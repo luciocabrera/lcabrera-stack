@@ -6,6 +6,8 @@ import type {
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 
+import { TABLE_NESTED_URL_STATE_PREFIX } from '#ui/components/Table/Table.constants';
+
 type ResolveGroupDetailsHrefArgs = {
   /** Where the route serves one group's rows, or `undefined` if it does not. */
   readonly groupDetailsPath: string | undefined;
@@ -31,9 +33,14 @@ type ResolveGroupDetailsHrefArgs = {
  *
  * **Every other search param is carried through**, because opening a group
  * changes what is being asked and not how the rest of the page is configured.
- * The list's `filters` and `sorting` in particular are the floor the modal
- * inherits: the group row was computed under them, so a link that dropped them
- * would open on a larger set than the count it sits beside.
+ *
+ * **The list's `filters` and `sorting` are also copied into the nested
+ * namespace**, which is where the route serving the group reads its own state
+ * from. They are the floor it opens on — the group row was computed under them,
+ * so a link that dropped them would open on a larger set than the count it sits
+ * beside — and seeding them as the nested table's *own* params is what lets a
+ * reader then narrow further without re-filtering the list underneath. The
+ * originals stay untouched, so closing the modal returns to the list as it was.
  *
  * **The token is built by `@lcabrera/api`, not here.** Its parser is the other
  * half of one codec (ADR-082), and a request written by hand beside a reader
@@ -59,6 +66,14 @@ export const resolveGroupDetailsHref = ({
   }
 
   const params = new URLSearchParams(search);
+
+  for (const key of ['filters', 'sorting']) {
+    const value = params.get(key);
+
+    if (value !== null) {
+      params.set(`${TABLE_NESTED_URL_STATE_PREFIX}${key}`, value);
+    }
+  }
 
   params.set(
     OLAP_DRILL_GROUP_PARAM,

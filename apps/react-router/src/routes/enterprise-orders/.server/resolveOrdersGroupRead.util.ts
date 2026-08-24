@@ -1,5 +1,3 @@
-import type { OlapGroupReadResolution } from '@lcabrera/server/db/olap/olap.types';
-
 import { resolveGroupRead } from '@lcabrera/server/db/olap/resolve-group-read.util';
 
 import {
@@ -7,8 +5,6 @@ import {
   MAX_ENTERPRISE_ORDERS_LIMIT,
 } from '../config/enterpriseOrders.constants';
 import { selectOrderGroupKeyTruncations } from './enterpriseOrders.service';
-
-export type OrdersReadResolution = OlapGroupReadResolution;
 
 type ResolveOrdersGroupReadArgs = Omit<
   Parameters<typeof resolveGroupRead>[0],

@@ -1,6 +1,7 @@
 import type { TablePersistenceEntry } from '#ui/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { TABLE_NESTED_URL_STATE_PREFIX } from '#ui/components/Table/Table.constants';
 import { serializeStateSlice } from '#ui/components/Table/utils';
 import {
   MAX_COOKIE_ENTRY_VALUE_LENGTH,
@@ -37,12 +38,15 @@ export const usePersistTableStateAction = () => {
     // Scope keys to the current app so tables in different apps that reuse the
     // same persistenceKey never share cookies / storage entries.
     const appId = metaStore.get()?.appId;
-    // A table sharing another route's URL contributes no param updates at all.
-    // Dropped here rather than at each of the four builders because this is the
-    // one place every entry passes through, and `applySearchParamUpdates`
-    // already ignores an empty key — so one check covers filters, sorting,
-    // grouping and the batched settings write.
-    const isUrlStateReadOnly = metaStore.get()?.isUrlStateReadOnly === true;
+    // A table sharing another route's URL writes its params under a prefix
+    // rather than over the ones already there. Applied here rather than at each
+    // of the four builders because this is the one place every entry passes
+    // through, so it covers filters, sorting, grouping and the batched settings
+    // write together.
+    const paramPrefix =
+      metaStore.get()?.isUrlStateNested === true
+        ? TABLE_NESTED_URL_STATE_PREFIX
+        : '';
 
     const serializedEntries = entries.map(
       ({
@@ -64,8 +68,10 @@ export const usePersistTableStateAction = () => {
 
         return {
           key,
-          searchParamKey: isUrlStateReadOnly ? '' : (searchParamKey ?? ''),
-          searchParamValue: isUrlStateReadOnly ? '' : (searchParamValue ?? ''),
+          searchParamKey: searchParamKey
+            ? `${paramPrefix}${searchParamKey}`
+            : '',
+          searchParamValue: searchParamValue ?? '',
           value,
         };
       },

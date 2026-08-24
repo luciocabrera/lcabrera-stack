@@ -35,10 +35,17 @@ The link is not a tab stop — `tabIndex={-1}` with `Enter` handled on the focus
 cell, the same rule the chevron follows, because the grid has exactly one tab
 stop addressed by row key plus column key.
 
-**Also added: `isUrlStateReadOnly`.** A table rendering inside another table's
-route shares its URL, and the table persists filters and sort there. Declared, a
-table reads that state as its starting floor and keeps its own adjustments in
-the store; absent, a table owns its URL exactly as before.
+**Also added: `isUrlStateNested`.** A table rendering inside another table's
+route shares its URL, and the table's own sort and filters travel through that
+URL — it is the only channel its loader reads. Declared, every search param the
+table writes and reads carries a `nested.` prefix, so both tables own their state
+on one URL and neither re-filters the other. The group link seeds the nested
+params from the list's, which is the floor the group was computed under, so the
+route opens on exactly the set the count beside it described and a reader can
+narrow from there.
+
+Suppressing the write instead was tried and is wrong: the drawer would show the
+new filter and the grid would keep the old rows.
 
 **Why the shape changed rather than the drill being fixed.** The bounded page
 never paged again, so "show me this group's orders" was permanently truncated.

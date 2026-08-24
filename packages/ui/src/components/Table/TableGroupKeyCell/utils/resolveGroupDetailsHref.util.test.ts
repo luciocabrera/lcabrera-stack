@@ -113,4 +113,29 @@ describe('resolveGroupDetailsHref', () => {
       periods: { order_date: 'month' },
     });
   });
+
+  it('seeds the nested namespace from the list’s filters and sorting', () => {
+    // The floor the group was computed under, handed to the route serving it as
+    // that route's *own* state — so a reader can narrow further inside it
+    // without re-filtering the list underneath, and a refresh keeps both.
+    const href = resolve({
+      search: '?filters=%7B%22status%22%3A%22open%22%7D&sorting=abc&page=2',
+    });
+    const params = new URL(href ?? '', 'http://table.test').searchParams;
+
+    expect(params.get('nested.filters')).toBe('{"status":"open"}');
+    expect(params.get('nested.sorting')).toBe('abc');
+    // The originals survive, so closing returns to the list as it was.
+    expect(params.get('filters')).toBe('{"status":"open"}');
+    expect(params.get('sorting')).toBe('abc');
+    expect(params.get('page')).toBe('2');
+  });
+
+  it('adds no nested params when the list carries none', () => {
+    const href = resolve({ search: '?page=2' });
+    const params = new URL(href ?? '', 'http://table.test').searchParams;
+
+    expect(params.has('nested.filters')).toBe(false);
+    expect(params.has('nested.sorting')).toBe(false);
+  });
 });

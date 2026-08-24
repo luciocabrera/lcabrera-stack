@@ -85,11 +85,20 @@ one group's heading.
 **7. A refusal is a page carrying an error** (ADR-068), so the table renders the
 reason instead of the client throwing on a shape it cannot parse.
 
-**8. A nested table reads URL state and does not write it.** A child route
-shares its parent's URL, and the table persists filters and sort there through
-`/_action/persist-cookie`. `isUrlStateReadOnly` makes the modal inherit the
-list's filters as its floor — the group row was computed under them — while its
-own adjustments stay in the store for the life of the dialog.
+**8. A nested table writes its URL state under a prefix.** A child route shares
+its parent's URL, and a table's own sort and filters travel through that URL —
+`readTableLoaderStateFromRequest` reads them from the search params and nowhere
+else, and `useTableRoutePage` composes load-more from what the loader returned.
+So `isUrlStateNested` prefixes every param the table writes and reads with
+`TABLE_NESTED_URL_STATE_PREFIX`, and the link seeds those from the list's, which
+is the floor the group was computed under.
+
+Suppressing the write instead was the first attempt and is wrong for a reason
+worth recording: the param is the only channel that reaches the loader, so a
+nested table that wrote nothing would show the new filter in its drawer and
+serve the old rows in its grid — and page further under the stale filters too.
+Nothing consulted the store it wrote to. Prefixing keeps both tables' state on
+one URL, and a refresh and a shared link keep working for both.
 
 **9. Deciding the read is the package's job, not the route's.** `resolveGroupRead`
 in `@lcabrera/server` owns the whole sequence — token present or not, refuse an

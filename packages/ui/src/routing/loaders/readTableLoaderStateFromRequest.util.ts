@@ -9,7 +9,10 @@ import type {
 } from '#ui/components/Table';
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
-import { TABLE_TOTALS_PLACEMENT_PARAM } from '#ui/components/Table/Table.constants';
+import {
+  TABLE_NESTED_URL_STATE_PREFIX,
+  TABLE_TOTALS_PLACEMENT_PARAM,
+} from '#ui/components/Table/Table.constants';
 import {
   readPersistedStateFromCookie,
   readPersistedUiFlagsFromCookie,
@@ -46,6 +49,12 @@ type ReadTableLoaderStateFromRequestArgs<
    * endpoint does not produce (ADR-063).
    */
   readonly includeGrouping?: boolean;
+  /**
+   * Set when this table shares another route's URL: every param below is read
+   * under `TABLE_NESTED_URL_STATE_PREFIX`, matching what the write side puts
+   * there.
+   */
+  readonly isUrlStateNested?: boolean;
   readonly persistenceKey: string;
   readonly request: Request;
 };
@@ -66,10 +75,15 @@ export const readTableLoaderStateFromRequest = <
   defaultGrouping,
   includeFilters = false,
   includeGrouping = false,
+  isUrlStateNested = false,
   persistenceKey,
   request,
 }: ReadTableLoaderStateFromRequestArgs<TData>) => {
   const url = new URL(request.url);
+  const param = (key: string) =>
+    url.searchParams.get(
+      `${isUrlStateNested ? TABLE_NESTED_URL_STATE_PREFIX : ''}${key}`,
+    );
 
   const cookieHeader = request.headers.get('Cookie');
   const cookieState = readPersistedStateFromCookie({
@@ -97,14 +111,12 @@ export const readTableLoaderStateFromRequest = <
     cookieState.columnPinning ??
     ({ left: [], right: [] } as ColumnPinningState<TData>);
 
-  const standaloneSortParam = url.searchParams.get('sorting');
+  const standaloneSortParam = param('sorting');
   const sorting = standaloneSortParam
     ? deserializeSortingFromURL<TData>(standaloneSortParam)
     : ([] as SortingState<TData>);
 
-  const standaloneFiltersParam = includeFilters
-    ? url.searchParams.get('filters')
-    : undefined;
+  const standaloneFiltersParam = includeFilters ? param('filters') : undefined;
 
   const parsedFilters = standaloneFiltersParam
     ? deserializeFiltersFromURL<TData>(standaloneFiltersParam)
@@ -118,7 +130,7 @@ export const readTableLoaderStateFromRequest = <
     : parsedFilters;
 
   const standaloneGroupingParam = includeGrouping
-    ? url.searchParams.get('grouping')
+    ? param('grouping')
     : undefined;
 
   // Sanitized there rather than here, because an unsanitized key list has no
@@ -133,7 +145,7 @@ export const readTableLoaderStateFromRequest = <
   });
 
   const totalsPlacement = resolveLoaderTotalsPlacement({
-    param: url.searchParams.get(TABLE_TOTALS_PLACEMENT_PARAM),
+    param: param(TABLE_TOTALS_PLACEMENT_PARAM),
     persisted: metaUiFlags.totalsPlacement,
   });
 

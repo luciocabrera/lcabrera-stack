@@ -284,6 +284,17 @@ export const TABLE_TOTALS_PLACEMENT_LABELS: Record<
 export const TABLE_TOTALS_PLACEMENT_PARAM = 'totals';
 
 /**
+ * The prefix every search param of a table nested in another table's route
+ * carries (`isUrlStateNested`).
+ *
+ * Both halves of the round trip use it — `usePersistTableStateAction` writes
+ * under it and `readTableLoaderStateFromRequest` reads under it — so a nested
+ * table's sort and filters reach its loader without colliding with the params
+ * of the table it is rendered over.
+ */
+export const TABLE_NESTED_URL_STATE_PREFIX = 'nested.';
+
+/**
  * The aggregates a share of the total is offered on, and the reason it is a
  * short list: a share is a ratio to a denominator the client derives, and only
  * an **additive** measure has one it can derive correctly (#648).

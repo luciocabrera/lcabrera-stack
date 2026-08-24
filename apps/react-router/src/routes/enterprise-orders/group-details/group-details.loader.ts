@@ -26,11 +26,11 @@ import {
 /**
  * The rows underneath one group row, as an ordinary paginated table (ADR-087).
  *
- * It inherits the list's `filters` and `sorting` as its floor and writes none of
- * them back — `isUrlStateReadOnly` keeps its own adjustments in the store, so
- * the modal cannot overwrite the URL of the list underneath it. It declares no
- * grouping (a grouped read would return group rows again) and no keyset (the
- * translation rewrites the sort a cursor would have to match).
+ * `isUrlStateNested` puts its own `filters` and `sorting` under a prefix, so it
+ * shares the list's URL without re-filtering the list underneath it; the link
+ * seeds those from the list's, which is the floor the group was computed under.
+ * It declares no grouping (a grouped read would return group rows again) and no
+ * keyset (the translation rewrites the sort a cursor would have to match).
  */
 const tableLoader = createTableRouteLoader<
   EnterpriseOrderTableRow,
@@ -59,7 +59,7 @@ const tableLoader = createTableRouteLoader<
   filterOptions: { transport: 'loader' },
   meta: {
     isServerFilterEnabled: true,
-    isUrlStateReadOnly: true,
+    isUrlStateNested: true,
   },
   persistenceKey: GROUP_DETAILS_PERSISTENCE_KEY,
   schemaName: SCHEMA_NAME,

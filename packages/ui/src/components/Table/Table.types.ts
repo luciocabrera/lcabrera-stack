@@ -884,24 +884,21 @@ export type TableMetaState = {
   readonly isTableSettingsOpen: boolean;
   readonly isTableSettingsPinned: boolean;
   /**
-   * This table shares its URL with another table's route, so it **reads** the
-   * URL's filter/sort state as its starting floor but never writes back to it
-   * (#870).
+   * This table shares another route's URL, so every search param it writes and
+   * reads carries `TABLE_NESTED_URL_STATE_PREFIX`.
    *
-   * The group-details modal is why it exists: it renders over the grouped list
-   * as a child route, so both tables see one `?filters`. Without this the
-   * modal's own filter drawer would overwrite the grouped view's filters —
-   * which are the very state the modal inherited — and the list underneath
-   * would be reconfigured by a change made in a dialog on top of it.
+   * A nested table cannot use the bare `filters`/`sorting`/`grouping` params:
+   * they belong to the table it is rendered over, and writing them would
+   * re-filter the list underneath it. Suppressing the write instead is not an
+   * option either — the param is the only channel that reaches the loader, so a
+   * nested table that wrote nothing would show a filter in its drawer and
+   * unfiltered rows in its grid. Prefixing is what lets both tables own their
+   * own state on one URL, and it keeps a refresh and a shared link working.
    *
-   * Absent means off, so an ordinary table owns its URL exactly as before. What
-   * a read-only table changes is durability, not capability: its own sort and
-   * filters live in the store for the life of the dialog, and a refresh returns
-   * to the inherited floor. Anything the URL must survive a refresh with
-   * belongs in a param of its own — the modal keeps the group it opened in
-   * `group`.
+   * Route-declared only: a nested table's params must line up with the ones its
+   * loader reads, and a persisted cookie cannot know that.
    */
-  readonly isUrlStateReadOnly?: boolean;
+  readonly isUrlStateNested?: boolean;
   /** Page size for subsequent loads */
   readonly loadMorePageSize: number;
   /** Locale for formatting (defaults to navigator.language) */

@@ -106,13 +106,24 @@ export const resolveGroupRead = async ({
       periods === undefined ? undefined : await selectTruncations?.(periods),
   });
 
-  if (drill.kind === 'refused') return toRefusal(drill.reason);
-
+  // A ternary rather than an early return, and not a style choice: an `if` with
+  // an implicit else placed after an `await` makes v8-to-istanbul report the
+  // else branch as taken `-1` times, and fallow refuses the whole coverage file
+  // over it (`invalid value: integer -1, expected u32`) rather than reporting a
+  // finding — so the audit dies on an unrelated error.
+  //
   // `includeTotal` is re-asserted over the translation's `false`: that served
   // one bounded page beside a group row that already stated the count, where
   // this read pages and has to say how far it goes.
-  return {
-    kind: 'read',
-    read: { ...drill.read, cursor, includeTotal: isFirstPage, offset: skip },
-  };
+  return drill.kind === 'refused'
+    ? toRefusal(drill.reason)
+    : {
+        kind: 'read',
+        read: {
+          ...drill.read,
+          cursor,
+          includeTotal: isFirstPage,
+          offset: skip,
+        },
+      };
 };
