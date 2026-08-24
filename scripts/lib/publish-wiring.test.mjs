@@ -172,6 +172,42 @@ describe('this repository publishes what it develops against', () => {
     // one.
   });
 
+  it('declares no major bump while a package is still pre-1.0', () => {
+    // Every public package here is beta, and Changesets takes `major` on a
+    // `0.x` package straight to `1.0.0` — so a `major` declaration is not
+    // "this breaks", it is "this package's API is now stable". An npm version
+    // is permanent, so that claim cannot be walked back.
+    //
+    // A break in a `0.x` package is a `minor`, spelled out in the changeset
+    // body for the consumer who has to act on it. Taking one to `1.0.0` is a
+    // deliberate decision; exempt it here in the same commit.
+    const stable = new Set();
+    const preRelease = new Map(
+      publicPackageDirs
+        .map((directory) => readManifest(directory))
+        .filter((manifest) => manifest.version.startsWith('0.'))
+        .map((manifest) => [manifest.name, manifest.version]),
+    );
+
+    const changesetDir = join(REPO_ROOT, '.changeset');
+    const promotions = readdirSync(changesetDir)
+      .filter((file) => file.endsWith('.md') && file !== 'README.md')
+      .flatMap((file) => {
+        const front = readFileSync(join(changesetDir, file), 'utf8').split(
+          '---',
+        )[1];
+        return [...(front ?? '').matchAll(/'(?<name>[^']+)':\s*major/gu)]
+          .map((match) => match.groups.name)
+          .filter((name) => preRelease.has(name) && !stable.has(name))
+          .map(
+            (name) =>
+              `${file}: ${name}@${preRelease.get(name)} would become 1.0.0`,
+          );
+      });
+
+    expect(promotions).toEqual([]);
+  });
+
   it('gitignores dist so a build is never committed', () => {
     const ignored = readFileSync(join(REPO_ROOT, '.gitignore'), 'utf8');
 
