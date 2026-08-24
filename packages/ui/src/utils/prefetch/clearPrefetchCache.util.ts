@@ -14,12 +14,6 @@ const EMPTY_PREFETCH_CACHE = {
   skip: -1,
 } as const;
 
-/**
- * Resets a prefetch cache ref to its initial empty state.
- *
- * Accepts both required and optional `RefObject` shapes — when the ref is
- * present the cache is cleared, otherwise this is a no-op.
- */
 export const clearPrefetchCache = <TResponse>({
   prefetchRef,
 }: ClearPrefetchCacheArgs<TResponse>) => {

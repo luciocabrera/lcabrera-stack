@@ -7,12 +7,6 @@ import {
 } from '../ColumnOrderSectionContext/actions';
 import { useGetUnpinConflictModal } from '../ColumnOrderSectionContext/selectors';
 
-/**
- * Conflict-resolution modal shown when unpinning a column would leave a gap
- * in its pinned group. Owns its store wiring: reads the unpin-conflict modal
- * slice and dispatches the accept/cancel actions itself, delegating the shell
- * to the shared {@link ChoiceModal}.
- */
 export const UnpinConflictModal = () => {
   const { columnLabel, isOpen, side } = useGetUnpinConflictModal();
   const acceptUnpinConflict = useAcceptUnpinConflict();

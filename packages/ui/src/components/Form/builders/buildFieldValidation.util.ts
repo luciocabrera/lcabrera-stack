@@ -9,12 +9,6 @@ export type FieldValidationOpts = {
   readonly required?: boolean;
 };
 
-/**
- * Assemble a Form `clientValidation` object from flat validation options,
- * dropping every unset key. Returns `{ clientValidation }` only when at least
- * one rule is present, so a field with no validation carries no
- * `clientValidation` key at all (matching a hand-written field literal).
- */
 export const buildFieldValidation = ({
   max,
   maxLength,

@@ -10,9 +10,6 @@ type GetTableColumnDrawerStateArgs<TData> = {
   readonly columnsState?: TableColumnsState<TData>;
 };
 
-/**
- * Maps a table column state snapshot into the drawer state for one column.
- */
 export const getTableColumnDrawerState = <TData>({
   columnKey,
   columnsState,

@@ -22,35 +22,10 @@ import { resolveGroupKeyAvailability } from '#ui/components/Table/utils/resolveG
 import type { GroupByColumnButtonProps } from './GroupByColumnButton.types';
 
 /**
- * "Group by This" item of the grouping section: adds this column to the group
- * keys and highlights itself while it is one of them, clicking again to remove
- * it. A self-connected delegate — it reads the applied keys from the grouping
- * store itself rather than being handed them, so no parent drills grouping
- * state through the menu.
- *
- * `current` is **this column when it is a key**, not the first key, and that is
- * what makes `deriveToggleCommandState` say the right thing under multi-key
- * grouping: "active" means the table is grouped by this column, whatever else
- * it is also grouped by. Reading `keys[0]` would light up only the outermost
- * level and leave every deeper one looking unapplied.
- *
- * **The catalogue's answer narrows the declared one** (ADR-058, #642). The
- * endpoint decides group-key legality from the column's real Postgres type and
- * its distinct-value statistics, and refuses a large share of the columns a
- * table declares `isGroupable` — so an item built from the declaration alone
- * offers keys the query then rejects. A refused column is disabled here and
- * says why in its `title`, which is the difference between an affordance a user
- * can rule out before clicking and one that empties the table. `title` and
- * `isDisabled` are gated on the **same** condition, so the explanation can never
- * appear on a control that is about to do something else.
- *
- * Disabling is never applied to a key that is **already applied**, at the depth
- * cap or under a refusal: a click on an applied key removes it, and a URL can
- * seed a grouping the catalogue would refuse today (ADR-061), so making that
- * item unclickable would be the one state a user could not leave from here.
- * Refusing past the cap is `resolveTableGroupingUpdate`'s job and happens
- * whatever this button says; disabling is so a user is not offered an action
- * that would be ignored.
+ * "Group by This" item of the grouping section: adds this column to the group keys and
+ * highlights itself while it is one of them, clicking again to remove it.
+ * A self-connected delegate — it reads the applied keys from the grouping store itself
+ * rather than being handed them, so no parent drills grouping state through the menu.
  */
 export const GroupByColumnButton = <TData,>({
   columnKey,

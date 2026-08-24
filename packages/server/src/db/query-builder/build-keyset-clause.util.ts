@@ -16,24 +16,16 @@ type BuildKeysetClauseArgs = {
 
 type KeysetClauseResult = {
   readonly nextParamIndex: number;
-  /** A bare predicate, ready to be ANDed into a WHERE — no `WHERE` keyword. */
   readonly text: string;
   readonly values: readonly unknown[];
 };
 
 /**
- * The keyset ("seek") predicate for `cursor`: the rows that sort strictly after
- * it under `sort`. Expanded lexicographic form — one OR-branch per sort
- * position — rather than the compact row comparison `(a, b) > ($1, $2)`, which
- * cannot express mixed sort directions and is wrong across NULLs (ADR-052).
- *
- * Every cursor value is bound once and referenced by placeholder, so the values
- * array stays one-per-sort-column however many branches reference it. That every
- * one of them IS referenced — pg rejects a bind list longer than the statement's
- * placeholders — rests on the final branch always surviving, which is what
- * `assertKeysetCursor`'s non-null rule for the unique column buys.
- *
- * An empty `text` means there is no cursor; there is no other empty result.
+ * The keyset ("seek") predicate for `cursor`: the rows that sort strictly after it under
+ * `sort`.
+ * Expanded lexicographic form — one OR-branch per sort position — rather than the compact
+ * row comparison `(a, b) > ($1, $2)`, which cannot express mixed sort directions and is
+ * wrong across NULLs (ADR-052).
  */
 export const buildKeysetClause = ({
   allowedColumns,

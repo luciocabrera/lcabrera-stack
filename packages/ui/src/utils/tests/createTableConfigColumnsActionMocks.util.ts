@@ -10,11 +10,7 @@ type ColumnsStore<TState extends Record<string, unknown>> = {
 type CreateTableConfigColumnsActionMocksArgs<
   TState extends Record<string, unknown>,
 > = {
-  /**
-   * The applied aggregates the fake grouping store reports. Defaults to none,
-   * for the same reason the group keys do — a table carrying measure columns is
-   * its own scenario.
-   */
+  /** The applied aggregates the fake grouping store reports. */
   readonly initialAggregates?: readonly TableColumnAggregate[];
   readonly initialColumnsState: TState;
   /**

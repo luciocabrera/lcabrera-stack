@@ -6,11 +6,6 @@ export type ToDateQueryFiltersArgs = {
   readonly filter: DateFilter;
 };
 
-/**
- * Translate a table date filter to generic `QueryFilter`s. `after`/`before`
- * map to `gt`/`lt`, `equals` to `eq`, and `between` to a `gte` + `lte` pair
- * (falling back to `eq` when the second bound is absent).
- */
 export const toDateQueryFilters = ({
   column,
   filter,

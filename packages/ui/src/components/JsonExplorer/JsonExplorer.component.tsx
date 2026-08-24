@@ -8,15 +8,6 @@ import type { JsonExplorerProps } from './JsonExplorer.types';
 
 import { styles } from './JsonExplorer.stylex';
 
-/**
- * One tab per JSON section, each rendering that section's rows as a flat
- * `StaticTable` next to a button copying the section's raw JSON.
- *
- * Sections arrive already shaped — their columns are inferred server-side (see
- * `JsonExplorerProps`) — so this adds no structure of its own. A value that is
- * itself an object or array is passed through to the table as a cell value,
- * not rendered as nested structure.
- */
 export const JsonExplorer = ({ sections }: JsonExplorerProps) => (
   <Tabs
     tabs={sections.map((section) => ({

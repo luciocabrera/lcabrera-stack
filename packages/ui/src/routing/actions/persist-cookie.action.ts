@@ -14,12 +14,8 @@ type CookieEntry = {
 
 /**
  * Server action to persist cookies via Set-Cookie headers.
- *
- * Receives a JSON array of entries from form data. Each entry contains
- * a cookie key/value pair and optional search param updates.
- * Sets all cookies server-side via multiple Set-Cookie response headers
- * and redirects only when the requested search param updates effectively
- * change the URL.
+ * Sets all cookies server-side via multiple Set-Cookie response headers and redirects only
+ * when the requested search param updates effectively change the URL.
  */
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();

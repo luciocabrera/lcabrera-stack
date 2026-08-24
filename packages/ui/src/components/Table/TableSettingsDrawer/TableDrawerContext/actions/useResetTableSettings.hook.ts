@@ -4,12 +4,8 @@ import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 import { buildBatchTableSettingsUpdate } from './buildBatchTableSettingsUpdate.util';
 
 /**
- * Re-seeds every drawer draft from the live table state — the discard half of
- * the Accept/Cancel pair.
- *
- * The grouping draft is re-seeded here too, and that is what makes Cancel
- * cancel a grouping edit. It writes only the drawer's own stores, so discarding
- * costs no navigation and no loader run however many edits were staged.
+ * The grouping draft is re-seeded here too, and that is what makes Cancel cancel a
+ * grouping edit.
  */
 export const useResetTableSettings = () => {
   const { columnsStore, groupingStore } = useTableConfigContextValue();

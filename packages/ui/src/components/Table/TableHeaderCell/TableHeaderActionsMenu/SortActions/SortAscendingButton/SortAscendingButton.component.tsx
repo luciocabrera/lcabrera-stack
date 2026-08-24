@@ -13,10 +13,7 @@ import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveCol
 import type { SortAscendingButtonProps } from './SortAscendingButton.types';
 
 /**
- * "Ascending" item of the sorting section: toggles ascending sort on/off and
- * highlights itself (via the `primary` variant + `aria-pressed`) while it is
- * the applied direction. Closes the menu via `onClose`. Identity and
- * active-state come from the shared `SORT_ASCENDING_COMMAND` (ADR-011); this
+ * Identity and active-state come from the shared `SORT_ASCENDING_COMMAND` (ADR-011); this
  * surface owns only its live commit-context and menu presentation.
  */
 export const SortAscendingButton = <TData,>({

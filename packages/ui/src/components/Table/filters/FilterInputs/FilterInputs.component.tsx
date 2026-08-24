@@ -11,13 +11,6 @@ import { InputContent } from './InputContent';
 import { OperatorSelect } from './OperatorSelect/OperatorSelect.component';
 import { getOperatorFromFilter } from './utils';
 
-/**
- * Shared component for rendering filter inputs based on column data type; a
- * thin shell composing the OperatorSelect delegate and the type-dispatched
- * InputContent, plus the input-visibility orchestration while the operator
- * dropdown is open. Used by both drawers, each wiring its own filter store
- * through the filter/onChange props.
- */
 export const FilterInputs = <TData = Record<string, unknown>,>({
   columnKey,
   filter,

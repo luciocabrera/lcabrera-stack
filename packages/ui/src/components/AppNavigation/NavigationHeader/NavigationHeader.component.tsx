@@ -12,11 +12,6 @@ import { styles } from '../AppNavigation.stylex';
 import { NavigationHeaderActions } from '../NavigationHeaderActions';
 import { getBrandIconSizeStyle, getHeaderDensityStyle } from '../utils';
 
-/**
- * Header of the navigation sidebar: brand icon + title plus the
- * expand/collapse action. The action sits inline with the brand when expanded
- * and drops below it when collapsed. Owns the collapse preference write.
- */
 export const NavigationHeader = () => {
   const navigationCollapsedPreference =
     useGetGlobalNavigationCollapsedPreference();

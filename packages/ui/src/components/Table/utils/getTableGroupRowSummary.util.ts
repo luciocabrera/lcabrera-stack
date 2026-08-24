@@ -10,15 +10,9 @@ import { TABLE_GROUP_ROW_FIELD } from '../Table.constants';
 import { isTableAggregateFn } from './isTableAggregateFn.util';
 
 /**
- * `value` is checked for **presence**, not for type — the same distinction
- * `toAggregateValue` documents below, and for the same reason one type over. A
- * key is whatever its column is, and `null` is a legitimate key rather than a
- * missing one: a NULL group is a group, and it is precisely the group whose
- * rows an equality would silently return nothing for. An entry carrying no `value` key
- * at all is malformed, and `Object.hasOwn` separates the two.
- *
- * `label` is still type-checked, because it is always a formatted string and
- * the hierarchy column renders it directly.
+ * A key is whatever its column is, and `null` is a legitimate key rather than a missing
+ * one: a NULL group is a group, and it is precisely the group whose rows an equality would
+ * silently return nothing for.
  */
 const toKeyValue = (entry: unknown): TableGroupKeyValue | undefined => {
   if (!isObject(entry)) {
@@ -34,14 +28,6 @@ const toKeyValue = (entry: unknown): TableGroupKeyValue | undefined => {
     : undefined;
 };
 
-/**
- * `value` is checked for **presence**, not for type, and those are different
- * questions. Its type is `unknown` because an aggregate is whatever its column
- * is, and `null` is a legitimate answer — `avg` over a group whose rows are all
- * NULL returns SQL NULL, which the cell should render as an absence rather than
- * a reason to reject the whole summary. An entry carrying no `value` key at all
- * is malformed, and `Object.hasOwn` is what separates the two.
- */
 const toAggregateValue = (
   entry: unknown,
 ): TableGroupAggregateValue | undefined => {
@@ -72,22 +58,10 @@ const narrowEvery = <TValue>({ narrow, values }: NarrowEveryArgs<TValue>) => {
 };
 
 /**
- * Reads a row's group summary, or `undefined` when the row is an ordinary data
- * row.
- *
- * Validating rather than casting is what lets the render path ask the row what
- * it is: the summary arrives across the loader boundary as plain JSON, so
- * `TData` says nothing about it, and a half-written summary would otherwise
- * render `undefined` into the group header. Every member is checked, and one
- * `path` or `aggregates` entry that does not narrow refuses the **whole**
- * summary — a group described by some of its keys is not the group the row
- * holds, and rendering it would label a two-key group with one key's value.
- *
- * **An empty `path` is a legal summary**, not a malformed one: it is the
- * rollup's grand total, the row that totals every group and is keyed by none
- * (ADR-065). Refusing it — which this did while `flat` was the only mode —
- * would drop the one row a rollup exists to produce, silently, as an ordinary
- * data row with no columns in it.
+ * **An empty `path` is a legal summary**, not a malformed one: it is the rollup's grand
+ * total, the row that totals every group and is keyed by none (ADR-065).
+ * Refusing it — which this did while `flat` was the only mode — would drop the one row a
+ * rollup exists to produce, silently, as an ordinary data row with no columns in it.
  */
 export const getTableGroupRowSummary = (
   row: Record<string, unknown>,

@@ -23,17 +23,8 @@ export type ParsedOrdersPageParams = {
 };
 
 /**
- * The paginated-orders search params as generic query descriptor pieces, for
- * both `/paginated` and the group-details route (ADR-087).
- *
- * `limit` and the sort length are bounded in `selectOrdersPage`, not here: the
- * SSR loader reads the same table without passing through this function, so a
- * clamp here would bound one entry point and have to be repeated for the other
- * (#706). What this returns is what the request asked for.
- *
- * `sort` resolves against a fallback because this is a public URL: a caller that
- * is not the table client would otherwise get a paginated read with no ORDER BY,
- * which repeats and skips rows.
+ * The paginated-orders search params as generic query descriptor pieces, for both
+ * `/paginated` and the group-details route (ADR-087).
  */
 export const parseOrdersPageParams = (
   params: URLSearchParams,

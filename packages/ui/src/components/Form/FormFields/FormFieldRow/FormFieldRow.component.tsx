@@ -9,13 +9,6 @@ import type { FormFieldRowProps } from './FormFieldRow.types';
 
 import { styles } from './FormFieldRow.stylex';
 
-/**
- * Renders a `row` field node: its child fields laid out horizontally, each in a
- * cell that delegates back to `FormFields` via `FormFieldsRendererContext` (see
- * that context's doc comment for why this isn't a direct import of
- * `FormFields.component.tsx`). Cells are equal-width by default; the optional
- * positional `spans` array widens individual cells (grow factor per cell).
- */
 export const FormFieldRow = <TValues extends Record<string, unknown>>({
   field,
 }: FormFieldRowProps<TValues>) => {

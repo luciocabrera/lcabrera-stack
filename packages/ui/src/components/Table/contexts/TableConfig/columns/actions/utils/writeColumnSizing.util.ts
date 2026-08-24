@@ -13,11 +13,8 @@ type WriteColumnSizingArgs<TData> = {
 };
 
 /**
- * Writes one column's width to the columns store and recomputes the pinned
- * offsets that depend on it. Shared by every sizing action so they never have
- * to call one another; pass `width: undefined` to drop the column back to its
- * default.
- *
+ * Shared by every sizing action so they never have to call one another; pass `width:
+ * undefined` to drop the column back to its default.
  * Persistence is deliberately not here — see `usePersistColumnSizingAction`.
  */
 export const writeColumnSizing = <TData>({

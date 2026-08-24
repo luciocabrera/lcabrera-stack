@@ -1,9 +1,5 @@
 import { InfoBox } from '#ui/components/InfoBox';
 
-/**
- * Body of the general section: static guidance describing how the width
- * presets apply.
- */
 export const GeneralSectionBody = () => {
   return (
     <InfoBox>

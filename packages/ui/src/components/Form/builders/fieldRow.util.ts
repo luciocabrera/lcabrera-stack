@@ -5,7 +5,6 @@ export type FieldRowArgs<TValues extends Record<string, unknown>> = {
   readonly spans?: readonly number[];
 };
 
-/** Build a row container, including `spans` only when provided. */
 export const fieldRow = <TValues extends Record<string, unknown>>({
   fields,
   spans,

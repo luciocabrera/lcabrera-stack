@@ -4,12 +4,6 @@ import type {
 } from '#ui/components/Table/Table.types';
 import type { Pagination } from '#ui/types/ui.types';
 
-/**
- * Executor for `kind: 'static'` descriptors: serves pages by slicing the
- * baked values client-side (no network). Returns the
- * `{ onLoadMore, dataSelector, dataTotalSelector }` contract consumed by
- * the filter fetch chain; total convention: `hasMore ? Infinity : length`.
- */
 export const resolveStaticFilterOptions = (
   descriptor: StaticFilterOptionsDescriptor,
 ) => ({

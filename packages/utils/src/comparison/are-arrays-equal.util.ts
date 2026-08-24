@@ -3,12 +3,6 @@ type AreArraysEqualArgs<T> = {
   readonly right?: readonly T[];
 };
 
-/**
- * Ordered strict equality check for arrays.
- *
- * Returns true only when both arrays have the same length and all values at
- * matching indices are strictly equal (`===`).
- */
 export const areArraysEqual = <T>({ left, right }: AreArraysEqualArgs<T>) => {
   if (left === right) {
     return true;

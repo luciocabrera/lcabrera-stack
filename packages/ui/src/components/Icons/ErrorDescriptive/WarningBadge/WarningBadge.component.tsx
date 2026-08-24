@@ -2,7 +2,6 @@ import * as stylex from '@stylexjs/stylex';
 
 import { styles } from './WarningBadge.stylex';
 
-/** Bouncing warning badge illustration rendered on top of `ErrorDescriptive`. */
 export const WarningBadge = () => (
   <g {...stylex.props(styles.badgeGroup)} transform='translate(240,70)'>
     <circle {...stylex.props(styles.badge)} cx='0' cy='0' r='14' />

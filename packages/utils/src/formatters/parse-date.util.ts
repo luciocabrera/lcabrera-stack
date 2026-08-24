@@ -1,7 +1,3 @@
-/**
- * Parse a value into a Date object
- * Handles Date objects, ISO strings, and timestamps
- */
 export const parseDate = (value: unknown) => {
   if (value instanceof Date) {
     return value;

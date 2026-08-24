@@ -11,7 +11,6 @@ type ReadPinActionStateArgs<TData extends Record<string, unknown>> = {
   readonly tableState: TableColumnsState<TData> | undefined;
 };
 
-/** Reads the shared column-order and pinning state needed by pin action hooks. */
 export const readPinActionState = <TData extends Record<string, unknown>>({
   drawerState,
   tableState,

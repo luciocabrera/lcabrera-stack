@@ -1,11 +1,8 @@
 import type { RootErrorBoundaryProps } from './RootErrorBoundary.types';
 
 /**
- * Deliberately dependency-light top-level fallback shared by every app's
- * root `ErrorBoundary` route export. Unlike `RouteErrorBoundary` (styled,
- * interactive, router-hook-driven), this is the last-resort boundary that
- * must render even when the app shell, providers, or stylesheet failed to
- * load — so it uses only plain HTML and surfaces the stack in dev only.
+ * Deliberately dependency-light top-level fallback shared by every app's root
+ * `ErrorBoundary` route export.
  */
 export const RootErrorBoundary = ({ error }: RootErrorBoundaryProps) => {
   const message = 'Oops!';

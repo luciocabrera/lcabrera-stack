@@ -8,11 +8,6 @@ type BuildAllOrderedColumnsArgs<TData> = {
   readonly columnsOrder: ColumnOrderState;
 };
 
-/**
- * Builds the complete ordered column list.
- * Uses columnOrder if available, otherwise uses column definition order.
- * Appends any columns not present in columnOrder at the end.
- */
 export const buildAllOrderedColumns = <TData>({
   columns,
   columnsOrder,

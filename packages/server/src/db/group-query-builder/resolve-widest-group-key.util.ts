@@ -11,17 +11,9 @@ type WidestGroupKey = {
 };
 
 /**
- * The group key contributing the most to a cardinality bound — the one whose
- * removal shrinks the result the most, and therefore the one a refusal should
- * name.
- *
- * Ties keep the earlier key, so the refusal is stable for a given request rather
- * than depending on iteration order.
- *
- * `undefined` for an empty key list. A caller reaching here with none has
- * already been refused by `assertGroupDepth`, but a bound of zero keys is one
- * this function genuinely cannot answer, and inventing a name for it would put
- * `"undefined"` in a user-facing sentence.
+ * A caller reaching here with none has already been refused by `assertGroupDepth`, but a
+ * bound of zero keys is one this function genuinely cannot answer, and inventing a name
+ * for it would put `"undefined"` in a user-facing sentence.
  */
 export const resolveWidestGroupKey = ({
   capabilities,

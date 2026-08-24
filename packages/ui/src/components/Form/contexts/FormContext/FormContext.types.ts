@@ -17,7 +17,6 @@ export type FormContextValue<
   readonly metaStore: TStore<FormMetaState<TValues>>;
 };
 
-/** Per-field data — high-frequency, every slice keyed by accessor. */
 export type FormFieldsState<TValues extends Record<string, unknown>> = {
   readonly errors: FieldErrors<TValues>;
   /** Frozen pristine snapshot captured at mount — never mutated after creation; the dirty-check baseline for `mode: 'edit'`. */
@@ -25,11 +24,6 @@ export type FormFieldsState<TValues extends Record<string, unknown>> = {
   readonly values: TValues;
 };
 
-/**
- * Form-level config — low-frequency, not keyed by any single field. Fields
- * are to a form what columns are to the table: definitions owned by the
- * store so consumers subscribe via selectors instead of prop drilling.
- */
 export type FormMetaState<
   TValues extends Record<string, unknown> = Record<string, unknown>,
 > = {

@@ -11,15 +11,10 @@ import { TableEmptyStateAction } from './TableEmptyStateAction/TableEmptyStateAc
 import { TableEmptyStateMessage } from './TableEmptyStateMessage/TableEmptyStateMessage.component';
 
 /**
- * Empty-state row rendered inside the table body when there are no rows and the
- * table is not loading. The content is pinned (`position: sticky`) and sized to
- * the scroll container's viewport minus the sticky header height, so it stays
- * centered in the visible body area — both axes — without introducing a
- * vertical scrollbar, even when the table body overflows horizontally.
- *
- * A thin shell over that arithmetic. *Why* the body is empty — nothing matched,
- * or the endpoint refused the query — decides both what it says and which
- * recovery it offers, and each delegate reads that for itself.
+ * The content is pinned (`position: sticky`) and sized to the scroll container's viewport
+ * minus the sticky header height, so it stays centered in the visible body area — both
+ * axes — without introducing a vertical scrollbar, even when the table body overflows
+ * horizontally.
  */
 export const TableEmptyState = () => {
   const { centerCols, leftPinnedCols, rightPinnedCols } =

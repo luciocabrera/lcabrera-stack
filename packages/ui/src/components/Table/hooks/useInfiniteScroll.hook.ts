@@ -16,11 +16,9 @@ type UseInfiniteScrollArgs<TData, TResponse> = InfiniteScroll<
     InfiniteScroll<TData, TResponse>,
     'hasMore' | 'isLoadingMore'
   >) => Promise<void>;
-  /** Reference to the scrollable container (IntersectionObserver root) */
   scrollContainerRef: RefObject<HTMLElement | null>;
   /** Reference to the sentinel element rendered at the end of the scrollable content */
   sentinelRef: RefObject<HTMLElement | null>;
-  /** Pixels from bottom to trigger  */
   threshold: number;
 };
 

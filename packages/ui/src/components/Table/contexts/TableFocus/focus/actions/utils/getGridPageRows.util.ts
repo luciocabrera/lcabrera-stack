@@ -4,11 +4,8 @@ type GetGridPageRowsArgs = {
 };
 
 /**
- * How many rows `PageUp`/`PageDown` move by: one viewport of the scroll
- * container, which is what "a page" means to the person looking at it.
- *
- * Never less than one, so the keys still move by a row before the container has
- * been measured — a page of zero rows would make them silently dead.
+ * Never less than one, so the keys still move by a row before the container has been
+ * measured — a page of zero rows would make them silently dead.
  */
 export const getGridPageRows = ({
   container,

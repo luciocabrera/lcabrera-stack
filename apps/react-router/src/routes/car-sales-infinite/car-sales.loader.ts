@@ -14,16 +14,6 @@ import {
   TITLE,
 } from './CarSales.constants';
 
-/**
- * Loader for the infinite-scroll car sales route. Loads the first page only;
- * the component fetches subsequent pages via `onLoadMore`, through
- * `/_api/car-sales/paginated`. The read promise is returned unawaited for
- * Suspense streaming.
- *
- * `readCarSalesPage` reads Postgres **server-side** by default — no api-server
- * round-trip — and goes to the external endpoint only when `VITE_API_URL` asks
- * for it.
- */
 export const loader = createTableRouteLoader<
   CarSale,
   CarSalesResponse & { hasMore: boolean }

@@ -11,21 +11,11 @@ import { activateGridCellLink } from './utils/activateGridCellLink.util';
 import { getIsGridNavigationTarget } from './utils/getIsGridNavigationTarget.util';
 
 /**
- * Everything the `role="grid"` element needs to be the grid's tab stop and its
- * keyboard surface.
- *
- * The container is focusable whenever no rendered cell holds the tab stop, so
- * the grid is always exactly one stop in the page's tab order — including while
- * the focused row sits outside the virtualization window and therefore has no
- * node at all (ADR-062).
- *
- * `focusout` carries the element focus is moving *to*, which is what
- * distinguishes leaving the grid from moving between two cells inside it; a
- * row unmounting under focus reports no such element, and that is correctly
- * read as leaving.
- *
- * `Enter` is the one key here that acts rather than navigates — see
- * `activateGridCellLink` for why a cell's link cannot be a tab stop of its own.
+ * Everything the `role="grid"` element needs to be the grid's tab stop and its keyboard
+ * surface.
+ * The container is focusable whenever no rendered cell holds the tab stop, so the grid is
+ * always exactly one stop in the page's tab order — including while the focused row sits
+ * outside the virtualization window and therefore has no node at all (ADR-062).
  */
 export const useTableGridFocus = <TData extends Record<string, unknown>>() => {
   const isTabStop = useGetIsTableGridTabStop();

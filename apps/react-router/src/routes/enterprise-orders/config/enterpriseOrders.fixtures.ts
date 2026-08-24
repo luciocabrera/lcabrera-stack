@@ -1,9 +1,5 @@
 import type { EnterpriseOrderInput } from './enterpriseOrders.schema';
 
-/**
- * A fully valid raw form payload (strings, as they arrive from FormData) minus
- * the checkbox flags, which tests set explicitly to `'on'`. Test-only support.
- */
 export const buildValidOrderFormFields = (): Record<string, string> => ({
   billing_address_line1: '221B Baker Street',
   billing_city: 'London',
@@ -41,11 +37,6 @@ export const buildValidOrderFormFields = (): Record<string, string> => ({
   weight_kg: '1.2',
 });
 
-/**
- * A fully valid, post-parse `EnterpriseOrderInput` for unit tests. Test-only
- * support (imported by the mapping/action suites) — not part of the entity's
- * public surface.
- */
 export const buildValidOrderInput = (): EnterpriseOrderInput => ({
   billing_address_line1: '221B Baker Street',
   billing_city: 'London',

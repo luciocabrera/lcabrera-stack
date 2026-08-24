@@ -11,10 +11,6 @@ type ShouldSkipInitialFetchArgs = {
   readonly currentFilter: FilterDataSnapshot;
 };
 
-/**
- * Returns `true` when the initial fetch for a column's filter data should
- * be skipped — i.e., data has already been loaded or a fetch is in progress.
- */
 export const shouldSkipInitialFetch = ({
   currentFilter,
 }: ShouldSkipInitialFetchArgs) =>

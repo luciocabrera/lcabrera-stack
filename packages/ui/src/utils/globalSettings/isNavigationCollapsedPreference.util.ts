@@ -2,11 +2,6 @@ import type { GlobalNavigationCollapsedPreference } from '#ui/types/globalSettin
 
 import { NAVIGATION_COLLAPSED_VALUES } from './globalSettings.constants';
 
-/**
- * Narrow an unknown cookie value to a navigation collapsed preference.
- * @param value - Raw value read from the settings cookie payload.
- * @returns True when the value is a valid collapsed/expanded preference.
- */
 export const isNavigationCollapsedPreference = (
   value: unknown,
 ): value is GlobalNavigationCollapsedPreference => {

@@ -8,17 +8,6 @@ type RenderFromDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly descriptor: TableBodyCellDescriptor<TData>;
 };
 
-/**
- * Renders a `TableBodyCell` from an already-built descriptor.
- *
- * The split from `buildTableBodyCellDescriptor` is what keeps the cell's
- * decision-making testable without React: that util decides *what* a cell is
- * from the column and row, and this one only turns the result into an element.
- * Neither reads the other's inputs.
- *
- * `createElement` rather than JSX so this stays a `.ts` file — the two calls
- * pass whole descriptors through and gain nothing from JSX syntax.
- */
 export const renderFromDescriptor = <TData extends Record<string, unknown>>({
   descriptor,
 }: RenderFromDescriptorArgs<TData>) => {

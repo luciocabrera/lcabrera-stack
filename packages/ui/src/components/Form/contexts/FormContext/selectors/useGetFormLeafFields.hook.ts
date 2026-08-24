@@ -2,7 +2,6 @@ import type { LeafFieldDef } from '#ui/components/Form/Form.types';
 
 import { useMetaStore } from '#ui/components/Form/contexts/FormContext/useMetaStore.hook';
 
-/** Flattened leaf field definitions — accessor-bearing nodes only. */
 export const useGetFormLeafFields = <
   TValues extends Record<string, unknown> = Record<string, unknown>,
 >() =>

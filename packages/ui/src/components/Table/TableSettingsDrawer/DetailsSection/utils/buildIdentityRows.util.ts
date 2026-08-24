@@ -6,11 +6,6 @@ type BuildIdentityRowsArgs = {
   readonly title?: string;
 };
 
-/**
- * Build the optional identity rows, omitting any undefined values.
- * @param args - Title, table name, and schema name.
- * @returns The identity detail rows that have a value.
- */
 export const buildIdentityRows = ({
   schemaName,
   tableName,

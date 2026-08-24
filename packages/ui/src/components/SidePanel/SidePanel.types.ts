@@ -6,7 +6,6 @@ export type SidePanelProps = ComponentPropsWithoutRef<'dialog'> & {
   readonly isOpen: boolean;
   readonly isPinned?: boolean;
   readonly onClose?: () => void;
-  /** When pinned, portal the aside into this container (for components rendered deep in the DOM tree) */
   readonly portalContainer?: RefObject<HTMLElement | null>;
   readonly position?: SidePanelPosition;
   readonly shouldShowOverlay?: boolean;

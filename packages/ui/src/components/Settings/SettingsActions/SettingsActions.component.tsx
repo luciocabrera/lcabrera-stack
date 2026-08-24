@@ -7,11 +7,6 @@ import {
 } from '../SettingsDraftContext/actions';
 import { useGetSettingsDraftChanges } from '../SettingsDraftContext/selectors';
 
-/**
- * Accept/Cancel row of the global settings page. Owns its store wiring:
- * derives the dirty flag and dispatches the commit/discard draft actions
- * itself.
- */
 export const SettingsActions = () => {
   const { hasChanges } = useGetSettingsDraftChanges();
   const acceptSettingsDraft = useAcceptSettingsDraft();

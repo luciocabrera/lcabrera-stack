@@ -16,10 +16,6 @@ import { resolveDetailsLocale } from '../utils/resolveDetailsLocale.util';
 import { useDetailsConfigMeta } from './useDetailsConfigMeta.hook';
 import { useDetailsIdentityMeta } from './useDetailsIdentityMeta.hook';
 
-/**
- * Read table meta/data selectors and compose the ordered list of detail rows.
- * @returns The full list of rows rendered by DetailsSection.
- */
 export const useDetailsRows = (): readonly DetailsRow[] => {
   const columns = useGetColumns();
   const totalLoadedRows = useGetTableTotalLoadedRows();

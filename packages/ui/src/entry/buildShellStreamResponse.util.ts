@@ -8,12 +8,6 @@ type BuildShellStreamResponseArgs = {
   readonly responseStatusCode: number;
 };
 
-/**
- * Bridges React's `renderToPipeableStream` output into a fetch `Response`:
- * pipes the render into a PassThrough, exposes it as a web ReadableStream,
- * and clears the render-abort timeout when the stream finishes so the
- * closure is not retained.
- */
 export const buildShellStreamResponse = ({
   clearRenderTimeout,
   pipe,

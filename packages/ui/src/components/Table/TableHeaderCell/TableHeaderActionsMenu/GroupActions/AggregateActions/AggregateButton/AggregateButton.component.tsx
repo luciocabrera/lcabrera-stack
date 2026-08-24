@@ -15,23 +15,10 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 import type { AggregateButtonProps } from './AggregateButton.types';
 
 /**
- * One aggregation-mode item: applies its function to this column and highlights
- * itself while it is applied, clicking again to clear that one.
- *
- * A self-connected delegate — it reads the applied aggregates from the grouping
- * store itself, so the shell above it forwards identity (`columnKey`, `fn`) and
- * never state.
- *
+ * A self-connected delegate — it reads the applied aggregates from the grouping store
+ * itself, so the shell above it forwards identity (`columnKey`, `fn`) and never state.
  * **The state derivation is `deriveAggregateCommandState`, not the shared
- * `deriveToggleCommandState` beside it** (#831). A column may carry several
- * aggregates at once, so "is this one applied" is set membership rather than
- * equality against a single current value, and several items here can be active
- * together. Sorting and pinning keep the shared helper because their values
- * genuinely are single-valued.
- *
- * Clicking an applied item removes exactly that `(columnKey, fn)` pair and
- * leaves the column's other aggregates alone; clicking an unapplied one appends
- * it. Neither path can produce the pair twice.
+ * `deriveToggleCommandState` beside it** (#831).
  */
 export const AggregateButton = ({
   columnKey,

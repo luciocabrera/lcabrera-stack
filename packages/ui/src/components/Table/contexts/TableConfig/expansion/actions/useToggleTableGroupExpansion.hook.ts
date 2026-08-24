@@ -14,18 +14,11 @@ import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper
 import { resolveGroupCollapseFocusTarget } from './utils';
 
 /**
- * Opens or closes one group, keyed by its path.
- *
- * The write is local: expansion changes nothing server-side, so this touches no
- * URL param and triggers no revalidation — the grouped result is already
- * materialised in memory and collapsing filters it (ADR-061). That is the whole
- * reason it does not go through `useSetTableGrouping`, which exists to navigate.
- *
- * Collapsing can take the focused row out of the grid, so focus is repositioned
- * **before** the store write. Order matters: the focused cell's unmount
- * releases the grid's tab stop only while the store still names that cell, so a
- * focus target moved first is left alone by the row that is about to vanish,
- * and moved after would be revoked by it.
+ * The write is local: expansion changes nothing server-side, so this touches no URL param
+ * and triggers no revalidation — the grouped result is already materialised in memory and
+ * collapsing filters it (ADR-061).
+ * That is the whole reason it does not go through `useSetTableGrouping`, which exists to
+ * navigate.
  */
 export const useToggleTableGroupExpansion = <
   TData extends Record<string, unknown>,

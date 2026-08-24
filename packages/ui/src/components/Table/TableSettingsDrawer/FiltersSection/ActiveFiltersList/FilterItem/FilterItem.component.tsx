@@ -10,12 +10,6 @@ import { styles } from './FilterItem.stylex';
 import { FilterItemContent } from './FilterItemContent/FilterItemContent.component';
 import { FilterItemHeader } from './FilterItemHeader/FilterItemHeader.component';
 
-/**
- * One active-filter row; a thin shell composing the self-connected header
- * (toggle/label/remove) and, while expanded, the self-connected inputs body.
- * Reads only what gates rendering: the row's column and filter must still
- * exist, and the persisted expansion decides whether the body mounts.
- */
 export const FilterItem = ({ columnKey, isBusy }: FilterItemProps) => {
   const filters = useGetColumnFilters();
   const normalizedColumns = useGetNormalizedColumns();

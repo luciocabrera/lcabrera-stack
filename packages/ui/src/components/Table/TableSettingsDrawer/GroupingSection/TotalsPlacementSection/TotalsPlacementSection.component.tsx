@@ -17,21 +17,15 @@ import {
 } from '../../TableDrawerContext/selectors';
 import { styles } from './TotalsPlacementSection.stylex';
 
-/** Named once, so the visible heading and the accessible group name agree. */
 const SECTION_TITLE = 'Totals position';
 
 /**
- * Where a subtotal sits relative to the rows it totals.
- *
- * **Rendered only in `rollup`**, because that is the only mode that emits a
- * total at all — offered under `flat` it would be a control with nothing to
- * place, and the staged mode is the honest thing to read since Accept commits
- * both together.
- *
- * It stages like every other delegate here, but what it stages is not part of
- * the grouping configuration: placement rides the `totals` param and the
- * UI-flags cookie rather than the `grouping` param, because it outlives the
- * table it was set on (#578).
+ * **Rendered only in `rollup`**, because that is the only mode that emits a total at all —
+ * offered under `flat` it would be a control with nothing to place, and the staged mode is
+ * the honest thing to read since Accept commits both together.
+ * It stages like every other delegate here, but what it stages is not part of the grouping
+ * configuration: placement rides the `totals` param and the UI-flags cookie rather than
+ * the `grouping` param, because it outlives the table it was set on (#578).
  */
 export const TotalsPlacementSection = ({
   isBusy = false,

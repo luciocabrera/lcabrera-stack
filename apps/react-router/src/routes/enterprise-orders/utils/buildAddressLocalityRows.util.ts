@@ -7,12 +7,8 @@ import { POSTAL_CODE_PATTERN } from '../config';
 const { field, fieldRow } = createFieldBuilders<EnterpriseOrderValues>();
 
 /**
- * Build the shared `city`/`state` and `country`/`postal_code` rows of an address
- * group, parameterized by the column prefix. The shipping and billing address
- * sections are identical below their first line, so this keeps that scaffolding
- * in one place; the leading `address_line1`/`address_line2` differ per section
- * (shipping pairs the two lines in a spans row; billing has line 1 only) and
- * stay inline at each call site.
+ * Build the shared `city`/`state` and `country`/`postal_code` rows of an address group,
+ * parameterized by the column prefix.
  */
 export const buildAddressLocalityRows = (prefix: 'billing' | 'shipping') => [
   fieldRow({

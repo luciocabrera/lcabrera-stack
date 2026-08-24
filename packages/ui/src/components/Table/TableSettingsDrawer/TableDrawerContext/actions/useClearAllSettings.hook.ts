@@ -11,9 +11,6 @@ import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableC
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 import { getDefaultColumnPinning } from './getDefaultColumnPinning.util';
 
-/**
- * Hook to clear all table settings to empty defaults
- */
 export const useClearAllSettings = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore } = useTableDrawerContextValue();

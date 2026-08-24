@@ -18,22 +18,15 @@ import { toDrillRead } from './to-drill-read.util.ts';
 type ResolveGroupReadArgs = {
   readonly cursor?: readonly unknown[];
   readonly filters: readonly QueryFilter[];
-  /**
-   * Set by a route that serves *only* one group's rows. Absent, no token means
-   * "read the whole set", which is right for an endpoint answering both — and
-   * wrong for one whose every response is titled as a group.
-   */
   readonly isGroupRequired?: boolean;
   readonly limit: number;
-  /** The route's own page ceiling. Passed in, because only the route knows it. */
   readonly maxLimit: number;
-  /** The request's own params — read only for the group token. */
   readonly params: URLSearchParams;
   /** The column the route breaks ties on (ADR-008). */
   readonly primaryKey: string;
   /**
-   * How each truncated key was derived. A catalogue lookup against the route's
-   * own table, so the route owns it; called only when the token carries periods.
+   * A catalogue lookup against the route's own table, so the route owns it; called only when
+   * the token carries periods.
    */
   readonly selectTruncations?: (
     periods: Readonly<Record<string, OlapGroupPeriod>>,
@@ -42,7 +35,6 @@ type ResolveGroupReadArgs = {
   readonly sort: readonly QuerySort[];
 };
 
-/** Each names the row rather than the request: a reader clicked a row. */
 const REFUSAL_MESSAGE: Readonly<Record<OlapGroupReadRefusal, string>> = {
   absent: 'This page opens one group’s rows, and the link does not say which.',
   'grand-total':
@@ -61,15 +53,11 @@ const toRefusal = (reason: OlapGroupReadRefusal): OlapGroupReadResolution => ({
 });
 
 /**
- * The read to run for a request that may name a group — scoped to it when it
- * does, and otherwise the plain paginated read (ADR-087).
- *
- * `parseDrillGroup` answers `undefined` both for "no group here" and for "a
- * group I cannot read", so the param's *presence* is tested separately: without
- * that, a mangled link falls through to the unscoped read and serves the whole
- * table under the group's heading. `isGroupRequired` closes the other half of
- * that door — a route serving nothing but one group has no unscoped read to
- * fall through to.
+ * The read to run for a request that may name a group — scoped to it when it does, and
+ * otherwise the plain paginated read (ADR-087).
+ * `parseDrillGroup` answers `undefined` both for "no group here" and for "a group I cannot
+ * read", so the param's *presence* is tested separately: without that, a mangled link
+ * falls through to the unscoped read and serves the whole table under the group's heading.
  */
 export const resolveGroupRead = async ({
   cursor,

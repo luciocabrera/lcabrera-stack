@@ -18,18 +18,10 @@ type AssertGroupCardinalityArgs = {
 };
 
 /**
- * The three-way verdict on a pre-flight bound: refuse, warn, or nothing to say.
- * Throws for the first, returns the warning for the second and `undefined` for
- * the third.
- *
- * An unknown estimate **warns rather than refusing**, and that direction is the
- * whole design. Statistics are missing on a database nobody has analysed yet,
- * which is every freshly restored one; refusing there would make grouping look
- * broken exactly when it is most needed. The row limit is the backstop instead
- * (`resolveGroupRowLimit`), so proceeding is bounded rather than open-ended.
- *
- * The refusal names the widest key because that is the actionable half. "This
- * grouping is too large" leaves a user guessing which of four columns to drop.
+ * Statistics are missing on a database nobody has analysed yet, which is every freshly
+ * restored one; refusing there would make grouping look broken exactly when it is most
+ * needed.
+ * "This grouping is too large" leaves a user guessing which of four columns to drop.
  */
 export const assertGroupCardinality = ({
   capabilities,

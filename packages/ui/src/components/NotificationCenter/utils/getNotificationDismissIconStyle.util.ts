@@ -2,7 +2,6 @@ import type { AppNotification } from '#ui/contexts/NotificationContext';
 
 import { styles } from '../NotificationItem/NotificationItem.stylex';
 
-/** Resolves dismiss button icon style for each notification variant. */
 export const getNotificationDismissIconStyle = (
   variant: AppNotification['variant'],
 ) => {

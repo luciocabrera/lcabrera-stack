@@ -16,18 +16,6 @@ type ResolveGridFocusMoveArgs = {
 const clampIndex = ({ max, value }: { max: number; value: number }) =>
   Math.min(Math.max(value, 0), max);
 
-/**
- * Where a key press lands in this grid: `resolveGridFocusKey`'s answer, bounded
- * by the grid's real extent. `undefined` means no move — either the key is not
- * a grid key, or there is nothing to move within.
- *
- * A grid the user has not entered yet has no current cell, so the first grid
- * key focuses the first cell rather than moving one step from a position that
- * does not exist.
- *
- * Clamping rather than wrapping is the grid pattern's own rule: `ArrowDown` on
- * the last row is a no-op, not a jump back to the top.
- */
 export const resolveGridFocusMove = ({
   columnCount,
   columnIndex,

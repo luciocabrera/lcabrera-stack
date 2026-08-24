@@ -7,9 +7,6 @@ type UseClickOutsideArgs = {
   readonly ref: RefObject<HTMLElement | null>;
 };
 
-/**
- * Calls `onClickOutside` when a mousedown occurs outside the referenced element.
- */
 export const useClickOutside = ({
   onClickOutside,
   ref,

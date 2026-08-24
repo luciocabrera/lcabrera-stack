@@ -8,11 +8,6 @@ import type { ThemeProviderProps } from './ThemeContext.types';
 
 import { ThemeContext } from './ThemeContext.context';
 
-/**
- * ThemeProvider component that manages theme state and persistence
- * Uses cookies as primary storage for SSR compatibility, with localStorage sync
- * Wraps the application to provide theme context to all child components
- */
 export const ThemeProvider = ({
   appId,
   children,

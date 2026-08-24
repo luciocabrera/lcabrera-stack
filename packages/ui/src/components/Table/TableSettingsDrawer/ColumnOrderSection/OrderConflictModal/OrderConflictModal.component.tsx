@@ -7,12 +7,6 @@ import {
 } from '../ColumnOrderSectionContext/actions';
 import { useGetOrderConflict } from '../ColumnOrderSectionContext/selectors';
 
-/**
- * Conflict-resolution modal shown when a proposed column order breaks pin
- * contiguity. Owns its store wiring: reads the order-conflict slice and
- * dispatches the accept/cancel actions itself, delegating the shell to the
- * shared {@link ChoiceModal}.
- */
 export const OrderConflictModal = () => {
   const { description, isOpen } = useGetOrderConflict();
   const acceptOrderConflict = useAcceptOrderConflict();

@@ -14,12 +14,6 @@ import { isFilterValid } from '../../../utils/isFilterValid.util';
 import { styles } from '../FilterItem.stylex';
 import { useRemoveFilterItem } from '../useRemoveFilterItem.hook';
 
-/**
- * Header row of one active filter: the expand/collapse toggle with the
- * column label and validity badge, plus the remove button. Owns its store
- * wiring: reads the row's filter, column label, and persisted expanded
- * state itself.
- */
 export const FilterItemHeader = ({
   columnKey,
   isBusy,

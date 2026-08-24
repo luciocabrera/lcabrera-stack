@@ -2,7 +2,6 @@ import type { AppNotification } from '#ui/contexts/NotificationContext';
 
 import { styles } from '../NotificationItem/NotificationItem.stylex';
 
-/** Resolves the accent rail style for a notification variant. */
 export const getAccentStyle = (variant: AppNotification['variant']) => {
   if (variant === 'error') {
     return styles.itemSurfaceError;

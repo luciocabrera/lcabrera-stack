@@ -6,7 +6,6 @@ import type {
 import type { TStore } from '#ui/hooks/useStore.hook';
 
 export type ColumnOrderSectionContextValue = {
-  /** Store managing column order section modal state */
   readonly modalsStore: TStore<ColumnOrderSectionModalsState>;
 };
 

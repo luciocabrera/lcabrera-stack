@@ -9,11 +9,8 @@ type SplitColumnsByPinningArgs<TData> = {
 };
 
 /**
- * Splits `effectiveColumns` into left-pinned, center (non-pinned), and
- * right-pinned groups, and computes the pixel width for each center column.
- *
- * This is used by both `TableHeader` and `TableBody` to prepare input for
- * the Table's column virtualization.
+ * This is used by both `TableHeader` and `TableBody` to prepare input for the Table's
+ * column virtualization.
  */
 export const splitColumnsByPinning = <TData = Record<string, unknown>>({
   columnPinning,

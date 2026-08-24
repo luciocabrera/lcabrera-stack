@@ -10,9 +10,6 @@ import { DateFilterInput } from '../../DateFilterInput';
 import { NumberFilterInput } from '../../NumberFilterInput';
 import { TextOrSelectFilterInput } from './TextOrSelectFilterInput/TextOrSelectFilterInput.component';
 
-/**
- * Renders the appropriate filter input based on column data type.
- */
 export const InputContent = <TData,>({
   columnKey,
   dataType,

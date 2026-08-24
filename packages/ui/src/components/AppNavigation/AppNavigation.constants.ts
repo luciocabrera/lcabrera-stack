@@ -9,12 +9,6 @@ import {
   ICON_SIZE_XXS,
 } from '#ui/design-system/constants';
 
-/**
- * Which brand icon box size style to apply (matches button height per density).
- * - 'mini' → 1.75rem (matches mini button)
- * - 'sm'   → 2rem    (matches sm button)
- * - 'md'   → 2.5rem  (matches md button)
- */
 type BrandIconBoxSize = 'md' | 'mini' | 'sm';
 
 type NavDensityConfig = {
@@ -27,10 +21,6 @@ type NavDensityConfig = {
   readonly navIconSize: number;
 };
 
-/**
- * Icon sizes, button density, and panel width mapped to each navigation size
- * preference. The density affects all buttons and icons in the sidebar.
- */
 export const NAV_DENSITY: Record<
   GlobalNavigationSizePreference,
   NavDensityConfig

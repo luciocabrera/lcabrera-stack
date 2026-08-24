@@ -1,8 +1,5 @@
 import type { DateFormatPreset } from './formatters.types';
 
-/**
- * Map preset names to Intl.DateTimeFormat options
- */
 export const getDateTimeFormatOptions = (
   preset: DateFormatPreset,
 ): Intl.DateTimeFormatOptions => {

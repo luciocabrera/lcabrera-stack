@@ -6,15 +6,10 @@ type PruneGroupPeriodsArgs = {
 };
 
 /**
- * The granularities that still name a group key (#786).
- *
- * A granularity describes a key, so one left behind by a removed key describes
- * nothing — and it is not inert: the server refuses a request whose granularity
- * map names a column that is not a group key, so carrying it across would take
- * the whole grouped read down rather than being quietly ignored.
- *
- * The **same object instance** comes back when nothing was dropped, so a caller
- * comparing state by identity does not see a change it did not make.
+ * A granularity describes a key, so one left behind by a removed key describes nothing —
+ * and it is not inert: the server refuses a request whose granularity map names a column
+ * that is not a group key, so carrying it across would take the whole grouped read down
+ * rather than being quietly ignored.
  */
 export const pruneGroupPeriods = ({
   keys,

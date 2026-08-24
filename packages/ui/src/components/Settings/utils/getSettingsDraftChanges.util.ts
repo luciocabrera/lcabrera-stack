@@ -6,11 +6,6 @@ type GetSettingsDraftChangesArgs = {
   readonly draft: SettingsDraft;
 };
 
-/**
- * Diffs the staged settings draft against the baseline (the persisted
- * preferences resolved through the same toDraft defaults), split by domain
- * so accept can commit navigation and pinning updates independently.
- */
 export const getSettingsDraftChanges = ({
   baseline,
   draft,

@@ -9,15 +9,6 @@ type BuildColumnSizingCookieEntryArgs<TData> = {
   readonly persistenceKey: string | undefined;
 };
 
-/**
- * Build the cookie entry that persists the current column widths, scoped to the
- * table's app + persistence key. Returns `undefined` (a no-op) until the table
- * has both a persistence key and a width to save.
- *
- * The cookie is the only channel the SSR loader can read, so the width saved
- * here is the width the next document paints with — `getInitialColumnsState`
- * seeds the store from what the loader passed down.
- */
 export const buildColumnSizingCookieEntry = <TData>({
   appId,
   columnSizing,

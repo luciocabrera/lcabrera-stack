@@ -9,11 +9,6 @@ import { LaptopClient } from './LaptopClient';
 import { ServerRack } from './ServerRack';
 import { WarningBadge } from './WarningBadge';
 
-/**
- * Theme-adaptive, accessible, animated SVG illustrations for error / empty states.
- * - Uses `color` prop (or inherited color) so it blends with any UI theme.
- * - Respects prefers-reduced-motion.
- */
 export const ErrorDescriptive = () => {
   const titleId = useId();
   const descId = useId();

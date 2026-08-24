@@ -6,11 +6,6 @@ import { useFiltersDataContextValue } from '../../useFiltersDataContextValue.hoo
 import { fetchInitialFilterData } from './fetchInitialFilterData.util';
 import { fetchMoreFilterData } from './fetchMoreFilterData.util';
 
-/**
- * Hook that provides both initial and paginated filter data fetching
- * for a column. When `prefetchRef` is provided, automatically prefetches
- * the next page after each successful load (if `enablePrefetch` is on).
- */
 export const useFetchFilterData = <TData, TResponse>({
   columnKey,
   prefetchRef,

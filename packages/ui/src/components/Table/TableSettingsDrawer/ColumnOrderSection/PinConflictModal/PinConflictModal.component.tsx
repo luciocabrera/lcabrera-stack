@@ -7,12 +7,6 @@ import {
 } from '../ColumnOrderSectionContext/actions';
 import { useGetConflictModal } from '../ColumnOrderSectionContext/selectors';
 
-/**
- * Conflict-resolution modal shown when pinning a column that is not adjacent
- * to the existing pinned group. Owns its store wiring: reads the pin-conflict
- * modal slice and dispatches the accept/cancel actions itself, delegating the
- * shell to the shared {@link ChoiceModal}.
- */
 export const PinConflictModal = () => {
   const { columnLabel, isOpen, side } = useGetConflictModal();
   const acceptPinConflict = useAcceptPinConflict();

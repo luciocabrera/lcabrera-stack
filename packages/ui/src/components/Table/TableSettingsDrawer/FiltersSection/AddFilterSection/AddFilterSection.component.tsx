@@ -9,12 +9,6 @@ import type { AddFilterSectionProps } from './AddFilterSection.types';
 import { styles } from './AddFilterSection.stylex';
 import { useAddFilterSection } from './useAddFilterSection.hook';
 
-/**
- * Column picker + Add button for creating a new drawer filter. Purely
- * presentational: all store wiring, selection state, and the add-filter
- * flow live in useAddFilterSection; only the dropdown-open presentation
- * callback is received from the shell (overlay coordination).
- */
 export const AddFilterSection = ({
   isBusy = false,
   onDropdownOpenChange,

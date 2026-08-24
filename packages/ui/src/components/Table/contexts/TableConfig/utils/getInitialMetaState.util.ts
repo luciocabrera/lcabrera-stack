@@ -11,12 +11,6 @@ import {
 
 type GetInitialMetaStateArgs = Partial<TableMetaState>;
 
-/**
- * Builds the meta store's initial state. The drawer flags arrive from the
- * loader, which read them from the cookie — the only channel SSR can see — so
- * the drawer paints in its persisted state on the first frame rather than
- * popping open after hydration.
- */
 export const getInitialMetaState = ({
   appId,
   columnSettingsSelectedTab = 'general',

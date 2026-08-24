@@ -14,14 +14,10 @@ import { resolveRedirectTo } from './resolveRedirectTo.util';
 import { toLoginFieldErrors } from './toLoginFieldErrors.util';
 
 /**
- * Authoritative server login. Re-validates with the shared Zod schema (the
- * `clientAction` already validated in the browser, but the server never
- * trusts that), verifies the credential against the demo account's stored
- * hash, then mints a signed auth token, sets it as an httpOnly cookie, and
- * redirects to the sanitized `redirectTo`.
- *
- * Both failure branches return one no-oracle message so an attacker can't tell
- * an unknown email from a wrong password.
+ * Re-validates with the shared Zod schema (the `clientAction` already validated in the
+ * browser, but the server never trusts that), verifies the credential against the demo
+ * account's stored hash, then mints a signed auth token, sets it as an httpOnly cookie,
+ * and redirects to the sanitized `redirectTo`.
  */
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();

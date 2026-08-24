@@ -8,14 +8,6 @@ type SearchParamUpdate = {
   readonly value: string;
 };
 
-/**
- * Apply a list of search-param updates to a starting `URLSearchParams` without
- * mutating it. An empty `value` deletes the param; a non-empty `value` sets it.
- * Updates with an empty `key` are ignored. Returns the next `URLSearchParams`
- * (a fresh object) plus whether any update effectively changed the query —
- * empty string and absent both normalize to `undefined`, so re-applying the
- * current value reports no change.
- */
 export const applySearchParamUpdates = ({
   searchParams,
   updates,

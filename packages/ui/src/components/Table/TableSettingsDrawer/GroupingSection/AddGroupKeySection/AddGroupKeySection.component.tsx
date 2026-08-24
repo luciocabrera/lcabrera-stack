@@ -21,17 +21,10 @@ import { toGroupKeyColumnOptions } from '../utils';
 import { styles } from './AddGroupKeySection.stylex';
 
 /**
- * The drawer's "add a group key" control: the columns that may still be a group
- * key, and an Add button that appends the chosen one as the innermost level.
- *
- * Which columns those are is `toGroupKeyColumnOptions`' answer, so this list and
- * the header menu's enabled items come from one derivation — the column's own
- * declaration narrowed by the catalogue (ADR-058, #642). Offering a key the
- * endpoint refuses would empty the table instead of grouping it.
- *
- * At `MAX_TABLE_GROUP_KEYS` the control is replaced by a message saying so
- * rather than left enabled to be refused — `resolveTableGroupingUpdate` would
- * refuse it, and an affordance that silently does nothing reads as a bug.
+ * Which columns those are is `toGroupKeyColumnOptions`' answer, so this list and the
+ * header menu's enabled items come from one derivation — the column's own declaration
+ * narrowed by the catalogue (ADR-058, #642).
+ * Offering a key the endpoint refuses would empty the table instead of grouping it.
  */
 export const AddGroupKeySection = ({
   isBusy = false,

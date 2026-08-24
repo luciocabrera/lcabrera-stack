@@ -7,12 +7,6 @@ import type { TooltipTriggerProps } from './TooltipTrigger.types';
 import { styles } from './TooltipTrigger.stylex';
 import { getIsNativeInteractiveElement } from './utils/getIsNativeInteractiveElement.util';
 
-/**
- * Anchored inline wrapper that shows/hides the tooltip on hover, focus, and
- * touch. When the child is not a natively interactive element it also adds
- * `role='button'`, `tabIndex`, and keyboard handling (`Enter`/`Space` show,
- * `Escape` hides).
- */
 export const TooltipTrigger = ({
   anchorName,
   children,

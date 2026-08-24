@@ -7,22 +7,13 @@ import { getAppScopedCookieKey } from '#ui/utils/storage';
 import { THEME_COOKIE_NAME } from './theme.constants';
 
 type SetThemeCookieArgs = {
-  /**
-   * Optional per-app id used to scope the cookie key so apps sharing a host
-   * (cookies ignore port) do not overwrite each other.
-   */
   readonly appId?: string;
-  /** The theme mode to persist. */
   readonly theme: ThemeMode;
 };
 
 /**
- * Persist the theme through the same `/_action/persist-cookie` action every
- * other cookie write uses, so the `Set-Cookie` comes from the server. Shares the
- * `buildPersistCookieEntry` payload shape with `usePersistCookieAction`, but
- * submits with a router-free `fetch` rather than the hook: the theme provider
- * can render outside a data router (e.g. in isolated component tests), where a
- * fetcher hook would throw.
+ * Persist the theme through the same `/_action/persist-cookie` action every other cookie
+ * write uses, so the `Set-Cookie` comes from the server.
  */
 const persistThemeCookieServerSide = ({ appId, theme }: SetThemeCookieArgs) => {
   if (
@@ -51,9 +42,6 @@ const persistThemeCookieServerSide = ({ appId, theme }: SetThemeCookieArgs) => {
   });
 };
 
-/**
- * Set theme cookie (for client-side use).
- */
 export const setThemeCookie = ({ appId, theme }: SetThemeCookieArgs) => {
   // Persist through the React Router action so Set-Cookie comes from the server.
   persistThemeCookieServerSide({ appId, theme });

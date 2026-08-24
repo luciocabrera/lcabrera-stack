@@ -10,10 +10,9 @@ import type { NumericFieldControlProps } from './NumericFieldControl.types';
 import { styles } from './NumericFieldControl.stylex';
 
 /**
- * Shared numeric leaf-field control: `FormFieldChrome` wrapping a `type="number"`
- * input wired through `useFormField` so it stores a real `number`/`undefined`
- * (never the raw input string). `NumberField` and `CurrencyField` render this
- * with their own adornment / input attributes instead of repeating the wiring.
+ * Shared numeric leaf-field control: `FormFieldChrome` wrapping a `type="number"` input
+ * wired through `useFormField` so it stores a real `number`/`undefined` (never the raw
+ * input string).
  */
 export const NumericFieldControl = <TValues extends Record<string, unknown>>({
   adornment,

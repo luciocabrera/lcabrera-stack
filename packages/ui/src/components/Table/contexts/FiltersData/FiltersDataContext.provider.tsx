@@ -10,12 +10,6 @@ import type {
 import { getInitialFiltersDataState } from './filters/utils';
 import { FiltersDataContext } from './FiltersDataContext.context';
 
-/**
- * Provider for filter lookup data (distinct values).
- *
- * Must be placed ABOVE the Suspense boundary so the store survives
- * key changes triggered by sort/filter navigations.
- */
 export const FiltersDataProvider = <TData extends Record<string, unknown>>({
   children,
   columns,

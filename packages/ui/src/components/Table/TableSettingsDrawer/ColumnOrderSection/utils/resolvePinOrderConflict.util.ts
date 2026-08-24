@@ -11,9 +11,6 @@ type ResolvePinOrderConflictArgs = {
   readonly resolution: OrderConflictResolution;
 };
 
-/**
- * Resolves a conflict between a new column order and the current pinning state.
- */
 export const resolvePinOrderConflict = ({
   columnPinning,
   newOrder,
@@ -35,9 +32,6 @@ export const resolvePinOrderConflict = ({
   }
 };
 
-/**
- * Keep only pins that are already contiguous at the edges in the new order.
- */
 const removeConflictingPins = ({
   columnPinning,
   newOrder,
@@ -69,10 +63,6 @@ const removeConflictingPins = ({
   };
 };
 
-/**
- * Move pinned columns to the edges to keep all pins valid:
- * left-pinned to the start, right-pinned to the end, rest in the middle.
- */
 const pinToMatchOrder = ({
   columnPinning,
   newOrder,

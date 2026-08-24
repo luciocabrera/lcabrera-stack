@@ -5,7 +5,6 @@ import { createResizeStartData } from './createResizeStartData.util';
 import { resolveResizeWidth } from './resolveResizeWidth.util';
 
 type StartColumnResizeSessionArgs<TData> = {
-  /** Pointer position the gesture started from */
   readonly clientX: number;
   readonly columnKey: DataKey<TData>;
   readonly currentWidth: number | undefined;
@@ -15,25 +14,10 @@ type StartColumnResizeSessionArgs<TData> = {
   readonly onGestureEnd: () => void;
   /** Runs on every teardown path: mouse up, unmount, or a superseding drag */
   readonly onSessionEnd: () => void;
-  /** Store-only width write, called once per animation frame */
   readonly setColumnWidth: (args: ColumnSizingArgs<TData>) => void;
-  /** Persists the final width once the gesture is over */
   readonly syncColumnWidth: () => void;
 };
 
-/**
- * Opens a self-contained column-resize drag session and returns its teardown.
- *
- * Owns the side effects a resize gesture needs — document-level listeners,
- * `requestAnimationFrame` throttling, and the body styles that suppress text
- * selection — so `useColumnDragSession` stays a thin pointer-state hook.
- *
- * Frames go through `setColumnWidth` (store only, so a drag does not rewrite
- * the cookie at 60fps); `syncColumnWidth` persists once on release.
- *
- * @returns The session teardown. Safe to call from any path — it cancels the
- * in-flight frame, removes the listeners, and restores the body styles.
- */
 export const startColumnResizeSession = <TData>({
   clientX,
   columnKey,

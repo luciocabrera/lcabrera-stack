@@ -5,20 +5,12 @@ import { areAllGroupsCollapsed } from '#ui/components/Table/contexts/TableConfig
 import { useTableGroupTree } from './useTableGroupTree.hook';
 
 /**
- * The fold-every-group pair and whether either has anything to do (#774) — one
- * derivation, so the two controls offering it cannot disagree about when the
- * grid is already fully open or fully folded.
- *
- * The foldable set comes from `useTableGroupTree` rather than being enumerated
- * again here, which is the point: it is the same set every per-row chevron is
- * drawn from, so a disabled "Collapse All" means exactly "no chevron on screen
- * would close anything". A second enumeration is where those two answers would
- * drift apart.
- *
- * No route-capability gate is read. Both answers come from the rows, and a grid
- * whose route never declared grouping has no group rows in them — so the pair
- * reports nothing to fold without a second question that could contradict the
- * first.
+ * The fold-every-group pair and whether either has anything to do (#774) — one derivation,
+ * so the two controls offering it cannot disagree about when the grid is already fully
+ * open or fully folded.
+ * Both answers come from the rows, and a grid whose route never declared grouping has no
+ * group rows in them — so the pair reports nothing to fold without a second question that
+ * could contradict the first.
  */
 export const useTableGroupFoldAll = <
   TData extends Record<string, unknown> = Record<string, unknown>,

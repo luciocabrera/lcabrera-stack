@@ -39,14 +39,9 @@ const parseBooleanFilter = (value: unknown): ColumnFilter | undefined => {
 };
 
 /**
- * `{ op: 'ie' }` — the one compact filter that is an object rather than an
- * array, and read here **before** the `Array.isArray` guard below because of it.
- *
- * The shape is the whole point. `parseEqualsSelectFilter` accepts any all-string
- * array, so a one-element `['ie']` is already a select filter over the literal
- * value `ie` and has to stay one; an object cannot collide with it, or with any
- * other shape this codec writes. See `serializeEmptyFilter` for what claiming
- * the array form would have cost.
+ * `parseEqualsSelectFilter` accepts any all-string array, so a one-element `['ie']` is
+ * already a select filter over the literal value `ie` and has to stay one; an object
+ * cannot collide with it, or with any other shape this codec writes.
  */
 const parseEmptyFilter = (value: unknown): ColumnFilter | undefined => {
   if (!isObject(value) || Array.isArray(value)) {
@@ -188,12 +183,7 @@ const parseEqualsSelectFilter = (
   return { operator: 'equals', type: 'select', values };
 };
 
-/**
- * Deserialize a single compact filter value back to a ColumnFilter.
- *
- * Infers the filter type from the value shape and expands short operator codes.
- * Returns undefined if the value cannot be parsed.
- */
+/** Returns undefined if the value cannot be parsed. */
 export const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
   const booleanFilter = parseBooleanFilter(value);
   if (booleanFilter) {

@@ -10,12 +10,6 @@ export const TITLE = {
   singular: 'Row',
 };
 
-/**
- * Returns the display dataType for a column at the given index (1–149).
- * Types cycle as (index % 20):
- *   0,1,4,5 → number  |  2,3,7,8,9,10,11,12,13,14,15,16,17,18,19 → string
- *   6 → boolean  |  9 → date
- */
 // fallow-ignore-next-line complexity -- temporary testing suppression
 const getColDataType = (index: number) => {
   const mod = index % 20;

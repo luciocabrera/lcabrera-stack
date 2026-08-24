@@ -3,7 +3,6 @@ import * as stylex from '@stylexjs/stylex';
 import { KeyboardBase } from './keyboardBase';
 import { styles } from './LaptopClient.stylex';
 
-/** Stylized laptop / client illustration used on the right of `ErrorDescriptive`. */
 export const LaptopClient = () => (
   <g transform='translate(210,70)'>
     {/* screen */}

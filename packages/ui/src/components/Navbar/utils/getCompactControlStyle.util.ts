@@ -10,9 +10,5 @@ const COMPACT_CONTROL_STYLES = {
   sm: styles.compactControlSm,
 } as const;
 
-/**
- * Resolve the compact (icon-only) control override style for a toolbar
- * entry's design-system size.
- */
 export const getCompactControlStyle = (size: DesignSystemSize) =>
   COMPACT_CONTROL_STYLES[size];

@@ -7,12 +7,6 @@ type ResolveOptionLabelsArgs = {
   readonly value: unknown;
 };
 
-/**
- * Resolves a select/radio field's stored value(s) to their human-readable
- * option label(s) for read-only display — a single value maps to its option
- * label, an array (multi-select) maps to a comma-joined list, and any value
- * with no matching option falls back to its own string form.
- */
 export const resolveOptionLabels = ({
   options,
   value,

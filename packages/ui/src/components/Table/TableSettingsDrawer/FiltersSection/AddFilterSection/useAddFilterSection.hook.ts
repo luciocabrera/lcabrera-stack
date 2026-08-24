@@ -16,13 +16,6 @@ type UseAddFilterSectionArgs = {
   readonly onDropdownOpenChange?: (isOpen: boolean) => void;
 };
 
-/**
- * Store wiring and behavior for AddFilterSection: builds the filterable
- * column options (flagging already-filtered columns), owns the column-picker
- * selection and dropdown-open state, and runs the add flow — initialize a
- * filter for the selected column's data type, write it to the drawer draft,
- * and expand the new filter first.
- */
 export const useAddFilterSection = ({
   onDropdownOpenChange,
 }: UseAddFilterSectionArgs) => {

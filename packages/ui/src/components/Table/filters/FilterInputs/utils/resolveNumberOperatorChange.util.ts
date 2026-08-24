@@ -9,11 +9,6 @@ type ResolveNumberOperatorChangeArgs = {
   readonly operator: OperatorType;
 };
 
-/**
- * Next filter draft for a number/currency column: keep the drafted value (and
- * the `between` second value) when the existing filter is already a number
- * filter, otherwise seed an empty one.
- */
 // Return annotation required: 'number' widens to string without the
 // ColumnFilter contextual type.
 export const resolveNumberOperatorChange = ({

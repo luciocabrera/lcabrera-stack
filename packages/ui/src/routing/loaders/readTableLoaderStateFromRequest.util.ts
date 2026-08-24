@@ -29,10 +29,6 @@ import { resolveLoaderTotalsPlacement } from './resolveLoaderTotalsPlacement.uti
 type ReadTableLoaderStateFromRequestArgs<
   TData extends Record<string, unknown>,
 > = {
-  /**
-   * Per-application identifier used to scope persisted cookies so tables in
-   * different apps that share a `persistenceKey` do not read each other's state.
-   */
   readonly appId?: string;
   readonly columns?: readonly TableColumn<TData>[];
   /**
@@ -43,10 +39,9 @@ type ReadTableLoaderStateFromRequestArgs<
   readonly defaultGrouping?: TableGroupingState;
   readonly includeFilters?: boolean;
   /**
-   * Whether this route may be grouped at all. Off leaves `grouping` empty
-   * whatever the URL says — the capability is the route's to declare, and a
-   * `grouping` param on a route that cannot group is a request for a shape its
-   * endpoint does not produce (ADR-063).
+   * Off leaves `grouping` empty whatever the URL says — the capability is the route's to
+   * declare, and a `grouping` param on a route that cannot group is a request for a shape
+   * its endpoint does not produce (ADR-063).
    */
   readonly includeGrouping?: boolean;
   /**
@@ -60,12 +55,8 @@ type ReadTableLoaderStateFromRequestArgs<
 };
 
 /**
- * Read shared table loader state from URL and cookies.
- *
- * `sorting`, `filters` and `grouping` come from the URL because the
- * persist-cookie flow writes them there (ADR-010, ADR-061). Order, visibility,
- * sizing and pinning are cookie-only on that same flow, so they are read only
- * from the cookie.
+ * `sorting`, `filters` and `grouping` come from the URL because the persist-cookie flow
+ * writes them there (ADR-010, ADR-061).
  */
 export const readTableLoaderStateFromRequest = <
   TData extends Record<string, unknown>,

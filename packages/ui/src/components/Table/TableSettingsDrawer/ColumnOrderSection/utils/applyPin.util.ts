@@ -10,12 +10,6 @@ type ApplyPinArgs<TData> = {
   readonly staticKeys?: Set<string>;
 };
 
-/**
- * Creates a new pinning state with the given column added to the specified side.
- * Removes the column from the opposite side if present.
- * When pinning right, new columns are inserted before static columns.
- * When pinning left, new columns are inserted after static columns.
- */
 export const applyPin = <TData>({
   columnKey,
   columnPinning,

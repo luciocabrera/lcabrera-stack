@@ -7,11 +7,6 @@ import { TooltipContent } from './TooltipContent/TooltipContent.component';
 import { TooltipTrigger } from './TooltipTrigger/TooltipTrigger.component';
 import { getArrowOffset } from './utils';
 
-/**
- * Hover/focus driven contextual help built on the native Popover API. A thin
- * shell owning visibility state, refs, and show/hide orchestration, composing
- * the TooltipTrigger and TooltipContent delegates.
- */
 export const Tooltip = ({
   children,
   content,

@@ -20,7 +20,6 @@ import { styles } from './VirtualListFooter.stylex';
 
 const MODES = ['all', 'selected', 'unselected'] as const;
 
-/** Self-connected footer: loaded/total counts plus the filter-mode buttons. */
 export const VirtualListFooter = () => {
   const hasCheckboxes = useGetHasCheckboxes();
   const isLoading = useGetIsLoading();

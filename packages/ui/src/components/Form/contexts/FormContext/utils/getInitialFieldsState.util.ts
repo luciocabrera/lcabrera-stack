@@ -9,12 +9,6 @@ type GetInitialFieldsStateArgs<TValues extends Record<string, unknown>> = {
   readonly serverErrors?: FieldErrors<TValues>;
 };
 
-/**
- * Build the fields store's initial snapshot: the resolved initial values
- * (typed defaults for accessors the caller didn't provide), the frozen
- * pristine dirty-check baseline, and any server errors carried into the
- * first render.
- */
 export const getInitialFieldsState = <TValues extends Record<string, unknown>>({
   initialValues,
   leafFields,

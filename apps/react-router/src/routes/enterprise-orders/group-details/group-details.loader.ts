@@ -25,15 +25,9 @@ import {
 
 /**
  * The rows underneath one group row, as an ordinary paginated table (ADR-087).
- *
- * `isUrlStateNested` puts its own `filters` and `sorting` under a prefix, so it
- * shares the list's URL without re-filtering the list underneath it; the link
- * seeds those from the list's, which is the floor the group was computed under.
- * It declares no grouping (a grouped read would return group rows again) and no
- * keyset (the translation rewrites the sort a cursor would have to match), and
- * it requires the group token — every response it serves is titled as one
- * group, so there is no unscoped read for a link that lost its query to fall
- * through to.
+ * `isUrlStateNested` puts its own `filters` and `sorting` under a prefix, so it shares the
+ * list's URL without re-filtering the list underneath it; the link seeds those from the
+ * list's, which is the floor the group was computed under.
  */
 const tableLoader = createTableRouteLoader<
   EnterpriseOrderTableRow,

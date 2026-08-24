@@ -9,17 +9,8 @@ import type { EnterTableGridArgs } from './useEnterTableGrid.types';
 import { commitTableFocusTarget, resolveGridFocusContext } from './utils';
 
 /**
- * Records that DOM focus has arrived somewhere inside the grid, and — when it
- * landed on the grid container itself, which is what `Tab` does — hands it on
- * to the remembered cell.
- *
- * This is what makes the grid "one stop in the page's tab order, entered where
- * it was left" (ADR-062). The remembered row may be outside the rendered window
- * by the time the user comes back to it, so the commit scrolls it in and the
- * cell takes focus when it mounts.
- *
- * A grid with no rows keeps focus on the container: it stays focusable
- * precisely so focus has somewhere to be when no cell can hold it.
+ * This is what makes the grid "one stop in the page's tab order, entered where it was
+ * left" (ADR-062).
  */
 export const useEnterTableGrid = <TData extends Record<string, unknown>>() => {
   const { focusStore } = useTableFocusContextValue();

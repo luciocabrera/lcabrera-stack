@@ -16,21 +16,7 @@ type UseColumnDragSessionArgs<TData> = {
   readonly minWidth?: number;
 };
 
-/**
- * The pointer half of a column resize. Private to `useColumnResize`, which is
- * the single entry point a component should use.
- *
- * Each mouse down opens a self-contained drag session
- * (`startColumnResizeSession`), which owns the start snapshot, the
- * RAF-throttled move handler emitting clamped widths, and the paired teardown.
- * This hook holds only the pointer state around it: which session is in flight,
- * and whether the column is currently resizing. Unmount ends any in-flight
- * session through `endDragSessionRef`.
- *
- * The gesture owns both halves of its own write: frames go through
- * `useSetColumnSizingWithoutSync` (store only, so a drag does not rewrite the
- * cookie at 60fps) and mouse up persists once.
- */
+/** Unmount ends any in-flight session through `endDragSessionRef`. */
 export const useColumnDragSession = <TData>({
   columnKey,
   currentWidth,

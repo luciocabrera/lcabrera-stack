@@ -5,7 +5,6 @@ type ResolveToggleOptionFilterArgs = {
   readonly selectedValues: readonly string[];
 };
 
-/** Builds the next SelectFilter after toggling a single option. */
 export const resolveToggleOptionFilter = ({
   option,
   selectedValues,

@@ -4,17 +4,11 @@ type IsShallowEqualArgs<T extends Record<string, unknown>> = {
 };
 
 /**
- * Shallow equality check for objects
- *
- * Compares two objects by checking if they have the same keys
- * and if all values are strictly equal (===).
- *
- * @example
- * ```ts
- * isShallowEqual({ objA: { a: 1 }, objB: { a: 1 } }); // true
- * isShallowEqual({ objA: { a: 1 }, objB: { a: 2 } }); // false
- * isShallowEqual({ objA: { a: 1, b: 2 }, objB: { a: 1 } }); // false
- * ```
+ * Shallow equality check for objects Compares two objects by checking if they have the
+ * same keys and if all values are strictly equal (===).
+ * @example ```ts isShallowEqual({ objA: { a: 1 }, objB: { a: 1 } }); // true
+ * isShallowEqual({ objA: { a: 1 }, objB: { a: 2 } }); // false isShallowEqual({ objA: { a:
+ * 1, b: 2 }, objB: { a: 1 } }); // false ```
  */
 export const isShallowEqual = <T extends Record<string, unknown>>({
   objA,

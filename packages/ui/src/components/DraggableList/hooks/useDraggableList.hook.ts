@@ -5,9 +5,6 @@ import type {
   UseDraggableListProps,
 } from '../DraggableList.types';
 
-/**
- * Hook for managing draggable list state with native HTML5 drag and drop
- */
 export const useDraggableList = ({
   initialItems,
   onOrderChange,

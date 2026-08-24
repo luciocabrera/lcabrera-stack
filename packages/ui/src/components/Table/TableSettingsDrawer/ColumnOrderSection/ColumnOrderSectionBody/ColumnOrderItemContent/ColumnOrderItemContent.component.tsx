@@ -12,13 +12,9 @@ import {
 import { styles } from './ColumnOrderItemContent.stylex';
 
 /**
- * Row content for one column in the column order list: lock indicator for
- * static columns, the column label, and the Pin/Show toggles. Owns its store
- * wiring: dispatches the pin and visibility toggle actions itself.
- *
- * **A group key is listed and locked, not hidden** (ADR-080). It is one of the
- * consumer's own columns, so a drawer row for it answers something — which is
- * why it stays listed where the retired hierarchy column was filtered out — but
+ * **A group key is listed and locked, not hidden** (ADR-080).
+ * It is one of the consumer's own columns, so a drawer row for it answers something —
+ * which is why it stays listed where the retired hierarchy column was filtered out — but
  * its position and visibility are the grouping's while grouping is applied.
  */
 export const ColumnOrderItemContent = ({

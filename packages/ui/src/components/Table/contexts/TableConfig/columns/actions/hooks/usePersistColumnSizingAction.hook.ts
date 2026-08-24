@@ -3,15 +3,11 @@ import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableC
 import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
 
 /**
- * Persists whatever column widths are currently in the store to the cookie, via
- * the `/_action/persist-cookie` server action (`Set-Cookie`). A no-op until the
- * table has a persistence key and a width to save.
- *
- * Replaces the old client-side `document.cookie` write: the cookie is still the
- * only channel the SSR loader can read, so the width saved here is the width the
- * next document paints with. Reads the store rather than taking a width, so it
- * always saves the committed state even when the caller wrote it a moment
- * earlier. Fires only on drag-end (the per-frame path skips persistence).
+ * Persists whatever column widths are currently in the store to the cookie, via the
+ * `/_action/persist-cookie` server action (`Set-Cookie`).
+ * Replaces the old client-side `document.cookie` write: the cookie is still the only
+ * channel the SSR loader can read, so the width saved here is the width the next document
+ * paints with.
  */
 export const usePersistColumnSizingAction = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();

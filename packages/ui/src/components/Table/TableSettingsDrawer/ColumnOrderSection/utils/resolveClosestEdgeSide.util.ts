@@ -8,10 +8,6 @@ type ResolveClosestEdgeSideArgs<TData> = {
   readonly pinSide: PinSide;
 };
 
-/**
- * Resolves a PinSide value to an actual 'left' | 'right' side.
- * If 'closest-edge', determines side based on column position relative to the midpoint.
- */
 export const resolveClosestEdgeSide = <TData>({
   allOrderedColumns,
   columnKey,

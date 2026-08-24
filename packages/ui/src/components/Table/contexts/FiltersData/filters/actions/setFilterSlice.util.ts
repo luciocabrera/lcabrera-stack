@@ -12,11 +12,8 @@ type SetFilterSliceArgs<TData> = {
 };
 
 /**
- * Write a single column's FilterData slice into the filters-data store.
- *
- * `store.set` cannot type computed-key partial updates, so the one required
- * assertion is contained here — call sites must stay cast-free.
- * @param args - Target store, column key, and the full FilterData slice.
+ * `store.set` cannot type computed-key partial updates, so the one required assertion is
+ * contained here — call sites must stay cast-free.
  */
 export const setFilterSlice = <TData>({
   columnKey,

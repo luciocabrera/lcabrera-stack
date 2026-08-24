@@ -7,10 +7,6 @@ import { useTableDrawerContextValue } from '#ui/components/Table/TableSettingsDr
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { resolveAcceptedOrderConflictState } from './utils/resolveAcceptedOrderConflictState.util';
 
-/**
- * Hook to handle accepting an order conflict resolution.
- * Static columns are preserved in their original positions and pinning.
- */
 export const useAcceptOrderConflict = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();

@@ -8,12 +8,10 @@ import { fakeDelay } from './fakeDelay.util';
 import { isExternalApiEnabled } from './isExternalApiEnabled.util';
 
 /**
- * Browser fetcher for a page of car sales.
- *
- * It targets this app's own `/_api/car-sales/paginated` resource route by
- * default, and the external `car-sales-api` when `VITE_API_URL` is set — the
- * one axis the two differ on is the origin, which is exactly what
- * `createPaginatedFetcher`'s `resolveBaseUrl` strategy is for (ADR-056).
+ * It targets this app's own `/_api/car-sales/paginated` resource route by default, and the
+ * external `car-sales-api` when `VITE_API_URL` is set — the one axis the two differ on is
+ * the origin, which is exactly what `createPaginatedFetcher`'s `resolveBaseUrl` strategy
+ * is for (ADR-056).
  */
 
 export type CarSale = {
@@ -62,42 +60,20 @@ const isCarSalesPaginatedResponse = (
   typeof value.total === 'number' &&
   typeof value.hasMore === 'boolean';
 
-/**
- * The same-origin resource route this app serves for its own car-sales rows.
- * Exported so `routes.ts` and this fetcher can be asserted to still name the
- * same URL — they are declared in different shapes and nothing else pairs them.
- */
 export const CAR_SALES_PAGINATED_PATH = '/_api/car-sales/paginated';
 
-/** This app's own resource route, reading Postgres server-side. The default. */
 const fetchSelfHostedPage = createPaginatedFetcher({
   isValid: isCarSalesPaginatedResponse,
   path: CAR_SALES_PAGINATED_PATH,
 });
 
-/** The external `car-sales-api` endpoint, reachable only under the override. */
 const fetchExternalPage = createPaginatedFetcher({
   isValid: isCarSalesPaginatedResponse,
   path: '/car-sales/paginated',
   resolveBaseUrl: getApiBaseUrl,
 });
 
-/**
- * Fetch car sales data with pagination (offset-limit strategy).
- *
- * This is deliberately the only reader of the car-sales table. `car_sales`
- * holds 500k rows, so an unpaginated read returns a ~421MB body and kills SSR
- * while it is being serialized into the hydration payload. Every route takes a
- * bounded slice through here instead — including `car-sales`, which paginates
- * in memory and simply asks for a larger `limit`.
- *
- * Both endpoints answer the identical `{ data, hasMore, total }` shape, so the
- * override changes where the rows come from and nothing else.
- *
- * The `fakeDelay` is why this wraps the fetcher rather than being one: the
- * route exists to demonstrate the loading skeleton, which a local endpoint
- * answers too fast to show. It no-ops unless `VITE_API_DELAY_MS` is set.
- */
+/** This is deliberately the only reader of the car-sales table. */
 export const fetchCarSalesPage = async (args: PaginatedFetchArgs) => {
   await fakeDelay();
 

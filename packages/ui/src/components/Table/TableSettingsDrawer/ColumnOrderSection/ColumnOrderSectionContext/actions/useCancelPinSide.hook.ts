@@ -1,8 +1,5 @@
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
-/**
- * Hook to cancel the pin side selection modal.
- */
 export const useCancelPinSide = () => {
   const { modalsStore } = useColumnOrderSectionContextValue();
 

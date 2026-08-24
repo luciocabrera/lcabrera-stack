@@ -5,12 +5,7 @@ type ReadFromCookieArgs = {
   readonly key: string;
 };
 
-/**
- * Read from cookie (SSR-safe)
- *
- * @param key - The cookie key to read
- * @param cookieString - Optional cookie string for SSR context. If not provided, uses document.cookie
- */
+/** If not provided, uses document.cookie */
 export const readFromCookie = ({ cookieString, key }: ReadFromCookieArgs) => {
   // In browser, use document.cookie
   if (typeof document !== 'undefined' && !cookieString) {

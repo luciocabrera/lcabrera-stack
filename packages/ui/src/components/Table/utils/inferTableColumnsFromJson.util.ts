@@ -98,13 +98,8 @@ const toTableColumnDataType = (inferredType: InferredValueType) => {
 };
 
 /**
- * Computes TableColumn definitions from the union of keys across an
- * arbitrary array of JSON objects — the runtime counterpart to a
- * hand-authored `COLUMNS[]` constant. Intended to run server-side (a loader,
- * not a component) since it does no rendering itself; only complex
- * (object/array) columns get a `render`, and that render is a plain string
- * (a valid ReactNode) rather than JSX, so this file has no React dependency
- * and is safe to execute outside a browser/component context.
+ * Computes TableColumn definitions from the union of keys across an arbitrary array of
+ * JSON objects — the runtime counterpart to a hand-authored `COLUMNS[]` constant.
  */
 export const inferTableColumnsFromJson = ({
   rows,

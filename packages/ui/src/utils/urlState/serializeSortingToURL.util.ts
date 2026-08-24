@@ -2,18 +2,6 @@ import type { SortingState } from '#ui/components/Table';
 
 import { sortingCodec } from './sortingCodec.util';
 
-/**
- * Serialize SortingState to a compact URL-friendly string.
- *
- * Converts `[{ columnKey: "name", direction: "asc" }]`
- * into `{"name":"asc"}` — much shorter than the verbose array format.
- * Returns undefined when nothing carries a direction, so the caller leaves the
- * param off the URL entirely.
- *
- * Built with `Object.fromEntries` rather than by assigning into `{}`, so a
- * `__proto__` column key becomes an own property instead of hitting the
- * prototype setter and vanishing from the serialized param.
- */
 export const serializeSortingToURL = <TData>(sorting: SortingState<TData>) => {
   const entries = sorting
     .filter(

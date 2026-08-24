@@ -7,10 +7,8 @@ export type ResolveTagOverflowArgs = {
 };
 
 /**
- * Splits the selected labels into the tags that fit in the trigger and the
- * overflow count hidden behind the "+N more" badge. The measured
- * `visibleTagCount` only applies in multi mode with a selection; single
- * mode (and empty selections) always shows everything.
+ * Splits the selected labels into the tags that fit in the trigger and the overflow count
+ * hidden behind the "+N more" badge.
  */
 export const resolveTagOverflow = ({
   mode,

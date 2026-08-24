@@ -10,22 +10,7 @@ import {
 import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
 import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
 
-/**
- * Shared persistence hook for the column actions — internal to `actions/`, not
- * part of its public API, which is why it lives here rather than in the
- * barrel-exported action list or in `Table/hooks/` (where it used to sit, and
- * where reaching for it through the hooks barrel closed an actions ↔ hooks
- * import cycle).
- *
- * Persists table state to the **cookie**, written via a server action
- * (Set-Cookie header). The cookie is the single source of truth because it is
- * the only channel the SSR loader can read: the store is seeded from what the
- * loader passes down, so what is saved here is what the next document paints
- * with. A client-only copy could only contradict that markup and shift it at
- * hydration.
- *
- * Supports both a single entry and a batch of entries.
- */
+/** Persists table state to the **cookie**, written via a server action (Set-Cookie header). */
 export const usePersistTableStateAction = () => {
   const { metaStore } = useTableConfigContextValue();
   const persistCookie = usePersistCookieAction({

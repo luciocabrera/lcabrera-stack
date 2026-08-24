@@ -6,7 +6,6 @@ import type { GroupKeyTruncation } from './olap.types';
 import { toGroupLabel } from './to-group-label.util';
 import { toGroupPeriodLabel } from './to-group-period-label.util';
 
-/** One selected aggregate, paired with the alias the builder projected it under. */
 type GroupRowAggregate = {
   readonly alias: string;
   readonly columnKey: string;
@@ -21,14 +20,11 @@ type IsKeyRolledUpArgs = {
 
 type ToGroupRowArgs = {
   /**
-   * The selected aggregates. The alias comes from the builder's own result
-   * rather than being spelled here, so the name the SQL projected and the name
-   * this decodes by are one string.
+   * The alias comes from the builder's own result rather than being spelled here, so the
+   * name the SQL projected and the name this decodes by are one string.
    */
   readonly aggregates: readonly GroupRowAggregate[];
-  /** The group keys, in the query's nesting order. */
   readonly columnKeys: readonly string[];
-  /** The alias the builder projected `count(*)` under. */
   readonly countAlias: string;
   /** The alias the builder projected `GROUPING(k₁, …, kₙ)` under. */
   readonly maskAlias: string;
@@ -37,62 +33,13 @@ type ToGroupRowArgs = {
   readonly truncations?: Readonly<Record<string, GroupKeyTruncation>>;
 };
 
-/**
- * Whether key `index` of `keyCount` was rolled up in this row's grouping set.
- *
- * `GROUPING(k₁, …, kₙ)` puts the **first** key in the most significant bit, so
- * key `i` owns `2 ** (n - 1 - i)`. Read by division rather than with a bitwise
- * `&` because the two agree exactly at this size — the depth cap keeps the mask
- * under 16 — and the arithmetic form says which bit is being read without the
- * reader having to know the operator's precedence.
- */
+/** `GROUPING()` puts the first key in the MSB, so key `i` owns `2 ** (n - 1 - i)`. */
 const isKeyRolledUp = ({ index, keyCount, mask }: IsKeyRolledUpArgs) =>
   Math.trunc(mask / 2 ** (keyCount - 1 - index)) % 2 === 1;
 
 /**
- * Turns one row of a grouped read into a row a table can render.
- *
- * **The mask is what makes a rollup readable, and this is where it is decoded.**
- * A row whose `shipping_country` is NULL is either a real NULL in the data or
- * the subtotal across every country, and the two are textually identical — only
- * `GROUPING()` separates them. A set bit means "this row is not keyed by that
- * column", never "no value here". It lives beside `build-group-query`, which is
- * what *writes* the mask: the two are one protocol (ADR-082).
- *
- * The decode produces two things the renderer needs and cannot derive:
- *
- * - **`path` holds only the keys this row is actually grouped by.** A rollup
- *   emits sets that are prefixes of the key list, so dropping the rolled-up
- *   keys leaves a prefix whose length is the row's depth — what the grid reads
- *   a group's level from (ADR-080). The grand total rolls up every key and gets
- *   an empty path.
- * - **`isSubtotal`** — whether anything was rolled up at all. A flat read never
- *   sets a bit, so every row is a leaf and this stays `false` throughout, which
- *   is byte for byte the behaviour before rollup existed.
- *
- * **A truncated key is headed by its period**, not by the instant it starts —
- * `2021-06` rather than `2021-06-01T00:00:00.000Z`. `toGroupPeriodLabel` owns
- * that, and owns the frame the value has to be read back in (#786).
- *
- * **A key is emitted twice — formatted and raw; an aggregate only raw.** Only
- * this side can format a key: nothing downstream resolves a path entry back to
- * the column it came from, so the label has to be produced here. But formatting
- * is lossy in exactly the direction a query needs — a NULL key becomes
- * `(empty)`, a date an ISO string — so the raw value is carried beside it, and
- * that is what a drill turns into a filter (ADR-079). They answer two
- * questions, so collapsing them loses one.
- *
- * An aggregate is the opposite case and needs only the raw half: it names its
- * column, so the cell that renders it can ask the columns store for that
- * column's `dataType` and `format` and render it exactly as the cells beneath
- * it. Formatting one here is how a `numeric` sum reached a currency column as
- * `"302540833.38"` — `pg` hands `numeric` and `bigint` back as strings, and
- * this side has nothing better to do with one than pass it along.
- *
- * The result carries the summary and nothing else. A grouped read projects only
- * the group keys and their aggregates, so there is no detail row hiding
- * underneath — claiming otherwise by copying a key into its own column would
- * make the row look partly like a data row to every cell renderer.
+ * Decode `GROUPING()` here (ADR-082): a set bit means "not keyed by that column", never
+ * "no value here".
  */
 export const toGroupRow = ({
   aggregates,

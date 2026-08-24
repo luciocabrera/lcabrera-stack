@@ -15,11 +15,6 @@ type UseElementSizeArgs = {
 
 const INITIAL_SIZE: ElementSize = { height: 0, width: 0 };
 
-/**
- * Tracks the client (content-box, scrollbar-excluded) size of a referenced
- * element via `ResizeObserver`. SSR-safe: returns `{ height: 0, width: 0 }`
- * until the element is measured on the client.
- */
 export const useElementSize = ({ ref }: UseElementSizeArgs) => {
   const [size, setSize] = useState<ElementSize>(INITIAL_SIZE);
 

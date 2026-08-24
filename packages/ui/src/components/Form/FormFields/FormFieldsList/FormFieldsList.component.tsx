@@ -14,21 +14,8 @@ import { hasScrollOwningChild } from '../utils/hasScrollOwningChild.util';
 import { styles } from './FormFieldsList.stylex';
 
 /**
- * Single recursive walker for group/row/tab/leaf nodes — the render-side
- * counterpart to flattenFields.util.ts (ADR-005). Each node type delegates to
- * its own subcomponent; only the stable-key computation lives here.
- *
- * Provides itself via `FormFieldsRendererContext` rather than letting
- * `FormFieldGroup`/`FormFieldRow`/`FormFieldTabs` import this module
- * directly — those subcomponents recurse back into `FormFieldsList` to render
- * their nested `fields`, and a direct import would create a circular
- * dependency (`FormFieldsList` → subcomponent → `FormFieldsList`).
- *
- * That same context doubles as the depth signal. Every list renders inside its
- * parent's provider, so the one that reads `undefined` is by construction the
- * outermost — which is what earns it the height (`styles.region`) and, unless
- * a child already scrolls, the form's single scroll boundary
- * (see `Form/ARCHITECTURE.md` → Layout).
+ * Single recursive walker for group/row/tab/leaf nodes — the render-side counterpart to
+ * flattenFields.util.ts (ADR-005).
  */
 export const FormFieldsList = <TValues extends Record<string, unknown>>({
   fields,

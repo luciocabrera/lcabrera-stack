@@ -3,12 +3,6 @@ import type {
   EnterpriseOrderValues,
 } from './enterpriseOrders.types';
 
-/**
- * Map a persisted `EnterpriseOrder` row to Form values for edit/view: numeric
- * columns (which Postgres returns as strings) become numbers, and nullable
- * columns collapse to an empty string so the Form renders a blank field rather
- * than the literal "null".
- */
 export const toOrderFormValues = (
   order: EnterpriseOrder,
 ): EnterpriseOrderValues => ({

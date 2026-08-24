@@ -2,7 +2,6 @@ import * as stylex from '@stylexjs/stylex';
 
 import { styles } from './TableSheet.stylex';
 
-/** Empty table sheet with header cells and a dashed body, the central element of `NoDataDescriptive`. */
 export const TableSheet = () => (
   <g>
     <rect

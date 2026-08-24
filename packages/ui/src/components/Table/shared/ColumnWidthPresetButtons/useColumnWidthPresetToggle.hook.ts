@@ -6,13 +6,6 @@ type UseColumnWidthPresetToggleArgs = {
   readonly onSelectPreset: (preset: NonNullable<WidthPreset>) => void;
 };
 
-/**
- * Owns the min/max/default width-preset toggle state shared by the per-column
- * (GeneralSectionHeader) and all-columns (ColumnWidthsSection) width sections:
- * tracks the selected preset and exposes the three bound toggle handlers.
- * Selecting a preset invokes `onSelectPreset`; re-selecting the active preset
- * deselects it and reverts to the current state (no write).
- */
 export const useColumnWidthPresetToggle = ({
   onSelectPreset,
 }: UseColumnWidthPresetToggleArgs) => {

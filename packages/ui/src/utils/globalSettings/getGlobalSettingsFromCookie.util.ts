@@ -24,15 +24,6 @@ type GlobalSettingsCookiePayload = {
   readonly version?: unknown;
 };
 
-/**
- * Read global settings (pinning + navigation preferences) from the settings
- * cookie (SSR-safe via optional cookie string).
- *
- * Returns the fallback when the cookie is missing, malformed, or has a stale
- * version; each preference slice falls back independently when invalid.
- * @param args - Optional raw `Cookie` header string and the fallback state.
- * @returns The parsed global settings state, or the fallback.
- */
 export const getGlobalSettingsFromCookie = ({
   appId,
   cookieString,

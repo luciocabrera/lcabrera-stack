@@ -8,12 +8,6 @@ import { AppBackground } from '../AppBackground';
 import { AppDotted } from '../AppDotted';
 import { styles } from './AppShell.stylex';
 
-/**
- * The app frame rendered inside `AppProviders`: themed background, navigation,
- * the routed `<Outlet />` inside the `<main>` landmark, and the notification
- * centre. Pure composition — everything app-specific reaches the delegate that
- * renders it through `AppConfigContext`, so nothing is threaded through here.
- */
 export const AppShell = () => (
   <AppBackground>
     <AppNavigation />

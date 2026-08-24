@@ -85,7 +85,6 @@ const tableData: MockRow[] = Array.from({ length: 10_000 }, (_, rowIdx) =>
 
 // --- Table config ---
 
-/** Simulated API delay in milliseconds. Adjust to test loading states. */
 export const FAKE_API_DELAY_MS = 2000;
 
 const PERSISTENCE_KEY = 'app-showcase-table';

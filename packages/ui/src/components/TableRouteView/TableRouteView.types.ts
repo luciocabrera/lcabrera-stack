@@ -10,6 +10,5 @@ export type TableRouteViewProps<
   TableLayoutProps<TData, TResponse>,
   'actions' | 'dataErrorSelector' | 'dataSelector' | 'dataTotalSelector'
 > & {
-  /** The route's paginated read — typically a `createPaginatedFetcher` result. */
   readonly fetchPage: (query: PaginatedQuery) => Promise<TResponse>;
 };

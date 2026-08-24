@@ -2,9 +2,6 @@ import { useColumnDrawerContextValue } from '#ui/components/Table/ColumnSettings
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { logger } from '#ui/utils/logger';
 
-/**
- * Resets the column sorting in the drawer to match the current table state.
- */
 export const useResetColumnSorting = () => {
   const { columnsStore } = useTableConfigContextValue();
   const { columnStore } = useColumnDrawerContextValue();

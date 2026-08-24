@@ -7,11 +7,8 @@ type IsFormDirtyArgs<TValues extends Record<string, unknown>> = {
 };
 
 /**
- * Subset comparison restricted to the form's own accessors (not a full
- * isShallowEqual, since a caller-provided store may carry extra keys).
- * Arrays (multi-select) compare by value, not reference — VirtualSelect's
- * onChange always hands back a new array even when the selection is
- * unchanged from initialValues.
+ * Subset comparison restricted to the form's own accessors (not a full isShallowEqual,
+ * since a caller-provided store may carry extra keys).
  */
 export const isFormDirty = <TValues extends Record<string, unknown>>({
   accessors,

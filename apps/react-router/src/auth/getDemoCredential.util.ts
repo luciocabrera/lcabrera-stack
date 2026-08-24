@@ -7,12 +7,8 @@ type GetDemoCredentialArgs = {
 };
 
 /**
- * Resolves the showcase's single demo credential from the environment (with
- * documented dev defaults). Deterministic for a given `env`, so the login
- * action can pass `process.env` and tests can pass a fixture.
- *
- * Only the password **hash** is ever surfaced — the plaintext demo password
- * lives in docs, never in code.
+ * Only the password **hash** is ever surfaced — the plaintext demo password lives in docs,
+ * never in code.
  */
 export const getDemoCredential = ({
   env,

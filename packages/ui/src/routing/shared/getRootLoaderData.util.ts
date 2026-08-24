@@ -4,22 +4,10 @@ import { getRequestCspNonce } from '#ui/utils/security';
 import { getThemeFromCookie } from '#ui/utils/theme';
 
 type GetRootLoaderDataArgs = {
-  /**
-   * Per-application identifier used to scope the theme / global-settings
-   * cookies. Cookies are shared across ports on the same host, so each app must
-   * pass its own id to keep preferences isolated.
-   */
   readonly appId?: string;
   readonly request: Request;
 };
 
-/**
- * The root-route loader logic every app needs identically: theme and
- * global settings from cookies (for SSR hydration) plus the CSP nonce, all
- * already-shared reads. Takes the web-standard Request rather than an
- * app's generated Route.LoaderArgs type — root has no dynamic params, so
- * nothing is lost, and this stays usable from any app's root loader.
- */
 export const getRootLoaderData = ({
   appId,
   request,

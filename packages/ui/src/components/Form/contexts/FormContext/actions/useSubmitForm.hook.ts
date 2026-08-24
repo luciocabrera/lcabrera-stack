@@ -3,11 +3,8 @@ import { isFormDirty } from '#ui/components/Form/utils/isFormDirty.util';
 import { validateFields } from '#ui/components/Form/utils/validateFields.util';
 
 /**
- * Client-side pre-submit gate — progressive enhancement only, the action's
- * Zod parse on the server remains authoritative (ADR-005). Returns whether
- * the in-flight native form submission should proceed. Reads both stores
- * (mode and leaf fields from metaStore, values from fieldsStore) and
- * snapshots each once, per the store-pattern's cross-store action rule.
+ * Client-side pre-submit gate — progressive enhancement only, the action's Zod parse on
+ * the server remains authoritative (ADR-005).
  */
 export const useSubmitForm = <TValues extends Record<string, unknown>>() => {
   const { fieldsStore, metaStore } = useFormContextValue<TValues>();

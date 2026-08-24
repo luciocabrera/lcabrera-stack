@@ -1,11 +1,6 @@
 /**
- * Percent formatters, keyed by locale.
- *
- * Constructing an `Intl.NumberFormat` dominates the cost of formatting — it
- * loads locale data — while the formatter for a locale never changes. A share
- * renders in every measure cell of every group row, so building one per render
- * would pay that cost thousands of times for one object (#648). The same shape
- * `getCurrencySymbol` uses, and for the same reason.
+ * Constructing an `Intl.NumberFormat` dominates the cost of formatting — it loads locale
+ * data — while the formatter for a locale never changes.
  */
 const formatterCache = new Map<string, Intl.NumberFormat>();
 
@@ -33,6 +28,5 @@ type FormatSharePercentArgs = {
   readonly ratio: number;
 };
 
-/** A share as a percentage, to one decimal place, in the table's locale. */
 export const formatSharePercent = ({ locale, ratio }: FormatSharePercentArgs) =>
   getFormatter(locale).format(ratio);

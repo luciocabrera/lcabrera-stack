@@ -13,16 +13,6 @@ type ParseFilterOptionsParamsArgs = {
   readonly searchParams: URLSearchParams;
 };
 
-/**
- * Parse and validate the distinct-filter-options search params into the params
- * `fetchDistinctValues` expects. Returns `undefined` when a required source
- * identifier (schema/table/column) is missing so the caller can answer `400`;
- * allow-list authorization happens downstream in the BFF.
- *
- * The page-size fallback is injected via `defaultPageSize` rather than read
- * from a UI constant, keeping this server-side helper free of any `@lcabrera/ui`
- * dependency — the caller passes its own default.
- */
 export const parseFilterOptionsParams = ({
   defaultPageSize,
   searchParams,

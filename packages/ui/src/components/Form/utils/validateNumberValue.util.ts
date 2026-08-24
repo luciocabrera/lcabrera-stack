@@ -6,11 +6,6 @@ type ValidateNumberValueArgs = {
   readonly value: number;
 };
 
-/**
- * Validates a number value against the `min` and `max` client-validation
- * rules. Returns the shared `message` on the first failing rule, or
- * `undefined` when the value satisfies every configured constraint.
- */
 export const validateNumberValue = ({
   message,
   validation,

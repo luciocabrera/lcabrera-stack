@@ -5,10 +5,6 @@ type ResolveIsInitialLoadingArgs = {
   readonly optionsCount: number;
 };
 
-/**
- * Whether the list is in its initial-load window: no options yet and either
- * actively loading or about to bootstrap via `onFetchInitial`.
- */
 export const resolveIsInitialLoading = ({
   hasFetchInitial,
   isLoading,

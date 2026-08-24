@@ -1,14 +1,7 @@
 /**
- * Entity configuration for the `enterprise_orders` table.
- *
- * App-local, data + pure rules only — NO SQL and NO `pg` here. The generic
- * `@lcabrera/server` query builders/executors receive this configuration
- * (`schema`, `table`, column lists, `allowedColumns`) as plain data; the
- * enum value sets drive the Form select/radio options and the Zod schema.
- *
- * The column list and enum values are copied (not imported) from the api
- * layer on purpose — `apps/shared`/`api-shared` must never become a runtime
- * dependency of this app (see the feature plan §1).
+ * The column list and enum values are copied (not imported) from the api layer on purpose
+ * — `apps/shared`/`api-shared` must never become a runtime dependency of this app (see the
+ * feature plan §1).
  */
 
 // Type-only (erased at build) — carries no `pg`/SQL runtime into this file.
@@ -25,36 +18,27 @@ export const ENTERPRISE_ORDERS_TABLE = 'enterprise_orders';
 export const ENTERPRISE_ORDER_PRIMARY_KEY = 'order_id';
 
 /**
- * The ordering a paginated read falls back to when the request carries no sort
- * at all — the primary key ascending, the one column guaranteed unique.
- *
- * The Table client never needs this: `buildTablePageQuery` appends this same key
- * via `appendPrimaryKeySorting`, so a scrolled page always arrives sorted. It
- * exists because `/_api/enterprise-orders/paginated` is a public URL and that
- * guarantee lives in another package's client-side code — a direct request, a
- * non-Table consumer, or a column config that loses `isPrimaryKey` would
- * otherwise get a paginated read with no ORDER BY, which repeats and skips rows.
+ * The Table client never needs this: `buildTablePageQuery` appends this same key via
+ * `appendPrimaryKeySorting`, so a scrolled page always arrives sorted.
+ * It exists because `/_api/enterprise-orders/paginated` is a public URL and that guarantee
+ * lives in another package's client-side code — a direct request, a non-Table consumer, or
+ * a column config that loses `isPrimaryKey` would otherwise get a paginated read with no
+ * ORDER BY, which repeats and skips rows.
  */
 export const ENTERPRISE_ORDER_FALLBACK_SORT = [
   { columnKey: ENTERPRISE_ORDER_PRIMARY_KEY, direction: 'asc' },
 ] as const satisfies readonly ColumnSort[];
 
-/** The list route the create/edit/view modals overlay and return to. */
 export const ENTERPRISE_ORDERS_PATH = '/enterprise-orders';
 
-/** Where one group's rows open, as a modal route over the list (#870). */
 export const ENTERPRISE_ORDERS_GROUP_PATH = `${ENTERPRISE_ORDERS_PATH}/group`;
 
 /**
- * The row ceiling a grouped read is built with — a safety belt, not a page: a
- * grouped result is returned whole because there is nothing to scroll into
- * (ADR-059). It sits well above the distinct-value ceiling `@lcabrera/server`
- * already enforces on a group key, so it bounds a pathological result rather
- * than truncating an ordinary one.
+ * The row ceiling a grouped read is built with — a safety belt, not a page: a grouped
+ * result is returned whole because there is nothing to scroll into (ADR-059).
  */
 export const ENTERPRISE_ORDER_GROUP_MAX_ROWS = 5000;
 
-/** Every column of `enterprise_orders`, in alphabetical order. */
 export const ENTERPRISE_ORDER_COLUMNS = [
   'balance_due',
   'billing_address_line1',
@@ -117,22 +101,6 @@ export const ENTERPRISE_ORDER_COLUMNS = [
   'weight_kg',
 ] as const;
 
-/**
- * The read model for the list view: the columns the table actually renders,
- * and nothing else.
- *
- * The list query projects these instead of `ENTERPRISE_ORDER_COLUMNS`, so a
- * page stops carrying the free-text and audit columns no cell reads —
- * `internal_notes`, `order_notes`, `payment_reference`, the second address
- * line, the postal codes, the weights and volumes, the timestamps. Every row
- * of every page paid for those over the wire and through the SSR payload.
- *
- * It must stay in step with `COLUMNS` in `EnterpriseOrders.constants.tsx` —
- * a column rendered but not projected renders blank, with nothing in the type
- * system to catch it. The colocated test asserts the two agree, so the drift
- * fails the build rather than the page. The detail and edit views keep the
- * full column set; they read one row and can afford it.
- */
 export const ENTERPRISE_ORDER_LIST_COLUMNS = [
   'carrier',
   'customer_email',
@@ -168,9 +136,8 @@ export const ENTERPRISE_ORDER_LIST_COLUMNS = [
 ] as const;
 
 /**
- * Allow-list guarding every request-derived column that reaches a generic
- * query builder (filters/sort/projection). Passed as `allowedColumns` so a
- * column never listed here is rejected before it can reach SQL.
+ * Passed as `allowedColumns` so a column never listed here is rejected before it can reach
+ * SQL.
  */
 export const ENTERPRISE_ORDER_ALLOWED_COLUMNS: readonly string[] =
   ENTERPRISE_ORDER_COLUMNS;
@@ -181,53 +148,17 @@ export const ENTERPRISE_ORDER_ALLOWED_COLUMNS: readonly string[] =
 // ---------------------------------------------------------------------------
 
 /**
- * The largest page a read of this table will serve — the sibling of
- * `MAX_CAR_SALES_LIMIT` and `MAX_WIDE_ALLTYPES_LIMIT`, and the same kind of
- * bound over a table seeded to the same size as car-sales.
- *
- * `/_api/enterprise-orders/paginated` is a public, unauthenticated URL, so
- * without a ceiling `?limit=999999999` is a whole-table read and a whole-table
- * JSON response (#706). It is pre-existing rather than a regression: this route
- * has always accepted the parameter unbounded, and it is the last of the three
- * paginated routes to close the gap.
- *
- * The value is written out rather than imported from
- * `CLIENT_PAGINATION_ROW_LIMIT`, which happens to hold the same number. That
- * one is `/car-sales`'s **UI pagination** decision, and lowering it for that
- * demo must not quietly change what a public endpoint serves — the coupling
- * would run in the unsafe direction. `ENTERPRISE_ORDER_GROUP_MAX_ROWS` is not
- * it either: that bounds a grouped result, which is not a page and is not
- * scrolled (ADR-059).
- *
- * Nothing legitimate is clamped by it. Both readers of this table ask for
- * `INITIAL_PAGE_SIZE` — the SSR loader for the first page, the table's
- * load-more for every page after it — so the ceiling is headroom, not a limit
- * any UI reaches.
+ * `ENTERPRISE_ORDER_GROUP_MAX_ROWS` is not it either: that bounds a grouped result, which
+ * is not a page and is not scrolled (ADR-059).
+ * Both readers of this table ask for `INITIAL_PAGE_SIZE` — the SSR loader for the first
+ * page, the table's load-more for every page after it — so the ceiling is headroom, not a
+ * limit any UI reaches.
  */
 export const MAX_ENTERPRISE_ORDERS_LIMIT = 1000;
 
-/**
- * The most ORDER BY terms one read may carry — the sibling of
- * `MAX_CAR_SALES_SORT_RULES`, bounded by the same fact.
- *
- * The bound is the table's own column count: past it every further term
- * necessarily repeats a column already named, and `ORDER BY order_id, order_id`
- * orders nothing the first term did not. So it cannot truncate a sort a user is
- * able to express. What it stops is a hand-made request growing the ORDER BY
- * without limit — `sanitizeSorting` drops directionless entries but does not
- * deduplicate, so a repeated column would otherwise pass straight through to
- * the builder.
- */
+/** So it cannot truncate a sort a user is able to express. */
 export const MAX_ENTERPRISE_ORDERS_SORT_RULES = ENTERPRISE_ORDER_COLUMNS.length;
 
-/**
- * Columns offered as distinct-value filter dropdowns, each mapped to its
- * `ColumnType` (consumed by `@lcabrera/server`'s `selectFilterOptions`, where
- * only `text` columns also exclude the empty string). This is the single source
- * the same-origin `/_api/filter-options` service derives from: its keys are the
- * distinct allow-list (a column absent here is rejected before any SQL runs).
- * Every one is a free-text / convention-enum `varchar`, so `text` is correct.
- */
 export const ENTERPRISE_ORDER_DISTINCT_FILTER_COLUMNS: Readonly<
   Record<string, ColumnType>
 > = {

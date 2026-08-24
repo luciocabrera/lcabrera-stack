@@ -7,13 +7,6 @@ import { HideColumnButton } from './HideColumnButton/HideColumnButton.component'
 import { PinLeftButton } from './PinLeftButton/PinLeftButton.component';
 import { PinRightButton } from './PinRightButton/PinRightButton.component';
 
-/**
- * Pin/hide section of the column header actions menu (movable columns only) —
- * a thin shell composing the pin-left, pin-right, clear-pinning, and
- * hide-column delegates, with hiding split off below a separator since it is
- * not a pinning choice. Each delegate owns its own store wiring; this shell
- * only forwards `columnKey`, `onClose`, and the current `pinSide`.
- */
 export const PinAndHideActions = <TData,>({
   columnKey,
   onClose,

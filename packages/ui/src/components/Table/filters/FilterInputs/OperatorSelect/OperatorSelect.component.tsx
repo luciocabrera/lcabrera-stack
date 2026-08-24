@@ -9,12 +9,6 @@ import {
   resolveOperatorChange,
 } from '../utils';
 
-/**
- * Operator dropdown for a non-boolean filter: derives the operator options
- * from the column data type and emits the next filter draft on selection —
- * swapping the operator on an existing filter, or seeding a typed empty
- * filter when none exists yet.
- */
 export const OperatorSelect = ({
   dataType,
   filter,

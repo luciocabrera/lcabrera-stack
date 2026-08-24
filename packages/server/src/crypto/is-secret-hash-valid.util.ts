@@ -11,13 +11,9 @@ type IsSecretHashValidArgs = {
 };
 
 /**
- * Counterpart of hashSecret: verifies a candidate secret against a stored
- * `<saltHex>:<hashHex>` hash.
- *
- * Returns false — never throws — for anything that isn't that exact shape,
- * so a non-verifiable sentinel value stored in the hash column (the seeded
- * cqms `system` user) simply fails verification rather than erroring. The
- * comparison is timingSafeEqual so a partial match leaks no timing signal.
+ * Returns false — never throws — for anything that isn't that exact shape, so a
+ * non-verifiable sentinel value stored in the hash column (the seeded cqms `system` user)
+ * simply fails verification rather than erroring.
  */
 export const isSecretHashValid = ({
   secret,

@@ -1,20 +1,8 @@
 import { z } from 'zod';
 
 /**
- * Server-side auth configuration, validated once per read.
- *
- * All three values ship with a **dev-only** default so the showcase runs with
- * zero setup; every one must be overridden via the environment for anything
- * beyond local demoing.
- *
- * - `AUTH_TOKEN_SECRET` — HMAC key that signs the auth token. Rotating it
- *   invalidates every issued token.
- * - `AUTH_DEMO_EMAIL` — the single demo account's email.
- * - `AUTH_DEMO_PASSWORD_HASH` — `hashSecret()` output (`<saltHex>:<hashHex>`)
- *   for the demo password. **No real secret is committed** — the default is a
- *   scrypt hash of the deliberately public demo password `demo-password-123`
- *   (documented in `src/auth/ARCHITECTURE.md`). Generate a replacement with
- *   `hashSecret({ secret })` from `@lcabrera/server/crypto/hash-secret.util`.
+ * **No real secret is committed** — the default is a scrypt hash of the deliberately
+ * public demo password `demo-password-123` (documented in `src/auth/ARCHITECTURE.md`).
  */
 const authEnvSchema = z.object({
   AUTH_DEMO_EMAIL: z.string().min(1).default('demo@example.com'),

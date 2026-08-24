@@ -17,19 +17,11 @@ import { isClientFilterActive } from '../../utils/isClientFilterActive.util';
 import { SCROLL_THRESHOLD } from '../../VirtualList.constants';
 
 export type UseVirtualListInfiniteScrollArgs = {
-  /** The scroll container acting as the observer root */
   readonly rootRef: RefObject<HTMLElement | null>;
-  /** The end-of-options marker rendered inside the root */
   readonly sentinelRef: RefObject<HTMLElement | null>;
 };
 
-/**
- * Wires the list's infinite scroll: reads every observer input from the stores
- * and dispatches the fetch through the `useFetchMore` action.
- *
- * @returns `hasListEnd` — whether the caller should render the sentinel at all.
- * The same flag arms the observer, so mounting and observing stay in step.
- */
+/** @returns `hasListEnd` — whether the caller should render the sentinel at all. */
 export const useVirtualListInfiniteScroll = ({
   rootRef,
   sentinelRef,

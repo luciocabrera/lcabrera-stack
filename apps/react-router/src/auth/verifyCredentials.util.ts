@@ -8,15 +8,6 @@ type VerifyCredentialsArgs = {
   readonly password: string;
 };
 
-/**
- * Verifies a submitted email + password against the demo credential. The email
- * is matched case-insensitively; the password is checked against the stored
- * scrypt hash via `isSecretHashValid` (constant-time internally). Returns a
- * plain boolean so the caller can respond with one no-oracle message for both
- * unknown-email and wrong-password.
- *
- * Pure: `isSecretHashValid` is deterministic given its inputs.
- */
 export const verifyCredentials = ({
   credential,
   email,

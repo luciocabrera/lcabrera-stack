@@ -5,12 +5,6 @@ import type { TextOrSelectFilterInputProps } from './TextOrSelectFilterInput.typ
 import { SelectFilterInput } from '../../../SelectFilterInput';
 import { TextFilterInput } from '../../../TextFilterInput';
 
-/**
- * Text-typed filter input: renders a select list when the column has
- * fetchable options and the operator is an (in)equality, otherwise a free
- * text input. Owns the select→text operator mapping on change. Private
- * delegate of `InputContent` — keeps its `switch (dataType)` pure dispatch.
- */
 export const TextOrSelectFilterInput = <TData,>({
   columnKey,
   filter,

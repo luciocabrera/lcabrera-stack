@@ -15,25 +15,12 @@ type UseVirtualSelectDropdownPositionArgs = {
 };
 
 /**
- * Promotes a floating dropdown into the top layer and keeps it anchored to the
- * trigger.
- *
- * The promotion is the point. As `position: absolute` the list was clipped by
- * every scrolling or `overflow: hidden` ancestor between it and the document —
- * a Form group card, the form's own scroll region, a settings drawer — and no
- * z-index fixes that. This is why the same select looks fine on the showcase
- * page, which has no such ancestor, and is cut off inside a modal form. The
- * top layer sits outside all of them, and unlike a portal it leaves the DOM
- * tree untouched, so the shell's click-outside detection still counts a click
- * inside the list as inside the select.
- *
- * A ResizeObserver drives placement, including the first measurement — its
- * initial callback lands after the effect, so nothing sets state synchronously
- * during it. Scrolling an **ancestor** dismisses the dropdown rather than
- * chasing it: a fixed-position list cannot be re-anchored from a passive
- * listener without reading layout on every frame, and one that lags its
- * trigger reads worse than one that closes. Scrolling the option list itself
- * must not — see the guard on the listener.
+ * As `position: absolute` the list was clipped by every scrolling or `overflow: hidden`
+ * ancestor between it and the document — a Form group card, the form's own scroll region,
+ * a settings drawer — and no z-index fixes that.
+ * Scrolling an **ancestor** dismisses the dropdown rather than chasing it: a
+ * fixed-position list cannot be re-anchored from a passive listener without reading layout
+ * on every frame, and one that lags its trigger reads worse than one that closes.
  */
 export const useVirtualSelectDropdownPosition = ({
   anchorRef,

@@ -11,10 +11,6 @@ type SerializeFilterArgs = {
   readonly filter: ColumnFilter;
 };
 
-/**
- * Dispatch to the appropriate per-type serializer and return a compact
- * URL-friendly representation of a single column filter.
- */
 export const serializeFilter = ({ filter }: SerializeFilterArgs) => {
   switch (filter.type) {
     case 'boolean': {

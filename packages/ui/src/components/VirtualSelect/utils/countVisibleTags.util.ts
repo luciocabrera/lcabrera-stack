@@ -4,11 +4,7 @@ export type CountVisibleTagsArgs = {
   readonly totalCount: number;
   readonly trigger: HTMLElement;
 };
-/**
- * Counts how many tag children fit within height limit.
- * Reserves 1 slot for the overflow indicator when not all tags fit.
- * Always shows at least 1 tag when items are selected.
- */
+/** Reserves 1 slot for the overflow indicator when not all tags fit. */
 export const countVisibleTags = ({
   totalCount,
   trigger,

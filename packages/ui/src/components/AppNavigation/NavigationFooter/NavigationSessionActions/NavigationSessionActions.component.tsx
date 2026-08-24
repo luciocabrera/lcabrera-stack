@@ -9,13 +9,6 @@ import {
 
 import { NAV_DENSITY } from '../../AppNavigation.constants';
 
-/**
- * The navigation footer's session controls, rendered only by an app that
- * declared `isAuthEnabled`. Logging out mutates session state, so it POSTs a
- * `<Form>` to the app's logout route rather than linking to it — a GET is
- * something a prefetch can fire on its own. Mirrors the theme toggle beside it:
- * icon-only with a tooltip when the sidebar is collapsed.
- */
 export const NavigationSessionActions = () => {
   const logoutRoute = useGetAppLogoutRoute();
   const navigationCollapsedPreference =

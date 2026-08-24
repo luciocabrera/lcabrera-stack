@@ -4,10 +4,6 @@ import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableC
 
 import { useCloseColumnSettingsDrawer } from './useCloseColumnSettingsDrawer.hook';
 
-/**
- * Resets all column drawer settings from the current table state.
- * Optionally closes the drawer when shouldCloseDrawer is true.
- */
 export const useResetAllColumnDrawerSettings = () => {
   const { columnsStore } = useTableConfigContextValue();
   const { columnStore } = useColumnDrawerContextValue();

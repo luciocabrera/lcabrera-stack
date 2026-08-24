@@ -2,7 +2,6 @@ import * as stylex from '@stylexjs/stylex';
 
 import { styles } from './MagnifyingGlass.stylex';
 
-/** Floating magnifying glass over the sheet body — the "no results" cue in `NoDataDescriptive`. */
 export const MagnifyingGlass = () => (
   <g {...stylex.props(styles.magnifierGroup)}>
     <circle {...stylex.props(styles.lensFill)} cx='170' cy='120' r='22' />

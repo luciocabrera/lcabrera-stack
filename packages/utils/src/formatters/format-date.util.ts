@@ -9,11 +9,6 @@ type FormatDateArgs = DateFormatOptions & {
   readonly value: unknown;
 };
 
-/**
- * Format a date value using Intl.DateTimeFormat with locale support
- * @param args - The value and formatting options
- * @returns Formatted date string
- */
 export const formatDate = ({
   locale,
   preset: presetOption,

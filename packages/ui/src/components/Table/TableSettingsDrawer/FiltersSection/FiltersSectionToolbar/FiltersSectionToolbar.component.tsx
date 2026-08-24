@@ -25,12 +25,6 @@ const FILTERS_TOOLBAR = {
   reset: { label: 'Reset Filters' },
 } as const;
 
-/**
- * Clear/reset/expand-all/collapse-all buttons for the filters section, in
- * header ('toolbar') and footer variants. Fully self-connected: reads the
- * filter store and the persisted expanded-filters state and dispatches all
- * four actions itself.
- */
 export const FiltersSectionToolbar = ({
   isBusy = false,
   variant = 'footer',

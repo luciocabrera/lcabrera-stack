@@ -26,15 +26,11 @@ type OrderedColumnItem = {
 };
 
 /**
- * **A group key is undraggable for its own reason, not by being static**
- * (ADR-080). While grouping is applied the keys are hoisted to the head of the
- * order and the left pin, so a drag would be silently undone on the next
- * derivation — and a gesture that visibly does nothing is worse than one
- * refused. `isStatic` is the wrong instrument for it: `resolveColumnCapabilities`
- * makes `isResizable` a veto of `isStatic`, and `TableHeaderActionsMenu`
- * computes `hasPinAndHide = !isStatic`, so borrowing the flag would also freeze
- * the key's width and strip its header menu. Resizing a rung cannot break a
- * staircase.
+ * **A group key is undraggable for its own reason, not by being static** (ADR-080).
+ * While grouping is applied the keys are hoisted to the head of the order and the left
+ * pin, so a drag would be silently undone on the next derivation — and a gesture that
+ * visibly does nothing is worse than one refused.
+ * Resizing a rung cannot break a staircase.
  */
 export const createDraggableItems = <TContent>({
   allOrderedColumns,

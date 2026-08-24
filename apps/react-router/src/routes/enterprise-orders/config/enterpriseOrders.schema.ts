@@ -11,7 +11,6 @@ import {
   WAREHOUSE_LOCATION_VALUES,
 } from './enterpriseOrders.constants';
 
-/** Validation patterns exercised by the create/edit forms (feature plan §2). */
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+\.[^\s@]+$/;
 export const PHONE_PATTERN = /^\+?\d[\d\s().-]{6,29}$/;
 export const POSTAL_CODE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9\s-]{2,19}$/;
@@ -31,15 +30,6 @@ const optionalRating = z.preprocess(
     .optional(),
 );
 
-/**
- * The shared create/update gate for an enterprise order. Every validation kind
- * from the showcase matrix is exercised: required (`min(1)`), min/max
- * (`quantity`, `discount_percentage`, `customer_rating`), minLength/maxLength
- * (`customer_name`, postal codes), regex (`customer_email`, `customer_phone`,
- * postal codes) and type (enums + coerced numbers). FormData arrives as
- * strings, so numbers are coerced and booleans are pre-normalised by
- * `readOrderFormValues`.
- */
 export const enterpriseOrderSchema = z.object({
   billing_address_line1: z
     .string()
@@ -174,5 +164,4 @@ export const enterpriseOrderSchema = z.object({
   weight_kg: z.coerce.number().min(0, 'Weight cannot be negative.'),
 });
 
-/** The validated create/update payload (post-coercion). */
 export type EnterpriseOrderInput = z.infer<typeof enterpriseOrderSchema>;

@@ -13,7 +13,6 @@ const createEmptyPlacementMap = (): MutableNotificationsByPlacement => ({
   'top-right': [],
 });
 
-/** Groups notifications by viewport placement without mutating the source list. */
 export const groupNotificationsByPlacement = (
   notifications: readonly AppNotification[],
 ): NotificationsByPlacement => {

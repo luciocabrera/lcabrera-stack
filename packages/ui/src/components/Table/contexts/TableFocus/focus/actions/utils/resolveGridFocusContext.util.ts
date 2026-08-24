@@ -22,27 +22,8 @@ type ResolveGridFocusContextArgs<TData extends Record<string, unknown>> = {
 };
 
 /**
- * Everything a focus move needs to know about the grid right now, derived once
- * from the store snapshots its callers have already taken.
- *
- * Entering the grid and navigating within it ask the same questions — which
- * columns can be focused, which rows exist, where the remembered row is among
- * them, and how tall a row is — so the derivation lives here rather than being
- * written twice and drifting apart. Snapshots come in as arguments, so this
- * stays pure and the store reads stay in the action hooks where the
- * one-snapshot-per-store rule can be seen.
- *
- * `data` is the **visible** rows, not every loaded one. A row hidden under a
- * collapsed ancestor has no cell to receive focus, so a move that counted it
- * would consume a key press and land nowhere — the same failure the group row
- * itself has while it registers no cell (#651). Collapsing changes the index
- * space the grid navigates, which is exactly why focus is keyed by row identity
- * and re-resolved here on every move (ADR-062, ADR-067).
- *
- * **It must be given the same inputs as `useTableGroupTree`**, for the reason
- * `collapsedGroupPaths` is passed: anything that changes which rows the body
- * paints changes the index space this navigates, and a derivation reading fewer
- * inputs would navigate a different grid from the one on screen.
+ * Collapsing changes the index space the grid navigates, which is exactly why focus is
+ * keyed by row identity and re-resolved here on every move (ADR-062, ADR-067).
  */
 export const resolveGridFocusContext = <TData extends Record<string, unknown>>({
   columnsState,

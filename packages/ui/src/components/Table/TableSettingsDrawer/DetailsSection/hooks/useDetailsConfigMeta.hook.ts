@@ -11,10 +11,7 @@ import {
   useGetTableThreshold,
 } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 
-/**
- * Read the technical configuration meta values for the details panel.
- * @returns Density, pagination, virtualization, and persistence config values.
- */
+/** @returns Density, pagination, virtualization, and persistence config values. */
 export const useDetailsConfigMeta = () => {
   return {
     density: useGetTableDensity(),

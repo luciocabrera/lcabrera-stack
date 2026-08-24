@@ -10,11 +10,6 @@ import { FiltersSectionToolbar } from '../FiltersSectionToolbar';
 import { styles } from './ActiveFiltersList.stylex';
 import { FilterItem } from './FilterItem';
 
-/**
- * Expandable list of the active drawer filters with the count header and the
- * compact toolbar. Reads the filter store itself; each row is a
- * self-connected FilterItem that owns its own remove/toggle/change wiring.
- */
 export const ActiveFiltersList = ({
   isBusy = false,
 }: ActiveFiltersListProps) => {

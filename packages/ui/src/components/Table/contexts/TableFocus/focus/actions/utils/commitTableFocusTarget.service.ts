@@ -14,13 +14,10 @@ type CommitTableFocusTargetArgs = {
 };
 
 /**
- * Points the grid's focus at a cell that may not be rendered yet.
- *
- * The scroll happens before the store write, in that order, because that is the
- * order ADR-062 specifies for a move whose target lies outside the rendered
- * window: bring the row in, then ask for focus, so the request is already
- * outstanding when the row mounts and is honoured on its first effect rather
- * than needing a second pass.
+ * The scroll happens before the store write, in that order, because that is the order
+ * ADR-062 specifies for a move whose target lies outside the rendered window: bring the
+ * row in, then ask for focus, so the request is already outstanding when the row mounts
+ * and is honoured on its first effect rather than needing a second pass.
  */
 export const commitTableFocusTarget = ({
   columnKey,

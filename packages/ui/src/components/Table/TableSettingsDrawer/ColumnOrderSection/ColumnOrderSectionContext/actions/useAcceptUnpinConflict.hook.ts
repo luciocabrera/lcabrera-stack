@@ -8,9 +8,6 @@ import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionConte
 import { readPinActionState } from './utils/readPinActionState.util';
 import { resolveAcceptedUnpinConflictState } from './utils/resolveAcceptedUnpinConflictState.util';
 
-/**
- * Hook to handle accepting an unpin conflict resolution.
- */
 export const useAcceptUnpinConflict = <
   TData extends Record<string, unknown> = Record<string, unknown>,
 >() => {

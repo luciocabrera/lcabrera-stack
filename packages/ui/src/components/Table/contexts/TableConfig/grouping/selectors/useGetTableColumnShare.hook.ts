@@ -4,16 +4,9 @@ import { useGroupingStore } from '#ui/components/Table/contexts/TableConfig/grou
 
 type GetTableColumnShareArgs = {
   readonly columnKey: string;
-  /** Which of the column's aggregates is being asked about (#831). */
   readonly fn: TableAggregateFn;
 };
 
-/**
- * Whether this aggregate renders as a share of the grand total.
- *
- * It asks about a `(columnKey, fn)` pair rather than a column, because a column
- * may carry both `sum` and `count` and each takes its own share.
- */
 export const useGetTableColumnShare = ({
   columnKey,
   fn,

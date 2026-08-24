@@ -5,13 +5,6 @@ export type ReadOrderFormValuesArgs = {
   readonly formData: FormData;
 };
 
-/**
- * Pure FormData → raw payload map for the enterprise-order create/edit forms.
- * Text/number/date/enum fields are read as strings (the Zod schema coerces
- * numbers); the five flag fields use native checkbox semantics. The shape
- * matches `enterpriseOrderSchema`'s input, so the same reader feeds both the
- * browser `clientAction` and the server `action`.
- */
 export const readOrderFormValues = ({ formData }: ReadOrderFormValuesArgs) => ({
   billing_address_line1: readFormString({
     formData,

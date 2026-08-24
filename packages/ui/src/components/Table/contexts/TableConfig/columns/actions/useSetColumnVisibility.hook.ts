@@ -15,14 +15,6 @@ type SetColumnVisibilityArgs<TData> = {
   readonly isVisible: boolean;
 };
 
-/**
- * Hook to show/hide a single column directly on the table's live state.
- * Unlike the settings-drawer's useToggleColumnVisibility (which stages
- * changes in a draft store until Apply/Save), this writes straight to the
- * main columnsStore for quick-access affordances like the header actions
- * menu. No-op for a static column **or for a measure of one**, which is the
- * same column once the key is resolved.
- */
 export const useSetColumnVisibility = <TData>() => {
   const { columnsStore, groupingStore, metaStore } =
     useTableConfigContextValue<TData>();

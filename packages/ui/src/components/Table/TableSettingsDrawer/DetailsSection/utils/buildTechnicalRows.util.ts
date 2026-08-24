@@ -16,11 +16,6 @@ type BuildTechnicalRowsArgs = {
   readonly threshold: number;
 };
 
-/**
- * Build the technical configuration rows, dropping any with an empty value.
- * @param args - Table meta configuration values plus the integer formatter.
- * @returns The technical detail rows that have a value.
- */
 export const buildTechnicalRows = ({
   density,
   enablePrefetch,

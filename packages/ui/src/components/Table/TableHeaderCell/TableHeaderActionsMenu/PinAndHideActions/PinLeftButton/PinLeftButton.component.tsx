@@ -13,11 +13,8 @@ import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveCol
 import type { PinLeftButtonProps } from './PinLeftButton.types';
 
 /**
- * "Pin Left" item of the pin/hide section: toggles left pinning on/off and
- * highlights itself (via the `primary` variant + `aria-pressed`) while pinned
- * left. Closes the menu via `onClose`. Identity and active-state come from the
- * shared `PIN_LEFT_COMMAND` (ADR-011); this surface owns only its live
- * commit-context and menu presentation.
+ * Identity and active-state come from the shared `PIN_LEFT_COMMAND` (ADR-011); this
+ * surface owns only its live commit-context and menu presentation.
  */
 export const PinLeftButton = <TData,>({
   columnKey,

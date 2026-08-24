@@ -10,12 +10,6 @@ import { useCloseTableSettingsIfUnpinned } from '../hooks/useCloseTableSettingsI
 import { useBatchSetTableDrawerSettings } from '../TableDrawerContext/actions';
 import { useGetColumnFilters } from '../TableDrawerContext/selectors';
 
-/**
- * Footer of the table settings drawer: the Accept and Cancel buttons.
- * Accept validates the drawer filters (warning notification on invalid),
- * commits all drawer state to the table, and closes unless pinned; Cancel
- * discards pending changes. Both no-op while busy.
- */
 export const TableSettingsDrawerFooter = ({
   isBusy = false,
 }: TableSettingsDrawerFooterProps) => {

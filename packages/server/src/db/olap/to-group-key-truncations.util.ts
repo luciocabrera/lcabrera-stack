@@ -10,18 +10,9 @@ type ToGroupKeyTruncationsArgs = {
 };
 
 /**
- * Pairs each requested granularity with whether its column carries a time zone —
- * the two facts `toDrillRead` needs and cannot look up for itself (#786).
- *
+ * Pairs each requested granularity with whether its column carries a time zone — the two
+ * facts `toDrillRead` needs and cannot look up for itself (#786).
  * The route holds one and the catalogue the other, so this is where they meet.
- * Doing it here rather than inside the translation is what keeps that function
- * pure and its suite in the DB-free lane, exactly as `capabilities` reaching
- * `buildGroupQuery` does (ADR-058).
- *
- * A granularity naming a column with no capability is dropped rather than
- * guessed: the request that carried it is refused a step earlier by
- * `assertGroupKeys`, and inventing `isZoned: false` here would produce a range
- * computed in the wrong frame for the one case that got past it.
  */
 export const toGroupKeyTruncations = ({
   capabilities,

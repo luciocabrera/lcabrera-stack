@@ -38,13 +38,6 @@ type DerivePinSideResolutionStateResult<TData> =
   | DerivePinSideResolutionStateConflict
   | DerivePinSideResolutionStateResolved<TData>;
 
-/**
- * Pure pin-side resolution: computes side from pin preference, checks contiguity,
- * and returns either a conflict decision or resolved pinning/order state.
- *
- * Used by both drawer (ColumnOrderSection) and header pin-side modals to ensure
- * consistent resolution logic across UI entry points.
- */
 export const derivePinSideResolutionState = <TData>({
   allOrderedColumns,
   columnKey,

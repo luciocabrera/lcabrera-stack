@@ -15,20 +15,13 @@ import { useSetGroupingMode } from '../../TableDrawerContext/actions';
 import { useGetGroupingMode } from '../../TableDrawerContext/selectors';
 import { styles } from './GroupingModeSection.stylex';
 
-/** Named once, so the visible heading and the accessible group name agree. */
 const SECTION_TITLE = 'Totals';
 
 /**
- * The drawer's grouping-mode control: whether the read returns one row per
- * group, or those rows plus a subtotal for every level and a grand total.
- *
- * Self-connected like every other delegate in this section — it reads the
- * staged mode and dispatches its own action, so `GroupingSection` forwards
- * nothing but `isBusy`.
- *
- * The option labels state what changes in the grid rather than which SQL is
- * emitted: the mode is chosen for what it makes readable, and `GROUP BY ROLLUP`
- * is not a phrase the picker should require.
+ * The drawer's grouping-mode control: whether the read returns one row per group, or those
+ * rows plus a subtotal for every level and a grand total.
+ * Self-connected like every other delegate in this section — it reads the staged mode and
+ * dispatches its own action, so `GroupingSection` forwards nothing but `isBusy`.
  */
 export const GroupingModeSection = ({
   isBusy = false,

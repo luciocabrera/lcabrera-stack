@@ -15,12 +15,9 @@ type HandleToggleMenuArgs = {
 };
 
 /**
- * Trigger-click handler core: closes the menu when it is already open,
- * otherwise opens it via the Popover API and repositions across several
- * animation frames because virtualization/load-more can shift trigger
- * geometry right after the click. Environment reads (trigger lookup,
- * container/viewport rect) are injected so they stay owned by the hook and
- * are re-read on every stabilization frame.
+ * Trigger-click handler core: closes the menu when it is already open, otherwise opens it
+ * via the Popover API and repositions across several animation frames because
+ * virtualization/load-more can shift trigger geometry right after the click.
  */
 export const handleToggleMenu = ({
   closeMenu,

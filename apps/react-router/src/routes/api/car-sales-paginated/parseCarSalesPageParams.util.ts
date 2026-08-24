@@ -16,21 +16,12 @@ export type ParsedCarSalesPageParams = {
 };
 
 /**
- * Parse the paginated car-sales resource-route search params into the window
- * and sort the service takes.
- *
- * `sort` is JSON from the table client; structural narrowing is enough here
- * because the column identifiers are re-validated at the SQL layer
- * (`allowedColumns` + `assertSafeIdentifier`), and the fallback ordering is
- * applied by the service rather than here — so this parser cannot be the reason
- * a page comes back unordered.
- *
- * `limit` is clamped into `[1, MAX_CAR_SALES_LIMIT]`. The floor is because
- * `LIMIT 0` is a page with no rows and a `hasMore` that says the set is
- * exhausted — a scroll session that silently ends. The ceiling is because this
- * is a public, unauthenticated URL over a 500k-row table, so an uncapped
- * `?limit=` is a whole-table read; the endpoint this replaced had the same gap,
- * and it is closed here rather than reproduced (#701 review).
+ * `sort` is JSON from the table client; structural narrowing is enough here because the
+ * column identifiers are re-validated at the SQL layer (`allowedColumns` +
+ * `assertSafeIdentifier`), and the fallback ordering is applied by the service rather than
+ * here — so this parser cannot be the reason a page comes back unordered.
+ * The floor is because `LIMIT 0` is a page with no rows and a `hasMore` that says the set
+ * is exhausted — a scroll session that silently ends.
  */
 export const parseCarSalesPageParams = (
   params: URLSearchParams,

@@ -11,11 +11,6 @@ type UseScrollResetAfterLoadArgs = {
   readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
 };
 
-/**
- * Scrolls the table container back to the origin when a full (non-load-more)
- * load finishes, so filter/sort refreshes always show the first rows. Owns
- * its store wiring: subscribes to the loading flags itself.
- */
 export const useScrollResetAfterLoad = ({
   scrollContainerRef,
 }: UseScrollResetAfterLoadArgs) => {

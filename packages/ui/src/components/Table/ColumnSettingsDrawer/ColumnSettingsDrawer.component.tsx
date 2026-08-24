@@ -11,13 +11,6 @@ import { ColumnSettingsDrawerFooter } from './ColumnSettingsDrawerFooter/ColumnS
 import { ColumnSettingsDrawerHeader } from './ColumnSettingsDrawerHeader/ColumnSettingsDrawerHeader.component';
 import { useCancelColumnSettings } from './hooks/useCancelColumnSettings.hook';
 
-/**
- * Side-panel drawer for editing a single column's settings, composed of a
- * header (column label + pin/close toolbar), a capability-driven tabbed body
- * (General/Filter/Sorting/Pinning/Details), and a footer (Accept/Cancel).
- * Closing the panel cancels pending drawer changes; accept commits without
- * closing, and a pinned drawer always stays open.
- */
 export const ColumnSettingsDrawer = () => {
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();

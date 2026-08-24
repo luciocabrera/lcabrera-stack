@@ -6,13 +6,6 @@ import type { SectionCardProps } from './SectionCard.types';
 
 import { styles } from './SectionCard.stylex';
 
-/**
- * Generic bordered "section box" — title, optional description, then
- * whatever content the caller passes. Extracted from `SettingsOptionSection`
- * (which hardcoded a `RadioOptionGroup` as its only possible content) so any
- * consumer needing the same title+description+card shape can reuse it —
- * `SettingsOptionSection` now composes this instead of duplicating it.
- */
 export const SectionCard = ({
   children,
   customStylex,

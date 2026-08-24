@@ -17,10 +17,6 @@ type GetInitialListDataStateArgs = {
   readonly searchTerm: string;
 };
 
-/**
- * Builds the data-store state from the controlled `dataState`/`filter` props:
- * the raw mirror plus the pre-computed derived list state.
- */
 export const getInitialListDataState = ({
   dataState,
   filter,

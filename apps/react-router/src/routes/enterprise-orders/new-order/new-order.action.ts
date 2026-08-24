@@ -17,11 +17,6 @@ import {
   toOrderInsertValues,
 } from '../config';
 
-/**
- * Server action for creating an order: re-validate authoritatively, assign the
- * next `order_id` (`getMaxValue` + 1), derive the money totals and persist via
- * the generic insert executor, then redirect to the new record's view.
- */
 export const action = async ({ context, request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const parsed = parseOrderFormData(formData);

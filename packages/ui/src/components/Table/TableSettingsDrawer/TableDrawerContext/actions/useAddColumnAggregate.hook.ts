@@ -6,11 +6,9 @@ import { useSetGrouping } from './useSetGrouping.hook';
 
 type AddColumnAggregateArgs = {
   readonly columnKey: string;
-  /** The function to stage, beside whatever the column already carries. */
   readonly fn: TableAggregateFn;
 };
 
-/** Stage one more aggregate for a column. */
 export const useAddColumnAggregate = () => {
   const setGrouping = useSetGrouping();
 

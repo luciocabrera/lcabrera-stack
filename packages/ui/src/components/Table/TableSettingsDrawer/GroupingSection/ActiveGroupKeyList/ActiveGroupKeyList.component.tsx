@@ -21,19 +21,6 @@ import { toGroupKeyItems } from '../utils';
 import { styles } from './ActiveGroupKeyList.stylex';
 import { GroupKeyItemContent } from './GroupKeyItemContent';
 
-/**
- * The staged group keys, in nesting order, with drag-to-reorder and per-key
- * removal.
- *
- * Reordering is a real edit rather than a view preference: the order is the
- * grouped query's nesting order, so dragging a key changes the question the
- * table answers. It is staged like every other drawer edit and applied on
- * Accept, so a drag costs no loader run of its own.
- *
- * A self-connected delegate: it reads the staged keys and the route's columns
- * from their stores itself, so the section shell above it forwards only
- * `isBusy`.
- */
 export const ActiveGroupKeyList = ({
   isBusy = false,
 }: ActiveGroupKeyListProps) => {

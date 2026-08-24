@@ -22,18 +22,6 @@ type BuildAggregateProjectionArgs = {
   readonly startParamIndex: number;
 };
 
-/**
- * The aggregate half of the SELECT list.
- *
- * `FILTER (WHERE …)` is `buildWhereClause` verbatim — its output already starts
- * with the `WHERE` keyword the syntax wants, so a filtered aggregate needs no
- * filter code of its own and its values thread through the same unbroken `$n`
- * run.
- *
- * That is also why this returns `nextParamIndex`: a filtered aggregate claims
- * the leading placeholders, so the query's own `WHERE` no longer starts at
- * `$1`. `build-update-query.util.ts` has the same shape.
- */
 export const buildAggregateProjection = ({
   aliased,
   allowedColumns,

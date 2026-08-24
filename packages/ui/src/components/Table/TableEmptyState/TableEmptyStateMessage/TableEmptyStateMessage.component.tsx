@@ -7,18 +7,6 @@ import { toTableEmptyStateNotice } from '#ui/components/Table/TableEmptyState/ut
 
 import { styles } from './TableEmptyStateMessage.stylex';
 
-/**
- * The heading and sentence inside the empty table body — "nothing matched", or
- * the refusal the endpoint returned instead of rows (#642).
- *
- * A self-connected delegate: it reads the read's outcome, the table's title and
- * the refused column's label itself, so the shell around it stays the sticky
- * sizing box it was and no parent drills a message through.
- *
- * The column lookup is unconditional because a hook has to be, and harmless:
- * with no refused column the key is the empty string, which no column is
- * declared under.
- */
 export const TableEmptyStateMessage = () => {
   const error = useGetTableDataError();
   const titleSingular = useGetTableTitleSingular();

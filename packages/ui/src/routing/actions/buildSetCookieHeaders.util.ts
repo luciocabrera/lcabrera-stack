@@ -11,10 +11,8 @@ type CookiePair = {
 };
 
 /**
- * Build a fresh `Headers` carrying one `Set-Cookie` per entry that has both a
- * non-empty `key` and `value`. Pure: the expiry `Date` is injected by the
- * caller (the action owns the clock), and the returned `Headers` is a new
- * object — no argument is mutated.
+ * Build a fresh `Headers` carrying one `Set-Cookie` per entry that has both a non-empty
+ * `key` and `value`.
  */
 export const buildSetCookieHeaders = ({
   entries,

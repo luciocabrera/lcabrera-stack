@@ -6,9 +6,6 @@ import type { TabsHeaderButtonProps } from './TabsHeaderButton.types';
 
 import { busyStyles, styles } from './TabsHeaderButton.stylex';
 
-/**
- * Single tab button delegate for TabsHeader.
- */
 export const TabsHeaderButton = ({
   activeTab,
   isBusy,

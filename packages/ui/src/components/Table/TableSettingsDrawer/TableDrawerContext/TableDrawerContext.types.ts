@@ -16,7 +16,6 @@ export type TableDrawerColumnsState<TData> = Pick<
 >;
 
 export type TableDrawerContextValue<TData = Record<string, unknown>> = {
-  /** Store managing column-related state */
   readonly columnsStore: TStore<TableDrawerColumnsState<TData>>;
   /**
    * Draft copy of the table's grouping configuration. A second store rather
@@ -26,9 +25,8 @@ export type TableDrawerContextValue<TData = Record<string, unknown>> = {
    */
   readonly groupingStore: TStore<TableGroupingState>;
   /**
-   * Draft copy of the totals placement. A third store rather than a field on
-   * either draft above, because it commits to a third place again: the
-   * `totals` search param *and* the UI-flags cookie, where grouping is
+   * A third store rather than a field on either draft above, because it commits to a third
+   * place again: the `totals` search param *and* the UI-flags cookie, where grouping is
    * param-only and column state is cookie-only (#578).
    */
   readonly totalsPlacementStore: TStore<TableDrawerTotalsPlacementState>;

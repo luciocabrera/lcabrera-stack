@@ -1,17 +1,3 @@
-/**
- * Did the #450 fixes actually make anything faster?
- *
- * #450 deleted a provably no-op `.filter()` from both `unpin-beyond` branches of
- * `resolveAcceptedUnpinConflictState`, and made `resolvePinConflictState` reuse
- * the `allOrderedKeys` projection it already computed. Both were argued from
- * redundancy, and the first also removed an `O(window x pinned)` `Array.includes`
- * scan — a claim worth confirming rather than asserting, since a refactor that
- * "removes a pass" can easily measure as a wash. Issue #454.
- *
- * The pre-fix implementations are transcribed here from the diff; each is marked.
- * Read absolute per-call cost first — see ./ARCHITECTURE.md.
- */
-
 import { bench, describe } from 'vite-plus/test';
 
 import type {
@@ -22,10 +8,8 @@ import type {
 
 type Row = Record<string, unknown>;
 
-/** 150 is the real ceiling; the rest locate the O(n*m) term's onset. */
 const SIZES = [10, 30, 150, 1000] as const;
 
-/** Fraction of columns pinned — drives the removed `includes` scan's cost. */
 const PINNED_RATIO = 0.2;
 
 const sink = { total: 0 };

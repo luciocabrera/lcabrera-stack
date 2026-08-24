@@ -5,30 +5,17 @@ import type {
 
 type AddTableColumnAggregateArgs = {
   readonly columnKey: string;
-  /** The function to apply to that column. */
   readonly fn: TableAggregateFn;
   readonly grouping: TableGroupingState;
 };
 
 /**
- * Applies one more aggregate to a column, keeping every aggregate already
- * there.
- *
- * **Appended with a duplicate guard**, not filtered-and-re-added: a column may
- * carry any number of functions, and the one thing that must never happen is
- * the same `(columnKey, fn)` pair twice — two identical rows in the staged list,
- * two identical tokens in the URL, and a share that cannot say which of them it
- * belongs to (#831). Re-adding an applied pair therefore answers with the state
- * it was handed, so the caller's `unchanged` path takes over and nothing
- * navigates.
- *
- * Appending rather than inserting in column order is what gives the list a real
- * order to preserve: the user's arrangement is the order it renders and
- * serializes in, and #832 makes it draggable.
- *
- * The shares are carried across untouched. Adding a measure says nothing about
- * any other measure's share, and it cannot invalidate one either — pruning here
- * could only ever remove a share this call did not affect.
+ * **Appended with a duplicate guard**, not filtered-and-re-added: a column may carry any
+ * number of functions, and the one thing that must never happen is the same `(columnKey,
+ * fn)` pair twice — two identical rows in the staged list, two identical tokens in the
+ * URL, and a share that cannot say which of them it belongs to (#831).
+ * Adding a measure says nothing about any other measure's share, and it cannot invalidate
+ * one either — pruning here could only ever remove a share this call did not affect.
  */
 export const addTableColumnAggregate = ({
   columnKey,

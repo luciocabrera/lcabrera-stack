@@ -12,14 +12,6 @@ import type {
 import { getInitialSelectMetaState } from './utils';
 import { VirtualSelectContext } from './VirtualSelectContext.context';
 
-/**
- * The single provider the VirtualSelect shell mounts: provides the select
- * context (the meta store mirroring the shell-owned presentation metadata
- * via a sync effect, with `isListVisible` pre-computed, plus the shell's
- * dropdown-toggle callback for actions) and composes the VirtualListProvider
- * around `children`, so every delegate reads the select and list contexts
- * without any provider nesting in the shell.
- */
 export const VirtualSelectProvider = ({
   anchorRef,
   children,

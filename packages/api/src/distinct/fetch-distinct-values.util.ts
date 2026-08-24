@@ -15,15 +15,8 @@ type FetchDistinctValuesArgs = {
 };
 
 /**
- * Fetches one page of distinct values for a column from a distinct-values
- * endpoint (`<baseUrl>?schemaName&tableName&columnName&limit&offset`).
- * Transport-agnostic: pass the BFF base (`getApiBaseUrl() + '/distinct'`)
- * or a same-origin resource-route path as `baseUrl`.
- *
- * `signal` and `timeoutMs` are forwarded untouched to `fetchAndValidate` and
- * are opt-in there — see its doc comment for why there is no default timeout.
- * This path is the one that pages: a filter dropdown scrolled quickly issues
- * overlapping requests, and `signal` is how a superseded one gets cancelled.
+ * This path is the one that pages: a filter dropdown scrolled quickly issues overlapping
+ * requests, and `signal` is how a superseded one gets cancelled.
  */
 export const fetchDistinctValues = async ({
   baseUrl,

@@ -14,25 +14,11 @@ type ToAggregateItemsArgs<TData extends Record<string, unknown>> = {
 };
 
 /**
- * The selected aggregates as labelled rows, **in the order they are staged**.
- *
- * The staged order rather than the table's column order, and the reason changed
- * with the shape: a column may now carry several aggregates, so column order no
- * longer orders the list at all — and the list's own order is state the user
- * arranged by dragging these very rows (#832), carried in the `grouping` param.
+ * The staged order rather than the table's column order, and the reason changed with the
+ * shape: a column may now carry several aggregates, so column order no longer orders the
+ * list at all — and the list's own order is state the user arranged by dragging these very
+ * rows (#832), carried in the `grouping` param.
  * Re-sorting here would silently discard it.
- *
- * `id` is the row's identity — the `(columnKey, fn)` pair as one string — since
- * neither half is unique on its own and a React key has to be. It is the same
- * spelling the URL token uses, from the same function, so the two cannot drift.
- *
- * An aggregate on a column this route does not declare is dropped rather than
- * labelled with its key. It cannot be reached through the UI (both surfaces
- * build from the columns) and the loader's sanitizer refuses the whole grouping
- * when a URL carries one, so a row here would describe a state that does not
- * survive a reload. That drop is why a reorder is expressed as ids over the
- * **staged** list (`reorderTableColumnAggregates`) rather than rebuilt from
- * these rows: rebuilding would un-stage whatever this dropped.
  */
 export const toAggregateItems = <TData extends Record<string, unknown>>({
   aggregates,

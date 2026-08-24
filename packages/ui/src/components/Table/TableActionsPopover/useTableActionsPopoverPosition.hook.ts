@@ -17,16 +17,9 @@ type UseTableActionsPopoverPositionArgs = {
 };
 
 /**
- * Owns a table actions popover's open state and viewport-aware coordinates.
- * Repositioning is recomputed on resize/intersection while open, and across
- * several animation frames right after opening because virtualization/load-more
- * can shift trigger geometry immediately after the click. The keep/close/
- * reposition decision lives in resolveOpenMenuReposition and is applied by
- * applyRepositionOutcome; this hook owns state, observers, and the
- * environment reads (trigger lookup, viewport size) injected into the
- * handleToggleMenu/handlePopoverToggle handler cores. Shared by
- * TableRowActionsMenu (row actions) and TableHeaderActionsMenu (column
- * actions).
+ * Repositioning is recomputed on resize/intersection while open, and across several
+ * animation frames right after opening because virtualization/load-more can shift trigger
+ * geometry immediately after the click.
  */
 export const useTableActionsPopoverPosition = ({
   containerRef,

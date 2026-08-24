@@ -74,7 +74,6 @@ export type MaybePrefetchNextPageArgs<TData, TResponse> = {
   readonly prefetchRef: RefObject<PrefetchCache<TResponse>>;
 };
 
-/** The load-more callback once `getRequiredOnLoadMore` has proven it exists. */
 type OnLoadMore<TData, TResponse> = (
   params: Pagination<TData>,
 ) => Promise<TResponse>;

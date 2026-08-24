@@ -9,13 +9,6 @@ import type { ChoiceModalProps } from './ChoiceModal.types';
 
 import { styles } from './ChoiceModal.stylex';
 
-/**
- * Shared presentational modal for resolving a single-choice prompt: renders a
- * description, a radio group of options, and Accept/Cancel actions. Owns the
- * ephemeral selection state, which resets to `defaultValue` after accept or
- * cancel so the modal opens fresh next time. Pure and store-agnostic — feature
- * modals wrap it with their own data wiring and copy.
- */
 export const ChoiceModal = <TValue extends string>({
   defaultValue,
   description,

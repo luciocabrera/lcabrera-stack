@@ -7,12 +7,6 @@ type PrefetchNextPageArgs<TResponse, TData = unknown> = {
   readonly onLoadMore: (params: Pagination<TData>) => Promise<TResponse>;
 };
 
-/**
- * Creates a prefetch request for the next page of data.
- * Returns the initial cache state and a promise that resolves to the
- * final cache state (success or failure). The consumer is responsible
- * for applying these values to the ref with a staleness check.
- */
 export const prefetchNextPage = <TResponse, TData = unknown>({
   lastRow,
   limit,

@@ -23,20 +23,13 @@ type RenderTableBodyPinnedGroupArgs<TData, TColumn, TResult> = {
 };
 
 /**
- * Maps a column group to rendered cell results using shared row data.
- *
- * The row's identity, its absolute index and everything describing what kind of
- * row it is travel with the row itself rather than being bound into the
- * renderer, because all of them change per row while sizing and pinning do not.
- *
- * **Every per-row field must be named here explicitly.** The caller spreads one
- * `cellArgs` object into this function, so a field this signature does not
- * destructure is dropped silently rather than rejected — excess properties
- * survive a spread. That is how the structural marker went missing (#887): it
- * was built per row and never reached the cell descriptor, so every structural
- * row was read as an ordinary data row and the actions column asked it for a
- * primary key it does not have, emptying the table on the first click of a
- * chevron.
+ * **Every per-row field must be named here explicitly.** The caller spreads one `cellArgs`
+ * object into this function, so a field this signature does not destructure is dropped
+ * silently rather than rejected — excess properties survive a spread.
+ * That is how the structural marker went missing (#887): it was built per row and never
+ * reached the cell descriptor, so every structural row was read as an ordinary data row
+ * and the actions column asked it for a primary key it does not have, emptying the table
+ * on the first click of a chevron.
  */
 export const renderTableBodyPinnedGroup = <TData, TColumn, TResult>({
   carriedGroupKeys,

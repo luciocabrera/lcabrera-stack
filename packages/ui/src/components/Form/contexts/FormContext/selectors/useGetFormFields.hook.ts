@@ -2,7 +2,6 @@ import type { FieldNode } from '#ui/components/Form/Form.types';
 
 import { useMetaStore } from '#ui/components/Form/contexts/FormContext/useMetaStore.hook';
 
-/** Field definitions tree — the form's column-config analogue. */
 export const useGetFormFields = <
   TValues extends Record<string, unknown> = Record<string, unknown>,
 >() =>

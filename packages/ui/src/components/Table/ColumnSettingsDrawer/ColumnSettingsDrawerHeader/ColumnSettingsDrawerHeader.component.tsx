@@ -18,11 +18,6 @@ import {
 } from '../../contexts/TableData/data/selectors';
 import { useCancelColumnSettings } from '../hooks/useCancelColumnSettings.hook';
 
-/**
- * Header of the column settings drawer: settings icon + column label plus
- * the pin/close toolbar. Toggling the pin writes to the table meta store and
- * closing cancels pending drawer changes; both no-op while busy.
- */
 export const ColumnSettingsDrawerHeader = <
   TData extends Record<string, unknown>,
 >() => {

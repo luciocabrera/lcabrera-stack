@@ -16,10 +16,6 @@ type UseToggleColumnPinArgs = {
   readonly columnKey: DataKey<Record<string, unknown>>;
   readonly isPinning: boolean;
 };
-/**
- * Hook to toggle column pinning on/off.
- * Opens the appropriate modal when conflicts are detected.
- */
 export const useToggleColumnPin = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();

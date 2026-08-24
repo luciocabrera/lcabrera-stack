@@ -17,12 +17,8 @@ import {
 } from '../utils';
 
 /**
- * Div-based trigger shell used when the native `<button>` cannot be (tag
- * chips render nested remove buttons) or when the listbox is always open.
- * Self-connected — interaction/styling state comes from the select meta
- * selectors and the toggle dispatches through the meta action. The static
- * (`isAlwaysOpen`) and interactive variants share the same shell — only the
- * interaction props differ, so they are spread conditionally.
+ * Div-based trigger shell used when the native `<button>` cannot be (tag chips render
+ * nested remove buttons) or when the listbox is always open.
  */
 export const VirtualSelectDivTrigger = ({
   children,

@@ -1,6 +1,5 @@
 import { roundToCents } from '@lcabrera/utils/numbers/round-to-cents.util';
 
-/** Fixed sales-tax rate applied to the discounted subtotal. */
 const TAX_RATE = 0.08;
 
 export type DeriveOrderTotalsArgs = {
@@ -19,19 +18,6 @@ export type OrderTotals = {
   readonly total_amount: number;
 };
 
-/**
- * Derive the five computed money columns from the pricing inputs (feature plan
- * §6). Pure: `enterprise_orders` stores these as plain columns with no DB
- * default, so the action computes them here before every insert/update.
- *
- * - `subtotal      = unit_price * quantity`
- * - `discount      = subtotal * discount_percentage / 100`
- * - `tax           = (subtotal - discount) * TAX_RATE`
- * - `total         = (subtotal - discount) + tax + shipping_cost`
- * - `balance_due   = total - paid_amount`
- *
- * Each returned amount is rounded to cents to match `numeric(12,2)`.
- */
 export const deriveOrderTotals = ({
   discountPercentage,
   paidAmount,

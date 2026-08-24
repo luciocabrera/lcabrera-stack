@@ -3,9 +3,6 @@ type MergeArraysArgs<T> = {
   readonly overrideValue?: null | readonly T[];
 };
 
-/**
- * Concatenates two optional arrays while gracefully handling nullish inputs.
- */
 export const mergeArrays = <T>({
   baseValue,
   overrideValue,

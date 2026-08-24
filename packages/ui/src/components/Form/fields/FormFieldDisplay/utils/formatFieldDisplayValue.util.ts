@@ -12,14 +12,6 @@ type FormatFieldDisplayValueArgs<TValues extends Record<string, unknown>> = {
   readonly value: unknown;
 };
 
-/**
- * Formats a leaf field's stored value into the read-only text shown in `view`
- * mode (label + value, not a disabled widget): boolean → Yes/No, currency →
- * formatted currency, number → locale number, date/datetime → formatted date,
- * select/radio → the option label(s), everything else → the raw string.
- * Empty (`undefined`/`''`) non-boolean values render as an empty string so the
- * display component can show its own placeholder.
- */
 export const formatFieldDisplayValue = <
   TValues extends Record<string, unknown>,
 >({

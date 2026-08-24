@@ -6,11 +6,6 @@ export type ToNumberQueryFiltersArgs = {
   readonly filter: NumberFilter;
 };
 
-/**
- * Translate a table number/currency filter to generic `QueryFilter`s.
- * `between` becomes a `gte` + `lte` pair; the comparison operators map
- * directly. A drafting filter (undefined value) yields nothing.
- */
 export const toNumberQueryFilters = ({
   column,
   filter,

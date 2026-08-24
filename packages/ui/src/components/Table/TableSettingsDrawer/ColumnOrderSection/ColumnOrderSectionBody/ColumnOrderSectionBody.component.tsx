@@ -19,12 +19,6 @@ import {
 } from '../utils';
 import { ColumnOrderItemContent } from './ColumnOrderItemContent/ColumnOrderItemContent.component';
 
-/**
- * Body of the column order section: the drag-and-drop column list. Derives
- * the ordered settings columns from the column and drawer stores and
- * dispatches reorders; each row renders a ColumnOrderItemContent that owns
- * its own pin/visibility toggle wiring.
- */
 export const ColumnOrderSectionBody = ({
   isBusy = false,
 }: ColumnOrderSectionBodyProps) => {

@@ -7,11 +7,6 @@ import type { CurrencyFieldProps } from './CurrencyField.types';
 import { styles } from './CurrencyField.stylex';
 import { getCurrencySymbol } from './utils';
 
-/**
- * Currency leaf field: a numeric input (see `NumericFieldControl`) with a
- * leading currency-symbol adornment. Read/view rendering is handled by
- * `FormFieldDisplay`, which formats the stored number as a currency string.
- */
 export const CurrencyField = <TValues extends Record<string, unknown>>({
   field,
 }: CurrencyFieldProps<TValues>) => {

@@ -7,11 +7,6 @@ import type { ColumnOrderSectionHeaderProps } from './ColumnOrderSectionHeader.t
 import { ColumnOrderSectionToolbar } from '../ColumnOrderSectionToolbar';
 import { filterSettingsColumns } from '../utils';
 
-/**
- * Header of the column order section: the visible/total column count title
- * plus the compact order/clear/reset toolbar. Reads the column and
- * visibility stores itself to derive the counts.
- */
 export const ColumnOrderSectionHeader = ({
   isBusy = false,
 }: ColumnOrderSectionHeaderProps) => {

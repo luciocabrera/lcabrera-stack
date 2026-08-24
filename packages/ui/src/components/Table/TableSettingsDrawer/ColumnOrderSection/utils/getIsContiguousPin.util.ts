@@ -11,11 +11,6 @@ type GetIsContiguousPinArgs<TData> = {
   readonly side: 'left' | 'right';
 };
 
-/**
- * Checks whether pinning a column on a given side would maintain contiguous pinning.
- * - For 'left': all columns before the target must already be left-pinned.
- * - For 'right': all columns after the target must already be right-pinned.
- */
 export const getIsContiguousPin = <TData>({
   allOrderedColumns,
   columnKey,

@@ -18,20 +18,11 @@ import {
 } from './utils';
 
 /**
- * Moves the grid's single tab stop in response to a key, and answers whether
- * the key was one the grid claims — which is what the caller preventDefaults
- * on, so an unclaimed key still scrolls the page.
- *
- * The move is computed against the **visible** rows, not the rendered window: a
- * target outside the window is a scroll away, not an impossibility, and
- * `commitTableFocusTarget` brings it in. That is the point of holding focus as
- * data (ADR-062) — the old row can be unmounted and the new one not yet
- * mounted, and the move still lands.
- *
- * On a group row the horizontal keys are the treegrid's expansion keys first
- * and cell navigation second (ADR-067). The expansion branch answers `true` for
- * the same reason a move does — the grid handled the key, so the page must not
- * scroll on it as well.
+ * Moves the grid's single tab stop in response to a key, and answers whether the key was
+ * one the grid claims — which is what the caller preventDefaults on, so an unclaimed key
+ * still scrolls the page.
+ * That is the point of holding focus as data (ADR-062) — the old row can be unmounted and
+ * the new one not yet mounted, and the move still lands.
  */
 export const useMoveTableGridFocus = <
   TData extends Record<string, unknown>,

@@ -22,18 +22,10 @@ type ResolveColumnPeriodsArgs = {
 const NO_PERIODS: readonly GroupKeyPeriod[] = [];
 
 /**
- * The granularities this column may legally be grouped at (#786).
- *
- * It runs the **same refusal ladder** the raw column runs, with the period's
- * estimate substituted — deliberately, rather than checking cardinality alone.
- * A period changes exactly one input; role, equality and the unique-ish rule are
- * facts about the column and must not become negotiable because a granularity
- * was asked for. Reusing `refuseGroupKey` is what makes that structural instead
- * of a promise.
- *
- * A column of a type no granularity applies to answers with an empty list, which
- * is also the answer for every non-temporal column — so a surface reads one
- * field rather than asking the type a second question of its own.
+ * It runs the **same refusal ladder** the raw column runs, with the period's estimate
+ * substituted — deliberately, rather than checking cardinality alone.
+ * A period changes exactly one input; role, equality and the unique-ish rule are facts
+ * about the column and must not become negotiable because a granularity was asked for.
  */
 export const resolveColumnPeriods = ({
   estimate,

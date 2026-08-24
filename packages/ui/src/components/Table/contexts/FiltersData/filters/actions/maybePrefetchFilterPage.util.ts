@@ -3,11 +3,6 @@ import { firePrefetch } from '#ui/utils/prefetch/firePrefetch.util';
 
 import type { MaybePrefetchArgs } from './useFetchFilterData.types';
 
-/**
- * Fire a prefetch for the next filter data page when prefetch is enabled,
- * there is more data, and a prefetch ref is available.
- * @param args - Prefetch enablement, paging cursor, loader, and prefetch ref.
- */
 export const maybePrefetchFilterPage = <TResponse>({
   enablePrefetch,
   hasMore,

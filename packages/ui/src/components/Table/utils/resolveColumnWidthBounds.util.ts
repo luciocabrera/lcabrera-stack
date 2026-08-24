@@ -9,10 +9,9 @@ type ResolveColumnWidthBoundsArgs = {
 };
 
 /**
- * Effective clamping bounds for a column, resolving each unset side against
- * the table's default column widths. Every resize path (pointer drag, keyboard
- * stepping, the handle's announced `aria-valuemin`/`aria-valuemax`) reads its
- * bounds from here so they can never drift apart.
+ * Every resize path (pointer drag, keyboard stepping, the handle's announced
+ * `aria-valuemin`/`aria-valuemax`) reads its bounds from here so they can never drift
+ * apart.
  */
 export const resolveColumnWidthBounds = ({
   maxWidth,

@@ -9,11 +9,6 @@ type ClearPrefetchIfPresentArgs<TResponse> = {
   >['prefetchRef'];
 };
 
-/**
- * Resets the prefetch cache when a prefetch ref is provided; no-op when the
- * consumer opted out of prefetching and no ref exists.
- * @param args - Optional prefetch cache ref.
- */
 export const clearPrefetchIfPresent = <TResponse>({
   prefetchRef,
 }: ClearPrefetchIfPresentArgs<TResponse>) => {

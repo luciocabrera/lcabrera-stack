@@ -3,12 +3,9 @@ import { assignTriggerRef, getTriggerStyleProps } from './utils';
 import { VirtualSelectDivTrigger } from './VirtualSelectDivTrigger/VirtualSelectDivTrigger.component';
 
 /**
- * Combobox trigger: placeholder, single-value label, or tag chips with the
- * "+N more" overflow badge. Fully self-connected (zero props) — display
- * metadata comes from the select meta selectors, the selected labels from
- * the list data store, and interactions dispatch through the
- * toggle-dropdown/toggle-option actions. Owns the trigger ref + the
- * ResizeObserver-driven tag-overflow measurement.
+ * Combobox trigger: placeholder, single-value label, or tag chips with the "+N more"
+ * overflow badge.
+ * Owns the trigger ref + the ResizeObserver-driven tag-overflow measurement.
  */
 export const VirtualSelectTrigger = () => {
   const {

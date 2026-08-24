@@ -10,11 +10,6 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 
 import type { ManageColumnActionProps } from './ManageColumnAction.types';
 
-/**
- * "Manage Column" item of the column header actions menu: selects the column
- * and opens the per-column settings drawer, then closes the menu via
- * `onClose`.
- */
 export const ManageColumnAction = <TData,>({
   columnKey,
   onClose,

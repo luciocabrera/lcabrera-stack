@@ -2,9 +2,6 @@ import type { SortingState } from '#ui/components/Table/Table.types';
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
-/**
- * Hook to update sorting state
- */
 export const useSetColumnsSortings = () => {
   const { columnsStore } = useTableDrawerContextValue();
 

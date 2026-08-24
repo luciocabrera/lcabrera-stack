@@ -10,11 +10,8 @@ import { styles } from './VirtualListBody.stylex';
 import { VirtualListBodyChildren } from './VirtualListBodyChildren/VirtualListBodyChildren.component';
 
 /**
- * Owns the scroll container and the infinite-scroll sentinel (Table analog:
- * TableContent). Fully self-connected (zero props) — layout config comes
- * from the config store, the observer wiring from
- * `useVirtualListInfiniteScroll`. Content-mode dispatch and virtualization
- * live one level down in VirtualListBodyChildren.
+ * Owns the scroll container and the infinite-scroll sentinel (Table analog: TableContent).
+ * Content-mode dispatch and virtualization live one level down in VirtualListBodyChildren.
  */
 export const VirtualListBody = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);

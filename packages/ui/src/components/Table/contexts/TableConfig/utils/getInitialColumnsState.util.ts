@@ -17,26 +17,19 @@ import {
 type GetInitialTableStateArgs<TData extends Record<string, unknown>> = Partial<
   TableColumnsState<TData>
 > & {
-  /**
-   * The aggregates the loader applied, already sanitized. Each one becomes a
-   * derived measure column, so seeding it here is what makes the server's first
-   * paint and the client's agree about how many columns there are.
-   */
   readonly aggregates?: readonly TableColumnAggregate[];
   readonly crud?: TableCrudConfig;
   /**
-   * The group keys the loader applied, already sanitized. The derived slices
-   * carry the hierarchy column while grouping is on (ADR-065), and seeding it
-   * here is what makes the server's first paint and the client's agree.
+   * The derived slices carry the hierarchy column while grouping is on (ADR-065), and
+   * seeding it here is what makes the server's first paint and the client's agree.
    */
   readonly groupingKeys?: readonly string[];
 };
 
 /**
- * Builds the columns store's initial state from what the loader read out of the
- * cookie. That is the only source: the server renders from it, so anything the
- * client preferred over it (sessionStorage, which SSR cannot see) could only
- * contradict the markup already painted and shift the columns at hydration.
+ * That is the only source: the server renders from it, so anything the client preferred
+ * over it (sessionStorage, which SSR cannot see) could only contradict the markup already
+ * painted and shift the columns at hydration.
  */
 export const getInitialColumnsState = <TData extends Record<string, unknown>>({
   aggregates = [],

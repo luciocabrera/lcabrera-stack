@@ -6,9 +6,7 @@ import { readFromCookie } from '#ui/utils/storage/readFromCookie.util';
 import { THEME_COOKIE_NAME } from './theme.constants';
 
 type GetThemeFromCookieArgs = {
-  /** Optional per-app id used to scope the cookie key. */
   readonly appId?: string;
-  /** Raw `Cookie` header string (SSR) or undefined (client). */
   readonly cookieHeader?: string;
 };
 

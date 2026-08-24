@@ -4,37 +4,11 @@ import { isWithinCountDistinctBudget } from '#ui/components/Table/utils/isWithin
 import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
 
 /**
- * Whether an aggregate list is a legal **shape** for a grouping: no
- * `(columnKey, fn)` pair repeated, and no more `countDistinct` aggregates than
- * one read can carry.
- *
- * `areGroupKeysLegal` beside this one is the model, and the reason is the same:
- * the store is the boundary a published package exposes to a consumer writing
- * their own loader, and a shape the table cannot render must be refused there
- * rather than seeded. There is no cap on how many measures a column may carry —
- * as many as the catalogue offers (#831) — but there is one on `countDistinct`
- * across the whole list, and it is the same kind of answerable-from-the-list-alone
- * question as the depth cap that predicate checks (#842).
- *
- * **This guard is new because the shape change removed the one that was
- * implicit.** While `aggregates` was a column-to-function map a repeated pair
- * was unrepresentable, so nothing had to check for one; a list admits it. Left
- * unchecked, a consumer-seeded duplicate gives `toAggregateItems` two rows
- * sharing an id — React reconciles them as one — and reaches the server as two
- * projections deriving the same alias, which `assertGroupAliases` refuses: a 500
- * out of a state `@lcabrera/ui` itself accepted.
- *
- * A predicate rather than a refusal, like `areGroupKeysLegal`, so a caller
- * decides what "illegal" means for it. It is deliberately the **shape** question
- * only: whether a column exists, and whether the catalogue permits the function
- * on it (ADR-058), are questions the store cannot answer and stay with
- * `sanitizeGroupingByColumns` and the server. `sanitizeGroupingByColumns` asks
- * these same two questions at the URL boundary and refuses whole there too.
- *
- * Comparing whole tokens is sound where **joining** them would not be (see
- * `getShareDenominators`): the token is injective over `(columnKey, fn)` because
- * the function vocabulary is closed and contains no `:`, and a `Set` compares
- * one entry at a time.
+ * Whether an aggregate list is a legal **shape** for a grouping: no `(columnKey, fn)` pair
+ * repeated, and no more `countDistinct` aggregates than one read can carry.
+ * `areGroupKeysLegal` beside this one is the model, and the reason is the same: the store
+ * is the boundary a published package exposes to a consumer writing their own loader, and
+ * a shape the table cannot render must be refused there rather than seeded.
  */
 export const areGroupAggregatesLegal = (
   aggregates: readonly TableColumnAggregate[],

@@ -9,13 +9,9 @@ type ResolveTableGroupingUpdateArgs = {
   readonly existingGrouping: TableGroupingState;
   /**
    * Whether this route declared a default grouping, from
-   * `TableMetaState.hasDefaultGrouping`. It changes only how an **empty**
-   * configuration is written: with a default in play "off" has to be recorded
-   * in the URL rather than dropped from it (#578).
-   *
-   * Optional because the drawer's draft path resolves changes through here too
-   * and never reads `persistenceEntry` — it stages, and Accept is what
-   * persists. Both paths that do persist pass it.
+   * `TableMetaState.hasDefaultGrouping`.
+   * Optional because the drawer's draft path resolves changes through here too and never
+   * reads `persistenceEntry` — it stages, and Accept is what persists.
    */
   readonly hasDefaultGrouping?: boolean;
   readonly nextGrouping: TableGroupingState;
@@ -71,32 +67,10 @@ const isSameGrouping = ({
 
 /**
  * The grouping state change one interaction produces, as data.
- *
- * Pure and separate from the action hook for the reason every `resolve*Update`
- * here is: the navigation this feeds is a side effect, and the decision of
- * *whether* there is one to make must be testable without a store, a router or
- * a fetcher. `unchanged` is what stops a repeat click re-issuing a navigation
- * for state the table is already in.
- *
- * **An illegal key list is refused whole**, never repaired — not truncated to
- * the cap, and not de-duplicated. Either repair would group by something other
- * than what was asked for and answer a different question in silence, because
- * keys are ordered and the order is the query's nesting order.
- * `areGroupKeysLegal` is the shared question; this and `getInitialGroupingState`
- * answer it differently, which is why it is a predicate rather than a refusal.
- *
- * The header and drawer surfaces disable the affordance at the cap and never
- * offer an applied key twice, so neither branch is reachable through the UI;
- * `sanitizeGroupingByColumns` refuses the same lists arriving through the URL,
- * and the server's `assertGroupKeys` refuses them again before emitting SQL.
- *
- * The mode is part of the comparison, because it changes which grouping sets
- * the read emits and therefore which rows come back — switching it is a real
- * update even when every key and aggregate stays put.
- *
- * Clearing the last key clears the aggregates with it: an aggregate is computed
- * per group, so with no key there is nothing for it to describe, and leaving it
- * in the store would resurrect it on the next grouping the user applies.
+ * **An illegal key list is refused whole**, never repaired — not truncated to the cap, and
+ * not de-duplicated.
+ * `areGroupKeysLegal` is the shared question; this and `getInitialGroupingState` answer it
+ * differently, which is why it is a predicate rather than a refusal.
  */
 export const resolveTableGroupingUpdate = ({
   existingGrouping,

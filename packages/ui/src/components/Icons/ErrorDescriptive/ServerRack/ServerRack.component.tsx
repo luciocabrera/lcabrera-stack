@@ -2,7 +2,6 @@ import * as stylex from '@stylexjs/stylex';
 
 import { styles } from './ServerRack.stylex';
 
-/** Stylized server / database rack illustration used on the left of `ErrorDescriptive`. */
 export const ServerRack = () => (
   <g transform='translate(28,62)'>
     {/* server body (stacked panels) */}

@@ -6,13 +6,8 @@ import type { SelectQueryDescriptor } from './query-builder/query-builder.types.
 import { selectRows } from './select-rows.util.ts';
 
 /**
- * The `SELECT DISTINCT` sibling of `selectRows` — same descriptor, deduplicated
- * rows. A thin wrapper (identical to `selectRows({ ...descriptor, distinct:
- * true })`) so the two never drift and callers can read the intent. `tx` rides
- * along with the rest of the descriptor.
- *
- * For a single column's distinct values shaped for a filter dropdown, reach for
- * `selectFilterOptions`, which composes this — do not re-specialize the generic.
+ * A thin wrapper (identical to `selectRows({ ...descriptor, distinct: true })`) so the two
+ * never drift and callers can read the intent.
  */
 export const selectDistinctRows = async <TRow extends QueryResultRow>(
   descriptor: ExecutorOptions & SelectQueryDescriptor,

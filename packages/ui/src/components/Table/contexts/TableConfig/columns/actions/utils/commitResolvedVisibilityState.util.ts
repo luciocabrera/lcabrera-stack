@@ -8,7 +8,6 @@ type CommitResolvedVisibilityStateArgs<TData> = CommitResolvedColumnStateArgs<
   TData,
   'columnVisibility'
 > & {
-  /** Visibility commits always carry the resolved visibility set */
   readonly columnVisibility: ColumnVisibilityState<TData>;
 };
 

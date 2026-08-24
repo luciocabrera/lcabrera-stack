@@ -20,13 +20,6 @@ import { GeneralSection } from '../GeneralSection';
 import { PinningSection } from '../PinningSection';
 import { SortingSection } from '../SortingSection';
 
-/**
- * Body of the column settings drawer: the tabbed section container. Builds
- * the tab set from the column's capabilities (Filter only for filterable
- * columns with a data type, Sorting only for sortable columns, Pinning only
- * for movable columns) and wires the selected tab through the table meta
- * store so it survives drawer re-opens.
- */
 export const ColumnSettingsDrawerBody = <
   TData extends Record<string, unknown>,
 >() => {

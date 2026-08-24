@@ -16,11 +16,6 @@ type ResolveListDerivedStateArgs = {
   readonly selectedValues: readonly string[];
 };
 
-/**
- * Computes the derived slice of the data store (filtered options, select-all
- * flags, virtualized row count, content mode). Called wherever an input
- * changes: the data provider sync effect and the UI actions.
- */
 export const resolveListDerivedState = ({
   data,
   hasFetchInitial,
