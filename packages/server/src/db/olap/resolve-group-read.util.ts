@@ -1,0 +1,118 @@
+import type { OlapGroupPeriod } from '@lcabrera/api/olap/olap.types';
+
+import { OLAP_DRILL_GROUP_PARAM } from '@lcabrera/api/olap/olap.constants';
+import { parseDrillGroup } from '@lcabrera/api/olap/parse-drill-group.util';
+
+import type {
+  QueryFilter,
+  QuerySort,
+} from '../query-builder/query-builder.types';
+import type {
+  GroupKeyTruncation,
+  OlapGroupReadRefusal,
+  OlapGroupReadResolution,
+} from './olap.types';
+
+import { toDrillRead } from './to-drill-read.util.ts';
+
+type ResolveGroupReadArgs = {
+  readonly cursor?: readonly unknown[];
+  readonly filters: readonly QueryFilter[];
+  readonly limit: number;
+  /** The route's own page ceiling. Passed in, because only the route knows it. */
+  readonly maxLimit: number;
+  /** The request's own params — read only for the group token. */
+  readonly params: URLSearchParams;
+  /** The column the route breaks ties on (ADR-008). */
+  readonly primaryKey: string;
+  /**
+   * How each truncated key was derived. A catalogue lookup against the route's
+   * own table, so the route owns it; called only when the token carries periods.
+   */
+  readonly selectTruncations?: (
+    periods: Readonly<Record<string, OlapGroupPeriod>>,
+  ) => Promise<Readonly<Record<string, GroupKeyTruncation>>>;
+  readonly skip: number;
+  readonly sort: readonly QuerySort[];
+};
+
+/** Each names the row rather than the request: a reader clicked a row. */
+const REFUSAL_MESSAGE: Readonly<Record<OlapGroupReadRefusal, string>> = {
+  'grand-total':
+    'A grand total already summarises every row, so there is no narrower set to open.',
+  'incomplete-path':
+    'This group is named by fewer keys than the view was grouped by, so the rows underneath it are not the rows it counted.',
+  malformed: 'This link does not name a group that can be opened.',
+  subtotal:
+    'A subtotal summarises the groups above it rather than rows of its own.',
+};
+
+const toRefusal = (reason: OlapGroupReadRefusal): OlapGroupReadResolution => ({
+  kind: 'refused',
+  message: REFUSAL_MESSAGE[reason],
+  reason,
+});
+
+/**
+ * The read to run for a request that may name a group — scoped to it when it
+ * does, and otherwise the plain paginated read (ADR-087).
+ *
+ * `parseDrillGroup` answers `undefined` both for "no group here" and for "a
+ * group I cannot read", so the param's *presence* is tested separately: without
+ * that, a mangled link falls through to the unscoped read and serves the whole
+ * table under the group's heading.
+ */
+export const resolveGroupRead = async ({
+  cursor,
+  filters,
+  limit,
+  maxLimit,
+  params,
+  primaryKey,
+  selectTruncations,
+  skip,
+  sort,
+}: ResolveGroupReadArgs): Promise<OlapGroupReadResolution> => {
+  const isFirstPage = skip === 0;
+
+  if (!params.has(OLAP_DRILL_GROUP_PARAM)) {
+    return {
+      kind: 'read',
+      read: {
+        cursor,
+        filters,
+        includeTotal: isFirstPage,
+        limit,
+        offset: skip,
+        sort,
+      },
+    };
+  }
+
+  const request = parseDrillGroup(params);
+
+  if (request === undefined) return toRefusal('malformed');
+
+  const { periods } = request;
+  const drill = toDrillRead({
+    filters,
+    group: request.group,
+    groupKeys: request.groupKeys,
+    limit,
+    maxLimit,
+    primaryKey,
+    sort,
+    truncations:
+      periods === undefined ? undefined : await selectTruncations?.(periods),
+  });
+
+  if (drill.kind === 'refused') return toRefusal(drill.reason);
+
+  // `includeTotal` is re-asserted over the translation's `false`: that served
+  // one bounded page beside a group row that already stated the count, where
+  // this read pages and has to say how far it goes.
+  return {
+    kind: 'read',
+    read: { ...drill.read, cursor, includeTotal: isFirstPage, offset: skip },
+  };
+};

@@ -7,6 +7,7 @@ import type {
 } from '@lcabrera/ui/components/Table/Table.types';
 
 import { closePool } from '@lcabrera/server/db/get-pool.util';
+import { toDrillRead } from '@lcabrera/server/db/olap/to-drill-read.util';
 import { withTransaction } from '@lcabrera/server/db/with-transaction.util';
 import { TABLE_GROUP_ROW_FIELD } from '@lcabrera/ui/components/Table/Table.constants';
 import { afterAll, describe, expect, it } from 'vite-plus/test';
@@ -16,7 +17,10 @@ import {
   selectOrderGroupKeyTruncations,
   selectOrdersPage,
 } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
-import { toOrderDrillRead } from '@/routes/enterprise-orders/.server/toOrderDrillRead.util';
+import {
+  ENTERPRISE_ORDER_PRIMARY_KEY,
+  MAX_ENTERPRISE_ORDERS_LIMIT,
+} from '@/routes/enterprise-orders/config';
 
 /**
  * The criterion #776 exists for, and the one a unit test cannot discharge.
@@ -145,11 +149,13 @@ type DrillArgs = {
 const drilledPage = async ({ filters, keys, periods, summary }: DrillArgs) => {
   // A grid's group row carries a `label` the wire shape does not declare, and is
   // structurally assignable to it — so it is passed through unchanged (ADR-082).
-  const drill = toOrderDrillRead({
+  const drill = toDrillRead({
     filters,
     group: summary,
     groupKeys: keys,
     limit: 1000,
+    maxLimit: MAX_ENTERPRISE_ORDERS_LIMIT,
+    primaryKey: ENTERPRISE_ORDER_PRIMARY_KEY,
     sort: [],
     truncations: await selectOrderGroupKeyTruncations(periods),
   });

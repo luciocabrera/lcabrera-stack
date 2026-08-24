@@ -188,6 +188,15 @@ computes the upper bound by calendar arithmetic, and `toGroupKeyTruncations`
 catalogue fact that decides which frame that arithmetic runs in
 ([ADR-084](../../../docs/decisions/ADR-084-a-group-key-carries-its-granularity.md)).
 
+`resolveGroupRead` (`resolve-group-read.util.ts`) is the whole decision above it:
+a request that may name a group, as the read to run. It reads the token out of
+the search params, refuses an unreadable one rather than falling through to the
+unscoped read, applies the translation and positions the page, and carries the
+refusal messages so every consumer says the same thing about a subtotal. A route
+supplies its page ceiling, its tiebreaker column and the catalogue lookup, and
+nothing else
+([ADR-087](../../../docs/decisions/ADR-087-a-group-opens-its-rows-in-a-route.md)).
+
 All of this lived in `apps/react-router` until
 [ADR-082](../../../docs/decisions/ADR-082-the-olap-seam-lives-in-the-packages.md);
 none of it ever referenced an order. The drill request's wire codec is the one

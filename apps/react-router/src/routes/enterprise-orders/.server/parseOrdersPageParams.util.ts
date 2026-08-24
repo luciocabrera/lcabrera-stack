@@ -23,34 +23,17 @@ export type ParsedOrdersPageParams = {
 };
 
 /**
- * Parse the paginated-orders resource-route search params into generic query
- * descriptor pieces. The filter/sort payloads are JSON from the table client;
- * their column identifiers are re-validated at the SQL layer (`allowedColumns`
- * + `assertSafeIdentifier`), so structural narrowing here is sufficient.
+ * The paginated-orders search params as generic query descriptor pieces, for
+ * both `/paginated` and the group-details route (ADR-087).
  *
- * `cursor` is a tuple of **values**, never identifiers — it is parameterized
- * into the query and never reaches the SQL text. Whether it describes a total
- * order the page can actually seek along is `toOrderKeysetCursor`'s call.
+ * `limit` and the sort length are bounded in `selectOrdersPage`, not here: the
+ * SSR loader reads the same table without passing through this function, so a
+ * clamp here would bound one entry point and have to be repeated for the other
+ * (#706). What this returns is what the request asked for.
  *
- * `sort` is resolved against a fallback rather than passed through, so this
- * route's ordering is its own guarantee instead of a borrowed one. The Table
- * client always sends a sort — `buildTablePageQuery` appends the primary key —
- * but this is a public URL, and a caller that is not that client would otherwise
- * get a paginated read with no ORDER BY, which repeats and skips rows.
- *
- * **It lives with the domain, not with one of its callers.** Both the paginated
- * resource route and the group-details modal read the same params, and the
- * parser sitting inside one caller's folder made the other import sideways out
- * of a sibling route — one route wearing two hats (#870).
- *
- * **`limit` and the sort length are bounded — deliberately not here** (#706).
- * The sibling parsers clamp `limit` themselves; this route's SSR loader reads
- * the same table through `selectOrdersPage` **without** passing through this
- * function, so a clamp here would bound one of the two entry points and would
- * have to be repeated — in two places free to drift — to bound the other. Both
- * bounds live in `selectOrdersPage` instead, which every entry point does
- * reach: `MAX_ENTERPRISE_ORDERS_LIMIT` and `MAX_ENTERPRISE_ORDERS_SORT_RULES`.
- * What this returns is what the request asked for.
+ * `sort` resolves against a fallback because this is a public URL: a caller that
+ * is not the table client would otherwise get a paginated read with no ORDER BY,
+ * which repeats and skips rows.
  */
 export const parseOrdersPageParams = (
   params: URLSearchParams,

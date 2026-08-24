@@ -1,6 +1,10 @@
 ---
-'@lcabrera/ui': major
+'@lcabrera/server': minor
+'@lcabrera/ui': minor
 ---
+
+**Breaking**, landing as a `minor` because `@lcabrera/ui` is pre-1.0 — while a
+package is `0.x` a break is a `minor`, never a `major` (see `packages/CLAUDE.md`).
 
 A group's rows now open in a **route** rather than being spliced underneath the
 group row. The inline drill is gone, and with it three props.
@@ -12,6 +16,12 @@ group row. The inline drill is gone, and with it three props.
 - `isGroupDrillEnabled` (loader `meta`)
 - `TableGroupDrillFetcher`, `TableGroupDrillRequest`, and the drill row types
 - `toGroupKeyColumnFilter`, whose only consumer was the hand-off row
+
+**`@lcabrera/server` gains `resolveGroupRead`** — the whole decision of what a
+request that may name a group should read: token present or not, an unreadable
+one refused, the translation applied, the page positioned. A route supplies only
+its page ceiling, its tiebreaker column, and the catalogue lookup for a truncated
+key. It returns a read or a refusal carrying the sentence to render.
 
 **Added in their place:** `groupDetailsPath` on the loader `meta` — where the
 route serves one group's rows. A path rather than a callback, because a function

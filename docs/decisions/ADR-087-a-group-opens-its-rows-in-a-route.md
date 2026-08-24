@@ -91,7 +91,25 @@ shares its parent's URL, and the table persists filters and sort there through
 list's filters as its floor — the group row was computed under them — while its
 own adjustments stay in the store for the life of the dialog.
 
+**9. Deciding the read is the package's job, not the route's.** `resolveGroupRead`
+in `@lcabrera/server` owns the whole sequence — token present or not, refuse an
+unreadable one, translate, position the page — and returns either a read or a
+refusal with the sentence to render. A route supplies only what nothing else can
+know: its page ceiling, its tiebreaker column, and the catalogue lookup that
+resolves a truncated key against its own table. The refusal messages ship with
+it, so every consumer says the same thing about a subtotal.
+
+The alternative was leaving the sequence in the app, which is where it was first
+written. It read as route code and is not: every one of its branches exists for a
+rule stated above, and a second app adopting grouped tables would have had to
+rewrite all of them correctly to get a working link — the opposite of what a
+package is for. What is left in the route is a six-line binding.
+
 ## Consequences
+
+`@lcabrera/server` gains `resolveGroupRead` and the `OlapGroupRead*` types; the
+route's own resolver drops from three files to one binding, and its tests narrow
+to the two constants it supplies.
 
 The four-member fetch state, the drill chrome rows, the `tableDrill` marker
 field, the splice inside `resolveTableGroupTree`, and every util that existed to

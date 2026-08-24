@@ -7,6 +7,7 @@ import { selectOrdersPage } from '@/routes/enterprise-orders/.server/enterpriseO
 import { loader } from './enterprise-orders-paginated.loader';
 
 vi.mock('@/routes/enterprise-orders/.server/enterpriseOrders.service', () => ({
+  selectOrderGroupKeyTruncations: vi.fn(async () => ({})),
   selectOrdersPage: vi.fn(async () => ({
     data: [{ order_id: 1 }],
     hasMore: true,

@@ -47,3 +47,23 @@ export type OlapDrillRefusal = 'grand-total' | 'incomplete-path' | 'subtotal';
 export type OlapDrillTranslation =
   | { readonly kind: 'drillable'; readonly read: OlapDrillRead }
   | { readonly kind: 'refused'; readonly reason: OlapDrillRefusal };
+
+/**
+ * A page of the rows underneath one group row: the drill read, positioned. The
+ * cursor rides along untouched so a route that keysets can hand it straight to
+ * its own page-select.
+ */
+export type OlapGroupRead = OlapDrillRead & {
+  readonly cursor?: readonly unknown[];
+};
+
+/** A refusal, plus the one a request can earn that a group row cannot. */
+export type OlapGroupReadRefusal = 'malformed' | OlapDrillRefusal;
+
+export type OlapGroupReadResolution =
+  | { readonly kind: 'read'; readonly read: OlapGroupRead }
+  | {
+      readonly kind: 'refused';
+      readonly message: string;
+      readonly reason: OlapGroupReadRefusal;
+    };
