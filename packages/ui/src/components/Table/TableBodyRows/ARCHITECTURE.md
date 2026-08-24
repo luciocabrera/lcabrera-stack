@@ -306,5 +306,5 @@ row, and the hierarchy cell needs the first two to draw its disclosure. That
 answer travels down the same path the group summary does, rather than being
 re-derived at the cell: deriving it there would resolve the whole tree once per
 hierarchy cell, and deriving it from adjacency would be wrong under rollup,
-where a subtotal sits below the rows it totals. The disclosure lives in
-`TableGroupDisclosure/`.
+where a subtotal sits below the rows it totals. See
+[`TableGroupDisclosure/ARCHITECTURE.md`](../TableGroupDisclosure/ARCHITECTURE.md).

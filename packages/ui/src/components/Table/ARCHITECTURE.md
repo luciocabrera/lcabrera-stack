@@ -495,6 +495,9 @@ Leaf folders have no architecture file ([ADR-088](../../../../../docs/decisions/
 | TableBodyRows        | [TableBodyRows/ARCHITECTURE.md](TableBodyRows/ARCHITECTURE.md)               |
 | TableRow             | [TableRow/ARCHITECTURE.md](TableRow/ARCHITECTURE.md)                         |
 | TableEmptyState      | [TableEmptyState/ARCHITECTURE.md](TableEmptyState/ARCHITECTURE.md)           |
+| TableGroupAggregate  | [TableGroupAggregate/ARCHITECTURE.md](TableGroupAggregate/ARCHITECTURE.md)   |
+| TableGroupKeyCell    | [TableGroupKeyCell/ARCHITECTURE.md](TableGroupKeyCell/ARCHITECTURE.md)       |
+| TableGroupDisclosure | [TableGroupDisclosure/ARCHITECTURE.md](TableGroupDisclosure/ARCHITECTURE.md) |
 | Filters              | [filters/ARCHITECTURE.md](filters/ARCHITECTURE.md)                           |
 | Hooks                | [hooks/ARCHITECTURE.md](hooks/ARCHITECTURE.md)                               |
 | Utils                | [utils/ARCHITECTURE.md](utils/ARCHITECTURE.md)                               |

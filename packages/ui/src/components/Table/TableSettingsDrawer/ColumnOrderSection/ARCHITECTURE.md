@@ -38,7 +38,9 @@ ColumnOrderSection/
 ├── ColumnOrderSection.types.ts            → Section props + conflict resolution type re-exports
 │
 ├── ColumnOrderSectionContext/            → Nested context for modal state
-│   └── ColumnOrderSectionContext/
+│   ├── ColumnOrderSectionContext.context.ts
+│   ├── ColumnOrderSectionContext.types.ts
+│   └── useColumnOrderSectionContextValue.hook.ts
 │
 ├── ColumnOrderSectionHeader/             → Count title + compact toolbar (private delegate)
 │   ├── ColumnOrderSectionHeader.component.tsx
