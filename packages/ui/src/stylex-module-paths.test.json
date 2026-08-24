@@ -85,6 +85,7 @@
   "src/components/Table/TableGroupAggregate/TableGroupAggregate.stylex.ts",
   "src/components/Table/TableGroupAggregate/TableGroupShare/TableGroupShare.stylex.ts",
   "src/components/Table/TableGroupDisclosure/TableGroupDisclosure.stylex.ts",
+  "src/components/Table/TableGroupKeyCell/TableGroupDetailsAnchor/TableGroupDetailsAnchor.stylex.ts",
   "src/components/Table/TableGroupKeyCell/TableGroupKeyCell.stylex.ts",
   "src/components/Table/TableHeader/TableHeader.stylex.ts",
   "src/components/Table/TableHeaderBand/TableHeaderBand.stylex.ts",

@@ -1,3 +1,5 @@
+import type { LoaderFunctionArgs } from 'react-router';
+
 import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
 import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
 import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTableRouteLoader.util';
@@ -12,6 +14,7 @@ import type {
 
 import { selectOrdersPage } from '../.server/enterpriseOrders.service';
 import { resolveOrdersGroupRead } from '../.server/resolveOrdersGroupRead.util';
+import { toOrderGroupHeading } from '../.server/toOrderGroupHeading.util';
 import {
   COLUMNS,
   GROUP_DETAILS_PERSISTENCE_KEY,
@@ -43,7 +46,7 @@ import {
  * cursor built from the table's own sorting would not line up with it. One
  * group is bounded, so offset paging costs little and cannot skew.
  */
-export const loader = createTableRouteLoader<
+const tableLoader = createTableRouteLoader<
   EnterpriseOrderTableRow,
   EnterpriseOrdersResponse
 >({
@@ -71,4 +74,20 @@ export const loader = createTableRouteLoader<
   schemaName: SCHEMA_NAME,
   tableName: TABLE_NAME,
   title: TITLE,
+});
+
+/**
+ * The table loader plus the modal's own heading.
+ *
+ * Wrapped rather than folded in: `createTableRouteLoader` returns the table's
+ * three serializable slices and nothing route-specific, and the heading is this
+ * route's alone. `useTableRoutePage` reads only the slices it knows, so the
+ * extra field rides along untouched.
+ */
+export const loader = async (args: LoaderFunctionArgs) => ({
+  ...(await tableLoader(args)),
+  groupHeading: toOrderGroupHeading({
+    columns: COLUMNS,
+    params: new URL(args.request.url).searchParams,
+  }),
 });

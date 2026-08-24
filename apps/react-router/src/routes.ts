@@ -35,6 +35,7 @@ export default [
       'view/:orderId',
       'routes/enterprise-orders/order-detail-view/root.ts',
     ),
+    route('group', 'routes/enterprise-orders/group-details/root.ts'),
     route(':orderId', 'routes/enterprise-orders/order-detail/root.ts'),
   ]),
   route('wide-alltypes-150', 'routes/wide-alltypes-150/layout.ts', [

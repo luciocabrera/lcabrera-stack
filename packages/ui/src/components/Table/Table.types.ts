@@ -881,6 +881,17 @@ export type TableMetaState = {
    * A list of `(columnKey, fn)` pairs rather than a column-to-function map,
    * because a column may carry several aggregates at once (#831).
    */
+  /**
+   * Where this route serves one group's rows (#870). A path rather than a
+   * callback, because a function does not survive the loader boundary (ADR-009)
+   * — and a path is all the grid needs: it builds the link and the browser does
+   * the rest, so no fetch state, no per-group tracking and no spliced rows.
+   *
+   * Absent means the affordance is not offered at all, which is the honest
+   * default: a route with nowhere to send the reader would otherwise draw a
+   * link whose every use 404s.
+   */
+  readonly groupDetailsPath?: string;
   readonly groupingAggregates?: readonly TableColumnAggregate[];
   /**
    * What each of this route's columns may do in a grouped read, as the

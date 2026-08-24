@@ -23,3 +23,12 @@ floor. Anything that must survive a refresh belongs in a param of its own.
 It is suppressed in the single place every persistence entry passes through, so
 one declaration covers filters, sorting, grouping and the batched settings
 write rather than each builder having to remember.
+
+Also adds `groupDetailsPath` to that meta: where the route serves one group's
+rows. A path rather than a callback, because a function does not survive the
+loader boundary — and a path is all the grid needs, so the innermost key of a
+complete group renders as a link and the browser does the rest. No fetch state,
+no per-group tracking, no spliced rows.
+
+Absent, the affordance is not offered and nothing below reaches for routing
+context, so a grouped table still renders outside a `Router` exactly as before.

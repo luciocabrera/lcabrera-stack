@@ -6,6 +6,7 @@ import { accessibility } from '#ui/design-system/tokens/commons.stylex';
 import type { TableGroupKeyCellProps } from './TableGroupKeyCell.types';
 
 import { tableGroupKeyCellStyles } from './TableGroupKeyCell.stylex';
+import { TableGroupKeyLink } from './TableGroupKeyLink';
 import { resolveGroupKeyCellDisclosure } from './utils/resolveGroupKeyCellDisclosure.util';
 import { resolveGroupKeyCellText } from './utils/resolveGroupKeyCellText.util';
 
@@ -31,6 +32,12 @@ import { resolveGroupKeyCellText } from './utils/resolveGroupKeyCellText.util';
  * as empty, so an ancestor that is only implied would be announced nowhere. The
  * value goes in visually-hidden text, which is what keeps the row a complete
  * sentence to a screen reader while staying quiet on screen.
+ *
+ * **Only the row's own innermost level links to the group's rows.** Every
+ * filled key cell describes the same group, so linking each one would put two
+ * or three identical links on a row and leave no cell that means "this group"
+ * rather than "one of its ancestors". The innermost key is the level the row
+ * *is*, which is the one a reader clicks to see inside it.
  *
  * **A fold control leads the level it folds, in that level's own column**
  * (#802). A row states its ancestors and does not own them, so those are the
@@ -95,7 +102,15 @@ export const TableGroupKeyCell = ({
         )}
         title={text}
       >
-        {text}
+        {isInnermost ? (
+          <TableGroupKeyLink
+            groupingKeys={groupingKeys}
+            summary={summary}
+            text={text}
+          />
+        ) : (
+          text
+        )}
       </span>
     </span>
   );
