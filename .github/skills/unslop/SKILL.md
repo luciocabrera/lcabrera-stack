@@ -57,11 +57,10 @@ a pull request — is prose a person reads, and this skill applies to it.
 ## How to work
 
 1. **Voice.** Always read [`references/repo-voice.md`](references/repo-voice.md).
-   For chat, PR prose, issue prose, and review comments, if
-   `references/style-profile.md` exists, also read it; it wins on
-   conventions for those genres. Everything else (docs, essays, emails,
-   skills, ADRs, runbooks) stays on repo-voice. Epistemics cannot be
-   switched off by any profile.
+   That file is the voice for every genre. If a later calibrate has written
+   `references/style-profile.md`, also read it; it wins on conventions for
+   chat, PR prose, issue prose, and review comments. Epistemics cannot be
+   switched off.
 2. **Mode.** Rewriting: keep meaning, facts, genre. Writing: apply from draft
    one. Genre survives: a PR stays a PR, an email stays an email.
 3. **Volume** (pick if the user didn't; say which if it matters):
