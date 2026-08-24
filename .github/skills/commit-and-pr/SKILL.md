@@ -18,6 +18,10 @@ satisfy them.
 
 - Before writing any commit message.
 - Before opening or updating a pull request (title **and** description).
+- When writing the **prose** inside a PR or issue body: the
+  [`unslop`](../unslop/SKILL.md) skill. Headings and commit subjects stay
+  spelled as this skill and the templates require. Unslop the sentences
+  inside, not the headings.
 - When a commit or the `pr-standards` check fails and you need to fix it.
 - **After a review lands on your PR** — see **After review** below. A green gate
   is not a mergeable pull request.
@@ -66,7 +70,8 @@ printf 'feat(ui): my subject\n' | vp run commit:verify -- -
   The **`## What`** and **`## Verification`** (or `## Testing`) sections are
   **required**; the check fails without them. Keep `## Why` and `## Notes` when
   they add signal. The `🤖 Generated with Claude Code` footer is neither required
-  nor rejected.
+  nor rejected. Run [`unslop`](../unslop/SKILL.md) on the sentences inside those
+  sections. Do not rewrite the headings.
 
 Self-check before opening/updating a PR:
 

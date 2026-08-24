@@ -1,8 +1,8 @@
 ---
 id: unslop-pointer
 title: Point commit-and-pr at unslop
-owner: agent:claude
-status: active
+owner: agent:grok
+status: review
 branch: docs/910-unslop-pointer
 area:
   - .github/skills/commit-and-pr/**
@@ -19,6 +19,6 @@ Point commit-and-pr at unslop
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: pointer landed; PR next
 - Blockers: none
-- Next:
+- Next: open/ready PR
