@@ -118,14 +118,14 @@
       "count": 1,
       "status": "permanent",
       "reason": "A virtualization spacer row is decorative by construction: it renders one empty colSpan'd cell, declares no role and carries no tabIndex, so no focusable descendant exists and aria-hidden is correct. Biome flags aria-hidden on any table row because inside a role=grid a row IS focusable — which the Table now is (ADR-062) — and it cannot see that this particular row opts out of the grid's row sequence entirely.",
-      "ref": "ADR-035 §5, ADR-062, packages/ui/src/components/Table/SpacerRow/ARCHITECTURE.md"
+      "ref": "ADR-035 §5, ADR-062, packages/ui/src/components/Table/ARCHITECTURE.md"
     },
     {
       "key": "biome **/TableBase.component.tsx noNoninteractiveElementToInteractiveRole",
       "count": 1,
       "status": "permanent",
       "reason": "`<table role=\"grid\">` is the WAI-ARIA APG's own markup for an interactive data grid, and ARIA's taxonomy makes `grid` a subclass of `table` — so this is the spec's refinement of a table, not the \"non-interactive element handed an interactive role\" the rule guards against. To be precise about THIS element: `TableBase.stylex.ts` keeps `display: table`, so the `<table>` retains its implicit `table` role and the attribute upgrades it rather than being its only source (unlike the row, cell and body-group roles, which their own `display` overrides do destroy). Biome's rule takes no options — its schema is `additionalProperties: false` — so it cannot be told about the `table: ['grid']` allowance jsx-a11y ships by default on the same rule. A fix exists and is rejected on merit, not for lack of one: Biome's first suggestion is to render a `<div>`, which discards the native table fallback for anything that does not read ARIA, and its second is to drop the role, which re-exposes the grid as generic containers.",
-      "ref": "ADR-062, packages/ui/src/components/Table/TableBase/ARCHITECTURE.md"
+      "ref": "ADR-062, packages/ui/src/components/Table/ARCHITECTURE.md"
     },
     {
       "key": "biome **/TableBody.component.tsx noRedundantRoles",
@@ -139,7 +139,7 @@
       "count": 1,
       "status": "permanent",
       "reason": "The same rule, one level down, and here the attribute IS the only source: `<td role=\"gridcell\">` is the APG's cell markup, and `TableBodyCell.stylex.ts` sets every body cell to `display: flex`, which removes the implicit `cell` role in a real browser. jsx-a11y ships `td: ['gridcell']` as a default allowance on this rule; Biome's port carries no options at all, so the file is the only available scope.",
-      "ref": "ADR-062, packages/ui/src/components/Table/TableBodyCell/ARCHITECTURE.md"
+      "ref": "ADR-062, packages/ui/src/components/Table/ARCHITECTURE.md"
     },
     {
       "key": "biome **/TableHeaderCell.component.tsx noRedundantRoles",

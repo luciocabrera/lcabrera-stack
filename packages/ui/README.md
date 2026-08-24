@@ -72,8 +72,9 @@ export default {
 ```
 
 If that is more build surface than you want, take the package as a reference
-implementation rather than a dependency — the source is the documentation, and
-every component carries an `ARCHITECTURE.md`.
+implementation rather than a dependency — the source is the documentation.
+System wiring lives in that system's `ARCHITECTURE.md`; a leaf component's
+contract is its types and the inventory row.
 
 ## What's in it
 
@@ -237,9 +238,9 @@ extend anything:
   helpers live in `@lcabrera/api` and the Postgres code in `@lcabrera/server`,
   rather than all three sharing one package.
 
-Every component directory carries an `ARCHITECTURE.md` covering its props, render
-flow and constraints; `src/PATTERNS.md` covers the conventions across all of
-them, and `src/INVENTORY.md` catalogues every artifact.
+A system's `ARCHITECTURE.md` covers wiring that is not visible from one file
+(Table, Form, VirtualSelect); `src/PATTERNS.md` covers the conventions across
+all of them, and `src/INVENTORY.md` catalogues every artifact.
 
 ## Links
 
