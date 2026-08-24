@@ -13,10 +13,7 @@ import {
   TableFocusProvider,
 } from '#ui/components/Table/contexts';
 import { TableWrapperContext } from '#ui/components/Table/contexts/TableWrapper/TableWrapperContext.context';
-import {
-  TABLE_DRILL_ROW_FIELD,
-  TABLE_GROUP_ROW_FIELD,
-} from '#ui/components/Table/Table.constants';
+import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
 import { TableBase } from '#ui/components/Table/TableBase';
 import { TableBody } from '#ui/components/Table/TableBody';
 import { TableHeader } from '#ui/components/Table/TableHeader';
@@ -26,7 +23,7 @@ import { NotificationProvider } from '#ui/contexts/NotificationContext';
  * A grouped grid with **CRUD enabled**, which is the combination no rendering
  * test covered — every grouped test in this suite runs without an actions
  * column, so `resolveCrudRowId` had never been asked to resolve a row id for a
- * group row, a drill chrome row, or a drilled detail row.
+ * group row or for a detail row beneath one.
  *
  * That gap is what let a `TypeError` thrown during render reach a user: the
  * menu resolves a row id for any row the cell descriptor does not treat as
@@ -53,17 +50,6 @@ const groupRow: TestRow = {
     path: [
       { columnKey: 'customer_type', label: 'Business', value: 'Business' },
     ],
-  },
-};
-
-const drillChromeRow: TestRow = {
-  [TABLE_DRILL_ROW_FIELD]: {
-    kind: 'loading',
-    path: [
-      { columnKey: 'customer_type', label: 'Business', value: 'Business' },
-    ],
-    pathKey: 'customer_type=Business',
-    shortfall: 0,
   },
 };
 
@@ -152,24 +138,6 @@ describe('a grouped grid with row actions', () => {
   it('renders a group row without asking it for a row id', () => {
     expect(() => renderGrid([groupRow])).not.toThrow();
     expect(screen.getAllByTestId('table-group-header-row')).toHaveLength(1);
-  });
-
-  it('renders a drill chrome row without asking it for a row id', () => {
-    // The reported chevron crash. The marker was built per row and then
-    // dropped on the way to the cell descriptor, so the chrome row was read as
-    // an ordinary data row and the actions column asked it for a primary key
-    // it does not carry — emptying the grid on the first click.
-    renderGrid([groupRow, drillChromeRow]);
-
-    expect({
-      // The chrome must actually *render*, not merely fail to crash. Asserting
-      // only "no menu and three rows" cannot tell the marker arriving from the
-      // marker being dropped and the row blanked by the fail-closed branch —
-      // both produce an intact grid with an empty row.
-      loading: screen.queryAllByTestId('table-drill-loading').length,
-      menus: screen.queryAllByLabelText('Row actions').length,
-      rows: screen.queryAllByRole('row').length,
-    }).toStrictEqual({ loading: 1, menus: 0, rows: 3 });
   });
 
   it('survives a group row whose aggregate lost its value to JSON', () => {

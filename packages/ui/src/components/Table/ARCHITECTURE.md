@@ -210,11 +210,11 @@ one cell per rendered column, and therefore the same roving tab stop
 `Table.groupedGridSemantics.test.tsx` is where the two models meet.
 
 **Asking a row what it is has two different questions in it, and the render path
-needs both.** `getTableGroupRowSummary` and `getTableDrillRow` answer whether a
-marker is well-formed enough to render from; `hasTableStructuralMarker` answers
-whether the row carries one at all. The first two return `undefined` for a data
-row and for an unreadable marker alike, so on their own the grid cannot tell
-those apart — and it read the second as the first, handing a group row to the
+needs both.** `getTableGroupRowSummary` answers whether a marker is well-formed
+enough to render from; `hasTableStructuralMarker` answers whether the row
+carries one at all. The first returns `undefined` for a data row and for an
+unreadable marker alike, so on its own the grid cannot tell those apart — and it
+read the second as the first, handing a group row to the
 detail-row path where the actions column asked it for a primary key it was never
 going to have. A row that claims to be chrome is now blanked rather than
 reclassified, which is what lets the validators stay strict: one member that does

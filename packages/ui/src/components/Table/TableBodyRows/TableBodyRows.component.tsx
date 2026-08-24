@@ -9,10 +9,7 @@ import { useTableGroupTree } from '#ui/components/Table/hooks';
 import { createRenderTableBodyCell } from '#ui/components/Table/TableBody/utils/createRenderTableBodyCell.util';
 import { renderTableBodyPinnedGroup } from '#ui/components/Table/TableBody/utils/renderTableBodyPinnedGroup.util';
 import { TableRow } from '#ui/components/Table/TableRow';
-import {
-  getTableDrillRow,
-  getTableGroupRowSummary,
-} from '#ui/components/Table/utils';
+import { getTableGroupRowSummary } from '#ui/components/Table/utils';
 import { hasTableStructuralMarker } from '#ui/components/Table/utils/hasTableStructuralMarker.util';
 import { resolveCarriedGroupKeys } from '#ui/components/Table/utils/resolveCarriedGroupKeys.util';
 import { resolveDeclaredGroupingKeys } from '#ui/components/Table/utils/resolveDeclaredGroupingKeys.util';
@@ -99,7 +96,6 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
         const cellArgs = {
           carriedGroupKeys,
           disclosure: rowMeta?.[rowIndex],
-          drillRow: getTableDrillRow(row),
           groupSummary,
           // Asked of the row, not of the two values above: neither can tell a
           // malformed marker from an absent one, and that gap is what let a

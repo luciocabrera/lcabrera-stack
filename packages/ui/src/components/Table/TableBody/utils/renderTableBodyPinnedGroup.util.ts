@@ -1,21 +1,16 @@
-import type {
-  TableDrillRowMarker,
-  TableGroupRowSummary,
-} from '#ui/components/Table/Table.types';
+import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
 import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupDisclosure';
 
 type RenderTableBodyPinnedGroupArgs<TData, TColumn, TResult> = {
   readonly carriedGroupKeys: ReadonlySet<string>;
   readonly columns: readonly TColumn[];
   readonly disclosure?: TableGroupDisclosureState;
-  readonly drillRow?: TableDrillRowMarker;
   readonly groupSummary?: TableGroupRowSummary;
   readonly hasStructuralMarker: boolean;
   readonly renderCell: (args: {
     readonly carriedGroupKeys: ReadonlySet<string>;
     readonly col: TColumn;
     readonly disclosure?: TableGroupDisclosureState;
-    readonly drillRow?: TableDrillRowMarker;
     readonly groupSummary?: TableGroupRowSummary;
     readonly hasStructuralMarker: boolean;
     readonly row: TData;
@@ -46,7 +41,6 @@ export const renderTableBodyPinnedGroup = <TData, TColumn, TResult>({
   carriedGroupKeys,
   columns,
   disclosure,
-  drillRow,
   groupSummary,
   hasStructuralMarker,
   renderCell,
@@ -59,7 +53,6 @@ export const renderTableBodyPinnedGroup = <TData, TColumn, TResult>({
       carriedGroupKeys,
       col,
       disclosure,
-      drillRow,
       groupSummary,
       hasStructuralMarker,
       row,

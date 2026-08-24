@@ -45,13 +45,9 @@ export const TableGroupDisclosure = ({
 }: TableGroupDisclosureProps) => {
   const toggleGroupExpansion = useToggleTableGroupExpansion();
 
-  // Two ways to have something under you, and a rollup makes them disjoint:
-  // the subtotal owns loaded children and may not drill, the leaf may drill and
-  // owns nothing loaded. Either earns the chevron (ADR-079).
-  const isOpenable =
-    disclosure?.hasChildren === true || disclosure?.isDrillable === true;
-
-  if (!isOpenable) {
+  // A leaf group owns no loaded children, so it draws no chevron: its rows open
+  // in their own route rather than under it (#870).
+  if (disclosure?.hasChildren !== true) {
     return <span {...stylex.props(tableGroupDisclosureStyles.spacer)} />;
   }
 

@@ -33,11 +33,10 @@ export const TableRouteView = <
   dataErrorSelector = (response) => response.error,
   dataSelector = (response) => response.data,
   dataTotalSelector = (response) => response.total,
-  fetchDrill,
   fetchPage,
 }: TableRouteViewProps<TData, TResponse>) => {
-  const { columnsState, dataPromise, metaState, onDrillGroup, onLoadMore } =
-    useTableRoutePage<TData, TResponse>({ fetchDrill, fetchPage });
+  const { columnsState, dataPromise, metaState, onLoadMore } =
+    useTableRoutePage<TData, TResponse>({ fetchPage });
 
   return (
     <TableLayout<TData, TResponse>
@@ -48,7 +47,6 @@ export const TableRouteView = <
       dataSelector={dataSelector}
       dataTotalSelector={dataTotalSelector}
       metaState={metaState}
-      onDrillGroup={onDrillGroup}
       onLoadMore={onLoadMore}
     />
   );

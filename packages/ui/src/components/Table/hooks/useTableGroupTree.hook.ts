@@ -1,10 +1,5 @@
-import {
-  useGetTableCanDrillGroups,
-  useGetTableCollapsedGroupPaths,
-  useGetTableDrilledGroups,
-} from '#ui/components/Table/contexts/TableConfig/expansion/selectors';
+import { useGetTableCollapsedGroupPaths } from '#ui/components/Table/contexts/TableConfig/expansion/selectors';
 import { resolveTableGroupTree } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
-import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
 import { useGetTableData } from '#ui/components/Table/contexts/TableData/data/selectors';
 
 /**
@@ -24,18 +19,6 @@ export const useTableGroupTree = <
 >() => {
   const data = useGetTableData<TData>();
   const collapsedGroupPaths = useGetTableCollapsedGroupPaths();
-  const groupingKeys = useGetTableGroupingKeys();
-  // Both halves, never the flag alone: a route that declares the capability and
-  // supplies no fetcher would otherwise mark every leaf drillable and leave the
-  // affordance permanently inert.
-  const canDrill = useGetTableCanDrillGroups();
-  const drilledGroups = useGetTableDrilledGroups();
 
-  return resolveTableGroupTree({
-    canDrill,
-    collapsedGroupPaths,
-    data,
-    drilledGroups,
-    groupingKeys,
-  });
+  return resolveTableGroupTree({ collapsedGroupPaths, data });
 };

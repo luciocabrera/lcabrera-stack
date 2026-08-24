@@ -3,7 +3,6 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
-  TableDrillRowMarker,
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 import type { TableBodyCellProps } from '#ui/components/Table/TableBodyCell/TableBodyCell.types';
@@ -43,7 +42,6 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
    * failure, or the hand-off past one page (ADR-079). Asked of the **row**, like
    * the group summary beside it, so all three kinds of row arrive in one array.
    */
-  readonly drillRow?: TableDrillRowMarker;
   /**
    * The applied group keys. A detail row blanks the columns it is grouped by:
    * the value is stated once by the group row above it, and repeating it down a
@@ -133,7 +131,6 @@ export const buildTableBodyCellDescriptor = <
   col,
   columnSizing,
   disclosure,
-  drillRow,
   groupingKeys,
   groupSummary,
   hasStructuralMarker,
@@ -168,7 +165,6 @@ export const buildTableBodyCellDescriptor = <
     carriedGroupKeys,
     columnKey,
     disclosure,
-    drillRow,
     groupingKeys,
     groupSummary,
     hasStructuralMarker,

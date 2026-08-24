@@ -28,7 +28,6 @@ describe('TableGroupDisclosure', () => {
       <TableGroupDisclosure
         disclosure={{
           hasChildren: true,
-          isDrillable: false,
           isExpanded: true,
           levelDisclosures: [],
         }}
@@ -48,7 +47,6 @@ describe('TableGroupDisclosure', () => {
       <TableGroupDisclosure
         disclosure={{
           hasChildren: true,
-          isDrillable: false,
           isExpanded: true,
           levelDisclosures: [],
         }}
@@ -64,7 +62,6 @@ describe('TableGroupDisclosure', () => {
       <TableGroupDisclosure
         disclosure={{
           hasChildren: true,
-          isDrillable: false,
           isExpanded: false,
           levelDisclosures: [],
         }}
@@ -82,7 +79,6 @@ describe('TableGroupDisclosure', () => {
       <TableGroupDisclosure
         disclosure={{
           hasChildren: false,
-          isDrillable: false,
           isExpanded: false,
           levelDisclosures: [],
         }}
@@ -109,7 +105,6 @@ describe('TableGroupDisclosure', () => {
       <TableGroupDisclosure
         disclosure={{
           hasChildren: true,
-          isDrillable: false,
           isExpanded: false,
           levelDisclosures: [],
         }}

@@ -1,12 +1,9 @@
-import {
-  TABLE_DRILL_ROW_FIELD,
-  TABLE_GROUP_ROW_FIELD,
-} from '../Table.constants';
+import { TABLE_GROUP_ROW_FIELD } from '../Table.constants';
 
 /**
  * Whether a row **claims** to be grid chrome, asked without narrowing it.
  *
- * `getTableGroupRowSummary` and `getTableDrillRow` answer a different question:
+ * `getTableGroupRowSummary` answers a different question:
  * whether the row's marker is well-formed enough to render from. Both return
  * `undefined` when it is not, and that answer is indistinguishable from "this
  * is an ordinary data row" — so a group row with one malformed member was
@@ -22,5 +19,4 @@ import {
  * that strictness turning into a reclassification.
  */
 export const hasTableStructuralMarker = (row: Record<string, unknown>) =>
-  Object.hasOwn(row, TABLE_GROUP_ROW_FIELD) ||
-  Object.hasOwn(row, TABLE_DRILL_ROW_FIELD);
+  Object.hasOwn(row, TABLE_GROUP_ROW_FIELD);

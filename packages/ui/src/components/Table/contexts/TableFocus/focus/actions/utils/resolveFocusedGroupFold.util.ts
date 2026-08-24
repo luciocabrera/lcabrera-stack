@@ -49,14 +49,12 @@ export const resolveFocusedGroupFold = ({
   if (level !== undefined)
     return {
       hasChildren: true,
-      isDrillable: false,
       isExpanded: level.isExpanded,
       path: level.path,
     };
 
   const fromRow = {
     hasChildren: meta?.hasChildren ?? false,
-    isDrillable: meta?.isDrillable ?? false,
     isExpanded: meta?.isExpanded ?? false,
     path: groupPath,
   };
@@ -69,7 +67,7 @@ export const resolveFocusedGroupFold = ({
 
   const isInnermost = groupPath?.at(-1)?.columnKey === columnKey;
 
-  return isInnermost && fromRow.isDrillable
-    ? fromRow
-    : { ...fromRow, hasChildren: false, isDrillable: false };
+  // A key cell folds the level it names and nothing else, so the innermost one
+  // — the level the row *is* — has nothing under it to fold (#870).
+  return isInnermost ? { ...fromRow, hasChildren: false } : fromRow;
 };

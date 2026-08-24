@@ -7,7 +7,6 @@ export { getIsTableSettingsOpen } from './getIsTableSettingsOpen.util';
 export { getNormalizedColumns } from './getNormalizedColumns.util';
 export { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 export { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.util';
-export { getTableDrillRow } from './getTableDrillRow.util';
 export { getTableGroupRowSummary } from './getTableGroupRowSummary.util';
 export { isTableAggregateFn } from './isTableAggregateFn.util';
 export { orderLegalAggregates } from './orderLegalAggregates.util';
@@ -19,4 +18,3 @@ export { resolvePrimaryKeyColumnKeys } from './resolvePrimaryKeyColumnKeys.util'
 export { resolveTableActionsColumn } from './resolveTableActionsColumn.util';
 export { serializeStateSlice } from './serializeStateSlice.util';
 export { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';
-export { toGroupKeyColumnFilter } from './toGroupKeyColumnFilter.util';

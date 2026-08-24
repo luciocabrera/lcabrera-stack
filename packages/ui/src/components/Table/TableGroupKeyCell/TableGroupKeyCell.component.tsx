@@ -79,12 +79,7 @@ export const TableGroupKeyCell = ({
       </span>
     );
 
-  const control = resolveGroupKeyCellDisclosure({
-    columnKey,
-    disclosure,
-    isInnermost,
-    path: summary.path,
-  });
+  const control = resolveGroupKeyCellDisclosure({ columnKey, disclosure });
 
   return (
     <span

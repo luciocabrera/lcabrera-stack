@@ -40,7 +40,6 @@ describe('renderTableBodyPinnedGroup', () => {
       carriedGroupKeys: new Set<string>(),
       col: 'name',
       disclosure: undefined,
-      drillRow: undefined,
       groupSummary: undefined,
       hasStructuralMarker: false,
       row,
@@ -51,7 +50,6 @@ describe('renderTableBodyPinnedGroup', () => {
       carriedGroupKeys: new Set<string>(),
       col: 'amount',
       disclosure: undefined,
-      drillRow: undefined,
       groupSummary: undefined,
       hasStructuralMarker: false,
       row,
@@ -96,7 +94,6 @@ describe('renderTableBodyPinnedGroup', () => {
       carriedGroupKeys: new Set<string>(),
       col: columns[0],
       disclosure: undefined,
-      drillRow: undefined,
       groupSummary: undefined,
       hasStructuralMarker: false,
       row,
@@ -107,7 +104,6 @@ describe('renderTableBodyPinnedGroup', () => {
       carriedGroupKeys: new Set<string>(),
       col: columns[1],
       disclosure: undefined,
-      drillRow: undefined,
       groupSummary: undefined,
       hasStructuralMarker: false,
       row,
@@ -121,18 +117,11 @@ describe('renderTableBodyPinnedGroup', () => {
     // destructuring the call object has no such key, and every other case here
     // passes whether or not it does — an `undefined` expectation cannot tell
     // "not forwarded" from "forwarded as undefined".
-    const drillRow = {
-      kind: 'loading',
-      path: [{ columnKey: 'name', label: 'Ana', value: 'Ana' }],
-      pathKey: 'name:Ana',
-      shortfall: 0,
-    } as const;
     const renderCell = vi.fn(({ col }: { readonly col: string }) => col);
 
     renderTableBodyPinnedGroup({
       carriedGroupKeys: new Set<string>(),
       columns: ['name'],
-      drillRow,
       hasStructuralMarker: true,
       renderCell,
       row: {},
@@ -141,7 +130,7 @@ describe('renderTableBodyPinnedGroup', () => {
     });
 
     expect(renderCell).toHaveBeenCalledWith(
-      expect.objectContaining({ drillRow, hasStructuralMarker: true }),
+      expect.objectContaining({ hasStructuralMarker: true }),
     );
   });
 });

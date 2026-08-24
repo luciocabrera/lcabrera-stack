@@ -2,16 +2,12 @@ import type {
   TableColumnsState,
   TableDataState,
   TableFocusState,
-  TableGroupDrillFetcher,
   TableGroupExpansionState,
   TableGroupingState,
   TableMetaState,
 } from '#ui/components/Table/Table.types';
 
-import {
-  canDrillGroups,
-  resolveTableGroupTree,
-} from '#ui/components/Table/contexts/TableConfig/expansion/utils';
+import { resolveTableGroupTree } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
 
 import { getGridColumnKeys } from './getGridColumnKeys.util';
 import { resolveFocusedRowIndex } from './resolveFocusedRowIndex.util';
@@ -23,12 +19,6 @@ type ResolveGridFocusContextArgs<TData extends Record<string, unknown>> = {
   readonly focusState: TableFocusState;
   readonly groupingState: TableGroupingState;
   readonly metaState: TableMetaState;
-  /**
-   * The route's drill fetcher. Read here for the same reason the meta flag is:
-   * both must be present for a row to be drillable, and this derivation has to
-   * agree with the one the body paints from.
-   */
-  readonly onDrillGroup: TableGroupDrillFetcher | undefined;
 };
 
 /**
@@ -60,20 +50,12 @@ export const resolveGridFocusContext = <TData extends Record<string, unknown>>({
   dataState,
   expansionState,
   focusState,
-  groupingState,
   metaState,
-  onDrillGroup,
 }: ResolveGridFocusContextArgs<TData>) => {
   const { columns, pinnedColumnPartition } = columnsState;
   const { rowMeta, rows } = resolveTableGroupTree({
-    canDrill: canDrillGroups({
-      isGroupDrillEnabled: metaState.isGroupDrillEnabled,
-      onDrillGroup,
-    }),
     collapsedGroupPaths: expansionState.collapsedGroupPaths,
     data: dataState.data,
-    drilledGroups: expansionState.drilledGroups,
-    groupingKeys: groupingState.keys,
   });
 
   return {

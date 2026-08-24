@@ -67,7 +67,6 @@ const renderCell = ({
       columnKey={columnKey}
       disclosure={{
         hasChildren: true,
-        isDrillable: false,
         isExpanded: true,
         levelDisclosures,
       }}

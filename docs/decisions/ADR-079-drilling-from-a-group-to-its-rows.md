@@ -1,6 +1,17 @@
 # ADR-079 — A group drills to one bounded page of its rows, and hands off for the rest
 
-- **Status:** Accepted
+- **Status:** Superseded by [ADR-087](./ADR-087-a-group-opens-its-rows-in-a-route.md)
+
+> **Superseded 2026-08-24 (#870).** The body below is left exactly as written — a
+> dated record of what was true at the time. A group's rows now open in a modal
+> **route** rather than being spliced underneath the group row: the inline drill,
+> its bounded page, its hand-off row, its per-group fetch state and the
+> `/_api/enterprise-orders/drill` endpoint are all gone, and `onDrillGroup` /
+> `isGroupDrillEnabled` have left `@lcabrera/ui`'s public surface. What survives
+> untouched is `toDrillRead` and the four correctness rules it owns — ADR-087
+> changes who calls it, not what it does. See ADR-087 for why the parallel row
+> lifecycle this decision introduced was the cost that outweighed the benefit.
+
 - **Date:** 2026-08-18
 - **Amended:** 2026-08-19 (#777) — the primary decision is unchanged; the per-group fetch state gains a **fourth** member, `failed`, because the three named below cannot express a drill that was asked for and did not arrive. See [Amendments](#amendments).
 - **Scope:** `@lcabrera/ui` — `src/components/Table/` group rows and expansion; `@lcabrera/server` — the paginated read a drill reuses

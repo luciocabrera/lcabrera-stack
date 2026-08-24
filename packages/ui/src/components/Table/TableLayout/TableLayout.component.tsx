@@ -23,7 +23,6 @@ export const TableLayout = <
   dataSelector,
   dataTotalSelector,
   metaState,
-  onDrillGroup,
   onLoadMore,
 }: TableLayoutProps<TData, TResponse>) => {
   return (
@@ -31,7 +30,6 @@ export const TableLayout = <
       <TableConfigProvider<TData>
         columnsState={columnsState}
         metaState={metaState}
-        onDrillGroup={onDrillGroup}
       >
         <TableFocusProvider>
           <FiltersDataProvider<TData> columns={columnsState.columns}>

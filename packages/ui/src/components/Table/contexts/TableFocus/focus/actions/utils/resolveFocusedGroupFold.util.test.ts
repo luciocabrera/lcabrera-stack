@@ -18,7 +18,6 @@ const metaOf = (
   overrides: Partial<TableGroupTreeRowMeta> = {},
 ): TableGroupTreeRowMeta => ({
   hasChildren: false,
-  isDrillable: false,
   isExpanded: false,
   level: 2,
   levelDisclosures: [],
@@ -65,21 +64,6 @@ describe('resolveFocusedGroupFold', () => {
     });
 
     expect(fold.hasChildren).toBe(false);
-    expect(fold.isDrillable).toBe(false);
-  });
-
-  it('still answers the drill from a drillable leaf’s innermost key cell', () => {
-    // A drillable leaf owns no loaded children, so it has no level entry by
-    // construction — the fallback is the drill, and it must survive the rule
-    // above (ADR-079).
-    const fold = resolveFocusedGroupFold({
-      columnKey: 'district',
-      groupPath: MARAIS,
-      meta: metaOf({ isDrillable: true }),
-    });
-
-    expect(fold.isDrillable).toBe(true);
-    expect(fold.path).toStrictEqual(MARAIS);
   });
 
   it('keeps the row-scoped keys on a column that holds no level at all', () => {
@@ -89,7 +73,6 @@ describe('resolveFocusedGroupFold', () => {
       columnKey: 'unrelated',
       groupPath: MARAIS,
       meta: metaOf({
-        isDrillable: true,
         levelDisclosures: [
           { columnKey: 'city', isExpanded: true, path: PARIS },
         ],
@@ -97,7 +80,6 @@ describe('resolveFocusedGroupFold', () => {
     });
 
     expect(fold.path).toStrictEqual(MARAIS);
-    expect(fold.isDrillable).toBe(true);
   });
 
   it('falls back to the row when nothing has focus in a column', () => {
@@ -120,7 +102,6 @@ describe('resolveFocusedGroupFold', () => {
       }),
     ).toStrictEqual({
       hasChildren: false,
-      isDrillable: false,
       isExpanded: false,
       path: undefined,
     });

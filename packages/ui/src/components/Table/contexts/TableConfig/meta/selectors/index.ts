@@ -13,7 +13,6 @@ export { useGetTableInitialPageSize } from './useGetTableInitialPageSize.hook';
 export { useGetTableIsBordered } from './useGetTableIsBordered.hook';
 export { useGetTableIsColumnSettingsOpen } from './useGetTableIsColumnSettingsOpen.hook';
 export { useGetTableIsColumnSettingsPinned } from './useGetTableIsColumnSettingsPinned.hook';
-export { useGetTableIsGroupDrillEnabled } from './useGetTableIsGroupDrillEnabled.hook';
 export { useGetTableIsGroupingEnabled } from './useGetTableIsGroupingEnabled.hook';
 export { useGetTableIsGroupingLocked } from './useGetTableIsGroupingLocked.hook';
 export { useGetTableIsRounded } from './useGetTableIsRounded.hook';

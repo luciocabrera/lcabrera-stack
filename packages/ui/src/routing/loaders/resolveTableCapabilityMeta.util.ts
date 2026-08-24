@@ -12,7 +12,6 @@ type ResolveTableCapabilityMetaArgs = {
  * this util exists to prevent.
  */
 type TableCapabilityKey =
-  | 'isGroupDrillEnabled'
   | 'isGroupingEnabled'
   | 'isGroupingLocked'
   | 'isKeysetEnabled'
@@ -36,16 +35,12 @@ type TableCapabilityKey =
  *
  * `isGroupingLocked` is here for the same reason rather than a different one
  * (#578): it decides whether the client may reshape the grouping, so a cookie
- * able to seed it is a cookie able to unlock a curated table. `isGroupDrillEnabled`
- * joined the list at the same time — its own doc already said a route that does
- * not declare it must not offer the affordance, which is a guarantee the
- * `...meta` spread alone could not make.
+ * able to seed it is a cookie able to unlock a curated table.
  */
 export const resolveTableCapabilityMeta = ({
   meta,
 }: ResolveTableCapabilityMetaArgs) =>
   ({
-    isGroupDrillEnabled: meta?.isGroupDrillEnabled === true,
     isGroupingEnabled: meta?.isGroupingEnabled === true,
     isGroupingLocked: meta?.isGroupingLocked === true,
     isKeysetEnabled: meta?.isKeysetEnabled === true,

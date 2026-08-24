@@ -79,7 +79,6 @@
   "src/components/Table/TableBodyCell/TableBodyCell.stylex.ts",
   "src/components/Table/TableBodyRows/TableBodyRows.stylex.ts",
   "src/components/Table/TableContent/TableContent.stylex.ts",
-  "src/components/Table/TableDrillRowCell/TableDrillRowCell.stylex.ts",
   "src/components/Table/TableEmptyState/TableEmptyState.stylex.ts",
   "src/components/Table/TableEmptyState/TableEmptyStateMessage/TableEmptyStateMessage.stylex.ts",
   "src/components/Table/TableGroupAggregate/TableGroupAggregate.stylex.ts",
