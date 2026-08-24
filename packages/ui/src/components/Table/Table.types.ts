@@ -344,7 +344,11 @@ export type TableGroupKeyRefusalReason =
 
 export type TableGroupKeyValue = {
   readonly columnKey: string;
-  /** Formatted service-side — a path entry cannot resolve back to a column descriptor. */
+  /**
+   * Formatted service-side — a path entry cannot resolve back to a column descriptor.
+   * This is also the string `resolveGroupPathKey` encodes into the key expansion is stored
+   * under, so changing what it holds invalidates every stored collapse.
+   */
   readonly label: string;
   /**
    * Cannot be recovered from `label` (NULL renders as `(empty)`). `null` is a

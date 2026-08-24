@@ -30,6 +30,9 @@ export type UseInfiniteScrollObserverArgs = {
  * The effect re-runs whenever `isEnabled` changes, which re-observes the sentinel and
  * re-fires `onReachEnd` if it is still in view after a page loads — this keeps loading
  * until the content fills the container (or `isEnabled` becomes `false`).
+ * `onReachEnd` is read through a ref so the observer's lifetime is decoupled from the
+ * callback's identity. Callers may pass inline callbacks without causing the observer to
+ * disconnect/reconnect (and potentially re-fire) on every render.
  * `onReachEnd` may fire repeatedly while the sentinel stays in view, so the handler must
  * be idempotent (guard against overlapping loads via `isEnabled`).
  */
