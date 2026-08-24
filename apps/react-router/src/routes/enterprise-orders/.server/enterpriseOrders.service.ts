@@ -209,15 +209,8 @@ export type SelectOrdersPageArgs = {
    * session runs, so counting per page is work with a known answer (#402).
    */
   readonly includeTotal: boolean;
-  /**
-   * Clamped into `[1, MAX_ENTERPRISE_ORDERS_LIMIT]` here rather than trusted, because this
-   * is the one function both entry points reach — see the ceiling note below.
-   */
   readonly limit: number;
   readonly offset: number;
-  /**
-   * Truncated to `MAX_ENTERPRISE_ORDERS_SORT_RULES` here for the same reason as `limit`.
-   */
   readonly sort: readonly QuerySort[];
   readonly totalsPlacement?: TableTotalsPlacement;
 };

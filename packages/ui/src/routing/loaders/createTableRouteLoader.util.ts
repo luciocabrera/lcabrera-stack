@@ -44,10 +44,6 @@ type CreateTableRouteLoaderArgs<
    * it does not produce.
    */
   readonly defaultGrouping?: TableGroupingState;
-  /**
-   * Return the promise **unawaited** — the factory hands it straight back as `dataPromise`
-   * for Suspense streaming, so the route renders its skeleton immediately.
-   */
   readonly fetchPage: (
     args: TableRouteFetchPageArgs<TData>,
   ) => Promise<TResponse>;
