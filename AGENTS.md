@@ -158,6 +158,9 @@ Selection guideline:
   reuse brief.
 - **Finishing any code change?** Run `quality-gate-workflow`.
 - **Committing or opening a PR?** Use `commit-and-pr`.
+- **Writing English a person will read** (chat, PR/issue prose, docs,
+  review comments)? Use `unslop`. Template headings and commit subjects
+  stay under `commit-and-pr`.
 - **Routing/data mutations?** Use `react-router-framework-mode`.
 - **React component implementation?** Use `react-19`.
 - **Understanding unfamiliar code before changing it?** Use `codebase-explorer`.
