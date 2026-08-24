@@ -94,9 +94,13 @@ Auto-invocation is driven by the `description` field (Claude matches it against 
 | `app-graph`                   | Deterministic folder/file inventory scanner                | description                                        |
 
 A skill with `paths:` frontmatter is **not** in an agent's skill listing until it
-opens a matching file. That is the intended economy. `store-pattern` also
-matches the store/selector hooks under `packages/ui/src/hooks/`, so Rule 5
-does not depend on already having a `contexts/` file open.
+opens a matching file. That is the intended economy, but it has one sharp edge:
+Non-Negotiable Rule 5 tells you to invoke `store-pattern` _before_ touching a
+store, selector, or action, and the skill does not appear until you already
+have a matching file open. Invoke it by name. The extra globs
+(`**/hooks/useStore.hook.ts`, `**/hooks/useStoreSelector.hook.ts`) cover
+editing the generic store primitives; store domains still live under
+`contexts/`.
 
 **Skill anatomy:**
 
