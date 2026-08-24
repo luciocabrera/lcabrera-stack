@@ -65,7 +65,16 @@ export const resolveGroupDetailsHref = ({
     return;
   }
 
-  const params = new URLSearchParams(search);
+  // Built without the nested params rather than copying and deleting: one
+  // already in `search` was written inside a *different* group's route and
+  // describes that group's set. Carried through, it would open this group
+  // narrower than the count on the row it was clicked from — the mismatch the
+  // seeding below prevents, in the other direction.
+  const params = new URLSearchParams(
+    [...new URLSearchParams(search)].filter(
+      ([key]) => !key.startsWith(TABLE_NESTED_URL_STATE_PREFIX),
+    ),
+  );
 
   for (const key of ['filters', 'sorting']) {
     const value = params.get(key);

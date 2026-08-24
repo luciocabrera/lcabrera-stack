@@ -74,7 +74,7 @@ const tableLoader = createTableRouteLoader<
  */
 export const loader = async (args: LoaderFunctionArgs) => ({
   ...(await tableLoader(args)),
-  groupHeading: toOrderGroupHeading({
+  groupHeading: await toOrderGroupHeading({
     columns: COLUMNS,
     params: new URL(args.request.url).searchParams,
   }),

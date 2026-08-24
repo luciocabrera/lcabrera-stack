@@ -131,6 +131,30 @@ describe('resolveGroupDetailsHref', () => {
     expect(params.get('page')).toBe('2');
   });
 
+  it('clears a nested param left behind by another group', () => {
+    // Closing the modal drops `group`, and a nested param written *inside* one
+    // group's route can outlive it on the list's URL. Copied through, the next
+    // group opens under a filter set for a different group — narrower than the
+    // count on the row it was clicked from.
+    const href = resolve({
+      search: '?nested.filters=%7B%22status%22%3A%22from-group-a%22%7D&page=2',
+    });
+    const params = new URL(href ?? '', 'http://table.test').searchParams;
+
+    expect(params.has('nested.filters')).toBe(false);
+    expect(params.get('page')).toBe('2');
+  });
+
+  it('replaces a stale nested param with the list’s own state', () => {
+    const href = resolve({
+      search:
+        '?filters=%7B%22status%22%3A%22list%22%7D&nested.filters=%7B%22status%22%3A%22from-group-a%22%7D',
+    });
+    const params = new URL(href ?? '', 'http://table.test').searchParams;
+
+    expect(params.get('nested.filters')).toBe('{"status":"list"}');
+  });
+
   it('adds no nested params when the list carries none', () => {
     const href = resolve({ search: '?page=2' });
     const params = new URL(href ?? '', 'http://table.test').searchParams;

@@ -106,6 +106,9 @@ resolveGroupRead [const] ({ cursor, filters, limit, maxLimit, params, primaryKey
 ## ./db/olap/to-drill-read.util
 toDrillRead [const] ({ filters, group, groupKeys, limit, maxLimit, primaryKey, sort, truncations }: ToDrillReadArgs) => OlapDrillTranslation
 
+## ./db/olap/to-group-heading.util
+toGroupHeading [const] ({ columns, params, truncations }: ToGroupHeadingArgs) => string | undefined
+
 ## ./db/olap/to-group-key-truncations.util
 toGroupKeyTruncations [const] ({ capabilities, periods }: ToGroupKeyTruncationsArgs) => Readonly<Record<string, GroupKeyTruncation>>
 

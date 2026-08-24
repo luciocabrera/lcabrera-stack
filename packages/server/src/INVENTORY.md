@@ -197,6 +197,13 @@ supplies its page ceiling, its tiebreaker column and the catalogue lookup, and
 nothing else
 ([ADR-087](../../../docs/decisions/ADR-087-a-group-opens-its-rows-in-a-route.md)).
 
+`toGroupHeading` (`to-group-heading.util.ts`) is the heading the route serving
+those rows shows: one `Label: value` per key, read back out of the token, which
+carries raw values because `encodeDrillGroup` drops the group row's formatted
+label on purpose. A truncated key is formatted through `toGroupPeriodLabel` and
+not `toGroupLabel`, so the heading reads `2021-06` like the row that was clicked
+rather than the instant underneath it.
+
 All of this lived in `apps/react-router` until
 [ADR-082](../../../docs/decisions/ADR-082-the-olap-seam-lives-in-the-packages.md);
 none of it ever referenced an order. The drill request's wire codec is the one

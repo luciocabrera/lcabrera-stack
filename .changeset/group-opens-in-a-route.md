@@ -23,6 +23,11 @@ one refused, the translation applied, the page positioned. A route supplies only
 its page ceiling, its tiebreaker column, and the catalogue lookup for a truncated
 key. It returns a read or a refusal carrying the sentence to render.
 
+**`@lcabrera/server` also gains `toGroupHeading`** — the heading that route
+shows, read back out of the token. A truncated key is formatted as its period, so
+the heading reads `2021-06` like the group row that was clicked rather than the
+instant underneath it.
+
 **Added in their place:** `groupDetailsPath` on the loader `meta` — where the
 route serves one group's rows. A path rather than a callback, because a function
 does not survive the loader boundary and a path does, so the whole pair collapses
