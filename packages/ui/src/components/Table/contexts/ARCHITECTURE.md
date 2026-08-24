@@ -151,10 +151,9 @@ graph TD
 
 ## Detailed Architecture
 
-| Context      | Details                                         |
-| ------------ | ----------------------------------------------- |
-| FiltersData  | [ARCHITECTURE.md](FiltersData/ARCHITECTURE.md)  |
-| TableConfig  | [ARCHITECTURE.md](TableConfig/ARCHITECTURE.md)  |
-| TableData    | [ARCHITECTURE.md](TableData/ARCHITECTURE.md)    |
-| TableFocus   | [ARCHITECTURE.md](TableFocus/ARCHITECTURE.md)   |
-| TableWrapper | [ARCHITECTURE.md](TableWrapper/ARCHITECTURE.md) |
+| Context     | Details                                        |
+| ----------- | ---------------------------------------------- |
+| FiltersData | [ARCHITECTURE.md](FiltersData/ARCHITECTURE.md) |
+| TableConfig | [ARCHITECTURE.md](TableConfig/ARCHITECTURE.md) |
+| TableData   | [ARCHITECTURE.md](TableData/ARCHITECTURE.md)   |
+| TableFocus  | [ARCHITECTURE.md](TableFocus/ARCHITECTURE.md)  |
