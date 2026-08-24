@@ -27,20 +27,32 @@ caller unchecked.
 available. Argument injection still is: the child parses its own argv, and a
 value that begins with `-` stops being data and becomes a flag.
 
-Two flows reached a spawner from `process.argv` with no validation between:
+Whether that is reachable depends on **how the value is placed in the vector**,
+and the two flows SonarCloud flagged as `jssecurity:S8705` differ on exactly
+that point. Both took a value from `process.argv` with no validation between;
+only one of them was injectable.
 
-- `vp run pr:threads -- --resolve <thread-id>` — `flagValue('--resolve')` went
-  straight into `runGh(['api', 'graphql', …, '-f', 'thread=' + threadId])`. Its
-  siblings `--pr` and `--repo` were already validated by `parsePullNumber` and
-  `parseRepository`; `--resolve` was never given the same treatment.
-- `vp run pr:queue -- --model <model>` — `flagValue('--model') ?? 'sonnet'` went
-  into the `claude` child's argv through `decideArgs` and `executeArgs`. This is
-  the more serious of the two: the vector already carries `--allowedTools` and,
-  on the apply pass, `--permission-mode acceptEdits`. A `--model` value read as
-  a flag would be widening the sandbox those entries exist to draw.
+- `vp run pr:queue -- --model <model>` — **injectable.**
+  `flagValue('--model') ?? 'sonnet'` reached the `claude` child's argv through
+  `decideArgs` and `executeArgs` as **its own element**, so a leading `-` puts
+  it in flag position and shifts the element after it into the model slot. The
+  vector already carries `--allowedTools` and, on the apply pass,
+  `--permission-mode acceptEdits`, so this is a value that can widen the very
+  sandbox those entries exist to draw.
+- `vp run pr:threads -- --resolve <thread-id>` — **not injectable.** The id is
+  concatenated, not passed separately: `runGh(['api', 'graphql', …, '-f',
+'thread=' + threadId])` produces an element that begins with `thread=`
+  whatever the id is. `--resolve --paginate` sends `thread=--paginate`, which
+  `gh` reads as the value of `-f` and binds as a GraphQL variable string. There
+  is no vector in which it reaches flag position.
 
-SonarCloud reported both as `jssecurity:S8705`, and the finding held on
-inspection rather than dissolving into a false positive.
+The probe that separates them is "does the child's argv ever contain an element
+that begins with `-` and came from the operator?" — and it answers no for
+`--resolve`. What was true of that flow is weaker and still worth fixing: it was
+the one `pr-threads.mjs` argument with no shape check at all, while its siblings
+`--pr` and `--repo` went through `parsePullNumber` and `parseRepository`, so a
+mistyped id reached the GraphQL API and failed as an error about a variable the
+operator never typed.
 
 ## Decision
 
@@ -56,7 +68,9 @@ vector, so no caller of either can skip it.
 **At the flag**, so the operator gets a message naming their typo rather than a
 downstream error about something else. `pr-threads.mjs` runs `--resolve` through
 `parseThreadId`; `pr-queue-operator.mjs` runs `--model` through
-`parseModelName` when it reads its options.
+`parseModelName` when it reads its options. For `--resolve` this is the whole
+justification, not a secondary one — the `-f key=value` framing already denies
+that value flag position.
 
 The second placement is not redundant with the first. `runDecision` reports a
 failed spawn as an `ESCALATE` verdict rather than an error, so a typo caught
@@ -97,8 +111,10 @@ than sitting beside one.
 
 **Mark the two findings accepted in SonarCloud.** Rejected on the repository's
 own rule (AGENTS.md §5, Rule 11): a finding is verified and then fixed, never
-suppressed. Tracing both flows to `process.argv` showed there was something real
-to fix, so accepting them would have been recording a known hole as reviewed.
+suppressed. The `--model` flow was a real injection path, so accepting that one
+would have been recording a known hole as reviewed. The `--resolve` flow was
+not, and accepting it would have been defensible — it was fixed anyway because
+the shape check is cheap and pays for itself in the error message.
 
 **Validate only at the flag.** Rejected because it holds for the flow Sonar
 happened to trace and nothing else. `runGh` has about ten callers; a guarantee

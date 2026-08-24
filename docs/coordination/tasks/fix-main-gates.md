@@ -8,7 +8,9 @@ area:
   - reports/api-surface/**
   - scripts/lib/gh-exec.mjs
   - scripts/lib/pr-queue-*.mjs
+  - scripts/pr-queue-operator.mjs
   - scripts/pr-threads.mjs
+  - docs/decisions/ADR-089-*
   - packages/repo-standards/scripts/cli-input*
 started: 2026-08-24
 updated: 2026-08-24
