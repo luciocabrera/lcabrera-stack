@@ -6,10 +6,9 @@ import { PERSIST_COOKIE_ACTION } from '#ui/constants/globalSettings.constants';
 
 type UsePersistCookieActionArgs = {
   /**
-   * A stable key makes a newer submit supersede an in-flight one, giving last-write-wins for
-   * rapid repeats (e.g.
-   * toggling a drawer twice) — the ordering guarantee the old synchronous `document.cookie`
-   * write had for free.
+   * A stable key makes a newer submit supersede an in-flight one, giving last-write-wins
+   * for rapid repeats (e.g. toggling a drawer twice) — the ordering guarantee the old
+   * synchronous `document.cookie` write had for free.
    */
   readonly fetcherKey: string;
 };

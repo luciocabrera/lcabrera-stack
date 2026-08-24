@@ -8,13 +8,6 @@ type ReadPersistedStateFromCookieArgs = {
   readonly persistenceKey: string;
 };
 
-/**
- * @example ```tsx // In browser const state = readPersistedStateFromCookie({
- * persistenceKey: 'my-table' }); // In SSR (React Router loader) export async function
- * loader({ request }) { const cookieHeader = request.headers.get('Cookie'); const state =
- * readPersistedStateFromCookie({ persistenceKey: 'my-table', cookieString: cookieHeader
- * }); return { initialTableState: state }; } ```
- */
 export const readPersistedStateFromCookie = ({
   appId,
   cookieString,

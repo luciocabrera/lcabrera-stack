@@ -11,6 +11,9 @@ type BuildLoginRedirectUrlArgs = {
  * `encodeURIComponent`-escaped so nested query strings survive the round-trip.
  * A guarded **client-side** navigation reaches the middleware as React Router's
  * single-fetch request — the pathname carries a `.data` suffix (e.g.
+ * `/enterprise-orders.data`). That suffix must be stripped, or `redirectTo` captures a
+ * URL that matches no route and login bounces the user to the single-fetch endpoint (a
+ * silent root-boundary error) instead of the page.
  */
 export const buildLoginRedirectUrl = ({
   request,

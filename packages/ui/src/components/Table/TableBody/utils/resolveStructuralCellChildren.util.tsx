@@ -20,11 +20,15 @@ type ResolveStructuralCellChildrenArgs = {
 };
 
 /**
- * Three cases, in an order that is load-bearing: 1.
- * **A group row's own cells**, asked of the row and never of the grouping configuration,
- * so a group row and a detail row can arrive in one result.
- * It is a malformed group row, never a data row, and saying so here is what keeps a bad
- * marker inside the branch that knows what to do with it.
+ * Three cases, in an order that is load-bearing:
+ * 1. A group row's own cells, asked of the row so a group row and a detail row can arrive
+ *    in one result.
+ * 2. A row that claims to be structural but did not narrow — blanked whole. Falling
+ *    through handed it to the detail-row path, where the actions column asked it for a
+ *    primary key and `resolveCrudRowId` threw during render (ADR-062).
+ * 3. A detail row's grouped-by columns, blanked with `EMPTY_CELL` rather than `undefined`:
+ *    `TableBodyCell` treats `children !== undefined` as content supplied and wraps
+ *    `undefined` in an empty `<span title="">`.
  */
 export const resolveStructuralCellChildren = ({
   carriedGroupKeys,

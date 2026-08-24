@@ -4,9 +4,9 @@ type AreEqualByJsonArgs<T> = {
 };
 
 /**
- * Suitable for plain serializable objects where structural equivalence is required (e.g.
- * Caveats: property order matters; non-serializable values (Date, undefined inside arrays,
- * functions) are silently coerced by JSON.stringify.
+ * Structural equality for plain serializable objects (e.g. persistence hydration guards).
+ * Caveats: property order matters; `JSON.stringify` silently coerces Date, undefined
+ * inside arrays, and functions.
  */
 export const areEqualByJson = <T>({ left, right }: AreEqualByJsonArgs<T>) =>
   JSON.stringify(left) === JSON.stringify(right);

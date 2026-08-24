@@ -17,9 +17,8 @@ const resolveLogLevel = (override?: LogLevel) => {
 };
 
 /**
- * @example ```ts const log = createLogger({ prefix: '[carSales]' }); log.debug('URL:',
- * url); // only prints when level >= debug log.warn('Slow response'); // only prints when
- * level >= warn log.error('Fetch failed', e); // only prints when level >= error ```
+ * Methods below the configured level become no-ops at creation. In production, `debug` /
+ * `info` / `warn` bodies are tree-shaken because they are guarded by `import.meta.env.PROD`.
  */
 export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}) => {
   const activeLevel = resolveLogLevel(level);
