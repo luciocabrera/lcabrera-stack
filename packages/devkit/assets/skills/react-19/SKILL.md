@@ -16,9 +16,10 @@ allowed-tools: Read
 - Migrating React 18 patterns to React 19 (`use()`, refs-as-props, actions)
 - Enforcing React Compiler-safe patterns in component code
 
-> **Project law lives elsewhere.** This skill is React 19 APIs and compiler-safe
-> patterns. Components, StyleX, and props: the path-scoped React component rules.
-> `type` / no `React.FC` / readonly: AGENTS.md Rule 1. Shared state: `/store-pattern`.
+> This skill is React 19 APIs and compiler-safe patterns. Shared or complex UI
+> state: `/store-pattern`. Components: arrow functions, `type` (not `interface`),
+> readonly props, never `React.FC`. Styling: StyleX only — no `className`,
+> inline `style={{}}`, CSS Modules, or Tailwind.
 
 ## 🚨 CRITICAL: Reference Files are MANDATORY
 
@@ -48,9 +49,8 @@ React.useState(); // Wrong
 ## Component Declaration (REQUIRED)
 
 ```typescript
-// ✅ ALWAYS: Arrow function + named export
-// Props typing (`type`, readonly, no `React.FC`) is project law —
-// AGENTS.md Rule 1 and the path-scoped React component rules, not React 19 APIs.
+// ✅ ALWAYS: Arrow function + readonly props + named export
+// Never `React.FC`. Prefer `type` with `readonly` members.
 type ProductListProps = {
   readonly products: readonly Product[];
 };
@@ -80,8 +80,8 @@ export default MyRoute;
 ## Memoization (compiler first)
 
 React Compiler handles most memoization automatically — favor correct code over
-manual `useMemo` / `useCallback` / `memo` (AGENTS.md Rule 7, ADR-004). Add
-manual memoization only when you have measured that the compiler cannot.
+manual `useMemo` / `useCallback` / `memo`. Add manual memoization only when you
+have measured that the compiler cannot.
 
 ```typescript
 // ✅ Default: let the compiler optimize
@@ -105,11 +105,13 @@ const handleAddToCart = useCallback((id) => addToCart(id), []);
 
 ## 🚫 Critical Anti-Patterns
 
-- **DO NOT** reach for `useMemo`, `useCallback`, or `memo` as the default → React Compiler first (AGENTS.md Rule 7).
-- **DO NOT** use function declarations for components → Use arrow functions + named export.
+- **DO NOT** reach for `useMemo`, `useCallback`, or `memo` as the default → React Compiler first.
+- **DO NOT** use function declarations for components → Use arrow functions + a `readonly` props type + named export. Never `React.FC`.
 - **DO NOT** create promises inside a component's render and pass them to `use()` → Always pass promises from outside or parent.
 - **DO NOT** use `forwardRef` → In React 19, `ref` is a regular prop.
-- **DO NOT** use `useContext()` → Always use `use()` instead; it supports conditional calls. Project rule: AGENTS.md Rule 3.
+- **DO NOT** use `useContext()` → Always use `use()` instead; it supports conditional calls.
+- **DO NOT** use plain `createContext` for shared or complex UI state → `/store-pattern`. Plain context is only for low-volatility globals (theme, locale).
+- **DO NOT** use `className`, `style={{}}`, CSS Modules, or Tailwind → StyleX only (`@stylexjs/stylex`).
 
 ---
 
@@ -199,7 +201,8 @@ export const HeadingWrong = ({ children }: HeadingProps) => {
 
 **Key difference**: `use()` can be called conditionally, `useContext()` cannot.
 
-**Project rule**: when context is appropriate at all is `/store-pattern` and the path-scoped React component rules, not a React 19 API question.
+**Where the rule for when context is appropriate lives:** `/store-pattern` —
+it is not a React 19 API question.
 
 ## Actions with useTransition
 
@@ -393,7 +396,9 @@ export const VideoPlayer= () => {
 
 ## Context as Provider
 
-> **Project rule**: when plain context is appropriate is `/store-pattern`. Always read context with `use()` (React 19); `useContext()` is AGENTS.md Rule 3.
+> Plain `createContext` is only for low-volatility globals (theme, locale).
+> Shared or complex UI state: `/store-pattern`. Always read context with `use()`;
+> never `useContext()`.
 
 ```typescript
 import { createContext, use } from "react";

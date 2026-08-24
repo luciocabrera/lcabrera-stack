@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -130,5 +136,17 @@ describe('validateSkills — this repository', () => {
 
     expect(result.errors).toEqual([]);
     expect(result.skippedDirectories).toEqual(['code-smell-shared']);
+  });
+
+  it('CI watches agent files and the contract module, not only skills/', () => {
+    const yaml = readFileSync(
+      join(REPO_ROOT, '.github/workflows/validate-skills.yml'),
+      'utf8',
+    );
+
+    expect(yaml.match(/'\.claude\/agents\/\*\*'/g)?.length).toBe(2);
+    expect(
+      yaml.match(/'scripts\/lib\/validate-skills-contract\.cjs'/g)?.length,
+    ).toBe(2);
   });
 });

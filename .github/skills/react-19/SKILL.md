@@ -199,7 +199,8 @@ export const HeadingWrong = ({ children }: HeadingProps) => {
 
 **Key difference**: `use()` can be called conditionally, `useContext()` cannot.
 
-**Project rule**: when context is appropriate at all is `/store-pattern` and the path-scoped React component rules, not a React 19 API question.
+**Where the rule for when context is appropriate lives:** `/store-pattern`
+and the path-scoped React component rules — it is not a React 19 API question.
 
 ## Actions with useTransition
 
@@ -393,7 +394,8 @@ export const VideoPlayer= () => {
 
 ## Context as Provider
 
-> **Project rule**: when plain context is appropriate is `/store-pattern`. Always read context with `use()` (React 19); `useContext()` is AGENTS.md Rule 3.
+> **Project rule:** For when plain context is appropriate, read `/store-pattern`.
+> Always read context with `use()` (React 19); `useContext()` is AGENTS.md Rule 3.
 
 ```typescript
 import { createContext, use } from "react";
