@@ -16,7 +16,9 @@
  * substitution that produces it happens only because changesets shells out to
  * pnpm. Nothing else here says so.
  */
-import { readdirSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { readdirSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -33,18 +35,6 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const RELEASE_WORKFLOW = join(REPO_ROOT, '.github', 'workflows', 'release.yml');
 
 const { packagesDir, publicPackageDirs } = readPublishing(REPO_ROOT);
-
-/**
- * A `major` declared against a package, in any spelling a changeset can carry.
- *
- * Both quoting styles are matched because both reach a release: `vp fmt`
- * rewrites a double-quoted name to a single-quoted one, so matching one style
- * would leave the gate below depending on the formatter having already run —
- * a clean pass would then mean "formatted", not "no promotion". A bare name is
- * matched too, though YAML reserves `@` as an indicator and Changesets refuses
- * to parse one, so that spelling fails loudly rather than silently.
- */
-const MAJOR_DECLARATION = /['"]?(?<name>@[^'"\s:]+)['"]?\s*:\s*major/gu;
 
 const readManifest = (directory) =>
   JSON.parse(
@@ -184,53 +174,42 @@ describe('this repository publishes what it develops against', () => {
     // one.
   });
 
-  it('declares no major bump while a package is still pre-1.0', () => {
-    // Every public package here is beta, and Changesets takes `major` on a
-    // `0.x` package straight to `1.0.0` — so a `major` declaration is not
-    // "this breaks", it is "this package's API is now stable". An npm version
-    // is permanent, so that claim cannot be walked back.
+  it('plans no release that takes a package out of pre-1.0', () => {
+    // Asked of the PLANNED RELEASE, not of the changeset text. Every public
+    // package here is beta, and Changesets takes `major` on a `0.x` package
+    // straight to `1.0.0` — so a promotion is not "this breaks", it is "this
+    // API is now stable", and an npm version is permanent.
     //
-    // A break in a `0.x` package is a `minor`, spelled out in the changeset
-    // body for the consumer who has to act on it. Taking one to `1.0.0` is a
-    // deliberate decision; exempt it here in the same commit.
-    const stable = new Set();
-    const preRelease = new Map(
-      publicPackageDirs
-        .map((directory) => readManifest(directory))
-        .filter((manifest) => manifest.version.startsWith('0.'))
-        .map((manifest) => [manifest.name, manifest.version]),
-    );
+    // Scanning declarations was tried and was wrong twice: first matching only
+    // a single-quoted package name, then only a bare bump value. YAML also
+    // admits `'@lcabrera/ui': 'major'`, `{ '@lcabrera/ui': major }` and a
+    // trailing comment, and Changesets honours every one — so a pattern keeps
+    // reporting the same clean pass a repository with no promotion gets.
+    //
+    // The plan cannot be spelled around: it is the tool's own resolution. It
+    // also catches a promotion nothing declares — a peer dependent dragged to
+    // `1.0.0` by the package it peers on, which is the trap
+    // `onlyUpdatePeerDependentsWhenOutOfRange` exists to disarm.
+    const planFile = join(tmpdir(), 'publish-wiring-release-plan.json');
+    execFileSync(join(REPO_ROOT, 'node_modules', '.bin', 'changeset'), [
+      'status',
+      `--output=${planFile}`,
+    ]);
+    const { releases } = JSON.parse(readFileSync(planFile, 'utf8'));
+    rmSync(planFile, { force: true });
 
-    const changesetDir = join(REPO_ROOT, '.changeset');
-    const promotions = readdirSync(changesetDir)
-      .filter((file) => file.endsWith('.md') && file !== 'README.md')
-      .flatMap((file) => {
-        const front = readFileSync(join(changesetDir, file), 'utf8').split(
-          '---',
-        )[1];
-        return [...(front ?? '').matchAll(MAJOR_DECLARATION)]
-          .map((match) => match.groups.name)
-          .filter((name) => preRelease.has(name) && !stable.has(name))
-          .map(
-            (name) =>
-              `${file}: ${name}@${preRelease.get(name)} would become 1.0.0`,
-          );
-      });
+    const promotions = releases
+      .filter(
+        (release) =>
+          release.oldVersion.startsWith('0.') &&
+          !release.newVersion.startsWith('0.'),
+      )
+      .map(
+        (release) =>
+          `${release.name}: ${release.oldVersion} would become ${release.newVersion}`,
+      );
 
     expect(promotions).toEqual([]);
-  });
-
-  it('sees a major declaration in every spelling that reaches a release', () => {
-    // A narrowed pattern reports the same clean pass as a repository with no
-    // promotion pending — which is how the single-quote-only first draft passed
-    // over a double-quoted `major` that Changesets honours.
-    const seen = [
-      "'@lcabrera/ui': major",
-      '"@lcabrera/ui": major',
-      '@lcabrera/ui: major',
-    ].map((line) => [...line.matchAll(MAJOR_DECLARATION)][0]?.groups.name);
-
-    expect(seen).toEqual(['@lcabrera/ui', '@lcabrera/ui', '@lcabrera/ui']);
   });
 
   it('gitignores dist so a build is never committed', () => {
