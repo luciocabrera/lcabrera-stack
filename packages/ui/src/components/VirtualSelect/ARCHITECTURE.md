@@ -18,14 +18,13 @@ VirtualSelect/
 │   └── (see contexts/ARCHITECTURE.md)  composes VirtualListProvider
 │
 ├── VirtualSelectHeader/              → Private delegate — busy overlay + trigger composition;
-│   └── (see its ARCHITECTURE.md)       zero props, reads only isBusy
+│                                        zero props, reads only isBusy
 │
 ├── VirtualSelectDropdown/            → Private delegate — positioned listbox shell around
-│   └── (see its ARCHITECTURE.md)       VirtualListContent; zero props (meta + list config selectors)
+│                                        VirtualListContent; zero props (meta + list config selectors)
 │
 ├── VirtualSelectTrigger/             → Self-connected combobox trigger (placeholder / label / tags,
 │                                        owns triggerRef + overflow)
-│   ├── ARCHITECTURE.md
 │   ├── index.ts
 │   ├── VirtualSelectTrigger.component.tsx
 │   ├── VirtualSelectTrigger.stylex.ts   (exports TRIGGER_MAX_HEIGHT)
@@ -36,10 +35,8 @@ VirtualSelect/
 │   ├── useVirtualSelectDropdown.hook.ts     → Open/close state + onOpenChange notification
 │   └── useVirtualSelectTagOverflow.hook.ts  → ResizeObserver-driven visible tag count
 │
-└── utils/
-    ├── ARCHITECTURE.md
-    ├── index.ts
-    └── (option/selection/overflow resolution — see utils/ARCHITECTURE.md)
+└── utils/                           → option/selection/overflow resolution
+    └── index.ts
 ```
 
 `VirtualSelectHeader` and `VirtualSelectDropdown` are private delegates (no `index.ts`, imported via direct file paths — ADR-007); both have zero props, so they carry no `.types.ts`.
@@ -110,7 +107,7 @@ The provider lives for the **select's lifetime**, not per dropdown open:
 
 ## Dropdown Positioning
 
-Owned by `VirtualSelectDropdown` (see its `ARCHITECTURE.md`): `getDropdownStyle({ isAlwaysOpen, shouldFillHeight })` picks between floating (`dropdownFloatingPosition` — promoted to the top layer so no scrolling ancestor can clip it), inline (`dropdownStatic`), and fill-height (`dropdownStaticFill`) positioning. The shell supplies the anchor: its `containerRef` is passed to the provider as `anchorRef`, and the dropdown measures against it.
+Owned by `VirtualSelectDropdown`: `getDropdownStyle({ isAlwaysOpen, shouldFillHeight })` picks between floating (`dropdownFloatingPosition` — promoted to the top layer so no scrolling ancestor can clip it), inline (`dropdownStatic`), and fill-height (`dropdownStaticFill`) positioning. The shell supplies the anchor: its `containerRef` is passed to the provider as `anchorRef`, and the dropdown measures against it.
 
 The container and dropdown use explicit `border-box`, `min-width: 0`, and
 `max-width: 100%` sizing so both floating and always-open variants remain
@@ -133,7 +130,7 @@ graph TD
 
 ## Tag Overflow (multi mode)
 
-Owned by `VirtualSelectTrigger` (see its `ARCHITECTURE.md`): the trigger holds its own ref, runs `useVirtualSelectTagOverflow` (ResizeObserver → `countVisibleTags`), and splits the store-read selected labels into `visibleTags` + `overflowCount` via `resolveTagOverflow`.
+Owned by `VirtualSelectTrigger`: the trigger holds its own ref, runs `useVirtualSelectTagOverflow` (ResizeObserver → `countVisibleTags`), and splits the store-read selected labels into `visibleTags` + `overflowCount` via `resolveTagOverflow`.
 
 ## Click-Outside Handling
 
@@ -141,7 +138,7 @@ Owned by `VirtualSelectTrigger` (see its `ARCHITECTURE.md`): the trigger holds i
 
 ## Busy State
 
-Owned by `VirtualSelectHeader` (see its `ARCHITECTURE.md`): when `isBusy` is true, a shimmer overlay renders over the container and the trigger is disabled so the dropdown cannot be opened while the parent UI is loading. `useVirtualSelectDropdown` also suppresses `toggleDropdown` while busy.
+Owned by `VirtualSelectHeader`: when `isBusy` is true, a shimmer overlay renders over the container and the trigger is disabled so the dropdown cannot be opened while the parent UI is loading. `useVirtualSelectDropdown` also suppresses `toggleDropdown` while busy.
 
 ## Props
 

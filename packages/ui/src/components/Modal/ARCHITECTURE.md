@@ -111,7 +111,7 @@ full height — is otherwise paying for one twice over.
 | `width`     | `min(90vw, 520px)` |
 | `maxHeight` | `min(85vh, 600px)` |
 
-The dialog **hugs its content** vertically — `maxHeight` is a cap, not a fixed height. `AppBackground` inside the dialog must keep `shouldFillViewport={false}`: its default `100vh` height would make the children taller than the dialog and produce a phantom scrollbar (see `AppBackground/ARCHITECTURE.md` → Sizing Contract).
+The dialog **hugs its content** vertically — `maxHeight` is a cap, not a fixed height. `AppBackground` inside the dialog must keep `shouldFillViewport={false}`: its default `100vh` height would make the children taller than the dialog and produce a phantom scrollbar.
 
 The interior is a flex column (via `AppDotted`): the body has `flex: 1 1 auto` + `minHeight: 0`, so it absorbs any spare height (pushing the footer to the bottom edge) and scrolls internally when content exceeds the cap, while the header and footer (`flexShrink: 0`) stay pinned. To get a constant-size modal instead of content-hugging, change the dialog's `maxHeight` to `height` — the body/footer distribution handles both cases.
 
