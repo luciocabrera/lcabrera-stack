@@ -27,6 +27,7 @@ export type CountQueryDescriptor = {
 };
 
 export type DeleteQueryDescriptor = {
+  /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
   readonly filters: readonly QueryFilter[];
   readonly returning?: readonly string[];
@@ -35,6 +36,7 @@ export type DeleteQueryDescriptor = {
 };
 
 export type InsertQueryDescriptor = {
+  /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
   readonly returning?: readonly string[];
   readonly schema: string;
@@ -43,6 +45,7 @@ export type InsertQueryDescriptor = {
 };
 
 export type MaxValueQueryDescriptor = {
+  /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
   readonly column: string;
   readonly schema: string;
@@ -81,7 +84,11 @@ export type QuerySort = {
 };
 
 export type SelectQueryDescriptor = {
-  /** Omit when every column is developer-hardcoded, never derived from a request. */
+  /**
+   * Opt-in authorization: when provided, every fields/filter/sort column must be a member,
+   * in addition to the always-on `assertSafeIdentifier` syntax check. Omit when every
+   * column is developer-hardcoded, never derived from a request.
+   */
   readonly allowedColumns?: readonly string[];
   /**
    * Keyset pagination: resume strictly after the row this cursor describes, instead of
@@ -108,6 +115,7 @@ export type SelectQueryDescriptor = {
 export type UnaryOperator = 'isNotNull' | 'isNull';
 
 export type UpdateQueryDescriptor = {
+  /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
   readonly filters: readonly QueryFilter[];
   readonly returning?: readonly string[];
