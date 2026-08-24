@@ -1,5 +1,319 @@
 # @lcabrera/server
 
+## 0.4.0
+
+### Minor Changes
+
+- 4911e39: Each aggregate selected on a grouped Table now renders as **its own column**,
+  under a two-level header naming the source column above the function.
+
+  Previously every aggregate applied to a column landed in that column's single
+  cell, so two measures on `Total Amount` rendered as one cell reading
+  `Average … Minimum …` — truncated together, under a header that named neither,
+  and sortable, resizable and pinnable neither separately nor at all. A measure is
+  a column's worth of data; giving it a column puts it inside the machinery every
+  other column already has.
+
+  The columns are **derived, not declared**: they appear when a grouping is
+  applied and vanish when it clears, and nothing about them reaches the persisted
+  column layout — so a deselected aggregate needs no cleanup, and ungrouping
+  restores your own columns exactly. A **primary-key** column is measured beside
+  itself rather than replaced, because a table with no column carrying
+  `isPrimaryKey` cannot resolve a row id for its CRUD links.
+
+  Sorting a measure column now reaches the query. `toGroupSort` turns a sort
+  naming a measure into an aggregate `ORDER BY` term and places it after the key
+  terms, which is the one position that both orders something and is accepted —
+  an aggregate ahead of a key is refused rather than quietly demoted.
+
+  **Breaking, for a consumer calling the column derivations directly.**
+  `deriveColumnViewState` and `getPinnedDerivedColumnsState` now require an
+  `aggregates` argument. It is required rather than defaulted on purpose: these
+  functions are re-run on every column change, and a caller free to omit it would
+  silently paint the source column instead of its measures on the next pin, hide
+  or resize. Pass the applied `aggregates` from the grouping state — `[]` where
+  nothing is grouped.
+
+  Two additive changes to the published type surface:
+
+  - `DataKey` admits `AggregateColumnKey` (`` `${string}:${TableAggregateFn}` ``),
+    by the same precedent that admits `'actions'` — a column identity that names
+    no field of the row.
+  - `TableColumn` gains an optional `headerGroupLabel`, the name stated above a
+    derived column in the header band.
+  - `pruneSortingToColumns` is exported: it drops a sort naming a column
+    **nothing can order by**, which is what stops a measure sort outliving its
+    column. It takes the declared column keys and the painted ones as two
+    separate arguments, because a measured column is replaced while grouped —
+    pruning against the painted list alone would discard a sort on a column that
+    is merely not on screen.
+
+  A measure **inherits its source column's layout locks**. `isStatic` and
+  `isResizable` carry onto the derived columns, so a column you froze cannot be
+  pinned, hidden or resized through the measures that replace it — every layout
+  action on a measure acts on the column it measures, which would otherwise have
+  made a measure a way around the lock. The flags describing the _data_ do not
+  carry: a measure is never filterable or groupable and always sortable,
+  whatever its source allows.
+
+  **One known limitation.** A measured column is replaced, and every row renders
+  over the same columns — so a **drilled detail row** has no cell for its own raw
+  value while an aggregate is applied to that column. Keeping the source column
+  alongside its measures would fix it at the cost of an empty column on every
+  group row of every grouped view, to serve rows only a drill produces. The
+  inline drill is being replaced by a modal route that applies no grouping, where
+  every declared column is present and the question does not arise.
+
+- e8a19de: Grouped reads can now be a **cube**, alongside `flat` and `rollup`.
+
+  `GroupingMode` gains `'cube'`, which emits every subset of the group keys as an
+  explicit grouping set — the same construct the other two modes already compile
+  to (ADR-059), so nothing about decoding a grouped row changes. The mask still
+  tells a structural NULL from a real one, and `groupingSetMasks` still ships in
+  emission order.
+
+  ```ts
+  await selectGroupedRows({
+    aggregates: [{ fn: 'count' }, { column: 'amount', fn: 'sum' }],
+    allowedColumns: ['region', 'channel', 'amount'],
+    grouping: 'cube',
+    keys: ['region', 'channel'],
+    maxRows: 5000,
+    schema: 'public',
+    table: 'orders',
+  });
+  // grouping sets: (region, channel), (region), (channel), ()
+  ```
+
+  **A cube result is a lattice, not a tree.** `(channel)` with no region is a
+  child of no region row and has no depth, so a consumer that indents grouped rows
+  by path length is correct for `flat` and `rollup` and wrong here — render a cube
+  flat, with each row carrying its own coordinates. The rows stay long, one per
+  grouping-set combination, so a pivot projection remains possible later.
+
+  **A cube is capped at three group keys**, one below the four the other modes
+  allow, and is refused at construction with the existing `'too-many-keys'`
+  reason. Its set count is `2ⁿ` rather than `n+1`, and the cardinality estimate
+  cannot be relied on to catch that: the estimate is `unknown` whenever a key has
+  no statistics, and unknown warns rather than refuses, so on an unanalysed table
+  there would be no bound at all.
+
+  **The depth-refusal message now names the mode**, for every mode rather than
+  only for cube. For the same over-deep `flat` request that previously read:
+
+  > A grouped query takes at most 4 group keys; got 5.
+
+  it now reads:
+
+  > A flat grouping takes at most 4 group keys; got 5.
+
+  The cap for `flat` and `rollup` is unchanged at four — only the wording moved.
+  Cube then states its own lower cap in the same shape: `A cube grouping takes at
+most 3 group keys; got 4.`
+
+  Anything matching on that message text needs updating. The `reason`
+  discriminant is unchanged and is what callers should branch on.
+
+- ae3022a: A date or timestamp column can now be a group key at a chosen granularity —
+  year, quarter, month or day — instead of being refused for holding one value per
+  calendar day.
+
+  ```ts
+  await selectGroupedRows({
+    aggregates: [{ fn: 'count' }, { column: 'total_amount', fn: 'sum' }],
+    allowedColumns: ['order_date', 'total_amount'],
+    grouping: 'rollup',
+    keys: ['order_date'],
+    maxRows: 5000,
+    periods: { order_date: 'month' }, // ← new
+    schema: 'public',
+    table: 'orders',
+  });
+  ```
+
+  The granularity is a **column-keyed map beside** the key list, not a member of
+  it: a column can be a group key at most once, so a map is per-key by
+  construction and `keys` stays `readonly string[]` in both packages, in the URL
+  and in every group path. `OlapGroupPeriod` lives in `@lcabrera/api` and both
+  other packages alias it — it travels in two params, so it is wire vocabulary.
+
+  **`ColumnGroupingCapability` gains `periods`, and it is independent of
+  `canGroup`.** A date column is routinely refused as a raw key and legal at a
+  month, so read `periods` _instead of_ `canGroup` for a temporal column rather
+  than after it:
+
+  ```ts
+  { column: 'order_date', typeName: 'date', role: 'dimension',
+    canGroup: false, refusal: 'too-many-distinct', distinctEstimate: 1800,
+    periods: ['month', 'quarter', 'year'] }
+  ```
+
+  The cardinality guard measures the **truncated** expression. `pg_stats` has no
+  distinct count for `date_trunc('month', c)`, so the capabilities query now reads
+  the column's histogram range and the estimate is bounded by both that range and
+  the raw distinct count.
+
+  **Truncation is performed in a stated time zone.** `date_trunc(field,
+timestamptz)` resolves against the session `TimeZone`, so the same order falls in
+  December for one caller and January for another. `timestamptz` keys are pinned to
+  UTC; `date` and `timestamp` are cast so the call cannot promote them through the
+  session zone.
+
+  **Drilling a truncated group is a half-open range**, `gte` the period start and
+  `lt` the next — the group's value is a period start no row holds, so an equality
+  returns the boundary row alone. `toDrillRead` takes a new `truncations` argument
+  for this; `toGroupKeyTruncations` builds it from the capabilities. `toGroupRow`
+  and `decodeGroupedRows` take the same argument, and use it to head a period group
+  `2021-06` rather than with an ISO instant.
+
+  In `@lcabrera/ui`, an applied temporal key in the settings drawer carries a
+  granularity control offering exactly the periods the route reports. The
+  `grouping` URL param gains a `gran` member beside `agg`; it is dropped when
+  empty, so an untruncated grouping produces the link it always did.
+
+  **Breaking for anyone constructing these types by hand.**
+  `ColumnGroupingCapability.periods` and `TableGroupingState.periods` are required
+  rather than optional — a surface that omitted one would silently offer nothing.
+  Values produced by `getColumnGroupingCapabilities` and the loader are unaffected.
+
+- 7addbad: A grouped read can be issued and decoded without the caller re-deriving how.
+
+  `@lcabrera/server/db/olap` shipped `toGroupRow`, which decodes one row. What it
+  did not ship was the step either side of it: building the aggregate list a
+  grouped read is issued with, pairing each requested aggregate with the alias the
+  builder projected it under, and deriving the grouped `ORDER BY`. Every consumer
+  had to write those again, against a result that already carries everything they
+  need.
+
+  **`toGroupAggregates` and `decodeGroupedRows` are two halves of one convention.**
+  A grouped read always asks for `count(*)`, because a group row states how many
+  rows it covers whether or not the route selected an aggregate — and the position
+  `count` occupies is the position the decode skips. Nothing in the type system
+  relates the two, so they ship in one module for the reason ADR-082 keeps an
+  encoder beside its parser: split apart they can disagree in any way at all and
+  still compile, and the symptom is every aggregate rendering against its
+  neighbour's column, with no error anywhere.
+
+  **`toGroupSort`** derives the grouped `ORDER BY` from the table's own sort — one
+  term per key in nesting order, carrying the user's direction where they sorted
+  that key and ascending where they did not. The nesting order is the tree, so a
+  sort sets a level's direction rather than reordering the levels. A sort on any
+  other column is dropped, because a grouped result has one row per group and no
+  row of that column's values.
+
+  A route now supplies its table, the aggregates its UI offered, and its row
+  ceiling. Nothing else.
+
+- f85324d: Adds a column filter that selects the rows where a column **holds no value**.
+
+  Until now every member of `ColumnFilter` carried a value and mapped to a
+  comparison, and SQL equality against NULL is never true — so there was no
+  filter a user could build, or a URL could carry, that selected null rows. The
+  gap was load-bearing: `resolveDrillHandoffSearch` refuses to offer its link at
+  all when a group's key is NULL, because "the filter vocabulary has no 'is null'
+  member", and the NULL group is the one a reader is most likely to click into.
+
+  **The query layer already emitted `IS NULL`.** `QueryFilter` has a unary arm and
+  `appendFilterClause` gives it a branch that binds no parameter. What was missing
+  was a vocabulary that could reach it, so this adds the span between: an
+  `EmptyFilter` in both packages' `ColumnFilter` unions, a `toQueryFilters` arm
+  producing the unary filter, a URL codec, and the operators in the filter editor.
+
+  **It is its own `type`, not an operator on the value-carrying filters.**
+  Emptiness is not a comparison: adding `isEmpty` to `TextFilter` and its siblings
+  would put a `value` on every one of them that must then be ignored, and force
+  each editor to hide its own input. One value-less member keeps "carries a value"
+  true of every other member of the union.
+
+  **Empty means SQL NULL and deliberately not the empty string.** A text column
+  can hold both and they are different facts — `''` is a value someone stored.
+  A column where `''` is meaningful wants a text `equals ''`.
+
+  The operators are offered for **every** column type, because any column can hold
+  nothing; the data type decides which comparisons make sense, not whether
+  emptiness does.
+
+  **In the URL it is an object, `{"op":"ie"}`, not an array.** Every other
+  compact filter is an array, and a select filter is written as its bare values —
+  so `["ie"]` already means "this column equals the value `ie`". Claiming that
+  form would have made `ie` and `nie` reserved words in a position holding
+  arbitrary user data, turning a consumer's "country is ie" link into "country is
+  empty" with nothing to say so.
+
+  A boolean column gets these operators from `BooleanFilterInput` rather than the
+  operator dropdown, which `FilterInputs` does not render for one.
+
+  For consumers: `ColumnFilter` gains a variant, so an exhaustive `switch` over
+  `filter.type` that previously compiled may now need an arm. Three such
+  dispatches inside these packages did — the URL serializer, the drawer's
+  validity check, and the URL-restore compatibility check — and each would have
+  dropped the filter silently rather than failing.
+
+- dd82183: The OLAP seam is now part of the packages, so a consumer no longer has to write
+  it.
+
+  Grouping, rollup, cube and drill are features of a table in the same sense that
+  sorting and filtering are, but the code joining the query engine to the grid had
+  to be written by the consuming app: how to decode a grouped read, and how to turn
+  a group row back into a query for the rows underneath it. Both are now shipped
+  (ADR-082).
+
+  **`@lcabrera/server` gains `db/olap/`.**
+
+  - `toGroupRow` turns one row of a grouped read into the group summary a grid
+    renders, decoding the `GROUPING()` mask — the only thing that separates a
+    subtotal from a genuine NULL, since the two are textually identical. It sits
+    beside `build-group-query`, which is what writes that mask.
+  - `toDrillRead` turns a group row into the paginated read of the rows underneath
+    it, carrying four rules that are easy to get wrong and quiet when they are: the
+    grouped view's filters are inherited unchanged, a NULL key becomes `IS NULL`
+    rather than an equality that is never true, group-key terms come out of the
+    sort while the primary key goes in as a tiebreaker, and the read carries no
+    grouping — which would otherwise return group rows again. It answers a typed
+    refusal for a grand total, a subtotal or an incomplete path rather than an
+    empty page.
+  - `toGroupLabel` formats a group key against the closed dimension vocabulary.
+
+  Your route supplies its own primary key and page ceiling, and nothing else.
+
+  **`@lcabrera/api` gains `olap/`** — the wire codec for a drill request.
+  `encodeDrillGroup` and `parseDrillGroup` are two halves of one thing and now live
+  together, so a browser encoder and a server parser cannot drift apart. It also
+  carries `OLAP_GROUP_ROW_FIELD`, the row field a grouped read attaches its summary
+  to, which `@lcabrera/ui` re-declares as `TABLE_GROUP_ROW_FIELD`.
+
+  **`@lcabrera/server` now depends on `@lcabrera/api`.** The dependency runs
+  Node → browser-safe, which is the harmless direction: `@lcabrera/api` declares no
+  dependencies of its own, so nothing new enters your graph.
+
+  No existing API changed.
+
+- d8113ad: `QueryFilter` gains an `isNull` operator.
+
+  `UnaryOperator` was `'isNotNull'` alone, which left "this column is null"
+  inexpressible — and it cannot be spelled as an equality, because SQL's
+  three-valued logic makes `col = NULL` never match, not even a null row. The
+  vocabulary is now closed under negation:
+
+  ```ts
+  filters: [{ column: 'shipping_country', operator: 'isNull' }];
+  // → WHERE "shipping_country" IS NULL
+  ```
+
+  Like `isNotNull` it carries no value and consumes no parameter slot, so filters
+  after it keep their placeholders.
+
+  **Widening the union is breaking for a consumer that exhaustively switches on
+  `UnaryOperator`** with no default arm. That is the intended shape: the operator
+  maps in this package are closed records, which is what makes a new operator a
+  type error rather than a silent gap.
+
+### Patch Changes
+
+- Updated dependencies [ae3022a]
+- Updated dependencies [dd82183]
+  - @lcabrera/api@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

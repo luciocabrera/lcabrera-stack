@@ -1,5 +1,114 @@
 # @lcabrera/api
 
+## 0.4.0
+
+### Minor Changes
+
+- ae3022a: A date or timestamp column can now be a group key at a chosen granularity —
+  year, quarter, month or day — instead of being refused for holding one value per
+  calendar day.
+
+  ```ts
+  await selectGroupedRows({
+    aggregates: [{ fn: 'count' }, { column: 'total_amount', fn: 'sum' }],
+    allowedColumns: ['order_date', 'total_amount'],
+    grouping: 'rollup',
+    keys: ['order_date'],
+    maxRows: 5000,
+    periods: { order_date: 'month' }, // ← new
+    schema: 'public',
+    table: 'orders',
+  });
+  ```
+
+  The granularity is a **column-keyed map beside** the key list, not a member of
+  it: a column can be a group key at most once, so a map is per-key by
+  construction and `keys` stays `readonly string[]` in both packages, in the URL
+  and in every group path. `OlapGroupPeriod` lives in `@lcabrera/api` and both
+  other packages alias it — it travels in two params, so it is wire vocabulary.
+
+  **`ColumnGroupingCapability` gains `periods`, and it is independent of
+  `canGroup`.** A date column is routinely refused as a raw key and legal at a
+  month, so read `periods` _instead of_ `canGroup` for a temporal column rather
+  than after it:
+
+  ```ts
+  { column: 'order_date', typeName: 'date', role: 'dimension',
+    canGroup: false, refusal: 'too-many-distinct', distinctEstimate: 1800,
+    periods: ['month', 'quarter', 'year'] }
+  ```
+
+  The cardinality guard measures the **truncated** expression. `pg_stats` has no
+  distinct count for `date_trunc('month', c)`, so the capabilities query now reads
+  the column's histogram range and the estimate is bounded by both that range and
+  the raw distinct count.
+
+  **Truncation is performed in a stated time zone.** `date_trunc(field,
+timestamptz)` resolves against the session `TimeZone`, so the same order falls in
+  December for one caller and January for another. `timestamptz` keys are pinned to
+  UTC; `date` and `timestamp` are cast so the call cannot promote them through the
+  session zone.
+
+  **Drilling a truncated group is a half-open range**, `gte` the period start and
+  `lt` the next — the group's value is a period start no row holds, so an equality
+  returns the boundary row alone. `toDrillRead` takes a new `truncations` argument
+  for this; `toGroupKeyTruncations` builds it from the capabilities. `toGroupRow`
+  and `decodeGroupedRows` take the same argument, and use it to head a period group
+  `2021-06` rather than with an ISO instant.
+
+  In `@lcabrera/ui`, an applied temporal key in the settings drawer carries a
+  granularity control offering exactly the periods the route reports. The
+  `grouping` URL param gains a `gran` member beside `agg`; it is dropped when
+  empty, so an untruncated grouping produces the link it always did.
+
+  **Breaking for anyone constructing these types by hand.**
+  `ColumnGroupingCapability.periods` and `TableGroupingState.periods` are required
+  rather than optional — a surface that omitted one would silently offer nothing.
+  Values produced by `getColumnGroupingCapabilities` and the loader are unaffected.
+
+- dd82183: The OLAP seam is now part of the packages, so a consumer no longer has to write
+  it.
+
+  Grouping, rollup, cube and drill are features of a table in the same sense that
+  sorting and filtering are, but the code joining the query engine to the grid had
+  to be written by the consuming app: how to decode a grouped read, and how to turn
+  a group row back into a query for the rows underneath it. Both are now shipped
+  (ADR-082).
+
+  **`@lcabrera/server` gains `db/olap/`.**
+
+  - `toGroupRow` turns one row of a grouped read into the group summary a grid
+    renders, decoding the `GROUPING()` mask — the only thing that separates a
+    subtotal from a genuine NULL, since the two are textually identical. It sits
+    beside `build-group-query`, which is what writes that mask.
+  - `toDrillRead` turns a group row into the paginated read of the rows underneath
+    it, carrying four rules that are easy to get wrong and quiet when they are: the
+    grouped view's filters are inherited unchanged, a NULL key becomes `IS NULL`
+    rather than an equality that is never true, group-key terms come out of the
+    sort while the primary key goes in as a tiebreaker, and the read carries no
+    grouping — which would otherwise return group rows again. It answers a typed
+    refusal for a grand total, a subtotal or an incomplete path rather than an
+    empty page.
+  - `toGroupLabel` formats a group key against the closed dimension vocabulary.
+
+  Your route supplies its own primary key and page ceiling, and nothing else.
+
+  **`@lcabrera/api` gains `olap/`** — the wire codec for a drill request.
+  `encodeDrillGroup` and `parseDrillGroup` are two halves of one thing and now live
+  together, so a browser encoder and a server parser cannot drift apart. It also
+  carries `OLAP_GROUP_ROW_FIELD`, the row field a grouped read attaches its summary
+  to, which `@lcabrera/ui` re-declares as `TABLE_GROUP_ROW_FIELD`.
+
+  **`@lcabrera/server` now depends on `@lcabrera/api`.** The dependency runs
+  Node → browser-safe, which is the harmless direction: `@lcabrera/api` declares no
+  dependencies of its own, so nothing new enters your graph.
+
+  No existing API changed.
+
+### Patch Changes
+
+- @lcabrera/utils@0.2.0
+
 ## 0.3.0
 
 ### Minor Changes

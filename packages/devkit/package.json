@@ -1,6 +1,6 @@
 {
   "name": "@lcabrera/devkit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "description": "Materialises this repository's agent setup — skills, path rules, subagent definitions and the contracts they bind to — into a consumer repository, and reports what has diverged.",
   "keywords": [
