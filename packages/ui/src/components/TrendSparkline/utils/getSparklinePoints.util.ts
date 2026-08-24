@@ -4,13 +4,6 @@ type GetSparklinePointsArgs = {
   readonly width: number;
 };
 
-/**
- * Maps chronological values onto an SVG polyline `points` string, evenly
- * spaced on x and normalized to [0, height] on y (inverted — SVG y grows
- * downward, so the highest value gets the smallest y). Falls back to a
- * flat mid-height line when there's nothing to compare (0-1 values, or
- * every value identical) rather than dividing by zero.
- */
 export const getSparklinePoints = ({
   height,
   values,

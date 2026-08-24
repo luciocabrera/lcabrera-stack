@@ -16,10 +16,6 @@ type GetInitialFormMetaStateArgs<TValues extends Record<string, unknown>> = {
   readonly submitLabel?: string;
 };
 
-/**
- * Build the meta store's initial snapshot from the Form's public props,
- * resolving the label and submission-flavour defaults.
- */
 export const getInitialFormMetaState = <
   TValues extends Record<string, unknown>,
 >({

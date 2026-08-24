@@ -29,57 +29,9 @@ const NO_GROUPING: TableGroupingState = {
 };
 
 /**
- * Builds the grouping store's initial state from the configuration the loader
- * applied.
- *
- * Both halves arrive on `metaState` rather than as their own loader field,
- * because the loader's returned shape is pinned to three keys and inferred
- * structurally — a fourth would change the loader data type of every table
- * route at once. Seeding from meta keeps the applied grouping travelling with
- * the rest of the loader's serializable state (ADR-009) at no cost to that
- * shape.
- *
- * **This is a write path, and it checks the same shape invariants the outer
- * boundaries do** — `areGroupKeysLegal` (within the depth cap, and no key
- * repeated) and `areGroupAggregatesLegal` (no `(columnKey, fn)` pair repeated,
- * and no more `countDistinct` aggregates than one read can carry).
- * A route built on `createTableRouteLoader` cannot reach it with an illegal
- * list, because `sanitizeGroupingByColumns` already refused — but
- * `@lcabrera/ui` is published, and a consumer writing their own loader is the
- * intended use rather than an edge case. Without these guards such a route seeds
- * a store the package then renders as grouped, and the query throws at
- * `assertGroupKeys` or at `assertGroupAliases`, which refuses two projections
- * deriving one alias: a 500 out of a state the package itself accepted.
- *
- * The **aggregate** guard is newer than the key one and exists because the shape
- * change removed an implicit check: while `aggregates` was a column-to-function
- * map a repeated pair was unrepresentable, and a list admits it (#831). It has a
- * second half since #842, and that one is a **whole-request** rule rather than a
- * shape one: a grouped read carries at most
- * `MAX_TABLE_COUNT_DISTINCT_AGGREGATES` `countDistinct` aggregates, counted
- * across every column together, so a seed naming two is refused here exactly as
- * a duplicate pair is. Both surfaces withhold the second offer, but a
- * hand-written loader reaches this function without passing either.
- *
- * The refusal is **whole** — never truncated to the cap, never de-duplicated.
- * Keys are ordered and the order is the query's nesting order, so either repair
- * answers a different question from the one asked; a de-duplicated aggregate
- * list is the same kind of silent correction, and a consumer who sent a
- * duplicate asked for something this table cannot render and is better told than
- * quietly fixed. That is the same reasoning `resolveTableGroupingUpdate` and
- * `sanitizeGroupingByColumns` refuse whole for.
- *
- * The *question* is shared and the *answer* is not: an update on an illegal list
- * is `unchanged`, leaving the applied grouping alone, while a seed has no prior
- * state to leave alone and can only answer no grouping.
- *
- * The mode goes with them too, defaulting to `flat`: a route that never offers
- * the choice, and every link written before rollup existed, both mean the one
- * grouping set they have always meant.
- *
- * Aggregates go with the keys. An aggregate is computed per group, so with no
- * key there is nothing for it to describe — the same normalisation
- * `resolveTableGroupingUpdate` applies when the last key is removed.
+ * Refuse the whole seed, never truncate or de-dupe — a published package, so a
+ * consumer's own loader can reach here without `sanitizeGroupingByColumns`. An
+ * illegal seed answers no grouping (there is no prior state to leave alone).
  */
 export const getInitialGroupingState = ({
   groupingAggregates = [],

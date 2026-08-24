@@ -6,7 +6,6 @@ import { useSetGrouping } from './useSetGrouping.hook';
 
 type SetGroupKeyPeriodArgs = {
   readonly columnKey: string;
-  /** `undefined` groups the column at its raw values again. */
   readonly period: TableGroupPeriod | undefined;
 };
 

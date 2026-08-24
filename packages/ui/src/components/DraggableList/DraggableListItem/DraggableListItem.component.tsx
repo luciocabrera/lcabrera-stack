@@ -5,12 +5,6 @@ import type { DraggableListItemProps } from './DraggableListItem.types';
 import { busyStyles, styles } from './DraggableListItem.stylex';
 import { handleDragOver } from './utils';
 
-/**
- * Single draggable row: derives its own drag state (`isDragging`,
- * `isDragOver`, `isDragEnabled`) and owns the `<li>` with the drag event
- * wiring, busy shimmer overlay, and drag handle. Private delegate of
- * `DraggableList` — not exported from the barrel.
- */
 export const DraggableListItem = ({
   dragItemId,
   isBusy,

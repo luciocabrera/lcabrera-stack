@@ -2,10 +2,6 @@ import type { GlobalNavigationSizePreference } from '#ui/types/globalSettings.ty
 
 import { styles } from '../AppNavigation.stylex';
 
-/**
- * Returns the density-responsive StyleX style for the panel header padding and
- * gap, or `undefined` for the medium (default) density.
- */
 export const getHeaderDensityStyle = (
   navigationSizePreference: GlobalNavigationSizePreference | undefined,
 ) => {

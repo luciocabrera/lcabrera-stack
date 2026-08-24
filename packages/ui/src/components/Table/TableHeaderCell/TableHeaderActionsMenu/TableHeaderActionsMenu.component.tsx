@@ -16,14 +16,10 @@ import { SortActions } from './SortActions/SortActions.component';
 import { tableHeaderActionsMenuStyles } from './TableHeaderActionsMenu.stylex';
 
 /**
- * Column header popover menu composing the sort, group, pin/hide, and
- * manage-column sections. Renders nothing (no trigger) when the column has no
- * sortable/groupable/pinnable/settings affordance at all.
- *
- * Grouping is read here rather than passed in: it is a route capability, not a
- * column one, so it comes from the meta store the loader seeded (ADR-063). A
- * route that never declared it gets no grouping section at all — the menu it
- * renders is byte-identical to the one it rendered before grouping existed.
+ * Grouping is read here rather than passed in: it is a route capability, not a column one,
+ * so it comes from the meta store the loader seeded (ADR-063).
+ * A route that never declared it gets no grouping section at all — the menu it renders is
+ * byte-identical to the one it rendered before grouping existed.
  */
 export const TableHeaderActionsMenu = <TData,>({
   columnKey,

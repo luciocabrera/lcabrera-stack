@@ -4,10 +4,6 @@ import type { action } from './new-order.action';
 
 import { OrderFormModal } from '../OrderFormModal';
 
-/**
- * The create-order route: renders the Form (create mode) inside a Modal over
- * the list. Surfaces any server-side field errors returned by the action.
- */
 export const NewOrder = () => {
   const actionData = useActionData<typeof action>();
   const serverErrors =

@@ -8,13 +8,6 @@ export type ToOrderColumnValuesArgs = {
   readonly input: EnterpriseOrderInput;
 };
 
-/**
- * Map a validated order payload to the column→value record shared by insert
- * and update: every user-editable column plus the five computed money columns
- * (`deriveOrderTotals`). Optional string fields collapse to `null`; the
- * server-assigned identity/audit columns are added by the insert/update
- * wrappers, not here.
- */
 export const toOrderColumnValues = ({ input }: ToOrderColumnValuesArgs) => {
   const totals = deriveOrderTotals({
     discountPercentage: input.discount_percentage,

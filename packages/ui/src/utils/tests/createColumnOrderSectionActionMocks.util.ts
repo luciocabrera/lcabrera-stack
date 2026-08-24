@@ -8,10 +8,6 @@ type CreateColumnOrderSectionActionMocksArgs = {
   readonly initialTableState: LooseTableState;
 };
 
-/**
- * Loose drawer state shape — avoids TData inference binding tests to specific key types.
- * ColumnFiltersState and ColumnSizingState are generic Records to prevent over-constraint.
- */
 type LooseDrawerState = {
   readonly columnFilters: Record<string, unknown>;
   readonly columnOrder: string[];

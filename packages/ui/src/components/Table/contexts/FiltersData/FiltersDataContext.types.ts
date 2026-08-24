@@ -5,7 +5,6 @@ import type {
 import type { TStore } from '#ui/hooks/useStore.hook';
 
 export type FiltersDataContextValue<TData = Record<string, unknown>> = {
-  /** Store managing filters lookup data */
   readonly filtersDataStore: TStore<FiltersDataState<TData>>;
 };
 

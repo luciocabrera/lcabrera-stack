@@ -14,12 +14,10 @@ type GenerateApiTokenArgs = {
 };
 
 /**
- * Mints a bearer token as two halves: a public `tokenId` (the indexed
- * lookup) and a high-entropy `secret` (only its hash is ever persisted).
- * `plaintext` — `<prefix><tokenId>.<secret>` — is shown to the user once at
- * issue time and never stored. `prefix` is caller-supplied (e.g. a product
- * tag that aids secret scanning); this util stays generic and reusable
- * across apps, with no product-specific value baked in.
+ * Two halves: a public `tokenId` for the indexed lookup, and a high-entropy `secret` of
+ * which only the hash is persisted. `plaintext` — `<prefix><tokenId>.<secret>` — is shown
+ * once at issue time and never stored. `prefix` is caller-supplied (e.g. a product tag
+ * that aids secret scanning); this util stays generic.
  */
 export const generateApiToken = ({
   prefix = '',

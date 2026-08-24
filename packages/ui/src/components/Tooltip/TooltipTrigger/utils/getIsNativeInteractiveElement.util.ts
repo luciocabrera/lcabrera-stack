@@ -11,11 +11,6 @@ const NATIVE_INTERACTIVE_TAGS: ReadonlySet<string> = new Set([
   'textarea',
 ]);
 
-/**
- * Checks whether a React node renders a natively interactive HTML element
- * (link, button, form control) that already provides its own focus and
- * keyboard semantics, so the tooltip trigger must not add `role`/`tabIndex`.
- */
 export const getIsNativeInteractiveElement = (node: ReactNode) =>
   isValidElement(node) &&
   typeof node.type === 'string' &&

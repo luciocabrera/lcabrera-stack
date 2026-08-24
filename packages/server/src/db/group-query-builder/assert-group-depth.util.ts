@@ -9,22 +9,10 @@ type AssertGroupDepthArgs = {
 };
 
 /**
- * Everything about a group-key list that can be judged from the list and the
- * mode alone: that there is one, that it is not too deep **for that mode**, and
- * that no key repeats.
- *
- * Split out of `assertGroupKeys` because it is the half that needs **no
- * catalogue answer**, which is what lets `selectGroupedRows` run it before it
- * borrows a connection. A request at depth 9 costing a catalogue round trip
- * before being refused is a request that pays for the mistake it is about to be
- * told about (ADR-066).
- *
- * `assertGroupKeys` still calls it, so the builder refuses the same shapes on
- * its own — the pre-flight check is an earlier gate, never the only one.
- *
- * The cap is per mode because cube's set count is exponential in the depth
- * where the others' is linear. `MAX_KEYS_BY_GROUPING` carries the numbers, and
- * why the cardinality estimate cannot enforce this in the cap's place.
+ * Split out of `assertGroupKeys` because it is the half that needs **no catalogue
+ * answer**, which is what lets `selectGroupedRows` run it before it borrows a connection.
+ * A request at depth 9 costing a catalogue round trip before being refused is a request
+ * that pays for the mistake it is about to be told about (ADR-066).
  */
 export const assertGroupDepth = ({
   grouping,

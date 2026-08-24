@@ -6,24 +6,11 @@ import { useTableRoutePage } from '#ui/hooks/useTableRoutePage.hook';
 import type { TableRouteViewProps } from './TableRouteView.types';
 
 /**
- * A whole table route's view: loader data in, paginated table out.
- *
- * The view-side counterpart to `createTableRouteLoader`. Between the two, a
- * table route declares its columns, its loader and its fetcher, and writes no
- * fetch plumbing, no sort composition and no table JSX.
- *
- * A route whose response is not `{ data, hasMore?, total? }`, or that needs its
- * own JSX around the table, composes `useTableRoutePage` with `TableLayout`
- * directly instead.
- *
- * What the endpoint can do — seek by cursor, filter server-side — is declared on
- * the loader `meta`, not here, so the loader and the load-more read one
- * declaration (ADR-063). The props this component does take are the pieces only
- * the component can supply: a fetcher, a toolbar node and the response
- * selectors. The fetcher is a prop because a function does not survive the
- * loader boundary (ADR-009); the query it receives is composed by
- * `useTableRoutePage`, so a page inherits the view's filters and sort by
- * construction.
+ * What the endpoint can do — seek by cursor, filter server-side — is declared on the
+ * loader `meta`, not here, so the loader and the load-more read one declaration (ADR-063).
+ * The fetcher is a prop because a function does not survive the loader boundary (ADR-009);
+ * the query it receives is composed by `useTableRoutePage`, so a page inherits the view's
+ * filters and sort by construction.
  */
 export const TableRouteView = <
   TData extends Record<string, unknown>,

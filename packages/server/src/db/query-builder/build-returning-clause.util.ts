@@ -8,15 +8,11 @@ type BuildReturningClauseArgs = {
 };
 
 /**
- * Shared `RETURNING` builder for the write builders (insert/update/delete).
- *
- * - Omitted or empty `returning` → `''` (no clause; the write returns no rows).
- * - The single sentinel `['*']` → `RETURNING *` — the whole affected row, how
- *   the executors return rows generically without enumerating columns. `*` is a
- *   fixed SQL token, never an identifier, so it bypasses the per-column checks.
- * - Any other list is an explicit projection: each column passes
- *   assertSafeIdentifier plus the opt-in assertColumnAllowed, then is quoted.
- *
+ * Shared `RETURNING` builder:
+ * - omitted or empty → no clause
+ * - `['*']` alone → `RETURNING *` (`*` is a token, not an identifier)
+ * - any other list is an explicit projection through `assertSafeIdentifier` plus opt-in
+ *   `assertColumnAllowed`
  * `*` mixed with real column names is rejected — it is only valid on its own.
  */
 export const buildReturningClause = ({

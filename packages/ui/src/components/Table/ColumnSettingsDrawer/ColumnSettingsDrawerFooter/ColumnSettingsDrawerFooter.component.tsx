@@ -8,12 +8,6 @@ import {
 import { useBatchSetColumnDrawerSettings } from '../ColumnDrawerContext/actions';
 import { useCancelColumnSettings } from '../hooks/useCancelColumnSettings.hook';
 
-/**
- * Footer of the column settings drawer: the Accept and Cancel buttons.
- * Accept commits all drawer-local column state to the table and keeps the
- * drawer open; Cancel discards pending changes and closes unless pinned.
- * Both no-op while busy.
- */
 export const ColumnSettingsDrawerFooter = () => {
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();

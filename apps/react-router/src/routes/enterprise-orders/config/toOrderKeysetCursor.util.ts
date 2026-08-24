@@ -8,19 +8,11 @@ export type ToOrderKeysetCursorArgs = {
 };
 
 /**
- * The `QueryCursor` to seek with, or `undefined` to fall back to `OFFSET`. The
- * shape is checked where it is used — `selectRows` takes a `QueryCursor`.
- *
- * The cursor values arrive from the browser, and the sort is whatever the user
- * built in the table — neither is guaranteed to describe a total order. The
- * builder throws on one that does not (ADR-052), and a 500 is the wrong answer
- * here: keyset is an optimization, `OFFSET` is the ground truth, and the client
- * sends `skip` on every request either way. So a cursor that cannot be trusted
- * is dropped and the page is served the slow, correct way.
- *
- * The one case that is not hypothetical: sorting by `order_id` **and then**
- * another column leaves the primary key mid-sort, so `appendPrimaryKeySorting`
- * adds nothing and the sort does not end on a unique column.
+ * The builder throws on one that does not (ADR-052), and a 500 is the wrong answer here:
+ * keyset is an optimization, `OFFSET` is the ground truth, and the client sends `skip` on
+ * every request either way.
+ * So a cursor that cannot be trusted is dropped and the page is served the slow, correct
+ * way.
  */
 export const toOrderKeysetCursor = ({
   cursor,

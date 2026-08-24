@@ -26,19 +26,6 @@ type HandleRequest = (
   routerContext: EntryContext,
 ) => Promise<Response>;
 
-/**
- * Builds the `entry.server.tsx` default export every app needs identically
- * (streaming SSR via renderToPipeableStream, bot/SPA-mode full-render
- * detection, abort-on-timeout, HEAD short-circuit, CSP nonce threading,
- * critical-CSS preload header). `stylexCssHref` is the one genuinely
- * per-app value (each app compiles its own stylesheet) and stays a
- * parameter rather than being read inside this package.
- *
- * React Router's own tooling expects `entry.server.tsx` to export a
- * `streamTimeout` constant as a literal named export of that file — this
- * factory returns it alongside `handleRequest` so the caller can re-export
- * it directly: `export const { handleRequest, streamTimeout } = createHandleRequest(...)`.
- */
 export const createHandleRequest = ({
   stylexCssHref,
 }: CreateHandleRequestArgs) => {

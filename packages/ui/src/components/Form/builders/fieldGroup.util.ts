@@ -7,10 +7,6 @@ export type FieldGroupArgs<TValues extends Record<string, unknown>> = {
   readonly label: string;
 };
 
-/**
- * Build a card group section, including the `collapsible` / `defaultCollapsed`
- * flags only when provided.
- */
 export const fieldGroup = <TValues extends Record<string, unknown>>({
   collapsible,
   defaultCollapsed,

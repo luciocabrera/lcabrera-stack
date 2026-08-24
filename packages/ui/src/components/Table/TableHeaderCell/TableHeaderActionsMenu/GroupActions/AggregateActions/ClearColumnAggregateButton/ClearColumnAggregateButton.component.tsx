@@ -12,16 +12,12 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 import type { ClearColumnAggregateButtonProps } from './ClearColumnAggregateButton.types';
 
 /**
- * "No Aggregate" item: removes **every** aggregate applied to this column, not
- * just the last one chosen (#831).
- *
- * It **does** take a `columnKey`, unlike `ClearGroupingButton` beside it, and
- * the difference is not an oversight: an aggregate belongs to one column, so
- * clearing is a question about that column, where clearing grouping is a
- * whole-table action that asks about none.
- *
- * `target: undefined` is `deriveAggregateCommandState`'s clear command, so "is
- * there anything to clear" is answered there rather than restated here.
+ * It **does** take a `columnKey`, unlike `ClearGroupingButton` beside it, and the
+ * difference is not an oversight: an aggregate belongs to one column, so clearing is a
+ * question about that column, where clearing grouping is a whole-table action that asks
+ * about none.
+ * `target: undefined` is `deriveAggregateCommandState`'s clear command, so "is there
+ * anything to clear" is answered there rather than restated here.
  */
 export const ClearColumnAggregateButton = ({
   columnKey,

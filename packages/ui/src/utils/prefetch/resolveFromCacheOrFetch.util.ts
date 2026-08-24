@@ -6,11 +6,6 @@ type ResolveFromCacheOrFetchArgs<TResponse> = {
   readonly fetchFn: () => Promise<TResponse>;
 };
 
-/**
- * Resolves a response from the prefetch cache (hit or in-flight)
- * or falls back to a fresh fetch. Pure async function — cache reset
- * is the caller's responsibility.
- */
 export const resolveFromCacheOrFetch = async <TResponse>({
   cache,
   expectedSkip,

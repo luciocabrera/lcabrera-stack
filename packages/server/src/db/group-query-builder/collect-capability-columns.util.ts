@@ -6,15 +6,9 @@ type CollectCapabilityColumnsArgs = {
 };
 
 /**
- * Every column a grouped read has to know the capabilities of: its group keys,
- * plus the column each aggregate is applied to.
- *
- * De-duplicated, because the catalogue query takes a column list and asking for
- * the same column twice would return it twice — and `count(*)` contributes no
- * column at all, which is why this is not a plain concatenation.
- *
- * Order is preserved (keys first, then aggregate columns in declaration order)
- * so the query text a test asserts is stable rather than set-ordered.
+ * De-duplicated, because the catalogue query takes a column list and asking for the same
+ * column twice would return it twice — and `count(*)` contributes no column at all, which
+ * is why this is not a plain concatenation.
  */
 export const collectCapabilityColumns = ({
   aggregates,

@@ -5,7 +5,6 @@ export type NumberFilterInputProps<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly filter: NumberFilter | undefined;
   readonly onChange: (filter?: NumberFilter) => void;
-  /** The operator is now controlled by FilterInputs */
   readonly operator: NumberFilter['operator'];
 };
 

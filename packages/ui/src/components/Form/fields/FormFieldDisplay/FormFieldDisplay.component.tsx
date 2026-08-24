@@ -8,9 +8,8 @@ import { styles } from './FormFieldDisplay.stylex';
 import { formatFieldDisplayValue } from './utils';
 
 /**
- * Read-only leaf renderer for `view` mode (ADR-005): shows the field's label
- * above its formatted value as a definition-list row instead of a disabled
- * input widget. Empty values render an em dash placeholder.
+ * Read-only leaf renderer for `view` mode (ADR-005): shows the field's label above its
+ * formatted value as a definition-list row instead of a disabled input widget.
  */
 export const FormFieldDisplay = <TValues extends Record<string, unknown>>({
   field,

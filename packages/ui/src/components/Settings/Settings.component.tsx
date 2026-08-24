@@ -5,12 +5,6 @@ import { SettingsActions } from './SettingsActions/SettingsActions.component';
 import { SettingsDraftProvider } from './SettingsDraftContext/SettingsDraftContext.provider';
 import { SettingsTabs } from './SettingsTabs/SettingsTabs.component';
 
-/**
- * Global settings page; a thin shell composing self-connected delegates
- * inside the settings draft store provider: SettingsTabs (Navigation +
- * Pinning preference tabs) and SettingsActions (Accept/Cancel). The staged
- * draft lives in SettingsDraftContext — no state or handlers are drilled.
- */
 export const Settings = () => {
   return (
     <SettingsDraftProvider>

@@ -20,9 +20,8 @@ import { readTableLoaderStateFromRequest } from './readTableLoaderStateFromReque
 import { resolveTableCapabilityMeta } from './resolveTableCapabilityMeta.util';
 
 /**
- * What a `createTableRouteLoader` loader hands the route component. Derived
- * from the factory rather than restated, so the view side cannot drift from
- * what the loader actually returns — `useTableRoutePage` reads exactly this.
+ * Derived from the factory rather than restated, so the view side cannot drift from what
+ * the loader actually returns — `useTableRoutePage` reads exactly this.
  */
 export type TableRouteLoaderData<
   TData extends Record<string, unknown>,
@@ -38,69 +37,35 @@ type CreateTableRouteLoaderArgs<
   readonly appId: string;
   readonly columns: TableColumn<TData>[];
   /**
-   * The grouping this route applies when the URL carries no `grouping` param —
-   * a curated starting point rather than a free-form picker's empty state
-   * (#578). Sanitized against `columns` exactly as a URL-supplied one is.
-   *
-   * It is read only where the route also declared `isGroupingEnabled`, for the
-   * same reason the param is: a default on a route that cannot group would ask
-   * its endpoint for a shape it does not produce.
-   *
-   * Pair it with `meta.isGroupingLocked` to make it the only grouping the table
-   * offers. On its own it is a default the user may change — and clearing it is
-   * a change the URL then records explicitly, so it survives the next
-   * navigation.
+   * The grouping this route applies when the URL carries no `grouping` param — a curated
+   * starting point rather than a free-form picker's empty state (#578).
+   * It is read only where the route also declared `isGroupingEnabled`, for the same reason
+   * the param is: a default on a route that cannot group would ask its endpoint for a shape
+   * it does not produce.
    */
   readonly defaultGrouping?: TableGroupingState;
-  /**
-   * The route's data fetch. Return the promise **unawaited** — the factory
-   * hands it straight back as `dataPromise` for Suspense streaming, so the
-   * route renders its skeleton immediately.
-   */
   readonly fetchPage: (
     args: TableRouteFetchPageArgs<TData>,
   ) => Promise<TResponse>;
   /**
-   * When set, filterable string columns without a descriptor get a serializable
-   * `kind: 'distinct'` filter-options descriptor baked in (ADR-009). Omit to
-   * leave columns untouched (a route with minimal/no distinct filtering).
+   * When set, filterable string columns without a descriptor get a serializable `kind:
+   * 'distinct'` filter-options descriptor baked in (ADR-009).
    */
   readonly filterOptions?: { readonly transport: FilterOptionsTransport };
   readonly includeFilters?: boolean;
   /**
    * Route-specific meta merged over the base (e.g. `crud`, `deleteActionPath`).
-   * This is also where a request-shaping capability is declared, and omitting
-   * one leaves it off (ADR-063).
-   *
-   * Every declaration is carried out in `metaState` for the view's load-more to
-   * read. Two of them the factory does not act on — `isKeysetEnabled` and
-   * `isServerFilterEnabled` shape later pages only, so what the *first* page
-   * sends stays the route's own `fetchPage`, which receives `filters`
-   * regardless of any flag.
-   *
-   * `isGroupingEnabled` is the exception, and has to be: grouping changes the
-   * **first** query, so the flag is what makes this factory read the `grouping`
-   * param at all. Off, the keys it hands `fetchPage` are empty whatever the URL
-   * carries — which is what makes the flag the single enablement point rather
-   * than one of two.
+   * This is also where a request-shaping capability is declared, and omitting one leaves it
+   * off (ADR-063).
    */
   readonly meta?: Partial<TableMetaState>;
   readonly persistenceKey: string;
   /**
-   * Resolves what each of this route's columns may do in a grouped read, from
-   * the database catalogue (ADR-058).
-   *
+   * Resolves what each of this route's columns may do in a grouped read, from the database
+   * catalogue (ADR-058).
    * It is injected rather than called here because the answer is Node-only —
-   * `@lcabrera/server`'s `getColumnGroupingCapabilities` reaches Postgres, and
-   * this package is client-safe (ADR-038), so it may not import it. What the
-   * factory owns is *when* it runs and *where the answer lands*: only when the
-   * route declared `isGroupingEnabled`, and always in the final unconditional
-   * meta spread, so a client-controlled cookie can neither trigger it nor
-   * substitute for it (ADR-063).
-   *
-   * It runs concurrently with `fetchPage`, so the added latency is the
-   * catalogue query alone rather than a second serialized round trip. Omit it
-   * and the aggregate menu simply offers nothing.
+   * `@lcabrera/server`'s `getColumnGroupingCapabilities` reaches Postgres, and this package
+   * is client-safe (ADR-038), so it may not import it.
    */
   readonly resolveGroupingCapabilities?: () => Promise<
     Readonly<Record<string, TableColumnGroupingCapability>>
@@ -111,16 +76,12 @@ type CreateTableRouteLoaderArgs<
 };
 
 /**
- * What a route's data fetch receives. The factory has already read and
- * sanitized the request, so a route only has to turn this into its own
- * paginated query. `effectiveSorting` carries the primary-key tiebreaker for
- * stable server pagination (ADR-008); `filters` is sanitized against the
- * route's columns.
- *
- * `grouping` is the sanitized configuration — ordered keys plus the per-column
- * aggregate map — and it is **empty unless the route declared
- * `isGroupingEnabled`**, so a route that never opted in reads an empty one here
- * however the URL is hand-edited, and forwarding it unconditionally is safe.
+ * `effectiveSorting` carries the primary-key tiebreaker for stable server pagination
+ * (ADR-008); `filters` is sanitized against the route's columns.
+ * `grouping` is the sanitized configuration — ordered keys plus the per-column aggregate
+ * map — and it is **empty unless the route declared `isGroupingEnabled`**, so a route that
+ * never opted in reads an empty one here however the URL is hand-edited, and forwarding it
+ * unconditionally is safe.
  */
 type TableRouteFetchPageArgs<TData extends Record<string, unknown>> = {
   readonly effectiveSorting: SortingState<TData>;
@@ -128,33 +89,24 @@ type TableRouteFetchPageArgs<TData extends Record<string, unknown>> = {
   readonly grouping: TableGroupingState;
   readonly request: Request;
   /**
-   * Where subtotals go, resolved from the `totals` param and the UI-flags
-   * cookie. Forward it to the grouped read — it is emitted as the direction of
-   * the `GROUPING()` term, so a route that drops it silently ignores the
-   * setting rather than failing (#578).
+   * Forward it to the grouped read — it is emitted as the direction of the `GROUPING()`
+   * term, so a route that drops it silently ignores the setting rather than failing (#578).
    */
   readonly totalsPlacement: TableTotalsPlacement;
 };
 
 /**
- * Build a table route's `loader` from config plus a `fetchPage` callback — the
- * loader-side counterpart to the generic `persist-cookie.action`. It absorbs
- * the boilerplate every table route repeated: read persisted state from URL +
- * cookies, sanitize sorting, append the primary-key tiebreaker, optionally bake
- * distinct filter descriptors onto the columns, and assemble the serializable
- * `columnsState` / `metaState`. Only the data fetch stays with the route.
- *
- * The returned loader returns `fetchPage`'s promise **unawaited**, preserving
- * Suspense streaming. Everything it returns is serializable — no functions
- * cross the single-fetch boundary (ADR-009).
- *
- * It is `async` only because a grouping-enabled route has one plain value it
- * must resolve before the document can be painted: the catalogue's answer about
- * what each column may do (ADR-058), which shapes a menu rather than a promise
- * a component can suspend on. `fetchPage` is called **before** that await, so
- * the data query and the catalogue query overlap and the added latency is the
- * slower of the two rather than their sum. A route that declares no grouping
- * awaits nothing at all.
+ * It absorbs the boilerplate every table route repeated: read persisted state from URL +
+ * cookies, sanitize sorting, append the primary-key tiebreaker, optionally bake distinct
+ * filter descriptors onto the columns, and assemble the serializable `columnsState` /
+ * `metaState`.
+ * The returned loader returns `fetchPage`'s promise **unawaited**, preserving Suspense
+ * streaming. Everything it returns is serializable — no functions cross the single-fetch
+ * boundary (ADR-009).
+ * It is `async` only because a grouping-enabled route has one plain value it must resolve
+ * before the document can be painted: the catalogue's answer about what each column may do
+ * (ADR-058). `fetchPage` is called **before** that await, so the data query and the
+ * catalogue query overlap.
  */
 export const createTableRouteLoader = <
   TData extends Record<string, unknown>,

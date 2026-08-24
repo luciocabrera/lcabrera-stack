@@ -10,12 +10,6 @@ type InsertAdjacentToPinnedGroupArgs<TData = Record<string, unknown>> = {
   readonly side: 'left' | 'right';
 };
 
-/**
- * Inserts a column adjacent to the pinned group on the given side.
- * - For 'left': inserts after the last left-pinned column.
- * - For 'right': inserts before the first right-pinned column.
- * Returns a new order array without mutating the input.
- */
 export const insertAdjacentToPinnedGroup = <TData = Record<string, unknown>>({
   columnKey,
   columnPinning,

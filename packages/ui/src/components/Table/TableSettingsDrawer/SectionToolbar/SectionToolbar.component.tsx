@@ -7,11 +7,6 @@ import type { SectionToolbarProps } from './SectionToolbar.types';
 
 import { styles } from './SectionToolbar.stylex';
 
-/**
- * Shared drawer section toolbar. Renders a row of action buttons from a
- * descriptor list and owns the `footer`/`toolbar` variant presentation
- * (color, size, width, icon size, tooltip vs. label).
- */
 export const SectionToolbar = ({
   buttons,
   isBusy = false,

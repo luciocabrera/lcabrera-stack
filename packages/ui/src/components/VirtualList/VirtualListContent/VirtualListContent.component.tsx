@@ -6,13 +6,6 @@ import { VirtualListBody } from '../VirtualListBody';
 import { VirtualListFooter } from '../VirtualListFooter';
 import { VirtualListHeader } from '../VirtualListHeader';
 
-/**
- * Provider-less composition of the VirtualList regions: the container plus
- * the self-connected Header/Body/Footer delegates. Fully self-connected
- * (zero props) — layout config comes from the list store. Must render
- * inside `VirtualListProvider` — mounted either by `VirtualList` itself or
- * composed by a host provider (e.g. `VirtualSelectProvider`).
- */
 export const VirtualListContent = () => {
   const shouldFillHeight = useGetShouldFillHeight();
 

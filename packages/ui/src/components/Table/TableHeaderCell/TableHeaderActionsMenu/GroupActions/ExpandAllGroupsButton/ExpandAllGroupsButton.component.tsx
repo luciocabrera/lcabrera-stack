@@ -8,13 +8,10 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 import type { ExpandAllGroupsButtonProps } from './ExpandAllGroupsButton.types';
 
 /**
- * "Expand All Groups" item of the grouping section: always shown to keep the
- * menu layout stable, disabled while nothing is collapsed.
- *
- * It writes client state and takes effect immediately, unlike the drawer's
- * grouping section, which stages its edits behind Accept (#654). That is why it
- * lives here and not there: expansion is not a setting to be applied
- * (ADR-061).
+ * "Expand All Groups" item of the grouping section: always shown to keep the menu layout
+ * stable, disabled while nothing is collapsed.
+ * It writes client state and takes effect immediately, unlike the drawer's grouping
+ * section, which stages its edits behind Accept (#654).
  */
 export const ExpandAllGroupsButton = ({
   onClose,

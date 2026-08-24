@@ -37,14 +37,8 @@ import {
 } from '../config';
 
 /**
- * Server-only Postgres data access for `wide_alltypes_150`, built entirely on
- * the generic `@lcabrera/server` executors (no entity-specific SQL). It reaches
- * the pool via `getPool`, so it must never enter the client bundle.
- *
- * This file lives in a `.server/` directory (a React Router framework
- * convention): every module inside is stripped from the client graph, and the
- * build FAILS if client code imports it. Import it only from loaders, actions
- * and middleware. `routes/enterprise-orders/.server/` is the blueprint.
+ * Server-only Postgres access for `wide_alltypes_150`. Lives in `.server/`, so the build
+ * fails if client code imports it. Reaches the pool via `getPool`.
  */
 
 const TARGET = {
@@ -62,9 +56,7 @@ const NO_GROUPING: TableGroupingState = {
 };
 
 export type SelectGroupedWideAlltypes150Args = {
-  /** The aggregates to project, in order; a column may appear more than once (#831). */
   readonly aggregates: TableGroupingState['aggregates'];
-  /** The columns the rows are grouped by, in nesting order. */
   readonly groupKeys: readonly string[];
   readonly groupMode: TableGroupingState['mode'];
   /** The granularity each temporal key is grouped at, by column (ADR-084). */
@@ -73,23 +65,12 @@ export type SelectGroupedWideAlltypes150Args = {
 };
 
 /**
- * Read one row per distinct combination of the group keys.
- *
- * **This function is the point of #575.** Every rule a grouped read depends on
- * — the `count(*)`-first aggregate list, the alias pairing, the grouped
- * `ORDER BY`, the `GROUPING()` decode — comes from `@lcabrera/server/db/olap`
- * (ADR-082, #643). What is written here is this table's own: which table, which
- * row ceiling, and turning the UI's aggregate record into a list, which reads a
- * `@lcabrera/ui` type the server package may not depend on (ADR-038).
- *
- * Compare it against `enterpriseOrders.service.ts` and the two are the same
- * eight lines around different constants. That is the genericity claim, and it
- * is checkable by reading rather than asserted.
- *
- * **No error class leaves here**, for the same reason as the orders route:
- * `@lcabrera/server` raises refusals and timeouts as classes, and single fetch
- * strips their prototype without a word, so an `instanceof` on the client is
- * always false (ADR-050, ADR-066).
+ * **This function is the point of #575.** Every rule a grouped read depends on — the
+ * `count(*)`-first aggregate list, the alias pairing, the grouped `ORDER BY`, the
+ * `GROUPING()` decode — comes from `@lcabrera/server/db/olap` (ADR-082, #643).
+ * What is written here is this table's own: which table, which row ceiling, and turning
+ * the UI's aggregate record into a list, which reads a `@lcabrera/ui` type the server
+ * package may not depend on (ADR-038).
  */
 const selectGroupedWideAlltypes150 = async ({
   aggregates: selectedAggregates,
@@ -151,13 +132,12 @@ const selectGroupedWideAlltypes150 = async ({
 };
 
 /**
- * What each of this route's columns may do in a grouped read, from the pg
- * catalogue (ADR-058).
- *
- * The wide table is where this matters most: 150 columns of deliberately mixed
- * types, so the coarse `TableColumn.dataType` vocabulary — which reports
- * `numeric`, `jsonb` and `point` alike as `string` (#550) — would offer the
- * wrong aggregates on a large fraction of them.
+ * What each of this route's columns may do in a grouped read, from the pg catalogue
+ * (ADR-058).
+ * The wide table is where this matters most: 150 columns of deliberately mixed types, so
+ * the coarse `TableColumn.dataType` vocabulary — which reports `numeric`, `jsonb` and
+ * `point` alike as `string` (#550) — would offer the wrong aggregates on a large fraction
+ * of them.
  */
 export const selectWideAlltypes150GroupingCapabilities = async () =>
   getColumnGroupingCapabilities({
@@ -167,32 +147,17 @@ export const selectWideAlltypes150GroupingCapabilities = async () =>
   });
 
 export type SelectWideAlltypes150PageArgs = {
-  /** Absent or empty means an ordinary paginated read. */
   readonly grouping?: TableGroupingState;
   readonly limit: number;
   readonly offset: number;
   /**
-   * The sort the caller asked for, already reduced to `{ columnKey, direction }`
-   * pairs. Narrowing it to what this table can actually order by happens here
-   * rather than in each caller, so the SSR loader and the paginated resource
-   * route cannot order a page two different ways.
+   * Narrowing it to what this table can actually order by happens here rather than in each
+   * caller, so the SSR loader and the paginated resource route cannot order a page two
+   * different ways.
    */
   readonly sorting: readonly ColumnSort[];
 };
 
-/**
- * Read a page of wide rows, plus the row count for the same page's `hasMore`.
- *
- * The sort is narrowed before it reaches the builder — unsortable columns
- * dropped, then capped at `MAX_WIDE_ALLTYPES_SORT_RULES` — because
- * `selectRows` validates every term and would otherwise reject the entire read
- * over one column the table happily selects.
- *
- * The count runs on **every** page, which is what the JSON endpoint this
- * replaces did: its response always carried a `total`, and this route's table
- * reads one from every page. The page and the count are independent queries, so
- * they run concurrently rather than end to end.
- */
 export const selectWideAlltypes150Page = async ({
   grouping = NO_GROUPING,
   limit,
@@ -233,33 +198,20 @@ export const selectWideAlltypes150Page = async ({
 };
 
 export type ReadWideAlltypes150PageArgs = {
-  /** Absent or empty means an ordinary paginated read. */
   readonly grouping?: TableGroupingState;
   readonly limit: number;
-  /** The SSR request's URL — only the external branch has an origin to resolve. */
   readonly requestUrl: string;
   readonly skip: number;
   readonly sorting: SortingState<WideAlltypes150>;
 };
 
 /**
- * A page of wide rows from whichever source this deployment is configured for.
- *
- * Self-hosted is the default and reads Postgres in this process: no API server
- * has to be running for `/wide-alltypes-150` to render (#687). `VITE_API_URL`
- * opts back into the external endpoint, which answers the identical
- * `{ data, hasMore, total }` — so the branch decides where the rows come from
- * and nothing downstream can tell.
- *
- * The route calls this for its first page; the browser's load-more makes the
- * same choice for itself inside `fetchWideAlltypes150Page`.
- *
- * **`grouping` reaches only the self-hosted branch**, and the loader is what
- * keeps that honest: it declares `isGroupingEnabled` from the same switch, so an
- * external deployment never offers the control and never sends the param. The
- * external endpoint has no grouping API to forward to, and answering a grouped
- * request from this process while the rows came from another one would summarise
- * a different result set than the page it sits above.
+ * **`grouping` reaches only the self-hosted branch**, and the loader is what keeps that
+ * honest: it declares `isGroupingEnabled` from the same switch, so an external deployment
+ * never offers the control and never sends the param.
+ * The external endpoint has no grouping API to forward to, and answering a grouped request
+ * from this process while the rows came from another one would summarise a different
+ * result set than the page it sits above.
  */
 export const readWideAlltypes150Page = async ({
   grouping,

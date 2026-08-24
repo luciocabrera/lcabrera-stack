@@ -18,31 +18,11 @@ type AssertGroupKeysArgs = {
 };
 
 /**
- * Every reason a set of group keys can be refused, checked before anything is
- * emitted.
- *
- * The depth half is delegated to `assertGroupDepth`, which needs no capability
- * map — and that is what lets the executor run it *before any round trip*, so a
- * request past the cap never costs a catalogue query (ADR-066). The builder
- * still runs it too: the pre-flight check is an earlier gate, never the only one.
- *
- * The capability lookup is what enforces ADR-058 from inside a pure function:
- * a column the catalogue refused is refused here with the catalogue's own
- * reason, rather than being re-litigated against a type vocabulary that cannot
- * tell `point` from `text`.
- *
- * **A key carrying a granularity is judged on that granularity alone.** The two
- * checks are alternatives rather than a pair, because a date column's raw
- * refusal is the very reason a granularity was asked for: `order_date` is
- * `too-many-distinct` at one group per calendar day and unremarkable at a
- * month, so requiring `canGroup` first would refuse every request this feature
- * exists to serve (#786).
- *
- * **A granularity naming a column that is not a key is refused, not ignored.**
- * The two travel as separate members of the same request, so they can disagree;
- * silently dropping one would run a query whose grouping is not the one the URL
- * describes, which is the whole-state rule the URL codec is written under
- * (ADR-061).
+ * The depth half is delegated to `assertGroupDepth`, which needs no capability map — and
+ * that is what lets the executor run it *before any round trip*, so a request past the cap
+ * never costs a catalogue query (ADR-066).
+ * The builder still runs it too: the pre-flight check is an earlier gate, never the only
+ * one.
  */
 export const assertGroupKeys = ({
   allowedColumns,

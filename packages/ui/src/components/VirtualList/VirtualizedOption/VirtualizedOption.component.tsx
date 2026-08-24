@@ -12,11 +12,6 @@ import { useGetHasCheckboxes } from '../contexts/list/selectors';
 import { SelectAllOption } from '../SelectAllOption';
 import { SelectOption } from '../SelectOption';
 
-/**
- * Self-connected row owner: resolves what the given window index renders
- * (Select All at index 0, otherwise an option row) and wires the pure
- * SelectAllOption/SelectOption leaves to selectors and actions.
- */
 export const VirtualizedOption = ({ index }: VirtualizedOptionProps) => {
   const filteredOptions = useGetFilteredOptions();
   const hasCheckboxes = useGetHasCheckboxes();

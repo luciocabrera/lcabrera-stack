@@ -9,10 +9,6 @@ import {
 import { VirtualizedOption } from '../../VirtualizedOption';
 import { styles } from './VirtualListBodyOptions.stylex';
 
-/**
- * Renders the virtualized window of rows (Table analog: TableBodyRows). The
- * window bounds arrive as producer→child props; row content self-connects.
- */
 export const VirtualListBodyOptions = ({
   endIndex,
   offsetY,

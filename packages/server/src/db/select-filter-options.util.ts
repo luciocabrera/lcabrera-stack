@@ -21,17 +21,6 @@ type SelectFilterOptionsArgs = ExecutorOptions & {
   readonly table: string;
 };
 
-/**
- * One page of a single column's distinct values, shaped for a filter dropdown:
- * `SELECT DISTINCT <column>` excluding NULL — and the empty string for `text`
- * columns — ordered ascending so pages are stable. This is the dropdown
- * specialization built *on top of* the generic `selectDistinctRows`, not a
- * second query path: it just composes the right `fields`/`filters`/`sort`.
- *
- * `hasMore` follows the page-size convention — a page filled to `limit` implies
- * another may exist. The return is widened to `readonly`; pg hands back mutable
- * arrays and nothing downstream should write to them.
- */
 export const selectFilterOptions = async ({
   allowedColumns,
   column,

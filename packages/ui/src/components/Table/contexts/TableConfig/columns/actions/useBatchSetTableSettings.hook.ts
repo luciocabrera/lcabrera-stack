@@ -22,25 +22,17 @@ type BatchSetTableSettingsArgs<TData> = {
   /** The whole grouping configuration to apply — staged, or unchanged. */
   readonly grouping: TableGroupingState;
   readonly settings: BatchTableSettingsUpdate<TData>;
-  /** Where totals go — staged, or unchanged. */
   readonly totalsPlacement: TableTotalsPlacement;
 };
 
 /**
- * The drawer's Accept: every staged setting committed in one write.
- *
- * Grouping travels with the column state instead of taking its own commit
- * path because both persist through the same `persist-table-state` fetcher,
- * and `router.fetch` aborts a key's in-flight request before starting the next
- * — so a second call would cancel the first commit and still cost a second
- * navigation for whichever half survived. One `persistTableState` call
- * carrying every entry is what makes Accept exactly one navigation, however
- * many edits were staged.
- *
- * Grouping is resolved rather than written blind: `resolveTableGroupingUpdate`
- * answers `unchanged` when the staged configuration is the applied one, which
- * is what keeps an Accept that touched no grouping from adding a `grouping`
- * param write to the batch.
+ * Grouping travels with the column state instead of taking its own commit path because
+ * both persist through the same `persist-table-state` fetcher, and `router.fetch` aborts a
+ * key's in-flight request before starting the next — so a second call would cancel the
+ * first commit and still cost a second navigation for whichever half survived.
+ * Grouping is resolved rather than written blind: `resolveTableGroupingUpdate` answers
+ * `unchanged` when the staged configuration is the applied one, which is what keeps an
+ * Accept that touched no grouping from adding a `grouping` param write to the batch.
  */
 export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
   const { columnsStore, groupingStore, metaStore } =

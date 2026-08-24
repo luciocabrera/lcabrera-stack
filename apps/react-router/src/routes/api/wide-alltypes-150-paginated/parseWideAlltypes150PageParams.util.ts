@@ -16,14 +16,8 @@ export type ParsedWideAlltypes150PageParams = {
 };
 
 /**
- * Parse the paginated wide-alltypes resource-route search params into the
- * window and sort the service takes.
- *
- * `limit` is clamped into `[1, MAX_WIDE_ALLTYPES_LIMIT]`, which the JSON
- * endpoint this replaces also did: a row here is 150 columns wide, and the URL
- * is public. Narrowing the sort to what the table can order by is the service's
- * job, not this parser's — the SSR loader never passes through here and needs
- * the same narrowing.
+ * Narrowing the sort to what the table can order by is the service's job, not this
+ * parser's — the SSR loader never passes through here and needs the same narrowing.
  */
 export const parseWideAlltypes150PageParams = (
   params: URLSearchParams,

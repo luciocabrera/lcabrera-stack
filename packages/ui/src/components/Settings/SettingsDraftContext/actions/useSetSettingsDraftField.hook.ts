@@ -7,7 +7,6 @@ type SetSettingsDraftFieldArgs<K extends keyof SettingsDraft> = {
   readonly value: SettingsDraft[K];
 };
 
-/** Stage a single settings-draft field update. */
 export const useSetSettingsDraftField = () => {
   const { draftStore } = useSettingsDraftContextValue();
 

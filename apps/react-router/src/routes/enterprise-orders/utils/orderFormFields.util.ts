@@ -40,17 +40,6 @@ export type BuildOrderFormFieldsArgs = {
   readonly mode: FormMode;
 };
 
-/**
- * Build the enterprise-order Form field tree (tabs → card groups → rows) for a
- * given mode (feature plan §4). Small enum fields render as radio-cards, large
- * sets as selects, and money fields as currency. Server-assigned identity,
- * computed money totals and audit columns are read-only and only appear in
- * edit/view (create derives them on save); `view` mode renders every field
- * read-only via the Form itself. The tree is assembled from the shared
- * `@lcabrera/ui` Form builders (`field`/`choiceField`/`toggleField`/`fieldRow`/
- * `fieldGroup`), bound to `EnterpriseOrderValues` via `createFieldBuilders`, so
- * the repeated field scaffolding lives in one place.
- */
 export const buildOrderFormFields = ({
   mode,
 }: BuildOrderFormFieldsArgs): readonly FieldNode<EnterpriseOrderValues>[] => {

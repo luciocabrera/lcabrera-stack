@@ -11,28 +11,12 @@ export const TITLE = {
 };
 
 /**
- * How many rows this route loads up front.
- *
- * Unlike its `car-sales-infinite` sibling, this route deliberately loads its
- * rows in one shot and paginates them in memory — it never fetches again, so
- * whatever it asks for here is the whole dataset it will ever show.
- *
- * That demo only stays honest while the slice is small. It previously asked
- * for the table unbounded, and `car_sales` holds 500k rows: a single request
- * produced a ~421MB JSON body, and SSR died with `Zone Allocation failed`
- * while serializing it into the hydration payload (~2.4GB RSS). Raising the
- * heap does not help — a V8 zone is malloc-backed, outside the JS heap — and
- * both the response and the encoded payload were within ~1.6x of V8's hard
- * 512MB string limit, so a modestly larger table would throw outright.
- *
- * 1000 rows demonstrates the same in-memory pagination at ~0.8MB.
+ * Unlike its `car-sales-infinite` sibling, this route deliberately loads its rows in one
+ * shot and paginates them in memory — it never fetches again, so whatever it asks for here
+ * is the whole dataset it will ever show.
  */
 export const CLIENT_PAGINATION_ROW_LIMIT = 1000;
 
-/**
- * Column definitions for the CarSale data table.
- * Shared between car-sales (paginated) and car-sales-infinite routes.
- */
 export const COLUMNS: TableColumn<CarSale>[] = [
   {
     dataType: 'number',

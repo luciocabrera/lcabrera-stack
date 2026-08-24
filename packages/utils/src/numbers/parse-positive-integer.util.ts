@@ -3,10 +3,6 @@ type ParsePositiveIntegerArgs = {
   readonly value: string | undefined;
 };
 
-/**
- * Parses a non-negative integer search param, falling back when the value
- * is missing, malformed, fractional, or negative.
- */
 export const parsePositiveInteger = ({
   fallback,
   value,

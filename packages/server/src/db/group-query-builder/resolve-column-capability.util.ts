@@ -15,13 +15,10 @@ import { toRoleAggregates } from './to-role-aggregates.util.ts';
  * not be a group key — which of the reasons applies.
  */
 /**
- * The histogram span as a usable number, or nothing.
- *
- * Two shapes have to fall through here. A column with no histogram yields SQL
- * NULL, which `pg` hands over as an absence; and `extract(epoch …)` is `numeric`,
- * which `pg` hands over as a **string** unless the query casts it — the cast is
- * there, and this is what keeps a missing one from silently coercing its way
- * through the arithmetic below.
+ * A column with no histogram yields SQL NULL, which `pg` hands over as an absence; and
+ * `extract(epoch …)` is `numeric`, which `pg` hands over as a **string** unless the query
+ * casts it — the cast is there, and this is what keeps a missing one from silently
+ * coercing its way through the arithmetic below.
  */
 const toSpanDays = (value: unknown) =>
   typeof value === 'number' && Number.isFinite(value) ? value : undefined;

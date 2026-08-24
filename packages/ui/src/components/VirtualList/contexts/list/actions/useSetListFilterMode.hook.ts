@@ -7,10 +7,6 @@ import {
   INITIAL_LIST_STATE,
 } from '../../VirtualListContext.constants';
 
-/**
- * Switches the footer filter mode and recomputes the derived list state in
- * the data store (filtered options, select-all flags, content mode).
- */
 export const useSetListFilterMode = () => {
   const { dataStore, listStore } = useVirtualListContextValue();
 

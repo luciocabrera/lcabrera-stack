@@ -7,14 +7,6 @@ import type { BooleanFilterInputProps } from './BooleanFilterInput.types';
 
 import { styles } from './BooleanFilterInput.stylex';
 
-/**
- * All / True / False, plus the empty operators.
- *
- * A boolean column is the one type `FilterInputs` gives no operator dropdown —
- * these buttons *are* its operator — so this is the only place the empty
- * operators can be offered for one, and the only place an empty filter restored
- * from a URL can be shown or cleared.
- */
 export const BooleanFilterInput = ({
   filter,
   onChange,

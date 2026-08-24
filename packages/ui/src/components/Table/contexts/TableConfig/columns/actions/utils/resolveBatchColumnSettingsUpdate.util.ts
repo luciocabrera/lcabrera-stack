@@ -26,10 +26,8 @@ export type BatchColumnSettingsUpdate<TData> = {
 };
 
 type ResolveBatchColumnSettingsUpdateArgs<TData> = {
-  /** The applied aggregates — see `getPinnedDerivedColumnsState`. */
   readonly aggregates: readonly TableColumnAggregate[];
   readonly columnsState?: Partial<TableColumnsState<TData>>;
-  /** The applied group keys — see `getPinnedDerivedColumnsState`. */
   readonly groupingKeys: readonly string[];
   readonly settings: BatchColumnSettingsUpdate<TData>;
 };

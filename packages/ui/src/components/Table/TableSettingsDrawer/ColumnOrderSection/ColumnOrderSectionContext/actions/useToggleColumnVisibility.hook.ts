@@ -8,10 +8,6 @@ type UseToggleColumnVisibilityArgs = {
   readonly columnKey: string;
   readonly isVisible: boolean;
 };
-/**
- * Hook to toggle a column's visibility.
- * No-op for static columns.
- */
 export const useToggleColumnVisibility = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();

@@ -5,20 +5,13 @@ import type { TableGroupShareProps } from './TableGroupShare.types';
 import { TableGroupShareValue } from './TableGroupShareValue';
 
 /**
- * One measure as a share of the grand total, when that measure asked for one.
- *
- * A self-connected delegate: it answers "is a share asked of this aggregate"
- * from the grouping store itself, so `TableGroupAggregate` renders it
- * unconditionally and forwards only the identity and the value it already
- * holds.
- *
- * It asks about the `(columnKey, fn)` pair rather than the column, because a
- * column may carry both `sum` and `count` and each takes its own share (#831).
- *
- * It does nothing but that check, and the split is deliberate — deriving the
- * denominator is a fold over every row, and a hook cannot be called
- * conditionally, so the work lives in `TableGroupShareValue` where it is only
- * mounted for a measure that is actually showing a share (#648).
+ * A self-connected delegate: it answers "is a share asked of this aggregate" from the
+ * grouping store itself, so `TableGroupAggregate` renders it unconditionally and forwards
+ * only the identity and the value it already holds.
+ * It does nothing but that check, and the split is deliberate — deriving the denominator
+ * is a fold over every row, and a hook cannot be called conditionally, so the work lives
+ * in `TableGroupShareValue` where it is only mounted for a measure that is actually
+ * showing a share (#648).
  */
 export const TableGroupShare = ({
   columnKey,

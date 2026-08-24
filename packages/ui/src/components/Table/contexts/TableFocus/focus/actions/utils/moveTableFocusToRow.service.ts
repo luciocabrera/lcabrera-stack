@@ -14,19 +14,12 @@ type MoveTableFocusToRowArgs = {
 };
 
 /**
- * Moves the grid's focus target to another row of the same column, keeping
- * whether DOM focus follows honest.
- *
- * A move the user did not make with the keyboard — a collapse folding away the
- * row they were on — must not *take* DOM focus when they are working somewhere
- * else on the page. So the request is only raised while focus is already inside
- * the grid; otherwise the target is repositioned quietly and the grid is
- * re-entered on it later, which is what `isGridFocused` exists to distinguish
- * (ADR-062).
- *
- * A target row with no column is not a target: `setTableFocusTarget` writes the
- * two together, so a stored row without one means the grid has never been
- * entered and there is nothing to keep pointed at a row.
+ * So the request is only raised while focus is already inside the grid; otherwise the
+ * target is repositioned quietly and the grid is re-entered on it later, which is what
+ * `isGridFocused` exists to distinguish (ADR-062).
+ * A target row with no column is not a target: `setTableFocusTarget` writes the two
+ * together, so a stored row without one means the grid has never been entered and there is
+ * nothing to keep pointed at a row.
  */
 export const moveTableFocusToRow = ({
   container,

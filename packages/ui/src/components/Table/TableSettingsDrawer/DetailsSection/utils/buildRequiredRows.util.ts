@@ -7,11 +7,6 @@ type BuildRequiredRowsArgs = {
   readonly totalRows: number;
 };
 
-/**
- * Build the always-visible required metric rows.
- * @param args - Totals, column count, and integer formatter.
- * @returns The required detail rows.
- */
 export const buildRequiredRows = ({
   columnCount,
   formatInteger,

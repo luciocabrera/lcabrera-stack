@@ -5,13 +5,12 @@ import type {
 } from '../query-builder/query-builder.types';
 
 /**
- * How one group key was truncated, as the drill translation needs it: the
- * granularity, and whether the column carried a time zone.
- *
- * `isZoned` is here rather than being looked up because the translation is pure
- * and the column's type is a catalogue fact — the route resolves it once (see
- * `toGroupKeyTruncations`) and hands the answer down, the same way
- * `capabilities` reaches the builder (ADR-058).
+ * How one group key was truncated, as the drill translation needs it: the granularity, and
+ * whether the column carried a time zone.
+ * `isZoned` is here rather than being looked up because the translation is pure and the
+ * column's type is a catalogue fact — the route resolves it once (see
+ * `toGroupKeyTruncations`) and hands the answer down, the same way `capabilities` reaches
+ * the builder (ADR-058).
  */
 export type GroupKeyTruncation = {
   readonly isZoned: boolean;
@@ -19,14 +18,9 @@ export type GroupKeyTruncation = {
 };
 
 /**
- * The paginated read of the rows underneath one group row.
- *
- * Structurally a subset of what a route's own page-select takes, so a caller
- * spreads it into that call rather than mapping it member by member.
- *
- * **It carries no grouping.** Passing the view's grouping through would send the
- * read straight back into the grouped branch and return group rows again — the
- * one mistake that looks like it works.
+ * **It carries no grouping.** Passing the view's grouping through would send the read
+ * straight back into the grouped branch and return group rows again — the one mistake that
+ * looks like it works.
  */
 export type OlapDrillRead = {
   readonly filters: readonly QueryFilter[];
@@ -49,9 +43,8 @@ export type OlapDrillTranslation =
   | { readonly kind: 'refused'; readonly reason: OlapDrillRefusal };
 
 /**
- * A page of the rows underneath one group row: the drill read, positioned. The
- * cursor rides along untouched so a route that keysets can hand it straight to
- * its own page-select.
+ * The cursor rides along untouched so a route that keysets can hand it straight to its own
+ * page-select.
  */
 export type OlapGroupRead = OlapDrillRead & {
   readonly cursor?: readonly unknown[];

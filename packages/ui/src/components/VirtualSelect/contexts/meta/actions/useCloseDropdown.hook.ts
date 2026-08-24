@@ -1,9 +1,8 @@
 import { useVirtualSelectContextValue } from '../../useVirtualSelectContextValue.hook';
 
 /**
- * Closes the dropdown. Distinct from `useToggleDropdown` because a toggle is
- * suppressed while the list is busy, so a dismissal expressed as a toggle
- * silently does nothing over a loading list.
+ * Distinct from `useToggleDropdown` because a toggle is suppressed while the list is busy,
+ * so a dismissal expressed as a toggle silently does nothing over a loading list.
  */
 export const useCloseDropdown = () => {
   const { onCloseDropdown } = useVirtualSelectContextValue();

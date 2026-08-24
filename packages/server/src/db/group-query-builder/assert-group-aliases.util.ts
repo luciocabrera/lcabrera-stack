@@ -2,27 +2,17 @@ import { assertSafeIdentifier } from '../query-builder/assert-safe-identifier.ut
 import { MAX_IDENTIFIER_LENGTH } from './group-query-builder.constants.ts';
 
 type AssertGroupAliasesArgs = {
-  /** Every alias the SELECT list will project, the mask's included. */
   readonly aliases: readonly string[];
   readonly allowedColumns: readonly string[];
 };
 
 /**
- * The projection's alias rules, all of which exist because Postgres fails them
- * quietly.
- *
- * **Length.** Postgres truncates an identifier past its limit with only a
- * `NOTICE`, and `pg` then returns one row object in which the second of two
- * truncation-equal aliases has overwritten the first — the first column is not
- * mangled, it is gone. Refusing is the only outcome a caller can act on; the
- * escape hatch is an explicit shorter `alias` on the aggregate.
- *
- * **Collision with a real column.** `group_mask` and `count_rows` are fixed
- * names, so a table that already has one would produce a duplicate output
- * column with the same silent overwrite.
- *
- * Group keys need no separate check: they are members of `allowedColumns`,
- * which `assertGroupKeys` has already established.
+ * **Length.** Postgres truncates an identifier past its limit with only a `NOTICE`, and
+ * `pg` then returns one row object in which the second of two truncation-equal aliases has
+ * overwritten the first — the first column is not mangled, it is gone.
+ * **Collision with a real column.** `group_mask` and `count_rows` are fixed names, so a
+ * table that already has one would produce a duplicate output column with the same silent
+ * overwrite.
  */
 export const assertGroupAliases = ({
   aliases,

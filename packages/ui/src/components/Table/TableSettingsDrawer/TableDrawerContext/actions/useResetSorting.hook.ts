@@ -4,9 +4,6 @@ import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableC
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
-/**
- * Hook to reset sorting to the original table configuration state
- */
 export const useResetSorting = () => {
   const { columnsStore } = useTableConfigContextValue();
   const { columnsStore: columnsDrawerStore } = useTableDrawerContextValue();

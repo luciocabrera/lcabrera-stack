@@ -20,12 +20,9 @@ const PERSISTED_SLICES = [
 ] as const;
 
 /**
- * Collect persisted table state slices from a raw storage source.
- * Shared by the cookie and sessionStorage readers — each supplies how to read a
- * raw slice value (and, for cookies, how to decode it) while this helper owns
- * the slice list, version check, and `columnVisibility` array→Set conversion.
- * @param args - Persistence key, raw slice reader, and optional raw transform.
- * @returns The parsed partial persisted state.
+ * Shared by the cookie and sessionStorage readers — each supplies how to read a raw slice
+ * value (and, for cookies, how to decode it) while this helper owns the slice list,
+ * version check, and `columnVisibility` array→Set conversion.
  */
 export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
   appId,

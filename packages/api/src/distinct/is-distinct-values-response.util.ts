@@ -1,9 +1,5 @@
 import type { DistinctValuesResponse } from './distinct.types.ts';
 
-/**
- * Type guard for the distinct-values endpoint response shape
- * (`{ hasMore: boolean; values: string[] }`).
- */
 export const isDistinctValuesResponse = (
   value: unknown,
 ): value is DistinctValuesResponse =>

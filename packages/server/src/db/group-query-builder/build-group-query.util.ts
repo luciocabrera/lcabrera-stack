@@ -21,24 +21,10 @@ import { resolveGroupKeyExpression } from './resolve-group-key-expression.util.t
 import { toGroupingSetMask } from './to-grouping-set-mask.util.ts';
 
 /**
- * The grouped read: keys, one variadic `GROUPING()` mask, the aggregates, and a
- * `GROUP BY GROUPING SETS` over the expanded sets (ADR-059).
- *
- * Pure, like its flat sibling — it never touches the pool, so its suite runs in
- * the DB-free lane. Legality it cannot derive is *passed in*: `capabilities`
- * carries the catalogue's answer per ADR-058, and every refusal below is that
- * answer being enforced rather than a second, weaker rule.
- *
- * The result carries `keys` and `groupingSetMasks` beside the SQL, because the
- * mask alone cannot be decoded — bit positions are relative to the key order,
- * so the decoder has to travel with the data it decodes. It carries `guardRails`
- * for the same reason: the emitted `LIMIT` is the rails' answer rather than the
- * requested `maxRows`, and a caller has to know when reaching it means the
- * result was refused rather than merely truncated (ADR-066).
- *
- * One departure from every other builder here: the `SELECT` list is assembled
- * first, so a `FILTER (WHERE …)` aggregate claims `$1…$k` and the query's own
- * `WHERE` starts after it.
+ * The grouped read: keys, one variadic `GROUPING()` mask, the aggregates, and a `GROUP BY
+ * GROUPING SETS` over the expanded sets (ADR-059).
+ * Pure, like its flat sibling — it never touches the pool, so its suite runs in the
+ * DB-free lane.
  */
 export const buildGroupQuery = ({
   aggregates,

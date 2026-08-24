@@ -7,9 +7,6 @@ import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableC
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
-/**
- * Hook to reset column order, visibility, and pinning to the original table configuration state
- */
 export const useResetColumnOrderAndVisibility = () => {
   const { columnsStore } = useTableConfigContextValue();
   const { columnsStore: columnsDrawerStore } = useTableDrawerContextValue();

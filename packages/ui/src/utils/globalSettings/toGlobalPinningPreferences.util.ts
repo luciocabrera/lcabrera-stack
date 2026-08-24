@@ -5,14 +5,6 @@ import { isPinConflictResolution } from './isPinConflictResolution.util';
 import { isPinSide } from './isPinSide.util';
 import { isUnpinConflictResolution } from './isUnpinConflictResolution.util';
 
-/**
- * Parse the pinning slice of the settings cookie payload.
- *
- * Invalid or missing fields resolve to undefined so callers can fall back to
- * defaults per preference.
- * @param value - Raw `pinning` slice from the cookie payload.
- * @returns Validated pinning preferences, or undefined when the slice is not an object.
- */
 export const toGlobalPinningPreferences = (value: unknown) => {
   if (!isObject(value)) {
     return;

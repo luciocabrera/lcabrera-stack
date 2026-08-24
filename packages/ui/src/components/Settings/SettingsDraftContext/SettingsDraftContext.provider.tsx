@@ -10,11 +10,6 @@ import type { SettingsDraftProviderProps } from './SettingsDraftContext.types';
 import { toDraft } from '../utils';
 import { SettingsDraftContext } from './SettingsDraftContext.context';
 
-/**
- * Provides the settings draft store: the staged (uncommitted) copy of the
- * global navigation/pinning preferences, seeded from the persisted values on
- * mount. Tabs edit the draft; SettingsActions commits or discards it.
- */
 export const SettingsDraftProvider = ({
   children,
 }: SettingsDraftProviderProps) => {

@@ -9,20 +9,8 @@ type StaticFilterOptions<TData> = Pick<
 >;
 
 /**
- * Creates a serializable static filter-options descriptor for a list of
- * values known at build time. Safe to return from loaders (no functions);
- * the client tool (`resolveFilterOptionsDescriptor`) serves pages by
- * slicing the values client-side, no API call involved.
- *
- * @example
- * ```ts
- * {
- *   dataType: 'string',
- *   ...createStaticFilterOptions(['Pending', 'Shipped', 'Delivered']),
- *   key: 'status',
- *   label: 'Status',
- * }
- * ```
+ * Creates a serializable static filter-options descriptor for a list of values known at
+ * build time.
  */
 export const createStaticFilterOptions = <TData>(
   values: readonly string[],

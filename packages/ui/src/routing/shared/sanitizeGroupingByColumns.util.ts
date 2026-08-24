@@ -21,51 +21,9 @@ const NO_GROUPING: TableGroupingState = {
 };
 
 /**
- * Narrows a URL-supplied grouping configuration to what this route's columns
- * actually allow, and refuses the **whole** configuration rather than dropping
- * part of it.
- *
- * Whole-state refusal is the contract (ADR-061), and grouping is where it earns
- * its keep: keys are ordered, and the order is the query's nesting order, so
- * dropping one silently answers a different question from the one the URL
- * describes. `sanitizeFiltersByColumns` drops per entry because a filter list is
- * a conjunction where each term stands alone; a key list is not. An aggregate
- * dropped on its own would mislead the same way — the numbers a shared link
- * promised would simply be absent from the table it opened.
- *
- * A duplicate key is refused for the same reason, and so is a list longer than
- * `MAX_TABLE_GROUP_KEYS`: the server refuses both too, and turning a 400 into a
- * flat table beats turning it into a 500.
- *
- * The **mode** passes through untouched. Which grouping sets a read emits is a
- * property of the query rather than of any column, so no column declaration can
- * refuse one — the closed vocabulary is enforced by the codec before this, and
- * the server refuses a mode its builder has no expansion for after it.
- *
- * `resolveColumnCapabilities` is the only column predicate here: a column keyed
- * `actions` is refused because `createActionsColumn` declares it ungroupable,
- * not because this function knows about that key. An aggregate's column is
- * checked for **existence** only — whether a given function is legal for it is a
- * catalogue answer (ADR-058) that no client-side column declaration can supply,
- * and the server's `assertGroupAggregates` is what enforces that half.
- *
- * What this side *can* see about the aggregate list is that no `(columnKey, fn)`
- * pair repeats, and it refuses a repeat whole for the reason it refuses a
- * duplicate key (#831).
- *
- * It can see one thing more, and it is not a per-column question at all: how
- * many `countDistinct` aggregates the list carries between them. The read takes
- * `MAX_TABLE_COUNT_DISTINCT_AGGREGATES` of them, so a link naming two is refused
- * here rather than sent and refused by `assertGroupAggregates` (#842). Whole,
- * like the rest: which of the two to keep is a question the link never answered,
- * and a table quietly showing one of them is not the table the link promised.
- *
- * A **granularity** splits along the same seam (#786). That it names one of the
- * keys is structural, so it is refused here; that the column is a date at all,
- * and that this granularity clears the cardinality guard, are catalogue answers,
- * so `assertGroupKeys` refuses those. Checking only the half this side can see
- * is what keeps a link naming an impossible granularity from turning into a
- * silently different table rather than a stated refusal.
+ * Refuse the whole URL grouping, never drop a key or aggregate (ADR-061): keys
+ * are ordered and the order is the query's nesting. Aggregate columns are
+ * checked for existence only — legality is a catalogue answer (ADR-058).
  */
 export const sanitizeGroupingByColumns = <
   TData extends Record<string, unknown>,

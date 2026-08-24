@@ -12,11 +12,6 @@ import type { TableSettingsDrawerHeaderProps } from './TableSettingsDrawerHeader
 
 import { useCancelTableSettings } from '../hooks/useCancelTableSettings.hook';
 
-/**
- * Header of the table settings drawer: settings icon + title plus the
- * pin/close toolbar. Toggling the pin writes to the table meta store and
- * closing cancels pending drawer changes; both no-op while busy.
- */
 export const TableSettingsDrawerHeader = ({
   isBusy = false,
 }: TableSettingsDrawerHeaderProps) => {

@@ -6,14 +6,9 @@ import { useSetGrouping } from './useSetGrouping.hook';
 
 type RemoveColumnAggregateArgs = {
   readonly columnKey: string;
-  /**
-   * The one function to un-stage, or `undefined` to clear every aggregate
-   * staged on the column.
-   */
   readonly fn?: TableAggregateFn;
 };
 
-/** Un-stage one of a column's aggregates, or all of them. */
 export const useRemoveColumnAggregate = () => {
   const setGrouping = useSetGrouping();
 

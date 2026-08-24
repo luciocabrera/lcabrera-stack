@@ -7,12 +7,6 @@ import { styles } from './NoDataDescriptive.stylex';
 import { PulseHalo } from './PulseHalo';
 import { TableSheet } from './TableSheet';
 
-/**
- * Theme-adaptive, accessible, animated SVG illustration for empty / no-data
- * states inside a table body.
- * - Uses `currentColor` throughout so it blends with any UI theme.
- * - Respects `prefers-reduced-motion`.
- */
 export const NoDataDescriptive = () => {
   const titleId = useId();
   const descId = useId();

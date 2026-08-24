@@ -7,13 +7,9 @@ import { isOlapGroupPeriod } from './is-olap-group-period.util';
 import { OLAP_DRILL_GROUP_PARAM } from './olap.constants';
 
 /**
- * One path entry, narrowed the way a group summary is narrowed on the grid side.
- *
- * `value` is checked for **presence**, not for type: a key is whatever its
- * column is, and `null` is a legitimate key rather than a missing one — the NULL
- * group is a group, and it is precisely the group a drill would otherwise
- * silently return nothing for. An entry carrying no `value` member at all is
- * malformed, and `Object.hasOwn` is what separates the two.
+ * `value` is checked for **presence**, not for type: a key is whatever its column is, and
+ * `null` is a legitimate key rather than a missing one — the NULL group is a group, and it
+ * is precisely the group a drill would otherwise silently return nothing for.
  */
 const toPathEntry = (entry: unknown) => {
   if (!isObject(entry)) return;
@@ -26,20 +22,11 @@ const toPathEntry = (entry: unknown) => {
 };
 
 /**
- * The granularity map, or `undefined` when it is present and unreadable — which
- * the caller must treat as a refusal rather than as "no granularities".
- *
- * A period outside the vocabulary refuses the whole descriptor for the same
- * reason a malformed path entry does: it would drill a different set from the
- * one the row summarises, with every returned row individually valid (#786).
- *
- * **A granularity naming a column that is not a group key is refused here too**,
- * which is what keeps this half of the wire under the same rule as the other:
- * `groupingCodec` refuses one on the grouping param and `assertGroupKeys`
- * refuses it again before SQL. Leaving the drill param looser would let a
- * request through that the grouped read it claims to drill could not have been
- * issued from — and would cost a catalogue lookup for a column nothing else in
- * the request mentions.
+ * The granularity map, or `undefined` when it is present and unreadable — which the caller
+ * must treat as a refusal rather than as "no granularities".
+ * **A granularity naming a column that is not a group key is refused here too**, which is
+ * what keeps this half of the wire under the same rule as the other: `groupingCodec`
+ * refuses one on the grouping param and `assertGroupKeys` refuses it again before SQL.
  */
 const toPeriods = ({
   keys,
@@ -61,14 +48,8 @@ const toPeriods = ({
 };
 
 /**
- * The group a drill request names, or `undefined` when the request does not name
- * one — which a route answers `400` to, never an empty page.
- *
- * **A partly-narrowed group is refused whole.** One path entry that does not
- * narrow rejects the entire descriptor rather than being dropped, because a
- * drill built from *some* of a group's keys is a query for a different, larger
- * set — it would return rows, all of them plausible, none of them the group the
- * user clicked.
+ * The group a drill request names, or `undefined` when the request does not name one —
+ * which a route answers `400` to, never an empty page.
  */
 export const parseDrillGroup = (
   params: URLSearchParams,

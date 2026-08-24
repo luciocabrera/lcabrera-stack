@@ -1,8 +1,5 @@
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
-/**
- * Hook to clear all sorting (set to empty).
- */
 export const useClearSorting = () => {
   const { columnsStore } = useTableDrawerContextValue();
 

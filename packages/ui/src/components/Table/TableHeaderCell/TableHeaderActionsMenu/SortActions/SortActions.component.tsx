@@ -4,12 +4,6 @@ import { ClearSortingButton } from './ClearSortingButton/ClearSortingButton.comp
 import { SortAscendingButton } from './SortAscendingButton/SortAscendingButton.component';
 import { SortDescendingButton } from './SortDescendingButton/SortDescendingButton.component';
 
-/**
- * Sorting section of the column header actions menu — a thin shell composing
- * the ascending, descending, and clear-sorting delegates. Each delegate owns
- * its own `useSetColumnSorting` wiring; this shell only forwards `columnKey`,
- * `onClose`, and the current `sortDirection`.
- */
 export const SortActions = <TData,>({
   columnKey,
   onClose,

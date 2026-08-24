@@ -16,12 +16,6 @@ import { useSetColumnsSizing } from '../../TableDrawerContext/actions';
 import { buildPresetColumnSizing } from '../utils/buildPresetColumnSizing.util';
 import { styles } from './ColumnWidthsSection.stylex';
 
-/**
- * "Column Widths" section of the general settings tab: min/max/default width
- * preset toggles. Selecting a preset bulk-writes the drawer's column sizing;
- * deselecting reverts to the current state (no write). Presets without any
- * configured bound are disabled.
- */
 export const ColumnWidthsSection = ({
   isBusy = false,
 }: ColumnWidthsSectionProps) => {

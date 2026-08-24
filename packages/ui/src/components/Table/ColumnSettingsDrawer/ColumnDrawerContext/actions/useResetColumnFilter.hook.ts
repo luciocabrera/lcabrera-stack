@@ -2,9 +2,6 @@ import { useColumnDrawerContextValue } from '#ui/components/Table/ColumnSettings
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { logger } from '#ui/utils/logger';
 
-/**
- * Resets the column filter in the drawer to match the current table state.
- */
 export const useResetColumnFilter = () => {
   const { columnsStore } = useTableConfigContextValue();
   const { columnStore } = useColumnDrawerContextValue();

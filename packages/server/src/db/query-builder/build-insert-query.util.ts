@@ -9,14 +9,9 @@ import { buildReturningClause } from './build-returning-clause.util.ts';
 import { quoteIdentifier } from './quote-identifier.util.ts';
 
 /**
- * Generic, schema/table-agnostic INSERT builder — the write-side twin of
- * buildSelectQuery. Turns a `{ schema, table, values }` descriptor into
- * `INSERT INTO schema.table (cols) VALUES ($1, $2, …) [RETURNING …]`.
- *
  * Every column key runs through assertSafeIdentifier (always) plus the opt-in
- * assertColumnAllowed, then is double-quoted via quoteIdentifier; every value
- * is a bound `$n` parameter, never interpolated. `returning` is delegated to
- * buildReturningClause (`['*']` for the whole row, or an explicit column list).
+ * assertColumnAllowed, then is double-quoted via quoteIdentifier; every value is a bound
+ * `$n` parameter, never interpolated.
  */
 export const buildInsertQuery = ({
   allowedColumns,

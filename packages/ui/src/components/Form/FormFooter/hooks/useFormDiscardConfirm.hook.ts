@@ -3,12 +3,6 @@ import { useState } from 'react';
 import { useGetFormCancelTo } from '#ui/components/Form/contexts/FormContext/selectors';
 import { useBackNavigate } from '#ui/hooks';
 
-/**
- * Owns the form's discard-changes confirmation flow: tracks whether the confirm
- * dialog is open and exposes the cancel-click / accept / dismiss handlers.
- * Cancelling with a dirty form opens the dialog; cancelling a clean form (or
- * accepting the dialog) navigates back to the form's cancel route.
- */
 export const useFormDiscardConfirm = () => {
   const cancelTo = useGetFormCancelTo();
   const goBack = useBackNavigate();

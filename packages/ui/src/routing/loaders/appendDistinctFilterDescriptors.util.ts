@@ -13,12 +13,9 @@ type AppendDistinctFilterDescriptorsArgs<TData> = {
 };
 
 /**
- * Loader-side decorator: attaches a `kind: 'distinct'` filter-options
- * descriptor to every filterable string column that doesn't already carry
- * a descriptor (static enums keep theirs). Pure and fully serializable —
- * works identically for hardcoded column constants and future
- * DB-introspected columns (`columnName` comes from `column.key`,
- * schema/table from the route, transport from app config).
+ * Pure and fully serializable — works identically for hardcoded column constants and
+ * future DB-introspected columns (`columnName` comes from `column.key`, schema/table from
+ * the route, transport from app config).
  */
 export const appendDistinctFilterDescriptors = <TData>({
   columns,

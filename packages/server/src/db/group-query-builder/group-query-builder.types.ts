@@ -2,11 +2,6 @@ import type { OlapGroupPeriod } from '@lcabrera/api/olap/olap.types';
 
 import type { QueryFilter } from '../query-builder/query-builder.types.ts';
 
-/**
- * The aggregate vocabulary a grouped read may request. `countDistinct` is a
- * separate member rather than a flag because it is the one that costs a
- * per-group tuplesort.
- */
 export type AggregateFn =
   | 'avg'
   | 'boolAnd'
@@ -24,9 +19,8 @@ export type AggregateSpec = {
 };
 
 /**
- * One aggregate paired with the alias it is projected under. Resolved once in
- * `buildGroupQuery`, so the alias the assertions check, the alias the SQL emits
- * and the alias the caller decodes by are the same string.
+ * Resolved once in `buildGroupQuery`, so the alias the assertions check, the alias the SQL
+ * emits and the alias the caller decodes by are the same string.
  */
 export type AliasedGroupAggregate = {
   readonly aggregate: GroupAggregate;
@@ -36,7 +30,6 @@ export type AliasedGroupAggregate = {
 /** What `buildGroupQuery` emitted, so a caller can decode the row it gets back. */
 export type BuiltGroupAggregate = {
   readonly alias: string;
-  /** Absent for `count(*)`. */
   readonly column?: string;
   readonly fn: AggregateFn;
 };
@@ -49,12 +42,6 @@ export type BuiltGroupQuery = {
    * is how a structural NULL is told apart from a real one.
    */
   readonly groupingSetMasks: readonly number[];
-  /**
-   * What the cardinality rails decided: the pre-flight bound, the `LIMIT` this
-   * query actually carries, and any warning worth passing on. Emitted rather
-   * than recomputed by the caller, so the number in the SQL and the number the
-   * caller reasons about are the same one.
-   */
   readonly guardRails: GroupGuardRails;
   /** The group keys, ordered — the bit positions above are relative to this. */
   readonly keys: readonly string[];
@@ -63,12 +50,6 @@ export type BuiltGroupQuery = {
   readonly values: readonly unknown[];
 };
 
-/**
- * Gate 1 of ADR-058. A dimension is what you group by (a country, a city, a
- * category); a fact is what you aggregate (an amount, a quantity, a price).
- * Anything else is out of both — including types Postgres would happily group,
- * such as `jsonb`.
- */
 export type ColumnAnalyticalRole = 'dimension' | 'fact' | 'unsupported';
 
 export type ColumnCapabilitiesQueryDescriptor = {
@@ -77,57 +58,19 @@ export type ColumnCapabilitiesQueryDescriptor = {
   readonly table: string;
 };
 
-/** One column's row from `buildColumnCapabilitiesQuery`, as `pg` returns it. */
 export type ColumnCapabilityRow = {
-  /** SQL aggregate names that exist for this column's type. */
   readonly aggregates: readonly string[];
   readonly column: string;
-  /** Whether the type resolves a default btree/hash equality operator. */
   readonly hasEquality: boolean;
-  /**
-   * Whether `pg_stats` holds a row for this column at all — and the only thing
-   * that makes `nDistinct` meaningful, since the query coalesces the absent
-   * case to a zero that would otherwise be indistinguishable from Postgres
-   * reporting undefined distinctness.
-   */
   readonly hasStats: boolean;
   readonly nDistinct: number;
   readonly relTuples: number;
-  /**
-   * How many days the column's `pg_stats` histogram spans; absent when the
-   * column is not a date/timestamp or has no histogram to measure.
-   *
-   * SQL NULL arrives here from `pg` as an absence, and `resolveColumnCapability`
-   * narrows anything that is not a finite number to one — which also catches the
-   * `numeric` a bare `extract(epoch …)` would hand back as a **string**.
-   *
-   * It is what makes a *derived* group key measurable. `pg_stats` describes the
-   * raw column, so the catalogue has no distinct count for
-   * `date_trunc('month', c)` and never will — but the number of months a range
-   * covers follows from the range, and the histogram's first and last bound are
-   * exactly that range, free of a table scan (#786).
-   */
   readonly spanDays?: number;
   readonly typeCategory: string;
   readonly typeName: string;
-  /**
-   * The schema the *type* lives in, not the table. Load-bearing for the named
-   * identifier exception: type names are per-schema, so a user-defined
-   * `app.uuid` reports `typname = 'uuid'` exactly like `pg_catalog.uuid` does,
-   * and only the namespace tells them apart.
-   */
   readonly typeNamespace: string;
 };
 
-/**
- * What a column may do in a grouped read.
- *
- * Discriminated on `canGroup` so that a refusal **must** carry its reason: the
- * UI says why rather than hiding the column, and a builder can put the reason
- * straight into an error without a fallback for a state that cannot occur.
- * `refusal?: never` on the groupable arm keeps `capability.refusal` readable
- * without narrowing first, which is what most consumers want.
- */
 export type ColumnGroupingCapability =
   | (ColumnCapabilityShared & {
       readonly canGroup: false;
@@ -138,52 +81,22 @@ export type ColumnGroupingCapability =
       readonly refusal?: never;
     });
 
-/**
- * `undefinedDistinctness` is `n_distinct = 0` — Postgres stating the type has no
- * equality operator, which ADR-058 forbids reading as `unknown`. `unknown` is
- * the genuinely absent case (no `pg_stats` row, or an empty table).
- */
 export type DistinctEstimate =
   | { readonly kind: 'known'; readonly value: number }
   | { readonly kind: 'undefinedDistinctness' }
   | { readonly kind: 'unknown' };
 
 export type GroupAggregate = {
-  /**
-   * Overrides the derived `${fn}_${column}` name. It is the escape hatch for
-   * two aggregates that would otherwise derive the same alias, and for a column
-   * name long enough to push the derived one past Postgres's identifier limit.
-   */
   readonly alias?: string;
-  /** Omitted only for `count`, which then becomes `count(*)`. */
   readonly column?: string;
-  /**
-   * Emitted as `FILTER (WHERE …)`. These values claim the leading `$n` slots,
-   * because the `SELECT` list is built before the `WHERE` clause.
-   */
   readonly filters?: readonly QueryFilter[];
   readonly fn: AggregateFn;
 };
 
-/**
- * The pre-flight row bound for a grouped read, computed before a single row is
- * read.
- *
- * `unknown` is not a number this code failed to compute — it is the catalogue
- * having no distinct estimate for at least one key, which ADR-066 answers with
- * warn-and-proceed plus the row-limit backstop rather than a refusal. Refusing
- * would leave grouping dead on a freshly restored database, where nothing has
- * been analysed yet.
- */
 export type GroupCardinalityEstimate =
   | { readonly columns: readonly string[]; readonly kind: 'unknown' }
   | { readonly kind: 'known'; readonly rows: number };
 
-/**
- * A grouped read that ran and is worth telling the caller about. Carried beside
- * the rows rather than thrown, because the data is there and usable — the point
- * is that the operator learns why it was expensive.
- */
 export type GroupCardinalityWarning =
   | { readonly columns: readonly string[]; readonly kind: 'stats-unavailable' }
   | {
@@ -191,51 +104,20 @@ export type GroupCardinalityWarning =
       readonly kind: 'estimate-above-warn-threshold';
     };
 
-/**
- * What the cardinality rails decided about a grouped read, carried on the built
- * query so the executor can act on it without re-deriving anything.
- *
- * `warning` is absent when there is nothing to say, rather than being a nullable
- * field: "no warning" and "a warning of kind none" are not two states worth
- * having.
- */
 export type GroupGuardRails = {
   readonly estimate: GroupCardinalityEstimate;
   readonly rowLimit: GroupRowLimit;
   readonly warning?: GroupCardinalityWarning;
 };
 
-/**
- * `cube` emits every subset of the keys, so its result is a **lattice, not a
- * tree**: `(category)` with no country is a child of nothing and has no depth.
- * Anything that indents by path length holds for `flat` and `rollup` and must
- * not assume it here — ADR-065's amendment puts a cube result in the flat form,
- * each row carrying its own coordinates.
- *
- * The expander map is closed over this union, which is what made cube arrive as
- * a real expansion rather than another entry: its sets are not prefixes.
- */
 export type GroupingMode = 'cube' | 'flat' | 'rollup';
 
-/**
- * Why a column may not be a group key. Distinguishable on purpose: grouping by a
- * primary key is the likeliest user mistake and deserves its own message.
- */
-/**
- * The granularity a date or timestamp group key is truncated to.
- *
- * **An alias, not a second declaration.** The vocabulary is wire vocabulary — it
- * travels in the grouping param and again in the drill param — so it belongs to
- * `@lcabrera/api`, which this package already declares a dependency on
- * (ADR-082). None of ADR-039's duplication applies: there is no undeclared edge
- * to route around, so a duplicate here would be two things that can disagree
- * where one thing cannot.
- *
- * The local name stays because this module's vocabulary is stated in its own
- * terms — a builder groups by *keys*, not by OLAP requests.
- */
 export type GroupKeyPeriod = OlapGroupPeriod;
 
+/**
+ * Distinguishable on purpose: grouping by a primary key is the likeliest user mistake and
+ * deserves its own message.
+ */
 export type GroupKeyRefusalReason =
   | 'no-equality-operator'
   | 'not-a-dimension'
@@ -245,96 +127,33 @@ export type GroupKeyRefusalReason =
 
 export type GroupQueryDescriptor = {
   readonly aggregates: readonly GroupAggregate[];
-  /**
-   * **Required**, unlike `SelectQueryDescriptor` where it is opt-in: every group
-   * key is request-derived by construction, so opt-in semantics would be a
-   * silent hole (ADR-059).
-   */
   readonly allowedColumns: readonly string[];
-  /**
-   * What each column may do, as `getColumnGroupingCapabilities` resolved it from
-   * the catalogue. Passed in rather than re-derived so this builder stays pure
-   * while still enforcing ADR-058 — the impure half answers "what is legal
-   * here", the builder refuses everything else.
-   */
   readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>;
   readonly filters?: readonly QueryFilter[];
   readonly grouping: GroupingMode;
-  /** Ordered, and the order is the tree's nesting order. */
   readonly keys: readonly string[];
   /** A safety belt, not a page — a grouped read is never paginated (ADR-059). */
   readonly maxRows: number;
-  /**
-   * The granularity to truncate a temporal key to, by column — a map beside the
-   * key list rather than a member of it.
-   *
-   * A key list of records would carry the granularity inside each key, and was
-   * rejected: `keys` is `readonly string[]` on both sides of the boundary, in
-   * the URL, in every group path and in the expansion store, so changing its
-   * element type moves a shape that six unrelated things already agree on. A
-   * column can be a key at most once, so a column-keyed map is per-key by
-   * construction and carries the same information (#786).
-   *
-   * A column named here that is not in `keys` is refused rather than ignored —
-   * see `assertGroupKeys`.
-   */
   readonly periods?: Readonly<Record<string, GroupKeyPeriod>>;
   readonly schema: string;
   readonly sort?: readonly GroupSort[];
-  /** Where a subtotal sits relative to the rows it totals. Defaults to `last`. */
   readonly subtotalPlacement?: 'first' | 'last';
   readonly table: string;
 };
 
-/**
- * The `LIMIT` a grouped read runs under, and whether reaching it means anything.
- *
- * `backstopAt` is set only when the guard's own ceiling is the binding one — a
- * result that long is then a refusal rather than a truncation, because it proves
- * the read blew past the budget the missing statistics could not predict. When
- * the *caller's* `maxRows` binds first there is no backstop: a caller that asked
- * for at most N rows got what it asked for.
- */
 export type GroupRowLimit = {
   readonly backstopAt?: number;
   readonly limit: number;
 };
 
-/**
- * A sort on a group key sets that key's direction in place. A sort on an
- * aggregate acts at the **innermost** level: its term is emitted after the
- * innermost key's `GROUPING` term and ahead of that key's own value term,
- * which stays last as the tiebreak.
- *
- * **The order of this list is meaningful, and an aggregate listed ahead of a
- * key is refused at construction** (`assert-group-sort.util.ts`). Ranking
- * parents by their own totals scrambles the hierarchy, and doing it correctly
- * needs the parent's aggregate on the child row
- * (`sum(…) OVER (PARTITION BY k₁)`) — a named v2. The refusal replaced an
- * earlier behaviour that silently moved such a sort behind every key term,
- * where it can never fire: within one grouping set the key columns already
- * identify the row, so the sort was accepted, emitted and dead.
- */
 export type GroupSort =
   | { readonly aggregateAlias: string; readonly direction: 'asc' | 'desc' }
   | { readonly direction: 'asc' | 'desc'; readonly key: string };
 
-/** The half of a capability that does not depend on whether the column is groupable. */
 type ColumnCapabilityShared = {
   readonly aggregates: readonly AggregateFn[];
   readonly column: string;
-  /** Resolved distinct-value estimate; absent when statistics are unavailable. */
   readonly distinctEstimate?: number;
-  /**
-   * The granularities this column may be grouped at, empty for anything that is
-   * not a date or a timestamp.
-   *
-   * Independent of `canGroup`, and that is the point: a date column is normally
-   * refused as a raw key — one group per calendar day — while `month` and above
-   * clear the same guard comfortably. So a refused column can still carry a
-   * non-empty list, and a surface that reads `canGroup` alone would hide the
-   * one dimension every report is organised by (#786).
-   */
   readonly periods: readonly GroupKeyPeriod[];
   readonly role: ColumnAnalyticalRole;
   readonly typeName: string;

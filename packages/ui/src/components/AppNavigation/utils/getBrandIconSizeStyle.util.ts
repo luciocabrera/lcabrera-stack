@@ -1,9 +1,5 @@
 import { styles } from '../AppNavigation.stylex';
 
-/**
- * Returns the StyleX style that sizes the brand icon box to match the button
- * height for the current density setting.
- */
 export const getBrandIconSizeStyle = (
   brandIconBoxSize: 'md' | 'mini' | 'sm',
 ) => {

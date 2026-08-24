@@ -6,11 +6,6 @@ import { ARROW_STYLES } from './TooltipContent.constants';
 import { styles } from './TooltipContent.stylex';
 import { getArrowStyle } from './utils/getArrowStyle.util';
 
-/**
- * Anchored popover body for Tooltip (`popover='manual'`, `role='tooltip'`)
- * rendering the placement-aware surface, the geometry-aligned arrow, and the
- * tooltip content. Visibility and arrow offset are owned by the parent.
- */
 export const TooltipContent = ({
   anchorName,
   arrowOffset,

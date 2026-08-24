@@ -13,27 +13,6 @@ type UseColumnResizeArgs<TData> = {
   readonly minWidth?: number;
 };
 
-/**
- * Everything needed to resize one column: every handler, and the value and
- * bounds a splitter has to announce. The single owner of resize store wiring —
- * a component spreads what it returns and triggers no actions of its own.
- *
- * Pointer drag is delegated to `useColumnDragSession`, which previews per frame
- * and persists once at mouse up. A keypress and a double-click are complete
- * interactions, so they go straight through `useSetColumnSizing`, which
- * persists on its own.
- *
- * @example
- * ```tsx
- * const { bounds, isResizing, onDoubleClick, onKeyDown, onMouseDown, width } =
- *   useColumnResize<TData>({
- *     columnKey: column.key,
- *     currentWidth: columnSizing[column.key],
- *     maxWidth: column.maxWidth,
- *     minWidth: column.minWidth,
- *   });
- * ```
- */
 export const useColumnResize = <TData>({
   columnKey,
   currentWidth,

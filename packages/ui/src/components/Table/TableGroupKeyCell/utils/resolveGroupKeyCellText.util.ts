@@ -12,26 +12,11 @@ type ResolveGroupKeyCellTextArgs = {
 };
 
 /**
- * What one group-key column holds for one group row, or `undefined` when that
- * level is not part of the row's grouping set.
- *
- * `undefined` is the ordinary answer, not an error: a rollup subtotal carries
- * one path entry fewer than the rows it totals, and a cube row carries an
- * arbitrary subset, so most grouped results leave some key columns empty on
- * some rows. **Which columns are filled is the depth signal** (ADR-080) — the
- * reading that works for a tree and a lattice alike, where `path.length - 1`
- * worked only for a tree.
- *
- * **The subtotal suffix goes on the innermost level only.** A subtotal states
- * its ancestry in the columns above it, exactly as a leaf group does; the one
- * column where it differs from a leaf is the level it totals, and that is where
- * the word belongs. Appending it to every filled column would read as several
- * totals rather than one.
- *
- * **The grand total is placed on the first key column** because it is keyed by
- * nothing and so belongs to no column on its own. The outermost key is the
- * column its total is across, and leaving it unplaced would render a row of
- * aggregates with nothing anywhere saying what they total.
+ * What one group-key column holds for one group row, or `undefined` when that level is not
+ * part of the row's grouping set.
+ * `undefined` is the ordinary answer, not an error: a rollup subtotal carries one path
+ * entry fewer than the rows it totals, and a cube row carries an arbitrary subset, so most
+ * grouped results leave some key columns empty on some rows.
  */
 export const resolveGroupKeyCellText = ({
   columnKey,

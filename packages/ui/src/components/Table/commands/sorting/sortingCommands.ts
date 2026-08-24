@@ -3,11 +3,9 @@ import { EraserIcon, SortAscIcon, SortDescIcon } from '#ui/components/Icons';
 import type { CommandDescriptor, CommandId } from '../commands.types';
 
 /**
- * The sorting capability's commands (ADR-011). Identical shape to the pinning
- * commands — identity defined once, shared by the header menu (live) and the
- * settings drawer (draft). This is the cross-capability check (ADR-011,
- * validation): the same `CommandDescriptor` and the same
- * `deriveToggleCommandState` predicate serve sorting unchanged, so the
+ * The sorting capability's commands (ADR-011).
+ * This is the cross-capability check (ADR-011, validation): the same `CommandDescriptor`
+ * and the same `deriveToggleCommandState` predicate serve sorting unchanged, so the
  * foundation is not fitted to pinning.
  */
 export const SORT_ASCENDING_COMMAND = {

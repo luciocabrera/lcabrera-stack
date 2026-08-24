@@ -8,22 +8,16 @@ import { getShareDenominators } from './getShareDenominators.util';
 
 type GetTableShareDenominatorArgs = {
   readonly columnKey: string;
-  /** Which of the column's aggregates the share is of (#831). */
   readonly fn: TableAggregateFn;
 };
 
 /**
- * The grand total this measure's share divides by, or `undefined` when there is
- * none to divide by.
- *
- * **It returns a number, and that is load-bearing.** `useSyncExternalStore`
- * compares snapshots with `Object.is`, so a selector handing back a freshly
- * built map would re-render forever. The fold that produces the map happens in
- * `getShareDenominators`, which caches on the stored rows array, and only the
- * one primitive this cell needs crosses the snapshot boundary.
- *
- * The two stores are read separately because they change independently: the
- * rows come from the data store, the selection from the grouping one.
+ * **It returns a number, and that is load-bearing.** `useSyncExternalStore` compares
+ * snapshots with `Object.is`, so a selector handing back a freshly built map would
+ * re-render forever.
+ * The fold that produces the map happens in `getShareDenominators`, which caches on the
+ * stored rows array, and only the one primitive this cell needs crosses the snapshot
+ * boundary.
  */
 export const useGetTableShareDenominator = ({
   columnKey,

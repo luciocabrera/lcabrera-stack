@@ -8,11 +8,6 @@ import { buildOrderBySorting } from './utils/buildOrderBySorting.util';
 import { readPinActionState } from './utils/readPinActionState.util';
 import { resolveOrderConflictUpdate } from './utils/resolveOrderConflictUpdate.util';
 
-/**
- * Hook to order columns by current sorting state.
- * Detects pin conflicts and opens the order conflict modal if needed.
- * Static columns are preserved in their original positions.
- */
 export const useOrderBySorting = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();

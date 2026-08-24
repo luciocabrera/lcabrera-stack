@@ -5,20 +5,11 @@ import { TableEmptyStateClearGroupingButton } from './TableEmptyStateClearGroupi
 import { TableEmptyStateRetryButton } from './TableEmptyStateRetryButton/TableEmptyStateRetryButton.component';
 
 /**
- * Picks the one recovery offered under the empty-table message.
- *
- * **Which action follows from whether repeating the request could change the
- * answer.** An empty result can turn into rows the moment the data does, so the
- * offer is a revalidation. A grouping the endpoint refused is a property of the
- * request rather than of a moment: revalidating sends the same keys and is
- * refused again, so the offer is the one edit that resolves it — dropping the
- * grouping.
- *
- * Choosing between two delegates rather than branching inside one keeps the
- * grouping write path **unmounted** unless a refusal is on screen. That path
- * reaches `usePersistTableStateAction`, which needs a `NotificationProvider`, and
- * a component that called it unconditionally would make every empty table
- * require one.
+ * A grouping the endpoint refused is a property of the request rather than of a moment:
+ * revalidating sends the same keys and is refused again, so the offer is the one edit that
+ * resolves it — dropping the grouping.
+ * Choosing between two delegates rather than branching inside one keeps the grouping write
+ * path **unmounted** unless a refusal is on screen.
  */
 export const TableEmptyStateAction = () => {
   const error = useGetTableDataError();

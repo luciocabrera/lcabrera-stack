@@ -8,14 +8,6 @@ import { styles } from './VirtualSelect.stylex';
 import { VirtualSelectDropdown } from './VirtualSelectDropdown/VirtualSelectDropdown.component';
 import { VirtualSelectHeader } from './VirtualSelectHeader/VirtualSelectHeader.component';
 
-/**
- * Thin shell over the select context: resolves the option label↔value mapping,
- * owns the dropdown open state, and mounts the single VirtualSelectProvider —
- * which provides the select metadata and composes the lifted VirtualListProvider
- * so every delegate consumes selectors and actions instead of drilled props.
- * Selection stays parent-owned: list changes exit through the shell's `onChange`
- * mapping passed on the `listState` group.
- */
 export const VirtualSelect = ({
   customStylex,
   dataState,

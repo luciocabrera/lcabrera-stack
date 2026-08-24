@@ -25,19 +25,6 @@ import {
   TITLE,
 } from './EnterpriseOrders.constants';
 
-/**
- * Loader for the enterprise orders route.
- *
- * `filterOptions.transport` is `loader` (not `bff`): filter options fetch
- * same-origin through the `/_api/filter-options` resource route, which calls
- * the distinct endpoint server-side — the same same-origin model the rows use.
- * `bff` fetches the API host directly from the browser, which only works behind
- * a proxy and fails CORS under a bare `react-router-serve` prod build (#340).
- *
- * The fetch reads Postgres server-side via the `.server` executor — no
- * api-server round-trip — and returns the promise unawaited for Suspense
- * streaming.
- */
 export const loader = createTableRouteLoader<
   EnterpriseOrderTableRow,
   EnterpriseOrdersResponse

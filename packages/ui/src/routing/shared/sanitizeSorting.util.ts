@@ -1,8 +1,5 @@
 import type { SortingState } from '#ui/components/Table';
 
-/**
- * Removes sorting entries with no direction or the UI-only 'actions' column key.
- */
 export const sanitizeSorting = <TData extends Record<string, unknown>>(
   sorting: SortingState<TData>,
 ) =>

@@ -4,14 +4,6 @@ import { DevStyleXInject } from '#ui/components/DevStyleXInject';
 
 import type { AppDocumentProps } from './AppDocument.types';
 
-/**
- * The `<html>` document shell shared by every route's `Layout` export —
- * head boilerplate (charset/viewport/CSP nonce meta, <Meta>, StyleX dev
- * injection, <Links>) and body wiring (<ScrollRestoration>/<Scripts>).
- * The app-specific pieces (the loader call for rootData, the app's own
- * compiled stylexCssHref import) stay in the app's own Root.layout.tsx —
- * this component only takes their resolved values as props.
- */
 export const AppDocument = ({
   children,
   rootData,

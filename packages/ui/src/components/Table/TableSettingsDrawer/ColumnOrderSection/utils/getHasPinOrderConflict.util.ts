@@ -9,12 +9,6 @@ type GetHasPinOrderConflictArgs<TData> = {
   readonly staticKeys?: Set<string>;
 };
 
-/**
- * Detects whether a new column order conflicts with the current pinning state.
- * Left-pinned columns must appear at the start of the order (contiguous),
- * and right-pinned columns must appear at the end (contiguous).
- * Static columns are excluded from conflict detection.
- */
 export const getHasPinOrderConflict = <TData>({
   columnPinning,
   newOrder,

@@ -6,9 +6,6 @@ export type GetOperatorFromFilterParams = {
   readonly filter: ColumnFilter | undefined;
 };
 
-/**
- * Gets the operator from an existing filter or defaults to 'equals'.
- */
 export const getOperatorFromFilter = ({
   dataType,
   filter,

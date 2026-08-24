@@ -14,49 +14,34 @@ import { TableRowActionsMenu } from '#ui/components/Table/TableRowActionsMenu';
 import { resolveStructuralCellChildren } from './resolveStructuralCellChildren.util';
 
 /**
- * `kind` is a rendering decision, not a column type: `custom` for the actions
- * column and for any column supplying `render()`, `default` otherwise. The
- * column's own type travels as `dataType` on the default branch, so a new
- * `dataType` never grows this union.
+ * The column's own type travels as `dataType` on the default branch, so a new `dataType`
+ * never grows this union.
  */
 export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
   | (TableBodyCellCustomFields<TData> & TableBodyCellDescriptorBase<TData>)
   | (TableBodyCellDefaultFields<TData> & TableBodyCellDescriptorBase<TData>);
 
 type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
-  /**
-   * Which of this row's group-key columns repeat the row above and render
-   * blank. Empty for a detail row, which blanks every key column outright.
-   */
   readonly carriedGroupKeys: ReadonlySet<string>;
   readonly col: TableColumn<TData>;
   readonly columnSizing: ColumnSizingState<TData>;
-  /**
-   * The row's place in the tree, when it has one. Resolved from the group tree
-   * rather than from the summary, because whether a row owns rows is a question
-   * about the other rows — see `TableGroupDisclosure.types.ts`.
-   */
   readonly disclosure?: TableGroupDisclosureState;
   /**
-   * The applied group keys. A detail row blanks the columns it is grouped by:
-   * the value is stated once by the group row above it, and repeating it down a
-   * column whose header already says it is a column of one word (ADR-065).
+   * A detail row blanks the columns it is grouped by: the value is stated once by the group
+   * row above it, and repeating it down a column whose header already says it is a column of
+   * one word (ADR-065).
    */
   readonly groupingKeys: readonly string[];
   /**
-   * Present when the row carries a group summary, absent when it is a detail
-   * row. Asked of the **row**, never of the grouping configuration, so a group
-   * row and a detail row can sit in one result.
+   * Asked of the **row**, never of the grouping configuration, so a group row and a detail
+   * row can sit in one result.
    */
   readonly groupSummary?: TableGroupRowSummary;
   /**
-   * See `hasTableStructuralMarker` — a row that claims to be chrome.
-   *
-   * **Required, not optional.** It is always computable and there is one call
-   * site; an optional flag defaulting to `false` would let a caller that
-   * forgets it compile cleanly and silently disable the fail-closed branch in
-   * `resolveStructuralCellChildren` — the same silent-drop shape as the marker
-   * loss this exists to fix (#887).
+   * **Required, not optional.** It is always computable and there is one call site; an
+   * optional flag defaulting to `false` would let a caller that forgets it compile cleanly
+   * and silently disable the fail-closed branch in `resolveStructuralCellChildren` — the
+   * same silent-drop shape as the marker loss this exists to fix (#887).
    */
   readonly hasStructuralMarker: boolean;
   readonly isLoadingState: boolean;
@@ -66,18 +51,12 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly rowKey: string;
 };
 
-/** Fields only a `custom` cell carries. */
 type TableBodyCellCustomFields<TData extends Record<string, unknown>> = {
   readonly children: TableBodyCellProps<TData>['children'];
   readonly kind: 'custom';
-  /**
-   * The cell renders `children`, so no label is ever displayed — but the prop
-   * is required, so the descriptor still has to carry one.
-   */
   readonly label: '';
 };
 
-/** Fields only a `default` cell carries. */
 type TableBodyCellDefaultFields<TData extends Record<string, unknown>> = {
   readonly dataType: TableBodyCellProps<TData>['dataType'];
   readonly format: TableBodyCellProps<TData>['format'];
@@ -86,22 +65,11 @@ type TableBodyCellDefaultFields<TData extends Record<string, unknown>> = {
   readonly value: TableBodyCellProps<TData>['value'];
 };
 
-/**
- * The fields both descriptor kinds carry.
- *
- * Every field is read back off `TableBodyCellProps` rather than re-declared,
- * because every field exists to be spread into `TableBodyCell`: renaming or
- * retyping a prop there is then a type error here, rather than a prop that
- * quietly stops arriving at the `createElement` call in `renderFromDescriptor`.
- * `NonNullable` marks the ones the builder always computes even though the prop
- * lets a caller omit them.
- */
 type TableBodyCellDescriptorBase<TData extends Record<string, unknown>> = {
   readonly columnKey: TableBodyCellProps<TData>['columnKey'];
   readonly isLoadingState: NonNullable<
     TableBodyCellProps<TData>['isLoadingState']
   >;
-  /** React's `key` for the cell element — not a prop. */
   readonly key: DataKey<TData>;
   readonly minWidth: NonNullable<TableBodyCellProps<TData>['minWidth']>;
   readonly pinInfo: TableBodyCellProps<TData>['pinInfo'];
@@ -111,13 +79,10 @@ type TableBodyCellDescriptorBase<TData extends Record<string, unknown>> = {
 };
 
 /**
- * Builds the props-derived descriptor needed to render a TableBodyCell.
- *
- * Group rows and detail rows come through here alike, because they share one
- * cell grid (ADR-065): the descriptor decides what a cell *holds*, and the
- * chrome around it — the `gridcell` role, the roving tab stop, the sticky
- * offset, the width — is identical either way. That is what makes a group row a
- * first-class focus target with no branch anywhere in the focus model.
+ * Group rows and detail rows come through here alike, because they share one cell grid
+ * (ADR-065): the descriptor decides what a cell *holds*, and the chrome around it — the
+ * `gridcell` role, the roving tab stop, the sticky offset, the width — is identical either
+ * way.
  */
 export const buildTableBodyCellDescriptor = <
   TData extends Record<string, unknown>,

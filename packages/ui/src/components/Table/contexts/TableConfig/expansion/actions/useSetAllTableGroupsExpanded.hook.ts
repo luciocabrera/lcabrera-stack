@@ -17,30 +17,11 @@ import {
 const NOTHING_COLLAPSED: ReadonlySet<string> = new Set<string>();
 
 /**
- * Opens or closes every group in one action (#774).
- *
- * Local, like the per-row toggle it generalises: expansion changes nothing
- * server-side, so this touches no URL param and triggers no revalidation
- * (ADR-061).
- *
- * **What it collapses is the tree's own foldable set**, not a second
- * enumeration of it: the same `foldableGroupPaths` every chevron is drawn from,
- * so "collapse all" cannot close a group the grid never offered to close, and
- * cannot leave one open that it did. That set excludes any group without a row
- * of its own, which is what stops a `flat` grid from folding itself out of
- * existence — see `collectFoldableGroupPaths`.
- *
- * It therefore collapses **to the outermost level**, never to nothing — and the
- * reason is that a collapse hides a group's **descendants**, never the group row
- * itself: `resolveGroupTreeNodes` tests a path's *proper* prefixes. Top-level
- * groups are in the set, since they own rows, and folding them leaves their own
- * rows standing. The grand total survives because it is nobody's descendant, and
- * the root is never foldable — which is what stops the whole table sitting
- * inside one collapsible subtree.
- *
- * Focus is repositioned **before** the store write, for the ordering reason
- * `useToggleTableGroupExpansion` records: the focused cell's unmount releases
- * the grid's tab stop only while the store still names that cell.
+ * Local, like the per-row toggle it generalises: expansion changes nothing server-side, so
+ * this touches no URL param and triggers no revalidation (ADR-061).
+ * **What it collapses is the tree's own foldable set**, not a second enumeration of it:
+ * the same `foldableGroupPaths` every chevron is drawn from, so "collapse all" cannot
+ * close a group the grid never offered to close, and cannot leave one open that it did.
  */
 export const useSetAllTableGroupsExpanded = <
   TData extends Record<string, unknown>,

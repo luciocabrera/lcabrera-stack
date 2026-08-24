@@ -16,13 +16,9 @@ import { tableHeaderStyles } from './TableHeader.stylex';
 import { hasHeaderBands, resolveHeaderBands } from './utils';
 
 /**
- * "Manage Column" opens the per-column settings drawer — filter and width — so
- * it is offered for a column that has both.
- *
- * Every painted column is now one of the consumer's own, including the group
- * keys (ADR-080), and a key keeps its filter and its width while grouped: the
- * hoist fixes where it sits, not what it is. So there is no column here whose
- * drawer would open with nothing in it to change.
+ * Every painted column is now one of the consumer's own, including the group keys
+ * (ADR-080), and a key keeps its filter and its width while grouped: the hoist fixes where
+ * it sits, not what it is.
  */
 const hasHeaderSettings = (col: { isHeaderHidden?: boolean; key: unknown }) =>
   !col.isHeaderHidden;

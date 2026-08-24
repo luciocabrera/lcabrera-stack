@@ -7,10 +7,6 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 
 import type { HideColumnButtonProps } from './HideColumnButton.types';
 
-/**
- * "Hide Column" item of the pin/hide section: hides the column at table level
- * via `useSetColumnVisibility`. Closes the menu via `onClose`.
- */
 export const HideColumnButton = <TData,>({
   columnKey,
   onClose,

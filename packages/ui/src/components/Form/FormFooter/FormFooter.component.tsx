@@ -6,13 +6,6 @@ import type { FormFooterProps } from './FormFooter.types';
 import { FormFooterActions } from './FormFooterActions';
 import { useFormDiscardConfirm } from './hooks';
 
-/**
- * Footer of the form body: submit/cancel buttons plus the discard-changes
- * confirmation flow. Fully self-connected: reads the mode, dirty state,
- * labels, and cancel route from the form stores, and derives the submission
- * flag itself from the formId-keyed fetcher or the navigation state. Renders
- * nothing in view mode.
- */
 export const FormFooter = ({ children }: FormFooterProps) => {
   const mode = useGetFormMode();
   const {

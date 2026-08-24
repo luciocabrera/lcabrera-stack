@@ -12,13 +12,6 @@ type ReadPersistedUiFlagsFromCookieArgs = {
   readonly persistenceKey: string;
 };
 
-/**
- * Read the persisted drawer UI state from cookies synchronously (SSR-safe).
- * Returns an empty object when nothing is stored or the payload is invalid.
- * Used by the route loader to seed the initial meta state so the drawer renders
- * in its persisted state on the first paint — this is the authoritative source,
- * nothing client-side may override it.
- */
 export const readPersistedUiFlagsFromCookie = ({
   appId,
   cookieString,

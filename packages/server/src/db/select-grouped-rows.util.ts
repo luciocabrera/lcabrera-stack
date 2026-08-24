@@ -23,39 +23,10 @@ import { withTransaction } from './with-transaction.util.ts';
 type SelectGroupedRowsArgs = Omit<GroupQueryDescriptor, 'capabilities'>;
 
 /**
- * Runs a grouped read under its own guard rails: refuse what is too deep,
- * resolve what each column may do, bound the result, and cut the query off at a
- * ceiling of its own.
- *
- * Four things happen in an order that is not arbitrary (ADR-066):
- *
- * 1. **Depth, before anything else.** It is pure, so a request past the cap is
- *    refused without borrowing a connection or issuing a catalogue query.
- * 2. **A transaction, always.** Not for atomicity — a read needs none — but
- *    because `statement_timeout` can only be set for *this* query by being set
- *    transaction-locally. Outside one it would persist on the pooled connection
- *    and re-tune every later query that borrows it.
- * 3. **The timeout first inside it**, so it covers the catalogue query too.
- * 4. **The capability answer and the query it authorises share the connection**,
- *    so both see one snapshot — and, critically, both are covered by the
- *    timeout. An executor called here without `tx` would silently run on the
- *    pool instead, outside the transaction, with no ceiling and no symptom.
- *
- * **Passing your own `tx` has a consequence worth knowing.** It is used as-is,
- * so the timeout is local to *your* transaction and reverts at *your* `COMMIT` —
- * which means this read's ceiling also applies to every statement you run after
- * it on that transaction, not only to this call. That follows from
- * transaction-locality rather than being a choice made here: the alternative is
- * reading the previous value back and restoring it afterwards, which is not
- * atomic with the query it wraps. If the rest of your transaction needs a
- * different ceiling, either call this **without** `tx` and let it open its own,
- * or set the value you want once it returns.
- *
- * The result carries the emitted `aggregates`, `keys` and `maskAlias` because a
- * grouped row cannot be decoded without them, `truncations` because a truncated
- * key's heading and its later drill both need the granularity paired with the
- * column's zonedness, plus `estimate` and any `warning` the rails produced — a grouping that ran on missing statistics is worth
- * saying out loud even though it succeeded.
+ * Order is not arbitrary (ADR-066): depth first (pure, no connection); then a transaction
+ * so `statement_timeout` can be local; timeout before the catalogue query; capabilities
+ * and the read share that `tx` so both sit under the ceiling. Passing your own `tx` keeps
+ * the ceiling until *your* COMMIT.
  */
 export const selectGroupedRows = async <TRow extends QueryResultRow>({
   tx,

@@ -12,23 +12,11 @@ import type {
 } from '#ui/components/Table/Table.types';
 import type { TStore } from '#ui/hooks/useStore.hook';
 
-/**
- * Shared argument shape of the `commitResolved*State` utils: the resolved
- * column state to derive and commit, the columns/meta store setters, and the
- * persistence callback narrowed to that commit path's writable slices.
- * Variants re-require members they depend on (e.g. visibility re-requires
- * `columnVisibility`) via intersection.
- */
 export type CommitResolvedColumnStateArgs<
   TData,
   TSlice extends keyof TablePersistenceConfig,
 > = {
-  /**
-   * The applied aggregates, read from the grouping store by the action hook.
-   * The derived slices carry one measure column per aggregate, so a commit that
-   * did not know about them would collapse them back into their source column
-   * on the next pin or hide.
-   */
+  /** The applied aggregates, read from the grouping store by the action hook. */
   readonly aggregates: readonly TableColumnAggregate[];
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;

@@ -6,26 +6,17 @@ import { PERSIST_COOKIE_ACTION } from '#ui/constants/globalSettings.constants';
 
 type UsePersistCookieActionArgs = {
   /**
-   * Stable `useFetcher` key scoping this concern's submissions. A stable key
-   * makes a newer submit supersede an in-flight one, giving last-write-wins for
-   * rapid repeats (e.g. toggling a drawer twice) — the ordering guarantee the
-   * old synchronous `document.cookie` write had for free.
+   * A stable key makes a newer submit supersede an in-flight one, giving last-write-wins
+   * for rapid repeats (e.g. toggling a drawer twice) — the ordering guarantee the old
+   * synchronous `document.cookie` write had for free.
    */
   readonly fetcherKey: string;
 };
 
 /**
- * The single client-side cookie-write primitive. Submits entries to the
- * `/_action/persist-cookie` server action so the `Set-Cookie` header comes from
- * the server — the only channel the SSR loader can read back to seed first
- * paint. Theme, global settings, table state, column sizing and drawer UI flags
- * all persist through it.
- *
- * Cookie-only entries (empty `searchParam*`) make the action respond `204`,
- * which {@link shouldRevalidatePersistCookieAction} skips — no loader refetch.
- *
- * @param fetcherKey - stable key isolating this concern's fetcher (see the arg
- *   doc for why the key must be stable).
+ * Submits entries to the `/_action/persist-cookie` server action so the `Set-Cookie`
+ * header comes from the server — the only channel the SSR loader can read back to seed
+ * first paint.
  */
 export const usePersistCookieAction = ({
   fetcherKey,

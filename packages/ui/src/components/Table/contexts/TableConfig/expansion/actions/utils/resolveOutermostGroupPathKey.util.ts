@@ -9,32 +9,17 @@ import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGrou
 
 type ResolveOutermostGroupPathKeyArgs<TData extends Record<string, unknown>> = {
   readonly columns: readonly TableColumn<TData>[];
-  /** Identity of the row the grid's focus points at, `undefined` when it points at none. */
   readonly focusedRowKey: string | undefined;
-  /** The rows on screen **before** the fold, in order. */
   readonly rows: readonly TData[];
 };
 
 /**
- * The top-level group a row sits inside, as a path key — the ancestor that
- * survives a collapse-all, so the one focus falls back to (#774).
- *
- * `resolveGroupCollapseFocusTarget` needs the collapsed group's path key, and
- * for a single collapse the caller already has it: it is the path it just
- * folded. Collapse-all has no such path — it folds every level at once — so the
- * ancestor has to be read back off the focused row instead, which is all this
- * does. The two are kept apart rather than generalised because their inputs
- * differ, not their intent: one is told the ancestor, the other must find it.
- *
  * A row's own path is what answers it, never its position, for the reason
- * `resolveGroupTreeNodes` states: rollup emits a subtotal after the rows it
- * totals, so a walk over neighbours reads the wrong group. A **detail** row is
- * the one exception, there and here alike — it carries no path of its own, so
- * the nearest group row above it is the only thing that can say where it sits.
- *
- * `undefined` means focus has nowhere to fall back to and should be left alone:
- * no row is focused, the focused row is not in this list, or it is the grand
- * total, whose path is empty and which no collapse can hide (ADR-065).
+ * `resolveGroupTreeNodes` states: rollup emits a subtotal after the rows it totals, so a
+ * walk over neighbours reads the wrong group.
+ * `undefined` means focus has nowhere to fall back to and should be left alone: no row is
+ * focused, the focused row is not in this list, or it is the grand total, whose path is
+ * empty and which no collapse can hide (ADR-065).
  */
 export const resolveOutermostGroupPathKey = <
   TData extends Record<string, unknown>,

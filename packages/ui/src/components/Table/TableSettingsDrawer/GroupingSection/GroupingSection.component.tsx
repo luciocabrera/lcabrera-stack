@@ -16,19 +16,10 @@ import { GroupingSectionToolbar } from './GroupingSectionToolbar';
 import { TotalsPlacementSection } from './TotalsPlacementSection';
 
 /**
- * The settings drawer's grouping tab: the staged group keys in nesting order,
- * the staged aggregates, the totals mode and position, and the controls to add
- * either.
- *
- * Structurally the sorting section's twin — `SidePanelSectionMain`, an add
- * control, an overlay-guarded list, a toolbar — because it is the same kind of
- * thing and the drawer-section pattern is what makes the drawer read as one
- * surface rather than five.
- *
- * Every control here writes the drawer's grouping **draft**, like every other
- * section, and Accept commits the whole configuration in one navigation. The
- * column-header grouping menu is the surface that still applies immediately:
- * it is a direct action with no Accept to wait for.
+ * The settings drawer's grouping tab: the staged group keys in nesting order, the staged
+ * aggregates, the totals mode and position, and the controls to add either.
+ * Every control here writes the drawer's grouping **draft**, like every other section, and
+ * Accept commits the whole configuration in one navigation.
  */
 export const GroupingSection = ({ isBusy = false }: GroupingSectionProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

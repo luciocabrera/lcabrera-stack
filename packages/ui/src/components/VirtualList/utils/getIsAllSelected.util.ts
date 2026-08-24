@@ -3,7 +3,6 @@ type GetIsAllSelectedArgs = {
   readonly selectedValues: readonly string[];
 };
 
-/** Whether every currently visible (filtered) option is selected. */
 export const getIsAllSelected = ({
   filteredOptions,
   selectedValues,

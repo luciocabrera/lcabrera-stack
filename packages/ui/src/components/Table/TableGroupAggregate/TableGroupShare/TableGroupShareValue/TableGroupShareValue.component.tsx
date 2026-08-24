@@ -16,21 +16,11 @@ import { formatSharePercent } from '../utils/formatSharePercent.util';
 import { resolveShareRatio } from '../utils/resolveShareRatio.util';
 
 /**
- * The percentage and its bar, for a column that is showing a share.
- *
- * Split from `TableGroupShare` so the denominator is read **only where a share
- * was asked for**. A hook cannot be called conditionally, so the check and the
- * work have to live in different components — and the work is a fold over every
- * row, which every measure cell would otherwise pay for on a table with no
- * share turned on at all (#648).
- *
- * **The denominator is the grand total, and the accessible text says so**
- * (ADR-086). This grid shows the same measure at several levels at once, so
- * position cannot carry which total a percentage is of.
- *
- * **The bar is decorative; the number is the content.** It is `aria-hidden` and
- * carries no `role`: it depicts a value that is already text beside it, and a
- * `progressbar` would announce the quantity twice and imply a task in progress.
+ * Split from `TableGroupShare` so the denominator is read **only where a share was asked
+ * for**.
+ * A hook cannot be called conditionally, so the check and the work have to live in
+ * different components — and the work is a fold over every row, which every measure cell
+ * would otherwise pay for on a table with no share turned on at all (#648).
  */
 export const TableGroupShareValue = ({
   columnKey,

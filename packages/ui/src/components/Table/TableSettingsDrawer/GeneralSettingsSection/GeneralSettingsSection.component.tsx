@@ -13,11 +13,6 @@ import { SortingSectionToolbar } from '../SortingSection/SortingSectionToolbar';
 import { AllSettingsSection } from './AllSettingsSection/AllSettingsSection.component';
 import { ColumnWidthsSection } from './ColumnWidthsSection/ColumnWidthsSection.component';
 
-/**
- * "General" tab of the table settings drawer: column width presets, the
- * footer-variant clear/reset toolbars of the Filters/Sorting/Columns
- * sections, and the cross-section clear/reset-all actions.
- */
 export const GeneralSettingsSection = ({
   isBusy = false,
   ...props

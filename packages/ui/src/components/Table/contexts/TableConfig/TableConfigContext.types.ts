@@ -7,12 +7,10 @@ import type {
 import type { TStore } from '#ui/hooks/useStore.hook';
 
 export type TableConfigContextValue<TData = Record<string, unknown>> = {
-  /** Store managing column-related state */
   readonly columnsStore: TStore<TableColumnsState<TData>>;
   /**
-   * Store managing which group rows are collapsed. It sits beside the grouping
-   * store for the same lifecycle reason, and apart from it because grouping
-   * configuration crosses the loader boundary while expansion never does
+   * It sits beside the grouping store for the same lifecycle reason, and apart from it
+   * because grouping configuration crosses the loader boundary while expansion never does
    * (ADR-067).
    */
   readonly expansionStore: TStore<TableGroupExpansionState>;
@@ -23,7 +21,6 @@ export type TableConfigContextValue<TData = Record<string, unknown>> = {
    * grouping state placed there would be wiped by its own effect (ADR-061).
    */
   readonly groupingStore: TStore<TableGroupingState>;
-  /** Store managing meta-related state */
   readonly metaStore: TStore<TableMetaState>;
 };
 

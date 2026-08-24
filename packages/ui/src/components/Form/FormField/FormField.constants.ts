@@ -16,11 +16,8 @@ export type AnyFieldComponent = (props: {
 }) => ReactNode;
 
 /**
- * Registry dispatch, not a switch — adding a leaf type is a new entry here,
- * not a growing conditional (ADR-005). Each concrete field component is
- * generic over its own `TValues`; erased to `AnyFieldComponent` at the
- * registry boundary and narrowed back inside each leaf via its own
- * `field.type`-specific def.
+ * Registry dispatch, not a switch — adding a leaf type is a new entry here, not a growing
+ * conditional (ADR-005).
  */
 export const fieldRegistry: Record<
   LeafFieldDef<Record<string, unknown>>['type'],

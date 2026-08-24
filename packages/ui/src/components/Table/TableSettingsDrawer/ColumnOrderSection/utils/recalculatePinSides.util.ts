@@ -13,12 +13,6 @@ type RecalculatePinSidesArgs = {
   readonly staticKeys?: Set<string>;
 };
 
-/**
- * Recalculates pin sides for pinned columns based on their new position.
- * Each pinned column is assigned to the closest edge (left or right).
- * If equidistant from both edges, the original side is preserved.
- * Static columns are preserved in their original pin side.
- */
 export const recalculatePinSides = ({
   columnPinning,
   newOrder,

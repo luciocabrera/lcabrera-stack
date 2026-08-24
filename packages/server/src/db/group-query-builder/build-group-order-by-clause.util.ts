@@ -5,10 +5,6 @@ import { assertGroupSort } from './assert-group-sort.util.ts';
 
 type BuildGroupOrderByClauseArgs = {
   readonly aggregateAliases: readonly string[];
-  /**
-   * Each key's SQL, by key. The value term still uses the output name — see
-   * below. A key with no entry falls back to its quoted identifier.
-   */
   readonly expressionByKey?: Readonly<Record<string, string>>;
   readonly keys: readonly string[];
   readonly sets: readonly (readonly string[])[];
@@ -20,42 +16,11 @@ const toDirection = (direction: 'asc' | 'desc' | undefined) =>
   direction === 'desc' ? 'DESC' : 'ASC';
 
 /**
- * `GROUPING(key) <placement>, key <user>` per key, with any aggregate sort
- * spliced in at the innermost level.
- *
- * The leading `GROUPING` term is what puts a subtotal beside the rows it
- * totals, and it is emitted only when that key is rolled up in at least one
- * set — so a flat grouping produces byte-identical output to the flat builder's
- * `ORDER BY`.
- *
- * **No `NULLS FIRST`/`NULLS LAST` anywhere, deliberately.** The `GROUPING` term
- * partitions the rows first: where it is 1 the key is NULL on every row in the
- * partition, so the following term orders nothing; where it is 0 the key is
- * real data and a genuine NULL takes Postgres's default placement, exactly as
- * the ungrouped list view gives it. The two kinds of NULL are never adjacent,
- * so there is no placement to state — and emitting one would break
- * `build-keyset-comparison.util.ts`, which depends on the default.
- *
- * **An aggregate sort lands after the innermost key's `GROUPING` term and ahead
- * of that key's own value term**, which is the one position where it does
- * anything and still keeps the tree: every ancestor level is already separated
- * by the terms above it, and `GROUPING(kₙ)` still holds each parent's subtotal
- * apart from the rows it totals. Appending it after the value term instead —
- * the shape this replaces — emits a term that can never fire, because within a
- * grouping set the key columns identify the row on their own. The value term
- * stays, last, as the tiebreak two equal aggregates would otherwise have none
- * of.
- *
- * Ranking an ancestor by an aggregate is refused rather than reordered — see
- * `assert-group-sort.util.ts`, which every request passes through first.
- *
- * **`GROUPING` takes the key's expression; the value term takes its output
- * name.** Postgres matches a `GROUPING` argument against a `GROUP BY`
- * expression syntactically, so a truncated key has to be spelled the same way
- * there — while `ORDER BY` resolves a bare name against the select list first,
- * where the projection has already aliased the truncation back to the column's
- * name. So the value term needs no change at all, and stays the identifier a
- * reader expects (#786).
+ * `GROUPING(key) <placement>, key <user>` per key, with any aggregate sort spliced in at
+ * the innermost level.
+ * The leading `GROUPING` term is what puts a subtotal beside the rows it totals, and it is
+ * emitted only when that key is rolled up in at least one set — so a flat grouping
+ * produces byte-identical output to the flat builder's `ORDER BY`.
  */
 export const buildGroupOrderByClause = ({
   aggregateAliases,

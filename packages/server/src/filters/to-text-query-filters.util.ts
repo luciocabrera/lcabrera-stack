@@ -6,12 +6,6 @@ export type ToTextQueryFiltersArgs = {
   readonly filter: TextFilter;
 };
 
-/**
- * Translate a table text filter to generic `QueryFilter`s. `contains`,
- * `startsWith` and `endsWith` map to `ilike` patterns; `notContains` to a
- * `notIlike` (`NOT ILIKE`) pattern; `equals`/`notEquals` to `eq`/`neq`. An
- * empty value yields nothing.
- */
 export const toTextQueryFilters = ({
   column,
   filter,

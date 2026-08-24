@@ -4,24 +4,10 @@ import type { ButtonProps } from '../Button.types';
 
 import { buttonStyles } from '../Button.stylex';
 
-/**
- * Args for {@link getButtonElement} — every {@link ButtonProps} field except the
- * tooltip concerns, which are owned by the `Button` component itself.
- */
 export type ButtonElementArgs = Omit<
   ButtonProps,
   'tooltipContent' | 'tooltipPlacement'
 >;
-/**
- * Builds the native `<button>` element for `Button`, applying every StyleX
- * variant (color, size, orientation, icon-only, busy/loading shimmer overlay,
- * and the primary-variant gradient overlay).
- *
- * Returns a host `<button>` element rather than a component so that wrappers
- * such as `Tooltip` keep detecting the trigger as a natively interactive
- * element (see `getIsNativeInteractiveElement`), which a component boundary
- * would hide.
- */
 export const getButtonElement = ({
   children,
   customStylex,

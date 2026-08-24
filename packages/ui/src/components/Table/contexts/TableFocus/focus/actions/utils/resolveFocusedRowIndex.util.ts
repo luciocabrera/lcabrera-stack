@@ -9,20 +9,7 @@ type ResolveFocusedRowIndexArgs<TData extends Record<string, unknown>> = {
   readonly rowKey: string | undefined;
 };
 
-/**
- * Where the focused row sits in the rows loaded right now, or `undefined` when
- * the grid holds no focus target and when there is nothing to hold one.
- *
- * This is ADR-062's focus-recovery rule made executable. The stored index is
- * checked first and is right in the ordinary case, so the scan below runs only
- * after the data underneath focus has actually moved — a sort, a filter or a
- * delete. When the row survives somewhere else it is found by identity; when it
- * is gone, focus falls to the nearest surviving row at the same absolute index
- * rather than to nothing, which is what keeps it out of `<body>`.
- *
- * `resolveRowKey` is the same derivation the rendered rows are keyed by, so
- * "the row this key identifies" means one thing in both places.
- */
+/** This is ADR-062's focus-recovery rule made executable. */
 export const resolveFocusedRowIndex = <TData extends Record<string, unknown>>({
   columns,
   data,

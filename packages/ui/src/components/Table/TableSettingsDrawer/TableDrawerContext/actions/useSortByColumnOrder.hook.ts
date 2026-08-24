@@ -3,11 +3,6 @@ import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveCol
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 
-/**
- * Hook to sort all sortable columns by their current column order.
- * Creates ascending sort entries for every sortable column,
- * ordered by the current column order (or definition order as fallback).
- */
 export const useSortByColumnOrder = () => {
   const { columnsStore } = useTableConfigContextValue();
   const { columnsStore: columnsDrawerStore } = useTableDrawerContextValue();

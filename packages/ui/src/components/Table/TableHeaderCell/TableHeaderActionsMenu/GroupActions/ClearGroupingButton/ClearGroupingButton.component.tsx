@@ -16,24 +16,11 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 import type { ClearGroupingButtonProps } from './ClearGroupingButton.types';
 
 /**
- * "Clear Grouping" item of the grouping section: always shown to keep the menu
- * layout stable, disabled until some column is grouped. It clears every applied
- * key and every selected aggregate, not only the column whose menu is open —
- * grouping is one whole-table state, so an ungrouped column's menu can still
+ * "Clear Grouping" item of the grouping section: always shown to keep the menu layout
+ * stable, disabled until some column is grouped.
+ * It clears every applied key and every selected aggregate, not only the column whose menu
+ * is open — grouping is one whole-table state, so an ungrouped column's menu can still
  * switch it off.
- *
- * **It takes no `columnKey`, and that is the point.** Its sibling
- * `GroupByColumnButton` gates on the open column's `isGroupable`, which is
- * correct for it: it groups *by that column*, so that column's capability is
- * exactly the question being asked. Clearing asks nothing about any column. The
- * two look symmetric and are not, so the difference is enforced structurally
- * rather than by comment — there is no column in scope here to gate on by
- * mistake, which is how the previous version of this file came to contradict
- * the paragraph above.
- *
- * What can disable it is the route's own capability, so that is what
- * `isDisabled` reads. The rest follows from `current`, which is where
- * `deriveToggleCommandState` already answers "is there anything to clear".
  */
 export const ClearGroupingButton = ({ onClose }: ClearGroupingButtonProps) => {
   const clearGrouping = useClearTableGrouping();

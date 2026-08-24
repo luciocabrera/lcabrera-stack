@@ -23,28 +23,10 @@ import { resolveTreeRowAriaProps } from './utils/resolveTreeRowAriaProps.util';
 
 /**
  * The rendered virtualization window.
- *
- * **One rendering path, whatever a row is** (ADR-065). A row carrying a group
- * summary and a detail row produce the same `TableRow` over the same columns in
- * the same order; only what each cell holds differs, and that is
- * `buildTableBodyCellDescriptor`'s decision. The spanning banner a group row
- * used to be, and the branch that chose it, are both gone — which is what makes
- * a group row's cells ordinary focus targets with no special case in the focus
- * model (ADR-062).
- *
- * What a row *is* is still asked of the **row**, not of the grouping
- * configuration, so a group row and a detail row can arrive in the same result.
- * The configuration is consulted for one thing only: which data columns a
- * *detail* row blanks, because its group row already states them.
- *
- * It loops over the rows a collapse leaves standing, and `rowIndex` counts
- * those. That index is the grid's index space in every other sense too — the
- * focus store's `rowIndex`, `aria-rowindex`, and the number `TableBody` sizes
- * `<tbody>` from all come off the same array (ADR-067) — so a hidden row cannot
- * be numbered, focused, or paid for in height. Every row goes through
- * `TableRow`, so every row paints at the store's `rowHeight` whatever kind it
- * is, and the tree attributes ride on that same element rather than on a shape
- * only one kind of row has.
+ * **One rendering path, whatever a row is** (ADR-065).
+ * The spanning banner a group row used to be, and the branch that chose it, are both gone
+ * — which is what makes a group row's cells ordinary focus targets with no special case in
+ * the focus model (ADR-062).
  */
 export const TableBodyRows = <TData extends Record<string, unknown>>({
   endIndex,

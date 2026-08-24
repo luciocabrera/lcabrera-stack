@@ -6,18 +6,11 @@ type AssertKeysetCursorArgs = {
 };
 
 /**
- * Refuses a keyset cursor the builder cannot resume correctly, at construction
- * time — the same posture as buildUpdateQuery/buildDeleteQuery refusing an
- * unfiltered mutation. A cursor is only well-defined over a total order, and
- * these are the parts of that checkable from the descriptor: a sort exists, one
- * value per sort entry, and the sort ends on a declared unique column carrying a
- * non-null value. Whether that column is genuinely unique is the caller's to
- * guarantee (ADR-052).
- *
- * The non-null rule is not a formality. Postgres permits many NULLs in a unique
- * index, so a null there is not a total order at all — and it is also what keeps
- * the final OR-branch of the predicate alive, which is what makes every bound
- * cursor value referenced by the emitted SQL.
+ * Refuses a keyset cursor the builder cannot resume correctly, at construction time: a
+ * sort exists, one value per sort entry, and the sort ends on a declared unique column
+ * carrying a non-null value. Whether that column is genuinely unique is the caller's to
+ * guarantee (ADR-052). The non-null rule keeps the final OR-branch of the predicate
+ * alive, so every bound cursor value is referenced by the emitted SQL.
  */
 export const assertKeysetCursor = ({
   cursor,

@@ -8,10 +8,6 @@ import { useTheme } from '#ui/hooks/useTheme.hook';
 import { NAV_DENSITY } from '../../AppNavigation.constants';
 import { resolveThemeLabel } from '../../utils';
 
-/**
- * The navigation footer's theme toggle. Icon-only with a tooltip when the
- * sidebar is collapsed, and sized by the global density preference.
- */
 export const NavigationThemeControl = () => {
   const navigationCollapsedPreference =
     useGetGlobalNavigationCollapsedPreference();

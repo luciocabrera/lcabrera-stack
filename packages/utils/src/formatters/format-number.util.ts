@@ -6,11 +6,6 @@ type FormatNumberArgs = NumberFormatOptions & {
   readonly value: number;
 };
 
-/**
- * Format a number value using Intl.NumberFormat with locale support
- * @param args - The value and formatting options
- * @returns Formatted number string
- */
 export const formatNumber = ({
   locale,
   maximumFractionDigits,

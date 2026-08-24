@@ -7,11 +7,6 @@ type FormatCurrencyArgs = CurrencyFormatOptions & {
   readonly value: number;
 };
 
-/**
- * Format a numeric value as currency using Intl.NumberFormat
- * @param args - The value and currency formatting options
- * @returns Formatted currency string
- */
 export const formatCurrency = ({
   currency: currencyCode,
   locale,

@@ -10,12 +10,9 @@ type ResolveOpenMenuRepositionArgs = {
 };
 
 /**
- * Decision core shared by the observer and post-open stabilization reposition
- * paths: `keep` while the menu is not open, `close` when the trigger left the
- * DOM (virtualization can unmount it), otherwise `reposition` with freshly
- * computed menu coordinates. `getContainerRect` is invoked only on the
- * reposition path, keeping closed-menu observer callbacks free of layout
- * reads. Only reads from its arguments — no DOM mutations.
+ * Decision core shared by the observer and post-open stabilization reposition paths:
+ * `keep` while the menu is not open, `close` when the trigger left the DOM (virtualization
+ * can unmount it), otherwise `reposition` with freshly computed menu coordinates.
  */
 export const resolveOpenMenuReposition = ({
   getContainerRect,

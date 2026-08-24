@@ -6,10 +6,6 @@ type ResolveSelectAllFilterArgs = {
   readonly selectedValues: readonly string[];
 };
 
-/**
- * Builds the next SelectFilter after toggling Select All: deselects every
- * visible option when all are selected, otherwise selects them all.
- */
 export const resolveSelectAllFilter = ({
   filteredOptions,
   isAllSelected,

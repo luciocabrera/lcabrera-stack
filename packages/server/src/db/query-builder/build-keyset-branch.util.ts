@@ -13,14 +13,8 @@ type BuildKeysetBranchArgs = {
 };
 
 /**
- * One OR-branch of the lexicographic keyset predicate: every earlier sort column
- * pinned to equality, the column at `index` advanced past the cursor.
- *
- * Equality is `IS NOT DISTINCT FROM`, not `=`, so a null cursor value ties with
- * a null column value instead of collapsing the whole branch to NULL.
- *
- * `undefined` when nothing can sort after the value at `index` — the branch is
- * unsatisfiable and the caller drops it.
+ * One OR-branch of the lexicographic keyset predicate: every earlier sort column pinned to
+ * equality, the column at `index` advanced past the cursor.
  */
 export const buildKeysetBranch = ({
   entries,

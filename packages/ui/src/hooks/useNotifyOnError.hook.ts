@@ -4,9 +4,6 @@ import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
 
 const NOTIFY_ON_ERROR_DURATION_MS = 10_000;
 
-/**
- * Fires a toast notification once whenever `error` changes identity.
- */
 export const useNotifyOnError = (error: unknown) => {
   const notify = useNotifyAction();
 

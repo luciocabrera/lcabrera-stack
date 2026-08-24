@@ -9,16 +9,12 @@ type ResolveTableActionsColumnArgs<TData extends Record<string, unknown>> = {
 };
 
 /**
- * Resolves the final columns array for a table, synthesizing the row-actions
- * column when `crud` enables a row-level operation (`read`/`update`/`delete`
- * — `create` alone only drives the header create-link and never needs a row
- * id, so it's deliberately excluded here) or when the consumer already
- * declared a `key: 'actions'` column (for a pure custom-actions menu with no
- * CRUD flags at all). Any consumer-supplied `actions` column is merged onto
- * `createActionsColumn`'s defaults, so only the fields the consumer cares
- * about (typically `render`) need to be specified. Also returns
- * `hasActionsColumn` so callers (e.g. pinning logic) don't need to re-derive
- * it by scanning the resolved columns again.
+ * Resolves the final columns array for a table, synthesizing the row-actions column when
+ * `crud` enables a row-level operation (`read`/`update`/`delete` — `create` alone only
+ * drives the header create-link and never needs a row id, so it's deliberately excluded
+ * here) or when the consumer already declared a `key: 'actions'` column (for a pure
+ * custom-actions menu with no CRUD flags at all).
+ * pinning logic) don't need to re-derive it by scanning the resolved columns again.
  */
 export const resolveTableActionsColumn = <
   TData extends Record<string, unknown>,

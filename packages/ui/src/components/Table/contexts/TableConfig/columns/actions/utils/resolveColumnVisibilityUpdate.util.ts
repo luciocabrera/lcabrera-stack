@@ -9,11 +9,6 @@ type ResolveColumnVisibilityUpdateArgs<TData> = {
   readonly isVisible: boolean;
 };
 
-/**
- * Computes the next columnVisibility Set for a single-column show/hide toggle.
- * The Set stores HIDDEN column keys (see getEffectiveColumns.util.ts), so
- * showing a column removes it from the Set and hiding adds it.
- */
 export const resolveColumnVisibilityUpdate = <TData>({
   columnKey,
   columnVisibility,

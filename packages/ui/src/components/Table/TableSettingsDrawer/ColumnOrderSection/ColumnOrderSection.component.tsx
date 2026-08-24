@@ -7,12 +7,6 @@ import { ColumnOrderSectionHeader } from './ColumnOrderSectionHeader/ColumnOrder
 import { ColumnOrderSectionModals } from './ColumnOrderSectionModals/ColumnOrderSectionModals.component';
 import { ColumnOrderSectionToolbar } from './ColumnOrderSectionToolbar';
 
-/**
- * Drawer section for column ordering, visibility, and pinning; a thin shell
- * composing private delegates that own their store wiring: a header (count
- * title + compact toolbar), a body (drag-and-drop column list), a footer
- * toolbar, and the pin/order conflict-resolution modals.
- */
 export const ColumnOrderSection = ({
   isBusy = false,
   ...props

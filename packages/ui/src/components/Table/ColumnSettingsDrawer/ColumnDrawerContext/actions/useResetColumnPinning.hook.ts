@@ -3,9 +3,6 @@ import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableC
 import { getColumnPinSide } from '#ui/components/Table/utils';
 import { logger } from '#ui/utils/logger';
 
-/**
- * Resets the column pinning in the drawer to match the current table state.
- */
 export const useResetColumnPinning = () => {
   const { columnsStore } = useTableConfigContextValue();
   const { columnStore } = useColumnDrawerContextValue();

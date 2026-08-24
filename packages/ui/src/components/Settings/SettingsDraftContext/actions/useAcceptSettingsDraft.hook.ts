@@ -15,11 +15,6 @@ import {
 } from '../../utils';
 import { useSettingsDraftContextValue } from '../useSettingsDraftContextValue.hook';
 
-/**
- * Commit the staged settings draft to the global preferences store,
- * dispatching navigation and pinning updates only for the domains that
- * actually changed. No-op when the draft matches the persisted baseline.
- */
 export const useAcceptSettingsDraft = () => {
   const { draftStore } = useSettingsDraftContextValue();
   const navigationPreferences = useGetGlobalNavigationPreferences();

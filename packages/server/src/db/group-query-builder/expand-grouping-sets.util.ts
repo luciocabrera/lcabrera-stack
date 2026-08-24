@@ -8,20 +8,11 @@ type ExpandGroupingSetsArgs = {
 };
 
 /**
- * The grouping sets to emit, in Postgres's own order — most specific first,
- * grand total last.
- *
- * ADR-059 expands here rather than emitting `ROLLUP(…)`/`CUBE(…)` sugar: the
- * planner normalises both into the same node, so expansion is free, and the
- * guard rails need this list anyway to bound the result. Keeping it over key
- * *names* rather than SQL text is what lets this file's whole suite be array
- * equality.
- *
- * The record is closed over `GroupingMode`, so a new mode is a compile error
- * here rather than a silent fallthrough — and that is exactly how cube arrived.
- * `flat` and `rollup` are prefixes of the key list and differ only in how many
- * they emit, so each is a count; cube's sets are subsets, so it needed a real
- * expansion and has its own file.
+ * The grouping sets to emit, in Postgres's own order — most specific first, grand total
+ * last.
+ * ADR-059 expands here rather than emitting `ROLLUP(…)`/`CUBE(…)` sugar: the planner
+ * normalises both into the same node, so expansion is free, and the guard rails need this
+ * list anyway to bound the result.
  */
 export const expandGroupingSets = ({
   grouping,

@@ -11,11 +11,8 @@ type ResolveDropdownPlacementArgs = {
 };
 
 /**
- * Viewport coordinates for a dropdown rendered in the top layer: below the
- * anchor by default, flipped above it when the list would not fit below and
- * there is more room above. Flipping needs the measured height, so callers
- * must read it after the popover is shown — a hidden popover measures zero,
- * which resolves to "fits below" and never flips.
+ * Flipping needs the measured height, so callers must read it after the popover is shown —
+ * a hidden popover measures zero, which resolves to "fits below" and never flips.
  */
 export const resolveDropdownPlacement = ({
   anchorRect,

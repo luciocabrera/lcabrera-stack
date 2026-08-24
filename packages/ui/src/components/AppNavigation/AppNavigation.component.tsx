@@ -10,14 +10,8 @@ import { NavigationFooter } from './NavigationFooter/NavigationFooter.component'
 import { NavigationHeader } from './NavigationHeader/NavigationHeader.component';
 
 /**
- * Application navigation sidebar: an always-pinned SidePanel composed of a
- * header (brand + expand/collapse action), a body (app-supplied route links),
- * and a footer (theme toggle + session controls). The panel is permanent — it
- * collapses to an icon rail but is never dismissed, so every route keeps its
- * primary navigation reachable in one click.
- *
- * Zero props: it owns only the panel's own geometry, and every delegate reads
- * what it renders from `GlobalSettingsContext` and `AppConfigContext` itself.
+ * The panel is permanent — it collapses to an icon rail but is never dismissed, so every
+ * route keeps its primary navigation reachable in one click.
  */
 export const AppNavigation = () => {
   const navigationCollapsedPreference =

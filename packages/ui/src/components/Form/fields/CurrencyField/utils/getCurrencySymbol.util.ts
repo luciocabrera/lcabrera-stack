@@ -6,23 +6,14 @@ type GetCurrencySymbolArgs = {
 };
 
 /**
- * Resolved symbols, keyed by `locale:currency`. Constructing the
- * `Intl.NumberFormat` dominates this function's cost by orders of magnitude —
- * it loads locale data — while the symbol for a given key never changes, so it
- * is derived once per key instead of on every render. The key includes the
- * locale so that a future non-constant `getDefaultLocale` cannot silently
- * return another locale's symbol.
+ * Constructing the `Intl.NumberFormat` dominates this function's cost by orders of
+ * magnitude — it loads locale data — while the symbol for a given key never changes, so it
+ * is derived once per key instead of on every render.
+ * The key includes the locale so that a future non-constant `getDefaultLocale` cannot
+ * silently return another locale's symbol.
  */
 const symbolCache = new Map<string, string>();
 
-/**
- * Resolves the currency symbol (e.g. `$`, `€`) for the given ISO currency code
- * via `Intl.NumberFormat`, used as the currency-field input adornment. Falls
- * back to the currency code itself when the symbol can't be derived. The locale
- * is the fixed default (`getDefaultLocale`) for SSR-stable output. The memo
- * above is an implementation detail: same input, same output, no observable
- * effect.
- */
 export const getCurrencySymbol = ({ currency }: GetCurrencySymbolArgs) => {
   const resolvedCurrency = currency ?? DEFAULT_CURRENCY;
   const locale = getDefaultLocale();

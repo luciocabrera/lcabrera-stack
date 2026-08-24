@@ -12,10 +12,6 @@ import { useSetSettingsDraftField } from '../SettingsDraftContext/actions';
 import { useGetSettingsDraft } from '../SettingsDraftContext/selectors';
 import { SettingsOptionSection } from '../SettingsOptionSection';
 
-/**
- * Navigation preferences tab. Owns its store wiring: reads the staged
- * settings draft and stages field updates itself.
- */
 export const NavigationSettingsTab = () => {
   const draft = useGetSettingsDraft();
   const setSettingsDraftField = useSetSettingsDraftField();

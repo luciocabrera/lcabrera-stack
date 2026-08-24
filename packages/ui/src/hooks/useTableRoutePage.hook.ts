@@ -8,27 +8,13 @@ import type { Pagination, TablePageResponse } from '#ui/types/ui.types';
 import { buildTablePageQuery } from '#ui/routing/shared/buildTablePageQuery.util';
 
 type UseTableRoutePageArgs<TResponse> = {
-  /**
-   * The route's paginated read — typically a `createPaginatedFetcher` result.
-   * It takes the query this hook builds, so the two halves are type-checked
-   * against each other rather than agreeing by convention.
-   */
   readonly fetchPage: (query: PaginatedQuery) => Promise<TResponse>;
 };
 
 /**
- * Wire a table route's loader data to its load-more fetch — the view-side
- * counterpart to `createTableRouteLoader`.
- *
- * Returns the four props `TableLayout` needs, so a route that wants custom JSX
- * around the table can spread them; a route that does not should render
- * `TableRouteView`, which is this hook plus the default selectors.
- *
- * The two request-shaping capabilities are read from the loader's `metaState`,
- * never passed in: a capability describes the endpoint, and the route's loader
- * is where the endpoint is declared (ADR-063). That puts the flag where both
- * halves of the route can reach it — though the loader does not itself act on
- * it today, so what the first page sends is still up to its own `fetchPage`.
+ * The two request-shaping capabilities are read from the loader's `metaState`, never
+ * passed in: a capability describes the endpoint, and the route's loader is where the
+ * endpoint is declared (ADR-063).
  */
 export const useTableRoutePage = <
   TData extends Record<string, unknown>,

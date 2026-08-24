@@ -13,7 +13,6 @@ type BuildWhereClauseArgs = {
   /** Keyset cursor to resume after; needs `sort` to describe its tuple. */
   readonly cursor?: QueryCursor;
   readonly filters?: readonly QueryFilter[];
-  /** The query's ORDER BY, read only to build the `cursor` predicate. */
   readonly sort?: readonly QuerySort[];
   readonly startParamIndex?: number;
 };
@@ -25,12 +24,10 @@ type WhereClauseResult = {
 };
 
 /**
- * Values are always parameterized ($1, $2, ...), never interpolated; each
- * filter's column runs through both identifier checks via appendFilterClause.
- *
- * A `cursor` contributes one more conjunct — the keyset seek predicate — bound
- * after the filters, so a filtered keyset page numbers its placeholders in one
- * unbroken run.
+ * Values are always parameterized ($1, $2, ...), never interpolated; each filter's column
+ * runs through both identifier checks via appendFilterClause.
+ * A `cursor` contributes one more conjunct — the keyset seek predicate — bound after the
+ * filters, so a filtered keyset page numbers its placeholders in one unbroken run.
  */
 export const buildWhereClause = ({
   allowedColumns,

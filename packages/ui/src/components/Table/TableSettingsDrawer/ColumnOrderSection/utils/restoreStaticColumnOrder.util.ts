@@ -6,10 +6,6 @@ type RestoreStaticColumnOrderArgs = {
   readonly staticKeys: Set<string>;
 };
 
-/**
- * Restores static columns to their original positions within a reordered column list.
- * Removes static keys from the new order, then re-inserts them at their original indices.
- */
 export const restoreStaticColumnOrder = ({
   currentOrder,
   newOrder,

@@ -17,12 +17,7 @@ export const SCHEMA_NAME = 'public';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
-/**
- * The group-details modal's own persistence key, deliberately not the list's.
- * The two tables show the same columns but are configured independently, and a
- * shared key would let a column hidden in the dialog disappear from the list
- * behind it.
- */
+/** The group-details modal's own persistence key, deliberately not the list's. */
 export const GROUP_DETAILS_PERSISTENCE_KEY = 'enterprise-orders-group-table';
 
 export const DELETE_ACTION_PATH = '/_action/enterprise-orders/delete';
@@ -34,14 +29,6 @@ export const CRUD: TableCrudConfig = {
   update: true,
 };
 
-/**
- * The list view's columns. Typed on `EnterpriseOrderTableRow`, not the whole
- * row: the list query projects only the read-model columns (#405), so naming
- * one it does not select is a compile error here rather than a blank cell in
- * production. The table row is the union of that read model and a group summary
- * row, because a grouped read returns one summary per group and projects none
- * of the columns.
- */
 export const COLUMNS: TableColumn<EnterpriseOrderTableRow>[] = [
   createBasicColumn({
     dataType: 'number',

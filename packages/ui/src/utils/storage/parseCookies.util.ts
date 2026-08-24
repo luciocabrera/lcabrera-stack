@@ -1,12 +1,3 @@
-/**
- * Parse cookies from a cookie header string
- *
- * @example
- * ```ts
- * parseCookies('theme=dark; lang=en') // { theme: 'dark', lang: 'en' }
- * parseCookies('data=foo=bar')        // { data: 'foo=bar' }
- * ```
- */
 export const parseCookies = (cookieHeader: string) => {
   const cookies: Record<string, string> = {};
 

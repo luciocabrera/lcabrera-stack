@@ -5,12 +5,9 @@ type DecodeAuthClaimsArgs = {
 };
 
 /**
- * Decodes a base64url token payload back into {@link AuthClaims}, returning
- * `undefined` — never throwing — for anything that is not a well-formed claims
- * object (bad base64, invalid JSON, missing/mistyped fields). A tampered or
- * garbage payload therefore simply fails to authenticate.
- *
- * Pure: a total function of its input with no side effects.
+ * Decodes a base64url token payload back into {@link AuthClaims}, returning `undefined` —
+ * never throwing — for anything that is not a well-formed claims object (bad base64,
+ * invalid JSON, missing/mistyped fields).
  */
 export const decodeAuthClaims = ({
   payload,

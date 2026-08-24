@@ -11,16 +11,6 @@ type ResolveTextOperatorChangeArgs = {
   readonly operator: OperatorType;
 };
 
-/**
- * Next filter draft for a string column, which can hold either a text or a
- * select filter.
- *
- * A select filter only models `equals`/`notEquals` (`SelectFilter['operator']`),
- * and `TextOrSelectFilterInput` swaps to a text input for every other operator,
- * so the filter converts with it. Keeping `type: 'select'` while the operator
- * moved on left the stale selected values serializing as `equals` behind a text
- * input the user was typing into.
- */
 // Return annotation required: 'text' widens to string without the ColumnFilter
 // contextual type.
 export const resolveTextOperatorChange = ({

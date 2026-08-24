@@ -7,13 +7,10 @@ type HashSecretArgs = {
 };
 
 /**
- * Hashes any secret for storage — a user password, an API token's secret
- * half, anything that must be verifiable but never readable back. scrypt
- * (node:crypto, zero new deps — ADR-017), output format
- * `<saltHex>:<hashHex>`, fresh salt per call.
- *
- * One shape for every credential on the platform: only the hash is
- * persisted, and isSecretHashValid is the only counterpart that reads it.
+ * Hashes any secret for storage — a user password, an API token's secret half, anything
+ * that must be verifiable but never readable back.
+ * scrypt (node:crypto, zero new deps — ADR-017), output format `<saltHex>:<hashHex>`,
+ * fresh salt per call.
  */
 export const hashSecret = ({ secret }: HashSecretArgs) => {
   const salt = randomBytes(SCRYPT_SALT_BYTES);

@@ -5,10 +5,6 @@ import {
   INITIAL_LIST_STATE,
 } from '../../VirtualListContext.constants';
 
-/**
- * Updates the header search term and recomputes the derived list state in
- * the data store (filtered options, select-all flags, content mode).
- */
 export const useSetSearchTerm = () => {
   const { dataStore, listStore } = useVirtualListContextValue();
 

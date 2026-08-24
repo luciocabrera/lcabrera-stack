@@ -13,11 +13,6 @@ import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionConte
 import { useAcceptOrderConflict } from './useAcceptOrderConflict.hook';
 import { resolveOrderConflictUpdate } from './utils/resolveOrderConflictUpdate.util';
 
-/**
- * Hook to handle column reordering via drag and drop.
- * Recalculates pin sides and detects conflicts.
- * Static columns are preserved in their original positions.
- */
 export const useReorderColumns = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();

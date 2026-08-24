@@ -16,15 +16,8 @@ type ResolveGroupGuardRailsArgs = {
 };
 
 /**
- * The three cardinality rails as one answer: estimate the result, refuse it or
- * warn about it, and settle the `LIMIT` it runs under.
- *
- * Composed here rather than in `buildGroupQuery` so the builder gains one call
- * instead of three, and so the whole policy can be tested — including the order
- * the rails apply in — without emitting any SQL.
- *
- * Throws `GroupingRefusedError` through `assertGroupCardinality` when the bound
- * is past the ceiling.
+ * Throws `GroupingRefusedError` through `assertGroupCardinality` when the bound is past
+ * the ceiling.
  */
 export const resolveGroupGuardRails = ({
   capabilities,

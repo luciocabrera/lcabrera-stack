@@ -1,11 +1,5 @@
 import type { PaginatedQuery } from './http.types.ts';
 
-/**
- * Build pagination query params (`limit`, `skip`, optional `sort`, `filter` and
- * `cursor`) shared by the table service paginated fetchers.
- * @param args - Pagination window plus optional sorting, filter and cursor payloads.
- * @returns A `URLSearchParams` instance ready to append to a paginated endpoint.
- */
 export const buildPaginatedQueryParams = ({
   cursor,
   filter,

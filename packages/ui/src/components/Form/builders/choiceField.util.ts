@@ -17,12 +17,6 @@ export type ChoiceFieldArgs<
 
 export type ChoiceFieldType = 'radio' | 'select';
 
-/**
- * Build an options field (`select` or `radio`). Bakes the structural keys and
- * assembles `clientValidation` from flat rules. Bind `TValues` once via
- * `createFieldBuilders<TValues>()` so call sites need no explicit type
- * arguments.
- */
 export const choiceField = <
   TValues extends Record<string, unknown>,
   T extends ChoiceFieldType,

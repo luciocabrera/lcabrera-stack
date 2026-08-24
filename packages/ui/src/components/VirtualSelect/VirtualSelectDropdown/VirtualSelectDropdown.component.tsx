@@ -17,16 +17,8 @@ import { resolveDropdownStyles } from './utils/resolveDropdownStyles.util';
 import { HAS_POPOVER_SUPPORT } from './VirtualSelectDropdown.constants';
 
 /**
- * Dropdown slice of VirtualSelect: the positioned listbox shell around the
- * provider-less VirtualListContent. Fully self-connected (zero props) —
- * positioning/visibility come from the select meta selectors and the
- * fill-height flag from the list config store; the list providers and the
- * selection-change mapping are owned by the shell.
- *
- * A trigger-opened dropdown renders in the top layer (`popover`) rather than
- * absolutely, so a scrolling ancestor cannot clip it. `isAlwaysOpen` is the
- * inline variant (Table filter panels) — it stays in normal flow, where there
- * is nothing to escape.
+ * A trigger-opened dropdown renders in the top layer (`popover`) rather than absolutely,
+ * so a scrolling ancestor cannot clip it.
  */
 export const VirtualSelectDropdown = () => {
   const anchorRef = useVirtualSelectAnchorRef();

@@ -10,15 +10,9 @@ import { buildWhereClause } from './build-where-clause.util.ts';
 import { quoteIdentifier } from './quote-identifier.util.ts';
 
 /**
- * Generic, schema/table-agnostic UPDATE builder. Turns
- * `{ schema, table, values, filters }` into
- * `UPDATE schema.table SET col = $n, … WHERE … [RETURNING …]`.
- *
  * The SET assignments own `$1…$k`; the WHERE clause is delegated to the shared
- * buildWhereClause with `startParamIndex` set past them, so SET and WHERE
- * parameters never collide. At least one filter is required — an unfiltered
- * UPDATE (which would rewrite every row) is refused outright. Same
- * identifier/value safety as buildInsertQuery.
+ * buildWhereClause with `startParamIndex` set past them, so SET and WHERE parameters never
+ * collide.
  */
 export const buildUpdateQuery = ({
   allowedColumns,

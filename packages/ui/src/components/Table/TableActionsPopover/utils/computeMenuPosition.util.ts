@@ -13,11 +13,6 @@ type ComputeMenuPositionArgs = {
   readonly triggerElement: HTMLElement;
 };
 
-/**
- * Measures the trigger, its enclosing table cell, and the menu, then derives
- * the menu coordinates via getTableActionsPopoverPosition with the popover's
- * layout constants. Only reads from its arguments — no DOM mutations.
- */
 export const computeMenuPosition = ({
   containerRect,
   menuElement,

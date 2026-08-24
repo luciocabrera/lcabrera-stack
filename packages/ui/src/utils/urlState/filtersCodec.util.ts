@@ -8,22 +8,12 @@ import { deserializeFilter } from './deserializeFilter.util';
 import { serializeFilter } from './serializeFilter.util';
 
 /**
- * Accepts a `{ columnKey: compactFilter }` object; an array, a bare string or a
- * number refuses the payload whole.
- *
- * Inside a recognised object each value goes through `deserializeFilter`, whose
- * `undefined` drops that entry. That per-entry drop is the pre-existing filter
- * contract, kept deliberately and pinned by an existing test.
- *
- * Be careful what it does and does not buy. `deserializeFilter` does **not**
- * reject an unknown operator code: its last branch reads any all-strings array
- * as a select-equals filter, so `["ZZ","x"]` yields a select filter over the
- * values `ZZ` and `x` rather than nothing. What rejects a filter a column
- * cannot carry is `sanitizeFiltersByColumns` in the loader path, which drops
- * unknown column keys and runs `isFilterCompatibleWithColumn` against each
- * column's declared `dataType` — though only when the loader passes it
- * `columns`, which is optional. This codec closes the envelope; that pass
- * closes the rest when it runs.
+ * Each value goes through `deserializeFilter`, whose `undefined` drops that entry. That
+ * per-entry drop is the pre-existing filter contract.
+ * `deserializeFilter` does not reject an unknown operator code: its last branch reads any
+ * all-strings array as a select-equals filter, so `["ZZ","x"]` yields a select filter
+ * rather than nothing. Unknown column keys are dropped later by `sanitizeFiltersByColumns`
+ * when the loader passes `columns`.
  */
 const narrowCompactFilters = (parsed: unknown) => {
   if (!isObject(parsed) || Array.isArray(parsed)) {
@@ -41,7 +31,6 @@ const narrowCompactFilters = (parsed: unknown) => {
   );
 };
 
-/** Codec for the compact `filters` search param. */
 export const filtersCodec = createUrlStateCodec<ColumnFiltersState>({
   compact: (state) =>
     Object.fromEntries(

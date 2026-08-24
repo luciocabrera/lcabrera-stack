@@ -1,12 +1,4 @@
-/**
- * Real-function counterpart to `scripts/bench-array-operations.mjs` (ADR-054).
- *
- * The synthetic benchmark ranks the SHAPES; this ranks the actual call sites, so
- * the eight findings accepted in `docs/agents/react-doctor-triage.md` rest on a
- * measurement of the code that ships rather than on a proxy. Issue #454.
- *
- * Read absolute per-call cost first, ratios second — see ./ARCHITECTURE.md.
- */
+/** Real-function counterpart to `scripts/bench-array-operations.mjs` (ADR-054). */
 
 import { bench, describe } from 'vite-plus/test';
 
@@ -25,11 +17,6 @@ import { resolvePrimaryKeyColumnKeys } from '../components/Table/utils/resolvePr
 
 type Row = Record<string, unknown>;
 
-/**
- * The realistic ceiling is 150 — the deliberate `wide-alltypes-150` stress
- * route. 1_000 and 10_000 are included only to locate a crossover, not because
- * any UI path reaches them.
- */
 const SIZES = [10, 30, 150, 1000, 10_000] as const;
 
 /** Consumed so V8 cannot delete the allocation under test. */

@@ -13,11 +13,8 @@ import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveCol
 import type { ClearPinningButtonProps } from './ClearPinningButton.types';
 
 /**
- * "Clear Pinning" item of the pin/hide section: always shown to keep the menu
- * layout stable, but disabled until a side is pinned. Unpins the column and
- * closes the menu via `onClose`. Identity and enabled-state come from the shared
- * `CLEAR_PINNING_COMMAND` (ADR-011); this surface owns only its live
- * commit-context and menu presentation.
+ * Identity and enabled-state come from the shared `CLEAR_PINNING_COMMAND` (ADR-011); this
+ * surface owns only its live commit-context and menu presentation.
  */
 export const ClearPinningButton = <TData,>({
   columnKey,

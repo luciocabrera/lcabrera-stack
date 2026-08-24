@@ -9,11 +9,6 @@ type ResolveDateOperatorChangeArgs = {
   readonly operator: OperatorType;
 };
 
-/**
- * Next filter draft for a date column: keep the drafted date (and the `between`
- * second date) when the existing filter is already a date filter, otherwise
- * seed an empty one.
- */
 // Return annotation required: 'date' widens to string without the ColumnFilter
 // contextual type.
 export const resolveDateOperatorChange = ({

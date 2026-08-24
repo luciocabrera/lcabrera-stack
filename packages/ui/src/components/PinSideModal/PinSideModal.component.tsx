@@ -3,11 +3,6 @@ import { PIN_SIDE_OPTIONS } from '#ui/constants/pinningPreferences.constants';
 
 import type { PinSideModalProps } from './PinSideModal.types';
 
-/**
- * Confirmation modal for choosing which side to pin a table column to. A thin,
- * store-agnostic wrapper that configures the shared {@link ChoiceModal} with the
- * pin-side copy and options; consumers own the open state and callbacks.
- */
 export const PinSideModal = ({
   columnLabel,
   isOpen,

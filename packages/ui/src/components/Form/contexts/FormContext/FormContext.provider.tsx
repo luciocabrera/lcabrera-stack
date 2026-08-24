@@ -14,13 +14,6 @@ import { FormContext } from './FormContext.context';
 import { getInitialFieldsState } from './utils/getInitialFieldsState.util';
 import { getInitialFormMetaState } from './utils/getInitialFormMetaState.util';
 
-/**
- * Owns the two form stores. The fields store carries the per-field runtime
- * state (values/errors/pristine baseline); the meta store carries the
- * form-level config (field definitions and their flattened leaves, formId,
- * mode, submission flavour, footer labels) so consumers self-connect via
- * selectors instead of prop drilling.
- */
 export const FormProvider = <TValues extends Record<string, unknown>>({
   cancelLabel,
   cancelTo,

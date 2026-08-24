@@ -6,12 +6,8 @@ import { DEFAULT_FILTER_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.co
 import { selectDistinctFilterOptions } from './.server/distinct.service';
 
 /**
- * Resource route serving distinct filter options for `transport: 'loader'`
- * descriptors: validates the search params, then reads the column's distinct
- * values straight from Postgres **server-side** via the app's own distinct
- * service — no api-server round-trip, the same self-sufficient model the row
- * loaders use. Returns the `{ hasMore, values }` page as a raw JSON Response —
- * the client tool consumes it with plain fetch, not the single-fetch protocol.
+ * Returns the `{ hasMore, values }` page as a raw JSON Response — the client tool consumes
+ * it with plain fetch, not the single-fetch protocol.
  */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);

@@ -31,14 +31,12 @@ export const CLEAR_GROUPING_COMMAND = {
 } satisfies CommandDescriptor;
 
 /**
- * The fold-every-group pair (#774). Whole-table commands like
- * `CLEAR_GROUPING_COMMAND`, and named for the state they produce rather than
- * the act — "Expand All Groups" says where the grid ends up, which is what a
+ * Whole-table commands like `CLEAR_GROUPING_COMMAND`, and named for the state they produce
+ * rather than the act — "Expand All Groups" says where the grid ends up, which is what a
  * menu item has to say when the same item is offered from every column.
- *
- * They carry no `column.` prefix in their ids for the same reason: the two
- * above are column commands whose *effect* is table-wide, while these are asked
- * of the grouped body itself and no column takes part in the question.
+ * They carry no `column.` prefix in their ids for the same reason: the two above are
+ * column commands whose *effect* is table-wide, while these are asked of the grouped body
+ * itself and no column takes part in the question.
  */
 export const EXPAND_ALL_GROUPS_COMMAND = {
   icon: ExpandAllIcon,
@@ -53,16 +51,9 @@ export const COLLAPSE_ALL_GROUPS_COMMAND = {
 } satisfies CommandDescriptor;
 
 /**
- * One aggregation-mode command per aggregate, keyed by the function it applies.
- *
- * A `Record` closed over `TableAggregateFn` rather than a list, so a member
- * added to the vocabulary is a compile error here instead of a function the
- * catalogue offers and the menu cannot render. Which of them a given column is
- * *offered* is a different question, answered per column from the capability
- * the loader shipped — this map is only what each command is.
- *
- * They share one icon on purpose: the label is what tells an average from a
- * sum, and eight near-identical glyphs would tell nothing.
+ * A `Record` closed over `TableAggregateFn` rather than a list, so a member added to the
+ * vocabulary is a compile error here instead of a function the catalogue offers and the
+ * menu cannot render.
  */
 export const AGGREGATE_COMMANDS: Record<TableAggregateFn, CommandDescriptor> = {
   avg: {
@@ -108,11 +99,10 @@ export const AGGREGATE_COMMANDS: Record<TableAggregateFn, CommandDescriptor> = {
 };
 
 /**
- * The clear half of the aggregation-mode set — `deriveToggleCommandState`'s
- * `target: undefined`, exactly as `CLEAR_SORTING_COMMAND` is for directions.
- *
- * Unlike `CLEAR_GROUPING_COMMAND` this **is** a column command: an aggregate
- * belongs to one column, so clearing it asks about that column and no other.
+ * The clear half of the aggregation-mode set — `deriveToggleCommandState`'s `target:
+ * undefined`, exactly as `CLEAR_SORTING_COMMAND` is for directions.
+ * Unlike `CLEAR_GROUPING_COMMAND` this **is** a column command: an aggregate belongs to
+ * one column, so clearing it asks about that column and no other.
  */
 export const CLEAR_COLUMN_AGGREGATE_COMMAND = {
   icon: EraserIcon,

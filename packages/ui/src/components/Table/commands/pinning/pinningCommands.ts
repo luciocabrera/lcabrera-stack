@@ -2,13 +2,7 @@ import { PinLeftIcon, PinOffIcon, PinRightIcon } from '#ui/components/Icons';
 
 import type { CommandDescriptor, CommandId } from '../commands.types';
 
-/**
- * The pinning capability's commands (ADR-011). Identity lives here once; every
- * surface — header menu (live), drawer (draft) — renders from these instead of
- * re-declaring the label and icon. Descriptors are overridable defaults: a
- * surface may substitute its own icon (e.g. a toolbar's clear affordance)
- * without forking the identity.
- */
+/** The pinning capability's commands (ADR-011). */
 export const PIN_LEFT_COMMAND = {
   icon: PinLeftIcon,
   id: 'column.pin.left' as CommandId,

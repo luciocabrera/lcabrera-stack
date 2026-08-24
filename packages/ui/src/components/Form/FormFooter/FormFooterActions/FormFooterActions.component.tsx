@@ -18,9 +18,6 @@ import type { FormFooterActionsProps } from './FormFooterActions.types';
 
 import { styles } from './FormFooterActions.stylex';
 
-/**
- * Action-row delegate for FormBodyFooter.
- */
 export const FormFooterActions = ({
   children,
   onCancelClick,

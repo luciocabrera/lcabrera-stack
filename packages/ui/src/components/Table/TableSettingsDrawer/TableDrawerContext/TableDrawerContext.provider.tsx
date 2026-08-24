@@ -11,14 +11,6 @@ import type {
 
 import { TableDrawerContext } from './TableDrawerContext.context';
 
-/**
- * Seeds the drawer's drafts from the live table state, once, at mount.
- *
- * `TableDrawersSection` mounts this only while the drawer is open and keys it
- * on the drawers sync nonce, so "at mount" is "when the drawer opens" — which
- * is what gives Cancel a baseline to restore even when the user's first action
- * is a removal.
- */
 export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
   const {
     columnsStore: tableColumnsStore,

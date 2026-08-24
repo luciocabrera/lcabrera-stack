@@ -27,7 +27,6 @@ const OPERATOR_SQL: Record<BinaryOperator, string> = {
   notIlike: 'NOT ILIKE',
 };
 
-/** Closed over `UnaryOperator`, so a new standalone operator is a type error here. */
 const UNARY_OPERATOR_SQL: Record<UnaryOperator, string> = {
   isNotNull: 'IS NOT NULL',
   isNull: 'IS NULL',
@@ -39,7 +38,6 @@ type AppendFilterClauseArgs = {
   readonly filter: QueryFilter;
 };
 
-/** Reducer step for buildWhereClause: validates the filter's column, then appends one SQL clause and its parameterized value(s). */
 export const appendFilterClause = ({
   accumulator,
   allowedColumns,

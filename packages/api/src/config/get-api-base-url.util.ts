@@ -9,9 +9,6 @@ const PRIVATE_IP_PATTERNS = [
   /^192\.168\./,
 ];
 
-/**
- * Check if hostname is a local/private IP address
- */
 const isLocalIp = (hostname: string): boolean => {
   // Check for localhost aliases
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
@@ -22,37 +19,9 @@ const isLocalIp = (hostname: string): boolean => {
 };
 
 /**
- * Get the API base URL based on the current environment.
- *
- * Priority:
- * 1. `VITE_API_URL` — an explicit override, if the app was built with one
- * 2. `requestUrl` — the host being served, when a loader/action supplies one
- * 3. Server-side rendering with neither — the localhost API host
- * 4. Client-side resolution — dev proxy, private IP, or the current origin
- *
- * **`VITE_API_URL` outranking `requestUrl` is a decision, and it reverses the
- * order this function shipped with through `@lcabrera/api@0.2.0`** (#705). The
- * reason is not that explicit configuration ought to beat inference on
- * principle. It is that only *half* a render can supply a `requestUrl`: a
- * loader has one and the browser does not, so ranking it first made a single
- * page resolve two different API hosts depending on which half asked — and
- * resolve them silently, because the SSR half rendered fine against the
- * request's own origin. An override that applies to one half of a render is
- * worse than one that does not apply at all.
- *
- * `requestUrl` keeps the job it actually had, which was never to outrank
- * anything: under SSR there is no `location` to read, so it is the only way a
- * deployed app can learn the origin it is being served from.
- *
- * **To resolve against the request's origin under SSR, do not set
- * `VITE_API_URL` for that build.** Vite substitutes it at build time, so it is
- * a build input rather than a runtime switch: a value present at build wins for
- * every caller in that bundle, and one absent at build cannot be supplied
- * later. An app needing both behaviours from one bundle has to choose between
- * them itself and pass the result as an explicit base URL — no argument to this
- * function will overrule the variable.
- *
- * @param requestUrl - Optional request URL from loader/action (the SSR origin)
+ * `VITE_API_URL` outranks `requestUrl` (ADR-072): a loader has a request URL and
+ * the browser does not, so ranking the request first resolved two hosts on one
+ * page. Under SSR, `requestUrl` is still the only way to learn the served origin.
  */
 export const getApiBaseUrl = (requestUrl?: string): string => {
   // Priority 1: an explicit override outranks every derived source.

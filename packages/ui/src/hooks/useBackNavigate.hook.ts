@@ -2,13 +2,6 @@ import { useNavigate } from 'react-router';
 
 type BrowserHistoryState = null | { readonly idx?: number };
 
-/**
- * Navigates to the previous in-app entry when this SPA session's history
- * stack actually has one (`history.state.idx`, the position marker
- * react-router's own browser history writes on every push — 0 or absent
- * means this page has no earlier in-app history), otherwise navigates to a
- * caller-supplied fallback route instead of leaving the app entirely.
- */
 export const useBackNavigate = () => {
   const navigate = useNavigate();
 

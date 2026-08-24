@@ -2,10 +2,6 @@ import { useColumnDrawerContextValue } from '#ui/components/Table/ColumnSettings
 
 import { useCloseColumnSettingsDrawer } from './useCloseColumnSettingsDrawer.hook';
 
-/**
- * Clears all column drawer settings (filter, sizing, sorting) to undefined.
- * Optionally closes the drawer when shouldCloseDrawer is true.
- */
 export const useClearAllColumnDrawerSettings = () => {
   const { columnStore } = useColumnDrawerContextValue();
   const closeColumnSettingsDrawer = useCloseColumnSettingsDrawer();

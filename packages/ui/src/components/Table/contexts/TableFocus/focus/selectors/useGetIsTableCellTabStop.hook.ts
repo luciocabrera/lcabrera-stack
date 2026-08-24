@@ -5,13 +5,6 @@ type UseGetIsTableCellTabStopArgs = {
   readonly rowKey: string;
 };
 
-/**
- * Whether this cell is the one element in the grid carrying `tabIndex={0}`.
- *
- * The selector answers a boolean rather than the focus target itself, so a
- * focus move re-renders only the two cells whose answer changed, not every
- * mounted cell.
- */
 export const useGetIsTableCellTabStop = ({
   columnKey,
   rowKey,

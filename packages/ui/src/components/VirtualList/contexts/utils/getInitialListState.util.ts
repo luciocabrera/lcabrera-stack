@@ -11,11 +11,8 @@ type GetInitialListStateArgs = Partial<VirtualListUiState> &
   VirtualListStateProps;
 
 /**
- * Builds the complete list-store state from the grouped `listState` props:
- * the config mirror (with `hasFetchInitial`/`hasFetchMore` derived from the
- * callbacks) plus the list-owned UI fields. UI fields default to the initial
- * values — the provider sync effect re-passes the current ones so a config
- * re-sync never clobbers in-flight UI state.
+ * UI fields default to the initial values — the provider sync effect re-passes the current
+ * ones so a config re-sync never clobbers in-flight UI state.
  */
 export const getInitialListState = ({
   hasCheckboxes = true,

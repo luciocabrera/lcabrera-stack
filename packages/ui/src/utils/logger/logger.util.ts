@@ -2,15 +2,10 @@ import type { CreateLoggerArgs, LogLevel } from './logger.types';
 
 import { DEFAULT_LOG_LEVEL, LOG_LEVEL_PRIORITY } from './logger.constants';
 
-/** No-op function reused by all suppressed log methods. */
 const noop = () => {
   /* intentional no-op — replaces log methods below the active level */
 };
 
-/**
- * Resolves the active log level from the env var, falling back to the default.
- * Validates the value against known levels; returns the default on mismatch.
- */
 const resolveLogLevel = (override?: LogLevel) => {
   if (override) return override;
 
@@ -22,20 +17,8 @@ const resolveLogLevel = (override?: LogLevel) => {
 };
 
 /**
- * Creates a level-aware logger instance.
- *
- * - Methods below the configured level are replaced with no-ops at creation time
- *   (zero per-call overhead).
- * - In production builds, `debug` / `info` / `warn` bodies are tree-shaken by Vite
- *   because they are guarded by `import.meta.env.PROD`.
- *
- * @example
- * ```ts
- * const log = createLogger({ prefix: '[carSales]' });
- * log.debug('URL:', url);      // only prints when level >= debug
- * log.warn('Slow response');   // only prints when level >= warn
- * log.error('Fetch failed', e); // only prints when level >= error
- * ```
+ * Methods below the configured level become no-ops at creation. In production, `debug` /
+ * `info` / `warn` bodies are tree-shaken because they are guarded by `import.meta.env.PROD`.
  */
 export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}) => {
   const activeLevel = resolveLogLevel(level);
@@ -75,14 +58,4 @@ export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}) => {
   };
 };
 
-/**
- * Default application-wide logger.
- * Reads `VITE_LOG_LEVEL` from the environment at module-load time.
- *
- * @example
- * ```ts
- * import { logger } from '#ui/utils/logger';
- * logger.warn('Something happened');
- * ```
- */
 export const logger = createLogger();

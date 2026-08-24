@@ -9,12 +9,6 @@ import { getCompactControlStyle } from '../utils/getCompactControlStyle.util';
 import { styles } from './NavbarItem.stylex';
 import { getCompactItemStyle } from './utils/getCompactItemStyle.util';
 
-/**
- * Single navbar entry: owns its compact style derivation and renders the
- * `<li>` wrapping either a `Button` (`type: 'button'`) or a `NavLink`
- * (`type: 'link'`), sharing the common control props across both branches.
- * Private delegate of `navbar` — not exported from the barrel.
- */
 export const NavbarItem = ({
   isCompact,
   item,

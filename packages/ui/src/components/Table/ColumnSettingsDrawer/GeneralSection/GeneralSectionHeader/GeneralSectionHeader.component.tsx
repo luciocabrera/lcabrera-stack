@@ -16,13 +16,6 @@ import { useSetDraftColumnSizing } from '../../ColumnDrawerContext/actions';
 import { resolvePresetColumnWidth } from '../utils/resolvePresetColumnWidth.util';
 import { styles } from './GeneralSectionHeader.stylex';
 
-/**
- * Header of the general section: the per-column min/max/default width preset
- * toggles. Reads the normalized column itself to derive the preset bounds
- * and writes the drawer's column sizing on selection; deselecting reverts to
- * the current state (no write). Presets without a configured bound are
- * disabled.
- */
 export const GeneralSectionHeader = <TData,>({
   columnKey,
   isBusy = false,

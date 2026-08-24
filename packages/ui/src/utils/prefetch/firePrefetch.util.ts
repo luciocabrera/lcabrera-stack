@@ -12,11 +12,6 @@ type FirePrefetchArgs<TResponse, TData = unknown> = {
   readonly prefetchRef: RefObject<PrefetchCache<TResponse>>;
 };
 
-/**
- * Fires a prefetch request for the next page and applies the result
- * to the given ref with a staleness check. If the ref's skip has
- * changed by the time the prefetch resolves, the result is discarded.
- */
 export const firePrefetch = <TResponse, TData = unknown>({
   lastRow,
   limit,

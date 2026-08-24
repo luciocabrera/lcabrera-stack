@@ -6,10 +6,6 @@ type ResolveResizeWidthArgs = {
   readonly minWidth: number;
 };
 
-/**
- * Width of a dragged column: the pointer delta from the drag origin applied
- * to the starting width, clamped to the [minWidth, maxWidth] bounds.
- */
 export const resolveResizeWidth = ({
   clientX,
   initialWidth,

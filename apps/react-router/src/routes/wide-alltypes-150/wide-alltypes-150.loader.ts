@@ -21,21 +21,9 @@ import {
 } from './WideAlltypes150.constants';
 
 /**
- * Loader for the wide-columns route. No `filterOptions` — this route's filter
- * support is deliberately minimal (see its ARCHITECTURE.md), so columns are
- * returned undecorated. The read promise is returned unawaited for Suspense
- * streaming.
- *
- * `readWideAlltypes150Page` reads Postgres **server-side** by default — no
- * api-server round-trip — and goes to the external endpoint only when
- * `VITE_API_URL` asks for it.
- *
- * **Grouping is declared from that same switch** (#575). It is the one
- * capability here the external endpoint cannot serve, so offering it while the
- * rows come from another process would summarise a different result set than the
- * page it sits above. `isExternalApiEnabled` is read once, at module scope,
- * because `meta` is a fixed object the factory captures when this file is
- * evaluated — and in a build the whole call folds to a constant anyway.
+ * No `filterOptions` — this route's filter support is deliberately minimal (see its
+ * ARCHITECTURE.md), so columns are returned undecorated.
+ * **Grouping is declared from that same switch** (#575).
  */
 const IS_SELF_HOSTED = !isExternalApiEnabled();
 export const loader = createTableRouteLoader<

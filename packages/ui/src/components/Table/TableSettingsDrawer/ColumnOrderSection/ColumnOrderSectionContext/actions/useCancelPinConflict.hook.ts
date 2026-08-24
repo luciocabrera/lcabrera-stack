@@ -1,8 +1,5 @@
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
-/**
- * Hook to cancel the pin conflict modal.
- */
 export const useCancelPinConflict = () => {
   const { modalsStore } = useColumnOrderSectionContextValue();
 

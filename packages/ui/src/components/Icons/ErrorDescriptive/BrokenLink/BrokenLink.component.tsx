@@ -2,7 +2,6 @@ import * as stylex from '@stylexjs/stylex';
 
 import { styles } from './BrokenLink.stylex';
 
-/** Connecting link between the two illustrations, with an animated crack, for `ErrorDescriptive`. */
 export const BrokenLink = () => (
   <g {...stylex.props(styles.linkGroup)} fill='none'>
     <path {...stylex.props(styles.link)} d='M150 100 L210 100' opacity='0.55' />

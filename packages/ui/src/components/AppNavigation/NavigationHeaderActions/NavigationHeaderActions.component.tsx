@@ -8,11 +8,6 @@ import type { NavigationHeaderActionsProps } from './NavigationHeaderActions.typ
 import { resolveExpandButtonLabel } from '../utils';
 import { headerActionsStyles } from './NavigationHeaderActions.stylex';
 
-/**
- * The expand/collapse control button rendered inside the navigation panel
- * header. Displayed vertically when the panel is collapsed, horizontally when
- * expanded.
- */
 export const NavigationHeaderActions = ({
   controlButtonSize,
   controlIconSize,

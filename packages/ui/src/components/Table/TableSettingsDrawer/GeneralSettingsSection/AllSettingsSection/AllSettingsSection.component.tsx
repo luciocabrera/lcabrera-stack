@@ -14,11 +14,6 @@ import {
 } from '../../TableDrawerContext/actions';
 import { styles } from './AllSettingsSection.stylex';
 
-/**
- * "All Settings" section of the general settings tab: cross-section bulk
- * actions that clear every drawer setting or reset them all from the current
- * table state.
- */
 export const AllSettingsSection = ({
   isBusy = false,
 }: AllSettingsSectionProps) => {

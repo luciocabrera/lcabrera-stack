@@ -6,15 +6,9 @@ type CreateActionsColumnOverrides<TData extends Record<string, unknown>> =
   Partial<TableColumn<TData>>;
 
 /**
- * Builds the row-actions column: pinned, non-filterable, non-sortable,
- * non-groupable, non-resizable, and static by default. Consumers only need to
- * pass overrides (typically `render`, to append custom per-row menu content) —
- * `key` is always forced back to `'actions'` regardless of what's passed.
- *
- * `isGroupable: false` is declared here rather than derived from the key, so
- * "may this column be a group key" stays one question with one answer
- * (`resolveColumnCapabilities`) instead of a `key === 'actions'` test copied
- * into every surface that offers grouping.
+ * `isGroupable: false` is declared here rather than derived from the key, so "may this
+ * column be a group key" stays one question with one answer (`resolveColumnCapabilities`)
+ * instead of a `key === 'actions'` test copied into every surface that offers grouping.
  */
 export const createActionsColumn = <TData extends Record<string, unknown>>(
   overrides: CreateActionsColumnOverrides<TData> = {},

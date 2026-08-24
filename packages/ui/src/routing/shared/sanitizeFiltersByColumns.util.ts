@@ -8,10 +8,6 @@ type SanitizeFiltersByColumnsArgs<TData extends Record<string, unknown>> = {
   readonly filters: ColumnFiltersState<TData>;
 };
 
-/**
- * Removes filters whose type is incompatible with the declared column data type.
- * Unknown column keys are also dropped.
- */
 export const sanitizeFiltersByColumns = <
   TData extends Record<string, unknown>,
 >({

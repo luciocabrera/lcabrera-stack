@@ -11,18 +11,10 @@ import { fieldRow } from './fieldRow.util';
 import { toggleField } from './toggleField.util';
 
 /**
- * Bind the Form's value shape `TValues` once and return the field-tree builders
- * (`field`/`choiceField`/`toggleField`/`fieldRow`/`fieldGroup`) with it baked
- * in. A generic builder cannot infer `TValues` from a string `accessor`, so
- * without this factory every call would need explicit type arguments — binding
- * it here keeps `accessor` type-checked against the value keys while call sites
- * stay as terse as a hand-written field literal.
- *
- * @example
- * const { field, choiceField, fieldGroup } = createFieldBuilders<OrderValues>();
- * const tree = [fieldGroup({ label: 'Summary', fields: [
- *   field({ accessor: 'order_date', label: 'Date', required: true, type: 'date' }),
- * ] })];
+ * A generic builder cannot infer `TValues` from a string `accessor`, so without this
+ * factory every call would need explicit type arguments — binding it here keeps `accessor`
+ * type-checked against the value keys while call sites stay as terse as a hand-written
+ * field literal.
  */
 export const createFieldBuilders = <
   TValues extends Record<string, unknown>,

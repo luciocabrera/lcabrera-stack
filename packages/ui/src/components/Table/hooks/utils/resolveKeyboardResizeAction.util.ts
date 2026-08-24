@@ -3,12 +3,6 @@ import {
   COLUMN_RESIZE_KEYBOARD_STEP,
 } from '#ui/components/Table/Table.constants';
 
-/**
- * What a keypress on the resize handle should do: nothing at all, restore the
- * column's default width, or move it to a concrete clamped width. Annotated as
- * the return type on purpose — inference would widen each `type` to `string`
- * and collapse the discriminated union at the call site.
- */
 type KeyboardResizeAction =
   | { readonly type: 'ignore' }
   | { readonly type: 'reset' }
@@ -22,15 +16,6 @@ type ResolveKeyboardResizeActionArgs = {
   readonly minWidth: number;
 };
 
-/**
- * Maps a keypress on the resize handle to a resize action, following the ARIA
- * window-splitter pattern: arrows step the width (shift for a coarse step),
- * Home/End jump to the bounds, and Enter restores the default. Any other key
- * resolves to `ignore` so the handler leaves the event alone.
- *
- * Returned widths are already clamped to `[minWidth, maxWidth]`, matching what
- * a pointer drag produces for the same column.
- */
 export const resolveKeyboardResizeAction = ({
   currentWidth,
   isShiftPressed,

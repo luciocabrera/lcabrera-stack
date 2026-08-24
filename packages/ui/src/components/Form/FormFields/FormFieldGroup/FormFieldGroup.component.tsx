@@ -10,12 +10,9 @@ import type { FormFieldGroupProps } from './FormFieldGroup.types';
 import { styles } from './FormFieldGroup.stylex';
 
 /**
- * Renders a `group` field node as a bordered card section: an optional header
- * (label) above its nested fields (delegated back to `FormFields` via
- * `FormFieldsRendererContext` — see that context's doc comment for why this
- * isn't a direct import of `FormFields.component.tsx`). When `collapsible`, the
- * header becomes a button that expands/collapses the body; collapsed fields are
- * hidden with `display:none` (not unmounted), so their values still submit.
+ * When `collapsible`, the header becomes a button that expands/collapses the body;
+ * collapsed fields are hidden with `display:none` (not unmounted), so their values still
+ * submit.
  */
 export const FormFieldGroup = <TValues extends Record<string, unknown>>({
   field,

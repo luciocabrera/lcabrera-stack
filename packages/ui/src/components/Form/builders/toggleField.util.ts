@@ -3,11 +3,6 @@ export type ToggleFieldArgs<TValues extends Record<string, unknown>> = {
   readonly label: string;
 };
 
-/**
- * Build a boolean toggle field (`type: 'boolean'`, `variant: 'toggle'`). Bind
- * `TValues` once via `createFieldBuilders<TValues>()` so call sites need no
- * explicit type arguments.
- */
 export const toggleField = <TValues extends Record<string, unknown>>({
   accessor,
   label,

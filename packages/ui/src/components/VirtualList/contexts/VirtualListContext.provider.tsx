@@ -16,13 +16,8 @@ import { INITIAL_LIST_STATE } from './VirtualListContext.constants';
 import { VirtualListContext } from './VirtualListContext.context';
 
 /**
- * Provides the VirtualList context: the list store (config props mirror plus
- * the list-owned UI state) and the data store (controlled dataState/filter
- * mirror plus the pre-computed derived state), with the parent callbacks on
- * the value for actions. Selection writes always exit through `onChange`.
- *
- * The list sync effect re-passes the current UI fields from the store so a
- * config re-sync never clobbers in-flight UI state (search term, filter mode).
+ * The list sync effect re-passes the current UI fields from the store so a config re-sync
+ * never clobbers in-flight UI state (search term, filter mode).
  */
 export const VirtualListProvider = ({
   children,

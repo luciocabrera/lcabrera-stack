@@ -25,13 +25,6 @@ const FIELDS: readonly FieldNode<LoginValues>[] = [
   },
 ];
 
-/**
- * Login page built with the `@lcabrera/ui` Form. Validation runs client-first via
- * the route's `clientAction` (Zod, no network on failure); `serverErrors`
- * surfaces whatever the server `action` returns when it re-validates or
- * rejects the credentials. A hidden `redirectTo` field round-trips the
- * post-login destination through the same submission.
- */
 export const Login = () => {
   const { redirectTo } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();

@@ -13,7 +13,6 @@ import {
 } from '../contexts/list/selectors';
 import { styles } from './VirtualListHeader.stylex';
 
-/** Self-connected search header: reads the term via selectors, writes via actions. */
 export const VirtualListHeader = () => {
   const name = useGetSearchInputName();
   const searchTerm = useGetSearchTerm();

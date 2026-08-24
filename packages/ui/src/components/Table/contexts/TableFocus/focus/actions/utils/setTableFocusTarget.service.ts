@@ -9,11 +9,8 @@ type SetTableFocusTargetArgs = {
 };
 
 /**
- * Points the grid's focus at one cell and asks for the DOM to follow.
- *
- * The one place `focusRequestId` is incremented, so a request can never be
- * raised without the target it refers to, nor a target set without a request
- * that would apply it.
+ * The one place `focusRequestId` is incremented, so a request can never be raised without
+ * the target it refers to, nor a target set without a request that would apply it.
  */
 export const setTableFocusTarget = ({
   columnKey,

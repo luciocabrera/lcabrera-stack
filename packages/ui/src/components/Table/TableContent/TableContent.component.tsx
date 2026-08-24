@@ -24,10 +24,8 @@ import { styles } from './TableContent.stylex';
 import { TableTitleActions } from './TableTitleActions/TableTitleActions.component';
 
 /**
- * Table layout shell: title bar, the scrollable table area with the
- * infinite-scroll sentinel, and the drawers section. Owns the scroll
- * container refs and the infinite-scroll/scroll-reset wiring; the title
- * actions are a self-connected delegate.
+ * Table layout shell: title bar, the scrollable table area with the infinite-scroll
+ * sentinel, and the drawers section.
  */
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,

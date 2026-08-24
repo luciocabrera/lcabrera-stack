@@ -11,17 +11,11 @@ import { GroupKeyPeriodSelect } from '../GroupKeyPeriodSelect';
 import { styles } from './GroupKeyItemContent.stylex';
 
 /**
- * One applied group key in the drawer list: its level, its column label, and a
- * remove control.
- *
- * The level is shown because the order of this list is not cosmetic — it is the
- * grouped query's nesting order, so a user dragging an item is changing which
- * question the table answers.
- *
- * A temporal key also carries a granularity control, which renders itself away
- * on every other column (#786). It sits here rather than in the add-key control
- * above because a granularity is a property of an **applied** key: it is chosen,
- * changed and read back long after the key was added.
+ * A temporal key also carries a granularity control, which renders itself away on every
+ * other column (#786).
+ * It sits here rather than in the add-key control above because a granularity is a
+ * property of an **applied** key: it is chosen, changed and read back long after the key
+ * was added.
  */
 export const GroupKeyItemContent = ({
   isBusy,

@@ -14,11 +14,6 @@ import {
 } from '../../ColumnDrawerContext/actions';
 import { styles } from './GeneralSectionFooter.stylex';
 
-/**
- * Footer of the general section: cross-section bulk actions that clear every
- * drawer setting for the column or reset them all from the current table
- * state.
- */
 export const GeneralSectionFooter = ({
   isBusy = false,
 }: GeneralSectionFooterProps) => {

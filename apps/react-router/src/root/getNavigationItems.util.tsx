@@ -7,9 +7,6 @@ import {
   SettingsIcon,
 } from '@lcabrera/ui/components/Icons';
 
-/**
- * Returns navigation items with icons scaled to the given size.
- */
 export const getNavigationItems = (
   iconSize: number,
 ): readonly NavbarItemConfig[] => [

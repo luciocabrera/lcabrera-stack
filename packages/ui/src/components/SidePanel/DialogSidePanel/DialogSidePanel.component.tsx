@@ -8,12 +8,9 @@ import type { DialogSidePanelProps } from './DialogSidePanel.types';
 import { sidePanelStyles } from '../SidePanel.stylex';
 
 /**
- * Overlay SidePanel variant backed by a native `<dialog>`. Owns the imperative
- * open/close lifecycle — `showModal()` for backdrop support, `show()` without
- * an overlay — and forwards the native `close` event (ESC key) to `onClose`.
- * Unmounting (e.g. switching to the pinned variant) removes the dialog from
- * the document, which closes it natively — no pinned-mode guards needed.
- * Private delegate of `SidePanel` — not exported from the barrel.
+ * Overlay SidePanel variant backed by a native `<dialog>`. Unmounting (e.g. switching to
+ * the pinned variant) removes the dialog from the document, which closes it natively — no
+ * pinned-mode guards needed.
  */
 export const DialogSidePanel = ({
   children,

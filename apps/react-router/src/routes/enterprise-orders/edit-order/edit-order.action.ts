@@ -18,11 +18,6 @@ import {
 } from '../config';
 import { parseOrderIdParam } from '../utils/parseOrderIdParam.util';
 
-/**
- * Server action for editing an order: re-check the target exists, re-validate
- * authoritatively, recompute the money totals and persist via the generic
- * update executor, then redirect to the record's view.
- */
 export const action = async ({
   context,
   params,
