@@ -13,11 +13,10 @@ type SetStatementTimeoutArgs = {
 };
 
 /**
- * Installs a `statement_timeout` for the rest of the current transaction only.
- * Three things about the spelling are load-bearing, and each is a trap that was hit before
- * it was avoided (ADR-066): - **`set_config`, not `SET`.** `SET LOCAL statement_timeout =
- * $1` is a syntax error: `SET` is a utility statement and cannot be prepared, so the value
- * would have to be interpolated into the SQL text.
+ * Three spelling traps (ADR-066): `set_config` not `SET` (SET cannot take a bound
+ * parameter); the third argument must be `true` (`is_local`) or the setting sticks on the
+ * pooled connection; `tx` is required or `is_local` expires before the query it was meant
+ * to bound.
  */
 export const setStatementTimeout = async ({
   timeoutMs,

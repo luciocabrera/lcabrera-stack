@@ -7,8 +7,8 @@ import type { TableRowProps } from './TableRow.types';
 import { tableRowStyles } from './TableRow.stylex';
 
 /**
- * It is written once here rather than at each call site so no row can be added without it
- * (ADR-062).
+ * `role='row'` is set after `{...rest}` because `display: flex` drops the implicit table
+ * role, and a caller must not be able to replace it (ADR-062).
  */
 export const TableRow = ({
   children,

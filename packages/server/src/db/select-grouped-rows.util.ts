@@ -23,11 +23,10 @@ import { withTransaction } from './with-transaction.util.ts';
 type SelectGroupedRowsArgs = Omit<GroupQueryDescriptor, 'capabilities'>;
 
 /**
- * Four things happen in an order that is not arbitrary (ADR-066): 1.
- * **Depth, before anything else.** It is pure, so a request past the cap is refused
- * without borrowing a connection or issuing a catalogue query.
- * **A transaction, always.** Not for atomicity — a read needs none — but because
- * `statement_timeout` can only be set for *this* query by being set transaction-locally.
+ * Order is not arbitrary (ADR-066): depth first (pure, no connection); then a transaction
+ * so `statement_timeout` can be local; timeout before the catalogue query; capabilities
+ * and the read share that `tx` so both sit under the ceiling. Passing your own `tx` keeps
+ * the ceiling until *your* COMMIT.
  */
 export const selectGroupedRows = async <TRow extends QueryResultRow>({
   tx,

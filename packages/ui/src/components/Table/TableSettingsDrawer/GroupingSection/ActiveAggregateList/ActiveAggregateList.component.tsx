@@ -19,9 +19,8 @@ import { styles } from './ActiveAggregateList.stylex';
 import { AggregateItemContent } from './AggregateItemContent';
 
 /**
- * It is the order the measures are listed in, and it is state rather than a view
- * preference: the `grouping` param's `agg` array carries it, so a shared link and a reload
- * read back what was dragged.
+ * Drag order is state: the `grouping` param's `agg` array carries it, so a shared link
+ * reads back what was dragged (#832).
  */
 export const ActiveAggregateList = ({
   isBusy = false,
