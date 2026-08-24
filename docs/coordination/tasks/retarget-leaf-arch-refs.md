@@ -1,7 +1,7 @@
 ---
 id: retarget-leaf-arch-refs
 title: retarget leftover pointers after leaf architecture cleanup
-owner: agent:claude
+owner: agent:grok
 status: active
 branch: docs/908-retarget-leaf-arch-refs
 area:
@@ -12,7 +12,7 @@ area:
 started: 2026-08-24
 updated: 2026-08-24
 plan: (none)
-pr: (none)
+pr: #909
 issue: #908
 ---
 
@@ -22,6 +22,6 @@ retarget leftover pointers after leaf architecture cleanup
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: refs retargeted; quality gate next
 - Blockers: none
-- Next:
+- Next: `vp run check:safe`, mark PR ready
