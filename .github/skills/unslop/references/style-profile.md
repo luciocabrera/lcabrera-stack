@@ -23,12 +23,9 @@ Typos in those samples are mistakes. Correct them. Do not copy them.
 
 ## 2. Vocabulary
 
-- Words and connectives to use: we, you, if, then, so, because, still,
-  package, app, copy, filter, gate, claim.
-- Words to never insert: delve, tapestry, landscape (abstract),
-  foundational, seamless, robust (as puffery), leverage, unlock, testament,
-  "it's important to note", "not just X but Y", "here's what that means in
-  practice".
+- Words and connectives to use: we, you, if, then, so, because. Short
+  common words. No second stop-list here; [`repo-voice.md`](repo-voice.md)
+  and `SKILL.md` Level 2 own the words not to insert.
 - Jargon: keep real repo terms (API surface, gate, claim, worktree, barrel,
   harness, store). Use the short form people already say (`repo`, `PR`,
   `IS NULL`).
@@ -87,4 +84,5 @@ Calibration date: 2026-08-24
 Samples: PR #889 review (package vs app duplication), PR #833 review
 (directory question), this chat, plus the explicit rules above. Thin on
 word count. Explicit rules win where samples and rules disagree.
-Updates: 2026-08-24 first save; 2026-08-24 typos are mistakes, never copy them
+Updates: 2026-08-24 first save; 2026-08-24 typos are mistakes, never copy
+them; 2026-08-24 drop the copied avoid-list (repo-voice owns it)

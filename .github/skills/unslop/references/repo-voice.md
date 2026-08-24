@@ -1,10 +1,10 @@
 # Default voice: this repository
 
-Used when `references/style-profile.md` does not exist. Derived from how
-this repo's durable prose is already written (`AGENTS.md`, the epic
-contract, `docs/agents/workflow.md`), not from a guess at Lucio's private
-register. A personal profile overrides this file on conventions; it cannot
-override epistemics.
+Default voice for this repository: skills, ADRs, runbooks, and
+architecture always use this file. Chat, PR prose, issue prose, and
+review comments use [`style-profile.md`](style-profile.md) when it
+exists; otherwise they use this file too. A profile overrides this file
+on conventions for those genres only. It cannot override epistemics.
 
 ## Typography
 
@@ -49,10 +49,9 @@ drifts"). Prefer a link to the home over a restatement.
 
 ## Genres
 
-- **Chat reply:** complete sentences, no telegraphic fragments, no coined
-  acronyms. Answer first.
-- **PR/issue prose:** fill the template; unslop the sentences inside, not
-  the headings.
+- **Chat reply / PR/issue prose:** if `style-profile.md` exists, that file.
+  Else this file: complete sentences, no coined acronyms, answer first.
+  Fill the template; unslop the sentences inside, not the headings.
 - **ADR / architecture:** constraints and consequences. No soul, no slack
   that reads as uncertainty about a decided rule.
 - **Skill / contract:** outline is the point; the outline test is exempt.

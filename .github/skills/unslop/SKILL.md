@@ -47,8 +47,10 @@ that rule.
 
 ## How to work
 
-1. **Voice.** If `references/style-profile.md` exists, read it; it wins on
-   conventions. Else read [`references/repo-voice.md`](references/repo-voice.md).
+1. **Voice.** Read [`references/repo-voice.md`](references/repo-voice.md) for
+   skills, ADRs, runbooks, and architecture. For chat, PR prose, issue
+   prose, and review comments, if `references/style-profile.md` exists,
+   read it (it wins on conventions); else use repo-voice there too.
    Epistemics cannot be switched off by any profile.
 2. **Mode.** Rewriting: keep meaning, facts, genre. Writing: apply from draft
    one. Genre survives: a PR stays a PR, an email stays an email.

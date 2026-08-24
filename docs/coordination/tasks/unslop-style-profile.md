@@ -5,7 +5,7 @@ owner: agent:grok
 status: review
 branch: docs/912-unslop-style-profile
 area:
-  - .github/skills/unslop/references/style-profile.md
+  - .github/skills/unslop/**
 started: 2026-08-24
 updated: 2026-08-24
 plan: (none)
