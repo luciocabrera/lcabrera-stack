@@ -16,12 +16,11 @@
  * substitution that produces it happens only because changesets shells out to
  * pnpm. Nothing else here says so.
  */
-import { execFileSync } from 'node:child_process';
-import { readdirSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import getReleasePlan from '@changesets/get-release-plan';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { readPublishing } from '../../packages/repo-standards/scripts/config.mjs';
@@ -174,7 +173,7 @@ describe('this repository publishes what it develops against', () => {
     // one.
   });
 
-  it('plans no release that takes a package out of pre-1.0', () => {
+  it('plans no release that takes a package out of pre-1.0', async () => {
     // Asked of the PLANNED RELEASE, not of the changeset text. Every public
     // package here is beta, and Changesets takes `major` on a `0.x` package
     // straight to `1.0.0` — so a promotion is not "this breaks", it is "this
@@ -190,13 +189,12 @@ describe('this repository publishes what it develops against', () => {
     // also catches a promotion nothing declares — a peer dependent dragged to
     // `1.0.0` by the package it peers on, which is the trap
     // `onlyUpdatePeerDependentsWhenOutOfRange` exists to disarm.
-    const planFile = join(tmpdir(), 'publish-wiring-release-plan.json');
-    execFileSync(join(REPO_ROOT, 'node_modules', '.bin', 'changeset'), [
-      'status',
-      `--output=${planFile}`,
-    ]);
-    const { releases } = JSON.parse(readFileSync(planFile, 'utf8'));
-    rmSync(planFile, { force: true });
+    //
+    // Read through the API, not the `changeset status` CLI: that command also
+    // asks git which packages changed since the trunk, and CI checks out
+    // without a local `main`, so it fails there while passing on any developer
+    // machine. `getReleasePlan` touches no git at all.
+    const { releases } = await getReleasePlan(REPO_ROOT);
 
     const promotions = releases
       .filter(

@@ -99,6 +99,7 @@
     "@arethetypeswrong/core": "catalog:tooling",
     "@biomejs/biome": "catalog:lint",
     "@changesets/cli": "catalog:tooling",
+    "@changesets/get-release-plan": "catalog:tooling",
     "@lcabrera/devkit": "workspace:*",
     "@lcabrera/repo-standards": "workspace:*",
     "@lcabrera/vite-config": "workspace:*",
