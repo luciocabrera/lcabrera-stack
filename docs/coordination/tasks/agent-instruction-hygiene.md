@@ -30,18 +30,21 @@ tighten skills, rules, and always-on agent instructions
 
 ## Status / next
 
-- Current step: addressing Claude review round 3 (changeset describes live skill, not seed)
-- Blockers: 1 unresolved review thread on `.changeset/agent-instruction-hygiene.md` (this commit)
-- Next: reply + resolve that thread; then wait for the next review pass / merge
+- Current step: addressing Claude review round 4 (`validate-skills.yml` `paths:` misses a move of a referenced script)
+- Blockers: 1 unresolved thread `PRRT_kwDOQt2ffM6bodKP` (this commit removes the filter)
+- Next: reply + resolve; then wait — Claude re-reviews every new head
+
+Check from the shell: `vp run pr:threads -- --pr 896`
 
 ## Review log
 
 Head moves after each fix, so Claude re-reviews. Keep this list current.
 
-| When       | Head       | Open threads                                                                             | Outcome                                               |
-| ---------- | ---------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| 2026-08-24 | `856699c9` | 3 (skills CI paths; seed points at unsipped files; ungrammatical store-pattern sentence) | Fixed `87492df9` + `ba9c7927`; all 3 resolved         |
-| 2026-08-24 | `ba9c7927` | 1 (manifest hash `a6560700` matched neither asset nor live file)                         | Fixed `b769ef9b`; resolved                            |
-| 2026-08-24 | `b769ef9b` | 1 (changeset claims seed matches live copy; it does not)                                 | This commit; changeset rewritten to describe the seed |
+| When       | Head       | Open threads                                                                              | Outcome                                             |
+| ---------- | ---------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| 2026-08-24 | `856699c9` | 3 (skills CI paths; seed points at unshipped files; ungrammatical store-pattern sentence) | Fixed `87492df9` + `ba9c7927`; all 3 resolved       |
+| 2026-08-24 | `ba9c7927` | 1 (manifest hash `a6560700` matched neither asset nor live file)                          | Fixed `b769ef9b`; resolved                          |
+| 2026-08-24 | `b769ef9b` | 1 (changeset claimed seed matches live copy)                                              | Fixed `0de26f64`; resolved                          |
+| 2026-08-24 | `0de26f64` | 1 (`paths:` filter does not run the gate when a _referenced_ script moves)                | This commit: drop the filter so the job always runs |
 
-CI on `b769ef9b`: Quality Gate, PR Standards, Validate Skills, Copilot review complete, Agent review verdict — all green. Merge is held by `required_review_thread_resolution`, not by failing checks.
+Merge is held by `required_review_thread_resolution` (approving-review count is 0), not by failing checks.

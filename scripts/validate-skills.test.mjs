@@ -138,15 +138,12 @@ describe('validateSkills — this repository', () => {
     expect(result.skippedDirectories).toEqual(['code-smell-shared']);
   });
 
-  it('CI watches agent files and the contract module, not only skills/', () => {
+  it('CI is not path-filtered, so a moved referenced script still runs the gate', () => {
     const yaml = readFileSync(
       join(REPO_ROOT, '.github/workflows/validate-skills.yml'),
       'utf8',
     );
 
-    expect(yaml.match(/'\.claude\/agents\/\*\*'/g)?.length).toBe(2);
-    expect(
-      yaml.match(/'scripts\/lib\/validate-skills-contract\.cjs'/g)?.length,
-    ).toBe(2);
+    expect(yaml).not.toMatch(/^\s+paths:/m);
   });
 });
