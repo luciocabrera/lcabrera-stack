@@ -2,7 +2,12 @@
 name: store-pattern
 description: External-store + split-context architecture for complex React state. Use when building or modifying stateful UI domains that need granular subscriptions and stable performance (especially Table-like components).
 user-invocable: true
-paths: ['**/contexts/**']
+paths:
+  [
+    '**/contexts/**',
+    '**/hooks/useStore.hook.ts',
+    '**/hooks/useStoreSelector.hook.ts',
+  ]
 allowed-tools: Read
 ---
 

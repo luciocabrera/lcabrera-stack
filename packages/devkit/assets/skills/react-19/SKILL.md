@@ -16,7 +16,10 @@ allowed-tools: Read
 - Migrating React 18 patterns to React 19 (`use()`, refs-as-props, actions)
 - Enforcing React Compiler-safe patterns in component code
 
-> **State & context architecture**: This skill covers React 19 APIs only. If you are building or modifying any shared state, context, or store — read `/store-pattern` first. The store-pattern is the only approved pattern for shared UI state in this project.
+> This skill is React 19 APIs and compiler-safe patterns. Shared or complex UI
+> state: `/store-pattern`. Components: arrow functions, `type` (not `interface`),
+> readonly props, never `React.FC`. Styling: StyleX only — no `className`,
+> inline `style={{}}`, CSS Modules, or Tailwind.
 
 ## 🚨 CRITICAL: Reference Files are MANDATORY
 
@@ -47,22 +50,16 @@ React.useState(); // Wrong
 
 ```typescript
 // ✅ ALWAYS: Arrow function + readonly props + named export
-// Wrapping a native element? Take `ComponentPropsWithoutRef<'x'>` instead and
-// get its attributes (and `children`) for free. Full decision table in
-// .claude/rules/react-components.md § Props Typing. Never `PropsWithChildren`:
-// it makes children optional and non-readonly (blocked by no-restricted-imports).
+// Never `React.FC`. Prefer `type` with `readonly` members.
 type ProductListProps = {
-  readonly onSelect: (id: string) => void;
   readonly products: readonly Product[];
 };
 
-export const ProductList = ({ products, onSelect }: ProductListProps) => {
+export const ProductList = ({ products }: ProductListProps) => {
   return (
     <ul>
       {products.map((p) => (
-        <li key={p.id} onClick={() => onSelect(p.id)}>
-          {p.name}
-        </li>
+        <li key={p.id}>{p.name}</li>
       ))}
     </ul>
   );
@@ -70,9 +67,6 @@ export const ProductList = ({ products, onSelect }: ProductListProps) => {
 
 // ❌ NEVER: function declaration for components
 export function ProductList({ products }: ProductListProps) { ... }
-
-// ❌ NEVER: React.FC — banned repo-wide (AGENTS.md Rule 1)
-export const ProductList: React.FC<ProductListProps> = ({ products }) => { ... }
 
 // ❌ NEVER: default export (unless required by framework)
 export default ProductList;
@@ -83,12 +77,14 @@ export const MyRoute = () => { ... }
 export default MyRoute;
 ```
 
-## No Manual Memoization (REQUIRED)
+## Memoization (compiler first)
 
-React Compiler handles optimization automatically. Never use `useMemo`, `useCallback`, or `memo` manually.
+React Compiler handles most memoization automatically — favor correct code over
+manual `useMemo` / `useCallback` / `memo`. Add manual memoization only when you
+have measured that the compiler cannot.
 
 ```typescript
-// ✅ React Compiler optimizes automatically
+// ✅ Default: let the compiler optimize
 export const ProductList = ({ products }: ProductListProps) => {
   const filtered = products.filter((p) => p.inStock);
   const sorted = [...filtered].sort((a, b) => a.price - b.price);
@@ -100,9 +96,8 @@ export const ProductList = ({ products }: ProductListProps) => {
   return <List items={sorted} onAdd={handleAddToCart} />;
 };
 
-// ❌ NEVER: Manual memoization
+// ⚠️ Not the first tool — only after a measured miss
 const filtered = useMemo(() => products.filter((p) => p.inStock), [products]);
-const sorted = useMemo(() => filtered.sort((a, b) => a.price - b.price), [filtered]);
 const handleAddToCart = useCallback((id) => addToCart(id), []);
 ```
 
@@ -110,13 +105,13 @@ const handleAddToCart = useCallback((id) => addToCart(id), []);
 
 ## 🚫 Critical Anti-Patterns
 
-- **DO NOT** use `useMemo`, `useCallback`, or `memo` manually → React Compiler handles this automatically.
-- **DO NOT** use function declarations for components → Use arrow functions + a `readonly` props type + named export.
+- **DO NOT** reach for `useMemo`, `useCallback`, or `memo` as the default → React Compiler first.
+- **DO NOT** use function declarations for components → Use arrow functions + a `readonly` props type + named export. Never `React.FC`.
 - **DO NOT** create promises inside a component's render and pass them to `use()` → Always pass promises from outside or parent.
 - **DO NOT** use `forwardRef` → In React 19, `ref` is a regular prop.
-- **DO NOT** use `useContext()` → Always use `use()` instead; it supports conditional calls and `useContext` is forbidden project-wide.
-- **DO NOT** use plain `createContext` for shared or complex UI state → Use the store-pattern — see `/store-pattern`. Plain context is only for low-volatility globals (theme, locale).
-- **DO NOT** use `className`, `style={{}}`, CSS Modules, or Tailwind → All styling uses StyleX exclusively (`@stylexjs/stylex`).
+- **DO NOT** use `useContext()` → Always use `use()` instead; it supports conditional calls.
+- **DO NOT** use plain `createContext` for shared or complex UI state → `/store-pattern`. Plain context is only for low-volatility globals (theme, locale).
+- **DO NOT** use `className`, `style={{}}`, CSS Modules, or Tailwind → StyleX only (`@stylexjs/stylex`).
 
 ---
 
@@ -206,7 +201,8 @@ export const HeadingWrong = ({ children }: HeadingProps) => {
 
 **Key difference**: `use()` can be called conditionally, `useContext()` cannot.
 
-**Project rule**: `use()` for context is only appropriate when consuming low-volatility global values (theme, locale). For shared or complex UI state, use the **store-pattern** instead — see `/store-pattern`.
+**Where the rule for when context is appropriate lives:** `/store-pattern` —
+it is not a React 19 API question.
 
 ## Actions with useTransition
 
@@ -350,11 +346,14 @@ export const Input = ({ ref, placeholder, ...props }: InputProps) => {
 // Usage
 export const Form = () => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const handleFocus = () => {
+    inputRef.current?.focus();
+  };
 
   return (
     <div>
       <Input ref={inputRef} placeholder="Name" />
-      <button onClick={() => inputRef.current?.focus()}>Focus</button>
+      <button onClick={handleFocus}>Focus</button>
     </div>
   );
 };
@@ -397,7 +396,9 @@ export const VideoPlayer= () => {
 
 ## Context as Provider
 
-> **⚠️ Project rule**: Plain `createContext` is only for low-volatility global values (theme, locale) that update rarely and don't need granular subscriptions. For any shared or complex UI state, use the **store-pattern** instead — see `/store-pattern`. Always read context with `use()`, never `useContext()`.
+> Plain `createContext` is only for low-volatility globals (theme, locale).
+> Shared or complex UI state: `/store-pattern`. Always read context with `use()`;
+> never `useContext()`.
 
 ```typescript
 import { createContext, use } from "react";
@@ -414,9 +415,8 @@ export const App = ({ children }: AppProps) => {
   return <ThemeContext value="dark">{children}</ThemeContext>;
 };
 
-// ❌ Old way — and `React.FC` is banned repo-wide (AGENTS.md Rule 1), as is
-//    the `React.` namespace access shown here. Kept only to name the pattern.
-export const AppOld: React.FC<AppProps> = ({ children }) => {
+// ❌ Old way — `Context.Provider` is unnecessary in React 19
+export const AppOld = ({ children }: AppProps) => {
   return (
     <ThemeContext.Provider value="dark">{children}</ThemeContext.Provider>
   );
