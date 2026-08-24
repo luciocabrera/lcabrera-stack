@@ -7,8 +7,8 @@
 > ([ADR-088](../../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)).
 > Kept so the draft remains readable, not so it is applied.
 
-**Version:** 1.0.0
-**Last Updated:** December 2025
+**Version:** 1.0.0  
+**Last Updated:** December 2025  
 **Status:** Historical / superseded by `AGENTS.md`
 
 ---
