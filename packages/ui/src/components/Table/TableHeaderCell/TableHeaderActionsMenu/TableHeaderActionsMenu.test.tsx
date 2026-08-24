@@ -24,13 +24,10 @@ const { MockTableActionsPopover } = vi.hoisted(() => ({
 
 const mockCloseMenu = vi.fn();
 
-const { NO_COLLAPSED_GROUP_PATHS, NO_DRILLED_GROUPS, NO_ROWS } = vi.hoisted(
-  () => ({
-    NO_COLLAPSED_GROUP_PATHS: new Set<string>(),
-    NO_DRILLED_GROUPS: new Map<string, never>(),
-    NO_ROWS: [] as readonly Record<string, unknown>[],
-  }),
-);
+const { NO_COLLAPSED_GROUP_PATHS, NO_ROWS } = vi.hoisted(() => ({
+  NO_COLLAPSED_GROUP_PATHS: new Set<string>(),
+  NO_ROWS: [] as readonly Record<string, unknown>[],
+}));
 
 const {
   appliedAggregatesRef,
@@ -100,7 +97,6 @@ vi.mock(
   () => ({
     useGetTableCanDrillGroups: () => false,
     useGetTableCollapsedGroupPaths: () => NO_COLLAPSED_GROUP_PATHS,
-    useGetTableDrilledGroups: () => NO_DRILLED_GROUPS,
   }),
 );
 

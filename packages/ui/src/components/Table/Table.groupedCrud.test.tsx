@@ -189,7 +189,7 @@ describe('a grouped grid with row actions', () => {
     }).toStrictEqual({ menus: 1, rows: 4 });
   });
 
-  it('renders a drilled detail row, which does carry a row id', () => {
+  it('renders a detail row, which does carry a row id', () => {
     expect(() => renderGrid([groupRow, detailRow])).not.toThrow();
     expect(screen.getAllByLabelText('Row actions').length).toBeGreaterThan(0);
   });

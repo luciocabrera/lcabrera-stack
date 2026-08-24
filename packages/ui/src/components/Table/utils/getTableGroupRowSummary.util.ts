@@ -13,8 +13,8 @@ import { isTableAggregateFn } from './isTableAggregateFn.util';
  * `value` is checked for **presence**, not for type — the same distinction
  * `toAggregateValue` documents below, and for the same reason one type over. A
  * key is whatever its column is, and `null` is a legitimate key rather than a
- * missing one: a NULL group is a group, and it is precisely the group a drill
- * would otherwise silently return nothing for. An entry carrying no `value` key
+ * missing one: a NULL group is a group, and it is precisely the group whose
+ * rows an equality would silently return nothing for. An entry carrying no `value` key
  * at all is malformed, and `Object.hasOwn` separates the two.
  *
  * `label` is still type-checked, because it is always a formatted string and

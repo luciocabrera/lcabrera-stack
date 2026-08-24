@@ -664,9 +664,9 @@ export type TableGroupKeyValue = {
    */
   readonly label: string;
   /**
-   * The key's **raw value**, exactly as the read produced it — what a filter is
-   * built from when a group is turned back into the restriction it came from
-   * (ADR-079).
+   * The key's **raw value**, exactly as the read produced it — what the group
+   * token carries, and what the read of the group's rows is built from
+   * (ADR-087).
    *
    * It cannot be recovered from `label`, which is why both are carried:
    * formatting is lossy in exactly the direction a query needs. A NULL key
@@ -770,13 +770,6 @@ export type TableMetaState = {
   /** Error message if data fetch failed */
   readonly error?: string;
   /**
-   * The aggregates the loader actually applied, in order, sanitized alongside
-   * `groupingKeys` from the same `grouping` param. Seeds the grouping store.
-   *
-   * A list of `(columnKey, fn)` pairs rather than a column-to-function map,
-   * because a column may carry several aggregates at once (#831).
-   */
-  /**
    * Where this route serves one group's rows (#870). A path rather than a
    * callback, because a function does not survive the loader boundary (ADR-009)
    * — and a path is all the grid needs: it builds the link and the browser does
@@ -787,6 +780,13 @@ export type TableMetaState = {
    * link whose every use 404s.
    */
   readonly groupDetailsPath?: string;
+  /**
+   * The aggregates the loader actually applied, in order, sanitized alongside
+   * `groupingKeys` from the same `grouping` param. Seeds the grouping store.
+   *
+   * A list of `(columnKey, fn)` pairs rather than a column-to-function map,
+   * because a column may carry several aggregates at once (#831).
+   */
   readonly groupingAggregates?: readonly TableColumnAggregate[];
   /**
    * What each of this route's columns may do in a grouped read, as the

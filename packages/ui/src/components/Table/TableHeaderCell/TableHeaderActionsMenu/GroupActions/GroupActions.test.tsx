@@ -23,7 +23,6 @@ const {
   mockRemoveColumnAggregate,
   mockSetAllGroupsExpanded,
   mockToggleGroupKey,
-  NO_DRILLED_GROUPS,
   normalizedColumnRef,
 } = vi.hoisted(() => ({
   appliedAggregatesRef: {
@@ -41,7 +40,6 @@ const {
   mockRemoveColumnAggregate: vi.fn(),
   mockSetAllGroupsExpanded: vi.fn(),
   mockToggleGroupKey: vi.fn(),
-  NO_DRILLED_GROUPS: new Map<string, never>(),
   normalizedColumnRef: { current: {} as Record<string, unknown> },
 }));
 
@@ -79,7 +77,6 @@ vi.mock(
   () => ({
     useGetTableCanDrillGroups: () => false,
     useGetTableCollapsedGroupPaths: () => collapsedGroupPathsRef.current,
-    useGetTableDrilledGroups: () => NO_DRILLED_GROUPS,
   }),
 );
 

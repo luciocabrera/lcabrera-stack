@@ -25,7 +25,8 @@ import { NotificationProvider } from '#ui/contexts/NotificationContext';
 /**
  * A grouped grid that actually **renders** the group-details affordance.
  *
- * Every drill test before this one was over a pure helper, which is how a
+ * Every test of this feature before this one was over a pure helper, which is
+ * how a
  * `TypeError` on the render path reached a user (#870, #887). These mount the
  * grid and read what it drew.
  */

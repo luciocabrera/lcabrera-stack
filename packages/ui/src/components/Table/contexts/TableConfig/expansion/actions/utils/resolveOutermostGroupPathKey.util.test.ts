@@ -37,7 +37,7 @@ const berlinKey = resolveGroupPathKey(pathOf('Berlin'));
 
 /**
  * A rollup block, in the order rollup emits it: the deepest rows, a detail row
- * drilled under one of them, then the subtotal that totals them (#570), then
+ * under one of them, then the subtotal that totals them (#570), then
  * the grand total.
  */
 const rows: readonly Row[] = [

@@ -204,15 +204,14 @@ export const selectOrderGroupingCapabilities = async () =>
   });
 
 /**
- * Pairs a drill request's granularities with whether each column carries a time
+ * Pairs a group token's granularities with whether each column carries a time
  * zone — the fact `toDrillRead` needs to compute the right period boundary
- * (#786).
+ * (#786), and `toGroupHeading` needs to name the period the group row shows.
  *
- * The drill route is a second entry point into the same grouping, and it does
- * not go through `selectGroupedRows`, so it has no catalogue answer in hand.
- * The catalogue query is issued only when a granularity is actually present,
- * and only for the columns carrying one — an untruncated drill costs exactly
- * what it cost before.
+ * A request naming a group does not go through `selectGroupedRows`, so it has
+ * no catalogue answer in hand. The query is issued only when a granularity is
+ * actually present, and only for the columns carrying one — an untruncated read
+ * costs exactly what it cost before.
  */
 export const selectOrderGroupKeyTruncations = async (
   periods: Readonly<Record<string, TableGroupPeriod>> | undefined,

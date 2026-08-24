@@ -28,9 +28,9 @@ type ResolveFocusedGroupFoldArgs = {
  * *does* draw the chevron is in the same column one block up, and the subtotal
  * regains it the moment the group folds.
  *
- * The innermost key column of a **drillable** leaf is the exception, and it is
- * the drill rather than a fold: it opens rows that are not loaded, so it has no
- * level entry by construction (ADR-079).
+ * A row's own innermost key column has no level entry by construction: the row
+ * *is* that level, so there is nothing under it to fold. It carries the link to
+ * the group's rows instead (ADR-087).
  *
  * A column that is not a key column falls back to the row, which keeps the
  * treegrid pattern's row-scoped `ArrowLeft`/`ArrowRight` everywhere the question

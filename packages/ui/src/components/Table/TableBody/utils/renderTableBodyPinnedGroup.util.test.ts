@@ -7,8 +7,8 @@ const ROW_KEY = 'pk:[7]';
 
 /**
  * This function drops any per-row field its signature does not destructure —
- * excess properties survive the caller's spread — so `drillRow` went missing
- * here and every drill chrome row was read as a data row (#887).
+ * excess properties survive the caller's spread — so the structural marker went
+ * missing here and every structural row was read as a data row (#887).
  *
  * **A field is only pinned by a case that actually passes one.** These
  * assertions name the whole payload, but `toHaveBeenNthCalledWith` compares
@@ -112,8 +112,9 @@ describe('renderTableBodyPinnedGroup', () => {
     });
   });
 
-  it('forwards a drill marker rather than dropping it', () => {
-    // The regression case. With `drillRow` missing from this function's
+  it('forwards the structural marker rather than dropping it', () => {
+    // The regression case. With `hasStructuralMarker` missing from this
+    // function's
     // destructuring the call object has no such key, and every other case here
     // passes whether or not it does — an `undefined` expectation cannot tell
     // "not forwarded" from "forwarded as undefined".

@@ -39,11 +39,10 @@ type ResolveGridFocusContextArgs<TData extends Record<string, unknown>> = {
  * space the grid navigates, which is exactly why focus is keyed by row identity
  * and re-resolved here on every move (ADR-062, ADR-067).
  *
- * **The drill inputs are passed for the same reason `collapsedGroupPaths` is.**
- * A drilled page and its chrome are rows in the array the body paints, so a
- * derivation that omitted them would navigate a different grid from the one on
- * screen — every index past the first open drill off by the size of its page
- * (ADR-079). This must be given the same inputs as `useTableGroupTree`.
+ * **It must be given the same inputs as `useTableGroupTree`**, for the reason
+ * `collapsedGroupPaths` is passed: anything that changes which rows the body
+ * paints changes the index space this navigates, and a derivation reading fewer
+ * inputs would navigate a different grid from the one on screen.
  */
 export const resolveGridFocusContext = <TData extends Record<string, unknown>>({
   columnsState,

@@ -41,10 +41,10 @@ import { resolveGroupKeyCellText } from './utils/resolveGroupKeyCellText.util';
  *
  * **A fold control leads the level it folds, in that level's own column**
  * (#802). A row states its ancestors and does not own them, so those are the
- * levels it can fold; its own innermost level offers a drill instead, where the
- * route serves one (ADR-079). `resolveGroupKeyCellDisclosure` decides which of
- * the two a cell draws — see `TableGroupDisclosure` for why neither is a
- * button.
+ * levels it can fold — and its own innermost level, being the row itself, folds
+ * nothing: `resolveGroupKeyCellDisclosure` answers `undefined` there and
+ * `TableGroupDisclosure` draws the spacer, which is the box the link above sits
+ * beside. See `TableGroupDisclosure` for why the control is not a button.
  *
  * **Every drawn key cell reserves the chevron's box, filled or not.** Only some
  * rows of a key column offer a control — a subtotal does not fold the level it

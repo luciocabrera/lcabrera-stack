@@ -10,7 +10,7 @@
  * reachable by pointer and by this: `Enter` on the cell the roving focus is
  * already on, which is the grid pattern's own answer for an actionable cell.
  *
- * It is stated over *any* link rather than over the drill hand-off that
+ * It is stated over *any* link rather than over the group-details link that
  * prompted it, because the rule is a property of the focus model rather than of
  * one feature — a second linked cell would otherwise arrive keyboard-dead and
  * nothing would say why.

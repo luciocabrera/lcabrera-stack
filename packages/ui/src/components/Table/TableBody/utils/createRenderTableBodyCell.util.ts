@@ -31,7 +31,7 @@ type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly col: TableColumn<TData>;
   /** The row's place in the tree, when it is a group row — per row, like the summary. */
   readonly disclosure?: TableGroupDisclosureState;
-  /** The row's drill marker, when it is grid chrome — per row, like the summary. */
+  /** Whether the row is grid-created structure — per row, like the summary. */
   /** The row's group summary, when it has one — per row, like the row itself. */
   readonly groupSummary?: TableGroupRowSummary;
   /**
