@@ -11,7 +11,11 @@ type VerifyAuthTokenArgs = {
   readonly token: string;
 };
 
-/** Decode the claims — non-conforming payloads fail. */
+/**
+ * Returns claims only when everything checks out, else `undefined` (no oracle on which
+ * step failed): parse, constant-time HMAC, decode claims, reject expired (`exp <= nowSeconds`).
+ * `nowSeconds` is injected so this stays pure.
+ */
 export const verifyAuthToken = ({
   nowSeconds,
   secret,

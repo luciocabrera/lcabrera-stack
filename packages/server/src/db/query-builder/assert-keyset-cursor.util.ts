@@ -6,9 +6,11 @@ type AssertKeysetCursorArgs = {
 };
 
 /**
- * Refuses a keyset cursor the builder cannot resume correctly, at construction time — the
- * same posture as buildUpdateQuery/buildDeleteQuery refusing an unfiltered mutation.
- * Whether that column is genuinely unique is the caller's to guarantee (ADR-052).
+ * Refuses a keyset cursor the builder cannot resume correctly, at construction time: a
+ * sort exists, one value per sort entry, and the sort ends on a declared unique column
+ * carrying a non-null value. Whether that column is genuinely unique is the caller's to
+ * guarantee (ADR-052). The non-null rule keeps the final OR-branch of the predicate
+ * alive, so every bound cursor value is referenced by the emitted SQL.
  */
 export const assertKeysetCursor = ({
   cursor,

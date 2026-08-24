@@ -148,15 +148,17 @@ export const ENTERPRISE_ORDER_ALLOWED_COLUMNS: readonly string[] =
 // ---------------------------------------------------------------------------
 
 /**
- * `ENTERPRISE_ORDER_GROUP_MAX_ROWS` is not it either: that bounds a grouped result, which
- * is not a page and is not scrolled (ADR-059).
- * Both readers of this table ask for `INITIAL_PAGE_SIZE` — the SSR loader for the first
- * page, the table's load-more for every page after it — so the ceiling is headroom, not a
- * limit any UI reaches.
+ * Ceiling on `?limit=` for the public paginated URL. Written out rather than imported
+ * from `CLIENT_PAGINATION_ROW_LIMIT` so lowering that demo UI bound cannot change what
+ * this endpoint serves. `ENTERPRISE_ORDER_GROUP_MAX_ROWS` is not it either: that bounds a
+ * grouped result, which is not a page (ADR-059).
  */
 export const MAX_ENTERPRISE_ORDERS_LIMIT = 1000;
 
-/** So it cannot truncate a sort a user is able to express. */
+/**
+ * Bounded by the table's column count: past it every further term repeats a column
+ * already named, so it cannot truncate a sort a user is able to express.
+ */
 export const MAX_ENTERPRISE_ORDERS_SORT_RULES = ENTERPRISE_ORDER_COLUMNS.length;
 
 export const ENTERPRISE_ORDER_DISTINCT_FILTER_COLUMNS: Readonly<

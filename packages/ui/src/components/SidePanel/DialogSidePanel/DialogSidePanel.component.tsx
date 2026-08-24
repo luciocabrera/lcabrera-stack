@@ -7,7 +7,11 @@ import type { DialogSidePanelProps } from './DialogSidePanel.types';
 
 import { sidePanelStyles } from '../SidePanel.stylex';
 
-/** Unmounting (e.g. */
+/**
+ * Overlay SidePanel variant backed by a native `<dialog>`. Unmounting (e.g. switching to
+ * the pinned variant) removes the dialog from the document, which closes it natively — no
+ * pinned-mode guards needed.
+ */
 export const DialogSidePanel = ({
   children,
   isOpen,
