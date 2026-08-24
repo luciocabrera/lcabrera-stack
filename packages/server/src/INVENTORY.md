@@ -361,5 +361,5 @@ supplies any token `prefix` (e.g. CodePulse passes `cqms_` from scan-ingestion).
 
 When you add, rename, or remove an artifact:
 
-- Add / update the row in the relevant table above
-- If enhancing an existing artifact (making it more generic), update its description row — do **not** add a new row
+- Add / update the row in the relevant table above. The description is **one sentence**.
+- If enhancing an existing artifact (making it more generic), update that row — do **not** add a new row

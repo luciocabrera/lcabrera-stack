@@ -1,6 +1,6 @@
 ---
 name: architecture-guard
-description: Research what already exists before building anything new. Given a task description, reads INVENTORY.md, relevant ARCHITECTURE.md files, PATTERNS.md, and ADRs to surface reusable artifacts and active constraints. Use before implementing any new component, hook, utility, context, or feature.
+description: Research what already exists before building anything new. Given a task description, reads INVENTORY.md, PATTERNS.md, the system ARCHITECTURE.md if the area has one, and ADRs to surface reusable artifacts and active constraints. Use before implementing any new component, hook, utility, context, or feature.
 model: sonnet
 color: blue
 tools:
@@ -24,7 +24,7 @@ and **two** ADR namespaces, so always cite a path, never a bare number.
   - `packages/server/src/INVENTORY.md`
 - `packages/ui/src/PATTERNS.md` — the single PATTERNS.md: naming conventions, StyleX
   composition order, the thin-shell/store-wiring rule, drawer-section pattern, filter contract
-- `**/ARCHITECTURE.md` — colocated with the directory each describes (`vp run adr:list` for ADRs; glob for these)
+- System `ARCHITECTURE.md` — Table, Form, the query builders, and other clusters whose wiring is not visible from one file. Do not treat a file per leaf component as required ([ADR-088](../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)). `vp run adr:list` for ADRs.
 - ADRs, in two homes whose low numbers **collide**:
   - `docs/decisions/` — repo, published packages and toolchain decisions
   - `apps/react-router/docs/decisions/` — component/app decisions (Modal, Tooltip, store, StyleX…)
@@ -40,11 +40,9 @@ Given the caller's task description:
 2. **Read `packages/ui/src/PATTERNS.md`.** Identify any naming or structural conventions
    that apply.
 
-3. **Read relevant ARCHITECTURE.md files.** Glob for them rather than assuming a path —
-   they are colocated with the code. Prioritize:
-   - The directory being modified
-   - Parent directories if the change crosses boundaries
-   - The types directory of the owning package if types are involved
+3. **Read the system `ARCHITECTURE.md` only if the task is inside a system**
+   (Table and its stores, Form, the query builders). Do not glob every leaf
+   `ARCHITECTURE.md` and do not tell the caller to create one for a new folder.
 
 4. **Read relevant ADRs.** Glob **both** `docs/decisions/` and
    `apps/react-router/docs/decisions/` first, then read any whose title suggests relevance.
@@ -70,8 +68,8 @@ Given the caller's task description:
 ### Recommended approach
 One of:
 - **Reuse as-is**: use `ExistingThing` — it already covers the need.
-- **Enhance**: extend `ExistingThing` with `{param}` to cover the need — update its ARCHITECTURE.md after.
-- **Create new**: nothing in inventory covers this. Follow the bundle pattern: `ComponentName/{ComponentName.component.tsx, .types.ts, .stylex.ts, .test.tsx, index.ts}`.
+- **Enhance**: extend `ExistingThing` with `{param}` to cover the need — update its inventory row (one sentence). Update the system `ARCHITECTURE.md` only if the wiring itself changed.
+- **Create new**: nothing in inventory covers this. Follow the bundle pattern: `ComponentName/{ComponentName.component.tsx, .types.ts, .stylex.ts, .test.tsx, index.ts}`. Do not add an `ARCHITECTURE.md` for the folder.
 
 ### Gaps / unknowns
 (anything the caller should verify before starting)

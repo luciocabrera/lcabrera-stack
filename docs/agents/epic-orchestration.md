@@ -248,8 +248,10 @@ All of it, every time. Any failure aborts the merge.
 - [ ] `mergeable` is not `CONFLICTING`
 - [ ] The full [quality gate](../../.github/skills/quality-gate-workflow/SKILL.md)
       passed **on the final commit**, not on an earlier one
-- [ ] Docs updated in the **same commit** — ARCHITECTURE, INVENTORY, PATTERNS, ADR
-      as the [Documentation Update Rule](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule) requires
+- [ ] Docs updated in the **same commit** — inventory, ADR, PATTERNS, and a
+      system `ARCHITECTURE.md` only when wiring changed, as the
+      [Documentation Update Rule](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule)
+      requires ([ADR-088](../decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md))
 - [ ] A changeset exists if any `@lcabrera/*` package changed
 - [ ] [`merge-checklist.md`](merge-checklist.md)'s **[judgement]** items have been
       read by you, not ticked. Its **[auto]** items you confirm ran — you do not

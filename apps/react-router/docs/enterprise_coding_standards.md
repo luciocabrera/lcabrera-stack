@@ -1,8 +1,15 @@
 # 🚀 Enterprise Coding Standards: React 19 / TypeScript / StyleX / React Router 7
 
+> **Historical — not in force.** This file is a December 2025 draft. Do not
+> follow it. Canonical standards are [`AGENTS.md`](../../../AGENTS.md) and
+> [`.claude/rules/`](../../../.claude/rules/). JSDoc is **not** required on
+> exports; architecture files are **not** required per component folder
+> ([ADR-088](../../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)).
+> Kept so the draft remains readable, not so it is applied.
+
 **Version:** 1.0.0  
 **Last Updated:** December 2025  
-**Status:** Mandatory for all production code
+**Status:** Historical / superseded by `AGENTS.md`
 
 ---
 
@@ -1433,7 +1440,9 @@ const config = {
 
 ### 11.1 JSDoc for Public APIs
 
-All exported functions, types, and components must have JSDoc comments.
+**Not in force.** JSDoc is not required on exports. Comment only what the
+code cannot say (`AGENTS.md` §7). The example below is part of the historical
+draft, not a template to copy.
 
 ````typescript
 /**

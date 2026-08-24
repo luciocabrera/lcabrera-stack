@@ -127,13 +127,13 @@ sub-agent — used by the scan/report skills).
 
 Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, heavy, or parallelisable work. They start with no conversation context — their markdown file is their full system prompt. Filenames must match the `name:` frontmatter field (`<name>.md`).
 
-| Agent                | Purpose                                                                        | Tools                               | When to use                                                            |
-| -------------------- | ------------------------------------------------------------------------------ | ----------------------------------- | ---------------------------------------------------------------------- |
-| `quality-gate`       | Runs fmt→lint→check→test, returns pass/fail table                              | Bash, Read                          | Mid-session validation; scope is the changed workspace or `check:safe` |
-| `architecture-guard` | Reads INVENTORY.md, ARCHITECTURE.md, PATTERNS.md, ADRs — returns reuse brief   | Read, Glob, Grep                    | Before implementing anything new                                       |
-| `fallow-scan`        | Runs full fallow pipeline in background, saves JSON + report                   | Bash, Read, Write                   | Before large refactors or after big merges                             |
-| `refactor-builder`   | Implements one issue in its own worktree; never certifies or merges it         | Bash, Read, Write, Edit, Glob, Grep | Dispatched by `/refactor-verified` and `/epic`                         |
-| `refactor-verifier`  | Certifies a diff against acceptance criteria, blind to the builder's reasoning | Bash, Read, Write, Edit, Glob, Grep | Dispatched by the same two                                             |
+| Agent                | Purpose                                                                               | Tools                               | When to use                                                            |
+| -------------------- | ------------------------------------------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------- |
+| `quality-gate`       | Runs fmt→lint→check→test, returns pass/fail table                                     | Bash, Read                          | Mid-session validation; scope is the changed workspace or `check:safe` |
+| `architecture-guard` | Reads inventories, PATTERNS.md, the system ARCHITECTURE.md if any, ADRs — reuse brief | Read, Glob, Grep                    | Before implementing anything new                                       |
+| `fallow-scan`        | Runs full fallow pipeline in background, saves JSON + report                          | Bash, Read, Write                   | Before large refactors or after big merges                             |
+| `refactor-builder`   | Implements one issue in its own worktree; never certifies or merges it                | Bash, Read, Write, Edit, Glob, Grep | Dispatched by `/refactor-verified` and `/epic`                         |
+| `refactor-verifier`  | Certifies a diff against acceptance criteria, blind to the builder's reasoning        | Bash, Read, Write, Edit, Glob, Grep | Dispatched by the same two                                             |
 
 The last two take **dispatch parameters** — whether to ready the PR, whether to
 post findings to GitHub — because `/refactor-verified` and `/epic` want opposite

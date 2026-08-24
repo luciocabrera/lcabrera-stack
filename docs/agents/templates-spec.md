@@ -372,7 +372,8 @@ Documentation MUST reflect new behavior, constraints, patterns and agent rules.
 > `merge-checklist.md` when the _merge bar_ changes. Per-artifact documentation
 > follows the Documentation Update Rule in the
 > [`quality-gate-workflow` skill](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule),
-> which names the specific homes (`ARCHITECTURE.md`, `INVENTORY.md`, `PATTERNS.md`, ADRs).
+> which names the specific homes (inventory, PATTERNS, ADRs, and a system
+> `ARCHITECTURE.md` only when wiring changed; [ADR-088](../decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)).
 
 ## **5. When modifying existing code**
 

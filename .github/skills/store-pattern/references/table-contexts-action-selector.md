@@ -135,14 +135,8 @@ Selector hooks should not:
 
 ## Documentation Pattern
 
-Follow the architecture doc quality bar shown in:
-
-- `packages/ui/src/components/Button/ARCHITECTURE.md`
-
-Recommended sections:
-
-- File structure
-- Dependencies graph
-- Render/data flow diagram
-- Props/state tables
-- Consumer map
+Store wiring is a **system**. Record data flow and ownership in
+`packages/ui/src/components/Table/ARCHITECTURE.md` (and the store files under
+`contexts/`) when that wiring changes. Do not add a Props table, a file-tree
+listing, or a new `ARCHITECTURE.md` for a leaf folder
+([ADR-088](../../../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)).

@@ -13,9 +13,13 @@ ComponentName/
 ├── index.ts                          → barrel export only
 ├── ComponentName.component.tsx       → React component
 ├── ComponentName.types.ts            → Props and local types
-├── ComponentName.stylex.ts           → StyleX styles (if needed)
-└── ARCHITECTURE.md                   → Architecture documentation
+└── ComponentName.stylex.ts           → StyleX styles (if needed)
 ```
+
+Do not add an `ARCHITECTURE.md` because the folder is new. That file is for a
+**system** whose wiring is not visible from one file (Table, Form) — see
+[ADR-088](../../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md).
+The inventory row is how a leaf component is catalogued.
 
 Subcomponents follow the same pattern nested inside the parent folder:
 
@@ -491,7 +495,11 @@ export const PinConflictModal = () => {
 3. **Shared presentational components stay pure.** A shared/public component (e.g. `PinSideModal`) must not be coupled to a feature store — give it a small store-connected wrapper delegate named for the domain (e.g. `ColumnOrderPinSideModal`) that acts as its local owner.
 4. **Render-callback row content becomes a component** that consumes its own actions (e.g. `ColumnOrderItemContent`, `SortItemContent`) — this also removes inline-arrow handlers from JSX.
 5. **Derivations needed by two or more delegates** are extracted to a shared `*.util.ts` (e.g. `filterSettingsColumns`) instead of being computed in the parent and drilled.
-6. **Document ownership.** The component's `ARCHITECTURE.md` gets a "State Ownership Rule" table (delegate → selectors read → actions dispatched); its `INVENTORY.md` row is worded "thin shell composing private delegates that own their store wiring".
+6. **Document ownership where the wiring is a system.** Split store ownership
+   (delegate → selectors read → actions dispatched) belongs in that **system's**
+   `ARCHITECTURE.md` (Table, VirtualSelect), not a new file per delegate. The
+   `INVENTORY.md` row is worded "thin shell composing private delegates that own
+   their store wiring".
 7. **One context per domain, one provider per mount site; stores per concern.** A context split only pays off when the halves have different lifecycles/mount points (Table: config in `TableLayout`, data after Suspense in `Table`). When providers share a single mount point, do NOT stack them — use one context carrying multiple stores (`TableConfig`'s `columnsStore`/`groupingStore`/`metaStore`; `VirtualListContext`'s `listStore`/`dataStore`). Re-render isolation comes from the stores' `useSyncExternalStore` subscriptions, not from context boundaries. When a composite wraps a store-backed component, the composite's provider **composes** the inner-domain provider (`VirtualSelectProvider` renders `VirtualListProvider` around its children; the inner component exports a provider-less `<X>Content` composition) — the composite keeps its own context/meta store for its presentation metadata, mirrored from a grouped `metaState` prop via a sync effect (`TableDataProvider` precedent); shell-owned callbacks (e.g. dropdown toggle) go on the context value, dispatched through action hooks. Delegates read everything via selectors — zero props. Provider props are grouped as `<slice>State` objects (`columnsState`/`metaState`, `listState`/`metaState`), not loose keys. Canonical run: `VirtualSelect/contexts` composing `VirtualList/contexts`.
 8. **Single-owner state.** Never pass the same value to two providers or mirror it into two stores — each piece of state has exactly one owning store. When one store carries fields written by different owners (`VirtualListState` = config mirror + list-owned UI state), enforce a **writer boundary**: the provider sync effect writes only the config subset and re-passes the current UI fields it read from the store, so a config re-sync never clobbers in-flight UI state (guard it with a regression test).
 9. **Consumer-supplied configuration is a context, not a prop chain — and a value, not a store.** What a consuming app configures (`getNavigationItems`, `isAuthEnabled`, `logoutRoute`) reaches the delegate that renders it through `AppConfigContext`; `AppShell` and `AppNavigation` declare none of it. Rule 2 applies to app configuration exactly as it does to store state — a component that merely forwards a value should not name it. Because none of it changes after mount, the context carries a **plain value** with one-liner `use()` accessor hooks (`TableWrapperContext`'s shape), not a `useSyncExternalStore` store: there is nothing to subscribe to. The moment a field does start changing, it belongs in a store instead. Canonical run: `contexts/AppConfigContext/` + `components/RootComponent/` ([ADR-053](../../../docs/decisions/ADR-053-package-owned-app-root-and-app-config-context.md)).
@@ -671,6 +679,13 @@ without one, the spread order is a convention that nothing enforces.
 
 ## Architecture Documentation Rule
 
-Every component directory must have an `ARCHITECTURE.md`. Before writing any code, read the relevant `ARCHITECTURE.md` files. After any change, update them.
+An `ARCHITECTURE.md` is for a **system**, not for every component folder.
+Read the system file when the change is inside Table, Form, or another
+cluster whose wiring is not visible from one file. Do not create one for a
+leaf, and do not update a Props table or a file-tree listing — those are
+copies of the code.
 
-See `.github/copilot-instructions.md` → Section 16 for the full workflow.
+The inventory row, the types file, and
+[ADR-088](../../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)
+are the rest of the map. Comments follow `AGENTS.md` §7: only what the code
+cannot say, kept short.

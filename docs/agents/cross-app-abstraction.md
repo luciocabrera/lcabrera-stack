@@ -32,8 +32,8 @@ is meant to be built.
 
 The best version of this task is usually **a parameter or a config option
 threaded through a helper that already exists**, not a new export. An artifact
-that _almost_ fits gets generalised in place; its `ARCHITECTURE.md` row and
-`INVENTORY.md` description get updated in the same commit.
+that _almost_ fits gets generalised in place; its `INVENTORY.md` description
+gets updated in the same commit (one sentence).
 
 ### 2. Can the edge be declared?
 
@@ -85,8 +85,10 @@ API-surface snapshot, a permanent version number. Read
 
 ### 5. Otherwise, extract.
 
-Same runtime, declarable edge, nothing that already covers it: promote it, and
-give it an `ARCHITECTURE.md` if the directory is new.
+Same runtime, declarable edge, nothing that already covers it: promote it.
+Give it an `ARCHITECTURE.md` only if it is a system whose wiring is not
+visible from one file
+([ADR-088](../decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)).
 
 ---
 

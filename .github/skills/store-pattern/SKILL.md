@@ -32,24 +32,24 @@ This skill documents the project store architecture used in the Table domain:
 
 **This SKILL.md provides OVERVIEW only. For exact patterns and constraints, read the reference files BEFORE implementing.**
 
-| Reference                                                            | Use When                                                         |
-| -------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `references/table-contexts-action-selector.md`                       | Implementing or extending the Table store/context architecture   |
-| `references/architecture-templates/table-contexts/*.ARCHITECTURE.md` | Reusing the proven Table context architecture in other codebases |
-| `../quality-gate-workflow/SKILL.md`                                  | Running post-change validation after store/context updates       |
+| Reference                                                            | Use When                                                                                                                                                                                     |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `references/table-contexts-action-selector.md`                       | Implementing or extending the Table store/context architecture                                                                                                                               |
+| `references/architecture-templates/table-contexts/*.ARCHITECTURE.md` | The Table **system's** store split — read it, do not copy a file per new folder ([ADR-088](../../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)) |
+| `../quality-gate-workflow/SKILL.md`                                  | Running post-change validation after store/context updates                                                                                                                                   |
 
 **⚠️ DO NOT implement store/context changes without reading `references/table-contexts-action-selector.md` FIRST.**
 
 ## Quick Diagnostic — Which Reference to Open
 
-| Situation                                          | Reference to read                                                               |
-| -------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Adding a new state field to an existing store      | `references/table-contexts-action-selector.md` → §Actions                       |
-| Building a new domain's store/context from scratch | `references/architecture-templates/table-contexts/contexts.ARCHITECTURE.md`     |
-| Debugging a stale-render or missed-update bug      | `references/table-contexts-action-selector.md` → §Selectors                     |
-| Adding filter state for a new column               | `references/architecture-templates/table-contexts/filters-data.ARCHITECTURE.md` |
-| Adding config/meta state (density, pagination)     | `references/architecture-templates/table-contexts/table-config.ARCHITECTURE.md` |
-| Reviewing a PR for store misuse                    | Use the Review Checklist at the bottom of this file                             |
+| Situation                                          | Reference to read                                                                                                             |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Adding a new state field to an existing store      | `references/table-contexts-action-selector.md` → §Actions                                                                     |
+| Building a new domain's store/context from scratch | `references/architecture-templates/table-contexts/contexts.ARCHITECTURE.md` (Table's system file — do not add one per folder) |
+| Debugging a stale-render or missed-update bug      | `references/table-contexts-action-selector.md` → §Selectors                                                                   |
+| Adding filter state for a new column               | `references/architecture-templates/table-contexts/filters-data.ARCHITECTURE.md`                                               |
+| Adding config/meta state (density, pagination)     | `references/architecture-templates/table-contexts/table-config.ARCHITECTURE.md`                                               |
+| Reviewing a PR for store misuse                    | Use the Review Checklist at the bottom of this file                                                                           |
 
 ## Core Rules
 
@@ -81,16 +81,15 @@ columnsStore.set({ columnFilters: nextFilters });
 
 ## Architecture Anchors
 
-Reusable local templates:
+Table is a **system**. These files describe that system's store split. Do not
+copy them into a new folder, and do not add a Props table or a file-tree
+listing ([ADR-088](../../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)):
 
+- `packages/ui/src/components/Table/ARCHITECTURE.md`
 - `references/architecture-templates/table-contexts/contexts.ARCHITECTURE.md`
 - `references/architecture-templates/table-contexts/table-config.ARCHITECTURE.md`
 - `references/architecture-templates/table-contexts/table-data.ARCHITECTURE.md`
 - `references/architecture-templates/table-contexts/filters-data.ARCHITECTURE.md`
-
-Documentation structure benchmark:
-
-- `packages/ui/src/components/Button/ARCHITECTURE.md`
 
 ## Review Checklist
 
@@ -107,5 +106,5 @@ Documentation structure benchmark:
 For full implementation details and examples, read:
 
 - `references/table-contexts-action-selector.md`
-- `references/architecture-templates/table-contexts/*.ARCHITECTURE.md`
+- `references/architecture-templates/table-contexts/*.ARCHITECTURE.md` — Table's system files, not a per-folder template
 - `../quality-gate-workflow/SKILL.md`
