@@ -103,7 +103,7 @@ export const parseRepository = (raw) => {
   return text;
 };
 
-const NODE_ID = /^[A-Za-z0-9_][A-Za-z0-9_-]*={0,2}$/;
+const NODE_ID = /^\w[\w-]*={0,2}$/;
 
 export const parseThreadId = (raw) => {
   const text = String(raw ?? '').trim();
