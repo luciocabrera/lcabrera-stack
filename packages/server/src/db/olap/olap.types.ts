@@ -57,8 +57,12 @@ export type OlapGroupRead = OlapDrillRead & {
   readonly cursor?: readonly unknown[];
 };
 
-/** A refusal, plus the one a request can earn that a group row cannot. */
-export type OlapGroupReadRefusal = 'malformed' | OlapDrillRefusal;
+/**
+ * A group row's refusals, plus the two a *request* can earn that a row cannot:
+ * a token that cannot be read, and no token at all on a route that serves
+ * nothing else.
+ */
+export type OlapGroupReadRefusal = 'absent' | 'malformed' | OlapDrillRefusal;
 
 export type OlapGroupReadResolution =
   | { readonly kind: 'read'; readonly read: OlapGroupRead }

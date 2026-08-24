@@ -30,7 +30,10 @@ import {
  * shares the list's URL without re-filtering the list underneath it; the link
  * seeds those from the list's, which is the floor the group was computed under.
  * It declares no grouping (a grouped read would return group rows again) and no
- * keyset (the translation rewrites the sort a cursor would have to match).
+ * keyset (the translation rewrites the sort a cursor would have to match), and
+ * it requires the group token — every response it serves is titled as one
+ * group, so there is no unscoped read for a link that lost its query to fall
+ * through to.
  */
 const tableLoader = createTableRouteLoader<
   EnterpriseOrderTableRow,
@@ -41,6 +44,9 @@ const tableLoader = createTableRouteLoader<
   fetchPage: async ({ effectiveSorting, filters, request }) => {
     const resolved = await resolveOrdersGroupRead({
       filters: toQueryFilters({ filters }),
+      // This route serves one group and nothing else, so a request with no
+      // token is refused rather than read as the whole table.
+      isGroupRequired: true,
       limit: INITIAL_PAGE_SIZE,
       params: new URL(request.url).searchParams,
       skip: 0,

@@ -18,6 +18,12 @@ import { toDrillRead } from './to-drill-read.util.ts';
 type ResolveGroupReadArgs = {
   readonly cursor?: readonly unknown[];
   readonly filters: readonly QueryFilter[];
+  /**
+   * Set by a route that serves *only* one group's rows. Absent, no token means
+   * "read the whole set", which is right for an endpoint answering both — and
+   * wrong for one whose every response is titled as a group.
+   */
+  readonly isGroupRequired?: boolean;
   readonly limit: number;
   /** The route's own page ceiling. Passed in, because only the route knows it. */
   readonly maxLimit: number;
@@ -38,6 +44,7 @@ type ResolveGroupReadArgs = {
 
 /** Each names the row rather than the request: a reader clicked a row. */
 const REFUSAL_MESSAGE: Readonly<Record<OlapGroupReadRefusal, string>> = {
+  absent: 'This page opens one group’s rows, and the link does not say which.',
   'grand-total':
     'A grand total already summarises every row, so there is no narrower set to open.',
   'incomplete-path':
@@ -60,11 +67,14 @@ const toRefusal = (reason: OlapGroupReadRefusal): OlapGroupReadResolution => ({
  * `parseDrillGroup` answers `undefined` both for "no group here" and for "a
  * group I cannot read", so the param's *presence* is tested separately: without
  * that, a mangled link falls through to the unscoped read and serves the whole
- * table under the group's heading.
+ * table under the group's heading. `isGroupRequired` closes the other half of
+ * that door — a route serving nothing but one group has no unscoped read to
+ * fall through to.
  */
 export const resolveGroupRead = async ({
   cursor,
   filters,
+  isGroupRequired = false,
   limit,
   maxLimit,
   params,
@@ -76,6 +86,12 @@ export const resolveGroupRead = async ({
   const isFirstPage = skip === 0;
 
   if (!params.has(OLAP_DRILL_GROUP_PARAM)) {
+    // A route that serves only one group refuses instead: falling through would
+    // read the whole set and hand it to a caller that titles every response as
+    // a group — the same rows-under-the-wrong-heading failure an unreadable
+    // token is refused for, reached by a link that simply lost its query.
+    if (isGroupRequired) return toRefusal('absent');
+
     return {
       kind: 'read',
       read: {

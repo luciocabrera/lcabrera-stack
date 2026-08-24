@@ -52,6 +52,24 @@ describe('resolveGroupRead', () => {
     });
   });
 
+  it('refuses an absent token on a route that serves only one group', async () => {
+    // The other half of the same door. `/paginated` answers both the list and
+    // one group, so no token means "the whole set" there. A route whose every
+    // response is titled as a group has no such reading — falling through would
+    // serve the entire table under a group heading, reached by nothing more
+    // exotic than a link that lost its query string.
+    const resolved = await resolve({ isGroupRequired: true });
+
+    expect(resolved.kind).toBe('refused');
+    expect(resolved.kind === 'refused' && resolved.reason).toBe('absent');
+  });
+
+  it('still reads the whole set for an absent token when a group is optional', async () => {
+    const resolved = await resolve();
+
+    expect(resolved.kind).toBe('read');
+  });
+
   it('scopes the read to a named group', async () => {
     const resolved = await resolve({ entries: { group: groupToken() } });
 

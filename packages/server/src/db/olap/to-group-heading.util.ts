@@ -30,11 +30,9 @@ const HEADING_SEPARATOR = ' · ';
 const toPeriodDate = (value: unknown) => {
   if (value instanceof Date) return value;
 
-  if (typeof value === 'string' || typeof value === 'number') {
-    return new Date(value);
-  }
-
-  return;
+  return typeof value === 'string' || typeof value === 'number'
+    ? new Date(value)
+    : undefined;
 };
 
 /**

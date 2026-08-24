@@ -82,6 +82,14 @@ I cannot read", so the param's presence is tested separately — without that a
 mangled link falls through to the unscoped read and serves the whole table under
 one group's heading.
 
+**6b. A route that serves only one group requires the token.**
+`resolveGroupRead`'s "no token means the whole set" is right for `/paginated`,
+which answers both the list and one group, and wrong for a route whose every
+response is titled as a group: there, a link that lost its query string would
+serve the entire table under a group heading — the failure a _mangled_ token is
+refused for, reached without mangling anything. `isGroupRequired` is how a route
+says which of the two callers it is.
+
 **7. A refusal is a page carrying an error** (ADR-068), so the table renders the
 reason instead of the client throwing on a shape it cannot parse.
 

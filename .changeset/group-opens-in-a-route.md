@@ -23,6 +23,9 @@ one refused, the translation applied, the page positioned. A route supplies only
 its page ceiling, its tiebreaker column, and the catalogue lookup for a truncated
 key. It returns a read or a refusal carrying the sentence to render.
 
+`resolveGroupRead` takes `isGroupRequired` for a route that serves nothing but
+one group: there, an absent token is refused rather than read as the whole set.
+
 **`@lcabrera/server` also gains `toGroupHeading`** — the heading that route
 shows, read back out of the token. A truncated key is formatted as its period, so
 the heading reads `2021-06` like the group row that was clicked rather than the
