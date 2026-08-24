@@ -12,6 +12,7 @@ import {
   DECISION_SCHEMA,
   decideArgs,
   parseDecision,
+  parseModelName,
 } from './pr-queue-claude.mjs';
 
 const pr = {
@@ -172,5 +173,37 @@ describe('parseDecision', () => {
 
   it('refuses unparseable output', () => {
     expect(parseDecision('not json').error).toMatch(/unparseable/);
+  });
+});
+
+describe('parseModelName', () => {
+  for (const good of ['sonnet', 'claude-opus-5', 'claude-opus-5[1m]']) {
+    it(`accepts ${good}`, () => {
+      expect(parseModelName(good)).toBe(good);
+    });
+  }
+
+  it('refuses a value the child would read as a flag', () => {
+    expect(() => parseModelName('--permission-mode')).toThrow(
+      '--model must be',
+    );
+  });
+
+  for (const bad of ['', '  ', undefined, null, 'sonnet extra', 'a;b', '-x']) {
+    it(`refuses ${JSON.stringify(bad)}`, () => {
+      expect(() => parseModelName(bad)).toThrow('--model must be');
+    });
+  }
+
+  it('names the value it was given', () => {
+    expect(() => parseModelName('-x')).toThrow(JSON.stringify('-x'));
+  });
+});
+
+describe('decideArgs validates the model it places into argv', () => {
+  it('refuses to build a vector around a flag-shaped model', () => {
+    expect(() =>
+      decideArgs({ model: '--dangerously-skip-permissions' }),
+    ).toThrow('--model must be');
   });
 });

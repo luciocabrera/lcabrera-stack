@@ -29,6 +29,7 @@ slugify [const] (title: any) => any
 flagValue [const] (name: any, argv?: string[]) => string | undefined
 parsePullNumber [const] (raw: any) => number
 parseRepository [const] (raw: any) => string
+parseThreadId [const] (raw: any) => string
 positional [const] (index: any, argv?: string[]) => string | undefined
 readStdin [const] (stream?: NodeJS.ReadStream & { fd: 0; }) => Promise<string>
 withoutSeparator [const] (argv?: string[]) => string[]

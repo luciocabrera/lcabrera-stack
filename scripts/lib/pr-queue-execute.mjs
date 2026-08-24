@@ -16,7 +16,7 @@
  */
 import { execFileSync } from 'node:child_process';
 
-import { resolveClaudeBinary } from './pr-queue-claude.mjs';
+import { parseModelName, resolveClaudeBinary } from './pr-queue-claude.mjs';
 
 /**
  * Write-capable tools for the apply pass.
@@ -128,7 +128,7 @@ export const executeArgs = ({ model }) => [
   '--permission-mode',
   'acceptEdits',
   '--model',
-  model,
+  parseModelName(model),
   '--no-session-persistence',
 ];
 

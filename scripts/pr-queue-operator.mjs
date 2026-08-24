@@ -34,6 +34,7 @@ import { flagValue } from '../packages/repo-standards/scripts/cli-input.mjs';
 import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import {
   buildDecisionPrompt,
+  parseModelName,
   resolveClaudeBinary,
   runDecision,
 } from './lib/pr-queue-claude.mjs';
@@ -58,7 +59,7 @@ const APPLY_TIMEOUT_MS = 30 * 60 * 1000;
 const readOptions = () => ({
   apply: process.argv.includes('--apply'),
   limit: Number(flagValue('--limit') ?? 50),
-  model: flagValue('--model') ?? 'sonnet',
+  model: parseModelName(flagValue('--model') ?? 'sonnet'),
   only: flagValue('--pr'),
 });
 

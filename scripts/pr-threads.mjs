@@ -32,6 +32,7 @@ import process from 'node:process';
 import {
   flagValue,
   parsePullNumber,
+  parseThreadId,
 } from '../packages/repo-standards/scripts/cli-input.mjs';
 import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
@@ -96,7 +97,7 @@ const main = () => {
     return;
   }
   if (threadId !== undefined) {
-    if (!resolveThread(threadId)) {
+    if (!resolveThread(parseThreadId(threadId))) {
       console.error(`${threadId} is not resolved — GitHub did not confirm it.`);
       process.exitCode = 1;
       return;
