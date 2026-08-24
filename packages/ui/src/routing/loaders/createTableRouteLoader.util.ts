@@ -54,7 +54,7 @@ type CreateTableRouteLoaderArgs<
   readonly filterOptions?: { readonly transport: FilterOptionsTransport };
   readonly includeFilters?: boolean;
   /**
-   * `crud`, `deleteActionPath`).
+   * Route-specific meta merged over the base (e.g. `crud`, `deleteActionPath`).
    * This is also where a request-shaping capability is declared, and omitting one leaves it
    * off (ADR-063).
    */

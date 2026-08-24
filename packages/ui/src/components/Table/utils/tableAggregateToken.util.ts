@@ -19,10 +19,10 @@ export const toTableAggregateToken = ({
 }: TableColumnAggregate) => `${columnKey}${SEPARATOR}${fn}`;
 
 /**
- * A naive `split(':')` gets every ordinary key right and silently mangles that one.
- * This is a deliberate departure from `resolveGroupPathKey`, which encodes a group path
- * with `JSON.stringify` because *"a label may contain any character, and a joined form
- * collides the moment one contains the delimiter"*.
+ * Split on the last separator, not the first: a column key may contain `:`, and the
+ * function vocabulary is closed and contains none, so `"odd:col:sum"` reads as
+ * `("odd:col", "sum")`. A naive `split(':')` gets every ordinary key right and silently
+ * mangles that one.
  */
 export const parseTableAggregateToken = (
   token: string,

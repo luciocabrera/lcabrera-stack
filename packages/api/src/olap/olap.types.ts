@@ -31,5 +31,8 @@ export type OlapGroupPathEntry = {
  * **Wire vocabulary, so it lives here** — it travels in the grouping URL param and again
  * in the drill param, and both `@lcabrera/server` and `@lcabrera/ui` already declare
  * `@lcabrera/api` as a dependency (ADR-082).
+ * `week` is deliberately absent: `date_trunc('week', …)` is ISO Monday, and a reporting
+ * week is as often Sunday or fiscal, which #786 puts out of scope rather than settling in
+ * passing.
  */
 export type OlapGroupPeriod = 'day' | 'month' | 'quarter' | 'year';
