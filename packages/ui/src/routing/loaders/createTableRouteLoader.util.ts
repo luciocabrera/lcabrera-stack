@@ -44,6 +44,10 @@ type CreateTableRouteLoaderArgs<
    * it does not produce.
    */
   readonly defaultGrouping?: TableGroupingState;
+  /**
+   * Return the promise **unawaited** — the factory hands it straight back as `dataPromise`
+   * for Suspense streaming, so the route renders its skeleton immediately.
+   */
   readonly fetchPage: (
     args: TableRouteFetchPageArgs<TData>,
   ) => Promise<TResponse>;
@@ -100,8 +104,13 @@ type TableRouteFetchPageArgs<TData extends Record<string, unknown>> = {
  * cookies, sanitize sorting, append the primary-key tiebreaker, optionally bake distinct
  * filter descriptors onto the columns, and assemble the serializable `columnsState` /
  * `metaState`.
- * Everything it returns is serializable — no functions cross the single-fetch boundary
- * (ADR-009).
+ * The returned loader returns `fetchPage`'s promise **unawaited**, preserving Suspense
+ * streaming. Everything it returns is serializable — no functions cross the single-fetch
+ * boundary (ADR-009).
+ * It is `async` only because a grouping-enabled route has one plain value it must resolve
+ * before the document can be painted: the catalogue's answer about what each column may do
+ * (ADR-058). `fetchPage` is called **before** that await, so the data query and the
+ * catalogue query overlap.
  */
 export const createTableRouteLoader = <
   TData extends Record<string, unknown>,

@@ -4,7 +4,11 @@ import { useEffect, useRef } from 'react';
 
 export type UseInfiniteScrollObserverArgs = {
   readonly isEnabled: boolean;
-  /** Invoked when the sentinel scrolls within `threshold` pixels of the root's bottom edge */
+  /**
+   * Invoked when the sentinel scrolls within `threshold` pixels of the root's bottom edge.
+   * May fire repeatedly while the sentinel stays in view, so the handler must be
+   * idempotent (guard against overlapping loads via `isEnabled`).
+   */
   readonly onReachEnd: () => void;
   readonly rootRef: RefObject<HTMLElement | null>;
   readonly sentinelRef: RefObject<HTMLElement | null>;
@@ -26,6 +30,8 @@ export type UseInfiniteScrollObserverArgs = {
  * The effect re-runs whenever `isEnabled` changes, which re-observes the sentinel and
  * re-fires `onReachEnd` if it is still in view after a page loads — this keeps loading
  * until the content fills the container (or `isEnabled` becomes `false`).
+ * `onReachEnd` may fire repeatedly while the sentinel stays in view, so the handler must
+ * be idempotent (guard against overlapping loads via `isEnabled`).
  */
 export const useInfiniteScrollObserver = ({
   isEnabled,

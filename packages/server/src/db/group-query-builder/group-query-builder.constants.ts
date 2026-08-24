@@ -37,6 +37,15 @@ export const AGGREGATE_SQL_NAMES: readonly string[] = [
  * `uuid` needs this because Postgres files it under category `U` beside `jsonb`, `xml`,
  * `bytea` and `tsvector` — types the Table cannot render — so no structural property of a
  * catalogue row separates it from them.
+ * Entries are **schema-qualified**, and that is not decoration: type names are per-schema,
+ * so `CREATE TYPE app.uuid AS (…)` yields a composite whose `typname` is `uuid`. Matching
+ * on the bare name would admit it as a dimension — a type the Table cannot render, which
+ * is the exact failure this gate exists to prevent.
+ * Being an identifier also carries a second rule: these types must demonstrate low
+ * cardinality before they are a legal group key, the same bar a fact clears, because a
+ * `uuid` column is far more often a key than a label. That is why
+ * `refuse-group-key.util.ts` consults `isIdentifierType` too rather than treating them as
+ * ordinary dimensions.
  */
 export const IDENTIFIER_TYPE_NAMES: ReadonlySet<string> = new Set([
   'pg_catalog.uuid',
@@ -115,9 +124,15 @@ export const MAX_GROUP_KEYS = 4;
 /**
  * The depth cap per mode, closed over `GroupingMode` so a new mode must state its own
  * bound rather than inherit one.
+ * Cube stops a key earlier than the others because its set count is `2ⁿ`, not `n+1` — the
+ * sentence above already prices depth 4 at sixteen sets. Three is eight, which the row
+ * budget absorbs.
  * **It has to be a construction-time rule, and the cardinality rail is exactly why.** That
  * rail returns `unknown` when any key lacks a `pg_stats` row, and ADR-066 answers
- * `unknown` with warn-and-proceed so grouping survives a fresh restore.
+ * `unknown` with warn-and-proceed so grouping survives a fresh restore. So on an
+ * unanalysed table the estimate cannot refuse anything, and a depth-4 cube would run its
+ * sixteen sets under nothing but the row backstop. A bound that disappears on the
+ * least-analysed tables is not a bound.
  */
 export const MAX_KEYS_BY_GROUPING: Readonly<Record<GroupingMode, number>> = {
   cube: 3,

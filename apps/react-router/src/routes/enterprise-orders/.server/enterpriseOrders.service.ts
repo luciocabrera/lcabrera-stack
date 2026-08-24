@@ -209,8 +209,15 @@ export type SelectOrdersPageArgs = {
    * session runs, so counting per page is work with a known answer (#402).
    */
   readonly includeTotal: boolean;
+  /**
+   * Clamped into `[1, MAX_ENTERPRISE_ORDERS_LIMIT]` here rather than trusted, because this
+   * is the one function both entry points reach — see the ceiling note below.
+   */
   readonly limit: number;
   readonly offset: number;
+  /**
+   * Truncated to `MAX_ENTERPRISE_ORDERS_SORT_RULES` here for the same reason as `limit`.
+   */
   readonly sort: readonly QuerySort[];
   readonly totalsPlacement?: TableTotalsPlacement;
 };
@@ -228,6 +235,12 @@ type OrderColumnAggregate = {
 type UnfilteredOrderAggregate = Omit<GroupAggregate, 'alias' | 'filters'>;
 
 /**
+ * **The request-derived window is bounded here, not at the route's parser** (#706). Both
+ * entry points size this read — `/_api/enterprise-orders/paginated` from its search
+ * params, and the SSR loader from its own constant — and only one of them passes through
+ * `parseOrdersPageParams`, so a bound applied there covers half the surface. This function
+ * is the half both halves share: no caller of it can widen the window past
+ * `MAX_ENTERPRISE_ORDERS_LIMIT` or the ORDER BY past `MAX_ENTERPRISE_ORDERS_SORT_RULES`.
  * `getRowsCount` takes the data query's own `filters`/`allowedColumns`, so the two still
  * cannot drift.
  * `LIMIT 0` is floored to 1: a page with no rows and a `hasMore` that says the set is
