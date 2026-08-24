@@ -483,30 +483,24 @@ See [hooks/ARCHITECTURE.md](hooks/ARCHITECTURE.md) and
 
 ## Detailed Architecture
 
-| Area                  | Details                                                                        |
-| --------------------- | ------------------------------------------------------------------------------ |
-| Contexts              | [contexts/ARCHITECTURE.md](contexts/ARCHITECTURE.md)                           |
-| TableFocus context    | [contexts/TableFocus/ARCHITECTURE.md](contexts/TableFocus/ARCHITECTURE.md)     |
-| TableLayout           | [TableLayout/ARCHITECTURE.md](TableLayout/ARCHITECTURE.md)                     |
-| TableContent          | [TableContent/ARCHITECTURE.md](TableContent/ARCHITECTURE.md)                   |
-| TableBase             | [TableBase/ARCHITECTURE.md](TableBase/ARCHITECTURE.md)                         |
-| TableHeader           | [TableHeader/ARCHITECTURE.md](TableHeader/ARCHITECTURE.md)                     |
-| TableHeaderCell       | [TableHeaderCell/ARCHITECTURE.md](TableHeaderCell/ARCHITECTURE.md)             |
-| TableBody             | [TableBody/ARCHITECTURE.md](TableBody/ARCHITECTURE.md)                         |
-| TableBodyCell         | [TableBodyCell/ARCHITECTURE.md](TableBodyCell/ARCHITECTURE.md)                 |
-| TableRow              | [TableRow/ARCHITECTURE.md](TableRow/ARCHITECTURE.md)                           |
-| TableActionButton     | [TableActionButton/ARCHITECTURE.md](TableActionButton/ARCHITECTURE.md)         |
-| TableRowActionsMenu   | [TableRowActionsMenu/ARCHITECTURE.md](TableRowActionsMenu/ARCHITECTURE.md)     |
-| SpacerRow             | [SpacerRow/ARCHITECTURE.md](SpacerRow/ARCHITECTURE.md)                         |
-| SpacerCell            | [SpacerRow/ARCHITECTURE.md](SpacerRow/ARCHITECTURE.md)                         |
-| TableTitle            | [TableTitle/ARCHITECTURE.md](TableTitle/ARCHITECTURE.md)                       |
-| TableCheckDisplay     | [TableCheckDisplay/ARCHITECTURE.md](TableCheckDisplay/ARCHITECTURE.md)         |
-| TableSkeleton         | [TableSkeleton/ARCHITECTURE.md](TableSkeleton/ARCHITECTURE.md)                 |
-| TableSuspenseBoundary | [TableSuspenseBoundary/ARCHITECTURE.md](TableSuspenseBoundary/ARCHITECTURE.md) |
-| TableDataResolver     | [TableDataResolver/ARCHITECTURE.md](TableDataResolver/ARCHITECTURE.md)         |
-| TableDrawersSection   | [TableDrawersSection/ARCHITECTURE.md](TableDrawersSection/ARCHITECTURE.md)     |
-| Filters               | [filters/ARCHITECTURE.md](filters/ARCHITECTURE.md)                             |
-| Hooks                 | [hooks/ARCHITECTURE.md](hooks/ARCHITECTURE.md)                                 |
-| Utils                 | [utils/ARCHITECTURE.md](utils/ARCHITECTURE.md)                                 |
-| TableSettingsDrawer   | [TableSettingsDrawer/ARCHITECTURE.md](TableSettingsDrawer/ARCHITECTURE.md)     |
-| ColumnSettingsDrawer  | [ColumnSettingsDrawer/ARCHITECTURE.md](ColumnSettingsDrawer/ARCHITECTURE.md)   |
+Leaf folders have no architecture file ([ADR-088](../../../../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)). The inventory names them.
+
+| Area                 | Details                                                                      |
+| -------------------- | ---------------------------------------------------------------------------- |
+| Contexts             | [contexts/ARCHITECTURE.md](contexts/ARCHITECTURE.md)                         |
+| TableFocus context   | [contexts/TableFocus/ARCHITECTURE.md](contexts/TableFocus/ARCHITECTURE.md)   |
+| TableLayout          | [TableLayout/ARCHITECTURE.md](TableLayout/ARCHITECTURE.md)                   |
+| TableHeaderCell      | [TableHeaderCell/ARCHITECTURE.md](TableHeaderCell/ARCHITECTURE.md)           |
+| TableBody            | [TableBody/ARCHITECTURE.md](TableBody/ARCHITECTURE.md)                       |
+| TableBodyRows        | [TableBodyRows/ARCHITECTURE.md](TableBodyRows/ARCHITECTURE.md)               |
+| TableRow             | [TableRow/ARCHITECTURE.md](TableRow/ARCHITECTURE.md)                         |
+| TableEmptyState      | [TableEmptyState/ARCHITECTURE.md](TableEmptyState/ARCHITECTURE.md)           |
+| TableGroupAggregate  | [TableGroupAggregate/ARCHITECTURE.md](TableGroupAggregate/ARCHITECTURE.md)   |
+| TableGroupKeyCell    | [TableGroupKeyCell/ARCHITECTURE.md](TableGroupKeyCell/ARCHITECTURE.md)       |
+| TableGroupDisclosure | [TableGroupDisclosure/ARCHITECTURE.md](TableGroupDisclosure/ARCHITECTURE.md) |
+| Filters              | [filters/ARCHITECTURE.md](filters/ARCHITECTURE.md)                           |
+| Hooks                | [hooks/ARCHITECTURE.md](hooks/ARCHITECTURE.md)                               |
+| Utils                | [utils/ARCHITECTURE.md](utils/ARCHITECTURE.md)                               |
+| Commands             | [commands/ARCHITECTURE.md](commands/ARCHITECTURE.md)                         |
+| TableSettingsDrawer  | [TableSettingsDrawer/ARCHITECTURE.md](TableSettingsDrawer/ARCHITECTURE.md)   |
+| ColumnSettingsDrawer | [ColumnSettingsDrawer/ARCHITECTURE.md](ColumnSettingsDrawer/ARCHITECTURE.md) |
