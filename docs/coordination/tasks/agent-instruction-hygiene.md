@@ -12,6 +12,8 @@ area:
   - .github/skills/**
   - scripts/validate-skills.cjs
   - scripts/ARCHITECTURE.md
+  - packages/devkit/assets/skills/react-19/**
+  - .changeset/agent-instruction-hygiene.md
 started: 2026-08-24
 updated: 2026-08-24
 plan: (none)

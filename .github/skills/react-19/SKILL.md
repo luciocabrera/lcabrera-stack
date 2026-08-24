@@ -17,8 +17,8 @@ allowed-tools: Read
 - Enforcing React Compiler-safe patterns in component code
 
 > **Project law lives elsewhere.** This skill is React 19 APIs and compiler-safe
-> patterns. Components, StyleX, and props: `.claude/rules/react-components.md`.
-> `type` / no `React.FC` / readonly: `AGENTS.md` Rule 1. Shared state: `/store-pattern`.
+> patterns. Components, StyleX, and props: the path-scoped React component rules.
+> `type` / no `React.FC` / readonly: AGENTS.md Rule 1. Shared state: `/store-pattern`.
 
 ## 🚨 CRITICAL: Reference Files are MANDATORY
 
@@ -50,7 +50,7 @@ React.useState(); // Wrong
 ```typescript
 // ✅ ALWAYS: Arrow function + named export
 // Props typing (`type`, readonly, no `React.FC`) is project law —
-// `.claude/rules/react-components.md` and AGENTS.md Rule 1, not React 19 APIs.
+// AGENTS.md Rule 1 and the path-scoped React component rules, not React 19 APIs.
 type ProductListProps = {
   readonly products: readonly Product[];
 };
@@ -199,7 +199,7 @@ export const HeadingWrong = ({ children }: HeadingProps) => {
 
 **Key difference**: `use()` can be called conditionally, `useContext()` cannot.
 
-**Project rule**: when context is appropriate at all is `/store-pattern` and `.claude/rules/react-components.md`, not a React 19 API question.
+**Project rule**: when context is appropriate at all is `/store-pattern` and the path-scoped React component rules, not a React 19 API question.
 
 ## Actions with useTransition
 
