@@ -148,15 +148,15 @@ BuiltQuery [type] { readonly text: string; readonly values: readonly unknown[]; 
 ColumnType [type] 'boolean' | 'date' | 'enum' | 'number' | 'text'
 ComparisonOperator [type] BinaryOperator | UnaryOperator
 CountQueryDescriptor [type] { readonly allowedColumns?: readonly string[]; /** * Column passed to `count()`; defaults to `*` (count every matching row). Pass a * specific column when NULLs in that column should not be counted. */ readonly column?: string; readonly filters?: readonly QueryFilter[]; readonly schema: string; readonly table: string; }
-DeleteQueryDescriptor [type] { /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */ readonly allowedColumns?: readonly string[]; /** At least one filter is required — an unfiltered DELETE is refused. */ readonly filters: readonly QueryFilter[]; readonly returning?: readonly string[]; readonly schema: string; readonly table: string; }
-InsertQueryDescriptor [type] { /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */ readonly allowedColumns?: readonly string[]; readonly returning?: readonly string[]; readonly schema: string; readonly table: string; readonly values: Readonly<Record<string, unknown>>; }
+DeleteQueryDescriptor [type] { /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */ readonly allowedColumns?: readonly string[]; /** At least one filter is required — an unfiltered DELETE is refused. */ readonly filters: readonly QueryFilter[]; /** Columns to return; `['*']` returns the whole row and must stand alone. */ readonly returning?: readonly string[]; readonly schema: string; readonly table: string; }
+InsertQueryDescriptor [type] { /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */ readonly allowedColumns?: readonly string[]; /** Columns to return; `['*']` returns the whole row and must stand alone. */ readonly returning?: readonly string[]; readonly schema: string; readonly table: string; readonly values: Readonly<Record<string, unknown>>; }
 MaxValueQueryDescriptor [type] { /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */ readonly allowedColumns?: readonly string[]; readonly column: string; readonly schema: string; readonly table: string; }
 QueryCursor [type] { /** Must be the last `sort` entry; `assertKeysetCursor` throws otherwise. */ readonly uniqueColumn: string; /** One value per `sort` entry, in `sort` order. */ readonly values: readonly unknown[]; }
 QueryFilter [type] { readonly column: string; readonly operator: BinaryOperator; readonly value: unknown; } | { readonly column: string; readonly operator: UnaryOperator; }
 QuerySort [type] { readonly column: string; readonly direction: 'asc' | 'desc'; }
 SelectQueryDescriptor [type] { /** * Opt-in authorization: when provided, every fields/filter/sort column must be a member, * in addition to the always-on `assertSafeIdentifier` syntax check. Omit when every * column is developer-hardcoded, never derived from a request. */ readonly allowedColumns?: readonly string[]; /** * Keyset pagination: resume strictly after the row this cursor describes, instead of * counting past `offset` rows. * Requires `sort` to be a total order ending on `cursor.uniqueColumn`; see `QueryCursor` * and ADR-052. */ readonly cursor?: QueryCursor; readonly distinct?: boolean; readonly fields: readonly string[]; readonly filters?: readonly QueryFilter[]; readonly limit?: number; readonly offset?: number; readonly schema: string; readonly sort?: readonly QuerySort[]; readonly table: string; }
 UnaryOperator [type] 'isNotNull' | 'isNull'
-UpdateQueryDescriptor [type] { /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */ readonly allowedColumns?: readonly string[]; /** At least one filter is required — an unfiltered UPDATE is refused. */ readonly filters: readonly QueryFilter[]; readonly returning?: readonly string[]; readonly schema: string; readonly table: string; readonly values: Readonly<Record<string, unknown>>; }
+UpdateQueryDescriptor [type] { /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */ readonly allowedColumns?: readonly string[]; /** At least one filter is required — an unfiltered UPDATE is refused. */ readonly filters: readonly QueryFilter[]; /** Columns to return; `['*']` returns the whole row and must stand alone. */ readonly returning?: readonly string[]; readonly schema: string; readonly table: string; readonly values: Readonly<Record<string, unknown>>; }
 
 ## ./db/run-in-transaction.util
 runInTransaction [const] <TResult>({ client, run }: RunInTransactionArgs<TResult>) => Promise<TResult>
@@ -211,10 +211,10 @@ UniqueConstraintViolationError [class] UniqueConstraintViolationError
 ## ./filters/filters.types
 BooleanFilter [type] { readonly type: 'boolean'; readonly value: boolean; }
 ColumnFilter [type] BooleanFilter | DateFilter | EmptyFilter | NumberFilter | SelectFilter | TextFilter
-DateFilter [type] { readonly operator: 'after' | 'before' | 'between' | 'equals'; readonly type: 'date'; readonly value: string; readonly value2?: string; }
+DateFilter [type] { readonly operator: 'after' | 'before' | 'between' | 'equals'; readonly type: 'date'; /** ISO date string. */ readonly value: string; readonly value2?: string; }
 EmptyFilter [type] { readonly operator: 'isEmpty' | 'isNotEmpty'; readonly type: 'empty'; }
 NumberFilter [type] { readonly operator: 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; readonly value: number | undefined; readonly value2?: number; }
-SelectFilter [type] { readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; readonly value?: string; readonly values?: readonly string[]; }
+SelectFilter [type] { /** Defaults to `'equals'` if omitted. */ readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; /** Single value for `'select'`. */ readonly value?: string; /** Multiple values for `'multiSelect'`. */ readonly values?: readonly string[]; }
 TextFilter [type] { readonly operator: 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
 
 ## ./filters/resolve-filter-options-source.util
@@ -246,7 +246,7 @@ ToTextQueryFiltersArgs [type] { readonly column: string; readonly filter: TextFi
 
 ## ./sort/resolve-query-sort.util
 resolveQuerySort [const] ({ fallback, sorting }: ResolveQuerySortArgs) => readonly QuerySort[]
-ResolveQuerySortArgs [type] { readonly fallback: readonly ColumnSort[]; readonly sorting: readonly ColumnSort[]; }
+ResolveQuerySortArgs [type] { /** Applied when `sorting` is empty. Must itself be non-empty. */ readonly fallback: readonly ColumnSort[]; readonly sorting: readonly ColumnSort[]; }
 
 ## ./sort/sort.types
 ColumnSort [type] { readonly columnKey: string; readonly direction: 'asc' | 'desc'; }

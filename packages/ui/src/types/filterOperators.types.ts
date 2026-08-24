@@ -66,9 +66,12 @@ export type OperatorType =
   | TextOperatorType;
 
 export type SelectFilter = {
+  /** Defaults to `'equals'` if omitted. */
   readonly operator?: 'equals' | 'notEquals';
   readonly type: 'multiSelect' | 'select';
+  /** Single value for `'select'`. */
   readonly value?: string;
+  /** Multiple values for `'multiSelect'`. */
   readonly values?: readonly string[];
 };
 

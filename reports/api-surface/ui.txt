@@ -448,7 +448,7 @@ NumberFilter [type] { readonly operator: | 'between' | 'equals' | 'greaterThan' 
 NumberOperatorType [type] NumberFilter['operator']
 OperatorOption [type] { readonly label: string; readonly value: T; }
 OperatorType [type] | DateOperatorType | EmptyOperatorType | NumberOperatorType | TextOperatorType
-SelectFilter [type] { readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; readonly value?: string; readonly values?: readonly string[]; }
+SelectFilter [type] { /** Defaults to `'equals'` if omitted. */ readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; /** Single value for `'select'`. */ readonly value?: string; /** Multiple values for `'multiSelect'`. */ readonly values?: readonly string[]; }
 TextFilter [type] { readonly operator: | 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
 TextOperatorType [type] TextFilter['operator']
 

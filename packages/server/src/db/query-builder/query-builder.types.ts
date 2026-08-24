@@ -35,6 +35,7 @@ export type DeleteQueryDescriptor = {
   readonly allowedColumns?: readonly string[];
   /** At least one filter is required — an unfiltered DELETE is refused. */
   readonly filters: readonly QueryFilter[];
+  /** Columns to return; `['*']` returns the whole row and must stand alone. */
   readonly returning?: readonly string[];
   readonly schema: string;
   readonly table: string;
@@ -43,6 +44,7 @@ export type DeleteQueryDescriptor = {
 export type InsertQueryDescriptor = {
   /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
+  /** Columns to return; `['*']` returns the whole row and must stand alone. */
   readonly returning?: readonly string[];
   readonly schema: string;
   readonly table: string;
@@ -126,6 +128,7 @@ export type UpdateQueryDescriptor = {
   readonly allowedColumns?: readonly string[];
   /** At least one filter is required — an unfiltered UPDATE is refused. */
   readonly filters: readonly QueryFilter[];
+  /** Columns to return; `['*']` returns the whole row and must stand alone. */
   readonly returning?: readonly string[];
   readonly schema: string;
   readonly table: string;
