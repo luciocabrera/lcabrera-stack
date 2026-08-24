@@ -45,7 +45,11 @@ import {
   toOrderKeysetCursor,
 } from '../config';
 
-/** It reaches the pool via `getPool`, so it must never enter the client bundle. */
+/**
+ * Server-only Postgres access for `enterprise_orders`. Lives in `.server/`, so
+ * the build fails if client code imports it — that is what makes loaders/actions
+ * only a build rule here, not a comment. Reaches the pool via `getPool`.
+ */
 
 const TARGET = {
   allowedColumns: ENTERPRISE_ORDER_ALLOWED_COLUMNS,
@@ -84,6 +88,11 @@ export type SelectGroupedOrdersArgs = {
  * not paginated (ADR-059): there is no stable cursor over a result the server aggregated,
  * and the row count is bounded by the number of distinct key combinations rather than by
  * the table.
+ *
+ * This is the loader edge, so no error class leaves it. `@lcabrera/server` raises
+ * guard-rail refusals and statement timeouts as classes; React Router single
+ * fetch strips the prototype, so `instanceof` on the client is always false.
+ * Every refusal maps to the plain `SerializableDbError` union (ADR-050, ADR-066).
  */
 const selectGroupedOrders = async ({
   aggregates: selectedAggregates,

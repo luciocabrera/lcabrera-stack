@@ -87,9 +87,8 @@ export const PERIOD_CAPABLE_TYPE_NAMES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * The `date_trunc` field each granularity maps to — a closed map for `AGGREGATE_SQL`'s
- * reason: the value reaching SQL comes from here and never from the caller's string, so an
- * unvalidated period cannot become an identifier.
+ * The `date_trunc` field each granularity maps to. The value reaching SQL comes from here
+ * and never from the caller's string, so an unvalidated period cannot become an identifier.
  */
 export const PERIOD_SQL_FIELD: Readonly<Record<GroupKeyPeriod, string>> = {
   day: 'day',
@@ -127,9 +126,10 @@ export const MAX_KEYS_BY_GROUPING: Readonly<Record<GroupingMode, number>> = {
 };
 
 /**
- * That is the safe direction for a *hard* refusal, and it is why the warn threshold below
- * exists rather than this being the only rail (ADR-066, which names the query that
- * re-derives the gap).
+ * Estimated result rows past which a grouped read is refused outright.
+ * The estimate is an upper bound — `∏dₖ` assumes every key combination occurs — so it
+ * over-refuses on sparse data. That is the safe direction for a hard refusal, and it is
+ * why the warn threshold below exists rather than this being the only rail (ADR-066).
  */
 export const MAX_GROUP_ROWS_REFUSE = 50_000;
 

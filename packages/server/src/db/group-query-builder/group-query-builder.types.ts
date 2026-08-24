@@ -162,10 +162,6 @@ export type GroupGuardRails = {
 export type GroupingMode = 'cube' | 'flat' | 'rollup';
 
 /**
- * Distinguishable on purpose: grouping by a primary key is the likeliest user mistake and
- * deserves its own message.
- */
-/**
  * The granularity a date or timestamp group key is truncated to.
  * **An alias, not a second declaration.** The vocabulary is wire vocabulary — it travels
  * in the grouping param and again in the drill param — so it belongs to `@lcabrera/api`,
@@ -173,6 +169,10 @@ export type GroupingMode = 'cube' | 'flat' | 'rollup';
  */
 export type GroupKeyPeriod = OlapGroupPeriod;
 
+/**
+ * Distinguishable on purpose: grouping by a primary key is the likeliest user mistake and
+ * deserves its own message.
+ */
 export type GroupKeyRefusalReason =
   | 'no-equality-operator'
   | 'not-a-dimension'
@@ -202,11 +202,9 @@ export type GroupQueryDescriptor = {
   readonly maxRows: number;
   /**
    * The granularity to truncate a temporal key to, by column — a map beside the key list
-   * rather than a member of it.
-   * A key list of records would carry the granularity inside each key, and was rejected:
-   * `keys` is `readonly string[]` on both sides of the boundary, in the URL, in every group
-   * path and in the expansion store, so changing its element type moves a shape that six
-   * unrelated things already agree on.
+   * rather than a member of it. `keys` stays `readonly string[]` on both sides of the
+   * boundary; a column named here that is not in `keys` is refused rather than ignored
+   * (`assertGroupKeys`).
    */
   readonly periods?: Readonly<Record<string, GroupKeyPeriod>>;
   readonly schema: string;
@@ -229,8 +227,9 @@ export type GroupRowLimit = {
  * A sort on an aggregate acts at the **innermost** level: its term is emitted after the
  * innermost key's `GROUPING` term and ahead of that key's own value term, which stays last
  * as the tiebreak.
- * The refusal replaced an earlier behaviour that silently moved such a sort behind every
- * key term, where it can never fire: within one grouping set the key columns already
+ * An aggregate listed ahead of a key is refused at construction
+ * (`assert-group-sort.util.ts`). The earlier behaviour silently moved such a sort behind
+ * every key term, where it can never fire: within one grouping set the key columns already
  * identify the row, so the sort was accepted, emitted and dead.
  */
 export type GroupSort =
