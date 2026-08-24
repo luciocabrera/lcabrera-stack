@@ -198,13 +198,13 @@ Every tab condition below is a capability read through `resolveColumnCapabilitie
 somehow rendered for a column lacking the capability disables its commands rather
 than offering an edit the table will refuse.
 
-| Section          | Tab Condition              | Features                                                  | Details                                           |
-| ---------------- | -------------------------- | --------------------------------------------------------- | ------------------------------------------------- |
-| `GeneralSection` | Always shown               | Width presets (min/max/default), clear/reset all settings | [ARCHITECTURE.md](GeneralSection/ARCHITECTURE.md) |
-| `FilterSection`  | `isFilterable && dataType` | FilterInputs component, clear/reset filter                | [ARCHITECTURE.md](FilterSection/ARCHITECTURE.md)  |
-| `SortingSection` | `isSortable`               | Asc/desc toggle, clear/reset sorting                      | [ARCHITECTURE.md](SortingSection/ARCHITECTURE.md) |
-| `PinningSection` | `!isStatic`                | Pin left/right toggle, clear/reset pinning                | [ARCHITECTURE.md](PinningSection/ARCHITECTURE.md) |
-| `DetailsSection` | Always shown               | Read-only metadata display (label, key, dataType, etc.)   | [ARCHITECTURE.md](DetailsSection/ARCHITECTURE.md) |
+| Section          | Tab Condition              | Features                                                  |
+| ---------------- | -------------------------- | --------------------------------------------------------- |
+| `GeneralSection` | Always shown               | Width presets (min/max/default), clear/reset all settings |
+| `FilterSection`  | `isFilterable && dataType` | FilterInputs component, clear/reset filter                |
+| `SortingSection` | `isSortable`               | Asc/desc toggle, clear/reset sorting                      |
+| `PinningSection` | `!isStatic`                | Pin left/right toggle, clear/reset pinning                |
+| `DetailsSection` | Always shown               | Read-only metadata display (label, key, dataType, etc.)   |
 
 ### Section Toolbar Pattern
 

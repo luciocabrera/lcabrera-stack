@@ -120,7 +120,7 @@ itself rather than offering an edit the table would refuse.
 ## Actions Menu
 
 A single `MoreVerticalIcon` trigger (`TableActionsPopover`, shared with
-`TableRowActionsMenu` — see `components/Table/TableActionsPopover/ARCHITECTURE.md`)
+`TableRowActionsMenu` — see `components/Table/TableActionsPopover/`)
 opens a popover built by `TableHeaderActionsMenu`, replacing the previous
 inline pin/sort/settings buttons:
 
