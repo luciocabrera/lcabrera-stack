@@ -1,7 +1,8 @@
 # Author style profile
 
-Overrides [`repo-voice.md`](repo-voice.md) on conventions. Cannot switch off
-epistemics, invent facts, or imitate another named author.
+Overrides [`repo-voice.md`](repo-voice.md) on conventions for chat, PR
+prose, issue prose, and review comments. Cannot switch off epistemics,
+invent facts, or imitate another named author.
 
 This profile is a **balanced register**, not a transcript. The human
 samples were short. The explicit rules in §6 are the load-bearing part.
@@ -11,15 +12,8 @@ Typos in those samples are mistakes. Correct them. Do not copy them.
 
 ## 1. Typography
 
-- Em dashes: avoid in new prose. Do not strip them from existing repo docs
-  (`AGENTS.md`, ADRs).
-- Quotation marks: straight.
-- Headings: sentence case. Gates excepted (`## What`, `## Verification`,
-  issue template sections).
-- Lists and bold: a short list when the items are parallel. Prose otherwise.
-  Bold only a load-bearing name or command.
-- Paragraphs: short, 1–3 sentences.
-- Other: no decorative emoji. No ellipses for drama.
+- Paragraphs: short, 1–3 sentences. Everything else in this section
+  follows [`repo-voice.md`](repo-voice.md) and `SKILL.md` Level 1.
 
 ## 2. Vocabulary
 
@@ -85,4 +79,6 @@ Samples: PR #889 review (package vs app duplication), PR #833 review
 (directory question), this chat, plus the explicit rules above. Thin on
 word count. Explicit rules win where samples and rules disagree.
 Updates: 2026-08-24 first save; 2026-08-24 typos are mistakes, never copy
-them; 2026-08-24 drop the copied avoid-list (repo-voice owns it)
+them; 2026-08-24 drop the copied avoid-list (repo-voice owns it);
+2026-08-24 scope the override; drop restated typography; restore
+repo-voice provenance

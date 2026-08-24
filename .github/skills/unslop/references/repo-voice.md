@@ -1,10 +1,10 @@
 # Default voice: this repository
 
-Default voice for this repository: skills, ADRs, runbooks, and
-architecture always use this file. Chat, PR prose, issue prose, and
-review comments use [`style-profile.md`](style-profile.md) when it
-exists; otherwise they use this file too. A profile overrides this file
-on conventions for those genres only. It cannot override epistemics.
+Derived from how this repo's durable prose is already written
+(`AGENTS.md`, the epic contract, `docs/agents/workflow.md`), not from a
+guess at Lucio's private register. A personal profile overrides this
+file on conventions for the genres listed below. It cannot override
+epistemics.
 
 ## Typography
 
