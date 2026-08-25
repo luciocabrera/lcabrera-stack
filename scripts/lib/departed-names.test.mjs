@@ -33,7 +33,22 @@ describe('parseRoster', () => {
   it('refuses a blank name, which would match every line', () => {
     expect(() =>
       parseRoster(JSON.stringify({ names: [{ name: '  ' }] })),
-    ).toThrow(/empty name/);
+    ).toThrow(/missing or empty name/);
+  });
+
+  it('refuses a row whose `name` key is missing or misspelled', () => {
+    // The shape `find` could not catch: it maps to `undefined`, which is also
+    // what `find` returns for "nothing matched", so validation passed it and
+    // the run died later on `toLowerCase`.
+    expect(() =>
+      parseRoster(JSON.stringify({ names: [{ note: 'no name' }] })),
+    ).toThrow(/missing or empty name/);
+  });
+
+  it('refuses a name that is not a string', () => {
+    expect(() =>
+      parseRoster(JSON.stringify({ names: [{ name: 123 }] })),
+    ).toThrow(/missing or empty name/);
   });
 });
 

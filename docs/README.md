@@ -38,14 +38,14 @@ Start here when you're not sure where something belongs, or where to look.
 
 ## By document, what it is and its lifetime
 
-| Doc                              | Audience                 | Lifetime             | Canonical for                                                                                                                                                         |
-| -------------------------------- | ------------------------ | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AGENTS.md` (+ `.claude/rules/`) | every agent + human      | durable              | universal standards, the gate, the non-negotiables                                                                                                                    |
-| `COMMANDS.md`                    | every agent + human      | durable              | the command surface (CI-verified — see below)                                                                                                                         |
-| ADRs                             | every agent + human      | durable, append-only | one decision each, with context + consequences                                                                                                                        |
-| `*/ARCHITECTURE.md`              | anyone touching a system | durable              | that system's data flow and constraints — not a leaf component's props ([ADR-088](decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)) |
-| `INVENTORY.md` / `PATTERNS.md`   | anyone building UI       | durable              | reuse catalog / conventions                                                                                                                                           |
-| `docs/agents/research/*.md`      | anyone deciding the same | dated record         | how other projects solved it, at a named commit                                                                                                                       |
+| Doc                              | Audience                 | Lifetime           | Canonical for                                                                                                                                                         |
+| -------------------------------- | ------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md` (+ `.claude/rules/`) | every agent + human      | durable            | universal standards, the gate, the non-negotiables                                                                                                                    |
+| `COMMANDS.md`                    | every agent + human      | durable            | the command surface (CI-verified — see below)                                                                                                                         |
+| ADRs                             | every agent + human      | durable; see below | one decision each, with context + consequences                                                                                                                        |
+| `*/ARCHITECTURE.md`              | anyone touching a system | durable            | that system's data flow and constraints — not a leaf component's props ([ADR-088](decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)) |
+| `INVENTORY.md` / `PATTERNS.md`   | anyone building UI       | durable            | reuse catalog / conventions                                                                                                                                           |
+| `docs/agents/research/*.md`      | anyone deciding the same | dated record       | how other projects solved it, at a named commit                                                                                                                       |
 
 ---
 
@@ -83,6 +83,13 @@ that owns it — that is where ADR-014's Cancel/discard-changes rationale went,
 into `packages/ui`'s Form `ARCHITECTURE.md`. And a decision that reads oddly
 general was often specific once; `vp run adr:list` plus `git log --follow` is
 how to recover what it was about.
+
+**This is not a licence to revise an ADR.** Append-only still governs the part
+that matters: a conclusion is superseded by a _new_ ADR, never edited into a
+different one, and no decision recorded here has been re-argued. What was removed
+is an identity, not a claim — which is why an amended ADR now says its body keeps
+its original reasoning rather than that it is verbatim. If you find yourself
+changing what an ADR decided, you are writing the next ADR.
 
 `vp run departed:verify` keeps this true — the names live in
 [`scripts/departed-names.json`](../scripts/departed-names.json), so a

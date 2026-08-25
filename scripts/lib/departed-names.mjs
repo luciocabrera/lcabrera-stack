@@ -88,12 +88,12 @@ export const parseRoster = (text) => {
       'departed-names.json lists no names — the gate would pass anything.',
     );
   }
-  const blank = names.find(
-    (name) => typeof name !== 'string' || name.trim() === '',
-  );
-  if (blank !== undefined) {
+  // `some`, not `find`: a row missing its `name` key maps to `undefined`, which
+  // `find` also returns for "nothing matched" — so the check would pass exactly
+  // the malformed entry it exists to catch, and die later on `toLowerCase`.
+  if (names.some((name) => typeof name !== 'string' || name.trim() === '')) {
     throw new Error(
-      'departed-names.json has an empty name — it would match every line.',
+      'departed-names.json has a missing or empty name — it would match every line.',
     );
   }
   return {
