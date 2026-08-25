@@ -19,7 +19,7 @@ export const normalizeFlows = (flows, relPath) =>
   (flows ?? [])
     .map((flow) =>
       (flow.locations ?? []).map((location) => ({
-        file: relPath(location.component),
+        file: location.component ? relPath(location.component) : null,
         line: location.textRange?.startLine ?? null,
         message: location.msg ?? null,
       })),
