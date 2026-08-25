@@ -18,8 +18,11 @@ import {
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 const isPublished = (manifestPath) => {
-  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-  return manifest.private !== true;
+  try {
+    return JSON.parse(readFileSync(manifestPath, 'utf8')).private !== true;
+  } catch (error) {
+    throw new Error(`${manifestPath}: ${error.message}`);
+  }
 };
 
 const publishedPackageDirectories = () =>
@@ -34,15 +37,14 @@ const documentsIn = (directory) =>
   }).filter(isCheckedDocument);
 
 const main = () => {
-  const findings = publishedPackageDirectories()
-    .flatMap(documentsIn)
-    .flatMap((path) =>
-      appReferences({
-        exists: (reference) => existsSync(resolve(REPO_ROOT, reference)),
-        path,
-        text: readFileSync(resolve(REPO_ROOT, path), 'utf8'),
-      }),
-    );
+  const directories = publishedPackageDirectories();
+  const findings = directories.flatMap(documentsIn).flatMap((path) =>
+    appReferences({
+      exists: (reference) => existsSync(resolve(REPO_ROOT, reference)),
+      path,
+      text: readFileSync(resolve(REPO_ROOT, path), 'utf8'),
+    }),
+  );
 
   if (findings.length > 0) {
     console.error('Published packages must not reference apps:\n');
@@ -53,8 +55,13 @@ const main = () => {
     return;
   }
   console.log(
-    `Package reference gate passed: ${publishedPackageDirectories().length} published package(s) name no app.`,
+    `Package reference gate passed: ${directories.length} published package(s) name no app.`,
   );
 };
 
-main();
+try {
+  main();
+} catch (error) {
+  console.error(error.message);
+  process.exitCode = 1;
+}
