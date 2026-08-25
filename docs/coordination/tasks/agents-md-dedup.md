@@ -2,7 +2,7 @@
 id: agents-md-dedup
 title: Cut duplicated prose from the always-loaded AGENTS.md
 owner: agent:claude
-status: active
+status: review
 branch: docs/931-agents-md-dedup
 area:
   - AGENTS.md
@@ -10,7 +10,7 @@ area:
 started: 2026-08-25
 updated: 2026-08-25
 plan: (none)
-pr: (none)
+pr: #932
 issue: #931
 ---
 
@@ -20,6 +20,6 @@ Cut duplicated prose from the always-loaded AGENTS.md
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: PR #932 open, quality gate green, waiting on CI and review.
 - Blockers: none
-- Next:
+- Next: address review comments, then merge.
