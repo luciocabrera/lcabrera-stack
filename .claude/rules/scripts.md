@@ -72,6 +72,7 @@ these files lean on the repo-wide passes plus one dedicated gate:
 | **Biome** (root)            | correctness / react-domain, repo-wide                              |
 | **fallow** (`fallow audit`) | per-function complexity, CRAP, dead exports, dupes — new-only gate |
 | **`scripts:verify`**        | per-file size ceiling, repo-wide, baselined                        |
+| **`scripts:exits:verify`**  | `process.exit()` calls, repo-wide, parsed not grepped              |
 
 fallow's `maxUnitSize`/complexity limits apply to root `scripts/` but are
 **relaxed for `.github/skills/**` and `packages/eslint-local-rules/**`** in

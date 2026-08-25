@@ -82,9 +82,9 @@ const scan = () => {
   return JSON.parse(readFileSync(out, 'utf8'));
 };
 
+/** Throws, not exits: callers rely on this not returning (ADR-090). */
 const fail = (message) => {
-  process.stderr.write(`✗ ${message}\n`);
-  process.exit(1);
+  throw new Error(message);
 };
 
 /** One line per finding, in the `file:line rule` shape editors linkify. */
@@ -156,4 +156,9 @@ const main = () => {
   );
 };
 
-main();
+try {
+  main();
+} catch (error) {
+  process.stderr.write(`✗ ${error.message}\n`);
+  process.exitCode = 1;
+}

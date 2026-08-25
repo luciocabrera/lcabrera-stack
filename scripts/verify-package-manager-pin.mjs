@@ -1,13 +1,9 @@
 #!/usr/bin/env node
 /**
- * Guard: a refresh must not leave the `packageManager` pin without its hash.
+ * Gate: a refresh must not leave the `packageManager` pin without its hash.
  *
- * A bare pin still names the right version, so every version-based check reads a
- * clean refresh while the pin has stopped being an integrity check. Nothing else
- * looks at the hash. Why that happens is in scripts/lib/package-manager-pin.mjs.
- *
- * Guards the refresh rather than the repo: that is the only moment the field is
- * written, and a committed pin does not decay on its own.
+ * A bare pin names the right version, so nothing else notices it has stopped
+ * being an integrity check. Background: #927.
  *
  * Usage (from the repo root):
  *   node scripts/verify-package-manager-pin.mjs

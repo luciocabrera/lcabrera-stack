@@ -136,7 +136,13 @@ const runFallowJson = () => {
   );
 
   if (result.status !== 0) {
-    process.exit(result.status ?? 1);
+    // Thrown so main() stops before reading JSON this run never wrote.
+    throw Object.assign(
+      new Error('fallow failed to produce its JSON report.'),
+      {
+        exitStatus: result.status ?? 1,
+      },
+    );
   }
 };
 
@@ -250,4 +256,9 @@ const main = () => {
   console.log(`- Analysis: ${analysisPath}`);
 };
 
-main();
+try {
+  main();
+} catch (error) {
+  console.error(error.message);
+  process.exitCode = error.exitStatus ?? 1;
+}

@@ -157,6 +157,13 @@ jobs:
         # .claude/rules/scripts.md.
         run: vp run scripts:verify
 
+      - name: Tooling scripts do not exit mid-stream
+        id: script_exits_gate
+        # `process.exit()` can drop a buffered stderr write, losing the message
+        # that explains the failure — in CI and under `tee` exactly. See
+        # ADR-090.
+        run: vp run scripts:exits:verify
+
       - name: Shipped seeds name no repository fact
         id: seeds_gate
         # The files packages/devkit ships are meant to land in someone else's

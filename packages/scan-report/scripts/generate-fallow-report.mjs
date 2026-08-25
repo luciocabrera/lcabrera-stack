@@ -136,8 +136,10 @@ const runFallow = (rawArtifactPath) => {
   const failureDetail =
     result.stderr?.trim() || result.error?.message || `exit ${result.status}`;
   if (!context.isTargetMode) {
-    console.error(`fallow failed to run: ${failureDetail}`);
-    process.exit(result.status ?? 1);
+    // Thrown, not returned: the caller reads a missing result as target mode.
+    throw Object.assign(new Error(`fallow failed to run: ${failureDetail}`), {
+      exitStatus: result.status ?? 1,
+    });
   }
   toolFailures.push(`fallow failed to run: ${failureDetail}`);
   return undefined;
@@ -420,4 +422,9 @@ const main = () => {
   });
 };
 
-main();
+try {
+  main();
+} catch (error) {
+  console.error(error.message);
+  process.exitCode = error.exitStatus ?? 1;
+}

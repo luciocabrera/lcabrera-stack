@@ -46,8 +46,11 @@ describe('deps-refresh.sh and the packageManager pin', () => {
     // this array is empty on the success path — so the plain form breaks the
     // normal run, not the failing one. Nothing under scripts/ uses a bash-4-only
     // construct, so the 3.2 floor is deliberate and this must stay guarded.
-    expect(script).toContain('${corepack_failed[@]+"${corepack_failed[@]}"}');
-    expect(script).not.toContain('"${corepack_failed[@]}" ||');
+    // Regex, not a string: a literal `${` trips noTemplateCurlyInString.
+    expect(script).toMatch(
+      /\$\{corepack_failed\[@\]\+"\$\{corepack_failed\[@\]\}"\}/u,
+    );
+    expect(script).not.toMatch(/"\$\{corepack_failed\[@\]\}" \|\|/u);
   });
 
   it('no longer claims taze leaves packageManager alone', () => {
