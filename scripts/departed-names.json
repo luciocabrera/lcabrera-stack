@@ -1,0 +1,32 @@
+{
+  "$comment": "Names of products and workspaces that left this repository. Read by scripts/verify-departed-names.mjs; see COMMANDS.md and docs/README.md. Add a name here the same commit you remove its last mention — the gate is what stops it coming back.",
+  "names": [
+    {
+      "name": "CQMS",
+      "note": "a second product that lived here; extracted in #683"
+    },
+    { "name": "CodePulse", "note": "the same product, after its rename" },
+    { "name": "admin_system", "note": "that product's admin app" },
+    { "name": "apps/admin", "note": "the same app, by its shorter path" },
+    { "name": "api-server", "note": "a demo API workspace; extracted in #686" },
+    { "name": "api-shared", "note": "the API workspaces' shared domain layer" },
+    { "name": "apps/shared", "note": "the same workspace, by path" },
+    { "name": "scan-orchestrator", "note": "that product's job orchestrator" },
+    { "name": "scan-ingestion", "note": "that product's ingestion package" },
+    { "name": "agent-runner", "note": "that product's agent runner package" },
+    {
+      "name": "api-playground",
+      "note": "the repository the API workspaces left for"
+    },
+    { "name": "llm_usage", "note": "that product's reporting schema" },
+    { "name": "v_scanner_llm_cost", "note": "a view in that schema" },
+    { "name": "TECH_SPEC", "note": "that product's technical spec" },
+    { "name": "PRD_V2", "note": "that product's requirements doc" }
+  ],
+  "allow": [
+    {
+      "path": "packages/repo-standards/scripts/adr-registry.test.mjs",
+      "reason": "asserts a departed name is ABSENT from the rendered ADR index — a guard against the name, not a reference to it"
+    }
+  ]
+}

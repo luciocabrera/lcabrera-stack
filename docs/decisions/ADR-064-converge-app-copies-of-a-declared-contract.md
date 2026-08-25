@@ -80,7 +80,7 @@ of this ADR claimed the stronger half for the whole.
 Anchored: each filter variant's cases are keyed by that variant's own operator
 union, so adding an operator to `@lcabrera/server`'s contract — or removing one
 — stops the shared workspace compiling until a case exists for it, and the new case then
-fails both API-server suites until their schemas accept it. An operator cannot go
+fails both API suites until their schemas accept it. An operator cannot go
 unchecked.
 
 Not anchored: the `drafting` group. "A value the mappers drop" spans an absent
