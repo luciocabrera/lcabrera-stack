@@ -134,7 +134,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run ready`               | `check:safe` + `build:all` — the full "is it shippable" check                                     |
 | `vp run check:safe`          | typegen → `vp check` → typecheck → eslint → biome → tests                                         |
 | `vp run check:push`          | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed` |
-| `vp run typecheck:all`       | real tsc in all 13 workspaces, dependency order                                                   |
+| `vp run typecheck:all`       | real tsc in all 12 workspaces, dependency order                                                   |
 | `vp run typecheck:changed`   | real tsc for the changed workspaces + dependents only — see below                                 |
 | `vp run typegen:all`         | route types for both React Router apps                                                            |
 | `vp run lint:all`            | Oxlint + eslint + Biome **with autofix**, every workspace                                         |
@@ -181,7 +181,7 @@ Tests job (and its coverage report) scope to the diff on pull requests; pushes t
 `main` still run the full `test:ci`.
 
 `typecheck:changed` applies the same change-based selection to the Quality Gate's
-slowest per-workspace step — real `tsc` across all 13 workspaces. It runs
+slowest per-workspace step — real `tsc` across all 12 workspaces. It runs
 `typecheck` only for the changed workspaces plus their dependents (a type error a
 diff introduces surfaces where the type is used, which the dependents walk covers),
 falling back to the full run on the same shared/root triggers and on pushes to
@@ -281,14 +281,15 @@ workspace. Scope any of these with `-w`, e.g. `-w 'apps/react-router'`. Full
 policy — entry rules, the CRAP/coverage trap, output conventions — is in
 [AGENTS.md → Fallow Static Analysis](AGENTS.md#fallow-static-analysis-run-from-repo-root).
 
-| Command                        | Does                                       |
-| ------------------------------ | ------------------------------------------ |
-| `vp run fallow:full`           | full scan                                  |
-| `vp run fallow:dead-code`      | dead code only                             |
-| `vp run fallow:health`         | complexity / health                        |
-| `vp run fallow:dupes`          | duplication                                |
-| `vp run fallow:audit`          | PR-style gate (`--base main`)              |
-| `vp run fallow:refresh-report` | regenerate the complexity threshold report |
+| Command                        | Does                                                                   |
+| ------------------------------ | ---------------------------------------------------------------------- |
+| `vp run fallow:full`           | full scan                                                              |
+| `vp run fallow:dead-code`      | dead code only                                                         |
+| `vp run fallow:health`         | complexity / health                                                    |
+| `vp run fallow:dupes`          | duplication                                                            |
+| `vp run fallow:audit`          | PR-style gate (`--base main`)                                          |
+| `vp run fallow:refresh-report` | regenerate the complexity threshold report                             |
+| `vp run fallow:report`         | full scan + `fallow.raw.json` in a timestamped run dir; echoes the dir |
 
 Always feed the audit real coverage:
 `vp run fallow:audit --base main --coverage reports/fallow/coverage/coverage-final.json`
@@ -712,7 +713,7 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 
 ## 5. Per-workspace tasks
 
-**Every one of the 13 workspaces** defines these seven:
+**Every one of the 12 workspaces** defines these seven:
 
 `format` · `format:check` · `lint` · `lint:check` · `lint:eslint` ·
 `lint:eslint:check` · `typecheck`
@@ -729,7 +730,6 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | `packages/ts-configs`         | `@repo/ts-configs`         | `generate`                                                                                                             |
 | `packages/tsconfig`           | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                               |
 | `packages/eslint-local-rules` | `@lcabrera/eslint-plugin`  | —                                                                                                                      |
-| `packages/scan-report`        | `@repo/scan-report`        | `test`, `test:coverage`                                                                                                |
 | `packages/devkit`             | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                |
 | `packages/repo-standards`     | `@lcabrera/repo-standards` | `test`, `test:coverage`                                                                                                |
 | `packages/utils`              | `@lcabrera/utils`          | —                                                                                                                      |

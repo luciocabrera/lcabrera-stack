@@ -137,7 +137,8 @@ describe('analyseClosure', () => {
         path: 'skills/epic/SKILL.md',
       },
       {
-        content: "import { scan } from '@repo/scan-report/deterministic-scan';",
+        content:
+          "import { scan } from '@repo/example-scan/deterministic-scan';",
         path: 'skills/epic/scripts/run.mjs',
       },
     ];
@@ -200,17 +201,17 @@ describe('classifyPathToken', () => {
   });
 
   test('falls back to the repository root, which is where prose usually means', () => {
-    const exists = (path) => path === 'packages/scan-report/SCHEMA_V1.md';
+    const exists = (path) => path === 'packages/example-scan/SCHEMA_V1.md';
     expect(
       classifyPathToken({
         exists,
         fromDirectory,
         rootDirectory,
-        token: 'packages/scan-report/SCHEMA_V1.md',
+        token: 'packages/example-scan/SCHEMA_V1.md',
       }),
     ).toEqual({
       kind: 'escape',
-      resolved: 'packages/scan-report/SCHEMA_V1.md',
+      resolved: 'packages/example-scan/SCHEMA_V1.md',
     });
   });
 
@@ -303,12 +304,12 @@ describe('analyseClosure path tokens', () => {
   test('a backticked path outside the directory is an escape', () => {
     const files = [
       {
-        content: 'Follow `packages/scan-report/SCHEMA_V1.md` exactly.',
+        content: 'Follow `packages/example-scan/SCHEMA_V1.md` exactly.',
         path: 'skills/epic/SKILL.md',
       },
     ];
     const { escapes } = analyseClosure({
-      exists: (path) => path === 'packages/scan-report/SCHEMA_V1.md',
+      exists: (path) => path === 'packages/example-scan/SCHEMA_V1.md',
       files,
       rootDirectory,
     });
@@ -317,8 +318,8 @@ describe('analyseClosure path tokens', () => {
         file: 'skills/epic/SKILL.md',
         kind: 'link',
         line: 1,
-        reference: 'packages/scan-report/SCHEMA_V1.md',
-        resolved: 'packages/scan-report/SCHEMA_V1.md',
+        reference: 'packages/example-scan/SCHEMA_V1.md',
+        resolved: 'packages/example-scan/SCHEMA_V1.md',
       },
     ]);
   });
@@ -327,26 +328,26 @@ describe('analyseClosure path tokens', () => {
     const files = [
       {
         content:
-          '```bash\nnode packages/scan-report/scripts/ingest-report.mjs\n```',
+          '```bash\nnode packages/example-scan/scripts/ingest-report.mjs\n```',
         path: 'skills/epic/SKILL.md',
       },
     ];
     const { escapes } = analyseClosure({
       allowedCommands: ['node'],
       exists: (path) =>
-        path === 'packages/scan-report/scripts/ingest-report.mjs',
+        path === 'packages/example-scan/scripts/ingest-report.mjs',
       files,
       rootDirectory,
     });
     expect(escapes.map((finding) => finding.resolved)).toEqual([
-      'packages/scan-report/scripts/ingest-report.mjs',
+      'packages/example-scan/scripts/ingest-report.mjs',
     ]);
   });
 
   test('without an existence check no prose token is analysed', () => {
     const files = [
       {
-        content: 'Follow `packages/scan-report/SCHEMA_V1.md` exactly.',
+        content: 'Follow `packages/example-scan/SCHEMA_V1.md` exactly.',
         path: 'skills/epic/SKILL.md',
       },
     ];

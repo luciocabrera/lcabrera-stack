@@ -65,7 +65,6 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // The scan runners' own pure halves — host-root derivation and ingestion
   // configuration. The runners themselves shell out to lint tools and are
   // exercised by running them, not by a unit suite.
-  { dir: 'packages/scan-report', name: '@repo/scan-report', run: true },
   // Reference extraction, path classification and the manifest state machine
   // are pure; the filesystem is reached only by the thin command shells around
   // them, so the suite runs without one.
@@ -101,7 +100,6 @@ export const COVERAGE_MERGE_WORKSPACES = [
   { dir: 'packages/repo-standards', name: '@lcabrera/repo-standards' },
   { dir: 'packages/eslint-local-rules', name: '@lcabrera/eslint-plugin' },
   { dir: 'packages/node-runtime', name: '@lcabrera/node' },
-  { dir: 'packages/scan-report', name: '@repo/scan-report' },
   { dir: 'packages/server', name: '@lcabrera/server' },
   { dir: 'packages/tsconfig', name: '@lcabrera/tsconfig' },
   { dir: 'packages/ui', name: '@lcabrera/ui' },

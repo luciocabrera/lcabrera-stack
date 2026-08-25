@@ -2,7 +2,7 @@ name: Validate Skills
 
 on:
   # No `paths:` filter. The script-path check reaches files this workflow does
-  # not own (e.g. `packages/scan-report/scripts/run-fallow.sh`). Filtering on
+  # not own (e.g. a runner in another workspace). Filtering on
   # the referencing skill/agent would miss a move or deletion of the target —
   # the direction the fallow-scan stale path actually ran.
   pull_request:

@@ -2,7 +2,7 @@
  * The skill-contract checks used by `scripts/validate-skills.cjs`.
  *
  * Why: a directory under `.github/skills/` with no SKILL.md used to be skipped
- * with no error (app-graph), and a SKILL.md or `.claude/agents/*.md` could name
+ * with no error, and a SKILL.md or `.claude/agents/*.md` could name
  * a script that was not there (the stale fallow-scan runner) and still pass.
  * This module is the pure half — classify, parse, collect errors. The CLI
  * prints them and sets the exit code.

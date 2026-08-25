@@ -69,12 +69,11 @@ parameterisation, not this table's job — the table says which rows will need o
 | `typescript-api-engineering`  | **parameterise**  | **soft**   | Already split into a generic half and a project half — the shape everything else is being moved toward. The generic half ships; the project half stays.                                                                                   |
 | `lint-toolchain`              | **repo-specific** | —          | It documents _this_ repository's analyser topology: which of four engines owns which rule, the suppressions register, the Sonar wiring. Useful to read, false everywhere else.                                                            |
 | `releasing`                   | **repo-specific** | —          | The Changesets flow, the publish gates and the label taxonomy of the `@lcabrera/*` packages specifically.                                                                                                                                 |
-| `linter-checker`              | **blocked**       | —          | Prose around scanners in an unpublished package.                                                                                                                                                                                          |
-| `fallow-code-checker`         | **blocked**       | —          | Same, plus coverage-merge scripts from the repository root.                                                                                                                                                                               |
-| `code-smell-checker`          | **blocked**       | —          | Same runtime; its report contract lives in the unpublished package.                                                                                                                                                                       |
-| `code-smell-zen`              | **blocked**       | —          | Same runtime.                                                                                                                                                                                                                             |
+| `linter-checker`              | **blocked**       | —          | Runs `vp run lint:report`, a root repository script.                                                                                                                                                                                      |
+| `fallow-code-checker`         | **blocked**       | —          | Runs `vp run fallow:report` and reads the root `.fallowrc.json`; also coverage-merge from the repository root.                                                                                                                            |
+| `code-smell-checker`          | **blocked**       | —          | Same root tasks. Its report contract ships beside it in `code-smell-shared/`.                                                                                                                                                             |
+| `code-smell-zen`              | **blocked**       | —          | Same root tasks.                                                                                                                                                                                                                          |
 | `code-smell-shared`           | **blocked**       | —          | The shared half of the two `code-smell` skills; it ships if and when they do.                                                                                                                                                             |
-| `app-graph`                   | **blocked**       | —          | Not prose at all — a report generator importing the unpublished package and `ts-morph`.                                                                                                                                                   |
 
 Reading the **hard** rows: `epic` names the consumer's root agent document
 through config, so without it an orchestrator is told to read a file nobody
@@ -84,11 +83,14 @@ nothing. `health-swarm`'s scouts write to report locations that come from config
 unset, a scout produces its findings nowhere. Every **soft** row loses
 specificity and keeps every instruction followable.
 
-The blocked group is one decision, not six: it is the scanner runtime, kept
-private in ADR-081 because publishing it would be justified by these skills
-alone and no second repository has asked for them. When one does, that request
-decides whether the scanners publish under their own name or fold into the gate
-runtime package, and this whole group moves with it.
+The blocked group is one decision, not one per row: each skill's first
+instruction runs a task defined in this repository's root manifest, which a
+consumer installing the skill would not have. ADR-081 blocked them on the
+scanner runtime being private; [ADR-091](../../docs/decisions/ADR-091-retire-the-scan-report-pipeline.md)
+retired that runtime and moved the report contract in beside the skills, so what
+remains is the root tasks. Publishing them means giving those tasks a home a
+consumer can install — the same question ADR-081 deferred, asked of a smaller
+surface.
 
 ## Path rules
 

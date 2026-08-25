@@ -48,18 +48,18 @@ describe('validateSkills — missing SKILL.md', () => {
   it('fails a scripts-only folder that is not on the support allowlist', () => {
     const repoRoot = makeRepo({
       '.github/skills/demo/SKILL.md': SKILL,
-      '.github/skills/app-graph/scripts/generate.mjs': 'export {}\n',
+      '.github/skills/scripts-only/scripts/generate.mjs': 'export {}\n',
     });
 
     const result = validateSkills({ repoRoot });
 
-    expect(result.errors.some((error) => error.includes('app-graph'))).toBe(
+    expect(result.errors.some((error) => error.includes('scripts-only'))).toBe(
       true,
     );
     expect(
       result.errors.some((error) => error.includes('Missing SKILL.md')),
     ).toBe(true);
-    expect(result.skippedDirectories).not.toContain('app-graph');
+    expect(result.skippedDirectories).not.toContain('scripts-only');
   });
 
   it('skips an explicit support directory without SKILL.md', () => {

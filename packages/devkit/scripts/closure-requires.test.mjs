@@ -74,7 +74,8 @@ describe('analyseClosure and declared config requirements', () => {
         path: 'skills/epic/SKILL.md',
       },
       {
-        content: "import { scan } from '@repo/scan-report/deterministic-scan';",
+        content:
+          "import { scan } from '@repo/example-scan/deterministic-scan';",
         path: 'skills/epic/scripts/run.mjs',
       },
     ];
