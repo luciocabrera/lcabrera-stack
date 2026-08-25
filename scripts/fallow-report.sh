@@ -29,9 +29,9 @@ fi
 mkdir -p "$OUTPUT_DIR"
 if [[ -n "$WORKSPACE" ]]; then
   vp run fallow:full -w "$WORKSPACE"
-  npx fallow -w "$WORKSPACE" --format json --output-file "$OUTPUT_DIR/fallow.raw.json" --quiet
+  vp run fallow:full -w "$WORKSPACE" --format json --output-file "$OUTPUT_DIR/fallow.raw.json" --quiet
 else
   vp run fallow:full
-  npx fallow --format json --output-file "$OUTPUT_DIR/fallow.raw.json" --quiet
+  vp run fallow:full --format json --output-file "$OUTPUT_DIR/fallow.raw.json" --quiet
 fi
 echo "Run directory: $OUTPUT_DIR/"

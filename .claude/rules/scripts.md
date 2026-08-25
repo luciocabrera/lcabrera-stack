@@ -74,7 +74,7 @@ these files lean on the repo-wide passes plus one dedicated gate:
 | **`scripts:exits:verify`**  | `process.exit()` calls, repo-wide, parsed not grepped              |
 
 fallow's `maxUnitSize`/complexity limits apply to root `scripts/` but are
-**relaxed for `.github/skills/**` and `packages/eslint-local-rules/**`** in
+**relaxed for `packages/eslint-local-rules/**`** in
 `.fallowrc.json` (deliberately — procedural CLI/AST-walker code). The size gate
 has no such carve-out: it covers every `.mjs`/`.cjs`, skills included.
 
