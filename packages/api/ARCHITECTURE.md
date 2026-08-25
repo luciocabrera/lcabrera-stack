@@ -97,15 +97,8 @@ From `@lcabrera/ui`:
 - `src/hooks/useTableRoutePage.hook.ts` and
   `src/components/TableRouteView/TableRouteView.types.ts` — `PaginatedQuery`
 
-From `apps/react-router`:
-
-- `src/services/carSales.api.ts`, `src/services/wideAlltypes150.api.ts` —
-  `createPaginatedFetcher` + `getApiBaseUrl`
-- `src/routes/enterprise-orders/fetchOrdersPage.service.ts` —
-  `createPaginatedFetcher` (same-origin, no base URL)
-- `src/routes/api/filter-options/filter-options.loader.ts`
-
-**No in-repo consumer resolves this package under NodeNext.** Every one above is
-a bundler-mode consumer, so nothing here would catch a regression in NodeNext
-resolution — which is the mode the explicit `.ts` extensions exist for. Treat
-that rule as load-bearing even though no local test fails when it breaks.
+**Nothing resolves this package under NodeNext where it can be checked.** Every
+consumer visible to this package's own tooling is a bundler-mode one, so no
+local failure catches a regression in NodeNext resolution — which is the mode
+the explicit `.ts` extensions exist for. Treat that rule as load-bearing even
+though nothing here fails when it breaks.
