@@ -2,7 +2,7 @@
 id: repo-docs-departed-residue
 title: chore(repo): clear the residue the departed exercises left in live docs
 owner: agent:claude
-status: active
+status: review
 branch: chore/937-repo-docs-departed-residue
 area:
   - docs/coordination/PLAN_TRIAGE.md
@@ -25,7 +25,7 @@ area:
 started: 2026-08-25
 updated: 2026-08-25
 plan: (none)
-pr: (none)
+pr: #938
 issue: #937
 ---
 
@@ -35,6 +35,6 @@ chore(repo): clear the residue the departed exercises left in live docs
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented, full `check:safe` green, PR #938 ready for review
 - Blockers: none
-- Next:
+- Next: address review, then merge
