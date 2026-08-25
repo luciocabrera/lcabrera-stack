@@ -52,7 +52,7 @@ Use a hybrid boundary model:
 
 See decision record:
 [`apps/react-router/docs/decisions/ADR-007-barrel-export-boundaries.md`](./decisions/ADR-007-barrel-export-boundaries.md)
-— ADR numbers 001–012 exist in both homes, so this one is cited by path.
+— cited by path because two ADR homes exist, not because this number is in both.
 
 ```typescript
 // src/components/Button/index.ts (public boundary)

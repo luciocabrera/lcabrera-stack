@@ -486,8 +486,8 @@ the decision that architecture files describe systems, not folders, is
   ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)). The
   homes are [`docs/decisions/`](docs/decisions/) (repo, packages, toolchain)
   and [`apps/react-router/docs/decisions/`](apps/react-router/docs/decisions/)
-  (showcase app). Numbers 001–012 in the app home collide with the repo home —
-  cite those by path.
+  (showcase app). Numbers 001–005 and 008 exist in both homes — cite those by
+  path. `GRANDFATHERED_DUPLICATES` in `adr-registry.mjs` is the authority.
 
 Do **not** create an `ARCHITECTURE.md` because the directory is new. Create one
 only for a system: multiple files, non-local data flow, constraints the code

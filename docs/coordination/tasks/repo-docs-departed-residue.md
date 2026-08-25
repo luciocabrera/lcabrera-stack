@@ -22,6 +22,7 @@ area:
   - packages/ui/src/components/Table/contexts/TableConfig/ARCHITECTURE.md
   - apps/react-router/README.md
   - apps/react-router/docs/coding-guidelines.md
+  - apps/react-router/docs/data-sources.md
   - AGENTS.md
 started: 2026-08-25
 updated: 2026-08-25
