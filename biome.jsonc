@@ -212,7 +212,6 @@
         "packages/eslint-local-rules/**",
         "packages/node-runtime/**",
         "packages/repo-standards/**",
-        "packages/scan-report/**",
         "packages/server/**",
         "packages/ts-configs/**",
         "packages/tsconfig/**",
