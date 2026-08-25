@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  departedPathReferences,
   departedReferences,
   formatFinding,
   isCheckedFile,
+  formatPathFinding,
   parseRoster,
   regularFiles,
   staleAllowances,
@@ -223,5 +225,49 @@ describe('staleAllowances', () => {
 
     expect(stale).toHaveLength(1);
     expect(stale[0]).toMatch(/did not read it/);
+  });
+});
+
+describe('departedPathReferences', () => {
+  const { allow, names } = parseRoster(
+    roster(allowOf('a/legacy.md', ['apps/legacy'])),
+  );
+  const find = (paths) =>
+    departedPathReferences({ allow, names, paths }).filter(
+      ({ isAllowed }) => !isAllowed,
+    );
+
+  it('catches a path that names a departed thing, whatever the contents say', () => {
+    expect(find(['apps/legacy/src/x.ts'])).toEqual([
+      { isAllowed: false, name: 'apps/legacy', path: 'apps/legacy/src/x.ts' },
+    ]);
+  });
+
+  it('matches case-insensitively', () => {
+    expect(find(['docs/Oldprod-notes.md'])).toHaveLength(1);
+  });
+
+  it('leaves a path naming nothing departed alone', () => {
+    expect(find(['packages/ui/src/Table/Table.component.tsx'])).toEqual([]);
+  });
+
+  it('honours an allowance for that exact path', () => {
+    expect(find(['a/legacy.md'])).toEqual([]);
+  });
+
+  it('reports every departed name a single path carries', () => {
+    expect(find(['apps/legacy/Oldprod.md'])).toHaveLength(2);
+  });
+});
+
+describe('formatPathFinding', () => {
+  it('says the PATH is the reference, so a reader does not grep the contents', () => {
+    const message = formatPathFinding({
+      name: 'Oldprod',
+      path: 'a/Oldprod.md',
+    });
+
+    expect(message).toContain('a/Oldprod.md');
+    expect(message).toContain('PATH');
   });
 });

@@ -154,6 +154,21 @@ export const departedReferences = ({ allow, names, path, text }) => {
 };
 
 /**
+ * A path can name a departed thing while its contents never spell it —
+ * a directory named for one is a reference in `git ls-files` output alone.
+ * Scanned separately from content so the report can say which one it is, and so
+ * a path match still counts toward keeping an allowance alive.
+ */
+export const departedPathReferences = ({ allow, names, paths }) =>
+  paths.flatMap((path) => {
+    const allowedNames = allow.get(path) ?? new Set();
+    const haystack = path.toLowerCase();
+    return names
+      .filter((name) => haystack.includes(name.toLowerCase()))
+      .map((name) => ({ isAllowed: allowedNames.has(name), name, path }));
+  });
+
+/**
  * Allowances that no longer excuse anything — the gate's own dead code.
  *
  * `walked` is every path the scan read; `seen` is every `path\0name` it matched.
@@ -175,6 +190,10 @@ export const staleAllowances = ({ allow, seen, walked }) =>
           `${path} — allowed to name \`${name}\`, which it no longer does. Remove it.`,
       );
   });
+
+export const formatPathFinding = ({ name, path }) =>
+  `${path} — its PATH names \`${name}\`, which left this repository. Rename the ` +
+  `file or directory; its contents alone are not the whole reference.`;
 
 export const formatFinding = ({ line, name, path }) =>
   `${path}:${line} — names \`${name}\`, which left this repository. Describe ` +

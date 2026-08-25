@@ -13,8 +13,10 @@ import { fileURLToPath } from 'node:url';
 import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 
 import {
+  departedPathReferences,
   departedReferences,
   formatFinding,
+  formatPathFinding,
   isCheckedFile,
   parseRoster,
   regularFiles,
@@ -68,6 +70,7 @@ const main = () => {
   const all = files.flatMap((path) =>
     departedReferences({ allow, names, path, text: readText(path) }),
   );
+  const pathHits = departedPathReferences({ allow, names, paths: files });
 
   // Both sections print before exiting: a stale allowance and a reintroduced
   // name are independent, and correcting a stale allowance can only ever add
@@ -75,10 +78,13 @@ const main = () => {
   // the second (.claude/rules/scripts.md — list every discrepancy).
   const stale = staleAllowances({
     allow,
-    seen: new Set(all.map(({ name, path }) => `${path}\0${name}`)),
+    seen: new Set(
+      [...all, ...pathHits].map(({ name, path }) => `${path}\0${name}`),
+    ),
     walked: new Set(files),
   });
   const findings = all.filter(({ isAllowed }) => !isAllowed);
+  const pathFindings = pathHits.filter(({ isAllowed }) => !isAllowed);
 
   if (stale.length > 0) {
     console.error(
@@ -86,6 +92,14 @@ const main = () => {
     );
     for (const message of stale) {
       console.error(`  - ${message}`);
+    }
+    console.error('');
+  }
+
+  if (pathFindings.length > 0) {
+    console.error('These PATHS name something that left this repository:\n');
+    for (const finding of pathFindings) {
+      console.error(`  - ${formatPathFinding(finding)}`);
     }
     console.error('');
   }
@@ -101,7 +115,7 @@ const main = () => {
     );
   }
 
-  if (stale.length > 0 || findings.length > 0) {
+  if (stale.length > 0 || findings.length > 0 || pathFindings.length > 0) {
     process.exitCode = 1;
     return;
   }
@@ -109,7 +123,7 @@ const main = () => {
   const allowed = all.length - findings.length;
   console.log(
     `Departed-name gate passed: ${files.length} tracked file(s) name none of ` +
-      `the ${names.length} departed thing(s)` +
+      `the ${names.length} departed thing(s), in their paths or their contents` +
       (allowed > 0 ? `, beyond ${allowed} allowed mention(s).` : '.'),
   );
 };
