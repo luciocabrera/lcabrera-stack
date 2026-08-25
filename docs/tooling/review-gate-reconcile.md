@@ -349,14 +349,17 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    is what you need. This step stays the right one for the two contexts that are
    advisory, and for reading what the sweep thinks.
 
-   **On a pull request that edits a gate, this step recomputes nothing.** It
-   prints three `Withheld` lines instead, because the self-edit rule above is in
-   the sweep and applies to every invocation of it — including this one, run
-   locally from the pull request's own branch, where the reasoning behind the
-   rule does not hold. There is no override. That is worth knowing precisely
-   because a #866-class stuck status is _by definition_ on a gate-editing pull
-   request, so the ladder's first rung is the one it cannot use: go to step 2 and
-   pick a per-gate dispatch.
+   **It withholds for whichever gates the pull request's own code is in.** The
+   self-edit rule above lives in the sweep, so it applies to every invocation —
+   including this one, run locally from the pull request's branch, where the
+   reasoning behind it does not hold. There is no override.
+
+   It stays **per gate**, as above: editing one gate's own module withholds that
+   gate and recomputes the others, while editing something all three closures
+   share withholds all three. So this rung is still worth running — it corrects
+   whatever it did not withhold. But a #866-class stuck status is by definition
+   on a gate-editing pull request, so the context you need is likely a withheld
+   one; step 2's per-gate dispatch is what gets it.
 
 2. **Dispatch the gate from Actions**, which needs no checkout — pick
    **Copilot Review Gate**, **Agent Review Gate** or **Review Gate Reconcile**,
@@ -389,9 +392,9 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    and the sweep is default-branch by design, which is the whole of what #868 and
    #884 are about.
 
-   **So on a gate-editing pull request, pick one of the two per-gate dispatches.**
-   They invoke their gate script directly, which is why they are unaffected;
-   _Review Gate Reconcile_ goes through the sweep and withholds, exactly as step 1
+   **So for a withheld gate, pick one of the two per-gate dispatches.** They
+   invoke their gate script directly, which is why they are unaffected; _Review
+   Gate Reconcile_ goes through the sweep and withholds the same gates step 1
    does. It reports that it withheld rather than going quietly green.
 
    `-R` is what makes "needs no checkout" true. `gh` infers the repository from a
