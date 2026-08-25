@@ -120,7 +120,7 @@ import { createPaginatedFetcher } from '@lcabrera/api/http/create-paginated-fetc
 
 export const fetchOrdersPage = createPaginatedFetcher<OrdersResponse>({
   isValid: isOrdersResponse, // required — an unvalidated page is a cast
-  path: '/car-sales/paginated',
+  path: '/orders/paginated',
   resolveBaseUrl: getApiBaseUrl, // omit for a same-origin resource route
 });
 

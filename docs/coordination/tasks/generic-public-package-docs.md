@@ -2,7 +2,7 @@
 id: generic-public-package-docs
 title: docs(packages): make the public package docs generic and self-contained
 owner: agent:claude
-status: active
+status: review
 branch: docs/939-generic-public-package-docs
 area:
   - packages/api/ARCHITECTURE.md
@@ -14,7 +14,7 @@ area:
 started: 2026-08-25
 updated: 2026-08-25
 plan: (none)
-pr: (none)
+pr: #940
 issue: #939
 ---
 
@@ -24,6 +24,6 @@ docs(packages): make the public package docs generic and self-contained
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented, full `check:safe` green, PR #940 ready for review
 - Blockers: none
-- Next:
+- Next: address review, then merge

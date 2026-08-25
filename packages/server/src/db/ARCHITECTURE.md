@@ -143,7 +143,6 @@ same reason — the one place in this folder where the seam is not optional.
 `selectRows<TRow>` does not validate the row against the view — pg cannot.
 Two consequences worth remembering:
 
-- `numeric` columns arrive as **strings**. Type them `string` and coerce at
-  the caller (see `scan-ingestion`'s `selectLlmCostRows.util.ts`, which does it
-  once for all three `llm_usage` cost readers).
+- `numeric` columns arrive as **strings**. Type them `string` and coerce once at
+  the caller, rather than in each reader that touches the column.
 - A `TRow` that disagrees with the view fails at runtime, not compile time.
