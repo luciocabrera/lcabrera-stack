@@ -281,15 +281,15 @@ workspace. Scope any of these with `-w`, e.g. `-w 'apps/react-router'`. Full
 policy — entry rules, the CRAP/coverage trap, output conventions — is in
 [AGENTS.md → Fallow Static Analysis](AGENTS.md#fallow-static-analysis-run-from-repo-root).
 
-| Command                        | Does                                                   |
-| ------------------------------ | ------------------------------------------------------ |
-| `vp run fallow:full`           | full scan                                              |
-| `vp run fallow:dead-code`      | dead code only                                         |
-| `vp run fallow:health`         | complexity / health                                    |
-| `vp run fallow:dupes`          | duplication                                            |
-| `vp run fallow:audit`          | PR-style gate (`--base main`)                          |
-| `vp run fallow:refresh-report` | regenerate the complexity threshold report             |
-| `vp run fallow:report`         | full scan + `fallow.raw.json` in a timestamped run dir |
+| Command                        | Does                                                                   |
+| ------------------------------ | ---------------------------------------------------------------------- |
+| `vp run fallow:full`           | full scan                                                              |
+| `vp run fallow:dead-code`      | dead code only                                                         |
+| `vp run fallow:health`         | complexity / health                                                    |
+| `vp run fallow:dupes`          | duplication                                                            |
+| `vp run fallow:audit`          | PR-style gate (`--base main`)                                          |
+| `vp run fallow:refresh-report` | regenerate the complexity threshold report                             |
+| `vp run fallow:report`         | full scan + `fallow.raw.json` in a timestamped run dir; echoes the dir |
 
 Always feed the audit real coverage:
 `vp run fallow:audit --base main --coverage reports/fallow/coverage/coverage-final.json`

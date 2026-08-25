@@ -76,6 +76,15 @@ its whole life where it did run, is not a feature being withdrawn.
 - **The scan skills stop emitting a machine-readable `report.json` from a
   runner.** `linter-checker` now points at the canonical `reports/` tree, which
   is what every other consumer of lint output in this repository already reads.
+- **[ADR-081](./ADR-081-ship-the-repo-setup-as-two-packages.md)'s blocker for the
+  scan skills is invalidated, not the classification.** ADR-081 held them
+  **blocked** because their first instruction ran a scanner from a package that
+  stays private. That package is gone and the report contract now ships inside
+  `.github/skills/code-smell-shared/`, so `packages/devkit/CLASSIFICATION.md` is
+  re-derived here: each row is blocked on a **root repository task**
+  (`lint:report`, `fallow:report`, `coverage:merge`) rather than on an
+  unpublished package. The verdict is unchanged; the reason is smaller, and the
+  question ADR-081 deferred is now asked of a smaller surface.
 - **A report can no longer be forwarded anywhere.** If a future consumer wants
   ingestion, it arrives with that consumer and is designed for it, rather than
   being carried indefinitely against the possibility.

@@ -3,7 +3,7 @@
 # the fallow-code-checker skill and the fallow-scan agent. Both need the same
 # invocation, which is why it is a script and not a line in each of them.
 #
-# Usage: vp run fallow:report [<workspace-glob>]
+# Usage: vp run fallow:report [-w <workspace-glob>]
 #
 # Writes reports/fallow/runs/<timestamp>/fallow.raw.json and echoes the
 # directory. Set OUTPUT_DIR to run into a directory you already own.
@@ -14,7 +14,13 @@ set -euo pipefail
 # reported findings only; the full dependency graph is analyzed either way.
 cd "$(git rev-parse --show-toplevel)"
 
-WORKSPACE="${1:-${FALLOW_WORKSPACE:-}}"
+# `-w <glob>` to match every other fallow task; a bare glob is also accepted.
+WORKSPACE="${FALLOW_WORKSPACE:-}"
+if [[ "${1:-}" == "-w" ]]; then
+  WORKSPACE="${2:?-w needs a workspace glob}"
+elif [[ -n "${1:-}" ]]; then
+  WORKSPACE="$1"
+fi
 
 if [[ -z "${OUTPUT_DIR:-}" ]]; then
   OUTPUT_DIR="reports/fallow/runs/$(date +%Y-%m-%d--%H-%M-%S)"

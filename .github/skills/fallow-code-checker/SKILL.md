@@ -64,7 +64,7 @@ If inputs are missing, default to:
 
 It creates a timestamped `reports/fallow/runs/<ts>/`, writes `fallow.raw.json` into it, and echoes the directory as its last line. Note that path — it is used for all subsequent saves.
 
-To scope the report to specific workspaces, pass a fallow `-w` glob, e.g. `vp run fallow:report 'apps/react-router'`. The full dependency graph is analyzed either way; the glob only filters reported findings.
+To scope the report to specific workspaces, pass a fallow `-w` glob, e.g. `vp run fallow:report -w 'apps/react-router'`. The full dependency graph is analyzed either way; the glob only filters reported findings.
 
 Use the JSON file as the source of truth for findings. Human output from the same run is for context only.
 
