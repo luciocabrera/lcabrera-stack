@@ -41,6 +41,15 @@ describe('deps-refresh.sh and the packageManager pin', () => {
     expect(script).not.toContain('continuing with the current pnpm');
   });
 
+  it('expands the corepack flag array in the bash-3.2-safe form', () => {
+    // `"${a[@]}"` on an EMPTY array aborts under `set -u` before bash 4.4, and
+    // this array is empty on the success path — so the plain form breaks the
+    // normal run, not the failing one. Nothing under scripts/ uses a bash-4-only
+    // construct, so the 3.2 floor is deliberate and this must stay guarded.
+    expect(script).toContain('${corepack_failed[@]+"${corepack_failed[@]}"}');
+    expect(script).not.toContain('"${corepack_failed[@]}" ||');
+  });
+
   it('no longer claims taze leaves packageManager alone', () => {
     // This sentence is what put the capture in the wrong place. If it comes
     // back, the reasoning that produced the bug has come back with it.

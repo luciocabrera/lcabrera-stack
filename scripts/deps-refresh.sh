@@ -295,7 +295,12 @@ corepack_failed=()
 "$corepack_global" use pnpm@latest || corepack_failed=(--corepack-failed)
 # No `pnpm_after` here on purpose: the guard reads the manifest itself, so there
 # is one reader of the field rather than two that can disagree.
-node scripts/verify-package-manager-pin.mjs --before "$pnpm_before" "${corepack_failed[@]}" ||
+# `${a[@]+"${a[@]}"}` rather than `"${a[@]}"`: expanding an empty array under
+# `set -u` aborts on bash before 4.4, and this array is empty on the SUCCESS
+# path, so the plain form fails the normal run. Same guard, same reason, as
+# scripts/publish-bootstrap.sh. `|| die` cannot catch it — a `set -u` expansion
+# error exits before the command runs.
+node scripts/verify-package-manager-pin.mjs --before "$pnpm_before" ${corepack_failed[@]+"${corepack_failed[@]}"} ||
   die "the packageManager pin lost its integrity hash — see above. The working tree holds the half-finished refresh; no issue, branch or commit was made."
 
 log "Reinstalling with the refreshed versions (vp install)"

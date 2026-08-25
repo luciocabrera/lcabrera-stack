@@ -29,15 +29,22 @@
  *
  * Governed by .claude/rules/scripts.md.
  */
-import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 import { flagValue } from '../packages/repo-standards/scripts/cli-input.mjs';
+import { readTextWithin } from '../packages/repo-standards/scripts/safe-read.mjs';
 import {
   describePinOutcome,
   parsePackageManagerPin,
 } from './lib/package-manager-pin.mjs';
 
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+
+// `--manifest` reaches the filesystem, so it is containment-checked rather than
+// passed straight to readFileSync. The refresh only ever points this at the root
+// manifest; the flag exists for tests, and a test argument is still an argument.
 const manifestPath = flagValue('--manifest') ?? 'package.json';
 const before = flagValue('--before');
 const corepackFailed = process.argv.includes('--corepack-failed');
@@ -49,7 +56,7 @@ const fail = (message) => {
 
 let manifest;
 try {
-  manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  manifest = JSON.parse(readTextWithin(manifestPath, REPO_ROOT));
 } catch (error) {
   fail(`cannot read ${manifestPath}: ${error.message}`);
 }

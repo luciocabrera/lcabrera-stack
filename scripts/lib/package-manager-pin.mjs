@@ -66,7 +66,9 @@ export const parsePackageManagerPin = (value) => {
 export const hasIntegrityHash = (value) => {
   const pin = parsePackageManagerPin(value);
 
-  return pin !== null && pin.algorithm !== null && pin.digest !== null;
+  // Both halves arrive together or not at all — the pattern cannot match one
+  // without the other — so this asserts the pair rather than either alone.
+  return Boolean(pin?.algorithm && pin.digest);
 };
 
 /**
