@@ -115,5 +115,5 @@
   "engines": {
     "node": ">=26 <27"
   },
-  "packageManager": "pnpm@11.22.0+sha256.57a97e6f23a3faffc03153a4ef8c770a0552612b8640aebe39bfdd5754d0ebdc"
+  "packageManager": "pnpm@11.23.0+sha256.78dcbf44f40cef50d1f4b535ca9961a30edb4b13c420c360bf4068d424a41bc4"
 }
