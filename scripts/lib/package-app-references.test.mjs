@@ -22,6 +22,18 @@ describe('appReferences', () => {
     expect(find('a consumer might have apps/web/**')).toEqual([]);
   });
 
+  it('matches an app name containing an underscore', () => {
+    // A class excluding `_` matches only the prefix, which then fails the
+    // existence test — a silent pass on exactly what the gate is for.
+    expect(
+      appReferences({
+        exists: (path) => path === 'apps/admin_system',
+        path: 'doc.md',
+        text: 'see apps/admin_system/src/x.ts',
+      }),
+    ).toEqual([{ line: 1, path: 'doc.md', reference: 'apps/admin_system' }]);
+  });
+
   it('ignores prose about the apps directory', () => {
     expect(find('the apps/ directory holds the harness')).toEqual([]);
   });

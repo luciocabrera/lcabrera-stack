@@ -11,8 +11,10 @@
  * `files`, so they reach no consumer.
  */
 
+import { proseLines } from './renamed-mentions.mjs';
+
 /** A path segment, so prose about "the apps directory" is not a finding. */
-const APP_PATH = /\bapps\/[a-z0-9][a-z0-9-]*/g;
+const APP_PATH = /\bapps\/[a-z0-9][a-z0-9_-]*/g;
 
 /** Generated from git history — a dated record, not a live pointer. */
 const GENERATED = /(^|\/)CHANGELOG\.md$/;
@@ -38,22 +40,13 @@ export const isCheckedFile = (path) =>
   !GENERATED.test(path) &&
   !TEST.test(path);
 
-/** 1-based line numbers sitting inside a ``` fence. Markdown only. */
-const fencedLines = (text) => {
-  const fenced = new Set();
-  let open = false;
-  text.split('\n').forEach((line, index) => {
-    if (line.trimStart().startsWith('```')) {
-      open = !open;
-      fenced.add(index + 1);
-      return;
-    }
-    if (open) {
-      fenced.add(index + 1);
-    }
-  });
-  return fenced;
-};
+/** Whole-text scanning for source; markdown drops fences via `proseLines`. */
+const numberedLines = (path, text) =>
+  path.endsWith('.md')
+    ? proseLines(text)
+    : text
+        .split('\n')
+        .map((line, index) => ({ number: index + 1, text: line }));
 
 /**
  * One finding per occurrence, not per distinct name: two mentions on different
@@ -61,16 +54,12 @@ const fencedLines = (text) => {
  *
  * `exists` takes a repo-relative path; injected so this stays testable.
  */
-export const appReferences = ({ exists, path, text }) => {
-  const skip = path.endsWith('.md') ? fencedLines(text) : new Set();
-  return [...text.matchAll(APP_PATH)]
-    .map((match) => ({
-      line: text.slice(0, match.index).split('\n').length,
-      path,
-      reference: match[0],
-    }))
-    .filter(({ line, reference }) => !skip.has(line) && exists(reference));
-};
+export const appReferences = ({ exists, path, text }) =>
+  numberedLines(path, text).flatMap((line) =>
+    [...line.text.matchAll(APP_PATH)]
+      .map((match) => ({ line: line.number, path, reference: match[0] }))
+      .filter(({ reference }) => exists(reference)),
+  );
 
 export const formatFinding = ({ line, path, reference }) =>
   `${path}:${line} — a published package names \`${reference}\`, which exists ` +
