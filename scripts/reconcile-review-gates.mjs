@@ -22,9 +22,10 @@
  * Exit codes: 0 = every gate run reported or was deliberately withheld; 1 = the
  * pull requests could not be listed, or at least one gate run failed. It never
  * exits 0 on a sweep that could not do its work — a reconcile that goes quiet is
- * the one failure nobody would notice. A withheld gate is not that: it is a
- * decision, it says so on its line, and it leaves a better-informed verdict
- * standing (#884).
+ * the one failure nobody would notice. A gate withheld because the pull request
+ * edits its code is not that: it is a decision, and it counts as reported. A gate
+ * withheld because the changed files could not be READ is a failure, and counts
+ * as one (#884).
  */
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, readFileSync } from 'node:fs';
@@ -41,11 +42,11 @@ import { errorMessage } from '../packages/repo-standards/scripts/error-message.m
 import { runGh } from './lib/gh-exec.mjs';
 import {
   gateArgs,
-  gateJudgesItsOwnEdit,
   localModuleClosure,
   openPullRequestNumbers,
   outcomeLine,
   sweepSummary,
+  withheldResult,
 } from './lib/review-gate-reconcile.mjs';
 
 const SCRIPTS_DIR = dirname(fileURLToPath(import.meta.url));
@@ -249,18 +250,13 @@ const main = () => {
     const changedFiles = fetchChangedFiles({ number, repository });
     return gates.map((gate) => {
       const result =
-        changedFiles === undefined ||
-        gateJudgesItsOwnEdit({ changedFiles, closure: gate.closure })
-          ? {
-              gate: gate.name,
-              number,
-              ok: true,
-              output:
-                changedFiles === undefined
-                  ? 'Withheld: could not read what this pull request changed, so whether it edits this gate is unknown (#884).'
-                  : 'Withheld: this pull request edits the code this gate runs, and the sweep runs the default branch (#884).',
-            }
-          : runGate({ extraArgs, gate, number, repository });
+        withheldResult({ changedFiles, gate, number }) ??
+        runGate({
+          extraArgs,
+          gate,
+          number,
+          repository,
+        });
       console.log(outcomeLine(result));
       return result;
     });

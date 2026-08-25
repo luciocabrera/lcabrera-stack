@@ -8,6 +8,8 @@ area:
   - scripts/reconcile-review-gates.mjs
   - scripts/lib/review-gate-reconcile.mjs
   - docs/tooling/review-gate-reconcile.md
+  - scripts/lib/review-gate-argv.test.mjs
+  - scripts/lib/review-gate-self-edit.test.mjs
 started: 2026-08-25
 updated: 2026-08-25
 plan: (none)

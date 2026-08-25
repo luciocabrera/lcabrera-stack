@@ -218,7 +218,7 @@ script's relative imports transitively from this checkout — which is the defau
 when the schedule runs it, and that is the point. A hand-written roster would keep passing
 while a gate grew a helper outside it.
 
-Three consequences worth knowing:
+What follows from it:
 
 - **It is per gate, and its reach is wider than the gate scripts.** A pull request
   editing `copilot-review.mjs` withholds only the Copilot gate; the other two still

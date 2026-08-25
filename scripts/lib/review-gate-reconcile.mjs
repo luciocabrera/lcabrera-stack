@@ -238,6 +238,41 @@ export const gateJudgesItsOwnEdit = ({ changedFiles = [], closure = [] }) => {
 };
 
 /**
+ * The result for a gate the sweep declines to run, or `undefined` to run it.
+ *
+ * The two reasons look alike and report differently, deliberately:
+ *
+ * - **A self-edit is a decision**, so it is `ok`. The sweep chose not to publish
+ *   and left a better-informed verdict standing; nothing is wrong.
+ * - **An unreadable file list is a failure**, so it is not. The sweep could not
+ *   do its work for that pull request, and this component's whole promise is to
+ *   be loud about that. Reporting it as `ok` would let a secondary rate limit
+ *   part-way through a sweep withhold every remaining gate, summarise `0
+ *   failure(s)`, exit 0, and file no tracking issue — statuses silently stopping
+ *   while every pull request still looks normal.
+ */
+export const withheldResult = ({ changedFiles, gate, number }) => {
+  if (changedFiles === undefined) {
+    return {
+      gate: gate.name,
+      number,
+      ok: false,
+      output:
+        'Withheld: could not read what this pull request changed, so whether it edits this gate is unknown (#884).',
+    };
+  }
+  return gateJudgesItsOwnEdit({ changedFiles, closure: gate.closure })
+    ? {
+        gate: gate.name,
+        number,
+        ok: true,
+        output:
+          'Withheld: this pull request edits the code this gate runs, and the sweep runs the default branch (#884).',
+      }
+    : undefined;
+};
+
+/**
  * The one spelling of the opt-in flag. `gateArgs` writes it and
  * `publishGateStatus` reads it, and a run where only one of them was renamed is
  * invisible: the gate stays unprotected, every test still passes, and the log
