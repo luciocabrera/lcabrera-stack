@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   configsDeclaringLint,
+  multiplyClassifiedWorkspaces,
   PLUGIN_PROBES,
   pluginsWithoutCoverage,
   probeCode,
@@ -10,6 +11,7 @@ import {
   staleRuntimeGlobs,
   unclassifiedWorkspaces,
   UNPROBED_PLUGINS,
+  workspaceRosters,
 } from './lint-plugins.mjs';
 
 describe('probeCode', () => {
@@ -218,5 +220,73 @@ describe('pluginsWithoutCoverage', () => {
     // An exemption with no reason is indistinguishable from an oversight.
     for (const reason of Object.values(UNPROBED_PLUGINS))
       expect(reason.length).toBeGreaterThan(0);
+  });
+});
+
+describe('multiplyClassifiedWorkspaces', () => {
+  it('is empty when every workspace is in exactly one list', () => {
+    expect(
+      multiplyClassifiedWorkspaces({
+        runtimes: { browser: ['packages/ui/**'], node: ['packages/server/**'] },
+        workspaces: ['packages/ui', 'packages/server'],
+      }),
+    ).toEqual([]);
+  });
+
+  // A workspace in both lists gets rules written on the assumption they never
+  // meet, and Biome reports nothing about it either way.
+  it('reports a workspace claimed by two lists', () => {
+    expect(
+      multiplyClassifiedWorkspaces({
+        runtimes: {
+          browser: ['packages/ui/**'],
+          node: ['packages/ui/**', 'packages/server/**'],
+        },
+        workspaces: ['packages/ui', 'packages/server'],
+      }),
+    ).toEqual(['packages/ui']);
+  });
+
+  it('ignores a duplicate glob naming no workspace', () => {
+    expect(
+      multiplyClassifiedWorkspaces({
+        runtimes: { a: ['apps/gone/**'], b: ['apps/gone/**'] },
+        workspaces: ['packages/ui'],
+      }),
+    ).toEqual([]);
+  });
+});
+
+describe('workspaceRosters', () => {
+  it('picks the blocks whose every glob names a whole workspace', () => {
+    expect(
+      workspaceRosters([
+        { includes: ['apps/react-router/**', 'packages/ui/**'] },
+        { includes: ['**/*.test.ts'] },
+        { includes: ['packages/server/**'] },
+      ]),
+    ).toEqual([
+      ['apps/react-router/**', 'packages/ui/**'],
+      ['packages/server/**'],
+    ]);
+  });
+
+  // The reason it matches by shape and not by index: Biome scopes most of its
+  // overrides by file pattern, and a roster read positionally would start
+  // checking one of those the moment a block is inserted above it.
+  it('rejects a block that mixes a workspace glob with a file pattern', () => {
+    expect(
+      workspaceRosters([{ includes: ['packages/ui/**', '**/routes/**'] }]),
+    ).toEqual([]);
+  });
+
+  it('ignores a nested path, which scopes below a workspace', () => {
+    expect(workspaceRosters([{ includes: ['packages/ui/src/**'] }])).toEqual(
+      [],
+    );
+  });
+
+  it('skips a block with no includes at all', () => {
+    expect(workspaceRosters([{ linter: {} }, { includes: [] }])).toEqual([]);
   });
 });

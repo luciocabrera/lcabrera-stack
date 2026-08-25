@@ -1,11 +1,19 @@
 /**
- * Gate: the root Oxlint config actually has every plugin family loaded, and no
- * workspace config carries a `lint` block that Vite+ will silently ignore.
+ * Gate: the root lint configs are wired the way they claim — every Oxlint
+ * plugin family is loaded, no workspace config carries a `lint` block that
+ * Vite+ will silently ignore, and both roster configs classify every workspace
+ * exactly once.
  *
- * Both failures are invisible by construction — a plugin that is not loaded and
- * code that is clean produce the same empty output — so this lints a deliberate
- * violation per family rather than reading the config. See
+ * Every one of those failures is invisible by construction — a plugin that is
+ * not loaded, an override whose glob matches nothing, and clean code all
+ * produce the same empty output — so this lints a deliberate violation per
+ * family rather than reading the config. See
  * `docs/decisions/ADR-042-oxlint-config-at-the-root.md`.
+ *
+ * It covers `biome.jsonc` as well as the Oxlint roster because the ungated one
+ * is the one that rotted: Oxlint's `WORKSPACE_RUNTIMES` stayed correct while
+ * Biome's overrides kept six departed workspaces and left five live ones — four
+ * of them public packages — in neither list.
  *
  * Effects live here; the rules are pure in `./lib/lint-plugins.mjs`.
  *
@@ -23,8 +31,10 @@ import {
 import { join, relative } from 'node:path';
 import process from 'node:process';
 
+import { parseJsonc } from './lib/jsonc.mjs';
 import {
   configsDeclaringLint,
+  multiplyClassifiedWorkspaces,
   PLUGIN_PROBES,
   pluginsWithoutCoverage,
   probeCode,
@@ -32,6 +42,7 @@ import {
   silentProbes,
   staleRuntimeGlobs,
   unclassifiedWorkspaces,
+  workspaceRosters,
 } from './lib/lint-plugins.mjs';
 
 const REPO_ROOT = process.cwd();
@@ -107,6 +118,18 @@ const lintConfigModule = () => import(join(REPO_ROOT, 'vite.config.ts'));
 /** The classification the root Oxlint config declares, read from the config itself. */
 const runtimeLists = async () => (await lintConfigModule()).WORKSPACE_RUNTIMES;
 
+/**
+ * The same classification as Biome declares it — its whole-workspace override
+ * blocks. Read from `biome.jsonc` itself for the reason `jsonc.mjs` gives: a
+ * malformed config makes Biome fall back to defaults silently, so a parse error
+ * here is a finding about the repo, not a nuisance.
+ */
+const biomeRosters = () =>
+  workspaceRosters(
+    parseJsonc(readFileSync(join(REPO_ROOT, 'biome.jsonc'), 'utf8'))
+      .overrides ?? [],
+  );
+
 /** The plugin families the root config actually names. */
 const configuredPlugins = async () =>
   (await lintConfigModule()).lintConfig.plugins;
@@ -127,11 +150,52 @@ const workspaceConfigs = () =>
       text: readFileSync(join(REPO_ROOT, path), 'utf8'),
     }));
 
+/**
+ * The two roster configs, each with the fix its own failure needs. Checked
+ * together so neither can drift from the workspace list on its own — which is
+ * exactly what happened while only one of them was read.
+ */
+const rosterSources = async () => [
+  {
+    fix:
+      '  Add it to `browser`, `node` or `agnostic` in WORKSPACE_RUNTIMES in\n' +
+      '  the root vite.config.ts.\n',
+    lists: await runtimeLists(),
+    name: 'the root Oxlint config',
+  },
+  {
+    fix:
+      '  Add it to the React or the Node `includes` roster in the\n' +
+      '  `overrides` array of biome.jsonc.\n',
+    lists: biomeRosters(),
+    name: 'biome.jsonc',
+  },
+];
+
+/** Every roster complaint, as ready-to-print lines. */
+const rosterFailures = ({ sources, workspaces }) =>
+  sources.flatMap(({ fix, lists, name }) => [
+    ...unclassifiedWorkspaces({ runtimes: lists, workspaces }).map(
+      (workspace) => `${workspace} is in no workspace list in ${name}.\n${fix}`,
+    ),
+    ...multiplyClassifiedWorkspaces({ runtimes: lists, workspaces }).map(
+      (workspace) =>
+        `${workspace} is in more than one workspace list in ${name}.\n` +
+        '  Every workspace belongs to exactly one — remove the duplicate.\n',
+    ),
+    ...staleRuntimeGlobs({ runtimes: lists, workspaces }).map(
+      (glob) =>
+        `${glob} is in a workspace list in ${name} but matches no ` +
+        'workspace — remove it.\n',
+    ),
+  ]);
+
 const main = async () => {
   const workspaces = [...workspaceDirs('apps'), ...workspaceDirs('packages')];
-  const runtimes = await runtimeLists();
-  const unclassified = unclassifiedWorkspaces({ runtimes, workspaces });
-  const stale = staleRuntimeGlobs({ runtimes, workspaces });
+  const rosters = rosterFailures({
+    sources: await rosterSources(),
+    workspaces,
+  });
   const plugins = await configuredPlugins();
   const uncovered = pluginsWithoutCoverage(plugins);
 
@@ -156,16 +220,7 @@ const main = async () => {
         `  The \`${probe.plugin}\` family is not loaded — add it to PLUGINS in\n` +
         '  packages/vite-configs/src/vite.lint.shared.config.ts.\n',
     );
-  for (const workspace of unclassified)
-    process.stdout.write(
-      `${workspace} is in no runtime list in the root Oxlint config.\n` +
-        '  Add it to `browser`, `node` or `agnostic` in WORKSPACE_RUNTIMES in\n' +
-        '  the root vite.config.ts.\n',
-    );
-  for (const glob of stale)
-    process.stdout.write(
-      `${glob} is in a runtime list but matches no workspace — remove it.\n`,
-    );
+  for (const line of rosters) process.stdout.write(line);
   for (const plugin of uncovered)
     process.stdout.write(
       `The \`${plugin}\` family is in PLUGINS but neither probed nor exempt.\n` +
@@ -175,20 +230,16 @@ const main = async () => {
     );
 
   const failures =
-    stray.length +
-    silent.length +
-    unclassified.length +
-    stale.length +
-    uncovered.length;
+    stray.length + silent.length + rosters.length + uncovered.length;
   if (failures > 0) {
     process.exitCode = 1;
     return;
   }
   process.stdout.write(
-    `Oxlint config: ${PLUGIN_PROBES.length} of ${plugins.length} plugin families ` +
+    `Lint config: ${PLUGIN_PROBES.length} of ${plugins.length} plugin families ` +
       `proven live by a planted violation (the rest documented as unprobeable), ` +
-      `${workspaces.length} workspaces classified by runtime, ` +
-      'no workspace config shadows the root.\n',
+      `${workspaces.length} workspaces classified exactly once by the Oxlint and ` +
+      'Biome rosters alike, no workspace config shadows the root.\n',
   );
 };
 

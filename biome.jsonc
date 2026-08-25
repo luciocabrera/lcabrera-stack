@@ -110,11 +110,10 @@
   },
   "overrides": [
     {
-      "includes": [
-        "apps/react-router/**",
-        "apps/admin_system/**",
-        "packages/ui/**",
-      ],
+      // React workspaces — the ones that contain JSX. Kept in lockstep with the
+      // Node override's `includes` below: every workspace is in exactly one of
+      // the two lists, which `vp run lint:plugins:verify` enforces.
+      "includes": ["apps/react-router/**", "packages/ui/**"],
       "linter": {
         "domains": { "react": "recommended" },
         "rules": {
@@ -205,21 +204,23 @@
       },
     },
     {
-      // Node/library workspaces (the 13 non-React workspaces — no JSX). Rules that
-      // only make sense off the browser live here so they never touch the React
-      // apps. Kept in lockstep with the React override's `includes`: every
-      // workspace is in exactly one of the two lists.
+      // Node/library workspaces — no JSX. Rules that only make sense off the
+      // browser live here so they never touch the React apps. Kept in lockstep
+      // with the React override's `includes` above: every workspace is in
+      // exactly one of the two lists, which `vp run lint:plugins:verify`
+      // enforces. It did not, and six of these globs named workspaces that had
+      // left while five live ones sat in neither list — so `useNodeAssertStrict`
+      // was silently off in four public packages.
       "includes": [
-        "apps/api-server/**",
-        "apps/api-server-fast/**",
-        "apps/scan-orchestrator/**",
-        "apps/shared/**",
-        "packages/agent-runner/**",
-        "packages/server/**",
-        "packages/node-runtime/**",
-        "packages/scan-ingestion/**",
-        "packages/ts-configs/**",
+        "packages/api/**",
+        "packages/devkit/**",
         "packages/eslint-local-rules/**",
+        "packages/node-runtime/**",
+        "packages/repo-standards/**",
+        "packages/scan-report/**",
+        "packages/server/**",
+        "packages/ts-configs/**",
+        "packages/tsconfig/**",
         "packages/utils/**",
         "packages/vite-configs/**",
       ],

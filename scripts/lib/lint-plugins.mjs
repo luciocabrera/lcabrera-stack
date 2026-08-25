@@ -140,3 +140,43 @@ export const staleRuntimeGlobs = ({ runtimes, workspaces }) => {
     .flat()
     .filter((glob) => !present.has(globWorkspace(glob)));
 };
+
+/**
+ * Workspaces named in more than one list.
+ *
+ * "Exactly one" is the invariant both rosters state, and the two failure modes
+ * are not symmetric: a workspace in NO list silently loses every rule the lists
+ * carry, while one in BOTH gets rules written on the assumption they never meet
+ * — a browser workspace picking up the Node-only set, or the reverse. Neither
+ * shows up as a diagnostic, so neither is visible without asking.
+ */
+export const multiplyClassifiedWorkspaces = ({ runtimes, workspaces }) => {
+  const counts = new Map();
+  for (const glob of Object.values(runtimes).flat()) {
+    const workspace = globWorkspace(glob);
+    counts.set(workspace, (counts.get(workspace) ?? 0) + 1);
+  }
+  return workspaces.filter((workspace) => (counts.get(workspace) ?? 0) > 1);
+};
+
+/** `apps/foo/**` or `packages/foo/**` — a whole workspace, not a file pattern. */
+const isWorkspaceGlob = (glob) =>
+  /^(?:apps|packages)\/[^/*]+\/\*\*$/u.test(glob);
+
+/**
+ * The `biome.jsonc` override blocks that classify whole workspaces.
+ *
+ * Identified by SHAPE, not by position: a roster block is one whose every glob
+ * names a whole workspace. Biome's other overrides all scope by file pattern
+ * (`**\/*.test.ts`, `**\/routes/**`, a single component), so none of them
+ * qualifies — and a block inserted or reordered later cannot slip past the
+ * check the way a hardcoded index would.
+ *
+ * Returned as a list of glob lists so the roster checks above read it exactly
+ * as they read Oxlint's `WORKSPACE_RUNTIMES`. The two configs disagreed for
+ * months precisely because only one of them was ever asked.
+ */
+export const workspaceRosters = (overrides) =>
+  overrides
+    .map((override) => override.includes ?? [])
+    .filter((globs) => globs.length > 0 && globs.every(isWorkspaceGlob));
