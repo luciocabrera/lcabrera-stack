@@ -275,6 +275,31 @@ describe('workspaceRosters', () => {
     ).toEqual([]);
   });
 
+  // The regression: the Node roster's own comment tells you to write a narrower
+  // whole-workspace block, which a plain shape test reads as a third roster and
+  // reports as a duplicate classification.
+  it('excludes a block that is a subset of another', () => {
+    expect(
+      workspaceRosters([
+        { includes: ['apps/react-router/**'] },
+        { includes: ['packages/server/**', 'packages/ui/**'] },
+        { includes: ['packages/server/**'] },
+      ]),
+    ).toEqual([
+      ['apps/react-router/**'],
+      ['packages/server/**', 'packages/ui/**'],
+    ]);
+  });
+
+  it('keeps two blocks that merely overlap, since neither is contained', () => {
+    expect(
+      workspaceRosters([
+        { includes: ['packages/a/**', 'packages/b/**'] },
+        { includes: ['packages/b/**', 'packages/c/**'] },
+      ]),
+    ).toHaveLength(2);
+  });
+
   it('ignores a nested path, which scopes below a workspace', () => {
     expect(workspaceRosters([{ includes: ['packages/ui/src/**'] }])).toEqual(
       [],

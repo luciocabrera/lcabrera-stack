@@ -156,10 +156,27 @@ const isWorkspaceGlob = (glob) =>
   /^(?:apps|packages)\/[^/*]+\/\*\*$/u.test(glob);
 
 /**
- * The `biome.jsonc` override blocks that classify whole workspaces, matched by
- * shape so a reordered or inserted block cannot slip past the check.
+ * The `biome.jsonc` override blocks that partition the workspaces.
+ *
+ * A whole-workspace block that is a subset of another is a rule scoped to some
+ * workspaces, not a roster — so it is excluded. Without that, the narrower block
+ * this repo's own config comment tells you to write would be read as a third
+ * roster and reported as a duplicate classification.
  */
-export const workspaceRosters = (overrides) =>
-  overrides
+export const workspaceRosters = (overrides) => {
+  const blocks = overrides
     .map((override) => override.includes ?? [])
-    .filter((globs) => globs.length > 0 && globs.every(isWorkspaceGlob));
+    .filter((globs) => globs.length > 0 && globs.every(isWorkspaceGlob))
+    .map((globs) => globs.map(globWorkspace));
+  return blocks
+    .filter(
+      (block, index) =>
+        !blocks.some(
+          (other, otherIndex) =>
+            otherIndex !== index &&
+            other.length > block.length &&
+            block.every((workspace) => other.includes(workspace)),
+        ),
+    )
+    .map((block) => block.map((workspace) => `${workspace}/**`));
+};
