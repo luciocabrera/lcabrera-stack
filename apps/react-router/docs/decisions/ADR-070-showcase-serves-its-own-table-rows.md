@@ -161,8 +161,10 @@ load-more page cannot arrive in different shapes.
   runtime switch was not built because the browser half cannot read `process.env`
   — it would send the loader external while the load-more stayed self-hosted,
   which is a worse failure than the one it replaces.
-- **The external API is no longer part of rendering this app.** `vp run dev` still
-  starts it; it now serves the override only.
+- **The external API is no longer part of rendering this app.** On the tree this
+  ADR shipped with, the dev task still started it and it served the override
+  only. Neither is true now: that server left the repository, and there is no
+  root `dev` task — `vp run dev:showcase` runs the app alone.
 - **A page is now bounded by this process's connection pool** rather than by a
   separate server's. The pool is `@lcabrera/server`'s singleton, shared with the
   enterprise-orders routes and the filter-options service.

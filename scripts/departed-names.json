@@ -27,6 +27,7 @@
   "allow": [
     {
       "path": ".sonarcloud.properties",
+      "names": ["api-server"],
       "reason": "mirrors exclusion globs configured in the SonarCloud UI verbatim. The literal is the actionable datum — it is what an admin searches Administration -> Analysis Scope for — so prose would break the row's only job. The entry goes when the UI drops the stale glob."
     }
   ]

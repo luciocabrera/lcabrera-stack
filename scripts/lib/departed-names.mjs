@@ -96,10 +96,17 @@ export const parseRoster = (text) => {
       'departed-names.json has a missing or empty name — it would match every line.',
     );
   }
-  return {
-    allowed: new Set((roster.allow ?? []).map(({ path }) => path)),
-    names,
-  };
+  const allow = new Map();
+  for (const entry of roster.allow ?? []) {
+    if (!Array.isArray(entry.names) || entry.names.length === 0) {
+      throw new Error(
+        `departed-names.json allows ${entry.path} without naming which names — ` +
+          'a whole-file exemption hides the next departed name to land there.',
+      );
+    }
+    allow.set(entry.path, new Set(entry.names));
+  }
+  return { allow, names };
 };
 
 /**
@@ -123,16 +130,51 @@ export const regularFiles = (output) =>
     )
     .map((match) => match[2]);
 
-/** One finding per occurrence: two mentions on two lines are two edits. */
-export const departedReferences = ({ allowed, names, path, text }) => {
-  if (allowed.has(path)) return [];
+/**
+ * One finding per occurrence: two mentions on two lines are two edits.
+ *
+ * Allowed findings are flagged rather than dropped, so the caller can both hide
+ * them from the report and prove each allowance still matches something. An
+ * allowance that silently outlives what it excuses is the rot AGENTS.md §6
+ * already forbids for dependency advisories.
+ */
+export const departedReferences = ({ allow, names, path, text }) => {
+  const allowedNames = allow.get(path) ?? new Set();
   return text.split('\n').flatMap((line, index) => {
     const haystack = line.toLowerCase();
     return names
       .filter((name) => haystack.includes(name.toLowerCase()))
-      .map((name) => ({ line: index + 1, name, path }));
+      .map((name) => ({
+        isAllowed: allowedNames.has(name),
+        line: index + 1,
+        name,
+        path,
+      }));
   });
 };
+
+/**
+ * Allowances that no longer excuse anything — the gate's own dead code.
+ *
+ * `walked` is every path the scan read; `seen` is every `path\0name` it matched.
+ * An allowance for a file the scan never read, or for a name that file no longer
+ * carries, is stale by exactly the rule that makes an unmatched dependency
+ * advisory a failure rather than a courtesy.
+ */
+export const staleAllowances = ({ allow, seen, walked }) =>
+  [...allow].flatMap(([path, allowedNames]) => {
+    if (!walked.has(path)) {
+      return [
+        `${path} — allowed, but the scan did not read it. Remove the entry.`,
+      ];
+    }
+    return [...allowedNames]
+      .filter((name) => !seen.has(`${path}\0${name}`))
+      .map(
+        (name) =>
+          `${path} — allowed to name \`${name}\`, which it no longer does. Remove it.`,
+      );
+  });
 
 export const formatFinding = ({ line, name, path }) =>
   `${path}:${line} — names \`${name}\`, which left this repository. Describe ` +

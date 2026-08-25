@@ -18,6 +18,7 @@ import {
   isCheckedFile,
   parseRoster,
   regularFiles,
+  staleAllowances,
 } from './lib/departed-names.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -52,7 +53,7 @@ const trackedFiles = () => {
 const readText = (path) => readFileSync(resolve(REPO_ROOT, path), 'utf8');
 
 const main = () => {
-  const { allowed, names } = parseRoster(
+  const { allow, names } = parseRoster(
     readFileSync(resolve(REPO_ROOT, 'scripts/departed-names.json'), 'utf8'),
   );
 
@@ -60,14 +61,31 @@ const main = () => {
   // A run that walked nothing must not report the same success as a clean tree.
   if (files.length === 0) {
     throw new Error(
-      'walked no files — check `git ls-files` and the extension list.',
+      'walked no files — check `git ls-files` and the binary list.',
     );
   }
 
-  const findings = files.flatMap((path) =>
-    departedReferences({ allowed, names, path, text: readText(path) }),
+  const all = files.flatMap((path) =>
+    departedReferences({ allow, names, path, text: readText(path) }),
   );
 
+  const stale = staleAllowances({
+    allow,
+    seen: new Set(all.map(({ name, path }) => `${path}\0${name}`)),
+    walked: new Set(files),
+  });
+  if (stale.length > 0) {
+    console.error(
+      'These allowances in scripts/departed-names.json are stale:\n',
+    );
+    for (const message of stale) {
+      console.error(`  - ${message}`);
+    }
+    process.exitCode = 1;
+    return;
+  }
+
+  const findings = all.filter(({ isAllowed }) => !isAllowed);
   if (findings.length > 0) {
     console.error('These name something that left this repository:\n');
     for (const finding of findings) {
@@ -75,15 +93,17 @@ const main = () => {
     }
     console.error(
       '\nRewrite the line, or — if the name genuinely must appear — add the file ' +
-        'to `allow` in scripts/departed-names.json with a reason.',
+        'to `allow` in scripts/departed-names.json with the names and a reason.',
     );
     process.exitCode = 1;
     return;
   }
 
+  const allowed = all.length - findings.length;
   console.log(
     `Departed-name gate passed: ${files.length} tracked file(s) name none of ` +
-      `the ${names.length} departed thing(s).`,
+      `the ${names.length} departed thing(s)` +
+      (allowed > 0 ? `, beyond ${allowed} allowed mention(s).` : '.'),
   );
 };
 

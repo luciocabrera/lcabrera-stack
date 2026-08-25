@@ -6,6 +6,7 @@ import {
   isCheckedFile,
   parseRoster,
   regularFiles,
+  staleAllowances,
 } from './departed-names.mjs';
 
 const roster = (extra = {}) =>
@@ -14,14 +15,20 @@ const roster = (extra = {}) =>
     ...extra,
   });
 
+const allowOf = (path, names) => ({ allow: [{ names, path, reason: 'r' }] });
+
 describe('parseRoster', () => {
   it('reads the names and the allow list', () => {
-    const { allowed, names } = parseRoster(
-      roster({ allow: [{ path: 'a.md' }] }),
-    );
+    const { allow, names } = parseRoster(roster(allowOf('a.md', ['Oldprod'])));
 
     expect(names).toEqual(['Oldprod', 'apps/legacy']);
-    expect(allowed.has('a.md')).toBe(true);
+    expect([...allow.get('a.md')]).toEqual(['Oldprod']);
+  });
+
+  it('refuses a whole-file exemption, which hides the next name to land there', () => {
+    expect(() =>
+      parseRoster(roster({ allow: [{ path: 'a.md', reason: 'r' }] })),
+    ).toThrow(/without naming which names/);
   });
 
   it('refuses a roster with no names, which would pass every tree', () => {
@@ -53,15 +60,17 @@ describe('parseRoster', () => {
 });
 
 describe('departedReferences', () => {
-  const { allowed, names } = parseRoster(
-    roster({ allow: [{ path: 'guard.test.mjs' }] }),
+  const { allow, names } = parseRoster(
+    roster(allowOf('guard.test.mjs', ['Oldprod'])),
   );
   const find = (path, text) =>
-    departedReferences({ allowed, names, path, text });
+    departedReferences({ allow, names, path, text }).filter(
+      ({ isAllowed }) => !isAllowed,
+    );
 
   it('reports the line a departed name appears on', () => {
     expect(find('doc.md', 'fine\nthe Oldprod extraction\n')).toEqual([
-      { line: 2, name: 'Oldprod', path: 'doc.md' },
+      { isAllowed: false, line: 2, name: 'Oldprod', path: 'doc.md' },
     ]);
   });
 
@@ -71,7 +80,7 @@ describe('departedReferences', () => {
 
   it('matches a path name no word boundary spans', () => {
     expect(find('doc.md', 'imports from apps/legacy')).toEqual([
-      { line: 1, name: 'apps/legacy', path: 'doc.md' },
+      { isAllowed: false, line: 1, name: 'apps/legacy', path: 'doc.md' },
     ]);
   });
 
@@ -83,8 +92,19 @@ describe('departedReferences', () => {
     expect(find('doc.md', '```ts\nschema: "Oldprod"\n```')).toHaveLength(1);
   });
 
-  it('skips a file on the allow list', () => {
+  it('hides a name the allow list excuses on that path', () => {
     expect(find('guard.test.mjs', 'Oldprod')).toEqual([]);
+  });
+
+  it('still reports a name the allow list does NOT excuse on that path', () => {
+    expect(find('guard.test.mjs', 'apps/legacy')).toEqual([
+      {
+        isAllowed: false,
+        line: 1,
+        name: 'apps/legacy',
+        path: 'guard.test.mjs',
+      },
+    ]);
   });
 
   it('does not flag a line that names nothing departed', () => {
@@ -167,5 +187,41 @@ describe('regularFiles', () => {
 
   it('keeps a path containing a space', () => {
     expect(regularFiles(`${entry('100644', 'a b.md')}\0`)).toEqual(['a b.md']);
+  });
+});
+
+describe('staleAllowances', () => {
+  const allow = new Map([['a.md', new Set(['Oldprod'])]]);
+
+  it('passes an allowance the file still needs', () => {
+    expect(
+      staleAllowances({
+        allow,
+        seen: new Set(['a.md\u0000Oldprod']),
+        walked: new Set(['a.md']),
+      }),
+    ).toEqual([]);
+  });
+
+  it('reports an allowance for a name the file no longer carries', () => {
+    const stale = staleAllowances({
+      allow,
+      seen: new Set(),
+      walked: new Set(['a.md']),
+    });
+
+    expect(stale).toHaveLength(1);
+    expect(stale[0]).toMatch(/no longer does/);
+  });
+
+  it('reports an allowance for a file the scan never read', () => {
+    const stale = staleAllowances({
+      allow,
+      seen: new Set(),
+      walked: new Set(),
+    });
+
+    expect(stale).toHaveLength(1);
+    expect(stale[0]).toMatch(/did not read it/);
   });
 });
