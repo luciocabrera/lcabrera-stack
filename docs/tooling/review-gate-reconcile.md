@@ -229,6 +229,12 @@ What follows from it:
   one of them withholds every gate including the required context. That is the principle
   working, not overreaching: it is code the gate runs. Read a closure rather than guessing
   at one — `localModuleClosure` is exported and the tests walk the real tree with it.
+- **The extra read is one request per pull request, filtered in `gh`.** The
+  `files` endpoint carries each entry's diff hunk, so it asks for
+  `.[].filename` rather than the payload: it is the sweep's only response whose
+  size scales with diff content, and overflowing `runGh`'s buffer would read as
+  "could not tell" — withholding every gate for that pull request on every run
+  until it closed.
 - **Not knowing counts as a self-edit.** When the changed files cannot be read at all, the
   sweep withholds rather than publishing: a verdict claimed without the check that
   justifies it is the thing this rule exists to prevent. The line says which of the two

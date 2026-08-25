@@ -228,6 +228,16 @@ describe('the sweep actually consults it — not a parallel definition', () => {
   // sweep must not reach `runGate` without offering the decision first.
   const source = () => readRepoFile('scripts/reconcile-review-gates.mjs');
 
+  /** One top-level `const <name> = …;` declaration, whole. */
+  const declarationOf = (name) => {
+    const text = source();
+    const start = text.indexOf(`const ${name} =`);
+    expect(start).toBeGreaterThan(-1);
+    const end = text.indexOf('\n};', start);
+    expect(end).toBeGreaterThan(start);
+    return text.slice(start, end);
+  };
+
   it('never assigns a gate result without consulting the decision', () => {
     expect(source()).not.toMatch(/const result =\s*runGate\(/u);
     expect(source()).toMatch(/const result =\s*withheldResult\(/u);
@@ -235,6 +245,15 @@ describe('the sweep actually consults it — not a parallel definition', () => {
 
   it('asks about the files this pull request changed', () => {
     expect(source()).toMatch(/pulls\/\$\{number\}\/files/u);
+  });
+
+  it('asks gh for filenames, not for the diff', () => {
+    // Every entry of that endpoint carries its `patch`. Pulling the whole
+    // payload to read one field puts the sweep's only diff-sized response
+    // against `runGh`'s 8 MB cap, and overflowing it reads as "could not tell"
+    // — which withholds every gate for that pull request until it closes.
+    expect(source()).toMatch(/'--jq',\s*'\.\[\]\.filename'/u);
+    expect(source()).not.toMatch(/JSON\.parse\([\s\S]{0,80}?pulls/u);
   });
 
   it('derives each gate’s closure from its own script', () => {
@@ -246,9 +265,11 @@ describe('the sweep actually consults it — not a parallel definition', () => {
   it('does not let one pull request’s failure end the sweep', () => {
     // `fetchChangedFiles` runs per pull request, so an unguarded throw would
     // abandon every pull request after it — where a gate failure costs one line.
-    expect(source()).toMatch(
-      /const fetchChangedFiles[\s\S]{0,600}?\}\s*catch\s*\(/u,
-    );
+    //
+    // Sliced to the declaration rather than matched across a character window:
+    // a window is an assertion about formatting, and this one already broke once
+    // on an added comment.
+    expect(declarationOf('fetchChangedFiles')).toMatch(/\}\s*catch\s*\(/u);
   });
 });
 

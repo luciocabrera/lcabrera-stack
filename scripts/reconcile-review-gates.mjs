@@ -77,17 +77,27 @@ const readRepoModule = (path) => {
  */
 const fetchChangedFiles = ({ number, repository }) => {
   try {
-    return JSON.parse(
-      runGh([
-        'api',
-        '--paginate',
-        '--slurp',
-        `repos/${repository}/pulls/${number}/files?per_page=100`,
-      ]),
-    )
-      .flat()
-      .map((file) => file?.filename)
-      .filter((filename) => typeof filename === 'string');
+    // `--jq` rather than parsing the payload here, because every entry of this
+    // endpoint carries its `patch` — the diff hunk itself. `runGh` caps stdout
+    // at 8 MB, and this is the only call in the sweep whose size scales with
+    // diff content rather than with pull request count, so a codemod-sized pull
+    // request could overflow it. Filtering in `gh` means only filenames cross
+    // the pipe, and the failure that would follow is not a hypothetical one: it
+    // reads as "could not tell", which withholds every gate for that pull
+    // request on every run for as long as it stays open.
+    const filenames = runGh([
+      'api',
+      '--paginate',
+      '--jq',
+      '.[].filename',
+      `repos/${repository}/pulls/${number}/files?per_page=100`,
+    ])
+      .split('\n')
+      .map((filename) => filename.trim())
+      .filter((filename) => filename !== '');
+    // A pull request with no files does not exist, so an empty answer means the
+    // request did not do what was asked. Not knowing is the loud case.
+    return filenames.length === 0 ? undefined : filenames;
   } catch (error) {
     console.error(
       `::warning::could not read the files changed by #${number}: ${errorMessage(error)}`,
