@@ -71,9 +71,7 @@ export const configs = [
         // while the published package could not be imported at all (ADR-060).
         // Without it, every deep import is checked against the real export map
         // by `tsc`, so an unexported subpath fails typecheck here rather than
-        // on a consumer's machine. This used to be stated on the admin_system
-        // entry and cross-referenced from here; that entry left with #683, so
-        // the reasoning lives here now.
+        // on a consumer's machine.
         '@lcabrera/ui': ['../../packages/ui/src/public-api.ts'],
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',

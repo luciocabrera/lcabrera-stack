@@ -35,8 +35,8 @@ because the numbers were never what collided.
 ## Decision
 
 `renderIndex` takes a home and **no entries**. Each home's `README.md` carries
-what is true of the home itself — its tier, its blurb, what happens to it at the
-CQMS extraction, where the template is, and why it does not list the ADRs. Adding
+what is true of the home itself — its tier, its blurb, where the template is,
+and why it does not list the ADRs. Adding
 an ADR therefore changes exactly one file, the ADR, so two ADR branches touch
 disjoint paths and there is nothing left to conflict on.
 

@@ -95,24 +95,9 @@
       "deslop/unused-dev-dependency",
     ],
 
-    "overrides": [
-      {
-        // False positive, confirmed by reading the effect. The rule cannot see
-        // through the `connect()` closure that reassigns `socket`, so it misses
-        // the cleanup that is there: the returned function sets `isUnmounted`,
-        // clears the pending reconnect timeout and closes the live socket.
-        //
-        // Scoped to this one file so the rule keeps protecting every other
-        // effect. Registered in docs/agents/public-package-suppressions.json.
-        //
-        // The glob is matched against the path React Doctor reports, which is
-        // relative to the *project* it detected (here `apps/admin_system`), not
-        // to the repo root. A repo-relative path here matches nothing and fails
-        // silently — the finding simply stays, which reads identically to the
-        // override not being there at all.
-        "files": ["src/hooks/useRunStatusSocket.hook.ts"],
-        "rules": ["react-doctor/effect-needs-cleanup"],
-      },
-    ],
+    // No overrides. If one is ever needed, note that the glob is matched against
+    // the path React Doctor reports, which is relative to the *project* it
+    // detected, not to the repo root — a repo-relative path matches nothing and
+    // fails silently, which reads identically to the override not being there.
   },
 }

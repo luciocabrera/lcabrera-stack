@@ -16,9 +16,9 @@ pooled connections**:
 The table has **no sequence** — `get-max-value.util.ts` documents itself as the
 "next id" read for tables without one. Before this ADR there was **no
 `withTransaction` or `PoolClient` seam anywhere** in `@lcabrera/server`; the only
-hand-rolled `BEGIN`/`ROLLBACK` lived in
-`packages/scan-ingestion/src/db/runMigrations.ts`. `scan-ingestion` otherwise
-avoids app-level transactions by pushing multi-step writes into stored procedures.
+hand-rolled `BEGIN`/`ROLLBACK` lived in a migration runner outside this package,
+which otherwise avoids app-level transactions by pushing multi-step writes into
+stored procedures.
 
 ## Problem
 
@@ -47,7 +47,7 @@ multi-step write anywhere in the repo can be made atomic without hand-rolling
    COMMIT/ROLLBACK with no unlock path to forget, and needs no schema change.
 4. **Retry on the typed `23505`** from ADR-050.
 5. **A real sequence or identity column.** The correct long-term fix, and the
-   `scan-ingestion` house style; it needs a migration on an app-owned table.
+   house style on the ingestion side; it needs a migration on an app-owned table.
 
 ## Decision
 

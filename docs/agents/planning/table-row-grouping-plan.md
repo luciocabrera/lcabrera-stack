@@ -129,7 +129,7 @@ boundary is at the service edge; the builder's checks are defense in depth.
    `build-keyset-comparison.util.ts` deliberately depends on default placement.
    Emitting explicit NULLS silently breaks keyset pagination.
 3. `query-builder/ARCHITECTURE.md` excludes joins, subqueries and aggregates;
-   CQMS's `PRD.md` (moved to the CQMS repository in #683) says rollup belongs in Postgres
+   a product spec written against this repository said rollup belongs in Postgres
    **views**. Generating GROUP BY contradicts both — **needs an ADR**.
 
 Zero `GROUP BY`/`ROLLUP`/`CUBE`/`GROUPING`/`HAVING` generation exists. The only
@@ -575,7 +575,7 @@ estimate is the displayed total.
 ### 2.10 What needs an ADR
 
 1. **Aggregation is builder-generated, not view-defined** — qualifies
-   `query-builder/ARCHITECTURE.md` and CQMS's `PRD.md`. Must state why Mode 2
+   `query-builder/ARCHITECTURE.md` and that product spec. Must state why Mode 2
    makes views impossible (runtime-chosen keys) and why a _sibling_ module
    preserves the flat builder's non-goals. Fold in the grouping-set primitive with
    the identical-plan evidence. → adopted as
@@ -598,7 +598,7 @@ estimate is the displayed total.
 
 > **Correction — all five go in `docs/decisions/`.** The original text sent
 > (2)–(3) to `apps/react-router/docs/decisions/` "alongside ADR-011". ADR-048's
-> test is whether a decision leaves when CQMS moves out; both candidate homes
+> test is whether a decision leaves when the product moves out; both candidate homes
 > stay, so the tie-break is package-versus-app — and every line of grouping code
 > lives in `packages/ui` and `packages/server`. ADR-011 and ADR-012 sit in the app
 > home because they predate the Table's extraction into the package; they are
@@ -1130,9 +1130,9 @@ loader `meta`.
 > and drops (`apps/react-router/src/.server/groupingLegality.smoke.test.ts`), so
 > nothing is lost by leaving the playground alone.
 >
-> Note also that these two routes fetch over HTTP from the api-server rather than
+> Note also that these two routes fetch over HTTP from the external API rather than
 > reading Postgres in process, so this slice is **not** configuration-only for
-> them either — it needs a grouped endpoint in `api-shared`, an Express route, a
+> them either — it needs a grouped endpoint in its domain layer, an Express route, a
 > Fastify plugin and new fetchers. Sized accordingly, and deliberately deferred.
 
 ### Slice 8 — Mode 1 presets + totals placement setting
@@ -1228,7 +1228,7 @@ does not cover (`lint:eslint:check`, `lint:biome:check`, `react-doctor:verify`).
 | 4   | **Estimates are wrong on a stale-statistics table**, so a "safe" query returns 200k rows                                                                                                  | Two independent backstops: the `LIMIT` at WARN+1 truncates, and the 10 s timeout bounds time. Never trust the estimate alone                                                          |
 | 5   | **Expansion resetting on revalidation reads as a bug**                                                                                                                                    | Path-keyed re-application survives sort changes (the common case) and most filter changes. Document it; the escape hatch is `sessionStorage`, already used for tab-scoped table state |
 | 6   | **Rolling out surfaces type gaps** that `enterprise-orders` alone does not exercise                                                                                                       | Proven up front by the §2.2 type probe, which owns a fixture carrying the awkward types, rather than by rolling the feature into the wide-column rendering playground                 |
-| 7   | **The third `GroupingState` copy drifts** the way copies 3–5 of `ColumnFilter` already have (`api-shared`, both api-servers — none guarded)                                               | `groupingContract.test.ts` with the annotation form. Do **not** extend grouping to the api-server routes in v1 — that is what created the unguarded copies                            |
+| 7   | **The third `GroupingState` copy drifts** the way copies 3–5 of `ColumnFilter` already have (the API's domain layer and both API servers — none guarded)                                  | `groupingContract.test.ts` with the annotation form. Do **not** extend grouping to the external API's routes in v1 — that is what created the unguarded copies                        |
 | 8   | **`@lcabrera/server`'s public surface grows**; `api-surface:verify` requires a changeset and new subpaths must land in **both** export maps                                               | Slice 1's checklist. Only 8 of 18 existing `query-builder` files are exported — export deliberately, not wholesale                                                                    |
 | 9   | **Doc drift.** `packages/server/src/filters/ARCHITECTURE.md` and `packages/server/src/INVENTORY.md` still claim `@lcabrera/ui` re-exports the server's filter types — false since ADR-039 | Fix in Slice 1 rather than writing grouping docs by analogy and inheriting the error                                                                                                  |
 | 10  | **`countDistinct` at cube depth 3** defeats the hash path once per grouping set                                                                                                           | Max one per query, and its presence tightens the guard thresholds (§4.2)                                                                                                              |

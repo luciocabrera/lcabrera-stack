@@ -52,10 +52,10 @@ implementations.
   targets the same-origin resource route `GET /_api/filter-options` whose loader
   reads Postgres **directly, server-side** via `@lcabrera/server`'s
   `selectFilterOptions` helper (an app-owned `.server` distinct service — no
-  api-server round-trip, the same self-sufficient model the row loaders use).
+  external API round-trip, the same self-sufficient model the row loaders use).
   All three demo routes use `loader` (enterprise-orders moved off `bff` in #340):
   `bff` fetches the API host directly from the browser, which only works behind a
-  proxy (dev Vite, or a prod reverse proxy) **and** needs the api-server running,
+  proxy (dev Vite, or a prod reverse proxy) **and** needs the external API running,
   so it fails under a bare `react-router-serve` prod build — whereas `loader`
   works in every environment with the app alone. `bff` remains a supported
   transport, still unit-covered in `packages/ui` (`getFilterOptionsBaseUrl`,
@@ -64,7 +64,7 @@ implementations.
   service holds **no allow-list of its own**: it derives both the allow-list and
   each column's `ColumnType` from the per-entity `config/*DISTINCT_FILTER_COLUMNS`
   maps (declared once per entity, alongside its schema/table), rather than
-  importing api-shared — an undeclared cross-app edge (ADR-039).
+  importing the API's own domain layer — an undeclared cross-app edge (ADR-039).
   `selectFilterOptions` is deliberately **thin over the generic** query layer:
   the builders/executors (`buildSelectQuery`/`selectRows` with `distinct: true`,
   exposed as `buildDistinctQuery`/`selectDistinctRows`) stay generic over a list
@@ -77,8 +77,8 @@ implementations.
   projection — is the tracked next step.
 - **Layering** — generic mechanisms live in `@repo/data-access`
   (`buildDistinctQuery` in the query builder; `fetchDistinctValues` +
-  response guard on the api side); domain config lives in api-shared
-  (`DISTINCT_SOURCES` allow-list + thin `createDistinctRepository`);
+  response guard on the api side); domain config lives on the API side
+  (a `DISTINCT_SOURCES` allow-list + a thin `createDistinctRepository`);
   packages/ui holds only descriptor types and the executor registry.
 
 ## Security

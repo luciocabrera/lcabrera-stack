@@ -1,6 +1,6 @@
 /**
  * The column list and enum values are copied (not imported) from the api layer on purpose
- * — `apps/shared`/`api-shared` must never become a runtime dependency of this app (see the
+ * — that layer must never become a runtime dependency of this app (see the
  * feature plan §1).
  */
 

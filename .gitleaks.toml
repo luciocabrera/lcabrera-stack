@@ -1,7 +1,7 @@
 # Secret scanning for repository CONTENT — the layer the two existing guards do
 # not cover.
 #
-# `scripts/claude-secrets-guard.mjs` and `packages/agent-runner` (ADR-020) both
+# `scripts/claude-secrets-guard.mjs` and the agent runner (ADR-020) both
 # sit at the AGENT boundary: they stop Claude reading an environment file or
 # writing a credential. Neither looks at what lands in a commit, so a human, a
 # different agent, or anyone using `--no-verify` could add one and nothing would

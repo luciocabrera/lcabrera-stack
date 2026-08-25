@@ -7,8 +7,8 @@
 
 ## Context
 
-Every consuming app hand-assembled its own root route. `apps/react-router` and
-`apps/admin_system` each imported `AppProviders` and `AppShell`, called
+Every consuming app hand-assembled its own root route. Each imported
+`AppProviders` and `AppShell`, called
 `useLoaderData` for the root loader, and threaded the same four values through
 in the same order. Only three of those inputs actually differ per app: the app
 id, the default theme, and the navigation items.

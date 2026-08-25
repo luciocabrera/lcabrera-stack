@@ -22,7 +22,7 @@ builder folder.**
 `selectRows` is the sanctioned join between the two halves. Before it existed,
 every caller imported `buildSelectQuery` _and_ `getPool` and re-wired the same
 four lines by hand — which fallow flagged as a clone group across the
-`llm_usage` readers, and which this folder's own docs had enshrined as the
+`reporting` readers, and which this folder's own docs had enshrined as the
 usage example. `selectDistinctRows` is its `SELECT DISTINCT` sibling — a
 one-line wrapper so the two never drift. `selectFilterOptions` composes _that_
 into the one specialization worth naming: the filter-dropdown read (one column's

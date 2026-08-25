@@ -15,14 +15,14 @@ import {
 describe('parseRenameDiff', () => {
   it('reads the status, old path and new path of each rename', () => {
     const output = [
-      'R100\tpackages/scan-ingestion/src/ingestion/ignoredDirectories.constants.ts\tpackages/scan-ingestion/src/ingestion/ingestion.constants.ts',
+      'R100\tpackages/ingestion/src/ingestion/ignoredDirectories.constants.ts\tpackages/ingestion/src/ingestion/ingestion.constants.ts',
       'R087\tapps/a/old.types.ts\tapps/a/new.types.ts',
     ].join('\n');
 
     expect(parseRenameDiff(output)).toEqual([
       {
-        from: 'packages/scan-ingestion/src/ingestion/ignoredDirectories.constants.ts',
-        to: 'packages/scan-ingestion/src/ingestion/ingestion.constants.ts',
+        from: 'packages/ingestion/src/ingestion/ignoredDirectories.constants.ts',
+        to: 'packages/ingestion/src/ingestion/ingestion.constants.ts',
       },
       { from: 'apps/a/old.types.ts', to: 'apps/a/new.types.ts' },
     ]);
@@ -152,8 +152,7 @@ describe('staleMentions', () => {
   const vanished = [
     {
       name: 'ignoredDirectories.constants.ts',
-      replacedBy:
-        'packages/scan-ingestion/src/ingestion/ingestion.constants.ts',
+      replacedBy: 'packages/ingestion/src/ingestion/ingestion.constants.ts',
     },
   ];
 
@@ -166,8 +165,7 @@ describe('staleMentions', () => {
         doc: 'docs/x.md',
         line: 1,
         name: 'ignoredDirectories.constants.ts',
-        replacedBy:
-          'packages/scan-ingestion/src/ingestion/ingestion.constants.ts',
+        replacedBy: 'packages/ingestion/src/ingestion/ingestion.constants.ts',
       },
     ]);
   });
@@ -198,8 +196,7 @@ describe('staleMentions', () => {
         doc: 'docs/other/decisions/ADR-029-cli-push-and-api-tokens.md',
         line: 5,
         name: 'ignoredDirectories.constants.ts',
-        replacedBy:
-          'packages/scan-ingestion/src/ingestion/ingestion.constants.ts',
+        replacedBy: 'packages/ingestion/src/ingestion/ingestion.constants.ts',
       },
     ]);
   });

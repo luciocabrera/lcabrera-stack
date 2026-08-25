@@ -6,8 +6,8 @@
 
 The `packages/` are what this repo ships. The `apps/` exist to exercise them:
 `apps/react-router` puts the Table, the store pattern and the query layer under
-realistic load, and `apps/admin_system`, `apps/api-server` and the rest play the
-same role for their areas. That ordering had never been written down, and
+realistic load, and any other app here plays the
+same role for its area. That ordering had never been written down, and
 `AGENTS.md` in fact read the other way round — _"The primary app is
 `apps/react-router/`"_ — which points a reader at the harness and away from the
 product.
@@ -103,7 +103,7 @@ annotation, `typecheck:all` exits 2 naming the incompatibility.
 - Fallow's duplication detector does not flag the two type blocks, so no
   baseline entry or suppression is involved.
 - This is a one-way door only in the cheap direction: if a third consumer appears
-  (a filtered table in `admin_system`) or the contract grows runtime code
+  (a filtered table in another app) or the contract grows runtime code
   (validation, shared mappers), promoting it to a shared package is
   straightforward, and at three copies the ceremony starts paying for itself.
 

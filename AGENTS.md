@@ -288,14 +288,12 @@ because `seed`/`db:seed` are **workspace scripts, not root scripts**.
 
 **The showcase owns the DDL for the tables it serves and seeds itself**
 ([ADR-071](docs/decisions/ADR-071-split-the-demo-database-setup.md)) from
-`apps/react-router/db/`, which is what creates `enterprise_orders`. That split
-was made while the API servers lived here and each side needed its own copy;
-they left with [`api-playground`](https://github.com/luciocabrera/api-playground)
-(#686) and took theirs with them, so the second copy of `setup_large_data.sql`
-is no longer in this repository — the duplication ADR-071 describes is now
-cross-repo, and the two copies can drift with nothing to catch it.
+`apps/react-router/db/`, which is what creates `enterprise_orders`. The other
+copy of `setup_large_data.sql` lives in a separate repository, so the
+duplication ADR-071 describes is cross-repo and the two can drift with nothing
+here to catch it.
 
-It reads env from `docker/local/.env` and then the workspace's own `.env`. The frontend proxies `/api` to `http://localhost:3001` for the external-API lane, which now means a server run from `api-playground`.
+It reads env from `docker/local/.env` and then the workspace's own `.env`. The frontend proxies `/api` to `http://localhost:3001` for the external-API lane, which means a server run from outside this repository.
 
 **Critical:** Import Vite config from `vite-plus`, not `vite`, for tooling integration. Example: `import { defineConfig } from 'vite-plus'`. For tests, import test utilities from `vite-plus/test`, not `vitest` directly (e.g. `import { expect, test, vi } from 'vite-plus/test'`) — it re-exports the vite-plus-bundled Vitest, so the test runtime always matches the toolchain and there is no self-managed `vitest` to drift. This convention was re-evaluated and changed once vite-plus became the runner ([ADR-045](docs/decisions/ADR-045-vite-plus-test-imports.md)); the earlier `vitest`-direct rule predated it.
 

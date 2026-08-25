@@ -43,8 +43,8 @@
 # `vp staged` to a different index than the one being committed. Scrub where the
 # risk is, not everywhere.
 # The seven repository-selecting variables are the same set
-# `buildGitChildEnv.util.ts` strips in @repo/scan-ingestion — that util protects
-# one caller, this protects everything a hook spawns. Keep the two lists in step.
+# a `buildGitChildEnv.util.ts` strips for one caller; this protects everything a
+# hook spawns. Keep the two lists in step.
 # GIT_CEILING_DIRECTORIES and GIT_DISCOVERY_ACROSS_FILESYSTEM are deliberately
 # absent from both: they only ever make discovery stricter.
 unset GIT_ALTERNATE_OBJECT_DIRECTORIES

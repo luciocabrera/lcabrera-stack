@@ -180,14 +180,14 @@ describe('routeArtifactReport', () => {
   it('passes the route modules the repo has today', () => {
     const paths = [
       // names the route module in a kebab-case folder
-      'apps/admin/src/routes/reports/trigger-scan/triggerScan.constants.ts',
-      'apps/admin/src/routes/reports/trigger-scan/TriggerScan.component.tsx',
+      'apps/docs-site/src/routes/reports/trigger-scan/triggerScan.constants.ts',
+      'apps/docs-site/src/routes/reports/trigger-scan/TriggerScan.component.tsx',
       // names the component in a PascalCase-artifact folder
-      'apps/admin/src/routes/reports/project-detail/ProjectDetail.types.ts',
-      'apps/admin/src/routes/reports/project-detail/ProjectDetail.component.tsx',
+      'apps/docs-site/src/routes/reports/project-detail/ProjectDetail.types.ts',
+      'apps/docs-site/src/routes/reports/project-detail/ProjectDetail.component.tsx',
       // a `.tsx` constants file at a route-container level
-      'apps/admin/src/routes/reports/Reports.constants.tsx',
-      'apps/admin/src/routes/reports/Reports.layout.tsx',
+      'apps/docs-site/src/routes/reports/Reports.constants.tsx',
+      'apps/docs-site/src/routes/reports/Reports.layout.tsx',
       // the folder name and the artifact name genuinely differ
       'apps/react-router/src/routes/car-sales-infinite/CarSales.types.ts',
       'apps/react-router/src/routes/car-sales-infinite/CarSales.component.tsx',

@@ -34,8 +34,8 @@ Format: **`type(scope): subject`**
   `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `perf`, `ci`, `build`,
   `revert`, `style`). Lowercase.
 - **scope** _(optional but preferred)_ — the workspace you touched, by its
-  directory name: `ui`, `admin_system`, `api-server`, `scan-orchestrator`,
-  `server`, … (derived automatically from `pnpm-workspace.yaml`), or a
+  directory name: `ui`, `server`, `utils`, `devkit`, …
+  (derived automatically from `pnpm-workspace.yaml`), or a
   cross-cutting area: `ci`, `docs`, `tooling`, `deps`, `coordination`, …. A
   sub-path like `ui/table` is fine. An unrecognised scope only **warns** — it
   never blocks.
@@ -46,7 +46,7 @@ Examples:
 
 ```
 feat(ui): add column resize handles
-fix(api-server): guard against null rows in the loader
+fix(server): guard against null rows in the loader
 refactor(ui)!: rename ColumnGroupsState to PinnedColumnPartitionState
 chore(coordination): close the commit-pr-standards task
 docs(agents): document the commit-msg hook
@@ -120,7 +120,7 @@ Two layers, so a mixed crew of agents and humans follows it without exception.
 
 **Commit messages** are Conventional Commits — `type(scope): subject`. The `type`
 is one of the spec's `ALLOWED_TYPES`; the `scope` is preferably the workspace you
-touched (`ui`, `admin_system`, `api-server`, … — derived from
+touched (`ui`, `server`, … — derived from
 `pnpm-workspace.yaml`, so it self-updates) or a cross-cutting area (`ci`, `docs`,
 `tooling`, …). An unrecognised scope only **warns**; a malformed header **fails**.
 Merge/revert/`fixup!` messages are skipped, and the `Co-Authored-By:` trailer is

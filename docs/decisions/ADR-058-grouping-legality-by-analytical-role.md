@@ -68,7 +68,7 @@ distinctness is undefined. The design conflates two meanings of one value.
 
 Because `dataType` is optional and defaults to the most permissive member, the
 same table also makes **every column with no declared type** "the best key".
-Most of `apps/admin_system`'s table columns declare no `dataType` at all
+Most of the other app's table columns declared no `dataType` at all
 (`grep -c 'dataType:'` against its `*.constants.tsx` versus the `label:` every
 column carries).
 

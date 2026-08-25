@@ -20,9 +20,9 @@ collision on `order_number` renders under the _customer name_ input, and the raw
 `pg` message string reaches the browser. `config/toOrderFieldErrors.util.ts` maps
 only `ZodError`; there is no DB-error → field path.
 
-`admin_system` had already reinvented a slice of this
-(`routes/cqms/trigger-scan/hasPostgresErrorCode.util.ts`), which is what the
-missing abstraction looks like when each consumer solves it alone.
+Another app had already reinvented a slice of this in a route-local
+`hasPostgresErrorCode.util.ts`, which is what the missing abstraction looks like
+when each consumer solves it alone.
 
 ## Problem
 
@@ -66,7 +66,7 @@ never leaves the server.**
   resolve two copies of `pg` — its own plus a transitive one — and `instanceof`
   is then false for an error that must still be recognised. The existing
   `hasPostgresErrorCode` shape is generalised into the package rather than a
-  parallel one being invented, and `admin_system` now imports it.
+  parallel one being invented, and that app now imports it.
 - **Every executor is wrapped, not only the four write executors.** They all go
   through one internal `runQuery` helper that owns the `try`/`catch`. A read
   cannot raise `23505`, but it can raise `42703 undefined_column`, whose message

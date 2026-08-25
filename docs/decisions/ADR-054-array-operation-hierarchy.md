@@ -148,7 +148,7 @@ the premise does not hold: `reduce()`+push already matches `for...of` at every s
 ceiling is needed to reach the fast path. The real distinction is _intent_, which is what
 the table encodes. Note also that this repo's UI ceiling is a virtualized grid — 150
 columns and a few dozen visible rows — so the 100,000-item scenario belongs to
-`packages/server` / `scan-ingestion`, where the same table applies unchanged.
+`packages/server`, where the same table applies unchanged.
 
 ## References
 

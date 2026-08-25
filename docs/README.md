@@ -38,14 +38,14 @@ Start here when you're not sure where something belongs, or where to look.
 
 ## By document, what it is and its lifetime
 
-| Doc                              | Audience                 | Lifetime             | Canonical for                                                                                                                                                         |
-| -------------------------------- | ------------------------ | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AGENTS.md` (+ `.claude/rules/`) | every agent + human      | durable              | universal standards, the gate, the non-negotiables                                                                                                                    |
-| `COMMANDS.md`                    | every agent + human      | durable              | the command surface (CI-verified — see below)                                                                                                                         |
-| ADRs                             | every agent + human      | durable, append-only | one decision each, with context + consequences                                                                                                                        |
-| `*/ARCHITECTURE.md`              | anyone touching a system | durable              | that system's data flow and constraints — not a leaf component's props ([ADR-088](decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)) |
-| `INVENTORY.md` / `PATTERNS.md`   | anyone building UI       | durable              | reuse catalog / conventions                                                                                                                                           |
-| `docs/agents/research/*.md`      | anyone deciding the same | dated record         | how other projects solved it, at a named commit                                                                                                                       |
+| Doc                              | Audience                 | Lifetime           | Canonical for                                                                                                                                                         |
+| -------------------------------- | ------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md` (+ `.claude/rules/`) | every agent + human      | durable            | universal standards, the gate, the non-negotiables                                                                                                                    |
+| `COMMANDS.md`                    | every agent + human      | durable            | the command surface (CI-verified — see below)                                                                                                                         |
+| ADRs                             | every agent + human      | durable; see below | one decision each, with context + consequences                                                                                                                        |
+| `*/ARCHITECTURE.md`              | anyone touching a system | durable            | that system's data flow and constraints — not a leaf component's props ([ADR-088](decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)) |
+| `INVENTORY.md` / `PATTERNS.md`   | anyone building UI       | durable            | reuse catalog / conventions                                                                                                                                           |
+| `docs/agents/research/*.md`      | anyone deciding the same | dated record       | how other projects solved it, at a named commit                                                                                                                       |
 
 ---
 
@@ -67,34 +67,42 @@ that ADR's own table still lists the third home it was written under, so
 A third home existed while a second product lived here, and left with it. That
 is why an old ADR may cite a number which now resolves in only one place.
 
-### Reading an ADR written in an earlier era
+### An ADR names no product but this one
 
-This repository has been three things, and an ADR means what it meant when it was
-written:
+Older ADRs were written while other products shared this repository, and their
+Context sections cited those products by name as the evidence that motivated a
+decision. Those names are gone: an ADR describes the constraint it decided
+against — "a second app needed to reuse the component library" — never the
+departed thing that happened to supply it. The reasoning is unchanged, and the
+decision still follows from the context it records; only an identity was
+removed.
 
-| Era                 | What the repo was                                                  |
-| ------------------- | ------------------------------------------------------------------ |
-| **One app**         | `apps/react-router` alone; no packages                             |
-| **A monorepo**      | several apps — the car-sales API servers, CQMS — plus the packages |
-| **Public packages** | the `@lcabrera/*` packages are the product; one app exercises them |
+**Including identities that still resolve.** Sibling repositories are on the
+roster too, and their links went with them. That is deliberate rather than an
+overreach of the rule: these packages are read by consumers who have none of this
+repository's history and no access to anything beside it, so a doc that leans on
+a link out is a doc that stops working the moment it ships. Where a pointer
+carried something actionable, the replacement states the thing itself — a
+contract a substitute server must serve, rather than the address of one that
+does.
 
-So an older ADR naming one of the car-sales API workspaces, or the CQMS admin
-app, is not necessarily rot — they were extracted to their own repositories
-(#683, #686) and the ADR bodies that cite them stay verbatim, by the rule at the
-end of this section. Two cases, and they are treated differently on purpose:
+Two consequences worth knowing. An ADR whose subject left entirely is deleted
+rather than kept as a husk, and what still governs is folded into the live doc
+that owns it — that is where ADR-014's Cancel/discard-changes rationale went,
+into `packages/ui`'s Form `ARCHITECTURE.md`. And a decision that reads oddly
+general was often specific once; `vp run adr:list` plus `git log --follow` is
+how to recover what it was about.
 
-- **Named as Context** — the evidence that motivated a decision about the
-  packages. Left exactly as written. Editing it would falsify _why_ the decision
-  was made, which is the one thing an ADR exists to record. ADR-001, ADR-004,
-  ADR-005, ADR-035, ADR-039 and ADR-053 are in this group.
-- **Named in the Decision** — instructions a reader would follow today, pointing
-  at a repository this no longer is. That gets a **dated amendment block** at the
-  top: status split, what still governs, what moved and under which issue. The
-  body stays verbatim below it. ADR-008 established the shape; ADR-014, ADR-064
-  and ADR-071 use it.
+**This is not a licence to revise an ADR.** Append-only still governs the part
+that matters: a conclusion is superseded by a _new_ ADR, never edited into a
+different one, and no decision recorded here has been re-argued. What was removed
+is an identity, not a claim — which is why an amended ADR now says its body keeps
+its original reasoning rather than that it is verbatim. If you find yourself
+changing what an ADR decided, you are writing the next ADR.
 
-The rule that makes this decidable: **never rewrite a body to match today.**
-Amend above it, and say what changed.
+`vp run departed:verify` keeps this true — the names live in
+[`scripts/departed-names.json`](../scripts/departed-names.json), so a
+reintroduced one fails the build rather than waiting to be noticed.
 
 Those links open the **directory**, which is the listing — each home's `README.md`
 is a generated page describing the home and lists no ADRs on purpose, because a

@@ -291,7 +291,7 @@ describe('buildGroupQuery', () => {
 
   it('refuses an unsafe schema or table', () => {
     expect(() =>
-      buildGroupQuery(descriptor({ schema: 'public; DROP SCHEMA cqms' })),
+      buildGroupQuery(descriptor({ schema: 'public; DROP SCHEMA reporting' })),
     ).toThrow('Unsafe identifier');
     expect(() => buildGroupQuery(descriptor({ table: 'Orders' }))).toThrow(
       'Unsafe identifier',

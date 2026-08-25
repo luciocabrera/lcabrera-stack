@@ -1,9 +1,8 @@
 /**
- * The column list is copied (not imported) from the api layer on purpose —
- * `apps/shared`/`api-shared` must never become a runtime dependency of this app
+ * The column list is copied (not imported) from the api layer on purpose — that
+ * layer must never become a runtime dependency of this app
  * ([ADR-039](../../../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)),
- * and this app is meant to keep rendering after that package is no longer reachable at all
- * (#686).
+ * and this app is meant to keep rendering when it is not reachable at all.
  */
 
 // Type-only (erased at build) — carries no `pg`/SQL runtime into this file.

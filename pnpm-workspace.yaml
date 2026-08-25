@@ -7,9 +7,8 @@ allowBuilds:
 # Supply chain security (https://pnpm.io/supply-chain-security)
 blockExoticSubdeps: true
 
-# Do NOT enable `enableGlobalVirtualStore` here. It was spiked and DECLINED in
-# an ADR that left with the CQMS extraction (#683): the global virtual store
-# does not
+# Do NOT enable `enableGlobalVirtualStore` here. It was spiked and DECLINED:
+# the global virtual store does not
 # link rolldown's platform-specific native binding as a sibling of
 # @voidzero-dev/vite-plus-core, so no `vp` command can load its task graph.
 # Re-check that gap before reconsidering.

@@ -171,7 +171,7 @@ root `vite.config.ts`). It is configured **once at the root** in `biome.jsonc`
 and runs one repo-wide pass — like Oxlint, unlike the per-workspace eslint
 fan-out. Do not add per-workspace `biome.jsonc` files or `lint:biome` scripts;
 `overrides` already scope per project. Full rationale — including why it is
-lint-only and why it is not a CQMS scanner — is in
+lint-only and why it is not a reporting scanner — is in
 [ADR-035](../../../docs/decisions/ADR-035-biome-third-linter.md). The rule set
 goes **beyond `recommended`**: a curated set of opt-in rules is enabled on top of
 the preset, added in approval-gated phases and measured per rule before landing

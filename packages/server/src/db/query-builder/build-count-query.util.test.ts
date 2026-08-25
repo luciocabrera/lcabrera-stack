@@ -5,12 +5,12 @@ import { buildCountQuery } from './build-count-query.util.ts';
 describe('buildCountQuery', () => {
   it('counts every row with `count(*)` by default', () => {
     const result = buildCountQuery({
-      schema: 'cqms',
-      table: 'v_scan_findings',
+      schema: 'reporting',
+      table: 'v_order_totals',
     });
 
     expect(result).toEqual({
-      text: 'SELECT count(*) AS count FROM "cqms"."v_scan_findings"',
+      text: 'SELECT count(*) AS count FROM "reporting"."v_order_totals"',
       values: [],
     });
   });
@@ -30,29 +30,32 @@ describe('buildCountQuery', () => {
 
   it('applies the same WHERE clause a matching buildSelectQuery call would produce', () => {
     const result = buildCountQuery({
-      filters: [{ column: 'severity', operator: 'eq', value: 'HIGH' }],
-      schema: 'cqms',
-      table: 'v_scan_findings',
+      filters: [{ column: 'order_status', operator: 'eq', value: 'Shipped' }],
+      schema: 'reporting',
+      table: 'v_order_totals',
     });
 
     expect(result).toEqual({
-      text: 'SELECT count(*) AS count FROM "cqms"."v_scan_findings" WHERE "severity" = $1',
-      values: ['HIGH'],
+      text: 'SELECT count(*) AS count FROM "reporting"."v_order_totals" WHERE "order_status" = $1',
+      values: ['Shipped'],
     });
   });
 
   it('rejects an unsafe table name', () => {
     expect(() =>
-      buildCountQuery({ schema: 'cqms', table: 't; DROP TABLE cqms.users' }),
+      buildCountQuery({
+        schema: 'reporting',
+        table: 't; DROP TABLE reporting.users',
+      }),
     ).toThrow();
   });
 
   it('rejects an unsafe count column', () => {
     expect(() =>
       buildCountQuery({
-        column: 'id); DROP TABLE cqms.users --',
-        schema: 'cqms',
-        table: 'v_scan_findings',
+        column: 'id); DROP TABLE reporting.users --',
+        schema: 'reporting',
+        table: 'v_order_totals',
       }),
     ).toThrow();
   });
@@ -60,10 +63,10 @@ describe('buildCountQuery', () => {
   it('rejects a count column outside allowedColumns', () => {
     expect(() =>
       buildCountQuery({
-        allowedColumns: ['severity'],
+        allowedColumns: ['order_status'],
         column: 'password_hash',
-        schema: 'cqms',
-        table: 'v_scan_findings',
+        schema: 'reporting',
+        table: 'v_order_totals',
       }),
     ).toThrow();
   });

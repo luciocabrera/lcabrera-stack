@@ -87,7 +87,7 @@ describe('car-sales loader', () => {
     );
   });
 
-  it("reads through the route's own server service, not an api-server URL", async () => {
+  it("reads through the route's own server service, not an external API URL", async () => {
     // The route renders with no API server running, so its first page must come
     // from the service that reads Postgres in this process. `readCarSalesPage`
     // owns the external-override branch behind that call.

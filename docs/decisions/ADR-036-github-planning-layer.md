@@ -21,7 +21,7 @@ an agent on any branch can read it offline, with no network and no auth, and CI'
 `board-sync` check fails the build if it drifts.
 
 It does **not** answer **(2)**. The durable backlog has been scattered across
-`docs/cqms/STATUS.md`, ADRs, `PLAN_TRIAGE.md`, and per-agent auto-memory — no
+product status docs, ADRs, `PLAN_TRIAGE.md`, and per-agent auto-memory — no
 single prioritised, cross-referenced, human-browsable list, and no kanban.
 
 GitHub ships exactly that layer natively: **Issues** (durable work items with
@@ -113,7 +113,7 @@ sub-issues, and Milestones are fully usable; only the auto-add-to-board step wai
   rejected: it is a maintenance sinkhole and a fresh drift source, the same class
   of problem as the `BOARD.md` merge-driver the register deliberately does **not**
   build. Sync stays one-way and GitHub-owned.
-- **`STATUS.md` stays canonical for CQMS status.** This layer does not mirror it
+- **A product's own status doc stays canonical for its status.** This layer does not mirror it
   wholesale; specific actionable items graduate to issues when they need a prioritised
   home, the way a plan's _claim_ graduates to a task file.
 - **One manual cost:** the owner-granted `project` scope + PAT/variable in §5.

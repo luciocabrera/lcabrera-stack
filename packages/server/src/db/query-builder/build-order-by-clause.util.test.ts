@@ -23,11 +23,11 @@ describe('buildOrderByClause', () => {
     expect(
       buildOrderByClause({
         sort: [
-          { column: 'total_cost_usd', direction: 'desc' },
-          { column: 'scanner_id', direction: 'asc' },
+          { column: 'total_amount', direction: 'desc' },
+          { column: 'order_id', direction: 'asc' },
         ],
       }),
-    ).toBe('ORDER BY "total_cost_usd" DESC, "scanner_id" ASC');
+    ).toBe('ORDER BY "total_amount" DESC, "order_id" ASC');
   });
 
   it('rejects an unsafe column name', () => {
@@ -41,7 +41,7 @@ describe('buildOrderByClause', () => {
   it('rejects a column not present in an optional allowedColumns list', () => {
     expect(() =>
       buildOrderByClause({
-        allowedColumns: ['total_cost_usd'],
+        allowedColumns: ['total_amount'],
         sort: [{ column: 'password_hash', direction: 'asc' }],
       }),
     ).toThrow();

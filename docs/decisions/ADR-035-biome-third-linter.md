@@ -1,7 +1,7 @@
 # ADR-035: Biome as the third linter (root-only, lint-only)
 
 **Status:** Accepted
-**Amends:** ADR-019 (which split `linter` into independent `eslint` / `oxlint` scanners — this adds a third rule engine alongside them, but deliberately **not** a third CQMS scanner; see Consequences).
+**Amends:** ADR-019 (which split `linter` into independent `eslint` / `oxlint` scanners — this adds a third rule engine alongside them, but deliberately **not** a third reporting scanner; see Consequences).
 **Amended:** 2026-07-18 — §7 adds the phased rule-hardening beyond the `recommended` preset.
 
 ## Context
@@ -209,7 +209,7 @@ The rest of Phase 3 completed with two more rules and one deferral:
   callbacks shadowed → `targetColumn`).
 - `noProcessEnv` — **deliberately not enabled.** The repo already centralizes env
   through Zod schemas (`readEnvConfig({ env: process.env })`, `envSchema.parse(process.env)`),
-  so every `process.env` read is the validation boundary — plus agent-runner
+  so every `process.env` read is the validation boundary — plus a runner
   forwarding raw env to a spawned subprocess, which cannot route through config.
   The reads sit in ordinary util files, not a tidy `config/` dir, so there is no
   clean glob exemption; enforcing it would need a cross-workspace env-reader
@@ -284,14 +284,14 @@ The general lesson: when two engines contradict each other, the form that
 silences both is not automatically correct. Check it against the types before
 believing it.
 
-**Not a third CQMS scanner (yet).** ADR-019 gave `eslint` and `oxlint`
+**Not a third reporting scanner (yet).** ADR-019 gave `eslint` and `oxlint`
 independent scanner rows, master/detail tables, and runner scripts; the
 `linter-checker` skill drives them. Biome gates PRs and produces a report, but
 has no scanner row and is not in `linter-checker`. That is a deliberate scope
 line, not an oversight — extending it is a follow-up with its own migration.
 The full, execute-ready spec for that follow-up (approved then parked before
-implementation) is `BIOME_SCANNER_PLAN.md`, now in the CQMS repository:
-it records the JSON-shape facts, the error/warning/info→HIGH/MEDIUM/LOW mapping,
+implementation) left this repository with the reporting pipeline:
+it recorded the JSON-shape facts, the error/warning/info→HIGH/MEDIUM/LOW mapping,
 and the load-bearing gotcha — `lint_violations.source` is a closed CHECK, so a
 half-built integration ingests and then fails at INSERT in production.
 

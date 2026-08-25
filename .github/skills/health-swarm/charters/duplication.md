@@ -28,13 +28,12 @@ normalised function bodies rather than trusting the tool.
 Already handled (do not refile): the copy-pasted root-script CLI helpers, now in
 `packages/repo-standards/scripts/cli-input.mjs`.
 
-Reviewed and deliberately left, with reasons in #519: the `apps/react-router` ⇄
-`api-shared` enterprise-orders constants (documented as deliberate, in sync, both
-app-local — and no longer a repo-local duplication at all since #686 moved
-`api-shared` to its own repository, which is what the copies existed to survive);
-`edit-order`/`order-detail` loaders (~10 lines, and the
-identical `admin_system` pattern is already accepted in
-`reports/fallow/baselines/dupes.json`); `coverage-report.mjs`/`merge-coverage.mjs`
+Reviewed and deliberately left, with reasons in #519: the enterprise-orders
+constants the showcase copies from the external API's domain layer (deliberate,
+and no longer a repo-local duplication at all since that layer moved to its own
+repository, which is what the copies existed to survive);
+`edit-order`/`order-detail` loaders (~10 lines, and the same pattern is already
+accepted in `reports/fallow/baselines/dupes.json`); `coverage-report.mjs`/`merge-coverage.mjs`
 (divergences deliberate and documented); `build-insert-query`/`build-update-query`
 (micro-abstraction on a published package).
 

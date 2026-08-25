@@ -123,7 +123,7 @@ describe('validateSkills — dangling script paths', () => {
 
   it('does not treat a node_modules consumer path as a missing repo script', () => {
     const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `${SKILL}\nruns \`node_modules/@repo/scan-report/scripts/run-fallow.sh\`.\n`,
+      '.github/skills/demo/SKILL.md': `${SKILL}\nruns \`node_modules/@repo/reporter/scripts/run-fallow.sh\`.\n`,
     });
 
     expect(validateSkills({ repoRoot }).errors).toEqual([]);

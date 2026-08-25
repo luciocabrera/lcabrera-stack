@@ -22,35 +22,34 @@ the subset the list view projects
 
 ## Setup
 
-### 1. Create Database Table
+### 1. Start Postgres
 
 ```bash
-cd /home/lucio/workspace/db
-./setup_orders.sh
+vp run db:up
 ```
 
-This will:
+### 2. Create the table and its demo rows
 
-- Create the `enterprise_orders` table, with the columns
+```bash
+vp run --filter vite-react-compiler seed
+```
+
+This applies
+[`db/setup_enterprise_orders.sql`](../../../db/setup_enterprise_orders.sql),
+which:
+
+- Creates the `enterprise_orders` table, with the columns
   `config/enterpriseOrders.constants.ts` lists in `ENTERPRISE_ORDER_COLUMNS`
-- Generate the demo rows — the `generate_series` in the DDL is the count, and
+- Generates the demo rows — the `generate_series` in the DDL is the count, and
   `SELECT count(*) FROM enterprise_orders` is what the database actually holds
-- Create indexes for performance
+- Creates indexes for performance
 
-### 2. Start API Server
+The route reads Postgres in this process, so no separate API server is needed.
 
-```bash
-cd /home/lucio/workspace/frameworks/vite-react-compiler/api-server
-vp run start
-```
-
-The API will be available at `http://localhost:3001`
-
-### 3. Start React App
+### 3. Start the app
 
 ```bash
-cd /home/lucio/workspace/frameworks/vite-react-compiler
-vp dev
+vp run dev:showcase
 ```
 
 ### 4. Navigate to Route
@@ -86,14 +85,14 @@ src/routes/enterprise-orders/
 Create / view / edit render **inside `@lcabrera/ui` Modal** overlaid on the list (route-driven
 modals — the parent renders the table + `<Outlet/>`). Submissions validate client-first via
 `clientAction` (Zod), then delegate to the server `action`, which re-validates, persists via
-the generic `@lcabrera/server` write builders (direct Postgres — no api-server), and
+the generic `@lcabrera/server` write builders (direct Postgres — no external API), and
 redirects. Requires local Postgres (`vp run db:up`) with the `DB_*` env the `dev` script
 sources from `docker/local/.env`.
 
 ## Data access
 
 Reads go through the generic `@lcabrera/server` query builders/executors (no
-api-server). `.server/enterpriseOrders.service.ts` exposes `selectOrdersPage`
+external API). `.server/enterpriseOrders.service.ts` exposes `selectOrdersPage`
 (list + count), `selectOrderById`, `getNextOrderId`, `insertOrder`,
 `updateOrder`, `deleteOrder`. The table's `ColumnFiltersState`/`SortingState`
 are translated to generic `QueryFilter[]`/`QuerySort[]` by two table-agnostic
@@ -250,7 +249,7 @@ would also pass for a component that showed it unconditionally.
 
 ## Related Documentation
 
-- Database setup: `/home/lucio/workspace/db/ENTERPRISE_ORDERS_README.md`
-- Quick start: `/home/lucio/workspace/db/QUICK_START.md`
-- Column reference: `/home/lucio/workspace/db/COLUMNS_REFERENCE.md`
-- System overview: `/home/lucio/workspace/db/SYSTEM_OVERVIEW.md`
+- Database setup: [`db/README.md`](../../../db/README.md)
+- The DDL this route needs: [`db/setup_enterprise_orders.sql`](../../../db/setup_enterprise_orders.sql)
+- Column reference: `config/enterpriseOrders.constants.ts` (`ENTERPRISE_ORDER_COLUMNS`)
+- How this route is wired: [`ARCHITECTURE.md`](./ARCHITECTURE.md)

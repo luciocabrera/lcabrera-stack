@@ -6,7 +6,7 @@ import {
   isCheckedFile,
 } from './package-app-references.mjs';
 
-const inRepo = new Set(['apps/react-router', 'apps/admin']);
+const inRepo = new Set(['apps/react-router', 'apps/docs-site']);
 const find = (text) =>
   appReferences({ exists: (path) => inRepo.has(path), path: 'doc.md', text });
 
@@ -24,14 +24,16 @@ describe('appReferences', () => {
 
   it('matches an app name containing an underscore', () => {
     // A class excluding `_` matches only the prefix, which then fails the
-    // existence test — a silent pass on exactly what the gate is for.
+    // existence test — a silent pass on exactly what the gate is for. The
+    // name is synthetic so the case keeps its underscore whatever this repo's
+    // apps are called.
     expect(
       appReferences({
-        exists: (path) => path === 'apps/admin_system',
+        exists: (path) => path === 'apps/docs_site',
         path: 'doc.md',
-        text: 'see apps/admin_system/src/x.ts',
+        text: 'see apps/docs_site/src/x.ts',
       }),
-    ).toEqual([{ line: 1, path: 'doc.md', reference: 'apps/admin_system' }]);
+    ).toEqual([{ line: 1, path: 'doc.md', reference: 'apps/docs_site' }]);
   });
 
   it('ignores prose about the apps directory', () => {
@@ -41,11 +43,13 @@ describe('appReferences', () => {
   it('reports every occurrence, not just the first per name', () => {
     // Each mention is its own edit, so collapsing them would hide work behind
     // a gate that has to be re-run to reveal it.
-    const findings = find('apps/admin\n\napps/react-router\napps/admin again');
+    const findings = find(
+      'apps/docs-site\n\napps/react-router\napps/docs-site again',
+    );
     expect(findings.map((finding) => finding.reference)).toEqual([
-      'apps/admin',
+      'apps/docs-site',
       'apps/react-router',
-      'apps/admin',
+      'apps/docs-site',
     ]);
     expect(findings.map((finding) => finding.line)).toEqual([1, 3, 4]);
   });
@@ -104,7 +108,9 @@ describe('fenced code', () => {
   });
 
   it('flags prose again after the fence closes', () => {
-    const findings = find('```ts\napps/admin\n```\nthen apps/react-router\n');
+    const findings = find(
+      '```ts\napps/docs-site\n```\nthen apps/react-router\n',
+    );
     expect(findings).toEqual([
       { line: 4, path: 'doc.md', reference: 'apps/react-router' },
     ]);

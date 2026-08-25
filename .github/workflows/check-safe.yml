@@ -253,6 +253,14 @@ jobs:
         # illustration and passes; `apps/react-router` is this repo's data.
         run: vp run package-refs:verify
 
+      - name: Nothing names a product or workspace that left this repo
+        id: departed_names_gate
+        # A name's absence from the tree cannot tell "departed" from "generic
+        # example", which is why this class went ungated through the whole
+        # extraction. scripts/departed-names.json names them outright instead,
+        # so the check is decidable and a reintroduced name fails here.
+        run: vp run departed:verify
+
       - name: No document names a file this PR renamed away
         id: renames_gate
         # docs:verify only resolves ROOT-ANCHORED tokens, so a backticked bare
@@ -464,7 +472,7 @@ jobs:
         # empty (valid) coverage file and fallow falls back to estimation.
         #
         # DB-free suites ONLY — this job has no Postgres. Every suite here is
-        # DB-free today (the DB-bound ones left with CQMS, #683), but the
+        # DB-free today, but the
         # constraint stands: it is what broke the previous attempt at this
         # (reverted 2026-07-14). See scripts/merge-coverage.mjs.
         env:

@@ -134,7 +134,7 @@ Two standing constraints, per the task brief, apply to every item below: (a)
 this repo's owner considers there to be too many packages already, so any
 opportunity implying a **third** npm name must be flagged as such and weighed
 against folding into `devkit` or `repo-standards` instead; (b) nothing
-CQMS-specific (the `@repo/scan-report`-dependent "blocked" skill group) may be
+product-specific (the `@repo/scan-report`-dependent "blocked" skill group) may be
 smuggled into a "generic" recommendation — the scan skills stay `@repo/*` and
 private until a real second consumer asks, per ADR-081's own stated restraint,
 and that restraint should hold here too.
@@ -194,7 +194,7 @@ and that restraint should hold here too.
    of the failure mode exists, rather than leaving the rejection as an abstract
    semver argument.
 
-6. **Do not fold the CQMS-shaped scan skills into either package under cover
+6. **Do not fold the product-shaped scan skills into either package under cover
    of these opportunities.** None of the above imply moving `linter-checker`,
    `fallow-code-checker`, `code-smell-checker`, `code-smell-zen`,
    `code-smell-shared`, or `app-graph` out of "blocked." That decision is

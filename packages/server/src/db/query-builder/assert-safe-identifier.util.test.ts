@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import { assertSafeIdentifier } from './assert-safe-identifier.util.ts';
 
 describe('assertSafeIdentifier', () => {
-  it.each(['scanner_id', 'v_scanner_llm_cost', '_leading_underscore', 'a'])(
+  it.each(['order_id', 'v_order_totals', '_leading_underscore', 'a'])(
     'accepts a valid identifier: %s',
     (identifier) => {
       expect(() => assertSafeIdentifier(identifier)).not.toThrow();

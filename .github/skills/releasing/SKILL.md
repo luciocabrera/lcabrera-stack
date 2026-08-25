@@ -66,8 +66,8 @@ Everything below is deliberate, and each one cost something to learn:
 - **`private: true` is what keeps a workspace out of the registry.**
   `changeset publish` skips private packages. The public ones no longer
   carry it, so nothing but the version number decides whether a merge publishes.
-  Every workspace not meant to publish MUST carry the flag: `api-server` and
-  `api-server-fast` had none at all and were one `npm publish` from going out.
+  Every workspace not meant to publish MUST carry the flag — two app workspaces
+  once had none at all and were one `npm publish` from going out.
 - **The tags are not a side effect of publishing — they need a git identity.**
   `changeset publish` tags with `git tag -m`, i.e. annotated, which requires
   `user.name`/`user.email`; `actions/checkout` sets neither. It also logs

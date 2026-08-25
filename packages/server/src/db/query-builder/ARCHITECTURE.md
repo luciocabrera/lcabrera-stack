@@ -3,7 +3,7 @@
 Generic, schema/table-agnostic Postgres query construction for the common
 single-table shapes — reads (flat list view, optional filter/sort/pagination;
 count; distinct) and writes (insert/update/delete; max-value) — the pattern
-every `scan-ingestion` list/rollup query used to hand-roll per file. Pure
+every list/rollup query used to hand-roll per file. Pure
 functions only; no DB access lives in this folder (see `@lcabrera/server/db/get-pool.util`
 for that) — callers execute the returned `{ text, values }` themselves (or use
 the `../*.util.ts` executors that pair each builder with `getPool`).
@@ -128,7 +128,7 @@ is).
 ## What this does NOT do
 
 - No joins, no subqueries, no raw SQL fragments — single table/view only.
-  A view that already encodes a join (e.g. `llm_usage.v_scanner_llm_cost`)
+  A view that already encodes a join (e.g. `reporting.v_order_totals`)
   is queried as a flat target; this builder doesn't build the join itself.
 - No multi-row `INSERT … VALUES (…), (…)`, no `ON CONFLICT`/upsert, no
   `UPDATE … FROM` — the write builders cover the single-row-shaped mutation
@@ -145,10 +145,10 @@ import { buildSelectQuery } from '@lcabrera/server/db/query-builder/build-select
 import { getPool } from '@lcabrera/server/db/get-pool.util';
 
 const { text, values } = buildSelectQuery({
-  fields: ['scanner_id', 'display_name', 'total_cost_usd'],
-  schema: 'llm_usage',
-  sort: [{ column: 'total_cost_usd', direction: 'desc' }],
-  table: 'v_scanner_llm_cost',
+  fields: ['order_id', 'customer_name', 'total_amount'],
+  schema: 'reporting',
+  sort: [{ column: 'total_amount', direction: 'desc' }],
+  table: 'v_order_totals',
 });
 
 const result = await getPool().query(text, values);
@@ -158,7 +158,7 @@ A future caller accepting a column name from a request:
 
 ```ts
 buildSelectQuery({
-  allowedColumns: ['total_cost_usd', 'call_count', 'scanner_id'],
+  allowedColumns: ['total_amount', 'order_count', 'order_id'],
   fields: [userProvidedSortColumn],
   // ...
 });

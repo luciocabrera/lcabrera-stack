@@ -12,11 +12,11 @@ const PUBLIC_FILES = [
   'packages/utils/src/merge-arrays.util.ts',
 ];
 const OTHER_FILES = [
-  'apps/admin/src/hooks/useRunStatusSocket.hook.ts',
+  'apps/docs-site/src/hooks/useRunStatusSocket.hook.ts',
   'apps/react-router/src/root.tsx',
 ];
 const PROJECT_DIRS = [
-  'apps/admin',
+  'apps/docs-site',
   'apps/react-router',
   'packages/ui',
   'packages/utils',

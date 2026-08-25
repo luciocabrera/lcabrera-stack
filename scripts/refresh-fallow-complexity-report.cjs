@@ -27,7 +27,7 @@
  *
  * @example
  * // Scope to all apps except one:
- * //   node scripts/refresh-fallow-complexity-report.cjs 'apps/*,!apps/shared'
+ * //   node scripts/refresh-fallow-complexity-report.cjs 'apps/*,!apps/docs-site'
  *
  * @example
  * // List every critical/high finding (e.g. for an agent handoff):

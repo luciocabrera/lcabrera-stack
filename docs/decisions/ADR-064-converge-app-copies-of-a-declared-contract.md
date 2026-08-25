@@ -2,17 +2,17 @@
 
 - **Status:** Accepted
 - **Date:** 2026-08-12
-- **Scope:** `apps/shared` (`api-shared`), `apps/api-server`, `apps/api-server-fast` — the enterprise-order column-filter contract
-- **Amended:** 2026-08-17 — all three workspaces left for
-  [`api-playground`](https://github.com/luciocabrera/api-playground) (#686)
+- **Scope:** the API servers' shared workspace and the two API servers — the enterprise-order column-filter contract
+- **Amended:** 2026-08-17 — all three workspaces left for a repository of their own (#686)
 - **Issue:** #567
 - **Extends:** [ADR-039](./ADR-039-duplicate-over-undeclared-edges.md) — its decision stands unchanged; this names the case it does not cover
 - **Related:** [ADR-038](./ADR-038-public-package-topology-by-runtime.md) (runtime split), [ADR-049](./ADR-049-findings-reports-are-produced-on-demand.md)
 
-> **⚠️ Amended 2026-08-17.** The body below is left exactly as written — a dated
-> record of what was true when the decision was made. The three workspaces in
-> its Scope moved to the `api-playground` repository in #686, so every artifact
-> named below is now over there.
+> **⚠️ Amended 2026-08-17.** The body below keeps its original reasoning — a
+> dated record of what was true when the decision was made, with the names of
+> departed workspaces removed and nothing else rewritten. The three workspaces in
+> its Scope moved to a repository of their own in #686, so every artifact named
+> below is now over there.
 >
 > **The status stays Accepted, because the decision was the rule, not the
 > example.** "Duplication is bought by an edge you may not declare; where the
@@ -20,7 +20,7 @@
 > extends [ADR-039](./ADR-039-duplicate-over-undeclared-edges.md), which is
 > live. Read the app copies below as the worked case that produced the rule.
 >
-> One thing did change in substance: `api-shared` declared `@lcabrera/server` as
+> One thing did change in substance: the shared workspace declared `@lcabrera/server` as
 > a workspace dependency, and the aliasing this ADR chose rested on that edge
 > being declared. It now resolves that package **from the registry** instead.
 > The rule is unaffected — a declared edge is a declared edge — but a reader
@@ -38,8 +38,8 @@ browser-safe package's graph.
 That reasoning is entirely about an **undeclared edge**. It says nothing about
 what the apps should do, and the apps read it as a licence to restate the shape
 too. By the time #567 was filed the same contract was written down five times:
-twice in the packages, once as TypeScript types in `apps/shared`, once as a Zod
-schema in `apps/api-server`, and once as a JSON Schema in `apps/api-server-fast`.
+twice in the packages, once as TypeScript types in the shared workspace, once as
+a Zod schema in one API server, and once as a JSON Schema in the other.
 Only the first two had a conformance test.
 
 The three app copies had already drifted, in the direction that costs a user a
@@ -56,7 +56,7 @@ the identical `filter` payload.
 **Duplication is bought by an edge you may not declare. Where the edge is
 already declared, alias.**
 
-`api-shared` declares `@lcabrera/server` as a dependency and hands the filters it
+The shared workspace declares `@lcabrera/server` as a dependency and hands the filters it
 parses straight to that package's `toQueryFilters`. Nothing about ADR-039's
 reasoning reaches it, so it no longer restates the shape:
 `enterpriseOrders.types.ts` aliases `ColumnFilter` and re-exports the variants.
@@ -70,7 +70,7 @@ that the state is accepted **and** reaches the query layer with exactly the
 clauses the React Router route builds from the same JSON. A validator that is
 stricter than the contract shows up as a rejection; one that is looser shows up
 as a different clause set. It is reached through a dedicated
-`api-shared/filter-contract` subpath rather than the package barrel, so it stays
+`filter-contract` subpath rather than the package barrel, so it stays
 out of both servers' startup path.
 
 **Where the contract has a closed vocabulary, the guard is anchored to it —
@@ -80,8 +80,8 @@ of this ADR claimed the stronger half for the whole.
 
 Anchored: each filter variant's cases are keyed by that variant's own operator
 union, so adding an operator to `@lcabrera/server`'s contract — or removing one
-— stops `api-shared` compiling until a case exists for it, and the new case then
-fails both API-server suites until their schemas accept it. An operator cannot go
+— stops the shared workspace compiling until a case exists for it, and the new case then
+fails both API suites until their schemas accept it. An operator cannot go
 unchecked.
 
 Not anchored: the `drafting` group. "A value the mappers drop" spans an absent
@@ -106,7 +106,7 @@ are closed sets and are checked strictly. Values are not: what becomes SQL is
 - The register of copies now has a mechanism behind it. What used to be five
   hand-maintained copies is one aliased type and two validators that fail a test
   the moment they disagree with the contract.
-- `api-shared` gains a second export subpath. Three options were open, and the
+- The shared workspace gains a second export subpath. Three options were open, and the
   cheapest was not the first one considered: exporting the cases from the package
   barrel (one line, but both servers import that barrel from `server.ts`, build
   with plain `tsc` and run `node dist/server.js` with no bundler and no
@@ -168,7 +168,7 @@ are closed sets and are checked strictly. Values are not: what becomes SQL is
   domain rather than the shape)
 - [ADR-039](./ADR-039-duplicate-over-undeclared-edges.md) — duplication over an
   undeclared edge, and where the cross-package guarantee lives
-- `apps/shared/src/features/enterpriseOrders/enterpriseOrders.fixtures.ts` — the
+- The shared workspace's `enterpriseOrders.fixtures.ts` — the
   contract cases
 - `apps/react-router/src/routes/enterprise-orders/filterContract.test.ts` — the
   package-to-package half of the guard

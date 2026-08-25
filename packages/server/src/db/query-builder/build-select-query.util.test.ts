@@ -5,13 +5,13 @@ import { buildSelectQuery } from './build-select-query.util.ts';
 describe('buildSelectQuery', () => {
   it('builds a plain select with explicit fields and no filters/sort/pagination', () => {
     const result = buildSelectQuery({
-      fields: ['scanner_id', 'display_name'],
-      schema: 'llm_usage',
-      table: 'v_scanner_llm_cost',
+      fields: ['order_id', 'customer_name'],
+      schema: 'reporting',
+      table: 'v_order_totals',
     });
 
     expect(result).toEqual({
-      text: 'SELECT "scanner_id", "display_name" FROM "llm_usage"."v_scanner_llm_cost"',
+      text: 'SELECT "order_id", "customer_name" FROM "reporting"."v_order_totals"',
       values: [],
     });
   });
@@ -32,20 +32,20 @@ describe('buildSelectQuery', () => {
 
   it('composes WHERE, ORDER BY, LIMIT, and OFFSET with correctly incrementing placeholders', () => {
     const result = buildSelectQuery({
-      fields: ['scanner_id', 'total_cost_usd'],
-      filters: [{ column: 'outcome', operator: 'eq', value: 'capped' }],
+      fields: ['order_id', 'total_amount'],
+      filters: [{ column: 'order_status', operator: 'eq', value: 'Shipped' }],
       limit: 10,
       offset: 20,
-      schema: 'llm_usage',
-      sort: [{ column: 'total_cost_usd', direction: 'desc' }],
-      table: 'v_scanner_llm_cost',
+      schema: 'reporting',
+      sort: [{ column: 'total_amount', direction: 'desc' }],
+      table: 'v_order_totals',
     });
 
     expect(result).toEqual({
       text:
-        'SELECT "scanner_id", "total_cost_usd" FROM "llm_usage"."v_scanner_llm_cost" ' +
-        'WHERE "outcome" = $1 ORDER BY "total_cost_usd" DESC LIMIT $2 OFFSET $3',
-      values: ['capped', 10, 20],
+        'SELECT "order_id", "total_amount" FROM "reporting"."v_order_totals" ' +
+        'WHERE "order_status" = $1 ORDER BY "total_amount" DESC LIMIT $2 OFFSET $3',
+      values: ['Shipped', 10, 20],
     });
   });
 
@@ -53,7 +53,7 @@ describe('buildSelectQuery', () => {
     expect(() =>
       buildSelectQuery({
         fields: ['a'],
-        schema: 'llm_usage; DROP SCHEMA cqms',
+        schema: 'reporting; DROP SCHEMA reporting',
         table: 't',
       }),
     ).toThrow();
@@ -63,8 +63,8 @@ describe('buildSelectQuery', () => {
     expect(() =>
       buildSelectQuery({
         fields: ['a'],
-        schema: 'llm_usage',
-        table: 't; DROP TABLE cqms.users',
+        schema: 'reporting',
+        table: 't; DROP TABLE reporting.users',
       }),
     ).toThrow();
   });
@@ -72,9 +72,9 @@ describe('buildSelectQuery', () => {
   it('rejects an unsafe field name', () => {
     expect(() =>
       buildSelectQuery({
-        fields: ['a; DROP TABLE cqms.users'],
-        schema: 'llm_usage',
-        table: 'v_scanner_llm_cost',
+        fields: ['a; DROP TABLE reporting.users'],
+        schema: 'reporting',
+        table: 'v_order_totals',
       }),
     ).toThrow();
   });
@@ -82,10 +82,10 @@ describe('buildSelectQuery', () => {
   it('rejects a field not present in an optional allowedColumns list', () => {
     expect(() =>
       buildSelectQuery({
-        allowedColumns: ['scanner_id'],
+        allowedColumns: ['order_id'],
         fields: ['password_hash'],
-        schema: 'llm_usage',
-        table: 'v_scanner_llm_cost',
+        schema: 'reporting',
+        table: 'v_order_totals',
       }),
     ).toThrow();
   });
@@ -93,10 +93,10 @@ describe('buildSelectQuery', () => {
   it('allows a field that is present in an optional allowedColumns list', () => {
     expect(() =>
       buildSelectQuery({
-        allowedColumns: ['scanner_id'],
-        fields: ['scanner_id'],
-        schema: 'llm_usage',
-        table: 'v_scanner_llm_cost',
+        allowedColumns: ['order_id'],
+        fields: ['order_id'],
+        schema: 'reporting',
+        table: 'v_order_totals',
       }),
     ).not.toThrow();
   });
