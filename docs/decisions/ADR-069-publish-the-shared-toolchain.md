@@ -9,14 +9,14 @@ of them can leave this repository. Reverse dependencies were enumerated from the
 workspace manifests on 2026-08-14
 (`grep -rn '"@repo/' --include=package.json apps packages`):
 
-| Workspace               | Consumers today                                                     |
-| ----------------------- | ------------------------------------------------------------------- |
-| `packages/vite-configs` | every app and every package                                         |
-| `packages/ts-configs`   | the generator that writes every workspace's tsconfig                |
-| `packages/plugins`      | `packages/vite-configs` only                                        |
-| `packages/node-runtime` | `apps/api-server`, `apps/api-server-fast`, `apps/scan-orchestrator` |
+| Workspace               | Consumers today                                      |
+| ----------------------- | ---------------------------------------------------- |
+| `packages/vite-configs` | every app and every package                          |
+| `packages/ts-configs`   | the generator that writes every workspace's tsconfig |
+| `packages/plugins`      | `packages/vite-configs` only                         |
+| `packages/node-runtime` | the two API servers and the job orchestrator         |
 
-The CQMS extraction (#672) forces the question but is not the reason to answer
+The second product's extraction (#672) forces the question but is not the reason to answer
 it. The reason is that this toolchain is the most reused thing in the repo and
 the only part of it that cannot be reused _outside_ the repo. A second
 repository built on these conventions has two options today: copy the files, or
@@ -241,15 +241,15 @@ still holds — only the registry step is withdrawn.
   defaults, `allowed-tools` and argument hints are per-repo. `validate-skills.yml`
   keeps checking the local copies.
 
-Published from **this** repo, not from the extracted CodePulse one. That is
+Published from **this** repo, not from the extracted one. That is
 forced by the wave ordering in #672: #677 is in wave B, blocked only by this ADR,
-while the CodePulse repository does not exist until #678 in wave C. A mechanism
+while the extracted repository does not exist until #678 in wave C. A mechanism
 that requires the new repo cannot be implemented by the issue that needs it.
 
-Ingestion is not part of the package. #677 turns `ingestIntoCqms` — which shells
-out to a hardcoded `packages/scan-ingestion/src/cli/ingest.cli.ts` with two
-hardcoded env-file paths — into a configured command that skips with a clear
-message when nothing is configured; #682 publishes the CodePulse ingestion CLI
+Ingestion is not part of the package. #677 turns the ingestion call — which
+shelled out to a hardcoded CLI path with two hardcoded env-file paths — into a
+configured command that skips with a clear message when nothing is configured;
+#682 publishes the extracted product's ingestion CLI
 this repo then configures it to call. That order means the skills never break,
 they only stop persisting until #682 lands.
 
@@ -311,7 +311,7 @@ export that uses it.
 `eslint-plugin-react-dom`, `eslint-plugin-react-hooks`,
 `eslint-plugin-react-refresh` and `eslint-plugin-react-x` at call time, and not
 one of them appears in `packages/vite-configs/package.json`. It works today only
-because `apps/react-router`, `apps/admin_system` and `packages/ui` each declare
+because `apps/react-router`, the second app and `packages/ui` each declare
 them for themselves. They all become peers, on the same reasoning as the peer
 rows above.
 
@@ -326,7 +326,7 @@ satisfy that resolver: the consuming workspace has to declare them too. `./fmt`,
 `./lint`, `./pack`, `./run` and `./eslint-base-custom-rules` have no such
 requirement.
 
-### The extracted CodePulse repo publishes under `@codepulse/*`
+### The extracted repo publishes under its own product scope
 
 The scope question is ADR-040's, asked in the new repo: a package that ships
 takes the product scope, one that does not stays `@repo/*`. Carrying `@lcabrera/*`
@@ -335,16 +335,16 @@ across would say the packages belong to this repo's product line, and carrying
 monorepo — the two names would then mean the same thing in two places, which is
 the confusion ADR-040 exists to prevent.
 
-`@codepulse/*` is the scope, and #682's ingestion CLI is the first package to
+Its own product scope is the answer, and #682's ingestion CLI is the first package to
 need it — a CLI installable from outside its own repo is precisely what makes the
 ingestion contract a versioned interface rather than a relative path.
 
-**Precondition:** the npm registry search for `scope:codepulse` returned zero
-packages on 2026-08-14, which shows no package is published there — it does **not**
-prove the scope is unclaimed, since an org can exist with nothing public and the
-search index lags. #678 must confirm the scope is registrable by the account that
-owns `@lcabrera` before depending on the name; if it is not, the fallback is
-`@lcabrera/codepulse-*`, which loses the product signal but nothing else.
+**Precondition:** the npm registry search for that scope returned zero packages
+on 2026-08-14, which shows no package is published there — it does **not** prove
+the scope is unclaimed, since an org can exist with nothing public and the search
+index lags. #678 must confirm the scope is registrable by the account that owns
+`@lcabrera` before depending on the name; if it is not, the fallback is a
+product-prefixed `@lcabrera/*` name, which loses the product signal but nothing else.
 
 ## Consequences
 
@@ -422,17 +422,17 @@ through a flag, and the coordination cost is paid every release. Rejected as
 speculative generality; folding is reversible, an npm name is not.
 
 **Fold `@repo/node-runtime` into `@lcabrera/server` or `@lcabrera/utils`, or
-inline it into `apps/scan-orchestrator`.** The first two are rejected above on
+inline it into the job orchestrator.** The first two are rejected above on
 ADR-038 and the purity guarantee. Inlining is rejected because of the consumer
-split in the Context table: `apps/scan-orchestrator` leaves with CQMS while
-`apps/api-server` and `apps/api-server-fast` stay, so inlining into the one that
+split in the Context table: the orchestrator leaves with the second product while
+the two API servers stay, so inlining into the one that
 leaves means duplicating `registerShutdownSignals` into the ones that do not —
 without the boundary ADR-039 asks for when duplication is the right call.
 
-**Ship the scan-report scripts from the CodePulse repo instead.** CodePulse owns
+**Ship the scan-report scripts from the extracted repo instead.** That product owns
 the ingestion contract and consumes the output, so it looks like the natural
 owner. Rejected on ordering: #677 is blocked only by this ADR and lands in wave
-B, while the CodePulse repo is not scaffolded until #678 in wave C. It would also
+B, while the extracted repo is not scaffolded until #678 in wave C. It would also
 make a repo that only wants deterministic lint reports install a code-quality
 product to get them, when the scan half already runs standalone via
 `--skip-ingest`.
@@ -443,27 +443,28 @@ it is invisible to consumers, who see only the `exports` subpaths.
 ## Amendment 2026-08-14 — scan-report does not publish
 
 The fourth row of the Decision table is withdrawn before it ever landed.
-`@repo/scan-report` stays private and leaves with the CQMS extraction (#679).
+`@repo/scan-report` stays private and leaves with the extraction (#679).
 The other three are unaffected: they are reusable in any TypeScript project,
 which is exactly what this package turned out not to be.
 
-**Every consumer is CQMS.** Traced across the implementing branch for #677:
-`packages/scan-ingestion`, `apps/scan-orchestrator` and `packages/agent-runner`
-all move to the CQMS repository under #679, and the one consumer staying here —
-the `app-graph` skill — is itself CQMS-coupled. Everything else the name matches
+**Every consumer belongs to the extracted product.** Traced across the
+implementing branch for #677: the ingestion package, the job orchestrator and the
+agent runner all move to the extracted repository under #679, and the one
+consumer staying here — the `app-graph` skill — is itself coupled to it.
+Everything else the name matches
 is registry wiring (`.fallowrc.json`, `tsconfig.entries.ts`,
 `vite.lint.shared.config.ts`, the lockfile), not a consumer. So no consumer
-survives the extraction with a reason to exist independently of CQMS.
+survives the extraction with a reason to exist independently of the extracted product.
 
-**And its contract is CQMS's contract.** The package's own `ARCHITECTURE.md`
+**And its contract is that product's contract.** The package's own `ARCHITECTURE.md`
 states the versioned surface is the CLI flags plus `SCHEMA_V1.md` /
-`REPORT_JSON_CONTRACT.md` — a report schema that means nothing without a CQMS to
+`REPORT_JSON_CONTRACT.md` — a report schema that means nothing without a consumer to
 ingest it. Publishing that would put an experimental application's internal
 contract on npm permanently, and an npm version cannot be withdrawn
 ([`packages/CLAUDE.md`](../../packages/CLAUDE.md)).
 
 **The cross-repo consumer that justified publishing was not consuming.** The
-argument was that this repository's skills feed CQMS from outside it. #714
+argument was that this repository's skills feed that product from outside it. #714
 records that ingestion had been failing silently the whole time: the runners
 passed `--local-path`, which the ingestion CLI retired for a required
 `--project-id`, and the failure was swallowed as a best-effort warning. The link
@@ -477,7 +478,7 @@ and the install-derived host root all stand.
 
 ## References
 
-- #673 (this decision), #672 (the CQMS extraction epic), #674, #675, #676, #677,
+- #673 (this decision), #672 (the extraction epic), #674, #675, #676, #677,
   #678, #682
 - [ADR-038](ADR-038-public-package-topology-by-runtime.md) — public package
   topology by runtime; why `pg` must not reach a client-safe graph
@@ -492,7 +493,7 @@ and the install-derived host root all stand.
 - [ADR-047](ADR-047-declare-optional-peer-dependencies.md) — optional peers, and
   proving a vestigial dependency by regenerating the lockfile
 - [ADR-048](ADR-048-adr-taxonomy-and-one-sequence.md) — why this ADR is in this
-  home: the decision stays when CQMS moves
+  home: the decision stays when the product moves
 - [ADR-057](ADR-057-publish-the-custom-lint-rules.md) — the precedent; make the
   repo's own conventions optional, then ship
 - [ADR-060](ADR-060-source-shipping-package-module-resolution.md) — what a

@@ -56,14 +56,13 @@ ruleTester.run('domain-folder-filename', rule, {
     {
       code,
       errors: [{ messageId: 'folderNamed' }],
-      filename:
-        'packages/scan-ingestion/src/ingestion/lint/lintViolation.types.ts',
+      filename: 'packages/server/src/ingestion/lint/lintViolation.types.ts',
     },
     {
       code,
       errors: [{ messageId: 'folderNamed' }],
       filename:
-        'apps/scan-orchestrator/src/queue/deterministicScannerConfigs.constants.ts',
+        'apps/react-router/src/queue/deterministicJobConfigs.constants.ts',
     },
     // A test file is checked against the subject it covers, so a misnamed
     // `*.constants.test.ts` cannot slip through where its subject could not.
@@ -125,7 +124,7 @@ ruleTester.run('domain-folder-filename', rule, {
     // camelCase folder, camelCase file — same subject, different spelling
     {
       code,
-      filename: 'apps/api-server/src/features/carSales/carSales.constants.ts',
+      filename: 'apps/react-router/src/features/carSales/carSales.constants.ts',
     },
     {
       code,

@@ -86,8 +86,8 @@ because the `bff` filter-options transport failed CORS under a bare
 | Browser fetcher         | `services/<entity>.api.ts`, same-origin                |
 
 The column lists in those `config/` modules are **copied, not imported**, from
-`apps/shared`. That is ADR-039 applied unchanged: this app may not take a runtime
-dependency on `api-shared`, and after #686 it will not be able to.
+the external API's domain layer. That is ADR-039 applied unchanged: this app may
+not take a runtime dependency on it, and it no longer could.
 
 **`VITE_API_URL` remains an override, and it is a _build-time_ one.** Set it and
 the same routes fetch from the external API instead — the loader through
@@ -144,9 +144,9 @@ load-more page cannot arrive in different shapes.
 - **The SSR first page no longer pays for a network hop**, and no route depends
   on the Vite dev proxy or on any CORS configuration.
 - **Two column lists now exist for `car_sales` and two for `wide_alltypes_150`**
-  — one here, one in `apps/shared` — and nothing checks that they agree. That is
-  the accepted cost of ADR-039, and it is temporary in this instance: the copy in
-  `apps/shared` leaves with #686. The colocated constants tests do check each
+  — one here, one on the API side — and nothing checks that they agree. That is
+  the accepted cost of ADR-039, and it was temporary in this instance: the other
+  copy left with the API. The colocated constants tests do check each
   app-local list against the columns its own table actually renders, which is the
   drift that would break a page.
 - **The override is a code path most runs do not take**, which is exactly how one
@@ -161,8 +161,8 @@ load-more page cannot arrive in different shapes.
   runtime switch was not built because the browser half cannot read `process.env`
   — it would send the loader external while the load-more stayed self-hosted,
   which is a worse failure than the one it replaces.
-- **`car-sales-api` is no longer part of rendering this app.** `vp run dev` still
-  starts it; it now serves the override and `apps/admin_system` only.
+- **The external API is no longer part of rendering this app.** `vp run dev` still
+  starts it; it now serves the override only.
 - **A page is now bounded by this process's connection pool** rather than by a
   separate server's. The pool is `@lcabrera/server`'s singleton, shared with the
   enterprise-orders routes and the filter-options service.
@@ -193,7 +193,7 @@ itself — and because `enterprise-orders` had already demonstrated the direct
 call, which means this option would have left two shapes in the app rather than
 one.
 
-**Import the column lists from `api-shared` instead of copying them.** Rejected
+**Import the column lists from the API's domain layer instead of copying them.** Rejected
 by ADR-039 before this issue existed: the edge is undeclared, and it is about to
 be unresolvable. The comment in `enterpriseOrders.constants.ts` records the same
 shortcut being considered and rejected there.

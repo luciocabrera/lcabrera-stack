@@ -14,12 +14,12 @@
 ADRs had accumulated in four directories with no rule saying which one a new
 decision belonged in:
 
-| Directory                           | Held                                                                    |
-| ----------------------------------- | ----------------------------------------------------------------------- |
-| `docs/cqms/decisions/`              | 47 ADRs — CQMS product decisions **and** repo/package/tooling decisions |
-| `apps/react-router/docs/decisions/` | 12 ADRs — showcase-app component decisions, numbered 001–012            |
-| `docs/agents/planning/adrs/`        | four numbered **drafts**                                                |
-| `docs/agents/decisions/`            | two documents that state they are _not_ ADRs                            |
+| Directory                           | Held                                                               |
+| ----------------------------------- | ------------------------------------------------------------------ |
+| the product home                    | 47 ADRs — product decisions **and** repo/package/tooling decisions |
+| `apps/react-router/docs/decisions/` | 12 ADRs — showcase-app component decisions, numbered 001–012       |
+| `docs/agents/planning/adrs/`        | four numbered **drafts**                                           |
+| `docs/agents/decisions/`            | two documents that state they are _not_ ADRs                       |
 
 Nothing checked any of it. `docs:verify` skips every `decisions` directory on
 purpose — an ADR records a point in time, so its paths are allowed to go stale —
@@ -31,17 +31,17 @@ Three failures had already landed:
 
 1. **`ADR-047` meant two documents.** `ADR-047-declare-optional-peer-dependencies`
    (#383) and the `ADR-047-server-error-translation-result-contract` draft (#381).
-   The draft's own header said "`docs/cqms/decisions/` currently ends at ADR-046" —
+   The draft's own header said the product home "currently ends at ADR-046" —
    true the day it was written, false a week later. A draft had reserved a number
    it did not own, and the sequence moved on underneath it.
-2. **Every number 001–012 already meant two things**, across the app and CQMS
+2. **Every number 001–012 already meant two things**, across the app and product
    namespaces. `docs/README.md` carried a ⚠️ section telling readers to always
    cite an ADR by path because of it. A trap that needs a warning label is a
    design defect, not a convention.
-3. **The extraction boundary ran straight through `docs/cqms/decisions/`.**
-   CQMS/CodePulse is going to its own repository, leaving the `@lcabrera/*`
+3. **The extraction boundary ran straight through the product home.**
+   That product is going to its own repository, leaving the `@lcabrera/*`
    packages here as the product. Twenty of those 47 ADRs are repo, package or
-   tooling decisions that must stay; 27 are CQMS decisions that must go. They
+   tooling decisions that must stay; 27 are product decisions that must go. They
    were interleaved, so the split was a per-file judgement call — and it got
    harder every week, because every new ADR landed on the wrong side of a line
    nobody had drawn yet.
@@ -53,20 +53,20 @@ readability; that one is a migration whose cost compounds.
 
 ### One home per tier, and the tier boundary is the extraction boundary
 
-| Tier   | Home                                | Holds                                                         | At extraction |
-| ------ | ----------------------------------- | ------------------------------------------------------------- | ------------- |
-| `repo` | `docs/decisions/`                   | the repo, the published `@lcabrera/*` packages, the toolchain | **stays**     |
-| `cqms` | `docs/cqms/decisions/`              | CQMS / CodePulse — schema, scanners, ingestion, orchestration | **leaves**    |
-| `app`  | `apps/react-router/docs/decisions/` | decisions internal to the showcase app                        | **stays**     |
+| Tier    | Home                                | Holds                                                         | At extraction |
+| ------- | ----------------------------------- | ------------------------------------------------------------- | ------------- |
+| `repo`  | `docs/decisions/`                   | the repo, the published `@lcabrera/*` packages, the toolchain | **stays**     |
+| product | the product's own home              | its schema, scanners, ingestion and orchestration             | **leaves**    |
+| `app`   | `apps/react-router/docs/decisions/` | decisions internal to the showcase app                        | **stays**     |
 
 The question that places an ADR is therefore not "what is it about" but **"when
-CQMS moves out, does this decision go with it?"** That is a question with one
+the product moves out, does this decision go with it?"** That is a question with one
 answer, which is what a taxonomy needs. "Which directory feels right" is not.
 
 A decision that genuinely spans two tiers is written where its _durable_ half
 lives and cross-referenced from the other. ADR-005 (the generic `Form` in
-`packages/ui`) is the worked example: it was written to serve CQMS forms, but the
-component is product, so it is `repo` tier and CQMS cites it.
+`packages/ui`) is the worked example: it was written to serve that product's
+forms, but the component is product, so it is `repo` tier and the product cites it.
 
 ### One global number sequence
 
@@ -107,21 +107,21 @@ and `check-safe.yml`.
 
 ## Consequences
 
-- **Extraction becomes a directory move.** `docs/cqms/` — spec, status, plans and
+- **Extraction becomes a directory move.** The product's docs — spec, status, plans and
   now exactly its own decisions — is the unit that leaves.
 - **A bare `ADR-NNN` is citable again** for anything from 013 up. The ⚠️
   two-namespace warning in `docs/README.md` shrinks to a footnote about the
   grandfathered range.
 - **Both sequences are sparse.** `docs/decisions/` runs 001–005, 008, 014, 032,
-  035–040, 042–047; `docs/cqms/decisions/` holds the rest. That is not untidy — it
+  035–040, 042–047; the product home held the rest. That is not untidy — it
   is the record of the two tracks having been interleaved, and closing the gaps
   would mean renumbering, which is what this ADR refuses.
 - **`git log --follow` still reaches every moved ADR**; the split used `git mv`.
 - **Placing a new ADR takes one question**, and getting it wrong is now a gate
   failure rather than a thing someone notices during an extraction.
-- **The four `@lcabrera/server` drafts retarget from `docs/cqms/decisions/` to
-  `docs/decisions/`** — they are product-package decisions and were pointed at
-  the CQMS home only because it was the only home that existed.
+- **The four `@lcabrera/server` drafts retarget to `docs/decisions/`** — they are
+  product-package decisions and were pointed at the other home only because it
+  was the only home that existed.
 
 ## Alternatives considered
 
@@ -132,7 +132,7 @@ citation, in exchange for cosmetics. See above.
 extraction is a filesystem operation, and a field does not move files. It would
 also leave the split as a query rather than a boundary you can see.
 
-**Per-tier number prefixes (`REPO-001`, `CQMS-001`).** Rejected — it renames every
+**Per-tier number prefixes (`REPO-001`, `APP-001`).** Rejected — it renames every
 existing ADR, which is renumbering wearing a different hat, and the repo's
 citation habit is already `ADR-NNN`.
 

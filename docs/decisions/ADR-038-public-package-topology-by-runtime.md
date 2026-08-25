@@ -33,8 +33,8 @@ Two further observations shaped the fix rather than just the diagnosis:
   read in server code both typecheck.
 - **"Data access" never covered the whole package.** `crypto/` (scrypt hashing)
   and `tokens/` (bearer-token minting) are credential primitives containing no
-  SQL, consumed by `apps/react-router/src/auth/` as well as by
-  `@repo/scan-ingestion`.
+  SQL, consumed by `apps/react-router/src/auth/` as well as by the
+  server-side workspaces.
 
 ## Decision
 

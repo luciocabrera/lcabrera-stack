@@ -24,11 +24,11 @@ fallow's own reported numbers confirms those tiers exactly.
 At an estimated 0%, **any function with cyclomatic ≥ 5 exceeds 30**. So
 `login.action.ts` — cyclomatic 5, cognitive 2, about as simple as code gets —
 was reported `critical`. The gate was measuring _missing tests_ and calling it
-complexity, and it would keep blocking every future CQMS PR the same way.
+complexity, and it would keep blocking PRs the same way.
 
 A first attempt to fix this by feeding Istanbul data was reverted the same day
-it landed: it ran `vp run --filter @repo/scan-ingestion test:coverage`, but
-scan-ingestion's `queries/*` suites are **real-DB integration tests** —
+it landed: it ran a `test:coverage` task whose `queries/*` suites are
+**real-DB integration tests** —
 `getPool()` → `readEnvConfig()` throws on the audit job's missing `DB_*`. It
 had only ever passed locally, against a running Postgres.
 
@@ -40,10 +40,10 @@ had only ever passed locally, against a running Postgres.
 into the `fallow-audit` job in `check-safe.yml`. Coverage replaces the guess
 with measurement wherever tests actually exist.
 
-### 2. Split scan-ingestion's suites — coverage must never need a database
+### 2. Split the DB-bound suites — coverage must never need a database
 
 This is the piece the reverted attempt lacked, and the reason it can land now.
-`packages/scan-ingestion/vite.config.ts` keeps `test` as the full suite (needs
+That workspace's `vite.config.ts` keeps `test` as the full suite (needs
 Postgres, so `vp run test:all` is unchanged) and adds `test:unit` /
 `test:coverage`, which exclude `src/queries/**` and
 `src/ingestion/ingestReport.test.ts` — the only DB-dependent suites. The
@@ -60,8 +60,7 @@ only trustworthy via the full `test` task.
 ### 3. One merged report, one shared reporter config
 
 `vp run coverage:merge` (`scripts/merge-coverage.mjs`) runs `test:coverage`
-across the DB-free workspaces (`@repo/data-access`, `@repo/scan-ingestion`,
-`admin-system`) and merges their reports into
+across the DB-free workspaces and merges their reports into
 `reports/fallow/coverage/coverage-final.json` — under the canonical
 `reports/fallow/` tree, and gitignored by the existing `coverage/` rule since
 it is a build product, not a tracked snapshot. Istanbul keys entries by
@@ -89,7 +88,7 @@ the repo. Both are one line to add.
   is the gate working, not a regression.
 - **`coverage_source: "mixed"` is the expected steady state.** Files with no
   tests at all have nothing to measure and still fall back to the estimate, so
-  ~18 findings on untested `admin_system` route actions are unchanged by this
+  the findings on untested route actions elsewhere are unchanged by this
   ADR. Coverage cannot fix them; tests or extraction can (the repo's own
   convention: move branchy logic into a colocated tested `.util.ts`, which both
   lowers the caller's cyclomatic and earns real coverage).
@@ -107,7 +106,7 @@ the repo. Both are one line to add.
 ## Alternatives rejected
 
 - **Provision Postgres + migrations in the audit job** — heavy, and it races
-  the shared CQMS queue (`runQueuedScan`, a documented flake). This is what the
+  a shared job queue (a documented flake). This is what the
   2026-07-14 revert was escaping.
 - **Raise `maxCrap`** — would hide real untested complexity everywhere, not
   just where coverage is unmeasurable.

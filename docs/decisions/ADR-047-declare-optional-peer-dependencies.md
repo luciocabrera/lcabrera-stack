@@ -19,9 +19,8 @@ become vestigial. It concluded that `vitest` is load-bearing (every workspace
 invokes its binary **by path**, which needs a direct dep) but that
 `@vitest/coverage-v8` is not, because "vitest resolves the v8 coverage provider
 from vite-plus's own dependency tree at runtime". #358 removed all seven
-declarations — `apps/admin_system`, `apps/react-router`, `packages/api`,
-`packages/node-runtime`, `packages/scan-ingestion`, `packages/server`,
-`packages/utils` — and `cleanupUnusedCatalogs` pruned the catalog entry.
+declarations — `apps/react-router`, `packages/api`, `packages/node-runtime`,
+`packages/server` and `packages/utils` among them — and `cleanupUnusedCatalogs` pruned the catalog entry.
 
 Both halves of that reasoning were false, and the evidence behind it could not
 have shown so:

@@ -5,16 +5,15 @@ that workspace left the repository)**.
 
 > **⚠️ Amended 2026-08-17.** The body below is left exactly as written — a dated
 > record of what was true when the decision was made. What has changed since:
-> `apps/api-server`, `apps/api-server-fast` and `apps/shared` moved to the
-> [`api-playground`](https://github.com/luciocabrera/api-playground) repository
-> in #686, so every `apps/api-server/…` bullet below now describes a path in
-> that repository, not this one.
+> the two API workspaces and their shared one moved to a repository of their
+> own, so every API-side bullet below now describes a path over there, not one
+> here.
 >
 > **What still governs here:** the showcase owns the DDL for the tables it
 > serves and seeds itself — `apps/react-router/db/` and its `seed-db.mjs`.
 >
 > **What this ADR can no longer promise:** the last line of the Decision says
-> "nothing in this repository names a path under `apps/api-server/`". That was
+> "nothing in this repository names a path under the API workspace". That was
 > the point of the split and it held; it is now true for the trivial reason that
 > the workspace is gone. The consequence the ADR did not foresee is that
 > `setup_large_data.sql` is still duplicated — but the two copies are now in
@@ -23,15 +22,15 @@ that workspace left the repository)**.
 
 ## Context
 
-The demo schema lived in one place: `apps/api-server/db/`, applied by a root
+The demo schema lived in one place: the API workspace's `db/`, applied by a root
 script (`scripts/seed-db.cjs`) that named both files by path. That was coherent
 while the API servers were the only thing that talked to Postgres.
 
 Two changes broke it. [ADR-070](../../apps/react-router/docs/decisions/ADR-070-showcase-serves-its-own-table-rows.md)
 made the showcase serve `car_sales` and `wide_alltypes_150` from its own
 process, joining `enterprise_orders`, which it already served — so the showcase
-now queries every table in that directory. And #686 moves `apps/api-server`,
-`apps/api-server-fast` and `apps/shared` to their own repository, which takes
+now queries every table in that directory. And #686 moves the two API
+workspaces and their shared one to their own repository, which takes
 the directory with them.
 
 The result would have been a showcase whose `/enterprise-orders`,
@@ -47,19 +46,19 @@ nothing else present.
 - `apps/react-router/db/setup_enterprise_orders.sql` — **moved** here. Only the
   showcase serves `enterprise_orders`.
 - `apps/react-router/db/setup_large_data.sql` — a **copy**.
-  `apps/api-server/db/setup_large_data.sql` stays where it is. Both sides serve
+  The API side's copy stays where it is. Both sides serve
   `car_sales` and `wide_alltypes_150`.
 - `apps/react-router/scripts/seed-db.mjs` — the showcase's runner. It creates
   `DB_NAME` if absent and applies both files through `pg`, so seeding the
   showcase needs Docker and Node and no `psql`. Run it with
   `vp run --filter vite-react-compiler seed` (or `db:seed` to bring the
   database up first).
-- `apps/api-server/scripts/seed-db.mjs` — the API side's runner, the former root
+- The API side's `scripts/seed-db.mjs` — its runner, the former root
   script, now resolving its one SQL file inside its own workspace. It keeps the
   host-`psql`-or-container behaviour it always had.
-  `car-sales-api-fast`'s `seed` delegates to it by workspace name rather than by
-  path, so both API workspaces travel to the new repository intact and nothing
-  in this repository names a path under `apps/api-server/`.
+  The second API workspace's `seed` delegates to it by workspace name rather
+  than by path, so both travel to the new repository intact and nothing in this
+  repository names a path inside them.
 
 The `\timing on` line at the head of each SQL file is gone. It is a `psql`
 meta-command, and removing it is what lets any client apply these files; nothing
@@ -75,7 +74,7 @@ The handling has two phases:
 
 1. **While both copies are in this repository** they are byte-identical, and a
    change to one belongs in the other in the same commit
-   (`diff apps/react-router/db/setup_large_data.sql apps/api-server/db/setup_large_data.sql`).
+   (`diff` the showcase's `setup_large_data.sql` against the API side's).
    `apps/react-router/db/README.md` states this where an editor will see it.
 2. **After #691 moves the API workspaces out**, the copies are independent. Each
    repository's copy is authoritative for its own routes and neither promises the
@@ -84,7 +83,7 @@ The handling has two phases:
    Nothing enforces equality across the repository boundary, and nothing should
    pretend to.
 
-**The API side no longer creates `enterprise_orders`.** `apps/api-server` still
+**The API side no longer creates `enterprise_orders`.** It still
 has enterprise-order endpoints, and in this repository they keep working because
 the showcase seeds that table into the same database. In the extracted repository
 they will not, until it either brings its own DDL or drops those endpoints —
@@ -97,7 +96,7 @@ missing one. The showcase's own seed is the one the README and COMMANDS.md point
 at.
 
 **Sonar's exclusion list is now wrong until the UI is updated.**
-`**/apps/api-server/db/**` no longer covers the moved files;
+The API workspace's `db/` glob no longer covers the moved files;
 `.sonarcloud.properties` records the entry the UI needs (it is a mirror — the UI
 is the source of truth, so this file alone cannot fix it).
 
@@ -136,7 +135,7 @@ is the source of truth, so this file alone cannot fix it).
      request input.
    - Nothing applies it: the compose file mounts no SQL and has no
      `docker-entrypoint-initdb.d`, and the seeding scripts named only the two
-     files in `apps/api-server/db/`. The running local database confirms it —
+     files in the API workspace's `db/`. The running local database confirms it —
      `car_sales_db` contains exactly `car_sales`, `enterprise_orders` and
      `wide_alltypes_150`, so the dump had never been applied.
 

@@ -11,9 +11,9 @@
 [`packages/server/src/db/query-builder/`](../../packages/server/src/db/query-builder/)
 is a set of pure functions that assemble parameterized SQL over raw `pg`, with no
 ORM. Its `ARCHITECTURE.md` states the module's non-goals: **no joins, no
-subqueries, no raw SQL fragments**. Separately,
-CQMS's `PRD.md` (now in the CQMS repository) states that rollup belongs in Postgres
-**views**.
+subqueries, no raw SQL fragments**. Separately, a
+product spec written against this repository stated that rollup belongs in
+Postgres **views**.
 
 Row grouping needs `GROUP BY`, aggregates, and — for a count of groups — a
 subquery. At the time of this decision the repo generated none of them: nothing
@@ -155,6 +155,6 @@ while leaving orphaned detail rows: a hierarchy with holes.
 
 - [`docs/agents/planning/table-row-grouping-plan.md`](../agents/planning/table-row-grouping-plan.md) §1.4, §2.3, §4 — the design session, and the probe output quoted above
 - [`packages/server/src/db/query-builder/ARCHITECTURE.md`](../../packages/server/src/db/query-builder/ARCHITECTURE.md) — the non-goals this qualifies
-- CQMS's `PRD.md`, now in the CQMS repository — the "rollup belongs in views" statement this qualifies
+- That product spec — the "rollup belongs in views" statement this qualifies
 - [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md) — where legality comes from, and why the builder does not re-derive it
 - Issues #551 (this decision), #562 (the emission half), #573 (the guard rails)

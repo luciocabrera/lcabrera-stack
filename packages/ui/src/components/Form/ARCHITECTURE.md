@@ -5,10 +5,8 @@ applied to forms (`fields` instead of `columns`). Renders from a recursive
 `group`/`row`/`tab`/leaf field tree, submits through React Router 7's native
 `<Form>` (or `useFetcher().Form` as an opt-in), and supports `create`/`edit`/
 `view` modes with dirty-check-gated edit submission and a built-in
-Accept/Cancel footer (see ADR-005, and
-[ADR-014](../../../../../docs/decisions/ADR-014-path-field-and-form-cancel-ux.md)
-for Cancel's discard-changes confirmation — that ADR's `path` field half is
-superseded and its code deleted, so `Form.types.ts` has no `'path'` field).
+Accept/Cancel footer (see ADR-005; Cancel's discard-changes confirmation is
+documented under **Cancel & Discard-Changes Flow** below).
 
 ## File Structure
 

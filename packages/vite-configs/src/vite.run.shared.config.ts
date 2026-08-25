@@ -33,7 +33,7 @@ const DEFAULT_ENV_FILES = ['./.env'] as const;
 /**
  * Sources one env file into the shell if it is there.
  *
- * Load-if-exists (`[ -f ]`) mirrors api-server's `--env-file-if-exists`, so a
+ * Load-if-exists (`[ -f ]`) mirrors Node's `--env-file-if-exists`, so a
  * missing file is skipped rather than fatal; the `tr -d "\r"` strips CRs from
  * Windows/WSL-authored .env files.
  */

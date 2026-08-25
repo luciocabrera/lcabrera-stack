@@ -26,14 +26,14 @@ describe('selectRows', () => {
 
     const result = await selectRows<{ readonly id: string }>({
       fields: ['id'],
-      schema: 'llm_usage',
+      schema: 'reporting',
       sort: [{ column: 'id', direction: 'asc' }],
-      table: 'v_daily_llm_cost',
+      table: 'v_daily_totals',
     });
 
     expect(result).toEqual(rows);
     expect(query).toHaveBeenCalledWith(
-      'SELECT "id" FROM "llm_usage"."v_daily_llm_cost" ORDER BY "id" ASC',
+      'SELECT "id" FROM "reporting"."v_daily_totals" ORDER BY "id" ASC',
       [],
     );
   });
@@ -43,13 +43,13 @@ describe('selectRows', () => {
 
     await selectRows({
       fields: ['id'],
-      filters: [{ column: 'scan_id', operator: 'eq', value: 'abc' }],
-      schema: 'llm_usage',
-      table: 'v_daily_llm_cost',
+      filters: [{ column: 'order_id', operator: 'eq', value: 'abc' }],
+      schema: 'reporting',
+      table: 'v_daily_totals',
     });
 
     expect(query).toHaveBeenCalledWith(
-      'SELECT "id" FROM "llm_usage"."v_daily_llm_cost" WHERE "scan_id" = $1',
+      'SELECT "id" FROM "reporting"."v_daily_totals" WHERE "order_id" = $1',
       ['abc'],
     );
   });
@@ -58,7 +58,7 @@ describe('selectRows', () => {
     await expect(
       selectRows({
         fields: ['id'],
-        schema: 'llm_usage',
+        schema: 'reporting',
         table: 'v; DROP TABLE',
       }),
     ).rejects.toThrow();
@@ -71,13 +71,13 @@ describe('selectRows', () => {
 
     await selectRows({
       fields: ['id'],
-      schema: 'llm_usage',
-      table: 'v_daily_llm_cost',
+      schema: 'reporting',
+      table: 'v_daily_totals',
       tx: { query: txQuery } as unknown as TransactionClient,
     });
 
     expect(txQuery).toHaveBeenCalledWith(
-      'SELECT "id" FROM "llm_usage"."v_daily_llm_cost"',
+      'SELECT "id" FROM "reporting"."v_daily_totals"',
       [],
     );
     expect(query).not.toHaveBeenCalled();
@@ -93,8 +93,8 @@ describe('selectRows', () => {
     const rejects = expect(
       selectRows({
         fields: ['id'],
-        schema: 'llm_usage',
-        table: 'v_daily_llm_cost',
+        schema: 'reporting',
+        table: 'v_daily_totals',
       }),
     ).rejects;
 

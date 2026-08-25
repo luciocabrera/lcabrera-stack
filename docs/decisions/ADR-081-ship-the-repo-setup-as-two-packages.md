@@ -59,8 +59,8 @@ directly, which is why `.claude/skills` is a symlink to `.github/skills` here.
 Installing a package into `node_modules` puts nothing where any of them look.
 
 A gate is invoked by **name**: `verify-pr.mjs` imports its siblings under
-`scripts/lib/`, and `@repo/scan-report/deterministic-scan` is imported as a
-module. Copying that into `.github/skills/` puts executable code outside node's
+`scripts/lib/`, and a scanner package's `deterministic-scan` entry was imported
+as a module. Copying that into `.github/skills/` puts executable code outside node's
 resolution graph — no peer checks, no dedup, one vendored copy per consumer that
 no upgrade can ever reach.
 
@@ -89,7 +89,7 @@ Any single mechanism gets one of the two wrong.
    rejected as an _additional_ route — the two are compatible, and a consumer who
    only uses Claude Code would gain a read-only install with no drift to
    reconcile. Deferred rather than declined, on the restraint this ADR already
-   applies to `@lcabrera/scan-report`: no second repository has asked. Recorded
+   applies to that scanner package: no second repository has asked. Recorded
    because it is what two of the three projects surveyed in
    [#716](https://github.com/luciocabrera/vite-react-compiler/issues/716) chose
    exclusively, and the third offers as one of two co-equal routes — so its
@@ -146,7 +146,7 @@ resolve every reference, and execute each bin.
 **The three scan skills are classified not-yet-portable**, and the reason is
 recorded rather than left as an omission: `linter-checker`, `fallow-code-checker`
 and `code-smell-checker` are prose whose first instruction runs a scanner from
-`@repo/scan-report`, which stays `@repo/*` and `private: true`. Publishing it
+a package that stays private. Publishing it
 would be justified only by those three skills, and no second repository has asked
 for them. #677 already decided that package's fate from an inventory rather than
 a real consumer list and got it wrong in the other direction; this ADR declines to
@@ -180,7 +180,7 @@ into `repo-standards`.
 
 ## Alternatives considered
 
-- **Publish `@lcabrera/scan-report` alongside the two packages.** Rejected on the
+- **Publish the scanner package alongside these two.** Rejected on the
   consumer list, not on the code — the package is already host-agnostic
   (`resolveHostRoot` derives the consumer root from an installed path, ingestion
   is a consumer-supplied command, fallow is an optional peer, and its report

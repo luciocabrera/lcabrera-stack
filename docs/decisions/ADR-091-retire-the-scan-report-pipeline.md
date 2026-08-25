@@ -10,10 +10,10 @@ package as `@lcabrera/scan-report`. Its
 withdrew that, and its reasoning was unambiguous:
 
 > "no consumer survives the extraction with a reason to exist independently of
-> CQMS"
-> "the one consumer staying here — the `app-graph` skill — is itself
-> CQMS-coupled"
-> "a report schema that means nothing without a CQMS to ingest it"
+> the extracted product"
+> "the one consumer staying here — the `app-graph` skill — is itself coupled to
+> it"
+> "a report schema that means nothing without a consumer to ingest it"
 
 The question that amendment answered was **publish or do not publish**. It
 concluded "do not — it leaves with the extraction." The extraction happened; the

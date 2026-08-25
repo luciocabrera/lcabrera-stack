@@ -6,7 +6,7 @@
 
 `packages/ui`, `api`, `server` and `utils` are the product ([ADR-039](ADR-039-duplicate-over-undeclared-edges.md)); the apps exist to exercise them. They were all named `@repo/*`, which is the placeholder `create-turbo` scaffolds with. `@repo` is not a scope anyone owns — every probe of `@repo/<anything>` on the npm registry 404s — so nothing could ever be published under it, and a consumer resolving `@repo/ui` would fail.
 
-The other six workspaces (`vite-configs`, `ts-configs`, `plugins`, `agent-runner`, `node-runtime`, `scan-ingestion`) are build and tooling infrastructure. They are not published and there is no plan to publish them.
+The other six workspaces — `vite-configs`, `ts-configs`, `plugins`, `node-runtime` and the two server-side ones — are build and tooling infrastructure. They are not published and there is no plan to publish them.
 
 ## Decision
 
