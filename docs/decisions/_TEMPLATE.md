@@ -3,12 +3,15 @@
   file, strips this comment, and fills in the number and heading; copying it by
   hand does the same job.
 
-  WHERE IT GOES is not a matter of taste — pick the home by one question: when
-  CQMS moves to its own repository, does this decision go with it?
-  ADR-048-adr-taxonomy-and-one-sequence.md has the table. WHICH NUMBER is not a
-  choice either: `vp run adr:verify` prints the next free one, and it is global
-  across all three homes. (ADR-001..012 predate that rule and each mean two
-  things; cite one of those by path, and never renumber them.)
+  WHERE IT GOES is not a matter of taste — pick the home by one question: is
+  this about the repo and what it ships, or about the showcase app's own
+  internals? `ADR_HOMES` in packages/repo-standards/scripts/adr-registry.mjs is
+  the set of homes, and `vp run adr:verify` enforces it. WHICH NUMBER is not a
+  choice either: `vp run adr:verify` prints the next free one,
+  and it is global across both homes. (A few low numbers predate that rule and
+  exist in both — `GRANDFATHERED_DUPLICATES` in
+  packages/repo-standards/scripts/adr-registry.mjs is the set. Cite one of those
+  by path, and never renumber them.)
 
   `vp run adr:verify` checks placement, filename, heading number and index
   freshness — it does NOT read the sections below. They are the convention this

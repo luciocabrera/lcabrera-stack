@@ -96,8 +96,9 @@ which one you are in before renaming anything:
 
 - **An artifact folder** — one holding a component, context or route module — names
   the file after the artifact, because the folder is a container for that one
-  thing: `TableConfig/TableConfigContext.types.ts`,
-  `project-detail/ProjectDetail.types.ts`, `trigger-scan/triggerScan.constants.ts`.
+  thing: `TableConfig/TableConfigContext.types.ts` and
+  `enterprise-orders/EnterpriseOrders.constants.tsx` — a PascalCase artifact
+  folder and a kebab-case route one.
   `packages/ui/src/PATTERNS.md` owns that spelling.
 - **A catch-all folder** — `types/`, `constants/`, `utils/` — names the file after
   its subject, because the folder names a _kind_, not a domain, and holds many:

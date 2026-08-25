@@ -52,18 +52,20 @@ Start here when you're not sure where something belongs, or where to look.
 ## ADRs: two homes, one number sequence
 
 The home is chosen by **scope — is this a decision about the repository and what
-it ships, or about the showcase app's own internals?**
-([ADR-048](./decisions/ADR-048-adr-taxonomy-and-one-sequence.md).)
+it ships, or about the showcase app's own internals?** The one sequence across
+both homes is [ADR-048](./decisions/ADR-048-adr-taxonomy-and-one-sequence.md);
+that ADR's own table still lists the third home it was written under, so
+`ADR_HOMES` in
+[`adr-registry.mjs`](../packages/repo-standards/scripts/adr-registry.mjs) — which
+`vp run adr:verify` enforces — is the live set.
 
 | Home                                                                        | Holds                                                                   |
 | --------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | [`docs/decisions/`](./decisions/)                                           | the repo, the published `@lcabrera/*` packages, the toolchain           |
 | [`apps/react-router/docs/decisions/`](../apps/react-router/docs/decisions/) | the showcase app — Modal, Tooltip, the store pattern, grid interaction… |
 
-There were three. The split was originally drawn by "when CQMS moves to its own
-repository, does this decision go with it?" — that move happened in #683 and the
-CQMS home went with it, which is why an old ADR may cite a number that now
-resolves in only one place.
+A third home existed while a second product lived here, and left with it. That
+is why an old ADR may cite a number which now resolves in only one place.
 
 ### Reading an ADR written in an earlier era
 
@@ -77,7 +79,9 @@ written:
 | **Public packages** | the `@lcabrera/*` packages are the product; one app exercises them |
 
 So an older ADR naming one of the car-sales API workspaces, or the CQMS admin
-app, is not necessarily rot. Two cases, and they are treated differently on purpose:
+app, is not necessarily rot — they were extracted to their own repositories
+(#683, #686) and the ADR bodies that cite them stay verbatim, by the rule at the
+end of this section. Two cases, and they are treated differently on purpose:
 
 - **Named as Context** — the evidence that motivated a decision about the
   packages. Left exactly as written. Editing it would falsify _why_ the decision
@@ -102,10 +106,12 @@ titles as prose rather than as filenames, run `vp run adr:list`.
 in [`docs/agents/planning/adr-drafts/`](./agents/planning/adr-drafts/) and hold
 **no number** — one is assigned at adoption, never at proposal.
 
-⚠️ **Numbers 001–012 predate the single sequence and each mean two things** —
-`ADR-011` is grid interaction _and_ the agent-runner permission model. Cite one of
-those by path. They are deliberately not renumbered: an ADR is a dated record.
-The same trap exists for "Phase 2" — see STATUS.md §1.
+⚠️ **A few low numbers predate the single sequence and exist in both homes** —
+`ADR-004` is the package standalone quality gate _and_ React Compiler. Cite those
+by path. `GRANDFATHERED_DUPLICATES` in
+[`adr-registry.mjs`](../packages/repo-standards/scripts/adr-registry.mjs) is the
+set, and `vp run adr:verify` enforces it. They are deliberately not renumbered:
+an ADR is a dated record.
 
 ---
 
@@ -122,19 +128,18 @@ repo docs above, not left in these:
   memory should shrink to a link.
 - **Plans** (`~/.claude/plans/`) — one agent's scratch for one task. Ephemeral.
   When a plan yields a durable decision or spec, it **graduates** into the repo
-  (an ADR, a STATUS entry, or a `*_PLAN.md`) — the way `BIOME_SCANNER_PLAN.md`
-  did — and the scratch file is then disposable. A plan's _claim_ (who's on it,
-  which files) graduates to the in-git work register at
-  [`docs/coordination/`](./coordination/README.md), so parallel agents can see it;
-  the old opaque scratch names are catalogued in
-  [`PLAN_TRIAGE.md`](./coordination/PLAN_TRIAGE.md).
+  — an ADR for a decision, or a `*_PLAN.md` for a spec — and the scratch file is
+  then disposable. A plan's _claim_ (who's on it, which files) graduates to the
+  in-git work register at
+  [`docs/coordination/`](./coordination/README.md), so parallel agents can see
+  it.
 
 ---
 
 ## Hygiene (how this stays true)
 
 - **Update the canonical doc in the same commit as the change that moves it.**
-  STATUS.md and COMMANDS.md both say this at the top; it applies to every doc here.
+  COMMANDS.md says this at the top; it applies to every doc here.
 - **`COMMANDS.md` is machine-checked.** `vp run commands:verify` (CI, via
   `check:safe`) fails the build if a documented command doesn't resolve or a real
   script is undocumented. It cannot check prose — so prose still needs care.

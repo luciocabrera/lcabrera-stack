@@ -63,7 +63,7 @@ already governs
 
 ## The external-API override
 
-**`VITE_API_URL` points the same routes at an external `car-sales-api`** — the
+**`VITE_API_URL` points the same routes at an external API server** — the
 loader through `readCarSalesPage` / `readWideAlltypes150Page`, the browser
 through `fetchCarSalesPage` / `fetchWideAlltypes150Page`. Both endpoints answer
 the identical `{ data, hasMore, total }`, so nothing downstream can tell which
@@ -134,11 +134,11 @@ grep -n -A3 '^var getApiBaseUrl' apps/react-router/build/server/index.js
 ```
 
 In **dev** there is no prebuilt bundle, so exporting the variable before the dev
-server is enough — that is all `dev:external-api` does:
+server is enough:
 
 ```bash
 vp run db:up
-vp run dev:external-api    # api-server + showcase, VITE_API_URL pre-set
+VITE_API_URL=http://localhost:3001/api vp run dev:showcase
 ```
 
 and the self-hosted default:
@@ -151,7 +151,7 @@ vp run dev:showcase        # showcase alone
 ### Keeping the override honest
 
 An override nobody runs is an override that breaks silently, so it is exercised
-three ways: `dev:external-api` by hand;
+three ways: by exporting `VITE_API_URL` by hand;
 `services/isExternalApiEnabled.util.test.ts` plus each fetcher's test in CI,
 which stub `VITE_API_URL` and assert the request URL each branch produces
 **including with an SSR `requestUrl` present**; and, in the package that now
@@ -159,11 +159,11 @@ owns the precedence, the `precedence: VITE_API_URL outranks the request URL`
 block in `packages/api/src/config/get-api-base-url.util.test.ts`. Deleting any
 of them leaves the branch less watched than it reads.
 
-**Point it somewhere the fallback would never reach.** `dev:external-api` sets
-`VITE_API_URL=http://localhost:3001/api`, which is convenient and useless as a
-check: it is byte-identical to what `getApiBaseUrl` answers for a local request
-URL anyway, so a request arriving at the api-server proves nothing about which
-of the two produced the address. It hid a real defect for two rounds of review
+**Point it somewhere the fallback would never reach.** The obvious value,
+`VITE_API_URL=http://localhost:3001/api`, is convenient and useless as a check:
+it is byte-identical to what `getApiBaseUrl` answers for a local request URL
+anyway, so a request arriving at that server proves nothing about which of the
+two produced the address. It hid a real defect for two rounds of review
 on #701, and #705 is the issue that settled it. To actually test the override,
 point it at a host nothing else uses — a stub server on a spare port — and
 assert the request lands _there_ while a **live** server on `:3001` stays idle.

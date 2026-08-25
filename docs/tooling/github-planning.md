@@ -133,12 +133,9 @@ done, Issues / sub-issues / Milestones work fully; only auto-add-to-board waits.
 ## Conventions
 
 - **Titles** follow the same Conventional-Commit shape as PRs where it fits
-  (`coverage(admin_system): …`) so issue, branch, and PR read consistently — but
+  (`coverage(ui): …`) so issue, branch, and PR read consistently — but
   this is not gate-enforced on issues.
 - **Milestones** group a phase or release; **labels** (the existing `app:` / `pkg:`
   / `type:` taxonomy, synced by `sync-labels.yml`) classify scope and kind.
 - **Epics** are an issue with children attached as **sub-issues** (not a prose
   checklist) so the progress bar is real.
-- **`STATUS.md` stays canonical** for CQMS built-vs-spec status; graduate a
-  specific actionable item to an issue when it needs a prioritised home, rather
-  than mirroring the whole page.

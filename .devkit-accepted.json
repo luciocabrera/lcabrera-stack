@@ -4,7 +4,7 @@
     "reason": "live copy points at this repo's AGENTS.md and path-scoped rules; the shipped seed stays self-contained so a consumer does not get dead pointers"
   },
   "docs/coordination/README.md": {
-    "hash": "dd9f74f52f9b830aec93751aad8f827fe6a499775382b45c3dd5075380f3879e",
+    "hash": "e3b644707db713cda041629fe1ccc89e541a25860d244c319f1af670e30ad1c6",
     "reason": "this repository authored its register before the kit existed; the seed is the generalised version and this one deliberately names vp tasks and ADR-037"
   },
   "docs/coordination/tasks/_TEMPLATE.md": {

@@ -244,7 +244,7 @@ Root scripts are **orchestration only** — anything project-specific lives in t
 **Full list: [COMMANDS.md §4](COMMANDS.md#4-root-orchestration-scripts).** The
 policy that governs them:
 
-There is deliberately **no `start:all`/`dev:all`**, and the reason has now expired twice. It began as a safety rule — `car-sales-api` and `car-sales-api-fast` served the same domain and could never run at once — and those left with [`api-playground`](https://github.com/luciocabrera/api-playground) (#686). It then became a coherence rule: the showcase and CQMS were unrelated products sharing a checkout. CQMS left too (#683). What remains is a single runnable app, so `dev:showcase` and `start:showcase` are the commands, and an "all" alias would just be a second name for one of them. Add one only when a second app arrives — and then say which of these two reasons it answers to.
+There is deliberately **no `start:all`/`dev:all`**. One app is runnable, so `dev:showcase` and `start:showcase` are the commands and an "all" alias would just be a second name for one of them. Add one when a second app arrives, and say what it buys.
 
 **`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every workspace now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there).
 
@@ -266,7 +266,7 @@ deliberate violation (Rule 14). Handling a _finding_ is Non-Negotiable Rule 11 �
 verify, then fix; never suppress. The public packages (§1) take no
 suppressions at all, enforced by `vp run suppressions:verify`.
 
-**`test:all` vs `test:ci`.** No suite here needs a database any more — the DB-bound ones left with CQMS (#683) — so the two now differ only in ordering: `test:ci` runs `vite-react-compiler` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing; it is what CI runs.
+**`test:all` vs `test:ci`.** No suite here needs a database, so the two differ only in ordering: `test:ci` runs `vite-react-compiler` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing; it is what CI runs.
 
 **A workspace with real-Postgres tests must split them**: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it. Nothing here needs this today — `UNIT_TASK_PACKAGES` in `scripts/lib/affected-tests.mjs` is empty — but the machinery is still wired, so a DB-bound workspace can rejoin `test:ci` without dragging its whole suite in.
 
@@ -459,8 +459,7 @@ The check runs in CI (`check-safe.yml`). It fails on register _integrity_ (a
 malformed task/branch file); overlap/shared-branch/staleness/
 missing-branch are non-blocking warnings. Full protocol and schema — including
 [independent vs shared branches](docs/coordination/README.md#independent-vs-shared-branches) —
-are in the coordination README. Historical scratch plans are catalogued in
-[`PLAN_TRIAGE.md`](docs/coordination/PLAN_TRIAGE.md).
+are in the coordination README.
 
 ### Architecture-First Workflow
 
@@ -487,8 +486,8 @@ the decision that architecture files describe systems, not folders, is
   ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)). The
   homes are [`docs/decisions/`](docs/decisions/) (repo, packages, toolchain)
   and [`apps/react-router/docs/decisions/`](apps/react-router/docs/decisions/)
-  (showcase app); the CQMS home left with #683. Numbers 001–012 in the app home
-  collide with the repo home — cite those by path.
+  (showcase app). Numbers 001–005 and 008 exist in both homes — cite those by
+  path. `GRANDFATHERED_DUPLICATES` in `adr-registry.mjs` is the authority.
 
 Do **not** create an `ARCHITECTURE.md` because the directory is new. Create one
 only for a system: multiple files, non-local data flow, constraints the code

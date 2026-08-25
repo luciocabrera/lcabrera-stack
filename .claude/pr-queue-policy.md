@@ -111,10 +111,9 @@ invocation is logged with the exact command run.
 
 **A2 — what "transient" means.** A failure is transient only when the log shows
 the job never got to run the repo's own checks: runner allocation, a network or
-registry timeout, a cancelled job, an action-internal error. Plus one known
-environmental race, documented in AGENTS.md §4: `runQueuedScan.test.ts` failing
-on a duplicate `reports_scan_id_key` while a CQMS dev session holds the local
-queue. **A failing assertion is never transient**, however flaky it looks, and a
+registry timeout, a cancelled job, an action-internal error. No suite here needs
+a database, so there is no known environmental race to add to that list.
+**A failing assertion is never transient**, however flaky it looks, and a
 re-run whose only justification is "it passed locally" is S10 — that is a
 conclusion, not evidence.
 

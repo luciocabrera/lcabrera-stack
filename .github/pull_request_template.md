@@ -1,9 +1,9 @@
 <!--
   PR title MUST be a Conventional Commit: `type(scope): subject`
-  e.g. `feat(ui): add column resize`, `fix(api-server): guard null rows`.
+  e.g. `feat(ui): add column resize`, `fix(server): guard null rows`.
   Types: feat|fix|chore|docs|test|refactor|perf|ci|build|revert|style.
-  Scope: the workspace you touched (ui, admin_system, api-server, …) or a
-  cross-cutting area (ci, docs, tooling, …).
+  Scope: the workspace you touched (ui, server, api, …) or a cross-cutting
+  area (ci, docs, tooling, …). commit-convention.mjs is the spec.
 
   Every section below is required — write "None" rather than deleting a
   heading, so a reviewer can tell "considered, nothing to say" from "skipped".

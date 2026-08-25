@@ -353,8 +353,7 @@ the output.
 - **`~/.claude/plans/<name>.md`** — one agent's private scratch for one task. Fine
   for thinking; **not** the shared record. When a plan describes work others need
   to see, its _claim_ graduates here (a task file) and its _decisions_ graduate to
-  an ADR / STATUS entry. Historical plans are catalogued in
-  [`PLAN_TRIAGE.md`](./PLAN_TRIAGE.md).
+  an ADR.
 - **Agent auto-memory** — one agent's cross-session notes, also invisible to
   others. Same rule: anything shared belongs in the repo.
 - **[`docs/README.md`](../README.md)** — the map of where every _durable_ fact

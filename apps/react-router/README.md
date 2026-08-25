@@ -69,11 +69,11 @@ vp run db:up
 vp run dev:showcase
 ```
 
-`VITE_API_URL` points the same routes at an external `car-sales-api` instead.
-It is a **build-time** switch: in dev, exporting it is enough
-(`vp run dev:external-api` is that path pre-wired), but against a production
-build it must be set for `vp run build` — setting it for `vp run start` alone
-does nothing, silently. Full map of both paths, the check that tells a built
+`VITE_API_URL` points the same routes at an external API server instead.
+It is a **build-time** switch: in dev,
+`VITE_API_URL=http://localhost:3001/api vp run dev:showcase` is enough, but
+against a production build it must be set for `vp run build` — setting it for
+`vp run start` alone does nothing, silently. Full map of both paths, the check that tells a built
 bundle's two states apart, and why the response shapes are identical:
 [`docs/data-sources.md`](docs/data-sources.md).
 
@@ -83,8 +83,8 @@ This app owns the DDL for every table it queries — `db/setup_large_data.sql`
 (`car_sales`, `wide_alltypes_150`) and `db/setup_enterprise_orders.sql`
 (`enterprise_orders`) — and seeds itself with them. Nothing outside this
 workspace is involved; [`db/README.md`](db/README.md) covers the one file that
-is deliberately duplicated with the car-sales API servers and how the copies are
-kept from drifting now that those servers live in a separate repository (#686).
+is deliberately duplicated with an external API server and how the copies are
+kept from drifting now that the two live in separate repositories.
 
 Start local PostgreSQL from the monorepo root, then seed:
 
@@ -111,11 +111,7 @@ Only needed for the `VITE_API_URL` override above.
 When it is running, the dev server proxies `/api` requests to
 `http://localhost:3001`.
 
-Start the API server from its workspace:
-
-```bash
-vp run --filter car-sales-api start
-```
+Start that server from its own repository — it is not a workspace here.
 
 If its responses suddenly return `total: 0`, first check DB sanity:
 
@@ -123,9 +119,8 @@ If its responses suddenly return `total: 0`, first check DB sanity:
 curl http://localhost:3001/api/db-sanity
 ```
 
-It seeds its own copy of the car-sales tables
-(`vp run --filter car-sales-api seed`) — that command does **not** create
-`enterprise_orders`, which belongs to this app.
+It seeds its own copy of the tables it serves, which does **not** create
+`enterprise_orders` — that one belongs to this app.
 
 ### DB Recovery And Backup
 
@@ -194,5 +189,5 @@ vp run test
 - `AGENTS.md`
 - `CLAUDE.md`
 - `GEMINI.md`
-- `docs/decisions/ADR-007-barrel-export-boundaries.md`
+- [`apps/react-router/docs/decisions/ADR-007-barrel-export-boundaries.md`](docs/decisions/ADR-007-barrel-export-boundaries.md)
 - `src/routes/enterprise-orders/README.md`

@@ -24,7 +24,7 @@ Use this skill when you need:
 
 ## Procedure
 
-Run BOTH scanners (ADR-019 split 'linter' into independent `oxlint` and `eslint` scanners — each produces its own raw artifact, report and scan):
+Run BOTH scanners — `oxlint` and `eslint` are independent, and each produces its own raw artifact, report and scan:
 
 ```bash
 node packages/scan-report/scripts/generate-oxlint-report.mjs [scope-directory]
