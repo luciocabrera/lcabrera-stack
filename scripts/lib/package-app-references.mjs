@@ -18,18 +18,20 @@ const GENERATED = /(^|\/)CHANGELOG\.md$/;
 export const isCheckedDocument = (path) =>
   path.endsWith('.md') && !GENERATED.test(path);
 
-/** `exists` takes a repo-relative path; injected so this stays testable. */
-export const appReferences = ({ exists, path, text }) => {
-  const seen = new Map();
-  for (const match of text.matchAll(APP_PATH)) {
-    const reference = match[0];
-    if (!seen.has(reference) && exists(reference)) {
-      const line = text.slice(0, match.index).split('\n').length;
-      seen.set(reference, { line, path, reference });
-    }
-  }
-  return [...seen.values()];
-};
+/**
+ * One finding per occurrence, not per distinct name: two mentions on different
+ * lines are two separate edits, and a verify script lists every discrepancy.
+ *
+ * `exists` takes a repo-relative path; injected so this stays testable.
+ */
+export const appReferences = ({ exists, path, text }) =>
+  [...text.matchAll(APP_PATH)]
+    .filter((match) => exists(match[0]))
+    .map((match) => ({
+      line: text.slice(0, match.index).split('\n').length,
+      path,
+      reference: match[0],
+    }));
 
 export const formatFinding = ({ line, path, reference }) =>
   `${path}:${line} — a published package names \`${reference}\`, which exists ` +
