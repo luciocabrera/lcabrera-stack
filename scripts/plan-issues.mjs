@@ -30,6 +30,7 @@ import {
   createIssue,
   createMilestones,
   linkPlannedChildren,
+  reachesFlagPosition,
 } from './lib/plan-issues-github.mjs';
 import { parseMilestoneNames, parsePlan } from './lib/plan-issues-parse.mjs';
 import {
@@ -88,7 +89,15 @@ const auditRecord = (record, { allowed, milestones, source }) => {
   return {
     record,
     body,
-    errors: validateIssueBody(body).errors,
+    errors: [
+      ...validateIssueBody(body).errors,
+      ...['title', 'milestone']
+        .filter((field) => reachesFlagPosition(record[field]))
+        .map(
+          (field) =>
+            `${field} starts with a dash, so gh would read it as a flag rather than a value: ${JSON.stringify(record[field])}`,
+        ),
+    ],
     warnings: [
       strays.length === 0
         ? ''
@@ -213,13 +222,13 @@ const main = () => {
 
   if (broken.length > 0) {
     console.error(
-      `\n${broken.length} issue(s) would be rejected by issue-standards.yml. ` +
+      `\n${broken.length} issue(s) would not survive creation. ` +
         'Fix the planning document, not the gate.',
     );
     process.exitCode = 1;
     return;
   }
-  console.log('Every issue would be accepted by the issue gate.');
+  console.log('Every issue would be created and accepted by the issue gate.');
 
   const wantsCreate = process.argv.includes('--create');
   const emitDirectory = flagValue('--emit') ?? (wantsCreate ? STAGING_DIR : '');

@@ -54,6 +54,36 @@ the one `pr-threads.mjs` argument with no shape check at all, while its siblings
 mistyped id reached the GraphQL API and failed as an error about a variable the
 operator never typed.
 
+### Correction (2026-08-25, [#917](https://github.com/luciocabrera/vite-react-compiler/issues/917))
+
+**`--resolve` was never the flow SonarCloud was reporting on `gh-exec.mjs`, and
+this ADR as first written identified the wrong caller.** The finding survived the
+change and the dating says why: the issue was created 2026-07-25, the day
+`gh-exec.mjs` shipped in #384; `--resolve` did not exist until 2026-08-18
+(#783); and on 2026-07-25 the only file importing `gh-exec.mjs` was
+`scripts/lib/plan-issues-github.mjs`, which shipped in the same PR. Nothing else
+could have produced it.
+
+That flow is injectable, by exactly the mechanism above. `createIssue` builds
+`['issue', 'create', '--title', issue.title, '--body-file', bodyPath, '--label',
+label, …]`, where the title, path, labels and milestone are each **their own argv
+element**; the title is parsed out of a planning document by a pattern accepting
+any character but a backtick, and the document is named on the command line. A
+title of `--label chore` puts `--label` in flag position and creates an issue
+with no title and an extra label.
+
+`assertGhArguments` does not stop it and was never going to: it checks element
+types and `args[0]`, and these values sit at later indices. #917 validates them
+where they enter the vector, and in the offline audit so `--create` is not the
+first place a bad title is noticed.
+
+The lesson is the one Rule 14 already states. The taint source here was
+**inferred** from reading the callers rather than read off the finding, and the
+inference was wrong; the SonarCloud flow API was unavailable at the time and the
+gap was filled with a plausible guess instead of being named as one. The dating
+check that settled it costs one `git log` and would have discriminated on day
+one.
+
 ## Decision
 
 Validate the argument vector, at two places, for two different reasons.
@@ -114,7 +144,9 @@ own rule (AGENTS.md §5, Rule 11): a finding is verified and then fixed, never
 suppressed. The `--model` flow was a real injection path, so accepting that one
 would have been recording a known hole as reviewed. The `--resolve` flow was
 not, and accepting it would have been defensible — it was fixed anyway because
-the shape check is cheap and pays for itself in the error message.
+the shape check is cheap and pays for itself in the error message. (See the
+Correction above: neither of those was the flow behind the `gh-exec.mjs`
+finding.)
 
 **Validate only at the flag.** Rejected because it holds for the flow Sonar
 happened to trace and nothing else. `runGh` has about ten callers; a guarantee

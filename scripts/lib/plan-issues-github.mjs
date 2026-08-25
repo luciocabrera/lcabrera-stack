@@ -10,6 +10,18 @@
  */
 import { runGh } from './gh-exec.mjs';
 
+export const reachesFlagPosition = (value) =>
+  String(value ?? '').startsWith('-');
+
+const assertIsData = (field, value) => {
+  if (reachesFlagPosition(value)) {
+    throw new Error(
+      `${field} would be read by gh as a flag rather than a value — got ${JSON.stringify(value)}`,
+    );
+  }
+  return value;
+};
+
 /** Titles of the milestones that already exist, so a re-run is idempotent. */
 export const existingMilestones = () =>
   JSON.parse(
@@ -48,11 +60,19 @@ export const createIssue = (issue, bodyPath, { dryRun, log }) => {
     'issue',
     'create',
     '--title',
-    issue.title,
+    assertIsData(`issue ${issue.id} title`, issue.title),
     '--body-file',
-    bodyPath,
-    ...issue.labels.flatMap((label) => ['--label', label]),
-    ...(issue.milestone === '' ? [] : ['--milestone', issue.milestone]),
+    assertIsData(`issue ${issue.id} body path`, bodyPath),
+    ...issue.labels.flatMap((label) => [
+      '--label',
+      assertIsData(`issue ${issue.id} label`, label),
+    ]),
+    ...(issue.milestone === ''
+      ? []
+      : [
+          '--milestone',
+          assertIsData(`issue ${issue.id} milestone`, issue.milestone),
+        ]),
   ];
   log(`issue: ${issue.id} — ${issue.title}`);
   if (dryRun) {
