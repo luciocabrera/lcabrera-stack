@@ -13,11 +13,7 @@ import { DEFAULT_ADR_COMMANDS, readRegisters } from './config.mjs';
  * Every directory allowed to hold an `ADR-NNN-*.md`, in index order. `tier` is
  * the stable key the gate reports.
  *
- * The split was originally drawn by what would survive the CQMS extraction, and
- * each entry carried a `keeps` flag recording that. The extraction has
- * happened: the `docs/cqms/decisions` home left with it, so every remaining
- * home would be `keeps: true` and a field that cannot be false is not data.
- * Both are gone rather than kept as a monument — the reasoning is ADR-048's.
+ * Homes are declared data, not derived: the reasoning is ADR-048's.
  */
 const registers = readRegisters();
 
@@ -64,11 +60,8 @@ export const NON_ADR_FILES = new Set(['README.md', TEMPLATE_FILE]);
  * would silently start pointing at a different document. Each may appear
  * exactly twice; nothing else may repeat.
  *
- * The set shrank when CQMS left. 006, 007 and 009–012 were duplicates only
- * because `docs/cqms/decisions` also used them; with that home gone the
- * showcase app holds each of those alone, so allowing a second would license a
- * NEW collision rather than tolerate an old one. What remains is the genuine
- * overlap between the repo and app homes.
+ * The set is exactly the genuine overlap between the two homes. Adding to it
+ * would license a NEW collision rather than tolerate an old one.
  */
 const GRANDFATHERED_DUPLICATES = new Set([1, 2, 3, 4, 5, 8]);
 
@@ -282,15 +275,10 @@ export const normalizeIndex = (markdown) =>
  * that reads the rendered output, not this signature: a defaulted second
  * parameter would leave the arity at 1.
  *
- * Everything it writes has to resolve in the repository it is generated INTO,
- * which is what removed three things from it. The commands are this package's
- * own bins rather than one repository's task names, since installing the package
- * is what puts them on the path. The two decision records it used to cite are
- * inlined as the reasoning they carried, because a fresh home has neither file
- * and an index that opens with two broken links is worse than one that explains
- * itself. And the sentence recording whether a home survived the CQMS extraction
- * is gone: that extraction happened, so the flag behind it stopped being data —
- * it read as false everywhere and printed the wrong half of a dead distinction.
+ * Everything it writes has to resolve in the repository it is generated INTO:
+ * the commands are this package's own bins, not one repository's task names,
+ * and the reasoning it used to cite by link is inlined, because a fresh home
+ * has neither file.
  */
 export const renderIndex = (home) => {
   const commands = commandsFor(home);

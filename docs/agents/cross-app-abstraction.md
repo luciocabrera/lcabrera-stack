@@ -124,7 +124,7 @@ Apps are disposable; packages are not.
 ## What does not get extracted
 
 - **App-specific anything.** Routes, loaders, and the shape of one app's screens.
-- **Demo-only code.** The car-sales servers' `api-shared` held what was genuinely
+- **Demo-only code.** A shared workspace between two demo servers held what was genuinely
   specific to comparing Express against Fastify, and nothing else. Code that is
   generic belongs in a package — but check step 1 first: being generic is not on
   its own a reason to move something. That bucket left the repo entirely in #686,

@@ -8,12 +8,8 @@
  * an allow/deny decision, with no I/O, so it is trivially unit-testable and the
  * entry script (`claude-secrets-guard.mjs`) stays a thin stdin→stdout shell.
  *
- * The secret-file policy is ADR-020's. It had a twin in the agent-runner SDK
- * guard, deliberately reimplemented rather than shared — the CLI hook is
- * bare-node `.mjs` and that guard was TS, so one module would have coupled a
- * security control to another package's internals. That twin left with CQMS
- * (#683), making this the only copy here; `secrets-guard.test.mjs` is now the
- * whole lock on the taxonomy rather than half of it.
+ * The secret-file policy is ADR-020's, and this is the only copy of it here,
+ * so `secrets-guard.test.mjs` is the whole lock on the taxonomy.
  *
  * Governed by .claude/rules/scripts.md.
  */

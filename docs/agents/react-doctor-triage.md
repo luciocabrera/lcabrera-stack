@@ -306,7 +306,7 @@ Straightforward, and recorded only so they are not re-derived.
 Beyond the array chains above, and all fixed:
 
 - **`zod-v4-prefer-top-level-string-formats`** — every occurrence was the same
-  shape, `z.string().uuid(…)` → `z.uuid(…)`, across the CQMS admin app's route
+  shape, `z.string().uuid(…)` → `z.uuid(…)`, across an admin app's route
   schemas/loaders/actions. Message arguments carry over unchanged. Two test files
   the report did not list were swept as well, so the pattern is gone rather than
   reduced.

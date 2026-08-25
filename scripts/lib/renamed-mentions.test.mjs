@@ -186,7 +186,7 @@ describe('staleMentions', () => {
     const docs = [
       {
         markdown,
-        path: 'docs/cqms/decisions/ADR-029-cli-push-and-api-tokens.md',
+        path: 'docs/other/decisions/ADR-029-cli-push-and-api-tokens.md',
       },
     ];
 
@@ -195,7 +195,7 @@ describe('staleMentions', () => {
     // be a path that was merely correct at the time.
     expect(staleMentions({ docs, vanished })).toEqual([
       {
-        doc: 'docs/cqms/decisions/ADR-029-cli-push-and-api-tokens.md',
+        doc: 'docs/other/decisions/ADR-029-cli-push-and-api-tokens.md',
         line: 5,
         name: 'ignoredDirectories.constants.ts',
         replacedBy:
