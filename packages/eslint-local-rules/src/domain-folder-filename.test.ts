@@ -207,7 +207,7 @@ ruleTester.run('domain-folder-filename', rule, {
         'apps/react-router/src/routes/car-sales/config/carSales.constants.ts',
     },
     // a package root is not a domain folder
-    { code, filename: 'packages/agent-runner/src/runSkillAgent.types.ts' },
+    { code, filename: 'packages/runner/src/runSkillAgent.types.ts' },
 
     // --- suffixes the rule does not pair ---
     { code, filename: 'packages/server/src/db/env.schema.ts' },

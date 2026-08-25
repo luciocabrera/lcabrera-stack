@@ -51,9 +51,9 @@ only, because its client is built for a page that omits the total.
 ## Duplication, on purpose
 
 `config/carSales.constants.ts` and `config/wideAlltypes150.constants.ts` carry
-column lists that also exist in `api-shared`, the car-sales servers' domain
-layer. They are **copied, not imported** — `api-shared` must never become a
-runtime dependency of this app
+column lists that also exist in the external API's domain layer. They are
+**copied, not imported** — that layer must never become a runtime dependency of
+this app
 ([ADR-039](../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)),
 and this app has to keep working once that package is no longer reachable at
 all. That stopped being hypothetical in #686, which moved it to a separate

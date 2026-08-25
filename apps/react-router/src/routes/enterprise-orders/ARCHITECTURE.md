@@ -47,7 +47,7 @@ maps (this route's lives in `config/enterpriseOrders.constants.ts`), so the
 column set is declared once.
 The `loader` transport keeps filter options on the same self-sufficient,
 same-origin/direct-DB path as the rows, so they load under a bare
-`react-router-serve` prod build with **no api-server, proxy, or CORS config**
+`react-router-serve` prod build with **no external API, proxy, or CORS config**
 (#340); the earlier `bff` transport fetched `:3001` cross-origin from the
 browser and failed CORS there.
 `enterprise-orders.loader.test.ts` guards the no-functions contract and the
@@ -370,7 +370,7 @@ column's grouping legality from the catalogue and emits the `GROUPING SETS` quer
 itself. It reaches Postgres via `getPool`, which reads `DB_*`
 env (sourced from `docker/local/.env` by the app's `dev` script). The
 `/_action/enterprise-orders/delete` action calls `deleteOrder` here, fixing the prior
-api-server 404 (feature plan §8 bug 1).
+external-API 404 (feature plan §8 bug 1).
 
 **Why `.server/` and not `server/`:** the leading dot makes this a React Router
 [server-only module](https://reactrouter.com/api/framework-conventions/server-modules)

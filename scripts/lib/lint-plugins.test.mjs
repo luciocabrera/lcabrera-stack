@@ -81,7 +81,7 @@ describe('configsDeclaringLint', () => {
         text: '  // lint: old,\n  fmt: f,',
       },
       {
-        path: 'apps/shared/vite.config.ts',
+        path: 'apps/docs-site/vite.config.ts',
         text: '  /* lint: old, */\n  fmt: f,',
       },
     ];
@@ -101,7 +101,7 @@ describe('configsDeclaringLint', () => {
 
   it('leaves a config with no lint key alone', () => {
     const files = [
-      { path: 'apps/shared/vite.config.ts', text: '  fmt: fmtConfig,' },
+      { path: 'apps/docs-site/vite.config.ts', text: '  fmt: fmtConfig,' },
     ];
     expect(configsDeclaringLint(files)).toEqual([]);
   });

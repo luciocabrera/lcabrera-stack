@@ -82,9 +82,9 @@ public package from either lane fails the suite rather than quietly shrinking a
 report.
 
 Coverage must never require Postgres: the first attempt at this lever was
-reverted (2026-07-14) because it ran scan-ingestion's `queries/*` suites in CI,
-where `getPool()` → `readEnvConfig()` throws on the missing `DB_*`. That is why
-`@repo/scan-ingestion` splits `test` (full, needs a DB) from
+reverted (2026-07-14) because it ran a workspace's real-Postgres `queries/*`
+suites in CI, where `getPool()` → `readEnvConfig()` throws on the missing `DB_*`.
+That is why a DB-bound workspace splits `test` (full, needs a DB) from
 `test:unit` / `test:coverage` (DB-free subset).
 
 **The whole coverage lane hangs off one declaration.** `@vitest/coverage-v8` is

@@ -129,8 +129,8 @@ There are two ADR homes on **one** number sequence
 ([`docs/README.md`](../../../docs/README.md)), and
 [ADR-048](../../../docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md) owns
 the rule for picking between them — read it rather than a summary here, so this
-does not become another place the taxonomy is written down. The CQMS home is
-gone.
+does not become another place the taxonomy is written down. A third home once
+existed and is gone.
 
 The one mechanic you need at gate time: take the number `vp run adr:verify`
 reports as free (it is global across both homes, whichever you are writing

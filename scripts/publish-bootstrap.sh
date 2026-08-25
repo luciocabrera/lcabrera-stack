@@ -83,7 +83,7 @@ read_manifest_field() {
 step "Checking the working copy"
 
 [[ -f package.json && -d packages ]] ||
-  fail "Run this from the repository root." "cd /home/lucio/workspace/vite-react-compiler"
+  fail "Run this from the repository root." "cd <repository root>"
 
 [[ -z "$(git status --porcelain)" ]] ||
   fail "The working tree has uncommitted changes." \

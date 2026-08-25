@@ -89,11 +89,11 @@ filtered aggregates introduced in #569 cannot round-trip through the only
 transport the architecture has — extend the codec or defer them explicitly.
 
 **Rolling out to the other three routes is not configuration.** They fetch over
-HTTP from the api-server rather than reading Postgres in process, so grouping
-them means an endpoint in `api-shared`, an Express route, a Fastify plugin and
+HTTP from the external API rather than reading Postgres in process, so grouping
+them means an endpoint in its domain layer, an Express route, a Fastify plugin and
 new fetchers — plus three more unguarded copies of the grouping shape, which is
 the mechanism the design's own Risk 7 forbids. #575 proves the same genericity
-claim with a type probe that owns its fixture instead; crossing the api-server
+claim with a type probe that owns its fixture instead; crossing the external-API
 boundary is deferred, and `wide-alltypes-150` is not a rollout target at all — it
 is a rendering playground for very wide grids, not a domain schema.
 
@@ -104,14 +104,14 @@ more copies under different names. Both greps reproduce; the first could not
 discriminate "no copy" from "a copy under another name". `NumberFilter.value` is
 `number | undefined` in both packages — documented as undefined mid-typing — and
 required in all three app-side copies, so a filter the react-router route
-correctly drops makes the api-server route reject the request (#567). The
+correctly drops makes the external API's route reject the request (#567). The
 downstream conclusion still stands: no shared contracts package, because
 [ADR-039](../../decisions/ADR-039-duplicate-over-undeclared-edges.md)'s promotion
 trigger is a third _consumer_, not a third _copy_.
 
 **Two ADRs moved home.** The design placed the state-split and focus-model
 decisions in the app's ADR home. ADR-048's test is whether a decision leaves with
-CQMS; both candidate homes stay, so the tie-break is package-versus-app, and
+the extracted product; both candidate homes stay, so the tie-break is package-versus-app, and
 every line of grouping code is in `packages/ui` and `packages/server`. ADR-011
 and ADR-012 sit in the app home only because they predate the Table's extraction
 into the package — grandfathered, not precedent.

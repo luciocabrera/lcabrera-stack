@@ -20,9 +20,8 @@
 #
 # Tests used to be omitted here, with the comment "the test suites need a
 # database, which a hook cannot assume". That is no longer true: `test:ci` is
-# DB-free by construction, and the two workspaces with real-Postgres suites
-# (scan-ingestion, scan-orchestrator) expose DB-free `test:unit` subsets that it
-# substitutes. What made it worth bringing forward is that removing the Claude
+# DB-free by construction, and any workspace with real-Postgres suites exposes a
+# DB-free `test:unit` subset that it substitutes. What made it worth bringing forward is that removing the Claude
 # `Stop` hook left nothing running tests locally at all.
 #
 # The fallow audit still stays in CI: it is a new-only gate scored against the

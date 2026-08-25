@@ -50,7 +50,7 @@ cited location is real and the two "High/correctness" claims are **live defects*
 
 1. **`@lcabrera/server` is the leverage point.** Error translation, the transaction
    seam, and pool tuning land once in the flagship package and every Node consumer
-   (react-router, admin_system, api-server, scan-ingestion) inherits them. Two
+   (the apps and the server-side workspaces) inherits them. Two
    per-app reinventions already exist (`hasPostgresErrorCode.util.ts`,
    `runMigrations.ts` BEGIN/ROLLBACK) — evidence the abstractions are missing, not
    speculative.
@@ -65,7 +65,7 @@ cited location is real and the two "High/correctness" claims are **live defects*
 
 **Atomic create is not "just a transaction."** `SELECT MAX(order_id)+1` on one
 connection still races under READ COMMITTED without `FOR UPDATE`/advisory-lock or
-retry-on-`23505` (or migrating to a real Postgres sequence — the `scan-ingestion`
-house style). The `with-transaction` draft must pick the strategy; #400 implements
+retry-on-`23505` (or migrating to a real Postgres sequence — the house style on
+the ingestion side). The `with-transaction` draft must pick the strategy; #400 implements
 it. This is the highest-risk item and is sequenced late, behind the error layer
 that turns a residual collision into a clean typed conflict.

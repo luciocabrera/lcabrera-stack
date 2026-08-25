@@ -153,8 +153,8 @@ project-specific belongs in that project's own `package.json`.
 | `vp run coverage:merge`      | merged coverage for the fallow gate (DB-free workspaces only)                                     |
 | `vp run coverage:report`     | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router)           |
 
-`test:all` vs `test:ci`: no suite here needs a database since the CQMS workspaces
-left (#683), so the two differ only in ordering — `test:ci` runs
+`test:all` vs `test:ci`: no suite here needs a database, so the two differ only
+in ordering — `test:ci` runs
 `vite-react-compiler` last so the PR's coverage summary is the fresh one. Use
 `test:ci` before pushing; it is what CI runs.
 
@@ -250,9 +250,8 @@ the showcase needs nothing but a database — see
 
 **The external-API lane still exists and is no longer run from here.** Setting
 `VITE_API_URL` points the same routes at an external server instead; the servers
-that lane was built against now live in
-[`api-playground`](https://github.com/luciocabrera/api-playground), so exercising
-it means running one of them from that repository. (An app-level `.env` is loaded
+that lane was built against live in a separate repository, so exercising it means
+running one of them from there. (An app-level `.env` is loaded
 after the variable is exported, so one that sets `VITE_API_URL` itself wins —
 that is the local override of the local override, and it is deliberate.)
 
@@ -753,8 +752,7 @@ Notes on the non-obvious ones:
 - **A workspace with real-Postgres tests must split them**: keep the full suite as
   `test`, and expose a DB-free `test:unit` (plus `test:coverage`) — otherwise the
   whole workspace drops out of `test:ci` and takes its pure tests with it.
-  Nothing needs this today — the precedent left with CQMS (#683) — but the
-  machinery is still wired.
+  Nothing needs this today, but the machinery is still wired.
 
 ---
 

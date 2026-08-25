@@ -464,7 +464,7 @@ jobs:
         # empty (valid) coverage file and fallow falls back to estimation.
         #
         # DB-free suites ONLY — this job has no Postgres. Every suite here is
-        # DB-free today (the DB-bound ones left with CQMS, #683), but the
+        # DB-free today, but the
         # constraint stands: it is what broke the previous attempt at this
         # (reverted 2026-07-14). See scripts/merge-coverage.mjs.
         env:

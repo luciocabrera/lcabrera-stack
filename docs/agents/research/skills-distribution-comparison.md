@@ -27,7 +27,7 @@ state is called out explicitly wherever it changes the verdict.
 > | **Gap 3 / Opportunity 3** — the peer check fires only at sync time                | **Closed** by [#845](https://github.com/luciocabrera/vite-react-compiler/pull/845): a `peer:` range is resolved once per run, so `sync` and `doctor` cannot disagree about what is installed.          |
 > | **Opportunity 4** — reject transcript-mined personalisation for now               | **Closed** by [#839](https://github.com/luciocabrera/vite-react-compiler/pull/839): recorded under ADR-081 §Alternatives considered, with the `devkit`-subcommand-not-a-package framing.               |
 > | **Opportunity 5** — reject bundling prose and runtime into one unit               | **Closed** by [#839](https://github.com/luciocabrera/vite-react-compiler/pull/839): recorded under ADR-081 §Alternatives considered, on the `0.0.0`-forever argument this doc supplied.                |
-> | **Opportunity 6** — leave the scan-report-bound skills where they are             | Unchanged, and still the standing position.                                                                                                                                                            |
+> | **Opportunity 6** — leave the report-bound skills where they are                  | Unchanged, and still the standing position.                                                                                                                                                            |
 >
 > Of §Open questions, **Q2** ("should the hard/soft split become a schema field")
 > was answered by #840 in the affirmative — it became declared frontmatter, not
@@ -134,7 +134,7 @@ Two standing constraints, per the task brief, apply to every item below: (a)
 this repo's owner considers there to be too many packages already, so any
 opportunity implying a **third** npm name must be flagged as such and weighed
 against folding into `devkit` or `repo-standards` instead; (b) nothing
-CQMS-specific (the `@repo/scan-report`-dependent "blocked" skill group) may be
+product-specific (the report-package-dependent "blocked" skill group) may be
 smuggled into a "generic" recommendation — the scan skills stay `@repo/*` and
 private until a real second consumer asks, per ADR-081's own stated restraint,
 and that restraint should hold here too.
@@ -150,7 +150,7 @@ and that restraint should hold here too.
    package (it could ship from inside `devkit` itself, or even from this
    repo's own tree) but should wait for a real request: ADR-081 already
    modeled the right discipline for this exact situation when it declined to
-   publish `@lcabrera/scan-report` ahead of a second consumer, and the same
+   publish the report package ahead of a second consumer, and the same
    reasoning applies here.
 
 2. **Adopt mattpocock's hard/soft-dependency split into `CLASSIFICATION.md`
@@ -194,7 +194,7 @@ and that restraint should hold here too.
    of the failure mode exists, rather than leaving the rejection as an abstract
    semver argument.
 
-6. **Do not fold the CQMS-shaped scan skills into either package under cover
+6. **Do not fold the product-shaped scan skills into either package under cover
    of these opportunities.** None of the above imply moving `linter-checker`,
    `fallow-code-checker`, `code-smell-checker`, `code-smell-zen`,
    `code-smell-shared`, or `app-graph` out of "blocked." That decision is

@@ -67,34 +67,26 @@ that ADR's own table still lists the third home it was written under, so
 A third home existed while a second product lived here, and left with it. That
 is why an old ADR may cite a number which now resolves in only one place.
 
-### Reading an ADR written in an earlier era
+### An ADR names no product but this one
 
-This repository has been three things, and an ADR means what it meant when it was
-written:
+Older ADRs were written while other products shared this repository, and their
+Context sections cited those products by name as the evidence that motivated a
+decision. Those names are gone: an ADR describes the constraint it decided
+against — "a second app needed to reuse the component library" — never the
+departed thing that happened to supply it. The reasoning is unchanged, and the
+decision still follows from the context it records; only an identity a reader
+cannot resolve was removed.
 
-| Era                 | What the repo was                                                  |
-| ------------------- | ------------------------------------------------------------------ |
-| **One app**         | `apps/react-router` alone; no packages                             |
-| **A monorepo**      | several apps — the car-sales API servers, CQMS — plus the packages |
-| **Public packages** | the `@lcabrera/*` packages are the product; one app exercises them |
+Two consequences worth knowing. An ADR whose subject left entirely is deleted
+rather than kept as a husk, and what still governs is folded into the live doc
+that owns it — that is where ADR-014's Cancel/discard-changes rationale went,
+into `packages/ui`'s Form `ARCHITECTURE.md`. And a decision that reads oddly
+general was often specific once; `vp run adr:list` plus `git log --follow` is
+how to recover what it was about.
 
-So an older ADR naming one of the car-sales API workspaces, or the CQMS admin
-app, is not necessarily rot — they were extracted to their own repositories
-(#683, #686) and the ADR bodies that cite them stay verbatim, by the rule at the
-end of this section. Two cases, and they are treated differently on purpose:
-
-- **Named as Context** — the evidence that motivated a decision about the
-  packages. Left exactly as written. Editing it would falsify _why_ the decision
-  was made, which is the one thing an ADR exists to record. ADR-001, ADR-004,
-  ADR-005, ADR-035, ADR-039 and ADR-053 are in this group.
-- **Named in the Decision** — instructions a reader would follow today, pointing
-  at a repository this no longer is. That gets a **dated amendment block** at the
-  top: status split, what still governs, what moved and under which issue. The
-  body stays verbatim below it. ADR-008 established the shape; ADR-014, ADR-064
-  and ADR-071 use it.
-
-The rule that makes this decidable: **never rewrite a body to match today.**
-Amend above it, and say what changed.
+`vp run departed:verify` keeps this true — the names live in
+[`scripts/departed-names.json`](../scripts/departed-names.json), so a
+reintroduced one fails the build rather than waiting to be noticed.
 
 Those links open the **directory**, which is the listing — each home's `README.md`
 is a generated page describing the home and lists no ADRs on purpose, because a

@@ -48,7 +48,7 @@ Still open (#516): no gate runs `pnpm audit` at all — the supply chain is the
 one thing this repo does not check; `minimumReleaseAge` is commented out while
 its exclude list has rotted; the in-range currency gap and the `vp` local/global
 version split; the unsatisfied `@babel/core` peer; the `jsdom` 30 major. (The undeclared
-`@babel/preset-typescript` listed here left with the CQMS workspaces in #683 —
+`@babel/preset-typescript` listed here left with the workspaces that declared it —
 re-probe rather than assuming it is still open elsewhere.)
 
 If the environment blocks a probe, **record it as unverified rather than

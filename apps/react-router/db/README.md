@@ -53,10 +53,8 @@ DELETE FROM enterprise_orders WHERE customer_id >= 900000;
 
 ## `setup_large_data.sql` has a copy in another repository
 
-The car-sales API servers serve `car_sales` and `wide_alltypes_150` from their
-own copy of this file. They left for
-[`api-playground`](https://github.com/luciocabrera/api-playground) under #686,
-taking it with them. The alternative — one owner and a cross-repo setup step —
+The external car-sales API servers serve `car_sales` and `wide_alltypes_150`
+from their own copy of this file, which left this repository with them. The alternative — one owner and a cross-repo setup step —
 was rejected for the reason
 [ADR-039](../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)
 gives, and the choice is recorded in

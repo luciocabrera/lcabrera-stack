@@ -74,8 +74,8 @@ lives at the root only.
 naming the path it renamed away from, is correct — not drift. `docs/decisions/`
 and `apps/react-router/docs/decisions/` are two homes on **one** number sequence
 (ADR-048); 001–005 and 008 predate it, so each of those means two things — always
-cite one of them with its path. A third home left the repo with CQMS in #683, which is
-why an old ADR may cite a number that now resolves only once.
+cite one of them with its path. A third home left the repo with a second product,
+which is why an old ADR may cite a number that now resolves only once.
 
 `AGENTS.md` is the real file; `CLAUDE.md` is a symlink to it. Fixes go in
 `AGENTS.md`.

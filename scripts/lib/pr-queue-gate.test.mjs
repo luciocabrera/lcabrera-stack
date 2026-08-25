@@ -92,7 +92,7 @@ describe('detectStops — mechanically certain §5 triggers', () => {
 describe('detectFlags — §5 areas needing the diff read', () => {
   it('flags a touched migration', () => {
     const flags = detectFlags(
-      pr({ files: [file('packages/scan-ingestion/migrations/0030-x.sql')] }),
+      pr({ files: [file('packages/ingestion/migrations/0030-x.sql')] }),
     );
     expect(flags.map((flag) => flag.id)).toEqual(['S1']);
     expect(flags[0].detail).toMatch(/migration/);

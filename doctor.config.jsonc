@@ -106,7 +106,7 @@
         // effect. Registered in docs/agents/public-package-suppressions.json.
         //
         // The glob is matched against the path React Doctor reports, which is
-        // relative to the *project* it detected (here `apps/admin_system`), not
+        // relative to the *project* it detected, not
         // to the repo root. A repo-relative path here matches nothing and fails
         // silently — the finding simply stays, which reads identically to the
         // override not being there at all.
