@@ -1,8 +1,7 @@
 /* Shared base reset — every consuming app's own index.css/app.css should
-   `@import` this rather than hand-copying it. Extracted after admin_system
-   shipped without it: unstyled <h1>/<h2>/<p> margins produced visibly
-   inconsistent spacing against apps/react-router, which had this reset
-   from the start. */
+   `@import` this rather than hand-copying it. Without it, unstyled
+   <h1>/<h2>/<p> margins differ between apps that import it and apps that
+   do not, which reads as inconsistent spacing rather than a missing reset. */
 * {
   box-sizing: border-box;
 }

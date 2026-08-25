@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import {
   appReferences,
   formatFinding,
-  isCheckedDocument,
+  isCheckedFile,
 } from './lib/package-app-references.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -30,15 +30,27 @@ const publishedPackageDirectories = () =>
     .filter((relative) => isPublished(resolve(REPO_ROOT, relative)))
     .map((relative) => dirname(relative));
 
-const documentsIn = (directory) =>
-  globSync(`${directory}/**/*.md`, {
+const filesIn = (directory) =>
+  globSync(`${directory}/**/*`, {
     cwd: REPO_ROOT,
     exclude: ['**/node_modules/**', '**/dist/**'],
-  }).filter(isCheckedDocument);
+  }).filter(isCheckedFile);
 
 const main = () => {
   const directories = publishedPackageDirectories();
-  const findings = directories.flatMap(documentsIn).flatMap((path) =>
+  // A run that walked nothing must not report the same success as a clean tree.
+  if (directories.length === 0) {
+    throw new Error(
+      'found no published packages under packages/ — check the glob.',
+    );
+  }
+  const files = directories.flatMap(filesIn);
+  if (files.length === 0) {
+    throw new Error(
+      'found no shipped text in any published package — check the glob.',
+    );
+  }
+  const findings = files.flatMap((path) =>
     appReferences({
       exists: (reference) => existsSync(resolve(REPO_ROOT, reference)),
       path,
@@ -55,7 +67,8 @@ const main = () => {
     return;
   }
   console.log(
-    `Package reference gate passed: ${directories.length} published package(s) name no app.`,
+    `Package reference gate passed: ${files.length} shipped file(s) across ` +
+      `${directories.length} published package(s) name no app.`,
   );
 };
 

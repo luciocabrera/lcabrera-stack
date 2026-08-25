@@ -15,8 +15,11 @@ const APP_PATH = /\bapps\/[a-z0-9][a-z0-9-]*/g;
 /** Generated from git history — a dated record, not a live pointer. */
 const GENERATED = /(^|\/)CHANGELOG\.md$/;
 
-export const isCheckedDocument = (path) =>
-  path.endsWith('.md') && !GENERATED.test(path);
+/** Text a package ships. A comment in `src` reaches consumers like prose does. */
+const SHIPPED_TEXT = /\.(css|js|md|mjs|ts|tsx)$/;
+
+export const isCheckedFile = (path) =>
+  SHIPPED_TEXT.test(path) && !GENERATED.test(path);
 
 /**
  * One finding per occurrence, not per distinct name: two mentions on different

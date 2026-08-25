@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   appReferences,
   formatFinding,
-  isCheckedDocument,
+  isCheckedFile,
 } from './package-app-references.mjs';
 
 const inRepo = new Set(['apps/react-router', 'apps/admin']);
@@ -39,11 +39,24 @@ describe('appReferences', () => {
   });
 });
 
-describe('isCheckedDocument', () => {
-  it('checks markdown but not a generated changelog', () => {
-    expect(isCheckedDocument('packages/ui/README.md')).toBe(true);
-    expect(isCheckedDocument('packages/ui/CHANGELOG.md')).toBe(false);
-    expect(isCheckedDocument('packages/ui/src/index.ts')).toBe(false);
+describe('isCheckedFile', () => {
+  it('checks every text form a package ships, not just markdown', () => {
+    // A comment in shipped `src` reaches a consumer the same way prose does.
+    for (const shipped of [
+      'packages/ui/README.md',
+      'packages/ui/src/design-system/reset.css',
+      'packages/ui/src/index.ts',
+      'packages/ui/src/Table.tsx',
+      'packages/repo-standards/scripts/adr-registry.mjs',
+    ]) {
+      expect(isCheckedFile(shipped)).toBe(true);
+    }
+  });
+
+  it('skips the generated changelog and non-text files', () => {
+    expect(isCheckedFile('packages/ui/CHANGELOG.md')).toBe(false);
+    expect(isCheckedFile('packages/ui/src/logo.png')).toBe(false);
+    expect(isCheckedFile('packages/ui/package.json')).toBe(false);
   });
 });
 
