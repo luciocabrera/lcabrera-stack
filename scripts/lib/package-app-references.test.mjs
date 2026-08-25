@@ -58,6 +58,38 @@ describe('isCheckedFile', () => {
     expect(isCheckedFile('packages/ui/src/logo.png')).toBe(false);
     expect(isCheckedFile('packages/ui/package.json')).toBe(false);
   });
+
+  it('skips tests, which every package excludes from its files', () => {
+    expect(isCheckedFile('packages/ui/src/Table.test.tsx')).toBe(false);
+    expect(isCheckedFile('packages/repo-standards/scripts/x.test.mjs')).toBe(
+      false,
+    );
+    expect(isCheckedFile('packages/ui/src/Table.tsx')).toBe(true);
+  });
+});
+
+describe('fenced code', () => {
+  it('does not flag a worked example inside a fence', () => {
+    // `apps/web` is illustration in several shipped READMEs; it must keep
+    // passing on the day this repo gains an app by that name.
+    expect(find('intro\n```ts\napps/react-router\n```\n')).toEqual([]);
+  });
+
+  it('flags prose again after the fence closes', () => {
+    const findings = find('```ts\napps/admin\n```\nthen apps/react-router\n');
+    expect(findings).toEqual([
+      { line: 4, path: 'doc.md', reference: 'apps/react-router' },
+    ]);
+  });
+
+  it('does not treat backticks in source as a fence', () => {
+    const findings = appReferences({
+      exists: (path) => inRepo.has(path),
+      path: 'pkg/src/x.ts',
+      text: '// ```\n// apps/react-router\n',
+    });
+    expect(findings.map((finding) => finding.line)).toEqual([2]);
+  });
 });
 
 describe('formatFinding', () => {

@@ -4,9 +4,11 @@
  * `apps/` directory exists — so a relative link into one is dead on arrival, and
  * prose about one describes a consumer the reader does not have.
  *
- * Existence is what discriminates. `apps/web` in a config example is generic
- * illustration and must pass; `apps/react-router` is this repo's data and must
- * not. An allowlist would decide the same question by hand, and rot.
+ * Existence is what discriminates a real reference from a worked example, but
+ * only outside fenced code: `apps/web` in a config sample must keep passing on
+ * the day this repo gains an `apps/web`, so fences are skipped rather than
+ * resolved. Tests are skipped too — every package here excludes them from
+ * `files`, so they reach no consumer.
  */
 
 /** A path segment, so prose about "the apps directory" is not a finding. */
@@ -15,11 +17,31 @@ const APP_PATH = /\bapps\/[a-z0-9][a-z0-9-]*/g;
 /** Generated from git history — a dated record, not a live pointer. */
 const GENERATED = /(^|\/)CHANGELOG\.md$/;
 
+/** Excluded from every published package's `files`, so never shipped. */
+const TEST = /\.(test|spec)\.[a-z]+$/;
+
 /** Text a package ships. A comment in `src` reaches consumers like prose does. */
 const SHIPPED_TEXT = /\.(css|js|md|mjs|ts|tsx)$/;
 
 export const isCheckedFile = (path) =>
-  SHIPPED_TEXT.test(path) && !GENERATED.test(path);
+  SHIPPED_TEXT.test(path) && !GENERATED.test(path) && !TEST.test(path);
+
+/** 1-based line numbers sitting inside a ``` fence. Markdown only. */
+const fencedLines = (text) => {
+  const fenced = new Set();
+  let open = false;
+  text.split('\n').forEach((line, index) => {
+    if (line.trimStart().startsWith('```')) {
+      open = !open;
+      fenced.add(index + 1);
+      return;
+    }
+    if (open) {
+      fenced.add(index + 1);
+    }
+  });
+  return fenced;
+};
 
 /**
  * One finding per occurrence, not per distinct name: two mentions on different
@@ -27,14 +49,16 @@ export const isCheckedFile = (path) =>
  *
  * `exists` takes a repo-relative path; injected so this stays testable.
  */
-export const appReferences = ({ exists, path, text }) =>
-  [...text.matchAll(APP_PATH)]
-    .filter((match) => exists(match[0]))
+export const appReferences = ({ exists, path, text }) => {
+  const skip = path.endsWith('.md') ? fencedLines(text) : new Set();
+  return [...text.matchAll(APP_PATH)]
     .map((match) => ({
       line: text.slice(0, match.index).split('\n').length,
       path,
       reference: match[0],
-    }));
+    }))
+    .filter(({ line, reference }) => !skip.has(line) && exists(reference));
+};
 
 export const formatFinding = ({ line, path, reference }) =>
   `${path}:${line} — a published package names \`${reference}\`, which exists ` +
