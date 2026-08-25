@@ -136,8 +136,7 @@ const runFallow = (rawArtifactPath) => {
   const failureDetail =
     result.stderr?.trim() || result.error?.message || `exit ${result.status}`;
   if (!context.isTargetMode) {
-    // Thrown, not returned: the caller reads a missing result as target mode and
-    // reports on it, so returning here would turn a hard failure into a report.
+    // Thrown, not returned: the caller reads a missing result as target mode.
     throw Object.assign(new Error(`fallow failed to run: ${failureDetail}`), {
       exitStatus: result.status ?? 1,
     });

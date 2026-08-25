@@ -1,23 +1,8 @@
 /**
  * Reading the `packageManager` pin, and judging what a refresh did to it.
  *
- * This module owns the reasoning the other two files point at.
- *
- * A refresh writes that field twice. taze moves the version and writes it BARE,
- * with no hash; corepack rewrites the same field adding the `+sha…`, and that
- * hash is the whole supply-chain guarantee — it is what makes the pin an
- * integrity check rather than a version preference.
- *
- * So neither tool's exit code describes what the field holds. corepack can exit
- * non-zero having ALREADY completed its write, and the inverse is the dangerous
- * one: dying before the write leaves taze's bare version, so the version moved,
- * every version-based check reads a clean refresh, and the pin has quietly
- * stopped being an integrity check.
- *
- * Read the field, never the exit code. These functions are pure so the outcomes
- * can be tested without a corepack that fails on demand. Background: #927.
- *
- * Governed by .claude/rules/scripts.md.
+ * taze writes the version bare; corepack adds the `+sha…`. Neither exit code
+ * says what the field holds, so read the field. Background: #927.
  */
 
 /**

@@ -1,21 +1,11 @@
 #!/usr/bin/env node
 /**
- * Gate: no repo script exits mid-stream.
- *
- * `.claude/rules/scripts.md` forbids `process.exit()` in favour of
- * `process.exitCode`, because exiting can drop a buffered stderr write — losing
- * the message that explains the failure, in CI and under `tee` exactly. Until
- * this gate the rule lived only in prose, and a new file broke it as easily as
- * an old one (#929).
- *
- * A lint rule cannot cover this: the eslint fan-out is per-workspace and root
- * `scripts/` is not a workspace, which is where most of these files live. Same
- * reason the size gate is a standalone repo-wide script.
+ * Gate: no repo script calls `process.exit()` (ADR-090).
  *
  * Usage (from the repo root):
  *   vp run scripts:exits:verify
  *
- * Exit : 0 when no script calls process.exit, 1 listing every one that does.
+ * Exit : 0 when no script calls it, 1 listing every one that does.
  *
  * Governed by .claude/rules/scripts.md.
  */
@@ -59,7 +49,7 @@ const findScripts = (directory) =>
 const main = () => {
   const scripts = findScripts(REPO_ROOT);
 
-  // Every offender, not the first — the rest of the same rule this gate enforces.
+  // Every offender, not the first: the same rule asks for that too.
   const offences = scripts.flatMap((file) => {
     const source = readFileSync(join(REPO_ROOT, file), 'utf8');
 

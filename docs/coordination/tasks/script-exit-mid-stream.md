@@ -6,6 +6,9 @@ status: review
 branch: chore/929-script-exit-mid-stream
 area:
   - scripts/verify-script-exits.mjs
+  - scripts/verify-package-manager-pin.mjs
+  - scripts/lib/package-manager-pin.mjs
+  - scripts/deps-refresh.sh
   - scripts/lib/script-exit-calls*
   - scripts/lib/deps-refresh-pin-drift.test.mjs
   - scripts/verify-eslint-pass.mjs

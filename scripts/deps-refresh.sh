@@ -262,9 +262,8 @@ log "Updating vp itself (global CLI; not part of the repo diff)"
 log "Removing node_modules + lockfile (pnpm clean) for a clean resolution"
 pnpm clean --lockfile
 
-# Read BEFORE taze runs: taze rewrites `packageManager` too, so a read taken
-# after it can never differ from the final value. Matches the whole value, hash
-# included — a `pnpm@[0-9.]*` pattern stops at the `+` and cannot see the hash.
+# Read BEFORE taze runs — taze rewrites `packageManager` too (#927). Matches the
+# whole value: a `pnpm@[0-9.]*` pattern stops at the `+` and misses the hash.
 package_manager_pin() {
   sed -nE 's/.*"packageManager": *"([^"]+)".*/\1/p' package.json | head -1
 }
@@ -275,19 +274,13 @@ taze_log="$(mktemp)"
 trap 'rm -f "$taze_log"' EXIT
 npx --yes taze@latest -r --write "${taze_exclude[@]}" | tee "$taze_log"
 
-# corepack's exit status is context, not a verdict — it can fail AFTER writing
-# the field. The guard below reads the field instead; why, in
-# scripts/lib/package-manager-pin.mjs.
+# corepack can fail AFTER writing the field, so the guard reads the field (#927).
 log "Updating pnpm itself (the pinned packageManager) to the latest release"
 corepack_failed=()
 "$corepack_global" use pnpm@latest || corepack_failed=(--corepack-failed)
-# No `pnpm_after` here on purpose: the guard reads the manifest itself, so there
-# is one reader of the field rather than two that can disagree.
-# `${a[@]+"${a[@]}"}` rather than `"${a[@]}"`: expanding an empty array under
-# `set -u` aborts on bash before 4.4, and this array is empty on the SUCCESS
-# path, so the plain form fails the normal run. Same guard, same reason, as
-# scripts/publish-bootstrap.sh. `|| die` cannot catch it — a `set -u` expansion
-# error exits before the command runs.
+# No `pnpm_after`: the guard reads the manifest, so there is one reader.
+# `${a[@]+...}`: an empty array under `set -u` aborts on bash < 4.4, and this one
+# is empty on the SUCCESS path. Same form as scripts/publish-bootstrap.sh.
 node scripts/verify-package-manager-pin.mjs --before "$pnpm_before" ${corepack_failed[@]+"${corepack_failed[@]}"} ||
   die "the packageManager pin lost its integrity hash — see above. The working tree holds the half-finished refresh; no issue, branch or commit was made."
 

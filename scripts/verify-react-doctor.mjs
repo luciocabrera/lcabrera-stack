@@ -82,13 +82,7 @@ const scan = () => {
   return JSON.parse(readFileSync(out, 'utf8'));
 };
 
-/**
- * Ends the gate with a message.
- *
- * Throws rather than exiting: four callers rely on this not returning, and
- * `process.exit()` here could drop the very message it just wrote. The
- * top-level handler owns the single write and the status.
- */
+/** Throws, not exits: callers rely on this not returning (ADR-090). */
 const fail = (message) => {
   throw new Error(message);
 };

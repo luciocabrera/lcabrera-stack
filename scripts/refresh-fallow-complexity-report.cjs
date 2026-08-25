@@ -136,7 +136,7 @@ const runFallowJson = () => {
   );
 
   if (result.status !== 0) {
-    // Thrown so main() stops before reading the JSON this run failed to write.
+    // Thrown so main() stops before reading JSON this run never wrote.
     throw Object.assign(
       new Error('fallow failed to produce its JSON report.'),
       {

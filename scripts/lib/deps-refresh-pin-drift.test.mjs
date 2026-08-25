@@ -46,8 +46,7 @@ describe('deps-refresh.sh and the packageManager pin', () => {
     // this array is empty on the success path — so the plain form breaks the
     // normal run, not the failing one. Nothing under scripts/ uses a bash-4-only
     // construct, so the 3.2 floor is deliberate and this must stay guarded.
-    // Matched by regex, not by a plain string: a literal `${` inside one trips
-    // Biome's noTemplateCurlyInString, and the shell form is the whole subject.
+    // Regex, not a string: a literal `${` trips noTemplateCurlyInString.
     expect(script).toMatch(
       /\$\{corepack_failed\[@\]\+"\$\{corepack_failed\[@\]\}"\}/u,
     );

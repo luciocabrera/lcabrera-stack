@@ -1,9 +1,6 @@
 /*
- * The comment-versus-call distinction is the whole reason this parses instead of
- * grepping (#929). A regex-based gate fails the file that documents the rule —
- * `scripts/verify-package-manager-pin.mjs` carries `process.exit()` in a comment
- * explaining why it does not call it — so the cases below are what separate a
- * working gate from one that punishes the most careful file in the repo.
+ * The comment-versus-call distinction is why this parses instead of grepping;
+ * ADR-090 has the reasoning.
  */
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -52,8 +49,7 @@ describe('findProcessExitCalls', () => {
 
 describe('mayContainExitCall', () => {
   it('is the cheap pre-filter, so it matches text a parse would reject', () => {
-    // Deliberately loose: it exists to skip parsing the whole repo, not to
-    // decide anything. The parse is what decides.
+    // Loose on purpose: it only skips work. The parse decides.
     expect(mayContainExitCall('// process.exit')).toBe(true);
     expect(mayContainExitCall('process.exitCode = 0;')).toBe(true);
     expect(mayContainExitCall('const a = 1;')).toBe(false);
