@@ -248,12 +248,17 @@ Every table route in `apps/react-router` serves its own rows from Postgres, so
 the showcase needs nothing but a database — see
 [the app's data-sources doc](apps/react-router/docs/data-sources.md).
 
-**The external-API lane still exists and is no longer run from here.** Setting
-`VITE_API_URL` points the same routes at an external server instead; the servers
-that lane was built against live in a separate repository, so exercising it means
-running one of them from there. (An app-level `.env` is loaded
-after the variable is exported, so one that sets `VITE_API_URL` itself wins —
-that is the local override of the local override, and it is deliberate.)
+**The external-API lane still exists, and nothing in this repository serves it.**
+Setting `VITE_API_URL` points the same routes at an external server instead of
+this app's own loaders. To exercise it you supply that server: it must serve the
+paginated row and filter-option endpoints the routes call, over the column lists
+in `apps/react-router/src/routes/*/config/`, which are the contract
+([the app's data-sources doc](apps/react-router/docs/data-sources.md) describes
+both transports). No such server ships from here, and the lane is not needed to
+run the showcase — every table route reads Postgres in process. (An app-level
+`.env` is loaded after the variable is exported, so one that sets `VITE_API_URL`
+itself wins — that is the local override of the local override, and it is
+deliberate.)
 
 ### Database
 

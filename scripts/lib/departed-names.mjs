@@ -102,6 +102,27 @@ export const parseRoster = (text) => {
   };
 };
 
+/**
+ * Paths of REGULAR files in `git ls-files -s -z` output (`<mode> <sha> <stage>\t<path>`).
+ *
+ * Mode is git's own answer, so no stat call can disagree with it. Both other
+ * modes must be dropped, and neither is hypothetical here: `120000` is a
+ * symlink — `.claude/skills` points at a directory, so reading it raises EISDIR,
+ * while `CLAUDE.md` and two others point at `AGENTS.md`, which git tracks in its
+ * own right and which would otherwise be reported once per link. `160000` is a
+ * submodule gitlink, which has no blob to read at all.
+ */
+export const regularFiles = (output) =>
+  output
+    .split('\0')
+    .filter(Boolean)
+    .map((entry) => /^(\d{6}) \S+ \d+\t(.+)$/s.exec(entry))
+    .filter(
+      (match) =>
+        match !== null && (match[1] === '100644' || match[1] === '100755'),
+    )
+    .map((match) => match[2]);
+
 /** One finding per occurrence: two mentions on two lines are two edits. */
 export const departedReferences = ({ allowed, names, path, text }) => {
   if (allowed.has(path)) return [];

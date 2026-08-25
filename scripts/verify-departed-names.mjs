@@ -17,6 +17,7 @@ import {
   formatFinding,
   isCheckedFile,
   parseRoster,
+  regularFiles,
 } from './lib/departed-names.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -30,24 +31,25 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
  * this repository and not one an inherited variable names.
  */
 const trackedFiles = () => {
-  const output = runGit({ args: ['ls-files', '-z'], cwd: REPO_ROOT });
+  const output = runGit({ args: ['ls-files', '-s', '-z'], cwd: REPO_ROOT });
   // `undefined` is git missing or failing — not an empty repository.
   if (output === undefined) {
     throw new Error(
       '`git ls-files` produced nothing. Refusing to report a clean pass on no data.',
     );
   }
-  return output.split('\0').filter(Boolean);
+  return regularFiles(output);
 };
 
-/** A file git tracks may still be binary; those decode to replacement chars. */
-const readText = (path) => {
-  try {
-    return readFileSync(resolve(REPO_ROOT, path), 'utf8');
-  } catch {
-    return '';
-  }
-};
+/**
+ * Deliberately not wrapped in a try/catch. An unreadable file returning `''`
+ * would report exactly what a file naming nothing reports, which is the silent
+ * pass this script refuses everywhere else. `readFileSync` does not throw on
+ * binary content — it throws on EISDIR (a submodule gitlink), ENOENT (a tracked
+ * symlink whose target is gone) and EACCES, none of which should be swallowed
+ * by a gate. `main`'s catch turns any of them into a loud, named failure.
+ */
+const readText = (path) => readFileSync(resolve(REPO_ROOT, path), 'utf8');
 
 const main = () => {
   const { allowed, names } = parseRoster(

@@ -5,6 +5,7 @@ import {
   formatFinding,
   isCheckedFile,
   parseRoster,
+  regularFiles,
 } from './departed-names.mjs';
 
 const roster = (extra = {}) =>
@@ -117,5 +118,39 @@ describe('formatFinding', () => {
     expect(formatFinding({ line: 7, name: 'Oldprod', path: 'a.md' })).toContain(
       'Oldprod',
     );
+  });
+});
+
+describe('regularFiles', () => {
+  const entry = (mode, path) => `${mode} abc123 0\t${path}`;
+
+  it('keeps a regular file', () => {
+    expect(regularFiles(`${entry('100644', 'a.md')}\0`)).toEqual(['a.md']);
+  });
+
+  it('keeps an executable file', () => {
+    expect(regularFiles(`${entry('100755', 'hook')}\0`)).toEqual(['hook']);
+  });
+
+  it('drops a symlink — it either is a directory or duplicates a tracked file', () => {
+    expect(regularFiles(`${entry('120000', 'CLAUDE.md')}\0`)).toEqual([]);
+  });
+
+  it('drops a submodule gitlink, which has no blob to read', () => {
+    expect(regularFiles(`${entry('160000', 'vendor//lib')}\0`)).toEqual([]);
+  });
+
+  it('keeps the regular files alongside the modes it drops', () => {
+    const output = [
+      entry('100644', 'a.md'),
+      entry('120000', '.claude/skills'),
+      entry('100755', 'b.sh'),
+    ].join('\0');
+
+    expect(regularFiles(`${output}\0`)).toEqual(['a.md', 'b.sh']);
+  });
+
+  it('keeps a path containing a space', () => {
+    expect(regularFiles(`${entry('100644', 'a b.md')}\0`)).toEqual(['a b.md']);
   });
 });
