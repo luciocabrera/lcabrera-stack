@@ -1,51 +1,92 @@
-# Vite+ Monorepo Starter
+# vite-react-compiler
 
-A starter for creating a Vite+ monorepo.
+A pnpm monorepo built with the [Vite+](https://viteplus.dev) unified toolchain
+(`vp`). **The `packages/` are the product; the `apps/` exist to exercise them.**
 
-> **[COMMANDS.md](COMMANDS.md) is the canonical command reference** — every root
-> script, every per-workspace task, and what CI runs. The few below are just the
-> starting points. Project rules and conventions live in [AGENTS.md](AGENTS.md).
+## The packages
+
+These publish to npm under **`@lcabrera/*`**. Each is meant to be consumed from
+outside this repo, so each stands on its own — declared dependencies, a
+resolvable public surface, no reliance on a consumer's tsconfig `paths`.
+`vp run release:plan` prints the current publishable set.
+
+| Package                                                  | What it is                                                                         |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [`@lcabrera/ui`](packages/ui)                            | React 19 + StyleX components — the Table, the Form, hooks, contexts, design tokens |
+| [`@lcabrera/api`](packages/api)                          | the browser-safe data layer: fetch, query shapes, no `node:` anything              |
+| [`@lcabrera/server`](packages/server)                    | the Node half — DB access, query builders, crypto, tokens                          |
+| [`@lcabrera/utils`](packages/utils)                      | pure helpers; no DOM lib, no node types, no side effects                           |
+| [`@lcabrera/node`](packages/node-runtime)                | process lifecycle — signals, shutdown                                              |
+| [`@lcabrera/eslint-plugin`](packages/eslint-local-rules) | the custom lint rules                                                              |
+| [`@lcabrera/tsconfig`](packages/tsconfig)                | the tsconfig factories and their writer                                            |
+| [`@lcabrera/vite-config`](packages/vite-configs)         | the shared Vite/lint/test config                                                   |
+| [`@lcabrera/devkit`](packages/devkit)                    | the repo setup this repo hands to another repo                                     |
+| [`@lcabrera/repo-standards`](packages/repo-standards)    | the gates behind that setup — commits, ADRs, claims, publishing                    |
+
+Two internal workspaces stay `@repo/*` and never publish: `ts-configs` (this
+repo's own workspace roster) and `scan-report` (the scanners the skills run).
+The scope is the signal — `@lcabrera/` ships and has outside consumers,
+`@repo/` is internal.
+
+**Nothing but the version number stands between a mistake and the registry.**
+`private` is off on each of them and each has a trusted publisher, so a merged
+version bump publishes on its own, and an npm version is permanent. Read
+[`packages/CLAUDE.md`](packages/CLAUDE.md) before editing any manifest there.
+
+## The app
+
+[`apps/react-router`](apps/react-router) is a React Router 7 SSR showcase — a
+feature-rich data Table with store-based state, virtualization, infinite scroll
+and granular `useSyncExternalStore` subscriptions. It is a harness, not a
+product: it puts the packages under realistic load and is the only thing that
+legitimately depends on several at once, which makes it where cross-package
+integration gets verified. Never put a guarantee a _package_ relies on into it.
+
+Products built on these packages live in their own repositories — CQMS left in
+#683, the car-sales API servers in #686. If a change is only meaningful to one
+of those, it belongs there.
 
 ## Development
 
-Everything goes through `vp` (Vite+) — never `pnpm`/`npm`/`yarn` directly.
+Everything goes through `vp` — never `pnpm`/`npm`/`yarn` directly, except for
+the handful of commands `vp` does not wrap.
 
 ```bash
-vp install        # install dependencies
-vp run dev        # frontend + express api (dev:fast = fastify, dev:cqms = CQMS)
-vp run build:all  # build every workspace
-vp run ready      # check everything is ready (full gate + build)
+vp install            # install dependencies
+vp run dev:showcase   # run the showcase app
+vp run build:all      # build every workspace
+vp run ready          # the full gate + build
 ```
 
 Tests:
 
 ```bash
-vp run test:ci    # every DB-free suite — what CI runs, needs no database
-vp run test:all   # every suite, including the DB-bound ones — needs Postgres
+vp run test:ci        # what CI runs — no suite here needs a database
+vp run test:all       # every suite, plus the root scripts/ tests
 ```
 
-Before finishing any change, run the quality gate — see
-[COMMANDS.md §3](COMMANDS.md#3-the-quality-gate). `vp check` alone is not the
-whole gate: it runs neither the eslint pass nor `tsc`.
+Before finishing any change, run the quality gate — `vp run check:safe` chains
+it the way CI does. `vp check` alone is **not** the whole gate: it runs neither
+the eslint pass nor `tsc`.
 
-## Local DB Workflow
+## Local database
 
-From the repository root:
+The showcase serves its own tables and seeds itself.
 
 ```bash
-# Start local postgres
-vp run db:up
-
-# Check status
-vp run db:status
-
-# Seed the showcase's own tables (seed/db:seed are workspace scripts, so they
-# need --filter); car-sales-api seeds its own copy of the car-sales tables
-vp run --filter vite-react-compiler seed
-
-# Or do both bring-up + seed
-vp run --filter vite-react-compiler db:seed
-
-# Stop local postgres
-vp run db:down
+vp run db:up                                # start local postgres
+vp run db:status                            # check it
+vp run --filter vite-react-compiler seed    # seed (a workspace script, hence --filter)
+vp run --filter vite-react-compiler db:seed # or bring-up + seed together
+vp run db:down                              # stop it
 ```
+
+## Where to look next
+
+- **[COMMANDS.md](COMMANDS.md)** — the canonical command reference: every root
+  script, every per-workspace task, what CI runs. `vp run commands:verify`
+  keeps it honest.
+- **[AGENTS.md](AGENTS.md)** — project rules and conventions (symlinked as
+  `CLAUDE.md` / `GEMINI.md` / `.github/copilot-instructions.md`).
+- **[docs/README.md](docs/README.md)** — where each kind of doc lives, and how
+  to read an ADR written when this repo was something else.

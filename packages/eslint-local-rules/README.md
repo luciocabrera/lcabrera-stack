@@ -151,7 +151,7 @@ components/Table/persistence.constants.ts           # names no artifact in Table
 
 ```
 db/group-query-builder/group-query-builder.constants.ts
-routes/cqms/trigger-scan/triggerScan.constants.ts   # artifact folder
+routes/orders/new-order/newOrder.constants.ts       # artifact folder
 constants/virtualization.constants.ts               # catch-all folder
 ```
 

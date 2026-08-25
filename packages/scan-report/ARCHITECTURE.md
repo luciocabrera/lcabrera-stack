@@ -1,21 +1,27 @@
 # `@repo/scan-report` — architecture
 
-The scanners behind the `linter-checker`, `code-smell-checker`,
+The scanners behind the `app-graph`, `linter-checker`, `code-smell-checker`,
 `code-smell-zen` and `fallow-code-checker` skills. They used to live under
 `.github/skills/*/scripts/`, where they could only ever be copied into another
 repository; [ADR-069](../../docs/decisions/ADR-069-publish-the-shared-toolchain.md)
 made them a package instead, and the skills kept their `SKILL.md` — prompt text
 is per-repository, code is not.
 
-**Private on purpose.** ADR-069 first had this package publishing as
-`@lcabrera/scan-report`; its
+**Private on purpose, and the reason has changed.** ADR-069 first had this
+package publishing as `@lcabrera/scan-report`; its
 [amendment](../../docs/decisions/ADR-069-publish-the-shared-toolchain.md#amendment-2026-08-14--scan-report-does-not-publish)
-withdrew that before it landed, because every consumer is CQMS and the versioned
-contract below is CQMS's report schema. It moves with the extraction (#679). The
-decoupling that got it here — a configured ingestion command, no workspace-named
-default scope, an install-derived host root — is needed either way: a runner that
-hardcodes a path into another product's workspace breaks when that product moves,
-registry or no registry.
+withdrew that on the grounds that every consumer was CQMS, so the package would
+leave with the extraction. CQMS left in #683 and this package stayed — the
+consumers listed at the top of this file are all in this repository, and
+`app-graph` imports `deterministic-scan` as a module rather than shelling out.
+
+What still holds is the packaging answer, for a different reason: the versioned
+contract below is a **report shape**, and a report shape is per-repository the
+same way prompt text is. The decoupling that got it here — a configured
+ingestion command, no workspace-named default scope, an install-derived host
+root — was never contingent on the extraction either: a runner that hardcodes a
+path into another product's workspace breaks when that product moves, registry
+or no registry.
 
 ## Layout
 
@@ -46,8 +52,9 @@ list this package is not on. All three by construction, not by exemption.
 **Its contract is the report shape, not a TypeScript surface.** What a consumer
 depends on is the CLI flag set and `SCHEMA_V1.md`/`REPORT_JSON_CONTRACT.md` —
 change either document and you have changed the contract, with or without a type
-diff. That the contract is a _CQMS_ report schema is what settled the packaging
-question: it is meaningless without a CQMS to ingest it.
+diff. That is what settled the packaging question: a report schema is agreed
+between a scanner and whatever ingests it in the same repository, so versioning
+it on a registry would pin the wrong half.
 
 **The host root is derived from the install location, never from `cwd`.** An
 orchestrator spawns these runners from wherever it happens to be, so a
@@ -128,7 +135,7 @@ The line is drawn at _installed but broken_. A fallow that exists and exits
 non-zero against the host's own repository still hard-exits, because that is the
 host's tooling failing and it should hear about it immediately; the same failure
 against a `--target` project only degrades, since an arbitrary project can break
-a tool in ways the host never does (CQMS ADR-015).
+a tool in ways the host never does.
 
 `fallow` is deliberately not a dependency of this package at all: the runner
 resolves it from the repository being scanned rather than from its own

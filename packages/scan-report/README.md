@@ -7,10 +7,18 @@ machine-readable `report.json`, and a human-readable `report.md`.
 - **[SCHEMA_V1.md](SCHEMA_V1.md)** — the canonical report contract
 - **[REPORT_JSON_CONTRACT.md](REPORT_JSON_CONTRACT.md)** — the `report.json` shape a consumer parses
 
-**Private, and staying that way.** Every consumer is CQMS, and the contract
-above is CQMS's report schema, so this package travels with the extraction
-(#679) rather than going to a registry — the reasoning is recorded in
-[ADR-069's amendment](../../docs/decisions/ADR-069-publish-the-shared-toolchain.md#amendment-2026-08-14--scan-report-does-not-publish).
+**Private, and staying that way** — though not for the reason
+[ADR-069's amendment](../../docs/decisions/ADR-069-publish-the-shared-toolchain.md#amendment-2026-08-14--scan-report-does-not-publish)
+gave. That amendment withdrew the planned `@lcabrera/scan-report` publish on the
+grounds that every consumer was CQMS and would leave with it. CQMS left in #683;
+this package did not, because the consumers that matter were in this repository
+all along: the `app-graph` skill imports `deterministic-scan` directly, and
+`linter-checker`, `fallow-code-checker`, `code-smell-checker` and
+`code-smell-zen` execute the runners and the `scan-report-ingest` bin. The
+conclusion survived its own reasoning — it stays `@repo/*` and `private: true`
+because the report shape it versions is per-repository, not because it is
+going anywhere.
+
 Nothing below assumes a registry; it works the same in whichever repository the
 workspace lives.
 
