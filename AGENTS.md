@@ -93,27 +93,14 @@ the new `packages/tsconfig` above, and the surviving workspace stays private.
 The publishing history and the scan-report amendment live in
 [ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md).
 
-`api` and `server` split on **runtime**, and the split is load-bearing, not
-cosmetic — the two names say which runtime each one is for, and the tsconfigs
-enforce it in both directions. `@lcabrera/api` is browser-safe: its tsconfig omits
-`node` types, so a `process`/`fs` reach-in fails typecheck there. `@lcabrera/server`
-is Node-only (`pg`, `node:crypto`) and gets no DOM lib, so a `window`/`document`
-reach-in fails there. They were one package until the cost showed up: `@lcabrera/ui`
-depended on the combined package for two fetch helpers and so pulled the Postgres
-driver into every consumer's dependency graph. `packages/ui`'s `check:public-api`
-now enforces the invariant — **a client-safe package may only depend on workspace
-packages that are themselves client-safe** — so that regression fails the gate
-instead of passing silently. The full topology and what each tsconfig denies is
-[ADR-038](docs/decisions/ADR-038-public-package-topology-by-runtime.md),
-which supersedes ADR-008.
-
-`utils` and `node` split on purity, and the split is deliberate:
-`@lcabrera/utils` guarantees pure, side-effect-free helpers, so anything that must
-touch the process (signal handlers, exit paths) belongs in `@lcabrera/node`
-(the `packages/node-runtime` workspace) instead of eroding that guarantee. That
-is also why publishing did not merge the two — nor fold `@lcabrera/node` into
-`@lcabrera/server`, which would drag `pg` into a consumer that only wanted a
-shutdown handler (ADR-069, on ADR-038's reasoning).
+`api`/`server` split on **runtime** and `utils`/`node` on **purity**, and both
+splits are load-bearing, not cosmetic. The invariant to carry everywhere: **a
+client-safe package may only depend on workspace packages that are themselves
+client-safe**, enforced by `packages/ui`'s `check:public-api`. The topology and
+what each tsconfig denies is in [`packages/CLAUDE.md`](packages/CLAUDE.md) and
+[ADR-038](docs/decisions/ADR-038-public-package-topology-by-runtime.md)
+(supersedes ADR-008); why publishing merged neither pair is
+[ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md).
 
 All source paths below (e.g. `src/components/`) are relative to `apps/react-router/` unless otherwise noted.
 
@@ -152,32 +139,20 @@ stop for implementation patterns.
 Selection guideline:
 
 - **Working in complex UI state?** Start with `store-pattern`.
-- **Creating a component, hook, util, or context?** Spawn the
-  `architecture-guard` agent first — it reads the inventories, PATTERNS.md,
-  the system `ARCHITECTURE.md` if the area has one, and ADRs, and returns a
-  reuse brief.
-- **Finishing any code change?** Run `quality-gate-workflow`.
-- **Committing or opening a PR?** Use `commit-and-pr`.
 - **Writing English a person will read** (chat, PR/issue prose, docs,
   review comments)? Use `unslop`. Template headings and commit subjects
   stay under `commit-and-pr`.
 - **Routing/data mutations?** Use `react-router-framework-mode`.
 - **React component implementation?** Use `react-19`.
-- **Understanding unfamiliar code before changing it?** Use `codebase-explorer`.
 - **Picking a scan?** `linter-checker` (mechanical lint),
   `fallow-code-checker` (fallow), `code-smell-zen` (diff smells),
   `code-smell-checker` (full-tree smells), `health-swarm` (repo-wide rot with
   evidence).
-- **Auditing what has rotted repo-wide?** Use `health-swarm` — six read-mostly
-  scouts in parallel (duplication, dead code, perf, deps, doc drift, lint
-  coherence), each held to a probe that could have disproved its own finding.
-  Prefer a subset (`/health-swarm perf deps`) unless a full sweep is warranted.
+- **Auditing what has rotted repo-wide?** `health-swarm` — prefer a subset
+  (`/health-swarm perf deps`) unless a full sweep is warranted.
 - **Configuring or debugging a linter (Oxlint/eslint/Biome/Sonar)?** Use `lint-toolchain`.
-- **Cutting a release, or touching the changelog/label automation?** Use `releasing`.
 - **Implementing a backlog issue that has real acceptance criteria?** Use
-  `refactor-verified` — a builder subagent implements it, and a **separate**
-  verifier subagent certifies it from the diff and the criteria alone, never the
-  builder's reasoning. The standard it enforces is
+  `refactor-verified`; the standard it enforces is
   [`docs/agents/refactor-verified-contract.md`](docs/agents/refactor-verified-contract.md).
 - **Driving a whole epic to merged?** Use `epic` (`/epic <n>`) — the epic-scale
   form of the above, not a replacement for it. It maps the dependency graph,
