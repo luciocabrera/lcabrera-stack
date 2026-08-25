@@ -60,10 +60,8 @@ it ships, or about the showcase app's own internals?**
 | [`docs/decisions/`](./decisions/)                                           | the repo, the published `@lcabrera/*` packages, the toolchain           |
 | [`apps/react-router/docs/decisions/`](../apps/react-router/docs/decisions/) | the showcase app — Modal, Tooltip, the store pattern, grid interaction… |
 
-There were three. The split was originally drawn by "when CQMS moves to its own
-repository, does this decision go with it?" — that move happened in #683 and the
-CQMS home went with it, which is why an old ADR may cite a number that now
-resolves in only one place.
+A third home existed while a second product lived here, and left with it. That
+is why an old ADR may cite a number which now resolves in only one place.
 
 ### Reading an ADR written in an earlier era
 
@@ -73,11 +71,12 @@ written:
 | Era                 | What the repo was                                                  |
 | ------------------- | ------------------------------------------------------------------ |
 | **One app**         | `apps/react-router` alone; no packages                             |
-| **A monorepo**      | several apps — the car-sales API servers, CQMS — plus the packages |
+| **A monorepo**      | several applications, plus the packages                            |
 | **Public packages** | the `@lcabrera/*` packages are the product; one app exercises them |
 
-So an older ADR naming one of the car-sales API workspaces, or the CQMS admin
-app, is not necessarily rot. Two cases, and they are treated differently on purpose:
+So an older ADR naming a workspace that is no longer here — those applications
+were extracted to their own repositories — is not necessarily rot. Two cases,
+and they are treated differently on purpose:
 
 - **Named as Context** — the evidence that motivated a decision about the
   packages. Left exactly as written. Editing it would falsify _why_ the decision
