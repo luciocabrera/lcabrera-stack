@@ -220,9 +220,19 @@ while a gate grew a helper outside it.
 
 Three consequences worth knowing:
 
-- **It is per gate.** A pull request editing `copilot-review.mjs` withholds only the
-  Copilot gate; the other two still publish, because that file is not in their closure. A
-  pull request editing `review-gate-reconcile.mjs` withholds all three, because it is.
+- **It is per gate, and its reach is wider than the gate scripts.** A pull request
+  editing `copilot-review.mjs` withholds only the Copilot gate; the other two still
+  publish, because that file is not in their closure. Editing the shared
+  `review-gate-reconcile.mjs` withholds all three. So do the general-purpose helpers the
+  closure legitimately reaches — `cli-input.mjs` and `error-message.mjs` under
+  `packages/repo-standards/` are used far beyond these gates, and a pull request touching
+  one of them withholds every gate including the required context. That is the principle
+  working, not overreaching: it is code the gate runs. Read a closure rather than guessing
+  at one — `localModuleClosure` is exported and the tests walk the real tree with it.
+- **Not knowing counts as a self-edit.** When the changed files cannot be read at all, the
+  sweep withholds rather than publishing: a verdict claimed without the check that
+  justifies it is the thing this rule exists to prevent. The line says which of the two
+  reasons applied.
 - **A gate-editing pull request loses the sweep's help.** That is the trade, and it is the
   correct one — the sweep has no trustworthy opinion there. The event path still works
   (#866 fixed the ref it dispatches with), and break-glass rung 3 with `--ref` is the

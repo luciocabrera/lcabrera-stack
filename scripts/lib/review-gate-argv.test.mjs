@@ -274,6 +274,78 @@ describe('the code a gate actually runs', () => {
   });
 });
 
+describe('the precondition the walk depends on', () => {
+  // `localModuleClosure` follows relative, single-quoted specifiers. That reaches
+  // everything today because these scripts import nothing else — but a gate that
+  // later pulls in a workspace package, or quotes an import with `"`, would drop
+  // silently out of its own closure and the sweep would start publishing on a
+  // self-edit again. Narrowing is the failure direction that matters, so the
+  // convention is asserted rather than trusted.
+  const GATE_ENTRIES = [
+    'scripts/copilot-review-status.mjs',
+    'scripts/verify-agent-review.mjs',
+    'scripts/verify-review-threads.mjs',
+  ];
+  const closureOf = (entry) =>
+    localModuleClosure({
+      entry,
+      readFile: (path) => {
+        try {
+          return readRepoFile(path);
+        } catch {
+          return undefined;
+        }
+      },
+    });
+
+  /**
+   * The specifier on every real import line, comments excluded.
+   *
+   * Scanning raw source finds prose: `pr-threads-api.mjs` contains the phrase
+   * `from "could not read it"` in a docblock, which a naive match reads as an
+   * import of a package called `could not read it`. The closure's own walk is
+   * immune — it only accepts specifiers starting with `.` — but a check that
+   * cries wolf gets deleted, so this one reads import lines only.
+   */
+  const importSpecifiers = (source) =>
+    source
+      .split('\n')
+      .filter((line) => {
+        const trimmed = line.trim();
+        return (
+          !trimmed.startsWith('*') &&
+          !trimmed.startsWith('//') &&
+          /^(?:import\b|export\b|\}).*\bfrom\s+['"]/u.test(trimmed)
+        );
+      })
+      .flatMap((line) => {
+        const match = /\bfrom\s+['"]([^'"]+)['"]/u.exec(line);
+        return match === null ? [] : [{ quote: line, specifier: match[1] }];
+      });
+
+  const allModules = () => [...new Set(GATE_ENTRIES.flatMap(closureOf))];
+
+  it('imports nothing but `node:` builtins and relative paths', () => {
+    const foreign = allModules().flatMap((module) =>
+      importSpecifiers(readRepoFile(module)).flatMap(({ specifier }) =>
+        specifier.startsWith('.') || specifier.startsWith('node:')
+          ? []
+          : [`${module} -> ${specifier}`],
+      ),
+    );
+    expect(foreign).toEqual([]);
+  });
+
+  it('quotes every import with a single quote', () => {
+    const doubleQuoted = allModules().flatMap((module) =>
+      importSpecifiers(readRepoFile(module)).flatMap(({ quote }) =>
+        /\bfrom\s+"/u.test(quote) ? [`${module}: ${quote.trim()}`] : [],
+      ),
+    );
+    expect(doubleQuoted).toEqual([]);
+  });
+});
+
 describe('the sweep actually consults it — not a parallel definition', () => {
   // Every assertion above passes with the decision never called. #866 and #868
   // are both cases where the wiring, not the logic, was the defect.
@@ -282,7 +354,7 @@ describe('the sweep actually consults it — not a parallel definition', () => {
   it('withholds before it would spawn the gate', () => {
     // The guard has to sit on the path to `runGate`, not beside it.
     expect(source()).toMatch(
-      /gateJudgesItsOwnEdit\(\{[^}]*\}\)\s*\?[\s\S]{0,400}?:\s*runGate\(/,
+      /gateJudgesItsOwnEdit\([\s\S]{0,200}?\?[\s\S]{0,700}?:\s*runGate\(/u,
     );
   });
 
@@ -294,6 +366,21 @@ describe('the sweep actually consults it — not a parallel definition', () => {
   it('derives each gate’s closure from its own script', () => {
     expect(source()).toMatch(
       /localModuleClosure\(\{[\s\S]{0,200}?gate\.script/,
+    );
+  });
+
+  it('withholds when it could not read what the pull request changed', () => {
+    // Not knowing is not the same as nothing changed. Publishing here would be a
+    // verdict claimed without the check that justifies it.
+    expect(source()).toMatch(/changedFiles === undefined\s*\|\|/u);
+    expect(source()).toMatch(/could not read what this pull request changed/u);
+  });
+
+  it('does not let one pull request’s failure end the sweep', () => {
+    // `fetchChangedFiles` runs per pull request, so an unguarded throw would
+    // abandon every pull request after it — where a gate failure costs one line.
+    expect(source()).toMatch(
+      /const fetchChangedFiles[\s\S]{0,600}?\}\s*catch\s*\(/u,
     );
   });
 

@@ -166,9 +166,11 @@ export const shouldPublishStatus = ({
  *
  * `readFile` is injected so this stays pure and testable; it takes a
  * repo-relative path and returns the source, or `undefined` when there is no
- * such file. An unreadable import is skipped rather than thrown on: a sweep must
- * not die because one module moved, and the caller's fallback — treating the
- * closure as incomplete — is the safe direction.
+ * such file. **An unreadable module stays IN the closure and the walk stops
+ * there** — it is added before it is read. Nothing downstream compensates for a
+ * short closure, so the width is the safety margin: too wide costs a withheld
+ * gate, too narrow lets the sweep publish on a self-edit, which is the defect
+ * #884 closes. Do not "fix" this into dropping the module.
  */
 export const localModuleClosure = ({ entry, readFile }) => {
   const seen = new Set();

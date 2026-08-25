@@ -19,10 +19,12 @@
  *   vp run review-gates:reconcile -- --pr 738 --dry-run
  *   vp run review-gates:reconcile -- --repo owner/name
  *
- * Exit codes: 0 = every gate run reported; 1 = the pull requests could not be
- * listed, or at least one gate run failed. It never exits 0 on a sweep that
- * could not do its work — a reconcile that goes quiet is the one failure nobody
- * would notice.
+ * Exit codes: 0 = every gate run reported or was deliberately withheld; 1 = the
+ * pull requests could not be listed, or at least one gate run failed. It never
+ * exits 0 on a sweep that could not do its work — a reconcile that goes quiet is
+ * the one failure nobody would notice. A withheld gate is not that: it is a
+ * decision, it says so on its line, and it leaves a better-informed verdict
+ * standing (#884).
  */
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, readFileSync } from 'node:fs';
@@ -59,23 +61,39 @@ const readRepoModule = (path) => {
 };
 
 /**
- * The files one pull request changes, repo-relative.
+ * The files one pull request changes, repo-relative, or `undefined` when they
+ * could not be read.
  *
  * Read once per pull request rather than once per gate: the answer is the same
  * for all three, and the sweep's cost is already one API call per gate.
+ *
+ * A failure here is caught rather than thrown, and the difference is the rest of
+ * the sweep: this runs per pull request, so one transient API error would
+ * otherwise abandon every pull request after it — where the same class of
+ * failure inside a gate costs one line. `undefined` is not "nothing changed": the
+ * caller withholds on it, because a sweep that cannot tell whether this pull
+ * request edits the gate must not publish as though it had checked.
  */
-const fetchChangedFiles = ({ number, repository }) =>
-  JSON.parse(
-    runGh([
-      'api',
-      '--paginate',
-      '--slurp',
-      `repos/${repository}/pulls/${number}/files?per_page=100`,
-    ]),
-  )
-    .flat()
-    .map((file) => file?.filename)
-    .filter((filename) => typeof filename === 'string');
+const fetchChangedFiles = ({ number, repository }) => {
+  try {
+    return JSON.parse(
+      runGh([
+        'api',
+        '--paginate',
+        '--slurp',
+        `repos/${repository}/pulls/${number}/files?per_page=100`,
+      ]),
+    )
+      .flat()
+      .map((file) => file?.filename)
+      .filter((filename) => typeof filename === 'string');
+  } catch (error) {
+    console.error(
+      `::warning::could not read the files changed by #${number}: ${errorMessage(error)}`,
+    );
+    return undefined;
+  }
+};
 
 /**
  * The gates this sweep republishes, named by gate rather than by the status
@@ -230,18 +248,19 @@ const main = () => {
   const results = pullRequests.flatMap((number) => {
     const changedFiles = fetchChangedFiles({ number, repository });
     return gates.map((gate) => {
-      const result = gateJudgesItsOwnEdit({
-        changedFiles,
-        closure: gate.closure,
-      })
-        ? {
-            gate: gate.name,
-            number,
-            ok: true,
-            output:
-              'Withheld: this pull request edits the code this gate runs, and the sweep runs the default branch (#884).',
-          }
-        : runGate({ extraArgs, gate, number, repository });
+      const result =
+        changedFiles === undefined ||
+        gateJudgesItsOwnEdit({ changedFiles, closure: gate.closure })
+          ? {
+              gate: gate.name,
+              number,
+              ok: true,
+              output:
+                changedFiles === undefined
+                  ? 'Withheld: could not read what this pull request changed, so whether it edits this gate is unknown (#884).'
+                  : 'Withheld: this pull request edits the code this gate runs, and the sweep runs the default branch (#884).',
+            }
+          : runGate({ extraArgs, gate, number, repository });
       console.log(outcomeLine(result));
       return result;
     });
