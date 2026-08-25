@@ -193,35 +193,84 @@ it is smaller than it sounds, because for that gate the sweep was never the only
   the required check at all, so what survives is the record rather than the
   merge.
 
-### The rule is one-directional; the reasoning behind it is not
+### The rule is one-directional; the sweep's answer to the other direction is not
 
-The sweep still publishes `pending` → `success`. The argument for the rule — _the sweep
-runs default-branch gate code, so it is not the better-informed opinion_ — applies just
-as well to that direction, and it is not blocked there.
+The sweep still publishes `pending` → `success`, and it must: correcting a `pending`
+that a missed event left behind is the whole reason it exists, and that is the very same
+transition. Refusing it was considered in #880 and rejected — it would stop the sweep
+doing its job while still looking like it worked.
 
-That leaves the **mirror of #866**, on a pull request that makes a gate _stricter_: its
-own run posts `pending` (correct under the new, tighter rule), the sweep recomputes with
-the lenient code being replaced, gets `success`, and publishes it. Same head, same cause,
-opposite direction — and, since `Copilot review complete` became a required
-context on
-2026-08-21, **a false green on a live merge bar** rather than a hypothetical one.
+That left the **mirror of #866**, on a pull request making a gate _stricter_: its own run
+posts `pending`, correct under the new tighter rule; the sweep recomputes with the lenient
+code being replaced, gets `success`, and publishes it. Same head, same cause, opposite
+direction — and once `Copilot review complete` became required on 2026-08-21, a false
+green on a live merge bar.
 
-**Deliberately not blocked.** Correcting a `pending` that a missed event left behind is
-the sweep's entire job, and it is the very same transition; refusing it would stop the
-sweep doing what it exists for while still looking like it worked. That is the trap the
-rejected "only fill absence" option fell into.
+**#884 closed it, and not by blocking a transition.** Both directions come from one
+defect — the sweep judging a pull request with the gate code that pull request is
+replacing — so the fix is upstream of the state machine: **the sweep does not publish for
+a gate whose own code the pull request changes.** It withholds, says so in the report, and
+leaves the verdict the pull request's own run already posted from its own code, which is
+the better-informed one.
 
-**It is closer to reachable than the dismissal case below**, and worth saying plainly:
-it needs only a pull request that tightens a gate, which is an ordinary change — no
-missing event required — and a pull request whose own gate code disagrees with
-`main`'s
-is not hypothetical, because #866 was one. What #866 does **not** evidence is this
-polarity: what was measured there is `main`'s code overwriting a `success` with
-`pending`, and no instance of the reverse has been observed. What limits the
-damage is that the green is not arbitrary — the head really was reviewed under
-the rule `main` still holds — and that it lasts only until the pull request
-merges, after which both copies agree. If a way to tell "stale code disagrees" from
-"a missed event left this stale" is ever wanted, it has to serve both directions.
+The code each gate runs is **derived, not listed**: `localModuleClosure` walks the gate
+script's relative imports transitively from this checkout — which is the default branch
+when the schedule runs it, and that is the point. A hand-written roster would keep passing
+while a gate grew a helper outside it.
+
+What follows from it:
+
+- **It is per gate, and its reach is wider than the gate scripts.** A pull request
+  editing `copilot-review.mjs` withholds only the Copilot gate; the other two still
+  publish, because that file is not in their closure. Editing the shared
+  `review-gate-reconcile.mjs` withholds all three. So do the general-purpose helpers the
+  closure legitimately reaches — `cli-input.mjs` and `error-message.mjs` under
+  `packages/repo-standards/` are used far beyond these gates, and a pull request touching
+  one of them withholds every gate including the required context. That is the principle
+  working, not overreaching: it is code the gate runs. Read a closure rather than guessing
+  at one — `localModuleClosure` is exported and the tests walk the real tree with it.
+- **The sweep's own driver is in every gate's closure, and no gate imports it.**
+  `reconcile-review-gates.mjs` decides what each gate run _is_ — `GATES` carries the
+  `protectSuccess` flags and `gateArgs` turns them into `--protect-success` — so a pull
+  request editing only the driver changes every gate run while matching nothing in any
+  gate's own closure. Left out, that reopens #884 through the one file the walk cannot
+  reach from a gate, in its #868 form: the sweep runs the default branch's driver, decides
+  without the flag the pull request adds, and overwrites a `success` the head's own run got
+  right. `gateClosure` unions the two.
+- **The extra read is two requests per pull request, both filtered in `gh`.** The
+  `files` endpoint carries each entry's diff hunk, so it asks for
+  `.[].filename` rather than the payload: it is the sweep's only response whose
+  size scales with diff content, and overflowing `runGh`'s buffer would read as
+  "could not tell" — withholding every gate for that pull request on every run
+  until it closed. The second reads the pull request's own `changed_files`,
+  because that endpoint **caps its response** and `gh --paginate` exits 0 on a
+  capped list: a short list is the one wrong answer that never reaches a `catch`,
+  and the files it drops are as likely as any to be the ones a closure names.
+  Comparing against the count rather than against a written-down cap means
+  nothing here goes stale if GitHub changes it. The count is read first, so a
+  push landing between the two shows up as _more_ files than expected, which is
+  the direction that does not alarm.
+- **Not knowing counts as a self-edit.** When the changed files cannot be read at all, the
+  sweep withholds rather than publishing: a verdict claimed without the check that
+  justifies it is the thing this rule exists to prevent. The line says which of the two
+  reasons applied.
+- **An empty list is not "not knowing".** `gh` exits 0 and prints nothing for a pull
+  request whose diff has gone empty — its head force-pushed back to the merge base, or its
+  commits absorbed by the base — and that is a truthful answer: no file of it is in any
+  gate's closure, so it sweeps normally. Folding it into the unreadable signal would fail
+  all three gates on every scheduled run until someone closed it, blaming an API problem
+  that is not happening. `runGh` throws on a non-zero `gh`, so the genuine failure is
+  already the loud one.
+- **A gate-editing pull request loses the sweep's help.** That is the trade, and it is the
+  correct one — the sweep has no trustworthy opinion there. The event path still works
+  (#866 fixed the ref it dispatches with), and break-glass rung 3 with `--ref` is the
+  manual route.
+- **`Review threads resolved` has no other publisher**, so on a pull request editing
+  `pr-threads.mjs` that status simply stops being refreshed. It is advisory —
+  `required_review_thread_resolution` is what holds that merge — so the cost is a stale
+  report, not a stuck pull request.
+
+Changing a doc or a workflow does not withhold anything: neither is code the sweep runs.
 
 ### The residual case, and what currently keeps it unreachable
 
@@ -307,6 +356,18 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    is what you need. This step stays the right one for the two contexts that are
    advisory, and for reading what the sweep thinks.
 
+   **It withholds for whichever gates the pull request's own code is in.** The
+   self-edit rule above lives in the sweep, so it applies to every invocation —
+   including this one, run locally from the pull request's branch, where the
+   reasoning behind it does not hold. There is no override.
+
+   It stays **per gate**, as above: editing one gate's own module withholds that
+   gate and recomputes the others, while editing something all three closures
+   share withholds all three. So this rung is still worth running — it corrects
+   whatever it did not withhold. But a #866-class stuck status is by definition
+   on a gate-editing pull request, so the context you need is likely a withheld
+   one; step 2's per-gate dispatch is what gets it.
+
 2. **Dispatch the gate from Actions**, which needs no checkout — pick
    **Copilot Review Gate**, **Agent Review Gate** or **Review Gate Reconcile**,
    press **Run workflow**, and give the pull request number. A dispatch is
@@ -337,6 +398,11 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    reconcile dispatch is deliberately left without one: it is the sweep,
    and the sweep is default-branch by design, which is the whole of what #868 and
    #884 are about.
+
+   **So for a withheld gate, pick one of the two per-gate dispatches.** They
+   invoke their gate script directly, which is why they are unaffected; _Review
+   Gate Reconcile_ goes through the sweep and withholds the same gates step 1
+   does. It reports that it withheld rather than going quietly green.
 
    `-R` is what makes "needs no checkout" true. `gh` infers the repository from a
    git remote, so without it these fail with `not a git repository` before any
@@ -393,12 +459,12 @@ before relying on it again.
   merge. `Agent review verdict` is still advisory. `Review threads
 resolved` is a report either way: `required_review_thread_resolution` on the
   `main` ruleset is what actually holds that merge, not this status.
-- **The promotion activated one hazard this file already describes.** The
-  `pending` → `success` direction above — the mirror of #866, on a pull request
-  that tightens a gate — was written while every gate here was advisory, so it
-  cost a stale status. It now greens a required check. It is tracked, not
-  accepted: #884. The dismissal case further down
-  is still held shut by its own preconditions.
+- **The hazard the promotion activated is closed.** The `pending` → `success`
+  direction above — the mirror of #866, on a pull request that tightens a gate —
+  cost a stale status while every gate here was advisory, and greened a required
+  check once one was not. #884 closed it by withholding the sweep entirely on a
+  pull request that edits the gate's own code. The dismissal case further down is
+  still held shut by its own preconditions.
 - **Requiredness is not why a gate opts in to the no-downgrade rule.** The two sit
   next to each other here only by timing — #868 shipped the opt-in before the
   promotion, so being required cannot have been its reason. The reason is the one
@@ -421,4 +487,5 @@ resolved` is a report either way: `required_review_thread_resolution` on the
 - [`docs/agents/agent-review-contract.md`](../agents/agent-review-contract.md) — what the other gate validates
 - [ADR-076](../decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md) — why a sweep rather than a fix to the trigger
 - #737 — the measurement; #698 — the promotion this unblocked, done 2026-08-21
-  for `Copilot review complete`; #884 — the false green that promotion made live
+  for `Copilot review complete`; #884 — the false green that promotion made
+  live, closed by withholding on a self-edit

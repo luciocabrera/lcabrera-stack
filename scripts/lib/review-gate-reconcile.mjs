@@ -155,6 +155,123 @@ export const shouldPublishStatus = ({
 };
 
 /**
+ * Every local module a gate script loads, repo-relative, entry included.
+ * Follows relative specifiers only; `node:*` is the only bare one these use.
+ *
+ * An unreadable module stays IN the closure and the walk stops there. Too wide
+ * costs a withheld gate, too narrow lets the sweep publish on a self-edit — do
+ * not "fix" it into dropping the module. ADR-076, #884 amendment.
+ */
+export const localModuleClosure = ({ entry, readFile }) => {
+  const seen = new Set();
+  const pending = [normalizePath(entry)];
+  while (pending.length > 0) {
+    const current = pending.pop();
+    if (current === undefined || seen.has(current)) {
+      continue;
+    }
+    seen.add(current);
+    const source = readFile(current);
+    if (source === undefined) {
+      continue;
+    }
+    for (const specifier of relativeSpecifiers(source)) {
+      pending.push(resolveFrom({ from: current, specifier }));
+    }
+  }
+  return [...seen].toSorted((a, b) => a.localeCompare(b));
+};
+
+/** `a/./b/../c` as `a/c`, with no leading `./`. */
+const normalizePath = (path) => {
+  const parts = [];
+  for (const segment of String(path).split('/')) {
+    if (segment === '' || segment === '.') {
+      continue;
+    }
+    if (segment === '..') {
+      parts.pop();
+      continue;
+    }
+    parts.push(segment);
+  }
+  return parts.join('/');
+};
+
+/**
+ * The relative import specifiers in one module's source. Keep `(` inside the
+ * optional group — `\s*\(?\s*` backtracks super-linearly (Sonar S8786).
+ */
+const relativeSpecifiers = (source) =>
+  [...source.matchAll(/(?:from|import)\s*(?:\(\s*)?'(\.[^']*)'/gu)].map(
+    (match) => match[1],
+  );
+
+/** One relative specifier, resolved against the module that imported it. */
+const resolveFrom = ({ from, specifier }) =>
+  normalizePath(`${from.split('/').slice(0, -1).join('/')}/${specifier}`);
+
+/**
+ * The changed-file list, or `undefined` when it cannot be trusted to be whole.
+ *
+ * `gh --paginate` exits 0 on a list the files endpoint capped, so a short list
+ * is the one wrong answer that never reaches a `catch`. `expected` is the raw
+ * `changed_files` read, so no cap is written down here. Parsed with `parseInt`,
+ * not `Number`: `Number('')` is 0, which every list satisfies.
+ */
+export const completeFileList = ({ expected, filenames }) => {
+  const count = Number.parseInt(String(expected).trim(), 10);
+  return filenames.length >= count ? filenames : undefined;
+};
+
+/**
+ * One gate's closure, unioned with the driver's: the driver picks each gate's
+ * argv, so editing it alone changes every gate run while matching no gate's own
+ * closure. Walked, not appended — today's one-path union is a fact about the
+ * current imports, not a property. ADR-076, #884 amendment.
+ */
+export const gateClosure = ({ driverEntry, entry, readFile }) =>
+  [
+    ...new Set([
+      ...localModuleClosure({ entry: driverEntry, readFile }),
+      ...localModuleClosure({ entry, readFile }),
+    ]),
+  ].toSorted((a, b) => a.localeCompare(b));
+
+/** Whether the pull request changes code this gate runs. ADR-076, #884 amendment. */
+export const gateJudgesItsOwnEdit = ({ changedFiles = [], closure = [] }) => {
+  const touched = new Set(changedFiles.map((file) => normalizePath(file)));
+  return closure.some((module) => touched.has(module));
+};
+
+/**
+ * The result for a gate the sweep declines to run, or `undefined` to run it.
+ *
+ * A self-edit is a decision, so `ok`; an unreadable file list is a failure, so
+ * the sweep cannot report `0 failure(s)` and exit 0 having checked nothing.
+ */
+export const withheldResult = ({ changedFiles, gate, number }) => {
+  if (changedFiles === undefined) {
+    return {
+      gate: gate.name,
+      number,
+      ok: false,
+      output:
+        'Withheld: could not read what this pull request changed, so whether it edits this gate is unknown (#884).',
+    };
+  }
+  return gateJudgesItsOwnEdit({ changedFiles, closure: gate.closure })
+    ? {
+        gate: gate.name,
+        number,
+        ok: true,
+        output:
+          'Withheld: this pull request edits the code this gate runs, so the verdict would come from whichever copy this run loaded — on the schedule, the copy being replaced (#884).',
+      }
+    : undefined;
+};
+
+/**
  * The one spelling of the opt-in flag. `gateArgs` writes it and
  * `publishGateStatus` reads it, and a run where only one of them was renamed is
  * invisible: the gate stays unprotected, every test still passes, and the log

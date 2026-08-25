@@ -136,6 +136,24 @@ tighter bound anyway, because scheduled delivery is best-effort.
 > `docs/tooling/review-gate-reconcile.md` carries the rule, what it gives up, and the
 > residual false-green case that #699 would make reachable.
 
+> **Narrowed again by #884 / [#921](https://github.com/luciocabrera/vite-react-compiler/pull/921)**
+> (2026-08-25). The amendment above protected a published `success` from being weakened.
+> It did not stop the sweep publishing in the first place, so promoting
+> `Copilot review complete` to a required context made the remaining direction live: on a
+> pull request with no status yet, the default branch's copy of a gate could publish a
+> green the pull request's own code would not have produced. The sweep now **withholds
+> every gate verdict for a pull request that changes the code that gate runs**, computed
+> as a module closure over the gate script _and the sweep's driver_ — the driver chooses
+> each gate's argv, so editing it alone changes every gate run. Not knowing what a pull
+> request changed withholds too, and is reported as a failure rather than a decision.
+>
+> The trade is deliberate: a gate-editing pull request loses the sweep's help entirely,
+> including the required context, and the event path plus the two per-gate dispatches are
+> what cover it. Rejected alternatives — checking out the pull request's code (the sweep
+> would then run unreviewed code with a token that can publish) and an override flag (a
+> second path to a verdict computed by code under review). `docs/tooling/review-gate-reconcile.md`
+> carries the closure's reach, what the withhold costs, and the recovery ladder.
+
 ## References
 
 - #737 — the measurement, the reproduction commands and the acceptance criteria

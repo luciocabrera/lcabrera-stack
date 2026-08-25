@@ -19,14 +19,14 @@
  *   vp run review-gates:reconcile -- --pr 738 --dry-run
  *   vp run review-gates:reconcile -- --repo owner/name
  *
- * Exit codes: 0 = every gate run reported; 1 = the pull requests could not be
- * listed, or at least one gate run failed. It never exits 0 on a sweep that
- * could not do its work — a reconcile that goes quiet is the one failure nobody
- * would notice.
+ * Exit codes: 0 = every gate run reported or deliberately withheld; 1 = the
+ * pull requests could not be listed, or at least one gate run failed. It never
+ * exits 0 on a sweep that could not do its work — a reconcile that goes quiet is
+ * the one failure nobody would notice.
  */
 import { execFileSync } from 'node:child_process';
-import { appendFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { appendFileSync, readFileSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
@@ -38,13 +38,71 @@ import {
 import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import {
+  completeFileList,
   gateArgs,
+  gateClosure,
   openPullRequestNumbers,
   outcomeLine,
   sweepSummary,
+  withheldResult,
 } from './lib/review-gate-reconcile.mjs';
 
 const SCRIPTS_DIR = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = dirname(SCRIPTS_DIR);
+
+/**
+ * This driver's own repo-relative path. Derived, not written down: it goes into
+ * every gate's closure, and a literal would stop matching on a rename — which
+ * looks exactly like a healthy sweep.
+ */
+const DRIVER_MODULE = relative(REPO_ROOT, fileURLToPath(import.meta.url));
+
+/** One repo-relative module's source, or `undefined` when there is none. */
+const readRepoModule = (path) => {
+  try {
+    return readFileSync(join(REPO_ROOT, path), 'utf8');
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * The files one pull request changes, repo-relative, or `undefined` when they
+ * could not be read — which the caller withholds on, rather than publishing as
+ * though it had checked. Caught, not thrown: this runs per pull request, so one
+ * transient error would otherwise abandon every pull request after it.
+ */
+const fetchChangedFiles = ({ number, repository }) => {
+  try {
+    // Read before the list, so a push landing between the two shows up as more
+    // files than expected — the direction `completeFileList` does not alarm on.
+    const expected = runGh([
+      'api',
+      `repos/${repository}/pulls/${number}`,
+      '--jq',
+      '.changed_files',
+    ]);
+    // `--jq`, not a payload parse: every entry carries its `patch`, and this is
+    // the only call here whose size scales with diff content against `runGh`'s
+    // 8 MB cap. Overflowing it reads as "could not tell".
+    const filenames = runGh([
+      'api',
+      '--paginate',
+      '--jq',
+      '.[].filename',
+      `repos/${repository}/pulls/${number}/files?per_page=100`,
+    ])
+      .split('\n')
+      .map((filename) => filename.trim())
+      .filter((filename) => filename !== '');
+    return completeFileList({ expected, filenames });
+  } catch (error) {
+    console.error(
+      `::warning::could not read the files changed by #${number}: ${errorMessage(error)}`,
+    );
+    return undefined;
+  }
+};
 
 /**
  * The gates this sweep republishes, named by gate rather than by the status
@@ -67,6 +125,21 @@ const GATES = [
   { name: 'agent-review', script: 'verify-agent-review.mjs' },
   { name: 'review-threads', script: 'verify-review-threads.mjs' },
 ];
+
+/**
+ * Each gate paired with the modules it would execute, resolved from this
+ * checkout — the default branch when the schedule runs it. That is the point:
+ * the closure is the code THIS sweep runs, this file included.
+ */
+const gatesWithClosures = () =>
+  GATES.map((gate) => ({
+    ...gate,
+    closure: gateClosure({
+      driverEntry: DRIVER_MODULE,
+      entry: `scripts/${gate.script}`,
+      readFile: readRepoModule,
+    }),
+  }));
 
 const resolveRepository = () =>
   flagValue('--repo') ??
@@ -179,13 +252,22 @@ const main = () => {
   console.log(
     `Reconciling ${pullRequests.length} pull request(s) in ${repository}.`,
   );
-  const results = pullRequests.flatMap((number) =>
-    GATES.map((gate) => {
-      const result = runGate({ extraArgs, gate, number, repository });
+  const gates = gatesWithClosures();
+  const results = pullRequests.flatMap((number) => {
+    const changedFiles = fetchChangedFiles({ number, repository });
+    return gates.map((gate) => {
+      const result =
+        withheldResult({ changedFiles, gate, number }) ??
+        runGate({
+          extraArgs,
+          gate,
+          number,
+          repository,
+        });
       console.log(outcomeLine(result));
       return result;
-    }),
-  );
+    });
+  });
 
   const { failures, text } = sweepSummary({ pullRequests, results });
   console.log(text);
