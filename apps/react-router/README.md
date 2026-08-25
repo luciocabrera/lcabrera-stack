@@ -70,9 +70,10 @@ vp run dev:showcase
 ```
 
 `VITE_API_URL` points the same routes at an external API server instead.
-It is a **build-time** switch: in dev, exporting it before `vp run dev` is
-enough, but against a production build it must be set for `vp run build` —
-setting it for `vp run start` alone does nothing, silently. Full map of both paths, the check that tells a built
+It is a **build-time** switch: in dev,
+`VITE_API_URL=http://localhost:3001/api vp run dev:showcase` is enough, but
+against a production build it must be set for `vp run build` — setting it for
+`vp run start` alone does nothing, silently. Full map of both paths, the check that tells a built
 bundle's two states apart, and why the response shapes are identical:
 [`docs/data-sources.md`](docs/data-sources.md).
 
