@@ -8,6 +8,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  completeFileList,
   gateClosure,
   gateJudgesItsOwnEdit,
   localModuleClosure,
@@ -306,12 +307,10 @@ describe('the sweep actually consults it — not a parallel definition', () => {
     expect(declarationOf('fetchChangedFiles')).not.toMatch(/JSON\.parse\(/u);
   });
 
-  it('reads an empty file list as no files, not as an unreadable one', () => {
-    // The read side of the test above: `gh` exits 0 and prints nothing for a
-    // pull request whose diff has gone empty.
-    const body = declarationOf('fetchChangedFiles');
-    expect(body).toMatch(/return filenames;/u);
-    expect(body).not.toMatch(/filenames\.length/u);
+  it('asks how many files the pull request changed, and consults the check', () => {
+    // Without the count there is nothing to compare a capped list against.
+    expect(source()).toMatch(/'\.changed_files'/u);
+    expect(source()).toMatch(/return completeFileList\(/u);
   });
 
   it('derives each gate’s closure from its own script', () => {
@@ -322,6 +321,50 @@ describe('the sweep actually consults it — not a parallel definition', () => {
   it('does not let one pull request’s failure end the sweep', () => {
     // Runs per pull request, so an unguarded throw abandons every one after it.
     expect(declarationOf('fetchChangedFiles')).toMatch(/\}\s*catch\s*\(/u);
+  });
+});
+
+describe('whether the changed-file list can be trusted', () => {
+  it('accepts a list that accounts for every changed file', () => {
+    expect(
+      completeFileList({ expected: '2', filenames: ['a.mjs', 'b.mjs'] }),
+    ).toEqual(['a.mjs', 'b.mjs']);
+  });
+
+  it('accepts an empty list for a pull request whose diff has gone empty', () => {
+    // `gh` exits 0 printing nothing; that is an answer, not a failure to read.
+    expect(completeFileList({ expected: '0', filenames: [] })).toEqual([]);
+  });
+
+  it('rejects a list the files endpoint capped', () => {
+    // The one wrong answer that never reaches a `catch`: `gh --paginate` exits 0
+    // on a capped list, and the missing files are the ones a gate closure names.
+    expect(
+      completeFileList({
+        expected: '3200',
+        filenames: Array.from({ length: 3000 }, () => 'a.mjs'),
+      }),
+    ).toBeUndefined();
+  });
+
+  it('rejects a count that came back empty', () => {
+    // `Number('')` is 0, which every list satisfies — so this passes with
+    // `Number` in place of `parseInt` and is the reason the parse is spelled out.
+    expect(
+      completeFileList({ expected: '', filenames: ['a.mjs'] }),
+    ).toBeUndefined();
+  });
+
+  it('rejects a count that came back null', () => {
+    expect(
+      completeFileList({ expected: 'null', filenames: ['a.mjs'] }),
+    ).toBeUndefined();
+  });
+
+  it('accepts a list longer than expected, which is a push mid-read', () => {
+    expect(
+      completeFileList({ expected: '1', filenames: ['a.mjs', 'b.mjs'] }),
+    ).toEqual(['a.mjs', 'b.mjs']);
   });
 });
 

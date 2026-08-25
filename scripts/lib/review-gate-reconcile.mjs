@@ -212,6 +212,19 @@ const resolveFrom = ({ from, specifier }) =>
   normalizePath(`${from.split('/').slice(0, -1).join('/')}/${specifier}`);
 
 /**
+ * The changed-file list, or `undefined` when it cannot be trusted to be whole.
+ *
+ * `gh --paginate` exits 0 on a list the files endpoint capped, so a short list
+ * is the one wrong answer that never reaches a `catch`. `expected` is the raw
+ * `changed_files` read, so no cap is written down here. Parsed with `parseInt`,
+ * not `Number`: `Number('')` is 0, which every list satisfies.
+ */
+export const completeFileList = ({ expected, filenames }) => {
+  const count = Number.parseInt(String(expected).trim(), 10);
+  return filenames.length >= count ? filenames : undefined;
+};
+
+/**
  * One gate's closure, unioned with the driver's: the driver picks each gate's
  * argv, so editing it alone changes every gate run while matching no gate's own
  * closure. Walked, not appended — today's one-path union is a fact about the

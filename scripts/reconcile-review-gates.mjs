@@ -38,6 +38,7 @@ import {
 import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import { runGh } from './lib/gh-exec.mjs';
 import {
+  completeFileList,
   gateArgs,
   gateClosure,
   openPullRequestNumbers,
@@ -73,6 +74,14 @@ const readRepoModule = (path) => {
  */
 const fetchChangedFiles = ({ number, repository }) => {
   try {
+    // Read before the list, so a push landing between the two shows up as more
+    // files than expected — the direction `completeFileList` does not alarm on.
+    const expected = runGh([
+      'api',
+      `repos/${repository}/pulls/${number}`,
+      '--jq',
+      '.changed_files',
+    ]);
     // `--jq`, not a payload parse: every entry carries its `patch`, and this is
     // the only call here whose size scales with diff content against `runGh`'s
     // 8 MB cap. Overflowing it reads as "could not tell".
@@ -86,10 +95,7 @@ const fetchChangedFiles = ({ number, repository }) => {
       .split('\n')
       .map((filename) => filename.trim())
       .filter((filename) => filename !== '');
-    // Empty is returned as-is, not as "could not tell": an open pull request can
-    // have no diff, and `runGh` throws on a non-zero `gh`, so a real read
-    // failure already reaches the catch.
-    return filenames;
+    return completeFileList({ expected, filenames });
   } catch (error) {
     console.error(
       `::warning::could not read the files changed by #${number}: ${errorMessage(error)}`,

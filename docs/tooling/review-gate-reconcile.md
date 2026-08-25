@@ -237,12 +237,19 @@ What follows from it:
   reach from a gate, in its #868 form: the sweep runs the default branch's driver, decides
   without the flag the pull request adds, and overwrites a `success` the head's own run got
   right. `gateClosure` unions the two.
-- **The extra read is one request per pull request, filtered in `gh`.** The
+- **The extra read is two requests per pull request, both filtered in `gh`.** The
   `files` endpoint carries each entry's diff hunk, so it asks for
   `.[].filename` rather than the payload: it is the sweep's only response whose
   size scales with diff content, and overflowing `runGh`'s buffer would read as
   "could not tell" — withholding every gate for that pull request on every run
-  until it closed.
+  until it closed. The second reads the pull request's own `changed_files`,
+  because that endpoint **caps its response** and `gh --paginate` exits 0 on a
+  capped list: a short list is the one wrong answer that never reaches a `catch`,
+  and the files it drops are as likely as any to be the ones a closure names.
+  Comparing against the count rather than against a written-down cap means
+  nothing here goes stale if GitHub changes it. The count is read first, so a
+  push landing between the two shows up as _more_ files than expected, which is
+  the direction that does not alarm.
 - **Not knowing counts as a self-edit.** When the changed files cannot be read at all, the
   sweep withholds rather than publishing: a verdict claimed without the check that
   justifies it is the thing this rule exists to prevent. The line says which of the two
