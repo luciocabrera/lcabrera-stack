@@ -183,6 +183,15 @@ describe('what the sweep does instead of running a gate', () => {
     expect(result?.output).toMatch(/edits the code this gate runs/u);
   });
 
+  it('judges a pull request whose diff is empty', () => {
+    // `[]` and `undefined` are different answers, and only one of them is a
+    // problem. An open pull request can have zero files — its head force-pushed
+    // back to the merge base — and no file of one is in any gate's closure.
+    expect(
+      withheldResult({ changedFiles: [], gate, number: 7 }),
+    ).toBeUndefined();
+  });
+
   it('withholds an unreadable file list, and calls it a FAILURE', () => {
     // The distinction is the whole alarm. A secondary rate limit part-way
     // through a sweep withholds every remaining gate; reporting those as `ok`
@@ -254,6 +263,16 @@ describe('the sweep actually consults it — not a parallel definition', () => {
     // — which withholds every gate for that pull request until it closes.
     expect(source()).toMatch(/'--jq',\s*'\.\[\]\.filename'/u);
     expect(source()).not.toMatch(/JSON\.parse\([\s\S]{0,80}?pulls/u);
+  });
+
+  it('reads an empty file list as no files, not as an unreadable one', () => {
+    // The read side of the test above. `gh` exits 0 and prints nothing for a
+    // pull request whose diff has gone empty; folding that into the unreadable
+    // signal would fail all three gates on every scheduled run until someone
+    // closed it, naming an API problem that is not happening.
+    const body = declarationOf('fetchChangedFiles');
+    expect(body).toMatch(/return filenames;/u);
+    expect(body).not.toMatch(/filenames\.length/u);
   });
 
   it('derives each gate’s closure from its own script', () => {

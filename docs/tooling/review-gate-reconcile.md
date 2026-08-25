@@ -239,6 +239,13 @@ What follows from it:
   sweep withholds rather than publishing: a verdict claimed without the check that
   justifies it is the thing this rule exists to prevent. The line says which of the two
   reasons applied.
+- **An empty list is not "not knowing".** `gh` exits 0 and prints nothing for a pull
+  request whose diff has gone empty — its head force-pushed back to the merge base, or its
+  commits absorbed by the base — and that is a truthful answer: no file of it is in any
+  gate's closure, so it sweeps normally. Folding it into the unreadable signal would fail
+  all three gates on every scheduled run until someone closed it, blaming an API problem
+  that is not happening. `runGh` throws on a non-zero `gh`, so the genuine failure is
+  already the loud one.
 - **A gate-editing pull request loses the sweep's help.** That is the trade, and it is the
   correct one — the sweep has no trustworthy opinion there. The event path still works
   (#866 fixed the ref it dispatches with), and break-glass rung 3 with `--ref` is the

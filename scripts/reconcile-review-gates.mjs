@@ -95,9 +95,15 @@ const fetchChangedFiles = ({ number, repository }) => {
       .split('\n')
       .map((filename) => filename.trim())
       .filter((filename) => filename !== '');
-    // A pull request with no files does not exist, so an empty answer means the
-    // request did not do what was asked. Not knowing is the loud case.
-    return filenames.length === 0 ? undefined : filenames;
+    // An empty list is returned as-is, NOT as "could not tell". A pull request
+    // whose diff has gone empty stays open — force-push the head back to the
+    // merge base, or let the base absorb its commits — and `[]` on exit 0 is the
+    // truthful answer for it: no file is in any gate's closure, so nothing needs
+    // withholding. Mapping it to `undefined` would fail all three gates on every
+    // scheduled run until someone closed the pull request, blaming an API problem
+    // that is not happening. `runGh` throws on a non-zero `gh`, so the genuine
+    // "could not tell" case already reaches the catch below.
+    return filenames;
   } catch (error) {
     console.error(
       `::warning::could not read the files changed by #${number}: ${errorMessage(error)}`,
