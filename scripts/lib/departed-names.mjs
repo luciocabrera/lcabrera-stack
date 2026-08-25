@@ -26,12 +26,52 @@ const ROSTER = /(^|\/)departed-names\.json$/;
  * list could hold. A gate for prose should err toward reading a file, so the
  * exclusions are the binaries and the two files that are records, not pointers.
  */
-const BINARY =
-  /\.(avif|bmp|db|dll|eot|exe|gif|gz|ico|jar|jpe?g|mp[34]|mov|node|otf|pdf|png|so|sqlite|tar|tgz|tiff?|ttf|wasm|wav|webm|webp|woff2?|zip)$/i;
+const BINARY_EXTENSIONS = new Set([
+  'avif',
+  'bmp',
+  'db',
+  'dll',
+  'eot',
+  'exe',
+  'gif',
+  'gz',
+  'ico',
+  'jar',
+  'jpeg',
+  'jpg',
+  'mov',
+  'mp3',
+  'mp4',
+  'node',
+  'otf',
+  'pdf',
+  'png',
+  'so',
+  'sqlite',
+  'tar',
+  'tgz',
+  'tif',
+  'tiff',
+  'ttf',
+  'wasm',
+  'wav',
+  'webm',
+  'webp',
+  'woff',
+  'woff2',
+  'zip',
+]);
 const LOCKFILE = /(^|\/)(pnpm-lock\.yaml|package-lock\.json)$/;
 
+/** A leading dot is a name, not an extension: `.gitignore` is text. */
+const extensionOf = (path) => {
+  const name = path.slice(path.lastIndexOf('/') + 1);
+  const dot = name.lastIndexOf('.');
+  return dot > 0 ? name.slice(dot + 1).toLowerCase() : '';
+};
+
 export const isCheckedFile = (path) =>
-  !BINARY.test(path) &&
+  !BINARY_EXTENSIONS.has(extensionOf(path)) &&
   !GENERATED.test(path) &&
   !ROSTER.test(path) &&
   !LOCKFILE.test(path);

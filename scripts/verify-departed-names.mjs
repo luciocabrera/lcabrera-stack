@@ -6,10 +6,11 @@
  *
  * Exit codes: 0 = nothing names a departed thing, 1 = something does.
  */
-import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 
 import {
   departedReferences,
@@ -23,15 +24,21 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 /**
  * Tracked files only. Globbing the working tree would walk build output and the
  * residue a deleted workspace leaves behind, which is not what a reader reads.
+ *
+ * `runGit` rather than a bare `execFileSync('git', …)`: it pins PATH to fixed
+ * system directories and strips the `GIT_DIR` family, so the answer is about
+ * this repository and not one an inherited variable names.
  */
-const trackedFiles = () =>
-  execFileSync('git', ['ls-files', '-z'], {
-    cwd: REPO_ROOT,
-    encoding: 'utf8',
-    maxBuffer: 64 * 1024 * 1024,
-  })
-    .split('\0')
-    .filter(Boolean);
+const trackedFiles = () => {
+  const output = runGit({ args: ['ls-files', '-z'], cwd: REPO_ROOT });
+  // `undefined` is git missing or failing — not an empty repository.
+  if (output === undefined) {
+    throw new Error(
+      '`git ls-files` produced nothing. Refusing to report a clean pass on no data.',
+    );
+  }
+  return output.split('\0').filter(Boolean);
+};
 
 /** A file git tracks may still be binary; those decode to replacement chars. */
 const readText = (path) => {
