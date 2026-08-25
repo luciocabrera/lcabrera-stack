@@ -1,0 +1,29 @@
+---
+id: package-docs-departed-product
+title: docs(packages): describe the packages, not the exercise that left
+owner: agent:claude
+status: active
+branch: docs/935-package-docs-departed-product
+area:
+  - README.md
+  - packages/scan-report/README.md
+  - packages/scan-report/ARCHITECTURE.md
+  - packages/server/src/INVENTORY.md
+  - packages/ui/src/components/Form/ARCHITECTURE.md
+  - packages/eslint-local-rules/README.md
+started: 2026-08-25
+updated: 2026-08-25
+plan: (none)
+pr: (none)
+issue: #935
+---
+
+## What
+
+docs(packages): describe the packages, not the exercise that left
+
+## Status / next
+
+- Current step: just claimed
+- Blockers: none
+- Next:
