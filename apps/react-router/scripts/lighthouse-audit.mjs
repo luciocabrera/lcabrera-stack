@@ -133,7 +133,15 @@ async function startProductionServer() {
     log(`\n❌ Server process error: ${getErrorMessage(error)}`, colors.red);
   });
 
-  await waitForServer(AUDIT_URL, 60);
+  try {
+    await waitForServer(AUDIT_URL, 60);
+  } catch (error) {
+    // The caller owns the child only once this returns, and a live child with
+    // piped stdio keeps the event loop alive — so exitCode alone would hang.
+    serverProcess.kill();
+    throw error;
+  }
+
   return serverProcess;
 }
 
