@@ -27,11 +27,19 @@ if [[ -z "${OUTPUT_DIR:-}" ]]; then
 fi
 
 mkdir -p "$OUTPUT_DIR"
+# Findings make fallow exit non-zero. This reports them, it does not gate on
+# them, so neither pass may abort the other — but a missing artifact must, or
+# the skill reads a file that is not there and calls it the source of truth.
 if [[ -n "$WORKSPACE" ]]; then
-  vp run fallow:full -w "$WORKSPACE"
-  vp run fallow:full -w "$WORKSPACE" --format json --output-file "$OUTPUT_DIR/fallow.raw.json" --quiet
+  vp run fallow:full -w "$WORKSPACE" || true
+  vp run fallow:full -w "$WORKSPACE" --format json --output-file "$OUTPUT_DIR/fallow.raw.json" --quiet || true
 else
-  vp run fallow:full
-  vp run fallow:full --format json --output-file "$OUTPUT_DIR/fallow.raw.json" --quiet
+  vp run fallow:full || true
+  vp run fallow:full --format json --output-file "$OUTPUT_DIR/fallow.raw.json" --quiet || true
+fi
+
+if [[ ! -s "$OUTPUT_DIR/fallow.raw.json" ]]; then
+  echo "fallow wrote no JSON to $OUTPUT_DIR/fallow.raw.json" >&2
+  exit 1
 fi
 echo "Run directory: $OUTPUT_DIR/"
