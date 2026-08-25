@@ -2,7 +2,7 @@
 id: departed-name-retirement
 title: retire the departed products' names, and gate their return
 owner: agent:claude
-status: active
+status: review
 branch: chore/947-departed-name-retirement
 area:
   - docs/decisions/**
@@ -15,7 +15,7 @@ area:
 started: 2026-08-25
 updated: 2026-08-25
 plan: (none)
-pr: (none)
+pr: '#948'
 issue: #947
 ---
 
@@ -25,6 +25,13 @@ retire the departed products' names, and gate their return
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: complete, in review — `vp run check:safe` green in the worktree
 - Blockers: none
-- Next:
+- Next: address review, then merge
+
+## Scope note
+
+`CHANGELOG.md` is deliberately untouched and excluded from the gate: it is
+regenerated from git commit subjects (`vp run changelog:generate`), so a
+hand-edit is reverted by the next run and the subjects themselves are immutable
+history.
