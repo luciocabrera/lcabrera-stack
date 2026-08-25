@@ -23,6 +23,11 @@
     { "name": "TECH_SPEC", "note": "that product's technical spec" },
     { "name": "PRD_V2", "note": "that product's requirements doc" }
   ],
-  "$allow": "A file that must name a departed thing goes here as { path, reason }. Nothing does today — a test asserting a name is absent can assert a synthetic one instead, which is what keeps this empty.",
-  "allow": []
+  "$allow": "A file that must name a departed thing goes here as { path, reason }. Keep it short: a test asserting a name is absent can assert a synthetic one instead.",
+  "allow": [
+    {
+      "path": ".sonarcloud.properties",
+      "reason": "mirrors exclusion globs configured in the SonarCloud UI verbatim. The literal is the actionable datum — it is what an admin searches Administration -> Analysis Scope for — so prose would break the row's only job. The entry goes when the UI drops the stale glob."
+    }
+  ]
 }

@@ -2,8 +2,9 @@
 
 **Status:** Superseded by [ADR-038](ADR-038-public-package-topology-by-runtime.md)
 
-> The body below is left exactly as written — a dated record of what was true at
-> the time, per its own Decision #1. `packages/data-access` has since been split
+> The body below keeps its original reasoning — a dated record of what was true
+> at the time, per its own Decision #1. Only the names of workspaces that have
+> since left this repository were removed; nothing else was rewritten. `packages/data-access` has since been split
 > by runtime into `@repo/api` (browser-safe) and `@repo/server` (Node-only), and
 > the file names referenced here are now kebab-case. See ADR-038.
 

@@ -3,8 +3,9 @@
 **Status:** **Accepted (showcase half — still live)**; **historical (API half —
 that workspace left the repository)**.
 
-> **⚠️ Amended 2026-08-17.** The body below is left exactly as written — a dated
-> record of what was true when the decision was made. What has changed since:
+> **⚠️ Amended 2026-08-17.** The body below keeps its original reasoning — a
+> dated record of what was true when the decision was made, with the names of
+> departed workspaces removed and nothing else rewritten. What has changed since:
 > the two API workspaces and their shared one moved to a repository of their
 > own, so every API-side bullet below now describes a path over there, not one
 > here.

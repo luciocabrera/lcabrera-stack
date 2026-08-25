@@ -8,8 +8,9 @@
 - **Extends:** [ADR-039](./ADR-039-duplicate-over-undeclared-edges.md) — its decision stands unchanged; this names the case it does not cover
 - **Related:** [ADR-038](./ADR-038-public-package-topology-by-runtime.md) (runtime split), [ADR-049](./ADR-049-findings-reports-are-produced-on-demand.md)
 
-> **⚠️ Amended 2026-08-17.** The body below is left exactly as written — a dated
-> record of what was true when the decision was made. The three workspaces in
+> **⚠️ Amended 2026-08-17.** The body below keeps its original reasoning — a
+> dated record of what was true when the decision was made, with the names of
+> departed workspaces removed and nothing else rewritten. The three workspaces in
 > its Scope moved to a repository of their own in #686, so every artifact named
 > below is now over there.
 >
@@ -69,7 +70,7 @@ that the state is accepted **and** reaches the query layer with exactly the
 clauses the React Router route builds from the same JSON. A validator that is
 stricter than the contract shows up as a rejection; one that is looser shows up
 as a different clause set. It is reached through a dedicated
-a `filter-contract` subpath rather than the package barrel, so it stays
+`filter-contract` subpath rather than the package barrel, so it stays
 out of both servers' startup path.
 
 **Where the contract has a closed vocabulary, the guard is anchored to it —
