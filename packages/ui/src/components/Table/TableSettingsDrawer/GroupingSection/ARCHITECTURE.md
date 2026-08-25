@@ -346,10 +346,10 @@ list renders as grouped and then raises at `assertGroupKeys`.
 
 It is a duplicate of `@lcabrera/server`'s `MAX_GROUP_KEYS`
 ([ADR-039](../../../../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)),
-pinned to it by `groupingContract.test.ts` in `apps/react-router`.
+pinned to it by a contract test in a consumer that depends on both packages.
 
 `MAX_TABLE_COUNT_DISTINCT_AGGREGATES` is the second constant of that shape and is
-pinned in the same file (#842). It is not a depth cap: it bounds the **read**
+pinned by the same test (#842). It is not a depth cap: it bounds the **read**
 rather than the key list, so it is checked by `isWithinCountDistinctBudget.util.ts`
 rather than by `areGroupKeysLegal`, and the surfaces spend it by withholding an
 offer rather than by disabling a control.

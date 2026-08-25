@@ -96,8 +96,8 @@ reflow for permanently off-centre content.
 `padding.lg` is tuned for plain content. A child that carries its own
 edge-to-edge chrome — a `Tabs` strip, which brings its own inline padding and
 gutter — should zero the inline half via `bodyStylex` rather than stack two
-insets; `OrderFormModal` is the worked example. Keep the block padding, or the
-strip collides with the title rule and the footer sits on the bottom edge.
+insets. Keep the block padding, or the strip collides with the title rule and the
+footer sits on the bottom edge.
 
 Such a child should zero the **gutter** through the same prop
 (`scrollbarGutter: 'auto'`). A reservation costs its inline space whether or not

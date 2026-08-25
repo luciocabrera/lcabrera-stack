@@ -41,10 +41,10 @@ either is a behaviour change for the mappers, not a type-only edit.
 
 ## How the two copies stay in step
 
-`apps/react-router/src/routes/enterprise-orders/filterContract.test.ts` is the
-guard. It lives in the app because the app is the only thing that legitimately
-depends on both packages — integrating them is precisely what the harness is
-for.
+A **conformance test in a consumer** is the guard, and it has to live there:
+only something that depends on both packages can compare their two copies, and
+neither package may depend on the other ([ADR-039](../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
+Any consumer of both should carry one; this repository's does.
 
 - **The compile-time half is the call itself.** The fixture is annotated
   `Record<string, ColumnFilter>` using `@lcabrera/ui`'s union and passed to
@@ -53,9 +53,8 @@ for.
   not `satisfies`: `satisfies` would keep each value's narrow literal type and
   check only the filters written down, while the annotation widens them to the
   union, so the whole union is checked. Add an operator to the UI's union and
-  leave this one alone, and `vp run typecheck` in `apps/react-router` exits
-  non-zero naming that test — and `parseOrdersPageParams`, which puts the same
-  assignability on the production path.
+  leave this one alone, and the consumer's `typecheck` exits non-zero naming
+  that test — the failure is a compile error, not an assertion.
 - **The runtime half** asserts the `QueryFilter[]` that one filter of each
   variant of the union maps to — variants, not every operator — and that a
   number filter left `undefined` mid-edit maps to no clause at all.
@@ -99,10 +98,9 @@ the same lookup before `resolveFilterOptionsSource` existed.
 It takes the registry (`schema.table` → column → `ColumnType`) as an argument:
 which sources exist is the consumer's data, the refusal rule is not.
 
-**Refusal is a return value, not a throw.** The edges answer in different shapes
-— the showcase's `/_api/filter-options` loader returns a 400 `Response`,
-`api-shared`'s repository throws a typed `HttpError` for its middleware to
-render — and neither should have to catch to tell "not allowed" from "the query
+**Refusal is a return value, not a throw.** Edges answer in different shapes — a
+loader returns a 400 `Response`, a repository behind middleware throws a typed
+error — and neither should have to catch to tell "not allowed" from "the query
 failed".
 
 **Naming which half was refused is separate from repeating it.** Branching on

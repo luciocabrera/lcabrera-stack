@@ -11,8 +11,8 @@ Grouping, rollup, cube and drill are features of a table, in the same sense that
 sorting and filtering are — so their machinery belongs to the packages, not to
 whichever app first needed it
 ([ADR-082](../../../../../docs/decisions/ADR-082-the-olap-seam-lives-in-the-packages.md)).
-Every file here was previously a `toOrder*` module in `apps/react-router`, and
-none of them referenced an order: what looked like route code was the protocol.
+Every file here began as a `toOrder*` module inside a route, and none of them
+referenced an order: what looked like route code was the protocol.
 
 The split against `group-query-builder/` is **write versus read of the same
 protocol**. That directory builds the `GROUPING SETS` query and projects the
@@ -77,7 +77,8 @@ reimplementation would be a second place for them to drift:
 3. **Group-key terms come out of the sort, and the primary key goes in.** The
    keys are constant within a group and order nothing; without a total order two
    equal rows can come back in any order, repeating and skipping rows across
-   pages ([ADR-008](../../../../../apps/react-router/docs/decisions/ADR-008-primary-key-sort-tiebreaker.md)).
+   pages. Any total-order tiebreaker will do; the primary key is the one column
+   guaranteed to be present and unique.
 4. **The read carries no grouping.** Forwarding the view's grouping sends it back
    into the grouped branch and returns group rows again — the one mistake that
    looks like it works, because it returns rows.

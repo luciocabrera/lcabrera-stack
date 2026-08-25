@@ -204,7 +204,7 @@ label on purpose. A truncated key is formatted through `toGroupPeriodLabel` and
 not `toGroupLabel`, so the heading reads `2021-06` like the row that was clicked
 rather than the instant underneath it.
 
-All of this lived in `apps/react-router` until
+All of this lived in route code until
 [ADR-082](../../../docs/decisions/ADR-082-the-olap-seam-lives-in-the-packages.md);
 none of it ever referenced an order. The drill request's wire codec is the one
 piece that is **not** here: it is `@lcabrera/api`'s `olap/`, because the encoder
@@ -283,10 +283,9 @@ this package
 so the contract is duplicated rather than shared through an edge that only
 resolves in-repo
 ([ADR-039](../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
-What holds the two copies in step is the conformance test
-`apps/react-router/src/routes/enterprise-orders/filterContract.test.ts`, which
-feeds `@lcabrera/ui`-typed filters to `toQueryFilters` — drift there fails
-`typecheck`, not just the assertions.
+What holds the two copies in step is a conformance test in a consumer of both
+packages, feeding `@lcabrera/ui`-typed filters to `toQueryFilters` — drift fails
+`typecheck`, not just the assertions. See `filters/ARCHITECTURE.md`.
 
 | Artifact                     | Location                                        | Description                                                                                                                                                                                                                                                                                                                                         |
 | ---------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
