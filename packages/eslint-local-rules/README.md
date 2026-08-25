@@ -114,7 +114,7 @@ than being counted: two files in one folder cannot both be
 The hard part is telling the shapes apart from the path, and the rule is
 deliberate about how it does it, because the obvious answer is wrong.
 PascalCase separates a _component_ folder from a domain folder but not a
-_route_ one — `trigger-scan/` and `group-query-builder/` are both kebab-case and
+_route_ one — `new-order/` and `group-query-builder/` are both kebab-case and
 only the first may name a file after its contents. So the rule treats a
 PascalCase folder as an artifact folder, and exempts everything under an
 `artifactFolders` tree outright.
