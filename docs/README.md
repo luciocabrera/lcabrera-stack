@@ -52,8 +52,12 @@ Start here when you're not sure where something belongs, or where to look.
 ## ADRs: two homes, one number sequence
 
 The home is chosen by **scope — is this a decision about the repository and what
-it ships, or about the showcase app's own internals?**
-([ADR-048](./decisions/ADR-048-adr-taxonomy-and-one-sequence.md).)
+it ships, or about the showcase app's own internals?** The one sequence across
+both homes is [ADR-048](./decisions/ADR-048-adr-taxonomy-and-one-sequence.md);
+that ADR's own table still lists the third home it was written under, so
+`ADR_HOMES` in
+[`adr-registry.mjs`](../packages/repo-standards/scripts/adr-registry.mjs) — which
+`vp run adr:verify` enforces — is the live set.
 
 | Home                                                                        | Holds                                                                   |
 | --------------------------------------------------------------------------- | ----------------------------------------------------------------------- |

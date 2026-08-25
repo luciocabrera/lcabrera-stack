@@ -5,8 +5,9 @@
 
   WHERE IT GOES is not a matter of taste — pick the home by one question: is
   this about the repo and what it ships, or about the showcase app's own
-  internals? ADR-048-adr-taxonomy-and-one-sequence.md has the table. WHICH
-  NUMBER is not a choice either: `vp run adr:verify` prints the next free one,
+  internals? `ADR_HOMES` in packages/repo-standards/scripts/adr-registry.mjs is
+  the set of homes, and `vp run adr:verify` enforces it. WHICH NUMBER is not a
+  choice either: `vp run adr:verify` prints the next free one,
   and it is global across both homes. (A few low numbers predate that rule and
   exist in both — `GRANDFATHERED_DUPLICATES` in
   packages/repo-standards/scripts/adr-registry.mjs is the set. Cite one of those
