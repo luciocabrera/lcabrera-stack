@@ -389,12 +389,12 @@ automatically via `name`. Two components need explicit handling:
 In this repository the consumers are all in `apps/react-router`, which is what
 exercises the package (AGENTS.md §1):
 
-| Consumer                                | Mode     | Notes                                                           |
-| --------------------------------------- | -------- | --------------------------------------------------------------- |
-| `routes/enterprise-orders/new-order`    | `create` | via `OrderFormModal`, `cancelTo` the orders list                |
-| `routes/enterprise-orders/edit-order`   | `edit`   | same modal, same `cancelTo`                                     |
-| `routes/enterprise-orders/order-detail` | `view`   | same modal; the only consumer that exercises `FormFieldDisplay` |
-| `routes/login`                          | `create` | `cancelTo='/'`; the smallest consumer, one field group          |
+| Consumer                                | Mode     | Notes                                                               |
+| --------------------------------------- | -------- | ------------------------------------------------------------------- |
+| `routes/enterprise-orders/new-order`    | `create` | via `OrderFormModal`, `cancelTo` the orders list                    |
+| `routes/enterprise-orders/edit-order`   | `edit`   | same modal, same `cancelTo`                                         |
+| `routes/enterprise-orders/order-detail` | `view`   | same modal; the only consumer that exercises `FormFieldDisplay`     |
+| `routes/login`                          | `create` | `cancelTo='/'`; the smallest consumer, two leaf fields and no group |
 
 A `path` field type once existed — server filesystem browsing via a
 `browseDirectory` loader — and was removed. No Form field touches the host
