@@ -6,8 +6,6 @@ status: review
 branch: docs/935-package-docs-departed-product
 area:
   - README.md
-  - packages/scan-report/README.md
-  - packages/scan-report/ARCHITECTURE.md
   - packages/server/src/INVENTORY.md
   - packages/ui/src/components/Form/ARCHITECTURE.md
   - packages/eslint-local-rules/README.md
