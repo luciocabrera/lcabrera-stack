@@ -205,6 +205,8 @@ describe('renderIndex', () => {
     // This package is installed into repositories that are not this one, so a
     // task name from one repository's runner, or a link to a decision record a
     // fresh home does not hold, reads as an instruction and is not one.
+    // `CQMS` is a departed name that once reached the rendered index; it is
+    // asserted absent so it cannot return, not because it is expected.
     const rendered = renderIndex(DEFAULT_REGISTERS.adrHomes[0]);
 
     for (const absent of ['vp run', 'CQMS', 'ADR-048', 'ADR-075']) {

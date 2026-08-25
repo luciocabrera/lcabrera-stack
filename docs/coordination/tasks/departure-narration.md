@@ -25,9 +25,9 @@ issue: #945
 ## What
 
 Live docs and comments still explained what the repo used to be — "those suites
-left with CQMS (#683)", a `--home cqms` the CLI no longer resolves, fixtures
-naming departed workspaces. Trimmed to the current fact; dated records
-(`docs/decisions/`) stay verbatim.
+left with CQMS (#683)", a coverage rollout phase describing extracted
+workspaces, fixtures naming departed workspaces. Trimmed to the current fact;
+dated records (`docs/decisions/`) stay verbatim.
 
 ## Status / next
 
