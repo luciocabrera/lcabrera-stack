@@ -247,8 +247,7 @@ Two more consequences worth knowing before changing it:
   which is what separates a pinned action row from the content scrolling behind
   it. The form therefore sets **no `gap`** — the rule belongs directly under the
   content it cuts off, not floating in dead space above it. A host that wants
-  the footer flush against its own edge drops its block-end padding, as
-  `OrderFormModal` does.
+  the footer flush against its own edge drops its block-end padding.
 - **A scroll container reserves its gutter on both edges**
   (`scrollbarGutter: stable both-edges`) so no field resizes the moment content
   grows past the cap. Reserving a single edge would trade the reflow for
@@ -260,9 +259,10 @@ Two more consequences worth knowing before changing it:
   - `hasScrollOwningChild.util` — the root list drops `styles.scroll` (keeping
     `styles.region`, the height a tab panel's `height: 100%` needs) when its
     only child is a `tab` node, which already scrolls.
-  - `bodyStylex` on `Modal` — `OrderFormModal` zeroes the body's inline padding
-    _and_ its gutter, since a Form takes the body's full height and can never
-    scroll it (see `Modal/ARCHITECTURE.md` → Layout Sections).
+  - `bodyStylex` on `Modal` — a host rendering a Form in a modal zeroes the
+    body's inline padding _and_ its gutter, since a Form takes the body's full
+    height and can never scroll it (see `Modal/ARCHITECTURE.md` → Layout
+    Sections).
 
 ## Submission Flow
 
@@ -384,17 +384,7 @@ automatically via `name`. Two components need explicit handling:
   (standard HTML behavior, not a bug here) — the consuming action's Zod
   schema must treat an absent boolean field as `false`.
 
-## Consumer Map
-
-In this repository the consumers are all in `apps/react-router`, which is what
-exercises the package (AGENTS.md §1):
-
-| Consumer                                | Mode     | Notes                                                               |
-| --------------------------------------- | -------- | ------------------------------------------------------------------- |
-| `routes/enterprise-orders/new-order`    | `create` | via `OrderFormModal`, `cancelTo` the orders list                    |
-| `routes/enterprise-orders/edit-order`   | `edit`   | same modal, same `cancelTo`                                         |
-| `routes/enterprise-orders/order-detail` | `view`   | same modal; the only consumer that exercises `FormFieldDisplay`     |
-| `routes/login`                          | `create` | `cancelTo='/'`; the smallest consumer, two leaf fields and no group |
+## No filesystem-coupled field types
 
 A `path` field type once existed — server filesystem browsing via a
 `browseDirectory` loader — and was removed. No Form field touches the host
