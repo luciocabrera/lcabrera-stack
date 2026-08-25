@@ -48,7 +48,7 @@ jobs:
         # is also what puts the container on Node 26. Do NOT add a setup-node step
         # alongside it — a second node on PATH is how `engineStrict` starts
         # refusing installs.
-        uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
+        uses: voidzero-dev/setup-vp@1b32467adbe183473499fd9d5d372c3ed9641754 # v1.18.0
         with:
           cache: false
           run-install: false

@@ -65,15 +65,13 @@ const {
       set: vi.fn(),
     },
     mockGroupingStore: {
-      get: vi.fn(
-        (): TableGroupingState => ({
-          aggregates: [],
-          keys: [],
-          mode: 'flat',
-          periods: {},
-          shares: [],
-        }),
-      ),
+      get: vi.fn((): TableGroupingState => ({
+        aggregates: [],
+        keys: [],
+        mode: 'flat',
+        periods: {},
+        shares: [],
+      })),
       set: vi.fn(),
     },
     mockMetaStore: {

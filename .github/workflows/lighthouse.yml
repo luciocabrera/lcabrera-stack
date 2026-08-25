@@ -31,7 +31,7 @@ jobs:
           fetch-depth: 1
 
       - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@8ecb39174989ce55af90f45cf55b02738599831d
+        uses: voidzero-dev/setup-vp@1b32467adbe183473499fd9d5d372c3ed9641754 # v1.18.0
         with:
           cache: true
           run-install: false

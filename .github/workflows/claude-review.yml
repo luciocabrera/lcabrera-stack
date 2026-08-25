@@ -94,7 +94,7 @@ jobs:
       # It is NOT to be "fixed" with pull_request_target; that trades a visible failure for
       # secret exposure on untrusted code.
       - name: Run the Claude review
-        uses: anthropics/claude-code-action@5ee796a55f92566ecd7e39d70dd613abcbea0d7c # v1
+        uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1.0.205
         with:
           # A subscription token, not an API key, and exactly one credential is passed on
           # purpose: a static key takes precedence where both are given, so leaving the key
