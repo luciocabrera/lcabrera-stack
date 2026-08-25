@@ -136,7 +136,7 @@ export const createSonarApi = ({ base, project, token }) => {
     issues: paged(
       'issues/search',
       'issues',
-      `componentKeys=${project}&resolved=false`,
+      `componentKeys=${project}&resolved=false&additionalFields=_all`,
     ),
 
     /** Lines of code actually indexed, total and per language. */
