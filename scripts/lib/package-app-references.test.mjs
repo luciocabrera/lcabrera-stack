@@ -24,14 +24,16 @@ describe('appReferences', () => {
 
   it('matches an app name containing an underscore', () => {
     // A class excluding `_` matches only the prefix, which then fails the
-    // existence test — a silent pass on exactly what the gate is for.
+    // existence test — a silent pass on exactly what the gate is for. The
+    // name is synthetic so the case keeps its underscore whatever this repo's
+    // apps are called.
     expect(
       appReferences({
-        exists: (path) => path === 'apps/docs-site',
+        exists: (path) => path === 'apps/docs_site',
         path: 'doc.md',
-        text: 'see apps/docs-site/src/x.ts',
+        text: 'see apps/docs_site/src/x.ts',
       }),
-    ).toEqual([{ line: 1, path: 'doc.md', reference: 'apps/docs-site' }]);
+    ).toEqual([{ line: 1, path: 'doc.md', reference: 'apps/docs_site' }]);
   });
 
   it('ignores prose about the apps directory', () => {
