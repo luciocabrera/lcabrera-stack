@@ -111,9 +111,8 @@ invocation is logged with the exact command run.
 
 **A2 — what "transient" means.** A failure is transient only when the log shows
 the job never got to run the repo's own checks: runner allocation, a network or
-registry timeout, a cancelled job, an action-internal error. There is no known
-environmental race left to add to that list — the one this used to name was in a
-CQMS suite that left with #683, and no suite here needs a database any more.
+registry timeout, a cancelled job, an action-internal error. No suite here needs
+a database, so there is no known environmental race to add to that list.
 **A failing assertion is never transient**, however flaky it looks, and a
 re-run whose only justification is "it passed locally" is S10 — that is a
 conclusion, not evidence.

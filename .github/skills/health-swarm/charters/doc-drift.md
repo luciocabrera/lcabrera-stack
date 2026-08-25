@@ -58,9 +58,7 @@ compile, UI `INVENTORY.md`'s absent artifacts, and `Form/ARCHITECTURE.md`
 citing a field type whose code was deleted.
 
 Still open (#515), needing a decision rather than an edit: three `PATTERNS.md`
-rules are violated at scale, which usually means the rule is what is wrong. Two
-others from that sweep closed by leaving — `scan-ingestion/ARCHITECTURE.md` and
-CQMS's `STATUS.md` went to the CQMS repository with #683.
+rules are violated at scale, which usually means the rule is what is wrong.
 
 The scope finding from the same sweep — a package in neither documented scope —
 shows what "needs a decision" buys you. The answer was not a doc edit: the
