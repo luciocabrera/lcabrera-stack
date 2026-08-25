@@ -155,22 +155,12 @@ export const shouldPublishStatus = ({
 };
 
 /**
- * Every local module a gate script loads, as repo-relative paths — the entry
- * itself included.
+ * Every local module a gate script loads, repo-relative, entry included.
+ * Follows relative specifiers only; `node:*` is the only bare one these use.
  *
- * This is derived rather than listed because a list is the thing that rots: a
- * gate that grows a new helper would keep passing a hand-written roster while
- * quietly falling outside it, and nothing would say so. Every non-builtin import
- * in these scripts is relative (`node:*` is the only bare specifier used), so
- * following the relative ones reaches exactly the code the gate runs.
- *
- * `readFile` is injected so this stays pure and testable; it takes a
- * repo-relative path and returns the source, or `undefined` when there is no
- * such file. **An unreadable module stays IN the closure and the walk stops
- * there** — it is added before it is read. Nothing downstream compensates for a
- * short closure, so the width is the safety margin: too wide costs a withheld
- * gate, too narrow lets the sweep publish on a self-edit, which is the defect
- * #884 closes. Do not "fix" this into dropping the module.
+ * An unreadable module stays IN the closure and the walk stops there. Too wide
+ * costs a withheld gate, too narrow lets the sweep publish on a self-edit — do
+ * not "fix" it into dropping the module. ADR-076, #884 amendment.
  */
 export const localModuleClosure = ({ entry, readFile }) => {
   const seen = new Set();
@@ -209,13 +199,8 @@ const normalizePath = (path) => {
 };
 
 /**
- * The relative import specifiers in one module's source.
- *
- * The `(` sits inside the optional group rather than between two whitespace
- * runs. `\s*\(?\s*` lets the engine split the same spaces many equivalent ways,
- * which is Sonar S8786 — it fired on exactly that shape here. This form has one
- * parse per input: `(` is not whitespace, so at each position the group either
- * applies or does not.
+ * The relative import specifiers in one module's source. Keep `(` inside the
+ * optional group — `\s*\(?\s*` backtracks super-linearly (Sonar S8786).
  */
 const relativeSpecifiers = (source) =>
   [...source.matchAll(/(?:from|import)\s*(?:\(\s*)?'(\.[^']*)'/gu)].map(
@@ -227,21 +212,10 @@ const resolveFrom = ({ from, specifier }) =>
   normalizePath(`${from.split('/').slice(0, -1).join('/')}/${specifier}`);
 
 /**
- * One gate's closure, unioned with the closure of the driver that runs it.
- *
- * The gate script alone is not the code that produces the verdict. The driver
- * chooses the gate's argv — `GATES` carries each `protectSuccess` flag and
- * `gateArgs` turns it into `--protect-success` — so a pull request that edits
- * ONLY the driver changes what every gate run does while matching nothing in any
- * gate's own closure. That is #884 in its original shape, re-entering through the
- * one file no gate imports: the sweep would run the default branch's driver,
- * decide without the flag the pull request adds, and overwrite a `success` its
- * own head got right — which is #868.
- *
- * Unioned rather than chained, because no gate imports the driver and no driver
- * import is unreachable from the gates. In this tree the union adds exactly the
- * driver's own path; that is not a property to rely on, which is why this walks
- * rather than appends a constant.
+ * One gate's closure, unioned with the driver's: the driver picks each gate's
+ * argv, so editing it alone changes every gate run while matching no gate's own
+ * closure. Walked, not appended — today's one-path union is a fact about the
+ * current imports, not a property. ADR-076, #884 amendment.
  */
 export const gateClosure = ({ driverEntry, entry, readFile }) =>
   [
@@ -251,20 +225,7 @@ export const gateClosure = ({ driverEntry, entry, readFile }) =>
     ]),
   ].toSorted((a, b) => a.localeCompare(b));
 
-/**
- * Whether this sweep's opinion about a pull request is worth publishing at all.
- *
- * The sweep runs from the default branch — GitHub gives a `schedule` no other
- * choice — so on a pull request that edits a gate it is judging the change with
- * the code the change is replacing. #866 is that disagreement having actually
- * happened, and #868 closed the half where the sweep took a `success` away. This
- * is the other half: the sweep must not hand one out either.
- *
- * Withholding, rather than publishing something weaker, is deliberate. The pull
- * request's own run already published a verdict from its own code, and that is
- * the better-informed one; replacing it with a sweep-flavoured `pending` would
- * be the same mistake in the opposite direction.
- */
+/** Whether the pull request changes code this gate runs. ADR-076, #884 amendment. */
 export const gateJudgesItsOwnEdit = ({ changedFiles = [], closure = [] }) => {
   const touched = new Set(changedFiles.map((file) => normalizePath(file)));
   return closure.some((module) => touched.has(module));
@@ -273,16 +234,8 @@ export const gateJudgesItsOwnEdit = ({ changedFiles = [], closure = [] }) => {
 /**
  * The result for a gate the sweep declines to run, or `undefined` to run it.
  *
- * The two reasons look alike and report differently, deliberately:
- *
- * - **A self-edit is a decision**, so it is `ok`. The sweep chose not to publish
- *   and left a better-informed verdict standing; nothing is wrong.
- * - **An unreadable file list is a failure**, so it is not. The sweep could not
- *   do its work for that pull request, and this component's whole promise is to
- *   be loud about that. Reporting it as `ok` would let a secondary rate limit
- *   part-way through a sweep withhold every remaining gate, summarise `0
- *   failure(s)`, exit 0, and file no tracking issue — statuses silently stopping
- *   while every pull request still looks normal.
+ * A self-edit is a decision, so `ok`; an unreadable file list is a failure, so
+ * the sweep cannot report `0 failure(s)` and exit 0 having checked nothing.
  */
 export const withheldResult = ({ changedFiles, gate, number }) => {
   if (changedFiles === undefined) {

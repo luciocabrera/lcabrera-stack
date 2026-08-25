@@ -19,13 +19,10 @@
  *   vp run review-gates:reconcile -- --pr 738 --dry-run
  *   vp run review-gates:reconcile -- --repo owner/name
  *
- * Exit codes: 0 = every gate run reported or was deliberately withheld; 1 = the
+ * Exit codes: 0 = every gate run reported or deliberately withheld; 1 = the
  * pull requests could not be listed, or at least one gate run failed. It never
  * exits 0 on a sweep that could not do its work — a reconcile that goes quiet is
- * the one failure nobody would notice. A gate withheld because the pull request
- * edits its code is not that: it is a decision, and it counts as reported. A gate
- * withheld because the changed files could not be READ is a failure, and counts
- * as one (#884).
+ * the one failure nobody would notice.
  */
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, readFileSync } from 'node:fs';
@@ -53,12 +50,9 @@ const SCRIPTS_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = dirname(SCRIPTS_DIR);
 
 /**
- * This driver's own repo-relative path, derived rather than written down.
- *
- * It goes into every gate's closure (`gateClosure`), so a literal here would
- * stop matching the moment the file was renamed — and the symptom of that is a
- * sweep that publishes where it should withhold, which looks exactly like a
- * healthy one.
+ * This driver's own repo-relative path. Derived, not written down: it goes into
+ * every gate's closure, and a literal would stop matching on a rename — which
+ * looks exactly like a healthy sweep.
  */
 const DRIVER_MODULE = relative(REPO_ROOT, fileURLToPath(import.meta.url));
 
@@ -73,28 +67,15 @@ const readRepoModule = (path) => {
 
 /**
  * The files one pull request changes, repo-relative, or `undefined` when they
- * could not be read.
- *
- * Read once per pull request rather than once per gate: the answer is the same
- * for all three, and the sweep's cost is already one API call per gate.
- *
- * A failure here is caught rather than thrown, and the difference is the rest of
- * the sweep: this runs per pull request, so one transient API error would
- * otherwise abandon every pull request after it — where the same class of
- * failure inside a gate costs one line. `undefined` is not "nothing changed": the
- * caller withholds on it, because a sweep that cannot tell whether this pull
- * request edits the gate must not publish as though it had checked.
+ * could not be read — which the caller withholds on, rather than publishing as
+ * though it had checked. Caught, not thrown: this runs per pull request, so one
+ * transient error would otherwise abandon every pull request after it.
  */
 const fetchChangedFiles = ({ number, repository }) => {
   try {
-    // `--jq` rather than parsing the payload here, because every entry of this
-    // endpoint carries its `patch` — the diff hunk itself. `runGh` caps stdout
-    // at 8 MB, and this is the only call in the sweep whose size scales with
-    // diff content rather than with pull request count, so a codemod-sized pull
-    // request could overflow it. Filtering in `gh` means only filenames cross
-    // the pipe, and the failure that would follow is not a hypothetical one: it
-    // reads as "could not tell", which withholds every gate for that pull
-    // request on every run for as long as it stays open.
+    // `--jq`, not a payload parse: every entry carries its `patch`, and this is
+    // the only call here whose size scales with diff content against `runGh`'s
+    // 8 MB cap. Overflowing it reads as "could not tell".
     const filenames = runGh([
       'api',
       '--paginate',
@@ -105,14 +86,9 @@ const fetchChangedFiles = ({ number, repository }) => {
       .split('\n')
       .map((filename) => filename.trim())
       .filter((filename) => filename !== '');
-    // An empty list is returned as-is, NOT as "could not tell". A pull request
-    // whose diff has gone empty stays open — force-push the head back to the
-    // merge base, or let the base absorb its commits — and `[]` on exit 0 is the
-    // truthful answer for it: no file is in any gate's closure, so nothing needs
-    // withholding. Mapping it to `undefined` would fail all three gates on every
-    // scheduled run until someone closed the pull request, blaming an API problem
-    // that is not happening. `runGh` throws on a non-zero `gh`, so the genuine
-    // "could not tell" case already reaches the catch below.
+    // Empty is returned as-is, not as "could not tell": an open pull request can
+    // have no diff, and `runGh` throws on a non-zero `gh`, so a real read
+    // failure already reaches the catch.
     return filenames;
   } catch (error) {
     console.error(
@@ -146,13 +122,8 @@ const GATES = [
 
 /**
  * Each gate paired with the modules it would execute, resolved from this
- * checkout — which is the default branch when the schedule runs it. That is the
- * point: the closure describes the code THIS sweep runs, so comparing a pull
- * request's changed files against it answers "would I be judging this change
- * with the code it replaces?" (#884).
- *
- * "The code THIS sweep runs" includes this file, which no gate imports — see
- * `gateClosure` for why leaving it out reopened #884 through the driver.
+ * checkout — the default branch when the schedule runs it. That is the point:
+ * the closure is the code THIS sweep runs, this file included.
  */
 const gatesWithClosures = () =>
   GATES.map((gate) => ({

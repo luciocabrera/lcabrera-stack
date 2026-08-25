@@ -1,14 +1,9 @@
 /**
- * Whether the sweep should have an opinion about a pull request at all.
+ * Whether the sweep should have an opinion about a pull request at all —
+ * ADR-076, #884 amendment.
  *
- * The sweep runs the DEFAULT BRANCH's gate code — GitHub gives a `schedule` no
- * other choice — so on a pull request that edits a gate it would judge the change
- * with the code being replaced. #868 stopped it taking a `success` away; this is
- * the other half, which is that it must not hand one out (#884).
- *
- * The closure is derived rather than listed on purpose, so these assert the
- * derivation and not a roster: a fixture whose deepest module is only reachable
- * through two hops fails if the walk stops at one.
+ * These assert the closure's DERIVATION, not a roster: a hand-listed closure is
+ * the thing that rots silently.
  */
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -46,15 +41,12 @@ describe('the code a gate actually runs', () => {
   });
 
   it('reaches a module only the second hop can find', () => {
-    // `deep.mjs` is imported by `helper.mjs`, never by the entry. A walk that
-    // read the entry and stopped would pass every other assertion here.
+    // A walk that read the entry and stopped passes every other assertion here.
     expect(closure()).toContain('scripts/lib/deep.mjs');
   });
 
   it('unions the driver that runs the gate into the gate’s closure', () => {
-    // The gate script is not the whole of the code that produces the verdict:
-    // the driver picks the gate's argv, so a pull request editing only the
-    // driver changes every gate run while matching no gate's own closure.
+    // The driver picks the gate's argv, so editing it alone changes every run.
     const withDriver = gateClosure({
       driverEntry: 'scripts/driver.mjs',
       entry: 'scripts/gate.mjs',
@@ -64,9 +56,8 @@ describe('the code a gate actually runs', () => {
           : { ...FIXTURE, 'scripts/lib/driver-only.mjs': '' }[path],
     });
     expect(withDriver).toContain('scripts/driver.mjs');
-    // Transitively, not just the entry — the driver's own imports count too.
+    // Transitive, not just the entry; and the gate's own side survives.
     expect(withDriver).toContain('scripts/lib/driver-only.mjs');
-    // And the gate's side survives the union.
     expect(withDriver).toContain('scripts/lib/deep.mjs');
   });
 
@@ -109,9 +100,8 @@ describe('the code a gate actually runs', () => {
     expect(real).toContain('scripts/copilot-review-status.mjs');
     expect(real).toContain('scripts/lib/copilot-review.mjs');
     expect(real).toContain('scripts/lib/review-gate-reconcile.mjs');
-    // The driver is NOT reachable from a gate — no gate imports it. That is the
-    // gap `gateClosure` exists to close, asserted here so the union below is
-    // measured against a real absence rather than an assumed one.
+    // No gate imports the driver — the gap `gateClosure` closes. Asserted so the
+    // union test below measures a real absence, not an assumed one.
     expect(real).not.toContain('scripts/reconcile-review-gates.mjs');
   });
 
@@ -139,12 +129,9 @@ describe('the code a gate actually runs', () => {
 });
 
 describe('the precondition the walk depends on', () => {
-  // `localModuleClosure` follows relative, single-quoted specifiers. That reaches
-  // everything today because these scripts import nothing else — but a gate that
-  // later pulls in a workspace package, or quotes an import with `"`, would drop
-  // silently out of its own closure and the sweep would start publishing on a
-  // self-edit again. Narrowing is the failure direction that matters, so the
-  // convention is asserted rather than trusted.
+  // The walk follows relative, single-quoted specifiers only. A gate that later
+  // imports a workspace package, or uses `"`, would drop silently out of its own
+  // closure — so the convention is asserted rather than trusted.
   const GATE_ENTRIES = [
     'scripts/copilot-review-status.mjs',
     'scripts/verify-agent-review.mjs',
@@ -163,13 +150,8 @@ describe('the precondition the walk depends on', () => {
     });
 
   /**
-   * The specifier on every real import line, comments excluded.
-   *
-   * Scanning raw source finds prose: `pr-threads-api.mjs` contains the phrase
-   * `from "could not read it"` in a docblock, which a naive match reads as an
-   * import of a package called `could not read it`. The closure's own walk is
-   * immune — it only accepts specifiers starting with `.` — but a check that
-   * cries wolf gets deleted, so this one reads import lines only.
+   * The specifier on every real import line, comments excluded — `pr-threads-api.mjs`
+   * has `from "could not read it"` in prose, which a raw scan reads as an import.
    */
   const importSpecifiers = (source) =>
     source
@@ -230,19 +212,16 @@ describe('what the sweep does instead of running a gate', () => {
   });
 
   it('judges a pull request whose diff is empty', () => {
-    // `[]` and `undefined` are different answers, and only one of them is a
-    // problem. An open pull request can have zero files — its head force-pushed
-    // back to the merge base — and no file of one is in any gate's closure.
+    // An open pull request can have zero files (head force-pushed to the merge
+    // base), so `[]` and `undefined` are different answers.
     expect(
       withheldResult({ changedFiles: [], gate, number: 7 }),
     ).toBeUndefined();
   });
 
   it('withholds an unreadable file list, and calls it a FAILURE', () => {
-    // The distinction is the whole alarm. A secondary rate limit part-way
-    // through a sweep withholds every remaining gate; reporting those as `ok`
-    // summarises `0 failure(s)`, exits 0, files no tracking issue, and statuses
-    // silently stop being corrected while every pull request looks normal.
+    // A rate limit part-way through a sweep withholds every remaining gate.
+    // Reporting those as `ok` exits 0 having corrected nothing.
     const result = withheldResult({ changedFiles: undefined, gate, number: 7 });
     expect(result?.ok).toBe(false);
     expect(result?.output).toMatch(
@@ -251,8 +230,7 @@ describe('what the sweep does instead of running a gate', () => {
   });
 
   it('is counted as a failure by the summary the sweep exits on', () => {
-    // Asserted through `sweepSummary` rather than on the flag, because the flag
-    // only matters via the count that decides the exit code.
+    // Through `sweepSummary`: the flag only matters via the exit-code count.
     const unreadable = withheldResult({
       changedFiles: undefined,
       gate,
@@ -277,10 +255,8 @@ describe('what the sweep does instead of running a gate', () => {
 });
 
 describe('the sweep actually consults it — not a parallel definition', () => {
-  // Every assertion above passes with the decision never called. #866 and #868
-  // are both cases where the wiring, not the logic, was the defect. Asserted as
-  // an invariant rather than a shape: whatever the expression looks like, the
-  // sweep must not reach `runGate` without offering the decision first.
+  // Every assertion above passes with the decision never called — #866 and #868
+  // were both wiring, not logic.
   const source = () => readRepoFile('scripts/reconcile-review-gates.mjs');
 
   /** One top-level `const <name> = …;` declaration, whole. */
@@ -291,11 +267,8 @@ describe('the sweep actually consults it — not a parallel definition', () => {
     const end = text.indexOf('\n};', start);
     expect(end).toBeGreaterThan(start);
     const slice = text.slice(start, end);
-    // `\n};` terminates a BLOCK-bodied arrow. For an expression-bodied one it
-    // lands in whatever declaration comes next, silently widening the slice —
-    // the same class of accidental window this file has already been bitten by
-    // three times. Over-slicing fails here rather than weakening an assertion
-    // somewhere else.
+    // `\n};` only terminates a BLOCK-bodied arrow; on an expression-bodied one it
+    // runs into the next declaration. Fail here rather than silently widen.
     expect(slice).not.toMatch(/\n(?:const|export) /u);
     return slice;
   };
@@ -306,18 +279,16 @@ describe('the sweep actually consults it — not a parallel definition', () => {
   });
 
   it('closes over the driver too, not just the gate script', () => {
-    // The whole-file form is deliberate: `gatesWithClosures` is an
-    // expression-bodied arrow, so `declarationOf` cannot bound it. Reverting to
-    // the un-unioned walk is what this has to catch, and the un-unioned walk is
-    // named — so its absence anywhere in the driver is the assertion.
+    // Whole-file because `gatesWithClosures` is expression-bodied, so
+    // `declarationOf` cannot bound it. The un-unioned walk is named, so its
+    // absence anywhere in the driver is the assertion.
     expect(source()).toMatch(/gateClosure\(/u);
     expect(source()).not.toMatch(/localModuleClosure\(/u);
   });
 
   it('derives its own path rather than writing it down', () => {
-    // This file is in every gate's closure. A literal would stop matching the
-    // moment it was renamed, and the symptom — a sweep that publishes where it
-    // should withhold — is indistinguishable from a healthy one.
+    // A literal would stop matching on a rename, and a sweep that publishes where
+    // it should withhold looks exactly like a healthy one.
     expect(source()).not.toMatch(/'scripts\/reconcile-review-gates\.mjs'/u);
     expect(source()).toMatch(/driverEntry: DRIVER_MODULE/u);
   });
@@ -327,42 +298,29 @@ describe('the sweep actually consults it — not a parallel definition', () => {
   });
 
   it('asks gh for filenames, not for the diff', () => {
-    // Every entry of that endpoint carries its `patch`. Pulling the whole
-    // payload to read one field puts the sweep's only diff-sized response
-    // against `runGh`'s 8 MB cap, and overflowing it reads as "could not tell"
-    // — which withholds every gate for that pull request until it closes.
+    // Every entry carries its `patch`, so parsing the payload puts the sweep's
+    // only diff-sized response against `runGh`'s 8 MB cap.
     expect(source()).toMatch(/'--jq',\s*'\.\[\]\.filename'/u);
-    // Scoped to the declaration, not matched across a window over the file. The
-    // only `JSON.parse(` here belongs to `fetchOpenPullRequests`, so a window
-    // wide enough to reach a `pulls` path measures THAT function's formatting —
-    // and would fail this test, under this name, for an edit to code it is not
-    // about.
+    // Scoped, not windowed: the only `JSON.parse(` here is in
+    // `fetchOpenPullRequests`, so a window measures that function's formatting.
     expect(declarationOf('fetchChangedFiles')).not.toMatch(/JSON\.parse\(/u);
   });
 
   it('reads an empty file list as no files, not as an unreadable one', () => {
-    // The read side of the test above. `gh` exits 0 and prints nothing for a
-    // pull request whose diff has gone empty; folding that into the unreadable
-    // signal would fail all three gates on every scheduled run until someone
-    // closed it, naming an API problem that is not happening.
+    // The read side of the test above: `gh` exits 0 and prints nothing for a
+    // pull request whose diff has gone empty.
     const body = declarationOf('fetchChangedFiles');
     expect(body).toMatch(/return filenames;/u);
     expect(body).not.toMatch(/filenames\.length/u);
   });
 
   it('derives each gate’s closure from its own script', () => {
-    // Exact, not a window: the point is that each gate's entry is that gate's
-    // own script rather than a shared or hardcoded list.
+    // Exact, not a window: each gate's entry is that gate's own script.
     expect(source()).toMatch(/entry: `scripts\/\$\{gate\.script\}`/u);
   });
 
   it('does not let one pull request’s failure end the sweep', () => {
-    // `fetchChangedFiles` runs per pull request, so an unguarded throw would
-    // abandon every pull request after it — where a gate failure costs one line.
-    //
-    // Sliced to the declaration rather than matched across a character window:
-    // a window is an assertion about formatting, and this one already broke once
-    // on an added comment.
+    // Runs per pull request, so an unguarded throw abandons every one after it.
     expect(declarationOf('fetchChangedFiles')).toMatch(/\}\s*catch\s*\(/u);
   });
 });
