@@ -23,10 +23,6 @@
     { "name": "TECH_SPEC", "note": "that product's technical spec" },
     { "name": "PRD_V2", "note": "that product's requirements doc" }
   ],
-  "allow": [
-    {
-      "path": "packages/repo-standards/scripts/adr-registry.test.mjs",
-      "reason": "asserts a departed name is ABSENT from the rendered ADR index — a guard against the name, not a reference to it"
-    }
-  ]
+  "$allow": "A file that must name a departed thing goes here as { path, reason }. Nothing does today — a test asserting a name is absent can assert a synthetic one instead, which is what keeps this empty.",
+  "allow": []
 }

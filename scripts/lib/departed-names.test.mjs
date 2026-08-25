@@ -9,7 +9,7 @@ import {
 
 const roster = (extra = {}) =>
   JSON.stringify({
-    names: [{ name: 'CQMS' }, { name: 'apps/shared' }],
+    names: [{ name: 'Oldprod' }, { name: 'apps/legacy' }],
     ...extra,
   });
 
@@ -19,7 +19,7 @@ describe('parseRoster', () => {
       roster({ allow: [{ path: 'a.md' }] }),
     );
 
-    expect(names).toEqual(['CQMS', 'apps/shared']);
+    expect(names).toEqual(['Oldprod', 'apps/legacy']);
     expect(allowed.has('a.md')).toBe(true);
   });
 
@@ -44,31 +44,31 @@ describe('departedReferences', () => {
     departedReferences({ allowed, names, path, text });
 
   it('reports the line a departed name appears on', () => {
-    expect(find('doc.md', 'fine\nthe CQMS extraction\n')).toEqual([
-      { line: 2, name: 'CQMS', path: 'doc.md' },
+    expect(find('doc.md', 'fine\nthe Oldprod extraction\n')).toEqual([
+      { line: 2, name: 'Oldprod', path: 'doc.md' },
     ]);
   });
 
-  it('matches case-insensitively, so `cqms` is the same finding', () => {
-    expect(find('doc.md', 'schema: cqms')).toHaveLength(1);
+  it('matches case-insensitively, so `oldprod` is the same finding', () => {
+    expect(find('doc.md', 'schema: oldprod')).toHaveLength(1);
   });
 
   it('matches a path name no word boundary spans', () => {
-    expect(find('doc.md', 'imports from apps/shared')).toEqual([
-      { line: 1, name: 'apps/shared', path: 'doc.md' },
+    expect(find('doc.md', 'imports from apps/legacy')).toEqual([
+      { line: 1, name: 'apps/legacy', path: 'doc.md' },
     ]);
   });
 
   it('reports each occurrence separately — two lines are two edits', () => {
-    expect(find('doc.md', 'CQMS\nCQMS')).toHaveLength(2);
+    expect(find('doc.md', 'Oldprod\nOldprod')).toHaveLength(2);
   });
 
   it('scans fenced code, where the fixtures that carried these names lived', () => {
-    expect(find('doc.md', '```ts\nschema: "CQMS"\n```')).toHaveLength(1);
+    expect(find('doc.md', '```ts\nschema: "Oldprod"\n```')).toHaveLength(1);
   });
 
   it('skips a file on the allow list', () => {
-    expect(find('guard.test.mjs', 'CQMS')).toEqual([]);
+    expect(find('guard.test.mjs', 'Oldprod')).toEqual([]);
   });
 
   it('does not flag a line that names nothing departed', () => {
@@ -111,11 +111,11 @@ describe('isCheckedFile', () => {
 
 describe('formatFinding', () => {
   it('names the file, the line and what to do instead', () => {
-    expect(formatFinding({ line: 7, name: 'CQMS', path: 'a.md' })).toContain(
+    expect(formatFinding({ line: 7, name: 'Oldprod', path: 'a.md' })).toContain(
       'a.md:7',
     );
-    expect(formatFinding({ line: 7, name: 'CQMS', path: 'a.md' })).toContain(
-      'CQMS',
+    expect(formatFinding({ line: 7, name: 'Oldprod', path: 'a.md' })).toContain(
+      'Oldprod',
     );
   });
 });

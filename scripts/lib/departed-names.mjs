@@ -7,10 +7,10 @@
  * Naming them outright is what makes the check decidable.
  *
  * Matching is case-insensitive and substring-based, not word-bounded: the roster
- * holds paths (`apps/shared`) and snake_case identifiers (`llm_usage`) that no
- * single word boundary spans, and a departed name inside a longer token is still
- * that name. Fenced code is scanned like prose — a fixture naming a departed
- * workspace is exactly the case this exists to catch.
+ * holds path-shaped and snake_case names that no single word boundary spans, and
+ * a departed name inside a longer token is still that name. Fenced code is
+ * scanned like prose — a fixture naming a departed workspace is exactly the case
+ * this exists to catch.
  */
 
 /** Generated from git history — a dated record of commits, not a live pointer. */

@@ -205,11 +205,11 @@ describe('renderIndex', () => {
     // This package is installed into repositories that are not this one, so a
     // task name from one repository's runner, or a link to a decision record a
     // fresh home does not hold, reads as an instruction and is not one.
-    // `CQMS` is a departed name that once reached the rendered index; it is
-    // asserted absent so it cannot return, not because it is expected.
+    // A departed product name once reached this index too; `departed:verify`
+    // now guards that class repo-wide, so this asserts the shape it shares.
     const rendered = renderIndex(DEFAULT_REGISTERS.adrHomes[0]);
 
-    for (const absent of ['vp run', 'CQMS', 'ADR-048', 'ADR-075']) {
+    for (const absent of ['vp run', 'ADR-048', 'ADR-075']) {
       expect(rendered).not.toContain(absent);
     }
     expect(rendered).toContain('npx repo-adr');
