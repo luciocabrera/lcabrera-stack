@@ -57,6 +57,7 @@ import { fileURLToPath } from 'node:url';
 import { createSonarApi, fetchJson } from './lib/sonar-api.mjs';
 import { reportPathFor } from './lib/sonar-report-path.mjs';
 import { logSafe, summaryLines } from './lib/sonar-summary.mjs';
+import { normalizeFlows } from './lib/sonar-flows.mjs';
 import { waitForAnalysis } from './lib/sonar-wait.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
@@ -151,27 +152,31 @@ const relPath = (component) =>
     ? component.slice(CONFIG.project.length + 1)
     : component;
 
-const normIssue = (issue) => ({
-  key: issue.key,
-  rule: issue.rule,
-  type: issue.type,
-  severity: issue.severity,
-  file: relPath(issue.component),
-  line: issue.line ?? null,
-  message: issue.message,
-  effort: issue.effort ?? null,
-  // Sonar returns tags/impacts in an unstable order; sort so the tracked
-  // report is byte-identical run to run (no git churn).
-  tags: (issue.tags ?? []).toSorted(),
-  impacts: (issue.impacts ?? []).toSorted(
-    (a, b) =>
-      a.softwareQuality.localeCompare(b.softwareQuality) ||
-      a.severity.localeCompare(b.severity),
-  ),
-  cleanCodeCategory: issue.cleanCodeAttributeCategory ?? null,
-  status: issue.issueStatus ?? issue.status,
-  creationDate: issue.creationDate,
-});
+const normIssue = (issue) => {
+  const flows = normalizeFlows(issue.flows, relPath);
+  return {
+    key: issue.key,
+    rule: issue.rule,
+    type: issue.type,
+    severity: issue.severity,
+    file: relPath(issue.component),
+    line: issue.line ?? null,
+    message: issue.message,
+    effort: issue.effort ?? null,
+    // Sonar returns tags/impacts in an unstable order; sort so the tracked
+    // report is byte-identical run to run (no git churn).
+    tags: (issue.tags ?? []).toSorted(),
+    impacts: (issue.impacts ?? []).toSorted(
+      (a, b) =>
+        a.softwareQuality.localeCompare(b.softwareQuality) ||
+        a.severity.localeCompare(b.severity),
+    ),
+    cleanCodeCategory: issue.cleanCodeAttributeCategory ?? null,
+    status: issue.issueStatus ?? issue.status,
+    creationDate: issue.creationDate,
+    ...(flows.length > 0 ? { flows } : {}),
+  };
+};
 
 const normHotspot = (hotspot) => ({
   key: hotspot.key,
