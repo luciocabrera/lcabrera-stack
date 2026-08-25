@@ -35,9 +35,9 @@ catalogs:
     # peer and the graph splits across separate Vite+, Vite, and Vitest copies.
     # Keep this in lockstep with the `vite-plus` version (same Vite+ release).
     # See node_modules/vite-plus/docs/guide/migrate-rules.md "Vite and Overrides".
-    vite: npm:@voidzero-dev/vite-plus-core@0.2.6
+    vite: npm:@voidzero-dev/vite-plus-core@0.3.0
     vite-plugin-babel: ^1.7.3
-    vite-plus: 0.2.6
+    vite-plus: 0.3.0
 
   lint:
     '@biomejs/biome': ^2.5.10
@@ -90,8 +90,8 @@ catalogs:
     # it for every workspace. Removing it needs a from-scratch lockfile and a
     # coverage run to justify — see
     # docs/decisions/ADR-047-declare-optional-peer-dependencies.md.
-    '@vitest/coverage-v8': 4.1.10
-    vitest: 4.1.10
+    '@vitest/coverage-v8': 4.1.11
+    vitest: 4.1.11
 
   tooling:
     '@arethetypeswrong/core': ^0.18.5
@@ -142,7 +142,7 @@ minimumReleaseAgeExclude:
 
   - '@voidzero-dev/*'
   - react-router@8.3.0
-  - vite-plus@0.2.6
+  - vite-plus
 
 # Redirect every `vite`/`vitest` edge to the toolchain catalog so the workspace
 # resolves a single Vite+ instance (see the `build` catalog note above). The core
