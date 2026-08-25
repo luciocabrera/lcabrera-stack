@@ -10,11 +10,6 @@ import { resolveDistinctEstimate } from './resolve-distinct-estimate.util.ts';
 import { toRoleAggregates } from './to-role-aggregates.util.ts';
 
 /**
- * Both ADR-058 gates for one column: what it may be grouped by, what it may be
- * aggregated with, at which granularities if it is temporal, and — when it may
- * not be a group key — which of the reasons applies.
- */
-/**
  * A column with no histogram yields SQL NULL, which `pg` hands over as an absence; and
  * `extract(epoch …)` is `numeric`, which `pg` hands over as a **string** unless the query
  * casts it — the cast is there, and this is what keeps a missing one from silently
@@ -23,6 +18,11 @@ import { toRoleAggregates } from './to-role-aggregates.util.ts';
 const toSpanDays = (value: unknown) =>
   typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 
+/**
+ * Both ADR-058 gates for one column: what it may be grouped by, what it may be
+ * aggregated with, at which granularities if it is temporal, and — when it may
+ * not be a group key — which of the reasons applies.
+ */
 export const resolveColumnCapability = (
   row: ColumnCapabilityRow,
 ): ColumnGroupingCapability => {
