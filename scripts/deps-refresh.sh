@@ -6,9 +6,8 @@
 # push, PR) so the whole thing is one command instead of a remembered sequence.
 # "Everything updatable" is the intent, in one pass:
 #   - vp itself (the global CLI) via `vp upgrade`
-#   - pnpm (the pinned `packageManager`) — taze moves the version, then
-#     `corepack use pnpm@latest` rewrites the same field WITH the integrity
-#     hash. Both write it; only the second makes it a real pin (#927).
+#   - pnpm (the pinned `packageManager`) — taze moves the version, corepack adds
+#     the integrity hash; both write the field (#927)
 #   - the pnpm catalog + every workspace package.json via taze — which also bumps
 #     the `vite-plus` dep, and with it vite/rolldown/vitest/oxlint/oxfmt/tsdown
 # then clean + reinstall so the tree resolves against all of it. Superseded
@@ -263,10 +262,9 @@ log "Updating vp itself (global CLI; not part of the repo diff)"
 log "Removing node_modules + lockfile (pnpm clean) for a clean resolution"
 pnpm clean --lockfile
 
-# Read BEFORE taze runs. taze rewrites `packageManager` too, so a read taken
-# after it can never differ from the final value — which is what made the
-# move-detection below unreachable for as long as the header claimed otherwise.
-# Matches the whole value, hash included; `pnpm@[0-9.]*` stops at the `+`.
+# Read BEFORE taze runs: taze rewrites `packageManager` too, so a read taken
+# after it can never differ from the final value. Matches the whole value, hash
+# included — a `pnpm@[0-9.]*` pattern stops at the `+` and cannot see the hash.
 package_manager_pin() {
   sed -nE 's/.*"packageManager": *"([^"]+)".*/\1/p' package.json | head -1
 }
@@ -277,19 +275,9 @@ taze_log="$(mktemp)"
 trap 'rm -f "$taze_log"' EXIT
 npx --yes taze@latest -r --write "${taze_exclude[@]}" | tee "$taze_log"
 
-# The `packageManager` field is written TWICE here, and neither writer's exit
-# code describes what it ends up holding. taze (above) moves the version and
-# writes it BARE — `pnpm@11.23.0`, no hash. corepack adds the `+sha…`, and that
-# hash is the whole supply-chain guarantee on the pin.
-#
-# So corepack's status is context, not a verdict. It can exit non-zero AFTER
-# completing its write: the distro corepack Node 26 leaves on PATH installs
-# pnpm, rewrites the field, then dies launching it (#927). Announcing "continuing
-# with the current pnpm" on that exit — which is what this used to do — states
-# the opposite of what happened. The dangerous inverse is a corepack that dies
-# BEFORE its write, leaving taze's bare version: the version still moved, so
-# every version-based check reads a clean refresh while the pin has silently
-# lost its integrity half. The guard below is what refuses that.
+# corepack's exit status is context, not a verdict — it can fail AFTER writing
+# the field. The guard below reads the field instead; why, in
+# scripts/lib/package-manager-pin.mjs.
 log "Updating pnpm itself (the pinned packageManager) to the latest release"
 corepack_failed=()
 "$corepack_global" use pnpm@latest || corepack_failed=(--corepack-failed)

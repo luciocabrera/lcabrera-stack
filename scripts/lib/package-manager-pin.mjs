@@ -1,25 +1,21 @@
 /**
  * Reading the `packageManager` pin, and judging what a refresh did to it.
  *
- * Why this exists: during a dependency refresh that field is written TWICE, by
- * two tools with different jobs, and neither one's exit code describes what the
- * field ends up holding (#927).
+ * This module owns the reasoning the other two files point at.
  *
- * `taze --write` moves the version and writes it BARE — `pnpm@11.23.0`, no
- * hash. `corepack use pnpm@latest` then rewrites the same field WITH the
- * `+sha…`, and that hash is the whole supply-chain guarantee on the pin: it is
- * what makes the pin an integrity check rather than a version preference.
+ * A refresh writes that field twice. taze moves the version and writes it BARE,
+ * with no hash; corepack rewrites the same field adding the `+sha…`, and that
+ * hash is the whole supply-chain guarantee — it is what makes the pin an
+ * integrity check rather than a version preference.
  *
- * The trap that motivated this module is corepack exiting non-zero AFTER
- * completing its write. The distro corepack that Node 26 leaves on PATH
- * installs pnpm, rewrites the field, then dies launching it — so a caller
- * reading the exit code concludes the pin did not move while it is sitting
- * there, moved and correctly hashed. The inverse is the dangerous one: a
- * corepack that dies BEFORE its write leaves taze's bare version behind, the
- * refresh reports success, and the pin has quietly lost its integrity check.
+ * So neither tool's exit code describes what the field holds. corepack can exit
+ * non-zero having ALREADY completed its write, and the inverse is the dangerous
+ * one: dying before the write leaves taze's bare version, so the version moved,
+ * every version-based check reads a clean refresh, and the pin has quietly
+ * stopped being an integrity check.
  *
- * So: read the field, never the exit code. These functions are pure so the
- * three outcomes can be tested without a corepack that fails on demand.
+ * Read the field, never the exit code. These functions are pure so the outcomes
+ * can be tested without a corepack that fails on demand. Background: #927.
  *
  * Governed by .claude/rules/scripts.md.
  */
