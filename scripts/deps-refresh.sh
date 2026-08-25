@@ -6,7 +6,9 @@
 # push, PR) so the whole thing is one command instead of a remembered sequence.
 # "Everything updatable" is the intent, in one pass:
 #   - vp itself (the global CLI) via `vp upgrade`
-#   - pnpm (the pinned `packageManager`) via `corepack use pnpm@latest`
+#   - pnpm (the pinned `packageManager`) — taze moves the version, then
+#     `corepack use pnpm@latest` rewrites the same field WITH the integrity
+#     hash. Both write it; only the second makes it a real pin (#927).
 #   - the pnpm catalog + every workspace package.json via taze — which also bumps
 #     the `vite-plus` dep, and with it vite/rolldown/vitest/oxlint/oxfmt/tsdown
 # then clean + reinstall so the tree resolves against all of it. Superseded
@@ -261,19 +263,40 @@ log "Updating vp itself (global CLI; not part of the repo diff)"
 log "Removing node_modules + lockfile (pnpm clean) for a clean resolution"
 pnpm clean --lockfile
 
+# Read BEFORE taze runs. taze rewrites `packageManager` too, so a read taken
+# after it can never differ from the final value — which is what made the
+# move-detection below unreachable for as long as the header claimed otherwise.
+# Matches the whole value, hash included; `pnpm@[0-9.]*` stops at the `+`.
+package_manager_pin() {
+  sed -nE 's/.*"packageManager": *"([^"]+)".*/\1/p' package.json | head -1
+}
+pnpm_before="$(package_manager_pin || true)"
+
 log "Updating the pnpm catalog + package.json versions (taze), holding ${EXCLUDE[*]}"
 taze_log="$(mktemp)"
 trap 'rm -f "$taze_log"' EXIT
 npx --yes taze@latest -r --write "${taze_exclude[@]}" | tee "$taze_log"
 
-# taze does not touch the `packageManager` field, so pnpm itself would never move.
-# corepack rewrites it (with hash) and installs with the new pnpm — that install IS
-# the reinstall; the `vp install` below then reconciles. A soft failure (offline)
-# leaves the old pin in place rather than aborting the whole refresh.
-pnpm_before="$(grep -oE 'pnpm@[0-9][0-9.]*' package.json | head -1 || true)"
+# The `packageManager` field is written TWICE here, and neither writer's exit
+# code describes what it ends up holding. taze (above) moves the version and
+# writes it BARE — `pnpm@11.23.0`, no hash. corepack adds the `+sha…`, and that
+# hash is the whole supply-chain guarantee on the pin.
+#
+# So corepack's status is context, not a verdict. It can exit non-zero AFTER
+# completing its write: the distro corepack Node 26 leaves on PATH installs
+# pnpm, rewrites the field, then dies launching it (#927). Announcing "continuing
+# with the current pnpm" on that exit — which is what this used to do — states
+# the opposite of what happened. The dangerous inverse is a corepack that dies
+# BEFORE its write, leaving taze's bare version: the version still moved, so
+# every version-based check reads a clean refresh while the pin has silently
+# lost its integrity half. The guard below is what refuses that.
 log "Updating pnpm itself (the pinned packageManager) to the latest release"
-"$corepack_global" use pnpm@latest || echo "deps-refresh: 'corepack use pnpm@latest' failed — continuing with the current pnpm"
-pnpm_after="$(grep -oE 'pnpm@[0-9][0-9.]*' package.json | head -1 || true)"
+corepack_failed=()
+"$corepack_global" use pnpm@latest || corepack_failed=(--corepack-failed)
+# No `pnpm_after` here on purpose: the guard reads the manifest itself, so there
+# is one reader of the field rather than two that can disagree.
+node scripts/verify-package-manager-pin.mjs --before "$pnpm_before" "${corepack_failed[@]}" ||
+  die "the packageManager pin lost its integrity hash — see above. The working tree holds the half-finished refresh; no issue, branch or commit was made."
 
 log "Reinstalling with the refreshed versions (vp install)"
 "$vp_global" install
@@ -304,9 +327,10 @@ fi
 # --- the ceremony: issue → branch → commit → push → PR ------------------------
 # The catalog changes taze made, as a compact list for the commit + PR body.
 moved="$(grep -E '·|→|->' "$taze_log" | sed -E 's/^[[:space:]]+//' | sed -E 's/\x1b\[[0-9;]*m//g' || true)"
-if [[ -n "$pnpm_after" && "$pnpm_before" != "$pnpm_after" ]]; then
-  moved="${pnpm_before} → ${pnpm_after} (packageManager)"$'\n'"${moved}"
-fi
+# No dedicated packageManager line: taze reports the pnpm move in its own log,
+# which the grep above already picks up, so adding one printed it twice. The part
+# taze's line cannot show — whether the integrity hash survived — is a hard guard
+# above rather than a sentence here.
 # A run can now land with no version moved at all — the lockfile alone changed,
 # because regenerating it from nothing dropped resolutions nothing reaches. Say so
 # rather than pointing at a manifest diff that is empty.
