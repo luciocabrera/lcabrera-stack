@@ -55,7 +55,7 @@ catalogs:
     eslint-plugin-unicorn: ^73.0.0
     globals: ^17.11.0
     react-doctor: ^0.9.12
-    typescript-eslint: ^8.67.0
+    typescript-eslint: ^8.68.0
 
   react:
     '@react-router/dev': ^8.3.0
@@ -130,6 +130,9 @@ minimumReleaseAgeExclude:
   - '@eslint-react/*' # lint-only packages with frequent coordinated releases
 
   - '@typescript-eslint/*'
+  # The meta-package, which the scoped glob above does not match. It releases
+  # in lockstep with the scoped ones, so the two must be listed together.
+  - typescript-eslint
 
   - '@vitest/*'
 
