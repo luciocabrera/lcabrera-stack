@@ -223,14 +223,10 @@
         "rules": {
           "style": {
             "useNodeAssertStrict": "error", // node:assert -> node:assert/strict
-            // NOTE: noProcessEnv is deliberately NOT enabled. The repo already
-            // centralizes env through Zod schemas (`readEnvConfig({ env: process.env })`,
-            // `envSchema.parse(process.env)`), so every `process.env` read is the
-            // legitimate validation boundary (plus agent-runner forwarding raw env
-            // to a spawned subprocess, which cannot route through config). The
-            // reads sit in ordinary util files, not a tidy `config/` dir, so there
-            // is no clean glob exemption; enforcing it would need a cross-workspace
-            // env-reader refactor touching the vital `server` package. See ADR-035 §7.
+            // noProcessEnv is deliberately off: env is centralised through Zod
+            // schemas, so every `process.env` read is the validation boundary.
+            // They sit in ordinary util files, so there is no clean glob
+            // exemption. See ADR-035 §7.
           },
         },
       },
