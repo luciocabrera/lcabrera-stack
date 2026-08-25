@@ -61,8 +61,8 @@ vp run ready          # the full gate + build
 Tests:
 
 ```bash
-vp run test:ci        # what CI runs — no suite here needs a database
-vp run test:all       # every suite, plus the root scripts/ tests
+vp run test:ci        # what CI runs — showcase last, so its coverage is fresh
+vp run test:all       # the same suites, in workspace dependency order
 ```
 
 Before finishing any change, run the quality gate — `vp run check:safe` chains
