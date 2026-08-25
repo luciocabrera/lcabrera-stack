@@ -275,7 +275,7 @@ export const withheldResult = ({ changedFiles, gate, number }) => {
         number,
         ok: true,
         output:
-          'Withheld: this pull request edits the code this gate runs, and the sweep runs the default branch (#884).',
+          'Withheld: this pull request edits the code this gate runs, so the verdict would come from whichever copy this run loaded — on the schedule, the copy being replaced (#884).',
       }
     : undefined;
 };

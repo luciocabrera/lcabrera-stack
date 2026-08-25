@@ -341,6 +341,15 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    is what you need. This step stays the right one for the two contexts that are
    advisory, and for reading what the sweep thinks.
 
+   **On a pull request that edits a gate, this step recomputes nothing.** It
+   prints three `Withheld` lines instead, because the self-edit rule above is in
+   the sweep and applies to every invocation of it — including this one, run
+   locally from the pull request's own branch, where the reasoning behind the
+   rule does not hold. There is no override. That is worth knowing precisely
+   because a #866-class stuck status is _by definition_ on a gate-editing pull
+   request, so the ladder's first rung is the one it cannot use: go to step 2 and
+   pick a per-gate dispatch.
+
 2. **Dispatch the gate from Actions**, which needs no checkout — pick
    **Copilot Review Gate**, **Agent Review Gate** or **Review Gate Reconcile**,
    press **Run workflow**, and give the pull request number. A dispatch is
@@ -371,6 +380,11 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    reconcile dispatch is deliberately left without one: it is the sweep,
    and the sweep is default-branch by design, which is the whole of what #868 and
    #884 are about.
+
+   **So on a gate-editing pull request, pick one of the two per-gate dispatches.**
+   They invoke their gate script directly, which is why they are unaffected;
+   _Review Gate Reconcile_ goes through the sweep and withholds, exactly as step 1
+   does. It reports that it withheld rather than going quietly green.
 
    `-R` is what makes "needs no checkout" true. `gh` infers the repository from a
    git remote, so without it these fail with `not a git repository` before any

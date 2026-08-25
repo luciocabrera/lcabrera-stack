@@ -262,7 +262,12 @@ describe('the sweep actually consults it — not a parallel definition', () => {
     // against `runGh`'s 8 MB cap, and overflowing it reads as "could not tell"
     // — which withholds every gate for that pull request until it closes.
     expect(source()).toMatch(/'--jq',\s*'\.\[\]\.filename'/u);
-    expect(source()).not.toMatch(/JSON\.parse\([\s\S]{0,80}?pulls/u);
+    // Scoped to the declaration, not matched across a window over the file. The
+    // only `JSON.parse(` here belongs to `fetchOpenPullRequests`, so a window
+    // wide enough to reach a `pulls` path measures THAT function's formatting —
+    // and would fail this test, under this name, for an edit to code it is not
+    // about.
+    expect(declarationOf('fetchChangedFiles')).not.toMatch(/JSON\.parse\(/u);
   });
 
   it('reads an empty file list as no files, not as an unreadable one', () => {
