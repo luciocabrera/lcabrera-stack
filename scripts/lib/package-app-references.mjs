@@ -20,11 +20,19 @@ const GENERATED = /(^|\/)CHANGELOG\.md$/;
 /** Excluded from every published package's `files`, so never shipped. */
 const TEST = /\.(test|spec)\.[a-z]+$/;
 
-/** Text a package ships. A comment in `src` reaches consumers like prose does. */
-const SHIPPED_TEXT = /\.(css|js|md|mjs|ts|tsx)$/;
+/**
+ * Text a package ships. A comment in `src` reaches consumers like prose does,
+ * and so does a workflow template's `paths:` filter — `@lcabrera/devkit` ships
+ * `.yml` and two extensionless git hooks, which is why this is not a source
+ * extension list. Anything without an extension is text here; binaries carry one.
+ */
+const SHIPPED_TEXT = /\.(css|js|md|mjs|ts|tsx|ya?ml)$/;
+const NO_EXTENSION = /(^|\/)[^./]+$/;
 
 export const isCheckedFile = (path) =>
-  SHIPPED_TEXT.test(path) && !GENERATED.test(path) && !TEST.test(path);
+  (SHIPPED_TEXT.test(path) || NO_EXTENSION.test(path)) &&
+  !GENERATED.test(path) &&
+  !TEST.test(path);
 
 /** 1-based line numbers sitting inside a ``` fence. Markdown only. */
 const fencedLines = (text) => {

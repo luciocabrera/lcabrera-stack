@@ -5,7 +5,7 @@
  *
  * Exit codes: 0 = no published package names an app, 1 = one does.
  */
-import { existsSync, globSync, readFileSync } from 'node:fs';
+import { existsSync, globSync, readFileSync, statSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -30,11 +30,14 @@ const publishedPackageDirectories = () =>
     .filter((relative) => isPublished(resolve(REPO_ROOT, relative)))
     .map((relative) => dirname(relative));
 
+// A directory has no extension either, so glob hits must be narrowed to files.
 const filesIn = (directory) =>
   globSync(`${directory}/**/*`, {
     cwd: REPO_ROOT,
     exclude: ['**/node_modules/**', '**/dist/**'],
-  }).filter(isCheckedFile);
+  })
+    .filter((path) => statSync(resolve(REPO_ROOT, path)).isFile())
+    .filter(isCheckedFile);
 
 const main = () => {
   const directories = publishedPackageDirectories();

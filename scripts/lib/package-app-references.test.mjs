@@ -59,6 +59,16 @@ describe('isCheckedFile', () => {
     expect(isCheckedFile('packages/ui/package.json')).toBe(false);
   });
 
+  it('checks the non-source text a package ships', () => {
+    // devkit ships workflow templates and two extensionless git hooks; a
+    // `paths:` filter naming an app is exactly what this gate is for.
+    expect(isCheckedFile('packages/devkit/assets/workflows/check.yml')).toBe(
+      true,
+    );
+    expect(isCheckedFile('packages/devkit/assets/hooks/pre-push')).toBe(true);
+    expect(isCheckedFile('packages/ui/assets/font.woff2')).toBe(false);
+  });
+
   it('skips tests, which every package excludes from its files', () => {
     expect(isCheckedFile('packages/ui/src/Table.test.tsx')).toBe(false);
     expect(isCheckedFile('packages/repo-standards/scripts/x.test.mjs')).toBe(
