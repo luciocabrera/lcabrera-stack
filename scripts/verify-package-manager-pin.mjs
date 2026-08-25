@@ -42,47 +42,76 @@ import {
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-// `--manifest` reaches the filesystem, so it is containment-checked rather than
-// passed straight to readFileSync. The refresh only ever points this at the root
-// manifest; the flag exists for tests, and a test argument is still an argument.
-const manifestPath = flagValue('--manifest') ?? 'package.json';
-const before = flagValue('--before');
-const corepackFailed = process.argv.includes('--corepack-failed');
+const HINT =
+  '  taze writes the bare version; corepack adds the "+sha…". A bare pin means corepack\n' +
+  '  did not complete its write, so the pin is a version preference rather than an\n' +
+  '  integrity check. Re-run `corepack use pnpm@latest` and commit the result.';
 
-const fail = (message) => {
-  process.stderr.write(`verify-package-manager-pin: ${message}\n`);
-  process.exit(1);
+/**
+ * `--manifest` reaches the filesystem, so it is containment-checked rather than
+ * passed straight to a read. The refresh only ever points this at the root
+ * manifest; the flag exists for tests, and a test argument is still an argument.
+ *
+ * `JSON.parse` happily returns `null` for the text "null", which would then be
+ * dereferenced as an object — so the shape is checked here rather than assumed.
+ */
+const readManifest = (path) => {
+  const parsed = JSON.parse(readTextWithin(path, REPO_ROOT));
+
+  if (parsed === null || typeof parsed !== 'object') {
+    throw new TypeError(`${path} does not contain a JSON object`);
+  }
+
+  return parsed;
 };
 
-let manifest;
+const main = () => {
+  const manifestPath = flagValue('--manifest') ?? 'package.json';
+  const before = flagValue('--before');
+  const corepackFailed = process.argv.includes('--corepack-failed');
+
+  const after = readManifest(manifestPath).packageManager;
+
+  // Collected rather than thrown one at a time, per .claude/rules/scripts.md.
+  // These three are mutually exclusive by nature — a field cannot be both absent
+  // and malformed — so the list holds at most one today; the shape is what keeps
+  // a fourth check from being bolted on as an early exit.
+  const problems = [];
+
+  if (after === undefined) {
+    problems.push(
+      `${manifestPath} declares no packageManager field. Nothing pins the package manager, so an install can use any version.`,
+    );
+  } else if (parsePackageManagerPin(after) === null) {
+    problems.push(
+      `${manifestPath} has a malformed packageManager pin: ${after}`,
+    );
+  } else {
+    const outcome = describePinOutcome({ after, before, corepackFailed });
+
+    if (outcome.level === 'error') {
+      problems.push(`${outcome.message}.\n${HINT}`);
+    } else {
+      const stream = outcome.level === 'warn' ? process.stderr : process.stdout;
+      stream.write(`verify-package-manager-pin: ${outcome.message}\n`);
+    }
+  }
+
+  for (const problem of problems) {
+    process.stderr.write(`verify-package-manager-pin: ${problem}\n`);
+  }
+
+  if (problems.length > 0) {
+    // Never `process.exit()` here: stderr is asynchronous when it is a pipe, and
+    // exiting mid-stream can drop the message above — on the one failure path
+    // this script exists to explain, under exactly the CI/`tee` runs that need it.
+    process.exitCode = 1;
+  }
+};
+
 try {
-  manifest = JSON.parse(readTextWithin(manifestPath, REPO_ROOT));
+  main();
 } catch (error) {
-  fail(`cannot read ${manifestPath}: ${error.message}`);
+  process.stderr.write(`verify-package-manager-pin: ${error.message}\n`);
+  process.exitCode = 1;
 }
-
-const after = manifest.packageManager;
-
-if (after === undefined) {
-  fail(
-    `${manifestPath} declares no packageManager field. Nothing pins the package manager, so an install can use any version.`,
-  );
-}
-
-if (parsePackageManagerPin(after) === null) {
-  fail(`${manifestPath} has a malformed packageManager pin: ${after}`);
-}
-
-const outcome = describePinOutcome({ after, before, corepackFailed });
-
-if (outcome.level === 'error') {
-  fail(
-    `${outcome.message}.\n` +
-      '  taze writes the bare version; corepack adds the "+sha…". A bare pin means corepack\n' +
-      '  did not complete its write, so the pin is a version preference rather than an\n' +
-      '  integrity check. Re-run `corepack use pnpm@latest` and commit the result.',
-  );
-}
-
-const stream = outcome.level === 'warn' ? process.stderr : process.stdout;
-stream.write(`verify-package-manager-pin: ${outcome.message}\n`);
