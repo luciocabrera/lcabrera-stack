@@ -29,7 +29,7 @@
  */
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
@@ -42,7 +42,7 @@ import { errorMessage } from '../packages/repo-standards/scripts/error-message.m
 import { runGh } from './lib/gh-exec.mjs';
 import {
   gateArgs,
-  localModuleClosure,
+  gateClosure,
   openPullRequestNumbers,
   outcomeLine,
   sweepSummary,
@@ -51,6 +51,16 @@ import {
 
 const SCRIPTS_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = dirname(SCRIPTS_DIR);
+
+/**
+ * This driver's own repo-relative path, derived rather than written down.
+ *
+ * It goes into every gate's closure (`gateClosure`), so a literal here would
+ * stop matching the moment the file was renamed — and the symptom of that is a
+ * sweep that publishes where it should withhold, which looks exactly like a
+ * healthy one.
+ */
+const DRIVER_MODULE = relative(REPO_ROOT, fileURLToPath(import.meta.url));
 
 /** One repo-relative module's source, or `undefined` when there is none. */
 const readRepoModule = (path) => {
@@ -140,11 +150,15 @@ const GATES = [
  * point: the closure describes the code THIS sweep runs, so comparing a pull
  * request's changed files against it answers "would I be judging this change
  * with the code it replaces?" (#884).
+ *
+ * "The code THIS sweep runs" includes this file, which no gate imports — see
+ * `gateClosure` for why leaving it out reopened #884 through the driver.
  */
 const gatesWithClosures = () =>
   GATES.map((gate) => ({
     ...gate,
-    closure: localModuleClosure({
+    closure: gateClosure({
+      driverEntry: DRIVER_MODULE,
       entry: `scripts/${gate.script}`,
       readFile: readRepoModule,
     }),

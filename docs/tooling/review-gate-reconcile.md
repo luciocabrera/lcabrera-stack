@@ -229,6 +229,14 @@ What follows from it:
   one of them withholds every gate including the required context. That is the principle
   working, not overreaching: it is code the gate runs. Read a closure rather than guessing
   at one — `localModuleClosure` is exported and the tests walk the real tree with it.
+- **The sweep's own driver is in every gate's closure, and no gate imports it.**
+  `reconcile-review-gates.mjs` decides what each gate run _is_ — `GATES` carries the
+  `protectSuccess` flags and `gateArgs` turns them into `--protect-success` — so a pull
+  request editing only the driver changes every gate run while matching nothing in any
+  gate's own closure. Left out, that reopens #884 through the one file the walk cannot
+  reach from a gate, in its #868 form: the sweep runs the default branch's driver, decides
+  without the flag the pull request adds, and overwrites a `success` the head's own run got
+  right. `gateClosure` unions the two.
 - **The extra read is one request per pull request, filtered in `gh`.** The
   `files` endpoint carries each entry's diff hunk, so it asks for
   `.[].filename` rather than the payload: it is the sweep's only response whose

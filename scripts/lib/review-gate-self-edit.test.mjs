@@ -13,6 +13,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  gateClosure,
   gateJudgesItsOwnEdit,
   localModuleClosure,
   sweepSummary,
@@ -48,6 +49,25 @@ describe('the code a gate actually runs', () => {
     // `deep.mjs` is imported by `helper.mjs`, never by the entry. A walk that
     // read the entry and stopped would pass every other assertion here.
     expect(closure()).toContain('scripts/lib/deep.mjs');
+  });
+
+  it('unions the driver that runs the gate into the gate’s closure', () => {
+    // The gate script is not the whole of the code that produces the verdict:
+    // the driver picks the gate's argv, so a pull request editing only the
+    // driver changes every gate run while matching no gate's own closure.
+    const withDriver = gateClosure({
+      driverEntry: 'scripts/driver.mjs',
+      entry: 'scripts/gate.mjs',
+      readFile: (path) =>
+        path === 'scripts/driver.mjs'
+          ? `import { only } from './lib/driver-only.mjs';`
+          : { ...FIXTURE, 'scripts/lib/driver-only.mjs': '' }[path],
+    });
+    expect(withDriver).toContain('scripts/driver.mjs');
+    // Transitively, not just the entry — the driver's own imports count too.
+    expect(withDriver).toContain('scripts/lib/driver-only.mjs');
+    // And the gate's side survives the union.
+    expect(withDriver).toContain('scripts/lib/deep.mjs');
   });
 
   it('leaves builtins out — they cannot be edited by a pull request', () => {
@@ -89,6 +109,32 @@ describe('the code a gate actually runs', () => {
     expect(real).toContain('scripts/copilot-review-status.mjs');
     expect(real).toContain('scripts/lib/copilot-review.mjs');
     expect(real).toContain('scripts/lib/review-gate-reconcile.mjs');
+    // The driver is NOT reachable from a gate — no gate imports it. That is the
+    // gap `gateClosure` exists to close, asserted here so the union below is
+    // measured against a real absence rather than an assumed one.
+    expect(real).not.toContain('scripts/reconcile-review-gates.mjs');
+  });
+
+  it('puts the real driver into every real gate’s closure', () => {
+    for (const script of [
+      'scripts/copilot-review-status.mjs',
+      'scripts/verify-agent-review.mjs',
+      'scripts/verify-review-threads.mjs',
+    ]) {
+      expect(
+        gateClosure({
+          driverEntry: 'scripts/reconcile-review-gates.mjs',
+          entry: script,
+          readFile: (path) => {
+            try {
+              return readRepoFile(path);
+            } catch {
+              return undefined;
+            }
+          },
+        }),
+      ).toContain('scripts/reconcile-review-gates.mjs');
+    }
   });
 });
 
@@ -244,12 +290,36 @@ describe('the sweep actually consults it — not a parallel definition', () => {
     expect(start).toBeGreaterThan(-1);
     const end = text.indexOf('\n};', start);
     expect(end).toBeGreaterThan(start);
-    return text.slice(start, end);
+    const slice = text.slice(start, end);
+    // `\n};` terminates a BLOCK-bodied arrow. For an expression-bodied one it
+    // lands in whatever declaration comes next, silently widening the slice —
+    // the same class of accidental window this file has already been bitten by
+    // three times. Over-slicing fails here rather than weakening an assertion
+    // somewhere else.
+    expect(slice).not.toMatch(/\n(?:const|export) /u);
+    return slice;
   };
 
   it('never assigns a gate result without consulting the decision', () => {
     expect(source()).not.toMatch(/const result =\s*runGate\(/u);
     expect(source()).toMatch(/const result =\s*withheldResult\(/u);
+  });
+
+  it('closes over the driver too, not just the gate script', () => {
+    // The whole-file form is deliberate: `gatesWithClosures` is an
+    // expression-bodied arrow, so `declarationOf` cannot bound it. Reverting to
+    // the un-unioned walk is what this has to catch, and the un-unioned walk is
+    // named — so its absence anywhere in the driver is the assertion.
+    expect(source()).toMatch(/gateClosure\(/u);
+    expect(source()).not.toMatch(/localModuleClosure\(/u);
+  });
+
+  it('derives its own path rather than writing it down', () => {
+    // This file is in every gate's closure. A literal would stop matching the
+    // moment it was renamed, and the symptom — a sweep that publishes where it
+    // should withhold — is indistinguishable from a healthy one.
+    expect(source()).not.toMatch(/'scripts\/reconcile-review-gates\.mjs'/u);
+    expect(source()).toMatch(/driverEntry: DRIVER_MODULE/u);
   });
 
   it('asks about the files this pull request changed', () => {
@@ -281,9 +351,9 @@ describe('the sweep actually consults it — not a parallel definition', () => {
   });
 
   it('derives each gate’s closure from its own script', () => {
-    expect(source()).toMatch(
-      /localModuleClosure\(\{[\s\S]{0,200}?gate\.script/u,
-    );
+    // Exact, not a window: the point is that each gate's entry is that gate's
+    // own script rather than a shared or hardcoded list.
+    expect(source()).toMatch(/entry: `scripts\/\$\{gate\.script\}`/u);
   });
 
   it('does not let one pull request’s failure end the sweep', () => {

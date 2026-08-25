@@ -227,6 +227,31 @@ const resolveFrom = ({ from, specifier }) =>
   normalizePath(`${from.split('/').slice(0, -1).join('/')}/${specifier}`);
 
 /**
+ * One gate's closure, unioned with the closure of the driver that runs it.
+ *
+ * The gate script alone is not the code that produces the verdict. The driver
+ * chooses the gate's argv — `GATES` carries each `protectSuccess` flag and
+ * `gateArgs` turns it into `--protect-success` — so a pull request that edits
+ * ONLY the driver changes what every gate run does while matching nothing in any
+ * gate's own closure. That is #884 in its original shape, re-entering through the
+ * one file no gate imports: the sweep would run the default branch's driver,
+ * decide without the flag the pull request adds, and overwrite a `success` its
+ * own head got right — which is #868.
+ *
+ * Unioned rather than chained, because no gate imports the driver and no driver
+ * import is unreachable from the gates. In this tree the union adds exactly the
+ * driver's own path; that is not a property to rely on, which is why this walks
+ * rather than appends a constant.
+ */
+export const gateClosure = ({ driverEntry, entry, readFile }) =>
+  [
+    ...new Set([
+      ...localModuleClosure({ entry: driverEntry, readFile }),
+      ...localModuleClosure({ entry, readFile }),
+    ]),
+  ].toSorted((a, b) => a.localeCompare(b));
+
+/**
  * Whether this sweep's opinion about a pull request is worth publishing at all.
  *
  * The sweep runs from the default branch — GitHub gives a `schedule` no other
