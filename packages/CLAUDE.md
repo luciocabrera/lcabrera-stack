@@ -206,8 +206,12 @@ nothing detects that.
 directions — `@lcabrera/api` gets no `node` types, `@lcabrera/server` gets no DOM
 lib. `packages/ui`'s `check:public-api` enforces the invariant that **a
 client-safe package may only depend on workspace packages that are themselves
-client-safe**. Full topology:
-[ADR-038](../docs/decisions/ADR-038-public-package-topology-by-runtime.md).
+client-safe**. They were one package until the cost showed up: `@lcabrera/ui`
+depended on the combined package for two fetch helpers and so pulled the
+Postgres driver into every consumer's dependency graph. Full topology, and what
+each tsconfig denies:
+[ADR-038](../docs/decisions/ADR-038-public-package-topology-by-runtime.md),
+which supersedes ADR-008.
 
 `utils` and `node` split on purity: `@lcabrera/utils` guarantees pure,
 side-effect-free helpers, so anything that must touch the process (signal
