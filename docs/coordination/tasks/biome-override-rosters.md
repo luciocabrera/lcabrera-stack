@@ -6,6 +6,9 @@ status: review
 branch: fix/933-biome-override-rosters
 area:
   - biome.jsonc
+  - scripts/verify-lint-plugins.mjs
+  - scripts/lib/lint-plugins*
+  - COMMANDS.md
 started: 2026-08-25
 updated: 2026-08-25
 plan: (none)

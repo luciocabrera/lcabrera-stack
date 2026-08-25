@@ -1,19 +1,12 @@
 /**
  * Gate: the root lint configs are wired the way they claim — every Oxlint
- * plugin family is loaded, no workspace config carries a `lint` block that
- * Vite+ will silently ignore, and both roster configs classify every workspace
- * exactly once.
+ * plugin family loaded, no workspace config shadowing the root, and both the
+ * Oxlint and Biome rosters classifying every workspace exactly once.
  *
- * Every one of those failures is invisible by construction — a plugin that is
- * not loaded, an override whose glob matches nothing, and clean code all
- * produce the same empty output — so this lints a deliberate violation per
- * family rather than reading the config. See
+ * Each failure is invisible by construction: an unloaded plugin, a glob that
+ * matches nothing, and clean code all produce the same empty output. So this
+ * lints a deliberate violation rather than reading the config. See
  * `docs/decisions/ADR-042-oxlint-config-at-the-root.md`.
- *
- * It covers `biome.jsonc` as well as the Oxlint roster because the ungated one
- * is the one that rotted: Oxlint's `WORKSPACE_RUNTIMES` stayed correct while
- * Biome's overrides kept six departed workspaces and left five live ones — four
- * of them public packages — in neither list.
  *
  * Effects live here; the rules are pure in `./lib/lint-plugins.mjs`.
  *
@@ -118,12 +111,7 @@ const lintConfigModule = () => import(join(REPO_ROOT, 'vite.config.ts'));
 /** The classification the root Oxlint config declares, read from the config itself. */
 const runtimeLists = async () => (await lintConfigModule()).WORKSPACE_RUNTIMES;
 
-/**
- * The same classification as Biome declares it — its whole-workspace override
- * blocks. Read from `biome.jsonc` itself for the reason `jsonc.mjs` gives: a
- * malformed config makes Biome fall back to defaults silently, so a parse error
- * here is a finding about the repo, not a nuisance.
- */
+/** The same classification as Biome declares it. */
 const biomeRosters = () =>
   workspaceRosters(
     parseJsonc(readFileSync(join(REPO_ROOT, 'biome.jsonc'), 'utf8'))
@@ -150,11 +138,7 @@ const workspaceConfigs = () =>
       text: readFileSync(join(REPO_ROOT, path), 'utf8'),
     }));
 
-/**
- * The two roster configs, each with the fix its own failure needs. Checked
- * together so neither can drift from the workspace list on its own — which is
- * exactly what happened while only one of them was read.
- */
+/** The two roster configs, each with the fix its own failure needs. */
 const rosterSources = async () => [
   {
     fix:

@@ -110,9 +110,8 @@
   },
   "overrides": [
     {
-      // React workspaces — the ones that contain JSX. Kept in lockstep with the
-      // Node override's `includes` below: every workspace is in exactly one of
-      // the two lists, which `vp run lint:plugins:verify` enforces.
+      // Workspaces that contain JSX. Every workspace is in exactly one of the
+      // two rosters; `vp run lint:plugins:verify` enforces that.
       "includes": ["apps/react-router/**", "packages/ui/**"],
       "linter": {
         "domains": { "react": "recommended" },
@@ -204,13 +203,9 @@
       },
     },
     {
-      // Node/library workspaces — no JSX. Rules that only make sense off the
-      // browser live here so they never touch the React apps. Kept in lockstep
-      // with the React override's `includes` above: every workspace is in
-      // exactly one of the two lists, which `vp run lint:plugins:verify`
-      // enforces. It did not, and six of these globs named workspaces that had
-      // left while five live ones sat in neither list — so `useNodeAssertStrict`
-      // was silently off in four public packages.
+      // Workspaces that contain no JSX. That is the only axis this splits on:
+      // `api` and `utils` are client-safe, so a browser-hostile rule needs its
+      // own narrower block, not this one.
       "includes": [
         "packages/api/**",
         "packages/devkit/**",

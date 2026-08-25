@@ -233,8 +233,6 @@ describe('multiplyClassifiedWorkspaces', () => {
     ).toEqual([]);
   });
 
-  // A workspace in both lists gets rules written on the assumption they never
-  // meet, and Biome reports nothing about it either way.
   it('reports a workspace claimed by two lists', () => {
     expect(
       multiplyClassifiedWorkspaces({
@@ -271,9 +269,6 @@ describe('workspaceRosters', () => {
     ]);
   });
 
-  // The reason it matches by shape and not by index: Biome scopes most of its
-  // overrides by file pattern, and a roster read positionally would start
-  // checking one of those the moment a block is inserted above it.
   it('rejects a block that mixes a workspace glob with a file pattern', () => {
     expect(
       workspaceRosters([{ includes: ['packages/ui/**', '**/routes/**'] }]),
