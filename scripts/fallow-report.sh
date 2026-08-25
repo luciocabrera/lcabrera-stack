@@ -27,6 +27,9 @@ if [[ -z "${OUTPUT_DIR:-}" ]]; then
 fi
 
 mkdir -p "$OUTPUT_DIR"
+# OUTPUT_DIR may be a directory the caller already owns, so a previous run's
+# artifact would satisfy the guard below and pass off stale findings as this run's.
+rm -f "$OUTPUT_DIR/fallow.raw.json"
 # Findings make fallow exit non-zero. This reports them, it does not gate on
 # them, so neither pass may abort the other — but a missing artifact must, or
 # the skill reads a file that is not there and calls it the source of truth.
