@@ -31,7 +31,7 @@ describe('isRootAnchored', () => {
     expect(isRootAnchored('packages/ui/src/INVENTORY.md', REPO_ROOTS)).toBe(
       true,
     );
-    expect(isRootAnchored('apps/react-router', REPO_ROOTS)).toBe(true);
+    expect(isRootAnchored('apps/web', REPO_ROOTS)).toBe(true);
     expect(isRootAnchored('.github/skills/react-19/SKILL.md', REPO_ROOTS)).toBe(
       true,
     );
@@ -125,7 +125,7 @@ describe('extractCandidates', () => {
 
   it('keeps prose on both sides of a fenced block', () => {
     const markdown = [
-      'Before `apps/react-router/src/routes.ts`',
+      'Before `apps/web/src/routes.ts`',
       '```',
       '`packages/ignored/thing.ts`',
       '```',
@@ -136,10 +136,7 @@ describe('extractCandidates', () => {
       extractCandidates(markdown, REPO_ROOTS).toSorted((left, right) =>
         left.localeCompare(right),
       ),
-    ).toEqual([
-      'apps/react-router/src/routes.ts',
-      'packages/utils/ARCHITECTURE.md',
-    ]);
+    ).toEqual(['apps/web/src/routes.ts', 'packages/utils/ARCHITECTURE.md']);
   });
 
   it('picks up relative markdown link targets, anchored or not', () => {
@@ -191,9 +188,7 @@ describe('isDatedRecord', () => {
   it('recognises an ADR in each of the three homes', () => {
     expect(isDatedRecord('docs/decisions/ADR-044-x.md')).toBe(true);
     expect(isDatedRecord('docs/cqms/decisions/ADR-016-x.md')).toBe(true);
-    expect(isDatedRecord('apps/react-router/docs/decisions/ADR-003-x.md')).toBe(
-      true,
-    );
+    expect(isDatedRecord('apps/web/docs/decisions/ADR-003-x.md')).toBe(true);
   });
 
   it('does not treat an ordinary document as a dated record', () => {

@@ -299,9 +299,9 @@ The first group follows
 [ADR-039](../../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)'s
 pattern, without exception: this package is client-safe and cannot import the
 Node-only builder, so a rail it must respect is **duplicated** and then pinned to
-the server's value by a contract test in `apps/react-router` — the one workspace
-that legitimately depends on both packages. Two constants and one assertion each,
-never a copy left to drift.
+the server's value by a contract test in a consumer of both packages — the only
+place that comparison can be made. Two constants and one assertion each, never a
+copy left to drift.
 
 ### Layout
 

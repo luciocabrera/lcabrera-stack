@@ -144,9 +144,8 @@ clean, plausible, wrong answer if you drop it.
    `Object.keys(row)` of length one. So an over-long alias is refused at
    construction, with an explicit shorter `alias` as the escape hatch.
 
-`../../../../../apps/react-router/src/.server/groupingCapability.smoke.test.ts`
-is the live-Postgres proof for the first three, since a mocked row cannot show
-any of them. It is gated behind `SMOKE_DB`.
+The first three need a **live-Postgres smoke test** to prove, since a mocked row
+cannot show any of them. This repository gates one behind `SMOKE_DB`.
 
 ## Refusal reasons
 
@@ -222,12 +221,12 @@ matrix. A long result can be re-projected into a pivot later; a pre-widened one
 has already thrown the coordinates away. That is the difference between a pivot
 table being a rendering change and being a rewrite.
 
-`../../../../../apps/react-router/src/.server/cubeExpansion.smoke.test.ts` is the
-live-Postgres proof that the sets expanded here are the ones `CUBE (…)` means.
-A unit test can only assert the expansion against _our own_ expectation of
-`CUBE`, which reports green whether or not that expectation is right; running
-both and diffing the results is what separates them. Its fixture carries a real
-NULL in one key, because a structural NULL and a real one are textually identical
+That the sets expanded here are the ones `CUBE (…)` means needs a **live-Postgres
+smoke test**. A unit test can only assert the expansion against _our own_
+expectation of `CUBE`, which reports green whether or not that expectation is
+right; running both and diffing the results is what separates them. Such a
+fixture must carry a real NULL in one key, because a structural NULL and a real
+one are textually identical
 and a comparison ignoring `GROUPING()` would call two different results equal.
 
 ## Ordering, and the `NULLS` keyword that must not appear
@@ -323,7 +322,6 @@ whose own `maxRows` is tighter keeps its number and gets no backstop.
 | `MAX_GROUP_ROWS_WARN`   | above it, a warning beside the rows; also the backstop `LIMIT` when unknown  |
 | `MAX_GROUP_ROWS_REFUSE` | above it, refused — naming the widest group key, which is the actionable one |
 
-`../../../../../apps/react-router/src/.server/groupingGuardRails.smoke.test.ts`
-is the live-Postgres proof for the rails whose behaviour a mocked suite reports
-green either way — the statement timeout firing, and the pool default surviving
-on the same pooled connection.
+Two of these rails need a **live-Postgres smoke test**, because a mocked suite
+reports them green either way — the statement timeout firing, and the pool
+default surviving on the same pooled connection.

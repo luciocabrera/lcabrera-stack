@@ -59,7 +59,7 @@ describe('adrFindings', () => {
       findings({
         homes: [
           home('docs/decisions', ['ADR-001-a.md']),
-          home('apps/react-router/docs/decisions', ['ADR-001-b.md']),
+          home('apps/web/docs/decisions', ['ADR-001-b.md']),
         ],
       }),
     ).toEqual([]);
@@ -69,7 +69,7 @@ describe('adrFindings', () => {
     const result = findings({
       homes: [
         home('docs/decisions', ['ADR-047-a.md']),
-        home('apps/react-router/docs/decisions', ['ADR-047-b.md']),
+        home('apps/web/docs/decisions', ['ADR-047-b.md']),
       ],
     });
 
@@ -82,7 +82,7 @@ describe('adrFindings', () => {
       findings({
         homes: [
           home('docs/decisions', ['ADR-001-a.md', 'ADR-001-c.md']),
-          home('apps/react-router/docs/decisions', ['ADR-001-b.md']),
+          home('apps/web/docs/decisions', ['ADR-001-b.md']),
         ],
       }),
     ).toHaveLength(1);
@@ -165,7 +165,7 @@ describe('nextFreeNumber', () => {
     expect(
       nextFreeNumber([
         home('docs/decisions', ['ADR-047-a.md']),
-        home('apps/react-router/docs/decisions', ['ADR-041-b.md']),
+        home('apps/web/docs/decisions', ['ADR-041-b.md']),
       ]),
     ).toBe(48);
   });

@@ -84,6 +84,7 @@ the way CI does.
 The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` — the
 **DB-free CI Quality Gate** (steps 3–6 plus `commands:verify`, `coordination:verify`,
 `scripts:verify`, `scripts:exits:verify`, `seeds:verify`, `devkit:closure -- --shipped`, `docs:verify`,
+`package-refs:verify`,
 `renames:verify`, `route-names:verify`,
 `inventory:verify`, `adr:verify`, `viteplus:verify` and `configs:verify`, mirroring the
 "Quality Gate (Format · Lint · Types)" job in
@@ -451,6 +452,7 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 | `vp run suppressions:verify`  | check the four public packages carry no unapproved suppression (see [the protocol](docs/agents/public-package-suppressions.md))                                                                                                                                                      |
 | `vp run suppressions:list`    | print every suppression reaching a public package, approved or not                                                                                                                                                                                                                   |
 | `vp run docs:verify`          | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one)                                                                                                                                   |
+| `vp run package-refs:verify`  | check no published package's docs name one of this repo's apps                                                                                                                                                                                                                       |
 | `vp run renames:verify`       | check no document still names a file this change renamed away — scoped to the diff, which is what lets it check bare filenames at all (`--base <ref>`, default `origin/main`)                                                                                                        |
 | `vp run route-names:verify`   | check every `*.types`/`*.constants` file in a route folder names an artifact that folder holds — the half of `local-rules/domain-folder-filename` an ESLint rule cannot reach (#613)                                                                                                 |
 | `vp run inventory:verify`     | check every `*.util.ts`/`*.util.tsx` value export (`export const`/`export function`; type-only exports are out of scope) is named (in backticks) somewhere in its tree's own `INVENTORY.md` (`--write` regenerates `scripts/inventory-drift-baseline.json`, reviewed as a JSON diff) |
