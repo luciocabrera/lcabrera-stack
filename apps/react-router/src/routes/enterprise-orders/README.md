@@ -34,14 +34,15 @@ vp run db:up
 vp run --filter vite-react-compiler seed
 ```
 
-This applies [`db/setup_enterprise_orders.sql`](../../../db/setup_enterprise_orders.sql)
-and:
+This applies
+[`db/setup_enterprise_orders.sql`](../../../db/setup_enterprise_orders.sql),
+which:
 
-- Create the `enterprise_orders` table, with the columns
+- Creates the `enterprise_orders` table, with the columns
   `config/enterpriseOrders.constants.ts` lists in `ENTERPRISE_ORDER_COLUMNS`
-- Generate the demo rows — the `generate_series` in the DDL is the count, and
+- Generates the demo rows — the `generate_series` in the DDL is the count, and
   `SELECT count(*) FROM enterprise_orders` is what the database actually holds
-- Create indexes for performance
+- Creates indexes for performance
 
 The route reads Postgres in this process, so no separate API server is needed.
 
