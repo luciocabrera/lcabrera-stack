@@ -2,7 +2,7 @@
 id: sweep-skip-self-edits
 title: stop the sweep judging a PR with the gate code it is replacing
 owner: agent:claude
-status: active
+status: review
 branch: chore/884-sweep-skip-self-edits
 area:
   - scripts/reconcile-review-gates.mjs
@@ -21,6 +21,6 @@ stop the sweep judging a PR with the gate code it is replacing
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review
 - Blockers: none
 - Next:

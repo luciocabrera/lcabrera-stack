@@ -193,35 +193,46 @@ it is smaller than it sounds, because for that gate the sweep was never the only
   the required check at all, so what survives is the record rather than the
   merge.
 
-### The rule is one-directional; the reasoning behind it is not
+### The rule is one-directional; the sweep's answer to the other direction is not
 
-The sweep still publishes `pending` → `success`. The argument for the rule — _the sweep
-runs default-branch gate code, so it is not the better-informed opinion_ — applies just
-as well to that direction, and it is not blocked there.
+The sweep still publishes `pending` → `success`, and it must: correcting a `pending`
+that a missed event left behind is the whole reason it exists, and that is the very same
+transition. Refusing it was considered in #880 and rejected — it would stop the sweep
+doing its job while still looking like it worked.
 
-That leaves the **mirror of #866**, on a pull request that makes a gate _stricter_: its
-own run posts `pending` (correct under the new, tighter rule), the sweep recomputes with
-the lenient code being replaced, gets `success`, and publishes it. Same head, same cause,
-opposite direction — and, since `Copilot review complete` became a required
-context on
-2026-08-21, **a false green on a live merge bar** rather than a hypothetical one.
+That left the **mirror of #866**, on a pull request making a gate _stricter_: its own run
+posts `pending`, correct under the new tighter rule; the sweep recomputes with the lenient
+code being replaced, gets `success`, and publishes it. Same head, same cause, opposite
+direction — and once `Copilot review complete` became required on 2026-08-21, a false
+green on a live merge bar.
 
-**Deliberately not blocked.** Correcting a `pending` that a missed event left behind is
-the sweep's entire job, and it is the very same transition; refusing it would stop the
-sweep doing what it exists for while still looking like it worked. That is the trap the
-rejected "only fill absence" option fell into.
+**#884 closed it, and not by blocking a transition.** Both directions come from one
+defect — the sweep judging a pull request with the gate code that pull request is
+replacing — so the fix is upstream of the state machine: **the sweep does not publish for
+a gate whose own code the pull request changes.** It withholds, says so in the report, and
+leaves the verdict the pull request's own run already posted from its own code, which is
+the better-informed one.
 
-**It is closer to reachable than the dismissal case below**, and worth saying plainly:
-it needs only a pull request that tightens a gate, which is an ordinary change — no
-missing event required — and a pull request whose own gate code disagrees with
-`main`'s
-is not hypothetical, because #866 was one. What #866 does **not** evidence is this
-polarity: what was measured there is `main`'s code overwriting a `success` with
-`pending`, and no instance of the reverse has been observed. What limits the
-damage is that the green is not arbitrary — the head really was reviewed under
-the rule `main` still holds — and that it lasts only until the pull request
-merges, after which both copies agree. If a way to tell "stale code disagrees" from
-"a missed event left this stale" is ever wanted, it has to serve both directions.
+The code each gate runs is **derived, not listed**: `localModuleClosure` walks the gate
+script's relative imports transitively from this checkout — which is the default branch
+when the schedule runs it, and that is the point. A hand-written roster would keep passing
+while a gate grew a helper outside it.
+
+Three consequences worth knowing:
+
+- **It is per gate.** A pull request editing `copilot-review.mjs` withholds only the
+  Copilot gate; the other two still publish, because that file is not in their closure. A
+  pull request editing `review-gate-reconcile.mjs` withholds all three, because it is.
+- **A gate-editing pull request loses the sweep's help.** That is the trade, and it is the
+  correct one — the sweep has no trustworthy opinion there. The event path still works
+  (#866 fixed the ref it dispatches with), and break-glass rung 3 with `--ref` is the
+  manual route.
+- **`Review threads resolved` has no other publisher**, so on a pull request editing
+  `pr-threads.mjs` that status simply stops being refreshed. It is advisory —
+  `required_review_thread_resolution` is what holds that merge — so the cost is a stale
+  report, not a stuck pull request.
+
+Changing a doc or a workflow does not withhold anything: neither is code the sweep runs.
 
 ### The residual case, and what currently keeps it unreachable
 
@@ -393,12 +404,12 @@ before relying on it again.
   merge. `Agent review verdict` is still advisory. `Review threads
 resolved` is a report either way: `required_review_thread_resolution` on the
   `main` ruleset is what actually holds that merge, not this status.
-- **The promotion activated one hazard this file already describes.** The
-  `pending` → `success` direction above — the mirror of #866, on a pull request
-  that tightens a gate — was written while every gate here was advisory, so it
-  cost a stale status. It now greens a required check. It is tracked, not
-  accepted: #884. The dismissal case further down
-  is still held shut by its own preconditions.
+- **The hazard the promotion activated is closed.** The `pending` → `success`
+  direction above — the mirror of #866, on a pull request that tightens a gate —
+  cost a stale status while every gate here was advisory, and greened a required
+  check once one was not. #884 closed it by withholding the sweep entirely on a
+  pull request that edits the gate's own code. The dismissal case further down is
+  still held shut by its own preconditions.
 - **Requiredness is not why a gate opts in to the no-downgrade rule.** The two sit
   next to each other here only by timing — #868 shipped the opt-in before the
   promotion, so being required cannot have been its reason. The reason is the one
@@ -421,4 +432,5 @@ resolved` is a report either way: `required_review_thread_resolution` on the
 - [`docs/agents/agent-review-contract.md`](../agents/agent-review-contract.md) — what the other gate validates
 - [ADR-076](../decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md) — why a sweep rather than a fix to the trigger
 - #737 — the measurement; #698 — the promotion this unblocked, done 2026-08-21
-  for `Copilot review complete`; #884 — the false green that promotion made live
+  for `Copilot review complete`; #884 — the false green that promotion made
+  live, closed by withholding on a self-edit

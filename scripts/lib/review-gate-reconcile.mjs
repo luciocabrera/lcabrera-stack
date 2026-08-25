@@ -155,6 +155,87 @@ export const shouldPublishStatus = ({
 };
 
 /**
+ * Every local module a gate script loads, as repo-relative paths — the entry
+ * itself included.
+ *
+ * This is derived rather than listed because a list is the thing that rots: a
+ * gate that grows a new helper would keep passing a hand-written roster while
+ * quietly falling outside it, and nothing would say so. Every non-builtin import
+ * in these scripts is relative (`node:*` is the only bare specifier used), so
+ * following the relative ones reaches exactly the code the gate runs.
+ *
+ * `readFile` is injected so this stays pure and testable; it takes a
+ * repo-relative path and returns the source, or `undefined` when there is no
+ * such file. An unreadable import is skipped rather than thrown on: a sweep must
+ * not die because one module moved, and the caller's fallback — treating the
+ * closure as incomplete — is the safe direction.
+ */
+export const localModuleClosure = ({ entry, readFile }) => {
+  const seen = new Set();
+  const pending = [normalizePath(entry)];
+  while (pending.length > 0) {
+    const current = pending.pop();
+    if (current === undefined || seen.has(current)) {
+      continue;
+    }
+    seen.add(current);
+    const source = readFile(current);
+    if (source === undefined) {
+      continue;
+    }
+    for (const specifier of relativeSpecifiers(source)) {
+      pending.push(resolveFrom({ from: current, specifier }));
+    }
+  }
+  return [...seen].toSorted((a, b) => a.localeCompare(b));
+};
+
+/** `a/./b/../c` as `a/c`, with no leading `./`. */
+const normalizePath = (path) => {
+  const parts = [];
+  for (const segment of String(path).split('/')) {
+    if (segment === '' || segment === '.') {
+      continue;
+    }
+    if (segment === '..') {
+      parts.pop();
+      continue;
+    }
+    parts.push(segment);
+  }
+  return parts.join('/');
+};
+
+/** The relative import specifiers in one module's source. */
+const relativeSpecifiers = (source) =>
+  [...source.matchAll(/(?:from|import)\s*\(?\s*'(\.[^']*)'/gu)].map(
+    (match) => match[1],
+  );
+
+/** One relative specifier, resolved against the module that imported it. */
+const resolveFrom = ({ from, specifier }) =>
+  normalizePath(`${from.split('/').slice(0, -1).join('/')}/${specifier}`);
+
+/**
+ * Whether this sweep's opinion about a pull request is worth publishing at all.
+ *
+ * The sweep runs from the default branch — GitHub gives a `schedule` no other
+ * choice — so on a pull request that edits a gate it is judging the change with
+ * the code the change is replacing. #866 is that disagreement having actually
+ * happened, and #868 closed the half where the sweep took a `success` away. This
+ * is the other half: the sweep must not hand one out either.
+ *
+ * Withholding, rather than publishing something weaker, is deliberate. The pull
+ * request's own run already published a verdict from its own code, and that is
+ * the better-informed one; replacing it with a sweep-flavoured `pending` would
+ * be the same mistake in the opposite direction.
+ */
+export const gateJudgesItsOwnEdit = ({ changedFiles = [], closure = [] }) => {
+  const touched = new Set(changedFiles.map((file) => normalizePath(file)));
+  return closure.some((module) => touched.has(module));
+};
+
+/**
  * The one spelling of the opt-in flag. `gateArgs` writes it and
  * `publishGateStatus` reads it, and a run where only one of them was renamed is
  * invisible: the gate stays unprotected, every test still passes, and the log

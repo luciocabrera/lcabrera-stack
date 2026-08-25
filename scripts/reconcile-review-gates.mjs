@@ -25,7 +25,7 @@
  * would notice.
  */
 import { execFileSync } from 'node:child_process';
-import { appendFileSync } from 'node:fs';
+import { appendFileSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -39,12 +39,43 @@ import { errorMessage } from '../packages/repo-standards/scripts/error-message.m
 import { runGh } from './lib/gh-exec.mjs';
 import {
   gateArgs,
+  gateJudgesItsOwnEdit,
+  localModuleClosure,
   openPullRequestNumbers,
   outcomeLine,
   sweepSummary,
 } from './lib/review-gate-reconcile.mjs';
 
 const SCRIPTS_DIR = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = dirname(SCRIPTS_DIR);
+
+/** One repo-relative module's source, or `undefined` when there is none. */
+const readRepoModule = (path) => {
+  try {
+    return readFileSync(join(REPO_ROOT, path), 'utf8');
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * The files one pull request changes, repo-relative.
+ *
+ * Read once per pull request rather than once per gate: the answer is the same
+ * for all three, and the sweep's cost is already one API call per gate.
+ */
+const fetchChangedFiles = ({ number, repository }) =>
+  JSON.parse(
+    runGh([
+      'api',
+      '--paginate',
+      '--slurp',
+      `repos/${repository}/pulls/${number}/files?per_page=100`,
+    ]),
+  )
+    .flat()
+    .map((file) => file?.filename)
+    .filter((filename) => typeof filename === 'string');
 
 /**
  * The gates this sweep republishes, named by gate rather than by the status
@@ -67,6 +98,22 @@ const GATES = [
   { name: 'agent-review', script: 'verify-agent-review.mjs' },
   { name: 'review-threads', script: 'verify-review-threads.mjs' },
 ];
+
+/**
+ * Each gate paired with the modules it would execute, resolved from this
+ * checkout — which is the default branch when the schedule runs it. That is the
+ * point: the closure describes the code THIS sweep runs, so comparing a pull
+ * request's changed files against it answers "would I be judging this change
+ * with the code it replaces?" (#884).
+ */
+const gatesWithClosures = () =>
+  GATES.map((gate) => ({
+    ...gate,
+    closure: localModuleClosure({
+      entry: `scripts/${gate.script}`,
+      readFile: readRepoModule,
+    }),
+  }));
 
 const resolveRepository = () =>
   flagValue('--repo') ??
@@ -179,13 +226,26 @@ const main = () => {
   console.log(
     `Reconciling ${pullRequests.length} pull request(s) in ${repository}.`,
   );
-  const results = pullRequests.flatMap((number) =>
-    GATES.map((gate) => {
-      const result = runGate({ extraArgs, gate, number, repository });
+  const gates = gatesWithClosures();
+  const results = pullRequests.flatMap((number) => {
+    const changedFiles = fetchChangedFiles({ number, repository });
+    return gates.map((gate) => {
+      const result = gateJudgesItsOwnEdit({
+        changedFiles,
+        closure: gate.closure,
+      })
+        ? {
+            gate: gate.name,
+            number,
+            ok: true,
+            output:
+              'Withheld: this pull request edits the code this gate runs, and the sweep runs the default branch (#884).',
+          }
+        : runGate({ extraArgs, gate, number, repository });
       console.log(outcomeLine(result));
       return result;
-    }),
-  );
+    });
+  });
 
   const { failures, text } = sweepSummary({ pullRequests, results });
   console.log(text);
