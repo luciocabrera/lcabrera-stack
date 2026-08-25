@@ -208,9 +208,17 @@ const normalizePath = (path) => {
   return parts.join('/');
 };
 
-/** The relative import specifiers in one module's source. */
+/**
+ * The relative import specifiers in one module's source.
+ *
+ * The `(` sits inside the optional group rather than between two whitespace
+ * runs. `\s*\(?\s*` lets the engine split the same spaces many equivalent ways,
+ * which is Sonar S8786 — it fired on exactly that shape here. This form has one
+ * parse per input: `(` is not whitespace, so at each position the group either
+ * applies or does not.
+ */
 const relativeSpecifiers = (source) =>
-  [...source.matchAll(/(?:from|import)\s*\(?\s*'(\.[^']*)'/gu)].map(
+  [...source.matchAll(/(?:from|import)\s*(?:\(\s*)?'(\.[^']*)'/gu)].map(
     (match) => match[1],
   );
 
