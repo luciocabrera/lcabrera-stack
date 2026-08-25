@@ -110,11 +110,9 @@
   },
   "overrides": [
     {
-      "includes": [
-        "apps/react-router/**",
-        "apps/admin_system/**",
-        "packages/ui/**",
-      ],
+      // Workspaces that contain JSX. Every workspace is in exactly one of the
+      // two rosters; `vp run lint:plugins:verify` enforces that.
+      "includes": ["apps/react-router/**", "packages/ui/**"],
       "linter": {
         "domains": { "react": "recommended" },
         "rules": {
@@ -205,21 +203,19 @@
       },
     },
     {
-      // Node/library workspaces (the 13 non-React workspaces — no JSX). Rules that
-      // only make sense off the browser live here so they never touch the React
-      // apps. Kept in lockstep with the React override's `includes`: every
-      // workspace is in exactly one of the two lists.
+      // Workspaces that contain no JSX. That is the only axis this splits on:
+      // `api` and `utils` are client-safe, so a browser-hostile rule needs its
+      // own narrower block, not this one.
       "includes": [
-        "apps/api-server/**",
-        "apps/api-server-fast/**",
-        "apps/scan-orchestrator/**",
-        "apps/shared/**",
-        "packages/agent-runner/**",
-        "packages/server/**",
-        "packages/node-runtime/**",
-        "packages/scan-ingestion/**",
-        "packages/ts-configs/**",
+        "packages/api/**",
+        "packages/devkit/**",
         "packages/eslint-local-rules/**",
+        "packages/node-runtime/**",
+        "packages/repo-standards/**",
+        "packages/scan-report/**",
+        "packages/server/**",
+        "packages/ts-configs/**",
+        "packages/tsconfig/**",
         "packages/utils/**",
         "packages/vite-configs/**",
       ],
@@ -227,14 +223,10 @@
         "rules": {
           "style": {
             "useNodeAssertStrict": "error", // node:assert -> node:assert/strict
-            // NOTE: noProcessEnv is deliberately NOT enabled. The repo already
-            // centralizes env through Zod schemas (`readEnvConfig({ env: process.env })`,
-            // `envSchema.parse(process.env)`), so every `process.env` read is the
-            // legitimate validation boundary (plus agent-runner forwarding raw env
-            // to a spawned subprocess, which cannot route through config). The
-            // reads sit in ordinary util files, not a tidy `config/` dir, so there
-            // is no clean glob exemption; enforcing it would need a cross-workspace
-            // env-reader refactor touching the vital `server` package. See ADR-035 §7.
+            // noProcessEnv is deliberately off: env is centralised through Zod
+            // schemas, so every `process.env` read is the validation boundary.
+            // They sit in ordinary util files, so there is no clean glob
+            // exemption. See ADR-035 §7.
           },
         },
       },

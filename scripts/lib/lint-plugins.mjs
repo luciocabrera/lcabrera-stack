@@ -140,3 +140,43 @@ export const staleRuntimeGlobs = ({ runtimes, workspaces }) => {
     .flat()
     .filter((glob) => !present.has(globWorkspace(glob)));
 };
+
+/** Workspaces named in more than one list — the other half of "exactly one". */
+export const multiplyClassifiedWorkspaces = ({ runtimes, workspaces }) => {
+  const counts = new Map();
+  for (const glob of Object.values(runtimes).flat()) {
+    const workspace = globWorkspace(glob);
+    counts.set(workspace, (counts.get(workspace) ?? 0) + 1);
+  }
+  return workspaces.filter((workspace) => (counts.get(workspace) ?? 0) > 1);
+};
+
+/** `apps/foo/**` or `packages/foo/**` — a whole workspace, not a file pattern. */
+const isWorkspaceGlob = (glob) =>
+  /^(?:apps|packages)\/[^/*]+\/\*\*$/u.test(glob);
+
+/**
+ * The `biome.jsonc` override blocks that partition the workspaces.
+ *
+ * A whole-workspace block that is a subset of another is a rule scoped to some
+ * workspaces, not a roster — so it is excluded. Without that, the narrower block
+ * this repo's own config comment tells you to write would be read as a third
+ * roster and reported as a duplicate classification.
+ */
+export const workspaceRosters = (overrides) => {
+  const blocks = overrides
+    .map((override) => override.includes ?? [])
+    .filter((globs) => globs.length > 0 && globs.every(isWorkspaceGlob))
+    .map((globs) => globs.map(globWorkspace));
+  return blocks
+    .filter(
+      (block, index) =>
+        !blocks.some(
+          (other, otherIndex) =>
+            otherIndex !== index &&
+            other.length > block.length &&
+            block.every((workspace) => other.includes(workspace)),
+        ),
+    )
+    .map((block) => block.map((workspace) => `${workspace}/**`));
+};
