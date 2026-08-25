@@ -100,7 +100,7 @@ Form/
 │   ├── CustomField/   → escape hatch via field.renderField(...)
 │   └── FormFieldDisplay/ → read-only `view`-mode renderer: label + formatted value text (not a disabled widget). utils/{formatFieldDisplayValue,resolveOptionLabels,stringifyLeafValue}.util
 │   (each: <Name>.component.tsx + <Name>.types.ts; TextField/RadioField/FormFieldDisplay/CurrencyField/NumericFieldControl also <Name>.stylex.ts; per-consumer helpers live in <Name>/utils/ behind an index.ts barrel)
-│   (the former PathField/PathBrowserModal `path` leaf was removed by ADR-028 — no filesystem-coupled field types)
+│   (the former PathField/PathBrowserModal `path` leaf was removed — no filesystem-coupled field types)
 │
 ├── builders/                   → Public field-tree DSL (exported from the barrel):
 │   ├── createFieldBuilders.util.ts → Binds TValues once → { field, choiceField, toggleField, fieldRow, fieldGroup } (a generic builder can't infer TValues from a string accessor)
@@ -247,8 +247,7 @@ Two more consequences worth knowing before changing it:
   which is what separates a pinned action row from the content scrolling behind
   it. The form therefore sets **no `gap`** — the rule belongs directly under the
   content it cuts off, not floating in dead space above it. A host that wants
-  the footer flush against its own edge drops its block-end padding, as
-  `OrderFormModal` does.
+  the footer flush against its own edge drops its block-end padding.
 - **A scroll container reserves its gutter on both edges**
   (`scrollbarGutter: stable both-edges`) so no field resizes the moment content
   grows past the cap. Reserving a single edge would trade the reflow for
@@ -260,9 +259,10 @@ Two more consequences worth knowing before changing it:
   - `hasScrollOwningChild.util` — the root list drops `styles.scroll` (keeping
     `styles.region`, the height a tab panel's `height: 100%` needs) when its
     only child is a `tab` node, which already scrolls.
-  - `bodyStylex` on `Modal` — `OrderFormModal` zeroes the body's inline padding
-    _and_ its gutter, since a Form takes the body's full height and can never
-    scroll it (see `Modal/ARCHITECTURE.md` → Layout Sections).
+  - `bodyStylex` on `Modal` — a host rendering a Form in a modal zeroes the
+    body's inline padding _and_ its gutter, since a Form takes the body's full
+    height and can never scroll it (see `Modal/ARCHITECTURE.md` → Layout
+    Sections).
 
 ## Submission Flow
 
@@ -325,9 +325,8 @@ graph TD
 ```
 
 - **`cancelTo`** (required prop) is the fallback route — conventionally the
-  entity's list route (`/cqms/projects`), but a consumer scoped to one
-  parent entity can point narrower (`trigger-scan` cancels to that
-  project's detail page, not the top-level project list).
+  entity's list route, but a consumer scoped to one parent entity can point
+  narrower, at that parent's detail page rather than the top-level list.
 - **`useBackNavigate`** (`packages/ui/src/hooks/`) owns the "was there a
   real in-app previous page" decision via `history.state.idx` — react-
   router's own browser-history position marker — so Cancel doesn't
@@ -385,11 +384,9 @@ automatically via `name`. Two components need explicit handling:
   (standard HTML behavior, not a bug here) — the consuming action's Zod
   schema must treat an absent boolean field as `false`.
 
-## Consumer Map
+## No filesystem-coupled field types
 
-CQMS's `new-project` and `trigger-scan` route actions (Implementation Plan
-step 8) are the first real consumers, both using `mode: 'create'`;
-`edit-project` uses `mode: 'edit'`. The former `path` field type (server
-filesystem browsing via `browseDirectory.loader`) was removed by ADR-028 —
-project code now arrives as synced snapshots, and no Form field touches
-the platform's filesystem.
+A `path` field type once existed — server filesystem browsing via a
+`browseDirectory` loader — and was removed. No Form field touches the host
+filesystem, and none should: it is the one field type that cannot work in a
+consumer that renders the form somewhere other than where the files are.

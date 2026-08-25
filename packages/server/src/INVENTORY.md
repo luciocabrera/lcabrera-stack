@@ -262,7 +262,7 @@ These deliberately say "secret", not "password" or "token": passwords
 (`createUser`, `setUserPassword`, `authenticateUser`) and API-token secrets
 (`issueApiToken`, `verifyApiToken`) are the same problem, and a single pair of
 primitives keeps credential hashing to one shape and one audited
-implementation (ADR-017). Do **not** reintroduce domain-named wrappers around
+implementation. Do **not** reintroduce domain-named wrappers around
 these — fallow's `thin-wrapper` rule is an error, and the duplicate
 `hashPassword`/`isPasswordValid`/`hashApiToken`/`isApiTokenValid` pairs they
 replaced were themselves a duplication finding.
@@ -321,11 +321,12 @@ See `sort/ARCHITECTURE.md`.
 
 ## `src/tickets/`
 
-Reusable, DB-free **stateless capability** primitives (ADR-041). A ticket
+Reusable, DB-free **stateless capability** primitives. A ticket
 authorizes a bearer for exactly one `subject` until it expires, and is
 verified by re-deriving its HMAC rather than by a lookup — the shape to reach
-for on a channel that must authorize on connect with no database in the path
-(CodePulse's `/ws/runs`). Both are exported per-file in the `exports` map.
+for on a channel that must authorize on connect with no database in the path,
+a WebSocket upgrade being the case it was built for. Both are exported per-file
+in the `exports` map.
 
 | Artifact              | Location                                 | Description                                                                                       |
 | --------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
@@ -341,11 +342,13 @@ use a ticket to grant _one thing, briefly_.
 
 ## `src/tokens/`
 
-Reusable, DB-free bearer-token primitives (ADR-029). The CQMS-specific
-persistence (issue/verify/list/revoke against `cqms.api_tokens`) lives in
-`@repo/scan-ingestion`; these are the generic halves any app can reuse. Both
-are exported per-file in the `exports` map. Hashing a token's secret half is
-**not** here — it is `crypto/hash-secret.util.ts` above.
+Reusable, DB-free bearer-token primitives. Only the halves that carry
+no product decision live here: minting and parsing. The persistence they pair
+with — issue, verify, list, revoke against a table of token hashes — is the
+consumer's, and stays there, which is why nothing in this directory touches a
+database or names a schema. Both are exported per-file in the `exports` map.
+Hashing a token's secret half is **not** here — it is
+`crypto/hash-secret.util.ts` above.
 
 | Artifact           | Location                            | Description                                                                                          |
 | ------------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -353,7 +356,7 @@ are exported per-file in the `exports` map. Hashing a token's secret half is
 | `parseApiToken`    | `tokens/parse-api-token.util.ts`    | Splits a plaintext (given the same `prefix`) back into `{ tokenId, secret }`; undefined if malformed |
 
 These are fully generic — no product-specific value is baked in; the caller
-supplies any token `prefix` (e.g. CodePulse passes `cqms_` from scan-ingestion).
+supplies any token `prefix` it wants (`acme_`), or none at all.
 
 ---
 
