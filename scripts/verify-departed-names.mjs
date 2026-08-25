@@ -69,11 +69,17 @@ const main = () => {
     departedReferences({ allow, names, path, text: readText(path) }),
   );
 
+  // Both sections print before exiting: a stale allowance and a reintroduced
+  // name are independent, and correcting a stale allowance can only ever add
+  // findings. Stopping at the first would cost a CI round-trip to learn about
+  // the second (.claude/rules/scripts.md — list every discrepancy).
   const stale = staleAllowances({
     allow,
     seen: new Set(all.map(({ name, path }) => `${path}\0${name}`)),
     walked: new Set(files),
   });
+  const findings = all.filter(({ isAllowed }) => !isAllowed);
+
   if (stale.length > 0) {
     console.error(
       'These allowances in scripts/departed-names.json are stale:\n',
@@ -81,11 +87,9 @@ const main = () => {
     for (const message of stale) {
       console.error(`  - ${message}`);
     }
-    process.exitCode = 1;
-    return;
+    console.error('');
   }
 
-  const findings = all.filter(({ isAllowed }) => !isAllowed);
   if (findings.length > 0) {
     console.error('These name something that left this repository:\n');
     for (const finding of findings) {
@@ -95,6 +99,9 @@ const main = () => {
       '\nRewrite the line, or — if the name genuinely must appear — add the file ' +
         'to `allow` in scripts/departed-names.json with the names and a reason.',
     );
+  }
+
+  if (stale.length > 0 || findings.length > 0) {
     process.exitCode = 1;
     return;
   }

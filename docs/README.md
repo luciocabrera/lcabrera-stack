@@ -74,8 +74,17 @@ Context sections cited those products by name as the evidence that motivated a
 decision. Those names are gone: an ADR describes the constraint it decided
 against — "a second app needed to reuse the component library" — never the
 departed thing that happened to supply it. The reasoning is unchanged, and the
-decision still follows from the context it records; only an identity a reader
-cannot resolve was removed.
+decision still follows from the context it records; only an identity was
+removed.
+
+**Including identities that still resolve.** Sibling repositories are on the
+roster too, and their links went with them. That is deliberate rather than an
+overreach of the rule: these packages are read by consumers who have none of this
+repository's history and no access to anything beside it, so a doc that leans on
+a link out is a doc that stops working the moment it ships. Where a pointer
+carried something actionable, the replacement states the thing itself — a
+contract a substitute server must serve, rather than the address of one that
+does.
 
 Two consequences worth knowing. An ADR whose subject left entirely is deleted
 rather than kept as a husk, and what still governs is folded into the live doc
