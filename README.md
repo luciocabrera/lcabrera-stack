@@ -42,9 +42,9 @@ product: it puts the packages under realistic load and is the only thing that
 legitimately depends on several at once, which makes it where cross-package
 integration gets verified. Never put a guarantee a _package_ relies on into it.
 
-Products built on these packages live in their own repositories — CQMS left in
-#683, the car-sales API servers in #686. If a change is only meaningful to one
-of those, it belongs there.
+Products built on these packages live in their own repositories. If a change is
+only meaningful to one of them, it belongs there — not here, and never inside a
+package.
 
 ## Development
 
