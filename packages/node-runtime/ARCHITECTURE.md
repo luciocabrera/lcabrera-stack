@@ -9,27 +9,23 @@ Published as **`@lcabrera/node`** from the `packages/node-runtime` workspace
 its consumers are no longer only in-repo ones. `README.md` is the
 consumer-facing document; this file is why the package is shaped the way it is.
 
-**It has no in-repo consumers left.** The car-sales demo servers left under #686
-and the CQMS orchestrator under #683; both now resolve it from npm, which is what
-publishing it was for — they are the only thing exercising it the way an outside
-project would. The consequence is worth stating plainly: nothing in this
-repository will fail if this package breaks, so its own suite is the whole
-safety net.
+**It has no in-repo consumers.** Nothing in this repository fails if this package
+breaks, so its own suite is the whole safety net.
 
 ## Why this package exists
 
 The repo had no home for process-lifecycle code, and each existing candidate
 was wrong in its own way:
 
-| Candidate           | Why not                                                                                                                                  |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `@lcabrera/utils`   | Its `ARCHITECTURE.md` commits to "keep utilities pure and side-effect free". Registering signal handlers is a side effect by definition. |
-| `api-shared`        | The car-sales demo's shared lib. The other consumer was CQMS product code; depending on it would have coupled product to demo.           |
-| `@lcabrera/server`  | Owns DB/query/crypto/token concerns. A process signal is not data access.                                                                |
-| Duplicating per app | What we had: 12 lines of identical `process.on` wiring in two servers, flagged as a fallow clone group.                                  |
+| Candidate                   | Why not                                                                                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `@lcabrera/utils`           | Its `ARCHITECTURE.md` commits to "keep utilities pure and side-effect free". Registering signal handlers is a side effect by definition. |
+| A consumer's own shared lib | Reaching into one application's shared code couples every other consumer to that application.                                            |
+| `@lcabrera/server`          | Owns DB/query/crypto/token concerns. A process signal is not data access.                                                                |
+| Duplicating per app         | What we had: a dozen lines of identical `process.on` wiring per service, flagged as a fallow clone group.                                |
 
-Every consumer depends on **this** package, not on each other — the demo and
-the product stay decoupled.
+Every consumer depends on **this** package, not on each other, so no two of them
+are coupled by sharing it.
 
 Publishing did not change that answer, and two merges that look cheaper were
 rejected again on the same grounds

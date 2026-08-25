@@ -25,11 +25,10 @@ half out removes that edge at the package boundary rather than papering over it.
   `check:public-api` fails when any workspace package in its dependency closure
   contains a `node:*` import. That is what makes this split hold.
 - **Relative imports carry explicit `.ts` extensions.** The package must resolve
-  under both bundler mode (Vite/Vitest/tsc) and `moduleResolution: NodeNext`
-  (the car-sales servers and their shared domain layer, extracted to the
-  `api-playground` repository under #686). Extensionless imports are
-  bundler-only — that is precisely why the old `src/api/` barrel could not be
-  consumed from that domain layer at all.
+  under both bundler mode (Vite/Vitest/tsc) and `moduleResolution: NodeNext`,
+  because a consumer may be either. Extensionless imports are bundler-only —
+  that is precisely why the old `src/api/` barrel could not be consumed from a
+  NodeNext package at all.
 - **Explicit per-file subpath exports, no barrel** (ADR-007). Consumers import
   the module they need, and tests mock that module rather than a barrel.
 - **kebab-case `.util` files**, matching `@lcabrera/utils`. Asserted by the
@@ -47,7 +46,7 @@ half out removes that edge at the package boundary rather than papering over it.
 | `http/`     | `build-paginated-query-params.util.ts` | Builds the `limit`/`skip`/`sort`/`filter` query params shared by paginated fetchers             |
 | `http/`     | `create-paginated-fetcher.util.ts`     | Factory: endpoint declaration (path, guard, base-URL strategy) in, validated page fetcher out   |
 | `http/`     | `http.types.ts`                        | `PaginatedSort`, `PaginatedQuery`, `PaginatedFetchArgs` — the shared paginated-read contract    |
-| `distinct/` | `distinct.types.ts`                    | `DistinctValuesResponse` — the wire contract, also re-exported by `api-shared`                  |
+| `distinct/` | `distinct.types.ts`                    | `DistinctValuesResponse` — the wire contract a distinct-values endpoint returns                 |
 | `distinct/` | `fetch-distinct-values.util.ts`        | Pages a distinct-values endpoint — the HTTP half of the ADR-009 descriptors                     |
 | `distinct/` | `is-distinct-values-response.util.ts`  | Type guard for `DistinctValuesResponse`                                                         |
 | `distinct/` | `parse-filter-options-params.util.ts`  | Parses filter-option search params into `fetchDistinctValues` args (page-size default injected) |
@@ -98,18 +97,8 @@ From `@lcabrera/ui`:
 - `src/hooks/useTableRoutePage.hook.ts` and
   `src/components/TableRouteView/TableRouteView.types.ts` — `PaginatedQuery`
 
-From `apps/react-router`:
-
-- `src/services/carSales.api.ts`, `src/services/wideAlltypes150.api.ts` —
-  `createPaginatedFetcher` + `getApiBaseUrl`
-- `src/routes/enterprise-orders/fetchOrdersPage.service.ts` —
-  `createPaginatedFetcher` (same-origin, no base URL)
-- `src/routes/api/filter-options/filter-options.loader.ts`
-
-From the car-sales servers' shared domain layer (`api-shared`, in the
-`api-playground` repository since #686):
-
-- `src/types/api.types.ts` re-exports `DistinctValuesResponse` (NodeNext — the
-  reason explicit extensions are mandatory here). It is the only consumer that
-  resolves this package under NodeNext, and it is now out-of-repo, so nothing
-  here would catch a regression in that resolution mode.
+**Nothing resolves this package under NodeNext where it can be checked.** Every
+consumer visible to this package's own tooling is a bundler-mode one, so no
+local failure catches a regression in NodeNext resolution — which is the mode
+the explicit `.ts` extensions exist for. Treat that rule as load-bearing even
+though nothing here fails when it breaks.

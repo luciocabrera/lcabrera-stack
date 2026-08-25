@@ -57,7 +57,7 @@ with the date `preset` (which is `dateStyle`-only on its own), and `timeZone`
 pins the output to an IANA zone. **Pass `timeZone` for anything rendered during
 SSR** — the default is the runtime's own zone, so the server and the browser
 produce different strings for the same instant and React reports a hydration
-mismatch. `RunLink` in `admin_system` is the worked example.
+mismatch.
 
 ### formatters.constants.ts
 

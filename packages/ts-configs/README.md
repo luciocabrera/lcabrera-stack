@@ -32,7 +32,6 @@ tsconfig.entries.ts                       ← edit to add or retune one workspac
         ├── packages/ts-configs/tsconfig.app.json  ← this workspace's own (Node)
         ├── apps/react-router/tsconfig.app.json    ← generated
         ├── apps/react-router/tsconfig.node.json   ← generated
-        ├── apps/admin_system/tsconfig.app.json    ← generated
         └── … one per workspace
 ```
 
