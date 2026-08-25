@@ -59,7 +59,8 @@ const main = () => {
     readFileSync(resolve(REPO_ROOT, 'scripts/departed-names.json'), 'utf8'),
   );
 
-  const files = trackedFiles().filter(isCheckedFile);
+  const tracked = trackedFiles();
+  const files = tracked.filter(isCheckedFile);
   // A run that walked nothing must not report the same success as a clean tree.
   if (files.length === 0) {
     throw new Error(
@@ -70,7 +71,9 @@ const main = () => {
   const all = files.flatMap((path) =>
     departedReferences({ allow, names, path, text: readText(path) }),
   );
-  const pathHits = departedPathReferences({ allow, names, paths: files });
+  // Every TRACKED path, not just the ones whose contents are read: a departed
+  // name in a directory above a binary is still a name in `git ls-files`.
+  const pathHits = departedPathReferences({ allow, names, paths: tracked });
 
   // Both sections print before exiting: a stale allowance and a reintroduced
   // name are independent, and correcting a stale allowance can only ever add
