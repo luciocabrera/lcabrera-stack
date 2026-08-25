@@ -71,12 +71,13 @@ written:
 | Era                 | What the repo was                                                  |
 | ------------------- | ------------------------------------------------------------------ |
 | **One app**         | `apps/react-router` alone; no packages                             |
-| **A monorepo**      | several applications, plus the packages                            |
+| **A monorepo**      | several apps — the car-sales API servers, CQMS — plus the packages |
 | **Public packages** | the `@lcabrera/*` packages are the product; one app exercises them |
 
-So an older ADR naming a workspace that is no longer here — those applications
-were extracted to their own repositories — is not necessarily rot. Two cases,
-and they are treated differently on purpose:
+So an older ADR naming one of the car-sales API workspaces, or the CQMS admin
+app, is not necessarily rot — they were extracted to their own repositories
+(#683, #686) and the ADR bodies that cite them stay verbatim, by the rule at the
+end of this section. Two cases, and they are treated differently on purpose:
 
 - **Named as Context** — the evidence that motivated a decision about the
   packages. Left exactly as written. Editing it would falsify _why_ the decision
@@ -101,9 +102,12 @@ titles as prose rather than as filenames, run `vp run adr:list`.
 in [`docs/agents/planning/adr-drafts/`](./agents/planning/adr-drafts/) and hold
 **no number** — one is assigned at adoption, never at proposal.
 
-⚠️ **Numbers 001–012 predate the single sequence and each mean two things** —
-`ADR-011` is grid interaction _and_ the agent-runner permission model. Cite one of
-those by path. They are deliberately not renumbered: an ADR is a dated record.
+⚠️ **A few low numbers predate the single sequence and exist in both homes** —
+`ADR-004` is the package standalone quality gate _and_ React Compiler. Cite those
+by path. `GRANDFATHERED_DUPLICATES` in
+[`adr-registry.mjs`](../packages/repo-standards/scripts/adr-registry.mjs) is the
+set, and `vp run adr:verify` enforces it. They are deliberately not renumbered:
+an ADR is a dated record.
 
 ---
 
