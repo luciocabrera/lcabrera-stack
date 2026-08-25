@@ -62,8 +62,8 @@ export const renderAdr = ({ number, template, title }) => {
 
 /**
  * The home a `--home` key names. Keyed by `tier` rather than by directory, so
- * the CLI takes the words ADR-048 uses and the answer stays correct if a
- * directory moves. The tiers are whatever the consumer's `adrHomes` declares.
+ * the answer stays correct if a directory moves. The tiers are whatever the
+ * consumer's `adrHomes` declares.
  */
 export const resolveHome = (homes, tier) =>
   homes.find((home) => home.tier === tier);

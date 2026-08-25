@@ -121,8 +121,8 @@ repo docs above, not left in these:
   memory should shrink to a link.
 - **Plans** (`~/.claude/plans/`) — one agent's scratch for one task. Ephemeral.
   When a plan yields a durable decision or spec, it **graduates** into the repo
-  — an ADR for a decision, a doc for a spec — and the scratch file is then
-  disposable. A plan's _claim_ (who's on it, which files) graduates to the
+  — an ADR for a decision, or a `*_PLAN.md` for a spec — and the scratch file is
+  then disposable. A plan's _claim_ (who's on it, which files) graduates to the
   in-git work register at
   [`docs/coordination/`](./coordination/README.md), so parallel agents can see
   it.

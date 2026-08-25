@@ -9,6 +9,7 @@ area:
   - docs/coordination/README.md
   - docs/README.md
   - devkit.config.json
+  - .devkit-accepted.json
   - .github/skills/health-swarm/charters/doc-drift.md
   - docs/tooling/github-planning.md
   - .claude/pr-queue-policy.md
