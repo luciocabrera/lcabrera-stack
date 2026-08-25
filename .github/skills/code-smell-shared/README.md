@@ -13,12 +13,13 @@ This folder contains shared output and validation standards used by:
 - EXAMPLE_REPORT.md: fully populated sample report using schema v1.0
 - RULE_FIX_QUICK_REFERENCE.md: TS/React rule-to-fix guidance and verification snippets
 
-The two contract documents live with the code that produces them, in
-[`@repo/scan-report`](../../../packages/scan-report/README.md), and ship in
-its tarball so a consuming repository can read the contract it is emitting:
+The two contract documents live here, beside the skills that follow them — a
+report shape is agreed between a scanner and whatever reads it, which makes it
+per-repository the same way prompt text is
+([ADR-091](../../../docs/decisions/ADR-091-retire-the-scan-report-pipeline.md)):
 
-- [SCHEMA_V1.md](../../../packages/scan-report/SCHEMA_V1.md): canonical report contract and validation rules
-- [REPORT_JSON_CONTRACT.md](../../../packages/scan-report/REPORT_JSON_CONTRACT.md): the `report.json` sibling contract a scan consumer parses
+- [SCHEMA_V1.md](./SCHEMA_V1.md): canonical report contract and validation rules
+- [REPORT_JSON_CONTRACT.md](./REPORT_JSON_CONTRACT.md): the `report.json` sibling contract a scan consumer parses
 
 ## Intended outcome
 
@@ -26,17 +27,11 @@ All scan skills emit structurally equivalent markdown reports that can be
 consumed by agents without custom parsing per skill, plus a structurally
 equivalent `report.json`.
 
-## Persisting a run
+## The artifacts are the deliverable
 
-Writing the artifacts and persisting them are separate steps, and only the first
-is a scan skill's business. Each skill's final step runs
-`node packages/scan-report/scripts/ingest-report.mjs` (published as the
-`scan-report-ingest` bin), which forwards its arguments to the command
-configured under `ingest` in `scan-report.config.json` at the repository root.
-Unconfigured ingest (`scan-report.config.json` missing / skip) is the documented
-normal state in this repository — the step prints a skip naming the missing
-configuration and exits 0, and the three report artifacts are the whole
-deliverable.
+A scan skill writes its report files and stops. There is no forwarding step: the
+artifacts in the run directory are the whole output, and whatever wants them
+reads them from there.
 
 A configured command that fails is a different outcome from an unconfigured one:
 it exits non-zero and says `Ingestion FAILED`. Report it — the artifacts survive

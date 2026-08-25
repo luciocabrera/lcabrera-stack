@@ -24,8 +24,7 @@ Facing that call — promote it into a package, or write it twice?
 walks the decision in order and links the ADR that owns each step.
 
 **Two scopes, and the split carries meaning.** The publishable packages are
-**`@lcabrera/*`**; the internal ones (`ts-configs`, `scan-report`) stay
-**`@repo/*`**. So the
+**`@lcabrera/*`**; the internal one (`ts-configs`) stays **`@repo/*`**. So the
 import line tells you which side of the product boundary you are on: `@lcabrera/`
 means it ships and has consumers outside this repo, `@repo/` means internal, change
 it freely. A new package picks its scope by one question — does it ship? — and a
@@ -87,10 +86,7 @@ which passes exactly like a correct one.
 `packages/ts-configs` is not
 on that list because it never joins it: it is the split, so what became public is
 the new `packages/tsconfig` above, and the surviving workspace stays private.
-`packages/scan-report` is not on it either: it stays `@repo/scan-report` and
-`private: true` because the `app-graph`, `linter-checker` and
-`fallow-code-checker` skills import and execute its scripts to scan this repo.
-The publishing history and the scan-report amendment live in
+The publishing history lives in
 [ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md).
 
 `api`/`server` split on **runtime** and `utils`/`node` on **purity**, and both

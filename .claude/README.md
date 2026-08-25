@@ -91,7 +91,6 @@ Auto-invocation is driven by the `description` field (Claude matches it against 
 | `lint-toolchain`              | Configure or debug Oxlint / eslint / Biome / Sonar         | description + `paths`                              |
 | `releasing`                   | Changesets release, changelog, PR label taxonomy           | description (cutting a release)                    |
 | `typescript-api-engineering`  | API-layer architecture standards                           | description (not RR `routes/api/` resource routes) |
-| `app-graph`                   | Deterministic folder/file inventory scanner                | description                                        |
 
 A skill with `paths:` frontmatter is **not** in an agent's skill listing until it
 opens a matching file. That is the intended economy, but it has one sharp edge:

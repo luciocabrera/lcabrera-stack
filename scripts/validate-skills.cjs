@@ -3,7 +3,7 @@
 /*
  * Why: a skill folder without SKILL.md, or a SKILL.md / agent file pointing
  * at a script that is not there, used to pass this gate — the same silent
- * skip that hid `.github/skills/app-graph/` and the stale fallow-scan runner
+ * skip that hid a scripts-only skill directory and the stale fallow-scan runner
  * path. Usage: `node scripts/validate-skills.cjs` (optional `--json`).
  * Exit 0 only when every skill directory is a skill or an explicit support
  * allowlist entry, every SKILL.md contract holds, and every referenced

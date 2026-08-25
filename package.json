@@ -104,7 +104,6 @@
     "@lcabrera/devkit": "workspace:*",
     "@lcabrera/repo-standards": "workspace:*",
     "@lcabrera/vite-config": "workspace:*",
-    "@repo/scan-report": "workspace:*",
     "@vitest/coverage-v8": "catalog:test",
     "fallow": "catalog:tooling",
     "react-doctor": "catalog:lint",

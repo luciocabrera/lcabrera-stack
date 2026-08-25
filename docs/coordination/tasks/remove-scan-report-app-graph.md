@@ -2,7 +2,7 @@
 id: remove-scan-report-app-graph
 title: chore(repo): remove scan-report and the app-graph skill
 owner: agent:claude
-status: active
+status: review
 branch: chore/941-remove-scan-report-app-graph
 area:
   - packages/scan-report/**
@@ -20,7 +20,7 @@ area:
 started: 2026-08-25
 updated: 2026-08-25
 plan: (none)
-pr: (none)
+pr: #942
 issue: #941
 ---
 
@@ -30,6 +30,6 @@ chore(repo): remove scan-report and the app-graph skill
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented, full `check:safe` green, PR #942 ready for review
 - Blockers: none
-- Next:
+- Next: address review, then merge

@@ -74,7 +74,6 @@ parameterisation, not this table's job — the table says which rows will need o
 | `code-smell-checker`          | **blocked**       | —          | Same runtime; its report contract lives in the unpublished package.                                                                                                                                                                       |
 | `code-smell-zen`              | **blocked**       | —          | Same runtime.                                                                                                                                                                                                                             |
 | `code-smell-shared`           | **blocked**       | —          | The shared half of the two `code-smell` skills; it ships if and when they do.                                                                                                                                                             |
-| `app-graph`                   | **blocked**       | —          | Not prose at all — a report generator importing the unpublished package and `ts-morph`.                                                                                                                                                   |
 
 Reading the **hard** rows: `epic` names the consumer's root agent document
 through config, so without it an orchestrator is told to read a file nobody

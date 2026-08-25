@@ -62,9 +62,9 @@ If inputs are missing, default to:
 
 Run both passes in a single shell invocation so the timestamp is consistent:
 
-!`bash packages/scan-report/scripts/run-fallow.sh`
+!`vp run fallow:full`
 
-To scope the report to specific workspaces, pass a fallow `-w` glob as the first argument, e.g. `bash packages/scan-report/scripts/run-fallow.sh 'apps/react-router'`. The helper ships in [`@repo/scan-report`](../../../packages/scan-report/README.md); the path above is this repository's own workspace copy, and a repository that installed the package runs `node_modules/@repo/scan-report/scripts/run-fallow.sh`. The full dependency graph is analyzed either way; the glob only filters reported findings.
+To scope the report to specific workspaces, pass a fallow `-w` glob, e.g. `vp run fallow:full -w 'apps/react-router'`. The full dependency graph is analyzed either way; the glob only filters reported findings.
 
 Note the run directory path from the final echo — it is used for all subsequent saves.
 
@@ -127,7 +127,7 @@ When a finding is aggregate (for example duplicate groups or files above thresho
 
 Use the shared output contract and template:
 
-- ../../../packages/scan-report/SCHEMA_V1.md
+- ../code-smell-shared/SCHEMA_V1.md
 - ../code-smell-shared/REPORT_TEMPLATE.md
 - ../code-smell-shared/TEST_PLAN.md
 - ../code-smell-shared/RULE_FIX_QUICK_REFERENCE.md
@@ -137,7 +137,7 @@ Add `raw_summary_line` in Metadata with verbatim human output.
 Add `raw_artifact` in Metadata with the path to `fallow.raw.json`.
 Use the shared report structure exactly — all scan skills emit the same SCHEMA_V1 report so downstream agents need no per-skill parsing.
 
-Also build `report.json` from these same findings — see ../../../packages/scan-report/REPORT_JSON_CONTRACT.md. Set `finding_kind: "duplication_group"` + `extra.instances` for any finding derived from `dupes.clone_groups`; every other finding is the default `single_location`. Map any status other than `open`/`in-progress`/`done`/`deferred` (in particular `resolved`) to `done` in the JSON.
+Also build `report.json` from these same findings — see ../code-smell-shared/REPORT_JSON_CONTRACT.md. Set `finding_kind: "duplication_group"` + `extra.instances` for any finding derived from `dupes.clone_groups`; every other finding is the default `single_location`. Map any status other than `open`/`in-progress`/`done`/`deferred` (in particular `resolved`) to `done` in the JSON.
 
 8. Save the report artifact.
 
@@ -147,16 +147,6 @@ Always save without prompting. The run directory was created in step 2. Write:
 2. `report.md` — write the final report to the same directory
 3. `report.json` — write the JSON built in step 7 to the same directory
 4. Tell the user all three saved paths
-
-5. Persist the run. `ingest-report.mjs` (published as the `scan-report-ingest` bin) forwards to whatever ingestion command this repository configured in `scan-report.config.json`; where nothing is configured it prints a skip and exits 0, so this step is safe to run anywhere. The report files are already saved regardless.
-
-Run, substituting `$OUTPUT_DIR` with the exact run directory from step 2:
-
-```bash
-node packages/scan-report/scripts/ingest-report.mjs --skill=fallow --run-dir="$OUTPUT_DIR" --local-path="$(git rev-parse --show-toplevel)" --raw-json=fallow.raw.json
-```
-
-Read its output: `Ingestion skipped` is a normal state to mention in passing, while `Ingestion FAILED` (a configured command that did not complete, e.g. `cqms_db` unreachable) exits non-zero and must be reported to the user with the reason. Neither one is a scan failure — the report artifacts stand on their own.
 
 ## Decision Logic
 
@@ -189,7 +179,6 @@ Before finalizing:
 - prioritized queue provided
 - report saved to `reports/fallow/runs/{run-directory}/report.md`
 - `report.json` saved alongside it, matching the same findings
-- persistence attempted via `scan-report-ingest` (skip reported as normal; a configured failure reported as a failure)
 - residual risk and validation steps documented
 
 ## Example Prompts

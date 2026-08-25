@@ -1,16 +1,11 @@
 # `report.json` Contract
 
-This document defines the **JSON** sibling of `report.md`, written by every
-scanner in `@repo/scan-report` and by the agent-authored scan skills
-(`code-smell-checker`, `code-smell-zen`, `fallow-code-checker`).
+This document defines the **JSON** sibling of `report.md`, written by the scan
+skills (`code-smell-checker`, `code-smell-zen`, `fallow-code-checker`).
 
 Unlike `SCHEMA_V1.md` (the Markdown report contract), `report.json` is for a
-machine parser rather than a human reader — it is what an ingestion command
-receives. Save it as `report.json` in the same run directory as `report.md`,
-then hand the run to `scan-report-ingest`, which forwards it to whatever
-command the repository configured (`ingest` in `scan-report.config.json`, or
-the `SCAN_REPORT_INGEST_*` variables). Where nothing is configured, this file
-is still the deliverable.
+machine parser rather than a human reader. Save it as `report.json` in the same
+run directory as `report.md`; that file is the deliverable.
 
 **This is the same findings you already wrote to `report.md` — it must not add, drop, or reinterpret any finding.** Author it directly from the Markdown you just produced; do not re-derive findings independently.
 

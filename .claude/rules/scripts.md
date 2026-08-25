@@ -7,7 +7,7 @@ paths: ['**/*.mjs', '**/*.cjs', '**/scripts/**/*.js']
 Covers the repo's `.mjs` / `.cjs` (and `scripts/**/*.js`) — the verify gates,
 report generators, seeders, and skill runners under `scripts/`,
 `.github/skills/*/scripts/`, `apps/*/scripts/` and
-`packages/scan-report/scripts/`. Both shared eslint configs globally ignore a
+`packages/repo-standards/scripts/`. Both shared eslint configs globally ignore a
 `scripts/` directory, which is why a workspace's tooling scripts belong there
 rather than in its `src/`: the eslint custom-rules pass is aimed at library and
 application source, and these four analysers are what govern the rest. These files run under Node,
@@ -31,7 +31,7 @@ do.** They are real code and rot the same way. The exemplar to copy is
   as the rest of the repo; don't stack a 200-line procedure in `main`.
 - **Extract cohesive helpers into a sibling module once a script grows** — the
   `.mjs` analogue of the one-util-per-file rule.
-  `packages/scan-report/scripts/lint-report-shared.mjs` and its siblings are the
+  the report generators under `.github/skills/*/scripts/` are the
   pattern: shared logic imported, not copy-pasted (fallow flags the dupes when it
   isn't).
 - **Hard ceiling: 350 code lines** (non-blank, non-comment) per file — aim well

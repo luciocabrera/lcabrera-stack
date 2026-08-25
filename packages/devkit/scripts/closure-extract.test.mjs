@@ -67,16 +67,16 @@ describe('extractImportSpecifiers', () => {
       'import {',
       '  readManifest,',
       '  writeManifest,',
-      "} from '@repo/scan-report/deterministic-scan';",
+      "} from '@repo/example-scan/deterministic-scan';",
     ].join('\n');
     expect(
       extractImportSpecifiers(content).map((entry) => entry.specifier),
-    ).toEqual(['@repo/scan-report/deterministic-scan']);
+    ).toEqual(['@repo/example-scan/deterministic-scan']);
   });
 
   test('reads static, side-effect, dynamic and require forms', () => {
     const content = [
-      "import { a } from '@repo/scan-report/deterministic-scan';",
+      "import { a } from '@repo/example-scan/deterministic-scan';",
       "import './side-effect.mjs';",
       "const b = require('ts-morph');",
       "await import('node:fs');",
@@ -85,7 +85,7 @@ describe('extractImportSpecifiers', () => {
       extractImportSpecifiers(content).map((entry) => entry.specifier),
     ).toEqual(
       expect.arrayContaining([
-        '@repo/scan-report/deterministic-scan',
+        '@repo/example-scan/deterministic-scan',
         './side-effect.mjs',
         'ts-morph',
         'node:fs',
@@ -97,7 +97,7 @@ describe('extractImportSpecifiers', () => {
 describe('isPathToken', () => {
   test('accepts an explicitly relative path and a path with an extension', () => {
     expect(isPathToken('./references/advanced.md')).toBe(true);
-    expect(isPathToken('packages/scan-report/SCHEMA_V1.md')).toBe(true);
+    expect(isPathToken('packages/example-scan/SCHEMA_V1.md')).toBe(true);
   });
 
   test('rejects a url, a spaced string and a slashed word with no extension', () => {
@@ -110,14 +110,14 @@ describe('isPathToken', () => {
 describe('extractPathTokens', () => {
   test('reads a path out of prose backticks and out of a command argument', () => {
     const content = [
-      'Follow `packages/scan-report/SCHEMA_V1.md` exactly.',
+      'Follow `packages/example-scan/SCHEMA_V1.md` exactly.',
       '',
       '```bash',
       'node scripts/ingest-report.mjs --run-dir="$OUT"',
       '```',
     ].join('\n');
     expect(extractPathTokens(content)).toEqual([
-      { line: 1, token: 'packages/scan-report/SCHEMA_V1.md' },
+      { line: 1, token: 'packages/example-scan/SCHEMA_V1.md' },
       { line: 4, token: 'scripts/ingest-report.mjs' },
     ]);
   });

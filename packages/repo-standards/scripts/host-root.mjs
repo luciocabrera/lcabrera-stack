@@ -12,9 +12,6 @@
  * the consumer above `node_modules`, and a linked copy walks up to the nearest
  * `.git`.
  *
- * This is the one copy. `@repo/scan-report` had the same resolver for the same
- * reason and now calls this one, passing its own environment-variable name —
- * which is why the name is an argument rather than a constant.
  */
 
 import { existsSync } from 'node:fs';

@@ -49,7 +49,6 @@
   },
   "runtime_coverage_findings": [],
   "target_keys": [
-    "packages/scan-report/scripts/finding-templates.mjs:high impact",
     "packages/server/src/db/query-builder/quote-identifier.util.ts:high impact"
   ]
 }

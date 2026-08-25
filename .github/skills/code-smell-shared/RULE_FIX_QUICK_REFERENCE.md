@@ -7,7 +7,7 @@ React Router note: server data fetching should use loaders/actions, not `useEffe
 
 Use this with:
 
-- [SCHEMA_V1.md](../../../packages/scan-report/SCHEMA_V1.md)
+- [SCHEMA_V1.md](./SCHEMA_V1.md)
 - REPORT_TEMPLATE.md
 - EXAMPLE_REPORT.md
 

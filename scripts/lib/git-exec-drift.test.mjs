@@ -24,9 +24,8 @@ describe('the repository-variable list', () => {
   // cannot import from one another. Copies drift; this is the guard that makes
   // them fail loudly instead.
   //
-  // A fourth copy now lives in the CQMS repository (#683 took the workspace
-  // that held it). Nothing here can reach it, so that one is unguarded — say so
-  // rather than letting two green assertions imply all copies agree.
+  // Copies outside this repository cannot be reached, so they are unguarded —
+  // say so rather than letting a green assertion imply all copies agree.
   it('matches the set the pre-push hook scrubs', () => {
     const shell = readRepoFile('.vite-hooks/scrub-git-env.sh');
     const unset = new Set(
@@ -38,20 +37,5 @@ describe('the repository-variable list', () => {
     for (const name of GIT_REPOSITORY_VARIABLES) {
       expect(unset.has(name), `${name} is not unset by the hook`).toBe(true);
     }
-  });
-
-  it('matches run-git.mjs in @repo/scan-report', () => {
-    // A published package cannot import root tooling (ADR-039), so it carries
-    // its own copy of the same discipline.
-    const runner = readRepoFile('packages/scan-report/scripts/run-git.mjs');
-    const listed = [...runner.matchAll(/'(?<name>GIT_[A-Z_]+)'/gu)].map(
-      (match) => match.groups.name,
-    );
-
-    const byName = (a, b) => a.localeCompare(b);
-
-    expect(listed.toSorted(byName)).toEqual(
-      GIT_REPOSITORY_VARIABLES.toSorted(byName),
-    );
   });
 });

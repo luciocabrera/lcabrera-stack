@@ -180,7 +180,7 @@ Walk every hunk. For each issue you find, cite **exactly one** catalog ID from t
 - **LOW** — minor; in-passing fix
 - **NIT** — style preference, no real cost
 
-Sort findings by severity (desc), then by file path. Emit **exactly this structure** as your final response, which satisfies the shared schema defined in `../../../packages/scan-report/SCHEMA_V1.md` and `../code-smell-shared/REPORT_TEMPLATE.md`:
+Sort findings by severity (desc), then by file path. Emit **exactly this structure** as your final response, which satisfies the shared schema defined in `../code-smell-shared/SCHEMA_V1.md` and `../code-smell-shared/REPORT_TEMPLATE.md`:
 
 ````markdown
 # Smell Report
@@ -294,17 +294,9 @@ After producing the final report, **always** save it to disk without prompting t
 1. Determine the output directory. Check whether the `OUTPUT_DIR` environment variable is already set (`echo "$OUTPUT_DIR"`) — a UI-triggered scan sets this so its scratch files land in the right place, not the target project's own working tree. If it's set, use it as-is. Otherwise, capture the current timestamp (`date +%Y-%m-%d--%H-%M-%S`) and use `.tmp/code-smell-zen/{timestamp}/`.
 2. Create the output directory (`mkdir -p`) if it doesn't already exist.
 3. Write the full report as `report.md` inside that directory, using the same markdown structure emitted in Step 5.
-4. Build `report.json` from the same findings, following `../../../packages/scan-report/REPORT_JSON_CONTRACT.md` exactly (flatten severity counts, map any non-canonical `status` — e.g. `resolved` — to `done`; every finding is `single_location`, this skill never emits `duplication_group`), and write it as `report.json` in the same directory.
+4. Build `report.json` from the same findings, following `../code-smell-shared/REPORT_JSON_CONTRACT.md` exactly (flatten severity counts, map any non-canonical `status` — e.g. `resolved` — to `done`; every finding is `single_location`, this skill never emits `duplication_group`), and write it as `report.json` in the same directory.
 5. Tell the user the paths to both saved files.
-6. Persist the run. `ingest-report.mjs` (published as the `scan-report-ingest` bin) forwards to whatever ingestion command this repository configured in `scan-report.config.json`; where nothing is configured it prints a skip and exits 0, so this step is safe to run anywhere. Run, substituting `$OUTPUT_DIR` with the resolved directory from step 1 and `<BASE>` with the base resolved in Step 1:
-
-```bash
-node packages/scan-report/scripts/ingest-report.mjs --skill=code-smell-zen --run-dir="$OUTPUT_DIR" --local-path="$(git rev-parse --show-toplevel)" --scope-type=diff --scope-value="<BASE>..HEAD"
-```
-
-Read its output: `Ingestion skipped` (nothing configured) is a normal state to mention in passing, while `Ingestion FAILED` — a configured command that did not complete, e.g. `cqms_db` unreachable — exits non-zero and must be reported to the user with the reason. Neither one is a skill failure; both report files are already saved.
-
-The directory layout groups all runs of this skill together, with each run in its own timestamped subfolder:
+   The directory layout groups all runs of this skill together, with each run in its own timestamped subfolder:
 
 ```
 .tmp/
