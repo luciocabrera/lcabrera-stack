@@ -1,11 +1,11 @@
 ---
 name: linter-checker
-description: Run oxlint + the custom-rules eslint pass and produce a schema-aligned lint report. Use for a fully deterministic lint sweep of a package or app, persisted wherever this repo configures ingestion.
-argument-hint: 'Optional scope directory, for example: apps/react-router or packages/ui (default: the whole repository)'
+description: Run oxlint, the custom-rules eslint pass and Biome, and produce a schema-aligned lint report. Use for a fully deterministic repo-wide lint sweep.
+argument-hint: 'Optional single engine, for example: --only=oxlint, --only=eslint or --only=biome (default: all three)'
 user-invocable: true
 context: fork
 agent: general-purpose
-allowed-tools: Bash(node:*), Read
+allowed-tools: Bash(vp:*,node:*), Read
 ---
 
 # Linter Checker
@@ -18,8 +18,7 @@ Produce a fully deterministic lint report — **no LLM judgment anywhere in find
 
 Use this skill when you need:
 
-- a quick, deterministic lint sweep of a package or app
-- lint findings persisted alongside the other scanners' history, when this repo has an ingestion command configured
+- a quick, deterministic lint sweep of the repository
 - a report that needs no human triage — every finding is already unambiguous (a real rule violation at a real location)
 
 ## Procedure
@@ -30,6 +29,10 @@ pass — there is no per-scanner runner to invoke:
 ```bash
 vp run lint:report
 ```
+
+To report one engine only, pass `--only=<oxlint|eslint|biome>`; any other
+value is rejected rather than ignored. There is no scope argument — the sweep is
+always repo-wide.
 
 It writes one file per engine into the canonical `reports/` tree:
 
@@ -64,5 +67,5 @@ deterministic.
 
 ## Example Prompts
 
-- /linter-checker run a lint sweep on apps/react-router
-- /linter-checker check packages/ui for lint violations
+- /linter-checker run a lint sweep
+- /linter-checker report only the oxlint findings

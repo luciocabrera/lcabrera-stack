@@ -32,7 +32,3 @@ equivalent `report.json`.
 A scan skill writes its report files and stops. There is no forwarding step: the
 artifacts in the run directory are the whole output, and whatever wants them
 reads them from there.
-
-A configured command that fails is a different outcome from an unconfigured one:
-it exits non-zero and says `Ingestion FAILED`. Report it — the artifacts survive
-either way, but a broken persistence path is not a normal state.

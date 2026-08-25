@@ -2,7 +2,6 @@
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
   "entry": [
     "scripts/**/*.{cjs,mjs,js}",
-    ".github/skills/*/scripts/*.{js,mjs,cjs}",
     "packages/devkit/scripts/*.mjs",
     "packages/repo-standards/scripts/*.mjs",
     "apps/react-router/lighthouse.config.js",
@@ -60,7 +59,6 @@
       },
       {
         "files": [
-          ".github/skills/**/*.mjs",
           "packages/repo-standards/scripts/verify-*.mjs",
           "packages/repo-standards/scripts/new-adr.mjs",
           "packages/repo-standards/scripts/close-coordination-claim.mjs",
@@ -73,7 +71,7 @@
         "maxCognitive": 65535,
         "maxCrap": 1000000,
         "maxUnitSize": 100000,
-        "reason": "Dev tooling, not shipped product: the report generators in .github/skills, the command entry points in @lcabrera/repo-standards (named one by one, never by directory glob), and the custom ESLint rule visitors are inherently procedural CLI/AST-walker code where complexity/CRAP/unit-size limits do not apply. The glob names the entry points only \u2014 the library modules beside them are ordinary code and stay governed."
+        "reason": "Dev tooling, not shipped product: the command entry points in @lcabrera/repo-standards (named one by one, never by directory glob), and the custom ESLint rule visitors are inherently procedural CLI/AST-walker code where complexity/CRAP/unit-size limits do not apply. The glob names the entry points only \u2014 the library modules beside them are ordinary code and stay governed."
       },
       {
         "files": ["scripts/**/*.{mjs,cjs}", "apps/*/scripts/**/*.{mjs,cjs}"],

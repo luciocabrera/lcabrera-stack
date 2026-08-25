@@ -1,7 +1,7 @@
 /*
  * The set of git variables that select a repository is defined once, in
- * `@lcabrera/repo-standards`, and copied wherever the definition cannot reach — the
- * pre-push hook is shell, and the scanners carry their own runner.
+ * `@lcabrera/repo-standards`, and copied wherever the definition cannot reach —
+ * the pre-push hook is shell, so it cannot import it.
  *
  * These checks belong to the REPOSITORY: each asserts that one of this repo's
  * own files agrees with the shared list, which is the kind of edge a publishable
@@ -20,9 +20,8 @@ const readRepoFile = (...parts) =>
   readFileSync(join(REPO_ROOT, ...parts), 'utf8');
 
 describe('the repository-variable list', () => {
-  // Copies exist because a shell hook, a package's runner and this module
-  // cannot import from one another. Copies drift; this is the guard that makes
-  // them fail loudly instead.
+  // The shell hook cannot import this list. Copies drift; this is the guard
+  // that makes them fail loudly instead.
   //
   // Copies outside this repository cannot be reached, so they are unguarded —
   // say so rather than letting a green assertion imply all copies agree.

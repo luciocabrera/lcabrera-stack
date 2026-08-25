@@ -14,7 +14,7 @@ allowed-tools: Bash(bash:*,cat:*,date:*,mkdir:*,node:*,npx:*,tee:*,vp:*), Read, 
 
 Produce a full fallow findings report that:
 
-- executes vp run fallow:full
+- executes vp run fallow:report
 - captures and classifies all fallow categories from raw output
 - separates high-confidence issues from likely false positives
 - provides a fix plan ordered by risk and effort
@@ -42,7 +42,7 @@ Use this skill when you need to:
 Collect or infer:
 
 - scope: repo (all workspaces), a workspace glob (fallow `-w` syntax), or changed files
-- execution directory: always the repo root — `fallow:full` is defined in the root package.json and `.fallowrc.json` lives at the root
+- execution directory: always the repo root — `fallow:report` is defined in the root package.json and `.fallowrc.json` lives at the root
 - constraints: behavior-safe cleanup only, test coverage expectations
 
 If inputs are missing, default to:
@@ -55,20 +55,18 @@ If inputs are missing, default to:
 
 1. Resolve execution directory.
 
-- always run from the repo root (`git rev-parse --show-toplevel`) — the runner script does this itself
-- if the root package.json has no `fallow:full` script, stop and report the missing script with a remediation hint
+- always run from the repo root — `scripts/fallow-report.sh` does this itself
+- if the root package.json has no `fallow:report` script, stop and report the missing script with a remediation hint
 
-2. Capture timestamp, create output directory, and execute fallow.
+2. Execute fallow.
 
-Run both passes in a single shell invocation so the timestamp is consistent:
+!`vp run fallow:report`
 
-!`vp run fallow:full`
+It creates a timestamped `reports/fallow/runs/<ts>/`, writes `fallow.raw.json` into it, and echoes the directory as its last line. Note that path — it is used for all subsequent saves.
 
-To scope the report to specific workspaces, pass a fallow `-w` glob, e.g. `vp run fallow:full -w 'apps/react-router'`. The full dependency graph is analyzed either way; the glob only filters reported findings.
+To scope the report to specific workspaces, pass a fallow `-w` glob, e.g. `vp run fallow:report 'apps/react-router'`. The full dependency graph is analyzed either way; the glob only filters reported findings.
 
-Note the run directory path from the final echo — it is used for all subsequent saves.
-
-Use the JSON file as the source of truth for findings. Human output from `vp run fallow:full` is for context only.
+Use the JSON file as the source of truth for findings. Human output from the same run is for context only.
 
 3. Parse findings into normalized records.
 

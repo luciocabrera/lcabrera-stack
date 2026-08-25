@@ -30,10 +30,9 @@ do.** They are real code and rot the same way. The exemplar to copy is
 - **Small, single-responsibility functions.** The same purity/decomposition bar
   as the rest of the repo; don't stack a 200-line procedure in `main`.
 - **Extract cohesive helpers into a sibling module once a script grows** — the
-  `.mjs` analogue of the one-util-per-file rule.
-  the report generators under `.github/skills/*/scripts/` are the
-  pattern: shared logic imported, not copy-pasted (fallow flags the dupes when it
-  isn't).
+  `.mjs` analogue of the one-util-per-file rule. `scripts/lib/` is the pattern:
+  shared logic imported by the CLI shells beside it, not copy-pasted (fallow
+  flags the dupes when it isn't).
 - **Hard ceiling: 350 code lines** (non-blank, non-comment) per file — aim well
   under. Over it, split. Enforced by `vp run scripts:verify`; inherited offenders
   are grandfathered in `scripts/script-size-baseline.json` and may not grow.
