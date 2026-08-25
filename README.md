@@ -23,8 +23,8 @@ resolvable public surface, no reliance on a consumer's tsconfig `paths`.
 | [`@lcabrera/devkit`](packages/devkit)                    | the repo setup this repo hands to another repo                                     |
 | [`@lcabrera/repo-standards`](packages/repo-standards)    | the gates behind that setup — commits, ADRs, claims, publishing                    |
 
-Internal workspaces stay `@repo/*` and never publish: `ts-configs` (this repo's
-own workspace roster) and `scan-report` (the scanners the skills run).
+`ts-configs` stays `@repo/*` and never publishes — it is this repo's own
+workspace roster.
 The scope is the signal — `@lcabrera/` ships and has outside consumers,
 `@repo/` is internal.
 

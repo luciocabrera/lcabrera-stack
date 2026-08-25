@@ -1,6 +1,6 @@
 ---
 name: linter-checker
-description: Run oxlint, the custom-rules eslint pass and Biome, and produce a schema-aligned lint report. Use for a fully deterministic repo-wide lint sweep.
+description: Run oxlint, the custom-rules eslint pass and Biome, and write one JSON report per engine into reports/. Use for a fully deterministic repo-wide lint sweep.
 argument-hint: 'Optional single engine, for example: --only=oxlint, --only=eslint or --only=biome (default: all three)'
 user-invocable: true
 context: fork
@@ -12,7 +12,9 @@ allowed-tools: Bash(vp:*,node:*), Read
 
 ## Outcome
 
-Produce a fully deterministic lint report — **no LLM judgment anywhere in finding generation** (unlike `code-smell-checker`/`code-smell-zen`/`fallow-code-checker`'s triage step). Every finding is a direct, mechanical translation of a real `oxlint`/eslint diagnostic.
+Produce one JSON report per engine, in that engine's own shape — **no LLM judgment anywhere** (unlike `code-smell-checker`/`code-smell-zen`/`fallow-code-checker`, which triage into the shared SCHEMA_V1 report). Nothing here is translated: the files are what `oxlint`, eslint and Biome emitted.
+
+This skill is therefore **not** a producer of the shared report contract, and its output cannot be handed to an agent that parses SCHEMA_V1 without a conversion step.
 
 ## When to Apply
 
