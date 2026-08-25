@@ -3,10 +3,11 @@
  * plugin family loaded, no workspace config shadowing the root, and both the
  * Oxlint and Biome rosters classifying every workspace exactly once.
  *
- * Each failure is invisible by construction: an unloaded plugin, a glob that
- * matches nothing, and clean code all produce the same empty output. So this
- * lints a deliberate violation rather than reading the config. See
- * `docs/decisions/ADR-042-oxlint-config-at-the-root.md`.
+ * Two mechanisms, because the failures differ. A plugin family is proven by
+ * planting a violation — loaded-and-clean looks identical to not-loaded. A
+ * roster is proven by reading the config against the workspaces on disk, since
+ * no planted code can flag a glob that matches nothing.
+ * See `docs/decisions/ADR-042-oxlint-config-at-the-root.md`.
  *
  * Effects live here; the rules are pure in `./lib/lint-plugins.mjs`.
  *
