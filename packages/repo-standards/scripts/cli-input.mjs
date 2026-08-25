@@ -73,7 +73,6 @@ export const parsePullNumber = (raw) => {
   return number;
 };
 
-/** One `owner` or `name`: what GitHub allows, and never a bare dot run. */
 const REPOSITORY = /^(?<owner>[\w.-]+)\/(?<name>[\w.-]+)$/;
 const NOT_A_NAME = new Set(['.', '..']);
 
