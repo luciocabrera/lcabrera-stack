@@ -314,8 +314,8 @@ so SSR and the initial client render already agree on the seeded state.
 
 ## Testing Pattern
 
-- `columns.hooks.test.tsx`, `meta.hooks.test.tsx` and `grouping.hooks.test.tsx` share a common store scaffold through [src/utils/tests/createMockStore.util.ts](src/utils/tests/createMockStore.util.ts).
-- Columns action-hook tests share a dedicated mock wiring utility via [src/utils/tests/createTableConfigColumnsActionMocks.util.ts](src/utils/tests/createTableConfigColumnsActionMocks.util.ts).
+- `columns.hooks.test.tsx`, `meta.hooks.test.tsx` and `grouping.hooks.test.tsx` share a common store scaffold through [createMockStore.util.ts](../../../../utils/tests/createMockStore.util.ts).
+- Columns action-hook tests share a dedicated mock wiring utility via [createTableConfigColumnsActionMocks.util.ts](../../../../utils/tests/createTableConfigColumnsActionMocks.util.ts).
 - Tests keep `vi.mock(...)` stable while reassigning local store instances in `beforeEach`, which avoids `vi.hoisted` initialization-order pitfalls.
 
 ## Columns Actions

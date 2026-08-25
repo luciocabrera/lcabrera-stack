@@ -459,8 +459,7 @@ The check runs in CI (`check-safe.yml`). It fails on register _integrity_ (a
 malformed task/branch file); overlap/shared-branch/staleness/
 missing-branch are non-blocking warnings. Full protocol and schema — including
 [independent vs shared branches](docs/coordination/README.md#independent-vs-shared-branches) —
-are in the coordination README. Historical scratch plans are catalogued in
-[`PLAN_TRIAGE.md`](docs/coordination/PLAN_TRIAGE.md).
+are in the coordination README.
 
 ### Architecture-First Workflow
 

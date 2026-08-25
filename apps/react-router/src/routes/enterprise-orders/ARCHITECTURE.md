@@ -20,7 +20,7 @@ Enterprise table route for large-order operational data with a dedicated constan
 
 ## Constants Responsibilities
 
-The file [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx) owns:
+The file [EnterpriseOrders.constants.tsx](./EnterpriseOrders.constants.tsx) owns:
 
 - `PERSISTENCE_KEY` used by the table persistence layer.
 - `COLUMNS` definitions, including filter adapters. `COLUMNS` no longer
@@ -61,7 +61,7 @@ column.
 
 ## Duplication Guardrail
 
-- Repeated string columns are composed through `createBasicColumn(...)` from `@lcabrera/ui/components/Table/utils` in [src/routes/enterprise-orders/EnterpriseOrders.constants.tsx](src/routes/enterprise-orders/EnterpriseOrders.constants.tsx); their distinct filter descriptors are appended once in the loader by `appendDistinctFilterDescriptors` (ADR-009) instead of per-column wiring.
+- Repeated string columns are composed through `createBasicColumn(...)` from `@lcabrera/ui/components/Table/utils` in [EnterpriseOrders.constants.tsx](./EnterpriseOrders.constants.tsx); their distinct filter descriptors are appended once in the loader by `appendDistinctFilterDescriptors` (ADR-009) instead of per-column wiring.
 - This keeps the descriptor params (`schemaName`/`tableName`/`columnName`) consistent across customer and shipping fields while preserving each column's label/width metadata.
 - The row-actions column is likewise never hand-declared here — it's synthesized by `TableConfigProvider` (via `getInitialColumnsState` / `resolveTableActionsColumn`) from `CRUD`, keeping store initialization explicit and side-effect free.
 

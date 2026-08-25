@@ -105,7 +105,6 @@ in [`docs/agents/planning/adr-drafts/`](./agents/planning/adr-drafts/) and hold
 ⚠️ **Numbers 001–012 predate the single sequence and each mean two things** —
 `ADR-011` is grid interaction _and_ the agent-runner permission model. Cite one of
 those by path. They are deliberately not renumbered: an ADR is a dated record.
-The same trap exists for "Phase 2" — see STATUS.md §1.
 
 ---
 
@@ -122,19 +121,18 @@ repo docs above, not left in these:
   memory should shrink to a link.
 - **Plans** (`~/.claude/plans/`) — one agent's scratch for one task. Ephemeral.
   When a plan yields a durable decision or spec, it **graduates** into the repo
-  (an ADR, a STATUS entry, or a `*_PLAN.md`) — the way `BIOME_SCANNER_PLAN.md`
-  did — and the scratch file is then disposable. A plan's _claim_ (who's on it,
-  which files) graduates to the in-git work register at
-  [`docs/coordination/`](./coordination/README.md), so parallel agents can see it;
-  the old opaque scratch names are catalogued in
-  [`PLAN_TRIAGE.md`](./coordination/PLAN_TRIAGE.md).
+  — an ADR for a decision, a doc for a spec — and the scratch file is then
+  disposable. A plan's _claim_ (who's on it, which files) graduates to the
+  in-git work register at
+  [`docs/coordination/`](./coordination/README.md), so parallel agents can see
+  it.
 
 ---
 
 ## Hygiene (how this stays true)
 
 - **Update the canonical doc in the same commit as the change that moves it.**
-  STATUS.md and COMMANDS.md both say this at the top; it applies to every doc here.
+  COMMANDS.md says this at the top; it applies to every doc here.
 - **`COMMANDS.md` is machine-checked.** `vp run commands:verify` (CI, via
   `check:safe`) fails the build if a documented command doesn't resolve or a real
   script is undocumented. It cannot check prose — so prose still needs care.

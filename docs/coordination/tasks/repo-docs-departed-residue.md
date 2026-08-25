@@ -6,8 +6,13 @@ status: active
 branch: chore/937-repo-docs-departed-residue
 area:
   - docs/coordination/PLAN_TRIAGE.md
+  - docs/coordination/README.md
+  - docs/README.md
+  - devkit.config.json
+  - .github/skills/health-swarm/charters/doc-drift.md
   - docs/tooling/github-planning.md
   - .claude/pr-queue-policy.md
+  - .claude/rules/typescript.md
   - .claude/README.md
   - .github/skills/linter-checker/SKILL.md
   - packages/repo-standards/scripts/commit-convention.mjs

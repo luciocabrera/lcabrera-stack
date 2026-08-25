@@ -30,7 +30,6 @@
       ],
       "ignoredDocs": [
         "reports/",
-        "docs/coordination/PLAN_TRIAGE.md",
         "_PLAN.md",
         ".github/skills/react-router-framework-mode/",
         ".github/skills/store-pattern/references/architecture-templates/"

@@ -57,12 +57,10 @@ breakage from the correct-by-design historical paths is in
 compile, UI `INVENTORY.md`'s absent artifacts, and `Form/ARCHITECTURE.md`
 citing a field type whose code was deleted.
 
-Still open (#515), all needing a decision rather than an edit:
-`scan-ingestion/ARCHITECTURE.md` contradicts itself about the ad-hoc project
-path while the symbol it calls deleted still exists in the source; CQMS
-`STATUS.md`'s "no 409 banner" may describe UI the built "409 surface" does not
-cover; and three `PATTERNS.md` rules are violated at scale, which usually means
-the rule is what is wrong.
+Still open (#515), needing a decision rather than an edit: three `PATTERNS.md`
+rules are violated at scale, which usually means the rule is what is wrong. Two
+others from that sweep closed by leaving — `scan-ingestion/ARCHITECTURE.md` and
+CQMS's `STATUS.md` went to the CQMS repository with #683.
 
 The scope finding from the same sweep — a package in neither documented scope —
 shows what "needs a decision" buys you. The answer was not a doc edit: the

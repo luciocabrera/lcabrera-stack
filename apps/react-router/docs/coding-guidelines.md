@@ -50,7 +50,9 @@ Use a hybrid boundary model:
 - Across feature/module boundaries, use a curated `index.ts` barrel as the public API.
 - Avoid deep internal barrels that re-export all internals.
 
-See decision record: `docs/decisions/ADR-007-barrel-export-boundaries.md`.
+See decision record:
+[`apps/react-router/docs/decisions/ADR-007-barrel-export-boundaries.md`](./decisions/ADR-007-barrel-export-boundaries.md)
+— ADR numbers 001–012 exist in both homes, so this one is cited by path.
 
 ```typescript
 // src/components/Button/index.ts (public boundary)
