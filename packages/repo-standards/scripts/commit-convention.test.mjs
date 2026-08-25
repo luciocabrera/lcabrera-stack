@@ -16,7 +16,7 @@ import {
 // which makes the spec itself the thing that has to be pinned.
 
 // A Set, matching what the hook and CI gate pass in.
-const workspaces = new Set(['ui', 'server', 'admin_system', 'api-server']);
+const workspaces = new Set(['ui', 'server', 'admin', 'api']);
 const errorsOf = (result) => result.errors;
 
 describe('parseCommitHeader', () => {

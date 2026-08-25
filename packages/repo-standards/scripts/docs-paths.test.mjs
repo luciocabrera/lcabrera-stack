@@ -190,7 +190,7 @@ describe('extractCandidates', () => {
 describe('isDatedRecord', () => {
   it('recognises an ADR in each of the three homes', () => {
     expect(isDatedRecord('docs/decisions/ADR-044-x.md')).toBe(true);
-    expect(isDatedRecord('docs/cqms/decisions/ADR-016-x.md')).toBe(true);
+    expect(isDatedRecord('docs/other/decisions/ADR-016-x.md')).toBe(true);
     expect(isDatedRecord('apps/react-router/docs/decisions/ADR-003-x.md')).toBe(
       true,
     );
@@ -251,11 +251,11 @@ describe('enforcedTokens', () => {
         repoRoots: REPO_ROOTS,
         tokens: [
           'packages/data-access',
-          '../cqms/STATUS.md',
+          '../other/STATUS.md',
           'docs/agents/gone/',
         ],
       }),
-    ).toEqual(['../cqms/STATUS.md']);
+    ).toEqual(['../other/STATUS.md']);
   });
 
   it('is empty for an ADR that only names historical paths', () => {

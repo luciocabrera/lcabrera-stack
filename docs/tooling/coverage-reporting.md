@@ -102,9 +102,8 @@ only once its coverage runs clean and means something.** Checklist:
 2. **Coverage is external-service-free.** `test:coverage` must not need Postgres,
    a browser beyond jsdom, or a network service — the `unit-tests` job has none.
    A workspace with real-DB tests must expose a DB-free `test:coverage` subset
-   first. Nothing here needs that today — the workspaces that did left with CQMS
-   (#683) — but it is the exact constraint that reverted the first
-   coverage-into-CI attempt (2026-07-14).
+   first. Nothing here needs that today, but it is the exact constraint that
+   reverted the first coverage-into-CI attempt (2026-07-14).
 3. **It emits `coverage-summary.json`.** Automatic once `test:coverage` uses the
    shared `VITEST_COVERAGE_FLAGS` (all current ones do).
 4. **Append it** to `COVERAGE_REPORT_WORKSPACES` in
@@ -126,10 +125,9 @@ only once its coverage runs clean and means something.** Checklist:
   `eslint-local-rules` was listed here too, which stopped being true once it
   gained a suite per rule (#205); it was admitted in the Phase 3 second pass
   below.
-- **Phase 3 — apps & server workspaces.** The CQMS orchestrator plus the three
-  car-sales workspaces (`api-shared`, `car-sales-api`, `car-sales-api-fast`).
-  ✅ done (#52/#53/#54). All four have since left the repo — car-sales in #686,
-  CQMS in #683 — and their roster rows left with them.
+- **Phase 3 — the remaining app and server workspaces.** ✅ done
+  (#52/#53/#54). Those workspaces have since been extracted to their own
+  repositories, and their roster rows went with them.
 
   **Second pass**: `packages/eslint-local-rules` (#302), written off as having
   nothing to cover. That was written before #205 gave every custom rule a
@@ -138,16 +136,11 @@ only once its coverage runs clean and means something.** Checklist:
   correct while it had no suites, but afterwards it only meant the suite
   vanishing would still report success.
 
-  The plan expected the two API servers to need a DB-free `test:coverage`
-  **subset** carved out of real-Postgres suites, the way the CQMS workspaces
-  did. That turned out to be wrong: every suite in
-  `api-shared`, `car-sales-api` and `car-sales-api-fast` injects its
-  dependencies — controllers and plugins take a repository, `readEnvConfig`
-  takes a plain object, the distinct repository test passes a pool mock — so
-  none of them opens a connection and no split was needed. Their
-  `test:coverage` tasks deliberately load **no** environment file, which is
-  what keeps that honest: if one ever starts needing a database, it fails here
-  instead of passing on a developer machine that happens to have Postgres up.
+  One lesson survived the extraction: a workspace whose suites **inject** their
+  dependencies needs no DB-free subset at all, because nothing opens a
+  connection. Loading **no** environment file in `test:coverage` is what keeps
+  that honest — if one ever starts needing a database it fails here, instead of
+  passing on a developer machine that happens to have Postgres up.
 
   Tracked as GitHub epic
   [#50](https://github.com/luciocabrera/vite-react-compiler/issues/50)
@@ -162,10 +155,10 @@ Each phase is its own PR, kept reviewable and green before the next.
   shared `VITEST_COVERAGE_FLAGS` do not pass `--coverage.all`, and v8 only
   instruments modules that were actually loaded. A source file no test imports is
   therefore **absent from the report** rather than counted as 0% — so it cannot
-  pull the number down. The clearest illustration used to be `@repo/agent-runner`,
-  which reported ~100% measured across most of its source files because two were
-  never imported by a test; it left with CQMS (#683), but the effect is a
-  property of the flags, not of that package.
+  pull the number down. A workspace whose tests import only part of its source
+  reports a high percentage of a small measured set, which reads as thorough
+  coverage and is not. The effect is a property of the flags, not of any one
+  workspace.
 
   This applies to every workspace in the table, and it is why a high percentage
   is evidence about tested code rather than about a workspace's completeness.

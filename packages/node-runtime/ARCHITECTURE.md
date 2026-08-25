@@ -77,7 +77,7 @@ small is what a correct boundary costs here.
 import { registerShutdownSignals } from '@lcabrera/node/registerShutdownSignals.util';
 
 const shutdown = async () => {
-  console.warn('🛑 Shutting down scan-orchestrator');
+  console.warn('🛑 Shutting down the worker');
   await closePool();
 };
 

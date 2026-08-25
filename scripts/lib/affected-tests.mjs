@@ -18,12 +18,9 @@
  * FULL run is just "every workspace is affected", so it reproduces `test:ci` by
  * construction.
  *
- * It also used to substitute a DB-free `test:unit` for the workspaces that
- * needed a real Postgres. Those left with CQMS (#683), and the substitution went
- * with them rather than staying as an empty list: a constant that can only be
- * empty, a filter that can only return nothing and a group that is always
- * dropped is dead code, not a preserved mechanism. `test:ci` in the root
- * manifest is the shape to mirror if one is ever needed again.
+ * No workspace here needs a real Postgres, so there is no DB-free `test:unit`
+ * substitution — `test:ci` in the root manifest is the shape to mirror if one
+ * is ever needed.
  *
  * Effectful only in `readWorkspaceGraph` (reads package.json files); the rest is
  * pure and drives the runner in `scripts/test-changed.mjs`. See

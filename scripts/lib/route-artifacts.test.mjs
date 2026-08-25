@@ -53,8 +53,8 @@ describe('agreement with local-rules/domain-folder-filename', () => {
     // silence is what a passing run looks like.
     const cases = [
       'apps/a/src/routes/car-sales/CarSales.types.ts',
-      'apps/a/src/routes/cqms/Cqms.constants.tsx',
-      'apps/a/src/routes/cqms/trigger-scan/triggerScan.constants.ts',
+      'apps/a/src/routes/reports/Reports.constants.tsx',
+      'apps/a/src/routes/reports/trigger-scan/triggerScan.constants.ts',
       'apps/a/src/routes/x/editOrder.action.test.ts',
       'apps/a/src/routes/x/Root.error-boundary.tsx',
       'apps/a/src/routes/x/index.ts',
@@ -180,14 +180,14 @@ describe('routeArtifactReport', () => {
   it('passes the route modules the repo has today', () => {
     const paths = [
       // names the route module in a kebab-case folder
-      'apps/admin_system/src/routes/cqms/trigger-scan/triggerScan.constants.ts',
-      'apps/admin_system/src/routes/cqms/trigger-scan/TriggerScan.component.tsx',
+      'apps/admin/src/routes/reports/trigger-scan/triggerScan.constants.ts',
+      'apps/admin/src/routes/reports/trigger-scan/TriggerScan.component.tsx',
       // names the component in a PascalCase-artifact folder
-      'apps/admin_system/src/routes/cqms/project-detail/ProjectDetail.types.ts',
-      'apps/admin_system/src/routes/cqms/project-detail/ProjectDetail.component.tsx',
+      'apps/admin/src/routes/reports/project-detail/ProjectDetail.types.ts',
+      'apps/admin/src/routes/reports/project-detail/ProjectDetail.component.tsx',
       // a `.tsx` constants file at a route-container level
-      'apps/admin_system/src/routes/cqms/Cqms.constants.tsx',
-      'apps/admin_system/src/routes/cqms/Cqms.layout.tsx',
+      'apps/admin/src/routes/reports/Reports.constants.tsx',
+      'apps/admin/src/routes/reports/Reports.layout.tsx',
       // the folder name and the artifact name genuinely differ
       'apps/react-router/src/routes/car-sales-infinite/CarSales.types.ts',
       'apps/react-router/src/routes/car-sales-infinite/CarSales.component.tsx',

@@ -201,14 +201,10 @@ describe('renderIndex', () => {
   });
 
   it('names nothing a repository generating its first index would not have', () => {
-    // Rendered from a home carrying NO command spellings — a fresh consumer's,
-    // and the shape the seed ships. This package is installed into repositories
-    // that are not this one: a task name from one repository's runner, and a
-    // link to a decision record a fresh home does not hold, both read as
-    // instructions and are neither. The CQMS sentence is in the list because it
-    // was exactly this failure surviving in place — the flag choosing between
-    // its two spellings stopped being set, so every index printed the wrong half
-    // of a distinction that no longer existed.
+    // Rendered from a home carrying NO command spellings — a fresh consumer's.
+    // This package is installed into repositories that are not this one, so a
+    // task name from one repository's runner, or a link to a decision record a
+    // fresh home does not hold, reads as an instruction and is not one.
     const rendered = renderIndex(DEFAULT_REGISTERS.adrHomes[0]);
 
     for (const absent of ['vp run', 'CQMS', 'ADR-048', 'ADR-075']) {
