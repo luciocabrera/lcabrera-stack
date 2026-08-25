@@ -9,10 +9,8 @@ Published as **`@lcabrera/node`** from the `packages/node-runtime` workspace
 its consumers are no longer only in-repo ones. `README.md` is the
 consumer-facing document; this file is why the package is shaped the way it is.
 
-**It has no in-repo consumers.** Every consumer resolves it from npm, which is
-what publishing it was for — they exercise it exactly the way any outside project
-would. The consequence is worth stating plainly: nothing in this repository fails
-if this package breaks, so its own suite is the whole safety net.
+**It has no in-repo consumers.** Nothing in this repository fails if this package
+breaks, so its own suite is the whole safety net.
 
 ## Why this package exists
 
