@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { createIssue, reachesFlagPosition } from './plan-issues-github.mjs';
+import { createIssue, startsWithDash } from './plan-issues-github.mjs';
 
 const issue = (overrides) => ({
   id: 'E-1',
@@ -12,10 +12,10 @@ const issue = (overrides) => ({
 
 const options = () => ({ dryRun: false, log: () => undefined });
 
-describe('reachesFlagPosition', () => {
+describe('startsWithDash', () => {
   for (const value of ['-x', '--label', '--']) {
     it(`is true for ${JSON.stringify(value)}`, () => {
-      expect(reachesFlagPosition(value)).toBe(true);
+      expect(startsWithDash(value)).toBe(true);
     });
   }
 
@@ -27,12 +27,12 @@ describe('reachesFlagPosition', () => {
     undefined,
   ]) {
     it(`is false for ${JSON.stringify(value)}`, () => {
-      expect(reachesFlagPosition(value)).toBe(false);
+      expect(startsWithDash(value)).toBe(false);
     });
   }
 });
 
-describe('createIssue refuses a value gh would read as a flag', () => {
+describe('createIssue refuses a dash-leading value', () => {
   it('refuses a title starting with a dash, before spawning gh', () => {
     expect(() =>
       createIssue(issue({ title: '--label chore' }), 'body.md', options()),

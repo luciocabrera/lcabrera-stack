@@ -10,13 +10,12 @@
  */
 import { runGh } from './gh-exec.mjs';
 
-export const reachesFlagPosition = (value) =>
-  String(value ?? '').startsWith('-');
+export const startsWithDash = (value) => String(value ?? '').startsWith('-');
 
 const assertIsData = (field, value) => {
-  if (reachesFlagPosition(value)) {
+  if (startsWithDash(value)) {
     throw new Error(
-      `${field} would be read by gh as a flag rather than a value — got ${JSON.stringify(value)}`,
+      `${field} starts with a dash, which makes an unusable issue — got ${JSON.stringify(value)}`,
     );
   }
   return value;

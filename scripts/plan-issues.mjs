@@ -30,7 +30,7 @@ import {
   createIssue,
   createMilestones,
   linkPlannedChildren,
-  reachesFlagPosition,
+  startsWithDash,
 } from './lib/plan-issues-github.mjs';
 import { parseMilestoneNames, parsePlan } from './lib/plan-issues-parse.mjs';
 import {
@@ -92,10 +92,10 @@ const auditRecord = (record, { allowed, milestones, source }) => {
     errors: [
       ...validateIssueBody(body).errors,
       ...['title', 'milestone']
-        .filter((field) => reachesFlagPosition(record[field]))
+        .filter((field) => startsWithDash(record[field]))
         .map(
           (field) =>
-            `${field} starts with a dash, so gh would read it as a flag rather than a value: ${JSON.stringify(record[field])}`,
+            `${field} starts with a dash, which makes an unusable issue: ${JSON.stringify(record[field])}`,
         ),
     ],
     warnings: [
