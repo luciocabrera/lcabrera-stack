@@ -17,8 +17,12 @@ const APP_PATH = /\bapps\/[a-z0-9][a-z0-9-]*/g;
 /** Generated from git history — a dated record, not a live pointer. */
 const GENERATED = /(^|\/)CHANGELOG\.md$/;
 
-/** Excluded from every published package's `files`, so never shipped. */
-const TEST = /\.(test|spec)\.[a-z]+$/;
+/**
+ * `.test.*` is what every published package excludes from `files`. `.spec.*` is
+ * a sanctioned suffix here but no manifest excludes it, so one would ship and is
+ * checked — widen this only alongside the manifests.
+ */
+const TEST = /\.test\.[a-z]+$/;
 
 /**
  * Text a package ships. A comment in `src` reaches consumers like prose does,

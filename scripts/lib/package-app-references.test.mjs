@@ -69,12 +69,18 @@ describe('isCheckedFile', () => {
     expect(isCheckedFile('packages/ui/assets/font.woff2')).toBe(false);
   });
 
-  it('skips tests, which every package excludes from its files', () => {
+  it('skips .test.*, which every package excludes from its files', () => {
     expect(isCheckedFile('packages/ui/src/Table.test.tsx')).toBe(false);
     expect(isCheckedFile('packages/repo-standards/scripts/x.test.mjs')).toBe(
       false,
     );
     expect(isCheckedFile('packages/ui/src/Table.tsx')).toBe(true);
+  });
+
+  it('checks .spec.*, which no manifest excludes', () => {
+    // Skipping it would ship an unchecked file — the exclusions are the
+    // authority, not the suffix convention.
+    expect(isCheckedFile('packages/ui/src/Table.spec.ts')).toBe(true);
   });
 });
 
