@@ -54,6 +54,57 @@ the one `pr-threads.mjs` argument with no shape check at all, while its siblings
 mistyped id reached the GraphQL API and failed as an error about a variable the
 operator never typed.
 
+### Correction (2026-08-25, [#917](https://github.com/luciocabrera/vite-react-compiler/issues/917) / [#918](https://github.com/luciocabrera/vite-react-compiler/pull/918))
+
+Two things in this ADR as first written were wrong. The second was found only
+because the first was being fixed.
+
+**1. It named the wrong caller.** `--resolve` was never the flow SonarCloud
+reports on `gh-exec.mjs`. The finding was created 2026-07-25, the day
+`gh-exec.mjs` shipped in #384; `--resolve` did not exist until 2026-08-18
+(#783); and on 2026-07-25 the only file importing `gh-exec.mjs` was
+`scripts/lib/plan-issues-github.mjs`, from that same PR. Nothing else could have
+produced it.
+
+**2. It described a `gh` exploit that does not exist, by assuming `gh` parses
+argv the way the `claude` CLI does.** It does not. `gh` is cobra/pflag, and
+pflag takes a value flag's value as the **next argv element verbatim** — no
+leading-dash check. Probed against this repository:
+
+```
+$ gh issue list --label '--nonexistent'     # exit 0, empty result — taken verbatim
+$ gh issue list --label '--limit'           # exit 0 — verbatim even when it is a real gh flag
+$ gh api '--nonexistent'                    # unknown flag: --nonexistent, exit 1
+$ gh api 'repos/luciocabrera/vite-react-compiler' --jq .name   # control: works
+```
+
+So the real property is narrower than this ADR claimed, and it is about
+**position, not content**:
+
+- A value **after a flag** is never reparsed. `--title '--label chore'` sets the
+  title to the literal string `--label chore`. There is no shift and no extra
+  label.
+- A **positional** element beginning with `-` _is_ parsed as a flag.
+
+Every untrusted value in `createIssue` — title, body path, labels, milestone —
+is a flag _value_, so none of them was injectable. And every interpolated
+positional across all `runGh` callers carries a literal `repos/` prefix, so none
+can begin with `-` either. **Nothing currently reachable through `runGh` is
+argument-injectable.**
+
+What #918 keeps, on the honest justification: a shape check that refuses a
+dash-leading title or milestone, because such a value silently produces a
+useless issue and the offline audit is the right place to say so. It is not
+closing an injection hole in `gh`, and the helper is named `startsWithDash`
+rather than anything implying flag position.
+
+**The failure mode both errors share** is the one Rule 14 exists for. Each time,
+a mechanism was carried over from somewhere else — a different caller, a
+different CLI's parser — and written down as fact without a probe that could
+have refuted it. Both were caught in review rather than by the author. The
+probes above take seconds and discriminate; the dating check in (1) is one
+`git log`. Neither was run until someone asked.
+
 ## Decision
 
 Validate the argument vector, at two places, for two different reasons.
@@ -114,7 +165,9 @@ own rule (AGENTS.md §5, Rule 11): a finding is verified and then fixed, never
 suppressed. The `--model` flow was a real injection path, so accepting that one
 would have been recording a known hole as reviewed. The `--resolve` flow was
 not, and accepting it would have been defensible — it was fixed anyway because
-the shape check is cheap and pays for itself in the error message.
+the shape check is cheap and pays for itself in the error message. (See the
+Correction above: neither of those was the flow behind the `gh-exec.mjs`
+finding, and the `gh` exploit this ADR originally described does not exist.)
 
 **Validate only at the flag.** Rejected because it holds for the flow Sonar
 happened to trace and nothing else. `runGh` has about ten callers; a guarantee
