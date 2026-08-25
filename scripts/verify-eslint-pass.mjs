@@ -115,10 +115,10 @@ if (failures.length > 0) {
     process.stderr.write(`✗ ${workspace}: ${FAILURE_HINT[verdict]}\n`);
   }
 
-  process.exit(1);
+  process.exitCode = 1;
+} else {
+  process.stdout.write(
+    `eslint pass verified: \`${PROBE_RULE}\` reports the planted violation in ` +
+      `${PROBE_WORKSPACES.join(', ')}.\n`,
+  );
 }
-
-process.stdout.write(
-  `eslint pass verified: \`${PROBE_RULE}\` reports the planted violation in ` +
-    `${PROBE_WORKSPACES.join(', ')}.\n`,
-);

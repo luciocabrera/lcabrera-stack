@@ -82,9 +82,15 @@ const scan = () => {
   return JSON.parse(readFileSync(out, 'utf8'));
 };
 
+/**
+ * Ends the gate with a message.
+ *
+ * Throws rather than exiting: four callers rely on this not returning, and
+ * `process.exit()` here could drop the very message it just wrote. The
+ * top-level handler owns the single write and the status.
+ */
 const fail = (message) => {
-  process.stderr.write(`✗ ${message}\n`);
-  process.exit(1);
+  throw new Error(message);
 };
 
 /** One line per finding, in the `file:line rule` shape editors linkify. */
@@ -156,4 +162,9 @@ const main = () => {
   );
 };
 
-main();
+try {
+  main();
+} catch (error) {
+  process.stderr.write(`✗ ${error.message}\n`);
+  process.exitCode = 1;
+}

@@ -58,12 +58,14 @@ function getTrendPresentation(diff) {
 export async function checkLighthouseScores(reportPath) {
   if (!existsSync(reportPath)) {
     log(`\n❌ Report not found: ${reportPath}`, colors.red);
-    process.exit(1);
+    process.exitCode = 1;
+    return false;
   }
 
   if (!existsSync(BASELINE_FILE)) {
     log(`\n❌ Baseline file not found: ${BASELINE_FILE}`, colors.red);
-    process.exit(1);
+    process.exitCode = 1;
+    return false;
   }
 
   const report = JSON.parse(readFileSync(reportPath, 'utf-8'));
@@ -139,7 +141,7 @@ const args = process.argv.slice(2);
 if (args[0]) {
   const reportPath = args[0];
   const passed = await checkLighthouseScores(reportPath);
-  process.exit(passed ? 0 : 1);
+  process.exitCode = passed ? 0 : 1;
 } else {
   log('Usage:', colors.blue);
   log('  node scripts/check-lighthouse-scores.mjs <report.json>', colors.dim);

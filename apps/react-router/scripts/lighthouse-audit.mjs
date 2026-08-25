@@ -220,5 +220,5 @@ try {
   await runAudit();
 } catch (error) {
   log(`\n❌ Error: ${getErrorMessage(error)}`, colors.red);
-  process.exit(1);
+  process.exitCode = 1;
 }

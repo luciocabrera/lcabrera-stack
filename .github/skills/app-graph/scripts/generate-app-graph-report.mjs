@@ -588,7 +588,8 @@ const main = () => {
   } catch (error) {
     if (!context.isTargetMode) {
       console.error(`app-graph walk failed: ${error.message}`);
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
     toolFailures.push(`walk failed: ${error.message}`);
     nodes.length = 0;
@@ -632,9 +633,8 @@ const main = () => {
     report,
   });
 
-  console.log(`Run directory: ${outputDirectory}/`);
   console.log(
-    `Nodes: ${stats.total_node_count} (${stats.folder_count} folders, ${stats.file_count} files, max depth ${stats.max_depth})`,
+    `Run directory: ${outputDirectory}/\nNodes: ${stats.total_node_count} (${stats.folder_count} folders, ${stats.file_count} files, max depth ${stats.max_depth})`,
   );
 
   ingestScanArtifacts({

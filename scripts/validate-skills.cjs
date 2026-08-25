@@ -28,7 +28,8 @@ const runCli = () => {
     for (const error of result.errors) {
       console.error(`- ${error}`);
     }
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   console.log(
