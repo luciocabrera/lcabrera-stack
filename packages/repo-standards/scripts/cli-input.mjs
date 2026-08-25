@@ -74,7 +74,7 @@ export const parsePullNumber = (raw) => {
 };
 
 /** One `owner` or `name`: what GitHub allows, and never a bare dot run. */
-const SEGMENT = /^[\w.-]+$/;
+const REPOSITORY = /^(?<owner>[\w.-]+)\/(?<name>[\w.-]+)$/;
 const NOT_A_NAME = new Set(['.', '..']);
 
 /**
@@ -92,15 +92,15 @@ const NOT_A_NAME = new Set(['.', '..']);
  * repos/../../user` returns 404 here rather than reaching another endpoint.
  */
 export const parseRepository = (raw) => {
-  const text = String(raw ?? '').trim();
-  const parts = text.split('/');
-  const wellFormed =
-    parts.length === 2 &&
-    parts.every((part) => SEGMENT.test(part) && !NOT_A_NAME.has(part));
-  if (!wellFormed) {
+  const groups = REPOSITORY.exec(String(raw ?? '').trim())?.groups;
+  if (
+    groups === undefined ||
+    NOT_A_NAME.has(groups.owner) ||
+    NOT_A_NAME.has(groups.name)
+  ) {
     throw new Error(`--repo must be owner/name — got ${JSON.stringify(raw)}`);
   }
-  return text;
+  return `${groups.owner}/${groups.name}`;
 };
 
 const NODE_ID = /^\w[\w-]*={0,2}$/;
