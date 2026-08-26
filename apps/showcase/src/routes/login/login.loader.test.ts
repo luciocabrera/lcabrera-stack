@@ -8,7 +8,18 @@ import { signAuthToken } from '@/auth/signAuthToken.util';
 
 import { loader } from './login.loader';
 
-const SECRET = readAuthEnvConfig({ env: process.env }).AUTH_TOKEN_SECRET;
+// The mode is named rather than inherited from the runner — reading the ambient
+// env alone made this file's import depend on Vitest exporting NODE_ENV=test,
+// so a runner already exporting `production` failed it at import time with a
+// secret error rather than a test failure.
+//
+// The rest of the env is kept, and that half matters just as much: the code
+// under test reads `process.env` at request time, so dropping it would leave
+// this signing with the published default while the subject verifies with
+// whatever `AUTH_TOKEN_SECRET` the environment actually holds.
+const SECRET = readAuthEnvConfig({
+  env: { ...process.env, NODE_ENV: 'test' },
+}).AUTH_TOKEN_SECRET;
 
 type InvokeArgs = {
   readonly cookie?: string;
