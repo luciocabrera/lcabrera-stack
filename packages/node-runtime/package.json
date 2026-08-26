@@ -1,6 +1,6 @@
 {
   "name": "@lcabrera/node",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": false,
   "description": "Process-lifecycle primitives for long-running Node services — graceful shutdown on the signals a container runtime actually sends.",
   "keywords": [
