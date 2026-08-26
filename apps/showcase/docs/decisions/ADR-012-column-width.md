@@ -76,31 +76,44 @@ status nobody moved — the Decision above is a proposal whose commands are not
 built. What follows is where its three deferred questions stand, so a reader can
 tell what binds them and what would close this.
 
-**Closed: splitter de-focus — and it left a functional gap.** The question was
-gated on the navigation model, and
+**Closed: splitter de-focus.** The question was gated on the navigation model,
+and
 [ADR-062](../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)
 decided that model. `ResizeHandle` is now `tabIndex={-1}` against the grid's
 single roving tab stop, and its own docblock cites ADR-062 for exactly this. It
 keeps `role="separator"` and the full `aria-value*` set, so the ARIA
 window-splitter reading in the Context is unchanged.
 
-What changed is more than tab-order participation, and a reader triaging this
-needs it stated plainly: **there is no keyboard path to column resize today.**
-The splitter still _handles_ keys — `useColumnResize` routes `Home`, `End` and
-the arrows through `resolveKeyboardResizeAction.util.ts` — but nothing can focus
-it. The roving tab stop is a body cell (`useTableCellFocus` is used only by
-`TableBodyCell`, and its `cell.focus()` is the Table's only programmatic focus
-call), and `TableHeaderCell` has no focus wiring at all. `ResizeHandle`'s
-docblock leans on the header command for keyboard access — and that command is
-the one this section records as unimplemented. So de-focus closed the navigation
-question by removing the only reachable keyboard surface for width, on the
-understanding that the commands would supply the replacement. They have not.
+More changed than tab-order participation, and it is worth stating precisely,
+because the imprecise version is tempting and wrong: **de-focus removed keyboard
+access to incremental, exact-pixel resize — not keyboard access to width.** The
+splitter still handles keys, with `useColumnResize` routing `Home`, `End` and the
+arrows through `resolveKeyboardResizeAction.util.ts`, but nothing can focus it
+any more, so that behaviour is unreachable. `ResizeHandle`'s docblock hands
+keyboard access to the header command instead, and that command is the one this
+section records as unimplemented.
+
+The drawer remains reachable, and it is a genuine keyboard path to width: the
+header actions trigger is a native `Button` with no `tabIndex` override and a
+layout-only trigger style, so Tab reaches it; `ManageColumnAction` opens the
+column drawer; and `GeneralSectionHeader`'s width presets commit through
+`setDraftColumnSizing` on Accept. That is one of the three surfaces the Context
+already describes.
+
+So the gap is narrower and more specific than "no keyboard access": a keyboard
+user gets **presets, not pixels** — and for a column with no configured bounds
+the Min and Max presets are disabled (`isMinDisabled={!hasMinWidth}`,
+`isMaxDisabled={!hasMaxWidth}`), leaving only Reset. An **unbounded column has no
+keyboard resize at all**, which is the Context's existing candidate bug
+reappearing as the sharpest edge of this question.
 
 **Still open: the WCAG 2.5.7 (Dragging Movements) reading.** Nothing in the tree
-or in either decisions home has taken a position on it since. It remains
-load-bearing for whether the disabled-preset gap is a live AA failure — and the
-paragraph above sharpens the question rather than answering it, because the
-keyboard alternative whose sufficiency 2.5.7 turns on does not currently exist.
+or in either decisions home has taken a position on it since. The paragraphs
+above sharpen what has to be read rather than answering it: 2.5.7 turns on
+whether a single-pointer non-drag alternative is required where a keyboard one
+exists, and here the keyboard alternative is preset-only and disappears entirely
+for an unbounded column. That is the case to weigh — not an absence of any
+alternative.
 
 **Still open: autofit under virtualization.** `Fit to content` is not
 implemented, so the scroll-dependence and the width/height trade-off under
