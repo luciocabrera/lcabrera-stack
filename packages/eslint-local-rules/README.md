@@ -51,6 +51,7 @@ explicit extensions are **required**, would be actively wrong.
 | `domain-folder-filename`            |         | A folder's shared `*.types`/`*.constants` is named after it |
 | `filename-convention`               |         | Base-name case follows the file's type suffix               |
 | `merge-duplicate-imports`           | ✅      | One import statement per source module                      |
+| `no-habit-return-types`             | ✅      | No return type TypeScript would infer identically           |
 | `no-inline-type-imports`            | ✅      | `import type { X }` over `import { type X }`                |
 | `no-type-definitions-in-components` |         | Types live in `*.types.ts`, not in component files          |
 | `readonly-props`                    | ✅      | Every member of a `*Props` type is `readonly`               |

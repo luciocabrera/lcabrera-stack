@@ -185,7 +185,7 @@ const BOOLEAN_OPERATORS = new Set([
 ]);
 
 /** An expression TypeScript infers as exactly `boolean`, never a literal type. */
-const isBooleanExpression = (node: TSESTree.Expression): boolean =>
+const isBooleanExpression = (node: TSESTree.Expression) =>
   (node.type === AST_NODE_TYPES.Literal && typeof node.value === 'boolean') ||
   (node.type === AST_NODE_TYPES.UnaryExpression && node.operator === '!') ||
   (node.type === AST_NODE_TYPES.BinaryExpression &&
