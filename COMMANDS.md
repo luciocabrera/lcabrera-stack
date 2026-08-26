@@ -248,6 +248,13 @@ Every table route in `apps/showcase` serves its own rows from Postgres, so
 the showcase needs nothing but a database — see
 [the app's data-sources doc](apps/showcase/docs/data-sources.md).
 
+**`start:showcase` additionally needs the two auth variables set**, and
+`dev:showcase` does not. `@react-router/serve` defaults `NODE_ENV` to
+`production`, which is outside the modes where the published auth defaults
+apply, so the first request touching auth refuses until `AUTH_TOKEN_SECRET` and
+`AUTH_DEMO_PASSWORD_HASH` are set. The app's tracked env example says what to
+put in them.
+
 **The external-API lane still exists, and nothing in this repository serves it.**
 Setting `VITE_API_URL` points the same routes at an external server instead of
 this app's own loaders. To exercise it you supply that server: it must serve the

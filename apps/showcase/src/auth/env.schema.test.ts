@@ -9,6 +9,23 @@ const PRODUCTION_ENV = {
   NODE_ENV: 'production',
 };
 
+/** The message a refused parse threw, or `''` when it did not refuse. */
+const messageFor = (env: NodeJS.ProcessEnv) => {
+  try {
+    readAuthEnvConfig({ env });
+    return '';
+  } catch (error) {
+    return error instanceof Error ? error.message : '';
+  }
+};
+
+/** Only the `AUTH_… must be set` phrases in a message, in order. */
+const refusalsIn = (message: string) =>
+  message
+    .matchAll(/AUTH_[A-Z_]+ must be set/gu)
+    .map(([refusal]) => refusal)
+    .toArray();
+
 describe('readAuthEnvConfig', () => {
   it('applies dev defaults in development', () => {
     const config = readAuthEnvConfig({ env: { NODE_ENV: 'development' } });
@@ -70,6 +87,33 @@ describe('readAuthEnvConfig', () => {
     );
   });
 
+  it('names its own variable when the value is set but blank', () => {
+    // The shape a deploy platform produces when it declares a variable and
+    // leaves it empty. `.min(1)` rejects it on its own terms — "Too small:
+    // expected string to have >=1 characters" — which names nothing, so the
+    // refusal message has to be on the length check as well as the type.
+    for (const name of ['AUTH_TOKEN_SECRET', 'AUTH_DEMO_PASSWORD_HASH']) {
+      const message = messageFor({ ...PRODUCTION_ENV, [name]: '' });
+
+      expect(refusalsIn(message)).toEqual([`${name} must be set`]);
+    }
+  });
+
+  it('spells the permitted modes from the set that accepts them', () => {
+    // Two copies of "development or test" — one in the guard, one in the prose —
+    // is the drift AGENTS.md §7 is most insistent about, so the message is built
+    // from the set. This fails if someone adds a mode and not the wording.
+    const message = messageFor({
+      ...PRODUCTION_ENV,
+      AUTH_TOKEN_SECRET: undefined,
+    });
+
+    for (const mode of ['development', 'test']) {
+      expect(readAuthEnvConfig({ env: { NODE_ENV: mode } })).toBeDefined();
+      expect(message).toContain(mode);
+    }
+  });
+
   it('accepts production once both are supplied', () => {
     const config = readAuthEnvConfig({ env: PRODUCTION_ENV });
 
@@ -96,20 +140,9 @@ describe('readAuthEnvConfig', () => {
     // alone and this test could never fail the way its own comment claims.
     // Swapping the two `name:` values in `env.schema.ts` fails the line below.
     for (const name of ['AUTH_TOKEN_SECRET', 'AUTH_DEMO_PASSWORD_HASH']) {
-      const message = (() => {
-        try {
-          readAuthEnvConfig({ env: { ...PRODUCTION_ENV, [name]: undefined } });
-          return '';
-        } catch (error) {
-          return error instanceof Error ? error.message : '';
-        }
-      })();
+      const message = messageFor({ ...PRODUCTION_ENV, [name]: undefined });
 
-      const refusals = message.matchAll(/AUTH_[A-Z_]+ must be set/gu).toArray();
-
-      expect(refusals.map(([refusal]) => refusal)).toEqual([
-        `${name} must be set`,
-      ]);
+      expect(refusalsIn(message)).toEqual([`${name} must be set`]);
     }
   });
 });

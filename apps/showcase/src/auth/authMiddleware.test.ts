@@ -9,7 +9,13 @@ import { authMiddleware } from './authMiddleware';
 import { readAuthEnvConfig } from './env.schema';
 import { signAuthToken } from './signAuthToken.util';
 
-const SECRET = readAuthEnvConfig({ env: process.env }).AUTH_TOKEN_SECRET;
+// The mode is named rather than inherited from the runner. Reading the ambient
+// env here made this file's import depend on Vitest exporting NODE_ENV=test: a
+// runner that already exports `production` failed it at import time with a
+// secret error rather than a test failure.
+const SECRET = readAuthEnvConfig({
+  env: { NODE_ENV: 'test' },
+}).AUTH_TOKEN_SECRET;
 
 const nextStub = async () => new Response();
 
