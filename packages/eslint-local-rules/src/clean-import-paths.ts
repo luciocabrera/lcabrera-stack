@@ -1,10 +1,6 @@
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 
-import { ESLintUtils } from '@typescript-eslint/utils';
-
-const createRule = ESLintUtils.RuleCreator(
-  (name) => `https://example.com/rule/${name}`,
-);
+import { createRule } from './create-rule.ts';
 
 // Relative prefixes are universal — every project has them, and they are what
 // makes a path internal in the first place. An ALIAS is per-project (`@/` here,

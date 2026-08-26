@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { expect, it } from 'vite-plus/test';
 
 import { rules } from './index.ts';
@@ -39,4 +39,31 @@ it('has a colocated test for every registered rule', () => {
   );
 
   expect(untested).toEqual([]);
+});
+
+// The other way a rule stops being right without failing anything. ESLint prints
+// `meta.docs.url` beside every finding it reports, so this string lands in a
+// consumer's terminal — and nothing in this repository ever renders it, which is
+// how eight of the ten rules shipped `https://example.com/rule/<name>`, the
+// placeholder the first one was scaffolded from, while two pointed at a
+// `/rules/<name>` path that has never existed.
+//
+// Asserting the URL against the factory that built it would pass whatever the
+// factory said. These two assertions do not: the location is a literal here, and
+// the anchor has to match a heading the README really carries.
+const README = readFileSync('README.md', 'utf8');
+const DOCS_LOCATION =
+  'https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/eslint-local-rules/README.md';
+
+it('documents every rule at a URL that resolves', () => {
+  const broken = Object.entries(rules).flatMap(([ruleName, rule]) => {
+    const url = rule.meta.docs?.url;
+    const documented = README.includes(`### \`${ruleName}\``);
+
+    return documented && url === `${DOCS_LOCATION}#${ruleName}`
+      ? []
+      : [`${ruleName}: url=${url ?? 'none'} documented=${documented}`];
+  });
+
+  expect(broken).toEqual([]);
 });

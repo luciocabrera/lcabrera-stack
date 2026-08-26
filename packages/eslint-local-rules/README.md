@@ -394,15 +394,13 @@ swaps to `dist` at pack time, because a `.ts` file inside a consumer's
 
 ### Adding a rule
 
-1. Create `src/<rule-name>.ts` and default-export a rule built with
-   `ESLintUtils.RuleCreator`:
+1. Create `src/<rule-name>.ts` and default-export a rule built with the shared
+   `createRule` from `src/create-rule.ts`. Do not declare a local one: it also
+   decides the docs URL ESLint prints in a consumer's terminal, and ten private
+   copies is how eight rules ended up shipping a placeholder domain.
 
    ```typescript
-   import { ESLintUtils } from '@typescript-eslint/utils';
-
-   const createRule = ESLintUtils.RuleCreator(
-     (name) => `https://github.com/luciocabrera/lcabrera-stack/rules/${name}`,
-   );
+   import { createRule } from './create-rule.ts';
 
    export default createRule({
      create(context) {
@@ -426,6 +424,8 @@ swaps to `dist` at pack time, because a `.ts` file inside a consumer's
    fails the build for a registered rule with no suite. A rule that stops
    matching anything reports exactly the same clean pass as code that is
    correct, so the test is the only thing that can tell the two apart.
+   That same file also fails a rule with no `### \`<rule-name>\`` heading below,
+   because the docs URL it prints is built from that anchor.
 4. Anything a consumer would have to match to use the rule — an alias, a
    filename suffix, a naming migration — belongs in `meta.schema` as an option
    with a default, not hardcoded.

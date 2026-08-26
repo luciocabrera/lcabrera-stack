@@ -19,7 +19,10 @@ place. Every already-published version keeps the old URL permanently, so this is
 the first release whose links are right on their own.
 
 `@lcabrera/eslint-plugin` also changes what it prints into a consumer's lint
-output. Its `domain-folder-filename` and `filename-convention` rules build a
-docs URL that ESLint shows beside each finding, and that URL pointed at
-`/rules/<name>` — a path that has never existed in this repository. It now points
-at the rule's own section in the package README, which does.
+output. ESLint shows `meta.docs.url` beside every finding, and none of the ten
+rules had a URL that resolved: eight emitted `https://example.com/rule/<name>`,
+the placeholder the first rule was scaffolded from, and two pointed at a
+`/rules/<name>` path this repository has never had. All ten now link to the
+rule's own section in the package README, which does exist, and they build that
+link from one shared factory instead of ten copies — the copies are what let
+eight of them drift.
