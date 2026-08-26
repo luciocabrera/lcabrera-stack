@@ -101,6 +101,7 @@ hand-publish, and the only one that cannot prevent anything.
     "sharedBranchesDir": "docs/coordination/branches"
   },
   "registers": {
+    "adrGrandfatheredDuplicates": [],
     "adrHomes": [
       { "dir": "docs/decisions", "tier": "repo", "title": "…", "blurb": "…" }
     ],
@@ -125,6 +126,15 @@ string, so it passes validation and fails at the read; the gate names the config
 key and the rule rather than reporting an ENOENT for a directory that was never
 meant to exist. The two spellings are not both accepted, because that would put
 two names on one location, which is what every other key here refuses.
+
+`adrGrandfatheredDuplicates` defaults to nothing for the same reason, one register
+up. It lists the ADR numbers a repository already lets mean two things, because
+two of its homes each started a sequence at 001, and that overlap is the
+repository's own history — a default carrying any number would exempt one a
+consumer never duplicated, and a number the gate permits twice is a citation that
+can silently point at the wrong document. Declaring one licenses an existing pair;
+it never licenses a new collision, because a third use of the same number is still
+rejected.
 
 `publicPackageDirs` is the exception that defaults to nothing useful: the roster
 of packages under the API-surface ratchet is the repository's own data, and

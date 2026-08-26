@@ -500,8 +500,9 @@ the decision that architecture files describe systems, not folders, is
   and [`apps/react-router/docs/decisions/`](apps/react-router/docs/decisions/)
   (showcase app). `ADR-005` is the one number still meaning two things — the Form
   component here, StyleX in the showcase — so cite that pair by path.
-  `GRANDFATHERED_DUPLICATES` in `adr-registry.mjs` is the authority, and every
-  other repeat is a collision the gate rejects.
+  `registers.adrGrandfatheredDuplicates` in `devkit.config.json` is the
+  authority — editing it is what changes the gate — and every other repeat is a
+  collision `vp run adr:verify` rejects.
 
 Do **not** create an `ARCHITECTURE.md` because the directory is new. Create one
 only for a system: multiple files, non-local data flow, constraints the code

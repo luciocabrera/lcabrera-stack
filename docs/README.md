@@ -118,10 +118,11 @@ in [`docs/agents/planning/adr-drafts/`](./agents/planning/adr-drafts/) and hold
 _and_ StyleX. Cite that pair by path. Several low numbers used to overlap this
 way, because each home started its own sequence at 001; the repo-home half of the
 rest was the bootstrap-era set and went with it, so the set shrank to one.
-`GRANDFATHERED_DUPLICATES` in
-[`adr-registry.mjs`](../packages/repo-standards/scripts/adr-registry.mjs) is the
-authority, `vp run adr:verify` enforces it, and every other repeat is rejected.
-The surviving pair is deliberately not renumbered: an ADR is a dated record.
+`registers.adrGrandfatheredDuplicates` in
+[`devkit.config.json`](../devkit.config.json) is the authority — it declares
+`[5]`, and editing it is what changes the gate. `vp run adr:verify` enforces it
+and rejects every other repeat. The surviving pair is deliberately not
+renumbered: an ADR is a dated record.
 
 ---
 
