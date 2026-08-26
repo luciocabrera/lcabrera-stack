@@ -44,6 +44,10 @@ export const DEFAULT_ADR_COMMANDS = {
  */
 export const DEFAULT_REGISTERS = {
   adrCommands: DEFAULT_ADR_COMMANDS,
+  // Empty for the same reason as `publicPackageDirs`: an overlap is the
+  // repository's own history, and a default carrying one exempts numbers a
+  // consumer never duplicated — which is a number the gate lets mean two things.
+  adrGrandfatheredDuplicates: [],
   adrHomes: [
     {
       blurb: 'Architecture decisions for this repository.',
@@ -244,6 +248,11 @@ export const resolveRegisters = (raw) => {
 
   return {
     adrCommands,
+    adrGrandfatheredDuplicates: Array.isArray(block.adrGrandfatheredDuplicates)
+      ? block.adrGrandfatheredDuplicates.filter(
+          (value) => Number.isInteger(value) && value > 0,
+        )
+      : DEFAULT_REGISTERS.adrGrandfatheredDuplicates,
     // Carried on every home, because the index renderer takes a home and
     // nothing else: a repository's own spelling has to reach it that way, or it
     // would have to be read from module state — and then anything rendering an

@@ -135,7 +135,7 @@ export const configs = [
     // rather than an app config with 'node' bolted on.
     //
     // It used to be the latter because the package carried two runtimes at
-    // once (ADR-008): a browser src/api/ half needing DOM + vite/client
+    // once: a browser src/api/ half needing DOM + vite/client
     // alongside a Node src/db/ half. That half is gone — it is @lcabrera/api now
     // — so the DOM lib was left granting Window, document and fetch to a
     // package that has no business touching any of them. Dropping to

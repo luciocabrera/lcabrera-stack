@@ -54,17 +54,18 @@ const commandsFor = (home) => home.commands ?? DEFAULT_ADR_COMMANDS;
 export const NON_ADR_FILES = new Set(['README.md', TEMPLATE_FILE]);
 
 /**
- * Numbers that mean two things, because each home once started its own sequence
- * at 001. They are not renumbered: an ADR is a dated record, and every merged PR,
- * issue and commit citing one would silently start pointing elsewhere. Each may
- * appear exactly twice; nothing else may repeat.
+ * Numbers a repository already lets mean two things, because each of its homes
+ * once started its own sequence at 001. They are not renumbered: an ADR is a
+ * dated record, and every merged PR, issue and commit citing one would silently
+ * start pointing elsewhere. Each may appear exactly twice; nothing else may
+ * repeat.
  *
- * The set is exactly the genuine overlap between the two homes, so it shrinks as
- * one side of a pair goes. Only 005 is left — the Form component here, StyleX in
- * the showcase — after the bootstrap-era 001–004 and 008 were deleted. Adding to
- * it would license a NEW collision rather than tolerate an old one.
+ * Declared rather than hardcoded, and empty by default — an overlap is the host
+ * repository's own history, so a set baked in here would exempt numbers a
+ * consumer never duplicated. Adding one licenses a NEW collision rather than
+ * tolerating an old one, so a repository declares only the pairs it really has.
  */
-const GRANDFATHERED_DUPLICATES = new Set([5]);
+const GRANDFATHERED_DUPLICATES = new Set(registers.adrGrandfatheredDuplicates);
 
 const FILENAME = /^ADR-(\d{3})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$/;
 

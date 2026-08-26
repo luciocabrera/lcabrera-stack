@@ -12,8 +12,8 @@ export default defineConfig({
     alias: {
       // Self-referencing alias, same mechanism (and same reason) as every
       // consuming app's own '@lcabrera/ui' resolve.alias entry — real Node
-      // package-exports resolution doesn't apply here (no exports map;
-      // ADR-003), and tsconfig `paths` alone only helps tsc/editors, not
+      // package-exports resolution doesn't apply here (no exports map), and
+      // tsconfig `paths` alone only helps tsc/editors, not
       // Vite/Vitest's own bundler-level resolution.
       '@lcabrera/ui': fileURLToPath(new URL('src', import.meta.url)),
     },

@@ -73,9 +73,9 @@ lives at the root only.
 **An ADR is a dated record.** A superseded ADR naming deleted code, or an ADR
 naming the path it renamed away from, is correct — not drift. `docs/decisions/`
 and `apps/react-router/docs/decisions/` are two homes on **one** number sequence
-(ADR-048); 001–005 and 008 predate it, so each of those means two things — always
-cite one of them with its path. A third home left the repo with a second product,
-which is why an old ADR may cite a number that now resolves only once.
+(ADR-048); `005` predates it and still means two things, so cite that pair with
+its path. A third home left the repo with a second product, which is why an old
+ADR may cite a number that now resolves only once.
 
 `AGENTS.md` is the real file; `CLAUDE.md` is a symlink to it. Fixes go in
 `AGENTS.md`.
