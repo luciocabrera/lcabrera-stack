@@ -157,6 +157,19 @@ ruleTester.run('no-habit-return-types', rule, {
     },
     // Not every branch is boolean, so `boolean` may be widening a union.
     'function pick(a): boolean { if (a) { return a; } return false; }',
+    // Every RETURN is boolean, but the bottom is reachable — so inference says
+    // `boolean | undefined` and dropping the annotation widens the contract.
+    // The annotated form is a TS2366, and `vp run lint` chains `eslint --fix`,
+    // so reporting it would clear a type error by widening rather than by
+    // adding the missing return.
+    'function f(a): boolean { if (a) { return true; } }',
+    // The same hole with a statement in front of it: a bare `return;` returns
+    // `undefined` on that path.
+    'function g(a): boolean { if (a) { return true; } return; }',
+    {
+      code: 'function C(a): JSX.Element { if (a) { return <a />; } }',
+      filename: 'f.tsx',
+    },
     'const test = (): boolean => a && b;',
     // A function that names itself: TypeScript can fail to infer a recursive
     // return type, so the annotation may be load-bearing.

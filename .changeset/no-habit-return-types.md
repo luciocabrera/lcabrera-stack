@@ -14,8 +14,10 @@ which this plugin does not have.
 So the rule reports only annotations that cannot be hiding anything, because the
 body shape fixes the inferred type exactly: `void` and `Promise<void>` on a block
 body that returns no value and whose end point is plainly reachable, `boolean`
-where every returned expression is a comparison or a boolean literal, and
-`JSX.Element` where every return is JSX. Everywhere else it is silent — so a
+where every return carries a comparison or a boolean literal, and `JSX.Element`
+where every return carries JSX — both under the same reachability condition,
+because a body that can fall off its end returns `undefined` on that path and
+inference gives `T | undefined`. Everywhere else it is silent — so a
 deliberate widening is never flagged, and the rule has no options and nothing to
 disable.
 

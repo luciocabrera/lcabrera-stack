@@ -21,9 +21,10 @@
  * - `: void` on a block body with no `return <value>` that either reaches its
  *   bottom or returns bare (see `canCompleteNormally`)
  * - `: Promise<void>` on an `async` block body meeting the same conditions
- * - `: boolean` where every returned expression is a comparison, a `!`, or a
- *   boolean literal
- * - `: JSX.Element` on a function whose every return is JSX
+ * - `: boolean` where every return carries a comparison, a `!`, or a boolean
+ *   literal, and the bottom is unreachable
+ * - `: JSX.Element` on a function whose every return carries JSX, under the same
+ *   reachability condition
  *
  * Everywhere else it is silent, which is the point: a deliberate widening is not
  * reported, so there is no escape hatch to add. That matters more than reach
@@ -152,16 +153,22 @@ const FUNCTION_NODE_TYPES = new Set<string>([
   AST_NODE_TYPES.FunctionExpression,
 ]);
 
-/** Every `return <expr>` reachable in this function, skipping nested ones. */
-const returnedExpressions = (body: TSESTree.Node) => {
-  const found: TSESTree.Expression[] = [];
+/**
+ * Every `return` reachable in this function, skipping nested ones.
+ *
+ * The statements rather than their arguments, because `return;` and `return x`
+ * answer different questions here: the first says the function returns `void` on
+ * that path, the second says what it returns.
+ */
+const returnStatements = (body: TSESTree.Node) => {
+  const found: TSESTree.ReturnStatement[] = [];
 
   walkNodes({
     root: body,
     shouldDescend: (node) => {
       if (node !== body && FUNCTION_NODE_TYPES.has(node.type)) return false;
       if (node.type === AST_NODE_TYPES.ReturnStatement) {
-        if (node.argument !== null) found.push(node.argument);
+        found.push(node);
         return false;
       }
       return true;
@@ -231,20 +238,6 @@ const hasOwnBreak = (root: TSESTree.Node) =>
     root,
     skip: (node) =>
       BREAK_SCOPE_TYPES.has(node.type) || FUNCTION_NODE_TYPES.has(node.type),
-  });
-
-/**
- * Whether the body returns anywhere, counting a bare `return;`.
- *
- * `never` is inferred only for a function that neither falls off its bottom nor
- * returns at all. A bare `return;` returns `void` — it just does not fall
- * through, which is a different question from the one `canCompleteNormally` asks.
- */
-const hasReturnStatement = (body: TSESTree.Node) =>
-  contains({
-    matches: (node) => node.type === AST_NODE_TYPES.ReturnStatement,
-    root: body,
-    skip: (node) => FUNCTION_NODE_TYPES.has(node.type),
   });
 
 /**
@@ -340,13 +333,16 @@ type IsRedundantArgs = {
 
 /** No returned value, and the function can still return — so `void`, not `never`. */
 const canReturnVoid = (node: FunctionNode) => {
-  const { body } = node;
   // Narrowed inline rather than through an `isBlock` boolean, which does not
   // carry the narrowing to `canCompleteNormally`.
+  const { body } = node;
+  if (body.type !== AST_NODE_TYPES.BlockStatement) return false;
+
+  const returns = returnStatements(body);
+
   return (
-    body.type === AST_NODE_TYPES.BlockStatement &&
-    returnedExpressions(body).length === 0 &&
-    (canCompleteNormally(body) || hasReturnStatement(body))
+    returns.every((each) => each.argument === null) &&
+    (canCompleteNormally(body) || returns.length > 0)
   );
 };
 
@@ -355,18 +351,35 @@ type HasOnlyReturnsMatchingArgs = {
   readonly predicate: (expression: TSESTree.Expression) => boolean;
 };
 
-/** At least one returned expression, and every one of them matches. */
+/**
+ * Every path out of the function returns a value the predicate claims.
+ *
+ * Matching returns is not enough on its own — the bottom has to be unreachable
+ * too. A block that can fall off its end returns `undefined` on that path, so
+ * inference gives `T | undefined` and removing the annotation widens the
+ * contract. That the annotated form is a `TS2366` under `strictNullChecks` is no
+ * protection: lint runs on red trees constantly and `vp run lint` chains
+ * `eslint --fix`, so the autofix would clear the type error by widening the
+ * return type instead of by adding the missing return.
+ *
+ * A bare `return;` is the same hole with a statement in front of it, so every
+ * return has to carry a value. A concise arrow body always returns its
+ * expression, and neither question arises.
+ */
 const hasOnlyReturnsMatching = ({
   node,
   predicate,
 }: HasOnlyReturnsMatchingArgs) => {
   const { body } = node;
-  const returned =
-    body.type === AST_NODE_TYPES.BlockStatement
-      ? returnedExpressions(body)
-      : [body];
+  if (body.type !== AST_NODE_TYPES.BlockStatement) return predicate(body);
 
-  return returned.length > 0 && returned.every((each) => predicate(each));
+  const returns = returnStatements(body);
+
+  return (
+    !canCompleteNormally(body) &&
+    returns.length > 0 &&
+    returns.every((each) => each.argument !== null && predicate(each.argument))
+  );
 };
 
 const isRedundant = ({ annotation, node }: IsRedundantArgs) => {
