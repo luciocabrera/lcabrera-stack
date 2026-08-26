@@ -284,10 +284,17 @@ export const normalizeIndex = (markdown) =>
  * directory. Rendered into a repository with a single home it is not false, it
  * is vacuous, and it reads as though the reader has missed a second directory.
  *
- * The single-home wording carries the fact that is actually load-bearing there
- * and is not obvious: `nextFreeNumber` takes the highest number in use and adds
- * one, so a deleted ADR's number is never handed out again and a citation of it
- * never silently starts pointing at something else.
+ * The single-home wording carries the fact that is load-bearing there and is not
+ * obvious from the directory: `nextFreeNumber` takes the highest number in use
+ * and adds one, so a gap is never filled and a retired ADR's number stays
+ * retired.
+ *
+ * The exception is stated because it is reachable and is the likeliest
+ * retirement: the maximum is computed from the files PRESENT, so deleting the
+ * highest-numbered ADR lowers it and the next `adr:new` takes that number back.
+ * A citation of the retired one then points at a different decision. Promising
+ * otherwise would be a load-bearing claim in generated prose that no mechanism
+ * keeps (#974).
  */
 const numberingParagraph = (homeCount) =>
   homeCount > 1
@@ -297,9 +304,9 @@ const numberingParagraph = (homeCount) =>
         'number.',
       ]
     : [
-        'A number identifies exactly one ADR, and a retired one is never reissued:',
-        'the next free number is the highest in use plus one, never the first gap,',
-        'so a citation keeps pointing at the decision it was written against.',
+        'A number identifies exactly one ADR. The next free one is taken from the',
+        'highest in use rather than the first gap, so retiring an ADR leaves its',
+        'number unused — unless it was the highest, which frees it for the next.',
       ];
 
 /**

@@ -207,6 +207,28 @@ describe('headingNumber / headingTitle', () => {
 });
 
 describe('nextFreeNumber', () => {
+  it('hands back the highest number once its ADR is deleted', () => {
+    // The limit of what the index may promise. The maximum is taken from the
+    // files PRESENT, so retiring the top ADR lowers it and the next one takes
+    // that number — while a merged PR citing the retired ADR now points
+    // somewhere else. Retiring a just-landed ADR is the likeliest retirement,
+    // so this is reachable rather than theoretical (#974).
+    const before = home('docs/decisions', ['ADR-047-a.md', 'ADR-048-b.md']);
+    const after = home('docs/decisions', ['ADR-047-a.md']);
+
+    expect(nextFreeNumber([before])).toBe(49);
+    expect(nextFreeNumber([after])).toBe(48);
+  });
+
+  it('never fills a gap below the highest', () => {
+    // The half that IS guaranteed, and the half the index states.
+    expect(
+      nextFreeNumber([
+        home('docs/decisions', ['ADR-001-a.md', 'ADR-047-b.md']),
+      ]),
+    ).toBe(48);
+  });
+
   it('is one past the highest anywhere, not per home', () => {
     expect(
       nextFreeNumber([
@@ -295,6 +317,7 @@ describe('renderIndex', () => {
     const rendered = renderIndex(ADR_HOMES[0], { homeCount: 1 });
 
     expect(rendered).toContain('A number identifies exactly one ADR');
+    expect(rendered).toContain('unless it was the highest');
     expect(rendered).not.toContain('ADR home in this repository');
     expect(rendered).not.toContain('no two homes');
   });
