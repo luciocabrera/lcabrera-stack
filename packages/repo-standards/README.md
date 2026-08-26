@@ -230,11 +230,15 @@ index and the board are overwritten, and the claim closer unlinks.
 `adrHomes` defaults to **one** home, because that is all a repository is assumed
 to have. A repository keeping a second — decisions internal to one app, say —
 declares both, and the order it declares them in is the order they are reported.
-This repository declared two until its app-home ADRs were refiled against what
-they govern, and closing that home was a one-line `devkit.config.json` edit with
-no code change — which is the demonstration that the config really drives the
-gate. Declare a home the gate does not know about and every ADR in it is
-reported homeless.
+The register is the only definition of a home: `ADR_HOMES` is read from it, and
+the stray check derives its known directories from `ADR_HOMES`, so opening or
+closing a home is a register edit rather than a gate change. This repository
+declared two until its app-home ADRs were refiled against what they govern, and
+closing that home was that entry plus the `adrGrandfatheredDuplicates` number
+that existed only to tolerate the two homes colliding. The failure runs the
+opposite way to what you might expect: a declared home is never reported
+homeless, but an `ADR-NNN-*.md` in a directory you have **not** declared is
+reported as a stray, naming every home you did declare.
 
 Only these are repository data: a gate that says "retarget to `main`" tells a
 repository with a differently-named default branch something false, and one that
