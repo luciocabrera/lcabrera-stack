@@ -21,7 +21,7 @@
  * //   node scripts/refresh-fallow-complexity-report.cjs
  *
  * @example
- * // Scope to the react-router app:
+ * // Scope to the showcase app:
  * //   vp run fallow:refresh-report apps/showcase
  * //   node scripts/refresh-fallow-complexity-report.cjs apps/showcase
  *

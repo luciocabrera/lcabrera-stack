@@ -61,11 +61,16 @@ const workspaceDirectories = () =>
  * Every workspace's package name, from the manifests rather than from a list.
  *
  * Read alongside `workspaceDirectories`, because the two do not imply each
- * other: this repository's showcase app is called `showcase` and
- * lives in `apps/showcase`, so a seed naming the directory matches no
- * package name. Lifting `rules/routes-data.md`'s exemption is what showed it —
- * the gate reported that file's three package-name lines and left its blueprint
- * path alone (#860).
+ * other: `packages/ui` publishes as `@lcabrera/ui`, and neither string contains
+ * the other, so a seed naming the directory matches no package name. Lifting
+ * `rules/routes-data.md`'s exemption is what showed it — the gate reported that
+ * file's three package-name lines and left its blueprint path alone (#860).
+ *
+ * A name here can be an ordinary English word — `showcase` is one — and matching
+ * is `line.includes`, so a shipped file using it in prose fails with "names
+ * `showcase`". That reads as a false positive and is not one: the word is a
+ * workspace name, and a seed carrying it is carrying this repository's
+ * vocabulary to a consumer that has no such workspace. Reword the seed.
  */
 const workspacePackageNames = () =>
   WORKSPACE_DIRS.filter((group) => isDirectory(join(REPO_ROOT, group))).flatMap(

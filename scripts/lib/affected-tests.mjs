@@ -169,7 +169,7 @@ export const withDependents = (seeds, dependents) => {
  * Split affected packages into ordered `vp run` groups mirroring `test:ci`:
  * plain `test` first, then (CI only) `showcase`'s coverage `test:ci`
  * LAST so its summary is the fresh one. Empty groups are dropped. Without `ci`,
- * react-router runs plain `test`.
+ * the showcase runs plain `test`.
  */
 export const partitionTasks = (affectedPackages, { ci = false } = {}) => {
   const affected = new Set(affectedPackages);

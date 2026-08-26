@@ -69,7 +69,7 @@
         "blurb": "Decisions internal to the `apps/showcase` showcase app — its components, routes and interaction model.",
         "dir": "apps/showcase/docs/decisions",
         "tier": "app",
-        "title": "React Router showcase app"
+        "title": "Showcase app"
       }
     ],
     "adrCommands": {

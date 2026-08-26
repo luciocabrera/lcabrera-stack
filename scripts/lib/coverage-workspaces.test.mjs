@@ -83,7 +83,7 @@ describe('COVERAGE_MERGE_WORKSPACES', () => {
   });
 
   it('excludes the showcase app the fallow merge deliberately skips', () => {
-    // Not stylistic: pulling react-router in would drag the repo's largest
+    // Not stylistic: pulling the showcase in would drag the repo's largest
     // suite into the fallow lane, whose findings are baselined anyway.
     expect(dirsOf(COVERAGE_MERGE_WORKSPACES)).not.toContain('apps/showcase');
   });

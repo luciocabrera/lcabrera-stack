@@ -51,11 +51,12 @@ describe('forbiddenWords', () => {
   });
 
   it('carries a workspace directory whose package name is spelled differently', () => {
-    // The two are independent strings: this repository's showcase app is named
-    // `showcase` and sits in `apps/showcase`. Reading only the
-    // manifests leaves the directory unwatched — lifting `routes-data.md`'s
-    // exemption showed exactly that, with the gate reporting its three
-    // package-name lines and not its blueprint path (#860).
+    // The two are independent strings: `packages/ui` publishes as
+    // `@lcabrera/ui`, and neither contains the other. Reading only the manifests
+    // leaves the directory unwatched — lifting `routes-data.md`'s exemption
+    // showed exactly that, with the gate reporting its three package-name lines
+    // and not its blueprint path (#860).
+    expect(words).toContain('packages/ui');
     expect(words).toContain('apps/showcase');
   });
 

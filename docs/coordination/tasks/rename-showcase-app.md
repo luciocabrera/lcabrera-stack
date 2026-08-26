@@ -7,10 +7,21 @@ branch: chore/951-rename-showcase-app
 area:
   - apps/showcase/**
   - packages/ts-configs/**
+  - packages/repo-standards/**
+  - packages/eslint-local-rules/**
+  - scripts/**
+  - docs/**
+  - .claude/**
+  - .github/**
+  - reports/fallow/baselines/**
   - COMMANDS.md
   - README.md
   - AGENTS.md
-  - scripts/**
+  - biome.jsonc
+  - vite.config.ts
+  - devkit.config.json
+  - .sonarcloud.properties
+  - .fallowrc.json
 started: 2026-08-26
 updated: 2026-08-26
 plan: (none)

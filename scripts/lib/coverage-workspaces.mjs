@@ -36,7 +36,7 @@ const SUPPRESSIONS_MARKER = 'eslint-suppressions';
  * `run: true`  — this script runs its `test:coverage` (it runs plain `test`
  *                during `test:ci`, so no summary exists yet).
  * `run: false` — its `coverage-summary.json` is already produced upstream
- *                (react-router emits it from its own `test:ci`, and re-running
+ *                (the showcase emits it from its own `test:ci`, and re-running
  *                the repo's largest suite here would be wasteful). `--all`
  *                overrides this for standalone local runs where `test:ci` has
  *                not run first.
