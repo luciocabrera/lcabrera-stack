@@ -85,9 +85,9 @@ describe('readAuthEnvConfig', () => {
       })();
 
       expect(message).toContain(name);
-      expect([...message.matchAll(/AUTH_[A-Z_]+ must be set/gu)]).toHaveLength(
-        1,
-      );
+      expect(
+        message.matchAll(/AUTH_[A-Z_]+ must be set/gu).toArray(),
+      ).toHaveLength(1);
     }
   });
 });
