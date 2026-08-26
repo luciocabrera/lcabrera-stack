@@ -13,11 +13,12 @@ area:
   - scripts/**
   - docs/tooling/**
   - docs/agents/research/**
+  - docs/decisions/**
   - .github/**
 started: 2026-08-26
 updated: 2026-08-26
 plan: (none)
-pr: (none)
+pr: '#966'
 issue: #955
 ---
 
@@ -27,8 +28,9 @@ chore(repo): rename the repository
 
 ## Status / next
 
-- Current step: repository renamed on GitHub; 55 files repointed; Sonar key left
-  alone per #954; changeset for all ten published packages. check:safe exit 0.
+- Current step: renamed on GitHub, tree repointed, ADR-092 records the decision.
+  The Sonar key is untouched and the binding followed the rename on its own, so
+  #954's prediction of a manual re-bind is corrected in the PR. Lucio has updated
+  the ten npm trusted publishers. `check:safe` exit 0.
 - Blockers: none
-- Next: the two settings actions are Lucio's — 10 npm trusted publishers, and a
-  Sonar re-bind (which turned out to be automatic; see the PR).
+- Next: review rounds on #966, then merge — it closes epic #949.
