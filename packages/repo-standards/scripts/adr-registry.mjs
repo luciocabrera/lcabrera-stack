@@ -54,16 +54,17 @@ const commandsFor = (home) => home.commands ?? DEFAULT_ADR_COMMANDS;
 export const NON_ADR_FILES = new Set(['README.md', TEMPLATE_FILE]);
 
 /**
- * Numbers that already meant two things before the one-sequence rule existed,
- * because each home started its own sequence at 001. They are not renumbered:
- * an ADR is a dated record, and every merged PR, issue and commit citing one
- * would silently start pointing at a different document. Each may appear
- * exactly twice; nothing else may repeat.
+ * Numbers that mean two things, because each home once started its own sequence
+ * at 001. They are not renumbered: an ADR is a dated record, and every merged PR,
+ * issue and commit citing one would silently start pointing elsewhere. Each may
+ * appear exactly twice; nothing else may repeat.
  *
- * The set is exactly the genuine overlap between the two homes. Adding to it
- * would license a NEW collision rather than tolerate an old one.
+ * The set is exactly the genuine overlap between the two homes, so it shrinks as
+ * one side of a pair goes. Only 005 is left — the Form component here, StyleX in
+ * the showcase — after the bootstrap-era 001–004 and 008 were deleted. Adding to
+ * it would license a NEW collision rather than tolerate an old one.
  */
-const GRANDFATHERED_DUPLICATES = new Set([1, 2, 3, 4, 5, 8]);
+const GRANDFATHERED_DUPLICATES = new Set([5]);
 
 const FILENAME = /^ADR-(\d{3})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$/;
 

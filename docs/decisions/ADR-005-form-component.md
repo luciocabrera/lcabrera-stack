@@ -4,7 +4,7 @@
 
 ## Context
 
-A product spec called for a generic `Form` component in `packages/ui`, parallel to `Table`: the same "the component knows how to render itself from declarative config" philosophy (`columns` for `Table`, `fields` for `Form`), and `Form` must be exactly as agnostic to where its `fields` came from as `Table` already is about `columns` — whether hand-authored or computed server-side. This is built on the `useStore.hook.ts` primitive `Table` already established (ADR-001) — no new dependency.
+A product spec called for a generic `Form` component in `packages/ui`, parallel to `Table`: the same "the component knows how to render itself from declarative config" philosophy (`columns` for `Table`, `fields` for `Form`), and `Form` must be exactly as agnostic to where its `fields` came from as `Table` already is about `columns` — whether hand-authored or computed server-side. This is built on the `useStore.hook.ts` primitive `Table` already established when the component library was extracted — no new dependency.
 
 Two decisions were corrected mid-implementation, before any code was written for them, based on direct user direction:
 

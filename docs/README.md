@@ -114,12 +114,14 @@ titles as prose rather than as filenames, run `vp run adr:list`.
 in [`docs/agents/planning/adr-drafts/`](./agents/planning/adr-drafts/) and hold
 **no number** — one is assigned at adoption, never at proposal.
 
-⚠️ **A few low numbers predate the single sequence and exist in both homes** —
-`ADR-004` is the package standalone quality gate _and_ React Compiler. Cite those
-by path. `GRANDFATHERED_DUPLICATES` in
+⚠️ **One number still means two things** — `ADR-005` is the `Form` component
+_and_ StyleX. Cite that pair by path. Several low numbers used to overlap this
+way, because each home started its own sequence at 001; the repo-home half of the
+rest was the bootstrap-era set and went with it, so the set shrank to one.
+`GRANDFATHERED_DUPLICATES` in
 [`adr-registry.mjs`](../packages/repo-standards/scripts/adr-registry.mjs) is the
-set, and `vp run adr:verify` enforces it. They are deliberately not renumbered:
-an ADR is a dated record.
+authority, `vp run adr:verify` enforces it, and every other repeat is rejected.
+The surviving pair is deliberately not renumbered: an ADR is a dated record.
 
 ---
 
