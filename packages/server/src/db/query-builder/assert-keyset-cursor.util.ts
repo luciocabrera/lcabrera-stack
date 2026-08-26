@@ -15,7 +15,7 @@ type AssertKeysetCursorArgs = {
 export const assertKeysetCursor = ({
   cursor,
   sort = [],
-}: AssertKeysetCursorArgs): void => {
+}: AssertKeysetCursorArgs) => {
   if (sort.length === 0) {
     throw new Error('Keyset pagination requires a sort; none was provided.');
   }

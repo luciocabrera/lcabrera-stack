@@ -16,7 +16,7 @@ type AssertGroupColumnArgs = {
 export const assertGroupColumn = ({
   allowedColumns,
   column,
-}: AssertGroupColumnArgs): void => {
+}: AssertGroupColumnArgs) => {
   try {
     assertSafeIdentifier(column);
     assertColumnAllowed({ allowedColumns, column });

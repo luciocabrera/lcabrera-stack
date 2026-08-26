@@ -30,7 +30,7 @@ export const assertGroupKeys = ({
   grouping,
   keys,
   periods = {},
-}: AssertGroupKeysArgs): void => {
+}: AssertGroupKeysArgs) => {
   assertGroupDepth({ grouping, keys });
 
   for (const key of keys) {

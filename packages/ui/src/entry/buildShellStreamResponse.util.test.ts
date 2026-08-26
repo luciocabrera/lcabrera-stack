@@ -4,11 +4,9 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { buildShellStreamResponse } from './buildShellStreamResponse.util';
 
-const pipeEnding =
-  (chunk?: string) =>
-  (destination: PassThrough): void => {
-    destination.end(chunk);
-  };
+const pipeEnding = (chunk?: string) => (destination: PassThrough) => {
+  destination.end(chunk);
+};
 
 describe('buildShellStreamResponse', () => {
   it('returns a text/html Response echoing status and headers, streaming what the render pipes', async () => {

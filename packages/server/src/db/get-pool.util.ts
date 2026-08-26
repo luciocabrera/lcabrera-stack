@@ -27,7 +27,7 @@ export const getPool = (): Pool => {
   return poolRef.current;
 };
 
-export const closePool = async (): Promise<void> => {
+export const closePool = async () => {
   if (!poolRef.current) {
     return;
   }

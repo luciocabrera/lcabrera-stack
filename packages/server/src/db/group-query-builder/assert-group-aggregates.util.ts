@@ -23,7 +23,7 @@ export const assertGroupAggregates = ({
   aggregates,
   allowedColumns,
   capabilities,
-}: AssertGroupAggregatesArgs): void => {
+}: AssertGroupAggregatesArgs) => {
   if (aggregates.length === 0) {
     throw new GroupingRefusedError({
       message: 'A grouped query needs at least one aggregate.',

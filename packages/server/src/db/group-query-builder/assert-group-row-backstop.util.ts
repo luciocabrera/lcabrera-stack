@@ -10,7 +10,7 @@ type AssertGroupRowBackstopArgs = {
 export const assertGroupRowBackstop = ({
   rowCount,
   rowLimit,
-}: AssertGroupRowBackstopArgs): void => {
+}: AssertGroupRowBackstopArgs) => {
   if (rowLimit.backstopAt === undefined || rowCount < rowLimit.backstopAt) {
     return;
   }

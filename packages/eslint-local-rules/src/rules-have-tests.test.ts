@@ -55,6 +55,19 @@ const README = readFileSync('README.md', 'utf8');
 const DOCS_LOCATION =
   'https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/eslint-local-rules/README.md';
 
+// The same rot one level up, and it needs its own assertion. The `###` heading
+// above is what a docs URL anchors to; the Rules table at the top of the README
+// is the index a consumer reads first, and a rule can be registered, tested and
+// given a resolving anchor while never appearing in it — which is exactly what
+// `no-habit-return-types` did. Nothing above would have failed.
+it('lists every registered rule in the summary table', () => {
+  const missing = Object.keys(rules).filter(
+    (ruleName) => !README.includes(`| \`${ruleName}\``),
+  );
+
+  expect(missing).toEqual([]);
+});
+
 it('documents every rule at a URL that resolves', () => {
   const broken = Object.entries(rules).flatMap(([ruleName, rule]) => {
     const url = rule.meta.docs?.url;

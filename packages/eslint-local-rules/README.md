@@ -51,6 +51,7 @@ explicit extensions are **required**, would be actively wrong.
 | `domain-folder-filename`            |         | A folder's shared `*.types`/`*.constants` is named after it |
 | `filename-convention`               |         | Base-name case follows the file's type suffix               |
 | `merge-duplicate-imports`           | ✅      | One import statement per source module                      |
+| `no-habit-return-types`             | ✅      | No return type TypeScript would infer identically           |
 | `no-inline-type-imports`            | ✅      | `import type { X }` over `import { type X }`                |
 | `no-type-definitions-in-components` |         | Types live in `*.types.ts`, not in component files          |
 | `readonly-props`                    | ✅      | Every member of a `*Props` type is `readonly`               |
@@ -254,6 +255,107 @@ import type { type User } from './types'; // redundant
 ```typescript
 import type { User, Post } from './types';
 ```
+
+### `no-habit-return-types`
+
+Removes a return-type annotation TypeScript would have written itself. Auto-fixable.
+
+An explicit return type is sometimes deliberate — it can promise callers **less**
+than the function really returns, so the extra detail never enters the contract:
+
+```typescript
+const makePet = (): Animal => new Dog(); // callers get Animal, never Dog
+```
+
+That is indistinguishable in the source text from a redundant one, and telling
+them apart means comparing the written type against the inferred one. This plugin
+has no TypeScript program, so it cannot.
+
+**The rule therefore reports only annotations that cannot be hiding anything**,
+because the shape of the body fixes the inferred type exactly. Everywhere else it
+is silent, so there is no case where a deliberate widening is flagged — and
+therefore no escape hatch, no options, and nothing to disable.
+
+**❌ Disallowed:**
+
+```tsx
+const reset = (): void => {
+  store.clear();
+};
+const save = async (): Promise<void> => {
+  await put();
+};
+const isOpen = (): boolean => count === 1;
+const Row = (): JSX.Element => <tr />;
+```
+
+**✅ Left alone** — each could be widening, so none is reported:
+
+```tsx
+const makePet = (): Animal => new Dog();
+const getName = (): string => user.firstName;
+const ignore = (): void => doSomethingThatReturnsAValue(); // discards on purpose
+const Row = (): React.ReactNode => <tr />; // wider than JSX.Element
+function walk(n): void {
+  walk(n.next);
+} // recursion: inference can fail
+const fail = (): void => {
+  if (x) {
+    throw p;
+  } else {
+    throw q;
+  }
+}; // end point unreachable: inference says `never`, so `void` widens it
+```
+
+That last one is why the `void` and `Promise<void>` arms ask whether the body can
+reach its bottom, rather than scanning it for a `throw`. TypeScript infers `never`
+for a function that neither returns nor reaches its bottom, so `void` there is a
+widening — and reachability is a property of the whole body, not of any one
+statement:
+
+```typescript
+if (x) {
+  throw p;
+} // bottom reachable   → void   → reported
+if (x) {
+  throw p;
+} else {
+  throw q;
+} // bottom unreachable → never  → left alone
+switch (x) {
+  default:
+    throw p;
+} // bottom unreachable → never  → left alone
+for (;;) {
+  tick();
+} // bottom unreachable → never  → left alone
+try {
+  go();
+} finally {
+  throw p;
+} // bottom unreachable → never  → left alone
+```
+
+**One case is out of reach and stays wrong.** A call to a function declared
+`(): never` also makes the bottom unreachable, and `process.exit(1)` is the
+everyday example:
+
+```typescript
+const die = (): void => {
+  process.exit(1); // infers `never`; this rule removes the annotation anyway
+};
+```
+
+Deciding it means resolving the callee's signature, and this plugin has no
+TypeScript program. It is called out here rather than left to be discovered
+because the rule is auto-fixable and has nothing to disable — if you hit it, the
+annotation has to be restored by hand, or the function given a body the rule
+does not recognise. Closing it properly needs a type-aware rule.
+
+The trade is deliberate and worth knowing: `(): string` on a body returning a
+`string` is a habit this rule will not catch, because the same annotation over a
+body returning `'a' | 'b'` is a widening. Reviews still own that half.
 
 ### `merge-duplicate-imports`
 
