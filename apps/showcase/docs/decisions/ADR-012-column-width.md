@@ -1,6 +1,6 @@
 # ADR-012: Column Width as the First Instance of the Grid Interaction Architecture
 
-**Status:** Proposed
+**Status:** Proposed — deliberately open, not un-triaged; see [Status, 2026-08-26](#status-2026-08-26)
 
 ## Context
 
@@ -68,3 +68,41 @@ Full evidence and the round-by-round reasoning live in the decision log at
   (user-initiated, CLS-exempt), then persists.
 - This ADR stays **Proposed** until the deferred width questions are resolved;
   ADR-011 is independently **Accepted**.
+
+## Status, 2026-08-26
+
+This ADR is still **Proposed**, and that is the intended state rather than a
+status nobody moved — the Decision above is a proposal whose commands are not
+built. What follows is where its three deferred questions stand, so a reader can
+tell what binds them and what would close this.
+
+**Closed: splitter de-focus.** It was gated on the navigation model, and
+[ADR-062](../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)
+decided that model. `ResizeHandle` is now `tabIndex={-1}` against the grid's
+single roving tab stop, and its own docblock cites ADR-062 for exactly this. The
+splitter keeps `role="separator"` with the full `aria-value*` set, so the ARIA
+window-splitter reading in the Context is unchanged; only its participation in
+the tab order was settled.
+
+**Still open: the WCAG 2.5.7 (Dragging Movements) reading.** Nothing in the tree
+or in either decisions home has taken a position on it since. It remains
+load-bearing for whether the disabled-preset gap is a live AA failure.
+
+**Still open: autofit under virtualization.** `Fit to content` is not
+implemented, so the scroll-dependence and the width/height trade-off under
+dynamic row height are untested rather than resolved.
+
+**The Decision is unimplemented.** None of `Fit to content`, `Wider`, `Narrower`,
+`Reset` or `Set width` exists in the header actions menu. Width is still set
+through the three surfaces the Context describes. Do not read this ADR as
+recording current practice.
+
+**The candidate bug is still live.** `ResizeHandle` reads
+`minWidth ?? DEFAULT_MIN_COLUMN_WIDTH` while the drawer's `GeneralSectionHeader`
+tests the raw `column.minWidth !== undefined`, so a column with no configured
+bounds still offers a reset it will not resize.
+
+**What would close this ADR:** a reading of WCAG 2.5.7 that settles whether a
+keyboard alternative suffices, and a per-column autofit policy under
+virtualization. Either outcome is a status move here, not a new ADR — the
+decision itself is not being re-argued.
