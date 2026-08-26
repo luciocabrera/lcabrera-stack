@@ -233,8 +233,8 @@ describe('enforcedTokens', () => {
   });
 
   it('exempts a root-anchored path named inside an ADR', () => {
-    // Descriptive: ADR-008 IS the record of the @repo/api -> data-access
-    // rename, so naming the old path is its content, not a dead reference.
+    // Descriptive: the record of a package rename is where its old name
+    // belongs, so naming that path is its content, not a dead reference.
     expect(
       enforcedTokens({
         docPath: adr,
