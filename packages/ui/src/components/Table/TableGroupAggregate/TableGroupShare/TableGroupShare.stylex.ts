@@ -13,8 +13,9 @@ export const tableGroupShareStyles = stylex.create({
    * The filled portion. Its width is the datum itself, so it is a **dynamic**
    * style rather than an inline one: StyleX compiles a style function to a
    * custom property, which keeps the value out of a `style` attribute and so
-   * out of the way of a strict CSP (ADR-005, and the same shape
-   * `TableBodyCell`'s pinned offsets take).
+   * out of the way of a strict CSP. Same shape `TableBodyCell`'s pinned offsets
+   * take. Do not "simplify" this to an inline style — the CSP compatibility is
+   * the whole reason for the function.
    */
   barFill: (width: string) => ({
     borderRadius: 'inherit',

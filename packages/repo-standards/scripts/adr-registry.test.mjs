@@ -30,8 +30,11 @@ const home = (dir, filenames) => ({
   })),
 });
 
-const findings = ({ drafts = [], homes = [], strays = [] }) =>
-  adrFindings({ drafts, homes, strays });
+// `grandfathered` is forwarded WITHOUT a default here on purpose: passing
+// `undefined` lets `adrFindings` fall back to the configured register, so a test
+// that omits it exercises the real config rather than a fixture.
+const findings = ({ drafts = [], grandfathered, homes = [], strays = [] }) =>
+  adrFindings({ drafts, grandfathered, homes, strays });
 
 describe('parseAdrFilename', () => {
   it('reads the number and slug from a well-formed name', () => {
@@ -55,15 +58,16 @@ describe('parseAdrFilename', () => {
 });
 
 describe('adrFindings', () => {
-  it('passes the one surviving overlap, twice each', () => {
-    expect(
-      findings({
-        homes: [
-          home('docs/decisions', ['ADR-005-a.md']),
-          home('apps/showcase/docs/decisions', ['ADR-005-b.md']),
-        ],
-      }),
-    ).toEqual([]);
+  it('rejects the last overlap once the register empties, 005 included', () => {
+    const result = findings({
+      homes: [
+        home('docs/decisions', ['ADR-005-a.md']),
+        home('apps/showcase/docs/decisions', ['ADR-005-b.md']),
+      ],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toContain('ADR-005');
   });
 
   it('rejects a number the shrinking set no longer grandfathers', () => {
@@ -90,7 +94,7 @@ describe('adrFindings', () => {
     expect(result[0]).toContain('ADR-047');
   });
 
-  it('fails a grandfathered number used a third time', () => {
+  it('fails a number used three times, in one home or across two', () => {
     expect(
       findings({
         homes: [
@@ -99,6 +103,35 @@ describe('adrFindings', () => {
         ],
       }),
     ).toHaveLength(1);
+  });
+
+  // This repository grandfathers nothing, so these two drive the register with a
+  // synthetic set. Without them the `> 2` branch has no coverage at all and can be
+  // deleted with the suite still green — and it is live behaviour for a consumer
+  // that declares its own overlaps, not dead code.
+  it('passes a grandfathered number used exactly twice', () => {
+    expect(
+      findings({
+        grandfathered: new Set([5]),
+        homes: [
+          home('docs/decisions', ['ADR-005-a.md']),
+          home('apps/showcase/docs/decisions', ['ADR-005-b.md']),
+        ],
+      }),
+    ).toEqual([]);
+  });
+
+  it('fails a grandfathered number used a third time', () => {
+    const result = findings({
+      grandfathered: new Set([5]),
+      homes: [
+        home('docs/decisions', ['ADR-005-a.md', 'ADR-005-c.md']),
+        home('apps/showcase/docs/decisions', ['ADR-005-b.md']),
+      ],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toContain('ADR-005');
   });
 
   it('fails a numbered draft, which is how a number gets reserved but not owned', () => {
@@ -205,12 +238,24 @@ describe('looksLikeAdr', () => {
 
 describe('renderIndex', () => {
   it('links the template relative to the home it renders', () => {
-    const [repo, app] = ADR_HOMES;
+    const [repo] = ADR_HOMES;
 
     expect(renderIndex(repo)).toContain('](./_TEMPLATE.md)');
-    expect(renderIndex(app)).toContain(
-      '](../../../../docs/decisions/_TEMPLATE.md)',
-    );
+  });
+
+  it('links the template up out of a nested home', () => {
+    // No nested home is configured today — the showcase app's closed when its
+    // ADRs were filed against what they govern. The depth arithmetic still has
+    // to work, because `adrHomes` is config and a repo consuming
+    // `@lcabrera/repo-standards` can declare one.
+    expect(
+      renderIndex({
+        blurb: 'A nested home.',
+        dir: 'apps/showcase/docs/decisions',
+        tier: 'app',
+        title: 'Nested',
+      }),
+    ).toContain('](../../../../docs/decisions/_TEMPLATE.md)');
   });
 
   it('names nothing a repository generating its first index would not have', () => {

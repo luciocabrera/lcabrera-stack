@@ -184,9 +184,25 @@ deployment was built, and the `grep` above is what answers it.
 ### Where the two paths disagree
 
 One case, and it is documented rather than fixed here: sorting
-`wide_alltypes_150.c_018` (`point`). The external endpoint answers `400` and the
-route renders its error boundary; the self-hosted one drops the unorderable term
-and answers a normal page ordered by the fallback key. The column's header is
-clickable either way. Full table of both responses, and why the fix belongs in
-its own change, in
-[that route's ARCHITECTURE.md](../src/routes/wide-alltypes-150/ARCHITECTURE.md).
+`wide_alltypes_150.c_018` (`Point 18`). `point` has no btree ordering, so
+Postgres rejects the whole query rather than that one term — and the header is
+clickable either way, because `WideAlltypes150.constants.ts` sets
+`isSortable: mod !== 19`, which excludes only the `integer[]` columns.
+
+| Request                                                                        | External (built with `VITE_API_URL`)                                         | Self-hosted (default)                               |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | --------------------------------------------------- |
+| `…/wide-alltypes-150/paginated?sort=[{"columnKey":"c_018","direction":"asc"}]` | `400` — `{"error":"Unsupported wide-alltypes sort column: c_018"}`           | `200` — a normal page, ordered by the `id` fallback |
+| `/wide-alltypes-150?sorting={"c_018":"asc"}`                                   | HTTP `500`; the error boundary renders `API request failed: 400 Bad Request` | HTTP `200`; the table renders                       |
+
+The external endpoint **rejects** a sort it cannot serve; this one **drops the
+term** and falls back to the primary key. The forgiving direction is deliberate —
+a clickable header that returns rows beats one that replaces the page with an
+error — but it is a behavioural difference, not a detail: a user who clicks
+`Point 18` sees the table re-render apparently unsorted rather than being told
+the column cannot be ordered.
+
+**Neither is the behaviour this route wants.** The real fix is making
+`isSortable` exclude `point` as well as `integer[]`, so the header never offers
+the sort. That changes what the route renders, so it belongs in its own change
+rather than in the one that moved the data source (#687 §5). Until then the
+divergence is the documented cost of the move.

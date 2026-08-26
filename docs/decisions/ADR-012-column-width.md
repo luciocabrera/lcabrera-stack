@@ -78,7 +78,7 @@ tell what binds them and what would close this.
 
 **Closed: splitter de-focus.** The question was gated on the navigation model,
 and
-[ADR-062](../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)
+[ADR-062](./ADR-062-grid-semantics-roving-focus-and-row-identity.md)
 decided that model. `ResizeHandle` is now `tabIndex={-1}` against the grid's
 single roving tab stop, and its own docblock cites ADR-062 for exactly this. It
 keeps `role="separator"` and the full `aria-value*` set, so the ARIA

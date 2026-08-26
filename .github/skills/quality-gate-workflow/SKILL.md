@@ -125,17 +125,15 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
 
 ### Where a new ADR goes
 
-There are two ADR homes on **one** number sequence
+There is **one** ADR home, `docs/decisions/`, on one number sequence
 ([`docs/README.md`](../../../docs/README.md)), and
 [ADR-048](../../../docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md) owns
-the rule for picking between them — read it rather than a summary here, so this
-does not become another place the taxonomy is written down. A third home once
-existed and is gone.
+the taxonomy — read it rather than a summary here, so this does not become
+another place it is written down. Two other homes existed and are gone.
 
 The one mechanic you need at gate time: take the number `vp run adr:verify`
-reports as free (it is global across both homes, whichever you are writing
-in). That gate fails a stray, a reused number, a malformed name and a stale
-index.
+reports as free. That gate fails a stray, a reused number, a malformed name and
+a stale index.
 
 The ADR file is the whole change. A home's `README.md` carries no row per ADR, so
 there is no index to regenerate and — the point of it — no file for a second ADR

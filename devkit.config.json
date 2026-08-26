@@ -57,19 +57,13 @@
     }
   },
   "registers": {
-    "adrGrandfatheredDuplicates": [5],
+    "adrGrandfatheredDuplicates": [],
     "adrHomes": [
       {
         "blurb": "The repository, its published `@lcabrera/*` packages, and the toolchain.",
         "dir": "docs/decisions",
         "tier": "repo",
         "title": "Repository, packages & tooling"
-      },
-      {
-        "blurb": "Decisions internal to the `apps/showcase` showcase app — its components, routes and interaction model.",
-        "dir": "apps/showcase/docs/decisions",
-        "tier": "app",
-        "title": "Showcase app"
       }
     ],
     "adrCommands": {

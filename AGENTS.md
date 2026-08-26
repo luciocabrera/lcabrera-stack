@@ -282,7 +282,7 @@ suppressions at all, enforced by `vp run suppressions:verify`.
 
 **`test:all` vs `test:ci`.** No suite here needs a database, so the two differ only in ordering: `test:ci` runs `showcase` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing; it is what CI runs.
 
-**A workspace with real-Postgres tests must split them**: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it. Nothing here needs this today — `UNIT_TASK_PACKAGES` in `scripts/lib/affected-tests.mjs` is empty — but the machinery is still wired, so a DB-bound workspace can rejoin `test:ci` without dragging its whole suite in.
+**A workspace with real-Postgres tests must split them**: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it. Nothing here needs this today and **the substitution is not built** — `scripts/lib/affected-tests.mjs` says so in its own header, and the only per-workspace substitution it carries is `COVERAGE_TASK_PACKAGE`. Build it when a DB-bound workspace arrives, mirroring `test:ci` in the root manifest; do not assume it is waiting.
 
 ### Fallow Static Analysis (run from repo root)
 
@@ -495,14 +495,13 @@ the decision that architecture files describe systems, not folders, is
   opening a home's `README.md` expecting an index: it says what the home holds
   and deliberately lists no ADRs, because a committed list is one region every
   ADR branch appends to
-  ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)). The
-  homes are [`docs/decisions/`](docs/decisions/) (repo, packages, toolchain)
-  and [`apps/showcase/docs/decisions/`](apps/showcase/docs/decisions/)
-  (showcase app). `ADR-005` is the one number still meaning two things — the Form
-  component here, StyleX in the showcase — so cite that pair by path.
-  `registers.adrGrandfatheredDuplicates` in `devkit.config.json` is the
-  authority — editing it is what changes the gate — and every other repeat is a
-  collision `vp run adr:verify` rejects.
+  ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)). There
+  is now exactly one home, [`docs/decisions/`](docs/decisions/), and **a number
+  identifies exactly one ADR** — `registers.adrGrandfatheredDuplicates` in
+  `devkit.config.json` is empty, so every repeat is a collision `vp run
+adr:verify` rejects. Two homes existed while the showcase app kept its own;
+  that is why an older ADR may cite a number, or a path, that now resolves
+  somewhere else.
 
 Do **not** create an `ARCHITECTURE.md` because the directory is new. Create one
 only for a system: multiple files, non-local data flow, constraints the code

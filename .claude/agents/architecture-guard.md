@@ -15,8 +15,8 @@ You do not write code. You read, search, and report.
 
 ## Project layout (repo-root-relative paths — do not assume a single app)
 
-The shared UI lives in `packages/ui`, not in an app. There are **three** inventories
-and **two** ADR namespaces, so always cite a path, never a bare number.
+The shared UI lives in `packages/ui`, not in an app. There are **three** inventories,
+and **one** ADR home — a number names exactly one ADR.
 
 - Inventories (catalog of existing components, hooks, utilities, types, constants):
   - `packages/ui/src/INVENTORY.md` — the shared UI library (start here for anything UI)
@@ -25,9 +25,9 @@ and **two** ADR namespaces, so always cite a path, never a bare number.
 - `packages/ui/src/PATTERNS.md` — the single PATTERNS.md: naming conventions, StyleX
   composition order, the thin-shell/store-wiring rule, drawer-section pattern, filter contract
 - System `ARCHITECTURE.md` — Table, Form, the query builders, and other clusters whose wiring is not visible from one file. Do not treat a file per leaf component as required ([ADR-088](../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)). `vp run adr:list` for ADRs.
-- ADRs, in two homes whose low numbers **collide**:
-  - `docs/decisions/` — repo, published packages and toolchain decisions
-  - `apps/showcase/docs/decisions/` — component/app decisions (Modal, Tooltip, store, StyleX…)
+- ADRs, all in one home: `docs/decisions/` — repo, published packages, toolchain,
+  and the component decisions (Modal, Tooltip, the store, the grid) that were
+  filed against the showcase app before the Table moved into `packages/ui`.
 
 ## Procedure
 
@@ -44,10 +44,9 @@ Given the caller's task description:
    (Table and its stores, Form, the query builders). Do not glob every leaf
    `ARCHITECTURE.md` and do not tell the caller to create one for a new folder.
 
-4. **Read relevant ADRs.** Glob **both** `docs/decisions/` and
-   `apps/showcase/docs/decisions/` first, then read any whose title suggests relevance.
-   `ADR-005` is the one number both homes use, so cite that pair by path; every
-   other number names exactly one ADR.
+4. **Read relevant ADRs.** Glob `docs/decisions/` first, then read any whose title
+   suggests relevance. A number names exactly one ADR — no number is grandfathered
+   to mean two things any more.
 
 5. **Grep for existing implementations** if INVENTORY.md mentions a candidate artifact — confirm it still exists at the stated path before recommending reuse.
 

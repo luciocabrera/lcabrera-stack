@@ -139,7 +139,10 @@ and both pass a `typeof === 'number'` check.
 depicts a value that is already text beside it; a `progressbar` would announce
 the quantity twice and imply a task in progress. Its width is a StyleX **dynamic
 style** rather than an inline one, so the per-render value becomes a custom
-property and no `style` attribute stands in the way of a strict CSP (ADR-005).
+property and no `style` attribute stands in the way of a strict CSP. (StyleX-only
+styling is Non-Negotiable Rule 2 in `AGENTS.md`; this cited an app-home ADR-005
+that recorded it, and that record is gone — the number now names the `Form`
+component alone.)
 
 **What is not built:** share of the immediate parent, and any other derived
 measure — running totals, period-over-period, rank. The mechanism here is

@@ -6,7 +6,7 @@
 - **Issue:** #777 — unblocks its rendering half; retrospectively corrects #776
 - **Extends:** [ADR-038](./ADR-038-public-package-topology-by-runtime.md) — allocates a new seam across the same runtime split
 - **Narrows:** [ADR-039](./ADR-039-duplicate-over-undeclared-edges.md) — nothing it decided changes; this records the case it always permitted
-- **Related:** [ADR-009](../../apps/showcase/docs/decisions/ADR-009-serializable-filter-options-descriptors.md) (the descriptor pattern this reuses), [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md), [ADR-059](./ADR-059-aggregation-is-builder-generated.md), [ADR-063](./ADR-063-request-shaping-capabilities-on-the-loader-meta.md), [ADR-079](./ADR-079-drilling-from-a-group-to-its-rows.md), [ADR-080](./ADR-080-a-group-key-renders-in-its-own-column.md)
+- **Related:** [ADR-009](./ADR-009-serializable-filter-options-descriptors.md) (the descriptor pattern this reuses), [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md), [ADR-059](./ADR-059-aggregation-is-builder-generated.md), [ADR-063](./ADR-063-request-shaping-capabilities-on-the-loader-meta.md), [ADR-079](./ADR-079-drilling-from-a-group-to-its-rows.md), [ADR-080](./ADR-080-a-group-key-renders-in-its-own-column.md)
 
 ## Context
 

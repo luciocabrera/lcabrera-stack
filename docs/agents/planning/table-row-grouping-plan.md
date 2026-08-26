@@ -80,7 +80,7 @@ export type CommandId = string & { readonly __brand: 'CommandId' };
 - Availability (`isFilterable`/`isSortable`/`isStatic`) is re-derived ad hoc with
   `!== false` in 8+ files, never through that function.
 - **No registry** — deliberately deferred by
-  [ADR-011](../../../apps/showcase/docs/decisions/ADR-011-grid-interaction-architecture.md).
+  [ADR-011](../../decisions/ADR-011-grid-interaction-architecture.md).
 
 The rule for a new capability, `commands/ARCHITECTURE.md`: _"A new capability adds
 a sibling `*Commands.ts`. If it cannot reuse `deriveToggleCommandState` or
@@ -597,11 +597,12 @@ estimate is the displayed total.
    the loader `meta`. Grouping would have entrenched the split.
 
 > **Correction — all five go in `docs/decisions/`.** The original text sent
-> (2)–(3) to `apps/showcase/docs/decisions/` "alongside ADR-011". ADR-048's
+> (2)–(3) to the showcase app's own decisions folder "alongside ADR-011". ADR-048's
 > test is whether a decision leaves when the product moves out; both candidate homes
-> stay, so the tie-break is package-versus-app — and every line of grouping code
-> lives in `packages/ui` and `packages/server`. ADR-011 and ADR-012 sit in the app
-> home because they predate the Table's extraction into the package; they are
+> stayed at the time, so the tie-break is package-versus-app — and every line of
+> grouping code lives in `packages/ui` and `packages/server`. ADR-011 and ADR-012 sat
+> in the app home because they predated the Table's extraction into the package, and
+> have since moved to `docs/decisions/` for that reason; they are
 > grandfathered, not precedent.
 
 Number with `vp run adr:verify` (global sequence) — all five in `docs/decisions/`;
