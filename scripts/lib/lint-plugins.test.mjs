@@ -259,14 +259,11 @@ describe('workspaceRosters', () => {
   it('picks the blocks whose every glob names a whole workspace', () => {
     expect(
       workspaceRosters([
-        { includes: ['apps/react-router/**', 'packages/ui/**'] },
+        { includes: ['apps/showcase/**', 'packages/ui/**'] },
         { includes: ['**/*.test.ts'] },
         { includes: ['packages/server/**'] },
       ]),
-    ).toEqual([
-      ['apps/react-router/**', 'packages/ui/**'],
-      ['packages/server/**'],
-    ]);
+    ).toEqual([['apps/showcase/**', 'packages/ui/**'], ['packages/server/**']]);
   });
 
   it('rejects a block that mixes a workspace glob with a file pattern', () => {
@@ -281,14 +278,11 @@ describe('workspaceRosters', () => {
   it('excludes a block that is a subset of another', () => {
     expect(
       workspaceRosters([
-        { includes: ['apps/react-router/**'] },
+        { includes: ['apps/showcase/**'] },
         { includes: ['packages/server/**', 'packages/ui/**'] },
         { includes: ['packages/server/**'] },
       ]),
-    ).toEqual([
-      ['apps/react-router/**'],
-      ['packages/server/**', 'packages/ui/**'],
-    ]);
+    ).toEqual([['apps/showcase/**'], ['packages/server/**', 'packages/ui/**']]);
   });
 
   it('keeps two blocks that merely overlap, since neither is contained', () => {

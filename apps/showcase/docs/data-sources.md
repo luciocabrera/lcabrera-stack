@@ -123,7 +123,7 @@ before it matches the code and reports the same first line whichever way the fol
 went. Remove the `^` and see it for yourself.
 
 ```bash
-grep -n -A2 '^var isExternalApiEnabled' apps/react-router/build/server/index.js
+grep -n -A2 '^var isExternalApiEnabled' apps/showcase/build/server/index.js
 ```
 
 The same anchored read answers the sharper question, which host the loader will
@@ -132,7 +132,7 @@ collapses to a single `return "<the value>";` with the `requestUrl` branch
 eliminated:
 
 ```bash
-grep -n -A3 '^var getApiBaseUrl' apps/react-router/build/server/index.js
+grep -n -A3 '^var getApiBaseUrl' apps/showcase/build/server/index.js
 ```
 
 In **dev** there is no prebuilt bundle, so exporting the variable before the dev

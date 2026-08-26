@@ -30,8 +30,8 @@ tsconfig.entries.ts                       ← edit to add or retune one workspac
         ▼  vp run --filter @repo/ts-configs generate
         │
         ├── packages/ts-configs/tsconfig.app.json  ← this workspace's own (Node)
-        ├── apps/react-router/tsconfig.app.json    ← generated
-        ├── apps/react-router/tsconfig.node.json   ← generated
+        ├── apps/showcase/tsconfig.app.json    ← generated
+        ├── apps/showcase/tsconfig.node.json   ← generated
         └── … one per workspace
 ```
 

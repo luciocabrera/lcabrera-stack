@@ -4,7 +4,7 @@
 > feasibility/architecture evaluation (Strict Architect, Pragmatic Analyst,
 > Performance Engineer, DX Advocate) orchestrated against the blueprint in
 > [`.github/skills/typescript-api-engineering/generic-architecture-standards.md`](../../../.github/skills/typescript-api-engineering/generic-architecture-standards.md)
-> and the reference feature `apps/react-router/src/routes/enterprise-orders/`.
+> and the reference feature `apps/showcase/src/routes/enterprise-orders/`.
 > When a recommendation here graduates into an enforced decision, promote it to a
 > real ADR in the home its tier calls for — `docs/decisions/` for the repo, the
 > published packages and the toolchain — and cite it by number ([ADR-048](../../decisions/ADR-048-adr-taxonomy-and-one-sequence.md)).

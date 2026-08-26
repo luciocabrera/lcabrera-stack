@@ -111,7 +111,7 @@
       "count": 1,
       "status": "permanent",
       "reason": "A column resize handle is a window splitter: role=separator with keyboard resize semantics. HTML has no native element carrying that role, so Biome's suggested substitution has nothing to substitute.",
-      "ref": "ADR-035 §5, apps/react-router/docs/decisions/ADR-012-column-width.md"
+      "ref": "ADR-035 §5, apps/showcase/docs/decisions/ADR-012-column-width.md"
     },
     {
       "key": "biome **/SpacerRow.component.tsx noAriaHiddenOnFocusable",
@@ -167,7 +167,7 @@
       "count": 1,
       "status": "permanent",
       "reason": "The trigger adds role=button and tabIndex only when its child is not already natively interactive, so the handlers always sit on something focusable at runtime. Biome evaluates the JSX statically and cannot follow the conditional role.",
-      "ref": "ADR-035 §5, apps/react-router/docs/decisions/ADR-002-tooltip.md"
+      "ref": "ADR-035 §5, apps/showcase/docs/decisions/ADR-002-tooltip.md"
     },
     {
       "key": "biome **/eslint-local-rules/src/** noDefaultExport",
@@ -188,7 +188,7 @@
       "count": 1,
       "status": "permanent",
       "reason": "React Compiler owns memoization in this repo, so hand-maintained dependency arrays are deliberately absent. Biome's rule demands the exact thing ADR-004 removed; leaving it on would flag correct code across the whole package.",
-      "ref": "apps/react-router/docs/decisions/ADR-004-react-compiler-memoization.md, ADR-035 §5"
+      "ref": "apps/showcase/docs/decisions/ADR-004-react-compiler-memoization.md, ADR-035 §5"
     },
     {
       "key": "inline packages/ui/src/components/Tooltip/Tooltip.test.tsx typescript-eslint/unbound-method",
@@ -202,14 +202,14 @@
       "count": 6,
       "status": "permanent",
       "reason": "CSS anchor positioning (anchor-name, position-anchor, position-area) is a shipped browser feature that StyleX's property allowlist predates. Verified still load-bearing on 2026-07-22: deleting the directives produces 6 real eslint errors.",
-      "ref": "apps/react-router/docs/decisions/ADR-002-tooltip.md"
+      "ref": "apps/showcase/docs/decisions/ADR-002-tooltip.md"
     },
     {
       "key": "inline packages/ui/src/components/Tooltip/TooltipTrigger/TooltipTrigger.stylex.ts @stylexjs/valid-styles",
       "count": 1,
       "status": "permanent",
       "reason": "Same CSS anchor positioning gap as TooltipContent — StyleX cannot validate a property its allowlist does not yet contain, and the anchor name is what binds trigger to content.",
-      "ref": "apps/react-router/docs/decisions/ADR-002-tooltip.md"
+      "ref": "apps/showcase/docs/decisions/ADR-002-tooltip.md"
     },
     {
       "key": "inline packages/ui/src/utils/tests/mockDialogElement.util.ts typescript-eslint/unbound-method",

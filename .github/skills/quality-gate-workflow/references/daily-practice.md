@@ -13,7 +13,7 @@ Run the quality gate after every change set so correctness and maintainability d
 ## The Gate
 
 Per-workspace stages (`vp fmt`, `vp lint`, `vp run typecheck`, `vp run test`)
-run from the workspace whose files changed. `apps/react-router/` is an example,
+run from the workspace whose files changed. `apps/showcase/` is an example,
 not the default. From the repo root, `vp run check:safe` chains the whole gate.
 Stages 4 and 5 stay root-only.
 

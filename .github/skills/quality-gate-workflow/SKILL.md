@@ -26,7 +26,7 @@ This skill defines the mandatory validation sequence after code changes.
 
 > **Default working directory: the workspace whose files changed.** `vp run test`,
 > `vp check` and `vp run typecheck` resolve per workspace. From the repo root,
-> `vp run check:safe` chains the entire gate the way CI does. `apps/react-router/`
+> `vp run check:safe` chains the entire gate the way CI does. `apps/showcase/`
 > is an example of a workspace, not the implicit default.
 >
 > **Stages 4 and 5 are the exceptions** — both are root-only, repo-wide passes and
@@ -54,7 +54,7 @@ only `vp lint .` will report clean on code that fails CI, which now runs
 **Stage 4 is not covered by stage 6 either, and it is root-only.** `vp check` does
 not run Biome. Unlike stages 2 and 3 there is no per-workspace variant: `biome.jsonc`
 lives at the repo root and its `overrides` scope the react domain to the React
-workspaces that exist (`apps/react-router`, `packages/ui`), so one
+workspaces that exist (`apps/showcase`, `packages/ui`), so one
 repo-wide pass covers everything. `cd` to the root for this stage, then come back.
 Biome is the only linter here carrying the React-domain rules the other two miss
 (`noNestedComponentDefinitions`, `noDuplicatedSpreadProps`). CI runs
@@ -108,7 +108,7 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
 
 - **New artifact created, enhanced, or renamed** → one sentence in the owning
   workspace's `INVENTORY.md` (`packages/ui/src/`, `packages/server/src/`,
-  `apps/react-router/src/`, …).
+  `apps/showcase/src/`, …).
 - **New or changed command** → [`COMMANDS.md`](../../../COMMANDS.md) in the
   same commit (`vp run commands:verify` fails a miss).
 - **New naming/structural convention** → `packages/ui/src/PATTERNS.md` and the

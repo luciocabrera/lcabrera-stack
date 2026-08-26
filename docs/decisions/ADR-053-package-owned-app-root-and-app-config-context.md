@@ -3,7 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-07-25
 - **Issue:** [#436](https://github.com/luciocabrera/vite-react-compiler/issues/436)
-- **Relates to:** [ADR-007](../../apps/react-router/docs/decisions/ADR-007-barrel-export-boundaries.md) (barrel boundaries for private delegates), [ADR-038](ADR-038-public-package-topology-by-runtime.md) (what a published package may depend on), [ADR-046](ADR-046-public-api-surface-snapshot.md) (the surface this adds to).
+- **Relates to:** [ADR-007](../../apps/showcase/docs/decisions/ADR-007-barrel-export-boundaries.md) (barrel boundaries for private delegates), [ADR-038](ADR-038-public-package-topology-by-runtime.md) (what a published package may depend on), [ADR-046](ADR-046-public-api-surface-snapshot.md) (the surface this adds to).
 
 ## Context
 

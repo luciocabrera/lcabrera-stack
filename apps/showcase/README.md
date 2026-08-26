@@ -1,4 +1,4 @@
-# vite-react-compiler
+# showcase
 
 React 19 + TypeScript + StyleX + React Router 7 application with SSR support,
 built on Vite+.
@@ -90,9 +90,9 @@ Start local PostgreSQL from the monorepo root, then seed:
 
 ```bash
 vp run db:up
-vp run --filter vite-react-compiler seed
+vp run --filter showcase seed
 # or one-shot bring-up + seed
-vp run --filter vite-react-compiler db:seed
+vp run --filter showcase db:seed
 ```
 
 The seeder creates the database named by `DB_NAME` if it does not exist, then
@@ -189,5 +189,5 @@ vp run test
 - `AGENTS.md`
 - `CLAUDE.md`
 - `GEMINI.md`
-- [`apps/react-router/docs/decisions/ADR-007-barrel-export-boundaries.md`](docs/decisions/ADR-007-barrel-export-boundaries.md)
+- [`apps/showcase/docs/decisions/ADR-007-barrel-export-boundaries.md`](docs/decisions/ADR-007-barrel-export-boundaries.md)
 - `src/routes/enterprise-orders/README.md`

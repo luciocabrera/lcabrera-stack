@@ -1,11 +1,11 @@
 {
-  "apps/react-router/src/auth/buildLoginRedirectUrl.util.ts": [
+  "apps/showcase/src/auth/buildLoginRedirectUrl.util.ts": [
     "buildLoginRedirectUrl"
   ],
-  "apps/react-router/src/auth/decodeAuthClaims.util.ts": ["decodeAuthClaims"],
-  "apps/react-router/src/auth/parseAuthToken.util.ts": ["parseAuthToken"],
-  "apps/react-router/src/auth/readAuthCookie.util.ts": ["readAuthCookie"],
-  "apps/react-router/src/features/showcase/ShowcasePage/showcaseData.util.ts": [
+  "apps/showcase/src/auth/decodeAuthClaims.util.ts": ["decodeAuthClaims"],
+  "apps/showcase/src/auth/parseAuthToken.util.ts": ["parseAuthToken"],
+  "apps/showcase/src/auth/readAuthCookie.util.ts": ["readAuthCookie"],
+  "apps/showcase/src/features/showcase/ShowcasePage/showcaseData.util.ts": [
     "FAKE_API_DELAY_MS",
     "FETCH_DELAY_MS",
     "FETCH_PAGE_SIZE",
@@ -16,73 +16,73 @@
     "SHOWCASE_META_STATE",
     "STATIC_FRUITS"
   ],
-  "apps/react-router/src/routes/api/car-sales-paginated/parseCarSalesPageParams.util.ts": [
+  "apps/showcase/src/routes/api/car-sales-paginated/parseCarSalesPageParams.util.ts": [
     "parseCarSalesPageParams"
   ],
-  "apps/react-router/src/routes/api/enterprise-orders-delete/parseOrderId.util.ts": [
+  "apps/showcase/src/routes/api/enterprise-orders-delete/parseOrderId.util.ts": [
     "parseOrderId"
   ],
-  "apps/react-router/src/routes/api/wide-alltypes-150-paginated/parseWideAlltypes150PageParams.util.ts": [
+  "apps/showcase/src/routes/api/wide-alltypes-150-paginated/parseWideAlltypes150PageParams.util.ts": [
     "parseWideAlltypes150PageParams"
   ],
-  "apps/react-router/src/routes/car-sales/config/toCarSaleRow.util.ts": [
+  "apps/showcase/src/routes/car-sales/config/toCarSaleRow.util.ts": [
     "toCarSaleRow"
   ],
-  "apps/react-router/src/routes/enterprise-orders/config/deriveOrderTotals.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/config/deriveOrderTotals.util.ts": [
     "deriveOrderTotals"
   ],
-  "apps/react-router/src/routes/enterprise-orders/config/formatOrderNumber.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/config/formatOrderNumber.util.ts": [
     "formatOrderNumber"
   ],
-  "apps/react-router/src/routes/enterprise-orders/config/isEnterpriseOrdersResponse.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/config/isEnterpriseOrdersResponse.util.ts": [
     "isEnterpriseOrdersResponse"
   ],
-  "apps/react-router/src/routes/enterprise-orders/config/parseOrderFormData.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/config/parseOrderFormData.util.ts": [
     "parseOrderFormData"
   ],
-  "apps/react-router/src/routes/enterprise-orders/config/readOrderFormValues.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/config/readOrderFormValues.util.ts": [
     "readOrderFormValues"
   ],
-  "apps/react-router/src/routes/enterprise-orders/config/toOrderColumnValues.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/config/toOrderColumnValues.util.ts": [
     "toOrderColumnValues"
   ],
-  "apps/react-router/src/routes/enterprise-orders/config/toOrderFieldErrors.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/config/toOrderFieldErrors.util.ts": [
     "toOrderFieldErrors"
   ],
-  "apps/react-router/src/routes/enterprise-orders/config/toOrderFormValues.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/config/toOrderFormValues.util.ts": [
     "toOrderFormValues"
   ],
-  "apps/react-router/src/routes/enterprise-orders/config/toOrderInsertValues.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/config/toOrderInsertValues.util.ts": [
     "toOrderInsertValues"
   ],
-  "apps/react-router/src/routes/enterprise-orders/config/toOrderKeysetCursor.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/config/toOrderKeysetCursor.util.ts": [
     "toOrderKeysetCursor"
   ],
-  "apps/react-router/src/routes/enterprise-orders/config/toOrderUpdateValues.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/config/toOrderUpdateValues.util.ts": [
     "toOrderUpdateValues"
   ],
-  "apps/react-router/src/routes/enterprise-orders/utils/buildAddressLocalityRows.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/utils/buildAddressLocalityRows.util.ts": [
     "buildAddressLocalityRows"
   ],
-  "apps/react-router/src/routes/enterprise-orders/utils/orderFormFields.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/utils/orderFormFields.util.ts": [
     "buildOrderFormFields"
   ],
-  "apps/react-router/src/routes/enterprise-orders/utils/parseOrderIdParam.util.ts": [
+  "apps/showcase/src/routes/enterprise-orders/utils/parseOrderIdParam.util.ts": [
     "parseOrderIdParam"
   ],
-  "apps/react-router/src/routes/login/resolveRedirectTo.util.ts": [
+  "apps/showcase/src/routes/login/resolveRedirectTo.util.ts": [
     "resolveRedirectTo"
   ],
-  "apps/react-router/src/routes/login/toLoginFieldErrors.util.ts": [
+  "apps/showcase/src/routes/login/toLoginFieldErrors.util.ts": [
     "toLoginFieldErrors"
   ],
-  "apps/react-router/src/routes/wide-alltypes-150/config/serializeDatabaseValue.util.ts": [
+  "apps/showcase/src/routes/wide-alltypes-150/config/serializeDatabaseValue.util.ts": [
     "serializeDatabaseValue"
   ],
-  "apps/react-router/src/routes/wide-alltypes-150/config/toHexString.util.ts": [
+  "apps/showcase/src/routes/wide-alltypes-150/config/toHexString.util.ts": [
     "toHexString"
   ],
-  "apps/react-router/src/routes/wide-alltypes-150/config/toWideAlltypes150Row.util.ts": [
+  "apps/showcase/src/routes/wide-alltypes-150/config/toWideAlltypes150Row.util.ts": [
     "toWideAlltypes150Row"
   ],
   "packages/server/src/db/group-query-builder/assert-group-key-periods.util.ts": [

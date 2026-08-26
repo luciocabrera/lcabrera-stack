@@ -66,10 +66,10 @@ needs and are marked with what.
       "severity": "high",
       "file": ".github/skills/quality-gate-workflow/SKILL.md",
       "line": 42,
-      "summary": "The gate sequence tells the reader to run every stage from apps/react-router/, but two of the stages are root-only.",
-      "failure_scenario": "An agent follows the sequence from apps/react-router/. Biome and React Doctor resolve a different scope there, report clean on a change that fails them at the root, and the PR reaches CI believing the gate passed.",
+      "summary": "The gate sequence tells the reader to run every stage from apps/showcase/, but two of the stages are root-only.",
+      "failure_scenario": "An agent follows the sequence from apps/showcase/. Biome and React Doctor resolve a different scope there, report clean on a change that fails them at the root, and the PR reaches CI believing the gate passed.",
       "rule": "AGENTS.md §7 Post-Change Quality Gate",
-      "refutation": "Checked whether either stage has a per-workspace script that would make the instruction correct: apps/react-router/package.json defines neither, so both resolve only at the root."
+      "refutation": "Checked whether either stage has a per-workspace script that would make the instruction correct: apps/showcase/package.json defines neither, so both resolve only at the root."
     }
   ]
 }

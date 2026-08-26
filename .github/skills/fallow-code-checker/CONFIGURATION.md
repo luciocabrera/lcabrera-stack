@@ -8,7 +8,7 @@ loads on demand rather than in every session.
 Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects
 every pnpm workspace — **never add per-app fallow configs or dependencies.**
 Scope any command's output with `-w`, e.g.
-`vp run fallow:dead-code -w 'apps/react-router'`.
+`vp run fallow:dead-code -w 'apps/showcase'`.
 
 **Entry policy**: `entry` in `.fallowrc.json` is only for files invoked outside
 the import graph (root/app scripts, skill runner scripts, vite config fragments

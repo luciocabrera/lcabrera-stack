@@ -38,7 +38,7 @@ The premise is false in both directions, and the failure is silent.
 Any table carrying a `point`, `jsonb` or `numeric` column shows it, because the
 five-member vocabulary reports all three as `string`. Probed against a
 purpose-built fixture
-([`groupingLegality.smoke.test.ts`](../../apps/react-router/src/.server/groupingLegality.smoke.test.ts),
+([`groupingLegality.smoke.test.ts`](../../apps/showcase/src/.server/groupingLegality.smoke.test.ts),
 which creates and drops its own three-column table):
 
 - a `point` column maps to `string` — the type the design calls "the best key".

@@ -1,7 +1,7 @@
 ---
 name: fallow-code-checker
 description: Run a full fallow scan with vp and produce a prioritized, evidence-based report aligned to the code-smell-checker output contract. Use when running a full static analysis scan for dead code, unused exports, high complexity, or fallow findings.
-argument-hint: 'Optional scope, for example: repo, apps/react-router, or changed files only'
+argument-hint: 'Optional scope, for example: repo, apps/showcase, or changed files only'
 user-invocable: true
 context: fork
 agent: general-purpose
@@ -64,7 +64,7 @@ If inputs are missing, default to:
 
 It creates a timestamped `reports/fallow/runs/<ts>/`, writes `fallow.raw.json` into it, and echoes the directory as its last line. Note that path — it is used for all subsequent saves.
 
-To scope the report to specific workspaces, pass a fallow `-w` glob, e.g. `vp run fallow:report -w 'apps/react-router'`. The full dependency graph is analyzed either way; the glob only filters reported findings.
+To scope the report to specific workspaces, pass a fallow `-w` glob, e.g. `vp run fallow:report -w 'apps/showcase'`. The full dependency graph is analyzed either way; the glob only filters reported findings.
 
 Use the JSON file as the source of truth for findings. Human output from the same run is for context only.
 
@@ -182,5 +182,5 @@ Before finalizing:
 ## Example Prompts
 
 - /fallow-code-checker run a full fallow scan and give me quick wins first
-- /fallow-code-checker scan apps/react-router and separate real issues from false positives
+- /fallow-code-checker scan apps/showcase and separate real issues from false positives
 - /fallow-code-checker run after this merge and propose a safe cleanup sequence

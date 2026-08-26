@@ -31,7 +31,7 @@ describe('isRootAnchored', () => {
     expect(isRootAnchored('packages/ui/src/INVENTORY.md', REPO_ROOTS)).toBe(
       true,
     );
-    expect(isRootAnchored('apps/react-router', REPO_ROOTS)).toBe(true);
+    expect(isRootAnchored('apps/showcase', REPO_ROOTS)).toBe(true);
     expect(isRootAnchored('.github/skills/react-19/SKILL.md', REPO_ROOTS)).toBe(
       true,
     );
@@ -125,7 +125,7 @@ describe('extractCandidates', () => {
 
   it('keeps prose on both sides of a fenced block', () => {
     const markdown = [
-      'Before `apps/react-router/src/routes.ts`',
+      'Before `apps/showcase/src/routes.ts`',
       '```',
       '`packages/ignored/thing.ts`',
       '```',
@@ -137,7 +137,7 @@ describe('extractCandidates', () => {
         left.localeCompare(right),
       ),
     ).toEqual([
-      'apps/react-router/src/routes.ts',
+      'apps/showcase/src/routes.ts',
       'packages/utils/ARCHITECTURE.md',
     ]);
   });
@@ -191,7 +191,7 @@ describe('isDatedRecord', () => {
   it('recognises an ADR in each of the three homes', () => {
     expect(isDatedRecord('docs/decisions/ADR-044-x.md')).toBe(true);
     expect(isDatedRecord('docs/other/decisions/ADR-016-x.md')).toBe(true);
-    expect(isDatedRecord('apps/react-router/docs/decisions/ADR-003-x.md')).toBe(
+    expect(isDatedRecord('apps/showcase/docs/decisions/ADR-003-x.md')).toBe(
       true,
     );
   });

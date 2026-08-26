@@ -69,7 +69,7 @@ dependencies, the API-surface gate, and the two rename traps that silently break
 consumer — lives in [`packages/CLAUDE.md`](packages/CLAUDE.md), which loads
 whenever you work under `packages/`. Read it before editing any manifest there.
 
-The apps are the harness. `apps/react-router` is a **React 19 + TypeScript +
+The apps are the harness. `apps/showcase` is a **React 19 + TypeScript +
 StyleX + React Router 7** SSR application that puts the packages under load —
 a feature-rich data Table with store-based state management, virtualization,
 infinite scroll, and granular subscriptions via `useSyncExternalStore`. It is
@@ -116,9 +116,9 @@ what each tsconfig denies is in [`packages/CLAUDE.md`](packages/CLAUDE.md) and
 publishing merged neither pair is
 [ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md).
 
-All source paths below (e.g. `src/components/`) are relative to `apps/react-router/` unless otherwise noted.
+All source paths below (e.g. `src/components/`) are relative to `apps/showcase/` unless otherwise noted.
 
-### Source Structure (apps/react-router/src/)
+### Source Structure (apps/showcase/src/)
 
 **This app is deliberately thin.** Components, hooks, contexts, design tokens,
 shared utils and the Table live in `@lcabrera/ui`; pure helpers in `@lcabrera/utils`.
@@ -280,13 +280,13 @@ deliberate violation (Rule 14). Handling a _finding_ is Non-Negotiable Rule 11 �
 verify, then fix; never suppress. The public packages (§1) take no
 suppressions at all, enforced by `vp run suppressions:verify`.
 
-**`test:all` vs `test:ci`.** No suite here needs a database, so the two differ only in ordering: `test:ci` runs `vite-react-compiler` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing; it is what CI runs.
+**`test:all` vs `test:ci`.** No suite here needs a database, so the two differ only in ordering: `test:ci` runs `showcase` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing; it is what CI runs.
 
 **A workspace with real-Postgres tests must split them**: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it. Nothing here needs this today — `UNIT_TASK_PACKAGES` in `scripts/lib/affected-tests.mjs` is empty — but the machinery is still wired, so a DB-bound workspace can rejoin `test:ci` without dragging its whole suite in.
 
 ### Fallow Static Analysis (run from repo root)
 
-Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects every pnpm workspace — never add per-app fallow configs or dependencies. Scope any command's output with `-w`, e.g. `vp run fallow:dead-code -w 'apps/react-router'`.
+Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects every pnpm workspace — never add per-app fallow configs or dependencies. Scope any command's output with `-w`, e.g. `vp run fallow:dead-code -w 'apps/showcase'`.
 
 `reports/fallow/` is the **single canonical location** for every fallow artifact; only `reports/fallow/baselines/` is tracked. The split is a rule, not a habit: a gate compares against it → tracked; it reports what a tool found → produced on demand ([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md)). **So there is no snapshot to read — run the command and read what it writes.**
 
@@ -301,12 +301,12 @@ Entry policy, the full output table, the glob-crosses-`/` trap and the coverage-
 ### Local Database Workflow (run from repo root)
 
 Commands: [COMMANDS.md §4 → Database](COMMANDS.md#database). `vp run db:up` starts
-local Postgres; seeding goes through `vp run --filter vite-react-compiler seed`,
+local Postgres; seeding goes through `vp run --filter showcase seed`,
 because `seed`/`db:seed` are **workspace scripts, not root scripts**.
 
 **The showcase owns the DDL for the tables it serves and seeds itself**
 ([ADR-071](docs/decisions/ADR-071-split-the-demo-database-setup.md)) from
-`apps/react-router/db/`, which is what creates `enterprise_orders`. The other
+`apps/showcase/db/`, which is what creates `enterprise_orders`. The other
 copy of `setup_large_data.sql` lives in a separate repository, so the
 duplication ADR-071 describes is cross-repo and the two can drift with nothing
 here to catch it.
@@ -497,7 +497,7 @@ the decision that architecture files describe systems, not folders, is
   ADR branch appends to
   ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)). The
   homes are [`docs/decisions/`](docs/decisions/) (repo, packages, toolchain)
-  and [`apps/react-router/docs/decisions/`](apps/react-router/docs/decisions/)
+  and [`apps/showcase/docs/decisions/`](apps/showcase/docs/decisions/)
   (showcase app). `ADR-005` is the one number still meaning two things — the Form
   component here, StyleX in the showcase — so cite that pair by path.
   `registers.adrGrandfatheredDuplicates` in `devkit.config.json` is the

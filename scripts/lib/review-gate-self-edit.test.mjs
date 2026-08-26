@@ -383,7 +383,7 @@ describe('whether the sweep should judge a pull request at all', () => {
   it('judges an ordinary pull request', () => {
     expect(
       gateJudgesItsOwnEdit({
-        changedFiles: ['apps/react-router/src/root.tsx'],
+        changedFiles: ['apps/showcase/src/root.tsx'],
         closure,
       }),
     ).toBe(false);
@@ -393,7 +393,7 @@ describe('whether the sweep should judge a pull request at all', () => {
     // `helper.mjs` somewhere else is a different file and must not withhold.
     expect(
       gateJudgesItsOwnEdit({
-        changedFiles: ['apps/react-router/helper.mjs'],
+        changedFiles: ['apps/showcase/helper.mjs'],
         closure,
       }),
     ).toBe(false);

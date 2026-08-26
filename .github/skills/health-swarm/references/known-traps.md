@@ -47,7 +47,7 @@ A static-analysis flag is a **hypothesis, not a measurement**. Issue #454
 already tracks "react-doctor flagged it but nobody benchmarked it", so
 rediscovering that is a duplicate.
 
-The client asset output directory under `apps/react-router` is **not emptied
+The client asset output directory under `apps/showcase` is **not emptied
 between builds**, so any `find`-based byte total there mixes stale hashes from
 previous builds. Separate current-build files by mtime.
 
@@ -72,7 +72,7 @@ lives at the root only.
 
 **An ADR is a dated record.** A superseded ADR naming deleted code, or an ADR
 naming the path it renamed away from, is correct — not drift. `docs/decisions/`
-and `apps/react-router/docs/decisions/` are two homes on **one** number sequence
+and `apps/showcase/docs/decisions/` are two homes on **one** number sequence
 (ADR-048); `005` predates it and still means two things, so cite that pair with
 its path. A third home left the repo with a second product, which is why an old
 ADR may cite a number that now resolves only once.

@@ -31,7 +31,7 @@ vp run db:up
 ### 2. Create the table and its demo rows
 
 ```bash
-vp run --filter vite-react-compiler seed
+vp run --filter showcase seed
 ```
 
 This applies
@@ -218,7 +218,7 @@ real create → read → update → list/count → delete round-trip through the
 
 ```bash
 vp run db:up          # once, from the repo root
-vp run test:smoke     # from apps/react-router — sources DB_* + sets SMOKE_DB
+vp run test:smoke     # from apps/showcase — sources DB_* + sets SMOKE_DB
 ```
 
 The suite deletes the single row it creates (the delete is part of the flow), so it

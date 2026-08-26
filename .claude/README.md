@@ -193,7 +193,7 @@ Two layers:
 - **`settings.json` (committed)** — team-shared allow-list: the `vp` toolchain, quality-gate commands, skill scripts. Anything every contributor will run repeatedly and trusts unconditionally.
 - **`settings.local.json` (not committed — ignored via global gitignore)** — personal one-off approvals accumulated during your own sessions. Keep it small; when an entry proves generally useful, promote it to `settings.json`.
 
-Entries use glob-style patterns: `Bash(cd apps/react-router && vp lint*)` approves any `vp lint` invocation prefixed with that `cd`.
+Entries use glob-style patterns: `Bash(cd apps/showcase && vp lint*)` approves any `vp lint` invocation prefixed with that `cd`.
 
 ---
 

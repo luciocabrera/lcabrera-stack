@@ -26,7 +26,7 @@ Stop at the first step that answers.
 Check the owning workspace's `INVENTORY.md` before writing anything —
 [`packages/ui/src/INVENTORY.md`](../../packages/ui/src/INVENTORY.md),
 [`packages/server/src/INVENTORY.md`](../../packages/server/src/INVENTORY.md),
-[`apps/react-router/src/INVENTORY.md`](../../apps/react-router/src/INVENTORY.md) —
+[`apps/showcase/src/INVENTORY.md`](../../apps/showcase/src/INVENTORY.md) —
 and [`packages/ui/src/PATTERNS.md`](../../packages/ui/src/PATTERNS.md) for how it
 is meant to be built.
 
@@ -113,7 +113,7 @@ definition, and could not honestly describe both.
 
 ### Where the conformance guarantee lives
 
-**In the app** — `apps/react-router` is the only thing that legitimately depends
+**In the app** — `apps/showcase` is the only thing that legitimately depends
 on several packages at once, so cross-package conformance is verified there.
 
 **Never the converse: a guarantee a _package_ relies on must not live in an app.**

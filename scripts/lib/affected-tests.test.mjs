@@ -9,7 +9,7 @@ import { resolveAffected, resolveTestGroups } from './affected-tests.mjs';
 // those on every PR and lint config cannot change how a test builds or runs. The
 // graph is synthetic so the cases are readable and there is no filesystem I/O:
 // vite-configs is a GLOBAL package everything depends on, and the dependent chain
-// is utils -> ui -> react-router.
+// is utils -> ui -> showcase.
 const GRAPH = [
   {
     name: 'vite-configs',
@@ -33,10 +33,10 @@ const GRAPH = [
     deps: new Set(['@lcabrera/vite-config', '@lcabrera/utils']),
   },
   {
-    name: 'react-router',
+    name: 'showcase',
     kind: 'app',
-    dir: 'apps/react-router',
-    pkgName: 'vite-react-compiler',
+    dir: 'apps/showcase',
+    pkgName: 'showcase',
     deps: new Set(['@lcabrera/vite-config', '@lcabrera/ui']),
   },
 ];
@@ -71,10 +71,10 @@ describe('resolveAffected — lint-only carve-out', () => {
       'packages/utils/src/foo.ts',
     ]);
     expect(result.mode).toBe('scoped');
-    // utils changed -> its dependents ui + react-router; vite-configs is NOT
+    // utils changed -> its dependents ui + showcase; vite-configs is NOT
     // pulled in, because its only changed file was filtered out.
     expect(new Set(result.packages)).toEqual(
-      new Set(['@lcabrera/utils', '@lcabrera/ui', 'vite-react-compiler']),
+      new Set(['@lcabrera/utils', '@lcabrera/ui', 'showcase']),
     );
   });
 });
@@ -104,7 +104,7 @@ describe('resolveAffected — ordinary scoping is unchanged', () => {
     const result = affected(['packages/utils/src/foo.ts']);
     expect(result.mode).toBe('scoped');
     expect(new Set(result.packages)).toEqual(
-      new Set(['@lcabrera/utils', '@lcabrera/ui', 'vite-react-compiler']),
+      new Set(['@lcabrera/utils', '@lcabrera/ui', 'showcase']),
     );
   });
 

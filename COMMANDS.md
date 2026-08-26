@@ -23,10 +23,10 @@ Everything runs through `vp` (Vite+). **Never use `pnpm`/`npm`/`yarn` directly.*
 Read this before hunting for a task definition. A runnable task can come from
 **three** places, and grepping `package.json` alone will not find it:
 
-| Source                                        | Example                                                         |
-| --------------------------------------------- | --------------------------------------------------------------- |
-| `package.json` → `scripts`                    | `packages/ui`'s `typecheck`                                     |
-| A shared factory from `@lcabrera/vite-config` | `apps/react-router`'s `test` (via `createReactRouterRunConfig`) |
+| Source                                        | Example                                                     |
+| --------------------------------------------- | ----------------------------------------------------------- |
+| `package.json` → `scripts`                    | `packages/ui`'s `typecheck`                                 |
+| A shared factory from `@lcabrera/vite-config` | `apps/showcase`'s `test` (via `createReactRouterRunConfig`) |
 
 This is why `grep -l '"test":' apps/*/package.json packages/*/package.json`
 finds almost nothing yet `vp run -r test` runs suites nearly everywhere: the
@@ -41,7 +41,7 @@ workspace, by **package name** not directory), `--parallel`. Note `--filter` and
 
 ## 2. Daily commands
 
-Run from the workspace you are working in (e.g. `apps/react-router/`).
+Run from the workspace you are working in (e.g. `apps/showcase/`).
 
 | Task                 | Command                |
 | -------------------- | ---------------------- |
@@ -155,7 +155,7 @@ project-specific belongs in that project's own `package.json`.
 
 `test:all` vs `test:ci`: no suite here needs a database, so the two differ only
 in ordering — `test:ci` runs
-`vite-react-compiler` last so the PR's coverage summary is the fresh one. Use
+`showcase` last so the PR's coverage summary is the fresh one. Use
 `test:ci` before pushing; it is what CI runs.
 
 `test:scripts` is chained into both, and needs to be: root `scripts/` is **not a
@@ -168,7 +168,7 @@ exactly what compliant input reports, which is nothing.
 diffs the working tree against the branch point (`git merge-base` with
 `origin/main`; override the base with `TEST_CHANGED_BASE`), maps changed files to
 workspaces, and adds every workspace that transitively **depends on** them — so a
-`packages/ui` edit still exercises `apps/react-router`. It prints a per-workspace
+`packages/ui` edit still exercises `apps/showcase`. It prints a per-workspace
 summary of what runs and what is skipped. Only the few files that change how every
 workspace resolves its tests — `pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root
 `vite.config.ts`, and the shared `vite-configs`/`ts-configs` packages — force the
@@ -176,7 +176,7 @@ full suite (a real dependency change always bumps the lockfile); every other
 out-of-workspace change (root package.json scripts, lint/tsconfig configs, docs,
 root `scripts/`) affects no suite and runs nothing. Task substitution mirrors
 `test:ci`: the scan packages run their DB-free `test:unit`, and with `--ci` (`node
-scripts/test-changed.mjs --ci`) `vite-react-compiler` runs its coverage `test:ci`
+scripts/test-changed.mjs --ci`) `showcase` runs its coverage `test:ci`
 last. `--dry-run` prints the `vp run` commands without executing them. CI's Unit
 Tests job (and its coverage report) scope to the diff on pull requests; pushes to
 `main` still run the full `test:ci`.
@@ -244,16 +244,16 @@ the script exits without opening anything.
 | `vp run dev:showcase`   | the showcase frontend — Postgres is all it needs |
 | `vp run start:showcase` | the built showcase                               |
 
-Every table route in `apps/react-router` serves its own rows from Postgres, so
+Every table route in `apps/showcase` serves its own rows from Postgres, so
 the showcase needs nothing but a database — see
-[the app's data-sources doc](apps/react-router/docs/data-sources.md).
+[the app's data-sources doc](apps/showcase/docs/data-sources.md).
 
 **The external-API lane still exists, and nothing in this repository serves it.**
 Setting `VITE_API_URL` points the same routes at an external server instead of
 this app's own loaders. To exercise it you supply that server: it must serve the
 paginated row and filter-option endpoints the routes call, over the column lists
-in `apps/react-router/src/routes/*/config/`, which are the contract
-([the app's data-sources doc](apps/react-router/docs/data-sources.md) describes
+in `apps/showcase/src/routes/*/config/`, which are the contract
+([the app's data-sources doc](apps/showcase/docs/data-sources.md) describes
 both transports). No such server ships from here, and the lane is not needed to
 run the showcase — every table route reads Postgres in process. (An app-level
 `.env` is loaded after the variable is exported, so one that sets `VITE_API_URL`
@@ -262,19 +262,19 @@ deliberate.)
 
 ### Database
 
-| Command                                       | Does                                    |
-| --------------------------------------------- | --------------------------------------- |
-| `vp run db:up`                                | start local Postgres                    |
-| `vp run db:status`                            | container status                        |
-| `vp run db:down`                              | stop it                                 |
-| `vp run --filter vite-react-compiler seed`    | create + seed the showcase's own tables |
-| `vp run --filter vite-react-compiler db:seed` | bring up + seed                         |
+| Command                            | Does                                    |
+| ---------------------------------- | --------------------------------------- |
+| `vp run db:up`                     | start local Postgres                    |
+| `vp run db:status`                 | container status                        |
+| `vp run db:down`                   | stop it                                 |
+| `vp run --filter showcase seed`    | create + seed the showcase's own tables |
+| `vp run --filter showcase db:seed` | bring up + seed                         |
 
 `seed` and `db:seed` are **workspace scripts, not root scripts** — they need the
 `--filter` (or run them from the workspace directory). **Each side owns its own
 DDL and its own runner**
 ([ADR-071](docs/decisions/ADR-071-split-the-demo-database-setup.md)): the
-showcase's is `apps/react-router/db/`, applied through `pg` so it needs only
+showcase's is `apps/showcase/db/`, applied through `pg` so it needs only
 Docker and Node. Seeding the showcase is what creates `enterprise_orders`. It
 reads env from `docker/local/.env` and then the workspace's own `.env`; the
 frontend proxies `/api` to `http://localhost:3001` for the external-API lane.
@@ -282,7 +282,7 @@ frontend proxies `/api` to `http://localhost:3001` for the external-API lane.
 ### Fallow static analysis
 
 Configured once at the repo root (`.fallowrc.json`); it auto-detects every
-workspace. Scope any of these with `-w`, e.g. `-w 'apps/react-router'`. Full
+workspace. Scope any of these with `-w`, e.g. `-w 'apps/showcase'`. Full
 policy — entry rules, the CRAP/coverage trap, output conventions — is in
 [AGENTS.md → Fallow Static Analysis](AGENTS.md#fallow-static-analysis-run-from-repo-root).
 
@@ -730,7 +730,7 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 
 | Workspace                     | Package name               | Notable extra tasks                                                                                                    |
 | ----------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `apps/react-router`           | `vite-react-compiler`      | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
+| `apps/showcase`               | `showcase`                 | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
 | `packages/ui`                 | `@lcabrera/ui`             | `check:public-api`, `test:coverage`, `bench`                                                                           |
 | `packages/server`             | `@lcabrera/server`         | `test:coverage`                                                                                                        |
 | `packages/node-runtime`       | `@lcabrera/node`           | `build`, `test:coverage`                                                                                               |

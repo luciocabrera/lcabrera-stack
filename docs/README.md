@@ -59,10 +59,10 @@ that ADR's own table still lists the third home it was written under, so
 [`adr-registry.mjs`](../packages/repo-standards/scripts/adr-registry.mjs) — which
 `vp run adr:verify` enforces — is the live set.
 
-| Home                                                                        | Holds                                                                   |
-| --------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [`docs/decisions/`](./decisions/)                                           | the repo, the published `@lcabrera/*` packages, the toolchain           |
-| [`apps/react-router/docs/decisions/`](../apps/react-router/docs/decisions/) | the showcase app — Modal, Tooltip, the store pattern, grid interaction… |
+| Home                                                                | Holds                                                                   |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [`docs/decisions/`](./decisions/)                                   | the repo, the published `@lcabrera/*` packages, the toolchain           |
+| [`apps/showcase/docs/decisions/`](../apps/showcase/docs/decisions/) | the showcase app — Modal, Tooltip, the store pattern, grid interaction… |
 
 A third home existed while a second product lived here, and left with it. That
 is why an old ADR may cite a number which now resolves in only one place.

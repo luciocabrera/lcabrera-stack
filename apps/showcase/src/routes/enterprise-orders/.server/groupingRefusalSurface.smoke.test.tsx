@@ -41,7 +41,7 @@ import { selectOrderGroupingCapabilities } from './enterpriseOrders.service';
  * bare `vp run test` skip it:
  *
  *   vp run db:up            # once, from the repo root
- *   vp run test:smoke       # from apps/react-router (sources DB_* + sets SMOKE_DB)
+ *   vp run test:smoke       # from apps/showcase (sources DB_* + sets SMOKE_DB)
  */
 const IS_SMOKE_ENABLED = Boolean(process.env.SMOKE_DB);
 

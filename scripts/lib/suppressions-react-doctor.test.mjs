@@ -13,11 +13,11 @@ const PUBLIC_FILES = [
 ];
 const OTHER_FILES = [
   'apps/docs-site/src/hooks/useRunStatusSocket.hook.ts',
-  'apps/react-router/src/root.tsx',
+  'apps/showcase/src/root.tsx',
 ];
 const PROJECT_DIRS = [
   'apps/docs-site',
-  'apps/react-router',
+  'apps/showcase',
   'packages/ui',
   'packages/utils',
 ];

@@ -27,7 +27,7 @@ The demo schema lived in one place: the API workspace's `db/`, applied by a root
 script (`scripts/seed-db.cjs`) that named both files by path. That was coherent
 while the API servers were the only thing that talked to Postgres.
 
-Two changes broke it. [ADR-070](../../apps/react-router/docs/decisions/ADR-070-showcase-serves-its-own-table-rows.md)
+Two changes broke it. [ADR-070](../../apps/showcase/docs/decisions/ADR-070-showcase-serves-its-own-table-rows.md)
 made the showcase serve `car_sales` and `wide_alltypes_150` from its own
 process, joining `enterprise_orders`, which it already served — so the showcase
 now queries every table in that directory. And #686 moves the two API
@@ -145,6 +145,6 @@ is the source of truth, so this file alone cannot fix it).
 - Issue #689, epic #686
 - [ADR-039](./ADR-039-duplicate-over-undeclared-edges.md) — duplicate rather than
   depend on an edge that resolves in only one place
-- [ADR-070](../../apps/react-router/docs/decisions/ADR-070-showcase-serves-its-own-table-rows.md) — why the showcase
+- [ADR-070](../../apps/showcase/docs/decisions/ADR-070-showcase-serves-its-own-table-rows.md) — why the showcase
   queries these tables at all
-- [`apps/react-router/db/README.md`](../../apps/react-router/db/README.md)
+- [`apps/react-router/db/README.md`](../../apps/showcase/db/README.md)

@@ -39,7 +39,7 @@ drill against a single batch's id range when the size spread is what you are
 testing.
 
 ```sh
-docker exec -i <container> psql -U <user> -d <db> < apps/react-router/db/seed_olap_drill.sql
+docker exec -i <container> psql -U <user> -d <db> < apps/showcase/db/seed_olap_drill.sql
 ```
 
 To undo, delete by customer id — every appended row carries `900000 + <pool

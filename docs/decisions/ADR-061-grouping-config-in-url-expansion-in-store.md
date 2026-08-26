@@ -209,9 +209,9 @@ user opened. The path key is what makes the mitigation above possible at all.
 ## References
 
 - [`docs/agents/planning/table-row-grouping-plan.md`](../agents/planning/table-row-grouping-plan.md) §2.6, §5 — the design session this decision came out of
-- [ADR-010](../../apps/react-router/docs/decisions/ADR-010-cookie-persistence-server-action.md) — the persist-cookie flow this rides
+- [ADR-010](../../apps/showcase/docs/decisions/ADR-010-cookie-persistence-server-action.md) — the persist-cookie flow this rides
 - [ADR-056](./ADR-056-generic-table-route-data-path.md) — the loader factory whose remount key is discussed above
 - [ADR-059](./ADR-059-aggregation-is-builder-generated.md) — the grouped SQL the URL configuration drives
-- [ADR-009](../../apps/react-router/docs/decisions/ADR-009-serializable-filter-options-descriptors.md) — why loader-crossing data is plain and serializable
+- [ADR-009](../../apps/showcase/docs/decisions/ADR-009-serializable-filter-options-descriptors.md) — why loader-crossing data is plain and serializable
 - [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md) — how the configuration and expansion state placed here are rendered: a grid-owned hierarchy column, with aggregates aligned under their own columns
 - Issues #553 (this decision), #557 / #612 (the remount key, deleted), #561 (the codec and its refusal contract)

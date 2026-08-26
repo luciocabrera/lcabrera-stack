@@ -6,7 +6,7 @@
  *
  * Why this exists: AGENTS.md § "Reuse Before You Build" makes the three
  * inventories (`packages/ui/src`, `packages/server/src`,
- * `apps/react-router/src`) mandatory reading before writing anything new, but
+ * `apps/showcase/src`) mandatory reading before writing anything new, but
  * nothing failed when an artifact was added without its entry. Closing #579
  * found nineteen such gaps, some a year old; #811 fixed them and named this
  * gate in its own retrospective. The matching rule — a name in backticks

@@ -250,7 +250,7 @@ jobs:
         # Apps are the harness; a package is consumed where no `apps/` exists,
         # so a relative link into one is dead for every consumer. Existence is
         # what discriminates — `apps/web` in a config example is generic
-        # illustration and passes; `apps/react-router` is this repo's data.
+        # illustration and passes; `apps/showcase` is this repo's data.
         run: vp run package-refs:verify
 
       - name: Nothing names a product or workspace that left this repo
@@ -645,7 +645,7 @@ jobs:
           name: coverage-report
           path: |
             ./coverage/monorepo-coverage-summary.json
-            ./apps/react-router/coverage/coverage-summary.json
+            ./apps/showcase/coverage/coverage-summary.json
             ./coverage/coverage-summary.json
           if-no-files-found: ignore
           compression-level: 9
@@ -692,7 +692,7 @@ jobs:
             // Fallback: the legacy single-workspace table, so the comment never
             // regresses to nothing if the matrix file is absent.
             const buildLegacy = () => {
-              const path = ['./apps/react-router/coverage/coverage-summary.json', './coverage/coverage-summary.json']
+              const path = ['./apps/showcase/coverage/coverage-summary.json', './coverage/coverage-summary.json']
                 .find((p) => fs.existsSync(p));
               if (!path) return null;
               const total = JSON.parse(fs.readFileSync(path, 'utf-8')).total;

@@ -61,8 +61,7 @@ ruleTester.run('domain-folder-filename', rule, {
     {
       code,
       errors: [{ messageId: 'folderNamed' }],
-      filename:
-        'apps/react-router/src/queue/deterministicJobConfigs.constants.ts',
+      filename: 'apps/showcase/src/queue/deterministicJobConfigs.constants.ts',
     },
     // A test file is checked against the subject it covers, so a misnamed
     // `*.constants.test.ts` cannot slip through where its subject could not.
@@ -88,8 +87,7 @@ ruleTester.run('domain-folder-filename', rule, {
     {
       code,
       errors: [{ messageId: 'folderNamed' }],
-      filename:
-        'apps/react-router/src/routes/car-sales-infinite/CarSales.types.ts',
+      filename: 'apps/showcase/src/routes/car-sales-infinite/CarSales.types.ts',
       options: [{ artifactFolders: [] }],
     },
     // Each option REPLACES its default rather than extending it: naming `bits`
@@ -124,7 +122,7 @@ ruleTester.run('domain-folder-filename', rule, {
     // camelCase folder, camelCase file — same subject, different spelling
     {
       code,
-      filename: 'apps/react-router/src/features/carSales/carSales.constants.ts',
+      filename: 'apps/showcase/src/features/carSales/carSales.constants.ts',
     },
     {
       code,
@@ -146,7 +144,7 @@ ruleTester.run('domain-folder-filename', rule, {
     {
       code,
       filename:
-        'apps/react-router/src/features/showcase/ShowcasePage/ShowcasePage.types.ts',
+        'apps/showcase/src/features/showcase/ShowcasePage/ShowcasePage.types.ts',
     },
 
     // --- artifact folders: everything under a `routes/` tree ---
@@ -156,26 +154,25 @@ ruleTester.run('domain-folder-filename', rule, {
     {
       code,
       filename:
-        'apps/react-router/src/routes/orders/trigger-sync/triggerSync.constants.ts',
+        'apps/showcase/src/routes/orders/trigger-sync/triggerSync.constants.ts',
     },
     {
       code,
       filename:
-        'apps/react-router/src/routes/orders/order-detail/OrderDetail.types.ts',
+        'apps/showcase/src/routes/orders/order-detail/OrderDetail.types.ts',
     },
     {
       code,
-      filename: 'apps/react-router/src/routes/orders/Orders.constants.tsx',
+      filename: 'apps/showcase/src/routes/orders/Orders.constants.tsx',
+    },
+    {
+      code,
+      filename: 'apps/showcase/src/routes/car-sales-infinite/CarSales.types.ts',
     },
     {
       code,
       filename:
-        'apps/react-router/src/routes/car-sales-infinite/CarSales.types.ts',
-    },
-    {
-      code,
-      filename:
-        'apps/react-router/src/routes/wide-alltypes-150/WideAlltypes150.constants.ts',
+        'apps/showcase/src/routes/wide-alltypes-150/WideAlltypes150.constants.ts',
     },
 
     // --- catch-all folders: the folder names a kind, not a subject ---
@@ -204,7 +201,7 @@ ruleTester.run('domain-folder-filename', rule, {
     {
       code,
       filename:
-        'apps/react-router/src/routes/car-sales/config/carSales.constants.ts',
+        'apps/showcase/src/routes/car-sales/config/carSales.constants.ts',
     },
     // a package root is not a domain folder
     { code, filename: 'packages/runner/src/runSkillAgent.types.ts' },

@@ -4,8 +4,8 @@
     "scripts/**/*.{cjs,mjs,js}",
     "packages/devkit/scripts/*.mjs",
     "packages/repo-standards/scripts/*.mjs",
-    "apps/react-router/lighthouse.config.js",
-    "apps/react-router/config/*.ts",
+    "apps/showcase/lighthouse.config.js",
+    "apps/showcase/config/*.ts",
     "packages/ui/config/*.ts",
     "apps/*/scripts/**/*.{ts,js,mjs}"
   ],
@@ -40,11 +40,11 @@
   ],
   "ignoreExports": [
     {
-      "file": "apps/react-router/src/features/showcase/ShowcasePage/ShowcasePage.stylex.ts",
+      "file": "apps/showcase/src/features/showcase/ShowcasePage/ShowcasePage.stylex.ts",
       "exports": ["*"]
     },
     {
-      "file": "apps/react-router/src/features/showcase/ShowcasePage/SidePanelSection/SidePanelSection.stylex.ts",
+      "file": "apps/showcase/src/features/showcase/ShowcasePage/SidePanelSection/SidePanelSection.stylex.ts",
       "exports": ["*"]
     }
   ],

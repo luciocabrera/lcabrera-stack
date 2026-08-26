@@ -10,7 +10,7 @@
  * WHY THIS EXISTS
  * ---------------
  * The coverage comment used to read a single workspace's `coverage-summary.json`
- * (react-router's, because `test:ci` runs its coverage last), so the PR only ever
+ * (the showcase's, because `test:ci` runs its coverage last), so the PR only ever
  * saw one app's numbers with no label. This collects each reported workspace's
  * own `coverage-summary.json`, tags it with the project name, and aggregates a
  * monorepo-wide total, so the comment shows one row per workspace plus a total.
@@ -18,12 +18,12 @@
  * WHY A SEPARATE SCRIPT FROM merge-coverage.mjs
  * ---------------------------------------------
  * merge-coverage.mjs feeds the *fallow gate* — detailed `coverage-final.json`,
- * DB-free workspaces only, and react-router is deliberately excluded (its suite
+ * DB-free workspaces only, and the showcase is deliberately excluded (its suite
  * is the largest and its fallow findings are baselined, so coverage buys that
  * gate nothing). This feeds the *PR comment* — per-workspace `coverage-summary`
- * totals for the public-facing surfaces, which explicitly include react-router.
+ * totals for the public-facing surfaces, which explicitly include the showcase.
  * Different workspace sets, different inputs, different consumers; coupling them
- * would drag react-router into the fallow merge it is meant to stay out of.
+ * would drag the showcase into the fallow merge it is meant to stay out of.
  *
  * ROLLOUT
  * -------
@@ -35,7 +35,7 @@
  * Usage (from the repo root):
  *   vp run coverage:report              # run test:coverage for `run:true` workspaces, read the rest, aggregate
  *   node scripts/coverage-report.mjs    # same, direct
- *   node scripts/coverage-report.mjs --all       # also run react-router's test:coverage (standalone local use)
+ *   node scripts/coverage-report.mjs --all       # also run the showcase's test:coverage (standalone local use)
  *   node scripts/coverage-report.mjs --no-run     # aggregate already-generated summaries only, run nothing
  *   git diff --name-only BASE | node scripts/coverage-report.mjs --changed  # only workspaces a diff affected (CI PRs)
  *

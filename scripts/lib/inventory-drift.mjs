@@ -4,7 +4,7 @@
  * package's own `INVENTORY.md`.
  *
  * Scope is deliberately narrow. `INVENTORY.md` in `packages/ui/src`,
- * `packages/server/src` and `apps/react-router/src` differ on purpose —
+ * `packages/server/src` and `apps/showcase/src` differ on purpose —
  * `ui` is table-driven, `server` names private helpers in prose parentheticals
  * — so the only matching rule that works for both is "the symbol's name
  * appears in backticks somewhere in the file", not "the symbol has a row".
@@ -25,8 +25,8 @@ export const INVENTORY_TREES = [
     root: 'packages/server/src',
   },
   {
-    inventory: 'apps/react-router/src/INVENTORY.md',
-    root: 'apps/react-router/src',
+    inventory: 'apps/showcase/src/INVENTORY.md',
+    root: 'apps/showcase/src',
   },
 ];
 

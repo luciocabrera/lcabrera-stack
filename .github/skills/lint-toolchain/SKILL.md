@@ -186,7 +186,7 @@ Four constraints hold it in place:
   `eslint-suppressions.json` ignore rule already had to settle once.
 - **Domains are scoped per project, not global.** The `react` domain is enabled
   in an `overrides` entry covering only the three React workspaces
-  (`apps/react-router`, `packages/ui`) — enabling it
+  (`apps/showcase`, `packages/ui`) — enabling it
   globally would apply React rules to the Express/Fastify/node workspaces. `test`
   is scoped to test files; `project` runs repo-wide. Both add zero findings today
   and exist to guard future code.

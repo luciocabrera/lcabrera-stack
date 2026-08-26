@@ -39,19 +39,19 @@ decisions were settled before designing:
 
 `pnpm-workspace.yaml` globs `apps/*` + `packages/*` — 17 workspaces.
 
-| Concern            | Owner                                                                                                                                                                      |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Data grid          | `@lcabrera/ui` — [`packages/ui/src/components/Table/`](../../../packages/ui/src/components/Table/) (published, ships **source** not `dist`, for StyleX path identity)      |
-| Query construction | `@lcabrera/server` — [`packages/server/src/db/query-builder/`](../../../packages/server/src/db/query-builder/) — hand-rolled pure functions over raw `pg`, no ORM          |
-| Schema metadata    | The **apps**, as hand-declared constants — [`enterpriseOrders.constants.ts`](../../../apps/react-router/src/routes/enterprise-orders/config/enterpriseOrders.constants.ts) |
-| Route/loader layer | Factory in `@lcabrera/ui` ([`packages/ui/src/routing/`](../../../packages/ui/src/routing/)); call sites in `apps/react-router`                                             |
+| Concern            | Owner                                                                                                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Data grid          | `@lcabrera/ui` — [`packages/ui/src/components/Table/`](../../../packages/ui/src/components/Table/) (published, ships **source** not `dist`, for StyleX path identity)  |
+| Query construction | `@lcabrera/server` — [`packages/server/src/db/query-builder/`](../../../packages/server/src/db/query-builder/) — hand-rolled pure functions over raw `pg`, no ORM      |
+| Schema metadata    | The **apps**, as hand-declared constants — [`enterpriseOrders.constants.ts`](../../../apps/showcase/src/routes/enterprise-orders/config/enterpriseOrders.constants.ts) |
+| Route/loader layer | Factory in `@lcabrera/ui` ([`packages/ui/src/routing/`](../../../packages/ui/src/routing/)); call sites in `apps/showcase`                                             |
 
 **The binding constraint:** `@lcabrera/ui` is browser-safe and may **not** depend
 on `@lcabrera/server` ([ADR-038](../../decisions/ADR-038-public-package-topology-by-runtime.md)),
 enforced by `check:public-api`. Shapes needed on both sides are **duplicated**,
 never imported across, held in step by a conformance test in the app
 ([ADR-039](../../decisions/ADR-039-duplicate-over-undeclared-edges.md),
-[`filterContract.test.ts`](../../../apps/react-router/src/routes/enterprise-orders/filterContract.test.ts)).
+[`filterContract.test.ts`](../../../apps/showcase/src/routes/enterprise-orders/filterContract.test.ts)).
 That test uses a `: Record<string, T>` **annotation** — `satisfies` preserves
 literal types and silently defeats the check.
 
@@ -80,7 +80,7 @@ export type CommandId = string & { readonly __brand: 'CommandId' };
 - Availability (`isFilterable`/`isSortable`/`isStatic`) is re-derived ad hoc with
   `!== false` in 8+ files, never through that function.
 - **No registry** — deliberately deferred by
-  [ADR-011](../../../apps/react-router/docs/decisions/ADR-011-grid-interaction-architecture.md).
+  [ADR-011](../../../apps/showcase/docs/decisions/ADR-011-grid-interaction-architecture.md).
 
 The rule for a new capability, `commands/ARCHITECTURE.md`: _"A new capability adds
 a sibling `*Commands.ts`. If it cannot reuse `deriveToggleCommandState` or
@@ -299,7 +299,7 @@ first. This is strictly _less_ work than a per-entity grouping catalog and is wh
 > is per-type rather than per-family and no coarsening captures it. In the other
 > direction a `numeric` column mapped to `string` is never offered `sum`/`avg` —
 > the vocabulary forbids legal aggregates as well as permitting illegal ones.
-> Probed by `apps/react-router/src/.server/groupingLegality.smoke.test.ts`, which
+> Probed by `apps/showcase/src/.server/groupingLegality.smoke.test.ts`, which
 > creates and drops its own three-column fixture. §2.8's guard then routes the failure into
 > execution, because `n_distinct` for such a column is `0`, which §2.8 maps to
 > UNKNOWN and therefore to "warn and proceed".
@@ -432,7 +432,7 @@ introduce `<Await>`/`defer`.
 > route component destructure a fixed set that excludes it, and no JSX `key` is
 > written from it. The probe that could have disproved this is enumerating every
 > consumer of table loader data across `packages/ui/src` and
-> `apps/react-router/src`; the competing explanation, React Router applying the
+> `apps/showcase/src`; the competing explanation, React Router applying the
 > field itself, fails because it does not read a loader field named `key` and a
 > JSX key must be written explicitly. Remounting works today only because
 > `use(dataPromise)` re-suspends on a new promise reference, which a grouping
@@ -597,7 +597,7 @@ estimate is the displayed total.
    the loader `meta`. Grouping would have entrenched the split.
 
 > **Correction — all five go in `docs/decisions/`.** The original text sent
-> (2)–(3) to `apps/react-router/docs/decisions/` "alongside ADR-011". ADR-048's
+> (2)–(3) to `apps/showcase/docs/decisions/` "alongside ADR-011". ADR-048's
 > test is whether a decision leaves when the product moves out; both candidate homes
 > stay, so the tie-break is package-versus-app — and every line of grouping code
 > lives in `packages/ui` and `packages/server`. ADR-011 and ADR-012 sit in the app
@@ -1127,7 +1127,7 @@ loader `meta`.
 > shipping a data feature into it would be fitting the feature to a test harness.
 > It is excluded from this slice. Its type variety was only ever wanted as
 > _evidence_ for §2.2, and that evidence now comes from a fixture the probe owns
-> and drops (`apps/react-router/src/.server/groupingLegality.smoke.test.ts`), so
+> and drops (`apps/showcase/src/.server/groupingLegality.smoke.test.ts`), so
 > nothing is lost by leaving the playground alone.
 >
 > Note also that these two routes fetch over HTTP from the external API rather than
@@ -1258,7 +1258,7 @@ changed the design rather than just filling a blank.
 
 ## Verification
 
-**Per slice**, from `apps/react-router/` unless noted:
+**Per slice**, from `apps/showcase/` unless noted:
 
 ```bash
 vp fmt .                    # 1  Oxfmt (also formats .md — doc edits need this)

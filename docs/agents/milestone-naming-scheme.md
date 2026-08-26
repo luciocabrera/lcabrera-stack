@@ -18,7 +18,7 @@ Extracting reusable utilities, services, and patterns into flagship packages.
 
 ### M3 – Cross‑App Integration
 
-Applying abstractions across apps (e.g., apps/react-router, apps/*).
+Applying abstractions across apps (e.g., apps/showcase, apps/*).
 
 ### M4 – Hardening & QA
 

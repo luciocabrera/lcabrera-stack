@@ -189,11 +189,11 @@ describe('routeArtifactReport', () => {
       'apps/docs-site/src/routes/reports/Reports.constants.tsx',
       'apps/docs-site/src/routes/reports/Reports.layout.tsx',
       // the folder name and the artifact name genuinely differ
-      'apps/react-router/src/routes/car-sales-infinite/CarSales.types.ts',
-      'apps/react-router/src/routes/car-sales-infinite/CarSales.component.tsx',
+      'apps/showcase/src/routes/car-sales-infinite/CarSales.types.ts',
+      'apps/showcase/src/routes/car-sales-infinite/CarSales.component.tsx',
       // digits in the subject
-      'apps/react-router/src/routes/wide-alltypes-150/WideAlltypes150.constants.ts',
-      'apps/react-router/src/routes/wide-alltypes-150/WideAlltypes150.component.tsx',
+      'apps/showcase/src/routes/wide-alltypes-150/WideAlltypes150.constants.ts',
+      'apps/showcase/src/routes/wide-alltypes-150/WideAlltypes150.component.tsx',
     ];
     expect(routeArtifactReport(paths).findings).toEqual([]);
     expect(routeArtifactReport(paths).checked).toBe(5);
@@ -201,14 +201,13 @@ describe('routeArtifactReport', () => {
 
   it('reports a file named after nothing in its folder', () => {
     const paths = [
-      'apps/react-router/src/routes/car-sales/zzz-nope.constants.ts',
-      'apps/react-router/src/routes/car-sales/CarSales.component.tsx',
+      'apps/showcase/src/routes/car-sales/zzz-nope.constants.ts',
+      'apps/showcase/src/routes/car-sales/CarSales.component.tsx',
     ];
     expect(routeArtifactReport(paths).findings).toEqual([
       {
         artifacts: ['CarSales'],
-        filePath:
-          'apps/react-router/src/routes/car-sales/zzz-nope.constants.ts',
+        filePath: 'apps/showcase/src/routes/car-sales/zzz-nope.constants.ts',
       },
     ]);
   });

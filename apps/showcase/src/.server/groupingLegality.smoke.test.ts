@@ -25,7 +25,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
  * CI unit job and a bare `vp run test` skip it. Run it with a local Postgres up:
  *
  *   vp run db:up            # once, from the repo root
- *   vp run test:smoke       # from apps/react-router (sources DB_* + sets SMOKE_DB)
+ *   vp run test:smoke       # from apps/showcase (sources DB_* + sets SMOKE_DB)
  */
 const IS_SMOKE_ENABLED = Boolean(process.env.SMOKE_DB);
 

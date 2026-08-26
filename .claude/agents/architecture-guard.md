@@ -20,14 +20,14 @@ and **two** ADR namespaces, so always cite a path, never a bare number.
 
 - Inventories (catalog of existing components, hooks, utilities, types, constants):
   - `packages/ui/src/INVENTORY.md` — the shared UI library (start here for anything UI)
-  - `apps/react-router/src/INVENTORY.md`
+  - `apps/showcase/src/INVENTORY.md`
   - `packages/server/src/INVENTORY.md`
 - `packages/ui/src/PATTERNS.md` — the single PATTERNS.md: naming conventions, StyleX
   composition order, the thin-shell/store-wiring rule, drawer-section pattern, filter contract
 - System `ARCHITECTURE.md` — Table, Form, the query builders, and other clusters whose wiring is not visible from one file. Do not treat a file per leaf component as required ([ADR-088](../../docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)). `vp run adr:list` for ADRs.
 - ADRs, in two homes whose low numbers **collide**:
   - `docs/decisions/` — repo, published packages and toolchain decisions
-  - `apps/react-router/docs/decisions/` — component/app decisions (Modal, Tooltip, store, StyleX…)
+  - `apps/showcase/docs/decisions/` — component/app decisions (Modal, Tooltip, store, StyleX…)
 
 ## Procedure
 
@@ -45,7 +45,7 @@ Given the caller's task description:
    `ARCHITECTURE.md` and do not tell the caller to create one for a new folder.
 
 4. **Read relevant ADRs.** Glob **both** `docs/decisions/` and
-   `apps/react-router/docs/decisions/` first, then read any whose title suggests relevance.
+   `apps/showcase/docs/decisions/` first, then read any whose title suggests relevance.
    `ADR-005` is the one number both homes use, so cite that pair by path; every
    other number names exactly one ADR.
 

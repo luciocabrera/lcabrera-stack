@@ -29,7 +29,7 @@ export const WORKSPACE_RUNTIMES = {
   agnostic: ['packages/utils/**'],
   /** Workspaces whose code runs in a browser. */
   browser: [
-    'apps/react-router/**',
+    'apps/showcase/**',
     'packages/ui/**',
     // Browser-safe by construction — its tsconfig omits node types (ADR-038).
     'packages/api/**',

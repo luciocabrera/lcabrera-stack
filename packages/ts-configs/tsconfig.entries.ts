@@ -76,19 +76,13 @@ export const configs = [
       },
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
-    filePath: path.resolve(
-      workspaceRoot,
-      'apps/react-router/tsconfig.app.json',
-    ),
+    filePath: path.resolve(workspaceRoot, 'apps/showcase/tsconfig.app.json'),
   },
   {
     config: createNodeTsConfig({
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.node.tsbuildinfo',
     }),
-    filePath: path.resolve(
-      workspaceRoot,
-      'apps/react-router/tsconfig.node.json',
-    ),
+    filePath: path.resolve(workspaceRoot, 'apps/showcase/tsconfig.node.json'),
   },
   {
     config: createAppTsConfig({
