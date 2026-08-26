@@ -9,8 +9,9 @@ import { z } from 'zod';
  * both not-`production`, so guarding that one name would hand the published
  * secret back to exactly the deployments this file exists to stop.
  *
- * `test` is here because three test files read the ambient process env at module
- * scope; narrowing this to `development` alone breaks them at import time.
+ * `test` is here because the auth test files parse this schema in `test` mode at
+ * module scope; narrowing this to `development` alone breaks them at import
+ * time, with a secret error rather than a test failure.
  */
 const DEVELOPMENT_MODES = new Set(['development', 'test']);
 

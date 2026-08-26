@@ -118,9 +118,12 @@ describe('readAuthEnvConfig', () => {
   });
 
   it('spells the permitted modes from the set that accepts them', () => {
-    // Two copies of "development or test" — one in the guard, one in the prose —
-    // is the drift AGENTS.md §7 is most insistent about, so the message is built
-    // from the set. This fails if someone adds a mode and not the wording.
+    // What this pins, exactly: both permitted modes parse, and the refusal that
+    // the non-permitted branch produces names both of them. It does NOT catch a
+    // mode added to the set without the wording — deriving the message from the
+    // set is what makes that unreachable, and the loop below reads a literal
+    // because `DEVELOPMENT_MODES` is not exported. Widening the module's surface
+    // to let a test read it would cost more than the assertion is worth.
     const message = messageFor({
       ...PRODUCTION_ENV,
       AUTH_TOKEN_SECRET: undefined,
