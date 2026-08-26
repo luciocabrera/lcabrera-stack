@@ -15,8 +15,8 @@ You do not write code. You read, search, and report.
 
 ## Project layout (repo-root-relative paths — do not assume a single app)
 
-The shared UI lives in `packages/ui`, not in an app. There are **three** inventories
-and **two** ADR namespaces, so always cite a path, never a bare number.
+The shared UI lives in `packages/ui`, not in an app. There are **three** inventories,
+and **one** ADR home — a number names exactly one ADR.
 
 - Inventories (catalog of existing components, hooks, utilities, types, constants):
   - `packages/ui/src/INVENTORY.md` — the shared UI library (start here for anything UI)

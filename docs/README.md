@@ -59,15 +59,28 @@ table still lists the homes it was written under, so `adrHomes` in
 [`adr-registry.mjs`](../packages/repo-standards/scripts/adr-registry.mjs), which
 `vp run adr:verify` enforces — is the live set.
 
-Two other homes existed and are gone: one left with a second product, and the
-showcase app's own home closed once its ADRs were read against what they
-actually govern. Eleven of them documented code in `packages/ui` — Modal,
-Tooltip, the `useRef` store, barrel boundaries, the sort tiebreaker, the filter
-descriptors, the cookie primitive, the grid interaction architecture — and moved
-here keeping their numbers. The two that were genuinely about the app were
-deleted, their live content folded into the docs that own it
-([`apps/showcase/docs/data-sources.md`](../apps/showcase/docs/data-sources.md)
-for how the showcase gets its rows, AGENTS.md Rule 2 for StyleX).
+Two other homes existed and are gone. One left with a second product. The
+showcase app's own home closed for a different reason, and the criterion is
+worth stating because it is not the departure rule below: **the packages are the
+product, so an app-only record does not earn an ADR.** Eleven of that home's
+ADRs turned out to document code in `packages/ui` — Modal, Tooltip, the `useRef`
+store, barrel boundaries, the sort tiebreaker, the filter descriptors, the cookie
+primitive, the grid interaction architecture — and moved here keeping their
+numbers. The two that were genuinely about the app were deleted.
+
+Their subjects had **not** departed, which is what separates this from the rule
+below: the showcase still self-hosts its rows, and StyleX still governs. What
+carried the live content was already elsewhere —
+[`apps/showcase/docs/data-sources.md`](../apps/showcase/docs/data-sources.md)
+describes the self-hosting arrangement in more detail than its ADR did, and
+StyleX is Non-Negotiable Rule 2 in `AGENTS.md`. Nothing had to be moved.
+
+**The cost, stated plainly:** a deleted ADR's reasoning survives only in git
+history, and a live ADR can end up amending something a reader can no longer
+open — ADR-072 amends the self-hosting decision and now names `data-sources.md`
+instead. That is a real loss of the append-only property, accepted here because
+the alternative was keeping app-only records in a repository whose product is its
+packages. Weigh it before deleting the next one.
 
 That is why an old ADR may cite a number, or a path, that now resolves somewhere
 else. The number is the stable part.
@@ -94,7 +107,8 @@ does.
 Two consequences worth knowing. An ADR whose subject left entirely is deleted
 rather than kept as a husk, and what still governs is folded into the live doc
 that owns it — that is where ADR-014's Cancel/discard-changes rationale went,
-into `packages/ui`'s Form `ARCHITECTURE.md`. And a decision that reads oddly
+into `packages/ui`'s Form `ARCHITECTURE.md`. (This is the _departure_ rule; the
+scope rule above is a separate one and deletes for a different reason.) And a decision that reads oddly
 general was often specific once; `vp run adr:list` plus `git log --follow` is
 how to recover what it was about.
 
