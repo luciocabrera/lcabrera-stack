@@ -76,17 +76,31 @@ status nobody moved — the Decision above is a proposal whose commands are not
 built. What follows is where its three deferred questions stand, so a reader can
 tell what binds them and what would close this.
 
-**Closed: splitter de-focus.** It was gated on the navigation model, and
+**Closed: splitter de-focus — and it left a functional gap.** The question was
+gated on the navigation model, and
 [ADR-062](../../../../docs/decisions/ADR-062-grid-semantics-roving-focus-and-row-identity.md)
 decided that model. `ResizeHandle` is now `tabIndex={-1}` against the grid's
-single roving tab stop, and its own docblock cites ADR-062 for exactly this. The
-splitter keeps `role="separator"` with the full `aria-value*` set, so the ARIA
-window-splitter reading in the Context is unchanged; only its participation in
-the tab order was settled.
+single roving tab stop, and its own docblock cites ADR-062 for exactly this. It
+keeps `role="separator"` and the full `aria-value*` set, so the ARIA
+window-splitter reading in the Context is unchanged.
+
+What changed is more than tab-order participation, and a reader triaging this
+needs it stated plainly: **there is no keyboard path to column resize today.**
+The splitter still _handles_ keys — `useColumnResize` routes `Home`, `End` and
+the arrows through `resolveKeyboardResizeAction.util.ts` — but nothing can focus
+it. The roving tab stop is a body cell (`useTableCellFocus` is used only by
+`TableBodyCell`, and its `cell.focus()` is the Table's only programmatic focus
+call), and `TableHeaderCell` has no focus wiring at all. `ResizeHandle`'s
+docblock leans on the header command for keyboard access — and that command is
+the one this section records as unimplemented. So de-focus closed the navigation
+question by removing the only reachable keyboard surface for width, on the
+understanding that the commands would supply the replacement. They have not.
 
 **Still open: the WCAG 2.5.7 (Dragging Movements) reading.** Nothing in the tree
 or in either decisions home has taken a position on it since. It remains
-load-bearing for whether the disabled-preset gap is a live AA failure.
+load-bearing for whether the disabled-preset gap is a live AA failure — and the
+paragraph above sharpens the question rather than answering it, because the
+keyboard alternative whose sufficiency 2.5.7 turns on does not currently exist.
 
 **Still open: autofit under virtualization.** `Fit to content` is not
 implemented, so the scroll-dependence and the width/height trade-off under
