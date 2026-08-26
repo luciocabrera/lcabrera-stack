@@ -277,7 +277,7 @@ therefore no escape hatch, no options, and nothing to disable.
 
 **❌ Disallowed:**
 
-```typescript
+```tsx
 const reset = (): void => {
   store.clear();
 };
@@ -290,7 +290,7 @@ const Row = (): JSX.Element => <tr />;
 
 **✅ Left alone** — each could be widening, so none is reported:
 
-```typescript
+```tsx
 const makePet = (): Animal => new Dog();
 const getName = (): string => user.firstName;
 const ignore = (): void => doSomethingThatReturnsAValue(); // discards on purpose

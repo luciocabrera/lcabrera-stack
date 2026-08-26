@@ -338,36 +338,58 @@ type IsRedundantArgs = {
   readonly node: FunctionNode;
 };
 
-const isRedundant = ({ annotation, node }: IsRedundantArgs) => {
+/** No returned value, and the function can still return — so `void`, not `never`. */
+const canReturnVoid = (node: FunctionNode) => {
+  const { body } = node;
   // Narrowed inline rather than through an `isBlock` boolean, which does not
   // carry the narrowing to `canCompleteNormally`.
+  return (
+    body.type === AST_NODE_TYPES.BlockStatement &&
+    returnedExpressions(body).length === 0 &&
+    (canCompleteNormally(body) || hasReturnStatement(body))
+  );
+};
+
+type HasOnlyReturnsMatchingArgs = {
+  readonly node: FunctionNode;
+  readonly predicate: (expression: TSESTree.Expression) => boolean;
+};
+
+/** At least one returned expression, and every one of them matches. */
+const hasOnlyReturnsMatching = ({
+  node,
+  predicate,
+}: HasOnlyReturnsMatchingArgs) => {
   const { body } = node;
   const returned =
     body.type === AST_NODE_TYPES.BlockStatement
       ? returnedExpressions(body)
       : [body];
-  const canReturnNormally =
-    body.type === AST_NODE_TYPES.BlockStatement &&
-    (canCompleteNormally(body) || hasReturnStatement(body));
 
+  return returned.length > 0 && returned.every((each) => predicate(each));
+};
+
+const isRedundant = ({ annotation, node }: IsRedundantArgs) => {
+  // The annotation is matched BEFORE anything walks the body. The common case
+  // here is `: SomeType`, which no arm claims, and computing the returns and the
+  // reachability first meant every one of those paid for two full subtree walks
+  // to learn that the annotation was never a candidate.
   if (annotation.type === AST_NODE_TYPES.TSVoidKeyword) {
-    return canReturnNormally && returned.length === 0;
+    return canReturnVoid(node);
   }
   if (isPromiseOfVoid(annotation)) {
-    return node.async && canReturnNormally && returned.length === 0;
+    return node.async && canReturnVoid(node);
   }
   if (annotation.type === AST_NODE_TYPES.TSBooleanKeyword) {
     return (
       !node.async &&
-      returned.length > 0 &&
-      returned.every((each) => isBooleanExpression(each as TSESTree.Expression))
+      hasOnlyReturnsMatching({ node, predicate: isBooleanExpression })
     );
   }
   if (isJsxElement(annotation)) {
     return (
       !node.async &&
-      returned.length > 0 &&
-      returned.every((each) => isJsxExpression(each as TSESTree.Expression))
+      hasOnlyReturnsMatching({ node, predicate: isJsxExpression })
     );
   }
   return false;
@@ -411,8 +433,10 @@ export default createRule<[], MessageIds>({
     const check = (node: FunctionNode) => {
       const annotation = node.returnType?.typeAnnotation;
       if (annotation === undefined) return;
-      if (isSelfReferential({ name: functionName(node), node })) return;
+      // `isRedundant` first: it is cheap and rejects nearly everything, so the
+      // whole-body walk `isSelfReferential` does runs only for a candidate.
       if (!isRedundant({ annotation, node })) return;
+      if (isSelfReferential({ name: functionName(node), node })) return;
 
       context.report({
         fix: (fixer) => fixer.remove(node.returnType as TSESTree.Node),
