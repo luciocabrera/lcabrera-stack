@@ -24,7 +24,7 @@ Form/
 ├── index.ts                  → Barrel: Form + public types
 │
 ├── FormBody/
-│   ├── FormBody.component.tsx → The view shell: RR7 Form/fetcher.Form (formId-keyed) + submit gating; self-connects formId/submission
+│   ├── FormBody.component.tsx → The view shell: React Router Form/fetcher.Form (formId-keyed) + submit gating; self-connects formId/submission
 │   ├── FormBodyFooter/        → Footer shell for discard-changes confirmation + private action-row delegate
 │   ├── FormBody.stylex.ts
 │   ├── FormBody.types.ts      → Pick<FormProps, 'action' | 'children' | 'method'>
@@ -266,14 +266,14 @@ Two more consequences worth knowing before changing it:
 
 ```mermaid
 graph TD
-  A["User clicks Save"] --> B["RR7 Form's internal submitHandler calls our onSubmit first"]
+  A["User clicks Save"] --> B["React Router Form's internal submitHandler calls our onSubmit first"]
   B --> C["handleSubmit calls submitForm() — leafFields read from the meta store snapshot"]
   C --> D{"mode === 'edit' and not dirty?"}
   D -->|"yes"| E["return false → event.preventDefault() → no request sent, DB untouched"]
   D -->|"no"| F["validateFields → fieldsStore.set({ errors })"]
   F --> G{"any errors?"}
   G -->|"yes"| E
-  G -->|"no"| H["return true → RR7 proceeds: real fetch to the action"]
+  G -->|"no"| H["return true → React Router proceeds: real fetch to the action"]
 ```
 
 `noValidate` is set on the `<form>` element deliberately: leaf inputs still
@@ -377,7 +377,7 @@ automatically via `name`. Two components need explicit handling:
 
 - **`VirtualSelect`** renders no native form control at all — `SelectField`
   mirrors the current selection into hidden `<input type="hidden">`
-  elements so RR7's `Form`/`fetcher.Form` still submits real `FormData`.
+  elements so React Router's `Form`/`fetcher.Form` still submits real `FormData`.
 - **Native checkboxes** are omitted from `FormData` entirely when unchecked
   (standard HTML behavior, not a bug here) — the consuming action's Zod
   schema must treat an absent boolean field as `false`.

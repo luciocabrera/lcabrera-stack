@@ -59,7 +59,7 @@ guardrails:
    `to*Values`), not entity classes; the FP/immutability rules make the function
    form the idiomatic equivalent.
 8. **Results that cross the loader/action boundary must be plain serializable
-   discriminated unions** — RR7 single-fetch silently drops functions, so no class
+   discriminated unions** — React Router single-fetch silently drops functions, so no class
    instances with methods may be returned to the client.
 
 ## Layering Model (with diagrams)
@@ -67,7 +67,7 @@ guardrails:
 ### Blueprint → this repo mapping
 
 ```
-STANDARD (Express)          →   THIS REPO (RR7 framework mode)
+STANDARD (Express)          →   THIS REPO (React Router framework mode)
 ──────────────────────────────────────────────────────────────
 Router + Middleware         →   routes.ts + route root.ts + middleware[]   (transport wiring)
 Validation                  →   config/*.schema.ts (Zod) — clientAction pre-gate + action re-validate
