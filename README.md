@@ -20,8 +20,8 @@ resolvable public surface, no reliance on a consumer's tsconfig `paths`.
 | [`@lcabrera/utils`](packages/utils)       | pure helpers; no DOM lib, no node types, no side effects                           |
 | [`@lcabrera/node`](packages/node-runtime) | process lifecycle — signals, shutdown                                              |
 
-These build to `dist` with export maps, and the showcase exercises them under
-realistic load.
+`api`, `server`, `utils` and `node` build to `dist`; `ui` publishes
+TypeScript source. The showcase exercises all five under realistic load.
 
 ### The repo toolchain — installed by another _repository_
 
@@ -37,9 +37,11 @@ realistic load.
 build**: an `.mjs` file loads from `node_modules` as it is, and a repository
 setup is the one thing that cannot be delivered by being described.
 
-**This half has no consumer inside this repo except the repo itself**, so the
-showcase cannot validate it — which is how `devkit`'s shipped git hooks once
-arrived inert and went unnoticed.
+**What no in-repo run can check is the delivery.** A `workspace:*` link
+resolves the source directory, so a packed tarball's file modes never appear —
+which is how `devkit`'s shipped git hooks arrived inert: `pnpm pack` writes every
+entry `0644`, and git skips a non-executable hook without failing. Only a
+packed-tarball test catches that class.
 
 **Which product does a change serve?** That is the first question for any new
 capability, and one that serves neither is a signal to stop rather than to add a

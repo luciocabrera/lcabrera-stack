@@ -14,9 +14,13 @@ installed by another **application**. The **repo toolchain** —
 `@lcabrera/tsconfig`, `vite-config`, `eslint-plugin`, `devkit`,
 `repo-standards` — is installed by another **repository**. Ask which of the two
 a change serves; a capability that serves neither is a signal to stop rather than
-to add a package. Only the application stack has an in-repo consumer, so **the
-showcase cannot validate the toolchain** — this repo is its only user here, which
-is how `devkit`'s shipped git hooks arrived inert and went unnoticed (§4).
+to add a package. The split is by consumer, not by build shape — `@lcabrera/ui`
+publishes TypeScript source just as `devkit` publishes `.mjs`.
+
+**What no in-repo run can validate is the delivery**, which is why `devkit` and
+`repo-standards` need a packed-tarball test: a `workspace:*` link resolves the
+source directory, so a tarball's file modes never appear — and that is how their
+shipped git hooks arrived inert and went unnoticed (§4).
 
 **The `apps/` exist to exercise the packages, and that is the tie-breaker.** When
 package cleanliness and app convenience pull
