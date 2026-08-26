@@ -19,15 +19,21 @@ where every returned expression is a comparison or a boolean literal, and
 deliberate widening is never flagged, and the rule has no options and nothing to
 disable.
 
-Reachability is why the `void` arms walk the whole body rather than its `return`
-statements. A function that cannot reach its end point infers `never`, so `void`
-there is a widening — and an `if`/`else` where both arms throw, a `switch` whose
-`default` throws, `for (;;)` and a throwing `finally` all reach that state
-without writing a `throw` anywhere a scan of the body's top level would see it.
-With no type checker the test is lexical and deliberately blunt: any `throw`
-outside a nested function, or any endless loop, silences the rule for that
-function. It therefore also stays quiet on a guard clause, which really does
-infer `void` — over-caution in the direction that cannot corrupt a signature.
+The `void` arms ask whether the body can reach its bottom, because that is the
+question that separates `void` from `never`: TypeScript infers `never` for a
+function that neither returns nor reaches its bottom, so an annotation there is
+widening `never` to `void` and must not be removed. An `if`/`else` where both
+arms throw, a `switch` whose `default` throws, `for (;;)` and a throwing
+`finally` all make the bottom unreachable, while a guard clause — `if (bad)
+{ throw … }` — does not, and is reported.
+
+**One case is out of reach and stays wrong.** A call to a function declared
+`(): never` also makes the bottom unreachable, so `(): void => { process.exit(1); }`
+infers `never` and this rule removes the annotation anyway. Deciding it means
+resolving the callee's signature, which needs a type checker this plugin does not
+have. The rule is auto-fixable and has nothing to disable, so if you meet this the
+annotation has to be restored by hand. Closing it properly needs a type-aware
+rule; it is stated here rather than left to be found.
 
 **Consumers of `@lcabrera/vite-config` get this as an error on their next
 upgrade.** It is auto-fixable, so `eslint --fix` clears it; the findings it

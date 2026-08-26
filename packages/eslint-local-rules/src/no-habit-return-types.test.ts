@@ -21,6 +21,41 @@ ruleTester.run('no-habit-return-types', rule, {
       errors: [{ messageId: 'redundant' }],
       output: 'const reset = () => { store.clear(); };',
     },
+    // A guard clause: the `if` can be skipped, so the bottom is reachable and
+    // inference really does say `void`. Reported again now that the check asks
+    // about reachability rather than about the presence of a `throw`.
+    {
+      code: 'function guard(a): void { if (!a) { throw new Error("no"); } }',
+      errors: [{ messageId: 'redundant' }],
+      output: 'function guard(a) { if (!a) { throw new Error("no"); } }',
+    },
+    // A `break` finishes the loop, so this one is not endless.
+    {
+      code: 'const loop = (): void => { while (true) { if (x) { break; } } };',
+      errors: [{ messageId: 'redundant' }],
+      output: 'const loop = () => { while (true) { if (x) { break; } } };',
+    },
+    // The body cannot finish but the handler can, so the bottom is reachable.
+    {
+      code: 'const caught = (): void => { try { throw p; } catch { handle(); } };',
+      errors: [{ messageId: 'redundant' }],
+      output: 'const caught = () => { try { throw p; } catch { handle(); } };',
+    },
+    // No `default`, so every case can be skipped.
+    {
+      code: 'const picked = (): void => { switch (x) { case 1: throw p; } };',
+      errors: [{ messageId: 'redundant' }],
+      output: 'const picked = () => { switch (x) { case 1: throw p; } };',
+    },
+    // KNOWN LIMITATION, pinned so it cannot be lost. `process.exit` is declared
+    // `(): never`, so the bottom is unreachable and inference says `never` — but
+    // knowing that means resolving the callee's signature, and this plugin has
+    // no type checker. Delete this case when a type-aware version closes it.
+    {
+      code: 'const die = (): void => { process.exit(1); };',
+      errors: [{ messageId: 'redundant' }],
+      output: 'const die = () => { process.exit(1); };',
+    },
     {
       code: 'function reset(): void { store.clear(); return; }',
       errors: [{ messageId: 'redundant' }],
@@ -104,9 +139,15 @@ ruleTester.run('no-habit-return-types', rule, {
     'const cleanup = (): void => { try { go(); } finally { throw p; } };',
     'const forever = (): void => { for (;;) { tick(); } };',
     'const spin = (): void => { while (true) { tick(); } };',
-    // The cost of a lexical test, stated as a test: a guard clause leaves the
-    // end reachable and really does infer `void`, and the rule stays silent.
-    'function guard(a): void { if (!a) { throw new Error("no"); } }',
+    // All four spellings, because the compiler's test is syntactic and treats
+    // them alike — a check that knew only two of them still auto-narrowed these.
+    'const tested = (): void => { for (;true;) { tick(); } };',
+    'const once = (): void => { do { tick(); } while (true); };',
+    // The inner `break` belongs to the inner loop, so the outer one is still
+    // endless. Counting it would report an annotation that is widening `never`.
+    'const nested = (): void => { while (true) { while (x) { break; } } };',
+    // Unreachable after the first statement, so the bottom is never reached.
+    'function fell(): void { throw p; log(); }',
     // Wider React types are doing real work and must survive.
     { code: 'const Row = (): React.ReactNode => <tr />;', filename: 'f.tsx' },
     { code: 'const Row = (): ReactElement => <tr />;', filename: 'f.tsx' },

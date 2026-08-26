@@ -307,16 +307,50 @@ const fail = (): void => {
 }; // end point unreachable: inference says `never`, so `void` widens it
 ```
 
-That last one is the reason the `void` and `Promise<void>` arms test the whole
-body rather than its `return` statements. A function that cannot reach its end
-point infers `never`, and reachability is not a local property — an `if`/`else`
-where both arms throw, a `switch` whose `default` throws, `for (;;)` and a
-`finally` that throws all reach it, and none of them writes a `throw` where a
-scan of the body's top level would find it. With no TypeScript program the test
-has to be lexical, so it is blunt: **any** `throw` outside a nested function, or
-any endless loop, silences the rule for that function. It therefore also stays
-quiet on a guard clause, which really does infer `void` — over-caution in the
-direction that cannot corrupt a signature.
+That last one is why the `void` and `Promise<void>` arms ask whether the body can
+reach its bottom, rather than scanning it for a `throw`. TypeScript infers `never`
+for a function that neither returns nor reaches its bottom, so `void` there is a
+widening — and reachability is a property of the whole body, not of any one
+statement:
+
+```typescript
+if (x) {
+  throw p;
+} // bottom reachable   → void   → reported
+if (x) {
+  throw p;
+} else {
+  throw q;
+} // bottom unreachable → never  → left alone
+switch (x) {
+  default:
+    throw p;
+} // bottom unreachable → never  → left alone
+for (;;) {
+  tick();
+} // bottom unreachable → never  → left alone
+try {
+  go();
+} finally {
+  throw p;
+} // bottom unreachable → never  → left alone
+```
+
+**One case is out of reach and stays wrong.** A call to a function declared
+`(): never` also makes the bottom unreachable, and `process.exit(1)` is the
+everyday example:
+
+```typescript
+const die = (): void => {
+  process.exit(1); // infers `never`; this rule removes the annotation anyway
+};
+```
+
+Deciding it means resolving the callee's signature, and this plugin has no
+TypeScript program. It is called out here rather than left to be discovered
+because the rule is auto-fixable and has nothing to disable — if you hit it, the
+annotation has to be restored by hand, or the function given a body the rule
+does not recognise. Closing it properly needs a type-aware rule.
 
 The trade is deliberate and worth knowing: `(): string` on a body returning a
 `string` is a habit this rule will not catch, because the same annotation over a
