@@ -75,14 +75,20 @@ export const repositoryIdentity = (gitConfig) => {
 /**
  * What a seed may not contain.
  *
- * The owner and the repository slug are BOTH here, and neither is the manifest
- * name. That was the assumption this list was first written on — that the
- * package name covers the slug, and that a URL naming the owner names the
- * repository too — and it is false in this repository twice over: the manifest
- * is called `vite-monorepo` while the slug is something else, and the owner
- * appears in no manifest at all. The shape it let through is the most ordinary
- * leak a shipped markdown file has, a `https://github.com/<owner>/<repo>/...`
- * link, which matched nothing and passed.
+ * The owner and the repository slug are BOTH here, and neither is derived from
+ * the manifest name. That was the assumption this list was first written on —
+ * that the package name covers the slug, and that a URL naming the owner names
+ * the repository too — and it let through the most ordinary leak a shipped
+ * markdown file has, a `https://github.com/<owner>/<repo>/...` link, which
+ * matched nothing and passed.
+ *
+ * The root manifest and the repository slug happen to be the same string today.
+ * **That is a coincidence, and collecting them separately is not redundant.**
+ * They were different until the repository was renamed, they are independent
+ * fields that nothing keeps in step, and the owner still appears in no manifest
+ * at all. A future reader who deletes one of these inputs because it looks like
+ * a duplicate of the other reopens the hole; the test fixture keeps them
+ * deliberately divergent so the gate is exercised the way it has to work.
  *
  * `workspacePaths` is separate from `workspaceNames` because a workspace's
  * directory and its package name are independent strings, and a seed can leak

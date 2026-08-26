@@ -22,7 +22,7 @@ describe('the argv the sweep hands each gate', () => {
   const args = () =>
     gateArgs({
       number: 738,
-      repository: 'luciocabrera/vite-react-compiler',
+      repository: 'luciocabrera/lcabrera-stack',
       script: '/repo/scripts/copilot-review-status.mjs',
     });
 
@@ -32,7 +32,7 @@ describe('the argv the sweep hands each gate', () => {
       '--pr',
       '738',
       '--repo',
-      'luciocabrera/vite-react-compiler',
+      'luciocabrera/lcabrera-stack',
       '--if-changed',
     ]);
   });
@@ -44,7 +44,7 @@ describe('the argv the sweep hands each gate', () => {
   it('tells the gate which repository the sweep listed', () => {
     const argv = args();
     expect(argv[argv.indexOf('--repo') + 1]).toBe(
-      'luciocabrera/vite-react-compiler',
+      'luciocabrera/lcabrera-stack',
     );
   });
 
@@ -70,7 +70,7 @@ describe('the argv the sweep hands each gate', () => {
       gateArgs({
         number: 738,
         protectSuccess: true,
-        repository: 'luciocabrera/vite-react-compiler',
+        repository: 'luciocabrera/lcabrera-stack',
         script: '/repo/scripts/copilot-review-status.mjs',
       }),
     ).toEqual([
@@ -78,7 +78,7 @@ describe('the argv the sweep hands each gate', () => {
       '--pr',
       '738',
       '--repo',
-      'luciocabrera/vite-react-compiler',
+      'luciocabrera/lcabrera-stack',
       '--if-changed',
       PROTECT_SUCCESS_FLAG,
     ]);

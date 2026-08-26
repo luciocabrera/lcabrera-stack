@@ -3,7 +3,7 @@
 **Status:** Accepted
 
 **Date:** 2026-08-14
-**Issue:** [#715](https://github.com/luciocabrera/vite-react-compiler/issues/715)
+**Issue:** [#715](https://github.com/luciocabrera/lcabrera-stack/issues/715)
 **Relates to:** [ADR-057](./ADR-057-publish-the-custom-lint-rules.md),
 [ADR-043](./ADR-043-release-tooling-changesets-over-pnpm-native.md),
 [ADR-038](./ADR-038-public-package-topology-by-runtime.md)
@@ -23,7 +23,7 @@ to build before it can typecheck, test or run, and put the `dist` map in
 ## Problem
 
 Two independent ways for those gates to report success having established
-nothing, both found while verifying [#710](https://github.com/luciocabrera/vite-react-compiler/pull/710).
+nothing, both found while verifying [#710](https://github.com/luciocabrera/lcabrera-stack/pull/710).
 
 1. **A skipped gate read as a passed gate.** On a tree where the packages had
    not been built, all three exited 0. `attw:verify` announced that published
@@ -117,7 +117,7 @@ AGENTS.md §4 already allows, alongside `pnpm clean`.
 
 ## References
 
-- Issue [#715](https://github.com/luciocabrera/vite-react-compiler/issues/715) —
+- Issue [#715](https://github.com/luciocabrera/lcabrera-stack/issues/715) —
   both mechanisms, with the reproduction that found them.
 - [ADR-057](./ADR-057-publish-the-custom-lint-rules.md) — the `publishConfig`
   swap and the hazard it prevents.

@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-07-25
-- **Issue:** [#436](https://github.com/luciocabrera/vite-react-compiler/issues/436)
+- **Issue:** [#436](https://github.com/luciocabrera/lcabrera-stack/issues/436)
 - **Relates to:** [ADR-007](./ADR-007-barrel-export-boundaries.md) (barrel boundaries for private delegates), [ADR-038](ADR-038-public-package-topology-by-runtime.md) (what a published package may depend on), [ADR-046](ADR-046-public-api-surface-snapshot.md) (the surface this adds to).
 
 ## Context
@@ -42,7 +42,7 @@ than importing an app's generated loader type, the same way `AppDocument` types
 loader delegates to that helper satisfies it by construction, and an app with no
 root loader at all degrades to the declared defaults instead of crashing.
 
-> **Amended by [#440](https://github.com/luciocabrera/vite-react-compiler/issues/440).**
+> **Amended by [#440](https://github.com/luciocabrera/lcabrera-stack/issues/440).**
 > The loader read moved down to `AppProviders`, the only component that consumed
 > `theme`/`globalSettings`, and the type moved and was renamed with it
 > (`AppProvidersLoaderData`). `RootComponent` is still the whole root route and

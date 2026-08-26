@@ -187,9 +187,9 @@ sentence. That is the behaviour ADR-050 already rejected at the action edge.
 
 ## References
 
-- Issue [#573](https://github.com/luciocabrera/vite-react-compiler/issues/573);
-  parent [#547](https://github.com/luciocabrera/vite-react-compiler/issues/547);
-  blocks [#574](https://github.com/luciocabrera/vite-react-compiler/issues/574) (cube)
+- Issue [#573](https://github.com/luciocabrera/lcabrera-stack/issues/573);
+  parent [#547](https://github.com/luciocabrera/lcabrera-stack/issues/547);
+  blocks [#574](https://github.com/luciocabrera/lcabrera-stack/issues/574) (cube)
 - [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md),
   [ADR-059](./ADR-059-aggregation-is-builder-generated.md),
   [ADR-050](./ADR-050-server-error-translation-and-result-contract.md),

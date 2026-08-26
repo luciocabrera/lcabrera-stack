@@ -244,11 +244,11 @@ all of them, and `src/INVENTORY.md` catalogues every artifact.
 
 ## Links
 
-- [Repository](https://github.com/luciocabrera/vite-react-compiler) —
+- [Repository](https://github.com/luciocabrera/lcabrera-stack) —
   `packages/ui`
-- [Changelog](https://github.com/luciocabrera/vite-react-compiler/blob/main/packages/ui/CHANGELOG.md)
-- [Component patterns](https://github.com/luciocabrera/vite-react-compiler/blob/main/packages/ui/src/PATTERNS.md)
-  · [Artifact inventory](https://github.com/luciocabrera/vite-react-compiler/blob/main/packages/ui/src/INVENTORY.md)
+- [Changelog](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/ui/CHANGELOG.md)
+- [Component patterns](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/ui/src/PATTERNS.md)
+  · [Artifact inventory](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/ui/src/INVENTORY.md)
 - Companion packages: [`@lcabrera/utils`](https://www.npmjs.com/package/@lcabrera/utils)
   (pure helpers), [`@lcabrera/api`](https://www.npmjs.com/package/@lcabrera/api)
   (browser HTTP), [`@lcabrera/server`](https://www.npmjs.com/package/@lcabrera/server)

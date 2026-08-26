@@ -194,7 +194,7 @@ The closest thing to an "update path" a consumer has is re-running
 far as any consulted source states — behaves as a fresh materialization rather
 than a merge; nothing in the docs or the repo describes what happens to a
 consumer's local edits to a previously-installed plugin file on re-install.
-This is the single largest asymmetry with the vite-react-compiler design under
+This is the single largest asymmetry with the lcabrera-stack design under
 consideration: ADR-081's checksum-manifest tri-state (unchanged / locally
 modified / new-upstream) has no counterpart here at all. That tri-state is
 ADR-081's wording; the shipped `devkit` classifies six — see
@@ -222,7 +222,7 @@ when a line is absent, so this is an override layer, not a requirement" (per
 the skill's own description). That is the entirety of the configuration
 mechanism — there is **no equivalent of `devkit.config.json`**: no
 workspace/repo roster, no command map, no GitHub owner/repo field, no
-per-repo active-gates list. Repo-specific data that vite-react-compiler's
+per-repo active-gates list. Repo-specific data that lcabrera-stack's
 devkit design threads through a shared config file is instead either hardcoded
 generically (e.g. every playbook's closing PR-link format is the literal
 template string `https://github.com/<owner>/<repo>/pull/<number>`, left for
@@ -324,7 +324,7 @@ parallel, separately-maintained repository with its own translation layer.
   still sees the full menu — relevant given pstack explicitly targets an IDE
   agent, not necessarily one with free filesystem globbing.
 - **The gate/skill line is not drawn here the way ADR-081 draws it.**
-  vite-react-compiler's split is explicit: materialize path-discovered prose
+  lcabrera-stack's split is explicit: materialize path-discovered prose
   (`devkit`), but resolve invoked, code-dependent gates from `node_modules`
   (`repo-standards`), because a gate has real logic and versioned semantics a
   copy-paste can't safely carry. pstack has no equivalent "gate" package at

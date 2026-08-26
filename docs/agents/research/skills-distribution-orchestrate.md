@@ -16,7 +16,7 @@ is:
 > reconciles the tree from disk and git."
 
 This is exactly the multi-agent-coordination category the background
-context flagged — it is a genuine parallel to vite-react-compiler's own
+context flagged — it is a genuine parallel to lcabrera-stack's own
 epic/refactor-verified orchestration, but built for **Cursor's cloud-agent
 product** rather than local subagents. Core shape, from
 `skills/orchestrate/SKILL.md` and `references/*.md`:
@@ -33,7 +33,7 @@ product** rather than local subagents. Core shape, from
 - **Verifiers** are the same shape as workers but produce a verdict
   (`live-ui-verified | unit-test-verified | type-check-only |
 verifier-blocked | verifier-failed`) against one target task's acceptance
-  criteria — closely analogous to vite-react-compiler's
+  criteria — closely analogous to lcabrera-stack's
   `refactor-verified` builder/verifier split, down to "verifier sees only
   the target's acceptance criteria," though orchestrate's verifier does see
   the worker's own branch/diff, not just the criteria blind.
@@ -115,12 +115,12 @@ derives them from `zod` schemas in `orchestrate/skills/orchestrate/scripts/schem
 `zod-to-json-schema`. `references/planner.md` explicitly instructs
 regenerating them "after plan or state shape changes" — the zod source is
 canonical, the checked-in JSON is derived, same shape as
-vite-react-compiler's own "tsconfigs are generated, never hand-edit"
+lcabrera-stack's own "tsconfigs are generated, never hand-edit"
 convention.
 
 ## 3. Installation & distribution mechanism
 
-This is the most load-bearing difference from vite-react-compiler's model,
+This is the most load-bearing difference from lcabrera-stack's model,
 and it runs deeper than "npm vs. copy."
 
 **There is no npm package at all.** `orchestrate/skills/orchestrate/scripts/package.json` is
@@ -264,7 +264,7 @@ built directly on Cursor's product surface:
   portable the way a plain-markdown skill file is.
 - `SKILL.md` frontmatter (`name`, `description`,
   `disable-model-invocation: true`) _does_ look like the generic
-  Anthropic-style skill convention (matching what vite-react-compiler's own
+  Anthropic-style skill convention (matching what lcabrera-stack's own
   `.github/skills/*/SKILL.md` uses), and the plugin schema's `skills` field
   is explicitly listed as usable by "Agent & Cursor Plugins" per the docs
   fetch — so the **prose/skill layer alone** is plausibly portable to
@@ -289,7 +289,7 @@ built directly on Cursor's product surface:
   only `orchestrate` (the marketplace lists every plugin independently, one
   row each) gets no automatic pull of `cursor-sdk`, and no manifest-level
   signal that one is needed. This is exactly the class of problem
-  vite-react-compiler's own `@lcabrera/*` public-package boundary rules
+  lcabrera-stack's own `@lcabrera/*` public-package boundary rules
   exist to catch mechanically (ADR-038) — here it's caught by nothing but a
   human reading the prose.
 - **No update-safety net for local edits.** As covered in §4, there is no
@@ -319,16 +319,16 @@ built directly on Cursor's product surface:
 - **State is disk+git, not a database or API.** `plan.json`/`state.json`/
   `handoffs/*.md` living in `.orchestrate/<rootSlug>/` and (optionally)
   synced to git via `syncStateToGit` is a deliberate low-tech choice for
-  the same reason vite-react-compiler prefers files over hidden state:
+  the same reason lcabrera-stack prefers files over hidden state:
   "A script with a JSON state file keeps its footing" against long-running
   agent drift. Worth noting as convergent design even though the domain
-  (cloud-agent fleet coordination) differs from vite-react-compiler's
+  (cloud-agent fleet coordination) differs from lcabrera-stack's
   epic/refactor-verified orchestration.
 - **Generated JSON Schemas from a zod source of truth** —
   `plan.schema.json`/`state.schema.json` are checked in but generated via
   `bun run generate-schemas`, with an explicit "regenerate after shape
   changes" instruction. Structurally identical in spirit to
-  vite-react-compiler's own generated-tsconfig rule ("tsconfigs are
+  lcabrera-stack's own generated-tsconfig rule ("tsconfigs are
   generated — never hand-edit them").
 - **Provenance caveat**: the clone is `poteto/plugins`, but
   `orchestrate/.cursor-plugin/plugin.json` itself declares

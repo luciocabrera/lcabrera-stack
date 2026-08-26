@@ -343,9 +343,9 @@ expiry trivially testable.
 
 ## Links
 
-- [Repository](https://github.com/luciocabrera/vite-react-compiler) —
+- [Repository](https://github.com/luciocabrera/lcabrera-stack) —
   `packages/server`
-- [Changelog](https://github.com/luciocabrera/vite-react-compiler/blob/main/packages/server/CHANGELOG.md)
+- [Changelog](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/server/CHANGELOG.md)
 - Companion packages: [`@lcabrera/utils`](https://www.npmjs.com/package/@lcabrera/utils)
   (pure helpers), [`@lcabrera/api`](https://www.npmjs.com/package/@lcabrera/api)
   (the browser half), [`@lcabrera/ui`](https://www.npmjs.com/package/@lcabrera/ui)

@@ -2,7 +2,7 @@
 
 Research target: [github.com/mattpocock/skills](https://github.com/mattpocock/skills), a repository of AI-agent
 skills maintained by Matt Pocock (aihero.dev), cloned shallow at commit `885e2ca4d842d139e9aef4e48d366c63cb1b8013`
-(2026-08-19). This document exists to inform ADR-081 in `vite-react-compiler` (the `@lcabrera/devkit` /
+(2026-08-19). This document exists to inform ADR-081 in `lcabrera-stack` (the `@lcabrera/devkit` /
 `@lcabrera/repo-standards` split) — the framing dimensions below (materialize-vs-resolve, config, versioning,
 multi-agent compatibility) are chosen because they map onto that decision, not because they're the only
 interesting things about this repo.
@@ -226,7 +226,7 @@ technique fails for Codex's plugin path specifically because "Codex copies the p
 ## 4. Versioning & update path
 
 - **Package versioning**: [Changesets](https://github.com/changesets/changesets) (`.changeset/*.md` +
-  `@changesets/cli`, `@changesets/changelog-github`), the same tool family `vite-react-compiler` uses. Every
+  `@changesets/cli`, `@changesets/changelog-github`), the same tool family `lcabrera-stack` uses. Every
   substantive PR carries a changeset; `npm run version` runs `changeset version && node
 scripts/sync-plugin-version.mjs`, and `CHANGELOG.md` is generated (v1.2.3 at the researched commit — three
   patch entries, each linked to its PR and commit SHA, in the Changesets-standard format).
@@ -355,7 +355,7 @@ phrasing is actively maintained, not just an initial design intent that then rot
 - **The plugin-vs-copy split is philosophical, not just technical, and the repo says so out loud.** "Subscribe
   vs. fork" is presented as the actual product decision, with the tradeoff stated plainly to the user rather than
   papered over: a plugin user gets zero editability and automatic (if SHA-pinned) updates; a `skills.sh` user
-  gets full editability and manual updates that are really full re-copies. `vite-react-compiler`'s split is a
+  gets full editability and manual updates that are really full re-copies. `lcabrera-stack`'s split is a
   different axis entirely (_discovery mechanism_ — path vs. name — rather than _ownership philosophy_), but the
   same "pick one, don't blend" instinct shows up in both: this repo says "installing both leaves you with every
   skill twice," and ADR-081 similarly keeps materialized-skill-content and resolved-gate-code in fully separate
@@ -400,7 +400,7 @@ doctor`: mattpocock/skills bets that natural-language reconciliation, invoked on
   explicitly as **user-invoked**, and a later v1.2.3-era change making `wizard` **model-invoked** specifically so
   the agent can reach for it mid-task "the moment it hits a step only a human can perform, instead of dumping
   numbered instructions into the chat" — with the explicit non-goal stated alongside it: "don't invoke it for
-  steps the agent can perform itself." This is a genuinely useful taxonomy question `vite-react-compiler`'s own
+  steps the agent can perform itself." This is a genuinely useful taxonomy question `lcabrera-stack`'s own
   skills (`.github/skills/*`) don't currently seem to draw as an explicit line — the closer analog in this
   repo's language is user-invoked ≈ a skill someone types deliberately (`commit-and-pr`, `epic`) vs. model-invoked
   ≈ one the agent should reach for unprompted when the task shape matches (`store-pattern`,
@@ -409,10 +409,10 @@ doctor`: mattpocock/skills bets that natural-language reconciliation, invoked on
 - **The "why" lives in ADRs and a `CHANGELOG.md` with real narrative substance, not just terse Changesets
   one-liners.** Multiple `CHANGELOG.md` entries run several paragraphs, explaining _why_ a change was made (e.g.
   the `wizard` promotion entry above), which is unusual for a changelog and closer to a PR-description style —
-  worth noting since `vite-react-compiler`'s own convention (Non-Negotiable Rule 14 / "Verifying a claim") pushes
+  worth noting since `lcabrera-stack`'s own convention (Non-Negotiable Rule 14 / "Verifying a claim") pushes
   narrative into the PR/issue rather than the changelog; this repo instead pushes a good amount of it _into_ the
   changelog itself, apparently on the theory that the changelog is what an installed-plugin user actually reads
-  (they have no PR history to consult), while `vite-react-compiler`'s changelog readers can always trace back to
+  (they have no PR history to consult), while `lcabrera-stack`'s changelog readers can always trace back to
   the PR.
 
 - **Overall philosophy/tone** (useful reference material independent of the distribution question): the README

@@ -24,11 +24,9 @@
 
 import type { TSESTree } from '@typescript-eslint/utils';
 
-import { AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 
-const createRule = ESLintUtils.RuleCreator(
-  (name) => `https://example.com/rule/${name}`,
-);
+import { createRule } from './create-rule.ts';
 
 /** The object literals a props type declares itself, unwrapping intersections. */
 const ownTypeLiterals = (

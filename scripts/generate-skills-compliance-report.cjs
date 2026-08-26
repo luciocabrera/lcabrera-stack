@@ -101,7 +101,7 @@ const buildReport = (result) => {
     `- report_id: skills-compliance-${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`,
     `- generated_at: ${generatedAt}`,
     '- skill_name: code-smell-checker',
-    '- repository: vite-react-compiler',
+    '- repository: lcabrera-stack',
     '- scope_type: repo',
     '- scope_value: .github/skills',
     '- severity_scale: BLOCKER, HIGH, MEDIUM, LOW, NIT',

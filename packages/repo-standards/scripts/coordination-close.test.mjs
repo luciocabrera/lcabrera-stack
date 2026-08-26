@@ -77,7 +77,7 @@ describe('tasksClosedBy — the pass direction', () => {
   );
 
   it('resolves a task from a full pull-request URL in pr:', () => {
-    const pr = 'https://github.com/luciocabrera/vite-react-compiler/pull/533';
+    const pr = 'https://github.com/luciocabrera/lcabrera-stack/pull/533';
     const entries = [task({ branch: 'some/other-branch', pr })];
     expect(names(tasksClosedBy({ entries, ...MERGED }))).toHaveLength(1);
   });
@@ -125,7 +125,7 @@ describe('prNumberOf', () => {
     ["'#521'", 521],
     ['521', 521],
     [521, 521],
-    ['https://github.com/luciocabrera/vite-react-compiler/pull/58', 58],
+    ['https://github.com/luciocabrera/lcabrera-stack/pull/58', 58],
   ])('reads %s as %i', (value, expected) => {
     expect(prNumberOf(value)).toBe(expected);
   });

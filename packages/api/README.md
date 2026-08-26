@@ -158,9 +158,9 @@ const { hasMore, values } = await fetchDistinctValues({
 
 ## Links
 
-- [Repository](https://github.com/luciocabrera/vite-react-compiler) —
+- [Repository](https://github.com/luciocabrera/lcabrera-stack) —
   `packages/api`
-- [Changelog](https://github.com/luciocabrera/vite-react-compiler/blob/main/packages/api/CHANGELOG.md)
+- [Changelog](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/api/CHANGELOG.md)
 - Companion packages: [`@lcabrera/utils`](https://www.npmjs.com/package/@lcabrera/utils)
   (pure helpers), [`@lcabrera/server`](https://www.npmjs.com/package/@lcabrera/server)
   (the Node half), [`@lcabrera/ui`](https://www.npmjs.com/package/@lcabrera/ui)

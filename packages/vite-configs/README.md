@@ -6,7 +6,7 @@ otherwise copies into every workspace.
 
 Nothing here hardcodes a directory of ours: the workspace roster, the StyleX
 source alias and the env-file list are all arguments
-([ADR-069](https://github.com/luciocabrera/vite-react-compiler/blob/main/docs/decisions/ADR-069-publish-the-shared-toolchain.md)).
+([ADR-069](https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/decisions/ADR-069-publish-the-shared-toolchain.md)).
 
 ```bash
 npm install --save-dev @lcabrera/vite-config

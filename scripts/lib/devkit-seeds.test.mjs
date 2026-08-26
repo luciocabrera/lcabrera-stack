@@ -34,7 +34,7 @@ import {
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 const words = forbiddenWords({
-  repositoryName: 'vite-monorepo',
+  repositoryName: 'a-manifest-name',
   repositoryOwner: 'an-owner',
   repositorySlug: 'a-slug',
   secretNames: ['GITHUB_TOKEN', 'SONAR_TOKEN'],
@@ -44,7 +44,7 @@ const words = forbiddenWords({
 
 describe('forbiddenWords', () => {
   it('carries the repository, its workspaces, its secrets and its runner', () => {
-    expect(words).toContain('vite-monorepo');
+    expect(words).toContain('a-manifest-name');
     expect(words).toContain('@lcabrera/ui');
     expect(words).toContain('secrets.SONAR_TOKEN');
     expect(words).toContain('vp ');

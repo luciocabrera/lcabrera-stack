@@ -39,14 +39,10 @@
 
 import type { TSESTree } from '@typescript-eslint/utils';
 
-import { ESLintUtils } from '@typescript-eslint/utils';
 import path from 'node:path';
 
+import { createRule } from './create-rule.ts';
 import { parseFileName } from './file-names.ts';
-
-const createRule = ESLintUtils.RuleCreator(
-  (name) => `https://github.com/luciocabrera/vite-react-compiler/rules/${name}`,
-);
 
 type FolderShape = 'artifact' | 'domain' | 'exempt';
 

@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 
-**Issue:** [#900](https://github.com/luciocabrera/vite-react-compiler/issues/900)
+**Issue:** [#900](https://github.com/luciocabrera/lcabrera-stack/issues/900)
 
 **Relates to:** the documentation map in [`docs/README.md`](../README.md),
 and the comment rule in [`AGENTS.md`](../../AGENTS.md) §7.
@@ -115,4 +115,4 @@ code already says it, write nothing.
 - [`AGENTS.md`](../../AGENTS.md) §7 — comment only what the code cannot say
 - [`.github/skills/quality-gate-workflow/SKILL.md`](../../.github/skills/quality-gate-workflow/SKILL.md) — Documentation Update Rule
 - [`packages/ui/src/PATTERNS.md`](../../packages/ui/src/PATTERNS.md) — was requiring a file per component directory
-- [#900](https://github.com/luciocabrera/vite-react-compiler/issues/900)
+- [#900](https://github.com/luciocabrera/lcabrera-stack/issues/900)

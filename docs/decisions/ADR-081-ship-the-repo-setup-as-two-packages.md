@@ -3,7 +3,7 @@
 **Status:** Accepted
 
 **Date:** 2026-08-18
-**Issue:** [#716](https://github.com/luciocabrera/vite-react-compiler/issues/716)
+**Issue:** [#716](https://github.com/luciocabrera/lcabrera-stack/issues/716)
 **Relates to:** [ADR-069](./ADR-069-publish-the-shared-toolchain.md) (the
 generic-core / repo-data split this follows),
 [ADR-073](./ADR-073-publishing-gates-check-the-packed-tarball.md) (the gate shape
@@ -17,8 +17,8 @@ subagent definitions, the contracts under `docs/agents/`, the gate scripts under
 `scripts/` and `scripts/lib/`, and the workflows under `.github/workflows/` are
 all reachable only by having this checkout. A second repository starts with none
 of it and either copies the directories or does without — which is what
-[#672](https://github.com/luciocabrera/vite-react-compiler/issues/672) and
-[#686](https://github.com/luciocabrera/vite-react-compiler/issues/686) left
+[#672](https://github.com/luciocabrera/lcabrera-stack/issues/672) and
+[#686](https://github.com/luciocabrera/lcabrera-stack/issues/686) left
 behind them.
 
 Copying is not a distribution mechanism. It has no update path: an improvement
@@ -91,7 +91,7 @@ Any single mechanism gets one of the two wrong.
    reconcile. Deferred rather than declined, on the restraint this ADR already
    applies to `@lcabrera/scan-report`: no second repository has asked. Recorded
    because it is what two of the three projects surveyed in
-   [#716](https://github.com/luciocabrera/vite-react-compiler/issues/716) chose
+   [#716](https://github.com/luciocabrera/lcabrera-stack/issues/716) chose
    exclusively, and the third offers as one of two co-equal routes — so its
    absence would otherwise read as an oversight.
 6. **Two packages split by delivery mechanism, plus a consumer config file.**
@@ -220,7 +220,7 @@ that turns a copy into a distribution (see §Decision on the manifest).
 
 ## References
 
-- [#716](https://github.com/luciocabrera/vite-react-compiler/issues/716) — the
+- [#716](https://github.com/luciocabrera/lcabrera-stack/issues/716) — the
   issue this decides, and the home of the surveys and their commands.
 - [ADR-069](./ADR-069-publish-the-shared-toolchain.md) — the generic-core /
   repo-data split.

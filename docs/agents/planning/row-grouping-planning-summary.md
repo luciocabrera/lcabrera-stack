@@ -14,11 +14,11 @@
 
 Three epics, each with its children linked as real sub-issues, across M1–M5:
 
-| Epic | Issue                                                                                                       |
-| ---- | ----------------------------------------------------------------------------------------------------------- |
-| E-1  | [#547](https://github.com/luciocabrera/vite-react-compiler/issues/547) — server-driven row grouping         |
-| E-2  | [#548](https://github.com/luciocabrera/vite-react-compiler/issues/548) — grid foundations grouping rides on |
-| E-3  | [#549](https://github.com/luciocabrera/vite-react-compiler/issues/549) — self-healing governance, round 2   |
+| Epic | Issue                                                                                                  |
+| ---- | ------------------------------------------------------------------------------------------------------ |
+| E-1  | [#547](https://github.com/luciocabrera/lcabrera-stack/issues/547) — server-driven row grouping         |
+| E-2  | [#548](https://github.com/luciocabrera/lcabrera-stack/issues/548) — grid foundations grouping rides on |
+| E-3  | [#549](https://github.com/luciocabrera/lcabrera-stack/issues/549) — self-healing governance, round 2   |
 
 Each issue body carries a provenance line naming its planning id. The planning
 document was a one-shot input under the gitignored `.tmp/planning/` and is

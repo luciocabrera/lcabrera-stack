@@ -4,11 +4,7 @@
 
 import type { TSESTree } from '@typescript-eslint/utils';
 
-import { ESLintUtils } from '@typescript-eslint/utils';
-
-const createRule = ESLintUtils.RuleCreator(
-  (name) => `https://example.com/rule/${name}`,
-);
+import { createRule } from './create-rule.ts';
 
 export default createRule({
   create(context) {

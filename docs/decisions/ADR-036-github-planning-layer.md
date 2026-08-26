@@ -69,7 +69,7 @@ exactly as they are.**
 
 - **Issues** — the durable backlog (the "what should happen" currently scattered).
 - **Sub-issues** — epics decomposed into children with a native progress bar
-  (e.g. the coverage rollout, [#50](https://github.com/luciocabrera/vite-react-compiler/issues/50)).
+  (e.g. the coverage rollout, [#50](https://github.com/luciocabrera/lcabrera-stack/issues/50)).
 - **Milestones** — release/date/phase grouping.
 - **Projects** — a **human** kanban/table/roadmap view. A planning and reporting
   surface for people, **not** a coordination input for agents (they read the git
@@ -95,7 +95,7 @@ The layers connect by **pointing, never by duplicating or syncing bidirectionall
 GitHub Projects v2 mutations require the `project` scope, which the default
 Actions `GITHUB_TOKEN` does **not** carry. Standing up the board is therefore a
 **one-time owner step**, tracked in
-[#56](https://github.com/luciocabrera/vite-react-compiler/issues/56) and documented
+[#56](https://github.com/luciocabrera/lcabrera-stack/issues/56) and documented
 in `docs/tooling/github-planning.md`: grant the scope
 (`gh auth refresh -s project,read:project`), create one Project, then set the repo
 `PROJECT_URL` variable + `ADD_TO_PROJECT_PAT` secret. Until then, Issues,

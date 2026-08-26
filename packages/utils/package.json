@@ -10,13 +10,13 @@
     "typescript",
     "utilities"
   ],
-  "homepage": "https://github.com/luciocabrera/vite-react-compiler/tree/main/packages/utils#readme",
-  "bugs": "https://github.com/luciocabrera/vite-react-compiler/issues",
+  "homepage": "https://github.com/luciocabrera/lcabrera-stack/tree/main/packages/utils#readme",
+  "bugs": "https://github.com/luciocabrera/lcabrera-stack/issues",
   "license": "MIT",
   "author": "Lucio Cabrera",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/luciocabrera/vite-react-compiler.git",
+    "url": "git+https://github.com/luciocabrera/lcabrera-stack.git",
     "directory": "packages/utils"
   },
   "files": [

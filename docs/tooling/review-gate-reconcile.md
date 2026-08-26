@@ -377,12 +377,12 @@ Waiting up to one interval is the ordinary answer. When that is too long:
    ```bash
    gh workflow run copilot-review-gate.yml -f pr=<n> \
      --ref <the pull request's branch> \
-     -R luciocabrera/vite-react-compiler
+     -R luciocabrera/lcabrera-stack
    gh workflow run agent-review-verdict.yml -f pr=<n> \
      --ref <the pull request's branch> \
-     -R luciocabrera/vite-react-compiler
+     -R luciocabrera/lcabrera-stack
    gh workflow run review-gate-reconcile.yml -f pr=<n> \
-     -R luciocabrera/vite-react-compiler   # the sweep is default-branch by design
+     -R luciocabrera/lcabrera-stack   # the sweep is default-branch by design
    ```
 
    **`--ref` on the two gate dispatches is not optional when the pull request

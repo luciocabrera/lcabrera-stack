@@ -6,7 +6,7 @@ enforced shape — as commands, so a repository that installs this package can r
 them.
 
 Published from
-[`vite-react-compiler`](https://github.com/luciocabrera/vite-react-compiler),
+[`lcabrera-stack`](https://github.com/luciocabrera/lcabrera-stack),
 which is also its first consumer
 ([ADR-081](../../docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
 

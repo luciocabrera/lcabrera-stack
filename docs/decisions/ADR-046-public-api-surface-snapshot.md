@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-07-24
-- **Issue:** [#359](https://github.com/luciocabrera/vite-react-compiler/issues/359)
+- **Issue:** [#359](https://github.com/luciocabrera/lcabrera-stack/issues/359)
 - **Relates to:** [ADR-038](ADR-038-public-package-topology-by-runtime.md) (public-package topology), [ADR-043](ADR-043-release-tooling-changesets-over-pnpm-native.md) (the Changesets flow this gate protects), `scripts/verify-publish-surface.mjs` (the adjacent subpath-parity guard this sits beside).
 
 ## Context
