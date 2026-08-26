@@ -45,7 +45,7 @@ twins live in `TableDrawerContext/actions` and resolve through the same
 `applyGroupingReducer`, so the drawer cannot stage a configuration Accept would
 then refuse.
 
-This reverses the live-write departure #568 introduced ([#654](https://github.com/luciocabrera/vite-react-compiler/issues/654)):
+This reverses the live-write departure #568 introduced ([#654](https://github.com/luciocabrera/lcabrera-stack/issues/654)):
 a Cancel button that did not cancel is a correctness problem, and batching turns
 N loader round trips into one.
 

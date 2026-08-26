@@ -3,7 +3,7 @@
 **Status:** Accepted
 
 **Date:** 2026-08-17
-**Issue:** [#733](https://github.com/luciocabrera/vite-react-compiler/issues/733)
+**Issue:** [#733](https://github.com/luciocabrera/lcabrera-stack/issues/733)
 **Relates to:** [ADR-073](./ADR-073-publishing-gates-check-the-packed-tarball.md),
 [ADR-043](./ADR-043-release-tooling-changesets-over-pnpm-native.md),
 [ADR-057](./ADR-057-publish-the-custom-lint-rules.md)
@@ -21,7 +21,7 @@ That defect happened. `@lcabrera/eslint-plugin@0.1.0` is on npm with
 `exports: {".": "./src/index.ts"}` and `dependencies: {"@typescript-eslint/utils":
 "catalog:lint"}`; `npm install` of it aborts at resolution with
 `EUNSUPPORTEDPROTOCOL`, before `exports` is ever read
-([#730](https://github.com/luciocabrera/vite-react-compiler/issues/730)). Every
+([#730](https://github.com/luciocabrera/lcabrera-stack/issues/730)). Every
 gate in this repository was green while that shipped, because none of them reads
 a published manifest. `release-publish-plan.mjs` queries the registry, but only
 for `dist-tags.latest`, to answer "is there anything to publish?".
@@ -44,7 +44,7 @@ broken artifacts, all published before the pnpm path was in place, none of them
 fixable by any change to this repository. A required check in that state fails
 every pull request, including the one that would fix it — the same liveness
 argument that keeps
-[#698](https://github.com/luciocabrera/vite-react-compiler/issues/698) from
+[#698](https://github.com/luciocabrera/lcabrera-stack/issues/698) from
 folding gate promotion into the work that builds a gate.
 
 The two interact: full coverage makes a permanently-red gate possible, and a
@@ -186,9 +186,9 @@ is cheaper than being silent in the state this gate exists to catch.
 
 ## References
 
-- Issue [#733](https://github.com/luciocabrera/vite-react-compiler/issues/733) —
+- Issue [#733](https://github.com/luciocabrera/lcabrera-stack/issues/733) —
   the gap and its acceptance criteria.
-- Issue [#730](https://github.com/luciocabrera/vite-react-compiler/issues/730) —
+- Issue [#730](https://github.com/luciocabrera/lcabrera-stack/issues/730) —
   the broken publish, with the registry reads that establish it.
 - [ADR-073](./ADR-073-publishing-gates-check-the-packed-tarball.md) — the
   pnpm-pack guarantee this sits beside, and the principle it extends.

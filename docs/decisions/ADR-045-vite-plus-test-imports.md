@@ -2,8 +2,8 @@
 
 - **Status:** Accepted
 - **Date:** 2026-07-23
-- **Issue:** [#346](https://github.com/luciocabrera/vite-react-compiler/issues/346)
-- **Relates to:** [#344](https://github.com/luciocabrera/vite-react-compiler/issues/344)/[#345](https://github.com/luciocabrera/vite-react-compiler/pull/345) — part A (single Vite instance), the base this builds on. [ADR-043](ADR-043-release-tooling-changesets-over-pnpm-native.md)/[ADR-044](ADR-044-decline-pnpm-global-virtual-store.md) — the dependency-tooling exploration this closes out.
+- **Issue:** [#346](https://github.com/luciocabrera/lcabrera-stack/issues/346)
+- **Relates to:** [#344](https://github.com/luciocabrera/lcabrera-stack/issues/344)/[#345](https://github.com/luciocabrera/lcabrera-stack/pull/345) — part A (single Vite instance), the base this builds on. [ADR-043](ADR-043-release-tooling-changesets-over-pnpm-native.md)/[ADR-044](ADR-044-decline-pnpm-global-virtual-store.md) — the dependency-tooling exploration this closes out.
 
 ## Context
 
@@ -67,4 +67,4 @@ passes `typecheck:all`.
   references, and `packages/plugins`' test script still invokes `vitest` directly.
   Dropping them is a further cleanup, not part of this decision.
 - The `vite`/`vitest` versions and the single-instance topology are unchanged —
-  that was part A ([#345](https://github.com/luciocabrera/vite-react-compiler/pull/345)).
+  that was part A ([#345](https://github.com/luciocabrera/lcabrera-stack/pull/345)).

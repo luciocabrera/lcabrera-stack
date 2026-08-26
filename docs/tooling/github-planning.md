@@ -26,7 +26,7 @@ the prioritised, cross-referenced, human-browsable backlog and a kanban.
   happen" that outlives any branch.
 - **Sub-issue** — a child of an epic issue, with a native progress bar. Use for
   phased rollouts (the coverage rollout epic is
-  [#50](https://github.com/luciocabrera/vite-react-compiler/issues/50), children
+  [#50](https://github.com/luciocabrera/lcabrera-stack/issues/50), children
   #51–#55).
 - **Milestone** — release / date / phase grouping (e.g. _Coverage rollout —
   Phase 3_).
@@ -99,7 +99,7 @@ review moves it to In Review, and merge closes it out — all automatically.
 The board is the only piece that needs owner-level access: Projects v2 mutations
 require the **`project` scope**, which the default Actions `GITHUB_TOKEN` does not
 carry. Tracked in
-[#56](https://github.com/luciocabrera/vite-react-compiler/issues/56). Until it is
+[#56](https://github.com/luciocabrera/lcabrera-stack/issues/56). Until it is
 done, Issues / sub-issues / Milestones work fully; only auto-add-to-board waits.
 
 1. **Grant the scope** to your `gh` token:

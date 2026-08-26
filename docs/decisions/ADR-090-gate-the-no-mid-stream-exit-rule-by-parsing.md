@@ -3,7 +3,7 @@
 **Status:** Accepted
 
 **Date:** 2026-08-25
-**Issue:** [#929](https://github.com/luciocabrera/vite-react-compiler/issues/929)
+**Issue:** [#929](https://github.com/luciocabrera/lcabrera-stack/issues/929)
 **Relates to:** [ADR-055](./ADR-055-react-doctor-as-a-gate.md)
 
 ## Context

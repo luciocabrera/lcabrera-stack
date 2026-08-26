@@ -3,7 +3,7 @@
 **Status:** Accepted
 
 **Date:** 2026-08-17
-**Issue:** [#750](https://github.com/luciocabrera/vite-react-compiler/issues/750)
+**Issue:** [#750](https://github.com/luciocabrera/lcabrera-stack/issues/750)
 **Relates to:** [ADR-055](./ADR-055-react-doctor-as-a-gate.md),
 [ADR-077](./ADR-077-audit-every-published-version-and-report-rather-than-block.md),
 [ADR-076](./ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md)
@@ -190,7 +190,7 @@ for one spelling matches nothing on the other and reports a confident zero.
 
 ## References
 
-- Issue [#750](https://github.com/luciocabrera/vite-react-compiler/issues/750) —
+- Issue [#750](https://github.com/luciocabrera/lcabrera-stack/issues/750) —
   the gap, its measurement on #740, and the acceptance criteria.
 - [`docs/tooling/copilot-review-gate.md`](../tooling/copilot-review-gate.md) —
   how to run the report and how to read each state.
@@ -199,5 +199,5 @@ for one spelling matches nothing on the other and reports a confident zero.
 - [ADR-077](./ADR-077-audit-every-published-version-and-report-rather-than-block.md)
   — the sibling report-don't-block decision, and the "a check that goes green
   because it could not run is worse than none" argument.
-- Issue [#698](https://github.com/luciocabrera/vite-react-compiler/issues/698) —
+- Issue [#698](https://github.com/luciocabrera/lcabrera-stack/issues/698) —
   where gate promotion is decided, kept separate from gate construction.

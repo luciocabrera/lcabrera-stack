@@ -3,7 +3,7 @@
 **Status:** Accepted
 
 **Date:** 2026-08-24
-**Issue:** [#915](https://github.com/luciocabrera/vite-react-compiler/issues/915)
+**Issue:** [#915](https://github.com/luciocabrera/lcabrera-stack/issues/915)
 **Relates to:** [ADR-036](./ADR-036-github-planning-layer.md)
 
 ## Context
@@ -54,7 +54,7 @@ the one `pr-threads.mjs` argument with no shape check at all, while its siblings
 mistyped id reached the GraphQL API and failed as an error about a variable the
 operator never typed.
 
-### Correction (2026-08-25, [#917](https://github.com/luciocabrera/vite-react-compiler/issues/917) / [#918](https://github.com/luciocabrera/vite-react-compiler/pull/918))
+### Correction (2026-08-25, [#917](https://github.com/luciocabrera/lcabrera-stack/issues/917) / [#918](https://github.com/luciocabrera/lcabrera-stack/pull/918))
 
 Two things in this ADR as first written were wrong. The second was found only
 because the first was being fixed.
@@ -75,7 +75,7 @@ leading-dash check. Probed against this repository:
 $ gh issue list --label '--nonexistent'     # exit 0, empty result — taken verbatim
 $ gh issue list --label '--limit'           # exit 0 — verbatim even when it is a real gh flag
 $ gh api '--nonexistent'                    # unknown flag: --nonexistent, exit 1
-$ gh api 'repos/luciocabrera/vite-react-compiler' --jq .name   # control: works
+$ gh api 'repos/luciocabrera/lcabrera-stack' --jq .name   # control: works
 ```
 
 So the real property is narrower than this ADR claimed, and it is about
@@ -184,7 +184,7 @@ parsing, which only validation addresses.
 
 ## References
 
-- [#915](https://github.com/luciocabrera/vite-react-compiler/issues/915) — the
+- [#915](https://github.com/luciocabrera/lcabrera-stack/issues/915) — the
   two findings, their taint sources, and the reproduction.
 - `packages/repo-standards/scripts/git-exec.mjs` — the binary-and-environment
   half of this discipline (Sonar S4036), the layer below this one.

@@ -4,7 +4,7 @@
 - **Date:** 2026-07-22
 - **Supersedes:** the per-workspace Oxlint factory layer (`base-lint`,
   `api-lint`, `frontend-lint`, `react-router-lint`)
-- **Issue:** [#318](https://github.com/luciocabrera/vite-react-compiler/issues/318)
+- **Issue:** [#318](https://github.com/luciocabrera/lcabrera-stack/issues/318)
 
 ## Context
 

@@ -2,8 +2,8 @@
 
 - **Status:** Accepted
 - **Date:** 2026-07-23
-- **Issue:** [#331](https://github.com/luciocabrera/vite-react-compiler/issues/331)
-- **Relates to:** [#328](https://github.com/luciocabrera/vite-react-compiler/pull/328) — the pnpm 11.16 bump that made the feature available; the multi-worktree agent workflow ([coordination README](../coordination/README.md)) that motivated it.
+- **Issue:** [#331](https://github.com/luciocabrera/lcabrera-stack/issues/331)
+- **Relates to:** [#328](https://github.com/luciocabrera/lcabrera-stack/pull/328) — the pnpm 11.16 bump that made the feature available; the multi-worktree agent workflow ([coordination README](../coordination/README.md)) that motivated it.
 
 ## Context
 
@@ -85,5 +85,5 @@ in the resolved tree.
 - No change to installs or the worktree workflow; per-worktree `node_modules`
   stays a full `.pnpm` hardlink farm (cheap in data via store hardlinks, but heavy
   in inodes — the cost this feature would have removed).
-- The measurements and the failing output live on [#331](https://github.com/luciocabrera/vite-react-compiler/issues/331)
+- The measurements and the failing output live on [#331](https://github.com/luciocabrera/lcabrera-stack/issues/331)
   as the dated evidence behind this record.

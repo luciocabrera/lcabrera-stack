@@ -2,8 +2,8 @@
 
 - **Status:** Accepted
 - **Date:** 2026-07-23
-- **Issue:** [#334](https://github.com/luciocabrera/vite-react-compiler/issues/334)
-- **Relates to:** [#266](https://github.com/luciocabrera/vite-react-compiler/pull/266) — the Changesets adoption, which recorded the wiring but not the alternatives.
+- **Issue:** [#334](https://github.com/luciocabrera/lcabrera-stack/issues/334)
+- **Relates to:** [#266](https://github.com/luciocabrera/lcabrera-stack/pull/266) — the Changesets adoption, which recorded the wiring but not the alternatives.
 
 ## Context
 

@@ -299,9 +299,9 @@ is the property this decision exists to keep.
 ## References
 
 - #772 — the issue this decides; #547 — the epic
-- #765 / [PR #766](https://github.com/luciocabrera/vite-react-compiler/pull/766)
+- #765 / [PR #766](https://github.com/luciocabrera/lcabrera-stack/pull/766)
   — the aggregate `label` → `value` change this repeats for keys, and why
-- #771 / [PR #773](https://github.com/luciocabrera/vite-react-compiler/pull/773)
+- #771 / [PR #773](https://github.com/luciocabrera/lcabrera-stack/pull/773)
   — the pointer expansion a drill is triggered from
 - `packages/ui/src/components/Table/Table.types.ts` — `TableGroupKeyValue`,
   `TableGroupRowSummary`

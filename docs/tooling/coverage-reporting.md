@@ -77,15 +77,15 @@ authority and fails if any of them is absent from either lane. It keys on the
 directory rather than the package name, so an npm scope rename cannot defeat it.
 Adding a fifth public package extends the check with no edit here:
 
-| Workspace                     | Package                   | `run` | Why                                                                                                                                  |
-| ----------------------------- | ------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `packages/ui`                 | `@lcabrera/ui`            | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                                   |
-| `packages/server`             | `@lcabrera/server`        | true  | Same                                                                                                                                 |
-| `packages/api`                | `@lcabrera/api`           | true  | Same — the browser half of the former `data-access` ([ADR-038](../decisions/ADR-038-public-package-topology-by-runtime.md))          |
-| `apps/showcase`               | `showcase`                | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                       |
-| `packages/node-runtime`       | `@lcabrera/node`          | true  | Phase 2 — DB-free `test:coverage`                                                                                                    |
-| `packages/utils`              | `@lcabrera/utils`         | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))                   |
-| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | true  | Phase 3 — a `RuleTester` suite per rule ([#205](https://github.com/luciocabrera/vite-react-compiler/issues/205)); reaches no service |
+| Workspace                     | Package                   | `run` | Why                                                                                                                             |
+| ----------------------------- | ------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui`                 | `@lcabrera/ui`            | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                              |
+| `packages/server`             | `@lcabrera/server`        | true  | Same                                                                                                                            |
+| `packages/api`                | `@lcabrera/api`           | true  | Same — the browser half of the former `data-access` ([ADR-038](../decisions/ADR-038-public-package-topology-by-runtime.md))     |
+| `apps/showcase`               | `showcase`                | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                  |
+| `packages/node-runtime`       | `@lcabrera/node`          | true  | Phase 2 — DB-free `test:coverage`                                                                                               |
+| `packages/utils`              | `@lcabrera/utils`         | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/lcabrera-stack/issues/124))                   |
+| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | true  | Phase 3 — a `RuleTester` suite per rule ([#205](https://github.com/luciocabrera/lcabrera-stack/issues/205)); reaches no service |
 
 `run: false` reuses a summary produced upstream; `--all` forces every workspace
 to run (standalone local use, where `test:ci` has not run first).
@@ -143,7 +143,7 @@ only once its coverage runs clean and means something.** Checklist:
   passing on a developer machine that happens to have Postgres up.
 
   Tracked as GitHub epic
-  [#50](https://github.com/luciocabrera/vite-react-compiler/issues/50)
+  [#50](https://github.com/luciocabrera/lcabrera-stack/issues/50)
   (children #51–#55, milestone _Coverage rollout — Phase 3_) — the durable-backlog
   layer from [ADR-036](../decisions/ADR-036-github-planning-layer.md).
 

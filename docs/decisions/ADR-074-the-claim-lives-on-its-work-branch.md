@@ -2,10 +2,10 @@
 
 - **Status:** Accepted
 - **Date:** 2026-08-14
-- **Issue:** [#704](https://github.com/luciocabrera/vite-react-compiler/issues/704)
+- **Issue:** [#704](https://github.com/luciocabrera/lcabrera-stack/issues/704)
 - **Corrects:** the "claim lives on `main`, landed early" rule in
   [`docs/coordination/README.md`](../coordination/README.md), written before
-  [#233](https://github.com/luciocabrera/vite-react-compiler/issues/233) and left
+  [#233](https://github.com/luciocabrera/lcabrera-stack/issues/233) and left
   standing after it.
 - **Relates to:** [ADR-036](ADR-036-github-planning-layer.md) (the durable backlog
   this register links to), [ADR-037](ADR-037-coordination-board-is-a-local-view.md)
@@ -39,8 +39,8 @@ problem it was solving.
 
 A documented rule nothing implements is not inert. It is read, and acted on.
 Copilot's review quoted it verbatim on two unrelated PRs
-([#702](https://github.com/luciocabrera/vite-react-compiler/pull/702),
-[#718](https://github.com/luciocabrera/vite-react-compiler/pull/718)) and asked
+([#702](https://github.com/luciocabrera/lcabrera-stack/pull/702),
+[#718](https://github.com/luciocabrera/lcabrera-stack/pull/718)) and asked
 in both that the task file be split into a separate claim-only PR. It read the
 protocol correctly each time. Because every PR that `vp run coordination:claim`
 produces carries its own task file, that finding recurs on every claim and costs
@@ -85,7 +85,7 @@ above.
 - Because the comparison runs between claims on live branches, all of the
   register's false-positive pressure lands on glob width: two disjoint tasks
   whose `area` globs are directory-level collide by construction. That is
-  [#712](https://github.com/luciocabrera/vite-react-compiler/issues/712), kept
+  [#712](https://github.com/luciocabrera/lcabrera-stack/issues/712), kept
   separate — it is about how narrow a glob should be, not about where the file
   lands.
 
@@ -98,7 +98,7 @@ one-branch flow, is the Decision above. These are the two it beat.
 branch free of task files.** Rejected on the mechanics, not on taste. `main`
 carries a ruleset with a `pull_request` rule and `required_status_checks` — read
 the live list with
-`gh api repos/luciocabrera/vite-react-compiler/rules/branches/main` — so:
+`gh api repos/luciocabrera/lcabrera-stack/rules/branches/main` — so:
 
 - a direct push of the claim is refused outright — GitHub answers `GH013`,
   naming the required checks it is still expecting (the same wall that killed the
@@ -125,13 +125,13 @@ one agent's drifting task never fails another's build.
 
 ## References
 
-- [#704](https://github.com/luciocabrera/vite-react-compiler/issues/704) — the
+- [#704](https://github.com/luciocabrera/lcabrera-stack/issues/704) — the
   contradiction, its two measured comments, and the option table this settles
-- [#233](https://github.com/luciocabrera/vite-react-compiler/issues/233) — the
+- [#233](https://github.com/luciocabrera/lcabrera-stack/issues/233) — the
   tree-only check that reported a clean register to both sides of a real
   collision; the reason the remote read exists
-- [#711](https://github.com/luciocabrera/vite-react-compiler/issues/711),
-  [#712](https://github.com/luciocabrera/vite-react-compiler/issues/712) — the
+- [#711](https://github.com/luciocabrera/lcabrera-stack/issues/711),
+  [#712](https://github.com/luciocabrera/lcabrera-stack/issues/712) — the
   other two members of the family: `area` is hand-written intent, not observed
   outcome
 - [`docs/coordination/README.md`](../coordination/README.md) — the protocol this

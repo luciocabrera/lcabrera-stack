@@ -197,7 +197,7 @@ Two things remain, and they are what retire the token for good.
 1. Configure trusted publishing for EACH package on npmjs.com:
      the package -> Settings -> Trusted Publisher -> GitHub Actions
        Organization or user: luciocabrera
-       Repository:           vite-react-compiler
+       Repository:           lcabrera-stack
        Workflow filename:    release.yml
 
 2. Log out of npm once every package is configured, so no credential is left

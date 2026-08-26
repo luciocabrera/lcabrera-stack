@@ -15,13 +15,13 @@
 Five epics, each with its children linked as real sub-issues, across milestones
 M1–M5:
 
-| Epic | Issue                                                                                                             |
-| ---- | ----------------------------------------------------------------------------------------------------------------- |
-| E-1  | [#389](https://github.com/luciocabrera/vite-react-compiler/issues/389) — `@lcabrera/server` persistence hardening |
-| E-2  | [#390](https://github.com/luciocabrera/vite-react-compiler/issues/390) — enterprise-orders correctness & security |
-| E-3  | [#391](https://github.com/luciocabrera/vite-react-compiler/issues/391) — read-path performance                    |
-| E-4  | [#392](https://github.com/luciocabrera/vite-react-compiler/issues/392) — self-healing governance                  |
-| E-5  | [#393](https://github.com/luciocabrera/vite-react-compiler/issues/393) — observability (optional)                 |
+| Epic | Issue                                                                                                        |
+| ---- | ------------------------------------------------------------------------------------------------------------ |
+| E-1  | [#389](https://github.com/luciocabrera/lcabrera-stack/issues/389) — `@lcabrera/server` persistence hardening |
+| E-2  | [#390](https://github.com/luciocabrera/lcabrera-stack/issues/390) — enterprise-orders correctness & security |
+| E-3  | [#391](https://github.com/luciocabrera/lcabrera-stack/issues/391) — read-path performance                    |
+| E-4  | [#392](https://github.com/luciocabrera/lcabrera-stack/issues/392) — self-healing governance                  |
+| E-5  | [#393](https://github.com/luciocabrera/lcabrera-stack/issues/393) — observability (optional)                 |
 
 The planning ids appear in each issue body's provenance line, so this map is what
 resolves an old reference to one:

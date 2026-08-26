@@ -201,7 +201,7 @@ ADR citations and gate wiring that are ours alone.
 ## Mechanisms considered and not adopted
 
 Surveying how comparable projects distribute their skills
-([#716](https://github.com/luciocabrera/vite-react-compiler/issues/716)) turned
+([#716](https://github.com/luciocabrera/lcabrera-stack/issues/716)) turned
 up three shapes worth a verdict here, so a later reader can tell them from
 mechanisms nobody looked at. ADR-081 carries the reasoning; this is the pointer.
 

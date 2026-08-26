@@ -310,7 +310,7 @@ timestamptz)` resolves against the session `TimeZone`, so the same order falls i
 - 41314fe: A grouped Table now renders each group key's value in that key's **own column**
   rather than in a grid-owned hierarchy column, and reads a row's level from which
   key columns are filled rather than from an indent
-  ([ADR-080](https://github.com/luciocabrera/vite-react-compiler/blob/main/docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
+  ([ADR-080](https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
 
   Four things this fixes, three of them visible before:
 
@@ -539,7 +539,7 @@ timestamptz)` resolves against the session `TimeZone`, so the same order falls i
   functions in its header actions menu.
 
   A grouped column renders its key's value rather than a measure
-  ([ADR-080](https://github.com/luciocabrera/vite-react-compiler/blob/main/docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)),
+  ([ADR-080](https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)),
   so the aggregate a user picked there was written to the grouping state and then
   dropped by the rendering — the menu item looked broken. The settings drawer's
   "Add Aggregate" picker already left those columns out, so the two surfaces

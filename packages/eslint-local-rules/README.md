@@ -401,8 +401,7 @@ swaps to `dist` at pack time, because a `.ts` file inside a consumer's
    import { ESLintUtils } from '@typescript-eslint/utils';
 
    const createRule = ESLintUtils.RuleCreator(
-     (name) =>
-       `https://github.com/luciocabrera/vite-react-compiler/rules/${name}`,
+     (name) => `https://github.com/luciocabrera/lcabrera-stack/rules/${name}`,
    );
 
    export default createRule({

@@ -26,7 +26,12 @@ import { COMPONENT_FILE_SUFFIXES } from './component-files.ts';
 import { parseFileName } from './file-names.ts';
 
 const createRule = ESLintUtils.RuleCreator(
-  (name) => `https://github.com/luciocabrera/vite-react-compiler/rules/${name}`,
+  // The README documents every rule under a `### \`<name>\`` heading, so this anchor
+  // resolves. The previous form pointed at `/rules/<name>`, a path that has never
+  // existed — and this URL is not internal: ESLint prints it in a consumer's own
+  // lint output, so a 404 here is a broken link in someone else's terminal.
+  (name) =>
+    `https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/eslint-local-rules/README.md#${name}`,
 );
 
 type MessageIds = 'deprecatedSuffix' | 'hookPrefix' | 'wrongCase';

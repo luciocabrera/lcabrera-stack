@@ -2,8 +2,8 @@
 
 - **Status:** Accepted
 - **Date:** 2026-07-25
-- **Issue:** [#382](https://github.com/luciocabrera/vite-react-compiler/issues/382)
-- **Corrects:** [#357](https://github.com/luciocabrera/vite-react-compiler/issues/357) / [#358](https://github.com/luciocabrera/vite-react-compiler/pull/358), whose stated mechanism was wrong.
+- **Issue:** [#382](https://github.com/luciocabrera/lcabrera-stack/issues/382)
+- **Corrects:** [#357](https://github.com/luciocabrera/lcabrera-stack/issues/357) / [#358](https://github.com/luciocabrera/lcabrera-stack/pull/358), whose stated mechanism was wrong.
 - **Relates to:** [ADR-045](ADR-045-vite-plus-test-imports.md) (the `vite-plus/test` switch that prompted the audit), [ADR-044](ADR-044-decline-pnpm-global-virtual-store.md) (adjacent pnpm-resolution decision).
 
 ## Context

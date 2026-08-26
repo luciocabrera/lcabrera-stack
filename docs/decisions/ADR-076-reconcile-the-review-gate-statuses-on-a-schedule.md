@@ -123,7 +123,7 @@ tighter bound anyway, because scheduled delivery is best-effort.
 
 ## Amendments
 
-> **Narrowed by #868 / [#880](https://github.com/luciocabrera/vite-react-compiler/pull/880)**
+> **Narrowed by #868 / [#880](https://github.com/luciocabrera/lcabrera-stack/pull/880)**
 > (2026-08-21). Property 2 above — _"It publishes only a change"_ — now has a second
 > half: for `Copilot review complete` the sweep publishes only a change **and never a
 > weaker state than a published `success`**, though it still re-describes one. Per gate,
@@ -136,7 +136,7 @@ tighter bound anyway, because scheduled delivery is best-effort.
 > `docs/tooling/review-gate-reconcile.md` carries the rule, what it gives up, and the
 > residual false-green case that #699 would make reachable.
 
-> **Narrowed again by #884 / [#921](https://github.com/luciocabrera/vite-react-compiler/pull/921)**
+> **Narrowed again by #884 / [#921](https://github.com/luciocabrera/lcabrera-stack/pull/921)**
 > (2026-08-25). The amendment above protected a published `success` from being weakened.
 > It did not stop the sweep publishing in the first place, so promoting
 > `Copilot review complete` to a required context made the remaining direction live: on a

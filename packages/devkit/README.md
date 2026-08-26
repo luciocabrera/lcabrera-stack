@@ -5,7 +5,7 @@ definitions, and the workflows, hooks, templates and registers that make them ru
 — into a consumer repository, and reports what has diverged.
 
 Published from
-[`vite-react-compiler`](https://github.com/luciocabrera/vite-react-compiler),
+[`lcabrera-stack`](https://github.com/luciocabrera/lcabrera-stack),
 which is also its first consumer
 ([ADR-081](../../docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
 

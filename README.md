@@ -1,4 +1,4 @@
-# vite-react-compiler
+# lcabrera-stack
 
 A pnpm monorepo built with the [Vite+](https://viteplus.dev) unified toolchain
 (`vp`).

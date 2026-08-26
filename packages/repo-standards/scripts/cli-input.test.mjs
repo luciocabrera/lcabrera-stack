@@ -113,8 +113,8 @@ describe('parsePullNumber — what it refuses, and how loudly', () => {
 
 describe('parseRepository', () => {
   it('takes owner/name, including the dots and dashes GitHub allows', () => {
-    expect(parseRepository('luciocabrera/vite-react-compiler')).toBe(
-      'luciocabrera/vite-react-compiler',
+    expect(parseRepository('luciocabrera/lcabrera-stack')).toBe(
+      'luciocabrera/lcabrera-stack',
     );
     expect(parseRepository(' some-owner/repo.name_v2 ')).toBe(
       'some-owner/repo.name_v2',

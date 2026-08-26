@@ -296,7 +296,7 @@ or are checking the parser against it — this is what it is reading. Note the
 matches nothing on the other.
 
 ```bash
-gh api --paginate 'repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews?per_page=100' \
+gh api --paginate 'repos/luciocabrera/lcabrera-stack/pulls/<n>/reviews?per_page=100' \
   --jq '.[] | select(.user.login | startswith("copilot")) | .body' \
   | grep -A20 'Suppressed comments'
 ```
@@ -309,7 +309,7 @@ thread count answer different questions — compare them with
 ```bash
 gh api graphql -F n=<n> -f query='
   query($n: Int!) {
-    repository(owner: "luciocabrera", name: "vite-react-compiler") {
+    repository(owner: "luciocabrera", name: "lcabrera-stack") {
       pullRequest(number: $n) { reviewThreads(first: 100) { totalCount } }
     }
   }' --jq '.data.repository.pullRequest.reviewThreads.totalCount'
@@ -326,7 +326,7 @@ rather than transcribing it — a fixture someone retyped teaches the parser a
 format that never existed:
 
 ```bash
-gh api --paginate 'repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews?per_page=100' \
+gh api --paginate 'repos/luciocabrera/lcabrera-stack/pulls/<n>/reviews?per_page=100' \
   --jq '.[] | select(.id == <review-id>)
         | {body, id, login: .user.login, pr: <n>, submittedAt: .submitted_at}'
 ```
@@ -487,7 +487,7 @@ the pull request number is the only thing to fill in:
 ```bash
 gh api graphql -F n=<n> -f query='
   query($n: Int!) {
-    repository(owner: "luciocabrera", name: "vite-react-compiler") {
+    repository(owner: "luciocabrera", name: "lcabrera-stack") {
       pullRequest(number: $n) {
         headRefOid
         reviews(last: 100) { nodes { author { login } state commit { oid } submittedAt } }
@@ -569,7 +569,7 @@ within one interval with nobody doing anything, so these rungs are for when that
 is too long, or when the sweep is not running. Check rather than assume —
 
 ```bash
-gh run list -R luciocabrera/vite-react-compiler \
+gh run list -R luciocabrera/lcabrera-stack \
   --workflow=review-gate-reconcile.yml --limit 5
 ```
 
@@ -592,7 +592,7 @@ rest of the preconditions.
    box on a thread, or the endpoint behind it:
 
    ```bash
-   gh api repos/luciocabrera/vite-react-compiler/pulls/<n>/comments/<comment-id>/replies \
+   gh api repos/luciocabrera/lcabrera-stack/pulls/<n>/comments/<comment-id>/replies \
      -f body='<text>'
    ```
 
@@ -621,11 +621,11 @@ rest of the preconditions.
    SHA, then re-run it:
 
    ```bash
-   gh run list -R luciocabrera/vite-react-compiler \
+   gh run list -R luciocabrera/lcabrera-stack \
      --workflow=copilot-review-gate.yml --limit 20 \
      --json databaseId,headSha,event,createdAt \
      --jq '.[]|select(.headSha|startswith("<head-sha>"))|"\(.databaseId) \(.event) \(.createdAt)"'
-   gh run rerun -R luciocabrera/vite-react-compiler <id>
+   gh run rerun -R luciocabrera/lcabrera-stack <id>
    ```
 
    Any run on that head will do, whatever event created it. A re-run replays the
@@ -660,7 +660,7 @@ rest of the preconditions.
    vp run review-gates:reconcile -- --pr <n>          # from a checkout
    gh workflow run copilot-review-gate.yml -f pr=<n> \
      --ref <the pull request's branch> \
-     -R luciocabrera/vite-react-compiler          # or press it in Actions
+     -R luciocabrera/lcabrera-stack          # or press it in Actions
    ```
 
    **`--ref` is not optional on a pull request that edits the gate.** A dispatch
@@ -682,7 +682,7 @@ rest of the preconditions.
    rung 6. The local form posts as you and leaves no workflow run behind: on #738
    head `bd1b475a` (2026-08-17) the `success` that cleared a missing recompute shows as
    `creator: luciocabrera` with no `target_url` under
-   `gh api repos/luciocabrera/vite-react-compiler/commits/<sha>/statuses`, which
+   `gh api repos/luciocabrera/lcabrera-stack/commits/<sha>/statuses`, which
    is how to tell a local recompute from a workflow one afterwards.
 
    **Use the dispatch form to clear a merge. The local form cannot, and it can
@@ -730,7 +730,7 @@ rest of the preconditions.
    state nobody can re-derive later.
 
    ```bash
-   gh api --method POST repos/luciocabrera/vite-react-compiler/statuses/<head-sha> \
+   gh api --method POST repos/luciocabrera/lcabrera-stack/statuses/<head-sha> \
      -f state=success -f 'context=Copilot review complete' \
      -f 'description=break-glass: <reason>'
    ```
@@ -834,11 +834,11 @@ the ladder is for. So no ratio is written down, and the commands are here instea
 — #737 §1 carries this method and the sample it was first taken on:
 
 ```bash
-gh run list -R luciocabrera/vite-react-compiler \
+gh run list -R luciocabrera/lcabrera-stack \
   --workflow=copilot-review-gate.yml --limit 60 \
   --json event,headSha,createdAt,conclusion \
   --jq '.[]|select(.event=="pull_request_review")|"\(.headSha[0:8]) \(.createdAt) \(.conclusion)"'
-gh api --paginate repos/luciocabrera/vite-react-compiler/pulls/<n>/reviews \
+gh api --paginate repos/luciocabrera/lcabrera-stack/pulls/<n>/reviews \
   --jq '.[]|"\(.user.login) \(.commit_id[0:8]) \(.submitted_at)"'
 ```
 
@@ -862,7 +862,7 @@ check reports a healthy trigger while the status is stale:
   even when the attempt the review created was held. Run `31895693848` — the one
   #737 §1 counted as having executed — reads `success`, and its first attempt is
   `action_required` while its second was triggered by a human;
-  `gh api repos/luciocabrera/vite-react-compiler/actions/runs/<id>/attempts/1`
+  `gh api repos/luciocabrera/lcabrera-stack/actions/runs/<id>/attempts/1`
   is what says which. Anything counting reviews whose run executed has to read
   attempt 1, or it counts a human's re-run as a working trigger.
 
@@ -878,7 +878,7 @@ Only the reviewer differs, so the reviewer is what moved it — a run that faile
 for some property of the workflow or the branch would have failed for both. The
 repository's Actions approval policy at the time of that reading was
 `first_time_contributors`
-(`gh api repos/luciocabrera/vite-react-compiler/actions/permissions/fork-pr-contributor-approval`),
+(`gh api repos/luciocabrera/lcabrera-stack/actions/permissions/fork-pr-contributor-approval`),
 and the `Copilot` bot is not a contributor to this repository. **That reading is
 now historical**: the policy was loosened to
 `first_time_contributors_new_to_github` on 2026-08-18, which is what the bullet
@@ -977,7 +977,7 @@ Further things the notes assume:
   it rather than trusting this line:
 
   ```bash
-  gh api repos/luciocabrera/vite-react-compiler/rulesets/19141543 \
+  gh api repos/luciocabrera/lcabrera-stack/rulesets/19141543 \
     --jq '.rules[] | select(.type=="required_status_checks")
           | .parameters.required_status_checks[]'
   ```
@@ -1012,7 +1012,7 @@ Further things the notes assume:
   status corrects itself assumes it is. GitHub disables `schedule` triggers after
   60 days of repository inactivity, so `gh workflow list` says whether this one
   is still active — and
-  `gh run list -R luciocabrera/vite-react-compiler --workflow=review-gate-reconcile.yml --limit 5`
+  `gh run list -R luciocabrera/lcabrera-stack --workflow=review-gate-reconcile.yml --limit 5`
   says whether it
   has actually run, which is the question. A workflow reads `active` from the
   moment its file lands on `main`, before any scheduled run has happened, and
@@ -1034,9 +1034,9 @@ claims and only the first follows from the run list. Re-derive them with
 
 ```bash
 git log --format='%h %ad' --date=short main -- .github/workflows/copilot-review-gate.yml
-gh api '/repos/luciocabrera/vite-react-compiler/actions/workflows/copilot-review-gate.yml/runs?per_page=100' \
+gh api '/repos/luciocabrera/lcabrera-stack/actions/workflows/copilot-review-gate.yml/runs?per_page=100' \
   --jq '.workflow_runs[]|select(.event=="pull_request_review")|"\(.created_at) \(.head_branch) \(.conclusion)"'
-gh run view <id> -R luciocabrera/vite-react-compiler --log | grep 'Checking out the ref' -A2
+gh run view <id> -R luciocabrera/lcabrera-stack --log | grep 'Checking out the ref' -A2
 ```
 
 Re-read this section before treating a quiet gate as a broken one.

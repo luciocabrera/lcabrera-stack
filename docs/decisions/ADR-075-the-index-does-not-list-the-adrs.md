@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 
-**Issue:** [#724](https://github.com/luciocabrera/vite-react-compiler/issues/724)
+**Issue:** [#724](https://github.com/luciocabrera/lcabrera-stack/issues/724)
 
 **Amends:** [ADR-048](./ADR-048-adr-taxonomy-and-one-sequence.md) — "Each home
 carries a generated index". The index stays generated and stays gated; what it
@@ -106,7 +106,7 @@ the missing parameter was itself the guarantee; it was not.
 
 ## References
 
-- Issue [#724](https://github.com/luciocabrera/vite-react-compiler/issues/724)
+- Issue [#724](https://github.com/luciocabrera/lcabrera-stack/issues/724)
 - PRs #719 and #722 — the two collisions this is written from
 - [ADR-048](./ADR-048-adr-taxonomy-and-one-sequence.md) — the taxonomy and the
   one-sequence rule, whose index section this amends

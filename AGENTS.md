@@ -1,4 +1,4 @@
-# Project Instructions — vite-react-compiler
+# Project Instructions — lcabrera-stack
 
 <!-- Audience: Claude, Gemini, and other non-GitHub agents — for GitHub Copilot see .github/copilot-instructions.md -->
 
