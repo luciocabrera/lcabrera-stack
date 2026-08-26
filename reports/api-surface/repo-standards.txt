@@ -13,7 +13,7 @@ nextFreeNumber [const] (homes: any) => number
 NON_ADR_FILES [const] Set<string>
 normalizeIndex [const] (markdown: any) => any
 parseAdrFilename [const] (filename: any) => { number: number; slug: string | undefined; } | undefined
-renderIndex [const] (home: any) => string
+renderIndex [const] (home: any, { homeCount }?: { homeCount?: any; }) => string
 renderListing [const] (homes: any) => any
 TEMPLATE_FILE [const] "_TEMPLATE.md"
 TEMPLATE_HOME [const] string

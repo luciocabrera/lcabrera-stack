@@ -276,6 +276,33 @@ export const normalizeIndex = (markdown) =>
     .trim();
 
 /**
+ * What the index says about numbering, which depends on how many homes the
+ * consuming repository declares — and `adrHomes` defaults to one.
+ *
+ * The cross-home sentence is the whole point of the register when there are
+ * several: a number identifies one ADR across the repository, not one per
+ * directory. Rendered into a repository with a single home it is not false, it
+ * is vacuous, and it reads as though the reader has missed a second directory.
+ *
+ * The single-home wording carries the fact that is actually load-bearing there
+ * and is not obvious: `nextFreeNumber` takes the highest number in use and adds
+ * one, so a deleted ADR's number is never handed out again and a citation of it
+ * never silently starts pointing at something else.
+ */
+const numberingParagraph = (homeCount) =>
+  homeCount > 1
+    ? [
+        'Numbers are unique across every ADR home in this repository, so a decision',
+        'that spans two of them is still one record and no two homes can reuse a',
+        'number.',
+      ]
+    : [
+        'A number identifies exactly one ADR, and a retired one is never reissued:',
+        'the next free number is the highest in use plus one, never the first gap,',
+        'so a citation keeps pointing at the decision it was written against.',
+      ];
+
+/**
  * A home's `README.md`: what is true of the home itself, and deliberately not a
  * row per ADR.
  *
@@ -294,8 +321,14 @@ export const normalizeIndex = (markdown) =>
  * the commands are this package's own bins, not one repository's task names,
  * and the reasoning it used to cite by link is inlined, because a fresh home
  * has neither file.
+ *
+ * `homeCount` rides in an options object rather than as a bare second argument
+ * for two reasons: `Function.length` stops counting at the first default, so the
+ * arity stays 1; and the ADR-075 test above deliberately calls this with an
+ * array as the second argument to prove entries cannot be injected that way —
+ * destructuring an array yields the default, so that probe keeps working.
  */
-export const renderIndex = (home) => {
+export const renderIndex = (home, { homeCount = ADR_HOMES.length } = {}) => {
   const commands = commandsFor(home);
 
   return [
@@ -305,9 +338,7 @@ export const renderIndex = (home) => {
     '',
     home.blurb,
     '',
-    'Numbers are unique across every ADR home in this repository, so a decision',
-    'that spans two of them is still one record and no two homes can reuse a',
-    'number.',
+    ...numberingParagraph(homeCount),
     '',
     `Writing one: start from [\`_TEMPLATE.md\`](${fileInTemplateHome(home.dir, TEMPLATE_FILE)})`,
     `or run \`${commands.new}\`, which takes the next free number for you.`,

@@ -285,6 +285,39 @@ describe('renderIndex', () => {
   });
 
   /**
+   * `adrHomes` defaults to ONE home, so the default render is the one that has
+   * to read correctly. The cross-home sentence is not false in a single-home
+   * repository, it is vacuous — it describes a second directory the reader
+   * cannot find. Both branches are asserted because only one of them ever
+   * renders here, and an unasserted branch is one nothing would notice losing.
+   */
+  it('says what numbering means for a single-home repository', () => {
+    const rendered = renderIndex(ADR_HOMES[0], { homeCount: 1 });
+
+    expect(rendered).toContain('A number identifies exactly one ADR');
+    expect(rendered).not.toContain('ADR home in this repository');
+    expect(rendered).not.toContain('no two homes');
+  });
+
+  it('says what numbering means across several homes', () => {
+    const rendered = renderIndex(ADR_HOMES[0], { homeCount: 2 });
+
+    expect(rendered).toContain(
+      'unique across every ADR home in this repository',
+    );
+    expect(rendered).not.toContain('A number identifies exactly one ADR');
+  });
+
+  it('takes the home count from the register when none is given', () => {
+    // The seam has a default, and a default nothing exercises is a second
+    // implementation. This pins the rendered default to the configured length
+    // rather than to whichever branch happens to be current.
+    expect(renderIndex(ADR_HOMES[0])).toBe(
+      renderIndex(ADR_HOMES[0], { homeCount: ADR_HOMES.length }),
+    );
+  });
+
+  /**
    * ADR-075 in one assertion: a committed index that names the ADRs is a file
    * every ADR branch appends to, so two of them conflict.
    *
