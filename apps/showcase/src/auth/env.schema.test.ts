@@ -89,6 +89,12 @@ describe('readAuthEnvConfig', () => {
     // The schema cannot see the key it was assigned to, so the name is passed in
     // and could be passed wrong — a copy-paste would report the other variable
     // and send a deployment to set something that is already set.
+    //
+    // Asserted on the name the message CARRIES, not on that name appearing:
+    // `ZodError.message` is a JSON dump of the issues and each one already holds
+    // `"path": ["AUTH_…"]`, so a presence check passes on a swap via the path
+    // alone and this test could never fail the way its own comment claims.
+    // Swapping the two `name:` values in `env.schema.ts` fails the line below.
     for (const name of ['AUTH_TOKEN_SECRET', 'AUTH_DEMO_PASSWORD_HASH']) {
       const message = (() => {
         try {
@@ -99,10 +105,11 @@ describe('readAuthEnvConfig', () => {
         }
       })();
 
-      expect(message).toContain(name);
-      expect(
-        message.matchAll(/AUTH_[A-Z_]+ must be set/gu).toArray(),
-      ).toHaveLength(1);
+      const refusals = message.matchAll(/AUTH_[A-Z_]+ must be set/gu).toArray();
+
+      expect(refusals.map(([refusal]) => refusal)).toEqual([
+        `${name} must be set`,
+      ]);
     }
   });
 });
