@@ -8,7 +8,7 @@ Infinite-scroll load-more paginates with `OFFSET k`
 (`selectOrdersPage` → `buildSelectQuery`), which is O(offset): Postgres walks and
 discards `k` rows before it returns the first row of the page. The cost grows
 linearly with how far the user has scrolled, for no functional reason —
-[ADR-008 (primary-key sort tiebreaker)](../../apps/showcase/docs/decisions/ADR-008-primary-key-sort-tiebreaker.md)
+[ADR-008 (primary-key sort tiebreaker)](./ADR-008-primary-key-sort-tiebreaker.md)
 already appends the primary key to every server sort, so the rows come back in a
 **total order** and a stable cursor exists whether or not anything uses one.
 
@@ -135,6 +135,6 @@ because `uniqueColumn` carries a non-null value by the rule above.
 
 ## References
 
-- [ADR-008 — primary-key sort tiebreaker](../../apps/showcase/docs/decisions/ADR-008-primary-key-sort-tiebreaker.md)
+- [ADR-008 — primary-key sort tiebreaker](./ADR-008-primary-key-sort-tiebreaker.md)
 - [ADR-051 — `withTransaction` + the `tx` executor option](./ADR-051-with-transaction-and-tx-executor-option.md)
 - Issues #403 (this ADR), #404 (the builder), #391 (the epic)

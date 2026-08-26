@@ -140,7 +140,7 @@ The filters of a drilled read are, in order:
 Its sort is the view's sort **minus the group-key terms**, which are constant
 within a group and order nothing, followed by the route's own tiebreaker so the
 page is deterministic
-([ADR-008](../../apps/showcase/docs/decisions/ADR-008-primary-key-sort-tiebreaker.md)).
+([ADR-008](./ADR-008-primary-key-sort-tiebreaker.md)).
 Its limit is the route's page size, clamped by the same ceiling every read of
 that table is clamped by.
 

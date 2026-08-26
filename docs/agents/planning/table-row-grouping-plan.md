@@ -80,7 +80,7 @@ export type CommandId = string & { readonly __brand: 'CommandId' };
 - Availability (`isFilterable`/`isSortable`/`isStatic`) is re-derived ad hoc with
   `!== false` in 8+ files, never through that function.
 - **No registry** — deliberately deferred by
-  [ADR-011](../../../apps/showcase/docs/decisions/ADR-011-grid-interaction-architecture.md).
+  [ADR-011](../../decisions/ADR-011-grid-interaction-architecture.md).
 
 The rule for a new capability, `commands/ARCHITECTURE.md`: _"A new capability adds
 a sibling `*Commands.ts`. If it cannot reuse `deriveToggleCommandState` or

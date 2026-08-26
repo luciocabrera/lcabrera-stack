@@ -5,7 +5,7 @@
 - **Scope:** `@lcabrera/ui` (`components/TableRouteView`, `hooks/useTableRoutePage`, `routing/loaders`, the Table's meta state), the paginated table routes in `apps/react-router`
 - **Issue:** #555 — implemented by #564
 - **Amends:** [ADR-056](./ADR-056-generic-table-route-data-path.md) §4 — its reasoning and its safety property stand; only its mechanism changes
-- **Related:** ADR-009 (serializable loader data — [app home](../../apps/showcase/docs/decisions/ADR-009-serializable-filter-options-descriptors.md)), ADR-043 (Changesets), ADR-046 (public API-surface snapshot), ADR-052 (keyset cursor), ADR-058 and ADR-059 (grouping)
+- **Related:** ADR-009 (serializable loader data — [app home](./ADR-009-serializable-filter-options-descriptors.md)), ADR-043 (Changesets), ADR-046 (public API-surface snapshot), ADR-052 (keyset cursor), ADR-058 and ADR-059 (grouping)
 
 ## Context
 

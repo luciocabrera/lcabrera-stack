@@ -5,7 +5,7 @@
 - **Scope:** `@lcabrera/ui` — the loader factory's default grouping, the lock, and the totals-placement channel
 - **Issue:** #578 — grouping presets and configurable totals placement
 - **Narrows:** [ADR-061](./ADR-061-grouping-config-in-url-expansion-in-store.md) — grouping still travels in the URL; this records the one state that URL could not previously express, and adds a second setting that does not travel there
-- **Related:** [ADR-010](../../apps/showcase/docs/decisions/ADR-010-cookie-persistence-server-action.md) (the channel the placement persists in), [ADR-063](./ADR-063-request-shaping-capabilities-on-the-loader-meta.md) (why the lock is route-declared), [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md) (the totals being placed)
+- **Related:** [ADR-010](./ADR-010-cookie-persistence-server-action.md) (the channel the placement persists in), [ADR-063](./ADR-063-request-shaping-capabilities-on-the-loader-meta.md) (why the lock is route-declared), [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md) (the totals being placed)
 
 ## Context
 

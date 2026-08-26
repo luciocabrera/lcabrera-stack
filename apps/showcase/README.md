@@ -189,5 +189,5 @@ vp run test
 - `AGENTS.md`
 - `CLAUDE.md`
 - `GEMINI.md`
-- [`apps/showcase/docs/decisions/ADR-007-barrel-export-boundaries.md`](docs/decisions/ADR-007-barrel-export-boundaries.md)
+- [`docs/decisions/ADR-007-barrel-export-boundaries.md`](../../docs/decisions/ADR-007-barrel-export-boundaries.md)
 - `src/routes/enterprise-orders/README.md`
