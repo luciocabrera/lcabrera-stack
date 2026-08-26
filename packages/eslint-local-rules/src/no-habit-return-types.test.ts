@@ -146,6 +146,11 @@ ruleTester.run('no-habit-return-types', rule, {
     // The inner `break` belongs to the inner loop, so the outer one is still
     // endless. Counting it would report an annotation that is widening `never`.
     'const nested = (): void => { while (true) { while (x) { break; } } };',
+    // The same, unbraced — the shape where the outer loop's body IS the inner
+    // scope. Nothing in this repository or a consumer's forces braces, so the
+    // braced case above does not cover it.
+    'const bare = (): void => { while (true) while (x) break; };',
+    'const swap = (): void => { while (true) switch (x) { case 1: break; } };',
     // Unreachable after the first statement, so the bottom is never reached.
     'function fell(): void { throw p; log(); }',
     // Wider React types are doing real work and must survive.

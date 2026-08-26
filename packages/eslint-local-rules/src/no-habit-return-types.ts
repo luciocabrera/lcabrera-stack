@@ -279,7 +279,13 @@ const canCompleteNormally = (node: TSESTree.Statement): boolean => {
     case AST_NODE_TYPES.DoWhileStatement:
     case AST_NODE_TYPES.ForStatement:
     case AST_NODE_TYPES.WhileStatement: {
-      return !isAlwaysTrue(node.test) || hasOwnBreak(node.body);
+      // The loop itself, not its body. `contains` exempts `root` from `skip` so
+      // that a caller can hand in the construct whose nested twins it wants
+      // pruned — hand it the body and that exemption lands on the wrong
+      // statement whenever the body IS a break scope, which an unbraced
+      // `while (true) while (x) break;` makes it. The inner `break` would then
+      // count as this loop's.
+      return !isAlwaysTrue(node.test) || hasOwnBreak(node);
     }
     // No `else` means the skip path reaches the bottom whatever the body does.
     case AST_NODE_TYPES.IfStatement: {
