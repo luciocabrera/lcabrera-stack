@@ -57,8 +57,15 @@ Three consequences are decided with it:
    `luciocabrera_vite-react-compiler` (an underscore, not a slash), stable across
    a GitHub rename, and re-keying it would discard the project's history for a
    cosmetic gain.
-3. **`CHANGELOG.md` keeps the old URLs.** It is generated, and its entries are
-   dated records of links that resolved when they were written.
+3. **No changelog is swept, and there are two kinds.** The root `CHANGELOG.md`
+   is regenerated wholesale from git history by `vp run changelog:generate`, so
+   a hand edit there does not survive. Each `packages/*/CHANGELOG.md` is written
+   by Changesets, which only ever prepends — a hand edit there _would_ survive,
+   and it ships inside the tarball. Both are left alone for the same reason:
+   every entry is a dated record of what a released version said, and its links
+   resolved when they were written and still resolve through the redirect.
+   Repointing a shipped historical entry is a decision about all ten packages,
+   not something a rename sweep should reach by accident.
 
 ## Consequences
 
