@@ -21,8 +21,12 @@ import {
 } from './WideAlltypes150.constants';
 
 /**
- * No `filterOptions` — this route's filter support is deliberately minimal (see its
- * ARCHITECTURE.md), so columns are returned undecorated.
+ * No `filterOptions`, and columns are returned undecorated: this loader appends no
+ * distinct filter descriptors because the endpoint behind it supports none. It
+ * declares neither `isKeysetEnabled` nor `isServerFilterEnabled` on its `meta`, and
+ * absent means off (ADR-063), so load-more carries `limit`, `skip` and `sort` only.
+ * `COLUMNS` is fully serializable with no functions (ADR-009), which is what lets the
+ * loader return it directly inside `columnsState`.
  * **Grouping is declared from that same switch** (#575).
  */
 const IS_SELF_HOSTED = !isExternalApiEnabled();

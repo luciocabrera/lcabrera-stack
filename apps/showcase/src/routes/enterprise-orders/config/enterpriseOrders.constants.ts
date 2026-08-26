@@ -144,7 +144,7 @@ export const ENTERPRISE_ORDER_ALLOWED_COLUMNS: readonly string[] =
 
 // ---------------------------------------------------------------------------
 // What bounds a paginated read. Both are applied in `selectOrdersPage`, the one
-// function every entry point goes through — see the route's ARCHITECTURE.md.
+// function every entry point goes through.
 // ---------------------------------------------------------------------------
 
 /**

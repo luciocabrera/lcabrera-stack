@@ -22,7 +22,7 @@ describe('serializeDatabaseValue', () => {
   it('renders a date column as a quoted JSON string, as this table always has', () => {
     // Deliberately preserved rather than corrected: this is what every page of
     // this grid has displayed for its date/timestamp columns. See the util's
-    // header and the route's ARCHITECTURE.md.
+    // header for why.
     expect(serializeDatabaseValue(new Date('2020-01-01T23:00:00.000Z'))).toBe(
       '"2020-01-01T23:00:00.000Z"',
     );
