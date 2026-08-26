@@ -21,12 +21,6 @@ ruleTester.run('no-habit-return-types', rule, {
       errors: [{ messageId: 'redundant' }],
       output: 'const reset = () => { store.clear(); };',
     },
-    // A guarded throw still leaves a normal completion, so inference says `void`.
-    {
-      code: 'function guard(a): void { if (!a) { throw new Error("no"); } }',
-      errors: [{ messageId: 'redundant' }],
-      output: 'function guard(a) { if (!a) { throw new Error("no"); } }',
-    },
     {
       code: 'function reset(): void { store.clear(); return; }',
       errors: [{ messageId: 'redundant' }],
@@ -76,6 +70,14 @@ ruleTester.run('no-habit-return-types', rule, {
       errors: [{ messageId: 'redundant' }],
       output: 'const run = () => { const inner = () => 1; inner(); };',
     },
+    // Nor does its throw: `run`'s own end point is still reachable, so `void` is
+    // what inference produces. This is what the nested-function prune buys.
+    {
+      code: 'const run = (): void => { const inner = () => { throw p; }; inner(); };',
+      errors: [{ messageId: 'redundant' }],
+      output:
+        'const run = () => { const inner = () => { throw p; }; inner(); };',
+    },
   ],
   valid: [
     // The whole reason the rule is shaped this way: an annotation that promises
@@ -91,10 +93,20 @@ ruleTester.run('no-habit-return-types', rule, {
     'const value = (): void => { return maybe(); };',
     // `Promise<void>` on a non-async function is not what inference produces.
     'const wait = (): Promise<void> => { start(); };',
-    // A body that always throws infers `never`, so `void` is widening it.
+    // A body whose end point cannot be reached infers `never`, so `void` is
+    // widening it. None of the four below puts a `throw` among the block's
+    // direct children, which is why the check walks the body instead.
     'const fail = (): void => { throw new Error("no"); };',
     'function fail(): void { log(); throw new Error("no"); }',
     'const failAsync = async (): Promise<void> => { throw new Error("no"); };',
+    'const both = (): void => { if (x) { throw p; } else { throw q; } };',
+    'const cased = (): void => { switch (x) { default: throw p; } };',
+    'const cleanup = (): void => { try { go(); } finally { throw p; } };',
+    'const forever = (): void => { for (;;) { tick(); } };',
+    'const spin = (): void => { while (true) { tick(); } };',
+    // The cost of a lexical test, stated as a test: a guard clause leaves the
+    // end reachable and really does infer `void`, and the rule stays silent.
+    'function guard(a): void { if (!a) { throw new Error("no"); } }',
     // Wider React types are doing real work and must survive.
     { code: 'const Row = (): React.ReactNode => <tr />;', filename: 'f.tsx' },
     { code: 'const Row = (): ReactElement => <tr />;', filename: 'f.tsx' },

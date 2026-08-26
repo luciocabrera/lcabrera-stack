@@ -13,11 +13,21 @@ which this plugin does not have.
 
 So the rule reports only annotations that cannot be hiding anything, because the
 body shape fixes the inferred type exactly: `void` and `Promise<void>` on a block
-body that returns no value and cannot end on an unguarded `throw`, `boolean`
+body that returns no value and whose end point is plainly reachable, `boolean`
 where every returned expression is a comparison or a boolean literal, and
 `JSX.Element` where every return is JSX. Everywhere else it is silent — so a
 deliberate widening is never flagged, and the rule has no options and nothing to
 disable.
+
+Reachability is why the `void` arms walk the whole body rather than its `return`
+statements. A function that cannot reach its end point infers `never`, so `void`
+there is a widening — and an `if`/`else` where both arms throw, a `switch` whose
+`default` throws, `for (;;)` and a throwing `finally` all reach that state
+without writing a `throw` anywhere a scan of the body's top level would see it.
+With no type checker the test is lexical and deliberately blunt: any `throw`
+outside a nested function, or any endless loop, silences the rule for that
+function. It therefore also stays quiet on a guard clause, which really does
+infer `void` — over-caution in the direction that cannot corrupt a signature.
 
 **Consumers of `@lcabrera/vite-config` get this as an error on their next
 upgrade.** It is auto-fixable, so `eslint --fix` clears it; the findings it

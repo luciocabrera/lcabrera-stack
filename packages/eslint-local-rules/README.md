@@ -298,7 +298,25 @@ const Row = (): React.ReactNode => <tr />; // wider than JSX.Element
 function walk(n): void {
   walk(n.next);
 } // recursion: inference can fail
+const fail = (): void => {
+  if (x) {
+    throw p;
+  } else {
+    throw q;
+  }
+}; // end point unreachable: inference says `never`, so `void` widens it
 ```
+
+That last one is the reason the `void` and `Promise<void>` arms test the whole
+body rather than its `return` statements. A function that cannot reach its end
+point infers `never`, and reachability is not a local property — an `if`/`else`
+where both arms throw, a `switch` whose `default` throws, `for (;;)` and a
+`finally` that throws all reach it, and none of them writes a `throw` where a
+scan of the body's top level would find it. With no TypeScript program the test
+has to be lexical, so it is blunt: **any** `throw` outside a nested function, or
+any endless loop, silences the rule for that function. It therefore also stays
+quiet on a guard clause, which really does infer `void` — over-caution in the
+direction that cannot corrupt a signature.
 
 The trade is deliberate and worth knowing: `(): string` on a body returning a
 `string` is a habit this rule will not catch, because the same annotation over a

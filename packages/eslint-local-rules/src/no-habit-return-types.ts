@@ -18,8 +18,9 @@
  * hiding anything, because the shape of the body fixes the inferred type
  * exactly:
  *
- * - `: void` on a block body with no `return <value>`
- * - `: Promise<void>` on an `async` block body with no `return <value>`
+ * - `: void` on a block body with no `return <value>` whose end point is
+ *   plainly reachable (see `mayNotCompleteNormally`)
+ * - `: Promise<void>` on an `async` block body meeting the same two conditions
  * - `: boolean` where every returned expression is a comparison, a `!`, or a
  *   boolean literal
  * - `: JSX.Element` on a function whose every return is JSX
@@ -155,19 +156,50 @@ const isJsxExpression = (node: TSESTree.Expression) =>
   node.type === AST_NODE_TYPES.JSXElement ||
   node.type === AST_NODE_TYPES.JSXFragment;
 
+/** A loop with nothing that can end it: `for (;;)` and `while (true)`. */
+const isEndlessLoop = (node: TSESTree.Node) =>
+  (node.type === AST_NODE_TYPES.ForStatement && node.test === null) ||
+  (node.type === AST_NODE_TYPES.WhileStatement &&
+    node.test.type === AST_NODE_TYPES.Literal &&
+    node.test.value === true);
+
 /**
- * Whether the block can throw before its end without a branch guarding it.
+ * Whether the block's end point might be unreachable.
  *
- * A function whose body always throws infers `never`, not `void` — so `: void`
- * there is a *widening*, exactly what this rule must not touch. A throw nested
- * inside an `if` still leaves a normal completion, and TypeScript infers `void`
- * for it, so only a throw directly in the body is disqualifying. Erring towards
- * silence: a body that both returns early and then throws is skipped too.
+ * A function with no returned value whose end point cannot be reached infers
+ * `never`, not `void` — so `: void` there is a *widening*, exactly what this
+ * rule must not touch. Reachability is a property of the whole body, not of one
+ * statement: an `if`/`else` where both arms throw, a `switch` whose `default`
+ * throws, `for (;;)`, and a `finally` that throws all make the end unreachable,
+ * and not one of them puts a `throw` among the block's direct children.
+ *
+ * With no type checker the test has to be lexical, so it is deliberately blunt:
+ * any `throw` outside a nested function, or any endless loop, disqualifies the
+ * block. That over-reports — a guard clause (`if (!a) { throw … }`) leaves the
+ * end reachable and really does infer `void`, and the rule now stays silent on
+ * it — which is the trade this rule makes everywhere. A missed habit costs a
+ * review comment; a false positive auto-narrows a published signature to `never`
+ * and, with inline disables forbidden, leaves the consumer nowhere to put the
+ * exception.
  */
-const hasTopLevelThrow = (body: TSESTree.BlockStatement) =>
-  body.body.some(
-    (statement) => statement.type === AST_NODE_TYPES.ThrowStatement,
-  );
+const mayNotCompleteNormally = (body: TSESTree.BlockStatement) => {
+  let isFound = false;
+
+  walkNodes({
+    root: body,
+    shouldDescend: (node) => {
+      if (isFound) return false;
+      if (node !== body && FUNCTION_NODE_TYPES.has(node.type)) return false;
+      if (node.type === AST_NODE_TYPES.ThrowStatement || isEndlessLoop(node)) {
+        isFound = true;
+        return false;
+      }
+      return true;
+    },
+  });
+
+  return isFound;
+};
 
 /**
  * Whether the annotation is one inference is guaranteed to reproduce.
@@ -183,14 +215,15 @@ type IsRedundantArgs = {
 
 const isRedundant = ({ annotation, node }: IsRedundantArgs) => {
   // Narrowed inline rather than through an `isBlock` boolean, which does not
-  // carry the narrowing to `hasTopLevelThrow`.
+  // carry the narrowing to `mayNotCompleteNormally`.
   const { body } = node;
   const returned =
     body.type === AST_NODE_TYPES.BlockStatement
       ? returnedExpressions(body)
       : [body];
   const canCompleteNormally =
-    body.type === AST_NODE_TYPES.BlockStatement && !hasTopLevelThrow(body);
+    body.type === AST_NODE_TYPES.BlockStatement &&
+    !mayNotCompleteNormally(body);
 
   if (annotation.type === AST_NODE_TYPES.TSVoidKeyword) {
     return canCompleteNormally && returned.length === 0;
