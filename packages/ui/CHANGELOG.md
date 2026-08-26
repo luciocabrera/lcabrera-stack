@@ -1,5 +1,121 @@
 # @lcabrera/ui
 
+## 0.5.0
+
+### Minor Changes
+
+- f8edbbc: **Breaking**, landing as a `minor` because `@lcabrera/ui` is pre-1.0 — while a
+  package is `0.x` a break is a `minor`, never a `major` (see `packages/CLAUDE.md`).
+
+  A group's rows now open in a **route** rather than being spliced underneath the
+  group row. The inline drill is gone, and with it three props.
+
+  **Removed from the public surface:**
+
+  - `onDrillGroup` (`TableLayout`) and `fetchDrill` (`TableRouteView`,
+    `useTableRoutePage`)
+  - `isGroupDrillEnabled` (loader `meta`)
+  - `TableGroupDrillFetcher`, `TableGroupDrillRequest`, and the drill row types
+  - `toGroupKeyColumnFilter`, whose only consumer was the hand-off row
+
+  **`@lcabrera/server` gains `resolveGroupRead`** — the whole decision of what a
+  request that may name a group should read: token present or not, an unreadable
+  one refused, the translation applied, the page positioned. A route supplies only
+  its page ceiling, its tiebreaker column, and the catalogue lookup for a truncated
+  key. It returns a read or a refusal carrying the sentence to render.
+
+  `resolveGroupRead` takes `isGroupRequired` for a route that serves nothing but
+  one group: there, an absent token is refused rather than read as the whole set.
+
+  **`@lcabrera/server` also gains `toGroupHeading`** — the heading that route
+  shows, read back out of the token. A truncated key is formatted as its period, so
+  the heading reads `2021-06` like the group row that was clicked rather than the
+  instant underneath it.
+
+  **Added in their place:** `groupDetailsPath` on the loader `meta` — where the
+  route serves one group's rows. A path rather than a callback, because a function
+  does not survive the loader boundary and a path does, so the whole pair collapses
+  into one declaration alongside every other capability. Absent means the
+  affordance is not offered, so a route that declared neither is unaffected.
+
+  The innermost key of a complete group row becomes a link carrying the group as a
+  token plus every other search param; the route it opens reads them as its floor.
+  The link is not a tab stop — `tabIndex={-1}` with `Enter` handled on the focused
+  cell, the same rule the chevron follows, because the grid has exactly one tab
+  stop addressed by row key plus column key.
+
+  **Also added: `isUrlStateNested`.** A table rendering inside another table's
+  route shares its URL, and the table's own sort and filters travel through that
+  URL — it is the only channel its loader reads. Declared, every search param the
+  table writes and reads carries a `nested.` prefix, so both tables own their state
+  on one URL and neither re-filters the other. The group link seeds the nested
+  params from the list's, which is the floor the group was computed under, so the
+  route opens on exactly the set the count beside it described and a reader can
+  narrow from there.
+
+  Suppressing the write instead was tried and is wrong: the drawer would show the
+  new filter and the grid would keep the old rows.
+
+  **Why the shape changed rather than the drill being fixed.** The bounded page
+  never paged again, so "show me this group's orders" was permanently truncated.
+  The cost was not the fetch but the state around it: a four-member status per
+  group, chrome rows that are neither summary nor data occupying real height in
+  the virtualized row array, a marker field parallel to the group marker, and a
+  splice inside the loop that builds the row/meta pair the focus model indexes by.
+  A render-path `TypeError` that emptied the whole table took three composing
+  defects to produce, none of them in the drill's own logic and all three in
+  machinery that existed only to splice rows into a grid not built to have rows
+  spliced into it.
+
+  `TableGroupTreeRowMeta` loses `isDrillable`; `hasChildren` alone decides
+  `aria-expanded`, and a leaf group is simply not a tree node to open.
+
+  Migrating: replace `isGroupDrillEnabled: true` plus a `fetchDrill` prop with
+  `groupDetailsPath: '<your route>'` on the loader `meta`, and serve that route.
+  Removing them is a compile error rather than a silently inert affordance.
+
+  See ADR-087, which supersedes ADR-079.
+
+### Patch Changes
+
+- 0be6483: Shipped documentation names React Router rather than the major it is on.
+
+  `@lcabrera/devkit`'s seeded `rules/routes-data.md`, `@lcabrera/ui`'s Form
+  `ARCHITECTURE.md` and `INVENTORY.md`, and a `SelectField` comment all stated a
+  major version as a present fact — as the shorthand `RR7` in most cases — and every
+  one was a full major out of date, because the catalog has pinned the next one for
+  some time.
+  Nothing checks a version written into prose, which is why it went wrong quietly
+  and why the wording is now the framework's name and its mode ("React Router
+  framework mode"), which stays true across a major.
+
+  A version still belongs in prose where it is a floor a reader must clear, such as
+  the middleware reference's `requires v7.9.0+`; those are unchanged.
+
+- 55211d7: Point `homepage`, `bugs` and `repository.url` at the repository's new name.
+
+  The old URLs still resolve — GitHub redirects them — but only while the old name
+  stays unregistered, and a published version's metadata can never be corrected in
+  place. Every already-published version keeps the old URL permanently, so this is
+  the first release whose links are right on their own.
+
+  `@lcabrera/eslint-plugin` also changes what it prints into a consumer's lint
+  output. ESLint shows `meta.docs.url` beside every finding, and none of the ten
+  rules had a URL that resolved: eight emitted `https://example.com/rule/<name>`,
+  the placeholder the first rule was scaffolded from, and two pointed at a
+  `/rules/<name>` path this repository has never had. All ten now link to the
+  rule's own section in the package README, which does exist, and they build that
+  link from one shared factory instead of ten copies — the copies are what let
+  eight of them drift.
+
+- 9f1cc03: JSDoc on exported types is shorter. Signatures are unchanged. Comments that only
+  restated a name are gone; traps and invariants stay on the line they govern
+  (ADR-088).
+- Updated dependencies [55211d7]
+- Updated dependencies [9f1cc03]
+  - @lcabrera/utils@0.2.1
+  - @lcabrera/api@0.4.1
+
 ## 0.4.0
 
 ### Minor Changes

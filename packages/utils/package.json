@@ -1,6 +1,6 @@
 {
   "name": "@lcabrera/utils",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": false,
   "description": "Pure, framework-agnostic TypeScript utilities — no side effects, no dependencies, browser or server.",
   "keywords": [
