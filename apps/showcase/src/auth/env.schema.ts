@@ -1,8 +1,13 @@
 import { z } from 'zod';
 
 /**
- * **No real secret is committed** — the default is a scrypt hash of the deliberately
- * public demo password `demo-password-123` (documented in `src/auth/ARCHITECTURE.md`).
+ * **No real secret is committed.** `AUTH_DEMO_PASSWORD_HASH`'s default is a scrypt hash
+ * of `demo-password-123`, a password that is deliberately public: it is the showcase's
+ * demo login and grants nothing but this app's own secured routes against a demo
+ * database. `AUTH_TOKEN_SECRET`'s default is likewise a dev placeholder. Both are
+ * defaults, so a real deployment overrides them from the environment and neither
+ * default ever reaches one — which is the property to preserve if you touch this
+ * schema. Do not add a default for anything that is not public by construction.
  */
 const authEnvSchema = z.object({
   AUTH_DEMO_EMAIL: z.string().min(1).default('demo@example.com'),

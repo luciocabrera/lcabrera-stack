@@ -102,7 +102,7 @@
       "key": "react-doctor doctor.config.jsonc rule react-doctor/no-barrel-import",
       "count": 1,
       "reason": "The rule does not apply to a Vite repo, and its own documentation says so: it names Vite tree-shaking as the false-positive case. Verified here rather than assumed — an entry importing one symbol from a flagged barrel builds to that symbol alone, with the barrel module elided. Acting on it would also contradict ADR-007, which requires importing through a curated barrel across a module boundary. Off repo-wide, not for these packages.",
-      "ref": "ADR-055, ADR-007 (app home), PR #457"
+      "ref": "ADR-055, ADR-007, PR #457"
     }
   ],
   "approved": [

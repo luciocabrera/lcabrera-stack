@@ -113,7 +113,7 @@ trigger is a third _consumer_, not a third _copy_.
 decisions in the app's ADR home. ADR-048's test is whether a decision leaves with
 the extracted product; both candidate homes stay, so the tie-break is package-versus-app, and
 every line of grouping code is in `packages/ui` and `packages/server`. ADR-011
-and ADR-012 sit in the app home only because they predate the Table's extraction
+and ADR-012 sat in the app home only because they predated the Table's extraction
 into the package — grandfathered, not precedent.
 
 ## Governance

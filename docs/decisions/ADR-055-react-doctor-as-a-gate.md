@@ -73,7 +73,7 @@ both carry their reasoning inline in `doctor.config.jsonc` and an argued entry i
   tree-shaking as its false-positive case. Verified rather than assumed: an entry
   importing one symbol from a flagged barrel builds to that symbol alone, with
   the barrel module elided. Acting on it would also contradict
-  [ADR-007 (app home)](./ADR-007-barrel-export-boundaries.md),
+  [ADR-007](./ADR-007-barrel-export-boundaries.md),
   which _requires_ importing through a curated barrel across a module boundary.
 - **`deslop/unused-dev-dependency`** — the shared ESLint config resolves its
   plugins from the _consuming_ workspace via `fromWorkspace(name)`, a dynamic
