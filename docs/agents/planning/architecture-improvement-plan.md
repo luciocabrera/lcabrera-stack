@@ -18,7 +18,7 @@
 
 ## Vision
 
-Keep the architecture the repo already has — React Router 7 framework mode as the
+Keep the architecture the repo already has — React Router framework mode as the
 transport+controller edge, `.server/` services as the persistence boundary, the
 generic `@lcabrera/server` executors as the repository, and pure `config/` utils as
 the domain — and close the **three real gaps** the blueprint exposes, without

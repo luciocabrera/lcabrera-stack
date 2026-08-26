@@ -2,7 +2,7 @@
 
 Declarative, `fields`-driven form component — the `Table`/`columns` philosophy
 applied to forms (`fields` instead of `columns`). Renders from a recursive
-`group`/`row`/`tab`/leaf field tree, submits through React Router 7's native
+`group`/`row`/`tab`/leaf field tree, submits through React Router's native
 `<Form>` (or `useFetcher().Form` as an opt-in), and supports `create`/`edit`/
 `view` modes with dirty-check-gated edit submission and a built-in
 Accept/Cancel footer (see ADR-005; Cancel's discard-changes confirmation is

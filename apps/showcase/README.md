@@ -1,12 +1,12 @@
 # showcase
 
-React 19 + TypeScript + StyleX + React Router 7 application with SSR support,
+React 19 + TypeScript + StyleX + React Router application with SSR support,
 built on Vite+.
 
 ## Overview
 
 - React 19 with React Compiler
-- React Router 7 loaders/actions and SSR
+- React Router framework-mode loaders/actions and SSR
 - StyleX-only styling
 - Vite+ workflow with task definitions for build, start, and test
 - Enterprise-style table implementation with virtualization, persistence, and

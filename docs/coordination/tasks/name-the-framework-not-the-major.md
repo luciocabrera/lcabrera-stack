@@ -1,6 +1,6 @@
 ---
 id: name-the-framework-not-the-major
-title: docs(repo): the docs say React Router 7, the catalog pins 8
+title: docs(repo): name the framework, not the major it is on
 owner: agent:claude
 status: active
 branch: chore/962-name-the-framework-not-the-major
@@ -21,10 +21,13 @@ issue: #962
 
 ## What
 
-docs(repo): the docs say React Router 7, the catalog pins 8
+docs(repo): name the framework, not the major it is on
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: live docs name the framework rather than its major, both copies
+  of `routes-data.md` still match, and AGENTS.md carries the convention so the
+  claim cannot come back. The prose said one major while the catalog pinned the
+  next.
 - Blockers: none
-- Next:
+- Next: review rounds on #973, then merge.

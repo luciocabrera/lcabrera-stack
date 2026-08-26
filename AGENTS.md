@@ -70,7 +70,7 @@ consumer — lives in [`packages/CLAUDE.md`](packages/CLAUDE.md), which loads
 whenever you work under `packages/`. Read it before editing any manifest there.
 
 The apps are the harness. `apps/showcase` is a **React 19 + TypeScript +
-StyleX + React Router 7** SSR application that puts the packages under load —
+StyleX + React Router** SSR application that puts the packages under load —
 a feature-rich data Table with store-based state management, virtualization,
 infinite scroll, and granular subscriptions via `useSyncExternalStore`. It is
 also where cross-package integration is verified, since it is the only thing that
@@ -421,6 +421,17 @@ soon after, and nothing checks them — the same silent rot that made
 place. Name the command that produces the number instead (`vp run
 suppressions:list`, `vp lint . --format=json`). A count is only allowed where a
 gate asserts it, such as `count` in the suppressions register.
+
+**A dependency's major version is the same shape, and it rotted the same way.**
+Name the framework, not the major it is on — "React Router framework mode",
+never the name followed by a version number. The catalog in
+`pnpm-workspace.yaml` is where a version is
+declared, and prose repeating it is a second declaration nothing keeps in step —
+the docs claimed 7 while the catalog pinned 8, across the rule file agents load
+for every route change and the copy `@lcabrera/devkit` ships to other
+repositories (#962). A version belongs in prose only where it is a **floor** a
+reader must clear ("middleware requires v7.9.0+"), which stays true as the
+dependency moves.
 
 The durable place for measurements, investigation narrative and "why we chose
 this" is the **PR or the issue** — dated, immutable, and not something a later

@@ -64,7 +64,7 @@ version bump publishes on its own, and an npm version is permanent. Read
 
 ## The app
 
-[`apps/showcase`](apps/showcase) is a React Router 7 SSR showcase — a
+[`apps/showcase`](apps/showcase) is a React Router framework-mode SSR showcase — a
 feature-rich data Table with store-based state, virtualization, infinite scroll
 and granular `useSyncExternalStore` subscriptions. It is a harness, not a
 product: it puts the packages under realistic load and is the only thing that
