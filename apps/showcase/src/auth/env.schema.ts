@@ -37,14 +37,26 @@ const publicDefault = ({
   isDevelopment,
   name,
 }: PublicDefaultArgs) => {
-  if (isDevelopment) return z.string().min(1).default(devDefault);
+  // A blank value is a mistake in every mode, and `.min(1)` refuses it with
+  // Zod's own "Too small: expected string to have >=1 characters" — naming
+  // nothing — unless it is given a message. Here the fix differs from the
+  // refusing branch's, because the default IS available: the line just cannot
+  // reach it by assigning an empty string.
+  if (isDevelopment) {
+    return z
+      .string()
+      .min(
+        1,
+        `${name} is set but empty — remove the line to use the published development default, or give it a value.`,
+      )
+      .default(devDefault);
+  }
 
   // The same message on both the type error and the length check. A variable a
   // deploy platform declared and left blank arrives as `''`, which `.min(1)`
-  // rejects on its own terms — "Too small: expected string to have >=1
-  // characters", naming nothing. Probed rather than assumed: a schema-level
-  // `error` is not a blanket map over checks, and `error: () => …` does not
-  // reach this one either.
+  // would otherwise reject on its own terms. Probed rather than assumed: a
+  // schema-level `error` is not a blanket map over checks, and `error: () => …`
+  // does not reach this one either.
   const refusal = `${name} must be set unless NODE_ENV is ${PERMITTED_MODES} — its development default is published in this repository and does not apply here.`;
 
   return z.string({ error: refusal }).min(1, refusal);

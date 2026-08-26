@@ -99,6 +99,24 @@ describe('readAuthEnvConfig', () => {
     }
   });
 
+  it('names its own variable when a development value is blank', () => {
+    // The two cases behave OPPOSITELY on this branch, which is the point: a
+    // missing value takes the published default — that is what development mode
+    // is for — while a blank one is refused. Without a message on the length
+    // check the refusal is Zod's nameless "Too small", which is exactly the
+    // failure this change exists to remove, in the one mode a local env file is
+    // actually read in.
+    for (const name of ['AUTH_TOKEN_SECRET', 'AUTH_DEMO_PASSWORD_HASH']) {
+      const message = messageFor({ [name]: '', NODE_ENV: 'development' });
+
+      expect(message).toContain(`${name} is set but empty`);
+    }
+
+    expect(
+      readAuthEnvConfig({ env: { NODE_ENV: 'development' } }).AUTH_TOKEN_SECRET,
+    ).toMatch(/dev-insecure/);
+  });
+
   it('spells the permitted modes from the set that accepts them', () => {
     // Two copies of "development or test" — one in the guard, one in the prose —
     // is the drift AGENTS.md §7 is most insistent about, so the message is built

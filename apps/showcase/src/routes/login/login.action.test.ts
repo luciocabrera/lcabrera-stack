@@ -8,12 +8,17 @@ import { verifyAuthToken } from '@/auth/verifyAuthToken.util';
 
 import { action } from './login.action';
 
-// The mode is named rather than inherited from the runner. Reading the ambient
-// env here made this file's import depend on Vitest exporting NODE_ENV=test: a
-// runner that already exports `production` failed it at import time with a
+// The mode is named rather than inherited from the runner — reading the ambient
+// env alone made this file's import depend on Vitest exporting NODE_ENV=test,
+// so a runner already exporting `production` failed it at import time with a
 // secret error rather than a test failure.
+//
+// The rest of the env is kept, and that half matters just as much: the code
+// under test reads `process.env` at request time, so dropping it would leave
+// this signing with the published default while the subject verifies with
+// whatever `AUTH_TOKEN_SECRET` the environment actually holds.
 const SECRET = readAuthEnvConfig({
-  env: { NODE_ENV: 'test' },
+  env: { ...process.env, NODE_ENV: 'test' },
 }).AUTH_TOKEN_SECRET;
 
 const invoke = (fields: Record<string, string>) =>
