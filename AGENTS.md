@@ -8,8 +8,25 @@ This file provides guidance to AI agents when working with code in this reposito
 
 This is a **pnpm monorepo** built with the **Vite+** unified toolchain (`vp` CLI).
 
-**The `packages/` are the product. The `apps/` exist to exercise them.** Read
-that as the tie-breaker it is: when package cleanliness and app convenience pull
+**This repository ships two products, split by who installs them.** The
+**application stack** — `@lcabrera/ui`, `api`, `server`, `utils`, `node` — is
+installed by another **application**. The **repo toolchain** —
+`@lcabrera/tsconfig`, `vite-config`, `eslint-plugin`, `devkit`,
+`repo-standards` — is installed by another **repository**. Ask which of the two
+a change serves; a capability that serves neither is a signal to stop rather than
+to add a package. The split is by consumer, not by build shape — `@lcabrera/ui`
+publishes TypeScript source just as `devkit` publishes `.mjs`.
+
+**What no in-repo run can validate is the delivery.** A `workspace:*` link
+resolves the source directory, so a packed tarball's file modes never appear —
+which is how `devkit`'s shipped git hooks once arrived inert. That is the reason
+`vp run tarball:verify` exists: it packs both distributed packages and installs
+them into a scratch repo outside this tree. It is chained into `check:safe` and
+runs as its own CI step
+([ADR-073](docs/decisions/ADR-073-publishing-gates-check-the-packed-tarball.md)).
+
+**The `apps/` exist to exercise the packages, and that is the tie-breaker.** When
+package cleanliness and app convenience pull
 in opposite directions, the package wins. A package must stand on its own —
 declared dependencies, a resolvable public surface, no reliance on a consumer's
 tsconfig `paths` to make an import work — because it is meant to be consumed from
@@ -75,9 +92,9 @@ sentence — it is which workspaces gitignore `eslint-suppressions.json`, which
 `vp run suppressions:verify` reads at runtime, so a new public package is
 covered the day it is added; keep the prose in step.
 
-`packages/devkit` and `packages/repo-standards` are the setup this repository
-hands to another repository, which is the one thing that cannot be shipped by
-being described. They are the first public packages that ship **`.mjs` source
+`packages/devkit` and `packages/repo-standards` are how the toolchain product
+is delivered — the setup this repository hands to another repository, which is
+the one thing that cannot be shipped by being described. They are the first public packages that ship **`.mjs` source
 and do not build**: unlike a `.ts` file, an `.mjs` one loads from
 `node_modules` as it is. That has a cost the built packages do not pay — the
 API-surface extractor reads the entry through the workspace's tsconfig, so

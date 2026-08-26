@@ -1,27 +1,56 @@
 # vite-react-compiler
 
 A pnpm monorepo built with the [Vite+](https://viteplus.dev) unified toolchain
-(`vp`). **The `packages/` are the product; the `apps/` exist to exercise them.**
+(`vp`).
 
-## The packages
+## What this repo ships
 
-These publish to npm under **`@lcabrera/*`**. Each is meant to be consumed from
-outside this repo, so each stands on its own — declared dependencies, a
+**Two products, split by who installs them.** Both publish to npm under
+**`@lcabrera/*`**, and each package stands on its own — declared dependencies, a
 resolvable public surface, no reliance on a consumer's tsconfig `paths`.
 `vp run release:plan` prints the current publishable set.
 
-| Package                                                  | What it is                                                                         |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| [`@lcabrera/ui`](packages/ui)                            | React 19 + StyleX components — the Table, the Form, hooks, contexts, design tokens |
-| [`@lcabrera/api`](packages/api)                          | the browser-safe data layer: fetch, query shapes, no `node:` anything              |
-| [`@lcabrera/server`](packages/server)                    | the Node half — DB access, query builders, crypto, tokens                          |
-| [`@lcabrera/utils`](packages/utils)                      | pure helpers; no DOM lib, no node types, no side effects                           |
-| [`@lcabrera/node`](packages/node-runtime)                | process lifecycle — signals, shutdown                                              |
-| [`@lcabrera/eslint-plugin`](packages/eslint-local-rules) | the custom lint rules                                                              |
-| [`@lcabrera/tsconfig`](packages/tsconfig)                | the tsconfig factories and their writer                                            |
-| [`@lcabrera/vite-config`](packages/vite-configs)         | the shared Vite/lint/test config                                                   |
-| [`@lcabrera/devkit`](packages/devkit)                    | the repo setup this repo hands to another repo                                     |
-| [`@lcabrera/repo-standards`](packages/repo-standards)    | the gates behind that setup — commits, ADRs, claims, publishing                    |
+### The application stack — installed by another _application_
+
+| Package                                   | What it is                                                                         |
+| ----------------------------------------- | ---------------------------------------------------------------------------------- |
+| [`@lcabrera/ui`](packages/ui)             | React 19 + StyleX components — the Table, the Form, hooks, contexts, design tokens |
+| [`@lcabrera/api`](packages/api)           | the browser-safe data layer: fetch, query shapes, no `node:` anything              |
+| [`@lcabrera/server`](packages/server)     | the Node half — DB access, query builders, crypto, tokens                          |
+| [`@lcabrera/utils`](packages/utils)       | pure helpers; no DOM lib, no node types, no side effects                           |
+| [`@lcabrera/node`](packages/node-runtime) | process lifecycle — signals, shutdown                                              |
+
+`api`, `server`, `utils` and `node` build to `dist`; `ui` publishes
+TypeScript source. The showcase depends on `ui`, `api`, `server` and `utils` and
+exercises them under realistic load. `node` has no in-repo consumer and is
+covered by its own tests alone.
+
+### The repo toolchain — installed by another _repository_
+
+| Package                                                  | What it is                                                      |
+| -------------------------------------------------------- | --------------------------------------------------------------- |
+| [`@lcabrera/eslint-plugin`](packages/eslint-local-rules) | the custom lint rules                                           |
+| [`@lcabrera/tsconfig`](packages/tsconfig)                | the tsconfig factories and their writer                         |
+| [`@lcabrera/vite-config`](packages/vite-configs)         | the shared Vite/lint/test config                                |
+| [`@lcabrera/devkit`](packages/devkit)                    | the repo setup this repo hands to another repo                  |
+| [`@lcabrera/repo-standards`](packages/repo-standards)    | the gates behind that setup — commits, ADRs, claims, publishing |
+
+`devkit` and `repo-standards` ship `.mjs` source and deliberately **do not
+build**: an `.mjs` file loads from `node_modules` as it is, and a repository
+setup is the one thing that cannot be delivered by being described.
+
+**No in-repo run can check the delivery.** A `workspace:*` link resolves the
+source directory, so a packed tarball's file modes never appear — which is how
+`devkit`'s shipped git hooks once arrived inert: `pnpm pack` writes every entry
+`0644`, and git skips a non-executable hook without failing. That is why
+`vp run tarball:verify` packs `devkit` and `repo-standards` and installs them
+into a scratch repo outside this tree; it is chained into `check:safe` and runs
+as its own CI step
+([ADR-073](docs/decisions/ADR-073-publishing-gates-check-the-packed-tarball.md)).
+
+**Which product does a change serve?** That is the first question for any new
+capability, and one that serves neither is a signal to stop rather than to add a
+package.
 
 `ts-configs` stays `@repo/*` and never publishes — it is this repo's own
 workspace roster.
