@@ -4,7 +4,7 @@ import { getDemoCredential } from './getDemoCredential.util';
 import { verifyCredentials } from './verifyCredentials.util';
 
 const DEMO_PASSWORD = 'demo-password-123';
-const credential = getDemoCredential({ env: {} });
+const credential = getDemoCredential({ env: { NODE_ENV: 'development' } });
 
 describe('verifyCredentials', () => {
   it('accepts the correct email and password', () => {
