@@ -4,9 +4,10 @@
 
 Architecture decisions for this repository.
 
-A number identifies exactly one ADR. The next free one is taken from the
-highest in use rather than the first gap, so retiring an ADR leaves its
-number unused — unless it was the highest, which frees it for the next.
+A number identifies exactly one ADR.
+The next free number is taken from the highest in use rather than the first
+gap, so retiring an ADR leaves its number unused — unless it was the highest,
+which frees it for the next.
 
 Writing one: start from [`_TEMPLATE.md`](./_TEMPLATE.md)
 or run `npx repo-adr`, which takes the next free number for you.

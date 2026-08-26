@@ -24,3 +24,8 @@ register, so every existing caller renders exactly as before.
 `@lcabrera/devkit`'s seeded `docs/decisions/README.md` is regenerated to match,
 so a freshly initialised repository's index does not fail its own `adr:verify` on
 the first run.
+
+The uniqueness sentence is also conditioned on `adrGrandfatheredDuplicates`. The
+duplicate check is home-agnostic, so a declared exemption lets one number name two
+ADRs inside a single home — a repository that declares one was being handed a
+generated page that contradicted its own directory.
