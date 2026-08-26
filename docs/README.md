@@ -17,7 +17,7 @@ Start here when you're not sure where something belongs, or where to look.
 | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **The rules** — TS/React/StyleX standards, the non-negotiables, the quality gate  | [`AGENTS.md`](../AGENTS.md) (+ path-scoped [`.claude/rules/`](../.claude/rules/))                                                                                                                                     |
 | **How to run something** — every `vp` command, what CI runs                       | [`COMMANDS.md`](../COMMANDS.md)                                                                                                                                                                                       |
-| **Why a thing is built the way it is** — an architectural decision                | an **ADR** (two homes, one number sequence — see the warning below)                                                                                                                                                   |
+| **Why a thing is built the way it is** — an architectural decision                | an **ADR** in [`docs/decisions/`](./decisions/) — one home, one number sequence                                                                                                                                       |
 | **How other projects solved a problem we are deciding** — external research       | [`docs/agents/research/`](./agents/research/README.md) — dated, sourced write-ups that feed an ADR; not plans, which live in [`docs/agents/planning/`](./agents/planning/)                                            |
 | **Who's working on what right now** — in-flight work, owners, area locks          | [`docs/coordination/`](./coordination/README.md) — the task register (`tasks/*.md`); `vp run coordination:board` renders a local table view                                                                           |
 | **The durable backlog** — what should happen next, epics, milestones              | GitHub **Issues / sub-issues / Milestones / Projects**; boundary vs. the register in [ADR-036](decisions/ADR-036-github-planning-layer.md), runbook [`docs/tooling/github-planning.md`](./tooling/github-planning.md) |
@@ -123,25 +123,28 @@ changing what an ADR decided, you are writing the next ADR.
 [`scripts/departed-names.json`](../scripts/departed-names.json), so a
 reintroduced one fails the build rather than waiting to be noticed.
 
-Those links open the **directory**, which is the listing — each home's `README.md`
-is a generated page describing the home and lists no ADRs on purpose, because a
+That link opens the **directory**, which is the listing — the home's `README.md`
+is a generated page describing it and lists no ADRs on purpose, because a
 committed list is one region every ADR branch appends to
 ([ADR-075](./decisions/ADR-075-the-index-does-not-list-the-adrs.md)). To read the
 titles as prose rather than as filenames, run `vp run adr:list`.
 **A number identifies exactly one ADR**: take the next free one from
-`vp run adr:verify`, whichever home you are writing in. Unadopted proposals wait
-in [`docs/agents/planning/adr-drafts/`](./agents/planning/adr-drafts/) and hold
+`vp run adr:verify`. Unadopted proposals wait in
+[`docs/agents/planning/adr-drafts/`](./agents/planning/adr-drafts/) and hold
 **no number** — one is assigned at adoption, never at proposal.
 
-⚠️ **One number still means two things** — `ADR-005` is the `Form` component
-_and_ StyleX. Cite that pair by path. Several low numbers used to overlap this
-way, because each home started its own sequence at 001; the repo-home half of the
-rest was the bootstrap-era set and went with it, so the set shrank to one.
-`registers.adrGrandfatheredDuplicates` in
-[`devkit.config.json`](../devkit.config.json) is the authority — it declares
-`[5]`, and editing it is what changes the gate. `vp run adr:verify` enforces it
-and rejects every other repeat. The surviving pair is deliberately not
-renumbered: an ADR is a dated record.
+**No number is grandfathered any more.** Several low numbers used to mean two
+things, because each home started its own sequence at 001; the last surviving
+pair was `ADR-005` — the `Form` component here and StyleX in the app home — and
+it ended when that home closed. `registers.adrGrandfatheredDuplicates` in
+[`devkit.config.json`](../devkit.config.json) is the authority and is now empty,
+so `vp run adr:verify` rejects **every** repeat. Editing that register is what
+changes the gate.
+
+One consequence to know when reading an older document: a bare `ADR-005` written
+before the closure may have meant the StyleX record, which no longer exists — the
+number now resolves only to the `Form` component. StyleX itself is Non-Negotiable
+Rule 2 in [`AGENTS.md`](../AGENTS.md).
 
 ---
 

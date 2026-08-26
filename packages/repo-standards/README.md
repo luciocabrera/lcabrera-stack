@@ -230,9 +230,11 @@ index and the board are overwritten, and the claim closer unlinks.
 `adrHomes` defaults to **one** home, because that is all a repository is assumed
 to have. A repository keeping a second — decisions internal to one app, say —
 declares both, and the order it declares them in is the order they are reported.
-This repository declares two; drop the second from its `devkit.config.json` and
-`vp run adr:verify` reports every ADR in the app home as homeless, which is the
-check that the config is really driving the gate.
+This repository declared two until its app-home ADRs were refiled against what
+they govern, and closing that home was a one-line `devkit.config.json` edit with
+no code change — which is the demonstration that the config really drives the
+gate. Declare a home the gate does not know about and every ADR in it is
+reported homeless.
 
 Only these are repository data: a gate that says "retarget to `main`" tells a
 repository with a differently-named default branch something false, and one that

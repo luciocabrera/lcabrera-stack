@@ -3,14 +3,13 @@
   file, strips this comment, and fills in the number and heading; copying it by
   hand does the same job.
 
-  WHERE IT GOES is not a matter of taste — pick the home by one question: is
-  this about the repo and what it ships, or about the showcase app's own
-  internals? `ADR_HOMES` in packages/repo-standards/scripts/adr-registry.mjs is
-  the set of homes, and `vp run adr:verify` enforces it. WHICH NUMBER is not a
-  choice either: `vp run adr:verify` prints the next free one,
-  and it is global across both homes. (`ADR-005` predates that rule and still
-  exists in both — `registers.adrGrandfatheredDuplicates` in devkit.config.json
-  is the set. Cite that pair by path, and never renumber it.)
+  WHERE IT GOES is settled: docs/decisions/ is the only home. `registers.adrHomes`
+  in devkit.config.json is the set — read by adr-registry.mjs and enforced by
+  `vp run adr:verify` — so adding a home is a config change, not a convention.
+  WHICH NUMBER is not a choice either: `vp run adr:verify` prints the next free
+  one. No number is grandfathered to mean two things, and
+  `registers.adrGrandfatheredDuplicates` is empty, so the gate rejects every
+  repeat. Never renumber an existing ADR — it is a dated record.
 
   `vp run adr:verify` checks placement, filename, heading number and index
   freshness — it does NOT read the sections below. They are the convention this
