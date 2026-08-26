@@ -1,11 +1,11 @@
 # ADR-038: The shared packages are split by runtime — `@repo/api`, `@repo/server`, `@repo/utils`
 
-**Status:** Accepted — supersedes [ADR-008](ADR-008-packages-api-renamed-data-access.md)
+**Status:** Accepted — supersedes the earlier decision that combined both runtimes in one `packages/data-access`
 
 ## Context
 
-ADR-008 folded the browser fetch utilities and a new Postgres `db/` subtree into
-one package, `packages/data-access`, and defended the mix explicitly: `packages/ui`
+An earlier decision folded the browser fetch utilities and a new Postgres `db/`
+subtree into one package, `packages/data-access`, and defended the mix explicitly: `packages/ui`
 had already set the precedent of one package legitimately spanning two runtimes
 (its `src/entry/` SSR utilities), so a second such package looked like consistency
 rather than debt.
@@ -94,9 +94,11 @@ runtime.**
   are claims the toolchain checks. A package that grows a second runtime does not
   get `types` widened to accommodate it — it gets split, or the offending code
   moves.
-- **ADR-008 is superseded, not rewritten.** It remains an accurate record of what
-  was true when written, and its own text says historical ADRs should be left
-  that way. This ADR is the pointer for anyone reading it later.
+- **The superseded decision is recorded here, not kept as a husk.** Its Context
+  above states what it decided and why the mix looked like consistency at the
+  time; that reasoning is unchanged. The record it lived in was a bootstrap-era
+  ADR describing a package layout that no longer exists, and it was deleted
+  rather than maintained.
 
 ## Verification performed
 

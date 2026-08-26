@@ -211,7 +211,7 @@ depended on the combined package for two fetch helpers and so pulled the
 Postgres driver into every consumer's dependency graph. Full topology, and what
 each tsconfig denies:
 [ADR-038](../docs/decisions/ADR-038-public-package-topology-by-runtime.md),
-which supersedes ADR-008.
+which supersedes the combined package that carried both runtimes.
 
 `utils` and `node` split on purity: `@lcabrera/utils` guarantees pure,
 side-effect-free helpers, so anything that must touch the process (signal

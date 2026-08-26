@@ -57,6 +57,7 @@
     }
   },
   "registers": {
+    "adrGrandfatheredDuplicates": [5],
     "adrHomes": [
       {
         "blurb": "The repository, its published `@lcabrera/*` packages, and the toolchain.",

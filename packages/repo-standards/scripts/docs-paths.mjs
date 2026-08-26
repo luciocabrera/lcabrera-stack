@@ -136,8 +136,8 @@ export const isDatedRecord = (docPath) => docPath.includes('/decisions/');
  * the whole corpus was exempted by an `IGNORED_DOCS` substring, so genuinely
  * dead links in ADRs went unreported — while simply un-exempting it would have
  * reported ~22 paths that are correct precisely because they are historical.
- * ADR-008 IS the record of the `@repo/api` → `@repo/data-access` rename, so
- * naming `packages/data-access` is its content, not a broken reference.
+ * The record of a package rename IS the place its old name belongs, so an ADR
+ * naming `packages/data-access` is stating its content, not a broken reference.
  *
  * The split is structural rather than a heuristic, and it follows the two
  * shapes `extractCandidates` already recognises:

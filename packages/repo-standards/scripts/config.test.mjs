@@ -105,6 +105,27 @@ describe('resolveRegisters', () => {
     );
   });
 
+  it('defaults the grandfathered ADR numbers to none, and takes a declared set', () => {
+    expect(
+      resolveRegisters(JSON.stringify({})).adrGrandfatheredDuplicates,
+    ).toEqual([]);
+    expect(
+      resolveRegisters(
+        JSON.stringify({ registers: { adrGrandfatheredDuplicates: [5, 8] } }),
+      ).adrGrandfatheredDuplicates,
+    ).toEqual([5, 8]);
+  });
+
+  it('drops a grandfathered entry that is not a positive integer', () => {
+    expect(
+      resolveRegisters(
+        JSON.stringify({
+          registers: { adrGrandfatheredDuplicates: [5, 0, -1, 'four', 2.5] },
+        }),
+      ).adrGrandfatheredDuplicates,
+    ).toEqual([5]);
+  });
+
   it('overrides the template home and the tasks directory independently', () => {
     const resolved = resolveRegisters(
       JSON.stringify({ registers: { coordinationTasksDir: 'ops/claims' } }),

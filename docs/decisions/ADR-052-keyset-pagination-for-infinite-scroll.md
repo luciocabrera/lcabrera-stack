@@ -136,6 +136,5 @@ because `uniqueColumn` carries a non-null value by the rule above.
 ## References
 
 - [ADR-008 — primary-key sort tiebreaker](../../apps/react-router/docs/decisions/ADR-008-primary-key-sort-tiebreaker.md)
-  (cite by path — a second ADR-008 exists, see `AGENTS.md`)
 - [ADR-051 — `withTransaction` + the `tx` executor option](./ADR-051-with-transaction-and-tx-executor-option.md)
 - Issues #403 (this ADR), #404 (the builder), #391 (the epic)

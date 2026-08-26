@@ -7,8 +7,10 @@ contract behind the Table's filter dropdowns.
 ## Why this package exists
 
 `@lcabrera/server` held two things at once — browser `fetch` utilities and
-Node/Postgres access — and [ADR-008](../../docs/decisions/ADR-008-packages-api-renamed-data-access.md)
-accepted that deliberately, because nothing depended on only one half.
+Node/Postgres access — and that was accepted deliberately at the time, because
+nothing depended on only one half
+([ADR-038](../../docs/decisions/ADR-038-public-package-topology-by-runtime.md)
+records the decision and what replaced it).
 
 That stopped being true. `@lcabrera/ui` came to depend on the combined package for
 exactly two helpers (`getApiBaseUrl`, `fetchDistinctValues`), which meant every

@@ -20,7 +20,7 @@
  */
 export const createPackConfig = () => ({
   // Aimed at tsconfig.app.json rather than the default tsconfig.json: the latter
-  // is the ADR-003 wrapper (`files: []` plus `references`), which the declaration
+  // is the thin wrapper (`files: []` plus `references`), which the declaration
   // plugin cannot build a TypeScript program from.
   dts: { tsconfig: 'tsconfig.app.json' },
   entry: ['src/**/*.ts', '!src/**/*.test.ts'],

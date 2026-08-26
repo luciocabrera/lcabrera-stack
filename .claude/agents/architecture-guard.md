@@ -46,8 +46,8 @@ Given the caller's task description:
 
 4. **Read relevant ADRs.** Glob **both** `docs/decisions/` and
    `apps/react-router/docs/decisions/` first, then read any whose title suggests relevance.
-   The two homes reuse numbers 001–005 and 008, so cite an ADR by path or topic — never by
-   number alone.
+   `ADR-005` is the one number both homes use, so cite that pair by path; every
+   other number names exactly one ADR.
 
 5. **Grep for existing implementations** if INVENTORY.md mentions a candidate artifact — confirm it still exists at the stated path before recommending reuse.
 

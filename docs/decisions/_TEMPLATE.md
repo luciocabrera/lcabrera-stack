@@ -8,10 +8,9 @@
   internals? `ADR_HOMES` in packages/repo-standards/scripts/adr-registry.mjs is
   the set of homes, and `vp run adr:verify` enforces it. WHICH NUMBER is not a
   choice either: `vp run adr:verify` prints the next free one,
-  and it is global across both homes. (A few low numbers predate that rule and
-  exist in both — `GRANDFATHERED_DUPLICATES` in
-  packages/repo-standards/scripts/adr-registry.mjs is the set. Cite one of those
-  by path, and never renumber them.)
+  and it is global across both homes. (`ADR-005` predates that rule and still
+  exists in both — `registers.adrGrandfatheredDuplicates` in devkit.config.json
+  is the set. Cite that pair by path, and never renumber it.)
 
   `vp run adr:verify` checks placement, filename, heading number and index
   freshness — it does NOT read the sections below. They are the convention this

@@ -112,7 +112,8 @@ client-safe package may only depend on workspace packages that are themselves
 client-safe**, enforced by `packages/ui`'s `check:public-api`. The topology and
 what each tsconfig denies is in [`packages/CLAUDE.md`](packages/CLAUDE.md) and
 [ADR-038](docs/decisions/ADR-038-public-package-topology-by-runtime.md)
-(supersedes ADR-008); why publishing merged neither pair is
+(which supersedes the combined `data-access` package it replaced); why
+publishing merged neither pair is
 [ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md).
 
 All source paths below (e.g. `src/components/`) are relative to `apps/react-router/` unless otherwise noted.
@@ -497,8 +498,11 @@ the decision that architecture files describe systems, not folders, is
   ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)). The
   homes are [`docs/decisions/`](docs/decisions/) (repo, packages, toolchain)
   and [`apps/react-router/docs/decisions/`](apps/react-router/docs/decisions/)
-  (showcase app). Numbers 001–005 and 008 exist in both homes — cite those by
-  path. `GRANDFATHERED_DUPLICATES` in `adr-registry.mjs` is the authority.
+  (showcase app). `ADR-005` is the one number still meaning two things — the Form
+  component here, StyleX in the showcase — so cite that pair by path.
+  `registers.adrGrandfatheredDuplicates` in `devkit.config.json` is the
+  authority — editing it is what changes the gate — and every other repeat is a
+  collision `vp run adr:verify` rejects.
 
 Do **not** create an `ARCHITECTURE.md` because the directory is new. Create one
 only for a system: multiple files, non-local data flow, constraints the code

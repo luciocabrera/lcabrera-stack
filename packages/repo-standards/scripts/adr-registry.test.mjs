@@ -1,8 +1,9 @@
 /**
  * The rules worth a test are the ones that already failed in the wild: a number
  * reused across two homes (there were two ADR-047s), a draft holding a number it
- * does not own (that is where the second one came from), and the grandfathered
- * 001–012 overlap, which must keep passing or the gate cannot land at all.
+ * does not own (that is where the second one came from), and the one number still
+ * tolerated in both homes — the set shrinks as a pair loses a side, so a number it
+ * no longer covers must be rejected like any other repeat.
  */
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -54,15 +55,27 @@ describe('parseAdrFilename', () => {
 });
 
 describe('adrFindings', () => {
-  it('passes the grandfathered 001–012 overlap, twice each', () => {
+  it('passes the one surviving overlap, twice each', () => {
     expect(
       findings({
         homes: [
-          home('docs/decisions', ['ADR-001-a.md']),
-          home('apps/react-router/docs/decisions', ['ADR-001-b.md']),
+          home('docs/decisions', ['ADR-005-a.md']),
+          home('apps/react-router/docs/decisions', ['ADR-005-b.md']),
         ],
       }),
     ).toEqual([]);
+  });
+
+  it('rejects a number the shrinking set no longer grandfathers', () => {
+    const result = findings({
+      homes: [
+        home('docs/decisions', ['ADR-001-a.md']),
+        home('apps/react-router/docs/decisions', ['ADR-001-b.md']),
+      ],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toContain('ADR-001');
   });
 
   it('fails a number reused outside that overlap — the two-ADR-047 case', () => {
@@ -81,8 +94,8 @@ describe('adrFindings', () => {
     expect(
       findings({
         homes: [
-          home('docs/decisions', ['ADR-001-a.md', 'ADR-001-c.md']),
-          home('apps/react-router/docs/decisions', ['ADR-001-b.md']),
+          home('docs/decisions', ['ADR-005-a.md', 'ADR-005-c.md']),
+          home('apps/react-router/docs/decisions', ['ADR-005-b.md']),
         ],
       }),
     ).toHaveLength(1);

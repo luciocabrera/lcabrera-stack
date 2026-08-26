@@ -36,7 +36,7 @@
 > what the body says is there — and could reasonably conclude that
 > `data-sources.md` had drifted rather than that this line had.
 >
-> The body below keeps its original reasoning, per the ADR-008 precedent of
+> The body below keeps its original reasoning, per the established precedent of
 > correcting a dated record from its header rather than re-arguing it. Two later
 > changes did edit it: the names of workspaces that have since left this
 > repository were removed, and the bullet on the external API — which asserted
