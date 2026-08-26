@@ -17,10 +17,13 @@ a change serves; a capability that serves neither is a signal to stop rather tha
 to add a package. The split is by consumer, not by build shape — `@lcabrera/ui`
 publishes TypeScript source just as `devkit` publishes `.mjs`.
 
-**What no in-repo run can validate is the delivery**, which is why `devkit` and
-`repo-standards` need a packed-tarball test: a `workspace:*` link resolves the
-source directory, so a tarball's file modes never appear — and that is how their
-shipped git hooks arrived inert and went unnoticed (§4).
+**What no in-repo run can validate is the delivery.** A `workspace:*` link
+resolves the source directory, so a packed tarball's file modes never appear —
+which is how `devkit`'s shipped git hooks once arrived inert. That is the reason
+`vp run tarball:verify` exists: it packs both distributed packages and installs
+them into a scratch repo outside this tree. It is chained into `check:safe` and
+runs as its own CI step
+([ADR-073](docs/decisions/ADR-073-publishing-gates-check-the-packed-tarball.md)).
 
 **The `apps/` exist to exercise the packages, and that is the tie-breaker.** When
 package cleanliness and app convenience pull

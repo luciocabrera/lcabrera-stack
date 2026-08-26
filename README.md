@@ -21,7 +21,9 @@ resolvable public surface, no reliance on a consumer's tsconfig `paths`.
 | [`@lcabrera/node`](packages/node-runtime) | process lifecycle — signals, shutdown                                              |
 
 `api`, `server`, `utils` and `node` build to `dist`; `ui` publishes
-TypeScript source. The showcase exercises all five under realistic load.
+TypeScript source. The showcase depends on `ui`, `api`, `server` and `utils` and
+exercises them under realistic load. `node` has no in-repo consumer and is
+covered by its own tests alone.
 
 ### The repo toolchain — installed by another _repository_
 
