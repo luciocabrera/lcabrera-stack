@@ -207,6 +207,28 @@ describe('headingNumber / headingTitle', () => {
 });
 
 describe('nextFreeNumber', () => {
+  it('hands back the highest number once its ADR is deleted', () => {
+    // The limit of what the index may promise. The maximum is taken from the
+    // files PRESENT, so retiring the top ADR lowers it and the next one takes
+    // that number — while a merged PR citing the retired ADR now points
+    // somewhere else. Retiring a just-landed ADR is the likeliest retirement,
+    // so this is reachable rather than theoretical (#974).
+    const before = home('docs/decisions', ['ADR-047-a.md', 'ADR-048-b.md']);
+    const after = home('docs/decisions', ['ADR-047-a.md']);
+
+    expect(nextFreeNumber([before])).toBe(49);
+    expect(nextFreeNumber([after])).toBe(48);
+  });
+
+  it('never fills a gap below the highest', () => {
+    // The half that IS guaranteed, and the half the index states.
+    expect(
+      nextFreeNumber([
+        home('docs/decisions', ['ADR-001-a.md', 'ADR-047-b.md']),
+      ]),
+    ).toBe(48);
+  });
+
   it('is one past the highest anywhere, not per home', () => {
     expect(
       nextFreeNumber([
@@ -282,6 +304,66 @@ describe('renderIndex', () => {
 
     expect(rendered).toContain(ADR_HOMES[0].commands.new);
     expect(rendered).not.toContain('npx repo-adr');
+  });
+
+  /**
+   * `adrHomes` defaults to ONE home, so the default render is the one that has
+   * to read correctly. The cross-home sentence is not false in a single-home
+   * repository, it is vacuous — it describes a second directory the reader
+   * cannot find. Both branches are asserted because only one of them ever
+   * renders here, and an unasserted branch is one nothing would notice losing.
+   */
+  const index = (options) =>
+    renderIndex(ADR_HOMES[0], { exemptionCount: 0, homeCount: 1, ...options });
+
+  it('says what numbering means for a single-home repository', () => {
+    const rendered = index({});
+
+    expect(rendered).toContain('A number identifies exactly one ADR');
+    expect(rendered).toContain('unless it was the highest');
+    expect(rendered).not.toContain('ADR home in this repository');
+  });
+
+  it('says what numbering means across several homes', () => {
+    const rendered = index({ homeCount: 2 });
+
+    expect(rendered).toContain(
+      'unique across every ADR home in this repository',
+    );
+    expect(rendered).not.toContain('A number identifies exactly one ADR');
+  });
+
+  /**
+   * The uniqueness sentence is the one claim here that a repository can falsify
+   * from its own config: `duplicateFindings` is home-agnostic, so a declared
+   * exemption lets one number name two ADRs inside a SINGLE home. Stated flat,
+   * the generated page would contradict the directory it sits in.
+   */
+  it('admits the exemption when the repository declares one', () => {
+    const rendered = index({ exemptionCount: 1 });
+
+    expect(rendered).toContain('adrGrandfatheredDuplicates');
+    expect(rendered).toContain('may name two ADRs');
+  });
+
+  it('says nothing about exemptions when there are none', () => {
+    expect(index({})).not.toContain('adrGrandfatheredDuplicates');
+  });
+
+  it('renders the branch this repository\u2019s registers imply', () => {
+    // Deliberately a weak probe, and worth saying so rather than dressing it up:
+    // both registers are module state, so defaults hardcoded to this
+    // repository's current values would pass identically — the same shape as a
+    // lint probe whose rule never loaded. What it does hold is the tie between
+    // the rendered page and the registers, so declaring a second home or an
+    // exemption fails this until the defaults follow.
+    const rendered = renderIndex(ADR_HOMES[0]);
+
+    expect(rendered).toContain(
+      ADR_HOMES.length > 1
+        ? 'ADR home in this repository'
+        : 'A number identifies exactly one ADR',
+    );
   });
 
   /**

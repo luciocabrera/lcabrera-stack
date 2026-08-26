@@ -276,6 +276,52 @@ export const normalizeIndex = (markdown) =>
     .trim();
 
 /**
+ * What the index says about numbering, which depends on what the consuming
+ * repository has declared — and both registers default to the quiet case.
+ *
+ * The cross-home sentence is the whole point of the register when there are
+ * several homes: a number identifies one ADR across the repository, not one per
+ * directory. Rendered into a repository with a single home it is not false, it
+ * is vacuous, and it reads as though the reader has missed a second directory.
+ *
+ * The uniqueness claim is stated flatly only while `adrGrandfatheredDuplicates`
+ * is empty, which is its default. A declared exemption lets one number name two
+ * ADRs — in ONE home as readily as across two, because the duplicate check is
+ * home-agnostic — so a repository that declares one would otherwise be handed a
+ * generated page contradicting its own directory.
+ *
+ * The single-home wording carries the fact that is load-bearing there and is not
+ * obvious from the directory: `nextFreeNumber` takes the highest number in use
+ * and adds one, so a gap is never filled and a retired ADR's number stays
+ * retired.
+ *
+ * The exception is stated because it is reachable and is the likeliest
+ * retirement: the maximum is computed from the files PRESENT, so deleting the
+ * highest-numbered ADR lowers it and the next `adr:new` takes that number back.
+ * A citation of the retired one then points at a different decision. Promising
+ * otherwise would be a load-bearing claim in generated prose that no mechanism
+ * keeps (#974).
+ */
+const numberingParagraph = ({ exemptionCount, homeCount }) => [
+  ...(homeCount > 1
+    ? [
+        'Numbers are unique across every ADR home in this repository, so a decision',
+        'that spans two of them is still one record.',
+      ]
+    : ['A number identifies exactly one ADR.']),
+  ...(exemptionCount > 0
+    ? [
+        'The exception is the numbers this repository has declared in',
+        '`adrGrandfatheredDuplicates`, each of which may name two ADRs; every other',
+        'repeat is rejected.',
+      ]
+    : []),
+  'The next free number is taken from the highest in use rather than the first',
+  'gap, so retiring an ADR leaves its number unused — unless it was the highest,',
+  'which frees it for the next.',
+];
+
+/**
  * A home's `README.md`: what is true of the home itself, and deliberately not a
  * row per ADR.
  *
@@ -294,8 +340,20 @@ export const normalizeIndex = (markdown) =>
  * the commands are this package's own bins, not one repository's task names,
  * and the reasoning it used to cite by link is inlined, because a fresh home
  * has neither file.
+ *
+ * `homeCount` rides in an options object rather than as a bare second argument
+ * for two reasons: `Function.length` stops counting at the first default, so the
+ * arity stays 1; and the ADR-075 test above deliberately calls this with an
+ * array as the second argument to prove entries cannot be injected that way —
+ * destructuring an array yields the default, so that probe keeps working.
  */
-export const renderIndex = (home) => {
+export const renderIndex = (
+  home,
+  {
+    exemptionCount = GRANDFATHERED_DUPLICATES.size,
+    homeCount = ADR_HOMES.length,
+  } = {},
+) => {
   const commands = commandsFor(home);
 
   return [
@@ -305,9 +363,7 @@ export const renderIndex = (home) => {
     '',
     home.blurb,
     '',
-    'Numbers are unique across every ADR home in this repository, so a decision',
-    'that spans two of them is still one record and no two homes can reuse a',
-    'number.',
+    ...numberingParagraph({ exemptionCount, homeCount }),
     '',
     `Writing one: start from [\`_TEMPLATE.md\`](${fileInTemplateHome(home.dir, TEMPLATE_FILE)})`,
     `or run \`${commands.new}\`, which takes the next free number for you.`,

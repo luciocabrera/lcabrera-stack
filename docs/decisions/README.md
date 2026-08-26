@@ -4,9 +4,10 @@
 
 The repository, its published `@lcabrera/*` packages, and the toolchain.
 
-Numbers are unique across every ADR home in this repository, so a decision
-that spans two of them is still one record and no two homes can reuse a
-number.
+A number identifies exactly one ADR.
+The next free number is taken from the highest in use rather than the first
+gap, so retiring an ADR leaves its number unused — unless it was the highest,
+which frees it for the next.
 
 Writing one: start from [`_TEMPLATE.md`](./_TEMPLATE.md)
 or run `vp run adr:new`, which takes the next free number for you.
