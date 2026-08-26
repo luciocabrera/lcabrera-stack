@@ -6,7 +6,7 @@ type AssertColumnAllowedArgs = {
 export const assertColumnAllowed = ({
   allowedColumns,
   column,
-}: AssertColumnAllowedArgs): void => {
+}: AssertColumnAllowedArgs) => {
   if (allowedColumns === undefined) {
     return;
   }

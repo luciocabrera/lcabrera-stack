@@ -14,10 +14,7 @@ type AssertGroupDepthArgs = {
  * A request at depth 9 costing a catalogue round trip before being refused is a request
  * that pays for the mistake it is about to be told about (ADR-066).
  */
-export const assertGroupDepth = ({
-  grouping,
-  keys,
-}: AssertGroupDepthArgs): void => {
+export const assertGroupDepth = ({ grouping, keys }: AssertGroupDepthArgs) => {
   if (keys.length === 0) {
     throw new GroupingRefusedError({
       message: 'A grouped query needs at least one group key.',

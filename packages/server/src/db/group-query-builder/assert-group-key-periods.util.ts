@@ -28,7 +28,7 @@ export const assertGroupKeyPeriods = ({
   capabilities,
   keys,
   periods,
-}: AssertGroupKeyPeriodsArgs): void => {
+}: AssertGroupKeyPeriodsArgs) => {
   const applied = new Set(keys);
 
   for (const [column, period] of Object.entries(periods)) {

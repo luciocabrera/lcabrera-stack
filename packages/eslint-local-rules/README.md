@@ -255,6 +255,55 @@ import type { type User } from './types'; // redundant
 import type { User, Post } from './types';
 ```
 
+### `no-habit-return-types`
+
+Removes a return-type annotation TypeScript would have written itself. Auto-fixable.
+
+An explicit return type is sometimes deliberate — it can promise callers **less**
+than the function really returns, so the extra detail never enters the contract:
+
+```typescript
+const makePet = (): Animal => new Dog(); // callers get Animal, never Dog
+```
+
+That is indistinguishable in the source text from a redundant one, and telling
+them apart means comparing the written type against the inferred one. This plugin
+has no TypeScript program, so it cannot.
+
+**The rule therefore reports only annotations that cannot be hiding anything**,
+because the shape of the body fixes the inferred type exactly. Everywhere else it
+is silent, so there is no case where a deliberate widening is flagged — and
+therefore no escape hatch, no options, and nothing to disable.
+
+**❌ Disallowed:**
+
+```typescript
+const reset = (): void => {
+  store.clear();
+};
+const save = async (): Promise<void> => {
+  await put();
+};
+const isOpen = (): boolean => count === 1;
+const Row = (): JSX.Element => <tr />;
+```
+
+**✅ Left alone** — each could be widening, so none is reported:
+
+```typescript
+const makePet = (): Animal => new Dog();
+const getName = (): string => user.firstName;
+const ignore = (): void => doSomethingThatReturnsAValue(); // discards on purpose
+const Row = (): React.ReactNode => <tr />; // wider than JSX.Element
+function walk(n): void {
+  walk(n.next);
+} // recursion: inference can fail
+```
+
+The trade is deliberate and worth knowing: `(): string` on a body returning a
+`string` is a habit this rule will not catch, because the same annotation over a
+body returning `'a' | 'b'` is a widening. Reviews still own that half.
+
 ### `merge-duplicate-imports`
 
 Merges multiple import statements from the same source into a single import.

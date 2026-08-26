@@ -119,7 +119,7 @@ const checkFunction = ({
 }: {
   readonly context: TSESLint.RuleContext<'useObjectParam', []>;
   readonly node: FunctionNode;
-}): void => {
+}) => {
   const params = node.params;
 
   // Skip if single parameter or no parameters. A lone ObjectPattern — the shape

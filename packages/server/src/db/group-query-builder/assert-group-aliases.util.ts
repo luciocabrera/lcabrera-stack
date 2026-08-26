@@ -17,7 +17,7 @@ type AssertGroupAliasesArgs = {
 export const assertGroupAliases = ({
   aliases,
   allowedColumns,
-}: AssertGroupAliasesArgs): void => {
+}: AssertGroupAliasesArgs) => {
   const seen = new Set<string>();
 
   for (const alias of aliases) {

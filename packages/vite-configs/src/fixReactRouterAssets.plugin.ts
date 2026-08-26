@@ -132,7 +132,7 @@ const ensureServerCssFile = ({
   cssPath,
   fileSystem,
   serverBuildDir,
-}: EnsureServerCssFileArgs): void => {
+}: EnsureServerCssFileArgs) => {
   const serverFile = path.join(serverBuildDir, cssPath);
   if (fileSystem.existsSync(serverFile)) {
     return;

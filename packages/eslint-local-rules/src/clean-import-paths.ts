@@ -56,7 +56,7 @@ const reportIfPathNeedsCleanup = ({
     | TSESTree.ExportNamedDeclaration
     | TSESTree.ImportDeclaration;
   readonly prefixes: readonly string[];
-}): void => {
+}) => {
   const sourceNode = node.source;
 
   if (!sourceNode || typeof sourceNode.value !== 'string') {

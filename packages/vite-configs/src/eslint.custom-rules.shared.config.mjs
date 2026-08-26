@@ -300,6 +300,7 @@ export const createCustomRulesLintConfig = async ({
         'local-rules/domain-folder-filename': 'error',
         'local-rules/filename-convention': 'error',
         'local-rules/merge-duplicate-imports': 'error',
+        'local-rules/no-habit-return-types': 'error',
         'local-rules/no-inline-type-imports': 'error',
         // One value per rule: ESLint flat config replaces a rule wholesale when
         // a later config sets it again, so every restriction that applies to

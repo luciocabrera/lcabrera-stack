@@ -117,6 +117,7 @@ export const createBaseCustomRulesLintConfig = ({
         'local-rules/domain-folder-filename': 'error',
         'local-rules/filename-convention': 'error',
         'local-rules/merge-duplicate-imports': 'error',
+        'local-rules/no-habit-return-types': 'error',
         'local-rules/no-inline-type-imports': 'error',
         'local-rules/type-suffix-naming': 'error',
         // Node/library workspaces have no React block, so this is the only place
