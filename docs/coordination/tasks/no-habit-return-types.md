@@ -1,0 +1,25 @@
+---
+id: no-habit-return-types
+title: feat(eslint-local-rules): enforce Rule 9 with a no-habit-return-types rule
+owner: agent:claude
+status: active
+branch: chore/963-no-habit-return-types
+area:
+  - packages/eslint-local-rules/**
+  - packages/vite-configs/**
+started: 2026-08-26
+updated: 2026-08-26
+plan: (none)
+pr: (none)
+issue: #963
+---
+
+## What
+
+feat(eslint-local-rules): enforce Rule 9 with a no-habit-return-types rule
+
+## Status / next
+
+- Current step: just claimed
+- Blockers: none
+- Next:
