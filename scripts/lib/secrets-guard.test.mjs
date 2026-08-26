@@ -170,7 +170,7 @@ describe('source-file paths are not credentials', () => {
     `"command": "node \\"${HOOK_PATH}.mjs\\""`,
     'const secretGuard = "./scripts/lib/secrets-guard.mjs";',
     'password_helper: "packages/server/src/crypto/hash-password.util.ts"',
-    '"token_fixture": "apps/react-router/src/routes/api/token-refresh.util.ts"',
+    '"token_fixture": "apps/showcase/src/routes/api/token-refresh.util.ts"',
     // Windows spelling of the same path. `hasDirectoryComponent` in the entry
     // module already accepts both separators; this one must too.
     String.raw`const secretPath = "C:\scripts\claude-secrets-guard.mjs";`,

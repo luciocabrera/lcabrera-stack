@@ -35,8 +35,8 @@ const GRAPH = [
   {
     name: 'react-router',
     kind: 'app',
-    dir: 'apps/react-router',
-    pkgName: 'vite-react-compiler',
+    dir: 'apps/showcase',
+    pkgName: 'showcase',
     deps: new Set(['@lcabrera/vite-config', '@lcabrera/ui']),
   },
 ];
@@ -74,7 +74,7 @@ describe('resolveAffected — lint-only carve-out', () => {
     // utils changed -> its dependents ui + react-router; vite-configs is NOT
     // pulled in, because its only changed file was filtered out.
     expect(new Set(result.packages)).toEqual(
-      new Set(['@lcabrera/utils', '@lcabrera/ui', 'vite-react-compiler']),
+      new Set(['@lcabrera/utils', '@lcabrera/ui', 'showcase']),
     );
   });
 });
@@ -104,7 +104,7 @@ describe('resolveAffected — ordinary scoping is unchanged', () => {
     const result = affected(['packages/utils/src/foo.ts']);
     expect(result.mode).toBe('scoped');
     expect(new Set(result.packages)).toEqual(
-      new Set(['@lcabrera/utils', '@lcabrera/ui', 'vite-react-compiler']),
+      new Set(['@lcabrera/utils', '@lcabrera/ui', 'showcase']),
     );
   });
 

@@ -10,12 +10,12 @@ On every pull request the `Unit Tests & Coverage` job posts a single, updated
 comment: **one row per reported workspace plus an aggregated monorepo total**,
 badged per metric (✅ ≥ 80 %, ⚠️ ≥ 60 %, ❌ below).
 
-| Workspace             | Lines | Statements | Functions | Branches |
-| --------------------- | ----- | ---------- | --------- | -------- |
-| `@lcabrera/ui`        | …     | …          | …         | …        |
-| `@lcabrera/server`    | …     | …          | …         | …        |
-| `vite-react-compiler` | …     | …          | …         | …        |
-| **🏛 Monorepo total**  | …     | …          | …         | …        |
+| Workspace            | Lines | Statements | Functions | Branches |
+| -------------------- | ----- | ---------- | --------- | -------- |
+| `@lcabrera/ui`       | …     | …          | …         | …        |
+| `@lcabrera/server`   | …     | …          | …         | …        |
+| `showcase`           | …     | …          | …         | …        |
+| **🏛 Monorepo total** | …     | …          | …         | …        |
 
 Before this, the comment showed a single unlabelled table — react-router's
 totals alone, because `test:ci` runs its coverage last and the comment read that
@@ -69,7 +69,7 @@ Defined in `COVERAGE_REPORT_WORKSPACES` in
 [`scripts/lib/coverage-workspaces.mjs`](../../scripts/lib/coverage-workspaces.mjs),
 most-critical first. These are the public-facing / highest-value surfaces (all
 four packages heading for public release — `ui`, `api`, `server`, `utils` — are
-here; `apps/react-router` is the showcase app).
+here; `apps/showcase` is the showcase app).
 
 That membership is **asserted, not just documented**: `test:scripts` resolves the
 never-baseline packages from the gitignore rule AGENTS.md §4 names as the
@@ -82,7 +82,7 @@ Adding a fifth public package extends the check with no edit here:
 | `packages/ui`                 | `@lcabrera/ui`            | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                                   |
 | `packages/server`             | `@lcabrera/server`        | true  | Same                                                                                                                                 |
 | `packages/api`                | `@lcabrera/api`           | true  | Same — the browser half of the former `data-access` ([ADR-038](../decisions/ADR-038-public-package-topology-by-runtime.md))          |
-| `apps/react-router`           | `vite-react-compiler`     | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                       |
+| `apps/showcase`               | `showcase`                | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                       |
 | `packages/node-runtime`       | `@lcabrera/node`          | true  | Phase 2 — DB-free `test:coverage`                                                                                                    |
 | `packages/utils`              | `@lcabrera/utils`         | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/vite-react-compiler/issues/124))                   |
 | `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | true  | Phase 3 — a `RuleTester` suite per rule ([#205](https://github.com/luciocabrera/vite-react-compiler/issues/205)); reaches no service |
@@ -114,7 +114,7 @@ only once its coverage runs clean and means something.** Checklist:
 ### Phased rollout
 
 - **Phase 1 — critical surfaces.** `packages/ui`, `packages/server`,
-  `apps/react-router`. ✅ done (PR #32).
+  `apps/showcase`. ✅ done (PR #32).
 - **Phase 2 — remaining library packages.** `packages/node-runtime`,
   `packages/utils` and `packages/api` (each has a
   DB-free `test:coverage`). ✅ done. `utils` was deferred at first for having no
@@ -178,7 +178,7 @@ Each phase is its own PR, kept reviewable and green before the next.
   report set.
 - **The numbers reflect each suite's executed-file footprint.** v8 measures only
   files a test imports, so denominators differ wildly by suite maturity
-  (`@lcabrera/ui` measures ~1244 files, `vite-react-compiler` ~12). Enabling
+  (`@lcabrera/ui` measures ~1244 files, `showcase` ~12). Enabling
   `coverage.all` would count untested files too — a truer denominator and lower
   percentages — but that is a per-workspace coverage-quality decision, out of
   scope for the reporting plumbing here.

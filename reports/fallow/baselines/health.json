@@ -1,11 +1,11 @@
 {
   "finding_counts": {
-    "apps/react-router/scripts/check-lighthouse-scores.mjs": {
+    "apps/showcase/scripts/check-lighthouse-scores.mjs": {
       "crap_moderate": {
         "count": 1
       }
     },
-    "apps/react-router/src/features/showcase/ShowcasePage/VirtualSelectSection/VirtualSelectSection.component.tsx": {
+    "apps/showcase/src/features/showcase/ShowcasePage/VirtualSelectSection/VirtualSelectSection.component.tsx": {
       "crap_moderate": {
         "count": 1
       }

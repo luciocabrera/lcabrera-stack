@@ -51,7 +51,7 @@ Use a hybrid boundary model:
 - Avoid deep internal barrels that re-export all internals.
 
 See decision record:
-[`apps/react-router/docs/decisions/ADR-007-barrel-export-boundaries.md`](./decisions/ADR-007-barrel-export-boundaries.md)
+[`apps/showcase/docs/decisions/ADR-007-barrel-export-boundaries.md`](./decisions/ADR-007-barrel-export-boundaries.md)
 — cited by path because two ADR homes exist, not because this number is in both.
 
 ```typescript

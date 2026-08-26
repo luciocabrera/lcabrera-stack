@@ -11,7 +11,7 @@ other scouts — possibly none. That is a correct outcome, not a failed one.
 - `vp run react-doctor:verify` — repo-wide, writes
   `reports/react-doctor/full-latest.json`. The only pass checking effect
   cleanup, server/client boundaries and render-path cost.
-- `vp run build` in `apps/react-router` emits `build/server/index.js`; bundle
+- `vp run build` in `apps/showcase` emits `build/server/index.js`; bundle
   analysis starts there.
 - `vp run fallow:health --file-scores --hotspots` — complexity hotspots, again
   hypotheses rather than measurements.

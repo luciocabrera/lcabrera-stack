@@ -5,7 +5,7 @@ owner: agent:claude
 status: active
 branch: chore/951-rename-showcase-app
 area:
-  - apps/react-router/**
+  - apps/showcase/**
   - apps/showcase/**
   - packages/ts-configs/**
   - COMMANDS.md

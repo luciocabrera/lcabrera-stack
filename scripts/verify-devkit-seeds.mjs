@@ -61,8 +61,8 @@ const workspaceDirectories = () =>
  * Every workspace's package name, from the manifests rather than from a list.
  *
  * Read alongside `workspaceDirectories`, because the two do not imply each
- * other: this repository's showcase app is called `vite-react-compiler` and
- * lives in `apps/react-router`, so a seed naming the directory matches no
+ * other: this repository's showcase app is called `showcase` and
+ * lives in `apps/showcase`, so a seed naming the directory matches no
  * package name. Lifting `rules/routes-data.md`'s exemption is what showed it —
  * the gate reported that file's three package-name lines and left its blueprint
  * path alone (#860).

@@ -7,7 +7,7 @@
 - **Issue:** #705 (found on PR #701 / #687)
 - **Relates to:** [ADR-038](./ADR-038-public-package-topology-by-runtime.md)
   (`@lcabrera/api` is the browser-safe package),
-  [ADR-070](../../apps/react-router/docs/decisions/ADR-070-showcase-serves-its-own-table-rows.md)
+  [ADR-070](../../apps/showcase/docs/decisions/ADR-070-showcase-serves-its-own-table-rows.md)
   (which rejected this change as the wrong home, and is amended by it)
 
 ## Context
@@ -133,5 +133,5 @@ reasoning does not improve with age, and the blast radius only grows.
 - The paired stub-server probe that establishes the behaviour in a real build
   (which host each build reaches, with a live server at both addresses) is in the
   PR for #705
-- [ADR-070](../../apps/react-router/docs/decisions/ADR-070-showcase-serves-its-own-table-rows.md)
+- [ADR-070](../../apps/showcase/docs/decisions/ADR-070-showcase-serves-its-own-table-rows.md)
   — amended by this decision

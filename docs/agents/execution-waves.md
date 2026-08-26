@@ -28,7 +28,7 @@ Every issue MUST belong to exactly one wave.
 
 - Applying abstractions across apps
 - Removing duplication
-- Aligning apps/react-router with flagship packages
+- Aligning apps/showcase with flagship packages
 
 ### Wave 4 — Hardening & QA
 

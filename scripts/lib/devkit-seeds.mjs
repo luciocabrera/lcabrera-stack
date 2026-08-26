@@ -87,7 +87,7 @@ export const repositoryIdentity = (gitConfig) => {
  * `workspacePaths` is separate from `workspaceNames` because a workspace's
  * directory and its package name are independent strings, and a seed can leak
  * either. This repository proves it: the showcase app is named
- * `vite-react-compiler` and lives in `apps/react-router`, so a blueprint path
+ * `showcase` and lives in `apps/showcase`, so a blueprint path
  * naming the directory matches nothing derived from the manifests. That file
  * did not ship clean — it was exempted outright — but lifting the exemption is
  * what exposed the hole: the gate reported its three package-name lines and

@@ -4,11 +4,11 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'apps/react-router/src/**'
-      - 'apps/react-router/public/**'
-      - 'apps/react-router/package.json'
-      - 'apps/react-router/lighthouse.config.js'
-      - 'apps/react-router/scripts/**'
+      - 'apps/showcase/src/**'
+      - 'apps/showcase/public/**'
+      - 'apps/showcase/package.json'
+      - 'apps/showcase/lighthouse.config.js'
+      - 'apps/showcase/scripts/**'
       - '.github/workflows/lighthouse.yml'
   workflow_dispatch:
 
@@ -40,14 +40,14 @@ jobs:
         run: vp install --frozen-lockfile --ignore-scripts && vp config
 
       - name: Install Playwright browsers
-        run: cd apps/react-router && vp exec playwright install chromium --with-deps
+        run: cd apps/showcase && vp exec playwright install chromium --with-deps
 
       - name: Build production
-        run: cd apps/react-router && vp run build
+        run: cd apps/showcase && vp run build
 
       - name: Start production server
         run: |
-          cd apps/react-router
+          cd apps/showcase
 
           vp exec react-router-serve build/server/index.js &
           SERVER_PID=$!
@@ -68,13 +68,13 @@ jobs:
           exit 1
 
       - name: Run Lighthouse audit
-        run: cd apps/react-router && vp run audit:lighthouse
+        run: cd apps/showcase && vp run audit:lighthouse
         continue-on-error: true
 
       - name: Find latest Lighthouse report
         id: find_report
         run: |
-          LATEST_REPORT=$(ls -t apps/react-router/lighthouse-reports/lighthouse-*.json 2>/dev/null | head -1 || true)
+          LATEST_REPORT=$(ls -t apps/showcase/lighthouse-reports/lighthouse-*.json 2>/dev/null | head -1 || true)
 
           if [ -z "$LATEST_REPORT" ]; then
             echo "report_found=false" >> "$GITHUB_OUTPUT"
@@ -90,7 +90,7 @@ jobs:
         id: check_scores
         if: steps.find_report.outputs.report_found == 'true'
         run: |
-          cd apps/react-router
+          cd apps/showcase
           node scripts/check-lighthouse-scores.mjs "${{ github.workspace }}/${{ steps.find_report.outputs.report_path }}"
         continue-on-error: true
 
@@ -110,12 +110,12 @@ jobs:
               output += '| ' + name.charAt(0).toUpperCase() + name.slice(1) + ' | ' + score + '/100 | ' + status + ' |\n';
             });
             console.log(output);
-          " > apps/react-router/lighthouse-comment.md
+          " > apps/showcase/lighthouse-comment.md
 
       - name: Prepare fallback comment
         if: steps.find_report.outputs.report_found != 'true'
         run: |
-          cat > apps/react-router/lighthouse-comment.md << 'EOF'
+          cat > apps/showcase/lighthouse-comment.md << 'EOF'
           ## 📊 Lighthouse Audit Results
 
           Lighthouse report was not generated in this run, so scores could not be parsed.
@@ -129,7 +129,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const comment = fs.readFileSync('apps/react-router/lighthouse-comment.md', 'utf-8') + '\n\n' +
+            const comment = fs.readFileSync('apps/showcase/lighthouse-comment.md', 'utf-8') + '\n\n' +
               '**Detailed Report:** [View Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n' +
               '📁 Audit created at: ' + new Date().toISOString();
 
@@ -146,8 +146,8 @@ jobs:
         with:
           name: lighthouse-report
           path: |
-            apps/react-router/lighthouse-reports/*.json
-            apps/react-router/lighthouse-comment.md
+            apps/showcase/lighthouse-reports/*.json
+            apps/showcase/lighthouse-comment.md
           if-no-files-found: ignore
           compression-level: 9
           retention-days: 3

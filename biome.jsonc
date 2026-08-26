@@ -112,7 +112,7 @@
     {
       // Workspaces that contain JSX. Every workspace is in exactly one of the
       // two rosters; `vp run lint:plugins:verify` enforces that.
-      "includes": ["apps/react-router/**", "packages/ui/**"],
+      "includes": ["apps/showcase/**", "packages/ui/**"],
       "linter": {
         "domains": { "react": "recommended" },
         "rules": {

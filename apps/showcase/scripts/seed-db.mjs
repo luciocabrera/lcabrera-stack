@@ -14,8 +14,8 @@
  * purpose: a wrong guess surfaces as an authentication failure somewhere else.
  *
  * Usage:
- *   vp run --filter vite-react-compiler seed      seed a running database
- *   vp run --filter vite-react-compiler db:seed   bring the database up, then seed
+ *   vp run --filter showcase seed      seed a running database
+ *   vp run --filter showcase db:seed   bring the database up, then seed
  *
  * Exit codes: 0 = seeded, 1 = env is incomplete, or a statement failed.
  */
@@ -120,7 +120,7 @@ const main = async () => {
 
   if (missing.length > 0) {
     throw new Error(
-      `Missing required environment variable(s): ${missing.join(', ')}. Provide them in docker/local/.env or apps/react-router/.env.`,
+      `Missing required environment variable(s): ${missing.join(', ')}. Provide them in docker/local/.env or apps/showcase/.env.`,
     );
   }
 

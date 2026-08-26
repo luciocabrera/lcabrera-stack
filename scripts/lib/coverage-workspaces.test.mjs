@@ -42,7 +42,7 @@ describe('publicPackageDirs', () => {
     // A baselining workspace is not public-facing; if this ever returned every
     // workspace, the checks below would stop meaning anything.
     const dirs = publicPackageDirs(REPO_ROOT);
-    expect(dirs).not.toContain('apps/react-router');
+    expect(dirs).not.toContain('apps/showcase');
   });
 
   it('returns an empty set for a directory with no workspaces', () => {
@@ -85,8 +85,6 @@ describe('COVERAGE_MERGE_WORKSPACES', () => {
   it('excludes the showcase app the fallow merge deliberately skips', () => {
     // Not stylistic: pulling react-router in would drag the repo's largest
     // suite into the fallow lane, whose findings are baselined anyway.
-    expect(dirsOf(COVERAGE_MERGE_WORKSPACES)).not.toContain(
-      'apps/react-router',
-    );
+    expect(dirsOf(COVERAGE_MERGE_WORKSPACES)).not.toContain('apps/showcase');
   });
 });

@@ -5,7 +5,7 @@
 - **Scope:** `@lcabrera/ui` (`components/TableRouteView`, `hooks/useTableRoutePage`, `routing/loaders`, the Table's meta state), the paginated table routes in `apps/react-router`
 - **Issue:** #555 — implemented by #564
 - **Amends:** [ADR-056](./ADR-056-generic-table-route-data-path.md) §4 — its reasoning and its safety property stand; only its mechanism changes
-- **Related:** ADR-009 (serializable loader data — [app home](../../apps/react-router/docs/decisions/ADR-009-serializable-filter-options-descriptors.md)), ADR-043 (Changesets), ADR-046 (public API-surface snapshot), ADR-052 (keyset cursor), ADR-058 and ADR-059 (grouping)
+- **Related:** ADR-009 (serializable loader data — [app home](../../apps/showcase/docs/decisions/ADR-009-serializable-filter-options-descriptors.md)), ADR-043 (Changesets), ADR-046 (public API-surface snapshot), ADR-052 (keyset cursor), ADR-058 and ADR-059 (grouping)
 
 ## Context
 
@@ -38,7 +38,7 @@ These are not presentation flags. They decide what the request contains, and the
 [`createTableRouteLoader`](../../packages/ui/src/routing/loaders/createTableRouteLoader.util.ts)
 takes `meta?: Partial<TableMetaState>` and merges it into the `metaState` it
 returns;
-[`enterprise-orders.loader.ts`](../../apps/react-router/src/routes/enterprise-orders/enterprise-orders.loader.ts)
+[`enterprise-orders.loader.ts`](../../apps/showcase/src/routes/enterprise-orders/enterprise-orders.loader.ts)
 declares `meta: { crud: CRUD, deleteActionPath: DELETE_ACTION_PATH }`;
 [`TableConfigContext.provider.tsx`](../../packages/ui/src/components/Table/contexts/TableConfig/TableConfigContext.provider.tsx)
 seeds the meta store from it, and `useGetTableCrud` reads it back out. **Absent

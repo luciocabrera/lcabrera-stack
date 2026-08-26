@@ -22,8 +22,8 @@
  *
  * @example
  * // Scope to the react-router app:
- * //   vp run fallow:refresh-report apps/react-router
- * //   node scripts/refresh-fallow-complexity-report.cjs apps/react-router
+ * //   vp run fallow:refresh-report apps/showcase
+ * //   node scripts/refresh-fallow-complexity-report.cjs apps/showcase
  *
  * @example
  * // Scope to all apps except one:
@@ -32,7 +32,7 @@
  * @example
  * // List every critical/high finding (e.g. for an agent handoff):
  * //   vp run fallow:refresh-report --top=1000
- * //   node scripts/refresh-fallow-complexity-report.cjs apps/react-router --top=50
+ * //   node scripts/refresh-fallow-complexity-report.cjs apps/showcase --top=50
  *
  * Outputs — always under `reports/fallow/`, the single canonical location for
  * every fallow artifact (see AGENTS.md "Fallow Static Analysis"):
@@ -48,7 +48,7 @@ const repoRoot = path.resolve(__dirname, '..');
 
 const DEFAULT_TOP_FINDINGS = 20;
 const cliArgs = process.argv.slice(2);
-// Optional workspace glob (fallow -w syntax), e.g. 'apps/react-router' or
+// Optional workspace glob (fallow -w syntax), e.g. 'apps/showcase' or
 // 'apps/*'. No positional argument scans the entire monorepo.
 const workspaceScope = cliArgs.find((arg) => !arg.startsWith('--')) ?? null;
 const topFlag = cliArgs.find((arg) => arg.startsWith('--top='));

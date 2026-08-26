@@ -4,11 +4,11 @@
 - **Date:** 2026-08-12
 - **Scope:** `@lcabrera/ui` — `src/components/Table/` (body, rows, cells, header cells) and the virtualization window they render through
 - **Issue:** #554 — implemented by #559 (row identity) and #560 (roles and focus)
-- **Related:** [ADR-011](../../apps/react-router/docs/decisions/ADR-011-grid-interaction-architecture.md) (deferred this as "Step 0"), [ADR-012](../../apps/react-router/docs/decisions/ADR-012-column-width.md) (the first instance of ADR-011's model), [ADR-052](./ADR-052-keyset-pagination-for-infinite-scroll.md) (where a page of rows comes from)
+- **Related:** [ADR-011](../../apps/showcase/docs/decisions/ADR-011-grid-interaction-architecture.md) (deferred this as "Step 0"), [ADR-012](../../apps/showcase/docs/decisions/ADR-012-column-width.md) (the first instance of ADR-011's model), [ADR-052](./ADR-052-keyset-pagination-for-infinite-scroll.md) (where a page of rows comes from)
 
 ## Context
 
-[ADR-011](../../apps/react-router/docs/decisions/ADR-011-grid-interaction-architecture.md)
+[ADR-011](../../apps/showcase/docs/decisions/ADR-011-grid-interaction-architecture.md)
 put accessibility in both of its layers — the command owns the semantic contract,
 the surface owns "ARIA mechanics (role, focus)" — and called the focus model
 _"Step 0 … the spine that row selection, grouping, and nested headers all ride
@@ -251,7 +251,7 @@ a real scroll container.
 
 ## References
 
-- [ADR-011](../../apps/react-router/docs/decisions/ADR-011-grid-interaction-architecture.md) — deferred this as "Step 0", and assigned ARIA role/focus mechanics to the surface layer
+- [ADR-011](../../apps/showcase/docs/decisions/ADR-011-grid-interaction-architecture.md) — deferred this as "Step 0", and assigned ARIA role/focus mechanics to the surface layer
 - [`docs/agents/planning/table-row-grouping-plan.md`](../agents/planning/table-row-grouping-plan.md) — the design session this decision was extracted from
 - [`packages/ui/src/components/Table/TableRow/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableRow/ARCHITECTURE.md) — the height invariant, and why `<tbody>` is `display: grid`
 - [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md) — how a grouped grid renders hierarchy, decided so that a group row owns addressable cells and the roving tab stop above needs no special case for it

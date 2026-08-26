@@ -44,7 +44,7 @@ import { toOrderUpdateValues } from '@/routes/enterprise-orders/config/toOrderUp
  * skips it. Run it with a local Postgres up:
  *
  *   vp run db:up            # once, from the repo root
- *   vp run test:smoke       # from apps/react-router (sources DB_* + sets SMOKE_DB)
+ *   vp run test:smoke       # from apps/showcase (sources DB_* + sets SMOKE_DB)
  *
  * The suite cleans up the single row it creates (the delete step is part of the
  * flow), so it is safe to re-run.

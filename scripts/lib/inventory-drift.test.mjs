@@ -21,8 +21,8 @@ describe('treeFor', () => {
     expect(treeFor('packages/server/src/db/get-pool.util.ts')?.root).toBe(
       'packages/server/src',
     );
-    expect(treeFor('apps/react-router/src/auth/authMiddleware.ts')?.root).toBe(
-      'apps/react-router/src',
+    expect(treeFor('apps/showcase/src/auth/authMiddleware.ts')?.root).toBe(
+      'apps/showcase/src',
     );
   });
 

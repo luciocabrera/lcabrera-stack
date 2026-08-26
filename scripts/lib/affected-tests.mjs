@@ -2,7 +2,7 @@
  * Turns a list of changed files into the exact `vp run` test groups needed to
  * cover them — the brain behind `vp run test:changed`. A change to one workspace
  * must also re-test every workspace that DEPENDS on it (a `packages/ui` edit can
- * break `apps/react-router`), so this walks the workspace dependency graph
+ * break `apps/showcase`), so this walks the workspace dependency graph
  * (built from each package.json's `workspace:*` deps) to add transitive
  * dependents. Only the few files that change how every workspace resolves its
  * tests — the lockfile, the workspace manifest, the root Vite+ config, and the
@@ -14,7 +14,7 @@
  * (see `LINT_ONLY_PATTERNS`).
  *
  * The per-workspace task substitution mirrors `test:ci` exactly so the two never
- * diverge: in CI mode `vite-react-compiler` runs its coverage `test:ci` last. A
+ * diverge: in CI mode `showcase` runs its coverage `test:ci` last. A
  * FULL run is just "every workspace is affected", so it reproduces `test:ci` by
  * construction.
  *
@@ -35,7 +35,7 @@ import {
 } from '../../packages/repo-standards/scripts/workspace-scopes.mjs';
 
 /** The one package that emits the PR coverage summary via its `test:ci`. */
-export const COVERAGE_TASK_PACKAGE = 'vite-react-compiler';
+export const COVERAGE_TASK_PACKAGE = 'showcase';
 
 /**
  * Package names whose change forces a full run because they define the shared
@@ -167,7 +167,7 @@ export const withDependents = (seeds, dependents) => {
 
 /**
  * Split affected packages into ordered `vp run` groups mirroring `test:ci`:
- * plain `test` first, then (CI only) `vite-react-compiler`'s coverage `test:ci`
+ * plain `test` first, then (CI only) `showcase`'s coverage `test:ci`
  * LAST so its summary is the fresh one. Empty groups are dropped. Without `ci`,
  * react-router runs plain `test`.
  */

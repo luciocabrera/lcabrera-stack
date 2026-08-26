@@ -5,7 +5,7 @@
  *
  * Re-derive which way a given bundle folded (#708):
  *
- * `grep -n -A2 '^var isExternalApiEnabled' apps/react-router/build/server/index.js`
+ * `grep -n -A2 '^var isExternalApiEnabled' apps/showcase/build/server/index.js`
  *
  * The `^` is load-bearing: the bundler preserves this comment, including the command, so
  * dropping the anchor matches the documentation before the code.

@@ -1,4 +1,4 @@
-# Artifact Inventory (`apps/react-router`)
+# Artifact Inventory (`apps/showcase`)
 
 Before creating anything new, check this inventory. If something here does the job — or could do it with a small enhancement to make it more generic — **prefer enhancing the existing artifact** over creating a new one.
 
@@ -62,7 +62,7 @@ owns the DDL for every table it queries and seeds itself — see
 | ----------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `setup_large_data.sql`        | `db/`      | `car_sales` + `wide_alltypes_150`. A copy lives in a separate repository; the two are independent (see `db/README.md`) |
 | `setup_enterprise_orders.sql` | `db/`      | `enterprise_orders` — this app is the only thing that serves it                                                        |
-| `seed-db.mjs`                 | `scripts/` | Creates `DB_NAME` if absent, then applies both files through `pg`. `vp run --filter vite-react-compiler seed`          |
+| `seed-db.mjs`                 | `scripts/` | Creates `DB_NAME` if absent, then applies both files through `pg`. `vp run --filter showcase seed`                     |
 
 ---
 

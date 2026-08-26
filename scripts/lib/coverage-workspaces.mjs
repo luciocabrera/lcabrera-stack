@@ -46,7 +46,7 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // The two halves of the former `data-access`, split by runtime (ADR-038).
   { dir: 'packages/server', name: '@lcabrera/server', run: true },
   { dir: 'packages/api', name: '@lcabrera/api', run: true },
-  { dir: 'apps/react-router', name: 'vite-react-compiler', run: false },
+  { dir: 'apps/showcase', name: 'showcase', run: false },
   // Phase 2 — remaining library packages with a DB-free test:coverage.
   { dir: 'packages/node-runtime', name: '@lcabrera/node', run: true },
   { dir: 'packages/utils', name: '@lcabrera/utils', run: true },
@@ -89,7 +89,7 @@ export const COVERAGE_REPORT_WORKSPACES = [
  * for pulling in a suite that needed Postgres, so a new workspace is added here
  * only once its coverage task is known to run clean without one.
  *
- * Deliberately absent: `vite-react-compiler` (apps/react-router) — the showcase
+ * Deliberately absent: `showcase` (apps/showcase) — the showcase
  * app. Its fallow findings are baselined, so coverage buys the gate nothing
  * today, and its suite is the largest in the repo. This is why the two lists are
  * not derived from one another.

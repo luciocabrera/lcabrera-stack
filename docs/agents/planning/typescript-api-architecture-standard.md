@@ -26,7 +26,7 @@ those rungs:
 This edition keeps every blueprint _principle_ and expresses it in the repo's
 existing suffix vocabulary and its build-enforced `.server/` boundary, which is a
 **stronger** guarantee than the blueprint's convention. The reference
-implementation is `apps/react-router/src/routes/enterprise-orders/`.
+implementation is `apps/showcase/src/routes/enterprise-orders/`.
 
 ## Core Principles
 

@@ -6,14 +6,14 @@ import {
   isCheckedFile,
 } from './package-app-references.mjs';
 
-const inRepo = new Set(['apps/react-router', 'apps/docs-site']);
+const inRepo = new Set(['apps/showcase', 'apps/docs-site']);
 const find = (text) =>
   appReferences({ exists: (path) => inRepo.has(path), path: 'doc.md', text });
 
 describe('appReferences', () => {
   it('flags an app that exists in this repository', () => {
-    expect(find('see apps/react-router/src')).toEqual([
-      { line: 1, path: 'doc.md', reference: 'apps/react-router' },
+    expect(find('see apps/showcase/src')).toEqual([
+      { line: 1, path: 'doc.md', reference: 'apps/showcase' },
     ]);
   });
 
@@ -44,11 +44,11 @@ describe('appReferences', () => {
     // Each mention is its own edit, so collapsing them would hide work behind
     // a gate that has to be re-run to reveal it.
     const findings = find(
-      'apps/docs-site\n\napps/react-router\napps/docs-site again',
+      'apps/docs-site\n\napps/showcase\napps/docs-site again',
     );
     expect(findings.map((finding) => finding.reference)).toEqual([
       'apps/docs-site',
-      'apps/react-router',
+      'apps/showcase',
       'apps/docs-site',
     ]);
     expect(findings.map((finding) => finding.line)).toEqual([1, 3, 4]);
@@ -104,15 +104,13 @@ describe('fenced code', () => {
   it('does not flag a worked example inside a fence', () => {
     // `apps/web` is illustration in several shipped READMEs; it must keep
     // passing on the day this repo gains an app by that name.
-    expect(find('intro\n```ts\napps/react-router\n```\n')).toEqual([]);
+    expect(find('intro\n```ts\napps/showcase\n```\n')).toEqual([]);
   });
 
   it('flags prose again after the fence closes', () => {
-    const findings = find(
-      '```ts\napps/docs-site\n```\nthen apps/react-router\n',
-    );
+    const findings = find('```ts\napps/docs-site\n```\nthen apps/showcase\n');
     expect(findings).toEqual([
-      { line: 4, path: 'doc.md', reference: 'apps/react-router' },
+      { line: 4, path: 'doc.md', reference: 'apps/showcase' },
     ]);
   });
 
@@ -120,7 +118,7 @@ describe('fenced code', () => {
     const findings = appReferences({
       exists: (path) => inRepo.has(path),
       path: 'pkg/src/x.ts',
-      text: '// ```\n// apps/react-router\n',
+      text: '// ```\n// apps/showcase\n',
     });
     expect(findings.map((finding) => finding.line)).toEqual([2]);
   });
@@ -131,9 +129,9 @@ describe('formatFinding', () => {
     const message = formatFinding({
       line: 12,
       path: 'packages/ui/README.md',
-      reference: 'apps/react-router',
+      reference: 'apps/showcase',
     });
     expect(message).toContain('packages/ui/README.md:12');
-    expect(message).toContain('apps/react-router');
+    expect(message).toContain('apps/showcase');
   });
 });

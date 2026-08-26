@@ -45,7 +45,7 @@ Defined in root `package.json`:
 - Keep reporting scripts deterministic and safe for CI artifact generation.
 
 Database seeding is **not** here: each workspace owns its own DDL and its own
-runner (`apps/react-router/scripts/seed-db.mjs`), so neither breaks when the
+runner (`apps/showcase/scripts/seed-db.mjs`), so neither breaks when the
 other's workspace moves — see
 [ADR-071](../docs/decisions/ADR-071-split-the-demo-database-setup.md). That
 split is what let the API servers leave for their own repository under #686

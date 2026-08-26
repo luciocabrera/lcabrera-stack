@@ -5,7 +5,7 @@ route loaders already consolidated into `createTableRouteLoader`.
 
 ## Tools
 
-- `vp run fallow:dupes`, `vp run fallow:full`. Scope with `-w 'apps/react-router'`.
+- `vp run fallow:dupes`, `vp run fallow:full`. Scope with `-w 'apps/showcase'`.
   Artifacts land in `reports/fallow/`, which is produced on demand — **run the
   command; there is no snapshot to read.**
 - `packages/ui/src/INVENTORY.md` and `packages/ui/src/PATTERNS.md`. The repo's

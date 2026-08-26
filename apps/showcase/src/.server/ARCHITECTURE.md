@@ -50,7 +50,7 @@ job skip them all:
 
 ```bash
 vp run db:up          # once, from the repo root
-vp run test:smoke     # from apps/react-router — sources DB_* + sets SMOKE_DB
+vp run test:smoke     # from apps/showcase — sources DB_* + sets SMOKE_DB
 ```
 
 `groupingGuardRails.smoke.test.ts` forces `DB_POOL_MAX = 1` before the pool is

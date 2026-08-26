@@ -4,7 +4,7 @@
 - **Date:** 2026-08-13
 - **Scope:** `@lcabrera/ui` — `src/components/Table/` expansion state, the derived row set, and the `treegrid` semantics and keyboard contract built on it
 - **Issue:** #571 — refines [ADR-061](./ADR-061-grouping-config-in-url-expansion-in-store.md) and [ADR-062](./ADR-062-grid-semantics-roving-focus-and-row-identity.md)
-- **Related:** [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md) (what a group row renders), [ADR-059](./ADR-059-aggregation-is-builder-generated.md) (a grouped read returns whole), [ADR-009](../../apps/react-router/docs/decisions/ADR-009-serializable-filter-options-descriptors.md) (loader-crossing data is plain and serializable)
+- **Related:** [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md) (what a group row renders), [ADR-059](./ADR-059-aggregation-is-builder-generated.md) (a grouped read returns whole), [ADR-009](../../apps/showcase/docs/decisions/ADR-009-serializable-filter-options-descriptors.md) (loader-crossing data is plain and serializable)
 
 ## Context
 
@@ -275,6 +275,6 @@ to be made per feature rather than inherited.
 - [ADR-062](./ADR-062-grid-semantics-roving-focus-and-row-identity.md) — the grid roles, the roving tab stop, and the generic focus-recovery rule this one refines
 - [ADR-065](./ADR-065-grouped-rows-render-a-hierarchy-column.md) — what a group row renders, and why prefixes are what a grouping mode emits
 - [ADR-059](./ADR-059-aggregation-is-builder-generated.md) — a grouped read returns whole, which is why the default is expanded
-- [ADR-009](../../apps/react-router/docs/decisions/ADR-009-serializable-filter-options-descriptors.md) — loader-crossing data is plain and serializable
+- [ADR-009](../../apps/showcase/docs/decisions/ADR-009-serializable-filter-options-descriptors.md) — loader-crossing data is plain and serializable
 - [`packages/ui/src/components/Table/TableRow/ARCHITECTURE.md`](../../packages/ui/src/components/Table/TableRow/ARCHITECTURE.md) — the height invariant a collapse must not disturb
 - Issues #571 (this decision), #553 / #561 (ADR-061's slices), #554 / #560 (the focus model), #647 / #659 (the group-row shape), #570 (rollup ordering), #651 (the group row that answers no focus request)
