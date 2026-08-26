@@ -19,10 +19,13 @@ fix(showcase): AUTH_TOKEN_SECRET falls back to a published default with no produ
 
 ## Status / next
 
-- Current step: the published defaults are withheld when `NODE_ENV=production`,
-  so the parse fails by name instead of signing tokens with a repo-readable
-  string. Same treatment for `AUTH_DEMO_PASSWORD_HASH`; `AUTH_DEMO_EMAIL` keeps
-  its default. Guard proved to fire — neutralising it fails exactly the three
-  tests that assert it.
+- Current step: the published defaults apply only where `NODE_ENV` is
+  `development` or `test`, so the parse fails by name everywhere else instead of
+  signing tokens with a repo-readable string. Testing the permitted values rather
+  than `production` is the point: review round 1 found that guarding
+  `production` alone left an unset `NODE_ENV` (what `node build/server/index.js`
+  starts with) and `staging` still getting the published secret back. Same
+  treatment for `AUTH_DEMO_PASSWORD_HASH`; `AUTH_DEMO_EMAIL` keeps its default.
+  Guard proved to fire — neutralising it fails exactly the tests that assert it.
 - Blockers: none
 - Next: review rounds on #972, then merge.

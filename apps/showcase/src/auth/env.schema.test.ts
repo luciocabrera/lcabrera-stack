@@ -10,21 +10,33 @@ const PRODUCTION_ENV = {
 };
 
 describe('readAuthEnvConfig', () => {
-  it('applies dev defaults when nothing is set', () => {
-    const config = readAuthEnvConfig({ env: {} });
+  it('applies dev defaults in development', () => {
+    const config = readAuthEnvConfig({ env: { NODE_ENV: 'development' } });
 
     expect(config.AUTH_DEMO_EMAIL).toBe('demo@example.com');
     expect(config.AUTH_TOKEN_SECRET).toMatch(/dev-insecure/);
     expect(config.AUTH_DEMO_PASSWORD_HASH).toMatch(/^[0-9a-f]+:[0-9a-f]+$/);
   });
 
-  it('applies dev defaults in development', () => {
-    // Asserted separately from the absent case: `NODE_ENV` unset and
-    // `NODE_ENV=development` reach the same branch today, and a future guard
-    // written as `!== 'development'` would split them without failing anything.
-    const config = readAuthEnvConfig({ env: { NODE_ENV: 'development' } });
+  it('applies dev defaults under test', () => {
+    // Asserted separately from `development` because this is the mode the suite
+    // itself runs in: folding the two together would let a guard permitting only
+    // `development` pass here on the runner's env rather than on the code.
+    expect(
+      readAuthEnvConfig({ env: { NODE_ENV: 'test' } }).AUTH_TOKEN_SECRET,
+    ).toMatch(/dev-insecure/);
+  });
 
-    expect(config.AUTH_TOKEN_SECRET).toMatch(/dev-insecure/);
+  it('refuses every mode that is not development or test', () => {
+    // Why the guard tests the permitted values instead of `production`, pinned
+    // so it cannot quietly go back: an unset `NODE_ENV` is what
+    // `node build/server/index.js` starts with, and `staging` is nobody's
+    // development machine. Both once got the published secret handed back.
+    for (const NODE_ENV of [undefined, 'staging', 'Production', 'production']) {
+      expect(() => readAuthEnvConfig({ env: { NODE_ENV } })).toThrow(
+        /AUTH_TOKEN_SECRET must be set/,
+      );
+    }
   });
 
   it('honors provided overrides', () => {
@@ -32,6 +44,7 @@ describe('readAuthEnvConfig', () => {
       env: {
         AUTH_DEMO_EMAIL: 'ops@corp.test',
         AUTH_TOKEN_SECRET: 'prod-secret',
+        NODE_ENV: 'development',
       },
     });
 
@@ -44,7 +57,7 @@ describe('readAuthEnvConfig', () => {
       readAuthEnvConfig({
         env: { ...PRODUCTION_ENV, AUTH_TOKEN_SECRET: undefined },
       }),
-    ).toThrow(/AUTH_TOKEN_SECRET must be set when NODE_ENV=production/);
+    ).toThrow(/AUTH_TOKEN_SECRET must be set unless NODE_ENV is development/);
   });
 
   it('refuses to start in production without the demo password hash', () => {
@@ -52,7 +65,9 @@ describe('readAuthEnvConfig', () => {
       readAuthEnvConfig({
         env: { ...PRODUCTION_ENV, AUTH_DEMO_PASSWORD_HASH: undefined },
       }),
-    ).toThrow(/AUTH_DEMO_PASSWORD_HASH must be set when NODE_ENV=production/);
+    ).toThrow(
+      /AUTH_DEMO_PASSWORD_HASH must be set unless NODE_ENV is development/,
+    );
   });
 
   it('accepts production once both are supplied', () => {
