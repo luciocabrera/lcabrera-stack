@@ -4,9 +4,9 @@
 
 Architecture decisions for this repository.
 
-Numbers are unique across every ADR home in this repository, so a decision
-that spans two of them is still one record and no two homes can reuse a
-number.
+A number identifies exactly one ADR, and a retired one is never reissued:
+the next free number is the highest in use plus one, never the first gap,
+so a citation keeps pointing at the decision it was written against.
 
 Writing one: start from [`_TEMPLATE.md`](./_TEMPLATE.md)
 or run `npx repo-adr`, which takes the next free number for you.

@@ -1,5 +1,6 @@
 ---
 '@lcabrera/repo-standards': patch
+'@lcabrera/devkit': patch
 ---
 
 The generated ADR index now says something true for the number of homes the
@@ -16,3 +17,7 @@ first gap.
 
 `renderIndex` gains an optional `homeCount` option defaulting to the configured
 register, so every existing caller renders exactly as before.
+
+`@lcabrera/devkit`'s seeded `docs/decisions/README.md` is regenerated to match,
+so a freshly initialised repository's index does not fail its own `adr:verify` on
+the first run.

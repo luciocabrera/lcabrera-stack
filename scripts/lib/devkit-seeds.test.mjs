@@ -195,11 +195,21 @@ describe('every exemption names where it is tracked', () => {
 
 describe('the seeded decision index', () => {
   it('is byte-identical to what the gate generates for a default home', () => {
+    // Both the home AND the count come from DEFAULT_REGISTERS, deliberately.
+    // This asset is what a repository with no config of its own receives, so it
+    // has to match what the gate renders THERE. Letting the count fall through
+    // to this repository's register would compare the seed against whatever
+    // `adrHomes` happens to hold here, and the seed would drift the day someone
+    // declared a second home locally.
     const seeded = readFileSync(
       join(REPO_ROOT, 'packages/devkit/assets/decisions/README.md'),
       'utf8',
     );
-    expect(seeded).toBe(renderIndex(DEFAULT_REGISTERS.adrHomes[0]));
+    expect(seeded).toBe(
+      renderIndex(DEFAULT_REGISTERS.adrHomes[0], {
+        homeCount: DEFAULT_REGISTERS.adrHomes.length,
+      }),
+    );
   });
 });
 
