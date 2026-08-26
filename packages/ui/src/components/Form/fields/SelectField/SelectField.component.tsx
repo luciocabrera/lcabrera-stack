@@ -50,7 +50,7 @@ export const SelectField = <TValues extends Record<string, unknown>>({
         selected={selected}
       />
       {/* VirtualSelect has no native form input — mirror the selection into
-          hidden inputs so RR7's <Form>/fetcher.Form submits real FormData. */}
+          hidden inputs so React Router's <Form>/fetcher.Form submits real FormData. */}
       {selected.map((selectedValue) => (
         <input
           key={selectedValue}

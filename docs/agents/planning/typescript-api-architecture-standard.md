@@ -2,7 +2,7 @@
 
 > **Status:** Advisory standard, adapted from the framework-agnostic blueprint in
 > [`.github/skills/typescript-api-engineering/generic-architecture-standards.md`](../../../.github/skills/typescript-api-engineering/generic-architecture-standards.md)
-> to this repo's actual architecture: React Router 7 framework mode (SSR,
+> to this repo's actual architecture: React Router framework mode (SSR,
 > loaders/actions), the public `@lcabrera/{ui,api,server,utils}` packages, and the
 > runtime split (browser-safe `api` vs Node-only `server`). Where this edition and
 > the blueprint disagree, **this edition wins for code in this repo** — the
@@ -14,7 +14,7 @@
 
 The blueprint prescribes a classic
 `Router → Middleware → Validation → Controller → UseCase → Domain → RepositoryInterface → PostgresRepository`
-ladder. In React Router 7 framework mode, the framework **collapses** several of
+ladder. In React Router framework mode, the framework **collapses** several of
 those rungs:
 
 - **Router + Controller** = the route module's `loader`/`action`.
@@ -45,7 +45,7 @@ executors → pg`. `config/` (domain) has no downward dependency. The `.server/`
    uses `withTransaction` on a single `PoolClient`.
 6. **Domain invariants live in pure functions**, tested in isolation, client-safe.
 7. **Anything crossing the loader/action boundary is plain serializable data.**
-   RR7 single-fetch silently replaces functions with `undefined` — no class
+   React Router single-fetch silently replaces functions with `undefined` — no class
    instances with methods may be returned to the client.
 8. **Public-package discipline holds.** The four `@lcabrera/*` packages never
    baseline, scope, or inline-disable a finding; a new subpath is added to both

@@ -10,7 +10,7 @@ paths:
   ]
 ---
 
-# Data Layer — React Router 7
+# Data Layer — React Router framework mode
 
 > For full framework-mode patterns (route modules, forms, navigation, pending/optimistic UI, sessions), invoke the `react-router-framework-mode` skill.
 
