@@ -30,8 +30,11 @@ const home = (dir, filenames) => ({
   })),
 });
 
-const findings = ({ drafts = [], homes = [], strays = [] }) =>
-  adrFindings({ drafts, homes, strays });
+// `grandfathered` is forwarded WITHOUT a default here on purpose: passing
+// `undefined` lets `adrFindings` fall back to the configured register, so a test
+// that omits it exercises the real config rather than a fixture.
+const findings = ({ drafts = [], grandfathered, homes = [], strays = [] }) =>
+  adrFindings({ drafts, grandfathered, homes, strays });
 
 describe('parseAdrFilename', () => {
   it('reads the number and slug from a well-formed name', () => {
@@ -100,6 +103,35 @@ describe('adrFindings', () => {
         ],
       }),
     ).toHaveLength(1);
+  });
+
+  // This repository grandfathers nothing, so these two drive the register with a
+  // synthetic set. Without them the `> 2` branch has no coverage at all and can be
+  // deleted with the suite still green — and it is live behaviour for a consumer
+  // that declares its own overlaps, not dead code.
+  it('passes a grandfathered number used exactly twice', () => {
+    expect(
+      findings({
+        grandfathered: new Set([5]),
+        homes: [
+          home('docs/decisions', ['ADR-005-a.md']),
+          home('apps/showcase/docs/decisions', ['ADR-005-b.md']),
+        ],
+      }),
+    ).toEqual([]);
+  });
+
+  it('fails a grandfathered number used a third time', () => {
+    const result = findings({
+      grandfathered: new Set([5]),
+      homes: [
+        home('docs/decisions', ['ADR-005-a.md', 'ADR-005-c.md']),
+        home('apps/showcase/docs/decisions', ['ADR-005-b.md']),
+      ],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toContain('ADR-005');
   });
 
   it('fails a numbered draft, which is how a number gets reserved but not owned', () => {

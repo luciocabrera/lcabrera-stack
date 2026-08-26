@@ -4,7 +4,7 @@
 
 ## ./adr-registry
 ADR_HOMES [const] any
-adrFindings [const] ({ drafts, homes, strays }: { drafts: any; homes: any; strays: any; }) => any[]
+adrFindings [const] ({ drafts, grandfathered, homes, strays, }: { drafts: any; grandfathered?: Set<any> | undefined; homes: any; strays: any; }) => any[]
 DRAFT_DIR [const] string
 headingNumber [const] (markdown: any) => number | undefined
 headingTitle [const] (markdown: any) => any

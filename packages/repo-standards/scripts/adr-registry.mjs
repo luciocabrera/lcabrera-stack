@@ -129,8 +129,16 @@ const homeFindings = (home, entries) =>
         ];
   });
 
-/** Every number used more than the taxonomy allows, with where it is used. */
-const duplicateFindings = (homes) => {
+/**
+ * Every number used more than the taxonomy allows, with where it is used.
+ *
+ * `grandfathered` is a parameter rather than a direct read of the module-level set
+ * so both branches stay reachable from a test. This repository declares none, so
+ * without the seam the `> 2` side would have no coverage at all and deleting it
+ * would keep the suite green — while remaining live behaviour for any consumer
+ * that declares its own overlaps.
+ */
+const duplicateFindings = (homes, grandfathered = GRANDFATHERED_DUPLICATES) => {
   const uses = new Map();
   for (const home of homes) {
     for (const entry of home.entries) {
@@ -144,7 +152,7 @@ const duplicateFindings = (homes) => {
   }
   return [...uses.entries()]
     .filter(([number, at]) =>
-      GRANDFATHERED_DUPLICATES.has(number) ? at.length > 2 : at.length > 1,
+      grandfathered.has(number) ? at.length > 2 : at.length > 1,
     )
     .map(
       ([number, at]) =>
@@ -178,10 +186,15 @@ const strayFindings = (strayPaths) =>
  *
  * `homes` is `{ dir, entries: [{ filename, headingNumber }] }` per home.
  */
-export const adrFindings = ({ drafts, homes, strays }) => [
+export const adrFindings = ({
+  drafts,
+  grandfathered = GRANDFATHERED_DUPLICATES,
+  homes,
+  strays,
+}) => [
   ...strayFindings(strays),
   ...homes.flatMap((home) => homeFindings(home, home.entries)),
-  ...duplicateFindings(homes),
+  ...duplicateFindings(homes, grandfathered),
   ...draftFindings(drafts),
 ];
 
