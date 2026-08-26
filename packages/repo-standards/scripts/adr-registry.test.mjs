@@ -55,15 +55,16 @@ describe('parseAdrFilename', () => {
 });
 
 describe('adrFindings', () => {
-  it('passes the one surviving overlap, twice each', () => {
-    expect(
-      findings({
-        homes: [
-          home('docs/decisions', ['ADR-005-a.md']),
-          home('apps/showcase/docs/decisions', ['ADR-005-b.md']),
-        ],
-      }),
-    ).toEqual([]);
+  it('rejects the last overlap once the register empties, 005 included', () => {
+    const result = findings({
+      homes: [
+        home('docs/decisions', ['ADR-005-a.md']),
+        home('apps/showcase/docs/decisions', ['ADR-005-b.md']),
+      ],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toContain('ADR-005');
   });
 
   it('rejects a number the shrinking set no longer grandfathers', () => {
@@ -90,7 +91,7 @@ describe('adrFindings', () => {
     expect(result[0]).toContain('ADR-047');
   });
 
-  it('fails a grandfathered number used a third time', () => {
+  it('fails a number used three times, in one home or across two', () => {
     expect(
       findings({
         homes: [
@@ -205,12 +206,24 @@ describe('looksLikeAdr', () => {
 
 describe('renderIndex', () => {
   it('links the template relative to the home it renders', () => {
-    const [repo, app] = ADR_HOMES;
+    const [repo] = ADR_HOMES;
 
     expect(renderIndex(repo)).toContain('](./_TEMPLATE.md)');
-    expect(renderIndex(app)).toContain(
-      '](../../../../docs/decisions/_TEMPLATE.md)',
-    );
+  });
+
+  it('links the template up out of a nested home', () => {
+    // No nested home is configured today — the showcase app's closed when its
+    // ADRs were filed against what they govern. The depth arithmetic still has
+    // to work, because `adrHomes` is config and a repo consuming
+    // `@lcabrera/repo-standards` can declare one.
+    expect(
+      renderIndex({
+        blurb: 'A nested home.',
+        dir: 'apps/showcase/docs/decisions',
+        tier: 'app',
+        title: 'Nested',
+      }),
+    ).toContain('](../../../../docs/decisions/_TEMPLATE.md)');
   });
 
   it('names nothing a repository generating its first index would not have', () => {

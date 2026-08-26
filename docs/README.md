@@ -49,23 +49,28 @@ Start here when you're not sure where something belongs, or where to look.
 
 ---
 
-## ADRs: two homes, one number sequence
+## ADRs: one home, one number sequence
 
-The home is chosen by **scope — is this a decision about the repository and what
-it ships, or about the showcase app's own internals?** The one sequence across
-both homes is [ADR-048](./decisions/ADR-048-adr-taxonomy-and-one-sequence.md);
-that ADR's own table still lists the third home it was written under, so
-`ADR_HOMES` in
-[`adr-registry.mjs`](../packages/repo-standards/scripts/adr-registry.mjs) — which
+Every ADR lives in [`docs/decisions/`](./decisions/) — the repo, the published
+`@lcabrera/*` packages, and the toolchain. The one sequence is
+[ADR-048](./decisions/ADR-048-adr-taxonomy-and-one-sequence.md); that ADR's own
+table still lists the homes it was written under, so `adrHomes` in
+[`devkit.config.json`](../devkit.config.json) — read by
+[`adr-registry.mjs`](../packages/repo-standards/scripts/adr-registry.mjs), which
 `vp run adr:verify` enforces — is the live set.
 
-| Home                                                                | Holds                                                                   |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [`docs/decisions/`](./decisions/)                                   | the repo, the published `@lcabrera/*` packages, the toolchain           |
-| [`apps/showcase/docs/decisions/`](../apps/showcase/docs/decisions/) | the showcase app — Modal, Tooltip, the store pattern, grid interaction… |
+Two other homes existed and are gone: one left with a second product, and the
+showcase app's own home closed once its ADRs were read against what they
+actually govern. Eleven of them documented code in `packages/ui` — Modal,
+Tooltip, the `useRef` store, barrel boundaries, the sort tiebreaker, the filter
+descriptors, the cookie primitive, the grid interaction architecture — and moved
+here keeping their numbers. The two that were genuinely about the app were
+deleted, their live content folded into the docs that own it
+([`apps/showcase/docs/data-sources.md`](../apps/showcase/docs/data-sources.md)
+for how the showcase gets its rows, AGENTS.md Rule 2 for StyleX).
 
-A third home existed while a second product lived here, and left with it. That
-is why an old ADR may cite a number which now resolves in only one place.
+That is why an old ADR may cite a number, or a path, that now resolves somewhere
+else. The number is the stable part.
 
 ### An ADR names no product but this one
 

@@ -72,10 +72,11 @@ lives at the root only.
 
 **An ADR is a dated record.** A superseded ADR naming deleted code, or an ADR
 naming the path it renamed away from, is correct — not drift. `docs/decisions/`
-and `apps/showcase/docs/decisions/` are two homes on **one** number sequence
-(ADR-048); `005` predates it and still means two things, so cite that pair with
-its path. A third home left the repo with a second product, which is why an old
-ADR may cite a number that now resolves only once.
+is now the only home, on **one** number sequence (ADR-048), and no number is
+grandfathered to mean two things any more. Two other homes have closed — one
+left with a second product, one when the showcase app's ADRs were filed against
+what they actually govern — which is why an old ADR may cite a number, or a
+path, that now resolves elsewhere.
 
 `AGENTS.md` is the real file; `CLAUDE.md` is a symlink to it. Fixes go in
 `AGENTS.md`.

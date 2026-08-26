@@ -187,6 +187,4 @@ One case, and it is documented rather than fixed here: sorting
 `wide_alltypes_150.c_018` (`point`). The external endpoint answers `400` and the
 route renders its error boundary; the self-hosted one drops the unorderable term
 and answers a normal page ordered by the fallback key. The column's header is
-clickable either way. Full table of both responses, and why the fix belongs in
-its own change, in
-[that route's ARCHITECTURE.md](../src/routes/wide-alltypes-150/ARCHITECTURE.md).
+clickable either way.

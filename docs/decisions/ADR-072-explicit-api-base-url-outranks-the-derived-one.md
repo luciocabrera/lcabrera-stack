@@ -7,8 +7,10 @@
 - **Issue:** #705 (found on PR #701 / #687)
 - **Relates to:** [ADR-038](./ADR-038-public-package-topology-by-runtime.md)
   (`@lcabrera/api` is the browser-safe package),
-  [ADR-070](../../apps/showcase/docs/decisions/ADR-070-showcase-serves-its-own-table-rows.md)
-  (which rejected this change as the wrong home, and is amended by it)
+  and the showcase's self-hosting decision, which rejected this change as the
+  wrong home and is amended by it (that ADR has since been deleted — its live
+  content is
+  [`apps/showcase/docs/data-sources.md`](../../apps/showcase/docs/data-sources.md))
 
 ## Context
 
@@ -98,9 +100,13 @@ no query for the first — `getApiBaseUrl` always returns a string.
   byte-identical to the fallback, so it exercises the branch without
   discriminating it. It is kept for convenience and `docs/data-sources.md` says
   plainly what it cannot show.
-- **ADR-070 is amended, not superseded.** What it decided — the showcase
-  self-hosts, `VITE_API_URL` is an opt-in build-time override — is untouched; only
-  its rejected alternative and the two utils it named have moved.
+- **The showcase's self-hosting decision is amended, not superseded.** What it
+  decided — the showcase self-hosts, `VITE_API_URL` is an opt-in build-time
+  override — is untouched; only its rejected alternative and the two utils it
+  named have moved. That ADR was later deleted as app-only, and what still
+  governs lives in
+  [`apps/showcase/docs/data-sources.md`](../../apps/showcase/docs/data-sources.md),
+  which carries the build-time trap in more detail than the ADR did.
 
 ## Alternatives considered
 
@@ -133,5 +139,5 @@ reasoning does not improve with age, and the blast radius only grows.
 - The paired stub-server probe that establishes the behaviour in a real build
   (which host each build reaches, with a live server at both addresses) is in the
   PR for #705
-- [ADR-070](../../apps/showcase/docs/decisions/ADR-070-showcase-serves-its-own-table-rows.md)
-  — amended by this decision
+- [`apps/showcase/docs/data-sources.md`](../../apps/showcase/docs/data-sources.md)
+  — the live doc for what this decision amends

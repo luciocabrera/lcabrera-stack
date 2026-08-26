@@ -68,7 +68,7 @@ owns the DDL for every table it queries and seeds itself — see
 
 ## Auth (`src/auth/`)
 
-Self-contained, server-only auth for the secured-routes showcase. See [`src/auth/ARCHITECTURE.md`](auth/ARCHITECTURE.md) for the full flow and file map.
+Self-contained, server-only auth for the secured-routes showcase.
 
 | Artifact                                  | Location                         | Description                                                                                                                                                                                    |
 | ----------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
