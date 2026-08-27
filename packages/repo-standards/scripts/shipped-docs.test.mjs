@@ -10,8 +10,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  corpusProblem,
   documentFindings,
+  emptyCorpusProblems,
   packageFindings,
   proseLines,
   rosterProblem,
@@ -106,6 +106,30 @@ describe('a path only the author repository has', () => {
     expect(findingsFor({ text: 'Wrap it in `try/catch`.' })).toEqual([]);
   });
 
+  it('leaves a roster-anchored path the package itself ships alone', () => {
+    // `scripts/` is in the default roster AND in the `files` of the two `.mjs`
+    // packages, so their own READMEs name files that do arrive in the install.
+    // Judging by the first path segment alone reported those, and the only way
+    // to satisfy such a finding is to delete accurate documentation.
+    expect(
+      findingsFor({
+        files: ['scripts/verify-pr.mjs'],
+        text: 'The gate is `scripts/verify-pr.mjs`.',
+      }),
+    ).toEqual([]);
+  });
+
+  it('still reports a sibling path under the same directory that is not shipped', () => {
+    expect(
+      findingsFor({
+        files: ['scripts/verify-pr.mjs'],
+        text: 'The gate is `scripts/verify-inventory.mjs`.',
+      }),
+    ).toEqual([
+      expect.stringContaining('names `scripts/verify-inventory.mjs`'),
+    ]);
+  });
+
   it('leaves an example inside a fenced block alone', () => {
     expect(
       findingsFor({
@@ -184,6 +208,10 @@ describe('packageFindings', () => {
       packageFindings({ ...packed, files: ['package.json'] }).documents,
     ).toEqual([]);
   });
+
+  it('carries the package name, so the empty case can be named', () => {
+    expect(packageFindings(packed).name).toBe('@scope/thing');
+  });
 });
 
 describe('the two refusals', () => {
@@ -196,7 +224,27 @@ describe('the two refusals', () => {
   });
 
   it('refuses a corpus that holds no document', () => {
-    expect(corpusProblem(0)).toContain('read nothing');
-    expect(corpusProblem(1)).toBeUndefined();
+    expect(
+      emptyCorpusProblems([{ documents: [], name: '@scope/thing' }]),
+    ).toEqual([expect.stringContaining('@scope/thing ships no document')]);
+    expect(
+      emptyCorpusProblems([{ documents: ['README.md'], name: '@scope/thing' }]),
+    ).toEqual([]);
+  });
+
+  it('asks it PER PACKAGE, so nine healthy neighbours cannot cover one', () => {
+    // The reachable regression, and the one a sum hides. `@lcabrera/ui`'s whole
+    // shipped corpus is its root README: lose it and the roster total moves by
+    // one while that package installs nothing readable at all. A total can only
+    // reach zero if every package loses its README at once, which npm's
+    // always-include-the-README behaviour puts out of reach — so the aggregate
+    // guarded a state it could not observe.
+    expect(
+      emptyCorpusProblems([
+        { documents: ['README.md'], name: '@scope/fine' },
+        { documents: [], name: '@scope/empty' },
+        { documents: ['README.md', 'GUIDE.md'], name: '@scope/rich' },
+      ]),
+    ).toEqual([expect.stringContaining('@scope/empty ships no document')]);
   });
 });

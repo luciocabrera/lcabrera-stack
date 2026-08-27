@@ -60,8 +60,8 @@ is the inverted question for a published artifact: a link can resolve perfectly
 here and point at nothing in the install. `vp run shipped-docs:verify` is the
 check that asks the right one — it packs each public package and reads the
 markdown back out of the tarball, so `files` decides its corpus rather than the
-working tree, and it refuses both an empty package roster and a corpus of no
-documents rather than reporting a pass over nothing.
+working tree, and it refuses both an empty package roster and any single package
+that ships no readable document rather than reporting a pass over nothing.
 
 What made it declarable `met` rather than merely wired: each of its four rules
 was shown failing on a planted violation in a real shipped README and passing on
@@ -76,8 +76,9 @@ the README states what a consumer needs and links the rest by absolute URL.
 
 **Why this persona, on a requirement that covers both lines.** `packages` names
 the whole published roster — toolchain and application stack alike, because the
-gate reads every tarball — so either persona would be well-formed here — which is precisely why the register's tie-breaker is the
-failure list rather than the package roster. A document that ships broken fails
+gate reads every tarball — so either persona would be well-formed here, which is
+precisely why the register's tie-breaker is the failure list rather than the
+package roster. A document that ships broken fails
 hardest for the repository maintainer: the registry page is where they evaluate
 the toolchain **before** adopting it, so a dead link there costs them the
 decision itself, and it is their agents that act on a shipped document without

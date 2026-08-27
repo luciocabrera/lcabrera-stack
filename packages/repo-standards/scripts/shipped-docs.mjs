@@ -127,15 +127,28 @@ const linkFindings = ({ docPath, holds, lines }) =>
     });
 
 /**
- * A token anchored at a directory only the repository that wrote the document
- * has. The roster arrives from the caller because it is the author
- * repository's layout, and it is the precision mechanism rather than a detail:
- * it is what separates `docs/decisions/` from `try/catch`.
+ * A token anchored at a directory the roster names, and NOT shipped by the
+ * package that named it.
+ *
+ * Both halves are load-bearing, and the second one is the half that keeps this
+ * rule honest. The roster is the author repository's layout, so it is the
+ * precision mechanism that separates `docs/decisions/` from `try/catch` — but a
+ * roster entry can also be a directory the package genuinely ships:
+ * `@lcabrera/repo-standards` and `@lcabrera/devkit` both put `scripts/` in
+ * `files`, so a README of theirs naming `scripts/verify-pr.mjs` is naming a
+ * file that arrives in the install. Judging by the first path segment alone
+ * reported that as unreachable, and the only way to satisfy such a finding is
+ * to delete accurate documentation — which is precisely the noise reputation
+ * this module's header says the gate must not earn.
+ *
+ * So `holds` decides it, from the packed file list: a path the tarball carries
+ * is by construction not a path only the author has.
  */
-const repoAnchored = (token, repoOnlyDirs) =>
+const repoAnchored = ({ holds, repoOnlyDirs, token }) =>
   !isUnresolvable(token) &&
   token.includes('/') &&
-  repoOnlyDirs.includes(token.split('/')[0]);
+  repoOnlyDirs.includes(token.split('/')[0]) &&
+  !holds(token.endsWith('/') ? token.slice(0, -1) : token);
 
 /**
  * Backticked tokens and link targets naming the author's own tree.
@@ -143,8 +156,18 @@ const repoAnchored = (token, repoOnlyDirs) =>
  * Reported once per token: a document that names one directory in fifteen
  * places has one thing to fix, and fifteen lines saying so buries the other
  * fourteen findings.
+ *
+ * A path in BARE PROSE is deliberately not a candidate — only inline code and
+ * link targets are. That is the documented-path gate's trade, taken here for
+ * the same reason: resolving every `word/word` in a sentence is what produced
+ * its ~830 hits, most of them conventions rather than paths, and a gate that
+ * cries wolf gets bypassed. The cost is real and bounded — a shipped document
+ * can name `docs/decisions` in running text and go unreported — and it is worth
+ * paying only while the corpus does not do it. Widening this is safe; check the
+ * shipped corpus first, because a rule that reports a teaching placeholder
+ * costs more than the one instance it catches.
  */
-const repoPathFindings = ({ docPath, lines, repoOnlyDirs }) => {
+const repoPathFindings = ({ docPath, holds, lines, repoOnlyDirs }) => {
   const candidates = lines.flatMap(({ number, text }) =>
     [
       ...inlineCodeTokens(text),
@@ -155,7 +178,9 @@ const repoPathFindings = ({ docPath, lines, repoOnlyDirs }) => {
   const seen = new Set();
   const findings = [];
   for (const { number, token } of candidates) {
-    if (!repoAnchored(token, repoOnlyDirs) || seen.has(token)) continue;
+    if (seen.has(token) || !repoAnchored({ holds, repoOnlyDirs, token })) {
+      continue;
+    }
     seen.add(token);
     findings.push(
       `${docPath}:${number} names \`${token}\`, a path only the repository this was written in has`,
@@ -191,7 +216,7 @@ export const documentFindings = ({ docPath, holds, repoOnlyDirs, text }) => {
   const lines = proseLines(text);
   return [
     ...linkFindings({ docPath, holds, lines }),
-    ...repoPathFindings({ docPath, lines, repoOnlyDirs }),
+    ...repoPathFindings({ docPath, holds, lines, repoOnlyDirs }),
     ...citationFindings({ docPath, lines }),
   ];
 };
@@ -233,6 +258,9 @@ export const packageFindings = ({ files, name, readFile, repoOnlyDirs }) => {
 
   return {
     documents,
+    // Carried through so the caller can refuse an empty corpus BY PACKAGE
+    // without re-deriving which package a result came from.
+    name,
     findings: documents.flatMap((docPath) =>
       documentFindings({
         docPath,
@@ -259,14 +287,27 @@ export const rosterProblem = (publicPackageDirs) =>
     : undefined;
 
 /**
- * Why a corpus of nothing is refused.
+ * Every package that reached a consumer with nothing readable in it.
  *
- * The other half of the same property, and the reachable one: every package
- * could be declared and packed correctly while `files` ships no markdown from
- * any of them, and "every shipped document reads correctly" is trivially true
- * of a set with no documents in it.
+ * Asked per package, not over the roster, and the difference is the whole
+ * check. `@lcabrera/ui`'s entire shipped corpus is its root README — the
+ * `!src/**\/*.md` negation removes the rest and the changelog is an exempt
+ * dated record — so losing that one file leaves it installing no readable
+ * document at all. Summed across ten packages that regression moves the total
+ * from 32 to 31 and prints a pass; and the total can only reach zero if every
+ * package loses its README at once, which npm's always-include-the-README
+ * behaviour puts out of reach. An aggregate refusal therefore guards a state it
+ * cannot observe while the reachable one goes silently by.
+ *
+ * A package with no document is refused rather than skipped for the reason the
+ * whole gate exists: "every shipped document reads correctly" is trivially true
+ * of a package with no documents, and reads afterwards exactly like one that was
+ * checked.
  */
-export const corpusProblem = (documentCount) =>
-  documentCount === 0
-    ? 'no packed package shipped a document, so this gate read nothing — a documentation gate that reads no document reports the same clean pass as a correct one'
-    : undefined;
+export const emptyCorpusProblems = (packages) =>
+  packages
+    .filter(({ documents }) => documents.length === 0)
+    .map(
+      ({ name }) =>
+        `${name} ships no document a consumer could read, so nothing about what it installs was checked — a package whose corpus is empty passes every rule here for free`,
+    );

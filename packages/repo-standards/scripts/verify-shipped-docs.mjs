@@ -35,7 +35,7 @@ import { errorMessage } from './error-message.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 import { packAndRead } from './publish-pack.mjs';
 import {
-  corpusProblem,
+  emptyCorpusProblems,
   packageFindings,
   rosterProblem,
 } from './shipped-docs.mjs';
@@ -49,8 +49,11 @@ const REPO_ROOT = resolveHostRoot({
  * documents are wrong". Both exit 1, and conflating them is how "read nothing"
  * comes to read as "found nothing".
  */
-const refuse = (reason) => {
-  console.error(`Shipped-docs gate refused to report a pass: ${reason}.`);
+const refuse = (reasons) => {
+  console.error('Shipped-docs gate refused to report a pass:\n');
+  for (const reason of reasons) {
+    console.error(`  - ${reason}`);
+  }
   process.exitCode = 1;
 };
 
@@ -92,7 +95,7 @@ const main = () => {
   const { packagesDir, publicPackageDirs } = readPublishing(REPO_ROOT);
   const roster = rosterProblem(publicPackageDirs);
   if (roster !== undefined) {
-    refuse(roster);
+    refuse([roster]);
     return;
   }
 
@@ -103,16 +106,18 @@ const main = () => {
     repoOnlyDirs: shippedDocs.repoOnlyDirs,
   });
 
+  // Per package, not over the roster: a package that ships nothing readable is
+  // the reachable regression, and summing hides it behind its nine neighbours.
+  const empty = emptyCorpusProblems(results);
+  if (empty.length > 0) {
+    refuse(empty);
+    return;
+  }
+
   const documents = results.reduce(
     (total, result) => total + result.documents.length,
     0,
   );
-  const corpus = corpusProblem(documents);
-  if (corpus !== undefined) {
-    refuse(corpus);
-    return;
-  }
-
   const findings = results.flatMap((result) => result.findings);
   if (findings.length > 0) {
     reportFailure(findings);

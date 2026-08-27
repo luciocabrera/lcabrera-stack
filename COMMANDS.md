@@ -357,8 +357,10 @@ package, a link to a file `files` excluded, a path anchored at one of this
 repository's own directories, and a decision cited with no absolute URL on the
 line. Which directories count as this repository's is
 `gates.shippedDocs.repoOnlyDirs` in [`devkit.config.json`](devkit.config.json).
-It refuses an empty package roster and a corpus of no documents rather than
-reporting a pass over nothing. It needs no `dist/` — markdown is not built — so
+It refuses an empty package roster, and any single package that ships no
+readable document, rather than reporting a pass over nothing — asked per
+package, because `@lcabrera/ui`'s whole shipped corpus is its root README and a
+roster-wide total would hide losing it behind its nine neighbours. It needs no `dist/` — markdown is not built — so
 it runs beside `tarball:verify` rather than after `packages:build`.
 
 Run `packages:build` **before** `publish:verify`, `api-surface:verify` and

@@ -25,8 +25,8 @@ only way to see a negated pattern at all. It reports a relative link that leaves
 the package, a link to a file the package does not ship, a path anchored at one
 of the author repository's own directories (`gates.shippedDocs.repoOnlyDirs`,
 defaulting to the conventional monorepo layout), and a decision cited with no
-absolute URL on the line. An empty package roster and a corpus of no documents
-are refused rather than passed.
+absolute URL on the line. An empty package roster, and any package that ships no
+readable document, are refused rather than passed.
 
 The remaining published READMEs stop naming the repository's own tree in
 passing: the source directory each package lives in is now a link a reader can
