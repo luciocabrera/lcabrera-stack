@@ -1,3 +1,11 @@
+---
+kind: standard
+status: live
+recorded: 2026-07-25
+issues: []
+packages: [ui, api, server, utils, showcase]
+---
+
 # TypeScript API Architecture Standard (lcabreara Edition)
 
 > **Status:** Advisory standard, adapted from the framework-agnostic blueprint in

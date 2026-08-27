@@ -1,3 +1,11 @@
+---
+kind: charter
+status: live
+recorded: 2026-07-25
+issues: []
+packages: []
+---
+
 # ADR drafts
 
 Proposed decisions that have not been adopted. A draft is named by slug and holds
@@ -11,5 +19,10 @@ what keeps two adoptions in flight from conflicting
 ([ADR-075](../../../decisions/ADR-075-the-index-does-not-list-the-adrs.md)). The
 rule and the tier split are
 [ADR-048](../../../decisions/ADR-048-adr-taxonomy-and-one-sequence.md).
+
+A draft carries no planning frontmatter. The block on this page is here because
+it is a charter for a directory under `planning/`, and the
+[parent charter](../README.md) says why the drafts beside it are out of its
+scope.
 
 This directory is often empty — that is the healthy state, not a missing file.

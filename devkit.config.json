@@ -30,7 +30,6 @@
       ],
       "ignoredDocs": [
         "reports/",
-        "_PLAN.md",
         ".github/skills/react-router-framework-mode/",
         ".github/skills/store-pattern/references/architecture-templates/"
       ],

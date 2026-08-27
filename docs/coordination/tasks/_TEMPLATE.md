@@ -36,7 +36,10 @@ Fields:
            warns when two non-done tasks' areas intersect.
   started  YYYY-MM-DD
   updated  YYYY-MM-DD — bump this whenever you make progress; stale tasks are flagged
-  plan     optional pointer to out-of-git scratch (~/.claude/plans/<name>.md) or a *_PLAN.md
+  plan     optional pointer to the out-of-git scratch behind this work
+           (~/.claude/plans/<name>.md, .tmp/planning/<name>.md), or (none).
+           Which plan surface holds what, and for how long, is
+           docs/agents/planning/README.md.
   pr       PR number/URL once opened
   issue    REQUIRED — the GitHub backlog issue this work picks up (`#50` or an
            issues URL). Backlog/planning lives in GitHub Issues (ADR-036); this

@@ -1,7 +1,16 @@
+---
+kind: summary
+status: live
+recorded: 2026-08-11
+issues: ['#547', '#548', '#549']
+packages: [ui, server, showcase]
+---
+
 # Planning session — grid row grouping (2026-08)
 
-> **The backlog is on GitHub.** This is the dated synthesis of the session that
-> filed it, kept for the reasoning and the identifier map GitHub does not hold.
+> **The backlog is on GitHub.** This is a **dated record** — the synthesis of
+> the session that filed it, kept for the reasoning and the identifier map
+> GitHub does not hold.
 > Status, milestones, dependencies and acceptance criteria live on the issues —
 > that is what [ADR-036](../../decisions/ADR-036-github-planning-layer.md) makes
 > canonical, so nothing here restates them.

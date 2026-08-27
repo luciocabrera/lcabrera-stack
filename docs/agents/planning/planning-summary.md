@@ -1,10 +1,28 @@
+---
+kind: summary
+status: live
+recorded: 2026-07-25
+issues: ['#389', '#390', '#391', '#392', '#393']
+packages: [server, showcase]
+---
+
 # Planning session — `@lcabrera/server` persistence hardening (2026-07)
 
-> **The backlog is on GitHub.** This is the dated synthesis of the session that
-> produced it, kept for the reasoning GitHub does not hold. Status, milestones,
-> dependencies and acceptance criteria live on the issues themselves — that is
-> what [ADR-036](../../decisions/ADR-036-github-planning-layer.md) makes
-> canonical, so nothing here restates them.
+> **Amended 2026-08-27 — three of the five epics below have closed.** E-1
+> (#389), E-3 (#391) and E-4 (#392) were closed as of that date; E-2 (#390) and
+> E-5 (#393) were still open. "High-level direction" is therefore the ranking
+> this session **set and has since largely executed** — read it as what was
+> decided in 2026-07, not as what to do next. The epic table stays as written,
+> because resolving an old `P-07` reference to an issue number is the job that
+> outlives the work. Re-derive the state rather than trusting this paragraph:
+> `for n in 389 390 391 392 393; do gh issue view $n --json number,state,title; done`.
+
+> **The backlog is on GitHub.** This is a **dated record** — the synthesis of
+> the session that produced it, kept for the reasoning GitHub does not hold.
+> Status, milestones, dependencies and acceptance criteria live on the issues
+> themselves — that is what
+> [ADR-036](../../decisions/ADR-036-github-planning-layer.md) makes canonical, so
+> nothing here restates them.
 >
 > Orchestrator synthesis of a two-agent session (Systems Architect +
 > Implementation Engineer) over
