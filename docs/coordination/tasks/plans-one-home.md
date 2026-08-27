@@ -2,7 +2,7 @@
 id: plans-one-home
 title: Give plans one home, one shape, and a disposal rule
 owner: agent:claude
-status: active
+status: review
 branch: docs/987-plans-one-home
 area:
   - docs/agents/planning/**
@@ -23,6 +23,6 @@ Give plans one home, one shape, and a disposal rule
 
 ## Status / next
 
-- Current step: charter, frontmatter and the `*_PLAN.md` retirement are written; running the gate
+- Current step: pushed as #1007, gate green, awaiting review
 - Blockers: none
-- Next: commit, push, update the draft PR
+- Next: address review, then merge and delete this file
