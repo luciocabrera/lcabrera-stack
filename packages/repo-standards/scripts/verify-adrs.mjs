@@ -73,7 +73,7 @@ import {
   renderListing,
 } from './adr-registry.mjs';
 import { pad } from './adr-scaffold.mjs';
-import { readRegisters } from './config.mjs';
+import { CONFIG_FILE_NAME, readRegisters } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 import { deriveWorkspaceScopes } from './workspace-scopes.mjs';
 
@@ -281,8 +281,11 @@ const report = (findings, stale) => {
       `  - ${home.dir}/${INDEX_FILE} is out of date — run \`${commandsFor(home).write}\``,
     );
   }
+  // The rule itself, not a pointer to this repository's copy of it: a path
+  // printed into a consumer's terminal is one they cannot open, and there is no
+  // link for anything to catch — it just quietly does not exist.
   console.error(
-    '\nThe taxonomy is docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md.',
+    `\nEvery ADR lives in one of the declared homes and takes the next free number, and one number names one ADR across all of them. The homes are \`registers.adrHomes\` in ${CONFIG_FILE_NAME}.`,
   );
 };
 
