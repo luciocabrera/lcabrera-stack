@@ -12,10 +12,18 @@ export const tableGroupAggregateStyles = stylex.create({
     color: colors.textSecondary,
     opacity: 0.55,
   },
+  /**
+   * `justifyContent: inherit` rather than a value of its own: the container is `width: 100%`
+   * inside a flex `<td>`, so it fills the cell and the cell's own `justify-content` reaches
+   * nothing without this. Inheriting keeps the decision where the column's type is known —
+   * `getCellStyleProps` — instead of hardcoding `flex-end` here, which would right-align a
+   * measure and leave the em dash, the group key and the blanked cell wrong (#1018).
+   */
   container: {
     gap: spacing.xxs,
     alignItems: 'center',
     display: 'flex',
+    justifyContent: 'inherit',
     minWidth: 0,
     width: '100%',
   },

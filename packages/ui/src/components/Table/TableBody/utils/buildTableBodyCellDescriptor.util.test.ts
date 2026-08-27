@@ -5,6 +5,7 @@ import type {
   DataKey,
   PinnedColumnInfo,
   TableColumn,
+  TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
@@ -20,6 +21,33 @@ type RowKey = DataKey<Row>;
 
 const ROW_INDEX = 3;
 const ROW_KEY = 'pk:[3]';
+
+const SUMMARY: TableGroupRowSummary = {
+  aggregates: [{ columnKey: 'amount', fn: 'sum', value: '4200' }],
+  count: 2,
+  isSubtotal: false,
+  path: [{ columnKey: 'name', label: 'A', value: 'A' }],
+};
+
+/** Every field the three cases below do not vary. */
+const baseArgs = {
+  carriedGroupKeys: new Set<string>(),
+  columnSizing: {} as ColumnSizingState<Row>,
+  groupingKeys: [],
+  hasStructuralMarker: false,
+  isLoadingState: false,
+  pinnedOffsets: {} as Record<RowKey, PinnedColumnInfo>,
+  row: { amount: 42 },
+  rowIndex: ROW_INDEX,
+  rowKey: ROW_KEY,
+} as const;
+
+const MEASURE_COLUMN: TableColumn<Row> = {
+  dataType: 'currency',
+  key: 'amount',
+  label: 'Amount',
+  minWidth: 120,
+};
 
 describe('buildTableBodyCellDescriptor', () => {
   it('builds a default descriptor with column value', () => {
@@ -81,6 +109,7 @@ describe('buildTableBodyCellDescriptor', () => {
     expect(descriptor).toEqual({
       children: 'custom',
       columnKey: 'name',
+      dataType: undefined,
       isLoadingState: false,
       key: 'name',
       kind: 'custom',
@@ -91,6 +120,59 @@ describe('buildTableBodyCellDescriptor', () => {
       rowKey: ROW_KEY,
       width: 180,
     });
+  });
+
+  /**
+   * The three branches #1018 separates. All three produce `kind: 'custom'`, which is
+   * exactly why `kind` cannot answer the alignment question: only `dataType` distinguishes
+   * content the grid supplied from content the consumer did.
+   */
+  it('carries the column’s type onto a group row’s aggregate cell', () => {
+    const descriptor = buildTableBodyCellDescriptor({
+      ...baseArgs,
+      col: MEASURE_COLUMN,
+      groupSummary: SUMMARY,
+    });
+
+    expect(descriptor.kind).toBe('custom');
+    expect(descriptor.dataType).toBe('currency');
+  });
+
+  it('carries the column’s type onto a blanked group-key cell', () => {
+    // A detail row under a grouping blanks the columns it is grouped by. It renders
+    // nothing, so the class is invisible — and the cell still has to align like the rest
+    // of its column, because the em-dash and aggregate cases go through the same branch.
+    const descriptor = buildTableBodyCellDescriptor({
+      ...baseArgs,
+      col: MEASURE_COLUMN,
+      groupingKeys: ['amount'],
+    });
+
+    expect(descriptor.kind).toBe('custom');
+    expect(descriptor.dataType).toBe('currency');
+  });
+
+  it('carries no type onto a consumer’s own rendered cell', () => {
+    // The discriminating case: the column declares `currency` just as the group row's
+    // column above does, and the only difference is who produced the content. A
+    // consumer's `render()` output keeps the cell's default alignment.
+    const descriptor = buildTableBodyCellDescriptor({
+      ...baseArgs,
+      col: { ...MEASURE_COLUMN, render: () => 'consumer' },
+    });
+
+    expect(descriptor.kind).toBe('custom');
+    expect(descriptor.dataType).toBeUndefined();
+  });
+
+  it('carries no type onto the actions cell', () => {
+    const descriptor = buildTableBodyCellDescriptor({
+      ...baseArgs,
+      col: { key: 'actions', label: '' },
+    });
+
+    expect(descriptor.kind).toBe('custom');
+    expect(descriptor.dataType).toBeUndefined();
   });
 
   it('uses pinned offsets and empty string when row value is missing', () => {

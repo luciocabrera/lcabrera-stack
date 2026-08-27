@@ -175,3 +175,39 @@ Cell rendering is delegated to `TableBodyRows` using the
 - Width is resolved from `columnSizing[col.key]` or `col.minWidth`
 - `isLoadingState` is forwarded through the cell descriptor to each `<TableBodyCell>`
 - **SpacerRow** computes its own `colSpan` from `useGetPinnedColumnPartition()`
+
+## `dataType` travels on both descriptor branches, and it is not the discriminator
+
+`kind` tells the two branches apart. `dataType` is on both, answering a different
+question on each: on `default` it says how to **format** the value, and on
+`custom` the content is already rendered, so it says only how the cell
+**aligns**.
+
+That second job used to be inferred from `children !== undefined`, and the
+inference was wrong for half the cases. Every group-row cell comes back from
+`resolveStructuralCellChildren` — an aggregate, a group key, an em dash, a
+detail row's blanked key column — so every one of them took the branch written
+for a consumer's own `render()` output and skipped alignment outright. A currency
+total sat at the left edge of a column whose detail rows were all flush right
+(#1018).
+
+So the flag `TableBodyCell` acts on is now `isAlignedByDataType`, and the
+descriptor decides it by **stating the column's type or withholding it**:
+
+| Branch                                    | `dataType`     | Cell aligns by |
+| ----------------------------------------- | -------------- | -------------- |
+| Grid-supplied structural content          | `col.dataType` | the column     |
+| The `actions` column                      | `undefined`    | nothing        |
+| A consumer's `render()` output            | `undefined`    | nothing        |
+| An ordinary data cell (`kind: 'default'`) | `col.dataType` | the column     |
+
+`TableBodyCellCustomFields` declares `dataType` **required** for the same reason
+`hasStructuralMarker` is required: an optional field lets a new branch forget it
+and inherit the wrong default silently, which is the shape of the defect above.
+
+A cell's alignment class reaches a **flex child that fills it** only if that
+child asks — `TableGroupAggregate` and `TableGroupKeyCell` are `width: 100%`, so
+both set `justifyContent: 'inherit'` rather than a value of their own. Hardcoding
+`flex-end` in either would move the type decision into a component that does not
+own the column, and would align the measures while leaving the em dash and the
+blanked cells behind.

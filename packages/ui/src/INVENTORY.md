@@ -192,13 +192,13 @@ Ergonomic builders for the `fields` tree, exported from `@lcabrera/ui/components
 
 ### `src/components/Table/TableBody/utils/`
 
-| Function                       | Location                                                                 | Description                                                                          |
-| ------------------------------ | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| `buildTableBodyCellDescriptor` | `components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.tsx` | Derives render-ready body-cell descriptor data from column + row                     |
-| `createRenderTableBodyCell`    | `components/Table/TableBody/utils/createRenderTableBodyCell.util.ts`     | Creates bound row-cell renderer from sizing/pinning + descriptor util                |
-| `generatePlaceholderData`      | `components/Table/TableBody/utils/generatePlaceholderData.util.ts`       | Builds empty placeholder rows keyed by visible columns                               |
-| `renderFromDescriptor`         | `components/Table/TableBody/utils/renderFromDescriptor.util.ts`          | Renders a `TableBodyCell` element from a built cell descriptor                       |
-| `renderTableBodyPinnedGroup`   | `components/Table/TableBody/utils/renderTableBodyPinnedGroup.util.ts`    | Maps one pinning partition (left/center/right) through the shared body-cell renderer |
+| Function                       | Location                                                                 | Description                                                                                                                                                                                                                            |
+| ------------------------------ | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `buildTableBodyCellDescriptor` | `components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.tsx` | Derives render-ready body-cell descriptor data from column + row. Carries the column's `dataType` on **both** branches — grid-supplied group-row content aligns by it, a consumer's `render()` output withholds it and stays unaligned |
+| `createRenderTableBodyCell`    | `components/Table/TableBody/utils/createRenderTableBodyCell.util.ts`     | Creates bound row-cell renderer from sizing/pinning + descriptor util                                                                                                                                                                  |
+| `generatePlaceholderData`      | `components/Table/TableBody/utils/generatePlaceholderData.util.ts`       | Builds empty placeholder rows keyed by visible columns                                                                                                                                                                                 |
+| `renderFromDescriptor`         | `components/Table/TableBody/utils/renderFromDescriptor.util.ts`          | Renders a `TableBodyCell` element from a built cell descriptor                                                                                                                                                                         |
+| `renderTableBodyPinnedGroup`   | `components/Table/TableBody/utils/renderTableBodyPinnedGroup.util.ts`    | Maps one pinning partition (left/center/right) through the shared body-cell renderer                                                                                                                                                   |
 
 ### `src/components/Table/TableBodyRows/utils/` _(private delegates)_
 

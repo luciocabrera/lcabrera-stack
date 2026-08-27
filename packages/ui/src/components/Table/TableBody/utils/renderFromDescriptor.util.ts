@@ -16,6 +16,7 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
       TableBodyCell,
       {
         columnKey: descriptor.columnKey,
+        dataType: descriptor.dataType,
         isLoadingState: descriptor.isLoadingState,
         key: descriptor.key,
         label: descriptor.label,
