@@ -235,16 +235,22 @@ export const blockFindings = ({ markdown, workspaces }) => {
 };
 
 /**
- * A `##` heading and its title. The title is captured greedily to end of line
- * and trimmed in code rather than matched with a lazy group between two
- * whitespace classes: that shape backtracks super-linearly on a long run of
- * spaces (Sonar S8786, measured quadratic before this), and it bought nothing
- * `trim` does not.
+ * A `##` heading and its title.
+ *
+ * The title group is required to START with a non-space, which is what keeps
+ * this linear: the run of spaces after `##` and the title itself must not both
+ * be able to match the same character, or the engine has a choice at every space
+ * and backtracks super-linearly over a long run of them (Sonar S8786; the first
+ * spelling here measured quadratic). Trailing spaces are left to `trim`, where
+ * there is no second quantifier to be ambiguous with.
+ *
+ * The group is optional so that `##` followed by nothing but spaces still parses
+ * — it yields no title, and the caller treats that as not a heading.
  *
  * `###` does not match, because the character after `##` must be a space or a
  * tab — so a subsection stays part of the section it sits in.
  */
-const SECTION = /^##[ \t]+(.*)$/;
+const SECTION = /^##[ \t]+([^ \t].*)?$/;
 const TITLE = /^#[ \t]+/;
 /**
  * An HTML comment, INCLUDING an unterminated one, which runs to the end of the
@@ -270,7 +276,8 @@ export const sectionsOf = (body) => {
   let open;
   for (const line of body.replaceAll(COMMENT, '').split('\n')) {
     const heading = SECTION.exec(line);
-    const title = heading === null ? '' : heading[1].trim().toLowerCase();
+    const title =
+      heading === null ? '' : (heading[1] ?? '').trim().toLowerCase();
     if (title !== '') {
       open = title;
       sections.set(open, []);
