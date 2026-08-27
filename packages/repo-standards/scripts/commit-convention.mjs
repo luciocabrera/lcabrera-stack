@@ -135,7 +135,7 @@ const DEPENDENCIES_BLOCK = /^[ \t]*dependencies:/im;
 const dependencyErrors = (body) => {
   if (!DEPENDENCIES_BLOCK.test(body)) {
     return [
-      `Issue description is missing the \`dependencies:\` block required under \`## Planning Metadata\` — it needs ${DEPENDENCY_KEYS.map((key) => `\`${key}\``).join(', ')}, and an empty answer counts.`,
+      `Issue description is missing the \`dependencies:\` block required under \`## Planning Metadata\` — it needs all four keys (${DEPENDENCY_KEYS.join(', ')}), and an empty answer counts.`,
     ];
   }
   return DEPENDENCY_KEYS.filter(

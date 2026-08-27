@@ -153,10 +153,13 @@ npx repo-verify-adrs --adopt   # write the baseline once, from today's failures
 npx repo-verify-adrs --write   # regenerate the index
 ```
 
-`--adopt` refuses a baseline that already exists, so it is safe to run blind and
-is not a way to absorb later failures — it is the one-time step, and afterwards
-only NEW records are held to the content rules. `--write` prunes the baseline as
-you classify records, and never adds to it.
+`--adopt` refuses to overwrite a baseline that is already there, so running it
+blind either writes the first one or fails; afterwards only NEW records are held
+to the content rules. It is not a claim that nothing can grandfather afresh —
+deleting the file and adopting again is an ordinary thing to be able to do, and
+what holds either way is the bound: at most `maxEntries` records escape the
+content rules. `--write` prunes the baseline as you classify records, and never
+adds to it.
 
 Each `publicPackageDirs` entry is a **directory name under `packagesDir`** —
 `ui`, not `packages/ui`. Spelling it the second way is a valid repo-relative

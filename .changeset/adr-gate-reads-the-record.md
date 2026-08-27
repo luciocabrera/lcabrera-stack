@@ -22,8 +22,11 @@ first run each one fails on `no metadata block` and on whichever sections it
 lacks. `repo-verify-adrs --adopt` writes the baseline once from exactly those
 failures, grandfathering them; `repo-verify-adrs --write` then regenerates the
 index. After that the gate is green, and only NEW records are held to the rules.
-`--adopt` refuses a baseline that already exists, so it is safe to run blind and
-cannot be used to absorb later failures.
+`--adopt` refuses to overwrite a baseline that is already there, so running it
+blind either writes the first one or fails — it will not quietly replace yours.
+That is not a claim that nothing can grandfather afresh: deleting the file and
+adopting again is an ordinary thing to be able to do. What holds either way is
+the bound above.
 
 Records written before the block are grandfathered in that baseline rather than
 edited into shape. The gate guarantees one thing about it: the list

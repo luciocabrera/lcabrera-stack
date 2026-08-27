@@ -145,9 +145,10 @@ export const prunedBaseline = ({ baseline, records }) => {
  * The baseline a repository adopting the gate starts from: everything failing
  * today, and a bound at exactly that many.
  *
- * Written once and never again — the caller refuses to overwrite an existing
- * file, because a second adoption is exactly the "absorb today's failures"
- * command this contract exists to not have.
+ * The caller refuses to overwrite an existing file, so a second `--adopt` over a
+ * baseline that is there cannot replace it. That is the whole of the refusal:
+ * deleting the file first and adopting again grandfathers whatever fails then,
+ * and the bound is what holds either way.
  */
 export const adoptedBaseline = (records) => {
   const files = records
