@@ -37,9 +37,21 @@ const SECRET_FILE = {
   sshKeyPrefixes: ['id_dsa', 'id_ecdsa', 'id_ed25519', 'id_rsa'],
 };
 
+// A `file:line[:col]` reference — `grep -n` output, a stack frame, a review
+// comment — names a path without being one, and reading that suffix as part of
+// the name defeated the template carve-out this module's own deny message
+// advertises: `.env.example:11` parsed as suffix `.example:11`, which is not
+// `.example`, so a reference TO the template was denied. Dropping the reference
+// cannot open a hole — `.env:11` normalises to `.env`, which is still denied.
+const LINE_REFERENCE = /:\d+(?::\d+)?$/;
+
+/** The basename a candidate really names, with any `:line[:col]` suffix dropped. */
+const candidateBasename = (candidate) =>
+  basename(String(candidate).trim()).toLowerCase().replace(LINE_REFERENCE, '');
+
 /** Name-based: does this path point at a credential-bearing file? */
 const isSecretFilePath = (candidate) => {
-  const name = basename(String(candidate).trim()).toLowerCase();
+  const name = candidateBasename(candidate);
   if (name.length === 0) {
     return false;
   }
@@ -124,17 +136,42 @@ const AMBIGUOUS_BASENAMES = new Set(
 
 const hasDirectoryComponent = (candidate) => /[/\\]/.test(String(candidate));
 
+// A dotted identifier chain — no separator, no space, no punctuation. Linear,
+// no nested quantifier (S8786): each repetition must consume a literal `.`, and
+// `\w` cannot match one, so the split points are fixed.
+const PROPERTY_ACCESS_CHAIN = /^[\w$]+(?:\.[\w$]+)+$/;
+
+/**
+ * `<chain>.env` with no separator is the `object.property` shape far more often
+ * than it is a filename, so matching it denied plain everyday commands —
+ * `grep -rn process.env src/`, `grep -rn import.meta.env packages/`. A real env
+ * file is dot-prefixed (`.env`, `.env.local`) or carries a directory
+ * (`config/dev.env`), and both still match; so does a quoted `my file.env`,
+ * which the chain shape rejects on the space. Only the `.env` family relaxes —
+ * key material (`server.key`) stays strict, because nothing reads like a
+ * property access there.
+ */
+const isEnvPropertyAccess = (candidate) => {
+  const token = String(candidate).trim();
+  return (
+    PROPERTY_ACCESS_CHAIN.test(token) && token.toLowerCase().endsWith('.env')
+  );
+};
+
 /**
  * Bash tokens are GUESSES at paths; Read's `file_path` is a declared one. So an
  * ambiguous bare word only counts here when it carries a directory — which the
  * real files always do (`~/.aws/credentials`, `./credentials`). The deliberate
- * cost is a bare `cat credentials` naming a file in the working directory; the
- * explicit path tools still match that spelling, and it is a poor trade to deny
- * every sentence containing the word to catch it.
+ * cost is a bare `cat credentials` (or `cat foo.env`) naming a file in the
+ * working directory; the explicit path tools still match those spellings, and it
+ * is a poor trade to deny every sentence containing the word to catch it.
  */
 const isSecretPathInCommand = (candidate) => {
-  const name = basename(String(candidate).trim()).toLowerCase();
+  const name = candidateBasename(candidate);
   if (AMBIGUOUS_BASENAMES.has(name) && !hasDirectoryComponent(candidate)) {
+    return false;
+  }
+  if (isEnvPropertyAccess(candidate)) {
     return false;
   }
   return isSecretFilePath(candidate);
