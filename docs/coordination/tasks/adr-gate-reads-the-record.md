@@ -35,8 +35,8 @@ splitting them would edit `adr-registry.mjs`, `verify-adrs.mjs` and
 
 ## Status / next
 
-- Current step: round 3 — the module header and COMMANDS.md no longer claim the
-  baseline is shut against every command; re-adoption after deletion is stated
-  as the open door it is
+- Current step: round 4 — the baseline's prose states the invariant it enforces
+  instead of enumerating which paths are shut; the residual swap is pinned by a
+  test and its design question is #1014
 - Blockers: none
 - Next: awaiting review on #1013

@@ -42,7 +42,8 @@
   "files": [
     "scripts",
     "CHANGELOG.md",
-    "!scripts/**/*.test.mjs"
+    "!scripts/**/*.test.mjs",
+    "!scripts/**/*-fixtures.mjs"
   ],
   "type": "module",
   "exports": {

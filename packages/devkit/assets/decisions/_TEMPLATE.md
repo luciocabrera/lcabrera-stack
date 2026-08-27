@@ -30,7 +30,7 @@ governs:
   say. Drop a section that has nothing to say; do not rename the ones you keep.
 
   Records that predate the block are grandfathered in a baseline the gate reads,
-  rather than edited into shape. That list may shrink and may not grow.
+  rather than edited into shape. That list may not get longer.
 
   This file is the whole change. A home's index carries no row per record, so
   there is nothing to regenerate and nothing for a second decision branch to

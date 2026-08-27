@@ -501,34 +501,23 @@ what was decided. That is why adding one to an old ADR is allowed while editing
 its body is not.
 
 The records that predate the block are grandfathered in
-[`scripts/adr-content-baseline.json`](scripts/adr-content-baseline.json), and
-that list may **shrink but not grow**. Growth is decided by the list's size, not
-by any record's number: `maxEntries` is the most entries the baseline may hold,
-so a list longer than its own bound is a finding whatever the added entry is
-called. A number window would not do this — a sequence has gaps, and a record
-taking a retired number falls inside any window.
+[`scripts/adr-content-baseline.json`](scripts/adr-content-baseline.json).
 
-What holds that direction, and what does not — the second list is the one worth
-reading, because a bound is easy to believe more of than it delivers:
+**What the gate guarantees about it is one thing: the list may hold at most
+`maxEntries` entries.** Every exemption beyond that count fails, whatever added
+it. The bound is a count and not a number window, because a sequence has gaps and
+a record taking a retired number falls inside any window. `--write` only prunes,
+lowers `maxEntries` to what it kept, and refuses to rewrite a baseline that has
+already grown; an entry naming no record, or one whose record now satisfies the
+rules, is a finding until it is dropped.
 
-- **Shut: appending an entry.** The list is then longer than its own bound.
-- **Shut: swapping one entry for another.** The record dropped out of the list is
-  no longer grandfathered and reports its own findings.
-- **Shut: `--write`.** It only prunes, lowers `maxEntries` to what it kept —
-  never raises it — and refuses outright to rewrite a baseline that has already
-  grown, so it cannot launder a hand-added entry into one the next run calls
-  clean. An entry naming no record, or one whose record now satisfies the rules,
-  is a finding until it is dropped.
-- **Open: deleting the baseline and running `--adopt` again.** It refuses a
-  baseline that _exists_; it cannot refuse one that has been removed, and nothing
-  in the tree remembers there was one. Re-adoption grandfathers whatever fails at
-  that moment, new records included.
-- **Open: raising `maxEntries` by hand.** Nothing in a tracked file could prevent
-  it.
-
-Both open doors move `maxEntries`, and that is what the bound actually buys:
-reopening grandfathering is one number changing in a diff rather than one line
-appended to a list of seventy that read alike.
+**What it does not give you.** It is not proof against an editor — nothing in a
+tracked file is. And a swap that holds the count constant trades one exemption
+for another with `maxEntries` never moving: classify a record, drop its line, add
+another, and the bound is untouched. What makes the exempt set reviewable is not
+the bound but the file — the set changes only by editing it, so every change to
+it is in that file's diff, whatever route produced it. **Review the diff, not the
+count.**
 
 A grandfathered record is unclassified, so `adr:list -- --package` cannot see it,
 and both commands print how many are in that state rather than letting an empty

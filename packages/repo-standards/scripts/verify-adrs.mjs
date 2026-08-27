@@ -270,17 +270,16 @@ const report = (findings, stale) => {
 /**
  * Adoption, refused over a baseline that is already there.
  *
- * What that does and does not buy: it stops the reflex of re-running `--adopt`
- * to make a failing run go away. It cannot stop the same thing done by deleting
- * the file first, because nothing in the tree remembers there was one — so this
- * is not "no command grandfathers afresh", and `adr-baseline.mjs` lists that
- * door open. Both routes rewrite `maxEntries`, which is what makes either
- * visible in a diff.
+ * The refusal stops the reflex of re-running `--adopt` to make a failing run go
+ * away. It is not a claim that nothing can grandfather afresh — deleting the
+ * file first is an ordinary thing to be able to do. What holds either way is
+ * `adr-baseline.mjs`'s invariant: the exempt set changes only by editing that
+ * file, so whatever route was taken is in its diff.
  */
 const runAdopt = (records) => {
   if (existsSync(BASELINE_PATH)) {
     console.error(
-      `${BASELINE_REL} already exists. Adoption happens once: prune it with --write as records are classified. Deleting it and adopting again grandfathers whatever fails today — \`maxEntries\` will say so.`,
+      `${BASELINE_REL} already exists. Adoption happens once — prune it with --write as records are classified.`,
     );
     process.exitCode = 1;
     return;
@@ -425,7 +424,7 @@ const main = () => {
     `ADR gate passed: ${total} ADR(s) across ${homes.length} home(s); next free number is ADR-${pad(nextFreeNumber(homes))}.`,
   );
   console.log(
-    `${baseline.files.length} record(s) predate the metadata block and are grandfathered in ${BASELINE_REL}, which may hold at most ${baseline.maxEntries} and only ever shrinks; they are unclassified and \`--list --package\` cannot see them.`,
+    `${baseline.files.length} record(s) predate the metadata block and are grandfathered in ${BASELINE_REL}, which may hold at most ${baseline.maxEntries}; they are unclassified and \`--list --package\` cannot see them. Which records are exempt is decided by that file alone — read its diff, not the count.`,
   );
   console.log(
     'Not checked, and not checkable here: whether a section says anything true — only that it is present and not empty.',

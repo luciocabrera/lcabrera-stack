@@ -36,8 +36,8 @@ governs:
 
   Records written before the block existed are grandfathered in
   scripts/adr-content-baseline.json rather than edited into shape. That list may
-  shrink and may not grow: prune it with `vp run adr:verify -- --write` after
-  classifying one of them.
+  not get longer: prune it with `vp run adr:verify -- --write` after classifying
+  one of them.
 
   After adding the file, run `vp run adr:verify`. This file is the whole change:
   a home's index carries no row per ADR, so there is nothing to regenerate and

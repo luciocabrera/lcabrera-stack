@@ -17,14 +17,17 @@ not judge what a section says, and its success line says so.
 one workspace, separated from the repository-wide ones it inherits.
 
 Records written before the block are grandfathered in a baseline the gate reads
-rather than edited into shape, and that list may shrink but not grow. Growth is
-bounded by `maxEntries` — the most entries the baseline may hold — rather than by
-a number window, which a record taking a retired number would fall inside.
-`--write` only prunes, lowers the bound to what it kept, and refuses to rewrite a
-baseline that has already grown. `--adopt` refuses a baseline that already
-exists — but not one that has been deleted, so re-adoption is a way to
-grandfather afresh; it moves `maxEntries` when it does, which is what makes it
-visible. The path is `registers.adrContentBaseline`.
+rather than edited into shape. The gate guarantees one thing about it: the list
+may hold at most `maxEntries` entries, and every exemption beyond that count
+fails. A count rather than a number window, because a sequence has gaps and a
+record taking a retired number falls inside any window. `--write` only prunes,
+lowers the bound to what it kept, and refuses to rewrite a baseline that has
+already grown.
+
+It is not proof against an editor, and a swap that holds the count constant
+trades one exemption for another without the bound moving. What makes the exempt
+set reviewable is that it changes only by editing that one file — so read its
+diff, not the count. The path is `registers.adrContentBaseline`.
 
 `@lcabrera/devkit` ships the template carrying the block with generic
 placeholders, so a scaffolded record fails the gate until its author says what

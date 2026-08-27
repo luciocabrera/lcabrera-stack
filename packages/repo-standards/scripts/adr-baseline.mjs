@@ -6,7 +6,8 @@
  * An ADR is a dated record, so a bulk rewrite of ninety of them would touch the
  * one kind of file this repository never rewrites, to satisfy a rule none of
  * them were written under. They are listed instead, and the list is held to a
- * contract with one direction: it may SHRINK, and it may not GROW.
+ * contract with one direction: it may get SHORTER, and it may not get LONGER.
+ * That is a rule about the list's LENGTH, not about which records are on it.
  *
  * **Growth is a question about the list's size, not about any record's number.**
  * The first cut of this bounded it by number — nothing above the highest ADR
@@ -17,31 +18,27 @@
  * property itself: the most entries the baseline may hold, which no numbering
  * can slip past.
  *
- * Which doors that shuts, and which it leaves open. The open ones are listed
- * because this is the module deciding which records escape the gate, and a
- * reader will act on a claim here precisely when it sounds exhaustive.
+ * **What this guarantees.** The gate enforces one thing: the list may hold at
+ * most `maxEntries` entries, and every exemption beyond that count fails. That
+ * is enough to make the exempt set reviewable, because the set changes only by
+ * editing this file — so every change to it, by whatever route, is in this
+ * file's diff.
  *
- * - **Shut: appending an entry.** The list is then longer than its own bound,
- *   whatever the entry is numbered, and the gate says so.
- * - **Shut: swapping one entry for another.** The record dropped out of the
- *   list is no longer grandfathered and reports its own findings.
- * - **Shut: `--write`.** It only prunes, and it RATCHETS `maxEntries` down to
- *   what it kept — it never raises it — and it refuses outright to rewrite a
- *   baseline that has already grown. So it cannot launder a hand-added entry
- *   into a baseline the next run calls clean.
- * - **OPEN: deleting the baseline and adopting again.** `--adopt` refuses a
- *   baseline that EXISTS; it cannot refuse one that has been removed, and
- *   nothing in the tree remembers that there was one. Re-adoption grandfathers
- *   whatever fails at that moment, new records included. It does not defeat the
- *   bound — `--adopt` writes `maxEntries` from what it grandfathered, so the
- *   number still moves in the diff — but it is a command path and calling it
- *   shut would be false.
- * - **OPEN: raising `maxEntries` by hand.** Nothing in a tracked file can be
- *   proof against an editor.
+ * **What it does not give you.** It is not proof against an editor; nothing in a
+ * tracked file is. And a swap that holds the count constant trades one exemption
+ * for another with `maxEntries` never moving — classify a record, drop its line,
+ * add another, and the bound is untouched. So review the file's DIFF, not the
+ * bound.
  *
- * Both open doors are visible the same way, and that is the property this shape
- * actually buys: reopening grandfathering shows up as a single number changing,
- * rather than as one line appended to a list of seventy that read alike.
+ * Both halves are spelled out because this is the module deciding which records
+ * escape the gate, and a reader will act on a claim here precisely when it
+ * sounds exhaustive. Three earlier revisions of this comment listed which paths
+ * were shut instead, and each list was falsified by a path it had not thought
+ * of — a number window missed the gaps in the sequence, "every command" missed
+ * deleting the file and adopting again, "swapping is shut" missed the swap where
+ * the dropped record has since been classified. An enumeration of shut doors is
+ * a completeness claim; a statement about the invariant is not, and cannot be
+ * falsified by finding a sixth path.
  *
  * Shape: `{ files: [<filename>], maxEntries: <number> }`.
  */
