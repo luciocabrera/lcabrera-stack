@@ -46,6 +46,21 @@ const DENY_CASES = [
   ['Grep', { glob: '.env', path: '.' }],
   // Read declares its path, so the bare spelling is still a path there.
   ['Read', { file_path: 'credentials' }],
+  // The env-chain relief is an allowlist of code spellings, NOT the shape
+  // `<anything>.env` — these are ordinary spellings of a real env file and must
+  // stay denied. Relaxing to the shape would take all four with it.
+  ['Bash', { command: 'cat prod.env' }],
+  ['Bash', { command: 'cat secrets.env' }],
+  ['Bash', { command: 'cat dev.env' }],
+  ['Bash', { command: 'cat config/dev.env' }],
+  ['Bash', { command: 'cat .env' }],
+  // ...and it is Bash-only, for the same reason the bare-word rule is.
+  ['Read', { file_path: 'foo.env' }],
+  // Only the .env family relaxes. `server.key` is the property-access shape too,
+  // but key material has no prose or code spelling to be confused with.
+  ['Bash', { command: 'cat server.key' }],
+  // Dropping a `:line` reference must not promote a real env file to a template.
+  ['Bash', { command: 'cat .env:11' }],
   ['Write', { content: `k = "${AKIA}"`, file_path: 'src/c.ts' }],
   ['Write', { content: `t = "${GHP}"`, file_path: 'src/c.ts' }],
   ['Write', { content: PRIVATE_KEY_HEADER, file_path: 'src/x.ts' }],
@@ -91,6 +106,18 @@ const ALLOW_CASES = [
   ['Bash', { command: "grep -rn 'credentials' scripts/lib/guard.mjs" }],
   ['Bash', { command: 'node -e \'console.log("credentials")\'' }],
   ['Grep', { path: 'src', pattern: '.env' }],
+  // The runtime env objects are code, not paths, and reading them as filenames
+  // denied these outright — ordinary commands in a Vite/React repo, with no
+  // heredoc and no quoting involved. The last two pin the rest of the allowlist,
+  // which this repo does not use but which costs nothing to keep correct.
+  ['Bash', { command: 'grep -rn process.env src/' }],
+  ['Bash', { command: 'grep -rn import.meta.env packages/' }],
+  ['Bash', { command: 'grep -rn globalThis.process.env src/' }],
+  ['Bash', { command: 'grep -rn Deno.env src/' }],
+  // A `file:line` reference to the template. The carve-out this module's deny
+  // message advertises used to read the suffix as `.example:11` and deny it.
+  ['Bash', { command: 'echo see .env.example:11 for the shape' }],
+  ['Bash', { command: 'sed -n 11p .env.example' }],
   ['Write', { content: 'API_KEY=your-key-here', file_path: '.env.example' }],
   [
     'Edit',

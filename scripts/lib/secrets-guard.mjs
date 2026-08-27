@@ -37,9 +37,21 @@ const SECRET_FILE = {
   sshKeyPrefixes: ['id_dsa', 'id_ecdsa', 'id_ed25519', 'id_rsa'],
 };
 
+// A `file:line[:col]` reference — `grep -n` output, a stack frame, a review
+// comment — names a path without being one, and reading that suffix as part of
+// the name defeated the template carve-out this module's own deny message
+// advertises: `.env.example:11` parsed as suffix `.example:11`, which is not
+// `.example`, so a reference TO the template was denied. Dropping the reference
+// cannot open a hole — `.env:11` normalises to `.env`, which is still denied.
+const LINE_REFERENCE = /:\d+(?::\d+)?$/;
+
+/** The basename a candidate really names, with any `:line[:col]` suffix dropped. */
+const candidateBasename = (candidate) =>
+  basename(String(candidate).trim()).toLowerCase().replace(LINE_REFERENCE, '');
+
 /** Name-based: does this path point at a credential-bearing file? */
 const isSecretFilePath = (candidate) => {
-  const name = basename(String(candidate).trim()).toLowerCase();
+  const name = candidateBasename(candidate);
   if (name.length === 0) {
     return false;
   }
@@ -125,6 +137,23 @@ const AMBIGUOUS_BASENAMES = new Set(
 const hasDirectoryComponent = (candidate) => /[/\\]/.test(String(candidate));
 
 /**
+ * The runtime env objects, spelled out. These are the only tokens that both end
+ * in `.env` and are code rather than a path, so `grep -rn process.env src/` was
+ * denied as an attempt to open a file. Anything deeper —
+ * `process.env.DATABASE_URL` — already passed: it ends in the variable name and
+ * matches no taxonomy entry.
+ *
+ * An allowlist, not a shape, and the distinction is the whole point. Accepting
+ * any dotted chain would also admit `cat prod.env` and `cat secrets.env`, on the
+ * reasoning that a real env file is dot-prefixed or carries a directory. That is
+ * a convention, not a property of env files, and a deny must not rest on one.
+ * Widening this set is a policy change, not a false-positive fix: it needs a
+ * deny-side case pinning what it costs.
+ */
+const ENV_CODE_CHAIN =
+  /^(?:(?:globalThis\.)?process|import\.meta|bun|deno)\.env$/i;
+
+/**
  * Bash tokens are GUESSES at paths; Read's `file_path` is a declared one. So an
  * ambiguous bare word only counts here when it carries a directory — which the
  * real files always do (`~/.aws/credentials`, `./credentials`). The deliberate
@@ -133,8 +162,11 @@ const hasDirectoryComponent = (candidate) => /[/\\]/.test(String(candidate));
  * every sentence containing the word to catch it.
  */
 const isSecretPathInCommand = (candidate) => {
-  const name = basename(String(candidate).trim()).toLowerCase();
+  const name = candidateBasename(candidate);
   if (AMBIGUOUS_BASENAMES.has(name) && !hasDirectoryComponent(candidate)) {
+    return false;
+  }
+  if (ENV_CODE_CHAIN.test(String(candidate).trim())) {
     return false;
   }
   return isSecretFilePath(candidate);
