@@ -71,10 +71,25 @@ assembling an application by hand.
 
 ## How the lines and personas meet
 
-The application stack serves the application developer directly and the data user
-through them — so a requirement in the data user's vocabulary is still a claim
-about packages, and still names the packages it concerns. The toolchain serves
-the repository maintainer only.
+The application stack is installed by the application developer, and reaches the
+data user through them — so a requirement in the data user's vocabulary is still
+a claim about packages, and still names the packages it concerns. The toolchain
+is installed by the repository maintainer.
+
+**That is a statement about who installs what, and it is not a rule for which
+persona a requirement declares.** The two fields answer different questions:
+`packages` says what the requirement is about, `persona` says whose definition of
+"it works" the statement is written in. A requirement owed by **both** lines —
+a shipped document that has to read correctly wherever it lands is the worked
+case — still declares exactly one persona, and picks the one it fails hardest
+for. The failure list closing each persona's section above is what decides that;
+counting packages is not.
+
+Worth knowing before trusting a checker on it: a cross-line requirement naming a
+persona from either of its lines is **well-formed whichever it picks**, so a
+structural check reports the same pass for the right answer and the wrong one.
+The first entry written here got it wrong for exactly that reason, and what
+caught it was the failure list, not the schema.
 
 ## This page lists no requirements
 

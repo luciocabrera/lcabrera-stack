@@ -64,7 +64,10 @@ One is plural and the other is not, on purpose. A requirement can be a
 requirement of both product lines — a document that reads correctly on the
 registry is owed by every published package — but it is written in **one voice**,
 and a statement addressed to two personas at once ends up addressed to neither.
-Pick the persona the requirement fails hardest for.
+Pick the persona the requirement **fails hardest for**. Each persona's
+section in [`VISION.md`](./VISION.md) ends with its failure modes, and that
+list is the tie-breaker — not the roster of packages, which answers a
+different question.
 
 Three more rules carry weight:
 
