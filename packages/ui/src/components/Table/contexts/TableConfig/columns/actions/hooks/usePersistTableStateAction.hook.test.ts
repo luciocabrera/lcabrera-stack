@@ -294,4 +294,83 @@ describe('usePersistTableStateAction', () => {
       value: [],
     });
   });
+  // A table whose layout is transient is never seeded from the cookie, so a
+  // slice written here would ride in every subsequent request's Cookie header
+  // for a loader that does not read it.
+  describe('a transient column layout', () => {
+    it('drops the state slices and keeps the URL params', () => {
+      metaStoreGetMock.mockReturnValue({ isColumnLayoutTransient: true });
+      serializeStateSliceMock.mockReturnValue({
+        key: 'orders-group:columnOrder',
+        value: '["id"]',
+      });
+
+      const { result } = renderHook(() => usePersistTableStateAction());
+
+      act(() => {
+        result.current([
+          {
+            searchParamKey: 'filters',
+            searchParamValue: '{"status":"active"}',
+          },
+          {
+            persistenceKey: 'orders-group',
+            slice: 'columnOrder',
+            valueSlice: ['id'],
+          },
+        ]);
+      });
+
+      expect(serializeStateSliceMock).not.toHaveBeenCalled();
+      expect(submitMock).toHaveBeenCalledWith(
+        {
+          currentUrl: '/enterprise-orders?page=2',
+          entries: JSON.stringify([
+            {
+              searchParamKey: 'filters',
+              searchParamValue: '{"status":"active"}',
+            },
+          ]),
+        },
+        { action: '/_action/persist-cookie', method: 'POST' },
+      );
+    });
+
+    it('writes nothing at all when every entry was a layout slice', () => {
+      // An empty write is a round trip that sets no cookie and changes no URL.
+      metaStoreGetMock.mockReturnValue({ isColumnLayoutTransient: true });
+
+      const { result } = renderHook(() => usePersistTableStateAction());
+
+      act(() => {
+        result.current({
+          persistenceKey: 'orders-group',
+          slice: 'columnPinning',
+          valueSlice: { left: ['id'], right: [] },
+        });
+      });
+
+      expect(submitMock).not.toHaveBeenCalled();
+    });
+
+    it('still persists every slice on an ordinary table', () => {
+      metaStoreGetMock.mockReturnValue({});
+      serializeStateSliceMock.mockReturnValue({
+        key: 'orders:columnOrder',
+        value: '["id"]',
+      });
+
+      const { result } = renderHook(() => usePersistTableStateAction());
+
+      act(() => {
+        result.current({
+          persistenceKey: 'orders',
+          slice: 'columnOrder',
+          valueSlice: ['id'],
+        });
+      });
+
+      expect(submitMock).toHaveBeenCalledTimes(1);
+    });
+  });
 });

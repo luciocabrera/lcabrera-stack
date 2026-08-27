@@ -385,4 +385,63 @@ describe('readTableLoaderStateFromRequest', () => {
       ]);
     });
   });
+
+  // A view a reader arrives at rather than keeps opens at the columns the route
+  // declared, not at the shape an earlier, unrelated visit left behind.
+  describe('isColumnLayoutTransient', () => {
+    it('reads no persisted layout at all', () => {
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({
+        columnOrder: ['status', 'amount'],
+        columnPinning: { left: ['status'], right: [] },
+        columnSizing: { amount: 180 },
+        columnVisibility: new Set(['amount']),
+      });
+      vi.mocked(readPersistedStateFromCookie).mockClear();
+
+      const state = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        isColumnLayoutTransient: true,
+        persistenceKey: 'orders',
+        request: new Request('https://example.com/orders/group', {
+          headers: { Cookie: 'table-state-orders-columnOrder=whatever' },
+        }),
+      });
+
+      // Not "filtered afterwards": the cookie is not consulted, so a slice added
+      // to the persisted set later cannot leak in behind this.
+      expect(vi.mocked(readPersistedStateFromCookie)).not.toHaveBeenCalled();
+      expect(state.columnOrder).toEqual([]);
+      expect(state.columnPinning).toEqual({ left: [], right: [] });
+      expect(state.columnSizing).toEqual({});
+      expect(state.columnVisibility).toEqual(new Set());
+    });
+
+    it('still reads the sorting and filters this request carries', () => {
+      // Layout is what a cookie carries; sort and filters travel in the URL and
+      // are this view's own, so they are untouched by the flag.
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+
+      const search = new URLSearchParams({
+        filters: filtersFor('list'),
+        sorting: sortingFor('amount'),
+      });
+
+      const state = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        includeFilters: true,
+        isColumnLayoutTransient: true,
+        persistenceKey: 'orders',
+        request: new Request(
+          `https://example.com/orders/group?${search.toString()}`,
+        ),
+      });
+
+      expect(state.filters).toStrictEqual({
+        status: { operator: 'equals', type: 'text', value: 'list' },
+      });
+      expect(state.sorting).toStrictEqual([
+        { columnKey: 'amount', direction: 'asc' },
+      ]);
+    });
+  });
 });

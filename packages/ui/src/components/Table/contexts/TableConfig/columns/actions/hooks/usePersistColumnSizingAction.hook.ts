@@ -17,6 +17,11 @@ export const usePersistColumnSizingAction = <TData>() => {
 
   return () => {
     const metaState = metaStore.get();
+
+    // A transient layout is not seeded from the cookie, so a width written here
+    // would be carried on every request and read by nobody.
+    if (metaState?.isColumnLayoutTransient === true) return;
+
     const entry = buildColumnSizingCookieEntry<TData>({
       appId: metaState?.appId,
       columnSizing: columnsStore.get()?.columnSizing,

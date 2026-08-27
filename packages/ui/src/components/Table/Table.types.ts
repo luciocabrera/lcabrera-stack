@@ -379,6 +379,30 @@ export type TableGroupRowSummary = {
   readonly path: readonly TableGroupKeyValue[];
 };
 
+/**
+ * A restriction the table **states** and cannot change: the route already scoped the read
+ * by it, and the filters panel says so instead of reading as unrestricted (ADR-087).
+ * It is not a `ColumnFilter` and never becomes one — a group key truncated to a month is a
+ * half-open range, and the filter vocabulary's `between` maps to `gte`/`lte`, which would
+ * pull in the first row of the next month (ADR-087 decision 4).
+ */
+export type TableLockedFilter = {
+  readonly columnKey: string;
+  /** Already formatted for a reader; the table does not re-derive it from a row. */
+  readonly label: string;
+  readonly value: string;
+};
+
+export type TableLockedFilters = {
+  readonly entries: readonly TableLockedFilter[];
+  /**
+   * Why the restriction could not be read, rendered in place of the entries. An unreadable
+   * one must not draw as an empty list: that reads as "nothing restricts these rows", which
+   * is the opposite of what a refused token means.
+   */
+  readonly refusal?: string;
+};
+
 export type TableMetadataValue = boolean | number | string;
 
 export type TableMetaState = {
@@ -421,6 +445,16 @@ export type TableMetaState = {
   readonly hasDefaultGrouping?: boolean;
   readonly initialPageSize: number;
   readonly isBordered: boolean;
+  /**
+   * Route-declared: this table's column order, pinning, sizing and visibility are neither
+   * restored from the persistence cookie nor written to it, so every open starts from the
+   * declared columns in declared order. Absent means off — the layout persists, which is
+   * what every ordinary table wants.
+   * It is for a view a reader arrives at rather than keeps: a modal over one group's rows
+   * is a look, and inheriting the shape of an earlier, unrelated look is not a preference
+   * anyone expressed (ADR-087).
+   */
+  readonly isColumnLayoutTransient?: boolean;
   readonly isColumnSettingsOpen: boolean;
   readonly isColumnSettingsPinned: boolean;
   /** Endpoint capability (ADR-063). Absent means off. */
@@ -443,6 +477,12 @@ export type TableMetaState = {
   readonly isUrlStateNested?: boolean;
   readonly loadMorePageSize: number;
   readonly locale?: string;
+  /**
+   * Route-declared (ADR-063): what already scopes this table's read, stated so the filters
+   * panel does not read as unrestricted. Absent means nothing the table cannot change is
+   * restricting it.
+   */
+  readonly lockedFilters?: TableLockedFilters;
   readonly overscan: number;
   readonly persistenceKey: string;
   readonly placeholderRowCount: number;

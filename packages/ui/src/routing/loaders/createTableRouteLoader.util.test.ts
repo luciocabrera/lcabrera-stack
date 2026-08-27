@@ -92,6 +92,21 @@ const uiFlagsCookie = (state: Record<string, unknown>) =>
     JSON.stringify({ value: state, version: 1 }),
   )}`;
 
+/**
+ * One persisted layout slice, in the same versioned envelope the persist-cookie
+ * action writes and `collectPersistedStateSlices` reads back.
+ */
+const layoutCookie = ({
+  slice,
+  value,
+}: {
+  readonly slice: string;
+  readonly value: unknown;
+}) =>
+  `table-state-${baseConfig.appId}-${baseConfig.persistenceKey}-${slice}=${encodeURIComponent(
+    JSON.stringify({ value, version: 1 }),
+  )}`;
+
 type CollectFunctionPathsArgs = {
   readonly path?: string;
   readonly value: unknown;
@@ -290,6 +305,31 @@ describe('createTableRouteLoader', () => {
       });
 
       expect(result.metaState.isUrlStateNested).toBe(false);
+    });
+
+    it('ignores an isColumnLayoutTransient injected through the UI-flags cookie', async () => {
+      // It decides whether the layout cookie is read back at all, so a cookie
+      // able to deny it is a cookie able to restore the very layout a route
+      // said not to restore.
+      const { result } = await invoke({
+        cookie: uiFlagsCookie({ isColumnLayoutTransient: true }),
+      });
+
+      expect(result.metaState.isColumnLayoutTransient).toBe(false);
+    });
+
+    it('ignores lockedFilters injected through the UI-flags cookie', async () => {
+      // A locked filter is a sentence about what scopes these rows. A cookie
+      // able to seed one prints a restriction the read is not under.
+      const { result } = await invoke({
+        cookie: uiFlagsCookie({
+          lockedFilters: {
+            entries: [{ columnKey: 'status', label: 'Status', value: 'Open' }],
+          },
+        }),
+      });
+
+      expect(result.metaState.lockedFilters).toBeUndefined();
     });
 
     it('takes groupDetailsPath from the route meta, over any cookie value', async () => {
@@ -768,6 +808,97 @@ describe('createTableRouteLoader', () => {
       });
 
       expect(result.metaState.isGroupingLocked).toBe(false);
+    });
+  });
+
+  describe('locked filters', () => {
+    it('resolves them from the request and puts them on the meta', async () => {
+      const { result } = await invoke({
+        config: {
+          resolveLockedFilters: ({ request }) => ({
+            entries: [
+              {
+                columnKey: 'status',
+                label: 'Status',
+                value: new URL(request.url).searchParams.get('group') ?? '',
+              },
+            ],
+          }),
+        },
+        url: 'http://localhost/rows?group=Open',
+      });
+
+      expect(result.metaState.lockedFilters).toEqual({
+        entries: [{ columnKey: 'status', label: 'Status', value: 'Open' }],
+      });
+    });
+
+    it('carries a refusal through rather than flattening it to no entries', async () => {
+      // An unreadable restriction renders as *why*; rendering it as an empty
+      // list would say the rows are unrestricted, which is the opposite.
+      const { result } = await invoke({
+        config: {
+          resolveLockedFilters: () => ({
+            entries: [],
+            refusal: 'This link does not name a group that can be read.',
+          }),
+        },
+      });
+
+      expect(result.metaState.lockedFilters).toEqual({
+        entries: [],
+        refusal: 'This link does not name a group that can be read.',
+      });
+    });
+
+    it('awaits an async resolver', async () => {
+      const { result } = await invoke({
+        config: {
+          resolveLockedFilters: async () => ({
+            entries: [
+              { columnKey: 'status', label: 'Status', value: 'Closed' },
+            ],
+          }),
+        },
+      });
+
+      expect(result.metaState.lockedFilters).toEqual({
+        entries: [{ columnKey: 'status', label: 'Status', value: 'Closed' }],
+      });
+    });
+
+    it('leaves the meta field undefined when the route declares no resolver', async () => {
+      const { result } = await invoke();
+
+      expect(result.metaState.lockedFilters).toBeUndefined();
+    });
+  });
+
+  describe('transient column layout', () => {
+    it('opens at the declared columns whatever the layout cookie holds', async () => {
+      const { result } = await invoke({
+        config: { meta: { isColumnLayoutTransient: true } },
+        cookie: layoutCookie({
+          slice: 'columnOrder',
+          value: ['status', 'name', 'id'],
+        }),
+      });
+
+      expect(result.metaState.isColumnLayoutTransient).toBe(true);
+      expect(result.columnsState.columnOrder).toEqual([]);
+    });
+
+    it('restores the persisted layout when the route does not declare it', async () => {
+      // The flag is opt-in, and this is the half that says so: the same cookie
+      // is read back on an ordinary table.
+      const { result } = await invoke({
+        cookie: layoutCookie({
+          slice: 'columnOrder',
+          value: ['status', 'name', 'id'],
+        }),
+      });
+
+      expect(result.columnsState.columnOrder).toEqual(['status', 'name', 'id']);
     });
   });
 });

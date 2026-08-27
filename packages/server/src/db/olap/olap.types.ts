@@ -18,6 +18,19 @@ export type GroupKeyTruncation = {
 };
 
 /**
+ * One group key, as a statement of what restricts the rows a route serving that group
+ * answers with (ADR-087).
+ * `value` is already formatted for a reader — a truncated key through `toGroupPeriodLabel`,
+ * everything else through `toGroupLabel` — because the raw key of a truncated group is a
+ * boundary instant rather than the month the reader clicked.
+ */
+export type GroupRestriction = {
+  readonly columnKey: string;
+  readonly label: string;
+  readonly value: string;
+};
+
+/**
  * **It carries no grouping.** Passing the view's grouping through would send the read
  * straight back into the grouped branch and return group rows again — the one mistake that
  * looks like it works.

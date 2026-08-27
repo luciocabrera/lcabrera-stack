@@ -8,6 +8,7 @@ import type {
   TableColumn,
 } from '#ui/components/Table';
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
+import type { PersistedState } from '#ui/components/Table/utils/persistence.types';
 
 import {
   TABLE_NESTED_URL_STATE_PREFIX,
@@ -45,6 +46,12 @@ type ReadTableLoaderStateFromRequestArgs<
    */
   readonly includeGrouping?: boolean;
   /**
+   * On, the persisted column layout is not read at all: `columnOrder`, `columnPinning`,
+   * `columnSizing` and `columnVisibility` come back empty, so the table paints the columns
+   * the route declared, in the order it declared them, on every request.
+   */
+  readonly isColumnLayoutTransient?: boolean;
+  /**
    * Set when this table shares another route's URL: every param below is read
    * under `TABLE_NESTED_URL_STATE_PREFIX`, matching what the write side puts
    * there.
@@ -66,6 +73,7 @@ export const readTableLoaderStateFromRequest = <
   defaultGrouping,
   includeFilters = false,
   includeGrouping = false,
+  isColumnLayoutTransient = false,
   isUrlStateNested = false,
   persistenceKey,
   request,
@@ -77,11 +85,16 @@ export const readTableLoaderStateFromRequest = <
     );
 
   const cookieHeader = request.headers.get('Cookie');
-  const cookieState = readPersistedStateFromCookie({
-    appId,
-    cookieString: cookieHeader ?? undefined,
-    persistenceKey,
-  });
+  // Emptied here rather than at each of the four layout slices below: those are
+  // the whole of what the cookie says about layout, so one branch covers it and
+  // no later reader has to remember which four they were.
+  const cookieState: Partial<PersistedState> = isColumnLayoutTransient
+    ? {}
+    : readPersistedStateFromCookie({
+        appId,
+        cookieString: cookieHeader ?? undefined,
+        persistenceKey,
+      });
 
   const metaUiFlags = readPersistedUiFlagsFromCookie({
     appId,

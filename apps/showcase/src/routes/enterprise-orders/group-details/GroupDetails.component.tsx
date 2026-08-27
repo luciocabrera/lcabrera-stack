@@ -4,6 +4,7 @@ import { OLAP_DRILL_GROUP_PARAM } from '@lcabrera/api/olap/olap.constants';
 import { TableRouteView } from '@lcabrera/ui';
 import { Modal } from '@lcabrera/ui/components/Modal';
 import { TABLE_NESTED_URL_STATE_PREFIX } from '@lcabrera/ui/components/Table/Table.constants';
+import { toLockedFiltersHeading } from '@lcabrera/ui/components/Table/utils';
 import { useLoaderData, useNavigate, useSearchParams } from 'react-router';
 
 import type {
@@ -26,9 +27,12 @@ const FALLBACK_TITLE = 'Group';
  * **The token is forwarded verbatim, never rebuilt.** The modal has no group row in hand —
  * it may have been opened from a link — so the URL is the only statement of which group
  * this is, and re-encoding it from parsed parts would be a second chance to get it wrong.
+ * **The title and the Filters panel read one answer.** Both come off
+ * `metaState.lockedFilters`, which the loader resolved from the token, so the dialog
+ * cannot end up headed by a group the panel does not list.
  */
 export const GroupDetails = () => {
-  const { groupHeading } = useLoaderData<typeof loader>();
+  const { metaState } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -62,7 +66,7 @@ export const GroupDetails = () => {
       customStylex={styles.dialog}
       isOpen
       onClose={handleClose}
-      title={groupHeading ?? FALLBACK_TITLE}
+      title={toLockedFiltersHeading(metaState.lockedFilters) ?? FALLBACK_TITLE}
     >
       <TableRouteView<EnterpriseOrderTableRow, EnterpriseOrdersResponse>
         fetchPage={handleFetchPage}

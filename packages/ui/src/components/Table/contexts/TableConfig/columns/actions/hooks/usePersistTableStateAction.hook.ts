@@ -36,7 +36,17 @@ export const usePersistTableStateAction = () => {
     const paramPrefix =
       meta?.isUrlStateNested === true ? TABLE_NESTED_URL_STATE_PREFIX : '';
 
-    const serializedEntries = entries.map(
+    // A table whose layout is transient is never seeded from the cookie
+    // (`readTableLoaderStateFromRequest`), so a slice written here would grow
+    // every subsequent request's Cookie header carrying state no loader reads.
+    // Only the slices go: the URL params beside them are this table's filters
+    // and sort, which are read back and stay real.
+    const persistedEntries =
+      meta?.isColumnLayoutTransient === true
+        ? entries.filter(({ slice }) => slice === undefined)
+        : entries;
+
+    const serializedEntries = persistedEntries.map(
       ({
         persistenceKey,
         searchParamKey,
@@ -79,8 +89,12 @@ export const usePersistTableStateAction = () => {
     });
 
     // Write to cookie via server action — the loader reads it back on the next
-    // document request and seeds the store from it.
-    persistCookie(serializedEntries);
+    // document request and seeds the store from it. A transient layout can
+    // filter every entry away, and an empty write is a round trip that sets
+    // nothing.
+    if (serializedEntries.length > 0) {
+      persistCookie(serializedEntries);
+    }
 
     return true;
   };

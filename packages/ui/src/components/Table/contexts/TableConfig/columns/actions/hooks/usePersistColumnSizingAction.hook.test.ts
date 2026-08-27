@@ -64,4 +64,22 @@ describe('usePersistColumnSizingAction', () => {
 
     expect(persistMock).not.toHaveBeenCalled();
   });
+  it('does not submit for a table whose column layout is transient', () => {
+    // The cookie is not read back for such a table, so a width written here is
+    // carried on every request and consulted by nobody.
+    columnsGetMock.mockReturnValue({ columnSizing: { id: 120 } });
+    metaGetMock.mockReturnValue({
+      appId: 'admin',
+      isColumnLayoutTransient: true,
+      persistenceKey: 'orders-group',
+    });
+
+    const { result } = renderHook(() => usePersistColumnSizingAction());
+
+    act(() => {
+      result.current();
+    });
+
+    expect(persistMock).not.toHaveBeenCalled();
+  });
 });
