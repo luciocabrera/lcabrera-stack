@@ -268,14 +268,19 @@ const report = (findings, stale) => {
 };
 
 /**
- * The baseline is written once, on adoption, and never again. There is
- * deliberately no command that turns today's failures into tomorrow's
- * exemptions — that is what would make it grow.
+ * Adoption, refused over a baseline that is already there.
+ *
+ * What that does and does not buy: it stops the reflex of re-running `--adopt`
+ * to make a failing run go away. It cannot stop the same thing done by deleting
+ * the file first, because nothing in the tree remembers there was one — so this
+ * is not "no command grandfathers afresh", and `adr-baseline.mjs` lists that
+ * door open. Both routes rewrite `maxEntries`, which is what makes either
+ * visible in a diff.
  */
 const runAdopt = (records) => {
   if (existsSync(BASELINE_PATH)) {
     console.error(
-      `${BASELINE_REL} already exists. The baseline is adopted once: it may be pruned with --write, and it may not grow.`,
+      `${BASELINE_REL} already exists. Adoption happens once: prune it with --write as records are classified. Deleting it and adopting again grandfathers whatever fails today — \`maxEntries\` will say so.`,
     );
     process.exitCode = 1;
     return;
@@ -321,12 +326,17 @@ const runWrite = (homes, records) => {
 
   const pruned = prunedBaseline({ baseline, records });
   const dropped = baseline.files.length - pruned.files.length;
+  // The bound is reported off its own comparison, not off `dropped`. A baseline
+  // whose list was shortened by hand has slack in it, so a run that prunes
+  // nothing still tightens the bound — and saying "unchanged" while rewriting
+  // the file is the one thing a gate's output must not do.
+  const tightened = pruned.maxEntries !== baseline.maxEntries;
   if (existsSync(BASELINE_PATH)) {
     saveBaseline(pruned);
     console.log(
-      dropped === 0
+      dropped === 0 && !tightened
         ? `${BASELINE_REL} unchanged — every grandfathered record still needs it.`
-        : `${BASELINE_REL} pruned: ${dropped} record(s) no longer need grandfathering; it may now hold at most ${pruned.maxEntries}.`,
+        : `${BASELINE_REL} rewritten: ${dropped} record(s) no longer need grandfathering; it may now hold at most ${pruned.maxEntries}.`,
     );
   }
   writeIndexes(homes);

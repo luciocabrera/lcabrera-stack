@@ -35,7 +35,8 @@ splitting them would edit `adr-registry.mjs`, `verify-adrs.mjs` and
 
 ## Status / next
 
-- Current step: round 2 — the baseline's growth bound no longer depends on ADR
-  numbering, so a record taking a retired number cannot be grandfathered
+- Current step: round 3 — the module header and COMMANDS.md no longer claim the
+  baseline is shut against every command; re-adoption after deletion is stated
+  as the open door it is
 - Blockers: none
 - Next: awaiting review on #1013

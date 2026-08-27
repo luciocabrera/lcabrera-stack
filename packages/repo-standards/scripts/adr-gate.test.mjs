@@ -72,24 +72,16 @@ It stands.
 Nothing changes.
 `;
 
-const CONFIG = `${JSON.stringify(
-  {
-    registers: {
-      adrContentBaseline: BASELINE,
-      adrGrandfatheredDuplicates: [],
-      adrHomes: [
-        {
-          blurb: 'Decisions.',
-          dir: HOME,
-          tier: 'repo',
-          title: 'Decisions',
-        },
-      ],
-    },
-  },
-  undefined,
-  2,
-)}\n`;
+const CONFIG = `{
+  "registers": {
+    "adrContentBaseline": "${BASELINE}",
+    "adrGrandfatheredDuplicates": [],
+    "adrHomes": [
+      { "blurb": "Decisions.", "dir": "${HOME}", "tier": "repo", "title": "Decisions" }
+    ]
+  }
+}
+`;
 
 const roots = [];
 
@@ -310,13 +302,36 @@ describe('the grandfathering baseline', () => {
     expect(runGate(root).output).toContain('no `## Context` section');
   });
 
-  it('is adopted once — there is no command that absorbs new failures', () => {
+  it('refuses a second --adopt over a baseline that is still there', () => {
+    // Deliberately narrow, and named for what it asserts: `--adopt` cannot
+    // refuse a baseline that has been DELETED, so "no command absorbs new
+    // failures" would be a claim this test does not make and the code does not
+    // keep. That door is documented open in `adr-baseline.mjs`.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
 
     const second = runGate(root, ['--adopt']);
     expect(second.status).not.toBe(0);
-    expect(second.output).toContain('adopted once');
+    expect(second.output).toContain('Adoption happens once');
+  });
+
+  it('grandfathers afresh when the baseline is deleted, moving the bound', () => {
+    // The open door, pinned so it stays visible: re-adoption is a command path
+    // that exempts a new record. It does not defeat the bound — `maxEntries`
+    // moves with it — and that pairing is the whole claim the header makes.
+    const root = makeAdrRepo({ legacy: true });
+    runGate(root, ['--adopt']);
+    expect(readBaseline(root).maxEntries).toBe(1);
+
+    writeIn(root)(
+      `${HOME}/ADR-003-a-fresh-gap.md`,
+      '# ADR-003 — A fresh gap\n',
+    );
+    rmSync(join(root, BASELINE));
+    runGate(root, ['--adopt']);
+
+    expect(runGate(root).status).toBe(0);
+    expect(readBaseline(root).maxEntries).toBe(2);
   });
 
   it('refuses an entry naming no record, and prunes it on --write', () => {
@@ -356,7 +371,7 @@ describe('the grandfathering baseline', () => {
     expect(runGate(root).output).toContain('has grown');
   });
 
-  it('has no command that absorbs a hand-added entry', () => {
+  it('refuses to prune a grown baseline, rather than absorbing the entry', () => {
     // `--write` prunes. If it also ratcheted the bound UP it would launder the
     // edit above into a baseline the next run reports as clean.
     const root = makeAdrRepo({ legacy: true });
@@ -367,6 +382,24 @@ describe('the grandfathering baseline', () => {
 
     expect(runGate(root, ['--write']).status).not.toBe(0);
     expect(runGate(root).output).toContain('has grown');
+  });
+
+  it('does not say "unchanged" about a run that tightened the bound', () => {
+    // Reachable by hand-shortening the list without running --write, which
+    // leaves slack. The file is rewritten either way, so the message is the only
+    // thing that could be wrong — and a gate telling a reader nothing happened
+    // is the same defect as a gate claiming more than it checks.
+    const root = makeAdrRepo({ legacy: true });
+    runGate(root, ['--adopt']);
+    const baseline = readBaseline(root);
+    writeFileSync(
+      join(root, BASELINE),
+      `${JSON.stringify({ ...baseline, files: [] }, undefined, 2)}\n`,
+    );
+
+    const written = runGate(root, ['--write']);
+    expect(written.stdout).toContain('may now hold at most 0');
+    expect(written.stdout).not.toContain('unchanged');
   });
 
   it('lowers the bound as records are classified, so it only ever shrinks', () => {

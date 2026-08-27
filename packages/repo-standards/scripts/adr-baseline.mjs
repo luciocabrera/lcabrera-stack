@@ -17,21 +17,31 @@
  * property itself: the most entries the baseline may hold, which no numbering
  * can slip past.
  *
- * Which doors that shuts, and which it does not:
+ * Which doors that shuts, and which it leaves open. The open ones are listed
+ * because this is the module deciding which records escape the gate, and a
+ * reader will act on a claim here precisely when it sounds exhaustive.
  *
- * - **Shut: every command.** `--adopt` refuses a baseline that already exists,
- *   so there is no command that turns today's failures into tomorrow's
- *   exemptions. `--write` only prunes, and it RATCHETS `maxEntries` down to what
- *   it kept — it never raises it, so it cannot launder a hand-added entry into
- *   a baseline the next run calls clean.
  * - **Shut: appending an entry.** The list is then longer than its own bound,
  *   whatever the entry is numbered, and the gate says so.
  * - **Shut: swapping one entry for another.** The record dropped out of the
  *   list is no longer grandfathered and reports its own findings.
- * - **NOT shut: raising `maxEntries` by hand.** Nothing in a tracked file can be
- *   proof against an editor. What the bound buys is that reopening
- *   grandfathering is a single number changing in a diff, rather than one line
- *   appended to a list of seventy that read alike.
+ * - **Shut: `--write`.** It only prunes, and it RATCHETS `maxEntries` down to
+ *   what it kept — it never raises it — and it refuses outright to rewrite a
+ *   baseline that has already grown. So it cannot launder a hand-added entry
+ *   into a baseline the next run calls clean.
+ * - **OPEN: deleting the baseline and adopting again.** `--adopt` refuses a
+ *   baseline that EXISTS; it cannot refuse one that has been removed, and
+ *   nothing in the tree remembers that there was one. Re-adoption grandfathers
+ *   whatever fails at that moment, new records included. It does not defeat the
+ *   bound — `--adopt` writes `maxEntries` from what it grandfathered, so the
+ *   number still moves in the diff — but it is a command path and calling it
+ *   shut would be false.
+ * - **OPEN: raising `maxEntries` by hand.** Nothing in a tracked file can be
+ *   proof against an editor.
+ *
+ * Both open doors are visible the same way, and that is the property this shape
+ * actually buys: reopening grandfathering shows up as a single number changing,
+ * rather than as one line appended to a list of seventy that read alike.
  *
  * Shape: `{ files: [<filename>], maxEntries: <number> }`.
  */
