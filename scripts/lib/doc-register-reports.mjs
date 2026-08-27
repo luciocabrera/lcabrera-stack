@@ -147,7 +147,8 @@ export const distanceReport = ({ requirements, resolves, rootTasks }) => {
 
 const documentRow = (entry, width) => {
   const state = entry.fields.state ?? entry.fields.kind ?? '?';
-  return `  ${pad(`[${state}]`, width + 2)} ${entry.file}  ${describeIssues(entry)}`;
+  const label = pad(`[${state}]`, width + 2);
+  return `  ${label} ${entry.file}  ${describeIssues(entry)}`;
 };
 
 const documentRows = (entries) => {

@@ -160,7 +160,10 @@ const metProblems = (entry, { ciCommands }) => {
 
 const H1 = /^# \S/m;
 const REQUIRED_SECTIONS = [/^## Statement$/m, /^## Acceptance$/m];
-const CHECKBOX = /^\s*[*-] \[[ xX]\]/m;
+// `[ \t]*`, not `\s*`: with the `m` flag `\s` matches a newline too, so `^\s*`
+// can backtrack across blank lines super-linearly (Sonar S8786). A bullet's
+// indent is spaces or tabs, so the narrower class is also the correct one.
+const CHECKBOX = /^[ \t]*[*-] \[[ xX]\]/m;
 
 /** The body shape `docs/product/README.md` fixes, plus its one prohibition:
  *  an acceptance checkbox is a second declaration of `state`, and two copies of
