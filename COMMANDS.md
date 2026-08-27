@@ -469,9 +469,9 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 | `vp run renames:verify`       | check no document still names a file this change renamed away — scoped to the diff, which is what lets it check bare filenames at all (`--base <ref>`, default `origin/main`)                                                                                                        |
 | `vp run route-names:verify`   | check every `*.types`/`*.constants` file in a route folder names an artifact that folder holds — the half of `local-rules/domain-folder-filename` an ESLint rule cannot reach (#613)                                                                                                 |
 | `vp run inventory:verify`     | check every `*.util.ts`/`*.util.tsx` value export (`export const`/`export function`; type-only exports are out of scope) is named (in backticks) somewhere in its tree's own `INVENTORY.md` (`--write` regenerates `scripts/inventory-drift-baseline.json`, reviewed as a JSON diff) |
-| `vp run adr:verify`           | check ADR home, filename, heading and number uniqueness, and that each home's index is current; prints the next free number (`--write` regenerates the indexes)                                                                                                                      |
+| `vp run adr:verify`           | check ADR home, filename, heading, number uniqueness, each home's index, and each record's `governs` block and required sections; prints the next free number (`--write` prunes the baseline and regenerates the indexes; `--adopt` writes the baseline once)                        |
 | `vp run adr:new`              | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|app] [--slug <s>] [--dry-run]`                                                                                                                            |
-| `vp run adr:list`             | print every ADR with its title, per home — the listing each home's index deliberately does not carry ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md))                                                                                                         |
+| `vp run adr:list`             | print every ADR with its title, per home — the listing each home's index deliberately does not carry ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)); `-- --package <workspace-directory-name>` narrows it to the decisions governing one                    |
 | `vp run devkit:sync`          | materialise the shipped files into this repository from [`packages/devkit`](packages/devkit/CLASSIFICATION.md) — a locally modified file is reported and kept, never overwritten; `-- --profile full` also places the workflows, hooks, templates and registers                      |
 | `vp run devkit:doctor`        | report what differs between the materialised copies and the package; `-- --check` fails on a difference, `-- --verbose` also lists acknowledged edits, `-- --profile <name>` reads a profile other than the configured one, `-- --accept <path> --reason "…"` acknowledges ONE       |
 | `vp run devkit:closure`       | measure what a directory references but does not contain — `-- <dir> [<dir> ...]`, or `-- --shipped` for every file the package places, in every profile (`-- --profile <name>` narrows it to one); the instrument behind the classification table                                   |
@@ -482,6 +482,35 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 | `vp run skills:validate`      | validate skill definitions                                                                                                                                                                                                                                                           |
 | `vp run skills:report`        | skills compliance report                                                                                                                                                                                                                                                             |
 | `vp run prepare`              | `vp config` — runs automatically on install                                                                                                                                                                                                                                          |
+
+`adr:verify` reads the record, not only its name. Every ADR opens with a
+`---` block declaring **`governs`** — workspace directory names (`ui`,
+`node-runtime`, never npm names), or the single value `repository` when the
+decision constrains no one workspace. The two do not mix, and the list is never
+empty: "governs everything" and "nobody filled this in" must not be spelled the
+same way. The gate also requires `## Context`, `## Decision`, `## Consequences`
+and at least one of `## Options considered` / `## Alternatives considered` to be
+present and **not empty** — a heading whose only content is the template's own
+prompt counts as empty. It does not judge what a section says, and its success
+line says so.
+
+**The block is additive classification, not an amendment.** An ADR is a dated
+record and its body is never rewritten; `governs` says what the decision applies
+to, which is a fact about the tree you are standing in rather than a change to
+what was decided. That is why adding one to an old ADR is allowed while editing
+its body is not.
+
+The records that predate the block are grandfathered in
+[`scripts/adr-content-baseline.json`](scripts/adr-content-baseline.json), and
+that list may **shrink but not grow**. Three things hold that direction, none of
+them a promise: `closedAt` is the highest number the baseline covers and an entry
+above it is refused, so a record written since cannot be grandfathered at all;
+`--adopt` refuses a baseline that already exists, so no command turns today's
+failures into tomorrow's exemptions; and `--write` only prunes — an entry naming
+no record, or one whose record now satisfies the rules, is a finding until it is
+dropped. A grandfathered record is unclassified, so `adr:list -- --package`
+cannot see it, and both commands print how many are in that state rather than
+letting an empty listing read as "no decisions govern this package".
 
 `devkit:doctor -- --accept` takes **one** file at a time and refuses a path the
 report does not currently call `modified` or `conflict`, or a missing `--reason` — the same

@@ -9,6 +9,8 @@
  * docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md.
  */
 
+import { adrBody } from './adr-content.mjs';
+
 /** A leading `<!-- … -->` block, which the template uses for its own
  *  instructions. Stripped so a scaffolded ADR does not inherit them. */
 const LEADING_COMMENT = /^\s*<!--[\s\S]*?-->\s*/;
@@ -46,18 +48,28 @@ export const adrFilename = (number, title) =>
  * The section bodies keep their `<!-- … -->` prompts on purpose: they are what
  * tells the author what belongs there, and an author who deletes them has read
  * them. Only the file-level block at the top is dropped.
+ *
+ * The classification block is carried through VERBATIM, placeholders included.
+ * A scaffolded record therefore fails `adr:verify` until its author says what
+ * the decision governs — which is the point of asking, and is why the leading
+ * comment is found after the block rather than at byte zero.
  */
 export const renderAdr = ({ number, template, title }) => {
-  const withoutInstructions = template.replace(LEADING_COMMENT, '');
+  const body = adrBody(template);
+  const block = template.slice(0, template.length - body.length);
+  const withoutInstructions = body.replace(LEADING_COMMENT, '');
   if (!HEADING_LINE.test(withoutInstructions)) {
     throw new Error(
       'the ADR template no longer has an `# ADR-NNN — …` heading to fill in',
     );
   }
-  return withoutInstructions.replace(
+  const record = withoutInstructions.replace(
     HEADING_LINE,
     `# ADR-${pad(number)} — ${title}`,
   );
+  // The stripped comment took the blank line after the block with it; markdown
+  // does not need it back, but every other record in the home has one.
+  return block === '' ? record : `${block}\n${record}`;
 };
 
 /**

@@ -11,6 +11,11 @@ import {
   parseAdrFilename,
 } from '../../packages/repo-standards/scripts/adr-registry.mjs';
 import {
+  REPOSITORY_SCOPE,
+  blockFindings,
+  governedBy,
+} from '../../packages/repo-standards/scripts/adr-content.mjs';
+import {
   adrFilename,
   pad,
   renderAdr,
@@ -81,9 +86,22 @@ describe('renderAdr', () => {
   });
 
   it("drops the template's own instructions", () => {
-    expect(template()).toMatch(/^\s*<!--/);
-    expect(rendered()).toMatch(/^# ADR-052/);
+    // The instructions sit after the classification block, not at byte zero, so
+    // this is what proves the scaffold still finds them there.
+    expect(template()).toMatch(/^---\n[\s\S]*?\n---\n\s*<!--/);
+    expect(rendered()).toMatch(/^---\n[\s\S]*?\n---\n\n# ADR-052/);
     expect(rendered()).not.toContain('vp run adr:new');
+  });
+
+  it('carries the classification block through with its placeholder intact', () => {
+    // A scaffolded record must FAIL `adr:verify` until its author says what the
+    // decision governs. Filling the placeholder in here would hand out a record
+    // that passes the gate while classifying nothing.
+    expect(rendered()).toContain('governs:');
+    expect(governedBy(rendered())).not.toContain(REPOSITORY_SCOPE);
+    expect(
+      blockFindings({ markdown: rendered(), workspaces: new Set(['ui']) }),
+    ).not.toEqual([]);
   });
 
   it('keeps the per-section prompts, which are what tell the author what goes there', () => {
@@ -96,6 +114,18 @@ describe('renderAdr', () => {
     expect(() =>
       renderAdr({ number: 52, template: '## Context\n', title: 'x' }),
     ).toThrow(/heading/);
+  });
+
+  it('still renders a template that carries no block at all', () => {
+    // The block is additive: a consumer's older template has none, and the
+    // scaffold must not start requiring one to work.
+    expect(
+      renderAdr({
+        number: 52,
+        template: '<!-- how to -->\n\n# ADR-NNN — x\n',
+        title: 'y',
+      }),
+    ).toBe('# ADR-052 — y\n');
   });
 });
 
@@ -123,6 +153,12 @@ describe('the shipped template', () => {
     ]) {
       expect(template()).toContain(heading);
     }
+  });
+
+  it('carries the classification block the gate now requires', () => {
+    // The template is the one place an author copies from, so a block the gate
+    // asks for and the template does not offer is a rule nobody can satisfy.
+    expect(template()).toMatch(/^---\ngoverns:/);
   });
 
   it('is not itself readable as an ADR', () => {

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * Fails the build when an ADR is in the wrong place, badly named, or reuses a
- * number — and keeps each home's index in step with its directory.
+ * Fails the build when an ADR is in the wrong place, badly named, reuses a
+ * number, or does not say what it decided and what it governs — and keeps each
+ * home's index in step with its directory.
  *
  * Why this exists: nothing checked ADR placement at all. `docs:verify` skips
  * every `decisions` directory on purpose, because an ADR records a point in time
@@ -11,10 +12,19 @@
  * docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md; this file is what
  * makes it hold.
  *
+ * The gate then read only the filename, so a record with no context, no decision
+ * and no consequences passed exactly like a complete one, and nothing said which
+ * packages a decision constrained. `adr-content.mjs` is the reading of the
+ * record; `adr-baseline.mjs` is the grandfathering of the ones written before
+ * the block existed.
+ *
  * Usage:
- *   repo-verify-adrs           check; exit 1 on any violation
- *   repo-verify-adrs --write   regenerate each home's README index
- *   repo-verify-adrs --list    print every ADR with its title
+ *   repo-verify-adrs                     check; exit 1 on any violation
+ *   repo-verify-adrs --write             prune the baseline, regenerate indexes
+ *   repo-verify-adrs --adopt             write the baseline ONCE, on adoption
+ *   repo-verify-adrs --list              print every ADR with its title
+ *   repo-verify-adrs --list --package <workspace>
+ *                                        print the decisions governing one
  *
  * `--list` is where the per-ADR table went: the committed index carries no row
  * per ADR, because that made every pair of concurrent ADR branches conflict
@@ -22,10 +32,30 @@
  *
  * Exit codes: 0 = clean, 1 = a violation, or an index that is out of date.
  */
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  EMPTY_BASELINE,
+  adoptedBaseline,
+  baselineFindings,
+  baselinedFiles,
+  prunedBaseline,
+  readableBaseline,
+} from './adr-baseline.mjs';
+import {
+  REPOSITORY_SCOPE,
+  adrBody,
+  governedBy,
+  recordFindings,
+} from './adr-content.mjs';
 import {
   ADR_HOMES,
   DRAFT_DIR,
@@ -36,15 +66,33 @@ import {
   looksLikeAdr,
   nextFreeNumber,
   normalizeIndex,
+  parseAdrFilename,
+  renderGoverned,
   renderIndex,
   renderListing,
 } from './adr-registry.mjs';
+import { pad } from './adr-scaffold.mjs';
+import { readRegisters } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
+import { deriveWorkspaceScopes } from './workspace-scopes.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 const INDEX_FILE = 'README.md';
+
+const BASELINE_REL = readRegisters(REPO_ROOT).adrContentBaseline;
+const BASELINE_PATH = join(REPO_ROOT, BASELINE_REL);
+
+/**
+ * The workspace names a record's `governs` may hold, derived from
+ * pnpm-workspace.yaml rather than declared — so a workspace added today is a
+ * legal answer today. An empty roster is not treated as "allow anything": the
+ * finding says the roster could not be derived, because a gate that accepts
+ * every name when it can read none is a gate reporting a clean pass over
+ * nothing.
+ */
+const WORKSPACES = deriveWorkspaceScopes(REPO_ROOT);
 
 /** Directories that never hold governed documentation. */
 const SKIPPED_DIRS = new Set([
@@ -64,12 +112,21 @@ const listMarkdown = (dir) => {
     : [];
 };
 
+/**
+ * One record, read once. The heading is taken from the BODY rather than from the
+ * file: a `#` comment inside the block would otherwise be picked up as the H1,
+ * and the number check would stop firing without saying so.
+ */
 const entryFor = (dir, filename) => {
   const markdown = readFileSync(join(REPO_ROOT, dir, filename), 'utf8');
+  const body = adrBody(markdown);
   return {
     filename,
-    headingNumber: headingNumber(markdown),
-    title: headingTitle(markdown),
+    governs: governedBy(markdown),
+    headingNumber: headingNumber(body),
+    markdown,
+    number: parseAdrFilename(filename)?.number,
+    title: headingTitle(body),
   };
 };
 
@@ -140,6 +197,60 @@ const writeIndexes = (homes) => {
   );
 };
 
+/** What every record says about itself, with where it lives, for the baseline
+ *  arithmetic and for the findings alike. */
+const recordsOf = (homes) =>
+  homes.flatMap((home) =>
+    home.entries.map((entry) => ({
+      filename: entry.filename,
+      findings: recordFindings({
+        markdown: entry.markdown,
+        workspaces: WORKSPACES,
+      }),
+      number: entry.number,
+      path: `${home.dir}/${entry.filename}`,
+    })),
+  );
+
+const readBaseline = () =>
+  existsSync(BASELINE_PATH)
+    ? readableBaseline(JSON.parse(readFileSync(BASELINE_PATH, 'utf8')))
+    : EMPTY_BASELINE;
+
+/** The directory is created rather than assumed: a repository adopting the gate
+ *  need not already have one where the baseline is configured to live. */
+const saveBaseline = (baseline) => {
+  mkdirSync(dirname(BASELINE_PATH), { recursive: true });
+  writeFileSync(BASELINE_PATH, `${JSON.stringify(baseline, undefined, 2)}\n`);
+};
+
+/**
+ * A workspace called `repository` would make the two meanings of `governs`
+ * indistinguishable. Reported once against the roster rather than per record,
+ * because it is the roster that is wrong.
+ */
+const rosterFindings = () =>
+  WORKSPACES.has(REPOSITORY_SCOPE)
+    ? [
+        `pnpm-workspace.yaml declares a workspace named \`${REPOSITORY_SCOPE}\`, which is the word \`governs\` uses for "no one workspace" — the two cannot be told apart`,
+      ]
+    : [];
+
+const contentFindings = ({ baseline, records }) => {
+  const grandfathered = baselinedFiles(baseline);
+  return [
+    ...rosterFindings(),
+    ...records
+      .filter((record) => !grandfathered.has(record.filename))
+      .flatMap((record) =>
+        record.findings.map((finding) => `${record.path} — ${finding}`),
+      ),
+    ...baselineFindings({ baseline, records }).map(
+      (finding) => `${BASELINE_REL}: ${finding}`,
+    ),
+  ];
+};
+
 const report = (findings, stale) => {
   console.error(`ADR gate — ${findings.length + stale.length} violation(s):\n`);
   for (const finding of findings) {
@@ -155,30 +266,125 @@ const report = (findings, stale) => {
   );
 };
 
-const main = () => {
-  const homes = readHomes();
-
-  if (process.argv.includes('--list')) {
-    console.log(renderListing(homes));
+/**
+ * The baseline is written once, on adoption, and never again. There is
+ * deliberately no command that turns today's failures into tomorrow's
+ * exemptions — that is what would make it grow.
+ */
+const runAdopt = (records) => {
+  if (existsSync(BASELINE_PATH)) {
+    console.error(
+      `${BASELINE_REL} already exists. The baseline is adopted once: it may be pruned with --write, and it may not grow.`,
+    );
+    process.exitCode = 1;
     return;
   }
+  const baseline = adoptedBaseline(records);
+  saveBaseline(baseline);
+  console.log(
+    `Wrote ${BASELINE_REL}: ${baseline.files.length} record(s) grandfathered, closed at ADR-${pad(baseline.closedAt)}.`,
+  );
+};
 
-  const findings = adrFindings({
+/** Prune-only. `--write` may drop an entry that no longer earns its place; it
+ *  may never absorb a new one. */
+const runWrite = (homes, records) => {
+  const structural = adrFindings({
     drafts: listMarkdown(DRAFT_DIR),
     homes,
     strays: strayPaths(),
   });
-
-  if (process.argv.includes('--write')) {
-    if (findings.length > 0) {
-      report(findings, []);
-      process.exitCode = 1;
-      return;
-    }
-    writeIndexes(homes);
+  if (structural.length > 0) {
+    report(structural, []);
+    process.exitCode = 1;
     return;
   }
 
+  const baseline = readBaseline();
+  const pruned = prunedBaseline({ baseline, records });
+  const dropped = baseline.files.length - pruned.files.length;
+  if (existsSync(BASELINE_PATH)) {
+    saveBaseline(pruned);
+    console.log(
+      dropped === 0
+        ? `${BASELINE_REL} unchanged — every grandfathered record still needs it.`
+        : `${BASELINE_REL} pruned: ${dropped} record(s) no longer need grandfathering.`,
+    );
+  }
+  writeIndexes(homes);
+};
+
+/** `--package <name>`, or undefined. (pure) */
+const packageArg = (argv) => {
+  const at = argv.indexOf('--package');
+  return at === -1 ? undefined : argv[at + 1];
+};
+
+/**
+ * How many records the listing cannot see.
+ *
+ * Printed under the tables because an empty one is ambiguous otherwise: "no
+ * decision governs this package" and "every decision predates the block" read
+ * the same, and only one of them is a fact about the package.
+ */
+const unclassifiedCount = (homes) =>
+  homes.reduce(
+    (count, home) =>
+      count + home.entries.filter((entry) => entry.governs.length === 0).length,
+    0,
+  );
+
+const runList = (homes) => {
+  const workspace = packageArg(process.argv);
+  if (workspace === undefined) {
+    console.log(renderListing(homes));
+    return;
+  }
+  if (!WORKSPACES.has(workspace)) {
+    console.error(
+      `--package: \`${workspace}\` is no workspace in this repository (${[...WORKSPACES].toSorted((left, right) => left.localeCompare(right)).join(', ')}). A name nothing answers to would list nothing and read as "no decisions govern it".`,
+    );
+    process.exitCode = 1;
+    return;
+  }
+  console.log(renderGoverned({ homes, workspace }));
+
+  const unclassified = unclassifiedCount(homes);
+  if (unclassified > 0) {
+    console.log(
+      `_${unclassified} record(s) carry no \`governs\` block, appear in neither table, and are grandfathered in ${BASELINE_REL}._`,
+    );
+  }
+};
+
+const main = () => {
+  const homes = readHomes();
+  const records = recordsOf(homes);
+
+  if (process.argv.includes('--list')) {
+    runList(homes);
+    return;
+  }
+
+  if (process.argv.includes('--adopt')) {
+    runAdopt(records);
+    return;
+  }
+
+  if (process.argv.includes('--write')) {
+    runWrite(homes, records);
+    return;
+  }
+
+  const baseline = readBaseline();
+  const findings = [
+    ...adrFindings({
+      drafts: listMarkdown(DRAFT_DIR),
+      homes,
+      strays: strayPaths(),
+    }),
+    ...contentFindings({ baseline, records }),
+  ];
   const stale = staleIndexes(homes);
   if (findings.length > 0 || stale.length > 0) {
     report(findings, stale);
@@ -188,7 +394,13 @@ const main = () => {
 
   const total = homes.reduce((count, home) => count + home.entries.length, 0);
   console.log(
-    `ADR gate passed: ${total} ADR(s) across ${homes.length} home(s); next free number is ADR-${String(nextFreeNumber(homes)).padStart(3, '0')}.`,
+    `ADR gate passed: ${total} ADR(s) across ${homes.length} home(s); next free number is ADR-${pad(nextFreeNumber(homes))}.`,
+  );
+  console.log(
+    `${baseline.files.length} record(s) predate the metadata block and are grandfathered in ${BASELINE_REL} (closed at ADR-${pad(baseline.closedAt)}); they are unclassified and \`--list --package\` cannot see them.`,
+  );
+  console.log(
+    'Not checked, and not checkable here: whether a section says anything true — only that it is present and not empty.',
   );
 };
 

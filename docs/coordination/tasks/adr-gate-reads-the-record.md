@@ -1,6 +1,6 @@
 ---
 id: adr-gate-reads-the-record
-title: Make the ADR gate read the record: metadata block, section assertion, listing by package
+title: 'Make the ADR gate read the record: metadata block, section assertion, listing by package'
 owner: agent:claude
 status: active
 branch: feat/991-adr-gate-reads-the-record
@@ -11,19 +11,30 @@ area:
   - devkit.config.json
   - COMMANDS.md
   - scripts/adr-content-baseline.json
+  - scripts/lib/adr-scaffold.test.mjs
+  - packages/devkit/assets/root/COMMANDS.md
+  - reports/api-surface/repo-standards.txt
+  - .changeset/adr-gate-reads-the-record.md
 started: 2026-08-27
 updated: 2026-08-27
 plan: (none)
-pr: (none)
+pr: 1013
 issue: #991
 ---
 
 ## What
 
-Make the ADR gate read the record: metadata block, section assertion, listing by package
+Teach `adr:verify` to read the ADR body: a `governs` classification block held
+against the derived workspace roster, the required sections (#588, landed here),
+a grandfathering baseline for the records that predate the block, and
+`adr:list -- --package <workspace>`.
+
+Lands #588 as well as #991 — both teach the same gate to read the body, and
+splitting them would edit `adr-registry.mjs`, `verify-adrs.mjs` and
+`docs/decisions/_TEMPLATE.md` twice with a conflict in between.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implementation complete, running the gate
 - Blockers: none
-- Next:
+- Next: push, retitle the draft PR, ready it

@@ -83,7 +83,7 @@ until you acknowledge it.
 | `repo-verify-pr --title <t> --body-file <f>` | a pull request's title and every required section             |
 | `repo-verify-issue --body-file <f>`          | an issue body's required sections                             |
 | `repo-verify-claims`                         | the coordination register's integrity, overlap and staleness  |
-| `repo-verify-adrs`                           | every ADR home, and regenerates the index                     |
+| `repo-verify-adrs`                           | every ADR home, and every record's block and sections         |
 | `repo-verify-publish`                        | the tarball each built package would publish, by packing it   |
 | `repo-verify-api-surface`                    | each published package's exported surface against a snapshot  |
 | `repo-verify-types`                          | that a built package's published types resolve for a consumer |

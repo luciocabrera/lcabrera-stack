@@ -76,7 +76,7 @@ install and a git hook can call them from the working tree.
 | `repo-verify-pr`     | A pull request's title, description and base branch.                |
 | `repo-verify-issue`  | An issue description against the template.                          |
 | `repo-verify-claims` | The coordination register's integrity, overlap and staleness.       |
-| `repo-verify-adrs`   | Decision-record placement, numbering and index freshness.           |
+| `repo-verify-adrs`   | Decision-record placement, numbering, index freshness, and body.    |
 | `repo-close-claim`   | Deletes the task file(s) a merged pull request claimed.             |
 | `repo-claim-board`   | Renders the register as a table, on demand.                         |
 | `repo-adr`           | Scaffolds a new decision record at the next free number.            |
