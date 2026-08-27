@@ -122,6 +122,24 @@ describe('commandsRunByCi', () => {
     ).toBe(true);
   });
 
+  // The over-reporting limit, pinned so the header and the code cannot drift
+  // apart again: a filter is read by neither, so the task counts either way.
+  // Both of these workflows would sit out most pull requests.
+  it('counts a task from a branch-filtered or path-filtered workflow', () => {
+    const branchFiltered =
+      'name: Release\n\non:\n  push:\n    branches: [main]\n\njobs:\n  publish:\n    steps:\n      - run: vp run publish:verify\n';
+    const pathFiltered =
+      'name: Lighthouse\n\non:\n  pull_request:\n    paths:\n      - apps/showcase/**\n\njobs:\n  audit:\n    steps:\n      - run: vp run audit:lighthouse\n';
+
+    const counted = commandsRunByCi({
+      rootScripts,
+      workflows: [{ source: branchFiltered }, { source: pathFiltered }],
+    });
+
+    expect(counted.has('publish:verify')).toBe(true);
+    expect(counted.has('audit:lighthouse')).toBe(true);
+  });
+
   it('does not count one named only in a comment', () => {
     expect(
       commandsRunByCi({ rootScripts, workflows }).has('docs:mentioned-only'),
@@ -134,8 +152,9 @@ describe('commandsIn', () => {
     expect(commandsIn('vp run a:b && vp run c')).toEqual(['a:b', 'c']);
   });
 
-  // Under-reporting on purpose: a task behind `--filter` is not named here, and
-  // a gate that flatters a pointer is worse than one that stays quiet.
+  // The under-reporting limit: a task behind `--filter` is not named here, so a
+  // pointer at one fails to resolve rather than being flattered. (The other
+  // limit runs the other way — see the module header.)
   it('names no task behind a flag', () => {
     expect(commandsIn('vp run --filter showcase test')).toEqual([]);
   });

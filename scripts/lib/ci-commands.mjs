@@ -10,20 +10,34 @@
  * and this module does not pretend to it; see `docs/product/README.md`, which
  * makes it a procedure for the author and the reviewer.
  *
- * Two deliberate limits, both of which make this UNDER-report rather than
- * over-report: only a task named literally after `vp run` is seen (not one
- * behind `--filter`), and a path-filtered workflow counts, because whether its
- * filter covers a given change is a per-change question. A gate that flatters a
- * pointer is the failure mode to avoid, so where it cannot tell, it is silent.
+ * Two deliberate limits, and they err in OPPOSITE directions. Know which before
+ * trusting a result.
+ *
+ * It UNDER-reports a task named behind a flag: only one written literally after
+ * `vp run` is seen, so `vp run --filter showcase test` names nothing. A pointer
+ * at such a task fails to resolve rather than being flattered.
+ *
+ * It OVER-reports a filtered workflow. `workflowTriggers` reads trigger NAMES
+ * only, so a `push:` block's `branches:`/`tags:` and any `paths:` are discarded
+ * — a `push`-triggered workflow counts regardless of its branch filter, and a
+ * path-filtered one counts regardless of what the change touched. Whether a
+ * filter covers a given change is a per-change question no file answers, and
+ * the alternative — dropping every filtered workflow — would make real gates
+ * invisible, which fails the same rule in the worse direction. The residual
+ * cost is that a `met` claim can rest on a workflow that would not run on a
+ * pull request, so a reviewer weighing one reads the workflow rather than this
+ * module's verdict alone.
  *
  * Everything here is pure — callers read the files.
  */
 
 /**
- * Triggers that fire on a change to the repository. A `schedule`- or
- * `workflow_dispatch`-only workflow is real CI, but it does not run against the
- * commit that declares the requirement, so it cannot be what a `met` claim
- * rests on.
+ * Triggers that fire on a change to the repository — a commit, whether it is
+ * still on a branch or already on `main`. A `schedule`- or
+ * `workflow_dispatch`-only workflow is real CI, but it runs against a clock or
+ * a person rather than against a change, so it cannot be what a `met` claim
+ * rests on. `push` is in the set and its `branches:` filter is not read, which
+ * is the over-report the module header describes.
  */
 export const GATING_TRIGGERS = new Set(['merge_group', 'pull_request', 'push']);
 

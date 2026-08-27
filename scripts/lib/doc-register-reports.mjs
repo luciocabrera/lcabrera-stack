@@ -63,9 +63,13 @@ const issuesOf = (entry) => {
   return issues.map((issue) => (issue.startsWith('#') ? issue : `#${issue}`));
 };
 
+/** Nothing in either report knows whether an issue is OPEN: the registers hold
+ *  numbers and both reports read the working tree with no GitHub call. So the
+ *  empty case says what was read — the document names none — rather than
+ *  asserting a state nothing here checked (AGENTS.md Rule 14). */
 const describeIssues = (entry) => {
   const issues = issuesOf(entry);
-  return issues.length === 0 ? 'no open issue' : issues.join(', ');
+  return issues.length === 0 ? 'names no issue' : issues.join(', ');
 };
 
 const asList = (values) => (values.length === 0 ? '—' : values.join(', '));

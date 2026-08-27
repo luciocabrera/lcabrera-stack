@@ -112,6 +112,27 @@ describe('packageDocsReport', () => {
     expect(report).toContain('[plan] docs/agents/planning/a-plan.md  #547');
   });
 
+  // Neither report makes a GitHub call, so "open" is not a fact either one has:
+  // the registers hold bare numbers read from the working tree. The empty case
+  // reports what was read (AGENTS.md Rule 14).
+  it('says a document names no issue, not that none is open', () => {
+    const report = packageDocsReport({
+      planning: [],
+      requirements: [
+        toEntry({
+          file: 'docs/product/requirements/e.md',
+          register: 'requirement',
+          source:
+            '---\nid: e\nstate: met\npackages: [ui]\nissues: []\n---\n\n# e\n',
+        }),
+      ],
+      workspace: 'ui',
+    });
+
+    expect(report).toContain('docs/product/requirements/e.md  names no issue');
+    expect(report).not.toContain('open');
+  });
+
   it('says so plainly when a workspace owes nothing', () => {
     const report = packageDocsReport({
       planning: [],
