@@ -136,42 +136,37 @@ const AMBIGUOUS_BASENAMES = new Set(
 
 const hasDirectoryComponent = (candidate) => /[/\\]/.test(String(candidate));
 
-// A dotted identifier chain — no separator, no space, no punctuation. Linear,
-// no nested quantifier (S8786): each repetition must consume a literal `.`, and
-// `\w` cannot match one, so the split points are fixed.
-const PROPERTY_ACCESS_CHAIN = /^[\w$]+(?:\.[\w$]+)+$/;
-
 /**
- * `<chain>.env` with no separator is the `object.property` shape far more often
- * than it is a filename, so matching it denied plain everyday commands —
- * `grep -rn process.env src/`, `grep -rn import.meta.env packages/`. A real env
- * file is dot-prefixed (`.env`, `.env.local`) or carries a directory
- * (`config/dev.env`), and both still match; so does a quoted `my file.env`,
- * which the chain shape rejects on the space. Only the `.env` family relaxes —
- * key material (`server.key`) stays strict, because nothing reads like a
- * property access there.
+ * The runtime env objects, spelled out. These are the only tokens that both end
+ * in `.env` and are code rather than a path, so `grep -rn process.env src/` was
+ * denied as an attempt to open a file. Anything deeper —
+ * `process.env.DATABASE_URL` — already passed: it ends in the variable name and
+ * matches no taxonomy entry.
+ *
+ * An allowlist, not a shape, and the distinction is the whole point. Accepting
+ * any dotted chain would also admit `cat prod.env` and `cat secrets.env`, on the
+ * reasoning that a real env file is dot-prefixed or carries a directory. That is
+ * a convention, not a property of env files, and a deny must not rest on one.
+ * Widening this set is a policy change, not a false-positive fix: it needs a
+ * deny-side case pinning what it costs.
  */
-const isEnvPropertyAccess = (candidate) => {
-  const token = String(candidate).trim();
-  return (
-    PROPERTY_ACCESS_CHAIN.test(token) && token.toLowerCase().endsWith('.env')
-  );
-};
+const ENV_CODE_CHAIN =
+  /^(?:(?:globalThis\.)?process|import\.meta|bun|deno)\.env$/i;
 
 /**
  * Bash tokens are GUESSES at paths; Read's `file_path` is a declared one. So an
  * ambiguous bare word only counts here when it carries a directory — which the
  * real files always do (`~/.aws/credentials`, `./credentials`). The deliberate
- * cost is a bare `cat credentials` (or `cat foo.env`) naming a file in the
- * working directory; the explicit path tools still match those spellings, and it
- * is a poor trade to deny every sentence containing the word to catch it.
+ * cost is a bare `cat credentials` naming a file in the working directory; the
+ * explicit path tools still match that spelling, and it is a poor trade to deny
+ * every sentence containing the word to catch it.
  */
 const isSecretPathInCommand = (candidate) => {
   const name = candidateBasename(candidate);
   if (AMBIGUOUS_BASENAMES.has(name) && !hasDirectoryComponent(candidate)) {
     return false;
   }
-  if (isEnvPropertyAccess(candidate)) {
+  if (ENV_CODE_CHAIN.test(String(candidate).trim())) {
     return false;
   }
   return isSecretFilePath(candidate);
