@@ -197,6 +197,15 @@ describe('sectionFindings', () => {
     ]);
   });
 
+  it('does not read a `##` with no title as a section', () => {
+    // The heading regex captures greedily and trims, rather than using a lazy
+    // group between two whitespace classes — so an all-whitespace title has to
+    // be rejected in code, where a `(.+?)` would have rejected it by failing.
+    const blank = '## Decision\n\ntext\n\n##   \n\nloose\n';
+    expect([...sectionsOf(blank).keys()]).toEqual(['decision']);
+    expect(sectionsOf(blank).get('decision')).toContain('loose');
+  });
+
   it('keeps a `###` subsection inside the section it sits in', () => {
     expect(
       sectionsOf('## Decision\n\n### Detail\n\ntext\n').get('decision'),

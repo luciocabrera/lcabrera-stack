@@ -67,7 +67,6 @@ import {
   looksLikeAdr,
   nextFreeNumber,
   normalizeIndex,
-  parseAdrFilename,
   renderGoverned,
   renderIndex,
   renderListing,
@@ -126,7 +125,6 @@ const entryFor = (dir, filename) => {
     governs: governedBy(markdown),
     headingNumber: headingNumber(body),
     markdown,
-    number: parseAdrFilename(filename)?.number,
     title: headingTitle(body),
   };
 };
@@ -208,7 +206,6 @@ const recordsOf = (homes) =>
         markdown: entry.markdown,
         workspaces: WORKSPACES,
       }),
-      number: entry.number,
       path: `${home.dir}/${entry.filename}`,
     })),
   );
@@ -476,8 +473,14 @@ const main = () => {
   console.log(
     `ADR gate passed: ${total} ADR(s) across ${homes.length} home(s); next free number is ADR-${pad(nextFreeNumber(homes))}.`,
   );
+  // The bound is deliberately not printed here. Every command that writes the
+  // baseline leaves it equal to the list's length, so on a clean run the two
+  // numbers cannot differ, and the one place they can — a list that has grown —
+  // is a finding that prints both. (Sonar reads the parsed field reaching a log
+  // as a leak; it is an `Number.isInteger`-guarded count and cannot carry
+  // anything else, but the line reads better without it either way.)
   console.log(
-    `${baseline.files.length} record(s) predate the metadata block and are grandfathered in ${BASELINE_REL}, which may hold at most ${baseline.maxEntries}; they are unclassified and \`--list --package\` cannot see them. Exemptions are keyed on filename, so that list pins how many records escape these rules, not which — review the records too.`,
+    `${baseline.files.length} record(s) predate the metadata block and are grandfathered in ${BASELINE_REL}; they are unclassified and \`--list --package\` cannot see them. Exemptions are keyed on filename, so that list pins how many records escape these rules, not which — review the records too.`,
   );
   console.log(
     'Not checked, and not checkable here: whether a section says anything true — only that it is present and not empty.',

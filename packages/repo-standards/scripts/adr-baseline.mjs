@@ -91,8 +91,11 @@ const growthFinding = (baseline) =>
 /**
  * What the baseline itself gets wrong.
  *
- * `records` is `{ filename, findings, number }` per ADR — `findings` being what
- * the content rules say about it, so this module never parses a record itself.
+ * `records` is `{ filename, findings }` per ADR — `findings` being what the
+ * content rules say about it, so this module never parses a record itself. It
+ * keys on the filename and decides on the findings, and reads nothing else; a
+ * record's NUMBER was in this shape while the bound was a number window, and
+ * went with it.
  */
 export const baselineFindings = ({ baseline, records }) => {
   const byFilename = new Map(

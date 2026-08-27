@@ -17,10 +17,12 @@ import {
   readableBaseline,
 } from './adr-baseline.mjs';
 
+// The number builds the filename and is not a field: the contract is
+// `{ filename, findings }`, and a fixture carrying more than the shape would let
+// a reader back into the module go unnoticed.
 const record = (number, findings = []) => ({
   filename: `ADR-${String(number).padStart(3, '0')}-a.md`,
   findings,
-  number,
 });
 
 const failing = (number) => record(number, ['no metadata block']);

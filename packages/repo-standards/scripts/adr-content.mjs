@@ -234,7 +234,17 @@ export const blockFindings = ({ markdown, workspaces }) => {
   ];
 };
 
-const SECTION = /^##[ \t]+(.+?)[ \t]*$/;
+/**
+ * A `##` heading and its title. The title is captured greedily to end of line
+ * and trimmed in code rather than matched with a lazy group between two
+ * whitespace classes: that shape backtracks super-linearly on a long run of
+ * spaces (Sonar S8786, measured quadratic before this), and it bought nothing
+ * `trim` does not.
+ *
+ * `###` does not match, because the character after `##` must be a space or a
+ * tab — so a subsection stays part of the section it sits in.
+ */
+const SECTION = /^##[ \t]+(.*)$/;
 const TITLE = /^#[ \t]+/;
 /**
  * An HTML comment, INCLUDING an unterminated one, which runs to the end of the
@@ -260,8 +270,9 @@ export const sectionsOf = (body) => {
   let open;
   for (const line of body.replaceAll(COMMENT, '').split('\n')) {
     const heading = SECTION.exec(line);
-    if (heading !== null) {
-      open = heading[1].toLowerCase();
+    const title = heading === null ? '' : heading[1].trim().toLowerCase();
+    if (title !== '') {
+      open = title;
       sections.set(open, []);
     } else if (TITLE.test(line)) {
       open = undefined;

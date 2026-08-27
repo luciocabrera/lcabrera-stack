@@ -35,9 +35,8 @@ splitting them would edit `adr-registry.mjs`, `verify-adrs.mjs` and
 
 ## Status / next
 
-- Current step: round 6 — five review threads: `--write` no longer exits 0 on a
-  tree the plain run rejects, `--package` refuses a missing name, the changing
-  counts are out of the published comments, the shipped template no longer
-  contradicts itself, and the comment strip handles an unterminated comment
+- Current step: round 7 — the dead `number` field, its import and the stale
+  contract comment are gone, and the two Sonar findings on this PR's own code
+  are fixed: a super-linear heading regex, and a parsed count reaching a log
 - Blockers: none
 - Next: awaiting review on #1013
