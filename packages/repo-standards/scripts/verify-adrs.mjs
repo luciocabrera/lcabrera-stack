@@ -309,7 +309,7 @@ const runAdopt = (records) => {
   const baseline = adoptedBaseline(records);
   saveBaseline(baseline);
   console.log(
-    `Wrote ${BASELINE_REL}: ${baseline.files.length} record(s) grandfathered, and that is the most it may ever hold.`,
+    `Wrote ${BASELINE_REL}: ${baseline.files.length} record(s) grandfathered. From here the gate refuses a longer list, and --adopt refuses to overwrite this file while it is there.`,
   );
 };
 
@@ -391,12 +391,23 @@ const runWrite = (homes, records) => {
  * The two are different answers and must not collapse: reading a missing name as
  * "no filter" prints every record under no heading, which answers a question the
  * reader did not ask. A following `--flag` is treated as missing for the same
- * reason, since `--package --write` names no workspace either.
+ * reason, since `--package --write` names no workspace either — as is
+ * `--package=` with nothing after the equals. Both spellings of the flag are
+ * matched, because the `=` form is a single argv entry.
  */
+const PACKAGE_FLAG = '--package';
+
 const packageArg = (argv) => {
-  const at = argv.indexOf('--package');
+  const at = argv.findIndex(
+    (arg) => arg === PACKAGE_FLAG || arg.startsWith(`${PACKAGE_FLAG}=`),
+  );
   if (at === -1) {
     return undefined;
+  }
+  // `--package=ui` is one argv entry, so `indexOf` never saw it and the whole
+  // flag read as absent — the unasked-for full listing, with a clean exit.
+  if (argv[at] !== PACKAGE_FLAG) {
+    return argv[at].slice(PACKAGE_FLAG.length + 1);
   }
   const value = argv[at + 1];
   return value === undefined || value.startsWith('--') ? '' : value;

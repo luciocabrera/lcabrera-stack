@@ -248,6 +248,26 @@ describe('listing the decisions that govern one package', () => {
     expect(listed.stdout).not.toContain('| ADR | Decision |');
   });
 
+  it.each(['--package=nope', '--package='])(
+    'refuses `%s`, which argv delivers as one entry',
+    (spelling) => {
+      // `indexOf('--package')` never matched the `=` form, so the flag read as
+      // absent and the full listing printed with a CLEAN exit — the one outcome
+      // the space-separated case is refused loudly to prevent.
+      const listed = runGate(makeAdrRepo(), ['--list', spelling]);
+
+      expect(listed.status).not.toBe(0);
+      expect(listed.stdout).not.toContain('| ADR | Decision |');
+    },
+  );
+
+  it('accepts the `=` spelling when it names a real workspace', () => {
+    const listed = runGate(makeAdrRepo(), ['--list', '--package=ui']);
+
+    expect(listed.status).toBe(0);
+    expect(listed.stdout).toContain('## Governing `ui`');
+  });
+
   it('refuses a name no workspace answers to, rather than listing nothing', () => {
     // An empty listing for a typo reads as "no decisions govern it", which is
     // the one answer this command must never give by accident.
