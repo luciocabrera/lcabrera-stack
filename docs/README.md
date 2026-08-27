@@ -159,13 +159,16 @@ repo docs above, not left in these:
   plus genuinely personal context (a user preference, a gotcha too small for an
   ADR). If a memory starts restating a repo doc, the repo doc is canonical and the
   memory should shrink to a link.
-- **Plans** (`~/.claude/plans/`) — one agent's scratch for one task. Ephemeral.
-  When a plan yields a durable decision or spec, it **graduates** into the repo
-  — an ADR for a decision, or a `*_PLAN.md` for a spec — and the scratch file is
-  then disposable. A plan's _claim_ (who's on it, which files) graduates to the
-  in-git work register at
+- **Plans** (`~/.claude/plans/`, plus the gitignored `.tmp/planning/` and
+  `.tmp/epic-<n>/`) — scratch for one task, one planning session, or one epic
+  run. Ephemeral, and invisible to everyone else, so whatever has to survive is
+  moved out deliberately: a decision **graduates** into an ADR, the work itself
+  into GitHub Issues, the session's reasoning into a committed record, and a
+  plan's _claim_ (who's on it, which files) into the in-git work register at
   [`docs/coordination/`](./coordination/README.md), so parallel agents can see
-  it.
+  it. Which surface holds what, for how long, and how a landed record is retired
+  is the planning charter,
+  [`docs/agents/planning/`](./agents/planning/README.md).
 
 ---
 

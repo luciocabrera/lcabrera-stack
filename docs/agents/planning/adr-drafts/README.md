@@ -1,3 +1,11 @@
+---
+kind: charter
+status: live
+recorded: 2026-07-25
+issues: []
+packages: []
+---
+
 # ADR drafts
 
 Proposed decisions that have not been adopted. A draft is named by slug and holds

@@ -1,3 +1,11 @@
+---
+kind: plan
+status: live
+recorded: 2026-08-11
+issues: ['#547', '#548', '#549']
+packages: [ui, server, showcase]
+---
+
 # Planning session — grid row grouping (2026-08)
 
 > **The backlog is on GitHub.** This is the dated synthesis of the session that

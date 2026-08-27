@@ -1,3 +1,11 @@
+---
+kind: plan
+status: live
+recorded: 2026-07-25
+issues: ['#389', '#390', '#391', '#392', '#393']
+packages: [server, showcase]
+---
+
 # Architecture Improvement Plan (lcabreara)
 
 > **Status:** Advisory synthesis — not an ADR. Produced by a four-agent

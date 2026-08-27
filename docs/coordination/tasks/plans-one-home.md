@@ -7,12 +7,13 @@ branch: docs/987-plans-one-home
 area:
   - docs/agents/planning/**
   - devkit.config.json
+  - .devkit-accepted.json
   - docs/coordination/tasks/_TEMPLATE.md
   - docs/README.md
 started: 2026-08-27
 updated: 2026-08-27
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1007
 issue: #987
 ---
 
@@ -22,6 +23,6 @@ Give plans one home, one shape, and a disposal rule
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: charter, frontmatter and the `*_PLAN.md` retirement are written; running the gate
 - Blockers: none
-- Next:
+- Next: commit, push, update the draft PR
