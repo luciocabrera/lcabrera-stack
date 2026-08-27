@@ -2,7 +2,7 @@
 id: gate-doc-registers
 title: Gate the doc registers and report the product's distance
 owner: agent:claude
-status: active
+status: review
 branch: ci/989-gate-doc-registers
 area:
   - scripts/**
@@ -12,7 +12,7 @@ area:
 started: 2026-08-27
 updated: 2026-08-27
 plan: (none)
-pr: (none)
+pr: 1012
 issue: #989
 ---
 
@@ -22,6 +22,6 @@ Gate the doc registers and report the product's distance
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate + both reports built, wired into `check:safe` and CI, gate green
 - Blockers: none
-- Next:
+- Next: ready the PR for review
