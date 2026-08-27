@@ -84,7 +84,7 @@ the way CI does.
 The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` — the
 **DB-free CI Quality Gate** (steps 3–6 plus `commands:verify`, `coordination:verify`,
 `scripts:verify`, `scripts:exits:verify`, `seeds:verify`, `devkit:closure -- --shipped`, `docs:verify`,
-`package-refs:verify`, `departed:verify`,
+`registers:verify`, `package-refs:verify`, `departed:verify`,
 `renames:verify`, `route-names:verify`,
 `inventory:verify`, `adr:verify`, `viteplus:verify` and `configs:verify`, mirroring the
 "Quality Gate (Format · Lint · Types)" job in
@@ -490,6 +490,44 @@ edit's on-disk hash in `.devkit-accepted.json`, which is **tracked**: commit it
 alongside `.devkit-manifest.json`. Because the record is keyed to that hash,
 editing the file again re-reports it with no further command, and reverting to
 the acknowledged content quiets it again. Withdraw one by deleting its entry.
+
+### Product & planning registers
+
+The requirement register under
+[`docs/product/requirements/`](docs/product/requirements/) and the planning
+documents under [`docs/agents/planning/`](docs/agents/planning/README.md) are
+frontmatter, so a script can read them. These three commands are what read them.
+
+| Command                   | Does                                                                                                                                                                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vp run registers:verify` | the gate — fails a malformed entry, a duplicate id, an evidence pointer that resolves to nothing, a `requires` cycle, a package name no workspace answers to, a `met` requirement with no command CI runs, and a plan naming no issue |
+| `vp run product:distance` | print how far the product is from its intent — met against unmet, by product line, persona and package, then every unmet requirement with the issues that would move it. Writes nothing                                               |
+| `vp run docs:for-package` | print every document that declares one workspace in its `packages:` field, from both registers — `-- <workspace-directory-name>`, e.g. `-- node-runtime`. Writes nothing, reads nothing but the working tree                          |
+
+`registers:verify` **refuses to pass having read no entries**: an empty register
+and a clean one are otherwise the same exit code, which is the failure every
+gate in this file exists to avoid.
+
+It also checks **half** of one rule, and its success line says so. A requirement
+declaring `met` must point at a `command` that CI runs **and that could fail**;
+"CI runs it" is derivable from the workflows and the root manifest, and
+"it could fail" is not derivable from anything in the tree. That half stays a
+procedure for the author and the reviewer — break the property on purpose, watch
+the pointer fail, then write `met`
+([`docs/product/README.md`](docs/product/README.md)). A check that appeared to
+cover it would be the exact defect the register exists to expose.
+
+Drafts are out of scope. `docs/agents/planning/adr-drafts/` holds proposed ADRs,
+which carry no block by charter, so the gate requires none of one — while still
+holding any block a file there does declare to the schema
+([`docs/agents/planning/README.md`](docs/agents/planning/README.md)).
+
+Neither report writes a file. A distance is a measurement, and a measurement in
+a tracked file is right on the day it is written and wrong from the next commit
+([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md)) —
+redirect stdout into a PR or an issue, where it is dated. `product:distance`
+**resolves** every evidence pointer and runs none of them, and says which it did
+in its own output.
 
 ### Coordination register
 

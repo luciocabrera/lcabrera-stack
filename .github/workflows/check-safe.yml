@@ -245,6 +245,22 @@ jobs:
         # inherited breakage is grandfathered in scripts/docs-paths-baseline.json.
         run: vp run docs:verify
 
+      - name: Requirement and planning registers hold
+        id: registers_gate
+        # Both registers are prose until something reads them, and an
+        # unenforced document rots — the reason commands:verify, docs:verify
+        # and scripts:verify all exist. This fails a malformed entry, a
+        # duplicate id, an evidence pointer resolving to nothing, a `requires`
+        # cycle, a package name no workspace answers to, a plan whose work was
+        # never filed, and a `met` requirement with no command CI runs behind
+        # it. Reading nothing fails too: an empty register and a clean one are
+        # otherwise the same exit code.
+        #
+        # Half a rule on purpose: that a `met` requirement's command COULD fail
+        # is not derivable from the tree, so it stays a procedure for the author
+        # and the reviewer (docs/product/README.md). See #989.
+        run: vp run registers:verify
+
       - name: No published package names one of this repo's apps
         id: package_refs_gate
         # Apps are the harness; a package is consumed where no `apps/` exists,
