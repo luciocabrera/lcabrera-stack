@@ -8,14 +8,14 @@ once.
 
 ## What lives here
 
-| Artifact                              | Kind      | Role                                                                                                                                                                                                                |
-| ------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CommandDescriptor` / `CommandId`     | type      | Presentation-neutral identity `{ id, label, icon }`. No handler, no enablement.                                                                                                                                     |
-| `deriveToggleCommandState.util.ts`    | pure util | Capability-agnostic `{ isActive, isEnabled }` from `{ current, target, isDisabled }`; `isDisabled` comes from `resolveColumnCapabilities`                                                                           |
-| `deriveAggregateCommandState.util.ts` | pure util | The aggregate commands' own `{ isActive, isEnabled }`, from `{ applied, columnKey, target, isDisabled }` — see below for why it is beside the toggle rather than inside it                                          |
-| `pinning/pinningCommands.ts`          | constants | `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND`                                                                                                                                                    |
-| `sorting/sortingCommands.ts`          | constants | `SORT_ASCENDING_COMMAND`, `SORT_DESCENDING_COMMAND`, `CLEAR_SORTING_COMMAND`                                                                                                                                        |
-| `grouping/groupingCommands.ts`        | constants | `GROUP_BY_COLUMN_COMMAND`, `CLEAR_GROUPING_COMMAND`, `EXPAND_ALL_GROUPS_COMMAND`, `COLLAPSE_ALL_GROUPS_COMMAND`, `AGGREGATE_COMMANDS` (a `Record` closed over `TableAggregateFn`), `CLEAR_COLUMN_AGGREGATE_COMMAND` |
+| Artifact                              | Kind      | Role                                                                                                                                                                                                                                                                              |
+| ------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CommandDescriptor` / `CommandId`     | type      | Presentation-neutral identity `{ id, label, icon }`. No handler, no enablement.                                                                                                                                                                                                   |
+| `deriveToggleCommandState.util.ts`    | pure util | Capability-agnostic `{ isActive, isEnabled }` from `{ current, target, isDisabled }`; `isDisabled` comes from `resolveColumnCapabilities`                                                                                                                                         |
+| `deriveAggregateCommandState.util.ts` | pure util | The aggregate commands' own `{ isActive, isEnabled }`, from `{ applied, columnKey, target, isDisabled }` — see below for why it is beside the toggle rather than inside it                                                                                                        |
+| `pinning/pinningCommands.ts`          | constants | `PIN_LEFT_COMMAND`, `PIN_RIGHT_COMMAND`, `CLEAR_PINNING_COMMAND`                                                                                                                                                                                                                  |
+| `sorting/sortingCommands.ts`          | constants | `SORT_ASCENDING_COMMAND`, `SORT_DESCENDING_COMMAND`, `CLEAR_SORTING_COMMAND`                                                                                                                                                                                                      |
+| `grouping/groupingCommands.ts`        | constants | `GROUP_BY_COLUMN_COMMAND`, `CLEAR_GROUPING_COMMAND`, `EXPAND_ALL_GROUPS_COMMAND`, `COLLAPSE_ALL_GROUPS_COMMAND`, `EXPAND_GROUP_LEVEL_COMMAND`, `COLLAPSE_GROUP_LEVEL_COMMAND`, `AGGREGATE_COMMANDS` (a `Record` closed over `TableAggregateFn`), `CLEAR_COLUMN_AGGREGATE_COMMAND` |
 
 ## What deliberately does **not** live here
 
@@ -37,8 +37,8 @@ once.
 - Header menu (live commit-context): `TableHeaderCell/TableHeaderActionsMenu/` —
   `PinAndHideActions` (PinLeft/PinRight/ClearPinning), `SortActions`
   (SortAscending/SortDescending/ClearSorting) and `GroupActions`
-  (GroupByColumn/ClearGrouping/ExpandAllGroups/CollapseAllGroups plus the
-  aggregation-mode block).
+  (GroupByColumn/ClearGrouping/ExpandAllGroups/CollapseAllGroups, the
+  `GroupLevelActions` block, plus the aggregation-mode block).
 - Settings drawer (draft commit-context): `ColumnSettingsDrawer/PinningSection/`
   and `ColumnSettingsDrawer/SortingSection/`.
 
@@ -64,6 +64,17 @@ and `COLLAPSE_ALL_GROUPS_COMMAND` are commands of the grouped **body**, so their
 ids carry no `column.` prefix and their enablement comes from the rows rather
 than from `resolveColumnCapabilities` — `useTableGroupFoldAll` reads the same
 foldable set the per-row chevrons are drawn from (#774).
+
+`EXPAND_` and `COLLAPSE_GROUP_LEVEL_COMMAND` are the same act at one depth and
+sit on the other side of that line: they fold the level the open column states,
+so they **are** column commands and their ids carry the prefix (#1020). Their
+enablement still comes from the rows — `useTableGroupLevelFold` filters that same
+foldable set to the one depth — and so does whether they are rendered at all,
+which is the only place in this layer where the rows decide that. `isDisabled`
+therefore never reaches them from `resolveColumnCapabilities`: no column
+capability can answer "is this column an applied group key with a foldable level
+above it", and borrowing one that looks close would be the copy-paste this file
+warns about two paragraphs down.
 
 Every consumer resolves its own capability and passes it as `isDisabled`, and
 **the capability is the one that governs that command, not the one its neighbour

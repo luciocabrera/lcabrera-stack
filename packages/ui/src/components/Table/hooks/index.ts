@@ -5,4 +5,5 @@ export { useSyncTableGroupExpansion } from './useSyncTableGroupExpansion.hook';
 export { useTableCellFocus } from './useTableCellFocus.hook';
 export { useTableGridFocus } from './useTableGridFocus.hook';
 export { useTableGroupFoldAll } from './useTableGroupFoldAll.hook';
+export { useTableGroupLevelFold } from './useTableGroupLevelFold.hook';
 export { useTableGroupTree } from './useTableGroupTree.hook';

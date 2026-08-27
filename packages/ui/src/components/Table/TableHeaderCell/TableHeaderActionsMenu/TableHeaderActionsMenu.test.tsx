@@ -90,6 +90,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
 // empty, which is also the state that renders them disabled.
 vi.mock('#ui/components/Table/contexts/TableConfig/expansion/actions', () => ({
   useSetAllTableGroupsExpanded: () => vi.fn(),
+  useSetTableGroupLevelExpanded: () => vi.fn(),
 }));
 
 vi.mock(
