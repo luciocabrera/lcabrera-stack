@@ -64,11 +64,32 @@ export const ALTERNATIVE_SECTIONS = [
   'Alternatives considered',
 ];
 
-const OPENING = '---\n';
+/**
+ * Every line ending, because a consumer's checkout decides this and not us.
+ * git-for-windows installs with `core.autocrlf=true` by default, so a record
+ * there begins `---\r\n`; matching only `\n` reported every well-formed ADR as
+ * having no block at all, and no section either. `workspace-scopes.mjs` and
+ * `commit-convention.mjs` in this package already split this way.
+ */
+const LINE = /\r?\n/;
 
-/** Where the closing fence's newline is, or -1 when the record opens no block. */
-const fenceEnd = (markdown) =>
-  markdown.startsWith(OPENING) ? markdown.indexOf('\n---', 3) : -1;
+const OPENING = /^---\r?\n/;
+
+/**
+ * Where the block's text starts and where its closing fence begins, or undefined
+ * when the record opens no block.
+ *
+ * The search for the closing fence starts one character INSIDE the opening one,
+ * so an empty block — `---` immediately followed by `---` — is still a block.
+ */
+const blockRange = (markdown) => {
+  const opening = OPENING.exec(markdown);
+  if (opening === null) {
+    return undefined;
+  }
+  const end = markdown.indexOf('\n---', opening[0].length - 1);
+  return end === -1 ? undefined : { end, start: opening[0].length };
+};
 
 /**
  * The record itself, with any block taken off the front.
@@ -79,11 +100,11 @@ const fenceEnd = (markdown) =>
  * firing.
  */
 export const adrBody = (markdown) => {
-  const end = fenceEnd(markdown);
-  if (end === -1) {
+  const range = blockRange(markdown);
+  if (range === undefined) {
     return markdown;
   }
-  const newline = markdown.indexOf('\n', end + 1);
+  const newline = markdown.indexOf('\n', range.end + 1);
   return newline === -1 ? '' : markdown.slice(newline + 1);
 };
 
@@ -154,13 +175,14 @@ const readItem = (state, text, line) => {
  * missing block and an unreadable one are different mistakes.
  */
 export const parseAdrBlock = (markdown) => {
-  if (fenceEnd(markdown) === -1) {
+  const range = blockRange(markdown);
+  if (range === undefined) {
     return undefined;
   }
   const state = { errors: [], fields: {}, open: undefined };
   for (const [index, raw] of markdown
-    .slice(4, fenceEnd(markdown))
-    .split('\n')
+    .slice(range.start, range.end)
+    .split(LINE)
     .entries()) {
     const text = raw.trim();
     if (text === '' || text.startsWith('#')) {
@@ -274,7 +296,7 @@ const COMMENT = /<!--[\s\S]*?(?:-->|$)/g;
 export const sectionsOf = (body) => {
   const sections = new Map();
   let open;
-  for (const line of body.replaceAll(COMMENT, '').split('\n')) {
+  for (const line of body.replaceAll(COMMENT, '').split(LINE)) {
     const heading = SECTION.exec(line);
     const title =
       heading === null ? '' : (heading[1] ?? '').trim().toLowerCase();

@@ -55,6 +55,25 @@ describe('the ADR gate reading the record', () => {
     expect(result.stdout).toContain('whether a section says anything true');
   });
 
+  it('reads a record checked out with CRLF, and still judges it', () => {
+    // git-for-windows installs with `core.autocrlf=true`, so this is the default
+    // consumer checkout on that platform, not an exotic one. BOTH halves matter:
+    // a fix that merely made CRLF stop failing could have done so by reading no
+    // block and no section at all, which is what the bug was.
+    const root = makeAdrRepo();
+    const crlf = (text) => text.replaceAll('\n', '\r\n');
+    const write = writeIn(root);
+
+    write(RECORD, crlf(RECORD_TEXT));
+    expect(runGate(root).status).toBe(0);
+
+    write(RECORD, crlf(RECORD_TEXT.replace('  - ui', '  - nope')));
+    expect(runGate(root).output).toContain('no workspace in this repository');
+
+    write(RECORD, crlf(RECORD_TEXT.replace('## Context', '## Not context')));
+    expect(runGate(root).output).toContain('no `## Context` section');
+  });
+
   it('rejects a record with no metadata block', () => {
     const root = makeAdrRepo();
     expectRejects(

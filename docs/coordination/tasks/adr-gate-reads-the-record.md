@@ -38,6 +38,7 @@ splitting them would edit `adr-registry.mjs`, `verify-adrs.mjs` and
 - Current step: round 7 — dead `number` field and its import removed, both Sonar
   findings fixed, and the consumer upgrade story documented: the changeset, the
   package README and the shipped COMMANDS row now name `--adopt`, and the
-  staleness message uses the home's own command instead of this repo's
+  staleness message uses the home's own command instead of this repo's; the
+  block and section parsing is line-ending agnostic, which it was not
 - Blockers: none
 - Next: awaiting review on #1013
