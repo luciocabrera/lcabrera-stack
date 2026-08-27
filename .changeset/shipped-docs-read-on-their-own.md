@@ -1,11 +1,14 @@
 ---
 '@lcabrera/repo-standards': minor
+'@lcabrera/devkit': patch
 '@lcabrera/eslint-plugin': patch
 '@lcabrera/node': patch
 '@lcabrera/api': patch
 '@lcabrera/server': patch
+'@lcabrera/tsconfig': patch
 '@lcabrera/utils': patch
 '@lcabrera/ui': patch
+'@lcabrera/vite-config': patch
 ---
 
 Stop shipping documents a consumer cannot read, and gate the recurrence.
@@ -17,6 +20,15 @@ repository cloned: in an install they are pages of relative links to a decisions
 directory that is not in the tarball, plus decision citations by bare number.
 `files` now carries `"!src/**/*.md"`, so the source arrives without them and the
 README states what a consumer needs, linking the rest by absolute URL.
+
+Every other published package carries the same negation for whichever directory
+it publishes its source from — `src`, or `scripts` for the two `.mjs` packages.
+It is inert in each of them today and changes nothing that ships, which a
+before/after comparison of all ten packed file lists confirms. It is there
+because it is the only guard that makes a newly added `src/ARCHITECTURE.md`
+fail to ship outright, rather than merely be likely to trip the content gate on
+its way out. `@lcabrera/devkit`'s `assets` are the deliberate exception: that
+markdown is what the package exists to copy.
 
 `@lcabrera/repo-standards` adds `repo-verify-shipped-docs`, which packs each
 package named in `publishing.publicPackageDirs` and reads the markdown back out

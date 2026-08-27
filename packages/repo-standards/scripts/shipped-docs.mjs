@@ -159,13 +159,15 @@ const repoAnchored = ({ holds, repoOnlyDirs, token }) =>
  *
  * A path in BARE PROSE is deliberately not a candidate — only inline code and
  * link targets are. That is the documented-path gate's trade, taken here for
- * the same reason: resolving every `word/word` in a sentence is what produced
- * its ~830 hits, most of them conventions rather than paths, and a gate that
- * cries wolf gets bypassed. The cost is real and bounded — a shipped document
- * can name `docs/decisions` in running text and go unreported — and it is worth
- * paying only while the corpus does not do it. Widening this is safe; check the
- * shipped corpus first, because a rule that reports a teaching placeholder
- * costs more than the one instance it catches.
+ * the same reason: resolving every `word/word` in a sentence sweeps up far more
+ * conventions than paths — suffix patterns, teaching placeholders, prose like
+ * `try/catch` — and a gate that cries wolf gets bypassed. `docs-paths.mjs`'s
+ * own header carries that argument and the measurement behind it. The cost is
+ * real and bounded — a shipped document can name `docs/decisions` in running
+ * text and go unreported — and it is worth paying only while the corpus does
+ * not do it. Widening this is safe; check the shipped corpus first, because a
+ * rule that reports a teaching placeholder costs more than the one instance it
+ * catches.
  */
 const repoPathFindings = ({ docPath, holds, lines, repoOnlyDirs }) => {
   const candidates = lines.flatMap(({ number, text }) =>

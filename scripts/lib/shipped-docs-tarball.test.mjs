@@ -28,6 +28,8 @@ import { fileURLToPath } from 'node:url';
 
 import { afterAll, describe, expect, it } from 'vite-plus/test';
 
+import { readFileSync } from 'node:fs';
+
 import { readPublishing } from '../../packages/repo-standards/scripts/config.mjs';
 import { packAndRead } from '../../packages/repo-standards/scripts/publish-pack.mjs';
 import {
@@ -36,7 +38,7 @@ import {
 } from '../../packages/repo-standards/scripts/shipped-docs.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const { packagesDir } = readPublishing(REPO_ROOT);
+const { packagesDir, publicPackageDirs } = readPublishing(REPO_ROOT);
 
 /** The packages that keep documentation inside `src/` and must not ship it. */
 const SOURCE_DOC_PACKAGES = ['server', 'ui', 'utils'];
@@ -137,5 +139,50 @@ describe('the corpus follows the manifest, not the tree', () => {
     const excluded = corpusWith(['docs', '!docs/**/*.md']);
     expect(excluded.documents).toEqual(['README.md']);
     expect(excluded.findings).toEqual([]);
+  });
+});
+
+/**
+ * That the negation is on EVERY published manifest, not only the three that
+ * had documents to remove.
+ *
+ * This is the assertion `packages/CLAUDE.md` was making in prose and nothing
+ * was checking. The bullet states one `files` shape for every public package;
+ * for a while five of them did not have it, so the file agents load on every
+ * `packages/` edit asserted a guard most manifests did not carry — and the
+ * failure that sets up is the one this whole gate exists to close. Someone adds
+ * `packages/api/src/ARCHITECTURE.md`, reads the bullet, and the document ships.
+ *
+ * The content gate catches that only if the new document happens to carry a bad
+ * link or a bare citation. Likely, not certain. The manifest line is what makes
+ * it certain, so it is the one asserted here — and asserted from the roster
+ * rather than a written-out list, so a package is covered the day it is
+ * published rather than the day someone remembers this file.
+ */
+describe('every published manifest keeps its own source markdown out', () => {
+  const manifestOf = (directory) =>
+    JSON.parse(
+      readFileSync(
+        join(REPO_ROOT, packagesDir, directory, 'package.json'),
+        'utf8',
+      ),
+    );
+
+  it('has a roster to check, so this cannot pass over nothing', () => {
+    expect(publicPackageDirs.length).toBeGreaterThan(0);
+  });
+
+  it.each(publicPackageDirs)('packages/%s', (directory) => {
+    const files = manifestOf(directory).files ?? [];
+    // Whichever directory this package actually publishes its source from —
+    // the `.mjs` packages keep theirs under `scripts`, and `@lcabrera/devkit`'s
+    // `assets` are deliberately NOT it: that markdown is what the package
+    // exists to copy, so negating it would gut the product.
+    const sourceDir = ['src', 'scripts'].find((name) => files.includes(name));
+    expect(
+      sourceDir,
+      `packages/${directory} publishes no source directory`,
+    ).toBeDefined();
+    expect(files).toContain(`!${sourceDir}/**/*.md`);
   });
 });

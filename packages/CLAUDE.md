@@ -146,7 +146,13 @@ by inspection:
   repository: those documents are written for someone who has the repository
   cloned, and in an install they are pages of references to a decisions directory
   the reader has no access to. What a consumer needs is stated in the README.
-  `vp run shipped-docs:verify` holds that line from the other side, over the
+  Every package carries it, including the ones with no such markdown today: it
+  is inert there and it is the only guard that makes a new
+  `src/ARCHITECTURE.md` fail to ship rather than merely be likely to trip
+  `vp run shipped-docs:verify` on its way out. `@lcabrera/devkit`'s `assets`
+  are the deliberate exception — that markdown IS what the package exists to
+  copy, so the negation names the source directory and never `assets`.
+  `vp run shipped-docs:verify` holds the same line from the other side, over the
   packed tarball. The negated pattern is honoured by pnpm
   pack. `src` stays in the built packages only because they emit sourcemaps — it
   is unreachable through the published `exports` map, so it exists purely to let
