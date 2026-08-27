@@ -2,7 +2,7 @@
 id: align-group-row-numerics
 title: Right-align numeric values on group rows
 owner: agent:claude
-status: active
+status: review
 branch: fix/1018-align-group-row-numerics
 area:
   - packages/ui/src/components/Table/TableBodyCell/**
@@ -24,7 +24,6 @@ Right-align numeric values on group rows
 
 ## Status / next
 
-- Current step: implementing — cell alignment follows the column's data type on
-  group rows as well as detail rows (#1018)
+- Current step: in review — PR #1022 is ready, gate green locally
 - Blockers: none
-- Next: quality gate, then push
+- Next: address review, then merge and delete this file
