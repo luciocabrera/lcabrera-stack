@@ -41,7 +41,7 @@ export const TEMPLATE_HOME = registers.adrTemplateHome;
  * so carrying it here costs nothing: the signature stays arity 1, which is the
  * property that keeps the directory from coming back in (ADR-075).
  */
-const commandsFor = (home) => home.commands ?? DEFAULT_ADR_COMMANDS;
+export const commandsFor = (home) => home.commands ?? DEFAULT_ADR_COMMANDS;
 
 /**
  * Markdown that lives in a home without being an ADR: the generated index, and

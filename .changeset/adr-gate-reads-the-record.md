@@ -16,8 +16,17 @@ not judge what a section says, and its success line says so.
 `repo-verify-adrs --list --package <workspace>` prints the decisions governing
 one workspace, separated from the repository-wide ones it inherits.
 
-Records written before the block are grandfathered in a baseline the gate reads
-rather than edited into shape. The gate guarantees one thing about it: the list
+**Upgrading an existing decision home takes two commands, and the gate is red
+until you run them.** Every record already in the home predates the block, so on
+first run each one fails on `no metadata block` and on whichever sections it
+lacks. `repo-verify-adrs --adopt` writes the baseline once from exactly those
+failures, grandfathering them; `repo-verify-adrs --write` then regenerates the
+index. After that the gate is green, and only NEW records are held to the rules.
+`--adopt` refuses a baseline that already exists, so it is safe to run blind and
+cannot be used to absorb later failures.
+
+Records written before the block are grandfathered in that baseline rather than
+edited into shape. The gate guarantees one thing about it: the list
 may hold at most `maxEntries` entries, and every exemption beyond that count
 fails. A count rather than a number window, because a sequence has gaps and a
 record taking a retired number falls inside any window. `--write` only prunes,

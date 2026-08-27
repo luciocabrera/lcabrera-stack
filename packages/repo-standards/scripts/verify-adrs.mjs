@@ -62,6 +62,7 @@ import {
   DRAFT_DIR,
   NON_ADR_FILES,
   adrFindings,
+  commandsFor,
   headingNumber,
   headingTitle,
   looksLikeAdr,
@@ -268,8 +269,16 @@ const report = (findings, stale) => {
     console.error(`  - ${finding}`);
   }
   for (const home of stale) {
+    // The home's OWN spelling of the command, not this repository's. A consumer
+    // reading `vp run …` is being told to run something they do not have — the
+    // reason `registers.adrCommands` exists, and the reason the generated index
+    // already uses it. Pre-dates this change; corrected here because the
+    // adoption recipe added to the README in the same commit tells a consumer to
+    // run the other spelling. Through `commandsFor`, which carries the fallback
+    // for a home that declares none — `DEFAULT_REGISTERS`'s homes do not, which
+    // is every consumer with no config file at all.
     console.error(
-      `  - ${home.dir}/${INDEX_FILE} is out of date — run \`vp run adr:verify -- --write\``,
+      `  - ${home.dir}/${INDEX_FILE} is out of date — run \`${commandsFor(home).write}\``,
     );
   }
   console.error(

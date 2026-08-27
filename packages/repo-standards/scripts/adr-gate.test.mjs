@@ -153,6 +153,20 @@ describe('the ADR gate reading the record', () => {
 });
 
 describe('--write, which is the command the gate tells people to run', () => {
+  it('names the home’s own spelling of it, not this repository’s', () => {
+    // The fixture declares no `adrCommands`, so this is the default a consumer
+    // gets. A hardcoded `vp run …` here would tell them to run something they do
+    // not have — and the earlier spelling crashed outright on a home carrying no
+    // commands at all, which is every consumer with no config file.
+    const root = makeAdrRepo();
+    editIn(root)('docs/decisions/README.md', 'ADR index', 'Stale index');
+
+    const stale = runGate(root);
+    expect(stale.status).not.toBe(0);
+    expect(stale.output).toContain('npx repo-verify-adrs --write');
+    expect(stale.output).not.toContain('vp run');
+  });
+
   it('refuses a record the plain run refuses, rather than exiting clean', () => {
     // `report()`'s staleness finding names `--write`, and it is what
     // `registers.adrCommands.write` puts in every generated index. An author who

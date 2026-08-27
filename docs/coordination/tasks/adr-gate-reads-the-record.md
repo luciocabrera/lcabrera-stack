@@ -35,8 +35,9 @@ splitting them would edit `adr-registry.mjs`, `verify-adrs.mjs` and
 
 ## Status / next
 
-- Current step: round 7 — the dead `number` field, its import and the stale
-  contract comment are gone, and the two Sonar findings on this PR's own code
-  are fixed: a super-linear heading regex, and a parsed count reaching a log
+- Current step: round 7 — dead `number` field and its import removed, both Sonar
+  findings fixed, and the consumer upgrade story documented: the changeset, the
+  package README and the shipped COMMANDS row now name `--adopt`, and the
+  staleness message uses the home's own command instead of this repo's
 - Blockers: none
 - Next: awaiting review on #1013
