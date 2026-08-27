@@ -8,18 +8,32 @@
  * them were written under. They are listed instead, and the list is held to a
  * contract with one direction: it may SHRINK, and it may not GROW.
  *
- * Three mechanisms hold that direction, and none of them is a promise:
+ * **Growth is a question about the list's size, not about any record's number.**
+ * The first cut of this bounded it by number — nothing above the highest ADR
+ * present at adoption could be grandfathered — and that is a proxy, not the
+ * property. A sequence has gaps (this repository's has twenty-three), and a
+ * record taking a retired number lands inside any window, so one appended line
+ * grandfathered a brand-new empty ADR and the gate passed. `maxEntries` is the
+ * property itself: the most entries the baseline may hold, which no numbering
+ * can slip past.
  *
- * - `closedAt` is the highest number the baseline covers. An entry above it is
- *   refused, so a record written after the gate landed cannot be grandfathered
- *   at all. Raising it is a one-token diff that says exactly what it does,
- *   which is the point — a filename appended to a list of ninety says nothing.
- * - Adoption happens ONCE. `--adopt` refuses a baseline that already exists, so
- *   there is no command that turns today's failures into tomorrow's exemptions.
- * - `--write` only prunes. An entry naming no record, or naming one that now
- *   satisfies the rules, is a finding until it is dropped.
+ * Which doors that shuts, and which it does not:
  *
- * Shape: `{ closedAt: <number>, files: [<filename>] }`.
+ * - **Shut: every command.** `--adopt` refuses a baseline that already exists,
+ *   so there is no command that turns today's failures into tomorrow's
+ *   exemptions. `--write` only prunes, and it RATCHETS `maxEntries` down to what
+ *   it kept — it never raises it, so it cannot launder a hand-added entry into
+ *   a baseline the next run calls clean.
+ * - **Shut: appending an entry.** The list is then longer than its own bound,
+ *   whatever the entry is numbered, and the gate says so.
+ * - **Shut: swapping one entry for another.** The record dropped out of the
+ *   list is no longer grandfathered and reports its own findings.
+ * - **NOT shut: raising `maxEntries` by hand.** Nothing in a tracked file can be
+ *   proof against an editor. What the bound buys is that reopening
+ *   grandfathering is a single number changing in a diff, rather than one line
+ *   appended to a list of seventy that read alike.
+ *
+ * Shape: `{ files: [<filename>], maxEntries: <number> }`.
  */
 
 /**
@@ -35,7 +49,7 @@ const byName = (left, right) => {
 };
 
 /** A baseline that grandfathers nothing — what an absent file means. */
-export const EMPTY_BASELINE = { closedAt: 0, files: [] };
+export const EMPTY_BASELINE = { files: [], maxEntries: 0 };
 
 const isRecord = (value) =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -43,21 +57,34 @@ const isRecord = (value) =>
 /**
  * A parsed baseline reduced to the two fields, so a malformed file cannot make
  * the gate read `undefined` as "grandfather everything". A missing or unusable
- * `files` yields none, which fails loudly rather than quietly.
+ * `files` yields none; an unusable `maxEntries` yields zero, which reports as
+ * growth rather than as a bound nobody set.
  */
 export const readableBaseline = (parsed) => {
   if (!isRecord(parsed)) {
     return EMPTY_BASELINE;
   }
   return {
-    closedAt: Number.isInteger(parsed.closedAt) ? parsed.closedAt : 0,
     files: Array.isArray(parsed.files)
       ? parsed.files.filter((name) => typeof name === 'string')
       : [],
+    maxEntries:
+      Number.isInteger(parsed.maxEntries) && parsed.maxEntries >= 0
+        ? parsed.maxEntries
+        : 0,
   };
 };
 
 export const baselinedFiles = (baseline) => new Set(baseline.files);
+
+/** Whether the list is longer than the bound the last command wrote. */
+export const hasGrown = (baseline) =>
+  baseline.files.length > baseline.maxEntries;
+
+const plural = (count) => (count === 1 ? 'entry' : 'entries');
+
+const growthFinding = (baseline) =>
+  `it lists ${baseline.files.length} ${plural(baseline.files.length)} but \`maxEntries\` is ${baseline.maxEntries} — the baseline has grown, and it may only shrink. Drop what was added, or classify the records it covers.`;
 
 /**
  * What the baseline itself gets wrong.
@@ -70,67 +97,57 @@ export const baselineFindings = ({ baseline, records }) => {
     records.map((record) => [record.filename, record]),
   );
 
-  return baseline.files.flatMap((filename) => {
-    const record = byFilename.get(filename);
-    if (record === undefined) {
-      return [
-        `${filename} is grandfathered but names no ADR — prune it with \`--write\``,
-      ];
-    }
-    if (record.findings.length === 0) {
-      return [
-        `${filename} is grandfathered but now satisfies the content rules — prune it with \`--write\``,
-      ];
-    }
-    return record.number !== undefined && record.number > baseline.closedAt
-      ? [
-          `${filename} is above the baseline's closedAt (${baseline.closedAt}) — a record written after the gate landed carries the block; it is not grandfathered`,
-        ]
-      : [];
-  });
+  return [
+    ...(hasGrown(baseline) ? [growthFinding(baseline)] : []),
+    ...baseline.files.flatMap((filename) => {
+      const record = byFilename.get(filename);
+      if (record === undefined) {
+        return [
+          `${filename} is grandfathered but names no ADR — prune it with \`--write\``,
+        ];
+      }
+      return record.findings.length === 0
+        ? [
+            `${filename} is grandfathered but now satisfies the content rules — prune it with \`--write\``,
+          ]
+        : [];
+    }),
+  ];
 };
 
-/** The number under which a filename may be grandfathered at all. */
-const withinWindow = (record, closedAt) =>
-  record.number !== undefined && record.number <= closedAt;
-
 /**
- * The baseline with every entry that no longer earns its place removed — the
- * only automatic edit there is. An entry naming nothing, one whose record now
- * passes, and one above the window all drop out.
+ * The baseline with every entry that no longer earns its place removed, and the
+ * bound lowered to match — the only automatic edit there is.
+ *
+ * The bound is taken from what was KEPT rather than from `Math.min` with the old
+ * one, so it can only fall. Callers must refuse to write a grown baseline before
+ * calling this; otherwise pruning a list of 71 with a bound of 70 would rewrite
+ * the bound as 71 and absorb the growth.
  */
 export const prunedBaseline = ({ baseline, records }) => {
   const kept = new Set(
     records
-      .filter(
-        (record) =>
-          record.findings.length > 0 && withinWindow(record, baseline.closedAt),
-      )
+      .filter((record) => record.findings.length > 0)
       .map((record) => record.filename),
   );
-  return {
-    closedAt: baseline.closedAt,
-    files: baseline.files
-      .filter((filename) => kept.has(filename))
-      .toSorted(byName),
-  };
+  const files = baseline.files
+    .filter((filename) => kept.has(filename))
+    .toSorted(byName);
+  return { files, maxEntries: files.length };
 };
 
 /**
  * The baseline a repository adopting the gate starts from: everything failing
- * today, and a window closed at the highest number it holds.
+ * today, and a bound at exactly that many.
  *
  * Written once and never again — the caller refuses to overwrite an existing
  * file, because a second adoption is exactly the "absorb today's failures"
  * command this contract exists to not have.
  */
-export const adoptedBaseline = (records) => ({
-  closedAt: records.reduce(
-    (highest, record) => Math.max(highest, record.number ?? 0),
-    0,
-  ),
-  files: records
+export const adoptedBaseline = (records) => {
+  const files = records
     .filter((record) => record.findings.length > 0)
     .map((record) => record.filename)
-    .toSorted(byName),
-});
+    .toSorted(byName);
+  return { files, maxEntries: files.length };
+};

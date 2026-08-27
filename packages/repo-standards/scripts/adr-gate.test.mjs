@@ -147,6 +147,27 @@ afterEach(() => {
   }
 });
 
+const readBaseline = (root) =>
+  JSON.parse(readFileSync(join(root, BASELINE), 'utf8'));
+
+/** One line appended to the grandfathered list — the whole of the hand edit. */
+const appendEntry = (root, filename) => {
+  const baseline = readBaseline(root);
+  writeFileSync(
+    join(root, BASELINE),
+    `${JSON.stringify(
+      {
+        ...baseline,
+        files: [...baseline.files, filename].toSorted((left, right) =>
+          left.localeCompare(right),
+        ),
+      },
+      undefined,
+      2,
+    )}\n`,
+  );
+};
+
 /** Plant, assert the failure names its own cause, correct, assert the pass. */
 const expectPlantedFailure = (root, plant, correct, expected) => {
   plant();
@@ -321,16 +342,45 @@ describe('the grandfathering baseline', () => {
     expect(runGate(root).status).toBe(0);
   });
 
-  it('refuses an entry above the window it was closed at', () => {
+  it('refuses an entry that was never adopted, whatever it is numbered', () => {
+    // The door a number window leaves open: this repository's own sequence has
+    // gaps, so a record taking a retired number lands INSIDE any window and is
+    // grandfathered by one appended line. Growth is decided by how many entries
+    // the baseline may hold, which no number can slip past.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
-    const baseline = join(root, BASELINE);
-    writeFileSync(
-      baseline,
-      readFileSync(baseline, 'utf8').replace('"closedAt": 2', '"closedAt": 1'),
-    );
+    const write = writeIn(root);
+    write(`${HOME}/ADR-001-a-gap-number.md`, '# ADR-001 — A gap number\n');
+    appendEntry(root, 'ADR-001-a-gap-number.md');
 
-    expect(runGate(root).output).toContain("above the baseline's closedAt");
+    expect(runGate(root).output).toContain('has grown');
+  });
+
+  it('has no command that absorbs a hand-added entry', () => {
+    // `--write` prunes. If it also ratcheted the bound UP it would launder the
+    // edit above into a baseline the next run reports as clean.
+    const root = makeAdrRepo({ legacy: true });
+    runGate(root, ['--adopt']);
+    const write = writeIn(root);
+    write(`${HOME}/ADR-004-another.md`, '# ADR-004 — Another\n');
+    appendEntry(root, 'ADR-004-another.md');
+
+    expect(runGate(root, ['--write']).status).not.toBe(0);
+    expect(runGate(root).output).toContain('has grown');
+  });
+
+  it('lowers the bound as records are classified, so it only ever shrinks', () => {
+    const root = makeAdrRepo({ legacy: true });
+    runGate(root, ['--adopt']);
+    expect(readBaseline(root).maxEntries).toBe(1);
+
+    writeFileSync(
+      join(root, HOME, LEGACY_FILE),
+      RECORD_TEXT.replace('# ADR-001', '# ADR-002'),
+    );
+    runGate(root, ['--write']);
+
+    expect(readBaseline(root)).toEqual({ files: [], maxEntries: 0 });
   });
 });
 

@@ -47,6 +47,7 @@ import {
   adoptedBaseline,
   baselineFindings,
   baselinedFiles,
+  hasGrown,
   prunedBaseline,
   readableBaseline,
 } from './adr-baseline.mjs';
@@ -282,12 +283,18 @@ const runAdopt = (records) => {
   const baseline = adoptedBaseline(records);
   saveBaseline(baseline);
   console.log(
-    `Wrote ${BASELINE_REL}: ${baseline.files.length} record(s) grandfathered, closed at ADR-${pad(baseline.closedAt)}.`,
+    `Wrote ${BASELINE_REL}: ${baseline.files.length} record(s) grandfathered, and that is the most it may ever hold.`,
   );
 };
 
-/** Prune-only. `--write` may drop an entry that no longer earns its place; it
- *  may never absorb a new one. */
+/**
+ * Prune-only. `--write` may drop an entry that no longer earns its place; it may
+ * never absorb a new one.
+ *
+ * A baseline that has already grown is refused rather than rewritten. Pruning it
+ * would set the bound to whatever the grown list kept, which is exactly how a
+ * hand-added entry would become a baseline the next run reports as clean.
+ */
 const runWrite = (homes, records) => {
   const structural = adrFindings({
     drafts: listMarkdown(DRAFT_DIR),
@@ -301,6 +308,17 @@ const runWrite = (homes, records) => {
   }
 
   const baseline = readBaseline();
+  if (hasGrown(baseline)) {
+    report(
+      baselineFindings({ baseline, records }).map(
+        (finding) => `${BASELINE_REL}: ${finding}`,
+      ),
+      [],
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   const pruned = prunedBaseline({ baseline, records });
   const dropped = baseline.files.length - pruned.files.length;
   if (existsSync(BASELINE_PATH)) {
@@ -308,7 +326,7 @@ const runWrite = (homes, records) => {
     console.log(
       dropped === 0
         ? `${BASELINE_REL} unchanged — every grandfathered record still needs it.`
-        : `${BASELINE_REL} pruned: ${dropped} record(s) no longer need grandfathering.`,
+        : `${BASELINE_REL} pruned: ${dropped} record(s) no longer need grandfathering; it may now hold at most ${pruned.maxEntries}.`,
     );
   }
   writeIndexes(homes);
@@ -397,7 +415,7 @@ const main = () => {
     `ADR gate passed: ${total} ADR(s) across ${homes.length} home(s); next free number is ADR-${pad(nextFreeNumber(homes))}.`,
   );
   console.log(
-    `${baseline.files.length} record(s) predate the metadata block and are grandfathered in ${BASELINE_REL} (closed at ADR-${pad(baseline.closedAt)}); they are unclassified and \`--list --package\` cannot see them.`,
+    `${baseline.files.length} record(s) predate the metadata block and are grandfathered in ${BASELINE_REL}, which may hold at most ${baseline.maxEntries} and only ever shrinks; they are unclassified and \`--list --package\` cannot see them.`,
   );
   console.log(
     'Not checked, and not checkable here: whether a section says anything true — only that it is present and not empty.',

@@ -2,7 +2,8 @@
  * The direction of the contract is the only thing worth testing here: the
  * baseline shrinks and does not grow. Each case is a way it could grow by
  * accident — a malformed file read as "grandfather everything", an entry naming
- * nothing, an entry for a record written after the window closed.
+ * nothing, an entry nobody adopted, and a prune that ratchets the bound the
+ * wrong way.
  */
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -11,6 +12,7 @@ import {
   adoptedBaseline,
   baselineFindings,
   baselinedFiles,
+  hasGrown,
   prunedBaseline,
   readableBaseline,
 } from './adr-baseline.mjs';
@@ -33,15 +35,25 @@ describe('readableBaseline', () => {
   });
 
   it('drops a non-string entry rather than carrying it', () => {
-    expect(readableBaseline({ closedAt: 2, files: ['a.md', 7] })).toEqual({
-      closedAt: 2,
+    expect(readableBaseline({ files: ['a.md', 7], maxEntries: 2 })).toEqual({
       files: ['a.md'],
+      maxEntries: 2,
     });
+  });
+
+  it('reads an unusable bound as zero, which reports as growth', () => {
+    // Not as "no bound set": a baseline whose bound cannot be read must not be
+    // the one state that grandfathers freely.
+    for (const maxEntries of [undefined, -1, 'many', 1.5]) {
+      expect(hasGrown(readableBaseline({ files: ['a.md'], maxEntries }))).toBe(
+        true,
+      );
+    }
   });
 });
 
 describe('baselineFindings', () => {
-  const baseline = { closedAt: 2, files: ['ADR-001-a.md'] };
+  const baseline = { files: ['ADR-001-a.md'], maxEntries: 1 };
 
   it('says nothing about an entry that still earns its place', () => {
     expect(baselineFindings({ baseline, records: [failing(1)] })).toEqual([]);
@@ -59,38 +71,53 @@ describe('baselineFindings', () => {
     ]);
   });
 
-  it('reports an entry above the window, which is how it would grow', () => {
+  it('reports a list longer than its bound, whatever the numbers are', () => {
+    // The door a number window left open: a record taking a RETIRED number sits
+    // inside any window, so numbering cannot be what decides this.
     expect(
       baselineFindings({
-        baseline: { closedAt: 0, files: ['ADR-001-a.md'] },
-        records: [failing(1)],
-      }),
-    ).toEqual([expect.stringContaining("above the baseline's closedAt")]);
+        baseline: { files: ['ADR-001-a.md', 'ADR-002-a.md'], maxEntries: 1 },
+        records: [failing(1), failing(2)],
+      })[0],
+    ).toContain('has grown');
   });
 });
 
 describe('prunedBaseline', () => {
-  it('keeps only the entries still inside the window and still failing', () => {
+  it('keeps only the entries still failing, and lowers the bound to match', () => {
     expect(
       prunedBaseline({
         baseline: {
-          closedAt: 2,
           files: ['ADR-003-a.md', 'ADR-002-a.md', 'ADR-001-a.md'],
+          maxEntries: 3,
         },
         records: [failing(1), record(2), failing(3)],
       }),
-    ).toEqual({ closedAt: 2, files: ['ADR-001-a.md'] });
+    ).toEqual({ files: ['ADR-001-a.md', 'ADR-003-a.md'], maxEntries: 2 });
+  });
+
+  it('never raises the bound above what it kept', () => {
+    // Guards the laundering path: pruning a grown list must not write the grown
+    // length back as the new bound. The caller refuses first; this is the second
+    // half of that, so the two cannot disagree.
+    const pruned = prunedBaseline({
+      baseline: { files: ['ADR-001-a.md', 'ADR-002-a.md'], maxEntries: 1 },
+      records: [failing(1), failing(2)],
+    });
+
+    expect(pruned.maxEntries).toBe(pruned.files.length);
   });
 });
 
 describe('adoptedBaseline', () => {
-  it('closes the window at the highest record present', () => {
+  it('bounds the baseline at exactly what it grandfathered', () => {
     const adopted = adoptedBaseline([failing(1), record(2), failing(3)]);
 
     expect(adopted).toEqual({
-      closedAt: 3,
       files: ['ADR-001-a.md', 'ADR-003-a.md'],
+      maxEntries: 2,
     });
     expect(baselinedFiles(adopted).has('ADR-002-a.md')).toBe(false);
+    expect(hasGrown(adopted)).toBe(false);
   });
 });

@@ -502,15 +502,29 @@ its body is not.
 
 The records that predate the block are grandfathered in
 [`scripts/adr-content-baseline.json`](scripts/adr-content-baseline.json), and
-that list may **shrink but not grow**. Three things hold that direction, none of
-them a promise: `closedAt` is the highest number the baseline covers and an entry
-above it is refused, so a record written since cannot be grandfathered at all;
-`--adopt` refuses a baseline that already exists, so no command turns today's
-failures into tomorrow's exemptions; and `--write` only prunes — an entry naming
-no record, or one whose record now satisfies the rules, is a finding until it is
-dropped. A grandfathered record is unclassified, so `adr:list -- --package`
-cannot see it, and both commands print how many are in that state rather than
-letting an empty listing read as "no decisions govern this package".
+that list may **shrink but not grow**. Growth is decided by the list's size, not
+by any record's number: `maxEntries` is the most entries the baseline may hold,
+so a list longer than its own bound is a finding whatever the added entry is
+called. A number window would not do this — a sequence has gaps, and a record
+taking a retired number falls inside any window.
+
+Three things hold the direction, and the third is why they are worth listing:
+
+- **`--adopt` refuses a baseline that already exists**, so no command turns
+  today's failures into tomorrow's exemptions.
+- **`--write` only prunes**, and it lowers `maxEntries` to what it kept — never
+  raises it, so it cannot launder a hand-added entry into a baseline the next run
+  calls clean. It refuses outright to rewrite one that has already grown. An entry
+  naming no record, or one whose record now satisfies the rules, is a finding
+  until it is dropped.
+- **Raising `maxEntries` by hand is not shut, and nothing in a tracked file could
+  shut it.** What the bound buys is that reopening grandfathering is one number
+  changing in a diff rather than one line appended to a list of seventy that read
+  alike.
+
+A grandfathered record is unclassified, so `adr:list -- --package` cannot see it,
+and both commands print how many are in that state rather than letting an empty
+listing read as "no decisions govern this package".
 
 `devkit:doctor -- --accept` takes **one** file at a time and refuses a path the
 report does not currently call `modified` or `conflict`, or a missing `--reason` — the same

@@ -2,7 +2,7 @@
 id: adr-gate-reads-the-record
 title: 'Make the ADR gate read the record: metadata block, section assertion, listing by package'
 owner: agent:claude
-status: active
+status: review
 branch: feat/991-adr-gate-reads-the-record
 area:
   - packages/repo-standards/**
@@ -35,6 +35,7 @@ splitting them would edit `adr-registry.mjs`, `verify-adrs.mjs` and
 
 ## Status / next
 
-- Current step: implementation complete, running the gate
+- Current step: round 2 — the baseline's growth bound no longer depends on ADR
+  numbering, so a record taking a retired number cannot be grandfathered
 - Blockers: none
-- Next: push, retitle the draft PR, ready it
+- Next: awaiting review on #1013

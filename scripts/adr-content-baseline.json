@@ -1,5 +1,4 @@
 {
-  "closedAt": 93,
   "files": [
     "ADR-001-native-dialog-modal.md",
     "ADR-002-css-anchor-positioning-tooltip.md",
@@ -71,5 +70,6 @@
     "ADR-091-retire-the-scan-report-pipeline.md",
     "ADR-092-name-the-repository-after-the-scope.md",
     "ADR-093-declare-a-requirement-state-rather-than-derive-it.md"
-  ]
+  ],
+  "maxEntries": 70
 }

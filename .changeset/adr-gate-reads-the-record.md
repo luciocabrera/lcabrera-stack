@@ -17,9 +17,12 @@ not judge what a section says, and its success line says so.
 one workspace, separated from the repository-wide ones it inherits.
 
 Records written before the block are grandfathered in a baseline the gate reads
-rather than edited into shape: `--adopt` writes it once and refuses a second
-call, `--write` only prunes it, and an entry above its `closedAt` window is
-refused. The path is `registers.adrContentBaseline`.
+rather than edited into shape, and that list may shrink but not grow. Growth is
+bounded by `maxEntries` — the most entries the baseline may hold — rather than by
+a number window, which a record taking a retired number would fall inside.
+`--adopt` writes the baseline once and refuses a second call; `--write` only
+prunes, lowers the bound to what it kept, and refuses to rewrite a baseline that
+has already grown. The path is `registers.adrContentBaseline`.
 
 `@lcabrera/devkit` ships the template carrying the block with generic
 placeholders, so a scaffolded record fails the gate until its author says what
