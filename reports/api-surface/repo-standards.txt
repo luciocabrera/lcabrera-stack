@@ -5,6 +5,7 @@
 ## ./adr-registry
 ADR_HOMES [const] any
 adrFindings [const] ({ drafts, grandfathered, homes, strays, }: { drafts: any; grandfathered?: Set<any> | undefined; homes: any; strays: any; }) => any[]
+commandsFor [const] (home: any) => any
 DRAFT_DIR [const] string
 headingNumber [const] (markdown: any) => number | undefined
 headingTitle [const] (markdown: any) => any
@@ -13,6 +14,7 @@ nextFreeNumber [const] (homes: any) => number
 NON_ADR_FILES [const] Set<string>
 normalizeIndex [const] (markdown: any) => any
 parseAdrFilename [const] (filename: any) => { number: number; slug: string | undefined; } | undefined
+renderGoverned [const] ({ homes, workspace }: { homes: any; workspace: any; }) => string
 renderIndex [const] (home: any, { exemptionCount, homeCount, }?: { exemptionCount?: number | undefined; homeCount?: any; }) => string
 renderListing [const] (homes: any) => any
 TEMPLATE_FILE [const] "_TEMPLATE.md"
@@ -49,16 +51,16 @@ DEFAULT_ADR_COMMANDS [const] { list: string; new: string; write: string; }
 DEFAULT_CONVENTIONS [const] { defaultBranch: string; sharedBranchesDir: string; }
 DEFAULT_GATES [const] { scriptSize: { baselineFile: string; ceiling: number; guideDoc: string; skipDirs: never[]; }; strayConfigs: { configuredIn: string; skipDirs: never[]; unreadNames: never[]; unreadPrefixes: never[]; }; docsPaths: { baselineFile: string; expectedAbsent: never[]; expectedAbsentPrefixes: never[]; ignoredDocs: never[]; onDemandReportDirs: never[]; repoRoots: never[]; }; }
 DEFAULT_PUBLISHING [const] { apiSurfaceDir: string; packagesDir: string; publicPackageDirs: never[]; releaseWorkflow: string; workspaceDirs: string[]; }
-DEFAULT_REGISTERS [const] { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
+DEFAULT_REGISTERS [const] { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
 readConventions [const] (root?: any) => { defaultBranch: any; sharedBranchesDir: string; }
 readCoordinationPaths [const] (root?: any) => { boardDoc: string; boardRel: string; branchesDir: string; branchesRel: string; tasksDir: string; tasksRel: string; }
 readGates [const] (root?: any) => { scriptSize: { baselineFile: string; ceiling: any; guideDoc: any; skipDirs: any; }; strayConfigs: { configuredIn: any; skipDirs: any; unreadNames: any; unreadPrefixes: any; }; docsPaths: { baselineFile: string; expectedAbsent: any; expectedAbsentPrefixes: any; ignoredDocs: any; onDemandReportDirs: any; repoRoots: any; }; }
 readPublishing [const] (root?: any) => { apiSurfaceDir: string; packagesDir: string; publicPackageDirs: any; releaseWorkflow: string; workspaceDirs: any; }
-readRegisters [const] (root?: any) => { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; } | { adrCommands: { [k: string]: any; }; adrGrandfatheredDuplicates: any; adrHomes: any; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
+readRegisters [const] (root?: any) => { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; } | { adrCommands: { [k: string]: any; }; adrGrandfatheredDuplicates: any; adrHomes: any; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
 resolveConventions [const] (raw: any) => { defaultBranch: any; sharedBranchesDir: string; }
 resolveGates [const] (raw: any) => { scriptSize: { baselineFile: string; ceiling: any; guideDoc: any; skipDirs: any; }; strayConfigs: { configuredIn: any; skipDirs: any; unreadNames: any; unreadPrefixes: any; }; docsPaths: { baselineFile: string; expectedAbsent: any; expectedAbsentPrefixes: any; ignoredDocs: any; onDemandReportDirs: any; repoRoots: any; }; }
 resolvePublishing [const] (raw: any) => { apiSurfaceDir: string; packagesDir: string; publicPackageDirs: any; releaseWorkflow: string; workspaceDirs: any; }
-resolveRegisters [const] (raw: any) => { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; } | { adrCommands: { [k: string]: any; }; adrGrandfatheredDuplicates: any; adrHomes: any; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
+resolveRegisters [const] (raw: any) => { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; } | { adrCommands: { [k: string]: any; }; adrGrandfatheredDuplicates: any; adrHomes: any; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
 
 ## ./coordination-board
 renderBoard [const] (tasks: any, branches: any, { tasksRel }?: {}) => string

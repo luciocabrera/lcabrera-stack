@@ -96,7 +96,8 @@ const main = () => {
     }
     console.error(
       '\nTitle format: `type(scope): subject`. Description: fill in ' +
-        '.github/pull_request_template.md. See the commit-and-pr skill.',
+        '.github/pull_request_template.md — every section, "None" where it does ' +
+        'not apply. The spec is this package’s `./commit-convention` export.',
     );
     process.exitCode = 1;
     return;

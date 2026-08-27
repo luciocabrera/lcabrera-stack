@@ -1,7 +1,13 @@
+---
+governs:
+  - <repository, or one workspace directory name per line>
+---
+
 <!--
   The shape of an ADR in this repo. `vp run adr:new -- "<title>"` copies this
   file, strips this comment, and fills in the number and heading; copying it by
-  hand does the same job.
+  hand does the same job. The `---` block above is carried through as it is, so
+  a scaffolded ADR fails the gate until you say what the decision governs.
 
   WHERE IT GOES is settled: docs/decisions/ is the only home. `registers.adrHomes`
   in devkit.config.json is the set — read by adr-registry.mjs and enforced by
@@ -11,11 +17,27 @@
   `registers.adrGrandfatheredDuplicates` is empty, so the gate rejects every
   repeat. Never renumber an existing ADR — it is a dated record.
 
-  `vp run adr:verify` checks placement, filename, heading number and index
-  freshness — it does NOT read the sections below. They are the convention this
-  file carries, derived from what ADR-047..051 already do rather than invented:
-  Context / Decision / Consequences / Alternatives considered are in all of them.
-  Drop a section that has nothing to say; do not rename the ones you keep.
+  `governs` is ADDITIVE CLASSIFICATION, not an amendment: it says what the
+  decision applies to, which is a fact about the tree you are standing in, not a
+  change to what was decided. That is why adding one to an old ADR is allowed
+  while rewriting its body is not. Its values are workspace DIRECTORY names —
+  `ui`, `server`, `node-runtime`, not npm names — derived from
+  pnpm-workspace.yaml, or the single value `repository` when the decision
+  constrains no one workspace. The two do not mix, and the list is never empty:
+  a decision that governs everything says so, so that "nobody filled this in"
+  cannot be spelled the same way as an answer. `vp run adr:list -- --package ui`
+  is what reads it.
+
+  `vp run adr:verify` checks placement, filename, heading number, index
+  freshness, the block above, and that Context, Decision, Consequences and one
+  of the two alternatives sections are present and not empty. It does NOT judge
+  what they say. Sections marked optional below may be dropped; do not rename
+  the ones you keep.
+
+  Records written before the block existed are grandfathered in
+  scripts/adr-content-baseline.json rather than edited into shape. That list may
+  not get longer: prune it with `vp run adr:verify -- --write` after classifying
+  one of them.
 
   After adding the file, run `vp run adr:verify`. This file is the whole change:
   a home's index carries no row per ADR, so there is nothing to regenerate and
@@ -45,11 +67,11 @@
 
 ## Options considered
 
-<!-- Optional. A numbered list, each with why it was rejected, and the chosen one
-     marked `Chosen.` — ADR-050 is the worked example. Use this when the decision
-     was a choice between comparable designs; use `Alternatives considered` below
-     when it is one design plus the objections it had to answer. Small ADRs need
-     only one of the two. -->
+<!-- A numbered list, each with why it was rejected, and the chosen one marked
+     `Chosen.` — ADR-050 is the worked example. Use this when the decision was a
+     choice between comparable designs; use `Alternatives considered` below when
+     it is one design plus the objections it had to answer. A small ADR needs
+     only one of the two, and the gate requires at least one. -->
 
 ## Decision
 
@@ -66,7 +88,7 @@
 
 <!-- Each rejected alternative with the reason it lost, so it is not re-proposed
      from scratch. "Rejected on evidence: <what was measured>" beats "rejected as
-     too complex". -->
+     too complex". One of this and `Options considered` above is required. -->
 
 ## References
 

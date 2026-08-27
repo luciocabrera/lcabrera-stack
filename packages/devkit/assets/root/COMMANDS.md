@@ -69,17 +69,18 @@ Each is a bin the gate runtime installs. They read nothing but their arguments,
 their environment and the repository, so a workflow can call them after an
 install and a git hook can call them from the working tree.
 
-| Bin                  | What it checks                                                      |
-| -------------------- | ------------------------------------------------------------------- |
-| `repo-verify-commit` | One commit message, from a file or from stdin.                      |
-| `repo-verify-branch` | The branch name, from `--branch`, the environment, or the checkout. |
-| `repo-verify-pr`     | A pull request's title, description and base branch.                |
-| `repo-verify-issue`  | An issue description against the template.                          |
-| `repo-verify-claims` | The coordination register's integrity, overlap and staleness.       |
-| `repo-verify-adrs`   | Decision-record placement, numbering and index freshness.           |
-| `repo-close-claim`   | Deletes the task file(s) a merged pull request claimed.             |
-| `repo-claim-board`   | Renders the register as a table, on demand.                         |
-| `repo-adr`           | Scaffolds a new decision record at the next free number.            |
+| Bin                        | What it checks                                                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `repo-verify-commit`       | One commit message, from a file or from stdin.                                                                            |
+| `repo-verify-branch`       | The branch name, from `--branch`, the environment, or the checkout.                                                       |
+| `repo-verify-pr`           | A pull request's title, description and base branch.                                                                      |
+| `repo-verify-issue`        | An issue description against the template.                                                                                |
+| `repo-verify-claims`       | The coordination register's integrity, overlap and staleness.                                                             |
+| `repo-verify-adrs`         | Decision-record placement, numbering, index freshness, and body.                                                          |
+| `repo-verify-adrs --adopt` | Once, on a home that already holds records: grandfathers today's failures so only new records are held to the body rules. |
+| `repo-close-claim`         | Deletes the task file(s) a merged pull request claimed.                                                                   |
+| `repo-claim-board`         | Renders the register as a table, on demand.                                                                               |
+| `repo-adr`                 | Scaffolds a new decision record at the next free number.                                                                  |
 
 ## 4. What this repository supplies
 

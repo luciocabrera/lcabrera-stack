@@ -7,6 +7,7 @@
  * docs/decisions/ADR-048-adr-taxonomy-and-one-sequence.md.
  */
 
+import { REPOSITORY_SCOPE } from './adr-content.mjs';
 import { DEFAULT_ADR_COMMANDS, readRegisters } from './config.mjs';
 
 /**
@@ -40,7 +41,7 @@ export const TEMPLATE_HOME = registers.adrTemplateHome;
  * so carrying it here costs nothing: the signature stays arity 1, which is the
  * property that keeps the directory from coming back in (ADR-075).
  */
-const commandsFor = (home) => home.commands ?? DEFAULT_ADR_COMMANDS;
+export const commandsFor = (home) => home.commands ?? DEFAULT_ADR_COMMANDS;
 
 /**
  * Markdown that lives in a home without being an ADR: the generated index, and
@@ -240,6 +241,48 @@ export const renderListing = (homes) =>
       '',
     ])
     .join('\n');
+
+const sortedRows = (homes, matches) =>
+  homes.flatMap((home) =>
+    [...home.entries]
+      .sort((a, b) => a.filename.localeCompare(b.filename))
+      .filter((entry) => matches(entry.governs ?? []))
+      .map((entry) => listingRow(home, entry)),
+  );
+
+const governedTable = (title, rows) => [
+  `## ${title}`,
+  '',
+  ...(rows.length === 0
+    ? ['_None._']
+    : ['| ADR | Decision |', '| --- | --- |', ...rows]),
+  '',
+];
+
+/**
+ * The decisions constraining one workspace, for `--list --package <name>`.
+ *
+ * Two tables rather than one, because an agent about to touch a package is
+ * bound by both and the difference matters: the first is the set of decisions
+ * taken ABOUT that workspace, the second the repository-wide ones it inherits
+ * along with every other. Folding them together would let a reader mistake a
+ * repository rule for a package's own.
+ *
+ * `entries` carry `governs` from the record's own block, so a record with no
+ * block appears in neither table — which is the visible cost of grandfathering,
+ * and the reason the caller prints how many are in that state.
+ */
+export const renderGoverned = ({ homes, workspace }) =>
+  [
+    ...governedTable(
+      `Governing \`${workspace}\``,
+      sortedRows(homes, (governs) => governs.includes(workspace)),
+    ),
+    ...governedTable(
+      'Repository-wide — every workspace inherits these',
+      sortedRows(homes, (governs) => governs.includes(REPOSITORY_SCOPE)),
+    ),
+  ].join('\n');
 
 /** The path from one home back up to the home that holds the template; that
  *  home links to its own copy directly. */

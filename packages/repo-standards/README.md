@@ -76,22 +76,22 @@ until you acknowledge it.
 
 ## Commands
 
-| Bin                                          | Checks                                                        |
-| -------------------------------------------- | ------------------------------------------------------------- |
-| `repo-verify-commit <file>`                  | a commit message against the Conventional Commit spec         |
-| `repo-verify-branch [name]`                  | a branch name against the same type vocabulary                |
-| `repo-verify-pr --title <t> --body-file <f>` | a pull request's title and every required section             |
-| `repo-verify-issue --body-file <f>`          | an issue body's required sections                             |
-| `repo-verify-claims`                         | the coordination register's integrity, overlap and staleness  |
-| `repo-verify-adrs`                           | every ADR home, and regenerates the index                     |
-| `repo-verify-publish`                        | the tarball each built package would publish, by packing it   |
-| `repo-verify-api-surface`                    | each published package's exported surface against a snapshot  |
-| `repo-verify-types`                          | that a built package's published types resolve for a consumer |
-| `repo-audit-release`                         | every version already on the registry, after the fact         |
-| `repo-plan-release`                          | which packages have a version the registry does not have      |
-| `repo-adr "<title>"`                         | — scaffolds an ADR in the home you name                       |
-| `repo-claim-board`                           | — renders the live claims, including ones on other branches   |
-| `repo-close-claim --pr <n>`                  | — deletes the task file a merged pull request closes          |
+| Bin                                          | Checks                                                                                     |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `repo-verify-commit <file>`                  | a commit message against the Conventional Commit spec                                      |
+| `repo-verify-branch [name]`                  | a branch name against the same type vocabulary                                             |
+| `repo-verify-pr --title <t> --body-file <f>` | a pull request's title and every required section                                          |
+| `repo-verify-issue --body-file <f>`          | an issue body's required sections                                                          |
+| `repo-verify-claims`                         | the coordination register's integrity, overlap and staleness                               |
+| `repo-verify-adrs`                           | every ADR home, and every record's block and sections (`--adopt` once on an existing home) |
+| `repo-verify-publish`                        | the tarball each built package would publish, by packing it                                |
+| `repo-verify-api-surface`                    | each published package's exported surface against a snapshot                               |
+| `repo-verify-types`                          | that a built package's published types resolve for a consumer                              |
+| `repo-audit-release`                         | every version already on the registry, after the fact                                      |
+| `repo-plan-release`                          | which packages have a version the registry does not have                                   |
+| `repo-adr "<title>"`                         | — scaffolds an ADR in the home you name                                                    |
+| `repo-claim-board`                           | — renders the live claims, including ones on other branches                                |
+| `repo-close-claim --pr <n>`                  | — deletes the task file a merged pull request closes                                       |
 
 In the repository this is published from they are the root `vp run` tasks of the
 same name — `commit:verify`, `pr:verify`, `coordination:verify`,
@@ -122,6 +122,7 @@ hand-publish, and the only one that cannot prevent anything.
     "adrHomes": [
       { "dir": "docs/decisions", "tier": "repo", "title": "…", "blurb": "…" }
     ],
+    "adrContentBaseline": "scripts/adr-content-baseline.json",
     "adrDraftDir": "docs/agents/planning/adr-drafts",
     "adrTemplateHome": "docs/decisions",
     "coordinationBoardDoc": "docs/coordination/BOARD.md",
@@ -136,6 +137,29 @@ hand-publish, and the only one that cannot prevent anything.
   }
 }
 ```
+
+`adrContentBaseline` is where the ADR gate keeps the records it grandfathers.
+It is held to the same containment rule as every other path here, and its default
+sits beside the other two baselines this package writes rather than inside the
+config, because it is a list of your filenames and a register of policy is not
+where those belong.
+
+**Adopting the gate on a home that already has records takes two commands, and
+the gate is red until you run them.** Every existing record predates the metadata
+block, so each one fails on first run:
+
+```bash
+npx repo-verify-adrs --adopt   # write the baseline once, from today's failures
+npx repo-verify-adrs --write   # regenerate the index
+```
+
+`--adopt` refuses to overwrite a baseline that is already there, so running it
+blind either writes the first one or fails; afterwards only NEW records are held
+to the content rules. It is not a claim that nothing can grandfather afresh —
+deleting the file and adopting again is an ordinary thing to be able to do, and
+what holds either way is the bound: at most `maxEntries` records escape the
+content rules. `--write` prunes the baseline as you classify records, and never
+adds to it.
 
 Each `publicPackageDirs` entry is a **directory name under `packagesDir`** —
 `ui`, not `packages/ui`. Spelling it the second way is a valid repo-relative
