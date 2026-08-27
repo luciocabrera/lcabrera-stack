@@ -38,7 +38,7 @@ describe('getCellStyleProps', () => {
     const result = getCellStyleProps({
       customStylex: {} as StyleXStyles,
       dataType: 'currency',
-      hasCustomContent: false,
+      isAlignedByDataType: true,
       minWidth: 120,
       pinInfo: {
         isFirstPinnedRight: false,
@@ -63,11 +63,13 @@ describe('getCellStyleProps', () => {
     });
   });
 
-  it('skips alignment styles for custom content and supports right pinning', () => {
+  it('skips alignment styles for consumer content and supports right pinning', () => {
+    // A consumer's own `render()` output: the cell holds content nothing here chose the
+    // layout of, so no alignment class is applied even though the column is a boolean.
     const result = getCellStyleProps({
       customStylex: undefined,
       dataType: 'boolean',
-      hasCustomContent: true,
+      isAlignedByDataType: false,
       minWidth: 80,
       pinInfo: {
         isFirstPinnedRight: true,
@@ -87,6 +89,58 @@ describe('getCellStyleProps', () => {
         { offset: 24, type: 'right' },
         false,
         'shadowRight',
+        undefined,
+      ],
+    });
+  });
+
+  // The discriminating pair for #1018: identical arguments but for the flag, so the only
+  // thing either case can be reporting is the flag. A group row's aggregate reaches here
+  // as content that is already rendered — the old `hasCustomContent` — and must still take
+  // the column's alignment.
+  it('right-aligns a currency column whose content was supplied', () => {
+    const result = getCellStyleProps({
+      customStylex: undefined,
+      dataType: 'currency',
+      isAlignedByDataType: true,
+      minWidth: 80,
+      pinInfo: undefined,
+      width: 160,
+    });
+
+    expect(result).toEqual({
+      args: [
+        { minWidth: 80, type: 'base', width: 160 },
+        'alignRight',
+        false,
+        false,
+        false,
+        undefined,
+        undefined,
+        undefined,
+      ],
+    });
+  });
+
+  it('centres a date column whose content was supplied', () => {
+    const result = getCellStyleProps({
+      customStylex: undefined,
+      dataType: 'date',
+      isAlignedByDataType: true,
+      minWidth: 80,
+      pinInfo: undefined,
+      width: 160,
+    });
+
+    expect(result).toEqual({
+      args: [
+        { minWidth: 80, type: 'base', width: 160 },
+        false,
+        'alignCenter',
+        false,
+        false,
+        undefined,
+        undefined,
         undefined,
       ],
     });

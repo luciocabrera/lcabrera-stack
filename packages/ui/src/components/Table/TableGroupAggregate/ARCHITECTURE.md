@@ -96,6 +96,20 @@ beside the value whenever the cell's own column carries a filter. It is a UI
 obligation rather than a SQL one: nothing about the query is wrong, so there is
 nothing for the builder to refuse.
 
+## Where it is aligned, and why not here
+
+Nowhere in this component. The cell around it decides, from the column's
+`dataType`, exactly as it does for the detail rows below
+([TableBody/ARCHITECTURE.md](../TableBody/ARCHITECTURE.md)) — this container only
+declines to block the decision, with `justifyContent: 'inherit'`. It is
+`width: 100%` inside a flex `<td>`, so it fills the cell and the cell's own
+`justify-content` would otherwise reach nothing.
+
+Setting `flex-end` here instead was the obvious fix and is wrong twice: it puts a
+type decision in a component that does not know the column, and it moves only the
+measures — the em dash this cell also draws, the group key cell beside it, and a
+detail row's blanked key column all stay where they were (#1018).
+
 ## What it does not do
 
 - **No uniform-value fallback.** A group row shows selected aggregates and

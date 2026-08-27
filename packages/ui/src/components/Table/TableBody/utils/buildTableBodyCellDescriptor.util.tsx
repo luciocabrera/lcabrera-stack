@@ -14,8 +14,9 @@ import { TableRowActionsMenu } from '#ui/components/Table/TableRowActionsMenu';
 import { resolveStructuralCellChildren } from './resolveStructuralCellChildren.util';
 
 /**
- * The column's own type travels as `dataType` on the default branch, so a new `dataType`
- * never grows this union.
+ * `dataType` travels on **both** branches, so it is not what tells them apart — `kind` is.
+ * On the default branch it says how to format the value; on the custom branch the value is
+ * already rendered and it says only how the cell aligns (#1018).
  */
 export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
   | (TableBodyCellCustomFields<TData> & TableBodyCellDescriptorBase<TData>)
@@ -53,6 +54,13 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
 
 type TableBodyCellCustomFields<TData extends Record<string, unknown>> = {
   readonly children: TableBodyCellProps<TData>['children'];
+  /**
+   * **Required, not optional**, for the same reason `hasStructuralMarker` is: every branch
+   * below has to state whether the cell aligns by its column, and an optional field would
+   * let one forget silently — which is the shape of the bug this fixes. `undefined` is the
+   * consumer-supplied answer, and it is spelled out.
+   */
+  readonly dataType: TableBodyCellProps<TData>['dataType'];
   readonly kind: 'custom';
   readonly label: '';
 };
@@ -130,14 +138,21 @@ export const buildTableBodyCellDescriptor = <
     hasStructuralMarker,
   });
 
+  // Grid-supplied content answers in the column's own units — an aggregate, a group key,
+  // an em dash, a blanked key column — so it takes the column's alignment and a measure
+  // lines up with the detail rows beneath it (#1018).
   if (structuralChildren !== undefined) {
-    return { ...shared, children: structuralChildren };
+    return { ...shared, children: structuralChildren, dataType: col.dataType };
   }
 
   const customActions = col.render?.(row);
 
+  // The two consumer-supplied branches carry no `dataType`: what a `render()` returns is
+  // the consumer's layout to decide, and the actions menu is chrome with no column type at
+  // all. Both keep the cell's default alignment.
   if (col.key === 'actions') {
     return {
+      ...shared,
       children: (
         <TableRowActionsMenu
           customActions={customActions}
@@ -145,33 +160,12 @@ export const buildTableBodyCellDescriptor = <
           row={row}
         />
       ),
-      columnKey,
-      isLoadingState,
-      key: col.key,
-      kind: 'custom',
-      label: '',
-      minWidth,
-      pinInfo,
-      rowIndex,
-      rowKey,
-      width,
+      dataType: undefined,
     };
   }
 
   if (customActions) {
-    return {
-      children: customActions,
-      columnKey,
-      isLoadingState,
-      key: col.key,
-      kind: 'custom',
-      label: '',
-      minWidth,
-      pinInfo,
-      rowIndex,
-      rowKey,
-      width,
-    };
+    return { ...shared, children: customActions, dataType: undefined };
   }
 
   return {

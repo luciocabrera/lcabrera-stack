@@ -38,6 +38,15 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
 }: TableBodyCellProps<TData>) => {
   const hasCustomContent = children !== undefined;
   const dataType = dataTypeProp ?? detectDataType(value);
+  /**
+   * Two questions, one flag until #1018. `hasCustomContent` still answers "content was
+   * supplied, so do not wrap it in the text span". Alignment asks something else: does this
+   * cell know its column's type? Grid-supplied content — a group row's aggregate or key, a
+   * blanked cell — arrives carrying the column's `dataType` and lines up with the detail
+   * rows beneath it; a consumer's own `render()` output arrives with none and keeps the
+   * cell's default alignment, which is the case the opt-out was written for.
+   */
+  const isAlignedByDataType = !hasCustomContent || dataTypeProp !== undefined;
   const { cellRef, onFocus, tabIndex } = useTableCellFocus({
     columnKey,
     rowIndex,
@@ -64,7 +73,7 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
       {...getCellStyleProps({
         customStylex,
         dataType,
-        hasCustomContent,
+        isAlignedByDataType,
         minWidth,
         pinInfo,
         width,

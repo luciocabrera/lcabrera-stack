@@ -9,10 +9,12 @@ area:
   - packages/ui/src/components/Table/TableBody/utils/**
   - packages/ui/src/components/Table/TableGroupAggregate/**
   - packages/ui/src/components/Table/TableGroupKeyCell/**
+  - packages/ui/src/components/Table/Table.groupRowAlignment.test.tsx
+  - .changeset/**
 started: 2026-08-27
 updated: 2026-08-27
 plan: (none)
-pr: (none)
+pr: '#1022'
 issue: #1018
 ---
 
@@ -22,6 +24,7 @@ Right-align numeric values on group rows
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implementing — cell alignment follows the column's data type on
+  group rows as well as detail rows (#1018)
 - Blockers: none
-- Next:
+- Next: quality gate, then push
