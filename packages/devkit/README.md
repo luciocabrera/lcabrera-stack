@@ -426,9 +426,12 @@ it as a `devDependency` to do that, which is the same split
 
 ## What ships
 
-The list is the sync's own report — run `devkit sync` or `devkit doctor
---verbose` and read what it names. Why each skill, rule and subagent definition
-got the verdict it did, including the ones deliberately kept back, is recorded
-in
+The **Profiles** table above is the shape of it, and `devkit closure --shipped`
+is the count per profile. That command reads the plan rather than your tree, so
+it answers the same in a repository that has never synced and in one that is
+already in step. A `sync` or `doctor` report is **not** that list: it names only
+what the run wrote or held back, so a repository up to date with the package
+reports nothing at all. Why each skill, rule and subagent definition got the
+verdict it did, including the ones deliberately kept back, is recorded in
 [`CLASSIFICATION.md`](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/devkit/CLASSIFICATION.md),
 which stays in the source repository and is not part of this install.
