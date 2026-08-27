@@ -72,13 +72,12 @@ different question.
 Three more rules carry weight:
 
 - **A requirement declaring `met` carries at least one `command` pointer that CI
-  runs — and that could fail.** A claim with nothing running behind it goes stale
-  in silence; one attached to a command in the gate fails loudly when it stops
-  being true. "It runs" is the cheap half of that test and not the whole of it: a
-  scanner iterating an empty list, or a filter that quietly stopped matching
-  anything, reports exactly the pass that correct code reports. So before
-  declaring `met`, **break the property on purpose and watch the pointer fail**.
-  If it does not fail, the requirement is `unmet` and the dead check is the gap.
+  runs and that could fail** — the standard is
+  [ADR-093](../decisions/ADR-093-declare-a-requirement-state-rather-than-derive-it.md)'s,
+  and it argues there why a claim with nothing failable behind it goes stale in
+  silence. The **procedure** is this page's: before declaring `met`, break the
+  property on purpose and watch the pointer fail. If it does not fail, the
+  requirement is `unmet` and the dead check is the gap.
 - **`packages` names workspace directories.** `node-runtime`, not `@lcabrera/node`;
   `eslint-local-rules`, not `@lcabrera/eslint-plugin`. The directory name is what
   `deriveWorkspaces` in

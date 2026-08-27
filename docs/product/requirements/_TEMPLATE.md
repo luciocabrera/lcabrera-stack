@@ -29,7 +29,9 @@ Frontmatter:
             the change that makes it true. There is no third value: a percentage,
             a score or an "as of" date is a measurement, and a measurement in a
             tracked file is wrong from the next commit onward. A requirement
-            declaring `met` carries at least one `command` pointer that CI runs.
+            declaring `met` carries at least one `command` pointer that CI runs
+            AND that could fail — break the property on purpose and watch the
+            pointer fail before you write `met`.
   packages  workspace DIRECTORY names — ui, server, node-runtime, repo-standards —
             not npm package names. The roster comes from pnpm-workspace.yaml.
   requires  ids of requirements this one leans on. A cycle is a malformed register.

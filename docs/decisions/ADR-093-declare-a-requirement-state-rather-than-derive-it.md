@@ -68,8 +68,15 @@ written by hand and flipped in the same commit as the change that makes it true.
 Three rules make the declaration answerable rather than decorative:
 
 1. **A requirement declaring `met` carries at least one `command` evidence
-   pointer that CI runs.** The claim is then attached to something that fails
-   loudly — a lie has to survive the gate, not merely survive review.
+   pointer that CI runs _and that could fail_.** The claim is then attached to
+   something that fails loudly — a lie has to survive the gate, not merely
+   survive review. "It runs" is the cheap half of that test and not the whole of
+   it: a scanner iterating an empty list, or a filter that quietly stopped
+   matching anything, reports exactly the pass that correct code reports, so a
+   pointer that cannot fail attaches the claim to nothing. The procedure for
+   settling it belongs with the schema and is stated in
+   [`docs/product/README.md`](../product/README.md), not here — this decision
+   fixes the standard, that page says how to meet it.
 2. **There is no third value.** No `partial`, no percentage, no score, no "as
    of" date. A third value is where a measurement gets in, and a measurement in
    a tracked file is right on the day it is written and wrong from the next
@@ -94,7 +101,8 @@ green check.
 **What it costs, stated plainly: a declared state can be wrong.** The register
 can say `met` on a branch where it no longer is, and nothing in the file itself
 will notice. Three things blunt that and none of them removes it — the `met`
-rule ties the claim to a CI command, the flip lands in the commit that earns it,
+rule ties the claim to a CI command that can fail, the flip lands in the commit
+that earns it,
 and a wrong claim is a diff someone reviewed rather than an accident. Anyone
 reading `state` is reading a **claim with a named author**, not a test result,
 and should treat it accordingly.
@@ -103,6 +111,14 @@ and should treat it accordingly.
 in this repository could ever run. The register stays readable offline on any
 branch. And the field cannot silently degrade into "we could not check", because
 there is no path by which a tool writes it.
+
+**Worked, and it is why rule 1 reads as it does.** The first entry written under
+this decision declared `met` on a guard whose dependency filter had stopped
+matching anything after a package rename. The pointer ran, scanned nothing, and
+could not fail; the whole gate passed with a deliberate violation planted. Review
+caught it in [#1006](https://github.com/luciocabrera/lcabrera-stack/pull/1006)
+and it was demoted to `unmet`. An earlier draft of this rule asked only that the
+command run, which is the form that would have let it stand.
 
 **The trap.** The pressure to add a third state will come, and it will arrive
 disguised as accuracy — a requirement half of whose criteria hold, and `unmet`
