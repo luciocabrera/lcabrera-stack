@@ -28,7 +28,14 @@ to serve and its `## Acceptance` is what settles whether you are done. Read it
 before writing the issue's §6, not after: where the two disagree, one of them is
 wrong and finding out at review costs a round.
 
-**2. If nothing covers it, decide whether it belongs here, then write it in the
+**2. If none covers it exactly, look for the near-match before you reach for the
+template.** Nothing dedupes the directory, so a second file restating a
+requirement that is already there stays there. If an existing one is nearly
+right, edit it. If your work genuinely leans on another rather than restating
+it, name that one in `requires` — `browse-and-edit-a-table-without-writing-sql`
+names what it leans on there and repeats none of it.
+
+**3. Only then decide whether a new file belongs here, and write it in the
 change that needs it.** `docs/product/README.md` opens with two sections that
 settle the first half — _What this layer is canonical for_ and _Four things it is
 not_, the second naming the home each of those four goes to instead. Read them
@@ -39,12 +46,6 @@ prompt, not permission. Copy
 [`requirements/_TEMPLATE.md`](../../../docs/product/requirements/_TEMPLATE.md)
 to `requirements/<id>.md`, where `<id>` equals the filename slug, and do not open
 a separate sweep to enumerate the product in one sitting.
-
-**3. Check it is not already there under another name first.** Nothing dedupes
-the directory. If an existing requirement is nearly right, edit that one. If
-yours genuinely leans on another, name it in `requires` rather than restating
-it — `browse-and-edit-a-table-without-writing-sql` names what it leans on there
-and repeats none of it.
 
 **4. When your change makes one true, flip `state` in the same commit.** A flip
 on its own is a claim with no diff behind it. Read the `met` rule below before
