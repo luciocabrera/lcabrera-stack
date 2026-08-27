@@ -12,6 +12,7 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   HOME,
+  LEGACY_FILE,
   RECORD,
   RECORD_TEXT,
   editIn,
@@ -151,6 +152,36 @@ describe('the ADR gate reading the record', () => {
   });
 });
 
+describe('--write, which is the command the gate tells people to run', () => {
+  it('refuses a record the plain run refuses, rather than exiting clean', () => {
+    // `report()`'s staleness finding names `--write`, and it is what
+    // `registers.adrCommands.write` puts in every generated index. An author who
+    // adds an unclassified record, is told the index is stale, runs the command
+    // named, and gets exit 0 has been told the record is fine — by the gate.
+    const root = makeAdrRepo();
+    editIn(root)(RECORD, '---\ngoverns:\n  - ui\n---\n\n', '');
+
+    expect(runGate(root).status).not.toBe(0);
+    expect(runGate(root, ['--write']).status).not.toBe(0);
+    expect(runGate(root, ['--write']).output).toContain('no metadata block');
+  });
+
+  it('still prunes a baseline entry whose record now passes', () => {
+    // The other half, and why this cannot simply refuse on every content
+    // finding: "prune me" IS a content finding, so refusing on all of them
+    // would leave no command able to shrink the baseline.
+    const root = makeAdrRepo({ legacy: true });
+    runGate(root, ['--adopt']);
+    writeIn(root)(
+      `${HOME}/${LEGACY_FILE}`,
+      RECORD_TEXT.replace('# ADR-001', '# ADR-002'),
+    );
+
+    expect(runGate(root, ['--write']).status).toBe(0);
+    expect(runGate(root).status).toBe(0);
+  });
+});
+
 describe('listing the decisions that govern one package', () => {
   it('separates a package’s own decisions from the repository-wide ones', () => {
     const root = makeAdrRepo({ legacy: true });
@@ -170,6 +201,18 @@ describe('listing the decisions that govern one package', () => {
     expect(listed.stdout).toContain('Repository-wide');
     expect(listed.stdout).toContain('[ADR-003]');
     expect(listed.stdout).toContain('1 record(s) carry no `governs` block');
+  });
+
+  it('refuses --package with no name, rather than listing everything', () => {
+    // The unknown-name branch below exists so a filter naming nothing cannot
+    // read as "no decisions govern it". A MISSING name is the same defect
+    // pointed the other way, and louder: the reader gets a table answering a
+    // question they did not ask.
+    const listed = runGate(makeAdrRepo(), ['--list', '--package']);
+
+    expect(listed.status).not.toBe(0);
+    expect(listed.output).toContain('--package needs a workspace');
+    expect(listed.stdout).not.toContain('| ADR | Decision |');
   });
 
   it('refuses a name no workspace answers to, rather than listing nothing', () => {

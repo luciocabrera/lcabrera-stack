@@ -27,7 +27,8 @@ governs:
   The gate checks placement, filename, heading number, index freshness, the
   block above, and that Context, Decision, Consequences and one of the two
   alternatives sections are present and not empty. It does NOT judge what they
-  say. Drop a section that has nothing to say; do not rename the ones you keep.
+  say. Sections marked optional below may be dropped; do not rename the ones you
+  keep.
 
   Records that predate the block are grandfathered in a baseline the gate reads,
   rather than edited into shape. That list may not get longer.

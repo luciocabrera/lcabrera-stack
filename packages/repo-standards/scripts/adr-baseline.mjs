@@ -3,20 +3,19 @@
  * escape hatch is reviewable without reading any I/O.
  *
  * The records that predate the classification block are not edited into shape.
- * An ADR is a dated record, so a bulk rewrite of ninety of them would touch the
- * one kind of file this repository never rewrites, to satisfy a rule none of
- * them were written under. They are listed instead, and the list is held to a
+ * An ADR is a dated record, so rewriting a home full of them would touch the one
+ * kind of file a repository never rewrites, to satisfy a rule none of them were
+ * written under. They are listed instead, and the list is held to a
  * contract with one direction: it may get SHORTER, and it may not get LONGER.
  * That is a rule about the list's LENGTH, not about which records are on it.
  *
  * **Growth is a question about the list's size, not about any record's number.**
  * The first cut of this bounded it by number — nothing above the highest ADR
  * present at adoption could be grandfathered — and that is a proxy, not the
- * property. A sequence has gaps (this repository's has twenty-three), and a
- * record taking a retired number lands inside any window, so one appended line
- * grandfathered a brand-new empty ADR and the gate passed. `maxEntries` is the
- * property itself: the most entries the baseline may hold, which no numbering
- * can slip past.
+ * property. A sequence has gaps, and a record taking a retired number lands
+ * inside any window, so one appended line grandfathered a brand-new empty ADR
+ * and the gate passed. `maxEntries` is the property itself: the most entries the
+ * baseline may hold, which no numbering can slip past.
  *
  * **What this guarantees.** The gate enforces one thing: the list may hold at
  * most `maxEntries` entries, and every exemption beyond that count fails.

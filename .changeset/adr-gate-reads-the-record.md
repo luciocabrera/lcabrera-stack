@@ -22,7 +22,9 @@ may hold at most `maxEntries` entries, and every exemption beyond that count
 fails. A count rather than a number window, because a sequence has gaps and a
 record taking a retired number falls inside any window. `--write` only prunes,
 lowers the bound to what it kept, and refuses to rewrite a baseline that has
-already grown.
+already grown; it regenerates the indexes and then still fails on any record
+finding it cannot fix, so the command the gate names never reports a tree clean
+that a plain run rejects.
 
 It is not proof against an editor, and it exempts filenames rather than records:
 the list pins how many records escape the content rules, not which. A slot freed

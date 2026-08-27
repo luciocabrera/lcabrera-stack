@@ -236,7 +236,19 @@ export const blockFindings = ({ markdown, workspaces }) => {
 
 const SECTION = /^##[ \t]+(.+?)[ \t]*$/;
 const TITLE = /^#[ \t]+/;
-const COMMENT = /<!--[\s\S]*?-->/g;
+/**
+ * An HTML comment, INCLUDING an unterminated one, which runs to the end of the
+ * input — which is what a markdown renderer does with it too, so a heading swept
+ * up by one is a heading no reader sees either.
+ *
+ * Matching only the terminated form left `<!--` in the stripped text, so a
+ * section whose sole content was an unterminated comment read as filled: the
+ * `not empty` check was lenient in exactly the direction it exists to catch.
+ * CodeQL flags the same shape as incomplete sanitization; the injection it has
+ * in mind needs an HTML sink and there is none here, but the incompleteness was
+ * real on its own terms.
+ */
+const COMMENT = /<!--[\s\S]*?(?:-->|$)/g;
 
 /**
  * Each `##` section's lines, keyed by its lower-cased title. Comments are

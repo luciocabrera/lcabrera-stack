@@ -35,8 +35,9 @@ splitting them would edit `adr-registry.mjs`, `verify-adrs.mjs` and
 
 ## Status / next
 
-- Current step: round 5 — the baseline's prose says what an exemption is keyed
-  on (a filename) rather than which routes can change the exempt set; both
-  residuals are pinned by tests and their design question is #1014
+- Current step: round 6 — five review threads: `--write` no longer exits 0 on a
+  tree the plain run rejects, `--package` refuses a missing name, the changing
+  counts are out of the published comments, the shipped template no longer
+  contradicts itself, and the comment strip handles an unterminated comment
 - Blockers: none
 - Next: awaiting review on #1013

@@ -164,6 +164,17 @@ describe('sectionFindings', () => {
     expect(sectionFindings(empty)).toContain('`## Decision` is empty');
   });
 
+  it('reads an unterminated comment as nothing, not as content', () => {
+    // The lenient direction: a section whose only content is a comment someone
+    // forgot to close must not read as filled. A markdown renderer swallows the
+    // rest of the document there too, so nothing after it is content either.
+    const unterminated = BODY.replace('What is true now.', '<!-- todo');
+    expect(sectionFindings(unterminated)).toContain('`## Decision` is empty');
+    expect(sectionsOf(unterminated).get('decision').join('')).not.toContain(
+      '<!--',
+    );
+  });
+
   it('reads the template prompts as nothing, not as content', () => {
     // A scaffolded record whose prompts are all still in place has said nothing,
     // and must not pass for having a heading over each comment.

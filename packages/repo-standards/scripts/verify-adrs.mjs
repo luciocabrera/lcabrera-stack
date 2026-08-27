@@ -237,7 +237,16 @@ const rosterFindings = () =>
       ]
     : [];
 
-const contentFindings = ({ baseline, records }) => {
+/**
+ * What the records themselves get wrong — everything `--write` cannot fix for
+ * you, and so everything it must refuse on.
+ *
+ * Kept apart from the baseline's own findings because those two answer to
+ * different commands. "Prune me" is a finding `--write` exists to act on, so
+ * refusing on it would leave no command able to shrink the baseline; a record
+ * with no `governs` block is a finding only its author can act on.
+ */
+const recordContentFindings = ({ baseline, records }) => {
   const grandfathered = baselinedFiles(baseline);
   return [
     ...rosterFindings(),
@@ -246,11 +255,15 @@ const contentFindings = ({ baseline, records }) => {
       .flatMap((record) =>
         record.findings.map((finding) => `${record.path} — ${finding}`),
       ),
-    ...baselineFindings({ baseline, records }).map(
-      (finding) => `${BASELINE_REL}: ${finding}`,
-    ),
   ];
 };
+
+const contentFindings = ({ baseline, records }) => [
+  ...recordContentFindings({ baseline, records }),
+  ...baselineFindings({ baseline, records }).map(
+    (finding) => `${BASELINE_REL}: ${finding}`,
+  ),
+];
 
 const report = (findings, stale) => {
   console.error(`ADR gate — ${findings.length + stale.length} violation(s):\n`);
@@ -295,11 +308,26 @@ const runAdopt = (records) => {
  * Prune-only. `--write` may drop an entry that no longer earns its place; it may
  * never absorb a new one.
  *
- * A baseline that has already grown is refused rather than rewritten. Pruning it
+ * **It never exits 0 on a tree the plain run rejects.** This is the command the
+ * gate NAMES — the staleness finding tells an author to run it, and
+ * `registers.adrCommands.write` puts it in every generated index — so an author
+ * who adds an unclassified record, is told the index is stale, runs the command
+ * named and gets a clean exit has been told the record is fine, by the gate.
+ *
+ * It still does its work first, then reports: the index is regenerated and the
+ * baseline pruned, and the record's own findings are printed with a non-zero
+ * exit. Refusing to write instead would leave a stale index unfixable while any
+ * record failed, which is a different job. `verify-docs-paths.mjs --write` splits
+ * the same way, for the same reason.
+ *
+ * The exception is a STRUCTURAL finding — a malformed name, a stray — because
+ * the index is generated from those names and would be written wrong. And a
+ * baseline that has already grown is refused rather than rewritten: pruning it
  * would set the bound to whatever the grown list kept, which is exactly how a
  * hand-added entry would become a baseline the next run reports as clean.
  */
 const runWrite = (homes, records) => {
+  const baseline = readBaseline();
   const structural = adrFindings({
     drafts: listMarkdown(DRAFT_DIR),
     homes,
@@ -311,7 +339,6 @@ const runWrite = (homes, records) => {
     return;
   }
 
-  const baseline = readBaseline();
   if (hasGrown(baseline)) {
     report(
       baselineFindings({ baseline, records }).map(
@@ -339,12 +366,31 @@ const runWrite = (homes, records) => {
     );
   }
   writeIndexes(homes);
+
+  // Everything this command cannot fix for the author, after everything it can.
+  const remaining = recordContentFindings({ baseline: pruned, records });
+  if (remaining.length > 0) {
+    report(remaining, []);
+    process.exitCode = 1;
+  }
 };
 
-/** `--package <name>`, or undefined. (pure) */
+/**
+ * `--package <name>` — `undefined` when the flag is absent, the empty string
+ * when it is there with nothing usable after it. (pure)
+ *
+ * The two are different answers and must not collapse: reading a missing name as
+ * "no filter" prints every record under no heading, which answers a question the
+ * reader did not ask. A following `--flag` is treated as missing for the same
+ * reason, since `--package --write` names no workspace either.
+ */
 const packageArg = (argv) => {
   const at = argv.indexOf('--package');
-  return at === -1 ? undefined : argv[at + 1];
+  if (at === -1) {
+    return undefined;
+  }
+  const value = argv[at + 1];
+  return value === undefined || value.startsWith('--') ? '' : value;
 };
 
 /**
@@ -365,6 +411,13 @@ const runList = (homes) => {
   const workspace = packageArg(process.argv);
   if (workspace === undefined) {
     console.log(renderListing(homes));
+    return;
+  }
+  if (workspace === '') {
+    console.error(
+      '--package needs a workspace directory name after it. Listing everything for a filter that named nothing would answer a question you did not ask.',
+    );
+    process.exitCode = 1;
     return;
   }
   if (!WORKSPACES.has(workspace)) {

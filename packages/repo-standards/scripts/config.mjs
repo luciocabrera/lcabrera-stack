@@ -69,7 +69,7 @@ export const DEFAULT_REGISTERS = {
   ],
   // Alongside the other two baselines rather than inside this file: it is a
   // list of the consumer's own filenames, and a register of policy is not where
-  // ninety of those belong.
+  // a file list belongs.
   adrContentBaseline: 'scripts/adr-content-baseline.json',
   adrDraftDir: 'docs/agents/planning/adr-drafts',
   adrTemplateHome: 'docs/decisions',
