@@ -273,8 +273,8 @@ const report = (findings, stale) => {
  * The refusal stops the reflex of re-running `--adopt` to make a failing run go
  * away. It is not a claim that nothing can grandfather afresh — deleting the
  * file first is an ordinary thing to be able to do. What holds either way is
- * `adr-baseline.mjs`'s invariant: the exempt set changes only by editing that
- * file, so whatever route was taken is in its diff.
+ * `adr-baseline.mjs`'s bound: at most `maxEntries` records escape the content
+ * rules, whatever wrote the list.
  */
 const runAdopt = (records) => {
   if (existsSync(BASELINE_PATH)) {
@@ -424,7 +424,7 @@ const main = () => {
     `ADR gate passed: ${total} ADR(s) across ${homes.length} home(s); next free number is ADR-${pad(nextFreeNumber(homes))}.`,
   );
   console.log(
-    `${baseline.files.length} record(s) predate the metadata block and are grandfathered in ${BASELINE_REL}, which may hold at most ${baseline.maxEntries}; they are unclassified and \`--list --package\` cannot see them. Which records are exempt is decided by that file alone — read its diff, not the count.`,
+    `${baseline.files.length} record(s) predate the metadata block and are grandfathered in ${BASELINE_REL}, which may hold at most ${baseline.maxEntries}; they are unclassified and \`--list --package\` cannot see them. Exemptions are keyed on filename, so that list pins how many records escape these rules, not which — review the records too.`,
   );
   console.log(
     'Not checked, and not checkable here: whether a section says anything true — only that it is present and not empty.',

@@ -24,10 +24,11 @@ record taking a retired number falls inside any window. `--write` only prunes,
 lowers the bound to what it kept, and refuses to rewrite a baseline that has
 already grown.
 
-It is not proof against an editor, and a swap that holds the count constant
-trades one exemption for another without the bound moving. What makes the exempt
-set reviewable is that it changes only by editing that one file — so read its
-diff, not the count. The path is `registers.adrContentBaseline`.
+It is not proof against an editor, and it exempts filenames rather than records:
+the list pins how many records escape the content rules, not which. A slot freed
+by classifying one record can be spent on another, and a record can be rewritten
+under a name already on the list without the list moving. Review the records'
+diffs alongside the register's. The path is `registers.adrContentBaseline`.
 
 `@lcabrera/devkit` ships the template carrying the block with generic
 placeholders, so a scaffolded record fails the gate until its author says what

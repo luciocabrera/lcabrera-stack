@@ -19,26 +19,22 @@
  * can slip past.
  *
  * **What this guarantees.** The gate enforces one thing: the list may hold at
- * most `maxEntries` entries, and every exemption beyond that count fails. That
- * is enough to make the exempt set reviewable, because the set changes only by
- * editing this file — so every change to it, by whatever route, is in this
- * file's diff.
+ * most `maxEntries` entries, and every exemption beyond that count fails.
  *
- * **What it does not give you.** It is not proof against an editor; nothing in a
- * tracked file is. And a swap that holds the count constant trades one exemption
- * for another with `maxEntries` never moving — classify a record, drop its line,
- * add another, and the bound is untouched. So review the file's DIFF, not the
- * bound.
+ * **What it does not.** It is not proof against an editor. And it exempts
+ * FILENAMES, not records — `verify-adrs.mjs` asks whether a record's filename is
+ * on the list — so the list pins how many records escape the content rules, not
+ * which. A slot freed by classifying one record can be spent on another, and a
+ * record can be rewritten under a name already on the list without the list
+ * moving at all. The register's diff is therefore half the review; the records'
+ * diffs are the other half.
  *
- * Both halves are spelled out because this is the module deciding which records
+ * That second paragraph exists because this is the module deciding which records
  * escape the gate, and a reader will act on a claim here precisely when it
- * sounds exhaustive. Three earlier revisions of this comment listed which paths
- * were shut instead, and each list was falsified by a path it had not thought
- * of — a number window missed the gaps in the sequence, "every command" missed
- * deleting the file and adopting again, "swapping is shut" missed the swap where
- * the dropped record has since been classified. An enumeration of shut doors is
- * a completeness claim; a statement about the invariant is not, and cannot be
- * falsified by finding a sixth path.
+ * sounds exhaustive. Four earlier revisions tried to describe the ROUTES by
+ * which the exempt set can change, and every one was falsified by a route it had
+ * not thought of. What the exemption is keyed on is a fact about one line of
+ * code; how many ways there are to exercise that key is not.
  *
  * Shape: `{ files: [<filename>], maxEntries: <number> }`.
  */

@@ -35,8 +35,8 @@ splitting them would edit `adr-registry.mjs`, `verify-adrs.mjs` and
 
 ## Status / next
 
-- Current step: round 4 — the baseline's prose states the invariant it enforces
-  instead of enumerating which paths are shut; the residual swap is pinned by a
-  test and its design question is #1014
+- Current step: round 5 — the baseline's prose says what an exemption is keyed
+  on (a filename) rather than which routes can change the exempt set; both
+  residuals are pinned by tests and their design question is #1014
 - Blockers: none
 - Next: awaiting review on #1013

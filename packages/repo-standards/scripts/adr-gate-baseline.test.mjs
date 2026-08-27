@@ -7,7 +7,7 @@
  *
  * The last case pins a residual rather than a refusal — see its comment.
  */
-import { rmSync, writeFileSync } from 'node:fs';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vite-plus/test';
@@ -57,8 +57,8 @@ describe('the grandfathering baseline', () => {
 
   it('grandfathers afresh when the baseline is deleted, moving the bound', () => {
     // Pinned as behaviour, not as a refusal: re-adoption after deletion exempts
-    // whatever fails at that moment. It leaves the bound intact, which is all
-    // the gate promises — the change to the exempt set is in the file's diff.
+    // whatever fails at that moment, and leaves the bound intact — which is all
+    // the gate promises.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
     expect(readBaseline(root).maxEntries).toBe(1);
@@ -142,13 +142,13 @@ describe('the grandfathering baseline', () => {
     expect(written.stdout).not.toContain('unchanged');
   });
 
-  it('lets a count-preserving swap through, which is why the diff is the review', () => {
+  it('lets a count-preserving swap through, leaving the bound intact', () => {
     // The residual, pinned as behaviour rather than argued away. Classifying a
     // record frees its line; spending that line on a content-less new record
     // keeps the count at its bound and reports nothing. Each new exemption still
-    // costs an old one, so the list cannot grow — but `maxEntries` does not move,
-    // and only the file's diff shows the trade. Whether the gate should refuse a
-    // swap outright is a separate design question (#1014).
+    // costs an old one, so the list cannot grow — but `maxEntries` does not move.
+    // Whether the gate should refuse a swap, and whether an exemption should be
+    // keyed on a record rather than on its filename, is #1014.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
     const write = writeIn(root);
@@ -169,6 +169,22 @@ describe('the grandfathering baseline', () => {
 
     expect(runGate(root).status).toBe(0);
     expect(readBaseline(root).maxEntries).toBe(1);
+  });
+
+  it('exempts the filename, so a record can change under a listed name', () => {
+    // The root cause behind three separate counterexamples, pinned as a fact
+    // rather than left in a comment: the gate asks whether a record's FILENAME
+    // is on the list. Rewrite a grandfathered record and the register does not
+    // move, because nothing about it was ever keyed on the record. Whether
+    // identity should mean the name or the record is #1014.
+    const root = makeAdrRepo({ legacy: true });
+    runGate(root, ['--adopt']);
+    const before = readFileSync(join(root, BASELINE), 'utf8');
+
+    writeIn(root)(`${HOME}/${LEGACY_FILE}`, '# ADR-002 — Rewritten\n');
+
+    expect(runGate(root).status).toBe(0);
+    expect(readFileSync(join(root, BASELINE), 'utf8')).toBe(before);
   });
 
   it('lowers the bound as records are classified', () => {

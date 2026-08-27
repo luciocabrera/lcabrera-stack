@@ -512,12 +512,12 @@ already grown; an entry naming no record, or one whose record now satisfies the
 rules, is a finding until it is dropped.
 
 **What it does not give you.** It is not proof against an editor — nothing in a
-tracked file is. And a swap that holds the count constant trades one exemption
-for another with `maxEntries` never moving: classify a record, drop its line, add
-another, and the bound is untouched. What makes the exempt set reviewable is not
-the bound but the file — the set changes only by editing it, so every change to
-it is in that file's diff, whatever route produced it. **Review the diff, not the
-count.**
+tracked file is. And it exempts **filenames, not records**: the gate asks whether
+a record's filename is on the list, so the list pins how many records escape the
+content rules, not which. A slot freed by classifying one record can be spent on
+another, and a record can be rewritten under a name already on the list without
+the list moving at all. **The register's diff is half the review; the records'
+diffs are the other half.**
 
 A grandfathered record is unclassified, so `adr:list -- --package` cannot see it,
 and both commands print how many are in that state rather than letting an empty
