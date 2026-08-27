@@ -2,7 +2,6 @@
 name: product-requirement
 description: Read and maintain the product requirements register in docs/product/ — consult it before building against the published packages, write a requirement when none covers the work, and flip one to met in the commit that earns it. Use when planning a change to a package a consumer installs, when writing acceptance criteria, or when editing anything under docs/product/.
 user-invocable: true
-paths: ['docs/product/**']
 ---
 
 # Working the requirements register
