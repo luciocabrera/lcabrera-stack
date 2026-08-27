@@ -204,6 +204,17 @@ jobs:
         # scratch repository under the OS temp root, and runs every declared bin.
         run: vp run tarball:verify
 
+      - name: Every shipped document reads with only its package on disk
+        id: shipped_docs_gate
+        # The doc gate below asks whether a path resolves in THIS repository,
+        # which is the inverted question for a published file: a link resolves
+        # perfectly here and points at nothing under a consumer's node_modules.
+        # This one packs each public package and reads the markdown back out of
+        # the tarball, so it sees what `files` actually ships rather than what
+        # the working tree holds — the two differ by design, since the internal
+        # documentation stays in the repo and out of the install.
+        run: vp run shipped-docs:verify
+
       - name: Oxlint plugin families are loaded
         id: lint_plugins_gate
         # Naming `lint.plugins` REPLACES Oxlint's default set, so dropping an

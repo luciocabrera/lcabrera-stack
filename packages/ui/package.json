@@ -24,7 +24,8 @@
     "src",
     "CHANGELOG.md",
     "!src/**/*.test.*",
-    "!src/benchmarks"
+    "!src/benchmarks",
+    "!src/**/*.md"
   ],
   "type": "module",
   "sideEffects": false,

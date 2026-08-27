@@ -72,9 +72,9 @@ export default {
 ```
 
 If that is more build surface than you want, take the package as a reference
-implementation rather than a dependency — the source is the documentation.
-System wiring lives in that system's `ARCHITECTURE.md`; a leaf component's
-contract is its types and the inventory row.
+implementation rather than a dependency — the source is the documentation. A
+leaf component's contract is its types; how a whole system is wired is written
+up in the repository, which is where the links at the foot of this page go.
 
 ## What's in it
 
@@ -238,14 +238,15 @@ extend anything:
   helpers live in `@lcabrera/api` and the Postgres code in `@lcabrera/server`,
   rather than all three sharing one package.
 
-A system's `ARCHITECTURE.md` covers wiring that is not visible from one file
-(Table, Form, VirtualSelect); `src/PATTERNS.md` covers the conventions across
-all of them, and `src/INVENTORY.md` catalogues every artifact.
+The install carries the source and this page. Everything else — the per-system
+write-ups of wiring that is not visible from one file (Table, Form,
+VirtualSelect), the conventions shared across them, and the catalogue of every
+artifact — stays in the repository and is linked below.
 
 ## Links
 
-- [Repository](https://github.com/luciocabrera/lcabrera-stack) —
-  `packages/ui`
+- [Repository](https://github.com/luciocabrera/lcabrera-stack) ·
+  [this package's source](https://github.com/luciocabrera/lcabrera-stack/tree/main/packages/ui)
 - [Changelog](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/ui/CHANGELOG.md)
 - [Component patterns](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/ui/src/PATTERNS.md)
   · [Artifact inventory](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/ui/src/INVENTORY.md)

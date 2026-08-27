@@ -137,7 +137,7 @@ holds a `*.component.tsx`, `*.layout.tsx`, `*.error-boundary.tsx`,
 `*.meta.ts`, and the `*.types` / `*.constants` base must name one of them. That
 needs a directory listing, so it belongs in a repo-level script rather than in
 this rule; the repository this plugin comes from runs exactly that check as
-`route-names:verify` (`scripts/verify-route-artifacts.mjs`), and keeps its copy
+`route-names:verify`, and keeps its copy
 of the option defaults above in step with this rule through a test.
 
 **❌ Disallowed:**

@@ -87,6 +87,7 @@ until you acknowledge it.
 | `repo-verify-publish`                        | the tarball each built package would publish, by packing it                                |
 | `repo-verify-api-surface`                    | each published package's exported surface against a snapshot                               |
 | `repo-verify-types`                          | that a built package's published types resolve for a consumer                              |
+| `repo-verify-shipped-docs`                   | that every document in the packed tarball reads with only that package on disk             |
 | `repo-audit-release`                         | every version already on the registry, after the fact                                      |
 | `repo-plan-release`                          | which packages have a version the registry does not have                                   |
 | `repo-adr "<title>"`                         | — scaffolds an ADR in the home you name                                                    |
@@ -100,12 +101,14 @@ same name — `commit:verify`, `pr:verify`, `coordination:verify`,
 [COMMANDS.md](https://github.com/luciocabrera/lcabrera-stack/blob/main/COMMANDS.md)
 is the authority on which is which.
 
-The four publishing gates answer four different questions, and none substitutes
-for another: `repo-verify-publish` packs the tarball and checks what is in it,
-`repo-verify-types` asks whether the types in it resolve, `repo-verify-api-surface`
-asks whether the surface changed without a changeset, and `repo-audit-release`
-asks what is already on the registry — the only one of the four that can see a
-hand-publish, and the only one that cannot prevent anything.
+The publishing gates answer different questions, and none substitutes for
+another: `repo-verify-publish` packs the tarball and checks what is in it,
+`repo-verify-types` asks whether the types in it resolve,
+`repo-verify-shipped-docs` asks whether the documents in it still read once the
+repository they were written in is gone, `repo-verify-api-surface` asks whether
+the surface changed without a changeset, and `repo-audit-release` asks what is
+already on the registry — the only one that can see a hand-publish, and the only
+one that cannot prevent anything.
 
 ## Configuration
 
@@ -162,7 +165,7 @@ content rules. `--write` prunes the baseline as you classify records, and never
 adds to it.
 
 Each `publicPackageDirs` entry is a **directory name under `packagesDir`** —
-`ui`, not `packages/ui`. Spelling it the second way is a valid repo-relative
+`ui`, not `<packagesDir>/ui`. Spelling it the second way is a valid repo-relative
 string, so it passes validation and fails at the read; the gate names the config
 key and the rule rather than reporting an ENOENT for a directory that was never
 meant to exist. The two spellings are not both accepted, because that would put
@@ -191,7 +194,7 @@ it is the one key where configuring too little is the dangerous direction:
 `changeset publish` walks every non-private workspace regardless of directory,
 so a directory left out here under-reports what a release would publish.
 
-The `gates` block carries the rosters the three measuring gates would otherwise
+The `gates` block carries the rosters the measuring gates would otherwise
 hardcode:
 
 ```json
@@ -216,12 +219,15 @@ hardcode:
       "expectedAbsentPrefixes": [],
       "onDemandReportDirs": [],
       "baselineFile": "scripts/docs-paths-baseline.json"
+    },
+    "shippedDocs": {
+      "repoOnlyDirs": ["apps", "docs", "packages", "scripts"]
     }
   }
 }
 ```
 
-Three things about it are easy to get wrong.
+Four things about it are easy to get wrong.
 
 `strayConfigs` has **no useful default**, for the same reason `publicPackageDirs`
 does not: which config filenames are decoys is a per-toolchain answer, and
@@ -234,6 +240,16 @@ clean tree.
 nothing": the gate reads the top-level directories instead. Every other list in
 that block is an exemption, so empty is the _strict_ end of the range and a
 repository that configures nothing gets the gate at its most demanding.
+
+`shippedDocs.repoOnlyDirs` runs the other way to every list above it. It is the
+gate's **reach**, not an exemption: each entry names a directory whose name, seen
+inside an installed document, is an instruction to open something the reader does
+not have. So it defaults to the conventional monorepo layout rather than to
+nothing, and declaring it empty falls back to that default instead of switching
+the check off — a roster nobody wrote is the one state that must not read as a
+clean pass. Put a directory in it when your repository has one and a consumer
+would not; leave out anything a consumer's own tree plausibly holds, or the gate
+will report a document for naming a path that is fine.
 
 Every `skipDirs` **extends** the built-in list rather than replacing it. A
 repository that declared its own and forgot `node_modules` would not get a
@@ -341,7 +357,8 @@ repository's exact setup.
 | `verify-react-doctor.mjs`, `verify-route-artifacts.mjs` | Named in #798 as inherently this repository's: one analyser's triage, and one framework's generated route artifacts.                                                                                                                                                                                     |
 
 The prose side already reads it the same way: `lint-toolchain` is classified
-**repo-specific** in `packages/devkit/CLASSIFICATION.md` because "it documents
+**repo-specific** in [devkit's classification table](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/devkit/CLASSIFICATION.md)
+because "it documents
 _this_ repository's analyser topology". A gate and the document describing it
 should not disagree about whether they travel.
 

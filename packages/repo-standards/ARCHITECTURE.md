@@ -1,6 +1,6 @@
 # `@lcabrera/repo-standards` — architecture
 
-One spec, four commands, and the small readers they share.
+One spec, a set of commands, and the small readers they share.
 
 | Module                                                                        | Responsibility                                                                                                                                           |
 | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -10,7 +10,8 @@ One spec, four commands, and the small readers they share.
 | `cli-input.mjs`                                                               | argv and stdin readers, including stepping over the separator a task runner forwards.                                                                    |
 | `safe-read.mjs`, `git-dir.mjs`, `report-warnings.mjs`, `workspace-scopes.mjs` | Reading a file inside the repository, locating the git directory, printing non-blocking hints, deriving the scope vocabulary from `pnpm-workspace.yaml`. |
 | `coordination-read.mjs`, `coordination-parse.mjs`                             | The register entries the pull-request gate consults for declared shared branches.                                                                        |
-| `verify-*.mjs`                                                                | The four commands. Effects at the edges; every decision comes from the pure validators.                                                                  |
+| `shipped-docs.mjs`                                                            | Whether a document in a packed tarball reads with only that package on disk — the inverse of the documented-path question.                               |
+| `verify-*.mjs`                                                                | The commands. Effects at the edges; every decision comes from the pure validators.                                                                       |
 
 ## Two decisions worth not undoing
 

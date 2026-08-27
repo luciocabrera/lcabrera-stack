@@ -53,6 +53,9 @@
         "reports",
         "scripts"
       ]
+    },
+    "shippedDocs": {
+      "repoOnlyDirs": ["apps", "docker", "docs", "packages", "scripts"]
     }
   },
   "registers": {

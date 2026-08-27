@@ -235,6 +235,16 @@ export const DEFAULT_GATES = {
     onDemandReportDirs: [],
     repoRoots: [],
   },
+  // The conventional monorepo layout, so a repository that follows it
+  // configures nothing. Unlike the exemption lists above, this one is the
+  // gate's REACH: an entry adds a directory whose name, seen inside an
+  // installed document, is an instruction to open something the reader does not
+  // have. Declaring it empty therefore falls back to this rather than switching
+  // the check off — a roster nobody wrote is the one state that must not read
+  // as a clean pass.
+  shippedDocs: {
+    repoOnlyDirs: ['apps', 'docs', 'packages', 'scripts'],
+  },
 };
 
 export const resolveGates = (raw) => {
@@ -246,6 +256,7 @@ export const resolveGates = (raw) => {
     ? block.strayConfigs
     : {};
   const docsPaths = isPlainObject(block.docsPaths) ? block.docsPaths : {};
+  const shippedDocs = isPlainObject(block.shippedDocs) ? block.shippedDocs : {};
 
   return {
     scriptSize: {
@@ -323,6 +334,12 @@ export const resolveGates = (raw) => {
       repoRoots: verbatimList(
         docsPaths.repoRoots,
         DEFAULT_GATES.docsPaths.repoRoots,
+      ),
+    },
+    shippedDocs: {
+      repoOnlyDirs: verbatimList(
+        shippedDocs.repoOnlyDirs,
+        DEFAULT_GATES.shippedDocs.repoOnlyDirs,
       ),
     },
   };
