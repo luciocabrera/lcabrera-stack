@@ -165,6 +165,10 @@ Selection guideline:
 - **Auditing what has rotted repo-wide?** `health-swarm` — prefer a subset
   (`/health-swarm perf deps`) unless a full sweep is warranted.
 - **Configuring or debugging a linter (Oxlint/eslint/Biome/Sonar)?** Use `lint-toolchain`.
+- **Building against a published package, or writing acceptance criteria?** Use
+  `product-requirement` — read [`docs/product/`](docs/product/README.md) for what
+  a consumer must already be able to do, write a requirement when none covers the
+  work, and flip one to `met` in the commit that earns it.
 - **Implementing a backlog issue that has real acceptance criteria?** Use
   `refactor-verified`; the standard it enforces is
   [`docs/agents/refactor-verified-contract.md`](docs/agents/refactor-verified-contract.md).
