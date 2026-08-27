@@ -16,6 +16,7 @@ import {
   BASELINE,
   HOME,
   LEGACY_FILE,
+  LEGACY_TEXT,
   RECORD,
   RECORD_TEXT,
   appendEntry,
@@ -36,7 +37,7 @@ describe('the grandfathering baseline', () => {
     expect(runGate(root).status).not.toBe(0);
     expect(runGate(root, ['--adopt']).status).toBe(0);
     expect(runGate(root).status).toBe(0);
-    expect(runGate(root).stdout).toContain('1 record(s) predate');
+    expect(runGate(root).stdout).toContain('1 record(s) are grandfathered');
 
     // The one that is not grandfathered is still held to the rules.
     editIn(root)(RECORD, '## Context', '## Not context');
@@ -169,6 +170,31 @@ describe('the grandfathering baseline', () => {
 
     expect(runGate(root).status).toBe(0);
     expect(readBaseline(root).maxEntries).toBe(1);
+  });
+
+  it('counts grandfathered and unclassified separately, because they differ', () => {
+    // The workflow this gate exists to invite: adding `governs` to an old record
+    // is allowed, rewriting its body is not. So classify one that still fails a
+    // section rule — it becomes visible to `--list --package` while staying
+    // grandfathered, and one number reported as both would be false on a green
+    // run, in output that ships.
+    const root = makeAdrRepo({ legacy: true });
+    runGate(root, ['--adopt']);
+    runGate(root, ['--write']);
+    expect(runGate(root).stdout).toContain('1 carry no `governs` block');
+
+    writeIn(root)(
+      `${HOME}/${LEGACY_FILE}`,
+      `---\ngoverns:\n  - ui\n---\n\n${LEGACY_TEXT}`,
+    );
+
+    const after = runGate(root);
+    expect(after.status).toBe(0);
+    expect(after.stdout).toContain('1 record(s) are grandfathered');
+    expect(after.stdout).toContain('0 carry no `governs` block');
+    expect(runGate(root, ['--list', '--package', 'ui']).stdout).toContain(
+      'ADR-002',
+    );
   });
 
   it('exempts the filename, so a record can change under a listed name', () => {

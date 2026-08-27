@@ -519,9 +519,13 @@ another, and a record can be rewritten under a name already on the list without
 the list moving at all. **The register's diff is half the review; the records'
 diffs are the other half.**
 
-A grandfathered record is unclassified, so `adr:list -- --package` cannot see it,
-and both commands print how many are in that state rather than letting an empty
-listing read as "no decisions govern this package".
+**Grandfathered and unclassified are two different sets**, and they come apart on
+the workflow this gate exists to invite: adding `governs` to an old record is
+allowed while rewriting its body is not, so a record can be classified — and so
+visible to `adr:list -- --package` — while still failing a section rule and still
+grandfathered. Both commands print the two counts separately rather than one for
+both, and print the unclassified count under the listing so an empty one cannot
+read as "no decisions govern this package".
 
 `devkit:doctor -- --accept` takes **one** file at a time and refuses a path the
 report does not currently call `modified` or `conflict`, or a missing `--reason` — the same

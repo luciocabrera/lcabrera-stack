@@ -482,14 +482,21 @@ const main = () => {
   console.log(
     `ADR gate passed: ${total} ADR(s) across ${homes.length} home(s); next free number is ADR-${pad(nextFreeNumber(homes))}.`,
   );
-  // The bound is deliberately not printed here. Every command that writes the
-  // baseline leaves it equal to the list's length, so on a clean run the two
-  // numbers cannot differ, and the one place they can — a list that has grown —
-  // is a finding that prints both. (Sonar reads the parsed field reaching a log
-  // as a leak; it is an `Number.isInteger`-guarded count and cannot carry
-  // anything else, but the line reads better without it either way.)
+  // Two counts, because they are two sets and they come apart on the very
+  // workflow this gate exists to invite. Adding `governs` to an old record is
+  // allowed while rewriting its body is not, so a record can be classified —
+  // visible to `--list --package` — and still grandfathered, because it still
+  // fails a section rule. One number reported as both was false on a green run.
+  //
+  // The bound is deliberately not printed. Every command that writes the
+  // baseline leaves it equal to the list's length, so on a clean run it cannot
+  // differ from the first count, and the one place it can — a list that has
+  // grown — is a finding that prints both.
   console.log(
-    `${baseline.files.length} record(s) predate the metadata block and are grandfathered in ${BASELINE_REL}; they are unclassified and \`--list --package\` cannot see them. Exemptions are keyed on filename, so that list pins how many records escape these rules, not which — review the records too.`,
+    `${baseline.files.length} record(s) are grandfathered in ${BASELINE_REL} and exempt from the content rules; ${unclassifiedCount(homes)} carry no \`governs\` block, so \`--list --package\` cannot see those. A record can be in one set and not the other.`,
+  );
+  console.log(
+    'Exemptions are keyed on filename, so that list pins how many records escape these rules, not which — review the records too.',
   );
   console.log(
     'Not checked, and not checkable here: whether a section says anything true — only that it is present and not empty.',
