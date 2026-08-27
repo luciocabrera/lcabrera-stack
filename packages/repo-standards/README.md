@@ -8,7 +8,7 @@ them.
 Published from
 [`lcabrera-stack`](https://github.com/luciocabrera/lcabrera-stack),
 which is also its first consumer
-([ADR-081](../../docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
+([ADR-081](https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
 
 ## Why a package rather than scripts
 
@@ -18,6 +18,19 @@ whose first instruction names a file they do not have. This is the half that has
 to be **resolved** from `node_modules` rather than copied — it is code, invoked
 by name, and copying it would put it outside node's resolution graph where no
 upgrade can reach it.
+
+## Why the setup is two packages
+
+The other half is `@lcabrera/devkit`, and the split is by **how a consumer gets
+the file** rather than by topic. Prose is discovered by path — an agent reads a
+directory — so it has to be copied into your tree, and a package sitting in
+`node_modules` puts nothing where any agent looks. Code is the opposite, for the
+reason above. Either mechanism applied to both halves gets one of them wrong.
+
+Versioning separates them again. These gates carry machine contracts their
+callers pin on, while skill prose changes constantly, so a single package would
+make every wording fix a version bump for contract consumers and every contract
+break a major for the package that ships a paragraph.
 
 ## Installing
 
@@ -29,11 +42,12 @@ Every entry in the table below is a bin, so it is on the path once installed and
 is invoked by name — from a task, from a git hook, from a workflow step. There is
 nothing to import and nothing to copy.
 
-It pairs with [`@lcabrera/devkit`](../devkit/README.md), which materialises the
-prose that invokes these gates and, with `devkit init`, writes the tasks that
-reach them. Neither needs the other to be useful: this package is gates without
-the prose, and `devkit` alone is prose that names commands you would supply
-yourself.
+It pairs with
+[`@lcabrera/devkit`](https://www.npmjs.com/package/@lcabrera/devkit), which
+materialises the prose that invokes these gates and, with `devkit init`, writes
+the tasks that reach them. Neither needs the other to be useful: this package is
+gates without the prose, and `devkit` alone is prose that names commands you
+would supply yourself.
 
 To install an unreleased change, or to see what a consumer actually receives,
 install the packed tarball instead — and pack with **pnpm**, because
@@ -56,8 +70,9 @@ discards.
 Where a gate needs to behave differently for your repository, the answer is
 `devkit.config.json` below rather than an edit. Divergence as a supported state
 belongs to the half that gets copied into your tree — see
-[`@lcabrera/devkit`](../devkit/README.md), where a materialised file you edit is
-left alone on every subsequent sync and reported until you acknowledge it.
+[`@lcabrera/devkit`](https://www.npmjs.com/package/@lcabrera/devkit), where a
+materialised file you edit is left alone on every subsequent sync and reported
+until you acknowledge it.
 
 ## Commands
 
@@ -78,10 +93,12 @@ left alone on every subsequent sync and reported until you acknowledge it.
 | `repo-claim-board`                           | — renders the live claims, including ones on other branches   |
 | `repo-close-claim --pr <n>`                  | — deletes the task file a merged pull request closes          |
 
-In this repository they are the root `vp run` tasks of the same name —
-`commit:verify`, `pr:verify`, `coordination:verify`, `publish:verify`,
-`api-surface:verify`, `attw:verify`, `release:audit`, `release:plan` and the
-rest. [COMMANDS.md](../../COMMANDS.md) is the authority on which is which.
+In the repository this is published from they are the root `vp run` tasks of the
+same name — `commit:verify`, `pr:verify`, `coordination:verify`,
+`publish:verify`, `api-surface:verify`, `attw:verify`, `release:audit`,
+`release:plan` and the rest, and its
+[COMMANDS.md](https://github.com/luciocabrera/lcabrera-stack/blob/main/COMMANDS.md)
+is the authority on which is which.
 
 The four publishing gates answer four different questions, and none substitutes
 for another: `repo-verify-publish` packs the tarball and checks what is in it,

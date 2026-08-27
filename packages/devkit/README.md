@@ -7,16 +7,37 @@ definitions, and the workflows, hooks, templates and registers that make them ru
 Published from
 [`lcabrera-stack`](https://github.com/luciocabrera/lcabrera-stack),
 which is also its first consumer
-([ADR-081](../../docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
+([ADR-081](https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/decisions/ADR-081-ship-the-repo-setup-as-two-packages.md)).
 
 **It has no `build` script, and that is not an omission.** The publishing
-contract in [`packages/CLAUDE.md`](../CLAUDE.md) has every package whose sources
-are TypeScript build, because a `.ts` file inside `node_modules` cannot be loaded
-at all. This package's sources are `.mjs` — already loadable — so there is
-nothing to compile and `exports` can point straight at what ships. Adding a build
-step would put a `dist` between the bin and the assets it reads for no gain.
-Verify what a consumer receives by packing and reading the tarball, not by
-reading the manifest; `files` carries a negated pattern that only pnpm honours.
+contract there builds every package whose sources are TypeScript, because a
+`.ts` file inside `node_modules` cannot be loaded at all. This package's sources
+are `.mjs` — already loadable — so there is nothing to compile and `exports` can
+point straight at what ships. Adding a build step would put a `dist` between the
+bin and the assets it reads for no gain. Verify what a consumer receives by
+packing and reading the tarball, not by reading the manifest; `files` carries a
+negated pattern that only pnpm honours.
+
+## Why the setup is two packages
+
+It arrives as this package and `@lcabrera/repo-standards`, split by **how a
+consumer gets the file** rather than by topic.
+
+Prose is discovered by path — an agent reads a directory — so it has to be
+copied into your tree, where you can then edit it. A gate is invoked by name; it
+is code, and copying code puts it outside node's resolution graph, where no
+upgrade, peer check or dedup can ever reach it. Either mechanism applied to both
+halves gets one of them wrong: one package resolved from `node_modules` puts no
+file where a skill is looked for, and one package that copies everything vendors
+the gates into a fork nobody can update.
+
+Versioning separates them again. Prose changes constantly, while a gate carries
+a machine contract its callers pin on, so a single package would make every
+wording fix a version bump for those callers and every contract break a major
+for the package that ships a paragraph.
+
+Neither half needs the other to be useful: `repo-standards` is the gates without
+the prose, and this package alone is prose naming commands you supply yourself.
 
 ## Why a command rather than an import
 
@@ -405,6 +426,12 @@ it as a `devDependency` to do that, which is the same split
 
 ## What ships
 
-[`CLASSIFICATION.md`](./CLASSIFICATION.md) carries the verdict for every skill,
-rule and subagent definition, and the reason behind each one — including the
-ones deliberately kept back.
+The **Profiles** table above is the shape of it, and `devkit closure --shipped`
+is the count per profile. That command reads the plan rather than your tree, so
+it answers the same in a repository that has never synced and in one that is
+already in step. A `sync` or `doctor` report is **not** that list: it names only
+what the run wrote or held back, so a repository up to date with the package
+reports nothing at all. Why each skill, rule and subagent definition got the
+verdict it did, including the ones deliberately kept back, is recorded in
+[`CLASSIFICATION.md`](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/devkit/CLASSIFICATION.md),
+which stays in the source repository and is not part of this install.

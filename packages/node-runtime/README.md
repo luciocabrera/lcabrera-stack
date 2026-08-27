@@ -83,7 +83,8 @@ nothing; only calling the helper does.
 This package lives in
 [`luciocabrera/lcabrera-stack`](https://github.com/luciocabrera/lcabrera-stack)
 under `packages/node-runtime`. Its scope and the boundaries it is held to are in
-[`ARCHITECTURE.md`](./ARCHITECTURE.md); the decision to publish it is
+[the repository's `ARCHITECTURE.md`](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/node-runtime/ARCHITECTURE.md),
+which does not travel in the install; the decision to publish it is
 [ADR-069](https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/decisions/ADR-069-publish-the-shared-toolchain.md).
 
 ## License

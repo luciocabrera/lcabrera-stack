@@ -2,6 +2,12 @@
 
 A flexible navigation Navbar component that can render buttons or navigation links with support for both vertical and horizontal orientations.
 
+**It is internal to `@lcabrera/ui`.** The package's export map carries the
+Navbar types subpath and no barrel beside it, so the component itself does not
+resolve from outside the package; a consumer reaches it by rendering `AppShell`,
+which composes it. The examples below are written from inside the package and
+use its own `#ui/*` specifier.
+
 ## Features
 
 - ✅ **Flexible rendering**: Supports both buttons and NavLinks
@@ -17,7 +23,7 @@ A flexible navigation Navbar component that can render buttons or navigation lin
 ### Basic Vertical Navigation (SidePanel)
 
 ```tsx
-import { Navbar } from '@/components/Navbar';
+import { Navbar } from '#ui/components/Navbar';
 import { Home, Settings, User } from 'lucide-react';
 
 const items = [
@@ -172,9 +178,10 @@ If not provided, items get auto-generated IDs: `Navbar-item-0`, `Navbar-item-1`,
 
 ## Examples
 
-`Navbar.test.tsx` is the worked usage: it renders both item shapes (`type:
+The worked usage is `Navbar.test.tsx`, which renders both item shapes (`type:
 'link'` with `to`, and `type: 'button'` with `onClick`) and asserts the rendered
-element for each.
+element for each. It is a test file, and the published package excludes those, so
+it is beside this file in the repository and not in an install.
 
 There is no `Navbar.examples.tsx`. This section pointed at one for a long time
 and nothing noticed, because the documented-path gate did not check a relative
