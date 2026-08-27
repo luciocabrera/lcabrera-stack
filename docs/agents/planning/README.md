@@ -57,7 +57,18 @@ Three consequences of that split:
 | Status, milestones, dependencies, acceptance criteria              | GitHub Issues (ADR-036)                               |
 | Who is touching which files right now                              | [`../../coordination/`](../../coordination/README.md) |
 
-## The block every document here carries
+## The block a planning document carries
+
+**Scope: the planning documents in this directory, and not
+[`adr-drafts/`](./adr-drafts/).** A draft is a proposed ADR holding no number
+while it waits on the one global sequence. What it is named, and what happens to
+it at adoption, are set by
+[ADR-048](../../decisions/ADR-048-adr-taxonomy-and-one-sequence.md) and by that
+directory's own charter — not by this one. Giving `kind` a `draft` value would
+put a second schema on a document whose whole purpose is to leave for the ADR
+home and be read there under that home's rules. So a draft carries no block;
+`adr-drafts/README.md` carries one only because it is itself a charter for a
+directory here.
 
 Five keys, at the top of the file, before the `#` heading:
 
@@ -84,7 +95,7 @@ packages: [server, showcase]
 | `plan`     | the design a session settled on, and the evidence for it                              | dated record                 |
 | `summary`  | what a session filed — the epic table and the planning-id → issue map                 | dated record                 |
 | `standard` | an advisory standard this repo's code is written against, claiming no ADR's authority | durable until it is promoted |
-| `charter`  | this page, and the one in `adr-drafts/`                                               | durable                      |
+| `charter`  | this page, and `adr-drafts/README.md` — the only document there that carries a block  | durable                      |
 
 `recorded` plus a `kind` of `plan` or `summary` is what marks a document a
 **dated record**: true as of that day, and amended above the body rather than

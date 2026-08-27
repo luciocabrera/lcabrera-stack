@@ -20,4 +20,9 @@ what keeps two adoptions in flight from conflicting
 rule and the tier split are
 [ADR-048](../../../decisions/ADR-048-adr-taxonomy-and-one-sequence.md).
 
+A draft carries no planning frontmatter. The block on this page is here because
+it is a charter for a directory under `planning/`, and the
+[parent charter](../README.md) says why the drafts beside it are out of its
+scope.
+
 This directory is often empty — that is the healthy state, not a missing file.
