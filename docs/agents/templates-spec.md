@@ -27,25 +27,31 @@ Adopted. The generated files are live and are what agents actually use:
 They are what CI reads. Every deviation that was necessary is recorded here, so
 no future agent "restores" the spec text and breaks the build.
 
-### Deviation 1 — the PR template's `## What` and `## Verification` headings stay plain
+### Deviation 1 — the PR template's required headings stay plain
 
-Section 2 spells these `## **📝 1. What**` and `## **🔬 3. Verification**`. This
-repository has enforced those two sections since before this spec existed:
-`packages/repo-standards/scripts/commit-convention.mjs` matches them with `/^#{1,6}\s+what\b/im`, run
-on every PR by `.github/workflows/pr-standards.yml`.
+Section 2 decorates every heading: `## **📝 1. What**`, `## **📊 4. Impact
+Analysis**`, and so on. This repository has enforced the PR sections since
+before this spec existed. `packages/repo-standards/scripts/commit-convention.mjs`
+matches each required one as a heading — `/^#{1,6}\s+what\b/im` is the shape —
+run on every PR by `.github/workflows/pr-standards.yml`.
 
-The decorated spelling does not match — after `## ` comes `**📝 1.`, not `what`.
-Verified against the real validator:
+The decorated spelling does not match: after `## ` comes `**📝 1.`, not `what`.
+Feeding both spellings to `validatePrBody`:
 
 ```
-PROPOSED headings → missing `## What`, missing `## Verification`   ❌
-PLAIN headings    → {"errors":[],"warnings":[]}                     ✅
+PROPOSED headings → 6 errors: What, Why, Verification / Testing,
+                    Impact Analysis, Test Coverage, Documentation Updates
+PLAIN headings    → {"errors":[],"warnings":[]}
 ```
+
+Every required heading fails, not two. An earlier version of this transcript
+recorded two, which is where the belief that only `What` and `Verification`
+matter came from.
 
 Adopting Section 2 verbatim would therefore fail the PR Standards check on every
 future PR — including the one that introduced it. The template keeps every
 section this file specifies, and the plain spelling for **each heading the
-validator requires** — not only the two named above. `REQUIRED_PR_SECTIONS` in
+validator requires**. `REQUIRED_PR_SECTIONS` in
 `commit-convention.mjs` is that list, and every entry is anchored the same way,
 so `## **📊 4. Impact Analysis**` fails exactly as `## **📝 1. What**` does. Only
 a heading the validator does not require may carry decoration.
@@ -210,8 +216,9 @@ Save this file as:
 .github/pull_request_template.md
 ```
 
-> **See Deviation 1 above.** The `What` and `Verification` headings are kept
-> plain in the generated template because CI matches them.
+> **See Deviation 1 above.** Every heading the validator requires is kept plain
+> in the generated template, because CI matches them as headings. The decorated
+> spellings below are this specification's, not the template's.
 
 ## **📌 Title**
 

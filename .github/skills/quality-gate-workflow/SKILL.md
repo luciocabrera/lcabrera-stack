@@ -130,9 +130,12 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
   code cannot say — → that **system's** `ARCHITECTURE.md` (Table, Form, the
   query builders). Not a Props table, not a file tree, not a mermaid of the
   function body, and not a new file because a folder is new.
-- **A trap on a specific line** → a short comment on that line, or nothing if
-  the name already says it. Do not add JSDoc that restates a name, a type, or
-  an ADR. Scripts keep the short "why" header in
+- **A trap, a measurement, or a why** → **not a comment.** No comment sits above
+  a function or component declaration and no prose sits inside its body
+  ([ADR-094](../../../docs/decisions/ADR-094-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md)).
+  A decision goes in the ADR that owns it; investigation and measurement go in
+  the pull request or the issue. The one exemption is the short file-level "why"
+  header on a script, in
   [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md).
 
 ### Where a new ADR goes

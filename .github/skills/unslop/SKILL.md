@@ -34,16 +34,18 @@ the English: chat replies, PR/issue **prose**, docs, ADRs, review comments.
 
 - Source code, snapshots, generated files, JSON/YAML, lockfiles
 - Commit **subjects** (the Conventional Commit format in `commit-and-pr`)
-- Required template headings (`## What`, `## Verification`, issue § headings).
-  The [`commit-and-pr`](../commit-and-pr/SKILL.md) skill owns those spellings;
-  numbering or emoji in them fails `pr:verify`
+- Required template headings — every one the PR and issue templates carry, not
+  a chosen two. The [`commit-and-pr`](../commit-and-pr/SKILL.md) skill owns
+  their spellings; numbering or emoji in one the gate matches fails `pr:verify`
 - Machine-readable verdicts (`agent-review-verdict/v1`)
 - Binary acceptance criteria, runbooks, merge checklists, `ARCHITECTURE.md`
   constraint lists: keep the genre. Do not "add soul" to a spec
 
-Comments on code follow [`AGENTS.md`](../../../AGENTS.md) §7 (comment only
-what the code cannot say; no changing numbers). This skill does not replace
-that rule.
+Comments on code follow [`AGENTS.md`](../../../AGENTS.md) §7 and
+[ADR-094](../../../docs/decisions/ADR-094-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md):
+no comment above a function or component and none inside its body, so there is
+usually no comment prose to unslop. What moved out of the code — into an ADR or
+a pull request — is prose a person reads, and this skill applies to it.
 
 ## How to work
 
@@ -73,8 +75,10 @@ that rule.
   Parentheses as a dash-substitute are themselves a tell. If the thought
   needs separation, end the sentence.
 - **Quotes.** One style, held. Default: straight.
-- **Headings.** Sentence case. Exception: the exact headings a gate matches
-  (`## What`, `## Verification`, issue template sections).
+- **Headings.** Sentence case. Exception: the exact headings a gate matches —
+  `REQUIRED_PR_SECTIONS` and `REQUIRED_ISSUE_SECTIONS` in
+  `packages/repo-standards/scripts/commit-convention.mjs` are that list, and it
+  is longer than the two people remember.
 - **Bold.** Only where the reader would get lost without it. Never every
   "key term".
 - **Lists.** Connected prose of fewer than four items stays a paragraph.

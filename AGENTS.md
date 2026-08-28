@@ -30,10 +30,10 @@ package cleanliness and app convenience pull
 in opposite directions, the package wins. A package must stand on its own —
 declared dependencies, a resolvable public surface, no reliance on a consumer's
 tsconfig `paths` to make an import work — because it is meant to be consumed from
-outside this repo, where none of this monorepo's wiring exists. `packages/ui`,
-`packages/api`, `packages/server`, `packages/utils`,
-`packages/eslint-local-rules`, `packages/tsconfig` and `packages/node-runtime`
-are held strictest for exactly that reason (§4). This is why the column-filter shapes are **duplicated**
+outside this repo, where none of this monorepo's wiring exists. The public
+packages are held strictest for exactly that reason, and which those are is one
+question with one answer: `vp run suppressions:packages`. This is why the
+column-filter shapes are **duplicated**
 in `@lcabrera/ui` and `@lcabrera/server` rather than shared through an elegant edge that
 only resolves in-repo ([ADR-039](docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
 Facing that call — promote it into a package, or write it twice?
@@ -343,7 +343,7 @@ The headline rules every agent must know regardless of which files are open. Ful
 8. **Use `@/` alias for `src/`** — relative imports only within the same directory.
 9. **No explicit return types on functions/hooks/components — let TypeScript infer** — annotate only when inference genuinely fails (recursion, overloads, complex conditional types) or must be widened. (`.claude/rules/typescript.md`)
 10. **Never use workaround-only fixes** — always address and solve the underlying issue. If there is any doubt about intent, trade-offs, or risk, ask the user before applying a workaround or partial fix.
-11. **Never ignore, suppress, or omit a lint finding — verify, then fix.** Oxlint/eslint violations (including stylistic `unicorn/*` rules like `prefer-simple-condition-first` / `no-nested-ternary`) are real until you have read the flagged code and confirmed otherwise. Do **not** dismiss one as a false positive without checking, and do **not** silence a new one — no inline `// eslint-disable`/`oxlint-disable`, no rule-off in config, no hand-added `eslint-suppressions.json` entry. Fix the code (reorder operands, restructure logic, wire up/delete the export). If it is a genuine false positive, explain why rather than disabling. The public packages (§1) are held strictest — each one's `eslint-suppressions.json` is gitignored, so none is ever committed and none of them baselines (§4).
+11. **Never ignore, suppress, or omit a lint finding — verify, then fix.** Oxlint/eslint violations (including stylistic `unicorn/*` rules like `prefer-simple-condition-first` / `no-nested-ternary`) are real until you have read the flagged code and confirmed otherwise. Do **not** dismiss one as a false positive without checking, and do **not** silence a new one — no inline `// eslint-disable`/`oxlint-disable`, no rule-off in config, no hand-added `eslint-suppressions.json` entry. Fix the code (reorder operands, restructure logic, wire up/delete the export). If it is a genuine false positive, explain why rather than disabling. The public packages (§1) are held strictest — each one's `eslint-suppressions.json` is gitignored, so none is ever committed and none of them baselines.
 12. **Claim shared work before you touch it.** Multiple agents and humans work this repo in parallel. Before non-trivial work, register it in [`docs/coordination/`](docs/coordination/README.md): check for an area overlap, then create a task file (`tasks/_TEMPLATE.md`) with the `area` globs you own, branch, and keep `status`/`updated` current until it merges. Never edit files inside another active task's `area` without coordinating. The register — not `~/.claude/plans/` scratch, which is invisible to everyone else — is the shared record. `vp run coordination:verify` (CI) keeps it honest. (See "Multi-Agent Coordination" in §7.)
 13. **Commits and PRs follow the enforced format.** Every commit message is a Conventional Commit (`type(scope): subject`) and every PR has a conforming title plus every section of [`.github/pull_request_template.md`](.github/pull_request_template.md) — checked by the `commit-msg` git hook locally and the `pr-standards.yml` gate in CI. Do not restate the template's section list here or anywhere else; open the template. The one spec is `packages/repo-standards/scripts/commit-convention.mjs`; don't restate its type list elsewhere, and (Rule 11) fix a failing message/description rather than weakening the check. (See "Commit & PR Standards" in §7 and the `commit-and-pr` skill.)
 14. **A claim needs evidence that could have disproved it, and steps someone else can re-run.** Before writing a finding into a doc, comment, issue or PR, ask **what else would produce the same observation** — if anything would, the probe is not evidence, so change the probe. Then state the **preconditions** the steps depend on (config state, branch, whether a fix has landed); if the same change alters those preconditions, say so explicitly, or the steps stop reproducing the moment they merge. A written claim is load-bearing: someone will act on it without re-deriving it. (See "Verifying a claim" in §7.)
@@ -432,10 +432,13 @@ in the **pull request or the issue**, which is dated and immutable and cannot be
 mistaken for current fact. Neither is optional: deleting the reasoning instead of
 moving it is not compliance.
 
-Applying this to the code that predates it, and the lint rule in
+The record is
+[ADR-094](docs/decisions/ADR-094-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
+which also states what the rule costs and which paragraph of
+[ADR-088](docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)
+it corrects. Applying it to the code that predates it, and the lint rule in
 `@lcabrera/eslint-plugin` that will enforce it, are
-[#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028). Do not sweep
-`packages/**` for it here.
+[#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028).
 
 **Never put a changing number in a comment or a doc.** Counts, file totals,
 finding tallies and measurements are true on the day they are written and wrong
