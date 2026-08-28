@@ -16,7 +16,7 @@ The gate sequence is single-sourced in the `quality-gate-workflow` skill — do 
 
 1. Read `.github/skills/quality-gate-workflow/SKILL.md` and run its **Canonical Gate Order** exactly, respecting its **Non-Negotiable Rules** (execution directory, `vp run test` not `vp test`, no skipped stages).
 2. Default scope is the workspace whose files changed. If none is obvious, run `vp run check:safe` from the repo root. If the caller passes `root`, run that shortcut; if a package path, run per-workspace stages from that path. `apps/showcase/` is an example of a workspace, not the implicit default.
-3. **Stages 4 (Biome) and 5 (React Doctor) are root-only regardless of scope** — they are repo-wide passes with no per-workspace variant. Run those two from the repo root and the rest from the scope, whatever the scope is. Running either from inside a workspace does not exercise the gate.
+3. **Stages 4 (Biome), 5 (React Doctor) and 8 (tests) are root-only regardless of scope.** Biome and React Doctor are repo-wide passes with no per-workspace variant. Stage 8 is root-only for a different reason: `vp run test` resolves per workspace and root `scripts/` is in none, so a tooling-script change run under a workspace scope executes none of its tests and reports green — `vp run test:changed` reads the diff and picks both halves. Run those three from the repo root and the rest from the scope, whatever the scope is. Running one from inside a workspace does not exercise the gate.
 4. Stop at the first failure and report it — do not continue to later steps, as their output would be misleading.
 
 ## Output format
@@ -35,12 +35,12 @@ Return exactly this structure:
 | 5. React Doctor (`react-doctor:verify`, root) | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
 | 6. tsgolint (`vp check`)              | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
 | 7. tsc (`vp run typecheck`)           | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
-| 8. Tests (`vp run test`)              | ✅ pass / ❌ fail / ⏭️ not reached | pass/fail counts + first 3 failures |
+| 8. Tests (`vp run test:changed`, root) | ✅ pass / ❌ fail / ⏭️ not reached | pass/fail counts + first 3 failures; name the groups it selected |
 
 **Report a row for every stage in the skill's Canonical Gate Order, every time.**
 Steps 3, 4, 5 and 7 are the ones that get skipped in practice and none is covered
 by another: `vp check` runs neither the ESLint pass, nor Biome, nor React Doctor,
-nor real `tsc`. A short table hides exactly the stages a caller most needs to know
+nor real `tsc`. Step 8 is the one that gets run in the wrong place. A short table hides exactly the stages a caller most needs to know
 ran. Because you stop at the first failure, mark every later stage **⏭️ not
 reached** — never omit the row, and never imply it passed.
 

@@ -75,7 +75,7 @@ disagree about the stages, the skill is right and this table is the bug.
 | 5   | `vp run react-doctor:verify` | React Doctor — root-only, errors block        |
 | 6   | `vp check`                   | fmt + Oxlint + **tsgolint** type pass         |
 | 7   | `vp run typecheck`           | real **tsc** — **not** the same as step 6     |
-| 8   | `vp run test`                | vitest                                        |
+| 8   | `vp run test:changed`        | vitest — root-only; reaches `scripts/` too    |
 
 Which stages get skipped in practice and why none is redundant is the skill's to
 explain, not this file's. From the root, `vp run check:safe` chains the whole thing
@@ -92,11 +92,11 @@ The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` �
 `vp run test:changed`. This closes the gap the pre-commit hook leaves: `vp staged` covers
 only fmt + Oxlint + tsgolint + Biome on staged files, so the ESLint pass and a full
 type-check first turn red in CI otherwise. **Tests are scoped, not the full suite**:
-`test:changed` runs only the workspaces the push touches plus their dependents, so a
-docs-only push runs none. The full suite is forced only by a change to `pnpm-lock.yaml`,
-`pnpm-workspace.yaml`, the root `vite.config.ts`, or the shared config packages
-(`@lcabrera/vite-config` / `@repo/ts-configs`) — deliberately **not** by any root file, since
-a real dependency change always moves the lockfile.
+`test:changed` selects on the diff and covers both halves — the affected
+workspaces and the root `scripts/` suites — so a docs-only push runs none, while
+a tooling-script edit still runs its tests here. Exactly what it selects, and
+what forces the full suite instead, is under [Gate & CI](#gate--ci) below; this
+section does not restate it.
 The **fallow audit** stays CI-only — it is a new-only gate scored against the merge base,
 needing full history and a coverage merge. `vp run` caches per task, so a warm push is
 quick; bypass a WIP push with `git push --no-verify`.
@@ -130,33 +130,42 @@ project-specific belongs in that project's own `package.json`.
 
 ### Gate & CI
 
-| Command                      | Does                                                                                              |
-| ---------------------------- | ------------------------------------------------------------------------------------------------- |
-| `vp run ready`               | `check:safe` + `build:all` — the full "is it shippable" check                                     |
-| `vp run check:safe`          | typegen → `vp check` → typecheck → eslint → biome → tests                                         |
-| `vp run check:push`          | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed` |
-| `vp run typecheck:all`       | real tsc in all 12 workspaces, dependency order                                                   |
-| `vp run typecheck:changed`   | real tsc for the changed workspaces + dependents only — see below                                 |
-| `vp run typegen:all`         | route types for both React Router apps                                                            |
-| `vp run lint:all`            | Oxlint + eslint + Biome **with autofix**, every workspace                                         |
-| `vp run lint:biome`          | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                     |
-| `vp run lint:biome:check`    | Biome repo-wide, check only — what CI runs                                                        |
-| `vp run lint:report`         | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)          |
-| `vp run react-doctor:verify` | React Doctor gate (ADR-055) — full scope, fails on error severity; writes the report too          |
-| `vp run react-doctor:report` | the same scan, never failing — writes `reports/react-doctor/full-latest.json` (gitignored)        |
-| `vp run format:all`          | `vp fmt .` across the tree                                                                        |
-| `vp run build:all`           | build every workspace                                                                             |
-| `vp run test:all`            | every suite — **needs Postgres**                                                                  |
-| `vp run test:ci`             | every DB-free suite — what CI runs, no Postgres needed                                            |
-| `vp run test:changed`        | only the suites a diff touched (changed workspaces + their dependents) — see below                |
-| `vp run test:scripts`        | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                |
-| `vp run coverage:merge`      | merged coverage for the fallow gate (DB-free workspaces only)                                     |
-| `vp run coverage:report`     | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router)           |
+| Command                               | Does                                                                                               |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `vp run ready`                        | `check:safe` + `build:all` — the full "is it shippable" check                                      |
+| `vp run check:safe`                   | typegen → `vp check` → typecheck → eslint → biome → tests                                          |
+| `vp run check:push`                   | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed`  |
+| `vp run typecheck:all`                | real tsc in all 12 workspaces, dependency order                                                    |
+| `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                  |
+| `vp run typegen:all`                  | route types for both React Router apps                                                             |
+| `vp run lint:all`                     | Oxlint + eslint + Biome **with autofix**, every workspace                                          |
+| `vp run lint:biome`                   | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                      |
+| `vp run lint:biome:check`             | Biome repo-wide, check only — what CI runs                                                         |
+| `vp run lint:report`                  | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)           |
+| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails on error severity; writes the report too           |
+| `vp run react-doctor:report`          | the same scan, never failing — writes `reports/react-doctor/full-latest.json` (gitignored)         |
+| `vp run format:all`                   | `vp fmt .` across the tree                                                                         |
+| `vp run build:all`                    | build every workspace                                                                              |
+| `vp run test:all`                     | every workspace suite plus the root `scripts/` suites — no database needed                         |
+| `vp run test:ci`                      | the same suites, `showcase` last so its coverage summary is fresh — run before pushing             |
+| `vp run test:changed`                 | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below |
+| `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                 |
+| `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                          |
+| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only)                                      |
+| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router)            |
 
-`test:all` vs `test:ci`: no suite here needs a database, so the two differ only
-in ordering — `test:ci` runs
-`showcase` last so the PR's coverage summary is the fresh one. Use
-`test:ci` before pushing; it is what CI runs.
+`test:all` vs `test:ci`: neither runs a suite that needs a database, so the two
+differ only in ordering — `test:ci` runs `showcase` last so the PR's coverage
+summary is the fresh one. Use `test:ci` before pushing — it is what CI runs on a
+push to `main`; on a pull request CI runs `test:changed -- --ci`, chosen by event
+in `check-safe.yml`'s Unit Tests job.
+
+**The DB-bound suites exist and are opt-in.** `apps/showcase`'s `*.smoke.test.*`
+files each gate on `SMOKE_DB`, which is set in exactly one place —
+`vp run --filter showcase test:smoke`, which also sources `docker/local/.env`.
+Nothing else sets it, so under `test`, `test:all`, `test:ci` and `test:changed`
+those suites skip and no connection is opened. Start Postgres with
+`vp run db:up` before running them.
 
 `test:scripts` is chained into both, and needs to be: root `scripts/` is **not a
 workspace**, so `vp run -r test` never reaches it. That is why the logic behind
@@ -164,22 +173,27 @@ workspace**, so `vp run -r test` never reaches it. That is why the logic behind
 long as it did — a gate whose decision logic silently stops matching reports
 exactly what compliant input reports, which is nothing.
 
-`test:changed` runs only the suites a diff touched, for a fast local loop. It
-diffs the working tree against the branch point (`git merge-base` with
-`origin/main`; override the base with `TEST_CHANGED_BASE`), maps changed files to
-workspaces, and adds every workspace that transitively **depends on** them — so a
-`packages/ui` edit still exercises `apps/showcase`. It prints a per-workspace
-summary of what runs and what is skipped. Only the few files that change how every
-workspace resolves its tests — `pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root
-`vite.config.ts`, and the shared `vite-configs`/`ts-configs` packages — force the
-full suite (a real dependency change always bumps the lockfile); every other
-out-of-workspace change (root package.json scripts, lint/tsconfig configs, docs,
-root `scripts/`) affects no suite and runs nothing. Task substitution mirrors
-`test:ci`: the scan packages run their DB-free `test:unit`, and with `--ci` (`node
-scripts/test-changed.mjs --ci`) `showcase` runs its coverage `test:ci`
-last. `--dry-run` prints the `vp run` commands without executing them. CI's Unit
-Tests job (and its coverage report) scope to the diff on pull requests; pushes to
-`main` still run the full `test:ci`.
+`test:changed` runs only the suites a diff touched, for a fast local loop, and
+this paragraph is the one statement of what that selection is — every other
+surface points here. It diffs the working tree against the branch point
+(`git merge-base` with `origin/main`; override the base with
+`TEST_CHANGED_BASE`), maps changed files to workspaces, and adds every workspace
+that transitively **depends on** them — so a `packages/ui` edit still exercises
+`apps/showcase`. It prints a per-workspace summary of what runs and what is
+skipped. Only the few files that change how every workspace resolves its tests —
+`pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root `vite.config.ts`, and the
+shared config packages `GLOBAL_PACKAGES` names in
+[`scripts/lib/affected-tests.mjs`](scripts/lib/affected-tests.mjs) — force the
+full suite (a real dependency change always bumps the lockfile). A change to a
+code file under root `scripts/` (`.mjs`, `.cjs` or `.js`) adds the
+`test:scripts` group, which no workspace selection would ever reach; every other
+out-of-workspace change (root package.json scripts, lint/tsconfig configs, docs)
+affects no suite and runs nothing. Affected workspaces run plain `test`; with
+`--ci` (`node scripts/test-changed.mjs --ci`) `showcase` runs its coverage
+`test:ci` last, mirroring the root `test:ci` ordering. `--dry-run` prints the
+`vp run` commands without executing them. CI's Unit Tests job (and its coverage
+report) scope to the diff on pull requests; pushes to `main` still run the full
+`test:ci`.
 
 `typecheck:changed` applies the same change-based selection to the Quality Gate's
 slowest per-workspace step — real `tsc` across all 12 workspaces. It runs
@@ -469,35 +483,36 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 
 ### AI config & skills tooling
 
-| Command                       | Does                                                                                                                                                                                                                                                                                                                             |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vp run commands:verify`      | check this file still matches reality                                                                                                                                                                                                                                                                                            |
-| `vp run scripts:verify`       | check `.mjs`/`.cjs` size ceiling (`--write` rebaselines)                                                                                                                                                                                                                                                                         |
-| `vp run scripts:exits:verify` | fail any `.mjs`/`.cjs` calling `process.exit()` instead of setting `process.exitCode`                                                                                                                                                                                                                                            |
-| `vp run seeds:verify`         | check no file `packages/devkit` ships names this repository — its package names, its secrets or its task runner; the forbidden words are derived from the repository, so a new workspace is covered the day it is added                                                                                                          |
-| `vp run lint:plugins:verify`  | prove every Oxlint plugin family is loaded, that no workspace config shadows the root ([ADR-042](docs/decisions/ADR-042-oxlint-config-at-the-root.md)), and that the Oxlint and Biome workspace rosters each classify every workspace exactly once                                                                               |
-| `vp run lint:eslint:verify`   | prove the **eslint** pass still runs its rules — plants a misordered import and requires `perfectionist/sort-imports` to report it (#472)                                                                                                                                                                                        |
-| `vp run suppressions:verify`  | check the four public packages carry no unapproved suppression (see [the protocol](docs/agents/public-package-suppressions.md))                                                                                                                                                                                                  |
-| `vp run suppressions:list`    | print every suppression reaching a public package, approved or not                                                                                                                                                                                                                                                               |
-| `vp run docs:verify`          | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one)                                                                                                                                                                               |
-| `vp run package-refs:verify`  | check no published package's docs name one of this repo's apps                                                                                                                                                                                                                                                                   |
-| `vp run departed:verify`      | check nothing names a product or workspace that left this repository — the roster is [`scripts/departed-names.json`](scripts/departed-names.json)                                                                                                                                                                                |
-| `vp run renames:verify`       | check no document still names a file this change renamed away — scoped to the diff, which is what lets it check bare filenames at all (`--base <ref>`, default `origin/main`)                                                                                                                                                    |
-| `vp run route-names:verify`   | check every `*.types`/`*.constants` file in a route folder names an artifact that folder holds — the half of `local-rules/domain-folder-filename` an ESLint rule cannot reach (#613)                                                                                                                                             |
-| `vp run inventory:verify`     | check every `*.util.ts`/`*.util.tsx` value export (`export const`/`export function`; type-only exports are out of scope) is named (in backticks) somewhere in its tree's own `INVENTORY.md` (`--write` regenerates `scripts/inventory-drift-baseline.json`, reviewed as a JSON diff)                                             |
-| `vp run adr:verify`           | check ADR home, filename, heading, number uniqueness, each home's index, and each record's `governs` block and required sections; prints the next free number (`--write` prunes the baseline and regenerates the indexes, then still fails on any record finding it cannot fix; `--adopt` writes the baseline once)              |
-| `vp run adr:new`              | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|app] [--slug <s>] [--dry-run]`                                                                                                                                                                        |
-| `vp run adr:list`             | print every ADR with its title, per home — the listing each home's index deliberately does not carry ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)); `-- --package <workspace-directory-name>` narrows it to the decisions governing one, and refuses a name that is missing or answers to no workspace |
-| `vp run devkit:sync`          | materialise the shipped files into this repository from [`packages/devkit`](packages/devkit/CLASSIFICATION.md) — a locally modified file is reported and kept, never overwritten; `-- --profile full` also places the workflows, hooks, templates and registers                                                                  |
-| `vp run devkit:doctor`        | report what differs between the materialised copies and the package; `-- --check` fails on a difference, `-- --verbose` also lists acknowledged edits, `-- --profile <name>` reads a profile other than the configured one, `-- --accept <path> --reason "…"` acknowledges ONE                                                   |
-| `vp run devkit:closure`       | measure what a directory references but does not contain — `-- <dir> [<dir> ...]`, or `-- --shipped` for every file the package places, in every profile (`-- --profile <name>` narrows it to one); the instrument behind the classification table                                                                               |
-| `vp run devkit:check`         | fail when this repository's materialised copies differ from the package — the drift gate, since consuming the kit's own output is only a guarantee if something checks it                                                                                                                                                        |
-| `vp run tarball:verify`       | pack both distributed packages, install them into a scratch repository outside this tree, and run every declared bin — the only check that sees what a consumer actually receives                                                                                                                                                |
-| `vp run viteplus:verify`      | check AGENTS.md has no Vite+ managed block rendering content — the markers are removed so `vp install` cannot refill them; this catches them coming back (`--write` re-empties a refilled one)                                                                                                                                   |
-| `vp run configs:verify`       | check no formatter/linter config file exists that no engine reads — fmt and lint are configured once in the root `vite.config.ts` (ADR-042), so a `.oxfmtrc.json`/`.prettierrc` beside it is a decoy                                                                                                                             |
-| `vp run skills:validate`      | validate skill definitions                                                                                                                                                                                                                                                                                                       |
-| `vp run skills:report`        | skills compliance report                                                                                                                                                                                                                                                                                                         |
-| `vp run prepare`              | `vp config` — runs automatically on install                                                                                                                                                                                                                                                                                      |
+| Command                        | Does                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vp run commands:verify`       | check this file still matches reality                                                                                                                                                                                                                                                                                            |
+| `vp run scripts:verify`        | check `.mjs`/`.cjs` size ceiling (`--write` rebaselines)                                                                                                                                                                                                                                                                         |
+| `vp run scripts:exits:verify`  | fail any `.mjs`/`.cjs` calling `process.exit()` instead of setting `process.exitCode`                                                                                                                                                                                                                                            |
+| `vp run seeds:verify`          | check no file `packages/devkit` ships names this repository — its package names, its secrets or its task runner; the forbidden words are derived from the repository, so a new workspace is covered the day it is added                                                                                                          |
+| `vp run lint:plugins:verify`   | prove every Oxlint plugin family is loaded, that no workspace config shadows the root ([ADR-042](docs/decisions/ADR-042-oxlint-config-at-the-root.md)), and that the Oxlint and Biome workspace rosters each classify every workspace exactly once                                                                               |
+| `vp run lint:eslint:verify`    | prove the **eslint** pass still runs its rules — plants a misordered import and requires `perfectionist/sort-imports` to report it (#472)                                                                                                                                                                                        |
+| `vp run suppressions:verify`   | check every package on the never-baseline roster carries no unapproved suppression (see [the protocol](docs/agents/public-package-suppressions.md))                                                                                                                                                                              |
+| `vp run suppressions:list`     | print every suppression reaching a public package, approved or not                                                                                                                                                                                                                                                               |
+| `vp run suppressions:packages` | print the never-baseline roster itself, one workspace directory per line — the one answer every other document cites instead of keeping its own copy                                                                                                                                                                             |
+| `vp run docs:verify`           | check every documented repository path resolves (`--write` prunes resolved baseline entries; `--accept <doc> <ref> --reason "…"` grandfathers one)                                                                                                                                                                               |
+| `vp run package-refs:verify`   | check no published package's docs name one of this repo's apps                                                                                                                                                                                                                                                                   |
+| `vp run departed:verify`       | check nothing names a product or workspace that left this repository — the roster is [`scripts/departed-names.json`](scripts/departed-names.json)                                                                                                                                                                                |
+| `vp run renames:verify`        | check no document still names a file this change renamed away — scoped to the diff, which is what lets it check bare filenames at all (`--base <ref>`, default `origin/main`)                                                                                                                                                    |
+| `vp run route-names:verify`    | check every `*.types`/`*.constants` file in a route folder names an artifact that folder holds — the half of `local-rules/domain-folder-filename` an ESLint rule cannot reach (#613)                                                                                                                                             |
+| `vp run inventory:verify`      | check every `*.util.ts`/`*.util.tsx` value export (`export const`/`export function`; type-only exports are out of scope) is named (in backticks) somewhere in its tree's own `INVENTORY.md` (`--write` regenerates `scripts/inventory-drift-baseline.json`, reviewed as a JSON diff)                                             |
+| `vp run adr:verify`            | check ADR home, filename, heading, number uniqueness, each home's index, and each record's `governs` block and required sections; prints the next free number (`--write` prunes the baseline and regenerates the indexes, then still fails on any record finding it cannot fix; `--adopt` writes the baseline once)              |
+| `vp run adr:new`               | scaffold an ADR from [`_TEMPLATE.md`](docs/decisions/_TEMPLATE.md) with the next free number — `-- "<title>" [--home repo\|app] [--slug <s>] [--dry-run]`                                                                                                                                                                        |
+| `vp run adr:list`              | print every ADR with its title, per home — the listing each home's index deliberately does not carry ([ADR-075](docs/decisions/ADR-075-the-index-does-not-list-the-adrs.md)); `-- --package <workspace-directory-name>` narrows it to the decisions governing one, and refuses a name that is missing or answers to no workspace |
+| `vp run devkit:sync`           | materialise the shipped files into this repository from [`packages/devkit`](packages/devkit/CLASSIFICATION.md) — a locally modified file is reported and kept, never overwritten; `-- --profile full` also places the workflows, hooks, templates and registers                                                                  |
+| `vp run devkit:doctor`         | report what differs between the materialised copies and the package; `-- --check` fails on a difference, `-- --verbose` also lists acknowledged edits, `-- --profile <name>` reads a profile other than the configured one, `-- --accept <path> --reason "…"` acknowledges ONE                                                   |
+| `vp run devkit:closure`        | measure what a directory references but does not contain — `-- <dir> [<dir> ...]`, or `-- --shipped` for every file the package places, in every profile (`-- --profile <name>` narrows it to one); the instrument behind the classification table                                                                               |
+| `vp run devkit:check`          | fail when this repository's materialised copies differ from the package — the drift gate, since consuming the kit's own output is only a guarantee if something checks it                                                                                                                                                        |
+| `vp run tarball:verify`        | pack both distributed packages, install them into a scratch repository outside this tree, and run every declared bin — the only check that sees what a consumer actually receives                                                                                                                                                |
+| `vp run viteplus:verify`       | check AGENTS.md has no Vite+ managed block rendering content — the markers are removed so `vp install` cannot refill them; this catches them coming back (`--write` re-empties a refilled one)                                                                                                                                   |
+| `vp run configs:verify`        | check no formatter/linter config file exists that no engine reads — fmt and lint are configured once in the root `vite.config.ts` (ADR-042), so a `.oxfmtrc.json`/`.prettierrc` beside it is a decoy                                                                                                                             |
+| `vp run skills:validate`       | validate skill definitions                                                                                                                                                                                                                                                                                                       |
+| `vp run skills:report`         | skills compliance report                                                                                                                                                                                                                                                                                                         |
+| `vp run prepare`               | `vp config` — runs automatically on install                                                                                                                                                                                                                                                                                      |
 
 `adr:verify` reads the record, not only its name. Every ADR opens with a
 `---` block declaring **`governs`** — workspace directory names (`ui`,
@@ -833,19 +848,19 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 Beyond that, tasks are per-workspace. `build` and `test` are common but come from
 `vite.config.ts` rather than `scripts` in most workspaces (see §1).
 
-| Workspace                     | Package name               | Notable extra tasks                                                                                                    |
-| ----------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `apps/showcase`               | `showcase`                 | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
-| `packages/ui`                 | `@lcabrera/ui`             | `check:public-api`, `test:coverage`, `bench`                                                                           |
-| `packages/server`             | `@lcabrera/server`         | `test:coverage`                                                                                                        |
-| `packages/node-runtime`       | `@lcabrera/node`           | `build`, `test:coverage`                                                                                               |
-| `packages/ts-configs`         | `@repo/ts-configs`         | `generate`                                                                                                             |
-| `packages/tsconfig`           | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                               |
-| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin`  | —                                                                                                                      |
-| `packages/devkit`             | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                |
-| `packages/repo-standards`     | `@lcabrera/repo-standards` | `test`, `test:coverage`                                                                                                |
-| `packages/utils`              | `@lcabrera/utils`          | —                                                                                                                      |
-| `packages/vite-configs`       | `@lcabrera/vite-config`    | `build`, `test`, `test:coverage`                                                                                       |
+| Workspace                     | Package name               | Notable extra tasks                                                                                                                  |
+| ----------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `apps/showcase`               | `showcase`                 | `typegen`, `test:ci`, `test:smoke`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
+| `packages/ui`                 | `@lcabrera/ui`             | `check:public-api`, `test:coverage`, `bench`                                                                                         |
+| `packages/server`             | `@lcabrera/server`         | `test:coverage`                                                                                                                      |
+| `packages/node-runtime`       | `@lcabrera/node`           | `build`, `test:coverage`                                                                                                             |
+| `packages/ts-configs`         | `@repo/ts-configs`         | `generate`                                                                                                                           |
+| `packages/tsconfig`           | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                                             |
+| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin`  | —                                                                                                                                    |
+| `packages/devkit`             | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                              |
+| `packages/repo-standards`     | `@lcabrera/repo-standards` | `test`, `test:coverage`                                                                                                              |
+| `packages/utils`              | `@lcabrera/utils`          | —                                                                                                                                    |
+| `packages/vite-configs`       | `@lcabrera/vite-config`    | `build`, `test`, `test:coverage`                                                                                                     |
 
 Notes on the non-obvious ones:
 

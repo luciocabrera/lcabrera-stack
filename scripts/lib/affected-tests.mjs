@@ -6,7 +6,7 @@
  * (built from each package.json's `workspace:*` deps) to add transitive
  * dependents. Only the few files that change how every workspace resolves its
  * tests — the lockfile, the workspace manifest, the root Vite+ config, and the
- * shared `vite-configs`/`ts-configs` build machinery — force the FULL suite;
+ * shared config packages `GLOBAL_PACKAGES` names below — force the FULL suite;
  * every other out-of-workspace file (root package.json scripts, docs, tooling)
  * affects no suite and is ignored. Lint/format-only configs (the `vite-configs`
  * eslint/oxlint/oxfmt factories, any `eslint.config.mjs`) are dropped before

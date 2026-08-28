@@ -1,6 +1,6 @@
 /**
  * Gate: the public packages carry no suppression that has not been argued for in
- * writing (AGENTS.md §4). Membership is resolved at runtime from the workspaces
+ * writing (AGENTS.md §1). Membership is resolved at runtime from the workspaces
  * that gitignore `eslint-suppressions.json`, never from a list written here.
  *
  * Findings are diffed against `docs/agents/public-package-suppressions.json` in
@@ -20,8 +20,12 @@
  *
  * Effects live here; the rules are pure in `./lib/suppressions.mjs`.
  *
- * Usage: node scripts/verify-suppressions.mjs [--list]
- *   --list  print every suppression found, approved or not, and exit 0
+ * Usage: node scripts/verify-suppressions.mjs [--list | --packages]
+ *   --list      print every suppression found, approved or not, and exit 0
+ *   --packages  print the roster itself, one directory per line, and exit 0.
+ *               This is the answer every other document points at instead of
+ *               keeping its own copy, which is how three different rosters
+ *               ended up in circulation and the narrowest one governed a merge.
  */
 import { readdirSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
@@ -168,6 +172,11 @@ const main = () => {
         'workspaces gitignore eslint-suppressions.json — check that first.\n',
     );
     process.exitCode = 1;
+    return;
+  }
+
+  if (process.argv.includes('--packages')) {
+    for (const dir of packageDirs) process.stdout.write(`${dir}\n`);
     return;
   }
 

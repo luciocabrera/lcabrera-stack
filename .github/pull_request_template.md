@@ -8,9 +8,10 @@
   Every section below is required — write "None" rather than deleting a
   heading, so a reviewer can tell "considered, nothing to say" from "skipped".
 
-  `## What` and `## Verification` are matched by the PR Standards CI check
-  (packages/repo-standards/scripts/commit-convention.mjs) and MUST keep those exact spellings —
-  no numbering, emoji or bold in those two headings, or the gate fails.
+  The PR Standards CI check (packages/repo-standards/scripts/commit-convention.mjs)
+  matches these as HEADINGS, so they MUST keep their plain spelling: numbering,
+  emoji or bold in one of the ones it requires fails the gate. Which those are is
+  that file's REQUIRED_PR_SECTIONS — read it there rather than from a copy.
   See the `commit-and-pr` skill and docs/agents/workflow.md.
 -->
 

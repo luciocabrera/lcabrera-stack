@@ -14,8 +14,9 @@ trust the check and look at its output.
 ## Pre-merge requirements
 
 - [ ] **PR description fully completed** — every heading present, none deleted
-      **[auto: PR Standards / `pr:verify`** for `## What` and `## Verification`;
-      **judgement** for the rest]
+      **[auto: PR Standards / `pr:verify`** for the sections
+      `commit-convention.mjs` lists as required; **judgement** for whether each
+      one says anything]
 - [ ] **Issue acceptance criteria satisfied** — each box in the linked issue is
       met, or the deviation is explained in the PR **[judgement]**
 - [ ] **No unexplained deviations from issue scope** — anything outside the

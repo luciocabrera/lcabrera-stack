@@ -24,14 +24,14 @@ This skill defines the mandatory validation sequence after code changes.
 
 ## Canonical Gate Order
 
-> **Default working directory: the workspace whose files changed.** `vp run test`,
-> `vp check` and `vp run typecheck` resolve per workspace. From the repo root,
+> **Default working directory: the workspace whose files changed.** `vp check`
+> and `vp run typecheck` resolve per workspace. From the repo root,
 > `vp run check:safe` chains the entire gate the way CI does. `apps/showcase/`
 > is an example of a workspace, not the implicit default.
 >
-> **Stages 4 and 5 are the exceptions** — both are root-only, repo-wide passes and
-> are marked as such below. `cd` to the repo root for those two, then come back.
-> Running either from inside a workspace is not the gate.
+> **Stages 4, 5 and 8 are the exceptions** — all three are root-only passes and
+> are marked as such below. `cd` to the repo root for those, then come back.
+> Running one from inside a workspace is not the gate.
 
 1. `vp fmt .`
 2. `vp lint .` — Oxlint
@@ -40,7 +40,7 @@ This skill defines the mandatory validation sequence after code changes.
 5. `vp run react-doctor:verify` — the React Doctor gate — **run from the repo root**
 6. `vp check` — fmt + Oxlint + the **tsgolint** type pass
 7. `vp run typecheck` — the real **tsc** pass (plus `check:public-api` in `packages/ui`)
-8. `vp run test`
+8. `vp run test:changed` — **run from the repo root**
 
 Use this exact order because each stage catches issues earlier/cheaper than the next.
 
@@ -89,6 +89,24 @@ types before checking. CI runs `vp run typecheck:all` as its own step in
 in dependency order — the run prints them, and COMMANDS.md §5 lists them under a
 gate that keeps the count honest.
 
+**Stage 8 is root-only because not everything that has tests is in a workspace.**
+`vp run test` resolves per workspace, and root `scripts/` — every verify gate,
+report generator and their `lib/` modules — is in none of them, so editing a
+tooling script and running the workspace's suite executes not one of its tests
+and reports green. `vp run test:changed` selects the affected workspaces and their dependents **and**
+adds the root `test:scripts` group when a script under root `scripts/` changed,
+so it cannot miss either half. **It reads untracked files too**, not only the
+tracked diff — this stage runs before a commit, and a new component with a new
+colocated test is untracked at that moment; `scripts/changed-files.sh` adds
+`git ls-files --others --exclude-standard` for exactly that case, so nothing has
+to be `git add`ed first. It prints what it selected and what it skipped; check
+that line rather than assuming. To run one half directly:
+`vp run test` inside a workspace, `vp run test:scripts` from the root. CI reaches
+both halves by either of two paths, chosen by event in `check-safe.yml`'s Unit
+Tests job: `vp run test:changed -- --ci` on a pull request, `vp run test:ci` on a
+push to `main`. Locally, `vp run check:safe` chains `vp run test:all`
+(`vp run -r test` plus `test:scripts`); CI runs neither of those two.
+
 Shortcut: `vp run lint` in a workspace chains `vp lint . --fix` **and**
 `vp run lint:eslint` (autofix for both), which is usually what you want while
 iterating — but it does **not** include Biome or React Doctor, so stages 4 and 5
@@ -118,10 +136,15 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
   code cannot say — → that **system's** `ARCHITECTURE.md` (Table, Form, the
   query builders). Not a Props table, not a file tree, not a mermaid of the
   function body, and not a new file because a folder is new.
-- **A trap on a specific line** → a short comment on that line, or nothing if
-  the name already says it. Do not add JSDoc that restates a name, a type, or
-  an ADR. Scripts keep the short "why" header in
-  [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md).
+- **A trap, a measurement, or a why** → **not a comment.** No comment sits above
+  a function or component declaration and no prose sits inside its body
+  ([ADR-095](../../../docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md)).
+  A decision goes in the ADR that owns it; investigation and measurement go in
+  the pull request or the issue. Two exemptions: the short file-level "why"
+  header on a script, in
+  [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md), and JSDoc a
+  build reads (`@param`, `@returns`, …) — the annotations, not prose sharing
+  their block.
 
 ### Where a new ADR goes
 

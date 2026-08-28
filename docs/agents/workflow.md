@@ -39,11 +39,12 @@ section, including **Impact Analysis** — that section exists because several
 agents work this repo in parallel and a change that is safe in isolation may not
 be.
 
-Two headings are load-bearing: **`## What` and `## Verification` are matched by
-CI** (`packages/repo-standards/scripts/commit-convention.mjs`, run by
-[`pr-standards.yml`](../../.github/workflows/pr-standards.yml)) and must keep those
-exact spellings. Numbering, emoji or bold in _those two_ headings fails the gate.
-Decorate the others freely.
+**The headings are matched as headings**, by
+`packages/repo-standards/scripts/commit-convention.mjs` (run by
+[`pr-standards.yml`](../../.github/workflows/pr-standards.yml)), so each one the
+validator requires must keep its plain spelling — numbering, emoji or bold in any
+of them fails the gate. `REQUIRED_PR_SECTIONS` in that file is the list; it is
+not repeated here, and it is longer than the two this page used to name.
 
 The PR title is a Conventional Commit. The type list lives in the spec, not here.
 
@@ -90,6 +91,5 @@ options — then ask.
 [`templates-spec.md`](templates-spec.md), alongside this page,
 is the source specification these files were generated from. It records the
 intended structure; the files linked above are what agents actually use, and one
-deliberate deviation is recorded in it: the PR template's `## What` and
-`## Verification` headings keep their plain spelling so the existing enforced
-gate keeps working.
+deliberate deviation is recorded in it: the PR template's required headings keep
+their plain spelling so the existing enforced gate keeps working.

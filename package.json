@@ -91,6 +91,7 @@
     "sonar:verify": "node scripts/sonar-report.mjs --gate",
     "start:showcase": "vp run --filter showcase start",
     "suppressions:list": "node scripts/verify-suppressions.mjs --list",
+    "suppressions:packages": "node scripts/verify-suppressions.mjs --packages",
     "suppressions:verify": "node scripts/verify-suppressions.mjs",
     "tarball:verify": "node scripts/verify-devkit-tarball.mjs",
     "test:all": "vp run -r test && vp run test:scripts",

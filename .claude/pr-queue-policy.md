@@ -156,9 +156,21 @@ reviewed PR (which S9 keeps the operator's hands off).
   a new `.env`, a token-shaped literal, or a change to `docker/local/**` env
   wiring.
 - **S5 — A new suppression.** Any added inline `eslint-disable` / `oxlint-disable`,
-  rule-off in config, or `eslint-suppressions.json` entry — and in
-  `packages/{ui,api,server,utils}`, any at all. Rule 11 says fix the code; a
-  suppression arriving with a green rollup is exactly the case the rule exists for.
+  rule-off in config, or `eslint-suppressions.json` entry — and inside a package
+  on the never-baseline roster, any at all. **Derive that roster, never recall
+  it:** `vp run suppressions:packages` prints it, and `pr-queue-operator.mjs`
+  resolves it once per pass, from the operator's **own checkout**, then hands the
+  array to `pr-queue-gate.mjs` — which reads no filesystem and never sees the head
+  ref. Two consequences follow, and both matter. A PR that adds a new public
+  package is judged against the roster **without** it, until the operator's
+  checkout carries that package's gitignore line; treat such a PR as S1 and read
+  the diff. And a roster that resolves empty is treated as "every `packages/*`
+  directory", not "none", so a broken resolution over-flags instead of merging.
+  This trigger used to carry a literal list of package paths, narrower than the
+  roster the standing rules cover, so a suppression forbidden everywhere could
+  still read as `MERGE` in the packages the literal had missed. Rule 11 says fix
+  the code; a suppression arriving with a green rollup is exactly the case the
+  rule exists for.
 - **S6 — Another agent is holding the branch.** The head ref moved during the
   pass, the PR is claimed by a live task in `docs/coordination/` owned by someone
   else, or the action would force-push over commits the operator did not make.
@@ -169,8 +181,29 @@ reviewed PR (which S9 keeps the operator's hands off).
   permissions, or anything affecting trusted-publisher config. Nothing but the
   version number stands between a mistake and the registry, and an npm version is
   permanent.
-- **S9 — Self-modification.** A PR that edits this policy, the operator script,
-  or its lib modules. The operator does not merge changes to its own leash.
+- **S9 — Self-modification.** A PR that edits this policy, the operator, or
+  anything the operator imports. It does not merge changes to its own leash.
+  That set is `OPERATOR_FILES` in `pr-queue-gate.mjs`: this document, plus the
+  transitive import closure of `pr-queue-operator.mjs`. It is not curated —
+  `pr-queue-gate.test.mjs` walks the real import graph and fails when the list
+  and the graph disagree, in either direction.
+  **What it costs.** The closure reaches shared modules under
+  `packages/repo-standards/scripts/`, so a PR editing the commit convention, the
+  config reader or the workspace roster escalates even though it was not aimed at
+  the operator. The commit convention is the one worth naming: it decides E6 and
+  E7, which are eligibility blockers carrying `ACT` rather than stops, so without
+  this the operator would have _acted_ on a changed convention rather than
+  halted. Over-stopping is the direction to be wrong in, and S9 is per-PR, so it
+  never holds an unrelated merge.
+  **What it does not cover.** The walk follows `import`, so anything read at run
+  time sits outside it, and there are two kinds. This document is read by path
+  and is listed by hand. The never-baseline roster is read by _shape_ — every
+  workspace's `.gitignore`, plus the `packages/` listing — so no list could name
+  it in advance. What bounds that one is where it is read from: `REPO_ROOT` comes
+  from `import.meta.url`, so the roster is always the operator's own checkout and
+  nothing in the branch under judgement can move it. A PR that adds or removes a
+  public package changes what the operator flags only once it has merged and the
+  operator's checkout has followed.
 - **S10 — No re-runnable evidence.** Any verdict the operator cannot support with
   a command someone else can run and an observation that would have come out
   differently had the verdict been wrong. Absence of evidence escalates; it never

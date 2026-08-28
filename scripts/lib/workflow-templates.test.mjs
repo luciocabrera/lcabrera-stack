@@ -20,9 +20,10 @@ import {
 //
 // It is not hypothetical. docs/agents/templates-spec.md records Deviation 1 —
 // the source specification spells the headings `## **📝 1. What**`, which
-// `/^#{1,6}\s+what\b/im` cannot match. Until now the only thing standing between
-// that spelling and a permanently red gate was a comment in the template asking
-// editors not to decorate two of the six required headings.
+// `/^#{1,6}\s+what\b/im` cannot match. The only thing that stood between that
+// spelling and a permanently red gate was a comment in the template, and it
+// asked editors to keep two of the six required headings plain — so four of them
+// were decoratable as far as any reader could tell.
 //
 // scripts/coordination-claim.sh is here for the same reason: it generates a full
 // issue body and a full draft-PR body inline, so the repo's own tooling can
@@ -81,6 +82,22 @@ describe('the shipped PR template', () => {
     expect(decorated, 'the `## What` heading moved — re-target this').not.toBe(
       read(PR_TEMPLATE),
     );
+    expect(validatePrBody(decorated).errors).not.toEqual([]);
+  });
+
+  it.each([
+    'Why',
+    'Verification',
+    'Impact Analysis',
+    'Test Coverage',
+    'Documentation Updates',
+  ])('fails once `## %s` is decorated too', (heading) => {
+    const template = read(PR_TEMPLATE);
+    const decorated = template.replace(
+      new RegExp(`^## ${heading}$`, 'mu'),
+      `## **✨ ${heading}**`,
+    );
+    expect(decorated, `the \`## ${heading}\` heading moved`).not.toBe(template);
     expect(validatePrBody(decorated).errors).not.toEqual([]);
   });
 });

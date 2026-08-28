@@ -62,8 +62,8 @@ A real conflict archetype: for a type-only re-export, ESLint wants inline
 resolution is the block form, which both accept — **not** disabling a rule.
 
 **Never propose suppressing, ignoring or disabling a rule as the fix**
-(Non-Negotiable Rule 11). `packages/ui`, `packages/api`, `packages/server` and
-`packages/utils` take no suppressions at all.
+(Non-Negotiable Rule 11). The public packages take none at all —
+`vp run suppressions:packages` prints which those are.
 
 `vp fmt` reads the `fmt` block in the root `vite.config.ts`, and lint config
 lives at the root only.
