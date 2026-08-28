@@ -334,6 +334,40 @@ describe('usePersistTableStateAction', () => {
       );
     });
 
+    it('keeps the URL half of an entry that carries both', () => {
+      metaStoreGetMock.mockReturnValue({ isColumnLayoutTransient: true });
+      serializeStateSliceMock.mockReturnValue({
+        key: 'orders-group:columnFilters',
+        value: '{"status":"active"}',
+      });
+
+      const { result } = renderHook(() => usePersistTableStateAction());
+
+      act(() => {
+        result.current({
+          persistenceKey: 'orders-group',
+          searchParamKey: 'filters',
+          searchParamValue: '{"status":"active"}',
+          slice: 'columnFilters',
+          valueSlice: { status: 'active' },
+        });
+      });
+
+      expect(serializeStateSliceMock).not.toHaveBeenCalled();
+      expect(submitMock).toHaveBeenCalledWith(
+        {
+          currentUrl: '/enterprise-orders?page=2',
+          entries: JSON.stringify([
+            {
+              searchParamKey: 'filters',
+              searchParamValue: '{"status":"active"}',
+            },
+          ]),
+        },
+        { action: '/_action/persist-cookie', method: 'POST' },
+      );
+    });
+
     it('writes nothing, and claims nothing, when every entry was a layout slice', () => {
       metaStoreGetMock.mockReturnValue({ isColumnLayoutTransient: true });
 

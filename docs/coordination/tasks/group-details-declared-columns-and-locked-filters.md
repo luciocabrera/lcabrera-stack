@@ -33,6 +33,6 @@ list of restrictions and refuses one it cannot read. Recorded as
 
 ## Status / next
 
-- Current step: round 3 — refusal-vocabulary gap closed and gated, `vp run check:safe` green
+- Current step: round 4 — ADR link depths, the both-shaped persistence entry, `vp run check:safe` green
 - Blockers: none
 - Next: address review findings
