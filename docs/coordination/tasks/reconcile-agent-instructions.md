@@ -12,6 +12,8 @@ area:
   - .github/skills/**
   - .github/pull_request_template.md
   - docs/agents/**
+  - docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md
+  - docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md
   - docs/coordination/README.md
   - docs/tooling/coverage-reporting.md
   - docs/product/requirements/**
@@ -29,6 +31,8 @@ Reconcile the instructions that tell agents opposite things
 
 ## Status / next
 
-- Current step: implemented, full gate green, PR #1027 open
+- Current step: `origin/main` merged in; this branch's ADR renumbered to 095
+  after `main` landed a different ADR-094 (#1024). Full gate green on the
+  merged tree, PR #1027 open
 - Blockers: none
 - Next: blind verification, then merge

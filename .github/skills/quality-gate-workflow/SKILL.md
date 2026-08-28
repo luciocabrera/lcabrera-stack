@@ -138,7 +138,7 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
   function body, and not a new file because a folder is new.
 - **A trap, a measurement, or a why** → **not a comment.** No comment sits above
   a function or component declaration and no prose sits inside its body
-  ([ADR-094](../../../docs/decisions/ADR-094-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md)).
+  ([ADR-095](../../../docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md)).
   A decision goes in the ADR that owns it; investigation and measurement go in
   the pull request or the issue. Two exemptions: the short file-level "why"
   header on a script, in

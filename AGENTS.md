@@ -439,7 +439,7 @@ mistaken for current fact. Neither is optional: deleting the reasoning instead o
 moving it is not compliance.
 
 The record is
-[ADR-094](docs/decisions/ADR-094-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
+[ADR-095](docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
 which also states what the rule costs and which paragraph of
 [ADR-088](docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)
 it corrects. Applying it to the code that predates it, and the lint rule in

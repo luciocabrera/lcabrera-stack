@@ -49,7 +49,7 @@ the English: chat replies, PR/issue **prose**, docs, ADRs, review comments.
   constraint lists: keep the genre. Do not "add soul" to a spec
 
 Comments on code follow [`AGENTS.md`](../../../AGENTS.md) §7 and
-[ADR-094](../../../docs/decisions/ADR-094-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md):
+[ADR-095](../../../docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md):
 no comment above a function or component and none inside its body, so there is
 usually no comment prose to unslop. What moved out of the code — into an ADR or
 a pull request — is prose a person reads, and this skill applies to it.

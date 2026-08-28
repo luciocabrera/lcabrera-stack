@@ -3,7 +3,7 @@ governs:
   - repository
 ---
 
-# ADR-094 — Move explanations out of functions and into the record that owns them
+# ADR-095 — Move explanations out of functions and into the record that owns them
 
 - **Status:** Accepted
 - **Date:** 2026-08-28
