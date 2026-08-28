@@ -197,12 +197,22 @@ supplies its page ceiling, its tiebreaker column and the catalogue lookup, and
 nothing else
 ([ADR-087](../../../docs/decisions/ADR-087-a-group-opens-its-rows-in-a-route.md)).
 
-`toGroupHeading` (`to-group-heading.util.ts`) is the heading the route serving
-those rows shows: one `Label: value` per key, read back out of the token, which
-carries raw values because `encodeDrillGroup` drops the group row's formatted
-label on purpose. A truncated key is formatted through `toGroupPeriodLabel` and
-not `toGroupLabel`, so the heading reads `2021-06` like the row that was clicked
-rather than the instant underneath it.
+`resolveGroupRestriction` (`resolve-group-restriction.util.ts`) is the other half
+of that request: what **restricts** the rows it is answered with, as one
+`{ columnKey, label, value }` entry per group key, outermost first, for a surface
+that has to state it. It refuses on the same conditions as `resolveGroupRead`, in
+the same order — the param's presence, then `parseDrillGroup`, then
+`resolveDrillRefusal` — and draws its sentence from the same `olap.constants.ts`
+map, so a panel and a grid answering one request cannot say different things
+about it. That is asserted by a contract test rather than by this sentence: the
+`agrees with resolveGroupRead on every refusal` block in
+`resolve-group-restriction.util.test.ts` drives both over the same requests and
+fails if either side gains a reason the other does not have. Values are read back
+out of the token, which carries raw ones because `encodeDrillGroup` drops the
+group row's formatted label on purpose; a truncated key is formatted through
+`toGroupPeriodLabel`, so it reads as the period the row was keyed by rather than
+the instant underneath it
+([ADR-094](../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
 
 All of this lived in route code until
 [ADR-082](../../../docs/decisions/ADR-082-the-olap-seam-lives-in-the-packages.md);

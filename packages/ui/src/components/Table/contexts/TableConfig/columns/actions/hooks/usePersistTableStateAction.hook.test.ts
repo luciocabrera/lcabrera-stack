@@ -294,4 +294,115 @@ describe('usePersistTableStateAction', () => {
       value: [],
     });
   });
+  describe('a transient column layout', () => {
+    it('drops the state slices and keeps the URL params', () => {
+      metaStoreGetMock.mockReturnValue({ isColumnLayoutTransient: true });
+      serializeStateSliceMock.mockReturnValue({
+        key: 'orders-group:columnOrder',
+        value: '["id"]',
+      });
+
+      const { result } = renderHook(() => usePersistTableStateAction());
+
+      act(() => {
+        result.current([
+          {
+            searchParamKey: 'filters',
+            searchParamValue: '{"status":"active"}',
+          },
+          {
+            persistenceKey: 'orders-group',
+            slice: 'columnOrder',
+            valueSlice: ['id'],
+          },
+        ]);
+      });
+
+      expect(serializeStateSliceMock).not.toHaveBeenCalled();
+      expect(notifyMock).toHaveBeenCalledTimes(1);
+      expect(submitMock).toHaveBeenCalledWith(
+        {
+          currentUrl: '/enterprise-orders?page=2',
+          entries: JSON.stringify([
+            {
+              searchParamKey: 'filters',
+              searchParamValue: '{"status":"active"}',
+            },
+          ]),
+        },
+        { action: '/_action/persist-cookie', method: 'POST' },
+      );
+    });
+
+    it('keeps the URL half of an entry that carries both', () => {
+      metaStoreGetMock.mockReturnValue({ isColumnLayoutTransient: true });
+      serializeStateSliceMock.mockReturnValue({
+        key: 'orders-group:columnFilters',
+        value: '{"status":"active"}',
+      });
+
+      const { result } = renderHook(() => usePersistTableStateAction());
+
+      act(() => {
+        result.current({
+          persistenceKey: 'orders-group',
+          searchParamKey: 'filters',
+          searchParamValue: '{"status":"active"}',
+          slice: 'columnFilters',
+          valueSlice: { status: 'active' },
+        });
+      });
+
+      expect(serializeStateSliceMock).not.toHaveBeenCalled();
+      expect(submitMock).toHaveBeenCalledWith(
+        {
+          currentUrl: '/enterprise-orders?page=2',
+          entries: JSON.stringify([
+            {
+              searchParamKey: 'filters',
+              searchParamValue: '{"status":"active"}',
+            },
+          ]),
+        },
+        { action: '/_action/persist-cookie', method: 'POST' },
+      );
+    });
+
+    it('writes nothing, and claims nothing, when every entry was a layout slice', () => {
+      metaStoreGetMock.mockReturnValue({ isColumnLayoutTransient: true });
+
+      const { result } = renderHook(() => usePersistTableStateAction());
+
+      act(() => {
+        result.current({
+          persistenceKey: 'orders-group',
+          slice: 'columnPinning',
+          valueSlice: { left: ['id'], right: [] },
+        });
+      });
+
+      expect(submitMock).not.toHaveBeenCalled();
+      expect(notifyMock).not.toHaveBeenCalled();
+    });
+
+    it('still persists every slice on an ordinary table', () => {
+      metaStoreGetMock.mockReturnValue({});
+      serializeStateSliceMock.mockReturnValue({
+        key: 'orders:columnOrder',
+        value: '["id"]',
+      });
+
+      const { result } = renderHook(() => usePersistTableStateAction());
+
+      act(() => {
+        result.current({
+          persistenceKey: 'orders',
+          slice: 'columnOrder',
+          valueSlice: ['id'],
+        });
+      });
+
+      expect(submitMock).toHaveBeenCalledTimes(1);
+    });
+  });
 });

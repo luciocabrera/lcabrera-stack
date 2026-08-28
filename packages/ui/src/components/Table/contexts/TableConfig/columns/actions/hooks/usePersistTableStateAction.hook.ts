@@ -1,5 +1,6 @@
 import type { TablePersistenceEntry } from '#ui/components/Table/Table.types';
 
+import { resolvePersistenceEntries } from '#ui/components/Table/contexts/TableConfig/columns/actions/utils';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { TABLE_NESTED_URL_STATE_PREFIX } from '#ui/components/Table/Table.constants';
 import { serializeStateSlice } from '#ui/components/Table/utils';
@@ -36,7 +37,12 @@ export const usePersistTableStateAction = () => {
     const paramPrefix =
       meta?.isUrlStateNested === true ? TABLE_NESTED_URL_STATE_PREFIX : '';
 
-    const serializedEntries = entries.map(
+    const persistedEntries = resolvePersistenceEntries({
+      entries,
+      isColumnLayoutTransient: meta?.isColumnLayoutTransient === true,
+    });
+
+    const serializedEntries = persistedEntries.map(
       ({
         persistenceKey,
         searchParamKey,
@@ -71,6 +77,10 @@ export const usePersistTableStateAction = () => {
       notify(PERSISTENCE_SIZE_WARNING);
       return false;
     }
+    if (serializedEntries.length === 0) {
+      return true;
+    }
+
     notify({
       durationMs: 10_000,
       message: 'This table state has been updated successfully.',
@@ -78,8 +88,6 @@ export const usePersistTableStateAction = () => {
       variant: 'success' as const,
     });
 
-    // Write to cookie via server action — the loader reads it back on the next
-    // document request and seeds the store from it.
     persistCookie(serializedEntries);
 
     return true;

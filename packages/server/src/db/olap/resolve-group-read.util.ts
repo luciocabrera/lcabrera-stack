@@ -13,6 +13,7 @@ import type {
   OlapGroupReadResolution,
 } from './olap.types';
 
+import { GROUP_READ_REFUSAL_MESSAGE } from './olap.constants.ts';
 import { toDrillRead } from './to-drill-read.util.ts';
 
 type ResolveGroupReadArgs = {
@@ -35,20 +36,9 @@ type ResolveGroupReadArgs = {
   readonly sort: readonly QuerySort[];
 };
 
-const REFUSAL_MESSAGE: Readonly<Record<OlapGroupReadRefusal, string>> = {
-  absent: 'This page opens one group’s rows, and the link does not say which.',
-  'grand-total':
-    'A grand total already summarises every row, so there is no narrower set to open.',
-  'incomplete-path':
-    'This group is named by fewer keys than the view was grouped by, so the rows underneath it are not the rows it counted.',
-  malformed: 'This link does not name a group that can be opened.',
-  subtotal:
-    'A subtotal summarises the groups above it rather than rows of its own.',
-};
-
 const toRefusal = (reason: OlapGroupReadRefusal): OlapGroupReadResolution => ({
   kind: 'refused',
-  message: REFUSAL_MESSAGE[reason],
+  message: GROUP_READ_REFUSAL_MESSAGE[reason],
   reason,
 });
 

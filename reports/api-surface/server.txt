@@ -90,6 +90,8 @@ toGroupSort [const] ({ groupKeys, requested, sort }: ToGroupSortArgs) => readonl
 
 ## ./db/olap/olap.types
 GroupKeyTruncation [type] { readonly isZoned: boolean; readonly period: GroupKeyPeriod; }
+GroupRestriction [type] { readonly columnKey: string; readonly label: string; readonly value: string; }
+GroupRestrictionStatement [type] { readonly entries: readonly GroupRestriction[]; readonly refusal?: string; }
 OlapDrillRead [type] { readonly filters: readonly QueryFilter[]; readonly includeTotal: boolean; readonly limit: number; readonly offset: number; readonly sort: readonly QuerySort[]; }
 OlapDrillRefusal [type] 'grand-total' | 'incomplete-path' | 'subtotal'
 OlapDrillTranslation [type] { readonly kind: 'drillable'; readonly read: OlapDrillRead; } | { readonly kind: 'refused'; readonly reason: OlapDrillRefusal; }
@@ -103,11 +105,11 @@ resolveDrillRefusal [const] ({ group, groupKeys }: ResolveDrillRefusalArgs) => O
 ## ./db/olap/resolve-group-read.util
 resolveGroupRead [const] ({ cursor, filters, isGroupRequired, limit, maxLimit, params, primaryKey, selectTruncations, skip, sort }: ResolveGroupReadArgs) => Promise<OlapGroupReadResolution>
 
+## ./db/olap/resolve-group-restriction.util
+resolveGroupRestriction [const] ({ columns, isGroupRequired, params, selectTruncations }: ResolveGroupRestrictionArgs) => Promise<GroupRestrictionStatement | undefined>
+
 ## ./db/olap/to-drill-read.util
 toDrillRead [const] ({ filters, group, groupKeys, limit, maxLimit, primaryKey, sort, truncations }: ToDrillReadArgs) => OlapDrillTranslation
-
-## ./db/olap/to-group-heading.util
-toGroupHeading [const] ({ columns, params, truncations }: ToGroupHeadingArgs) => string | undefined
 
 ## ./db/olap/to-group-key-truncations.util
 toGroupKeyTruncations [const] ({ capabilities, periods }: ToGroupKeyTruncationsArgs) => Readonly<Record<string, GroupKeyTruncation>>

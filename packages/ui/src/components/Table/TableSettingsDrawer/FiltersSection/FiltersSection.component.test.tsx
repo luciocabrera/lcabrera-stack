@@ -51,6 +51,10 @@ vi.mock('./AddFilterSection', () => ({
   ),
 }));
 
+vi.mock('./LockedFiltersList', () => ({
+  LockedFiltersList: () => <div data-testid='locked-filters-list' />,
+}));
+
 vi.mock('./FiltersSectionToolbar', () => ({
   FiltersSectionToolbar: ({
     isBusy,
@@ -76,6 +80,7 @@ describe('FiltersSection', () => {
     render(<FiltersSection />);
 
     expect(screen.getByTestId('add-filter-section')).not.toBeNull();
+    expect(screen.getByTestId('locked-filters-list')).not.toBeNull();
     expect(screen.getByTestId('active-filters-list')).not.toBeNull();
     expect(screen.getByTestId('filters-toolbar').textContent).toBe(
       'footer:false',

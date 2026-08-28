@@ -64,4 +64,20 @@ describe('usePersistColumnSizingAction', () => {
 
     expect(persistMock).not.toHaveBeenCalled();
   });
+  it('does not submit for a table whose column layout is transient', () => {
+    columnsGetMock.mockReturnValue({ columnSizing: { id: 120 } });
+    metaGetMock.mockReturnValue({
+      appId: 'admin',
+      isColumnLayoutTransient: true,
+      persistenceKey: 'orders-group',
+    });
+
+    const { result } = renderHook(() => usePersistColumnSizingAction());
+
+    act(() => {
+      result.current();
+    });
+
+    expect(persistMock).not.toHaveBeenCalled();
+  });
 });

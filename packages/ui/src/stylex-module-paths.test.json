@@ -99,6 +99,7 @@
   "src/components/Table/TableSettingsDrawer/FiltersSection/ActiveFiltersList/ActiveFiltersList.stylex.ts",
   "src/components/Table/TableSettingsDrawer/FiltersSection/ActiveFiltersList/FilterItem/FilterItem.stylex.ts",
   "src/components/Table/TableSettingsDrawer/FiltersSection/AddFilterSection/AddFilterSection.stylex.ts",
+  "src/components/Table/TableSettingsDrawer/FiltersSection/LockedFiltersList/LockedFiltersList.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GeneralSettingsSection/AllSettingsSection/AllSettingsSection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GeneralSettingsSection/ColumnWidthsSection/ColumnWidthsSection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GroupingSection/ActiveAggregateList/ActiveAggregateList.stylex.ts",
