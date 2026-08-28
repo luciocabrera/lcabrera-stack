@@ -16,8 +16,9 @@
  * `publicPackageDirs` resolves the never-baseline packages from the same
  * authority AGENTS.md names — the workspaces whose gitignore covers
  * `eslint-suppressions.json` — rather than restating a list that would drift the
- * moment a fifth package joins. Keying on the DIRECTORY, not the package name,
- * also keeps the invariant intact across an npm scope rename.
+ * moment another package joins. It is what `vp run suppressions:packages` prints,
+ * and it is the only statement of that roster. Keying on the DIRECTORY, not the
+ * package name, also keeps the invariant intact across an npm scope rename.
  */
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -134,7 +135,7 @@ const workspaceDirsIn = (repoRoot, root) => {
  * The never-baseline (public-facing) package directories, repo-relative.
  *
  * Derived rather than listed: AGENTS.md states the authority is which
- * workspaces gitignore `eslint-suppressions.json`, so a fifth public package
+ * workspaces gitignore `eslint-suppressions.json`, so a new public package
  * extends every check built on this without editing them.
  */
 export const publicPackageDirs = (repoRoot) =>

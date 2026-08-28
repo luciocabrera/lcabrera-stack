@@ -1,13 +1,14 @@
 /**
- * Finds every mechanism that can silence a finding inside the four public
- * packages, so AGENTS.md §4's "never silenced" is checked rather than claimed.
+ * Finds every mechanism that can silence a finding inside the public packages,
+ * so AGENTS.md §1's "never silenced" is checked rather than claimed.
  *
  * Pure functions; `verify-suppressions.mjs` owns the filesystem and diffs these
  * findings against the register. Rationale and protocol:
  * `docs/agents/public-package-suppressions.md`.
  *
- * The package list is resolved by `publicPackageDirs`, not hardcoded, so a fifth
- * public package is covered the day it is added.
+ * The package list is resolved by `publicPackageDirs`, not hardcoded, so a new
+ * public package is covered the day it is added. `vp run suppressions:packages`
+ * prints the roster; nothing restates it.
  */
 
 /**
@@ -368,10 +369,10 @@ const WEAK_LEVEL = /(['"])(off|warn)\1/gu;
  * workspace gets, while one turned off in a package's own file is that package
  * opting out. Only the latter is scanned here.
  *
- * Today all four are clean, and the convention is already explicit — three of
- * them carry a local `rules` block that sets `error` with options, commented
- * "rather than turning the rule off … so it still FAILS the gate". This asserts
- * that practice instead of trusting it to hold.
+ * The convention is already the practice — several packages carry a local
+ * `rules` block that sets `error` with options, commented "rather than turning
+ * the rule off … so it still FAILS the gate". This asserts that practice instead
+ * of trusting it to hold.
  */
 export const findConfigSuppressions = ({ file, text }) => {
   const name = file.slice(file.lastIndexOf('/') + 1);

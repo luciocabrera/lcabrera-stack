@@ -24,6 +24,7 @@ import getReleasePlan from '@changesets/get-release-plan';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { readPublishing } from '../../packages/repo-standards/scripts/config.mjs';
+import { publicPackageDirs as derivedPublicPackageDirs } from './coverage-workspaces.mjs';
 import {
   buildPublishExports,
   isBuiltPublicPackage,
@@ -69,6 +70,14 @@ const builtPackages = publicPackageDirs.filter((directory) =>
 );
 
 describe('this repository publishes what it develops against', () => {
+  it('declares the same roster the never-baseline rule is resolved from', () => {
+    const declared = [...publicPackageDirs]
+      .map((directory) => `${packagesDir}/${directory}`)
+      .sort((left, right) => left.localeCompare(right));
+    expect(declared.length).toBeGreaterThan(0);
+    expect(declared).toEqual(derivedPublicPackageDirs(REPO_ROOT));
+  });
+
   it('reproduces every built package’s committed publishConfig.exports', () => {
     // An empty roster would pass this silently, which reads the same as clean.
     expect(builtPackages.length).toBeGreaterThan(0);

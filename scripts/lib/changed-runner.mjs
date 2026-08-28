@@ -31,13 +31,24 @@ const vpArgsFor = ({ task, packages }) => [
   task,
 ];
 
-/** Print each workspace's disposition — what runs, what is skipped, and why. */
-export const printReport = ({ label, verb, mode, dispositions }) => {
+/** Print each workspace's disposition — what runs, what is skipped, and why.
+ *  `extra` names groups outside every workspace, which the tally cannot show. */
+export const printReport = ({
+  label,
+  verb,
+  mode,
+  dispositions,
+  extra = [],
+}) => {
   const running = dispositions.filter((disposition) => disposition.running);
   const skipped = dispositions.filter((disposition) => !disposition.running);
   process.stdout.write(
     `\n${label} — ${mode} run: ${running.length}/${dispositions.length} workspace(s) affected\n`,
   );
+  if (extra.length > 0) {
+    process.stdout.write('\nPlus (outside every workspace):\n');
+    for (const note of extra) process.stdout.write(`  • ${note}\n`);
+  }
   if (running.length > 0) {
     process.stdout.write('\nRunning:\n');
     for (const { dir, reason, task } of running) {

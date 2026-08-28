@@ -24,14 +24,14 @@ This skill defines the mandatory validation sequence after code changes.
 
 ## Canonical Gate Order
 
-> **Default working directory: the workspace whose files changed.** `vp run test`,
-> `vp check` and `vp run typecheck` resolve per workspace. From the repo root,
+> **Default working directory: the workspace whose files changed.** `vp check`
+> and `vp run typecheck` resolve per workspace. From the repo root,
 > `vp run check:safe` chains the entire gate the way CI does. `apps/showcase/`
 > is an example of a workspace, not the implicit default.
 >
-> **Stages 4 and 5 are the exceptions** — both are root-only, repo-wide passes and
-> are marked as such below. `cd` to the repo root for those two, then come back.
-> Running either from inside a workspace is not the gate.
+> **Stages 4, 5 and 8 are the exceptions** — all three are root-only passes and
+> are marked as such below. `cd` to the repo root for those, then come back.
+> Running one from inside a workspace is not the gate.
 
 1. `vp fmt .`
 2. `vp lint .` — Oxlint
@@ -40,7 +40,7 @@ This skill defines the mandatory validation sequence after code changes.
 5. `vp run react-doctor:verify` — the React Doctor gate — **run from the repo root**
 6. `vp check` — fmt + Oxlint + the **tsgolint** type pass
 7. `vp run typecheck` — the real **tsc** pass (plus `check:public-api` in `packages/ui`)
-8. `vp run test`
+8. `vp run test:changed` — **run from the repo root**
 
 Use this exact order because each stage catches issues earlier/cheaper than the next.
 
@@ -88,6 +88,18 @@ types before checking. CI runs `vp run typecheck:all` as its own step in
 `check-safe.yml`. From the root, `vp run typecheck:all` covers every workspace
 in dependency order — the run prints them, and COMMANDS.md §5 lists them under a
 gate that keeps the count honest.
+
+**Stage 8 is root-only because not everything that has tests is in a workspace.**
+`vp run test` resolves per workspace, and root `scripts/` — every verify gate,
+report generator and their `lib/` modules — is in none of them, so editing a
+tooling script and running the workspace's suite executes not one of its tests
+and reports green. `vp run test:changed` reads the diff, selects the affected
+workspaces **and** adds the root `test:scripts` group when a `.mjs`/`.cjs` under
+`scripts/` changed, so it cannot miss either half. It prints what it selected and
+what it skipped; check that line rather than assuming. To run one half directly:
+`vp run test` inside a workspace, `vp run test:scripts` from the root. CI runs
+`vp run test:all` (`vp run -r test` plus `test:scripts`), which `check:safe`
+chains.
 
 Shortcut: `vp run lint` in a workspace chains `vp lint . --fix` **and**
 `vp run lint:eslint` (autofix for both), which is usually what you want while

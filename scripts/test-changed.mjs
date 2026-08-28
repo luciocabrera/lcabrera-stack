@@ -60,7 +60,15 @@ const main = async () => {
     return;
   }
 
-  printReport({ label: 'test:changed', verb: 'tests', mode, dispositions });
+  printReport({
+    dispositions,
+    extra: scripts
+      ? ['test:scripts — a scripts/ file changed, and it is in no workspace']
+      : [],
+    label: 'test:changed',
+    mode,
+    verb: 'tests',
+  });
 
   if (groups.length === 0) {
     process.stdout.write('Nothing to test.\n');

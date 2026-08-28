@@ -82,15 +82,15 @@ _package_ relies on into an app.
 `ls apps/ packages/` is the layout; `pnpm-workspace.yaml` is the authority. What
 the listing cannot tell you is below.
 
-`packages/ui`,
-`packages/api`, `packages/server`, `packages/utils`,
-`packages/eslint-local-rules`, `packages/tsconfig`, `packages/node-runtime`,
-`packages/vite-configs`, `packages/devkit` and `packages/repo-standards`
-are public packages and are held strictest: never baseline, scope, or
-inline-disable a finding in any of them. The authority on that list is not this
-sentence — it is which workspaces gitignore `eslint-suppressions.json`, which
-`vp run suppressions:verify` reads at runtime, so a new public package is
-covered the day it is added; keep the prose in step.
+**The public packages are held strictest: never baseline, scope, or
+inline-disable a finding in any of them.** Which packages those are is stated in
+exactly one place — the workspaces whose `.gitignore` covers
+`eslint-suppressions.json` — and **`vp run suppressions:packages` prints that
+roster**. Cite the command; do not copy its output into a second document. Every
+check built on the rule resolves it the same way at runtime, so a new public
+package is covered the day its gitignore changes. Do not restore the list here:
+three surfaces once carried three different versions of it, and the narrowest
+governed an autonomous merge (#993).
 
 `packages/devkit` and `packages/repo-standards` are how the toolchain product
 is delivered — the setup this repository hands to another repository, which is
@@ -154,7 +154,8 @@ Selection guideline:
 
 - **Working in complex UI state?** Start with `store-pattern`.
 - **Writing English a person will read** (chat, PR/issue prose, docs,
-  review comments)? Use `unslop`. Template headings and commit subjects
+  review comments)? `unslop` is **required**, not suggested — run it on the
+  sentences before they are published. Template headings and commit subjects
   stay under `commit-and-pr`.
 - **Routing/data mutations?** Use `react-router-framework-mode`.
 - **React component implementation?** Use `react-19`.
@@ -344,7 +345,7 @@ The headline rules every agent must know regardless of which files are open. Ful
 10. **Never use workaround-only fixes** — always address and solve the underlying issue. If there is any doubt about intent, trade-offs, or risk, ask the user before applying a workaround or partial fix.
 11. **Never ignore, suppress, or omit a lint finding — verify, then fix.** Oxlint/eslint violations (including stylistic `unicorn/*` rules like `prefer-simple-condition-first` / `no-nested-ternary`) are real until you have read the flagged code and confirmed otherwise. Do **not** dismiss one as a false positive without checking, and do **not** silence a new one — no inline `// eslint-disable`/`oxlint-disable`, no rule-off in config, no hand-added `eslint-suppressions.json` entry. Fix the code (reorder operands, restructure logic, wire up/delete the export). If it is a genuine false positive, explain why rather than disabling. The public packages (§1) are held strictest — each one's `eslint-suppressions.json` is gitignored, so none is ever committed and none of them baselines (§4).
 12. **Claim shared work before you touch it.** Multiple agents and humans work this repo in parallel. Before non-trivial work, register it in [`docs/coordination/`](docs/coordination/README.md): check for an area overlap, then create a task file (`tasks/_TEMPLATE.md`) with the `area` globs you own, branch, and keep `status`/`updated` current until it merges. Never edit files inside another active task's `area` without coordinating. The register — not `~/.claude/plans/` scratch, which is invisible to everyone else — is the shared record. `vp run coordination:verify` (CI) keeps it honest. (See "Multi-Agent Coordination" in §7.)
-13. **Commits and PRs follow the enforced format.** Every commit message is a Conventional Commit (`type(scope): subject`) and every PR has a conforming title plus the required `## What` / `## Verification` sections — checked by the `commit-msg` git hook locally and the `pr-standards.yml` gate in CI. The one spec is `packages/repo-standards/scripts/commit-convention.mjs`; don't restate its type list elsewhere, and (Rule 11) fix a failing message/description rather than weakening the check. (See "Commit & PR Standards" in §7 and the `commit-and-pr` skill.)
+13. **Commits and PRs follow the enforced format.** Every commit message is a Conventional Commit (`type(scope): subject`) and every PR has a conforming title plus every section of [`.github/pull_request_template.md`](.github/pull_request_template.md) — checked by the `commit-msg` git hook locally and the `pr-standards.yml` gate in CI. Do not restate the template's section list here or anywhere else; open the template. The one spec is `packages/repo-standards/scripts/commit-convention.mjs`; don't restate its type list elsewhere, and (Rule 11) fix a failing message/description rather than weakening the check. (See "Commit & PR Standards" in §7 and the `commit-and-pr` skill.)
 14. **A claim needs evidence that could have disproved it, and steps someone else can re-run.** Before writing a finding into a doc, comment, issue or PR, ask **what else would produce the same observation** — if anything would, the probe is not evidence, so change the probe. Then state the **preconditions** the steps depend on (config state, branch, whether a fix has landed); if the same change alters those preconditions, say so explicitly, or the steps stop reproducing the moment they merge. A written claim is load-bearing: someone will act on it without re-deriving it. (See "Verifying a claim" in §7.)
 
 ## 6. Security
@@ -411,12 +412,30 @@ reader will actually get, and when someone reports that a claim does not
 reproduce, **look for the confound before defending or retracting** — both of
 those are conclusions, and each needs its own discriminating evidence.
 
-**Comment only what the code cannot say, and keep it short.** There is no
-"document every export" rule here — that one existed, produced volume rather than
-clarity, and was removed. A name and a signature already say what a function is;
-a comment earns its place by carrying what they cannot — a non-obvious
-constraint, a trap, a decision whose alternative looks equally reasonable. If the
-code can be made clearer instead, do that and write no comment.
+**No comment above a function or component declaration, and no prose inside its
+body.** Both positions are covered: the JSDoc block over the declaration and any
+explanation within it. A name, a signature and the types already say what the
+code is, and an explanation next to code is the copy nothing keeps true — which
+is the failure every gate in this file exists to catch. If the code can be made
+clearer instead, do that.
+
+**The single exemption is the file-level header** that
+[`.claude/rules/scripts.md`](.claude/rules/scripts.md) mandates for a `.mjs`/`.cjs`
+script: one short block at the top of the file saying why the file exists, its
+usage and its exit codes. It stays exactly as that rule specifies.
+
+**The explanation still has to live somewhere, and there are two homes.** A
+decision — why this approach and not the one that looks equally reasonable —
+belongs in the ADR that owns it, in [`docs/decisions/`](docs/decisions/). Everything
+else — the investigation, the measurement, the trap you hit on the way — belongs
+in the **pull request or the issue**, which is dated and immutable and cannot be
+mistaken for current fact. Neither is optional: deleting the reasoning instead of
+moving it is not compliance.
+
+Applying this to the code that predates it, and the lint rule in
+`@lcabrera/eslint-plugin` that will enforce it, are
+[#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028). Do not sweep
+`packages/**` for it here.
 
 **Never put a changing number in a comment or a doc.** Counts, file totals,
 finding tallies and measurements are true on the day they are written and wrong
@@ -437,10 +456,10 @@ repositories (#962). A version belongs in prose only where it is a **floor** a
 reader must clear ("middleware requires v7.9.0+"), which stays true as the
 dependency moves.
 
-The durable place for measurements, investigation narrative and "why we chose
-this" is the **PR or the issue** — dated, immutable, and not something a later
-reader mistakes for current fact. Keep the file comment to what someone editing
-that line needs in order not to break it.
+The durable place for measurements and investigation narrative is the **PR or the
+issue** — dated, immutable, and not something a later reader mistakes for current
+fact. That is the same split the comment rule above draws, stated here for the
+numbers and the versions specifically.
 
 ### Multi-Agent Coordination
 

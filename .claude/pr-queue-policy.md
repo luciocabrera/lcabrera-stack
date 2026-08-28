@@ -156,9 +156,14 @@ reviewed PR (which S9 keeps the operator's hands off).
   a new `.env`, a token-shaped literal, or a change to `docker/local/**` env
   wiring.
 - **S5 — A new suppression.** Any added inline `eslint-disable` / `oxlint-disable`,
-  rule-off in config, or `eslint-suppressions.json` entry — and in
-  `packages/{ui,api,server,utils}`, any at all. Rule 11 says fix the code; a
-  suppression arriving with a green rollup is exactly the case the rule exists for.
+  rule-off in config, or `eslint-suppressions.json` entry — and inside a package
+  on the never-baseline roster, any at all. **Derive that roster, never recall
+  it:** `vp run suppressions:packages` prints it, and `pr-queue-gate.mjs` resolves
+  the same list on the branch it is judging. This trigger used to carry a literal
+  list of package paths, narrower than the roster the standing rules cover, so a
+  suppression forbidden everywhere could still read as `MERGE` in the packages
+  the literal had missed. Rule 11 says fix the code; a suppression arriving with a
+  green rollup is exactly the case the rule exists for.
 - **S6 — Another agent is holding the branch.** The head ref moved during the
   pass, the PR is claimed by a live task in `docs/coordination/` owned by someone
   else, or the action would force-push over commits the operator did not make.

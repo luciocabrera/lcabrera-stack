@@ -12,10 +12,10 @@ Run the quality gate after every change set so correctness and maintainability d
 
 ## The Gate
 
-Per-workspace stages (`vp fmt`, `vp lint`, `vp run typecheck`, `vp run test`)
-run from the workspace whose files changed. `apps/showcase/` is an example,
-not the default. From the repo root, `vp run check:safe` chains the whole gate.
-Stages 4 and 5 stay root-only.
+Per-workspace stages (`vp fmt`, `vp lint`, `vp run typecheck`) run from the
+workspace whose files changed. `apps/showcase/` is an example, not the default.
+From the repo root, `vp run check:safe` chains the whole gate. Stages 4, 5 and 8
+stay root-only.
 
 ```bash
 vp fmt .
@@ -25,7 +25,7 @@ vp run lint:biome:check     # from the repo ROOT
 vp run react-doctor:verify  # from the repo ROOT — errors block
 vp check
 vp run typecheck
-vp run test
+vp run test:changed         # from the repo ROOT — reaches root scripts/ too
 ```
 
 ## Why This Order
@@ -39,7 +39,7 @@ vp run test
 | 5    | `vp run react-doctor:verify` | effect cleanup, server/client boundaries, render cost     | the only pass covering these; errors block                |
 | 6    | `vp check`                   | fmt + Oxlint + the tsgolint type pass                     | verifies structural correctness before runtime assertions |
 | 7    | `vp run typecheck`           | real `tsc`; `check:public-api` in `packages/ui`           | the reference type-check the tsgolint pass approximates   |
-| 8    | `vp run test`                | behavioral regressions                                    | highest-cost stage, run after static checks pass          |
+| 8    | `vp run test:changed`        | behavioral regressions, in every affected suite           | highest-cost stage, run after static checks pass          |
 
 **Three linters, none redundant.** Oxlint (2) runs repo-wide from the root;
 eslint (3) fans out per workspace; Biome (4) is root-only — there is no
@@ -96,18 +96,25 @@ Use an incremental loop while coding, then full gate before completion.
 
 ## Suggested Strictness Levels
 
-| Situation                     | Minimum                              |
-| ----------------------------- | ------------------------------------ |
-| Tiny docs/comment-only change | `vp lint .` + `vp check`             |
-| Local WIP coding loop         | targeted lint/check during iteration |
-| Ready to mark task done       | the full gate, every stage           |
-| Pre-merge or PR update        | the full gate, every stage           |
+| Situation               | Minimum                              |
+| ----------------------- | ------------------------------------ |
+| Local WIP coding loop   | targeted lint/check during iteration |
+| Ready to mark task done | the full gate, every stage           |
+| Pre-merge or PR update  | the full gate, every stage           |
+
+**There is no size or file-type that earns a shorter gate.** This table used to
+carry a "tiny docs/comment-only change" row whose minimum was two stages, which
+contradicted the skill's own "do not skip a stage" and was wrong on its own
+terms: a markdown edit can break `docs:verify`, `commands:verify`,
+`registers:verify`, `adr:verify` or `renames:verify`, none of which `vp lint`
+or `vp check` runs. The only shortening on offer is the WIP loop above, and it
+ends before the work is called done.
 
 ## Common Anti-Patterns
 
 ```bash
 # ❌ Skipping lint and jumping to tests
-vp run test
+vp run test:changed
 
 # ❌ Running check before formatting/linting
 vp check
@@ -141,7 +148,7 @@ vp run lint:biome:check     # from the repo ROOT
 vp run react-doctor:verify  # from the repo ROOT — errors block
 vp check
 vp run typecheck
-vp run test
+vp run test:changed         # from the repo ROOT — reaches root scripts/ too
 ```
 
 From the repo root, `vp run check:safe` chains the whole thing the way CI does.
@@ -157,7 +164,7 @@ Use this in PR templates or review guides:
 - [ ] `vp run react-doctor:verify` passed (from the root)
 - [ ] `vp check` passed
 - [ ] `vp run typecheck` passed
-- [ ] `vp run test` passed
+- [ ] `vp run test:changed` passed (from the root)
 
 ## Notes for This Repository Family
 

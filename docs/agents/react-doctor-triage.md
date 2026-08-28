@@ -19,8 +19,8 @@ are visible via `vp run react-doctor:report`.
 > re-checked against v0.9.1.
 
 **A suppression is not a triage row.** Because those mechanisms exist, they are now
-policed: `suppressions:verify` detects every one of them, and inside the four public
-packages each needs an argued entry in
+policed: `suppressions:verify` detects every one of them, and inside the public
+packages (`vp run suppressions:packages`) each needs an argued entry in
 [`public-package-suppressions.json`](public-package-suppressions.json). Non-Negotiable
 Rule 11 applies unchanged — prefer fixing the code, and record an accepted finding here
 rather than silencing it.

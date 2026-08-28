@@ -20,8 +20,6 @@
 
 const TEST_FILE = /(?:^|\/)[^/]*\.(?:test|spec)\.[cm]?[jt]sx?$/;
 const SUPPRESSIONS_FILE = /(?:^|\/)eslint-suppressions\.json$/;
-const PUBLIC_PACKAGE = /^packages\/(?:ui|api|server|utils)\//;
-const PUBLIC_MANIFEST = /^packages\/(?:ui|api|server|utils)\/package\.json$/;
 const MIGRATION_FILE = /(?:^|\/)migrations\//;
 const CHANGESET_FILE = /^\.changeset\/(?!README)[^/]+\.md$/;
 const PUBLISH_WORKFLOW = /^\.github\/workflows\/(?:release|publish|changelog)/;
@@ -30,6 +28,21 @@ const OPERATOR_FILE =
   /^(?:\.claude\/pr-queue-policy\.md|scripts\/pr-queue-operator\.mjs|scripts\/lib\/pr-queue-[a-z-]+\.mjs)$/;
 
 const has = (pr, pattern) => pr.files.some((file) => pattern.test(file.path));
+
+const inPublicPackage = (path, packages) =>
+  packages === undefined
+    ? /^packages\/[^/]+\//u.test(path)
+    : packages.some((dir) => path.startsWith(`${dir}/`));
+
+const touchesPublicPackage = (pr, packages) =>
+  pr.files.some((file) => inPublicPackage(file.path, packages));
+
+const touchesPublicManifest = (pr, packages) =>
+  pr.files.some(
+    (file) =>
+      file.path.endsWith('/package.json') &&
+      inPublicPackage(file.path, packages),
+  );
 
 /** A path present in the diff with no additions left — the file is gone. */
 const removed = (pr, pattern) =>
@@ -75,14 +88,14 @@ export const detectStops = (pr) =>
   ].filter(Boolean);
 
 /** §5 areas the diff touches that need reading before a verdict (see header). */
-export const detectFlags = (pr) =>
+export const detectFlags = (pr, packages) =>
   [
     has(pr, MIGRATION_FILE) && {
       detail:
         'a migration is in the diff — confirm no existing column, table or constraint is altered or dropped',
       id: 'S1',
     },
-    has(pr, PUBLIC_MANIFEST) && {
+    touchesPublicManifest(pr, packages) && {
       detail:
         'a public package manifest changed — confirm the exports map, version and peer ranges are untouched',
       id: 'S1',
@@ -91,7 +104,7 @@ export const detectFlags = (pr) =>
       detail: 'a changeset is in the diff — confirm it is not major',
       id: 'S8',
     },
-    has(pr, PUBLIC_PACKAGE) && {
+    touchesPublicPackage(pr, packages) && {
       detail:
         'a never-baseline package changed — confirm no export was removed or narrowed and no suppression was added',
       id: 'S1',
@@ -176,10 +189,10 @@ const strictest = (verdicts) =>
  * must answer, and it answers them by escalating or by recording the probe that
  * discharges them. An unanswered flag is S10 at the model layer, not here.
  */
-export const evaluateGate = (pr, conformance) => {
+export const evaluateGate = (pr, conformance, packages) => {
   const stops = detectStops(pr);
   const blockers = detectBlockers(pr, conformance);
-  const flags = detectFlags(pr);
+  const flags = detectFlags(pr, packages);
   const verdict =
     stops.length > 0
       ? 'ESCALATE'

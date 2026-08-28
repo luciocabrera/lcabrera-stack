@@ -43,9 +43,12 @@ PLAIN headings    → {"errors":[],"warnings":[]}                     ✅
 ```
 
 Adopting Section 2 verbatim would therefore fail the PR Standards check on every
-future PR — including the one that introduced it. The template keeps all eight
-sections and the plain spelling for those two headings only; the other six carry
-whatever formatting you like.
+future PR — including the one that introduced it. The template keeps every
+section this file specifies, and the plain spelling for **each heading the
+validator requires** — not only the two named above. `REQUIRED_PR_SECTIONS` in
+`commit-convention.mjs` is that list, and every entry is anchored the same way,
+so `## **📊 4. Impact Analysis**` fails exactly as `## **📝 1. What**` does. Only
+a heading the validator does not require may carry decoration.
 
 **This is now checked, not just written down.**
 [`scripts/lib/workflow-templates.test.mjs`](../../scripts/lib/workflow-templates.test.mjs)

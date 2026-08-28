@@ -67,28 +67,19 @@ for the fallow side.
 
 Defined in `COVERAGE_REPORT_WORKSPACES` in
 [`scripts/lib/coverage-workspaces.mjs`](../../scripts/lib/coverage-workspaces.mjs),
-most-critical first. These are the public-facing / highest-value surfaces (all
-four packages heading for public release — `ui`, `api`, `server`, `utils` — are
-here; `apps/showcase` is the showcase app).
+most-critical first — that module is the roster, and this page deliberately does
+not copy it. `run: true` means the reporter runs the workspace's `test:coverage`;
+`run: false` means its summary is already produced upstream.
 
 That membership is **asserted, not just documented**: `test:scripts` resolves the
-never-baseline packages from the gitignore rule AGENTS.md §4 names as the
-authority and fails if any of them is absent from either lane. It keys on the
-directory rather than the package name, so an npm scope rename cannot defeat it.
-Adding a fifth public package extends the check with no edit here:
+never-baseline packages from the gitignore rule AGENTS.md §1 names as the
+authority (`vp run suppressions:packages` prints them) and fails if any of them
+is absent from either lane. It keys on the directory rather than the package
+name, so an npm scope rename cannot defeat it. A new public package extends the
+check with no edit here.
 
-| Workspace                     | Package                   | `run` | Why                                                                                                                             |
-| ----------------------------- | ------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/ui`                 | `@lcabrera/ui`            | true  | Runs `test:coverage` here (plain `test` in `test:ci`, no coverage)                                                              |
-| `packages/server`             | `@lcabrera/server`        | true  | Same                                                                                                                            |
-| `packages/api`                | `@lcabrera/api`           | true  | Same — the browser half of the former `data-access` ([ADR-038](../decisions/ADR-038-public-package-topology-by-runtime.md))     |
-| `apps/showcase`               | `showcase`                | false | Its `test:ci` already emits the summary; re-running the repo's largest suite would be wasteful                                  |
-| `packages/node-runtime`       | `@lcabrera/node`          | true  | Phase 2 — DB-free `test:coverage`                                                                                               |
-| `packages/utils`              | `@lcabrera/utils`         | true  | Phase 2 — pure helpers, own 95% threshold ([#124](https://github.com/luciocabrera/lcabrera-stack/issues/124))                   |
-| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin` | true  | Phase 3 — a `RuleTester` suite per rule ([#205](https://github.com/luciocabrera/lcabrera-stack/issues/205)); reaches no service |
-
-`run: false` reuses a summary produced upstream; `--all` forces every workspace
-to run (standalone local use, where `test:ci` has not run first).
+`--all` forces every workspace to run (standalone local use, where `test:ci` has
+not run first).
 
 ## Adding a workspace
 

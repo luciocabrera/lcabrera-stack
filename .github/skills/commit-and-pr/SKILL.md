@@ -66,12 +66,18 @@ printf 'feat(ui): my subject\n' | vp run commit:verify -- -
 
 - **Title** — same Conventional-Commit format as a commit (`type(scope): subject`).
   It is the human-facing summary and the squash-fallback subject.
-- **Description** — fill in [`.github/pull_request_template.md`](../../pull_request_template.md).
-  The **`## What`** and **`## Verification`** (or `## Testing`) sections are
-  **required**; the check fails without them. Keep `## Why` and `## Notes` when
-  they add signal. The `🤖 Generated with Claude Code` footer is neither required
-  nor rejected. Run [`unslop`](../unslop/SKILL.md) on the sentences inside those
-  sections. Do not rewrite the headings.
+- **Description** — fill in
+  [`.github/pull_request_template.md`](../../pull_request_template.md). **Every
+  section it carries is required**; write "None" rather than deleting a heading.
+  Which of them the gate matches is
+  [`commit-convention.mjs`](../../../packages/repo-standards/scripts/commit-convention.mjs)'s
+  `REQUIRED_PR_SECTIONS`, and neither that list nor the template's is repeated
+  here — reading either takes a second, and the copy that used to sit in this
+  bullet named two of them and told you the rest were optional. The `🤖 Generated
+with Claude Code` footer is neither required nor rejected. Run
+  [`unslop`](../unslop/SKILL.md) on the sentences inside the sections, and do not
+  rewrite the headings — the gate matches them as headings, so numbering, emoji
+  or bold in one fails it.
 
 Self-check before opening/updating a PR:
 
@@ -128,9 +134,8 @@ always accepted.
 
 **Pull requests** need a conforming title (same format) and a description with
 every section in
-[`.github/pull_request_template.md`](../../pull_request_template.md): `## What`,
-`## Why`, `## Verification` (or `## Testing`), `## Impact Analysis`,
-`## Test Coverage`, `## Documentation Updates`. CI's
+[`.github/pull_request_template.md`](../../pull_request_template.md) — open it
+rather than working from a list here. CI's
 [`pr-standards.yml`](../../workflows/pr-standards.yml) runs `pr:verify` on the
 title + body, `branch:verify` on the head ref, and `commit:verify` over every
 non-merge commit in the range, so nothing that skipped the local hook

@@ -2,7 +2,7 @@
 id: reconcile-agent-instructions
 title: Reconcile the instructions that tell agents opposite things
 owner: agent:claude
-status: active
+status: review
 branch: docs/993-reconcile-agent-instructions
 area:
   - AGENTS.md
@@ -19,7 +19,7 @@ area:
 started: 2026-08-28
 updated: 2026-08-28
 plan: (none)
-pr: (none)
+pr: 1027
 issue: #993
 ---
 
@@ -29,6 +29,6 @@ Reconcile the instructions that tell agents opposite things
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented, full gate green, PR #1027 open
 - Blockers: none
-- Next:
+- Next: blind verification, then merge

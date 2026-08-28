@@ -1,12 +1,11 @@
 # Suppressions in the public packages
 
-`packages/ui`, `packages/api`, `packages/server`, `packages/utils`,
-`packages/eslint-local-rules`, `packages/tsconfig` and `packages/node-runtime`
-ship to consumers outside this repo. AGENTS.md §4 holds them to a single rule: **every finding gets fixed —
-never baselined, never scoped off, never inline-disabled.** The membership is not
-this sentence: `vp run suppressions:verify` resolves it from the workspaces that
-gitignore `eslint-suppressions.json`, so a new package joins the day its manifest
-and gitignore change.
+The public packages ship to consumers outside this repo, and AGENTS.md §1 holds
+them to a single rule: **every finding gets fixed — never baselined, never
+scoped off, never inline-disabled.** Which packages those are is not written
+here and is not written there: `vp run suppressions:packages` prints the roster,
+resolved from the workspaces that gitignore `eslint-suppressions.json`, so a new
+package joins the day its manifest and gitignore change.
 
 This page is how that rule is checked, and what to do when you think you have
 found the exception it allows.
@@ -15,8 +14,8 @@ found the exception it allows.
 
 Only one mechanism was ever really enforced.
 
-Each of those packages gitignores its `eslint-suppressions.json`. CI checks out
-no file, so there is nothing to suppress _with_ — the guarantee is structural,
+Each package on that roster gitignores its `eslint-suppressions.json`. CI checks
+out no file, so there is nothing to suppress _with_ — the guarantee is structural,
 not a check that has to run. That is why it has never failed.
 
 Nothing covered the rest. A `// NOSONAR`, an `@ts-expect-error`, an

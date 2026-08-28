@@ -106,10 +106,11 @@ pass and would let every eslint-only finding through. Burn debt down and shrink
 the baseline with `npx eslint . --config eslint.config.mjs --prune-suppressions`.
 Never add new entries by hand.
 
-**`packages/ui`, `packages/api`, `packages/server` and `packages/utils` are held
-strictest** — all four are public-facing, so every finding there gets fixed
+**The public packages are held strictest** — every finding there gets fixed
 rather than baselined or disabled, and an exception has to be argued in writing
-before it exists. That is **checked** (`vp run suppressions:verify`, CI step in
+before it exists. Do not list them here either:
+`vp run suppressions:packages` prints the roster, resolved from the workspaces
+that gitignore `eslint-suppressions.json`. That is **checked** (`vp run suppressions:verify`, CI step in
 `check-safe.yml`) rather than asserted, across every mechanism that can silence a
 finding in them. Anything not carrying a justified entry in
 [`docs/agents/public-package-suppressions.json`](../../../docs/agents/public-package-suppressions.json)
@@ -144,10 +145,10 @@ Each one's `eslint-suppressions.json` path is **gitignored**: ESLint's
 bulk-suppressions tooling — an editor extension, or `--prune-suppressions` run
 across every workspace — regenerates an empty `{}` for a workspace with nothing
 to suppress, and committing/deleting it was an endless loop. Because CI checks
-out no file, all four packages are suppression-free by construction and any real
-finding fails the gate. Never un-ignore any of them or commit a non-empty one. To
-check the real membership rather than trusting a list, grep the workspace
-`.gitignore`s for `eslint-suppressions`.
+out no file, they are suppression-free by construction and any real finding
+fails the gate. Never un-ignore any of them or commit a non-empty one. The
+membership is the gitignore rule itself, and `vp run suppressions:packages`
+prints what it currently resolves to.
 
 **A directive must name the engine that reads it — `eslint-disable` for ESLint,
 `oxlint-disable` for Oxlint.** Oxlint honours `eslint-disable` comments too, and

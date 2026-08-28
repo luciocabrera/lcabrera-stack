@@ -4,8 +4,12 @@
  * ceiling test is the important one — it is what stops a model reasoning its way
  * past a hard stop.
  */
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { describe, expect, it } from 'vite-plus/test';
 
+import { publicPackageDirs } from './coverage-workspaces.mjs';
 import {
   detectBlockers,
   detectFlags,
@@ -13,6 +17,10 @@ import {
   evaluateGate,
   isWithinCeiling,
 } from './pr-queue-gate.mjs';
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+const ROSTER = publicPackageDirs(REPO_ROOT);
 
 const file = (path, additions = 5, deletions = 1) => ({
   additions,
@@ -89,10 +97,16 @@ describe('detectStops — mechanically certain §5 triggers', () => {
   });
 });
 
+const neverBaselineFlagged = (path, packages) =>
+  detectFlags(pr({ files: [file(path)] }), packages).some((flag) =>
+    /never-baseline/.test(flag.detail),
+  );
+
 describe('detectFlags — §5 areas needing the diff read', () => {
   it('flags a touched migration', () => {
     const flags = detectFlags(
-      pr({ files: [file('packages/ingestion/migrations/0030-x.sql')] }),
+      pr({ files: [file('apps/showcase/migrations/0030-x.sql')] }),
+      ROSTER,
     );
     expect(flags.map((flag) => flag.id)).toEqual(['S1']);
     expect(flags[0].detail).toMatch(/migration/);
@@ -101,6 +115,7 @@ describe('detectFlags — §5 areas needing the diff read', () => {
   it('raises both public-package concerns for a public manifest', () => {
     const details = detectFlags(
       pr({ files: [file('packages/ui/package.json')] }),
+      ROSTER,
     )
       .filter((flag) => flag.id === 'S1')
       .map((flag) => flag.detail);
@@ -110,10 +125,30 @@ describe('detectFlags — §5 areas needing the diff read', () => {
 
   it('flags an edited test file even though it is not a stop', () => {
     expect(
-      detectFlags(pr({ files: [file('src/a.test.ts', 4, 4)] })).map(
+      detectFlags(pr({ files: [file('src/a.test.ts', 4, 4)] }), ROSTER).map(
         (f) => f.id,
       ),
     ).toContain('S2');
+  });
+
+  it('covers every package on the runtime never-baseline roster', () => {
+    expect(ROSTER.length).toBeGreaterThan(0);
+    for (const dir of ROSTER) {
+      expect(neverBaselineFlagged(`${dir}/src/thing.ts`, ROSTER)).toBe(true);
+      expect(neverBaselineFlagged(`${dir}/package.json`, ROSTER)).toBe(true);
+    }
+  });
+
+  it('leaves a workspace off the roster unflagged', () => {
+    expect(neverBaselineFlagged('packages/ts-configs/src/x.ts', ROSTER)).toBe(
+      false,
+    );
+    expect(neverBaselineFlagged('apps/showcase/src/x.ts', ROSTER)).toBe(false);
+  });
+
+  it('reaches every workspace package when no roster is supplied', () => {
+    expect(neverBaselineFlagged('packages/ts-configs/src/x.ts')).toBe(true);
+    expect(neverBaselineFlagged('scripts/lib/x.mjs')).toBe(false);
   });
 });
 

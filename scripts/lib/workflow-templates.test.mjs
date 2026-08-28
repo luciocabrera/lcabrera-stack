@@ -83,6 +83,21 @@ describe('the shipped PR template', () => {
     );
     expect(validatePrBody(decorated).errors).not.toEqual([]);
   });
+
+  it.each(['Why', 'Verification', 'Impact Analysis', 'Test Coverage'])(
+    'fails once `## %s` is decorated too',
+    (heading) => {
+      const template = read(PR_TEMPLATE);
+      const decorated = template.replace(
+        new RegExp(`^## ${heading}$`, 'mu'),
+        `## **✨ ${heading}**`,
+      );
+      expect(decorated, `the \`## ${heading}\` heading moved`).not.toBe(
+        template,
+      );
+      expect(validatePrBody(decorated).errors).not.toEqual([]);
+    },
+  );
 });
 
 describe('the shipped issue template', () => {
