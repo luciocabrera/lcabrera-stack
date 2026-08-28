@@ -861,6 +861,39 @@ describe('createTableRouteLoader', () => {
 
       expect(result.metaState.lockedFilters).toBeUndefined();
     });
+
+    it('surfaces a rejecting capability resolver and leaves no unhandled rejection', async () => {
+      const unhandled: unknown[] = [];
+      const record = (reason: unknown) => {
+        unhandled.push(reason);
+      };
+
+      process.on('unhandledRejection', record);
+
+      try {
+        await expect(
+          invoke({
+            config: {
+              meta: { isGroupingEnabled: true },
+              resolveGroupingCapabilities: async () => {
+                throw new Error('catalogue');
+              },
+              resolveLockedFilters: async () => {
+                throw new Error('restriction');
+              },
+            },
+          }),
+        ).rejects.toThrow('catalogue');
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        });
+      } finally {
+        process.off('unhandledRejection', record);
+      }
+
+      expect(unhandled).toEqual([]);
+    });
   });
 
   describe('transient column layout', () => {

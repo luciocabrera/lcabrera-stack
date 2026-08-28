@@ -149,6 +149,18 @@ holds it now is a **contract test** that drives both resolvers over the same set
 of requests and asserts they agree on whether the request is refused and on the
 sentence; it fails on exactly that gap.
 
+**6c. Two injected resolvers are started together and settled together.** Both
+reach a database, so the loader starts them before it awaits either — the same
+overlap the data query already gets. Awaiting them _in sequence_ is the trap: a
+rejection in the first means the second is never awaited, and a promise that
+rejects with no handler attached is an unhandled rejection, which in Node is a
+process-level event rather than a caught error. `Promise.all` is what avoids it,
+because it subscribes to every input at the call and so leaves none unattended;
+the first rejection is still what surfaces. The empty capability map is a typed
+constant rather than an inline `{}` for a narrower reason: in an array literal
+TypeScript widens the union of a record and a bare object literal to their common
+supertype, and every reader of the map then indexes an empty type.
+
 **7. A view reached by a link is left by rebuilding a URL, not by going back.**
 Closing such a view drops the params that scope it and keeps every other, rather
 than calling the router's history-back. Going back assumes there is an entry to
@@ -194,6 +206,13 @@ into.
 Two structurally identical shapes now describe one thing, one per package. They
 can drift, and nothing but a consumer compiling against both would notice. That
 is the standing cost of ADR-039 and is accepted here on the same grounds.
+
+A third injected resolver would have to join the `Promise.all` rather than be
+awaited beside it, and nothing enforces that — the sequential shape compiles, runs
+green on every route in this repository, and only misbehaves for a consumer whose
+route declares two resolvers and whose first one fails. The test that holds it
+asserts on a process-level event rather than on a return value, which is an
+unusual enough shape to be worth knowing is there.
 
 The refusal vocabulary is now shared by two resolvers, and a reason added to it
 has to be handled twice. Nothing in the type system says so — the map is total

@@ -33,6 +33,6 @@ list of restrictions and refuses one it cannot read. Recorded as
 
 ## Status / next
 
-- Current step: round 5 — comments swept to none or one short line, `vp run check:safe` green
+- Current step: round 6 — two injected resolvers settled together, `vp run check:safe` green
 - Blockers: none
 - Next: address review findings

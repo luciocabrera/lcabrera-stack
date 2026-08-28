@@ -20,6 +20,11 @@ import { appendDistinctFilterDescriptors } from './appendDistinctFilterDescripto
 import { readTableLoaderStateFromRequest } from './readTableLoaderStateFromRequest.util';
 import { resolveTableCapabilityMeta } from './resolveTableCapabilityMeta.util';
 
+/** Typed, so the tuple below does not widen the capability map to its supertype. */
+const NO_GROUPING_CAPABILITIES: Readonly<
+  Record<string, TableColumnGroupingCapability>
+> = {};
+
 /**
  * Derived from the factory rather than restated, so the view side cannot drift from what
  * the loader actually returns — `useTableRoutePage` reads exactly this.
@@ -195,14 +200,13 @@ export const createTableRouteLoader = <
       totalsPlacement,
     });
 
-    const lockedFiltersResult = resolveLockedFilters?.({ request });
-
-    const groupingCapabilities =
+    // Settled together: awaited in sequence, a rejection in one leaves the other unhandled.
+    const [groupingCapabilities, lockedFilters] = await Promise.all([
       resolveGroupingCapabilities && capabilityMeta.isGroupingEnabled
-        ? await resolveGroupingCapabilities()
-        : {};
-
-    const lockedFilters = await lockedFiltersResult;
+        ? resolveGroupingCapabilities()
+        : NO_GROUPING_CAPABILITIES,
+      resolveLockedFilters?.({ request }),
+    ]);
 
     return {
       columnsState: {
