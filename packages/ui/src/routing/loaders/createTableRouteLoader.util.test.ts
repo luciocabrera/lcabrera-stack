@@ -92,6 +92,45 @@ const uiFlagsCookie = (state: Record<string, unknown>) =>
     JSON.stringify({ value: state, version: 1 }),
   )}`;
 
+/** Node raises an unhandled rejection as a process event, so the assertion reads one. */
+const watchUnhandledRejections = async (run: () => Promise<void>) => {
+  const unhandled: unknown[] = [];
+  const record = (reason: unknown) => {
+    unhandled.push(reason);
+  };
+
+  process.on('unhandledRejection', record);
+
+  try {
+    await run();
+    await new Promise((resolve) => {
+      setTimeout(resolve, 10);
+    });
+  } finally {
+    process.off('unhandledRejection', record);
+  }
+
+  return unhandled;
+};
+
+const rejectsLater = (message: string) =>
+  new Promise<never>((_resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error(message));
+    }, 0);
+  });
+
+const layoutCookie = ({
+  slice,
+  value,
+}: {
+  readonly slice: string;
+  readonly value: unknown;
+}) =>
+  `table-state-${baseConfig.appId}-${baseConfig.persistenceKey}-${slice}=${encodeURIComponent(
+    JSON.stringify({ value, version: 1 }),
+  )}`;
+
 type CollectFunctionPathsArgs = {
   readonly path?: string;
   readonly value: unknown;
@@ -290,6 +329,26 @@ describe('createTableRouteLoader', () => {
       });
 
       expect(result.metaState.isUrlStateNested).toBe(false);
+    });
+
+    it('ignores an isColumnLayoutTransient injected through the UI-flags cookie', async () => {
+      const { result } = await invoke({
+        cookie: uiFlagsCookie({ isColumnLayoutTransient: true }),
+      });
+
+      expect(result.metaState.isColumnLayoutTransient).toBe(false);
+    });
+
+    it('ignores lockedFilters injected through the UI-flags cookie', async () => {
+      const { result } = await invoke({
+        cookie: uiFlagsCookie({
+          lockedFilters: {
+            entries: [{ columnKey: 'status', label: 'Status', value: 'Open' }],
+          },
+        }),
+      });
+
+      expect(result.metaState.lockedFilters).toBeUndefined();
     });
 
     it('takes groupDetailsPath from the route meta, over any cookie value', async () => {
@@ -768,6 +827,199 @@ describe('createTableRouteLoader', () => {
       });
 
       expect(result.metaState.isGroupingLocked).toBe(false);
+    });
+  });
+
+  describe('locked filters', () => {
+    it('resolves them from the request and puts them on the meta', async () => {
+      const { result } = await invoke({
+        config: {
+          resolveLockedFilters: ({ request }) => ({
+            entries: [
+              {
+                columnKey: 'status',
+                label: 'Status',
+                value: new URL(request.url).searchParams.get('group') ?? '',
+              },
+            ],
+          }),
+        },
+        url: 'http://localhost/rows?group=Open',
+      });
+
+      expect(result.metaState.lockedFilters).toEqual({
+        entries: [{ columnKey: 'status', label: 'Status', value: 'Open' }],
+      });
+    });
+
+    it('carries a refusal through rather than flattening it to no entries', async () => {
+      const { result } = await invoke({
+        config: {
+          resolveLockedFilters: () => ({
+            entries: [],
+            refusal: 'This link does not name a group that can be read.',
+          }),
+        },
+      });
+
+      expect(result.metaState.lockedFilters).toEqual({
+        entries: [],
+        refusal: 'This link does not name a group that can be read.',
+      });
+    });
+
+    it('awaits an async resolver', async () => {
+      const { result } = await invoke({
+        config: {
+          resolveLockedFilters: async () => ({
+            entries: [
+              { columnKey: 'status', label: 'Status', value: 'Closed' },
+            ],
+          }),
+        },
+      });
+
+      expect(result.metaState.lockedFilters).toEqual({
+        entries: [{ columnKey: 'status', label: 'Status', value: 'Closed' }],
+      });
+    });
+
+    it('leaves the meta field undefined when the route declares no resolver', async () => {
+      const { result } = await invoke();
+
+      expect(result.metaState.lockedFilters).toBeUndefined();
+    });
+
+    it('keeps a restriction the route declared statically on its meta', async () => {
+      const declared = {
+        entries: [{ columnKey: 'status', label: 'Status', value: 'Open' }],
+      };
+
+      const { result } = await invoke({
+        config: { meta: { lockedFilters: declared } },
+      });
+
+      expect(result.metaState.lockedFilters).toEqual(declared);
+    });
+
+    it('still refuses a declaration injected through the UI-flags cookie', async () => {
+      const { result } = await invoke({
+        cookie: uiFlagsCookie({
+          lockedFilters: {
+            entries: [{ columnKey: 'status', label: 'Status', value: 'Open' }],
+          },
+        }),
+      });
+
+      expect(result.metaState.lockedFilters).toBeUndefined();
+    });
+
+    it('prefers the per-request resolver over a static declaration', async () => {
+      const { result } = await invoke({
+        config: {
+          meta: {
+            lockedFilters: {
+              entries: [
+                { columnKey: 'status', label: 'Status', value: 'Declared' },
+              ],
+            },
+          },
+          resolveLockedFilters: () => ({
+            entries: [
+              { columnKey: 'status', label: 'Status', value: 'Resolved' },
+            ],
+          }),
+        },
+      });
+
+      expect(result.metaState.lockedFilters).toEqual({
+        entries: [{ columnKey: 'status', label: 'Status', value: 'Resolved' }],
+      });
+    });
+
+    it('surfaces a rejecting capability resolver and leaves no unhandled rejection', async () => {
+      const unhandled = await watchUnhandledRejections(async () => {
+        await expect(
+          invoke({
+            config: {
+              meta: { isGroupingEnabled: true },
+              resolveGroupingCapabilities: async () => {
+                throw new Error('catalogue');
+              },
+              resolveLockedFilters: async () => {
+                throw new Error('restriction');
+              },
+            },
+          }),
+        ).rejects.toThrow('catalogue');
+      });
+
+      expect(unhandled).toEqual([]);
+    });
+
+    it('surfaces a synchronously throwing restriction resolver and leaves no unhandled rejection', async () => {
+      const unhandled = await watchUnhandledRejections(async () => {
+        await expect(
+          invoke({
+            config: {
+              meta: { isGroupingEnabled: true },
+              resolveGroupingCapabilities: () => rejectsLater('catalogue'),
+              resolveLockedFilters: () => {
+                throw new Error('restriction');
+              },
+            },
+          }),
+        ).rejects.toThrow('restriction');
+      });
+
+      expect(unhandled).toEqual([]);
+    });
+
+    it('starts the restriction resolver even when the capability resolver throws synchronously', async () => {
+      const resolveLockedFilters = vi.fn(() => rejectsLater('restriction'));
+
+      const unhandled = await watchUnhandledRejections(async () => {
+        await expect(
+          invoke({
+            config: {
+              meta: { isGroupingEnabled: true },
+              resolveGroupingCapabilities: () => {
+                throw new Error('catalogue');
+              },
+              resolveLockedFilters,
+            },
+          }),
+        ).rejects.toThrow('catalogue');
+      });
+
+      expect(resolveLockedFilters).toHaveBeenCalledTimes(1);
+      expect(unhandled).toEqual([]);
+    });
+  });
+
+  describe('transient column layout', () => {
+    it('opens at the declared columns whatever the layout cookie holds', async () => {
+      const { result } = await invoke({
+        config: { meta: { isColumnLayoutTransient: true } },
+        cookie: layoutCookie({
+          slice: 'columnOrder',
+          value: ['status', 'name', 'id'],
+        }),
+      });
+
+      expect(result.metaState.isColumnLayoutTransient).toBe(true);
+      expect(result.columnsState.columnOrder).toEqual([]);
+    });
+
+    it('restores the persisted layout when the route does not declare it', async () => {
+      const { result } = await invoke({
+        cookie: layoutCookie({
+          slice: 'columnOrder',
+          value: ['status', 'name', 'id'],
+        }),
+      });
+
+      expect(result.columnsState.columnOrder).toEqual(['status', 'name', 'id']);
     });
   });
 });

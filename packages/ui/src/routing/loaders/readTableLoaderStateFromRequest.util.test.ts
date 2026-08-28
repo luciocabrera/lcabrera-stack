@@ -385,4 +385,57 @@ describe('readTableLoaderStateFromRequest', () => {
       ]);
     });
   });
+
+  describe('isColumnLayoutTransient', () => {
+    it('reads no persisted layout at all', () => {
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({
+        columnOrder: ['status', 'amount'],
+        columnPinning: { left: ['status'], right: [] },
+        columnSizing: { amount: 180 },
+        columnVisibility: new Set(['amount']),
+      });
+      vi.mocked(readPersistedStateFromCookie).mockClear();
+
+      const state = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        isColumnLayoutTransient: true,
+        persistenceKey: 'orders',
+        request: new Request('https://example.com/orders/group', {
+          headers: { Cookie: 'table-state-orders-columnOrder=whatever' },
+        }),
+      });
+
+      expect(vi.mocked(readPersistedStateFromCookie)).not.toHaveBeenCalled();
+      expect(state.columnOrder).toEqual([]);
+      expect(state.columnPinning).toEqual({ left: [], right: [] });
+      expect(state.columnSizing).toEqual({});
+      expect(state.columnVisibility).toEqual(new Set());
+    });
+
+    it('still reads the sorting and filters this request carries', () => {
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+
+      const search = new URLSearchParams({
+        filters: filtersFor('list'),
+        sorting: sortingFor('amount'),
+      });
+
+      const state = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        includeFilters: true,
+        isColumnLayoutTransient: true,
+        persistenceKey: 'orders',
+        request: new Request(
+          `https://example.com/orders/group?${search.toString()}`,
+        ),
+      });
+
+      expect(state.filters).toStrictEqual({
+        status: { operator: 'equals', type: 'text', value: 'list' },
+      });
+      expect(state.sorting).toStrictEqual([
+        { columnKey: 'amount', direction: 'asc' },
+      ]);
+    });
+  });
 });

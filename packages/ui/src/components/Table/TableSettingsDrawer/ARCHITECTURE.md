@@ -88,6 +88,7 @@ TableSettingsDrawer/
 │   ├── index.ts
 │   ├── FiltersSection/utils/isFilterValid.util.ts
 │   ├── AddFilterSection/                  → VirtualSelect for adding filters
+│   ├── LockedFiltersList/                 → Read-only restrictions the table cannot change
 │   ├── ActiveFiltersList/                 → Expandable filter items with FilterInputs
 │   └── FiltersSectionToolbar/             → Expand/collapse/clear/reset filter (toolbar + footer)
 │
@@ -272,10 +273,28 @@ a toolbar in dual-variant mode.
 | ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GeneralSettingsSection` | General  | Width presets, cross-section clear/reset, all settings clear/reset                                                                                                                                               |
 | `DetailsSection`         | Details  | Required row counts, optional table/schema, technical metadata                                                                                                                                                   |
-| `FiltersSection`         | Filters  | Add/remove/expand filters, FilterInputs, validation                                                                                                                                                              |
+| `FiltersSection`         | Filters  | Add/remove/expand filters, FilterInputs, validation, plus the read-only restrictions below                                                                                                                       |
 | `SortingSection`         | Sorting  | Add/remove/reorder sorts, direction toggle                                                                                                                                                                       |
 | `GroupingSection`        | Grouping | Multi-key group add/remove/reorder, legality-derived aggregate selection. Tab present only where the route declared `isGroupingEnabled`. See [GroupingSection/ARCHITECTURE.md](GroupingSection/ARCHITECTURE.md). |
 | `ColumnOrderSection`     | Columns  | Drag-drop reorder, pin toggle, visibility toggle, conflict modals. See [ColumnOrderSection/ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md).                                                                 |
+
+### A filter the table cannot change
+
+The Filters tab shows **two** lists, and the split is which store they come out
+of. `ActiveFiltersList` reads the drawer's draft `columnFilters` — the reader's
+own, each removable, each editable. `LockedFiltersList` reads
+`metaState.lockedFilters`, written by the loader and never by this side, and
+renders no control over it.
+
+That split is the whole wiring: `Clear Filters` and `Reset Filters` write the
+draft, so they cannot reach a restriction, and `Active Filters (n)` keeps
+counting only what the drawer can change. The locked list carries its own heading
+and its own count, and renders `refusal` in place of an empty list.
+
+Why it is a separate list rather than read-only rows in the first one, why an
+empty list is the one thing it must not draw, and why none of it becomes a
+`ColumnFilter` are
+[ADR-094](../../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md).
 
 ### Section Toolbar Pattern
 

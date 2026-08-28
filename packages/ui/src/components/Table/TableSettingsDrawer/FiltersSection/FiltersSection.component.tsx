@@ -10,6 +10,7 @@ import type { FiltersSectionProps } from './FiltersSection.types';
 import { ActiveFiltersList } from './ActiveFiltersList';
 import { AddFilterSection } from './AddFilterSection';
 import { FiltersSectionToolbar } from './FiltersSectionToolbar';
+import { LockedFiltersList } from './LockedFiltersList';
 
 export const FiltersSection = ({ isBusy = false }: FiltersSectionProps) => {
   const [isAddFilterOpen, setIsAddFilterOpen] = useState(false);
@@ -21,6 +22,7 @@ export const FiltersSection = ({ isBusy = false }: FiltersSectionProps) => {
         onDropdownOpenChange={setIsAddFilterOpen}
       />
       <SidePanelSectionOverlay isOpen={isAddFilterOpen}>
+        <LockedFiltersList />
         <ActiveFiltersList isBusy={isBusy} />
         <FiltersSectionToolbar isBusy={isBusy} />
       </SidePanelSectionOverlay>

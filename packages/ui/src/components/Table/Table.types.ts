@@ -379,6 +379,17 @@ export type TableGroupRowSummary = {
   readonly path: readonly TableGroupKeyValue[];
 };
 
+export type TableLockedFilter = {
+  readonly columnKey: string;
+  readonly label: string;
+  readonly value: string;
+};
+
+export type TableLockedFilters = {
+  readonly entries: readonly TableLockedFilter[];
+  readonly refusal?: string;
+};
+
 export type TableMetadataValue = boolean | number | string;
 
 export type TableMetaState = {
@@ -421,6 +432,8 @@ export type TableMetaState = {
   readonly hasDefaultGrouping?: boolean;
   readonly initialPageSize: number;
   readonly isBordered: boolean;
+  /** Route-declared. Absent means off: the layout persists (ADR-094). */
+  readonly isColumnLayoutTransient?: boolean;
   readonly isColumnSettingsOpen: boolean;
   readonly isColumnSettingsPinned: boolean;
   /** Endpoint capability (ADR-063). Absent means off. */
@@ -443,6 +456,8 @@ export type TableMetaState = {
   readonly isUrlStateNested?: boolean;
   readonly loadMorePageSize: number;
   readonly locale?: string;
+  /** Route-declared: what already scopes this read (ADR-063, ADR-094). */
+  readonly lockedFilters?: TableLockedFilters;
   readonly overscan: number;
   readonly persistenceKey: string;
   readonly placeholderRowCount: number;

@@ -17,6 +17,9 @@ export const usePersistColumnSizingAction = <TData>() => {
 
   return () => {
     const metaState = metaStore.get();
+
+    if (metaState?.isColumnLayoutTransient === true) return;
+
     const entry = buildColumnSizingCookieEntry<TData>({
       appId: metaState?.appId,
       columnSizing: columnsStore.get()?.columnSizing,

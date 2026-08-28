@@ -8,6 +8,7 @@ import type {
   TableColumn,
 } from '#ui/components/Table';
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
+import type { PersistedState } from '#ui/components/Table/utils/persistence.types';
 
 import {
   TABLE_NESTED_URL_STATE_PREFIX,
@@ -44,6 +45,8 @@ type ReadTableLoaderStateFromRequestArgs<
    * its endpoint does not produce (ADR-063).
    */
   readonly includeGrouping?: boolean;
+  /** On, no persisted column layout is read at all (ADR-094). */
+  readonly isColumnLayoutTransient?: boolean;
   /**
    * Set when this table shares another route's URL: every param below is read
    * under `TABLE_NESTED_URL_STATE_PREFIX`, matching what the write side puts
@@ -66,6 +69,7 @@ export const readTableLoaderStateFromRequest = <
   defaultGrouping,
   includeFilters = false,
   includeGrouping = false,
+  isColumnLayoutTransient = false,
   isUrlStateNested = false,
   persistenceKey,
   request,
@@ -77,11 +81,13 @@ export const readTableLoaderStateFromRequest = <
     );
 
   const cookieHeader = request.headers.get('Cookie');
-  const cookieState = readPersistedStateFromCookie({
-    appId,
-    cookieString: cookieHeader ?? undefined,
-    persistenceKey,
-  });
+  const cookieState: Partial<PersistedState> = isColumnLayoutTransient
+    ? {}
+    : readPersistedStateFromCookie({
+        appId,
+        cookieString: cookieHeader ?? undefined,
+        persistenceKey,
+      });
 
   const metaUiFlags = readPersistedUiFlagsFromCookie({
     appId,

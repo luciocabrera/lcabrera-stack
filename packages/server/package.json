@@ -46,8 +46,8 @@
     "./db/olap/olap.types": "./src/db/olap/olap.types.ts",
     "./db/olap/resolve-drill-refusal.util": "./src/db/olap/resolve-drill-refusal.util.ts",
     "./db/olap/resolve-group-read.util": "./src/db/olap/resolve-group-read.util.ts",
+    "./db/olap/resolve-group-restriction.util": "./src/db/olap/resolve-group-restriction.util.ts",
     "./db/olap/to-drill-read.util": "./src/db/olap/to-drill-read.util.ts",
-    "./db/olap/to-group-heading.util": "./src/db/olap/to-group-heading.util.ts",
     "./db/olap/to-group-key-truncations.util": "./src/db/olap/to-group-key-truncations.util.ts",
     "./db/olap/to-group-label.util": "./src/db/olap/to-group-label.util.ts",
     "./db/olap/to-group-row.util": "./src/db/olap/to-group-row.util.ts",
@@ -160,13 +160,13 @@
         "types": "./dist/db/olap/resolve-group-read.util.d.mts",
         "default": "./dist/db/olap/resolve-group-read.util.mjs"
       },
+      "./db/olap/resolve-group-restriction.util": {
+        "types": "./dist/db/olap/resolve-group-restriction.util.d.mts",
+        "default": "./dist/db/olap/resolve-group-restriction.util.mjs"
+      },
       "./db/olap/to-drill-read.util": {
         "types": "./dist/db/olap/to-drill-read.util.d.mts",
         "default": "./dist/db/olap/to-drill-read.util.mjs"
-      },
-      "./db/olap/to-group-heading.util": {
-        "types": "./dist/db/olap/to-group-heading.util.d.mts",
-        "default": "./dist/db/olap/to-group-heading.util.mjs"
       },
       "./db/olap/to-group-key-truncations.util": {
         "types": "./dist/db/olap/to-group-key-truncations.util.d.mts",

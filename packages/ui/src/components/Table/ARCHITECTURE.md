@@ -478,6 +478,18 @@ graph LR
   SessionRead --> Init
 ```
 
+**A route can declare its column layout transient.**
+`isColumnLayoutTransient` on the loader `meta` takes `columnOrder`,
+`columnPinning`, `columnSizing` and `columnVisibility` out of the cookie read
+**and** out of the write, so the grid opens at its declared columns in declared
+order on every request and stores nothing to open at next time. Filters and
+sorting are untouched — they travel in the URL. Like every other route-declared
+meta field it is re-asserted unconditionally in `createTableRouteLoader`, beside
+`lockedFilters`, because `metaUiFlags` comes out of a client-controlled cookie.
+
+Why both halves rather than one, and what it costs, are
+[ADR-094](../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md).
+
 See [hooks/ARCHITECTURE.md](hooks/ARCHITECTURE.md) and
 [utils/ARCHITECTURE.md](utils/ARCHITECTURE.md) for details.
 

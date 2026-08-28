@@ -17,6 +17,19 @@ export type GroupKeyTruncation = {
   readonly period: GroupKeyPeriod;
 };
 
+/** One group key, with `value` already formatted for a reader (ADR-094). */
+export type GroupRestriction = {
+  readonly columnKey: string;
+  readonly label: string;
+  readonly value: string;
+};
+
+/** Neither entries nor a refusal is not a state (ADR-094). */
+export type GroupRestrictionStatement = {
+  readonly entries: readonly GroupRestriction[];
+  readonly refusal?: string;
+};
+
 /**
  * **It carries no grouping.** Passing the view's grouping through would send the read
  * straight back into the grouped branch and return group rows again — the one mistake that

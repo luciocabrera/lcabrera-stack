@@ -21,6 +21,7 @@ export { useGetTableIsTableSettingsOpen } from './useGetTableIsTableSettingsOpen
 export { useGetTableIsTableSettingsPinned } from './useGetTableIsTableSettingsPinned.hook';
 export { useGetTableLoadMorePageSize } from './useGetTableLoadMorePageSize.hook';
 export { useGetTableLocale } from './useGetTableLocale.hook';
+export { useGetTableLockedFilters } from './useGetTableLockedFilters.hook';
 export { useGetTableOverscan } from './useGetTableOverscan.hook';
 export { useGetTablePersistenceKey } from './useGetTablePersistenceKey.hook';
 export { useGetTablePlaceholderRowCount } from './useGetTablePlaceholderRowCount.hook';

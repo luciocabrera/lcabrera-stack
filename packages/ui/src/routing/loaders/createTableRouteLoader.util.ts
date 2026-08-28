@@ -9,6 +9,7 @@ import type {
   FilterOptionsTransport,
   TableColumnGroupingCapability,
   TableGroupingState,
+  TableLockedFilters,
   TableMetaState,
   TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
@@ -18,6 +19,12 @@ import { sanitizeSorting } from '../shared/sanitizeSorting.util';
 import { appendDistinctFilterDescriptors } from './appendDistinctFilterDescriptors.util';
 import { readTableLoaderStateFromRequest } from './readTableLoaderStateFromRequest.util';
 import { resolveTableCapabilityMeta } from './resolveTableCapabilityMeta.util';
+import { startInjectedResolver } from './startInjectedResolver.util';
+
+/** Typed, so the tuple below does not widen the capability map to its supertype. */
+const NO_GROUPING_CAPABILITIES: Readonly<
+  Record<string, TableColumnGroupingCapability>
+> = {};
 
 /**
  * Derived from the factory rather than restated, so the view side cannot drift from what
@@ -70,6 +77,13 @@ type CreateTableRouteLoaderArgs<
   readonly resolveGroupingCapabilities?: () => Promise<
     Readonly<Record<string, TableColumnGroupingCapability>>
   >;
+  /** Answer with a `refusal`, never `undefined`, when unreadable (ADR-094). */
+  readonly resolveLockedFilters?: (args: {
+    readonly request: Request;
+  }) =>
+    | Promise<TableLockedFilters | undefined>
+    | TableLockedFilters
+    | undefined;
   readonly schemaName?: string;
   readonly tableName: string;
   readonly title: TableMetaState['title'];
@@ -121,6 +135,7 @@ export const createTableRouteLoader = <
   meta,
   persistenceKey,
   resolveGroupingCapabilities,
+  resolveLockedFilters,
   schemaName,
   tableName,
   title,
@@ -142,7 +157,9 @@ export const createTableRouteLoader = <
   // are re-asserted unconditionally: both are route facts a persisted cookie
   // must not be able to claim.
   const isUrlStateNested = meta?.isUrlStateNested === true;
+  const isColumnLayoutTransient = meta?.isColumnLayoutTransient === true;
   const groupDetailsPath = meta?.groupDetailsPath;
+  const declaredLockedFilters = meta?.lockedFilters;
 
   return async ({ request }: LoaderFunctionArgs) => {
     const {
@@ -161,6 +178,7 @@ export const createTableRouteLoader = <
       ...(defaultGrouping !== undefined && { defaultGrouping }),
       includeFilters,
       includeGrouping: capabilityMeta.isGroupingEnabled,
+      isColumnLayoutTransient,
       isUrlStateNested,
       persistenceKey,
       request,
@@ -184,10 +202,15 @@ export const createTableRouteLoader = <
       totalsPlacement,
     });
 
-    const groupingCapabilities =
-      resolveGroupingCapabilities && capabilityMeta.isGroupingEnabled
-        ? await resolveGroupingCapabilities()
-        : {};
+    // Started together and settled together, so neither can be stranded (ADR-094).
+    const [groupingCapabilities, lockedFilters] = await Promise.all([
+      startInjectedResolver(() =>
+        resolveGroupingCapabilities && capabilityMeta.isGroupingEnabled
+          ? resolveGroupingCapabilities()
+          : NO_GROUPING_CAPABILITIES,
+      ),
+      startInjectedResolver(() => resolveLockedFilters?.({ request })),
+    ]);
 
     return {
       columnsState: {
@@ -239,10 +262,9 @@ export const createTableRouteLoader = <
         // loader here reads back differently.
         hasDefaultGrouping:
           defaultGrouping !== undefined && capabilityMeta.isGroupingEnabled,
-        // Same rule: it decides which params this table's own state is written
-        // under, so a cookie able to set it detaches a table's state from the
-        // loader that reads it — the drawer updates and the rows do not.
+        isColumnLayoutTransient,
         isUrlStateNested,
+        lockedFilters: lockedFilters ?? declaredLockedFilters,
         totalsPlacement,
         ...capabilityMeta,
       },
