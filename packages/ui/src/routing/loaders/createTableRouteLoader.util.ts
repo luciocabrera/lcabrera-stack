@@ -158,6 +158,7 @@ export const createTableRouteLoader = <
   const isUrlStateNested = meta?.isUrlStateNested === true;
   const isColumnLayoutTransient = meta?.isColumnLayoutTransient === true;
   const groupDetailsPath = meta?.groupDetailsPath;
+  const declaredLockedFilters = meta?.lockedFilters;
 
   return async ({ request }: LoaderFunctionArgs) => {
     const {
@@ -260,7 +261,7 @@ export const createTableRouteLoader = <
           defaultGrouping !== undefined && capabilityMeta.isGroupingEnabled,
         isColumnLayoutTransient,
         isUrlStateNested,
-        lockedFilters,
+        lockedFilters: lockedFilters ?? declaredLockedFilters,
         totalsPlacement,
         ...capabilityMeta,
       },

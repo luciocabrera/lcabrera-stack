@@ -101,9 +101,19 @@ that heading says the rows are unrestricted, which is the opposite of what a
 refused request means, so "no entries and no refusal" is not a state a caller may
 produce.
 
+**3b. A restriction may be declared or resolved, and the resolver wins.** A
+restriction that is a property of the route rather than of the request needs no
+async resolver, so `lockedFilters` on the route's `meta` stands on its own; a
+route that also declares a resolver has the per-request answer preferred, because
+it is the more specific one. Neither path is the cookie, which decision 4 keeps
+out either way.
+
 **4. Both are route-declared and re-asserted unconditionally.**
 `createTableRouteLoader` writes `lockedFilters` and `isColumnLayoutTransient`
-into `metaState` after the persisted UI flags are spread, `undefined` included.
+into `metaState` after the persisted UI flags are spread. Each is read out of the
+route's own `meta` first and then re-asserted, so a route declaring one keeps it
+while the cookie is discarded — re-asserting the resolved value alone would drop
+the declaration along with the cookie's, since the same spread carries both.
 The UI-flags cookie is client-controlled and validated nowhere, so this is what
 stops a crafted one printing a restriction the read is not under, or denying a
 flag the route declared. It is the same rule `groupDetailsPath` and

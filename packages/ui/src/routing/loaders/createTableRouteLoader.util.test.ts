@@ -862,6 +862,53 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.lockedFilters).toBeUndefined();
     });
 
+    it('keeps a restriction the route declared statically on its meta', async () => {
+      const declared = {
+        entries: [{ columnKey: 'status', label: 'Status', value: 'Open' }],
+      };
+
+      const { result } = await invoke({
+        config: { meta: { lockedFilters: declared } },
+      });
+
+      expect(result.metaState.lockedFilters).toEqual(declared);
+    });
+
+    it('still refuses a declaration injected through the UI-flags cookie', async () => {
+      const { result } = await invoke({
+        cookie: uiFlagsCookie({
+          lockedFilters: {
+            entries: [{ columnKey: 'status', label: 'Status', value: 'Open' }],
+          },
+        }),
+      });
+
+      expect(result.metaState.lockedFilters).toBeUndefined();
+    });
+
+    it('prefers the per-request resolver over a static declaration', async () => {
+      const { result } = await invoke({
+        config: {
+          meta: {
+            lockedFilters: {
+              entries: [
+                { columnKey: 'status', label: 'Status', value: 'Declared' },
+              ],
+            },
+          },
+          resolveLockedFilters: () => ({
+            entries: [
+              { columnKey: 'status', label: 'Status', value: 'Resolved' },
+            ],
+          }),
+        },
+      });
+
+      expect(result.metaState.lockedFilters).toEqual({
+        entries: [{ columnKey: 'status', label: 'Status', value: 'Resolved' }],
+      });
+    });
+
     it('surfaces a rejecting capability resolver and leaves no unhandled rejection', async () => {
       const unhandled: unknown[] = [];
       const record = (reason: unknown) => {

@@ -1,5 +1,6 @@
 import type { TablePersistenceEntry } from '#ui/components/Table/Table.types';
 
+import { toUrlWriteOnly } from '#ui/components/Table/contexts/TableConfig/columns/actions/utils';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { TABLE_NESTED_URL_STATE_PREFIX } from '#ui/components/Table/Table.constants';
 import { serializeStateSlice } from '#ui/components/Table/utils';
@@ -9,15 +10,6 @@ import {
 } from '#ui/constants/globalSettings.constants';
 import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
 import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
-
-/** An entry may carry both halves; this keeps the URL one (ADR-094). */
-const toUrlWriteOnly = ({
-  searchParamKey,
-  searchParamValue,
-}: TablePersistenceEntry): TablePersistenceEntry => ({
-  searchParamKey,
-  ...(searchParamValue !== undefined && { searchParamValue }),
-});
 
 /** Persists table state to the **cookie**, written via a server action (Set-Cookie header). */
 export const usePersistTableStateAction = () => {

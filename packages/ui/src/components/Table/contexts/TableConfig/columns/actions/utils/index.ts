@@ -10,4 +10,5 @@ export { resolveColumnPinningUpdate } from './resolveColumnPinningUpdate.util';
 export { resolveColumnSortingUpdate } from './resolveColumnSortingUpdate.util';
 export { resolveColumnVisibilityUpdate } from './resolveColumnVisibilityUpdate.util';
 export { toDeclaredColumnKey } from './toDeclaredColumnKey.util';
+export { toUrlWriteOnly } from './toUrlWriteOnly.util';
 export { writeColumnSizing } from './writeColumnSizing.util';
