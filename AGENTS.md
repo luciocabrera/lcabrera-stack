@@ -285,9 +285,9 @@ deliberate violation (Rule 14). Handling a _finding_ is Non-Negotiable Rule 11 �
 verify, then fix; never suppress. The public packages (§1) take no
 suppressions at all, enforced by `vp run suppressions:verify`.
 
-**`test:all` vs `test:ci`.** Neither runs a suite that needs a database — the DB-bound smoke suites in `apps/showcase` gate on `SMOKE_DB`, and only `vp run --filter showcase test:smoke` sets it — so the two differ only in ordering: `test:ci` runs `showcase` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing; it is what CI runs.
+**`test:all` vs `test:ci`.** Neither runs a suite that needs a database — the DB-bound smoke suites in `apps/showcase` gate on `SMOKE_DB`, and only `vp run --filter showcase test:smoke` sets it — so the two differ only in ordering: `test:ci` runs `showcase` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing — it is what CI runs on a push to `main`; on a pull request CI runs `test:changed -- --ci` instead, and `check-safe.yml` picks between them by event.
 
-**A workspace with real-Postgres tests must split them**: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it. Nothing here needs this today and **the substitution is not built** — `scripts/lib/affected-tests.mjs` says so in its own header, and the only per-workspace substitution it carries is `COVERAGE_TASK_PACKAGE`. Build it when a DB-bound workspace arrives, mirroring `test:ci` in the root manifest; do not assume it is waiting.
+**A workspace with real-Postgres tests must split them**: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it. Nothing here needs this today — `apps/showcase`'s DB-bound suites gate themselves in-file on `SMOKE_DB` rather than needing a task-level split, which is the other way to discharge this — and **the substitution is not built** — `scripts/lib/affected-tests.mjs` says so in its own header, and the only per-workspace substitution it carries is `COVERAGE_TASK_PACKAGE`. Build it when a DB-bound workspace arrives, mirroring `test:ci` in the root manifest; do not assume it is waiting.
 
 ### Fallow Static Analysis (run from repo root)
 
@@ -419,10 +419,16 @@ code is, and an explanation next to code is the copy nothing keeps true — whic
 is the failure every gate in this file exists to catch. If the code can be made
 clearer instead, do that.
 
-**The single exemption is the file-level header** that
+**Two exemptions, both narrow.** The **file-level header** that
 [`.claude/rules/scripts.md`](.claude/rules/scripts.md) mandates for a `.mjs`/`.cjs`
-script: one short block at the top of the file saying why the file exists, its
-usage and its exit codes. It stays exactly as that rule specifies.
+script — one short block at the top of the file saying why the file exists, its
+usage and its exit codes — stays exactly as that rule specifies. And **JSDoc a
+build reads** stays: `@param`, `@returns`, `@type` and the rest of the
+annotations a tool consumes, because a published `.mjs` package's declarations
+are derived from them and dropping one publishes an option defaulting to `[]` as
+`never[]` ([`packages/CLAUDE.md`](packages/CLAUDE.md) owns that contract). The
+second exemption covers the **annotations**, not prose that happens to share
+their block: the test is whether removing the text changes what a tool emits.
 
 **The explanation still has to live somewhere, and there are two homes.** A
 decision — why this approach and not the one that looks equally reasonable —

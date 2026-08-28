@@ -93,10 +93,14 @@ gate that keeps the count honest.
 `vp run test` resolves per workspace, and root `scripts/` — every verify gate,
 report generator and their `lib/` modules — is in none of them, so editing a
 tooling script and running the workspace's suite executes not one of its tests
-and reports green. `vp run test:changed` reads the diff, selects the affected
-workspaces **and** adds the root `test:scripts` group when a `.mjs`/`.cjs` under
-`scripts/` changed, so it cannot miss either half. It prints what it selected and
-what it skipped; check that line rather than assuming. To run one half directly:
+and reports green. `vp run test:changed` selects the affected workspaces and their dependents **and**
+adds the root `test:scripts` group when a `.mjs`/`.cjs` under `scripts/` changed,
+so it cannot miss either half. **It reads untracked files too**, not only the
+tracked diff — this stage runs before a commit, and a new component with a new
+colocated test is untracked at that moment; `scripts/changed-files.sh` adds
+`git ls-files --others --exclude-standard` for exactly that case, so nothing has
+to be `git add`ed first. It prints what it selected and what it skipped; check
+that line rather than assuming. To run one half directly:
 `vp run test` inside a workspace, `vp run test:scripts` from the root. CI reaches
 both halves by either of two paths, chosen by event in `check-safe.yml`'s Unit
 Tests job: `vp run test:changed -- --ci` on a pull request, `vp run test:ci` on a
@@ -136,9 +140,11 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
   a function or component declaration and no prose sits inside its body
   ([ADR-094](../../../docs/decisions/ADR-094-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md)).
   A decision goes in the ADR that owns it; investigation and measurement go in
-  the pull request or the issue. The one exemption is the short file-level "why"
+  the pull request or the issue. Two exemptions: the short file-level "why"
   header on a script, in
-  [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md).
+  [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md), and JSDoc a
+  build reads (`@param`, `@returns`, …) — the annotations, not prose sharing
+  their block.
 
 ### Where a new ADR goes
 

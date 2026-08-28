@@ -157,7 +157,9 @@ project-specific belongs in that project's own `package.json`.
 
 `test:all` vs `test:ci`: neither runs a suite that needs a database, so the two
 differ only in ordering — `test:ci` runs `showcase` last so the PR's coverage
-summary is the fresh one. Use `test:ci` before pushing; it is what CI runs.
+summary is the fresh one. Use `test:ci` before pushing — it is what CI runs on a
+push to `main`; on a pull request CI runs `test:changed -- --ci`, chosen by event
+in `check-safe.yml`'s Unit Tests job.
 
 **The DB-bound suites exist and are opt-in.** `apps/showcase`'s `*.smoke.test.*`
 files each gate on `SMOKE_DB`, which is set in exactly one place —

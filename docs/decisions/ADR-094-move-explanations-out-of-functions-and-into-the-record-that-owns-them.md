@@ -43,9 +43,26 @@ positional, which is the property that lets a linter decide it.
 inside its body.** Both positions are covered: the JSDoc block over the
 declaration, and any explanation within it.
 
-**The single exemption is the file-level header** `.claude/rules/scripts.md`
-mandates: one short block at the top of a `.mjs`/`.cjs` file saying why the file
-exists, its usage and its exit codes. That rule is unchanged.
+**Two exemptions, both narrow.**
+
+1. **The file-level header** `.claude/rules/scripts.md` mandates: one short block
+   at the top of a `.mjs`/`.cjs` file saying why the file exists, its usage and
+   its exit codes. That rule is unchanged.
+2. **JSDoc a build reads** — `@param`, `@returns`, `@type` and the rest of the
+   annotations a tool consumes. In a published `.mjs` package the declarations
+   are derived from them: without the `@param` on
+   `createCustomRulesLintConfig`, an option defaulting to `[]` publishes as
+   `never[]`, which rejects the one value a consumer is supposed to pass, and
+   `attw:verify` fails. `packages/CLAUDE.md` states that as part of the
+   publishing contract.
+
+**The second exemption is for annotations, not for prose that shares their
+block.** A `@param` line stays; a paragraph above it explaining the design does
+not, and moves to one of the two homes below. Where an annotation genuinely
+needs a sentence to be usable — what a parameter means, not why the function
+exists — that sentence lives inside the tag it belongs to. Stated because
+#1028's sweep will be read against this line: the test is whether removing the
+text changes what a tool emits, not whether it sits in a `/** */`.
 
 **The explanation moves; it is not deleted.** There are two homes, and which one
 depends on what the explanation is:
