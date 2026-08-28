@@ -13,6 +13,7 @@ import { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 import { splitColumnsByPinning } from './splitColumnsByPinning.util';
 import { withAggregateColumns } from './withAggregateColumns.util';
 import { withGroupedColumnLayout } from './withGroupedColumnLayout.util';
+import { withGroupedColumnScope } from './withGroupedColumnScope.util';
 
 type GetPinnedDerivedColumnsStateArgs<TData> = {
   /**
@@ -36,9 +37,9 @@ type GetPinnedDerivedColumnsStateArgs<TData> = {
 /**
  * Every column slice the body and header paint from, derived together so they cannot
  * disagree about which columns exist.
- * The grouped layout is derived here, at the one point all the slices are computed from
- * (ADR-080): the group keys are hoisted to the head of the order and the left pin, and
- * forced visible.
+ * The grouped layout is derived here, at the one point all the slices are computed from:
+ * measure, then scope to what the grouping names (ADR-095), then hoist the keys to the
+ * head of the order and the left pin and force them visible (ADR-080).
  */
 export const getPinnedDerivedColumnsState = <TData>({
   aggregates,
@@ -58,16 +59,25 @@ export const getPinnedDerivedColumnsState = <TData>({
     groupingKeys,
   });
 
+  const scoped = withGroupedColumnScope<TData>({
+    aggregates,
+    columnOrder: measured.columnOrder,
+    columnPinning: measured.columnPinning,
+    columns: measured.columns,
+    columnVisibility: measured.columnVisibility,
+    groupingKeys,
+  });
+
   const {
     columnOrder: gridColumnOrder,
     columnPinning: gridColumnPinning,
     columns: gridColumns,
     columnVisibility: gridColumnVisibility,
   } = withGroupedColumnLayout<TData>({
-    columnOrder: measured.columnOrder,
-    columnPinning: measured.columnPinning,
-    columns: measured.columns,
-    columnVisibility: measured.columnVisibility,
+    columnOrder: scoped.columnOrder,
+    columnPinning: scoped.columnPinning,
+    columns: scoped.columns,
+    columnVisibility: scoped.columnVisibility,
     groupingKeys,
   });
 

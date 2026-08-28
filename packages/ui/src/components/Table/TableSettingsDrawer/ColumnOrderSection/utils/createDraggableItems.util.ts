@@ -6,9 +6,10 @@ type CreateDraggableItemsArgs<TContent> = {
     readonly left: readonly string[];
     readonly right: readonly string[];
   };
-  readonly columnVisibility: ReadonlySet<string>;
   /** The applied group keys — locked in place while grouping is applied. */
   readonly groupingKeys: readonly string[];
+  /** The declared keys the grid paints, which is what `Show` reflects (ADR-095). */
+  readonly renderedColumnKeys: ReadonlySet<string>;
   readonly renderItemContent: (args: {
     readonly columnKey: string;
     readonly isGroupKey: boolean;
@@ -26,28 +27,29 @@ type OrderedColumnItem = {
 };
 
 /**
- * **A group key is undraggable for its own reason, not by being static** (ADR-080).
- * While grouping is applied the keys are hoisted to the head of the order and the left
- * pin, so a drag would be silently undone on the next derivation — and a gesture that
- * visibly does nothing is worse than one refused.
+ * **A group key is undraggable for its own reason, not by being static** (ADR-080), and
+ * while grouping is applied so is every other row: the order shown is the grid's derived
+ * one, so a drag would write a derivation into the persisted order (ADR-095).
+ * A gesture the derivation would undo is refused rather than accepted.
  * Resizing a rung cannot break a staircase.
  */
 export const createDraggableItems = <TContent>({
   allOrderedColumns,
   columnPinning,
-  columnVisibility,
   groupingKeys,
+  renderedColumnKeys,
   renderItemContent,
 }: CreateDraggableItemsArgs<TContent>) => {
   const leftPinned = new Set<string>(columnPinning.left);
   const rightPinned = new Set<string>(columnPinning.right);
   const groupKeys = new Set<string>(groupingKeys);
+  const isGrouped = groupingKeys.length > 0;
 
   return allOrderedColumns.map((col) => {
     const isPinned = leftPinned.has(col.key) || rightPinned.has(col.key);
     const { isStatic } = resolveColumnCapabilities(col);
     const isGroupKey = groupKeys.has(col.key);
-    const isVisible = !columnVisibility.has(col.key);
+    const isVisible = renderedColumnKeys.has(col.key);
 
     return {
       content: renderItemContent({
@@ -59,7 +61,7 @@ export const createDraggableItems = <TContent>({
         label: col.label,
       }),
       id: col.key,
-      isDraggable: !isStatic && !isGroupKey,
+      isDraggable: !isStatic && !isGrouped,
     };
   });
 };

@@ -14,8 +14,8 @@ describe('createDraggableItems', () => {
         { key: 'id', label: 'ID' },
       ],
       columnPinning: { left: ['id'], right: [] },
-      columnVisibility: new Set(['name']),
       groupingKeys: [],
+      renderedColumnKeys: new Set(['id']),
       renderItemContent,
     });
 
@@ -57,21 +57,54 @@ describe('createDraggableItems', () => {
 
     const result = createDraggableItems({
       allOrderedColumns: [
-        { key: 'status', label: 'Status' },
-        { key: 'amount', label: 'Amount' },
+        { key: 'first', label: 'First' },
+        { key: 'second', label: 'Second' },
       ],
       columnPinning: { left: [], right: [] },
-      columnVisibility: new Set<string>(),
-      groupingKeys: ['status'],
+      groupingKeys: ['first'],
+      renderedColumnKeys: new Set(['first']),
       renderItemContent,
     });
 
     // Undraggable for its own reason: the hoist would silently undo the drag.
     // `isStatic` stays false, so the key keeps its width and its header menu —
     // borrowing that flag is exactly what ADR-080 refuses.
-    expect(result[0]).toMatchObject({ id: 'status', isDraggable: false });
+    expect(result[0]).toMatchObject({ id: 'first', isDraggable: false });
     expect(result[0]?.content).toBe('true:false');
-    expect(result[1]).toMatchObject({ id: 'amount', isDraggable: true });
-    expect(result[1]?.content).toBe('false:false');
+  });
+
+  it('locks every row while grouping is applied, not only the keys', () => {
+    // The order shown is the grid's derived one, so a drag would persist a
+    // derivation as the consumer's own column order.
+    const result = createDraggableItems({
+      allOrderedColumns: [
+        { key: 'first', label: 'First' },
+        { key: 'second', label: 'Second' },
+      ],
+      columnPinning: { left: [], right: [] },
+      groupingKeys: ['first'],
+      renderedColumnKeys: new Set(['first']),
+      renderItemContent: () => 'content',
+    });
+
+    expect(result.map((item) => item.isDraggable)).toStrictEqual([
+      false,
+      false,
+    ]);
+  });
+
+  it('reads `Show` from the rendered set rather than from the hidden keys', () => {
+    const result = createDraggableItems({
+      allOrderedColumns: [
+        { key: 'first', label: 'First' },
+        { key: 'second', label: 'Second' },
+      ],
+      columnPinning: { left: [], right: [] },
+      groupingKeys: ['first'],
+      renderedColumnKeys: new Set(['first']),
+      renderItemContent: ({ isVisible }) => String(isVisible),
+    });
+
+    expect(result.map((item) => item.content)).toStrictEqual(['true', 'false']);
   });
 });

@@ -305,16 +305,45 @@ copy left to drift.
 
 ### Layout
 
-While grouping is applied, two derivations reshape the column list, in an order
-that matters. `withAggregateColumns` runs first and replaces each **measured**
-column with one column per aggregate applied to it; `withGroupedColumnLayout`
-then hoists each group key to the head of the order and of the left pin, in key
-order, and forces it visible
+While grouping is applied, three derivations reshape the column list, in an
+order that matters. `withAggregateColumns` runs first and replaces each
+**measured** column with one column per aggregate applied to it —
+the primary key included, since a row id is resolved from the declared columns
+and never from the painted list. `withGroupedColumnScope` then drops every
+column the grouping neither keys nor measures, so the grid holds the group keys,
+the measures and the row-actions column and nothing else
+([ADR-095](../../../../../docs/decisions/ADR-095-the-grouping-decides-which-columns-the-grid-shows.md)).
+`withGroupedColumnLayout` runs last and hoists each group key to the head of the
+order and of the left pin, in key order, forcing it visible
 ([ADR-080](../../../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
-Both are derivations and never state, so neither reaches the cookie the column
+All three are derivations and never state, so none reaches the cookie the column
 layout persists through nor the list the drawer offers — which is what makes
 ungrouping free, and what means a deselected aggregate needs no pruning: the
 next derivation simply does not produce its column.
+
+**The row-actions column is the one thing the scope keeps that the grouping does
+not name**, because it is not a data column: its cell is the grid's own
+affordance rather than a field of the row, so a grouped grid keeps its row
+menus.
+
+**The settings drawer's Columns tab reads that same derivation, over its own
+draft** — `resolveRenderedColumnKeys` runs `getPinnedDerivedColumnsState` and
+maps each painted key back through `toDeclaredColumnKey`, so a measure ticks its
+source column's row. `Show`, the order the rows are listed in, and the count in
+the section header all come from that one answer, and the grid and the tab agree
+exactly when the drawer's draft is the applied state. Nothing is removed from
+the list: a column the grouping does not name is listed unticked, and ticking it
+opens the prompt below. **No row is draggable while grouping is applied** — the
+order shown is derived for its whole length, so a drag would write a derivation
+into the persisted order.
+
+**Turning a column on while grouped is a request to join the grouping, and the
+prompt asks how.** `resolveColumnGroupingChoices` offers what the column
+supports — as a group key, or with one of its offerable aggregates — from
+`resolveGroupKeyAvailability` and `resolveAddableAggregates`, the same pair the
+Grouping tab's pickers read; a column that supports neither is reported rather
+than prompted for. The choice is applied to the grouping draft and never to
+`columnVisibility`, which is the write path the warning below is about.
 
 **Keeping that true takes work at the two edges where a user acts on a measure
 column.** Pinning one resolves to the column it measures (`toDeclaredColumnKey`),
@@ -356,7 +385,9 @@ consumer froze. And a permission check must test the **declared** key, because
 permission set was ever built for, passes, and then writes the source key
 anyway. `useSetColumnPinning` cannot get this wrong — `resolveColumnPinningUpdate`
 receives the mapped key and guards inside — while `useSetColumnVisibility` orders
-the two by hand.
+the two by hand. The drawer's own `useToggleColumnVisibility` reads `staticKeys`
+for the same reason it must: `normalizedColumns` no longer holds a column the
+grouping scoped out, so a lock read from there would silently stop answering.
 
 Sorting is the third edge and it is handled server-side, because a measure sort
 is legitimate on the grouped read — `toGroupSort` maps it onto the aggregate's
@@ -364,26 +395,24 @@ alias — and meaningless on any ungrouped one. `toDrillRead` drops measure term
 alongside the group-key terms it already dropped; `pruneSortingToColumns` covers
 the other direction, when the grouping clears while such a sort is applied.
 
-**Replacement costs a detail row its raw value, and that is a known
+**A detail row arriving in a grouped grid renders blank, and that is a known
 limitation rather than an oversight.** Every row renders over the same
-partition (ADR-065), so taking `total_amount` off the grid takes it off the
-drilled rows too — they hold no `total_amount:avg` field, so both measure
-columns are blank on them and the order's own amount is unreachable without
-deselecting the aggregate. Keeping the source column alongside its measures
-would fix it and cost more than it saves: that column can carry no aggregate,
-so it would draw the em-dash on every group row of every grouped view, to serve
-rows that only a drill produces. #870 removes the inline drill for a modal route
-that applies no grouping — where the declared columns are all present and the
-question does not arise — and carries this as an acceptance criterion.
+partition (ADR-065), and a grouped grid paints the group keys and the measures
+alone (ADR-095) — so such a row has nothing to show: its key cells blank because
+the group row above states the value, and the measure columns are fields it does
+not carry. Keeping the unmeasured columns would fix it and cost more than it
+saves: they can carry no aggregate, so each would draw the em dash on every
+group row of every grouped view, to serve rows a grouped read does not return.
+ADR-087 opens a group's own rows in a route that applies no grouping — where the
+declared columns are all present and the question does not arise.
 `Table.aggregateColumns.test.tsx` pins the current behaviour so it stays a
 decision on record.
 
-The two cannot conflict, because an aggregate naming a group key is dropped —
-that column already carries its key's value. One column is never replaced,
-though: a **primary-key** column is measured _beside_ itself, because
-`resolveCrudRowId` answers `undefined` when no column carries `isPrimaryKey`, so
-substituting the only one silently strips the row-actions menu from every row,
-for a grouping settable from the URL.
+The scope and the measures cannot conflict, because an aggregate naming a group
+key is dropped — that column already carries its key's value. The em dash
+ADR-065 defined survives only for a measure column whose value the payload did
+not carry, which is what `TableGroupAggregate` renders when a group row states
+no aggregate for it.
 
 A measure column's key is the aggregate's token — `total_amount:avg` — which
 `DataKey` admits for the same reason it admits `'actions'`: a column identity

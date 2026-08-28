@@ -194,22 +194,23 @@ describe('withAggregateColumns', () => {
     expect(result.columnPinning.left).toStrictEqual([]);
   });
 
-  it('measures a primary-key column beside it rather than replacing it', () => {
-    // Replacing it would leave no column carrying `isPrimaryKey`, and
-    // `resolveCrudRowId` answers undefined when none does — taking out the
-    // row-actions menu of every row for a grouping settable from the URL.
+  it('replaces a measured primary-key column like any other', () => {
+    // A row id is resolved from the columns the consumer declared, never from
+    // the derived grid list, so keeping the source beside its measure bought
+    // nothing and painted a column no group row can fill (ADR-095).
     const result = run({
       aggregates: [{ columnKey: 'order_id', fn: 'count' }],
     });
 
     expect(keysOf(result)).toStrictEqual([
-      'order_id',
       'order_id:count',
       'customer_type',
       'total_amount',
       'order_count',
     ]);
-    expect(result.columns[0]?.isPrimaryKey).toBe(true);
+    expect(result.columns.some((column) => column.isPrimaryKey === true)).toBe(
+      false,
+    );
   });
 
   it('leaves the consumer’s own column list unmutated', () => {

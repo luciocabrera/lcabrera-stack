@@ -2,7 +2,7 @@
 id: grouped-column-scope
 title: the grouping decides which columns the grid shows, and the drawer shows the same set
 owner: agent:claude
-status: active
+status: review
 branch: feat/1019-grouped-column-scope
 area:
   - packages/ui/src/components/Table/**
@@ -10,7 +10,7 @@ area:
 started: 2026-08-28
 updated: 2026-08-28
 plan: (none)
-pr: (none)
+pr: 1033
 issue: #1019
 ---
 
@@ -20,6 +20,6 @@ the grouping decides which columns the grid shows, and the drawer shows the same
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented, gate green, PR ready for review
 - Blockers: none
-- Next:
+- Next: verifier + Copilot review

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import type {
   TableColumn,
+  TableColumnAggregate,
   TableColumnsState,
 } from '#ui/components/Table/Table.types';
 
@@ -26,49 +27,61 @@ const columnsState = getInitialColumnsState<Row>({
   columns,
 }) as TableColumnsState<Row>;
 
-const patch = (groupingKeys: readonly string[]) =>
-  resolveGroupingColumnsPatch<Row>({
-    aggregates: [],
-    columnsState,
-    groupingKeys,
-  });
+type PatchArgs = {
+  readonly aggregates?: readonly TableColumnAggregate[];
+  readonly groupingKeys: readonly string[];
+};
+
+const patch = ({ aggregates = [], groupingKeys }: PatchArgs) =>
+  resolveGroupingColumnsPatch<Row>({ aggregates, columnsState, groupingKeys });
+
+const measureAmount: readonly TableColumnAggregate[] = [
+  { columnKey: 'total_amount', fn: 'sum' },
+];
 
 describe('resolveGroupingColumnsPatch', () => {
   it('hoists the group keys to the head of the painted grid, in key order', () => {
-    // Ahead of `total_amount`, which the user both ordered first and pinned
-    // left. The keys land at indices 0…N-1 whatever the saved layout says.
+    // Ahead of the measure over `total_amount`, which the user both ordered
+    // first and pinned left. The keys land at indices 0…N-1 whatever the saved
+    // layout says.
     expect(
-      patch(['ship_country', 'order_status']).effectiveColumns.map(
-        (col) => col.key,
-      ),
-    ).toStrictEqual(['ship_country', 'order_status', 'total_amount']);
+      patch({
+        aggregates: measureAmount,
+        groupingKeys: ['ship_country', 'order_status'],
+      }).effectiveColumns.map((col) => col.key),
+    ).toStrictEqual(['ship_country', 'order_status', 'total_amount:sum']);
   });
 
-  it('adds no column of its own', () => {
-    // The synthetic hierarchy column is retired: a grouped row paints exactly
-    // the columns the consumer declared, one cell fewer than before (ADR-080).
-    expect(patch(['order_status']).effectiveColumns).toHaveLength(
-      columns.length,
-    );
+  it('paints the columns the grouping names and no others', () => {
+    // A column the grouping neither keys nor measures carries nothing on a
+    // group row, so it is not painted at all (ADR-095).
+    expect(
+      patch({ groupingKeys: ['order_status'] }).effectiveColumns.map((col) =>
+        String(col.key),
+      ),
+    ).toStrictEqual(['order_status']);
   });
 
   it('leaves no column between two group keys', () => {
-    const keys = patch(['ship_country', 'order_status'])
+    const keys = patch({
+      aggregates: measureAmount,
+      groupingKeys: ['ship_country', 'order_status'],
+    })
       .effectiveColumns.map((col) => String(col.key))
-      .filter((key) => key !== 'total_amount');
+      .filter((key) => key !== 'total_amount:sum');
 
     expect(keys).toStrictEqual(['ship_country', 'order_status']);
   });
 
   it('restores the user layout exactly when grouping goes off', () => {
     expect(
-      patch([]).pinnedColumnPartition.leftPinnedCols.map((col) => col.key),
+      patch({ groupingKeys: [] }).pinnedColumnPartition.leftPinnedCols.map(
+        (col) => col.key,
+      ),
     ).toStrictEqual(['total_amount']);
-    expect(patch([]).effectiveColumns.map((col) => col.key)).toStrictEqual([
-      'total_amount',
-      'order_status',
-      'ship_country',
-    ]);
+    expect(
+      patch({ groupingKeys: [] }).effectiveColumns.map((col) => col.key),
+    ).toStrictEqual(['total_amount', 'order_status', 'ship_country']);
   });
 
   it('moves a key out of the right pin rather than duplicating it', () => {
@@ -101,7 +114,7 @@ describe('resolveGroupingColumnsPatch', () => {
     // ungrouped read refuses an unknown column rather than ignoring it.
     // `columns`, `columnOrder` and `columnPinning` stay out.
     expect(
-      Object.keys(patch(['order_status'])).toSorted((a, b) =>
+      Object.keys(patch({ groupingKeys: ['order_status'] })).toSorted((a, b) =>
         a.localeCompare(b),
       ),
     ).toStrictEqual([

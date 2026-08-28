@@ -2,9 +2,12 @@ import { vi } from 'vite-plus/test';
 
 import type { ColumnOrderSectionModalsState } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.types';
 
+import { getInitialModalsState } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/utils';
+
 type CreateColumnOrderSectionActionMocksArgs = {
   readonly initialDrawerState: LooseDrawerState;
-  readonly initialModalsState: ColumnOrderSectionModalsState;
+  /** Merged over the section's own initial state, so a new modal needs no test edited. */
+  readonly initialModalsState: Partial<ColumnOrderSectionModalsState>;
   readonly initialTableState: LooseTableState;
 };
 
@@ -52,14 +55,15 @@ export const createColumnOrderSectionActionMocks = ({
   initialModalsState,
   initialTableState,
 }: CreateColumnOrderSectionActionMocksArgs) => {
+  const initialModals = getInitialModalsState(initialModalsState);
   const tableColumnsStore = createMockStore(initialTableState);
   const drawerColumnsStore = createMockStore(initialDrawerState);
-  const modalsStore = createMockStore(initialModalsState);
+  const modalsStore = createMockStore(initialModals);
 
   const resetMocks = () => {
     tableColumnsStore._state = initialTableState;
     drawerColumnsStore._state = initialDrawerState;
-    modalsStore._state = initialModalsState;
+    modalsStore._state = initialModals;
     tableColumnsStore.set.mockClear();
     drawerColumnsStore.set.mockClear();
     modalsStore.set.mockClear();

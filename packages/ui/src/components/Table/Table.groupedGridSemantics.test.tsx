@@ -297,21 +297,18 @@ describe('a grouped table under the grid ARIA model', () => {
   it('gives every row the same number of gridcells, groups included', () => {
     // The assertion this replaces pinned groups at contributing *none*, which
     // is the shape ADR-065 withdrew: a banner had one presentational cell, so a
-    // group row was not addressable by column at all. Seven rows across the two
-    // declared columns — and no third, because the synthetic hierarchy column
-    // is retired: a grouped row paints exactly what the consumer declared, one
-    // cell fewer per row than before (ADR-080).
+    // group row was not addressable by column at all.
     render(<Harness />);
 
-    // Seven rows across four columns: the two declared keys, the primary key,
-    // and the measure column derived from the aggregate on it (#869). The
-    // primary key is measured *beside* itself rather than replaced, because
-    // `resolveCrudRowId` answers undefined when no column carries
-    // `isPrimaryKey`, which would strip the row-actions menu from every row.
-    expect(getGrid().querySelectorAll('[role="gridcell"]')).toHaveLength(28);
+    // Seven rows across three columns: the two group keys, then the measure
+    // derived from the aggregate on the primary key (#869). The primary key
+    // itself is replaced by that measure rather than kept beside it — a row id
+    // is resolved from the consumer's declared columns, never from the painted
+    // list (ADR-095).
+    expect(getGrid().querySelectorAll('[role="gridcell"]')).toHaveLength(21);
 
     for (const row of screen.getAllByRole('row')) {
-      expect(row.querySelectorAll('[role="gridcell"]')).toHaveLength(4);
+      expect(row.querySelectorAll('[role="gridcell"]')).toHaveLength(3);
     }
   });
 
@@ -381,23 +378,16 @@ describe('a grouped table under the grid ARIA model', () => {
     const detailRow = screen.getAllByRole('row')[1];
     const cells = [...(detailRow?.querySelectorAll('[role="gridcell"]') ?? [])];
 
-    // City, District, Id, Id·Sum — both keys are hoisted to the head and blank
+    // City, District, Id·Sum — both keys are hoisted to the head and blank
     // here. The measure column is blank too, and for a different reason: a
     // detail row holds no aggregate, so there is nothing for it to state.
-    expect(cells.map((cell) => cell.textContent)).toStrictEqual([
-      '',
-      '',
-      '1',
-      '',
-    ]);
+    expect(cells.map((cell) => cell.textContent)).toStrictEqual(['', '', '']);
 
     // Empty means *empty*, not an empty `<span title="">`. The descriptor hands
     // the two key cells a fragment rather than `undefined` precisely so the
     // cell holds no element at all — text content alone cannot tell the two
     // apart. The measure cell is an ordinary data cell with no field behind it,
     // so it takes the default branch and does render a span.
-    expect(cells.map((cell) => cell.children.length)).toStrictEqual([
-      0, 0, 1, 1,
-    ]);
+    expect(cells.map((cell) => cell.children.length)).toStrictEqual([0, 0, 1]);
   });
 });
