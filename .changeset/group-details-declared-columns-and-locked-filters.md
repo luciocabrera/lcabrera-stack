@@ -29,6 +29,12 @@ Both are route-declared and re-asserted unconditionally by
 `createTableRouteLoader`, so the client-controlled UI-flags cookie can neither
 claim nor deny either one.
 
+`resolveLockedFilters` may answer synchronously or with a promise, and it is
+started alongside the grouping-capability resolver rather than after it. Whichever
+way either one fails — a throw where it stands, or a rejected promise — the loader
+rejects with the first failure while the other's promise stays attended, so a
+failing pair leaves no unhandled rejection behind.
+
 **Breaking, `@lcabrera/server`: `toGroupHeading` is replaced by
 `resolveGroupRestriction`,** at
 `@lcabrera/server/db/olap/resolve-group-restriction.util`. It answers the same

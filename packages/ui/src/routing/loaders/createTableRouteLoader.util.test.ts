@@ -92,6 +92,34 @@ const uiFlagsCookie = (state: Record<string, unknown>) =>
     JSON.stringify({ value: state, version: 1 }),
   )}`;
 
+/** Node raises an unhandled rejection as a process event, so the assertion reads one. */
+const watchUnhandledRejections = async (run: () => Promise<void>) => {
+  const unhandled: unknown[] = [];
+  const record = (reason: unknown) => {
+    unhandled.push(reason);
+  };
+
+  process.on('unhandledRejection', record);
+
+  try {
+    await run();
+    await new Promise((resolve) => {
+      setTimeout(resolve, 10);
+    });
+  } finally {
+    process.off('unhandledRejection', record);
+  }
+
+  return unhandled;
+};
+
+const rejectsLater = (message: string) =>
+  new Promise<never>((_resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error(message));
+    }, 0);
+  });
+
 const layoutCookie = ({
   slice,
   value,
@@ -910,14 +938,7 @@ describe('createTableRouteLoader', () => {
     });
 
     it('surfaces a rejecting capability resolver and leaves no unhandled rejection', async () => {
-      const unhandled: unknown[] = [];
-      const record = (reason: unknown) => {
-        unhandled.push(reason);
-      };
-
-      process.on('unhandledRejection', record);
-
-      try {
+      const unhandled = await watchUnhandledRejections(async () => {
         await expect(
           invoke({
             config: {
@@ -931,14 +952,47 @@ describe('createTableRouteLoader', () => {
             },
           }),
         ).rejects.toThrow('catalogue');
+      });
 
-        await new Promise((resolve) => {
-          setTimeout(resolve, 0);
-        });
-      } finally {
-        process.off('unhandledRejection', record);
-      }
+      expect(unhandled).toEqual([]);
+    });
 
+    it('surfaces a synchronously throwing restriction resolver and leaves no unhandled rejection', async () => {
+      const unhandled = await watchUnhandledRejections(async () => {
+        await expect(
+          invoke({
+            config: {
+              meta: { isGroupingEnabled: true },
+              resolveGroupingCapabilities: () => rejectsLater('catalogue'),
+              resolveLockedFilters: () => {
+                throw new Error('restriction');
+              },
+            },
+          }),
+        ).rejects.toThrow('restriction');
+      });
+
+      expect(unhandled).toEqual([]);
+    });
+
+    it('starts the restriction resolver even when the capability resolver throws synchronously', async () => {
+      const resolveLockedFilters = vi.fn(() => rejectsLater('restriction'));
+
+      const unhandled = await watchUnhandledRejections(async () => {
+        await expect(
+          invoke({
+            config: {
+              meta: { isGroupingEnabled: true },
+              resolveGroupingCapabilities: () => {
+                throw new Error('catalogue');
+              },
+              resolveLockedFilters,
+            },
+          }),
+        ).rejects.toThrow('catalogue');
+      });
+
+      expect(resolveLockedFilters).toHaveBeenCalledTimes(1);
       expect(unhandled).toEqual([]);
     });
   });

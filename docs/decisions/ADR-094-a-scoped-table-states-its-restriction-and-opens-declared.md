@@ -159,17 +159,33 @@ holds it now is a **contract test** that drives both resolvers over the same set
 of requests and asserts they agree on whether the request is refused and on the
 sentence; it fails on exactly that gap.
 
-**6c. Two injected resolvers are started together and settled together.** Both
-reach a database, so the loader starts them before it awaits either — the same
-overlap the data query already gets. Awaiting them _in sequence_ is the trap: a
-rejection in the first means the second is never awaited, and a promise that
-rejects with no handler attached is an unhandled rejection, which in Node is a
-process-level event rather than a caught error. `Promise.all` is what avoids it,
-because it subscribes to every input at the call and so leaves none unattended;
-the first rejection is still what surfaces. The empty capability map is a typed
-constant rather than an inline `{}` for a narrower reason: in an array literal
-TypeScript widens the union of a record and a bare object literal to their common
-supertype, and every reader of the map then indexes an empty type.
+**6c. Two injected resolvers are started together and settled together, each
+through a starter.** Both reach a database, so the loader starts them before it
+awaits either — the same overlap the data query already gets. Awaiting them _in
+sequence_ is the first trap: a rejection in the first means the second is never
+awaited, and a promise that rejects with no handler attached is an unhandled
+rejection, which in Node is a process-level event rather than a caught error.
+`Promise.all` answers that one, because it subscribes to every input at the call
+and so leaves none unattended; the first rejection is still what surfaces.
+
+It does not answer the second, and the two look identical in the source. A
+resolver may answer **synchronously** — the signature says so, and a route whose
+answer needs no database is entitled to. An array literal evaluates left to
+right and aborts on the first element that throws, so a synchronous throw in the
+second element means `Promise.all` is never called and the promise the first
+element already started is stranded: the caller receives the throw, and the
+strand surfaces later as an unhandled rejection naming the _other_ resolver.
+That is the same orphan the combinator was added to close, with the roles
+swapped, and no combinator can close it — nothing has been handed to one yet.
+Each resolver is therefore started through `startInjectedResolver`, which calls
+it and returns a promise whatever it does, so a synchronous throw arrives as a
+rejection `Promise.all` owns and cannot abort the literal that starts the other.
+Both still start, and neither waits on the other.
+
+The empty capability map is a typed constant rather than an inline `{}` for a
+narrower reason: in an array literal TypeScript widens the union of a record and
+a bare object literal to their common supertype, and every reader of the map then
+indexes an empty type.
 
 **7. A view reached by a link is left by rebuilding a URL, not by going back.**
 Closing such a view drops the params that scope it and keeps every other, rather
@@ -222,11 +238,12 @@ Two structurally identical shapes now describe one thing, one per package. They
 can drift, and nothing but a consumer compiling against both would notice. That
 is the standing cost of ADR-039 and is accepted here on the same grounds.
 
-A third injected resolver would have to join the `Promise.all` rather than be
-awaited beside it, and nothing enforces that — the sequential shape compiles, runs
-green on every route in this repository, and only misbehaves for a consumer whose
-route declares two resolvers and whose first one fails. The test that holds it
-asserts on a process-level event rather than on a return value, which is an
+A third injected resolver would have to be started through the starter and join
+the `Promise.all`, and nothing enforces either half — both the sequential shape
+and the bare array literal compile, run green on every route in this repository,
+and misbehave only for a consumer whose route declares two resolvers and whose
+first one fails or whose second one throws where it stands. The tests that hold
+it assert on a process-level event rather than on a return value, which is an
 unusual enough shape to be worth knowing is there.
 
 The refusal vocabulary is now shared by two resolvers, and a reason added to it

@@ -19,6 +19,7 @@ import { sanitizeSorting } from '../shared/sanitizeSorting.util';
 import { appendDistinctFilterDescriptors } from './appendDistinctFilterDescriptors.util';
 import { readTableLoaderStateFromRequest } from './readTableLoaderStateFromRequest.util';
 import { resolveTableCapabilityMeta } from './resolveTableCapabilityMeta.util';
+import { startInjectedResolver } from './startInjectedResolver.util';
 
 /** Typed, so the tuple below does not widen the capability map to its supertype. */
 const NO_GROUPING_CAPABILITIES: Readonly<
@@ -201,12 +202,14 @@ export const createTableRouteLoader = <
       totalsPlacement,
     });
 
-    // Settled together: awaited in sequence, a rejection in one leaves the other unhandled.
+    // Started together and settled together, so neither can be stranded (ADR-094).
     const [groupingCapabilities, lockedFilters] = await Promise.all([
-      resolveGroupingCapabilities && capabilityMeta.isGroupingEnabled
-        ? resolveGroupingCapabilities()
-        : NO_GROUPING_CAPABILITIES,
-      resolveLockedFilters?.({ request }),
+      startInjectedResolver(() =>
+        resolveGroupingCapabilities && capabilityMeta.isGroupingEnabled
+          ? resolveGroupingCapabilities()
+          : NO_GROUPING_CAPABILITIES,
+      ),
+      startInjectedResolver(() => resolveLockedFilters?.({ request })),
     ]);
 
     return {
