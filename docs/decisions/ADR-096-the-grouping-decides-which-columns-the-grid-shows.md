@@ -3,7 +3,7 @@ governs:
   - ui
 ---
 
-# ADR-095 — The grouping decides which columns the grid shows, and the settings drawer reads the same derivation
+# ADR-096 — The grouping decides which columns the grid shows, and the settings drawer reads the same derivation
 
 **Status:** Accepted
 
@@ -205,5 +205,7 @@ why the scope step writes no state of its own.
 - [ADR-058](./ADR-058-grouping-legality-by-analytical-role.md),
   [ADR-063](./ADR-063-request-shaping-capabilities-on-the-loader-meta.md) — the
   per-column legality the prompt reads and does not decide
+- [ADR-095](./ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md)
+  — why the reasoning above is here rather than beside the code it governs
 - [`packages/ui/src/components/Table/ARCHITECTURE.md`](../../packages/ui/src/components/Table/ARCHITECTURE.md)
   — the Layout section

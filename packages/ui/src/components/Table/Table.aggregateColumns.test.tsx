@@ -297,7 +297,7 @@ describe('a column carrying several measures', () => {
     ).toBe('ascending');
   });
 
-  it('leaves a detail row no cell of its own, a limitation ADR-095 records', () => {
+  it('leaves a detail row no cell of its own, a limitation ADR-096 records', () => {
     renderGrid();
 
     const detail = screen.getAllByRole('row').at(-1);

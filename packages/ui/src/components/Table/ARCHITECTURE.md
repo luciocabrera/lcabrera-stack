@@ -312,7 +312,7 @@ the primary key included, since a row id is resolved from the declared columns
 and never from the painted list. `withGroupedColumnScope` then drops every
 column the grouping neither keys nor measures, so the grid holds the group keys,
 the measures and the row-actions column and nothing else
-([ADR-095](../../../../../docs/decisions/ADR-095-the-grouping-decides-which-columns-the-grid-shows.md)).
+([ADR-096](../../../../../docs/decisions/ADR-096-the-grouping-decides-which-columns-the-grid-shows.md)).
 `withGroupedColumnLayout` runs last and hoists each group key to the head of the
 order and of the left pin, in key order, forcing it visible
 ([ADR-080](../../../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
@@ -403,7 +403,7 @@ the other direction, when the grouping clears while such a sort is applied.
 **A detail row arriving in a grouped grid renders blank, and that is a known
 limitation rather than an oversight.** Every row renders over the same
 partition (ADR-065), and a grouped grid paints the group keys and the measures
-alone (ADR-095) — so such a row has nothing to show: its key cells blank because
+alone (ADR-096) — so such a row has nothing to show: its key cells blank because
 the group row above states the value, and the measure columns are fields it does
 not carry. Keeping the unmeasured columns would fix it and cost more than it
 saves: they can carry no aggregate, so each would draw the em dash on every
