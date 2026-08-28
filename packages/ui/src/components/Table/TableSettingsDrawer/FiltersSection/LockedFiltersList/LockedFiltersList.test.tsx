@@ -11,11 +11,11 @@ import { LockedFiltersList } from './LockedFiltersList.component';
 
 afterEach(cleanup);
 
-const GROUP: TableLockedFilters = {
+const RESTRICTION: TableLockedFilters = {
   entries: [
-    { columnKey: 'category', label: 'Category', value: 'Automotive' },
-    { columnKey: 'subcategory', label: 'Subcategory', value: 'Exterior' },
-    { columnKey: 'customer_type', label: 'Customer Type', value: 'Business' },
+    { columnKey: 'region', label: 'Region', value: 'North' },
+    { columnKey: 'segment', label: 'Segment', value: 'Retail' },
+    { columnKey: 'tier', label: 'Tier', value: 'Gold' },
   ],
 };
 
@@ -31,9 +31,9 @@ const renderIn = (lockedFilters?: TableLockedFilters) => {
 
 describe('LockedFiltersList', () => {
   it('lists one entry per restriction, with its column label and value', () => {
-    renderIn(GROUP);
+    renderIn(RESTRICTION);
 
-    for (const { columnKey, label, value } of GROUP.entries) {
+    for (const { columnKey, label, value } of RESTRICTION.entries) {
       const entry = screen.getByTestId(`locked-filter-${columnKey}`);
 
       expect(entry.textContent).toContain(label);
@@ -42,23 +42,21 @@ describe('LockedFiltersList', () => {
   });
 
   it('lists them in the order the restriction states, outermost first', () => {
-    renderIn(GROUP);
+    renderIn(RESTRICTION);
 
     expect(
       [...screen.getByTestId('locked-filters-list').querySelectorAll('li')].map(
         (entry) => entry.dataset.testid,
       ),
     ).toEqual([
-      'locked-filter-category',
-      'locked-filter-subcategory',
-      'locked-filter-customer_type',
+      'locked-filter-region',
+      'locked-filter-segment',
+      'locked-filter-tier',
     ]);
   });
 
   it('offers no control that could remove or edit one', () => {
-    // The restriction is what makes this view that group's. A control able to
-    // take it off would leave the heading naming a group the rows are not in.
-    renderIn(GROUP);
+    renderIn(RESTRICTION);
 
     const section = screen.getByTestId('locked-filters-list');
 
@@ -68,9 +66,7 @@ describe('LockedFiltersList', () => {
   });
 
   it('counts separately from the reader-removable filters', () => {
-    // `Active Filters (n)` answers "how many can I take off"; an entry no
-    // control removes is not one of them, so it gets its own heading and count.
-    renderIn(GROUP);
+    renderIn(RESTRICTION);
 
     expect(screen.getByTestId('locked-filters-list').textContent).toContain(
       'Locked Filters (3)',
@@ -78,13 +74,16 @@ describe('LockedFiltersList', () => {
   });
 
   it('states why a restriction could not be read instead of listing nothing', () => {
-    // An empty list under this heading reads as "nothing restricts these rows",
-    // which is the opposite of what a refused token means.
-    renderIn({ entries: [], refusal: 'This link does not name a group.' });
+    renderIn({
+      entries: [],
+      refusal: 'This link does not name what it restricts.',
+    });
 
     const section = screen.getByTestId('locked-filters-list');
 
-    expect(section.textContent).toContain('This link does not name a group.');
+    expect(section.textContent).toContain(
+      'This link does not name what it restricts.',
+    );
     expect(section.querySelectorAll('li')).toHaveLength(0);
   });
 

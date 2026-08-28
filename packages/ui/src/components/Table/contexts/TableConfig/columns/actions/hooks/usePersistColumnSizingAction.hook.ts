@@ -7,7 +7,8 @@ import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
  * `/_action/persist-cookie` server action (`Set-Cookie`).
  * Replaces the old client-side `document.cookie` write: the cookie is still the only
  * channel the SSR loader can read, so the width saved here is the width the next document
- * paints with.
+ * paints with. A transient column layout writes none
+ * ([ADR-094](../../../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
  */
 export const usePersistColumnSizingAction = <TData>() => {
   const { columnsStore, metaStore } = useTableConfigContextValue<TData>();
@@ -18,8 +19,6 @@ export const usePersistColumnSizingAction = <TData>() => {
   return () => {
     const metaState = metaStore.get();
 
-    // A transient layout is not seeded from the cookie, so a width written here
-    // would be carried on every request and read by nobody.
     if (metaState?.isColumnLayoutTransient === true) return;
 
     const entry = buildColumnSizingCookieEntry<TData>({

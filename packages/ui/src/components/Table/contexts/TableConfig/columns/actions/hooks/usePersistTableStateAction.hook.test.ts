@@ -294,9 +294,6 @@ describe('usePersistTableStateAction', () => {
       value: [],
     });
   });
-  // A table whose layout is transient is never seeded from the cookie, so a
-  // slice written here would ride in every subsequent request's Cookie header
-  // for a loader that does not read it.
   describe('a transient column layout', () => {
     it('drops the state slices and keeps the URL params', () => {
       metaStoreGetMock.mockReturnValue({ isColumnLayoutTransient: true });
@@ -322,6 +319,7 @@ describe('usePersistTableStateAction', () => {
       });
 
       expect(serializeStateSliceMock).not.toHaveBeenCalled();
+      expect(notifyMock).toHaveBeenCalledTimes(1);
       expect(submitMock).toHaveBeenCalledWith(
         {
           currentUrl: '/enterprise-orders?page=2',
@@ -336,8 +334,7 @@ describe('usePersistTableStateAction', () => {
       );
     });
 
-    it('writes nothing at all when every entry was a layout slice', () => {
-      // An empty write is a round trip that sets no cookie and changes no URL.
+    it('writes nothing, and claims nothing, when every entry was a layout slice', () => {
       metaStoreGetMock.mockReturnValue({ isColumnLayoutTransient: true });
 
       const { result } = renderHook(() => usePersistTableStateAction());
@@ -351,6 +348,7 @@ describe('usePersistTableStateAction', () => {
       });
 
       expect(submitMock).not.toHaveBeenCalled();
+      expect(notifyMock).not.toHaveBeenCalled();
     });
 
     it('still persists every slice on an ordinary table', () => {

@@ -13,7 +13,7 @@ area:
   - packages/server/src/db/olap/**
   - apps/showcase/src/routes/enterprise-orders/**
 started: 2026-08-27
-updated: 2026-08-27
+updated: 2026-08-28
 plan: (none)
 pr: 1024
 issue: #1021
@@ -27,12 +27,12 @@ The group details modal opens at the declared columns and states its group.
 restriction the table states and cannot change, rendered as its own section of
 the Filters panel) and `isColumnLayoutTransient` (the column layout is neither
 restored from the persistence cookie nor written to it). `@lcabrera/server`'s
-`toGroupHeading` becomes `toGroupRestrictions`, answering the same parse as a
-list so a panel and a title cannot name different groups. The showcase's
-group-details route declares both.
+`toGroupHeading` becomes `resolveGroupRestriction`, which answers a request as a
+list of restrictions and refuses one it cannot read. Recorded as
+[ADR-094](../../decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md).
 
 ## Status / next
 
-- Current step: implemented; `vp run check:safe` green, PR readied for review
+- Current step: round 2 — review threads answered, `vp run check:safe` green
 - Blockers: none
 - Next: address review findings

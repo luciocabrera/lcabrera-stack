@@ -16,45 +16,29 @@ import { NotificationProvider } from '#ui/contexts/NotificationContext';
 
 import { FiltersSection } from './FiltersSection.component';
 
-/**
- * The filters panel of a table whose read is already scoped by something it cannot change
- * — a drill into one group (ADR-087).
- *
- * These mount the real panel rather than a mock of it, because the property under test is
- * about two surfaces that do not know about each other: the reader's own filters live in
- * the drawer's draft store, the restriction lives on the table's meta, and "clearing one
- * leaves the other standing" is only true while that stays so.
- */
 type Row = {
-  readonly customer_type: string;
-  readonly order_id: number;
-  readonly order_status: string;
+  readonly id: number;
+  readonly region: string;
+  readonly status: string;
 };
 
 afterEach(cleanup);
 
 const columns: TableColumn<Row>[] = [
-  {
-    dataType: 'number',
-    isPrimaryKey: true,
-    key: 'order_id',
-    label: 'Order ID',
-  },
-  { dataType: 'string', key: 'order_status', label: 'Status' },
-  { dataType: 'string', key: 'customer_type', label: 'Customer Type' },
+  { dataType: 'number', isPrimaryKey: true, key: 'id', label: 'ID' },
+  { dataType: 'string', key: 'status', label: 'Status' },
+  { dataType: 'string', key: 'region', label: 'Region' },
 ];
 
 const LOCKED: TableLockedFilters = {
   entries: [
-    { columnKey: 'category', label: 'Category', value: 'Automotive' },
-    { columnKey: 'customer_type', label: 'Customer Type', value: 'Business' },
+    { columnKey: 'region', label: 'Region', value: 'North' },
+    { columnKey: 'tier', label: 'Tier', value: 'Gold' },
   ],
 };
 
-// `ColumnFiltersState` is a total record over the row's keys; a real store never
-// holds an entry per column, so the cast is what every caller of it does.
 const READER_FILTER = {
-  order_status: { operator: 'equals', type: 'text', value: 'Shipped' },
+  status: { operator: 'equals', type: 'text', value: 'Open' },
 } as ColumnFiltersState<Row>;
 
 const Harness = () => (
@@ -78,10 +62,7 @@ const renderPanel = () => {
   );
 };
 
-/**
- * Both toolbars carry these buttons by design — the section header's compact
- * variant and the labelled footer one — and either must behave the same.
- */
+/** Rendered twice by design: the section header's variant and the footer's. */
 const clickInHeaderToolbar = (name: string) => {
   fireEvent.click(screen.getAllByRole('button', { name })[0] as HTMLElement);
 };
@@ -98,7 +79,7 @@ describe('FiltersSection with locked filters', () => {
     expect(screen.getByTestId('locked-filters-list').textContent).toContain(
       'Locked Filters (2)',
     );
-    expect(screen.getByTestId('filter-item-order_status')).not.toBeNull();
+    expect(screen.getByTestId('filter-item-status')).not.toBeNull();
     expect(document.body.textContent).toContain('Active Filters (1)');
   });
 
@@ -107,11 +88,11 @@ describe('FiltersSection with locked filters', () => {
 
     clickInHeaderToolbar('Clear Filters');
 
-    expect(screen.queryByTestId('filter-item-order_status')).toBeNull();
+    expect(screen.queryByTestId('filter-item-status')).toBeNull();
     expect(document.body.textContent).toContain('Active Filters (0)');
     expect(lockedEntryKeys()).toEqual([
-      'locked-filter-category',
-      'locked-filter-customer_type',
+      'locked-filter-region',
+      'locked-filter-tier',
     ]);
   });
 
@@ -121,12 +102,10 @@ describe('FiltersSection with locked filters', () => {
     clickInHeaderToolbar('Clear Filters');
     clickInHeaderToolbar('Reset Filters');
 
-    // Reset re-seeds the draft from the table, so the reader's filter is back —
-    // and the restriction never moved either way.
-    expect(screen.getByTestId('filter-item-order_status')).not.toBeNull();
+    expect(screen.getByTestId('filter-item-status')).not.toBeNull();
     expect(lockedEntryKeys()).toEqual([
-      'locked-filter-category',
-      'locked-filter-customer_type',
+      'locked-filter-region',
+      'locked-filter-tier',
     ]);
   });
 });

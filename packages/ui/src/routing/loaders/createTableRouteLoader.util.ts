@@ -72,14 +72,11 @@ type CreateTableRouteLoaderArgs<
     Readonly<Record<string, TableColumnGroupingCapability>>
   >;
   /**
-   * What already scopes this route's read and the table cannot change — a drill's group
-   * token, read back out of the request (ADR-087).
-   * Injected for the same reason the capability resolver above is: naming the restriction
-   * takes the route's own catalogue, which this client-safe package may not reach
-   * (ADR-038). It receives the request because the answer is per-request, not per-route.
-   * **Answer with a `refusal` rather than with nothing when the restriction is unreadable.**
-   * `undefined` renders no panel section at all, which on a scoped read says the rows are
-   * unrestricted — the one statement that is never true here.
+   * What already scopes this route's read and the table cannot change, resolved per
+   * request. Injected for the same reason the capability resolver above is: it reaches the
+   * route's own catalogue, which this client-safe package may not (ADR-038).
+   * Answer with a `refusal`, never with `undefined`, when the restriction is unreadable
+   * ([ADR-094](../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
    */
   readonly resolveLockedFilters?: (args: {
     readonly request: Request;
@@ -204,11 +201,6 @@ export const createTableRouteLoader = <
       totalsPlacement,
     });
 
-    // Started before the await below for the same reason the data query was:
-    // both reach the route's own database, and queueing them would add a round
-    // trip to every drill. Not `Promise.all` — an array literal collapses the
-    // capability map's union with `{}` to their common supertype, and every
-    // consumer of `groupingCapabilities` then indexes an empty object type.
     const lockedFiltersResult = resolveLockedFilters?.({ request });
 
     const groupingCapabilities =
@@ -268,11 +260,6 @@ export const createTableRouteLoader = <
         // loader here reads back differently.
         hasDefaultGrouping:
           defaultGrouping !== undefined && capabilityMeta.isGroupingEnabled,
-        // Same rule, twice more. `isColumnLayoutTransient` decides whether the
-        // cookie is read back at all, so a cookie able to deny it is a cookie
-        // able to restore the very layout the route said not to restore. And
-        // `lockedFilters` is a sentence about what scopes these rows: a cookie
-        // able to seed one would print a restriction the read is not under.
         isColumnLayoutTransient,
         isUrlStateNested,
         lockedFilters,

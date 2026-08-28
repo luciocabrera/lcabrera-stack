@@ -12,17 +12,9 @@ const UNREADABLE_RESTRICTION =
   'These rows are restricted, and the link does not say what to.';
 
 /**
- * What already restricts these rows, which this table states and cannot change (ADR-087).
- *
- * It is a **separate** section from `ActiveFiltersList` rather than extra rows inside it,
- * and the count stays separate too: `Active Filters (n)` answers "how many filters can I
- * take off", and an entry no control removes is not one of them. Nothing here is a
- * `ColumnFilter`, so `Clear Filters` and `Reset Filters` do not reach it — closing the view
- * is what clears it.
- *
- * A route that declares no restriction renders nothing here; one whose restriction could
- * not be read renders **why**, because an empty list under this heading would say the rows
- * are unrestricted — which is exactly what a refused token does not mean.
+ * The restriction this table states and cannot change, as its own section of the filters
+ * panel
+ * ([ADR-094](../../../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
  */
 export const LockedFiltersList = () => {
   const lockedFilters = useGetTableLockedFilters();

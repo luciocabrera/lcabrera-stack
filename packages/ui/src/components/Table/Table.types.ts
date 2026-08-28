@@ -380,26 +380,19 @@ export type TableGroupRowSummary = {
 };
 
 /**
- * A restriction the table **states** and cannot change: the route already scoped the read
- * by it, and the filters panel says so instead of reading as unrestricted (ADR-087).
- * It is not a `ColumnFilter` and never becomes one — a group key truncated to a month is a
- * half-open range, and the filter vocabulary's `between` maps to `gte`/`lte`, which would
- * pull in the first row of the next month (ADR-087 decision 4).
+ * One term of a restriction the table states and cannot change. Never a `ColumnFilter`
+ * ([ADR-094](../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
  */
 export type TableLockedFilter = {
   readonly columnKey: string;
-  /** Already formatted for a reader; the table does not re-derive it from a row. */
+  /** Already formatted for a reader; the table does not derive it from a row. */
   readonly label: string;
   readonly value: string;
 };
 
 export type TableLockedFilters = {
   readonly entries: readonly TableLockedFilter[];
-  /**
-   * Why the restriction could not be read, rendered in place of the entries. An unreadable
-   * one must not draw as an empty list: that reads as "nothing restricts these rows", which
-   * is the opposite of what a refused token means.
-   */
+  /** Why the restriction could not be read. No entries and no refusal is not a state. */
   readonly refusal?: string;
 };
 
@@ -446,13 +439,9 @@ export type TableMetaState = {
   readonly initialPageSize: number;
   readonly isBordered: boolean;
   /**
-   * Route-declared: this table's column order, pinning, sizing and visibility are neither
-   * restored from the persistence cookie nor written to it, so every open starts from the
-   * declared columns in declared order. Absent means off — the layout persists, which is
-   * what every ordinary table wants.
-   * It is for a view a reader arrives at rather than keeps: a modal over one group's rows
-   * is a look, and inheriting the shape of an earlier, unrelated look is not a preference
-   * anyone expressed (ADR-087).
+   * Route-declared: the column layout is neither restored from the persistence cookie nor
+   * written to it, so the grid opens at its declared columns every time. Absent means off
+   * ([ADR-094](../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
    */
   readonly isColumnLayoutTransient?: boolean;
   readonly isColumnSettingsOpen: boolean;
@@ -478,9 +467,8 @@ export type TableMetaState = {
   readonly loadMorePageSize: number;
   readonly locale?: string;
   /**
-   * Route-declared (ADR-063): what already scopes this table's read, stated so the filters
-   * panel does not read as unrestricted. Absent means nothing the table cannot change is
-   * restricting it.
+   * Route-declared (ADR-063, ADR-094): what already scopes this table's read. Absent means
+   * nothing the table cannot change is restricting it.
    */
   readonly lockedFilters?: TableLockedFilters;
   readonly overscan: number;

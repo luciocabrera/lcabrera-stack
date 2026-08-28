@@ -197,16 +197,18 @@ supplies its page ceiling, its tiebreaker column and the catalogue lookup, and
 nothing else
 ([ADR-087](../../../docs/decisions/ADR-087-a-group-opens-its-rows-in-a-route.md)).
 
-`toGroupRestrictions` (`to-group-restrictions.util.ts`) is how that route states
-which group it is showing: one `{ columnKey, label, value }` entry per key,
-outermost first, for every surface that has to name the group — a heading, a
-filters panel — so none of them can end up naming a different one. The values are
-read back out of the token, which carries raw ones because `encodeDrillGroup`
-drops the group row's formatted label on purpose; a truncated key is formatted
-through `toGroupPeriodLabel` and not `toGroupLabel`, so it reads `2021-06` like
-the row that was clicked rather than the instant underneath it. `undefined` means
-the request named no readable group — the same answer `parseDrillGroup` gives a
-token it refuses, so a caller may not draw it as "nothing restricts these rows".
+`resolveGroupRestriction` (`resolve-group-restriction.util.ts`) is the other half
+of that request: what **restricts** the rows it is answered with, as one
+`{ columnKey, label, value }` entry per group key, outermost first, for a surface
+that has to state it. It refuses an absent token where the caller requires one and
+an unreadable one always, carrying the same sentence out of
+`olap.constants.ts` that the refused read renders — so a panel and a
+grid answering the same request never disagree. Values are read back out of the
+token, which carries raw ones because `encodeDrillGroup` drops the group row's
+formatted label on purpose; a truncated key is formatted through
+`toGroupPeriodLabel`, so it reads as the period the row was keyed by rather than
+the instant underneath it
+([ADR-094](../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
 
 All of this lived in route code until
 [ADR-082](../../../docs/decisions/ADR-082-the-olap-seam-lives-in-the-packages.md);

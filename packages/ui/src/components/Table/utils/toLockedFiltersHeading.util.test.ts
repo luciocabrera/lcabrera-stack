@@ -7,18 +7,12 @@ describe('toLockedFiltersHeading', () => {
     expect(
       toLockedFiltersHeading({
         entries: [
-          { columnKey: 'category', label: 'Category', value: 'Automotive' },
-          { columnKey: 'subcategory', label: 'Subcategory', value: 'Exterior' },
-          {
-            columnKey: 'customer_type',
-            label: 'Customer Type',
-            value: 'Business',
-          },
+          { columnKey: 'region', label: 'Region', value: 'North' },
+          { columnKey: 'segment', label: 'Segment', value: 'Retail' },
+          { columnKey: 'tier', label: 'Tier', value: 'Gold' },
         ],
       }),
-    ).toBe(
-      'Category: Automotive · Subcategory: Exterior · Customer Type: Business',
-    );
+    ).toBe('Region: North · Segment: Retail · Tier: Gold');
   });
 
   it('answers undefined when the table declares no restriction', () => {
@@ -26,8 +20,6 @@ describe('toLockedFiltersHeading', () => {
   });
 
   it('answers undefined for a restriction that could not be read', () => {
-    // A caller falls back to its own title rather than heading the view with an
-    // empty line. What the restriction was is said in the panel, not here.
     expect(
       toLockedFiltersHeading({ entries: [], refusal: 'Unreadable link.' }),
     ).toBeUndefined();

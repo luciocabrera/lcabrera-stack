@@ -10,7 +10,12 @@ import {
 import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
 import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
 
-/** Persists table state to the **cookie**, written via a server action (Set-Cookie header). */
+/**
+ * Persists table state to the **cookie**, written via a server action (Set-Cookie header).
+ * A transient column layout keeps its URL params, writes no state slice, and reports no
+ * success for a write it did not make
+ * ([ADR-094](../../../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
+ */
 export const usePersistTableStateAction = () => {
   const { metaStore } = useTableConfigContextValue();
   const persistCookie = usePersistCookieAction({
@@ -36,11 +41,6 @@ export const usePersistTableStateAction = () => {
     const paramPrefix =
       meta?.isUrlStateNested === true ? TABLE_NESTED_URL_STATE_PREFIX : '';
 
-    // A table whose layout is transient is never seeded from the cookie
-    // (`readTableLoaderStateFromRequest`), so a slice written here would grow
-    // every subsequent request's Cookie header carrying state no loader reads.
-    // Only the slices go: the URL params beside them are this table's filters
-    // and sort, which are read back and stay real.
     const persistedEntries =
       meta?.isColumnLayoutTransient === true
         ? entries.filter(({ slice }) => slice === undefined)
@@ -81,6 +81,10 @@ export const usePersistTableStateAction = () => {
       notify(PERSISTENCE_SIZE_WARNING);
       return false;
     }
+    if (serializedEntries.length === 0) {
+      return true;
+    }
+
     notify({
       durationMs: 10_000,
       message: 'This table state has been updated successfully.',
@@ -88,13 +92,7 @@ export const usePersistTableStateAction = () => {
       variant: 'success' as const,
     });
 
-    // Write to cookie via server action — the loader reads it back on the next
-    // document request and seeds the store from it. A transient layout can
-    // filter every entry away, and an empty write is a round trip that sets
-    // nothing.
-    if (serializedEntries.length > 0) {
-      persistCookie(serializedEntries);
-    }
+    persistCookie(serializedEntries);
 
     return true;
   };

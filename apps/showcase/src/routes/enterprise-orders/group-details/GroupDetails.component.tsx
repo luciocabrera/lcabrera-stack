@@ -20,16 +20,9 @@ import { styles } from './GroupDetails.stylex';
 const FALLBACK_TITLE = 'Group';
 
 /**
- * **Closing rebuilds the list's URL rather than going back.** `navigate(-1)` would depend
- * on there being a history entry to return to, which a shared link opened in a new tab
- * does not have; dropping the `group` param and the modal's own nested ones keeps every
- * other, so the list reopens with the filters and grouping it was read under.
- * **The token is forwarded verbatim, never rebuilt.** The modal has no group row in hand —
- * it may have been opened from a link — so the URL is the only statement of which group
- * this is, and re-encoding it from parsed parts would be a second chance to get it wrong.
- * **The title and the Filters panel read one answer.** Both come off
- * `metaState.lockedFilters`, which the loader resolved from the token, so the dialog
- * cannot end up headed by a group the panel does not list.
+ * One group's rows over the list that summarised them
+ * ([ADR-087](../../../../../../docs/decisions/ADR-087-a-group-opens-its-rows-in-a-route.md),
+ * [ADR-094](../../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
  */
 export const GroupDetails = () => {
   const { metaState } = useLoaderData<typeof loader>();
@@ -39,10 +32,6 @@ export const GroupDetails = () => {
   const group = searchParams.get(OLAP_DRILL_GROUP_PARAM) ?? '';
 
   const handleClose = () => {
-    // The modal's own filters and sort go with the group param. They describe
-    // one group's set, so leaving them on the list's URL puts them in a shared
-    // link that reads as the list's own state, and hands the next group opened
-    // a floor taken from this one.
     const next = new URLSearchParams(
       [...searchParams].filter(
         ([key]) =>

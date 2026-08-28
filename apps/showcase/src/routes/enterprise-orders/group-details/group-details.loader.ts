@@ -12,7 +12,7 @@ import type {
 
 import { selectOrdersPage } from '../.server/enterpriseOrders.service';
 import { resolveOrdersGroupRead } from '../.server/resolveOrdersGroupRead.util';
-import { toOrderGroupLockedFilters } from '../.server/toOrderGroupLockedFilters.util';
+import { resolveOrdersGroupRestriction } from '../.server/resolveOrdersGroupRestriction.util';
 import {
   COLUMNS,
   GROUP_DETAILS_PERSISTENCE_KEY,
@@ -22,10 +22,12 @@ import {
 } from '../EnterpriseOrders.constants';
 
 /**
- * The rows underneath one group row, as an ordinary paginated table (ADR-087).
- * `isUrlStateNested` puts its own `filters` and `sorting` under a prefix, so it shares the
- * list's URL without re-filtering the list underneath it; the link seeds those from the
- * list's, which is the floor the group was computed under.
+ * The rows underneath one group row, as an ordinary paginated table
+ * ([ADR-087](../../../../../../docs/decisions/ADR-087-a-group-opens-its-rows-in-a-route.md),
+ * [ADR-094](../../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
+ * The three `meta` flags and the two resolvers are this route's whole binding: which
+ * params its state is written under, that it opens at its declared columns, and which
+ * table the group token and its granularities are resolved against.
  */
 export const loader = createTableRouteLoader<
   EnterpriseOrderTableRow,
@@ -36,8 +38,6 @@ export const loader = createTableRouteLoader<
   fetchPage: async ({ effectiveSorting, filters, request }) => {
     const resolved = await resolveOrdersGroupRead({
       filters: toQueryFilters({ filters }),
-      // This route serves one group and nothing else, so a request with no
-      // token is refused rather than read as the whole table.
       isGroupRequired: true,
       limit: INITIAL_PAGE_SIZE,
       params: new URL(request.url).searchParams,
@@ -56,19 +56,15 @@ export const loader = createTableRouteLoader<
   },
   filterOptions: { transport: 'loader' },
   meta: {
-    // A drill is a look at one group's rows, not a view a reader keeps: it opens
-    // at the columns COLUMNS declares, in that order, every time. Without this
-    // the layout comes out of the modal's own cookie, so an order shaped on some
-    // earlier, unrelated drill decides what this one shows first. Column sizing
-    // goes with it — the cookie carries the layout whole.
     isColumnLayoutTransient: true,
     isServerFilterEnabled: true,
     isUrlStateNested: true,
   },
   persistenceKey: GROUP_DETAILS_PERSISTENCE_KEY,
   resolveLockedFilters: ({ request }) =>
-    toOrderGroupLockedFilters({
+    resolveOrdersGroupRestriction({
       columns: COLUMNS,
+      isGroupRequired: true,
       params: new URL(request.url).searchParams,
     }),
   schemaName: SCHEMA_NAME,

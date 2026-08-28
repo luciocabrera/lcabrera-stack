@@ -18,16 +18,23 @@ export type GroupKeyTruncation = {
 };
 
 /**
- * One group key, as a statement of what restricts the rows a route serving that group
- * answers with (ADR-087).
- * `value` is already formatted for a reader — a truncated key through `toGroupPeriodLabel`,
- * everything else through `toGroupLabel` — because the raw key of a truncated group is a
- * boundary instant rather than the month the reader clicked.
+ * One group key, stated as what restricts the rows a request naming that group is answered
+ * with (ADR-094). `value` is already formatted for a reader, because the raw key of a
+ * truncated group is a boundary instant rather than the period it stands for.
  */
 export type GroupRestriction = {
   readonly columnKey: string;
   readonly label: string;
   readonly value: string;
+};
+
+/**
+ * The whole restriction, or why it could not be read. A refusal carries no entries, and a
+ * caller may not render that as "nothing restricts these rows" (ADR-094).
+ */
+export type GroupRestrictionStatement = {
+  readonly entries: readonly GroupRestriction[];
+  readonly refusal?: string;
 };
 
 /**

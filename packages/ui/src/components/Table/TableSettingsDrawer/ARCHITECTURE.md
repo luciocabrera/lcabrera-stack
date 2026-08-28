@@ -283,25 +283,18 @@ a toolbar in dual-variant mode.
 The Filters tab shows **two** lists, and the split is which store they come out
 of. `ActiveFiltersList` reads the drawer's draft `columnFilters` — the reader's
 own, each removable, each editable. `LockedFiltersList` reads
-`metaState.lockedFilters`, which the **route** resolved from the request and the
-loader wrote unconditionally, and offers no control at all
-([ADR-087](../../../../../../docs/decisions/ADR-087-a-group-opens-its-rows-in-a-route.md)).
+`metaState.lockedFilters`, written by the loader and never by this side, and
+renders no control over it.
 
-That split is what makes the rest fall out rather than needing to be arranged:
-`Clear Filters` and `Reset Filters` are drawer-draft actions, so they cannot
-reach a restriction, and `Active Filters (n)` keeps counting only what the reader
-can act on. The locked list carries its own heading and its own count.
+That split is the whole wiring: `Clear Filters` and `Reset Filters` write the
+draft, so they cannot reach a restriction, and `Active Filters (n)` keeps
+counting only what the drawer can change. The locked list carries its own heading
+and its own count, and renders `refusal` in place of an empty list.
 
-The one thing it must not do is draw an empty list. A route whose restriction
-could not be read — a drill whose `group` token does not parse — supplies
-`{ entries: [], refusal }`, and the panel renders the sentence: an empty list
-under this heading reads as "nothing restricts these rows", which is exactly what
-a refused token does not mean.
-
-Nothing here is a `ColumnFilter` and none of it becomes one. A group key
-truncated to a month is a half-open range, and the filter vocabulary's `between`
-maps to `gte`/`lte`, so a filter built from one would return the first row of the
-next month under the previous month's heading (ADR-087 decision 4).
+Why it is a separate list rather than read-only rows in the first one, why an
+empty list is the one thing it must not draw, and why none of it becomes a
+`ColumnFilter` are
+[ADR-094](../../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md).
 
 ### Section Toolbar Pattern
 

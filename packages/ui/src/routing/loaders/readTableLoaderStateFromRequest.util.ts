@@ -46,9 +46,9 @@ type ReadTableLoaderStateFromRequestArgs<
    */
   readonly includeGrouping?: boolean;
   /**
-   * On, the persisted column layout is not read at all: `columnOrder`, `columnPinning`,
-   * `columnSizing` and `columnVisibility` come back empty, so the table paints the columns
-   * the route declared, in the order it declared them, on every request.
+   * On, the persisted column layout is not read at all, so the grid paints its declared
+   * columns in declared order
+   * ([ADR-094](../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
    */
   readonly isColumnLayoutTransient?: boolean;
   /**
@@ -85,9 +85,6 @@ export const readTableLoaderStateFromRequest = <
     );
 
   const cookieHeader = request.headers.get('Cookie');
-  // Emptied here rather than at each of the four layout slices below: those are
-  // the whole of what the cookie says about layout, so one branch covers it and
-  // no later reader has to remember which four they were.
   const cookieState: Partial<PersistedState> = isColumnLayoutTransient
     ? {}
     : readPersistedStateFromCookie({

@@ -1,7 +1,10 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
 import { encodeDrillGroup } from '@lcabrera/api/olap/encode-drill-group.util';
+import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTableRouteLoader.util';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
+import { APP_ID } from '@/constants/app.constants';
 
 import { selectOrdersPage } from '../.server/enterpriseOrders.service';
 import {
@@ -15,10 +18,6 @@ vi.mock('../.server/enterpriseOrders.service', () => ({
   selectOrdersPage: vi.fn(async () => ({ data: [], hasMore: false, total: 0 })),
 }));
 
-/**
- * The group this modal is opened for, as the link writes it: three complete keys,
- * no subtotal.
- */
 const GROUP_PATH = [
   { columnKey: 'product_category', value: 'Automotive' },
   { columnKey: 'product_subcategory', value: 'Exterior' },
@@ -30,10 +29,7 @@ const groupToken = encodeDrillGroup({
   groupKeys: GROUP_PATH.map((entry) => entry.columnKey),
 });
 
-/**
- * A layout this modal was left in on some earlier drill, in the versioned envelope
- * the persist-cookie action writes and the loader reads back.
- */
+/** Keyed on `APP_ID`, which is what `getStorageKey` namespaces a table's slices with. */
 const layoutCookie = ({
   slice,
   value,
@@ -41,9 +37,14 @@ const layoutCookie = ({
   readonly slice: string;
   readonly value: unknown;
 }) =>
-  `table-state-showcase-${GROUP_DETAILS_PERSISTENCE_KEY}-${slice}=${encodeURIComponent(
+  `table-state-${APP_ID}-${GROUP_DETAILS_PERSISTENCE_KEY}-${slice}=${encodeURIComponent(
     JSON.stringify({ value, version: 1 }),
   )}`;
+
+const PERSISTED_ORDER = ['order_status', 'order_id'];
+
+const persistedOrderCookie = () =>
+  layoutCookie({ slice: 'columnOrder', value: PERSISTED_ORDER });
 
 type InvokeArgs = {
   readonly cookie?: string;
@@ -63,25 +64,19 @@ describe('group-details loader', () => {
     vi.mocked(selectOrdersPage).mockClear();
   });
 
-  // A drill is a look at one group's rows, not a view a reader keeps. Before
-  // this, the layout came out of the modal's own cookie, so an order shaped on
-  // some earlier, unrelated drill decided what this one showed first.
   describe('column layout', () => {
+    const persistedLayout = [
+      persistedOrderCookie(),
+      layoutCookie({
+        slice: 'columnPinning',
+        value: { left: ['order_status'], right: [] },
+      }),
+      layoutCookie({ slice: 'columnSizing', value: { order_id: 400 } }),
+      layoutCookie({ slice: 'columnVisibility', value: ['order_number'] }),
+    ].join('; ');
+
     it('opens at the declared columns whatever the persisted layout holds', async () => {
-      const result = await invoke({
-        cookie: [
-          layoutCookie({
-            slice: 'columnOrder',
-            value: ['order_status', 'order_id'],
-          }),
-          layoutCookie({
-            slice: 'columnPinning',
-            value: { left: ['order_status'], right: [] },
-          }),
-          layoutCookie({ slice: 'columnSizing', value: { order_id: 400 } }),
-          layoutCookie({ slice: 'columnVisibility', value: ['order_number'] }),
-        ].join('; '),
-      });
+      const result = await invoke({ cookie: persistedLayout });
 
       expect(result.metaState.isColumnLayoutTransient).toBe(true);
       expect(result.columnsState.columnOrder).toEqual([]);
@@ -91,22 +86,26 @@ describe('group-details loader', () => {
       });
       expect(result.columnsState.columnSizing).toEqual({});
       expect(result.columnsState.columnVisibility).toEqual(new Set());
+      expect(result.columnsState.columns[0]?.key).toBe('order_id');
     });
 
-    it('paints the declared list, in declared order, with order_id first', async () => {
-      // The declared order is the whole claim: nothing here reorders it, so the
-      // first painted column is the first COLUMNS names.
-      const result = await invoke({
-        cookie: layoutCookie({
-          slice: 'columnOrder',
-          value: ['order_status', 'order_id'],
-        }),
+    it('is a cookie this app really reads, so the assertion above can fail', async () => {
+      const ordinaryLoader = createTableRouteLoader({
+        appId: APP_ID,
+        columns: [...COLUMNS],
+        fetchPage: async () => ({ data: [], hasMore: false, total: 0 }),
+        persistenceKey: GROUP_DETAILS_PERSISTENCE_KEY,
+        tableName: 'enterprise_orders',
+        title: { plural: 'Orders', singular: 'Order' },
       });
 
-      expect(result.columnsState.columns.map((column) => column.key)).toEqual(
-        COLUMNS.map((column) => column.key),
-      );
-      expect(result.columnsState.columns[0]?.key).toBe('order_id');
+      const result = await ordinaryLoader({
+        request: new Request('http://localhost/enterprise-orders', {
+          headers: { cookie: persistedOrderCookie() },
+        }),
+      } as LoaderFunctionArgs);
+
+      expect(result.columnsState.columnOrder).toEqual(PERSISTED_ORDER);
     });
   });
 
@@ -136,9 +135,6 @@ describe('group-details loader', () => {
     });
 
     it('reads the token this request carries, never one a previous read saw', async () => {
-      // The route has no group row in hand — the link may have been pasted into
-      // a fresh tab — so the URL is the only statement of the group, and every
-      // request has to be answered from its own.
       await invoke();
 
       const second = await invoke({
@@ -163,8 +159,6 @@ describe('group-details loader', () => {
     });
 
     it('states why an unreadable token could not be read, rather than nothing', async () => {
-      // An empty entry list would read as "no filters applied", which on a route
-      // that refuses this very request says the rows are unrestricted.
       const result = await invoke({ group: 'not a token' });
 
       expect(result.metaState.lockedFilters?.entries).toEqual([]);
@@ -174,11 +168,6 @@ describe('group-details loader', () => {
     });
 
     it('adds no ColumnFilter, and leaves the token scoping the read', async () => {
-      // ADR-087 decision 4: the group travels as a token, and the entries are a
-      // statement rather than the mechanism. `toDrillRead` still turns it into
-      // the read's own query terms — which is why the entries must not become
-      // `ColumnFilter`s: a key truncated to a month is a half-open range, and
-      // the filter vocabulary's `between` maps to `gte`/`lte`.
       const result = await invoke();
 
       expect(result.columnsState.columnFilters).toEqual({});
@@ -190,8 +179,6 @@ describe('group-details loader', () => {
     });
 
     it('refuses the read rather than serving the whole table on a bad token', async () => {
-      // The panel's refusal and the grid's are two readings of one decision:
-      // `resolveGroupRead` answers `refused`, so no page is selected at all.
       await invoke({ group: 'not a token' });
 
       expect(vi.mocked(selectOrdersPage)).not.toHaveBeenCalled();

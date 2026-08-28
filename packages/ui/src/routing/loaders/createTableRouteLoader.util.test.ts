@@ -92,10 +92,7 @@ const uiFlagsCookie = (state: Record<string, unknown>) =>
     JSON.stringify({ value: state, version: 1 }),
   )}`;
 
-/**
- * One persisted layout slice, in the same versioned envelope the persist-cookie
- * action writes and `collectPersistedStateSlices` reads back.
- */
+/** One persisted layout slice, in the envelope the persist-cookie action writes. */
 const layoutCookie = ({
   slice,
   value,
@@ -308,9 +305,6 @@ describe('createTableRouteLoader', () => {
     });
 
     it('ignores an isColumnLayoutTransient injected through the UI-flags cookie', async () => {
-      // It decides whether the layout cookie is read back at all, so a cookie
-      // able to deny it is a cookie able to restore the very layout a route
-      // said not to restore.
       const { result } = await invoke({
         cookie: uiFlagsCookie({ isColumnLayoutTransient: true }),
       });
@@ -319,8 +313,6 @@ describe('createTableRouteLoader', () => {
     });
 
     it('ignores lockedFilters injected through the UI-flags cookie', async () => {
-      // A locked filter is a sentence about what scopes these rows. A cookie
-      // able to seed one prints a restriction the read is not under.
       const { result } = await invoke({
         cookie: uiFlagsCookie({
           lockedFilters: {
@@ -834,8 +826,6 @@ describe('createTableRouteLoader', () => {
     });
 
     it('carries a refusal through rather than flattening it to no entries', async () => {
-      // An unreadable restriction renders as *why*; rendering it as an empty
-      // list would say the rows are unrestricted, which is the opposite.
       const { result } = await invoke({
         config: {
           resolveLockedFilters: () => ({
@@ -889,8 +879,6 @@ describe('createTableRouteLoader', () => {
     });
 
     it('restores the persisted layout when the route does not declare it', async () => {
-      // The flag is opt-in, and this is the half that says so: the same cookie
-      // is read back on an ordinary table.
       const { result } = await invoke({
         cookie: layoutCookie({
           slice: 'columnOrder',

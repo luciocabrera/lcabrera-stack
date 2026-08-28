@@ -478,24 +478,17 @@ graph LR
   SessionRead --> Init
 ```
 
-**A route can declare its column layout transient, and that has to mean both
-halves.** `isColumnLayoutTransient` on the loader `meta` takes `columnOrder`,
+**A route can declare its column layout transient.**
+`isColumnLayoutTransient` on the loader `meta` takes `columnOrder`,
 `columnPinning`, `columnSizing` and `columnVisibility` out of the cookie read
-_and_ out of the write, so the table opens at the declared columns in declared
-order on every request and stores nothing to open at next time. Suppressing only
-the read would leave a `Set-Cookie` on every layout change and a header carried on
-every subsequent request for state no loader consults; suppressing only the write
-would still restore whatever an older visit left behind. Filters and sorting are
-untouched — they travel in the URL and are this request's own.
+**and** out of the write, so the grid opens at its declared columns in declared
+order on every request and stores nothing to open at next time. Filters and
+sorting are untouched — they travel in the URL. Like every other route-declared
+meta field it is re-asserted unconditionally in `createTableRouteLoader`, beside
+`lockedFilters`, because `metaUiFlags` comes out of a client-controlled cookie.
 
-It exists for a view a reader **arrives at** rather than keeps: the modal over one
-group's rows is a look, and inheriting the shape of an earlier, unrelated look is
-not a preference anyone expressed
-([ADR-087](../../../../../docs/decisions/ADR-087-a-group-opens-its-rows-in-a-route.md)).
-Like every other route-declared meta field it is re-asserted unconditionally in
-`createTableRouteLoader`, because `metaUiFlags` comes out of a client-controlled
-cookie: one able to deny the flag is one able to restore the very layout the route
-said not to restore.
+Why both halves rather than one, and what it costs, are
+[ADR-094](../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md).
 
 See [hooks/ARCHITECTURE.md](hooks/ARCHITECTURE.md) and
 [utils/ARCHITECTURE.md](utils/ARCHITECTURE.md) for details.

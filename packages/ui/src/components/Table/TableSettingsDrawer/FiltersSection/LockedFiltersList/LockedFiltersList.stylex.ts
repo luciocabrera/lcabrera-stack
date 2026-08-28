@@ -13,11 +13,6 @@ const localStyles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
   },
-  /**
-   * Deliberately not `surfaceStyles.interactiveCard`, which every removable filter
-   * above wears: a dashed, hover-free row says the reader has nothing to do here,
-   * where a card that lifts under the pointer says the opposite.
-   */
   entry: {
     borderColor: colors.borderPrimary,
     borderRadius: borderRadius.md,
