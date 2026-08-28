@@ -22,6 +22,7 @@ const {
   mockClearGrouping,
   mockRemoveColumnAggregate,
   mockSetAllGroupsExpanded,
+  mockSetGroupLevelExpanded,
   mockToggleGroupKey,
   normalizedColumnRef,
 } = vi.hoisted(() => ({
@@ -39,6 +40,7 @@ const {
   mockClearGrouping: vi.fn(),
   mockRemoveColumnAggregate: vi.fn(),
   mockSetAllGroupsExpanded: vi.fn(),
+  mockSetGroupLevelExpanded: vi.fn(),
   mockToggleGroupKey: vi.fn(),
   normalizedColumnRef: { current: {} as Record<string, unknown> },
 }));
@@ -67,6 +69,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
 
 vi.mock('#ui/components/Table/contexts/TableConfig/expansion/actions', () => ({
   useSetAllTableGroupsExpanded: () => mockSetAllGroupsExpanded,
+  useSetTableGroupLevelExpanded: () => mockSetGroupLevelExpanded,
 }));
 
 // The fold-all pair derives its enabled state from the same group tree the body
@@ -735,6 +738,123 @@ describe('GroupActions', () => {
       render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 
       expect(getButton('Collapse All Groups').disabled).toBe(true);
+    });
+  });
+
+  describe('folding one level from its column', () => {
+    it('offers both actions on an applied key that is not the outermost', () => {
+      dataRef.current = rollupRows;
+      groupingKeysRef.current = GROUP_FIXTURE_KEYS;
+
+      render(<GroupActions columnKey='status' onClose={mockOnClose} />);
+
+      expect(screen.getByText('Expand This Level')).not.toBeNull();
+      expect(screen.getByText('Collapse This Level')).not.toBeNull();
+    });
+
+    it('offers neither on the outermost key, where no row would survive', () => {
+      // ADR-083: the level above `city` is the root, which no row renders, so
+      // the fold could not be undone from the grid. Absent rather than
+      // disabled — it is not a state the reader can clear by clicking.
+      dataRef.current = rollupRows;
+      groupingKeysRef.current = GROUP_FIXTURE_KEYS;
+
+      render(<GroupActions columnKey='city' onClose={mockOnClose} />);
+
+      expect(screen.queryByText('Expand This Level')).toBeNull();
+      expect(screen.queryByText('Collapse This Level')).toBeNull();
+    });
+
+    it('offers neither on a column that is not a group key', () => {
+      // The same grouped rows as the first case, so it is the column doing the
+      // work rather than the grid being ungrouped.
+      dataRef.current = rollupRows;
+      groupingKeysRef.current = GROUP_FIXTURE_KEYS;
+
+      render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+      expect(screen.queryByText('Expand This Level')).toBeNull();
+      expect(screen.queryByText('Collapse This Level')).toBeNull();
+    });
+
+    it('offers neither under `flat`, where a fold could not be undone', () => {
+      // The same two key columns without the subtotal that renders `(Berlin)`.
+      dataRef.current = [
+        groupRow({ path: pathOf('Berlin', 'Open') }),
+        groupRow({ path: pathOf('Berlin', 'Shut') }),
+      ];
+      groupingKeysRef.current = GROUP_FIXTURE_KEYS;
+
+      render(<GroupActions columnKey='status' onClose={mockOnClose} />);
+
+      expect(screen.queryByText('Collapse This Level')).toBeNull();
+    });
+
+    it('leaves the whole-table pair standing wherever the level pair is not', () => {
+      // The two are different scopes of the same act, so withholding one must
+      // not take the other with it.
+      dataRef.current = rollupRows;
+      groupingKeysRef.current = GROUP_FIXTURE_KEYS;
+
+      render(<GroupActions columnKey='city' onClose={mockOnClose} />);
+
+      expect(screen.getByText('Expand All Groups')).not.toBeNull();
+      expect(screen.getByText('Collapse All Groups')).not.toBeNull();
+    });
+
+    it('folds this column\u{2019}s level and closes the menu', () => {
+      dataRef.current = rollupRows;
+      groupingKeysRef.current = GROUP_FIXTURE_KEYS;
+
+      render(<GroupActions columnKey='status' onClose={mockOnClose} />);
+
+      const button = getButton('Collapse This Level');
+
+      expect(button.disabled).toBe(false);
+
+      fireEvent.click(button);
+
+      expect(mockSetGroupLevelExpanded).toHaveBeenCalledWith({
+        columnKey: 'status',
+        isExpanded: false,
+      });
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops offering the collapse once this level is folded', () => {
+      dataRef.current = rollupRows;
+      groupingKeysRef.current = GROUP_FIXTURE_KEYS;
+      collapsedGroupPathsRef.current = new Set([
+        resolveGroupPathKey(pathOf('Berlin')),
+      ]);
+
+      render(<GroupActions columnKey='status' onClose={mockOnClose} />);
+
+      expect(getButton('Collapse This Level').disabled).toBe(true);
+    });
+
+    it('offers the expand only while this level is folded, and closes on it', () => {
+      dataRef.current = rollupRows;
+      groupingKeysRef.current = GROUP_FIXTURE_KEYS;
+
+      const { rerender } = render(
+        <GroupActions columnKey='status' onClose={mockOnClose} />,
+      );
+
+      expect(getButton('Expand This Level').disabled).toBe(true);
+
+      collapsedGroupPathsRef.current = new Set([
+        resolveGroupPathKey(pathOf('Berlin')),
+      ]);
+      rerender(<GroupActions columnKey='status' onClose={mockOnClose} />);
+
+      fireEvent.click(getButton('Expand This Level'));
+
+      expect(mockSetGroupLevelExpanded).toHaveBeenCalledWith({
+        columnKey: 'status',
+        isExpanded: true,
+      });
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
   });
 

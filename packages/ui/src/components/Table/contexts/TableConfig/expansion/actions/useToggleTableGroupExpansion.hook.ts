@@ -7,11 +7,10 @@ import {
 import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
-import { moveTableFocusToRow } from '#ui/components/Table/contexts/TableFocus/focus/actions/utils';
 import { useTableFocusContextValue } from '#ui/components/Table/contexts/TableFocus/useTableFocusContextValue.hook';
 import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
 
-import { resolveGroupCollapseFocusTarget } from './utils';
+import { applyGroupFoldFocus } from './utils';
 
 /**
  * The write is local: expansion changes nothing server-side, so this touches no URL param
@@ -46,22 +45,15 @@ export const useToggleTableGroupExpansion = <
         collapsedGroupPaths: nextCollapsed,
         data: dataStore.get().data,
       });
-      const target = resolveGroupCollapseFocusTarget({
+      applyGroupFoldFocus({
         columns: columnsStore.get().columns,
-        focusedRowKey: focusState.rowKey,
+        container: containerRef.current,
+        focusState,
+        focusStore,
         groupPathKey,
+        rowHeight: metaStore.get().rowHeight,
         rows,
       });
-
-      if (target !== undefined) {
-        moveTableFocusToRow({
-          container: containerRef.current,
-          focusState,
-          focusStore,
-          rowHeight: metaStore.get().rowHeight,
-          ...target,
-        });
-      }
     }
 
     expansionStore.set({ collapsedGroupPaths: nextCollapsed });

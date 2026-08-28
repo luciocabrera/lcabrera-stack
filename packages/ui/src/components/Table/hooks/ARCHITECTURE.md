@@ -22,6 +22,7 @@ hooks/
 ├── useTableGroupTree.hook.ts            → The rows a collapse leaves standing plus their ARIA tree metadata
 ├── useSyncTableGroupExpansion.hook.ts   → Drops collapsed paths the rows just loaded no longer carry
 ├── useTableGroupFoldAll.hook.ts         → The fold-every-group pair plus whether either has anything to do
+├── useTableGroupLevelFold.hook.ts       → The same pair for one column's level, plus whether it is offered at all
 ├── utils/
 │   ├── createResizeStartData.util.ts    → Drag-start snapshot: origin + effective width/bounds (+ .test)
 │   ├── getIsGridNavigationTarget.util.ts → Is this key event the grid's to interpret (+ .test)
@@ -46,7 +47,7 @@ from moving between two cells inside it, and `getIsGridNavigationTarget` to leav
 a key pressed inside a cell's own control — a row-actions menu, a filter input —
 to that control rather than swallowing it from the bubbling phase.
 
-## useTableGroupTree / useSyncTableGroupExpansion / useTableGroupFoldAll
+## useTableGroupTree / useSyncTableGroupExpansion / useTableGroupFoldAll / useTableGroupLevelFold
 
 The render side of expansion ([ADR-067](../../../../../../docs/decisions/ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md)).
 
@@ -71,6 +72,22 @@ which is what stops the effect re-entering itself.
 every per-row chevron is drawn from, so a disabled "Collapse All" means exactly
 "no chevron on screen would close anything", and there is no second derivation
 for the two answers to drift apart in.
+
+`useTableGroupLevelFold` is the same wiring for "Expand This Level" and
+"Collapse This Level" (#1020), which fold the groups one level **above** the
+column whose menu is open — the level that column states. It reads the same
+foldable set and filters it to that one depth, so the property above still
+holds: an action here can close only what a chevron on screen would close.
+
+Its third answer, `hasGroupLevel`, is what decides whether the two items are
+rendered at all, and it is deliberately the same derivation rather than a
+separate predicate: the level's fold set is empty on the outermost key (nothing
+above it renders a row), on a column that is no group key, and on a `flat`
+result — three cases that need no naming because the tree already answers all of
+them (ADR-083). The pair is **withheld** rather than disabled there, unlike the
+whole-table pair beside it, for the reason the aggregation block is withheld: no
+click can move a column into being a group key, so an inert item would only ask
+the reader to keep trying.
 
 ## useColumnResize
 

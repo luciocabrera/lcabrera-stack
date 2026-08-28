@@ -4,14 +4,10 @@ import {
 } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
-import { moveTableFocusToRow } from '#ui/components/Table/contexts/TableFocus/focus/actions/utils';
 import { useTableFocusContextValue } from '#ui/components/Table/contexts/TableFocus/useTableFocusContextValue.hook';
 import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
 
-import {
-  resolveGroupCollapseFocusTarget,
-  resolveOutermostGroupPathKey,
-} from './utils';
+import { applyGroupFoldFocus, resolveOutermostGroupPathKey } from './utils';
 
 /** Expansion is the complement of the collapsed set (ADR-067), so "everything open" is empty. */
 const NOTHING_COLLAPSED: ReadonlySet<string> = new Set<string>();
@@ -65,28 +61,18 @@ export const useSetAllTableGroupsExpanded = <
       focusedRowKey: focusState.rowKey,
       rows,
     });
-    const target =
-      groupPathKey === undefined
-        ? undefined
-        : resolveGroupCollapseFocusTarget({
-            columns,
-            focusedRowKey: focusState.rowKey,
-            groupPathKey,
-            rows: resolveTableGroupTree({
-              ...treeArgs,
-              collapsedGroupPaths: foldableGroupPaths,
-            }).rows,
-          });
-
-    if (target !== undefined) {
-      moveTableFocusToRow({
-        container: containerRef.current,
-        focusState,
-        focusStore,
-        rowHeight: metaStore.get().rowHeight,
-        ...target,
-      });
-    }
+    applyGroupFoldFocus({
+      columns,
+      container: containerRef.current,
+      focusState,
+      focusStore,
+      groupPathKey,
+      rowHeight: metaStore.get().rowHeight,
+      rows: resolveTableGroupTree({
+        ...treeArgs,
+        collapsedGroupPaths: foldableGroupPaths,
+      }).rows,
+    });
 
     expansionStore.set({ collapsedGroupPaths: foldableGroupPaths });
   };
