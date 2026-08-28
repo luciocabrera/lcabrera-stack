@@ -24,7 +24,7 @@ README states what a consumer needs, linking the rest by absolute URL.
 Every other published package carries the same negation for whichever directory
 it publishes its source from — `src`, or `scripts` for the two `.mjs` packages.
 It is inert in each of them today and changes nothing that ships, which a
-before/after comparison of all ten packed file lists confirms. It is there
+before/after comparison of every packed file list confirms. It is there
 because it is the only guard that makes a newly added `src/ARCHITECTURE.md`
 fail to ship outright, rather than merely be likely to trip the content gate on
 its way out. `@lcabrera/devkit`'s `assets` are the deliberate exception: that

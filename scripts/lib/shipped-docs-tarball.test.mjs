@@ -87,8 +87,8 @@ describe.each(SOURCE_DOC_PACKAGES)('packages/%s', (directory) => {
 });
 
 /**
- * The property the three blocks above rest on, isolated: two packs of ONE
- * unchanged directory, differing only in a `files` line.
+ * The property the blocks above rest on, isolated: two packs of ONE unchanged
+ * directory, differing only in a `files` line.
  *
  * A gate reading the working tree, or reading `files` and resolving it itself,
  * would give the same answer both times — so this is the probe that
@@ -143,13 +143,13 @@ describe('the corpus follows the manifest, not the tree', () => {
 });
 
 /**
- * That the negation is on EVERY published manifest, not only the three that
- * had documents to remove.
+ * That the negation is on EVERY published manifest, not only the ones that had
+ * documents to remove.
  *
  * This is the assertion `packages/CLAUDE.md` was making in prose and nothing
- * was checking. The bullet states one `files` shape for every public package;
- * for a while five of them did not have it, so the file agents load on every
- * `packages/` edit asserted a guard most manifests did not carry — and the
+ * was checking. The bullet states one `files` shape for every public package,
+ * and for a while most of them did not have it — so the file agents load on
+ * every `packages/` edit asserted a guard the manifests did not carry, and the
  * failure that sets up is the one this whole gate exists to close. Someone adds
  * `packages/api/src/ARCHITECTURE.md`, reads the bullet, and the document ships.
  *

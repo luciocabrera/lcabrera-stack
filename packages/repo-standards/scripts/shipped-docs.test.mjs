@@ -107,7 +107,7 @@ describe('a path only the author repository has', () => {
   });
 
   it('leaves a roster-anchored path the package itself ships alone', () => {
-    // `scripts/` is in the default roster AND in the `files` of the two `.mjs`
+    // `scripts/` is in the default roster AND in the `files` of the `.mjs`
     // packages, so their own READMEs name files that do arrive in the install.
     // Judging by the first path segment alone reported those, and the only way
     // to satisfy such a finding is to delete accurate documentation.

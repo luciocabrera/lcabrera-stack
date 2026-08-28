@@ -295,11 +295,12 @@ export const rosterProblem = (publicPackageDirs) =>
  * check. `@lcabrera/ui`'s entire shipped corpus is its root README — the
  * `!src/**\/*.md` negation removes the rest and the changelog is an exempt
  * dated record — so losing that one file leaves it installing no readable
- * document at all. Summed across ten packages that regression moves the total
- * from 32 to 31 and prints a pass; and the total can only reach zero if every
- * package loses its README at once, which npm's always-include-the-README
- * behaviour puts out of reach. An aggregate refusal therefore guards a state it
- * cannot observe while the reachable one goes silently by.
+ * document at all, while the roster-wide total merely drops by one and prints
+ * a pass. A sum cannot observe a single package emptying; and it can only reach
+ * zero if every package loses its README at once, which npm's
+ * always-include-the-README behaviour puts out of reach. An aggregate refusal
+ * therefore guards a state it cannot observe while the reachable one goes
+ * silently by.
  *
  * A package with no document is refused rather than skipped for the reason the
  * whole gate exists: "every shipped document reads correctly" is trivially true

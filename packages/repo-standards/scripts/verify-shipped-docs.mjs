@@ -107,7 +107,7 @@ const main = () => {
   });
 
   // Per package, not over the roster: a package that ships nothing readable is
-  // the reachable regression, and summing hides it behind its nine neighbours.
+  // the reachable regression, and a sum hides it behind its neighbours.
   const empty = emptyCorpusProblems(results);
   if (empty.length > 0) {
     refuse(empty);

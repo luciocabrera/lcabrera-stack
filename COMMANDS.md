@@ -360,7 +360,7 @@ line. Which directories count as this repository's is
 It refuses an empty package roster, and any single package that ships no
 readable document, rather than reporting a pass over nothing — asked per
 package, because `@lcabrera/ui`'s whole shipped corpus is its root README and a
-roster-wide total would hide losing it behind its nine neighbours. It needs no `dist/` — markdown is not built — so
+roster-wide total would hide losing it behind its neighbours. It needs no `dist/` — markdown is not built — so
 it runs beside `tarball:verify` rather than after `packages:build`.
 
 Run `packages:build` **before** `publish:verify`, `api-surface:verify` and
