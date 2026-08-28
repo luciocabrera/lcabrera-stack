@@ -1,6 +1,6 @@
 import type { TablePersistenceEntry } from '#ui/components/Table/Table.types';
 
-import { toUrlWriteOnly } from '#ui/components/Table/contexts/TableConfig/columns/actions/utils';
+import { resolvePersistenceEntries } from '#ui/components/Table/contexts/TableConfig/columns/actions/utils';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { TABLE_NESTED_URL_STATE_PREFIX } from '#ui/components/Table/Table.constants';
 import { serializeStateSlice } from '#ui/components/Table/utils';
@@ -37,12 +37,10 @@ export const usePersistTableStateAction = () => {
     const paramPrefix =
       meta?.isUrlStateNested === true ? TABLE_NESTED_URL_STATE_PREFIX : '';
 
-    const persistedEntries =
-      meta?.isColumnLayoutTransient === true
-        ? entries
-            .filter(({ searchParamKey }) => searchParamKey !== undefined)
-            .map((entry) => toUrlWriteOnly(entry))
-        : entries;
+    const persistedEntries = resolvePersistenceEntries({
+      entries,
+      isColumnLayoutTransient: meta?.isColumnLayoutTransient === true,
+    });
 
     const serializedEntries = persistedEntries.map(
       ({
