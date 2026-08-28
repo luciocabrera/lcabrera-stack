@@ -181,19 +181,29 @@ reviewed PR (which S9 keeps the operator's hands off).
   permissions, or anything affecting trusted-publisher config. Nothing but the
   version number stands between a mistake and the registry, and an npm version is
   permanent.
-- **S9 — Self-modification.** A PR that edits this policy or **any file the
-  operator's verdicts are computed from**. The operator does not merge changes to
-  its own leash. That set is `OPERATOR_FILES` in `pr-queue-gate.mjs`: this
-  document, plus the transitive import closure of `pr-queue-operator.mjs`. It is
-  not curated — `pr-queue-gate.test.mjs` walks the real import graph and fails
-  when the list and the graph disagree, in both directions.
-  **What it costs:** the closure reaches shared modules under
+- **S9 — Self-modification.** A PR that edits this policy, the operator, or
+  anything the operator imports. It does not merge changes to its own leash.
+  That set is `OPERATOR_FILES` in `pr-queue-gate.mjs`: this document, plus the
+  transitive import closure of `pr-queue-operator.mjs`. It is not curated —
+  `pr-queue-gate.test.mjs` walks the real import graph and fails when the list
+  and the graph disagree, in either direction.
+  **What it costs.** The closure reaches shared modules under
   `packages/repo-standards/scripts/`, so a PR editing the commit convention, the
   config reader or the workspace roster escalates even though it was not aimed at
-  the operator. That is the direction to be wrong in, and S9 is per-PR, so it
-  never stops an unrelated merge. **What it misses:** the walk follows `import`,
-  so a file the operator reads at run time rather than importing has to be listed
-  by hand. This document is the only one today, and the test knows it by name.
+  the operator. The commit convention is the one worth naming: it decides E6 and
+  E7, which are eligibility blockers carrying `ACT` rather than stops, so without
+  this the operator would have _acted_ on a changed convention rather than
+  halted. Over-stopping is the direction to be wrong in, and S9 is per-PR, so it
+  never holds an unrelated merge.
+  **What it does not cover.** The walk follows `import`, so anything read at run
+  time sits outside it, and there are two kinds. This document is read by path
+  and is listed by hand. The never-baseline roster is read by _shape_ — every
+  workspace's `.gitignore`, plus the `packages/` listing — so no list could name
+  it in advance. What bounds that one is where it is read from: `REPO_ROOT` comes
+  from `import.meta.url`, so the roster is always the operator's own checkout and
+  nothing in the branch under judgement can move it. A PR that adds or removes a
+  public package changes what the operator flags only once it has merged and the
+  operator's checkout has followed.
 - **S10 — No re-runnable evidence.** Any verdict the operator cannot support with
   a command someone else can run and an observation that would have come out
   differently had the verdict been wrong. Absence of evidence escalates; it never

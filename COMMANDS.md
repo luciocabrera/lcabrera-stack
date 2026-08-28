@@ -75,7 +75,7 @@ disagree about the stages, the skill is right and this table is the bug.
 | 5   | `vp run react-doctor:verify` | React Doctor — root-only, errors block        |
 | 6   | `vp check`                   | fmt + Oxlint + **tsgolint** type pass         |
 | 7   | `vp run typecheck`           | real **tsc** — **not** the same as step 6     |
-| 8   | `vp run test`                | vitest                                        |
+| 8   | `vp run test:changed`        | vitest — root-only; reaches `scripts/` too    |
 
 Which stages get skipped in practice and why none is redundant is the skill's to
 explain, not this file's. From the root, `vp run check:safe` chains the whole thing
@@ -92,8 +92,9 @@ The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` �
 `vp run test:changed`. This closes the gap the pre-commit hook leaves: `vp staged` covers
 only fmt + Oxlint + tsgolint + Biome on staged files, so the ESLint pass and a full
 type-check first turn red in CI otherwise. **Tests are scoped, not the full suite**:
-`test:changed` runs only the workspaces the push touches plus their dependents, so a
-docs-only push runs none. The full suite is forced only by a change to `pnpm-lock.yaml`,
+`test:changed` runs only the workspaces the push touches plus their dependents,
+plus the root `test:scripts` group when a `.mjs`/`.cjs` under `scripts/` changed,
+so a docs-only push runs none. The full suite is forced only by a change to `pnpm-lock.yaml`,
 `pnpm-workspace.yaml`, the root `vite.config.ts`, or the shared config packages
 (`@lcabrera/vite-config` / `@repo/ts-configs`) — deliberately **not** by any root file, since
 a real dependency change always moves the lockfile.
@@ -130,28 +131,28 @@ project-specific belongs in that project's own `package.json`.
 
 ### Gate & CI
 
-| Command                      | Does                                                                                              |
-| ---------------------------- | ------------------------------------------------------------------------------------------------- |
-| `vp run ready`               | `check:safe` + `build:all` — the full "is it shippable" check                                     |
-| `vp run check:safe`          | typegen → `vp check` → typecheck → eslint → biome → tests                                         |
-| `vp run check:push`          | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed` |
-| `vp run typecheck:all`       | real tsc in all 12 workspaces, dependency order                                                   |
-| `vp run typecheck:changed`   | real tsc for the changed workspaces + dependents only — see below                                 |
-| `vp run typegen:all`         | route types for both React Router apps                                                            |
-| `vp run lint:all`            | Oxlint + eslint + Biome **with autofix**, every workspace                                         |
-| `vp run lint:biome`          | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                     |
-| `vp run lint:biome:check`    | Biome repo-wide, check only — what CI runs                                                        |
-| `vp run lint:report`         | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)          |
-| `vp run react-doctor:verify` | React Doctor gate (ADR-055) — full scope, fails on error severity; writes the report too          |
-| `vp run react-doctor:report` | the same scan, never failing — writes `reports/react-doctor/full-latest.json` (gitignored)        |
-| `vp run format:all`          | `vp fmt .` across the tree                                                                        |
-| `vp run build:all`           | build every workspace                                                                             |
-| `vp run test:all`            | every suite — **needs Postgres**                                                                  |
-| `vp run test:ci`             | every DB-free suite — what CI runs, no Postgres needed                                            |
-| `vp run test:changed`        | only the suites a diff touched (changed workspaces + their dependents) — see below                |
-| `vp run test:scripts`        | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                |
-| `vp run coverage:merge`      | merged coverage for the fallow gate (DB-free workspaces only)                                     |
-| `vp run coverage:report`     | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router)           |
+| Command                      | Does                                                                                               |
+| ---------------------------- | -------------------------------------------------------------------------------------------------- |
+| `vp run ready`               | `check:safe` + `build:all` — the full "is it shippable" check                                      |
+| `vp run check:safe`          | typegen → `vp check` → typecheck → eslint → biome → tests                                          |
+| `vp run check:push`          | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed`  |
+| `vp run typecheck:all`       | real tsc in all 12 workspaces, dependency order                                                    |
+| `vp run typecheck:changed`   | real tsc for the changed workspaces + dependents only — see below                                  |
+| `vp run typegen:all`         | route types for both React Router apps                                                             |
+| `vp run lint:all`            | Oxlint + eslint + Biome **with autofix**, every workspace                                          |
+| `vp run lint:biome`          | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                      |
+| `vp run lint:biome:check`    | Biome repo-wide, check only — what CI runs                                                         |
+| `vp run lint:report`         | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)           |
+| `vp run react-doctor:verify` | React Doctor gate (ADR-055) — full scope, fails on error severity; writes the report too           |
+| `vp run react-doctor:report` | the same scan, never failing — writes `reports/react-doctor/full-latest.json` (gitignored)         |
+| `vp run format:all`          | `vp fmt .` across the tree                                                                         |
+| `vp run build:all`           | build every workspace                                                                              |
+| `vp run test:all`            | every suite — **needs Postgres**                                                                   |
+| `vp run test:ci`             | every DB-free suite — what CI runs, no Postgres needed                                             |
+| `vp run test:changed`        | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below |
+| `vp run test:scripts`        | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                 |
+| `vp run coverage:merge`      | merged coverage for the fallow gate (DB-free workspaces only)                                      |
+| `vp run coverage:report`     | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router)            |
 
 `test:all` vs `test:ci`: no suite here needs a database, so the two differ only
 in ordering — `test:ci` runs
@@ -172,9 +173,11 @@ workspaces, and adds every workspace that transitively **depends on** them — s
 summary of what runs and what is skipped. Only the few files that change how every
 workspace resolves its tests — `pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root
 `vite.config.ts`, and the shared `vite-configs`/`ts-configs` packages — force the
-full suite (a real dependency change always bumps the lockfile); every other
-out-of-workspace change (root package.json scripts, lint/tsconfig configs, docs,
-root `scripts/`) affects no suite and runs nothing. Task substitution mirrors
+full suite (a real dependency change always bumps the lockfile). A change to a
+`.mjs`/`.cjs` under root `scripts/` adds the `test:scripts` group, which no
+workspace selection would ever reach; every other out-of-workspace change (root
+package.json scripts, lint/tsconfig configs, docs) affects no suite and runs
+nothing. Task substitution mirrors
 `test:ci`: the scan packages run their DB-free `test:unit`, and with `--ci` (`node
 scripts/test-changed.mjs --ci`) `showcase` runs its coverage `test:ci`
 last. `--dry-run` prints the `vp run` commands without executing them. CI's Unit

@@ -25,8 +25,12 @@ const CHANGESET_FILE = /^\.changeset\/(?!README)[^/]+\.md$/;
 const PUBLISH_WORKFLOW = /^\.github\/workflows\/(?:release|publish|changelog)/;
 const ENV_FILE = /(?:^|\/)\.env(?:\.|$)|^docker\/local\//;
 /**
- * Every file the operator's verdicts are computed from: the policy it reads at
- * run time, and the transitive import closure of `pr-queue-operator.mjs`.
+ * The files a PR may not change without stopping the operator: the transitive
+ * import closure of `pr-queue-operator.mjs`, plus the policy it reads by path.
+ *
+ * Not the whole of its input. The never-baseline roster is read by shape from
+ * the operator's own checkout, so it cannot be enumerated here; §5 S9 in the
+ * policy says what that leaves uncovered and why it is bounded.
  *
  * Enumerated rather than pattern-matched, and not maintained by hand — the
  * `S9 covers the operator's whole input` case in `pr-queue-gate.test.mjs` walks

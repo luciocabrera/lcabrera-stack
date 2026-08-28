@@ -125,21 +125,27 @@ describe('detectStops — mechanically certain §5 triggers', () => {
     expect(detectStops(pr())).toEqual([]);
   });
 
-  it("S9 covers the operator's whole input", () => {
+  it('S9 covers every file the operator imports', () => {
     const closure = importClosure(OPERATOR_ENTRY);
     expect(closure).toContain(OPERATOR_ENTRY);
     expect(closure.length).toBeGreaterThan(1);
     expect(closure.filter((path) => !OPERATOR_FILES.has(path))).toEqual([]);
   });
 
-  it('lists nothing in S9 that the operator does not read', () => {
-    const closure = new Set(importClosure(OPERATOR_ENTRY));
-    const runtimeOnly = new Set(['.claude/pr-queue-policy.md']);
-    expect(
-      [...OPERATOR_FILES].filter(
-        (path) => !closure.has(path) && !runtimeOnly.has(path),
-      ),
-    ).toEqual([]);
+  it('lists nothing in S9 the operator does not open by name', () => {
+    const entry = readFileSync(join(REPO_ROOT, OPERATOR_ENTRY), 'utf8');
+    const closure = importClosure(OPERATOR_ENTRY);
+    const beyondClosure = [...OPERATOR_FILES].filter(
+      (path) => !closure.includes(path),
+    );
+    expect(beyondClosure.length).toBeGreaterThan(0);
+    for (const path of beyondClosure) {
+      expect(existsSync(join(REPO_ROOT, path))).toBe(true);
+      expect(
+        entry.includes(`'${path}'`) || entry.includes(`"${path}"`),
+        `${path} is in OPERATOR_FILES but ${OPERATOR_ENTRY} never names it`,
+      ).toBe(true);
+    }
   });
 
   it.each([...OPERATOR_FILES])('stops a PR touching %s (S9)', (path) => {
