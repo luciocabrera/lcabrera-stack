@@ -102,13 +102,16 @@ Use an incremental loop while coding, then full gate before completion.
 | Ready to mark task done | the full gate, every stage           |
 | Pre-merge or PR update  | the full gate, every stage           |
 
-**There is no size or file-type that earns a shorter gate.** This table used to
-carry a "tiny docs/comment-only change" row whose minimum was two stages, which
-contradicted the skill's own "do not skip a stage" and was wrong on its own
-terms: a markdown edit can break `docs:verify`, `commands:verify`,
-`registers:verify`, `adr:verify` or `renames:verify`, none of which `vp lint`
-or `vp check` runs. The only shortening on offer is the WIP loop above, and it
-ends before the work is called done.
+**There is no size or file-type that earns a shorter gate, and a documentation
+change needs `vp run check:safe`.** This table used to carry a "tiny
+docs/comment-only change" row whose minimum was two stages, which contradicted
+the skill's own "do not skip a stage" — and understated the bar rather than
+merely relaxing it. A markdown edit fails in `docs:verify`, `commands:verify`,
+`registers:verify`, `adr:verify` and `renames:verify`, and **none of the eight
+stages runs any of them**: stage 8 is `test:changed`, which selects nothing for a
+docs-only diff. `check:safe` is what chains those gates, so it is the minimum
+here, not the shortcut. The only shortening on offer is the WIP loop above, and
+it ends before the work is called done.
 
 ## Common Anti-Patterns
 

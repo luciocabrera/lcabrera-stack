@@ -15,7 +15,7 @@
  * like `biome.jsonc`, so the per-package `eslint-suppressions.json` gitignore
  * that makes the public packages structurally suppression-free does
  * nothing here. Without this, adopting React Doctor would have added three
- * unpoliced ways to silence a finding in exactly the packages AGENTS.md §4
+ * unpoliced ways to silence a finding in exactly the packages AGENTS.md §1
  * holds strictest.
  */
 

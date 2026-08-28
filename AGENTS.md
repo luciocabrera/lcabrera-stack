@@ -45,7 +45,7 @@ walks the decision in order and links the ADR that owns each step.
 import line tells you which side of the product boundary you are on: `@lcabrera/`
 means it ships and has consumers outside this repo, `@repo/` means internal, change
 it freely. A new package picks its scope by one question — does it ship? — and a
-`@lcabrera/*` one inherits the never-baseline rule (§4) and the invariants below.
+`@lcabrera/*` one inherits the never-baseline rule (below) and the invariants with it.
 Do not "tidy" the two into one ([ADR-040](docs/decisions/ADR-040-npm-scope-for-the-public-packages.md)).
 A package in **neither** scope means that question was never asked — that is how
 the custom lint rules sat unscoped until they became `@lcabrera/eslint-plugin`

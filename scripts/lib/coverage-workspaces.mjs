@@ -28,7 +28,7 @@ import { readTextWithin } from '../../packages/repo-standards/scripts/safe-read.
 /** Workspace roots that can hold a publishable package. */
 const WORKSPACE_ROOTS = ['packages', 'apps'];
 
-/** The gitignore entry that marks a package as never-baseline (AGENTS.md §4). */
+/** The gitignore entry that marks a package as never-baseline (AGENTS.md §1). */
 const SUPPRESSIONS_MARKER = 'eslint-suppressions';
 
 /**

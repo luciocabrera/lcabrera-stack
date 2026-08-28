@@ -22,7 +22,7 @@ Nothing covered the rest. A `// NOSONAR`, an `@ts-expect-error`, an
 `oxlint-disable-next-line`, a fallow baseline key, a `biome.jsonc` override, or a
 rule lowered in the package's own lint config were all just text nobody counted.
 When #308 first counted them, `packages/ui` held a substantial number of inline
-directives and targeted Biome rule-offs — while §4 said, in as many words, that
+directives and targeted Biome rule-offs — while the standing rule said, in as many words, that
 it held none. For the current figures, run `vp run suppressions:list`; they are
 deliberately not written down here, because a number in prose is a number
 nothing keeps true.
@@ -190,7 +190,7 @@ the gate rather than a claim in this file.
 
 The trade is deliberate and worth stating: a new gate can no longer be landed
 against a tree that still violates it, and a finding cannot be parked across
-PRs. For these packages that is what AGENTS.md §4 already demands — fix it,
+PRs. For these packages that is what AGENTS.md §1 already demands — fix it,
 or argue it `permanent`.
 
 ## If the gate fails on your branch

@@ -195,7 +195,7 @@
       "count": 2,
       "status": "permanent",
       "reason": "Same prototype save-and-restore as mockDialogElement, applied to the popover API methods this suite stubs. Binding breaks restoration for the same reason.",
-      "ref": "AGENTS.md §4 (directive must name its engine)"
+      "ref": ".github/skills/lint-toolchain/SKILL.md (a directive must name the engine that reads it)"
     },
     {
       "key": "inline packages/ui/src/components/Tooltip/TooltipContent/TooltipContent.stylex.ts @stylexjs/valid-styles",
@@ -216,7 +216,7 @@
       "count": 3,
       "status": "permanent",
       "reason": "Saves HTMLDialogElement prototype methods so teardown can restore them. Binding them, as the rule wants, produces new function identities and the restore silently stops restoring. Spelled oxlint-disable because only Oxlint recognises the typescript-eslint/ prefix.",
-      "ref": "AGENTS.md §4 (directive must name its engine)"
+      "ref": ".github/skills/lint-toolchain/SKILL.md (a directive must name the engine that reads it)"
     }
   ]
 }
