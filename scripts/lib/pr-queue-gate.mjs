@@ -24,8 +24,37 @@ const MIGRATION_FILE = /(?:^|\/)migrations\//;
 const CHANGESET_FILE = /^\.changeset\/(?!README)[^/]+\.md$/;
 const PUBLISH_WORKFLOW = /^\.github\/workflows\/(?:release|publish|changelog)/;
 const ENV_FILE = /(?:^|\/)\.env(?:\.|$)|^docker\/local\//;
-const OPERATOR_FILE =
-  /^(?:\.claude\/pr-queue-policy\.md|scripts\/pr-queue-operator\.mjs|scripts\/lib\/pr-queue-[a-z-]+\.mjs)$/;
+/**
+ * Every file the operator's verdicts are computed from: the policy it reads at
+ * run time, and the transitive import closure of `pr-queue-operator.mjs`.
+ *
+ * Enumerated rather than pattern-matched, and not maintained by hand — the
+ * `S9 covers the operator's whole input` case in `pr-queue-gate.test.mjs` walks
+ * the real import graph and fails when this list and that graph disagree.
+ */
+export const OPERATOR_FILES = new Set([
+  '.claude/pr-queue-policy.md',
+  'packages/repo-standards/scripts/branch-exemption.mjs',
+  'packages/repo-standards/scripts/cli-input.mjs',
+  'packages/repo-standards/scripts/commit-convention.mjs',
+  'packages/repo-standards/scripts/config-values.mjs',
+  'packages/repo-standards/scripts/config.mjs',
+  'packages/repo-standards/scripts/error-message.mjs',
+  'packages/repo-standards/scripts/host-root.mjs',
+  'packages/repo-standards/scripts/safe-read.mjs',
+  'packages/repo-standards/scripts/workspace-scopes.mjs',
+  'scripts/lib/coverage-workspaces.mjs',
+  'scripts/lib/gh-exec.mjs',
+  'scripts/lib/pr-queue-claude.mjs',
+  'scripts/lib/pr-queue-execute.mjs',
+  'scripts/lib/pr-queue-facts.mjs',
+  'scripts/lib/pr-queue-gate.mjs',
+  'scripts/lib/pr-queue-github.mjs',
+  'scripts/lib/pr-queue-log.mjs',
+  'scripts/lib/pr-queue-order.mjs',
+  'scripts/lib/pr-threads.mjs',
+  'scripts/pr-queue-operator.mjs',
+]);
 
 const has = (pr, pattern) => pr.files.some((file) => pattern.test(file.path));
 
@@ -81,7 +110,7 @@ export const detectStops = (pr) =>
       detail: 'the diff touches the release or publish workflow path',
       id: 'S8',
     },
-    has(pr, OPERATOR_FILE) && {
+    pr.files.some((file) => OPERATOR_FILES.has(file.path)) && {
       detail: 'the PR modifies the queue operator or its own policy',
       id: 'S9',
     },

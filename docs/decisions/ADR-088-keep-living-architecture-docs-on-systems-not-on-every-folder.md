@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 
-**Corrected in part by:** [ADR-094](ADR-094-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md) — the "Comments stay rare" paragraph under Decision, and the "A trap on this line → a code comment" row of the table under Context, were reversed by a standing rule set on 2026-08-28. Everything else here stands, and the body below is unedited.
+**Corrected in part by:** [ADR-094](ADR-094-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md) — the "Comments stay rare" paragraph under Decision, and the "A trap on this line → a code comment" row of the table under Context, were reversed by a standing rule set on 2026-08-28. Everything else here stands, and the body below keeps its original reasoning.
 
 **Issue:** [#900](https://github.com/luciocabrera/lcabrera-stack/issues/900)
 

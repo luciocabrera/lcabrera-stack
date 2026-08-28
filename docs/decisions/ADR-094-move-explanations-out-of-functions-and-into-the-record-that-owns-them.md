@@ -9,7 +9,7 @@ governs:
 - **Date:** 2026-08-28
 - **Issue:** [#993](https://github.com/luciocabrera/lcabrera-stack/issues/993)
 - **Corrects:** the "Comments stay rare" paragraph and the "A trap on this line → a code comment" row of [ADR-088](ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md). Nothing else in ADR-088 is touched: where architecture documents live, and what they may not contain, stand as decided.
-- **Relates to:** [ADR-075](ADR-075-the-index-does-not-list-the-adrs.md) (an ADR body is never rewritten, which is why this is a new record), [#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028) (the lint rule and the sweep).
+- **Relates to:** [`docs/README.md`](../README.md) ("This is not a licence to revise an ADR" — the append-only rule that makes this a new record rather than an edit, and that licenses the pointer added to ADR-088's header), [#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028) (the lint rule and the sweep).
 
 ## Context
 
@@ -95,10 +95,15 @@ gate exists means sweeping twice.
 
 ## Alternatives considered
 
-1. **Edit ADR-088's body to match.** Rejected: an ADR is a dated record and
-   ADR-075's "never rewrite a body" rule exists for exactly this. A reader six
-   months out needs to see that the repository held the old position and why it
-   changed, not a record that reads as though it always said this.
+1. **Edit ADR-088's body to match.** Rejected: an ADR is a dated record, and
+   [`docs/README.md`](../README.md) states the rule — "a conclusion is superseded
+   by a _new_ ADR, never edited into a different one". A reader six months out
+   needs to see that the repository held the old position and why it changed, not
+   a record that reads as though it always said this. The same paragraph is what
+   licenses the pointer ADR-088's header gained: an amended ADR says its body
+   keeps its original reasoning, which is a statement about the record, not a
+   revision of it. That practice pre-dates this decision — ADR-036 and ADR-035
+   both carry an amendment pointer in the same header slot.
 2. **Supersede ADR-088 entirely.** Rejected: most of ADR-088 is about where
    architecture documents live and what they may not contain, and none of that
    is in question. Marking the whole record superseded would retire a decision
@@ -109,13 +114,16 @@ gate exists means sweeping twice.
    surfaces drifted apart over.
 4. **State the rule only in `AGENTS.md` and leave ADR-088 alone.** Rejected: that
    is the state this record fixes. Two accepted surfaces would give opposite
-   answers, and ADR-088 is linked from `AGENTS.md` twice, so a reader following
-   the pointer lands on the reversed rule.
+   answers, and `AGENTS.md` links ADR-088 from more than one section, so a reader
+   following any of those pointers lands on the reversed rule.
+   `grep -n 'ADR-088' AGENTS.md` is the current count; it is not written here,
+   because a number in prose is one nothing keeps true.
 
 ## References
 
 - [`AGENTS.md`](../../AGENTS.md) §7 — the rule as agents read it
 - [ADR-088](ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md) — the record this corrects, in one paragraph and one table row
 - [`.claude/rules/scripts.md`](../../.claude/rules/scripts.md) — the file-level header that survives
+- [`docs/README.md`](../README.md) — append-only, and what an amended ADR may say about itself
 - [#993](https://github.com/luciocabrera/lcabrera-stack/issues/993) — the reconciliation that surfaced the conflict
 - [#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028) — the lint rule and the sweep

@@ -4,11 +4,13 @@
  * ceiling test is the important one — it is what stops a model reasoning its way
  * past a hard stop.
  */
-import { dirname, resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vite-plus/test';
 
+import { extractImportSpecifiers } from '../../packages/devkit/scripts/closure-extract.mjs';
 import { publicPackageDirs } from './coverage-workspaces.mjs';
 import {
   detectBlockers,
@@ -16,11 +18,38 @@ import {
   detectStops,
   evaluateGate,
   isWithinCeiling,
+  OPERATOR_FILES,
 } from './pr-queue-gate.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 const ROSTER = publicPackageDirs(REPO_ROOT);
+
+const OPERATOR_ENTRY = 'scripts/pr-queue-operator.mjs';
+
+const repoRelative = (fromFile, specifier) =>
+  relative(REPO_ROOT, resolve(dirname(join(REPO_ROOT, fromFile)), specifier))
+    .split('\\')
+    .join('/');
+
+const importClosure = (entry) => {
+  const seen = new Set();
+  const pending = [entry];
+  while (pending.length > 0) {
+    const current = pending.pop();
+    if (seen.has(current)) continue;
+    seen.add(current);
+    const full = join(REPO_ROOT, current);
+    if (!existsSync(full)) continue;
+    for (const { specifier } of extractImportSpecifiers(
+      readFileSync(full, 'utf8'),
+    )) {
+      if (specifier.startsWith('.'))
+        pending.push(repoRelative(current, specifier));
+    }
+  }
+  return [...seen].sort((left, right) => left.localeCompare(right));
+};
 
 const file = (path, additions = 5, deletions = 1) => ({
   additions,
@@ -94,6 +123,29 @@ describe('detectStops — mechanically certain §5 triggers', () => {
 
   it('leaves an ordinary PR unstopped', () => {
     expect(detectStops(pr())).toEqual([]);
+  });
+
+  it("S9 covers the operator's whole input", () => {
+    const closure = importClosure(OPERATOR_ENTRY);
+    expect(closure).toContain(OPERATOR_ENTRY);
+    expect(closure.length).toBeGreaterThan(1);
+    expect(closure.filter((path) => !OPERATOR_FILES.has(path))).toEqual([]);
+  });
+
+  it('lists nothing in S9 that the operator does not read', () => {
+    const closure = new Set(importClosure(OPERATOR_ENTRY));
+    const runtimeOnly = new Set(['.claude/pr-queue-policy.md']);
+    expect(
+      [...OPERATOR_FILES].filter(
+        (path) => !closure.has(path) && !runtimeOnly.has(path),
+      ),
+    ).toEqual([]);
+  });
+
+  it.each([...OPERATOR_FILES])('stops a PR touching %s (S9)', (path) => {
+    expect(detectStops(pr({ files: [file(path)] })).map((s) => s.id)).toContain(
+      'S9',
+    );
   });
 });
 
