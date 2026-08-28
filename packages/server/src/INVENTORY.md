@@ -200,12 +200,16 @@ nothing else
 `resolveGroupRestriction` (`resolve-group-restriction.util.ts`) is the other half
 of that request: what **restricts** the rows it is answered with, as one
 `{ columnKey, label, value }` entry per group key, outermost first, for a surface
-that has to state it. It refuses an absent token where the caller requires one and
-an unreadable one always, carrying the same sentence out of
-`olap.constants.ts` that the refused read renders — so a panel and a
-grid answering the same request never disagree. Values are read back out of the
-token, which carries raw ones because `encodeDrillGroup` drops the group row's
-formatted label on purpose; a truncated key is formatted through
+that has to state it. It refuses on the same conditions as `resolveGroupRead`, in
+the same order — the param's presence, then `parseDrillGroup`, then
+`resolveDrillRefusal` — and draws its sentence from the same `olap.constants.ts`
+map, so a panel and a grid answering one request cannot say different things
+about it. That is asserted by a contract test rather than by this sentence: the
+`agrees with resolveGroupRead on every refusal` block in
+`resolve-group-restriction.util.test.ts` drives both over the same requests and
+fails if either side gains a reason the other does not have. Values are read back
+out of the token, which carries raw ones because `encodeDrillGroup` drops the
+group row's formatted label on purpose; a truncated key is formatted through
 `toGroupPeriodLabel`, so it reads as the period the row was keyed by rather than
 the instant underneath it
 ([ADR-094](../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).

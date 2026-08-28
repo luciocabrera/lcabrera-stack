@@ -33,10 +33,11 @@ claim nor deny either one.
 `resolveGroupRestriction`,** at
 `@lcabrera/server/db/olap/resolve-group-restriction.util`. It answers the same
 request as a list — one `{ columnKey, label, value }` per group key, outermost
-first — instead of a joined string, and it refuses rather than returning nothing:
-an absent token where the caller passes `isGroupRequired`, and an unreadable one
-always, carrying the same sentence the refused read renders. A caller that wants
-the old string joins the entries, or uses `@lcabrera/ui`'s
+first — instead of a joined string, and it refuses rather than returning nothing.
+It refuses on the same conditions as `resolveGroupRead`, in the same order and
+out of the same message map, so a surface stating the restriction and a surface
+rendering the refused page cannot say different things about one request. A
+caller that wants the old string joins the entries, or uses `@lcabrera/ui`'s
 `toLockedFiltersHeading`.
 
 Migration: replace

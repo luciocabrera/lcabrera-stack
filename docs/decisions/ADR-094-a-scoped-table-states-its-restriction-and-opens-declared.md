@@ -1,7 +1,8 @@
 ---
 governs:
-  - ui
   - server
+  - showcase
+  - ui
 ---
 
 # ADR-094 — A scoped table states its restriction, and a view arrived at opens declared
@@ -116,15 +117,43 @@ untouched: they travel in the URL and belong to the request.
 
 **6. Resolving a group restriction is the package's job, not the route's.**
 `resolveGroupRestriction` in `@lcabrera/server` reads the token out of the search
-params, refuses an absent one where the caller requires it and an unreadable one
-always, resolves each key's label against the caller's declared columns, and
+params, resolves each key's label against the caller's declared columns, and
 formats a truncated key at its granularity. A route supplies only what nothing
 else can know: its columns, whether a token is mandatory, and the catalogue
-lookup against its own table. The refusal sentences are the same map the refused
-read already carries, so the panel and the grid state one decision twice rather
-than two decisions that can disagree.
+lookup against its own table.
 
-**7. The shape crosses the package boundary structurally.** `@lcabrera/server` is
+**6b. It refuses on the same conditions as the read, and says the same thing.**
+The two resolvers answer one request, so a reader must never be shown a refusal
+by one surface and a restriction by the other. Both test the param's presence,
+then `parseDrillGroup`, then `resolveDrillRefusal` — which already answers every
+refusal that is a property of the row and the applied keys alone, needing no
+filters, no sort and no catalogue lookup — and both draw their sentence from one
+map. Sharing the vocabulary is not enough on its own: the first implementation
+imported the map and still handled only two of its five reasons, so a subtotal
+was refused by the read and described as a restriction by the panel, and a grand
+total produced neither entries nor a refusal — the state decision 3 forbids. What
+holds it now is a **contract test** that drives both resolvers over the same set
+of requests and asserts they agree on whether the request is refused and on the
+sentence; it fails on exactly that gap.
+
+**7. A view reached by a link is left by rebuilding a URL, not by going back.**
+Closing such a view drops the params that scope it and keeps every other, rather
+than calling the router's history-back. Going back assumes there is an entry to
+return to, and the whole point of a shareable link is that it can be opened in a
+fresh tab where there is not; there, back leaves the reader somewhere else
+entirely or nowhere. Rebuilding also states what is being dropped, which is what
+lets a scoped view take its own state with it instead of leaving it on the URL
+the reader returns to.
+
+**8. The scoping travels one way only: read from the URL, forwarded verbatim.**
+A view arrived at holds no source row — the link may have been pasted — so the
+request is the only statement of what scopes it, and every surface reads it from
+there. Where the token has to be passed on, it is passed as received rather than
+re-encoded from its parsed parts: re-encoding is a second chance to get wrong
+what was already right, and it can only ever produce the same string or a worse
+one.
+
+**9. The shape crosses the package boundary structurally.** `@lcabrera/server` is
 Node-only and `@lcabrera/ui` is client-safe, so neither may import the other's
 type. `GroupRestrictionStatement` and `TableLockedFilters` are declared
 separately and are structurally identical, which is ADR-039's pattern and its
@@ -152,6 +181,13 @@ into.
 Two structurally identical shapes now describe one thing, one per package. They
 can drift, and nothing but a consumer compiling against both would notice. That
 is the standing cost of ADR-039 and is accepted here on the same grounds.
+
+The refusal vocabulary is now shared by two resolvers, and a reason added to it
+has to be handled twice. Nothing in the type system says so — the map is total
+over the union, but a resolver may still narrow which members it forwards, which
+is exactly how the first implementation shipped a gap. The contract test is the
+only thing standing between that and a panel contradicting the grid, so a new
+refusal reason means a new row in it.
 
 ## Alternatives considered
 

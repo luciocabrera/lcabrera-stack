@@ -183,5 +183,19 @@ describe('group-details loader', () => {
 
       expect(vi.mocked(selectOrdersPage)).not.toHaveBeenCalled();
     });
+
+    it('states the same refusal the grid renders, on a token the row cannot answer', async () => {
+      const result = await invoke({
+        group: encodeDrillGroup({
+          group: { isSubtotal: true, path: [...GROUP_PATH] },
+          groupKeys: GROUP_PATH.map((entry) => entry.columnKey),
+        }),
+      });
+
+      const page = await result.dataPromise;
+
+      expect(result.metaState.lockedFilters?.entries).toEqual([]);
+      expect(result.metaState.lockedFilters?.refusal).toBe(page.error?.message);
+    });
   });
 });

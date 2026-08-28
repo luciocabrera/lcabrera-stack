@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { GROUP_READ_REFUSAL_MESSAGE } from './olap.constants.ts';
+import { resolveGroupRead } from './resolve-group-read.util.ts';
 import { resolveGroupRestriction } from './resolve-group-restriction.util.ts';
 
 const COLUMNS = [
@@ -38,6 +39,70 @@ const valueFor = async (period: 'day' | 'month' | 'quarter' | 'year') => {
 
   return restriction?.entries[0]?.value;
 };
+
+const tokenFor = (raw: Record<string, unknown>) =>
+  new URLSearchParams({ group: JSON.stringify(raw) });
+
+const COMPLETE_PATH = [{ columnKey: 'shipping_country', value: 'France' }];
+
+const REFUSAL_REQUESTS = [
+  { name: 'no token', params: new URLSearchParams() },
+  {
+    name: 'an unparseable token',
+    params: new URLSearchParams({ group: 'not json' }),
+  },
+  {
+    name: 'a grand total',
+    params: tokenFor({
+      isSubtotal: false,
+      keys: ['shipping_country'],
+      path: [],
+    }),
+  },
+  {
+    name: 'a subtotal',
+    params: tokenFor({
+      isSubtotal: true,
+      keys: ['shipping_country'],
+      path: COMPLETE_PATH,
+    }),
+  },
+  {
+    name: 'a path shorter than the applied keys',
+    params: tokenFor({
+      isSubtotal: false,
+      keys: ['shipping_country', 'order_date'],
+      path: COMPLETE_PATH,
+    }),
+  },
+  {
+    name: 'a readable group',
+    params: tokenFor({
+      isSubtotal: false,
+      keys: ['shipping_country'],
+      path: COMPLETE_PATH,
+    }),
+  },
+];
+
+const readFor = async (params: URLSearchParams) =>
+  resolveGroupRead({
+    filters: [],
+    isGroupRequired: true,
+    limit: 50,
+    maxLimit: 500,
+    params,
+    primaryKey: 'id',
+    skip: 0,
+    sort: [],
+  });
+
+const restrictionFor = async (params: URLSearchParams) =>
+  resolveGroupRestriction({
+    columns: COLUMNS,
+    isGroupRequired: true,
+    params,
+  });
 
 describe('resolveGroupRestriction', () => {
   it('names each key by its declared column label', async () => {
@@ -174,5 +239,34 @@ describe('resolveGroupRestriction', () => {
         params: new URLSearchParams(),
       }),
     ).toBeUndefined();
+  });
+  describe('agrees with resolveGroupRead on every refusal', () => {
+    it.each(REFUSAL_REQUESTS)(
+      'refuses $name the same way, with the same sentence',
+      async ({ params }) => {
+        const read = await readFor(params);
+        const restriction = await restrictionFor(params);
+
+        expect(restriction?.refusal !== undefined).toBe(
+          read.kind === 'refused',
+        );
+        expect(restriction?.refusal).toBe(
+          read.kind === 'refused' ? read.message : undefined,
+        );
+      },
+    );
+
+    it.each(REFUSAL_REQUESTS)(
+      'never answers $name with neither entries nor a refusal',
+      async ({ params }) => {
+        const restriction = await restrictionFor(params);
+
+        expect(
+          restriction === undefined ||
+            restriction.entries.length > 0 ||
+            restriction.refusal !== undefined,
+        ).toBe(true);
+      },
+    );
   });
 });
