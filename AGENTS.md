@@ -285,7 +285,7 @@ deliberate violation (Rule 14). Handling a _finding_ is Non-Negotiable Rule 11 �
 verify, then fix; never suppress. The public packages (§1) take no
 suppressions at all, enforced by `vp run suppressions:verify`.
 
-**`test:all` vs `test:ci`.** No suite here needs a database, so the two differ only in ordering: `test:ci` runs `showcase` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing; it is what CI runs.
+**`test:all` vs `test:ci`.** Neither runs a suite that needs a database — the DB-bound smoke suites in `apps/showcase` gate on `SMOKE_DB`, and only `vp run --filter showcase test:smoke` sets it — so the two differ only in ordering: `test:ci` runs `showcase` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing; it is what CI runs.
 
 **A workspace with real-Postgres tests must split them**: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it. Nothing here needs this today and **the substitution is not built** — `scripts/lib/affected-tests.mjs` says so in its own header, and the only per-workspace substitution it carries is `COVERAGE_TASK_PACKAGE`. Build it when a DB-bound workspace arrives, mirroring `test:ci` in the root manifest; do not assume it is waiting.
 

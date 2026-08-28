@@ -2,13 +2,14 @@ name: PR Standards
 
 # Enforces the repo's commit + PR conventions on every pull request. The local
 # .vite-hooks/commit-msg hook gives the same feedback, but it can be skipped with
-# --no-verify, so this job is the real wall. Two checks, ONE spec
+# --no-verify, so this job is the real wall. Three checks, ONE spec
 # (packages/repo-standards/scripts/commit-convention.mjs):
+#   - the head branch name (verify-branch-name.mjs, off the event payload);
 #   - the PR title + description (repo-verify-pr);
 #   - every non-merge commit in the PR range (repo-verify-commit on stdin).
 # `edited` re-runs the check when the title/description is changed after opening;
-# without it a bad title "fixed" by an edit would keep a stale red check. Both
-# scripts use only Node built-ins, so there is no workspace install step.
+# without it a bad title "fixed" by an edit would keep a stale red check. All
+# three scripts use only Node built-ins, so there is no workspace install step.
 
 on:
   pull_request:

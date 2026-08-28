@@ -131,33 +131,40 @@ project-specific belongs in that project's own `package.json`.
 
 ### Gate & CI
 
-| Command                      | Does                                                                                               |
-| ---------------------------- | -------------------------------------------------------------------------------------------------- |
-| `vp run ready`               | `check:safe` + `build:all` — the full "is it shippable" check                                      |
-| `vp run check:safe`          | typegen → `vp check` → typecheck → eslint → biome → tests                                          |
-| `vp run check:push`          | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed`  |
-| `vp run typecheck:all`       | real tsc in all 12 workspaces, dependency order                                                    |
-| `vp run typecheck:changed`   | real tsc for the changed workspaces + dependents only — see below                                  |
-| `vp run typegen:all`         | route types for both React Router apps                                                             |
-| `vp run lint:all`            | Oxlint + eslint + Biome **with autofix**, every workspace                                          |
-| `vp run lint:biome`          | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                      |
-| `vp run lint:biome:check`    | Biome repo-wide, check only — what CI runs                                                         |
-| `vp run lint:report`         | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)           |
-| `vp run react-doctor:verify` | React Doctor gate (ADR-055) — full scope, fails on error severity; writes the report too           |
-| `vp run react-doctor:report` | the same scan, never failing — writes `reports/react-doctor/full-latest.json` (gitignored)         |
-| `vp run format:all`          | `vp fmt .` across the tree                                                                         |
-| `vp run build:all`           | build every workspace                                                                              |
-| `vp run test:all`            | every suite — **needs Postgres**                                                                   |
-| `vp run test:ci`             | every DB-free suite — what CI runs, no Postgres needed                                             |
-| `vp run test:changed`        | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below |
-| `vp run test:scripts`        | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                 |
-| `vp run coverage:merge`      | merged coverage for the fallow gate (DB-free workspaces only)                                      |
-| `vp run coverage:report`     | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router)            |
+| Command                               | Does                                                                                               |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `vp run ready`                        | `check:safe` + `build:all` — the full "is it shippable" check                                      |
+| `vp run check:safe`                   | typegen → `vp check` → typecheck → eslint → biome → tests                                          |
+| `vp run check:push`                   | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed`  |
+| `vp run typecheck:all`                | real tsc in all 12 workspaces, dependency order                                                    |
+| `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                  |
+| `vp run typegen:all`                  | route types for both React Router apps                                                             |
+| `vp run lint:all`                     | Oxlint + eslint + Biome **with autofix**, every workspace                                          |
+| `vp run lint:biome`                   | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                      |
+| `vp run lint:biome:check`             | Biome repo-wide, check only — what CI runs                                                         |
+| `vp run lint:report`                  | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)           |
+| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails on error severity; writes the report too           |
+| `vp run react-doctor:report`          | the same scan, never failing — writes `reports/react-doctor/full-latest.json` (gitignored)         |
+| `vp run format:all`                   | `vp fmt .` across the tree                                                                         |
+| `vp run build:all`                    | build every workspace                                                                              |
+| `vp run test:all`                     | every workspace suite plus the root `scripts/` suites — no database needed                         |
+| `vp run test:ci`                      | the same suites, `showcase` last so its coverage summary is fresh — run before pushing             |
+| `vp run test:changed`                 | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below |
+| `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                 |
+| `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                          |
+| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only)                                      |
+| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router)            |
 
-`test:all` vs `test:ci`: no suite here needs a database, so the two differ only
-in ordering — `test:ci` runs
-`showcase` last so the PR's coverage summary is the fresh one. Use
-`test:ci` before pushing; it is what CI runs.
+`test:all` vs `test:ci`: neither runs a suite that needs a database, so the two
+differ only in ordering — `test:ci` runs `showcase` last so the PR's coverage
+summary is the fresh one. Use `test:ci` before pushing; it is what CI runs.
+
+**The DB-bound suites exist and are opt-in.** `apps/showcase`'s `*.smoke.test.*`
+files each gate on `SMOKE_DB`, which is set in exactly one place —
+`vp run --filter showcase test:smoke`, which also sources `docker/local/.env`.
+Nothing else sets it, so under `test`, `test:all`, `test:ci` and `test:changed`
+those suites skip and no connection is opened. Start Postgres with
+`vp run db:up` before running them.
 
 `test:scripts` is chained into both, and needs to be: root `scripts/` is **not a
 workspace**, so `vp run -r test` never reaches it. That is why the logic behind
@@ -837,19 +844,19 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 Beyond that, tasks are per-workspace. `build` and `test` are common but come from
 `vite.config.ts` rather than `scripts` in most workspaces (see §1).
 
-| Workspace                     | Package name               | Notable extra tasks                                                                                                    |
-| ----------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `apps/showcase`               | `showcase`                 | `typegen`, `test:ci`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
-| `packages/ui`                 | `@lcabrera/ui`             | `check:public-api`, `test:coverage`, `bench`                                                                           |
-| `packages/server`             | `@lcabrera/server`         | `test:coverage`                                                                                                        |
-| `packages/node-runtime`       | `@lcabrera/node`           | `build`, `test:coverage`                                                                                               |
-| `packages/ts-configs`         | `@repo/ts-configs`         | `generate`                                                                                                             |
-| `packages/tsconfig`           | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                               |
-| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin`  | —                                                                                                                      |
-| `packages/devkit`             | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                |
-| `packages/repo-standards`     | `@lcabrera/repo-standards` | `test`, `test:coverage`                                                                                                |
-| `packages/utils`              | `@lcabrera/utils`          | —                                                                                                                      |
-| `packages/vite-configs`       | `@lcabrera/vite-config`    | `build`, `test`, `test:coverage`                                                                                       |
+| Workspace                     | Package name               | Notable extra tasks                                                                                                                  |
+| ----------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `apps/showcase`               | `showcase`                 | `typegen`, `test:ci`, `test:smoke`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
+| `packages/ui`                 | `@lcabrera/ui`             | `check:public-api`, `test:coverage`, `bench`                                                                                         |
+| `packages/server`             | `@lcabrera/server`         | `test:coverage`                                                                                                                      |
+| `packages/node-runtime`       | `@lcabrera/node`           | `build`, `test:coverage`                                                                                                             |
+| `packages/ts-configs`         | `@repo/ts-configs`         | `generate`                                                                                                                           |
+| `packages/tsconfig`           | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                                             |
+| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin`  | —                                                                                                                                    |
+| `packages/devkit`             | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                              |
+| `packages/repo-standards`     | `@lcabrera/repo-standards` | `test`, `test:coverage`                                                                                                              |
+| `packages/utils`              | `@lcabrera/utils`          | —                                                                                                                                    |
+| `packages/vite-configs`       | `@lcabrera/vite-config`    | `build`, `test`, `test:coverage`                                                                                                     |
 
 Notes on the non-obvious ones:
 
