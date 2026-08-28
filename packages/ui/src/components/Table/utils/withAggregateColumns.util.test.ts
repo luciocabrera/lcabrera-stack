@@ -195,9 +195,6 @@ describe('withAggregateColumns', () => {
   });
 
   it('replaces a measured primary-key column like any other', () => {
-    // A row id is resolved from the columns the consumer declared, never from
-    // the derived grid list, so keeping the source beside its measure bought
-    // nothing and painted a column no group row can fill (ADR-095).
     const result = run({
       aggregates: [{ columnKey: 'order_id', fn: 'count' }],
     });

@@ -19,10 +19,6 @@ type WithGroupedColumnScopeArgs<TData> = {
   readonly groupingKeys: readonly string[];
 };
 
-/**
- * Derivation, never state (ADR-095): while grouping is applied the grid holds the group
- * keys, the measures and the row-actions column, and nothing else.
- */
 export const withGroupedColumnScope = <TData>({
   aggregates,
   columnOrder,

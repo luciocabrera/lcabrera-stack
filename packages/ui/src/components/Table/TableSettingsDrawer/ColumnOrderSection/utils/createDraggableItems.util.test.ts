@@ -74,8 +74,6 @@ describe('createDraggableItems', () => {
   });
 
   it('locks every row while grouping is applied, not only the keys', () => {
-    // The order shown is the grid's derived one, so a drag would persist a
-    // derivation as the consumer's own column order.
     const result = createDraggableItems({
       allOrderedColumns: [
         { key: 'first', label: 'First' },

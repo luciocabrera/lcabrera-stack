@@ -19,10 +19,6 @@ type ResolveColumnGroupingChoicesArgs<TData> = {
   readonly groupingKeys: readonly string[];
 };
 
-/**
- * What a column may join the grouping as, from the same resolvers the Grouping tab's own
- * pickers read (ADR-058, ADR-080) — empty means the grouping cannot show it at all.
- */
 export const resolveColumnGroupingChoices = <TData>({
   aggregates,
   capability,

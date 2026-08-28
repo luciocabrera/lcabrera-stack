@@ -8,7 +8,6 @@ type CreateDraggableItemsArgs<TContent> = {
   };
   /** The applied group keys — locked in place while grouping is applied. */
   readonly groupingKeys: readonly string[];
-  /** The declared keys the grid paints, which is what `Show` reflects (ADR-095). */
   readonly renderedColumnKeys: ReadonlySet<string>;
   readonly renderItemContent: (args: {
     readonly columnKey: string;
@@ -26,13 +25,7 @@ type OrderedColumnItem = {
   readonly label: string;
 };
 
-/**
- * **A group key is undraggable for its own reason, not by being static** (ADR-080), and
- * while grouping is applied so is every other row: the order shown is the grid's derived
- * one, so a drag would write a derivation into the persisted order (ADR-095).
- * A gesture the derivation would undo is refused rather than accepted.
- * Resizing a rung cannot break a staircase.
- */
+/** Undraggable is its own flag, never `isStatic` (ADR-080, ADR-095). */
 export const createDraggableItems = <TContent>({
   allOrderedColumns,
   columnPinning,

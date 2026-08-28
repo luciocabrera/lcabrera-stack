@@ -73,8 +73,11 @@ column out. `resolveCrudRowId` keeps answering exactly where it did before.
 `getPinnedDerivedColumnsState` over the drawer's own draft and maps each painted
 key back to the column it was derived from, so a measure ticks its source's row.
 That answer drives three things: `Show` is on for a column the grid paints,
-the painted columns are listed first in the order the grid paints them, and the
-count in the section header is the size of that set. Nothing is removed from the
+the painted columns are listed first in the order the grid paints them —
+**while a grouping is applied, and only then**, because hoisting an ungrouped
+list would sink every hidden column to the bottom and a drag would persist that
+as the consumer's own order — and the count in the section header is the size of
+that set. Nothing is removed from the
 list — a column the grouping does not name is still listed, unticked, which is
 what makes it addressable.
 
@@ -117,7 +120,16 @@ blank: its group-key cells are blanked because the group row above states the
 value, and the measure columns are fields it does not carry. That is the
 completion of the limitation ADR-065 already carried, and it is only reachable
 by feeding a grouped grid rows a grouped read does not return — ADR-087 moved a
-group's own rows to a route that applies no grouping.
+group's own rows to a route that applies no grouping. Keeping the unmeasured
+columns to serve such a row is the trade this decision refuses: they can carry
+no aggregate, so each would draw the em dash on every group row of every grouped
+view.
+
+**No cell of a grouped grid can hold a consumer's own `render()` output.** A
+group-key cell is the grid's own, and a measure column is built from its source
+without carrying `render`, so a column declaring one is either a key, a measure,
+or not painted. Anything that has to be checked about consumer-rendered content
+— its alignment, for one — is only checkable on an ungrouped grid.
 
 Pinning and hiding a column the grouping does not name still write the
 consumer's own layout, and neither shows on screen until the grouping clears.

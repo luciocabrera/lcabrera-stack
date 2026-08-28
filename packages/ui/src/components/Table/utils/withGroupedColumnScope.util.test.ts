@@ -83,8 +83,6 @@ describe('withGroupedColumnScope', () => {
   });
 
   it('changes nothing when every applied key is undeclared', () => {
-    // Grouping configuration is URL state, so it can name a column this route
-    // never declared. Scoping to it would paint an empty grid.
     const result = run({ groupingKeys: ['not_a_column'] });
 
     expect(result.columns).toBe(columns);

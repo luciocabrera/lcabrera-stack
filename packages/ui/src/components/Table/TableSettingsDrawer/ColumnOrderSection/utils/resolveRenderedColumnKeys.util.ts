@@ -18,10 +18,6 @@ type ResolveRenderedColumnKeysArgs<TData> = {
   readonly groupingKeys: readonly string[];
 };
 
-/**
- * The declared keys the grid paints, in painted order, from the derivation the grid itself
- * renders through — a measure reads as the column it measures (ADR-095).
- */
 export const resolveRenderedColumnKeys = <TData>({
   aggregates,
   columnOrder,

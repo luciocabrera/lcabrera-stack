@@ -21,10 +21,6 @@ type WithAggregateColumnsArgs<TData> = {
   readonly groupingKeys: readonly string[];
 };
 
-/**
- * In-place derivation, never state: a group key is never measured (ADR-080); an
- * undeclared aggregate is dropped; every measured column is replaced by its measures.
- */
 export const withAggregateColumns = <TData>({
   aggregates,
   columnOrder,

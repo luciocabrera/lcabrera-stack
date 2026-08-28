@@ -19,12 +19,6 @@ type UseToggleColumnVisibilityArgs = {
   readonly isVisible: boolean;
 };
 
-/**
- * While grouping is applied a column is shown by joining the grouping, so turning one on
- * asks how rather than writing visibility (ADR-095); turning one off is unchanged.
- * The static guard reads `staticKeys`, which is built from the declared columns and so
- * still answers for a column the grouping scoped out of the grid.
- */
 export const useToggleColumnVisibility = () => {
   const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();

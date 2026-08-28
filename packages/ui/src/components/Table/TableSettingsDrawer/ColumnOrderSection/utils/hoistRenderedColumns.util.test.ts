@@ -27,8 +27,6 @@ describe('hoistRenderedColumns', () => {
   });
 
   it('leaves the consumer’s own order alone while no grouping is applied', () => {
-    // Hoisting here would sink every hidden column to the bottom of the list,
-    // and a drag would then persist that as the consumer's column order.
     const result = hoistRenderedColumns<Row>({
       columns,
       groupingKeys: [],

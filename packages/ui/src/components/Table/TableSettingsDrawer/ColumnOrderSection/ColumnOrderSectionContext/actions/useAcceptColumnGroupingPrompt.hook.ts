@@ -11,10 +11,6 @@ import { resolveGroupKeyAvailability } from '#ui/components/Table/utils/resolveG
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { useCancelColumnGroupingPrompt } from './useCancelColumnGroupingPrompt.hook';
 
-/**
- * The choice is applied to the drawer's grouping draft, never to the column layout: a
- * column joins the grid by joining the grouping (ADR-095).
- */
 export const useAcceptColumnGroupingPrompt = () => {
   const { modalsStore } = useColumnOrderSectionContextValue();
   const capabilities = useGetTableGroupingCapabilities();

@@ -6,7 +6,6 @@ import { getInitialModalsState } from '#ui/components/Table/TableSettingsDrawer/
 
 type CreateColumnOrderSectionActionMocksArgs = {
   readonly initialDrawerState: LooseDrawerState;
-  /** Merged over the section's own initial state, so a new modal needs no test edited. */
   readonly initialModalsState: Partial<ColumnOrderSectionModalsState>;
   readonly initialTableState: LooseTableState;
 };

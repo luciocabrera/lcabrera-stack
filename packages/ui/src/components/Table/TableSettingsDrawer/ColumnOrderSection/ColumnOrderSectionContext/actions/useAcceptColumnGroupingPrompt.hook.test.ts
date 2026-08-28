@@ -90,8 +90,6 @@ describe('useAcceptColumnGroupingPrompt', () => {
   });
 
   it('carries the granularity a column is only offered at', () => {
-    // A column the catalogue refuses raw is offered truncated, and adding it
-    // without one stages a grouping the server would refuse (ADR-084).
     setCapabilities({
       ordered_at: {
         aggregates: [],

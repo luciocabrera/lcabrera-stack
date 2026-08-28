@@ -53,8 +53,6 @@ describe('resolveRenderedColumnKeys', () => {
   });
 
   it('reads a measure as the column it measures', () => {
-    // The section lists the consumer's declared columns, so a measure has to
-    // answer under its source's key or its row would never tick.
     expect(
       run({
         aggregates: [

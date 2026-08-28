@@ -192,13 +192,9 @@ const headerAriaLabels = () =>
 describe('a column carrying several measures', () => {
   afterEach(cleanup);
 
-  it('draws one header per measure, not one header for both', () => {
+  it('draws one header per measure, and none for an unnamed column', () => {
     renderGrid();
 
-    // The defect this replaces: one `Total Amount` header over a cell reading
-    // `Average … Minimum …`, truncated together. The measured column itself is
-    // gone — replaced by its measures — and so is `Id`, which the grouping
-    // neither keys nor measures (ADR-095).
     expect(headerLabels()).toStrictEqual([
       'Customer Type',
       'Average',
@@ -271,9 +267,6 @@ describe('a column carrying several measures', () => {
       (cell) => cell.textContent,
     );
 
-    // The key's value, then one measure per cell. `Id` is not painted at all:
-    // the grouping neither keys nor measures it, so there is no cell for a
-    // dash to sit in (ADR-095).
     expect(cells).toStrictEqual(['Business', '2,503', '17']);
   });
 
@@ -304,18 +297,7 @@ describe('a column carrying several measures', () => {
     ).toBe('ascending');
   });
 
-  it('leaves a detail row no cell of its own', () => {
-    // **A known limitation, pinned so it is a decision rather than a surprise.**
-    // Every row renders over the same partition (ADR-065), and a grouped grid
-    // paints the group keys and the measures alone (ADR-095) — so a detail row
-    // arriving in one has nothing to show: the key blanks because the group row
-    // above states it, and the measures are fields it does not carry.
-    //
-    // Not fixed by keeping the unmeasured columns: they can hold no aggregate,
-    // so they would draw the em-dash on every group row of every grouped view,
-    // to serve rows a grouped read does not return. ADR-087 opens a group's own
-    // rows in a route that applies no grouping, where the declared columns are
-    // all present and the question does not arise.
+  it('leaves a detail row no cell of its own, a limitation ADR-095 records', () => {
     renderGrid();
 
     const detail = screen.getAllByRole('row').at(-1);
@@ -345,9 +327,7 @@ describe('a column carrying several measures', () => {
     expect(headerLabels()).toStrictEqual(['Customer Type', 'Average']);
   });
 
-  it('draws no band row at all when no aggregate is applied', () => {
-    // No measure, so the grouping names only its key and that is the whole
-    // grid — there is no source column left for a band to span (ADR-095).
+  it('draws no band row, and only the key, when no aggregate is applied', () => {
     renderGrid({ aggregates: [] });
 
     expect(screen.queryAllByTestId('table-header-band')).toHaveLength(0);

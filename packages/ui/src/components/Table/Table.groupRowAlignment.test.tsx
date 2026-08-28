@@ -221,10 +221,6 @@ describe('cell alignment on a grouped grid', () => {
     // The defect in one assertion: before #1018 every entry here read `default`, because
     // each of these cells is built through the descriptor's `custom` branch and that branch
     // skipped alignment outright.
-    //
-    // Two columns, because a grouped grid paints the group keys and the measures and
-    // nothing else (ADR-095): the key is a `date` and the measure a `currency`, so one
-    // assertion covers both alignments a declared type produces.
     renderGrid();
 
     expect(groupRowAlignments()).toStrictEqual({
@@ -233,27 +229,16 @@ describe('cell alignment on a grouped grid', () => {
     });
   });
 
-  it('aligns a detail row’s cells the same way', () => {
-    // `Order Date` is blanked here — its value is stated once, by the group row above —
-    // and still aligns like its column.
+  it('aligns a detail row’s blanked and empty cells the same way', () => {
     renderGrid();
 
     expect(detailRowAlignments()).toStrictEqual({
       'Order Date': 'center',
-      // The detail row holds no `total_amount:sum` field, so this cell is empty — and an
-      // empty cell in a currency column is still a currency column's cell.
       Sum: 'right',
     });
   });
 
-  it('leaves the cell a consumer renders its own alignment', () => {
-    // `Invoice` declares `currency` exactly as `Total Amount` does, and the only
-    // difference is who produced the content — which is what makes it the discriminating
-    // case rather than a second reading of the same fact.
-    //
-    // Read ungrouped, because that is the only place the case exists: a grouping paints
-    // its keys and its measures, a key cell is the grid's own and a measure column carries
-    // no `render` at all, so no grouped cell can hold consumer output.
+  it('leaves the cell a consumer renders its own alignment, ungrouped', () => {
     renderGrid({
       aggregates: [],
       data: [rows[1] as TestRow],

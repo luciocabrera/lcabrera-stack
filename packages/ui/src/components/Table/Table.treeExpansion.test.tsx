@@ -193,10 +193,6 @@ const Harness = ({ data }: HarnessProps) => {
     <TableConfigProvider<TestRow>
       columnsState={{ columns }}
       metaState={{
-        // The grouping is what decides which columns the grid paints
-        // (ADR-095): the key, then one column per measure. The count over `id`
-        // is here so the grid has a second column for horizontal navigation to
-        // move across.
         groupingAggregates: [{ columnKey: 'id', fn: 'count' }],
         groupingKeys: ['city'],
         overscan: 2,
@@ -305,15 +301,6 @@ const getGroupRows = () => screen.getAllByTestId('table-group-header-row');
 const getGroupLabels = () =>
   screen.getAllByTestId('table-group-key-cell').map((cell) => cell.textContent);
 
-/**
- * Each rendered row as `group` or `detail`, in order.
- *
- * Read in place of a detail row's `Id` cell, which no longer exists: a grouped
- * grid paints the group keys and the measures and nothing else (ADR-095), and
- * both blank on a detail row. The sequence still says which group's rows a
- * collapse removed, because a group's rows are the ones between its own row and
- * the next.
- */
 const getRowKinds = () =>
   getRenderedRows().map((row) =>
     row.dataset.testid === 'table-group-header-row' ? 'group' : 'detail',
@@ -348,12 +335,6 @@ const getAllTabStops = () => {
  * `grid` and `body` are real answers, not failures to read one: a focus target
  * whose row renders no cell leaves focus on the container or, once that row is
  * removed, on the document.
- *
- * Reported as the row's kind and its `aria-rowindex` rather than as the cell's
- * text. A grouped grid paints the keys and the measures and nothing else
- * (ADR-095), and both blank on a detail row — so a text trace reads `''` for
- * every one of them and cannot say which row focus reached. The column focus
- * sits in is read from the focus store instead (`getFocusTarget().columnKey`).
  */
 const readFocus = () => {
   const active = document.activeElement;
@@ -585,8 +566,6 @@ describe('a grouped table that expands and collapses', () => {
       trace.push(readFocus());
     }
 
-    // Paris, its three rows, then Berlin — collapsed, so its two rows are
-    // absent and the last ArrowDown clamps there rather than walking into them.
     expect(trace).toStrictEqual([
       'group#2',
       'detail#3',
@@ -694,16 +673,11 @@ describe('a grouped table that expands and collapses', () => {
     await enterGrid();
     await pressKey('ArrowDown');
 
-    // The first painted column is the group key, and it blanks on a detail row:
-    // the value is stated once, by the group row above it (ADR-080).
     expect(readFocus()).toBe('detail#3');
     expect(getFocusTarget().columnKey).toBe('city');
 
     await pressKey('ArrowRight');
 
-    // Moved one cell — onto the measure column, still on the same row — and
-    // collapsed nothing. Read from the focus store because both painted cells
-    // of a detail row are blank, so the DOM text cannot tell them apart.
     expect(readFocus()).toBe('detail#3');
     expect(getFocusTarget().columnKey).toBe('id:count');
     expect(getCollapsedPaths()).toStrictEqual([]);
@@ -718,8 +692,6 @@ describe('a grouped table that expands and collapses', () => {
     };
 
     await enterGrid();
-    // One column right, onto the measure: the trace names the row focus is on
-    // rather than the cell's text, which blanks on every detail row.
     await pressKey('ArrowRight');
     record();
     await pressKey('ArrowDown');
@@ -729,9 +701,6 @@ describe('a grouped table that expands and collapses', () => {
     await pressKey('ArrowDown');
     record();
 
-    // Focus is on the last row of Paris — inside the subtree about to close,
-    // which is the whole point: collapsing while focus sits elsewhere proves
-    // nothing.
     expect(trace).toStrictEqual([
       'group#2',
       'detail#3',
@@ -769,19 +738,6 @@ describe('a grouped table that expands and collapses', () => {
     await pressKey('ArrowDown');
     record();
 
-    // Entries 5–7 are the collapsed Paris row, at its new index. Three of them
-    // used to be something else, and all three changed for the same reason
-    // (#651): a one-cell banner registered no cell for any column key, so no
-    // node answered the outstanding focus request. Entry 5 was `body` — the
-    // collapse left DOM focus on the document, because the row it recovered to
-    // had nothing to receive it; entries 6 and 7 were `grid`, the container
-    // keeping a stop no cell would take. A group row has real cells, so the
-    // recovery lands on the collapsed row itself and stays there.
-    //
-    // Navigation still continues from the ancestor, which is what the last
-    // entry proves: two rows below Paris is the first row of Berlin. From
-    // `{ id: 5 }` — the index-based answer — two ArrowDowns clamp at the last
-    // row instead.
     expect(trace).toStrictEqual([
       'group#2',
       'detail#3',

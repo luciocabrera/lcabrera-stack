@@ -6,10 +6,6 @@ type HoistRenderedColumnsArgs<TData> = {
   readonly renderedColumnKeys: readonly string[];
 };
 
-/**
- * While grouping is applied the section lists the rendered columns first, in the order the
- * grid paints them (ADR-095); ungrouped, the consumer's own order stands.
- */
 export const hoistRenderedColumns = <TData>({
   columns,
   groupingKeys,

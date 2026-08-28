@@ -41,9 +41,6 @@ const measureAmount: readonly TableColumnAggregate[] = [
 
 describe('resolveGroupingColumnsPatch', () => {
   it('hoists the group keys to the head of the painted grid, in key order', () => {
-    // Ahead of the measure over `total_amount`, which the user both ordered
-    // first and pinned left. The keys land at indices 0…N-1 whatever the saved
-    // layout says.
     expect(
       patch({
         aggregates: measureAmount,
@@ -53,8 +50,6 @@ describe('resolveGroupingColumnsPatch', () => {
   });
 
   it('paints the columns the grouping names and no others', () => {
-    // A column the grouping neither keys nor measures carries nothing on a
-    // group row, so it is not painted at all (ADR-095).
     expect(
       patch({ groupingKeys: ['order_status'] }).effectiveColumns.map((col) =>
         String(col.key),

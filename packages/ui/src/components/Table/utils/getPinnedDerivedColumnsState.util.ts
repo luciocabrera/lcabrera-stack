@@ -37,9 +37,6 @@ type GetPinnedDerivedColumnsStateArgs<TData> = {
 /**
  * Every column slice the body and header paint from, derived together so they cannot
  * disagree about which columns exist.
- * The grouped layout is derived here, at the one point all the slices are computed from:
- * measure, then scope to what the grouping names (ADR-095), then hoist the keys to the
- * head of the order and the left pin and force them visible (ADR-080).
  */
 export const getPinnedDerivedColumnsState = <TData>({
   aggregates,
