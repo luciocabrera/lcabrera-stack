@@ -24,8 +24,12 @@ first in the order the grid paints them, and the header count is the size of tha
 set. Every declared column is still listed. Turning one **on** while grouped is
 now a request to add it to the grouping, so a prompt asks how — as a group key, or
 with one of the aggregates that column supports — and applies the choice to the
-grouping; a column that supports neither says so instead of opening an empty
-prompt. Turning a column off is unchanged.
+grouping, taking the column off the hidden set at the same time. A column the
+grouping already names is simply shown again, with no prompt. When there is
+nothing to offer, the report names its cause — the key limit, an exhausted
+column, the distinct-count budget, or a column the endpoint offers in neither
+role — rather than claiming the column can be neither. Turning a column off is
+unchanged.
 
 While grouping is applied no row in that tab is draggable, because the order it
 shows is derived for its whole length and a drag would persist a derivation as

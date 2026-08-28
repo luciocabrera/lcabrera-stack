@@ -3,6 +3,9 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
+import { COLUMN_GROUPING_REFUSAL_MESSAGES } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.constants';
+
 import { useToggleColumnVisibility } from './useToggleColumnVisibility.hook';
 
 type TestColumn = {
@@ -17,7 +20,6 @@ const {
   getCapabilities,
   getColumns,
   getGroupingKeys,
-  getRenderedColumnKeys,
   modalsStore,
   notify,
   setAggregates,
@@ -25,7 +27,6 @@ const {
   setColumns,
   setDrawerState,
   setGroupingKeys,
-  setRenderedColumnKeys,
   setStaticKeys,
   tableColumnsStore,
 } = vi.hoisted(() => {
@@ -34,7 +35,6 @@ const {
   let columns: readonly unknown[] = [];
   let drawerState: undefined | { readonly columnVisibility?: Set<string> };
   let groupingKeys: readonly string[] = [];
-  let renderedColumnKeys: readonly string[] = [];
   let staticKeys: Set<string> | undefined;
 
   return {
@@ -46,7 +46,6 @@ const {
     getCapabilities: () => capabilities,
     getColumns: () => columns,
     getGroupingKeys: () => groupingKeys,
-    getRenderedColumnKeys: () => renderedColumnKeys,
     modalsStore: { get: vi.fn(), set: vi.fn() },
     notify: vi.fn(),
     setAggregates: (next: readonly unknown[]) => {
@@ -63,9 +62,6 @@ const {
     },
     setGroupingKeys: (next: readonly string[]) => {
       groupingKeys = next;
-    },
-    setRenderedColumnKeys: (next: readonly string[]) => {
-      renderedColumnKeys = next;
     },
     setStaticKeys: (next: Set<string> | undefined) => {
       staticKeys = next;
@@ -115,17 +111,12 @@ vi.mock(
   }),
 );
 
-vi.mock('../../hooks', () => ({
-  useGetRenderedColumnKeys: () => getRenderedColumnKeys(),
-}));
-
 type ToggleArgs = {
   readonly columnKey: string;
   readonly columns?: readonly TestColumn[];
   readonly groupingKeys?: readonly string[];
   readonly hiddenKeys?: readonly string[];
   readonly isVisible: boolean;
-  readonly renderedColumnKeys?: readonly string[];
   readonly staticKeys?: readonly string[];
 };
 
@@ -135,12 +126,10 @@ const toggleColumnVisibility = ({
   groupingKeys = [],
   hiddenKeys,
   isVisible,
-  renderedColumnKeys = [],
   staticKeys,
 }: ToggleArgs) => {
   setColumns(columns ?? []);
   setGroupingKeys(groupingKeys);
-  setRenderedColumnKeys(renderedColumnKeys);
   setStaticKeys(staticKeys === undefined ? new Set() : new Set(staticKeys));
   setDrawerState(
     hiddenKeys ? { columnVisibility: new Set(hiddenKeys) } : undefined,
@@ -151,6 +140,17 @@ const toggleColumnVisibility = ({
   act(() => {
     result.current({ columnKey, isVisible });
   });
+};
+
+const cappedKeys = Array.from(
+  { length: MAX_TABLE_GROUP_KEYS },
+  (_unused, index) => `key_${String(index)}`,
+);
+
+const readNotification = () => {
+  const [payload] = notify.mock.calls.at(-1) ?? [];
+
+  return payload as undefined | { readonly message: string };
 };
 
 const readVisibilityPayload = () => {
@@ -166,7 +166,6 @@ describe('useToggleColumnVisibility', () => {
     setColumns([]);
     setDrawerState(undefined);
     setGroupingKeys([]);
-    setRenderedColumnKeys([]);
     setStaticKeys(new Set());
     drawerColumnsStore.set.mockClear();
     modalsStore.set.mockClear();
@@ -309,7 +308,6 @@ describe('useToggleColumnVisibility', () => {
       groupingKeys: ['region'],
       hiddenKeys: [],
       isVisible: false,
-      renderedColumnKeys: ['region'],
     });
 
     expect(drawerColumnsStore.set).toHaveBeenCalledWith({
@@ -328,7 +326,6 @@ describe('useToggleColumnVisibility', () => {
       groupingKeys: ['region'],
       hiddenKeys: [],
       isVisible: true,
-      renderedColumnKeys: ['region'],
     });
 
     expect(modalsStore.set).toHaveBeenCalledWith({
@@ -351,12 +348,57 @@ describe('useToggleColumnVisibility', () => {
       groupingKeys: ['region'],
       hiddenKeys: [],
       isVisible: true,
-      renderedColumnKeys: ['region'],
     });
 
     expect(modalsStore.set).not.toHaveBeenCalled();
     expect(drawerColumnsStore.set).not.toHaveBeenCalled();
     expect(notify).toHaveBeenCalledTimes(1);
+    expect(readNotification()?.message).toBe(
+      COLUMN_GROUPING_REFUSAL_MESSAGES['not-offered'],
+    );
+  });
+
+  it('reports the key cap rather than the column when only the cap refuses', () => {
+    setCapabilities({
+      amount: { aggregates: [], canGroup: true, periods: [] },
+    });
+
+    toggleColumnVisibility({
+      columnKey: 'amount',
+      columns: [
+        { key: 'region', label: 'Region' },
+        { key: 'amount', label: 'Amount' },
+      ],
+      groupingKeys: cappedKeys,
+      hiddenKeys: [],
+      isVisible: true,
+    });
+
+    expect(notify).toHaveBeenCalledTimes(1);
+    expect(readNotification()?.message).toBe(
+      COLUMN_GROUPING_REFUSAL_MESSAGES['key-cap-reached'],
+    );
+  });
+
+  it('shows a hidden column the grouping measures, without prompting', () => {
+    setAggregates([{ columnKey: 'amount', fn: 'sum' }]);
+
+    toggleColumnVisibility({
+      columnKey: 'amount',
+      columns: [
+        { key: 'region', label: 'Region' },
+        { key: 'amount', label: 'Amount' },
+      ],
+      groupingKeys: ['region'],
+      hiddenKeys: ['amount'],
+      isVisible: true,
+    });
+
+    expect(drawerColumnsStore.set).toHaveBeenCalledWith({
+      columnVisibility: new Set(),
+    });
+    expect(modalsStore.set).not.toHaveBeenCalled();
+    expect(notify).not.toHaveBeenCalled();
   });
 
   it('writes visibility for a column the grouping already names', () => {
@@ -366,7 +408,6 @@ describe('useToggleColumnVisibility', () => {
       groupingKeys: ['region'],
       hiddenKeys: ['region'],
       isVisible: true,
-      renderedColumnKeys: ['region'],
     });
 
     expect(drawerColumnsStore.set).toHaveBeenCalledWith({

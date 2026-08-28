@@ -7,20 +7,27 @@ import { useAcceptColumnGroupingPrompt } from './useAcceptColumnGroupingPrompt.h
 
 const {
   addColumnAggregate,
+  drawerColumnsStore,
   getCapabilities,
   getColumns,
   modalsStore,
   setCapabilities,
   setColumns,
+  setHiddenKeys,
   setPrompt,
   toggleGroupKey,
 } = vi.hoisted(() => {
   let capabilities: Record<string, unknown> = {};
   let columns: readonly unknown[] = [];
+  let hiddenKeys = new Set<string>();
   let prompt: unknown = { columnKey: '', isOpen: false };
 
   return {
     addColumnAggregate: vi.fn(),
+    drawerColumnsStore: {
+      get: vi.fn(() => ({ columnVisibility: hiddenKeys })),
+      set: vi.fn(),
+    },
     getCapabilities: () => capabilities,
     getColumns: () => columns,
     modalsStore: {
@@ -33,6 +40,9 @@ const {
     setColumns: (next: readonly unknown[]) => {
       columns = next;
     },
+    setHiddenKeys: (next: readonly string[]) => {
+      hiddenKeys = new Set(next);
+    },
     setPrompt: (next: unknown) => {
       prompt = next;
     },
@@ -43,6 +53,13 @@ const {
 vi.mock('../useColumnOrderSectionContextValue.hook', () => ({
   useColumnOrderSectionContextValue: () => ({ modalsStore }),
 }));
+
+vi.mock(
+  '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook',
+  () => ({
+    useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
+  }),
+);
 
 vi.mock(
   '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook',
@@ -73,8 +90,10 @@ describe('useAcceptColumnGroupingPrompt', () => {
   beforeEach(() => {
     setCapabilities({});
     setColumns([{ key: 'ordered_at', label: 'Ordered At' }]);
+    setHiddenKeys([]);
     setPrompt({ columnKey: 'ordered_at', isOpen: true });
     addColumnAggregate.mockClear();
+    drawerColumnsStore.set.mockClear();
     modalsStore.set.mockClear();
     toggleGroupKey.mockClear();
   });
@@ -130,6 +149,26 @@ describe('useAcceptColumnGroupingPrompt', () => {
     });
     expect(addColumnAggregate).not.toHaveBeenCalled();
     expect(toggleGroupKey).not.toHaveBeenCalled();
+  });
+
+  it('takes the column off the hidden set it was ticked back on from', () => {
+    setHiddenKeys(['ordered_at']);
+
+    accept('sum');
+
+    expect(drawerColumnsStore.set).toHaveBeenCalledWith({
+      columnVisibility: new Set(),
+    });
+    expect(addColumnAggregate).toHaveBeenCalledWith({
+      columnKey: 'ordered_at',
+      fn: 'sum',
+    });
+  });
+
+  it('leaves the hidden set alone when the column was not hidden', () => {
+    accept('sum');
+
+    expect(drawerColumnsStore.set).not.toHaveBeenCalled();
   });
 
   it('closes the prompt on every accepted choice', () => {

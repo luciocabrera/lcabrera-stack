@@ -8,7 +8,10 @@ import type {
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { resolveGroupKeyAvailability } from '#ui/components/Table/utils/resolveGroupKeyAvailability.util';
 
-import type { ColumnGroupingChoice } from '../ColumnOrderSection.types';
+import type {
+  ColumnGroupingChoice,
+  ColumnGroupingRefusal,
+} from '../ColumnOrderSection.types';
 
 import { resolveAddableAggregates } from '../../GroupingSection/utils';
 
@@ -19,31 +22,35 @@ type ResolveColumnGroupingChoicesArgs<TData> = {
   readonly groupingKeys: readonly string[];
 };
 
+type ResolveColumnGroupingChoicesResult = {
+  readonly options: readonly RadioOption<ColumnGroupingChoice>[];
+  readonly refusal: ColumnGroupingRefusal | undefined;
+};
+
 export const resolveColumnGroupingChoices = <TData>({
   aggregates,
   capability,
   column,
   groupingKeys,
-}: ResolveColumnGroupingChoicesArgs<TData>): readonly RadioOption<ColumnGroupingChoice>[] => {
-  if (column === undefined) return [];
+}: ResolveColumnGroupingChoicesArgs<TData>): ResolveColumnGroupingChoicesResult => {
+  if (column === undefined) return { options: [], refusal: 'not-offered' };
 
   const columnKey = String(column.key);
+  const isGroupKey = groupingKeys.includes(columnKey);
+  const isAtKeyCap = groupingKeys.length >= MAX_TABLE_GROUP_KEYS;
   const { isGroupable } = resolveGroupKeyAvailability<TData>({
     capability,
     column,
   });
-  const canAddGroupKey =
-    isGroupable &&
-    !groupingKeys.includes(columnKey) &&
-    groupingKeys.length < MAX_TABLE_GROUP_KEYS;
-  const { options } = resolveAddableAggregates({
+  const canAddGroupKey = isGroupable && !isGroupKey && !isAtKeyCap;
+  const { gap, options: aggregateOptions } = resolveAddableAggregates({
     applied: aggregates,
     capability,
     columnKey,
-    isGroupKey: groupingKeys.includes(columnKey),
+    isGroupKey,
   });
 
-  return [
+  const options: readonly RadioOption<ColumnGroupingChoice>[] = [
     ...(canAddGroupKey
       ? [
           {
@@ -54,10 +61,17 @@ export const resolveColumnGroupingChoices = <TData>({
           },
         ]
       : []),
-    ...options.map((option) => ({
+    ...aggregateOptions.map((option) => ({
       description: `Renders one column summarising each group by ${option.label.toLowerCase()}.`,
       label: option.label,
       value: option.value,
     })),
   ];
+
+  if (options.length > 0) return { options, refusal: undefined };
+  if (isGroupKey) return { options, refusal: 'already-a-key' };
+  if (isGroupable && isAtKeyCap) return { options, refusal: 'key-cap-reached' };
+  if (gap !== undefined) return { options, refusal: gap };
+
+  return { options, refusal: 'not-offered' };
 };

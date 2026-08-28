@@ -35,7 +35,17 @@ type ChoiceValuesArgs<TData> = Parameters<
 >[0];
 
 const choiceValues = <TData>(args: ChoiceValuesArgs<TData>) =>
-  resolveColumnGroupingChoices<TData>(args).map((choice) => choice.value);
+  resolveColumnGroupingChoices<TData>(args).options.map(
+    (choice) => choice.value,
+  );
+
+const refusalOf = <TData>(args: ChoiceValuesArgs<TData>) =>
+  resolveColumnGroupingChoices<TData>(args).refusal;
+
+const cappedKeys = Array.from(
+  { length: MAX_TABLE_GROUP_KEYS },
+  (_unused, index) => `key_${String(index)}`,
+);
 
 describe('resolveColumnGroupingChoices', () => {
   it('offers the group key first, then every aggregate the column supports', () => {
@@ -61,11 +71,6 @@ describe('resolveColumnGroupingChoices', () => {
   });
 
   it('withholds the group key at the depth cap', () => {
-    const cappedKeys = Array.from(
-      { length: MAX_TABLE_GROUP_KEYS },
-      (_unused, index) => `key_${String(index)}`,
-    );
-
     expect(
       choiceValues<Row>({
         aggregates: [],
@@ -84,7 +89,7 @@ describe('resolveColumnGroupingChoices', () => {
         column: { ...amount, isGroupable: false },
         groupingKeys: ['region'],
       }),
-    ).toStrictEqual([]);
+    ).toStrictEqual({ options: [], refusal: 'not-offered' });
   });
 
   it('offers nothing for a column this route does not declare', () => {
@@ -95,6 +100,67 @@ describe('resolveColumnGroupingChoices', () => {
         column: undefined,
         groupingKeys: ['region'],
       }),
-    ).toStrictEqual([]);
+    ).toStrictEqual({ options: [], refusal: 'not-offered' });
+  });
+
+  it('names the key cap, not the column, when only the cap is in the way', () => {
+    expect(
+      refusalOf<Row>({
+        aggregates: [
+          { columnKey: 'amount', fn: 'avg' },
+          { columnKey: 'amount', fn: 'sum' },
+        ],
+        capability: capability(),
+        column: amount,
+        groupingKeys: cappedKeys,
+      }),
+    ).toBe('key-cap-reached');
+  });
+
+  it('names an exhausted column rather than calling it unavailable', () => {
+    expect(
+      refusalOf<Row>({
+        aggregates: [
+          { columnKey: 'amount', fn: 'avg' },
+          { columnKey: 'amount', fn: 'sum' },
+        ],
+        capability: capability(),
+        column: { ...amount, isGroupable: false },
+        groupingKeys: ['region'],
+      }),
+    ).toBe('column-exhausted');
+  });
+
+  it('names the distinct-count budget rather than calling it unavailable', () => {
+    expect(
+      refusalOf<Row>({
+        aggregates: [{ columnKey: 'other', fn: 'countDistinct' }],
+        capability: capability({ aggregates: ['countDistinct'] }),
+        column: { ...amount, isGroupable: false },
+        groupingKeys: ['region'],
+      }),
+    ).toBe('count-distinct-spent');
+  });
+
+  it('reports a column the grouping already keys as already applied', () => {
+    expect(
+      refusalOf<Row>({
+        aggregates: [],
+        capability: capability(),
+        column: amount,
+        groupingKeys: ['amount'],
+      }),
+    ).toBe('already-a-key');
+  });
+
+  it('reports no refusal while it has something to offer', () => {
+    expect(
+      refusalOf<Row>({
+        aggregates: [],
+        capability: capability(),
+        column: amount,
+        groupingKeys: ['region'],
+      }),
+    ).toBeUndefined();
   });
 });

@@ -6,6 +6,7 @@ export { filterSettingsColumns } from './filterSettingsColumns.util';
 export { getHasPinOrderConflict } from './getHasPinOrderConflict.util';
 export { hoistRenderedColumns } from './hoistRenderedColumns.util';
 export { insertAdjacentToPinnedGroup } from './insertAdjacentToPinnedGroup.util';
+export { isColumnNamedByGrouping } from './isColumnNamedByGrouping.util';
 export { recalculatePinSides } from './recalculatePinSides.util';
 export { resolveColumnGroupingChoices } from './resolveColumnGroupingChoices.util';
 export { resolvePinConflictState } from './resolvePinConflictState.util';

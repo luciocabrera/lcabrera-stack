@@ -3,6 +3,7 @@ import type { ColumnVisibilityState } from '#ui/components/Table/Table.types';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { useGetTableGroupingCapabilities } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { COLUMN_GROUPING_REFUSAL_MESSAGES } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.constants';
 import {
   useGetGroupingAggregates,
   useGetGroupingKeys,
@@ -10,8 +11,10 @@ import {
 import { useTableDrawerContextValue } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
 
-import { useGetRenderedColumnKeys } from '../../hooks';
-import { resolveColumnGroupingChoices } from '../../utils';
+import {
+  isColumnNamedByGrouping,
+  resolveColumnGroupingChoices,
+} from '../../utils';
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 
 type UseToggleColumnVisibilityArgs = {
@@ -28,7 +31,6 @@ export const useToggleColumnVisibility = () => {
   const columns = useGetColumns();
   const groupingKeys = useGetGroupingKeys();
   const notify = useNotifyAction();
-  const renderedColumnKeys = useGetRenderedColumnKeys();
 
   return ({ columnKey, isVisible }: UseToggleColumnVisibilityArgs) => {
     const staticKeys = tableColumnsStore.get()?.staticKeys ?? new Set<string>();
@@ -36,22 +38,27 @@ export const useToggleColumnVisibility = () => {
     if (staticKeys.has(columnKey)) return;
 
     const isGrouped = groupingKeys.length > 0;
+    const isNamed = isColumnNamedByGrouping({
+      aggregates,
+      columnKey,
+      groupingKeys,
+    });
 
-    if (isGrouped && isVisible && !renderedColumnKeys.includes(columnKey)) {
+    if (isGrouped && isVisible && !isNamed) {
       const column = columns.find(
         (candidate) => String(candidate.key) === columnKey,
       );
-      const choices = resolveColumnGroupingChoices({
+      const { options, refusal } = resolveColumnGroupingChoices({
         aggregates,
         capability: capabilities[columnKey],
         column,
         groupingKeys,
       });
 
-      if (choices.length === 0) {
+      if (options.length === 0) {
         notify({
-          message: `${column?.label ?? columnKey} is offered neither as a group key nor as an aggregate here, so this grouping cannot show it.`,
-          title: 'Not available while grouping',
+          message: COLUMN_GROUPING_REFUSAL_MESSAGES[refusal ?? 'not-offered'],
+          title: `${column?.label ?? columnKey} is not in this grouping`,
           variant: 'warning',
         });
         return;

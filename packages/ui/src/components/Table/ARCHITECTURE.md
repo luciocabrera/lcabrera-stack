@@ -338,12 +338,17 @@ order shown is derived for its whole length, so a drag would write a derivation
 into the persisted order.
 
 **Turning a column on while grouped is a request to join the grouping, and the
-prompt asks how.** `resolveColumnGroupingChoices` offers what the column
-supports — as a group key, or with one of its offerable aggregates — from
-`resolveGroupKeyAvailability` and `resolveAddableAggregates`, the same pair the
-Grouping tab's pickers read; a column that supports neither is reported rather
-than prompted for. The choice is applied to the grouping draft and never to
-`columnVisibility`, which is the write path the warning below is about.
+prompt asks how.** The toggle branches on whether the grouping **names** the
+column (`isColumnNamedByGrouping`) rather than on whether it is painted: hiding
+a measured column hides its measures with it, so a named column can be unpainted
+and ticking it must simply un-hide it. For an unnamed one,
+`resolveColumnGroupingChoices` offers what the column supports — as a group key,
+or with one of its offerable aggregates — from `resolveGroupKeyAvailability` and
+`resolveAddableAggregates`, the same pair the Grouping tab's pickers read, and
+returns a `refusal` naming the cause when it can offer nothing. Accepting a
+choice writes the grouping draft and takes the column off the drawer's hidden
+set; it writes no derived key into `columnVisibility`, which is the write path
+the warning below is about.
 
 **Keeping that true takes work at the two edges where a user acts on a measure
 column.** Pinning one resolves to the column it measures (`toDeclaredColumnKey`),

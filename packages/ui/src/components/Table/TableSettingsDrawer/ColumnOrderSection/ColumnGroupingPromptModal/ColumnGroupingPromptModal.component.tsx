@@ -25,7 +25,7 @@ export const ColumnGroupingPromptModal = () => {
   const column = columns.find(
     (candidate) => String(candidate.key) === columnKey,
   );
-  const options = resolveColumnGroupingChoices({
+  const { options } = resolveColumnGroupingChoices({
     aggregates,
     capability: capabilities[columnKey],
     column,

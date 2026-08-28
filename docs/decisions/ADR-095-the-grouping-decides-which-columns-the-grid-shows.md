@@ -88,16 +88,38 @@ state — the same disagreement this decision removes. Both run one derivation
 over their own inputs, and the two agree exactly when the draft is the applied
 state: on open, and after Accept.
 
-**Turning a column on is a request to join the grouping.** While grouping is
-applied, ticking `Show` on a column the grid does not paint opens a prompt
-offering what that column supports — as a group key, or with one of its
-offerable aggregates — resolved by `resolveGroupKeyAvailability` and
+**Turning a column on is a request to join the grouping — unless the grouping
+already names it.** The question the toggle asks is whether the grouping
+**names** the column (`isColumnNamedByGrouping`: it is a group key, or it
+carries an applied aggregate), never whether the column is currently
+**painted**. The two differ for a measured column the user has hidden: hiding
+the source hides its measures with it, so it is named and not painted, and
+asking the painted question would route a request to un-hide it into a prompt
+that only ever writes the grouping — leaving it invisible however many
+aggregates were added, with clearing the grouping the only way out.
+
+So a named column takes the ordinary path and the tick un-hides it. An unnamed
+one opens a prompt offering what that column supports — as a group key, or with
+one of its offerable aggregates — resolved by `resolveGroupKeyAvailability` and
 `resolveAddableAggregates`, the same pair the Grouping tab's own pickers read
 ([ADR-058](./ADR-058-grouping-legality-by-analytical-role.md),
-[ADR-063](./ADR-063-request-shaping-capabilities-on-the-loader-meta.md)). The
-choice is applied to the grouping draft, never to the column layout. A column
-that supports neither reports that instead of opening an empty prompt.
-Unticking is unchanged: it writes `columnVisibility` as it always did.
+[ADR-063](./ADR-063-request-shaping-capabilities-on-the-loader-meta.md)).
+Accepting a choice writes the grouping draft **and** takes the column off the
+hidden set, because the gesture was "show this" and the grouping alone cannot
+show a hidden column. Unticking is unchanged: it writes `columnVisibility` as it
+always did.
+
+**A refusal names its cause.** An empty choice list has four of them, and only
+one is a statement about the column's capabilities, so
+`resolveColumnGroupingChoices` returns a `refusal` alongside the options rather
+than leaving the caller to guess: the column is already a key; the grouping is
+at `MAX_TABLE_GROUP_KEYS` and the column has no aggregate left to add; the
+`countDistinct` budget or the column's own applied functions leave the picker
+nothing (`resolveAddableAggregates`' existing `gap`); or the catalogue offers it
+neither role. The cap outranks the two aggregate gaps, because it is a fact
+about the grouping's shape and points at the control that would actually clear
+it. Saying "this column can be neither" for any of the first three would be
+false.
 
 **No row in the Columns tab is draggable while grouping is applied.** ADR-080
 made a group key undraggable because the next derivation would undo the drag.
@@ -161,7 +183,12 @@ why the scope step writes no state of its own.
    stand.** Rejected: that is state, and clearing the grouping would then have
    to undo it. Refusing the drag while grouped costs a gesture in one
    configuration and keeps ungrouping free.
-5. **Keep the primary-key column beside its measure.** Rejected on evidence:
+5. **Decide the prompt on whether the column is painted, and have the accept
+   path clear the hidden key.** Rejected: it fixes the invisibility and leaves
+   the wrong question in place, so ticking `Show` on a hidden, already-measured
+   column would still open a prompt asking which _second_ aggregate to add.
+   The naming test is the one the gesture is actually about.
+6. **Keep the primary-key column beside its measure.** Rejected on evidence:
    `TableRowActionsMenu` and `resolveRowKey` both read the columns store's
    declared `columns`, which no derivation writes, so nothing depended on the
    painted list carrying `isPrimaryKey`.

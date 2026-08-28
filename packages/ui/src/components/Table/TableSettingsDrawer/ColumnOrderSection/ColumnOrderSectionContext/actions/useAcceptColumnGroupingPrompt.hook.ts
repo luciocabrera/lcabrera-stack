@@ -1,3 +1,4 @@
+import type { ColumnVisibilityState } from '#ui/components/Table/Table.types';
 import type { ColumnGroupingChoice } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSection.types';
 
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
@@ -6,12 +7,14 @@ import {
   useAddColumnAggregate,
   useToggleGroupKey,
 } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/actions';
+import { useTableDrawerContextValue } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
 import { resolveGroupKeyAvailability } from '#ui/components/Table/utils/resolveGroupKeyAvailability.util';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { useCancelColumnGroupingPrompt } from './useCancelColumnGroupingPrompt.hook';
 
 export const useAcceptColumnGroupingPrompt = () => {
+  const { columnsStore: drawerColumnsStore } = useTableDrawerContextValue();
   const { modalsStore } = useColumnOrderSectionContextValue();
   const capabilities = useGetTableGroupingCapabilities();
   const columns = useGetColumns();
@@ -27,6 +30,15 @@ export const useAcceptColumnGroupingPrompt = () => {
     if (prompt === undefined || !prompt.isOpen) return;
 
     const { columnKey } = prompt;
+    const columnVisibility =
+      drawerColumnsStore.get()?.columnVisibility ??
+      (new Set() as ColumnVisibilityState);
+
+    if (columnVisibility.has(columnKey)) {
+      const shown = new Set(columnVisibility);
+      shown.delete(columnKey);
+      drawerColumnsStore.set({ columnVisibility: shown });
+    }
 
     if (choice !== 'group-key') {
       addColumnAggregate({ columnKey, fn: choice });
@@ -37,7 +49,9 @@ export const useAcceptColumnGroupingPrompt = () => {
       columnKey,
       period: resolveGroupKeyAvailability({
         capability: capabilities[columnKey],
-        column: columns.find((column) => String(column.key) === columnKey),
+        column: columns.find(
+          (candidate) => String(candidate.key) === columnKey,
+        ),
       }).requiredPeriod,
     });
   };
