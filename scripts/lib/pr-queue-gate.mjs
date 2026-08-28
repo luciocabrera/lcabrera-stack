@@ -33,7 +33,7 @@ const ENV_FILE = /(?:^|\/)\.env(?:\.|$)|^docker\/local\//;
  * policy says what that leaves uncovered and why it is bounded.
  *
  * Enumerated rather than pattern-matched, and not maintained by hand — the
- * `S9 covers the operator's whole input` case in `pr-queue-gate.test.mjs` walks
+ * `S9 covers every file the operator imports` case in `pr-queue-gate.test.mjs` walks
  * the real import graph and fails when this list and that graph disagree.
  */
 export const OPERATOR_FILES = new Set([

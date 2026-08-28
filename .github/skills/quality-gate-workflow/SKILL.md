@@ -97,9 +97,11 @@ and reports green. `vp run test:changed` reads the diff, selects the affected
 workspaces **and** adds the root `test:scripts` group when a `.mjs`/`.cjs` under
 `scripts/` changed, so it cannot miss either half. It prints what it selected and
 what it skipped; check that line rather than assuming. To run one half directly:
-`vp run test` inside a workspace, `vp run test:scripts` from the root. CI runs
-`vp run test:all` (`vp run -r test` plus `test:scripts`), which `check:safe`
-chains.
+`vp run test` inside a workspace, `vp run test:scripts` from the root. CI reaches
+both halves by either of two paths, chosen by event in `check-safe.yml`'s Unit
+Tests job: `vp run test:changed -- --ci` on a pull request, `vp run test:ci` on a
+push to `main`. Locally, `vp run check:safe` chains `vp run test:all`
+(`vp run -r test` plus `test:scripts`); CI runs neither of those two.
 
 Shortcut: `vp run lint` in a workspace chains `vp lint . --fix` **and**
 `vp run lint:eslint` (autofix for both), which is usually what you want while
