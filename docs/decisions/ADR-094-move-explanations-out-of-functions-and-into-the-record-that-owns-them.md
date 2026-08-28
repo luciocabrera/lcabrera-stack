@@ -93,6 +93,14 @@ and every published package carries comments in the covered positions today.
 Applying it, and the lint rule that enforces it, are #1028; sweeping before the
 gate exists means sweeping twice.
 
+That deferral covers an existing comment **edited** as well as one left alone. A
+comment in a covered position that is corrected — because it stated something
+false — is still in a covered position, and the edit is not a claim that it now
+complies. #1028 removes it on the same terms as the rest. Stating this because
+the opposite reading is available and wrong: a recently-touched comment looks
+reviewed, and a sweep that skips the ones someone has been near is the sweep that
+leaves the worst of them.
+
 ## Alternatives considered
 
 1. **Edit ADR-088's body to match.** Rejected: an ADR is a dated record, and

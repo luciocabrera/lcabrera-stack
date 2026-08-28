@@ -3,10 +3,11 @@
 Loads when you touch anything under `packages/`. The always-on framing — packages
 are the product, the `@lcabrera/` vs `@repo/` scope split, the never-baseline rule
 — is in the root [AGENTS.md](../AGENTS.md) §1 and §4. This file is the
-**publishing contract** for the public packages: `@lcabrera/ui`,
-`@lcabrera/api`, `@lcabrera/server`, `@lcabrera/utils`,
-`@lcabrera/eslint-plugin`, `@lcabrera/tsconfig`, `@lcabrera/node`,
-`@lcabrera/vite-config`, `@lcabrera/devkit` and `@lcabrera/repo-standards`.
+**publishing contract** for the public packages. Which those are is not written
+here: `vp run suppressions:packages` prints the roster, resolved from the
+workspaces that gitignore `eslint-suppressions.json`, and that is the one answer
+every check reads. A list in this paragraph would be a second one, and it would
+be the copy nothing gates.
 
 A published package's npm name and its workspace directory need not match, and
 several already do not: `@lcabrera/eslint-plugin` lives in

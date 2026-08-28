@@ -75,7 +75,14 @@ describe('this repository publishes what it develops against', () => {
       .map((directory) => `${packagesDir}/${directory}`)
       .sort((left, right) => left.localeCompare(right));
     expect(declared.length).toBeGreaterThan(0);
-    expect(declared).toEqual(derivedPublicPackageDirs(REPO_ROOT));
+    expect(
+      declared,
+      'This couples two rules that coincide today but are stated separately: ' +
+        'a package publishes because its manifest is not private, and it never ' +
+        'baselines because it gitignores eslint-suppressions.json. If they ever ' +
+        'legitimately diverge, change the rule that permits it before changing ' +
+        'this assertion.',
+    ).toEqual(derivedPublicPackageDirs(REPO_ROOT));
   });
 
   it('reproduces every built package’s committed publishConfig.exports', () => {

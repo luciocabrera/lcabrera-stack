@@ -31,8 +31,7 @@ const vpArgsFor = ({ task, packages }) => [
   task,
 ];
 
-/** Print each workspace's disposition — what runs, what is skipped, and why.
- *  `extra` names groups outside every workspace, which the tally cannot show. */
+/** Print each workspace's disposition — what runs, what is skipped, and why. */
 export const printReport = ({
   label,
   verb,
