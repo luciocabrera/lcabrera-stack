@@ -178,7 +178,12 @@ return to, and the whole point of a shareable link is that it can be opened in a
 fresh tab where there is not; there, back leaves the reader somewhere else
 entirely or nowhere. Rebuilding also states what is being dropped, which is what
 lets a scoped view take its own state with it instead of leaving it on the URL
-the reader returns to.
+the reader returns to. Its **own** state means both halves: the param naming the
+restriction, and the prefixed params its nested table wrote (ADR-087 decision 8).
+Leaving the prefixed ones behind costs twice — the URL a reader then shares reads
+as the underlying view's own state, and the next scoped view opened from it
+inherits a floor taken from this one rather than from the view it was computed
+under.
 
 **8. The scoping travels one way only: read from the URL, forwarded verbatim.**
 A view arrived at holds no source row — the link may have been pasted — so the
