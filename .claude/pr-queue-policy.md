@@ -158,12 +158,19 @@ reviewed PR (which S9 keeps the operator's hands off).
 - **S5 — A new suppression.** Any added inline `eslint-disable` / `oxlint-disable`,
   rule-off in config, or `eslint-suppressions.json` entry — and inside a package
   on the never-baseline roster, any at all. **Derive that roster, never recall
-  it:** `vp run suppressions:packages` prints it, and `pr-queue-gate.mjs` resolves
-  the same list on the branch it is judging. This trigger used to carry a literal
-  list of package paths, narrower than the roster the standing rules cover, so a
-  suppression forbidden everywhere could still read as `MERGE` in the packages
-  the literal had missed. Rule 11 says fix the code; a suppression arriving with a
-  green rollup is exactly the case the rule exists for.
+  it:** `vp run suppressions:packages` prints it, and `pr-queue-operator.mjs`
+  resolves it once per pass, from the operator's **own checkout**, then hands the
+  array to `pr-queue-gate.mjs` — which reads no filesystem and never sees the head
+  ref. Two consequences follow, and both matter. A PR that adds a new public
+  package is judged against the roster **without** it, until the operator's
+  checkout carries that package's gitignore line; treat such a PR as S1 and read
+  the diff. And a roster that resolves empty is treated as "every `packages/*`
+  directory", not "none", so a broken resolution over-flags instead of merging.
+  This trigger used to carry a literal list of package paths, narrower than the
+  roster the standing rules cover, so a suppression forbidden everywhere could
+  still read as `MERGE` in the packages the literal had missed. Rule 11 says fix
+  the code; a suppression arriving with a green rollup is exactly the case the
+  rule exists for.
 - **S6 — Another agent is holding the branch.** The head ref moved during the
   pass, the PR is claimed by a live task in `docs/coordination/` owned by someone
   else, or the action would force-push over commits the operator did not make.

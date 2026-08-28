@@ -146,10 +146,22 @@ describe('detectFlags — §5 areas needing the diff read', () => {
     expect(neverBaselineFlagged('apps/showcase/src/x.ts', ROSTER)).toBe(false);
   });
 
-  it('reaches every workspace package when no roster is supplied', () => {
-    expect(neverBaselineFlagged('packages/ts-configs/src/x.ts')).toBe(true);
-    expect(neverBaselineFlagged('scripts/lib/x.mjs')).toBe(false);
-  });
+  it.each([
+    ['absent', undefined],
+    ['empty', []],
+  ])(
+    'reaches every workspace package when the roster is %s',
+    (_label, roster) => {
+      expect(neverBaselineFlagged('packages/ts-configs/src/x.ts', roster)).toBe(
+        true,
+      );
+      expect(neverBaselineFlagged('packages/ui/src/x.ts', roster)).toBe(true);
+      expect(neverBaselineFlagged('packages/ui/package.json', roster)).toBe(
+        true,
+      );
+      expect(neverBaselineFlagged('scripts/lib/x.mjs', roster)).toBe(false);
+    },
+  );
 });
 
 describe('detectBlockers — §2, each carrying the verdict it forces', () => {

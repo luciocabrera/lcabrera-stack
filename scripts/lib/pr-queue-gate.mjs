@@ -30,7 +30,7 @@ const OPERATOR_FILE =
 const has = (pr, pattern) => pr.files.some((file) => pattern.test(file.path));
 
 const inPublicPackage = (path, packages) =>
-  packages === undefined
+  packages === undefined || packages.length === 0
     ? /^packages\/[^/]+\//u.test(path)
     : packages.some((dir) => path.startsWith(`${dir}/`));
 
