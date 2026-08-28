@@ -23,7 +23,8 @@
     "dist",
     "src",
     "CHANGELOG.md",
-    "!src/**/*.test.*"
+    "!src/**/*.test.*",
+    "!src/**/*.md"
   ],
   "type": "module",
   "sideEffects": false,

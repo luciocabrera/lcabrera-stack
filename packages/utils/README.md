@@ -93,8 +93,8 @@ import { slugify } from '@lcabrera/utils/strings/slugify.util';
 
 ## Links
 
-- [Repository](https://github.com/luciocabrera/lcabrera-stack) —
-  `packages/utils`
+- [Repository](https://github.com/luciocabrera/lcabrera-stack) ·
+  [this package's source](https://github.com/luciocabrera/lcabrera-stack/tree/main/packages/utils)
 - [Changelog](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/utils/CHANGELOG.md)
 - Companion packages: [`@lcabrera/api`](https://www.npmjs.com/package/@lcabrera/api)
   (browser HTTP), [`@lcabrera/server`](https://www.npmjs.com/package/@lcabrera/server)

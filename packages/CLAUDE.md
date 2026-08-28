@@ -135,12 +135,25 @@ by inspection:
   in the package directory, so the root one does not reach a consumer — this is
   deliberate duplication, same reasoning as
   [ADR-039](../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md).
-- **`files` is `["src", "!src/**/*.test.*"]`**, with `"dist"` added for every
-  built package, and the source directory named as it actually is — the two
-  `.mjs` packages keep theirs under `scripts`, and `@lcabrera/devkit` adds
-  `assets`, the files it exists to copy. Without `files` npm ships whatever is in
-  the directory: `@lcabrera/server` was shipping its whole test suite plus its
-  tsconfigs and `eslint.config.mjs`. The negated pattern is honoured by pnpm
+- **`files` is `["src", "!src/**/*.test.*", "!src/**/*.md"]`**, with `"dist"`
+  added for every built package, and the source directory named as it actually is
+  — the two `.mjs` packages keep theirs under `scripts`, and `@lcabrera/devkit`
+  adds `assets`, the files it exists to copy. Without `files` npm ships whatever
+  is in the directory: `@lcabrera/server` was shipping its whole test suite plus
+  its tsconfigs and `eslint.config.mjs`, and `@lcabrera/ui` its whole internal
+  documentation set. The second negation is why the markdown beside the source —
+  `INVENTORY.md`, `PATTERNS.md`, every system `ARCHITECTURE.md` — stays in the
+  repository: those documents are written for someone who has the repository
+  cloned, and in an install they are pages of references to a decisions directory
+  the reader has no access to. What a consumer needs is stated in the README.
+  Every package carries it, including the ones with no such markdown today: it
+  is inert there and it is the only guard that makes a new
+  `src/ARCHITECTURE.md` fail to ship rather than merely be likely to trip
+  `vp run shipped-docs:verify` on its way out. `@lcabrera/devkit`'s `assets`
+  are the deliberate exception — that markdown IS what the package exists to
+  copy, so the negation names the source directory and never `assets`.
+  `vp run shipped-docs:verify` holds the same line from the other side, over the
+  packed tarball. The negated pattern is honoured by pnpm
   pack. `src` stays in the built packages only because they emit sourcemaps — it
   is unreachable through the published `exports` map, so it exists purely to let
   a consumer step into the original TypeScript.

@@ -81,8 +81,8 @@ nothing; only calling the helper does.
 ## Contributing
 
 This package lives in
-[`luciocabrera/lcabrera-stack`](https://github.com/luciocabrera/lcabrera-stack)
-under `packages/node-runtime`. Its scope and the boundaries it is held to are in
+[`luciocabrera/lcabrera-stack`](https://github.com/luciocabrera/lcabrera-stack), in
+[its own directory](https://github.com/luciocabrera/lcabrera-stack/tree/main/packages/node-runtime). Its scope and the boundaries it is held to are in
 [the repository's `ARCHITECTURE.md`](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/node-runtime/ARCHITECTURE.md),
 which does not travel in the install; the decision to publish it is
 [ADR-069](https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/decisions/ADR-069-publish-the-shared-toolchain.md).

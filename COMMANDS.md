@@ -346,6 +346,22 @@ compiles it.
 | `vp run api-surface:verify`            | diff each public package's exported type surface against its tracked snapshot; require a changeset for a breaking change |
 | `vp run api-surface:verify -- --write` | regenerate the surface snapshots under `reports/api-surface/`                                                            |
 | `vp run attw:verify`                   | run Are The Types Wrong? over the built public packages — do the published types resolve for a consumer?                 |
+| `vp run shipped-docs:verify`           | pack each one and read every document in the tarball — does it still read with only that package on disk?                |
+
+`shipped-docs:verify` is the same instrument aimed at the documentation. The
+in-repo doc gate asks whether a path resolves **here**, which is the inverted
+question for an installed file: a link can resolve perfectly in this tree and
+point at nothing under a consumer's `node_modules`. So it packs, reads the
+markdown back out of the tarball, and fails a relative link that leaves the
+package, a link to a file `files` excluded, a path anchored at one of this
+repository's own directories, and a decision cited with no absolute URL on the
+line. Which directories count as this repository's is
+`gates.shippedDocs.repoOnlyDirs` in [`devkit.config.json`](devkit.config.json).
+It refuses an empty package roster, and any single package that ships no
+readable document, rather than reporting a pass over nothing — asked per
+package, because `@lcabrera/ui`'s whole shipped corpus is its root README and a
+roster-wide total would hide losing it behind its neighbours. It needs no `dist/` — markdown is not built — so
+it runs beside `tarball:verify` rather than after `packages:build`.
 
 Run `packages:build` **before** `publish:verify`, `api-surface:verify` and
 `attw:verify`: with no `dist/` there is no artifact to check, and all three
