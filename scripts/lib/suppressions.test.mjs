@@ -273,8 +273,6 @@ describe('findConfigSuppressions', () => {
     expect(config('rules: { "no-console": "warn" }')).toHaveLength(1);
   });
 
-  // The convention already practised in three of the four packages: pass the
-  // rule an option instead of turning it off, so a violation still FAILS.
   it('allows a rule set to error with options', () => {
     expect(
       config(

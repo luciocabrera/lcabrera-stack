@@ -116,7 +116,14 @@ Stop and split into sub-components/hooks/slots as soon as any of these show up:
 
 - **Always `use()`, never `useContext()`** — `use()` is conditional-safe and supports Promises; `useContext` is forbidden in this codebase.
 - **Single store snapshot per action** — call `store.get()` exactly once per execution, assign to a const, read all properties from it.
-- React Compiler handles most memoization automatically — favor correct code over manual optimization (see ADR-004).
+- **React Compiler owns memoization** — write plain, correct code and let it
+  memoize ([ADR-004](../../docs/decisions/ADR-004-react-compiler.md)).
+  That covers inline handlers: an `onClick={() => handler(id)}` arrow in JSX is
+  the idiomatic form here, not a reference to hoist. Reach for `useCallback` /
+  `useMemo` only when the identity of a value is semantically load-bearing, and
+  for nothing else. Do not re-add a rule forbidding that arrow: one sat in
+  "Forbidden" below and asked for exactly the hand-optimisation the ADR rejects
+  (#993).
 
 ## Styling — StyleX Only
 
@@ -143,7 +150,6 @@ export const styles = stylex.create({
 ### Forbidden
 
 - `style={...}` (inline styles) — runtime cost, no type safety
-- `onClick={() => handler()}` in JSX — creates new reference each render, breaks memoization
 - CSS Modules, Styled Components, Tailwind — inconsistent with architecture
 
 ## Reuse Before Building — Avoid Hidden Duplication

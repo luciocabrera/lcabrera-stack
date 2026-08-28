@@ -4,15 +4,52 @@
  * ceiling test is the important one — it is what stops a model reasoning its way
  * past a hard stop.
  */
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { describe, expect, it } from 'vite-plus/test';
 
+import { extractImportSpecifiers } from '../../packages/devkit/scripts/closure-extract.mjs';
+import { publicPackageDirs } from './coverage-workspaces.mjs';
 import {
   detectBlockers,
   detectFlags,
   detectStops,
   evaluateGate,
   isWithinCeiling,
+  OPERATOR_FILES,
 } from './pr-queue-gate.mjs';
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+const ROSTER = publicPackageDirs(REPO_ROOT);
+
+const OPERATOR_ENTRY = 'scripts/pr-queue-operator.mjs';
+
+const repoRelative = (fromFile, specifier) =>
+  relative(REPO_ROOT, resolve(dirname(join(REPO_ROOT, fromFile)), specifier))
+    .split('\\')
+    .join('/');
+
+const importClosure = (entry) => {
+  const seen = new Set();
+  const pending = [entry];
+  while (pending.length > 0) {
+    const current = pending.pop();
+    if (seen.has(current)) continue;
+    seen.add(current);
+    const full = join(REPO_ROOT, current);
+    if (!existsSync(full)) continue;
+    for (const { specifier } of extractImportSpecifiers(
+      readFileSync(full, 'utf8'),
+    )) {
+      if (specifier.startsWith('.'))
+        pending.push(repoRelative(current, specifier));
+    }
+  }
+  return [...seen].sort((left, right) => left.localeCompare(right));
+};
 
 const file = (path, additions = 5, deletions = 1) => ({
   additions,
@@ -87,12 +124,47 @@ describe('detectStops — mechanically certain §5 triggers', () => {
   it('leaves an ordinary PR unstopped', () => {
     expect(detectStops(pr())).toEqual([]);
   });
+
+  it('S9 covers every file the operator imports', () => {
+    const closure = importClosure(OPERATOR_ENTRY);
+    expect(closure).toContain(OPERATOR_ENTRY);
+    expect(closure.length).toBeGreaterThan(1);
+    expect(closure.filter((path) => !OPERATOR_FILES.has(path))).toEqual([]);
+  });
+
+  it('lists nothing in S9 the operator does not open by name', () => {
+    const entry = readFileSync(join(REPO_ROOT, OPERATOR_ENTRY), 'utf8');
+    const closure = importClosure(OPERATOR_ENTRY);
+    const beyondClosure = [...OPERATOR_FILES].filter(
+      (path) => !closure.includes(path),
+    );
+    expect(beyondClosure.length).toBeGreaterThan(0);
+    for (const path of beyondClosure) {
+      expect(existsSync(join(REPO_ROOT, path))).toBe(true);
+      expect(
+        entry.includes(`'${path}'`) || entry.includes(`"${path}"`),
+        `${path} is in OPERATOR_FILES but ${OPERATOR_ENTRY} never names it`,
+      ).toBe(true);
+    }
+  });
+
+  it.each([...OPERATOR_FILES])('stops a PR touching %s (S9)', (path) => {
+    expect(detectStops(pr({ files: [file(path)] })).map((s) => s.id)).toContain(
+      'S9',
+    );
+  });
 });
+
+const neverBaselineFlagged = (path, packages) =>
+  detectFlags(pr({ files: [file(path)] }), packages).some((flag) =>
+    /never-baseline/.test(flag.detail),
+  );
 
 describe('detectFlags — §5 areas needing the diff read', () => {
   it('flags a touched migration', () => {
     const flags = detectFlags(
-      pr({ files: [file('packages/ingestion/migrations/0030-x.sql')] }),
+      pr({ files: [file('apps/showcase/migrations/0030-x.sql')] }),
+      ROSTER,
     );
     expect(flags.map((flag) => flag.id)).toEqual(['S1']);
     expect(flags[0].detail).toMatch(/migration/);
@@ -101,6 +173,7 @@ describe('detectFlags — §5 areas needing the diff read', () => {
   it('raises both public-package concerns for a public manifest', () => {
     const details = detectFlags(
       pr({ files: [file('packages/ui/package.json')] }),
+      ROSTER,
     )
       .filter((flag) => flag.id === 'S1')
       .map((flag) => flag.detail);
@@ -110,11 +183,43 @@ describe('detectFlags — §5 areas needing the diff read', () => {
 
   it('flags an edited test file even though it is not a stop', () => {
     expect(
-      detectFlags(pr({ files: [file('src/a.test.ts', 4, 4)] })).map(
+      detectFlags(pr({ files: [file('src/a.test.ts', 4, 4)] }), ROSTER).map(
         (f) => f.id,
       ),
     ).toContain('S2');
   });
+
+  it('covers every package on the runtime never-baseline roster', () => {
+    expect(ROSTER.length).toBeGreaterThan(0);
+    for (const dir of ROSTER) {
+      expect(neverBaselineFlagged(`${dir}/src/thing.ts`, ROSTER)).toBe(true);
+      expect(neverBaselineFlagged(`${dir}/package.json`, ROSTER)).toBe(true);
+    }
+  });
+
+  it('leaves a workspace off the roster unflagged', () => {
+    expect(neverBaselineFlagged('packages/ts-configs/src/x.ts', ROSTER)).toBe(
+      false,
+    );
+    expect(neverBaselineFlagged('apps/showcase/src/x.ts', ROSTER)).toBe(false);
+  });
+
+  it.each([
+    ['absent', undefined],
+    ['empty', []],
+  ])(
+    'reaches every workspace package when the roster is %s',
+    (_label, roster) => {
+      expect(neverBaselineFlagged('packages/ts-configs/src/x.ts', roster)).toBe(
+        true,
+      );
+      expect(neverBaselineFlagged('packages/ui/src/x.ts', roster)).toBe(true);
+      expect(neverBaselineFlagged('packages/ui/package.json', roster)).toBe(
+        true,
+      );
+      expect(neverBaselineFlagged('scripts/lib/x.mjs', roster)).toBe(false);
+    },
+  );
 });
 
 describe('detectBlockers — §2, each carrying the verdict it forces', () => {

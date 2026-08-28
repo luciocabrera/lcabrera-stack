@@ -78,24 +78,37 @@ is no second agent to disturb.
 
 ## The task file
 
-One file per active task, `tasks/<id>.md`, YAML frontmatter + freeform notes:
+One file per active task, `tasks/<id>.md`, frontmatter + freeform notes:
 
 ```yaml
 ---
-id: table-ui-fixes # kebab-case, MUST equal the filename slug
+id: table-ui-fixes
 title: Four independent fixes in packages/ui Table
-owner: agent:claude # agent:<name> | human:<name>
-status: active # active | blocked | review | paused | done
-branch: fix/table-column-resize # the branch, or (uncommitted) / (worktree)
-area: # globs this work OWNS — the soft lock; keep them narrow
+owner: agent:claude
+status: active
+branch: fix/table-column-resize
+area:
   - packages/ui/src/components/Table/**
 started: 2026-07-18
 updated: 2026-07-18
-plan: task-four-independent-vast-galaxy.md # optional out-of-git scratch pointer
-pr: (none) # PR number/URL once opened
-issue: #50 # REQUIRED — the GitHub backlog issue this picks up; coordination:verify rejects a live task without a real reference (ADR-036)
+plan: task-four-independent-vast-galaxy.md
+pr: (none)
+issue: #50
 ---
 ```
+
+**Nothing after a value is a comment.** The register is read by the small
+frontmatter parser in
+[`coordination-parse.mjs`](../../packages/repo-standards/scripts/coordination-parse.mjs),
+not by a YAML library, so it takes the whole rest of the line as the value: a
+trailing `# note` lands inside `status`, and one on the `area:` line turns the
+list into a scalar, silently claiming nothing. Field-by-field documentation
+belongs below the block, which is where
+[`tasks/_TEMPLATE.md`](./tasks/_TEMPLATE.md) keeps it — copy that file rather
+than this example, and let `vp run coordination:verify` confirm the result.
+[`scripts/lib/coordination-example.test.mjs`](../../scripts/lib/coordination-example.test.mjs)
+runs the block above through that parser and the register's own schema, so an
+example that would be rejected as a claim fails the build here instead.
 
 Keep `area` **as narrow as the work really is** — a wide glob blocks more than it
 should. `packages/ui/src/components/Table/TableBody/**` is a better claim than

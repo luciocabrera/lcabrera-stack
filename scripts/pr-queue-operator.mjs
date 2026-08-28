@@ -39,6 +39,7 @@ import {
   runDecision,
 } from './lib/pr-queue-claude.mjs';
 import { buildExecutionPrompt, runExecution } from './lib/pr-queue-execute.mjs';
+import { publicPackageDirs } from './lib/coverage-workspaces.mjs';
 import { evaluateGate, isWithinCeiling } from './lib/pr-queue-gate.mjs';
 import {
   checkConformance,
@@ -199,6 +200,7 @@ const main = () => {
 
   const policy = readFileSync(POLICY_PATH, 'utf8');
   const workspaces = deriveWorkspaceScopes(REPO_ROOT);
+  const publicPackages = publicPackageDirs(REPO_ROOT);
   const { owner, repo } = resolveRepository();
   const queue = toQueue(fetchQueue({ limit: options.limit, owner, repo }));
   if (queue.length === 0) {
@@ -220,7 +222,11 @@ const main = () => {
   );
 
   const decided = sequence.map((pr, index) => {
-    const gate = evaluateGate(pr, checkConformance(pr, workspaces));
+    const gate = evaluateGate(
+      pr,
+      checkConformance(pr, workspaces),
+      publicPackages,
+    );
     const position = {
       edges: edgesFor(edges, pr.number),
       index,

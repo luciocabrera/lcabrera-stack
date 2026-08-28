@@ -18,6 +18,9 @@
 # `pipefail` propagates the runner's exit code. A base that cannot be resolved
 # is now a loud failure instead of a silent pass.
 #
+# It feeds the runner tracked changes since the merge base AND untracked,
+# non-ignored files, because the gate that uses it runs before a commit.
+#
 # Usage:
 #   bash scripts/changed-files.sh <runner> [args…]
 #   bash scripts/changed-files.sh node scripts/run-changed.mjs typecheck
@@ -49,4 +52,27 @@ if [[ -z "$base" ]]; then
   exit 1
 fi
 
-git diff --name-only "$base" | "$@"
+# Tracked changes AND untracked, non-ignored files. The second half matters
+# because this feeds the pre-commit quality gate: a new component with a new
+# colocated test, or a new scripts/lib module with its own suite, is untracked at
+# the moment the gate runs, and a tracked-only diff selects nothing and reports
+# green having executed no tests. `--exclude-standard` honours .gitignore, so
+# generated route types and local scratch stay out. In CI the checkout is clean,
+# so this half is empty and the selection is unchanged.
+#
+# Each half is captured and checked separately rather than piped from a group:
+# `{ a; b; } | c` exits with b's status, which would hide a failing `git diff` —
+# the exact fail-open shape this script exists to prevent.
+if ! tracked=$(git diff --name-only "$base"); then
+  echo "changed-files: 'git diff' against '$base' failed." >&2
+  echo "  Refusing to continue: a partial file list would check less than it seems." >&2
+  exit 1
+fi
+
+if ! untracked=$(git ls-files --others --exclude-standard); then
+  echo "changed-files: 'git ls-files --others' failed." >&2
+  echo "  Refusing to continue: new files would be silently skipped." >&2
+  exit 1
+fi
+
+printf '%s\n%s\n' "$tracked" "$untracked" | sed '/^$/d' | sort -u | "$@"
