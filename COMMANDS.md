@@ -92,12 +92,11 @@ The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` �
 `vp run test:changed`. This closes the gap the pre-commit hook leaves: `vp staged` covers
 only fmt + Oxlint + tsgolint + Biome on staged files, so the ESLint pass and a full
 type-check first turn red in CI otherwise. **Tests are scoped, not the full suite**:
-`test:changed` runs only the workspaces the push touches plus their dependents,
-plus the root `test:scripts` group when a `.mjs`/`.cjs` under `scripts/` changed,
-so a docs-only push runs none. The full suite is forced only by a change to `pnpm-lock.yaml`,
-`pnpm-workspace.yaml`, the root `vite.config.ts`, or the shared config packages
-(`@lcabrera/vite-config` / `@repo/ts-configs`) — deliberately **not** by any root file, since
-a real dependency change always moves the lockfile.
+`test:changed` selects on the diff and covers both halves — the affected
+workspaces and the root `scripts/` suites — so a docs-only push runs none, while
+a tooling-script edit still runs its tests here. Exactly what it selects, and
+what forces the full suite instead, is under [Gate & CI](#gate--ci) below; this
+section does not restate it.
 The **fallow audit** stays CI-only — it is a new-only gate scored against the merge base,
 needing full history and a coverage merge. `vp run` caches per task, so a warm push is
 quick; bypass a WIP push with `git push --no-verify`.
@@ -174,24 +173,27 @@ workspace**, so `vp run -r test` never reaches it. That is why the logic behind
 long as it did — a gate whose decision logic silently stops matching reports
 exactly what compliant input reports, which is nothing.
 
-`test:changed` runs only the suites a diff touched, for a fast local loop. It
-diffs the working tree against the branch point (`git merge-base` with
-`origin/main`; override the base with `TEST_CHANGED_BASE`), maps changed files to
-workspaces, and adds every workspace that transitively **depends on** them — so a
-`packages/ui` edit still exercises `apps/showcase`. It prints a per-workspace
-summary of what runs and what is skipped. Only the few files that change how every
-workspace resolves its tests — `pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root
-`vite.config.ts`, and the shared `vite-configs`/`ts-configs` packages — force the
+`test:changed` runs only the suites a diff touched, for a fast local loop, and
+this paragraph is the one statement of what that selection is — every other
+surface points here. It diffs the working tree against the branch point
+(`git merge-base` with `origin/main`; override the base with
+`TEST_CHANGED_BASE`), maps changed files to workspaces, and adds every workspace
+that transitively **depends on** them — so a `packages/ui` edit still exercises
+`apps/showcase`. It prints a per-workspace summary of what runs and what is
+skipped. Only the few files that change how every workspace resolves its tests —
+`pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root `vite.config.ts`, and the
+shared config packages `GLOBAL_PACKAGES` names in
+[`scripts/lib/affected-tests.mjs`](scripts/lib/affected-tests.mjs) — force the
 full suite (a real dependency change always bumps the lockfile). A change to a
-`.mjs`/`.cjs` under root `scripts/` adds the `test:scripts` group, which no
-workspace selection would ever reach; every other out-of-workspace change (root
-package.json scripts, lint/tsconfig configs, docs) affects no suite and runs
-nothing. Task substitution mirrors
-`test:ci`: the scan packages run their DB-free `test:unit`, and with `--ci` (`node
-scripts/test-changed.mjs --ci`) `showcase` runs its coverage `test:ci`
-last. `--dry-run` prints the `vp run` commands without executing them. CI's Unit
-Tests job (and its coverage report) scope to the diff on pull requests; pushes to
-`main` still run the full `test:ci`.
+code file under root `scripts/` (`.mjs`, `.cjs` or `.js`) adds the
+`test:scripts` group, which no workspace selection would ever reach; every other
+out-of-workspace change (root package.json scripts, lint/tsconfig configs, docs)
+affects no suite and runs nothing. Affected workspaces run plain `test`; with
+`--ci` (`node scripts/test-changed.mjs --ci`) `showcase` runs its coverage
+`test:ci` last, mirroring the root `test:ci` ordering. `--dry-run` prints the
+`vp run` commands without executing them. CI's Unit Tests job (and its coverage
+report) scope to the diff on pull requests; pushes to `main` still run the full
+`test:ci`.
 
 `typecheck:changed` applies the same change-based selection to the Quality Gate's
 slowest per-workspace step — real `tsc` across all 12 workspaces. It runs
