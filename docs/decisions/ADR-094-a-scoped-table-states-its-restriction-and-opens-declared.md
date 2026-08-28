@@ -115,12 +115,25 @@ sizing or visibility, and the persistence action writes none. Sizing travels wit
 the rest because the cookie carries the layout whole. Sorting and filters are
 untouched: they travel in the URL and belong to the request.
 
+**5b. The write half selects on what an entry writes, not on what it is.** A
+persistence entry is declared as a state-slice write, a URL write, **or both**,
+so suppressing the slice half by discarding every entry that carries a slice
+takes a live URL param down with it — silently, and with a success notification
+over a write that did not happen. The transient path therefore keeps the entries
+that write a param and strips the slice half off each. This is the same mistake
+as 6b in a different vocabulary: reading a declared set of shapes partially, and
+being right only about the shapes this repository happens to build. A published
+package has consumers that build the others.
+
 **6. Resolving a group restriction is the package's job, not the route's.**
 `resolveGroupRestriction` in `@lcabrera/server` reads the token out of the search
 params, resolves each key's label against the caller's declared columns, and
 formats a truncated key at its granularity. A route supplies only what nothing
 else can know: its columns, whether a token is mandatory, and the catalogue
-lookup against its own table.
+lookup against its own table. The lookup is **injected** rather than called,
+for the same reason the grouping-capability resolver already is: it reaches a
+database, and the package that renders the panel is client-safe and may not
+(ADR-038).
 
 **6b. It refuses on the same conditions as the read, and says the same thing.**
 The two resolvers answer one request, so a reader must never be shown a refusal

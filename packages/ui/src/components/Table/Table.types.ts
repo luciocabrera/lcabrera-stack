@@ -379,20 +379,14 @@ export type TableGroupRowSummary = {
   readonly path: readonly TableGroupKeyValue[];
 };
 
-/**
- * One term of a restriction the table states and cannot change. Never a `ColumnFilter`
- * ([ADR-094](../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
- */
 export type TableLockedFilter = {
   readonly columnKey: string;
-  /** Already formatted for a reader; the table does not derive it from a row. */
   readonly label: string;
   readonly value: string;
 };
 
 export type TableLockedFilters = {
   readonly entries: readonly TableLockedFilter[];
-  /** Why the restriction could not be read. No entries and no refusal is not a state. */
   readonly refusal?: string;
 };
 
@@ -438,11 +432,7 @@ export type TableMetaState = {
   readonly hasDefaultGrouping?: boolean;
   readonly initialPageSize: number;
   readonly isBordered: boolean;
-  /**
-   * Route-declared: the column layout is neither restored from the persistence cookie nor
-   * written to it, so the grid opens at its declared columns every time. Absent means off
-   * ([ADR-094](../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
-   */
+  /** Route-declared. Absent means off: the layout persists (ADR-094). */
   readonly isColumnLayoutTransient?: boolean;
   readonly isColumnSettingsOpen: boolean;
   readonly isColumnSettingsPinned: boolean;
@@ -466,10 +456,7 @@ export type TableMetaState = {
   readonly isUrlStateNested?: boolean;
   readonly loadMorePageSize: number;
   readonly locale?: string;
-  /**
-   * Route-declared (ADR-063, ADR-094): what already scopes this table's read. Absent means
-   * nothing the table cannot change is restricting it.
-   */
+  /** Route-declared: what already scopes this read (ADR-063, ADR-094). */
   readonly lockedFilters?: TableLockedFilters;
   readonly overscan: number;
   readonly persistenceKey: string;

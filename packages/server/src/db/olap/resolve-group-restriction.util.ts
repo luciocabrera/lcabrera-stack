@@ -17,18 +17,10 @@ import { toGroupPeriodLabel } from './to-group-period-label.util.ts';
 
 type ResolveGroupRestrictionArgs = {
   readonly columns: readonly RestrictionColumn[];
-  /**
-   * Set by a route whose every response is titled as one group: there, a request carrying
-   * no token is refused rather than answered as "nothing restricts these rows"
-   * ([ADR-087](../../../../../docs/decisions/ADR-087-a-group-opens-its-rows-in-a-route.md)
-   * decision 6b).
-   */
+  /** On, a request carrying no token is refused rather than read as unrestricted. */
   readonly isGroupRequired?: boolean;
   readonly params: URLSearchParams;
-  /**
-   * A catalogue lookup against the caller's own table, so the caller owns it; called only
-   * when the token carries granularities.
-   */
+  /** Called only when the token carries granularities. */
   readonly selectTruncations?: (
     periods: Readonly<Record<string, OlapGroupPeriod>>,
   ) => Promise<Readonly<Record<string, GroupKeyTruncation>>>;
@@ -81,15 +73,7 @@ const toEntry = ({
   };
 };
 
-/**
- * What restricts the rows a request naming one group is answered with — one entry per key,
- * outermost first — or a `refusal` carrying the same sentence the refused read renders
- * ([ADR-094](../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
- * It refuses on the same conditions as `resolveGroupRead`, in the same order and out of the
- * same message map, which is what the contract test beside it pins.
- * `undefined` means nothing restricts this read, which only a caller that does not require
- * a token can be answered with.
- */
+/** Refuses on the same conditions as `resolveGroupRead`, and says the same thing (ADR-094). */
 export const resolveGroupRestriction = async ({
   columns,
   isGroupRequired = false,

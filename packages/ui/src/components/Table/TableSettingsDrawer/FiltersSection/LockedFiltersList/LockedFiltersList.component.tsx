@@ -11,11 +11,6 @@ import { styles } from './LockedFiltersList.stylex';
 const UNREADABLE_RESTRICTION =
   'These rows are restricted, and the link does not say what to.';
 
-/**
- * The restriction this table states and cannot change, as its own section of the filters
- * panel
- * ([ADR-094](../../../../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
- */
 export const LockedFiltersList = () => {
   const lockedFilters = useGetTableLockedFilters();
 

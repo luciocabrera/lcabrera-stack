@@ -7,7 +7,6 @@ type ResolveOrdersGroupRestrictionArgs = Omit<
   'selectTruncations'
 >;
 
-/** This route's binding of the generic group restriction (ADR-082, ADR-094). */
 export const resolveOrdersGroupRestriction = (
   args: ResolveOrdersGroupRestrictionArgs,
 ) =>

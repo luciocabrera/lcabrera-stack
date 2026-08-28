@@ -62,7 +62,6 @@ const renderPanel = () => {
   );
 };
 
-/** Rendered twice by design: the section header's variant and the footer's. */
 const clickInHeaderToolbar = (name: string) => {
   fireEvent.click(screen.getAllByRole('button', { name })[0] as HTMLElement);
 };

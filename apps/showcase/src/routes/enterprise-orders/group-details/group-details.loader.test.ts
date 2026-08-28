@@ -29,7 +29,7 @@ const groupToken = encodeDrillGroup({
   groupKeys: GROUP_PATH.map((entry) => entry.columnKey),
 });
 
-/** Keyed on `APP_ID`, which is what `getStorageKey` namespaces a table's slices with. */
+/** `APP_ID`, never a literal: `getStorageKey` namespaces every slice with it. */
 const layoutCookie = ({
   slice,
   value,

@@ -71,13 +71,7 @@ type CreateTableRouteLoaderArgs<
   readonly resolveGroupingCapabilities?: () => Promise<
     Readonly<Record<string, TableColumnGroupingCapability>>
   >;
-  /**
-   * What already scopes this route's read and the table cannot change, resolved per
-   * request. Injected for the same reason the capability resolver above is: it reaches the
-   * route's own catalogue, which this client-safe package may not (ADR-038).
-   * Answer with a `refusal`, never with `undefined`, when the restriction is unreadable
-   * ([ADR-094](../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
-   */
+  /** Answer with a `refusal`, never `undefined`, when unreadable (ADR-094). */
   readonly resolveLockedFilters?: (args: {
     readonly request: Request;
   }) =>

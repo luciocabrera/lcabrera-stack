@@ -1,10 +1,6 @@
 import type { OlapGroupReadRefusal } from './olap.types';
 
-/**
- * One sentence per refusal, shipped with the package so every surface answering the same
- * request says the same thing about it — the grid rendering a refused page and the panel
- * stating what restricts the rows are two readings of one decision (ADR-094).
- */
+/** Shared by every resolver that refuses, so two surfaces cannot disagree (ADR-094). */
 export const GROUP_READ_REFUSAL_MESSAGE: Readonly<
   Record<OlapGroupReadRefusal, string>
 > = {

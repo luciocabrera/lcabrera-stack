@@ -45,11 +45,7 @@ type ReadTableLoaderStateFromRequestArgs<
    * its endpoint does not produce (ADR-063).
    */
   readonly includeGrouping?: boolean;
-  /**
-   * On, the persisted column layout is not read at all, so the grid paints its declared
-   * columns in declared order
-   * ([ADR-094](../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
-   */
+  /** On, no persisted column layout is read at all (ADR-094). */
   readonly isColumnLayoutTransient?: boolean;
   /**
    * Set when this table shares another route's URL: every param below is read

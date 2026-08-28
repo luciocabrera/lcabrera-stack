@@ -19,11 +19,6 @@ import { styles } from './GroupDetails.stylex';
 
 const FALLBACK_TITLE = 'Group';
 
-/**
- * One group's rows over the list that summarised them
- * ([ADR-087](../../../../../../docs/decisions/ADR-087-a-group-opens-its-rows-in-a-route.md),
- * [ADR-094](../../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
- */
 export const GroupDetails = () => {
   const { metaState } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();

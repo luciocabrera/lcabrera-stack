@@ -10,11 +10,7 @@ import {
 import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
 import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
 
-/**
- * One entry's URL half, with its state slice taken off. An entry may carry both, so a
- * transient layout selects on what an entry **writes** rather than on what it is —
- * discarding the whole entry would take a live URL param down with the slice.
- */
+/** An entry may carry both halves; this keeps the URL one (ADR-094). */
 const toUrlWriteOnly = ({
   searchParamKey,
   searchParamValue,
@@ -23,12 +19,7 @@ const toUrlWriteOnly = ({
   ...(searchParamValue !== undefined && { searchParamValue }),
 });
 
-/**
- * Persists table state to the **cookie**, written via a server action (Set-Cookie header).
- * A transient column layout keeps its URL params, writes no state slice, and reports no
- * success for a write it did not make
- * ([ADR-094](../../../../../../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
- */
+/** Persists table state to the **cookie**, written via a server action (Set-Cookie header). */
 export const usePersistTableStateAction = () => {
   const { metaStore } = useTableConfigContextValue();
   const persistCookie = usePersistCookieAction({

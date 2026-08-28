@@ -21,14 +21,6 @@ import {
   TITLE,
 } from '../EnterpriseOrders.constants';
 
-/**
- * The rows underneath one group row, as an ordinary paginated table
- * ([ADR-087](../../../../../../docs/decisions/ADR-087-a-group-opens-its-rows-in-a-route.md),
- * [ADR-094](../../../../../../docs/decisions/ADR-094-a-scoped-table-states-its-restriction-and-opens-declared.md)).
- * The three `meta` flags and the two resolvers are this route's whole binding: which
- * params its state is written under, that it opens at its declared columns, and which
- * table the group token and its granularities are resolved against.
- */
 export const loader = createTableRouteLoader<
   EnterpriseOrderTableRow,
   EnterpriseOrdersResponse

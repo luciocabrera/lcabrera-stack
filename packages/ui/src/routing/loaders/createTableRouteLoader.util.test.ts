@@ -92,7 +92,6 @@ const uiFlagsCookie = (state: Record<string, unknown>) =>
     JSON.stringify({ value: state, version: 1 }),
   )}`;
 
-/** One persisted layout slice, in the envelope the persist-cookie action writes. */
 const layoutCookie = ({
   slice,
   value,
