@@ -257,9 +257,19 @@ exist yet. The full statement is
 
 The pass that enqueues therefore ends with the pull request **queued, not
 merged**. Closing the linked issue, deleting the branch and pruning the worktree
-all wait for `state: MERGED`, which is a later observation — see
-[`merge-checklist.md`](../agents/merge-checklist.md) and
-[`.claude/pr-queue-policy.md`](../../.claude/pr-queue-policy.md) §4.
+all wait for `state: MERGED`, which is a later observation.
+
+**For a person merging by hand that is a wait; for the operator it is a gap.**
+`vp run pr:queue` reads open pull requests only — `QUEUE_QUERY` in
+`scripts/lib/pr-queue-github.mjs` is `pullRequests(states: OPEN, …)` — so a merged
+one never comes back to it and no pass can make that observation. Once the ruleset
+below is applied, an autonomous `--apply` run stops closing issues, deleting
+branches and pruning worktrees, and says nothing, because enqueuing is what
+succeeded. Do those three yourself after the queue merges, or run
+[#1043](https://github.com/luciocabrera/lcabrera-stack/issues/1043) down, which is
+the lane that owns them. `.claude/pr-queue-policy.md` §4 (A5–A8) is the statement
+of record; [`merge-checklist.md`](../agents/merge-checklist.md) is the by-hand
+version of the same wait.
 
 ## The ruleset change
 

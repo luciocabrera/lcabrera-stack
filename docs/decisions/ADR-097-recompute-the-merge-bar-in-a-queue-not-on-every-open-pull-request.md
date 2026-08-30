@@ -118,8 +118,9 @@ complete` all read what it exports, so neither event has its own copy of "what
   consequence below, which states what it is rather than what it sounds like. The
   operator's `MERGE` verdict is renamed `ENQUEUE`, a queued pull request is
   `WAIT` (E11) rather than something to act on, and closing the issue, deleting
-  the branch and pruning the worktree move to a later pass that observes
-  `state: MERGED`.
+  the branch and pruning the worktree (A6–A8) are **withdrawn** from the pass that
+  enqueues — withdrawn, not moved, because nothing here picks them up. See the
+  consequence that states what that leaves unowned.
 - A queue ejection gets its own signal. The failing checks belong to the merge
   group's commit, so the pull request's own required checks stay green and every
   rollup probe reads it as ready. `isInMergeQueue` and the
@@ -151,6 +152,24 @@ made the repository worse than before this change.
   deleting the branch, pruning the worktree — has to observe `state: MERGED`
   instead. Every such surface had to be found and changed; missing one would have
   left an autonomous operator deleting a branch whose work had not landed.
+- **The autonomous operator's post-merge housekeeping (A6–A8) is left unowned,
+  and this is a regression it pays knowingly.** Before the queue those three ran
+  in the pass that merged, because `gh pr merge --squash` merged synchronously and
+  the pull request was still in hand. In front of a queue that pass may not run
+  them, and no other pass can: `QUEUE_QUERY` in `scripts/lib/pr-queue-github.mjs`
+  is `pullRequests(states: OPEN, …)` and `scripts/pr-queue-operator.mjs` derives
+  every verdict from it, so a merged pull request never returns to `decide()` or
+  `applyDecisions()`. From the day the ruleset gains the `merge_queue` rule,
+  therefore, an autonomous `--apply` pass stops closing linked issues, stops
+  deleting head branches and stops pruning worktrees — and reports success, since
+  enqueuing is what it was asked to do. The alternative was worse in kind rather
+  than in degree: a pass that did them on the strength of having asked for a merge
+  would delete a branch whose work had not landed, and an ejected entry (above)
+  makes that reachable rather than theoretical. So the cost is accepted and
+  written down here, in `.claude/pr-queue-policy.md` §4 and in the apply pass's
+  own prompt rather than left to be discovered, and
+  [#1043](https://github.com/luciocabrera/lcabrera-stack/issues/1043) is the
+  merged-pull-request lane that ends it. Until then those three are a human's job.
 - A pull request can now fail in a place its own checks do not show. That is the
   ejection case above, and it is a new failure mode that did not exist before —
   mitigated by S11, not removed by it.

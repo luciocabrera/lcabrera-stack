@@ -153,7 +153,12 @@ Hard bounds, in force regardless of what the action list says:
   the pass ends with the pull request queued and not yet merged. Report
   \`merged: false\` then — it is not a failure. A6 (close the issue), A7 (delete the
   branch) and A8 (prune the worktree) are for a pull request that has actually
-  landed, so they belong to a later pass, never to this one.
+  landed, so you may not perform them here. NO LATER PASS PERFORMS THEM EITHER:
+  the operator reads only OPEN pull requests, so a merged one never comes back to
+  it. They are unowned until issue #1043 builds that lane, and a human does them
+  after the queue merges. If the action list names one, skip it and say so in
+  \`aborted\`, so the gap shows up in this pass's own report instead of reading as
+  work that was done.
 - Never mark a draft ready (A9). Never force-push over commits you did not make.
 - For a Copilot comment (A4): verify the claim against the tree BEFORE applying it.
   If it is wrong, reply with the probe that disproves it and resolve the thread —

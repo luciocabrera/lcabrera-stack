@@ -37,7 +37,7 @@ Exactly one verdict per PR per pass. There is deliberately no verdict meaning
 | Verdict    | Means                                                                           | Operator does                                                          |
 | ---------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | `ENQUEUE`  | Every §2 gate passes and no §5 trigger fires                                    | Runs A5 now, in the §3 order. Where a queue is required the PR is then |
-|            |                                                                                 | queued, not merged, and A6–A8 wait for a later pass                    |
+|            |                                                                                 | queued, not merged, and A6–A8 are unowned until #1043 (§4)             |
 | `ACT`      | Not eligible, but the blocker is entirely inside §4                             | Performs the named §4 actions, then re-evaluates on the next pass      |
 | `WAIT`     | Blocker clears on its own with no input from anyone (a check still running)     | Nothing. Records what it is waiting on and the earliest re-check       |
 | `ESCALATE` | A §5 trigger fired, or a §4 action hit its attempt bound, or evidence is absent | Stops on that PR, writes the escalation reason, touches nothing        |
@@ -129,9 +129,12 @@ invocation is logged with the exact command run.
 |        |                                          | REST merge, branch-merge and git-refs endpoints, the merge/enqueue/ref GraphQL mutations, and a `git push` whose             |
 |        |                                          | destination refspec is `main` — see what that bound is and is not, below. Subject is the PR title (E7 already                |
 |        |                                          | gated it). Where a queue is required this enqueues, and the pass ends with the PR queued rather than merged — success        |
-| **A6** | Close the linked issue                   | Only an issue the PR body links via a closing keyword, and only after the merge is confirmed on `main`                       |
-| **A7** | Delete the head branch                   | After merge, remote and local. Never a branch with commits that did not land (see the squash-merge trap in §6)               |
-| **A8** | Prune the worktree                       | Via `vp run housekeeping:prune -- --apply` only, which already refuses a dirty worktree, an un-PR'd commit, and any stash    |
+| **A6** | Close the linked issue                   | Only an issue the PR body links via a closing keyword, and only after the merge is confirmed on `main`. **No pass performs   |
+|        |                                          | this in front of a queue** — see below                                                                                       |
+| **A7** | Delete the head branch                   | After merge, remote and local. Never a branch with commits that did not land (see the squash-merge trap in §6). **No pass    |
+|        |                                          | performs this in front of a queue** — see below                                                                              |
+| **A8** | Prune the worktree                       | Via `vp run housekeeping:prune -- --apply` only, which already refuses a dirty worktree, an un-PR'd commit, and any stash.   |
+|        |                                          | **No pass performs this in front of a queue** — see below                                                                    |
 | **A9** | ~~Mark a draft ready~~ — **not allowed** | Draft is the author's signal that the work is unfinished. The operator has no basis to overrule it. Listed here so it is not |
 |        |                                          | mistaken for an oversight                                                                                                    |
 
@@ -170,12 +173,29 @@ containment; the containment is that pass's tool list, which is #1040 and does
 not exist yet. Stated here because a reader deciding how much to trust the leash
 needs its edge, not its headline.
 
-**A5–A8 span passes once a queue is required.** A5 hands the PR over; GitHub
-merges it minutes later, after building it on the live base. So A6, A7 and A8 —
-which all require the merge to have happened — belong to a later pass that
-observes `state: MERGED`, never to the one that enqueued. A pass that closed the
-issue and deleted the branch on the strength of having asked for a merge would be
-acting on a merge that had not happened, and may still be rejected (S11).
+**A5–A8 span passes once a queue is required, and A6–A8 are unowned in that
+window.** A5 hands the PR over; GitHub merges it minutes later, after building it
+on the live base. So A6, A7 and A8 — which all require the merge to have happened
+— may not be performed by the pass that enqueued: closing the issue and deleting
+the branch on the strength of having _asked_ for a merge acts on a merge that has
+not happened and may still be rejected (S11).
+
+**Nothing performs them instead.** There is no merged-pull-request lane: the
+operator's only source of pull requests is `QUEUE_QUERY` in
+`scripts/lib/pr-queue-github.mjs`, which is `pullRequests(states: OPEN, …)`, and
+`scripts/pr-queue-operator.mjs` builds every verdict from what `fetchQueue`
+returns — so a merged pull request never reaches `decide()` or
+`applyDecisions()` again and no pass can observe `state: MERGED` for it. In front
+of a queue, therefore, **linked issues stay open, head branches stay on the
+remote and worktrees accumulate**, and the enqueuing pass reports success while
+that happens. It is a known, stated gap, not an implied mechanism:
+[#1043](https://github.com/luciocabrera/lcabrera-stack/issues/1043) is the lane
+that closes it. Until it lands, A6–A8 are a human's job after the queue merges —
+`vp run housekeeping:prune -- --apply` is A8's half.
+
+Nothing here changes where no queue is required. There `gh pr merge <n> --squash`
+merges synchronously, the pass still holds the pull request, and A6–A8 run in it
+exactly as before.
 
 **A2 — what "transient" means.** A failure is transient only when the log shows
 the job never got to run the repo's own checks: runner allocation, a network or
