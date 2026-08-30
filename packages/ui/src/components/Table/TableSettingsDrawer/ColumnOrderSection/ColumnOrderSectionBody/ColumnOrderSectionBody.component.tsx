@@ -2,20 +2,22 @@ import type { DraggableItem } from '#ui/components/DraggableList';
 
 import { DraggableList } from '#ui/components/DraggableList';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
-import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
 import {
   useGetColumnOrder,
   useGetColumnPinning,
-  useGetColumnVisibility,
+  useGetGroupingKeys,
 } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
+import { resolveDeclaredGroupingKeys } from '#ui/components/Table/utils/resolveDeclaredGroupingKeys.util';
 
 import type { ColumnOrderSectionBodyProps } from './ColumnOrderSectionBody.types';
 
 import { useReorderColumns } from '../ColumnOrderSectionContext/actions';
+import { useGetRenderedColumnKeys } from '../hooks';
 import {
   buildAllOrderedColumns,
   createDraggableItems,
   filterSettingsColumns,
+  hoistRenderedColumns,
 } from '../utils';
 import { ColumnOrderItemContent } from './ColumnOrderItemContent/ColumnOrderItemContent.component';
 
@@ -25,21 +27,26 @@ export const ColumnOrderSectionBody = ({
   const columns = useGetColumns();
   const columnsOrder = useGetColumnOrder();
   const columnPinning = useGetColumnPinning();
-  const columnVisibility = useGetColumnVisibility();
-  const groupingKeys = useGetTableGroupingKeys();
+  const groupingKeys = useGetGroupingKeys();
+  const renderedColumnKeys = useGetRenderedColumnKeys();
   const reorderColumns = useReorderColumns();
 
+  const declaredGroupingKeys = resolveDeclaredGroupingKeys({
+    columns,
+    groupingKeys,
+  });
   const settingsColumns = filterSettingsColumns(columns);
-  const allOrderedColumns = buildAllOrderedColumns({
-    columns: settingsColumns,
-    columnsOrder,
+  const allOrderedColumns = hoistRenderedColumns({
+    columns: buildAllOrderedColumns({ columns: settingsColumns, columnsOrder }),
+    declaredGroupingKeys,
+    renderedColumnKeys,
   });
 
   const draggableItems: readonly DraggableItem[] = createDraggableItems({
     allOrderedColumns,
     columnPinning,
-    columnVisibility,
-    groupingKeys,
+    declaredGroupingKeys,
+    renderedColumnKeys: new Set(renderedColumnKeys),
     renderItemContent: (itemContentProps) => (
       <ColumnOrderItemContent {...itemContentProps} isBusy={isBusy} />
     ),

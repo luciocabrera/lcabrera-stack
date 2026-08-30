@@ -1,6 +1,7 @@
 import type { ColumnOrderSectionModalsState } from './ColumnOrderSectionContext.types';
 
 export const INITIAL_MODALS_STATE: ColumnOrderSectionModalsState = {
+  columnGroupingPrompt: { columnKey: '', isOpen: false },
   conflictModal: {
     columnKey: '',
     columnLabel: '',

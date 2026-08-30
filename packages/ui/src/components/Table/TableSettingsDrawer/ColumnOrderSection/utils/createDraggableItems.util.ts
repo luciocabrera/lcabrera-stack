@@ -6,9 +6,8 @@ type CreateDraggableItemsArgs<TContent> = {
     readonly left: readonly string[];
     readonly right: readonly string[];
   };
-  readonly columnVisibility: ReadonlySet<string>;
-  /** The applied group keys — locked in place while grouping is applied. */
-  readonly groupingKeys: readonly string[];
+  readonly declaredGroupingKeys: readonly string[];
+  readonly renderedColumnKeys: ReadonlySet<string>;
   readonly renderItemContent: (args: {
     readonly columnKey: string;
     readonly isGroupKey: boolean;
@@ -25,29 +24,24 @@ type OrderedColumnItem = {
   readonly label: string;
 };
 
-/**
- * **A group key is undraggable for its own reason, not by being static** (ADR-080).
- * While grouping is applied the keys are hoisted to the head of the order and the left
- * pin, so a drag would be silently undone on the next derivation — and a gesture that
- * visibly does nothing is worse than one refused.
- * Resizing a rung cannot break a staircase.
- */
+/** Undraggable is its own flag, never `isStatic` (ADR-080, ADR-096). */
 export const createDraggableItems = <TContent>({
   allOrderedColumns,
   columnPinning,
-  columnVisibility,
-  groupingKeys,
+  declaredGroupingKeys,
+  renderedColumnKeys,
   renderItemContent,
 }: CreateDraggableItemsArgs<TContent>) => {
   const leftPinned = new Set<string>(columnPinning.left);
   const rightPinned = new Set<string>(columnPinning.right);
-  const groupKeys = new Set<string>(groupingKeys);
+  const groupKeys = new Set<string>(declaredGroupingKeys);
+  const isGrouped = declaredGroupingKeys.length > 0;
 
   return allOrderedColumns.map((col) => {
     const isPinned = leftPinned.has(col.key) || rightPinned.has(col.key);
     const { isStatic } = resolveColumnCapabilities(col);
     const isGroupKey = groupKeys.has(col.key);
-    const isVisible = !columnVisibility.has(col.key);
+    const isVisible = renderedColumnKeys.has(col.key);
 
     return {
       content: renderItemContent({
@@ -59,7 +53,7 @@ export const createDraggableItems = <TContent>({
         label: col.label,
       }),
       id: col.key,
-      isDraggable: !isStatic && !isGroupKey,
+      isDraggable: !isStatic && !isGrouped,
     };
   });
 };

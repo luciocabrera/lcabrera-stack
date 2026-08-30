@@ -3,6 +3,15 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
+vi.mock(
+  '../ColumnGroupingPromptModal/ColumnGroupingPromptModal.component',
+  () => ({
+    ColumnGroupingPromptModal: () => (
+      <div data-testid='column-grouping-prompt-modal' />
+    ),
+  }),
+);
+
 vi.mock('../ColumnOrderPinSideModal/ColumnOrderPinSideModal.component', () => ({
   ColumnOrderPinSideModal: () => <div data-testid='pin-side-modal' />,
 }));
@@ -26,9 +35,10 @@ afterEach(() => {
 });
 
 describe('ColumnOrderSectionModals', () => {
-  it('renders all four conflict-resolution modals', () => {
+  it('renders every modal the section owns', () => {
     render(<ColumnOrderSectionModals />);
 
+    expect(screen.getByTestId('column-grouping-prompt-modal')).not.toBeNull();
     expect(screen.getByTestId('pin-side-modal')).not.toBeNull();
     expect(screen.getByTestId('pin-conflict-modal')).not.toBeNull();
     expect(screen.getByTestId('unpin-conflict-modal')).not.toBeNull();

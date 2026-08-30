@@ -236,9 +236,10 @@ export const styles = {
 
 ## A Grouped Layout Is Derived, Never Stored
 
-The layout a **grid** imposes rather than the consumer — today the group-key
-hoist
+The layout a **grid** imposes rather than the consumer — the group-key hoist
 ([ADR-080](../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md))
+and the removal of every column the grouping neither keys nor measures
+([ADR-096](../../../docs/decisions/ADR-096-the-grouping-decides-which-columns-the-grid-shows.md))
 — is computed in the _derived_ view state and never written to the columns
 store:
 
@@ -279,10 +280,27 @@ filtered back out of persisted pinning at every seam.
    menu. Filtering it out would take the row away in the one configuration where
    a user most wants to see which columns the grouping is holding.
 
+**A surface that lists the columns reads the derivation, never a second
+answer.** The settings drawer's Columns tab ticks, orders and counts its rows
+from `resolveRenderedColumnKeys`, which runs the grid's own
+`getPinnedDerivedColumnsState` over the drawer's draft and maps each painted key
+back to the column it was derived from. Building the same answer a second way —
+from `columnVisibility` and the declared order — is how the tab and the grid
+came to disagree about which columns exist (ADR-096). A column the derivation
+does not paint is still listed, unticked: rule 3 above, unchanged. That rule is about
+**which columns exist**. A surface answering something about the column a
+consumer declared — whether it can be filtered, what its label and data type are
+— reads the declared column (`useGetDeclaredColumn`), because the narrower
+painted list is not an answer to that question: the Filters tab keeps working on
+a column the grouping neither keys nor measures.
+
 **A gesture the derivation would undo is refused, not accepted.** The hoist
 already guarantees no column can sit between two keys, so a drag could not break
 anything — it would simply be undone on the next derivation, and a gesture that
-visibly does nothing is worse than one that is refused.
+visibly does nothing is worse than one that is refused. The same argument now
+covers the whole list while grouping is applied: the order shown is derived for
+its whole length, so a drag would persist a derivation as the consumer's own
+column order.
 
 ## Column Capability Defaults
 

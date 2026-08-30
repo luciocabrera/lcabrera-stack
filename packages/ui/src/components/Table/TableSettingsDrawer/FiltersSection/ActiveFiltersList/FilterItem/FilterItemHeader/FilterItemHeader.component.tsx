@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '#ui/components/Button';
 import { MenuCloseIcon } from '#ui/components/Icons';
-import { useGetNormalizedColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetDeclaredColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useSetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/actions';
 import { useGetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { ICON_SIZE_MD } from '#ui/design-system/constants';
@@ -19,12 +19,12 @@ export const FilterItemHeader = ({
   isBusy,
 }: FilterItemHeaderProps) => {
   const filters = useGetColumnFilters();
-  const normalizedColumns = useGetNormalizedColumns();
+  const column = useGetDeclaredColumn(columnKey);
   const expandedFilters = useGetTableSettingsExpandedFilters();
   const setExpandedFilters = useSetTableSettingsExpandedFilters();
   const removeFilterItem = useRemoveFilterItem();
 
-  const label = normalizedColumns[columnKey]?.label ?? columnKey;
+  const label = column?.label ?? columnKey;
   const isExpanded = expandedFilters.includes(columnKey);
   const isValid = isFilterValid(filters[columnKey]);
 

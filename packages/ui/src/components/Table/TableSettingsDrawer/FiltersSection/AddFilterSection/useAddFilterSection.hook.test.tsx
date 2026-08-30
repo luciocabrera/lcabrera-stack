@@ -16,19 +16,16 @@ const {
   expandedFiltersRef,
   mockSetColumnFilters,
   mockSetExpandedFilters,
-  normalizedColumnsRef,
 } = vi.hoisted(() => ({
   columnFiltersRef: { current: {} as Record<string, unknown> },
   columnsRef: { current: [] as readonly Record<string, unknown>[] },
   expandedFiltersRef: { current: [] as readonly string[] },
   mockSetColumnFilters: vi.fn(),
   mockSetExpandedFilters: vi.fn(),
-  normalizedColumnsRef: { current: {} as Record<string, unknown> },
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetColumns: () => columnsRef.current,
-  useGetNormalizedColumns: () => normalizedColumnsRef.current,
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
@@ -61,10 +58,6 @@ const activeFilters: ColumnFiltersState = {
 
 beforeEach(() => {
   columnsRef.current = columns;
-  normalizedColumnsRef.current = {
-    age: { dataType: 'number', key: 'age', label: 'Age' },
-    name: { dataType: 'string', key: 'name', label: 'Name' },
-  };
   columnFiltersRef.current = { ...activeFilters };
   expandedFiltersRef.current = ['name'];
   mockSetColumnFilters.mockReset();
@@ -124,11 +117,25 @@ describe('useAddFilterSection', () => {
     expect(mockSetExpandedFilters).not.toHaveBeenCalled();
   });
 
-  it('does nothing when the selected column is not in normalizedColumns', () => {
+  it('does nothing when the selected column is not one it offered', () => {
     const { result } = renderHook(() => useAddFilterSection({}));
 
     act(() => {
       result.current.handleVirtualSelectChange(['ghost']);
+    });
+    act(() => {
+      result.current.handleAddFilter();
+    });
+
+    expect(mockSetColumnFilters).not.toHaveBeenCalled();
+    expect(mockSetExpandedFilters).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when the selected column is not filterable', () => {
+    const { result } = renderHook(() => useAddFilterSection({}));
+
+    act(() => {
+      result.current.handleVirtualSelectChange(['internal']);
     });
     act(() => {
       result.current.handleAddFilter();

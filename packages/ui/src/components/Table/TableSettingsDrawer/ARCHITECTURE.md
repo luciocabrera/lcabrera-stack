@@ -114,7 +114,7 @@ TableSettingsDrawer/
 │   └── utils/
 │
 └── ColumnOrderSection/                    → Drag-drop column order + pin + visibility
-    ├── ColumnOrderSection.component.tsx    → DraggableList + conflict modals
+    ├── ColumnOrderSection.component.tsx    → DraggableList + this section's modals
     ├── ColumnOrderSection.types.ts         → Conflict resolution types
     ├── index.ts
     ├── ColumnOrderSectionContext/          → Nested context for modal state
@@ -276,7 +276,7 @@ a toolbar in dual-variant mode.
 | `FiltersSection`         | Filters  | Add/remove/expand filters, FilterInputs, validation, plus the read-only restrictions below                                                                                                                       |
 | `SortingSection`         | Sorting  | Add/remove/reorder sorts, direction toggle                                                                                                                                                                       |
 | `GroupingSection`        | Grouping | Multi-key group add/remove/reorder, legality-derived aggregate selection. Tab present only where the route declared `isGroupingEnabled`. See [GroupingSection/ARCHITECTURE.md](GroupingSection/ARCHITECTURE.md). |
-| `ColumnOrderSection`     | Columns  | Drag-drop reorder, pin toggle, visibility toggle, conflict modals. See [ColumnOrderSection/ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md).                                                                 |
+| `ColumnOrderSection`     | Columns  | Drag-drop reorder, pin toggle, visibility toggle, conflict and grouping-prompt modals. See [ColumnOrderSection/ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md).                                             |
 
 ### A filter the table cannot change
 
