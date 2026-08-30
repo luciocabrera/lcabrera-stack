@@ -115,16 +115,22 @@ const renderThreads = (threads) =>
         })
         .join('\n');
 
+const parenthesised = (text) => (text === '' ? '' : ` (${text})`);
+
 const renderQueue = (queue) => {
   if (!queue.enabled) {
     return 'not required on this base branch — landing is a direct squash merge';
   }
   if (queue.queued) {
-    return `in the queue${queue.state === '' ? '' : ` (${queue.state})`}${queue.position === undefined ? '' : ` at position ${queue.position + 1}`}`;
+    const at =
+      queue.position === undefined ? '' : ` at position ${queue.position + 1}`;
+    return `in the queue${parenthesised(queue.state)}${at}`;
   }
-  return queue.ejectedAt === ''
-    ? 'required on this base branch; this pull request is not in it'
-    : `required; REMOVED from the queue at ${queue.ejectedAt}${queue.ejectedReason === '' ? '' : ` — ${queue.ejectedReason}`}`;
+  if (queue.ejectedAt === '') {
+    return 'required on this base branch; this pull request is not in it';
+  }
+  const why = queue.ejectedReason === '' ? '' : ` — ${queue.ejectedReason}`;
+  return `required; REMOVED from the queue at ${queue.ejectedAt}${why}`;
 };
 
 const renderFindings = (label, findings) =>

@@ -80,6 +80,14 @@ const touchesPublicManifest = (pr, packages) =>
 const ejectedSinceHeadMoved = (pr) =>
   pr.queue.ejectedAt !== '' && pr.queue.ejectedAt > pr.headCommittedAt;
 
+const parenthesised = (text) => (text === '' ? '' : ` (${text})`);
+
+const ejectionDetail = (queue) =>
+  `the merge queue removed this pull request${parenthesised(queue.ejectedReason)} and the head has not moved since — read the merge group's checks before queueing it again`;
+
+const queuedDetail = (queue) =>
+  `already in the merge queue${parenthesised(queue.state)} — any action here removes it and starts the wait again`;
+
 /** A path present in the diff with no additions left — the file is gone. */
 const removedFile = (pr, pattern) =>
   pr.files.some(
@@ -151,7 +159,7 @@ export const detectFlags = (pr, packages) =>
       id: 'S2',
     },
     ejectedSinceHeadMoved(pr) && {
-      detail: `the merge queue removed this pull request${pr.queue.ejectedReason === '' ? '' : ` (${pr.queue.ejectedReason})`} and the head has not moved since — read the merge group's checks before queueing it again`,
+      detail: ejectionDetail(pr.queue),
       id: 'S11',
     },
   ].filter(Boolean);
@@ -216,7 +224,7 @@ export const detectBlockers = (pr, conformance) =>
         verdict: 'ACT',
       },
     pr.queue.queued && {
-      detail: `already in the merge queue${pr.queue.state === '' ? '' : ` (${pr.queue.state})`} — any action here removes it and starts the wait again`,
+      detail: queuedDetail(pr.queue),
       id: 'E11',
       verdict: 'WAIT',
     },

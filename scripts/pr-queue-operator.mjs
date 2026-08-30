@@ -119,8 +119,11 @@ const decide = ({ binary, gate, model, policy, position, pr }) => {
   }
   const forbidden = forbiddenActions(decision.actions);
   if (forbidden.length > 0) {
+    const named = forbidden
+      .map((item) => `\`${item.command}\` — ${item.reason}`)
+      .join('; ');
     return forcedDecision({
-      reason: `The decide pass authorised a command the policy forbids, so nothing runs: ${forbidden.map((item) => `\`${item.command}\` — ${item.reason}`).join('; ')}`,
+      reason: `The decide pass authorised a command the policy forbids, so nothing runs: ${named}`,
       ruleIds: ['A5', 'S10'],
     });
   }
