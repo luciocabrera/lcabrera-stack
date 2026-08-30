@@ -85,23 +85,23 @@ complete` all read what it exports, so neither event has its own copy of "what
   the queue never reads. Its workflow publishes the same verdict about the same
   head on the merge group's commit.
 - The merge step stops being a merge. `gh pr merge <n> --squash` enqueues where a
-  queue is required and squash-merges where one is not, and every other way to
-  land a pull request is forbidden to the operator. `forbiddenActions` is shaped
+  queue is required and squash-merges where one is not, and it is the only way of
+  landing a pull request the operator may authorise. `forbiddenActions` is shaped
   in two halves, because the two halves of the problem are opposite. The **flags**
   of `gh pr merge` are a closed vocabulary, so that half is an **allow-list**: the
   one authorised form passes and every other is refused. A deny-list of flags was
   tried first and leaked four times in one review round — it named `--merge` and
   `--rebase` while gh also spells them `-m` and `-r`, and named the
   `enablePullRequestAutoMerge` mutation while `--auto` calls the same mutation
-  from the CLI. Which **transport** reaches a merge is open (gh, `curl`, any HTTP
-  client), so that half stays a deny-list keyed on the operation's shape — the
-  REST `PUT …/pulls/{n}/merge` and `POST …/merges` endpoints, and the
-  `mergePullRequest` / `enablePullRequestAutoMerge` / `mergeBranch` mutations —
-  with the endpoint's path segments matched unread, so a shell variable standing
-  in for the number is the same endpoint. `forbiddenActions` escalates a
-  **decision** naming any of them; it does not sandbox the apply pass, which
-  needs `gh api` for other work and which no prefix allow-list can restrict to
-  reads — that residual is #1040 and is stated rather than implied. The
+  from the CLI. Which **transport** writes `main` is open (gh, `curl`, `git`
+  itself), so that half stays a deny-list keyed on the operation's shape — the
+  REST `PUT …/pulls/{n}/merge`, `POST …/merges` and `…/git/refs` endpoints, the
+  `mergePullRequest` / `enablePullRequestAutoMerge` / `mergeBranch` /
+  `enqueuePullRequest` / `updateRef` / `createCommitOnBranch` mutations, and a
+  `git push` whose destination refspec is `main` — with the endpoints' path
+  segments matched unread, so a shell variable standing in for the number is the
+  same endpoint. **That half is best-effort and cannot be complete**: see the
+  consequence below, which states what it is rather than what it sounds like. The
   operator's `MERGE` verdict is renamed `ENQUEUE`, a queued pull request is
   `WAIT` (E11) rather than something to act on, and closing the issue, deleting
   the branch and pruning the worktree move to a later pass that observes
@@ -143,17 +143,37 @@ made the repository worse than before this change.
 - The required-contexts list is now load-bearing in a second way: adding a
   required context whose workflow lacks `merge_group` does not fail loudly, it
   hangs the queue. Nothing mechanical prevents that today.
-- The operator's leash gained shapes but not a layer. `forbiddenActions` now
-  rejects every way of landing a pull request other than the authorised command,
-  in the decision it audits; the apply pass's own tool list still admits `gh api`,
-  which reaches the merge endpoint. #1040 is the guard that would close it, and
-  until it lands the bound is on what may be **authorised**, not on what may run.
+- **The leash gained shapes but not a layer, and the shapes are not the point.**
+  `forbiddenActions` refuses the routes to `main` that name themselves in plain
+  text — every form of `gh pr merge` but the authorised one, the REST merge,
+  branch-merge and git-refs endpoints, the merge, enqueue and ref mutations, and
+  a `git push` whose destination refspec is `main`. It **cannot** refuse every
+  route, because a deny-list over free text does not see an operation whose text
+  does not name it: a path or a ref held entirely in a variable, a script file, an
+  encoded string, or a spelling nobody has written down. The evidence that this is
+  a general property and not a gap to be closed is the history of this guard —
+  four missed spellings in one review round, three more in the next, each found by
+  reading rather than by the guard. So the honest claim is the narrow one: it
+  bounds, best-effort, what the decide pass may **authorise**, in the decision
+  text that is the audited artifact. **A decision-time audit is not containment.**
+  It cannot constrain the apply pass, whose tool list admits `Bash(gh api:*)` for
+  A4 and S11 and `Bash(git:*)` for A1, and which no prefix allow-list can restrict
+  to reads because gh's method is a flag and a push destination is an argument.
+  #1040 is that containment and does not exist yet; until it lands, the operator's
+  log is a record of what was authorised, not a guarantee of what ran.
 - The allow-list half costs a false ESCALATE on any `gh pr merge` the model
-  writes with an extra flag, `--repo` included. That is the direction a leash
-  should fail in, and the refusal names the authorised form, so the next pass
-  writes it. It also means a decision whose action text merely _quotes_ the
-  landing command inside another command escalates; the same was already true of
-  `--admin`.
+  writes in another shape: an extra flag (`--repo` included), and the two other
+  spellings of `<n>` that gh accepts — `#42` and the pull request's URL — because
+  the authorised form matches a bare decimal. That is the direction a leash should
+  fail in, and the refusal names the authorised form, so the next pass writes it.
+  It also means a decision whose action text merely _quotes_ the landing command
+  inside another command escalates; the same was already true of `--admin`.
+- The push shape costs nothing on ordinary work and is worth stating why: A1
+  pushes the head branch and A7 deletes it, and neither names `main` as a
+  destination, so `git push --force-with-lease origin <head>` and
+  `git push origin --delete <head>` pass unchanged. A push that reaches `main`
+  without naming it — a refspec in a variable, a configured `push.default` —
+  is not seen, which is the same residual as everything else in this half.
 - Not every shape it now refuses is reachable. `--auto` needs auto-merge enabled
   on the repository and this one has it off, so on 2026-08-30 the flag failed
   rather than merging. It is refused because it is the same operation as a

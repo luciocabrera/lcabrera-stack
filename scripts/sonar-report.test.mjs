@@ -8,6 +8,18 @@
  * of the merge — indistinguishable, in the check UI, from a clean project. Both
  * outcomes are planted here because a run that HAS a token exits 0 either way
  * and so can prove nothing about the flag.
+ *
+ * The script's other fail-or-skip branch — the `--wait` timeout — is NOT covered
+ * here, and the reason is cost rather than impossibility. It is reachable
+ * locally: `CONFIG.base` reads `SONAR_BASE_URL`, so a stub answering
+ * `/api/ce/activity` with `{"tasks": []}` drives `waitForAnalysis` to its
+ * timeout. What a case would have to pay for is the route in. `analysisReady`,
+ * which holds the two messages and the exit code, is not exported, so the only
+ * entry is the CLI; and the poll bounds are module constants in
+ * `lib/sonar-wait.mjs` (`WAIT_TIMEOUT_MS` 5 minutes, `WAIT_INTERVAL_MS` 15
+ * seconds), so the CLI takes five minutes of wall clock to get there. Covering it
+ * means making those two injectable or exporting the branch — a change to the
+ * script's shape, not to this file, and not this pull request's subject.
  */
 import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';

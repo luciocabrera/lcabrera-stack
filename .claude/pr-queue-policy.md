@@ -124,9 +124,10 @@ invocation is logged with the exact command run.
 | **A3** | Fix lint / format fallout                | Only the mechanical output of the repo's own fixers (`vp lint --fix`, `vp fmt`, `vp run lint:eslint`). Never a hand-rewrite  |
 | **A4** | Reply to and address a Copilot comment   | Verify first — see below. Reply on every thread it resolves, stating which                                                   |
 | **A5** | Land it: `gh pr merge <n> --squash`      | That exact command and no other form of it. `forbiddenActions` in `pr-queue-gate.mjs` matches it as an ALLOW-LIST, so        |
-|        |                                          | `--admin`, `--auto`, `-d`, `-m`/`--merge`, `-r`/`--rebase` and any flag gh adds later escalate the pull request without      |
-|        |                                          | being enumerated. The REST merge and branch-merge endpoints and the GraphQL merge mutations reach the same operation         |
-|        |                                          | through `gh api` and are refused by shape — see the bound it does not carry, below. Subject is the PR title (E7 already      |
+|        |                                          | `--admin`, `--auto`, `-d`, `-m`/`--merge`, `-r`/`--rebase`, `--repo`, a `#42` or URL spelling of `<n>`, and any flag gh      |
+|        |                                          | adds later escalate the pull request without being enumerated. Writing `main` by another route is refused by shape: the      |
+|        |                                          | REST merge, branch-merge and git-refs endpoints, the merge/enqueue/ref GraphQL mutations, and a `git push` whose             |
+|        |                                          | destination refspec is `main` — see what that bound is and is not, below. Subject is the PR title (E7 already                |
 |        |                                          | gated it). Where a queue is required this enqueues, and the pass ends with the PR queued rather than merged — success        |
 | **A6** | Close the linked issue                   | Only an issue the PR body links via a closing keyword, and only after the merge is confirmed on `main`                       |
 | **A7** | Delete the head branch                   | After merge, remote and local. Never a branch with commits that did not land (see the squash-merge trap in §6)               |
@@ -138,23 +139,36 @@ invocation is logged with the exact command run.
 of the problem are opposite. The flags of `gh pr merge` are a **closed**
 vocabulary — this row authorises one form — so that half is an allow-list, and a
 spelling nobody anticipated is refused rather than admitted. Which **transport**
-reaches a merge is open (gh, `curl`, any HTTP client), so that half stays a
-deny-list keyed on the endpoint path and the mutation name; an allow-list there
-would have to enumerate every command A1–A8 legitimately proposes, which is open
-too. What neither half can see is a command whose text does not name the
-operation: an endpoint held entirely in a variable, a script file, an encoded
-string.
+writes `main` is open (gh, `curl`, `git` itself), so that half stays a deny-list
+keyed on the endpoint path, the mutation name and the push destination; an
+allow-list there would have to enumerate every command A1–A8 legitimately
+proposes, which is open too, and a leash that blocks ordinary work is a leash
+that gets widened. So `git push --force-with-lease origin <head>` (A1) and
+`git push origin --delete <head>` (A7) pass, and `git push origin HEAD:main`
+does not.
+
+**A5 — the deny-list half is not complete, and cannot be.** It refuses the
+operations that name themselves in plain text. It does not see one whose text
+does not name it — a path or a ref held entirely in a variable, a script file, an
+encoded string, or a spelling nobody has written down yet. Every round of this
+guard so far has been another such spelling found by a reader, which is the
+evidence for the general claim: adding shapes narrows the gap and never closes
+it.
 
 **A5 — what it bounds, and what it does not.** It reads the DECISION's action
 list, which is the audited artifact, and escalates the whole pull request rather
-than filtering the offending line. So nothing forbidden reaches the apply pass
-_through the decision_. It is not a sandbox over that pass: `EXECUTE_TOOLS` has
-to include `Bash(gh api:*)` for A4's reply endpoint and S11's timeline query, a
-Claude Code Bash rule matches by prefix, and gh's method is a flag — so no
-allow-list admits those two while denying `--method PUT
-/repos/{o}/{r}/pulls/{n}/merge`, which merges directly and which this account's
-ruleset bypass makes succeed. That residual is #1040. Stated here because a
-reader deciding how much to trust the leash needs its edge, not its headline.
+than filtering the offending line. So the shapes it names do not reach the apply
+pass _through the decision_ — that, and not "nothing forbidden reaches it", is
+the property. It is not a sandbox over that pass: `EXECUTE_TOOLS` has to include
+`Bash(gh api:*)` for A4's reply endpoint and S11's timeline query and
+`Bash(git:*)` for A1's rebase, a Claude Code Bash rule matches by prefix, and
+gh's method is a flag — so no allow-list admits those while denying
+`--method PUT /repos/{o}/{r}/pulls/{n}/merge`, which merges directly, or
+`git push origin HEAD:main`, which needs no API at all. Both succeed for this
+account, whose role bypasses the ruleset. A decision-time audit is not
+containment; the containment is that pass's tool list, which is #1040 and does
+not exist yet. Stated here because a reader deciding how much to trust the leash
+needs its edge, not its headline.
 
 **A5–A8 span passes once a queue is required.** A5 hands the PR over; GitHub
 merges it minutes later, after building it on the live base. So A6, A7 and A8 —

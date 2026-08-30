@@ -219,14 +219,27 @@ one authorised command** — `gh pr merge <n> --squash` passes and every other f
 of `gh pr merge` is refused, including flags gh has not shipped yet.
 
 The transports are the other half and cannot be allow-listed, because any HTTP
-client reaches them: `PUT /repos/{owner}/{repo}/pulls/{n}/merge` merges a pull
-request directly, `POST /repos/{owner}/{repo}/merges` merges a branch with no
-pull request in the operation at all, and the `mergePullRequest`,
-`enablePullRequestAutoMerge` and `mergeBranch` GraphQL mutations do the same —
-all reachable through `gh api` or plain `curl`, and all succeeding for the same
-bypass-actor reason. Those are matched on the endpoint path and the mutation
-name, with the path's segments unread so a `$PR` variable is the same endpoint as
-a literal number. What that does and does not bound is
+client reaches them — and so does `git`. `PUT /repos/{owner}/{repo}/pulls/{n}/merge`
+merges a pull request directly, `POST /repos/{owner}/{repo}/merges` merges a
+branch with no pull request in the operation at all,
+`PATCH /repos/{owner}/{repo}/git/refs/heads/main` repoints the branch to any
+commit, `git push origin HEAD:main` does the same with no API at all, and the
+`mergePullRequest`, `enablePullRequestAutoMerge`, `mergeBranch`,
+`enqueuePullRequest`, `updateRef` and `createCommitOnBranch` GraphQL mutations
+cover the same ground — every one of them succeeding for the same bypass-actor
+reason. Those are matched on the endpoint path, the mutation name and the push
+destination, with the paths' segments unread so a `$PR` variable is the same
+endpoint as a literal number.
+
+**Read that half as best-effort, not as a wall.** A deny-list over free text
+refuses the operations that name themselves; it does not see one whose text does
+not name it — a path or a ref in a variable, a script file, an encoded string, or
+the next spelling nobody has written down. Three routes were found this way in a
+single review round, after four in the round before. It bounds what a decision
+may **authorise**, in the artifact that is audited, and it is not a sandbox over
+the apply pass: that pass holds `Bash(gh api:*)` and `Bash(git:*)` because A1, A4
+and S11 need them. #1040 is the tool-list guard that would contain it and does not
+exist yet. The full statement is
 [`.claude/pr-queue-policy.md`](../../.claude/pr-queue-policy.md) §4 A5.
 
 The pass that enqueues therefore ends with the pull request **queued, not

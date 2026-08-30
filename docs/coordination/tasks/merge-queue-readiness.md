@@ -39,11 +39,12 @@ blocks every merge.
 
 ## Status / next
 
-- Current step: review round 4 — the operator's leash is reshaped. The flags of
-  `gh pr merge` are allow-listed against A5's one authorised form (a deny-list of
-  spellings leaked `-m`, `-r` and `--auto`), the merge endpoints are matched with
-  their path segments unread and `POST …/merges` added, and the Sonar timeout
-  message no longer promises a merge-queue backstop that is not on the ruleset
+- Current step: review round 5 — the leash refuses the three remaining routes
+  that name themselves (a `git push` whose destination refspec is `main`, the
+  git-refs endpoint and its GraphQL twins, `enqueuePullRequest`), and every copy
+  of the claim now says what a decision-time deny-list over free text can
+  structurally do: bound what may be authorised, best-effort. Containment is the
+  apply pass's tool list, which is #1040
 - Blockers: none. The `docs/decisions/**` overlap warning against
   grouped-column-scope (#1033) is real and already resolved by content: that
   branch took ADR-096, so this one is ADR-097. The glob here is a single file and

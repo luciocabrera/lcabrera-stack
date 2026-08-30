@@ -7,13 +7,22 @@
  * never told about — a spelling it does not know must still be rejected, or the
  * guard is back to guessing. The transport half is a deny-list over operation
  * shapes, so the same endpoint is planted through `gh api` and through `curl`,
- * with its path segments written as shell variables as well as literals, and the
- * `gh api` reads A4 and S11 genuinely need are planted alongside to show the
- * bound still admits them.
+ * with its path segments written as shell variables as well as literals, and a
+ * push, a ref write and the enqueue mutation are planted beside the merge
+ * endpoints — every one of them a way of putting commits on `main` that names
+ * itself in plain text.
+ *
+ * The negative direction carries as much weight as the positive one here: a
+ * deny-list that refuses the pushes A1 and A7 make is a leash that gets widened,
+ * so those are pinned as ADMITTED alongside the reads.
+ *
+ * What no case here can pin is completeness. A deny-list over free text does not
+ * see an operation whose text does not name it, and passing every case below is
+ * not evidence that none exists — the module header says so, and #1040 is the
+ * containment that would make it true.
  *
  * Separate from `pr-queue-gate.test.mjs` because that file is the verdict
- * ceiling and this one is the command bound; #1040 is the part of this bound
- * that lives outside the decision and is therefore not testable here.
+ * ceiling and this one is the command bound.
  */
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -135,6 +144,57 @@ describe('forbiddenActions — one authorised landing, every other shape refused
     expect(
       forbiddenActions([
         action(`gh api graphql -f query='mutation{mergeBranch(input:{})}'`),
+      ]),
+    ).toHaveLength(1);
+  });
+
+  it('rejects a push whose destination refspec is the protected branch', () => {
+    expect(
+      forbiddenActions([
+        action('git push origin mybranch:main'),
+        action('git push origin HEAD:main'),
+        action('git push --force origin HEAD:refs/heads/main'),
+        action('git push origin main'),
+        action('git push origin +HEAD:main'),
+      ]),
+    ).toHaveLength(5);
+  });
+
+  it('leaves the pushes A1 and A7 make alone, and every other use of the name', () => {
+    expect(
+      forbiddenActions([
+        action('git push --force-with-lease origin ci/1034-merge-queue'),
+        action('git push origin --delete ci/1034-merge-queue'),
+        action('git push origin HEAD'),
+        action('git push origin main-fixes'),
+        action('git push origin feature/mainline'),
+        action('git rebase origin/main'),
+        action('git fetch origin main'),
+      ]),
+    ).toEqual([]);
+  });
+
+  it('rejects a ref write against the branch, in either transport', () => {
+    expect(
+      forbiddenActions([
+        action(
+          'gh api --method PATCH repos/o/r/git/refs/heads/main -f sha=deadbeef',
+        ),
+        action('gh api --method PATCH "repos/$O/$R/git/refs/heads/$BRANCH"'),
+        action(
+          `gh api graphql -f query='mutation{createCommitOnBranch(input:{})}'`,
+        ),
+        action(`gh api graphql -f query='mutation{updateRef(input:{})}'`),
+      ]),
+    ).toHaveLength(4);
+  });
+
+  it('rejects the enqueue mutation, which can jump the queue it enters', () => {
+    expect(
+      forbiddenActions([
+        action(
+          `gh api graphql -f query='mutation{enqueuePullRequest(input:{pullRequestId:"PR_k",jump:true})}'`,
+        ),
       ]),
     ).toHaveLength(1);
   });
