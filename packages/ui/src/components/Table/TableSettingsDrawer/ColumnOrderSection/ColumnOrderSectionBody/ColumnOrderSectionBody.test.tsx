@@ -20,8 +20,8 @@ import {
 
 const {
   mockColumns,
-  mockColumnVisibility,
   mockGroupingKeys,
+  mockRenderedColumnKeys,
   mockReorderColumns,
   mockToggleColumnPin,
   mockToggleColumnVisibility,
@@ -31,8 +31,8 @@ const {
     { isStatic: true, key: 'name', label: 'Name' },
     { key: 'skip', label: 'Skip', render: () => 'cell' },
   ],
-  mockColumnVisibility: new Set(['name']),
   mockGroupingKeys: [] as string[],
+  mockRenderedColumnKeys: ['id'] as string[],
   mockReorderColumns: vi.fn(),
   mockToggleColumnPin: vi.fn(),
   mockToggleColumnVisibility: vi.fn(),
@@ -83,18 +83,18 @@ vi.mock(
   }),
 );
 
-vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
-  useGetTableGroupingKeys: () => mockGroupingKeys,
-}));
-
 vi.mock(
   '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors',
   () => ({
     useGetColumnOrder: () => ['name', 'id'],
     useGetColumnPinning: () => ({ left: ['id'], right: [] }),
-    useGetColumnVisibility: () => mockColumnVisibility,
+    useGetGroupingKeys: () => mockGroupingKeys,
   }),
 );
+
+vi.mock('../hooks', () => ({
+  useGetRenderedColumnKeys: () => mockRenderedColumnKeys,
+}));
 
 vi.mock('#ui/components/ToggleSwitch', () => ({
   ToggleSwitch: ({

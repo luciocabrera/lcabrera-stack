@@ -72,14 +72,14 @@ const { MockBooleanFilterInput, MockInputContent, MockOperatorSelect } =
     ),
   }));
 
-const { useGetNormalizedColumnMock } = vi.hoisted(() => ({
-  useGetNormalizedColumnMock: vi.fn(),
+const { useGetDeclaredColumnMock } = vi.hoisted(() => ({
+  useGetDeclaredColumnMock: vi.fn(),
 }));
 
 vi.mock(
-  '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook',
+  '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetDeclaredColumn.hook',
   () => ({
-    useGetNormalizedColumn: useGetNormalizedColumnMock,
+    useGetDeclaredColumn: useGetDeclaredColumnMock,
   }),
 );
 
@@ -108,7 +108,7 @@ const renderFilterInputs = ({
   readonly onChange?: (filter?: ColumnFilter) => void;
   readonly shouldFillHeight?: boolean;
 }) => {
-  useGetNormalizedColumnMock.mockReturnValue(column);
+  useGetDeclaredColumnMock.mockReturnValue(column);
 
   return render(
     <FilterInputs<Row>

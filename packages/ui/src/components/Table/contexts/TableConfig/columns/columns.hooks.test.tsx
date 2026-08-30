@@ -78,8 +78,8 @@ import { useGetColumnSizing } from './selectors/useGetColumnSizing.hook';
 import { useGetColumnsSorting } from './selectors/useGetColumnsSorting.hook';
 import { useGetColumnVisibility } from './selectors/useGetColumnVisibility.hook';
 import { useGetColumnWidth } from './selectors/useGetColumnWidth.hook';
+import { useGetDeclaredColumn } from './selectors/useGetDeclaredColumn.hook';
 import { useGetNormalizedColumn } from './selectors/useGetNormalizedColumn.hook';
-import { useGetNormalizedColumns } from './selectors/useGetNormalizedColumns.hook';
 import { useGetPinnedColumnInfo } from './selectors/useGetPinnedColumnInfo.hook';
 import { useGetPinnedColumnOffsets } from './selectors/useGetPinnedColumnOffsets.hook';
 import { useGetPinnedColumnPartition } from './selectors/useGetPinnedColumnPartition.hook';
@@ -148,10 +148,12 @@ describe('TableConfig column hooks', () => {
     expect(renderHook(() => useGetColumnsSorting()).result.current).toEqual([
       { columnKey: 'status', direction: 'desc' },
     ]);
-    expect(renderHook(() => useGetNormalizedColumns()).result.current).toEqual({
-      actions: { key: 'actions', label: 'Actions' },
-      status: { key: 'status', label: 'Status' },
-    });
+    expect(renderHook(() => useGetDeclaredColumn('id')).result.current).toEqual(
+      { key: 'id' },
+    );
+    expect(
+      renderHook(() => useGetDeclaredColumn('ghost')).result.current,
+    ).toBeUndefined();
     expect(
       renderHook(() => useGetNormalizedColumn('status')).result.current,
     ).toEqual({

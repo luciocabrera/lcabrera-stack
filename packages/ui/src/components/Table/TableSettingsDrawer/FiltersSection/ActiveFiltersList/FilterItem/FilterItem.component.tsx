@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { useGetNormalizedColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetDeclaredColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useGetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 
 import type { FilterItemProps } from './FilterItem.types';
@@ -12,13 +12,10 @@ import { FilterItemHeader } from './FilterItemHeader/FilterItemHeader.component'
 
 export const FilterItem = ({ columnKey, isBusy }: FilterItemProps) => {
   const filters = useGetColumnFilters();
-  const normalizedColumns = useGetNormalizedColumns();
+  const column = useGetDeclaredColumn(columnKey);
   const expandedFilters = useGetTableSettingsExpandedFilters();
 
-  if (
-    !Object.hasOwn(normalizedColumns, columnKey) ||
-    !Object.hasOwn(filters, columnKey)
-  ) {
+  if (column === undefined || !Object.hasOwn(filters, columnKey)) {
     return;
   }
 

@@ -1,9 +1,6 @@
 import { useState } from 'react';
 
-import {
-  useGetColumns,
-  useGetNormalizedColumns,
-} from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useSetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/actions';
 import { useGetTableSettingsExpandedFilters } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
@@ -21,7 +18,6 @@ export const useAddFilterSection = ({
 }: UseAddFilterSectionArgs) => {
   const columns = useGetColumns();
   const filters = useGetColumnFilters();
-  const normalizedColumns = useGetNormalizedColumns();
   const expandedFilters = useGetTableSettingsExpandedFilters();
 
   const onFiltersChange = useSetColumnFilters();
@@ -29,16 +25,17 @@ export const useAddFilterSection = ({
   const [selectedColumn, setSelectedColumn] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Filter to only filterable columns and build { label, value } options
-  const filterableColumnOptions = columns
-    .filter((col) => resolveColumnCapabilities(col).isFilterable)
-    .map((col) => {
-      const hasActiveFilter = Object.hasOwn(filters, col.key);
-      return {
-        label: hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label,
-        value: col.key,
-      };
-    });
+  const filterableColumns = columns.filter(
+    (col) => resolveColumnCapabilities(col).isFilterable,
+  );
+
+  const filterableColumnOptions = filterableColumns.map((col) => {
+    const hasActiveFilter = Object.hasOwn(filters, col.key);
+    return {
+      label: hasActiveFilter ? `${col.label} ⚠️ (filtered)` : col.label,
+      value: col.key,
+    };
+  });
 
   const handleOpenChange = (isOpen: boolean) => {
     setIsDropdownOpen(isOpen);
@@ -48,7 +45,7 @@ export const useAddFilterSection = ({
   const handleAddFilter = () => {
     if (!selectedColumn) return;
 
-    const column = normalizedColumns[selectedColumn];
+    const column = filterableColumns.find((col) => col.key === selectedColumn);
     if (!column) return;
 
     onFiltersChange({
@@ -56,7 +53,6 @@ export const useAddFilterSection = ({
       [selectedColumn]: createInitialFilter(column.dataType),
     });
 
-    // Expand the newly added filter
     setExpandedFilters([
       selectedColumn,
       ...expandedFilters.filter((key) => key !== selectedColumn),

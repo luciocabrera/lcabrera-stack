@@ -21,11 +21,6 @@ type WithAggregateColumnsArgs<TData> = {
   readonly groupingKeys: readonly string[];
 };
 
-/**
- * In-place derivation, never state: a group key is never measured (ADR-080);
- * an undeclared aggregate is dropped; a primary-key column is measured beside
- * itself so `resolveCrudRowId` keeps working (#887).
- */
 export const withAggregateColumns = <TData>({
   aggregates,
   columnOrder,
@@ -82,10 +77,7 @@ export const withAggregateColumns = <TData>({
     };
 
     derivedBySource.set(aggregate.columnKey, [
-      ...(derivedBySource.get(aggregate.columnKey) ??
-        // The source column leads its own measures when it may not be replaced,
-        // so the expansion below adds rather than substitutes.
-        (source.isPrimaryKey === true ? [source] : [])),
+      ...(derivedBySource.get(aggregate.columnKey) ?? []),
       derived,
     ]);
   }

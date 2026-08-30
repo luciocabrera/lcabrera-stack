@@ -167,6 +167,7 @@ const ExpansionProbe = () => {
       </output>
       <output data-testid='focus-target'>
         {JSON.stringify({
+          columnKey: focusTarget.columnKey,
           rowIndex: focusTarget.rowIndex,
           rowKey: focusTarget.rowKey,
         })}
@@ -192,10 +193,7 @@ const Harness = ({ data }: HarnessProps) => {
     <TableConfigProvider<TestRow>
       columnsState={{ columns }}
       metaState={{
-        // A grouped table declares its keys, and that is what injects the
-        // hierarchy column a group row puts its label in (ADR-065). Without it
-        // the grid would render group rows into data columns only, which is not
-        // a state a grouped route can be in.
+        groupingAggregates: [{ columnKey: 'id', fn: 'count' }],
         groupingKeys: ['city'],
         overscan: 2,
         rowHeight: ROW_HEIGHT,
@@ -303,14 +301,10 @@ const getGroupRows = () => screen.getAllByTestId('table-group-header-row');
 const getGroupLabels = () =>
   screen.getAllByTestId('table-group-key-cell').map((cell) => cell.textContent);
 
-/**
- * The `Id` cell of every rendered **detail** row, in order. `id` is not a group
- * key, so it still renders — and it is what says which rows a collapse removed.
- */
-const getDetailIds = () =>
-  getRenderedRows()
-    .filter((row) => row.dataset.testid !== 'table-group-header-row')
-    .map((row) => row.querySelectorAll('[role="gridcell"]')[1]?.textContent);
+const getRowKinds = () =>
+  getRenderedRows().map((row) =>
+    row.dataset.testid === 'table-group-header-row' ? 'group' : 'detail',
+  );
 
 const getRenderedRows = () => screen.getAllByRole('row');
 
@@ -321,6 +315,7 @@ const getCollapsedPaths = () =>
 
 const getFocusTarget = () =>
   JSON.parse(screen.getByTestId('focus-target').textContent ?? '{}') as {
+    readonly columnKey?: string;
     readonly rowIndex?: number;
     readonly rowKey?: string;
   };
@@ -346,10 +341,14 @@ const readFocus = () => {
 
   if (active === null || active === document.body) return 'body';
   if (active === getGrid()) return 'grid';
-  if (active.getAttribute('role') === 'gridcell')
-    return active.textContent ?? '';
+  if (active.getAttribute('role') !== 'gridcell')
+    return active.tagName.toLowerCase();
 
-  return active.tagName.toLowerCase();
+  const row = active.closest('tr');
+  const kind =
+    row?.dataset.testid === 'table-group-header-row' ? 'group' : 'detail';
+
+  return `${kind}#${row?.getAttribute('aria-rowindex') ?? '?'}`;
 };
 
 const flushFrame = async () => {
@@ -483,7 +482,7 @@ describe('a grouped table that expands and collapses', () => {
     // Paris survives, its three rows do not, and Berlin's branch is untouched.
     expect(getRenderedRows()).toHaveLength(4);
     expect(getGroupLabels()).toStrictEqual(['Paris', 'Berlin']);
-    expect(getDetailIds()).toStrictEqual(['4', '5']);
+    expect(getRowKinds()).toStrictEqual(['group', 'group', 'detail', 'detail']);
 
     clickButton('toggle-paris');
     expect(getRenderedRows()).toHaveLength(7);
@@ -567,15 +566,12 @@ describe('a grouped table that expands and collapses', () => {
       trace.push(readFocus());
     }
 
-    // Paris (a group row's own `Id` cell), its three rows, then Berlin —
-    // collapsed, so its two rows are absent and the last ArrowDown clamps
-    // there rather than walking into them.
     expect(trace).toStrictEqual([
-      '—No aggregate',
-      '1',
-      '2',
-      '3',
-      '—No aggregate',
+      'group#2',
+      'detail#3',
+      'detail#4',
+      'detail#5',
+      'group#6',
     ]);
   });
 
@@ -627,7 +623,7 @@ describe('a grouped table that expands and collapses', () => {
     expect(getCollapsedPaths()).toStrictEqual([resolveGroupPathKey(paris)]);
     // Berlin is first now and still open; Paris is last and still closed.
     expect(getGroupLabels()).toStrictEqual(['Berlin', 'Paris']);
-    expect(getDetailIds()).toStrictEqual(['5', '4']);
+    expect(getRowKinds()).toStrictEqual(['group', 'detail', 'detail', 'group']);
   });
 
   it('drops a path a filter change removed, rather than re-applying it later', async () => {
@@ -644,7 +640,15 @@ describe('a grouped table that expands and collapses', () => {
     // The discriminating half: a collapse kept from data that no longer existed
     // would silently re-close Paris the moment the filter let it back.
     expect(getRenderedRows()).toHaveLength(7);
-    expect(getDetailIds()).toStrictEqual(['1', '2', '3', '4', '5']);
+    expect(getRowKinds()).toStrictEqual([
+      'group',
+      'detail',
+      'detail',
+      'detail',
+      'group',
+      'detail',
+      'detail',
+    ]);
   });
 
   it('expands with Right and collapses with Left, on the group row', async () => {
@@ -669,15 +673,13 @@ describe('a grouped table that expands and collapses', () => {
     await enterGrid();
     await pressKey('ArrowDown');
 
-    // The first cell of every row is now the grid's hierarchy column, and a
-    // detail row's is empty: its values are already in their own columns
-    // (ADR-065).
-    expect(readFocus()).toBe('');
+    expect(readFocus()).toBe('detail#3');
+    expect(getFocusTarget().columnKey).toBe('city');
 
     await pressKey('ArrowRight');
 
-    // Moved one cell — onto this row's `Id` — and collapsed nothing.
-    expect(readFocus()).toBe('1');
+    expect(readFocus()).toBe('detail#3');
+    expect(getFocusTarget().columnKey).toBe('id:count');
     expect(getCollapsedPaths()).toStrictEqual([]);
   });
 
@@ -690,9 +692,6 @@ describe('a grouped table that expands and collapses', () => {
     };
 
     await enterGrid();
-    // One column right of the hierarchy column, onto `Id`: it is the only
-    // column that renders on both kinds of row here, so a trace read there
-    // names which row focus is on rather than reading blank down the tree.
     await pressKey('ArrowRight');
     record();
     await pressKey('ArrowDown');
@@ -702,11 +701,12 @@ describe('a grouped table that expands and collapses', () => {
     await pressKey('ArrowDown');
     record();
 
-    // Focus is on the last row of Paris — inside the subtree about to close,
-    // which is the whole point: collapsing while focus sits elsewhere proves
-    // nothing. The first entry is the Paris group row's own `Id` cell: no
-    // aggregate was selected on that column, so it renders the dash.
-    expect(trace).toStrictEqual(['—No aggregate', '1', '2', '3']);
+    expect(trace).toStrictEqual([
+      'group#2',
+      'detail#3',
+      'detail#4',
+      'detail#5',
+    ]);
 
     clickButton('toggle-paris');
     record();
@@ -738,28 +738,15 @@ describe('a grouped table that expands and collapses', () => {
     await pressKey('ArrowDown');
     record();
 
-    // Every dash is a group row read at the `Id` column — no aggregate was
-    // selected there, so it renders one. Three of these four entries used to
-    // be something else, and all three change for the same reason (#651): a
-    // one-cell banner registered no cell for any column key, so no node
-    // answered the outstanding focus request. Entry 5 was `body` — the
-    // collapse left DOM focus on the document, because the row it recovered to
-    // had nothing to receive it; entries 6 and 7 were `grid`, the container
-    // keeping a stop no cell would take. ADR-065 gives a group row real cells,
-    // so the recovery now lands on the collapsed row itself and stays there.
-    //
-    // Navigation still continues from the ancestor, which is what the last
-    // entry proves: two rows below Paris is `{ id: 4 }`. From `{ id: 5 }` — the
-    // index-based answer — two ArrowDowns clamp at the last row and read `5`.
     expect(trace).toStrictEqual([
-      '—No aggregate',
-      '1',
-      '2',
-      '3',
-      '—No aggregate',
-      '—No aggregate',
-      '—No aggregate',
-      '4',
+      'group#2',
+      'detail#3',
+      'detail#4',
+      'detail#5',
+      'group#2',
+      'group#2',
+      'group#3',
+      'detail#4',
     ]);
   });
 
@@ -770,7 +757,7 @@ describe('a grouped table that expands and collapses', () => {
     await pressKey('ArrowDown');
     await pressKey('ArrowDown');
     await pressKey('ArrowRight');
-    expect(readFocus()).toBe('2');
+    expect(readFocus()).toBe('detail#4');
 
     const before = getFocusTarget();
 
@@ -778,6 +765,6 @@ describe('a grouped table that expands and collapses', () => {
     clickButton('toggle-berlin');
 
     expect(getFocusTarget()).toStrictEqual(before);
-    expect(readFocus()).toBe('2');
+    expect(readFocus()).toBe('detail#4');
   });
 });

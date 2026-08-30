@@ -192,15 +192,11 @@ const headerAriaLabels = () =>
 describe('a column carrying several measures', () => {
   afterEach(cleanup);
 
-  it('draws one header per measure, not one header for both', () => {
+  it('draws one header per measure, and none for an unnamed column', () => {
     renderGrid();
 
-    // The defect this replaces: one `Total Amount` header over a cell reading
-    // `Average … Minimum …`, truncated together. Four headers now, not three,
-    // and the measured column itself is gone — replaced by its measures.
     expect(headerLabels()).toStrictEqual([
       'Customer Type',
-      'Id',
       'Average',
       'Minimum',
     ]);
@@ -220,7 +216,6 @@ describe('a column carrying several measures', () => {
     // column's name rather than its name plus its menu button's.
     expect(headerAriaLabels()).toStrictEqual([
       // A plain column is its own name; only a derived one has to state two.
-      undefined,
       undefined,
       'Total Amount Average',
       'Total Amount Minimum',
@@ -272,8 +267,7 @@ describe('a column carrying several measures', () => {
       (cell) => cell.textContent,
     );
 
-    // `Id` shows the no-aggregate dash: it is neither a key nor measured.
-    expect(cells).toStrictEqual(['Business', '—No aggregate', '2,503', '17']);
+    expect(cells).toStrictEqual(['Business', '2,503', '17']);
   });
 
   it('survives a sort on a measure column', () => {
@@ -293,7 +287,6 @@ describe('a column carrying several measures', () => {
 
     expect(headerLabels()).toStrictEqual([
       'Customer Type',
-      'Id',
       'Average',
       'Minimum',
     ]);
@@ -304,20 +297,7 @@ describe('a column carrying several measures', () => {
     ).toBe('ascending');
   });
 
-  it('leaves a detail row no cell for its raw measured value', () => {
-    // **A known limitation, pinned so it is a decision rather than a surprise.**
-    // Every row renders over the same partition (ADR-065), and replacing the
-    // measured column takes `total_amount` off the grid entirely — so a detail
-    // row, which holds no `total_amount:avg` field, has nowhere to show its own
-    // amount. Only the primary key survives, because that column is measured
-    // beside itself rather than replaced.
-    //
-    // Not fixed by keeping the source column alongside its measures: that
-    // column can hold no aggregate, so it would draw the em-dash on every group
-    // row of every grouped view, to serve detail rows the inline drill spliced
-    // in. #870 replaced that with a modal route that applies no
-    // grouping, where the declared columns are all present and the question
-    // does not arise.
+  it('leaves a detail row no cell of its own, a limitation ADR-096 records', () => {
     renderGrid();
 
     const detail = screen.getAllByRole('row').at(-1);
@@ -325,9 +305,7 @@ describe('a column carrying several measures', () => {
       ...(detail?.querySelectorAll('[role="gridcell"]') ?? []),
     ].map((cell) => cell.textContent);
 
-    // `customer_type` blanks because the group row above states it; `id` is the
-    // primary key; both measure columns are empty. `4200` is unreachable.
-    expect(cells).toStrictEqual(['', '7', '', '']);
+    expect(cells).toStrictEqual(['', '', '']);
   });
 
   it('bands a single measure too, since its header states only the function', () => {
@@ -346,18 +324,14 @@ describe('a column carrying several measures', () => {
     expect(labelled.map((band) => band.textContent)).toStrictEqual([
       'Total Amount',
     ]);
-    expect(headerLabels()).toStrictEqual(['Customer Type', 'Id', 'Average']);
+    expect(headerLabels()).toStrictEqual(['Customer Type', 'Average']);
   });
 
-  it('draws no band row at all when no aggregate is applied', () => {
+  it('draws no band row, and only the key, when no aggregate is applied', () => {
     renderGrid({ aggregates: [] });
 
     expect(screen.queryAllByTestId('table-header-band')).toHaveLength(0);
-    expect(headerLabels()).toStrictEqual([
-      'Customer Type',
-      'Id',
-      'Total Amount',
-    ]);
-    expect(headerAriaLabels()).toStrictEqual([undefined, undefined, undefined]);
+    expect(headerLabels()).toStrictEqual(['Customer Type']);
+    expect(headerAriaLabels()).toStrictEqual([undefined]);
   });
 });

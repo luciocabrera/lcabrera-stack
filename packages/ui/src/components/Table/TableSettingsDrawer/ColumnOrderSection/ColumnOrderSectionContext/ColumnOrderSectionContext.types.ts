@@ -5,11 +5,17 @@ import type {
 } from '#ui/components/Table/Table.types';
 import type { TStore } from '#ui/hooks/useStore.hook';
 
+export type ColumnGroupingPromptState = {
+  readonly columnKey: string;
+  readonly isOpen: boolean;
+};
+
 export type ColumnOrderSectionContextValue = {
   readonly modalsStore: TStore<ColumnOrderSectionModalsState>;
 };
 
 export type ColumnOrderSectionModalsState = {
+  readonly columnGroupingPrompt: ColumnGroupingPromptState;
   readonly conflictModal: ConflictModalState;
   readonly orderConflict: OrderConflictModalState;
   readonly pinSideModal: PinSideModalState;

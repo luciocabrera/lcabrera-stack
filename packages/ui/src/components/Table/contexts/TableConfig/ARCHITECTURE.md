@@ -53,8 +53,8 @@ TableConfig/
 │       ├── useGetColumnVisibility.hook.ts       → Hidden columns set
 │       ├── useGetColumns.hook.ts                → Raw column definitions
 │       ├── useGetColumnsSorting.hook.ts         → Sorting state array
+│       ├── useGetDeclaredColumn.hook.ts         → Single column as the consumer declared it, by key
 │       ├── useGetNormalizedColumn.hook.ts       → Single normalized column by key
-│       ├── useGetNormalizedColumns.hook.ts      → All normalized columns
 │       ├── useGetPinnedColumnInfo.hook.ts       → Single column's pinned-offset entry by key (granular)
 │       └── useGetPinnedColumnOffsets.hook.ts    → Pre-computed pinned offsets, whole map (derived)
 │
@@ -464,21 +464,21 @@ Supports both single entries and batch submissions. Each entry specifies:
 
 ## Columns Selectors
 
-| Hook                          | Returns                         | Description                                 |
-| ----------------------------- | ------------------------------- | ------------------------------------------- |
-| `useGetColumns`               | `ColumnDef[]`                   | Raw column definitions                      |
-| `useGetColumnFilters`         | `ColumnFilters`                 | All active column filters                   |
-| `useGetColumnOrder`           | `ColumnOrderState`              | Column order array                          |
-| `useGetColumnPinning`         | `ColumnPinningState`            | Pinning state `{ left, right }`             |
-| `useGetColumnSizing`          | `ColumnSizingState`             | Column width map (whole map)                |
-| `useGetColumnWidth`           | `number \| undefined`           | One column's width by key (granular)        |
-| `useGetColumnVisibility`      | `Set<string>`                   | Set of hidden column keys                   |
-| `useGetColumnsSorting`        | `SortingState[]`                | Active sorting entries                      |
-| `useGetNormalizedColumn`      | `NormalizedColumn`              | Single enriched column by key               |
-| `useGetNormalizedColumns`     | `NormalizedColumn[]`            | All enriched column descriptors             |
-| `useGetPinnedColumnPartition` | `PinnedColumnPartitionState`    | Pre-split left/center/right columns         |
-| `useGetPinnedColumnOffsets`   | `PinnedColumnOffsetsState`      | Sticky offsets, whole map                   |
-| `useGetPinnedColumnInfo`      | `PinnedColumnInfo \| undefined` | One column's pinned entry by key (granular) |
+| Hook                          | Returns                         | Description                                                                     |
+| ----------------------------- | ------------------------------- | ------------------------------------------------------------------------------- |
+| `useGetColumns`               | `ColumnDef[]`                   | Raw column definitions                                                          |
+| `useGetColumnFilters`         | `ColumnFilters`                 | All active column filters                                                       |
+| `useGetColumnOrder`           | `ColumnOrderState`              | Column order array                                                              |
+| `useGetColumnPinning`         | `ColumnPinningState`            | Pinning state `{ left, right }`                                                 |
+| `useGetColumnSizing`          | `ColumnSizingState`             | Column width map (whole map)                                                    |
+| `useGetColumnWidth`           | `number \| undefined`           | One column's width by key (granular)                                            |
+| `useGetColumnVisibility`      | `Set<string>`                   | Set of hidden column keys                                                       |
+| `useGetColumnsSorting`        | `SortingState[]`                | Active sorting entries                                                          |
+| `useGetDeclaredColumn`        | `TableColumn \| undefined`      | One column as the consumer declared it, by key — the list no derivation narrows |
+| `useGetNormalizedColumn`      | `NormalizedColumn`              | Single enriched column by key, from the list the grid paints                    |
+| `useGetPinnedColumnPartition` | `PinnedColumnPartitionState`    | Pre-split left/center/right columns                                             |
+| `useGetPinnedColumnOffsets`   | `PinnedColumnOffsetsState`      | Sticky offsets, whole map                                                       |
+| `useGetPinnedColumnInfo`      | `PinnedColumnInfo \| undefined` | One column's pinned entry by key (granular)                                     |
 
 ## Meta Actions
 

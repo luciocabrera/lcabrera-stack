@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { Activity, useState } from 'react';
 
-import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetNormalizedColumn.hook';
+import { useGetDeclaredColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetDeclaredColumn.hook';
 
 import type { FilterInputsProps } from './FilterInputs.types';
 
@@ -18,7 +18,8 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
   onChange,
   shouldFillHeight = false,
 }: FilterInputsProps<TData>) => {
-  const column = useGetNormalizedColumn<TData>(columnKey);
+  const column = useGetDeclaredColumn<TData>(columnKey);
+  const dataType = column?.dataType;
 
   const [isOperatorOpen, setIsOperatorOpen] = useState(false);
 
@@ -27,7 +28,7 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
   // empty filter rather than drop it. Dropping it left the control reading
   // "All" while the table was filtered to the null rows, with no way to clear
   // it — the empty branch below never runs for a boolean column.
-  if (column.dataType === 'boolean') {
+  if (dataType === 'boolean') {
     return (
       <BooleanFilterInput
         filter={
@@ -46,7 +47,7 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
     return (
       <div {...stylex.props(styles.container)}>
         <OperatorSelect
-          dataType={column.dataType}
+          dataType={dataType}
           filter={filter}
           onChange={onChange}
           onOpenChange={setIsOperatorOpen}
@@ -58,12 +59,12 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
   const inputComponent = (
     <InputContent
       columnKey={columnKey}
-      dataType={column.dataType}
+      dataType={dataType}
       filter={filter}
-      hasFetchableOptions={Boolean(column.filterOptionsDescriptor)}
+      hasFetchableOptions={Boolean(column?.filterOptionsDescriptor)}
       listMaxHeight={listMaxHeight}
       onChange={onChange}
-      operator={getOperatorFromFilter({ dataType: column.dataType, filter })}
+      operator={getOperatorFromFilter({ dataType, filter })}
       shouldFillHeight={shouldFillHeight}
     />
   );
@@ -76,7 +77,7 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
       )}
     >
       <OperatorSelect
-        dataType={column.dataType}
+        dataType={dataType}
         filter={filter}
         onChange={onChange}
         onOpenChange={setIsOperatorOpen}

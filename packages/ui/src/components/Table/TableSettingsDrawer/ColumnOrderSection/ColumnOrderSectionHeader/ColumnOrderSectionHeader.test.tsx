@@ -5,13 +5,13 @@ import type { ReactNode } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-const { mockColumns, mockColumnVisibility } = vi.hoisted(() => ({
+const { mockColumns, mockRenderedColumnKeys } = vi.hoisted(() => ({
   mockColumns: [
     { key: 'id', label: 'ID' },
     { isStatic: true, key: 'name', label: 'Name' },
     { key: 'skip', label: 'Skip', render: () => 'cell' },
   ],
-  mockColumnVisibility: new Set(['name']),
+  mockRenderedColumnKeys: ['id'],
 }));
 
 vi.mock('#ui/components/SidePanel', () => ({
@@ -36,12 +36,9 @@ vi.mock(
   }),
 );
 
-vi.mock(
-  '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors',
-  () => ({
-    useGetColumnVisibility: () => mockColumnVisibility,
-  }),
-);
+vi.mock('../hooks', () => ({
+  useGetRenderedColumnKeys: () => mockRenderedColumnKeys,
+}));
 
 vi.mock('../ColumnOrderSectionToolbar', () => ({
   ColumnOrderSectionToolbar: ({

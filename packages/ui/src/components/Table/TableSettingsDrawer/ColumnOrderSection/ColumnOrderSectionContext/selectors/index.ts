@@ -1,3 +1,4 @@
+export { useGetColumnGroupingPrompt } from './useGetColumnGroupingPrompt.hook';
 export { useGetConflictModal } from './useGetConflictModal.hook';
 export { useGetOrderConflict } from './useGetOrderConflict.hook';
 export { useGetPinSideModal } from './useGetPinSideModal.hook';

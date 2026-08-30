@@ -96,7 +96,17 @@ const attachScrollMetrics = (container: HTMLDivElement | null) => {
   });
 };
 
-const Harness = () => {
+type HarnessProps = {
+  readonly aggregates?: readonly TableColumnAggregate[];
+  readonly data?: readonly TestRow[];
+  readonly groupingKeys?: readonly string[];
+};
+
+const Harness = ({
+  aggregates = AGGREGATES,
+  data = rows,
+  groupingKeys = GROUPING_KEYS,
+}: HarnessProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -110,8 +120,8 @@ const Harness = () => {
       <TableConfigProvider<TestRow>
         columnsState={{ columns }}
         metaState={{
-          groupingAggregates: AGGREGATES,
-          groupingKeys: GROUPING_KEYS,
+          groupingAggregates: aggregates,
+          groupingKeys,
           overscan: 2,
           rowHeight: ROW_HEIGHT,
         }}
@@ -119,10 +129,10 @@ const Harness = () => {
         <TableFocusProvider>
           <TableDataProvider<TestRow>
             dataState={{
-              data: rows,
+              data,
               isLoading: false,
               isLoadingMore: false,
-              totalRows: rows.length,
+              totalRows: data.length,
             }}
           >
             <TableWrapperContext value={{ containerRef, wrapperRef }}>
@@ -145,11 +155,11 @@ const Harness = () => {
  * router does not know 404s into React Router's default error boundary, which would replace
  * the grid with an error page and mask whatever was about to be asserted.
  */
-const renderGrid = () =>
+const renderGrid = (props: HarnessProps = {}) =>
   render(
     <RouterProvider
       router={createMemoryRouter([
-        { element: <Harness />, path: '/' },
+        { element: <Harness {...props} />, path: '/' },
         { action: () => ({ ok: true }), path: '/_action/persist-cookie' },
       ])}
     />,
@@ -214,20 +224,26 @@ describe('cell alignment on a grouped grid', () => {
     renderGrid();
 
     expect(groupRowAlignments()).toStrictEqual({
-      Id: 'default',
-      Invoice: 'right',
       'Order Date': 'center',
-      'Shipped At': 'center',
       Sum: 'right',
     });
   });
 
-  it('aligns a detail row’s cells the same way, bar the one the consumer renders', () => {
-    // `Invoice` declares `currency` exactly as the measure column does, and the only
-    // difference is who produced the content — which is what makes it the discriminating
-    // case rather than a second reading of the same fact. `Order Date` is blanked here
-    // (its value is stated once, by the group row above) and still aligns like its column.
+  it('aligns a detail row’s blanked and empty cells the same way', () => {
     renderGrid();
+
+    expect(detailRowAlignments()).toStrictEqual({
+      'Order Date': 'center',
+      Sum: 'right',
+    });
+  });
+
+  it('leaves the cell a consumer renders its own alignment, ungrouped', () => {
+    renderGrid({
+      aggregates: [],
+      data: [rows[1] as TestRow],
+      groupingKeys: [],
+    });
 
     expect(detailRowAlignments()).toStrictEqual({
       // No declared type; `7` is detected as a number from the value.
@@ -235,9 +251,7 @@ describe('cell alignment on a grouped grid', () => {
       Invoice: 'default',
       'Order Date': 'center',
       'Shipped At': 'center',
-      // The detail row holds no `total_amount:sum` field, so this cell is empty — and an
-      // empty cell in a currency column is still a currency column's cell.
-      Sum: 'right',
+      'Total Amount': 'right',
     });
   });
 });
