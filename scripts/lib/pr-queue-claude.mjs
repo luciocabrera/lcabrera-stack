@@ -38,7 +38,16 @@ export const resolveClaudeBinary = () =>
     '/usr/bin/claude',
   ].find((path) => path !== undefined && existsSync(path));
 
-/** Read-only tools for the decide pass — it observes the queue, never edits it. */
+/**
+ * The decide pass's tools. It observes the queue and produces a verdict; nothing
+ * here is meant to change anything.
+ *
+ * `gh api` is the exception to read that carefully — it takes a method, so the
+ * allow-list cannot make it read-only, and the same hole `#1040` records for the
+ * apply pass exists here. What differs is the consequence: this pass writes no
+ * decision log entry for a command it ran, so a departure here is invisible
+ * rather than merely unbounded, which is why #1040's guard has to cover both.
+ */
 export const DECIDE_TOOLS = [
   'Read',
   'Grep',

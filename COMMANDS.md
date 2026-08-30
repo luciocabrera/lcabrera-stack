@@ -768,10 +768,12 @@ pass that produces the verdict, then (only with `--apply`) an execute pass bound
 to the actions that verdict authorised. The decision log is written between them,
 so what ran can be checked against what was approved.
 
-Its landing verdict is `ENQUEUE`, not `MERGE`: `main` requires a GitHub merge
-queue, so `gh pr merge <n> --squash` hands the PR over and GitHub merges it
-afterwards. A pass therefore ends with the PR queued, and closing the issue or
-deleting the branch happens on a later pass that sees it merged. See
+Its landing verdict is `ENQUEUE`, not `MERGE`, because `gh pr merge <n> --squash`
+does not always merge: where `main` requires a GitHub merge queue it hands the PR
+over and GitHub merges it afterwards, so the pass ends with the PR queued and
+closing the issue or deleting the branch happens on a later pass that sees it
+merged. Where no queue is required the same command squash-merges on the spot.
+The operator reads `isMergeQueueEnabled` per PR rather than assuming either — see
 [`docs/tooling/merge-queue.md`](docs/tooling/merge-queue.md).
 
 | Command                          | Does                                                                                 |
@@ -905,9 +907,10 @@ Biome, and it does not run `tsc`.
 The three jobs run in **parallel** — "Biome runs before Fallow" holds within the
 Quality Gate job's step order, not across jobs.
 
-**Every one of them also runs on `merge_group`**, because `main` requires a merge
-queue and a workflow without that trigger never reports a required check inside
-one — the queue then waits forever with nothing saying why. `$DIFF_BASE` is the
+**Every one of them also runs on `merge_group`**, because a workflow without that
+trigger never reports a required check inside a merge queue — the queue then waits
+forever with nothing saying why, so the trigger has to be on `main` before the
+`merge_queue` rule goes on the ruleset. `$DIFF_BASE` is the
 pull-request base on a pull request and the merge group's parent commit in the
 queue, so a diff-scoped gate compares against the tree the change will actually
 land on. [`docs/tooling/merge-queue.md`](docs/tooling/merge-queue.md) is the whole

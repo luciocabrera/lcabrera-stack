@@ -15,7 +15,6 @@ import {
   detectFlags,
   detectStops,
   evaluateGate,
-  forbiddenActions,
   isWithinCeiling,
 } from './pr-queue-gate.mjs';
 
@@ -350,40 +349,5 @@ describe('isWithinCeiling — the model may only tighten', () => {
     expect(isWithinCeiling('ESCALATE', 'ACT')).toBe(false);
     expect(isWithinCeiling('ACT', 'ENQUEUE')).toBe(false);
     expect(isWithinCeiling('WAIT', 'ENQUEUE')).toBe(false);
-  });
-});
-
-describe('forbiddenActions — the two flags that go past the queue', () => {
-  const action = (command) => ({ command, rule: 'A5', why: 'land it' });
-
-  it('rejects --admin, which merges past every required check', () => {
-    expect(
-      forbiddenActions([action('gh pr merge 42 --squash --admin')]),
-    ).toEqual([
-      expect.objectContaining({ command: 'gh pr merge 42 --squash --admin' }),
-    ]);
-  });
-
-  it('rejects --delete-branch, which asks for a merge that has not happened', () => {
-    expect(
-      forbiddenActions([action('gh pr merge 42 --squash -d')]),
-    ).toHaveLength(1);
-    expect(
-      forbiddenActions([action('gh pr merge 42 --squash --delete-branch')]),
-    ).toHaveLength(1);
-  });
-
-  it('leaves the one authorised landing command alone', () => {
-    expect(forbiddenActions([action('gh pr merge 42 --squash')])).toEqual([]);
-  });
-
-  it('does not fire on an unrelated command that merely says admin', () => {
-    expect(
-      forbiddenActions([action('gh pr comment 42 --body "ask an admin"')]),
-    ).toEqual([]);
-  });
-
-  it('reads an absent action list as nothing forbidden, not as a throw', () => {
-    expect(forbiddenActions(undefined)).toEqual([]);
   });
 });

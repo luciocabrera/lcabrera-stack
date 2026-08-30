@@ -85,12 +85,19 @@ complete` all read what it exports, so neither event has its own copy of "what
   the queue never reads. Its workflow publishes the same verdict about the same
   head on the merge group's commit.
 - The merge step stops being a merge. `gh pr merge <n> --squash` enqueues where a
-  queue is required and squash-merges where one is not; `--admin` (which goes
-  past both, and which this repository's owner role **can** use) and
-  `--delete-branch` are forbidden with it. The PR queue operator's `MERGE`
-  verdict is renamed `ENQUEUE`, a queued pull request is `WAIT` (E11) rather than
-  something to act on, and closing the issue, deleting the branch and pruning the
-  worktree move to a later pass that observes `state: MERGED`.
+  queue is required and squash-merges where one is not. Every other way to land a
+  pull request is forbidden to the operator, and by shape rather than by command
+  name: `--admin` (which goes past both, and which this repository's owner role
+  **can** use), `--delete-branch`, a merge method that is not `--squash`, the
+  REST `PUT …/pulls/{n}/merge` endpoint, and the `mergePullRequest` /
+  `enablePullRequestAutoMerge` mutations. `forbiddenActions` escalates a
+  **decision** naming any of them; it does not sandbox the apply pass, which
+  needs `gh api` for other work and which no prefix allow-list can restrict to
+  reads — that residual is #1040 and is stated rather than implied. The
+  operator's `MERGE` verdict is renamed `ENQUEUE`, a queued pull request is
+  `WAIT` (E11) rather than something to act on, and closing the issue, deleting
+  the branch and pruning the worktree move to a later pass that observes
+  `state: MERGED`.
 - A queue ejection gets its own signal. The failing checks belong to the merge
   group's commit, so the pull request's own required checks stay green and every
   rollup probe reads it as ready. `isInMergeQueue` and the
@@ -100,6 +107,14 @@ complete` all read what it exports, so neither event has its own copy of "what
 Applying the ruleset itself is deliberately not part of this change: enabling the
 queue before the workflows are on `main` blocks every merge. The exact edit is in
 `docs/tooling/merge-queue.md`.
+
+That leaves a window in which the workflows are on `main` and the queue is not,
+and **the mitigation the queue replaces still has to hold in it**. So every
+surface that changes behaviour branches on `isMergeQueueEnabled` rather than on
+this ADR being merged: E10 in the operator, and the rebase-the-wave step in
+`docs/agents/epic-orchestration.md` Phase 4 — which is the workflow the #1034
+near-miss actually happened in, and where deleting the rebase early would have
+made the repository worse than before this change.
 
 ## Consequences
 
@@ -120,6 +135,11 @@ queue before the workflows are on `main` blocks every merge. The exact edit is i
 - The required-contexts list is now load-bearing in a second way: adding a
   required context whose workflow lacks `merge_group` does not fail loudly, it
   hangs the queue. Nothing mechanical prevents that today.
+- The operator's leash gained shapes but not a layer. `forbiddenActions` now
+  rejects every way of landing a pull request other than the authorised command,
+  in the decision it audits; the apply pass's own tool list still admits `gh api`,
+  which reaches the merge endpoint. #1040 is the guard that would close it, and
+  until it lands the bound is on what may be **authorised**, not on what may run.
 - One required context is lost outright (`SonarCloud Code Analysis`), and with it
   the backstop the strict gate's timeout-skip relied on. That is why the queue
   run passes `--require-analysis`: latency may skip the check for an author, it

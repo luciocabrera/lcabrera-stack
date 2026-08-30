@@ -2,19 +2,27 @@
 
 Verify every item before merging. **If any item fails, abort the merge.**
 
-**"Merging" is now asking the queue.** `main` requires a merge queue, so
-`gh pr merge <n> --squash` adds the pull request to it and GitHub merges it
-afterwards — having re-run every required check against the real merge result,
-which is the base as it is then plus everything ahead in the queue. Three things
-follow for a reader of this list, and
+**Where `main` requires a merge queue, "merging" is asking the queue.** The
+ruleset rule that switches that on is applied separately from the workflows that
+serve it ([ADR-097](../decisions/ADR-097-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)),
+so read which side you are on rather than assuming — `gh pr view <n> --json
+state` will not tell you, but `isMergeQueueEnabled` will
+([the probe](../tooling/merge-queue.md#what-merge-means-now)). `gh pr merge <n>
+--squash` is the right command either way: in front of a queue it adds the pull
+request and GitHub merges it afterwards, having re-run every required check
+against the real merge result; with no queue it squash-merges on the spot.
+
+Three things follow once the queue is on, and
 [`merge-queue.md`](../tooling/merge-queue.md) is where they are explained:
 
-- The checks below are the bar for **entering** the queue. The queue re-derives
-  them for the commit that actually lands, which is why a whole-tree gate can no
-  longer pass on a superseded base ([ADR-097](../decisions/ADR-097-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)).
+- The checks below become the bar for **entering** the queue. The queue re-derives
+  them for the commit that actually lands, which is what stops a whole-tree gate
+  passing on a superseded base. Until then that recomputation is nobody's job but
+  yours: rebase onto the current `main` and let the gate re-run.
 - Your pull request is **not merged when the command returns**. Anything you do
   after a merge — close the issue, delete the branch, prune the worktree — waits
-  for `gh pr view <n> --json state` to read `MERGED`.
+  for `gh pr view <n> --json state` to read `MERGED`. That wait is the correct
+  habit on both sides; without a queue it simply returns immediately.
 - The queue can throw it back out, and **that does not turn any check on this
   page red.** The failure belongs to the merge group's commit. Read
   [the ejection probe](../tooling/merge-queue.md#two-answers-this-repository-made-explicit)

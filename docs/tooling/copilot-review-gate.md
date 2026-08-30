@@ -446,9 +446,12 @@ it sits in while it waits. Promotion was kept separate from the work that built
 the gate for a reason worth keeping in view: a required check that has never
 reported blocks every pull request, including the one that would fix it.
 
-**And it has to report twice.** `main` requires a merge queue, which reads the
-required contexts against the merge group's own commit — not the pull request
-head this status is published on. So the workflow also runs on `merge_group`,
+**And it has to report twice.** A merge queue reads the required contexts against
+the merge group's own commit — not the pull request head this status is published
+on — so a status that reports only on the head is one the queue waits for
+forever. The trigger therefore goes on before the `merge_queue` rule does
+([ADR-097](../decisions/ADR-097-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)):
+the workflow also runs on `merge_group`,
 resolves the pull request from the queue branch's ref, and publishes the same
 verdict about the same head on the merge group's commit. The verdict is not
 weakened by the second publication: it still means an accepted reviewer's own

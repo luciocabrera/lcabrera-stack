@@ -39,11 +39,17 @@ blocks every merge.
 
 ## Status / next
 
-- Current step: review round 2 — the merge-queue lane's secret predicate and the
-  commit range it hands the gates
+- Current step: review round 3 — the enablement window (every behaviour change is
+  now gated on `isMergeQueueEnabled`, not on this merging), the operator's leash
+  against a direct merge through `gh api`, and what `validatePrBase` really
+  rejects
 - Blockers: none. The `docs/decisions/**` overlap warning against
   grouped-column-scope (#1033) is real and already resolved by content: that
   branch took ADR-096, so this one is ADR-097. The glob here is a single file and
   cannot be narrowed further.
 - Next: the owner applies the `merge_queue` rule to ruleset 19141543 (payload and
-  the drop of `SonarCloud Code Analysis` are in `docs/tooling/merge-queue.md`)
+  the drop of `SonarCloud Code Analysis` are in `docs/tooling/merge-queue.md`),
+  then runs the #1034 two-PR repro against the live queue. #1034 stays open until
+  both are done, which is why this PR references it without a closing keyword.
+- Follow-up raised, not done here: #1040 — `forbiddenActions` bounds the decision
+  the operator audits, not the apply pass's own tool list

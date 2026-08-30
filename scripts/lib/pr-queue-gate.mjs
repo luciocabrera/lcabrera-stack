@@ -254,6 +254,14 @@ export const evaluateGate = (pr, conformance, packages) => {
   return { blockers, flags, stops, verdict };
 };
 
+/**
+ * Landing a pull request has one authorised shape and several unauthorised ones,
+ * and matching `gh pr merge` alone bounds only the first. The REST merge
+ * endpoint and the GraphQL merge mutations reach the same operation through a
+ * tool the apply pass also needs for other work, so they are matched by the
+ * shape of the operation — path and mutation name — rather than by the command
+ * that carries them, which also covers `curl`.
+ */
 const FORBIDDEN_COMMANDS = [
   {
     pattern: /\bgh\s+pr\s+merge\b[^\n]*\s--admin\b/u,
@@ -265,9 +273,30 @@ const FORBIDDEN_COMMANDS = [
     reason:
       '`gh pr merge -d` asks GitHub to delete the branch as part of a merge that has not happened yet — gh refuses it in front of a queue, and A7 deletes the branch after the merge is confirmed',
   },
+  {
+    pattern: /\bgh\s+pr\s+merge\b[^\n]*\s--(?:merge|rebase)\b/u,
+    reason:
+      '`--merge` and `--rebase` are not the permitted merge method. A5 authorises `--squash`, which is what keeps `main` linear and keeps the PR title as the commit subject the changelog reads',
+  },
+  {
+    pattern: /\brepos\/[^\s/]+\/[^\s/]+\/pulls\/\d+\/merge\b/u,
+    reason:
+      'the REST merge endpoint lands a pull request directly, past the merge queue and past every required check exactly as `--admin` does, and the operator account is a ruleset bypass actor. A5 authorises `gh pr merge <n> --squash` and nothing else',
+  },
+  {
+    pattern: /\b(?:mergePullRequest|enablePullRequestAutoMerge)\b/u,
+    reason:
+      'the GraphQL merge mutations land a pull request outside the one audited command, and auto-merge lands it with no pass observing the result. A5 authorises `gh pr merge <n> --squash` and nothing else',
+  },
 ];
 
-/** Commands no decision may authorise, whatever the model reasoned. */
+/**
+ * Commands no decision may authorise, whatever the model reasoned.
+ *
+ * This bounds the DECISION, which is the audited artifact — it is not a sandbox
+ * over the apply pass, whose tool allow-list is broader because A1–A8 need it.
+ * The residual is #1040.
+ */
 export const forbiddenActions = (actions) =>
   (actions ?? []).flatMap((action) =>
     FORBIDDEN_COMMANDS.filter(({ pattern }) =>

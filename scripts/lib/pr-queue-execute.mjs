@@ -31,12 +31,22 @@ import { parseModelName, resolveClaudeBinary } from './pr-queue-claude.mjs';
  * request to it instead of merging, and where one is not, it squash-merges. The
  * flag that breaks that is `--admin`, which merges past the queue and past every
  * required check — the repository owner's role can bypass, so this is reachable
- * rather than theoretical. An allow-list pattern cannot forbid a flag, so the
- * bound is enforced one layer up instead: `forbiddenActions` in
- * `pr-queue-gate.mjs` rejects a DECISION that authorises `--admin` or
- * `--delete-branch`, so no such command reaches this pass through the audited
- * path. The prompt below states it as well, because the two together are the
- * leash and the prompt alone is not one.
+ * rather than theoretical.
+ *
+ * An allow-list pattern matches a command prefix and cannot forbid a flag, so
+ * the bound is enforced one layer up: `forbiddenActions` in `pr-queue-gate.mjs`
+ * rejects a DECISION that authorises any shape that lands a pull request other
+ * than `gh pr merge <n> --squash` — the flags, the REST merge endpoint, and the
+ * GraphQL merge mutations. Nothing forbidden reaches this pass through the
+ * audited path.
+ *
+ * What that does NOT bound is this pass departing from its action list. `gh api`
+ * is here because A4 replies to a review comment through it and S11 reads the
+ * queue timeline through it, and no prefix admits those while denying
+ * `--method PUT …/pulls/<n>/merge` — gh's method is a flag. Between the model
+ * and that endpoint there is only the prompt, which this file's own header says
+ * is not a leash. #1040 closes it; until then it is a stated residual, not a
+ * covered case.
  */
 export const EXECUTE_TOOLS = [
   'Read',

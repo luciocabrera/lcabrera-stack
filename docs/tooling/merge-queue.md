@@ -131,10 +131,19 @@ pins both outcomes.
 ruleset `19141543`, whose condition is `refs/heads/main`; a merge queue cannot be
 enabled on a wildcard branch pattern anyway. It is not a per-pull-request opt-in:
 there is no such thing, and there should not be — a queue that some pull requests
-skip does not give the property it was installed for. In practice that means
-every pull request, because `verify-pr.mjs` already rejects one targeting
-anything but `main`. The changesets "Version Packages" pull request goes through
-it like any other.
+skip does not give the property it was installed for. The changesets "Version
+Packages" pull request goes through it like any other.
+
+That covers every pull request whose base is `main`, which is the normal case but
+not the only permitted one. `validatePrBase` in `commit-convention.mjs` — what
+`verify-pr.mjs` calls — rejects a **feature-branch** base and nothing else: it
+exempts `main` and `release-*` through `isExemptBranch`, and it accepts a
+declared shared branch (`docs/coordination/branches/`) with a **warning** rather
+than an error. So a pull request into a shared branch or a release branch merges
+without a queue, and the recomputation this document is about happens later, on
+the pull request that takes that branch into `main` — which is one the queue does
+build. Reading the gate as "everything targets `main`" would put the property
+somewhere it is not.
 
 **An ejection is not an ordinary check failure, and it gets its own signal.**
 When the queue removes an entry, the failing checks belong to the merge group's
@@ -170,7 +179,26 @@ re-queue, discharges it.
 
 `gh pr merge <n> --squash` is the one command, and it is correct on both sides of
 the change: where a queue is required gh adds the pull request to it, and where
-one is not it squash-merges. Two flags must not be used with it:
+one is not it squash-merges. Which of the two you get is a fact to read, not to
+assume — the rule below is applied to the ruleset separately from the workflows
+that serve it, so there is a window in which every workflow here carries
+`merge_group` and no queue exists yet:
+
+```bash
+gh api graphql -f query='query($o:String!,$r:String!,$n:Int!){
+  repository(owner:$o,name:$r){ pullRequest(number:$n){ isMergeQueueEnabled } } }' \
+  -f o=luciocabrera -f r=lcabrera-stack -F n=<n> \
+  --jq '.data.repository.pullRequest.isMergeQueueEnabled'
+```
+
+It matters to a caller, because the mitigation the queue replaces is only
+unnecessary once the queue exists: with `false`, a whole-tree gate is still true
+only of the base it ran on, and rebasing the open pull requests after a merge is
+the only thing that recomputes it. `epic-orchestration.md` Phase 4 and the PR
+queue operator's E10 both branch on this field rather than on the ruleset having
+been edited.
+
+Two flags must not be used with the command:
 
 - **`--admin` merges past the queue and past every required check.** The
   repository owner's role is a bypass actor on the ruleset, so this works rather
@@ -178,6 +206,15 @@ one is not it squash-merges. Two flags must not be used with it:
 - **`-d` / `--delete-branch`** is refused outright by gh where a queue is
   required, because the merge has not happened yet. Delete the branch after the
   merge lands.
+
+`--admin` is not the only way past, and a leash that names only the flag is not a
+leash. `PUT /repos/{owner}/{repo}/pulls/{n}/merge` — reachable as
+`gh api --method PUT …` or plain `curl`, and reachable for the same bypass-actor
+reason — merges directly, as do the `mergePullRequest` and
+`enablePullRequestAutoMerge` GraphQL mutations. `forbiddenActions` in
+`scripts/lib/pr-queue-gate.mjs` rejects all of them by shape, not by command
+name; what that does and does not bound is
+[`.claude/pr-queue-policy.md`](../../.claude/pr-queue-policy.md) §4 A5.
 
 The pass that enqueues therefore ends with the pull request **queued, not
 merged**. Closing the linked issue, deleting the branch and pruning the worktree

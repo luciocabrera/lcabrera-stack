@@ -124,14 +124,26 @@ invocation is logged with the exact command run.
 | **A3** | Fix lint / format fallout                | Only the mechanical output of the repo's own fixers (`vp lint --fix`, `vp fmt`, `vp run lint:eslint`). Never a hand-rewrite  |
 | **A4** | Reply to and address a Copilot comment   | Verify first — see below. Reply on every thread it resolves, stating which                                                   |
 | **A5** | Land it: `gh pr merge <n> --squash`      | The only way to land, and the only permitted merge method. Never `--admin` (it goes past the queue and past every required   |
-|        |                                          | check, and this account can), never `-d`. Both are rejected mechanically: `forbiddenActions` in `pr-queue-gate.mjs`          |
-|        |                                          | escalates any decision naming one, so neither reaches the apply pass. Subject is the PR title (E7 already gated it).         |
-|        |                                          | Where a queue is required this enqueues, and the pass ends with the PR queued rather than merged — success, not a failure    |
+|        |                                          | check, and this account can), never `-d`, never `--merge`/`--rebase`, and never the REST merge endpoint or a GraphQL merge   |
+|        |                                          | mutation, which reach the same operation through `gh api`. `forbiddenActions` in `pr-queue-gate.mjs` escalates any decision  |
+|        |                                          | naming one — see the bound it does not carry, below. Subject is the PR title (E7 already gated it). Where a queue is         |
+|        |                                          | required this enqueues, and the pass ends with the PR queued rather than merged — success, not a failure                     |
 | **A6** | Close the linked issue                   | Only an issue the PR body links via a closing keyword, and only after the merge is confirmed on `main`                       |
 | **A7** | Delete the head branch                   | After merge, remote and local. Never a branch with commits that did not land (see the squash-merge trap in §6)               |
 | **A8** | Prune the worktree                       | Via `vp run housekeeping:prune -- --apply` only, which already refuses a dirty worktree, an un-PR'd commit, and any stash    |
 | **A9** | ~~Mark a draft ready~~ — **not allowed** | Draft is the author's signal that the work is unfinished. The operator has no basis to overrule it. Listed here so it is not |
 |        |                                          | mistaken for an oversight                                                                                                    |
+
+**A5 — what `forbiddenActions` bounds, and what it does not.** It reads the
+DECISION's action list, which is the audited artifact, and escalates the whole
+pull request rather than filtering the offending line. So nothing forbidden
+reaches the apply pass _through the decision_. It is not a sandbox over that
+pass: `EXECUTE_TOOLS` has to include `Bash(gh api:*)` for A4's reply endpoint and
+S11's timeline query, a Claude Code Bash rule matches by prefix, and gh's method
+is a flag — so no allow-list admits those two while denying `--method PUT
+/repos/{o}/{r}/pulls/{n}/merge`, which merges directly and which this account's
+ruleset bypass makes succeed. That residual is #1040. Stated here because a
+reader deciding how much to trust the leash needs its edge, not its headline.
 
 **A5–A8 span passes once a queue is required.** A5 hands the PR over; GitHub
 merges it minutes later, after building it on the live base. So A6, A7 and A8 —
