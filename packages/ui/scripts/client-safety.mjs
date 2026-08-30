@@ -119,7 +119,6 @@ const readManifest = (packageDir) => {
     : null;
 };
 
-/** The negated entries of a manifest's `files`: what an install never receives. */
 const collectUnpublishedGlobs = (manifest) =>
   (manifest.files ?? [])
     .filter((entry) => entry.startsWith('!'))
@@ -191,9 +190,6 @@ const selectArrivals = ({ frontier, seen }) =>
       ) === index,
   );
 
-// Breadth-first, so a package this one declares itself is recorded against this
-// package rather than against whichever dependency the walk happened to reach it
-// through, and so a cycle ends at the `seen` set.
 const walkClosure = ({ frontier, seen, workspaceDirectories }) => {
   const arrivals = selectArrivals({ frontier, seen });
 

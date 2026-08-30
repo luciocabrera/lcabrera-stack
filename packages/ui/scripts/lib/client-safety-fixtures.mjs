@@ -2,9 +2,8 @@
  * Scaffolds a throwaway pnpm workspace on disk for the client-safety guard's
  * tests: the guard answers "which package is where, and what does it publish"
  * by reading real manifests and real directories, so a fixture that is not a
- * directory tree tests something else. Shared by the guard's two test files —
- * neither may grow a second copy, which is what the size ceiling in
- * `.claude/rules/scripts.md` pushes toward.
+ * directory tree tests something else. Shared by the guard's test files, so
+ * neither grows a second copy of it.
  */
 
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
