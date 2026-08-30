@@ -129,7 +129,7 @@ TableConfig/
 │   │
 │   ├── utils/
 │   │   ├── resolveGroupTreeNodes.util.ts    → Pure: each loaded row's level, parent and visibility; group ancestry from the path, detail rows from the nearest group above
-│   │   ├── resolveTableGroupTree.util.ts    → Pure: the rows a collapse leaves standing plus their ARIA tree metadata, with each drilled page spliced under its group; returns the caller's array by reference when there is no tree
+│   │   ├── resolveTableGroupTree.util.ts    → Pure: the rows a collapse leaves standing plus their ARIA tree metadata; returns the caller's array by reference when there is no tree
 │   │   ├── resolveGroupLevelDisclosures.util.ts → Pure: the groups one row can fold, keyed by the column stating each level — ancestors, plus its own only when it is a collapsed subtotal (ADR-080 amendment)
 │   │   ├── collectFoldableGroupPaths.util.ts → Pure: the groups a control may fold — those that own rows **and** render a row of their own, so a `flat` ancestor nothing draws is never offered (#774)
 │   │   ├── collectGroupLevelFoldPaths.util.ts → Pure: the groups one column's level command folds — the union of the disclosures the row metadata above already keys by column (ADR-097)
@@ -147,7 +147,7 @@ TableConfig/
 │   │   ├── useToggleTableGroupExpansion.hook.ts → Open or close one group by path — or fetch it, when it is a drillable leaf; moves focus first when the collapse takes the focused row with it
 │   │   ├── useSetAllTableGroupsExpanded.hook.ts → Open every group, or fold to the outermost level — the tree's own foldable set, so it closes exactly what the chevrons offer (#774)
 │   │   ├── useSetTableGroupLevelExpanded.hook.ts → Fold or unfold the groups one column states, named by that column — every other level's expansion carried through (ADR-097)
-│   │   └── usePruneTableGroupExpansion.hook.ts  → Reconcile the collapsed paths against the rows just loaded, and discard every drilled page
+│   │   └── usePruneTableGroupExpansion.hook.ts  → Reconcile the collapsed paths against the rows just loaded
 │   │
 │   └── selectors/
 │       ├── useGetTableCollapsedGroupPaths.hook.ts → The paths whose subtree is hidden

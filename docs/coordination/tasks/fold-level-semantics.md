@@ -5,8 +5,9 @@ owner: agent:claude
 status: review
 branch: chore/1041-fold-level-semantics
 area:
-  - packages/ui/src/components/Table/contexts/TableConfig/expansion/**
+  - packages/ui/src/components/Table/contexts/TableConfig/**
   - packages/ui/src/components/Table/hooks/**
+  - packages/ui/src/components/Table/ARCHITECTURE.md
   - packages/ui/src/components/Table/TableHeaderCell/**
   - packages/ui/src/components/Table/commands/**
   - packages/ui/src/components/Table/Table.groupLevelFold.test.tsx
@@ -26,6 +27,7 @@ A fold control folds the groups its own column states
 
 ## Status / next
 
-- Current step: fold change and dependency refresh pushed, `vp run check:safe` green
+- Current step: review thread on ADR-097's drill citation cleared; gate green
 - Blockers: none
-- Next: verification, then merge. The PR stays draft until it passes.
+- Next: renumber to ADR-098 once #1038 merges, on the coordinator's word. The PR
+  stays draft until then.

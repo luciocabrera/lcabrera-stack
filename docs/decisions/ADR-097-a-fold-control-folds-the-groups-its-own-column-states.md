@@ -73,9 +73,8 @@ answers the empty set without being named as a case.
   where ADR-083 already leaves the whole-table pair disabled.
 
 The split matters because the second is a state the reader can clear: apply a
-deeper key, or drill into a group's rows (#870), and the innermost key's groups
-own rows and the pair comes alive. Withholding it there would have said the
-opposite.
+deeper key and the innermost key's groups own rows, so the pair comes alive.
+Withholding it there would have said the opposite.
 
 ## Consequences
 

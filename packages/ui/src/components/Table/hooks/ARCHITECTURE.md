@@ -85,10 +85,9 @@ all, and it asks a different question from the enabled states: is this column an
 applied group key. A column that is none is **withheld**, for the reason the
 aggregation block is — no click here can make a column a group key. A key whose
 groups own no rows is **disabled** instead, because that is a state the reader
-can clear: the innermost key gains a fold the moment a deeper key is applied or
-a group's rows are drilled into. Under `flat` nothing is foldable at all, so
-every key column shows the pair inert, which is what ADR-083 already says the
-whole-table pair does there.
+can clear: the innermost key gains a fold the moment a deeper key is applied.
+Under `flat` nothing is foldable at all, so every key column shows the pair
+inert, which is what ADR-083 already says the whole-table pair does there.
 
 ## useColumnResize
 
