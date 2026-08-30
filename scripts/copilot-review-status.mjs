@@ -7,11 +7,17 @@
  * head reviewed?" into a status anyone can read — and, since the first half of
  * #698, one the ruleset requires.
  *
- * Head and reviews are both read from the API at call time and the status is
- * posted against the head that read returns, never against the SHA in the event
- * payload. Two runs racing therefore agree instead of overwriting each other
- * with verdicts about different commits, and a status is never left on a commit
- * that has already been superseded.
+ * Head and reviews are both read from the API at call time and the verdict is
+ * about the head that read returns, never about the SHA in the event payload.
+ * Two runs racing therefore agree instead of overwriting each other with
+ * verdicts about different commits, and a status is never left on a commit that
+ * has already been superseded.
+ *
+ * WHERE it is published moves in one case: a merge-queue build reads the
+ * required contexts against the merge group, not against the pull request, so a
+ * status posted only on the pull request head is one the queue never sees and
+ * waits for forever. The queue run therefore publishes the same verdict about
+ * the same head on the merge group's commit. See docs/tooling/merge-queue.md.
  *
  * It also reports the findings Copilot SUPPRESSED — the ones it puts in the
  * review body instead of filing as threads, which conversation resolution
@@ -145,7 +151,7 @@ const main = () => {
     return;
   }
 
-  const { number, payload, repository } = target;
+  const { number, payload, repository, statusSha } = target;
   const pullRequest = fetchPullRequest(repository, number);
   const headSha = pullRequest?.head?.sha;
   if (typeof headSha !== 'string' || headSha === '') {
@@ -171,6 +177,11 @@ const main = () => {
   const { state } = verdict;
 
   console.log(`${repository}#${number} head ${headSha}`);
+  if (statusSha !== undefined) {
+    console.log(
+      `Merge group build — publishing the verdict about that head on ${statusSha}.`,
+    );
+  }
   console.log(describeReviews(reviews, verdict));
   reportSuppressed(suppressed, number);
   console.log(verdictLine({ description, state }));
@@ -179,7 +190,7 @@ const main = () => {
       context: STATUS_CONTEXT,
       description,
       repository,
-      sha: headSha,
+      sha: statusSha ?? headSha,
       state,
     }),
   );

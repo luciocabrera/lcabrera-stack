@@ -30,6 +30,14 @@ const pr = {
   mergeable: 'MERGEABLE',
   mergeStateStatus: 'CLEAN',
   number: 42,
+  queue: {
+    ejectedAt: '',
+    ejectedReason: '',
+    enabled: false,
+    position: undefined,
+    queued: false,
+    state: '',
+  },
   reviewDecision: '',
   size: 4,
   threads: {
@@ -118,7 +126,7 @@ describe('decideArgs', () => {
 describe('DECISION_SCHEMA', () => {
   it('admits exactly the four policy verdicts', () => {
     expect(DECISION_SCHEMA.properties.verdict.enum).toEqual([
-      'MERGE',
+      'ENQUEUE',
       'ACT',
       'WAIT',
       'ESCALATE',
@@ -137,7 +145,7 @@ describe('parseDecision', () => {
     evidence: [{ observation: 'clean', probe: 'gh pr checks 42' }],
     reasoning: 'all gates pass',
     ruleIds: ['E1'],
-    verdict: 'MERGE',
+    verdict: 'ENQUEUE',
   };
 
   it('reads the decision out of the CLI envelope', () => {
@@ -149,7 +157,7 @@ describe('parseDecision', () => {
     const stdout = JSON.stringify({
       result: `\`\`\`json\n${JSON.stringify(decision)}\n\`\`\``,
     });
-    expect(parseDecision(stdout).decision.verdict).toBe('MERGE');
+    expect(parseDecision(stdout).decision.verdict).toBe('ENQUEUE');
   });
 
   it('accepts an already-parsed object result', () => {

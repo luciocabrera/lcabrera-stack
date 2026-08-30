@@ -40,7 +40,11 @@ import {
 } from './lib/pr-queue-claude.mjs';
 import { buildExecutionPrompt, runExecution } from './lib/pr-queue-execute.mjs';
 import { publicPackageDirs } from './lib/coverage-workspaces.mjs';
-import { evaluateGate, isWithinCeiling } from './lib/pr-queue-gate.mjs';
+import {
+  evaluateGate,
+  forbiddenActions,
+  isWithinCeiling,
+} from './lib/pr-queue-gate.mjs';
 import {
   checkConformance,
   fetchQueue,
@@ -113,6 +117,13 @@ const decide = ({ binary, gate, model, policy, position, pr }) => {
   if (error !== undefined) {
     return failedDecision(error);
   }
+  const forbidden = forbiddenActions(decision.actions);
+  if (forbidden.length > 0) {
+    return forcedDecision({
+      reason: `The decide pass authorised a command the policy forbids, so nothing runs: ${forbidden.map((item) => `\`${item.command}\` — ${item.reason}`).join('; ')}`,
+      ruleIds: ['A5', 'S10'],
+    });
+  }
   return isWithinCeiling(gate.verdict, decision.verdict)
     ? decision
     : {
@@ -146,7 +157,7 @@ const propagateEscalations = (entries, edges) => {
 /** Runs the apply pass over the entries the decision log authorised. */
 const applyDecisions = ({ entries, model, policy }) => {
   for (const entry of entries) {
-    if (!['ACT', 'MERGE'].includes(entry.decision.verdict)) {
+    if (!['ACT', 'ENQUEUE'].includes(entry.decision.verdict)) {
       continue;
     }
     process.stdout.write(

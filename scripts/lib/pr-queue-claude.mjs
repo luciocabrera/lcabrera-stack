@@ -90,7 +90,7 @@ export const DECISION_SCHEMA = {
       items: { type: 'string' },
       type: 'array',
     },
-    verdict: { enum: ['MERGE', 'ACT', 'WAIT', 'ESCALATE'], type: 'string' },
+    verdict: { enum: ['ENQUEUE', 'ACT', 'WAIT', 'ESCALATE'], type: 'string' },
   },
   required: ['verdict', 'ruleIds', 'reasoning', 'evidence', 'actions'],
   type: 'object',
@@ -114,6 +114,18 @@ const renderThreads = (threads) =>
           return `  [${index + 1}] ${thread.author}${where}${outdated}\n      ${body}`;
         })
         .join('\n');
+
+const renderQueue = (queue) => {
+  if (!queue.enabled) {
+    return 'not required on this base branch — landing is a direct squash merge';
+  }
+  if (queue.queued) {
+    return `in the queue${queue.state === '' ? '' : ` (${queue.state})`}${queue.position === undefined ? '' : ` at position ${queue.position + 1}`}`;
+  }
+  return queue.ejectedAt === ''
+    ? 'required on this base branch; this pull request is not in it'
+    : `required; REMOVED from the queue at ${queue.ejectedAt}${queue.ejectedReason === '' ? '' : ` — ${queue.ejectedReason}`}`;
+};
 
 const renderFindings = (label, findings) =>
   findings.length === 0
@@ -155,6 +167,7 @@ author:   ${pr.author}
 branch:   ${pr.headRefName} -> ${pr.baseRefName}
 draft:    ${pr.isDraft}
 mergeable:${pr.mergeable}   mergeStateStatus: ${pr.mergeStateStatus}   reviewDecision: ${pr.reviewDecision || '(none)'}
+merge queue: ${renderQueue(pr.queue)}
 files (${pr.files.length}, ${pr.size} lines changed):
 ${pr.files.map((file) => `  +${file.additions} -${file.deletions} ${file.path}`).join('\n') || '  (none)'}
 checks:
@@ -183,7 +196,7 @@ Your task:
 3. Cite the policy rule ids the verdict rests on.
 4. Record every probe you ran and what it returned (policy §6). A verdict with no
    probe that could have come out otherwise is S10.
-5. For MERGE or ACT, list the exact §4 actions and the exact shell commands, in
+5. For ENQUEUE or ACT, list the exact §4 actions and the exact shell commands, in
    order. Bias toward action: if the policy permits the action, name it and do not
    defer it to a human. "A human should look at this" is only ESCALATE, and only
    with a §5 trigger id.

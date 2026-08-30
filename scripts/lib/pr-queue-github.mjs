@@ -13,6 +13,12 @@
  * probe reports a PR with open threads as clean. That is the §6 "pick a probe
  * that discriminates" trap in its most expensive form.
  *
+ * It carries the merge-queue state for the same reason. `gh pr view --json` has
+ * no field for it at all, and a pull request the queue has ejected keeps its own
+ * required checks green — so every REST probe reads it as eligible, which is the
+ * shape of the defect the queue was installed to fix. E11 and S11 in the policy
+ * are what these fields feed.
+ *
  * Governed by .claude/rules/scripts.md.
  */
 import {
@@ -28,6 +34,14 @@ query($owner:String!, $repo:String!, $limit:Int!) {
       nodes {
         number title url body isDraft mergeable mergeStateStatus reviewDecision
         headRefName baseRefName
+        isInMergeQueue isMergeQueueEnabled
+        mergeQueueEntry { state position }
+        timelineItems(last:1, itemTypes:[ADDED_TO_MERGE_QUEUE_EVENT, REMOVED_FROM_MERGE_QUEUE_EVENT]) {
+          nodes {
+            __typename
+            ... on RemovedFromMergeQueueEvent { createdAt reason }
+          }
+        }
         author { login }
         files(first:100) { nodes { path additions deletions } }
         reviewThreads(first:50) {
@@ -39,6 +53,7 @@ query($owner:String!, $repo:String!, $limit:Int!) {
         commits(last:1) {
           nodes {
             commit {
+              committedDate
               statusCheckRollup {
                 state
                 contexts(first:100) {

@@ -1,55 +1,27 @@
 /**
  * The gate is the operator's leash, so these tests pin the direction it fails
- * in: every uncertainty must resolve toward ESCALATE, never toward MERGE. The
+ * in: every uncertainty must resolve toward ESCALATE, never toward ENQUEUE. The
  * ceiling test is the important one — it is what stops a model reasoning its way
  * past a hard stop.
  */
-import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vite-plus/test';
 
-import { extractImportSpecifiers } from '../../packages/devkit/scripts/closure-extract.mjs';
 import { publicPackageDirs } from './coverage-workspaces.mjs';
 import {
   detectBlockers,
   detectFlags,
   detectStops,
   evaluateGate,
+  forbiddenActions,
   isWithinCeiling,
-  OPERATOR_FILES,
 } from './pr-queue-gate.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 const ROSTER = publicPackageDirs(REPO_ROOT);
-
-const OPERATOR_ENTRY = 'scripts/pr-queue-operator.mjs';
-
-const repoRelative = (fromFile, specifier) =>
-  relative(REPO_ROOT, resolve(dirname(join(REPO_ROOT, fromFile)), specifier))
-    .split('\\')
-    .join('/');
-
-const importClosure = (entry) => {
-  const seen = new Set();
-  const pending = [entry];
-  while (pending.length > 0) {
-    const current = pending.pop();
-    if (seen.has(current)) continue;
-    seen.add(current);
-    const full = join(REPO_ROOT, current);
-    if (!existsSync(full)) continue;
-    for (const { specifier } of extractImportSpecifiers(
-      readFileSync(full, 'utf8'),
-    )) {
-      if (specifier.startsWith('.'))
-        pending.push(repoRelative(current, specifier));
-    }
-  }
-  return [...seen].sort((left, right) => left.localeCompare(right));
-};
 
 const file = (path, additions = 5, deletions = 1) => ({
   additions,
@@ -57,13 +29,25 @@ const file = (path, additions = 5, deletions = 1) => ({
   path,
 });
 
+const queue = (overrides = {}) => ({
+  ejectedAt: '',
+  ejectedReason: '',
+  enabled: false,
+  position: undefined,
+  queued: false,
+  state: '',
+  ...overrides,
+});
+
 const pr = (overrides = {}) => ({
   checks: { all: [{ name: 'CI', state: 'SUCCESS' }], failed: [], pending: [] },
   files: [file('src/thing.ts')],
+  headCommittedAt: '2026-08-30T10:00:00Z',
   isDraft: false,
   mergeable: 'MERGEABLE',
   mergeStateStatus: 'CLEAN',
   number: 1,
+  queue: queue(),
   reviewDecision: '',
   size: 6,
   threads: { total: 0, unresolved: [] },
@@ -123,35 +107,6 @@ describe('detectStops — mechanically certain §5 triggers', () => {
 
   it('leaves an ordinary PR unstopped', () => {
     expect(detectStops(pr())).toEqual([]);
-  });
-
-  it('S9 covers every file the operator imports', () => {
-    const closure = importClosure(OPERATOR_ENTRY);
-    expect(closure).toContain(OPERATOR_ENTRY);
-    expect(closure.length).toBeGreaterThan(1);
-    expect(closure.filter((path) => !OPERATOR_FILES.has(path))).toEqual([]);
-  });
-
-  it('lists nothing in S9 the operator does not open by name', () => {
-    const entry = readFileSync(join(REPO_ROOT, OPERATOR_ENTRY), 'utf8');
-    const closure = importClosure(OPERATOR_ENTRY);
-    const beyondClosure = [...OPERATOR_FILES].filter(
-      (path) => !closure.includes(path),
-    );
-    expect(beyondClosure.length).toBeGreaterThan(0);
-    for (const path of beyondClosure) {
-      expect(existsSync(join(REPO_ROOT, path))).toBe(true);
-      expect(
-        entry.includes(`'${path}'`) || entry.includes(`"${path}"`),
-        `${path} is in OPERATOR_FILES but ${OPERATOR_ENTRY} never names it`,
-      ).toBe(true);
-    }
-  });
-
-  it.each([...OPERATOR_FILES])('stops a PR touching %s (S9)', (path) => {
-    expect(detectStops(pr({ files: [file(path)] })).map((s) => s.id)).toContain(
-      'S9',
-    );
   });
 });
 
@@ -291,19 +246,75 @@ describe('detectBlockers — §2, each carrying the verdict it forces', () => {
     const blockers = detectBlockers(pr({ mergeStateStatus: 'BEHIND' }), clean);
     expect(blockers.find((item) => item.id === 'E10').verdict).toBe('ACT');
   });
+
+  it('stops blocking on a behind branch once a queue recomputes the merge', () => {
+    const blockers = detectBlockers(
+      pr({ mergeStateStatus: 'BEHIND', queue: queue({ enabled: true }) }),
+      clean,
+    );
+    expect(blockers.map((item) => item.id)).not.toContain('E10');
+  });
+
+  it('waits on a pull request already in the queue, rather than touching it', () => {
+    const blockers = detectBlockers(
+      pr({ queue: queue({ enabled: true, queued: true, state: 'QUEUED' }) }),
+      clean,
+    );
+    expect(blockers.find((item) => item.id === 'E11').verdict).toBe('WAIT');
+  });
+});
+
+describe('detectFlags — an ejection the rollup cannot show', () => {
+  const ejected = (overrides) =>
+    queue({
+      ejectedAt: '2026-08-30T12:00:00Z',
+      ejectedReason: 'checks failed',
+      enabled: true,
+      ...overrides,
+    });
+
+  it('flags a pull request the queue removed while its own checks stayed green', () => {
+    const flags = detectFlags(
+      pr({
+        checks: {
+          all: [{ name: 'CI', state: 'SUCCESS' }],
+          failed: [],
+          pending: [],
+        },
+        queue: ejected(),
+      }),
+      ROSTER,
+    );
+    expect(flags.find((flag) => flag.id === 'S11').detail).toContain(
+      'checks failed',
+    );
+  });
+
+  it('clears once the head has moved, so an ejection is not permanent', () => {
+    const flags = detectFlags(
+      pr({ headCommittedAt: '2026-08-30T13:00:00Z', queue: ejected() }),
+      ROSTER,
+    );
+    expect(flags.map((flag) => flag.id)).not.toContain('S11');
+  });
+
+  it('does not flag a pull request that was never ejected', () => {
+    const flags = detectFlags(pr({ queue: queue({ enabled: true }) }), ROSTER);
+    expect(flags.map((flag) => flag.id)).not.toContain('S11');
+  });
 });
 
 describe('evaluateGate — the ceiling', () => {
-  it('is MERGE only when nothing blocks and nothing stops', () => {
-    expect(evaluateGate(pr(), clean).verdict).toBe('MERGE');
+  it('is ENQUEUE only when nothing blocks and nothing stops', () => {
+    expect(evaluateGate(pr(), clean).verdict).toBe('ENQUEUE');
   });
 
-  it('lets a flag alone still reach MERGE — the model must discharge it', () => {
+  it('lets a flag alone still reach ENQUEUE — the model must discharge it', () => {
     const gate = evaluateGate(
       pr({ files: [file('src/a.test.ts', 3, 3)] }),
       clean,
     );
-    expect(gate.verdict).toBe('MERGE');
+    expect(gate.verdict).toBe('ENQUEUE');
     expect(gate.flags.map((flag) => flag.id)).toContain('S2');
   });
 
@@ -329,15 +340,50 @@ describe('evaluateGate — the ceiling', () => {
 
 describe('isWithinCeiling — the model may only tighten', () => {
   it('allows tightening', () => {
-    expect(isWithinCeiling('MERGE', 'ESCALATE')).toBe(true);
+    expect(isWithinCeiling('ENQUEUE', 'ESCALATE')).toBe(true);
     expect(isWithinCeiling('ACT', 'ESCALATE')).toBe(true);
     expect(isWithinCeiling('WAIT', 'WAIT')).toBe(true);
   });
 
   it('refuses any loosening — the whole point of the leash', () => {
-    expect(isWithinCeiling('ESCALATE', 'MERGE')).toBe(false);
+    expect(isWithinCeiling('ESCALATE', 'ENQUEUE')).toBe(false);
     expect(isWithinCeiling('ESCALATE', 'ACT')).toBe(false);
-    expect(isWithinCeiling('ACT', 'MERGE')).toBe(false);
-    expect(isWithinCeiling('WAIT', 'MERGE')).toBe(false);
+    expect(isWithinCeiling('ACT', 'ENQUEUE')).toBe(false);
+    expect(isWithinCeiling('WAIT', 'ENQUEUE')).toBe(false);
+  });
+});
+
+describe('forbiddenActions — the two flags that go past the queue', () => {
+  const action = (command) => ({ command, rule: 'A5', why: 'land it' });
+
+  it('rejects --admin, which merges past every required check', () => {
+    expect(
+      forbiddenActions([action('gh pr merge 42 --squash --admin')]),
+    ).toEqual([
+      expect.objectContaining({ command: 'gh pr merge 42 --squash --admin' }),
+    ]);
+  });
+
+  it('rejects --delete-branch, which asks for a merge that has not happened', () => {
+    expect(
+      forbiddenActions([action('gh pr merge 42 --squash -d')]),
+    ).toHaveLength(1);
+    expect(
+      forbiddenActions([action('gh pr merge 42 --squash --delete-branch')]),
+    ).toHaveLength(1);
+  });
+
+  it('leaves the one authorised landing command alone', () => {
+    expect(forbiddenActions([action('gh pr merge 42 --squash')])).toEqual([]);
+  });
+
+  it('does not fire on an unrelated command that merely says admin', () => {
+    expect(
+      forbiddenActions([action('gh pr comment 42 --body "ask an admin"')]),
+    ).toEqual([]);
+  });
+
+  it('reads an absent action list as nothing forbidden, not as a throw', () => {
+    expect(forbiddenActions(undefined)).toEqual([]);
   });
 });

@@ -2,12 +2,26 @@ name: Check Safe
 
 on:
   pull_request:
+  # The merge queue builds each entry on a temporary `gh-readonly-queue/…`
+  # branch and dispatches `merge_group` for it. A workflow without this trigger
+  # never reports its required contexts there, and the queue then waits for a
+  # check that will never arrive, with nothing saying why. See
+  # docs/tooling/merge-queue.md.
+  merge_group:
+    types: [checks_requested]
   push:
     branches:
       - main
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  # What every diff-scoped gate here compares against. In a merge group that is
+  # the group's PARENT commit — the base branch plus every entry ahead of this
+  # one — so the diff is this pull request's own change against the tree it will
+  # actually land on, not against the base it was opened from. Recomputing that
+  # is the whole point of the queue (#1034). On a push to `main` it resolves to
+  # `origin/`, which no step then uses: that lane runs the full suites.
+  DIFF_BASE: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || format('origin/{0}', github.base_ref) }}
 
 jobs:
   quality-gate:
@@ -51,27 +65,31 @@ jobs:
         # compiler here is the reference implementation the other passes are
         # approximations of.
         #
-        # On a PR, `typecheck:changed` runs tsc only for the changed workspaces
-        # plus their dependents — a type error a diff introduces surfaces where
-        # the type is used, which the dependents walk covers, and `vp check`'s
-        # tsgolint pass above still type-checks the whole tree as a net. A
-        # root/shared change or a push to `main` runs the full `typecheck:all`.
+        # On a PR or a merge-group build, `typecheck:changed` runs tsc only for
+        # the changed workspaces plus their dependents — a type error a diff
+        # introduces surfaces where the type is used, which the dependents walk
+        # covers, and `vp check`'s tsgolint pass above still type-checks the
+        # whole tree as a net. A root/shared change or a push to `main` runs the
+        # full `typecheck:all`. In the queue the diff is taken against the group's
+        # parent, so a type another entry removed is caught from either side: the
+        # deleting entry's own walk reaches its dependents, and this one's diff
+        # sits on top of that entry.
         env:
-          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            vp run typecheck:changed
-          else
+          if [ "${{ github.event_name }}" = "push" ]; then
             vp run typecheck:all
+          else
+            vp run typecheck:changed
           fi
 
       - name: Type-check selection summary
         # Make the change-based selection visible in the run, not buried in the
         # type-check log — the per-workspace running/skipped breakdown goes to
         # the job summary. Report-only; type-checks nothing.
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name != 'push' && always()
         env:
-          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: |
           bash scripts/changed-files.sh \
             node scripts/run-changed.mjs typecheck --markdown >> "$GITHUB_STEP_SUMMARY"
@@ -296,12 +314,12 @@ jobs:
         # of them was found by hand afterwards (#611). Widening docs:verify to
         # every bare filename would report mostly suffix conventions and
         # teaching examples, so this is scoped to the names the diff actually
-        # renamed away. Pull requests only: a push to main has no base ref to
-        # diff against, and the gate refuses to run rather than report a pass it
-        # did not earn.
-        if: github.event_name == 'pull_request'
+        # renamed away. Everywhere there is a base to diff against, which is a
+        # pull request and a merge group but not a push to `main` — there the
+        # gate refuses to run rather than report a pass it did not earn.
+        if: github.event_name != 'push'
         env:
-          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: vp run renames:verify
 
       - name: Route-folder types/constants name a real artifact
@@ -389,7 +407,7 @@ jobs:
         # after packages:build — it snapshots the built dist a consumer installs.
         # See docs/decisions/ADR-046 and issue #359.
         env:
-          API_SURFACE_BASE: origin/${{ github.base_ref }}
+          API_SURFACE_BASE: ${{ env.DIFF_BASE }}
         run: vp run api-surface:verify
 
       - name: Published types resolve (attw)
@@ -462,7 +480,11 @@ jobs:
 
   fallow-audit:
     name: Fallow Audit (new-only gate)
-    if: github.event_name == 'pull_request'
+    # Wherever there is a base to attribute findings against — a pull request and
+    # a merge group, not a push to `main`. Skipping it in the queue would leave a
+    # REQUIRED context reporting `skipped`, which reads as a pass: the gate would
+    # then be green in the one place it is meant to decide a merge.
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -503,7 +525,7 @@ jobs:
         # constraint stands: it is what broke the previous attempt at this
         # (reverted 2026-07-14). See scripts/merge-coverage.mjs.
         env:
-          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: |
           bash scripts/changed-files.sh node scripts/merge-coverage.mjs --changed
 
@@ -515,7 +537,7 @@ jobs:
         run: |
           set -o pipefail
           STATUS=0
-          vp run fallow:audit --base "origin/${{ github.base_ref }}" --coverage reports/fallow/coverage/coverage-final.json --format json --quiet | tee fallow-audit.raw.txt || STATUS=$?
+          vp run fallow:audit --base "$DIFF_BASE" --coverage reports/fallow/coverage/coverage-final.json --format json --quiet | tee fallow-audit.raw.txt || STATUS=$?
           # vp run echoes a command banner before the JSON — keep everything
           # from the first JSON line onward so the summary step can parse it,
           # then propagate fallow's exit code (1 = introduced issues, 2 = error).
@@ -538,7 +560,7 @@ jobs:
               echo "| Field | Value |"
               echo "|-------|-------|"
               echo "| Verdict | $BADGE $VERDICT |"
-              echo "| Base | \`origin/${{ github.base_ref }}\` |"
+              echo "| Base | \`$DIFF_BASE\` |"
               echo "| Dead code introduced | $(jq -r '.attribution.dead_code_introduced // "n/a"' fallow-audit.json) |"
               echo "| Complexity introduced | $(jq -r '.attribution.complexity_introduced // "n/a"' fallow-audit.json) |"
               echo "| Duplication introduced | $(jq -r '.attribution.duplication_introduced // "n/a"' fallow-audit.json) |"
@@ -575,22 +597,23 @@ jobs:
       - name: Install dependencies
         run: vp install --frozen-lockfile --ignore-scripts && vp config
 
-      - name: Run the DB-free suites (changed on PRs, all on main)
-        # On a PR, `test:changed --ci` runs only the workspaces the diff touched
-        # plus their dependents — a root/shared change still falls back to the
-        # full suite. On a push to `main` (no base ref) it runs the full DB-free
-        # `test:ci`. Either way the task substitution is identical: scan packages
-        # use their DB-free `test:unit`, and react-router runs its coverage
-        # `test:ci` last so it emits coverage-summary.json for the step below.
-        # (When a PR skips react-router, the coverage step degrades gracefully —
-        # it filters absent summaries out.)
+      - name: Run the DB-free suites (changed on a base, all on main)
+        # On a PR or a merge-group build, `test:changed --ci` runs only the
+        # workspaces the diff touched plus their dependents — a root/shared
+        # change still falls back to the full suite. On a push to `main` (no base
+        # ref) it runs the full DB-free `test:ci`. Either way the task
+        # substitution is identical: scan packages use their DB-free `test:unit`,
+        # and react-router runs its coverage `test:ci` last so it emits
+        # coverage-summary.json for the step below. (When a run skips
+        # react-router, the coverage step degrades gracefully — it filters absent
+        # summaries out.)
         env:
-          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            vp run test:changed -- --ci
-          else
+          if [ "${{ github.event_name }}" = "push" ]; then
             vp run test:ci
+          else
+            vp run test:changed -- --ci
           fi
 
       - name: Test selection summary
@@ -598,9 +621,11 @@ jobs:
         # log: the per-workspace "running / skipped" breakdown goes to the job
         # summary and (below) a sticky PR comment, so a reviewer can see exactly
         # what was checked and what was skipped. Report-only — runs no tests.
-        if: github.event_name == 'pull_request' && always()
+        # The comment step below stays pull-request-only: a merge group has no
+        # issue to comment on.
+        if: github.event_name != 'push' && always()
         env:
-          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: |
           bash scripts/changed-files.sh \
             node scripts/test-changed.mjs --ci --markdown \
@@ -652,17 +677,17 @@ jobs:
         # package workspaces (their test run above is plain `test`, no coverage)
         # and reuses react-router's fresh summary.
         #
-        # On a PR it scopes to the same changed workspaces the test step ran
-        # (`--changed`), so an unrelated PR doesn't re-run coverage that was
+        # Against a base it scopes to the same changed workspaces the test step
+        # ran (`--changed`), so an unrelated PR doesn't re-run coverage that was
         # skipped; pushes to main report every workspace.
         if: always()
         env:
-          TEST_CHANGED_BASE: origin/${{ github.base_ref }}
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            bash scripts/changed-files.sh node scripts/coverage-report.mjs --changed
-          else
+          if [ "${{ github.event_name }}" = "push" ]; then
             vp run coverage:report
+          else
+            bash scripts/changed-files.sh node scripts/coverage-report.mjs --changed
           fi
 
       - name: Upload coverage report

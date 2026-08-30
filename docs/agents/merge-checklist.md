@@ -2,6 +2,24 @@
 
 Verify every item before merging. **If any item fails, abort the merge.**
 
+**"Merging" is now asking the queue.** `main` requires a merge queue, so
+`gh pr merge <n> --squash` adds the pull request to it and GitHub merges it
+afterwards — having re-run every required check against the real merge result,
+which is the base as it is then plus everything ahead in the queue. Three things
+follow for a reader of this list, and
+[`merge-queue.md`](../tooling/merge-queue.md) is where they are explained:
+
+- The checks below are the bar for **entering** the queue. The queue re-derives
+  them for the commit that actually lands, which is why a whole-tree gate can no
+  longer pass on a superseded base ([ADR-097](../decisions/ADR-097-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)).
+- Your pull request is **not merged when the command returns**. Anything you do
+  after a merge — close the issue, delete the branch, prune the worktree — waits
+  for `gh pr view <n> --json state` to read `MERGED`.
+- The queue can throw it back out, and **that does not turn any check on this
+  page red.** The failure belongs to the merge group's commit. Read
+  [the ejection probe](../tooling/merge-queue.md#two-answers-this-repository-made-explicit)
+  before queueing it again.
+
 Items marked **[auto]** are already enforced by CI or a git hook — the check
 name is given so you can confirm it ran rather than re-derive it by hand. Items
 marked **[judgement]** are the ones no machine can decide; those are the reason
@@ -73,6 +91,10 @@ trust the check and look at its output.
 
 ## Final merge gate
 
+- [ ] **Landed with `gh pr merge <n> --squash`** — never `--admin`, which merges
+      past the queue and past every required check, and which an admin account
+      can actually do; never `-d`, which gh refuses in front of a queue anyway
+      **[judgement]**
 - [ ] **Does not revert or contradict previous agent work** — check the
       coordination register and any overlapping active claim
       (`vp run coordination:verify`) **[judgement]**

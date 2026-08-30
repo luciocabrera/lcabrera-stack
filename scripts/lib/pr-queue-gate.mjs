@@ -5,9 +5,9 @@
  * Why this exists rather than leaving it all to the model: the stop list is the
  * operator's leash, and a leash a model can reason its way around is not one.
  * What this file returns is therefore a CEILING. The model may move a verdict
- * toward ESCALATE, never past it toward MERGE — so a deleted test escalates even
- * if the model finds the deletion reasonable, and that property is testable here
- * without invoking anything.
+ * toward ESCALATE, never past it toward ENQUEUE — so a deleted test escalates
+ * even if the model finds the deletion reasonable, and that property is testable
+ * here without invoking anything.
  *
  * The split inside §5 is deliberate. A `stop` is mechanically certain (the diff
  * removes a test file). A `flag` is "a §5 area is touched" — a migration, a
@@ -77,8 +77,11 @@ const touchesPublicManifest = (pr, packages) =>
       inPublicPackage(file.path, packages),
   );
 
+const ejectedSinceHeadMoved = (pr) =>
+  pr.queue.ejectedAt !== '' && pr.queue.ejectedAt > pr.headCommittedAt;
+
 /** A path present in the diff with no additions left — the file is gone. */
-const removed = (pr, pattern) =>
+const removedFile = (pr, pattern) =>
   pr.files.some(
     (file) =>
       pattern.test(file.path) && file.additions === 0 && file.deletions > 0,
@@ -91,7 +94,7 @@ export const detectStops = (pr) =>
       detail: 'the PR changes no files — nothing to merge',
       id: 'S7',
     },
-    removed(pr, TEST_FILE) && {
+    removedFile(pr, TEST_FILE) && {
       detail: `test file removed: ${pr.files
         .filter((file) => TEST_FILE.test(file.path) && file.additions === 0)
         .map((file) => file.path)
@@ -146,6 +149,10 @@ export const detectFlags = (pr, packages) =>
       detail:
         'tests changed — confirm no case was removed, skipped or narrowed',
       id: 'S2',
+    },
+    ejectedSinceHeadMoved(pr) && {
+      detail: `the merge queue removed this pull request${pr.queue.ejectedReason === '' ? '' : ` (${pr.queue.ejectedReason})`} and the head has not moved since — read the merge group's checks before queueing it again`,
+      id: 'S11',
     },
   ].filter(Boolean);
 
@@ -202,18 +209,24 @@ export const detectBlockers = (pr, conformance) =>
       id: 'E7',
       verdict: 'ACT',
     },
-    pr.mergeStateStatus === 'BEHIND' && {
-      detail: 'the branch is behind its base — update per A1',
-      id: 'E10',
-      verdict: 'ACT',
+    !pr.queue.enabled &&
+      pr.mergeStateStatus === 'BEHIND' && {
+        detail: 'the branch is behind its base — update per A1',
+        id: 'E10',
+        verdict: 'ACT',
+      },
+    pr.queue.queued && {
+      detail: `already in the merge queue${pr.queue.state === '' ? '' : ` (${pr.queue.state})`} — any action here removes it and starts the wait again`,
+      id: 'E11',
+      verdict: 'WAIT',
     },
   ].filter(Boolean);
 
-const PRECEDENCE = ['ESCALATE', 'ACT', 'WAIT', 'MERGE'];
+const PRECEDENCE = ['ESCALATE', 'ACT', 'WAIT', 'ENQUEUE'];
 
 /** The strictest verdict present — escalate outranks act outranks wait. */
 const strictest = (verdicts) =>
-  PRECEDENCE.find((verdict) => verdicts.includes(verdict)) ?? 'MERGE';
+  PRECEDENCE.find((verdict) => verdicts.includes(verdict)) ?? 'ENQUEUE';
 
 /**
  * The mechanical ceiling for one PR.
@@ -232,6 +245,27 @@ export const evaluateGate = (pr, conformance, packages) => {
       : strictest(blockers.map((blocker) => blocker.verdict));
   return { blockers, flags, stops, verdict };
 };
+
+const FORBIDDEN_COMMANDS = [
+  {
+    pattern: /\bgh\s+pr\s+merge\b[^\n]*\s--admin\b/u,
+    reason:
+      '`gh pr merge --admin` merges past the merge queue and past every required check, and the operator account can. A5 authorises `--squash` and nothing else',
+  },
+  {
+    pattern: /\bgh\s+pr\s+merge\b[^\n]*\s(?:-d|--delete-branch)\b/u,
+    reason:
+      '`gh pr merge -d` asks GitHub to delete the branch as part of a merge that has not happened yet — gh refuses it in front of a queue, and A7 deletes the branch after the merge is confirmed',
+  },
+];
+
+/** Commands no decision may authorise, whatever the model reasoned. */
+export const forbiddenActions = (actions) =>
+  (actions ?? []).flatMap((action) =>
+    FORBIDDEN_COMMANDS.filter(({ pattern }) =>
+      pattern.test(action.command ?? ''),
+    ).map(({ reason }) => ({ command: action.command ?? '', reason })),
+  );
 
 /** True when the model's verdict is at or below the mechanical ceiling. */
 export const isWithinCeiling = (ceiling, proposed) =>

@@ -44,10 +44,13 @@
  * finished before reading — Automatic Analysis is async, so a bare read races it.
  * `--since <iso>` (the PR head commit time) guards freshness so a previous
  * commit's analysis isn't accepted; on timeout the check is skipped, not failed,
- * so Sonar latency never blocks a merge (the required SonarCloud check still gates).
+ * so Sonar latency never blocks an author. `--require-analysis` turns that skip
+ * into a failure, for the one context where nothing else is looking afterwards:
+ * a merge-queue build, which is the last word before the merge.
  *
- * Exit codes: 0 = report written / gate OK (or skipped when no token / wait
- *             timeout), 1 = gate failing, new issues (--fail-on-issues),
+ * Exit codes: 0 = report written / gate OK (or skipped when no token, or on a
+ *             wait timeout without --require-analysis), 1 = gate failing, new
+ *             issues (--fail-on-issues), no analysis under --require-analysis,
  *             analysis failed, fetch error, or bad arguments.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -81,6 +84,7 @@ const BOOLEAN_FLAGS = new Map([
   ['--fail-on-issues', 'failOnIssues'],
   ['--wait', 'wait'],
   ['--require-token', 'requireToken'],
+  ['--require-analysis', 'requireAnalysis'],
 ]);
 
 const VALUE_FLAGS = new Map([
@@ -95,6 +99,7 @@ const parseArgs = (argv) => {
     failOnIssues: false,
     wait: false,
     requireToken: false,
+    requireAnalysis: false,
     pr: undefined,
     branch: undefined,
     since: undefined,
@@ -312,6 +317,32 @@ const printNoToken = (gateMode) => {
     );
 };
 
+const analysisReady = async ({ args, target, token }) => {
+  const ready = await waitForAnalysis({
+    fetchJson,
+    token,
+    base: CONFIG.base,
+    project: CONFIG.project,
+    target,
+    since: args.since,
+  });
+  if (ready) {
+    return true;
+  }
+  const timedOut = `Timed out waiting for SonarCloud analysis of ${target.type} ${target.value}`;
+  if (args.requireAnalysis) {
+    console.error(
+      `${timedOut} — failing, because --require-analysis says nothing else will read Sonar for this change.`,
+    );
+    process.exitCode = 1;
+    return false;
+  }
+  console.warn(
+    `${timedOut} — skipping the strict issue check. The merge-queue build of this pull request runs it again with --require-analysis, and cannot skip.`,
+  );
+  return false;
+};
+
 const printBranchHint = (branch) => {
   console.log(
     logSafe(
@@ -354,22 +385,8 @@ const main = async () => {
     return;
   }
 
-  if (args.wait) {
-    const ready = await waitForAnalysis({
-      fetchJson,
-      token,
-      base: CONFIG.base,
-      project: CONFIG.project,
-      target,
-      since: args.since,
-    });
-    if (!ready) {
-      console.warn(
-        `Timed out waiting for SonarCloud analysis of ${target.type} ${target.value} — ` +
-          'skipping the strict issue check (the required SonarCloud check still gates).',
-      );
-      return;
-    }
+  if (args.wait && !(await analysisReady({ args, target, token }))) {
+    return;
   }
 
   const api = createSonarApi({

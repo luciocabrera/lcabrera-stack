@@ -44,6 +44,15 @@ name: Copilot Review Gate
 # that has never reported blocks every pull request including the one that would
 # fix it. `Agent review verdict` is the half still advisory.
 #
+# Being required is also why it runs on `merge_group`. A merge queue reads the
+# required contexts against the merge group's own commit, and this context is a
+# COMMIT STATUS on the pull request head — a different commit, which the queue
+# never looks at. Without this trigger the queue would wait for it forever. The
+# queue run re-reads the same pull request (the queue names it in its ref) and
+# publishes the same verdict about the same head, on the merge group's commit.
+# A queued pull request cannot move underneath it: a push removes it from the
+# queue. See docs/tooling/merge-queue.md.
+#
 # WHICH REVIEWERS, AND WHY PER REVIEWER. The set is an explicit named list in
 # scripts/lib/copilot-review.mjs — today the Copilot bot above, and the in-workflow
 # reviewer in claude-review.yml. Per reviewer rather than newest-across-the-set, so
@@ -68,6 +77,8 @@ on:
     types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
   pull_request_review:
     types: [submitted, dismissed]
+  merge_group:
+    types: [checks_requested]
   # Break-glass, and the one rung an author can reach without push access to a
   # status API. A dispatch run is attributed to whoever pressed it, so a
   # maintainer's dispatch executes where the same recompute triggered by a bot's
@@ -131,17 +142,26 @@ jobs:
           # Present on both review events' payloads, and given by hand on a
           # dispatch. Passed through env, never a shell interpolation, so nothing
           # from a PR is executed.
+          # Empty on a merge group, where the script reads the number out of the
+          # queue ref instead — passing `--pr ''` would be worse than passing
+          # nothing, so the flag is only added when there is a number for it.
           PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr }}
           # The emptiness test is what keeps a dispatch out of the fork branch:
           # `workflow_dispatch` carries no `pull_request` object, and comparing
           # an absent name against the repository would call every dispatch a
-          # fork and silently turn break-glass into a dry run.
+          # fork and silently turn break-glass into a dry run. A merge group has
+          # no pull request object either, and it is never a fork run: it builds
+          # on a branch of THIS repository, so the token can write there even for
+          # a queued fork pull request.
           IS_FORK: ${{ github.event.pull_request.head.repo.full_name != '' &&
             github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
+          ARGS=()
+          if [ -n "$PR_NUMBER" ]; then
+            ARGS+=(--pr "$PR_NUMBER")
+          fi
           if [ "$IS_FORK" = "true" ]; then
             echo "::warning::Fork pull request — GITHUB_TOKEN is read-only here, so no commit status can be published. The check stays absent; see docs/tooling/copilot-review-gate.md for the break-glass path."
-            node scripts/copilot-review-status.mjs --pr "$PR_NUMBER" --dry-run
-          else
-            node scripts/copilot-review-status.mjs --pr "$PR_NUMBER"
+            ARGS+=(--dry-run)
           fi
+          node scripts/copilot-review-status.mjs "${ARGS[@]}"

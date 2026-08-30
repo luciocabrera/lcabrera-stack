@@ -14,8 +14,8 @@
 
 const VERDICT_MARK = {
   ACT: '🔧',
+  ENQUEUE: '✅',
   ESCALATE: '🛑',
-  MERGE: '✅',
   WAIT: '⏳',
 };
 
@@ -91,7 +91,7 @@ export const renderLog = ({ entries, mode, pass }) => `# PR queue decision log
 - **Repository**: ${pass.repository}
 - **Policy**: \`.claude/pr-queue-policy.md\`
 - **Model**: ${pass.model}
-- **Queue**: ${entries.length} open PR(s) — ${countBy(entries, 'MERGE')} MERGE, ${countBy(entries, 'ACT')} ACT, ${countBy(entries, 'WAIT')} WAIT, ${countBy(entries, 'ESCALATE')} ESCALATE
+- **Queue**: ${entries.length} open PR(s) — ${countBy(entries, 'ENQUEUE')} ENQUEUE, ${countBy(entries, 'ACT')} ACT, ${countBy(entries, 'WAIT')} WAIT, ${countBy(entries, 'ESCALATE')} ESCALATE
 ${pass.cycle.length > 0 ? `- **⚠ Dependency cycle**: #${pass.cycle.join(', #')} — every PR in it escalates (policy §3)\n` : ''}
 ## Merge order
 

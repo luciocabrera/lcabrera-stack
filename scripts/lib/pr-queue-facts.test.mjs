@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   normalizeCheck,
   summarizeChecks,
+  summarizeQueue,
   summarizeThreads,
   toFacts,
 } from './pr-queue-facts.mjs';
@@ -149,5 +150,65 @@ describe('toFacts', () => {
       number: 9,
     });
     expect(facts.checks.failed.map((check) => check.name)).toEqual(['x']);
+  });
+});
+
+describe('summarizeQueue', () => {
+  it('reads a pull request sitting in the queue', () => {
+    expect(
+      summarizeQueue({
+        isInMergeQueue: true,
+        isMergeQueueEnabled: true,
+        mergeQueueEntry: { position: 0, state: 'AWAITING_CHECKS' },
+        timelineItems: { nodes: [{ __typename: 'AddedToMergeQueueEvent' }] },
+      }),
+    ).toEqual({
+      ejectedAt: '',
+      ejectedReason: '',
+      enabled: true,
+      position: 0,
+      queued: true,
+      state: 'AWAITING_CHECKS',
+    });
+  });
+
+  it('records an ejection, which no check on the pull request reports', () => {
+    const queue = summarizeQueue({
+      isInMergeQueue: false,
+      isMergeQueueEnabled: true,
+      timelineItems: {
+        nodes: [
+          {
+            __typename: 'RemovedFromMergeQueueEvent',
+            createdAt: '2026-08-30T12:00:00Z',
+            reason: 'checks failed',
+          },
+        ],
+      },
+    });
+    expect(queue.ejectedAt).toBe('2026-08-30T12:00:00Z');
+    expect(queue.ejectedReason).toBe('checks failed');
+    expect(queue.queued).toBe(false);
+  });
+
+  it('treats a re-queue as clearing the ejection, since it is the later event', () => {
+    expect(
+      summarizeQueue({
+        isInMergeQueue: true,
+        isMergeQueueEnabled: true,
+        timelineItems: { nodes: [{ __typename: 'AddedToMergeQueueEvent' }] },
+      }).ejectedAt,
+    ).toBe('');
+  });
+
+  it('reads a repository with no queue at all as not enabled, not ejected', () => {
+    expect(summarizeQueue({ number: 1 })).toEqual({
+      ejectedAt: '',
+      ejectedReason: '',
+      enabled: false,
+      position: undefined,
+      queued: false,
+      state: '',
+    });
   });
 });

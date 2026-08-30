@@ -19,10 +19,10 @@ const entry = (overrides = {}) => ({
     ],
     reasoning: 'Every §2 gate holds.',
     ruleIds: ['E1', 'E3', 'A5'],
-    verdict: 'MERGE',
+    verdict: 'ENQUEUE',
     ...overrides.decision,
   },
-  gate: { verdict: 'MERGE', ...overrides.gate },
+  gate: { verdict: 'ENQUEUE', ...overrides.gate },
   position: {
     edges: [{ from: 41, rule: 'O3', to: 42 }],
     index: 0,
@@ -94,7 +94,7 @@ describe('renderLog', () => {
       mode: 'dry-run',
       pass,
     });
-    expect(markdown).toContain('1 MERGE');
+    expect(markdown).toContain('1 ENQUEUE');
     expect(markdown).toContain('1 ESCALATE');
   });
 
@@ -117,10 +117,10 @@ describe('toJson', () => {
       pass: { cycle: [], model: 'sonnet', repository: 'o/r', startedAt: 'x' },
     });
     expect(json.decisions[0]).toMatchObject({
-      ceiling: 'MERGE',
+      ceiling: 'ENQUEUE',
       number: 42,
       position: 1,
-      verdict: 'MERGE',
+      verdict: 'ENQUEUE',
     });
     expect(json.mode).toBe('dry-run');
   });
