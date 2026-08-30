@@ -139,7 +139,7 @@ a fake typo or an inserted "um".
 
 **Soul, only where the genre allows** (chat, essays, narrative docs; not
 specs): have an opinion, vary rhythm, acknowledge mixed feelings, use "I"
-when you are the one judging, let a little mess in. Specifics do the work
+when you are the one judging. Specifics do the work
 that folksiness pretends to.
 
 ### Epistemics (no profile can override)

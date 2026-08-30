@@ -4,6 +4,7 @@
     "scripts/**/*.{cjs,mjs,js}",
     "packages/devkit/scripts/*.mjs",
     "packages/repo-standards/scripts/*.mjs",
+    "packages/ui/scripts/*.mjs",
     "apps/showcase/lighthouse.config.js",
     "apps/showcase/config/*.ts",
     "packages/ui/config/*.ts",
