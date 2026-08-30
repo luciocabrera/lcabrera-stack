@@ -14,7 +14,7 @@ describe('createDraggableItems', () => {
         { key: 'id', label: 'ID' },
       ],
       columnPinning: { left: ['id'], right: [] },
-      groupingKeys: [],
+      declaredGroupingKeys: [],
       renderedColumnKeys: new Set(['id']),
       renderItemContent,
     });
@@ -61,7 +61,7 @@ describe('createDraggableItems', () => {
         { key: 'second', label: 'Second' },
       ],
       columnPinning: { left: [], right: [] },
-      groupingKeys: ['first'],
+      declaredGroupingKeys: ['first'],
       renderedColumnKeys: new Set(['first']),
       renderItemContent,
     });
@@ -80,7 +80,7 @@ describe('createDraggableItems', () => {
         { key: 'second', label: 'Second' },
       ],
       columnPinning: { left: [], right: [] },
-      groupingKeys: ['first'],
+      declaredGroupingKeys: ['first'],
       renderedColumnKeys: new Set(['first']),
       renderItemContent: () => 'content',
     });
@@ -98,7 +98,7 @@ describe('createDraggableItems', () => {
         { key: 'second', label: 'Second' },
       ],
       columnPinning: { left: [], right: [] },
-      groupingKeys: ['first'],
+      declaredGroupingKeys: ['first'],
       renderedColumnKeys: new Set(['first']),
       renderItemContent: ({ isVisible }) => String(isVisible),
     });

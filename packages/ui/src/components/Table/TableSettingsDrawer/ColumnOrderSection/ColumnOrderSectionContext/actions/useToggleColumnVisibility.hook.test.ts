@@ -334,6 +334,27 @@ describe('useToggleColumnVisibility', () => {
     expect(drawerColumnsStore.set).not.toHaveBeenCalled();
   });
 
+  it('shows a column when the applied keys name no declared column', () => {
+    setCapabilities({
+      amount: { aggregates: ['sum'], canGroup: true, periods: [] },
+    });
+
+    toggleColumnVisibility({
+      columnKey: 'amount',
+      columns: [
+        { key: 'region', label: 'Region' },
+        { key: 'amount', label: 'Amount' },
+      ],
+      groupingKeys: ['tier'],
+      hiddenKeys: ['amount'],
+      isVisible: true,
+    });
+
+    expect(readVisibilityPayload()?.columnVisibility).toStrictEqual(new Set());
+    expect(modalsStore.set).not.toHaveBeenCalled();
+    expect(notify).not.toHaveBeenCalled();
+  });
+
   it('reports rather than prompting when the column can join as neither', () => {
     setCapabilities({
       amount: { aggregates: [], canGroup: false, periods: [] },
@@ -366,7 +387,7 @@ describe('useToggleColumnVisibility', () => {
     toggleColumnVisibility({
       columnKey: 'amount',
       columns: [
-        { key: 'region', label: 'Region' },
+        ...cappedKeys.map((key) => ({ key, label: key })),
         { key: 'amount', label: 'Amount' },
       ],
       groupingKeys: cappedKeys,

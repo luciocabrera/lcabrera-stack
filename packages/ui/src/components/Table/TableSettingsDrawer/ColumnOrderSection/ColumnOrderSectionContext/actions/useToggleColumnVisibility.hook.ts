@@ -9,6 +9,7 @@ import {
   useGetGroupingKeys,
 } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
 import { useTableDrawerContextValue } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { resolveDeclaredGroupingKeys } from '#ui/components/Table/utils/resolveDeclaredGroupingKeys.util';
 import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
 
 import {
@@ -37,11 +38,15 @@ export const useToggleColumnVisibility = () => {
 
     if (staticKeys.has(columnKey)) return;
 
-    const isGrouped = groupingKeys.length > 0;
+    const declaredGroupingKeys = resolveDeclaredGroupingKeys({
+      columns,
+      groupingKeys,
+    });
+    const isGrouped = declaredGroupingKeys.length > 0;
     const isNamed = isColumnNamedByGrouping({
       aggregates,
       columnKey,
-      groupingKeys,
+      groupingKeys: declaredGroupingKeys,
     });
 
     if (isGrouped && isVisible && !isNamed) {

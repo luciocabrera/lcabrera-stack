@@ -6,8 +6,7 @@ type CreateDraggableItemsArgs<TContent> = {
     readonly left: readonly string[];
     readonly right: readonly string[];
   };
-  /** The applied group keys — locked in place while grouping is applied. */
-  readonly groupingKeys: readonly string[];
+  readonly declaredGroupingKeys: readonly string[];
   readonly renderedColumnKeys: ReadonlySet<string>;
   readonly renderItemContent: (args: {
     readonly columnKey: string;
@@ -29,14 +28,14 @@ type OrderedColumnItem = {
 export const createDraggableItems = <TContent>({
   allOrderedColumns,
   columnPinning,
-  groupingKeys,
+  declaredGroupingKeys,
   renderedColumnKeys,
   renderItemContent,
 }: CreateDraggableItemsArgs<TContent>) => {
   const leftPinned = new Set<string>(columnPinning.left);
   const rightPinned = new Set<string>(columnPinning.right);
-  const groupKeys = new Set<string>(groupingKeys);
-  const isGrouped = groupingKeys.length > 0;
+  const groupKeys = new Set<string>(declaredGroupingKeys);
+  const isGrouped = declaredGroupingKeys.length > 0;
 
   return allOrderedColumns.map((col) => {
     const isPinned = leftPinned.has(col.key) || rightPinned.has(col.key);

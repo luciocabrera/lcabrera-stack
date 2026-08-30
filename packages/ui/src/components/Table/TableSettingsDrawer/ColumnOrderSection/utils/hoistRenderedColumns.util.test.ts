@@ -19,7 +19,7 @@ describe('hoistRenderedColumns', () => {
   it('lists the rendered columns first, in the order the grid paints them', () => {
     const result = hoistRenderedColumns<Row>({
       columns,
-      groupingKeys: ['region'],
+      declaredGroupingKeys: ['region'],
       renderedColumnKeys: ['region', 'amount'],
     });
 
@@ -29,7 +29,7 @@ describe('hoistRenderedColumns', () => {
   it('leaves the consumer’s own order alone while no grouping is applied', () => {
     const result = hoistRenderedColumns<Row>({
       columns,
-      groupingKeys: [],
+      declaredGroupingKeys: [],
       renderedColumnKeys: ['region'],
     });
 
@@ -39,7 +39,7 @@ describe('hoistRenderedColumns', () => {
   it('ignores a rendered key the section does not list', () => {
     const result = hoistRenderedColumns<Row>({
       columns,
-      groupingKeys: ['region'],
+      declaredGroupingKeys: ['region'],
       renderedColumnKeys: ['region', 'not_listed'],
     });
 

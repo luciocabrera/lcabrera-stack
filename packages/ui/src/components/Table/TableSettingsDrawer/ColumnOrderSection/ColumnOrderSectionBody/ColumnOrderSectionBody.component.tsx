@@ -7,6 +7,7 @@ import {
   useGetColumnPinning,
   useGetGroupingKeys,
 } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
+import { resolveDeclaredGroupingKeys } from '#ui/components/Table/utils/resolveDeclaredGroupingKeys.util';
 
 import type { ColumnOrderSectionBodyProps } from './ColumnOrderSectionBody.types';
 
@@ -30,17 +31,21 @@ export const ColumnOrderSectionBody = ({
   const renderedColumnKeys = useGetRenderedColumnKeys();
   const reorderColumns = useReorderColumns();
 
+  const declaredGroupingKeys = resolveDeclaredGroupingKeys({
+    columns,
+    groupingKeys,
+  });
   const settingsColumns = filterSettingsColumns(columns);
   const allOrderedColumns = hoistRenderedColumns({
     columns: buildAllOrderedColumns({ columns: settingsColumns, columnsOrder }),
-    groupingKeys,
+    declaredGroupingKeys,
     renderedColumnKeys,
   });
 
   const draggableItems: readonly DraggableItem[] = createDraggableItems({
     allOrderedColumns,
     columnPinning,
-    groupingKeys,
+    declaredGroupingKeys,
     renderedColumnKeys: new Set(renderedColumnKeys),
     renderItemContent: (itemContentProps) => (
       <ColumnOrderItemContent {...itemContentProps} isBusy={isBusy} />

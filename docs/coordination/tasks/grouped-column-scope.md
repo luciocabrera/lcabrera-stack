@@ -20,6 +20,6 @@ the grouping decides which columns the grid shows, and the drawer shows the same
 
 ## Status / next
 
-- Current step: review round 2 — the Filters tab now reads the declared columns
+- Current step: review round 3 — the drawer resolves declared group keys, as the grid does
 - Blockers: none
 - Next: verifier + Copilot review

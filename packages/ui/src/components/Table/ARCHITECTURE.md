@@ -394,6 +394,15 @@ the two by hand. The drawer's own `useToggleColumnVisibility` reads `staticKeys`
 for the same reason it must: `normalizedColumns` no longer holds a column the
 grouping scoped out, so a lock read from there would silently stop answering.
 
+**The drawer decides "grouped" the way the grid does, from the declared keys.**
+`ColumnOrderSectionBody` resolves `resolveDeclaredGroupingKeys` once and hands
+the result to `hoistRenderedColumns` and `createDraggableItems`, and
+`useToggleColumnVisibility` resolves it for its own gate — so an applied
+grouping that names no declared column leaves the tab ordered, draggable and
+directly toggleable, which is what the grid is doing beside it. Only the
+key-cap count in `resolveColumnGroupingChoices` reads the raw applied list,
+because a cap is about the grouping that would be written.
+
 **The Filters tab reads the declared columns for the same reason, through
 `useGetDeclaredColumn`.** `FilterItem`, `FilterItemHeader`, `FilterInputs`,
 `SelectFilterInput` and `useAddFilterSection` all answer a question about the

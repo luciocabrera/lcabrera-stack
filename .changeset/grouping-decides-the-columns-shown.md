@@ -41,3 +41,10 @@ measures stays listed and removable while the grouping is applied, and adding on
 from the picker works for every column the picker offers. A filter restates the
 read rather than the layout, so it takes effect without waiting for the grouping
 to clear.
+
+An applied grouping that names no column the table declares — a shared link from
+a table with a different column set, or a hand-edited parameter — now leaves the
+settings drawer's Columns tab behaving exactly as an ungrouped one: rows in the
+consumer's own order, every row draggable, and a hidden column shown by ticking
+it rather than being asked which grouping role it should take. The grid already
+ignored such a grouping; the tab now agrees with it.

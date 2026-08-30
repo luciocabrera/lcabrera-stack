@@ -88,6 +88,24 @@ state — the same disagreement this decision removes. Both run one derivation
 over their own inputs, and the two agree exactly when the draft is the applied
 state: on open, and after Accept.
 
+**"A grouping is applied" means the same thing on both sides.** The scope and
+the hoist both resolve the applied keys against the declared columns first
+(`resolveDeclaredGroupingKeys`), because grouping is URL state and can name a
+column this route never declared — a link shared from a route with a different
+column set, or a hand-edited param. Every drawer answer that turns on whether a
+grouping is in effect resolves the same way: the question the `Show` toggle
+asks, the order the tab lists its rows in, and the refusal to drag. So a
+grouping naming only undeclared keys leaves the tab exactly as an ungrouped one
+leaves it — the grid is painting every column, and the drawer says so. Deciding
+it on the raw key list instead left a hidden column un-showable: ticking it was
+answered with a prompt that writes only the grouping, while the grid it was
+meant to rejoin was never scoped at all.
+
+**The key cap is the one count that stays on the applied keys.**
+`MAX_TABLE_GROUP_KEYS` is a fact about the grouping that would be written, and an
+undeclared key occupies a slot in it, so `resolveColumnGroupingChoices` counts
+the list as it stands rather than the declared subset of it.
+
 **The Filters tab reads the declared columns, not the painted ones.** Which
 columns the grid paints is a statement about the grid; whether a column can be
 filtered is a statement about the column, and the consumer's declaration is
