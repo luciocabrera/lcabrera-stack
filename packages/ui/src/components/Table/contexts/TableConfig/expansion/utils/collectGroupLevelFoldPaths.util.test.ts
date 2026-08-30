@@ -28,10 +28,7 @@ const groupRow = ({ isSubtotal = false, path }: GroupRowArgs): Row => ({
   [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, isSubtotal, path },
 });
 
-/**
- * A three-level rollup in the order rollup emits it — every subtotal after the
- * rows it totals (#570), the grand total last (ADR-065).
- */
+/** A three-level rollup in the order rollup emits it (#570), the grand total last. */
 const rollup: readonly Row[] = [
   groupRow({ path: pathOf('Elec', 'Phones', 'Retail') }),
   groupRow({ path: pathOf('Elec', 'Phones', 'Corporate') }),
@@ -50,103 +47,123 @@ const flat: readonly Row[] = [
 
 const NOTHING_COLLAPSED: ReadonlySet<string> = new Set<string>();
 
-type FoldPathsForArgs = {
+const PHONES = resolveGroupPathKey(pathOf('Elec', 'Phones'));
+const TABLETS = resolveGroupPathKey(pathOf('Elec', 'Tablets'));
+const ELEC = resolveGroupPathKey(pathOf('Elec'));
+
+const sorted = (paths: ReadonlySet<string>) =>
+  [...paths].toSorted((a, b) => a.localeCompare(b));
+
+type LevelArgs = {
+  readonly collapsedGroupPaths?: ReadonlySet<string>;
   readonly columnKey: string;
   readonly data?: readonly Row[];
 };
 
+const foldPathsFor = ({
+  collapsedGroupPaths = NOTHING_COLLAPSED,
+  columnKey,
+  data = rollup,
+}: LevelArgs) =>
+  sorted(
+    collectGroupLevelFoldPaths({
+      columnKey,
+      rowMeta: resolveTableGroupTree({ collapsedGroupPaths, data }).rowMeta,
+    }),
+  );
+
 /**
- * The foldable set is taken from the real tree rather than hand-written, so the
- * paths this selects are exactly the ones the chevrons are drawn from — which is
- * the whole property ADR-083 asks of it.
+ * What the chevrons drawn in one column would fold, read off the row metadata the
+ * grid paints from rather than re-sliced from the key list.
  */
-const foldPathsFor = ({ columnKey, data = rollup }: FoldPathsForArgs) => {
-  const { foldableGroupPaths } = resolveTableGroupTree({
-    collapsedGroupPaths: NOTHING_COLLAPSED,
+const chevronPathsFor = ({
+  collapsedGroupPaths = NOTHING_COLLAPSED,
+  columnKey,
+  data = rollup,
+}: LevelArgs) => {
+  const { rowMeta = [] } = resolveTableGroupTree({
+    collapsedGroupPaths,
     data,
   });
+  const paths = new Set<string>();
 
-  return [
-    ...collectGroupLevelFoldPaths({
-      columnKey,
-      data,
-      foldableGroupPaths,
-      groupingKeys: GROUPING_KEYS,
-    }),
-  ].toSorted((a, b) => a.localeCompare(b));
+  for (const meta of rowMeta) {
+    for (const disclosure of meta.levelDisclosures) {
+      if (disclosure.columnKey === columnKey)
+        paths.add(resolveGroupPathKey(disclosure.path));
+    }
+  }
+
+  return sorted(paths);
 };
 
 describe('collectGroupLevelFoldPaths', () => {
-  it('folds the level above the column, which is what removes its values', () => {
-    // `customerType` is the third key, so what has to close is every
-    // subcategory group: the customer-type rows are their descendants, and the
-    // subcategory subtotals survive to reopen them.
-    expect(foldPathsFor({ columnKey: 'customerType' })).toStrictEqual(
-      [
-        resolveGroupPathKey(pathOf('Elec', 'Phones')),
-        resolveGroupPathKey(pathOf('Elec', 'Tablets')),
-      ].toSorted((a, b) => a.localeCompare(b)),
+  it('names the groups the column itself states', () => {
+    expect(foldPathsFor({ columnKey: 'subcategory' })).toStrictEqual(
+      sorted(new Set([PHONES, TABLETS])),
     );
   });
 
-  it('never names the level the column itself states', () => {
-    // The discriminating half of the test above: folding `[Elec, Phones]`
-    // itself would take the subcategory row away too, which is the outcome the
-    // reader asked *not* to have.
-    expect(foldPathsFor({ columnKey: 'customerType' })).not.toContain(
-      resolveGroupPathKey(pathOf('Elec', 'Phones', 'Retail')),
-    );
+  it('never names the level above the column', () => {
+    expect(foldPathsFor({ columnKey: 'subcategory' })).not.toContain(ELEC);
   });
 
-  it('answers one level up for a middle key, not the deepest one', () => {
-    expect(foldPathsFor({ columnKey: 'subcategory' })).toStrictEqual([
-      resolveGroupPathKey(pathOf('Elec')),
-    ]);
+  it('names the outermost key’s own groups, which survive their fold', () => {
+    expect(foldPathsFor({ columnKey: 'category' })).toStrictEqual([ELEC]);
   });
 
-  it('offers nothing on the outermost key, where no row would survive', () => {
-    // ADR-083 read off the tree rather than spelled as an index check: the
-    // level above `category` is the root, which no row renders, so it never
-    // enters the foldable set in the first place.
-    expect(foldPathsFor({ columnKey: 'category' })).toStrictEqual([]);
+  it('names nothing on the innermost key, whose groups own no rows', () => {
+    expect(foldPathsFor({ columnKey: 'customerType' })).toStrictEqual([]);
   });
 
-  it('offers nothing on a column that is not an applied key', () => {
-    // And specifically does not read `slice(0, -1)` — "every entry but the
-    // last" — out of `indexOf`'s miss.
+  it('names nothing on a column that is not an applied key', () => {
     expect(foldPathsFor({ columnKey: 'total_amount' })).toStrictEqual([]);
   });
 
-  it('offers nothing under `flat`, where every level above is undrawn', () => {
-    // `[Elec, Phones]` is the parent of both rows and no row *is* it, so
-    // folding it would hide the group with nothing left to reopen it from.
+  it('names nothing under `flat`, where no level renders a row', () => {
     expect(
-      foldPathsFor({ columnKey: 'customerType', data: flat }),
+      foldPathsFor({ columnKey: 'subcategory', data: flat }),
     ).toStrictEqual([]);
   });
 
   it('names each group once however many rows sit inside it', () => {
-    // Two customer-type rows live under `[Elec, Phones]`; the write is a set of
-    // paths, not one entry per row.
     expect(
-      foldPathsFor({ columnKey: 'customerType' }).filter(
-        (pathKey) => pathKey === resolveGroupPathKey(pathOf('Elec', 'Phones')),
+      foldPathsFor({ columnKey: 'subcategory' }).filter(
+        (pathKey) => pathKey === PHONES,
       ),
     ).toHaveLength(1);
   });
 
-  it('ignores rows shallower than the level being folded', () => {
-    // The `[Elec]` subtotal is above this level. Slicing its path to depth two
-    // yields `[Elec]` — a real, foldable, and *wrong* group — so the guard has
-    // to skip the row rather than clamp it.
-    expect(foldPathsFor({ columnKey: 'customerType' })).not.toContain(
-      resolveGroupPathKey(pathOf('Elec')),
-    );
+  it('keeps naming a group it has already folded, so the fold can be undone', () => {
+    expect(
+      foldPathsFor({
+        collapsedGroupPaths: new Set([PHONES]),
+        columnKey: 'subcategory',
+      }),
+    ).toStrictEqual(sorted(new Set([PHONES, TABLETS])));
   });
 
   it('ignores rows that carry no group summary at all', () => {
     expect(
-      foldPathsFor({ columnKey: 'customerType', data: [...rollup, { id: 7 }] }),
-    ).toStrictEqual(foldPathsFor({ columnKey: 'customerType' }));
+      foldPathsFor({ columnKey: 'subcategory', data: [...rollup, { id: 7 }] }),
+    ).toStrictEqual(foldPathsFor({ columnKey: 'subcategory' }));
+  });
+
+  describe('agrees with the chevrons drawn in the same column', () => {
+    for (const columnKey of GROUPING_KEYS) {
+      it(`on ${columnKey}, with nothing folded`, () => {
+        expect(foldPathsFor({ columnKey })).toStrictEqual(
+          chevronPathsFor({ columnKey }),
+        );
+      });
+
+      it(`on ${columnKey}, with a middle group already folded`, () => {
+        const collapsedGroupPaths = new Set([PHONES]);
+
+        expect(foldPathsFor({ collapsedGroupPaths, columnKey })).toStrictEqual(
+          chevronPathsFor({ collapsedGroupPaths, columnKey }),
+        );
+      });
+    }
   });
 });

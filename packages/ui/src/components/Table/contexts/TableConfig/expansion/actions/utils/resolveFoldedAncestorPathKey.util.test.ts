@@ -45,7 +45,6 @@ const rows: readonly Row[] = [
 const berlinOpen = resolveGroupPathKey(pathOf('Berlin', 'Open'));
 const berlin = resolveGroupPathKey(pathOf('Berlin'));
 
-/** What "collapse the priority level" folds: every group one level above it. */
 const levelPaths: ReadonlySet<string> = new Set([berlinOpen]);
 
 const keyOf = (index: number) => {

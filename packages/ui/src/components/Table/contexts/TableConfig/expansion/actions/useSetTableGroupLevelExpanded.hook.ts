@@ -15,18 +15,10 @@ type SetTableGroupLevelExpandedArgs = {
   readonly isExpanded: boolean;
 };
 
-/**
- * Local, like the fold-all it narrows: expansion changes nothing server-side, so this
- * touches no URL param and triggers no revalidation (ADR-061).
- * **What it folds is the tree's own foldable set, filtered to one level** — the same
- * `foldableGroupPaths` every chevron is drawn from, so this can no more close a group the
- * grid refused to offer than "collapse all" can (ADR-083). Every path outside the level
- * is carried through untouched, which is what leaves the other levels' expansion alone.
- */
 export const useSetTableGroupLevelExpanded = <
   TData extends Record<string, unknown>,
 >() => {
-  const { columnsStore, expansionStore, groupingStore, metaStore } =
+  const { columnsStore, expansionStore, metaStore } =
     useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue<TData>();
   const { focusStore } = useTableFocusContextValue();
@@ -35,25 +27,17 @@ export const useSetTableGroupLevelExpanded = <
   return ({ columnKey, isExpanded }: SetTableGroupLevelExpandedArgs) => {
     const { collapsedGroupPaths } = expansionStore.get();
     const treeArgs = { data: dataStore.get().data };
-    const { foldableGroupPaths, rows } = resolveTableGroupTree({
+    const { rowMeta, rows } = resolveTableGroupTree({
       ...treeArgs,
       collapsedGroupPaths,
     });
-    const levelPaths = collectGroupLevelFoldPaths({
-      columnKey,
-      data: treeArgs.data,
-      foldableGroupPaths,
-      groupingKeys: groupingStore.get().keys,
-    });
+    const levelPaths = collectGroupLevelFoldPaths({ columnKey, rowMeta });
     const nextCollapsed = setCollapsedGroupLevel({
       collapsedGroupPaths,
       isCollapsed: !isExpanded,
       levelPaths,
     });
 
-    // Nothing at this level can change — the same set instance back. The early
-    // return is the action's half of the disabled control, so a click that
-    // slipped past the button writes no store either.
     if (nextCollapsed === collapsedGroupPaths) return;
 
     if (!isExpanded) {

@@ -66,15 +66,14 @@ than from `resolveColumnCapabilities` — `useTableGroupFoldAll` reads the same
 foldable set the per-row chevrons are drawn from (#774).
 
 `EXPAND_` and `COLLAPSE_GROUP_LEVEL_COMMAND` are the same act at one depth and
-sit on the other side of that line: they fold the level the open column states,
-so they **are** column commands and their ids carry the prefix (#1020). Their
-enablement still comes from the rows — `useTableGroupLevelFold` filters that same
-foldable set to the one depth — and so does whether they are rendered at all,
-which is the only place in this layer where the rows decide that. `isDisabled`
-therefore never reaches them from `resolveColumnCapabilities`: no column
-capability can answer "is this column an applied group key with a foldable level
-above it", and borrowing one that looks close would be the copy-paste this file
-warns about two paragraphs down.
+sit on the other side of that line: they fold the groups the open column states,
+so they **are** column commands and their ids carry the prefix (ADR-097). Their
+enablement still comes from the rows — `useTableGroupLevelFold` unions the
+disclosures the tree keys by that column — while whether they are rendered at all
+comes from the applied grouping keys. `isDisabled` therefore never reaches them
+from `resolveColumnCapabilities`: no column capability can answer "do this
+column's groups own rows right now", and borrowing one that looks close would be
+the copy-paste this file warns about two paragraphs down.
 
 Every consumer resolves its own capability and passes it as `isDisabled`, and
 **the capability is the one that governs that command, not the one its neighbour

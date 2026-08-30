@@ -742,9 +742,17 @@ describe('GroupActions', () => {
   });
 
   describe('folding one level from its column', () => {
-    it('offers both actions on an applied key that is not the outermost', () => {
+    it('offers both actions on every applied group key', () => {
       dataRef.current = rollupRows;
       groupingKeysRef.current = GROUP_FIXTURE_KEYS;
+
+      const outermost = render(
+        <GroupActions columnKey='city' onClose={mockOnClose} />,
+      );
+
+      expect(screen.getByText('Expand This Level')).not.toBeNull();
+      expect(screen.getByText('Collapse This Level')).not.toBeNull();
+      outermost.unmount();
 
       render(<GroupActions columnKey='status' onClose={mockOnClose} />);
 
@@ -752,22 +760,7 @@ describe('GroupActions', () => {
       expect(screen.getByText('Collapse This Level')).not.toBeNull();
     });
 
-    it('offers neither on the outermost key, where no row would survive', () => {
-      // ADR-083: the level above `city` is the root, which no row renders, so
-      // the fold could not be undone from the grid. Absent rather than
-      // disabled — it is not a state the reader can clear by clicking.
-      dataRef.current = rollupRows;
-      groupingKeysRef.current = GROUP_FIXTURE_KEYS;
-
-      render(<GroupActions columnKey='city' onClose={mockOnClose} />);
-
-      expect(screen.queryByText('Expand This Level')).toBeNull();
-      expect(screen.queryByText('Collapse This Level')).toBeNull();
-    });
-
     it('offers neither on a column that is not a group key', () => {
-      // The same grouped rows as the first case, so it is the column doing the
-      // work rather than the grid being ungrouped.
       dataRef.current = rollupRows;
       groupingKeysRef.current = GROUP_FIXTURE_KEYS;
 
@@ -777,26 +770,34 @@ describe('GroupActions', () => {
       expect(screen.queryByText('Collapse This Level')).toBeNull();
     });
 
-    it('offers neither under `flat`, where a fold could not be undone', () => {
-      // The same two key columns without the subtotal that renders `(Berlin)`.
+    it('leaves both inert on the innermost key, whose groups own no rows', () => {
+      dataRef.current = rollupRows;
+      groupingKeysRef.current = GROUP_FIXTURE_KEYS;
+
+      render(<GroupActions columnKey='status' onClose={mockOnClose} />);
+
+      expect(getButton('Collapse This Level').disabled).toBe(true);
+      expect(getButton('Expand This Level').disabled).toBe(true);
+    });
+
+    it('leaves both inert under `flat`, where a fold could not be undone', () => {
       dataRef.current = [
         groupRow({ path: pathOf('Berlin', 'Open') }),
         groupRow({ path: pathOf('Berlin', 'Shut') }),
       ];
       groupingKeysRef.current = GROUP_FIXTURE_KEYS;
 
-      render(<GroupActions columnKey='status' onClose={mockOnClose} />);
+      render(<GroupActions columnKey='city' onClose={mockOnClose} />);
 
-      expect(screen.queryByText('Collapse This Level')).toBeNull();
+      expect(getButton('Collapse This Level').disabled).toBe(true);
+      expect(getButton('Expand This Level').disabled).toBe(true);
     });
 
     it('leaves the whole-table pair standing wherever the level pair is not', () => {
-      // The two are different scopes of the same act, so withholding one must
-      // not take the other with it.
       dataRef.current = rollupRows;
       groupingKeysRef.current = GROUP_FIXTURE_KEYS;
 
-      render(<GroupActions columnKey='city' onClose={mockOnClose} />);
+      render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
 
       expect(screen.getByText('Expand All Groups')).not.toBeNull();
       expect(screen.getByText('Collapse All Groups')).not.toBeNull();
@@ -806,7 +807,7 @@ describe('GroupActions', () => {
       dataRef.current = rollupRows;
       groupingKeysRef.current = GROUP_FIXTURE_KEYS;
 
-      render(<GroupActions columnKey='status' onClose={mockOnClose} />);
+      render(<GroupActions columnKey='city' onClose={mockOnClose} />);
 
       const button = getButton('Collapse This Level');
 
@@ -815,7 +816,7 @@ describe('GroupActions', () => {
       fireEvent.click(button);
 
       expect(mockSetGroupLevelExpanded).toHaveBeenCalledWith({
-        columnKey: 'status',
+        columnKey: 'city',
         isExpanded: false,
       });
       expect(mockOnClose).toHaveBeenCalledTimes(1);
@@ -828,7 +829,7 @@ describe('GroupActions', () => {
         resolveGroupPathKey(pathOf('Berlin')),
       ]);
 
-      render(<GroupActions columnKey='status' onClose={mockOnClose} />);
+      render(<GroupActions columnKey='city' onClose={mockOnClose} />);
 
       expect(getButton('Collapse This Level').disabled).toBe(true);
     });
@@ -838,7 +839,7 @@ describe('GroupActions', () => {
       groupingKeysRef.current = GROUP_FIXTURE_KEYS;
 
       const { rerender } = render(
-        <GroupActions columnKey='status' onClose={mockOnClose} />,
+        <GroupActions columnKey='city' onClose={mockOnClose} />,
       );
 
       expect(getButton('Expand This Level').disabled).toBe(true);
@@ -846,12 +847,12 @@ describe('GroupActions', () => {
       collapsedGroupPathsRef.current = new Set([
         resolveGroupPathKey(pathOf('Berlin')),
       ]);
-      rerender(<GroupActions columnKey='status' onClose={mockOnClose} />);
+      rerender(<GroupActions columnKey='city' onClose={mockOnClose} />);
 
       fireEvent.click(getButton('Expand This Level'));
 
       expect(mockSetGroupLevelExpanded).toHaveBeenCalledWith({
-        columnKey: 'status',
+        columnKey: 'city',
         isExpanded: true,
       });
       expect(mockOnClose).toHaveBeenCalledTimes(1);

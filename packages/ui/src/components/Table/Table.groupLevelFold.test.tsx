@@ -35,22 +35,15 @@ import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
 import { TableBase } from '#ui/components/Table/TableBase';
 import { TableBody } from '#ui/components/Table/TableBody';
 
-/**
- * Folding one level of a grouping and leaving the rest alone (#1020), end to
- * end against real stores.
- *
- * The unit tests say which paths a level names. Only a whole grid can say what
- * the reader is left holding: that the outer levels and their subtotals are
- * still on screen, that a level folded from the menu reopens from the chevron
- * on the row that survived it, and that a collapse someone made themselves
- * outlives the action in both directions.
- */
 type TestRow = Record<string, unknown>;
 
 const ROW_HEIGHT = 40;
 const CONTAINER_HEIGHT = 400;
 
 const GROUPING_KEYS = ['status', 'customerType', 'priority'];
+
+/** Every key, plus a column that is no key at all — the withheld case. */
+const MENU_COLUMNS = [...GROUPING_KEYS, 'id'];
 
 const columns: TableColumn<TestRow>[] = [
   { isPrimaryKey: true, key: 'id', label: 'Id' },
@@ -210,7 +203,7 @@ const Harness = () => {
         >
           <TableWrapperContext value={{ containerRef, wrapperRef }}>
             <FocusReadout />
-            {GROUPING_KEYS.map((columnKey) => (
+            {MENU_COLUMNS.map((columnKey) => (
               <LevelFoldControl columnKey={columnKey} key={columnKey} />
             ))}
             <div data-testid='scroll-container' ref={setContainer}>
@@ -285,8 +278,8 @@ const enterGrid = async () => {
   await flushFrame();
 };
 
-/** What the grid draws once the priority level is folded away. */
-const WITHOUT_PRIORITY = [
+/** What the grid draws once the customer-type groups are folded. */
+const CUSTOMER_TYPE_FOLDED = [
   'Cancelled | Business total',
   'Retail total',
   'Cancelled total',
@@ -294,6 +287,27 @@ const WITHOUT_PRIORITY = [
   'Active total',
   'Grand total',
 ];
+
+/** And once the status groups are, from the outermost key’s own column. */
+const STATUS_FOLDED = ['Cancelled total', 'Active total', 'Grand total'];
+
+const openChevronIn = (index: number) =>
+  getRows()
+    .map((row) =>
+      cellOf({ index, row })?.querySelector(
+        '[data-testid="table-group-disclosure"][data-expanded="true"]',
+      ),
+    )
+    .find((chevron) => chevron !== null && chevron !== undefined);
+
+const foldEveryChevronIn = (index: number) => {
+  let chevron = openChevronIn(index);
+
+  while (chevron !== undefined) {
+    fireEvent.click(chevron);
+    chevron = openChevronIn(index);
+  }
+};
 
 describe('folding one group level from its column', () => {
   beforeEach(() => {
@@ -312,25 +326,61 @@ describe('folding one group level from its column', () => {
     vi.unstubAllGlobals();
   });
 
-  it('removes the values its column states and leaves every outer level', () => {
+  it('folds the groups its own column states, keeping that column’s rows', () => {
     render(<Harness />);
 
     expect(getRows()).toHaveLength(10);
 
-    fireEvent.click(control('collapse-priority'));
+    fireEvent.click(control('collapse-customerType'));
 
-    // The customer-type blocks and the status blocks are all still on screen
-    // with their subtotals; only the priority rows are gone. A collapse-all
-    // would have left three rows, and folding the level the column *is* rather
-    // than the one above it would have taken the customer-type rows too.
-    expect(drawnLabels()).toStrictEqual(WITHOUT_PRIORITY);
+    expect(drawnLabels()).toStrictEqual(CUSTOMER_TYPE_FOLDED);
   });
+
+  it('folds one group from the chevron in the column that states it', () => {
+    render(<Harness />);
+
+    fireEvent.click(
+      chevronIn({
+        index: CUSTOMER_CELL,
+        row: getRows()[0] as Element,
+      }) as Element,
+    );
+
+    expect(drawnLabels()).toStrictEqual([
+      'Cancelled | Business total',
+      'Retail | Critical',
+      'Retail total',
+      'Cancelled total',
+      'Active | Business | Critical',
+      'Business total',
+      'Active total',
+      'Grand total',
+    ]);
+  });
+
+  it.each(GROUPING_KEYS)(
+    'leaves the grid where every chevron in %s would leave it',
+    (columnKey) => {
+      const cellIndex = GROUPING_KEYS.indexOf(columnKey);
+      const fromMenu = render(<Harness />);
+
+      fireEvent.click(control(`collapse-${columnKey}`));
+
+      const byMenu = drawnLabels();
+
+      fromMenu.unmount();
+      render(<Harness />);
+      foldEveryChevronIn(cellIndex);
+
+      expect(byMenu).toStrictEqual(drawnLabels());
+    },
+  );
 
   it('restores exactly those rows when the same column expands', () => {
     render(<Harness />);
 
-    fireEvent.click(control('collapse-priority'));
-    fireEvent.click(control('expand-priority'));
+    fireEvent.click(control('collapse-customerType'));
+    fireEvent.click(control('expand-customerType'));
 
     expect(getRows()).toHaveLength(10);
   });
@@ -338,12 +388,7 @@ describe('folding one group level from its column', () => {
   it('reopens a folded level from the surviving row’s own chevron', () => {
     render(<Harness />);
 
-    fireEvent.click(control('collapse-priority'));
-
-    // Row 0 is now `Cancelled Business ·total·`, the row the fold left standing
-    // — and the control that undoes it sits in the cell for the level it holds.
-    // Without this the action would be a one-way trip out of the data for
-    // anyone who closed the menu (ADR-083).
+    fireEvent.click(control('collapse-customerType'));
     fireEvent.click(
       chevronIn({
         index: CUSTOMER_CELL,
@@ -366,8 +411,6 @@ describe('folding one group level from its column', () => {
   it('leaves another level’s expansion alone, in both directions', () => {
     render(<Harness />);
 
-    // `Cancelled` is folded by hand first, from the chevron on the row that
-    // states it.
     fireEvent.click(
       chevronIn({
         index: STATUS_CELL,
@@ -382,9 +425,8 @@ describe('folding one group level from its column', () => {
       'Grand total',
     ]);
 
-    fireEvent.click(control('collapse-priority'));
+    fireEvent.click(control('collapse-customerType'));
 
-    // The hand-made fold survives the level collapse...
     expect(drawnLabels()).toStrictEqual([
       'Cancelled total',
       'Active | Business total',
@@ -392,11 +434,8 @@ describe('folding one group level from its column', () => {
       'Grand total',
     ]);
 
-    fireEvent.click(control('expand-priority'));
+    fireEvent.click(control('expand-customerType'));
 
-    // ...and the level expand, which must not open it either. An action that
-    // wrote the whole collapsed set rather than its own level would have
-    // reopened `Cancelled` here.
     expect(drawnLabels()).toStrictEqual([
       'Cancelled total',
       'Active | Business | Critical',
@@ -406,39 +445,65 @@ describe('folding one group level from its column', () => {
     ]);
   });
 
-  it('folds the level above whichever column asks, not always the innermost', () => {
+  it('folds the groups of whichever column asks, not always the innermost', () => {
     render(<Harness />);
 
-    fireEvent.click(control('collapse-customerType'));
+    fireEvent.click(control('collapse-status'));
 
-    // `customerType` is the second key, so this folds the *status* groups —
-    // which is the same set of rows "Collapse All Groups" would leave, reached
-    // by naming one level rather than every level.
+    expect(drawnLabels()).toStrictEqual(STATUS_FOLDED);
+  });
+
+  it('leaves the outermost key’s own rows standing, with a live chevron', () => {
+    render(<Harness />);
+
+    fireEvent.click(control('collapse-status'));
+
+    expect(drawnLabels()).toStrictEqual(STATUS_FOLDED);
+
+    fireEvent.click(
+      chevronIn({
+        index: STATUS_CELL,
+        row: getRows()[0] as Element,
+      }) as Element,
+    );
+
     expect(drawnLabels()).toStrictEqual([
+      'Cancelled | Business | Critical',
+      'High',
+      'Business total',
+      'Retail | Critical',
+      'Retail total',
       'Cancelled total',
       'Active total',
       'Grand total',
     ]);
   });
 
-  it('offers nothing on the outermost key, nor on a column that is no key', () => {
+  it('offers the pair on every group key and on no other column', () => {
     render(<Harness />);
 
-    // Nothing above `status` renders a row, so a fold there could not be undone
-    // (ADR-083) — and `id` is not a group key at all.
-    expect(screen.queryByTestId('collapse-status')).toBeNull();
-    expect(screen.queryByTestId('expand-status')).toBeNull();
+    for (const columnKey of GROUPING_KEYS) {
+      expect(control(`collapse-${columnKey}`)).not.toBeNull();
+      expect(control(`expand-${columnKey}`)).not.toBeNull();
+    }
+
     expect(screen.queryByTestId('collapse-id')).toBeNull();
+    expect(screen.queryByTestId('expand-id')).toBeNull();
+  });
+
+  it('leaves both inert on the innermost key, whose groups own no rows', () => {
+    render(<Harness />);
+
+    expect(control('collapse-priority').disabled).toBe(true);
+    expect(control('expand-priority').disabled).toBe(true);
   });
 
   it('counts the surviving rows, not the loaded ones', () => {
     render(<Harness />);
-    fireEvent.click(control('collapse-priority'));
+    fireEvent.click(control('collapse-customerType'));
 
     const grid = screen.getByTestId('table');
 
-    // The header is row 1, so the count is the visible rows plus it — and the
-    // body's indices have to land inside it, ending exactly on it.
     expect(grid.getAttribute('aria-rowcount')).toBe('7');
     expect(
       getRows().map((row) => row.getAttribute('aria-rowindex')),
@@ -450,12 +515,11 @@ describe('folding one group level from its column', () => {
 
     expect(readBodyHeight()).toBe(`${10 * ROW_HEIGHT}px`);
 
-    fireEvent.click(control('collapse-priority'));
+    fireEvent.click(control('collapse-customerType'));
 
-    // `<tbody>`'s height and both virtualization spacers come from the same
-    // count, so a body still measured against the loaded rows would stand four
-    // rows taller than its contents.
-    expect(readBodyHeight()).toBe(`${WITHOUT_PRIORITY.length * ROW_HEIGHT}px`);
+    expect(readBodyHeight()).toBe(
+      `${CUSTOMER_TYPE_FOLDED.length * ROW_HEIGHT}px`,
+    );
   });
 
   it('leaves focus on the row the fold left standing', async () => {
@@ -464,17 +528,10 @@ describe('folding one group level from its column', () => {
     await enterGrid();
     await pressKey('ArrowDown');
 
-    // Focus is on `Cancelled / Business / High`, a priority row inside the
-    // block about to close — collapsing while focus sits on a surviving row
-    // would prove nothing.
     expect(getFocusTarget().rowIndex).toBe(1);
 
-    fireEvent.click(control('collapse-priority'));
+    fireEvent.click(control('collapse-customerType'));
 
-    // The claim: focus lands on that row's own customer-type group, the nearest
-    // ancestor this fold closed, at its new index. ADR-062's generic rule —
-    // nearest survivor at the same absolute index — would have answered the
-    // `Cancelled Retail` subtotal, in a different block.
     expect(getFocusTarget().rowIndex).toBe(0);
     expect(getFocusTarget().rowKey).toContain(
       resolveGroupPathKey(pathOf('Cancelled', 'Business')),
@@ -490,33 +547,27 @@ describe('folding one group level from its column', () => {
 
     const before = getFocusTarget();
 
-    // Row 2 is the `Cancelled Business` subtotal — the group this fold closes,
-    // whose own row a collapse never hides (ADR-067).
     expect(before.rowKey).toContain(
       resolveGroupPathKey(pathOf('Cancelled', 'Business')),
     );
 
-    fireEvent.click(control('collapse-priority'));
+    fireEvent.click(control('collapse-customerType'));
 
-    // Nothing is handed anywhere: the row the reader was on is still drawn, so
-    // the action must not relocate focus to an ancestor it did not need to.
     expect(getFocusTarget()).toStrictEqual(before);
   });
 
   it('stops offering each direction once it would do nothing', () => {
     render(<Harness />);
 
-    expect(control('collapse-priority').disabled).toBe(false);
-    expect(control('expand-priority').disabled).toBe(true);
-
-    fireEvent.click(control('collapse-priority'));
-
-    expect(control('collapse-priority').disabled).toBe(true);
-    expect(control('expand-priority').disabled).toBe(false);
-
-    // The other level is untouched by either, which is what makes the pair
-    // per-level rather than a second name for the whole-table pair.
     expect(control('collapse-customerType').disabled).toBe(false);
     expect(control('expand-customerType').disabled).toBe(true);
+
+    fireEvent.click(control('collapse-customerType'));
+
+    expect(control('collapse-customerType').disabled).toBe(true);
+    expect(control('expand-customerType').disabled).toBe(false);
+
+    expect(control('collapse-status').disabled).toBe(false);
+    expect(control('expand-status').disabled).toBe(true);
   });
 });

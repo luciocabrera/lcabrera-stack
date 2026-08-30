@@ -74,20 +74,21 @@ every per-row chevron is drawn from, so a disabled "Collapse All" means exactly
 for the two answers to drift apart in.
 
 `useTableGroupLevelFold` is the same wiring for "Expand This Level" and
-"Collapse This Level" (#1020), which fold the groups one level **above** the
-column whose menu is open — the level that column states. It reads the same
-foldable set and filters it to that one depth, so the property above still
-holds: an action here can close only what a chevron on screen would close.
+"Collapse This Level", which fold **the groups the open column states** — every
+group at once where a chevron in that column folds one (ADR-097). It does not
+re-derive which those are: it takes the level disclosures the tree already keys
+by column and unions the ones this column carries, so the menu and the chevrons
+answer from one derivation rather than two that agree by arithmetic.
 
-Its third answer, `hasGroupLevel`, is what decides whether the two items are
-rendered at all, and it is deliberately the same derivation rather than a
-separate predicate: the level's fold set is empty on the outermost key (nothing
-above it renders a row), on a column that is no group key, and on a `flat`
-result — three cases that need no naming because the tree already answers all of
-them (ADR-083). The pair is **withheld** rather than disabled there, unlike the
-whole-table pair beside it, for the reason the aggregation block is withheld: no
-click can move a column into being a group key, so an inert item would only ask
-the reader to keep trying.
+Its third answer, `hasGroupLevel`, decides whether the two items are rendered at
+all, and it asks a different question from the enabled states: is this column an
+applied group key. A column that is none is **withheld**, for the reason the
+aggregation block is — no click here can make a column a group key. A key whose
+groups own no rows is **disabled** instead, because that is a state the reader
+can clear: the innermost key gains a fold the moment a deeper key is applied or
+a group's rows are drilled into. Under `flat` nothing is foldable at all, so
+every key column shows the pair inert, which is what ADR-083 already says the
+whole-table pair does there.
 
 ## useColumnResize
 

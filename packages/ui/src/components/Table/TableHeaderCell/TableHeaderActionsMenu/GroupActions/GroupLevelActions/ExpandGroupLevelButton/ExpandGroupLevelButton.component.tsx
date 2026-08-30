@@ -7,12 +7,6 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 
 import type { ExpandGroupLevelButtonProps } from './ExpandGroupLevelButton.types';
 
-/**
- * "Expand This Level" item: reopens the groups this column's level was folded into,
- * disabled while none of them is folded.
- * Every path outside that level is left as it is, so a level opened here does not reopen
- * one the reader closed themselves.
- */
 export const ExpandGroupLevelButton = ({
   columnKey,
   onClose,
