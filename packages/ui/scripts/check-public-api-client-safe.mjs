@@ -6,11 +6,15 @@
  * Two checks, because the first one alone was not enough:
  *
  *  1. **Import graph.** Walk `src/public-api.ts` through its relative imports
- *     and fail on any `node:*` specifier.
+ *     and fail on any `node:` specifier.
  *
- *  2. **Dependency closure.** For every `@repo/*` package in this package's
- *     runtime `dependencies`, scan that package's whole source for `node:*`
- *     and fail if it has any.
+ *  2. **Dependency closure.** For every workspace package in this package's
+ *     runtime `dependencies`, scan that package's whole source for `node:`
+ *     specifiers and fail if it has any. Which dependencies those are, and which
+ *     directory each one lives in, are answered by the workspace roster rather
+ *     than by the shape of the package name: a name-prefix filter stopped
+ *     matching anything at the npm scope rename (ADR-040) and this half went
+ *     quiet with no edit and no failing test (#1010).
  *
  * Check 2 is the one that matters and it did not exist. Check 1 only followed
  * paths starting with `.`, so it never crossed a package boundary: it reported
@@ -22,7 +26,11 @@
  *
  * The invariant check 2 encodes: **a client-safe package may only depend on
  * workspace packages that are themselves client-safe.** No denylist of "server"
- * package names is needed — containing a `node:*` import is the signal.
+ * package names is needed — reaching for a `node:` builtin is the signal.
+ *
+ * A scan that selected nothing, or that placed a dependency in a directory with
+ * no source under it, exits non-zero too: a run that opened no file otherwise
+ * prints exactly what a run that opened every file and found nothing prints.
  *
  * Third-party dependencies are deliberately not scanned. `@react-router/node`
  * is a legitimate runtime dependency here, reached only through the SSR-only
@@ -33,187 +41,35 @@
  * first.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const uiRootDir = resolve(__dirname, '..');
-const publicApiFilePath = resolve(uiRootDir, 'src/public-api.ts');
-const workspacePackagesDir = resolve(uiRootDir, '..');
-const SOURCE_FILE_PATTERN = /\.(?:tsx?|mjs|js)$/;
+import {
+  buildWorkspaceDirectoryIndex,
+  collectClientSafetyReport,
+} from './client-safety.mjs';
 
-// Every junction between two quantifiers here is over disjoint character sets,
-// which is what keeps the scan linear.
-//
-// An earlier pass fixed only half of this. It replaced a lazy `[^'"\n]+?` beside
-// a greedy `\s+` with a single greedy `[^'"\n]+` and one `\s` separator — but
-// left the keyword's own `\s+` sitting directly in front of `[^'"\n]+`, and `\s`
-// is a subset of `[^'"\n]`. So a line like `export` followed by a long run of
-// spaces still split ambiguously between the two quantifiers and backtracked
-// quadratically. Anchoring the pre-`from` segment on `\S` removes that overlap.
-//
-// The strings matched are unchanged: the preceding `\s+` is greedy, so the next
-// character can never have been whitespace anyway.
-const importExportPattern =
-  /(?:import|export)\s+(?:type\s+)?(?:\S[^'"\n]*\sfrom\s+)?['"]([^'"\n]+)['"]/g;
-
-// `matchAll` iterates against an internal clone of the regex, so the module-level
-// /g pattern's `lastIndex` is never advanced and needs no reset between calls.
-const collectStaticSources = (fileText) =>
-  [...fileText.matchAll(importExportPattern)].map((match) => match[1]);
-
-const collectLocalDependencyPaths = ({ fromFilePath, sources }) => {
-  return sources
-    .filter((source) => source.startsWith('.'))
-    .map((source) => resolveLocalModuleFilePath(fromFilePath, source))
-    .filter((dependencyPath) => dependencyPath !== null);
-};
-
-const resolveLocalModuleFilePath = (fromFilePath, source) => {
-  const basePath = resolve(dirname(fromFilePath), source);
-  const candidates = [
-    `${basePath}.ts`,
-    `${basePath}.tsx`,
-    `${basePath}.js`,
-    `${basePath}.mjs`,
-    resolve(basePath, 'index.ts'),
-    resolve(basePath, 'index.tsx'),
-    resolve(basePath, 'index.js'),
-    resolve(basePath, 'index.mjs'),
-  ];
-
-  return (
-    candidates.find(
-      (candidatePath) =>
-        existsSync(candidatePath) && statSync(candidatePath).isFile(),
-    ) ?? null
-  );
-};
-
-const collectStaticDependencies = (filePath, seen = new Set()) => {
-  if (seen.has(filePath)) {
-    return [];
-  }
-
-  seen.add(filePath);
-
-  const fileText = readFileSync(filePath, 'utf8');
-  const sources = collectStaticSources(fileText);
-  const directDependencies = sources.map((source) => ({ filePath, source }));
-  const localDependencyPaths = collectLocalDependencyPaths({
-    fromFilePath: filePath,
-    sources,
-  });
-
-  const nestedDependencies = localDependencyPaths.flatMap((dependencyPath) =>
-    collectStaticDependencies(dependencyPath, seen),
-  );
-
-  return [...directDependencies, ...nestedDependencies];
-};
-
-/** Every source file under a directory, recursively (node_modules excluded). */
-const collectSourceFiles = (directoryPath) => {
-  if (!existsSync(directoryPath)) {
-    return [];
-  }
-
-  return readdirSync(directoryPath, { withFileTypes: true }).flatMap(
-    (entry) => {
-      const entryPath = join(directoryPath, entry.name);
-
-      if (entry.isDirectory()) {
-        return entry.name === 'node_modules'
-          ? []
-          : collectSourceFiles(entryPath);
-      }
-
-      return SOURCE_FILE_PATTERN.test(entry.name) ? [entryPath] : [];
-    },
-  );
-};
-
-/** The `@repo/*` runtime dependencies declared by a package.json. */
-const collectWorkspaceDependencyNames = (packageJsonPath) => {
-  const manifest = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-
-  return Object.keys(manifest.dependencies ?? {}).filter((name) =>
-    name.startsWith('@repo/'),
-  );
-};
-
-/**
- * Server-only imports anywhere in a workspace dependency's own source. A
- * package that reaches for `node:*` cannot be safely bundled for the browser,
- * so depending on it makes this package server-only too.
- */
-const collectServerOnlyUsage = (workspacePackageName) => {
-  const packageDirName = workspacePackageName.replace('@repo/', '');
-  const sourceDir = resolve(workspacePackagesDir, packageDirName, 'src');
-
-  return collectSourceFiles(sourceDir).flatMap((filePath) =>
-    collectStaticSources(readFileSync(filePath, 'utf8'))
-      .filter((source) => source.startsWith('node:'))
-      .map((source) => ({ filePath, source, workspacePackageName })),
-  );
-};
-
-const formatGraphViolations = (violations) =>
-  violations.length === 0
-    ? []
-    : [
-        '',
-        'Server-only imports in the public API graph — remove the SSR-only',
-        'exports from the root barrel and use @lcabrera/ui/server:',
-        ...violations.map(
-          ({ filePath, source }) => `- ${filePath} imports ${source}`,
-        ),
-      ];
-
-const formatDependencyViolations = (violations) =>
-  violations.length === 0
-    ? []
-    : [
-        '',
-        'Workspace dependencies that are not client-safe — a client-safe package',
-        'may only depend on client-safe workspace packages, so move the',
-        'server-only half out or depend on a narrower package:',
-        ...violations.map(
-          ({ filePath, source, workspacePackageName }) =>
-            `- ${workspacePackageName} is a dependency, and ${filePath} imports ${source}`,
-        ),
-      ];
-
-/** Pure: every violation, in report order. Empty means client-safe. */
-const collectViolationReport = () => {
-  const graphViolations = collectStaticDependencies(publicApiFilePath).filter(
-    ({ source }) => source.startsWith('node:'),
-  );
-  const dependencyViolations = collectWorkspaceDependencyNames(
-    resolve(uiRootDir, 'package.json'),
-  ).flatMap(collectServerOnlyUsage);
-
-  return [
-    ...formatGraphViolations(graphViolations),
-    ...formatDependencyViolations(dependencyViolations),
-  ];
-};
+const uiRootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = resolve(uiRootDir, '..', '..');
 
 const main = () => {
-  const reportLines = collectViolationReport();
+  const { reportLines, scannedPackageNames } = collectClientSafetyReport({
+    manifest: JSON.parse(
+      readFileSync(resolve(uiRootDir, 'package.json'), 'utf8'),
+    ),
+    publicApiFilePath: resolve(uiRootDir, 'src/public-api.ts'),
+    workspaceDirectories: buildWorkspaceDirectoryIndex(repoRoot),
+  });
 
   if (reportLines.length === 0) {
     console.log(
-      'PASS: public API graph and its workspace dependencies are client-safe.',
+      `PASS: the public API graph, and the source of ${scannedPackageNames.join(', ')}, are client-safe.`,
     );
     return;
   }
 
-  console.error(
-    'FAIL: packages/ui/src/public-api.ts leaks server-only dependencies.',
-  );
+  console.error('FAIL: packages/ui is not verified client-safe.');
   console.error(reportLines.join('\n'));
   process.exitCode = 1;
 };
