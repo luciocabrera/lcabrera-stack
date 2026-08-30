@@ -46,12 +46,18 @@
  * commit's analysis isn't accepted; on timeout the check is skipped, not failed,
  * so Sonar latency never blocks an author. `--require-analysis` turns that skip
  * into a failure, for the one context where nothing else is looking afterwards:
- * a merge-queue build, which is the last word before the merge.
+ * a merge-queue build, which is the last word before the merge. It IMPLIES
+ * `--require-token`, because the tokenless skip below returns before any
+ * analysis is looked for — without the implication, the flag that means
+ * "nothing else will read Sonar for this change" still exits 0 on a run that
+ * read nothing at all.
  *
- * Exit codes: 0 = report written / gate OK (or skipped when no token, or on a
- *             wait timeout without --require-analysis), 1 = gate failing, new
- *             issues (--fail-on-issues), no analysis under --require-analysis,
- *             analysis failed, fetch error, or bad arguments.
+ * Exit codes: 0 = report written / gate OK (or skipped when there is no token
+ *             and neither --require-token nor --require-analysis was passed, or
+ *             on a wait timeout without --require-analysis), 1 = gate failing,
+ *             new issues (--fail-on-issues), no token under --require-token,
+ *             no analysis under --require-analysis, analysis failed, fetch
+ *             error, or bad arguments.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -123,7 +129,10 @@ const parseArgs = (argv) => {
       );
     }
   }
-  return args;
+  return {
+    ...args,
+    requireToken: args.requireToken || args.requireAnalysis,
+  };
 };
 
 /** Current branch from `.git/HEAD` — filesystem only, no subprocess (S4036). */
@@ -377,8 +386,9 @@ const main = async () => {
       console.error(
         'SONAR_TOKEN is required in this context but was not provided — ' +
           'refusing to report a gate as passing when it never ran. ' +
-          'Pass --require-token only where the secret is available ' +
-          '(same-repo pull requests); fork PRs must omit it.',
+          'Every run has the secret except a pull request from a fork, which ' +
+          'is the one lane that must omit --require-token (and --require-' +
+          'analysis, which implies it).',
       );
       process.exitCode = 1;
     }

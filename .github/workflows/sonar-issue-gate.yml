@@ -6,10 +6,10 @@ name: Sonar Issue Gate
 # app reports and the new *code smells* that gate lets through (assigning a
 # stricter custom gate is a paid feature). `--wait` polls the Compute Engine until
 # THIS target's analysis has finished (Automatic Analysis runs async, in parallel
-# with CI), so it never races. Fork PRs get no secrets, so the script skips there
-# and the job stays green — but on a same-repo run a missing token FAILS
-# (--require-token) instead of reporting this required check green without having
-# run.
+# with CI), so it never races. A pull request FROM A FORK gets no secrets, so the
+# script skips there and the job stays green — everywhere else a missing token
+# FAILS (--require-token) instead of reporting this required check green without
+# having run.
 #
 # It answers for a pull request inside the merge queue as well. SonarCloud
 # analyses `main` and pull requests and nothing else — there is no scanner in this
@@ -138,12 +138,22 @@ jobs:
         run: |
           SINCE="$(gh api "repos/$GITHUB_REPOSITORY/commits/$PR_HEAD_SHA" --jq '.commit.committer.date')"
           echo "PR #$PR_NUMBER head $PR_HEAD_SHA committed at $SINCE"
-          # --require-token on same-repo runs only: there the secret IS available,
-          # so a missing one is a misconfiguration and must fail rather than
-          # report this required check green without ever running. Fork PRs get
-          # no secrets by design, so they omit it and still skip cleanly.
+          # --require-token wherever the secret IS available: there a missing one
+          # is a misconfiguration and must fail rather than report this required
+          # check green without ever running.
+          #
+          # Availability is a property of the RUN, not of the pull request.
+          # GitHub withholds secrets from "a workflow triggered from a forked
+          # repository", and a merge group is not one: the queue builds it on a
+          # `gh-readonly-queue/…` branch of THIS repository, so a queue run has
+          # the full secret set even for a queued fork pull request. Reading
+          # PR_IS_FORK alone would drop the flag there, where a missing secret
+          # takes sonar-report.mjs's tokenless early return — which precedes
+          # --require-analysis — and reports this required check green having
+          # read nothing, in front of the merge. So only a fork `pull_request`
+          # omits it, and any event added later fails closed.
           FLAGS=()
-          if [ "$PR_IS_FORK" != "true" ]; then
+          if [ "$EVENT_NAME" != "pull_request" ] || [ "$PR_IS_FORK" != "true" ]; then
             FLAGS+=(--require-token)
           fi
           # --require-analysis in the queue only. On a pull request a Sonar

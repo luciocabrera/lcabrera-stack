@@ -78,8 +78,13 @@ per-workflow copy:
   reads the pull request through the API, and exports `BRANCH_NAME`, `PR_TITLE`,
   `PR_BODY`, `PR_BASE`, `PR_NUMBER`, `PR_HEAD_SHA`, `PR_IS_FORK`,
   `RANGE_BASE_SHA` and `RANGE_HEAD_SHA`. It **fails** when it cannot resolve one:
-  a gate that cannot name its subject must not fall back to a default. The
-  decisions are `scripts/lib/merge-queue.mjs` and are unit-tested.
+  a gate that cannot name its subject must not fall back to a default. It fails
+  the same way on a range that spans nothing — one side absent, or both the same
+  commit — because that is not a smaller check but a green one:
+  `git rev-list --no-merges A..A` walks no commit, so the commit-message gate
+  exits 0 having validated none, and `git diff A A` is empty, which the Sonar
+  gate reads as "no analysable file changed" and skips. The decisions are
+  `scripts/lib/merge-queue.mjs` and are unit-tested.
 
 Two gates need more than a base.
 
@@ -99,6 +104,26 @@ latency spike skips the check rather than blocking an author, and the queue buil
 catches whatever that let through — but in the queue a skip would be the last
 word before the merge, so the queue run passes `--require-analysis` and a missing
 analysis fails.
+
+## A queue run has this repository's secrets
+
+Secrets are withheld from "a workflow triggered from a forked repository". **A
+merge group is not one**: the queue builds it on a `gh-readonly-queue/…` branch
+of this repository, so a queue run gets the full secret set — and a
+`GITHUB_TOKEN` that can write — even when the pull request it answers for came
+from a fork. `copilot-review-gate.yml` depends on that to publish its status
+there at all.
+
+So `PR_IS_FORK` says where the pull request came from; it does not say whether
+this run holds a token, and using it for that in the queue is a silent green.
+Two things stop it: `sonar-issue-gate.yml` passes `--require-token` on every
+event except a fork `pull_request`, and `--require-analysis` implies
+`--require-token` inside `sonar-report.mjs` — the tokenless early return comes
+before any analysis is looked for, so on its own the flag that means "nothing
+else will read Sonar for this change" still exits 0 on a run that read nothing.
+A missing or rotated `SONAR_TOKEN` therefore fails the queue build instead of
+reporting a required check green in front of the merge. `scripts/sonar-report.test.mjs`
+pins both outcomes.
 
 ## Two answers this repository made explicit
 

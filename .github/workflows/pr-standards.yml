@@ -77,10 +77,20 @@ jobs:
         # group's parent..the merge group, which walks this entry's own commits
         # and none of the entries ahead of it — each of those is validated by its
         # own build.
+        #
+        # The walk is captured and its status checked before the loop, never run
+        # inside `$( )` in the `for`: a failed rev-list there expands to nothing,
+        # the loop body never runs, and the step exits 0 having validated no
+        # commit at all — a required check reporting green over a range it could
+        # not read.
         run: |
           set -o pipefail
+          if ! SHAS="$(git rev-list --no-merges "$RANGE_BASE_SHA..$RANGE_HEAD_SHA")"; then
+            echo "::error::cannot walk $RANGE_BASE_SHA..$RANGE_HEAD_SHA — refusing to report a pass over commits that were never read"
+            exit 1
+          fi
           status=0
-          for sha in $(git rev-list --no-merges "$RANGE_BASE_SHA..$RANGE_HEAD_SHA"); do
+          for sha in $SHAS; do
             # By path, not through the task runner or a bin: this workflow
             # runs without installing, and these gates import nothing outside
             # node builtins and their own siblings so they need no install.

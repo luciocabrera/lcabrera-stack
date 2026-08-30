@@ -8,7 +8,7 @@ area:
   - .github/workflows/**
   - scripts/pr-queue-operator.mjs
   - scripts/resolve-subject-pr.mjs
-  - scripts/sonar-report.mjs
+  - scripts/sonar-report*
   - scripts/copilot-review-status.mjs
   - scripts/lib/pr-queue-*
   - scripts/lib/merge-queue*
@@ -39,7 +39,8 @@ blocks every merge.
 
 ## Status / next
 
-- Current step: implementation complete, gate running
+- Current step: review round 2 — the merge-queue lane's secret predicate and the
+  commit range it hands the gates
 - Blockers: none. The `docs/decisions/**` overlap warning against
   grouped-column-scope (#1033) is real and already resolved by content: that
   branch took ADR-096, so this one is ADR-097. The glob here is a single file and

@@ -1,8 +1,9 @@
 /**
  * The cases here are the ones that would let a merge-group run report green
  * having checked nothing: a ref that names no pull request, an event with no
- * pull request in it at all, and a title or body carrying the shape that would
- * inject a second variable into `$GITHUB_ENV`.
+ * pull request in it at all, a commit range that spans nothing, and a title or
+ * body carrying the shape that would inject a second variable into
+ * `$GITHUB_ENV`.
  */
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -97,6 +98,45 @@ describe('subjectRequest', () => {
       '`push`',
     );
   });
+
+  it('refuses a merge group whose range has collapsed to one commit', () => {
+    const request = subjectRequest({
+      eventName: 'merge_group',
+      payload: {
+        merge_group: {
+          base_sha: 'group1',
+          head_ref: QUEUE_REF,
+          head_sha: 'group1',
+        },
+      },
+    });
+    expect(request.error).toContain('spans no commit');
+    expect(request.range).toBe(undefined);
+  });
+
+  it('refuses a merge group whose payload carries no base commit', () => {
+    const request = subjectRequest({
+      eventName: 'merge_group',
+      payload: { merge_group: { head_ref: QUEUE_REF, head_sha: 'group1' } },
+    });
+    expect(request.error).toContain('(absent)..group1');
+    expect(request.range).toBe(undefined);
+  });
+
+  it('refuses a pull request whose base and head are the same commit', () => {
+    expect(
+      subjectRequest({
+        eventName: 'pull_request',
+        payload: {
+          pull_request: {
+            base: { sha: 'same1' },
+            head: { sha: 'same1' },
+            number: 42,
+          },
+        },
+      }).error,
+    ).toContain('spans no commit');
+  });
 });
 
 describe('statusSha', () => {
@@ -145,7 +185,7 @@ describe('subjectEnv', () => {
     });
   });
 
-  it('reports a fork, so a tokenless context is not asked for a secret', () => {
+  it('reports where the pull request came from, which is not whether this run has secrets', () => {
     expect(
       subjectEnv({
         pullRequest: {
@@ -156,6 +196,26 @@ describe('subjectEnv', () => {
         repository: 'owner/repo',
       }).PR_IS_FORK,
     ).toBe('true');
+  });
+
+  it('throws rather than exporting a range that spans no commit', () => {
+    expect(() =>
+      subjectEnv({
+        pullRequest,
+        range: { baseSha: 'same1', headSha: 'same1' },
+        repository: 'owner/repo',
+      }),
+    ).toThrow(/spans no commit/u);
+  });
+
+  it('throws rather than exporting a range with no base', () => {
+    expect(() =>
+      subjectEnv({
+        pullRequest,
+        range: { headSha: 'head1' },
+        repository: 'owner/repo',
+      }),
+    ).toThrow(/spans no commit/u);
   });
 });
 

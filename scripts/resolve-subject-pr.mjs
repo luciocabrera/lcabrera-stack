@@ -14,11 +14,15 @@
  * decisions are `scripts/lib/merge-queue.mjs`; the queue itself is
  * `docs/tooling/merge-queue.md`.
  *
+ * `PR_IS_FORK` says where the pull request came from. It does NOT say whether
+ * this run has the repository's secrets: a merge-queue build runs on a branch
+ * of this repository and gets them all, even for a queued fork pull request.
+ *
  * Usage (in a workflow step, with GH_TOKEN set):
  *   node scripts/resolve-subject-pr.mjs
  *
  * Exit codes: 0 = the environment was written, 1 = no pull request could be
- * resolved, or it could not be read.
+ * resolved, its commit range spans no commit, or it could not be read.
  */
 import { randomUUID } from 'node:crypto';
 import { appendFileSync, readFileSync } from 'node:fs';
@@ -56,7 +60,7 @@ const main = () => {
   });
   if (request.error !== undefined) {
     process.stderr.write(
-      `resolve-subject-pr: ${request.error}.\nRefusing to continue: a gate that cannot name its subject would check nothing and report green.\n`,
+      `resolve-subject-pr: ${request.error}.\nRefusing to continue: a gate that cannot name its subject, or the range it must read, would check nothing and report green.\n`,
     );
     process.exitCode = 1;
     return;
