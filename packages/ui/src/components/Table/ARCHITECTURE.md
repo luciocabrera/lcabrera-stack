@@ -394,6 +394,14 @@ the two by hand. The drawer's own `useToggleColumnVisibility` reads `staticKeys`
 for the same reason it must: `normalizedColumns` no longer holds a column the
 grouping scoped out, so a lock read from there would silently stop answering.
 
+**The Filters tab reads the declared columns for the same reason, through
+`useGetDeclaredColumn`.** `FilterItem`, `FilterItemHeader`, `FilterInputs`,
+`SelectFilterInput` and `useAddFilterSection` all answer a question about the
+column the consumer declared, not about the one the grid paints, so a filter on
+a column the grouping neither keys nor measures stays listed and removable and
+the picker's offer stays honourable — a filter restates the read rather than the
+layout, so it applies while the grouping is on.
+
 Sorting is the third edge and it is handled server-side, because a measure sort
 is legitimate on the grouped read — `toGroupSort` maps it onto the aggregate's
 alias — and meaningless on any ungrouped one. `toDrillRead` drops measure terms

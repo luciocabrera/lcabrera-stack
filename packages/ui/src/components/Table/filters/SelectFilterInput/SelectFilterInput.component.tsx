@@ -5,7 +5,7 @@ import type { PrefetchCache } from '#ui/types/ui.types';
 
 import { useFetchFilterData } from '#ui/components/Table/contexts/FiltersData/filters/actions';
 import { useGetFilterData } from '#ui/components/Table/contexts/FiltersData/filters/selectors';
-import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetDeclaredColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { VirtualSelect } from '#ui/components/VirtualSelect';
 import { resolveFilterOptionsDescriptor } from '#ui/utils/filters/resolveFilterOptionsDescriptor.util';
 
@@ -19,7 +19,7 @@ export const SelectFilterInput = <TData,>({
   onChange,
   shouldFillHeight = false,
 }: SelectFilterInputProps<TData>) => {
-  const column = useGetNormalizedColumn<TData>(columnKey);
+  const column = useGetDeclaredColumn<TData>(columnKey);
   const filterData = useGetFilterData<TData>(columnKey);
 
   const prefetchRef = useRef<PrefetchCache<FilterOptionsResponse>>({
@@ -37,14 +37,14 @@ export const SelectFilterInput = <TData,>({
   });
 
   const handleFetchInitial = async () => {
-    if (!column.filterOptionsDescriptor) return;
+    if (!column?.filterOptionsDescriptor) return;
     await fetchInitial(
       resolveFilterOptionsDescriptor(column.filterOptionsDescriptor),
     );
   };
 
   const handleFetchMore = async () => {
-    if (!column.filterOptionsDescriptor) return;
+    if (!column?.filterOptionsDescriptor) return;
     await fetchMore(
       resolveFilterOptionsDescriptor(column.filterOptionsDescriptor),
     );

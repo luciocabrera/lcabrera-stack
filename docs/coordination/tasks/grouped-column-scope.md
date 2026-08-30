@@ -8,7 +8,7 @@ area:
   - packages/ui/src/components/Table/**
   - docs/decisions/**
 started: 2026-08-28
-updated: 2026-08-28
+updated: 2026-08-30
 plan: (none)
 pr: 1033
 issue: #1019
@@ -20,6 +20,6 @@ the grouping decides which columns the grid shows, and the drawer shows the same
 
 ## Status / next
 
-- Current step: implemented, gate green, PR ready for review
+- Current step: review round 2 — the Filters tab now reads the declared columns
 - Blockers: none
 - Next: verifier + Copilot review

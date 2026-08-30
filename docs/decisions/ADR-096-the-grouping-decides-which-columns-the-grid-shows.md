@@ -88,6 +88,21 @@ state — the same disagreement this decision removes. Both run one derivation
 over their own inputs, and the two agree exactly when the draft is the applied
 state: on open, and after Accept.
 
+**The Filters tab reads the declared columns, not the painted ones.** Which
+columns the grid paints is a statement about the grid; whether a column can be
+filtered is a statement about the column, and the consumer's declaration is
+where that lives. So every surface answering a filter question — the guard that
+decides whether an active filter is listed, the label its row draws, the inputs
+it renders, and the column the Add button resolves — reads
+`useGetDeclaredColumn` rather than the painted `normalizedColumns`. Taking them
+from the painted list instead has two reachable ends, both while a grouping is
+applied and both on a column it neither keys nor measures: an existing filter
+vanishes from the list while it stays on the query, so the only control that
+would remove it is gone until the grouping clears; and the picker keeps offering
+the column while the Add button resolves nothing and silently does nothing. The
+picker and the add path now read one list, so an offer that cannot be honoured
+is not expressible.
+
 **Turning a column on is a request to join the grouping — unless the grouping
 already names it.** The question the toggle asks is whether the grouping
 **names** the column (`isColumnNamedByGrouping`: it is a group key, or it
@@ -156,7 +171,10 @@ or not painted. Anything that has to be checked about consumer-rendered content
 Pinning and hiding a column the grouping does not name still write the
 consumer's own layout, and neither shows on screen until the grouping clears.
 That is deliberate: the layout is the consumer's and the grouping is a lens over
-it, so an edit made under the lens is kept rather than refused.
+it, so an edit made under the lens is kept rather than refused. **A filter is
+not layout** — it restates the read, so it takes effect under the lens rather
+than waiting for it to clear, which is why the Filters tab stays addressable for
+every declared column and not only for the painted ones.
 
 **The trap.** The removal has to stay a derivation. `columnVisibility` is
 persisted and the drawer writes **declared** keys into it, so a derived key that

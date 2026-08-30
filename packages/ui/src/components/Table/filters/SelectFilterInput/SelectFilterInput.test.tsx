@@ -19,15 +19,15 @@ afterEach(cleanup);
 type Row = { readonly status: string };
 
 const {
+  declaredColumnMock,
   fetchDistinctValuesMock,
   fetchInitialMock,
   fetchMoreMock,
-  normalizedColumnMock,
 } = vi.hoisted(() => ({
+  declaredColumnMock: vi.fn(),
   fetchDistinctValuesMock: vi.fn(),
   fetchInitialMock: vi.fn(),
   fetchMoreMock: vi.fn(),
-  normalizedColumnMock: vi.fn(),
 }));
 
 const MockVirtualSelect = vi.hoisted(() => {
@@ -69,7 +69,7 @@ vi.mock('@lcabrera/api/config/get-api-base-url.util', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
-  useGetNormalizedColumn: normalizedColumnMock,
+  useGetDeclaredColumn: declaredColumnMock,
 }));
 
 vi.mock('#ui/components/Table/contexts/FiltersData/filters/selectors', () => ({
@@ -95,7 +95,7 @@ vi.mock('#ui/components/VirtualSelect', () => ({
 }));
 
 const renderWithColumn = (column: TableColumn<Row>) => {
-  normalizedColumnMock.mockReturnValue(column);
+  declaredColumnMock.mockReturnValue(column);
   render(
     <SelectFilterInput<Row>
       columnKey='status'

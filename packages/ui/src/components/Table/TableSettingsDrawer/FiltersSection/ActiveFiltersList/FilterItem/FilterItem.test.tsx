@@ -12,11 +12,16 @@ import {
 
 const {
   columnFiltersRef,
+  DECLARED_COLUMNS,
   expandedFiltersRef,
   mockSetColumnFilters,
   mockSetExpandedFilters,
 } = vi.hoisted(() => ({
   columnFiltersRef: { current: {} as Record<string, unknown> },
+  DECLARED_COLUMNS: {
+    price: { key: 'price', label: 'Price' },
+    status: { key: 'status', label: 'Status' },
+  },
   expandedFiltersRef: { current: [] as readonly string[] },
   mockSetColumnFilters: vi.fn(),
   mockSetExpandedFilters: vi.fn(),
@@ -70,10 +75,8 @@ vi.mock('../../../TableDrawerContext/selectors', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
-  useGetNormalizedColumns: () => ({
-    price: { key: 'price', label: 'Price' },
-    status: { key: 'status', label: 'Status' },
-  }),
+  useGetDeclaredColumn: (columnKey: string) =>
+    DECLARED_COLUMNS[columnKey as keyof typeof DECLARED_COLUMNS],
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({

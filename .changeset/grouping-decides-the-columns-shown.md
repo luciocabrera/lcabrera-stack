@@ -34,3 +34,10 @@ unchanged.
 While grouping is applied no row in that tab is draggable, because the order it
 shows is derived for its whole length and a drag would persist a derivation as
 the consumer's own column order. Dragging is unaffected once the grouping clears.
+
+The Filters tab is unaffected by the narrower painted set: it reads the columns
+a consumer declared, so a filter on a column the grouping neither keys nor
+measures stays listed and removable while the grouping is applied, and adding one
+from the picker works for every column the picker offers. A filter restates the
+read rather than the layout, so it takes effect without waiting for the grouping
+to clear.

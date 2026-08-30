@@ -287,7 +287,12 @@ from `resolveRenderedColumnKeys`, which runs the grid's own
 back to the column it was derived from. Building the same answer a second way —
 from `columnVisibility` and the declared order — is how the tab and the grid
 came to disagree about which columns exist (ADR-096). A column the derivation
-does not paint is still listed, unticked: rule 3 above, unchanged.
+does not paint is still listed, unticked: rule 3 above, unchanged. That rule is about
+**which columns exist**. A surface answering something about the column a
+consumer declared — whether it can be filtered, what its label and data type are
+— reads the declared column (`useGetDeclaredColumn`), because the narrower
+painted list is not an answer to that question: the Filters tab keeps working on
+a column the grouping neither keys nor measures.
 
 **A gesture the derivation would undo is refused, not accepted.** The hoist
 already guarantees no column can sit between two keys, so a drag could not break
