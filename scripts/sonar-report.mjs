@@ -347,7 +347,7 @@ const analysisReady = async ({ args, target, token }) => {
     return false;
   }
   console.warn(
-    `${timedOut} — skipping the strict issue check. The merge-queue build of this pull request runs it again with --require-analysis, and cannot skip.`,
+    `${timedOut} — skipping the strict issue check rather than failing, because --require-analysis was not passed. So this run is not a verdict on this change's issues, and what holds the merge is whichever checks the ruleset requires, not this one.`,
   );
   return false;
 };

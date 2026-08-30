@@ -85,12 +85,20 @@ complete` all read what it exports, so neither event has its own copy of "what
   the queue never reads. Its workflow publishes the same verdict about the same
   head on the merge group's commit.
 - The merge step stops being a merge. `gh pr merge <n> --squash` enqueues where a
-  queue is required and squash-merges where one is not. Every other way to land a
-  pull request is forbidden to the operator, and by shape rather than by command
-  name: `--admin` (which goes past both, and which this repository's owner role
-  **can** use), `--delete-branch`, a merge method that is not `--squash`, the
-  REST `PUT …/pulls/{n}/merge` endpoint, and the `mergePullRequest` /
-  `enablePullRequestAutoMerge` mutations. `forbiddenActions` escalates a
+  queue is required and squash-merges where one is not, and every other way to
+  land a pull request is forbidden to the operator. `forbiddenActions` is shaped
+  in two halves, because the two halves of the problem are opposite. The **flags**
+  of `gh pr merge` are a closed vocabulary, so that half is an **allow-list**: the
+  one authorised form passes and every other is refused. A deny-list of flags was
+  tried first and leaked four times in one review round — it named `--merge` and
+  `--rebase` while gh also spells them `-m` and `-r`, and named the
+  `enablePullRequestAutoMerge` mutation while `--auto` calls the same mutation
+  from the CLI. Which **transport** reaches a merge is open (gh, `curl`, any HTTP
+  client), so that half stays a deny-list keyed on the operation's shape — the
+  REST `PUT …/pulls/{n}/merge` and `POST …/merges` endpoints, and the
+  `mergePullRequest` / `enablePullRequestAutoMerge` / `mergeBranch` mutations —
+  with the endpoint's path segments matched unread, so a shell variable standing
+  in for the number is the same endpoint. `forbiddenActions` escalates a
   **decision** naming any of them; it does not sandbox the apply pass, which
   needs `gh api` for other work and which no prefix allow-list can restrict to
   reads — that residual is #1040 and is stated rather than implied. The
@@ -140,6 +148,18 @@ made the repository worse than before this change.
   in the decision it audits; the apply pass's own tool list still admits `gh api`,
   which reaches the merge endpoint. #1040 is the guard that would close it, and
   until it lands the bound is on what may be **authorised**, not on what may run.
+- The allow-list half costs a false ESCALATE on any `gh pr merge` the model
+  writes with an extra flag, `--repo` included. That is the direction a leash
+  should fail in, and the refusal names the authorised form, so the next pass
+  writes it. It also means a decision whose action text merely _quotes_ the
+  landing command inside another command escalates; the same was already true of
+  `--admin`.
+- Not every shape it now refuses is reachable. `--auto` needs auto-merge enabled
+  on the repository and this one has it off, so on 2026-08-30 the flag failed
+  rather than merging. It is refused because it is the same operation as a
+  mutation already refused, and because a leash whose coverage depends on a
+  repository setting staying put is not one — not because a live bypass was
+  found.
 - One required context is lost outright (`SonarCloud Code Analysis`), and with it
   the backstop the strict gate's timeout-skip relied on. That is why the queue
   run passes `--require-analysis`: latency may skip the check for an author, it

@@ -255,39 +255,62 @@ export const evaluateGate = (pr, conformance, packages) => {
 };
 
 /**
- * Landing a pull request has one authorised shape and several unauthorised ones,
- * and matching `gh pr merge` alone bounds only the first. The REST merge
- * endpoint and the GraphQL merge mutations reach the same operation through a
- * tool the apply pass also needs for other work, so they are matched by the
- * shape of the operation — path and mutation name — rather than by the command
- * that carries them, which also covers `curl`.
+ * Landing a pull request is bounded in two structurally different ways, because
+ * the two halves of the problem have opposite shapes.
+ *
+ * The FLAG vocabulary of `gh pr merge` is closed — A5 authorises
+ * `gh pr merge <n> --squash` and nothing else — so that half is an ALLOW-LIST.
+ * A deny-list of flags cannot hold there, and did not: it named `--merge` and
+ * `--rebase` while gh also spells them `-m` and `-r`, and named the
+ * `enablePullRequestAutoMerge` mutation while `--auto` calls it. Each missed
+ * spelling is admitted in silence. Matching the one authorised form instead
+ * rejects every other, including flags gh has not shipped yet.
+ *
+ * Which TRANSPORT reaches a merge is open — gh, curl, any HTTP client — so the
+ * shapes below stay a deny-list, keyed on the endpoint path and the mutation
+ * name rather than on the command carrying them. An allow-list there would have
+ * to enumerate every command A1–A8 legitimately proposes, which is open too, and
+ * a leash that blocks ordinary work is a leash that gets widened.
+ *
+ * What that structurally cannot cover is a command whose text does not name the
+ * operation: a path held entirely in a variable, a script file, an encoded
+ * string. This bounds the decision TEXT, which is the audited artifact, not the
+ * apply pass; that residual is #1040.
  */
-const FORBIDDEN_COMMANDS = [
+const MERGE_SUBCOMMAND = /\bgh\s+pr\s+merge\b/u;
+
+/** A5's landing command in full. Every other form of it is a way past. */
+const AUTHORISED_LANDING = /^gh\s+pr\s+merge\s+\d+\s+--squash$/u;
+
+const UNAUTHORISED_LANDING =
+  '`gh pr merge` in any form but `gh pr merge <n> --squash`, which A5 authorises and this matches as an allow-list — so `--admin` (past the queue and past every required check, and the operator account can), `--auto` (`enablePullRequestAutoMerge` under another name), `-d`/`--delete-branch` (a deletion for a merge that has not happened yet), `-m`/`--merge`, `-r`/`--rebase` (not the permitted method: `--squash` keeps the PR title as the commit subject the changelog reads) and any flag gh adds later are all rejected without being enumerated';
+
+/** The same landing, reached without naming `gh pr merge`. */
+const FORBIDDEN_SHAPES = [
   {
-    pattern: /\bgh\s+pr\s+merge\b[^\n]*\s--admin\b/u,
+    pattern: /\brepos\/[^\s/]+\/[^\s/]+\/pulls\/[^\s/]+\/merge\b/u,
     reason:
-      '`gh pr merge --admin` merges past the merge queue and past every required check, and the operator account can. A5 authorises `--squash` and nothing else',
+      'the REST merge endpoint lands a pull request directly, past the merge queue and past every required check exactly as `--admin` does, and the operator account is a ruleset bypass actor. Its path segments are matched unread, so a shell variable in place of the number is the same endpoint. A5 authorises `gh pr merge <n> --squash` and nothing else',
   },
   {
-    pattern: /\bgh\s+pr\s+merge\b[^\n]*\s(?:-d|--delete-branch)\b/u,
+    pattern: /\brepos\/[^\s/]+\/[^\s/]+\/merges\b/u,
     reason:
-      '`gh pr merge -d` asks GitHub to delete the branch as part of a merge that has not happened yet — gh refuses it in front of a queue, and A7 deletes the branch after the merge is confirmed',
+      'the REST branch-merge endpoint puts a head branch into a base branch with no pull request in the operation at all, so it lands the work past the queue, past every required check and past the squash. A5 authorises `gh pr merge <n> --squash` and nothing else',
   },
   {
-    pattern: /\bgh\s+pr\s+merge\b[^\n]*\s--(?:merge|rebase)\b/u,
+    pattern: /\b(?:mergePullRequest|enablePullRequestAutoMerge|mergeBranch)\b/u,
     reason:
-      '`--merge` and `--rebase` are not the permitted merge method. A5 authorises `--squash`, which is what keeps `main` linear and keeps the PR title as the commit subject the changelog reads',
+      'the GraphQL merge mutations land a pull request, or a branch, outside the one audited command, and auto-merge lands it with no pass observing the result. A5 authorises `gh pr merge <n> --squash` and nothing else',
   },
-  {
-    pattern: /\brepos\/[^\s/]+\/[^\s/]+\/pulls\/\d+\/merge\b/u,
-    reason:
-      'the REST merge endpoint lands a pull request directly, past the merge queue and past every required check exactly as `--admin` does, and the operator account is a ruleset bypass actor. A5 authorises `gh pr merge <n> --squash` and nothing else',
-  },
-  {
-    pattern: /\b(?:mergePullRequest|enablePullRequestAutoMerge)\b/u,
-    reason:
-      'the GraphQL merge mutations land a pull request outside the one audited command, and auto-merge lands it with no pass observing the result. A5 authorises `gh pr merge <n> --squash` and nothing else',
-  },
+];
+
+const forbiddenReasons = (command) => [
+  ...(MERGE_SUBCOMMAND.test(command) && !AUTHORISED_LANDING.test(command)
+    ? [UNAUTHORISED_LANDING]
+    : []),
+  ...FORBIDDEN_SHAPES.filter(({ pattern }) => pattern.test(command)).map(
+    ({ reason }) => reason,
+  ),
 ];
 
 /**
@@ -298,11 +321,13 @@ const FORBIDDEN_COMMANDS = [
  * The residual is #1040.
  */
 export const forbiddenActions = (actions) =>
-  (actions ?? []).flatMap((action) =>
-    FORBIDDEN_COMMANDS.filter(({ pattern }) =>
-      pattern.test(action.command ?? ''),
-    ).map(({ reason }) => ({ command: action.command ?? '', reason })),
-  );
+  (actions ?? []).flatMap((action) => {
+    const command = action.command ?? '';
+    return forbiddenReasons(command.trim()).map((reason) => ({
+      command,
+      reason,
+    }));
+  });
 
 /** True when the model's verdict is at or below the mechanical ceiling. */
 export const isWithinCeiling = (ceiling, proposed) =>

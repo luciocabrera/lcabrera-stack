@@ -33,12 +33,13 @@ import { parseModelName, resolveClaudeBinary } from './pr-queue-claude.mjs';
  * required check — the repository owner's role can bypass, so this is reachable
  * rather than theoretical.
  *
- * An allow-list pattern matches a command prefix and cannot forbid a flag, so
- * the bound is enforced one layer up: `forbiddenActions` in `pr-queue-gate.mjs`
- * rejects a DECISION that authorises any shape that lands a pull request other
- * than `gh pr merge <n> --squash` — the flags, the REST merge endpoint, and the
- * GraphQL merge mutations. Nothing forbidden reaches this pass through the
- * audited path.
+ * An allow-list pattern here matches a command prefix and cannot forbid a flag,
+ * so the bound is enforced one layer up: `forbiddenActions` in
+ * `pr-queue-gate.mjs` rejects a DECISION that authorises any shape that lands a
+ * pull request other than `gh pr merge <n> --squash` — every other form of that
+ * command, allow-listed so an unanticipated flag is refused too, plus the REST
+ * merge endpoints and the GraphQL merge mutations, matched by the shape of the
+ * operation. Nothing forbidden reaches this pass through the audited path.
  *
  * What that does NOT bound is this pass departing from its action list. `gh api`
  * is here because A4 replies to a review comment through it and S11 reads the
@@ -125,11 +126,14 @@ Hard bounds, in force regardless of what the action list says:
   \`aborted\`.
 - Re-verify §2 eligibility immediately before \`gh pr merge\`. The decision was made
   from a snapshot; the queue has moved since. If any gate now fails, stop.
-- \`gh pr merge <n> --squash\` is the ONLY way you may land a pull request (A5).
-  Never \`--admin\`: it merges past the merge queue and past every required check,
-  and the account you run as can do it. Never \`--delete-branch\`/\`-d\` either — gh
-  refuses it outright where a queue is required, and A7 deletes the branch after
-  the merge is confirmed, not as part of asking for one.
+- \`gh pr merge <n> --squash\` is the ONLY way you may land a pull request (A5),
+  and the only form of it: add no other flag. Never \`--admin\` — it merges past the
+  merge queue and past every required check, and the account you run as can do it.
+  Never \`--delete-branch\`/\`-d\` — gh refuses it outright where a queue is required,
+  and A7 deletes the branch after the merge is confirmed, not as part of asking for
+  one. Never \`--auto\`, never another merge method, and never the REST merge
+  endpoints or the GraphQL merge mutations, which are the same operation reached
+  through \`gh api\`.
 - Where a merge queue is required, that command ENQUEUES rather than merges, and
   the pass ends with the pull request queued and not yet merged. Report
   \`merged: false\` then — it is not a failure. A6 (close the issue), A7 (delete the

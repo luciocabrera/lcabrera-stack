@@ -123,24 +123,35 @@ invocation is logged with the exact command run.
 | **A2** | Re-run a transient CI failure            | Transient as defined below. One re-run per check per pass; a second identical failure is by definition not transient → S10   |
 | **A3** | Fix lint / format fallout                | Only the mechanical output of the repo's own fixers (`vp lint --fix`, `vp fmt`, `vp run lint:eslint`). Never a hand-rewrite  |
 | **A4** | Reply to and address a Copilot comment   | Verify first — see below. Reply on every thread it resolves, stating which                                                   |
-| **A5** | Land it: `gh pr merge <n> --squash`      | The only way to land, and the only permitted merge method. Never `--admin` (it goes past the queue and past every required   |
-|        |                                          | check, and this account can), never `-d`, never `--merge`/`--rebase`, and never the REST merge endpoint or a GraphQL merge   |
-|        |                                          | mutation, which reach the same operation through `gh api`. `forbiddenActions` in `pr-queue-gate.mjs` escalates any decision  |
-|        |                                          | naming one — see the bound it does not carry, below. Subject is the PR title (E7 already gated it). Where a queue is         |
-|        |                                          | required this enqueues, and the pass ends with the PR queued rather than merged — success, not a failure                     |
+| **A5** | Land it: `gh pr merge <n> --squash`      | That exact command and no other form of it. `forbiddenActions` in `pr-queue-gate.mjs` matches it as an ALLOW-LIST, so        |
+|        |                                          | `--admin`, `--auto`, `-d`, `-m`/`--merge`, `-r`/`--rebase` and any flag gh adds later escalate the pull request without      |
+|        |                                          | being enumerated. The REST merge and branch-merge endpoints and the GraphQL merge mutations reach the same operation         |
+|        |                                          | through `gh api` and are refused by shape — see the bound it does not carry, below. Subject is the PR title (E7 already      |
+|        |                                          | gated it). Where a queue is required this enqueues, and the pass ends with the PR queued rather than merged — success        |
 | **A6** | Close the linked issue                   | Only an issue the PR body links via a closing keyword, and only after the merge is confirmed on `main`                       |
 | **A7** | Delete the head branch                   | After merge, remote and local. Never a branch with commits that did not land (see the squash-merge trap in §6)               |
 | **A8** | Prune the worktree                       | Via `vp run housekeeping:prune -- --apply` only, which already refuses a dirty worktree, an un-PR'd commit, and any stash    |
 | **A9** | ~~Mark a draft ready~~ — **not allowed** | Draft is the author's signal that the work is unfinished. The operator has no basis to overrule it. Listed here so it is not |
 |        |                                          | mistaken for an oversight                                                                                                    |
 
-**A5 — what `forbiddenActions` bounds, and what it does not.** It reads the
-DECISION's action list, which is the audited artifact, and escalates the whole
-pull request rather than filtering the offending line. So nothing forbidden
-reaches the apply pass _through the decision_. It is not a sandbox over that
-pass: `EXECUTE_TOOLS` has to include `Bash(gh api:*)` for A4's reply endpoint and
-S11's timeline query, a Claude Code Bash rule matches by prefix, and gh's method
-is a flag — so no allow-list admits those two while denying `--method PUT
+**A5 — how `forbiddenActions` is shaped.** In two halves, because the two halves
+of the problem are opposite. The flags of `gh pr merge` are a **closed**
+vocabulary — this row authorises one form — so that half is an allow-list, and a
+spelling nobody anticipated is refused rather than admitted. Which **transport**
+reaches a merge is open (gh, `curl`, any HTTP client), so that half stays a
+deny-list keyed on the endpoint path and the mutation name; an allow-list there
+would have to enumerate every command A1–A8 legitimately proposes, which is open
+too. What neither half can see is a command whose text does not name the
+operation: an endpoint held entirely in a variable, a script file, an encoded
+string.
+
+**A5 — what it bounds, and what it does not.** It reads the DECISION's action
+list, which is the audited artifact, and escalates the whole pull request rather
+than filtering the offending line. So nothing forbidden reaches the apply pass
+_through the decision_. It is not a sandbox over that pass: `EXECUTE_TOOLS` has
+to include `Bash(gh api:*)` for A4's reply endpoint and S11's timeline query, a
+Claude Code Bash rule matches by prefix, and gh's method is a flag — so no
+allow-list admits those two while denying `--method PUT
 /repos/{o}/{r}/pulls/{n}/merge`, which merges directly and which this account's
 ruleset bypass makes succeed. That residual is #1040. Stated here because a
 reader deciding how much to trust the leash needs its edge, not its headline.

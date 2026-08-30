@@ -1,11 +1,15 @@
 /**
- * A5 is the operator's one authorised way to land a pull request, and the ways
- * past it are not all spelled `gh pr merge`. The REST merge endpoint and the
- * GraphQL merge mutations reach the same operation through `gh api`, which the
- * apply pass holds for other reasons, and the account it runs as is a ruleset
- * bypass actor — so these pin the shapes rather than the command names, in both
- * directions: every way past is rejected, and the `gh api` calls A4 and S11
- * genuinely need are not.
+ * A5 has one authorised way to land a pull request, and the ways past it are
+ * neither all spelled `gh pr merge` nor all spelled the same when they are.
+ *
+ * Two properties are pinned, matching the two structures in `pr-queue-gate.mjs`.
+ * The flag half is an ALLOW-LIST, so the cases below include flags the guard was
+ * never told about — a spelling it does not know must still be rejected, or the
+ * guard is back to guessing. The transport half is a deny-list over operation
+ * shapes, so the same endpoint is planted through `gh api` and through `curl`,
+ * with its path segments written as shell variables as well as literals, and the
+ * `gh api` reads A4 and S11 genuinely need are planted alongside to show the
+ * bound still admits them.
  *
  * Separate from `pr-queue-gate.test.mjs` because that file is the verdict
  * ceiling and this one is the command bound; #1040 is the part of this bound
@@ -15,8 +19,12 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { forbiddenActions } from './pr-queue-gate.mjs';
 
-describe('forbiddenActions — every way past the queue, not only the flags', () => {
+describe('forbiddenActions — one authorised landing, every other shape refused', () => {
   const action = (command) => ({ command, rule: 'A5', why: 'land it' });
+
+  it('leaves the one authorised landing command alone', () => {
+    expect(forbiddenActions([action('gh pr merge 42 --squash')])).toEqual([]);
+  });
 
   it('rejects --admin, which merges past every required check', () => {
     expect(
@@ -35,8 +43,30 @@ describe('forbiddenActions — every way past the queue, not only the flags', ()
     ).toHaveLength(1);
   });
 
-  it('leaves the one authorised landing command alone', () => {
-    expect(forbiddenActions([action('gh pr merge 42 --squash')])).toEqual([]);
+  it('rejects a merge method that is not --squash, in both gh spellings', () => {
+    expect(forbiddenActions([action('gh pr merge 42 --merge')])).toHaveLength(
+      1,
+    );
+    expect(forbiddenActions([action('gh pr merge 42 --rebase')])).toHaveLength(
+      1,
+    );
+    expect(forbiddenActions([action('gh pr merge 42 -m')])).toHaveLength(1);
+    expect(forbiddenActions([action('gh pr merge 42 -r')])).toHaveLength(1);
+  });
+
+  it('rejects --auto, the flag that calls enablePullRequestAutoMerge', () => {
+    expect(
+      forbiddenActions([action('gh pr merge 42 --squash --auto')]),
+    ).toHaveLength(1);
+  });
+
+  it('rejects a flag it was never told about, because the form is allow-listed', () => {
+    expect(
+      forbiddenActions([
+        action('gh pr merge 42 --squash --match-head-commit deadbeef'),
+        action('gh pr merge 42 --squash --a-flag-gh-has-not-shipped-yet'),
+      ]),
+    ).toHaveLength(2);
   });
 
   it('does not fire on an unrelated command that merely says admin', () => {
@@ -49,21 +79,23 @@ describe('forbiddenActions — every way past the queue, not only the flags', ()
     expect(forbiddenActions(undefined)).toEqual([]);
   });
 
-  it('rejects a merge method that is not --squash', () => {
-    expect(forbiddenActions([action('gh pr merge 42 --merge')])).toHaveLength(
-      1,
-    );
-    expect(forbiddenActions([action('gh pr merge 42 --rebase')])).toHaveLength(
-      1,
-    );
-  });
-
   it('rejects the REST merge endpoint, which no `gh pr merge` pattern sees', () => {
     const command =
       'gh api --method PUT repos/luciocabrera/lcabrera-stack/pulls/42/merge -f merge_method=squash';
     expect(forbiddenActions([action(command)])).toEqual([
       expect.objectContaining({ command }),
     ]);
+  });
+
+  it('reads that path with its segments unread, so shell variables do not evade it', () => {
+    expect(
+      forbiddenActions([
+        action('gh api "repos/$OWNER/$REPO/pulls/$PR/merge" --method PUT'),
+        action(
+          'gh api --method PUT repos/luciocabrera/lcabrera-stack/pulls/$PR/merge',
+        ),
+      ]),
+    ).toHaveLength(2);
   });
 
   it('matches that endpoint by shape, so the transport does not matter', () => {
@@ -75,6 +107,14 @@ describe('forbiddenActions — every way past the queue, not only the flags', ()
         ),
       ]),
     ).toHaveLength(2);
+  });
+
+  it('rejects the branch-merge endpoint, which needs no pull request at all', () => {
+    expect(
+      forbiddenActions([
+        action('gh api --method POST repos/o/r/merges -f base=main -f head=x'),
+      ]),
+    ).toHaveLength(1);
   });
 
   it('rejects the GraphQL merge mutations', () => {
@@ -90,6 +130,11 @@ describe('forbiddenActions — every way past the queue, not only the flags', ()
         action(
           `gh api graphql -f query='mutation{enablePullRequestAutoMerge(input:{})}'`,
         ),
+      ]),
+    ).toHaveLength(1);
+    expect(
+      forbiddenActions([
+        action(`gh api graphql -f query='mutation{mergeBranch(input:{})}'`),
       ]),
     ).toHaveLength(1);
   });

@@ -198,7 +198,7 @@ the only thing that recomputes it. `epic-orchestration.md` Phase 4 and the PR
 queue operator's E10 both branch on this field rather than on the ruleset having
 been edited.
 
-Two flags must not be used with the command:
+Flags worth knowing by name, because a reader reaches for them:
 
 - **`--admin` merges past the queue and past every required check.** The
   repository owner's role is a bypass actor on the ruleset, so this works rather
@@ -206,14 +206,27 @@ Two flags must not be used with the command:
 - **`-d` / `--delete-branch`** is refused outright by gh where a queue is
   required, because the merge has not happened yet. Delete the branch after the
   merge lands.
+- **`--auto`** asks GitHub to merge the pull request the moment its checks pass,
+  with no pass observing the result. Auto-merge is switched off at the repository
+  level today, so it fails rather than merging; it is refused anyway, because a
+  leash that depends on a repository setting staying put is not one.
 
-`--admin` is not the only way past, and a leash that names only the flag is not a
-leash. `PUT /repos/{owner}/{repo}/pulls/{n}/merge` — reachable as
-`gh api --method PUT …` or plain `curl`, and reachable for the same bypass-actor
-reason — merges directly, as do the `mergePullRequest` and
-`enablePullRequestAutoMerge` GraphQL mutations. `forbiddenActions` in
-`scripts/lib/pr-queue-gate.mjs` rejects all of them by shape, not by command
-name; what that does and does not bound is
+Naming flags is not how the guard works, though, and naming them is exactly how
+it kept springing leaks: gh spells `--merge` and `--rebase` as `-m` and `-r` too,
+and `--auto` is the `enablePullRequestAutoMerge` mutation under a second name. So
+`forbiddenActions` in `scripts/lib/pr-queue-gate.mjs` is an **allow-list over the
+one authorised command** — `gh pr merge <n> --squash` passes and every other form
+of `gh pr merge` is refused, including flags gh has not shipped yet.
+
+The transports are the other half and cannot be allow-listed, because any HTTP
+client reaches them: `PUT /repos/{owner}/{repo}/pulls/{n}/merge` merges a pull
+request directly, `POST /repos/{owner}/{repo}/merges` merges a branch with no
+pull request in the operation at all, and the `mergePullRequest`,
+`enablePullRequestAutoMerge` and `mergeBranch` GraphQL mutations do the same —
+all reachable through `gh api` or plain `curl`, and all succeeding for the same
+bypass-actor reason. Those are matched on the endpoint path and the mutation
+name, with the path's segments unread so a `$PR` variable is the same endpoint as
+a literal number. What that does and does not bound is
 [`.claude/pr-queue-policy.md`](../../.claude/pr-queue-policy.md) §4 A5.
 
 The pass that enqueues therefore ends with the pull request **queued, not
