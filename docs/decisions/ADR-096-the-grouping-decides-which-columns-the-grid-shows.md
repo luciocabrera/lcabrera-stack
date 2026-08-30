@@ -186,19 +186,30 @@ without carrying `render`, so a column declaring one is either a key, a measure,
 or not painted. Anything that has to be checked about consumer-rendered content
 — its alignment, for one — is only checkable on an ungrouped grid.
 
-Pinning and hiding a column the grouping does not name still write the
-consumer's own layout, and neither shows on screen until the grouping clears.
-That is deliberate: the layout is the consumer's and the grouping is a lens over
-it, so an edit made under the lens is kept rather than refused. **A filter is
-not layout** — it restates the read, so it takes effect under the lens rather
-than waiting for it to clear, which is why the Filters tab stays addressable for
-every declared column and not only for the painted ones.
+Pinning a column the grouping does not name still writes the consumer's own
+layout, and does not show on screen until the grouping clears. That is
+deliberate: the layout is the consumer's and the grouping is a lens over it, so
+an edit made under the lens is kept rather than refused. **Hiding one is a
+different matter, and it is not available under the lens at all.** The row's
+`Show` switch reads from the painted set, so an unnamed column's switch is
+already off and the only gesture it offers is on — which is the prompt. A user
+who wants such a column hidden clears the grouping first. The trade is that the
+switch answers one question at a time: under a lens it asks whether the column
+joins the grouping, and the layout question waits for the lens to lift.
+
+**A filter is not layout** — it restates the read, so it takes effect under the
+lens rather than waiting for it to clear, which is why the Filters tab stays
+addressable for every declared column and not only for the painted ones.
 
 **The trap.** The removal has to stay a derivation. `columnVisibility` is
 persisted and the drawer writes **declared** keys into it, so a derived key that
 reaches the cookie can never be taken out again through the per-column UI —
-which is why the prompt writes the grouping and never the visibility set, and
-why the scope step writes no state of its own.
+which is why the scope step writes no state of its own. The prompt does write
+`columnVisibility`, taking the column it was asked about off the hidden set
+before applying the choice. That is safe for the same reason: the key it removes
+is one the consumer declared. What must never reach that set is a key the
+derivation invented, such as a measure's own `<column>:<fn>`, because the
+per-column UI offers no row from which to take it back out.
 
 ## Alternatives considered
 
