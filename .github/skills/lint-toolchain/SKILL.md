@@ -303,9 +303,14 @@ and `--fail-on-issues` also fails on any open issue.
 2. The **`.github/workflows/sonar-issue-gate.yml`** job closes that gap for free
    — it runs `sonar-report.mjs --gate --fail-on-issues --wait` on every PR and
    fails on **any** open issue (the code smells layer 1 misses). `--wait` polls
-   the Compute Engine (`api/ce/activity`) until the PR head commit's analysis has
-   finished — Automatic Analysis is async and runs in parallel with CI, so a bare
-   read races it; `--since` (the head commit time) is the freshness guard, and on
+   SonarCloud until it has analysed the PR head commit — Automatic Analysis is
+   async and runs in parallel with CI, so a bare read races it. `--head-sha` is
+   what that compares against, because `api/project_pull_requests/list` reports
+   the commit SonarCloud analysed for a pull request; `api/ce/activity` is the
+   in-flight and failed signal and the branch lane's fallback, where `--since`
+   (the head commit time) guards freshness. Do not promote the activity list back
+   to freshness authority: it is project-wide, takes no pull-request filter and
+   does not page, so an older pull request's analysis falls out of its window. On
    timeout the job **skips** rather than blocks. Without a token (fork PRs) the
    script skips and the job stays green. To make layer 2 blocking, add the
    **"Strict Sonar issue gate"** check to the `main` ruleset's required checks

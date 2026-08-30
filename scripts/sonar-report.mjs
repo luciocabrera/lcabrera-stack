@@ -38,15 +38,17 @@
  *   vp run sonar:report -- --branch main
  *   vp run sonar:verify                    # gate mode: exit 1 if the gate is failing
  *   vp run sonar:verify -- --pr 31 --fail-on-issues
- *   vp run sonar:verify -- --pr 31 --fail-on-issues --wait --since <iso>
+ *   vp run sonar:verify -- --pr 31 --fail-on-issues --wait --head-sha <sha>
  *
- * `--wait` (CI use) polls the Compute Engine until this target's analysis has
- * finished before reading — Automatic Analysis is async, so a bare read races it.
- * `--since <iso>` (the PR head commit time) guards freshness so a previous
- * commit's analysis isn't accepted; on timeout the check is skipped, not failed,
- * so Sonar latency never blocks an author. `--require-analysis` turns that skip
- * into a failure, for the one context where nothing else is looking afterwards:
- * a merge-queue build, which is the last word before the merge. It IMPLIES
+ * `--wait` (CI use) polls SonarCloud until this target's analysis has finished
+ * before reading — Automatic Analysis is async, so a bare read races it.
+ * `--head-sha <sha>` is how it knows: SonarCloud reports the commit it analysed
+ * for a pull request, so the wait ends the moment that matches, however long ago
+ * it ran. `--since <iso>` (the head commit time) is the weaker fallback for a
+ * branch target, or for a run given no head sha. On timeout the check is skipped,
+ * not failed, so Sonar latency never blocks an author. `--require-analysis` turns
+ * that skip into a failure, for the one context where nothing else is looking
+ * afterwards: a merge-queue build, the last word before the merge. It IMPLIES
  * `--require-token`, because the tokenless skip below returns before any
  * analysis is looked for — without the implication, the flag that means
  * "nothing else will read Sonar for this change" still exits 0 on a run that
@@ -97,6 +99,7 @@ const VALUE_FLAGS = new Map([
   ['--pr', 'pr'],
   ['--branch', 'branch'],
   ['--since', 'since'],
+  ['--head-sha', 'headSha'],
 ]);
 
 const parseArgs = (argv) => {
@@ -109,6 +112,7 @@ const parseArgs = (argv) => {
     pr: undefined,
     branch: undefined,
     since: undefined,
+    headSha: undefined,
   };
   const queue = [...argv];
   while (queue.length > 0) {
@@ -334,11 +338,13 @@ const analysisReady = async ({ args, target, token }) => {
     project: CONFIG.project,
     target,
     since: args.since,
+    headSha: args.headSha,
   });
   if (ready) {
     return true;
   }
-  const timedOut = `Timed out waiting for SonarCloud analysis of ${target.type} ${target.value}`;
+  const at = args.headSha === undefined ? '' : ` at commit ${args.headSha}`;
+  const timedOut = `Timed out waiting for SonarCloud analysis of ${target.type} ${target.value}${at}`;
   if (args.requireAnalysis) {
     console.error(
       `${timedOut} — failing, because --require-analysis says nothing else will read Sonar for this change.`,

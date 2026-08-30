@@ -4,9 +4,9 @@ name: Sonar Issue Gate
 # using the repo's sonar-report.mjs, and in `--gate` mode on a failing SonarCloud
 # quality gate too — so it covers the rating-based "Sonar way" gate the SonarCloud
 # app reports and the new *code smells* that gate lets through (assigning a
-# stricter custom gate is a paid feature). `--wait` polls the Compute Engine until
-# THIS target's analysis has finished (Automatic Analysis runs async, in parallel
-# with CI), so it never races. A pull request FROM A FORK gets no secrets, so the
+# stricter custom gate is a paid feature). `--wait` polls SonarCloud until it has
+# analysed THIS run's head commit (Automatic Analysis runs async, in parallel with
+# CI), so it never races. A pull request FROM A FORK gets no secrets, so the
 # script skips there and the job stays green — everywhere else a missing token
 # FAILS (--require-token) instead of reporting this required check green without
 # having run.
@@ -128,12 +128,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         # sonar-report.mjs needs only Node built-ins + global fetch (present on
-        # ubuntu-latest), so no workspace install. --since = the pull request head
-        # commit's time, the freshness guard so a previous commit's analysis is
-        # not accepted. It is read through the API rather than from git, because
-        # in a merge group that commit need not be in the checkout at all; if it
-        # cannot be resolved the step fails rather than dating the guard from a
-        # newer commit, which would reject every run. Every value the step
+        # ubuntu-latest), so no workspace install.
+        #
+        # --head-sha is the freshness guard that discriminates: SonarCloud records
+        # which commit it analysed for a pull request, so the wait ends when that
+        # equals this run's head however long ago the analysis ran. --since is the
+        # weaker fallback, and it is why the Compute Engine cannot be the only
+        # probe — `api/ce/activity` is project-wide, takes no pull-request filter
+        # and does not page, so an older pull request's perfectly good analysis
+        # falls out of its window and the wait times out. Under --require-analysis
+        # that timeout fails this required check and the queue ejects the entry.
+        #
+        # Both values are read through the API rather than from git, because in a
+        # merge group the head commit need not be in the checkout at all; if
+        # either cannot be resolved the step fails rather than dating the guard
+        # from a newer commit, which would reject every run. Every value the step
         # substitutes comes through env, never a shell interpolation.
         run: |
           SINCE="$(gh api "repos/$GITHUB_REPOSITORY/commits/$PR_HEAD_SHA" --jq '.commit.committer.date')"
@@ -164,4 +173,4 @@ jobs:
             FLAGS+=(--require-analysis)
           fi
           node scripts/sonar-report.mjs --gate --fail-on-issues "${FLAGS[@]}" \
-            --pr "$PR_NUMBER" --wait --since "$SINCE"
+            --pr "$PR_NUMBER" --wait --since "$SINCE" --head-sha "$PR_HEAD_SHA"

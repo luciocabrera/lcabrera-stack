@@ -105,6 +105,19 @@ catches whatever that let through — but in the queue a skip would be the last
 word before the merge, so the queue run passes `--require-analysis` and a missing
 analysis fails.
 
+That makes **how the wait decides "analysed"** load-bearing, and it is why the
+step passes `--head-sha`. SonarCloud reports the commit it analysed for a pull
+request (`api/project_pull_requests/list`), so the wait ends on an exact match
+however long ago the analysis ran. It may not lean on `api/ce/activity`, which is
+scoped to the project rather than to a pull request: it takes a page size,
+ignores a `pullRequest` parameter and a page number, and therefore only ever
+shows the most recent tasks. Nothing re-analyses inside a queue — no push
+reaches the pull request and SonarCloud never touches a `gh-readonly-queue/…`
+branch — so an entry whose head predates that window would wait out the full
+timeout and be ejected with a valid analysis of exactly that commit sitting in
+SonarCloud. The activity list stays as the in-flight and failed signal, and as
+the fallback for a branch target.
+
 ## A queue run has this repository's secrets
 
 Secrets are withheld from "a workflow triggered from a forked repository". **A

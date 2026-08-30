@@ -72,6 +72,20 @@ origin/main | wc -l`).
 gate` already covers it and more — `--gate` fails on the same SonarCloud
   quality gate, `--fail-on-issues` fails on any open issue, which the app's
   rating-based gate does not.
+- `Strict Sonar issue gate` decides "has SonarCloud analysed this code yet?" by
+  **comparing the commit SonarCloud says it analysed** for the pull request
+  (`api/project_pull_requests/list` carries `commit.sha`) against the head this
+  run answers for, rather than by looking for a recent Compute Engine task. The
+  task-based probe was a proxy — a CE task carries no commit sha — and
+  `api/ce/activity` is scoped to the project, not to a pull request: it takes a
+  page size, silently ignores a `pullRequest` parameter and a page number, and so
+  can only ever show the most recent tasks. That is fine while the analysis is
+  seconds old, which is the pull-request lane. It is wrong in a queue, where
+  nothing re-analyses anything: an entry whose head was pushed before the window
+  begins would wait out the full timeout and, under `--require-analysis`, be
+  ejected while a valid analysis of exactly that commit sat in SonarCloud.
+  `api/ce/activity` stays as the in-flight and failed signal and as the branch
+  lane's fallback, where `--since` still guards freshness.
 - Inside the queue every diff-scoped gate takes its base from
   `github.event.merge_group.base_sha`, documented as the merge group's parent
   commit — so the diff is this pull request's own change against the tree it will
