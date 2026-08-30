@@ -463,8 +463,9 @@ silently deriving from the declared list. That requirement is also what this
 site evaded: it reached past `deriveColumnViewState` to the `getNormalizedColumns`
 primitive underneath, and so had nothing to fail on.
 
-A group row renders **each key's value in that key's own column**, one measure
-per measure column, and an em dash on a column carrying no aggregate at all. **Depth is read from which key columns are filled**,
+A group row renders **each key's value in that key's own column** and one measure
+per measure column — the only columns it holds, so the dash above is the only one
+it can draw. **Depth is read from which key columns are filled**,
 not from a pixel offset: a rollup fills a prefix, a cube fills an arbitrary
 subset, and neither needs the other's reading. A key column renders **blank** on
 its detail rows: the value is stated once, by the group row directly above them,
