@@ -75,7 +75,7 @@ filters/
 
 ```mermaid
 graph TD
-  FI["FilterInputs"] --> col["useGetNormalizedColumn(columnKey)"]
+  FI["FilterInputs"] --> col["useGetDeclaredColumn(columnKey)"]
   col --> dt{"column.dataType"}
 
   dt -->|boolean| BI["BooleanFilterInput"]
@@ -103,7 +103,7 @@ graph TD
 
 ```mermaid
 graph TD
-  SI["SelectFilterInput"] --> col["useGetNormalizedColumn(columnKey)"]
+  SI["SelectFilterInput"] --> col["useGetDeclaredColumn(columnKey)"]
   SI --> fd["useGetFilterData(columnKey)"]
   SI --> fetch["useFetchFilterData(columnKey)"]
   SI --> more["useFetchMoreFilterData(columnKey)"]

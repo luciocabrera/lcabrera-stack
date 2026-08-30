@@ -1,6 +1,6 @@
 # ADR-065 — A grouped grid renders its hierarchy in a grid-owned column, not a spanning banner
 
-- **Status:** Accepted; the **grid-owned hierarchy column** and the rejection of "reading B" are superseded by [ADR-080](./ADR-080-a-group-key-renders-in-its-own-column.md) (2026-08-18, #789)
+- **Status:** Accepted; the **grid-owned hierarchy column** and the rejection of "reading B" are superseded by [ADR-080](./ADR-080-a-group-key-renders-in-its-own-column.md) (2026-08-18, #789); the **em dash a column carrying no aggregate drew on a group row** is superseded by [ADR-096](./ADR-096-the-grouping-decides-which-columns-the-grid-shows.md) (2026-08-30, #1019)
 - **Date:** 2026-08-13
 - **Amended:** 2026-08-13 (#659) — the primary decision is unchanged; the rejection of the repurposed data column is restated on multi-key grouping, a grouped-by data column blanks on its detail rows, the retained banner is withdrawn, and all three are read off one principle. The body below is the record as accepted; every passage the amendment changes is marked where it stands. See [Amendments](#amendments).
 - **Scope:** `@lcabrera/ui` — `src/components/Table/` group rows and the cell grid they share with detail rows
@@ -17,6 +17,15 @@
 > stands — the shared cell grid, the em dash for an unrequested aggregate, the
 > refusal to leak a uniform detail value onto a group row, the dropped banner,
 > and blanking a grouped-by column on its detail rows.
+
+> **Superseded in part by ADR-096.** A grouped grid no longer paints a column
+> the grouping neither keys nor measures, so the em dash such a column drew on a
+> group row — listed as still standing in the note above — has no column left to
+> be drawn in. The reasoning here is not contradicted: the em dash was right
+> while a group's own rows sat under the group row and the column was full on
+> them, and [ADR-087](./ADR-087-a-group-opens-its-rows-in-a-route.md) ended that
+> by moving a group's rows into a route that applies no grouping. Everything
+> else the note above lists as standing still stands.
 
 ## Context
 

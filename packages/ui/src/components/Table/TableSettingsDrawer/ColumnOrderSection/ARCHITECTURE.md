@@ -3,31 +3,35 @@
 Column reordering, visibility toggling, and pinning with drag-and-drop.
 A thin shell (mirroring the `TableSettingsDrawer` header/body/footer pattern)
 composing private delegates that own their store wiring, with a nested
-ColumnOrderSectionContext managing the conflict-resolution modal state.
+ColumnOrderSectionContext managing this section's modal state.
 
 ## State Ownership Rule
 
 No modal or row state is prop-drilled through the section shell. Each
 delegate reads the selectors and dispatches the actions it needs itself:
 
-| Delegate                   | Reads (selectors)                                     | Dispatches (actions)                     |
-| -------------------------- | ----------------------------------------------------- | ---------------------------------------- |
-| `ColumnOrderSection`       | — (pure composition)                                  | —                                        |
-| `ColumnOrderSectionHeader` | columns, columnVisibility                             | — (toolbar delegates its own)            |
-| `ColumnOrderSectionBody`   | columns, columnOrder, columnPinning, columnVisibility | reorderColumns                           |
-| `ColumnOrderItemContent`   | —                                                     | toggleColumnPin, toggleColumnVisibility  |
-| `ColumnOrderSectionModals` | — (pure composition)                                  | —                                        |
-| `ColumnOrderPinSideModal`  | pinSideModal                                          | acceptPinSide, cancelPinSide             |
-| `PinConflictModal`         | conflictModal                                         | acceptPinConflict, cancelPinConflict     |
-| `UnpinConflictModal`       | unpinConflictModal                                    | acceptUnpinConflict, cancelUnpinConflict |
-| `OrderConflictModal`       | orderConflict                                         | acceptOrderConflict, cancelOrderConflict |
+| Delegate                    | Reads (selectors)                                                                     | Dispatches (actions)                                   |
+| --------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `ColumnOrderSection`        | — (pure composition)                                                                  | —                                                      |
+| `ColumnOrderSectionHeader`  | columns, renderedColumnKeys                                                           | — (toolbar delegates its own)                          |
+| `ColumnOrderSectionBody`    | columns, columnOrder, columnPinning, groupingKeys, renderedColumnKeys                 | reorderColumns                                         |
+| `ColumnOrderItemContent`    | —                                                                                     | toggleColumnPin, toggleColumnVisibility                |
+| `ColumnOrderSectionModals`  | — (pure composition)                                                                  | —                                                      |
+| `ColumnGroupingPromptModal` | columnGroupingPrompt, columns, groupingKeys, groupingAggregates, groupingCapabilities | acceptColumnGroupingPrompt, cancelColumnGroupingPrompt |
+| `ColumnOrderPinSideModal`   | pinSideModal                                                                          | acceptPinSide, cancelPinSide                           |
+| `PinConflictModal`          | conflictModal                                                                         | acceptPinConflict, cancelPinConflict                   |
+| `UnpinConflictModal`        | unpinConflictModal                                                                    | acceptUnpinConflict, cancelUnpinConflict               |
+| `OrderConflictModal`        | orderConflict                                                                         | acceptOrderConflict, cancelOrderConflict               |
 
-All four modals render the same shell — a description, a radio group of
-resolution options, and Accept/Cancel actions — so they delegate that shell to
-the shared presentational `ChoiceModal` (`components/ChoiceModal/`) and supply
-only their own title, copy, options, and data wiring. The shared `PinSideModal`
-(`components/PinSideModal/`) likewise stays presentational; the
-`ColumnOrderPinSideModal` wrapper is its local owner and wires it to the store.
+Every modal here but one renders the same shell — a description, a radio group,
+and Accept/Cancel actions — so it delegates that shell to the shared
+presentational `ChoiceModal` (`components/ChoiceModal/`) and supplies only its
+own title, copy, options, and data wiring. What the radio group offers differs:
+the conflict modals offer resolutions, while `ColumnGroupingPromptModal` offers
+the roles a column can take in the grouping (ADR-096) — the same shell answering
+a different question. `ColumnOrderPinSideModal` is the exception: it wraps the
+shared `PinSideModal` (`components/PinSideModal/`), which likewise stays
+presentational, and is its local owner.
 
 ## File Structure
 
@@ -56,7 +60,11 @@ ColumnOrderSection/
 │       ├── ColumnOrderItemContent.types.ts
 │       └── ColumnOrderItemContent.stylex.ts
 │
-├── ColumnOrderSectionModals/             → Hosts the four conflict modals (pure composition)
+├── ColumnGroupingPromptModal/            → Ask how an unnamed column should join the grouping (self-connected, no props; delegates shell to ChoiceModal)
+│   ├── ColumnGroupingPromptModal.component.tsx
+│   └── ColumnGroupingPromptModal.test.tsx
+│
+├── ColumnOrderSectionModals/             → Hosts this section's modals (pure composition)
 │   ├── ColumnOrderSectionModals.component.tsx
 │   └── ColumnOrderSectionModals.test.tsx
 │
@@ -81,7 +89,7 @@ ColumnOrderSection/
 │   ├── UnpinConflictModal.component.tsx
 │   └── UnpinConflictModal.test.tsx
 │
-└── utils/                                → Pin/order conflict utilities
+└── utils/                                → Pin/order conflict and grouping-prompt utilities
     ├── index.ts
     ├── applyPin.util.ts                   → Apply pin respecting static columns
     ├── buildAllOrderedColumns.util.ts     → Build complete ordered column list
@@ -95,7 +103,7 @@ ColumnOrderSection/
     └── restoreStaticColumnOrder.util.ts   → Restore static columns to positions
 ```
 
-The conflict modals and the Header/Body/Modals delegates are private
+The modals and the Header/Body/Modals delegates are private
 delegates (ADR-007): imported via direct file paths, no `index.ts`, and no
 Props re-exports.
 
@@ -111,7 +119,7 @@ graph LR
 
   Header --> SidePanelSectionHeader
   Header --> useGetColumns["useGetColumns (TableConfig)"]
-  Header --> useGetColumnVisibility["useGetColumnVisibility (selector)"]
+  Header --> useGetRenderedColumnKeys["useGetRenderedColumnKeys (section hook)"]
   Header --> COSToolbar2["ColumnOrderSectionToolbar (toolbar variant)"]
   Header --> filterSettingsColumns["filterSettingsColumns util"]
 
@@ -119,12 +127,17 @@ graph LR
   Body --> useGetColumns
   Body --> useGetColumnOrder["useGetColumnOrder (selector)"]
   Body --> useGetColumnPinning["useGetColumnPinning (selector)"]
-  Body --> useGetColumnVisibility
+  Body --> useGetGroupingKeys["useGetGroupingKeys (drawer selector)"]
+  Body --> useGetRenderedColumnKeys
   Body --> useReorderColumns["useReorderColumns (context action)"]
   Body --> buildAllOrderedColumns["buildAllOrderedColumns util"]
+  Body --> resolveDeclaredGroupingKeys["resolveDeclaredGroupingKeys util"]
+  Body --> hoistRenderedColumns["hoistRenderedColumns util"]
   Body --> createDraggableItems["createDraggableItems util"]
   Body --> filterSettingsColumns
   Body --> ItemContent["ColumnOrderItemContent"]
+  useGetRenderedColumnKeys --> resolveRenderedColumnKeys["resolveRenderedColumnKeys util"]
+  resolveRenderedColumnKeys --> getPinnedDerivedColumnsState["getPinnedDerivedColumnsState (the grid's own derivation)"]
   useReorderColumns --> GlobalSettings["GlobalSettingsContext order-conflict preference"]
 
   ItemContent --> LockIcon
@@ -132,10 +145,15 @@ graph LR
   ItemContent --> useToggleColumnPin["useToggleColumnPin (context action)"]
   ItemContent --> useToggleColumnVisibility["useToggleColumnVisibility (context action)"]
 
+  Modals --> ColumnGroupingPromptModal
   Modals --> ColumnOrderPinSideModal
   Modals --> PinConflictModal
   Modals --> UnpinConflictModal
   Modals --> OrderConflictModal
+
+  ColumnGroupingPromptModal --> useGetColumnGroupingPrompt["useGetColumnGroupingPrompt (context selector)"]
+  ColumnGroupingPromptModal --> resolveColumnGroupingChoices["resolveColumnGroupingChoices util"]
+  ColumnGroupingPromptModal --> GroupingPromptActions["useAcceptColumnGroupingPrompt / useCancelColumnGroupingPrompt"]
 
   ColumnOrderPinSideModal --> PinSideModal["PinSideModal (shared component)"]
   ColumnOrderPinSideModal --> useGetPinSideModal["useGetPinSideModal (context selector)"]
@@ -161,18 +179,20 @@ graph LR
 ```mermaid
 graph TD
   A["ColumnOrderSection renders SidePanelSectionMain"] --> B["ColumnOrderSectionHeader"]
-  B --> C["filterSettingsColumns → visible/total count title"]
+  B --> C["filterSettingsColumns ∩ renderedColumnKeys → painted/total count title"]
   B --> D["ColumnOrderSectionToolbar variant='toolbar'"]
 
   A --> E["ColumnOrderSectionBody"]
   E --> F["filterSettingsColumns + buildAllOrderedColumns → ordered list"]
-  F --> G["createDraggableItems → DraggableItem array"]
+  F --> F2["hoistRenderedColumns → painted columns first while grouped"]
+  F2 --> G["createDraggableItems → DraggableItem array"]
   G --> H["Each row: ColumnOrderItemContent (lock + label + Pin/Show toggles)"]
   E --> I["DraggableList → useReorderColumns on drop"]
 
   A --> J["ColumnOrderSectionToolbar variant='footer'"]
 
   A --> K["ColumnOrderSectionModals"]
+  K --> P["ColumnGroupingPromptModal → ChoiceModal (group key or aggregate)"]
   K --> L["ColumnOrderPinSideModal → shared PinSideModal (choose left/right)"]
   K --> M["PinConflictModal (self-connected)"]
   K --> N["UnpinConflictModal (self-connected)"]
@@ -201,7 +221,8 @@ graph TD
 The ColumnOrderSection uses **two nested contexts**:
 
 - **TableDrawerContext**: column state (order, pinning, visibility)
-- **ColumnOrderSectionContext**: modal state (conflict resolution flows)
+- **ColumnOrderSectionContext**: modal state (conflict resolution and the
+  grouping prompt)
 
 Actions in ColumnOrderSectionContext read/write to both stores.
 
@@ -230,13 +251,17 @@ Actions in ColumnOrderSectionContext read/write to both stores.
 | `filterSettingsColumns`        | Columns manageable in the section (no custom render, or static); shared by header counts + body list |
 | `getIsContiguousPin`           | Check if pin side maintains contiguity                                                               |
 | `getPinnedEntries`             | Flatten left/right pinning into keyed entries                                                        |
+| `hoistRenderedColumns`         | List the painted columns first, in the order the grid paints them; identity when nothing is grouped  |
 | `insertAdjacentToPinnedGroup`  | Place column next to its pin group                                                                   |
+| `isColumnNamedByGrouping`      | Whether the grouping names a column — a group key, or one carrying an applied aggregate              |
 | `pinAllBetween`                | Pin all columns between edge and target column                                                       |
 | `recalculatePinSides`          | Reassign left/right based on position after reorder                                                  |
 | `resolveClosestSide`           | Pick nearest pin side from edge distances                                                            |
 | `resolveClosestEdgeSide`       | Convert 'closest-edge' to actual 'left' or 'right'                                                   |
+| `resolveColumnGroupingChoices` | The roles a column can take in the grouping, or the refusal naming why it can take none              |
 | `resolvePinConflictState`      | Shared pin-conflict resolution to next `{ columnOrder, columnPinning }`                              |
 | `resolvePinOrderConflict`      | Apply one of three order/pin conflict resolutions                                                    |
+| `resolveRenderedColumnKeys`    | Run the grid's own column derivation over the drawer's draft, mapped back to declared keys           |
 | `resolveToggleColumnPinIntent` | Resolves pin/unpin toggle intent into direct update vs modal/auto-accept action                      |
 | `restoreStaticColumnOrder`     | Ensure static columns stay in their original positions                                               |
 | `restoreStaticPinnedColumns`   | Restores default pin side membership for static columns                                              |
