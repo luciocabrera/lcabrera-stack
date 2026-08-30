@@ -1,58 +1,20 @@
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
   buildWorkspaceDirectoryIndex,
-  collectClientSafetyReport,
+  collectDependencyClosure,
+  collectPublishedSourceFiles,
   collectScanDefects,
   scanWorkspaceDependencies,
   selectWorkspaceDependencies,
 } from './client-safety.mjs';
-
-const scaffold = (packages) => {
-  const root = mkdtempSync(join(tmpdir(), 'ui-client-safety-'));
-  writeFileSync(
-    join(root, 'pnpm-workspace.yaml'),
-    'packages:\n  - packages/*\n',
-  );
-
-  for (const { directory, name, sources = {} } of packages) {
-    const packageDir = join(root, 'packages', directory);
-    mkdirSync(join(packageDir, 'src'), { recursive: true });
-    writeFileSync(join(packageDir, 'package.json'), JSON.stringify({ name }));
-
-    for (const [fileName, text] of Object.entries(sources)) {
-      writeFileSync(join(packageDir, 'src', fileName), text);
-    }
-  }
-
-  return root;
-};
-
-const CLEAN_SOURCE = 'export const one = 1;\n';
-const SERVER_ONLY_SOURCE = "import { readFileSync } from 'node:fs';\n";
-
-const scaffoldWithConsumer = ({ dependencies, packages, publicApi }) => {
-  const root = scaffold([
-    {
-      directory: 'ui',
-      name: '@scope/ui',
-      sources: { 'public-api.ts': publicApi },
-    },
-    ...packages,
-  ]);
-
-  return {
-    manifest: { dependencies, name: '@scope/ui' },
-    publicApiFilePath: join(root, 'packages', 'ui', 'src', 'public-api.ts'),
-    root,
-    workspaceDirectories: buildWorkspaceDirectoryIndex(root),
-  };
-};
+import {
+  CLEAN_SOURCE,
+  scaffold,
+  SERVER_ONLY_SOURCE,
+} from './lib/client-safety-fixtures.mjs';
 
 describe('buildWorkspaceDirectoryIndex', () => {
   it('places a package by the name it publishes, not by the name of its directory', () => {
@@ -98,6 +60,151 @@ describe('selectWorkspaceDependencies', () => {
   });
 });
 
+describe('collectDependencyClosure', () => {
+  it('follows the edges a dependency declares, not only the ones this package declares', () => {
+    const root = scaffold([
+      {
+        dependencies: { '@scope/deep': 'workspace:*' },
+        directory: 'api',
+        name: '@scope/api',
+      },
+      { directory: 'deep', name: '@scope/deep' },
+    ]);
+
+    expect(
+      collectDependencyClosure({
+        manifest: {
+          dependencies: { '@scope/api': 'workspace:*' },
+          name: '@scope/ui',
+        },
+        workspaceDirectories: buildWorkspaceDirectoryIndex(root),
+      }),
+    ).toEqual([
+      {
+        packageDir: join(root, 'packages', 'api'),
+        packageName: '@scope/api',
+        requiredBy: '@scope/ui',
+      },
+      {
+        packageDir: join(root, 'packages', 'deep'),
+        packageName: '@scope/deep',
+        requiredBy: '@scope/api',
+      },
+    ]);
+  });
+
+  it('names a package once, as a direct dependency, when a dependency also declares it', () => {
+    const root = scaffold([
+      {
+        dependencies: { '@scope/utils': 'workspace:*' },
+        directory: 'api',
+        name: '@scope/api',
+      },
+      { directory: 'utils', name: '@scope/utils' },
+    ]);
+
+    expect(
+      collectDependencyClosure({
+        manifest: {
+          dependencies: {
+            '@scope/api': 'workspace:*',
+            '@scope/utils': 'workspace:*',
+          },
+          name: '@scope/ui',
+        },
+        workspaceDirectories: buildWorkspaceDirectoryIndex(root),
+      }).map(({ packageName, requiredBy }) => ({ packageName, requiredBy })),
+    ).toEqual([
+      { packageName: '@scope/api', requiredBy: '@scope/ui' },
+      { packageName: '@scope/utils', requiredBy: '@scope/ui' },
+    ]);
+  });
+
+  it('stops at the package the walk started from', () => {
+    const root = scaffold([
+      {
+        dependencies: { '@scope/ui': 'workspace:*' },
+        directory: 'api',
+        name: '@scope/api',
+      },
+      { directory: 'ui', name: '@scope/ui' },
+    ]);
+
+    expect(
+      collectDependencyClosure({
+        manifest: {
+          dependencies: { '@scope/api': 'workspace:*' },
+          name: '@scope/ui',
+        },
+        workspaceDirectories: buildWorkspaceDirectoryIndex(root),
+      }).map(({ packageName }) => packageName),
+    ).toEqual(['@scope/api']);
+  });
+
+  it('terminates on a dependency cycle', () => {
+    const root = scaffold([
+      {
+        dependencies: { '@scope/b': 'workspace:*' },
+        directory: 'a',
+        name: '@scope/a',
+      },
+      {
+        dependencies: { '@scope/a': 'workspace:*' },
+        directory: 'b',
+        name: '@scope/b',
+      },
+    ]);
+
+    expect(
+      collectDependencyClosure({
+        manifest: {
+          dependencies: { '@scope/a': 'workspace:*' },
+          name: '@scope/ui',
+        },
+        workspaceDirectories: buildWorkspaceDirectoryIndex(root),
+      }).map(({ packageName }) => packageName),
+    ).toEqual(['@scope/a', '@scope/b']);
+  });
+});
+
+describe('collectPublishedSourceFiles', () => {
+  it('leaves out what the package excludes from `files`, which no install receives', () => {
+    const root = scaffold([
+      {
+        directory: 'utils',
+        files: ['src', '!src/**/*.test.*', '!src/benchmarks'],
+        name: '@scope/utils',
+        sources: {
+          'benchmarks/merge.bench.ts': CLEAN_SOURCE,
+          'merge.test.ts': SERVER_ONLY_SOURCE,
+          'merge.ts': CLEAN_SOURCE,
+        },
+      },
+    ]);
+
+    expect(
+      collectPublishedSourceFiles(join(root, 'packages', 'utils')),
+    ).toEqual([join(root, 'packages', 'utils', 'src', 'merge.ts')]);
+  });
+
+  it('reads every source file when the manifest excludes nothing', () => {
+    const root = scaffold([
+      {
+        directory: 'utils',
+        name: '@scope/utils',
+        sources: { 'merge.test.ts': CLEAN_SOURCE, 'merge.ts': CLEAN_SOURCE },
+      },
+    ]);
+
+    expect(
+      collectPublishedSourceFiles(join(root, 'packages', 'utils')).sort(),
+    ).toEqual([
+      join(root, 'packages', 'utils', 'src', 'merge.test.ts'),
+      join(root, 'packages', 'utils', 'src', 'merge.ts'),
+    ]);
+  });
+});
+
 describe('collectScanDefects', () => {
   it('reports the empty dependency set — a scan of nothing is not a clean run', () => {
     expect(collectScanDefects([])).toEqual([
@@ -108,9 +215,16 @@ describe('collectScanDefects', () => {
   it('reports a dependency the roster could not place', () => {
     expect(
       collectScanDefects([
-        { packageDir: null, packageName: '@scope/ghost', sourceFiles: [] },
+        {
+          packageDir: null,
+          packageName: '@scope/ghost',
+          requiredBy: '@scope/api',
+          sourceFiles: [],
+        },
       ]),
-    ).toEqual([expect.stringContaining('@scope/ghost')]);
+    ).toEqual([
+      expect.stringContaining('@scope/ghost is a dependency of @scope/api'),
+    ]);
   });
 
   it('reports a dependency whose resolved directory held nothing to read', () => {
@@ -150,138 +264,19 @@ describe('scanWorkspaceDependencies', () => {
 
     expect(
       scanWorkspaceDependencies({
-        manifest: { dependencies: { '@scope/node': 'workspace:*' } },
+        manifest: {
+          dependencies: { '@scope/node': 'workspace:*' },
+          name: '@scope/ui',
+        },
         workspaceDirectories: buildWorkspaceDirectoryIndex(root),
       }),
     ).toEqual([
       {
         packageDir: join(root, 'packages', 'node-runtime'),
         packageName: '@scope/node',
+        requiredBy: '@scope/ui',
         sourceFiles: [join(root, 'packages', 'node-runtime', 'src', 'read.ts')],
       },
     ]);
-  });
-});
-
-describe('collectClientSafetyReport', () => {
-  it('names the packages it scanned when everything is client-safe', () => {
-    const { manifest, publicApiFilePath, workspaceDirectories } =
-      scaffoldWithConsumer({
-        dependencies: { '@scope/utils': 'workspace:*' },
-        packages: [
-          {
-            directory: 'utils',
-            name: '@scope/utils',
-            sources: { 'one.ts': CLEAN_SOURCE },
-          },
-        ],
-        publicApi: CLEAN_SOURCE,
-      });
-
-    expect(
-      collectClientSafetyReport({
-        manifest,
-        publicApiFilePath,
-        workspaceDirectories,
-      }),
-    ).toEqual({ reportLines: [], scannedPackageNames: ['@scope/utils'] });
-  });
-
-  it('fails on a server-only import in a workspace dependency whose directory differs from its name', () => {
-    const { manifest, publicApiFilePath, root, workspaceDirectories } =
-      scaffoldWithConsumer({
-        dependencies: { '@scope/node': 'workspace:*' },
-        packages: [
-          {
-            directory: 'node-runtime',
-            name: '@scope/node',
-            sources: { 'read.ts': SERVER_ONLY_SOURCE },
-          },
-        ],
-        publicApi: CLEAN_SOURCE,
-      });
-
-    expect(
-      collectClientSafetyReport({
-        manifest,
-        publicApiFilePath,
-        workspaceDirectories,
-      }).reportLines,
-    ).toContain(
-      `- @scope/node is a dependency, and ${join(root, 'packages', 'node-runtime', 'src', 'read.ts')} imports node:fs`,
-    );
-  });
-
-  it('fails when the manifest declares no workspace dependency at all', () => {
-    const { manifest, publicApiFilePath, workspaceDirectories } =
-      scaffoldWithConsumer({
-        dependencies: { isbot: '^5.0.0' },
-        packages: [
-          {
-            directory: 'utils',
-            name: '@scope/utils',
-            sources: { 'one.ts': CLEAN_SOURCE },
-          },
-        ],
-        publicApi: CLEAN_SOURCE,
-      });
-
-    const { reportLines, scannedPackageNames } = collectClientSafetyReport({
-      manifest,
-      publicApiFilePath,
-      workspaceDirectories,
-    });
-
-    expect(scannedPackageNames).toEqual([]);
-    expect(reportLines).toContain(
-      '- no workspace dependency was selected, so the closure was never opened — a scan of nothing is not a pass',
-    );
-  });
-
-  it('still fails on a server-only import reached from the public API itself', () => {
-    const { manifest, publicApiFilePath, workspaceDirectories } =
-      scaffoldWithConsumer({
-        dependencies: { '@scope/utils': 'workspace:*' },
-        packages: [
-          {
-            directory: 'utils',
-            name: '@scope/utils',
-            sources: { 'one.ts': CLEAN_SOURCE },
-          },
-        ],
-        publicApi: SERVER_ONLY_SOURCE,
-      });
-
-    expect(
-      collectClientSafetyReport({
-        manifest,
-        publicApiFilePath,
-        workspaceDirectories,
-      }).reportLines,
-    ).toContain(`- ${publicApiFilePath} imports node:fs`);
-  });
-});
-
-describe('the guard as this repository wires it', () => {
-  const uiRootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-  const repoRoot = resolve(uiRootDir, '..', '..');
-
-  it('opens every workspace dependency packages/ui really declares', () => {
-    const manifest = JSON.parse(
-      readFileSync(join(uiRootDir, 'package.json'), 'utf8'),
-    );
-
-    const scans = scanWorkspaceDependencies({
-      manifest,
-      workspaceDirectories: buildWorkspaceDirectoryIndex(repoRoot),
-    });
-
-    expect(scans.map(({ packageName }) => packageName)).toEqual(
-      Object.entries(manifest.dependencies)
-        .filter(([, versionSpec]) => versionSpec.startsWith('workspace:'))
-        .map(([name]) => name),
-    );
-    expect(scans.length).toBeGreaterThan(0);
-    expect(collectScanDefects(scans)).toEqual([]);
   });
 });

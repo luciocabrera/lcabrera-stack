@@ -1,20 +1,21 @@
 /**
  * The deciding half of this package's client-safety gate: which imports make a
- * package server-only, which of this package's dependencies are workspace
- * packages, and where each of those lives on disk. The effects — resolving
- * paths, printing, the exit code — are in `check-public-api-client-safe.mjs`
- * beside it.
+ * package server-only, which packages sit in this one's workspace dependency
+ * closure, and which of their files a consumer actually installs. The effects —
+ * resolving paths, printing, the exit code — are in
+ * `check-public-api-client-safe.mjs` beside it.
  *
- * Two rules here exist because the gate reported a pass it had not earned for a
+ * Three rules here exist because the gate reported a pass it had not earned for a
  * scope rename's worth of commits: dependency selection asks the workspace
- * roster rather than matching a name prefix, and a scan that opened nothing is
+ * roster rather than matching a name prefix, it follows every edge rather than
+ * only the ones this package declares itself, and a scan that opened nothing is
  * reported as a defect instead of as a clean run. The requirement this serves is
  * docs/product/requirements/the-ui-package-stays-client-safe.md.
  */
 
 import { deriveWorkspaces } from '@lcabrera/repo-standards/workspace-scopes';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, matchesGlob, relative, resolve, sep } from 'node:path';
 
 const SOURCE_FILE_PATTERN = /\.(?:tsx?|mjs|js)$/;
 const WORKSPACE_PARENT_DIR = { app: 'apps', pkg: 'packages' };
@@ -110,14 +111,40 @@ const collectSourceFiles = (directoryPath) => {
   );
 };
 
-const readManifestName = (packageDir) => {
+const readManifest = (packageDir) => {
   const manifestPath = join(packageDir, 'package.json');
 
-  if (!existsSync(manifestPath)) {
-    return null;
-  }
+  return existsSync(manifestPath)
+    ? JSON.parse(readFileSync(manifestPath, 'utf8'))
+    : null;
+};
 
-  return JSON.parse(readFileSync(manifestPath, 'utf8')).name ?? null;
+/** The negated entries of a manifest's `files`: what an install never receives. */
+const collectUnpublishedGlobs = (manifest) =>
+  (manifest.files ?? [])
+    .filter((entry) => entry.startsWith('!'))
+    .map((entry) => entry.slice(1));
+
+const isPublished = ({ filePath, packageDir, unpublishedGlobs }) => {
+  const packageRelativePath = relative(packageDir, filePath)
+    .split(sep)
+    .join('/');
+
+  return !unpublishedGlobs.some(
+    (glob) =>
+      matchesGlob(packageRelativePath, glob) ||
+      matchesGlob(packageRelativePath, `${glob}/**`),
+  );
+};
+
+export const collectPublishedSourceFiles = (packageDir) => {
+  const unpublishedGlobs = collectUnpublishedGlobs(
+    readManifest(packageDir) ?? {},
+  );
+
+  return collectSourceFiles(join(packageDir, 'src')).filter((filePath) =>
+    isPublished({ filePath, packageDir, unpublishedGlobs }),
+  );
 };
 
 export const buildWorkspaceDirectoryIndex = (repoRoot) =>
@@ -126,7 +153,7 @@ export const buildWorkspaceDirectoryIndex = (repoRoot) =>
       .map(({ kind, name }) => join(repoRoot, WORKSPACE_PARENT_DIR[kind], name))
       .map((packageDir) => ({
         packageDir,
-        packageName: readManifestName(packageDir),
+        packageName: readManifest(packageDir)?.name ?? null,
       }))
       .filter(({ packageName }) => packageName !== null)
       .map(({ packageDir, packageName }) => [packageName, packageDir]),
@@ -147,22 +174,77 @@ export const selectWorkspaceDependencies = ({
       packageName: name,
     }));
 
+const collectEdgesOf = ({ dependency, workspaceDirectories }) =>
+  dependency.packageDir === null
+    ? []
+    : selectWorkspaceDependencies({
+        manifest: readManifest(dependency.packageDir) ?? {},
+        workspaceDirectories,
+      }).map((edge) => ({ ...edge, requiredBy: dependency.packageName }));
+
+const selectArrivals = ({ frontier, seen }) =>
+  frontier.filter(
+    (dependency, index) =>
+      !seen.has(dependency.packageName) &&
+      frontier.findIndex(
+        ({ packageName }) => packageName === dependency.packageName,
+      ) === index,
+  );
+
+// Breadth-first, so a package this one declares itself is recorded against this
+// package rather than against whichever dependency the walk happened to reach it
+// through, and so a cycle ends at the `seen` set.
+const walkClosure = ({ frontier, seen, workspaceDirectories }) => {
+  const arrivals = selectArrivals({ frontier, seen });
+
+  if (arrivals.length === 0) {
+    return [];
+  }
+
+  return [
+    ...arrivals,
+    ...walkClosure({
+      frontier: arrivals.flatMap((dependency) =>
+        collectEdgesOf({ dependency, workspaceDirectories }),
+      ),
+      seen: new Set([
+        ...seen,
+        ...arrivals.map(({ packageName }) => packageName),
+      ]),
+      workspaceDirectories,
+    }),
+  ];
+};
+
+export const collectDependencyClosure = ({ manifest, workspaceDirectories }) =>
+  walkClosure({
+    frontier: selectWorkspaceDependencies({
+      manifest,
+      workspaceDirectories,
+    }).map((dependency) => ({ ...dependency, requiredBy: manifest.name })),
+    seen: new Set(manifest.name === undefined ? [] : [manifest.name]),
+    workspaceDirectories,
+  });
+
 export const scanWorkspaceDependencies = ({ manifest, workspaceDirectories }) =>
-  selectWorkspaceDependencies({ manifest, workspaceDirectories }).map(
+  collectDependencyClosure({ manifest, workspaceDirectories }).map(
     (dependency) => ({
       ...dependency,
       sourceFiles:
         dependency.packageDir === null
           ? []
-          : collectSourceFiles(join(dependency.packageDir, 'src')),
+          : collectPublishedSourceFiles(dependency.packageDir),
     }),
   );
 
-const collectServerOnlyUsage = ({ packageName, sourceFiles }) =>
+const describeEdge = ({ packageName, requiredBy }) =>
+  `${packageName} is a dependency of ${requiredBy}`;
+
+const collectServerOnlyUsage = ({ packageName, requiredBy, sourceFiles }) =>
   sourceFiles.flatMap((filePath) =>
     collectStaticSources(readFileSync(filePath, 'utf8'))
       .filter((source) => source.startsWith('node:'))
-      .map((source) => ({ filePath, packageName, source })),
+      .map((source) => ({ filePath, packageName, requiredBy, source })),
   );
 
 export const collectScanDefects = (scans) => [
@@ -174,8 +256,8 @@ export const collectScanDefects = (scans) => [
   ...scans
     .filter(({ packageDir }) => packageDir === null)
     .map(
-      ({ packageName }) =>
-        `${packageName} is declared as a workspace dependency, but no workspace in pnpm-workspace.yaml publishes that name`,
+      (scan) =>
+        `${describeEdge(scan)}, but no workspace in pnpm-workspace.yaml publishes that name`,
     ),
   ...scans
     .filter(
@@ -184,7 +266,7 @@ export const collectScanDefects = (scans) => [
     )
     .map(
       ({ packageDir, packageName }) =>
-        `${packageName} resolved to ${packageDir}, whose src/ holds no source file — nothing was scanned for it`,
+        `${packageName} resolved to ${packageDir}, whose published src/ holds no source file — nothing was scanned for it`,
     ),
 ];
 
@@ -216,12 +298,12 @@ const formatDependencyViolations = (violations) =>
     ? []
     : [
         '',
-        'Workspace dependencies that are not client-safe — a client-safe package',
-        'may only depend on client-safe workspace packages, so move the',
-        'server-only half out or depend on a narrower package:',
+        'Workspace packages in the dependency closure that are not client-safe — a',
+        'client-safe package may only depend on client-safe workspace packages, so',
+        'move the server-only half out or depend on a narrower package:',
         ...violations.map(
-          ({ filePath, packageName, source }) =>
-            `- ${packageName} is a dependency, and ${filePath} imports ${source}`,
+          (violation) =>
+            `- ${describeEdge(violation)}, and ${violation.filePath} imports ${violation.source}`,
         ),
       ];
 

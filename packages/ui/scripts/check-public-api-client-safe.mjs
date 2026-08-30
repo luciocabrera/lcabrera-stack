@@ -8,13 +8,20 @@
  *  1. **Import graph.** Walk `src/public-api.ts` through its relative imports
  *     and fail on any `node:` specifier.
  *
- *  2. **Dependency closure.** For every workspace package in this package's
- *     runtime `dependencies`, scan that package's whole source for `node:`
- *     specifiers and fail if it has any. Which dependencies those are, and which
+ *  2. **Dependency closure.** Walk this package's runtime `dependencies` to
+ *     every workspace package they reach — theirs, and theirs in turn — and fail
+ *     on a `node:` specifier anywhere in the source those packages publish. The
+ *     walk is transitive because the invariant is: an install pulls the whole
+ *     closure, so a direct-edge-only check passes whenever a server-only import
+ *     sits one package further out. Which dependencies those are, and which
  *     directory each one lives in, are answered by the workspace roster rather
  *     than by the shape of the package name: a name-prefix filter stopped
  *     matching anything at the npm scope rename (ADR-040) and this half went
  *     quiet with no edit and no failing test (#1010).
+ *
+ *     A file a dependency's `files` field excludes — its colocated tests, its
+ *     benchmarks — is not read. No install receives it, so a `node:` import
+ *     there reaches no consumer's bundle and is not this gate's business.
  *
  * Check 2 is the one that matters and it did not exist. Check 1 only followed
  * paths starting with `.`, so it never crossed a package boundary: it reported

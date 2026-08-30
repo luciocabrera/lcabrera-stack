@@ -23,13 +23,16 @@ Fix #1010: `packages/ui`'s client-safety guard selected its dependency closure b
 a `@repo/` name prefix and placed each package by string substitution, so after
 the npm scope rename it scanned nothing and printed PASS. Selection and
 placement now come from the workspace roster, and a scan that opened no file is
-reported as a defect instead of a clean run.
+reported as a defect instead of a clean run. Review round 2 widened the walk to
+the whole dependency closure — the packages a dependency declares, to any depth —
+and narrowed what it reads to the source each package publishes, so a colocated
+test no install receives is no longer a violation.
 
 Carries one change outside the issue, at the repository owner's request: a
 one-line edit to `.github/skills/unslop/SKILL.md`.
 
 ## Status / next
 
-- Current step: gate run, PR #1036 open as a draft
+- Current step: round 2 — both review threads addressed, gate re-run
 - Blockers: none
 - Next: verification
