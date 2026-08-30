@@ -2,7 +2,7 @@
 id: fold-level-semantics
 title: A fold control folds the groups its own column states
 owner: agent:claude
-status: active
+status: review
 branch: chore/1041-fold-level-semantics
 area:
   - packages/ui/src/components/Table/contexts/TableConfig/expansion/**
@@ -26,6 +26,6 @@ A fold control folds the groups its own column states
 
 ## Status / next
 
-- Current step: fold change implemented, gate running
+- Current step: fold change and dependency refresh pushed, `vp run check:safe` green
 - Blockers: none
-- Next: dependency refresh in its own commit, then review
+- Next: verification, then merge. The PR stays draft until it passes.
