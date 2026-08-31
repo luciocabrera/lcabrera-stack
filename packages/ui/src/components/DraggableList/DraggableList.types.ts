@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 
 export type DraggableItem = {
   readonly content: ReactNode;
+  /** Items sharing one value may not be split apart by a drop. */
+  readonly groupId?: string;
   readonly id: string;
   readonly isDraggable?: boolean;
 };

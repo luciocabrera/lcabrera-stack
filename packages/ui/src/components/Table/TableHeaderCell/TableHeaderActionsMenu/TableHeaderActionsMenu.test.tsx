@@ -356,10 +356,11 @@ describe('TableHeaderActionsMenu', () => {
         />,
       );
 
-      // sort │ group │ pin │ hide │ manage — four boundaries, one more than the
-      // same column renders with grouping off. No capability is resolved for
-      // this column, so the aggregation-mode block contributes none.
-      expect(screen.getAllByRole('separator')).toHaveLength(4);
+      // sort │ group │ fold │ pin │ hide │ manage — five boundaries, two more
+      // than the same column renders with grouping off. No capability is
+      // resolved for this column, so the aggregation-mode block contributes
+      // none.
+      expect(screen.getAllByRole('separator')).toHaveLength(5);
     });
 
     it('adds the aggregation-mode block only once a capability is resolved', () => {
@@ -391,7 +392,7 @@ describe('TableHeaderActionsMenu', () => {
       expect(screen.getByText('Count')).not.toBeNull();
       expect(screen.getByText('No Aggregate')).not.toBeNull();
       // One more boundary than the absent-capability case above.
-      expect(screen.getAllByRole('separator')).toHaveLength(5);
+      expect(screen.getAllByRole('separator')).toHaveLength(6);
     });
 
     it('drops only the aggregation block once the column becomes a group key', () => {
@@ -441,8 +442,8 @@ describe('TableHeaderActionsMenu', () => {
       expect(screen.queryByText('Sum')).toBeNull();
       expect(screen.queryByText('Count')).toBeNull();
       expect(screen.queryByText('No Aggregate')).toBeNull();
-      // Back to the four boundaries the block-less grouping menu renders.
-      expect(screen.getAllByRole('separator')).toHaveLength(4);
+      // Back to the five boundaries the block-less grouping menu renders.
+      expect(screen.getAllByRole('separator')).toHaveLength(5);
     });
 
     it('renders a trigger for a locked column that has nothing else to offer', () => {
@@ -459,7 +460,12 @@ describe('TableHeaderActionsMenu', () => {
       );
 
       expect(screen.getByText('Group by This')).not.toBeNull();
-      expect(screen.queryByRole('separator')).toBeNull();
+      // One separator, and it is the grouping block's own — between naming a
+      // key and folding the groups. The shell adds none, because there is no
+      // second section for this column to be separated from.
+      expect(screen.getAllByRole('separator')).toHaveLength(1);
+      expect(screen.queryByText('Pin Left')).toBeNull();
+      expect(screen.queryByText('Manage Column')).toBeNull();
     });
   });
 });
@@ -498,7 +504,7 @@ describe('the layout actions a grouped column cannot take', () => {
     expect(
       renderGroupedMenu({ columnKey: 'name', columnLabel: 'Name' }),
     ).toStrictEqual([true, true, true, true]);
-    expect(getMenuButton('Remove from Grouping').disabled).toBe(false);
+    expect(getMenuButton('Remove This Group').disabled).toBe(false);
   });
 
   it('refuses only the pinning on a measure, and leaves Hide Column working', () => {
@@ -516,6 +522,6 @@ describe('the layout actions a grouped column cannot take', () => {
     expect(
       renderGroupedMenu({ columnKey: 'name', columnLabel: 'Name' }),
     ).toStrictEqual([false, false, false, false]);
-    expect(getMenuButton('Remove from Grouping').disabled).toBe(true);
+    expect(getMenuButton('Remove This Group').disabled).toBe(true);
   });
 });

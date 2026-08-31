@@ -107,3 +107,77 @@ describe('useDraggableList', () => {
     expect(result.current.dragItemId.current).toBeUndefined();
   });
 });
+
+const grouped: DraggableItem[] = [
+  { content: 'Minimum', groupId: 'total', id: 'total:min' },
+  { content: 'Maximum', groupId: 'total', id: 'total:max' },
+  { content: 'Sum', groupId: 'total', id: 'total:sum' },
+  { content: 'Count', groupId: 'order', id: 'order:count' },
+];
+
+type DropArgs = {
+  readonly from: string;
+  readonly to: string;
+};
+
+const drop = ({ from, to }: DropArgs) => {
+  const onOrderChange = vi.fn();
+  const { result } = renderHook(() =>
+    useDraggableList({ initialItems: grouped, onOrderChange }),
+  );
+
+  act(() => {
+    result.current.handleDragStart(from);
+    result.current.handleDragEnter(to);
+    result.current.handleDragEnd();
+  });
+
+  return {
+    ids: result.current.items.map((item) => item.id),
+    onOrderChange,
+  };
+};
+
+describe('a drop that would split a group', () => {
+  it('is refused, leaving the list and its listeners untouched', () => {
+    const { ids, onOrderChange } = drop({
+      from: 'order:count',
+      to: 'total:max',
+    });
+
+    expect(ids).toStrictEqual([
+      'total:min',
+      'total:max',
+      'total:sum',
+      'order:count',
+    ]);
+    expect(onOrderChange).not.toHaveBeenCalled();
+  });
+
+  it('allows the whole group to move past the other one', () => {
+    const { ids, onOrderChange } = drop({
+      from: 'order:count',
+      to: 'total:min',
+    });
+
+    expect(ids).toStrictEqual([
+      'order:count',
+      'total:min',
+      'total:max',
+      'total:sum',
+    ]);
+    expect(onOrderChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows a reorder inside one group', () => {
+    const { ids, onOrderChange } = drop({ from: 'total:sum', to: 'total:min' });
+
+    expect(ids).toStrictEqual([
+      'total:sum',
+      'total:min',
+      'total:max',
+      'order:count',
+    ]);
+    expect(onOrderChange).toHaveBeenCalledTimes(1);
+  });
+});

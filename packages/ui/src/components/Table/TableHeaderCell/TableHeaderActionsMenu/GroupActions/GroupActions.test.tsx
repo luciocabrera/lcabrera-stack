@@ -433,7 +433,9 @@ describe('GroupActions', () => {
       expect(screen.queryByText('Count')).toBeNull();
       // The clear item goes with them: "nothing to offer" has one exit.
       expect(screen.queryByText('No Aggregate')).toBeNull();
-      expect(screen.queryByTestId('separator')).toBeNull();
+      // The one separator left is the fold block's own, above it — the
+      // aggregation block contributes none of its own.
+      expect(screen.getAllByTestId('separator')).toHaveLength(1);
     });
 
     it('leaves the rest of the grouping section untouched by that suppression', () => {
@@ -898,13 +900,13 @@ describe('GroupActions', () => {
   });
 });
 
-describe('Remove from Grouping', () => {
+describe('Remove This Group', () => {
   it('drops this key alone, leaving the rest of the grouping standing', () => {
     groupingKeysRef.current = ['city', 'order_status'];
 
     render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 
-    fireEvent.click(getButton('Remove from Grouping'));
+    fireEvent.click(getButton('Remove This Group'));
 
     expect(mockToggleGroupKey).toHaveBeenCalledWith({
       columnKey: 'order_status',
@@ -919,7 +921,7 @@ describe('Remove from Grouping', () => {
 
     render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 
-    expect(getButton('Remove from Grouping').disabled).toBe(true);
+    expect(getButton('Remove This Group').disabled).toBe(true);
   });
 
   it('is absent under a curated grouping, like the two items beside it', () => {
@@ -928,7 +930,7 @@ describe('Remove from Grouping', () => {
 
     render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 
-    expect(screen.queryByText('Remove from Grouping')).toBeNull();
+    expect(screen.queryByText('Remove This Group')).toBeNull();
     expect(screen.queryByText('Group by This')).toBeNull();
     expect(screen.queryByText('Clear Grouping')).toBeNull();
   });
@@ -944,7 +946,7 @@ describe('Remove from Grouping', () => {
 
     expect(labels.slice(0, 3)).toStrictEqual([
       'Group by This',
-      'Remove from Grouping',
+      'Remove This Group',
       'Clear Grouping',
     ]);
   });

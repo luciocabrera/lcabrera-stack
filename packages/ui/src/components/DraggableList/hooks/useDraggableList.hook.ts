@@ -5,6 +5,8 @@ import type {
   UseDraggableListProps,
 } from '../DraggableList.types';
 
+import { isGroupedOrderContiguous } from '../utils';
+
 export const useDraggableList = ({
   initialItems,
   onOrderChange,
@@ -56,6 +58,12 @@ export const useDraggableList = ({
     }
 
     updatedItems.splice(toIndex, 0, movedItem);
+
+    if (!isGroupedOrderContiguous(updatedItems)) {
+      dragItemId.current = undefined;
+      dragOverItemId.current = undefined;
+      return;
+    }
 
     setItems(updatedItems);
 
