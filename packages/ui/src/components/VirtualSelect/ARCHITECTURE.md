@@ -18,7 +18,8 @@ VirtualSelect/
 │   └── (see contexts/ARCHITECTURE.md)  composes VirtualListProvider
 │
 ├── VirtualSelectHeader/              → Private delegate — busy overlay + trigger composition;
-│                                        zero props, reads only isBusy
+│                                        zero props, reads only isBusy — deliberately, so a
+│                                        disabled select structurally cannot shimmer
 │
 ├── VirtualSelectDropdown/            → Private delegate — positioned listbox shell around
 │                                        VirtualListContent; zero props (meta + list config selectors)
@@ -136,26 +137,23 @@ Owned by `VirtualSelectTrigger`: the trigger holds its own ref, runs `useVirtual
 
 `useClickOutside` listens on `containerRef` (wraps both header and dropdown). When a click lands outside the container, `closeDropdown()` sets `isOpen = false`.
 
-## Busy State
+## Busy and Disabled
 
-Owned by `VirtualSelectHeader`: when `isBusy` is true, a shimmer overlay renders over the container and the trigger is disabled so the dropdown cannot be opened while the parent UI is loading. `useVirtualSelectDropdown` also suppresses `toggleDropdown` while busy.
+Two causes, one effect on interaction and only one on paint. `isBusy` says the
+parent is loading; `isDisabled` says this select is not to be used. Both make the
+select inert — `useVirtualSelectDropdown` and `useVirtualSelectTrigger` read
+`isInert`, which is either one, and suppress `toggleDropdown` — but the shimmer
+overlay belongs to `isBusy` alone, and `VirtualSelectHeader` reads that selector
+and no other, so it cannot be drawn for a disabled select.
+
+That separation is the fix for a real bug rather than a tidy-up: with no disabled
+state, a caller that needed one reached for `isBusy`, and the "Select a
+function…" picker shimmered permanently.
 
 ## Props
 
-| Prop               | Type                           | Default           | Description                                           |
-| ------------------ | ------------------------------ | ----------------- | ----------------------------------------------------- |
-| `customStylex`     | `StyleXStyles`                 | —                 | Style overrides for the dropdown container            |
-| `dataState`        | `VirtualListDataState`         | —                 | Async data (mutually exclusive with `options`)        |
-| `isBusy`           | `boolean`                      | `false`           | Shows a shimmer overlay and disables trigger input    |
-| `isAlwaysOpen`     | `boolean`                      | `false`           | List is always visible; trigger is non-interactive    |
-| `listboxId`        | `string`                       | generated         | id wiring the trigger/listbox ARIA relationship       |
-| `listMaxHeight`    | `string`                       | `LIST_MAX_HEIGHT` | CSS max-height for the VirtualList scroll area        |
-| `mode`             | `'single' \| 'multi'`          | —                 | Selection behaviour (required)                        |
-| `onChange`         | `(selected: string[]) => void` | —                 | Called on every selection change                      |
-| `onFetchInitial`   | `() => Promise<void> \| void`  | —                 | Fires once when the select mounts (composed provider) |
-| `onFetchMore`      | `() => Promise<void> \| void`  | —                 | Infinite-scroll fetch (via the fetch-more action)     |
-| `onOpenChange`     | `(isOpen: boolean) => void`    | —                 | Notifies parent of open/close state                   |
-| `options`          | `string[]`                     | `[]`              | Static options (used when no `dataState`)             |
-| `placeholder`      | `string`                       | `'Select...'`     | Shown when nothing is selected                        |
-| `selected`         | `string[]`                     | —                 | Controlled selected values (required)                 |
-| `shouldFillHeight` | `boolean`                      | `false`           | Expand to fill available vertical space               |
+The table that stood here listed every prop with its type and default, which is
+`VirtualSelectProps` written twice — and it went stale the moment `isDisabled`
+landed, still naming `isBusy` as the only way to make the trigger inert. Read the
+type. What it cannot tell you is above: which of the two inert causes draws a
+shimmer, and why they are separate.
