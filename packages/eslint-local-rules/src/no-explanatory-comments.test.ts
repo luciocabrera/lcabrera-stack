@@ -86,12 +86,7 @@ ruleTester.run('no-explanatory-comments', rule, {
       '  readonly column?: typeof x;',
       '};',
     ),
-    inside(
-      'export type Descriptor = {',
-      '  /** Absent means off, as issue #850 established. */',
-      '  readonly column?: typeof x;',
-      '};',
-    ),
+
     {
       ...inside(
         'export type Descriptor = {',
@@ -239,6 +234,10 @@ ruleTester.run('no-explanatory-comments', rule, {
       '  readonly port?: typeof x;',
       '  /** American Depositary Receipt (ADR) ratio. */',
       '  readonly ratio?: typeof x;',
+      '  /** The client may issue 3 retries before giving up. */',
+      '  readonly retries?: typeof x;',
+      '  /** Vendor status code PR2 means partially refunded. */',
+      '  readonly status?: typeof x;',
       '};',
     ),
     ok(

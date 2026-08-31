@@ -69,7 +69,7 @@ type Options = readonly [
 
 const DEFAULT_MEMBER_NOTE_MAX_LENGTH = 120;
 
-const RECORD_REFERENCE = /\badr[-\s]?\d|\b(?:issue|pull request|pr)\s*#?\d/i;
+const RECORD_REFERENCE = /\badr[-\s]?\d/i;
 
 const DEFAULT_DIRECTIVES = [
   '#__PURE__',

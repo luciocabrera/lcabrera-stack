@@ -24,9 +24,8 @@ import process from 'node:process';
 
 import {
   classifyProbe,
-  PROBE_RULE,
   PROBE_WORKSPACES,
-  probeSource,
+  PROBES,
 } from './lib/eslint-pass-probe.mjs';
 
 const REPO_ROOT = process.cwd();
@@ -34,13 +33,22 @@ const REPO_ROOT = process.cwd();
 const eslintBin = (workspace) =>
   join(REPO_ROOT, workspace, 'node_modules', '.bin', 'eslint');
 
-const withProbeFile = (workspace, run) => {
-  const dir = mkdtempSync(join(REPO_ROOT, workspace, '.eslint-probe-'));
+const probeRoot = (workspace) => {
+  const src = join(REPO_ROOT, workspace, 'src');
+
+  return existsSync(src)
+    ? { dir: src, prefix: 'src/' }
+    : { dir: join(REPO_ROOT, workspace), prefix: '' };
+};
+
+const withProbeFile = (workspace, probe, run) => {
+  const { dir: root, prefix } = probeRoot(workspace);
+  const dir = mkdtempSync(join(root, '.eslint-probe-'));
 
   try {
-    writeFileSync(join(dir, 'probe.ts'), probeSource(), 'utf8');
+    writeFileSync(join(dir, 'probe.ts'), probe.source(), 'utf8');
 
-    return run(`${basename(dir)}/probe.ts`);
+    return run(`${prefix}${basename(dir)}/probe.ts`);
   } finally {
     rmSync(dir, { force: true, recursive: true });
   }
@@ -71,37 +79,43 @@ const FAILURE_HINT = {
     `  and read the TypeError. If it names \`isExternalModuleNameRelative\`, the\n` +
     `  \`packageExtensions\` entry for eslint-plugin-perfectionist in\n` +
     `  pnpm-workspace.yaml has been lost or overridden (#472).`,
-  silent:
-    `the pass ran but never reported \`${PROBE_RULE}\` for a deliberately\n` +
-    `  misordered import, so the rule is not loaded. Check the shared eslint\n` +
-    `  configs in @lcabrera/vite-config.`,
 };
 
-const verdictFor = (workspace) => {
+const silentHint = (probe) =>
+  `the pass ran but never reported \`${probe.rule}\` for\n  ${probe.silentHint}`;
+
+const hintFor = (verdict, probe) =>
+  verdict === 'silent' ? silentHint(probe) : FAILURE_HINT[verdict];
+
+const verdictFor = (workspace, probe) => {
   if (!existsSync(eslintBin(workspace))) {
     return 'no-binary';
   }
 
-  return withProbeFile(workspace, (file) =>
-    classifyProbe(lintProbe(workspace, file)),
+  return withProbeFile(workspace, probe, (file) =>
+    classifyProbe(lintProbe(workspace, file), probe.rule),
   );
 };
 
-const failures = PROBE_WORKSPACES.flatMap((workspace) => {
-  const verdict = verdictFor(workspace);
+const failures = PROBE_WORKSPACES.flatMap((workspace) =>
+  PROBES.flatMap((probe) => {
+    const verdict = verdictFor(workspace, probe);
 
-  return verdict === 'reported' ? [] : [{ verdict, workspace }];
-});
+    return verdict === 'reported' ? [] : [{ probe, verdict, workspace }];
+  }),
+);
 
 if (failures.length > 0) {
-  for (const { verdict, workspace } of failures) {
-    process.stderr.write(`✗ ${workspace}: ${FAILURE_HINT[verdict]}\n`);
+  for (const { probe, verdict, workspace } of failures) {
+    process.stderr.write(
+      `✗ ${workspace} (${probe.rule}): ${hintFor(verdict, probe)}\n`,
+    );
   }
 
   process.exitCode = 1;
 } else {
   process.stdout.write(
-    `eslint pass verified: \`${PROBE_RULE}\` reports the planted violation in ` +
-      `${PROBE_WORKSPACES.join(', ')}.\n`,
+    `eslint pass verified: ${PROBES.length} rule(s) report the planted ` +
+      `violation in ${PROBE_WORKSPACES.join(', ')}.\n`,
   );
 }
