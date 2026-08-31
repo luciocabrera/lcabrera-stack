@@ -3,6 +3,7 @@ export { useInfiniteScroll } from './useInfiniteScroll.hook';
 export { useScrollResetAfterLoad } from './useScrollResetAfterLoad.hook';
 export { useSyncTableGroupExpansion } from './useSyncTableGroupExpansion.hook';
 export { useTableCellFocus } from './useTableCellFocus.hook';
+export { useTableColumnLayoutLock } from './useTableColumnLayoutLock.hook';
 export { useTableGridFocus } from './useTableGridFocus.hook';
 export { useTableGroupFoldAll } from './useTableGroupFoldAll.hook';
 export { useTableGroupLevelFold } from './useTableGroupLevelFold.hook';

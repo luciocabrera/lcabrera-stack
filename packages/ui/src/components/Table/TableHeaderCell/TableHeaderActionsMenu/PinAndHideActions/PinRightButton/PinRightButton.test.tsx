@@ -10,10 +10,17 @@ import {
   vi,
 } from 'vite-plus/test';
 
-const { mockSetColumnPinning, normalizedColumnRef } = vi.hoisted(() => ({
-  mockSetColumnPinning: vi.fn(),
-  normalizedColumnRef: { current: {} as Record<string, unknown> },
-}));
+import type { TableColumnLayoutLock } from '#ui/components/Table/Table.types';
+
+const { layoutLockRef, mockSetColumnPinning, normalizedColumnRef } = vi.hoisted(
+  () => ({
+    layoutLockRef: {
+      current: undefined as TableColumnLayoutLock | undefined,
+    },
+    mockSetColumnPinning: vi.fn(),
+    normalizedColumnRef: { current: {} as Record<string, unknown> },
+  }),
+);
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
   useSetColumnPinning: () => mockSetColumnPinning,
@@ -21,6 +28,10 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetNormalizedColumn: () => normalizedColumnRef.current,
+}));
+
+vi.mock('#ui/components/Table/hooks', () => ({
+  useTableColumnLayoutLock: () => layoutLockRef.current,
 }));
 
 vi.mock('#ui/components/Table/TableActionsPopover', () => ({
@@ -42,6 +53,7 @@ const getButton = () => {
 
 beforeEach(() => {
   normalizedColumnRef.current = { key: 'name', label: 'Name' };
+  layoutLockRef.current = undefined;
 });
 
 afterEach(() => {
@@ -97,5 +109,47 @@ describe('PinRightButton', () => {
     render(<PinRightButton columnKey='name' onClose={mockOnClose} />);
 
     expect(getButton().disabled).toBe(true);
+  });
+});
+
+describe('PinRightButton under a layout lock', () => {
+  it('is disabled while the column is a group key', () => {
+    layoutLockRef.current = 'group-key';
+
+    render(
+      <PinRightButton columnKey='name' onClose={mockOnClose} pinSide='left' />,
+    );
+
+    expect(getButton().disabled).toBe(true);
+  });
+
+  it('is disabled while the column is a measure', () => {
+    layoutLockRef.current = 'measure';
+
+    render(
+      <PinRightButton columnKey='name' onClose={mockOnClose} pinSide='left' />,
+    );
+
+    expect(getButton().disabled).toBe(true);
+  });
+
+  it('states the reason on the item, which fires no pointer events once disabled', () => {
+    layoutLockRef.current = 'group-key';
+
+    render(
+      <PinRightButton columnKey='name' onClose={mockOnClose} pinSide='left' />,
+    );
+
+    expect(getButton().getAttribute('title')).toBe(
+      'Cannot pin this column: a grouped column is always shown and always pinned to the left.',
+    );
+  });
+
+  it('is enabled again once no lock applies', () => {
+    render(
+      <PinRightButton columnKey='name' onClose={mockOnClose} pinSide='left' />,
+    );
+
+    expect(getButton().disabled).toBe(false);
   });
 });

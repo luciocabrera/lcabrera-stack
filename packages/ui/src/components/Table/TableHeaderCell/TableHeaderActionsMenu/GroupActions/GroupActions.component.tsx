@@ -6,6 +6,7 @@ import { CollapseAllGroupsButton } from './CollapseAllGroupsButton/CollapseAllGr
 import { ExpandAllGroupsButton } from './ExpandAllGroupsButton/ExpandAllGroupsButton.component';
 import { GroupByColumnButton } from './GroupByColumnButton/GroupByColumnButton.component';
 import { GroupLevelActions } from './GroupLevelActions/GroupLevelActions.component';
+import { RemoveGroupKeyButton } from './RemoveGroupKeyButton';
 
 /**
  * Grouping section of the column header actions menu — a thin shell composing the
@@ -21,6 +22,7 @@ export const GroupActions = <TData,>({
 }: GroupActionsProps<TData>) => (
   <>
     <GroupByColumnButton columnKey={columnKey} onClose={onClose} />
+    <RemoveGroupKeyButton columnKey={columnKey} onClose={onClose} />
     <ClearGroupingButton onClose={onClose} />
     <ExpandAllGroupsButton onClose={onClose} />
     <CollapseAllGroupsButton onClose={onClose} />

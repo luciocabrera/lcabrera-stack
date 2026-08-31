@@ -3,6 +3,12 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import type { TableColumnLayoutLock } from '#ui/components/Table/Table.types';
+
+const { layoutLockRef } = vi.hoisted(() => ({
+  layoutLockRef: { current: undefined as TableColumnLayoutLock | undefined },
+}));
+
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
   useSetColumnPinning: () => vi.fn(),
   useSetColumnVisibility: () => vi.fn(),
@@ -10,6 +16,10 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetNormalizedColumn: () => ({ key: 'name', label: 'Name' }),
+}));
+
+vi.mock('#ui/components/Table/hooks', () => ({
+  useTableColumnLayoutLock: () => layoutLockRef.current,
 }));
 
 vi.mock('#ui/components/Table/TableActionsPopover', () => ({
@@ -33,6 +43,7 @@ const getButton = (label: string) => {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  layoutLockRef.current = undefined;
 });
 
 describe('PinAndHideActions', () => {
@@ -69,5 +80,41 @@ describe('PinAndHideActions', () => {
     render(<PinAndHideActions columnKey='name' onClose={mockOnClose} />);
 
     expect(getButton('Clear Pinning').disabled).toBe(true);
+  });
+});
+
+describe('PinAndHideActions under a layout lock', () => {
+  it('refuses every layout action on a group key', () => {
+    layoutLockRef.current = 'group-key';
+
+    render(
+      <PinAndHideActions
+        columnKey='name'
+        onClose={mockOnClose}
+        pinSide='left'
+      />,
+    );
+
+    expect(getButton('Pin Left').disabled).toBe(true);
+    expect(getButton('Pin Right').disabled).toBe(true);
+    expect(getButton('Clear Pinning').disabled).toBe(true);
+    expect(getButton('Hide Column').disabled).toBe(true);
+  });
+
+  it('refuses only the pinning on a measure', () => {
+    layoutLockRef.current = 'measure';
+
+    render(
+      <PinAndHideActions
+        columnKey='name'
+        onClose={mockOnClose}
+        pinSide='left'
+      />,
+    );
+
+    expect(getButton('Pin Left').disabled).toBe(true);
+    expect(getButton('Pin Right').disabled).toBe(true);
+    expect(getButton('Clear Pinning').disabled).toBe(true);
+    expect(getButton('Hide Column').disabled).toBe(false);
   });
 });

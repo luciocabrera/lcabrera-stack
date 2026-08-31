@@ -897,3 +897,55 @@ describe('GroupActions', () => {
     });
   });
 });
+
+describe('Remove from Grouping', () => {
+  it('drops this key alone, leaving the rest of the grouping standing', () => {
+    groupingKeysRef.current = ['city', 'order_status'];
+
+    render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+    fireEvent.click(getButton('Remove from Grouping'));
+
+    expect(mockToggleGroupKey).toHaveBeenCalledWith({
+      columnKey: 'order_status',
+      period: undefined,
+    });
+    expect(mockClearGrouping).not.toHaveBeenCalled();
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('is disabled on a column that is not an applied key', () => {
+    groupingKeysRef.current = ['city'];
+
+    render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+    expect(getButton('Remove from Grouping').disabled).toBe(true);
+  });
+
+  it('is absent under a curated grouping, like the two items beside it', () => {
+    groupingKeysRef.current = ['order_status'];
+    isGroupingLockedRef.current = true;
+
+    render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+    expect(screen.queryByText('Remove from Grouping')).toBeNull();
+    expect(screen.queryByText('Group by This')).toBeNull();
+    expect(screen.queryByText('Clear Grouping')).toBeNull();
+  });
+
+  it('sits between Group by This and the whole-table Clear Grouping', () => {
+    groupingKeysRef.current = ['order_status'];
+
+    render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
+
+    const labels = screen
+      .getAllByRole('button')
+      .map((button) => button.textContent);
+
+    expect(labels.slice(0, 3)).toStrictEqual([
+      'Group by This',
+      'Remove from Grouping',
+      'Clear Grouping',
+    ]);
+  });
+});

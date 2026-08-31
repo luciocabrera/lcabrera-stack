@@ -23,6 +23,7 @@ hooks/
 ├── useSyncTableGroupExpansion.hook.ts   → Drops collapsed paths the rows just loaded no longer carry
 ├── useTableGroupFoldAll.hook.ts         → The fold-every-group pair plus whether either has anything to do
 ├── useTableGroupLevelFold.hook.ts       → The same pair for one column's level, plus whether it is offered at all
+├── useTableColumnLayoutLock.hook.ts     → Whether a grouped column refuses pinning, and hiding with it — the four Pin/Hide menu items' one answer
 ├── utils/
 │   ├── createResizeStartData.util.ts    → Drag-start snapshot: origin + effective width/bounds (+ .test)
 │   ├── getIsGridNavigationTarget.util.ts → Is this key event the grid's to interpret (+ .test)

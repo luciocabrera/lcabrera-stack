@@ -2,6 +2,7 @@ import { OLAP_GROUP_ROW_FIELD } from '@lcabrera/api/olap/olap.constants';
 
 import type {
   TableAggregateFn,
+  TableColumnLayoutLock,
   TableGroupingMode,
   TableGroupKeyRefusalReason,
   TableGroupPeriod,
@@ -137,6 +138,14 @@ export const TABLE_GROUP_KEY_REFUSAL_LABELS: Record<
   'too-many-distinct':
     'it holds too many distinct values — filter the table down first',
   'unique-ish': 'nearly every row has its own value',
+};
+
+export const TABLE_COLUMN_LAYOUT_LOCK_LABELS: Record<
+  TableColumnLayoutLock,
+  string
+> = {
+  'group-key': 'a grouped column is always shown and always pinned to the left',
+  measure: 'a measure shares the pinning of the column it measures',
 };
 
 export const TABLE_TOTALS_PLACEMENTS: readonly TableTotalsPlacement[] = [

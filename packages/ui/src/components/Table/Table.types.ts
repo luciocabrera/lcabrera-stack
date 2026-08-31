@@ -202,6 +202,8 @@ export type TableColumnGroupingCapability =
       readonly refusal?: never;
     });
 
+export type TableColumnLayoutLock = 'group-key' | 'measure';
+
 export type TableColumnsState<TData = Record<string, unknown>> = {
   readonly columnFilters: ColumnFiltersState<TData>;
   readonly columnOrder: ColumnOrderState<TData>;

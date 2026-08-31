@@ -75,3 +75,29 @@ describe('resolveRenderedColumnKeys', () => {
     expect(run({ groupingKeys: ['region'] })).toStrictEqual(['region']);
   });
 });
+
+describe('the drawer listing and the grid agree about measure order', () => {
+  it('follows the staged aggregate order rather than the declared one', () => {
+    expect(
+      run({
+        aggregates: [
+          { columnKey: 'amount', fn: 'sum' },
+          { columnKey: 'id', fn: 'count' },
+        ],
+        groupingKeys: ['region'],
+      }),
+    ).toStrictEqual(['region', 'amount', 'id']);
+  });
+
+  it('moves with the staged order when the two aggregates swap', () => {
+    expect(
+      run({
+        aggregates: [
+          { columnKey: 'id', fn: 'count' },
+          { columnKey: 'amount', fn: 'sum' },
+        ],
+        groupingKeys: ['region'],
+      }),
+    ).toStrictEqual(['region', 'id', 'amount']);
+  });
+});
