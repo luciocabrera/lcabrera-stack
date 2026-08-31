@@ -72,31 +72,6 @@ const foldPathsFor = ({
     }),
   );
 
-/**
- * What the chevrons drawn in one column would fold, read off the row metadata the
- * grid paints from rather than re-sliced from the key list.
- */
-const chevronPathsFor = ({
-  collapsedGroupPaths = NOTHING_COLLAPSED,
-  columnKey,
-  data = rollup,
-}: LevelArgs) => {
-  const { rowMeta = [] } = resolveTableGroupTree({
-    collapsedGroupPaths,
-    data,
-  });
-  const paths = new Set<string>();
-
-  for (const meta of rowMeta) {
-    for (const disclosure of meta.levelDisclosures) {
-      if (disclosure.columnKey === columnKey)
-        paths.add(resolveGroupPathKey(disclosure.path));
-    }
-  }
-
-  return sorted(paths);
-};
-
 describe('collectGroupLevelFoldPaths', () => {
   it('names the groups the column itself states', () => {
     expect(foldPathsFor({ columnKey: 'subcategory' })).toStrictEqual(
@@ -149,20 +124,22 @@ describe('collectGroupLevelFoldPaths', () => {
     ).toStrictEqual(foldPathsFor({ columnKey: 'subcategory' }));
   });
 
-  describe('agrees with the chevrons drawn in the same column', () => {
+  describe('names, per column, exactly the foldable groups of the fixture', () => {
+    const EXPECTED: Record<string, readonly string[]> = {
+      category: [ELEC],
+      customerType: [],
+      subcategory: sorted(new Set([PHONES, TABLETS])),
+    };
+
     for (const columnKey of GROUPING_KEYS) {
       it(`on ${columnKey}, with nothing folded`, () => {
-        expect(foldPathsFor({ columnKey })).toStrictEqual(
-          chevronPathsFor({ columnKey }),
-        );
+        expect(foldPathsFor({ columnKey })).toStrictEqual(EXPECTED[columnKey]);
       });
 
       it(`on ${columnKey}, with a middle group already folded`, () => {
-        const collapsedGroupPaths = new Set([PHONES]);
-
-        expect(foldPathsFor({ collapsedGroupPaths, columnKey })).toStrictEqual(
-          chevronPathsFor({ collapsedGroupPaths, columnKey }),
-        );
+        expect(
+          foldPathsFor({ collapsedGroupPaths: new Set([PHONES]), columnKey }),
+        ).toStrictEqual(EXPECTED[columnKey]);
       });
     }
   });
