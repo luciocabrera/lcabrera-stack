@@ -27,7 +27,6 @@
  * map — was claimed here and unreachable; making it real is #864.
  */
 
-/** Shapes that are never a path: globs, regexes, placeholders, commands. */
 const isDisqualified = (token) =>
   token === '' ||
   /\s/.test(token) ||

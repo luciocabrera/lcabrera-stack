@@ -8,13 +8,12 @@
  * this repo are real Errors; this is about the ones that are not.
  *
  * Governed by .claude/rules/scripts.md.
+ *
+ * `errorMessage` never throws: a getter that itself throws, or an object with
+ * no useful string form, still yields something printable rather than
+ * replacing the original failure.
  */
 
-/**
- * `error.message` for an Error, a readable rendering otherwise. Never throws —
- * a getter that itself throws, or an object with no useful string form, still
- * yields something printable rather than replacing the original failure.
- */
 export const errorMessage = (value) => {
   try {
     if (value instanceof Error) {

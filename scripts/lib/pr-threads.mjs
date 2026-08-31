@@ -21,7 +21,6 @@
  * Governed by .claude/rules/scripts.md.
  */
 
-/** The commit-status context this gate publishes under. One definition. */
 export const STATUS_CONTEXT = 'Review threads resolved';
 
 const EXCERPT = 160;

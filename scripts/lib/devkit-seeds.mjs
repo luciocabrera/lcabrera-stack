@@ -7,14 +7,13 @@
  * to keep out of shipped files, so the words are derived from the repository on
  * every run and only the deciding half lives here — pure, so it can be tested
  * without a tree. The same split `publish-wiring.test.mjs` makes.
+ *
+ * The runner word is the one word no manifest carries as data and the one a
+ * seed leaks most easily, because writing a command is how you say what a step
+ * does. It is matched with a trailing space so those letters inside a word are
+ * not a finding.
  */
 
-/**
- * The task runner every command in this repository goes through. It is the one
- * word no manifest carries as data, and the one a seed leaks most easily,
- * because writing a command is how you say what a step does. Matched with a
- * trailing space so the letters `vp` inside a word are not a finding.
- */
 export const RUNNER_WORDS = ['vp '];
 
 export const UNIVERSAL_SECRETS = new Set(['GITHUB_TOKEN']);

@@ -13,7 +13,6 @@
  * Governed by .claude/rules/scripts.md.
  */
 
-/** Body lines that declare a dependency the author knows about (policy O2). */
 const DECLARED_EDGE = /\b(?:depends on|stacked on|blocked by|after)\s+#(\d+)/gi;
 
 const SNAPSHOT_PATH =

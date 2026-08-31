@@ -29,16 +29,14 @@
  * module's verdict alone.
  *
  * Everything here is pure — callers read the files.
+ *
+ * `GATING_TRIGGERS` are the triggers that fire on a change to the repository.
+ * A `schedule`- or `workflow_dispatch`-only workflow is real CI, but it runs
+ * against a clock or a person rather than a change, so it cannot be what a
+ * `met` claim rests on. `push` is in the set and its `branches:` filter is not
+ * read, which is the over-report described above.
  */
 
-/**
- * Triggers that fire on a change to the repository — a commit, whether it is
- * still on a branch or already on `main`. A `schedule`- or
- * `workflow_dispatch`-only workflow is real CI, but it runs against a clock or
- * a person rather than against a change, so it cannot be what a `met` claim
- * rests on. `push` is in the set and its `branches:` filter is not read, which
- * is the over-report the module header describes.
- */
 export const GATING_TRIGGERS = new Set(['merge_group', 'pull_request', 'push']);
 
 const indentOf = (line) => line.length - line.trimStart().length;

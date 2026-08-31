@@ -3,7 +3,6 @@
  * `../verify-eslint-pass.mjs`.
  */
 
-/** The rule whose silence this gate exists to catch. */
 export const PROBE_RULE = 'perfectionist/sort-imports';
 
 export const PROBE_WORKSPACES = ['packages/ui', 'packages/vite-configs'];

@@ -22,7 +22,6 @@
  * Usage: node scripts/bench-array-operations.mjs [--json]
  */
 
-/** The five shapes ADR-054 chooses between. Each returns the same array. */
 const SHAPES = {
   'filter().map()': (rows, keep) => rows.filter(keep).map((row) => row.name),
   'flatMap()': (rows, keep) =>

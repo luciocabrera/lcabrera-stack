@@ -8,9 +8,11 @@
  * error can be any thrown value, and does.
  *
  * https://docs.github.com/actions/reference/workflow-commands-for-github-actions
+ *
+ * `%` is replaced first, or the escapes introduced after it are escaped in
+ * turn.
  */
 
-/** `%` is replaced first, or the escapes introduced below are escaped in turn. */
 export const annotationData = (message) =>
   String(message)
     .replaceAll('%', '%25')

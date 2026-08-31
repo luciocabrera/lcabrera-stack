@@ -14,7 +14,11 @@
  *
  * The **file-level header** stays: it describes the module, not a declaration,
  * and `.claude/rules/scripts.md` mandates one for every `.mjs`/`.cjs` script.
- * Every comment before the first token of the file is in that position.
+ * The file's first comment block is in that position — adjacent `//` lines count
+ * as one block, and a shebang does not start it. A later block is not: keying the
+ * exemption on the first token instead exempts every comment before it, so in a
+ * file that imports nothing a per-declaration JSDoc above the first declaration
+ * went unreported.
  *
  * A **tool directive** stays, because it is not prose — deleting one changes
  * what another engine reports. The two positions where that bites are the
@@ -125,6 +129,31 @@ const attachmentTarget = (node: TSESTree.Node) => {
   return parent !== undefined && EXPORT_TYPES.has(parent.type) ? parent : node;
 };
 
+const resolveHeaderEnd = (sourceCode: TSESLint.SourceCode) => {
+  const firstToken = sourceCode.getFirstToken(sourceCode.ast)?.range[0];
+  if (firstToken === undefined) return Infinity;
+
+  const hasShebang = sourceCode.getText().startsWith('#!');
+  const before = sourceCode
+    .getAllComments()
+    .filter((comment) => comment.range[1] <= firstToken);
+  const isShebang = (comment: TSESTree.Comment) =>
+    hasShebang && comment.range[0] === 0;
+  const shebangEnd =
+    before.find((comment) => isShebang(comment))?.range[1] ?? 0;
+
+  const leading = before.filter((comment) => !isShebang(comment));
+  const [head] = leading;
+  if (head === undefined) return shebangEnd;
+
+  let last = head;
+  for (const comment of leading.slice(1)) {
+    if (comment.loc.start.line !== last.loc.end.line + 1) break;
+    last = comment;
+  }
+  return last.range[1];
+};
+
 export default createRule<Options, MessageIds>({
   create(context) {
     const [options] = context.options;
@@ -132,8 +161,7 @@ export default createRule<Options, MessageIds>({
     const annotationTags = options?.annotationTags ?? DEFAULT_ANNOTATION_TAGS;
     const { sourceCode } = context;
     const isTypeScript = TYPESCRIPT_FILE.test(context.filename);
-    const headerEnd =
-      sourceCode.getFirstToken(sourceCode.ast)?.range[0] ?? Infinity;
+    const headerEnd = resolveHeaderEnd(sourceCode);
     const reported = new Set<TSESTree.Comment>();
 
     const isExempt = (comment: TSESTree.Comment) => {

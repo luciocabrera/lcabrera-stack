@@ -14,7 +14,6 @@
  * Governed by .claude/rules/scripts.md.
  */
 
-/** Extension of a path, including the dot ("" when there is none). */
 export const fileExtension = (name) =>
   name.includes('.') ? name.slice(name.lastIndexOf('.')) : '';
 

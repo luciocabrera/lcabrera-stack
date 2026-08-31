@@ -33,9 +33,11 @@
  * API; `passDetail` is counts.
  *
  * Governed by .claude/rules/scripts.md.
+ *
+ * GitHub truncates a commit-status description past the length
+ * `MAX_DESCRIPTION` holds.
  */
 
-/** GitHub truncates a commit-status description past this. */
 const MAX_DESCRIPTION = 140;
 
 const MAX_SUMMARY_REASON = 600;

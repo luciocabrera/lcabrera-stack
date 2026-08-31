@@ -6,13 +6,10 @@
 // filenames slightly differently from its neighbour goes quiet rather than
 // wrong — a suffix it stops recognising reports exactly the clean pass that
 // compliant code does.
+//
+// `parseFileName` strips a trailing `.test`/`.spec` segment first, so a test
+// file is checked against the subject it covers.
 
-/**
- * Split a filename into its `{ name, suffix }`, or `undefined` when the file
- * has no recognised `<name>.<suffix>.<ext>` shape. A trailing `.test`/`.spec`
- * segment is stripped first so a test file is checked against the subject it
- * covers (`editOrder.action.test.ts` → name `editOrder`, suffix `action`).
- */
 export const parseFileName = (filename: string) => {
   const base = filename.split(/[/\\]/).pop() ?? filename;
   const withoutExt = base.replace(/\.(?:tsx?|jsx?|mjs|cjs)$/, '');

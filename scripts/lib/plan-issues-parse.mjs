@@ -9,21 +9,16 @@
  * The document contract, which a plan file must follow:
  * an issue is an h3 whose text is `<ID> — \`<conventional title>\``, and its
  * planning metadata is either a fenced yaml block or a `Metadata` line.
- */
-
-/**
- * An h3 heading opens an issue; anything at h2 or above closes the section.
  *
+ * An h3 heading opens an issue and anything at h2 or above closes the section.
  * The trailing `note` group is load-bearing: an entry may carry an editorial
- * suffix after the title (`_(optional)_`). Anchoring the pattern at the closing
- * backtick instead silently drops that whole issue from the run, which is a
- * failure mode with no symptom — the backlog just comes out one issue short.
- *
- * `note` is captured greedily and trimmed in JS rather than fenced by
- * `\s*(?<note>.*?)\s*$`: two whitespace runs around a lazy group give the
- * engine many equivalent ways to split the same trailing spaces, which is
+ * suffix after the title, and anchoring at the closing backtick instead
+ * silently drops that whole issue — a failure with no symptom, the backlog
+ * just comes out one issue short. `note` is captured greedily and trimmed in
+ * JS rather than fenced by two whitespace runs around a lazy group, which is
  * super-linear backtracking (Sonar S8786).
  */
+
 const HEADING_RE =
   /^###\s+(?<id>[EPG]-\d+)\s+—\s+`(?<title>[^`]+)`(?<note>.*)$/;
 

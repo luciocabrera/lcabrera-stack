@@ -3,12 +3,13 @@
  * `verify-coordination.mjs` so that script stays under the size ceiling and its
  * effects (fs, git) stay separated from this logic. Everything here is pure —
  * same input, same output, no I/O. See `.claude/rules/scripts.md`.
+ *
+ * `NO_BRANCH` lives here rather than in a caller because three consumers read
+ * the same vocabulary — the verifier, the merged-drift reconciliation and the
+ * close-on-merge resolver — and a private copy in any one of them would drift
+ * silently.
  */
 
-/** `branch:` values that name no branch. Lives here, not in a caller, because
- *  three consumers now read the same vocabulary (the verifier, the merged-drift
- *  reconciliation, and the close-on-merge resolver) and a private copy in any
- *  one of them would drift silently. */
 export const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
 
 export const NO_PR = new Set(['(none)', '']);

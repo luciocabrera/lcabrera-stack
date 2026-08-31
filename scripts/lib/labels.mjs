@@ -6,8 +6,6 @@
  * `.claude/rules/scripts.md`.
  */
 
-// [commitType, labelName, color, description] — tuples (not repeated object
-// literals) so the table doesn't read as self-duplication.
 const TYPE_LABELS = [
   ['feat', 'type: feature', '0e8a16', 'A new feature'],
   ['fix', 'type: bug', 'd73a4a', 'A bug fix'],

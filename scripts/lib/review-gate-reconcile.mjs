@@ -14,14 +14,11 @@
  * it drives.
  *
  * Governed by .claude/rules/scripts.md.
+ *
+ * `error` is in the terminal set for completeness — no gate here publishes it
+ * today, and a hand-posted one still must not be quietly downgraded.
  */
 
-/**
- * States that mean the gate has already witnessed something terminal.
- *
- * `error` is included for completeness — no gate here publishes it today, and a
- * hand-posted one still must not be quietly downgraded.
- */
 const TERMINAL_STATES = new Set(['error', 'failure']);
 
 const pullNumber = (pull) =>

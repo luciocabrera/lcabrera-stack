@@ -25,9 +25,10 @@
  * `docs/tooling/copilot-review-gate.md`.
  *
  * Governed by .claude/rules/scripts.md.
+ *
+ * REST spells the reviewer `…[bot]` and GraphQL drops the suffix. Both appear.
  */
 
-/** REST spells the reviewer `…[bot]`, GraphQL drops the suffix. Both appear. */
 const COPILOT_LOGIN = 'copilot-pull-request-reviewer';
 const CLAUDE_REVIEW_LOGIN = 'claude-general-reviewer';
 const BOT_SUFFIX = /\[bot\]$/;

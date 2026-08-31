@@ -18,9 +18,11 @@
  * permanent grant: it names the advisory it covers, it expires, and this module
  * reports both an entry that has expired and one that no longer matches
  * anything. A grant nobody rechecks is how the last list died.
+ *
+ * `SEVERITY_RANK` runs least to most severe, as npm and pnpm spell them; the
+ * index IS the rank.
  */
 
-/** Least to most severe, as npm/pnpm spell them. Index IS the rank. */
 const SEVERITY_RANK = ['info', 'low', 'moderate', 'high', 'critical'];
 
 const rankOf = (severity) => {

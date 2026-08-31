@@ -11,9 +11,11 @@
  *
  * Pure: callers hand in manifests and file lists. The packing, installing and
  * executing live in the CLI.
+ *
+ * npm always includes the files in `ALWAYS_PACKED` regardless of `files`, so
+ * their absence is a real fault rather than a packaging choice.
  */
 
-/** npm always includes these regardless of `files`, so their absence is a real fault. */
 const ALWAYS_PACKED = ['package.json'];
 
 const stripLeadingDot = (path) => path.replace(/^\.\//, '');

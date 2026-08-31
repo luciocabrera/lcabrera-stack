@@ -9,9 +9,11 @@
  * this feature exists to stop being believed.
  *
  * Governed by .claude/rules/scripts.md.
+ *
+ * GitHub truncates a commit-status description past the length
+ * `DESCRIPTION_LIMIT` holds.
  */
 
-/** GitHub truncates a commit-status description past this. */
 const DESCRIPTION_LIMIT = 140;
 
 const plural = (count, noun) => `${count} ${noun}${count === 1 ? '' : 's'}`;

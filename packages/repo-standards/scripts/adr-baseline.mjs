@@ -36,13 +36,13 @@
  * code; how many ways there are to exercise that key is not.
  *
  * Shape: `{ files: [<filename>], maxEntries: <number> }`.
+ *
+ * The name comparator is deterministic across locales, unlike `localeCompare`:
+ * the baseline is a committed file, so a comparator depending on the machine
+ * reading it would reorder the list in someone else's checkout and show as a
+ * diff nobody made.
  */
 
-/**
- * Deterministic across locales, unlike `localeCompare`: the baseline is a
- * committed file, so a comparator that depends on the machine reading it would
- * reorder the list in someone else's checkout and show as a diff nobody made.
- */
 const byName = (left, right) => {
   if (left === right) {
     return 0;

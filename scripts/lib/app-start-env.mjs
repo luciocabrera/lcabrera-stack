@@ -16,15 +16,12 @@
  * here would make the test agree with itself.
  *
  * Governed by .claude/rules/scripts.md.
+ *
+ * The env files are keyed on the `[ -f … ]` guard rather than the `eval` that
+ * follows: the guard is what makes a missing file skippable rather than fatal,
+ * so a fragment without one is not this wiring however much it looks like it.
  */
 
-/**
- * The env files a `start` command sources, app-relative and in load order.
- *
- * Keyed on the `[ -f … ]` guard rather than on the `eval` that follows it: the
- * guard is what makes a missing file skippable rather than fatal, so a fragment
- * without one is not this wiring however much it looks like it.
- */
 export const startEnvFiles = (command) =>
   [...command.matchAll(/\[ -f (\S+) \]/g)].map(([, file]) => file);
 

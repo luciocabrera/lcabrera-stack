@@ -35,7 +35,6 @@
  * writing and the exit code are `verify-adrs.mjs`.
  */
 
-/** What `governs` says when a decision constrains no single workspace. */
 export const REPOSITORY_SCOPE = 'repository';
 
 const GOVERNS = 'governs';

@@ -1,25 +1,18 @@
 /**
  * Rules for the Oxlint config-wiring gate. Pure; effects live in
  * `../verify-lint-plugins.mjs`.
+ *
+ * A plugin family goes dark silently: naming `lint.plugins` REPLACES Oxlint's
+ * default set, so dropping an entry disables every rule it owns and reports
+ * nothing, indistinguishable from clean code. Only a planted violation tells
+ * the two apart, which is why this gate lints code instead of reading config.
+ * Every family is either probed or listed in `UNPROBED_PLUGINS` with a reason,
+ * and the gate fails when that stops being true. `ext` is per-probe because a
+ * react rule needs `.tsx`: the same source saved as `.ts` reports only parse
+ * errors, so one hardcoded extension would make a probe pass for the wrong
+ * reason.
  */
 
-/**
- * One deliberate violation per plugin family Oxlint must have loaded.
- *
- * A family goes dark silently: naming `lint.plugins` REPLACES Oxlint's default
- * set, so dropping an entry disables every rule it owns and reports nothing —
- * indistinguishable from clean code. Only a planted violation tells the two
- * apart, which is why this gate lints code instead of reading config.
- *
- * Every family in `PLUGINS` is either probed here or listed in
- * `UNPROBED_PLUGINS` with a reason, and `pluginsWithoutCoverage` fails the gate
- * when that stops being true — so a family cannot be added and left unproven.
- *
- * `ext` is the probe file's extension, per-probe rather than a constant because
- * a react rule needs `.tsx`: the same source saved as `.ts` reports only
- * TypeScript parse errors and no `react(…)` code at all, so one hardcoded
- * extension would make a probe pass for the wrong reason.
- */
 export const PLUGIN_PROBES = [
   {
     code: 'debugger;\nexport const a = 1;\n',

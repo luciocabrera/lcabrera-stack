@@ -23,7 +23,6 @@
  * Pure by design — the caller owns the filesystem.
  */
 
-/** Per-run artifacts, gitignored. Sibling of the fallow convention. */
 export const RUNS_DIRECTORY = 'reports/sonar/runs';
 
 const asFileSegment = (value) =>

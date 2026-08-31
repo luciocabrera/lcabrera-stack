@@ -11,7 +11,6 @@
  * why they are asserted rather than removed.
  */
 
-/** Lockfiles that would make changesets publish with something other than pnpm. */
 const FOREIGN_LOCKFILES = ['package-lock.json', 'yarn.lock', 'bun.lockb'];
 
 export const stripComments = (text) =>

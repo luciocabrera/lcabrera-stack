@@ -4,16 +4,13 @@
  * Separated from the CLI so the mapping rules can be unit-tested without
  * touching the filesystem — `test:scripts` covers this file. The CLI keeps the
  * effects: reading manifests, checking `dist`, writing `package.json`.
+ *
+ * In scope means published publicly AND builds, derived rather than listed so
+ * adding a `build` script enrols a package automatically. A package may omit
+ * `build` on purpose — one whose identity is tied to its source path, which is
+ * what StyleX themes do — and is gated by its own workspace check instead.
  */
 
-/**
- * A package is in scope when it is published publicly AND builds.
- *
- * Derived rather than listed, so adding a `build` script to a public package
- * enrols it automatically. A package may omit `build` on purpose — one whose
- * identity is tied to its source path (StyleX themes are the case this was
- * written for) ships source and is gated by its own workspace check instead.
- */
 export const isBuiltPublicPackage = (manifest) =>
   manifest.scripts?.build !== undefined &&
   manifest.publishConfig?.access === 'public';

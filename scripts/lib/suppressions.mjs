@@ -9,19 +9,14 @@
  * The package list is resolved by `publicPackageDirs`, not hardcoded, so a new
  * public package is covered the day it is added. `vp run suppressions:packages`
  * prints the roster; nothing restates it.
- */
-
-/**
- * The inline directives that silence a finding, by engine.
  *
  * The TypeScript escape hatches are included even though they are type
  * assertions rather than lint suppressions: each silences a compiler
- * diagnostic, which is the property under test, and the file-level one silences
- * every diagnostic in the file at once.
- *
- * Ordered longest-prefix-first so `eslint-disable-next-line` is not reported as
- * a bare `eslint-disable`.
+ * diagnostic, which is the property under test, and the file-level one
+ * silences every diagnostic at once. The list is ordered longest-prefix-first
+ * so `eslint-disable-next-line` is not reported as a bare `eslint-disable`.
  */
+
 const INLINE_DIRECTIVES = [
   'eslint-disable-next-line',
   'eslint-disable',

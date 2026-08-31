@@ -18,7 +18,6 @@
  * Pure — the npm queries and all output live in `release-publish-plan.mjs`.
  */
 
-/** Column widths are irrelevant to the gate; this is the order rows render in. */
 const STATE_ORDER = ['publish', 'first-publish', 'up-to-date'];
 
 export const classifyRelease = ({ packageExists, versionExists }) => {

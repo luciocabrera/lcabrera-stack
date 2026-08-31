@@ -16,7 +16,6 @@
  * Governed by .claude/rules/scripts.md.
  */
 
-/** The head of the #671 sequence, and the commit it superseded. */
 export const HEAD = 'dd8fb7867fa4cc57044c6c6808313528d7d7e0d3';
 export const EARLIER = 'ff868c68f40fcd9740ea16cb313b37e5f10cd9b5';
 

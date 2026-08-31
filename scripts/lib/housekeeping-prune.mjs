@@ -8,9 +8,11 @@
  * pure module rather than inline in the shell: the cost of it being wrong is
  * deleted work, so it is exercised without a repo in
  * housekeeping-prune.test.mjs.
+ *
+ * Trunk and release lines are never pruned, whatever their pull request state
+ * says.
  */
 
-/** Trunk and release lines are never pruned, whatever their PR state says. */
 const PROTECTED = /^(?:main|release-.*)$/u;
 
 const MERGED_OR_CLOSED = new Set(['CLOSED', 'MERGED']);

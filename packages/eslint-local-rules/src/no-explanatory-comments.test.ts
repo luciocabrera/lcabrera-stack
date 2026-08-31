@@ -102,6 +102,29 @@ ruleTester.run('no-explanatory-comments', rule, {
       options: [{ annotationTags: ['@other'] }],
     },
     {
+      code: [
+        '// Why this module exists, and it imports nothing.',
+        '',
+        '/** The suffixes a component file may carry. */',
+        'export const SUFFIXES = [".component.tsx"];',
+      ].join('\n'),
+      errors: [{ messageId: 'aboveDeclaration' as const }],
+    },
+    {
+      code: [
+        '#!/usr/bin/env node',
+        '',
+        '/**',
+        ' * Why this module exists.',
+        ' */',
+        '',
+        '/** The rule whose silence this gate exists to catch. */',
+        'export const PROBE_RULE = 1;',
+      ].join('\n'),
+      errors: [{ messageId: 'aboveDeclaration' as const }],
+      filename: 'probe.mjs',
+    },
+    {
       code: src(
         '// prettier-ignore',
         'export const read = () => {',
@@ -154,6 +177,31 @@ ruleTester.run('no-explanatory-comments', rule, {
       'const value = x; // trailing on the line above, not a heading',
       'export const read = () => value;',
     ),
+    {
+      code: [
+        '#!/usr/bin/env node',
+        '',
+        '/**',
+        ' * Why this module exists, below a shebang that is not the header.',
+        ' */',
+        '',
+        'export const read = () => 1;',
+      ].join('\n'),
+      filename: 'run.mjs',
+    },
+    {
+      code: [
+        '// Why this module exists, in a header of several adjacent lines',
+        '// that carry on without a blank line between them.',
+        'export const read = () => 1;',
+      ].join('\n'),
+    },
+    {
+      code: ['#!/usr/bin/env node', '', 'export const read = () => 1;'].join(
+        '\n',
+      ),
+      filename: 'bare.mjs',
+    },
     {
       ...ok(
         '// keep-me this is configured as a directive prefix',

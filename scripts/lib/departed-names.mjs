@@ -11,9 +11,11 @@
  * a departed name inside a longer token is still that name. Fenced code is
  * scanned like prose — a fixture naming a departed workspace is exactly the case
  * this exists to catch.
+ *
+ * `CHANGELOG.md` is generated from git history — a dated record of commits,
+ * not a live pointer — so it is exempt from the name check.
  */
 
-/** Generated from git history — a dated record of commits, not a live pointer. */
 const GENERATED = /(^|\/)CHANGELOG\.md$/;
 
 const ROSTER = /(^|\/)departed-names\.json$/;

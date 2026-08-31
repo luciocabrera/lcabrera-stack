@@ -10,7 +10,6 @@
  * to its source entry so a reader can check the original wording.
  */
 
-/** Marks a section this module derived, so it is never mistaken for authored text. */
 const DERIVED_NOTE = '_Derived from the planning entry; see the source link._';
 
 export const knownLabels = (labels, allowed) =>

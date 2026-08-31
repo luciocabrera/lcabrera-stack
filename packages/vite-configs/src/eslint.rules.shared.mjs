@@ -6,16 +6,13 @@
  * independent — one carries the React/StyleX layers, the other deliberately does
  * not — and these were the only part that had drifted apart by being written
  * twice.
+ *
+ * The `security/*` escalations are from `warn` to `error` so a
+ * bulk-suppression baseline can cover the inherited findings while NEW
+ * occurrences fail the gate: suppressions only apply at error severity, so a
+ * warning is unbaselineable and therefore unenforceable.
  */
 
-/**
- * Severities the plugins' own recommended configs get wrong for this stack.
- *
- * The `security/*` escalations are from `warn` to `error` so a bulk-suppression
- * baseline can cover the inherited findings and NEW occurrences fail the gate —
- * suppressions only apply at error severity, so a warning is unbaselineable and
- * therefore unenforceable.
- */
 export const SHARED_PLUGIN_RULE_SEVERITIES = {
   'security/detect-non-literal-fs-filename': 'error',
   'security/detect-non-literal-regexp': 'error',

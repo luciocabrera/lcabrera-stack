@@ -20,14 +20,13 @@
  *
  * Pure: callers hand in already-collected paths, so the traversal stays in the
  * CLI and this half needs no fixture tree.
+ *
+ * A prefix rule as well as a name set, because some tools accept a family of
+ * spellings — `.prettierrc`, `.prettierrc.json`, `.prettierrc.yaml` — that
+ * exact names cannot cover without listing every variant and still missing the
+ * next one.
  */
 
-/**
- * A prefix rule as well as a name set, because some tools accept a family of
- * spellings — `.prettierrc`, `.prettierrc.json`, `.prettierrc.yaml` — that a set
- * of exact names cannot cover without listing every variant and still missing
- * the next one.
- */
 export const isStrayConfig = ({ filename, unreadNames, unreadPrefixes }) =>
   unreadNames.includes(filename) ||
   unreadPrefixes.some((prefix) => filename.startsWith(prefix));

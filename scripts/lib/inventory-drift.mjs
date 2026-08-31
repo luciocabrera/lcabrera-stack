@@ -17,7 +17,6 @@
  * correct documentation as drift. See #817.
  */
 
-/** Each tree this gate covers, and the `INVENTORY.md` that documents it. */
 export const INVENTORY_TREES = [
   { inventory: 'packages/ui/src/INVENTORY.md', root: 'packages/ui/src' },
   {

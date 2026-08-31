@@ -7,7 +7,6 @@
  * in `verify-coordination.mjs` owns the file writes. See `.claude/rules/scripts.md`.
  */
 
-/** Wrap a value in backticks (own function so the template literal isn't nested). */
 const code = (value) => `\`${value}\``;
 const renderArea = (area) => area.map(code).join('<br>');
 

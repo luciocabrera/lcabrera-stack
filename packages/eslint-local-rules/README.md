@@ -420,8 +420,11 @@ export { mount as default };
 
 Three positions are exempt, each for a reason the rule can check.
 
-The **file-level header** — every comment before the file's first token — stays,
-because it describes the module rather than a declaration.
+The **file-level header** — the file's first comment block, with adjacent `//`
+lines counting as one block and a shebang not starting it — stays, because it
+describes the module rather than a declaration. Only the first block: a second
+one, separated by a blank line, is a comment about the declaration under it and
+is reported even when nothing but the header precedes it.
 
 A **tool directive** stays, because deleting one changes what another engine
 reports. This is the exemption that carries real weight, and the two positions

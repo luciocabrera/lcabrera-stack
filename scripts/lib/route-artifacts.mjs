@@ -27,7 +27,6 @@
  * positive set was empty.
  */
 
-/** Suffixes that make a file the artifact a folder is built around. */
 export const ARTIFACT_SUFFIXES = new Set([
   'action',
   'clientAction',

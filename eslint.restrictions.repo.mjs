@@ -20,20 +20,16 @@
  * pure `db/query-builder/*` builders share `query-builder.types` — so the guard
  * is on runtime access, the thing that pulls a database connection into a
  * client bundle.
+ *
+ * These patterns are a courtesy, not the boundary. The boundary is
+ * `packages/ui`'s `exports` map, which carries no wildcard, so an unlisted
+ * path does not resolve for a consumer at all. What they buy is a message at
+ * the import site, and they cover the in-repo case where a tsconfig `paths`
+ * alias would otherwise hide the breakage until publish. `#ui/*` is absent
+ * deliberately: it is package-internal, so nothing outside `packages/ui` can
+ * resolve it.
  */
 
-/**
- * These are a courtesy, not the boundary. The boundary is `packages/ui`'s
- * `exports` map, which names every public subpath and no longer carries a
- * wildcard — an unlisted path does not resolve for a consumer at all. What
- * these patterns buy is a message at the import site instead of a resolution
- * error, and they still cover the in-repo case, where a tsconfig `paths` alias
- * resolves `@lcabrera/ui/*` straight to `src/` and would otherwise hide the
- * breakage until publish.
- *
- * `#ui/*` is deliberately absent: it is package-internal, so nothing outside
- * `packages/ui` can resolve it and there is nothing to restrict.
- */
 export const UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS = [
   {
     group: ['@lcabrera/ui/src/**'],

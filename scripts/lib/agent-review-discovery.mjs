@@ -16,14 +16,13 @@
  *     appended after a `fail`.
  *
  * Governed by .claude/rules/scripts.md.
+ *
+ * Comment bodies above `MAX_VERDICT_BODY_BYTES` are refused rather than
+ * parsed. A verdict is untrusted input from a pull request comment, and a size
+ * cap is the one defence that does not depend on the parser being well
+ * behaved.
  */
 
-/** The first line of a verdict comment, before the head SHA. */
-/**
- * Comment bodies above this are refused rather than parsed. The verdict is
- * untrusted input from a pull request comment, and a size cap is the one
- * defence that does not depend on the parser being well behaved.
- */
 export const MAX_VERDICT_BODY_BYTES = 65_536;
 
 const MARKER_LINE = /^Agent-review verdict: ([0-9a-f]{40})$/;

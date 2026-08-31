@@ -18,11 +18,12 @@
  * drops the first one's restrictions. That is why they are exported at all — a
  * consumer adding its own `no-restricted-syntax` has to re-compose them, and
  * cannot do that without being able to name them.
+ *
+ * `export *` re-exports whatever a module happens to expose today, so a barrel
+ * silently grows a public surface nobody reviewed and dead exports stay
+ * invisible. Barrels list what they publish.
  */
 
-// `export *` re-exports whatever a module happens to expose today, so a barrel
-// silently grows a public surface nobody reviewed and dead exports stay
-// invisible. Barrels list what they publish (PATTERNS.md, react-components.md).
 export const BARREL_SYNTAX_RESTRICTIONS = [
   {
     message:

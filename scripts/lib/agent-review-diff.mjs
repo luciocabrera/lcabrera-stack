@@ -14,9 +14,11 @@
  * added lines, and that case is reported rather than assumed empty.
  *
  * Governed by .claude/rules/scripts.md.
+ *
+ * The hunk-header pattern is anchored with bounded groups, so nothing can
+ * backtrack.
  */
 
-/** Anchored on the hunk header, with bounded groups — nothing can backtrack. */
 const HUNK_HEADER = /^@@ -\d{1,12}(?:,\d{1,12})? \+(\d{1,12})(?:,\d{1,12})? @@/;
 
 export const addedLines = (patch) => {
