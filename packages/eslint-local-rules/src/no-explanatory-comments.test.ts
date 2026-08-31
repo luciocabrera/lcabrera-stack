@@ -86,6 +86,29 @@ ruleTester.run('no-explanatory-comments', rule, {
       code: [
         "import { x } from './x.ts';",
         '',
+        '// The shape the reader hands back.',
+        'interface Result {',
+        '  readonly value: typeof x;',
+        '}',
+      ].join('\n'),
+      errors: [{ messageId: 'aboveDeclaration' }],
+    },
+    {
+      code: [
+        "import { x } from './x.ts';",
+        '',
+        'enum Mode {',
+        '  /** The only mode a link written before rollup existed can name. */',
+        '  Flat = 0,',
+        '}',
+        'export const mode = Mode.Flat === x;',
+      ].join('\n'),
+      errors: [{ messageId: 'insideDeclaration' }],
+    },
+    {
+      code: [
+        "import { x } from './x.ts';",
+        '',
         '// Memoised because the parent re-renders on every keystroke.',
         'export const Row = memo(() => x);',
       ].join('\n'),

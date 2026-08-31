@@ -137,8 +137,12 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
   query builders). Not a Props table, not a file tree, not a mermaid of the
   function body, and not a new file because a folder is new.
 - **A trap, a measurement, or a why** → **not a comment.** No comment sits above
-  a function or component declaration and no prose sits inside its body
-  ([ADR-095](../../../docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md)).
+  a declaration, no prose sits inside a function or component body, and none
+  sits inside a type declaration
+  ([ADR-095](../../../docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
+  amended for the third position by
+  [ADR-098](../../../docs/decisions/ADR-098-the-no-comment-rule-covers-a-type-declaration.md));
+  `local-rules/no-explanatory-comments` reports all three.
   A decision goes in the ADR that owns it; investigation and measurement go in
   the pull request or the issue. Two exemptions: the short file-level "why"
   header on a script, in

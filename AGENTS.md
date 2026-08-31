@@ -413,12 +413,18 @@ reader will actually get, and when someone reports that a claim does not
 reproduce, **look for the confound before defending or retracting** — both of
 those are conclusions, and each needs its own discriminating evidence.
 
-**No comment above a function or component declaration, and no prose inside its
-body.** Both positions are covered: the JSDoc block over the declaration and any
-explanation within it. A name, a signature and the types already say what the
-code is, and an explanation next to code is the copy nothing keeps true — which
-is the failure every gate in this file exists to catch. If the code can be made
-clearer instead, do that.
+**No comment above a declaration, no prose inside a function or component body,
+and none inside a type declaration either.** Three positions, not two: the JSDoc
+block over the declaration, any explanation within a body, and a note between a
+type's members — an `Args`/`Props`/`Result` type is where this repository writes
+them most, and it is where they rot identically
+([ADR-098](docs/decisions/ADR-098-the-no-comment-rule-covers-a-type-declaration.md)).
+"Above a declaration" is the general form and covers a plain `const` too; a
+command descriptor's JSDoc named a derivation its only consumer had stopped using
+([#850](https://github.com/luciocabrera/lcabrera-stack/issues/850)). A name, a
+signature and the types already say what the code is, and an explanation next to
+code is the copy nothing keeps true — which is the failure every gate in this
+file exists to catch. If the code can be made clearer instead, do that.
 
 **Two exemptions, both narrow.** The **file-level header** that
 [`.claude/rules/scripts.md`](.claude/rules/scripts.md) mandates for a `.mjs`/`.cjs`
@@ -441,6 +447,9 @@ moving it is not compliance.
 
 The record is
 [ADR-095](docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
+amended by
+[ADR-098](docs/decisions/ADR-098-the-no-comment-rule-covers-a-type-declaration.md)
+for the third position,
 which also states what the rule costs and which paragraph of
 [ADR-088](docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)
 it corrects. `local-rules/no-explanatory-comments` in

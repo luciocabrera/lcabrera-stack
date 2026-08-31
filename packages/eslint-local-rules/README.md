@@ -363,6 +363,12 @@ body returning `'a' | 'b'` is a widening. Reviews still own that half.
 Reports a comment written above a declaration, or inside a function, component
 or type declaration. Not fixable — see below.
 
+Three positions, and the third is the one most often missed: a note between a
+type's members. An `Args`/`Props`/`Result` type is where a prose block explaining
+a shape feels most justified, because the members carry no bodies to read
+instead — and it is where it rots identically. "Above a declaration" is the
+general form, so a plain `const` is covered too.
+
 A name, a signature and a type already say what the code is, and prose repeating
 them is a second copy of a fact kept in the one place nothing checks. The failure
 is not cosmetic: a helper in the repository this plugin comes from documented

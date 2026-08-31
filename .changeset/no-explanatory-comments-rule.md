@@ -6,6 +6,10 @@
 Report a comment written above a declaration, or inside a function, component or
 type declaration.
 
+Three positions, not two. A note between a type's members is covered on the same
+terms as prose in a function body, and "above a declaration" is the general form
+— a plain `const` is covered too.
+
 `local-rules/no-explanatory-comments` is the new rule, and both shared flat
 configs (`eslint-custom-rules` and `eslint-base-custom-rules`) now turn it on for
 `.ts`/`.tsx` sources. A name, a signature and a type already say what the code
