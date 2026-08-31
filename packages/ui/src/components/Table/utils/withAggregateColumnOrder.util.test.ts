@@ -72,29 +72,25 @@ const staged: readonly TableColumnAggregate[] = [
 const keysOf = (result: ReturnType<typeof run>) =>
   result.columns.map((column) => String(column.key));
 
+const STAGED_PAINT = [
+  'region',
+  'amount:min',
+  'amount:max',
+  'amount:sum',
+  'id:count',
+];
+
 describe('withAggregateColumnOrder', () => {
   it('ranks each measured column by its first entry in the staged list', () => {
     const result = run({ aggregates: staged });
 
-    expect(keysOf(result)).toStrictEqual([
-      'region',
-      'amount:min',
-      'amount:max',
-      'amount:sum',
-      'id:count',
-    ]);
+    expect(keysOf(result)).toStrictEqual(STAGED_PAINT);
   });
 
   it('orders the column order the same way', () => {
     const result = run({ aggregates: staged });
 
-    expect(result.columnOrder.map(String)).toStrictEqual([
-      'region',
-      'amount:min',
-      'amount:max',
-      'amount:sum',
-      'id:count',
-    ]);
+    expect(result.columnOrder.map(String)).toStrictEqual(STAGED_PAINT);
   });
 
   it('keeps a column’s measures contiguous when the staged list interleaves two', () => {
@@ -107,13 +103,7 @@ describe('withAggregateColumnOrder', () => {
       ],
     });
 
-    expect(keysOf(result)).toStrictEqual([
-      'region',
-      'amount:min',
-      'amount:max',
-      'amount:sum',
-      'id:count',
-    ]);
+    expect(keysOf(result)).toStrictEqual(STAGED_PAINT);
   });
 
   it('leaves the non-measure columns where they were', () => {
@@ -162,13 +152,7 @@ describe('withAggregateColumnOrder', () => {
       aggregates: [{ columnKey: 'region', fn: 'count' }, ...staged],
     });
 
-    expect(keysOf(result)).toStrictEqual([
-      'region',
-      'amount:min',
-      'amount:max',
-      'amount:sum',
-      'id:count',
-    ]);
+    expect(keysOf(result)).toStrictEqual(STAGED_PAINT);
   });
 
   it('passes pinning and visibility through untouched', () => {

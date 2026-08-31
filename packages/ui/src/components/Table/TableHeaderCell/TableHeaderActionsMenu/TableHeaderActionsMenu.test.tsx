@@ -464,70 +464,58 @@ describe('TableHeaderActionsMenu', () => {
   });
 });
 
+const LAYOUT_ITEMS = ['Pin Left', 'Pin Right', 'Clear Pinning', 'Hide Column'];
+
+type RenderGroupedMenuArgs = {
+  readonly columnKey: string;
+  readonly columnLabel: string;
+};
+
+const renderGroupedMenu = ({
+  columnKey,
+  columnLabel,
+}: RenderGroupedMenuArgs) => {
+  isGroupingEnabledRef.current = true;
+
+  render(
+    <TableHeaderActionsMenu
+      columnKey={columnKey as never}
+      columnLabel={columnLabel}
+      hasSettings
+      isSortable
+      isStatic={false}
+      pinSide='left'
+    />,
+  );
+
+  return LAYOUT_ITEMS.map((item) => getMenuButton(item).disabled);
+};
+
 describe('the layout actions a grouped column cannot take', () => {
   it('refuses pin and hide on a group key, and offers the per-column ungroup', () => {
-    isGroupingEnabledRef.current = true;
     groupingKeysRef.current = ['name'];
 
-    render(
-      <TableHeaderActionsMenu
-        columnKey='name'
-        columnLabel='Name'
-        hasSettings
-        isSortable
-        isStatic={false}
-        pinSide='left'
-      />,
-    );
-
-    expect(getMenuButton('Pin Left').disabled).toBe(true);
-    expect(getMenuButton('Pin Right').disabled).toBe(true);
-    expect(getMenuButton('Clear Pinning').disabled).toBe(true);
-    expect(getMenuButton('Hide Column').disabled).toBe(true);
+    expect(
+      renderGroupedMenu({ columnKey: 'name', columnLabel: 'Name' }),
+    ).toStrictEqual([true, true, true, true]);
     expect(getMenuButton('Remove from Grouping').disabled).toBe(false);
   });
 
   it('refuses only the pinning on a measure, and leaves Hide Column working', () => {
-    isGroupingEnabledRef.current = true;
     groupingKeysRef.current = ['region'];
     columnsRef.current = [{ key: 'amount', label: 'Amount' }];
 
-    render(
-      <TableHeaderActionsMenu
-        columnKey={'amount:sum' as never}
-        columnLabel='Sum'
-        hasSettings
-        isSortable
-        isStatic={false}
-        pinSide='left'
-      />,
-    );
-
-    expect(getMenuButton('Pin Left').disabled).toBe(true);
-    expect(getMenuButton('Pin Right').disabled).toBe(true);
-    expect(getMenuButton('Clear Pinning').disabled).toBe(true);
-    expect(getMenuButton('Hide Column').disabled).toBe(false);
+    expect(
+      renderGroupedMenu({ columnKey: 'amount:sum', columnLabel: 'Sum' }),
+    ).toStrictEqual([true, true, true, false]);
   });
 
   it('leaves an ungrouped column’s menu exactly as it was', () => {
-    isGroupingEnabledRef.current = true;
     groupingKeysRef.current = ['region'];
 
-    render(
-      <TableHeaderActionsMenu
-        columnKey='name'
-        columnLabel='Name'
-        hasSettings
-        isSortable
-        isStatic={false}
-        pinSide='left'
-      />,
-    );
-
-    expect(getMenuButton('Pin Left').disabled).toBe(false);
-    expect(getMenuButton('Pin Right').disabled).toBe(false);
-    expect(getMenuButton('Clear Pinning').disabled).toBe(false);
-    expect(getMenuButton('Hide Column').disabled).toBe(false);
+    expect(
+      renderGroupedMenu({ columnKey: 'name', columnLabel: 'Name' }),
+    ).toStrictEqual([false, false, false, false]);
     expect(getMenuButton('Remove from Grouping').disabled).toBe(true);
   });
 });

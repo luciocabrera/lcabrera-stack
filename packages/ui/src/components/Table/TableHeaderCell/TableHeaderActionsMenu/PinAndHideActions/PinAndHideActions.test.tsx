@@ -83,27 +83,51 @@ describe('PinAndHideActions', () => {
   });
 });
 
+const PINNING_ITEMS = ['Pin Left', 'Pin Right', 'Clear Pinning'];
+
+const renderLocked = (lock: TableColumnLayoutLock) => {
+  layoutLockRef.current = lock;
+
+  render(
+    <PinAndHideActions columnKey='name' onClose={mockOnClose} pinSide='left' />,
+  );
+};
+
 describe('PinAndHideActions under a layout lock', () => {
   it('refuses every layout action on a group key', () => {
-    layoutLockRef.current = 'group-key';
+    renderLocked('group-key');
 
-    render(
-      <PinAndHideActions
-        columnKey='name'
-        onClose={mockOnClose}
-        pinSide='left'
-      />,
+    expect(PINNING_ITEMS.map((item) => getButton(item).disabled)).toStrictEqual(
+      [true, true, true],
     );
-
-    expect(getButton('Pin Left').disabled).toBe(true);
-    expect(getButton('Pin Right').disabled).toBe(true);
-    expect(getButton('Clear Pinning').disabled).toBe(true);
     expect(getButton('Hide Column').disabled).toBe(true);
   });
 
-  it('refuses only the pinning on a measure', () => {
-    layoutLockRef.current = 'measure';
+  it('refuses only the pinning on a measure, leaving Hide Column working', () => {
+    renderLocked('measure');
 
+    expect(PINNING_ITEMS.map((item) => getButton(item).disabled)).toStrictEqual(
+      [true, true, true],
+    );
+    expect(getButton('Hide Column').disabled).toBe(false);
+  });
+
+  it('states the reason on each refused item, which fires no pointer events', () => {
+    renderLocked('group-key');
+
+    expect(
+      [...PINNING_ITEMS, 'Hide Column'].map((item) =>
+        getButton(item).getAttribute('title'),
+      ),
+    ).toStrictEqual([
+      'Cannot pin this column: a grouped column is always shown and always pinned to the left.',
+      'Cannot pin this column: a grouped column is always shown and always pinned to the left.',
+      'Cannot pin this column: a grouped column is always shown and always pinned to the left.',
+      'Cannot hide this column: a grouped column is always shown and always pinned to the left.',
+    ]);
+  });
+
+  it('leaves all four enabled when no lock applies', () => {
     render(
       <PinAndHideActions
         columnKey='name'
@@ -112,9 +136,8 @@ describe('PinAndHideActions under a layout lock', () => {
       />,
     );
 
-    expect(getButton('Pin Left').disabled).toBe(true);
-    expect(getButton('Pin Right').disabled).toBe(true);
-    expect(getButton('Clear Pinning').disabled).toBe(true);
-    expect(getButton('Hide Column').disabled).toBe(false);
+    expect(
+      [...PINNING_ITEMS, 'Hide Column'].map((item) => getButton(item).disabled),
+    ).toStrictEqual([false, false, false, false]);
   });
 });
