@@ -23,10 +23,12 @@ header â€” the file's first comment block, adjacent `//` lines counting as one â
 describes the module rather than a declaration. A tool directive is not prose, and the list of
 recognised prefixes is the `directives` option, and it earns its place in two
 ordinary positions the rule reports: a disable comment directly above the
-declaration it covers, and a coverage or type-checker directive inside a body. A one-line note on a member of an exported type is
-exempt, because that member is a published surface and a precondition, a default
-or an encoding is not derivable from its type; a comment above the type, or
-inside one the module does not export, is still reported. An annotated JSDoc
+declaration it covers, and a coverage or type-checker directive inside a body. A note on a member of an exported type is exempt
+while it is a single line within `memberNoteMaxLength` naming no ADR and no
+issue, because that member is a published surface and a precondition, a default
+or an encoding is not derivable from its type; a longer or record-citing note, a
+comment above the type, and one inside a type the module does not export are all
+still reported. An annotated JSDoc
 block is exempt in a JavaScript file and only there, because a published `.mjs` package's `.d.mts` is derived from it
 while a TypeScript declaration carries its own types; the recognised tags are the
 `annotationTags` option. Setting either option replaces its default list.

@@ -27,11 +27,15 @@
  * this rule reports, so without the exemption it would order a suppression
  * another engine reads to be deleted.
  *
- * A note on a **member of an exported type** stays. The declaration is the
+ * A note on a **member of an exported type** stays, in one shape only: a single
+ * line, within `memberNoteMaxLength`, naming no record. The declaration is the
  * package's published surface, so the note reaches an installer's editor and the
  * API-surface snapshot, and a precondition, a default or an encoding is not
- * derivable from the member's type. A type that is not exported has no such
- * reader, so its members are reported like any other prose.
+ * derivable from the member's type — while the rationale behind it, and a
+ * pointer to a record that installer cannot open, are exactly what does not
+ * belong there. Keying the exemption on the export alone would permit both. A
+ * type that is not exported has no such reader, so its members are reported like
+ * any other prose.
  *
  * An **annotated JSDoc block in a JavaScript file** stays, and only there. A
  * TypeScript declaration carries its own types, so a `@param` beside one is
@@ -59,8 +63,13 @@ type Options = readonly [
   {
     readonly annotationTags?: readonly string[];
     readonly directives?: readonly string[];
+    readonly memberNoteMaxLength?: number;
   }?,
 ];
+
+const DEFAULT_MEMBER_NOTE_MAX_LENGTH = 120;
+
+const RECORD_REFERENCE = /ADR-\d|#\d/;
 
 const DEFAULT_DIRECTIVES = [
   '#__PURE__',
@@ -168,6 +177,8 @@ export default createRule<Options, MessageIds>({
     const [options] = context.options;
     const directives = options?.directives ?? DEFAULT_DIRECTIVES;
     const annotationTags = options?.annotationTags ?? DEFAULT_ANNOTATION_TAGS;
+    const memberNoteMaxLength =
+      options?.memberNoteMaxLength ?? DEFAULT_MEMBER_NOTE_MAX_LENGTH;
     const { sourceCode } = context;
     const isTypeScript = TYPESCRIPT_FILE.test(context.filename);
     const headerEnd = resolveHeaderEnd(sourceCode);
@@ -216,8 +227,22 @@ export default createRule<Options, MessageIds>({
       flagAbove(node);
     };
 
+    const isMemberNote = (comment: TSESTree.Comment) =>
+      comment.type === AST_TOKEN_TYPES.Block &&
+      comment.loc.start.line === comment.loc.end.line &&
+      comment.range[1] - comment.range[0] <= memberNoteMaxLength &&
+      !RECORD_REFERENCE.test(comment.value);
+
+    const flagInsideExportedType = (node: TSESTree.Node) => {
+      for (const comment of sourceCode.getCommentsInside(node)) {
+        if (isMemberNote(comment)) continue;
+        flag({ comment, messageId: 'insideDeclaration' });
+      }
+    };
+
     const flagTypeDeclaration = (node: TSESTree.Node) => {
       if (attachmentTarget(node) === node) flagInside(node);
+      else flagInsideExportedType(node);
       flagAbove(node);
     };
 
@@ -254,6 +279,7 @@ export default createRule<Options, MessageIds>({
         properties: {
           annotationTags: { items: { type: 'string' }, type: 'array' },
           directives: { items: { type: 'string' }, type: 'array' },
+          memberNoteMaxLength: { minimum: 0, type: 'number' },
         },
         type: 'object',
       },

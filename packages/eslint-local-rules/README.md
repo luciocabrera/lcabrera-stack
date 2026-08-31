@@ -434,12 +434,15 @@ inside a body. Both sit exactly where this rule reports, so without the
 exemption it would order you to delete a suppression another engine is reading —
 and the colocated suite asserts that turning `directives` off reports both.
 
-A note on a **member of an exported type** stays. The declaration is a package's
-published surface, so the note reaches an installer's editor and the API-surface
-snapshot, and a precondition, a default or an encoding is not derivable from the
-member's type. Keep it to one line stating that fact: the exemption covers the
-member, not the type, so a comment above an exported type is still reported, and
-so is one inside a type the module does not export.
+A note on a **member of an exported type** stays, in one shape only. The
+declaration is a package's published surface, so the note reaches an installer's
+editor and the API-surface snapshot, and a precondition, a default or an
+encoding is not derivable from the member's type. The shape is checked, not
+asked for: a single line, no longer than `memberNoteMaxLength`, naming no ADR
+and no issue — the rationale belongs in the record, and an installer cannot open
+one. The exemption covers the member, not the type, so a comment above an
+exported type is still reported, and so is one inside a type the module does not
+export.
 
 An **annotated JSDoc block in a JavaScript file** stays, and only there. A
 TypeScript declaration carries its own types, so `@param` beside one is prose; a
@@ -448,10 +451,11 @@ ships an option defaulting to `[]` as `never[]`. The exemption covers the whole
 block, because the description a tool emits and prose that merely shares the
 block are the same text to a parser.
 
-| Option           | Default                                                                                                                                                                                                                             | Effect                                                           |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `directives`     | `eslint-disable`, `oxlint-disable`, `biome-ignore`, `prettier-ignore`, `react-doctor-disable`, `fallow-ignore`, `NOSONAR`, `@ts-expect-error`, `@vitest-environment`, `v8 ignore` and the rest of the engine prefixes in the source | Comment prefixes read as a directive rather than as prose        |
-| `annotationTags` | `@param`, `@returns`, `@type`, `@template`, `@satisfies`, `@callback`, `@property`, `@overload`                                                                                                                                     | JSDoc tags whose block a build reads, exempt in JavaScript files |
+| Option                | Default                                                                                                                                                                                                                             | Effect                                                                 |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `directives`          | `eslint-disable`, `oxlint-disable`, `biome-ignore`, `prettier-ignore`, `react-doctor-disable`, `fallow-ignore`, `NOSONAR`, `@ts-expect-error`, `@vitest-environment`, `v8 ignore` and the rest of the engine prefixes in the source | Comment prefixes read as a directive rather than as prose              |
+| `annotationTags`      | `@param`, `@returns`, `@type`, `@template`, `@satisfies`, `@callback`, `@property`, `@overload`                                                                                                                                     | JSDoc tags whose block a build reads, exempt in JavaScript files       |
+| `memberNoteMaxLength` | `120`                                                                                                                                                                                                                               | Longest a member note on an exported type may be before it is reported |
 
 Setting either option **replaces** its default list rather than adding to it.
 

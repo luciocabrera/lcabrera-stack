@@ -66,6 +66,36 @@ ruleTester.run('no-explanatory-comments', rule, {
       'export type Exported = { readonly value: typeof x };',
     ),
     inside(
+      'export type Descriptor = {',
+      '  /**',
+      '   * A rationale paragraph rather than a one-line note, which is not what a',
+      '   * published member carries.',
+      '   */',
+      '  readonly column?: typeof x;',
+      '};',
+    ),
+    inside(
+      'export type Descriptor = {',
+      '  /** Absent means off. See ADR-063 for why. */',
+      '  readonly column?: typeof x;',
+      '};',
+    ),
+    inside(
+      'export type Descriptor = {',
+      '  /** Absent means off, as #850 established. */',
+      '  readonly column?: typeof x;',
+      '};',
+    ),
+    {
+      ...inside(
+        'export type Descriptor = {',
+        '  /** A note that runs past the configured budget for a member note. */',
+        '  readonly column?: typeof x;',
+        '};',
+      ),
+      options: [{ memberNoteMaxLength: 20 }],
+    },
+    inside(
       'type Result = {',
       '  /** Absent while the first read is in flight. */',
       '  readonly value?: typeof x;',
@@ -203,6 +233,15 @@ ruleTester.run('no-explanatory-comments', rule, {
       '  Flat = 0,',
       '}',
     ),
+    {
+      ...ok(
+        'export type Descriptor = {',
+        '  /** A note held to a shorter budget than the default. */',
+        '  readonly column?: typeof x;',
+        '};',
+      ),
+      options: [{ memberNoteMaxLength: 60 }],
+    },
     ok(
       'const value = x;',
       '',
