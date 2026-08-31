@@ -19,6 +19,18 @@ const PERSISTED_SLICES = [
   'columnVisibility',
 ] as const;
 
+const readSliceValue = (source: string) => {
+  try {
+    const parsed = JSON.parse(source) as { value: unknown; version: number };
+
+    return parsed.version === PERSISTENCE_VERSION
+      ? { value: parsed.value }
+      : undefined;
+  } catch {
+    return;
+  }
+};
+
 export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
   appId,
   persistenceKey,
@@ -37,20 +49,19 @@ export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
       continue;
     }
 
-    try {
-      const source = transformRaw ? transformRaw(rawValue) : rawValue;
-      const parsed = JSON.parse(source) as { value: unknown; version: number };
+    const parsed = readSliceValue(
+      transformRaw ? transformRaw(rawValue) : rawValue,
+    );
 
-      if (parsed.version === PERSISTENCE_VERSION) {
-        result[slice] = (
-          slice === 'columnVisibility' && Array.isArray(parsed.value)
-            ? new Set(parsed.value as string[])
-            : parsed.value
-        ) as never;
-      }
-    } catch {
+    if (!parsed) {
       continue;
     }
+
+    result[slice] = (
+      slice === 'columnVisibility' && Array.isArray(parsed.value)
+        ? new Set(parsed.value as string[])
+        : parsed.value
+    ) as never;
   }
 
   return result;
