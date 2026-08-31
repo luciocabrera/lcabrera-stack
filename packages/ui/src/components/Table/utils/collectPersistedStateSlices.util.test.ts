@@ -9,6 +9,13 @@ const collectFrom = (raw: Readonly<Record<string, string>>) =>
     readRawSlice: (sliceKey) => raw[sliceKey],
   });
 
+const collectDecoded = (raw: Readonly<Record<string, string>>) =>
+  collectPersistedStateSlices({
+    persistenceKey: 'table',
+    readRawSlice: (sliceKey) => raw[sliceKey],
+    transformRaw: decodeURIComponent,
+  });
+
 const sliceKey = (slice: string) => `table-state-table-${slice}`;
 
 describe('collectPersistedStateSlices', () => {
@@ -48,6 +55,13 @@ describe('collectPersistedStateSlices', () => {
     });
 
     expect(result.sorting).toBeUndefined();
+  });
+
+  it('skips a slice whose transformRaw throws on the raw value', () => {
+    const raw = { [sliceKey('sorting')]: '%E0%A4%A' };
+
+    expect(() => collectDecoded(raw)).not.toThrow();
+    expect(collectDecoded(raw)).toEqual({});
   });
 
   it('rebuilds columnVisibility as a Set', () => {

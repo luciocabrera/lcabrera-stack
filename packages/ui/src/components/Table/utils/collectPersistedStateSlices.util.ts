@@ -19,8 +19,14 @@ const PERSISTED_SLICES = [
   'columnVisibility',
 ] as const;
 
-const readSliceValue = (source: string) => {
+type ReadSliceValueArgs = {
+  readonly rawValue: string;
+  readonly transformRaw?: (raw: string) => string;
+};
+
+const readSliceValue = ({ rawValue, transformRaw }: ReadSliceValueArgs) => {
   try {
+    const source = transformRaw ? transformRaw(rawValue) : rawValue;
     const parsed = JSON.parse(source) as { value: unknown; version: number };
 
     return parsed.version === PERSISTENCE_VERSION
@@ -49,9 +55,7 @@ export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
       continue;
     }
 
-    const parsed = readSliceValue(
-      transformRaw ? transformRaw(rawValue) : rawValue,
-    );
+    const parsed = readSliceValue({ rawValue, transformRaw });
 
     if (!parsed) {
       continue;
