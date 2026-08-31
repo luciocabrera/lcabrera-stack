@@ -14,7 +14,7 @@ const isLocalIp = (hostname: string): boolean => {
   return PRIVATE_IP_PATTERNS.some((pattern) => pattern.test(hostname));
 };
 
-const resolveFromRequestUrl = (requestUrl: string): string | undefined => {
+const resolveFromRequestUrl = (requestUrl: string) => {
   try {
     const { hostname, protocol } = new URL(requestUrl);
 
@@ -22,7 +22,7 @@ const resolveFromRequestUrl = (requestUrl: string): string | undefined => {
       ? CONFIG.localhost.apiHost
       : `${protocol}//${hostname}/api`;
   } catch {
-    return undefined;
+    return;
   }
 };
 
