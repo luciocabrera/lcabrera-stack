@@ -13,7 +13,6 @@ import {
 const {
   appliedAggregatesRef,
   capabilityRef,
-  collapsedGroupPathsRef,
   dataRef,
   groupingKeysRef,
   isGroupingEnabledRef,
@@ -25,15 +24,15 @@ const {
   mockSetGroupLevelExpanded,
   mockToggleGroupKey,
   normalizedColumnRef,
+  toggledGroupPathsRef,
 } = vi.hoisted(() => ({
   appliedAggregatesRef: {
     current: [] as readonly { columnKey: string; fn: string }[],
   },
   capabilityRef: { current: undefined as unknown },
-  collapsedGroupPathsRef: { current: new Set<string>() },
   dataRef: { current: [] as readonly Record<string, unknown>[] },
-
   groupingKeysRef: { current: [] as readonly string[] },
+
   isGroupingEnabledRef: { current: true },
   isGroupingLockedRef: { current: false },
   mockAddColumnAggregate: vi.fn(),
@@ -43,6 +42,7 @@ const {
   mockSetGroupLevelExpanded: vi.fn(),
   mockToggleGroupKey: vi.fn(),
   normalizedColumnRef: { current: {} as Record<string, unknown> },
+  toggledGroupPathsRef: { current: new Set<string>() },
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
@@ -79,7 +79,8 @@ vi.mock(
   '#ui/components/Table/contexts/TableConfig/expansion/selectors',
   () => ({
     useGetTableCanDrillGroups: () => false,
-    useGetTableCollapsedGroupPaths: () => collapsedGroupPathsRef.current,
+    useGetTableDefaultGroupFold: () => 'expanded',
+    useGetTableToggledGroupPaths: () => toggledGroupPathsRef.current,
   }),
 );
 
@@ -158,7 +159,7 @@ afterEach(() => {
   vi.clearAllMocks();
   appliedAggregatesRef.current = [];
   capabilityRef.current = undefined;
-  collapsedGroupPathsRef.current = new Set<string>();
+  toggledGroupPathsRef.current = new Set<string>();
   dataRef.current = [];
   groupingKeysRef.current = [];
   isGroupingEnabledRef.current = true;
@@ -701,7 +702,7 @@ describe('GroupActions', () => {
     it('stops offering the collapse once every foldable group is folded', () => {
       dataRef.current = rollupRows;
       groupingKeysRef.current = ['city', 'status'];
-      collapsedGroupPathsRef.current = new Set([
+      toggledGroupPathsRef.current = new Set([
         resolveGroupPathKey(pathOf('Berlin')),
       ]);
 
@@ -713,7 +714,7 @@ describe('GroupActions', () => {
     it('offers the expand only while something is collapsed, and closes on it', () => {
       dataRef.current = rollupRows;
       groupingKeysRef.current = ['city', 'status'];
-      collapsedGroupPathsRef.current = new Set([
+      toggledGroupPathsRef.current = new Set([
         resolveGroupPathKey(pathOf('Berlin')),
       ]);
 
@@ -825,7 +826,7 @@ describe('GroupActions', () => {
     it('stops offering the collapse once this level is folded', () => {
       dataRef.current = rollupRows;
       groupingKeysRef.current = GROUP_FIXTURE_KEYS;
-      collapsedGroupPathsRef.current = new Set([
+      toggledGroupPathsRef.current = new Set([
         resolveGroupPathKey(pathOf('Berlin')),
       ]);
 
@@ -844,7 +845,7 @@ describe('GroupActions', () => {
 
       expect(getButton('Expand This Level').disabled).toBe(true);
 
-      collapsedGroupPathsRef.current = new Set([
+      toggledGroupPathsRef.current = new Set([
         resolveGroupPathKey(pathOf('Berlin')),
       ]);
       rerender(<GroupActions columnKey='city' onClose={mockOnClose} />);

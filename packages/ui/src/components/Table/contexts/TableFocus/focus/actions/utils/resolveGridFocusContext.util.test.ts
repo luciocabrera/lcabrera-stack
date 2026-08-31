@@ -136,7 +136,8 @@ describe('resolveGridFocusContext', () => {
       totalRows: groupedRows.length,
     }) as TableDataState<Row>;
     const collapsed: TableGroupExpansionState = {
-      collapsedGroupPaths: new Set([resolveGroupPathKey(groupPath)]),
+      defaultFold: 'expanded',
+      toggledGroupPaths: new Set([resolveGroupPathKey(groupPath)]),
     };
 
     const expanded = resolveGridFocusContext({

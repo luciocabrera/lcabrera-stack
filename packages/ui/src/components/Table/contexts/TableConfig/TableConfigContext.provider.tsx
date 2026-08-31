@@ -52,10 +52,17 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   );
   const metaStore = useStore<TableMetaState>(normalizedMetaState);
   const groupingStore = useStore<TableGroupingState>(normalizedGroupingState);
-  // Expansion seeds from nothing — it is client state and does not travel in
-  // the URL (ADR-061), so there is no loader half of it to normalize.
+  // Expansion itself seeds from nothing — it is client state and does not
+  // travel in the URL (ADR-061). Its *default* does come from the loader: it is
+  // the reader's Global Settings answer, read off the settings cookie, and
+  // seeding it here is what lets a `collapsed` preference land on the first
+  // paint rather than one paint later.
   const expansionStore = useStore<TableGroupExpansionState>(
-    getInitialExpansionState(),
+    getInitialExpansionState({
+      ...(metaState?.defaultGroupFold !== undefined && {
+        defaultFold: metaState.defaultGroupFold,
+      }),
+    }),
   );
 
   const value: TableConfigContextValue<TData> = {

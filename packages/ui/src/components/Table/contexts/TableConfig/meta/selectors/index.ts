@@ -3,7 +3,6 @@ export { useGetTableColumnGroupingCapability } from './useGetTableColumnGrouping
 export { useGetTableColumnSelectedKey } from './useGetTableColumnSelectedKey.hook';
 export { useGetTableColumnSettingsSelectedTab } from './useGetTableColumnSettingsSelectedTab.hook';
 export { useGetTableCrud } from './useGetTableCrud.hook';
-export { useGetTableDefaultGroupFold } from './useGetTableDefaultGroupFold.hook';
 export { useGetTableDeleteActionPath } from './useGetTableDeleteActionPath.hook';
 export { useGetTableDensity } from './useGetTableDensity.hook';
 export { useGetTableDrawersSyncNonce } from './useGetTableDrawersSyncNonce.hook';

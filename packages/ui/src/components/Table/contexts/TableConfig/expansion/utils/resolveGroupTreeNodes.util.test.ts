@@ -35,7 +35,11 @@ const summary = ({
 const noneCollapsed = new Set<string>();
 
 const nodesFor = (summaries: readonly (TableGroupRowSummary | undefined)[]) =>
-  resolveGroupTreeNodes({ collapsedGroupPaths: noneCollapsed, summaries });
+  resolveGroupTreeNodes({
+    defaultFold: 'expanded',
+    summaries,
+    toggledGroupPaths: noneCollapsed,
+  });
 
 describe('resolveGroupTreeNodes', () => {
   it('takes a group row level and parent from its own path', () => {

@@ -1,1 +1,2 @@
-export { useGetTableCollapsedGroupPaths } from './useGetTableCollapsedGroupPaths.hook';
+export { useGetTableDefaultGroupFold } from './useGetTableDefaultGroupFold.hook';
+export { useGetTableToggledGroupPaths } from './useGetTableToggledGroupPaths.hook';

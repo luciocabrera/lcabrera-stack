@@ -6,23 +6,23 @@ describe('toggleCollapsedGroupPath', () => {
   it('collapses a path that was open and re-opens one that was collapsed', () => {
     const opened = new Set<string>();
     const collapsed = toggleCollapsedGroupPath({
-      collapsedGroupPaths: opened,
       pathKey: 'a',
+      toggledGroupPaths: opened,
     });
 
     expect([...collapsed]).toStrictEqual(['a']);
     expect([
       ...toggleCollapsedGroupPath({
-        collapsedGroupPaths: collapsed,
         pathKey: 'a',
+        toggledGroupPaths: collapsed,
       }),
     ]).toStrictEqual([]);
   });
 
   it('leaves every other collapsed path alone', () => {
     const next = toggleCollapsedGroupPath({
-      collapsedGroupPaths: new Set(['a', 'b']),
       pathKey: 'b',
+      toggledGroupPaths: new Set(['a', 'b']),
     });
 
     expect([...next]).toStrictEqual(['a']);
@@ -34,8 +34,8 @@ describe('toggleCollapsedGroupPath', () => {
     // would keep painting the previous expansion.
     const current = new Set(['a']);
     const next = toggleCollapsedGroupPath({
-      collapsedGroupPaths: current,
       pathKey: 'a',
+      toggledGroupPaths: current,
     });
 
     expect(next).not.toBe(current);

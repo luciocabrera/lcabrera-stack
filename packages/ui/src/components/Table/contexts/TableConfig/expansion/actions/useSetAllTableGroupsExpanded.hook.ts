@@ -1,5 +1,6 @@
 import {
-  areAllGroupsCollapsed,
+  countCollapsedGroups,
+  resolveFoldAllTarget,
   resolveTableGroupTree,
 } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
@@ -8,9 +9,6 @@ import { useTableFocusContextValue } from '#ui/components/Table/contexts/TableFo
 import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
 
 import { applyGroupFoldFocus, resolveOutermostGroupPathKey } from './utils';
-
-/** Expansion is the complement of the collapsed set (ADR-067), so "everything open" is empty. */
-const NOTHING_COLLAPSED: ReadonlySet<string> = new Set<string>();
 
 /**
  * Local, like the per-row toggle it generalises: expansion changes nothing server-side, so
@@ -29,30 +27,35 @@ export const useSetAllTableGroupsExpanded = <
   const containerRef = useTableContainerRef();
 
   return (isExpanded: boolean) => {
-    const { collapsedGroupPaths } = expansionStore.get();
-
-    if (isExpanded) {
-      if (collapsedGroupPaths.size === 0) return;
-
-      expansionStore.set({ collapsedGroupPaths: NOTHING_COLLAPSED });
-
-      return;
-    }
-
-    const treeArgs = { data: dataStore.get().data };
+    const { defaultFold, toggledGroupPaths } = expansionStore.get();
+    // Resolved before either direction, where expanding once short-circuited on
+    // an empty set: under a `collapsed` default an empty set is a fully folded
+    // grid, so "nothing to open" cannot be read off the size.
+    const treeArgs = { data: dataStore.get().data, defaultFold };
     const { foldableGroupPaths, rows } = resolveTableGroupTree({
       ...treeArgs,
-      collapsedGroupPaths,
+      toggledGroupPaths,
+    });
+    const collapsedCount = countCollapsedGroups({
+      defaultFold,
+      foldableGroupPaths,
+      toggledGroupPaths,
+    });
+    const target = resolveFoldAllTarget({
+      defaultFold,
+      foldableGroupPaths,
+      isExpanded,
     });
 
-    if (
-      areAllGroupsCollapsed({
-        collapsedGroupPaths,
-        foldableGroupPaths,
-      })
-    ) {
+    if (isExpanded) {
+      if (collapsedCount === 0) return;
+
+      expansionStore.set({ toggledGroupPaths: target });
+
       return;
     }
+
+    if (collapsedCount === foldableGroupPaths.size) return;
 
     const { columns } = columnsStore.get();
     const focusState = focusStore.get();
@@ -70,10 +73,10 @@ export const useSetAllTableGroupsExpanded = <
       rowHeight: metaStore.get().rowHeight,
       rows: resolveTableGroupTree({
         ...treeArgs,
-        collapsedGroupPaths: foldableGroupPaths,
+        toggledGroupPaths: target,
       }).rows,
     });
 
-    expansionStore.set({ collapsedGroupPaths: foldableGroupPaths });
+    expansionStore.set({ toggledGroupPaths: target });
   };
 };

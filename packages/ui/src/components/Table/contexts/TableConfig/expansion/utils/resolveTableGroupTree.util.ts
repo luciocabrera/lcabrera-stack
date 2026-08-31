@@ -1,4 +1,7 @@
-import type { TableGroupRowSummary } from '#ui/components/Table/Table.types';
+import type {
+  TableGroupFold,
+  TableGroupRowSummary,
+} from '#ui/components/Table/Table.types';
 
 import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGroupRowSummary.util';
 
@@ -21,8 +24,9 @@ export type TableGroupTreeRowMeta = {
 };
 
 type ResolveTableGroupTreeArgs<TData> = {
-  readonly collapsedGroupPaths: ReadonlySet<string>;
   readonly data: readonly TData[];
+  readonly defaultFold: TableGroupFold;
+  readonly toggledGroupPaths: ReadonlySet<string>;
 };
 
 type VisibleRow<TData> = {
@@ -52,8 +56,9 @@ const countSiblings = (parentKeys: readonly string[]) => {
  * `aria-rowindex` — counts **visible** rows and not loaded ones (ADR-067).
  */
 export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
-  collapsedGroupPaths,
   data,
+  defaultFold,
+  toggledGroupPaths,
 }: ResolveTableGroupTreeArgs<TData>) => {
   if (data.every((row) => getTableGroupRowSummary(row) === undefined)) {
     return {
@@ -65,7 +70,11 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
   }
 
   const summaries = data.map((row) => getTableGroupRowSummary(row));
-  const nodes = resolveGroupTreeNodes({ collapsedGroupPaths, summaries });
+  const nodes = resolveGroupTreeNodes({
+    defaultFold,
+    summaries,
+    toggledGroupPaths,
+  });
   const foldableGroupPaths = collectFoldableGroupPaths(nodes);
   const visible: VisibleRow<TData>[] = [];
 
@@ -91,7 +100,7 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
   for (const { hasChildren, node, row, summary } of visible) {
     const posInSet = (positions.get(node.parentKey) ?? 0) + 1;
     const isCollapsed =
-      node.pathKey !== undefined && collapsedGroupPaths.has(node.pathKey);
+      node.pathKey !== undefined && toggledGroupPaths.has(node.pathKey);
 
     positions.set(node.parentKey, posInSet);
     rows.push(row);
@@ -102,10 +111,10 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
       isExpanded: !isCollapsed && node.pathKey !== undefined,
       level: node.level,
       levelDisclosures: resolveGroupLevelDisclosures({
-        collapsedGroupPaths,
         foldableKeys: foldableGroupPaths,
         pathKey: node.pathKey,
         summary,
+        toggledGroupPaths,
       }),
       pathKey: node.pathKey,
       posInSet,

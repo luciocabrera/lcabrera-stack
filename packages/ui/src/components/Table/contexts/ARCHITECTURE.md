@@ -119,7 +119,7 @@ graph TD
   subgraph "Configuration Layer"
     CS["columnsStore<br/>(columns, filters, sorting, pinning, sizing, visibility)"]
     GS["groupingStore<br/>(applied group keys)"]
-    ES["expansionStore<br/>(collapsed group paths)"]
+    ES["expansionStore<br/>(toggled group paths + default fold)"]
     MS["metaStore<br/>(density, title, drawer toggles, row height, capabilities)"]
   end
 

@@ -34,8 +34,9 @@ export const resolveGridFocusContext = <TData extends Record<string, unknown>>({
 }: ResolveGridFocusContextArgs<TData>) => {
   const { columns, pinnedColumnPartition } = columnsState;
   const { rowMeta, rows } = resolveTableGroupTree({
-    collapsedGroupPaths: expansionState.collapsedGroupPaths,
     data: dataState.data,
+    defaultFold: expansionState.defaultFold,
+    toggledGroupPaths: expansionState.toggledGroupPaths,
   });
 
   return {

@@ -12,10 +12,10 @@ export type TableGroupLevelDisclosure = {
 };
 
 type ResolveGroupLevelDisclosuresArgs = {
-  readonly collapsedGroupPaths: ReadonlySet<string>;
   readonly foldableKeys: ReadonlySet<string>;
   readonly pathKey: string | undefined;
   readonly summary: TableGroupRowSummary | undefined;
+  readonly toggledGroupPaths: ReadonlySet<string>;
 };
 
 const NOTHING: readonly TableGroupLevelDisclosure[] = [];
@@ -28,10 +28,10 @@ const NOTHING: readonly TableGroupLevelDisclosure[] = [];
  * which every row inside the group carries.
  */
 export const resolveGroupLevelDisclosures = ({
-  collapsedGroupPaths,
   foldableKeys,
   pathKey,
   summary,
+  toggledGroupPaths,
 }: ResolveGroupLevelDisclosuresArgs): readonly TableGroupLevelDisclosure[] => {
   if (summary === undefined || summary.path.length === 0) return NOTHING;
 
@@ -43,7 +43,7 @@ export const resolveGroupLevelDisclosures = ({
 
     if (!foldableKeys.has(levelKey)) continue;
 
-    const isCollapsed = collapsedGroupPaths.has(levelKey);
+    const isCollapsed = toggledGroupPaths.has(levelKey);
 
     if (!isCollapsed && levelKey === pathKey && summary.isSubtotal) continue;
 
