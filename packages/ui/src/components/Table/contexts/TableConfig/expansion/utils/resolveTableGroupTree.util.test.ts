@@ -392,6 +392,39 @@ describe('resolveTableGroupTree under a collapsed default', () => {
     ]);
   });
 
+  it('announces a folded group as collapsed, not as expanded', () => {
+    // The gap that let two raw membership reads through review: the cases above
+    // assert `rows` and `foldableGroupPaths`, and both are right while
+    // `rowMeta.isExpanded` is inverted. This value reaches `aria-expanded` on
+    // the row and the chevron's direction, so a grid that landed folded because
+    // the reader asked it to would announce every group as open.
+    const expanded = collapsedTree().rowMeta?.map((meta) => meta.isExpanded);
+
+    expect(expanded).toStrictEqual([false, false]);
+  });
+
+  it('points the level chevrons the folded way too', () => {
+    const disclosures = collapsedTree().rowMeta?.flatMap(
+      ({ levelDisclosures }) =>
+        levelDisclosures.map(({ isExpanded }) => isExpanded),
+    );
+
+    expect(disclosures?.every((isExpanded) => !isExpanded)).toBe(true);
+  });
+
+  it('turns one group’s chevron around when the set opens it', () => {
+    const rowMeta = collapsedTree([resolveGroupPathKey(berlin)]).rowMeta ?? [];
+    const berlinMeta = rowMeta.find(
+      ({ pathKey }) => pathKey === resolveGroupPathKey(berlin),
+    );
+    const parisMeta = rowMeta.find(
+      ({ pathKey }) => pathKey === resolveGroupPathKey(paris),
+    );
+
+    expect(berlinMeta?.isExpanded).toBe(true);
+    expect(parisMeta?.isExpanded).toBe(false);
+  });
+
   it('finds the same foldable groups either way, since that is structural', () => {
     expect(collapsedTree().foldableGroupPaths).toStrictEqual(
       resolveTableGroupTree({

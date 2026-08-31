@@ -50,7 +50,12 @@ the property the whole change exists for. A group nobody has touched follows the
 default with no path enumerated and no data needed to name one.
 
 **One predicate reads membership.** `isGroupCollapsed` is the only place the set
-is asked about a path, so the two polarities cannot come to disagree.
+is asked about a path, so the two polarities cannot come to disagree. That is a
+rule the rename can hide rather than surface: the field kept its type, so two
+raw `has` reads compiled unchanged and only review caught them — one publishing
+`rowMeta.isExpanded`, which reaches `aria-expanded`, and one deciding which way
+each level's chevron points. `grep` for a bare `.has(` on the set is the check;
+a green build is not.
 `countCollapsedGroups` and `resolveFoldAllTarget` are built on it and replace two
 readings that were only ever right under `expanded`: `isExpandAllEnabled` was
 `toggledGroupPaths.size > 0`, and expand-all wrote the empty set.

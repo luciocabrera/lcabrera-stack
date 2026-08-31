@@ -29,6 +29,11 @@ would discard everyone's navigation and pinning for nothing.
 Both reach the Table through the loader's meta rather than through
 `GlobalSettingsContext`, so a Table still renders outside the settings provider.
 
+Every read of the set's membership goes through one predicate, including the two
+that decide `aria-expanded` on a group row and which way a level's chevron
+points — both of which announced a fully folded grid as open until they were
+routed through it.
+
 **Breaking, and why it is `minor`:** `TableGroupExpansionState` renamed
 `collapsedGroupPaths` to **`toggledGroupPaths`** and gained a required
 `defaultFold`. The set now holds the groups folded the _other way from the

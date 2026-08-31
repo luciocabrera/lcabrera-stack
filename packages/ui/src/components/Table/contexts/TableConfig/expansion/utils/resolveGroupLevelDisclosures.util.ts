@@ -1,9 +1,12 @@
 import type {
+  TableGroupFold,
   TableGroupKeyValue,
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 
 import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
+
+import { isGroupCollapsed } from './isGroupCollapsed.util';
 
 export type TableGroupLevelDisclosure = {
   readonly columnKey: string;
@@ -12,6 +15,7 @@ export type TableGroupLevelDisclosure = {
 };
 
 type ResolveGroupLevelDisclosuresArgs = {
+  readonly defaultFold: TableGroupFold;
   readonly foldableKeys: ReadonlySet<string>;
   readonly pathKey: string | undefined;
   readonly summary: TableGroupRowSummary | undefined;
@@ -28,6 +32,7 @@ const NOTHING: readonly TableGroupLevelDisclosure[] = [];
  * which every row inside the group carries.
  */
 export const resolveGroupLevelDisclosures = ({
+  defaultFold,
   foldableKeys,
   pathKey,
   summary,
@@ -43,7 +48,11 @@ export const resolveGroupLevelDisclosures = ({
 
     if (!foldableKeys.has(levelKey)) continue;
 
-    const isCollapsed = toggledGroupPaths.has(levelKey);
+    const isCollapsed = isGroupCollapsed({
+      defaultFold,
+      pathKey: levelKey,
+      toggledGroupPaths,
+    });
 
     if (!isCollapsed && levelKey === pathKey && summary.isSubtotal) continue;
 

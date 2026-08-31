@@ -9,6 +9,7 @@ import type { TableGroupLevelDisclosure } from './resolveGroupLevelDisclosures.u
 import type { GroupTreeNode } from './resolveGroupTreeNodes.util';
 
 import { collectFoldableGroupPaths } from './collectFoldableGroupPaths.util';
+import { isGroupCollapsed } from './isGroupCollapsed.util';
 import { resolveGroupLevelDisclosures } from './resolveGroupLevelDisclosures.util';
 import { resolveGroupTreeNodes } from './resolveGroupTreeNodes.util';
 
@@ -100,17 +101,25 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
   for (const { hasChildren, node, row, summary } of visible) {
     const posInSet = (positions.get(node.parentKey) ?? 0) + 1;
     const isCollapsed =
-      node.pathKey !== undefined && toggledGroupPaths.has(node.pathKey);
+      node.pathKey !== undefined &&
+      isGroupCollapsed({
+        defaultFold,
+        pathKey: node.pathKey,
+        toggledGroupPaths,
+      });
 
     positions.set(node.parentKey, posInSet);
     rows.push(row);
     rowMeta.push({
       hasChildren,
-      // Expansion is held by its complement, so a group nobody has touched is
-      // open (ADR-067). A detail row has no path key and is never either.
+      // Asked of the predicate, not of membership: the set holds the groups
+      // folded the other way from `defaultFold`, so a `has` here announces
+      // every group of a fully folded grid as expanded (ADR-103). A detail row
+      // has no path key and is never either.
       isExpanded: !isCollapsed && node.pathKey !== undefined,
       level: node.level,
       levelDisclosures: resolveGroupLevelDisclosures({
+        defaultFold,
         foldableKeys: foldableGroupPaths,
         pathKey: node.pathKey,
         summary,
