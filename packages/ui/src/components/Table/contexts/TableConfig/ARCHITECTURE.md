@@ -228,7 +228,7 @@ what a reader has to know, is below.
 **The set holds the exceptions, not the collapsed paths.** Membership means
 collapsed under an `expanded` default and expanded under a `collapsed` one, which
 is why `isGroupCollapsed` is the only thing allowed to read it
-([ADR-103](../../../../../../docs/decisions/ADR-103-the-expansion-set-holds-the-exceptions-to-a-default-fold.md)).
+([ADR-103](../../../../../../../docs/decisions/ADR-103-the-expansion-set-holds-the-exceptions-to-a-default-fold.md)).
 Storing exceptions is what lets a group that has not loaded yet still follow the
 reader's default — naming the collapsed paths needs the data first.
 
