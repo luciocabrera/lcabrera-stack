@@ -120,41 +120,24 @@ TableConfig/
 │       ├── useGetTableGroupingKeys.hook.ts       → The applied group keys, in nesting order
 │       └── useGetTableGroupingAggregates.hook.ts  → Every applied (columnKey, fn) aggregate, in order — the state's own array, so the snapshot is stable
 │
-├── expansion/                               → Which group rows are collapsed, and which have fetched their own rows (ADR-061, ADR-067, ADR-079)
+├── expansion/                               → Which group rows are folded, and which have fetched their own rows (ADR-061, ADR-067, ADR-079, ADR-103)
 │   ├── useExpansionStore.hook.ts            → Resolves the config expansionStore, delegates to useStoreSelector
 │   │
 │   │  A separate store from grouping, and the reason is the loader boundary:
 │   │  `TableGroupingState` is also the URL codec's and the loader's type, and a
 │   │  `Set` does not cross it (ADR-009).
 │   │
-│   ├── utils/
-│   │   ├── resolveGroupTreeNodes.util.ts    → Pure: each loaded row's level, parent and visibility; group ancestry from the path, detail rows from the nearest group above
-│   │   ├── resolveTableGroupTree.util.ts    → Pure: the rows a collapse leaves standing plus their ARIA tree metadata; returns the caller's array by reference when there is no tree
-│   │   ├── resolveGroupLevelDisclosures.util.ts → Pure: the groups one row can fold, keyed by the column stating each level — ancestors, plus its own only when it is a collapsed subtotal (ADR-080 amendment)
-│   │   ├── collectFoldableGroupPaths.util.ts → Pure: the groups a control may fold — those that own rows **and** render a row of their own, so a `flat` ancestor nothing draws is never offered (#774)
-│   │   ├── collectGroupLevelFoldPaths.util.ts → Pure: the groups one column's level command folds — the union of the disclosures the row metadata above already keys by column (ADR-097)
-│   │   ├── areAllGroupsCollapsed.util.ts    → Pure: whether every foldable group is already folded, by membership rather than size
-│   │   ├── toggleCollapsedGroupPath.util.ts → Pure: one group's expansion flipped, as a new set
-│   │   ├── setCollapsedGroupLevel.util.ts  → Pure: one level folded or unfolded as a whole, everything outside it carried through; same instance back when nothing moved
-│   │   ├── pruneCollapsedGroupPaths.util.ts → Pure: drop collapsed paths the new rows no longer carry; same instance back when nothing changed
-│   │
-│   ├── actions/
-│   │   ├── utils/resolveGroupCollapseFocusTarget.util.ts → Pure: the ancestor focus falls back to when a collapse hides the focused row
-│   │   ├── utils/resolveFocusedGroupPath.util.ts        → Pure: the group the focused row sits in — the one walk the two resolvers below narrow
-│   │   ├── utils/resolveOutermostGroupPathKey.util.ts   → Pure: which ancestor that is when a collapse-all folds every level at once and names no single path (#774)
-│   │   ├── utils/resolveFoldedAncestorPathKey.util.ts  → Pure: which of the groups a level fold closed the focused row was inside, when the fold names many and none is the row's own (#1020)
-│   │   ├── utils/applyGroupFoldFocus.service.ts       → Effect: hand focus to the row a fold left standing, or leave it alone — the tail all three fold actions share
-│   │   ├── useToggleTableGroupExpansion.hook.ts → Open or close one group by path; moves focus first when the collapse takes the focused row with it
-│   │   ├── useSetAllTableGroupsExpanded.hook.ts → Open every group, or fold to the outermost level — the tree's own foldable set, so it closes exactly what the chevrons offer (#774)
-│   │   ├── useSetTableGroupLevelExpanded.hook.ts → Fold or unfold the groups one column states, named by that column — every other level's expansion carried through (ADR-097)
-│   │   └── usePruneTableGroupExpansion.hook.ts  → Reconcile the collapsed paths against the rows just loaded
-│   │
-│   └── selectors/
-│       ├── useGetTableCollapsedGroupPaths.hook.ts → The paths whose subtree is hidden
+│   │  The `utils/`, `actions/` and `selectors/` under it were enumerated here
+│   │  file by file, and that listing was a copy of `ls` that went stale inside
+│   │  one pull request — it still named a util ADR-103 deletes and a selector it
+│   │  renames. `ls` and `packages/ui/src/INVENTORY.md` are the two surfaces that
+│   │  stay true, and the invariant worth knowing is not a filename: every read
+│   │  of the toggled set goes through `isGroupCollapsed`, because membership
+│   │  means collapsed under one default and expanded under the other (ADR-103).
 │
 ├── utils/
   ├── getInitialColumnsState.util.ts       → Build initial columns state from props; synthesizes the `actions` column via `resolveTableActionsColumn` when `crud.read/update/delete` is enabled (or a consumer `actions` column is declared), and only force-pins it right when it actually exists
-  ├── getInitialExpansionState.util.ts     → Nothing collapsed: a grouped read returns whole, so the tree opens (ADR-067). No loader seed — expansion does not travel in the URL
+  ├── getInitialExpansionState.util.ts     → No group folded away from `defaultFold`. Expansion does not travel in the URL, but that default does: it is the reader's Global Settings answer, arriving through the loader's meta (ADR-067, ADR-103)
   ├── getInitialGroupingState.util.ts      → Build initial grouping state from the configuration the loader applied (`metaState.groupingKeys` + `metaState.groupingAggregates` + `metaState.groupingMode`)
   ├── getInitialMetaState.util.ts          → Build initial meta state from props
   └── index.ts                             → Barrel: utils
@@ -235,20 +218,24 @@ interaction, from one snapshot of each store. What it does not touch is
 reach neither the persisted layout nor the settings drawer, which is what lets
 ungrouping restore the user's layout with no snapshot to keep.
 
-## Expansion State Shape
+## Expansion State
 
-```typescript
-TableGroupExpansionState = {
-  collapsedGroupPaths: ReadonlySet<string>; // Group paths whose subtree is HIDDEN — membership means collapsed, as `ColumnVisibilityState` holds the hidden columns. Empty = fully expanded, which is the initial state
-};
-```
+The shape was declared here in TypeScript and the declaration was wrong the day
+`defaultFold` landed, so it is gone: `TableGroupExpansionState` in
+`Table.types.ts` is the one place it is stated. What that copy could not say, and
+what a reader has to know, is below.
 
-**Why the complement, and why a separate store.** A grouped read returns whole
-(ADR-059) and lazy per-level fetching is a non-goal, so collapsing by default
-would hide rows already fetched and save nothing; the empty set therefore has to
-mean "expanded". And it is not a field on `TableGroupingState` because that type
-is also the URL codec's and `createTableRouteLoader`'s — everything in it crosses
-the single-fetch boundary, where a `Set` does not survive (ADR-009, ADR-067).
+**The set holds the exceptions, not the collapsed paths.** Membership means
+collapsed under an `expanded` default and expanded under a `collapsed` one, which
+is why `isGroupCollapsed` is the only thing allowed to read it
+([ADR-103](../../../../../../docs/decisions/ADR-103-the-expansion-set-holds-the-exceptions-to-a-default-fold.md)).
+Storing exceptions is what lets a group that has not loaded yet still follow the
+reader's default — naming the collapsed paths needs the data first.
+
+**Why a separate store.** It is not a field on `TableGroupingState` because that
+type is also the URL codec's and `createTableRouteLoader`'s — everything in it
+crosses the single-fetch boundary, where a `Set` does not survive (ADR-009,
+ADR-067).
 
 ## Meta State Shape
 
