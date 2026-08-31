@@ -82,6 +82,12 @@ ruleTester.run('no-explanatory-comments', rule, {
     ),
     inside(
       'export type Descriptor = {',
+      '  /** Absent means off, as adr 063 records. */',
+      '  readonly column?: typeof x;',
+      '};',
+    ),
+    inside(
+      'export type Descriptor = {',
       '  /** Absent means off, as #850 established. */',
       '  readonly column?: typeof x;',
       '};',
@@ -219,6 +225,14 @@ ruleTester.run('no-explanatory-comments', rule, {
       'export type Descriptor = {',
       '  /** Defaults to `*`. */',
       '  readonly column?: typeof x;',
+      '};',
+    ),
+    ok(
+      'export type Tokens = {',
+      '  /** Rendered on the accent colour `#0d6efd` while pinned. */',
+      '  readonly accent?: typeof x;',
+      '  /** Grid line `#2` of the CSS template. */',
+      '  readonly line?: typeof x;',
       '};',
     ),
     ok(

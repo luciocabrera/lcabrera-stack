@@ -69,7 +69,7 @@ type Options = readonly [
 
 const DEFAULT_MEMBER_NOTE_MAX_LENGTH = 120;
 
-const RECORD_REFERENCE = /ADR-\d|#\d/;
+const RECORD_REFERENCE = /\badr\b|#\d{2,5}(?![\da-z])/i;
 
 const DEFAULT_DIRECTIVES = [
   '#__PURE__',

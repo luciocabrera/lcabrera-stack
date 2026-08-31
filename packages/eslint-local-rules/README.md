@@ -439,7 +439,8 @@ declaration is a package's published surface, so the note reaches an installer's
 editor and the API-surface snapshot, and a precondition, a default or an
 encoding is not derivable from the member's type. The shape is checked, not
 asked for: a single line, no longer than `memberNoteMaxLength`, naming no ADR
-and no issue — the rationale belongs in the record, and an installer cannot open
+and no issue number (a `#` before two to five digits; a colour token such as
+`#0d6efd` is not one) — the rationale belongs in the record, and an installer cannot open
 one. The exemption covers the member, not the type, so a comment above an
 exported type is still reported, and so is one inside a type the module does not
 export.
