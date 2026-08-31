@@ -438,9 +438,10 @@ A note on a **member of an exported type** stays, in one shape only. The
 declaration is a package's published surface, so the note reaches an installer's
 editor and the API-surface snapshot, and a precondition, a default or an
 encoding is not derivable from the member's type. The shape is checked, not
-asked for: a single line, no longer than `memberNoteMaxLength`, naming no ADR
-and no issue number (a `#` before two to five digits; a colour token such as
-`#0d6efd` is not one) — the rationale belongs in the record, and an installer cannot open
+asked for: a single line, no longer than `memberNoteMaxLength`, citing no
+record — an ADR by number, or an issue or pull request named as one. A bare
+`#123` is not read as a citation: a colour token, a port and an ordinal all take
+that shape, and refusing a note that says `#000` is the worse error — the rationale belongs in the record, and an installer cannot open
 one. The exemption covers the member, not the type, so a comment above an
 exported type is still reported, and so is one inside a type the module does not
 export.

@@ -88,7 +88,7 @@ ruleTester.run('no-explanatory-comments', rule, {
     ),
     inside(
       'export type Descriptor = {',
-      '  /** Absent means off, as #850 established. */',
+      '  /** Absent means off, as issue #850 established. */',
       '  readonly column?: typeof x;',
       '};',
     ),
@@ -233,6 +233,12 @@ ruleTester.run('no-explanatory-comments', rule, {
       '  readonly accent?: typeof x;',
       '  /** Grid line `#2` of the CSS template. */',
       '  readonly line?: typeof x;',
+      '  /** Falls back to `#000` when unset. */',
+      '  readonly track?: typeof x;',
+      '  /** Served on port #8080 in development. */',
+      '  readonly port?: typeof x;',
+      '  /** American Depositary Receipt (ADR) ratio. */',
+      '  readonly ratio?: typeof x;',
       '};',
     ),
     ok(
