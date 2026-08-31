@@ -3,15 +3,18 @@ import * as stylex from '@stylexjs/stylex';
 import { Button } from '#ui/components/Button';
 import { EyeOffIcon } from '#ui/components/Icons';
 import { useSetColumnVisibility } from '#ui/components/Table/contexts/TableConfig/columns/actions';
+import { TABLE_COLUMN_LAYOUT_LOCK_LABELS } from '#ui/components/Table/Table.constants';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
 
 import type { HideColumnButtonProps } from './HideColumnButton.types';
 
 export const HideColumnButton = <TData,>({
   columnKey,
+  layoutLock,
   onClose,
 }: HideColumnButtonProps<TData>) => {
   const setColumnVisibility = useSetColumnVisibility<TData>();
+  const isGroupKey = layoutLock === 'group-key';
 
   const handleHideColumn = () => {
     setColumnVisibility({ columnKey, isVisible: false });
@@ -26,6 +29,10 @@ export const HideColumnButton = <TData,>({
           <EyeOffIcon size={16} />
         </span>
       }
+      isDisabled={isGroupKey}
+      {...(isGroupKey && {
+        title: `Cannot hide this column: ${TABLE_COLUMN_LAYOUT_LOCK_LABELS['group-key']}.`,
+      })}
       onClick={handleHideColumn}
       orientation='horizontal'
       size='mini'

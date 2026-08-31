@@ -7,6 +7,7 @@ import {
 } from '#ui/components/Table/commands';
 import { useSetColumnPinning } from '#ui/components/Table/contexts/TableConfig/columns/actions';
 import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { TABLE_COLUMN_LAYOUT_LOCK_LABELS } from '#ui/components/Table/Table.constants';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
@@ -18,6 +19,7 @@ import type { ClearPinningButtonProps } from './ClearPinningButton.types';
  */
 export const ClearPinningButton = <TData,>({
   columnKey,
+  layoutLock,
   onClose,
   pinSide,
 }: ClearPinningButtonProps<TData>) => {
@@ -27,7 +29,7 @@ export const ClearPinningButton = <TData,>({
   const { icon: ClearPinningCommandIcon, label } = CLEAR_PINNING_COMMAND;
   const { isEnabled } = deriveToggleCommandState({
     current: pinSide,
-    isDisabled: isStatic,
+    isDisabled: isStatic || layoutLock !== undefined,
     target: undefined,
   });
 
@@ -45,6 +47,9 @@ export const ClearPinningButton = <TData,>({
         </span>
       }
       isDisabled={!isEnabled}
+      {...(layoutLock !== undefined && {
+        title: `Cannot pin this column: ${TABLE_COLUMN_LAYOUT_LOCK_LABELS[layoutLock]}.`,
+      })}
       onClick={handleClearPinning}
       orientation='horizontal'
       size='mini'

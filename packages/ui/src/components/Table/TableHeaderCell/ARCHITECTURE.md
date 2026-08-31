@@ -139,11 +139,34 @@ inline pin/sort/settings buttons:
   `useSetColumnVisibility({ columnKey, isVisible: false })` — a single-column,
   table-level visibility action (see `contexts/TableConfig/ARCHITECTURE.md`),
   distinct from the settings-drawer's draft-scoped `useToggleColumnVisibility`.
+  It is `isDisabled` on a group key, and only there — see the layout lock below.
 - **Manage Column** (`ManageColumnAction`, when `hasSettings`): opens the
   per-column `ColumnSettingsDrawer` — identical wiring to the previous
   "Settings for {label}" button (`setTableColumnSelectedKey` +
   `setTableDrawersOpenState({ isColumnSettingsOpen: true,
 isTableSettingsOpen: false })`).
+
+**The layout lock.** While a grouping is applied, two kinds of column cannot
+take a layout action. `PinAndHideActions` asks `useTableColumnLayoutLock` once
+and passes the answer to its four delegates as `layoutLock`, the way it already
+passes `pinSide` — one subscription, so the four cannot disagree. A **group
+key** is force-pinned left and forced visible by `withGroupedColumnLayout` on
+every derivation, so Pin Left, Pin Right, Clear Pinning **and** Hide Column are
+disabled on one. A **measure** resolves every layout action back through
+`toDeclaredColumnKey` to the column it measures, which then expands into all of
+that column's measures, so the three pinning items are disabled while Hide
+Column stays enabled — hiding a measure works, and takes its siblings with it.
+The reason rides the item as a `title` from
+`TABLE_COLUMN_LAYOUT_LOCK_LABELS`, because a disabled button fires no pointer
+events and a tooltip on one never opens. Neither refusal applies to an
+ungrouped grid
+([ADR-100](../../../../../../docs/decisions/ADR-100-the-header-menu-refuses-the-layout-actions-a-grouped-column-cannot-take.md)).
+
+**Removing one group key** is `RemoveGroupKeyButton`, between "Group by This"
+and the whole-table "Clear Grouping". It calls the same
+`useToggleTableGroupKey` and is disabled unless the column is an applied key.
+"Group by This" still toggles off, so the two are alternate routes to one
+action rather than a replacement.
 
 **Stable layout & section dividers.** Every option always renders (the "Clear"
 items disable rather than disappear) so the menu never changes height as state

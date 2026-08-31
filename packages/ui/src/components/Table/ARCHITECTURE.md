@@ -305,7 +305,7 @@ copy left to drift.
 
 ### Layout
 
-While grouping is applied, three derivations reshape the column list, in an
+While grouping is applied, four derivations reshape the column list, in an
 order that matters. `withAggregateColumns` runs first and replaces each
 **measured** column with one column per aggregate applied to it —
 the primary key included, since a row id is resolved from the declared columns
@@ -313,13 +313,27 @@ and never from the painted list. `withGroupedColumnScope` then drops every
 column the grouping neither keys nor measures, so the grid holds the group keys,
 the measures and the row-actions column and nothing else
 ([ADR-096](../../../../../docs/decisions/ADR-096-the-grouping-decides-which-columns-the-grid-shows.md)).
+`withAggregateColumnOrder` then arranges the measures the grouping kept: the
+staged aggregate list orders them, each measured column ranked by its first
+entry in that list so a column's measures stay contiguous
+([ADR-099](../../../../../docs/decisions/ADR-099-the-staged-aggregate-list-orders-the-measure-columns.md)).
 `withGroupedColumnLayout` runs last and hoists each group key to the head of the
 order and of the left pin, in key order, forcing it visible
 ([ADR-080](../../../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
-All three are derivations and never state, so none reaches the cookie the column
+All four are derivations and never state, so none reaches the cookie the column
 layout persists through nor the list the drawer offers — which is what makes
 ungrouping free, and what means a deselected aggregate needs no pruning: the
 next derivation simply does not produce its column.
+
+**Two of those derivations are what the header menu refuses over.** A group key
+is force-pinned left and forced visible on every derivation, so pinning or
+hiding one writes state the next derivation discards; a measure resolves every
+layout action back to the column it measures, which then expands into _all_ of
+that column's measures. `resolveColumnLayoutLock` answers which of the two a
+column is, `PinAndHideActions` asks it once through `useTableColumnLayoutLock`
+and drills the answer to its four delegates, and the item states the reason in a
+`title` because a disabled button fires no pointer events. Hide Column is refused on a group key only — hiding a measure
+works, and takes its siblings with it.
 
 **The row-actions column is the one thing the scope keeps that the grouping does
 not name**, because it is not a data column: its cell is the grid's own

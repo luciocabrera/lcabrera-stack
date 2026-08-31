@@ -335,3 +335,47 @@ describe('a column carrying several measures', () => {
     expect(headerAriaLabels()).toStrictEqual([undefined]);
   });
 });
+
+describe('measures from several columns', () => {
+  afterEach(cleanup);
+
+  it('paints them in the staged order, not the declared column order', () => {
+    renderGrid({
+      aggregates: [
+        { columnKey: 'total_amount', fn: 'avg' },
+        { columnKey: 'total_amount', fn: 'min' },
+        { columnKey: 'id', fn: 'count' },
+      ],
+    });
+
+    expect(headerLabels()).toStrictEqual([
+      'Customer Type',
+      'Average',
+      'Minimum',
+      'Count',
+    ]);
+  });
+
+  it('keeps a column’s measures under one band when the staged list interleaves them', () => {
+    renderGrid({
+      aggregates: [
+        { columnKey: 'total_amount', fn: 'avg' },
+        { columnKey: 'id', fn: 'count' },
+        { columnKey: 'total_amount', fn: 'min' },
+      ],
+    });
+
+    expect(headerLabels()).toStrictEqual([
+      'Customer Type',
+      'Average',
+      'Minimum',
+      'Count',
+    ]);
+    expect(
+      screen
+        .getAllByTestId('table-header-band')
+        .map((band) => band.textContent)
+        .filter((label) => label !== ''),
+    ).toStrictEqual(['Total Amount', 'Id']);
+  });
+});

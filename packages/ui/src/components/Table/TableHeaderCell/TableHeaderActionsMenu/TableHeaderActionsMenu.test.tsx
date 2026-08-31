@@ -24,7 +24,8 @@ const { MockTableActionsPopover } = vi.hoisted(() => ({
 
 const mockCloseMenu = vi.fn();
 
-const { NO_COLLAPSED_GROUP_PATHS, NO_ROWS } = vi.hoisted(() => ({
+const { columnsRef, NO_COLLAPSED_GROUP_PATHS, NO_ROWS } = vi.hoisted(() => ({
+  columnsRef: { current: [] as readonly Record<string, unknown>[] },
   NO_COLLAPSED_GROUP_PATHS: new Set<string>(),
   NO_ROWS: [] as readonly Record<string, unknown>[],
 }));
@@ -76,6 +77,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetColumns: () => columnsRef.current,
   useGetNormalizedColumn: () => ({ key: 'name', label: 'Name' }),
 }));
 
@@ -117,11 +119,18 @@ vi.mock('#ui/components/Table/TableActionsPopover', () => ({
 
 import { TableHeaderActionsMenu } from './TableHeaderActionsMenu.component';
 
+const getMenuButton = (label: string) => {
+  const button = screen.getByText(label).closest('button');
+  if (button === null) throw new Error(`No button for "${label}"`);
+  return button;
+};
+
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
   appliedAggregatesRef.current = [];
   capabilityRef.current = undefined;
+  columnsRef.current = [];
   groupingKeysRef.current = [];
   isGroupingEnabledRef.current = false;
 });
@@ -452,5 +461,61 @@ describe('TableHeaderActionsMenu', () => {
       expect(screen.getByText('Group by This')).not.toBeNull();
       expect(screen.queryByRole('separator')).toBeNull();
     });
+  });
+});
+
+const LAYOUT_ITEMS = ['Pin Left', 'Pin Right', 'Clear Pinning', 'Hide Column'];
+
+type RenderGroupedMenuArgs = {
+  readonly columnKey: string;
+  readonly columnLabel: string;
+};
+
+const renderGroupedMenu = ({
+  columnKey,
+  columnLabel,
+}: RenderGroupedMenuArgs) => {
+  isGroupingEnabledRef.current = true;
+
+  render(
+    <TableHeaderActionsMenu
+      columnKey={columnKey as never}
+      columnLabel={columnLabel}
+      hasSettings
+      isSortable
+      isStatic={false}
+      pinSide='left'
+    />,
+  );
+
+  return LAYOUT_ITEMS.map((item) => getMenuButton(item).disabled);
+};
+
+describe('the layout actions a grouped column cannot take', () => {
+  it('refuses pin and hide on a group key, and offers the per-column ungroup', () => {
+    groupingKeysRef.current = ['name'];
+
+    expect(
+      renderGroupedMenu({ columnKey: 'name', columnLabel: 'Name' }),
+    ).toStrictEqual([true, true, true, true]);
+    expect(getMenuButton('Remove from Grouping').disabled).toBe(false);
+  });
+
+  it('refuses only the pinning on a measure, and leaves Hide Column working', () => {
+    groupingKeysRef.current = ['region'];
+    columnsRef.current = [{ key: 'amount', label: 'Amount' }];
+
+    expect(
+      renderGroupedMenu({ columnKey: 'amount:sum', columnLabel: 'Sum' }),
+    ).toStrictEqual([true, true, true, false]);
+  });
+
+  it('leaves an ungrouped column’s menu exactly as it was', () => {
+    groupingKeysRef.current = ['region'];
+
+    expect(
+      renderGroupedMenu({ columnKey: 'name', columnLabel: 'Name' }),
+    ).toStrictEqual([false, false, false, false]);
+    expect(getMenuButton('Remove from Grouping').disabled).toBe(true);
   });
 });

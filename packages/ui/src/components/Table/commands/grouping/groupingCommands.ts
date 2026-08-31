@@ -24,6 +24,12 @@ export const GROUP_BY_COLUMN_COMMAND = {
   label: 'Group by This',
 } satisfies CommandDescriptor;
 
+export const REMOVE_GROUP_KEY_COMMAND = {
+  icon: EraserIcon,
+  id: 'column.group.remove' as CommandId,
+  label: 'Remove from Grouping',
+} satisfies CommandDescriptor;
+
 export const CLEAR_GROUPING_COMMAND = {
   icon: UngroupRowsIcon,
   id: 'column.group.clear' as CommandId,

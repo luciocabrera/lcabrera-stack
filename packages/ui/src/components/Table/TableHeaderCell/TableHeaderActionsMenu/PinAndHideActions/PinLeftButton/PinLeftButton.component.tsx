@@ -7,6 +7,7 @@ import {
 } from '#ui/components/Table/commands';
 import { useSetColumnPinning } from '#ui/components/Table/contexts/TableConfig/columns/actions';
 import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { TABLE_COLUMN_LAYOUT_LOCK_LABELS } from '#ui/components/Table/Table.constants';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
@@ -18,6 +19,7 @@ import type { PinLeftButtonProps } from './PinLeftButton.types';
  */
 export const PinLeftButton = <TData,>({
   columnKey,
+  layoutLock,
   onClose,
   pinSide,
 }: PinLeftButtonProps<TData>) => {
@@ -27,7 +29,7 @@ export const PinLeftButton = <TData,>({
   const { icon: PinLeftCommandIcon, label } = PIN_LEFT_COMMAND;
   const { isActive, isEnabled } = deriveToggleCommandState({
     current: pinSide,
-    isDisabled: isStatic,
+    isDisabled: isStatic || layoutLock !== undefined,
     target: 'left',
   });
 
@@ -46,6 +48,9 @@ export const PinLeftButton = <TData,>({
         </span>
       }
       isDisabled={!isEnabled}
+      {...(layoutLock !== undefined && {
+        title: `Cannot pin this column: ${TABLE_COLUMN_LAYOUT_LOCK_LABELS[layoutLock]}.`,
+      })}
       onClick={handlePinLeft}
       orientation='horizontal'
       size='mini'

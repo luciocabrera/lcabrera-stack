@@ -11,6 +11,7 @@ import type {
 import { getEffectiveColumns } from './getEffectiveColumns.util';
 import { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 import { splitColumnsByPinning } from './splitColumnsByPinning.util';
+import { withAggregateColumnOrder } from './withAggregateColumnOrder.util';
 import { withAggregateColumns } from './withAggregateColumns.util';
 import { withGroupedColumnLayout } from './withGroupedColumnLayout.util';
 import { withGroupedColumnScope } from './withGroupedColumnScope.util';
@@ -65,16 +66,25 @@ export const getPinnedDerivedColumnsState = <TData>({
     groupingKeys,
   });
 
+  const staged = withAggregateColumnOrder<TData>({
+    aggregates,
+    columnOrder: scoped.columnOrder,
+    columnPinning: scoped.columnPinning,
+    columns: scoped.columns,
+    columnVisibility: scoped.columnVisibility,
+    groupingKeys,
+  });
+
   const {
     columnOrder: gridColumnOrder,
     columnPinning: gridColumnPinning,
     columns: gridColumns,
     columnVisibility: gridColumnVisibility,
   } = withGroupedColumnLayout<TData>({
-    columnOrder: scoped.columnOrder,
-    columnPinning: scoped.columnPinning,
-    columns: scoped.columns,
-    columnVisibility: scoped.columnVisibility,
+    columnOrder: staged.columnOrder,
+    columnPinning: staged.columnPinning,
+    columns: staged.columns,
+    columnVisibility: staged.columnVisibility,
     groupingKeys,
   });
 
