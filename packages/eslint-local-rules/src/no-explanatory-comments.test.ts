@@ -61,6 +61,10 @@ ruleTester.run('no-explanatory-comments', rule, {
       '// The shape the reader hands back.',
       'type Result = { readonly value: typeof x };',
     ),
+    above(
+      '// The shape the reader hands back.',
+      'export type Exported = { readonly value: typeof x };',
+    ),
     inside(
       'type Result = {',
       '  /** Absent while the first read is in flight. */',
@@ -181,6 +185,24 @@ ruleTester.run('no-explanatory-comments', rule, {
       '};',
     ),
     { ...ok(ANNOTATED), filename: 'make.mjs' },
+    ok(
+      'export type Descriptor = {',
+      '  /** Defaults to `*`. */',
+      '  readonly column?: typeof x;',
+      '};',
+    ),
+    ok(
+      'export interface Options {',
+      "  /** IANA time zone, e.g. `'UTC'`. */",
+      '  readonly timeZone?: typeof x;',
+      '}',
+    ),
+    ok(
+      'export enum Mode {',
+      '  /** Emitted when every key is rolled up. */',
+      '  Flat = 0,',
+      '}',
+    ),
     ok(
       'const value = x;',
       '',

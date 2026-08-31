@@ -10,7 +10,7 @@
  * two durable homes instead: the decision record for a choice whose alternative
  * looks equally reasonable, and the pull request or issue for an investigation.
  *
- * Three positions are exempt, each for a reason the AST can check.
+ * Four positions are exempt, each for a reason the AST can check.
  *
  * The **file-level header** stays: it describes the module, not a declaration,
  * and `.claude/rules/scripts.md` mandates one for every `.mjs`/`.cjs` script.
@@ -26,6 +26,12 @@
  * and a coverage or type-checker directive inside a body. Both are positions
  * this rule reports, so without the exemption it would order a suppression
  * another engine reads to be deleted.
+ *
+ * A note on a **member of an exported type** stays. The declaration is the
+ * package's published surface, so the note reaches an installer's editor and the
+ * API-surface snapshot, and a precondition, a default or an encoding is not
+ * derivable from the member's type. A type that is not exported has no such
+ * reader, so its members are reported like any other prose.
  *
  * An **annotated JSDoc block in a JavaScript file** stays, and only there. A
  * TypeScript declaration carries its own types, so a `@param` beside one is
@@ -210,6 +216,11 @@ export default createRule<Options, MessageIds>({
       flagAbove(node);
     };
 
+    const flagTypeDeclaration = (node: TSESTree.Node) => {
+      if (attachmentTarget(node) === node) flagInside(node);
+      flagAbove(node);
+    };
+
     return {
       ArrowFunctionExpression: flagInside,
       ClassBody: flagInside,
@@ -219,9 +230,9 @@ export default createRule<Options, MessageIds>({
       MethodDefinition: flagAbove,
       PropertyDefinition: flagAbove,
       TSDeclareFunction: flagAbove,
-      TSEnumDeclaration: flagBoth,
-      TSInterfaceDeclaration: flagBoth,
-      TSTypeAliasDeclaration: flagBoth,
+      TSEnumDeclaration: flagTypeDeclaration,
+      TSInterfaceDeclaration: flagTypeDeclaration,
+      TSTypeAliasDeclaration: flagTypeDeclaration,
       VariableDeclaration: flagAbove,
     } satisfies TSESLint.RuleListener;
   },

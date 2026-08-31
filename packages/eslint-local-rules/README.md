@@ -418,7 +418,7 @@ export const mount = () => {
 export { mount as default };
 ```
 
-Three positions are exempt, each for a reason the rule can check.
+Four positions are exempt, each for a reason the rule can check.
 
 The **file-level header** — the file's first comment block, with adjacent `//`
 lines counting as one block and a shebang not starting it — stays, because it
@@ -433,6 +433,13 @@ above the declaration it covers, and a `v8 ignore next` or a `@ts-expect-error`
 inside a body. Both sit exactly where this rule reports, so without the
 exemption it would order you to delete a suppression another engine is reading —
 and the colocated suite asserts that turning `directives` off reports both.
+
+A note on a **member of an exported type** stays. The declaration is a package's
+published surface, so the note reaches an installer's editor and the API-surface
+snapshot, and a precondition, a default or an encoding is not derivable from the
+member's type. Keep it to one line stating that fact: the exemption covers the
+member, not the type, so a comment above an exported type is still reported, and
+so is one inside a type the module does not export.
 
 An **annotated JSDoc block in a JavaScript file** stays, and only there. A
 TypeScript declaration carries its own types, so `@param` beside one is prose; a
