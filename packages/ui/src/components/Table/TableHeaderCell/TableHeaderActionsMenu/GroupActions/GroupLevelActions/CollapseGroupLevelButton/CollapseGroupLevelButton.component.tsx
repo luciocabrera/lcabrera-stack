@@ -7,12 +7,6 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 
 import type { CollapseGroupLevelButtonProps } from './CollapseGroupLevelButton.types';
 
-/**
- * "Collapse This Level" item: folds the groups one level above this column, which is what
- * takes the values the column states off the grid and leaves every outer level standing.
- * Disabled once every group at that level is already folded — the same predicate the
- * action's early return uses, so a disabled item and a click that does nothing agree.
- */
 export const CollapseGroupLevelButton = ({
   columnKey,
   onClose,
