@@ -21,8 +21,12 @@ loading overlay. It now takes **`isDisabled`**: inert exactly as busy is, with
 no shimmer.
 
 **A column's aggregates stay contiguous.** `DraggableItem` takes an optional
-`groupId`, and `DraggableList` refuses a drop that would split a group — other
-consumers pass none and are unaffected. `addTableColumnAggregate` also stops
+`groupId`, and `DraggableList` refuses a drop that leaves **more** groups split
+than it found (`countFragmentedGroups`) — other consumers pass none and are
+unaffected. Compared rather than judged outright, because an interleaved list
+arrives without anyone crafting one: a `grouping` link written before this
+release carries an interleaved `agg`, and refusing every imperfect result would
+leave a sufficiently fragmented list with no drop it would accept at all. `addTableColumnAggregate` also stops
 appending to the tail, which could build an interleaved list with no drag at
 all. The grid already clamped this at paint time; the drawer can no longer
 express the state it clamped.

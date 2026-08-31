@@ -23,10 +23,11 @@ export const useSetTableGrouping = () => {
   return (
     deriveNextGrouping: (current: TableGroupingState) => TableGroupingState,
   ) => {
+    const metaState = metaStore.get();
     const result = applyGroupingReducer({
       deriveNextGrouping,
       existingGrouping: groupingStore.get(),
-      hasDefaultGrouping: metaStore.get()?.hasDefaultGrouping === true,
+      hasDefaultGrouping: metaState?.hasDefaultGrouping === true,
     });
 
     if (result.kind !== 'updated') return;
@@ -75,8 +76,6 @@ export const useSetTableGrouping = () => {
     // longer exist. Bumping the nonce re-keys `TableDrawerProvider` and
     // re-seeds every draft, which is what sorting, pinning and visibility
     // already do from the same menu.
-    const metaState = metaStore.get();
-
     metaStore.set({
       drawersSyncNonce: (metaState?.drawersSyncNonce ?? 0) + 1,
     });

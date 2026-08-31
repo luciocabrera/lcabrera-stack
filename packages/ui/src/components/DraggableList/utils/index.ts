@@ -1,1 +1,1 @@
-export { isGroupedOrderContiguous } from './isGroupedOrderContiguous.util';
+export { countFragmentedGroups } from './countFragmentedGroups.util';
