@@ -6,12 +6,12 @@ status: active
 branch: chore/1032-package-rationale-rule
 area:
   - .claude/rules/**
-  - docs/agents/**
   - .claude/agents/**
+  - AGENTS.md
 started: 2026-08-31
 updated: 2026-08-31
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1046
 issue: #1032
 ---
 
@@ -21,6 +21,7 @@ State that a package's rationale never cites a consumer
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: rule file written, AGENTS.md row added, both agent definitions
+  updated, issue body narrowed to the one uncovered standard
 - Blockers: none
-- Next:
+- Next: gate, push, draft PR
