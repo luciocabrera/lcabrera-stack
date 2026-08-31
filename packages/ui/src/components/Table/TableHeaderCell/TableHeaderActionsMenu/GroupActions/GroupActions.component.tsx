@@ -6,7 +6,7 @@ import { CollapseAllGroupsButton } from './CollapseAllGroupsButton/CollapseAllGr
 import { ExpandAllGroupsButton } from './ExpandAllGroupsButton/ExpandAllGroupsButton.component';
 import { GroupByColumnButton } from './GroupByColumnButton/GroupByColumnButton.component';
 import { GroupLevelActions } from './GroupLevelActions/GroupLevelActions.component';
-import { RemoveGroupKeyButton } from './RemoveGroupKeyButton';
+import { RemoveGroupKeyButton } from './RemoveGroupKeyButton/RemoveGroupKeyButton.component';
 
 /**
  * Grouping section of the column header actions menu — a thin shell composing the
