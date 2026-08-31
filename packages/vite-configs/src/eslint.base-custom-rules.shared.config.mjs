@@ -67,6 +67,11 @@ export const createBaseCustomRulesLintConfig = ({
     { rules: { ...SHARED_PLUGIN_RULE_SEVERITIES } },
     createNodeScriptFileConfig({ globals }),
     {
+      files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+      plugins: { 'local-rules': localRules },
+      rules: { 'local-rules/no-explanatory-comments': 'error' },
+    },
+    {
       ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
     },
     {

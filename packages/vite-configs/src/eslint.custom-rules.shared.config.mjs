@@ -204,6 +204,11 @@ export const createCustomRulesLintConfig = async ({
     },
     createNodeScriptFileConfig({ globals }),
     {
+      files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+      plugins: { 'local-rules': localRules },
+      rules: { 'local-rules/no-explanatory-comments': 'error' },
+    },
+    {
       ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
     },
     {

@@ -33,25 +33,43 @@ describe('the shared flat configs carry the local rules a consumer inherits', ()
       const blocks = (await factory({
         tsconfigRootDir: UI_WORKSPACE,
       })) as readonly FlatConfigBlock[];
+      const severities = severityOf({
+        blocks,
+        rule: 'local-rules/no-explanatory-comments',
+      });
 
-      expect(
-        severityOf({ blocks, rule: 'local-rules/no-explanatory-comments' }),
-      ).toEqual(['error']);
+      expect(severities.length).toBeGreaterThan(0);
+      expect(severities.every((severity) => severity === 'error')).toBe(true);
     });
 
-    it(`registers the local-rules plugin for TypeScript sources in the ${name} factory`, async () => {
+    it(`registers the local-rules plugin on every block that sets the rule in the ${name} factory`, async () => {
       const blocks = (await factory({
         tsconfigRootDir: UI_WORKSPACE,
       })) as readonly (FlatConfigBlock & {
         readonly plugins?: Readonly<Record<string, unknown>>;
       })[];
-      const owning = blocks.find(
+      const owning = blocks.filter(
         (block) =>
           block.rules?.['local-rules/no-explanatory-comments'] !== undefined,
       );
 
-      expect(owning?.plugins?.['local-rules']).toBeDefined();
-      expect(owning?.files?.some((glob) => glob.endsWith('*.tsx'))).toBe(true);
+      expect(
+        owning.every((block) => block.plugins?.['local-rules'] !== undefined),
+      ).toBe(true);
+    });
+
+    it(`covers both the TypeScript and the JavaScript sources in the ${name} factory`, async () => {
+      const blocks = (await factory({
+        tsconfigRootDir: UI_WORKSPACE,
+      })) as readonly FlatConfigBlock[];
+      const globs = blocks.flatMap((block) =>
+        block.rules?.['local-rules/no-explanatory-comments'] === undefined
+          ? []
+          : [...(block.files ?? [])],
+      );
+
+      expect(globs.some((glob) => glob.endsWith('*.tsx'))).toBe(true);
+      expect(globs.some((glob) => glob.endsWith('*.mjs'))).toBe(true);
     });
   }
 });
