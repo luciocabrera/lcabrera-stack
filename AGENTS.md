@@ -418,7 +418,7 @@ and none inside a type declaration either.** Three positions, not two: the JSDoc
 block over the declaration, any explanation within a body, and a note between a
 type's members — an `Args`/`Props`/`Result` type is where this repository writes
 them most, and it is where they rot identically
-([ADR-098](docs/decisions/ADR-098-the-no-comment-rule-covers-a-type-declaration.md)).
+([ADR-099](docs/decisions/ADR-099-the-no-comment-rule-covers-a-type-declaration.md)).
 "Above a declaration" is the general form and covers a plain `const` too; a
 command descriptor's JSDoc named a derivation its only consumer had stopped using
 ([#850](https://github.com/luciocabrera/lcabrera-stack/issues/850)). A name, a
@@ -448,7 +448,7 @@ moving it is not compliance.
 The record is
 [ADR-095](docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
 amended by
-[ADR-098](docs/decisions/ADR-098-the-no-comment-rule-covers-a-type-declaration.md)
+[ADR-099](docs/decisions/ADR-099-the-no-comment-rule-covers-a-type-declaration.md)
 for the third position,
 which also states what the rule costs and which paragraph of
 [ADR-088](docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)
