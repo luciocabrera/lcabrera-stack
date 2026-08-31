@@ -140,6 +140,9 @@ export const TABLE_GROUP_KEY_REFUSAL_LABELS: Record<
   'unique-ish': 'nearly every row has its own value',
 };
 
+export const TABLE_GROUP_KEY_APPLIED_LABEL =
+  'Already grouped by this column — use Remove This Group to drop it.';
+
 export const TABLE_COLUMN_LAYOUT_LOCK_LABELS: Record<
   TableColumnLayoutLock,
   string

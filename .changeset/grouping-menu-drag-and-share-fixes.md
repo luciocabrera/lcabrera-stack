@@ -29,7 +29,26 @@ express the state it clamped.
 
 **Menu.** A separator between the grouping items and the fold items, and
 `Remove from Grouping` is now **`Remove This Group`**, carrying the same icon as
-the remove button on the draggable rows.
+the remove button on the draggable rows. **`Group by This` adds only** — applied,
+it is disabled and names its own cause, because `Remove This Group` is now the
+removal (ADR-101).
+
+**An open settings drawer follows a live grouping change.** Its drafts are
+seeded at mount, and the grouping write path bumped nothing it watches, so
+removing a key from the header menu left the Grouping tab still listing it.
+`useSetTableGrouping` now bumps `drawersSyncNonce`, which sorting, pinning and
+visibility already did.
+
+**The Sorting tab reads a measure properly.** It looked labels up in the
+declared columns only, so a measure sort painted its raw `total_amount:min`
+token; it now reads `Minimum of Total Amount`, from a resolver the Grouping tab
+shares so the two cannot drift. Measure sorts are also listed after the column
+sorts, which is the only order the read applies —
+`buildGroupOrderByClause` splices every aggregate term in at the innermost group
+key however the rows are dragged.
+
+**The share bar is legible.** Its fill was `brandPrimary`, which is
+`#ffffff00` in the light theme and near-black in the dark one. It is now `info`.
 
 **Breaking, and why it is `minor`:** two composition hooks under
 `@lcabrera/ui/components/VirtualSelect/hooks` and

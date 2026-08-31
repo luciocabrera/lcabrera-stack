@@ -187,21 +187,24 @@ describe('GroupActions', () => {
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
-  it('marks itself active and toggles off when it is an applied key', () => {
+  it('marks itself active and goes inert once it is an applied key', () => {
+    // Add-only. Removal is `Remove This Group`, so a second click here would be
+    // a second spelling of one act.
     groupingKeysRef.current = ['order_status'];
 
     render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 
-    expect(getButton('Group by This').getAttribute('aria-pressed')).toBe(
-      'true',
+    const button = getButton('Group by This');
+
+    expect(button.getAttribute('aria-pressed')).toBe('true');
+    expect(button.disabled).toBe(true);
+    expect(button.getAttribute('title')).toBe(
+      'Already grouped by this column — use Remove This Group to drop it.',
     );
 
-    fireEvent.click(getButton('Group by This'));
+    fireEvent.click(button);
 
-    expect(mockToggleGroupKey).toHaveBeenCalledWith({
-      columnKey: 'order_status',
-      period: undefined,
-    });
+    expect(mockToggleGroupKey).not.toHaveBeenCalled();
   });
 
   it('marks itself active when it is a *deeper* key, not only the first', () => {
@@ -227,7 +230,7 @@ describe('GroupActions', () => {
     expect(button.disabled).toBe(false);
   });
 
-  it('disables adding a key at the configured depth, but not removing one', () => {
+  it('disables adding a key at the configured depth, and removal stays elsewhere', () => {
     groupingKeysRef.current = Array.from(
       { length: MAX_TABLE_GROUP_KEYS },
       (_unused, index) => `key_${index}`,
@@ -239,15 +242,17 @@ describe('GroupActions', () => {
 
     expect(getButton('Group by This').disabled).toBe(true);
 
-    // The same depth, but this column is one of the applied keys — so the click
-    // would remove rather than add, and must stay available.
+    // The same depth, but this column is now one of the applied keys. Group by
+    // This stays inert either way; what must remain available is the item that
+    // actually removes, or a full grouping could not be edited at all.
     groupingKeysRef.current = [
       'order_status',
       ...groupingKeysRef.current.slice(1),
     ];
     rerender(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 
-    expect(getButton('Group by This').disabled).toBe(false);
+    expect(getButton('Group by This').disabled).toBe(true);
+    expect(getButton('Remove This Group').disabled).toBe(false);
   });
 
   it('disables Group by This for a column the catalogue refuses, and says why', () => {
@@ -271,22 +276,21 @@ describe('GroupActions', () => {
     expect(mockToggleGroupKey).not.toHaveBeenCalled();
   });
 
-  it('still removes a refused key that is already applied, and explains nothing there', () => {
-    // A URL can seed a grouping the catalogue refuses today (ADR-061), so the
-    // one item that can undo it must not be disabled by that same refusal — and
-    // must not explain it either: this click *removes* the grouping, so "Cannot
-    // group by this column" would describe an action nobody is taking.
+  it('leaves a refused key that is already applied removable, through the item that removes', () => {
+    // A URL can seed a grouping the catalogue refuses today (ADR-061), so
+    // something must always be able to undo it. That used to be this item's
+    // second click; it is now `Remove This Group`, which is gated on the key
+    // being applied and never on the refusal.
     capabilityRef.current = numericCapability;
     groupingKeysRef.current = ['total_amount'];
 
     render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
 
-    const button = getButton('Group by This');
+    expect(getButton('Group by This').getAttribute('title')).toBe(
+      'Already grouped by this column — use Remove This Group to drop it.',
+    );
 
-    expect(button.disabled).toBe(false);
-    expect(button.getAttribute('title')).toBeNull();
-
-    fireEvent.click(button);
+    fireEvent.click(getButton('Remove This Group'));
 
     expect(mockToggleGroupKey).toHaveBeenCalledWith({
       columnKey: 'total_amount',

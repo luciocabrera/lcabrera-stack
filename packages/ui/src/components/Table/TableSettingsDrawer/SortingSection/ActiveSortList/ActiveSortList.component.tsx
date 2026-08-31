@@ -9,6 +9,7 @@ import {
   SidePanelSectionHeader,
 } from '#ui/components/SidePanel';
 import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
+import { resolveAggregateColumnLabel } from '#ui/components/Table/utils/resolveAggregateColumnLabel.util';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 
 import type { SortItem } from '../SortingSection.types';
@@ -30,14 +31,27 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
     (col) => resolveColumnCapabilities(col).isSortable,
   );
 
-  // Convert sorting state to sort items with labels
-  const sortItems: SortItem[] = sorting.map((sort) => ({
+  const toSortItem = (sort: (typeof sorting)[number]): SortItem => ({
     columnKey: sort.columnKey,
     direction: sort.direction,
     label:
-      sortableColumns.find((col) => col.key === sort.columnKey)?.label ??
+      sortableColumns.find((col) => String(col.key) === sort.columnKey)
+        ?.label ??
+      resolveAggregateColumnLabel({ columnKey: sort.columnKey, columns }) ??
       sort.columnKey,
-  }));
+  });
+
+  const isMeasure = (columnKey: string) =>
+    resolveAggregateColumnLabel({ columnKey, columns }) !== undefined;
+
+  // A measure always sorts innermost, whatever its position here:
+  // `buildGroupOrderByClause` splices every aggregate term in at the last group
+  // key. Showing one above a column sort would state a precedence the read does
+  // not apply, so the two are kept as blocks in that order.
+  const sortItems: SortItem[] = [
+    ...sorting.filter((sort) => !isMeasure(sort.columnKey)),
+    ...sorting.filter((sort) => isMeasure(sort.columnKey)),
+  ].map((sort) => toSortItem(sort));
 
   const handleRemoveSort = (columnKey: string) => {
     onSortChange(sorting.filter((s) => s.columnKey !== columnKey));
@@ -74,6 +88,7 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
         onToggleDirection={handleToggleDirection}
       />
     ),
+    groupId: isMeasure(item.columnKey) ? 'measure' : 'column',
     id: item.columnKey,
   }));
 

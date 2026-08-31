@@ -11,7 +11,7 @@ export const tableGroupShareStyles = stylex.create({
   },
   barFill: (width: string) => ({
     borderRadius: 'inherit',
-    backgroundColor: colors.brandPrimary,
+    backgroundColor: colors.info,
     display: 'block',
     height: '100%',
     width,

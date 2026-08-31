@@ -109,3 +109,50 @@ describe('ActiveSortList', () => {
     expect(screen.getByText(/No sorting applied/)).not.toBeNull();
   });
 });
+
+describe('a measure among the sorts', () => {
+  beforeEach(() => {
+    columnsRef.current = [
+      { key: 'id', label: 'ID' },
+      { dataType: 'number', key: 'total_amount', label: 'Total Amount' },
+    ];
+  });
+
+  it('reads as the function and the column it measures, not the raw token', () => {
+    sortingRef.current = [{ columnKey: 'total_amount:min', direction: 'asc' }];
+
+    render(<ActiveSortList />);
+
+    expect(listedLabels()).toEqual(['Minimum of Total Amount']);
+  });
+
+  it('is listed after the column sorts, which is the order the read applies', () => {
+    // `buildGroupOrderByClause` splices every aggregate term in at the last
+    // group key, so a measure cannot outrank a column sort however it is
+    // dragged. Listing it above one would state a precedence that never runs.
+    sortingRef.current = [
+      { columnKey: 'total_amount:sum', direction: 'desc' },
+      { columnKey: 'id', direction: 'asc' },
+    ];
+
+    render(<ActiveSortList />);
+
+    expect(listedLabels()).toEqual(['ID', 'Sum of Total Amount']);
+  });
+
+  it('keeps several measures in their own order behind the columns', () => {
+    sortingRef.current = [
+      { columnKey: 'total_amount:sum', direction: 'desc' },
+      { columnKey: 'id', direction: 'asc' },
+      { columnKey: 'total_amount:min', direction: 'asc' },
+    ];
+
+    render(<ActiveSortList />);
+
+    expect(listedLabels()).toEqual([
+      'ID',
+      'Sum of Total Amount',
+      'Minimum of Total Amount',
+    ]);
+  });
+});

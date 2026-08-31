@@ -3,7 +3,7 @@ import type {
   TableGroupingState,
 } from '#ui/components/Table/Table.types';
 
-import { TABLE_AGGREGATE_LABELS } from '#ui/components/Table/Table.constants';
+import { resolveAggregateColumnLabel } from '#ui/components/Table/utils/resolveAggregateColumnLabel.util';
 import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregateToken.util';
 
 import type { AggregateItem } from '../GroupingSection.types';
@@ -34,6 +34,10 @@ export const toAggregateItems = <TData extends Record<string, unknown>>({
       columnKey,
       fn,
       id: toTableAggregateToken({ columnKey, fn }),
-      label: `${TABLE_AGGREGATE_LABELS[fn]} of ${columnByKey.get(columnKey)?.label ?? columnKey}`,
+      label:
+        resolveAggregateColumnLabel({
+          columnKey: toTableAggregateToken({ columnKey, fn }),
+          columns,
+        }) ?? columnKey,
     }));
 };

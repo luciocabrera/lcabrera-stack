@@ -14,6 +14,7 @@ import {
 } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import {
   MAX_TABLE_GROUP_KEYS,
+  TABLE_GROUP_KEY_APPLIED_LABEL,
   TABLE_GROUP_KEY_REFUSAL_LABELS,
 } from '#ui/components/Table/Table.constants';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
@@ -21,12 +22,6 @@ import { resolveGroupKeyAvailability } from '#ui/components/Table/utils/resolveG
 
 import type { GroupByColumnButtonProps } from './GroupByColumnButton.types';
 
-/**
- * "Group by This" item of the grouping section: adds this column to the group keys and
- * highlights itself while it is one of them, clicking again to remove it.
- * A self-connected delegate — it reads the applied keys from the grouping store itself
- * rather than being handed them, so no parent drills grouping state through the menu.
- */
 export const GroupByColumnButton = <TData,>({
   columnKey,
   onClose,
@@ -50,9 +45,18 @@ export const GroupByColumnButton = <TData,>({
   const isAtDepthCap = groupingKeys.length >= MAX_TABLE_GROUP_KEYS;
   const { isActive, isEnabled } = deriveToggleCommandState({
     current: isApplied ? String(columnKey) : undefined,
-    isDisabled: !isApplied && (!isGroupable || isAtDepthCap),
+    isDisabled: isApplied || !isGroupable || isAtDepthCap,
     target: String(columnKey),
   });
+
+  const resolveTitle = () => {
+    if (isApplied) return TABLE_GROUP_KEY_APPLIED_LABEL;
+    if (refusal === undefined || isEnabled) return;
+
+    return `Cannot group by this column: ${TABLE_GROUP_KEY_REFUSAL_LABELS[refusal]}.`;
+  };
+
+  const title = resolveTitle();
 
   const handleGroupByColumn = () => {
     // The granularity goes on with the key: a column the catalogue refuses raw
@@ -77,15 +81,7 @@ export const GroupByColumnButton = <TData,>({
       size='mini'
       // The reason rides the disabled item rather than a tooltip: a disabled
       // button fires no pointer events, so a tooltip on one never opens.
-      //
-      // Gated on `!isEnabled` and not merely on the refusal: an applied key is
-      // still clickable under one, and there the click **removes** the
-      // grouping. "Cannot group by this column" on a control about to ungroup
-      // would describe an action the user is not taking.
-      {...(refusal !== undefined &&
-        !isEnabled && {
-          title: `Cannot group by this column: ${TABLE_GROUP_KEY_REFUSAL_LABELS[refusal]}.`,
-        })}
+      {...(title !== undefined && { title })}
       variant={isActive ? 'primary' : 'ghost'}
     >
       {label}
