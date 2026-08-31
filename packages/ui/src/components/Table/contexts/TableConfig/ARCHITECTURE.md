@@ -144,7 +144,7 @@ TableConfig/
 │   │   ├── utils/resolveOutermostGroupPathKey.util.ts   → Pure: which ancestor that is when a collapse-all folds every level at once and names no single path (#774)
 │   │   ├── utils/resolveFoldedAncestorPathKey.util.ts  → Pure: which of the groups a level fold closed the focused row was inside, when the fold names many and none is the row's own (#1020)
 │   │   ├── utils/applyGroupFoldFocus.service.ts       → Effect: hand focus to the row a fold left standing, or leave it alone — the tail all three fold actions share
-│   │   ├── useToggleTableGroupExpansion.hook.ts → Open or close one group by path — or fetch it, when it is a drillable leaf; moves focus first when the collapse takes the focused row with it
+│   │   ├── useToggleTableGroupExpansion.hook.ts → Open or close one group by path; moves focus first when the collapse takes the focused row with it
 │   │   ├── useSetAllTableGroupsExpanded.hook.ts → Open every group, or fold to the outermost level — the tree's own foldable set, so it closes exactly what the chevrons offer (#774)
 │   │   ├── useSetTableGroupLevelExpanded.hook.ts → Fold or unfold the groups one column states, named by that column — every other level's expansion carried through (ADR-097)
 │   │   └── usePruneTableGroupExpansion.hook.ts  → Reconcile the collapsed paths against the rows just loaded
