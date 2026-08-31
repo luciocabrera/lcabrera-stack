@@ -11,20 +11,8 @@ import type { ColumnSort } from '@lcabrera/server/sort/sort.types';
 export const ENTERPRISE_ORDERS_SCHEMA = 'public';
 export const ENTERPRISE_ORDERS_TABLE = 'enterprise_orders';
 
-/**
- * The primary key — and so the column that makes any order sort a total order
- * (ADR-008), which is what a keyset cursor needs to resume from (ADR-052).
- */
 export const ENTERPRISE_ORDER_PRIMARY_KEY = 'order_id';
 
-/**
- * The Table client never needs this: `buildTablePageQuery` appends this same key via
- * `appendPrimaryKeySorting`, so a scrolled page always arrives sorted.
- * It exists because `/_api/enterprise-orders/paginated` is a public URL and that guarantee
- * lives in another package's client-side code — a direct request, a non-Table consumer, or
- * a column config that loses `isPrimaryKey` would otherwise get a paginated read with no
- * ORDER BY, which repeats and skips rows.
- */
 export const ENTERPRISE_ORDER_FALLBACK_SORT = [
   { columnKey: ENTERPRISE_ORDER_PRIMARY_KEY, direction: 'asc' },
 ] as const satisfies readonly ColumnSort[];
@@ -33,10 +21,6 @@ export const ENTERPRISE_ORDERS_PATH = '/enterprise-orders';
 
 export const ENTERPRISE_ORDERS_GROUP_PATH = `${ENTERPRISE_ORDERS_PATH}/group`;
 
-/**
- * The row ceiling a grouped read is built with — a safety belt, not a page: a grouped
- * result is returned whole because there is nothing to scroll into (ADR-059).
- */
 export const ENTERPRISE_ORDER_GROUP_MAX_ROWS = 5000;
 
 export const ENTERPRISE_ORDER_COLUMNS = [
@@ -135,30 +119,11 @@ export const ENTERPRISE_ORDER_LIST_COLUMNS = [
   'warehouse_location',
 ] as const;
 
-/**
- * Passed as `allowedColumns` so a column never listed here is rejected before it can reach
- * SQL.
- */
 export const ENTERPRISE_ORDER_ALLOWED_COLUMNS: readonly string[] =
   ENTERPRISE_ORDER_COLUMNS;
 
-// ---------------------------------------------------------------------------
-// What bounds a paginated read. Both are applied in `selectOrdersPage`, the one
-// function every entry point goes through.
-// ---------------------------------------------------------------------------
-
-/**
- * Ceiling on `?limit=` for the public paginated URL. Written out rather than imported
- * from `CLIENT_PAGINATION_ROW_LIMIT` so lowering that demo UI bound cannot change what
- * this endpoint serves. `ENTERPRISE_ORDER_GROUP_MAX_ROWS` is not it either: that bounds a
- * grouped result, which is not a page (ADR-059).
- */
 export const MAX_ENTERPRISE_ORDERS_LIMIT = 1000;
 
-/**
- * Bounded by the table's column count: past it every further term repeats a column
- * already named, so it cannot truncate a sort a user is able to express.
- */
 export const MAX_ENTERPRISE_ORDERS_SORT_RULES = ENTERPRISE_ORDER_COLUMNS.length;
 
 export const ENTERPRISE_ORDER_DISTINCT_FILTER_COLUMNS: Readonly<
@@ -180,11 +145,6 @@ export const ENTERPRISE_ORDER_DISTINCT_FILTER_COLUMNS: Readonly<
   shipping_state: 'text',
   warehouse_location: 'text',
 };
-
-// ---------------------------------------------------------------------------
-// Enum value sets (convention-only in the DB — no CHECK constraints). Used for
-// Form select/radio options and Zod `z.enum(...)` validation.
-// ---------------------------------------------------------------------------
 
 export const ORDER_STATUS_VALUES = [
   'Pending',

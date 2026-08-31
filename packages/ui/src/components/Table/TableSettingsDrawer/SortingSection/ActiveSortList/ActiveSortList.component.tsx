@@ -25,12 +25,10 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
   const sorting = useGetColumnsSorting();
   const onSortChange = useSetColumnsSortings();
 
-  // Filter to only sortable columns
   const sortableColumns = columns.filter(
     (col) => resolveColumnCapabilities(col).isSortable,
   );
 
-  // Convert sorting state to sort items with labels
   const sortItems: SortItem[] = sorting.map((sort) => ({
     columnKey: sort.columnKey,
     direction: sort.direction,
@@ -64,7 +62,6 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
     onSortChange(newSorting);
   };
 
-  // Convert sort items to draggable items
   const draggableItems: DraggableItem[] = sortItems.map((item) => ({
     content: (
       <SortItemContent

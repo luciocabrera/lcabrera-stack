@@ -200,7 +200,6 @@ describe('TableContent', () => {
     }
 
     expect(outerContainer.dataset.rounded).toBe('true');
-    // The radius belongs to the bordered card, not the inner scroll area.
     expect(
       screen.getByTestId('table-body').closest('[data-scroll-locked]'),
     ).not.toBe(outerContainer);

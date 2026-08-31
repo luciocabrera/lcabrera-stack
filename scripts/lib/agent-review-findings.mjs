@@ -17,13 +17,11 @@
  */
 import { isAddedLine } from './agent-review-diff.mjs';
 
-/** §3: these two block; `medium` and `low` never do. */
 const BLOCKING_SEVERITIES = new Set(['critical', 'high']);
 
 const isFilledString = (value) =>
   typeof value === 'string' && value.trim() !== '';
 
-/** §2.4 step 5, for one finding. (pure) */
 const admissibilityErrors = (finding, index, at) => {
   const errors = [];
   if (BLOCKING_SEVERITIES.has(finding.severity)) {
@@ -61,30 +59,18 @@ const admissibilityErrors = (finding, index, at) => {
   return errors;
 };
 
-/**
- * §2.4 step 5 across the document. Runs after the shape check, so every finding
- * already has the id these messages name. (pure)
- */
 export const findingsAdmissibilityErrors = (findings, index) =>
   findings.flatMap((finding) =>
     admissibilityErrors(finding, index, `finding \`${finding.id}\``),
   );
 
-/** The ids of the findings whose severity blocks. (pure) */
 export const blockingFindingIds = (findings) =>
   findings
     .filter((finding) => BLOCKING_SEVERITIES.has(finding.severity))
     .map((finding) => finding.id);
 
-/** Ids rendered for a message, so the messages need no nested template. (pure) */
 const quotedIds = (ids) => ids.map((id) => `\`${id}\``).join(', ');
 
-/**
- * §2.4 step 6 — `verdict` against what the document shows.
- *
- * Runs only once every finding is admissible, so "an admissible blocking
- * finding" and "a blocking finding" are the same set by this point. (pure)
- */
 export const consistencyErrors = (document) => {
   const blocking = blockingFindingIds(document.findings);
   const errors = [];

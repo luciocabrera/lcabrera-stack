@@ -34,7 +34,6 @@ export const isStrayConfig = ({ filename, unreadNames, unreadPrefixes }) =>
 
 const basename = (path) => path.slice(path.lastIndexOf('/') + 1);
 
-/** The offending entries among `paths`, in the order they were given. */
 export const strayConfigsIn = ({ paths, unreadNames, unreadPrefixes }) =>
   paths.filter((path) =>
     isStrayConfig({
@@ -44,14 +43,6 @@ export const strayConfigsIn = ({ paths, unreadNames, unreadPrefixes }) =>
     }),
   );
 
-/**
- * Why the gate cannot run, or undefined when it can.
- *
- * An empty roster is refused rather than passed. The gate would otherwise report
- * success having compared every file against nothing, which is indistinguishable
- * from a repository that is genuinely clean — and a consumer who wired the task
- * without configuring it would believe they were covered.
- */
 export const rosterProblem = ({ unreadNames, unreadPrefixes }) =>
   unreadNames.length === 0 && unreadPrefixes.length === 0
     ? 'gates.strayConfigs names no unread config files, so this gate would compare every file against an empty list. Declare `unreadNames` and/or `unreadPrefixes`, or drop the task.'

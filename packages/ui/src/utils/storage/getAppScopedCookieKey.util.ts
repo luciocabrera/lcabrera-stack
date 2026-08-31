@@ -1,9 +1,10 @@
+/**
+ * Cookies are not scoped by port, so apps sharing a host would otherwise read
+ * and write each other's app-level cookies (theme, global settings). The app
+ * prefix is what keeps them apart.
+ */
+
 type GetAppScopedCookieKeyArgs = {
-  /**
-   * When provided, the key is prefixed so that apps sharing the same host (cookies are NOT
-   * scoped by port) do not read or write each other's app-level cookies (theme, global
-   * settings).
-   */
   readonly appId?: string;
   readonly key: string;
 };

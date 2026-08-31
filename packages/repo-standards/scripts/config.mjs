@@ -32,27 +32,12 @@ import { resolveHostRoot } from './host-root.mjs';
 // package's published surface, and gates name the file in their own messages.
 export { CONFIG_FILE_NAME };
 
-/**
- * How a reader of a generated index is told to run these gates.
- *
- * Configuration rather than a constant, because the answer differs per
- * repository and an index naming the wrong one is a page instructing its reader
- * to run something that does not exist. `npx` is the default because it is the
- * one spelling that resolves wherever the package is installed — a bare bin name
- * does not, since `node_modules/.bin` is not on a plain shell's PATH. A
- * repository that drives everything through a task runner declares its own.
- */
 export const DEFAULT_ADR_COMMANDS = {
   list: 'npx repo-verify-adrs --list',
   new: 'npx repo-adr',
   write: 'npx repo-verify-adrs --write',
 };
 
-/**
- * One home, because that is all a repository is assumed to have. A repository
- * that keeps a second — decisions internal to one app, say — declares both, and
- * the order it declares them in is the order they are reported.
- */
 export const DEFAULT_REGISTERS = {
   adrCommands: DEFAULT_ADR_COMMANDS,
   // Empty for the same reason as `publicPackageDirs`: an overlap is the
@@ -82,16 +67,6 @@ export const DEFAULT_CONVENTIONS = {
   sharedBranchesDir: 'docs/coordination/branches',
 };
 
-/**
- * `publicPackageDirs` has no useful default: the roster is the repository's own
- * data, and guessing it would point the gate at directories a consumer does not
- * have. Empty is therefore the honest default — and it is safe, because every
- * gate that reads it refuses to run on an empty roster rather than reporting a
- * clean pass over nothing.
- *
- * The rest default to the conventional layout, so a repository that follows it
- * configures nothing.
- */
 export const DEFAULT_PUBLISHING = {
   apiSurfaceDir: 'reports/api-surface',
   packagesDir: 'packages',
@@ -117,7 +92,6 @@ export const resolveConventions = (raw) => {
   };
 };
 
-/** A home needs somewhere to be and something to call itself; the rest is prose. */
 const readableHome = (home) =>
   typeof home === 'object' &&
   home !== null &&
@@ -126,22 +100,12 @@ const readableHome = (home) =>
   typeof home.tier === 'string' &&
   home.tier.trim() !== '';
 
-/**
- * A home writes ADRs, so its directory is held to the containment rule too, and
- * its tier is trimmed: the tier is a lookup key (`--home <tier>`), so a padded
- * one would validate and then match nothing.
- */
 const containedHome = (home) => ({
   ...home,
   dir: repoRelative(home.dir, home.dir, 'registers.adrHomes[].dir'),
   tier: home.tier.trim(),
 });
 
-/**
- * Each command taken on its own, so a repository that declares one still gets a
- * working spelling for the two it did not — a half-declared block would
- * otherwise leave the rest naming nothing.
- */
 const resolveAdrCommands = (block) => {
   const declared = isPlainObject(block) ? block : {};
   return Object.fromEntries(
@@ -169,10 +133,6 @@ export const resolveRegisters = (raw) => {
           (value) => Number.isInteger(value) && value > 0,
         )
       : DEFAULT_REGISTERS.adrGrandfatheredDuplicates,
-    // Carried on every home, because the index renderer takes a home and
-    // nothing else: a repository's own spelling has to reach it that way, or it
-    // would have to be read from module state — and then anything rendering an
-    // index for somewhere else would silently get this repository's.
     adrHomes: declaredHomes.map((home) => ({ ...home, commands: adrCommands })),
     adrContentBaseline: repoRelative(
       block.adrContentBaseline,
@@ -202,18 +162,6 @@ export const resolveRegisters = (raw) => {
   };
 };
 
-/**
- * The gates that measure a repository rather than describe it.
- *
- * `skipDirs` EXTENDS the scanner's built-in list rather than replacing it. A
- * consumer who declared their own and forgot `node_modules` would not get a
- * narrower gate; they would get one walking their whole dependency tree, which
- * reads as the gate being slow rather than misconfigured.
- *
- * `guideDoc` is empty by default because the pointer is the one part of a
- * finding that cannot be guessed — this repository sends readers to its script
- * rules, and a consumer's equivalent is named by them or by nobody.
- */
 export const DEFAULT_GATES = {
   scriptSize: {
     baselineFile: 'scripts/script-size-baseline.json',
@@ -279,12 +227,6 @@ export const resolveGates = (raw) => {
         DEFAULT_GATES.scriptSize.skipDirs,
       ),
     },
-    // Which config filenames are decoys is a per-toolchain answer, never a
-    // guessable one: `.prettierrc` is a decoy in a repository formatted by
-    // something else and the live policy in a repository formatted by Prettier.
-    // So the roster is empty by default and the gate refuses rather than
-    // reporting a clean pass over a list it was never given — the same shape
-    // `publishing.publicPackageDirs` takes.
     strayConfigs: {
       configuredIn: readableString(
         strayConfigs.configuredIn,
@@ -303,10 +245,6 @@ export const resolveGates = (raw) => {
         DEFAULT_GATES.strayConfigs.unreadPrefixes,
       ),
     },
-    // `repoRoots` empty means "derive them from the tree" rather than "check
-    // nothing" — the CLI reads the top-level directories instead. Every other
-    // list here is an exemption, so empty is the strict end of the range and a
-    // consumer who configures nothing gets the gate at its most demanding.
     docsPaths: {
       baselineFile: repoRelative(
         docsPaths.baselineFile,
@@ -361,9 +299,6 @@ export const resolvePublishing = (raw) => {
       DEFAULT_PUBLISHING.packagesDir,
       'publishing.packagesDir',
     ),
-    // An empty roster stays empty: it is the signal every reader turns into a
-    // loud failure, so replacing it with a default would hide the one state
-    // that must not pass silently.
     publicPackageDirs: containedList(
       block.publicPackageDirs,
       DEFAULT_PUBLISHING.publicPackageDirs,
@@ -382,11 +317,6 @@ export const resolvePublishing = (raw) => {
   };
 };
 
-/**
- * The repository this package is installed in — not the working directory, so a
- * gate invoked from a subdirectory reads the same config as one invoked from
- * the root.
- */
 const hostRoot = () =>
   resolveHostRoot({ moduleDirectory: dirname(fileURLToPath(import.meta.url)) });
 
@@ -406,15 +336,6 @@ export const readPublishing = (root = hostRoot()) =>
 
 export const readGates = (root = hostRoot()) => resolveGates(readRaw(root));
 
-/**
- * The coordination register's three locations, absolute, from one read of the
- * config. Every command that touches the register resolves them here rather
- * than joining its own — which is how the closer came to delete from
- * `docs/coordination/tasks` while reporting the configured path.
- *
- * The relative forms travel with them because they are what a message should
- * print: an absolute path inside a runner's checkout tells the reader nothing.
- */
 export const readCoordinationPaths = (root = hostRoot()) => {
   const raw = readRaw(root);
   const { coordinationBoardDoc, coordinationTasksDir } = resolveRegisters(raw);

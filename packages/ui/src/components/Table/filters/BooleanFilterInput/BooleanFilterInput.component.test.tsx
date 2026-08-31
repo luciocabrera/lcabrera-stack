@@ -20,7 +20,6 @@ describe('BooleanFilterInput', () => {
 
     render(<BooleanFilterInput filter={undefined} onChange={onChange} />);
 
-    // "All" is the active choice: clicking it clears (emits no filter).
     fireEvent.click(button('All'));
     expect(onChange).toHaveBeenCalledWith();
   });
@@ -51,7 +50,6 @@ describe('BooleanFilterInput', () => {
 
     render(<BooleanFilterInput filter={filter} onChange={onChange} />);
 
-    // A truthy filter derives the "true" selection; picking "All" clears it.
     fireEvent.click(button('All'));
 
     expect(onChange).toHaveBeenCalledWith();
@@ -69,8 +67,6 @@ describe('BooleanFilterInput', () => {
   });
 
   it('emits an empty filter when "Is empty" is picked', () => {
-    // A boolean column reaches this control instead of the operator dropdown,
-    // so these two buttons are the only way to build an empty filter on one.
     const onChange = vi.fn();
 
     render(<BooleanFilterInput filter={undefined} onChange={onChange} />);
@@ -97,9 +93,6 @@ describe('BooleanFilterInput', () => {
   });
 
   it('marks the active empty operator rather than falling back to "All"', () => {
-    // What a filter restored from a URL has to look like. Reading "All" while
-    // the table is filtered is the failure this control exists to rule out, and
-    // "All" is what it showed before the filter reached it.
     const filter: EmptyFilter = { operator: 'isNotEmpty', type: 'empty' };
     const onChange = vi.fn();
 

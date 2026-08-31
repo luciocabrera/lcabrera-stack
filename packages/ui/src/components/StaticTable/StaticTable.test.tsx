@@ -19,8 +19,6 @@ const rows: readonly Row[] = [
   { id: '2', name: 'Beta' },
 ];
 
-// Table's column-sort action needs both a real data router (useFetcher) and
-// NotificationProvider — the same stack any real route already sits inside.
 const renderWithRouter = (element: ReactNode) => {
   const router = createMemoryRouter(
     [

@@ -17,12 +17,10 @@ export const getNewColumnFiltersBasedOnColumnKey = <TData>({
 }: GetNewColumnFiltersBasedOnColumnKeyArgs<TData>) => {
   const prev = columnFiltersState[columnKey];
 
-  // No-op: removing a non-existent key
   if (columnFilter === undefined && prev === undefined) {
     return columnFiltersState;
   }
 
-  // No-op: setting same filter (shallow equality)
   if (
     columnFilter !== undefined &&
     prev !== undefined &&
@@ -31,12 +29,11 @@ export const getNewColumnFiltersBasedOnColumnKey = <TData>({
     return columnFiltersState;
   }
 
-  // Need a new object (add/update/remove). Build it in one pass without mutating input.
   const next: ColumnFiltersState<TData> = {} as ColumnFiltersState<TData>;
 
   for (const k in columnFiltersState) {
     if (!Object.hasOwn(columnFiltersState, k)) continue;
-    if (k === columnKey) continue; // skip the key being changed/removed
+    if (k === columnKey) continue;
     next[k as DataKey<TData>] = columnFiltersState[k as DataKey<TData>];
   }
 

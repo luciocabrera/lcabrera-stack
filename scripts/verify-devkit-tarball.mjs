@@ -49,7 +49,6 @@ import {
 
 const REPO_ROOT = process.cwd();
 
-/** The packages a consumer installs. Their directories, not their npm names. */
 const DISTRIBUTED = ['devkit', 'repo-standards'];
 
 const run = (command, args, cwd) =>
@@ -61,7 +60,6 @@ const run = (command, args, cwd) =>
 
 const toPosix = (value) => value.replaceAll('\\', '/');
 
-/** Every file devkit placed, ignoring the install it placed them beside. */
 const materialisedFiles = (directory) =>
   readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     if (entry.name === 'node_modules' || entry.name === '.git') return [];
@@ -69,7 +67,6 @@ const materialisedFiles = (directory) =>
     return entry.isDirectory() ? materialisedFiles(path) : [path];
   });
 
-/** One file out of a tarball, without unpacking the whole thing. */
 const packedFileReader = (tarball) => (target) => {
   try {
     return run('tar', ['-xzOf', tarball, `package/${target}`], REPO_ROOT);
@@ -78,17 +75,6 @@ const packedFileReader = (tarball) => (target) => {
   }
 };
 
-/**
- * Pack with pnpm, not npm: `publishConfig` and `catalog:` are pnpm rewrites.
- *
- * The manifest comes back OUT of the tarball rather than off disk, which is the
- * whole point of packing. pnpm substitutes `publishConfig` at pack time, so a
- * package using the built shape has `exports` pointing at `./src/*` on disk and
- * `./dist/*` in the artifact — comparing the on-disk map against the packed files
- * would report every export missing while the artifact is fine, and, more quietly,
- * would report green for a subpath present in `exports` and forgotten in
- * `publishConfig.exports`. `publish-pack.mjs` reads it back for the same reason.
- */
 const packOne = ({ directory, into }) => {
   const packageDir = join(REPO_ROOT, 'packages', directory);
   const output = run('pnpm', ['pack', '--pack-destination', into], packageDir);
@@ -114,7 +100,6 @@ const packedPathsOf = (tarball) =>
     .filter((line) => line !== '' && !line.endsWith('/'))
     .map((line) => line.replace(/^package\//, ''));
 
-/** A git repository with a foreign remote, holding nothing of this one. */
 const scratchConsumer = () => {
   const root = mkdtempSync(join(tmpdir(), 'devkit-tarball-'));
   run('git', ['init', '-q', '.'], root);
@@ -127,19 +112,11 @@ const scratchConsumer = () => {
     join(root, 'package.json'),
     `${JSON.stringify({ name: 'consumer', private: true, type: 'module', version: '1.0.0' }, undefined, 2)}\n`,
   );
-  // No `devkit.config.json`. `init` writes it, and having the gate hand-write
-  // one would be the gate supplying the half it is meant to be checking — the
-  // same shape as reading a manifest off disk while claiming to check a tarball.
   return root;
 };
 
-/** The hooks directory this scratch consumer's config leaves at its default. */
 const HOOKS_PATH = '.githooks';
 
-/**
- * What `init` wired up, read back from the consumer's own manifest and its own
- * link directory rather than from what `init` said it did.
- */
 const initTaskFindings = (consumer) => {
   const binDir = join(consumer, 'node_modules', '.bin');
   return taskFindings({
@@ -149,15 +126,6 @@ const initTaskFindings = (consumer) => {
   });
 };
 
-/**
- * The tasks `init` wires that take no arguments, so a freshly initialised
- * repository can run them as they stand.
- *
- * The rest of what it writes — `commit:verify`, `pr:verify`, `issue:verify`,
- * `coordination:close`, `adr:new` — take arguments and print usage without
- * them. Those are invoked by the hook and the workflow `init` places, not by a
- * person typing the task name.
- */
 const BARE_TASKS = [
   'adr:list',
   'adr:verify',
@@ -167,11 +135,6 @@ const BARE_TASKS = [
   'scripts:verify',
 ];
 
-/**
- * Runs them where a consumer would, through the manifest rather than by calling
- * the binary directly — the task line is part of what `init` wrote, so a task
- * whose arguments are wrong has to be able to fail here.
- */
 const bareTaskFailures = (consumer) =>
   BARE_TASKS.flatMap((name) => {
     try {
@@ -185,14 +148,6 @@ const bareTaskFailures = (consumer) =>
     }
   });
 
-/**
- * Customise the shared config the way a real consumer would, re-init over it,
- * and report what the command destroyed.
- *
- * Only reachable here: the scratch consumer starts with no config at all, so
- * without deliberately writing one there is nothing for `--force` to preserve
- * and the check would pass over a command that deletes everything.
- */
 const reinitConfigFindings = (consumer) => {
   const path = join(consumer, 'devkit.config.json');
   const before = {
@@ -215,7 +170,6 @@ const reinitConfigFindings = (consumer) => {
   });
 };
 
-/** Owner, group or other — any of them is what git accepts as executable. */
 const EXECUTABLE_BITS = 0o111;
 
 const materialisedModes = (consumer) =>
@@ -224,7 +178,6 @@ const materialisedModes = (consumer) =>
     path: toPosix(relative(consumer, path)),
   }));
 
-/** Each declared bin, executed by name through the consumer's own resolution. */
 const binFailures = ({ consumer, manifest }) =>
   declaredBins(manifest).flatMap(({ name }) => {
     let output = '';
@@ -243,7 +196,6 @@ const binFailures = ({ consumer, manifest }) =>
     return failure === undefined ? [] : [`${manifest.name}: ${failure}`];
   });
 
-/** One consumer-side command, as a finding rather than as an exception. */
 const consumerStepFailure = ({ args, bin, consumer }) => {
   try {
     run(bin, args, consumer);
@@ -255,13 +207,6 @@ const consumerStepFailure = ({ args, bin, consumer }) => {
   }
 };
 
-/**
- * Whether the kit actually placed anything, read from its own record.
- *
- * Asserted rather than assumed: the success line used to claim `devkit sync`
- * materialised while nothing here had checked it, and a kit that placed every
- * file produced identical output to one that placed none.
- */
 const materialisedFailure = (consumer) => {
   const manifestPath = join(consumer, '.devkit-manifest.json');
   const manifest = existsSync(manifestPath)
@@ -276,7 +221,6 @@ const materialisedFailure = (consumer) => {
   return failure === undefined ? [] : [failure];
 };
 
-/** Nothing the consumer received may still carry an unanswered placeholder. */
 const survivingPlaceholders = (consumer) =>
   materialisedFiles(consumer)
     .filter((path) => readFileSync(path, 'utf8').includes('{{commands.'))
@@ -306,8 +250,6 @@ const main = () => {
         manifest,
         packedPaths: packedPathsOf(tarball),
       }).map((finding) => finding.detail),
-      // Checked against the tarball rather than the working tree: the shebang
-      // has to be in what a consumer receives, not merely in what we edited.
       ...binsWithoutShebang({
         manifest,
         readPackedFile: packedFileReader(tarball),
@@ -331,17 +273,8 @@ const main = () => {
       0,
     );
 
-    // Each consumer-side step is collected rather than thrown, so one broken
-    // command still yields the whole report. A gate that dies on its first
-    // finding tells you less than one that lists them: the crash is a stack
-    // trace where the answer should be.
     const devkitBin = join(consumer, 'node_modules', '.bin', 'devkit');
     const materialised = [
-      // `init` first, and with `--profile full`: it is the command a consumer
-      // reaches for before any other, and the only one that can be checked from
-      // a repository holding none of this. `sync` after it is the idempotent
-      // re-run, which is where an init that recorded what it did not write shows
-      // up as drift on a tree nobody touched.
       ...consumerStepFailure({
         args: ['init', '--profile', 'full'],
         bin: devkitBin,
@@ -360,10 +293,6 @@ const main = () => {
         hooksPath: HOOKS_PATH,
         materialised: materialisedModes(consumer),
       }),
-      // Last, because it runs `devkit:check`: a drift report is only meaningful
-      // once the sync above has had its turn, and it is the assertion that
-      // `init` leaves a repository clean rather than one reporting drift on the
-      // day it was set up.
       ...reinitConfigFindings(consumer),
       ...bareTaskFindings({
         expected: BARE_TASKS,

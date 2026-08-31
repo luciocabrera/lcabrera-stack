@@ -19,9 +19,6 @@ describe('GroupingRefusedError', () => {
   });
 
   it('is not a PersistenceError', () => {
-    // Nothing here came from the driver. Widening `PersistenceError` to cover a
-    // refusal raised before a connection is even borrowed would stop it meaning
-    // "the database rejected this" (ADR-050).
     const error = new GroupingRefusedError({
       message: 'no keys',
       reason: 'no-keys',

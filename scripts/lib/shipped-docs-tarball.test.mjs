@@ -40,7 +40,6 @@ import {
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const { packagesDir, publicPackageDirs } = readPublishing(REPO_ROOT);
 
-/** The packages that keep documentation inside `src/` and must not ship it. */
 const SOURCE_DOC_PACKAGES = ['server', 'ui', 'utils'];
 
 const workDirectory = mkdtempSync(join(tmpdir(), 'shipped-docs-test-'));
@@ -61,9 +60,6 @@ describe.each(SOURCE_DOC_PACKAGES)('packages/%s', (directory) => {
   const packed = packAndRead({ destination: workDirectory, directory: source });
 
   it('still keeps the documents in the working tree', () => {
-    // The half that makes the next assertion evidence rather than a tautology:
-    // "the tarball holds no src markdown" is equally true of a package that
-    // deleted its documentation, and that is not what happened here.
     expect(inTree.length).toBeGreaterThan(0);
   });
 
@@ -77,9 +73,6 @@ describe.each(SOURCE_DOC_PACKAGES)('packages/%s', (directory) => {
   });
 
   it('still ships the source those documents describe', () => {
-    // The negation has to remove the documents and nothing else. `!src/**` with
-    // a typo'd extension takes the package's whole reason for existing with it,
-    // and every other gate here would keep passing.
     expect(
       packed.files.filter((path) => path.startsWith('src/')).length,
     ).toBeGreaterThan(0);
@@ -133,7 +126,6 @@ describe('the corpus follows the manifest, not the tree', () => {
   });
 
   it('stops reading it when only the manifest changes', () => {
-    // Same file, same contents, still on disk — `ls` would show it either way.
     expect(existsSync(join(fixture, 'docs', 'internal.md'))).toBe(true);
 
     const excluded = corpusWith(['docs', '!docs/**/*.md']);
@@ -174,10 +166,6 @@ describe('every published manifest keeps its own source markdown out', () => {
 
   it.each(publicPackageDirs)('packages/%s', (directory) => {
     const files = manifestOf(directory).files ?? [];
-    // Whichever directory this package actually publishes its source from —
-    // the `.mjs` packages keep theirs under `scripts`, and `@lcabrera/devkit`'s
-    // `assets` are deliberately NOT it: that markdown is what the package
-    // exists to copy, so negating it would gut the product.
     const sourceDir = ['src', 'scripts'].find((name) => files.includes(name));
     expect(
       sourceDir,

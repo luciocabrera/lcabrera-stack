@@ -21,13 +21,6 @@ import { resolveGroupRowStyle } from './utils/resolveGroupRowStyle.util';
 import { resolveRowKey } from './utils/resolveRowKey.util';
 import { resolveTreeRowAriaProps } from './utils/resolveTreeRowAriaProps.util';
 
-/**
- * The rendered virtualization window.
- * **One rendering path, whatever a row is** (ADR-065).
- * The spanning banner a group row used to be, and the branch that chose it, are both gone
- * — which is what makes a group row's cells ordinary focus targets with no special case in
- * the focus model (ADR-062).
- */
 export const TableBodyRows = <TData extends Record<string, unknown>>({
   endIndex,
   isLoadingState,
@@ -41,9 +34,6 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
   const pinnedOffsets = useGetPinnedColumnOffsets();
   const appliedGroupingKeys = useGetTableGroupingKeys();
 
-  // The same skip `withGroupedColumnLayout` applies to the hoist. A key naming
-  // no declared column is painted nowhere, so treating it as a key here would
-  // look for the grand total in a column that does not exist.
   const groupingKeys = resolveDeclaredGroupingKeys<TData>({
     columns,
     groupingKeys: appliedGroupingKeys,
@@ -67,9 +57,6 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
         const treeProps = resolveTreeRowAriaProps(rowMeta?.[rowIndex]);
         const groupSummary = getTableGroupRowSummary(row);
         const isGroupRow = groupSummary !== undefined;
-        // Read off `rows`, the loaded array, never off `visibleRows` — a level
-        // carried from a row scrolled out of the window would be stated
-        // nowhere, so the window's first row refills (ADR-080).
         const carriedGroupKeys = resolveCarriedGroupKeys({
           isWindowFirst: index === 0,
           previousRow: rows[rowIndex - 1],
@@ -79,9 +66,6 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
           carriedGroupKeys,
           disclosure: rowMeta?.[rowIndex],
           groupSummary,
-          // Asked of the row, not of the two values above: neither can tell a
-          // malformed marker from an absent one, and that gap is what let a
-          // group row reach the detail-row path (ADR-062).
           hasStructuralMarker: hasTableStructuralMarker(row),
           renderCell: renderBodyCell,
           row,

@@ -54,17 +54,11 @@ describe('planSync carries the asset mode', () => {
   });
 
   test('an asset with no mode recorded plans a plain file', () => {
-    // `executable` is absent on every asset a caller builds by hand — a test, a
-    // consumer reaching for `planSync`. Absent must mean plain, not undefined,
-    // or `applySync` would chmod on a value it was never given.
     const [entry] = plan([{ content: 'body', path: 'rules/testing.md' }]);
     expect(entry.executable).toBe(false);
   });
 
   test('a refused entry carries the mode too', () => {
-    // Every entry carries it, including one that will never be written, so
-    // nothing downstream has to know which states happen to have a mode — the
-    // same discipline `onDiskHash` already follows.
     const [entry] = plan([
       {
         content: '{{commands.check}}',
@@ -107,13 +101,6 @@ describe('applySync honours the mode', () => {
   });
 
   test('sets the bit on a hook whose bytes already match', () => {
-    // The case `isWritten` does not cover, and the one this feature is FOR: a
-    // consumer who unzipped a tarball, copied the tree, or cloned onto a
-    // filesystem with no exec bit has the package's exact bytes at mode 0644.
-    // `classifyMaterialisation` says `current`, so nothing is written — and the
-    // mode is not in the hash, so `sync` says everything is up to date and
-    // `doctor` reports nothing while git skips the hook. The chmod keys off
-    // `isRecorded`, which is exactly the set whose content is provably ours.
     const root = scratch();
     const path = '.githooks/pre-push';
     const content = '#!/bin/sh\nexit 0\n';
@@ -134,9 +121,6 @@ describe('applySync honours the mode', () => {
   });
 
   test('leaves the mode of a file the consumer owns alone', () => {
-    // A `conflict` is a file this kit never wrote. Correcting its mode would be
-    // adopting it, which is the one mistake a materialiser cannot undo — so the
-    // chmod stops at `isRecorded` rather than running on every entry.
     const root = scratch();
     const path = '.githooks/pre-push';
     mkdirSync(join(root, '.githooks'), { recursive: true });
@@ -155,11 +139,6 @@ describe('applySync honours the mode', () => {
   });
 
   test('sets the bit when updating a hook that is already there', () => {
-    // `writeFileSync`'s mode option applies only when it CREATES the file, so an
-    // overwrite keeps whatever mode the file had. A consumer whose checkout lost
-    // the bit — a clone with core.fileMode off, an unzip, a copy — would take
-    // every upstream update and still have a hook git silently skips. This is
-    // why the bit is set AFTER the write rather than passed to it.
     const root = scratch();
     const path = '.githooks/commit-msg';
     mkdirSync(join(root, '.githooks'), { recursive: true });
@@ -181,12 +160,6 @@ describe('applySync honours the mode', () => {
 });
 
 describe('the mode this package ships its hooks with', () => {
-  // Everything above tests what happens once `executable` is true. This tests
-  // the one input it all reads: the mode the hook files are COMMITTED with.
-  // Nothing else in the tree asserts it, and if either is ever recreated,
-  // rewritten by a tool, or checked out with core.fileMode off, `executable`
-  // reads false, the chmod is skipped, and the consumer receives a hook git
-  // skips without a word — a clean `sync` either way.
   const assets = readFilesUnder({ directory: ASSETS_DIR, root: ASSETS_DIR });
 
   test('every hook is executable', () => {
@@ -197,10 +170,6 @@ describe('the mode this package ships its hooks with', () => {
   });
 
   test('nothing else is', () => {
-    // The other direction, because an accidental chmod on a document is how a
-    // consumer ends up with an executable markdown file and no reason for it.
-    // A future shipped script outside `hooks/` should fail here and be added
-    // deliberately rather than by a mode nobody looked at.
     const stray = assets
       .filter((asset) => !asset.path.startsWith('hooks/'))
       .filter((asset) => asset.executable)
@@ -211,11 +180,6 @@ describe('the mode this package ships its hooks with', () => {
 });
 
 describe('through the command, not just the applier', () => {
-  // The tests above call `applySync` directly, so none of them crosses the
-  // caller — and the caller is where the mode repair was cancelled: `runSync`
-  // used to skip `applySync` entirely when nothing needed writing, which is
-  // precisely the second run of a sync whose files are all `current`. A test
-  // that cannot reach that guard cannot tell this working from not working.
   const scratchRepo = () => {
     const root = scratch();
     writeFileSync(
@@ -236,8 +200,6 @@ describe('through the command, not just the applier', () => {
     runSync([], root);
     expect(statSync(hook).mode & EXECUTABLE_BITS).not.toBe(0);
 
-    // What a clone with core.fileMode off, an unzip, or a copy leaves behind:
-    // the right bytes, the wrong mode.
     chmodSync(hook, 0o644);
     runSync([], root);
 
@@ -247,11 +209,6 @@ describe('through the command, not just the applier', () => {
 });
 
 describe('doctor reads the same set sync wrote', () => {
-  // Newly reachable in this change: the two profiles used to name the same
-  // groups, so a `doctor` that ignored `--profile` could not disagree with a
-  // `sync` that honoured it. Now it can, and the disagreement is silent — every
-  // file outside the configured profile is filtered out of the plan before
-  // anything counts it, so `--check` exits 0 over a tree it never looked at.
   test('a file deleted from the wider profile is reported under that profile', () => {
     const root = scratch();
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
@@ -270,9 +227,6 @@ describe('doctor reads the same set sync wrote', () => {
     rmSync(join(root, '.githooks/pre-push'));
 
     expect(runDoctor(['--check', '--profile', 'full'], root)).toBe(1);
-    // …and the narrower profile does not place that file at all, so it has
-    // nothing to say about it. That is correct, and it is exactly why the two
-    // commands have to be asked the same question.
     expect(runDoctor(['--check', '--profile', 'agent'], root)).toBe(0);
 
     log.mockRestore();

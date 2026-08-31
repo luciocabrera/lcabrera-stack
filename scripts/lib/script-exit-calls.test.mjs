@@ -49,7 +49,6 @@ describe('findProcessExitCalls', () => {
 
 describe('mayContainExitCall', () => {
   it('is the cheap pre-filter, so it matches text a parse would reject', () => {
-    // Loose on purpose: it only skips work. The parse decides.
     expect(mayContainExitCall('// process.exit')).toBe(true);
     expect(mayContainExitCall('process.exitCode = 0;')).toBe(true);
     expect(mayContainExitCall('const a = 1;')).toBe(false);

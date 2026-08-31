@@ -2,11 +2,6 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { registerShutdownSignals } from './registerShutdownSignals.util.ts';
 
-/**
- * Spies on `process.on` rather than emitting real signals: emitting would run
- * vitest's own SIGINT handling, and `removeAllListeners` would delete it.
- * Returning `process` unregistered keeps the handlers off the real process.
- */
 const spyOnSignalRegistration = () =>
   vi.spyOn(process, 'on').mockReturnValue(process);
 

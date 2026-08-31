@@ -25,7 +25,6 @@ vi.mock('../../../TableDrawerContext/selectors', () => ({
 
 import { GroupKeyPeriodSelect } from './GroupKeyPeriodSelect.component';
 
-/** `order_date` as the catalogue reports it: refused raw, legal above a day. */
 const dateCapability: TableColumnGroupingCapability = {
   aggregates: ['count', 'countDistinct', 'max', 'min'],
   canGroup: false,
@@ -58,9 +57,6 @@ afterEach(() => {
 
 describe('GroupKeyPeriodSelect', () => {
   it('offers exactly the granularities the route reports, plus the raw column', () => {
-    // The capability's list rather than the whole vocabulary: `day` is missing
-    // here because the guard refuses one group per calendar day, and offering
-    // it would produce a refused read from a control that looked available.
     capabilityRef.current = dateCapability;
 
     renderSelect();
@@ -71,8 +67,6 @@ describe('GroupKeyPeriodSelect', () => {
   });
 
   it('renders nothing at all for a column with no granularities', () => {
-    // Every non-temporal column, and any date whose range is too wide for even
-    // a year. A disabled control would suggest a choice the route lacks.
     capabilityRef.current = { ...dateCapability, periods: [] };
 
     renderSelect();
@@ -105,8 +99,6 @@ describe('GroupKeyPeriodSelect', () => {
   });
 
   it('clears the granularity when the raw option is chosen', () => {
-    // `<select>` cannot hold `undefined`, so the empty value is the one thing
-    // that has to be translated back rather than passed through.
     capabilityRef.current = dateCapability;
     periodsRef.current = { order_date: 'month' };
 

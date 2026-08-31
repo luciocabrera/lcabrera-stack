@@ -18,9 +18,6 @@ describe('resolveDrillRefusal', () => {
   });
 
   it('names the grand total ahead of the subtotal it also is', () => {
-    // A grand total carries `isSubtotal: true`, so testing the subtotal rule
-    // first would report every grand total as a subtotal and hide the more
-    // specific answer.
     expect(
       resolveDrillRefusal({
         group: { isSubtotal: true, path: [] },
@@ -39,7 +36,6 @@ describe('resolveDrillRefusal', () => {
   });
 
   it('refuses a path shorter than the applied keys', () => {
-    // Not a subtotal, but it names a larger set than the row that was clicked.
     expect(
       resolveDrillRefusal({
         group: { isSubtotal: false, path: path('city') },

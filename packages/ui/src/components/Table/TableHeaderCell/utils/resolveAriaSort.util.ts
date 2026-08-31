@@ -3,7 +3,6 @@ type ResolveAriaSortArgs = {
   readonly sortDirection: 'asc' | 'desc' | undefined;
 };
 
-/** A column header's `aria-sort`, or `undefined` on a header that cannot be sorted at all. */
 export const resolveAriaSort = ({
   isSortable,
   sortDirection,

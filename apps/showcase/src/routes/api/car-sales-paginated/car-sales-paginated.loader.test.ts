@@ -48,8 +48,6 @@ describe('car-sales paginated resource route', () => {
   });
 
   it('carries `total` on a page that is not the first', async () => {
-    // The table this serves reads a total from every page; the `skip === 0`-only
-    // count `enterprise-orders` uses would silently empty its footer.
     const response = await invokeLoader('limit=25&skip=475');
 
     expect(

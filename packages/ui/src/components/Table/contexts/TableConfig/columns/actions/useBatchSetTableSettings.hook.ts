@@ -19,21 +19,11 @@ import {
 } from './utils';
 
 type BatchSetTableSettingsArgs<TData> = {
-  /** The whole grouping configuration to apply — staged, or unchanged. */
   readonly grouping: TableGroupingState;
   readonly settings: BatchTableSettingsUpdate<TData>;
   readonly totalsPlacement: TableTotalsPlacement;
 };
 
-/**
- * Grouping travels with the column state instead of taking its own commit path because
- * both persist through the same `persist-table-state` fetcher, and `router.fetch` aborts a
- * key's in-flight request before starting the next — so a second call would cancel the
- * first commit and still cost a second navigation for whichever half survived.
- * Grouping is resolved rather than written blind: `resolveTableGroupingUpdate` answers
- * `unchanged` when the staged configuration is the applied one, which is what keeps an
- * Accept that touched no grouping from adding a `grouping` param write to the batch.
- */
 export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
   const { columnsStore, groupingStore, metaStore } =
     useTableConfigContextValue<TData>();
@@ -54,10 +44,6 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       hasDefaultGrouping: metaState?.hasDefaultGrouping === true,
       nextGrouping: grouping,
     });
-    // Resolved before the column state, and derived from the grouping this
-    // Accept is about to apply rather than the applied one: the hierarchy
-    // column belongs to the configuration being committed, so deriving from
-    // the old keys would leave it a render behind the grouping it renders.
     const nextGrouping =
       groupingUpdate.kind === 'updated' ? groupingUpdate.grouping : grouping;
     const resolvedUpdate = resolveBatchTableSettingsUpdate<TData>({
@@ -66,11 +52,6 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       groupingKeys: nextGrouping.keys,
       settings,
     });
-    // `resolvedUpdate.sorting`, not `settings.sorting`: this Accept may have
-    // deselected the aggregate whose measure column the sort names, and the
-    // sort travels in the URL — persisting the unpruned value would leave the
-    // loader reading a column the grid no longer has, which the ungrouped read
-    // refuses outright rather than ignores.
     const persistenceEntries = buildPersistencePayload<TData>({
       columnFilters: settings.columnFilters,
       columnOrder: settings.columnOrder,
@@ -80,18 +61,12 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       persistenceKey,
       sorting: resolvedUpdate.sorting,
     });
-    // Asked of the sorting that will actually be sent, not of the one the
-    // drawer staged: a prune changes the order the server returns even when the
-    // user touched no sort control, and reading the staged value there would
-    // report no change and skip the reload.
     const hasQueryChanged = getHasQueryChanged<TData>({
       columnsState,
       nextColumnFilters: settings.columnFilters,
       nextSorting: resolvedUpdate.sorting,
     });
 
-    // Absent reads as `last` on every other side of this, so comparing against
-    // the raw value would report a change the query cannot tell apart.
     const hasPlacementChanged =
       totalsPlacement !== (metaState?.totalsPlacement ?? 'last');
 
@@ -101,10 +76,6 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
         ...(groupingUpdate.kind === 'updated'
           ? [groupingUpdate.persistenceEntry]
           : []),
-        // Param-only, and deliberately not a cookie write of its own: the
-        // UI-flags cookie is rewritten whole below, so a second entry writing
-        // the same key on a different fetcher would be overwritten by whichever
-        // landed last (#578).
         ...(hasPlacementChanged
           ? [
               {
@@ -118,8 +89,6 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       return;
     }
 
-    // All three are pure reads, so the order is free; the two plain booleans
-    // lead because the comparison is the only one that has to be evaluated.
     if (
       hasQueryChanged ||
       hasPlacementChanged ||
@@ -135,9 +104,6 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       groupingStore.set(groupingUpdate.grouping);
     }
 
-    // One UI-flags write carrying both changes. They share a cookie whose value
-    // is serialized whole from the meta state, so writing them separately would
-    // have the second overwrite the first with a snapshot taken before it.
     const nextStatePatch = {
       ...(hasPlacementChanged && { totalsPlacement }),
       ...(metaState?.isTableSettingsPinned !== true && {

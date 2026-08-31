@@ -35,8 +35,6 @@ describe('resolveFocusedRowIndex', () => {
   });
 
   it('finds the row again after the data around it moved', () => {
-    // A sort put the same row somewhere else. Identity is data-derived, so it
-    // is still the same row and focus follows it rather than the position.
     const reordered = [rowAt(13), rowAt(12), rowAt(11), rowAt(10)];
 
     expect(

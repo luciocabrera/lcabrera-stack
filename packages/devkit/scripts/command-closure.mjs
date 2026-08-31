@@ -25,16 +25,6 @@ import {
 } from './config.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
 
-/**
- * Everything the package would place in this repository, the tools the
- * consumer's config answers for, and the keys that config is able to carry. A
- * reference to any of them travels.
- *
- * Deliberately not guarded: `buildPlan` throws on a malformed config, and
- * catching that here would substitute an empty shipped set for an error, so
- * every contract and sibling-skill reference would start reporting as an escape.
- * A configuration fault must read as a configuration fault, not as findings.
- */
 const shippedContext = ({ profile, root }) => {
   const { config, entries } = buildPlan({ profile, root });
   return {
@@ -45,21 +35,6 @@ const shippedContext = ({ profile, root }) => {
   };
 };
 
-/**
- * Every file the package places, checked as one body rather than per directory.
- *
- * This is the question that actually matters — a consumer receives the shipped
- * set, not a directory — and it is the only form that gives a clean answer where
- * a directory holds both shipped and unshipped files, as `.claude/rules` does.
- * `rootDirectory` is empty on purpose: nothing is internal by virtue of where it
- * sits, only by being shipped.
- *
- * The content analysed is the PLAN's, not the copy on disk. They are the same
- * file wherever this repository materialises a group, and only the plan exists
- * for a group it does not — the scaffolding seeds, which this repository holds
- * its own versions of and must not overwrite. Reading from disk there would
- * measure the repository's file and report the seed as checked.
- */
 const shippedEscapes = ({ profile, root }) => {
   const { allowedCommands, configKeys, entries, shipped } = shippedContext({
     profile,
@@ -82,17 +57,6 @@ const shippedEscapes = ({ profile, root }) => {
   return { escapes, fileCount: files.length };
 };
 
-/**
- * Every profile, unless one is named.
- *
- * Checking only the profile this repository happens to use would leave the
- * others measured by nothing, and a group that ships nowhere here is exactly
- * where an escape survives — the seeds. It is also the only way to catch the
- * mistake a profile makes possible: a file in one profile pointing at a file
- * only a WIDER profile places. That reference resolves for a consumer who took
- * everything and dangles for the one who took the smaller set, so it can only be
- * seen by checking the smaller set on its own.
- */
 const shippedResults = ({ profile, root }) =>
   (profile === undefined ? Object.keys(PROFILES) : [profile]).map((name) => ({
     name,
@@ -179,10 +143,6 @@ export const runClosure = (argv, root) => {
 
   const directories = rest.filter((entry) => entry !== '--shipped');
 
-  // Checked BEFORE dispatching on `--shipped`, because that dispatch reads the
-  // rest as directories and never looks at them again — anything flag-shaped
-  // left here would be filtered away unexamined and the run would report on a
-  // set nobody asked for.
   const unusable = directories.filter((entry) => entry.startsWith('-'));
   if (unusable.length > 0) {
     console.error(`not an argument this command takes: ${unusable.join(', ')}`);

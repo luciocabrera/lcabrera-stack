@@ -15,11 +15,6 @@ import { TableRow } from '../TableRow';
 import { tableHeaderStyles } from './TableHeader.stylex';
 import { hasHeaderBands, resolveHeaderBands } from './utils';
 
-/**
- * Every painted column is now one of the consumer's own, including the group keys
- * (ADR-080), and a key keeps its filter and its width while grouped: the hoist fixes where
- * it sits, not what it is.
- */
 const hasHeaderSettings = (col: { isHeaderHidden?: boolean; key: unknown }) =>
   !col.isHeaderHidden;
 
@@ -45,10 +40,6 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
       {...stylex.props(tableHeaderStyles.container, customStylex)}
     >
       {isShowsBands && (
-        // Decorative, and hidden from assistive technology on purpose — the
-        // group name reaches the tree through each measure column's own
-        // accessible name instead, so it is announced once rather than as a
-        // second header row in the `aria-rowindex` sequence.
         <TableRow aria-hidden='true' isHeader isStriped={false}>
           {partitions.flatMap((partition) =>
             resolveHeaderBands({ columns: partition }).map((band) => (

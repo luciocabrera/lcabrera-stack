@@ -23,8 +23,6 @@ const berlin = [{ columnKey: 'city', label: 'Berlin', value: 'Berlin' }];
 
 describe('pruneCollapsedGroupPaths', () => {
   it('keeps a collapse whose group the new rows still contain', () => {
-    // A sort reorders rows without touching any group's key values, which is
-    // what makes expansion survive one.
     const collapsedGroupPaths = new Set([resolveGroupPathKey(paris)]);
     const kept = pruneCollapsedGroupPaths({
       collapsedGroupPaths,
@@ -47,8 +45,6 @@ describe('pruneCollapsedGroupPaths', () => {
   });
 
   it('answers the same set when nothing was dropped, so no store write follows', () => {
-    // The caller compares by identity; a fresh set every time would write the
-    // store on every load and re-enter the effect that called it.
     const collapsedGroupPaths = new Set<string>();
 
     expect(

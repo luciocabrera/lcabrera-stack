@@ -27,7 +27,6 @@ describe('createNotificationId', () => {
   });
 
   it('falls back to a timestamp+counter id when randomUUID is unavailable', () => {
-    // A crypto object without randomUUID forces the fallback generator.
     vi.stubGlobal('crypto', {});
 
     const first = createNotificationId();
@@ -35,7 +34,6 @@ describe('createNotificationId', () => {
 
     expect(first).toMatch(/^notification-\d+-\d+$/);
     expect(second).toMatch(/^notification-\d+-\d+$/);
-    // The monotonic counter guarantees distinct ids even within one millisecond.
     expect(first).not.toBe(second);
   });
 });

@@ -9,10 +9,6 @@ type ToggleGroupShareArgs = {
   readonly fn: TableAggregateFn;
 };
 
-/**
- * The drawer's twin of the grouping reducers beside it, resolving through the same shared
- * util so what is staged is exactly what Accept commits.
- */
 export const useToggleGroupShare = () => {
   const setGrouping = useSetGrouping();
 

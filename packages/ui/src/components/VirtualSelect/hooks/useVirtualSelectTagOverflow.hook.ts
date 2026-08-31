@@ -34,9 +34,6 @@ export const useVirtualSelectTagOverflow = ({
     const observer = new ResizeObserver(measure);
     observer.observe(trigger);
 
-    // The initial measurement is deferred to a microtask so the effect body
-    // never sets state synchronously (react-x/set-state-in-effect); a real
-    // ResizeObserver also delivers an initial callback on observe().
     let isMeasureCancelled = false;
     queueMicrotask(() => {
       if (!isMeasureCancelled) measure();

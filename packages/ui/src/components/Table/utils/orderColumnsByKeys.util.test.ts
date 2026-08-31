@@ -2,12 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { orderColumnsByKeys } from './orderColumnsByKeys.util';
 
-// What these defend: this replaced a `columnOrder.map(find)` + `includes()`
-// pair inside getEffectiveColumns. The Map/Set rewrite is only safe if it
-// keeps the three behaviours the array form had by accident — dropping an
-// order key with no column, appending unmentioned columns in their original
-// relative order, and emitting a duplicated order key twice.
-
 const columns = [
   { key: 'a' as const, label: 'A' },
   { key: 'b' as const, label: 'B' },

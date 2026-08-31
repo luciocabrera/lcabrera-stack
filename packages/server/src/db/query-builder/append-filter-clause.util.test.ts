@@ -99,9 +99,6 @@ describe('appendFilterClause', () => {
   });
 
   it('leaves the parameter index untouched, so later filters keep their slots', () => {
-    // The property a unary operator can silently break: consuming a `$n` here
-    // shifts every following filter's placeholder off its value, which builds a
-    // query that runs and compares the wrong columns.
     const afterUnary = appendFilterClause({
       accumulator: { clauses: [], paramIndex: 1, values: [] },
       filter: { column: 'customer_name', operator: 'isNull' },
@@ -119,9 +116,6 @@ describe('appendFilterClause', () => {
   });
 
   it('is not the same clause as its negation', () => {
-    // `isNull` and `isNotNull` differ by one word and select disjoint row sets,
-    // so a copy-paste that emitted one for the other would pass any test that
-    // only checked "a clause was appended".
     const isNull = appendFilterClause({
       accumulator: { clauses: [], paramIndex: 1, values: [] },
       filter: { column: 'shipping_country', operator: 'isNull' },

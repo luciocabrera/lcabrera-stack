@@ -12,13 +12,6 @@ import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper
 
 import { applyGroupFoldFocus } from './utils';
 
-/**
- * The write is local: expansion changes nothing server-side, so this touches no URL param
- * and triggers no revalidation — the grouped result is already materialised in memory and
- * collapsing filters it (ADR-061).
- * That is the whole reason it does not go through `useSetTableGrouping`, which exists to
- * navigate.
- */
 export const useToggleTableGroupExpansion = <
   TData extends Record<string, unknown>,
 >() => {
@@ -39,8 +32,6 @@ export const useToggleTableGroupExpansion = <
 
     if (nextCollapsed.has(groupPathKey)) {
       const focusState = focusStore.get();
-      // The same inputs `useTableGroupTree` derives the painted rows from, so
-      // the index handed back is an index into the grid actually on screen.
       const { rows } = resolveTableGroupTree({
         collapsedGroupPaths: nextCollapsed,
         data: dataStore.get().data,

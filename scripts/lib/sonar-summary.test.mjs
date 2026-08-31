@@ -27,15 +27,11 @@ describe('summaryLines', () => {
   });
 
   it('adds an explicit warning line when the analysis is stale', () => {
-    // The regression this guards: a gate status printed with no indication that
-    // the analysis behind it ran ten days ago.
     const parts = summaryLines(reportAt('2026-07-11T11:02:07+0000'), 'x', NOW);
     expect(parts.stale).toBe(true);
     expect(parts.freshness).toHaveLength(2);
     expect(parts.freshness[0]).toContain('10 days ago');
     expect(parts.freshness[1]).toContain('predate the current code');
-    // The gate line itself must stay untouched — the warning is additive, so a
-    // caller grepping for the status still finds exactly what it did before.
     expect(parts.findings[1]).toBe('  quality gate: OK');
   });
 
@@ -68,9 +64,6 @@ describe('summaryLines — analysis scope', () => {
   });
 
   it('reports the lines analysed per language alongside the issue count', () => {
-    // The gap this closes: "0 issues" reads identically whether the files
-    // were analysed and clean or never indexed at all. Naming the languages
-    // answers "which analyser claimed our .sql files" directly.
     const parts = summaryLines(
       withScope({
         accepted: 0,
@@ -114,7 +107,6 @@ describe('summaryLines — analysis scope', () => {
   });
 
   it('degrades to zeroes rather than throwing on a report with no scope', () => {
-    // Older tracked snapshots predate these fields; reading one must not crash.
     const parts = summaryLines(reportAt('2026-07-21T11:00:00Z'), 'x', NOW);
 
     expect(parts.findings[3]).toBe('  scope: 0 lines  accepted: 0');

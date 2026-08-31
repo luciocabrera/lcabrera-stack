@@ -14,12 +14,6 @@ import {
 } from '../../contexts/TableData/data/selectors';
 import { TableCreateLink } from '../../TableCreateLink';
 
-/**
- * Action cluster of the table title bar: consumer-provided actions, the create link (when
- * CRUD create is enabled), and the settings-drawer toggle.
- * Owns its store wiring: reads crud/title/loading state and dispatches the settings toggle
- * itself.
- */
 export const TableTitleActions = ({ actions }: TableTitleActionsProps) => {
   const crud = useGetTableCrud();
   const isLoading = useGetTableIsLoading();

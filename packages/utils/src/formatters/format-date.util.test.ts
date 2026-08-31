@@ -61,9 +61,6 @@ describe('formatDate', () => {
     ).toBe('Jan 15, 2024, 6:30 PM');
   });
 
-  // The exact string is the point: it pins the output to the requested zone, so
-  // this fails on any machine whose own zone differs if `timeZone` stops being
-  // applied — which is the hydration bug in miniature.
   it('pins the output to the requested time zone', () => {
     const value = '2024-01-15T23:30:00Z';
     const options = {

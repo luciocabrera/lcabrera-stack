@@ -6,11 +6,6 @@ import {
   isBreakingChange,
 } from './api-surface-diff.mjs';
 
-// The diff decides what the gate reports and whether a changeset is required, so
-// the additive-vs-breaking line is the load-bearing distinction: an added export
-// can never break an external consumer's compile, while a removed or changed one
-// can. See verify-api-surface.mjs and issue #359.
-
 const surface = (entries) => entries;
 
 describe('diffSurfaces', () => {

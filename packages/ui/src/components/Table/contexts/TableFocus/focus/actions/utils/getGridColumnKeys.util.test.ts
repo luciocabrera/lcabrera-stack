@@ -30,8 +30,6 @@ describe('getGridColumnKeys', () => {
   });
 
   it('omits a hidden column, because the partition it reads already has', () => {
-    // The partition carries only the visible columns, so focus cannot land on
-    // a column that is not on screen.
     expect(
       getGridColumnKeys<Row>({
         centerCols: [column('city')],

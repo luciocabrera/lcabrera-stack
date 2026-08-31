@@ -15,10 +15,6 @@ type ResolveGroupGuardRailsArgs = {
   readonly maxRows: number;
 };
 
-/**
- * Throws `GroupingRefusedError` through `assertGroupCardinality` when the bound is past
- * the ceiling.
- */
 export const resolveGroupGuardRails = ({
   capabilities,
   grouping,

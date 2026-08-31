@@ -20,9 +20,6 @@ describe('setTableGroupingMode', () => {
   });
 
   it('leaves the keys and aggregates exactly as they were', () => {
-    // Orthogonal by construction: rollup adds the prefixes of the key list to
-    // the sets already emitted, so the mode changes how many rows come back
-    // and never what any of them is grouped by.
     const result = setTableGroupingMode({ grouping, mode: 'rollup' });
 
     expect(result.keys).toBe(grouping.keys);
@@ -36,8 +33,6 @@ describe('setTableGroupingMode', () => {
   });
 
   it('is settable with no key applied, where it is simply unused', () => {
-    // `serializeGroupingToURL` drops the whole configuration when the key list
-    // is empty, so a mode nobody can see never reaches the URL.
     expect(
       setTableGroupingMode({
         grouping: {

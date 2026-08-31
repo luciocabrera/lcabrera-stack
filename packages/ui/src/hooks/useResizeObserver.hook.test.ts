@@ -44,8 +44,6 @@ describe('useResizeObserver', () => {
 
     renderHook(() => useResizeObserver({ getTarget: () => target, onMeasure }));
 
-    // The initial measurement is a microtask away (deferred out of the
-    // effect body), so wait for it rather than asserting synchronously.
     await waitFor(() => expect(onMeasure).toHaveBeenCalledWith(target));
     expect(MockResizeObserver.instances[0]?.observe).toHaveBeenCalledWith(
       target,
@@ -85,7 +83,6 @@ describe('useResizeObserver', () => {
     );
 
     unmount();
-    // Flush the already-queued microtask, then assert it was a no-op.
     await Promise.resolve();
     expect(onMeasure).not.toHaveBeenCalled();
     expect(MockResizeObserver.instances[0]?.disconnect).toHaveBeenCalled();

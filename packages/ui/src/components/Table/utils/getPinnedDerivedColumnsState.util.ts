@@ -17,28 +17,15 @@ import { withGroupedColumnLayout } from './withGroupedColumnLayout.util';
 import { withGroupedColumnScope } from './withGroupedColumnScope.util';
 
 type GetPinnedDerivedColumnsStateArgs<TData> = {
-  /**
-   * **Required** for the reason `groupingKeys` is: a caller free to omit it would silently
-   * paint the source column instead of its measures on the next column change.
-   */
   readonly aggregates: readonly TableColumnAggregate[];
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
   readonly columnSizing?: ColumnSizingState<TData>;
   readonly columnVisibility?: ColumnVisibilityState<TData>;
-  /**
-   * **Required**, so every re-derivation is a compile error until it says what grouping is
-   * applied — a caller free to omit it would silently drop the key hoist on the next column
-   * change.
-   */
   readonly groupingKeys: readonly string[];
 };
 
-/**
- * Every column slice the body and header paint from, derived together so they cannot
- * disagree about which columns exist.
- */
 export const getPinnedDerivedColumnsState = <TData>({
   aggregates,
   columnOrder,

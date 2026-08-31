@@ -9,10 +9,6 @@ const isDirectionEntry = (
 ): entry is [string, 'asc' | 'desc'] =>
   entry[1] === 'asc' || entry[1] === 'desc';
 
-/**
- * Plain assignment routes a `__proto__` key to the prototype setter, which silently drops
- * that one key — a per-field drop, the one outcome this contract exists to rule out.
- */
 const narrowCompactSorting = (parsed: unknown) => {
   if (!isObject(parsed) || Array.isArray(parsed)) {
     return;

@@ -48,18 +48,6 @@ type FolderShape = 'artifact' | 'domain' | 'exempt';
 
 type MessageIds = 'artifactNamed' | 'folderNamed';
 
-// A single optional options object; each key REPLACES its default wholesale
-// rather than extending it, matching `filename-convention`'s option shape.
-//
-// `artifactFolders` names the directories whose whole subtree holds route
-// modules. Everything under one is exempt, because a route folder is a URL
-// segment and its modules are named for the route, which is not always the same
-// word (`routes/car-sales-infinite/CarSales.component.tsx`).
-//
-// `catchAllFolders` names the directories that name a kind rather than a
-// subject. `pairedSuffixes` names the file suffixes the pairing applies to —
-// deliberately not `.schema`/`.service`/`.api`, which have no settled
-// convention yet and would be a guess.
 type Options = readonly [
   {
     readonly artifactFolders?: readonly string[];
@@ -93,11 +81,6 @@ const DEFAULT_PAIRED_SUFFIXES = ['constants', 'types'] as const;
 const PASCAL_CASE = /^[A-Z][A-Za-z0-9]*$/;
 const NON_ALPHANUMERIC = /[^a-z0-9]/g;
 
-/**
- * One spelling of a subject, so the three the repo uses for it compare equal:
- * `trigger-scan`, `triggerScan` and `TriggerScan` all name the same thing, and
- * which one a file gets is decided by what it holds, not by what it is about.
- */
 const normalize = (value: string) =>
   value.toLowerCase().replaceAll(NON_ALPHANUMERIC, '');
 
@@ -117,11 +100,6 @@ const folderShapeFor = ({
   if (catchAllFolders.has(folder)) {
     return 'exempt';
   }
-  // An artifact TREE is exempt outright rather than checked against the folder
-  // name, because a route module is named for its route and that is not always
-  // the folder: `routes/car-sales-infinite/` holds `CarSales.component.tsx`.
-  // This is the rule's known blind spot, and the price of not reading the
-  // directory — see the header.
   if (segments.some((segment) => artifactFolders.has(segment))) {
     return 'exempt';
   }
@@ -131,11 +109,6 @@ const folderShapeFor = ({
   return 'domain';
 };
 
-/**
- * The directory segments of `filename`, relative to where ESLint was invoked.
- * Relative so that an ancestor of the project — a checkout that happens to sit
- * under a directory called `routes` — cannot exempt the whole workspace.
- */
 type DirectorySegmentsArgs = {
   readonly cwd: string;
   readonly filename: string;

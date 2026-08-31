@@ -21,18 +21,11 @@
 
 import { isAddedLine } from './agent-review-diff.mjs';
 
-/** GitHub rejects a review carrying more than this many comments. */
 const MAX_INLINE_COMMENTS = 100;
 
 const isFilledString = (value) =>
   typeof value === 'string' && value.trim() !== '';
 
-/**
- * Why this finding cannot become an inline comment, or `undefined` if it can.
- *
- * Order matters: a shape problem is reported as a shape problem even when the
- * file is also unreadable, because the two need different fixes. (pure)
- */
 const anchorRefusal = (finding, index) => {
   if (finding === null || typeof finding !== 'object') {
     return 'the finding is not an object';
@@ -55,14 +48,6 @@ const anchorRefusal = (finding, index) => {
   return undefined;
 };
 
-/**
- * Split findings into the ones that can be posted inline and the ones that
- * cannot, each of the latter carrying why.
- *
- * Anything past `MAX_INLINE_COMMENTS` is moved to the body rather than silently
- * cut: the API would reject the submission, and a truncation nobody is told
- * about reads exactly like a review that found less. (pure)
- */
 export const partitionFindings = (findings, index) => {
   const anchored = [];
   const unanchored = [];
@@ -87,7 +72,6 @@ export const partitionFindings = (findings, index) => {
   return { anchored, unanchored };
 };
 
-/** Where a finding pointed, as much of it as the finding actually gave. (pure) */
 const findingLocation = (finding) => {
   if (!isFilledString(finding?.path)) {
     return 'an unnamed location';
@@ -98,7 +82,6 @@ const findingLocation = (finding) => {
   return `\`${finding.path}\` line ${finding.line}`;
 };
 
-/** One unanchored finding, rendered so a reader can still act on it. (pure) */
 const renderUnanchored = ({ finding, reason }, position) => {
   const where = findingLocation(finding);
   const text = isFilledString(finding?.body)
@@ -107,13 +90,6 @@ const renderUnanchored = ({ finding, reason }, position) => {
   return `${position}. **${where}** — not posted inline because ${reason}.\n\n${text}`;
 };
 
-/**
- * The review body, with any unanchored findings appended under a heading.
- *
- * The heading says these do not block, because the reader's next question after
- * seeing a finding is whether it is holding the merge, and the answer differs
- * from the inline ones on the same review. (pure)
- */
 export const bodyWithUnanchored = (body, unanchored) => {
   if (unanchored.length === 0) {
     return body;
@@ -133,16 +109,6 @@ one says why it could not be placed.
 ${rendered}`;
 };
 
-/**
- * A degraded run, said on the pull request rather than only in the job log.
- *
- * It leads the body because it changes how everything under it should be read:
- * without it, a review whose findings file was lost is a summary paragraph and
- * nothing else, which is indistinguishable from a reviewer that found nothing.
- * The body no longer carries a prose copy of the findings to fall back on — the
- * prompt reserves it for what did *not* become a finding — so the log is the
- * only other place this appears, and a log is not where a reader looks. (pure)
- */
 export const bodyWithNote = (body, note) =>
   note === undefined
     ? body
@@ -150,14 +116,6 @@ export const bodyWithNote = (body, note) =>
 
 ${body}`;
 
-/**
- * The whole request body for `POST /repos/{owner}/{repo}/pulls/{n}/reviews`.
- *
- * `event` stays `COMMENT`: this reviewer does not approve and must not request
- * changes, because `REQUEST_CHANGES` blocks on the reviewer withdrawing it and
- * a workflow has no way to. Threads are what hold the merge, via the ruleset's
- * `required_review_thread_resolution`. (pure)
- */
 export const reviewPayload = ({ body, commitSha, findings, index, note }) => {
   const { anchored, unanchored } = partitionFindings(findings, index);
   return {

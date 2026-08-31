@@ -2,7 +2,6 @@ import { PinLeftIcon, PinOffIcon, PinRightIcon } from '#ui/components/Icons';
 
 import type { CommandDescriptor, CommandId } from '../commands.types';
 
-/** The pinning capability's commands (ADR-011). */
 export const PIN_LEFT_COMMAND = {
   icon: PinLeftIcon,
   id: 'column.pin.left' as CommandId,

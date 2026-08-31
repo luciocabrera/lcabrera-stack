@@ -29,8 +29,6 @@ describe('parseTableAggregateToken', () => {
   });
 
   it('splits on the LAST colon, so a column key may contain one', () => {
-    // The discriminating case: a naive `split(':')` reads this as
-    // `('odd', 'col')`, refuses it, and passes every other test in this file.
     expect(parseTableAggregateToken('odd:col:sum')).toStrictEqual({
       columnKey: 'odd:col',
       fn: 'sum',
@@ -73,8 +71,6 @@ describe('parseTableAggregateTokens', () => {
   });
 
   it('refuses the whole list when one token is unreadable', () => {
-    // Whole rather than per entry: a half-read list is a configuration nobody
-    // asked for (ADR-061).
     expect(
       parseTableAggregateTokens(['total_amount:sum', 'total_amount:median']),
     ).toBeUndefined();

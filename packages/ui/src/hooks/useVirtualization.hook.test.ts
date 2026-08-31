@@ -79,17 +79,11 @@ describe('useVirtualization', () => {
           resizeObserverCallbackRef.current = callback;
         }
 
-        public disconnect() {
-          // noop test double
-        }
+        public disconnect() {}
 
-        public observe() {
-          // noop test double
-        }
+        public observe() {}
 
-        public unobserve() {
-          // noop test double
-        }
+        public unobserve() {}
       },
     );
   });

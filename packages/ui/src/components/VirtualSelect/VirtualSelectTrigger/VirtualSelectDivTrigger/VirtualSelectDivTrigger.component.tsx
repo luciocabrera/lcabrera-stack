@@ -16,10 +16,6 @@ import {
   handleDivTriggerKeyDown,
 } from '../utils';
 
-/**
- * Div-based trigger shell used when the native `<button>` cannot be (tag chips render
- * nested remove buttons) or when the listbox is always open.
- */
 export const VirtualSelectDivTrigger = ({
   children,
   triggerRef,

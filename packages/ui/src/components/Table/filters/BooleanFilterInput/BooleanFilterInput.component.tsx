@@ -11,7 +11,6 @@ export const BooleanFilterInput = ({
   filter,
   onChange,
 }: BooleanFilterInputProps) => {
-  // Derive selected value directly from filter prop (no local state needed)
   const getSelectedValue = () => {
     if (!filter) return 'all';
     if (filter.type === 'empty') return filter.operator;

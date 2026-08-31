@@ -21,10 +21,6 @@ describe('areAllGroupsCollapsed', () => {
   });
 
   it('compares membership, not size', () => {
-    // A collapse survives a refetch by path (ADR-061) and is only pruned on a
-    // read, so between two reads the collapsed set can name a group the rows no
-    // longer hold. Same size, different sets: a size check would report the
-    // grid fully folded and leave the control dead on an open group.
     expect(
       areAllGroupsCollapsed({
         collapsedGroupPaths: new Set(['a-group-that-left']),

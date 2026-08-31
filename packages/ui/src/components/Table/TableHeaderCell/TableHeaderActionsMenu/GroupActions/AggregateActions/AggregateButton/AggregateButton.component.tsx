@@ -14,12 +14,6 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 
 import type { AggregateButtonProps } from './AggregateButton.types';
 
-/**
- * A self-connected delegate — it reads the applied aggregates from the grouping store
- * itself, so the shell above it forwards identity (`columnKey`, `fn`) and never state.
- * **The state derivation is `deriveAggregateCommandState`, not the shared
- * `deriveToggleCommandState` beside it** (#831).
- */
 export const AggregateButton = ({
   columnKey,
   fn,

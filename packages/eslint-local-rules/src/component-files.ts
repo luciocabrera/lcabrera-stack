@@ -24,12 +24,5 @@ export const COMPONENT_FILE_SUFFIXES = [
   'layout',
 ] as const;
 
-/**
- * Whether `filename` names a component file, by its `<Name>.<suffix>.tsx` shape.
- *
- * Matched on the suffix rather than merely on `.tsx` so that colocated tests,
- * stories and type modules (`Card.test.tsx`, `Card.types.ts`) are not treated as
- * components.
- */
 export const isComponentFilename = (filename: string) =>
   COMPONENT_FILE_SUFFIXES.some((suffix) => filename.endsWith(`.${suffix}.tsx`));

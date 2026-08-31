@@ -25,20 +25,9 @@ const MANIFEST = JSON.parse(
   readFileSync(join(SCRIPTS, '..', 'package.json'), 'utf8'),
 );
 
-/**
- * A static import or re-export, anchored to the start of its line — including
- * the `} from '…'` that closes a multi-line one.
- *
- * Anchored, and requiring the `from` keyword, because looser drafts matched
- * `Buffer.from('one ')` in a test fixture and then `export const X = '…'` in
- * half the modules. Nothing here imports dynamically, so there is no second
- * form to cover; if that changes, this stops seeing it, which is what the
- * self-check below is for.
- */
 const SPECIFIER =
   /^\s*(?:(?:import|export)[^'\n]*\bfrom\s*'|import\s*'|\}\s*from\s*')([^']+)'/gm;
 
-/** `@scope/name/sub` → `@scope/name`; `name/sub` → `name`. */
 const packageOf = (specifier) => {
   const parts = specifier.split('/');
   return specifier.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
@@ -60,9 +49,6 @@ const modules = readdirSync(SCRIPTS).filter((name) => name.endsWith('.mjs'));
 const runtimeModules = modules.filter((name) => !name.endsWith('.test.mjs'));
 
 describe('declared imports', () => {
-  // Guards the guard: a matcher that found nothing would pass both assertions
-  // below while proving nothing. Named specifiers, not a count, so a regex that
-  // silently stops matching one shape fails here rather than reporting clean.
   it('finds the imports it is meant to check', () => {
     expect(importedPackages('api-surface-extract.mjs')).toContain('ts-morph');
     expect(importedPackages('publish-pack.mjs')).toContain(
@@ -71,8 +57,6 @@ describe('declared imports', () => {
     expect(importedPackages('cli-input.test.mjs')).toContain('vite-plus');
   });
 
-  // The same fixture that defeated the first matcher: a bare `from '…'` that is
-  // not an import at all.
   it('does not mistake a method call for an import', () => {
     expect(importedPackages('cli-input.test.mjs')).not.toContain('one ');
   });

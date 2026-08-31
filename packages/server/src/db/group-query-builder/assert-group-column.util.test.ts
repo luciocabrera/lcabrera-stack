@@ -35,10 +35,6 @@ describe('assertGroupColumn', () => {
   it.each(['secret', 'Order_Status'])(
     'raises a typed refusal naming %s, not a bare Error',
     (column) => {
-      // The hole this closes: both shared assertions throw a bare `Error`, and
-      // `toSerializableDbError` reserves `unexpected` for a throw this package
-      // never vetted — so an allow-list violation used to reach the loader edge
-      // with its message withheld.
       const refusal = refusalOf(column);
 
       expect(refusal).toBeInstanceOf(GroupingRefusedError);

@@ -25,9 +25,6 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   columnsState,
   metaState,
 }: TableConfigProviderProps<TData>) => {
-  // All three stores seed purely from the loader's URL- and cookie-derived
-  // state, so the client renders exactly what the server did — see
-  // getInitialColumnsState.
   const normalizedMetaState = getInitialMetaState({ ...metaState });
   const normalizedGroupingState = getInitialGroupingState({
     groupingAggregates: metaState?.groupingAggregates,
@@ -36,10 +33,6 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     groupingPeriods: metaState?.groupingPeriods,
     groupingShares: metaState?.groupingShares,
   });
-  // Seeded from the grouping state rather than from the raw meta, so the keys
-  // are hoisted and the measure columns derived under exactly the configuration
-  // the grouping store accepted — an illegal one is refused there, and columns
-  // derived for a grouping that was refused would label nothing.
   const normalizedColumnsState = getInitialColumnsState<TData>({
     ...columnsState,
     aggregates: normalizedGroupingState.aggregates,
@@ -52,8 +45,6 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   );
   const metaStore = useStore<TableMetaState>(normalizedMetaState);
   const groupingStore = useStore<TableGroupingState>(normalizedGroupingState);
-  // Expansion seeds from nothing — it is client state and does not travel in
-  // the URL (ADR-061), so there is no loader half of it to normalize.
   const expansionStore = useStore<TableGroupExpansionState>(
     getInitialExpansionState(),
   );
@@ -65,8 +56,6 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     metaStore,
   };
 
-  // The context is declared non-generic; useTableConfigContextValue<TData>()
-  // restores the generic on read. Erase the type parameter only here.
   return (
     <TableConfigContext value={value as TableConfigContextValue}>
       {children}

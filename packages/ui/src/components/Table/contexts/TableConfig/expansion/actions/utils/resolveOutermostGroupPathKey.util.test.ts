@@ -35,11 +35,6 @@ const groupRow = ({ isSubtotal = false, path }: GroupRowArgs): Row => ({
 
 const berlinKey = resolveGroupPathKey(pathOf('Berlin'));
 
-/**
- * A rollup block, in the order rollup emits it: the deepest rows, a detail row
- * under one of them, then the subtotal that totals them (#570), then
- * the grand total.
- */
 const rows: readonly Row[] = [
   groupRow({ path: pathOf('Berlin', 'Open') }),
   { id: 7 },
@@ -77,9 +72,6 @@ describe('resolveOutermostGroupPathKey', () => {
   });
 
   it('answers a top-level row with itself, so focus never leaves it', () => {
-    // A collapse-all cannot hide it — it is nobody's descendant — and the
-    // caller compares the answer against the surviving rows, which still
-    // contain it.
     expect(
       resolveOutermostGroupPathKey({
         columns,
@@ -113,9 +105,6 @@ describe('resolveOutermostGroupPathKey', () => {
   });
 
   it('reads ancestry from the row, never from the row above it', () => {
-    // The trap rollup sets: the row *above* a top-level group row is the
-    // previous group's subtotal, so a walk that started one row early would
-    // hand Paris's rows Berlin's ancestor.
     const acrossBlocks: readonly Row[] = [
       groupRow({ isSubtotal: true, path: pathOf('Berlin') }),
       groupRow({ path: pathOf('Paris', 'Open') }),

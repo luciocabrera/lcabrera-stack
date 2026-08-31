@@ -15,13 +15,6 @@ const PROTECTED = /^(?:main|release-.*)$/u;
 
 const MERGED_OR_CLOSED = new Set(['CLOSED', 'MERGED']);
 
-/**
- * Collapse every PR that ever pointed at a branch into one verdict. A branch is
- * only deletable when it has at least one PR and *none* is still open — a single
- * open PR (a reopen, a re-target) keeps the branch alive. `undefined` means the
- * branch never had a PR, which is a different case the caller weighs against
- * whether the branch carries unique commits.
- */
 export const summarizePrs = (prs) => {
   if (!Array.isArray(prs) || prs.length === 0) {
     return undefined;
@@ -34,11 +27,6 @@ export const summarizePrs = (prs) => {
   return { number: last.number, state: String(last.state).toUpperCase() };
 };
 
-/**
- * A branch's fate. `uniqueCount` is the commit count on the branch but not on
- * `origin/main`; `undefined` means the comparison could not be made (no
- * `origin/main`), which is treated as "unknown" and kept, never guessed as zero.
- */
 export const classifyBranch = ({
   isCheckedOut,
   isCurrent,
@@ -83,11 +71,6 @@ export const classifyBranch = ({
   };
 };
 
-/**
- * A worktree's fate. The primary checkout is never removed. A dirty worktree is
- * reported, never removed — its uncommitted changes are exactly the work this
- * command exists not to lose.
- */
 export const classifyWorktree = ({ branch, dirty, isPrimary, pr }) => {
   if (isPrimary) {
     return { action: 'keep', reason: 'primary checkout' };
@@ -113,10 +96,6 @@ export const classifyWorktree = ({ branch, dirty, isPrimary, pr }) => {
   };
 };
 
-/**
- * Parse `git worktree list --porcelain` into records. The first entry is always
- * the primary checkout. Branch is `undefined` for a detached or bare worktree.
- */
 export const parseWorktrees = (porcelain) => {
   if (!porcelain) {
     return [];
@@ -138,7 +117,6 @@ export const parseWorktrees = (porcelain) => {
     .filter((entry) => entry.path !== undefined);
 };
 
-/** Join classifications into the buckets the shell prints and (with --apply) acts on. */
 export const buildPlan = ({
   branches,
   checkedOutBranches,

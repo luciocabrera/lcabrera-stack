@@ -49,10 +49,6 @@ export const DraggableListItem = ({
         </div>
       )}
       {canDrag && (
-        // Decorative: dragging is HTML5 mouse-only (`draggable` + drag events,
-        // no keyboard path), so the glyph advertises an affordance assistive
-        // tech cannot use. The `aria-label` this replaces was inert anyway — a
-        // bare <span> has an implicit `generic` role, which ignores aria-label.
         <span
           aria-hidden='true'
           data-testid='drag-handle'

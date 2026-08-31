@@ -5,13 +5,6 @@ type GetCurrencySymbolArgs = {
   readonly currency?: string;
 };
 
-/**
- * Constructing the `Intl.NumberFormat` dominates this function's cost by orders of
- * magnitude — it loads locale data — while the symbol for a given key never changes, so it
- * is derived once per key instead of on every render.
- * The key includes the locale so that a future non-constant `getDefaultLocale` cannot
- * silently return another locale's symbol.
- */
 const symbolCache = new Map<string, string>();
 
 export const getCurrencySymbol = ({ currency }: GetCurrencySymbolArgs) => {
@@ -34,8 +27,6 @@ export const getCurrencySymbol = ({ currency }: GetCurrencySymbolArgs) => {
 
     return symbol;
   } catch {
-    // A currency code Intl rejects throws deterministically, so the fallback is
-    // cached too rather than re-throwing on every render.
     symbolCache.set(cacheKey, resolvedCurrency);
 
     return resolvedCurrency;

@@ -80,8 +80,6 @@ describe('selectCarSalesPage', () => {
   });
 
   it('orders by the primary key when the request carries no sort', async () => {
-    // A paginated read with no ORDER BY repeats and skips rows as the planner
-    // changes plans between requests, and this endpoint is a public URL.
     await selectCarSalesPage({ limit: 10, offset: 0, sorting: [] });
 
     expect(vi.mocked(selectRows).mock.calls.at(0)?.at(0)?.sort).toStrictEqual([
@@ -90,10 +88,6 @@ describe('selectCarSalesPage', () => {
   });
 
   it('bounds how many ORDER BY terms one read can carry', async () => {
-    // The sibling of the wide-alltypes sort cap. A hand-made request to this
-    // public URL could otherwise grow the ORDER BY without limit; the bound is
-    // the column count, so no sort a user can express reaches it. Over-cap
-    // input is the assertion — an in-range sort passes with or without the fix.
     const overCap = Array.from(
       { length: MAX_CAR_SALES_SORT_RULES + 25 },
       () => ({ columnKey: 'car_id', direction: 'asc' as const }),

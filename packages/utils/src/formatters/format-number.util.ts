@@ -27,7 +27,6 @@ export const formatNumber = ({
   try {
     return new Intl.NumberFormat(resolvedLocale, formatOptions).format(value);
   } catch {
-    // Fallback to basic string conversion if Intl fails
     return String(value);
   }
 };

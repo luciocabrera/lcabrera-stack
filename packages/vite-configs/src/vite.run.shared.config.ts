@@ -20,37 +20,11 @@ type CreateReactRouterRunConfigArgs = {
   readonly envFiles?: readonly string[];
 };
 
-/**
- * The app's own `.env`, and nothing above it.
- *
- * A monorepo usually has a second file a level or two up — a compose env file,
- * a shared secrets file — but where that sits is the consuming repo's layout,
- * so it is passed in rather than assumed (ADR-069). Paths are relative to the
- * app directory, because that is the task's cwd.
- */
 const DEFAULT_ENV_FILES = ['./.env'] as const;
 
-/**
- * Sources one env file into the shell if it is there.
- *
- * Load-if-exists (`[ -f ]`) mirrors Node's `--env-file-if-exists`, so a
- * missing file is skipped rather than fatal; the `tr -d "\r"` strips CRs from
- * Windows/WSL-authored .env files.
- */
 const sourceEnvFile = (file: string) =>
   String.raw`[ -f ${file} ] && eval "$(tr -d "\r" < ${file})";`;
 
-/**
- * A shell fragment that exports every variable in `envFiles`, later files
- * winning.
- *
- * react-router-serve serves the production build in-process, and these SSR apps'
- * loaders read DB_* from `process.env` at runtime (`getPool` → `readEnvConfig`).
- * A bare `react-router-serve` inherits none of those, so the first DB-backed
- * request throws a ZodError — while `vp dev` works because each app's `dev`
- * script loads the same files into the shell before serving. The prod `start`
- * task must do the same.
- */
 export const createLoadLocalEnv = (
   envFiles: readonly string[] = DEFAULT_ENV_FILES,
 ) => `set -a; ${envFiles.map((file) => sourceEnvFile(file)).join(' ')} set +a;`;
@@ -61,10 +35,6 @@ export const createReactRouterRunConfig = ({
   tasks: {
     build: {
       cache: true,
-      // Pin NODE_ENV so StyleX plugin mode is stable across all shell environments.
-      // Exclude build output and generated types from the input fingerprint — without
-      // this, files written by react-router build would be tracked as inputs on the
-      // next run, causing guaranteed cache misses.
       command: 'NODE_ENV=production react-router build',
       env: ['NODE_ENV'],
       input: [

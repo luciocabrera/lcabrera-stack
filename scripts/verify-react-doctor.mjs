@@ -37,33 +37,17 @@ const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const REPORT = 'reports/react-doctor/full-latest.json';
 const CONFIG = 'doctor.config.jsonc';
 
-/**
- * The CLI's real entry file.
- *
- * The package's own `bin` script, run with `process.execPath` rather than
- * spawned by name, so nothing is searched for on PATH (Sonar S4036) and the
- * pinned `catalog:lint` version is the one that runs — not whatever a global
- * install happens to provide.
- *
- * Deliberately NOT `node_modules/.bin/react-doctor`: pnpm writes that as a
- * `#!/bin/sh` wrapper rather than a symlink, so it is not a JS file, resolving
- * it with `realpathSync` returns the wrapper itself, and handing it to node
- * fails on the shell syntax.
- */
 const entryPoint = () =>
   realpathSync(
     join(REPO_ROOT, 'node_modules', 'react-doctor', 'bin', 'react-doctor.js'),
   );
 
-/** Runs a scan and returns its parsed report, or exits if it cannot. */
 const scan = () => {
   const out = join(REPO_ROOT, REPORT);
   mkdirSync(dirname(out), { recursive: true });
   try {
     execFileSync(
       process.execPath,
-      // `--blocking none` so the exit code carries no verdict: this script
-      // decides, from the report, after checking the run actually happened.
       [
         entryPoint(),
         '.',
@@ -82,28 +66,15 @@ const scan = () => {
   return JSON.parse(readFileSync(out, 'utf8'));
 };
 
-/** Throws, not exits: callers rely on this not returning (ADR-090). */
 const fail = (message) => {
   throw new Error(message);
 };
 
-/** One line per finding, in the `file:line rule` shape editors linkify. */
 const render = ({ id, line, message, normalizedFilePath, rule }) => {
   const [repoPath] = (id ?? '').split('::');
   return `  ${repoPath || normalizedFilePath}:${line}  ${rule}\n      ${message}`;
 };
 
-/**
- * Fails if the config is not parseable, BEFORE the scan runs.
- *
- * Measured, not assumed: fed a malformed `doctor.config.jsonc`, React Doctor
- * discards it, falls back to built-in defaults and still reports `ok: true`.
- * Every `off` and `ignore` in the file silently stops applying, so a repo whose
- * suppressions are all on warnings would sail through a "clean" gate while
- * scanning under a configuration nobody chose. Same failure mode Biome has
- * (AGENTS.md §4), and the reason that file must stay valid rather than merely
- * present.
- */
 const assertConfigParses = () => {
   const path = join(REPO_ROOT, CONFIG);
   try {
@@ -121,7 +92,6 @@ const main = () => {
   assertConfigParses();
   const report = scan();
 
-  // Before the count means anything, the run has to have happened.
   if (report.ok !== true) {
     fail(
       `react-doctor did not complete: ${report.error?.message ?? 'unknown error'}\n` +

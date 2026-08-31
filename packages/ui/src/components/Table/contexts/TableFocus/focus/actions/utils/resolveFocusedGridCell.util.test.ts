@@ -73,9 +73,6 @@ describe('resolveFocusedGridCell', () => {
   });
 
   it('reports no focused cell before the grid has been entered', () => {
-    // Focus legitimately points at nothing, and at a row outside the window —
-    // the caller's job is to move it rather than to object (ADR-062).
-    // Called directly: a default parameter would substitute an index back in.
     const cell = resolveFocusedGridCell<Row>({
       columnKeys: COLUMN_KEYS,
       data: DATA,

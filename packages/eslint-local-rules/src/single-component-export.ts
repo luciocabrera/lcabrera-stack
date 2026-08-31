@@ -4,7 +4,6 @@ import { createRule } from './create-rule.ts';
 
 export default createRule({
   create(context) {
-    // Only apply to .component.tsx files
     const filename = context.filename;
     if (!filename.endsWith('.component.tsx')) {
       return {};
@@ -14,15 +13,12 @@ export default createRule({
 
     return {
       ExportNamedDeclaration(node: TSESTree.ExportNamedDeclaration) {
-        // Check if it's a function declaration
         if (node.declaration?.type === 'FunctionDeclaration') {
           const name = node.declaration.id?.name;
           if (name) {
             componentExports.push(name);
           }
-        }
-        // Check if it's a variable declaration with arrow function
-        else if (node.declaration?.type === 'VariableDeclaration') {
+        } else if (node.declaration?.type === 'VariableDeclaration') {
           for (const declarator of node.declaration.declarations) {
             if (
               declarator.id.type === 'Identifier' &&

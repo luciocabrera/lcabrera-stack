@@ -10,11 +10,6 @@ type AggregateCommandStateArgs = {
   readonly target: TableAggregateFn | undefined;
 };
 
-/**
- * Active/enabled state for an aggregate command against a column (ADR-011).
- * **This exists beside `deriveToggleCommandState` rather than widening it**, and that is
- * the point of the split (#831).
- */
 export const deriveAggregateCommandState = ({
   applied,
   columnKey,

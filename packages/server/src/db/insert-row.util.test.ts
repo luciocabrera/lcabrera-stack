@@ -101,8 +101,6 @@ describe('insertRow', () => {
     ).rejects;
 
     await rejects.toThrow(UniqueConstraintViolationError);
-    // The safe message, not the driver's — asserting the exact string is what
-    // proves the pg text did not survive the translation.
     await rejects.toThrow('A record with these values already exists.');
     await rejects.toMatchObject({ fields: { constraint: 'widgets_sku_key' } });
   });

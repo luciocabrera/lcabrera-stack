@@ -40,22 +40,8 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const shadowStylex = getShadowStyle(pinInfo);
 
   return (
-    // role and aria-sort are declared, not inherited: `tableHeaderCellStyles`
-    // `base()` sets `display: flex` on this `<th>` itself, which costs it its
-    // implicit `columnheader` role in the accessibility tree (ADR-062). The
-    // cause is this cell's own override, not the row's — restoring a table
-    // `display` on `TableRow` would not make the attribute redundant.
-    // All three are set after `{...rest}` so a caller cannot replace them.
     <th
       {...rest}
-      // A derived measure column draws only its function — `Average` — with the
-      // source column's name stated once above it by the header band. That band
-      // is decorative, so without a name stated here a screen-reader user gets a
-      // column called `Average` with nothing saying of what. It is an
-      // `aria-label` rather than a visually-hidden span because the two spans
-      // concatenate with no separator between them — `Total AmountAverage` —
-      // and because the name of a column header should be the column's name,
-      // not its name followed by its menu button's.
       aria-label={
         column.headerGroupLabel === undefined
           ? undefined

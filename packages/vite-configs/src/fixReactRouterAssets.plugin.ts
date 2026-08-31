@@ -10,17 +10,6 @@ import {
 } from 'node:fs';
 import path from 'node:path';
 
-/**
- * The filesystem calls this plugin makes, as a seam the caller owns.
- *
- * Not indirection for its own sake, and the same shape `@lcabrera/tsconfig`'s
- * writer uses. Every path here is derived from the build root and the emitted
- * manifest, so none of them can be a literal — which is precisely what
- * `security/detect-non-literal-fs-filename` reports, and a public package may
- * not carry a suppression (AGENTS.md §4). Handing the effect to the caller both
- * answers that and is what lets `fixReactRouterAssets.plugin.test.ts` assert
- * what lands on disk without writing anything.
- */
 export type ReactRouterAssetsFileSystem = {
   readonly copyFileSync: (source: string, destination: string) => void;
   readonly existsSync: (target: string) => boolean;
@@ -42,7 +31,6 @@ type EnsureServerCssFileArgs = {
 };
 
 type FixReactRouterAssetsArgs = {
-  /** The build root. Defaults to the process cwd, where `vite build` runs. */
   readonly cwd?: string;
   readonly fileSystem?: ReactRouterAssetsFileSystem;
 };
@@ -59,10 +47,6 @@ type ReadServerManifestArgs = {
 
 type ServerManifest = Record<string, ManifestChunk>;
 
-/**
- * The node:fs implementation, referenced rather than wrapped, so the annotation
- * checks the seam against node's real signatures instead of a re-typed copy.
- */
 const NODE_FILE_SYSTEM: ReactRouterAssetsFileSystem = {
   copyFileSync,
   existsSync,
@@ -150,17 +134,6 @@ const ensureServerCssFile = ({
   fileSystem.copyFileSync(clientSource, serverFile);
 };
 
-/**
- * Vite 8 (Rolldown) does not emit CSS assets during SSR builds, but the
- * generated manifest still references them. The react-router plugin then
- * tries to rename those (non-existent) files from the server build to the
- * client build, causing an ENOENT error.
- *
- * This plugin runs **before** react-router's writeBundle hook and
- * pre-creates any missing CSS files in the server assets directory so the
- * rename succeeds.  Content is copied from the client build when a matching
- * CSS file exists; otherwise an empty file is created as a placeholder.
- */
 export const fixReactRouterAssets = ({
   cwd = process.cwd(),
   fileSystem = NODE_FILE_SYSTEM,

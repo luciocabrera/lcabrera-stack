@@ -24,35 +24,20 @@ import {
 } from './closure-extract.mjs';
 import { requiredConfigKeys, requiresDeclarationLine } from './frontmatter.mjs';
 
-/**
- * A scheme is at least two characters, which is what separates `mailto:` from a
- * Windows drive letter. Treating `C:\\dir\\file.md` as a URL would silently drop
- * the most non-portable path a shipped file can contain.
- */
 const isExternalUrl = (target) =>
   /^[a-z][a-z0-9+.-]+:/i.test(target) || target.startsWith('//');
 
-/**
- * A path anchored to a filesystem root — POSIX `/…`, a Windows drive, or a UNC
- * share. It cannot resolve anywhere but the machine that wrote it, so it is
- * reported rather than resolved: treating it as relative would quietly place it
- * inside the shipped directory and call it internal, which is the most
- * non-portable reference a shipped file can hold going unnoticed.
- */
 const isAbsolutePath = (target) =>
   target.startsWith('/') ||
   target.startsWith('\\\\') ||
   /^[a-z]:[/\\]/i.test(target);
 
-/** `path#section` and `#section` both point at a heading; only the path travels. */
 const withoutAnchor = (target) => {
   const index = target.indexOf('#');
   return index === -1 ? target : target.slice(0, index);
 };
 
 const normalise = (segments) => {
-  // A local accumulator that never escapes this function; rebuilding the array
-  // per segment is quadratic on a deep path.
   const resolved = [];
   for (const segment of segments) {
     if (segment === '' || segment === '.') continue;
@@ -62,15 +47,6 @@ const normalise = (segments) => {
   return resolved;
 };
 
-/**
- * A directory the package puts at least one file into. The consumer will have
- * it, so a link to it travels — `[in this directory](./)` is the ordinary
- * markdown way to point at the folder a file sits in, and reading it as an
- * escape reports a page for naming its own home.
- *
- * Judged from the shipped files rather than from a separate list of directories,
- * so it cannot say a directory exists that nothing lands in.
- */
 const holdsShippedFile = (path, shipped) => {
   const prefix = `${path}/`;
   for (const entry of shipped) {
@@ -79,15 +55,6 @@ const holdsShippedFile = (path, shipped) => {
   return false;
 };
 
-/**
- * Whether a resolved path travels with the file that named it.
- *
- * The unit is the PACKAGE, not the directory. A skill legitimately points at a
- * contract document or a sibling skill that ships alongside it, and calling that
- * an escape would push every such reference toward being duplicated into each
- * directory that needs it — the exact failure the shipping model exists to
- * avoid. So a path the package ships is internal wherever it sits.
- */
 const travelsWith = ({ path, rootDirectory, shipped }) => {
   if (shipped.has(path) || holdsShippedFile(path, shipped)) return true;
   const root = rootDirectory.replace(/\/$/, '');
@@ -97,16 +64,6 @@ const travelsWith = ({ path, rootDirectory, shipped }) => {
 const resolveFrom = (base, target) =>
   normalise([...base.split('/'), ...target.split('/')]).join('/');
 
-/**
- * `internal` — resolves inside the shipped directory, so it travels with it.
- * `escape`   — resolves outside it: the consumer will not have this file.
- * `url` / `anchor` — nothing on disk to resolve.
- *
- * A markdown link is ALWAYS resolved against the file that holds it, which is
- * what the format means by a relative target. Resolving a bare-looking one from
- * the repository root instead reports a skill's own `references/advanced.md` as
- * an escape — a false positive that reads exactly like a real finding.
- */
 export const classifyLink = ({
   fromDirectory,
   rootDirectory,
@@ -125,14 +82,6 @@ export const classifyLink = ({
   };
 };
 
-/**
- * A path written in prose or handed to a command carries no convention saying
- * what it is relative to: `packages/x/y.md` means the repository root, while
- * `references/advanced.md` two lines later means the file's own directory. The
- * only thing that separates them is which one is actually there, so the caller
- * supplies the existence check and a token matching neither is left unreported
- * rather than guessed at.
- */
 export const classifyPathToken = ({
   exists,
   fromDirectory,
@@ -163,7 +112,6 @@ const SOURCE_EXTENSIONS = ['.cjs', '.js', '.mjs', '.mts', '.ts'];
 const isSourceFile = (path) =>
   SOURCE_EXTENSIONS.some((extension) => path.endsWith(extension));
 
-/** A builtin travels everywhere; a relative path is a link; anything else is a package. */
 const classifyImport = ({
   fromDirectory,
   rootDirectory,
@@ -209,11 +157,6 @@ const toEscapes = ({ classified, file }) =>
       resolved: reference.resolved,
     }));
 
-/**
- * A declared requirement escapes when the key it names is outside the config's
- * key space, because then no consumer can satisfy it — unlike a key that is
- * merely unset here, which is `sync`'s question and not this one.
- */
 const toRequiresEscapes = ({ allowedKeys, file }) =>
   requiredConfigKeys(file.content)
     .filter((key) => !allowedKeys.has(key))
@@ -253,9 +196,6 @@ export const analyseClosure = ({
         target: link.target,
       }),
     }));
-    // Without an existence check there is no way to tell a root-relative path
-    // from a file-relative one, so prose tokens are not analysed at all rather
-    // than analysed by guess.
     const tokens =
       exists === undefined
         ? []
@@ -312,9 +252,6 @@ export const analyseClosure = ({
     toRequiresEscapes({ allowedKeys, file }),
   );
 
-  // A link whose text repeats its own target — the spelling these skills use —
-  // is found twice, once as a link and once as a prose path. It is one
-  // dependency, and reporting it twice makes a short list look like a long one.
   return {
     escapes: dedupe([
       ...linkEscapes,

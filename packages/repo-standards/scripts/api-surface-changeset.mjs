@@ -14,7 +14,6 @@
 const BUMP_LINE = /^\s*["']?(@[\w./-]+)["']?\s*:\s*(patch|minor|major)\s*$/;
 const FRONTMATTER = /^---\n([\s\S]*?)\n---/;
 
-/** Package names bumped by a single changeset file's frontmatter. */
 export const parseChangesetBumps = (fileContent) => {
   const frontmatter = FRONTMATTER.exec(fileContent);
   if (frontmatter === null) {
@@ -27,17 +26,9 @@ export const parseChangesetBumps = (fileContent) => {
     .map((match) => match[1]);
 };
 
-/** Every package bumped across all changeset files. */
 export const collectBumpedPackages = (fileContents) =>
   new Set(fileContents.flatMap((content) => parseChangesetBumps(content)));
 
-/**
- * Given each changed package's classification and the bumped set, the packages
- * whose surface changed without a changeset. Breaking changes are always
- * required; a purely additive change is advisory (`required: false`) while the
- * packages are `0.x`, matching the changesets discipline without hard-failing a
- * legal minor. The caller decides how to surface each — fail vs warn.
- */
 export const missingChangesets = ({ bumpedPackages, changedPackages }) =>
   changedPackages
     .filter(({ name }) => !bumpedPackages.has(name))

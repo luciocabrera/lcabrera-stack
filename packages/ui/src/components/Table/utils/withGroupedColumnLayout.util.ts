@@ -16,10 +16,6 @@ type WithGroupedColumnLayoutArgs<TData> = {
   readonly groupingKeys: readonly string[];
 };
 
-/**
- * Derivation, never state (ADR-080): hoist keys to the head of order, left-pin, and force
- * visible.
- */
 export const withGroupedColumnLayout = <TData>({
   columnOrder,
   columnPinning,
@@ -51,8 +47,6 @@ export const withGroupedColumnLayout = <TData>({
       right: withoutKeys(columnPinning.right),
     },
     columns,
-    // Reallocated only when a key is actually hidden, so an ordinary grouped
-    // render keeps the store's own Set and the memo below it stays stable.
     columnVisibility:
       hiddenKeys.length === 0
         ? columnVisibility

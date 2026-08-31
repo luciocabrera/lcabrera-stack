@@ -6,12 +6,6 @@ type AssertGroupSortArgs = {
   readonly sort: readonly GroupSort[];
 };
 
-/**
- * Demotion was the previous behaviour, and it emits a term that orders nothing: within one
- * grouping set the key columns already identify the row, so the sort the caller asked for
- * was accepted, emitted, and dead.
- * A refusal is the only answer that cannot be mistaken for having worked.
- */
 export const assertGroupSort = ({
   aggregateAliases,
   keys,

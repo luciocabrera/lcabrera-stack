@@ -19,17 +19,8 @@
  * consumer's own StyleX plugin compiles it.
  */
 export const createPackConfig = () => ({
-  // Aimed at tsconfig.app.json rather than the default tsconfig.json: the latter
-  // is the thin wrapper (`files: []` plus `references`), which the declaration
-  // plugin cannot build a TypeScript program from.
   dts: { tsconfig: 'tsconfig.app.json' },
   entry: ['src/**/*.ts', '!src/**/*.test.ts'],
-  // Paired with `src` staying in `files`: a consumer stepping into one of these
-  // packages lands in the original TypeScript rather than in bundled output.
-  // Without the maps, shipping `src` would be dead weight — the published
-  // `exports` map points only at `dist`, so nothing can reach it.
   sourcemap: true,
-  // One output per input, mirroring `src`, so every `exports` subpath maps 1:1
-  // onto a built file and stays deep-importable.
   unbundle: true,
 });

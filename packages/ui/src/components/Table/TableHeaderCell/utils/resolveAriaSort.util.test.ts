@@ -19,8 +19,6 @@ describe('resolveAriaSort', () => {
   });
 
   it('says nothing at all about a column that cannot be sorted', () => {
-    // `none` would advertise an action that is not there; the absent attribute
-    // says the column does not participate in sorting.
     expect(
       resolveAriaSort({ isSortable: false, sortDirection: undefined }),
     ).toBeUndefined();

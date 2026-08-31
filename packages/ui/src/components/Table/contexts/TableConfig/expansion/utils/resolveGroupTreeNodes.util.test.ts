@@ -51,8 +51,6 @@ describe('resolveGroupTreeNodes', () => {
   });
 
   it('reads the same ancestry when the parent is emitted after its children', () => {
-    // Rollup's order (#570). Position moved; the prefixes did not, so neither
-    // row's place in the tree changes.
     const [child, root] = nodesFor([
       summary({ path: spain }),
       summary({ isSubtotal: true, path: emea }),
@@ -65,18 +63,12 @@ describe('resolveGroupTreeNodes', () => {
   });
 
   it('puts the grand total at the top level, as a sibling of the roots', () => {
-    // A rollup's last row is keyed by nothing. `path.length` alone is `0` —
-    // not a level at all, and invalid for `aria-level`, which is 1-based.
     const [grandTotal] = nodesFor([summary({ isSubtotal: true, path: [] })]);
 
     expect(grandTotal?.level).toBe(1);
   });
 
   it('gives the grand total the root as its parent, never itself', () => {
-    // The discriminating assertion: `resolveGroupPathKey([])` is `"[]"`, which
-    // is exactly this row's own path key — so a prefix branch reached with an
-    // empty path makes the grand total its own parent, and the whole grid ends
-    // up inside one collapsible subtree.
     const [grandTotal] = nodesFor([summary({ isSubtotal: true, path: [] })]);
 
     expect(grandTotal?.pathKey).toBe(resolveGroupPathKey([]));
@@ -85,8 +77,6 @@ describe('resolveGroupTreeNodes', () => {
   });
 
   it('keeps the root key distinct from every path key it could meet', () => {
-    // `JSON.stringify` over an array always starts `[`, the empty one included,
-    // so no group's key can collide with the root.
     expect(resolveGroupPathKey([])).not.toBe('');
   });
 

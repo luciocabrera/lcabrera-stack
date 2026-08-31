@@ -47,9 +47,6 @@ describe('resolveCrudRowId', () => {
   });
 
   it('answers undefined when no primary-key column is declared', () => {
-    // Not a throw: the only caller renders, and a throw there empties the grid
-    // rather than protecting a route (ADR-062, #887). The caller renders no
-    // menu, so no bad id reaches a route either way.
     expect(
       resolveCrudRowId<Row>({
         columns: [col({ key: 'order_id' }), col({ key: 'order_number' })],
@@ -68,8 +65,6 @@ describe('resolveCrudRowId', () => {
   });
 
   it('answers undefined when only one half of a composite key resolves', () => {
-    // A partial id would address a different row, so the whole answer is
-    // withheld rather than the resolvable half being joined alone.
     expect(
       resolveCrudRowId<Row>({
         columns: [

@@ -29,9 +29,6 @@ describe('toggleCollapsedGroupPath', () => {
   });
 
   it('answers a new set, so the store can see the change at all', () => {
-    // `useStore.set` compares the merged state shallowly: a set mutated in
-    // place is `===` its predecessor and notifies no subscriber, so the grid
-    // would keep painting the previous expansion.
     const current = new Set(['a']);
     const next = toggleCollapsedGroupPath({
       collapsedGroupPaths: current,

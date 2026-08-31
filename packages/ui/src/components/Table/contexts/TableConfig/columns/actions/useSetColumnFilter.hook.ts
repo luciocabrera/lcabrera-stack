@@ -12,12 +12,6 @@ type SetColumnFilterArgs<TData> = {
   readonly filter?: ColumnFilter;
 };
 
-/**
- * Hook to update a single column filter
- *
- * Persists the filter state to a cookie via server action (Set-Cookie header)
- * using useFetcher, ensuring the cookie is set server-side.
- */
 export const useSetColumnFilter = <TData>() => {
   const { columnsStore } = useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue();
@@ -33,14 +27,10 @@ export const useSetColumnFilter = <TData>() => {
         filter,
       });
 
-    // Persist to cookie and sync URL params in one action.
-    // Abort before loading/state changes when persistence would be oversized.
     if (!persistTableState(persistenceEntry)) return;
 
-    // Show loading feedback immediately
     dataStore.set({ isLoading: true });
 
-    // Update table context state
     columnsStore.set({ columnFilters });
   };
 };

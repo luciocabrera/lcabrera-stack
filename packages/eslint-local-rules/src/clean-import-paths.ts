@@ -2,14 +2,8 @@ import type { TSESLint, TSESTree } from '@typescript-eslint/utils';
 
 import { createRule } from './create-rule.ts';
 
-// Relative prefixes are universal — every project has them, and they are what
-// makes a path internal in the first place. An ALIAS is per-project (`@/` here,
-// `~/` and `#app/` elsewhere), so it is an option rather than a constant: this
-// rule ships, and a consumer whose alias is not listed would get silence rather
-// than a configurable answer.
 const RELATIVE_PREFIXES = ['./', '../'] as const;
 
-/** This repo's alias. As the default, in-repo behaviour is unchanged. */
 const DEFAULT_ALIAS_PREFIXES = ['@/'];
 
 type IsInternalPathArgs = {
@@ -19,9 +13,6 @@ type IsInternalPathArgs = {
 
 type Options = readonly [{ readonly aliasPrefixes?: readonly string[] }?];
 
-// `prefixes` is the already-concatenated relative + alias list, built once per
-// file in `create` rather than per node: this runs on every import and export
-// in the file, and the list cannot change between them.
 const isInternalPath = ({ prefixes, source }: IsInternalPathArgs): boolean =>
   prefixes.some((prefix) => source.startsWith(prefix));
 

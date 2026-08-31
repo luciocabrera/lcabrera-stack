@@ -3,15 +3,16 @@
 '@lcabrera/vite-config': minor
 ---
 
-Report a comment written above a function, component or type declaration, or
-inside one.
+Report a comment written above a declaration, or inside a function, component or
+type declaration.
 
 `local-rules/no-explanatory-comments` is the new rule, and both shared flat
 configs (`eslint-custom-rules` and `eslint-base-custom-rules`) now turn it on for
 `.ts`/`.tsx` sources. A name, a signature and a type already say what the code
 is; prose repeating them is a second copy of a fact kept where nothing checks it,
 which is how a helper came to advertise a storage reader that had never existed
-and two later designs came to offer that reader as a free fallback.
+and two later designs came to offer that reader as a free fallback, and how a
+command descriptor went on naming the derivation it had stopped using.
 
 Three positions are exempt, each decidable from the source. The file-level
 header — every comment before the file's first token — describes the module

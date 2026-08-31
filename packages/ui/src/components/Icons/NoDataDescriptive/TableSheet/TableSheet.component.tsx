@@ -13,7 +13,6 @@ export const TableSheet = () => (
       y='44'
     />
 
-    {/* header divider */}
     <line
       {...stylex.props(styles.sheetDetail)}
       x1='96'
@@ -22,7 +21,6 @@ export const TableSheet = () => (
       y2='76'
     />
 
-    {/* header cells */}
     <rect
       {...stylex.props(styles.headerCell)}
       height='8'
@@ -48,7 +46,6 @@ export const TableSheet = () => (
       y='56'
     />
 
-    {/* empty body area (dashed) */}
     <rect
       {...stylex.props(styles.dashedBody)}
       height='68'

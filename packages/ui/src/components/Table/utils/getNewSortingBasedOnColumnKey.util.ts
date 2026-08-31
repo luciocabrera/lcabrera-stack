@@ -13,7 +13,6 @@ export const getNewSortingBasedOnColumnKey = <TData>({
   existingSorting = [],
   sorting,
 }: GetNewSortingBasedOnColumnKeyArgs<TData>) => {
-  // Sorting: update in-place to preserve order, or remove if undefined;
   if (!sorting) {
     return existingSorting.filter((s) => s.columnKey !== columnKey);
   }

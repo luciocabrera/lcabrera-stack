@@ -16,6 +16,8 @@ area:
   - packages/ts-configs/**
   - packages/repo-standards/scripts/**
   - apps/showcase/src/**
+  - scripts/**
+  - docs/agents/planning/table-row-grouping-plan.md
 started: 2026-08-31
 updated: 2026-08-31
 plan: (none)
@@ -34,6 +36,6 @@ starting anything that edits source in those workspaces.
 
 ## Status / next
 
-- Current step: rule landed and wired; sweeping the covered positions
+- Current step: rule landed and wired; sweep applied, gate green
 - Blockers: none
-- Next: full gate, then `gh pr edit` #1045
+- Next: `gh pr edit` #1045, then hold for the verifier

@@ -51,7 +51,6 @@ describe('useColumnDragSession', () => {
   });
 
   afterEach(() => {
-    // Unmount hooks so in-flight drag sessions release their document listeners
     cleanup();
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
@@ -85,7 +84,6 @@ describe('useColumnDragSession', () => {
       columnKey: 'name',
       width: 260,
     });
-    // Frames must not touch the cookie
     expect(syncColumnsSizingMock).not.toHaveBeenCalled();
 
     act(() => {
@@ -120,9 +118,6 @@ describe('useColumnDragSession', () => {
   });
 
   it('commits the final width when the release lands in the same frame as the last move', () => {
-    // The suite's default stub runs frames synchronously; a real browser defers
-    // them, so a quick drag delivers its last move and the release before the
-    // queued frame ever runs. Queue frames here without running any.
     const pendingFrames: FrameRequestCallback[] = [];
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
       pendingFrames.push(callback);
@@ -144,8 +139,6 @@ describe('useColumnDragSession', () => {
       document.dispatchEvent(new MouseEvent('mouseup'));
     });
 
-    // The queued frame was cancelled on mouse up, so the gesture itself must
-    // have committed where it was released: 200 + (260 - 100)
     expect(setColumnSizingWithoutSyncMock).toHaveBeenCalledTimes(1);
     expect(setColumnSizingWithoutSyncMock).toHaveBeenCalledWith({
       columnKey: 'name',
@@ -165,7 +158,6 @@ describe('useColumnDragSession', () => {
 
     act(() => {
       result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
-      // Runs synchronously via the default stub, so nothing stays pending
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 250 }));
       document.dispatchEvent(new MouseEvent('mouseup'));
     });
@@ -250,7 +242,6 @@ describe('useColumnDragSession', () => {
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 150 }));
     });
 
-    // Only the second session's start position is live: 200 + (150 - 200)
     expect(setColumnSizingWithoutSyncMock).toHaveBeenCalledTimes(1);
     expect(setColumnSizingWithoutSyncMock).toHaveBeenCalledWith({
       columnKey: 'name',

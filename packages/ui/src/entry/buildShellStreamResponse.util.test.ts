@@ -37,7 +37,6 @@ describe('buildShellStreamResponse', () => {
       responseStatusCode: 200,
     });
 
-    // Draining the body drives the PassThrough to its final() hook.
     await response.text();
 
     expect(clearRenderTimeout).toHaveBeenCalledTimes(1);

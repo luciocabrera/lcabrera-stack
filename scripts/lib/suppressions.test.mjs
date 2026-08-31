@@ -11,10 +11,6 @@ import {
   targeted,
 } from './suppressions.mjs';
 
-// What these defend: the gate's whole value is that a MISSED suppression looks
-// identical to a clean package. Every assertion below started as a way this
-// detector reported "nothing here" about something that was there.
-
 const inline = (text) =>
   findInlineSuppressions({ file: 'packages/ui/a.ts', text });
 
@@ -31,9 +27,6 @@ describe('findInlineSuppressions', () => {
     expect(found.directive).toBe('oxlint-disable-next-line');
   });
 
-  // Regression: reading the trailing words of `@ts-expect-error testing edge
-  // case` produced the rule `testing` — a key that looks specific, groups
-  // unrelated directives together, and silently drifts when the prose is reworded.
   it('does not mistake prose after @ts-expect-error for a rule name', () => {
     const [found] = inline('// @ts-expect-error testing edge case');
     expect(found.rule).toBe('@ts-expect-error');
@@ -55,12 +48,6 @@ describe('findInlineSuppressions', () => {
     expect(inline('// @ts-nocheck')).toHaveLength(1);
   });
 
-  // Regression: the scan matched the token anywhere on the line, so a sentence
-  // ABOUT suppressions counted as one. It fired on a comment explaining that a
-  // rule carries its own exemptions precisely so authors are not taught to
-  // reach for an inline disable — and blocked a package for a suppression that
-  // did not exist. Engines honour a directive only at the start of a comment's
-  // content, which is now what the scan requires.
   it('ignores a directive named in prose rather than issued', () => {
     expect(
       inline('// people to reach for `eslint-disable`. That is the habit'),
@@ -73,10 +60,6 @@ describe('findInlineSuppressions', () => {
     );
   });
 
-  // The other half of that gate: narrowing the match must not lose a real
-  // directive. A trailing NOSONAR sits after code, and a block comment can
-  // carry its directive on a continuation line, where the value still trims to
-  // start with it.
   it('still finds a directive issued after code or on a continuation line', () => {
     expect(inline('const x = compute(); // NOSONAR')).toHaveLength(1);
     expect(inline('/* eslint-disable no-console */')).toHaveLength(1);
@@ -92,11 +75,6 @@ describe('findInlineSuppressions', () => {
 });
 
 describe('globMatches', () => {
-  // Regression: expanding the glob tokens with chained replaceAll rewrote the
-  // `*` quantifiers the earlier calls inserted, so `(?:[^/]+/)*` became
-  // `(?:[^/]+/)[^/]*`. Every deep path stopped matching and the detector
-  // reported 1 Biome scope-off where there were 6 — a silent under-count, the
-  // exact failure this whole gate exists to prevent.
   it('matches a deeply nested path through a leading **/', () => {
     expect(
       globMatches({
@@ -137,9 +115,6 @@ describe('findBiomeSuppressions', () => {
     expect(found.scope).toBe('targeted');
   });
 
-  // `**/logger.util.ts` reads like a category pattern but resolves to one
-  // packages/ui file — the classification has to come from what the glob
-  // actually matches, never from how broad it looks.
   it('classifies by resolved matches, not by how generic the pattern looks', () => {
     const [found] = findBiomeSuppressions({
       config: biomeConfig(['**/logger.util.ts'], 'noConsole'),
@@ -157,9 +132,6 @@ describe('findBiomeSuppressions', () => {
     });
     expect(found.scope).toBe('repo-wide');
     expect(targeted([{ ...found }])).toHaveLength(0);
-    // But it is NOT dropped — it goes to the acknowledged lane instead. The
-    // first version of this gate discarded these, which let a new override wide
-    // enough to catch a public package and anything else pass unlisted.
     expect(repoWide([{ ...found }])).toHaveLength(1);
   });
 
@@ -221,10 +193,6 @@ describe('findFallowSuppressions', () => {
     expect(found[0].rule).toBe('health:finding_counts');
   });
 
-  // Regression: `target_keys` lists the files fallow treats as HIGH IMPACT when
-  // scoring. Counting it reported a suppression on packages/server where there
-  // was none — the register would then have carried an approval for a finding
-  // that never existed, and the first honest reader would have deleted it.
   it('ignores target_keys, which marks a file as important, not excused', () => {
     expect(
       findFallowSuppressions({
@@ -261,8 +229,6 @@ describe('findConfigSuppressions', () => {
   const config = (text) =>
     findConfigSuppressions({ file: 'packages/utils/eslint.config.mjs', text });
 
-  // The seventh way to silence a finding, and one no source file reveals: the
-  // whole package simply stops reporting the rule.
   it('flags a rule lowered to off in a package lint config', () => {
     const [found] = config("rules: { 'no-console': 'off' }");
     expect(found.rule).toBe('rule level off');

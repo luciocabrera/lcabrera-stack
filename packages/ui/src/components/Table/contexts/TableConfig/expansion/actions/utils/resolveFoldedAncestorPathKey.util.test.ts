@@ -33,7 +33,6 @@ const groupRow = ({ isSubtotal = false, path }: GroupRowArgs): Row => ({
   [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, isSubtotal, path },
 });
 
-/** A rollup block plus one detail row, in the order rollup emits them (#570). */
 const rows: readonly Row[] = [
   groupRow({ path: pathOf('Berlin', 'Open', 'High') }),
   { id: 7 },
@@ -79,9 +78,6 @@ describe('resolveFoldedAncestorPathKey', () => {
   });
 
   it('names no ancestor for a row this fold cannot hide', () => {
-    // The `[Berlin]` subtotal is above the folded level, so it survives and
-    // focus must be left exactly where it is. An answer of `[Berlin]` here
-    // would move focus on a fold that took nothing away from the reader.
     expect(
       resolveFoldedAncestorPathKey({
         columns,
@@ -93,9 +89,6 @@ describe('resolveFoldedAncestorPathKey', () => {
   });
 
   it('leaves the folded group itself alone, because its own row survives', () => {
-    // Row 2 *is* `[Berlin, Open]`. A collapse hides a group's descendants and
-    // never its own row (ADR-067), so there is nothing to move away from —
-    // and the prefix scan must not answer with the row's own path.
     expect(
       resolveFoldedAncestorPathKey({
         columns,
@@ -107,8 +100,6 @@ describe('resolveFoldedAncestorPathKey', () => {
   });
 
   it('takes the outermost of several closed levels, not the nearest', () => {
-    // Both prefixes are folded; the reader has to land on the one that is still
-    // on screen, which is the shallower of the two.
     expect(
       resolveFoldedAncestorPathKey({
         columns,

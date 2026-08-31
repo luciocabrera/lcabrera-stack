@@ -8,11 +8,6 @@ import { assertSafeIdentifier } from './assert-safe-identifier.util.ts';
 import { buildReturningClause } from './build-returning-clause.util.ts';
 import { quoteIdentifier } from './quote-identifier.util.ts';
 
-/**
- * Every column key runs through assertSafeIdentifier (always) plus the opt-in
- * assertColumnAllowed, then is double-quoted via quoteIdentifier; every value is a bound
- * `$n` parameter, never interpolated.
- */
 export const buildInsertQuery = ({
   allowedColumns,
   returning,

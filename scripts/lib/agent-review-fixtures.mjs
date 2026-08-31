@@ -18,7 +18,6 @@ export const HEAD = 'a'.repeat(40);
 export const OTHER = 'b'.repeat(40);
 export const PR = 42;
 
-/** One file, whose only added line in the new file is line 2. */
 export const FILES = [
   {
     changes: 2,
@@ -68,6 +67,5 @@ export const failDocument = (overrides = {}) =>
     ...overrides,
   });
 
-/** A document rendered in §2.6's transport shape. */
 export const verdictBody = (document, sha = HEAD) =>
   `Agent-review verdict: ${sha}\n\n\`\`\`json\n${JSON.stringify(document, null, 2)}\n\`\`\`\n`;

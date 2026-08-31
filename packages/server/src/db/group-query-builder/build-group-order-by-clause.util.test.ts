@@ -20,17 +20,12 @@ const clause = (
 
 describe('buildGroupOrderByClause', () => {
   it('emits no GROUPING term when no key is ever rolled up', () => {
-    // A flat grouping must produce exactly what the ungrouped builder would,
-    // or the two orderings diverge for no reason.
     expect(clause()).toBe(
       'ORDER BY "order_status" ASC, "shipping_country" ASC',
     );
   });
 
   it('emits, for a single flat grouping set, what the flat builder emits', () => {
-    // The degenerate case checked against the other builder rather than against
-    // a string copied out of it: a hand-written expectation stays green when
-    // `buildOrderByClause` changes, which is exactly when the two would drift.
     const sort = [
       { direction: 'desc' as const, key: 'order_status' },
       { direction: 'asc' as const, key: 'shipping_country' },
@@ -51,8 +46,6 @@ describe('buildGroupOrderByClause', () => {
   });
 
   it('applies the user direction to the value term only', () => {
-    // The subtotal stays a footer under a DESC key — which is why this cannot
-    // reuse the flat ORDER BY builder.
     expect(
       clause({
         sets: ROLLUP,
@@ -65,8 +58,6 @@ describe('buildGroupOrderByClause', () => {
   });
 
   it('keeps every GROUPING term ASC whichever key the user reversed', () => {
-    // The hierarchy cannot invert: a descending key reverses the order of the
-    // parents, and each parent's subtotal still lands after its own children.
     expect(
       clause({
         sets: ROLLUP,
@@ -89,9 +80,6 @@ describe('buildGroupOrderByClause', () => {
   });
 
   it('splices an aggregate sort into the innermost level', () => {
-    // §1.7(d) of the planning document, proven against a live database:
-    // `GROUPING(a), a, GROUPING(b), sum(v) DESC` sorts leaves within each
-    // parent and leaves the tree intact.
     expect(
       clause({
         sets: ROLLUP,
@@ -105,8 +93,6 @@ describe('buildGroupOrderByClause', () => {
   });
 
   it('keeps the innermost key as the last term, as the aggregate tiebreak', () => {
-    // Without it, two leaves with equal aggregates have no defined order —
-    // a result set that reshuffles between two identical requests.
     expect(
       clause({
         sets: ROLLUP,
@@ -116,8 +102,6 @@ describe('buildGroupOrderByClause', () => {
   });
 
   it('never puts an aggregate term ahead of an ancestor key', () => {
-    // The discriminating property: whatever else the clause contains, every key
-    // above the innermost is separated before the aggregate is consulted.
     const terms = clause({
       sets: ROLLUP,
       sort: [
@@ -146,8 +130,6 @@ describe('buildGroupOrderByClause', () => {
   });
 
   it('never emits a NULLS keyword', () => {
-    // Emitting one would break build-keyset-comparison.util.ts, which depends
-    // on Postgres's default placement.
     expect(clause({ sets: ROLLUP })).not.toContain('NULLS');
   });
 

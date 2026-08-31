@@ -27,11 +27,6 @@ type RenderDateFieldArgs = {
 
 type Values = { readonly birthday: string; readonly meetingAt: string };
 
-/**
- * Reports the live store value and its runtime type, so the tests can assert
- * that `handleChange` stores the raw input string — not observable from the
- * rendered input alone.
- */
 const ValueProbe = ({ accessor }: { readonly accessor: keyof Values }) => {
   const value = useGetFieldValue<Values>(accessor);
 

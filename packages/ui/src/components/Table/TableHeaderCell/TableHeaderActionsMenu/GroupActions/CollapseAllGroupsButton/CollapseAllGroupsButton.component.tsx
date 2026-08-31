@@ -7,12 +7,6 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 
 import type { CollapseAllGroupsButtonProps } from './CollapseAllGroupsButton.types';
 
-/**
- * "Collapse All Groups" item of the grouping section: always shown to keep the menu layout
- * stable, disabled while every foldable group is already folded.
- * It folds to the **outermost** level rather than to nothing, because a collapse hides a
- * group's **descendants** and never the group row itself.
- */
 export const CollapseAllGroupsButton = ({
   onClose,
 }: CollapseAllGroupsButtonProps) => {

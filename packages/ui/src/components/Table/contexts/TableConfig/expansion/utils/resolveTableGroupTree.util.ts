@@ -10,7 +10,6 @@ import { resolveGroupLevelDisclosures } from './resolveGroupLevelDisclosures.uti
 import { resolveGroupTreeNodes } from './resolveGroupTreeNodes.util';
 
 export type TableGroupTreeRowMeta = {
-  /** Whether the row owns rows below it — what decides if `aria-expanded` applies at all. */
   readonly hasChildren: boolean;
   readonly isExpanded: boolean;
   readonly level: number;
@@ -44,13 +43,6 @@ const countSiblings = (parentKeys: readonly string[]) => {
   return counts;
 };
 
-/**
- * Collapsing filters an array that is already in memory — a grouped read returns whole
- * (ADR-059), so no fetch is involved and the only thing that changes is the index space
- * the virtualizer windows over.
- * That is why every index downstream of this — the focus store's `rowIndex`,
- * `aria-rowindex` — counts **visible** rows and not loaded ones (ADR-067).
- */
 export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
   collapsedGroupPaths,
   data,
@@ -97,8 +89,6 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
     rows.push(row);
     rowMeta.push({
       hasChildren,
-      // Expansion is held by its complement, so a group nobody has touched is
-      // open (ADR-067). A detail row has no path key and is never either.
       isExpanded: !isCollapsed && node.pathKey !== undefined,
       level: node.level,
       levelDisclosures: resolveGroupLevelDisclosures({

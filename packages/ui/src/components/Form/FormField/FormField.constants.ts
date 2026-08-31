@@ -15,10 +15,6 @@ export type AnyFieldComponent = (props: {
   readonly field: LeafFieldDef<Record<string, unknown>>;
 }) => ReactNode;
 
-/**
- * Registry dispatch, not a switch — adding a leaf type is a new entry here, not a growing
- * conditional (ADR-005).
- */
 export const fieldRegistry: Record<
   LeafFieldDef<Record<string, unknown>>['type'],
   AnyFieldComponent

@@ -27,16 +27,6 @@ type BuildTypeImportTextArgs = {
   readonly sourceCode: Readonly<TSESLint.SourceCode>;
 };
 
-/**
- * Renders the `import type { ... } from '...'` replacement for a declaration,
- * dropping every inline `type` keyword while keeping each specifier (and any
- * `as` alias) in source order.
- *
- * An ImportDeclaration's range covers its trailing semicolon, so replacing the
- * node wholesale silently drops one. The semicolon is mirrored from the source
- * rather than always emitted: punctuation style belongs to Oxfmt, and a fixer
- * that imposes its own is how a linter/formatter fight starts.
- */
 const buildTypeImportText = ({ node, sourceCode }: BuildTypeImportTextArgs) => {
   const importedNames = node.specifiers
     .filter(isImportSpecifier)
@@ -58,7 +48,6 @@ export default createRule({
   create(context) {
     return {
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
-        // Case 1: Check if this is already an "import type" statement with redundant inline "type" keywords
         if (node.importKind === 'type') {
           const hasRedundantInlineTypes = node.specifiers.some((specifier) =>
             isTypeImportSpecifier(specifier),
@@ -84,7 +73,6 @@ export default createRule({
           return;
         }
 
-        // Case 2: Check if this is a regular import with inline type specifiers
         const hasInlineTypes = node.specifiers.some((specifier) =>
           isTypeImportSpecifier(specifier),
         );
@@ -93,15 +81,12 @@ export default createRule({
           return;
         }
 
-        // Check if ALL imports are types (not mixed)
         const allTypes = node.specifiers.every(isTypeImportSpecifier);
 
         if (!allTypes) {
-          // Mixed imports - let TypeScript-ESLint handle this
           return;
         }
 
-        // Get the imported names
         const names = node.specifiers
           .filter(isImportSpecifier)
           .map((specifier) => getImportedName(specifier.imported))

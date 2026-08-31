@@ -8,10 +8,6 @@ import { branchSlug } from './coordination-parse.mjs';
 
 export const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const OWNER = /^(agent|human):.+/;
-// A GitHub issue reference: `#123`, a bare `123`, or a full issues URL. The
-// custom frontmatter parser keeps `#` literally (it is not YAML), so `#123` is
-// safe unquoted. `(none)` and other placeholders deliberately fail — every
-// claim must link its backlog item (ADR-036).
 const ISSUE_REF = /^(#?\d+|https?:\/\/\S+\/issues\/\d+)$/;
 const TASK_STATUSES = new Set([
   'active',
@@ -94,8 +90,6 @@ const slugForBranch = (slug, branch) =>
     ? `filename must be the branch slug \`${branchSlug(branch)}.md\``
     : undefined;
 
-/** Problems for one task file (filename prefix added by the caller). `seen` maps
- *  an already-visited id → its filename, for the duplicate check. */
 export const taskErrors = ({ slug, data }, seen) =>
   [
     ...missingFields(data, TASK_REQUIRED),
@@ -108,7 +102,6 @@ export const taskErrors = ({ slug, data }, seen) =>
     dupId(data.id, seen),
   ].filter(Boolean);
 
-/** Problems for one shared-branch descriptor file. */
 export const branchErrors = ({ slug, data }) =>
   [
     ...missingFields(data, BRANCH_REQUIRED),

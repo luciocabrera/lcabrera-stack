@@ -66,8 +66,6 @@ describe('assertGroupAggregates', () => {
   });
 
   it('accepts an aggregate on a column that is not a legal group key', () => {
-    // A fact is exactly the thing you aggregate and do not group by, so
-    // `canGroup: false` must not disqualify it here.
     expect(() => assert([{ column: 'total_amount', fn: 'avg' }])).not.toThrow();
   });
 
@@ -76,8 +74,6 @@ describe('assertGroupAggregates', () => {
   });
 
   it('refuses a type-illegal aggregate, naming the type and what is offered', () => {
-    // `min(jsonb)` does not exist; without this the query reaches Postgres and
-    // comes back as a 500 with a driver error in it.
     expect(() => assert([{ column: 'doc', fn: 'min' }])).toThrow(
       '"min" is not legal for column "doc" (jsonb); the catalogue offers count.',
     );

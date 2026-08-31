@@ -7,12 +7,6 @@ import { resolveAuthClaims } from '@/auth/resolveAuthClaims.util';
 
 import { resolveRedirectTo } from './resolveRedirectTo.util';
 
-/**
- * Prepares the login page: reads (and sanitizes) `redirectTo` from the query so
- * the form can round-trip it, and bounces an already-authenticated visitor
- * straight to their destination — this IS the login page, so it never guards
- * itself into a redirect loop.
- */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const redirectTo = resolveRedirectTo({
     candidate: new URL(request.url).searchParams.get('redirectTo'),

@@ -2,11 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { findReactDoctorSuppressions } from './suppressions-react-doctor.mjs';
 
-// What these defend: the same property the rest of the suppression gate does —
-// a detector that misses something reports exactly what a clean repo reports.
-// Two of the cases below are regressions that actually shipped in review: a
-// project-relative glob matched nothing, and `warn` was treated as enforcing.
-
 const PUBLIC_FILES = [
   'packages/ui/src/components/Table/Table.component.tsx',
   'packages/utils/src/merge-arrays.util.ts',
@@ -70,10 +65,6 @@ describe('global severity downgrades', () => {
 });
 
 describe('path-scoped ignores', () => {
-  // The regression: React Doctor reports paths relative to the project it
-  // detected, and `packages/ui` is its own project — so a real suppression is
-  // written WITHOUT the `packages/ui/` prefix. Matching only the repo-relative
-  // form let a planted public-package suppression through the gate.
   it('matches a project-relative glob against a public package file', () => {
     const [found] = find({
       ignore: {

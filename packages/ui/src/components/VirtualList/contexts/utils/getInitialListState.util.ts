@@ -10,10 +10,6 @@ import { INITIAL_LIST_STATE } from '../VirtualListContext.constants';
 type GetInitialListStateArgs = Partial<VirtualListUiState> &
   VirtualListStateProps;
 
-/**
- * UI fields default to the initial values — the provider sync effect re-passes the current
- * ones so a config re-sync never clobbers in-flight UI state.
- */
 export const getInitialListState = ({
   hasCheckboxes = true,
   hasSelectAll = true,

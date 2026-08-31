@@ -2,11 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { bodyOf, parseFrontmatter } from './doc-register-frontmatter.mjs';
 
-// The four shapes the two registers actually use. A parser that silently drops
-// one reports the field as absent, and an absent-field message sends the reader
-// to look for a line that is right there — so each shape is asserted rather
-// than assumed from the register happening to pass.
-
 const REQUIREMENT = `---
 id: render-a-table
 lines:
@@ -71,9 +66,6 @@ describe('parseFrontmatter', () => {
     expect(blockForm.fields.issues).toEqual([]);
   });
 
-  // A document with no block is not a malformed one — it is a different case,
-  // and the drafts exclusion depends on the caller being able to tell them
-  // apart.
   it('returns undefined when the document opens with no block', () => {
     expect(parseFrontmatter('# Just a heading\n')).toBeUndefined();
     expect(parseFrontmatter('---\nid: unterminated\n')).toBeUndefined();

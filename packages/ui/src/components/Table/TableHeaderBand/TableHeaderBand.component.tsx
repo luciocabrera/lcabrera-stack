@@ -11,10 +11,6 @@ import type { TableHeaderBandProps } from './TableHeaderBand.types';
 import { tableHeaderBandStyles } from './TableHeaderBand.stylex';
 import { resolveBandPinnedStyle } from './utils';
 
-/**
- * Spans by width, not `colSpan` — the row is `display: flex` (ADR-062).
- * The parent row is `aria-hidden`; do not add `role='presentation'`.
- */
 export const TableHeaderBand = <TData extends Record<string, unknown>>({
   columns,
   label,

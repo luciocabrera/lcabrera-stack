@@ -47,8 +47,6 @@ describe('mergedTaskDriftWarnings', () => {
   });
 
   it('defers to checkTaskBranches when the ref is genuinely absent', () => {
-    // refExists=false means the plain "branch resolves to nothing" check already
-    // fires; this reconciliation must not double-report the same task.
     expect(
       run({ liveBranches: ['other'], refExists: () => false, tasks: [task()] }),
     ).toEqual([]);

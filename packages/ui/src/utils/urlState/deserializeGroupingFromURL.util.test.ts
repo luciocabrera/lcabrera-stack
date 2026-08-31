@@ -69,9 +69,6 @@ describe('deserializeGroupingFromURL', () => {
   });
 
   it('round-trips a whole multi-aggregate configuration, shares included', () => {
-    // The configuration #831 makes reachable, through the boundary it has to
-    // survive: two measures on one column, a share naming one of them, and an
-    // order that is state rather than an artefact.
     const grouping = {
       aggregates: [
         { columnKey: 'total_amount', fn: 'sum' },
@@ -92,8 +89,6 @@ describe('deserializeGroupingFromURL', () => {
   });
 
   it('round-trips a column key containing a colon', () => {
-    // The right-split rule is what makes the token total; a naive `split(':')`
-    // passes every other case here and mangles only this one.
     const grouping = {
       aggregates: [{ columnKey: 'ns:total', fn: 'sum' }],
       keys: ['ns:status'],
@@ -114,8 +109,6 @@ describe('deserializeGroupingFromURL', () => {
   });
 
   it('drops the keys too when only the aggregates are malformed', () => {
-    // Whole-state refusal (ADR-061): the keys here are perfectly good, and a
-    // half-applied grouping would still run a query nobody asked for.
     expect(
       deserializeGroupingFromURL(
         '{"agg":["total_amount:median"],"keys":["order_status"]}',
@@ -124,8 +117,6 @@ describe('deserializeGroupingFromURL', () => {
   });
 
   it('drops the whole payload when one aggregate token of several is bad', () => {
-    // Refused, not filtered: a link promising two measures must not open
-    // showing one.
     expect(
       deserializeGroupingFromURL(
         '{"agg":["total_amount:sum","total_amount:median"],"keys":["order_status"]}',

@@ -18,9 +18,6 @@ const rows = [
   { file: 'src/b.ts', line: 4, rule: 'eqeqeq' },
 ];
 
-// Table's column-sort action needs both a real data router (useFetcher) and
-// NotificationProvider (error-toasting on a failed persist) — the same
-// stack any real route already sits inside via <AppProviders>/root.tsx.
 const renderWithRouter = (element: ReactNode) => {
   const router = createMemoryRouter(
     [

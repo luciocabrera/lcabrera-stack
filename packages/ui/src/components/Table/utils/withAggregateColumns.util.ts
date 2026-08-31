@@ -17,7 +17,6 @@ type WithAggregateColumnsArgs<TData> = {
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
   readonly columnVisibility: ColumnVisibilityState<TData>;
-  /** The applied group keys — a key column carries its key, never a measure. */
   readonly groupingKeys: readonly string[];
 };
 
@@ -50,10 +49,6 @@ export const withAggregateColumns = <TData>({
         fn: aggregate.fn,
       }),
       headerGroupLabel: source.label,
-      // A measure summarises rows the grid does not hold, so there is nothing
-      // here to filter and nothing to group by. Sorting is the one that is
-      // genuinely available: `buildGroupOrderByClause` already splices an
-      // aggregate sort in at the innermost level.
       isFilterable: false,
       isGroupable: false,
       isSortable: true,
@@ -63,14 +58,6 @@ export const withAggregateColumns = <TData>({
       ...(source.isResizable !== undefined && {
         isResizable: source.isResizable,
       }),
-      // The source's **layout locks** carry, because every layout action on a
-      // measure resolves to the source column anyway (`toDeclaredColumnKey`).
-      // Without this the derived column resolved `isStatic: false`, so
-      // `TableHeaderActionsMenu` offered Pin/Hide and `TableHeaderCell` drew a
-      // resize handle on a column the consumer had locked — a lock bypassed
-      // through the measure that replaced it. Capability flags that describe
-      // the *data* are set above instead, since a measure is not the source's
-      // data: it is never filterable or groupable, and always sortable.
       ...(source.isStatic !== undefined && { isStatic: source.isStatic }),
       ...(source.maxWidth !== undefined && { maxWidth: source.maxWidth }),
       ...(source.minWidth !== undefined && { minWidth: source.minWidth }),
@@ -105,12 +92,6 @@ export const withAggregateColumns = <TData>({
     columns: columns.flatMap(
       (column) => derivedBySource.get(String(column.key)) ?? [column],
     ),
-    // A `Set` rather than a list, but the same expansion and the same reason:
-    // the settings drawer builds its rows from the **declared** columns, so
-    // hiding `Total Amount` writes `total_amount` — a key `gridColumns` no
-    // longer holds, which would filter nothing while the drawer drew the
-    // column as hidden. Expanding here also leaves a directly-hidden measure
-    // key working, since a key that is not a source passes through as itself.
     columnVisibility: new Set(expandKeys([...columnVisibility])),
   };
 };

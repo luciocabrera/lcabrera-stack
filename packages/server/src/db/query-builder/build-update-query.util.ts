@@ -9,11 +9,6 @@ import { buildReturningClause } from './build-returning-clause.util.ts';
 import { buildWhereClause } from './build-where-clause.util.ts';
 import { quoteIdentifier } from './quote-identifier.util.ts';
 
-/**
- * The SET assignments own `$1…$k`; the WHERE clause is delegated to the shared
- * buildWhereClause with `startParamIndex` set past them, so SET and WHERE parameters never
- * collide.
- */
 export const buildUpdateQuery = ({
   allowedColumns,
   filters,

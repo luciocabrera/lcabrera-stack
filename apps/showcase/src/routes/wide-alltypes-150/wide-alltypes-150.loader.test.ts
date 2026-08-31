@@ -40,8 +40,6 @@ describe('wide-alltypes-150 loader', () => {
   });
 
   it('ships 150 columns carrying no function values', async () => {
-    // Single fetch replaces a function with `undefined` silently (ADR-009), so
-    // a `render` or a filter adapter added here would vanish without a word.
     const { columnsState } = await invokeLoader();
 
     const withFunctions = columnsState.columns.filter((column) =>
@@ -63,8 +61,6 @@ describe('wide-alltypes-150 loader', () => {
   });
 
   it('carries the primary-key tiebreaker into the sort it asks for', async () => {
-    // `createTableRouteLoader` appends it (ADR-008); without it page 2 is
-    // ordered differently from page 1 and rows repeat across the boundary.
     await invokeLoader();
 
     expect(readWideAlltypes150PageMock).toHaveBeenCalledWith(
@@ -74,8 +70,6 @@ describe('wide-alltypes-150 loader', () => {
     );
   });
 
-  // #575 — the genericity proof. Everything below is what a *second* SQL-backed
-  // route had to do to get grouping, and it is a flag plus a service.
   describe('grouping', () => {
     it('declares the capability so the table offers grouping at all', async () => {
       const { metaState } = await invokeLoader();
@@ -112,9 +106,6 @@ describe('wide-alltypes-150 loader', () => {
     });
 
     it('resolves each column’s real capability from the catalogue', async () => {
-      // 150 columns of deliberately mixed types is exactly where the coarse
-      // `dataType` vocabulary is wrong most often (#550), so this route needs
-      // the catalogue answer more than the orders route does.
       await invokeLoader();
 
       expect(resolveCapabilitiesMock).toHaveBeenCalledTimes(1);

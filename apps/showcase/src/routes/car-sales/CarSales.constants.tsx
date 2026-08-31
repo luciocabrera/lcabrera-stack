@@ -10,11 +10,6 @@ export const TITLE = {
   singular: 'Car Sale',
 };
 
-/**
- * Unlike its `car-sales-infinite` sibling, this route deliberately loads its rows in one
- * shot and paginates them in memory — it never fetches again, so whatever it asks for here
- * is the whole dataset it will ever show.
- */
 export const CLIENT_PAGINATION_ROW_LIMIT = 1000;
 
 export const COLUMNS: TableColumn<CarSale>[] = [

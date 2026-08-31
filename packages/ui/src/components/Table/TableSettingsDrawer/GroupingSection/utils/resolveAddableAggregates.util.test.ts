@@ -14,7 +14,6 @@ const numericCapability: TableColumnGroupingCapability = {
   typeName: 'numeric',
 };
 
-/** A dimension the catalogue offers both count flavours on. */
 const textCapability: TableColumnGroupingCapability = {
   aggregates: ['count', 'countDistinct', 'max', 'min'],
   canGroup: true,
@@ -24,7 +23,6 @@ const textCapability: TableColumnGroupingCapability = {
   typeName: 'text',
 };
 
-/** The same column narrowed to the two counts, so both gaps are reachable. */
 const countOnlyCapability: TableColumnGroupingCapability = {
   ...textCapability,
   aggregates: ['count', 'countDistinct'],
@@ -71,8 +69,6 @@ describe('resolveAddableAggregates', () => {
   });
 
   it('offers the function again once it is no longer applied', () => {
-    // Clearing the aggregate is the only thing that changes between this and
-    // the case above, so the omission cannot be anything but the subtraction.
     expect(
       resolveAddableAggregates({
         applied: [{ columnKey: 'total_amount', fn: 'count' }],
@@ -84,8 +80,6 @@ describe('resolveAddableAggregates', () => {
   });
 
   it('subtracts only the aggregates applied to *this* column', () => {
-    // A column key repeats across the staged list (#831), so a subtraction that
-    // ignored the column would empty a picker on the strength of another one.
     expect(
       resolveAddableAggregates({
         applied: [
@@ -115,8 +109,6 @@ describe('resolveAddableAggregates', () => {
   });
 
   it('does not call an empty list exhausted when nothing was legal', () => {
-    // The discriminating half of the pair above: both answer with no options,
-    // and only one of them has a reason worth showing the user.
     expect(
       resolveAddableAggregates({
         applied: [],
@@ -172,10 +164,6 @@ describe('resolveAddableAggregates', () => {
   });
 
   it('reports the budget, not exhaustion, when that is what emptied the list', () => {
-    // Both gaps are reachable here and they send the user to different
-    // controls: this column is not fully measured — `countDistinct` is still
-    // legal on it — and the measure to remove is on another column entirely
-    // (#842).
     expect(
       resolveAddableAggregates({
         applied: [
@@ -190,9 +178,6 @@ describe('resolveAddableAggregates', () => {
   });
 
   it('reports exhaustion when the column itself carries the distinct count', () => {
-    // The discriminating half: the same empty list, and the budget is spent —
-    // by this column. Nothing is withheld from it, so the answer is the #841
-    // message and the user is sent to this column's own measures.
     expect(
       resolveAddableAggregates({
         applied: [
@@ -207,8 +192,6 @@ describe('resolveAddableAggregates', () => {
   });
 
   it('stays silent when the column was never offered a distinct count', () => {
-    // A column with nothing withheld has nothing to explain, so a spent budget
-    // elsewhere does not turn its ordinary exhaustion into the wrong message.
     expect(
       resolveAddableAggregates({
         applied: [

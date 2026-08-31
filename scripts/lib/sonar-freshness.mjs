@@ -21,15 +21,8 @@ const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 
-/** Default beyond which an analysis is called out rather than quietly reported. */
 export const DEFAULT_STALE_HOURS = 24;
 
-/**
- * Milliseconds between an analysis and `now`, or null when the date is missing
- * or unparseable — SonarCloud omits it for a project it has never analysed.
- * A negative age (clock skew, or an analysis dated in the future) clamps to 0
- * rather than rendering as "-3 minutes ago".
- */
 export const analysisAgeMs = (analysisDate, now) => {
   if (typeof analysisDate !== 'string' || analysisDate === '') return null;
   const parsed = Date.parse(analysisDate);
@@ -37,7 +30,6 @@ export const analysisAgeMs = (analysisDate, now) => {
   return Math.max(0, now - parsed);
 };
 
-/** Coarse human age — the caller only needs the order of magnitude. */
 export const formatAge = (ageMs) => {
   if (ageMs === null) return 'unknown';
   if (ageMs < MINUTE_MS) return 'just now';
@@ -53,18 +45,9 @@ export const formatAge = (ageMs) => {
   return `${days} day${days === 1 ? '' : 's'} ago`;
 };
 
-/**
- * Whether an analysis is old enough to warn about. An unknown age counts as
- * stale: "we could not tell" must not read the same as "it is fresh", which is
- * the whole failure this module exists to prevent.
- */
 export const isStale = (ageMs, maxAgeHours = DEFAULT_STALE_HOURS) =>
   ageMs === null || ageMs > maxAgeHours * HOUR_MS;
 
-/**
- * The line `sonar:report` prints, plus whether it should be a warning.
- * Returns `{ line, stale }` so the caller picks the stream and the exit code.
- */
 export const freshnessLine = (analysisDate, now, maxAgeHours) => {
   const ageMs = analysisAgeMs(analysisDate, now);
   const stale = isStale(ageMs, maxAgeHours);

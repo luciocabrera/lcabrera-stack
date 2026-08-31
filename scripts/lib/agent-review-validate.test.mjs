@@ -46,15 +46,10 @@ describe('validateVerdictBody — the happy paths', () => {
       }),
     );
     expect(result.state).toBe('error');
-    // An error verdict is the reviewer's own conclusion, not a validation
-    // failure — nothing is wrong with the document.
     expect(result.errors).toEqual([]);
   });
 
   it('carries the reviewer reason out, so the report can say why', () => {
-    // Without this the two kinds of `error` — the reviewer could not conclude
-    // (§2.3), and the document is not usable (§2.4) — are indistinguishable
-    // downstream, and the report has to guess which one it is holding.
     const result = validate(
       passDocument({
         criteria: undefined,
@@ -218,8 +213,6 @@ describe('validateVerdictBody — §2.4 step 5, admissibility', () => {
 
 describe('validateVerdictBody — §2.4 step 6, and never repairing', () => {
   it('reports error, not fail, for a pass carrying an admissible blocking finding', () => {
-    // Recomputing the verdict here is exactly what §2.4 forbids: a validator
-    // that edits findings is a second reviewer with no contract.
     const result = validate(
       passDocument({ findings: [BLOCKING_FINDING], verdict: 'pass' }),
     );
@@ -271,8 +264,6 @@ describe('validateVerdictBody — the evidence a pass must carry', () => {
   });
 
   it('reports error for a criterion with no falsifier', () => {
-    // The falsifier is the whole point: without it a pass costs nothing to
-    // forge, which is the asymmetry §5 of issue #697 removes.
     const result = validate(
       passDocument({ criteria: [{ ...CRITERION, falsifier: '   ' }] }),
     );
@@ -307,8 +298,6 @@ describe('validatePullRequestVerdict', () => {
   });
 
   it('reports absent — not pass — once the head moves past the verdict', () => {
-    // The stale probe: the same document that passed for OTHER answers for
-    // nothing once HEAD is the head.
     const posted = comment(body(passDocument({ head_sha: OTHER }), OTHER));
     expect(
       validatePullRequestVerdict({

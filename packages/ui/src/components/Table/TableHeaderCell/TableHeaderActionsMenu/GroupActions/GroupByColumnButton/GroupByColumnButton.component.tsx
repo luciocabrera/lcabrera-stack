@@ -21,12 +21,6 @@ import { resolveGroupKeyAvailability } from '#ui/components/Table/utils/resolveG
 
 import type { GroupByColumnButtonProps } from './GroupByColumnButton.types';
 
-/**
- * "Group by This" item of the grouping section: adds this column to the group keys and
- * highlights itself while it is one of them, clicking again to remove it.
- * A self-connected delegate — it reads the applied keys from the grouping store itself
- * rather than being handed them, so no parent drills grouping state through the menu.
- */
 export const GroupByColumnButton = <TData,>({
   columnKey,
   onClose,
@@ -40,10 +34,6 @@ export const GroupByColumnButton = <TData,>({
     resolveGroupKeyAvailability<TData>({ capability, column });
   const { icon: GroupByColumnCommandIcon, label } = GROUP_BY_COLUMN_COMMAND;
 
-  // A curated grouping is not editable from here either. Hiding the item rather
-  // than disabling it, for the reason the drawer's Add is hidden: the lock is
-  // not a state the user can clear, so an inert control would only ask them to
-  // keep trying (#578).
   if (isGroupingLocked) return;
 
   const isApplied = groupingKeys.includes(String(columnKey));
@@ -55,9 +45,6 @@ export const GroupByColumnButton = <TData,>({
   });
 
   const handleGroupByColumn = () => {
-    // The granularity goes on with the key: a column the catalogue refuses raw
-    // is offered only truncated, so adding it without one applies a grouping
-    // the server would refuse (ADR-084).
     toggleGroupKey({ columnKey: String(columnKey), period: requiredPeriod });
     onClose();
   };
@@ -75,13 +62,6 @@ export const GroupByColumnButton = <TData,>({
       onClick={handleGroupByColumn}
       orientation='horizontal'
       size='mini'
-      // The reason rides the disabled item rather than a tooltip: a disabled
-      // button fires no pointer events, so a tooltip on one never opens.
-      //
-      // Gated on `!isEnabled` and not merely on the refusal: an applied key is
-      // still clickable under one, and there the click **removes** the
-      // grouping. "Cannot group by this column" on a control about to ungroup
-      // would describe an action the user is not taking.
       {...(refusal !== undefined &&
         !isEnabled && {
           title: `Cannot group by this column: ${TABLE_GROUP_KEY_REFUSAL_LABELS[refusal]}.`,

@@ -13,11 +13,6 @@ type ToGroupKeyColumnOptionsArgs<TData extends Record<string, unknown>> = {
   readonly stagedKeys: ReadonlySet<string>;
 };
 
-/**
- * Gated on `resolveGroupKeyAvailability`, so the drawer offers exactly what the header
- * menu leaves enabled: the column's own declaration narrowed by the catalogue's answer
- * (ADR-058, #642).
- */
 export const toGroupKeyColumnOptions = <TData extends Record<string, unknown>>({
   capabilities,
   columns,

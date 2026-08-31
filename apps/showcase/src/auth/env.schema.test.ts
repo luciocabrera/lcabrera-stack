@@ -2,14 +2,12 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { readAuthEnvConfig } from './env.schema';
 
-/** What a deployment must supply once the published defaults stop applying. */
 const PRODUCTION_ENV = {
   AUTH_DEMO_PASSWORD_HASH: 'aa:bb',
   AUTH_TOKEN_SECRET: 'a-real-deployment-secret',
   NODE_ENV: 'production',
 };
 
-/** The message a refused parse threw, or `''` when it did not refuse. */
 const messageFor = (env: NodeJS.ProcessEnv) => {
   try {
     readAuthEnvConfig({ env });
@@ -19,7 +17,6 @@ const messageFor = (env: NodeJS.ProcessEnv) => {
   }
 };
 
-/** Only the `AUTH_… must be set` phrases in a message, in order. */
 const refusalsIn = (message: string) =>
   message
     .matchAll(/AUTH_[A-Z_]+ must be set/gu)
@@ -36,19 +33,12 @@ describe('readAuthEnvConfig', () => {
   });
 
   it('applies dev defaults under test', () => {
-    // Asserted separately from `development` because this is the mode the suite
-    // itself runs in: folding the two together would let a guard permitting only
-    // `development` pass here on the runner's env rather than on the code.
     expect(
       readAuthEnvConfig({ env: { NODE_ENV: 'test' } }).AUTH_TOKEN_SECRET,
     ).toMatch(/dev-insecure/);
   });
 
   it('refuses every mode that is not development or test', () => {
-    // Why the guard tests the permitted values instead of `production`, pinned
-    // so it cannot quietly go back: an unset `NODE_ENV` is what
-    // `node build/server/index.js` starts with, and `staging` is nobody's
-    // development machine. Both once got the published secret handed back.
     for (const NODE_ENV of [undefined, 'staging', 'Production', 'production']) {
       expect(() => readAuthEnvConfig({ env: { NODE_ENV } })).toThrow(
         /AUTH_TOKEN_SECRET must be set/,
@@ -88,10 +78,6 @@ describe('readAuthEnvConfig', () => {
   });
 
   it('names its own variable when the value is set but blank', () => {
-    // The shape a deploy platform produces when it declares a variable and
-    // leaves it empty. `.min(1)` rejects it on its own terms — "Too small:
-    // expected string to have >=1 characters" — which names nothing, so the
-    // refusal message has to be on the length check as well as the type.
     for (const name of ['AUTH_TOKEN_SECRET', 'AUTH_DEMO_PASSWORD_HASH']) {
       const message = messageFor({ ...PRODUCTION_ENV, [name]: '' });
 
@@ -100,12 +86,6 @@ describe('readAuthEnvConfig', () => {
   });
 
   it('names its own variable when a development value is blank', () => {
-    // The two cases behave OPPOSITELY on this branch, which is the point: a
-    // missing value takes the published default — that is what development mode
-    // is for — while a blank one is refused. Without a message on the length
-    // check the refusal is Zod's nameless "Too small", which is exactly the
-    // failure this change exists to remove, in the one mode a local env file is
-    // actually read in.
     for (const name of ['AUTH_TOKEN_SECRET', 'AUTH_DEMO_PASSWORD_HASH']) {
       const message = messageFor({ [name]: '', NODE_ENV: 'development' });
 
@@ -118,12 +98,6 @@ describe('readAuthEnvConfig', () => {
   });
 
   it('spells the permitted modes from the set that accepts them', () => {
-    // What this pins, exactly: both permitted modes parse, and the refusal that
-    // the non-permitted branch produces names both of them. It does NOT catch a
-    // mode added to the set without the wording — deriving the message from the
-    // set is what makes that unreachable, and the loop below reads a literal
-    // because `DEVELOPMENT_MODES` is not exported. Widening the module's surface
-    // to let a test read it would cost more than the assertion is worth.
     const message = messageFor({
       ...PRODUCTION_ENV,
       AUTH_TOKEN_SECRET: undefined,
@@ -143,23 +117,12 @@ describe('readAuthEnvConfig', () => {
   });
 
   it('keeps the demo email default in production', () => {
-    // Not a credential, so withholding it would be friction with no gain. Pinned
-    // because "guard the auth vars" invites sweeping this one in with them.
     expect(readAuthEnvConfig({ env: PRODUCTION_ENV }).AUTH_DEMO_EMAIL).toBe(
       'demo@example.com',
     );
   });
 
   it('names its own variable in each refusal', () => {
-    // The schema cannot see the key it was assigned to, so the name is passed in
-    // and could be passed wrong — a copy-paste would report the other variable
-    // and send a deployment to set something that is already set.
-    //
-    // Asserted on the name the message CARRIES, not on that name appearing:
-    // `ZodError.message` is a JSON dump of the issues and each one already holds
-    // `"path": ["AUTH_…"]`, so a presence check passes on a swap via the path
-    // alone and this test could never fail the way its own comment claims.
-    // Swapping the two `name:` values in `env.schema.ts` fails the line below.
     for (const name of ['AUTH_TOKEN_SECRET', 'AUTH_DEMO_PASSWORD_HASH']) {
       const message = messageFor({ ...PRODUCTION_ENV, [name]: undefined });
 

@@ -14,9 +14,6 @@ describe('mergeObjects', () => {
       expect(mergeObjects<Settings>({})).toBeUndefined();
     });
 
-    // Unlike mergeArrays, this guard is a strict `=== undefined` check, and
-    // that is correct rather than an inconsistency: MergeObjectsArgs admits no
-    // null, so undefined is the only absence the type can express.
     it('returns undefined only when BOTH sides are undefined', () => {
       expect(mergeObjects<Settings>({ baseValue: {} })).toStrictEqual({});
       expect(mergeObjects<Settings>({ overrideValue: {} })).toStrictEqual({});
@@ -51,8 +48,6 @@ describe('mergeObjects', () => {
     });
 
     it('treats an explicit undefined in overrideValue as an overwrite', () => {
-      // Spread copies the key even when its value is undefined, so the base
-      // value does not survive. This is the documented shallow-merge contract.
       expect(
         mergeObjects<Settings>({
           baseValue: { theme: 'light' },

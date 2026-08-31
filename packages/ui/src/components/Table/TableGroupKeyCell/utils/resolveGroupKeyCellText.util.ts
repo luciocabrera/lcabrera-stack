@@ -11,13 +11,6 @@ type ResolveGroupKeyCellTextArgs = {
   readonly summary: TableGroupRowSummary;
 };
 
-/**
- * What one group-key column holds for one group row, or `undefined` when that level is not
- * part of the row's grouping set.
- * `undefined` is the ordinary answer, not an error: a rollup subtotal carries one path
- * entry fewer than the rows it totals, and a cube row carries an arbitrary subset, so most
- * grouped results leave some key columns empty on some rows.
- */
 export const resolveGroupKeyCellText = ({
   columnKey,
   groupingKeys,

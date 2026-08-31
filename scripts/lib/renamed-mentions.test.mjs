@@ -29,9 +29,6 @@ describe('parseRenameDiff', () => {
   });
 
   it('ignores a deletion, which has no replacement to point at', () => {
-    // Deletions are out of scope on purpose — a name can outlive its tracked
-    // file (a `.env` you are told to create, a build output), so a deleted name
-    // in prose is not provably stale the way a renamed one is.
     expect(parseRenameDiff('D\tpackages/ui/src/gone.util.ts')).toEqual([]);
   });
 
@@ -55,8 +52,6 @@ describe('vanishedNames', () => {
   });
 
   it('drops a file that only moved between directories', () => {
-    // The bare name in prose is still true; only the root-anchored path went
-    // stale, and `docs:verify` already checks that shape.
     expect(
       vanishedNames({
         renames: [
@@ -68,7 +63,6 @@ describe('vanishedNames', () => {
   });
 
   it('drops a basename another tracked file still carries', () => {
-    // Deleting one `index.ts` of many must not make every mention of one stale.
     expect(
       vanishedNames({
         renames: [{ from: 'packages/a/index.ts', to: 'packages/a/entry.ts' }],
@@ -78,11 +72,6 @@ describe('vanishedNames', () => {
   });
 
   it('ignores an index entry the rename set already removed', () => {
-    // The caller diffs the working tree but lists the index, and those disagree
-    // while a rename is half-staged: the new path is added, the old one is not
-    // yet removed from the index. Reading the index alone left the old basename
-    // looking live, so the rename was skipped and the gate passed on a doc that
-    // had genuinely gone stale.
     expect(
       vanishedNames({
         renames: [
@@ -96,8 +85,6 @@ describe('vanishedNames', () => {
   });
 
   it('counts the rename target as live even when the index lacks it', () => {
-    // The mirror case: the new path exists only in the working tree. Its
-    // basename must still count as live, or a directory-only move would report.
     expect(
       vanishedNames({
         renames: [
@@ -170,9 +157,6 @@ describe('staleMentions', () => {
     ]);
   });
 
-  // The regression this gate exists for. #604 renamed the file; ADR-029 went on
-  // naming it, the rename sweep and a full CI run both missed it, and #611 fixed
-  // it by hand. The prose below is that ADR's line as it stood on `c678c772`.
   it('reports the ADR-029 line #604 left behind', () => {
     const markdown = [
       '## Decision',
@@ -188,9 +172,6 @@ describe('staleMentions', () => {
       },
     ];
 
-    // A dated record is NOT exempt here, unlike the root-anchored corpus check:
-    // this fires only on a name the change is renaming right now, which cannot
-    // be a path that was merely correct at the time.
     expect(staleMentions({ docs, vanished })).toEqual([
       {
         doc: 'docs/other/decisions/ADR-029-cli-push-and-api-tokens.md',
@@ -231,8 +212,6 @@ describe('staleMentions', () => {
   });
 
   it('ignores a line that names the replacement too', () => {
-    // Recording the move, not following a stale pointer. A dated record that
-    // wants to keep the old name writes exactly this shape.
     const markdown =
       'Renamed `ignoredDirectories.constants.ts` to `ingestion.constants.ts`.';
     expect(
@@ -241,8 +220,6 @@ describe('staleMentions', () => {
   });
 
   it('ignores a line that names a filename pattern', () => {
-    // The suffix tables in `.claude/rules/typescript.md` pair a pattern with an
-    // example in the next cell; a rename matching the example is not a pointer.
     const suffixed = [
       {
         name: 'api.constants.ts',

@@ -3,12 +3,6 @@ import * as stylex from '@stylexjs/stylex';
 import { spacing, typography } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
-/**
- * Shared filter styles reused across filter input components.
- * Similar pattern to @lcabrera/ui/design-system/tokens/commons.stylex for interactive elements.
- *
- * Each filter component imports what it needs and composes with local overrides.
- */
 export const filterBaseStyles = stylex.create({
   container: {
     gap: spacing.sm,

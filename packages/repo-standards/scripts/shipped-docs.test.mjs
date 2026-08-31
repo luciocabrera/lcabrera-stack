@@ -20,12 +20,6 @@ import {
 
 const REPO_ONLY = ['apps', 'docs', 'packages', 'scripts'];
 
-/**
- * One document, read against a package that ships exactly what is listed.
- *
- * `holds` mirrors the CLI's: a directory counts when the package puts a file
- * into it, because `[source](./src/)` is the ordinary way to point at one.
- */
 const findingsFor = ({ docPath = 'README.md', files = [], text }) => {
   const shipped = [...files, docPath];
   return documentFindings({
@@ -61,9 +55,6 @@ describe('a relative link that escapes the package', () => {
 });
 
 describe('a relative link the package does not ship', () => {
-  // The failure a `files` negation introduces. The target is still in the
-  // working tree, so nothing in the source repository can observe it — which is
-  // why the gate reads the tarball and this test hands it a file list.
   const text = 'The patterns are in [PATTERNS.md](./PATTERNS.md).';
 
   it('is reported when the file is not in the packed list', () => {
@@ -107,10 +98,6 @@ describe('a path only the author repository has', () => {
   });
 
   it('leaves a roster-anchored path the package itself ships alone', () => {
-    // `scripts/` is in the default roster AND in the `files` of the `.mjs`
-    // packages, so their own READMEs name files that do arrive in the install.
-    // Judging by the first path segment alone reported those, and the only way
-    // to satisfy such a finding is to delete accurate documentation.
     expect(
       findingsFor({
         files: ['scripts/verify-pr.mjs'],
@@ -179,9 +166,6 @@ describe('shippedDocuments', () => {
   });
 
   it('leaves the dated and placeholder records to the corpus rule', () => {
-    // A changelog names paths as they were and a template's paths are meant to
-    // be replaced — the same exemptions the in-repo doc gates already apply, so
-    // that two walkers cannot drift into two notions of "ignored".
     expect(
       shippedDocuments(['CHANGELOG.md', 'assets/tasks/_TEMPLATE.md']),
     ).toEqual([]);
@@ -215,9 +199,6 @@ describe('packageFindings', () => {
 });
 
 describe('the two refusals', () => {
-  // Both exist because "every shipped document reads correctly" is trivially
-  // true of a set with no documents in it, and reads afterwards exactly like a
-  // set that was checked.
   it('refuses a roster that names no package', () => {
     expect(rosterProblem([])).toContain('publishing.publicPackageDirs');
     expect(rosterProblem(['ui'])).toBeUndefined();
@@ -233,12 +214,6 @@ describe('the two refusals', () => {
   });
 
   it('asks it PER PACKAGE, so nine healthy neighbours cannot cover one', () => {
-    // The reachable regression, and the one a sum hides. `@lcabrera/ui`'s whole
-    // shipped corpus is its root README: lose it and the roster total moves by
-    // one while that package installs nothing readable at all. A total can only
-    // reach zero if every package loses its README at once, which npm's
-    // always-include-the-README behaviour puts out of reach — so the aggregate
-    // guarded a state it could not observe.
     expect(
       emptyCorpusProblems([
         { documents: ['README.md'], name: '@scope/fine' },

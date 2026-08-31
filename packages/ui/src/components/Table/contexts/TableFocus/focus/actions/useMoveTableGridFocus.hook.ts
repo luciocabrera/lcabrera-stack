@@ -17,13 +17,6 @@ import {
   resolveGroupExpansionKey,
 } from './utils';
 
-/**
- * Moves the grid's single tab stop in response to a key, and answers whether the key was
- * one the grid claims — which is what the caller preventDefaults on, so an unclaimed key
- * still scrolls the page.
- * That is the point of holding focus as data (ADR-062) — the old row can be unmounted and
- * the new one not yet mounted, and the move still lands.
- */
 export const useMoveTableGridFocus = <
   TData extends Record<string, unknown>,
 >() => {

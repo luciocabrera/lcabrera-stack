@@ -18,7 +18,6 @@ export const serializeStateSlice = ({
 }: SerializeStateSliceArgs) => {
   const key = `${getStorageKey({ appId, persistenceKey })}-${slice}`;
 
-  // Convert Set to Array for columnVisibility
   const serializableValue =
     slice === 'columnVisibility' && value instanceof Set ? [...value] : value;
 

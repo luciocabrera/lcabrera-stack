@@ -20,8 +20,6 @@ describe('setCollapsedGroupLevel', () => {
   });
 
   it('removes every path of the level, leaving the rest of the set alone', () => {
-    // `b` is another level the reader folded themselves, and the whole point of
-    // a level-scoped action is that it survives this one.
     const next = setCollapsedGroupLevel({
       collapsedGroupPaths: new Set(['a/1', 'a/2', 'b']),
       isCollapsed: false,
@@ -32,8 +30,6 @@ describe('setCollapsedGroupLevel', () => {
   });
 
   it('answers the same set instance when the level is already folded', () => {
-    // Identity is what the action's early return reads, so "nothing to do" and
-    // "wrote nothing" are one decision rather than two that can disagree.
     const collapsedGroupPaths: ReadonlySet<string> = new Set([
       'a/1',
       'a/2',
@@ -62,8 +58,6 @@ describe('setCollapsedGroupLevel', () => {
   });
 
   it('answers a new set when only part of the level moves', () => {
-    // Size alone decides "changed", and it is exact here because the loop only
-    // ever adds or only ever deletes — a half-folded level still grows.
     const collapsedGroupPaths: ReadonlySet<string> = new Set(['a/1']);
     const next = setCollapsedGroupLevel({
       collapsedGroupPaths,

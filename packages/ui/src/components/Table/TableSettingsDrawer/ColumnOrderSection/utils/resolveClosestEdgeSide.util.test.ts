@@ -35,7 +35,6 @@ describe('resolveClosestEdgeSide', () => {
   });
 
   it('resolves closest-edge to left for column in first half', () => {
-    // cols has 4 elements, midpoint = 2, index 0 ('id') < 2 => left
     expect(
       resolveClosestEdgeSide({
         allOrderedColumns: cols,
@@ -46,7 +45,6 @@ describe('resolveClosestEdgeSide', () => {
   });
 
   it('resolves closest-edge to right for column in second half', () => {
-    // index 3 ('actions') >= 2 => right
     expect(
       resolveClosestEdgeSide({
         allOrderedColumns: cols,
@@ -57,7 +55,6 @@ describe('resolveClosestEdgeSide', () => {
   });
 
   it('resolves closest-edge to right for column at midpoint', () => {
-    // index 2 ('age') >= midpoint(2) => right
     expect(
       resolveClosestEdgeSide({
         allOrderedColumns: cols,

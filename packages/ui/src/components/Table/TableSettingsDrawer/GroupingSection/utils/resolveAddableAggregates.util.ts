@@ -10,17 +10,11 @@ import { resolveAggregatePickerGap } from './resolveAggregatePickerGap.util';
 
 type ResolveAddableAggregatesArgs = {
   readonly applied: readonly TableColumnAggregate[];
-  /** What the catalogue said about the chosen column (ADR-058). */
   readonly capability: TableColumnGroupingCapability | undefined;
   readonly columnKey: string;
   readonly isGroupKey: boolean;
 };
 
-/**
- * Picker-only: subtracts already-applied functions. Whole-request rules
- * (`countDistinct` budget) stay in `resolveAffordableAggregates` so the header
- * menu shares them (#842).
- */
 export const resolveAddableAggregates = ({
   applied,
   capability,

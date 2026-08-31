@@ -4,7 +4,6 @@ import type { MaxValueQueryDescriptor } from './query-builder/query-builder.type
 import { buildMaxValueQuery } from './query-builder/build-max-value-query.util.ts';
 import { runQuery } from './run-query.util.ts';
 
-/** ADR-051 picks the lock/retry strategy that closes the window. */
 export const getMaxValue = async ({
   tx,
   ...descriptor

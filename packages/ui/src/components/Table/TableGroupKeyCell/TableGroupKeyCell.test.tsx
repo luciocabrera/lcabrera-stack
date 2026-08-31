@@ -88,17 +88,12 @@ describe('TableGroupKeyCell', () => {
   });
 
   it('reserves the chevron box on every drawn key cell, control or not', () => {
-    // Only some rows of a key column offer a control — a subtotal does not fold
-    // the level it totals while that level is open — so a cell that dropped the
-    // box would sit a chevron's width off from its siblings in the same column.
     renderCell({ columnKey: 'city' });
 
     expect(screen.getByTestId('disclosure').dataset.openable).toBe('false');
   });
 
   it('leads a foldable level with a control, in that level’s own column', () => {
-    // The defect this addresses: the control belongs where the level is stated,
-    // which for an ancestor is a column the row does not own (#802).
     renderCell({
       columnKey: 'city',
       levelDisclosures: [
@@ -113,22 +108,16 @@ describe('TableGroupKeyCell', () => {
     const disclosure = screen.getByTestId('disclosure');
 
     expect(disclosure.dataset.openable).toBe('true');
-    // The ancestor's own path, not the row's — folding `Paris` from a row
-    // inside it must not fold the row's own group instead.
     expect(disclosure.dataset.controls).toBe('Paris');
   });
 
   it('leaves a level with no entry uncontrolled, innermost included', () => {
-    // Presence in `levelDisclosures` is the whole answer; the cell never
-    // re-derives whether a level has children.
     renderCell({ columnKey: 'district' });
 
     expect(screen.getByTestId('disclosure').dataset.openable).toBe('false');
   });
 
   it('renders a carried level as visually-hidden text, not as an empty cell', () => {
-    // An empty cell announces as empty, so an ancestor that is only implied
-    // would be announced nowhere at all (ADR-080).
     renderCell({ columnKey: 'city', isCarried: true });
 
     const carried = screen.getByTestId('table-group-key-carried');

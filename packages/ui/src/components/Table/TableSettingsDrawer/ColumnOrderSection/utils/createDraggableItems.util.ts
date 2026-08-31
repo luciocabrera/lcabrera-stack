@@ -24,7 +24,6 @@ type OrderedColumnItem = {
   readonly label: string;
 };
 
-/** Undraggable is its own flag, never `isStatic` (ADR-080, ADR-096). */
 export const createDraggableItems = <TContent>({
   allOrderedColumns,
   columnPinning,

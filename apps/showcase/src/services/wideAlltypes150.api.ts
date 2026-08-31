@@ -6,9 +6,6 @@ import { isObject } from '@lcabrera/utils/guards/is-object.util';
 
 import { isExternalApiEnabled } from './isExternalApiEnabled.util';
 
-// ─── Type ────────────────────────────────────────────────────────────────────
-
-// Properties sorted alphabetically: c_001…c_149 first (before "id"), id last.
 export type WideAlltypes150 = {
   readonly c_001: number;
   readonly c_002: string;
@@ -176,8 +173,6 @@ const isWideAlltypes150Response = (
   typeof value.hasMore === 'boolean' &&
   typeof value.total === 'number';
 
-// ─── Service ──────────────────────────────────────────────────────────────────
-
 export const WIDE_ALLTYPES_150_PAGINATED_PATH =
   '/_api/wide-alltypes-150/paginated';
 
@@ -192,9 +187,5 @@ const fetchExternalPage = createPaginatedFetcher<WideAlltypes150Response>({
   resolveBaseUrl: getApiBaseUrl,
 });
 
-/**
- * No filter support (varied column types make generic filtering impractical), and no
- * keyset support — so the route sends neither.
- */
 export const fetchWideAlltypes150Page = (args: PaginatedFetchArgs) =>
   isExternalApiEnabled() ? fetchExternalPage(args) : fetchSelfHostedPage(args);

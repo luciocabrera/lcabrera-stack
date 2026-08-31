@@ -35,8 +35,6 @@ describe('car-sales-infinite loader', () => {
   });
 
   it('declares neither keyset nor server filtering — this endpoint supports neither', async () => {
-    // Absent means off (ADR-063); a declaration here would make the load-more
-    // send a `cursor` and a `filter` the endpoint ignores.
     const { metaState } = await invokeLoader();
 
     expect(metaState.isKeysetEnabled).toBe(false);
@@ -44,8 +42,6 @@ describe('car-sales-infinite loader', () => {
   });
 
   it('carries the primary-key tiebreaker into the sort it asks for', async () => {
-    // `createTableRouteLoader` appends it (ADR-008); without it page 2 is
-    // ordered differently from page 1 and rows repeat across the boundary.
     await invokeLoader();
 
     expect(readCarSalesPageMock).toHaveBeenCalledWith(

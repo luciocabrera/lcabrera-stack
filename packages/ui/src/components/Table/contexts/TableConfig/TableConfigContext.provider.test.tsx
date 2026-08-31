@@ -13,12 +13,6 @@ import { useTableConfigContextValue } from './useTableConfigContextValue.hook';
 
 type HarnessProps = {
   readonly groupingKeys?: readonly string[];
-  /**
-   * Stands in for a navigation. It keys **only** the data provider, which is
-   * what React Router does in practice: `TableConfigProvider` sits outside the
-   * Suspense boundary and stays mounted, while `TableDataProvider` sits inside
-   * it and is re-created from each navigation's resolved promise.
-   */
   readonly revalidation: number;
 };
 
@@ -114,11 +108,6 @@ describe('TableConfigProvider', () => {
 
     rerender(<Harness groupingKeys={['order_status']} revalidation={2} />);
 
-    // The mount counts are what make this a probe rather than an assertion that
-    // nothing happened: the data half really was re-created and the config half
-    // really was not, so grouping surviving is evidence about *where the store
-    // lives*. On the data context the same click-then-revalidate would read
-    // back the loader's `order_status`.
     expect(mounts.data).toBe(2);
     expect(mounts.config).toBe(1);
     expect(readProbe('data')).toBe('2');

@@ -71,11 +71,8 @@ vi.mock('@lcabrera/server/db/update-rows.util', () => ({
   updateRows: vi.fn(async () => [{ order_id: 7 }]),
 }));
 
-/** The descriptor the first mocked `selectRows` call received. */
 const firstSelectDescriptor = () => vi.mocked(selectRows).mock.calls[0]?.[0];
 
-/** A `sort` param naming the same column over and over, as only a hand-made
- *  request would — `sanitizeSorting` drops directionless entries, not repeats. */
 const repeatedSortParam = (length: number) => {
   const rules = Array.from({ length }, () => ({
     columnKey: 'order_id',
@@ -125,9 +122,6 @@ describe('the resource route — GET /_api/enterprise-orders/paginated', () => {
     expect(descriptor?.sort).toStrictEqual([
       { column: 'order_id', direction: 'asc' },
     ]);
-    // A later page of a scroll session, so it reuses the total the first page
-    // paid for rather than counting again (#402) — and the mock answers one row
-    // for a window of fifty, which is the end of the set.
     expect(getRowsCount).not.toHaveBeenCalled();
     expect(await response.json()).toStrictEqual({
       data: [{ order_id: 7 }],
@@ -153,9 +147,6 @@ describe('the SSR path — GET /enterprise-orders', () => {
   });
 
   it('reads through a function that clamps whatever window it is handed', async () => {
-    // `selectOrdersPage` is what that loader's `fetchPage` calls; this is the
-    // same call with the one argument it controls widened past the ceiling,
-    // which is what a later caller on this path could hand it.
     await selectOrdersPage({
       filters: [],
       includeTotal: true,

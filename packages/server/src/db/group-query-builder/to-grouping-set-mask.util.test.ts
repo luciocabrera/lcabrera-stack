@@ -16,8 +16,6 @@ describe('toGroupingSetMask', () => {
   });
 
   it('gives the first key the most significant bit', () => {
-    // Rolling up the *first* of two keys must not produce the same mask as
-    // rolling up the second, or the decoder cannot tell the sets apart.
     expect(toGroupingSetMask({ keys: KEYS, set: ['shipping_country'] })).toBe(
       2,
     );

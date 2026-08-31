@@ -10,12 +10,6 @@ vi.mock('./enterpriseOrders.service', () => ({
   selectOrderGroupKeyTruncations: vi.fn(async () => ({})),
 }));
 
-/**
- * The resolution itself is tested in `@lcabrera/server` — this asserts only what
- * the route supplies: its two constants, and that `/paginated`'s own fetch
- * vocabulary reaches them. Both constants are read from the config rather than
- * written as literals, so the test tracks a change to either (ADR-082).
- */
 const GROUP_TOKEN = JSON.stringify({
   isSubtotal: false,
   keys: ['shipping_country'],

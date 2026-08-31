@@ -4,11 +4,6 @@ import type { QueryFilter } from './query-builder.types.ts';
 
 import { isUnaryFilter } from './is-unary-filter.util.ts';
 
-/**
- * The predicate's compile-time job: after the guard, the binary arm is narrowed
- * enough that `filter.value` resolves. This function existing and type-checking
- * is the assertion — the runtime cases below only confirm it agrees at runtime.
- */
 const readValue = (filter: QueryFilter) =>
   isUnaryFilter(filter) ? undefined : filter.value;
 

@@ -89,7 +89,6 @@ describe('useAcceptPinSide', () => {
   beforeEach(() => {
     resetMocks();
     mockAcceptPinConflict.mockClear();
-    // Restore pinSideModal so the guard passes
     modalsStore._state = {
       ...modalsStore._state,
       pinSideModal: PIN_SIDE_MODAL,
@@ -101,7 +100,6 @@ describe('useAcceptPinSide', () => {
       ...modalsStore._state,
       pinSideModal: { columnKey: 'id', columnLabel: '', isOpen: false },
     };
-    // modalsStore.get returns undefined to simulate missing modal
     (modalsStore.get as ReturnType<typeof vi.fn>).mockReturnValueOnce(
       undefined,
     );

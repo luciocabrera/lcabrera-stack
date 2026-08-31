@@ -1,10 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
 
-/**
- * Color Tokens - Theme Variables
- * These will be overridden by specific themes
- */
-
 export const colors = stylex.defineVars({
   active: 'var(--active)',
   // Background colors

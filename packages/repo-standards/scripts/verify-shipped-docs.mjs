@@ -44,11 +44,6 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 
-/**
- * A state in which no verdict was earned, kept apart from a verdict of "these
- * documents are wrong". Both exit 1, and conflating them is how "read nothing"
- * comes to read as "found nothing".
- */
 const refuse = (reasons) => {
   console.error('Shipped-docs gate refused to report a pass:\n');
   for (const reason of reasons) {
@@ -70,7 +65,6 @@ const reportFailure = (findings) => {
   process.exitCode = 1;
 };
 
-/** Packs each declared package and reads back what a consumer would receive. */
 const checkPackedDocs = ({ packagesDir, publicPackageDirs, repoOnlyDirs }) => {
   const workDirectory = mkdtempSync(join(tmpdir(), 'shipped-docs-'));
   try {
@@ -106,8 +100,6 @@ const main = () => {
     repoOnlyDirs: shippedDocs.repoOnlyDirs,
   });
 
-  // Per package, not over the roster: a package that ships nothing readable is
-  // the reachable regression, and a sum hides it behind its neighbours.
   const empty = emptyCorpusProblems(results);
   if (empty.length > 0) {
     refuse(empty);

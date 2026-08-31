@@ -6,21 +6,6 @@ import { fileURLToPath } from 'node:url';
 
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
-// The invariant these assertions defend: nothing a git hook runs may reach the
-// real repository through git's inherited environment.
-//
-// Git exports GIT_DIR to every hook, and it overrides the working directory for
-// any `git` the hook spawns. `readGitMetadata.util.test.ts` builds a throwaway
-// repo with `git init` + `git add .`; run under a hook, that re-initialises the
-// real repository and stages the deletion of every tracked file, because
-// `git add .` has staged deletions as well as additions since Git 2.0. HEAD is
-// left alone, so nothing looks wrong until the NEXT commit writes a near-empty
-// tree. Two commits were lost that way.
-//
-// The first test reproduces the damage against throwaway repositories, so the
-// mechanism is asserted rather than described. The second checks the hook still
-// carries the guard.
-
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const GIT_IDENTITY = [
   '-c',
@@ -66,13 +51,10 @@ describe('inherited git environment', () => {
         .split('\n'),
     ).toEqual(['a.txt', 'b.txt']);
 
-    // Exactly what a hook hands to everything it spawns.
     const inherited = { ...process.env, GIT_DIR: join(real, '.git') };
     const scratch = makeTemporaryDirectory();
     git({ args: ['add', '.'], cwd: scratch, env: inherited });
 
-    // The other repository's index is now empty, while its HEAD is untouched —
-    // which is precisely why this is invisible until the next commit.
     expect(git({ args: ['ls-files'], cwd: real }).trim()).toBe('');
     expect(
       git({ args: ['ls-tree', 'HEAD', '--name-only'], cwd: real }).trim(),
@@ -86,7 +68,6 @@ describe('inherited git environment', () => {
     git({ args: ['add', '.'], cwd: real });
     git({ args: [...GIT_IDENTITY, 'commit', '-qm', 'init'], cwd: real });
 
-    // Same call, with the variables the hook unsets removed.
     const { GIT_DIR: _removed, ...scrubbed } = {
       ...process.env,
       GIT_DIR: join(real, '.git'),
@@ -117,8 +98,6 @@ describe('the pre-push hook', () => {
       'utf8',
     );
 
-    // GIT_DIR alone caused the incident; the rest redirect git the same way and
-    // are unset so a future hook change cannot reintroduce it by another name.
     for (const variable of [
       'GIT_DIR',
       'GIT_WORK_TREE',

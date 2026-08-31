@@ -26,14 +26,12 @@ export const getHasPinOrderConflict = <TData>({
       ) as ColumnOrderState<TData>)
     : newOrder;
 
-  // Check left-pinned: all must be in the first N positions
   if (left.length > 0) {
     const leftPositions = left.map((key) => filteredOrder.indexOf(key));
     const maxLeftPos = Math.max(...leftPositions);
     if (maxLeftPos >= left.length) return true;
   }
 
-  // Check right-pinned: all must be in the last N positions
   if (right.length > 0) {
     const rightPositions = right.map((key) => filteredOrder.indexOf(key));
     const minRightPos = Math.min(...rightPositions);

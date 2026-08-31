@@ -13,10 +13,6 @@ type ResolveDropdownStylesArgs = {
   readonly shouldFillHeight: boolean;
 };
 
-/**
- * The consumer's `customStylex` splits the chain, and which side each style falls on is
- * load-bearing.
- */
 export const resolveDropdownStyles = ({
   customStylex,
   isAlwaysOpen,

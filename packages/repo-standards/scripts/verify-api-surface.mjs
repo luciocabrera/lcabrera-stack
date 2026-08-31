@@ -55,19 +55,6 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 
-/**
- * What the surface is compared against to decide whether a change is breaking.
- * The remote is `origin` because that is git's own default for the first
- * remote; the branch is configured, since a repository whose trunk is not
- * `main` would otherwise have every change measured against a ref that does
- * not exist — which resolves to no base snapshot, and so to no breaking change
- * ever being found.
- *
- * Read on use rather than at import, so that a malformed `devkit.config.json`
- * is reported by the handler at the foot of this file. A read in the module
- * body runs before that `try`, and a misconfigured host would get a stack
- * trace where every other failure of this gate prints one formatted line.
- */
 const baseRef = () =>
   process.env.API_SURFACE_BASE ??
   `origin/${readConventions(REPO_ROOT).defaultBranch}`;
@@ -77,7 +64,6 @@ const readSnapshot = (relativePath) => {
   return existsSync(absolute) ? readFileSync(absolute, 'utf8') : undefined;
 };
 
-/** The snapshot as committed on the base ref, or undefined if it is new there. */
 const readBaseSnapshot = (relativePath) =>
   runGit({ args: ['show', `${baseRef()}:${relativePath}`], cwd: REPO_ROOT });
 
@@ -88,24 +74,14 @@ const readChangesetContents = () => {
     .map((name) => readFileSync(join(directory, name), 'utf8'));
 };
 
-/** True for a built package whose entry files are not on disk — nothing to read. */
 const isUnbuilt = (packageConfig) =>
   !packageConfig.source && !entriesAreBuilt(packageConfig);
 
-/** The published entry files this package exports that are not on disk. */
 const missingEntries = (packageConfig) =>
   packageConfig.entries
     .filter(({ entryFile }) => !existsSync(entryFile))
     .map(({ entryFile }) => relative(REPO_ROOT, entryFile));
 
-/**
- * Names the files that are actually absent, not a directory.
- *
- * `isUnbuilt` is true when any exported entry is missing, which is usually a
- * missing `dist` but is equally a single subpath the build no longer emits.
- * Reporting the second as "dist is missing" sends the reader to look at a
- * directory that is plainly there.
- */
 const unreadableProblem = (packageConfig) => {
   const missing = missingEntries(packageConfig);
   const listed = missing.slice(0, 3).join(', ');
@@ -131,7 +107,6 @@ const writeSnapshots = (packages) => {
   return problems;
 };
 
-/** Compares the live surface to the committed snapshot; collects drift + change vs base. */
 const verifyPackage = (packageConfig) => {
   const surface = extractSurface(packageConfig);
   const liveText = renderSurface({

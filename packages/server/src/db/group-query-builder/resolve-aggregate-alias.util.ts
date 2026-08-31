@@ -5,11 +5,6 @@ import {
   COUNT_ROWS_ALIAS,
 } from './group-query-builder.constants.ts';
 
-/**
- * The `distinct` flag is folded into the prefix rather than the SQL name, because `count`
- * and `countDistinct` share one SQL function and would otherwise derive the same alias for
- * the same column — a collision that Postgres reports as nothing at all.
- */
 export const resolveAggregateAlias = (aggregate: GroupAggregate): string => {
   if (aggregate.alias !== undefined) {
     return aggregate.alias;

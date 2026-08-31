@@ -89,15 +89,8 @@ const descriptor = (
   ...overrides,
 });
 
-/** The `ORDER BY` tail, so two modes' ordering can be compared as one string. */
 const orderByOf = (text: string) => text.slice(text.indexOf('ORDER BY'));
 
-/**
- * The `GROUP BY` clause alone. The scoping is load-bearing: against the whole
- * statement a set like `("shipping_country")` also matches the `ORDER BY`'s
- * `GROUPING("shipping_country")` term, which every mode emits — so the same
- * probe run over `text` reports a cube and a rollup as identical.
- */
 const groupByOf = (text: string) =>
   text.slice(text.indexOf('GROUP BY'), text.indexOf('ORDER BY'));
 
@@ -162,8 +155,6 @@ describe('buildGroupQuery', () => {
   });
 
   it('gives a cube the same ORDER BY shape a rollup gets', () => {
-    // Ordering is driven by "is this key rolled up in some set", not by the
-    // mode, so cube must reach byte-identical terms — it rolls up every key.
     const cube = buildGroupQuery(descriptor({ grouping: 'cube' }));
     const rollup = buildGroupQuery(descriptor({ grouping: 'rollup' }));
 
@@ -171,9 +162,6 @@ describe('buildGroupQuery', () => {
   });
 
   it('emits the cross-cutting set a rollup never does', () => {
-    // The one output difference that identifies the mode from the SQL alone:
-    // `("shipping_country")` totals across every status, so it is a child of no
-    // status row. Compared over the GROUP BY clause only — see `groupByOf`.
     const cube = buildGroupQuery(descriptor({ grouping: 'cube' }));
     const rollup = buildGroupQuery(descriptor({ grouping: 'rollup' }));
 
@@ -253,9 +241,6 @@ describe('buildGroupQuery', () => {
   );
 
   it('shifts the WHERE clause when a FILTER aggregate claims the leading parameters', () => {
-    // The values array is the assertion that matters. Checking only the text
-    // would pass with the values in the wrong order, which is the actual bug
-    // this ordering can cause.
     const result = buildGroupQuery(
       descriptor({
         aggregates: [
@@ -428,8 +413,6 @@ describe('buildGroupQuery', () => {
   it('carries the pre-flight bound it emitted the LIMIT from', () => {
     const result = buildGroupQuery(descriptor());
 
-    // 12 x 12 for the two keys. Emitted rather than left to the caller, so the
-    // number in the SQL and the number the caller reasons about are the same.
     expect(result.guardRails).toEqual({
       estimate: { kind: 'known', rows: 144 },
       rowLimit: { limit: 5001 },
@@ -441,8 +424,6 @@ describe('buildGroupQuery', () => {
       descriptor({ keys: ['is_gift'], maxRows: 20_000 }),
     );
 
-    // The caller asked for 20 000; `is_gift` carries no estimate, so the read
-    // runs under the guard's own ceiling instead and reaching it is a refusal.
     expect(result.guardRails.rowLimit).toEqual({
       backstopAt: 5001,
       limit: 5001,
@@ -455,7 +436,6 @@ describe('buildGroupQuery', () => {
   });
 
   it('refuses a grouping whose bound is past the ceiling, naming the column', () => {
-    // 12 x 9000 = 108 000, past the 50 000 ceiling.
     const wide: ColumnGroupingCapability = {
       ...dimension('city'),
       distinctEstimate: 9000,
@@ -472,8 +452,6 @@ describe('buildGroupQuery', () => {
   });
 
   it('prefers the catalogue’s refusal over an arithmetic one', () => {
-    // Both would fire for this request. "That column cannot be a group key" is
-    // the actionable sentence; "the product is too large" is not.
     const wide: ColumnGroupingCapability = {
       ...dimension('city'),
       distinctEstimate: 9000,
@@ -530,9 +508,6 @@ describe('a truncated group key in the SQL', () => {
     });
 
   it('spells the truncation identically in the projection, GROUPING and the sets', () => {
-    // Postgres matches a `GROUPING` argument against a `GROUP BY` expression
-    // syntactically, so a second spelling of the same truncation fails to plan
-    // rather than answering differently.
     const { text } = built({
       keys: ['order_date'],
       periods: { order_date: 'month' },
@@ -545,8 +520,6 @@ describe('a truncated group key in the SQL', () => {
   });
 
   it('aliases the truncation back to the column name, so nothing downstream changes', () => {
-    // The row decoder, the group path and the ORDER BY value term all read the
-    // key by the name it was asked for.
     const { text } = built({
       keys: ['order_date'],
       periods: { order_date: 'year' },
@@ -568,8 +541,6 @@ describe('a truncated group key in the SQL', () => {
   });
 
   it('leaves an untruncated key exactly as it was', () => {
-    // A grouping with no granularity has to emit byte-identical SQL to the one
-    // it emitted before granularities existed.
     expect(built({ keys: ['status'], periods: {} }).text).toStrictEqual(
       buildGroupQuery({
         aggregates: [{ fn: 'count' }],

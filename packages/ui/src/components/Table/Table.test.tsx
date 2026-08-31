@@ -93,9 +93,6 @@ describe('Table', () => {
   });
 
   it('seeds the read refusal into the data store, where a surface can read it', () => {
-    // Without this the response's `error` reaches the client and nothing looks
-    // at it, which is a refused grouping rendering as an ordinary empty table
-    // (#642).
     type Response = {
       readonly data: readonly { readonly id: number }[];
       readonly error?: TableResponseError;

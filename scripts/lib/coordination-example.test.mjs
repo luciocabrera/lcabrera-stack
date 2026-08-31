@@ -7,16 +7,10 @@ import { describe, expect, it } from 'vite-plus/test';
 import { parseFrontmatter } from '../../packages/repo-standards/scripts/coordination-parse.mjs';
 import { taskErrors } from '../../packages/repo-standards/scripts/coordination-schema.mjs';
 
-// Runs the coordination README's worked example through the register's own
-// parser and schema, so an example that would be rejected as a claim fails the
-// build here. The register is not read by a YAML library, so a trailing
-// `# note` is part of the value — the failure this pins is #993.
-
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 const README = 'docs/coordination/README.md';
 
-/** The first fenced `yaml` block in the README — the task-file example. */
 const EXAMPLE = /```yaml\n(---\n[\s\S]*?\n---\n)```/u;
 
 const example = () => {

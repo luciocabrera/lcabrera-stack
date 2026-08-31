@@ -24,24 +24,13 @@
 /** The commit-status context this gate publishes under. One definition. */
 export const STATUS_CONTEXT = 'Review threads resolved';
 
-/** How much of an opening comment the report shows before it is cut. */
 const EXCERPT = 160;
 
-/** One line, collapsed — a thread's opening comment is markdown over many. */
 const excerpt = (body) => {
   const flat = body.replaceAll(/\s+/gu, ' ').trim();
   return flat.length > EXCERPT ? `${flat.slice(0, EXCERPT - 1)}…` : flat;
 };
 
-/**
- * Unresolved review threads, with the opening comment that explains each.
- *
- * `isResolved !== true` rather than `=== false` on purpose: a thread whose
- * resolution field is missing has not been shown to be settled, and policy E4
- * treats unknown as unresolved. An outdated thread still counts — the line moved,
- * the question did not. #646 merged with three `outdated=true` threads that were
- * in fact fixed in code, which is exactly the confusion this predicate refuses.
- */
 export const summarizeThreads = (nodes) => {
   const threads = nodes ?? [];
   const unresolved = threads
@@ -60,21 +49,11 @@ export const summarizeThreads = (nodes) => {
   return { total: threads.length, unresolved };
 };
 
-/**
- * `path:line`, degrading to the path alone, then to a placeholder. A review
- * comment carries no path when it is anchored to the pull request rather than
- * to a file, and an empty location would leave a bullet with nothing after it.
- */
 const where = (thread) => {
   const file = thread.path === '' ? '(no file)' : thread.path;
   return thread.line === undefined ? file : `${file}:${thread.line}`;
 };
 
-/**
- * The report an author reads. One block per unresolved thread, each carrying the
- * node id, because resolving one is a GraphQL mutation keyed by that id and
- * hunting for it in a web page is the step people skip.
- */
 export const formatThreads = ({ number, repository, threads }) => {
   if (threads.unresolved.length === 0) {
     return [
@@ -95,14 +74,6 @@ export const formatThreads = ({ number, repository, threads }) => {
   ];
 };
 
-/**
- * The gate's verdict.
- *
- * A draft never fails: draft is the author's own "not yet" and policy E1/A9 say
- * nothing overrules it, so an unresolved thread on WIP is expected rather than a
- * finding. The count still rides in the description, so a draft that is nearly
- * ready shows what is left without turning the checks list red.
- */
 export const decideThreadStatus = ({ isDraft, threads }) => {
   const open = threads.unresolved.length;
   if (isDraft) {

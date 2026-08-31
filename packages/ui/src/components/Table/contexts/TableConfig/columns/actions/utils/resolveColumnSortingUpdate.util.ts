@@ -42,15 +42,6 @@ type ResolveColumnSortingUpdateResult<TData> =
       readonly viewState: ReturnType<typeof deriveColumnViewState<TData>>;
     };
 
-/**
- * `withAggregateColumns` broke that: it paints measure columns the declared list has never
- * heard of, so a sort click dropped every one of them from the lookup while the partition
- * still asked `TableHeaderCell` to render them, and the cell destructured `undefined`
- * (#872).
- * Taking `aggregates` and `groupingKeys` as **required** arguments is the point rather
- * than an inconvenience: it is what makes a future derivation site fail to compile instead
- * of silently re-deriving from the wrong list.
- */
 export const resolveColumnSortingUpdate = <TData>({
   aggregates,
   columnOrder,

@@ -1,9 +1,5 @@
 import type { RootErrorBoundaryProps } from './RootErrorBoundary.types';
 
-/**
- * Deliberately dependency-light top-level fallback shared by every app's root
- * `ErrorBoundary` route export.
- */
 export const RootErrorBoundary = ({ error }: RootErrorBoundaryProps) => {
   const message = 'Oops!';
   let details = 'An unexpected error occurred.';

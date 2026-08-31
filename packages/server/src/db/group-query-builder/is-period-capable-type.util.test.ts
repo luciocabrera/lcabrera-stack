@@ -12,9 +12,6 @@ describe('isPeriodCapableType', () => {
   });
 
   it('refuses `time`, which is category D and has no calendar', () => {
-    // `date_trunc` accepts it; truncating a time of day to a month is not a
-    // question anybody asked, which is why the gate is by name and not by the
-    // type category the role derivation uses.
     expect(
       isPeriodCapableType({ typeName: 'time', typeNamespace: 'pg_catalog' }),
     ).toBe(false);
@@ -24,8 +21,6 @@ describe('isPeriodCapableType', () => {
   });
 
   it('refuses a type name borrowed by another schema', () => {
-    // `CREATE TYPE app.date AS (…)` reports `typname = 'date'` exactly like the
-    // built-in, and `date_trunc` would be handed a composite.
     expect(
       isPeriodCapableType({ typeName: 'date', typeNamespace: 'app' }),
     ).toBe(false);

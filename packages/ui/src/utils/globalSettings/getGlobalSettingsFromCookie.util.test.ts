@@ -81,7 +81,6 @@ describe('getGlobalSettingsFromCookie', () => {
   });
 
   it('returns fallback when the cookie payload is malformed JSON', () => {
-    // A raw cookie value that is not valid JSON drives the catch branch.
     const cookieString = `${GLOBAL_SETTINGS_COOKIE_KEY}=${encodeURIComponent('{not valid json')}`;
 
     expect(
@@ -95,7 +94,6 @@ describe('getGlobalSettingsFromCookie', () => {
       version: GLOBAL_SETTINGS_COOKIE_VERSION,
     });
 
-    // The default (unscoped) key is absent once an appId scopes the lookup.
     expect(
       getGlobalSettingsFromCookie({
         appId: 'admin',

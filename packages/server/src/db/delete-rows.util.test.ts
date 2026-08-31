@@ -84,8 +84,6 @@ describe('deleteRows', () => {
     ).rejects;
 
     await rejects.toThrow(ForeignKeyViolationError);
-    // The safe message, not the driver's — asserting the exact string is what
-    // proves the pg text did not survive the translation.
     await rejects.toThrow('A referenced record does not exist.');
     await rejects.toMatchObject({
       fields: { constraint: 'parts_widget_id_fkey' },

@@ -13,7 +13,6 @@ describe('sortingCodec', () => {
   });
 
   it('refuses the whole payload for a hand-edited direction', () => {
-    // `name` is valid and still goes: the refusal is of the payload, not the key.
     expect(
       sortingCodec.deserialize('{"name":"asc","age":"; DROP TABLE"}'),
     ).toStrictEqual({});
@@ -48,8 +47,6 @@ describe('sortingCodec', () => {
   });
 
   it('keeps a __proto__ key rather than dropping that one field', () => {
-    // Assigning into `{}` routes this to the prototype setter and loses it,
-    // which is the per-field drop the refusal contract rules out.
     const result = sortingCodec.deserialize(
       '{"__proto__":"asc","name":"desc"}',
     );

@@ -21,15 +21,10 @@ export type ColumnFilter =
 export type DateFilter = {
   readonly operator: 'after' | 'before' | 'between' | 'equals';
   readonly type: 'date';
-  /** ISO date string. */
   readonly value: string;
   readonly value2?: string;
 };
 
-/**
- * Empty is SQL NULL and deliberately not the empty string; see the mirror of this type in
- * `@lcabrera/ui` for why.
- */
 export type EmptyFilter = {
   readonly operator: 'isEmpty' | 'isNotEmpty';
   readonly type: 'empty';
@@ -50,12 +45,9 @@ export type NumberFilter = {
 };
 
 export type SelectFilter = {
-  /** Defaults to `'equals'` if omitted. */
   readonly operator?: 'equals' | 'notEquals';
   readonly type: 'multiSelect' | 'select';
-  /** Single value for `'select'`. */
   readonly value?: string;
-  /** Multiple values for `'multiSelect'`. */
   readonly values?: readonly string[];
 };
 

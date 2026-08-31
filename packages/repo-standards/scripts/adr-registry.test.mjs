@@ -30,9 +30,6 @@ const home = (dir, filenames) => ({
   })),
 });
 
-// `grandfathered` is forwarded WITHOUT a default here on purpose: passing
-// `undefined` lets `adrFindings` fall back to the configured register, so a test
-// that omits it exercises the real config rather than a fixture.
 const findings = ({ drafts = [], grandfathered, homes = [], strays = [] }) =>
   adrFindings({ drafts, grandfathered, homes, strays });
 
@@ -105,10 +102,6 @@ describe('adrFindings', () => {
     ).toHaveLength(1);
   });
 
-  // This repository grandfathers nothing, so these two drive the register with a
-  // synthetic set. Without them the `> 2` branch has no coverage at all and can be
-  // deleted with the suite still green — and it is live behaviour for a consumer
-  // that declares its own overlaps, not dead code.
   it('passes a grandfathered number used exactly twice', () => {
     expect(
       findings({
@@ -208,11 +201,6 @@ describe('headingNumber / headingTitle', () => {
 
 describe('nextFreeNumber', () => {
   it('hands back the highest number once its ADR is deleted', () => {
-    // The limit of what the index may promise. The maximum is taken from the
-    // files PRESENT, so retiring the top ADR lowers it and the next one takes
-    // that number — while a merged PR citing the retired ADR now points
-    // somewhere else. Retiring a just-landed ADR is the likeliest retirement,
-    // so this is reachable rather than theoretical (#974).
     const before = home('docs/decisions', ['ADR-047-a.md', 'ADR-048-b.md']);
     const after = home('docs/decisions', ['ADR-047-a.md']);
 
@@ -221,7 +209,6 @@ describe('nextFreeNumber', () => {
   });
 
   it('never fills a gap below the highest', () => {
-    // The half that IS guaranteed, and the half the index states.
     expect(
       nextFreeNumber([
         home('docs/decisions', ['ADR-001-a.md', 'ADR-047-b.md']),
@@ -266,10 +253,6 @@ describe('renderIndex', () => {
   });
 
   it('links the template up out of a nested home', () => {
-    // No nested home is configured today — the showcase app's closed when its
-    // ADRs were filed against what they govern. The depth arithmetic still has
-    // to work, because `adrHomes` is config and a repo consuming
-    // `@lcabrera/repo-standards` can declare one.
     expect(
       renderIndex({
         blurb: 'A nested home.',
@@ -281,12 +264,6 @@ describe('renderIndex', () => {
   });
 
   it('names nothing a repository generating its first index would not have', () => {
-    // Rendered from a home carrying NO command spellings — a fresh consumer's.
-    // This package is installed into repositories that are not this one, so a
-    // task name from one repository's runner, or a link to a decision record a
-    // fresh home does not hold, reads as an instruction and is not one.
-    // A departed product name once reached this index too; `departed:verify`
-    // now guards that class repo-wide, so this asserts the shape it shares.
     const rendered = renderIndex(DEFAULT_REGISTERS.adrHomes[0]);
 
     for (const absent of ['vp run', 'ADR-048', 'ADR-075']) {
@@ -296,23 +273,12 @@ describe('renderIndex', () => {
   });
 
   it("names a repository's own commands when it declares them", () => {
-    // The other half, and the reason the spellings ride on the home: this
-    // repository's readers cannot run a bare bin name — `node_modules/.bin` is
-    // not on a plain shell's PATH — so an index telling them to would be
-    // portable and wrong in the other direction.
     const rendered = renderIndex(ADR_HOMES[0]);
 
     expect(rendered).toContain(ADR_HOMES[0].commands.new);
     expect(rendered).not.toContain('npx repo-adr');
   });
 
-  /**
-   * `adrHomes` defaults to ONE home, so the default render is the one that has
-   * to read correctly. The cross-home sentence is not false in a single-home
-   * repository, it is vacuous — it describes a second directory the reader
-   * cannot find. Both branches are asserted because only one of them ever
-   * renders here, and an unasserted branch is one nothing would notice losing.
-   */
   const index = (options) =>
     renderIndex(ADR_HOMES[0], { exemptionCount: 0, homeCount: 1, ...options });
 
@@ -333,12 +299,6 @@ describe('renderIndex', () => {
     expect(rendered).not.toContain('A number identifies exactly one ADR');
   });
 
-  /**
-   * The uniqueness sentence is the one claim here that a repository can falsify
-   * from its own config: `duplicateFindings` is home-agnostic, so a declared
-   * exemption lets one number name two ADRs inside a SINGLE home. Stated flat,
-   * the generated page would contradict the directory it sits in.
-   */
   it('admits the exemption when the repository declares one', () => {
     const rendered = index({ exemptionCount: 1 });
 
@@ -351,12 +311,6 @@ describe('renderIndex', () => {
   });
 
   it('renders the branch this repository\u2019s registers imply', () => {
-    // Deliberately a weak probe, and worth saying so rather than dressing it up:
-    // both registers are module state, so defaults hardcoded to this
-    // repository's current values would pass identically — the same shape as a
-    // lint probe whose rule never loaded. What it does hold is the tie between
-    // the rendered page and the registers, so declaring a second home or an
-    // exemption fails this until the defaults follow.
     const rendered = renderIndex(ADR_HOMES[0]);
 
     expect(rendered).toContain(
@@ -366,17 +320,6 @@ describe('renderIndex', () => {
     );
   });
 
-  /**
-   * ADR-075 in one assertion: a committed index that names the ADRs is a file
-   * every ADR branch appends to, so two of them conflict.
-   *
-   * It asserts on the **output** given a directory, by both routes a
-   * reintroduced parameter could arrive — a second argument, and an `entries`
-   * key on the home. Asserting on the function's shape instead does not hold:
-   * `Function.length` stops counting at the first default, so
-   * `renderIndex = (home, entries = [])` with the rows restored passes an arity
-   * check and renders nothing when called with one argument.
-   */
   it('names no ADR, however it is handed the directory', () => {
     const planted = [
       { filename: 'ADR-901-planted.md', title: 'A planted decision' },

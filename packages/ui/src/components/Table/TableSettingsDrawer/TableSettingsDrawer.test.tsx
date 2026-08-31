@@ -105,9 +105,6 @@ vi.mock('#ui/components/Button', () => ({
 }));
 
 vi.mock('#ui/components/Icons', () => ({
-  // The grouping section reaches the commands barrel for its clear descriptor,
-  // and the barrel re-exports the pinning and sorting sets — so every icon any
-  // command descriptor names has to resolve here.
   BarChartIcon: () => <span>Bar chart icon</span>,
   CollapseAllIcon: () => <span>Collapse all icon</span>,
   EraserIcon: () => <span>Eraser icon</span>,

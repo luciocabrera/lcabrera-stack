@@ -26,21 +26,6 @@ import {
   nextManifest,
 } from './manifest.mjs';
 
-/**
- * What a file declares and this consumer cannot honour, or `undefined` when
- * there is nothing in the way.
- *
- * Both declarations are checked BEFORE substitution because a declared
- * requirement is the wider failure: substituting would report only the keys the
- * file happens to interpolate. A file is refused for the FIRST reason it cannot
- * be honoured rather than for the most visible one, so the order here is the
- * order the consumer is asked to fix things in.
- *
- * One state carries both, because both have the same outcome — nothing written,
- * nothing recorded. The kind travels with the entry only so the report can name
- * the right remediation: a line in `devkit.config.json`, or a package in the
- * consumer's own dependencies.
- */
 const unmetDeclaration = ({ content, config, peerVersions }) => {
   const keys = requiredConfigKeys(content).filter(
     (key) => !hasConfigKey({ config, path: key }),
@@ -54,7 +39,6 @@ const unmetDeclaration = ({ content, config, peerVersions }) => {
   return peers.length > 0 ? { missing: peers, unmetKind: 'peer' } : undefined;
 };
 
-/** What one asset becomes, or `undefined` when this config places it nowhere. */
 const planEntryFor = ({
   asset,
   config,
@@ -65,12 +49,6 @@ const planEntryFor = ({
   const targetPath = targetPathFor({ assetPath: asset.path, config });
   if (targetPath === undefined) return undefined;
 
-  // Carried on the entry rather than consumed and dropped. Acknowledging an
-  // edit is keyed to what is actually on disk, so a further edit invalidates
-  // it on its own; a plan that discarded this hash could only offer a
-  // path-keyed acknowledgement, which never expires. Every entry carries it,
-  // including a refused one, so nothing downstream has to know which states
-  // happen to have a hash.
   const onDisk = onDiskHash(targetPath);
 
   const unmet = unmetDeclaration({
@@ -91,13 +69,6 @@ const planEntryFor = ({
     };
   }
 
-  // Substituted BEFORE hashing, so the record describes what is on disk
-  // rather than the template it came from.
-  //
-  // The CI hook goes first and cannot fail: unlike a command, an absent value
-  // is the ordinary case, and it resolves to no steps rather than to a missing
-  // key. A workflow that needed one and got none fails on the runner, where it
-  // is visible; one held back here would leave the repository with no CI at all.
   const { content, missing } = substituteCommands({
     commands: config.commands,
     content: substituteCiSetup({
@@ -174,26 +145,6 @@ export const planSync = ({
     .filter((entry) => entry !== undefined);
 };
 
-/**
- * The plan with each acknowledged edit relabelled, layered OVER the
- * classification rather than folded into it — the same separation `manifestAfter`
- * already keeps from `planSync`. `classifyMaterialisation` stays a function of
- * three hashes, so the acceptance record can never change what `modified` means
- * and a consumer with no record gets exactly the plan they got before.
- *
- * `modified` and `conflict` are both relabelled, and quieting a conflict is not
- * adopting it — the package's version is still never written over the consumer's
- * file, so the one mistake a materialiser cannot undo remains impossible. What
- * changes is only whether a deliberate, permanent divergence is reported on
- * every run forever. A repository that authored its own register before adopting
- * the kit holds exactly that state, which is why `doctor --check` could not be a
- * gate until this: it was red on a correct tree.
- *
- * Both commands read the plan through this, because `sync` and `doctor` must not
- * disagree about which files are quiet. It costs `sync` nothing: `acknowledged`
- * is in neither the written nor the recorded set, exactly as the two states it
- * replaces were.
- */
 export const withAcceptance = ({ accepted, entries }) =>
   entries.map((entry) => {
     if (!isAcknowledgeable(entry.state)) return entry;
@@ -207,26 +158,8 @@ export const withAcceptance = ({ accepted, entries }) =>
     };
   });
 
-/**
- * `writeFileSync`'s mode applies only when it CREATES the file, so an entry that
- * already exists keeps whatever mode it had — which is why the bit is set
- * explicitly afterwards rather than passed as an option. A hook restored over a
- * non-executable file of the same name would otherwise stay silently inert.
- */
 const EXECUTABLE_MODE = 0o755;
 
-/**
- * Writing is one question, the mode is another, and they cover different sets.
- *
- * The mode is corrected on every file the record calls ours — `isRecorded`, not
- * `isWritten` — because a `current` file has the package's exact bytes and may
- * still have arrived without its bit, through a tarball, a copy, or a clone on a
- * filesystem that does not carry one. Nothing else would ever put it back: the
- * mode is not in the hash, so `sync` says everything is up to date and `doctor`
- * reports nothing while git skips the hook. Recorded is the right line because
- * it is exactly the set whose content is provably the package's; a `conflict` or
- * a `modified` file belongs to the consumer, and its mode is theirs too.
- */
 const needsExecutableBit = (entry) =>
   entry.executable === true && isRecorded(entry.state);
 
@@ -239,7 +172,6 @@ export const applySync = ({ entries, root }) => {
     writeFileSync(destination, entry.content);
   }
 
-  // After the writes, so a file created just above is included.
   for (const entry of entries.filter(needsExecutableBit)) {
     chmodSync(join(root, entry.path), EXECUTABLE_MODE);
   }
@@ -256,7 +188,6 @@ export const manifestAfter = ({ entries, previous, version }) =>
     version,
   });
 
-/** Hashing what is on disk, with absence reported as absence rather than thrown. */
 export const onDiskHasher = (root) => (targetPath) => {
   try {
     return hashContent(readFileSync(join(root, targetPath)));

@@ -27,8 +27,6 @@ describe('toTableEmptyStateNotice', () => {
       titleSingular: 'Order',
     });
 
-    // The heading is the label the user picked the column by; the sentence is
-    // the endpoint's, which is the only thing that knows *why*.
     expect(notice.title).toBe('Grouping by Total Amount was refused');
     expect(notice.message).toBe(
       'Column "total_amount" is not a legal group key: too-many-distinct.',
@@ -36,11 +34,6 @@ describe('toTableEmptyStateNotice', () => {
   });
 
   it('does not blame the widest key when a key combination is what was refused', () => {
-    // The trap this closes. `estimate-too-large` names the **widest** key,
-    // because that is the one worth dropping — not the one just picked. So a
-    // user who adds a fourth column would read "Grouping by Delivery Date was
-    // refused" about a column that was already applied and fine on its own. The
-    // endpoint's sentence still names it, in the role it actually plays.
     const notice = toTableEmptyStateNotice({
       columnName: 'Delivery Date',
       error: {
@@ -60,8 +53,6 @@ describe('toTableEmptyStateNotice', () => {
   });
 
   it('does not call an illegal aggregate a refused group key', () => {
-    // `aggregate-not-legal` names an *aggregated* column, which need not be a
-    // group key at all — so the heading may not claim it was one.
     const notice = toTableEmptyStateNotice({
       columnName: 'Order Notes',
       error: {
@@ -79,8 +70,6 @@ describe('toTableEmptyStateNotice', () => {
   });
 
   it('still says a grouping was refused when the refusal names no single column', () => {
-    // `too-many-keys` is about the request as a whole, so there is no column to
-    // name and the heading must not pretend there is.
     const notice = toTableEmptyStateNotice({
       columnName: undefined,
       error: {
@@ -116,8 +105,6 @@ describe('toTableEmptyStateNotice', () => {
   });
 
   it('never falls back to the no-data message once an error arrived', () => {
-    // The failure this closes: an unrecognised arm rendering "adjust your
-    // filters" over a refusal, which is the silent empty table again.
     const notice = toTableEmptyStateNotice({
       columnName: undefined,
       error: {

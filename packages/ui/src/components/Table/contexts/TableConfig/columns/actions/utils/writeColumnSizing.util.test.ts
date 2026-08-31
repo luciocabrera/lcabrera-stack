@@ -65,7 +65,6 @@ describe('writeColumnSizing', () => {
     writeColumnSizing<Row>({ columnKey: 'id', columnsStore, width: 180 });
 
     expect(mockColumnsStore.set).toHaveBeenCalledTimes(1);
-    // `id` is pinned left, so its width feeds the sticky offsets
     expect(mockColumnsStore.get()).toHaveProperty('pinnedColumnOffsets');
   });
 });

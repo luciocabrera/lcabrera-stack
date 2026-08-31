@@ -27,8 +27,6 @@ describe('parseAuthToken', () => {
   });
 
   it('rejects a token carrying an extra separator', () => {
-    // Neither half can contain a `.` (base64url payload, hex signature), so a
-    // third part is malformed rather than a signature that happens to hold one.
     expect(parseAuthToken({ token: 'cGF5bG9hZA.dead.beef' })).toBeUndefined();
   });
 });

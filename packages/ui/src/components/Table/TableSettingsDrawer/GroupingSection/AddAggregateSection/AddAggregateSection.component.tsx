@@ -22,16 +22,6 @@ import {
 import { AGGREGATE_PICKER_GAP_MESSAGES } from './AddAggregateSection.constants';
 import { styles } from './AddAggregateSection.stylex';
 
-/**
- * Both lists rest on `resolveOfferableAggregates` — the column list through
- * `toAggregatableColumnOptions`, the function list through `resolveAddableAggregates`,
- * which reaches it via `resolveAffordableAggregates` — so the second cannot offer
- * something the chosen column does not support, whichever way the two are picked, and
- * neither can disagree with the column header menu, which resolves through the same pair
- * (#830, #842).
- * What that predicate answers with is the catalogue capability the loader shipped
- * (ADR-058, ADR-063), minus any column staged as a group key (ADR-080).
- */
 export const AddAggregateSection = ({
   isBusy = false,
 }: AddAggregateSectionProps) => {
@@ -64,8 +54,6 @@ export const AddAggregateSection = ({
 
   const handleColumnChange = (values: readonly string[]) => {
     setSelectedColumn(values[0] ?? '');
-    // The function list is derived from the column, so a function chosen for
-    // the previous one may not exist for this one.
     setSelectedFn('');
   };
 

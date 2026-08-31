@@ -12,22 +12,16 @@ export type AggregateFn =
   | 'min'
   | 'sum';
 
-/** How an aggregate reaches SQL — `countDistinct` cannot be a bare name. */
 export type AggregateSpec = {
   readonly distinct: boolean;
   readonly sql: string;
 };
 
-/**
- * Resolved once in `buildGroupQuery`, so the alias the assertions check, the alias the SQL
- * emits and the alias the caller decodes by are the same string.
- */
 export type AliasedGroupAggregate = {
   readonly aggregate: GroupAggregate;
   readonly alias: string;
 };
 
-/** What `buildGroupQuery` emitted, so a caller can decode the row it gets back. */
 export type BuiltGroupAggregate = {
   readonly alias: string;
   readonly column?: string;
@@ -36,14 +30,8 @@ export type BuiltGroupAggregate = {
 
 export type BuiltGroupQuery = {
   readonly aggregates: readonly BuiltGroupAggregate[];
-  /**
-   * The `GROUPING()` value of each emitted set, in emission order. Bit
-   * `keys.length - 1 - i` is 1 when `keys[i]` was rolled up in that set, which
-   * is how a structural NULL is told apart from a real one.
-   */
   readonly groupingSetMasks: readonly number[];
   readonly guardRails: GroupGuardRails;
-  /** The group keys, ordered — the bit positions above are relative to this. */
   readonly keys: readonly string[];
   readonly maskAlias: 'group_mask';
   readonly text: string;
@@ -114,10 +102,6 @@ export type GroupingMode = 'cube' | 'flat' | 'rollup';
 
 export type GroupKeyPeriod = OlapGroupPeriod;
 
-/**
- * Distinguishable on purpose: grouping by a primary key is the likeliest user mistake and
- * deserves its own message.
- */
 export type GroupKeyRefusalReason =
   | 'no-equality-operator'
   | 'not-a-dimension'
@@ -132,7 +116,6 @@ export type GroupQueryDescriptor = {
   readonly filters?: readonly QueryFilter[];
   readonly grouping: GroupingMode;
   readonly keys: readonly string[];
-  /** A safety belt, not a page — a grouped read is never paginated (ADR-059). */
   readonly maxRows: number;
   readonly periods?: Readonly<Record<string, GroupKeyPeriod>>;
   readonly schema: string;

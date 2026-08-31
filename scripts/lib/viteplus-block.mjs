@@ -17,17 +17,8 @@
 export const START_MARKER = '<!--VITE PLUS START-->';
 export const END_MARKER = '<!--VITE PLUS END-->';
 
-/** Every HTML comment, including multi-line ones. */
 const HTML_COMMENT = /<!--[\s\S]*?-->/g;
 
-/**
- * Strip comments to a fixpoint. One pass is not enough: removing an inner
- * `<!-- … -->` can splice its neighbours into a NEW comment, so a single
- * `replace` leaves residue (CodeQL's incomplete-multi-character-sanitization).
- * Each pass strictly shortens the string or changes nothing, so this terminates.
- * A lone unterminated `<!--` never matches and survives — deliberately, since a
- * malformed comment is content nobody reviewed, and this gate fails closed.
- */
 const stripComments = (text) => {
   let current = text;
   let previous;
@@ -38,13 +29,6 @@ const stripComments = (text) => {
   return current;
 };
 
-/**
- * Locate the managed region.
- *
- * `absent` is a PASS, not a failure: with no markers Vite+'s sync is a no-op
- * (its own `updateExistingAgentInstructions` documents "No Vite+ markers → no
- * writes"), so a repo that deleted them is already safe.
- */
 export const findRegion = (text) => {
   const start = text.indexOf(START_MARKER);
   const end = text.indexOf(END_MARKER);
@@ -58,16 +42,13 @@ export const findRegion = (text) => {
   };
 };
 
-/** What the region actually renders: itself, minus comments and whitespace. */
 export const renderedContent = (inner) => stripComments(inner).trim();
 
-/** The offending lines, for an error message that points at the problem. */
 export const renderedLines = (inner) =>
   stripComments(inner)
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean);
 
-/** Replace the region's body, keeping both markers exactly where they were. */
 export const withEmptiedRegion = (text, region, body) =>
   `${text.slice(0, region.innerStart)}${body}${text.slice(region.innerEnd)}`;

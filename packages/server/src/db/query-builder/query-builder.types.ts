@@ -20,10 +20,6 @@ export type ComparisonOperator = BinaryOperator | UnaryOperator;
 
 export type CountQueryDescriptor = {
   readonly allowedColumns?: readonly string[];
-  /**
-   * Column passed to `count()`; defaults to `*` (count every matching row). Pass a
-   * specific column when NULLs in that column should not be counted.
-   */
   readonly column?: string;
   readonly filters?: readonly QueryFilter[];
   readonly schema: string;
@@ -31,20 +27,15 @@ export type CountQueryDescriptor = {
 };
 
 export type DeleteQueryDescriptor = {
-  /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
-  /** At least one filter is required — an unfiltered DELETE is refused. */
   readonly filters: readonly QueryFilter[];
-  /** Columns to return; `['*']` returns the whole row and must stand alone. */
   readonly returning?: readonly string[];
   readonly schema: string;
   readonly table: string;
 };
 
 export type InsertQueryDescriptor = {
-  /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
-  /** Columns to return; `['*']` returns the whole row and must stand alone. */
   readonly returning?: readonly string[];
   readonly schema: string;
   readonly table: string;
@@ -52,30 +43,17 @@ export type InsertQueryDescriptor = {
 };
 
 export type MaxValueQueryDescriptor = {
-  /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
   readonly column: string;
   readonly schema: string;
   readonly table: string;
 };
 
-/**
- * A keyset ("seek") cursor: the sort-key tuple of the last row of the previous page.
- * Passed to `buildSelectQuery` instead of `offset`, it resumes strictly after that row in
- * O(limit) rather than walking and discarding `offset` rows (ADR-052).
- */
 export type QueryCursor = {
-  /** Must be the last `sort` entry; `assertKeysetCursor` throws otherwise. */
   readonly uniqueColumn: string;
-  /** One value per `sort` entry, in `sort` order. */
   readonly values: readonly unknown[];
 };
 
-/**
- * The null tests are unary rather than `eq`/`neq` against `null` because SQL three-valued
- * logic makes those two spellings mean different things: `col = NULL` is never true, not
- * even for a NULL row.
- */
 export type QueryFilter =
   | {
       readonly column: string;
@@ -93,18 +71,7 @@ export type QuerySort = {
 };
 
 export type SelectQueryDescriptor = {
-  /**
-   * Opt-in authorization: when provided, every fields/filter/sort column must be a member,
-   * in addition to the always-on `assertSafeIdentifier` syntax check. Omit when every
-   * column is developer-hardcoded, never derived from a request.
-   */
   readonly allowedColumns?: readonly string[];
-  /**
-   * Keyset pagination: resume strictly after the row this cursor describes, instead of
-   * counting past `offset` rows.
-   * Requires `sort` to be a total order ending on `cursor.uniqueColumn`; see `QueryCursor`
-   * and ADR-052.
-   */
   readonly cursor?: QueryCursor;
   readonly distinct?: boolean;
   readonly fields: readonly string[];
@@ -116,19 +83,11 @@ export type SelectQueryDescriptor = {
   readonly table: string;
 };
 
-/**
- * Both null tests are here so the vocabulary is closed under negation — `isNotNull`
- * without `isNull` leaves "this group's key is NULL" inexpressible, which is exactly the
- * restriction a NULL group row drills into (ADR-079).
- */
 export type UnaryOperator = 'isNotNull' | 'isNull';
 
 export type UpdateQueryDescriptor = {
-  /** Same opt-in authorization semantics as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
-  /** At least one filter is required — an unfiltered UPDATE is refused. */
   readonly filters: readonly QueryFilter[];
-  /** Columns to return; `['*']` returns the whole row and must stand alone. */
   readonly returning?: readonly string[];
   readonly schema: string;
   readonly table: string;

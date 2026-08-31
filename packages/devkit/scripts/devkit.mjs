@@ -35,10 +35,6 @@ const USAGE = [
   '  devkit closure [--profile <name>] --shipped',
 ].join('\n');
 
-/**
- * A table rather than a chain of conditions, so adding a command does not make
- * the dispatcher harder to reason about or to test.
- */
 const COMMANDS = {
   closure: runClosure,
   doctor: runDoctor,
@@ -46,42 +42,11 @@ const COMMANDS = {
   sync: runSync,
 };
 
-/**
- * A bare `--` is how a task runner separates its own flags from the ones it
- * forwards, so it arrives in argv and means nothing here. Left in place it reads
- * as a directory name, which is how `devkit closure -- <dir>` failed while the
- * same command without the separator worked.
- */
 const withoutSeparator = (argv) => argv.filter((entry) => entry !== '--');
 
-/**
- * Asking for help is not a usage error, and the difference is not cosmetic:
- * `--help` is the first thing a consumer runs and the cheapest liveness check a
- * smoke test can make, so answering it on stderr with a failing code reads as a
- * broken install and aborts any caller running under `set -e`. An unrecognised
- * command still fails — the separation is between "you asked what this does" and
- * "you asked for something that is not here".
- */
 const HELP_FLAGS = new Set(['--help', '-h']);
 const HELP_COMMAND = 'help';
 
-/**
- * The two spellings are recognised in different places, and the asymmetry is the
- * whole point.
- *
- * A **flag** counts anywhere, because recognising it only in the command
- * position left `devkit sync --help` building a plan and applying it: a consumer
- * asking what a command does had their tree materialised into, and got exit 0
- * for it. `--help` and `-h` are not valid values for anything these commands
- * take, so nothing legitimate is lost by scanning for them.
- *
- * The bare **word** counts only in the command position, because it is an
- * ordinary string everywhere else. `--reason` takes free text and `closure`
- * takes directory names, so a wider scan turned
- * `doctor --accept <path> --reason help` into a usage page that recorded
- * nothing, and `closure help` into a success that analysed nothing — both the
- * silent-success failure the rest of this file exists to prevent.
- */
 const asksForHelp = (entries) =>
   entries[0] === HELP_COMMAND || entries.some((entry) => HELP_FLAGS.has(entry));
 

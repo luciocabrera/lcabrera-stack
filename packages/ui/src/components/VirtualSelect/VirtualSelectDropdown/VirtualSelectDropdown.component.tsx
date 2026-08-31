@@ -16,10 +16,6 @@ import { useVirtualSelectDropdownPosition } from './useVirtualSelectDropdownPosi
 import { resolveDropdownStyles } from './utils/resolveDropdownStyles.util';
 import { HAS_POPOVER_SUPPORT } from './VirtualSelectDropdown.constants';
 
-/**
- * A trigger-opened dropdown renders in the top layer (`popover`) rather than absolutely,
- * so a scrolling ancestor cannot clip it.
- */
 export const VirtualSelectDropdown = () => {
   const anchorRef = useVirtualSelectAnchorRef();
   const customStylex = useGetCustomStylex();

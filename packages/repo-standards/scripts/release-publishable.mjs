@@ -21,14 +21,6 @@
 /** Column widths are irrelevant to the gate; this is the order rows render in. */
 const STATE_ORDER = ['publish', 'first-publish', 'up-to-date'];
 
-/**
- * `first-publish` is a **skip**, not a failure, and not something this workflow
- * can fix by trying harder: npm binds a trusted publisher to an existing
- * package, so a brand-new scoped name has nothing to attach the trust to and
- * fails with `E404` under OIDC (npm/cli#8976). Publishing it needs one manual
- * `npm publish`. Classifying it separately is what keeps the job green while
- * still saying, on the run summary, that a package is waiting for a human.
- */
 export const classifyRelease = ({ packageExists, versionExists }) => {
   if (!packageExists) {
     return 'first-publish';
@@ -37,33 +29,12 @@ export const classifyRelease = ({ packageExists, versionExists }) => {
   return versionExists ? 'up-to-date' : 'publish';
 };
 
-/** The packages `changeset publish` would actually publish. */
 export const selectPublishable = (classified) =>
   classified.filter(({ state }) => state === 'publish');
 
-/** The packages waiting on a manual first publish. */
 export const selectFirstPublish = (classified) =>
   classified.filter(({ state }) => state === 'first-publish');
 
-/**
- * The never-published packages that would sink a batch publish, if one is due.
- *
- * `changeset publish` takes no package filter: it publishes **every**
- * non-private workspace whose version is missing from the registry, and
- * `config.ignore` does not apply — `publishPackages` filters on
- * `!packageJson.private` alone. So one never-published package fails the whole
- * run (`throw new ExitError(1)`), *after* the ones before it have already
- * reached npm and been tagged, and with the tag-push step skipped because the
- * publish step failed. That is a half-released state, recoverable only by hand.
- *
- * Refusing before anything is published turns that into an actionable stop. It
- * is deliberately not a silent skip: the release genuinely cannot proceed, and
- * the fix — one manual `npm publish`, or `private: true` until then — is a
- * decision for a person.
- *
- * Empty when nothing is due, so a never-published package sitting there
- * indefinitely costs nothing until someone actually cuts a release.
- */
 export const findBlockingFirstPublish = ({ firstPublish, publishable }) =>
   publishable.length > 0 ? firstPublish : [];
 
@@ -80,16 +51,6 @@ const compareRows = (left, right) => {
   return byState === 0 ? left.name.localeCompare(right.name) : byState;
 };
 
-/**
- * One version's section of a Changesets-generated `CHANGELOG.md`, for the body
- * of its GitHub Release.
- *
- * Dropping `changesets/action` (it cannot publish without also versioning, which
- * is what #620 is about) takes the release notes with it, so they are rebuilt
- * from the changelog the same action would have used. Falling back to an empty
- * string rather than throwing is deliberate: a missing section must not fail a
- * publish that has already reached npm and cannot be undone.
- */
 export const extractChangelogSection = ({ changelog, version }) => {
   const lines = changelog.split('\n');
   const start = lines.findIndex((line) => line.trim() === `## ${version}`);
@@ -104,11 +65,6 @@ export const extractChangelogSection = ({ changelog, version }) => {
   return (end === -1 ? rest : rest.slice(0, end)).join('\n').trim();
 };
 
-/**
- * A Markdown table for `$GITHUB_STEP_SUMMARY`, so a skipped publish is visible
- * on the run page without opening the log — the failure mode that let this
- * workflow report success through every push while publishing nothing.
- */
 export const renderSummary = (classified) => {
   const rows = [...classified]
     .sort(compareRows)

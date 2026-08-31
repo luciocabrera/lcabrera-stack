@@ -10,10 +10,6 @@ describe('isIdentifierType', () => {
   });
 
   it('refuses a same-named type from another schema', () => {
-    // The reason matching is schema-qualified. `CREATE TYPE app.uuid AS (a int,
-    // b int)` is a composite reporting `typname = 'uuid'`, and a bare-name match
-    // would admit it as a dimension — a type the Table cannot render, which is
-    // precisely what Gate 1 exists to refuse.
     expect(isIdentifierType({ typeName: 'uuid', typeNamespace: 'app' })).toBe(
       false,
     );

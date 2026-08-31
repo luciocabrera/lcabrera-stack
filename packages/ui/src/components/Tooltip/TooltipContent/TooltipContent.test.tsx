@@ -74,12 +74,6 @@ describe('TooltipContent', () => {
     expect(arrow?.getAttribute('style') ?? '').not.toContain('px');
   });
 
-  // The arrow's four border widths start at zero and each placement raises the
-  // two edges that end up outside the tooltip, so the outline carries on around
-  // the tip. Counting *replaced* classes is what gives this teeth: StyleX keys
-  // atomic classes by property, so opting a side in swaps its zero-width class
-  // for a 1px one. Drop the widths and nothing is replaced; add them to the
-  // wrong number of sides and the count moves.
   it.each(['top', 'bottom', 'left', 'right'] as const)(
     'borders exactly two arrow edges for the %s placement',
     (placement) => {

@@ -7,12 +7,6 @@ import {
 } from './doc-register-checks.mjs';
 import { toEntry } from './doc-registers.mjs';
 
-// Every rule below is asserted the same way: a document that passes, one line
-// changed so it must not, and the same document back. A rule that is not
-// wired reports exactly what a correct document reports, so only the pair is
-// evidence — the pass alone is what an unloaded rule also produces
-// (AGENTS.md Rule 14).
-
 const CONTEXT = {
   ciCommands: new Set(['test:ci']),
   ids: new Set(['render-a-table', 'sql-is-safe']),
@@ -75,8 +69,6 @@ const checkRequirement = (source) =>
 const checkPlanning = (source, file = 'docs/agents/planning/a-plan.md') =>
   planningProblems(toEntry({ file, register: 'planning', source }), CONTEXT);
 
-/** The one finding a planted violation must produce, named so a test cannot
- *  pass on some other rule firing. */
 const onlyProblem = (problems) => {
   expect(problems).toHaveLength(1);
   return problems[0];
@@ -140,8 +132,6 @@ describe('a requirement, one line at a time', () => {
     expect(checkRequirement(REQUIREMENT)).toEqual([]);
   });
 
-  // The trap the wave-1 builders left: `packages` names workspace DIRECTORIES,
-  // so the npm name looks right and resolves to nothing.
   it('fails a package name absent from the derived workspace roster', () => {
     const broken = REQUIREMENT.replace('  - ui\n', '  - @lcabrera/ui\n');
 
@@ -163,8 +153,6 @@ describe('a requirement, one line at a time', () => {
     expect(checkRequirement(REQUIREMENT)).toEqual([]);
   });
 
-  // The other half of the same trap: a requirement's issues are bare integers,
-  // and a planning document's are `#`-prefixed.
   it('fails a `#`-prefixed issue number', () => {
     const broken = REQUIREMENT.replace('- 994', '- #994');
 
@@ -198,8 +186,6 @@ describe('a requirement, one line at a time', () => {
     expect(checkRequirement(REQUIREMENT)).toEqual([]);
   });
 
-  // Half a rule, and the half that is decidable. That the command COULD fail is
-  // not derivable from any file, so nothing here claims it.
   it('fails `met` with no command pointer CI runs, and passes with one', () => {
     const claimed = REQUIREMENT.replace('state: unmet', 'state: met');
 
@@ -246,8 +232,6 @@ describe('a planning document, one line at a time', () => {
     expect(checkPlanning(PLANNING)).toEqual([]);
   });
 
-  // A charter serves no single issue, so the rule is about `plan` and not
-  // about "every document must name one".
   it('passes a charter with no issue', () => {
     const charter = PLANNING.replace('kind: plan', 'kind: charter').replace(
       "issues: ['#547']",
@@ -298,8 +282,6 @@ describe('a planning document, one line at a time', () => {
 });
 
 describe('the register as a whole', () => {
-  // An empty read and a clean read are the same exit code otherwise, which is
-  // the failure this whole gate exists to stop.
   it('refuses to pass having read no entries', () => {
     const nothing = registerFindings({
       ...CONTEXT,

@@ -42,7 +42,6 @@ import {
   summarize,
 } from './lib/worktree-env.mjs';
 
-/** git, or a clear failure — an unanswerable path question must not link anything. */
 const git = (args, cwd) => {
   const out = runGit({ args, cwd });
   if (out === undefined) {
@@ -51,10 +50,8 @@ const git = (args, cwd) => {
   return out;
 };
 
-/** A nested checkout (linked worktree or submodule) — its env files are not ours. */
 const isNestedCheckout = (dir) => existsSync(join(dir, '.git'));
 
-/** Repo-relative paths of every env-shaped file under `root`. */
 const findEnvFiles = (root, current = root, found = []) => {
   for (const entry of readdirSync(current, { withFileTypes: true })) {
     const full = join(current, entry.name);
@@ -69,12 +66,6 @@ const findEnvFiles = (root, current = root, found = []) => {
   return found;
 };
 
-/**
- * Keep only the paths git actually ignores — a tracked one must never be linked
- * over. `check-ignore` answers with its exit code: 0 some matched, 1 none did,
- * anything else is a real fault. Only 1 is "none"; treating a fault as "none"
- * would report a reassuring empty result while git is broken.
- */
 const keepIgnored = (root, relPaths) => {
   if (relPaths.length === 0) return [];
   const { status, stdout } = runGitStatus({
@@ -88,7 +79,6 @@ const keepIgnored = (root, relPaths) => {
   );
 };
 
-/** Link one path; returns its outcome so the caller reports without branching. */
 const linkOne = ({ sourceRoot, targetRoot, relPath, dryRun }) => {
   const destination = join(targetRoot, relPath);
   if (lstatSync(destination, { throwIfNoEntry: false })) {

@@ -16,13 +16,6 @@ const subpathsOf = (surface) => Object.keys(surface ?? {});
 
 const exportsOf = (surface, subpath) => surface?.[subpath] ?? {};
 
-/**
- * Compares one subpath across two surfaces.
- *
- * A subpath missing on one side is modelled as an empty export map, so a whole
- * removed or added subpath decomposes into per-export changes — the consumer
- * feels it the same way either route.
- */
 const diffSubpath = ({ base, next, subpath }) => {
   const before = exportsOf(base, subpath);
   const after = exportsOf(next, subpath);
@@ -54,11 +47,6 @@ const diffSubpath = ({ base, next, subpath }) => {
   });
 };
 
-/**
- * Every added/removed/changed export between two surfaces, sorted by subpath
- * then name so the report order is deterministic. Lists all of them — a verify
- * gate names every discrepancy, not just the first.
- */
 export const diffSurfaces = ({ base, next }) => {
   const subpaths = [
     ...new Set([...subpathsOf(base), ...subpathsOf(next)]),
@@ -66,19 +54,11 @@ export const diffSurfaces = ({ base, next }) => {
   return subpaths.flatMap((subpath) => diffSubpath({ base, next, subpath }));
 };
 
-/**
- * A `removed` or `changed` export can break an external consumer's compile; an
- * `added` one cannot. Classification is what decides whether a changeset is
- * merely advisable (additive) or required (breaking) — see
- * api-surface-changeset.mjs.
- */
 export const isBreakingChange = (change) =>
   change.kind === 'removed' || change.kind === 'changed';
 
-/** True when any change in the list breaks the consumer contract. */
 export const hasBreakingChange = (changes) => changes.some(isBreakingChange);
 
-/** One human-readable line per change, for the failure report. */
 export const formatChange = (change) => {
   const at = `${change.subpath} › ${change.name}`;
   if (change.kind === 'removed') {

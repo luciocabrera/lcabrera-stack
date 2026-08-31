@@ -23,9 +23,6 @@ describe('deriveAggregateCommandState', () => {
   });
 
   it('is active for SEVERAL functions on one column at once', () => {
-    // The whole reason this exists beside `deriveToggleCommandState`: a toggle
-    // can only ever report one active target, so this case is the one the shared
-    // helper cannot express.
     expect(
       ['sum', 'avg'].map(
         (fn) =>

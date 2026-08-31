@@ -66,9 +66,7 @@ vi.mock('../ColumnOrderSectionContext/selectors', () => ({
 import { ColumnGroupingPromptModal } from './ColumnGroupingPromptModal.component';
 
 const restoreRef: { current: () => void } = {
-  current: () => {
-    // no-op before setup
-  },
+  current: () => {},
 };
 
 afterEach(() => {

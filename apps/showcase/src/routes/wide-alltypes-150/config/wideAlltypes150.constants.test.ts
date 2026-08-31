@@ -24,7 +24,6 @@ describe('wide_alltypes_150 entity configuration', () => {
     expect(WIDE_ALLTYPES_COLUMNS.at(0)).toBe(WIDE_ALLTYPES_PRIMARY_KEY);
     expect(WIDE_ALLTYPES_COLUMNS.at(1)).toBe('c_001');
     expect(WIDE_ALLTYPES_COLUMNS.at(-1)).toBe('c_149');
-    // Zero-padded to three digits: `c_9` would name no column at all.
     expect(WIDE_ALLTYPES_COLUMNS).toContain('c_018');
     expect(WIDE_ALLTYPES_COLUMNS).toContain('c_100');
   });

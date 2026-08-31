@@ -6,31 +6,11 @@ import {
   createReactRouterRunConfig,
 } from './vite.run.shared.config.ts';
 
-// The start task runs with cwd = the app directory (apps/<name>), so the env
-// sources are addressed relatively — ../../docker/local/.env at the repo root
-// and ./.env in the app. Each case builds that two-level layout inside a
-// throwaway `mktemp -d`, `cd`s into the app dir, runs the *real* fragment
-// `createLoadLocalEnv` produced, and echoes one variable. The regression this
-// guards (a bare `react-router-serve` that loads no env — the #329 production
-// failure) passes any string assertion but fails a behavioural one, so the check
-// has to boot a shell. Fixture files are written by the shell, not node:fs, to
-// keep the value of one variable the assertion sees exactly what a served
-// loader's process.env would hold.
-
-/**
- * The two files this repo's React Router apps load, in precedence order.
- *
- * The package defaults to the app-local file alone, since the repo-root path is
- * this repo's dev-compose layout and no consumer's (ADR-069) — so the case that
- * matters here is the one an app passes in. Spelled out rather than imported
- * from an app config, so a change at either end shows up as a failure.
- */
 const REPO_ENV_FILES = ['../../docker/local/.env', './.env'];
 
 type EnvCase = {
   readonly appEnv?: string;
   readonly key: string;
-  /** The shell fragment under test — this repo's two files unless overridden. */
   readonly loadEnv?: string;
   readonly rootEnv?: string;
 };

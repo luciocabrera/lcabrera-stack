@@ -19,7 +19,6 @@ const groupRow = (path: readonly TableGroupKeyValue[]): Row => ({
   },
 });
 
-/** A rollup row: the same shape, totalling the levels beneath it (#570). */
 const subtotalRow = (path: readonly TableGroupKeyValue[]): Row => ({
   [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 4, isSubtotal: true, path },
 });
@@ -31,18 +30,6 @@ const berlinOpen = [
   { columnKey: 'status', label: 'Open', value: 'Open' },
 ];
 
-/**
- * Two roots, the second carrying a nested level:
- *
- * ```
- * 0  Paris
- * 1    {id: 1}
- * 2    {id: 2}
- * 3  Berlin
- * 4    Berlin / Open
- * 5      {id: 3}
- * ```
- */
 const rows: readonly Row[] = [
   groupRow(paris),
   { id: 1 },
@@ -62,9 +49,6 @@ const tree = (rowsIn: readonly Row[]) =>
 
 describe('resolveTableGroupTree', () => {
   it('returns the caller data by reference when the rows are not a tree', () => {
-    // The identity check is the point: an ungrouped grid re-derives this on
-    // every scroll frame, and must not pay a per-row allocation for a tree it
-    // does not have.
     const flat: readonly Row[] = [{ id: 1 }, { id: 2 }];
     const tree = resolveTableGroupTree({
       collapsedGroupPaths: noneCollapsed,
@@ -77,11 +61,6 @@ describe('resolveTableGroupTree', () => {
   });
 
   it('builds no summaries array for an ungrouped table', () => {
-    // Counting element *reads* cannot see this — a predicate walk and a `map`
-    // each read every index exactly once, so a read-counting probe passes on
-    // both (checked, before this one replaced it). What separates them is that
-    // one allocates an N-length array to throw away, and the observable trace
-    // of that is which method is called on `data` at all.
     const watched: Row[] = [{ id: 1 }, { id: 2 }, { id: 3 }];
     const everySpy = vi.spyOn(watched, 'every');
     const mapSpy = vi.spyOn(watched, 'map');
@@ -114,7 +93,6 @@ describe('resolveTableGroupTree', () => {
       data: rows,
     });
 
-    // Paris survives; its two details are gone; the Berlin branch is untouched.
     expect(tree.rows).toHaveLength(4);
     expect(tree.rowMeta?.map((meta) => meta.level)).toStrictEqual([1, 1, 2, 3]);
     expect(tree.rowMeta?.[0]?.isExpanded).toBe(false);
@@ -122,9 +100,6 @@ describe('resolveTableGroupTree', () => {
   });
 
   it('hides a nested group and its rows when the ancestor closes', () => {
-    // The discriminating case for prefix ancestry: collapsing Berlin has to
-    // take Berlin/Open with it, and Berlin/Open is a group row of its own that
-    // a per-row "is my path collapsed" test would have left standing.
     const tree = resolveTableGroupTree({
       collapsedGroupPaths: new Set([resolveGroupPathKey(berlin)]),
       data: rows,
@@ -165,9 +140,6 @@ describe('resolveTableGroupTree', () => {
   });
 
   it('still reports a collapsed group as having children it is hiding', () => {
-    // Read off the loaded rows rather than the visible ones — a collapsed group
-    // whose children are out of sight is exactly the row that must keep
-    // announcing `aria-expanded`.
     const tree = resolveTableGroupTree({
       collapsedGroupPaths: new Set([resolveGroupPathKey(paris)]),
       data: rows,
@@ -177,10 +149,6 @@ describe('resolveTableGroupTree', () => {
   });
 
   it('reads a rollup, whose parents follow their children and end at a grand total', () => {
-    // The shape #570 emits, and the one an adjacency walk gets wrong in three
-    // separate places. `[EMEA, Spain]` and `[EMEA, France]` are leaves; `[EMEA]`
-    // is their parent *and* is emitted after them; `[]` is the grand total,
-    // keyed by nothing.
     const emea = [{ columnKey: 'region', label: 'EMEA', value: 'EMEA' }];
     const spain = [
       ...emea,
@@ -201,22 +169,13 @@ describe('resolveTableGroupTree', () => {
       ],
     });
 
-    // Ancestry from the path, so a parent emitted last is still a parent.
     expect(tree.rowMeta?.map((meta) => meta.level)).toStrictEqual([2, 2, 1, 1]);
-    // The grand total is a *sibling* of the top-level groups, not their
-    // ancestor: read as an ancestor it would put the whole grid inside one
-    // collapsible subtree. Three roots would be wrong too — `[EMEA]` and `[]`
-    // are the only two rows at the top level.
     expect(tree.rowMeta?.map((meta) => meta.setSize)).toStrictEqual([
       2, 2, 2, 2,
     ]);
     expect(tree.rowMeta?.map((meta) => meta.posInSet)).toStrictEqual([
       1, 2, 1, 2,
     ]);
-    // And `[EMEA]` owns the two rows above it, so it can be folded. An
-    // adjacency test answers `false` here — the next row is shallower, not
-    // deeper — and withholds `aria-expanded` from the one row a reader most
-    // wants to close.
     expect(tree.rowMeta?.map((meta) => meta.hasChildren)).toStrictEqual([
       false,
       false,
@@ -237,7 +196,6 @@ describe('resolveTableGroupTree', () => {
       data: [groupRow(spain), subtotalRow(emea), subtotalRow([])],
     });
 
-    // Its child goes, it stays, and it still reports the child it is hiding.
     expect(tree.rows).toHaveLength(2);
     expect(tree.rowMeta?.[0]?.hasChildren).toBe(true);
     expect(tree.rowMeta?.[0]?.isExpanded).toBe(false);
@@ -258,11 +216,6 @@ describe('resolveTableGroupTree', () => {
 
   describe('the foldable set', () => {
     it('publishes every group that owns rows and renders one, and nothing else', () => {
-      // The same set the chevrons are drawn from, so "collapse all" and the
-      // per-row control cannot disagree about what is foldable (#774). Both
-      // roots own detail rows and Berlin also owns a deeper group, so all three
-      // are here — a detail row makes its group a parent as surely as a group
-      // row does.
       const { foldableGroupPaths } = tree(rows);
 
       expect(foldableGroupPaths.size).toBe(3);
@@ -274,12 +227,6 @@ describe('resolveTableGroupTree', () => {
     });
 
     it('keeps a group row standing through its own collapse', () => {
-      // The property "collapse all" rests on, and the one that makes a
-      // top-level group safe to fold: ancestry is read from a path's *proper*
-      // prefixes, so a collapse hides a group's descendants and never its own
-      // row. Both roots are foldable — they own rows — and folding every
-      // foldable path leaves one row per root plus anything that is nobody's
-      // descendant.
       const parisKey = resolveGroupPathKey(paris);
       const { foldableGroupPaths } = tree(rows);
 
@@ -300,9 +247,6 @@ describe('resolveTableGroupTree', () => {
     });
 
     it('offers no fold under `flat`, where no ancestor has a row of its own', () => {
-      // Every `flat` row carries the full key list, so `(Berlin)` is a parent
-      // and nothing renders it. Offering that fold hides both rows and leaves
-      // nothing behind to reopen it from — a one-way trip out of the data.
       const flat = [
         groupRow(berlinOpen),
         groupRow([
@@ -319,8 +263,6 @@ describe('resolveTableGroupTree', () => {
     });
 
     it('offers the same path under rollup, where the subtotal survives the fold', () => {
-      // The discriminating pair: identical deepest rows, one subtotal added.
-      // If the answer came from parenthood alone both cases would fold.
       const rollup = [groupRow(berlinOpen), subtotalRow(berlin)];
       const { foldableGroupPaths, rowMeta } = tree(rollup);
 

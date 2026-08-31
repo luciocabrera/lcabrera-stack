@@ -5,15 +5,6 @@ type ResolveDeclaredGroupingKeysArgs<TData> = {
   readonly groupingKeys: readonly string[];
 };
 
-/**
- * Grouping configuration is URL state, so it can name a column the consumer never declared
- * — a shared link from a route with a different column set, or a hand-edited param.
- * `withGroupedColumnLayout` hoists only declared keys, so a render path that disagreed
- * would drift on exactly the row nobody tests: with an undeclared key first,
- * `resolveGroupKeyCellText` would look for the grand total in a column that is never
- * painted, and the one row a rollup exists to produce would render as a bare line of
- * aggregates with nothing saying what they total.
- */
 export const resolveDeclaredGroupingKeys = <TData>({
   columns,
   groupingKeys,

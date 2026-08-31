@@ -68,14 +68,6 @@ const readOptions = () => ({
   only: flagValue('--pr'),
 });
 
-/**
- * A decision the model never produced.
- *
- * The failure direction matters: a model that times out, or answers off-schema,
- * must not leave a PR with no verdict — an absent verdict reads as "nothing to do
- * here" on the next pass. Policy S10 says the opposite, so a failed run becomes
- * an explicit escalation carrying the reason.
- */
 const failedDecision = (reason) => ({
   actions: [],
   evidence: [{ observation: reason, probe: 'headless claude decide pass' }],
@@ -84,7 +76,6 @@ const failedDecision = (reason) => ({
   verdict: 'ESCALATE',
 });
 
-/** A verdict forced by the operator itself, bypassing the model. */
 const forcedDecision = ({ reason, ruleIds }) => ({
   actions: [],
   evidence: [
@@ -95,7 +86,6 @@ const forcedDecision = ({ reason, ruleIds }) => ({
   verdict: 'ESCALATE',
 });
 
-/** One PR: mechanical ceiling, then the model, then the ceiling enforced again. */
 const decide = ({ binary, gate, model, policy, position, pr }) => {
   if (gate.stops.length > 0) {
     const triggers = gate.stops
@@ -136,7 +126,6 @@ const decide = ({ binary, gate, model, policy, position, pr }) => {
       };
 };
 
-/** Escalation propagates downstream (policy §1) once every PR has a verdict. */
 const propagateEscalations = (entries, edges) => {
   const roots = entries
     .filter((entry) => entry.decision.verdict === 'ESCALATE')
@@ -157,7 +146,6 @@ const propagateEscalations = (entries, edges) => {
   );
 };
 
-/** Runs the apply pass over the entries the decision log authorised. */
 const applyDecisions = ({ entries, model, policy }) => {
   for (const entry of entries) {
     if (!['ACT', 'ENQUEUE'].includes(entry.decision.verdict)) {

@@ -40,7 +40,6 @@ import {
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const TARGET = join(REPO_ROOT, 'AGENTS.md');
 
-/** The deliberate body: markers kept, nothing rendered, and the why recorded. */
 const EMPTY_BODY = `
 
 <!-- Deliberately empty, and gated by \`vp run viteplus:verify\`. Vite+ rewrites

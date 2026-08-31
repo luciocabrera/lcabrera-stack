@@ -22,7 +22,6 @@ const VERDICT_MARK = {
 const bullet = (lines, empty) =>
   lines.length === 0 ? `_${empty}_` : lines.map((l) => `- ${l}`).join('\n');
 
-/** One PR's section: verdict, why, what was probed, and what happens next. */
 export const renderEntry = (entry) => {
   const { decision, gate, position, pr } = entry;
   return `
@@ -71,7 +70,6 @@ ${bullet(
 const countBy = (entries, verdict) =>
   entries.filter((entry) => entry.decision.verdict === verdict).length;
 
-/** The at-a-glance table — merge order top to bottom, so it reads as a plan. */
 export const renderSummary = (entries) =>
   [
     '| # | PR | Verdict | Rules | Next action |',
@@ -83,7 +81,6 @@ export const renderSummary = (entries) =>
     }),
   ].join('\n');
 
-/** The whole log. `mode` is the one thing a reader must not have to infer. */
 export const renderLog = ({ entries, mode, pass }) => `# PR queue decision log
 
 - **Pass**: ${pass.startedAt}
@@ -102,7 +99,6 @@ ${renderSummary(entries)}
 ${entries.map(renderEntry).join('\n---\n')}
 `;
 
-/** The diffable form. Same content, no prose — a later pass compares to this. */
 export const toJson = ({ entries, mode, pass }) => ({
   decisions: entries.map((entry) => ({
     actions: entry.decision.actions,

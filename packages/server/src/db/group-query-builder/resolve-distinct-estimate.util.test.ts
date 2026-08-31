@@ -49,16 +49,12 @@ describe('resolveDistinctEstimate', () => {
     ).toEqual({ kind: 'unknown' });
   });
 
-  // The distinction ADR-058 turns on: both cases have "no usable number", and
-  // conflating them is what points the safety valve at the unsafe branch.
   it('keeps undefined distinctness apart from unavailable statistics', () => {
     const undefinedDistinctness = resolveDistinctEstimate({
       hasStats: true,
       nDistinct: 0,
       relTuples: 2000,
     });
-    // Both rows carry the same zero — the query coalesces the absent case — so
-    // `hasStats` is the only thing telling them apart.
     const unavailable = resolveDistinctEstimate({
       hasStats: false,
       nDistinct: 0,

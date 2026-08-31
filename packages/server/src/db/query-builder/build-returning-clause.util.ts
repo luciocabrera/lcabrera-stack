@@ -7,14 +7,6 @@ type BuildReturningClauseArgs = {
   readonly returning?: readonly string[];
 };
 
-/**
- * Shared `RETURNING` builder:
- * - omitted or empty → no clause
- * - `['*']` alone → `RETURNING *` (`*` is a token, not an identifier)
- * - any other list is an explicit projection through `assertSafeIdentifier` plus opt-in
- *   `assertColumnAllowed`
- * `*` mixed with real column names is rejected — it is only valid on its own.
- */
 export const buildReturningClause = ({
   allowedColumns,
   returning,

@@ -4,7 +4,6 @@ import { styles } from './ServerRack.stylex';
 
 export const ServerRack = () => (
   <g transform='translate(28,62)'>
-    {/* server body (stacked panels) */}
     <rect
       {...stylex.props(styles.serverFill)}
       height='18'
@@ -29,7 +28,6 @@ export const ServerRack = () => (
       x='0'
       y='48'
     />
-    {/* front panel details */}
     <g {...stylex.props(styles.serverDetail)} transform='translate(10,4)'>
       <circle cx='0' cy='5' fill='currentColor' fillOpacity='0.95' r='2.6' />
       <circle cx='14' cy='5' fill='currentColor' fillOpacity='0.6' r='2.6' />
@@ -46,7 +44,6 @@ export const ServerRack = () => (
       <rect fill='none' height='12' rx='3' width='56' x='36' y='-3' />
     </g>
 
-    {/* subtle database cylinder hint on the left edge */}
     <g transform='translate(-8,6)'>
       <ellipse
         cx='8'

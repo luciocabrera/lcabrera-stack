@@ -1,12 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Email format regex, shared by the Zod gate and the Form field's
- * `clientValidation.pattern` so the browser-side and server-side checks can never
- * disagree.
- * Deliberately a regex (not Zod's `.email()`) to showcase the `pattern` validation kind
- * end to end.
- */
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+\.[^\s@]+$/;
 
 export const PASSWORD_MIN_LENGTH = 8;

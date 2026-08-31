@@ -79,14 +79,6 @@ const CONFIG = {
   mainBranch: process.env.SONAR_MAIN_BRANCH ?? 'main',
 };
 
-// --- pure helpers ---------------------------------------------------------
-
-/**
- * Flags that simply flip a boolean, and flags that consume the next argv value.
- * Table-driven so adding a flag is a table entry, not another branch: this
- * function is on the strictest cognitive-complexity budget in the repo and a
- * per-flag `if` chain had already outgrown it.
- */
 const BOOLEAN_FLAGS = new Map([
   ['--gate', 'gate'],
   ['--fail-on-issues', 'failOnIssues'],
@@ -139,18 +131,15 @@ const parseArgs = (argv) => {
   };
 };
 
-/** Current branch from `.git/HEAD` — filesystem only, no subprocess (S4036). */
 const currentBranch = () => {
   const head = join(REPO_ROOT, '.git/HEAD');
   if (!existsSync(head)) return undefined;
   const ref = /^ref:\s+refs\/heads\/(.+)$/.exec(
     readFileSync(head, 'utf8').trim(),
   );
-  return ref?.[1]; // detached HEAD → undefined
+  return ref?.[1];
 };
 
-/** Resolve what to query. `explicit` marks a user-supplied target (skips the
- *  feature-branch hint). */
 const resolveTarget = (args) => {
   if (args.pr !== undefined) {
     return {
@@ -181,8 +170,6 @@ const normIssue = (issue) => {
     line: issue.line ?? null,
     message: issue.message,
     effort: issue.effort ?? null,
-    // Sonar returns tags/impacts in an unstable order; sort so the tracked
-    // report is byte-identical run to run (no git churn).
     tags: (issue.tags ?? []).toSorted(),
     impacts: (issue.impacts ?? []).toSorted(
       (a, b) =>
@@ -220,7 +207,6 @@ const normGate = (projectStatus) => ({
     .toSorted((a, b) => a.metric.localeCompare(b.metric)),
 });
 
-/** Stable ordering so an unchanged tree writes a byte-identical report. */
 const byLocation = (a, b) =>
   (a.file ?? '').localeCompare(b.file ?? '') ||
   (a.line ?? 0) - (b.line ?? 0) ||
@@ -243,10 +229,6 @@ const buildReport = (target, gate, issues, hotspots, analysisDate, scope) => {
     project: CONFIG.project,
     source: CONFIG.base,
     target,
-    // The analysis this snapshot came from, so a reader of the tracked file can
-    // tell an old result from a current one. Still deterministic: it is a
-    // property of the analysis, not of the run, so two fetches of the same
-    // analysis produce identical bytes. Only a genuinely new analysis moves it.
     analysisDate: analysisDate ?? null,
     qualityGate: normGate(gate),
     summary: {
@@ -254,11 +236,6 @@ const buildReport = (target, gate, issues, hotspots, analysisDate, scope) => {
       hotspots: normHotspots.length,
       bySeverity: countBy(normIssues, (i) => i.severity),
       byType: countBy(normIssues, (i) => i.type),
-      // What a zero above does NOT tell you on its own. `accepted` counts
-      // findings reviewed and marked rather than fixed; `analysed` records the
-      // lines actually indexed, per language. Without these, a clean project,
-      // a project whose every finding was accepted, and a project whose files
-      // are excluded from analysis all render identically.
       accepted: scope.accepted.length,
       acceptedByRule: countBy(scope.accepted, (i) => i.rule),
       analysed: scope.measures,
@@ -268,7 +245,6 @@ const buildReport = (target, gate, issues, hotspots, analysisDate, scope) => {
   };
 };
 
-/** Gate failures as a list of human-readable problems (empty = pass). */
 const gateProblems = (report, failOnIssues) => {
   const problems = [];
   if (report.qualityGate.status !== 'OK') {
@@ -290,15 +266,11 @@ const gateProblems = (report, failOnIssues) => {
   return problems;
 };
 
-// --- effects (edges) ------------------------------------------------------
-
 const loadEnv = () => {
   const envFile = join(REPO_ROOT, '.env');
   if (existsSync(envFile)) process.loadEnvFile(envFile);
 };
 
-/** Writes to the path the TARGET earns, so concurrent runs on different targets
- *  cannot overwrite each other (see `sonar-report-path.mjs`). */
 const writeReport = (report, outRel) => {
   const outPath = join(REPO_ROOT, outRel);
   mkdirSync(dirname(outPath), { recursive: true });
@@ -308,8 +280,6 @@ const writeReport = (report, outRel) => {
 const printSummary = (report, outRel) => {
   const parts = summaryLines(report, outRel, Date.now());
   for (const line of parts.findings) console.log(logSafe(line));
-  // A stale freshness note goes to stderr so it survives a `| tail` or a grep
-  // for the gate line — how a ten-day-old analysis got read as current once.
   const emit = parts.stale ? console.warn : console.log;
   for (const line of parts.freshness) emit(logSafe(line));
   console.log(logSafe(parts.written));
@@ -372,8 +342,6 @@ const printBranchHint = (branch) => {
     '  vp run sonar:report -- --branch main   # or the main snapshot',
   );
 };
-
-// --- orchestration --------------------------------------------------------
 
 const main = async () => {
   loadEnv();

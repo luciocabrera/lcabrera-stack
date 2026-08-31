@@ -20,7 +20,6 @@ import {
   retryDelayMs,
 } from './fetch-retry.mjs';
 
-/** A `fetch` stub returning each scripted outcome in turn. */
 const scripted = (outcomes) => {
   const calls = [];
   const attempt = () => {
@@ -44,8 +43,6 @@ describe('isRetryableStatus', () => {
   );
 
   it.each([200, 201, 400, 401, 403, 404, 422])('never retries %i', (status) => {
-    // A 4xx is the server saying the request is wrong. Repeating it spends the
-    // budget and delays the real message.
     expect(isRetryableStatus(status)).toBe(false);
   });
 });
@@ -120,8 +117,6 @@ describe('fetchWithRetry', () => {
   });
 
   it('returns the last response rather than throwing when it is a status', async () => {
-    // A persistent 503 stays a 503, so the caller's own error message — which
-    // names what it was doing — is what the operator reads.
     const { attempt } = scripted([503, 503, 503]);
 
     const response = await fetchWithRetry(attempt, {

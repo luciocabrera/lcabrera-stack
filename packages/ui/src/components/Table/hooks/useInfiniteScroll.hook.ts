@@ -17,7 +17,6 @@ type UseInfiniteScrollArgs<TData, TResponse> = InfiniteScroll<
     'hasMore' | 'isLoadingMore'
   >) => Promise<void>;
   scrollContainerRef: RefObject<HTMLElement | null>;
-  /** Reference to the sentinel element rendered at the end of the scrollable content */
   sentinelRef: RefObject<HTMLElement | null>;
   threshold: number;
 };

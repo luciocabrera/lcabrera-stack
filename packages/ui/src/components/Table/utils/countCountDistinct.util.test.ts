@@ -13,8 +13,6 @@ describe('countCountDistinct', () => {
   });
 
   it('counts across columns, since the budget is per read', () => {
-    // The discriminating case for both predicates above it: a count scoped to
-    // one column would answer 1 here and let a second distinct count through.
     expect(
       countCountDistinct([
         { columnKey: 'order_status', fn: 'countDistinct' },
@@ -24,8 +22,6 @@ describe('countCountDistinct', () => {
   });
 
   it('counts only countDistinct, not count', () => {
-    // The two share one SQL function and differ by the `DISTINCT` keyword, so a
-    // predicate matching on the SQL name would conflate them.
     expect(
       countCountDistinct([
         { columnKey: 'order_status', fn: 'count' },

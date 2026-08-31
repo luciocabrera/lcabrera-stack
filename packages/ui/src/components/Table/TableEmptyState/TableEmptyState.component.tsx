@@ -10,12 +10,6 @@ import { styles } from './TableEmptyState.stylex';
 import { TableEmptyStateAction } from './TableEmptyStateAction/TableEmptyStateAction.component';
 import { TableEmptyStateMessage } from './TableEmptyStateMessage/TableEmptyStateMessage.component';
 
-/**
- * The content is pinned (`position: sticky`) and sized to the scroll container's viewport
- * minus the sticky header height, so it stays centered in the visible body area — both
- * axes — without introducing a vertical scrollbar, even when the table body overflows
- * horizontally.
- */
 export const TableEmptyState = () => {
   const { centerCols, leftPinnedCols, rightPinnedCols } =
     useGetPinnedColumnPartition();
@@ -32,8 +26,6 @@ export const TableEmptyState = () => {
   const viewportHeight =
     containerHeight > 0 ? Math.max(0, containerHeight - headerHeight) : 0;
 
-  // Track the sticky header's border-box height (offsetHeight) so the empty
-  // state can fill exactly the remaining visible body area.
   useResizeObserver({
     getTarget: () => containerRef.current?.querySelector<HTMLElement>('thead'),
     onMeasure: (header) => {

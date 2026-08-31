@@ -14,7 +14,6 @@ export const useDraggableList = ({
   const dragItemId = useRef<string | undefined>(undefined);
   const dragOverItemId = useRef<string | undefined>(undefined);
 
-  // Sync local state with prop changes (adjust state during render, not in an effect)
   if (prevInitialItems !== initialItems) {
     setPrevInitialItems(initialItems);
     setItems([...initialItems]);

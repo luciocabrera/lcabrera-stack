@@ -15,10 +15,6 @@ export type ParsedWideAlltypes150PageParams = {
   readonly sorting: ReturnType<typeof sanitizeSorting<WideAlltypes150>>;
 };
 
-/**
- * Narrowing the sort to what the table can order by is the service's job, not this
- * parser's — the SSR loader never passes through here and needs the same narrowing.
- */
 export const parseWideAlltypes150PageParams = (
   params: URLSearchParams,
 ): ParsedWideAlltypes150PageParams => {

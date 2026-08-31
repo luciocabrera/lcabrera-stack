@@ -74,7 +74,6 @@ describe('withAggregateColumns', () => {
       ],
     });
 
-    // In place: the measures sit where `total_amount` sat, not at the end.
     expect(keysOf(result)).toStrictEqual([
       'order_id',
       'customer_type',
@@ -119,14 +118,12 @@ describe('withAggregateColumns', () => {
     const count = columnAt({ key: 'total_amount:count', result });
 
     expect(sum).toMatchObject({
-      // A sum of money is money.
       dataType: 'currency',
       format: { currency: { currency: 'USD' } },
       headerGroupLabel: 'Total Amount',
       label: 'Sum',
       minWidth: 160,
     });
-    // A tally is never money, whatever it is a tally of.
     expect(count?.dataType).toBe('number');
     expect(count?.label).toBe('Count');
   });
@@ -231,12 +228,6 @@ describe('a persisted layout that already names a measure column', () => {
   ];
 
   it('does not emit the same column twice in the order', () => {
-    // Reachable by pinning a measure before this was fixed, and reachable
-    // forever after through a cookie written by an older build: the order
-    // names `total_amount:avg` *and* the source column it comes from.
-    // `orderColumnsByKeys` resolves both entries to the same column object, so
-    // without deduplication two identical `Average` columns render with
-    // duplicate React keys.
     const result = run({
       aggregates,
       columnOrder: [
@@ -280,11 +271,6 @@ describe('hiding a measured column', () => {
   ];
 
   it('hides the measures that replaced it', () => {
-    // The settings drawer builds its rows from the **declared** columns, which
-    // this derivation deliberately never rewrites — so hiding `Total Amount`
-    // writes `total_amount`, a key `gridColumns` no longer holds. Before this,
-    // `getEffectiveColumns` filtered nothing and the drawer drew the column as
-    // hidden while the grid kept painting both measures under its band.
     const result = run({
       aggregates,
       columnVisibility: new Set(['total_amount']),
@@ -297,8 +283,6 @@ describe('hiding a measured column', () => {
   });
 
   it('leaves a directly-hidden measure hidden', () => {
-    // The header menu writes the derived key, and that path already worked.
-    // A key that is not a source column passes through as itself.
     const result = run({
       aggregates,
       columnVisibility: new Set(['total_amount:avg']),
@@ -339,11 +323,6 @@ describe('a measured column the consumer locked', () => {
     }).columns.find(({ key }) => String(key) === 'total_amount:avg');
 
   it('carries the lock onto the measure that replaced it', () => {
-    // Every layout action on a measure resolves to the source column, so a
-    // measure that resolves `isStatic: false` is a lock with a way around it:
-    // the header menu offered Pin/Hide on the measure, and the write landed on
-    // the locked source. `staticKeys` is built from the declared columns and
-    // could never have caught it.
     expect(measureOfLocked()).toMatchObject({
       isResizable: false,
       isStatic: true,
@@ -351,8 +330,6 @@ describe('a measured column the consumer locked', () => {
   });
 
   it('still describes the measure’s own data, not the source’s', () => {
-    // The locks carry; the data capabilities do not. A measure summarises rows
-    // the grid does not hold whatever its source allows.
     expect(measureOfLocked()).toMatchObject({
       isFilterable: false,
       isGroupable: false,

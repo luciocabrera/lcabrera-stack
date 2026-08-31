@@ -68,8 +68,6 @@ describe('FormFieldRow', () => {
     const [first, second] = [
       ...(container.firstElementChild?.children ?? []),
     ] as HTMLElement[];
-    // Dynamic StyleX writes the grow factor as an inline custom property, so a
-    // span-3 cell resolves to different inline styling than the span-1 cell.
     expect(first?.getAttribute('style')).not.toBe(
       second?.getAttribute('style'),
     );

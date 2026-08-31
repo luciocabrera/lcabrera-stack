@@ -33,7 +33,7 @@ describe('getPinnedColumnOffsets', () => {
     });
     expect(result.id?.offset).toBe(0);
     expect(result.id?.side).toBe('left');
-    expect(result.name?.offset).toBe(60); // id.minWidth
+    expect(result.name?.offset).toBe(60);
     expect(result.name?.side).toBe('left');
   });
 
@@ -55,7 +55,7 @@ describe('getPinnedColumnOffsets', () => {
     });
     expect(result.actions?.offset).toBe(0);
     expect(result.actions?.side).toBe('right');
-    expect(result.age?.offset).toBe(100); // actions.minWidth
+    expect(result.age?.offset).toBe(100);
   });
 
   it('marks first right pinned column as isFirstPinnedRight', () => {
@@ -75,7 +75,7 @@ describe('getPinnedColumnOffsets', () => {
       columnSizing: sizing,
       effectiveColumns: columns,
     });
-    expect(result.name?.offset).toBe(200); // uses columnSizing for id
+    expect(result.name?.offset).toBe(200);
   });
 
   it('marks last left pinned by effective order when pinning order diverges', () => {

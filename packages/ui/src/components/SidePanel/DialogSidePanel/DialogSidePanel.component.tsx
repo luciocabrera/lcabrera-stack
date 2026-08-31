@@ -7,11 +7,6 @@ import type { DialogSidePanelProps } from './DialogSidePanel.types';
 
 import { sidePanelStyles } from '../SidePanel.stylex';
 
-/**
- * Overlay SidePanel variant backed by a native `<dialog>`. Unmounting (e.g. switching to
- * the pinned variant) removes the dialog from the document, which closes it natively — no
- * pinned-mode guards needed.
- */
 export const DialogSidePanel = ({
   children,
   isOpen,
@@ -43,7 +38,6 @@ export const DialogSidePanel = ({
     if (!dialog) return;
 
     if (isOpen) {
-      // Use showModal() for backdrop support
       if (shouldShowOverlay) {
         dialog.showModal();
       } else {
@@ -54,7 +48,6 @@ export const DialogSidePanel = ({
     }
   }, [isOpen, shouldShowOverlay]);
 
-  // Handle native dialog close event (ESC key)
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;

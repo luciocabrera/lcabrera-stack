@@ -50,20 +50,12 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 
-/** The name and version `changeset publish` would compare with the registry. */
 const readReleaseTargets = () =>
   readPublishableManifests(REPO_ROOT).map(({ name, version }) => ({
     name,
     version,
   }));
 
-/**
- * The abbreviated packument answers both questions at once — `dist-tags` for
- * what is current, `versions` for whether this one is already up. The failure
- * semantics that matter here (a 404 is "never published"; anything else
- * rethrows, so an outage never reads as "nothing is published") live in
- * `registry-packument.mjs`, shared with `audit-release.mjs`.
- */
 const classifyPackage = async ({ name, version }) => {
   const packument = await fetchPackument(name);
 

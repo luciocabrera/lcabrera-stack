@@ -76,16 +76,6 @@ export const checkoutIsolationFinding = ({
       };
 };
 
-/**
- * The effectful half: reads the four facts from a checkout. Kept beside the
- * decision rather than inside it, so the table above stays testable without a
- * filesystem or a git binary.
- *
- * `--untracked-files=no` is deliberate — untracked files survive a branch
- * switch, so they are not what makes `git checkout main` unsafe; only tracked
- * modifications are. An unreadable git answer counts as dirty, because the
- * conservative direction is the one that downgrades a failure to a warning.
- */
 export const readCheckoutFacts = (repoRoot) => {
   const gitEntry = join(repoRoot, '.git');
   const status = runGit({

@@ -12,8 +12,6 @@ export const FormField = <TValues extends Record<string, unknown>>({
 }: FormFieldProps<TValues>) => {
   const mode = useGetFormMode();
 
-  // View mode renders each leaf as read-only label + value text rather than a
-  // disabled widget (custom fields keep their own escape-hatch renderer).
   if (mode === 'view' && field.type !== 'custom') {
     return <FormFieldDisplay field={field} />;
   }

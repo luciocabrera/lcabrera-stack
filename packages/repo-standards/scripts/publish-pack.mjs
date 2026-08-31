@@ -19,14 +19,6 @@ import { delimiter, join } from 'node:path';
 
 import { createPackageFromTarballData } from '@arethetypeswrong/core';
 
-/**
- * The pnpm executable as an absolute path.
- *
- * Resolved from PATH here rather than from a fixed system directory as
- * `git-exec.mjs` does: pnpm is not a system binary but the toolchain's own,
- * wherever the runner put it. Naming the file outright still removes the lookup
- * from the spawn itself (Sonar S4036).
- */
 const pnpmBinary = () =>
   (process.env.PATH ?? '')
     .split(delimiter)
@@ -34,13 +26,6 @@ const pnpmBinary = () =>
     .map((directory) => join(directory, 'pnpm'))
     .find((candidate) => existsSync(candidate));
 
-/**
- * Packs one package with pnpm; returns the tarball path.
- *
- * Throws when pnpm is missing rather than returning "nothing to check" — a
- * publishing gate that cannot produce the artifact has verified nothing, and
- * saying so is the whole point of this file.
- */
 const packPackage = ({ destination, directory }) => {
   const binary = pnpmBinary();
   if (binary === undefined) {
@@ -65,12 +50,6 @@ const packPackage = ({ destination, directory }) => {
   return filename;
 };
 
-/**
- * The packed tarball as a consumer would find it under `node_modules`: the
- * published manifest, the file list relative to the package root, and a reader
- * for the contents. Backed by the same unpacker attw uses, so the gate does not
- * carry a tar implementation of its own.
- */
 const readPackedPackage = (tarballPath) => {
   const packed = createPackageFromTarballData(
     new Uint8Array(readFileSync(tarballPath)),
@@ -84,6 +63,5 @@ const readPackedPackage = (tarballPath) => {
   };
 };
 
-/** Packs a package and reads the result back, in one step. */
 export const packAndRead = ({ destination, directory }) =>
   readPackedPackage(packPackage({ destination, directory }));

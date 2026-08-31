@@ -47,9 +47,6 @@ vi.mock('@lcabrera/server/db/select-grouped-rows.util', () => ({
     groupingSetMasks: [0],
     keys: ['order_status'],
     maskAlias: 'group_mask',
-    // Parsed rather than written as literals: a NULL group key and a bigint
-    // count arriving as a string are what `pg` actually hands back, and the
-    // second group exists to exercise exactly that.
     rows: JSON.parse(
       '[{"count_rows":"12","group_mask":0,"order_status":"Shipped"},{"count_rows":"3","group_mask":0,"order_status":null}]',
     ) as readonly Record<string, unknown>[],
@@ -162,7 +159,6 @@ it('reports the end of the set when a page comes back short of its limit', async
     sort: [],
   });
 
-  // The mock returns one row for a limit of ten.
   expect(page.hasMore).toBe(false);
 });
 
@@ -196,8 +192,6 @@ it('raises a zero window to one row', async () => {
 
   const [descriptor] = vi.mocked(selectRows).mock.calls[0] ?? [];
 
-  // `LIMIT 0` is a page with no rows and a `hasMore` that says the set is
-  // exhausted, which ends a scroll session silently.
   expect(descriptor?.limit).toBe(1);
 });
 
@@ -249,9 +243,6 @@ it('orders a grouped read by the bounded sort too', async () => {
     ),
   });
 
-  // The grouped read emits one term per key rather than one per sort entry, so
-  // what the bound protects here is the lookup: it reads a sort the builder
-  // would have accepted, not one that grew without limit.
   const [descriptor] = vi.mocked(selectGroupedRows).mock.calls[0] ?? [];
 
   expect(descriptor?.sort).toStrictEqual([
@@ -368,9 +359,6 @@ it('emits the rollup mode the grouping configuration asked for', async () => {
 });
 
 it('carries a user sort on a group key into the grouped read', async () => {
-  // Criterion 4 end to end: the direction has to reach the builder for the
-  // hierarchy to be able to hold under it. Hard-coding `asc` here would drop a
-  // user's sort silently, and the builder's own test could not see it.
   await selectOrdersPage({
     filters: [],
     grouping: grouping({ keys: ['order_status', 'shipping_country'] }),
@@ -382,8 +370,6 @@ it('carries a user sort on a group key into the grouped read', async () => {
 
   expect(selectGroupedRows).toHaveBeenCalledWith(
     expect.objectContaining({
-      // Nesting order is preserved and is not the sort's to change: the user's
-      // direction sets a level, it does not reorder the levels.
       sort: [
         { direction: 'desc', key: 'order_status' },
         { direction: 'asc', key: 'shipping_country' },
@@ -433,9 +419,6 @@ it('runs the grouped read when the loader applied a group key', async () => {
       table: 'enterprise_orders',
     }),
   );
-  // The NULL group's two fields disagree, and that is the point of #775: it
-  // renders as `(empty)` and queries as `null`. Parsed from JSON so the
-  // expected `null` is the shape the driver actually hands back.
   expect(page.data).toStrictEqual(
     JSON.parse(`[
       {
@@ -496,10 +479,6 @@ it('requests the selected aggregates beside the row count, and never a filtered 
     sort: [],
   });
 
-  // `count(*)` first, then the selection. No `filters` on any of them: a
-  // filtered aggregate has no slot in the URL param this configuration arrives
-  // through, and `UnfilteredOrderAggregate` removes the slot from what this
-  // service builds — so it is unrequestable here, not merely unrequested (#569).
   const [descriptor] = vi.mocked(selectGroupedRows).mock.calls.at(-1) ?? [];
 
   expect(descriptor?.aggregates).toStrictEqual([
@@ -521,8 +500,6 @@ it('returns the whole grouped result at once, because it is not paginated', asyn
     sort: [],
   });
 
-  // `limit: 1` is deliberately smaller than the result: a grouped read has no
-  // cursor to resume from, so it must not report more to come.
   expect(page.hasMore).toBe(false);
   expect(page.total).toBe(2);
   expect(page.data).toHaveLength(2);
@@ -595,9 +572,6 @@ it('maps a cancelled query to the union arm the edge branches on', async () => {
 });
 
 it('returns an error the single-fetch boundary cannot flatten', async () => {
-  // The discriminating half: `Error.message` is non-enumerable, so returning
-  // the class itself would put a payload carrying no message on the wire. The
-  // union carries the same sentence as an ordinary own property.
   const refusal = new GroupingRefusedError({
     message: 'too deep',
     reason: 'too-many-keys',
@@ -639,8 +613,6 @@ it('carries a stats-unavailable warning beside real rows', async () => {
     sort: [],
   });
 
-  // A warning is not an error: the data is real, and the operator learns why it
-  // was expensive.
   expect(page.groupingWarning).toStrictEqual({
     columns: ['order_status'],
     kind: 'stats-unavailable',

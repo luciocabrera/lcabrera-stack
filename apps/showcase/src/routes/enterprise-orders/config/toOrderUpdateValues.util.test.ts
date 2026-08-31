@@ -23,7 +23,6 @@ it('recomputes the money totals from the edited inputs', () => {
     now,
   });
 
-  // subtotal = 50 * 4 = 200 -> same totals as the fixture's 100 * 2
   expect(values.subtotal).toBe(200);
   expect(values.total_amount).toBe(199.4);
 });

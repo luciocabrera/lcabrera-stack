@@ -7,9 +7,6 @@ import { manifestAfter, planSync } from './sync.mjs';
 
 const emptyManifest = { files: {} };
 
-// ONE asset, planned against three trees. A gate that refused everything would
-// pass the first two of these and fail the third; a gate that was never wired
-// would pass the third and fail the first two.
 const declaringAsset = {
   content: [
     '---',
@@ -61,8 +58,6 @@ describe('planSync and a declared peer', () => {
   });
 
   test('an unmet peer never reaches the record sync writes', () => {
-    // What makes `sync` and `doctor` agree: both classify through planSync, and
-    // the only thing sync does extra is gated on these predicates.
     const [entry] = planFor(new Map());
     expect(
       manifestAfter({
@@ -75,9 +70,6 @@ describe('planSync and a declared peer', () => {
   });
 
   test('refuses it in every spelling of the same declaration', () => {
-    // A spelling the reader cannot see reads as no declaration, so the file is
-    // written into a consumer whose runtime cannot run it and nothing says so —
-    // the gate failing open, which is indistinguishable from it passing.
     const spellings = {
       'block sequence': [
         'peer:',
@@ -127,8 +119,6 @@ describe('planSync and a declared peer', () => {
   });
 
   test('an unmet config key is still reported first, and as itself', () => {
-    // Both declarations unsatisfiable at once. They share a state, so the thing
-    // that must not blur is which remediation the consumer is handed.
     const [entry] = planSync({
       assets: [
         {
@@ -153,8 +143,6 @@ describe('planSync and a declared peer', () => {
 
 describe('renderPlan and an unmet peer', () => {
   test('names the peer, and does not call it a config key', () => {
-    // One state, two remediations: `devkit.config.json` cannot fix a peer, and a
-    // report that said so would send the consumer to the wrong file.
     expect(
       renderPlan([
         {

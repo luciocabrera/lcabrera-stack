@@ -44,15 +44,6 @@ describe('getOperatorOptions', () => {
   });
 
   it('offers the empty operators for every operator family', () => {
-    // Emptiness is not a comparison and has no family: the data type decides
-    // which comparisons make sense, not whether a column can hold nothing. A
-    // list missing these is a column a user cannot ask the question of.
-    //
-    // `'boolean'` is deliberately absent. `FilterInputs` returns
-    // `BooleanFilterInput` for a boolean column before any `OperatorSelect` is
-    // rendered, so nothing ever reads this list for one — asserting it here
-    // would pass whether or not a boolean column offered the operators, which
-    // is no assertion at all. `BooleanFilterInput`'s own test covers that path.
     const dataTypes: readonly (TableColumnDataType | undefined)[] = [
       'currency',
       'date',

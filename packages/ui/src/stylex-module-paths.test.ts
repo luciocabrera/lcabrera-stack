@@ -28,8 +28,6 @@ const packageRoot = path.resolve(
   '..',
 );
 
-// Order is irrelevant — both tests compare by membership — so this is left
-// unsorted. The recorded JSON is sorted purely so its diffs stay readable.
 const currentStylexModulePaths = readdirSync(path.resolve(packageRoot, 'src'), {
   encoding: 'utf8',
   recursive: true,

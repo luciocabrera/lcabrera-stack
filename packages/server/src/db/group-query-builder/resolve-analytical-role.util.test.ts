@@ -25,9 +25,6 @@ describe('resolveAnalyticalRole', () => {
   );
 
   it('reads interval as a fact rather than a date-like dimension', () => {
-    // `interval` sits in its own category, not `D`, and the split is the useful
-    // one: a duration is a measure you sum, where a timestamp is a label you
-    // group by. Gate 2 then confirms Postgres really does define `sum(interval)`.
     expect(
       resolveAnalyticalRole({
         typeCategory: 'T',
@@ -66,10 +63,6 @@ describe('resolveAnalyticalRole', () => {
   );
 
   it('admits uuid by name while its category stays refused', () => {
-    // The pair that defines the exception. Both rows are category `U`; nothing
-    // structural separates them, so the name is the only thing that can. This
-    // fails in one direction if the name check is dropped, and in the other if
-    // someone reaches the uuid by adding `U` to the category table.
     expect(
       resolveAnalyticalRole({
         typeCategory: 'U',
@@ -87,10 +80,6 @@ describe('resolveAnalyticalRole', () => {
   });
 
   it('refuses a uuid-named type from another schema', () => {
-    // Type names are per-schema, so `CREATE TYPE app.uuid AS (a int, b int)` is
-    // a composite reporting `typname = 'uuid'`. Matching the bare name would
-    // admit it as a dimension — a type the Table cannot render, which is exactly
-    // what this gate exists to refuse.
     expect(
       resolveAnalyticalRole({
         typeCategory: 'C',
@@ -101,8 +90,6 @@ describe('resolveAnalyticalRole', () => {
   });
 
   it('admits a uuid whatever category a future Postgres files it under', () => {
-    // The name check runs first, so a recategorised `uuid` keeps working. The
-    // point of naming it was never the category it happens to sit in.
     expect(
       resolveAnalyticalRole({
         typeCategory: 'Z',
@@ -113,8 +100,6 @@ describe('resolveAnalyticalRole', () => {
   });
 
   it('defaults an unrecognised category to unsupported', () => {
-    // The Gate 1 default that lets the `unsupported` list stay non-exhaustive:
-    // a category invented by a future Postgres release is refused, not offered.
     expect(
       resolveAnalyticalRole({
         typeCategory: 'Ω',

@@ -36,9 +36,6 @@ describe('toBuiltPaths', () => {
   });
 
   it('handles a .mjs source, which builds like any other entry', () => {
-    // @lcabrera/vite-config ships its ESLint flat configs as .mjs — flat config
-    // is JavaScript. Leaving the extension on produced `…config.mjs.d.mts`,
-    // which resolves for nobody and is exactly what this gate exists to catch.
     expect(toBuiltPaths('./src/eslint.custom-rules.shared.config.mjs')).toEqual(
       {
         default: './dist/eslint.custom-rules.shared.config.mjs',
@@ -48,7 +45,6 @@ describe('toBuiltPaths', () => {
   });
 
   it('only rewrites a leading ./src/, never a nested one', () => {
-    // A `src` segment deeper in the path is part of the module's own layout.
     expect(toBuiltPaths('./src/db/src-helpers/parse.util.ts').default).toBe(
       './dist/db/src-helpers/parse.util.mjs',
     );
@@ -96,8 +92,6 @@ describe('isPublishedTargetCorrect', () => {
   });
 
   it('rejects a published entry with no types', () => {
-    // A missing `types` degrades silently: the import resolves and every symbol
-    // is `any`, so nothing fails until a consumer trusts a wrong signature.
     expect(
       isPublishedTargetCorrect({
         published: { default: './dist/x.util.mjs' },
@@ -148,9 +142,6 @@ describe('isSourceTarget', () => {
 });
 
 describe('packedSurfaceProblems', () => {
-  // These run against the manifest and file list read back out of the tarball,
-  // which is the only place the pnpm-only publishConfig substitution has
-  // actually happened. The manifest on disk cannot answer any of them.
   const sourceExports = { './x.util': './src/x.util.ts' };
   const files = ['package.json', 'dist/x.util.mjs', 'dist/x.util.d.mts'];
   const label = 'packages/example';
@@ -172,9 +163,6 @@ describe('packedSurfaceProblems', () => {
   });
 
   it('rejects a tarball still exporting TypeScript source', () => {
-    // What `npm pack` produces: publishConfig.exports is a pnpm extension, so
-    // npm leaves `exports` pointing at ./src and the import throws
-    // ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING in a consumer.
     expect(
       packedSurfaceProblems({
         files: [...files, 'src/x.util.ts'],
@@ -186,8 +174,6 @@ describe('packedSurfaceProblems', () => {
   });
 
   it('rejects a target the tarball does not contain', () => {
-    // `files` can exclude a built file while `dist` is still listed, which
-    // every manifest-only check reads as healthy.
     expect(
       packedSurfaceProblems({
         files: ['package.json', 'dist/x.util.d.mts'],

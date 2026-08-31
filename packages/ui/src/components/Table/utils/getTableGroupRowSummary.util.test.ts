@@ -46,13 +46,6 @@ describe('getTableGroupRowSummary', () => {
   });
 
   it('keeps a SQL NULL aggregate rather than rejecting the summary', () => {
-    // `avg` over a group whose rows are all NULL returns SQL NULL. That is a
-    // value the cell renders as an absence, not a malformed summary — and it
-    // is why `value` is checked for presence rather than for type.
-    //
-    // Parsed rather than written as a literal, for the reason given below: a
-    // JSON `null` is exactly how such a value reaches a row across the loader
-    // boundary, and it is the shape under test rather than an incidental one.
     const aggregates = JSON.parse(
       '[{"columnKey":"unit_price","fn":"avg","value":null}]',
     ) as readonly unknown[];
@@ -65,7 +58,6 @@ describe('getTableGroupRowSummary', () => {
   });
 
   it('refuses an aggregate carrying no value at all', () => {
-    // The other side of that coin: absent is malformed where null is data.
     expect(
       getTableGroupRowSummary({
         [TABLE_GROUP_ROW_FIELD]: {
@@ -111,10 +103,6 @@ describe('getTableGroupRowSummary', () => {
   });
 
   it('accepts a NULL key value and refuses a path entry with no `value` key', () => {
-    // Presence, not type — the same distinction the aggregate side draws. A
-    // NULL key is a real group and must survive; an entry that never carried
-    // the field is malformed and must take the whole summary down, because a
-    // group described by some of its keys is not the group the row holds.
     const withNull = JSON.parse(
       '[{"columnKey":"order_status","label":"(empty)","value":null}]',
     ) as readonly unknown[];
@@ -123,11 +111,6 @@ describe('getTableGroupRowSummary', () => {
       getTableGroupRowSummary({
         [TABLE_GROUP_ROW_FIELD]: { ...summary, path: withNull },
       })?.path,
-      // Compared against the parsed input rather than a `null` literal, so the
-      // expected value has the shape a driver actually returns. `toStrictEqual`
-      // is deep equality, not identity — the guard rebuilds each entry in
-      // `toKeyValue`, so identity would fail here by design. What this pins is
-      // that the NULL survives the rebuild uncoerced.
     ).toStrictEqual(withNull);
 
     expect(
@@ -141,9 +124,6 @@ describe('getTableGroupRowSummary', () => {
   });
 
   it('reads an empty path as the grand total, not as a malformed summary', () => {
-    // A rollup's grand total is keyed by nothing, so an empty path is the one
-    // row it produces — refusing it would drop exactly the row rollup exists
-    // for, and it would arrive as an ordinary data row with no columns.
     expect(
       getTableGroupRowSummary({
         [TABLE_GROUP_ROW_FIELD]: { ...summary, isSubtotal: true, path: [] },
@@ -152,8 +132,6 @@ describe('getTableGroupRowSummary', () => {
   });
 
   it('carries the subtotal flag, which the text alone cannot say', () => {
-    // The two rows this separates are textually identical: a real NULL key and
-    // a subtotal over that key both render an empty label from the same column.
     expect(
       getTableGroupRowSummary({
         [TABLE_GROUP_ROW_FIELD]: { ...summary, isSubtotal: true },
@@ -162,8 +140,6 @@ describe('getTableGroupRowSummary', () => {
   });
 
   it('refuses the whole summary when one path entry is malformed', () => {
-    // A two-key group described by one key is not the group the row holds, so
-    // rendering the good half would label it wrongly rather than incompletely.
     expect(
       getTableGroupRowSummary({
         [TABLE_GROUP_ROW_FIELD]: {
@@ -189,8 +165,6 @@ describe('getTableGroupRowSummary', () => {
   });
 
   it('refuses a non-object in the group field', () => {
-    // Parsed rather than written as a literal, because a JSON `null` is exactly
-    // how such a value reaches a row across the loader boundary.
     const nulledField = JSON.parse(
       `{"${TABLE_GROUP_ROW_FIELD}":null}`,
     ) as Record<string, unknown>;

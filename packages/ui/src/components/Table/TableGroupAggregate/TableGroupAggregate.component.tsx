@@ -25,7 +25,6 @@ export const TableGroupAggregate = ({
   columnKey,
   summary,
 }: TableGroupAggregateProps) => {
-  // Compare tokens, never parse the key: a consumer key may contain the separator.
   const aggregate = summary.aggregates.find(
     (entry) => toTableAggregateToken(entry) === columnKey,
   );
@@ -54,10 +53,6 @@ export const TableGroupAggregate = ({
       <span {...stylex.props(tableGroupAggregateStyles.measure)}>
         <span {...stylex.props(tableGroupAggregateStyles.value)}>
           {renderCellContent({
-            // The derived column already carries the type an aggregate answers
-            // in. The fallback is for a lookup that missed, and resolves from
-            // the function alone so a `count` stays a tally rather than
-            // inheriting a column type it never had.
             dataType:
               column?.dataType ??
               resolveAggregateDataType({

@@ -20,9 +20,6 @@ describe('resolveDropdownStyles', () => {
   it('puts the floating surface style before the consumer override', () => {
     const chain = resolveDropdownStyles(FLOATING);
 
-    // Position in the chain is the contract, so these assert on index rather
-    // than membership: StyleX is last-wins, and the consumer is meant to win
-    // against the surface styles.
     expect(chain.indexOf(styles.dropdownFloatingSurface)).toBeLessThan(
       chain.indexOf(FLOATING.customStylex),
     );
@@ -39,8 +36,6 @@ describe('resolveDropdownStyles', () => {
   it('applies the measured coordinates last of all', () => {
     const chain = resolveDropdownStyles(FLOATING);
 
-    // `dropdownAt` is a dynamic style, so it is identified by its position
-    // rather than by identity — nothing may come after it.
     expect(chain.at(-1)).toBeTruthy();
     expect(chain.at(-1)).not.toBe(styles.dropdownFloatingPosition);
   });

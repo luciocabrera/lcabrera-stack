@@ -10,8 +10,6 @@ import { join } from 'node:path';
 
 const DOT_GIT = /\.git$/;
 
-/** The `url` of the `[remote "origin"]` section — a line scan, not a backtracking
- *  regex over the whole file. */
 const originUrl = (configText) => {
   let inOrigin = false;
   for (const raw of configText.split('\n')) {
@@ -28,9 +26,6 @@ const originUrl = (configText) => {
   return undefined;
 };
 
-/** The last two path segments of an origin URL (owner/repo), handling both
- *  `https://host/owner/repo(.git)` and `git@host:owner/repo(.git)`. Split-based,
- *  so no backtracking regex. */
 const ownerRepo = (url) => {
   const segments = url.replace(DOT_GIT, '').split(/[:/]/).filter(Boolean);
   return segments.length < 2

@@ -15,22 +15,15 @@
  */
 import { globsOverlap } from './coordination-parse.mjs';
 
-/** Branch fields that name no real branch, so they cannot mean "same branch". */
 export const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
 
 const isLive = ({ data }) => data !== undefined && data.status !== 'done';
 
-/** The first glob in `a` that intersects one in `b`, if any. */
 const firstClash = (a, b) =>
   a.area?.find((x) => b.area?.some((y) => globsOverlap(x, y)));
 
 const sameBranch = (a, b) => a.branch === b.branch && !NO_BRANCH.has(a.branch);
 
-/**
- * One warning per colliding pair. Deliberately returns strings rather than
- * pushing into a caller's array, so the rule stays a pure function of its
- * input.
- */
 export const overlapWarnings = (tasks) => {
   const live = tasks.filter(isLive);
   const warnings = [];

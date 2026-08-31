@@ -31,8 +31,6 @@ describe('substituteCiSetup', () => {
     );
   });
 
-  // Deleting only the placeholder TEXT would leave an indented blank line in
-  // every consumer whose runner needs nothing, which is the majority of them.
   test('takes the whole line when there are no steps', () => {
     expect(
       substituteCiSetup({
@@ -48,8 +46,6 @@ describe('substituteCiSetup', () => {
     ).toBe(workflow());
   });
 
-  // Trailing whitespace on an otherwise empty line is what a YAML linter flags
-  // first, and it would arrive in every consumer's repository.
   test('leaves a blank line inside the block unindented', () => {
     expect(
       substituteCiSetup({
@@ -64,19 +60,11 @@ describe('substituteCiSetup', () => {
     expect(substituteCiSetup({ content, setup: VP_STEP })).toBe(content);
   });
 
-  // The templates spell it as a comment so they stay parseable YAML — a bare
-  // line sits where a sequence item belongs and `vp fmt` refuses the asset. So
-  // the bare spelling is not this placeholder, and substituting must not treat
-  // it as one.
   test('does not substitute a bare placeholder that is not a comment', () => {
     const content = workflow('      {{ci.setup}}');
     expect(substituteCiSetup({ content, setup: VP_STEP })).toBe(content);
   });
 
-  // Spelled exactly like the real placeholder but for the name, so what is being
-  // asserted is that the NAME is matched. Against `- run: {{commands.install}}`
-  // this passes whatever the name pattern is, since the `#` and the line anchor
-  // already reject it — a green test proving nothing.
   test('does not confuse a command placeholder for this one', () => {
     const content = workflow('      # {{commands.install}}');
     expect(substituteCiSetup({ content, setup: VP_STEP })).toBe(content);

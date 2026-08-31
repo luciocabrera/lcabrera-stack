@@ -58,9 +58,6 @@ describe('adrBody', () => {
   });
 
   it('hides a comment inside the block from anything reading the heading', () => {
-    // The heading number check reads the body. Were it to read the file, a `#`
-    // comment here would be picked up as the H1 and the check would stop firing
-    // while still reporting a clean pass.
     const withComment = `---\n# not a heading\ngoverns:\n  - ui\n---\n\n# ADR-001 — x\n`;
     expect(adrBody(withComment).trim()).toBe('# ADR-001 — x');
   });
@@ -77,8 +74,6 @@ describe('parseAdrBlock', () => {
   });
 
   it('reports a key declared twice rather than keeping the last', () => {
-    // The parser the doc registers share is silently last-wins. A gate whose job
-    // is to read the record must not lose half of what it was handed.
     const parsed = parseAdrBlock(
       '---\ngoverns: [ui]\ngoverns: [server]\n---\n',
     );
@@ -115,8 +110,6 @@ describe('blockFindings', () => {
   });
 
   it('refuses an empty list rather than reading it as repository-wide', () => {
-    // Otherwise "governs everything" and "nobody filled this in" are spelled
-    // the same, and the second is the one that happens by accident.
     expect(findings(`---\ngoverns: []\n---\n${BODY}`)).toEqual([
       expect.stringContaining(REPOSITORY_SCOPE),
     ]);
@@ -165,9 +158,6 @@ describe('sectionFindings', () => {
   });
 
   it('reads an unterminated comment as nothing, not as content', () => {
-    // The lenient direction: a section whose only content is a comment someone
-    // forgot to close must not read as filled. A markdown renderer swallows the
-    // rest of the document there too, so nothing after it is content either.
     const unterminated = BODY.replace('What is true now.', '<!-- todo');
     expect(sectionFindings(unterminated)).toContain('`## Decision` is empty');
     expect(sectionsOf(unterminated).get('decision').join('')).not.toContain(
@@ -176,8 +166,6 @@ describe('sectionFindings', () => {
   });
 
   it('reads the template prompts as nothing, not as content', () => {
-    // A scaffolded record whose prompts are all still in place has said nothing,
-    // and must not pass for having a heading over each comment.
     const prompted = BODY.replace(
       'What is true now.',
       '<!-- what is now true -->',
@@ -198,9 +186,6 @@ describe('sectionFindings', () => {
   });
 
   it('does not read a `##` with no title as a section', () => {
-    // The heading regex captures greedily and trims, rather than using a lazy
-    // group between two whitespace classes — so an all-whitespace title has to
-    // be rejected in code, where a `(.+?)` would have rejected it by failing.
     const blank = '## Decision\n\ntext\n\n##   \n\nloose\n';
     expect([...sectionsOf(blank).keys()]).toEqual(['decision']);
     expect(sectionsOf(blank).get('decision')).toContain('loose');

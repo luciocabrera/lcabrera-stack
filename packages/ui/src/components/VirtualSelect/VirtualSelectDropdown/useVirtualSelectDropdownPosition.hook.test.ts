@@ -27,10 +27,6 @@ type StubRectArgs = {
   readonly width?: number;
 };
 
-/**
- * jsdom lays nothing out, so every rect the hook reads has to be stubbed. Only
- * the four values `resolveDropdownPlacement` consumes matter.
- */
 const stubRect = ({
   bottom = 0,
   element,
@@ -63,11 +59,6 @@ const setup = () => {
   return { anchor, dropdown, onScrollAway, view };
 };
 
-/**
- * The ResizeObserver drives every measurement, including the first. `act` is
- * required, not decorative: the callback sets state from outside React's event
- * system, so without it `result.current` never advances past `undefined`.
- */
 const observe = () => {
   act(() => {
     observerCallbackRef.current?.([], {} as ResizeObserver);
@@ -95,8 +86,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   cleanup();
-  // The scroll tests append their own nodes; `cleanup` only unmounts what RTL
-  // rendered.
   document.body.replaceChildren();
 });
 
@@ -112,7 +101,6 @@ describe('useVirtualSelectDropdownPosition', () => {
 
     observe();
 
-    // bottom 100 + DROPDOWN_GAP_PX 12
     expect(view.result.current).toEqual({ left: 20, top: 112, width: 200 });
   });
 
@@ -123,9 +111,6 @@ describe('useVirtualSelectDropdownPosition', () => {
     const first = view.result.current;
     observe();
 
-    // Identity, not equality: a fresh object re-renders the virtualized list
-    // and re-triggers the ResizeObserver that produced it, which is the
-    // feedback loop this guard exists to break.
     expect(view.result.current).toBe(first);
   });
 
@@ -166,8 +151,6 @@ describe('useVirtualSelectDropdownPosition', () => {
   it('dismisses when a scroll container outside the dropdown scrolls', () => {
     const { dropdown, onScrollAway } = setup();
 
-    // Connected, because a window-level capture listener is only on the path
-    // of an event dispatched from inside the document.
     document.body.append(dropdown);
     const drawerBody = document.createElement('div');
     document.body.append(drawerBody);

@@ -50,18 +50,11 @@ const byName = (left, right) => {
   return left < right ? -1 : 1;
 };
 
-/** A baseline that grandfathers nothing — what an absent file means. */
 export const EMPTY_BASELINE = { files: [], maxEntries: 0 };
 
 const isRecord = (value) =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-/**
- * A parsed baseline reduced to the two fields, so a malformed file cannot make
- * the gate read `undefined` as "grandfather everything". A missing or unusable
- * `files` yields none; an unusable `maxEntries` yields zero, which reports as
- * growth rather than as a bound nobody set.
- */
 export const readableBaseline = (parsed) => {
   if (!isRecord(parsed)) {
     return EMPTY_BASELINE;
@@ -79,7 +72,6 @@ export const readableBaseline = (parsed) => {
 
 export const baselinedFiles = (baseline) => new Set(baseline.files);
 
-/** Whether the list is longer than the bound the last command wrote. */
 export const hasGrown = (baseline) =>
   baseline.files.length > baseline.maxEntries;
 
@@ -88,15 +80,6 @@ const plural = (count) => (count === 1 ? 'entry' : 'entries');
 const growthFinding = (baseline) =>
   `it lists ${baseline.files.length} ${plural(baseline.files.length)} but \`maxEntries\` is ${baseline.maxEntries} — the baseline has grown, and it may only shrink. Drop what was added, or classify the records it covers.`;
 
-/**
- * What the baseline itself gets wrong.
- *
- * `records` is `{ filename, findings }` per ADR — `findings` being what the
- * content rules say about it, so this module never parses a record itself. It
- * keys on the filename and decides on the findings, and reads nothing else; a
- * record's NUMBER was in this shape while the bound was a number window, and
- * went with it.
- */
 export const baselineFindings = ({ baseline, records }) => {
   const byFilename = new Map(
     records.map((record) => [record.filename, record]),
@@ -120,15 +103,6 @@ export const baselineFindings = ({ baseline, records }) => {
   ];
 };
 
-/**
- * The baseline with every entry that no longer earns its place removed, and the
- * bound lowered to match — the only automatic edit there is.
- *
- * The bound is taken from what was KEPT rather than from `Math.min` with the old
- * one, so it can only fall. Callers must refuse to write a grown baseline before
- * calling this; otherwise pruning a list of 71 with a bound of 70 would rewrite
- * the bound as 71 and absorb the growth.
- */
 export const prunedBaseline = ({ baseline, records }) => {
   const kept = new Set(
     records
@@ -141,15 +115,6 @@ export const prunedBaseline = ({ baseline, records }) => {
   return { files, maxEntries: files.length };
 };
 
-/**
- * The baseline a repository adopting the gate starts from: everything failing
- * today, and a bound at exactly that many.
- *
- * The caller refuses to overwrite an existing file, so a second `--adopt` over a
- * baseline that is there cannot replace it. That is the whole of the refusal:
- * deleting the file first and adopting again grandfathers whatever fails then,
- * and the bound is what holds either way.
- */
 export const adoptedBaseline = (records) => {
   const files = records
     .filter((record) => record.findings.length > 0)

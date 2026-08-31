@@ -2,12 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { branchErrors, taskErrors } from './coordination-schema.mjs';
 
-// The coordination register is the only signal of who owns what while several
-// agents and humans work this repo in parallel (Rule 12), and CI fails on
-// register INTEGRITY — so these validators decide whether a claim is a claim.
-// The `issue` rule in particular is what stops a task drifting away from its
-// backlog item (ADR-036): `(none)` must fail, not warn.
-
 const validTask = {
   area: ['packages/ui/**'],
   branch: 'feat/thing',
@@ -31,7 +25,6 @@ describe('taskErrors', () => {
   });
 
   it('reports every missing required field, not just the first', () => {
-    // A verify script must list all discrepancies in one run.
     const errors = taskErrors(
       { data: { id: 'my-task' }, slug: 'my-task' },
       new Map(),
@@ -40,7 +33,6 @@ describe('taskErrors', () => {
   });
 
   it('treats an empty area list as missing', () => {
-    // The area globs ARE the soft lock; an empty list claims nothing.
     expect(taskErrors(taskFile({ area: [] }), new Map()).join(' ')).toContain(
       'area',
     );
@@ -111,8 +103,6 @@ describe('branchErrors', () => {
   };
 
   it('accepts a well-formed shared-branch descriptor', () => {
-    // The slug is the WHOLE branch name flattened — `feat/shared-thing`
-    // becomes `feat-shared-thing`, not just its last segment.
     expect(
       branchErrors({ data: validBranch, slug: 'feat-shared-thing' }),
     ).toEqual([]);
@@ -125,8 +115,6 @@ describe('branchErrors', () => {
   });
 
   it('rejects a status outside the branch set', () => {
-    // Branch descriptors have their own narrower set — `paused` is a task
-    // status, not a branch one.
     expect(
       branchErrors({
         data: { ...validBranch, status: 'paused' },

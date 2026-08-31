@@ -11,10 +11,8 @@ import { join, relative, sep } from 'node:path';
 
 const toPosix = (path) => path.split(sep).join('/');
 
-/** Owner, group or other — any of them is what git records as an executable file. */
 const EXECUTABLE_BITS = 0o111;
 
-/** Every file under `directory`, depth-first, in a stable order. */
 const listFilesUnder = (directory) =>
   readdirSync(directory, { withFileTypes: true })
     .sort((left, right) => left.name.localeCompare(right.name))

@@ -12,10 +12,6 @@ type BuildKeysetBranchArgs = {
   readonly index: number;
 };
 
-/**
- * One OR-branch of the lexicographic keyset predicate: every earlier sort column pinned to
- * equality, the column at `index` advanced past the cursor.
- */
 export const buildKeysetBranch = ({
   entries,
   index,

@@ -4,9 +4,6 @@ import { createFmtConfig } from './src/vite.fmt.shared.config.ts';
 import { createPackConfig } from './src/vite.pack.shared.config.ts';
 import { VITEST_COVERAGE_FLAGS } from './src/vite.run.shared.config.ts';
 
-// Relative imports (not `@lcabrera/vite-config/...`): a package cannot resolve
-// its own published subpaths through its own `exports` map without the self-link
-// pnpm only creates for a dependency, and this is the package that defines them.
 const packConfig = createPackConfig();
 
 export default defineConfig({

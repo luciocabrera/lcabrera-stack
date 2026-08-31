@@ -29,8 +29,6 @@ describe('assertGroupDepth', () => {
   });
 
   it('refuses with a typed reason the loader edge can branch on', () => {
-    // The message is for a human; `reason` is what survives the mapping to the
-    // serializable union, so each refusal has to carry its own.
     const reasons = [[], ['a', 'b', 'c', 'd', 'e'], ['a', 'a']].map((keys) => {
       try {
         assertGroupDepth({ grouping: 'rollup', keys });
@@ -47,8 +45,6 @@ describe('assertGroupDepth', () => {
   it.each(['cube', 'flat', 'rollup'] as const)(
     'accepts three keys under %s',
     (grouping) => {
-      // Three is the depth every mode admits, so it is the one that isolates
-      // the cap below from any other reason a request could be refused.
       expect(() =>
         assertGroupDepth({ grouping, keys: ['a', 'b', 'c'] }),
       ).not.toThrow();
@@ -56,9 +52,6 @@ describe('assertGroupDepth', () => {
   );
 
   it('refuses a cube one key earlier than the modes that scale linearly', () => {
-    // The discriminating case: depth 4 is accepted for flat and rollup and
-    // refused for cube, on the same key list. A cap applied to every mode, or
-    // to none, fails one half of this.
     const keys = ['a', 'b', 'c', 'd'];
 
     expect(() => assertGroupDepth({ grouping: 'cube', keys })).toThrow(
@@ -69,9 +62,6 @@ describe('assertGroupDepth', () => {
   });
 
   it('refuses an over-deep cube as `too-many-keys`, not a new reason', () => {
-    // The edge already renders a sentence for this reason; cube being refused
-    // a key earlier is the same answer at a different number, so it must not
-    // force every consumer to grow an arm.
     try {
       assertGroupDepth({ grouping: 'cube', keys: ['a', 'b', 'c', 'd'] });
 

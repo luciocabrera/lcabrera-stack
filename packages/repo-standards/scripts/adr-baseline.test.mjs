@@ -17,9 +17,6 @@ import {
   readableBaseline,
 } from './adr-baseline.mjs';
 
-// The number builds the filename and is not a field: the contract is
-// `{ filename, findings }`, and a fixture carrying more than the shape would let
-// a reader back into the module go unnoticed.
 const record = (number, findings = []) => ({
   filename: `ADR-${String(number).padStart(3, '0')}-a.md`,
   findings,
@@ -29,8 +26,6 @@ const failing = (number) => record(number, ['no metadata block']);
 
 describe('readableBaseline', () => {
   it('reads a malformed file as grandfathering nothing', () => {
-    // The dangerous direction: a broken baseline that read as "everything is
-    // exempt" would turn the gate off while still exiting 0.
     for (const parsed of [undefined, null, [], 'text', { files: 'all' }]) {
       expect(readableBaseline(parsed)).toEqual(EMPTY_BASELINE);
     }
@@ -44,8 +39,6 @@ describe('readableBaseline', () => {
   });
 
   it('reads an unusable bound as zero, which reports as growth', () => {
-    // Not as "no bound set": a baseline whose bound cannot be read must not be
-    // the one state that grandfathers freely.
     for (const maxEntries of [undefined, -1, 'many', 1.5]) {
       expect(hasGrown(readableBaseline({ files: ['a.md'], maxEntries }))).toBe(
         true,
@@ -74,8 +67,6 @@ describe('baselineFindings', () => {
   });
 
   it('reports a list longer than its bound, whatever the numbers are', () => {
-    // The door a number window left open: a record taking a RETIRED number sits
-    // inside any window, so numbering cannot be what decides this.
     expect(
       baselineFindings({
         baseline: { files: ['ADR-001-a.md', 'ADR-002-a.md'], maxEntries: 1 },
@@ -99,9 +90,6 @@ describe('prunedBaseline', () => {
   });
 
   it('never raises the bound above what it kept', () => {
-    // Guards the laundering path: pruning a grown list must not write the grown
-    // length back as the new bound. The caller refuses first; this is the second
-    // half of that, so the two cannot disagree.
     const pruned = prunedBaseline({
       baseline: { files: ['ADR-001-a.md', 'ADR-002-a.md'], maxEntries: 1 },
       records: [failing(1), failing(2)],

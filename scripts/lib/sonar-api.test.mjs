@@ -14,8 +14,6 @@ describe('targetParam', () => {
   });
 
   it('encodes a branch name containing a slash', () => {
-    // Feature branches here are routinely `fix/…` or `chore/…`; an unescaped
-    // slash would silently query a different path.
     expect(targetParam({ type: 'branch', value: 'fix/sonar' })).toBe(
       'branch=fix%2Fsonar',
     );
@@ -32,8 +30,6 @@ describe('parseLanguageLines', () => {
   });
 
   it('distinguishes an analysed language from an absent one', () => {
-    // The whole point of the measure: a language missing here means those
-    // files were never indexed, which no issue count can reveal.
     const parsed = parseLanguageLines('ts=50876;pgsql=3024');
 
     expect(parsed.pgsql).toBe(3024);

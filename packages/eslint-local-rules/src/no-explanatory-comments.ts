@@ -1,6 +1,6 @@
 /**
- * Reports a comment written above a function, component or type declaration, or
- * inside one.
+ * Reports a comment written above a declaration, or inside a function,
+ * component or type declaration.
  *
  * A name, a signature and a type already say what the code is. Prose repeating
  * them is a second copy of a fact, kept in the one place nothing checks — which
@@ -93,11 +93,6 @@ const DEFAULT_ANNOTATION_TAGS = [
   '@type',
 ] as const;
 
-const FUNCTION_EXPRESSION_TYPES = new Set<string>([
-  AST_NODE_TYPES.ArrowFunctionExpression,
-  AST_NODE_TYPES.FunctionExpression,
-]);
-
 const EXPORT_TYPES = new Set<string>([
   AST_NODE_TYPES.ExportDefaultDeclaration,
   AST_NODE_TYPES.ExportNamedDeclaration,
@@ -111,21 +106,18 @@ const contentLines = (comment: TSESTree.Comment) =>
     .map((line) => line.replace(/^\s*\*+/, '').trim())
     .filter((line) => line !== '');
 
-const startsWithAny = (line: string, prefixes: readonly string[]) =>
+type StartsWithAnyArgs = {
+  readonly line: string;
+  readonly prefixes: readonly string[];
+};
+
+const startsWithAny = ({ line, prefixes }: StartsWithAnyArgs) =>
   prefixes.some((prefix) => line.startsWith(prefix));
 
-const holdsFunction = (declaration: TSESTree.VariableDeclaration) =>
-  declaration.declarations.some((declarator) => {
-    const { init } = declarator;
-    if (init === null) return false;
-    if (FUNCTION_EXPRESSION_TYPES.has(init.type)) return true;
-    return (
-      init.type === AST_NODE_TYPES.CallExpression &&
-      init.arguments.some((argument) =>
-        FUNCTION_EXPRESSION_TYPES.has(argument.type),
-      )
-    );
-  });
+type FlagArgs = {
+  readonly comment: TSESTree.Comment;
+  readonly messageId: MessageIds;
+};
 
 const attachmentTarget = (node: TSESTree.Node) => {
   const { parent } = node;
@@ -140,22 +132,25 @@ export default createRule<Options, MessageIds>({
     const { sourceCode } = context;
     const isTypeScript = TYPESCRIPT_FILE.test(context.filename);
     const headerEnd =
-      sourceCode.getFirstToken(sourceCode.ast)?.range[0] ??
-      Number.POSITIVE_INFINITY;
+      sourceCode.getFirstToken(sourceCode.ast)?.range[0] ?? Infinity;
     const reported = new Set<TSESTree.Comment>();
 
     const isExempt = (comment: TSESTree.Comment) => {
       const lines = contentLines(comment);
       const [first] = lines;
-      if (first !== undefined && startsWithAny(first, directives)) return true;
+      if (
+        first !== undefined &&
+        startsWithAny({ line: first, prefixes: directives })
+      )
+        return true;
       return (
         !isTypeScript &&
         comment.type === AST_TOKEN_TYPES.Block &&
-        lines.some((line) => startsWithAny(line, annotationTags))
+        lines.some((line) => startsWithAny({ line, prefixes: annotationTags }))
       );
     };
 
-    const flag = (comment: TSESTree.Comment, messageId: MessageIds) => {
+    const flag = ({ comment, messageId }: FlagArgs) => {
       if (reported.has(comment)) return;
       if (comment.range[1] <= headerEnd) return;
       if (isExempt(comment)) return;
@@ -168,13 +163,13 @@ export default createRule<Options, MessageIds>({
       const previous = sourceCode.getTokenBefore(target);
       for (const comment of sourceCode.getCommentsBefore(target)) {
         if (previous?.loc.end.line === comment.loc.start.line) continue;
-        flag(comment, 'aboveDeclaration');
+        flag({ comment, messageId: 'aboveDeclaration' });
       }
     };
 
     const flagInside = (node: TSESTree.Node) => {
       for (const comment of sourceCode.getCommentsInside(node)) {
-        flag(comment, 'insideDeclaration');
+        flag({ comment, messageId: 'insideDeclaration' });
       }
     };
 
@@ -195,16 +190,14 @@ export default createRule<Options, MessageIds>({
       TSEnumDeclaration: flagBoth,
       TSInterfaceDeclaration: flagBoth,
       TSTypeAliasDeclaration: flagBoth,
-      VariableDeclaration(node: TSESTree.VariableDeclaration) {
-        if (holdsFunction(node)) flagAbove(node);
-      },
+      VariableDeclaration: flagAbove,
     } satisfies TSESLint.RuleListener;
   },
   defaultOptions: [{}],
   meta: {
     docs: {
       description:
-        'Disallow a comment above a function, component or type declaration, or inside one',
+        'Disallow a comment above a declaration, or inside a function, component or type declaration',
     },
     messages: {
       aboveDeclaration:

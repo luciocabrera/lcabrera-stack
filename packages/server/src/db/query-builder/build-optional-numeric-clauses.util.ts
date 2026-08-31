@@ -19,7 +19,6 @@ type OptionalNumericClausesResult = {
   readonly values: readonly number[];
 };
 
-/** Builds a space-joined `LIMIT $n OFFSET $n+1`-style fragment, skipping any clause whose value is undefined and never leaving a gap in placeholder numbering. */
 export const buildOptionalNumericClauses = ({
   clauses,
   startParamIndex,

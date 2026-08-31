@@ -7,7 +7,6 @@ type ResolvePersistenceEntriesArgs = {
   readonly isColumnLayoutTransient?: boolean;
 };
 
-/** Which entries a table actually writes: a transient layout keeps only URL halves (ADR-094). */
 export const resolvePersistenceEntries = ({
   entries,
   isColumnLayoutTransient = false,

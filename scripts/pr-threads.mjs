@@ -43,21 +43,12 @@ import {
   resolveRepository,
 } from './lib/review-gate-status.mjs';
 
-/**
- * The pull request for the branch checked out here, or `undefined`.
- *
- * Only consulted when `--pr` named none: the point of the bare command is that
- * an agent finishing work does not have to look its own number up.
- */
 const pullForCurrentBranch = () => {
   try {
     return parsePullNumber(
       runGh(['pr', 'view', '--json', 'number', '--jq', '.number']),
     );
   } catch {
-    // Either gh found no pull request for this branch, or it printed something
-    // that is not one (`null` on a branch with none). Both mean "no PR" here,
-    // and neither may reach the query as `NaN`.
     return undefined;
   }
 };
@@ -70,7 +61,6 @@ mutation($thread:ID!) {
   resolveReviewThread(input:{threadId:$thread}) { thread { isResolved } }
 }`;
 
-/** Resolve one thread. Reports what GitHub says it became, never what we asked. */
 const resolveThread = (threadId) => {
   const raw = runGh([
     'api',
@@ -86,9 +76,6 @@ const resolveThread = (threadId) => {
 };
 
 const main = () => {
-  // Presence, not value: `flagValue` returns undefined for a trailing flag, so
-  // a bare `--resolve` would otherwise fall through and list threads instead —
-  // silently doing the opposite of what an action-shaped command was asked for.
   const wantsResolve = process.argv.includes('--resolve');
   const threadId = flagValue('--resolve');
   if (wantsResolve && threadId === undefined) {

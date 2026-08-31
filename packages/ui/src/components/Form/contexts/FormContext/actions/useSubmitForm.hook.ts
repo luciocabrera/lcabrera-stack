@@ -2,10 +2,6 @@ import { useFormContextValue } from '#ui/components/Form/contexts/FormContext/us
 import { isFormDirty } from '#ui/components/Form/utils/isFormDirty.util';
 import { validateFields } from '#ui/components/Form/utils/validateFields.util';
 
-/**
- * Client-side pre-submit gate — progressive enhancement only, the action's Zod parse on
- * the server remains authoritative (ADR-005).
- */
 export const useSubmitForm = <TValues extends Record<string, unknown>>() => {
   const { fieldsStore, metaStore } = useFormContextValue<TValues>();
 

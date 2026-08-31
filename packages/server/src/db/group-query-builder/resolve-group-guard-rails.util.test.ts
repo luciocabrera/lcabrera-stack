@@ -59,8 +59,6 @@ describe('resolveGroupGuardRails', () => {
   });
 
   it('warns without refusing between the two thresholds', () => {
-    // 12 x 900 = 10 800 — past the warn threshold, well short of the refuse
-    // one, which is the only band where a warning is the whole outcome.
     expect(resolve({ keys: ['region', 'city'] })).toEqual({
       estimate: { kind: 'known', rows: 10_800 },
       rowLimit: { limit: 5000 },
@@ -72,7 +70,6 @@ describe('resolveGroupGuardRails', () => {
   });
 
   it('refuses the product of two wide keys', () => {
-    // 60 x 900 = 54 000, past the refuse ceiling.
     expect(() => resolve({ keys: ['country', 'city'] })).toThrow(
       /Column "city"/,
     );

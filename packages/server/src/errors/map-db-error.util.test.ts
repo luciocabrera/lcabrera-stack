@@ -41,8 +41,6 @@ describe('mapDbError', () => {
   });
 
   it('translates 57014 into a query cancellation', () => {
-    // Raised by `statement_timeout` and by `pg_cancel_backend` alike, which is
-    // why the type is named for the code rather than for the timeout.
     const cause = pgError({ code: '57014' });
     const error = mapDbError(cause);
 

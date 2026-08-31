@@ -56,9 +56,6 @@ describe('resolveHeaderBands', () => {
   });
 
   it('splits a group whose columns are not adjacent', () => {
-    // A band is a visual span, so it can only cover columns that sit next to
-    // each other. Grouping by label alone would draw one band claiming to
-    // cover two columns with a third between them.
     const bands = resolveHeaderBands<Row>({
       columns: [
         column({

@@ -20,11 +20,6 @@ const readRepoFile = (...parts) =>
   readFileSync(join(REPO_ROOT, ...parts), 'utf8');
 
 describe('the repository-variable list', () => {
-  // The shell hook cannot import this list. Copies drift; this is the guard
-  // that makes them fail loudly instead.
-  //
-  // Copies outside this repository cannot be reached, so they are unguarded —
-  // say so rather than letting a green assertion imply all copies agree.
   it('matches the set the pre-push hook scrubs', () => {
     const shell = readRepoFile('.vite-hooks/scrub-git-env.sh');
     const unset = new Set(

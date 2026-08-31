@@ -16,38 +16,16 @@ import { fetchWithRetry } from './fetch-retry.mjs';
 const PAGE_SIZE = 500;
 const MAX_PAGES = 20;
 
-/**
- * SonarCloud analyses feature branches as pull requests, so the two target
- * kinds use different query parameters and are never interchangeable — a
- * `branch=<feature>` query 404s where `pullRequest=<n>` succeeds.
- */
 export const targetParam = (target) =>
   target.type === 'pullRequest'
     ? `pullRequest=${encodeURIComponent(target.value)}`
     : `branch=${encodeURIComponent(target.value)}`;
 
-/**
- * Parses SonarCloud's `ncloc_language_distribution` measure — a
- * `lang=count;lang=count` string — into a plain object of numbers.
- *
- * This is the measure that answers "was this file actually analysed, and by
- * which analyser?", which no issue count can. A project whose every finding
- * was accepted and a project whose files are excluded both report zero
- * issues; only this tells them apart.
- *
- * Malformed or absent input yields an empty object rather than throwing: it
- * is reporting, not a gate, and a missing measure must not take the run down.
- */
 export const parseLanguageLines = (value) =>
   Object.fromEntries(
     String(value ?? '')
       .split(';')
       .map((entry) => entry.split('='))
-      // `count` must be non-empty before Number(): `Number('')` is 0, so a
-      // malformed `ts=` would otherwise read as "analysed, zero lines" —
-      // indistinguishable from a language that really was indexed and empty,
-      // and the opposite of the "was this analysed at all" question this
-      // measure exists to answer.
       .filter(
         ([lang, count]) => lang && count && Number.isFinite(Number(count)),
       )
@@ -55,16 +33,11 @@ export const parseLanguageLines = (value) =>
   );
 
 const authHeader = (token) => {
-  // The colon is Basic-auth's empty-password separator: SonarCloud takes the
-  // token as the username. Encoded in its own statement rather than nested in
-  // the returned template, which is unreadable and Sonar's S4624.
   const encoded = Buffer.from(`${token}:`).toString('base64');
 
   return `Basic ${encoded}`;
 };
 
-// Every call here is a GET, and the report polls SonarCloud while an analysis is
-// still settling — the one place a transient 5xx is most likely.
 export const fetchJson = async (url, token) => {
   const response = await fetchWithRetry(() =>
     fetch(url, { headers: { Authorization: authHeader(token) } }),
@@ -103,11 +76,6 @@ export const createSonarApi = ({ base, project, token }) => {
     );
 
   return {
-    /**
-     * Issues reviewed and marked rather than fixed. Counted separately from
-     * open issues so a zero can be read correctly: "clean" and "everything
-     * was accepted" are otherwise indistinguishable in the report.
-     */
     acceptedIssues: paged(
       'issues/search',
       'issues',
@@ -139,7 +107,6 @@ export const createSonarApi = ({ base, project, token }) => {
       `componentKeys=${project}&resolved=false&additionalFields=_all`,
     ),
 
-    /** Lines of code actually indexed, total and per language. */
     measures: async (target) => {
       const body = await fetchJson(
         `${base}/api/measures/component?component=${project}` +

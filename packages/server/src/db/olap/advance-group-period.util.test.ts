@@ -8,7 +8,6 @@ type CalendarArgs = {
   readonly year: number;
 };
 
-/** A zone-free truncation arrives as a `Date` holding those wall-clock fields locally. */
 const local = ({ day = 1, month, year }: CalendarArgs) =>
   new Date(year, month - 1, day);
 
@@ -17,9 +16,6 @@ const utc = ({ day = 1, month, year }: CalendarArgs) =>
 
 describe('advanceGroupPeriod', () => {
   it('adds a calendar month, not a fixed number of days', () => {
-    // February is the case a milliseconds constant gets wrong: adding 30 days
-    // to 1 February lands on 3 March, putting the last two days of February in
-    // the next group and losing them from this one.
     expect(
       advanceGroupPeriod({
         isZoned: false,
@@ -67,12 +63,6 @@ describe('advanceGroupPeriod', () => {
   });
 
   it('reads a zoned value in UTC and an unzoned one locally', () => {
-    // The frames are not interchangeable. A `timestamptz` truncated in UTC
-    // arrives as the true instant; a `date` truncated zone-free arrives as a
-    // `Date` holding wall-clock fields in the local zone, whose UTC month is the
-    // previous one under any positive offset. Each is advanced in the frame it
-    // was written in, so both land on the first of the next month *as read back
-    // the same way*.
     const zoned = advanceGroupPeriod({
       isZoned: true,
       period: 'month',

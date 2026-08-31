@@ -42,9 +42,6 @@ describe('useDismissNotificationAction', () => {
 
     expect(result.current.notifications).toHaveLength(1);
 
-    // Kept despite Sonar's S8980: unlike the spy assertion below, this one
-    // reads store state through the hook, so the update has to be flushed
-    // before `result.current` reflects it.
     act(() => {
       if (id) result.current.dismiss(id);
     });

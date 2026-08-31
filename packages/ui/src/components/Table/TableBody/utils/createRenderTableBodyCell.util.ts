@@ -12,10 +12,6 @@ import { renderFromDescriptor } from './renderFromDescriptor.util';
 
 type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly columnSizing: ColumnSizingState<TData>;
-  /**
-   * Bound once for the whole window because it is configuration: a detail row consults it to
-   * know which of its columns the group row above it already states (ADR-065).
-   */
   readonly groupingKeys: readonly string[];
   readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
@@ -32,7 +28,6 @@ type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly rowKey: string;
 };
 
-/** Creates a stable row-cell renderer bound to current sizing, pin offsets and grouping. */
 export const createRenderTableBodyCell =
   <TData extends Record<string, unknown>>({
     columnSizing,

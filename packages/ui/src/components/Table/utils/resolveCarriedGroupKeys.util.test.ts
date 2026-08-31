@@ -39,8 +39,6 @@ describe('resolveCarriedGroupKeys', () => {
   });
 
   it("never carries the row's own innermost level", () => {
-    // Two identical rows: every level matches, and the innermost is still drawn
-    // so the row states something and the disclosure has a cell to sit in.
     expect([
       ...resolveCarriedGroupKeys({
         isWindowFirst: false,
@@ -51,8 +49,6 @@ describe('resolveCarriedGroupKeys', () => {
   });
 
   it('refills every level at the top of the rendered window', () => {
-    // The ancestor was scrolled past, so carrying it would state the block the
-    // reader is inside nowhere at all (ADR-080).
     expect(
       resolveCarriedGroupKeys({
         isWindowFirst: true,
@@ -66,9 +62,6 @@ describe('resolveCarriedGroupKeys', () => {
   });
 
   it('refills after a detail row, which states no level of its own', () => {
-    // A group row after a block of detail rows restates its ancestry with no
-    // rule of its own — a detail row has no path, so nothing above states the
-    // level and every level counts as changed.
     expect(
       resolveCarriedGroupKeys({
         isWindowFirst: false,
@@ -82,8 +75,6 @@ describe('resolveCarriedGroupKeys', () => {
   });
 
   it('stops at the first level that differs', () => {
-    // `Marais` under a different city is a different group, and blanking it
-    // would say the two were the same one.
     expect([
       ...resolveCarriedGroupKeys({
         isWindowFirst: false,

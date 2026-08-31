@@ -35,7 +35,6 @@ const styles = stylex.create({
   },
 });
 
-// Mirrors Button's busy overlay so a NavLink and a Button read as a matched pair while loading.
 const loadingStyles = stylex.create({
   overlay: {
     borderRadius: borderRadius.md,

@@ -22,9 +22,7 @@ const dialogMocksRef: {
   };
 } = {
   current: {
-    restoreMockDialog: () => {
-      // no-op default restore before setup
-    },
+    restoreMockDialog: () => {},
     showMock: vi.fn(),
     showModalMock: vi.fn(),
   },

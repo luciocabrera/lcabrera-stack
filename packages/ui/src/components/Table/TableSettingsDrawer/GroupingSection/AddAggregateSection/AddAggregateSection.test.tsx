@@ -117,8 +117,6 @@ beforeEach(() => {
   groupingKeysRef.current = [];
   columnsRef.current = [
     { key: 'order_status', label: 'Status' },
-    // Declared `string` on purpose: this is the `numeric` column the
-    // presentation vocabulary reports as text (#550). Only the catalogue knows.
     { dataType: 'string', key: 'total_amount', label: 'Total' },
     { key: 'doc', label: 'Document' },
   ];
@@ -160,14 +158,10 @@ describe('AddAggregateSection', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Total' }));
 
-    // `sum` on a column the presentation vocabulary calls a string, and no
-    // `min`/`max` — the catalogue's answer, not the declared type's.
     expect(listed(FUNCTION_PLACEHOLDER)).toEqual(['Count', 'Sum']);
   });
 
   it('offers a different set for a column of a different real type', () => {
-    // The discriminating half: if the menu were shaped from anything but the
-    // per-column capability, these two would be the same list.
     render(<AddAggregateSection />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Status' }));
@@ -194,8 +188,6 @@ describe('AddAggregateSection', () => {
   });
 
   it('drops a chosen function when the column changes under it', () => {
-    // `sum` is legal for `total_amount` and not for `order_status`, so keeping
-    // it would offer a combination the server refuses.
     render(<AddAggregateSection />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Total' }));
@@ -216,8 +208,6 @@ describe('AddAggregateSection', () => {
   });
 
   it('does not offer a column staged as a group key', () => {
-    // A grouped column renders its key's value rather than a measure
-    // (ADR-080), so an aggregate chosen on it could never be shown.
     groupingKeysRef.current = ['order_status'];
 
     render(<AddAggregateSection />);
@@ -226,9 +216,6 @@ describe('AddAggregateSection', () => {
   });
 
   it('empties the function list when the chosen column becomes a group key', () => {
-    // Both lists ask the same question of the same predicate, so staging the
-    // selected column as a key has to close both — leaving the functions up
-    // would offer an aggregate on a column the picker no longer offers.
     const { rerender } = render(<AddAggregateSection />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Total' }));
@@ -243,9 +230,6 @@ describe('AddAggregateSection', () => {
   });
 
   it('does not offer a function the chosen column already carries', () => {
-    // Adding is an append with a duplicate guard (#831), so re-picking an
-    // applied function is accepted and then does nothing visible — which is
-    // indistinguishable from a bug, so it is not offered (#841).
     aggregatesRef.current = [{ columnKey: 'total_amount', fn: 'sum' }];
 
     render(<AddAggregateSection />);
@@ -256,9 +240,6 @@ describe('AddAggregateSection', () => {
   });
 
   it('subtracts only what the *chosen* column carries', () => {
-    // The discriminating half: a subtraction blind to the column would drop
-    // `Count` here too, on the strength of another column's aggregate — and a
-    // column key does repeat across the staged list (#831).
     aggregatesRef.current = [{ columnKey: 'order_status', fn: 'count' }];
 
     render(<AddAggregateSection />);
@@ -284,9 +265,6 @@ describe('AddAggregateSection', () => {
   });
 
   it('says so when the column carries every function it supports', () => {
-    // The column list still offers such a column — it excludes group keys and
-    // unaggregatable columns, not exhausted ones (#830) — so the picker has to
-    // account for itself rather than render an empty control.
     aggregatesRef.current = [
       { columnKey: 'total_amount', fn: 'count' },
       { columnKey: 'total_amount', fn: 'sum' },
@@ -304,10 +282,6 @@ describe('AddAggregateSection', () => {
   });
 
   it('says nothing when the list empties for any other reason', () => {
-    // Exhaustion is not the only way the functions run out, and the other way
-    // has nothing to tell the user: the column stopped being aggregatable at
-    // all (ADR-080), so "remove one to add another" would answer a question
-    // nobody asked.
     const { rerender } = render(<AddAggregateSection />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Total' }));
@@ -320,8 +294,6 @@ describe('AddAggregateSection', () => {
   });
 
   it('does not offer a second distinct count while another column carries one', () => {
-    // The cap is per read rather than per column, so an aggregate staged on
-    // `total_amount` is what closes the offer on `order_status` (#842).
     aggregatesRef.current = [
       { columnKey: 'total_amount', fn: 'countDistinct' },
     ];
@@ -360,9 +332,6 @@ describe('AddAggregateSection', () => {
   });
 
   it('says the read has no room when that is what emptied the list', () => {
-    // `Distinct Count` is still legal on this column, so it is not fully
-    // measured and the #841 message would send the user to the wrong control:
-    // the measure to remove is the one on `total_amount`.
     capabilitiesRef.current = {
       ...capabilitiesRef.current,
       order_status: {
@@ -380,10 +349,6 @@ describe('AddAggregateSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Status' }));
 
     expect(screen.queryByTestId(FUNCTION_PLACEHOLDER)).toBeNull();
-    // Matched against the message constant rather than a sentence written out
-    // here, and the budget's value is pinned separately below: it is a duplicate
-    // of the server's and is expected to move, so this copy of it must not be
-    // one nothing checks (#842).
     expect(
       screen.getByText(AGGREGATE_PICKER_GAP_MESSAGES['count-distinct-spent']),
     ).not.toBeNull();
@@ -397,9 +362,6 @@ describe('AddAggregateSection', () => {
   });
 
   it('says the column is fully measured when it carries that distinct count itself', () => {
-    // The discriminating half of the pair above: the same two functions, both
-    // staged on the chosen column, so the budget is spent by the column asking.
-    // Nothing is withheld from it, and the user is sent to its own measures.
     capabilitiesRef.current = {
       ...capabilitiesRef.current,
       order_status: {
@@ -421,9 +383,6 @@ describe('AddAggregateSection', () => {
   });
 
   it('refuses to add a function that stopped being addable under it', () => {
-    // The staged list moves under a held selection — the list beside this
-    // control removes and the header menu writes live — so the Add button acts
-    // on what the picker currently offers, not on the raw selection.
     const { rerender } = render(<AddAggregateSection />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Total' }));

@@ -4,9 +4,6 @@ import type { TableGroupRow } from '@lcabrera/ui/components/Table/Table.types';
 
 import type { ENTERPRISE_ORDER_LIST_COLUMNS } from './enterpriseOrders.constants';
 
-/** Client-safe types for the `enterprise_orders` entity. */
-
-/** A single `enterprise_orders` row (serializable — safe to return from a loader). */
 export type EnterpriseOrder = {
   readonly balance_due: string;
   readonly billing_address_line1: string;
@@ -69,11 +66,6 @@ export type EnterpriseOrder = {
   readonly weight_kg: string;
 };
 
-/**
- * Declaring the column members as `never` is what makes the union below discriminated —
- * reading one off a row TypeScript has not narrowed is an error, rather than silently `T |
- * undefined`.
- */
 export type EnterpriseOrderGroupRow = TableGroupRow & {
   readonly [K in keyof EnterpriseOrderListRow]?: never;
 };
@@ -85,21 +77,9 @@ export type EnterpriseOrderListRow = Pick<
 
 export type EnterpriseOrdersResponse = {
   readonly data: readonly EnterpriseOrderTableRow[];
-  /**
-   * A grouped read can be refused (too deep, an illegal key, a result bound past the
-   * ceiling) or cut off by its statement timeout, and `@lcabrera/server` raises each as a
-   * typed error class — which React Router single fetch silently strips of its prototype on
-   * the way here.
-   * The loader edge maps it through `toSerializableDbError` so the client gets a
-   * discriminant instead of a shape it cannot recognise (ADR-050, ADR-066).
-   */
   readonly error?: SerializableDbError;
   readonly groupingWarning?: GroupCardinalityWarning;
   readonly hasMore: boolean;
-  /**
-   * The total cannot change while the session runs, so later pages omit it and the table
-   * keeps the one it has rather than making the database re-count the filtered set per page.
-   */
   readonly total?: number;
 };
 

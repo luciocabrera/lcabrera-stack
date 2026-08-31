@@ -99,7 +99,6 @@ describe('FormFieldGroup', () => {
 
     const bodyId = toggle.getAttribute('aria-controls') ?? '';
     expect(document.getElementById(bodyId)?.hidden).toBe(true);
-    // Collapsed fields remain in the DOM so their values still submit.
     expect(screen.getByLabelText('Name', { exact: false })).not.toBeNull();
   });
 

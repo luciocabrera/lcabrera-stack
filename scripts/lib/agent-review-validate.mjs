@@ -25,7 +25,6 @@ import {
 } from './agent-review-findings.mjs';
 import { documentShapeErrors } from './agent-review-schema.mjs';
 
-/** §2.5, and the pull request the verdict claims to be about. (pure) */
 const bindingErrors = (document, { pr, headSha }) => {
   const errors = [];
   if (document.head_sha !== headSha) {
@@ -39,17 +38,8 @@ const bindingErrors = (document, { pr, headSha }) => {
   return errors;
 };
 
-/** An `error` state carrying every reason it is one. (pure) */
 const invalid = (errors, extra = {}) => ({ state: 'error', errors, ...extra });
 
-/**
- * §2.4 steps 1–6 over one candidate comment.
- *
- * The steps run in order and stop at the first stage that fails, because a later
- * step reads fields an earlier one has not yet proven exist — admissibility on a
- * finding with no `severity` would report the wrong thing. Within a stage every
- * discrepancy is reported. (pure)
- */
 export const validateVerdictBody = (body, { pr, headSha, files }) => {
   const { document, errors: readErrors } = readVerdictDocument(body);
   if (document === undefined) {
@@ -79,24 +69,10 @@ export const validateVerdictBody = (body, { pr, headSha, files }) => {
     errors: [],
     document,
     blocking: blockingFindingIds(document.findings),
-    // Set only on this path — a document that validated. It is what lets the
-    // report tell a reviewer that could not conclude (§2.3) from a document
-    // this validator refused (§2.4), which are the same `error` state and
-    // completely different things to do about. The schema guarantees a
-    // non-empty string when `verdict` is `error`, and nothing otherwise.
     errorReason: document.error_reason,
   };
 };
 
-/**
- * The state of a pull request's agent review.
- *
- * `absent` covers both "nothing was ever posted" and "everything posted names an
- * earlier commit" — §2.5 is explicit that a verdict bound to a superseded head is
- * history rather than a verdict, so for *this* head no review was attempted. The
- * two are separated in `reason` because they need different responses.
- * (pure)
- */
 export const validatePullRequestVerdict = ({
   pr,
   headSha,

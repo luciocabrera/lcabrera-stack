@@ -1,29 +1,25 @@
 // @vitest-environment node
 
-import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-grouping-capabilities.util';
-import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
-import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
-
 /**
- * The live-Postgres half of #563. `@lcabrera/server`'s own suite is deliberately
- * DB-free (ADR-032), so it can assert the resolution rules but never that the
- * catalogue query returns what those rules are fed. This closes that gap: it
- * runs the real query against a fixture carrying one column per analytical role
- * and checks the capability that comes back.
+ * The live-Postgres half of #563: that the catalogue query returns what
+ * ADR-058's resolution rules are fed. `@lcabrera/server`'s own suite is DB-free
+ * (ADR-032) and can assert the rules but never their input.
  *
- * Every assertion here was wrong at least once before the query was right, which
- * is the reason it exists rather than being replaced by more unit tests. A
- * `varchar` column has no operator class of its own and an `enum` column's class
- * is registered against `anyenum`, so an equality check that looks only for an
- * exact `opcintype` match silently refuses both — a mocked row could never have
- * shown that.
+ * A `varchar` column has no operator class of its own and an `enum` column's is
+ * registered against `anyenum`, so an equality check looking only for an exact
+ * `opcintype` match silently refuses both — which no mocked row could show.
  *
- * Gated behind `SMOKE_DB` like the sibling suites, so the DB-less CI unit job and
- * a bare `vp run test` skip it. Run it with a local Postgres up:
+ * Gated behind `SMOKE_DB`, so the DB-less CI unit job and a bare `vp run test`
+ * skip it. Run it with a local Postgres up:
  *
  *   vp run db:up            # once, from the repo root
  *   vp run test:smoke       # from apps/showcase (sources DB_* + sets SMOKE_DB)
  */
+
+import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-grouping-capabilities.util';
+import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
+
 const IS_SMOKE_ENABLED = Boolean(process.env.SMOKE_DB);
 
 const SCHEMA = 'public';
@@ -31,15 +27,9 @@ const TABLE = 'grouping_capability_probe';
 const FIXTURE = `${SCHEMA}.${TABLE}`;
 const ENUM_TYPE = `${SCHEMA}.grouping_capability_mood`;
 
-/**
- * A schema holding a composite type deliberately named `uuid`. Type names are
- * per-schema, so this one reports `typname = 'uuid'` exactly like the built-in —
- * the case a bare-name identifier exception would wrongly admit.
- */
 const SHADOW_SCHEMA = 'grouping_capability_shadow';
 const SHADOW_UUID_TYPE = `${SHADOW_SCHEMA}.uuid`;
 
-/** One column per case the two gates have to tell apart. */
 const COLUMN = {
   /** `numeric`, low-cardinality — a fact that is demonstrably usable as a key. */
   amount: 'amount',
@@ -153,7 +143,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
     it('accepts the string dimensions, including the two with a borrowed operator class', async () => {
       const capabilities = await resolveCapabilities();
 
-      // `varchar` and the enum are the cases a naive equality lookup refuses.
       expect(capabilities[COLUMN.name]?.canGroup).toBe(true);
       expect(capabilities[COLUMN.code]?.canGroup).toBe(true);
       expect(capabilities[COLUMN.mood]?.canGroup).toBe(true);
@@ -164,8 +153,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       const capabilities = await resolveCapabilities();
       const doc = capabilities[COLUMN.doc];
 
-      // Postgres would group it — the sibling legality probe proves it does —
-      // so the refusal has to come from the role gate.
       expect(doc?.canGroup).toBe(false);
       expect(doc?.refusal).toBe('not-a-dimension');
       expect(doc?.typeName).toBe('jsonb');
@@ -207,8 +194,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       const capabilities = await resolveCapabilities();
       const flag = capabilities[COLUMN.flag];
 
-      // No `min`/`max`: Postgres has no boolean variant of either, which is the
-      // catalogue correcting the role gate's summary rather than contradicting it.
       expect(flag?.canGroup).toBe(true);
       expect(flag?.aggregates).toEqual([
         'boolAnd',
@@ -219,9 +204,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
     });
 
     it('offers a date dimension min and max but never avg or the boolean pair', async () => {
-      // `avg` is defined only for the numeric families and `interval`, and
-      // `bool_and`/`bool_or` only for boolean — so a single role permitting all
-      // of them still yields a different menu per type.
       const capabilities = await resolveCapabilities();
       const madeOn = capabilities[COLUMN.madeOn];
 
@@ -238,9 +220,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       const capabilities = await resolveCapabilities();
       const dur = capabilities[COLUMN.dur];
 
-      // The catalogue is what settles this: `interval` is the only non-numeric
-      // type Postgres defines `sum` and `avg` for, which is why the role gate
-      // calls it a fact rather than grouping it with the date-like dimensions.
       expect(dur?.role).toBe('fact');
       expect(dur?.canGroup).toBe(true);
       expect(dur?.aggregates).toEqual([
@@ -254,12 +233,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
     });
 
     it('records that an interval group key normalises its values', async () => {
-      // Not a capability assertion — a recorded consequence of admitting
-      // `interval` as a key. Its comparison semantics flatten 30 days to the
-      // month and 24 hours to the day, so three values a cell would render
-      // differently are one group, labelled with only one of them. Legal and
-      // documented, but a grouped read answers a subtly different question than
-      // the column displays, and the UI has to say so.
       const { rows } = await getPool().query<{
         readonly group_key: string;
         readonly rows_in_group: string;
@@ -279,8 +252,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
     it('accepts inet and cidr as dimensions', async () => {
       const capabilities = await resolveCapabilities();
 
-      // `cidr` owns neither aggregate: it reaches `min`/`max` through the binary
-      // cast to `inet`, the same mechanism `varchar` uses to borrow `text`'s.
       expect(capabilities[COLUMN.net]?.role).toBe('dimension');
       expect(capabilities[COLUMN.net]?.canGroup).toBe(true);
       expect(capabilities[COLUMN.net]?.aggregates).toEqual([
@@ -297,10 +268,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       const tenant = capabilities[COLUMN.tenant];
       const doc = capabilities[COLUMN.doc];
 
-      // Postgres files both under the same category, which is why the exception
-      // has to be by name — asked of the catalogue directly, since the resolved
-      // capability has already applied the rule under test and so cannot be
-      // evidence for the premise behind it.
       const { rows } = await getPool().query<{ readonly typcategory: string }>(
         `SELECT t.typcategory
            FROM pg_type t
@@ -311,7 +278,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       expect(rows).toHaveLength(2);
       expect(new Set(rows.map((r) => r.typcategory)).size).toBe(1);
 
-      // Same category, opposite answers: the name is doing the work.
       expect(tenant?.typeName).toBe('uuid');
       expect(tenant?.canGroup).toBe(true);
       expect(tenant?.role).toBe('dimension');
@@ -325,9 +291,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       const fake = capabilities[COLUMN.fakeId];
       const real = capabilities[COLUMN.tenant];
 
-      // The live proof that the exception is schema-qualified. Postgres reports
-      // both columns with `typname = 'uuid'`, so a bare-name match would admit a
-      // composite the Table cannot render. Only the namespace separates them.
       expect(fake?.typeName).toBe('uuid');
       expect(real?.typeName).toBe('uuid');
       expect(fake?.canGroup).toBe(false);
@@ -338,17 +301,12 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
     it('refuses the primary key even though int4 is a groupable category', async () => {
       const capabilities = await resolveCapabilities();
 
-      // The guard that makes admitting an identifier type safe: cardinality, not
-      // the type, is what refuses a key column.
       expect(capabilities[COLUMN.id]?.refusal).toBe('unique-ish');
     });
 
     it('offers a uuid no min or max, which Postgres does not define', async () => {
       const capabilities = await resolveCapabilities();
 
-      // A uuid sorts fine — it has a default btree operator class — so this is
-      // the case where "sortable" and "has min/max" come apart. Gate 2 drops
-      // both without the role table having to know.
       expect(capabilities[COLUMN.tenant]?.aggregates).toEqual([
         'count',
         'countDistinct',

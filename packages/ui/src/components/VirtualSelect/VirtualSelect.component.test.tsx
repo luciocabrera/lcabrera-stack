@@ -75,13 +75,9 @@ beforeEach(() => {
         resizeObserverCallbackRef.current = callback;
       }
 
-      public disconnect() {
-        // noop
-      }
+      public disconnect() {}
 
-      public observe() {
-        // noop
-      }
+      public observe() {}
     },
   );
 });
@@ -113,8 +109,6 @@ describe('VirtualSelect', () => {
 
     expect(screen.getByRole('listbox')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Alpha' })).toBeTruthy();
-    // The first notification is the open itself: the dropdown no longer
-    // reports its initial closed state through a mount effect.
     expect(onOpenChange).toHaveBeenNthCalledWith(1, true);
     const firstUseClickOutsideCallArgs = mockUseClickOutside.mock.calls[0]?.[0];
     expect(firstUseClickOutsideCallArgs).toBeDefined();

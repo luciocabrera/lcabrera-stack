@@ -92,8 +92,6 @@ describe('resolveBatchTableSettingsUpdate', () => {
     });
 
     expect(mockDeriveColumnViewState).toHaveBeenCalledWith({
-      // Forwarded, not derived: the Accept that commits a grouping change is
-      // the one that has to bring the hierarchy column with it.
       aggregates: [],
       columnOrder: ['id', 'age', 'name'],
       columnPinning: { left: ['id'], right: ['name'] },
@@ -142,16 +140,8 @@ describe('resolveBatchTableSettingsUpdate', () => {
   });
 
   it('keeps the sort of a column this Accept only hid', () => {
-    // The discriminating case, and the one a defect here passes silently:
-    // `effectiveColumns` is visibility-filtered while `normalizedColumns` is
-    // the painted list. Pruning against the former drops the sort of a column
-    // the user merely hid — a view preference, with the column still there to
-    // order by. The two lists must therefore DIFFER for this to test anything,
-    // which is why the mock is overridden rather than reused.
     mockDeriveColumnViewState.mockReturnValueOnce({
-      // `name` is hidden, so it is absent here...
       effectiveColumns: [{ key: 'id', label: 'ID' }],
-      // ...and present here, because the grid still has the column.
       normalizedColumns: {
         id: { key: 'id', label: 'ID' },
         name: { key: 'name', label: 'Name' },
@@ -187,7 +177,6 @@ describe('resolveBatchTableSettingsUpdate', () => {
   });
 
   it('drops the sort of a column the grid no longer has at all', () => {
-    // The other half, so the case above cannot pass by simply never pruning.
     mockDeriveColumnViewState.mockReturnValueOnce({
       effectiveColumns: [{ key: 'id', label: 'ID' }],
       normalizedColumns: { id: { key: 'id', label: 'ID' } },

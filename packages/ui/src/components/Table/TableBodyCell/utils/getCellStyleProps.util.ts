@@ -17,13 +17,6 @@ type GetCellStylePropsArgs = Pick<
   'customStylex' | 'minWidth' | 'pinInfo' | 'width'
 > & {
   readonly dataType: TableColumnDataType;
-  /**
-   * Whether the column's type decides where this cell's content sits. Deliberately not
-   * "does the cell hold custom content": one flag used to answer both, so every
-   * grid-supplied group-row cell inherited the opt-out written for a consumer's own
-   * `render()` output and a currency total sat at the left edge of a right-aligned column
-   * (#1018). `TableBodyCell` owns the question; this only applies the answer.
-   */
   readonly isAlignedByDataType: boolean;
 };
 

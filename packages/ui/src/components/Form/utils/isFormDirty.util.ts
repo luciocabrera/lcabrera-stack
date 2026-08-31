@@ -6,10 +6,6 @@ type IsFormDirtyArgs<TValues extends Record<string, unknown>> = {
   readonly initialValues: TValues;
 };
 
-/**
- * Subset comparison restricted to the form's own accessors (not a full isShallowEqual,
- * since a caller-provided store may carry extra keys).
- */
 export const isFormDirty = <TValues extends Record<string, unknown>>({
   accessors,
   currentValues,

@@ -10,10 +10,6 @@ describe('getInitialExpansionState', () => {
   });
 
   it('hands every call its own set, so two tables cannot collapse each other', () => {
-    // The discriminating assertion, and the reason this is a function rather
-    // than a module constant: a shared `Set` is mutable state two mounted
-    // Tables would both write through, so collapsing a group in one would fold
-    // the same path in the other.
     const first = getInitialExpansionState();
     const second = getInitialExpansionState();
 

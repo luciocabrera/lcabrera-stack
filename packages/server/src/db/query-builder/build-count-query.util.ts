@@ -8,11 +8,6 @@ import { assertSafeIdentifier } from './assert-safe-identifier.util.ts';
 import { buildWhereClause } from './build-where-clause.util.ts';
 import { quoteIdentifier } from './quote-identifier.util.ts';
 
-/**
- * Builds a `count(<column>)` query reusing the exact same WHERE-building logic as
- * buildSelectQuery, so a caller's data query and count query can never drift apart (pass
- * it the same `filters`/`allowedColumns` given to buildSelectQuery).
- */
 export const buildCountQuery = ({
   allowedColumns,
   column,

@@ -7,10 +7,6 @@ import type { PinnedSidePanelProps } from './PinnedSidePanel.types';
 
 import { sidePanelStyles } from '../SidePanel.stylex';
 
-/**
- * Renders a plain `<aside>` that is always visible, never shows a backdrop, and needs no
- * dialog lifecycle effects.
- */
 export const PinnedSidePanel = ({
   children,
   portalContainer,

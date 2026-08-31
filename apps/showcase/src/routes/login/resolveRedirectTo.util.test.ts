@@ -10,8 +10,6 @@ describe('resolveRedirectTo', () => {
   });
 
   it('falls back to default for a missing (non-string) candidate', () => {
-    // URLSearchParams.get returns null for an absent key — the real shape the
-    // loader passes in — so this exercises the null branch without a literal.
     const absent = new URLSearchParams().get('redirectTo');
 
     expect(resolveRedirectTo({ candidate: absent })).toBe('/');

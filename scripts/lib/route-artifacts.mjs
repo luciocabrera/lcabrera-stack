@@ -39,11 +39,6 @@ export const ARTIFACT_SUFFIXES = new Set([
   'meta',
 ]);
 
-/**
- * Copies of `domain-folder-filename`'s defaults. Kept in this order — the test
- * compares them to the rule's source, so a divergence fails rather than going
- * quiet.
- */
 export const ARTIFACT_TREE_FOLDERS = ['routes'];
 
 export const CATCH_ALL_FOLDERS = [
@@ -72,7 +67,6 @@ const EXTENSION = /\.(?:tsx?|jsx?|mjs|cjs)$/;
 const TEST_SEGMENT = /\.(?:test|spec)$/;
 const NON_ALPHANUMERIC = /[^a-z0-9]/g;
 
-/** Mirror of the plugin's `parseFileName`: `<name>.<suffix>.<ext>`, or nothing. */
 export const parseFileName = (filePath) => {
   const base = filePath.split('/').pop() ?? filePath;
   const withoutTest = base.replace(EXTENSION, '').replace(TEST_SEGMENT, '');
@@ -86,27 +80,14 @@ export const parseFileName = (filePath) => {
   };
 };
 
-/**
- * Mirror of the plugin's `normalize`: one spelling of a subject, so the three
- * the repo uses compare equal — `trigger-scan`, `triggerScan` and `TriggerScan`
- * all name the same thing, and which one a file gets is decided by what it
- * holds, not by what it is about.
- */
 export const normalizeSubject = (value) =>
   value.toLowerCase().replaceAll(NON_ALPHANUMERIC, '');
 
-/**
- * The directory part, or `''` for a file at the repo root — and the root case
- * needs saying, because `git ls-files` lists plenty of them. A bare
- * `slice(0, lastIndexOf('/'))` returns `slice(0, -1)` there, silently dropping
- * the last character and inventing a directory named `README.m`.
- */
 const directoryOf = (filePath) => {
   const lastSlash = filePath.lastIndexOf('/');
   return lastSlash === -1 ? '' : filePath.slice(0, lastSlash);
 };
 
-/** Tracked paths grouped by their directory — the folder listing, without `fs`. */
 export const groupByDirectory = (paths) => {
   const byDirectory = new Map();
   for (const filePath of paths) {
@@ -121,13 +102,11 @@ export const groupByDirectory = (paths) => {
   return byDirectory;
 };
 
-/** Under an artifact tree is exactly what the ESLint rule exempts. */
 const isUnderArtifactTree = (filePath) =>
   directoryOf(filePath)
     .split('/')
     .some((segment) => ARTIFACT_TREE.has(segment));
 
-/** The `*.types`/`*.constants` files the ESLint rule leaves to this gate. */
 export const candidatesIn = (paths) =>
   paths.filter((filePath) => {
     const parsed = parseFileName(filePath);
@@ -139,7 +118,6 @@ export const candidatesIn = (paths) =>
     );
   });
 
-/** Distinct base names of the artifacts a folder holds. */
 export const artifactNamesIn = (siblings) => [
   ...new Set(
     siblings
@@ -152,17 +130,6 @@ export const artifactNamesIn = (siblings) => [
   ),
 ];
 
-/**
- * Every route-folder file that names no artifact in its folder, plus what the
- * gate skipped and why, so a run that checks nothing cannot look like a run that
- * found nothing.
- *
- * The base need only PREFIX an artifact, which is the relation
- * `domain-folder-filename` already uses inside an artifact folder — the two
- * homes would otherwise disagree about `TableConfigContext.types.ts`. A folder
- * with no artifact at all is skipped rather than reported: there is no name to
- * require, and inventing one would be this gate guessing.
- */
 export const routeArtifactReport = (trackedPaths) => {
   const byDirectory = groupByDirectory(trackedPaths);
   const candidates = candidatesIn(trackedPaths);
@@ -189,7 +156,6 @@ export const routeArtifactReport = (trackedPaths) => {
   return { checked: candidates.length - skipped.length, findings, skipped };
 };
 
-/** One reported line: the file, and the artifacts it could legitimately name. */
 export const describeFinding = (finding) => {
   const parsed = parseFileName(finding.filePath);
   const options = finding.artifacts

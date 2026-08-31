@@ -17,8 +17,6 @@ import { basename } from 'node:path';
 
 import { fileExtension, scanForSecrets } from './secrets-guard-content.mjs';
 
-// ---- secret-file taxonomy (spec: ADR-020) -----------------------------------
-
 const SECRET_FILE = {
   // `.env.<suffix>` variants that are templates by convention, never real
   // credentials — the only carve-outs from the .env family.
@@ -37,19 +35,11 @@ const SECRET_FILE = {
   sshKeyPrefixes: ['id_dsa', 'id_ecdsa', 'id_ed25519', 'id_rsa'],
 };
 
-// A `file:line[:col]` reference — `grep -n` output, a stack frame, a review
-// comment — names a path without being one, and reading that suffix as part of
-// the name defeated the template carve-out this module's own deny message
-// advertises: `.env.example:11` parsed as suffix `.example:11`, which is not
-// `.example`, so a reference TO the template was denied. Dropping the reference
-// cannot open a hole — `.env:11` normalises to `.env`, which is still denied.
 const LINE_REFERENCE = /:\d+(?::\d+)?$/;
 
-/** The basename a candidate really names, with any `:line[:col]` suffix dropped. */
 const candidateBasename = (candidate) =>
   basename(String(candidate).trim()).toLowerCase().replace(LINE_REFERENCE, '');
 
-/** Name-based: does this path point at a credential-bearing file? */
 const isSecretFilePath = (candidate) => {
   const name = candidateBasename(candidate);
   if (name.length === 0) {
@@ -66,31 +56,14 @@ const isSecretFilePath = (candidate) => {
   );
 };
 
-// ---- per-tool candidate paths (spec: ADR-020) -------------------------------
-
-// Grep's `pattern` is deliberately absent — it is a CONTENT regex (grepping
-// source for the string ".env" is legitimate); its glob/path fields are paths.
 const TOOL_PATH_FIELDS = {
   Glob: ['path', 'pattern'],
   Grep: ['glob', 'path'],
   Read: ['file_path'],
 };
-// Split a Bash command into tokens; `=` is a separator so `--env-file=.env`
-// yields the `.env` token.
 const BASH_TOKEN_SPLIT = /[\s"'`;|&<>()=]+/;
 const GLOB_WILDCARDS = /[*?[\]]/g;
 
-// A quoted span is ONE candidate, never shredded into its words. Splitting it
-// made every word of a commit message, PR title or `node -e` script a candidate
-// path, so `git commit -m "...credentials..."` was denied as a secret-file read.
-// A quoted path is still checked — the span as a whole is what gets tested, so
-// `cat "my file.env"` still matches. Linear, no nested quantifier (S8786).
-//
-// Known gap: prose OUTSIDE quotes — a heredoc body naming `.npmrc`, say — is
-// still tokenised word-by-word and still denied. Closing that needs real shell
-// parsing to tell a heredoc body from arguments, which is not worth it: write
-// the text to a file and pass it by path (`--body-file`), as the callers that
-// hit this already do.
 const QUOTED_SPAN = /"([^"]*)"|'([^']*)'|`([^`]*)`/g;
 
 const bashCandidates = (command) => {
@@ -122,12 +95,6 @@ const candidatePathsFor = ({ toolInput, toolName }) => {
     .map((value) => value.replace(GLOB_WILDCARDS, ''));
 };
 
-// Taxonomy entries that are also ordinary English words. Matching one on a bare
-// token denies any command that merely MENTIONS it — a commit message, an issue
-// body, a grep pattern. Every other entry is dot-prefixed (`.npmrc`, `.netrc`)
-// or carries an extension (`credentials.json`, `*.pem`), so it cannot be
-// mistaken for prose; this list is derived rather than hand-written so a future
-// bare-word entry is covered automatically.
 const AMBIGUOUS_BASENAMES = new Set(
   SECRET_FILE.credentialBasenames.filter(
     (name) => !name.startsWith('.') && !name.includes('.'),
@@ -136,31 +103,9 @@ const AMBIGUOUS_BASENAMES = new Set(
 
 const hasDirectoryComponent = (candidate) => /[/\\]/.test(String(candidate));
 
-/**
- * The runtime env objects, spelled out. These are the only tokens that both end
- * in `.env` and are code rather than a path, so `grep -rn process.env src/` was
- * denied as an attempt to open a file. Anything deeper —
- * `process.env.DATABASE_URL` — already passed: it ends in the variable name and
- * matches no taxonomy entry.
- *
- * An allowlist, not a shape, and the distinction is the whole point. Accepting
- * any dotted chain would also admit `cat prod.env` and `cat secrets.env`, on the
- * reasoning that a real env file is dot-prefixed or carries a directory. That is
- * a convention, not a property of env files, and a deny must not rest on one.
- * Widening this set is a policy change, not a false-positive fix: it needs a
- * deny-side case pinning what it costs.
- */
 const ENV_CODE_CHAIN =
   /^(?:(?:globalThis\.)?process|import\.meta|bun|deno)\.env$/i;
 
-/**
- * Bash tokens are GUESSES at paths; Read's `file_path` is a declared one. So an
- * ambiguous bare word only counts here when it carries a directory — which the
- * real files always do (`~/.aws/credentials`, `./credentials`). The deliberate
- * cost is a bare `cat credentials` naming a file in the working directory; the
- * explicit path tools still match that spelling, and it is a poor trade to deny
- * every sentence containing the word to catch it.
- */
 const isSecretPathInCommand = (candidate) => {
   const name = candidateBasename(candidate);
   if (AMBIGUOUS_BASENAMES.has(name) && !hasDirectoryComponent(candidate)) {
@@ -192,19 +137,11 @@ const extractWriteContent = ({ toolInput, toolName }) => {
     .join('\n');
 };
 
-/**
- * The one public entry point. Returns `{ decision: 'allow' }` or
- * `{ decision: 'deny', reason }`. Pure — no reads, no process, no throws for a
- * well-formed payload.
- */
 export const evaluatePreToolUse = ({ hookEventName, toolInput, toolName }) => {
   if (hookEventName !== 'PreToolUse') {
     return { decision: 'allow' };
   }
 
-  // 1) Deterministic read/exfil guard — Read/Grep/Glob and Bash tokens.
-  // Bash gets the stricter reading of what counts as a path, because its
-  // candidates are inferred from a command line rather than declared in a field.
   const isSecretCandidate =
     toolName === 'Bash' ? isSecretPathInCommand : isSecretFilePath;
   const blockedPath = candidatePathsFor({ toolInput, toolName }).find(
@@ -217,7 +154,6 @@ export const evaluatePreToolUse = ({ hookEventName, toolInput, toolName }) => {
     };
   }
 
-  // 2) Write secret-scan — block content that introduces a credential.
   if (WRITE_TOOLS.has(toolName)) {
     const filePath =
       toolInput &&

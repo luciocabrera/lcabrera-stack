@@ -9,8 +9,6 @@ type ResolveNumberOperatorChangeArgs = {
   readonly operator: OperatorType;
 };
 
-// Return annotation required: 'number' widens to string without the
-// ColumnFilter contextual type.
 export const resolveNumberOperatorChange = ({
   filter,
   operator,

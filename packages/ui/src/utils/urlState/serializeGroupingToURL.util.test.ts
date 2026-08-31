@@ -46,8 +46,6 @@ describe('serializeGroupingToURL', () => {
   });
 
   it('leaves `agg` out entirely when nothing is selected', () => {
-    // A grouped table with no aggregate produces exactly the param it produced
-    // before aggregates existed, so an old shared link and a new one agree.
     expect(
       serializeGroupingToURL({
         grouping: {
@@ -104,10 +102,6 @@ describe('serializeGroupingToURL', () => {
   });
 
   it('writes the empty envelope instead where a default grouping exists', () => {
-    // An absent param is what the loader reads as "apply the route default", so
-    // on such a route "off" has to be something the URL can say — otherwise
-    // clearing is undone by the next navigation that writes any other param
-    // (#578).
     expect(
       serializeGroupingToURL({
         grouping: {
@@ -138,10 +132,6 @@ describe('serializeGroupingToURL', () => {
   });
 
   it('carries the shares beside the keys', () => {
-    // Round-tripped rather than asserted piecewise: the narrowing accepting a
-    // member and the serializer emitting it are two different halves, and a
-    // share that never reaches the URL never reaches the loader either — so the
-    // selection would survive exactly until the next navigation (#648).
     expect(
       serializeGroupingToURL({
         grouping: {
@@ -156,8 +146,6 @@ describe('serializeGroupingToURL', () => {
   });
 
   it('leaves `share` out entirely when nothing is showing one', () => {
-    // A grouped table with no share produces exactly the param it produced
-    // before shares existed.
     expect(
       serializeGroupingToURL({
         grouping: {

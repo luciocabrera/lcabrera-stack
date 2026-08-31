@@ -34,16 +34,12 @@ const allowed: TableColumnGroupingCapability = {
 
 describe('resolveGroupKeyAvailability', () => {
   it('refuses a column the catalogue refused, however the column is declared', () => {
-    // The defect this closes: `isGroupable` defaults to true, so a column the
-    // endpoint will reject was offered by default (#642).
     expect(
       resolveGroupKeyAvailability<Row>({ capability: refused, column }),
     ).toEqual({ isGroupable: false, refusal: 'too-many-distinct' });
   });
 
   it('leaves the declared answer standing when the route resolved no capability', () => {
-    // Absence is "nobody asked", not "refused" — a route may group without
-    // shipping a capability map at all.
     expect(
       resolveGroupKeyAvailability<Row>({ capability: undefined, column }),
     ).toEqual({ isGroupable: true, refusal: undefined });
@@ -59,10 +55,6 @@ describe('resolveGroupKeyAvailability', () => {
   });
 
   it('reports no reason for a consumer opt-out the catalogue also refuses', () => {
-    // Both facts are true at once, and they are different facts. Forwarding the
-    // catalogue's reason here would attribute the table's own decision to the
-    // endpoint, and hand the user a sentence about distinct values for a column
-    // that was never going to be on the menu.
     expect(
       resolveGroupKeyAvailability<Row>({
         capability: refused,
@@ -100,9 +92,6 @@ describe('a column the catalogue refuses raw but offers truncated', () => {
   } as const satisfies TableColumnGroupingCapability;
 
   it('is offerable, and names the granularity it must be added with', () => {
-    // The defect this exists to prevent: reading `canGroup` alone filtered
-    // `order_date` out of the add-key list, so the granularity control could
-    // never render and period grouping was unreachable from the UI (ADR-084).
     expect(
       resolveGroupKeyAvailability({
         capability: orderDate,
@@ -125,8 +114,6 @@ describe('a column the catalogue refuses raw but offers truncated', () => {
   });
 
   it('stays refused when there is no granularity either', () => {
-    // A refusal that a granularity cannot answer — a unique-ish id column, or a
-    // date whose range is too wide for even a year.
     expect(
       resolveGroupKeyAvailability({
         capability: { ...orderDate, periods: [] },
@@ -149,8 +136,6 @@ describe('a column the catalogue refuses raw but offers truncated', () => {
   });
 
   it('still refuses a column the table itself declared ungroupable', () => {
-    // The consumer's opt-out is checked first and a granularity cannot buy past
-    // it: the table said no, which is a different fact from the database's.
     expect(
       resolveGroupKeyAvailability({
         capability: orderDate,

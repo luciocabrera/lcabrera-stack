@@ -14,7 +14,6 @@ export const KeyboardBase = () => (
     />
     <g {...stylex.props(styles.laptopDetail)} transform='translate(14,4)'>
       <rect fill='none' height='4' rx='2' width='72' x='0' y='0' />
-      {/* small keys hint */}
       <rect
         fill='currentColor'
         fillOpacity='0.12'

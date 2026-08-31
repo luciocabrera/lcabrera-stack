@@ -21,9 +21,7 @@ const dialogMocksRef: {
   };
 } = {
   current: {
-    restoreMockDialog: () => {
-      // no-op before setup
-    },
+    restoreMockDialog: () => {},
     showModalMock: vi.fn(),
   },
 };
@@ -135,7 +133,6 @@ describe('PinSideModal', () => {
       screen.getByRole('button', { hidden: true, name: /accept/i }),
     );
 
-    // Re-open the modal to verify reset
     rerender(<PinSideModal {...defaultProps} onAccept={onAccept} />);
 
     const closestEdgeRadio = screen.getByRole<HTMLInputElement>('radio', {

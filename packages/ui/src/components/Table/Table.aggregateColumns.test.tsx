@@ -23,15 +23,6 @@ import { TableBody } from '#ui/components/Table/TableBody';
 import { TableHeader } from '#ui/components/Table/TableHeader';
 import { NotificationProvider } from '#ui/contexts/NotificationContext';
 
-/**
- * Several measures on one column, end to end against real stores (#869).
- *
- * A unit test over `withAggregateColumns` can say the derivation produces two
- * columns. Only a whole grid can say the two are **separately addressable** —
- * that each header is its own sortable `columnheader`, that each cell holds one
- * number rather than both, and that a screen reader is told which column the
- * measures belong to even though the band stating it is decorative.
- */
 type TestRow = Record<string, unknown>;
 
 const ROW_HEIGHT = 40;
@@ -83,11 +74,6 @@ const attachScrollMetrics = (container: HTMLDivElement | null) => {
   });
 };
 
-/**
- * Sorts a measure column from **inside** the provider tree, the way the header
- * actions menu does. A button rather than a `renderHook`, because the point is
- * that the grid re-renders afterwards against the store the action wrote.
- */
 const SortProbe = () => {
   const setColumnSorting = useSetColumnSorting<TestRow>();
 
@@ -155,15 +141,6 @@ const Harness = ({ aggregates = AGGREGATES }: HarnessProps) => {
   );
 };
 
-/**
- * A data router, because the header's resize handle reaches `useFetcher` to
- * persist a width, and the sort action posts the new sorting to the
- * persist-cookie route. The route has to exist rather than merely be
- * unexercised: a `useFetcher` submit to a path the router does not know 404s,
- * and React Router hands that to its default error boundary, which replaces the
- * grid with `Unexpected Application Error!` — a whole-tree failure that would
- * mask whatever the assertion was about to check.
- */
 const renderGrid = (props: HarnessProps = {}) =>
   render(
     <RouterProvider
@@ -174,16 +151,9 @@ const renderGrid = (props: HarnessProps = {}) =>
     />,
   );
 
-/**
- * The **drawn** label of each header, in painted order. Read off the label span
- * rather than the cell, whose `textContent` also collects the actions-menu
- * label and whose accessible name therefore ends in `… column actions`.
- */
 const headerLabels = () =>
   screen.getAllByTestId('table-header-label').map((el) => el.textContent);
 
-/** `undefined` where the header states no explicit name — `getAttribute` says
- * `null`, which this repo does not spell. */
 const headerAriaLabels = () =>
   screen
     .getAllByRole('columnheader')
@@ -203,19 +173,9 @@ describe('a column carrying several measures', () => {
   });
 
   it('names the source column in each measure header’s accessible name', () => {
-    // The band that states it visually is decorative, so without this a screen
-    // reader gets a column called `Average` with nothing saying of what.
     renderGrid();
 
-    // The visible label is the function alone; the source column reaches the
-    // tree through this cell's `aria-label`, so the header announces
-    // `Total Amount Average` rather than a bare `Average`. Deliberately not a
-    // visually-hidden span — see `TableHeaderCell`, which rejects that for two
-    // reasons: the spans concatenate without a separator
-    // (`Total AmountAverage`), and a header's accessible name should be the
-    // column's name rather than its name plus its menu button's.
     expect(headerAriaLabels()).toStrictEqual([
-      // A plain column is its own name; only a derived one has to state two.
       undefined,
       'Total Amount Average',
       'Total Amount Minimum',
@@ -223,8 +183,6 @@ describe('a column carrying several measures', () => {
   });
 
   it('offers each measure its own sort', () => {
-    // `none` means sortable and currently unsorted; an absent attribute would
-    // mean the column does not participate in sorting at all.
     renderGrid();
 
     expect(
@@ -247,15 +205,11 @@ describe('a column carrying several measures', () => {
   });
 
   it('hides the band row from assistive technology', () => {
-    // It carries no cell the focus model can address, and announcing it would
-    // add a row to the sequence `aria-rowindex` counts through.
     renderGrid();
 
     const band = screen.getAllByTestId('table-header-band')[0];
 
     expect(band?.closest('tr')?.getAttribute('aria-hidden')).toBe('true');
-    // One header row in the accessibility tree, plus the group row and the
-    // detail row beneath it — the band row is not among them.
     expect(screen.getAllByRole('row')).toHaveLength(3);
   });
 
@@ -271,16 +225,6 @@ describe('a column carrying several measures', () => {
   });
 
   it('survives a sort on a measure column', () => {
-    // The regression this pins (#872 review): the sort action rebuilt
-    // `normalizedColumns` from the consumer's **declared** column list, which
-    // has no measure columns in it, while leaving `pinnedColumnPartition` —
-    // which does — untouched. `TableHeaderCell` then looked up
-    // `total_amount:avg`, got `undefined`, and destructured it.
-    //
-    // Sorting a measure is the feature this PR ships, so the crash sat on its
-    // own headline path. A unit test over the sort resolver cannot see it: the
-    // two lists only diverge once an aggregate is applied, which is state the
-    // resolver never receives.
     renderGrid();
 
     fireEvent.click(screen.getByRole('button', { name: 'sort by average' }));
@@ -309,12 +253,6 @@ describe('a column carrying several measures', () => {
   });
 
   it('bands a single measure too, since its header states only the function', () => {
-    // The band is not a multi-measure affordance. `hasHeaderBands` asks whether
-    // any column carries a `headerGroupLabel`, and `withAggregateColumns` sets
-    // one on every derived column — so one aggregate draws a band over one
-    // measure. That is the intended behaviour rather than an accident of the
-    // predicate: the visible header reads `Average` whether it has siblings or
-    // not, so the source column still has to be stated somewhere.
     renderGrid({ aggregates: [{ columnKey: 'total_amount', fn: 'avg' }] });
 
     const labelled = screen

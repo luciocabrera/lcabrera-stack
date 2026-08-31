@@ -72,8 +72,6 @@ describe('buildAggregateProjection', () => {
   });
 
   it('parameterizes a FILTER clause and reports where the next parameter goes', () => {
-    // The values array is the assertion that matters: matching only the text
-    // would pass even if `$1` were bound to the wrong value.
     const result = buildAggregateProjection({
       aliased: [
         {

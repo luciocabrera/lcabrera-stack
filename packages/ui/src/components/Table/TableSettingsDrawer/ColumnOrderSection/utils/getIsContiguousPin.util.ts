@@ -19,9 +19,6 @@ export const getIsContiguousPin = <TData>({
 }: GetIsContiguousPinArgs<TData>) => {
   const index = allOrderedColumns.findIndex((col) => col.key === columnKey);
 
-  // The index bounds are kept as written rather than expressed with `slice`:
-  // when the column is absent `index` is -1, and `slice(0, -1)` would mean
-  // "all but the last" instead of the empty range this loop walks.
   if (side === 'left') {
     const leftPinned = new Set<string>(columnPinning.left);
 

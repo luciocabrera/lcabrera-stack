@@ -4,11 +4,6 @@ import { setTableGroupingMode } from '#ui/components/Table/contexts/TableConfig/
 
 import { useSetGrouping } from './useSetGrouping.hook';
 
-/**
- * Stage which grouping sets the read will emit. The drawer's twin of
- * `useSetTableGroupingMode`, resolving through the same reducer so a staged
- * mode is exactly what Accept commits.
- */
 export const useSetGroupingMode = () => {
   const setGrouping = useSetGrouping();
 

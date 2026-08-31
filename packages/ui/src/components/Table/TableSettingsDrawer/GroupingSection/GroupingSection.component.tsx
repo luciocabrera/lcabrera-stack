@@ -15,12 +15,6 @@ import { GroupingModeSection } from './GroupingModeSection';
 import { GroupingSectionToolbar } from './GroupingSectionToolbar';
 import { TotalsPlacementSection } from './TotalsPlacementSection';
 
-/**
- * The settings drawer's grouping tab: the staged group keys in nesting order, the staged
- * aggregates, the totals mode and position, and the controls to add either.
- * Every control here writes the drawer's grouping **draft**, like every other section, and
- * Accept commits the whole configuration in one navigation.
- */
 export const GroupingSection = ({ isBusy = false }: GroupingSectionProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 

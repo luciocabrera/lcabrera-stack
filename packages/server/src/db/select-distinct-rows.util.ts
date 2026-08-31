@@ -5,10 +5,6 @@ import type { SelectQueryDescriptor } from './query-builder/query-builder.types.
 
 import { selectRows } from './select-rows.util.ts';
 
-/**
- * A thin wrapper (identical to `selectRows({ ...descriptor, distinct: true })`) so the two
- * never drift and callers can read the intent.
- */
 export const selectDistinctRows = async <TRow extends QueryResultRow>(
   descriptor: ExecutorOptions & SelectQueryDescriptor,
 ): Promise<readonly TRow[]> =>

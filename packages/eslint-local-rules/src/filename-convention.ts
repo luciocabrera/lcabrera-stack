@@ -26,17 +26,6 @@ import { parseFileName } from './file-names.ts';
 
 type MessageIds = 'deprecatedSuffix' | 'hookPrefix' | 'wrongCase';
 
-// A single optional options object.
-//
-// `suffixCase` overrides the expected case for a given suffix (e.g.
-// `{ util: 'kebab-case' }` in `@lcabrera/utils`), so the rule stays live there
-// instead of being turned off. An unrecognised suffix falls through
-// `expectedCaseFor` and is skipped rather than reported, so a consumer with
-// suffixes this repo has never heard of gets no false positives.
-//
-// `deprecatedSuffixes` maps a retired spelling to its replacement. The default
-// is THIS repo's own migration history, which is exactly the kind of thing a
-// published rule must not force on anyone else — pass `{}` to drop it.
 type Options = readonly [
   {
     readonly deprecatedSuffixes?: Readonly<Record<string, string>>;
@@ -48,39 +37,19 @@ type SuffixCase = 'camelCase' | 'kebab-case' | 'PascalCase';
 
 const PASCAL_CASE = /^[A-Z][A-Za-z0-9]*$/;
 const CAMEL_CASE = /^[a-z][A-Za-z0-9]*$/;
-// A kebab segment is validated per-`-`-split part rather than with a single
-// `[a-z0-9]+(-[a-z0-9]+)*` regex, whose nested quantifier trips
-// security/detect-unsafe-regex (ReDoS heuristic). Splitting is linear and safe.
 const KEBAB_SEGMENT = /^[a-z0-9]+$/;
 const isKebabCase = (value: string) =>
   value.length > 0 &&
   value.split('-').every((segment) => KEBAB_SEGMENT.test(segment));
 
-// The casing model (see .claude/rules/typescript.md): a filename's case follows
-// what it names — a React component (PascalCase), the route/resource it belongs
-// to (kebab-case), or the function/value module it exports (camelCase).
-// `@lcabrera/utils` keeps kebab-case for its `.util` files; rather than turning this
-// rule off there, its eslint config passes `{ suffixCase: { util: 'kebab-case' } }`
-// so a camelCase `.util` file in that package still fails the gate.
 const KEBAB_SUFFIXES = new Set(['action', 'clientAction', 'loader', 'meta']);
-// Shared with `no-type-definitions-in-components` so the two rules cannot
-// disagree about what a component file is — they already had.
 const PASCAL_SUFFIXES = new Set<string>(COMPONENT_FILE_SUFFIXES);
 const CAMEL_SUFFIXES = new Set(['api', 'hook', 'schema', 'service', 'util']);
 
-// Deprecated suffix spellings → their canonical replacement. A multi-word
-// suffix is hyphenated (`error-boundary`), so the old camelCase form is
-// rejected with a rename hint. This is the DEFAULT only — it is this repo's
-// migration history, and `deprecatedSuffixes` replaces it wholesale.
 const DEFAULT_DEPRECATED_SUFFIXES: Readonly<Record<string, string>> = {
   errorBoundary: 'error-boundary',
 };
 
-/**
- * The expected case label for a suffix. Returns `undefined` (by falling through,
- * not an explicit `return` — unicorn/no-useless-undefined bans `return undefined`
- * and Sonar S3626 bans the redundant bare `return`) when the suffix is unenforced.
- */
 type ExpectedCaseForArgs = {
   readonly overrides: ReadonlyMap<string, SuffixCase>;
   readonly suffix: string;

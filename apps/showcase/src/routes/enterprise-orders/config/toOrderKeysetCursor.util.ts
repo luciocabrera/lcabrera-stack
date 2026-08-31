@@ -7,13 +7,6 @@ export type ToOrderKeysetCursorArgs = {
   readonly sort: readonly QuerySort[];
 };
 
-/**
- * The builder throws on one that does not (ADR-052), and a 500 is the wrong answer here:
- * keyset is an optimization, `OFFSET` is the ground truth, and the client sends `skip` on
- * every request either way.
- * So a cursor that cannot be trusted is dropped and the page is served the slow, correct
- * way.
- */
 export const toOrderKeysetCursor = ({
   cursor,
   sort,

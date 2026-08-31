@@ -31,9 +31,6 @@ const CAPABILITIES = {
 
 describe('toGroupKeyTruncations', () => {
   it('marks a timestamptz key zoned and every other temporal key not', () => {
-    // The pair the drill's boundary arithmetic branches on: a `timestamptz` is
-    // truncated in UTC and read back in UTC, a `date` is truncated zone-free
-    // and read back locally.
     expect(
       toGroupKeyTruncations({
         capabilities: CAPABILITIES,
@@ -55,8 +52,6 @@ describe('toGroupKeyTruncations', () => {
   });
 
   it('drops a granularity whose column has no capability rather than guessing', () => {
-    // Inventing `isZoned: false` would compute the range in the wrong frame for
-    // exactly the request that got past the earlier refusal.
     expect(
       toGroupKeyTruncations({
         capabilities: CAPABILITIES,

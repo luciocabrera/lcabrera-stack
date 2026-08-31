@@ -19,11 +19,6 @@ import { join, relative } from 'node:path';
 
 import { checkPackage, Package } from '@arethetypeswrong/core';
 
-/**
- * Resolution modes a modern consumer actually uses. `node10` (legacy) and
- * `node16-cjs` (a CJS require of an ESM-only package) fail by design here and
- * are not the contract this gate protects.
- */
 const RELEVANT_RESOLUTION_KINDS = new Set(['bundler', 'node16-esm']);
 
 const listFilesRecursively = (directory) =>
@@ -32,11 +27,6 @@ const listFilesRecursively = (directory) =>
     return statSync(path).isDirectory() ? listFilesRecursively(path) : [path];
   });
 
-/**
- * The package as a consumer would find it under `node_modules`: the manifest
- * with `publishConfig` merged in (pnpm's pack-time substitution) plus every
- * built file, keyed the way attw expects (`/node_modules/<name>/<path>`).
- */
 const buildInstalledPackage = (packageDirectory) => {
   const manifest = JSON.parse(
     readFileSync(join(packageDirectory, 'package.json'), 'utf8'),
@@ -55,7 +45,6 @@ const buildInstalledPackage = (packageDirectory) => {
   return new Package(files, manifest.name, manifest.version);
 };
 
-/** attw problems that reflect a break a modern consumer would actually hit. */
 export const relevantProblems = (problems) =>
   problems.filter(
     (problem) =>
@@ -63,7 +52,6 @@ export const relevantProblems = (problems) =>
       RELEVANT_RESOLUTION_KINDS.has(problem.resolutionKind),
   );
 
-/** One human-readable line per problem, for the failure report. */
 export const formatProblem = (problem) => {
   const at =
     problem.entrypoint === undefined ? '' : ` at ${problem.entrypoint}`;
@@ -72,7 +60,6 @@ export const formatProblem = (problem) => {
   return `  ${problem.kind}${at}${mode}`;
 };
 
-/** Checks one built package; returns its name and the problems that matter. */
 export const checkPackageTypes = async (packageDirectory) => {
   const analysis = await checkPackage(buildInstalledPackage(packageDirectory));
   return {

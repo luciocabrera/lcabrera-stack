@@ -47,9 +47,6 @@ describe('promisedPaths', () => {
 
 describe('missingFromTarball', () => {
   it('reports a promised path the tarball does not hold', () => {
-    // The failure the gate exists for: a bin that resolves from the workspace
-    // and was never packed. Everything here consumes these packages as
-    // `workspace:*`, which ignores `files`, so nothing else can see it.
     expect(
       missingFromTarball({
         manifest: MANIFEST,
@@ -73,8 +70,6 @@ describe('missingFromTarball', () => {
   });
 
   it('leaves a wildcard target alone', () => {
-    // `./scripts/*` is a pattern, not a file. Reporting it would be a finding
-    // about the check rather than about the package.
     expect(
       missingFromTarball({
         manifest: { exports: { './x': './scripts/*' }, name: 'p' },
@@ -123,8 +118,6 @@ describe('strayFromTarball', () => {
 
 describe('binStartupFailure', () => {
   it('accepts a gate that ran and reported a finding', () => {
-    // These bins are gates: exiting non-zero is them answering. "Did it exit 0"
-    // is the wrong question and would fail every healthy install.
     expect(
       binStartupFailure({
         name: 'repo-verify-pr',
@@ -141,9 +134,6 @@ describe('binStartupFailure', () => {
   });
 
   it('accepts a gate that REPORTS a resolution problem it found', () => {
-    // These gates are allowed to talk about resolution: the publishing gate
-    // says so in its own words when a package cannot be imported. Matching the
-    // words alone would fail the build for a gate doing its job.
     expect(
       binStartupFailure({
         name: 'repo-verify-publish',
@@ -155,9 +145,6 @@ describe('binStartupFailure', () => {
   });
 
   it('reports a bin that started and could not resolve its own code', () => {
-    // The subtle one: the executable was packed and something it imports was
-    // not. That writes a resolution error to stderr, which a naive "did it
-    // produce output" check reads as a healthy run.
     for (const marker of [
       'ERR_MODULE_NOT_FOUND',
       'Cannot find module',
@@ -223,10 +210,6 @@ describe('binsWithoutShebang', () => {
   const manifest = { bin: { kit: './scripts/kit.mjs' }, name: '@scope/kit' };
 
   it('reports a bin the shell would be handed', () => {
-    // The failure this replaced a coincidence with. Every in-repository run
-    // passes whether or not a bin has one, because pnpm links a bin through a
-    // wrapper that invokes node while npm symlinks the target and relies on the
-    // shebang — so the failing path is the one nothing here takes.
     expect(
       binsWithoutShebang({
         manifest,
@@ -253,8 +236,6 @@ describe('binsWithoutShebang', () => {
 
 describe('failureLine', () => {
   it('names the error rather than the version banner', () => {
-    // Taking the last line is the obvious choice and reports `Node.js v26.7.0`
-    // as the reason a command failed, which tells a reader nothing.
     const output = [
       'node:internal/modules/esm/resolve:272',
       '    throw new ERR_MODULE_NOT_FOUND(',
@@ -281,10 +262,6 @@ describe('failureLine', () => {
 
 describe('materialisationFailure', () => {
   it('reports a kit that placed nothing', () => {
-    // The gate used to claim `devkit sync` materialised while asserting
-    // nothing about it: drop the assets directory from the package's `files`
-    // and every step went green, because an empty plan is not an error and a
-    // closure probe over no files reports a self-contained set of none.
     expect(
       materialisationFailure({ manifestFiles: {}, presentPaths: [] }),
     ).toContain('recorded no files');
@@ -317,11 +294,6 @@ describe('materialisationFailure', () => {
 
 describe('noCommandsDeclared', () => {
   it('reports a distributed package that exposes nothing to run', () => {
-    // The vacuous half of "every declared bin ran": trivially true of a package
-    // declaring none. Reachable rather than theoretical — pnpm substitutes
-    // `publishConfig` at pack time and `bin` is one of the substituted fields,
-    // so an emptied `publishConfig.bin` empties the packed map while the
-    // workspace keeps working, since pnpm links its bins from the on-disk one.
     expect(noCommandsDeclared({ bin: {}, name: '@scope/kit' })).toContain(
       'declares no bins',
     );

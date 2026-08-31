@@ -14,11 +14,6 @@ const shimmerAnimation = stylex.keyframes({
   '100%': { transform: 'translateX(100%)' },
 });
 
-/**
- * Common reusable styles shared across components
- */
-
-// Base interactive element (button/link) styles
 export const baseInteractiveStyles = stylex.create({
   element: {
     borderColor: 'transparent',
@@ -73,7 +68,6 @@ export const baseInteractiveStyles = stylex.create({
   },
 });
 
-// Base ripple effect
 export const rippleBase = stylex.create({
   ripple: {
     backgroundPosition: 'center',
@@ -89,7 +83,6 @@ export const rippleBase = stylex.create({
   },
 });
 
-// Ripple variants for each color
 export const colorVariants = stylex.create({
   'danger-ghost': {
     borderColor: 'transparent',
@@ -206,7 +199,6 @@ export const overlayStyles = stylex.create({
   },
 });
 
-// Shared size variants for buttons and links
 export const sizeVariants = stylex.create({
   embedded: {
     borderRadius: borderRadius.sm,
@@ -262,7 +254,6 @@ export const sizeVariants = stylex.create({
   },
 });
 
-// Orientation variants for buttons and links in toolbars/navs
 export const orientationVariants = stylex.create({
   horizontal: {
     justifyContent: 'center',

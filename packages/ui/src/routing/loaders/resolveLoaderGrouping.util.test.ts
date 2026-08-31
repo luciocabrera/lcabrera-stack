@@ -5,11 +5,6 @@ import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
 import { resolveLoaderGrouping } from './resolveLoaderGrouping.util';
 
-/**
- * What `URLSearchParams.get` answers for a param the URL does not carry — read
- * from the API rather than written as a literal, so the fixture is the value
- * the loader actually receives rather than a stand-in for it.
- */
 const ABSENT_PARAM = new URLSearchParams().get('grouping');
 
 type Row = { readonly order_status: string; readonly region: string };
@@ -51,11 +46,6 @@ describe('resolveLoaderGrouping', () => {
   });
 
   it('does NOT re-apply the default over an explicitly cleared grouping', () => {
-    // The empty envelope is what the clear path writes on a route that has a
-    // default, and it is the whole reason the raw param is threaded here: it
-    // deserializes to the same `keys: []` an absent param would, so anything
-    // reading the parsed state alone would put the preset back and undo the
-    // user's clear on the next navigation (#578).
     expect(
       resolveLoaderGrouping<Row>({
         columns: COLUMNS,
@@ -82,8 +72,6 @@ describe('resolveLoaderGrouping', () => {
   });
 
   it('sanitizes the default against the route columns, refusing it whole', () => {
-    // A preset is the one grouping nobody has to type to run into, so a key
-    // naming a column this route no longer declares must not reach SQL.
     expect(
       resolveLoaderGrouping<Row>({
         columns: COLUMNS,

@@ -107,8 +107,6 @@ describe('ActiveGroupKeyList', () => {
 
     render(<ActiveGroupKeyList />);
 
-    // Nesting order, not column order: these two are declared the other way
-    // round above, which is what makes the assertion discriminate.
     expect(screen.getByText('1. Country')).not.toBeNull();
     expect(screen.getByText('2. Status')).not.toBeNull();
   });
@@ -155,8 +153,6 @@ describe('ActiveGroupKeyList', () => {
   });
 
   it('still renders the applied keys under a locked preset', () => {
-    // "Hides the picker while still rendering the grouping": the rows stay, so
-    // a reader can see what the table is grouped by (#578).
     isGroupingLockedRef.current = true;
     groupingKeysRef.current = ['order_status', 'shipping_country'];
 
@@ -167,8 +163,6 @@ describe('ActiveGroupKeyList', () => {
   });
 
   it('offers neither removal nor reorder under a locked preset', () => {
-    // The order is the query's nesting order, so a drag is an edit — a lock
-    // that stopped removal but allowed reordering would not be a lock.
     isGroupingLockedRef.current = true;
     groupingKeysRef.current = ['order_status', 'shipping_country'];
 
@@ -179,10 +173,6 @@ describe('ActiveGroupKeyList', () => {
   });
 
   it('claims no grouping exists when a lock is declared over no keys', () => {
-    // `isGroupingLocked` is a route declaration in its own right — nothing ties
-    // it to a default or to keys in the URL — so this state is reachable, and a
-    // message asserting the table "is grouped by a fixed set of columns" would
-    // be false in it.
     isGroupingLockedRef.current = true;
     groupingKeysRef.current = [];
 

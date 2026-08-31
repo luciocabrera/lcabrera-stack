@@ -11,11 +11,6 @@ import { CAR_SALES_PAGINATED_PATH, fetchCarSalesPage } from './carSales.api';
 
 const PAGE = { data: [], hasMore: false, total: 0 };
 
-/**
- * Typed to the one call shape `createPaginatedFetcher` makes — a string URL —
- * so `mock.calls` carries it and the requested URL, which is the whole
- * assertion in this file, needs no narrowing.
- */
 const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(
   () => Promise.resolve(Response.json(PAGE)),
 );
@@ -38,8 +33,6 @@ describe('fetchCarSalesPage', () => {
 
     await fetchCarSalesPage({ limit: 25, skip: 50 });
 
-    // Same-origin and path-only: no origin is resolved at all, which is what
-    // lets the same call work in the browser and in an SSR loader.
     expect(requestedUrl()).toBe(`${CAR_SALES_PAGINATED_PATH}?limit=25&skip=50`);
   });
 
@@ -54,13 +47,6 @@ describe('fetchCarSalesPage', () => {
   });
 
   it('honours the override host under SSR, where a requestUrl is present', async () => {
-    // The regression this pins, end to end through the fetcher: until #705,
-    // `getApiBaseUrl` ranked the SSR `requestUrl` above `VITE_API_URL`, so
-    // handing it one made the override pick the external branch while the
-    // request went to the request's own origin (#701 review). The override
-    // host is deliberately not `localhost:3001` — that is the value
-    // `getApiBaseUrl` returns for a local requestUrl, so an assertion using it
-    // would pass either way and prove nothing.
     vi.stubEnv('VITE_API_URL', 'http://override.example:9999/api');
 
     await fetchCarSalesPage({

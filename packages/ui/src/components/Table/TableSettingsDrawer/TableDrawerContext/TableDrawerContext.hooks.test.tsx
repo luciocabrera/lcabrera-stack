@@ -145,9 +145,6 @@ describe('TableDrawerContext grouping draft hooks', () => {
   });
 
   it('stages a key list, a reorder and an aggregate without any commit path', () => {
-    // The draft store is all these actions can reach — they take no
-    // persistence or navigation dependency at all, which is what the
-    // component-level count test in GroupingSection asserts from the outside.
     const { result: toggle } = renderHook(() => useToggleGroupKey(), {
       wrapper: Wrapper,
     });

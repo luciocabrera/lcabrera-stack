@@ -37,8 +37,6 @@ describe('TableGroupDisclosure', () => {
 
     fireEvent.click(screen.getByTestId('table-group-disclosure'));
 
-    // Called with the path, not with a row index: expansion is keyed by group
-    // path so it survives a sort that reorders every row (ADR-061).
     expect(toggleMock).toHaveBeenCalledWith(PATH);
   });
 
@@ -96,11 +94,6 @@ describe('TableGroupDisclosure', () => {
   });
 
   it('stays out of the tab order and out of the accessibility tree', () => {
-    // The constraint this component exists to respect. ADR-062 gives the grid
-    // one roving tab stop addressed by row key plus column key; a <button>
-    // here would add a second one inside a cell that already owns one. The row
-    // carries `aria-expanded`, so announcing this too would state the same
-    // thing twice.
     render(
       <TableGroupDisclosure
         disclosure={{

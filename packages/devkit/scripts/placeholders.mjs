@@ -14,7 +14,6 @@
 
 const PLACEHOLDER = /\{\{[ \t]*commands\.([a-zA-Z][\w-]*)[ \t]*\}\}/g;
 
-/** The command keys a piece of content asks the consumer to supply. */
 export const requiredCommands = (content) => [
   ...new Set([...content.matchAll(PLACEHOLDER)].map((match) => match[1])),
 ];

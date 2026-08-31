@@ -23,7 +23,6 @@ import { readRegisters } from './lib/doc-register-read.mjs';
 import { packageDocsReport } from './lib/doc-register-reports.mjs';
 import { documentsForPackage } from './lib/doc-registers.mjs';
 
-/** The first bare argument — `--` separators and flags are not workspace names. */
 const namedWorkspace = () =>
   process.argv.slice(2).find((argument) => !argument.startsWith('-'));
 

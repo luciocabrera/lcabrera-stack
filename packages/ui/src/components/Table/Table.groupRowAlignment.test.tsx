@@ -24,16 +24,6 @@ import { tableBodyCellStyles } from '#ui/components/Table/TableBodyCell/TableBod
 import { TableHeader } from '#ui/components/Table/TableHeader';
 import { NotificationProvider } from '#ui/contexts/NotificationContext';
 
-/**
- * A cell's alignment follows its **column's** type, on a group row as well as on the detail
- * rows beneath it (#1018).
- *
- * A unit test over `getCellStyleProps` can say the flag is honoured, and one over
- * `buildTableBodyCellDescriptor` can say the type is carried. Neither can say the two meet:
- * every group-row cell is built through the descriptor's `custom` branch, which is the
- * branch that used to mean "do not align", so only a whole grouped grid shows a currency
- * total and the numbers below it sharing one edge.
- */
 type TestRow = Record<string, unknown>;
 
 const ROW_HEIGHT = 40;
@@ -44,12 +34,6 @@ const AGGREGATES: readonly TableColumnAggregate[] = [
   { columnKey: 'total_amount', fn: 'sum' },
 ];
 
-/**
- * One column of each alignment, plus one that renders its own content. `invoice` declares
- * `currency` **and** a `render()`, which is what makes it discriminating: the type is
- * present and must still not be applied on a detail row, because the layout of a consumer's
- * own output is the consumer's to decide.
- */
 const columns: TableColumn<TestRow>[] = [
   { isPrimaryKey: true, key: 'id', label: 'Id' },
   { dataType: 'date', key: 'order_date', label: 'Order Date' },
@@ -150,11 +134,6 @@ const Harness = ({
   );
 };
 
-/**
- * A data router: the header's resize handle reaches `useFetcher`, and a submit to a path the
- * router does not know 404s into React Router's default error boundary, which would replace
- * the grid with an error page and mask whatever was about to be asserted.
- */
 const renderGrid = (props: HarnessProps = {}) =>
   render(
     <RouterProvider
@@ -168,11 +147,6 @@ const renderGrid = (props: HarnessProps = {}) =>
 const classesOf = (className: string | undefined) =>
   (className ?? '').split(' ').filter(Boolean);
 
-/**
- * Compiled here from the same style objects the cell uses, never written out as a hashed
- * literal: a StyleX class name changes with its declaration, so a literal would stop
- * matching the day the style moved and report every cell as unaligned.
- */
 const RIGHT_CLASSES = classesOf(
   stylex.props(tableBodyCellStyles.alignRight).className,
 );
@@ -191,12 +165,6 @@ const alignmentOf = (cell: Element | undefined) => {
   return 'default';
 };
 
-/**
- * One row's alignment keyed by the column drawn above it. Headers and cells are painted from
- * the same partition in the same order, so position is the join — and a measure column's
- * header reads as its function (`Sum`), with the source column stated by the decorative
- * band.
- */
 const alignmentsByColumn = (row: Element | undefined) => {
   const labels = screen
     .getAllByTestId('table-header-label')
@@ -218,9 +186,6 @@ describe('cell alignment on a grouped grid', () => {
   afterEach(cleanup);
 
   it('aligns every group-row cell by its own column’s type', () => {
-    // The defect in one assertion: before #1018 every entry here read `default`, because
-    // each of these cells is built through the descriptor's `custom` branch and that branch
-    // skipped alignment outright.
     renderGrid();
 
     expect(groupRowAlignments()).toStrictEqual({
@@ -246,7 +211,6 @@ describe('cell alignment on a grouped grid', () => {
     });
 
     expect(detailRowAlignments()).toStrictEqual({
-      // No declared type; `7` is detected as a number from the value.
       Id: 'right',
       Invoice: 'default',
       'Order Date': 'center',

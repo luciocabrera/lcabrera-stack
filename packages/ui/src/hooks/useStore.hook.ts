@@ -9,7 +9,6 @@ export type TStore<TData> = {
   subscribe: (callback: () => void) => () => void;
 };
 
-/** Read through `useStoreSelector` — it owns the `useSyncExternalStore` wiring. */
 export const useStore = <TData extends Record<string, unknown>>(
   initialState: TData,
 ) => {

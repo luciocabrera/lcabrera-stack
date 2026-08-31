@@ -21,7 +21,7 @@ describe('resolvePinOrderConflict', () => {
       newOrder: ['id', 'age', 'name', 'actions'],
       resolution: 'remove-conflicting-pins',
     });
-    expect(result.columnPinning.left).toEqual(['id']); // name is not contiguous
+    expect(result.columnPinning.left).toEqual(['id']);
     expect(result.columnOrder).toEqual(['id', 'age', 'name', 'actions']);
   });
 
@@ -31,7 +31,7 @@ describe('resolvePinOrderConflict', () => {
       newOrder: ['id', 'name', 'age', 'actions'],
       resolution: 'remove-conflicting-pins',
     });
-    expect(result.columnPinning.right).toEqual(['actions']); // name is not contiguous from right
+    expect(result.columnPinning.right).toEqual(['actions']);
   });
 
   it('pin-to-match-order: moves left-pinned to start, right-pinned to end', () => {

@@ -32,9 +32,6 @@ const drill = (overrides: Partial<Parameters<typeof toDrillRead>[0]> = {}) =>
 
 describe('toDrillRead', () => {
   it('carries every filter the grouped view was read under, unchanged and first', () => {
-    // The criterion the whole feature rests on. A drill that drops these
-    // returns rows that are individually correct and wrong under the heading
-    // they appear beneath.
     const result = drill();
 
     expect(result.kind).toBe('drillable');
@@ -62,9 +59,6 @@ describe('toDrillRead', () => {
   });
 
   it('uses IS NULL for a null key, never an equality', () => {
-    // `region = NULL` is never true, so an equality here returns an empty page
-    // for a group the row says holds rows — silently, on the group a user is
-    // most likely to click.
     const nullKey = JSON.parse(
       '{"columnKey":"region","value":null}',
     ) as OlapDrillGroup['path'][number];
@@ -77,8 +71,6 @@ describe('toDrillRead', () => {
   });
 
   it('treats an absent key value as IS NULL too', () => {
-    // `undefined` can only mean the key never arrived; an equality against it
-    // is the same dead comparison as one against null.
     const result = drill({
       group: groupOf({ path: [{ columnKey: 'region', value: undefined }] }),
     });
@@ -116,9 +108,6 @@ describe('toDrillRead', () => {
   });
 
   it('never carries a grouping, so the read cannot return group rows again', () => {
-    // Forwarding the view's grouping would send the read straight back into the
-    // grouped branch — the mistake that looks like it works, because it returns
-    // rows.
     const result = drill();
 
     expect(result.kind === 'drillable' ? result.read : {}).not.toHaveProperty(
@@ -162,8 +151,6 @@ describe('toDrillRead', () => {
   });
 
   it('names a grand total before it names a subtotal', () => {
-    // A grand total is *also* `isSubtotal`, so a subtotal-first ordering reports
-    // the less specific reason for every grand total.
     expect(drill({ group: groupOf({ isSubtotal: true, path: [] }) })).toEqual({
       kind: 'refused',
       reason: 'grand-total',
@@ -171,8 +158,6 @@ describe('toDrillRead', () => {
   });
 
   it('refuses a path shorter than the applied keys', () => {
-    // Only the innermost grouping set has rows directly underneath it, so a
-    // partial path would drill into a set the row does not identify.
     expect(drill({ groupKeys: ['region', 'status'] })).toEqual({
       kind: 'refused',
       reason: 'incomplete-path',
@@ -208,9 +193,6 @@ describe('a truncated group key', () => {
     });
 
   it('becomes a half-open range on the raw column, not an equality', () => {
-    // The group `2021-03` is `date_trunc('month', …)`, and no row holds that
-    // value — every row holds an instant inside the month. Equality returns the
-    // first of the month and nothing else.
     const drill = drillPeriod({
       truncations: { order_date: { isZoned: false, period: 'month' } },
     });
@@ -224,9 +206,6 @@ describe('a truncated group key', () => {
   });
 
   it("keeps the view's own filters ahead of the range", () => {
-    // The correctness criterion that fails quietly: a drill drawn without them
-    // returns rows that are true facts about the table and wrong under the
-    // heading they appear beneath.
     const drill = drillPeriod({
       truncations: { order_date: { isZoned: false, period: 'year' } },
     });
@@ -239,13 +218,8 @@ describe('a truncated group key', () => {
   });
 
   it('still says IS NULL for a NULL period group', () => {
-    // `date_trunc` of NULL is NULL, so a truncated key has a NULL group exactly
-    // as an untruncated one does — and it is still the group a range comparison
-    // would silently return nothing for.
     const drill = drillPeriod({
       truncations: { order_date: { isZoned: false, period: 'month' } },
-      // A real JSON null without the literal the lint rules forbid — the same
-      // trick the untruncated NULL case above uses.
       value: JSON.parse('null') as unknown,
     });
 
@@ -256,8 +230,6 @@ describe('a truncated group key', () => {
   });
 
   it('falls back to equality rather than a range drawn from an unparseable bound', () => {
-    // Returning nothing is the honest failure; a range computed from
-    // parsed-to-garbage boundaries would return the wrong rows and look right.
     const drill = drillPeriod({
       truncations: { order_date: { isZoned: false, period: 'month' } },
       value: 'not a date',
@@ -281,13 +253,6 @@ describe('a truncated group key', () => {
 
 describe('a sort naming a measure column', () => {
   it('is dropped, because a drill is an ungrouped read', () => {
-    // The grid keys a measure column `column:fn` and that key is ordinary sort
-    // state, so it travels with the request. A grouped read honours it —
-    // `toGroupSort` maps it onto the aggregate's alias — but a drill reads the
-    // group's rows with no grouping at all, where no such column exists.
-    // `buildOrderByClause` validates every term against `allowedColumns` and
-    // refuses the whole query, so leaving it in fails the drill outright
-    // rather than ignoring the term.
     const result = drill({
       sort: [
         { column: 'total_amount:avg', direction: 'desc' },
@@ -320,8 +285,6 @@ describe('a sort naming a measure column', () => {
   });
 
   it('keeps a real column whose name merely contains a colon', () => {
-    // The split is on the last colon and the suffix must be a known function,
-    // so an ordinary column is never mistaken for a measure.
     const result = drill({
       sort: [{ column: 'odd:column', direction: 'asc' }],
     });

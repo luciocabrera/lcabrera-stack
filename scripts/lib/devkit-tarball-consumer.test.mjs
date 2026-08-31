@@ -34,9 +34,6 @@ describe('clobberedConfigKeys', () => {
   });
 
   it('reports a block the command deleted', () => {
-    // `devkit.config.json` is one file read by both distributed packages.
-    // Writing a freshly-built object over it does not rewrite devkit's part of
-    // the config; it deletes the gate runtime's.
     expect(
       clobberedConfigKeys({
         after: { commands: {}, profile: 'full', publishing: before.publishing },
@@ -48,8 +45,6 @@ describe('clobberedConfigKeys', () => {
   });
 
   it('treats a config with nothing to preserve as a finding', () => {
-    // Comparing a config that was never customised proves nothing, and reads
-    // afterwards as a config that survived.
     expect(
       clobberedConfigKeys({
         after: { commands: {}, profile: 'agent' },
@@ -70,10 +65,6 @@ describe('bareTaskFindings', () => {
   });
 
   it('reports a task that runs but fails on a fresh repository', () => {
-    // The real finding: `configs:verify` resolved perfectly and exited 1,
-    // because its gate refuses a roster nobody has written yet. "The binary
-    // resolves" and "the task runs" are different claims, and the count was
-    // making the weaker one while sounding like the stronger.
     expect(
       bareTaskFindings({
         expected,
@@ -88,8 +79,6 @@ describe('bareTaskFindings', () => {
   });
 
   it('reports a task that quietly stopped being written', () => {
-    // Otherwise a task disappearing from `init` turns this gate into a smaller
-    // check that still reports a pass.
     expect(
       bareTaskFindings({
         expected,
@@ -118,9 +107,6 @@ describe('taskFindings', () => {
   });
 
   it('reports a task naming a binary nobody installed', () => {
-    // What a consumer meets as `command not found` on their first run, and what
-    // no workspace can show: there, every binary resolves whether or not the
-    // package declaring it was installed.
     expect(
       taskFindings({
         availableBins,
@@ -135,8 +121,6 @@ describe('taskFindings', () => {
   });
 
   it('treats a manifest with no runnable task as a finding', () => {
-    // The vacuous case again: `init` reporting "13 task(s) added" over a
-    // manifest it wrote none into exits exactly as cleanly as one that worked.
     const noneWired =
       '`devkit init` left no runnable gate task in the consumer manifest, so nothing it set up can be invoked';
     expect(taskFindings({ availableBins, scripts: { build: 'tsc' } })).toEqual([
@@ -162,9 +146,6 @@ describe('inertHooks', () => {
   });
 
   it('reports a hook without the bit, which git skips without a word', () => {
-    // The real defect: `pnpm pack` writes every entry 0644, so consumers got a
-    // `commit-msg` git ignored. A message violating every rule was committed
-    // with exit 0 — the gate was simply absent.
     expect(
       inertHooks({
         hooksPath,
@@ -176,9 +157,6 @@ describe('inertHooks', () => {
   });
 
   it('treats finding no hooks at all as a finding, not a pass', () => {
-    // The vacuous case. Run against the `agent` profile — which carries no
-    // hooks — this checked nothing and read afterwards as hooks that were fine.
-    // That is exactly how the defect above survived every packed-tarball run.
     expect(
       inertHooks({
         hooksPath,

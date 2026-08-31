@@ -128,8 +128,6 @@ describe('TableSettingsDrawerBody', () => {
   });
 
   it('offers no Grouping tab for a route that cannot group', () => {
-    // Absent means off (ADR-063): a table whose endpoint cannot group would
-    // otherwise offer a control whose every use is refused.
     render(<TableSettingsDrawerBody />);
 
     expect(screen.queryByText('Grouping')).toBeNull();
@@ -148,9 +146,6 @@ describe('TableSettingsDrawerBody', () => {
   });
 
   it('puts Grouping after Sorting and before Columns', () => {
-    // The tab order is the order a user reads the query in: filter, sort, then
-    // group. Appending it at the end would separate it from the two it belongs
-    // beside.
     isGroupingEnabledRef.current = true;
 
     render(<TableSettingsDrawerBody />);

@@ -7,12 +7,6 @@ import {
   unknownLabels,
 } from './plan-issues-render.mjs';
 
-// The point of this module is that a rendered body survives the SAME check
-// `issue-standards.yml` runs on open, so that is what the tests assert —
-// against the real `validateIssueBody`, not a restatement of its rules. An
-// epic is the hard case: three of the five required sections are absent from
-// how the planning document writes one.
-
 const record = (overrides = {}) => ({
   id: 'P-01',
   title: 'docs: an issue',
@@ -86,8 +80,6 @@ describe('renderIssueBody', () => {
   });
 
   it('names the planning document it was actually given', () => {
-    // Hardcoding a path here would cite a file that no longer exists on every
-    // issue the tool ever files — a plan is retired once its issues are open.
     expect(
       renderIssueBody(record(), '.tmp/planning/2026-07-server.md'),
     ).toContain('Planned as `P-01` in `.tmp/planning/2026-07-server.md`.');
@@ -109,8 +101,6 @@ describe('renderIssueBody', () => {
   });
 
   it('keeps the heading spelling the gate matches', () => {
-    // Numbering or emoji in these headings fails `pr:verify`'s sibling check;
-    // the issue gate matches them as headings, not as substrings.
     for (const heading of [
       '## 1. Problem Statement',
       '## 2. Objective',

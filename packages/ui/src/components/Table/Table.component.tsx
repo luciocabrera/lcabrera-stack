@@ -18,17 +18,12 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
   response,
 }: TableProps<TData, TResponse>) => {
   const data = dataSelector ? dataSelector(response) : [];
-  // The first response of a session always carries its total; `data.length`
-  // covers a table wired without a selector, and a server that omitted one.
   const totalRows = dataTotalSelector?.(response) ?? data.length;
 
   const tableContent = (
     <TableDataProvider<TData>
       dataState={{
         data,
-        // Read once here and seeded into the store, so every surface that has
-        // to say why the table is empty reads a selector rather than the
-        // response shape.
         error: dataErrorSelector?.(response),
         isLoading,
         totalRows,

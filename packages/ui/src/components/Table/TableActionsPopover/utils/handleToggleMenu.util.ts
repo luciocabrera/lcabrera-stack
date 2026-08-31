@@ -14,11 +14,6 @@ type HandleToggleMenuArgs = {
   readonly setMenuPosition: (position: MenuPosition) => void;
 };
 
-/**
- * Trigger-click handler core: closes the menu when it is already open, otherwise opens it
- * via the Popover API and repositions across several animation frames because
- * virtualization/load-more can shift trigger geometry right after the click.
- */
 export const handleToggleMenu = ({
   closeMenu,
   getContainerRect,

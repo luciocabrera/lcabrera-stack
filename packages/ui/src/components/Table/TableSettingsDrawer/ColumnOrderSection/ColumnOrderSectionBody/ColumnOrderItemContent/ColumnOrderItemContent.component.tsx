@@ -11,12 +11,6 @@ import {
 } from '../../ColumnOrderSectionContext/actions';
 import { styles } from './ColumnOrderItemContent.stylex';
 
-/**
- * **A group key is listed and locked, not hidden** (ADR-080).
- * It is one of the consumer's own columns, so a drawer row for it answers something —
- * which is why it stays listed where the retired hierarchy column was filtered out — but
- * its position and visibility are the grouping's while grouping is applied.
- */
 export const ColumnOrderItemContent = ({
   columnKey,
   isBusy = false,

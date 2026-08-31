@@ -33,7 +33,6 @@ export const toTextQueryFilters = ({
       return [{ column, operator: 'ilike', value: `${value}%` }];
     }
     default: {
-      // 'equals'
       return [{ column, operator: 'eq', value }];
     }
   }

@@ -42,18 +42,11 @@ export const ALWAYS_SKIPPED = [
   '.tmp',
 ];
 
-/** A line carrying no logic: blank, or opening/continuing a comment. */
 const isProse = (line) => /^\s*(\/\/|\/\*|\*|$)/.test(line);
 
 export const countCodeLines = (content) =>
   content.split('\n').filter((line) => !isProse(line)).length;
 
-/**
- * The blocking finding for one file, or undefined when it is within its limit.
- *
- * A grandfathered file is held to its RECORDED size, not to the ceiling: the
- * point of the baseline is that inherited debt may stay and may not grow.
- */
 export const sizeProblem = ({ ceiling, file, grandfathered, lines }) => {
   if (lines <= (grandfathered ?? ceiling)) return undefined;
   return grandfathered === undefined
@@ -61,12 +54,6 @@ export const sizeProblem = ({ ceiling, file, grandfathered, lines }) => {
     : `${file}: ${lines} code lines exceeds its grandfathered ${grandfathered} — it grew. Shrink it, don't raise the baseline.`;
 };
 
-/**
- * A "rebaseline me" hint for a grandfathered file that shrank.
- *
- * Non-blocking on purpose. Making it fail would mean a change that improved a
- * file failed the gate, which teaches people not to improve the file.
- */
 export const baselineWarning = ({ ceiling, file, grandfathered, lines }) => {
   if (grandfathered === undefined) return undefined;
   if (lines <= ceiling) {
@@ -78,10 +65,6 @@ export const baselineWarning = ({ ceiling, file, grandfathered, lines }) => {
   return undefined;
 };
 
-/**
- * The baseline for a set of measurements: every file over the ceiling, at the
- * size it is now, keyed in a stable order so the JSON diff is reviewable.
- */
 export const baselineFor = ({ ceiling, measured }) =>
   Object.fromEntries(
     measured
@@ -90,7 +73,6 @@ export const baselineFor = ({ ceiling, measured }) =>
       .map(({ file, lines }) => [file, lines]),
   );
 
-/** Every finding for a measured set, blocking and advisory kept apart. */
 export const findingsFor = ({ baseline, ceiling, measured }) => ({
   problems: measured
     .map(({ file, lines }) =>

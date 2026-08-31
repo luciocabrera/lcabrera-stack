@@ -67,9 +67,6 @@ const pinToMatchOrder = ({
   columnPinning,
   newOrder,
 }: Omit<ResolvePinOrderConflictArgs, 'resolution'>) => {
-  // Local Sets rather than `splitColumnsByPinning`: that helper partitions
-  // `TableColumn[]`, and this partitions the key list itself. Reaching for it
-  // would mean widening its published return shape to serve one caller.
   const leftPinnedKeys = new Set<string>(columnPinning.left);
   const rightPinnedKeys = new Set<string>(columnPinning.right);
 

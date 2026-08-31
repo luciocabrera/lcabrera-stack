@@ -49,7 +49,6 @@ describe('firePrefetch', () => {
 
     firePrefetch({ limit: 50, nextSkip: 100, onLoadMore, prefetchRef });
 
-    // Wait for the resolution to complete
     await vi.waitFor(() => {
       expect(prefetchRef.current.data).toBe('prefetched-data');
     });
@@ -69,15 +68,11 @@ describe('firePrefetch', () => {
 
     firePrefetch({ limit: 50, nextSkip: 100, onLoadMore, prefetchRef });
 
-    // Simulate the consumer consuming the cache and firing a new prefetch
-    // which changes the skip value
     prefetchRef.current = { data: undefined, promise: undefined, skip: 200 };
 
-    // Now resolve the original prefetch
     resolve('stale-data');
     await promise;
 
-    // The stale result should be discarded — skip should still be 200
     expect(prefetchRef.current.skip).toBe(200);
     expect(prefetchRef.current.data).toBeUndefined();
   });

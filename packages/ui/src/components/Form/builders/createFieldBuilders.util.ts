@@ -10,12 +10,6 @@ import { fieldGroup } from './fieldGroup.util';
 import { fieldRow } from './fieldRow.util';
 import { toggleField } from './toggleField.util';
 
-/**
- * A generic builder cannot infer `TValues` from a string `accessor`, so without this
- * factory every call would need explicit type arguments — binding it here keeps `accessor`
- * type-checked against the value keys while call sites stay as terse as a hand-written
- * field literal.
- */
 export const createFieldBuilders = <
   TValues extends Record<string, unknown>,
 >() => ({

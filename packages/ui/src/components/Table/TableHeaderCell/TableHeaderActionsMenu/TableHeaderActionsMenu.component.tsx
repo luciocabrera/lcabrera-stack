@@ -15,12 +15,6 @@ import { PinAndHideActions } from './PinAndHideActions/PinAndHideActions.compone
 import { SortActions } from './SortActions/SortActions.component';
 import { tableHeaderActionsMenuStyles } from './TableHeaderActionsMenu.stylex';
 
-/**
- * Grouping is read here rather than passed in: it is a route capability, not a column one,
- * so it comes from the meta store the loader seeded (ADR-063).
- * A route that never declared it gets no grouping section at all — the menu it renders is
- * byte-identical to the one it rendered before grouping existed.
- */
 export const TableHeaderActionsMenu = <TData,>({
   columnKey,
   columnLabel,
@@ -37,8 +31,6 @@ export const TableHeaderActionsMenu = <TData,>({
 
   if (!hasSorting && !isGroupingEnabled && !hasPinAndHide && !hasManage) return;
 
-  // A column with nothing above "Manage Column" puts it alone in the menu, with
-  // nothing to separate from.
   const isManageTheOnlySection = isStatic && !isSortable && !isGroupingEnabled;
   const hasSectionAbovePinAndHide = Boolean(hasSorting || isGroupingEnabled);
 

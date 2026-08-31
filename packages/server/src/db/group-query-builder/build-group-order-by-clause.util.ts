@@ -15,13 +15,6 @@ type BuildGroupOrderByClauseArgs = {
 const toDirection = (direction: 'asc' | 'desc' | undefined) =>
   direction === 'desc' ? 'DESC' : 'ASC';
 
-/**
- * `GROUPING(key) <placement>, key <user>` per key, with any aggregate sort spliced in at
- * the innermost level.
- * The leading `GROUPING` term is what puts a subtotal beside the rows it totals, and it is
- * emitted only when that key is rolled up in at least one set — so a flat grouping
- * produces byte-identical output to the flat builder's `ORDER BY`.
- */
 export const buildGroupOrderByClause = ({
   aggregateAliases,
   expressionByKey = {},
@@ -34,9 +27,6 @@ export const buildGroupOrderByClause = ({
 
   const placement = subtotalPlacement === 'first' ? 'DESC' : 'ASC';
 
-  // One pass into an array this call allocated: a key entry is dropped here
-  // (the key loop below reads its direction in place) and an aggregate entry is
-  // emitted in request order.
   const aggregateTerms: string[] = [];
 
   for (const entry of sort) {

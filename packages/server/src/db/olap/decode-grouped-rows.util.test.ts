@@ -14,11 +14,6 @@ const REQUESTED = [
   { column: 'quantity', fn: 'avg' },
 ] as const;
 
-/**
- * What `buildGroupQuery` emits for `toGroupAggregates({ requested: REQUESTED })`
- * — one entry per aggregate, in the order they were requested, each carrying the
- * alias the SQL projected it under.
- */
 const alias = (aggregate: { readonly column?: string; readonly fn: string }) =>
   aggregate.column === undefined
     ? `${aggregate.fn}_all`
@@ -42,8 +37,6 @@ describe('toGroupAggregates', () => {
   });
 
   it('asks for count(*) even when nothing else was selected', () => {
-    // A group row states how many rows it covers whether or not the route
-    // selected an aggregate, so the read is never issued without it.
     expect(toGroupAggregates({ requested: [] })).toStrictEqual([
       { fn: 'count' },
     ]);
@@ -52,10 +45,6 @@ describe('toGroupAggregates', () => {
 
 describe('decodeGroupedRows', () => {
   it('lands each aggregate on the column that asked for it', () => {
-    // The drift this guards: `count(*)` occupies the position the decode skips,
-    // and nothing in the type system relates the two. One place out and every
-    // aggregate renders against its neighbour's column, with no type error and
-    // no thrown value — only wrong numbers.
     const built = emit(toGroupAggregates({ requested: REQUESTED }));
     const [decoded] = decodeGroupedRows({
       aggregates: built,
@@ -83,10 +72,6 @@ describe('decodeGroupedRows', () => {
   });
 
   it('keeps two aggregates over ONE column apart', () => {
-    // The property `@lcabrera/ui` leans on since #831: a column may carry
-    // several measures, so the two must arrive as distinguishable fields.
-    // `resolveAggregateAlias` derives `${fn}_${column}`, which separates them,
-    // and `assertGroupAliases` refuses a projection where it did not.
     const requested = [
       { column: 'amount', fn: 'sum' },
       { column: 'amount', fn: 'avg' },
@@ -136,9 +121,6 @@ describe('decodeGroupedRows', () => {
   });
 
   it('throws rather than decoding a list that does not line up', () => {
-    // The quiet failure this refuses: an alias that is not there yields
-    // `row[undefined]`, so every group would report a count of NaN and
-    // aggregates of undefined — valid-looking rows carrying no data.
     expect(() =>
       decodeGroupedRows({
         aggregates: emit(toGroupAggregates({ requested: [] })),
@@ -163,9 +145,6 @@ describe('decodeGroupedRows', () => {
   });
 
   it('throws on a list of the right length in the wrong order', () => {
-    // The dangerous input, and the one a length check cannot see: every
-    // aggregate would be mislabelled with its neighbour's value and nothing
-    // would be thrown.
     const built = emit(toGroupAggregates({ requested: REQUESTED }));
 
     expect(() =>
@@ -188,8 +167,6 @@ describe('decodeGroupedRows', () => {
   });
 
   it('throws when the first projection is not count(*)', () => {
-    // Reading the count off whichever alias happens to be first is the other
-    // half of the same failure.
     expect(() =>
       decodeGroupedRows({
         aggregates: emit(REQUESTED),
@@ -221,10 +198,6 @@ describe('decodeGroupedRows', () => {
 
 describe('toGroupSort', () => {
   it('turns a sort on a measure column into an aggregate term, after the keys', () => {
-    // Position decides which level an aggregate orders, and `assertGroupSort`
-    // refuses one placed ahead of a key rather than quietly demoting it — so
-    // appending is the only placement that both means something and is
-    // accepted (#869).
     expect(
       toGroupSort({
         groupKeys: ['status'],
@@ -238,9 +211,6 @@ describe('toGroupSort', () => {
   });
 
   it('derives the alias with the builder’s own rule', () => {
-    // Re-spelling it here would let the ORDER BY term and the projected column
-    // drift apart, which Postgres reports as an unknown identifier rather than
-    // as the mistake it is.
     expect(
       toGroupSort({
         groupKeys: [],
@@ -251,9 +221,6 @@ describe('toGroupSort', () => {
   });
 
   it('drops a measure sort naming an aggregate this read did not request', () => {
-    // The grouping configuration is URL state, so it can name anything; an
-    // alias the query does not project would reach Postgres as an unknown
-    // identifier.
     expect(
       toGroupSort({
         groupKeys: ['status'],
@@ -274,8 +241,6 @@ describe('toGroupSort', () => {
   });
 
   it('emits one term per key, in nesting order', () => {
-    // The nesting order is the tree, so a user's sort sets a level's direction
-    // rather than reordering the levels.
     expect(
       toGroupSort({
         groupKeys: ['status', 'priority'],

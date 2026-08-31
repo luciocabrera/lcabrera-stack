@@ -208,11 +208,6 @@ describe('TableBody', () => {
   });
 
   it('sizes the window from the rows a collapse leaves standing, not the loaded count', () => {
-    // The discriminating case, and the height invariant itself: `<tbody>`'s
-    // declared height and both spacers come from `totalItems`, so counting rows
-    // hidden under a collapsed ancestor would leave the body taller than its
-    // contents by exactly that subtree (ADR-067). The two numbers are
-    // deliberately different here — reading the loaded count would answer 42.
     setupDefaultMocks();
     useGetTableTotalLoadedRowsMock.mockReturnValue(42);
     useTableGroupTreeMock.mockReturnValue({
@@ -294,12 +289,6 @@ describe('TableBody', () => {
     expect(screen.getByTestId('table-body-rows')).not.toBeNull();
   });
   it('declares role=rowgroup on the populated body, whose display: grid removed it', () => {
-    // The `role` ATTRIBUTE, not a `getByRole('rowgroup')` query: `<tbody>`
-    // implicitly maps to `rowgroup`, so a role query resolves identically with
-    // the attribute deleted and could never catch its removal. In a real
-    // browser the implicit role is gone — `TableBody.stylex.ts` makes this
-    // element a CSS grid — which is exactly why the attribute is there
-    // (ADR-062).
     setupDefaultMocks();
 
     const tableContainerRef = {
@@ -318,10 +307,6 @@ describe('TableBody', () => {
   });
 
   it('leaves the empty body its implicit rowgroup instead of restating it', () => {
-    // The empty branch keeps `display: table-row-group`, so the implicit role
-    // survives there and an explicit one would be the redundancy the populated
-    // branch only resembles. Pinning the absence stops the two branches from
-    // being "made consistent" without checking which one needs the attribute.
     setupDefaultMocks();
     useGetTableTotalLoadedRowsMock.mockReturnValue(0);
     useVirtualizationMock.mockReturnValue({

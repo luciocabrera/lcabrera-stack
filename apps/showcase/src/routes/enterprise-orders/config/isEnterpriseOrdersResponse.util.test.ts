@@ -27,9 +27,6 @@ describe('isEnterpriseOrdersResponse', () => {
     expect(isEnterpriseOrdersResponse({ data: [] })).toBe(false);
   });
 
-  // `null` is parsed rather than written: it is the case that matters most here
-  // — `typeof null === 'object'`, so a guard that only checks the typeof would
-  // pass it — and parsing keeps `unicorn/no-null` on for this file.
   it.each([undefined, JSON.parse('null'), 'page', 42, []])(
     'rejects %p',
     (value) => {

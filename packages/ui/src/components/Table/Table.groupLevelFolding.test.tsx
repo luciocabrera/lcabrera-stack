@@ -26,16 +26,6 @@ import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
 import { TableBase } from '#ui/components/Table/TableBase';
 import { TableBody } from '#ui/components/Table/TableBody';
 
-/**
- * Folding a group from the row that starts it rather than from the subtotal
- * that ends it (#802), end to end against real stores.
- *
- * A unit test over `resolveGroupLevelDisclosures` can say which levels a row
- * offers. Only a whole grid can say that the control is **reachable where the
- * reader is looking** — that clicking it folds the level its column holds and
- * not the row's own group, and that what it removes is the block rather than
- * the label. Both were true of the old placement too, on the wrong row.
- */
 type TestRow = Record<string, unknown>;
 
 const ROW_HEIGHT = 40;
@@ -50,11 +40,6 @@ const columns: TableColumn<TestRow>[] = [
   { key: 'priority', label: 'Priority' },
 ];
 
-/**
- * Where each key lands once the grouped layout hoists the key columns to the
- * front (ADR-080) — **not** the order `columns` declares them in, which puts
- * the primary key first.
- */
 const STATUS_CELL = 0;
 const CUSTOMER_CELL = 1;
 
@@ -74,23 +59,6 @@ const groupRow = ({ isSubtotal = false, path }: GroupRowArgs): TestRow => ({
   [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, isSubtotal, path },
 });
 
-/**
- * A three-level rollup, which is the shape the defect needs: every subtotal is
- * emitted **after** the rows it totals, so under the old placement the only
- * control for `Cancelled` sat on the last row of the block.
- *
- * ```
- * 0  Cancelled Business Critical
- * 1  Cancelled Business High
- * 2  Cancelled Business ·total·      ← path [Cancelled, Business]
- * 3  Cancelled Retail   Critical
- * 4  Cancelled Retail   ·total·      ← path [Cancelled, Retail]
- * 5  Cancelled ·total·               ← path [Cancelled]
- * 6  Active    Business Critical
- * 7  Active    Business ·total·
- * 8  Active    ·total·
- * ```
- */
 const rows: readonly TestRow[] = [
   groupRow({ path: pathOf('Cancelled', 'Business', 'Critical') }),
   groupRow({ path: pathOf('Cancelled', 'Business', 'High') }),
@@ -167,13 +135,6 @@ const cellOf = ({ index, row }: CellArgs) =>
 const chevronIn = (args: CellArgs) =>
   cellOf(args)?.querySelector('[data-testid="table-group-disclosure"]');
 
-/**
- * The labels each row actually **draws**, one string per row.
- *
- * Read off the drawn cells rather than off `textContent`, which would also
- * collect the visually-hidden restatement a carried level renders (ADR-080) and
- * so report every row as stating its whole ancestry.
- */
 const drawnLabels = () =>
   getRows().map((row) =>
     [...row.querySelectorAll('[data-testid="table-group-key-cell"]')]
@@ -201,8 +162,6 @@ describe('folding a group from the row that starts it', () => {
   it('offers an outer level’s control on the first row of its block', () => {
     render(<Harness />);
 
-    // Row 0 states `Cancelled` and does not own it — under the old placement
-    // its only control was on row 5, the subtotal that ends the block.
     expect(
       chevronIn({ index: STATUS_CELL, row: getRows()[0] as Element }),
     ).not.toBeNull();
@@ -220,9 +179,6 @@ describe('folding a group from the row that starts it', () => {
       }) as Element,
     );
 
-    // `Cancelled` folds to its own subtotal; `Active` is untouched. Had the
-    // click folded the row's own group — the leaf `Cancelled/Business/Critical`
-    // — row 0 alone would have gone and the other eight would have stayed.
     expect(drawnLabels()).toStrictEqual([
       'Cancelled total',
       'Active | Business | Critical',
@@ -243,15 +199,10 @@ describe('folding a group from the row that starts it', () => {
 
     const labels = drawnLabels();
 
-    // `Cancelled Business total` and `Cancelled Retail total` are subtotals
-    // *inside* the folded block, and go with it...
     expect(labels).not.toContain('Retail total');
     expect(labels.filter((label) => label.includes('Business total'))).toEqual([
-      // the one left belongs to `Active`, which was not folded
       'Business total',
     ]);
-    // ...while the block's own subtotal survives, because it is what the group
-    // collapses *to* and the only row left able to reopen it.
     expect(labels).toContain('Cancelled total');
   });
 
@@ -266,8 +217,6 @@ describe('folding a group from the row that starts it', () => {
     );
     expect(getRows()).toHaveLength(4);
 
-    // The control returns to the subtotal once it is the only row left; without
-    // that the group could be closed and never reopened.
     fireEvent.click(
       chevronIn({
         index: STATUS_CELL,
@@ -281,8 +230,6 @@ describe('folding a group from the row that starts it', () => {
   it('leaves an open subtotal no control in the level it totals', () => {
     render(<Harness />);
 
-    // Row 2 is `Cancelled Business ·total·`: it states `Business` as its own
-    // innermost level, and the control for that level belongs to row 0.
     expect(
       chevronIn({ index: CUSTOMER_CELL, row: getRows()[2] as Element }),
     ).toBeNull();
@@ -294,8 +241,6 @@ describe('folding a group from the row that starts it', () => {
   it('reserves the chevron’s space on a drawn cell that has no control', () => {
     render(<Harness />);
 
-    // AC: no row grows or shrinks because of where the chevron moved, and
-    // labels stay aligned down the column — so the box is drawn either way.
     const subtotalCell = cellOf({
       index: CUSTOMER_CELL,
       row: getRows()[2] as Element,

@@ -33,13 +33,6 @@
 const PLACEHOLDER =
   /^([ \t]*)#[ \t]*\{\{[ \t]*ci\.setup[ \t]*\}\}[ \t]*\r?\n/gm;
 
-/**
- * The lines indented to sit where the placeholder sat.
- *
- * A blank line keeps no indentation: trailing whitespace on an otherwise empty
- * line is what most YAML linters flag first, and it would arrive in every
- * consumer's repository.
- */
 const indented = ({ indent, lines }) =>
   lines
     .map((line) => (line.trim() === '' ? '' : `${indent}${line}`))
@@ -51,8 +44,5 @@ const indented = ({ indent, lines }) =>
  */
 export const substituteCiSetup = ({ content, setup = [] }) =>
   content.replaceAll(PLACEHOLDER, (_match, indent) =>
-    // No steps means the placeholder's whole LINE goes, not just its text —
-    // otherwise every workflow in a repository that needs no setup carries a
-    // stray blank line where the hook used to be.
     setup.length === 0 ? '' : `${indented({ indent, lines: setup })}\n\n`,
   );

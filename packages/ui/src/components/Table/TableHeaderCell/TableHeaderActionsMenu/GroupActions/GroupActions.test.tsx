@@ -108,7 +108,6 @@ const numericCapability: TableColumnGroupingCapability = {
   typeName: 'numeric',
 };
 
-/** A dimension the catalogue offers both count flavours on. */
 const textCapability: TableColumnGroupingCapability = {
   aggregates: ['count', 'countDistinct'],
   canGroup: true,
@@ -139,7 +138,6 @@ const groupRow = ({
   [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, isSubtotal, path },
 });
 
-/** A rollup block: the deepest row, then the subtotal that totals it (#570). */
 const rollupRows = [
   groupRow({ path: pathOf('Berlin', 'Open') }),
   groupRow({ isSubtotal: true, path: pathOf('Berlin') }),
@@ -205,8 +203,6 @@ describe('GroupActions', () => {
   });
 
   it('marks itself active when it is a *deeper* key, not only the first', () => {
-    // The multi-key case, and the one a `keys[0]` check gets wrong: every level
-    // below the outermost would read as unapplied.
     groupingKeysRef.current = ['priority', 'order_status'];
 
     render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
@@ -239,8 +235,6 @@ describe('GroupActions', () => {
 
     expect(getButton('Group by This').disabled).toBe(true);
 
-    // The same depth, but this column is one of the applied keys — so the click
-    // would remove rather than add, and must stay available.
     groupingKeysRef.current = [
       'order_status',
       ...groupingKeysRef.current.slice(1),
@@ -251,10 +245,6 @@ describe('GroupActions', () => {
   });
 
   it('disables Group by This for a column the catalogue refuses, and says why', () => {
-    // The defect: `isGroupable` defaults to true, so every column the endpoint
-    // refuses was still offered as a group key, and picking one emptied the
-    // table (#642). The declared flag is untouched here — the catalogue is the
-    // only thing saying no.
     capabilityRef.current = numericCapability;
 
     render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
@@ -272,10 +262,6 @@ describe('GroupActions', () => {
   });
 
   it('still removes a refused key that is already applied, and explains nothing there', () => {
-    // A URL can seed a grouping the catalogue refuses today (ADR-061), so the
-    // one item that can undo it must not be disabled by that same refusal — and
-    // must not explain it either: this click *removes* the grouping, so "Cannot
-    // group by this column" would describe an action nobody is taking.
     capabilityRef.current = numericCapability;
     groupingKeysRef.current = ['total_amount'];
 
@@ -295,10 +281,6 @@ describe('GroupActions', () => {
   });
 
   it('quotes no catalogue reason for a column the table itself declared ungroupable', () => {
-    // Two different facts, and only one of them is the endpoint's. A column the
-    // consumer hid from grouping is off the menu because the table said so, so
-    // quoting the catalogue's distinct-value reason would blame the wrong party
-    // for a decision the user cannot act on.
     capabilityRef.current = numericCapability;
     normalizedColumnRef.current = { isGroupable: false };
 
@@ -311,8 +293,6 @@ describe('GroupActions', () => {
   });
 
   it('leaves the column offered when the route resolved no capability for it', () => {
-    // Absence is "nobody asked": a route may group without shipping a
-    // capability map, and reading absence as a refusal would switch it off.
     render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 
     const button = getButton('Group by This');
@@ -340,11 +320,6 @@ describe('GroupActions', () => {
   });
 
   it('disables only Group by This for a column the table declares ungroupable', () => {
-    // The two buttons ask different questions and must not share a predicate.
-    // Grouping *by* this column depends on this column; clearing whole-table
-    // grouping does not, so a menu opened on an ungroupable column is still a
-    // way out of a grouped view. Sharing the gate here strands the user with no
-    // route to clearing except finding a groupable column's menu.
     normalizedColumnRef.current = { isGroupable: false };
     groupingKeysRef.current = ['priority'];
 
@@ -365,8 +340,6 @@ describe('GroupActions', () => {
   });
 
   it('still disables clearing when the route cannot group at all', () => {
-    // The one capability that legitimately disables it — and the reason
-    // `isDisabled` reads a real value rather than a hardcoded `false`.
     isGroupingEnabledRef.current = false;
     groupingKeysRef.current = ['priority'];
 
@@ -376,9 +349,6 @@ describe('GroupActions', () => {
   });
 
   it('fires one grouping call per click, whatever else re-renders', () => {
-    // The delegates read the applied key from the store, so a re-render is the
-    // cheap way a render-path write would show up: the call count would climb
-    // without any further interaction.
     const { rerender } = render(
       <GroupActions columnKey='order_status' onClose={mockOnClose} />,
     );
@@ -397,7 +367,6 @@ describe('GroupActions', () => {
 
   describe('aggregation-mode commands', () => {
     it('offers nothing when the route resolved no capability for the column', () => {
-      // Absent means "no aggregate is legal here", never "all of them are".
       render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 
       expect(screen.queryByText('Sum')).toBeNull();
@@ -412,17 +381,11 @@ describe('GroupActions', () => {
       expect(screen.getByText('Sum')).not.toBeNull();
       expect(screen.getByText('Average')).not.toBeNull();
       expect(screen.getByText('Count')).not.toBeNull();
-      // Never offered for this column: the catalogue did not report it. A menu
-      // shaped from `dataType` could not tell the difference (#550).
       expect(screen.queryByText('Minimum')).toBeNull();
       expect(screen.queryByText('All True')).toBeNull();
     });
 
     it('offers nothing at all while the column is an applied group key', () => {
-      // The same capability that offers three functions above offers none here,
-      // so it is the key membership doing the work and not the type. A grouped
-      // column renders its key's value rather than a measure (ADR-080), so the
-      // click wrote the grouping store and changed nothing on screen (#830).
       capabilityRef.current = numericCapability;
       groupingKeysRef.current = ['total_amount'];
 
@@ -431,7 +394,6 @@ describe('GroupActions', () => {
       expect(screen.queryByText('Sum')).toBeNull();
       expect(screen.queryByText('Average')).toBeNull();
       expect(screen.queryByText('Count')).toBeNull();
-      // The clear item goes with them: "nothing to offer" has one exit.
       expect(screen.queryByText('No Aggregate')).toBeNull();
       expect(screen.queryByTestId('separator')).toBeNull();
     });
@@ -468,9 +430,6 @@ describe('GroupActions', () => {
     });
 
     it('is unmoved when a *different* column joins or leaves the grouping', () => {
-      // The condition is "this column is a key", not "the table is grouped" —
-      // a predicate reading the key list's length would pass the test above and
-      // fail this one.
       capabilityRef.current = numericCapability;
       groupingKeysRef.current = ['priority'];
 
@@ -518,8 +477,6 @@ describe('GroupActions', () => {
     });
 
     it('adds a second function beside the one already applied', () => {
-      // The header half of #831: choosing `count` on a column carrying `avg`
-      // used to swap them, and the earlier selection vanished with no message.
       capabilityRef.current = numericCapability;
       appliedAggregatesRef.current = [{ columnKey: 'total_amount', fn: 'avg' }];
 
@@ -551,8 +508,6 @@ describe('GroupActions', () => {
     });
 
     it('marks SEVERAL functions active at once on one column', () => {
-      // The state a toggle derivation cannot express, which is why aggregates
-      // got their own beside the shared one (#831).
       capabilityRef.current = numericCapability;
       appliedAggregatesRef.current = [
         { columnKey: 'total_amount', fn: 'sum' },
@@ -591,18 +546,12 @@ describe('GroupActions', () => {
 
       fireEvent.click(getButton('No Aggregate'));
 
-      // No function named: "No Aggregate" clears every measure on the column,
-      // not only the last one chosen.
       expect(mockRemoveColumnAggregate).toHaveBeenCalledWith({
         columnKey: 'total_amount',
       });
     });
 
     it('withholds a second Distinct Count while keeping the one that carries it', () => {
-      // Both halves in one test on purpose (#842): a rule that withheld the
-      // function everywhere would pass the first assertion and strand the user
-      // with a distinct count they cannot clear from the menu it was applied
-      // from — this menu toggles, so that item is the only way off.
       capabilityRef.current = textCapability;
       appliedAggregatesRef.current = [
         { columnKey: 'order_status', fn: 'countDistinct' },
@@ -613,8 +562,6 @@ describe('GroupActions', () => {
       );
 
       expect(screen.queryByText('Distinct Count')).toBeNull();
-      // The rest of the same capability is untouched, so it is the budget doing
-      // the work and not the column falling out of the menu altogether.
       expect(screen.getByText('Count')).not.toBeNull();
       expect(screen.getByText('No Aggregate')).not.toBeNull();
 
@@ -654,9 +601,6 @@ describe('GroupActions', () => {
     });
 
     it('is unmoved by another column carrying an aggregate that is not a distinct count', () => {
-      // The discriminating half: the withholding above is about `countDistinct`
-      // and the read's budget for it, not about the column being measured at
-      // all.
       capabilityRef.current = textCapability;
       appliedAggregatesRef.current = [
         { columnKey: 'order_status', fn: 'count' },
@@ -726,9 +670,6 @@ describe('GroupActions', () => {
     });
 
     it('offers no collapse under `flat`, where a fold could not be undone', () => {
-      // The same two key columns, without the subtotal that renders `(Berlin)`.
-      // Folding it there hides every row of the group and leaves nothing behind
-      // to reopen it from, so the grid must not offer it at all (#774).
       dataRef.current = [
         groupRow({ path: pathOf('Berlin', 'Open') }),
         groupRow({ path: pathOf('Berlin', 'Shut') }),
@@ -861,9 +802,6 @@ describe('GroupActions', () => {
 
   describe('a locked preset', () => {
     it('offers neither Group by This nor Clear Grouping', () => {
-      // The drawer's picker is not the only surface that reshapes a grouping —
-      // this menu does it too, so a lock honoured in one and ignored in the
-      // other is not a lock (#578).
       isGroupingLockedRef.current = true;
       normalizedColumnRef.current = { isGroupable: true, key: 'order_status' };
       groupingKeysRef.current = ['order_status'];
@@ -879,7 +817,6 @@ describe('GroupActions', () => {
     });
 
     it('still offers the aggregate commands, which measure rather than group', () => {
-      // The lock covers the grouping shape, not what is measured over it.
       isGroupingLockedRef.current = true;
       normalizedColumnRef.current = { isGroupable: true, key: 'total_amount' };
       capabilityRef.current = {

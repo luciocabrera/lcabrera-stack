@@ -7,7 +7,6 @@ type UniqueConstraintViolationErrorArgs = {
   readonly fields: PgErrorFields;
 };
 
-/** SQLSTATE `23505` — a row collided with a unique index or primary key. */
 export class UniqueConstraintViolationError extends PersistenceError {
   public constructor({ cause, fields }: UniqueConstraintViolationErrorArgs) {
     super({

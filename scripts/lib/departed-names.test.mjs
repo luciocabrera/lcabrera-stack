@@ -46,9 +46,6 @@ describe('parseRoster', () => {
   });
 
   it('refuses a row whose `name` key is missing or misspelled', () => {
-    // The shape `find` could not catch: it maps to `undefined`, which is also
-    // what `find` returns for "nothing matched", so validation passed it and
-    // the run died later on `toLowerCase`.
     expect(() =>
       parseRoster(JSON.stringify({ names: [{ note: 'no name' }] })),
     ).toThrow(/missing or empty name/);

@@ -46,8 +46,6 @@ describe('analyseClosure and declared config requirements', () => {
   });
 
   test('a requires: that is not about config raises nothing', () => {
-    // The declaration a shipped reference file already carries. It must stay
-    // invisible to this pass or `--shipped` reports an escape that is not one.
     expect(
       analyseClosure({
         allowedConfigKeys: [],

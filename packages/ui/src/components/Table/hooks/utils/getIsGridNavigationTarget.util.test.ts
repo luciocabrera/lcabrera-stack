@@ -32,8 +32,6 @@ describe('getIsGridNavigationTarget', () => {
   });
 
   it('leaves a key pressed on a control inside a cell to that control', () => {
-    // A row-actions menu owns its own arrow keys. A grid that swallowed them
-    // from the bubbling phase would break every widget it contains.
     const { control, grid } = buildGrid();
 
     expect(getIsGridNavigationTarget({ grid, target: control })).toBe(false);

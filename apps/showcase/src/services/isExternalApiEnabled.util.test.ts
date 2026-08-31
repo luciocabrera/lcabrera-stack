@@ -14,9 +14,6 @@ describe('isExternalApiEnabled', () => {
   });
 
   it('is off when VITE_API_URL is set but empty', () => {
-    // A shell that exports the variable without a value would otherwise switch
-    // every route to an origin of `''` and produce a same-origin request that
-    // looks like the override worked.
     vi.stubEnv('VITE_API_URL', '');
 
     expect(isExternalApiEnabled()).toBe(false);

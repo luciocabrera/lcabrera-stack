@@ -36,14 +36,6 @@ const isDisqualified = (token) =>
   token.startsWith('#') ||
   /^[a-z]+:\/\//i.test(token);
 
-/**
- * A token anchored at a real top-level directory.
- *
- * The roster arrives from the caller because it is the consumer's layout — and
- * it is the precision mechanism itself, not a detail. It is what separates
- * `apps/web/foo.ts` from `try/catch`, so a repository given the wrong roots does
- * not get a stricter or a looser gate; it gets one reading a different corpus.
- */
 export const isRootAnchored = (token, repoRoots) => {
   if (isDisqualified(token) || !token.includes('/')) {
     return false;
@@ -51,55 +43,22 @@ export const isRootAnchored = (token, repoRoots) => {
   return repoRoots.includes(token.split('/')[0]);
 };
 
-/**
- * A `./` or `../` prefix, which makes a link target a path by construction —
- * no extension guess required.
- *
- * This exists because the extension was doing two unrelated jobs. `.md`
- * identifies a DOCUMENT for the corpus, and it was also deciding WHICH LINKS to
- * enforce; the second job it did badly, exempting every relative link to a
- * `.tsx`, `.ts` or script. Three ADRs and READMEs pointed at deleted files for
- * months with the gate green (#756).
- *
- * Deliberately narrower than "anything relative": a bare `(Foo.tsx)` with no
- * `./` is left alone, because parenthesised prose is not reliably a path and
- * this gate is worth more when it never cries wolf.
- */
 const isExplicitlyRelative = (token) => /^\.\.?\//.test(token);
 
-/** Punctuation a sentence leaves attached to a path it just named. */
 const TRAILING_PUNCTUATION = new Set(['.', ',', ':', ';', ')']);
 
-/** Peel that punctuation one character at a time — linear, and no backtracking. */
 const trimTrailingPunctuation = (value) =>
   TRAILING_PUNCTUATION.has(value.at(-1) ?? '')
     ? trimTrailingPunctuation(value.slice(0, -1))
     : value;
 
-/** Strip a heading anchor and trailing sentence punctuation. */
 export const normaliseToken = (token) =>
   trimTrailingPunctuation(token.split('#')[0].trim());
 
-/**
- * The contents of every inline code span in a run of text — odd-indexed
- * segments of a split on the delimiter are the code.
- *
- * Splitting rather than matching across the delimiters is what keeps this
- * linear: the obvious regex for an inline span scans with unbounded
- * backtracking, a real cost on the largest documents here and flagged as
- * super-linear. Exported so the rename gate splits identically instead of
- * growing a second, subtly different notion of "inside backticks".
- */
 export const inlineCodeTokens = (text) =>
   text.split('`').filter((_, index) => index % 2 === 1);
 
-/**
- * Backticked tokens that are root-anchored paths, plus the targets of relative
- * markdown links. Fenced code blocks are skipped — they are examples, and the
- * paths inside them are illustrative far more often than not.
- */
 export const extractCandidates = (markdown, repoRoots) => {
-  // Odd-indexed segments sit between a pair of fences; keep the even ones.
   const prose = markdown
     .split('```')
     .filter((_, index) => index % 2 === 0)
@@ -122,37 +81,8 @@ export const extractCandidates = (markdown, repoRoots) => {
   return [...new Set([...backticked, ...linked])];
 };
 
-/**
- * A document that records a decision as of a date — an ADR, in any of the three
- * homes (ADR-048).
- */
 export const isDatedRecord = (docPath) => docPath.includes('/decisions/');
 
-/**
- * The tokens a document is still accountable for.
- *
- * Everywhere except a dated record, that is all of them. An ADR is different,
- * and the difference is what this gate previously got wrong in BOTH directions:
- * the whole corpus was exempted by an `IGNORED_DOCS` substring, so genuinely
- * dead links in ADRs went unreported — while simply un-exempting it would have
- * reported ~22 paths that are correct precisely because they are historical.
- * The record of a package rename IS the place its old name belongs, so an ADR
- * naming `packages/data-access` is stating its content, not a broken reference.
- *
- * The split is structural rather than a heuristic, and it follows the two
- * shapes `extractCandidates` already recognises:
- *
- *   - A **root-anchored token** is descriptive prose. An ADR naming a path is
- *     saying "this is what existed when the decision was made", which stays
- *     true after the path is deleted. Not enforced here.
- *   - A **relative markdown link** is navigational — a pointer the reader is
- *     invited to follow. It either resolves or it is dead, and a dated record
- *     has no more licence to ship a dead link than any other document. Enforced.
- *
- * A file move breaks the second kind and leaves the first untouched, which is
- * exactly the failure that motivated this: 20 ADRs moved up one directory level
- * and took four now-unresolvable relative links with them.
- */
 export const enforcedTokens = ({ docPath, repoRoots, tokens }) =>
   isDatedRecord(docPath)
     ? tokens.filter((token) => !isRootAnchored(token, repoRoots))

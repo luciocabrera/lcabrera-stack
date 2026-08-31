@@ -15,9 +15,6 @@ const notInstalled = () => {
 
 describe('installedPeerVersion', () => {
   test('answers undefined instead of throwing when the peer is absent', () => {
-    // The gate runtime is an OPTIONAL peer: a consumer who wants the prose and
-    // none of the gates simply has not installed it. Throwing there would turn a
-    // normal state into a crashed `sync`.
     expect(() =>
       installedPeerVersion({
         from: '/anywhere/package.json',
@@ -45,8 +42,6 @@ describe('installedPeerVersion', () => {
   });
 
   test('treats a manifest with no usable version as absent', () => {
-    // A version it cannot establish is a version it cannot vouch for, so the
-    // gate refuses rather than passing something unchecked.
     const readings = [{}, { version: 7 }, { version: '' }, undefined, null];
     expect(
       readings.map((manifest) =>
@@ -62,8 +57,6 @@ describe('installedPeerVersion', () => {
 
 describe('checkPeerVersion', () => {
   test('separates in-range, out-of-range and absent', () => {
-    // All three directions in one assertion: a gate that always refused would
-    // pass the last two and fail the first.
     expect(
       [
         { installedVersion: '0.5.0', range: '>=0.1.0 <1.0.0' },
@@ -75,8 +68,6 @@ describe('checkPeerVersion', () => {
   });
 
   test('reads the operators a hand-rolled comparator gets wrong', () => {
-    // The reason this is a dependency and not fifteen lines of string
-    // comparison: every one of these is a correct answer that looks arguable.
     expect(
       [
         { installedVersion: '1.9.9', range: '^1.2.3' },
@@ -135,8 +126,6 @@ describe('unmetPeers', () => {
   });
 
   test('with no versions supplied, every declared peer reads as absent', () => {
-    // The default a plan built without a resolution falls back to: refuse, never
-    // write. A default of "satisfied" would be a gate that fails open.
     expect(unmetPeers({ peers: [peers[2]] })).toEqual([
       '@repo/fine@>=1.0.0 (not installed)',
     ]);
@@ -152,8 +141,6 @@ describe('declaredPeerNames', () => {
   });
 
   test('names each distinct peer once across every asset', () => {
-    // What makes one resolution per plan possible, and so what makes `sync` and
-    // `doctor` incapable of seeing different versions of the same package.
     expect(
       declaredPeerNames([
         asset('one', "'@repo/a@^1.0.0'", "'@repo/b@^1.0.0'"),

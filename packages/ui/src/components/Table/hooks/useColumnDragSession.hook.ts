@@ -16,7 +16,6 @@ type UseColumnDragSessionArgs<TData> = {
   readonly minWidth?: number;
 };
 
-/** Unmount ends any in-flight session through `endDragSessionRef`. */
 export const useColumnDragSession = <TData>({
   columnKey,
   currentWidth,
@@ -32,7 +31,6 @@ export const useColumnDragSession = <TData>({
     event.preventDefault();
     event.stopPropagation();
 
-    // A new drag always supersedes any session still in flight
     endDragSessionRef.current?.();
 
     endDragSessionRef.current = startColumnResizeSession<TData>({
@@ -52,7 +50,6 @@ export const useColumnDragSession = <TData>({
     setIsResizing(true);
   };
 
-  // End any in-flight drag session on unmount
   useEffect(() => {
     return () => {
       endDragSessionRef.current?.();

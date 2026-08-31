@@ -36,9 +36,6 @@ describe('expandCubeSets', () => {
   });
 
   it('emits every subset exactly once', () => {
-    // Set-level completeness, independent of the order asserted above: 2^n
-    // distinct subsets and 2^n emitted sets can only coincide if each appears
-    // once.
     const sets = expandCubeSets({ keys: KEYS });
     const seen = new Set(sets.map((set) => set.join('|')));
 
@@ -46,8 +43,6 @@ describe('expandCubeSets', () => {
   });
 
   it('preserves the key order inside every set', () => {
-    // `(c, a)` and `(a, c)` are the same grouping set to Postgres but not the
-    // same projection here — the mask's bit positions are relative to `keys`.
     const sets = expandCubeSets({ keys: KEYS });
 
     for (const set of sets) {
@@ -56,9 +51,6 @@ describe('expandCubeSets', () => {
   });
 
   it('walks the `GROUPING()` mask 0 → 2ⁿ-1, which is what fixes the order', () => {
-    // The claim the doc comment makes, stated as an assertion rather than
-    // prose: the emission order *is* ascending mask. A reordered expansion
-    // fails here even where the set of sets is identical.
     const masks = expandCubeSets({ keys: KEYS }).map((set) =>
       toGroupingSetMask({ keys: KEYS, set }),
     );
@@ -67,9 +59,6 @@ describe('expandCubeSets', () => {
   });
 
   it('emits a set that no rollup over the same keys produces', () => {
-    // What makes cube a lattice rather than a tree, and the one output
-    // difference that tells the two modes apart with no reference to the
-    // request: `(b)` totals across every `a`, so it is a child of no `a` row.
     const cube = expandCubeSets({ keys: KEYS }).map((set) => set.join('|'));
     const rollup = expandGroupingSets({ grouping: 'rollup', keys: KEYS }).map(
       (set) => set.join('|'),
@@ -86,8 +75,6 @@ describe('expandCubeSets', () => {
   });
 
   it('contains every rollup set, so cube only ever adds', () => {
-    // The containment that makes "cube ⊇ rollup" checkable: a cube must never
-    // *drop* a set a rollup would have emitted, or a subtotal disappears.
     const cube = expandCubeSets({ keys: KEYS }).map((set) => set.join('|'));
     const rollup = expandGroupingSets({ grouping: 'rollup', keys: KEYS });
 
@@ -104,8 +91,6 @@ describe('expandCubeSets', () => {
   });
 
   it('emits a single empty set for no keys', () => {
-    // 2^0 = 1. Not reachable through the builder — `assertGroupDepth` refuses
-    // an empty key list first — but the expansion must not depend on that.
     expect(expandCubeSets({ keys: [] })).toEqual([[]]);
   });
 });

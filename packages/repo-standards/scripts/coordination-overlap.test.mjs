@@ -20,8 +20,6 @@ describe('overlapWarnings', () => {
   });
 
   it('stays quiet when the two tasks share a branch', () => {
-    // Same-branch overlap is collaboration, which the register supports on
-    // purpose via branches/<slug>.md.
     const warnings = overlapWarnings([
       task({ area: ['packages/ui/**'], branch: 'shared', id: 'a' }),
       task({ area: ['packages/ui/**'], branch: 'shared', id: 'b' }),
@@ -31,8 +29,6 @@ describe('overlapWarnings', () => {
   });
 
   it('treats placeholder branches as distinct, not as one shared branch', () => {
-    // Two uncommitted claims are two different people, so `(uncommitted)`
-    // matching itself must not be read as "same branch, so collaboration".
     const warnings = overlapWarnings([
       task({ area: ['scripts/**'], branch: '(uncommitted)', id: 'a' }),
       task({ area: ['scripts/**'], branch: '(uncommitted)', id: 'b' }),
@@ -60,9 +56,6 @@ describe('overlapWarnings', () => {
   });
 
   it('warns for a claim read off another branch — the point of #233', () => {
-    // The regression: the verifier only ever saw claims in its own working
-    // tree, so two agents on two branches each read a clean register. A remote
-    // claim arrives with the same shape and a name marking where it came from.
     const warnings = overlapWarnings([
       task({ area: ['scripts/lib/**'], branch: 'mine', id: 'mine' }),
       task({
@@ -78,7 +71,6 @@ describe('overlapWarnings', () => {
   });
 
   it('survives a task whose area field is missing', () => {
-    // Schema errors are reported separately and must not crash the soft lock.
     expect(() =>
       overlapWarnings([
         task({ area: undefined, branch: 'x', id: 'a' }),

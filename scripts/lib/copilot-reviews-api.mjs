@@ -12,16 +12,6 @@
 import { reviewsFromPages } from './copilot-review.mjs';
 import { runGh } from './gh-exec.mjs';
 
-/**
- * Every review on the pull request, oldest first — all pages of them.
- *
- * Two flags earn their place. `--slurp` makes gh wrap the pages in one outer
- * array; without it gh documents each page as a separate JSON document, which
- * `JSON.parse` cannot read. `per_page` goes in the path rather than through
- * `-F`, because any field argument makes `gh api` issue a POST, and
- * `POST /pulls/{n}/reviews` opens a review instead of listing them — a read that
- * silently writes.
- */
 export const fetchPullRequestReviews = (repository, number) =>
   reviewsFromPages(
     JSON.parse(

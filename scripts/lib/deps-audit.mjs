@@ -23,7 +23,6 @@
 /** Least to most severe, as npm/pnpm spell them. Index IS the rank. */
 const SEVERITY_RANK = ['info', 'low', 'moderate', 'high', 'critical'];
 
-/** Unknown severities sort above everything, so a new spelling is never ignored. */
 const rankOf = (severity) => {
   const rank = SEVERITY_RANK.indexOf(severity);
   return rank === -1 ? SEVERITY_RANK.length : rank;
@@ -32,31 +31,10 @@ const rankOf = (severity) => {
 export const isAtLeast = ({ minimum, severity }) =>
   rankOf(severity) >= rankOf(minimum);
 
-/**
- * True when the report is evidence of an audit that actually walked the tree.
- *
- * `totalDependencies` is the tell. A successful audit of this monorepo counts
- * over a thousand packages; a report produced without reaching the registry
- * carries no count at all. Checking the advisory list instead would accept
- * exactly the failure this guards against.
- */
 export const auditDidRun = (report) =>
   typeof report?.metadata?.totalDependencies === 'number' &&
   report.metadata.totalDependencies > 0;
 
-/**
- * The advisories in a report, normalised to the fields a decision needs.
- *
- * Keyed by `github_advisory_id` rather than the numeric `id`: the number is
- * assigned by whichever registry answered and is not stable across them, so an
- * allowance keyed by it would silently stop matching. The GHSA identifier is
- * the durable name for the vulnerability itself.
- *
- * `production` comes from the findings rather than the advisory: the same
- * advisory can reach a tree through both a dev and a runtime path, and a
- * runtime path anywhere is what makes it a shipping concern (#516 Finding 1
- * turned on exactly this distinction).
- */
 export const readAdvisories = (report) =>
   Object.values(report?.advisories ?? {})
     .map((advisory) => ({
@@ -77,28 +55,12 @@ export const readAdvisories = (report) =>
         left.ghsa.localeCompare(right.ghsa),
     );
 
-/** An allowance covers an advisory when it names the same GHSA. */
 const allowanceFor = ({ allowances, ghsa }) =>
   allowances.find((allowance) => allowance.ghsa === ghsa);
 
-/**
- * An allowance is spent once its review date has passed.
- *
- * Compared as strings because both sides are `YYYY-MM-DD`, where lexical and
- * chronological order agree — no Date parsing, and no timezone in which the
- * gate flips at midnight for some contributors and not others.
- */
 const isExpired = ({ expires, today }) =>
   typeof expires !== 'string' || expires < today;
 
-/**
- * Splits the advisories into what blocks and what is knowingly carried, and
- * reports the allowances that no longer earn their place.
- *
- * An advisory below `minimumSeverity` is reported as `ignored` rather than
- * dropped, so "we do not gate on low" stays a visible choice rather than a
- * silence indistinguishable from having found nothing.
- */
 export const classifyAdvisories = ({
   advisories,
   allowances = [],
@@ -139,7 +101,6 @@ export const classifyAdvisories = ({
   };
 };
 
-/** One advisory as a single reviewable line. */
 export const formatAdvisory = (advisory) =>
   `${advisory.severity.padEnd(8)} ${advisory.module} ${advisory.vulnerable} — ${
     advisory.title

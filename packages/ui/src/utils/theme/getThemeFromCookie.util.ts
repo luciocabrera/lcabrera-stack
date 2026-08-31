@@ -10,9 +10,6 @@ type GetThemeFromCookieArgs = {
   readonly cookieHeader?: string;
 };
 
-/**
- * Get theme from cookie (SSR and browser-safe).
- */
 export const getThemeFromCookie = ({
   appId,
   cookieHeader,

@@ -135,7 +135,6 @@ describe('TableBase', () => {
   });
 
   it('reports a resolved empty grid as holding exactly its header row', () => {
-    // A filter matching nothing is an ordinary outcome and the count is known.
     useGetTableTotalRowsMock.mockReturnValue(0);
     useGetTableIsLoadingMock.mockReturnValue(false);
 
@@ -170,9 +169,6 @@ describe('TableBase', () => {
   });
 
   it('keeps its ARIA contract when a caller passes conflicting props', () => {
-    // The role and the row count are the grid's only source of those semantics
-    // once CSS has stripped the implicit ones, so `{...rest}` must not be able
-    // to replace them. Revert the spread order and this is what fails.
     useGetTableTotalRowsMock.mockReturnValue(120);
 
     render(
@@ -191,9 +187,6 @@ describe('TableBase', () => {
   });
 
   it('upgrades to role=treegrid, and counts the rows a collapse leaves standing', () => {
-    // The two move together on purpose: a treegrid's rows *are* the visible
-    // ones, so a count taken from the dataset would advertise more rows than
-    // the body can ever emit an `aria-rowindex` for (ADR-067).
     useGetTableTotalRowsMock.mockReturnValue(120);
     useTableGroupTreeMock.mockReturnValue({
       isTreeGrid: true,

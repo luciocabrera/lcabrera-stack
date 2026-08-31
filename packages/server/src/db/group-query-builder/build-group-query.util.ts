@@ -20,12 +20,6 @@ import { resolveGroupGuardRails } from './resolve-group-guard-rails.util.ts';
 import { resolveGroupKeyExpression } from './resolve-group-key-expression.util.ts';
 import { toGroupingSetMask } from './to-grouping-set-mask.util.ts';
 
-/**
- * The grouped read: keys, one variadic `GROUPING()` mask, the aggregates, and a `GROUP BY
- * GROUPING SETS` over the expanded sets (ADR-059).
- * Pure, like its flat sibling — it never touches the pool, so its suite runs in the
- * DB-free lane.
- */
 export const buildGroupQuery = ({
   aggregates,
   allowedColumns,
@@ -45,10 +39,6 @@ export const buildGroupQuery = ({
   assertGroupKeys({ allowedColumns, capabilities, grouping, keys, periods });
   assertGroupAggregates({ aggregates, allowedColumns, capabilities });
 
-  // After the legality gates and before anything is emitted: the catalogue's
-  // verdict on a single column is more specific than a bound on the whole
-  // result, so a column that cannot be grouped is refused with its own reason
-  // rather than with an arithmetic one.
   const guardRails = resolveGroupGuardRails({
     capabilities,
     grouping,
@@ -68,10 +58,6 @@ export const buildGroupQuery = ({
   });
 
   const sets = expandGroupingSets({ grouping, keys });
-  // Resolved once and shared by the projection, `GROUPING()`, the grouping sets
-  // and the `ORDER BY` — Postgres matches a `GROUPING` argument against its
-  // `GROUP BY` expression syntactically, so a second spelling of the same
-  // truncation fails to plan (#786).
   const expressionByKey = Object.fromEntries(
     keys.map((key) => [
       key,
@@ -100,9 +86,6 @@ export const buildGroupQuery = ({
   });
 
   const selectList = [
-    // A truncated key is aliased back to its column name, so every consumer —
-    // the row decoder, the group path, the `ORDER BY` value term — keeps
-    // reading the key by the name it asked for.
     ...keys.map((key, index) =>
       periods?.[key] === undefined
         ? keyExpressions[index]

@@ -21,11 +21,6 @@ const NO_GROUPING: TableGroupingState = {
   shares: [],
 };
 
-/**
- * The columns store is here because a grouping change re-derives the column
- * view state: the hierarchy column is a rendering of the grouping
- * configuration, so it appears and disappears with the keys (ADR-065).
- */
 const createColumnsState = () =>
   ({
     columnFilters: {},
@@ -61,9 +56,6 @@ const storesRef: {
   metaStore: createMockStore<Partial<TableMetaState>>({}),
 };
 
-// The same shape `meta.hooks.test.tsx` uses: `vi.hoisted` runs before the
-// module body, so the value it returns must be self-contained — it may only
-// reference `storesRef` when called, never at hoist time.
 const getTableConfigContextValue = vi.hoisted(() => {
   return function getTableConfigContextValue() {
     return {
@@ -116,9 +108,6 @@ describe('TableConfig grouping hooks', () => {
   });
 
   it('reads the grouping store the config context supplies', () => {
-    // The store is taken from the *config* context value, not the data one —
-    // this suite mocks only `useTableConfigContextValue` for it, so a slice
-    // living on the data context could not resolve here at all.
     const { result } = renderHook(() =>
       useGroupingStore((state) => state.keys),
     );
@@ -154,8 +143,6 @@ describe('TableConfig grouping hooks', () => {
   });
 
   it('hands back the stored array itself, so a re-read is a stable snapshot', () => {
-    // Load-bearing: `useSyncExternalStore` compares with `Object.is`, so a
-    // selector that built a fresh array per read would re-render forever.
     storesRef.groupingStore.set({
       aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
     });
@@ -276,8 +263,6 @@ describe('TableConfig grouping hooks', () => {
   });
 
   it('adds a second aggregate to a column that already carries one', () => {
-    // The live half of #831: the header menu writes immediately, so it has to
-    // append here exactly as the drawer stages.
     storesRef.groupingStore.set({
       aggregates: [{ columnKey: 'total_amount', fn: 'avg' }],
       keys: ['order_status'],
@@ -323,10 +308,6 @@ describe('TableConfig grouping hooks', () => {
   });
 
   it('fires one navigation per interaction, not one per re-render', () => {
-    // The discriminating part is the re-renders. A URL write driven from the
-    // render path (an effect, or a derivation with a side effect in it) would
-    // grow this count with every render; one driven from the event handler
-    // cannot. Re-rendering between the two clicks is what tells them apart.
     const { rerender, result } = renderHook(() => useToggleTableGroupKey());
 
     rerender();
@@ -379,12 +360,6 @@ describe('TableConfig grouping hooks', () => {
   });
 
   it('drops a measure sort from the URL, not only from the store', () => {
-    // The failure this closes: sorting travels in the `sorting` search param,
-    // so pruning the store alone left the loader still reading
-    // `total_amount:sum` after the measure column stopped existing —
-    // `sanitizeSorting` passes it through and the ungrouped read refuses an
-    // unknown column outright. Both params have to be written, in one call, so
-    // it stays one navigation.
     storesRef.groupingStore.set({
       aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
       keys: ['order_status'],
@@ -414,9 +389,6 @@ describe('TableConfig grouping hooks', () => {
   });
 
   it('leaves the sorting param alone when the sort survives the change', () => {
-    // The common case must still write exactly one param: `pruneSortingToColumns`
-    // returns the same array when it removed nothing, and that identity is what
-    // this branch reads.
     storesRef.columnsStore.set({
       columns: [
         { key: 'order_status', label: 'Status' },

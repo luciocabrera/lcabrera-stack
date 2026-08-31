@@ -29,7 +29,6 @@ const OPTIONS = [
   { label: 'Bravo', value: 'bravo' },
 ] as const;
 
-/** Reports the live store value so tests can assert what handleChange stored. */
 const ValueProbe = ({ accessor }: { readonly accessor: keyof Values }) => {
   const value = useGetFieldValue<Values>(accessor);
 
@@ -67,17 +66,11 @@ beforeEach(() => {
   vi.stubGlobal(
     'ResizeObserver',
     class {
-      public disconnect() {
-        // noop
-      }
+      public disconnect() {}
 
-      public observe() {
-        // noop
-      }
+      public observe() {}
 
-      public unobserve() {
-        // noop
-      }
+      public unobserve() {}
     },
   );
 });

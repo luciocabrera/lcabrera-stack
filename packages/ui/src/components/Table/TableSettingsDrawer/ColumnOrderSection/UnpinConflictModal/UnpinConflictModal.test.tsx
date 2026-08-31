@@ -39,9 +39,7 @@ import { UnpinConflictModal } from './UnpinConflictModal.component';
 
 const dialogMocksRef = {
   current: {
-    restoreMockDialog: () => {
-      // no-op before setup
-    },
+    restoreMockDialog: () => {},
   },
 };
 

@@ -39,8 +39,6 @@ describe('resolveShareDenominators', () => {
   });
 
   it('prefers the grand-total row, which the server computed', () => {
-    // The leaves here do not add up to the grand total, so this fails if the
-    // fallback is taken when a grand total is present.
     expect(
       resolveShareDenominators({
         shares: [REVENUE_SUM],
@@ -66,8 +64,6 @@ describe('resolveShareDenominators', () => {
   });
 
   it('never counts a subtotal into the summed fallback', () => {
-    // A rollup interleaves subtotals with the leaves they total, so counting
-    // them would multiply the denominator by the depth of the tree.
     const subtotal: TableGroupRowSummary = {
       aggregates: [{ columnKey: 'revenue', fn: 'sum', value: 40 }],
       count: 2,
@@ -88,8 +84,6 @@ describe('resolveShareDenominators', () => {
   });
 
   it('reads the string a numeric aggregate arrives as', () => {
-    // `pg` sends `numeric` and `bigint` as strings, and they are carried as
-    // strings so the displayed value stays lossless.
     expect(
       resolveShareDenominators({
         shares: [REVENUE_SUM],
@@ -99,8 +93,6 @@ describe('resolveShareDenominators', () => {
   });
 
   it('omits a measure whose denominator is zero', () => {
-    // Present-as-zero would divide to Infinity and render as a number nobody
-    // computed; absent is what the cell turns into an explicit absence.
     expect(
       resolveShareDenominators({
         shares: [REVENUE_SUM],
@@ -119,8 +111,6 @@ describe('resolveShareDenominators', () => {
   });
 
   it('refuses the whole sum when any leaf is unreadable', () => {
-    // A total over only the readable rows is a denominator that silently
-    // omitted rows — the failure this util exists to avoid.
     expect(
       resolveShareDenominators({
         shares: [REVENUE_SUM],
@@ -142,9 +132,6 @@ describe('resolveShareDenominators', () => {
   });
 
   it('divides each of two measures on one column by its own total', () => {
-    // The failure a column-keyed denominator could not avoid: `count` and `sum`
-    // are both shareable, and taking whichever entry came first would divide one
-    // measure by the other's total (#831).
     const both: TableGroupRowSummary = {
       aggregates: [
         { columnKey: 'revenue', fn: 'sum', value: 300 },
@@ -182,9 +169,6 @@ describe('resolveShareDenominators', () => {
   });
 
   it('refuses the sum when only some leaves carry the aggregate', () => {
-    // The contract is an exact denominator or an explicit absence. Skipping a
-    // leaf that has no entry would total the rows that happened to have one and
-    // render a plausible percentage from a partial sum (#648).
     const bare: TableGroupRowSummary = {
       aggregates: [],
       count: 1,

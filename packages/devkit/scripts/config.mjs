@@ -13,17 +13,6 @@
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
 
-/**
- * Directory layout is a default rather than a constant because a consumer may
- * legitimately keep skills elsewhere; the commands are empty because there is
- * no honest default for another repository's toolchain, and a wrong one would
- * be worse than an absent one.
- *
- * `hooks` defaults to `.githooks` rather than to any one toolchain's hook
- * directory: git runs whatever `core.hooksPath` names, so naming the directory a
- * particular runner owns would put the seeds where a consumer on another runner
- * never looks.
- */
 export const DEFAULT_CONFIG = {
   ci: { setup: [] },
   commands: {},
@@ -42,20 +31,6 @@ export const DEFAULT_CONFIG = {
   profile: 'agent',
 };
 
-/**
- * Which asset groups a profile materialises, split by who reads the result.
- *
- * `agent` is what an agent reads: the skills, the path rules, the subagent
- * definitions, and the contracts they bind to. `docs` and `coordination` are in
- * it because the skills cannot run without them — an orchestration contract or a
- * claim protocol that does not arrive leaves a skill whose first instruction is
- * to read a missing file.
- *
- * `full` adds what CI, git and the gates run: the workflows, the hooks, the
- * templates those gates check against, the ADR home the ADR gate reads, and the
- * command reference. A consumer who wants the prose and keeps their own process
- * takes `agent` and gets none of it.
- */
 const AGENT_GROUPS = ['skills', 'rules', 'agents', 'docs', 'coordination'];
 
 export const PROFILES = {
@@ -93,26 +68,6 @@ export const withProfile = ({ config, profile, source = '--profile' }) => {
   return { ...config, profile };
 };
 
-/**
- * The consumer's extra CI steps, as verbatim YAML lines.
- *
- * **Absent** resolves to "no extra steps" and says nothing: this is an optional
- * hook, and a repository whose runner needs nothing must not be made to declare
- * that it needs nothing.
- *
- * **Present but wrongly shaped throws**, and the distinction is not pedantry —
- * resolving it quietly to `[]` reproduces the bug this hook exists to remove.
- * The steps are verbatim YAML lines, so the natural JSON spelling of a step
- * (`{ "name": …, "uses": … }`) is wrong here and is the mistake a consumer will
- * actually make. Dropped silently, the placeholder line is deleted from every
- * workflow, `sync` reports success, the files record clean — and each job fails
- * at `{{commands.install}}` with `exit 127`, indistinguishable from having
- * declared no `ci` block at all, with nothing pointing back at this file.
- *
- * `commands` falling back beside it is not a precedent: a missing command still
- * surfaces, because `substituteCommands` holds the file back and names the key.
- * There is no such backstop here, precisely because absent has to stay silent.
- */
 const ciSetupLines = (ci) => {
   if (ci === undefined) return [];
   if (!isPlainObject(ci)) {
@@ -133,11 +88,6 @@ const ciSetupLines = (ci) => {
   return ci.setup;
 };
 
-/**
- * A malformed config is a failure, not a silent fallback: a consumer who wrote
- * one meant it, and quietly ignoring it would materialise into the wrong
- * directories while reporting success.
- */
 export const resolveConfig = (raw) => {
   if (raw === undefined) return DEFAULT_CONFIG;
   const parsed = JSON.parse(raw);
@@ -162,25 +112,8 @@ export const resolveConfig = (raw) => {
   };
 };
 
-/**
- * The three ways a consumer writes "the repository root" — the default, and the
- * two an editor or a person would plausibly leave behind.
- *
- * Every one of them has to produce a bare `COMMANDS.md`, because the manifest
- * key, the acceptance key and closure's containment check are all string
- * comparisons. Joined naively they produce `./COMMANDS.md` and `/COMMANDS.md`,
- * which are two more spellings of one file — and the leading-slash form is the
- * silent one: `join` still writes it to the right place, while closure resolves
- * a link to it as `COMMANDS.md`, matches nothing in the shipped set, and reports
- * the page as an escape.
- */
 const ROOT_BASES = new Set(['', '.', './']);
 
-/**
- * Where one asset lands. Assets are stored under a group directory whose name
- * is the config key that places it, so adding a group is a data change rather
- * than a code change.
- */
 export const targetPathFor = ({ assetPath, config }) => {
   const [group, ...rest] = assetPath.split('/');
   const base = config.paths[group];
@@ -190,47 +123,17 @@ export const targetPathFor = ({ assetPath, config }) => {
 
 export const groupsFor = (config) => PROFILES[config.profile] ?? [];
 
-/**
- * Groups whose files have to arrive executable.
- *
- * This is decided by the group and not by the mode of the shipped file, and the
- * reason is that the mode does not survive the journey. `pnpm pack` writes every
- * entry as 0644 — `npm pack` keeps 0755, but pnpm is the packer this kit must
- * use, because `publishConfig` and `catalog:` are pnpm rewrites and a tarball
- * built without them is not the artifact a consumer installs.
- *
- * So a consumer received hooks without the bit, and git skips a non-executable
- * hook: the `commit-msg` gate accepted a message violating every rule and the
- * commit landed with exit 0. Nothing in this repository could see it, because
- * `workspace:*` resolves the source directory, where the bit is set.
- *
- * The group name travels inside the path, so this survives any packer.
- */
 const EXECUTABLE_GROUPS = new Set(['hooks']);
 
 export const isExecutableAsset = (assetPath) =>
   EXECUTABLE_GROUPS.has(assetPath.split('/')[0]);
 
-/**
- * The tools the consumer's own command map invokes.
- *
- * A command reached through a placeholder is one of the reference forms a
- * shipped file is allowed to use, so closure must count it as answered. Without
- * this, parameterising a command — the very thing that makes a file portable —
- * would make the closure gate fail.
- */
 export const configuredCommandWords = (config) =>
   Object.values(config.commands ?? {})
     .filter((command) => typeof command === 'string')
     .map((command) => command.trim().split(/\s+/)[0] ?? '')
     .filter((word) => word !== '');
 
-/**
- * A dotted lookup that stops at the first segment the config does not own, so a
- * key never resolves through the prototype chain: `commands.constructor` names
- * nothing a consumer configured, and reading it as configured would let an asset
- * declaring it be written to a repository that has no commands at all.
- */
 const valueAt = ({ config, path }) =>
   path.split('.').reduce((cursor, segment) => {
     if (!isPlainObject(cursor) || !Object.hasOwn(cursor, segment)) {
@@ -239,32 +142,11 @@ const valueAt = ({ config, path }) =>
     return cursor[segment];
   }, config);
 
-/**
- * Does THIS consumer have that key? The question `sync` asks before writing a
- * file that declares it needs one.
- *
- * A null or empty value counts as unset, matching what `substituteCommands`
- * already does with an empty command: a key present but blank leaves the shipped
- * file's instruction just as unfollowable as an absent one, and writing it
- * anyway is the failure this gate exists to stop.
- */
 export const hasConfigKey = ({ config, path }) => {
   const value = valueAt({ config, path });
   return value !== undefined && value !== null && value !== '';
 };
 
-/**
- * The key SPACE this config defines — which is a different question from
- * whether one key is set, and the one `closure` needs: could ANY consumer
- * satisfy this declaration, or does it name something outside what
- * `devkit.config.json` is for? A consumer's file may carry blocks other tools
- * read, and a shipped asset binding to one of those is an escape however
- * reliably it resolves in the repository that wrote it.
- *
- * The command map is open-ended, exactly as `configuredCommandWords` treats it:
- * there is no fixed vocabulary of command names, so the space is whatever the
- * consumer configured rather than a list held here.
- */
 export const allowedConfigKeys = (config) => [
   'profile',
   ...Object.keys(config.paths ?? {}).map((key) => `paths.${key}`),

@@ -8,10 +8,6 @@ type ResolveAggregateDataTypeArgs = {
   readonly fn: TableAggregateFn;
 };
 
-/**
- * `count`/`countDistinct` are never the column's units; `boolAnd`/`boolOr` are never a
- * number. Everything else inherits `columnDataType`.
- */
 export const resolveAggregateDataType = ({
   columnDataType,
   fn,

@@ -13,10 +13,6 @@ export const useVirtualSelectDropdown = ({
 }: UseVirtualSelectDropdownArgs) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // The parent is notified from the handler that changes the state, not from an
-  // effect. An effect ran a render late — the parent painted once with the
-  // stale value before catching up — and it also fired on mount with `false`,
-  // which no consumer asked for.
   const closeDropdown = () => {
     setIsOpen(false);
     onOpenChange?.(false);

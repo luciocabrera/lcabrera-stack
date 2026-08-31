@@ -28,12 +28,5 @@
 export const startEnvFiles = (command) =>
   [...command.matchAll(/\[ -f (\S+) \]/g)].map(([, file]) => file);
 
-/**
- * The `--env-file` path a compose command passes, repo-root-relative.
- *
- * `undefined` when the script names none, which the caller must treat as a
- * failure: it would otherwise turn "the two ends disagree" into "there was
- * nothing to compare", and a comparison against nothing passes.
- */
 export const composeEnvFile = (script) =>
   /--env-file\s+(\S+)/.exec(script ?? '')?.[1];

@@ -40,8 +40,6 @@ describe('tasksClosedBy — the fail direction', () => {
   });
 
   it('resolves only the claiming task, leaving every other claim alone', () => {
-    // Kills a "delete the whole directory" implementation: the register here
-    // holds a live claim for unrelated work that must survive this merge.
     expect(
       names(tasksClosedBy({ entries: [other, task()], ...MERGED })),
     ).toEqual(['coordination-auto-close.md']);
@@ -83,8 +81,6 @@ describe('tasksClosedBy — the pass direction', () => {
   });
 
   it('resolves on the branch when the claim never recorded its PR', () => {
-    // The tooltip-arrow-border case: claimed before the PR existed, so `pr:`
-    // stayed `(none)` and the head ref is the only tie to the merge.
     const entries = [task({ pr: '(none)' })];
     expect(names(tasksClosedBy({ entries, ...MERGED }))).toEqual([
       'coordination-auto-close.md',

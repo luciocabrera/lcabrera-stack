@@ -4,8 +4,6 @@ import { getDemoCredential } from './getDemoCredential.util';
 
 describe('getDemoCredential', () => {
   it('returns the default demo credential in development', () => {
-    // The mode is named rather than left out: a published default applies only
-    // where `NODE_ENV` asks for one, so an empty env is refused, not defaulted.
     const credential = getDemoCredential({
       env: { NODE_ENV: 'development' },
     });

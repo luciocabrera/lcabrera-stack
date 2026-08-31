@@ -24,18 +24,12 @@ const KIND_LABELS = {
   VariableDeclaration: 'const',
 };
 
-/** Collapse whitespace and drop machine-specific `import("abs/path").` prefixes. */
 const normalizeSignature = (text) =>
   text
     .replace(/import\("[^"]*"\)\./g, '')
     .replace(/\s+/g, ' ')
     .trim();
 
-/**
- * A type alias prints as its own name via the type checker, so its body is read
- * from the written type node instead; everything else uses the resolved type,
- * which expands a value's inferred shape.
- */
 const rawSignatureFor = (declaration) => {
   if (declaration.getKindName() === 'TypeAliasDeclaration') {
     const node = declaration.getTypeNode();
@@ -52,7 +46,6 @@ const signatureFor = (declarations) => {
   return `[${kind}] ${normalizeSignature(rawSignatureFor(declaration))}`;
 };
 
-/** The exported name → signature map for one entry file. */
 const extractEntry = (sourceFile) => {
   const exported = sourceFile.getExportedDeclarations();
   return Object.fromEntries(
@@ -78,11 +71,6 @@ const createProject = (packageConfig) =>
         tsConfigFilePath: packageConfig.tsConfigFilePath,
       });
 
-/**
- * The full surface for one package: subpath → (export name → signature). The
- * project loads every entry first, then resolves their dependency graph once,
- * so re-exports across files resolve.
- */
 export const extractSurface = (packageConfig) => {
   const project = createProject(packageConfig);
   const loaded = packageConfig.entries.map((entry) => ({

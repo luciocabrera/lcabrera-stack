@@ -12,10 +12,6 @@ import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveCol
 
 import type { ClearSortingButtonProps } from './ClearSortingButton.types';
 
-/**
- * Identity and enabled-state come from the shared `CLEAR_SORTING_COMMAND` (ADR-011); this
- * surface owns only its live commit-context and menu presentation.
- */
 export const ClearSortingButton = <TData,>({
   columnKey,
   onClose,

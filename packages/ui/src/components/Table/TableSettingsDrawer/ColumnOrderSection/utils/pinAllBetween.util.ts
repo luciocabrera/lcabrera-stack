@@ -19,9 +19,6 @@ export const pinAllBetween = <TKey extends string>({
   const left = [...columnPinning.left];
   const right = [...columnPinning.right];
 
-  // Membership mirrors, updated in step with the arrays above. The guard reads
-  // state this loop is still writing, so a Set built once from `columnPinning`
-  // would answer for the input rather than for the partially-built result.
   const leftKeys = new Set<TKey>(left);
   const rightKeys = new Set<TKey>(right);
 

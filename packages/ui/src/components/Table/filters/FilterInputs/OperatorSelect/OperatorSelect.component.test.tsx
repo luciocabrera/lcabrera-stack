@@ -282,9 +282,6 @@ describe('OperatorSelect', () => {
   it('passes no style override to the select', () => {
     renderOperatorSelect({ dataType: 'string' });
 
-    // The override it used to pass reset `position`/`left`/`top`, which beat
-    // the dropdown's computed placement and parked the list in the viewport's
-    // top-left corner. Nothing here may style the dropdown's position.
     expect(screen.getByTestId('has-custom-stylex').textContent).toBe('false');
   });
 

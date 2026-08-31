@@ -41,27 +41,13 @@ import {
 import { deriveWorkspaces } from '../packages/repo-standards/scripts/workspace-scopes.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-/**
- * There is no default planning document, and that is deliberate: ADR-036 makes
- * GitHub Issues the durable backlog, so a tracked file that always holds "the
- * backlog" would be a second one. A plan is authored for one session, consumed
- * by `--create`, and retired. Keep the working copy under `.tmp/planning/`.
- */
 const PLAN_REQUIRED =
   'no planning document given. Pass --plan <file>; there is no tracked default, ' +
   'because GitHub Issues are the durable backlog (ADR-036) and a plan is a ' +
   'one-shot input. Keep the working copy under .tmp/planning/.';
 const MILESTONE_SCHEME = 'docs/agents/milestone-naming-scheme.md';
-/** Gitignored, per the repo's scratch convention. */
 const STAGING_DIR = '.tmp/plan-issues';
 
-/**
- * A path that stays inside the repository, or a refusal.
- *
- * `--emit` reaches this from the command line, so a traversal would otherwise
- * steer `mkdirSync`/`writeFileSync` anywhere the process can reach. Canonicalise
- * first, then check containment — comparing the raw string cannot see `..`.
- */
 const withinRoot = (relativePath) => {
   const target = resolve(REPO_ROOT, relativePath);
   if (target !== REPO_ROOT && !target.startsWith(REPO_ROOT + sep)) {
@@ -75,14 +61,9 @@ const withinRoot = (relativePath) => {
 const readRepoFile = (relativePath) =>
   readFileSync(withinRoot(relativePath), 'utf8');
 
-/** Every label name the taxonomy defines for this repo, in one flat list. */
 const allowedLabelNames = () =>
   buildLabelDefinitions(deriveWorkspaces(REPO_ROOT)).map(({ name }) => name);
 
-/**
- * The checks a record must survive. Each returns a list of problems, so one
- * issue reports everything wrong with it rather than only the first thing.
- */
 const auditRecord = (record, { allowed, milestones, source }) => {
   const body = renderIssueBody(record, source);
   const strays = unknownLabels(record.labels, allowed);
@@ -112,11 +93,6 @@ const auditRecord = (record, { allowed, milestones, source }) => {
   };
 };
 
-/**
- * The creation plan: what `--create` walks, and what `--emit` writes for review.
- * Labels are narrowed to the taxonomy here, so a stray name in the document can
- * never reach `gh` and create a label outside `lib/labels.mjs`.
- */
 const buildManifest = (audits, milestones, allowed) => ({
   milestones,
   issues: audits.map(({ record }) => ({
@@ -131,7 +107,6 @@ const buildManifest = (audits, milestones, allowed) => ({
   })),
 });
 
-/** Epics before the issues that name them as parent, so linking has a target. */
 const creationOrder = (audits) =>
   [...audits].sort(
     (left, right) =>
@@ -152,11 +127,6 @@ const emit = (directory, manifest, audits) => {
   return target;
 };
 
-/**
- * Creates the milestones, then the issues in epic-first order, then the
- * sub-issue links. Ordering matters: a link needs both ends to exist, and an
- * epic is always an end.
- */
 const create = (manifest, directory, dryRun) => {
   const log = (message) => console.log(`  ${dryRun ? '+ ' : ''}${message}`);
   const milestones = createMilestones(manifest.milestones, { dryRun, log });

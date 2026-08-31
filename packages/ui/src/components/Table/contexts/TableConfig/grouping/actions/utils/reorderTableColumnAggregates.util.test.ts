@@ -39,8 +39,6 @@ describe('reorderTableColumnAggregates', () => {
   });
 
   it('moves one measure of a column past the other, which is what a map could not express', () => {
-    // Two entries on the SAME column, reordered relative to each other: the
-    // pair is the identity, so a column-keyed shape has no way to say this.
     expect(
       reorderTableColumnAggregates({
         grouping: grouping({
@@ -60,8 +58,6 @@ describe('reorderTableColumnAggregates', () => {
   });
 
   it('reads a column key that contains the separator', () => {
-    // The token splits from the right, so `odd:col` survives the round trip
-    // through an id — the property `parseTableAggregateToken` is written for.
     expect(
       reorderTableColumnAggregates({
         grouping: grouping({
@@ -79,9 +75,6 @@ describe('reorderTableColumnAggregates', () => {
   });
 
   it('keeps an aggregate the ids do not name rather than dropping it', () => {
-    // The list a surface renders is not always the whole staged list — an
-    // aggregate on a column the route does not declare is hidden — so a
-    // reorder built from the visible rows must not un-stage the rest.
     expect(
       reorderTableColumnAggregates({
         grouping: grouping({
@@ -128,8 +121,6 @@ describe('reorderTableColumnAggregates', () => {
     expect(after.keys).toStrictEqual(before.keys);
     expect(after.mode).toBe(before.mode);
     expect(after.periods).toStrictEqual(before.periods);
-    // A share belongs to the pair, not to a position, so it moves with its
-    // measure and there is nothing to prune.
     expect(after.shares).toStrictEqual([
       { columnKey: 'total_amount', fn: 'sum' },
     ]);

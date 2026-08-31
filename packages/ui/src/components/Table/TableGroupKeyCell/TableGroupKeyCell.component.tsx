@@ -10,10 +10,6 @@ import { TableGroupKeyLink } from './TableGroupKeyLink';
 import { resolveGroupKeyCellDisclosure } from './utils/resolveGroupKeyCellDisclosure.util';
 import { resolveGroupKeyCellText } from './utils/resolveGroupKeyCellText.util';
 
-/**
- * One line: wrapping is silently clipped against `rowHeight` (ADR-065).
- * Every drawn key cell reserves the chevron box, filled or not (ADR-080).
- */
 export const TableGroupKeyCell = ({
   columnKey,
   disclosure,

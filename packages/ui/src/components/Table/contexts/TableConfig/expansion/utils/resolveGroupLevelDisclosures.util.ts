@@ -20,13 +20,6 @@ type ResolveGroupLevelDisclosuresArgs = {
 
 const NOTHING: readonly TableGroupLevelDisclosure[] = [];
 
-/**
- * Under a rollup the subtotal is the only row that owns loaded children, so it was the
- * only row that could carry a chevron — and it is emitted *after* the rows it totals,
- * which put the control at the end of a block whose start the reader is looking at (#802).
- * Asking the question of a **level** instead of a row answers it from the path prefix,
- * which every row inside the group carries.
- */
 export const resolveGroupLevelDisclosures = ({
   collapsedGroupPaths,
   foldableKeys,

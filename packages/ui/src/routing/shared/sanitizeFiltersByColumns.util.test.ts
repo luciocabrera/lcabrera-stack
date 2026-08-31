@@ -37,9 +37,7 @@ describe('sanitizeFiltersByColumns', () => {
     const result = sanitizeFiltersByColumns({
       columns,
       filters: {
-        // correct match — should be kept
         amount: { operator: 'equals', type: 'number', value: 42 },
-        // number filter on a string column — should be dropped
         status: { operator: 'equals', type: 'number', value: 42 },
       } as ColumnFiltersState<Row>,
     });
@@ -54,7 +52,6 @@ describe('sanitizeFiltersByColumns', () => {
       columns,
       filters: {
         status: { operator: 'contains', type: 'text', value: 'active' },
-        // 'unknown' is not in columns
         unknown: { operator: 'contains', type: 'text', value: 'foo' },
       } as unknown as ColumnFiltersState<Row>,
     });

@@ -19,11 +19,6 @@ const PERSISTED_SLICES = [
   'columnVisibility',
 ] as const;
 
-/**
- * Shared by the cookie and sessionStorage readers — each supplies how to read a raw slice
- * value (and, for cookies, how to decode it) while this helper owns the slice list,
- * version check, and `columnVisibility` array→Set conversion.
- */
 export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
   appId,
   persistenceKey,
@@ -42,21 +37,21 @@ export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
       continue;
     }
 
+    let parsed: { value: unknown; version: number };
+
     try {
       const source = transformRaw ? transformRaw(rawValue) : rawValue;
-      const parsed = JSON.parse(source) as {
-        value: unknown;
-        version: number;
-      };
-      if (parsed.version === PERSISTENCE_VERSION) {
-        result[slice] = (
-          slice === 'columnVisibility' && Array.isArray(parsed.value)
-            ? new Set(parsed.value as string[])
-            : parsed.value
-        ) as never;
-      }
+      parsed = JSON.parse(source) as { value: unknown; version: number };
     } catch {
-      // Invalid JSON — skip
+      continue;
+    }
+
+    if (parsed.version === PERSISTENCE_VERSION) {
+      result[slice] = (
+        slice === 'columnVisibility' && Array.isArray(parsed.value)
+          ? new Set(parsed.value as string[])
+          : parsed.value
+      ) as never;
     }
   }
 

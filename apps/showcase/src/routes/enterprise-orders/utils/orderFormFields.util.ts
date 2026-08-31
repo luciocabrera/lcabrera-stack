@@ -25,8 +25,6 @@ import { buildAddressLocalityRows } from './buildAddressLocalityRows.util';
 const { choiceField, field, fieldGroup, fieldRow, toggleField } =
   createFieldBuilders<EnterpriseOrderValues>();
 
-// Precomputed select/radio option sets — hoisted so the field factories stay
-// shallow (avoids nesting `toFieldOptions` inside group→row→field calls).
 const CARRIER_OPTIONS = toFieldOptions(CARRIER_VALUES);
 const CUSTOMER_TYPE_OPTIONS = toFieldOptions(CUSTOMER_TYPE_VALUES);
 const ORDER_STATUS_OPTIONS = toFieldOptions(ORDER_STATUS_VALUES);

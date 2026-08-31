@@ -55,9 +55,7 @@ class MockIntersectionObserver {
     return [];
   }
 
-  unobserve() {
-    // no-op
-  }
+  unobserve() {}
 }
 
 const triggerIntersection = (isIntersecting: boolean) => {

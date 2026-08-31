@@ -2,11 +2,6 @@ import { useTableFocusContextValue } from '#ui/components/Table/contexts/TableFo
 
 import type { ReleaseTableGridFocusArgs } from './useReleaseTableGridFocus.types';
 
-/**
- * The stored row and column are kept — the row is still the focus target, it just has no
- * node right now, which is the ordinary consequence of scrolling under virtualization
- * (ADR-062).
- */
 export const useReleaseTableGridFocus = () => {
   const { focusStore } = useTableFocusContextValue();
 

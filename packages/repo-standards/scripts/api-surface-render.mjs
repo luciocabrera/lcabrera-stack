@@ -23,7 +23,6 @@ const renderExports = (subpathExports) =>
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([name, signature]) => `${name} ${signature}`);
 
-/** A surface as deterministic text: sorted subpaths, each with sorted exports. */
 export const renderSurface = ({ packageName, surface }) => {
   const sections = Object.keys(surface)
     .sort((left, right) => left.localeCompare(right))
@@ -38,7 +37,6 @@ export const renderSurface = ({ packageName, surface }) => {
 const isSubpathHeader = (line) => line.startsWith(SUBPATH_PREFIX);
 const isComment = (line) => line.startsWith(HEADER_PREFIX);
 
-/** Inverse of `renderSurface`: snapshot text back into a surface object. */
 export const parseSurface = (text) => {
   const surface = {};
   let current;

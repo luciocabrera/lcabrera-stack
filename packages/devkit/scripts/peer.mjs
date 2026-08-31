@@ -31,15 +31,6 @@ export const PEER_OK = 'ok';
 export const PEER_OUT_OF_RANGE = 'out-of-range';
 export const PEER_NOT_INSTALLED = 'not-installed';
 
-/**
- * The default way a peer's manifest is read: the module resolver, the only thing
- * that knows a consumer's layout.
- *
- * A package whose `exports` do not expose `./package.json` throws here and so
- * reads as absent. That is the safe direction for a gate — a version it cannot
- * establish is a version it cannot vouch for — and it is why every peer named in
- * a `peer:` declaration must be one that exposes its manifest.
- */
 const requirePeerManifest = ({ from, packageName }) =>
   createRequire(from)(`${packageName}/package.json`);
 
@@ -85,7 +76,6 @@ export const checkPeerVersion = ({ installedVersion, range }) => {
   return satisfies(installedVersion, range) ? PEER_OK : PEER_OUT_OF_RANGE;
 };
 
-/** What the consumer has to act on: which package, which range, and what is there. */
 const describeUnmet = ({ installedVersion, peer, status }) =>
   `${peer.name}@${peer.range} (${
     status === PEER_NOT_INSTALLED
@@ -115,12 +105,6 @@ export const unmetPeers = ({ peers, versions = new Map() }) =>
     .filter(({ status }) => status !== PEER_OK)
     .map(describeUnmet);
 
-/**
- * Every distinct peer named across a set of assets. What makes "resolve once per
- * plan" possible: the caller resolves this list, not one name per asset, so a
- * peer named by twenty files is looked up once and `sync` and `doctor` cannot
- * see two different answers for it.
- */
 export const declaredPeerNames = (assets) => [
   ...new Set(
     assets.flatMap((asset) =>

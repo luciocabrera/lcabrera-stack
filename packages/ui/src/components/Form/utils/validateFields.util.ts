@@ -7,11 +7,6 @@ type ValidateFieldsArgs<TValues extends Record<string, unknown>> = {
   readonly values: TValues;
 };
 
-/**
- * Hand-rolled, non-Zod progressive-enhancement check for instant field
- * feedback only — the action's Zod parse on the server remains the
- * authoritative gate (see ADR-005).
- */
 export const validateFields = <TValues extends Record<string, unknown>>({
   leafFields,
   values,

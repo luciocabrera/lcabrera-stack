@@ -17,10 +17,8 @@ import { toGroupPeriodLabel } from './to-group-period-label.util.ts';
 
 type ResolveGroupRestrictionArgs = {
   readonly columns: readonly RestrictionColumn[];
-  /** On, a request carrying no token is refused rather than read as unrestricted. */
   readonly isGroupRequired?: boolean;
   readonly params: URLSearchParams;
-  /** Called only when the token carries granularities. */
   readonly selectTruncations?: (
     periods: Readonly<Record<string, OlapGroupPeriod>>,
   ) => Promise<Readonly<Record<string, GroupKeyTruncation>>>;
@@ -73,7 +71,6 @@ const toEntry = ({
   };
 };
 
-/** Refuses on the same conditions as `resolveGroupRead`, and says the same thing (ADR-094). */
 export const resolveGroupRestriction = async ({
   columns,
   isGroupRequired = false,

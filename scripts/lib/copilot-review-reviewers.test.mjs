@@ -46,24 +46,12 @@ describe('which reviewers the gate accepts', () => {
     expect(isAcceptedReviewer('claude-general-reviewer')).toBe(true);
   });
 
-  // The hole #865 closed, kept as a gate rather than a note. `github-actions` is
-  // the identity EVERY workflow here shares, so accepting it means any workflow
-  // that posts a review satisfies the gate. Re-adding it to the set fails this.
-  //
-  // It catches an EDIT TO THE SET and nothing else — this reads the constant, not
-  // the workflow. A submit step falling back to `github.token` leaves the set
-  // correct and this test green, while every review stops matching and the status
-  // sticks at `pending`. That case is `claude-review-workflow.test.mjs`, which
-  // reads the step.
   it('no longer accepts the shared GITHUB_TOKEN identity', () => {
     expect(isAcceptedReviewer('github-actions[bot]')).toBe(false);
     expect(isAcceptedReviewer('github-actions')).toBe(false);
   });
 
   it('accepts nobody else — the set is names, not a shape', () => {
-    // Each of these would be admitted by a rule the accepted set deliberately
-    // does not use: a `[bot]` suffix test, a substring match, a regex over bot
-    // logins. A new reviewer has to be an edit someone made on purpose.
     expect(isAcceptedReviewer('dependabot[bot]')).toBe(false);
     expect(isAcceptedReviewer('sonarqubecloud[bot]')).toBe(false);
     expect(isAcceptedReviewer('github-actions-runner[bot]')).toBe(false);
@@ -73,9 +61,6 @@ describe('which reviewers the gate accepts', () => {
   });
 
   it('keeps the Copilot test narrow, because the suppressed reader depends on it', () => {
-    // `copilot-suppressed.mjs` parses Copilot's own review markup, which no other
-    // reviewer emits. Widening this would send it hunting for a `Suppressed
-    // comments` block in reviews that never contain one.
     expect(isCopilotReviewer('copilot-pull-request-reviewer[bot]')).toBe(true);
     expect(isCopilotReviewer('claude-general-reviewer[bot]')).toBe(false);
   });
@@ -113,12 +98,6 @@ describe('two accepted reviewers', () => {
   });
 
   it('is SUCCESS when one reviewer covered the head and the OTHER later reviewed an older commit', () => {
-    // The behaviour worth arguing about, so it is in the name rather than left to
-    // be inferred. This is what a slow reviewer looks like: the head was reviewed,
-    // and a re-review requested before the last push arrives afterwards, naming
-    // the commit it was asked about. The head is covered — saying otherwise
-    // contradicts what this status asserts, and would fire on an ordinary
-    // sequence the day Copilot's credits return.
     const status = decideReviewStatus({
       headSha: HEAD,
       reviews: [
@@ -131,10 +110,6 @@ describe('two accepted reviewers', () => {
   });
 
   it("is pending when a reviewer's OWN newest review moved off the head", () => {
-    // The other half of per-reviewer, and the half that keeps #671 blocked: one
-    // reviewer covering the head is not the same as one reviewer having covered
-    // it at some point. Copilot reviewed the head and then reviewed something
-    // else; its newest names the later commit, and nothing covers the head.
     const status = decideReviewStatus({
       headSha: HEAD,
       reviews: [
@@ -146,9 +121,6 @@ describe('two accepted reviewers', () => {
   });
 
   it('does not let a slow reviewer turn a covered head into a failure', () => {
-    // Same sequence as above, with the late review being the one that triggered
-    // the run. `failure` says "waiting will not help"; it must not be reported
-    // about a head another accepted reviewer has already covered.
     const late = claudeReview({
       commit: EARLIER,
       submitted: '2026-08-20T10:15:11Z',
@@ -172,8 +144,6 @@ describe('two accepted reviewers', () => {
   });
 
   it('is not satisfied by an unaccepted author who reviewed the head', () => {
-    // The whole point of a named set: a reviewer nobody chose does not count,
-    // however plausible its login looks next to one that does.
     for (const login of [
       'luciocabrera',
       'dependabot[bot]',
@@ -188,8 +158,6 @@ describe('two accepted reviewers', () => {
   });
 
   it('names the reviewer that satisfied it, so a monoculture cannot go unnoticed', () => {
-    // If Copilot stops reviewing entirely, every pull request should say so on
-    // its face rather than reading the same as it always did.
     expect(
       decideReviewStatus({ headSha: HEAD, reviews: [claudeReview()] })
         .description,
@@ -205,10 +173,6 @@ describe('two accepted reviewers', () => {
   });
 
   it('names the most recent coverer when both reviewers covered the head', () => {
-    // Deterministic on purpose: the named reviewer is the monoculture signal, and
-    // a name that depends on the order the API returned reviews in is one nobody
-    // can act on. Asserted from both array orders so the fetch order cannot be
-    // what makes it pass.
     const copilot = restReview({ submitted: '2026-08-20T09:00:00Z' });
     const claude = claudeReview({ submitted: '2026-08-20T10:15:11Z' });
     for (const reviews of [
@@ -245,12 +209,6 @@ describe('two accepted reviewers', () => {
   });
 
   it('waits instead of failing while an accepted reviewer has not spoken yet', () => {
-    // The ordering the per-reviewer comparison does not cover, and the reason
-    // `failure` needs the extra precondition: a push lands, the in-workflow
-    // reviewer is still running, and Copilot's re-review of the PREVIOUS commit
-    // arrives first and fires the gate. Reporting `failure` there would claim
-    // waiting cannot help while the review that helps is being written — and it
-    // would stick, because the review that follows creates no workflow run.
     const staleCopilot = restReview({ commit: EARLIER });
     const status = decideReviewStatus({
       headSha: HEAD,

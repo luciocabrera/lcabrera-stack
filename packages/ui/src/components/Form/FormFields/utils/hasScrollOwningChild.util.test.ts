@@ -23,8 +23,6 @@ describe('hasScrollOwningChild', () => {
   });
 
   it('does not delegate when the tab node has siblings', () => {
-    // The tab panel fills 100% of the list, so a sibling overflows it — the
-    // list has to scroll after all.
     expect(hasScrollOwningChild([TAB, LEAF])).toBe(false);
   });
 

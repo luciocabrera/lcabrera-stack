@@ -1,9 +1,5 @@
 import { z } from 'zod';
 
-/**
- * `DB_POOL_MAX` and `DB_IDLE_TIMEOUT_MS` keep pg's own values on purpose: those two were
- * never the problem, and changing them here would silently re-tune every consumer.
- */
 export const envSchema = z.object({
   DB_CONNECTION_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
   /**
@@ -36,10 +32,6 @@ type ReadEnvConfigArgs = {
 export const readEnvConfig = ({ env }: ReadEnvConfigArgs): EnvConfig =>
   envSchema.parse(env);
 
-/**
- * Just the grouped-read ceiling, picked off the same schema rather than restated — one key
- * can never drift from the shape that documents it.
- */
 export const readGroupStatementTimeoutMs = ({ env }: ReadEnvConfigArgs) =>
   envSchema.pick({ DB_GROUP_STATEMENT_TIMEOUT_MS: true }).parse(env)
     .DB_GROUP_STATEMENT_TIMEOUT_MS;

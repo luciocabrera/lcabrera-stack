@@ -169,13 +169,6 @@ describe('TableHeaderCell', () => {
     expect(MockTableHeaderActionsMenu).not.toHaveBeenCalled();
   });
   it('declares role=columnheader, because the display overrides removed the implicit one', () => {
-    // The `role` ATTRIBUTE, not a `getByRole('columnheader')` query. Testing
-    // Library resolves implicit roles and `<th scope='col'>` implicitly maps to
-    // `columnheader`, so a role query returns this same element with the
-    // attribute deleted — a test written that way cannot fail for the reason it
-    // reports. In a real browser the implicit role is gone, because
-    // `tableHeaderCellStyles.base()` sets `display: flex` on this `<th>`
-    // itself (ADR-062), which is why the attribute is the thing worth pinning.
     useGetColumnWidthMock.mockReturnValue(undefined);
     useGetPinnedColumnInfoMock.mockReturnValue(undefined);
     useGetNormalizedColumnMock.mockReturnValue(createColumn());
@@ -228,9 +221,6 @@ describe('TableHeaderCell', () => {
     ).toBeNull();
   });
   it('keeps its ARIA contract when a caller passes conflicting props', () => {
-    // role, scope and aria-sort are the header's only source of those
-    // semantics, so `{...rest}` must not win. Revert the spread order in
-    // TableHeaderCell.component.tsx and this is what fails.
     useGetColumnWidthMock.mockReturnValue(undefined);
     useGetPinnedColumnInfoMock.mockReturnValue(undefined);
     useGetNormalizedColumnMock.mockReturnValue(

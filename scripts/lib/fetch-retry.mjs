@@ -16,7 +16,6 @@
  */
 import { setTimeout as pause } from 'node:timers/promises';
 
-/** 408 request timeout, 425 too early, 429 rate limited, 5xx server-side. */
 const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
 
 const DEFAULT_ATTEMPTS = 4;
@@ -25,18 +24,9 @@ const MAX_DELAY_MS = 4000;
 
 export const isRetryableStatus = (status) => RETRYABLE_STATUS.has(status);
 
-/** Exponential, capped. Deterministic on purpose — no jitter to make a test flaky. */
 export const retryDelayMs = (attemptIndex) =>
   Math.min(MAX_DELAY_MS, BASE_DELAY_MS * 2 ** attemptIndex);
 
-/**
- * Calls `attempt` until it produces a non-retryable outcome or the budget runs
- * out. The final attempt is deliberately unguarded, so whatever it yields —
- * a response, an error status, or a thrown transport failure — reaches the
- * caller unchanged and the existing error handling still applies.
- *
- * `sleep` is injectable so the tests assert the schedule without waiting on it.
- */
 export const fetchWithRetry = async (attempt, options = {}) => {
   const { attempts = DEFAULT_ATTEMPTS, onRetry, sleep = pause } = options;
 

@@ -28,22 +28,11 @@ const endOfString = (text, start) => {
   return text.length;
 };
 
-/** Index of the newline ending the line comment at `start`, or end of text. */
 const endOfLineComment = (text, start) => {
   const newline = text.indexOf('\n', start);
   return newline === -1 ? text.length : newline;
 };
 
-/**
- * Strips `//` line comments, leaving string literals untouched.
- *
- * String-aware by necessity: a `$schema` value contains `//`, and a naive strip
- * truncates the document into invalid JSON.
- *
- * Written as a scan over literals rather than a per-character state machine:
- * the flag-juggling version was correct but scored cognitive complexity 17, and
- * "skip to the end of this construct" is what the code actually means.
- */
 export const stripJsoncComments = (text) => {
   let out = '';
   let index = 0;
@@ -62,6 +51,5 @@ export const stripJsoncComments = (text) => {
   return out;
 };
 
-/** Parses JSONC — JSON plus `//` comments and trailing commas. */
 export const parseJsonc = (text) =>
   JSON.parse(stripJsoncComments(text).replaceAll(/,(?=\s*[}\]])/gu, ''));

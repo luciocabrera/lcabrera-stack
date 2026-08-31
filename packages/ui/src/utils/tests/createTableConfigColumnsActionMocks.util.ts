@@ -10,14 +10,8 @@ type ColumnsStore<TState extends Record<string, unknown>> = {
 type CreateTableConfigColumnsActionMocksArgs<
   TState extends Record<string, unknown>,
 > = {
-  /** The applied aggregates the fake grouping store reports. */
   readonly initialAggregates?: readonly TableColumnAggregate[];
   readonly initialColumnsState: TState;
-  /**
-   * The applied group keys the fake grouping store reports. Defaults to none —
-   * a column action under grouping is its own scenario, and the common one is
-   * a table that is not grouped.
-   */
   readonly initialGroupingKeys?: readonly string[];
   readonly persistenceKey: string;
 };
@@ -52,8 +46,6 @@ export const createTableConfigColumnsActionMocks = <
 
   const mockPersistTableState = vi.fn(() => true);
 
-  // Every column action reads the applied group keys, because the derived
-  // column slices carry the hierarchy column while grouping is on (ADR-065).
   const mockGroupingStore = {
     get: vi.fn(() => ({
       aggregates,

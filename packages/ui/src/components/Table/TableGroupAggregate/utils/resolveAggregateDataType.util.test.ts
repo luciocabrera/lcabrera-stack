@@ -4,8 +4,6 @@ import { resolveAggregateDataType } from './resolveAggregateDataType.util';
 
 describe('resolveAggregateDataType', () => {
   it('keeps the column’s type for aggregates that answer in its units', () => {
-    // sum/avg/min/max over money are still money; min/max over a date are
-    // still dates.
     expect(
       resolveAggregateDataType({ columnDataType: 'currency', fn: 'sum' }),
     ).toBe('currency');
@@ -21,9 +19,6 @@ describe('resolveAggregateDataType', () => {
   });
 
   it('renders a tally as a number whatever column it sits on', () => {
-    // The case that motivates the whole util: a count over a currency column
-    // is a row count, and formatting it as currency puts a symbol and two
-    // decimals on an integer that has neither.
     expect(
       resolveAggregateDataType({ columnDataType: 'currency', fn: 'count' }),
     ).toBe('number');
@@ -48,9 +43,6 @@ describe('resolveAggregateDataType', () => {
   });
 
   it('falls back to string for an undeclared column', () => {
-    // Matching what the cell renderer does with the same absence, so an
-    // aggregate and the cells beneath it stay in step even when the consumer
-    // declared no `dataType`.
     expect(
       resolveAggregateDataType({ columnDataType: undefined, fn: 'sum' }),
     ).toBe('string');

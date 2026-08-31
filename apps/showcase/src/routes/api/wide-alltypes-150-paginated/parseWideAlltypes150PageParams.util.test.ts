@@ -30,7 +30,6 @@ describe('parseWideAlltypes150PageParams', () => {
   });
 
   it("clamps the window to the endpoint's ceiling", () => {
-    // 150 columns a row, and the URL is public.
     expect(parse(`limit=${MAX_WIDE_ALLTYPES_LIMIT + 5000}`).limit).toBe(
       MAX_WIDE_ALLTYPES_LIMIT,
     );
@@ -46,8 +45,6 @@ describe('parseWideAlltypes150PageParams', () => {
   });
 
   it('leaves the unsortable point column for the service to drop', () => {
-    // Deliberate: the SSR loader never passes through this parser, so a
-    // narrowing done here only would leave that path unprotected.
     expect(
       parse('sort=[{"columnKey":"c_018","direction":"asc"}]').sorting,
     ).toStrictEqual([{ columnKey: 'c_018', direction: 'asc' }]);

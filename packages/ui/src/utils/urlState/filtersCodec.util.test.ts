@@ -30,8 +30,6 @@ describe('filtersCodec', () => {
   });
 
   it('yields no filter for a value it does not recognise', () => {
-    // `[]` carries no operator at all; `["ct", 5]` pairs a text operator with a
-    // payload no text filter can hold.
     const result = filtersCodec.deserialize(
       '{"bad":[],"mismatched":["ct",5],"name":["ct","test"]}',
     );

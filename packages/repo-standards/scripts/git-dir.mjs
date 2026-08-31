@@ -27,7 +27,6 @@ import { isAbsolute, join, resolve, sep } from 'node:path';
 
 const GITDIR_PREFIX = 'gitdir:';
 
-/** An existing directory, or `undefined` — the only shape callers may trust. */
 const asExistingDirectory = (path) => {
   if (!existsSync(path)) {
     return undefined;
@@ -35,7 +34,6 @@ const asExistingDirectory = (path) => {
   return statSync(path).isDirectory() ? path : undefined;
 };
 
-/** The `gitdir: <path>` pointer inside a linked worktree's `.git` file. */
 const readGitDirPointer = (gitPath, repoRoot) => {
   const line = readFileSync(gitPath, 'utf8').trim();
   if (!line.startsWith(GITDIR_PREFIX)) {
@@ -49,16 +47,9 @@ const readGitDirPointer = (gitPath, repoRoot) => {
   return asExistingDirectory(resolve(base));
 };
 
-/**
- * Absolute path to `repoRoot`'s git directory, or `undefined` when it cannot be
- * determined. Never throws — a caller that cannot resolve it is no worse off
- * than before.
- */
 export const resolveGitDir = (repoRoot) => {
   const root = resolve(repoRoot);
   const gitPath = join(root, '.git');
-  // `repoRoot` reaches us from a caller's own module location, but validate the
-  // join anyway: a root carrying traversal must not steer this read elsewhere.
   if (!gitPath.startsWith(root + sep)) {
     return undefined;
   }

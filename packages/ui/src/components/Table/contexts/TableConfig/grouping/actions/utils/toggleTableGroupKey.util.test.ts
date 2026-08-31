@@ -48,9 +48,6 @@ describe('toggleTableGroupKey', () => {
   });
 
   it('does not cap the depth — that refusal lives in one place', () => {
-    // Deliberate: `resolveTableGroupingUpdate` owns the cap, so this returns
-    // the over-long list and the resolver refuses it. Two enforcers could
-    // disagree; one cannot.
     const grouping: TableGroupingState = {
       aggregates: [],
       keys: ['a', 'b', 'c', 'd', 'e', 'f'],

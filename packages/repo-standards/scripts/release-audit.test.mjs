@@ -16,10 +16,6 @@ import {
   tagsByVersion,
 } from './release-audit.mjs';
 
-/**
- * `@lcabrera/eslint-plugin@0.1.0` exactly as the registry serves it — the real
- * broken publish (#730), not an invented shape.
- */
 const BROKEN = {
   dependencies: { '@typescript-eslint/utils': 'catalog:lint' },
   devDependencies: { eslint: 'catalog:lint' },
@@ -28,7 +24,6 @@ const BROKEN = {
   version: '0.1.0',
 };
 
-/** The same package at `0.1.1`, published through the pnpm path. */
 const CORRECT = {
   dependencies: { '@typescript-eslint/utils': '^8.67.0' },
   exports: {
@@ -38,7 +33,6 @@ const CORRECT = {
   version: '0.1.1',
 };
 
-/** `@lcabrera/ui` — ships source deliberately, and is correct doing so. */
 const SOURCE_SHIPPING = {
   dependencies: { '@lcabrera/utils': '^0.1.1' },
   exports: { '.': './src/public-api.ts', './hooks/*': './src/hooks/*' },
@@ -131,8 +125,6 @@ describe('manifestProblems', () => {
   });
 
   it('allows src exports for a package that ships source', () => {
-    // The discriminating case: `@lcabrera/ui`'s src targets are the intended
-    // surface, so a blanket "no ./src/" rule would fail a correct artifact.
     expect(
       manifestProblems({ manifest: SOURCE_SHIPPING, shipsSource: true }),
     ).toEqual([]);
@@ -173,8 +165,6 @@ describe('classifyAuditedVersion', () => {
   });
 
   it('never discharges a version a dist-tag still points at', () => {
-    // Deprecation warns but does not unpublish: `npm install <name>` still
-    // resolves to `latest`, so the consumer gets the broken artifact anyway.
     expect(
       classifyAuditedVersion({
         deprecated: true,
@@ -274,20 +264,14 @@ describe('resolvedNothing', () => {
   const missing = { name: '@lcabrera/new', published: false, versions: [] };
 
   it('fires when every package the run asked about was a 404', () => {
-    // A registry answering 404 to everything — a proxy, a wrong
-    // `npm_config_registry`, an auth failure serving 404 instead of 401 —
-    // otherwise reports "audited every package, all clean" having read nothing.
     expect(resolvedNothing([missing, missing, missing])).toBe(true);
   });
 
   it('tolerates one package awaiting its first publish', () => {
-    // The state this must NOT fail: a 404 is an answer for a package that has
-    // simply not shipped yet, which is why the sweep survives one.
     expect(resolvedNothing([resolved, missing])).toBe(false);
   });
 
   it('does not fire on a run that asked about nothing', () => {
-    // No targets is not blindness — there was no question to answer.
     expect(resolvedNothing([])).toBe(false);
   });
 
@@ -300,9 +284,6 @@ describe('readNothing', () => {
   const registry = 'https://registry.npmjs.org';
 
   it('blames a wrong name when the run was handed one', () => {
-    // The cause this message used to omit. A reader who named a package that
-    // does not exist was sent to check their proxy and their
-    // `npm_config_registry`, both of which were fine.
     const message = readNothing({ named: true, registry });
 
     expect(message).toContain('a name asked for is not on this registry');
@@ -310,8 +291,6 @@ describe('readNothing', () => {
   });
 
   it('blames an empty repository when the run asked for the roster', () => {
-    // A sweep cannot have been given a wrong name, so offering that cause here
-    // would point every reader at the one thing that cannot be true.
     const message = readNothing({ named: false, registry });
 
     expect(message).toContain('nothing here has been published yet');

@@ -28,7 +28,6 @@ import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 
 import { createRule } from './create-rule.ts';
 
-/** The object literals a props type declares itself, unwrapping intersections. */
 const ownTypeLiterals = (
   node: TSESTree.TypeNode,
 ): readonly TSESTree.TSTypeLiteral[] => {
@@ -41,11 +40,6 @@ const ownTypeLiterals = (
   return [];
 };
 
-/**
- * The declared members still missing `readonly`. Method signatures cannot carry
- * the modifier and an index signature's `readonly` sits in a different
- * position, so both are skipped.
- */
 const mutableMembers = (node: TSESTree.TypeNode) =>
   ownTypeLiterals(node).flatMap((literal) =>
     literal.members.filter(

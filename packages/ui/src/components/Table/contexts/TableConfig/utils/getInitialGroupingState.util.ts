@@ -28,11 +28,6 @@ const NO_GROUPING: TableGroupingState = {
   shares: [],
 };
 
-/**
- * Refuse the whole seed, never truncate or de-dupe — a published package, so a
- * consumer's own loader can reach here without `sanitizeGroupingByColumns`. An
- * illegal seed answers no grouping (there is no prior state to leave alone).
- */
 export const getInitialGroupingState = ({
   groupingAggregates = [],
   groupingKeys = [],
@@ -52,16 +47,10 @@ export const getInitialGroupingState = ({
     aggregates: [...groupingAggregates],
     keys: [...groupingKeys],
     mode: groupingMode,
-    // Pruned to the keys that survived, so a granularity for a key the loader
-    // did not apply cannot reach the server, which refuses one (#786).
     periods: pruneGroupPeriods({
       keys: groupingKeys,
       periods: groupingPeriods,
     }),
-    // Pruned to the aggregates the loader actually applied, and only the
-    // shareable ones: a share is a ratio over a measure, so one naming a
-    // measure that is not there divides nothing (#648, per aggregate since
-    // #831).
     shares: pruneGroupShares({
       aggregates: groupingAggregates,
       shares: groupingShares,

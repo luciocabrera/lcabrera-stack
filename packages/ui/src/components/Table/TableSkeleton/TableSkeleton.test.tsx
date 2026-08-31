@@ -64,9 +64,6 @@ describe('TableSkeleton', () => {
   });
 
   it('reserves exactly placeholderRowCount rows', () => {
-    // TableBody sizes <tbody> as these rows × rowHeight, so the count the
-    // skeleton reserves is the height the real response has to match. Any
-    // other source of rows here reserves a height the loader cannot honour.
     useGetTablePlaceholderRowCountMock.mockReturnValue(7);
 
     render(<TableSkeleton />);

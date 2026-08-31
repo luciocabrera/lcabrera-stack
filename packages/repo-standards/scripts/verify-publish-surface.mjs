@@ -61,14 +61,6 @@ import { releasePackerProblems } from './release-packer.mjs';
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
-/**
- * Reads every workspace manifest under the configured packages directory.
- *
- * The config is read here rather than in the module body, so that a malformed
- * `devkit.config.json` is reported by the handler at the foot of this file. A
- * read at import runs before that `try`, and a misconfigured host would get a
- * stack trace where every other failure of this gate prints one formatted line.
- */
 const readPackageManifests = () => {
   const { packagesDir } = readPublishing(REPO_ROOT);
 
@@ -126,7 +118,6 @@ const checkFiles = ({ directory, manifest }, problems) => {
   }
 };
 
-/** Packing an unbuilt package reports dozens of missing targets; say it once. */
 const unbuiltProblems = (packages) =>
   packages
     .filter(({ directory }) => !existsSync(join(REPO_ROOT, directory, 'dist')))
@@ -135,7 +126,6 @@ const unbuiltProblems = (packages) =>
         `${directory}: no dist/, so there is no publishable tarball to check — build the packages first.`,
     );
 
-/** Packs every package, checks each tarball, then imports them as a consumer. */
 const checkArtifacts = (packages, problems) => {
   const workDirectory = mkdtempSync(join(tmpdir(), 'publish-verify-'));
   try {

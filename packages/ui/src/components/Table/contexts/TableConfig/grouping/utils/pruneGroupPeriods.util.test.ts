@@ -4,9 +4,6 @@ import { pruneGroupPeriods } from './pruneGroupPeriods.util';
 
 describe('pruneGroupPeriods', () => {
   it('drops a granularity whose key is gone', () => {
-    // Not inert: the server refuses a granularity map naming a column that is
-    // not a group key, so carrying it across would take the whole grouped read
-    // down rather than being quietly ignored.
     expect(
       pruneGroupPeriods({
         keys: ['status'],

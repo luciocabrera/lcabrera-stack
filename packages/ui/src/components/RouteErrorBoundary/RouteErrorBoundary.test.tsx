@@ -87,7 +87,6 @@ describe('RouteErrorBoundary', () => {
       />,
     );
 
-    // In vitest (dev mode), import.meta.env.DEV is true so the error.message is shown
     expect(screen.getByText('Specific error message')).not.toBeNull();
   });
 

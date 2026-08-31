@@ -18,8 +18,6 @@ export const TableEmptyStateMessage = () => {
   );
 
   const { message, title } = toTableEmptyStateNotice({
-    // The header label is what the user picked the column by; the raw key is
-    // the fallback for a refusal naming a column this table does not render.
     columnName: refusedColumn?.label ?? refusedColumnKey,
     error,
     titleSingular,

@@ -6,7 +6,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { documentedFiles, isIgnoredDoc } from './markdown-corpus.mjs';
 
-/** A throwaway tree, since the walk is the half a pure test cannot reach. */
 const treeWith = (files) => {
   const root = mkdtempSync(join(tmpdir(), 'corpus-'));
   for (const [path, contents] of Object.entries(files)) {
@@ -44,13 +43,6 @@ describe('isIgnoredDoc', () => {
   });
 
   it('treats a trailing slash as meaning the directory, not the word', () => {
-    // The bug this guards. These fragments are substrings, so `reports/`
-    // excludes a directory while `reports` excludes every document whose NAME
-    // contains the word — which silently dropped
-    // `ADR-049-findings-reports-are-produced-on-demand.md` out of the corpus.
-    // A doc gate reading fewer files reports exactly the same clean pass as a
-    // corpus with nothing wrong in it, so the slash is load-bearing and must
-    // survive config parsing rather than being canonicalised away.
     const docPath = 'docs/decisions/ADR-049-findings-reports-are-produced.md';
 
     expect(isIgnoredDoc({ docPath, ignoredDocs: ['reports/'] })).toBe(false);
@@ -58,10 +50,6 @@ describe('isIgnoredDoc', () => {
   });
 
   it('does not exempt dated records wholesale', () => {
-    // Exempting `/decisions/` as a document hid every dead link in every ADR.
-    // They are filtered per token by `enforcedTokens` instead: the paths an ADR
-    // NAMES stay exempt as historical record, the links it asks you to FOLLOW
-    // do not.
     expect(
       isIgnoredDoc({
         docPath: 'docs/decisions/ADR-044-x.md',
@@ -98,11 +86,6 @@ describe('documentedFiles', () => {
   });
 
   it('does not descend into a separate checkout', () => {
-    // A linked worktree beside the repository is a second full copy. Walking
-    // into it scans every document twice and resolves its relative references
-    // against THIS root, so a doc that is correct in its own tree is reported
-    // broken here — and because that path is gitignored, the gate failed only
-    // on the machine that ran the recommended claim command and nowhere else.
     const root = treeWith({
       'KEEP.md': '# keep',
       'sibling-checkout/.git': 'gitdir: /elsewhere',

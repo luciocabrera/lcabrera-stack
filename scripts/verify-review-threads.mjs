@@ -46,7 +46,6 @@ const USAGE =
   'usage: node scripts/verify-review-threads.mjs --pr <number> ' +
   '[--repo <owner/name>] [--dry-run] [--if-changed]';
 
-/** What was read, so the verdict is diagnosable from the run log alone. */
 const describeThreads = (threads) =>
   `${threads.total} review thread(s), ${threads.unresolved.length} unresolved` +
   (threads.unresolved.length === 0

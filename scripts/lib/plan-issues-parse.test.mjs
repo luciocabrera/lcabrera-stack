@@ -7,12 +7,6 @@ import {
   splitIssueBlocks,
 } from './plan-issues-parse.mjs';
 
-// The planning document writes an issue three different ways, and each shape
-// has already cost something: a heading suffix silently dropped a whole issue,
-// and a multiline-anchored terminator truncated every section to its first
-// line. Both failures are invisible — the run just comes out short or thin —
-// so they are pinned here rather than left to review.
-
 const PLAN = `# Plan
 
 ## Epics
@@ -132,9 +126,6 @@ describe('parsePlan', () => {
 });
 
 describe('malformed input', () => {
-  // The bracket and fence readers were rewritten from regex to index
-  // arithmetic to kill quadratic backtracking; these pin the unterminated
-  // cases, which are exactly what the old patterns rescanned the input for.
   const parseOne = (block) =>
     parsePlan(`### P-99 — \`docs: x\`\n\n${block}\n`)[0];
 

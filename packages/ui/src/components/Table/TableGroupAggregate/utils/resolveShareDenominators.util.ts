@@ -12,10 +12,6 @@ type ResolveShareDenominatorsArgs = {
   readonly summaries: readonly TableGroupRowSummary[];
 };
 
-/**
- * The value the cell *displays* is still the string — this conversion never reaches it
- * (#648).
- */
 const toFiniteNumber = (value: TableGroupAggregateValue['value']) => {
   const parsed = typeof value === 'string' ? Number(value) : value;
 
@@ -37,11 +33,6 @@ const findAggregate = ({
     (entry) => entry.columnKey === columnKey && entry.fn === fn,
   );
 
-/**
- * The flat-mode denominator: every leaf's value added up.
- * `undefined` the moment any leaf is unreadable — whether its value cannot be read **or**
- * it carries no entry for this measure at all.
- */
 const sumLeafAggregates = ({
   columnKey,
   fn,
@@ -70,15 +61,6 @@ const sumLeafAggregates = ({
   return hasSeenLeaf ? total : undefined;
 };
 
-/**
- * The grand total a share divides by, per **measure** — keyed by the `(columnKey, fn)`
- * token, since a column may carry two shareable aggregates and each has its own total
- * (#831).
- * **Two sources, and both are exact for the measures a share is offered on.** Under
- * `rollup` the read already emitted the grand total as a row — keyed by nothing,
- * `isSubtotal` and an empty `path` — and that row is preferred because Postgres computed
- * it over the whole set.
- */
 export const resolveShareDenominators = ({
   shares,
   summaries,

@@ -144,8 +144,6 @@ describe('useBatchSetTableDrawerSettings', () => {
       result.current();
     });
 
-    // Exactly once, with both drafts: two commit calls would each submit on
-    // the shared persist fetcher key, and the second would abort the first.
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
       grouping: {
         aggregates: [{ columnKey: 'total', fn: 'sum' }],

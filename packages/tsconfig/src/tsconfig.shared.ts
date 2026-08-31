@@ -1,25 +1,19 @@
 export type CreateAppTsConfigArgs = {
-  /** The ambient type roots `types` is appended to — defaults to `['vite/client']`. Pass `[]` (or your own bundler's client types) outside a Vite project: `vite/client` does not resolve there, and a default a consumer cannot drop is this toolchain leaking out of the factory. */
   readonly baseTypes?: readonly string[];
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
-  /** Extra path aliases merged on top of the default `@/*` → `./src/*` mapping — for a package's own self-referencing alias (e.g. `@lcabrera/ui/*`) or a cross-package one. */
   readonly paths?: Record<string, readonly string[]>;
   readonly rootDirs?: readonly string[];
-  /** Set `false` to omit the default `@/*` → `./src/*` alias. Publishable packages pass this: `@/` resolves only through a tsconfig, so an `@/` import cannot survive publication, and dropping the alias makes tsc reject one instead of a reviewer having to spot it. */
   readonly srcAlias?: boolean;
   readonly tsBuildInfoFile: string;
-  /** Extra ambient type roots appended to `baseTypes` — e.g. `'node'` for a package whose src/ mixes browser-context and Node-context (SSR entry) files. */
   readonly types?: readonly string[];
 };
 
 export type CreateNodeTsConfigArgs = {
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
-  /** Path aliases for this config — node configs have none by default. */
   readonly paths?: Record<string, readonly string[]>;
   readonly tsBuildInfoFile: string;
-  /** Ambient type roots — defaults to `['node']`. Pass `[]` for a package contractually barred from Node globals (e.g. `@lcabrera/utils`, which is pure and side-effect free), so the config cannot hand it the APIs it must not reach for. */
   readonly types?: readonly string[];
 };
 
@@ -68,11 +62,6 @@ const createAppCompilerOptions = ({
   noUncheckedSideEffectImports: true,
   noUnusedLocals: true,
   noUnusedParameters: true,
-  // Omitted entirely when it would be empty. `packages/ui` is that case: it has
-  // no `@/*` alias and no self-alias, because resolving its own subpaths
-  // through an alias is what let a broken `exports` map go unnoticed
-  // (ADR-060). An empty `paths` reads like an oversight; absent says there is
-  // nothing to alias.
   ...((srcAlias || Object.keys(paths ?? {}).length > 0) && {
     paths: {
       ...(srcAlias && { '@/*': ['./src/*'] }),
@@ -104,9 +93,6 @@ const createNodeCompilerOptions = ({
   moduleResolution: 'bundler',
   noEmit: true,
   noFallthroughCasesInSwitch: true,
-  // Kept in lockstep with createAppCompilerOptions: without it the Node-context
-  // packages were type-checked strictly less than the browser ones, so an
-  // unchecked arr[0] passed here and failed there for no principled reason.
   noUncheckedIndexedAccess: true,
   noUncheckedSideEffectImports: true,
   noUnusedLocals: true,

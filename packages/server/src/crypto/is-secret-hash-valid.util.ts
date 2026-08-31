@@ -10,12 +10,6 @@ type IsSecretHashValidArgs = {
   readonly secretHash: string;
 };
 
-/**
- * Counterpart of `hashSecret`: verifies a candidate secret against a stored
- * `<saltHex>:<hashHex>` hash with `timingSafeEqual`, so a partial match leaks no timing
- * signal. Returns false — never throws — for anything that isn't that shape, so a
- * non-verifiable sentinel in the hash column simply fails rather than erroring.
- */
 export const isSecretHashValid = ({
   secret,
   secretHash,

@@ -12,13 +12,6 @@ const isVocabularyEntry = (
   entry: [string, unknown],
 ): entry is [string, 'off' | 'on'] => entry[1] === 'on' || entry[1] === 'off';
 
-/**
- * A narrowing in the shape every migrated codec uses: it answers `undefined`
- * the moment it meets a token it does not know, and rebuilds the state with
- * `Object.fromEntries` rather than by assigning into `{}` — assignment would
- * route a `__proto__` key to the prototype setter and drop it. This example is
- * copied, so it follows the rule the codec documents.
- */
 const narrowVocabulary = (parsed: unknown) => {
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
     return;
@@ -49,7 +42,6 @@ describe('createUrlStateCodec', () => {
   });
 
   it('drops the whole state when the narrowing refuses one token', () => {
-    // `a` is a perfectly good token; the contract is that it goes anyway.
     expect(codec.deserialize('{"a":"on","b":"sideways"}')).toStrictEqual({});
   });
 
@@ -122,9 +114,6 @@ describe('createUrlStateCodec', () => {
   });
 
   it('logs the failure kind without echoing the param', () => {
-    // V8 puts the input in a JSON.parse SyntaxError message, so logging the
-    // error object would leak the param's leading characters. `filters` carries
-    // user-entered text, so the log gets a discriminator and nothing else.
     debugSpy.mockClear();
     codec.deserialize('SESSIONTOKEN_abc123XYZ');
 

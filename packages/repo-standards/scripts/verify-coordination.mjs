@@ -139,7 +139,6 @@ const checkBranchSchema = (branches, problems) => {
   }
 };
 
-/** Live tasks grouped by real (non-placeholder) branch → the task ids on it. */
 const liveByBranch = (tasks) => {
   const byBranch = new Map();
   for (const { data } of tasks.filter(isLive)) {
@@ -205,12 +204,6 @@ const checkStale = (tasks, warnings) => {
   }
 };
 
-/**
- * A live task recording neither a real branch nor a PR is a "ghost" — nobody can
- * see the work in flight, and if it already merged nothing else flags it (this is
- * how a completed task sat `active` for days). Warns after a short grace period so
- * a freshly-filed claim isn't nagged before its first branch/PR.
- */
 const checkGhostTasks = (tasks, warnings) => {
   const today = new Date();
   for (const { name, data } of tasks) {
@@ -242,7 +235,6 @@ const REF_PATHS = (branch) => [
   join('refs', 'remotes', 'origin', branch),
 ];
 
-/** Is `branch` in `.git/packed-refs`? Each line is `<sha> refs/heads/<name>`. */
 const packedRefHas = (gitDir, branch) => {
   const packed = join(gitDir, 'packed-refs');
   if (!existsSync(packed)) {
@@ -254,11 +246,6 @@ const packedRefHas = (gitDir, branch) => {
     .some((line) => wanted.has(line.slice(line.indexOf(' ') + 1)));
 };
 
-/**
- * Best-effort ref check via the filesystem — no `git` subprocess, so nothing is
- * resolved through PATH. Lenient: if there's no plain `.git` directory (e.g. a
- * worktree, where it's a file), we can't tell, so we don't warn.
- */
 const gitRefExists = (branch) => {
   const gitDir = join(REPO_ROOT, '.git');
   if (!existsSync(gitDir) || !statSync(gitDir).isDirectory()) {
@@ -282,13 +269,6 @@ const checkTaskBranches = (tasks, warnings) => {
   }
 };
 
-/**
- * Claims living on other branches, plus a line saying what was actually read.
- *
- * The line is not decoration. Overlap detection used to be silently local-only
- * (#233), so "0 warnings" and "I could not look" printed identically. Anything
- * this could not read becomes a warning rather than an omission.
- */
 const gatherRemoteClaims = (tasks, warnings) => {
   if (process.argv.includes('--no-remote')) {
     return {
@@ -323,7 +303,6 @@ const gatherRemoteClaims = (tasks, warnings) => {
   return {
     claims: withoutLocalDuplicates({ localTasks: tasks, remoteClaims: claims }),
     coverage: `remote branches: ${readBranches.length} read, ${unreadBranches.length} unread`,
-    // Every live origin branch (read + unread), for the merged-task reconciliation.
     liveBranches: [...readBranches, ...unreadBranches],
   };
 };
@@ -353,9 +332,6 @@ const main = () => {
 
   const problems = [];
   const warnings = [];
-  // Remote claims feed overlap detection ONLY. Schema and unique-id stay local:
-  // another branch's malformed task is their problem to fix, and must not fail
-  // an unrelated PR.
   const remote = gatherRemoteClaims(tasks, warnings);
   checkTaskSchema(tasks, problems);
   checkBranchSchema(branches, problems);
@@ -364,8 +340,6 @@ const main = () => {
   checkStale(tasks, warnings);
   checkTaskBranches(tasks, warnings);
   checkGhostTasks(tasks, warnings);
-  // The trunk is the consumer's to name, and read here rather than at module
-  // scope so importing this file still touches nothing (#807).
   const isolation = checkoutIsolationFinding({
     ...readCheckoutFacts(REPO_ROOT),
     defaultBranch: readConventions(REPO_ROOT).defaultBranch,

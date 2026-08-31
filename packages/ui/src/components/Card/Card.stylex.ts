@@ -24,7 +24,6 @@ const baseStyles = stylex.create({
   },
 });
 
-// Elevation variants
 const elevationVariants = stylex.create({
   flat: {
     boxShadow: shadows.none,
@@ -43,7 +42,6 @@ const elevationVariants = stylex.create({
   },
 });
 
-// Padding variants
 const paddingVariants = stylex.create({
   lg: {
     padding: spacing.lg,
@@ -62,7 +60,6 @@ const paddingVariants = stylex.create({
   },
 });
 
-// Interactive variants
 const interactiveVariants = stylex.create({
   clickable: {
     backgroundPosition: 'center',
@@ -83,7 +80,6 @@ const interactiveVariants = stylex.create({
   static: {},
 });
 
-// Color variants
 const colorVariants = stylex.create({
   default: {
     borderColor: colors.borderPrimary,

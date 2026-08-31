@@ -7,10 +7,6 @@ type ToDeclaredColumnKeyArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];
 };
 
-/**
- * Guard on the result, never the argument: permissions are keyed by declared column and a
- * pre-map check tests a key no lock contains.
- */
 export const toDeclaredColumnKey = <TData>({
   columnKey,
   columns,

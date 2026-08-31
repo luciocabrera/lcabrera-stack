@@ -36,14 +36,11 @@ const BREAKING_LABEL = {
 const APP_COLOR = '1d76db';
 const PKG_COLOR = '5319e7';
 
-/** commit type → its label name (undefined for an unknown type). */
 export const typeLabelName = (type) =>
   TYPE_LABELS.find(([commitType]) => commitType === type)?.[1];
 
-/** workspace `{ name, kind }` → its scope label name. */
 export const workspaceLabelName = ({ name, kind }) => `${kind}: ${name}`;
 
-/** The full canonical label set given the derived workspaces. */
 export const buildLabelDefinitions = (workspaces) => [
   ...TYPE_LABELS.map(([, name, color, description]) => ({
     name,

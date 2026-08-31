@@ -54,7 +54,6 @@ import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 
 import { createRule } from './create-rule.ts';
 
-/** Functions that can carry a body, and so an inferrable return type. */
 type FunctionNode =
   | TSESTree.ArrowFunctionExpression
   | TSESTree.FunctionDeclaration
@@ -62,7 +61,6 @@ type FunctionNode =
 
 type MessageIds = 'redundant';
 
-/** `Promise<void>` is spelled as a reference with one argument. */
 const isPromiseOfVoid = (node: TSESTree.TypeNode) =>
   node.type === AST_NODE_TYPES.TSTypeReference &&
   node.typeName.type === AST_NODE_TYPES.Identifier &&
@@ -70,11 +68,6 @@ const isPromiseOfVoid = (node: TSESTree.TypeNode) =>
   node.typeArguments?.params.length === 1 &&
   node.typeArguments.params[0]?.type === AST_NODE_TYPES.TSVoidKeyword;
 
-/**
- * `JSX.Element` and `React.JSX.Element` only — never `ReactNode` or a bare
- * `ReactElement`, both of which are wider than what a JSX body infers and so are
- * doing the job this rule must not report.
- */
 const isJsxElement = (node: TSESTree.TypeNode) => {
   if (node.type !== AST_NODE_TYPES.TSTypeReference) return false;
   const { typeName } = node;
@@ -88,16 +81,6 @@ const isJsxElement = (node: TSESTree.TypeNode) => {
   );
 };
 
-/**
- * Visits every node beneath `root`, skipping `parent` links.
- *
- * `parent` is walked into by any naive `Object.values` traversal and closes a
- * cycle immediately — the first attempt here used `JSON.stringify` and threw
- * "Converting circular structure to JSON" on the simplest recursive case.
- *
- * `shouldDescend` both observes the node and decides whether its children are
- * worth walking; returning `false` prunes that subtree.
- */
 type WalkNodesArgs = {
   readonly root: TSESTree.Node;
   readonly shouldDescend: (node: TSESTree.Node) => boolean;
@@ -116,12 +99,6 @@ const walkNodes = ({ root, shouldDescend }: WalkNodesArgs) => {
   }
 };
 
-/**
- * Whether any node beneath `root` matches, pruning subtrees `skip` claims.
- *
- * `root` itself is never skipped, so a caller can hand in the very construct
- * whose nested twins it wants pruned — a loop looking for its own `break`.
- */
 type ContainsArgs = {
   readonly matches: (node: TSESTree.Node) => boolean;
   readonly root: TSESTree.Node;
@@ -153,13 +130,6 @@ const FUNCTION_NODE_TYPES = new Set<string>([
   AST_NODE_TYPES.FunctionExpression,
 ]);
 
-/**
- * Every `return` reachable in this function, skipping nested ones.
- *
- * The statements rather than their arguments, because `return;` and `return x`
- * answer different questions here: the first says the function returns `void` on
- * that path, the second says what it returns.
- */
 const returnStatements = (body: TSESTree.Node) => {
   const found: TSESTree.ReturnStatement[] = [];
 
@@ -191,7 +161,6 @@ const BOOLEAN_OPERATORS = new Set([
   'instanceof',
 ]);
 
-/** An expression TypeScript infers as exactly `boolean`, never a literal type. */
 const isBooleanExpression = (node: TSESTree.Expression) =>
   (node.type === AST_NODE_TYPES.Literal && typeof node.value === 'boolean') ||
   (node.type === AST_NODE_TYPES.UnaryExpression && node.operator === '!') ||
@@ -202,18 +171,10 @@ const isJsxExpression = (node: TSESTree.Expression) =>
   node.type === AST_NODE_TYPES.JSXElement ||
   node.type === AST_NODE_TYPES.JSXFragment;
 
-/**
- * TypeScript's own test for a loop that never ends, which is syntactic: the test
- * expression is absent, or it is the `true` keyword. It is not "can this loop be
- * shown to run forever" — `while (x)` with `x` a `true` constant is still a
- * loop the compiler treats as terminating. Mirrored rather than approximated so
- * that all four spellings agree with what inference actually does.
- */
 const isAlwaysTrue = (test: null | TSESTree.Expression) =>
   test === null ||
   (test.type === AST_NODE_TYPES.Literal && test.value === true);
 
-/** Statements that own an unlabelled `break`, so a nested one is not ours. */
 const BREAK_SCOPE_TYPES = new Set<string>([
   AST_NODE_TYPES.DoWhileStatement,
   AST_NODE_TYPES.ForInStatement,
@@ -223,14 +184,6 @@ const BREAK_SCOPE_TYPES = new Set<string>([
   AST_NODE_TYPES.WhileStatement,
 ]);
 
-/**
- * Whether an unlabelled `break` inside this loop or switch belongs to it.
- *
- * Nested loops and switches are pruned, because their `break` is theirs. A
- * labelled `break` is not counted at all: it can leave through an enclosing
- * label, and counting one would say a loop finishes when it may not — the
- * direction that ends in a wrong report, which this rule cannot afford.
- */
 const hasOwnBreak = (root: TSESTree.Node) =>
   contains({
     matches: (node) =>
@@ -240,54 +193,22 @@ const hasOwnBreak = (root: TSESTree.Node) =>
       BREAK_SCOPE_TYPES.has(node.type) || FUNCTION_NODE_TYPES.has(node.type),
   });
 
-/**
- * Whether control can fall out of the bottom of a statement.
- *
- * This is the question TypeScript asks to decide between `void` and `never`: a
- * function with no returned value infers `void` if its bottom is reachable and
- * `never` if it is not. Getting it approximately right is not good enough in
- * either direction — saying "unreachable" too often silences the rule (the
- * first version disqualified any body containing a `throw`, which is most guard
- * clauses and cost almost all of its reach), and saying "reachable" too often
- * removes an annotation that was widening `never` to `void`.
- *
- * So the shapes are enumerated rather than approximated, and where a shape is
- * genuinely ambiguous the answer is `false`, which only ever costs silence.
- *
- * ONE CASE IS OUT OF REACH AND STAYS WRONG: a call to a function declared to
- * return `never` also makes the bottom unreachable, and `process.exit(1)` is the
- * everyday example. Deciding it means resolving the callee's signature, and an
- * ESLint rule in this plugin has the AST and `context.filename` — no type
- * checker. `(): void => { process.exit(1); }` is therefore reported and fixed to
- * `never`. It is written down here, in the README and in the changeset because
- * it cannot be fixed lexically; closing it needs a type-aware rule.
- */
 const canCompleteNormally = (node: TSESTree.Statement): boolean => {
   switch (node.type) {
     case AST_NODE_TYPES.BlockStatement: {
       return node.body.every((statement) => canCompleteNormally(statement));
     }
-    // `break` and `continue` leave through an enclosing statement, which that
-    // statement's own case accounts for; neither reaches the next line here.
     case AST_NODE_TYPES.BreakStatement:
     case AST_NODE_TYPES.ContinueStatement:
     case AST_NODE_TYPES.ReturnStatement:
     case AST_NODE_TYPES.ThrowStatement: {
       return false;
     }
-    // A loop the compiler treats as endless finishes only through a `break`.
     case AST_NODE_TYPES.DoWhileStatement:
     case AST_NODE_TYPES.ForStatement:
     case AST_NODE_TYPES.WhileStatement: {
-      // The loop itself, not its body. `contains` exempts `root` from `skip` so
-      // that a caller can hand in the construct whose nested twins it wants
-      // pruned — hand it the body and that exemption lands on the wrong
-      // statement whenever the body IS a break scope, which an unbraced
-      // `while (true) while (x) break;` makes it. The inner `break` would then
-      // count as this loop's.
       return !isAlwaysTrue(node.test) || hasOwnBreak(node);
     }
-    // No `else` means the skip path reaches the bottom whatever the body does.
     case AST_NODE_TYPES.IfStatement: {
       return (
         node.alternate === null ||
@@ -295,12 +216,9 @@ const canCompleteNormally = (node: TSESTree.Statement): boolean => {
         canCompleteNormally(node.alternate)
       );
     }
-    // A `break` to this label would finish it; not counted, per `hasOwnBreak`.
     case AST_NODE_TYPES.LabeledStatement: {
       return canCompleteNormally(node.body);
     }
-    // Without a `default` every case can be skipped, so the bottom is reached.
-    // With one, it takes a `break` or a last clause that falls off the end.
     case AST_NODE_TYPES.SwitchStatement: {
       return (
         node.cases.every((each) => each.test !== null) ||
@@ -310,8 +228,6 @@ const canCompleteNormally = (node: TSESTree.Statement): boolean => {
         )
       );
     }
-    // A `finally` that cannot finish decides the whole statement; otherwise
-    // either the body or the handler reaching the bottom is enough.
     case AST_NODE_TYPES.TryStatement: {
       return (
         (node.finalizer === null || canCompleteNormally(node.finalizer)) &&
@@ -325,22 +241,12 @@ const canCompleteNormally = (node: TSESTree.Statement): boolean => {
   }
 };
 
-/**
- * Whether the annotation is one inference is guaranteed to reproduce.
- *
- * Each arm pairs a type with the body shape that pins it. The pairing is what
- * makes the rule safe: `: void` alone says nothing, `: void` on a block body
- * that returns no value cannot be hiding a wider contract.
- */
 type IsRedundantArgs = {
   readonly annotation: TSESTree.TypeNode;
   readonly node: FunctionNode;
 };
 
-/** No returned value, and the function can still return — so `void`, not `never`. */
 const canReturnVoid = (node: FunctionNode) => {
-  // Narrowed inline rather than through an `isBlock` boolean, which does not
-  // carry the narrowing to `canCompleteNormally`.
   const { body } = node;
   if (body.type !== AST_NODE_TYPES.BlockStatement) return false;
 
@@ -357,21 +263,6 @@ type HasOnlyReturnsMatchingArgs = {
   readonly predicate: (expression: TSESTree.Expression) => boolean;
 };
 
-/**
- * Every path out of the function returns a value the predicate claims.
- *
- * Matching returns is not enough on its own — the bottom has to be unreachable
- * too. A block that can fall off its end returns `undefined` on that path, so
- * inference gives `T | undefined` and removing the annotation widens the
- * contract. That the annotated form is a `TS2366` under `strictNullChecks` is no
- * protection: lint runs on red trees constantly and `vp run lint` chains
- * `eslint --fix`, so the autofix would clear the type error by widening the
- * return type instead of by adding the missing return.
- *
- * A bare `return;` is the same hole with a statement in front of it, so every
- * return has to carry a value. A concise arrow body always returns its
- * expression, and neither question arises.
- */
 const hasOnlyReturnsMatching = ({
   node,
   predicate,
@@ -389,10 +280,6 @@ const hasOnlyReturnsMatching = ({
 };
 
 const isRedundant = ({ annotation, node }: IsRedundantArgs) => {
-  // The annotation is matched BEFORE anything walks the body. The common case
-  // here is `: SomeType`, which no arm claims, and computing the returns and the
-  // reachability first meant every one of those paid for two full subtree walks
-  // to learn that the annotation was never a candidate.
   if (annotation.type === AST_NODE_TYPES.TSVoidKeyword) {
     return canReturnVoid(node);
   }
@@ -414,13 +301,6 @@ const isRedundant = ({ annotation, node }: IsRedundantArgs) => {
   return false;
 };
 
-/**
- * A function that names itself in its own body. TypeScript can fail to infer a
- * recursive return type, so an annotation there may be load-bearing even when
- * the shape looks ordinary. Matched lexically, because that is all this rule
- * has, and erring towards silence is the whole design — a shadowing local of the
- * same name makes this over-cautious, never wrong.
- */
 type IsSelfReferentialArgs = {
   readonly name: string | undefined;
   readonly node: FunctionNode;
@@ -435,7 +315,6 @@ const isSelfReferential = ({ name, node }: IsSelfReferentialArgs) =>
     skip: () => false,
   });
 
-/** The name a function is known by, for the recursion check. */
 const functionName = (node: FunctionNode) => {
   if (node.type === AST_NODE_TYPES.FunctionDeclaration) {
     return node.id?.name;
@@ -452,8 +331,6 @@ export default createRule<[], MessageIds>({
     const check = (node: FunctionNode) => {
       const annotation = node.returnType?.typeAnnotation;
       if (annotation === undefined) return;
-      // `isRedundant` first: it is cheap and rejects nearly everything, so the
-      // whole-body walk `isSelfReferential` does runs only for a candidate.
       if (!isRedundant({ annotation, node })) return;
       if (isSelfReferential({ name: functionName(node), node })) return;
 

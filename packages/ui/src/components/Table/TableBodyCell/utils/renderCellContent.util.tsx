@@ -28,7 +28,6 @@ const parseNumberValue = (value: unknown) => {
 
   const trimmed = value.trim();
 
-  // `Number('')` and `Number(' ')` are 0, not NaN — a blank cell is absent, not zero.
   if (trimmed === '') {
     return;
   }

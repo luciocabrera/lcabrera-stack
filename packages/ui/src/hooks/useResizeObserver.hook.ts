@@ -5,12 +5,6 @@ type UseResizeObserverArgs = {
   readonly onMeasure: (target: HTMLElement) => void;
 };
 
-/**
- * Owns the shared observer scaffold so consumers don't repeat it: - The initial
- * measurement is deferred to a microtask so the effect body never sets state synchronously
- * (react-x/set-state-in-effect); with a real ResizeObserver, `observe()` also delivers an
- * initial callback.
- */
 export const useResizeObserver = ({
   getTarget,
   onMeasure,

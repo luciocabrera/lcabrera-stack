@@ -48,7 +48,6 @@ const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const isDirectory = (path) =>
   statSync(path, { throwIfNoEntry: false })?.isDirectory() === true;
 
-/** The workspace directories themselves, as a shipped file would spell them. */
 const workspaceDirectories = () =>
   WORKSPACE_DIRS.filter((group) => isDirectory(join(REPO_ROOT, group))).flatMap(
     (group) =>
@@ -57,21 +56,6 @@ const workspaceDirectories = () =>
         .map((entry) => `${group}/${entry.name}`),
   );
 
-/**
- * Every workspace's package name, from the manifests rather than from a list.
- *
- * Read alongside `workspaceDirectories`, because the two do not imply each
- * other: `packages/ui` publishes as `@lcabrera/ui`, and neither string contains
- * the other, so a seed naming the directory matches no package name. Lifting
- * `rules/routes-data.md`'s exemption is what showed it — the gate reported that
- * file's three package-name lines and left its blueprint path alone (#860).
- *
- * A name here can be an ordinary English word — `showcase` is one — and matching
- * is `line.includes`, so a shipped file using it in prose fails with "names
- * `showcase`". That reads as a false positive and is not one: the word is a
- * workspace name, and a seed carrying it is carrying this repository's
- * vocabulary to a consumer that has no such workspace. Reword the seed.
- */
 const workspacePackageNames = () =>
   WORKSPACE_DIRS.filter((group) => isDirectory(join(REPO_ROOT, group))).flatMap(
     (group) =>
@@ -85,7 +69,6 @@ const workspacePackageNames = () =>
         .filter((name) => typeof name === 'string'),
   );
 
-/** The secrets this repository's own workflows read. */
 const configuredSecretNames = () =>
   filesUnder(WORKFLOWS_DIR)
     .flatMap((path) => [
@@ -95,12 +78,6 @@ const configuredSecretNames = () =>
 
 const toPosix = (path) => path.split(sep).join('/');
 
-/**
- * A linked worktree's git directory holds no `config` of its own — it points at
- * the shared one through `commondir`, and that is where the remote lives. Without
- * this the gate would lose the owner and slug in exactly the checkouts this
- * repository does its work in.
- */
 const gitConfigPath = () => {
   const gitDir = resolveGitDir(REPO_ROOT);
   if (gitDir === undefined) return undefined;
@@ -118,14 +95,6 @@ const gitConfigPath = () => {
   );
 };
 
-/**
- * Who this repository is, from its own git remote rather than from a name
- * written down here.
- *
- * Refused rather than defaulted when it cannot be read: a forbidden-word list
- * missing the owner and the slug reports a clean pass over the leak shape it
- * exists to catch, which is worse than not running at all.
- */
 const identity = () => {
   const path = gitConfigPath();
   const found =

@@ -7,13 +7,6 @@ import { isObject } from '@lcabrera/utils/guards/is-object.util';
 import { fakeDelay } from './fakeDelay.util';
 import { isExternalApiEnabled } from './isExternalApiEnabled.util';
 
-/**
- * It targets this app's own `/_api/car-sales/paginated` resource route by default, and the
- * external `car-sales-api` when `VITE_API_URL` is set — the one axis the two differ on is
- * the origin, which is exactly what `createPaginatedFetcher`'s `resolveBaseUrl` strategy
- * is for (ADR-056).
- */
-
 export type CarSale = {
   readonly buyer_address: string;
   readonly buyer_email: string;
@@ -73,7 +66,6 @@ const fetchExternalPage = createPaginatedFetcher({
   resolveBaseUrl: getApiBaseUrl,
 });
 
-/** This is deliberately the only reader of the car-sales table. */
 export const fetchCarSalesPage = async (args: PaginatedFetchArgs) => {
   await fakeDelay();
 

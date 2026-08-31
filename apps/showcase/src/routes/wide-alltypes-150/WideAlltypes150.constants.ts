@@ -10,7 +10,6 @@ export const TITLE = {
   singular: 'Row',
 };
 
-// fallow-ignore-next-line complexity -- temporary testing suppression
 const getColDataType = (index: number) => {
   const mod = index % 20;
   if (mod === 6) return 'boolean';
@@ -42,8 +41,6 @@ const PG_TYPE_LABELS: Readonly<Record<number, string>> = {
   19: 'Int[]',
 };
 
-// ─── Column definitions ───────────────────────────────────────────────────────
-
 const ID_COLUMN: TableColumn<WideAlltypes150> = {
   dataType: 'number',
   isPrimaryKey: true,
@@ -65,7 +62,7 @@ const buildGeneratedColumn = ({ index }: BuildGeneratedColumnArgs) => {
   return {
     dataType: getColDataType(index),
     isFilterable,
-    isSortable: mod !== 19, // integer[] columns are not meaningfully sortable
+    isSortable: mod !== 19,
     key,
     label: `${typeLabel} ${index}`,
     minWidth: 130,

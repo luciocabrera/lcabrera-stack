@@ -30,22 +30,12 @@ type RenderNumberFieldArgs = {
 
 type Values = { readonly amount: number; readonly quantity: number };
 
-/**
- * Reports the live store value and its runtime type, so the tests can assert
- * that `handleChange` stores a real `number` (not the input's raw string) and
- * a real `undefined` (not an empty string) — neither is observable from the
- * rendered input alone.
- */
 const ValueProbe = ({ accessor }: { readonly accessor: keyof Values }) => {
   const value = useGetFieldValue<Values>(accessor);
 
   return <output>{`${typeof value}:${String(value)}`}</output>;
 };
 
-/**
- * Reports live dirty state. Uses a `data-testid` rather than another `<output>`
- * so it does not collide with `ValueProbe`'s `status` role.
- */
 const DirtyProbe = () => {
   const isDirty = useGetIsFormDirty<Values>(['amount']);
 
@@ -288,9 +278,6 @@ describe('NumberField', () => {
     expect(hasFormInputStyles).toBe(true);
   });
 
-  // Regression: the field initialised to `''` but stored `undefined` on clear,
-  // so `'' !== undefined` left the form dirty forever — Save stayed enabled and
-  // Cancel raised a spurious "Discard changes?" on a visibly untouched field.
   it('leaves the form pristine when a number is typed and then cleared', () => {
     const field: NumberFieldDef<Values> = {
       accessor: 'amount',

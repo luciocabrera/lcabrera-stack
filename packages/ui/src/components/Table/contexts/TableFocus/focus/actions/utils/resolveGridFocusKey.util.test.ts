@@ -54,9 +54,6 @@ describe('resolveGridFocusKey', () => {
   });
 
   it('answers off the edge rather than clamping, leaving bounds to the caller', () => {
-    // The two halves are split on purpose: this one knows what a key means, the
-    // caller knows how big the grid is. Clamping here would make "the key did
-    // nothing" and "the key is not ours" the same answer.
     expect(at({ key: 'ArrowUp', rowIndex: 0 })).toEqual({
       columnIndex: 2,
       rowIndex: -1,

@@ -6,7 +6,6 @@ import { MAX_TABLE_COUNT_DISTINCT_AGGREGATES } from '../Table.constants';
 import { hasCountDistinctBudgetLeft } from './hasCountDistinctBudgetLeft.util';
 import { isWithinCountDistinctBudget } from './isWithinCountDistinctBudget.util';
 
-/** The budget spent exactly, derived from the constant for its twin's reason. */
 const atBudget: readonly TableColumnAggregate[] = Array.from(
   { length: MAX_TABLE_COUNT_DISTINCT_AGGREGATES },
   (_unused, index) => ({
@@ -27,9 +26,6 @@ describe('hasCountDistinctBudgetLeft', () => {
   });
 
   it('disagrees with the legality predicate on a list at the budget', () => {
-    // The pair that makes the two worth keeping apart: this list is legal *and*
-    // has no room for another. A surface reaching for the legality predicate
-    // would offer the entry that breaks it.
     expect(hasCountDistinctBudgetLeft(atBudget)).toBe(false);
     expect(isWithinCountDistinctBudget(atBudget)).toBe(true);
   });

@@ -41,17 +41,8 @@ import {
 
 const REPO_ROOT = process.cwd();
 
-/**
- * Absolute, so the command cannot be resolved through a writeable `PATH` entry
- * (Sonar S4036). The workspace-local binary is the same `vp` the gate runs under.
- */
 const VP = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 
-/**
- * Probes are linted from a directory inside the repo so they resolve the root
- * config, then removed. A path under `ignorePatterns` would be skipped, and one
- * outside the repo would not pick the config up at all.
- */
 const withProbeDir = (run) => {
   const dir = mkdtempSync(join(REPO_ROOT, '.oxlint-probe-'));
   try {
@@ -61,12 +52,6 @@ const withProbeDir = (run) => {
   }
 };
 
-/**
- * Every diagnostic code Oxlint reports for a directory.
- *
- * Oxlint exits non-zero precisely when it finds something, which here is the
- * success case — so the report is read off the thrown error's stdout.
- */
 const lintCodes = (dir) => {
   const options = {
     cwd: REPO_ROOT,
@@ -85,7 +70,6 @@ const lintCodes = (dir) => {
   return JSON.parse(raw.slice(start)).diagnostics.map(({ code }) => code);
 };
 
-/** Workspace directories under `apps/` and `packages/`. */
 const workspaceDirs = (group) => {
   try {
     return readdirSync(join(REPO_ROOT, group), { withFileTypes: true })
@@ -99,37 +83,19 @@ const workspaceDirs = (group) => {
   }
 };
 
-/**
- * The root Vite+ config — the source of truth both readers below use.
- *
- * `@lcabrera/vite-config` ships the `createLintConfig` factory; this repo owns
- * the roster it is called with, and the root config is where that data lives
- * (ADR-069, ADR-042). Reading the built object rather than the factory is what
- * keeps this gate honest about the config Oxlint actually loads.
- */
 const lintConfigModule = () => import(join(REPO_ROOT, 'vite.config.ts'));
 
-/** The classification the root Oxlint config declares, read from the config itself. */
 const runtimeLists = async () => (await lintConfigModule()).WORKSPACE_RUNTIMES;
 
-/** The same classification as Biome declares it. */
 const biomeRosters = () =>
   workspaceRosters(
     parseJsonc(readFileSync(join(REPO_ROOT, 'biome.jsonc'), 'utf8'))
       .overrides ?? [],
   );
 
-/** The plugin families the root config actually names. */
 const configuredPlugins = async () =>
   (await lintConfigModule()).lintConfig.plugins;
 
-/**
- * Every `vite.config.ts` in the repo, root included.
- *
- * Walked rather than asked of `git ls-files`: shelling out to a bare `git`
- * resolves it through `PATH` (Sonar S4036), and there is nothing here the
- * filesystem cannot answer.
- */
 const workspaceConfigs = () =>
   ['vite.config.ts', ...workspaceDirs('apps'), ...workspaceDirs('packages')]
     .map((entry) => (entry.endsWith('.ts') ? entry : `${entry}/vite.config.ts`))
@@ -139,7 +105,6 @@ const workspaceConfigs = () =>
       text: readFileSync(join(REPO_ROOT, path), 'utf8'),
     }));
 
-/** The two roster configs, each with the fix its own failure needs. */
 const rosterSources = async () => [
   {
     fix:
@@ -157,7 +122,6 @@ const rosterSources = async () => [
   },
 ];
 
-/** Every roster complaint, as ready-to-print lines. */
 const rosterFailures = ({ sources, workspaces }) =>
   sources.flatMap(({ fix, lists, name }) => [
     ...unclassifiedWorkspaces({ runtimes: lists, workspaces }).map(

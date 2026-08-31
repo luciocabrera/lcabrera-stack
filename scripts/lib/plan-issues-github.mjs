@@ -21,7 +21,6 @@ const assertIsData = (field, value) => {
   return value;
 };
 
-/** Titles of the milestones that already exist, so a re-run is idempotent. */
 export const existingMilestones = () =>
   JSON.parse(
     runGh([
@@ -33,7 +32,6 @@ export const existingMilestones = () =>
     ]),
   );
 
-/** Creates the milestones the scheme defines and GitHub does not have yet. */
 export const createMilestones = (wanted, { dryRun, log }) => {
   const present = dryRun ? [] : existingMilestones();
   const missing = wanted.filter((title) => !present.includes(title));
@@ -46,14 +44,8 @@ export const createMilestones = (wanted, { dryRun, log }) => {
   return { created: missing, skipped: wanted.length - missing.length };
 };
 
-/** `gh issue create` prints the new issue's URL; the number is its last segment. */
 const issueNumberFromUrl = (url) => Number(url.trim().split('/').at(-1));
 
-/**
- * Creates one issue and returns its number. Labels are passed individually
- * rather than comma-joined: a label name here can legitimately contain a comma,
- * and `--label a,b` would split it into two labels that do not exist.
- */
 export const createIssue = (issue, bodyPath, { dryRun, log }) => {
   const args = [
     'issue',
@@ -80,15 +72,9 @@ export const createIssue = (issue, bodyPath, { dryRun, log }) => {
   return issueNumberFromUrl(runGh(args));
 };
 
-/** The REST database id for an issue number — what the sub-issue API wants. */
 const issueDatabaseId = (number) =>
   Number(runGh(['api', `repos/:owner/:repo/issues/${number}`, '--jq', '.id']));
 
-/**
- * Attaches `childNumber` under `parentNumber` as a real sub-issue. Already-
- * attached children make the API 422; that is a re-run, not a failure, so it is
- * reported and skipped rather than aborting the remaining links.
- */
 export const linkSubIssue = (
   { parentId, childId, parentNumber, childNumber },
   { dryRun, log },
@@ -114,11 +100,6 @@ export const linkSubIssue = (
   }
 };
 
-/**
- * Wires every parent/child pair the plan declares. `numbers` maps a planning id
- * (`P-01`) to the real issue number; a pair naming an id that was not created
- * in this run is skipped, so a partial run still links what it can.
- */
 export const linkPlannedChildren = (issues, numbers, options) => {
   const pairs = issues.flatMap((issue) =>
     issue.children

@@ -11,10 +11,6 @@ type SetFilterSliceArgs<TData> = {
   readonly filtersDataStore: TStore<FiltersDataState<TData>>;
 };
 
-/**
- * `store.set` cannot type computed-key partial updates, so the one required assertion is
- * contained here — call sites must stay cast-free.
- */
 export const setFilterSlice = <TData>({
   columnKey,
   filter,

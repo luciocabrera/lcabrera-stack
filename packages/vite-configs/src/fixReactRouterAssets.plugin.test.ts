@@ -6,12 +6,6 @@ import type { ReactRouterAssetsFileSystem } from './fixReactRouterAssets.plugin.
 
 import { fixReactRouterAssets } from './fixReactRouterAssets.plugin.ts';
 
-// The regression this plugin exists for (#329-era SSR builds: react-router
-// renames a CSS asset Rolldown never emitted, and the build dies with ENOENT)
-// only shows up as a file appearing on disk, so asserting on the plugin object
-// would prove nothing. These cases run the real writeBundle hook against an
-// in-memory filesystem and read back what it wrote.
-
 const CWD = '/build-root';
 const SERVER_MANIFEST = `${CWD}/build/server/.vite/manifest.json`;
 const CLIENT_ASSETS = `${CWD}/build/client/assets`;
@@ -26,9 +20,6 @@ const createFakeFileSystem = (seed: Readonly<Record<string, string>> = {}) => {
   const files = new Map<string, string>(Object.entries(seed));
   const directories = new Set<string>();
 
-  // Annotated per member, the way `@lcabrera/tsconfig`'s writer test does it:
-  // the parameter list is node:fs's, not this file's, and the annotation is
-  // what says so.
   const copyFileSync: ReactRouterAssetsFileSystem['copyFileSync'] = (
     source,
     destination,
@@ -43,10 +34,6 @@ const createFakeFileSystem = (seed: Readonly<Record<string, string>> = {}) => {
     files.set(target, contents);
   };
 
-  // `existsSync` answers for directories too, which is not a detail: the plugin
-  // asks it about `build/client/assets` before reading it, and a fake that only
-  // knows files reports the client build as absent — so every case would take
-  // the empty-placeholder branch and the copy path would never be exercised.
   const containsPath = (target: string) =>
     files.has(target) ||
     directories.has(target) ||
@@ -69,10 +56,6 @@ const createFakeFileSystem = (seed: Readonly<Record<string, string>> = {}) => {
   return { directories, files, fileSystem } satisfies FakeFileSystem;
 };
 
-/**
- * Rollup types `writeBundle` as an object-or-function hook; this plugin declares
- * the function form, and running it is the only way to observe the effect.
- */
 const runWriteBundle = (plugin: Plugin) => {
   const hook = plugin.writeBundle;
   if (typeof hook !== 'function') {

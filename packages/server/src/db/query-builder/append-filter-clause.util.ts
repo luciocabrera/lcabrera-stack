@@ -49,8 +49,6 @@ export const appendFilterClause = ({
   const quotedColumn = quoteIdentifier(filter.column);
 
   if (isUnaryFilter(filter)) {
-    // No placeholder and no value: `IS [NOT] NULL` takes none, and consuming a
-    // `$n` slot here would shift every later filter's parameter index.
     return {
       clauses: [
         ...accumulator.clauses,

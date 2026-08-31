@@ -2,11 +2,6 @@ import { pruneGroupPeriods } from '#ui/components/Table/contexts/TableConfig/gro
 
 import { useSetGrouping } from './useSetGrouping.hook';
 
-/**
- * One naming a key that is no longer there is not inert: the server refuses a granularity
- * whose column is not a group key, so a removed date column would take the whole grouped
- * read down with it (#786).
- */
 export const useSetGroupKeys = () => {
   const setGrouping = useSetGrouping();
 
@@ -16,8 +11,6 @@ export const useSetGroupKeys = () => {
       keys,
       mode: grouping.mode,
       periods: pruneGroupPeriods({ keys, periods: grouping.periods }),
-      // Carried, not pruned: a share belongs to an aggregate, and removing a
-      // group key removes no aggregate.
       shares: grouping.shares,
     }));
   };

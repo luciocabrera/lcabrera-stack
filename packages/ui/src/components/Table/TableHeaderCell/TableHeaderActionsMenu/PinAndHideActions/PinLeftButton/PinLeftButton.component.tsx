@@ -13,10 +13,6 @@ import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveCol
 
 import type { PinLeftButtonProps } from './PinLeftButton.types';
 
-/**
- * Identity and active-state come from the shared `PIN_LEFT_COMMAND` (ADR-011); this
- * surface owns only its live commit-context and menu presentation.
- */
 export const PinLeftButton = <TData,>({
   columnKey,
   layoutLock,

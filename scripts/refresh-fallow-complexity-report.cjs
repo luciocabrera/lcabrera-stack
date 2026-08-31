@@ -48,8 +48,6 @@ const repoRoot = path.resolve(__dirname, '..');
 
 const DEFAULT_TOP_FINDINGS = 20;
 const cliArgs = process.argv.slice(2);
-// Optional workspace glob (fallow -w syntax), e.g. 'apps/showcase' or
-// 'apps/*'. No positional argument scans the entire monorepo.
 const workspaceScope = cliArgs.find((arg) => !arg.startsWith('--')) ?? null;
 const topFlag = cliArgs.find((arg) => arg.startsWith('--top='));
 const topFindingsLimit = topFlag
@@ -104,11 +102,6 @@ const ensureDir = (dirPath) => {
   }
 };
 
-/**
- * Run the fallow CLI from the repo root (honoring `workspaceScope`) and write
- * the raw JSON artifact to `reports/fallow/full-latest.json`.
- * Exits the process with fallow's status code on failure.
- */
 const runFallowJson = () => {
   if (!fs.existsSync(fallowBinPath)) {
     throw new TypeError(
@@ -136,7 +129,6 @@ const runFallowJson = () => {
   );
 
   if (result.status !== 0) {
-    // Thrown so main() stops before reading JSON this run never wrote.
     throw Object.assign(
       new Error('fallow failed to produce its JSON report.'),
       {

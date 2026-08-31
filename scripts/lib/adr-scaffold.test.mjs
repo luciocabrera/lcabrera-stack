@@ -53,8 +53,6 @@ describe('slugify', () => {
 
 describe('adrFilename', () => {
   it('produces a name the ADR gate accepts', () => {
-    // The point of the scaffold: what it writes must pass the check that would
-    // otherwise reject it. Parsed with the gate's own parser, not a copy.
     const filename = adrFilename(52, 'Some new decision');
     expect(filename).toBe('ADR-052-some-new-decision.md');
     expect(parseAdrFilename(filename)).toEqual({
@@ -78,25 +76,18 @@ describe('renderAdr', () => {
   });
 
   it('agrees with the filename the same call would produce', () => {
-    // A heading number that disagrees with its filename is one of the two
-    // findings `adr:verify` reports; the scaffold must not be able to create it.
     const filename = adrFilename(52, 'A new decision');
     expect(parseAdrFilename(filename).number).toBe(52);
     expect(rendered()).toContain(`# ADR-${pad(52)} `);
   });
 
   it("drops the template's own instructions", () => {
-    // The instructions sit after the classification block, not at byte zero, so
-    // this is what proves the scaffold still finds them there.
     expect(template()).toMatch(/^---\n[\s\S]*?\n---\n\s*<!--/);
     expect(rendered()).toMatch(/^---\n[\s\S]*?\n---\n\n# ADR-052/);
     expect(rendered()).not.toContain('vp run adr:new');
   });
 
   it('carries the classification block through with its placeholder intact', () => {
-    // A scaffolded record must FAIL `adr:verify` until its author says what the
-    // decision governs. Filling the placeholder in here would hand out a record
-    // that passes the gate while classifying nothing.
     expect(rendered()).toContain('governs:');
     expect(governedBy(rendered())).not.toContain(REPOSITORY_SCOPE);
     expect(
@@ -117,8 +108,6 @@ describe('renderAdr', () => {
   });
 
   it('still renders a template that carries no block at all', () => {
-    // The block is additive: a consumer's older template has none, and the
-    // scaffold must not start requiring one to work.
     expect(
       renderAdr({
         number: 52,
@@ -144,7 +133,6 @@ describe('resolveHome', () => {
 
 describe('the shipped template', () => {
   it('carries the sections every recent ADR uses', () => {
-    // Derived from ADR-047..051 rather than invented — see the template header.
     for (const heading of [
       '## Context',
       '## Decision',
@@ -156,14 +144,10 @@ describe('the shipped template', () => {
   });
 
   it('carries the classification block the gate now requires', () => {
-    // The template is the one place an author copies from, so a block the gate
-    // asks for and the template does not offer is a rule nobody can satisfy.
     expect(template()).toMatch(/^---\ngoverns:/);
   });
 
   it('is not itself readable as an ADR', () => {
-    // It lives inside a home; if the gate read it as an entry it would report a
-    // malformed filename on every run.
     expect(parseAdrFilename(TEMPLATE_FILE)).toBeUndefined();
   });
 });

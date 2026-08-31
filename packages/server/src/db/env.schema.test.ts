@@ -67,8 +67,6 @@ describe('readGroupStatementTimeoutMs', () => {
   });
 
   it('reads the key without requiring a single credential', () => {
-    // A guard rail that needed DB_PASSWORD to answer "how long may this query
-    // run" would depend on configuration it does not use.
     expect(
       readGroupStatementTimeoutMs({
         env: { DB_GROUP_STATEMENT_TIMEOUT_MS: '250' },

@@ -13,11 +13,6 @@ export type FilterOptionsSourceResolution =
       readonly columnType: ColumnType;
     };
 
-/**
- * The key is the joined pair because that is what a request carries; the map is the
- * **authorization boundary**, so it is developer-curated rather than derived from the
- * catalogue.
- */
 export type FilterOptionsSources = Readonly<
   Record<string, Readonly<Record<string, ColumnType>>>
 >;
@@ -29,7 +24,6 @@ export type ResolveFilterOptionsSourceArgs = {
   readonly table: string;
 };
 
-/** `selectFilterOptions` cannot answer either question. */
 export const resolveFilterOptionsSource = ({
   column,
   schema,
@@ -37,9 +31,6 @@ export const resolveFilterOptionsSource = ({
   table,
 }: ResolveFilterOptionsSourceArgs): FilterOptionsSourceResolution => {
   const sourceKey = `${schema}.${table}`;
-  // Own properties only, on both lookups. A registry is an object literal, so a
-  // request for the column `constructor` otherwise resolves to `Object`'s and
-  // this returns `allowed` with a `columnType` that is a function.
   const columns = Object.hasOwn(sources, sourceKey)
     ? sources[sourceKey]
     : undefined;

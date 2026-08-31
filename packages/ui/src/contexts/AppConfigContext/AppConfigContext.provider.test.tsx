@@ -16,7 +16,6 @@ const getFixtureNavigationItems = (
   { end: true, label: `Home ${iconSize}`, to: '/', type: 'link' },
 ];
 
-/** Reads every selector so one render asserts the whole published value. */
 const ConfigProbe = () => {
   const getNavigationItems = useGetAppNavigationItems();
   const isAuthEnabled = useGetIsAuthEnabled();

@@ -23,14 +23,6 @@ const RULE_SOURCE = join(
   'packages/eslint-local-rules/src/domain-folder-filename.ts',
 );
 
-// This module and `local-rules/domain-folder-filename` are two homes for one
-// convention: the rule owns everything outside a route tree, this owns what it
-// exempts. They must not disagree, and the copies below cannot be shared —
-// the rule is TypeScript inside a published package, this is a root script that
-// has to run on a fresh checkout with nothing built. So the copies are asserted
-// instead, the way `commit-convention.mjs` and `git-exec.mjs` assert theirs.
-
-/** The string entries of a `const NAME = [ … ]` literal in the rule's source. */
 const defaultListInRule = (name) => {
   const source = readFileSync(RULE_SOURCE, 'utf8');
   const declaration = source.indexOf(`const ${name} = [`);
@@ -41,16 +33,11 @@ const defaultListInRule = (name) => {
     .split('\n')
     .filter((line) => !line.trim().startsWith('//'))
     .join('\n');
-  // Odd-indexed segments of a split on the quote are the quoted contents —
-  // linear, and no regex to backtrack.
   return body.split("'").filter((_, index) => index % 2 === 1);
 };
 
 describe('agreement with local-rules/domain-folder-filename', () => {
   it('parses a filename exactly as the rule does', () => {
-    // Imported from the rule's own source, so this is equivalence rather than a
-    // restatement. A parse that drifts would make this gate go quiet, and
-    // silence is what a passing run looks like.
     const cases = [
       'apps/a/src/routes/car-sales/CarSales.types.ts',
       'apps/a/src/routes/reports/Reports.constants.tsx',
@@ -110,9 +97,6 @@ describe('groupByDirectory', () => {
   });
 
   it('files a repo-root path under the root, not under a truncated name', () => {
-    // `git ls-files` lists plenty of root-level files, and `lastIndexOf('/')`
-    // is -1 for each. Taking `slice(0, -1)` there would bucket `README.md`
-    // under a directory called `README.m`.
     expect(groupByDirectory(['README.md', 'package.json', 'a/b.ts'])).toEqual(
       new Map([
         ['', ['README.md', 'package.json']],
@@ -138,7 +122,6 @@ describe('candidatesIn', () => {
   });
 
   it('leaves everything outside a route tree to the ESLint rule', () => {
-    // The two homes must not overlap: a domain folder is the rule's business.
     expect(candidatesIn(['packages/server/src/filters/nope.types.ts'])).toEqual(
       [],
     );
@@ -174,24 +157,16 @@ describe('artifactNamesIn', () => {
 });
 
 describe('routeArtifactReport', () => {
-  // Pinned as a regression list, the way domain-folder-filename.test.ts pins
-  // its own: each of these is a real file that must keep passing, and each
-  // passes for a different reason.
   it('passes the route modules the repo has today', () => {
     const paths = [
-      // names the route module in a kebab-case folder
       'apps/docs-site/src/routes/reports/trigger-scan/triggerScan.constants.ts',
       'apps/docs-site/src/routes/reports/trigger-scan/TriggerScan.component.tsx',
-      // names the component in a PascalCase-artifact folder
       'apps/docs-site/src/routes/reports/project-detail/ProjectDetail.types.ts',
       'apps/docs-site/src/routes/reports/project-detail/ProjectDetail.component.tsx',
-      // a `.tsx` constants file at a route-container level
       'apps/docs-site/src/routes/reports/Reports.constants.tsx',
       'apps/docs-site/src/routes/reports/Reports.layout.tsx',
-      // the folder name and the artifact name genuinely differ
       'apps/showcase/src/routes/car-sales-infinite/CarSales.types.ts',
       'apps/showcase/src/routes/car-sales-infinite/CarSales.component.tsx',
-      // digits in the subject
       'apps/showcase/src/routes/wide-alltypes-150/WideAlltypes150.constants.ts',
       'apps/showcase/src/routes/wide-alltypes-150/WideAlltypes150.component.tsx',
     ];
@@ -213,8 +188,6 @@ describe('routeArtifactReport', () => {
   });
 
   it('accepts a base that extends an artifact name', () => {
-    // The same prefix relation `domain-folder-filename` uses inside an artifact
-    // folder, so the two homes cannot disagree about `XContext.types.ts`.
     const paths = [
       'apps/a/src/routes/x/TableConfigContext.types.ts',
       'apps/a/src/routes/x/TableConfig.context.tsx',

@@ -24,7 +24,6 @@ import {
 
 afterEach(removeAdrRepos);
 
-/** Plant, assert the failure names its own cause, correct, assert the pass. */
 const expectPlantedFailure = (root, plant, correct, expected) => {
   plant();
   const planted = runGate(root);
@@ -35,7 +34,6 @@ const expectPlantedFailure = (root, plant, correct, expected) => {
   expect(runGate(root).status).toBe(0);
 };
 
-/** One planted edit and its reversal, for the cases that are a single rewrite. */
 const expectRejects = (root, from, to, expected) => {
   const edit = editIn(root);
   expectPlantedFailure(
@@ -56,10 +54,6 @@ describe('the ADR gate reading the record', () => {
   });
 
   it('reads a record checked out with CRLF, and still judges it', () => {
-    // git-for-windows installs with `core.autocrlf=true`, so this is the default
-    // consumer checkout on that platform, not an exotic one. BOTH halves matter:
-    // a fix that merely made CRLF stop failing could have done so by reading no
-    // block and no section at all, which is what the bug was.
     const root = makeAdrRepo();
     const crlf = (text) => text.replaceAll('\n', '\r\n');
     const write = writeIn(root);
@@ -129,8 +123,6 @@ describe('the ADR gate reading the record', () => {
 
   it('rejects a section heading with nothing under it', () => {
     const root = makeAdrRepo();
-    // The comment is what a scaffolded record still has in it, so this is the
-    // state the gate has to catch, not a contrived blank.
     expectRejects(
       root,
       'It is so.',
@@ -156,9 +148,6 @@ describe('the ADR gate reading the record', () => {
   });
 
   it('still reads the heading number from the body, not from the block', () => {
-    // A `#` comment in the block would be the first `# ` line in the file. If
-    // the number check read the file rather than the body it would stop firing
-    // here and report a clean pass.
     const root = makeAdrRepo();
     const edit = editIn(root);
     edit(RECORD, '---\ngoverns:', '---\n# a note\ngoverns:');
@@ -173,10 +162,6 @@ describe('the ADR gate reading the record', () => {
 
 describe('--write, which is the command the gate tells people to run', () => {
   it('names the home’s own spelling of it, not this repository’s', () => {
-    // The fixture declares no `adrCommands`, so this is the default a consumer
-    // gets. A hardcoded `vp run …` here would tell them to run something they do
-    // not have — and the earlier spelling crashed outright on a home carrying no
-    // commands at all, which is every consumer with no config file.
     const root = makeAdrRepo();
     editIn(root)('docs/decisions/README.md', 'ADR index', 'Stale index');
 
@@ -187,10 +172,6 @@ describe('--write, which is the command the gate tells people to run', () => {
   });
 
   it('refuses a record the plain run refuses, rather than exiting clean', () => {
-    // `report()`'s staleness finding names `--write`, and it is what
-    // `registers.adrCommands.write` puts in every generated index. An author who
-    // adds an unclassified record, is told the index is stale, runs the command
-    // named, and gets exit 0 has been told the record is fine — by the gate.
     const root = makeAdrRepo();
     editIn(root)(RECORD, '---\ngoverns:\n  - ui\n---\n\n', '');
 
@@ -200,9 +181,6 @@ describe('--write, which is the command the gate tells people to run', () => {
   });
 
   it('still prunes a baseline entry whose record now passes', () => {
-    // The other half, and why this cannot simply refuse on every content
-    // finding: "prune me" IS a content finding, so refusing on all of them
-    // would leave no command able to shrink the baseline.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
     writeIn(root)(
@@ -237,10 +215,6 @@ describe('listing the decisions that govern one package', () => {
   });
 
   it('refuses --package with no name, rather than listing everything', () => {
-    // The unknown-name branch below exists so a filter naming nothing cannot
-    // read as "no decisions govern it". A MISSING name is the same defect
-    // pointed the other way, and louder: the reader gets a table answering a
-    // question they did not ask.
     const listed = runGate(makeAdrRepo(), ['--list', '--package']);
 
     expect(listed.status).not.toBe(0);
@@ -251,9 +225,6 @@ describe('listing the decisions that govern one package', () => {
   it.each(['--package=nope', '--package='])(
     'refuses `%s`, which argv delivers as one entry',
     (spelling) => {
-      // `indexOf('--package')` never matched the `=` form, so the flag read as
-      // absent and the full listing printed with a CLEAN exit — the one outcome
-      // the space-separated case is refused loudly to prevent.
       const listed = runGate(makeAdrRepo(), ['--list', spelling]);
 
       expect(listed.status).not.toBe(0);
@@ -269,8 +240,6 @@ describe('listing the decisions that govern one package', () => {
   });
 
   it('refuses a name no workspace answers to, rather than listing nothing', () => {
-    // An empty listing for a typo reads as "no decisions govern it", which is
-    // the one answer this command must never give by accident.
     const listed = runGate(makeAdrRepo(), ['--list', '--package', 'nope']);
 
     expect(listed.status).not.toBe(0);

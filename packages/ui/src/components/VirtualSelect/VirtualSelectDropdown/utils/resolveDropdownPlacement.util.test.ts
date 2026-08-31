@@ -28,8 +28,6 @@ describe('resolveDropdownPlacement', () => {
   });
 
   it('flips above the anchor when the list does not fit below', () => {
-    // 900 - 140 - 8 = 752 below, 108 - 8 = 100 above... so widen the shortfall
-    // by dropping the viewport: 300 - 140 - 8 = 152 below vs 100 above.
     const placement = resolveDropdownPlacement({
       anchorRect: { bottom: 620, left: 32, top: 588, width: 240 },
       dropdownHeight: 300,
@@ -37,7 +35,6 @@ describe('resolveDropdownPlacement', () => {
       viewportHeight: 700,
     });
 
-    // 700 - 620 - 8 = 72 below; 588 - 8 = 580 above → flips.
     expect(placement.top).toBe(588 - 8 - 300);
   });
 

@@ -30,9 +30,6 @@ describe('resolveDeclaredGroupingKeys', () => {
   });
 
   it('agrees with the hoist about which key is first', () => {
-    // The bug this exists to stop: the layout hoists only declared keys, so if
-    // the render path kept an undeclared one first, the grand total would be
-    // placed on a column that is never painted and would render nowhere.
     expect(resolve(['not_a_column', 'city', 'amount'])[0]).toBe('city');
   });
 });

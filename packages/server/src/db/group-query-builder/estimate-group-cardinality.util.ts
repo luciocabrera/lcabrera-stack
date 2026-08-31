@@ -12,13 +12,6 @@ type EstimateGroupCardinalityArgs = {
   readonly keys: readonly string[];
 };
 
-/**
- * An upper bound on the rows a grouped read will return, from the catalogue's per-column
- * distinct estimates.
- * It sums the product over **the grouping sets the query will actually emit**, taken from
- * the same `expandGroupingSets` the SQL is built from, rather than from a per-mode
- * formula.
- */
 export const estimateGroupCardinality = ({
   capabilities,
   grouping,

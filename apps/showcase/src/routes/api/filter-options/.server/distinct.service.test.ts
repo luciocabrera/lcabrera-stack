@@ -44,7 +44,6 @@ describe('selectDistinctFilterOptions', () => {
         table: 'car_sales',
       }),
     );
-    // Allow-list is the source's full column set, not just the one requested.
     const [descriptor] = selectFilterOptionsMock.mock.calls[0] ?? [];
     expect(descriptor.allowedColumns).toContain('color');
     expect(descriptor.allowedColumns).toContain('buyer_name');
@@ -78,11 +77,6 @@ describe('selectDistinctFilterOptions', () => {
     );
   });
 
-  /**
-   * `hasMore` is `values.length === limit`, so `LIMIT 0` returns no values and
-   * reports `0 === 0` — an empty page claiming another follows. A dropdown
-   * paging on `hasMore` would fetch forever without showing a value.
-   */
   it('floors a zero limit to 1 rather than serving a page that claims more', async () => {
     await selectDistinctFilterOptions({
       columnName: 'color',

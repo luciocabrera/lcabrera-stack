@@ -8,11 +8,6 @@ import { TableFocusProvider } from '#ui/components/Table/contexts/TableFocus';
 
 import { TableBodyCell } from './TableBodyCell.component';
 
-/**
- * A cell is a grid cell, so it reads the grid's focus store. That provider is
- * the only context it needs: pointer focus is a store write and nothing else,
- * which is what keeps a cell testable without the whole table around it.
- */
 const renderCell = (children: ReactNode) =>
   render(
     <TableFocusProvider>
@@ -106,9 +101,6 @@ describe('TableBodyCell', () => {
     expect(cell.getAttribute('tabindex')).toBe('-1');
   });
   it('keeps role=gridcell when a caller passes a conflicting role', () => {
-    // The role is the cell's only source of semantics once CSS has stripped the
-    // implicit one, so `{...rest}` must not be able to replace it. Revert the
-    // spread order in TableBodyCell.component.tsx and this is what fails.
     renderCell(
       <TableBodyCell
         columnKey='amount'

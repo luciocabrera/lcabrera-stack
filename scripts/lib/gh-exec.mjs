@@ -16,10 +16,8 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 
-/** Fixed, non-writable system directories — never the inherited PATH. */
 const TRUSTED_DIRECTORIES = ['/usr/local/bin', '/usr/bin', '/bin'];
 
-/** The gh binary as an absolute path, or `undefined` when it is not installed. */
 export const ghBinary = () =>
   TRUSTED_DIRECTORIES.map((directory) => `${directory}/gh`).find((path) =>
     existsSync(path),
@@ -45,11 +43,6 @@ export const assertGhArguments = (args) => {
   return args;
 };
 
-/**
- * Trimmed stdout on success. Throws on failure, carrying gh's stderr — a
- * caller creating issues needs to know which call failed and why, unlike the
- * read-only probes `runGit` serves.
- */
 export const runGh = (args) => {
   assertGhArguments(args);
   const binary = ghBinary();

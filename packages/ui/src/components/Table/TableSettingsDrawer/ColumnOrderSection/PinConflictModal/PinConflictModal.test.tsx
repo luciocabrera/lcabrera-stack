@@ -39,9 +39,7 @@ import { PinConflictModal } from './PinConflictModal.component';
 
 const dialogMocksRef = {
   current: {
-    restoreMockDialog: () => {
-      // no-op before setup
-    },
+    restoreMockDialog: () => {},
   },
 };
 

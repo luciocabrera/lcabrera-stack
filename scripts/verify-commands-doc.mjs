@@ -47,14 +47,8 @@ const execFileAsync = promisify(execFile);
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const COMMANDS_DOC = 'COMMANDS.md';
 
-/**
- * `vp run` prints `  <key>: <command>`, where the key may itself contain `:`
- * (`check:safe`) and `#` (`@lcabrera/ui#lint:eslint:check`). The lazy inner group
- * makes the split land on the last colon that is followed by whitespace.
- */
 const TASK_LINE = /^\s{2}([^\s:]+(?::[^\s:]+)*?):\s/;
 
-/** Reads every runnable task from the toolchain itself — all three sources. */
 const readTaskInventory = async () => {
   const { stdout } = await execFileAsync('vp', ['run'], { cwd: REPO_ROOT });
   const rootTasks = new Set();
@@ -80,7 +74,6 @@ const readTaskInventory = async () => {
   return { packageTasks, rootTasks };
 };
 
-/** Every workspace's package name, from the pnpm workspace layout. */
 const readWorkspaceNames = () =>
   ['apps', 'packages'].flatMap((group) =>
     readdirSync(join(REPO_ROOT, group))
@@ -89,24 +82,17 @@ const readWorkspaceNames = () =>
       .map((manifest) => JSON.parse(readFileSync(manifest, 'utf8')).name),
   );
 
-/** Root scripts are what §4 documents; vite.config tasks are covered by §2. */
 const readRootScripts = () =>
   Object.keys(
     JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf8')).scripts ??
       {},
   );
 
-/** `vp run <task>` mentions anywhere in the doc, deduped. */
 const findDocumentedCommands = (doc) => {
   const matches = doc.matchAll(/vp run ([a-z][\w:-]*)/g);
   return new Set([...matches].map(([, task]) => task));
 };
 
-/**
- * §5's table rows are `| \`dir\` | \`package-name\` | \`task\`, \`task\` |`.
- * Only the third column is read, and only its backticked tokens — prose in
- * that cell (an em dash for "none") is ignored.
- */
 const findWorkspaceTaskClaims = (doc) => {
   const section = doc.split('## 5. Per-workspace tasks')[1]?.split('\n---')[0];
   if (section === undefined) {
@@ -128,13 +114,11 @@ const findWorkspaceTaskClaims = (doc) => {
     });
 };
 
-/** Relative markdown links, split into path and optional #anchor. */
 const findLinks = (doc) =>
   [...doc.matchAll(/\]\((?!https?:)([^)#]+)(?:#([^)]+))?\)/g)].map(
     ([, path, anchor]) => ({ anchor, path }),
   );
 
-/** GitHub's heading→anchor slug, close enough for the headings used here. */
 const toAnchor = (heading) =>
   heading
     .toLowerCase()
@@ -210,14 +194,6 @@ const checkLinks = (doc, problems) => {
   }
 };
 
-/**
- * The "all 15 workspaces" bug, mechanised.
- *
- * The leading `\b` is load-bearing, not decoration. Without it a match can
- * start at every digit of a run, and each start re-scans the rest of that run
- * greedily before failing — quadratic in the length of the number. Measured on
- * a 128k-digit run: 2954ms without the boundary, 0.12ms with it.
- */
 const checkWorkspaceCount = (doc, expected, problems) => {
   for (const [, claimed] of doc.matchAll(/\b(\d+)\s+workspaces/g)) {
     if (Number(claimed) !== expected) {

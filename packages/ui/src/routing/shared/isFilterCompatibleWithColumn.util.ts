@@ -6,12 +6,6 @@ type IsFilterCompatibleWithColumnArgs<TData extends Record<string, unknown>> = {
   readonly filter: ColumnFilter;
 };
 
-/**
- * Emptiness is not a comparison, so there is no type it fails to make sense for — and this
- * function's answer is load-bearing in one direction only: a `false` here drops the filter
- * from a URL silently, so a missing arm reads to a user as a link that opened on the wrong
- * rows.
- */
 export const isFilterCompatibleWithColumn = <
   TData extends Record<string, unknown>,
 >({

@@ -24,9 +24,6 @@ describe('computeInitialValue (number)', () => {
     ).toBe(42);
   });
 
-  // Reachable, not an edge case the type forbids: `NumberFilter.value` is
-  // `number | undefined` because NumberFilterInput emits `value: undefined`
-  // for an empty input, so the state is spelled with the key present.
   it('returns empty string while the value is undefined mid-edit', () => {
     expect(
       computeInitialValue({

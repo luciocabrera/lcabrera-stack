@@ -18,24 +18,6 @@ export const isBuiltPublicPackage = (manifest) =>
   manifest.scripts?.build !== undefined &&
   manifest.publishConfig?.access === 'public';
 
-/**
- * Maps a source export target onto what the tarball must expose.
- *
- * tsdown emits ESM as `.mjs` with declarations beside it as `.d.mts`, and
- * `unbundle` keeps the `src` tree shape, so this is a pure path rewrite.
- *
- * A `src` entry is not always TypeScript: a package shipping ESLint flat
- * configs exports them as `.mjs`, because flat config is JavaScript. tsdown
- * builds those too (with `allowJs`, so their declarations are emitted), and
- * strips the extension the same way — so the rule is "drop the source
- * extension", not "drop `.ts`". Getting that wrong produced `x.mjs.d.mts`,
- * which resolves for nobody.
- *
- * Key order matters on the way out: Node matches export conditions in the order
- * they are written, so `types` must come first or a resolver can take `default`
- * and never look for the declarations. `--write` serialises this object straight
- * into the manifest, so the order here is the order that ships.
- */
 export const toBuiltPaths = (sourceTarget) => {
   const built = sourceTarget
     .replace(/^\.\/src\//, './dist/')
@@ -43,13 +25,11 @@ export const toBuiltPaths = (sourceTarget) => {
   return { types: `${built}.d.mts`, default: `${built}.mjs` };
 };
 
-/** Subpaths in one map but not the other, in both directions. */
 export const diffSubpaths = ({ published, source }) => ({
   extra: published.filter((subpath) => !source.includes(subpath)),
   missing: source.filter((subpath) => !published.includes(subpath)),
 });
 
-/** True when a published entry already matches what `toBuiltPaths` demands. */
 export const isPublishedTargetCorrect = ({ published, sourceTarget }) => {
   const expected = toBuiltPaths(sourceTarget);
   return (
@@ -58,7 +38,6 @@ export const isPublishedTargetCorrect = ({ published, sourceTarget }) => {
   );
 };
 
-/** Rebuilds `publishConfig.exports` from `exports`, preserving key order. */
 export const buildPublishExports = (exports_) =>
   Object.fromEntries(
     Object.entries(exports_ ?? {}).map(([subpath, sourceTarget]) => [
@@ -67,7 +46,6 @@ export const buildPublishExports = (exports_) =>
     ]),
   );
 
-/** Every file path an export entry can resolve to, conditions flattened. */
 export const collectTargets = (target) => {
   if (typeof target === 'string') {
     return [target];
@@ -78,17 +56,9 @@ export const collectTargets = (target) => {
   return Object.values(target).flatMap((value) => collectTargets(value));
 };
 
-/** The path a `./`-relative export target has inside the tarball. */
 const toTarballPath = (target) =>
   target.startsWith('./') ? target.slice(2) : target;
 
-/**
- * True for a target a consumer cannot load out of `node_modules`: Node refuses
- * to strip types there, so a `.ts` file is unreachable however present it is
- * (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`). This is the exact state the
- * `publishConfig.exports` swap exists to prevent, and the state an
- * `npm pack`-produced tarball is in, since the swap is a pnpm extension.
- */
 export const isSourceTarget = (target) =>
   target.startsWith('./src/') ||
   target.endsWith('.ts') ||
@@ -111,11 +81,6 @@ const targetProblems = ({ files, label, subpath, target }) => {
   return [...problems, ...absent];
 };
 
-/**
- * What is wrong with the artifact itself: the manifest and file list read back
- * out of the tarball, checked against the subpaths the source manifest
- * promises. Pure, so the rules are unit-tested without packing anything.
- */
 export const packedSurfaceProblems = ({
   files,
   label,

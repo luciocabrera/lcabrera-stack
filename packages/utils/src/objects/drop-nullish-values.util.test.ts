@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { dropNullishValues } from './drop-nullish-values.util';
 
-/**
- * Nulls reach this util from parsed JSON — a scan artifact, an API response —
- * so the fixtures are built the same way rather than with `null` literals.
- */
 const fromJson = <T extends object>(json: string) => JSON.parse(json) as T;
 
 describe('dropNullishValues', () => {
@@ -58,7 +54,6 @@ describe('dropNullishValues', () => {
       '{"nested":{"inner":null}}',
     );
 
-    // The nested null survives — only top-level entries are considered.
     expect(JSON.stringify(dropNullishValues(record))).toBe(
       '{"nested":{"inner":null}}',
     );

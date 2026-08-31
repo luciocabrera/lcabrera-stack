@@ -9,16 +9,9 @@ import {
 type ResolveGroupKeyExpressionArgs = {
   readonly key: string;
   readonly period?: GroupKeyPeriod;
-  /** The column's Postgres type name — what decides which truncation form is emitted. */
   readonly typeName?: string;
 };
 
-/**
- * The SQL a group key is grouped by: the quoted column, or a truncation of it (#786).
- * One function because the same string has to appear in four places — the projection,
- * `GROUPING()`, the grouping sets, and the `ORDER BY`'s `GROUPING` terms — and Postgres
- * matches `GROUPING(x)` against a `GROUP BY` expression **syntactically**.
- */
 export const resolveGroupKeyExpression = ({
   key,
   period,

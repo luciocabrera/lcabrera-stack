@@ -43,8 +43,6 @@ describe('classifyRelease', () => {
   });
 
   it('holds a package that has never been published for a human', () => {
-    // Not a failure and not retryable: a scoped first publish has no trusted
-    // publisher to authenticate against and dies with E404 under OIDC.
     expect(
       classifyRelease({ packageExists: false, versionExists: false }),
     ).toBe('first-publish');
@@ -52,8 +50,6 @@ describe('classifyRelease', () => {
 });
 
 describe('selectPublishable', () => {
-  // The regression that matters: one package's state must never influence
-  // another's. Before #620 a single pending changeset zeroed the whole list.
   it('picks only the publishable packages, ignoring their neighbours', () => {
     const classified = [
       { name: '@lcabrera/utils', state: 'publish' },
@@ -80,10 +76,6 @@ describe('selectPublishable', () => {
 });
 
 describe('findBlockingFirstPublish', () => {
-  // `changeset publish` takes no package filter, so a never-published package
-  // sinks the whole run *after* earlier ones have reached npm. Catching it
-  // before anything publishes is the difference between a clear stop and a
-  // half-released state.
   it('blocks when a never-published package coexists with a due release', () => {
     expect(
       findBlockingFirstPublish({
@@ -94,8 +86,6 @@ describe('findBlockingFirstPublish', () => {
   });
 
   it('stays quiet when nothing is due to publish', () => {
-    // The common case: a never-published package sits there for weeks and must
-    // not turn `main` red on every push.
     expect(
       findBlockingFirstPublish({
         firstPublish: [{ name: '@lcabrera/eslint-plugin' }],
@@ -133,8 +123,6 @@ describe('extractChangelogSection', () => {
   });
 
   it('returns empty rather than throwing for a version it cannot find', () => {
-    // The publish has already hit npm by the time notes are built, and npm is
-    // irreversible — a missing section must not fail the job after that point.
     expect(
       extractChangelogSection({ changelog: CHANGELOG, version: '9.9.9' }),
     ).toBe('');

@@ -26,9 +26,6 @@ export const removeTableColumnAggregate = ({
     keys: grouping.keys,
     mode: grouping.mode,
     periods: grouping.periods,
-    // Pruned against the **new** list, not cleared: removing one measure says
-    // nothing about any other measure's share, and the share of the measure
-    // that just went has to go with it (#648, per aggregate since #831).
     shares: pruneGroupShares({ aggregates, shares: grouping.shares }),
   };
 };

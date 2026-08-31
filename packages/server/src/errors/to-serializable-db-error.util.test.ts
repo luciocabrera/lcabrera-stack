@@ -42,8 +42,6 @@ describe('toSerializableDbError', () => {
   });
 
   it('maps a cancellation before the PersistenceError it extends', () => {
-    // Order matters: `QueryCanceledError` is a `PersistenceError`, so a check in
-    // the other order would collapse every timeout into `db-failed`.
     expect(
       toSerializableDbError(
         new QueryCanceledError({ cause: undefined, fields: { code: '57014' } }),
@@ -67,9 +65,6 @@ describe('toSerializableDbError', () => {
   });
 
   it('says nothing about an untranslated throw', () => {
-    // An error this package never vetted may carry anything — a driver message,
-    // a stack, a quoted value. Forwarding its text would reopen the leak the
-    // translation layer exists to close.
     const mapped = toSerializableDbError(
       new Error('relation "orders" does not exist at character 15'),
     );
@@ -95,10 +90,6 @@ describe('toSerializableDbError', () => {
   });
 
   it('recovers the message the class hides behind a non-enumerable property', () => {
-    // The reason this mapper exists rather than the error being returned as-is:
-    // `Error.message` is a **non-enumerable** own property, so no structural
-    // serializer copies it — the class reaches the client with every
-    // `instanceof` false and no message at all, silently.
     const error = new PersistenceError({
       cause: undefined,
       fields: { code: '42703' },

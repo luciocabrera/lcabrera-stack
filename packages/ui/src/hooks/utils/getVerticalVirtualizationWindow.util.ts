@@ -6,9 +6,6 @@ type GetVerticalVirtualizationWindowArgs = {
   readonly totalItems: number;
 };
 
-/**
- * Calculates the visible vertical virtualization window for fixed-height rows.
- */
 export const getVerticalVirtualizationWindow = ({
   containerHeight,
   itemHeight,

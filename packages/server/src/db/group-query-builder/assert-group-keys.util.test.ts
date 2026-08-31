@@ -6,11 +6,6 @@ import { assertGroupKeys } from './assert-group-keys.util.ts';
 
 const ALLOWED = ['order_status', 'shipping_country', 'city', 'priority', 'doc'];
 
-/**
- * Only the groupable arm is worth a factory. The refused one has to name its
- * reason — the type will not let it do otherwise — so writing it out is the
- * shorter of the two.
- */
 const groupable = (column: string): ColumnGroupingCapability => ({
   aggregates: ['count', 'countDistinct', 'max', 'min'],
   canGroup: true,
@@ -36,11 +31,6 @@ const CAPABILITIES: Readonly<Record<string, ColumnGroupingCapability>> = {
   shipping_country: groupable('shipping_country'),
 };
 
-/**
- * Rollup throughout: this file is about the *catalogue* half of the rules, and
- * the per-mode depth cap is asserted where it lives
- * (`assert-group-depth.util.test.ts`).
- */
 const assert = (keys: readonly string[]) =>
   assertGroupKeys({
     allowedColumns: ALLOWED,
@@ -61,16 +51,12 @@ describe('assertGroupKeys', () => {
   });
 
   it('refuses past the depth cap before any round trip', () => {
-    // The point of doing this purely: a request for five keys must never cost
-    // a catalogue query to reject.
     expect(() =>
       assert(['order_status', 'shipping_country', 'city', 'priority', 'doc']),
     ).toThrow('at most 4 group keys');
   });
 
   it('refuses a repeated key', () => {
-    // `GROUP BY GROUPING SETS ((a, a))` is legal SQL and produces a column
-    // twice, which the driver then folds — so it is refused here instead.
     expect(() => assert(['city', 'city'])).toThrow('must be distinct');
   });
 
@@ -93,8 +79,6 @@ describe('assertGroupKeys', () => {
   });
 
   it('refuses a column with no resolved capability', () => {
-    // A column the catalogue could not see must fail closed, never default to
-    // groupable.
     expect(() =>
       assertGroupKeys({
         allowedColumns: [...ALLOWED, 'ghost'],
@@ -110,7 +94,6 @@ describe('assertGroupKeys', () => {
   });
 });
 
-/** `order_date` as the catalogue reports it: refused raw, legal above a day. */
 const dated = (periods: readonly ('day' | 'month' | 'quarter' | 'year')[]) => ({
   ...groupable('order_date'),
   canGroup: false as const,
@@ -120,9 +103,6 @@ const dated = (periods: readonly ('day' | 'month' | 'quarter' | 'year')[]) => ({
 
 describe('a granularity on a group key', () => {
   it('is accepted on a column that offers it, even when the raw column is refused', () => {
-    // The case #786 exists for: `order_date` is `too-many-distinct` at one
-    // group per calendar day and unremarkable at a month, so requiring
-    // `canGroup` first would refuse every request this feature serves.
     expect(() =>
       assertGroupKeys({
         allowedColumns: ['order_date'],
@@ -159,8 +139,6 @@ describe('a granularity on a group key', () => {
   });
 
   it('refuses a granularity naming a column that is not a group key', () => {
-    // The two travel as separate members of one request, so they can disagree.
-    // Dropping it silently would run a grouping the URL does not describe.
     expect(() =>
       assertGroupKeys({
         allowedColumns: ['status', 'order_date'],
@@ -176,8 +154,6 @@ describe('a granularity on a group key', () => {
   });
 
   it('still refuses an ungroupable column that carries no granularity', () => {
-    // The granularity branch is an alternative to the `canGroup` check, not a
-    // way past it: a key with no granularity takes the original path.
     expect(() =>
       assertGroupKeys({
         allowedColumns: ['order_date'],

@@ -7,10 +7,6 @@ import type {
 
 export type InfiniteScroll<TData, TResponse> = {
   readonly dataSelector?: (response: TResponse) => readonly TData[];
-  /**
-   * May return `undefined` for a load-more page, which keeps the total already in the store
-   * — the total cannot change within a scroll session, so a server need only count once.
-   */
   readonly dataTotalSelector?: (response: TResponse) => number | undefined;
   readonly hasMore?: boolean;
   readonly isLoadingMore?: boolean;
@@ -22,12 +18,6 @@ export type LayoutProps = {
 };
 
 export type Pagination<TData = unknown> = {
-  /**
-   * The last row loaded so far, when there is one — the anchor a keyset ("seek") data source
-   * resumes from.
-   * `skip` cannot express "resume after this row", and only the consumer knows which of the
-   * row's fields make up its sort key, so the Table hands the row over and stays out of it.
-   */
   readonly lastRow?: TData;
   readonly limit: number;
   readonly skip: number;
@@ -55,11 +45,6 @@ export type Sorting<TData = Record<string, unknown>> = {
 
 export type TablePageResponse<TData> = {
   readonly data: readonly TData[];
-  /**
-   * A refusal is an expected outcome — a grouping the database will not run, a statement
-   * that timed out — so it arrives as a **successful** response carrying data, not as a
-   * rejected promise, and the route's error boundary never sees it.
-   */
   readonly error?: TableResponseError;
   readonly hasMore?: boolean;
   readonly total?: number;

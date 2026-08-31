@@ -36,10 +36,6 @@ describe('initRefusal', () => {
   });
 
   test('refuses on a manifest alone, with no config beside it', () => {
-    // The state a consumer reaches by syncing without ever writing a config.
-    // Read as uninitialised, init would infer a command map over a repository
-    // whose files are already recorded, and the first `doctor` after it would
-    // report drift on a tree nobody had touched.
     expect(initRefusal({ ...clean, manifestExists: true })).toMatch(
       /already here/,
     );
@@ -57,9 +53,6 @@ describe('initRefusal', () => {
 
 describe('initialConfig', () => {
   test('writes the commands and the profile, and no path layout', () => {
-    // Writing the path defaults back out as if they were choices would freeze
-    // them: a later change to one would be a silent no-op in every repository
-    // init ever touched.
     expect(
       initialConfig({
         commands: { install: 'npm ci', audit: 'npm audit' },
@@ -72,10 +65,6 @@ describe('initialConfig', () => {
   });
 
   test('records the trunk it was given, because the default is often wrong', () => {
-    // `git init` still produces `master` unless `init.defaultBranch` says
-    // otherwise, and the shipped gates default to `main` — so a consumer who
-    // took the default failed the branch gate and the coordination gate on
-    // their own trunk, on day one.
     expect(
       initialConfig({
         commands: { install: 'npm ci' },
@@ -90,10 +79,6 @@ describe('initialConfig', () => {
   });
 
   test('preserves every block it does not own', () => {
-    // `devkit.config.json` is shared with the gate runtime, which reads
-    // `registers`, `gates`, `publishing` and `conventions` from it. Written as a
-    // fresh object, a `--force` re-init deleted all of them — on exactly the
-    // repository the flag is documented for, the one customised over time.
     expect(
       initialConfig({
         commands: { install: 'npm ci' },
@@ -110,10 +95,8 @@ describe('initialConfig', () => {
         profile: 'full',
       }),
     ).toEqual({
-      // devkit's own answers are rewritten — that is what --force is for
       commands: { install: 'npm ci' },
       conventions: { defaultBranch: 'master', sharedBranchesDir: 'docs/sb' },
-      // everything else survives, including the layout nothing here writes
       gates: { strayConfigs: { unreadNames: ['.eslintignore'] } },
       paths: { hooks: '.husky' },
       profile: 'full',
@@ -123,9 +106,6 @@ describe('initialConfig', () => {
   });
 
   test('writes no conventions block when the branch could not be read', () => {
-    // A detached HEAD, or a `.git` this command cannot read. Writing an empty
-    // string would be worse than writing nothing: it names a trunk no branch can
-    // ever match, so every branch becomes a topic branch.
     for (const defaultBranch of ['', undefined]) {
       expect(
         initialConfig({
@@ -144,8 +124,6 @@ describe('tasksFor', () => {
   ];
 
   test('writes a task only for a bin that is actually installed', () => {
-    // The failure this prevents: a consumer who took `devkit` alone being given
-    // a dozen tasks that every exit with a command-not-found.
     expect(tasksFor({ availableBins: ['devkit'], profile: 'agent' })).toEqual({
       'devkit:check': 'devkit doctor --check',
       'devkit:sync': 'devkit sync',
@@ -232,25 +210,16 @@ describe('initFailure', () => {
   });
 
   test('a profile that planned nothing is a failure, not a clean pass', () => {
-    // The shape this kit has shipped twice: a command that asserts nothing
-    // passes over an empty result, and reads afterwards as a repository that
-    // was set up.
     expect(initFailure({ planned: 0, unmet: [] })).toMatch(
       /nothing was materialised/,
     );
   });
 
   test('a --force re-init that wrote nothing is a success, not a failure', () => {
-    // On an already-materialised tree every entry classifies `current`, so
-    // nothing is written. Judged on writes, this reported "this repository has
-    // not been set up" over one that is fully set up — reachable straight from
-    // this command's own advice to create a package.json and re-run --force.
     expect(initFailure({ planned: 31, unmet: [] })).toBeUndefined();
   });
 
   test('unresolved commands are reported even when files were planned', () => {
-    // The partial success is the dangerous one: 25 of 31 files is a repository
-    // whose CI workflows are simply absent, with a zero exit over it.
     expect(initFailure({ planned: 31, unmet: ['install'] })).toBeDefined();
   });
 });
@@ -266,9 +235,6 @@ describe('placedHooksPath', () => {
   });
 
   test('says nothing when no hook was placed', () => {
-    // A profile that carries no hooks, or one whose hooks were all held back.
-    // Naming a directory that is not there would be an instruction about files
-    // the consumer does not have.
     expect(
       placedHooksPath({
         entries: [{ path: 'docs/a.md' }],
@@ -289,9 +255,6 @@ describe('placedHooksPath', () => {
 
 describe('initSummary', () => {
   test('tells the consumer git will not run the hooks until pointed at them', () => {
-    // An unwired hook and a passing hook produce the identical exit 0 — the
-    // same silent absence the executable-bit fix closed. The README says it and
-    // COMMANDS.md repeats it; neither is in front of whoever just ran init.
     const summary = initSummary({
       added: [],
       hooksPath: '.githooks',

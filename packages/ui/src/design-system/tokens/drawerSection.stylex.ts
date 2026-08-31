@@ -3,13 +3,6 @@ import * as stylex from '@stylexjs/stylex';
 import { spacing, typography } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
-/**
- * Shared styles for Table Settings Drawer sections.
- * Used by SortingSection, AddFilterSection, ColumnOrderSection,
- * ActiveFiltersList, GeneralSettingsSection, and others.
- *
- * Import only the styles you need and compose with local overrides.
- */
 export const drawerSectionStyles = stylex.create({
   /** Flex column container with `gap: md`. Most common drawer layout. */
   container: {

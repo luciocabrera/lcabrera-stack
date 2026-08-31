@@ -11,14 +11,6 @@ type GetTableShareDenominatorArgs = {
   readonly fn: TableAggregateFn;
 };
 
-/**
- * **It returns a number, and that is load-bearing.** `useSyncExternalStore` compares
- * snapshots with `Object.is`, so a selector handing back a freshly built map would
- * re-render forever.
- * The fold that produces the map happens in `getShareDenominators`, which caches on the
- * stored rows array, and only the one primitive this cell needs crosses the snapshot
- * boundary.
- */
 export const useGetTableShareDenominator = ({
   columnKey,
   fn,

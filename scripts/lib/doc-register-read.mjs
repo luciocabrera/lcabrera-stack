@@ -25,7 +25,6 @@ const WORKFLOW_DIR = '.github/workflows';
 
 const toPosix = (path) => path.split(sep).join('/');
 
-/** Every markdown file under `dir`, repo-relative, template excluded. */
 const markdownFilesIn = (root, dir) => {
   const absolute = join(root, dir);
   if (!existsSync(absolute)) {
@@ -65,12 +64,6 @@ const readWorkflows = (root) => {
     }));
 };
 
-/**
- * Does a repo-relative evidence ref name something that exists? Containment is
- * checked first, so a `ref` climbing out of the tree resolves to nothing rather
- * than to a file on the machine — the ref comes from a document, and a document
- * is an untrusted input like any other.
- */
 const pointerResolver = (root) => (ref) => {
   const target = resolve(root, ref);
   return (
@@ -78,10 +71,6 @@ const pointerResolver = (root) => (ref) => {
   );
 };
 
-/**
- * Both registers, plus everything the checks need to judge them: the workspace
- * roster, the root manifest's tasks, and the tasks CI runs.
- */
 export const readRegisters = (root) => {
   const manifest = readJson(root, 'package.json');
   const rootScripts = manifest.scripts ?? {};

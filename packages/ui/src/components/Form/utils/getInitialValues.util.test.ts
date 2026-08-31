@@ -52,9 +52,6 @@ describe('getInitialValues', () => {
     expect(values.name).toBe('');
   });
 
-  // A number field stores `undefined` when cleared. Seeding `''` here made an
-  // untouched-then-cleared field compare unequal to its initial value, leaving
-  // the form permanently dirty.
   it('defaults number fields to undefined, matching what a cleared field stores', () => {
     const values = getInitialValues<Values>({ leafFields });
 

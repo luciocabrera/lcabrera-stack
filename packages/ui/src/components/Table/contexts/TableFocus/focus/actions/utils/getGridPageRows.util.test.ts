@@ -29,7 +29,6 @@ describe('getGridPageRows', () => {
   });
 
   it('is at least one row when the container has not been measured', () => {
-    // Zero would leave PageUp/PageDown silently dead.
     expect(
       getGridPageRows({ container: createContainer(0), rowHeight: 40 }),
     ).toBe(1);

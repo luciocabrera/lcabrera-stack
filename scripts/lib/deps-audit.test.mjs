@@ -8,12 +8,6 @@ import {
   readAdvisories,
 } from './deps-audit.mjs';
 
-// What these defend: this gate's whole value is that it fails when it cannot
-// answer. Every assertion below is a way a supply-chain check reports "clean"
-// about a tree it never looked at, or carries an advisory nobody decided to
-// carry. The fixtures are the real `pnpm audit --json` shape, taken from a
-// probe install of a knowingly vulnerable package.
-
 const TODAY = '2026-08-04';
 
 const advisory = (overrides = {}) => ({
@@ -36,9 +30,6 @@ const report = (advisories = {}, totalDependencies = 1122) => ({
 });
 
 describe('auditDidRun', () => {
-  // The one that matters. An unreachable registry produces an empty advisory
-  // list, which is byte-identical to a healthy tree — so "no advisories" can
-  // never be the evidence that the audit happened.
   it('rejects a report that walked no dependencies', () => {
     expect(auditDidRun(report({}, 0))).toBe(false);
     expect(auditDidRun({ advisories: {} })).toBe(false);
@@ -58,8 +49,6 @@ describe('isAtLeast', () => {
     expect(isAtLeast({ minimum: 'moderate', severity: 'low' })).toBe(false);
   });
 
-  // A severity nobody has seen before must not sort below the floor and vanish.
-  // Failing open here would be the same silence the gate exists to prevent.
   it('treats an unknown severity as the most severe', () => {
     expect(isAtLeast({ minimum: 'critical', severity: 'catastrophic' })).toBe(
       true,
@@ -73,8 +62,6 @@ describe('readAdvisories', () => {
     expect(found.ghsa).toBe('GHSA-35jh-r3h4-6jhm');
   });
 
-  // Without a GHSA there is still something to key on, and it must not collide
-  // with a real identifier or read as one.
   it('falls back to a marked pnpm id when no GHSA is given', () => {
     const [found] = readAdvisories(
       report({ 1: advisory({ github_advisory_id: undefined }) }),
@@ -82,9 +69,6 @@ describe('readAdvisories', () => {
     expect(found.ghsa).toBe('pnpm-1106913');
   });
 
-  // #516 Finding 1 turned on exactly this: the same advisory can arrive through
-  // both a dev and a runtime path, and one runtime path makes it a shipping
-  // concern. Reading only the first finding would have called it dev-only.
   it('marks production when any finding is on a runtime path', () => {
     const [found] = readAdvisories(
       report({
@@ -139,7 +123,6 @@ describe('classifyAdvisories', () => {
     expect(carried).toHaveLength(1);
   });
 
-  // An allowance is a deferral, not a pardon — the whole point of the date.
   it('blocks again once the allowance has expired', () => {
     const { blocking } = classifyAdvisories({
       advisories,
@@ -149,7 +132,6 @@ describe('classifyAdvisories', () => {
     expect(blocking[0].why).toContain('expired');
   });
 
-  // The date is compared on the day it falls, not after it.
   it('treats the expiry date itself as still live', () => {
     const { blocking } = classifyAdvisories({
       advisories,
@@ -159,7 +141,6 @@ describe('classifyAdvisories', () => {
     expect(blocking).toHaveLength(0);
   });
 
-  // An undated entry would otherwise be a permanent pardon by omission.
   it('refuses an allowance with no date', () => {
     const { blocking } = classifyAdvisories({
       advisories,
@@ -169,7 +150,6 @@ describe('classifyAdvisories', () => {
     expect(blocking[0].why).toContain('no date');
   });
 
-  // The rot Finding 3 documented: entries outliving the thing they covered.
   it('reports an allowance matching nothing in the tree', () => {
     const { stale } = classifyAdvisories({
       advisories,
@@ -182,8 +162,6 @@ describe('classifyAdvisories', () => {
     expect(stale.map((entry) => entry.ghsa)).toEqual(['GHSA-gone-gone-gone']);
   });
 
-  // Below the floor is a visible count, not a silence — otherwise "we do not
-  // gate on low" is indistinguishable from having found nothing.
   it('counts a sub-floor advisory as ignored rather than dropping it', () => {
     const low = readAdvisories(report({ 1: advisory({ severity: 'low' }) }));
     const { blocking, ignored } = classifyAdvisories({

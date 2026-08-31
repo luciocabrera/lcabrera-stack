@@ -38,7 +38,6 @@ const OPTIONS = {
   out: { type: 'string' },
 };
 
-/** Text from a repo-relative path, or `undefined` if it cannot be read. */
 const readOptional = (path) => {
   if (typeof path !== 'string' || path === '') {
     return undefined;
@@ -50,13 +49,6 @@ const readOptional = (path) => {
   }
 };
 
-/**
- * The findings array, or an empty one with the reason it is empty.
- *
- * Degrading here is deliberate: the prose review is already written and is worth
- * posting on its own. Failing the run because the structured half did not parse
- * would trade a whole review for its anchoring.
- */
 const readFindings = (path) => {
   const text = readOptional(path);
   if (text === undefined) {
@@ -77,7 +69,6 @@ const readFindings = (path) => {
   return { findings: parsed, note: undefined };
 };
 
-/** GitHub's per-file patch list, or an empty one — an unreadable diff anchors nothing. */
 const readFiles = (path) => {
   const text = readOptional(path);
   if (text === undefined) {

@@ -14,14 +14,6 @@ type UseVirtualSelectDropdownPositionArgs = {
   readonly onScrollAway: () => void;
 };
 
-/**
- * As `position: absolute` the list was clipped by every scrolling or `overflow: hidden`
- * ancestor between it and the document — a Form group card, the form's own scroll region,
- * a settings drawer — and no z-index fixes that.
- * Scrolling an **ancestor** dismisses the dropdown rather than chasing it: a
- * fixed-position list cannot be re-anchored from a passive listener without reading layout
- * on every frame, and one that lags its trigger reads worse than one that closes.
- */
 export const useVirtualSelectDropdownPosition = ({
   anchorRef,
   dropdownRef,
@@ -36,8 +28,6 @@ export const useVirtualSelectDropdownPosition = ({
 
     if (!isEnabled || !anchorElement || !dropdownElement) return;
 
-    // Must precede any measurement: until it is shown, a popover is
-    // `display: none` under the UA stylesheet and measures zero.
     if (
       typeof dropdownElement.showPopover === 'function' &&
       !dropdownElement.matches(':popover-open')
@@ -53,9 +43,6 @@ export const useVirtualSelectDropdownPosition = ({
         viewportHeight: globalThis.innerHeight,
       });
 
-      // Keeping the previous object stops an unchanged observation from
-      // re-rendering the virtualized list, and stops the observer below from
-      // feeding itself.
       setPlacement((current) =>
         current?.left === next.left &&
         current.top === next.top &&
@@ -66,19 +53,12 @@ export const useVirtualSelectDropdownPosition = ({
     };
 
     const handleScrollAway = (event: Event) => {
-      // Non-bubbling removes the bubble phase only: a capture listener on
-      // `window` is still on the path of a scroll from EVERY element, and the
-      // option list is itself a scroll container. Without this guard, scrolling
-      // the list closes the dropdown on the first wheel tick, which is what
-      // made an option below the fold unreachable.
       const { target } = event;
       if (target instanceof Node && dropdownElement.contains(target)) return;
 
       onScrollAway();
     };
 
-    // Capture phase: the element that scrolls is an ancestor, and a scroll
-    // event does not bubble up from it.
     globalThis.addEventListener('scroll', handleScrollAway, {
       capture: true,
       passive: true,
@@ -89,8 +69,6 @@ export const useVirtualSelectDropdownPosition = ({
         ? undefined
         : new ResizeObserver(reposition);
 
-    // documentElement covers viewport resize; the other two cover the trigger
-    // growing (a tag wrapping) and the list growing (a page loading in).
     resizeObserver?.observe(document.documentElement);
     resizeObserver?.observe(anchorElement);
     resizeObserver?.observe(dropdownElement);

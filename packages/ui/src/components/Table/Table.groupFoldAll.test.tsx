@@ -35,16 +35,6 @@ import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
 import { TableBase } from '#ui/components/Table/TableBase';
 import { TableBody } from '#ui/components/Table/TableBody';
 
-/**
- * Opening and closing every group in one action (#774), end to end against real
- * stores.
- *
- * The unit tests say which paths are foldable. Only a whole grid can say what
- * the reader is left holding: that a collapse-all stops at the outermost level
- * rather than emptying the table, that the row count and the body's height
- * follow the rows that survive rather than the rows that loaded, and that the
- * collapse outlives the next read.
- */
 type TestRow = Record<string, unknown>;
 
 const ROW_HEIGHT = 40;
@@ -75,23 +65,6 @@ const groupRow = ({ isSubtotal = false, path }: GroupRowArgs): TestRow => ({
   [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, isSubtotal, path },
 });
 
-/**
- * A three-level rollup, in the order rollup emits it — every subtotal after the
- * rows it totals (#570), and the grand total last of all (ADR-065).
- *
- * ```
- * 0  Cancelled Business Critical
- * 1  Cancelled Business High
- * 2  Cancelled Business ·total·
- * 3  Cancelled Retail   Critical
- * 4  Cancelled Retail   ·total·
- * 5  Cancelled ·total·
- * 6  Active    Business Critical
- * 7  Active    Business ·total·
- * 8  Active    ·total·
- * 9  ·total·                        ← keyed by nothing
- * ```
- */
 const rows: readonly TestRow[] = [
   groupRow({ path: pathOf('Cancelled', 'Business', 'Critical') }),
   groupRow({ path: pathOf('Cancelled', 'Business', 'High') }),
@@ -105,7 +78,6 @@ const rows: readonly TestRow[] = [
   groupRow({ isSubtotal: true, path: pathOf() }),
 ];
 
-/** The same result read back in the opposite order — what a sort change produces. */
 const resorted: readonly TestRow[] = [
   groupRow({ path: pathOf('Active', 'Business', 'Critical') }),
   groupRow({ isSubtotal: true, path: pathOf('Active', 'Business') }),
@@ -130,10 +102,6 @@ const attachScrollMetrics = (container: HTMLDivElement | null) => {
   });
 };
 
-/**
- * The pair as the header menu wires it — the real hook, so the enabled states
- * asserted here are the ones the menu items get.
- */
 const FoldAllControls = () => {
   const { isCollapseAllEnabled, isExpandAllEnabled, setAllGroupsExpanded } =
     useTableGroupFoldAll<TestRow>();
@@ -223,10 +191,6 @@ const control = (testId: 'collapse-all' | 'expand-all') =>
 
 const getGrid = () => screen.getByRole('treegrid');
 
-/**
- * StyleX writes the body's computed total to a custom property rather than to
- * `height`, so that is where the declared height actually lives.
- */
 const readBodyHeight = () =>
   screen.getByTestId('table-body').style.getPropertyValue('--x-height');
 
@@ -236,7 +200,6 @@ const getFocusTarget = () =>
     readonly rowKey?: string;
   };
 
-/** The scroll listener defers through `requestAnimationFrame`; only an awaited act drains it. */
 const flushFrame = async () => {
   await act(async () => {
     screen.getByTestId('scroll-container').dispatchEvent(new Event('scroll'));
@@ -253,11 +216,6 @@ const enterGrid = async () => {
   await flushFrame();
 };
 
-/**
- * The labels each row actually **draws**, read off the drawn cells rather than
- * `textContent`, which would also collect the visually-hidden restatement a
- * carried level renders (ADR-080).
- */
 const drawnLabels = () =>
   getRows().map((row) =>
     [...row.querySelectorAll('[data-testid="table-group-key-cell"]')]
@@ -289,12 +247,6 @@ describe('folding every group at once', () => {
 
     fireEvent.click(control('collapse-all'));
 
-    // Every level below the top is folded away, and the top-level subtotals
-    // survive their **own** collapse: a collapse hides a group's descendants,
-    // never its row. The grand total survives because it is nobody's
-    // descendant. A set built from the grouping *configuration* rather than
-    // from the tree would name levels this result never populated, and
-    // `pruneCollapsedGroupPaths` would drop them on the next read.
     expect(drawnLabels()).toStrictEqual([
       'Cancelled total',
       'Active total',
@@ -317,11 +269,6 @@ describe('folding every group at once', () => {
 
     const grid = screen.getByTestId('table');
 
-    // The largest single change the grid can make to its visible set, which is
-    // where an off-by-one would show: the count and the last row's index have
-    // to meet.
-    // The header is row 1, so the count is the visible rows plus it — and the
-    // body's indices have to land inside it, ending exactly on it.
     expect(grid.getAttribute('aria-rowcount')).toBe('4');
     expect(
       getRows().map((row) => row.getAttribute('aria-rowindex')),
@@ -334,10 +281,6 @@ describe('folding every group at once', () => {
     fireEvent.click(control('collapse-all'));
     rerender(<Harness data={resorted} />);
 
-    // Expansion is keyed by path, so a sort — which changes every group's
-    // position and no group's key values — must leave all of it standing
-    // (ADR-061). Asserted after a collapse-*all*, where every level is folded
-    // at once and a single surviving path would hide the failure.
     expect(drawnLabels()).toStrictEqual([
       'Active total',
       'Cancelled total',
@@ -363,9 +306,6 @@ describe('folding every group at once', () => {
 
     fireEvent.click(control('collapse-all'));
 
-    // The invariant a collapse-all is the hardest case for: `<tbody>`'s height
-    // and both spacers come from the same count, so a body still measured
-    // against the loaded rows would stand seven rows taller than its contents.
     expect(readBodyHeight()).toBe(`${3 * ROW_HEIGHT}px`);
   });
 
@@ -376,17 +316,10 @@ describe('folding every group at once', () => {
     await pressKey('ArrowDown');
     await pressKey('ArrowDown');
 
-    // Focus is on `Cancelled / Business / ·total·`, three levels in and inside
-    // the subtree about to close — collapsing while focus sits elsewhere would
-    // prove nothing.
     expect(getFocusTarget().rowIndex).toBe(2);
 
     fireEvent.click(control('collapse-all'));
 
-    // The claim: focus lands on that row's own top-level group, at its new
-    // index. ADR-062's generic rule — nearest survivor at the same absolute
-    // index — would have answered index 2, the grand total, which is in no
-    // sense where the reader was.
     expect(getFocusTarget().rowIndex).toBe(0);
     expect(getFocusTarget().rowKey).toContain(
       resolveGroupPathKey(pathOf('Cancelled')),

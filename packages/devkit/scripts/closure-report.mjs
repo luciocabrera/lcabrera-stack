@@ -12,13 +12,6 @@ import { relative, resolve } from 'node:path';
 import { analyseClosure } from './closure.mjs';
 import { readFilesUnder } from './files.mjs';
 
-/**
- * Commands a consumer can be expected to resolve: the ones any shell provides,
- * plus this kit's own bin. `devkit` is on the list for the opposite reason to
- * the rest — not because a consumer already had it, but because installing the
- * package that ships these files is what puts it there, so a shipped file
- * telling a reader to run it names something they have by construction.
- */
 export const BASELINE_COMMANDS = [
   'bash',
   'devkit',
@@ -61,11 +54,6 @@ const ESCAPE_VERBS = {
   requires: 'declares',
 };
 
-/**
- * One wording for every mode. The verb is what separates the four kinds for a
- * reader, and a finding printed without it says only that something escaped —
- * which does not tell anyone what to do about it.
- */
 export const describeEscape = (finding) =>
   `${finding.file}:${finding.line}  ${ESCAPE_VERBS[finding.kind]} ${finding.resolved ?? finding.reference}`;
 

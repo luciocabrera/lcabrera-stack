@@ -22,9 +22,6 @@ describe('restoreStaticColumnOrder', () => {
   });
 
   it('restores static columns to their original positions', () => {
-    // currentOrder: id(0), name(1), age(2) — id is static at index 0
-    // newOrder: age, name, id (after user drag, id was moved)
-    // Expected: id restored to index 0: id, age, name
     const result = restoreStaticColumnOrder({
       currentOrder: ['id', 'name', 'age'],
       newOrder: ['age', 'name', 'id'],
@@ -34,7 +31,6 @@ describe('restoreStaticColumnOrder', () => {
   });
 
   it('handles multiple static columns', () => {
-    // currentOrder: id(0), name(1), age(2), actions(3) — id and actions are static
     const result = restoreStaticColumnOrder({
       currentOrder: ['id', 'name', 'age', 'actions'],
       newOrder: ['age', 'name', 'id', 'actions'],

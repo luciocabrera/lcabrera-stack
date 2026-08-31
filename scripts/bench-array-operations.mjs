@@ -52,7 +52,6 @@ const CASES = [
 
 const RUNS = 9;
 const WARMUP = 3;
-/** Total element-visits per sample, so every size does comparable work. */
 const WORK_UNITS = 20_000_000;
 
 /** @returns {number} median of a numeric list, without mutating it */

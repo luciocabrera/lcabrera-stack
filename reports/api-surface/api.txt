@@ -34,8 +34,8 @@ createPaginatedFetcher [const] <TResponse>({ isValid, path, resolveBaseUrl, shap
 fetchAndValidate [const] <T>({ isValid, shapeErrorMessage, signal, timeoutMs, url }: FetchAndValidateArgs<T>) => Promise<T>
 
 ## ./http/http.types
-PaginatedFetchArgs [type] PaginatedQuery & { /** * Incoming SSR request URL, handed to `resolveBaseUrl` so a loader reaches * the API host by absolute URL. Omit it in the browser, where the same * resolver derives the origin from the document. */ readonly requestUrl?: string; readonly signal?: AbortSignal; readonly timeoutMs?: number; }
-PaginatedQuery [type] { /** * Keyset cursor — the sort-key tuple of the last row already loaded, in * `sorting` order — for an endpoint that can seek past it rather than count * `skip` rows. `skip` is still sent alongside: it remains the rows-loaded * count, and an endpoint that does not understand cursors keeps working. */ readonly cursor?: readonly unknown[]; readonly filter?: unknown; readonly limit: number; readonly skip: number; readonly sorting?: readonly PaginatedSort[]; }
+PaginatedFetchArgs [type] PaginatedQuery & { readonly requestUrl?: string; readonly signal?: AbortSignal; readonly timeoutMs?: number; }
+PaginatedQuery [type] { readonly cursor?: readonly unknown[]; readonly filter?: unknown; readonly limit: number; readonly skip: number; readonly sorting?: readonly PaginatedSort[]; }
 PaginatedSort [type] { readonly columnKey: PropertyKey; readonly direction?: 'asc' | 'desc'; }
 
 ## ./olap/encode-drill-group.util
@@ -51,7 +51,7 @@ OLAP_GROUP_ROW_FIELD [const] "tableGroup"
 
 ## ./olap/olap.types
 OlapDrillGroup [type] { readonly isSubtotal: boolean; readonly path: readonly OlapGroupPathEntry[]; }
-OlapDrillRequest [type] { readonly group: OlapDrillGroup; readonly groupKeys: readonly string[]; /** The granularity each temporal key was grouped at, by column. */ readonly periods?: Readonly<Record<string, OlapGroupPeriod>>; }
+OlapDrillRequest [type] { readonly group: OlapDrillGroup; readonly groupKeys: readonly string[]; readonly periods?: Readonly<Record<string, OlapGroupPeriod>>; }
 OlapGroupPathEntry [type] { readonly columnKey: string; readonly value: unknown; }
 OlapGroupPeriod [type] 'day' | 'month' | 'quarter' | 'year'
 

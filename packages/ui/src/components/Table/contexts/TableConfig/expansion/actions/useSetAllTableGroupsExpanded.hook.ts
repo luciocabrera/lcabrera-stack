@@ -9,16 +9,8 @@ import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper
 
 import { applyGroupFoldFocus, resolveOutermostGroupPathKey } from './utils';
 
-/** Expansion is the complement of the collapsed set (ADR-067), so "everything open" is empty. */
 const NOTHING_COLLAPSED: ReadonlySet<string> = new Set<string>();
 
-/**
- * Local, like the per-row toggle it generalises: expansion changes nothing server-side, so
- * this touches no URL param and triggers no revalidation (ADR-061).
- * **What it collapses is the tree's own foldable set**, not a second enumeration of it:
- * the same `foldableGroupPaths` every chevron is drawn from, so "collapse all" cannot
- * close a group the grid never offered to close, and cannot leave one open that it did.
- */
 export const useSetAllTableGroupsExpanded = <
   TData extends Record<string, unknown>,
 >() => {

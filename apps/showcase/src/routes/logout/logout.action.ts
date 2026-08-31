@@ -3,10 +3,6 @@ import { redirect } from 'react-router';
 import { LOGIN_ROUTE } from '@/auth/auth.constants';
 import { authCookie } from '@/auth/authCookie';
 
-/**
- * Exposed only as an action — logout mutates session state, so it must be a POST, never a
- * GET a prefetch or link could trigger.
- */
 export const action = async () => {
   const clearedCookie = await authCookie.serialize('', {
     expires: new Date(0),

@@ -13,7 +13,6 @@ import { join } from 'node:path';
 
 import { parseFrontmatter } from './coordination-parse.mjs';
 
-/** Parsed `.md` files in a register dir (missing dir → none). */
 export const readEntries = (dir) =>
   existsSync(dir)
     ? readdirSync(dir, { withFileTypes: true })

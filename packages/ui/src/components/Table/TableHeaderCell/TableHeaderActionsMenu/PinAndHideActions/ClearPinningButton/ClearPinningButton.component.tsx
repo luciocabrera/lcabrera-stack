@@ -13,10 +13,6 @@ import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveCol
 
 import type { ClearPinningButtonProps } from './ClearPinningButton.types';
 
-/**
- * Identity and enabled-state come from the shared `CLEAR_PINNING_COMMAND` (ADR-011); this
- * surface owns only its live commit-context and menu presentation.
- */
 export const ClearPinningButton = <TData,>({
   columnKey,
   layoutLock,

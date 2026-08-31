@@ -6,7 +6,6 @@ describe('deserializeSortingFromURL', () => {
   it('deserializes a compact sorting object', () => {
     const param = JSON.stringify({ age: 'desc', name: 'asc' });
     const result = deserializeSortingFromURL(param);
-    // JSON.parse preserves insertion order: age first, then name
     expect(result).toEqual([
       { columnKey: 'age', direction: 'desc' },
       { columnKey: 'name', direction: 'asc' },
@@ -23,8 +22,6 @@ describe('deserializeSortingFromURL', () => {
   });
 
   it('drops the whole sort when a direction is hand-edited', () => {
-    // `name` is a valid entry and goes with the rest: a half-applied sort
-    // reorders a shared link's rows while still looking like the linked sort.
     expect(
       deserializeSortingFromURL('{"name":"asc","age":"; DROP TABLE"}'),
     ).toEqual([]);

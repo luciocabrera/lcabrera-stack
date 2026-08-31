@@ -6,10 +6,6 @@ type GetDemoCredentialArgs = {
   readonly env: NodeJS.ProcessEnv;
 };
 
-/**
- * Only the password **hash** is ever surfaced — the plaintext demo password lives in docs,
- * never in code.
- */
 export const getDemoCredential = ({
   env,
 }: GetDemoCredentialArgs): DemoCredential => {

@@ -19,19 +19,9 @@ type GetInitialTableStateArgs<TData extends Record<string, unknown>> = Partial<
 > & {
   readonly aggregates?: readonly TableColumnAggregate[];
   readonly crud?: TableCrudConfig;
-  /**
-   * The derived slices carry the hierarchy column while grouping is on (ADR-065), and
-   * seeding it here is what makes the server's first paint and the client's agree.
-   */
   readonly groupingKeys?: readonly string[];
 };
 
-/**
- * Builds the columns store's initial state from what the loader read out of the cookie.
- * That is the only source: the server renders from it, so anything the client preferred
- * over it (sessionStorage, which SSR cannot see) could only contradict the markup already
- * painted and shift the columns at hydration.
- */
 export const getInitialColumnsState = <TData extends Record<string, unknown>>({
   aggregates = [],
   columnFilters = {} as ColumnFiltersState<TData>,
@@ -47,8 +37,6 @@ export const getInitialColumnsState = <TData extends Record<string, unknown>>({
   const { columns: resolvedColumns, hasActionsColumn } =
     resolveTableActionsColumn<TData>({ columns, crud });
 
-  // Persisted pinning state can arrive partial (e.g. `{}` on a cookie miss),
-  // so treat both sides as optional and normalize to empty arrays.
   const rawColumnPinning: Partial<ColumnPinningState<TData>> = columnPinning;
   const pinnedLeft = (rawColumnPinning.left ?? []).filter(
     (columnKey) => columnKey !== ACTIONS_COLUMN_KEY,

@@ -1,6 +1,5 @@
 import type { OlapGroupReadRefusal } from './olap.types';
 
-/** Shared by every resolver that refuses, so two surfaces cannot disagree (ADR-094). */
 export const GROUP_READ_REFUSAL_MESSAGE: Readonly<
   Record<OlapGroupReadRefusal, string>
 > = {

@@ -51,8 +51,6 @@ const main = async () => {
     groups,
   });
 
-  // Report-only: emit the markdown selection summary for CI (job summary + PR
-  // comment) and run nothing.
   if (markdown) {
     process.stdout.write(
       `${renderSelectionMarkdown(mode, dispositions, { scripts })}\n`,

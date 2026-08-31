@@ -44,20 +44,20 @@ explicit extensions are **required**, would be actively wrong.
 
 ## Rules
 
-| Rule                                | Fixable | What it enforces                                            |
-| ----------------------------------- | ------- | ----------------------------------------------------------- |
-| `clean-import-paths`                | ✅      | No file extensions or trailing `/index` on internal imports |
-| `destructuring-for-functions`       |         | An object parameter once a function takes 2+ arguments      |
-| `domain-folder-filename`            |         | A folder's shared `*.types`/`*.constants` is named after it |
-| `filename-convention`               |         | Base-name case follows the file's type suffix               |
-| `merge-duplicate-imports`           | ✅      | One import statement per source module                      |
-| `no-explanatory-comments`           |         | No comment above or inside a function, component or type    |
-| `no-habit-return-types`             | ✅      | No return type TypeScript would infer identically           |
-| `no-inline-type-imports`            | ✅      | `import type { X }` over `import { type X }`                |
-| `no-type-definitions-in-components` |         | Types live in `*.types.ts`, not in component files          |
-| `readonly-props`                    | ✅      | Every member of a `*Props` type is `readonly`               |
-| `single-component-export`           |         | One component per `*.component.tsx`                         |
-| `type-suffix-naming`                | ✅      | `Args`/`Props` suffixes over `Arguments`/`Properties`       |
+| Rule                                | Fixable | What it enforces                                             |
+| ----------------------------------- | ------- | ------------------------------------------------------------ |
+| `clean-import-paths`                | ✅      | No file extensions or trailing `/index` on internal imports  |
+| `destructuring-for-functions`       |         | An object parameter once a function takes 2+ arguments       |
+| `domain-folder-filename`            |         | A folder's shared `*.types`/`*.constants` is named after it  |
+| `filename-convention`               |         | Base-name case follows the file's type suffix                |
+| `merge-duplicate-imports`           | ✅      | One import statement per source module                       |
+| `no-explanatory-comments`           |         | No comment above a declaration, or inside a function or type |
+| `no-habit-return-types`             | ✅      | No return type TypeScript would infer identically            |
+| `no-inline-type-imports`            | ✅      | `import type { X }` over `import { type X }`                 |
+| `no-type-definitions-in-components` |         | Types live in `*.types.ts`, not in component files           |
+| `readonly-props`                    | ✅      | Every member of a `*Props` type is `readonly`                |
+| `single-component-export`           |         | One component per `*.component.tsx`                          |
+| `type-suffix-naming`                | ✅      | `Args`/`Props` suffixes over `Arguments`/`Properties`        |
 
 Four rules take options; the rest take none.
 
@@ -360,8 +360,8 @@ body returning `'a' | 'b'` is a widening. Reviews still own that half.
 
 ### `no-explanatory-comments`
 
-Reports a comment written above a function, component or type declaration, or
-inside one. Not fixable — see below.
+Reports a comment written above a declaration, or inside a function, component
+or type declaration. Not fixable — see below.
 
 A name, a signature and a type already say what the code is, and prose repeating
 them is a second copy of a fact kept in the one place nothing checks. The failure
@@ -375,6 +375,9 @@ that reader as a free fallback before review caught it.
 ```tsx
 // Reads the persisted slices, falling back to the defaults.
 export const read = () => collect(defaults);
+
+// The clear half of the set — `deriveToggle`'s `target: undefined`.
+export const CLEAR_COMMAND = { id: 'column.aggregate.clear' };
 
 export const Panel = () => {
   // The chevron points down while the panel is open.
@@ -404,6 +407,9 @@ export const mount = () => {
   console.log('a directive is not prose');
   return render(<Panel />);
 };
+
+// Above a statement rather than a declaration, so out of scope.
+export { mount as default };
 ```
 
 Three positions are exempt, each for a reason the rule can check.

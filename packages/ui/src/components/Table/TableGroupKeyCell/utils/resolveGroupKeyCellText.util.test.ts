@@ -61,9 +61,6 @@ describe('resolveGroupKeyCellText', () => {
   });
 
   it('leaves a level the row does not carry empty', () => {
-    // A rollup subtotal carries one entry fewer than the rows it totals, so
-    // most grouped results leave some key columns empty on some rows. Which
-    // columns are filled is the depth signal (ADR-080).
     expect(
       resolve({
         columnKey: 'district',
@@ -82,8 +79,6 @@ describe('resolveGroupKeyCellText', () => {
   });
 
   it('does not suffix a subtotal’s ancestors', () => {
-    // The ancestry reads exactly as a leaf group's does; the one column where a
-    // subtotal differs is the level it totals.
     expect(
       resolve({
         columnKey: 'city',
@@ -117,9 +112,6 @@ describe('resolveGroupKeyCellText', () => {
   });
 
   it('reads a cube row’s arbitrary subset by column, not by position', () => {
-    // Cube emits every subset, so a row may carry the second key and not the
-    // first. `path.at(-1)` is still its innermost; `path.length - 1` is not a
-    // depth and is never consulted.
     const cubeRow = summaryOf({ path: [['district', 'Marais']] });
 
     expect(resolve({ columnKey: 'city', summary: cubeRow })).toBeUndefined();

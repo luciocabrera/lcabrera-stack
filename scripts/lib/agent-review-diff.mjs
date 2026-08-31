@@ -19,14 +19,6 @@
 /** Anchored on the hunk header, with bounded groups — nothing can backtrack. */
 const HUNK_HEADER = /^@@ -\d{1,12}(?:,\d{1,12})? \+(\d{1,12})(?:,\d{1,12})? @@/;
 
-/**
- * The new-file line numbers a unified-diff patch adds. (pure)
- *
- * Walks the hunk body: `+` consumes a new-file line and records it, a context
- * line consumes one without recording, and `-` consumes none. A `\` line ("No
- * newline at end of file") belongs to whichever side precedes it and consumes
- * nothing.
- */
 export const addedLines = (patch) => {
   const added = new Set();
   let cursor = 0;
@@ -37,23 +29,13 @@ export const addedLines = (patch) => {
     } else if (line.startsWith('+')) {
       added.add(cursor);
       cursor += 1;
-    } else if (line.startsWith('-') || line.startsWith('\\')) {
-      // A removed line occupies no position in the new file.
-    } else {
+    } else if (!line.startsWith('-') && !line.startsWith('\\')) {
       cursor += 1;
     }
   }
   return added;
 };
 
-/**
- * An index over the whole pull request: which lines each file added, and which
- * files carry changes whose patch GitHub withheld.
- *
- * `unreadable` is what stops this failing open — a finding citing a file whose
- * patch never arrived cannot be confirmed against the diff, and the validator
- * says so instead of quietly admitting it. (pure)
- */
 export const diffIndex = (files) => {
   const added = new Map();
   const unreadable = new Set();
@@ -73,6 +55,5 @@ export const diffIndex = (files) => {
   return { added, unreadable };
 };
 
-/** Whether `file` line `line` is one this diff added. (pure) */
 export const isAddedLine = (index, file, line) =>
   index.added.get(file)?.has(line) === true;

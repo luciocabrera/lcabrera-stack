@@ -19,28 +19,17 @@ type IsKeyRolledUpArgs = {
 };
 
 type ToGroupRowArgs = {
-  /**
-   * The alias comes from the builder's own result rather than being spelled here, so the
-   * name the SQL projected and the name this decodes by are one string.
-   */
   readonly aggregates: readonly GroupRowAggregate[];
   readonly columnKeys: readonly string[];
   readonly countAlias: string;
-  /** The alias the builder projected `GROUPING(k₁, …, kₙ)` under. */
   readonly maskAlias: string;
   readonly row: Record<string, unknown>;
-  /** How each truncated key was derived, by column. Absent for an untruncated grouping. */
   readonly truncations?: Readonly<Record<string, GroupKeyTruncation>>;
 };
 
-/** `GROUPING()` puts the first key in the MSB, so key `i` owns `2 ** (n - 1 - i)`. */
 const isKeyRolledUp = ({ index, keyCount, mask }: IsKeyRolledUpArgs) =>
   Math.trunc(mask / 2 ** (keyCount - 1 - index)) % 2 === 1;
 
-/**
- * Decode `GROUPING()` here (ADR-082): a set bit means "not keyed by that column", never
- * "no value here".
- */
 export const toGroupRow = ({
   aggregates,
   columnKeys,
@@ -51,8 +40,6 @@ export const toGroupRow = ({
 }: ToGroupRowArgs) => {
   const count = Number(row[countAlias]);
   const mask = Number(row[maskAlias]);
-  // A mask that did not arrive as a number decodes as "nothing rolled up" —
-  // the flat reading, and the only one that cannot invent a subtotal.
   const groupingMask = Number.isFinite(mask) ? mask : 0;
 
   const groupedKeys = columnKeys.filter(

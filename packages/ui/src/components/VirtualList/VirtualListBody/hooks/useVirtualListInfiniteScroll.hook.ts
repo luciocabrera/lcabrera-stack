@@ -21,7 +21,6 @@ export type UseVirtualListInfiniteScrollArgs = {
   readonly sentinelRef: RefObject<HTMLElement | null>;
 };
 
-/** @returns `hasListEnd` — whether the caller should render the sentinel at all. */
 export const useVirtualListInfiniteScroll = ({
   rootRef,
   sentinelRef,
@@ -34,22 +33,11 @@ export const useVirtualListInfiniteScroll = ({
   const searchTerm = useGetSearchTerm();
   const fetchMore = useFetchMore();
 
-  // While a client-side filter narrows the loaded options, the visible list is
-  // a subset — so only fetch when the user reaches a real overflow bottom, never
-  // to fill a short/empty filtered view (which would scan the whole dataset).
   const shouldFetchToFill = !isClientFilterActive({
     listFilterMode,
     searchTerm,
   });
 
-  // The sentinel marks the end of the rendered options, so it exists only once
-  // there are options to reach the end of. In the 'empty' and 'loading' modes it
-  // would be the sole in-flow child of the scroll container, contributing its own
-  // height to `scrollHeight` — a phantom overflow that paints a scrollbar over
-  // "No options found" and satisfies the observer's overflow test as a genuine
-  // scrolled-to-bottom, fetching page after page for a filter that can never
-  // match one. Bootstrapping the first page is `onFetchInitial`'s job, not the
-  // sentinel's.
   const hasListEnd = contentMode === 'list';
 
   useInfiniteScrollObserver({

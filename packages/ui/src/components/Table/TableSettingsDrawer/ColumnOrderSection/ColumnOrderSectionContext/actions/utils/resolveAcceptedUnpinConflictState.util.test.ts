@@ -76,11 +76,6 @@ describe('resolveAcceptedUnpinConflictState', () => {
     expect(mockInsertAdjacentToPinnedGroup).not.toHaveBeenCalled();
   });
 
-  // Pins pre-existing behaviour rather than endorsing it: an absent `columnKey`
-  // leaves `index` at -1, and `slice(-1)` is the last element rather than the
-  // whole array — so the left branch unpins only the final column while the
-  // right branch (`slice(0, 0)`) is a no-op. Asymmetric and almost certainly not
-  // intended; see the follow-up issue before relying on either shape.
   it('unpins only the last column when the columnKey is absent', () => {
     mockBuildAllOrderedColumns.mockReturnValue([
       { key: 'id', label: 'ID' },

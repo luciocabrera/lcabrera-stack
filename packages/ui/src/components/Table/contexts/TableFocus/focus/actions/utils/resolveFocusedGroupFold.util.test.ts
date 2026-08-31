@@ -29,8 +29,6 @@ const metaOf = (
 
 describe('resolveFocusedGroupFold', () => {
   it('acts on the level the focused column holds', () => {
-    // The keyboard has to fold what the chevron in the same cell folds, or the
-    // two paths disagree on every row that states an ancestor (#802).
     const fold = resolveFocusedGroupFold({
       columnKey: 'city',
       groupPath: MARAIS,
@@ -47,10 +45,6 @@ describe('resolveFocusedGroupFold', () => {
   });
 
   it('offers nothing from a key cell that deliberately draws no chevron', () => {
-    // An open subtotal skips its own level, so its innermost key cell renders
-    // blank space. Folding from there with the keyboard would collapse the
-    // group from the one cell whose emptiness says it cannot — and would
-    // contradict the contract that the keyboard matches the chevron.
     const fold = resolveFocusedGroupFold({
       columnKey: 'district',
       groupPath: MARAIS,
@@ -67,8 +61,6 @@ describe('resolveFocusedGroupFold', () => {
   });
 
   it('keeps the row-scoped keys on a column that holds no level at all', () => {
-    // An aggregate column is not a key column, so the question of *which* level
-    // cannot arise there and the treegrid's row-scoped keys still apply.
     const fold = resolveFocusedGroupFold({
       columnKey: 'unrelated',
       groupPath: MARAIS,

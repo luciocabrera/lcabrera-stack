@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { mergeArrays } from './merge-arrays.util';
 
-// `MergeArraysArgs` admits null (its sole caller forwards `OxlintConfig` fields
-// like `jsPlugins: T[] | null`), so the null path must be covered — but
-// `unicorn/no-null` bans the literal in source. This holds the value behind a
-// typed binding: same type, no literal, lint satisfied.
 const nullish: null | readonly number[] = JSON.parse('null');
 
 describe('mergeArrays', () => {
@@ -26,10 +22,6 @@ describe('mergeArrays', () => {
     });
   });
 
-  // The guard is `!baseValue && !overrideValue`, which reads as "falsy" but is
-  // exactly a nullish check because arrays are always truthy — even when empty.
-  // These cases are what stop it being "simplified" into `.length` checks,
-  // which would wrongly collapse an empty array to undefined.
   describe('an empty array is a value, not an absence', () => {
     it('returns [] rather than undefined when a side is an empty array', () => {
       expect(mergeArrays({ baseValue: [] })).toStrictEqual([]);

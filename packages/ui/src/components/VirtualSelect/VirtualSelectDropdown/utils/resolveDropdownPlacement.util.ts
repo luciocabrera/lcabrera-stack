@@ -10,10 +10,6 @@ type ResolveDropdownPlacementArgs = {
   readonly viewportHeight: number;
 };
 
-/**
- * Flipping needs the measured height, so callers must read it after the popover is shown —
- * a hidden popover measures zero, which resolves to "fits below" and never flips.
- */
 export const resolveDropdownPlacement = ({
   anchorRect,
   dropdownHeight,
