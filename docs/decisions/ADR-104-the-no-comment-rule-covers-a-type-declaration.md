@@ -3,7 +3,7 @@ governs:
   - repository
 ---
 
-# ADR-101 — The no-comment rule covers a type declaration
+# ADR-104 — The no-comment rule covers a type declaration
 
 **Status:** Accepted
 

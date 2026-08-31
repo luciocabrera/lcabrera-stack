@@ -141,7 +141,7 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
   sits inside a type declaration
   ([ADR-095](../../../docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
   amended for the third position by
-  [ADR-101](../../../docs/decisions/ADR-101-the-no-comment-rule-covers-a-type-declaration.md));
+  [ADR-104](../../../docs/decisions/ADR-104-the-no-comment-rule-covers-a-type-declaration.md));
   `local-rules/no-explanatory-comments` reports all three.
   A decision goes in the ADR that owns it; investigation and measurement go in
   the pull request or the issue. Two exemptions: the short file-level "why"
