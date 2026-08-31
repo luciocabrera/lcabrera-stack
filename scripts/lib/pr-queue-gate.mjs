@@ -9,6 +9,10 @@
  * even if the model finds the deletion reasonable, and that property is testable
  * here without invoking anything.
  *
+ * The verdict vocabulary is closed. A value outside policy §1 is not a weaker
+ * verdict but no verdict at all, so the ceiling refuses it instead of ranking it
+ * by a list position it does not have.
+ *
  * The split inside §5 is deliberate. A `stop` is mechanically certain (the diff
  * removes a test file). A `flag` is "a §5 area is touched" — a migration, a
  * public manifest — which needs the diff read before it is either confirmed as a
@@ -230,7 +234,11 @@ export const detectBlockers = (pr, conformance) =>
     },
   ].filter(Boolean);
 
-const PRECEDENCE = ['ESCALATE', 'ACT', 'WAIT', 'ENQUEUE'];
+export const PRECEDENCE = Object.freeze(['ESCALATE', 'ACT', 'WAIT', 'ENQUEUE']);
+
+const VERDICTS = new Set(PRECEDENCE);
+
+export const isVerdict = (value) => VERDICTS.has(value);
 
 /** The strictest verdict present — escalate outranks act outranks wait. */
 const strictest = (verdicts) =>
@@ -386,4 +394,6 @@ export const forbiddenActions = (actions) =>
 
 /** True when the model's verdict is at or below the mechanical ceiling. */
 export const isWithinCeiling = (ceiling, proposed) =>
+  isVerdict(ceiling) &&
+  isVerdict(proposed) &&
   PRECEDENCE.indexOf(proposed) <= PRECEDENCE.indexOf(ceiling);

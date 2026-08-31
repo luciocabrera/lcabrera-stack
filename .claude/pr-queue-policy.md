@@ -42,6 +42,17 @@ Exactly one verdict per PR per pass. There is deliberately no verdict meaning
 | `WAIT`     | Blocker clears on its own with no input from anyone (a check still running)     | Nothing. Records what it is waiting on and the earliest re-check       |
 | `ESCALATE` | A §5 trigger fired, or a §4 action hit its attempt bound, or evidence is absent | Stops on that PR, writes the escalation reason, touches nothing        |
 
+**This table is the whole vocabulary, and it is closed.** A response naming
+anything else — the spelling a verdict used to have, a lower-cased one, a word
+invented on the spot — is not a weaker verdict, it is not a verdict: the decide
+pass is treated as having produced none, and the PR escalates under S10. It is
+never passed through, because a verdict nothing recognises is skipped by
+`applyDecisions` and counted in no column of the decision log, which reads as
+"nothing to do here" — the one outcome S10 exists to forbid. `PRECEDENCE` in
+`pr-queue-gate.mjs` is that vocabulary in code; the decide pass's JSON schema and
+the ceiling check both derive from it, so a rename cannot leave one of them
+admitting a word the others refuse.
+
 `ESCALATE` is per-PR, not per-queue: one escalating PR never stops the operator
 from landing an unrelated eligible one. The exception is an ordering edge (§3) —
 escalating a PR escalates everything downstream of it in the same chain, because

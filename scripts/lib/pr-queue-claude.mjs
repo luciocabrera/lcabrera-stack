@@ -20,6 +20,8 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { isVerdict, PRECEDENCE } from './pr-queue-gate.mjs';
+
 /**
  * The claude binary as an absolute path, never a bare name.
  *
@@ -99,7 +101,7 @@ export const DECISION_SCHEMA = {
       items: { type: 'string' },
       type: 'array',
     },
-    verdict: { enum: ['ENQUEUE', 'ACT', 'WAIT', 'ESCALATE'], type: 'string' },
+    verdict: { enum: [...PRECEDENCE], type: 'string' },
   },
   required: ['verdict', 'ruleIds', 'reasoning', 'evidence', 'actions'],
   type: 'object',
@@ -247,10 +249,11 @@ export const decideArgs = ({ model }) => [
 /**
  * The decision out of the CLI envelope.
  *
- * Defensive on two counts: the envelope's `result` is a string even under
- * `--json-schema`, and a model that ignores the schema tends to fence its JSON.
- * Both recover to a real object; anything else is reported as a failed run
- * rather than a verdict, because a half-parsed verdict is worse than none.
+ * Defensive on three counts: the envelope's `result` is a string even under
+ * `--json-schema`, a model that ignores the schema tends to fence its JSON, and
+ * nothing on that path enforces the schema's own verdict enum. The first two
+ * recover to a real object; a verdict outside policy §1 is reported as a failed
+ * run rather than carried, because one the operator cannot read is S10.
  */
 export const parseDecision = (stdout) => {
   try {
@@ -263,9 +266,11 @@ export const parseDecision = (stdout) => {
       typeof raw === 'string'
         ? JSON.parse(raw.replace(/^```(?:json)?\n?|\n?```$/g, '').trim())
         : raw;
-    return typeof decision?.verdict === 'string'
+    return isVerdict(decision?.verdict)
       ? { decision }
-      : { error: 'response carried no verdict' };
+      : {
+          error: `response carried no verdict the policy defines (${PRECEDENCE.join(', ')}): ${JSON.stringify(decision?.verdict)}`,
+        };
   } catch (cause) {
     return { error: `unparseable claude response: ${cause.message}` };
   }

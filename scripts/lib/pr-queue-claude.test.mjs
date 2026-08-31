@@ -125,12 +125,9 @@ describe('decideArgs', () => {
 
 describe('DECISION_SCHEMA', () => {
   it('admits exactly the four policy verdicts', () => {
-    expect(DECISION_SCHEMA.properties.verdict.enum).toEqual([
-      'ENQUEUE',
-      'ACT',
-      'WAIT',
-      'ESCALATE',
-    ]);
+    expect(new Set(DECISION_SCHEMA.properties.verdict.enum)).toEqual(
+      new Set(['ENQUEUE', 'ACT', 'WAIT', 'ESCALATE']),
+    );
   });
 
   it('requires evidence, so a bare verdict cannot validate', () => {
@@ -177,6 +174,25 @@ describe('parseDecision', () => {
     });
     expect(parseDecision(stdout).decision).toBeUndefined();
     expect(parseDecision(stdout).error).toMatch(/no verdict/);
+  });
+
+  it('refuses MERGE — the spelling the vocabulary used to have', () => {
+    const stdout = JSON.stringify({
+      result: JSON.stringify({ ...decision, verdict: 'MERGE' }),
+    });
+    expect(parseDecision(stdout).decision).toBeUndefined();
+    expect(parseDecision(stdout).error).toMatch(/no verdict/);
+    expect(parseDecision(stdout).error).toContain('"MERGE"');
+  });
+
+  it('refuses a verdict outside the vocabulary entirely', () => {
+    for (const verdict of ['TOTAL_NONSENSE', 'enqueue', '']) {
+      const stdout = JSON.stringify({
+        result: JSON.stringify({ ...decision, verdict }),
+      });
+      expect(parseDecision(stdout).decision).toBeUndefined();
+      expect(parseDecision(stdout).error).toMatch(/no verdict/);
+    }
   });
 
   it('refuses unparseable output', () => {

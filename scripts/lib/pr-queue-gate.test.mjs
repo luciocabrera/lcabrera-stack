@@ -1,8 +1,7 @@
 /**
  * The gate is the operator's leash, so these tests pin the direction it fails
- * in: every uncertainty must resolve toward ESCALATE, never toward ENQUEUE. The
- * ceiling test is the important one — it is what stops a model reasoning its way
- * past a hard stop.
+ * in: every uncertainty must resolve toward ESCALATE, never toward ENQUEUE.
+ * What the ceiling is worth once computed is `pr-queue-gate-ceiling.test.mjs`.
  */
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,7 +14,7 @@ import {
   detectFlags,
   detectStops,
   evaluateGate,
-  isWithinCeiling,
+  isVerdict,
 } from './pr-queue-gate.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -335,19 +334,35 @@ describe('evaluateGate — the ceiling', () => {
   it('escalates on a stop regardless of how clean everything else is', () => {
     expect(evaluateGate(pr({ files: [] }), clean).verdict).toBe('ESCALATE');
   });
-});
 
-describe('isWithinCeiling — the model may only tighten', () => {
-  it('allows tightening', () => {
-    expect(isWithinCeiling('ENQUEUE', 'ESCALATE')).toBe(true);
-    expect(isWithinCeiling('ACT', 'ESCALATE')).toBe(true);
-    expect(isWithinCeiling('WAIT', 'WAIT')).toBe(true);
-  });
-
-  it('refuses any loosening — the whole point of the leash', () => {
-    expect(isWithinCeiling('ESCALATE', 'ENQUEUE')).toBe(false);
-    expect(isWithinCeiling('ESCALATE', 'ACT')).toBe(false);
-    expect(isWithinCeiling('ACT', 'ENQUEUE')).toBe(false);
-    expect(isWithinCeiling('WAIT', 'ENQUEUE')).toBe(false);
+  it('emits only verdicts the vocabulary knows — what `strictest` rests on', () => {
+    const everyBlocker = [
+      ...detectBlockers(
+        pr({
+          checks: {
+            all: [{ name: 'CI', state: 'FAILURE' }],
+            failed: [{ name: 'CI', state: 'FAILURE' }],
+            pending: [{ name: 'Sonar', state: 'IN_PROGRESS' }],
+          },
+          isDraft: true,
+          mergeStateStatus: 'BEHIND',
+          mergeable: 'UNKNOWN',
+          queue: queue({ queued: true }),
+          reviewDecision: 'CHANGES_REQUESTED',
+          threads: { total: 1, unresolved: [{ path: 'a.ts' }] },
+        }),
+        { body: ['no ## What'], title: ['not conventional'] },
+      ),
+      ...detectBlockers(
+        pr({ checks: { all: [], failed: [], pending: [] } }),
+        clean,
+      ),
+    ];
+    expect(new Set(everyBlocker.map((blocker) => blocker.id))).toEqual(
+      new Set(['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E10', 'E11']),
+    );
+    expect(
+      everyBlocker.filter((blocker) => !isVerdict(blocker.verdict)),
+    ).toEqual([]);
   });
 });

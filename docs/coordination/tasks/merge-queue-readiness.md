@@ -41,7 +41,16 @@ blocks every merge.
 
 ## Status / next
 
-- Current step: review round 7 — `COMMANDS.md` was the last surface still saying
+- Current step: review round 9 — the rename of the operator's `MERGE` verdict to
+  `ENQUEUE` left `isWithinCeiling` ranking the proposed verdict with
+  `indexOf`, and an absent value has no position: `-1 <= anything` read every
+  unrecognised verdict as within every ceiling, not only the old spelling. The
+  vocabulary is now declared once (`PRECEDENCE` in `pr-queue-gate.mjs`), the
+  ceiling refuses a value outside it on either side, the decide pass's JSON
+  schema derives its enum from it, and `parseDecision` refuses a response
+  carrying one — which routes it through `failedDecision` to `ESCALATE` under
+  S10 instead of a row `applyDecisions` skips and the log counts in no column
+- Round 7 — `COMMANDS.md` was the last surface still saying
   A6-A8 happen on "a later pass that sees it merged", and its `--apply` row still
   ended "enqueue, close". Both now say what the code does. The leash is settled
   (round 5, residual routed to #1040) and the Sonar wait compares the commit
