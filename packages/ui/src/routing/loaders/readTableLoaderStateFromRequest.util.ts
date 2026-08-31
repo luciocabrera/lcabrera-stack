@@ -77,9 +77,6 @@ export const readTableLoaderStateFromRequest = <
     persistenceKey,
   });
 
-  // Read here rather than passed down from the root loader: this util is a
-  // published entry point a consumer's own loader calls directly, and it
-  // already holds the one thing the read needs — the request's Cookie header.
   const { grouping: groupingPreferences } = getGlobalSettingsFromCookie({
     appId,
     cookieString: cookieHeader ?? undefined,

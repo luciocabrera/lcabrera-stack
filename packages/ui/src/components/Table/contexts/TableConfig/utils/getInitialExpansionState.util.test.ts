@@ -11,9 +11,6 @@ describe('getInitialExpansionState', () => {
   });
 
   it("takes the reader's default and still starts with no exception to it", () => {
-    // Under `collapsed` the empty set is a fully folded grid, which is the
-    // whole point: the fold lands on the first paint, with no path enumerated
-    // and no data needed to name one.
     expect(
       getInitialExpansionState({ defaultFold: 'collapsed' }),
     ).toStrictEqual({

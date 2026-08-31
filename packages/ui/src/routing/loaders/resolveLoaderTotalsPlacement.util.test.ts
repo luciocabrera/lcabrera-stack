@@ -43,8 +43,6 @@ describe('resolveLoaderTotalsPlacement', () => {
   });
 
   it('lets the param outrank the global preference', () => {
-    // The whole ordering claim: a link is an explicit statement about one
-    // table, so it beats a standing preference about every table.
     expect(
       resolveLoaderTotalsPlacement({
         param: 'last',
@@ -65,8 +63,6 @@ describe('resolveLoaderTotalsPlacement', () => {
   });
 
   it('refuses a preference outside the vocabulary, like the other two', () => {
-    // The settings cookie is client-controlled too, so the third channel is
-    // guarded on the same terms as the first two.
     const preference = JSON.parse('"above"') as never;
 
     expect(

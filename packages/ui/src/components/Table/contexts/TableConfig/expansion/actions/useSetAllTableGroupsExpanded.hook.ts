@@ -10,13 +10,6 @@ import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper
 
 import { applyGroupFoldFocus, resolveOutermostGroupPathKey } from './utils';
 
-/**
- * Local, like the per-row toggle it generalises: expansion changes nothing server-side, so
- * this touches no URL param and triggers no revalidation (ADR-061).
- * **What it collapses is the tree's own foldable set**, not a second enumeration of it:
- * the same `foldableGroupPaths` every chevron is drawn from, so "collapse all" cannot
- * close a group the grid never offered to close, and cannot leave one open that it did.
- */
 export const useSetAllTableGroupsExpanded = <
   TData extends Record<string, unknown>,
 >() => {
@@ -28,9 +21,6 @@ export const useSetAllTableGroupsExpanded = <
 
   return (isExpanded: boolean) => {
     const { defaultFold, toggledGroupPaths } = expansionStore.get();
-    // Resolved before either direction, where expanding once short-circuited on
-    // an empty set: under a `collapsed` default an empty set is a fully folded
-    // grid, so "nothing to open" cannot be read off the size.
     const treeArgs = { data: dataStore.get().data, defaultFold };
     const { foldableGroupPaths, rows } = resolveTableGroupTree({
       ...treeArgs,

@@ -112,8 +112,6 @@ describe('under a grouping', () => {
   });
 
   it('offers a measured column no more than an unmeasured one', () => {
-    // `toGroupSort` matches a measure by its `column:fn` token, never by the
-    // bare column, so `status` here would order nothing.
     columnsRef.current = [
       { isSortable: true, key: 'region', label: 'Region' },
       { isSortable: true, key: 'status', label: 'Status' },

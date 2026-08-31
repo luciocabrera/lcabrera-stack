@@ -298,8 +298,6 @@ const collapsedTree = (toggled: readonly string[] = []) =>
 
 describe('resolveTableGroupTree under a collapsed default', () => {
   it('hides every subtree with nothing in the set at all', () => {
-    // The property the exception set exists for: no path is enumerated, no data
-    // is consulted to name one, and the fold is right on the first paint.
     expect(collapsedTree().rows).toStrictEqual([
       groupRow(paris),
       groupRow(berlin),
@@ -335,11 +333,6 @@ describe('resolveTableGroupTree under a collapsed default', () => {
   });
 
   it('announces a folded group as collapsed, not as expanded', () => {
-    // The gap that let two raw membership reads through review: the cases above
-    // assert `rows` and `foldableGroupPaths`, and both are right while
-    // `rowMeta.isExpanded` is inverted. This value reaches `aria-expanded` on
-    // the row and the chevron's direction, so a grid that landed folded because
-    // the reader asked it to would announce every group as open.
     const expanded = collapsedTree().rowMeta?.map((meta) => meta.isExpanded);
 
     expect(expanded).toStrictEqual([false, false]);

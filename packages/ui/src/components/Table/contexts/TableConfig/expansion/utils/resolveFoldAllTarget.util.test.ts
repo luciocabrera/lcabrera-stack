@@ -26,8 +26,6 @@ describe('resolveFoldAllTarget', () => {
   });
 
   it('names every foldable path to open everything under a collapsed default', () => {
-    // The mirror image, and the case a size check got backwards: opening
-    // everything is the fully-populated set here, not the empty one.
     expect(
       resolveFoldAllTarget({
         defaultFold: 'collapsed',

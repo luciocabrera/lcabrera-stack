@@ -13,7 +13,6 @@ type ToggleTableGroupKeyArgs = {
   readonly columnKey: string;
   readonly grouping: TableGroupingState;
   readonly period?: TableGroupPeriod;
-  /** The reader's Global Settings mode, which applies only to a grouping this call creates. */
   readonly preferredMode?: TableGroupingMode;
 };
 

@@ -31,9 +31,6 @@ export const useToggleTableGroupExpansion = <
       toggledGroupPaths,
     });
 
-    // Asked of the predicate, not of membership: under a `collapsed` default
-    // the set holds the groups that are *open*, so a `has` here would move
-    // focus on the expand rather than on the collapse.
     if (
       isGroupCollapsed({
         defaultFold,

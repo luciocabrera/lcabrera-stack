@@ -35,10 +35,6 @@ export const GroupByColumnButton = <TData,>({
     resolveGroupKeyAvailability<TData>({ capability, column });
   const { icon: GroupByColumnCommandIcon, label } = GROUP_BY_COLUMN_COMMAND;
 
-  // A curated grouping is not editable from here either. Hiding the item rather
-  // than disabling it, for the reason the drawer's Add is hidden: the lock is
-  // not a state the user can clear, so an inert control would only ask them to
-  // keep trying (#578).
   if (isGroupingLocked) return;
 
   const isApplied = groupingKeys.includes(String(columnKey));
@@ -59,9 +55,6 @@ export const GroupByColumnButton = <TData,>({
   const title = resolveTitle();
 
   const handleGroupByColumn = () => {
-    // The granularity goes on with the key: a column the catalogue refuses raw
-    // is offered only truncated, so adding it without one applies a grouping
-    // the server would refuse (ADR-084).
     toggleGroupKey({ columnKey: String(columnKey), period: requiredPeriod });
     onClose();
   };
@@ -79,8 +72,6 @@ export const GroupByColumnButton = <TData,>({
       onClick={handleGroupByColumn}
       orientation='horizontal'
       size='mini'
-      // The reason rides the disabled item rather than a tooltip: a disabled
-      // button fires no pointer events, so a tooltip on one never opens.
       {...(title !== undefined && { title })}
       variant={isActive ? 'primary' : 'ghost'}
     >

@@ -153,9 +153,6 @@ describe('a measure among the sorts', () => {
   });
 
   it('is listed after the column sorts, which is the order the read applies', () => {
-    // `buildGroupOrderByClause` splices every aggregate term in at the last
-    // group key, so a measure cannot outrank a column sort however it is
-    // dragged. Listing it above one would state a precedence that never runs.
     sortingRef.current = [
       { columnKey: 'total_amount:sum', direction: 'desc' },
       { columnKey: 'id', direction: 'asc' },

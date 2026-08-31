@@ -26,9 +26,6 @@ describe('resolveNewGroupingMode', () => {
   });
 
   it('does not reinstate itself when the user switched the mode back', () => {
-    // The reader prefers rollup and has switched this table to flat. Adding a
-    // second key must not undo that, which is the failure a loader-side default
-    // would produce.
     expect(
       resolveNewGroupingMode({
         keys: ['region', 'status'],

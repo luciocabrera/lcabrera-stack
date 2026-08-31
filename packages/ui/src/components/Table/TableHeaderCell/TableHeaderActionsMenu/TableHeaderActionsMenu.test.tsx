@@ -65,12 +65,6 @@ vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
-  // Read from typed refs rather than spelled inline. Both hooks really answer
-  // `X | undefined`, and the absent case is what the aggregation-mode block is
-  // gated on — so the mock has to be able to express it *and* to be seen
-  // expressing it. `() => undefined` is not an option: `unicorn/no-useless-undefined`
-  // rewrites it to `() => {}`, an empty block that returns `undefined` and reads
-  // like an empty object, which is exactly the confusion a reviewer hit.
   useGetTableColumnGroupingCapability: () => capabilityRef.current,
   useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
   useGetTableIsGroupingLocked: () => false,
@@ -207,7 +201,6 @@ describe('TableHeaderActionsMenu', () => {
       />,
     );
 
-    // sort │ pin │ hide │ manage — three boundaries between four groups.
     expect(screen.getAllByRole('separator')).toHaveLength(3);
   });
 
@@ -222,7 +215,6 @@ describe('TableHeaderActionsMenu', () => {
       />,
     );
 
-    // Only the pin │ hide boundary — nothing renders above "Pin Left".
     expect(screen.getAllByRole('separator')).toHaveLength(1);
   });
 
@@ -308,9 +300,6 @@ describe('TableHeaderActionsMenu', () => {
     );
   });
 
-  // Grouping is a *route* capability, so the menu reads it from the meta store
-  // rather than taking it as a prop. Absent means off, which is why the menu a
-  // non-grouping route renders is unchanged by this feature.
   describe('grouping section', () => {
     it('offers no grouping commands when the route did not declare the capability', () => {
       render(
@@ -357,17 +346,10 @@ describe('TableHeaderActionsMenu', () => {
         />,
       );
 
-      // sort │ group │ fold │ pin │ hide │ manage — five boundaries, two more
-      // than the same column renders with grouping off. No capability is
-      // resolved for this column, so the aggregation-mode block contributes
-      // none.
       expect(screen.getAllByRole('separator')).toHaveLength(5);
     });
 
     it('adds the aggregation-mode block only once a capability is resolved', () => {
-      // The case the mock could not express while it answered a fixed value:
-      // absent capability and present capability have to produce *different*
-      // menus, or the suite cannot fail for the reason criterion 2 exists.
       isGroupingEnabledRef.current = true;
       capabilityRef.current = {
         aggregates: ['count', 'sum'],
@@ -392,15 +374,10 @@ describe('TableHeaderActionsMenu', () => {
       expect(screen.getByText('Sum')).not.toBeNull();
       expect(screen.getByText('Count')).not.toBeNull();
       expect(screen.getByText('No Aggregate')).not.toBeNull();
-      // One more boundary than the absent-capability case above.
       expect(screen.getAllByRole('separator')).toHaveLength(6);
     });
 
     it('drops only the aggregation block once the column becomes a group key', () => {
-      // The suppression is surgical: this is the same menu as the test above,
-      // with the column applied as a key. Every other item has to survive it,
-      // or the fix for #830 has taken the column's sort/pin/hide/manage
-      // affordances down with the aggregates it meant to remove.
       isGroupingEnabledRef.current = true;
       capabilityRef.current = {
         aggregates: ['count', 'sum'],
@@ -443,7 +420,6 @@ describe('TableHeaderActionsMenu', () => {
       expect(screen.queryByText('Sum')).toBeNull();
       expect(screen.queryByText('Count')).toBeNull();
       expect(screen.queryByText('No Aggregate')).toBeNull();
-      // Back to the five boundaries the block-less grouping menu renders.
       expect(screen.getAllByRole('separator')).toHaveLength(5);
     });
 
@@ -461,9 +437,6 @@ describe('TableHeaderActionsMenu', () => {
       );
 
       expect(screen.getByText('Group by This')).not.toBeNull();
-      // One separator, and it is the grouping block's own — between naming a
-      // key and folding the groups. The shell adds none, because there is no
-      // second section for this column to be separated from.
       expect(screen.getAllByRole('separator')).toHaveLength(1);
       expect(screen.queryByText('Pin Left')).toBeNull();
       expect(screen.queryByText('Manage Column')).toBeNull();

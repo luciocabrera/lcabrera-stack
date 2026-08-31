@@ -10,10 +10,6 @@ import type {
 } from './pinningPreferences.types';
 import type { PinConflictResolution, PinSide } from './ui.types';
 
-/**
- * Each member is absent when it equals the shipped default, so a settings cookie
- * carries only what the user actually moved away from.
- */
 export type GlobalGroupingPreferences = {
   readonly defaultFold?: TableGroupFold;
   readonly mode?: TableGroupingMode;

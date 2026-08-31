@@ -27,8 +27,6 @@ describe('isGroupCollapsed', () => {
   });
 
   it('answers for a group the set has never named, either way', () => {
-    // The whole point of storing exceptions: a path nobody has touched still
-    // has an answer, with no data needed to name it first.
     expect(run({ defaultFold: 'collapsed', toggled: ['["b"]'] })).toBe(true);
     expect(run({ defaultFold: 'expanded', toggled: ['["b"]'] })).toBe(false);
   });

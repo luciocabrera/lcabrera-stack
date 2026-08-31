@@ -72,9 +72,6 @@ const contextValue: TableDrawerContextValue = {
   totalsPlacementStore: totalsPlacementStore as never,
 };
 
-// The drawer only ever mounts inside `TableConfigProvider`, and its grouping
-// actions read the reader's preferred mode off the meta store, so the harness
-// nests the two the way the app does.
 const metaStore = createMockStore<Partial<TableMetaState>>({});
 
 const Wrapper = ({ children }: WrapperProps) =>

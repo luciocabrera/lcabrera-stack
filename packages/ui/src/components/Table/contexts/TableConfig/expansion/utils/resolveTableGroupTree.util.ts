@@ -49,13 +49,6 @@ const countSiblings = (parentKeys: readonly string[]) => {
   return counts;
 };
 
-/**
- * Collapsing filters an array that is already in memory — a grouped read returns whole
- * (ADR-059), so no fetch is involved and the only thing that changes is the index space
- * the virtualizer windows over.
- * That is why every index downstream of this — the focus store's `rowIndex`,
- * `aria-rowindex` — counts **visible** rows and not loaded ones (ADR-067).
- */
 export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
   data,
   defaultFold,
@@ -112,10 +105,6 @@ export const resolveTableGroupTree = <TData extends Record<string, unknown>>({
     rows.push(row);
     rowMeta.push({
       hasChildren,
-      // Asked of the predicate, not of membership: the set holds the groups
-      // folded the other way from `defaultFold`, so a `has` here announces
-      // every group of a fully folded grid as expanded (ADR-103). A detail row
-      // has no path key and is never either.
       isExpanded: !isCollapsed && node.pathKey !== undefined,
       level: node.level,
       levelDisclosures: resolveGroupLevelDisclosures({
