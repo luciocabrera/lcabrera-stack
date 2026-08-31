@@ -426,10 +426,15 @@ signature and the types already say what the code is, and an explanation next to
 code is the copy nothing keeps true — which is the failure every gate in this
 file exists to catch. If the code can be made clearer instead, do that.
 
-**Two exemptions, both narrow.** The **file-level header** that
-[`.claude/rules/scripts.md`](.claude/rules/scripts.md) mandates for a `.mjs`/`.cjs`
-script — one short block at the top of the file saying why the file exists, its
-usage and its exit codes — stays exactly as that rule specifies. And **JSDoc a
+**Two exemptions, both narrow.** The **file-level header** stays: the file's
+**first comment block**, in a source file of any extension, saying why the module
+exists rather than what a declaration below it is.
+[`.claude/rules/scripts.md`](.claude/rules/scripts.md) is where that header is
+additionally **mandatory** — for a `.mjs`/`.cjs` script, one short block giving
+the file's purpose, its usage and its exit codes, exactly as that rule specifies.
+It is permitted everywhere, which is what makes it the home for a trap in a
+`.ts` file that has no ADR or issue to carry it. Only the first block: a second
+one below it is a comment about the declaration under it, and is reported. And **JSDoc a
 build reads** stays: `@param`, `@returns`, `@type` and the rest of the
 annotations a tool consumes, because a published `.mjs` package's declarations
 are derived from them and dropping one publishes an option defaulting to `[]` as

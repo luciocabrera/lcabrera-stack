@@ -61,9 +61,14 @@ comment on one of its members are each reported, and its colocated suite carries
 a fixture for each.
 
 **The exemptions are unchanged**, and they are what keeps the third position
-from being a trap. The file-level header `.claude/rules/scripts.md` mandates
-stays. A tool directive stays, because deleting one changes what another engine
-reports. And JSDoc a build reads stays — the annotations, not prose sharing
+from being a trap. The file-level header stays — the file's **first comment
+block**, in a source file of any extension, describing the module rather than a
+declaration. `.claude/rules/scripts.md` is where that header is additionally
+**mandatory**, for a `.mjs`/`.cjs` script; it is permitted everywhere, and that
+is what makes it a home for a trap in a `.ts` file with no other one. Stating it
+as only the header a script mandates would leave the TypeScript headers this
+sweep wrote unsanctioned, and deleting one takes the trap with it. A tool
+directive stays, because deleting one changes what another engine reports. And JSDoc a build reads stays — the annotations, not prose sharing
 their block. That last one is why the rule exempts an annotated block only in a
 JavaScript file: a TypeScript declaration carries its own types, so `@param`
 beside one is prose, while a published `.mjs` package's `.d.mts` is derived from

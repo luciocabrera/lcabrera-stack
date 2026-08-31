@@ -14,6 +14,9 @@ const src = (...lines: readonly string[]) =>
 
 const ok = (...lines: readonly string[]) => ({ code: src(...lines) });
 
+const directive = (name: string) =>
+  `// ${name} pinned as a fixture, not a live suppression`;
+
 const above = (...lines: readonly string[]) => ({
   code: src(...lines),
   errors: [{ messageId: 'aboveDeclaration' as const }],
@@ -159,6 +162,13 @@ ruleTester.run('no-explanatory-comments', rule, {
       ].join('\n'),
     },
     ok('// prettier-ignore', 'export const read = () => x;'),
+    ok(
+      directive('react-doctor-disable-next-line'),
+      'export const Panel = () => x;',
+    ),
+    ok(directive('react-doctor-disable-line'), 'export const Row = () => x;'),
+    ok(directive('react-doctor-disable'), 'export const Cell = () => x;'),
+    ok(directive('NOSONAR'), 'export const run = () => x;'),
     ok(
       'export const read = () => {',
       '  // v8 ignore next',
