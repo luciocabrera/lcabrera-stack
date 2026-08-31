@@ -8,7 +8,7 @@ governs:
 - **Status:** Accepted
 - **Date:** 2026-08-28
 - **Issue:** [#993](https://github.com/luciocabrera/lcabrera-stack/issues/993)
-- **Amended by:** [ADR-099](ADR-099-the-no-comment-rule-covers-a-type-declaration.md) — the Decision below names two positions, and the accurate list is three: a comment above a **type** declaration, and prose between its members, are covered on the same terms. Everything else here stands, and the body below keeps its original reasoning.
+- **Amended by:** [ADR-101](ADR-101-the-no-comment-rule-covers-a-type-declaration.md) — the Decision below names two positions, and the accurate list is three: a comment above a **type** declaration, and prose between its members, are covered on the same terms. Everything else here stands, and the body below keeps its original reasoning.
 - **Corrects:** the "Comments stay rare" paragraph and the "A trap on this line → a code comment" row of [ADR-088](ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md). Nothing else in ADR-088 is touched: where architecture documents live, and what they may not contain, stand as decided.
 - **Relates to:** [`docs/README.md`](../README.md) ("This is not a licence to revise an ADR" — the append-only rule that makes this a new record rather than an edit, and that licenses the pointer added to ADR-088's header), [#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028) (the lint rule and the sweep).
 
