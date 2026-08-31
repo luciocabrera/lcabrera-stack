@@ -154,6 +154,23 @@ ruleTester.run('no-explanatory-comments', rule, {
       filename: 'make.mjs',
       options: [{ annotationTags: ['@other'] }],
     },
+    {
+      code: [
+        "import { x } from './x.ts';",
+        '',
+        '// prettier-ignore',
+        'export const read = () => {',
+        '  // v8 ignore next',
+        '  if (x === undefined) return 0;',
+        '  return x;',
+        '};',
+      ].join('\n'),
+      errors: [
+        { messageId: 'aboveDeclaration' },
+        { messageId: 'insideDeclaration' },
+      ],
+      options: [{ directives: [] }],
+    },
   ],
   valid: [
     {
@@ -175,15 +192,11 @@ ruleTester.run('no-explanatory-comments', rule, {
     },
     {
       code: [
-        "import { render } from '@testing-library/react';",
+        "import { x } from './x.ts';",
         '',
-        '// @vitest-environment jsdom',
-        "import { Panel } from './Panel.component.tsx';",
-        '',
-        'export const mount = () => render(<Panel />);',
+        '// prettier-ignore',
+        'export const read = () => x;',
       ].join('\n'),
-      filename: 'Panel.component.test.tsx',
-      languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
     },
     {
       code: [

@@ -12,6 +12,14 @@
  * Compose, never re-declare: ESLint flat config replaces a rule wholesale when a
  * later block sets it again, so a workspace that adds its own
  * `no-restricted-syntax` after the factory's silently drops everything below.
+ *
+ * The server-only table matches the whole `@lcabrera/server/db` import path
+ * rather than individual utils, which drift as they are added and removed, and
+ * it covers both direct imports and barrel re-exports. Type-only imports stay
+ * allowed on purpose — they are erased at compile time, which is what lets the
+ * pure `db/query-builder/*` builders share `query-builder.types` — so the guard
+ * is on runtime access, the thing that pulls a database connection into a
+ * client bundle.
  */
 
 /**
@@ -47,13 +55,6 @@ export const UI_PUBLIC_IMPORT_BOUNDARY_PATTERNS = [
   },
 ];
 
-// Match the whole `@lcabrera/server/db` import path — not individual utils,
-// which drift as they are added and removed — and cover both direct imports and
-// barrel re-exports. Type-only imports are erased at compile time, so they stay
-// allowed (e.g. the `query-builder.types` the pure `db/query-builder/*` builders
-// share); the guard is on runtime access, which is what pulls the DB connection
-// into the bundle. The raw `pg` driver is banned by the generic table that ships
-// with the config package.
 const SERVER_ONLY_DB_MESSAGE =
   'Direct database access is server-only (the @lcabrera/server/db runtime helpers). Move this import to a `.server.ts` file or a `.server/` directory — or reach it through a server-only module.';
 
@@ -71,12 +72,6 @@ const SERVER_DB_IMPORT_BOUNDARY_RESTRICTIONS = [
   };
 });
 
-/**
- * The server-only surfaces of this repo's own packages, for the workspaces that
- * ship a client bundle. Pair it with the generic `node:` and `pg` tables from
- * `@lcabrera/vite-config/eslint-restrictions` — they are separate because only
- * these name a package of ours.
- */
 export const REPO_SERVER_ONLY_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS = [
   {
     // Both spellings: `#ui/…` is how `packages/ui` reaches its own file, and

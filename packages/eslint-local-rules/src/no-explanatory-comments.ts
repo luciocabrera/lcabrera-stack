@@ -17,10 +17,11 @@
  * Every comment before the first token of the file is in that position.
  *
  * A **tool directive** stays, because it is not prose — deleting one changes
- * what another engine reports. `@vitest-environment` is the case that makes this
- * more than a formality: import sorting leaves it below the imports, so it is
- * not in header position and a rule without this exemption would demand its
- * removal from every jsdom suite in a repository.
+ * what another engine reports. The two positions where that bites are the
+ * ordinary ones: a disable comment immediately above the declaration it covers,
+ * and a coverage or type-checker directive inside a body. Both are positions
+ * this rule reports, so without the exemption it would order a suppression
+ * another engine reads to be deleted.
  *
  * An **annotated JSDoc block in a JavaScript file** stays, and only there. A
  * TypeScript declaration carries its own types, so a `@param` beside one is

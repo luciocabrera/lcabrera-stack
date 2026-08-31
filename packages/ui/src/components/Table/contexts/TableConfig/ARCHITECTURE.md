@@ -428,9 +428,12 @@ one cookie, and the last write wins.
 reserves the drawer's width, and the selected tab and expanded filters decide
 what is painted inside it. Anything omitted could not be SSR'd.
 
-Only `dataState` (the skeleton's cached rows) remains in sessionStorage. It is
-not layout: SSR paints blank placeholders either way, and the rows are a
-per-tab cache, not state the server could seed.
+Nothing remains in sessionStorage — `grep -rn sessionStorage packages/ apps/
+--include='*.ts' --include='*.tsx'` finds no executable use, and
+`usePersistTableStateAction.hook.test.ts` asserts the cookie is the only write.
+The skeleton's cached rows were the last candidate for a second channel, and
+they are not layout: SSR paints blank placeholders either way. Adding one back
+means building the reader, not reusing one ([ADR-061](../../../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)).
 
 ### usePersistTableStateAction
 

@@ -405,12 +405,12 @@ type Result = {
 
 import { render } from '@testing-library/react';
 
-// @vitest-environment jsdom
 import { Panel } from './Panel.component.tsx';
 
+// oxlint-disable-next-line no-console
 export const mount = () => {
-  // oxlint-disable-next-line no-console
-  console.log('a directive is not prose');
+  // v8 ignore next
+  if (Panel === undefined) return;
   return render(<Panel />);
 };
 
@@ -424,9 +424,12 @@ The **file-level header** — every comment before the file's first token — st
 because it describes the module rather than a declaration.
 
 A **tool directive** stays, because deleting one changes what another engine
-reports. `@vitest-environment` is why this matters beyond principle: import
-sorting leaves it below the imports, so it is not in header position, and a rule
-without this exemption would demand its removal from every jsdom suite.
+reports. This is the exemption that carries real weight, and the two positions
+where it does are the ordinary ones: an `eslint-disable-next-line` immediately
+above the declaration it covers, and a `v8 ignore next` or a `@ts-expect-error`
+inside a body. Both sit exactly where this rule reports, so without the
+exemption it would order you to delete a suppression another engine is reading —
+and the colocated suite asserts that turning `directives` off reports both.
 
 An **annotated JSDoc block in a JavaScript file** stays, and only there. A
 TypeScript declaration carries its own types, so `@param` beside one is prose; a

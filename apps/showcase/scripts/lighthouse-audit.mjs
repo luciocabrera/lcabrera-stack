@@ -1,8 +1,17 @@
 #!/usr/bin/env node
 
 /**
- * Lighthouse Audit Script
- * Builds, serves, and audits the production site
+ * Builds the showcase, serves the production build, and audits it with
+ * Lighthouse through a Playwright-driven Chromium.
+ *
+ * The server child is spawned with piped stdio, and a live child with piped
+ * stdio keeps the event loop alive — so waiting on its exit code alone hangs
+ * rather than finishing. The caller owns the child only once the start helper
+ * returns, which is why the failure path kills it there rather than leaving
+ * that to whoever called.
+ *
+ * Exit codes: 0 = the audit ran and the report was written, 1 = the build, the
+ * server or the audit failed.
  */
 
 import { spawn } from 'node:child_process';
@@ -92,16 +101,20 @@ async function runBuild() {
   await runProcess(getLocalBinaryPath('react-router'), ['build']);
 }
 
+async function isServerResponding(url) {
+  try {
+    const response = await fetch(url);
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 async function waitForServer(url, maxAttempts = 30) {
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    try {
-      const response = await fetch(url);
-      if (response.ok) {
-        log('✓ Server is ready', colors.green);
-        return;
-      }
-    } catch {
-      // Server not ready yet.
+    if (await isServerResponding(url)) {
+      log('✓ Server is ready', colors.green);
+      return;
     }
 
     await new Promise((resolvePromise) => setTimeout(resolvePromise, 1000));
@@ -136,8 +149,6 @@ async function startProductionServer() {
   try {
     await waitForServer(AUDIT_URL, 60);
   } catch (error) {
-    // The caller owns the child only once this returns, and a live child with
-    // piped stdio keeps the event loop alive — so exitCode alone would hang.
     serverProcess.kill();
     throw error;
   }

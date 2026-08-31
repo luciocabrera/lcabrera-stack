@@ -21,9 +21,9 @@ command descriptor went on naming the derivation it had stopped using.
 Three positions are exempt, each decidable from the source. The file-level
 header — every comment before the file's first token — describes the module
 rather than a declaration. A tool directive is not prose, and the list of
-recognised prefixes is the `directives` option: `@vitest-environment` is why this
-matters beyond principle, since import sorting leaves it below the imports and so
-out of header position. An annotated JSDoc block is exempt in a JavaScript file
+recognised prefixes is the `directives` option, and it earns its place in two
+ordinary positions the rule reports: a disable comment directly above the
+declaration it covers, and a coverage or type-checker directive inside a body. An annotated JSDoc block is exempt in a JavaScript file
 and only there, because a published `.mjs` package's `.d.mts` is derived from it
 while a TypeScript declaration carries its own types; the recognised tags are the
 `annotationTags` option. Setting either option replaces its default list.

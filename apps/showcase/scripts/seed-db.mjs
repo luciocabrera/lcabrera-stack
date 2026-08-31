@@ -18,6 +18,15 @@
  *   vp run --filter showcase db:seed   bring the database up, then seed
  *
  * Exit codes: 0 = seeded, 1 = env is incomplete, or a statement failed.
+ *
+ * Three constraints the code cannot state. The DDL files are applied in the
+ * order the list gives them, and each drops and recreates the tables it owns,
+ * so the order is the dependency order rather than a preference. Each file is
+ * sent as one simple query, which Postgres runs as a single implicit
+ * transaction — a file applies whole or not at all. And a database name cannot
+ * be a bound parameter in `CREATE DATABASE`, so it is interpolated, which is
+ * why the name is checked to be an identifier and nothing else before it is
+ * used.
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -27,7 +36,6 @@ import { Client } from 'pg';
 
 const WORKSPACE_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-/** Applied in this order; each file drops and recreates the tables it owns. */
 const SQL_FILENAMES = ['setup_large_data.sql', 'setup_enterprise_orders.sql'];
 
 const REQUIRED_ENV_KEYS = [
@@ -38,7 +46,6 @@ const REQUIRED_ENV_KEYS = [
   'DB_USER',
 ];
 
-/** The database `CREATE DATABASE` is issued from — always present in Postgres. */
 const MAINTENANCE_DATABASE = 'postgres';
 
 const missingEnvKeys = (env) => REQUIRED_ENV_KEYS.filter((key) => !env[key]);
@@ -53,10 +60,6 @@ const readSettings = (env) => ({
   database: env.DB_NAME,
 });
 
-/**
- * A database name cannot be a bound parameter in `CREATE DATABASE`, so it is
- * interpolated — hence the name has to be an identifier and nothing else.
- */
 const assertSafeDatabaseName = (name) => {
   if (!/^[A-Za-z_]\w*$/.test(name)) {
     throw new Error(
@@ -99,10 +102,6 @@ const ensureDatabaseExists = async ({ connection, database }) => {
   });
 };
 
-/**
- * Each file is sent as one simple query, which Postgres runs as a single
- * implicit transaction — so a file either applies whole or not at all.
- */
 const applySqlFiles = ({ connection, database, sqlPaths }) =>
   withClient({
     connection,
