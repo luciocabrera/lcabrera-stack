@@ -6,7 +6,7 @@ type ParseVersionedPayloadArgs = {
 
 export const parseVersionedPayload = <T>({
   rawValue,
-}: ParseVersionedPayloadArgs): T | undefined => {
+}: ParseVersionedPayloadArgs) => {
   try {
     const parsed = JSON.parse(decodeURIComponent(rawValue)) as {
       value: unknown;
@@ -17,6 +17,6 @@ export const parseVersionedPayload = <T>({
       ? (parsed.value as T)
       : undefined;
   } catch {
-    return undefined;
+    return;
   }
 };
