@@ -100,6 +100,12 @@ it should and passed when it should is.
 - Never soften a verdict because the change is good work, and never manufacture a
   finding to look rigorous. `PASS` with one honest weak spot recorded under
   "Out of scope" beats a `FAIL` you had to reach for.
+- **Do not ask a diff which consumer needed it.** A `@lcabrera/*` change is
+  justified in the package's own vocabulary and never in an installing
+  application's names ([`.claude/rules/package-rationale.md`](../rules/package-rationale.md)),
+  so prose that names no consumer is complying with the rule, not hiding its
+  motivation. Hold your own findings to it too: cite the package behaviour you
+  observed, not the app you happened to observe it in.
 
 ## Output format
 

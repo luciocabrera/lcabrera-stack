@@ -27,6 +27,12 @@ repo are the only channel you have to it.
   creating anything new. Do not create an architecture file for a new folder.
 - Run the gate through the `quality-gate-workflow` skill. Do not improvise the
   sequence and do not skip a stage because it "cannot" be affected.
+- **A public package's rationale never cites a consumer.** Justify a
+  `@lcabrera/*` change in the package's own vocabulary, never in an installing
+  application's table, column, route or cookie names. This binds the changeset,
+  the ADR, the PR body and the commit message as much as the code —
+  [`.claude/rules/package-rationale.md`](../rules/package-rationale.md) is the
+  rule and the two tests for a sentence.
 - **Never suppress a finding** (Rule 11). No inline disables, no baseline entries,
   no rule-offs. Fix the code, or explain in your report why the engine is wrong.
 - Documentation updates land in the **same commit** as the code they describe.

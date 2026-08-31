@@ -12,11 +12,12 @@ This document describes every layer of the AI config for this project — what e
 ├── settings.json           ← committed: hooks + team-shared permission allow-list
 ├── settings.local.json     ← personal permission approvals (not committed)
 ├── rules/                  ← path-specific rules, loaded only when editing matching files
-│   ├── typescript.md       ← paths: **/*.ts, **/*.tsx
-│   ├── react-components.md ← paths: **/*.tsx, **/*.jsx, **/*.stylex.ts
-│   ├── testing.md          ← paths: **/*.test.ts, .tsx, .mjs, .cjs; **/*.spec.ts(x)
-│   ├── routes-data.md      ← paths: **/routes/**, **/services/**, **/*.api.ts, …
-│   └── scripts.md          ← paths: **/*.mjs, **/*.cjs, **/scripts/**/*.js
+│   ├── typescript.md        ← paths: **/*.ts, **/*.tsx
+│   ├── react-components.md  ← paths: **/*.tsx, **/*.jsx, **/*.stylex.ts
+│   ├── testing.md           ← paths: **/*.test.ts, .tsx, .mjs, .cjs; **/*.spec.ts(x)
+│   ├── routes-data.md       ← paths: **/routes/**, **/services/**, **/*.api.ts, …
+│   ├── scripts.md           ← paths: **/*.mjs, **/*.cjs, **/scripts/**/*.js
+│   └── package-rationale.md ← paths: packages/**, .changeset/**, docs/decisions/**
 ├── skills → ../.github/skills   ← symlink (canonical source is .github/skills/)
 └── agents/
     ├── quality-gate.md
@@ -53,13 +54,14 @@ Detailed per-file-type conventions intentionally do **not** live here — they l
 
 Each rule file has a `paths:` frontmatter with glob patterns. Claude Code loads a rule **only when editing files that match its globs** — TypeScript rules don't load while editing docs, React rules don't load while working in `packages/server`, etc.
 
-| Rule file             | Loads when editing                                   | Owns                                                                         |
-| --------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `typescript.md`       | any `.ts` / `.tsx`                                   | strict TS rules, naming conventions, file suffixes, FP/immutability, imports |
-| `react-components.md` | any `.tsx` / `.jsx` / `.stylex.ts`                   | component bundle pattern, props naming, React 19 rules, StyleX-only styling  |
-| `testing.md`          | `.test.ts` / `.tsx` / `.mjs` / `.cjs`; `.spec.ts(x)` | Vitest/Testing Library conventions, `vp run test`, coverage target           |
-| `routes-data.md`      | routes, services, `.api.ts`, RR config, entries      | loader/action data flow, store-pattern rule, error handling, Zod             |
-| `scripts.md`          | any `.mjs` / `.cjs` / `scripts/**/*.js`              | JSDoc "why" header, small pure functions, `node:` builtins, 350-line ceiling |
+| Rule file              | Loads when editing                                   | Owns                                                                          |
+| ---------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `typescript.md`        | any `.ts` / `.tsx`                                   | strict TS rules, naming conventions, file suffixes, FP/immutability, imports  |
+| `react-components.md`  | any `.tsx` / `.jsx` / `.stylex.ts`                   | component bundle pattern, props naming, React 19 rules, StyleX-only styling   |
+| `testing.md`           | `.test.ts` / `.tsx` / `.mjs` / `.cjs`; `.spec.ts(x)` | Vitest/Testing Library conventions, `vp run test`, coverage target            |
+| `routes-data.md`       | routes, services, `.api.ts`, RR config, entries      | loader/action data flow, store-pattern rule, error handling, Zod              |
+| `scripts.md`           | any `.mjs` / `.cjs` / `scripts/**/*.js`              | JSDoc "why" header, small pure functions, `node:` builtins, 350-line ceiling  |
+| `package-rationale.md` | anything under `packages/`, a changeset, an ADR      | what a change to a published package may be argued from, in code and in prose |
 
 **Non-Claude agents** (Copilot, Gemini) don't auto-load these — AGENTS.md §2 tells them to read the matching rule file before editing covered files.
 
@@ -85,11 +87,13 @@ Auto-invocation is driven by the `description` field (Claude matches it against 
 | `fallow-code-checker`         | Fallow static hygiene scan (runs in forked context)        | description                                        |
 | `linter-checker`              | Deterministic oxlint + eslint report (forked context)      | description                                        |
 | `commit-and-pr`               | Commit message + PR body that pass the enforced standard   | description (before committing / opening a PR)     |
+| `unslop`                      | English a person reads, without the AI tells               | description, or `/unslop`                          |
 | `refactor-verified`           | One issue: builder subagent + blind verifier subagent      | description (implementing an issue with criteria)  |
 | `epic`                        | A whole epic: waves of builders, a blind reviewer per PR   | description, or `/epic <n>`                        |
 | `health-swarm`                | Six parallel scouts auditing repo-wide rot                 | description (periodic audit / "what has rotted")   |
 | `lint-toolchain`              | Configure or debug Oxlint / eslint / Biome / Sonar         | description + `paths`                              |
 | `releasing`                   | Changesets release, changelog, PR label taxonomy           | description (cutting a release)                    |
+| `product-requirement`         | The `docs/product/` register of what a consumer can do     | description (building against a published package) |
 | `typescript-api-engineering`  | API-layer architecture standards                           | description (not RR `routes/api/` resource routes) |
 
 A skill with `paths:` frontmatter is **not** in an agent's skill listing until it
