@@ -770,18 +770,29 @@ so what ran can be checked against what was approved.
 
 Its landing verdict is `ENQUEUE`, not `MERGE`, because `gh pr merge <n> --squash`
 does not always merge: where `main` requires a GitHub merge queue it hands the PR
-over and GitHub merges it afterwards, so the pass ends with the PR queued and
-closing the issue or deleting the branch happens on a later pass that sees it
-merged. Where no queue is required the same command squash-merges on the spot.
+over and GitHub merges it afterwards, so the pass ends with the PR queued and not
+yet merged. Where no queue is required the same command squash-merges on the spot.
 The operator reads `isMergeQueueEnabled` per PR rather than assuming either — see
 [`docs/tooling/merge-queue.md`](docs/tooling/merge-queue.md).
 
-| Command                          | Does                                                                                 |
-| -------------------------------- | ------------------------------------------------------------------------------------ |
-| `vp run pr:queue`                | dry run: decide every open PR, write the decision log, change nothing                |
-| `vp run pr:queue -- --apply`     | execute each decision in order — rebase, fix, address review threads, enqueue, close |
-| `vp run pr:queue -- --pr <n>`    | decide one PR, still judged in the context of the whole set's ordering               |
-| `vp run pr:queue -- --model <m>` | pick the model for both passes                                                       |
+**In front of a queue, closing the linked issue, deleting the head branch and
+pruning the worktree (policy A6–A8) are unowned.** They need `state: MERGED`, and
+no pass observes it: the operator's only source of pull requests is
+`pullRequests(states: OPEN, …)` in `scripts/lib/pr-queue-github.mjs`, so a merged
+one never returns to `decide()` or `applyDecisions()`. An `--apply` run therefore
+stops doing those three and reports success, because enqueuing is what it was
+asked to do. Until
+[#1043](https://github.com/luciocabrera/lcabrera-stack/issues/1043) builds the
+merged-pull-request lane they are a human's job after the queue merges — `vp run
+housekeeping:prune -- --apply` is A8's half. Where no queue is required nothing
+changes: the merge is synchronous and A6–A8 run in the pass that made it.
+
+| Command                          | Does                                                                                                                 |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `vp run pr:queue`                | dry run: decide every open PR, write the decision log, change nothing                                                |
+| `vp run pr:queue -- --apply`     | execute each decision in order — rebase, fix, address review threads, land it; A6–A8 only where no queue is required |
+| `vp run pr:queue -- --pr <n>`    | decide one PR, still judged in the context of the whole set's ordering                                               |
+| `vp run pr:queue -- --model <m>` | pick the model for both passes                                                                                       |
 
 Logs land in `reports/pr-queue/runs/<timestamp>/` (`decision-log.md` to read,
 `decisions.json` to diff) — produced on demand, never committed ([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md)).

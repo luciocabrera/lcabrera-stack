@@ -24,7 +24,7 @@ area:
   - COMMANDS.md
   - .github/skills/lint-toolchain/SKILL.md
 started: 2026-08-30
-updated: 2026-08-30
+updated: 2026-08-31
 plan: (none)
 pr: #1038
 issue: #1034
@@ -41,13 +41,40 @@ blocks every merge.
 
 ## Status / next
 
-- Current step: review round 6 — the leash is settled (round 5, residual routed
-  to #1040) and the two remaining threads are on the queue lane itself. The Sonar
-  wait now compares the commit SonarCloud says it analysed for the pull request
-  against this run's head, instead of hunting for a recent Compute Engine task in
-  a project-wide window that an older pull request falls out of; and A6-A8 are
-  stated as unowned in front of a queue rather than deferred to a pass that does
-  not exist
+- Current step: review round 7 — `COMMANDS.md` was the last surface still saying
+  A6-A8 happen on "a later pass that sees it merged", and its `--apply` row still
+  ended "enqueue, close". Both now say what the code does. The leash is settled
+  (round 5, residual routed to #1040) and the Sonar wait compares the commit
+  SonarCloud says it analysed for the pull request against this run's head,
+  instead of hunting for a recent Compute Engine task in a project-wide window
+  that an older pull request falls out of
+- How the A6-A8 surface set was closed, so a ninth one does not surface next
+  round. Four rounds each corrected the surfaces the previous round named, which
+  is why a new one kept appearing; this one enumerates them from the tree
+  instead. Every tracked file is grepped for the claim's own vocabulary, and each
+  hit is read against `scripts/lib/pr-queue-github.mjs` and
+  `scripts/pr-queue-operator.mjs` rather than against a sibling document:
+
+  ```bash
+  git ls-files -z '*.md' '*.mjs' '*.yml' '*.ts' |
+    xargs -0 grep -nIiE -e 'clos(e|es|ing) the (linked )?issue' \
+      -e 'delet(e|es|ing) the (head )?branch' -e 'prun(e|es|ing) the worktree' \
+      -e 'remove the worktree' -e '(later|another|next) pass' \
+      -e 'sees it merged' -e 'once merged' -e 'after the merge' --
+  ```
+
+  Every hit it returns is one of three things. The **operator lane**, which now
+  says the three are unowned: `.claude/pr-queue-policy.md` §1 and §4, ADR-097's
+  consequences, `docs/tooling/merge-queue.md`, the apply prompt in
+  `scripts/lib/pr-queue-execute.mjs`, and `COMMANDS.md`. The **by-hand lane**,
+  which correctly waits on `state: MERGED` before doing any of them:
+  `docs/agents/merge-checklist.md` and `docs/agents/epic-orchestration.md`
+  Phase 4. Or a hit about something else entirely — the `ACT` verdict and the
+  review-gate reconcile sweep re-evaluating next pass, S10 refusing to defer a
+  failed run, the decision log's diffable form, the `releasing` skill's label
+  step, a `housekeeping:prune` test name. A reader checks that classification by
+  re-running the grep, not by taking it
+
 - Blockers: none. The `docs/decisions/**` overlap warning against
   grouped-column-scope (#1033) is real and already resolved by content: that
   branch took ADR-096, so this one is ADR-097. The glob here is a single file and

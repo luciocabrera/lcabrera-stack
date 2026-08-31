@@ -56,7 +56,8 @@ export const analysedHead = (pullRequests, target, headSha) => {
     (entry) => String(entry.key) === target.value,
   )?.commit?.sha;
   return (
-    analysed !== undefined && analysed.toLowerCase() === headSha.toLowerCase()
+    typeof analysed === 'string' &&
+    analysed.toLowerCase() === headSha.toLowerCase()
   );
 };
 

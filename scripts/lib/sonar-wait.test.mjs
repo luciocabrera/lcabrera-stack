@@ -80,6 +80,14 @@ describe('analysedHead', () => {
     );
   });
 
+  it('refuses an entry whose analysed sha is absent rather than throwing', () => {
+    expect(
+      analysedHead([{ commit: { sha: null }, key: '1038' }], PR, HEAD),
+    ).toBe(false);
+    expect(analysedHead([{ commit: {}, key: '1038' }], PR, HEAD)).toBe(false);
+    expect(analysedHead([{ key: '1038' }], PR, HEAD)).toBe(false);
+  });
+
   it('refuses every entry when no head sha was supplied', () => {
     const entries = [{ commit: { sha: HEAD }, key: '1038' }];
     expect(analysedHead(entries, PR, undefined)).toBe(false);
