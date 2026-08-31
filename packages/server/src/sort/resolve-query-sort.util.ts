@@ -2,6 +2,7 @@ import type { QuerySort } from '../db/query-builder/query-builder.types.ts';
 import type { ColumnSort } from './sort.types.ts';
 
 export type ResolveQuerySortArgs = {
+  /** Applied when `sorting` is empty; must itself be non-empty. */
   readonly fallback: readonly ColumnSort[];
   readonly sorting: readonly ColumnSort[];
 };

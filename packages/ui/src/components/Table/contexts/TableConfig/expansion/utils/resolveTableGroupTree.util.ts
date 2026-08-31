@@ -10,6 +10,7 @@ import { resolveGroupLevelDisclosures } from './resolveGroupLevelDisclosures.uti
 import { resolveGroupTreeNodes } from './resolveGroupTreeNodes.util';
 
 export type TableGroupTreeRowMeta = {
+  /** Decides whether `aria-expanded` applies at all. */
   readonly hasChildren: boolean;
   readonly isExpanded: boolean;
   readonly level: number;

@@ -19,6 +19,7 @@ export type FormContextValue<
 
 export type FormFieldsState<TValues extends Record<string, unknown>> = {
   readonly errors: FieldErrors<TValues>;
+  /** Frozen at mount; the dirty-check baseline for `mode: 'edit'`. */
   readonly initialValues: TValues;
   readonly values: TValues;
 };

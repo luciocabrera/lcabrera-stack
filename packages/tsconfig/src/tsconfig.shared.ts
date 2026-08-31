@@ -1,19 +1,25 @@
 export type CreateAppTsConfigArgs = {
+  /** Ambient type roots `types` is appended to; defaults to `['vite/client']`. Pass `[]` outside a Vite project. */
   readonly baseTypes?: readonly string[];
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
+  /** Merged on top of the default `@/*` -> `./src/*` mapping, not replacing it. */
   readonly paths?: Record<string, readonly string[]>;
   readonly rootDirs?: readonly string[];
+  /** Set `false` to omit the default `@/*` -> `./src/*` alias; publishable packages pass this. */
   readonly srcAlias?: boolean;
   readonly tsBuildInfoFile: string;
+  /** Extra roots appended to `baseTypes`, e.g. `'node'` for a src/ that mixes browser and Node files. */
   readonly types?: readonly string[];
 };
 
 export type CreateNodeTsConfigArgs = {
   readonly exclude?: readonly string[];
   readonly include?: readonly string[];
+  /** Node configs have none by default. */
   readonly paths?: Record<string, readonly string[]>;
   readonly tsBuildInfoFile: string;
+  /** Defaults to `['node']`. Pass `[]` for a package barred from Node globals. */
   readonly types?: readonly string[];
 };
 

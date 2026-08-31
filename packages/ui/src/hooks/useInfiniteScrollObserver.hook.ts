@@ -7,6 +7,7 @@ export type UseInfiniteScrollObserverArgs = {
   readonly onReachEnd: () => void;
   readonly rootRef: RefObject<HTMLElement | null>;
   readonly sentinelRef: RefObject<HTMLElement | null>;
+  /** `false` when the visible rows are a client-side subset of the loaded data. */
   readonly shouldFetchToFill?: boolean;
   readonly threshold: number;
 };

@@ -46,6 +46,7 @@ export type NumberFilter = {
     | 'lessThanOrEqual'
     | 'notEquals';
   readonly type: 'number';
+  /** Undefined while the user is drafting; the editing contract, not the query one. */
   readonly value: number | undefined;
   readonly value2?: number;
 };
@@ -64,9 +65,12 @@ export type OperatorType =
   | TextOperatorType;
 
 export type SelectFilter = {
+  /** Defaults to `'equals'`. */
   readonly operator?: 'equals' | 'notEquals';
   readonly type: 'multiSelect' | 'select';
+  /** Single value for `'select'`. */
   readonly value?: string;
+  /** Multiple values for `'multiSelect'`. */
   readonly values?: readonly string[];
 };
 

@@ -6,6 +6,7 @@ export type OlapDrillGroup = {
 export type OlapDrillRequest = {
   readonly group: OlapDrillGroup;
   readonly groupKeys: readonly string[];
+  /** Granularity each temporal key was grouped at, by column. */
   readonly periods?: Readonly<Record<string, OlapGroupPeriod>>;
 };
 

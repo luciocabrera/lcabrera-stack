@@ -7,6 +7,7 @@ export type DateFormatOptions = {
   readonly locale?: string;
   readonly preset?: DateFormatPreset;
   readonly timeStyle?: DateFormatPreset;
+  /** IANA time zone. Omitted uses the runtime's zone, so SSR and browser can differ. */
   readonly timeZone?: string;
 };
 

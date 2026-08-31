@@ -30,8 +30,10 @@ export type BuiltGroupAggregate = {
 
 export type BuiltGroupQuery = {
   readonly aggregates: readonly BuiltGroupAggregate[];
+  /** Bit `keys.length - 1 - i` is 1 when `keys[i]` was rolled up in that set. */
   readonly groupingSetMasks: readonly number[];
   readonly guardRails: GroupGuardRails;
+  /** Ordered; the mask bit positions are relative to this. */
   readonly keys: readonly string[];
   readonly maskAlias: 'group_mask';
   readonly text: string;
@@ -116,6 +118,7 @@ export type GroupQueryDescriptor = {
   readonly filters?: readonly QueryFilter[];
   readonly grouping: GroupingMode;
   readonly keys: readonly string[];
+  /** A safety belt, not a page: a grouped read is never paginated. */
   readonly maxRows: number;
   readonly periods?: Readonly<Record<string, GroupKeyPeriod>>;
   readonly schema: string;

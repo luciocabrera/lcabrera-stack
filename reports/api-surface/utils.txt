@@ -36,7 +36,7 @@ DEFAULT_LOCALE [const] "en-US"
 
 ## ./formatters/formatters.types
 CurrencyFormatOptions [type] { readonly currency?: string; readonly locale?: string; }
-DateFormatOptions [type] { readonly locale?: string; readonly preset?: DateFormatPreset; readonly timeStyle?: DateFormatPreset; readonly timeZone?: string; }
+DateFormatOptions [type] { readonly locale?: string; readonly preset?: DateFormatPreset; readonly timeStyle?: DateFormatPreset; /** IANA time zone. Omitted uses the runtime's zone, so SSR and browser can differ. */ readonly timeZone?: string; }
 DateFormatPreset [type] 'full' | 'long' | 'medium' | 'short'
 NumberFormatOptions [type] { readonly locale?: string; readonly maximumFractionDigits?: number; readonly minimumFractionDigits?: number; }
 

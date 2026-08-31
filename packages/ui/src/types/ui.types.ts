@@ -7,6 +7,7 @@ import type {
 
 export type InfiniteScroll<TData, TResponse> = {
   readonly dataSelector?: (response: TResponse) => readonly TData[];
+  /** May return `undefined` to keep the total already in the store. */
   readonly dataTotalSelector?: (response: TResponse) => number | undefined;
   readonly hasMore?: boolean;
   readonly isLoadingMore?: boolean;
@@ -18,6 +19,7 @@ export type LayoutProps = {
 };
 
 export type Pagination<TData = unknown> = {
+  /** The anchor a keyset data source resumes from. */
   readonly lastRow?: TData;
   readonly limit: number;
   readonly skip: number;
@@ -45,6 +47,7 @@ export type Sorting<TData = Record<string, unknown>> = {
 
 export type TablePageResponse<TData> = {
   readonly data: readonly TData[];
+  /** A refusal arrives as a successful response carrying data, not a rejected promise. */
   readonly error?: TableResponseError;
   readonly hasMore?: boolean;
   readonly total?: number;

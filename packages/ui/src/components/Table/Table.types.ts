@@ -120,15 +120,20 @@ export type TableAggregateFn =
 
 export type TableColumn<TData> = {
   readonly dataType?: TableColumnDataType;
+  /** Never a function: columns cross the loader serialization boundary. */
   readonly filterOptionsDescriptor?: FilterOptionsDescriptor;
   readonly format?: TableColumnFormat;
+  /** Source column's label; set only on a derived measure. */
   readonly headerGroupLabel?: string;
   readonly isFilterable?: boolean;
+  /** Consumer's half only: the catalogue can still refuse. */
   readonly isGroupable?: boolean;
   readonly isHeaderHidden?: boolean;
+  /** Identifies the row for CRUD; always appended to the query sort. */
   readonly isPrimaryKey?: boolean;
   readonly isResizable?: boolean;
   readonly isSortable?: boolean;
+  /** Locked from reorder/pin/resize/hide; not a runtime toggle. */
   readonly isStatic?: boolean;
   readonly key: DataKey<TData>;
   readonly label: string;
@@ -202,6 +207,7 @@ export type TableCrudConfig = {
 
 export type TableDataState<TData> = {
   readonly data: readonly TData[];
+  /** Required and nullable: the provider re-seeds with a shallow merge. */
   readonly error: TableResponseError | undefined;
   readonly hasMore: boolean;
   readonly isLoading: boolean;
@@ -214,9 +220,12 @@ export type TableDensity = 'comfortable' | 'compact';
 
 export type TableFocusState = {
   readonly columnKey: string | undefined;
+  /** Bumped so re-entering the cell that already holds focus is still a change. */
   readonly focusRequestId: number;
+  /** Written from the container's focus/blur, not inferred from the DOM. */
   readonly isGridFocused: boolean;
   readonly rowIndex: number | undefined;
+  /** Data-derived identity, never a position. */
   readonly rowKey: string | undefined;
 };
 
@@ -227,6 +236,7 @@ export type TableGroupAggregateValue = {
 };
 
 export type TableGroupExpansionState = {
+  /** Membership means collapsed; empty is fully expanded. Path keys, never row indexes. */
   readonly collapsedGroupPaths: ReadonlySet<string>;
 };
 
@@ -243,10 +253,13 @@ export type TableGroupingRefusalReason =
   | 'unknown-column';
 
 export type TableGroupingState = {
+  /** Order is listing order; it shapes no SQL. */
   readonly aggregates: readonly TableColumnAggregate[];
+  /** Order is the grouped query's nesting order. */
   readonly keys: readonly string[];
   readonly mode: TableGroupingMode;
   readonly periods: Readonly<Record<string, TableGroupPeriod>>;
+  /** Names an aggregate, not a column. Changes no SQL. */
   readonly shares: readonly TableColumnAggregate[];
 };
 
@@ -260,6 +273,7 @@ export type TableGroupKeyRefusalReason =
 export type TableGroupKeyValue = {
   readonly columnKey: string;
   readonly label: string;
+  /** `null` is a legitimate group, not a missing value; not recoverable from `label`. */
   readonly value: unknown;
 };
 
@@ -270,6 +284,7 @@ export type TableGroupRow = Record<'tableGroup', TableGroupRowSummary>;
 export type TableGroupRowSummary = {
   readonly aggregates: readonly TableGroupAggregateValue[];
   readonly count: number;
+  /** Carried, not inferred: a real NULL key and a subtotal produce the same `label`. */
   readonly isSubtotal: boolean;
   readonly path: readonly TableGroupKeyValue[];
 };
@@ -291,6 +306,7 @@ export type TableMetaState = {
   readonly additionalMetadata?: Readonly<
     Record<string, null | TableMetadataValue | undefined>
   >;
+  /** Namespaces persisted keys so apps sharing a `persistenceKey` do not clash. */
   readonly appId?: string;
   readonly columnSelectedKey?: string;
   readonly columnSettingsSelectedTab: string;
@@ -300,32 +316,48 @@ export type TableMetaState = {
   readonly drawersSyncNonce?: number;
   readonly enablePrefetch: boolean;
   readonly error?: string;
+  /** A path, not a callback: a function does not survive the loader boundary. */
   readonly groupDetailsPath?: string;
+  /** `(columnKey, fn)` pairs, not a column-to-function map. */
   readonly groupingAggregates?: readonly TableColumnAggregate[];
+  /** Absent means no aggregate is legal here, not that all of them are. */
   readonly groupingCapabilities?: Readonly<
     Record<string, TableColumnGroupingCapability>
   >;
+  /** Empty whenever grouping is off, refused, or unsupported. */
   readonly groupingKeys?: readonly string[];
+  /** Absent means `flat`. */
   readonly groupingMode?: TableGroupingMode;
+  /** Absent means every key is grouped at its raw values. */
   readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>;
+  /** Names an aggregate, not a column. Absent means none. */
   readonly groupingShares?: readonly TableColumnAggregate[];
+  /** With a default in play, an absent `grouping` param means apply the default. */
   readonly hasDefaultGrouping?: boolean;
   readonly initialPageSize: number;
   readonly isBordered: boolean;
+  /** Route-declared. Absent means off: the layout persists. */
   readonly isColumnLayoutTransient?: boolean;
   readonly isColumnSettingsOpen: boolean;
   readonly isColumnSettingsPinned: boolean;
+  /** Endpoint capability. Absent means off. */
   readonly isGroupingEnabled?: boolean;
+  /** Locks keys, mode and per-key granularity, not aggregates. */
   readonly isGroupingLocked?: boolean;
+  /** Endpoint capability. Absent means off. */
   readonly isKeysetEnabled?: boolean;
+  /** Off by default: the table is square. */
   readonly isRounded: boolean;
+  /** Endpoint capability. Absent means off. */
   readonly isServerFilterEnabled?: boolean;
   readonly isStriped: boolean;
   readonly isTableSettingsOpen: boolean;
   readonly isTableSettingsPinned: boolean;
+  /** Route-declared; nested params carry a prefix so they do not collide. */
   readonly isUrlStateNested?: boolean;
   readonly loadMorePageSize: number;
   readonly locale?: string;
+  /** Route-declared: what already scopes this read. */
   readonly lockedFilters?: TableLockedFilters;
   readonly overscan: number;
   readonly persistenceKey: string;
@@ -337,6 +369,7 @@ export type TableMetaState = {
   readonly tableSettingsSelectedTab: string;
   readonly threshold: number;
   readonly title?: TableTitle;
+  /** A query setting, not display: emitted as the `GROUPING()` `ORDER BY` direction. */
   readonly totalsPlacement?: TableTotalsPlacement;
   readonly wasTableSettingsOpenBeforeColumnSettings?: boolean;
 };
