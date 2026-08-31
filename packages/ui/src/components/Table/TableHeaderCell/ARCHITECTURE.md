@@ -147,8 +147,9 @@ inline pin/sort/settings buttons:
 isTableSettingsOpen: false })`).
 
 **The layout lock.** While a grouping is applied, two kinds of column cannot
-take a layout action, and all four Pin/Hide items ask
-`useTableColumnLayoutLock` — one answer, so they cannot disagree. A **group
+take a layout action. `PinAndHideActions` asks `useTableColumnLayoutLock` once
+and passes the answer to its four delegates as `layoutLock`, the way it already
+passes `pinSide` — one subscription, so the four cannot disagree. A **group
 key** is force-pinned left and forced visible by `withGroupedColumnLayout` on
 every derivation, so Pin Left, Pin Right, Clear Pinning **and** Hide Column are
 disabled on one. A **measure** resolves every layout action back through

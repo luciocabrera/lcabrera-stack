@@ -45,8 +45,10 @@ every key and every aggregate.
 ## Decision
 
 `resolveColumnLayoutLock` answers `'group-key' | 'measure' | undefined` for a
-column, and `useTableColumnLayoutLock` is how the four Pin/Hide delegates ask —
-one answer for four items, so they cannot disagree. A group key is a key in the
+column. `PinAndHideActions` asks it once through `useTableColumnLayoutLock` and
+drills the answer to its four delegates as a `layoutLock` prop, exactly as it
+already drills `pinSide` — one subscription, one answer, so the four items
+cannot disagree. A group key is a key in the
 applied list, the same question three other surfaces already ask. A measure is a
 key `toDeclaredColumnKey` resolves to something else, reusing that util rather
 than parsing the token, so a declared column literally named `foo:sum` is not
@@ -84,12 +86,13 @@ This_ or the explicit _Remove from Grouping_, and both do the same thing. That
 redundancy is the cost of not changing an existing gesture; it is worth
 revisiting if the toggle turns out to confuse more than it serves.
 
-**The lock is derived per delegate, from the declared column list.** Each of the
-four items subscribes to the columns store and the grouping keys to answer a
-question about the column whose menu is open. That is four subscriptions where
-one prop drill would do, and it is deliberate: these are self-connected
-delegates, and a prop would have to be threaded through
-`TableHeaderActionsMenu` and `PinAndHideActions` by every caller.
+**The lock is drilled, not self-connected.** These four delegates otherwise read
+what they need themselves, and the lock breaks that pattern. It follows
+`pinSide`, which the shell already drills to the same three buttons, and it buys
+one subscription to the columns store and the grouping keys instead of four
+answers to one question. The cost is that a delegate mounted outside
+`PinAndHideActions` gets no lock and would offer an action the grid refuses;
+nothing mounts one today, and the shell is the only caller.
 
 **Disabling is not diagnosing.** The measure case is refused because per-column
 pinning of a subtotal is meaningless, not because the write path is broken —

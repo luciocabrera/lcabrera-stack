@@ -330,9 +330,9 @@ is force-pinned left and forced visible on every derivation, so pinning or
 hiding one writes state the next derivation discards; a measure resolves every
 layout action back to the column it measures, which then expands into _all_ of
 that column's measures. `resolveColumnLayoutLock` answers which of the two a
-column is, `useTableColumnLayoutLock` is how the four Pin/Hide delegates ask,
-and the item states the reason in a `title` because a disabled button fires no
-pointer events. Hide Column is refused on a group key only — hiding a measure
+column is, `PinAndHideActions` asks it once through `useTableColumnLayoutLock`
+and drills the answer to its four delegates, and the item states the reason in a
+`title` because a disabled button fires no pointer events. Hide Column is refused on a group key only — hiding a measure
 works, and takes its siblings with it.
 
 **The row-actions column is the one thing the scope keeps that the grouping does

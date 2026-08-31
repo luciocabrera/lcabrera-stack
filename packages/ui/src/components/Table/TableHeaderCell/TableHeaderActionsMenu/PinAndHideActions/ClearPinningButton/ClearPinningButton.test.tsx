@@ -10,17 +10,10 @@ import {
   vi,
 } from 'vite-plus/test';
 
-import type { TableColumnLayoutLock } from '#ui/components/Table/Table.types';
-
-const { layoutLockRef, mockSetColumnPinning, normalizedColumnRef } = vi.hoisted(
-  () => ({
-    layoutLockRef: {
-      current: undefined as TableColumnLayoutLock | undefined,
-    },
-    mockSetColumnPinning: vi.fn(),
-    normalizedColumnRef: { current: {} as Record<string, unknown> },
-  }),
-);
+const { mockSetColumnPinning, normalizedColumnRef } = vi.hoisted(() => ({
+  mockSetColumnPinning: vi.fn(),
+  normalizedColumnRef: { current: {} as Record<string, unknown> },
+}));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
   useSetColumnPinning: () => mockSetColumnPinning,
@@ -28,10 +21,6 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
   useGetNormalizedColumn: () => normalizedColumnRef.current,
-}));
-
-vi.mock('#ui/components/Table/hooks', () => ({
-  useTableColumnLayoutLock: () => layoutLockRef.current,
 }));
 
 vi.mock('#ui/components/Table/TableActionsPopover', () => ({
@@ -53,7 +42,6 @@ const getButton = () => {
 
 beforeEach(() => {
   normalizedColumnRef.current = { key: 'name', label: 'Name' };
-  layoutLockRef.current = undefined;
 });
 
 afterEach(() => {
