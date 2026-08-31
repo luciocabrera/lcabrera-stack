@@ -481,3 +481,49 @@ describe('TableConfig grouping hooks', () => {
     expect(storesRef.groupingStore.get()).toStrictEqual(NO_GROUPING);
   });
 });
+
+describe('an open settings drawer', () => {
+  beforeEach(() => {
+    storesRef.columnsStore = createMockStore(createColumnsState());
+    storesRef.dataStore = createMockStore({});
+    storesRef.groupingStore = createMockStore<TableGroupingState>(NO_GROUPING);
+    storesRef.metaStore = createMockStore<Partial<TableMetaState>>({});
+    persistTableState.mockClear();
+    persistTableState.mockReturnValue(true);
+  });
+
+  it('is re-seeded by bumping the sync nonce, as pinning and sorting already do', () => {
+    const { result } = renderHook(() => useToggleTableGroupKey());
+
+    act(() => {
+      result.current({ columnKey: 'order_status' });
+    });
+
+    expect(storesRef.metaStore.get()?.drawersSyncNonce).toBe(1);
+  });
+
+  it('counts up from whatever the meta store already held', () => {
+    storesRef.metaStore.set({ drawersSyncNonce: 7 });
+
+    const { result } = renderHook(() => useToggleTableGroupKey());
+
+    act(() => {
+      result.current({ columnKey: 'order_status' });
+    });
+
+    expect(storesRef.metaStore.get()?.drawersSyncNonce).toBe(8);
+  });
+
+  it('is left alone when the grouping change was refused', () => {
+    storesRef.metaStore.set({ drawersSyncNonce: 3 });
+    persistTableState.mockReturnValue(false);
+
+    const { result } = renderHook(() => useToggleTableGroupKey());
+
+    act(() => {
+      result.current({ columnKey: 'order_status' });
+    });
+
+    expect(storesRef.metaStore.get()?.drawersSyncNonce).toBe(3);
+  });
+});

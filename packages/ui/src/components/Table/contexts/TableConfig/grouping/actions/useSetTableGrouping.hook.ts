@@ -23,10 +23,11 @@ export const useSetTableGrouping = () => {
   return (
     deriveNextGrouping: (current: TableGroupingState) => TableGroupingState,
   ) => {
+    const metaState = metaStore.get();
     const result = applyGroupingReducer({
       deriveNextGrouping,
       existingGrouping: groupingStore.get(),
-      hasDefaultGrouping: metaStore.get()?.hasDefaultGrouping === true,
+      hasDefaultGrouping: metaState?.hasDefaultGrouping === true,
     });
 
     if (result.kind !== 'updated') return;
@@ -69,5 +70,14 @@ export const useSetTableGrouping = () => {
     // each.
     columnsStore.set(columnsPatch);
     groupingStore.set(result.grouping);
+
+    // An open drawer holds a draft snapshotted at mount, so a live grouping
+    // change from the header menu leaves it showing keys and measures that no
+    // longer exist. Bumping the nonce re-keys `TableDrawerProvider` and
+    // re-seeds every draft, which is what sorting, pinning and visibility
+    // already do from the same menu.
+    metaStore.set({
+      drawersSyncNonce: (metaState?.drawersSyncNonce ?? 0) + 1,
+    });
   };
 };

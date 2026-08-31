@@ -21,6 +21,7 @@ const {
   const initialMetaState = {
     isAlwaysOpen: false,
     isBusy: false,
+    isDisabled: false,
     isOpen: false,
     listboxId: 'listbox-id',
     mode: 'single',
@@ -47,6 +48,7 @@ vi.mock('../contexts/meta/actions', () => ({
 vi.mock('../contexts/meta/selectors', () => ({
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
   useGetIsBusy: () => metaState.current.isBusy,
+  useGetIsInert: () => metaState.current.isBusy || metaState.current.isDisabled,
   useGetIsOpen: () => metaState.current.isOpen,
   useGetListboxId: () => metaState.current.listboxId,
   useGetMode: () => metaState.current.mode,
@@ -148,5 +150,22 @@ describe('VirtualSelectTrigger', () => {
 
     expect(screen.queryByRole('button')).toBeNull();
     expect(document.querySelector('[data-chevron]')).toBeNull();
+  });
+});
+
+describe('a disabled trigger', () => {
+  it('is inert exactly as a busy one is', () => {
+    setMetaState({ isDisabled: true });
+
+    render(<VirtualSelectTrigger />);
+
+    const trigger = screen.getByRole('button', { name: 'Pick one' });
+
+    expect(trigger.hasAttribute('disabled')).toBe(true);
+    expect(trigger.getAttribute('aria-disabled')).toBe('true');
+
+    fireEvent.click(trigger);
+
+    expect(toggleDropdownMock).not.toHaveBeenCalled();
   });
 });

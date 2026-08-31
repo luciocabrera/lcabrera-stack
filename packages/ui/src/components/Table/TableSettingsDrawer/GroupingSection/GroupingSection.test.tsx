@@ -605,4 +605,41 @@ describe('GroupingSection staging', () => {
     expect(persistTableState).toHaveBeenCalledTimes(1);
     expect(stores.groupingStore.get()).toStrictEqual(NO_GROUPING);
   });
+
+  it('offers a reset beside the clear, as every other section does', () => {
+    renderDrawer();
+
+    expect(
+      screen.getAllByRole('button', { name: 'Reset Grouping' }),
+    ).toHaveLength(2);
+  });
+
+  it('puts a staged edit back from the applied grouping', () => {
+    stores.groupingStore.reset({
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+      keys: ['order_status'],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+    });
+
+    renderDrawer();
+
+    fireEvent.click(
+      screen.getAllByRole('button', {
+        name: 'Clear Grouping',
+      })[0] as HTMLElement,
+    );
+
+    expect(screen.getByText(/No grouping applied/)).not.toBeNull();
+
+    fireEvent.click(
+      screen.getAllByRole('button', {
+        name: 'Reset Grouping',
+      })[0] as HTMLElement,
+    );
+
+    expect(screen.getByText('1. Status')).not.toBeNull();
+    expect(persistTableState).not.toHaveBeenCalled();
+  });
 });

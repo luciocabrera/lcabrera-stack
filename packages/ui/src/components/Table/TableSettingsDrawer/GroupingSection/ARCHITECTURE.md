@@ -67,7 +67,7 @@ GroupingSection/
 │   └── ShareOfTotalToggle/             → Share of the grand total, on the measures it is defined for
 ├── GroupingModeSection/                → Totals mode: groups only, or groups with subtotals
 ├── TotalsPlacementSection/             → Totals position: above or below their rows (rollup only)
-├── GroupingSectionToolbar/             → Clear grouping (toolbar + footer)
+├── GroupingSectionToolbar/             → Clear/reset grouping (toolbar + footer)
 └── utils/
     ├── toGroupKeyItems.util.ts         → Staged keys + labels, in nesting order
     ├── toAggregateItems.util.ts        → Staged aggregates + labels + a per-entry id, in staged order
@@ -100,6 +100,7 @@ flowchart TD
   H -->|reorder| L3["useReorderColumnAggregates"]
   I -->|add| L["useAddColumnAggregate"]
   M["GroupingSectionToolbar"] -->|clear| N["useClearGrouping"]
+  M -->|reset| N2["useResetGrouping"]
 
   J --> O["useSetGrouping (internal)"]
   K --> O
@@ -375,10 +376,6 @@ Every delegate is self-connected: the shell forwards presentation flags and
 nothing else, so no grouping state is drilled through it.
 
 ## What is deliberately absent
-
-**A reset button.** Sorting's toolbar has clear _and_ reset because sorting has a
-cookie-persisted default to reset to. Grouping has none — it is URL state — so
-the two would be one action under two names.
 
 **A filter input beside an aggregate.** A filtered aggregate has no slot in the
 compact `grouping` param the whole configuration round-trips through, so

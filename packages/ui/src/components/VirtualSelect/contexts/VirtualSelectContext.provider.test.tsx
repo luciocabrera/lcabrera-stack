@@ -56,6 +56,7 @@ describe('VirtualSelectProvider', () => {
       metaState: {
         isAlwaysOpen: true,
         isBusy: false,
+        isDisabled: false,
         isOpen: false,
         listboxId: 'listbox-id',
         mode: 'multi',
@@ -88,6 +89,7 @@ describe('VirtualSelectProvider', () => {
       metaState: {
         isAlwaysOpen: false,
         isBusy: false,
+        isDisabled: false,
         isOpen: false,
         listboxId: 'listbox-id',
         mode: 'single',
@@ -119,6 +121,7 @@ describe('VirtualSelectProvider', () => {
         metaState={{
           isAlwaysOpen: false,
           isBusy: false,
+          isDisabled: false,
           isOpen: isCurrentlyOpen,
           listboxId: 'listbox-id',
           mode: 'single',

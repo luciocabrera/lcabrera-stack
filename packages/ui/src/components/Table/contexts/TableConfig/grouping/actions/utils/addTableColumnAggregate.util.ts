@@ -28,8 +28,18 @@ export const addTableColumnAggregate = ({
 
   if (isApplied) return grouping;
 
+  const lastOfColumn = grouping.aggregates.findLastIndex(
+    (entry) => entry.columnKey === columnKey,
+  );
+  const insertAt =
+    lastOfColumn === -1 ? grouping.aggregates.length : lastOfColumn + 1;
+
   return {
-    aggregates: [...grouping.aggregates, { columnKey, fn }],
+    aggregates: [
+      ...grouping.aggregates.slice(0, insertAt),
+      { columnKey, fn },
+      ...grouping.aggregates.slice(insertAt),
+    ],
     keys: grouping.keys,
     mode: grouping.mode,
     periods: grouping.periods,

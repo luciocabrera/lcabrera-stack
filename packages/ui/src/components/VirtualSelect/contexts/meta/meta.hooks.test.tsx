@@ -34,6 +34,7 @@ const setup = (metaState: Partial<VirtualSelectMetaState> = {}) => {
   const metaStore = createMockStore<VirtualSelectMetaState>({
     isAlwaysOpen: false,
     isBusy: false,
+    isDisabled: false,
     isListVisible: true,
     isOpen: true,
     listboxId: 'listbox-id',

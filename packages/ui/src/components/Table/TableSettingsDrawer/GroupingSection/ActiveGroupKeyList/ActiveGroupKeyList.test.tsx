@@ -43,6 +43,7 @@ vi.mock(
 
 vi.mock('../../TableDrawerContext/actions', () => ({
   useClearGrouping: () => vi.fn(),
+  useResetGrouping: () => vi.fn(),
   useSetGroupKeyPeriod: () => vi.fn(),
   useSetGroupKeys: () => mockSetGroupKeys,
 }));

@@ -44,6 +44,7 @@ TableSettingsDrawer/
 │   │   ├── useOrderColumnsBySorting       → Reorder columns by sorting
 │   │   ├── useResetColumnOrderAndVisibility → Reset order + visibility from table
 │   │   ├── useResetFilters                → Reset filters from table
+│   │   ├── useResetGrouping               → Reset grouping from table
 │   │   ├── useResetSorting                → Reset sorting from table
 │   │   ├── useResetTableSettings          → Re-seed both drafts from the table
 │   │   ├── useAddColumnAggregate          → Stage one more aggregate for a column
@@ -99,6 +100,7 @@ TableSettingsDrawer/
 │   ├── AddSortSection/                    → VirtualSelect for adding sorts
 │   ├── ActiveSortList/                    → DraggableList of sorts
 │   ├── SortingSectionToolbar/             → Sort/clear/reset (toolbar + footer)
+│   ├── hooks/                             → useGroupedSortScope (which terms the read applies)
 │   └── utils/
 │
 ├── GroupingSection/                       → Multi-key grouping + aggregate selection
@@ -110,7 +112,7 @@ TableSettingsDrawer/
 │   ├── ActiveGroupKeyList/                → DraggableList of applied keys
 │   ├── AddAggregateSection/               → Column → legal-function selects
 │   ├── ActiveAggregateList/               → DraggableList of staged aggregates
-│   ├── GroupingSectionToolbar/            → Clear grouping (toolbar + footer)
+│   ├── GroupingSectionToolbar/            → Clear/reset grouping (toolbar + footer)
 │   └── utils/
 │
 └── ColumnOrderSection/                    → Drag-drop column order + pin + visibility

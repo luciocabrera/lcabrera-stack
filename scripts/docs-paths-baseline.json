@@ -1,5 +1,8 @@
 {
   "docs/agents/research/skills-distribution-mattpocock-skills.md": {
     "docs/agents/issue-tracker.md": "verbatim quotation from mattpocock/skills' code-review/SKILL.md — the path is inside the quote, so rewriting it to the /-prefixed form the rest of this doc uses would falsify the quote"
+  },
+  "docs/decisions/ADR-065-grouped-rows-render-a-hierarchy-column.md": {
+    "../../packages/ui/src/components/Table/TableGroupAggregate/ARCHITECTURE.md": "The file was deleted in #1050 as stale: it described a cell rendering several measures with function-name prefixes, which withAggregateColumns ended by giving each measure its own column. An ADR is a dated record and is not edited to match a later tree."
   }
 }
