@@ -10,6 +10,11 @@ export const getSettingsDraftChanges = ({
   baseline,
   draft,
 }: GetSettingsDraftChangesArgs): SettingsDraftChanges => {
+  const hasGroupingChanges =
+    draft.groupFold !== baseline.groupFold ||
+    draft.groupingMode !== baseline.groupingMode ||
+    draft.totalsPlacement !== baseline.totalsPlacement;
+
   const hasNavigationChanges =
     draft.navigationCollapsed !== baseline.navigationCollapsed ||
     draft.navigationSize !== baseline.navigationSize;
@@ -21,7 +26,8 @@ export const getSettingsDraftChanges = ({
     draft.unpinConflictResolution !== baseline.unpinConflictResolution;
 
   return {
-    hasChanges: hasNavigationChanges || hasPinningChanges,
+    hasChanges: hasGroupingChanges || hasNavigationChanges || hasPinningChanges,
+    hasGroupingChanges,
     hasNavigationChanges,
     hasPinningChanges,
   };

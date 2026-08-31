@@ -6,6 +6,7 @@ import type { SettingsDraft } from '../Settings.types';
 
 export type SettingsDraftChanges = {
   readonly hasChanges: boolean;
+  readonly hasGroupingChanges: boolean;
   readonly hasNavigationChanges: boolean;
   readonly hasPinningChanges: boolean;
 };

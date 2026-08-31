@@ -7,6 +7,7 @@ describe('serializeGlobalSettingsForCookie', () => {
   it('serializes settings into versioned payload', () => {
     const serialized = serializeGlobalSettingsForCookie({
       settings: {
+        grouping: {},
         navigation: {
           size: 'small',
         },
@@ -21,6 +22,7 @@ describe('serializeGlobalSettingsForCookie', () => {
 
     expect(JSON.parse(serialized)).toEqual({
       value: {
+        grouping: {},
         navigation: {
           size: 'small',
         },

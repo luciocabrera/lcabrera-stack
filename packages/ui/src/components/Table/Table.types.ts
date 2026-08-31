@@ -296,6 +296,9 @@ export type TableGroupExpansionState = {
   readonly collapsedGroupPaths: ReadonlySet<string>;
 };
 
+/** Which way a group sits before anyone has touched it. */
+export type TableGroupFold = 'collapsed' | 'expanded';
+
 /**
  * Duplicated from server `GroupingMode` (ADR-038, ADR-039). `cube` is absent:
  * its sets are not prefixes, so it cannot indent as a tree (#574).

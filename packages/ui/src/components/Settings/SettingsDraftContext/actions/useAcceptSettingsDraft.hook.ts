@@ -1,8 +1,10 @@
 import {
+  useSetGlobalGroupingPreferences,
   useSetGlobalNavigationPreferences,
   useSetGlobalPinningPreferences,
 } from '#ui/contexts/GlobalSettingsContext/actions';
 import {
+  useGetGlobalGroupingPreferences,
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
 } from '#ui/contexts/GlobalSettingsContext/selectors';
@@ -10,6 +12,7 @@ import {
 import {
   getSettingsDraftChanges,
   toDraft,
+  toGlobalGroupingPreferencesUpdate,
   toGlobalNavigationPreferencesUpdate,
   toGlobalPinningPreferencesUpdate,
 } from '../../utils';
@@ -17,8 +20,10 @@ import { useSettingsDraftContextValue } from '../useSettingsDraftContextValue.ho
 
 export const useAcceptSettingsDraft = () => {
   const { draftStore } = useSettingsDraftContextValue();
+  const groupingPreferences = useGetGlobalGroupingPreferences();
   const navigationPreferences = useGetGlobalNavigationPreferences();
   const pinningPreferences = useGetGlobalPinningPreferences();
+  const setGlobalGroupingPreferences = useSetGlobalGroupingPreferences();
   const setGlobalNavigationPreferences = useSetGlobalNavigationPreferences();
   const setGlobalPinningPreferences = useSetGlobalPinningPreferences();
 
@@ -26,11 +31,25 @@ export const useAcceptSettingsDraft = () => {
     const draft = draftStore.get();
     if (!draft) return;
 
-    const baseline = toDraft({ navigationPreferences, pinningPreferences });
-    const { hasChanges, hasNavigationChanges, hasPinningChanges } =
-      getSettingsDraftChanges({ baseline, draft });
+    const baseline = toDraft({
+      groupingPreferences,
+      navigationPreferences,
+      pinningPreferences,
+    });
+    const {
+      hasChanges,
+      hasGroupingChanges,
+      hasNavigationChanges,
+      hasPinningChanges,
+    } = getSettingsDraftChanges({ baseline, draft });
 
     if (!hasChanges) return;
+
+    if (hasGroupingChanges) {
+      setGlobalGroupingPreferences(
+        toGlobalGroupingPreferencesUpdate({ draft }),
+      );
+    }
 
     if (hasNavigationChanges) {
       const navigationUpdate = toGlobalNavigationPreferencesUpdate({

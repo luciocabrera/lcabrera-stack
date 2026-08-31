@@ -3,6 +3,7 @@ import { OLAP_GROUP_ROW_FIELD } from '@lcabrera/api/olap/olap.constants';
 import type {
   TableAggregateFn,
   TableColumnLayoutLock,
+  TableGroupFold,
   TableGroupingMode,
   TableGroupKeyRefusalReason,
   TableGroupPeriod,
@@ -159,6 +160,16 @@ export const TABLE_TOTALS_PLACEMENT_LABELS: Record<
 > = {
   first: 'Above their rows',
   last: 'Below their rows',
+};
+
+export const TABLE_GROUP_FOLDS: readonly TableGroupFold[] = [
+  'expanded',
+  'collapsed',
+];
+
+export const TABLE_GROUP_FOLD_LABELS: Record<TableGroupFold, string> = {
+  collapsed: 'Start collapsed',
+  expanded: 'Start expanded',
 };
 
 export const TABLE_TOTALS_PLACEMENT_PARAM = 'totals';

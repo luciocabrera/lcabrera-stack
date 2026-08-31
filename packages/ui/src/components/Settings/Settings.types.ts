@@ -1,3 +1,8 @@
+import type {
+  TableGroupFold,
+  TableGroupingMode,
+  TableTotalsPlacement,
+} from '#ui/components/Table/Table.types';
 import type { useGetGlobalNavigationPreferences } from '#ui/contexts/GlobalSettingsContext/selectors';
 import type {
   GlobalNavigationCollapsedPreference,
@@ -18,10 +23,13 @@ export type BuildNavigationUpdateArgs = {
 };
 
 export type SettingsDraft = {
+  readonly groupFold: TableGroupFold;
+  readonly groupingMode: TableGroupingMode;
   readonly navigationCollapsed: GlobalNavigationCollapsedPreference;
   readonly navigationSize: GlobalNavigationSizePreference;
   readonly orderConflictResolution: OrderConflictResolutionPreferenceOption;
   readonly pinConflictResolution: PinConflictResolutionPreferenceOption;
   readonly pinSide: PinSidePreferenceOption;
+  readonly totalsPlacement: TableTotalsPlacement;
   readonly unpinConflictResolution: UnpinConflictResolutionPreferenceOption;
 };

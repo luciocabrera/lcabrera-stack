@@ -89,6 +89,7 @@ vi.mock('#ui/contexts/NotificationContext', () => ({
 import { AppProviders } from './AppProviders.component';
 
 const globalSettings: GlobalSettingsState = {
+  grouping: {},
   navigation: {
     collapsed: 'expanded',
     size: 'medium',
