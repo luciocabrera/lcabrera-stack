@@ -50,13 +50,6 @@ export const COLLAPSE_ALL_GROUPS_COMMAND = {
   label: 'Collapse All Groups',
 } satisfies CommandDescriptor;
 
-/**
- * The same act at one depth: "This Level" names the level the column whose menu is open
- * states, and folds the groups one level above it — so unlike the pair above, these two
- * *are* asked of a column, and the id says so.
- * They carry the whole-table pair's icons deliberately: it is the same fold, and a second
- * glyph would imply a second kind of act rather than a narrower scope.
- */
 export const EXPAND_GROUP_LEVEL_COMMAND = {
   icon: ExpandAllIcon,
   id: 'column.group.expand.level' as CommandId,

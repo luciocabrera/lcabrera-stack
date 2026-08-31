@@ -91,7 +91,7 @@ graph LR
   subgraph "TableConfigProvider"
     CS["columnsStore<br/><small>columns, filters, sorting,<br/>pinning, sizing, visibility</small>"]
     GS["groupingStore<br/><small>applied group keys,<br/>aggregates, mode</small>"]
-    ES["expansionStore<br/><small>collapsed group paths,<br/>drilled pages</small>"]
+    ES["expansionStore<br/><small>collapsed group paths</small>"]
     MS["metaStore<br/><small>density, title, drawer toggles,<br/>row height, overscan</small>"]
   end
 
@@ -119,9 +119,9 @@ See [contexts/ARCHITECTURE.md](contexts/ARCHITECTURE.md) for details.
 `groupingStore` holds the applied keys, aggregates and mode — the _configuration_,
 which is URL state and travels through the loader
 ([ADR-061](../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)).
-`expansionStore` holds which paths are collapsed and which groups have drilled,
-which are _client_ state and do not: `TableGroupingState` is also the URL codec's
-and the loader's type, and a `Set` does not survive that boundary (ADR-009).
+`expansionStore` holds which paths are collapsed, which is _client_ state and
+does not: `TableGroupingState` is also the URL codec's and the loader's type,
+and a `Set` does not survive that boundary (ADR-009).
 Collapse is stored as the **collapsed** set rather than the expanded one, so a
 newly-arrived group is open by default and a refetch cannot silently fold rows
 ([ADR-067](../../../../../docs/decisions/ADR-067-expansion-is-the-collapsed-set-and-a-group-row-is-a-tree-node.md)).

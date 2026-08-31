@@ -129,10 +129,10 @@ TableConfig/
 │   │
 │   ├── utils/
 │   │   ├── resolveGroupTreeNodes.util.ts    → Pure: each loaded row's level, parent and visibility; group ancestry from the path, detail rows from the nearest group above
-│   │   ├── resolveTableGroupTree.util.ts    → Pure: the rows a collapse leaves standing plus their ARIA tree metadata, with each drilled page spliced under its group; returns the caller's array by reference when there is no tree
+│   │   ├── resolveTableGroupTree.util.ts    → Pure: the rows a collapse leaves standing plus their ARIA tree metadata; returns the caller's array by reference when there is no tree
 │   │   ├── resolveGroupLevelDisclosures.util.ts → Pure: the groups one row can fold, keyed by the column stating each level — ancestors, plus its own only when it is a collapsed subtotal (ADR-080 amendment)
 │   │   ├── collectFoldableGroupPaths.util.ts → Pure: the groups a control may fold — those that own rows **and** render a row of their own, so a `flat` ancestor nothing draws is never offered (#774)
-│   │   ├── collectGroupLevelFoldPaths.util.ts → Pure: the groups whose fold removes one column's values — the level above it, taken from the set above so the outermost key answers nothing (#1020)
+│   │   ├── collectGroupLevelFoldPaths.util.ts → Pure: the groups one column's level command folds — the union of the disclosures the row metadata above already keys by column (ADR-097)
 │   │   ├── areAllGroupsCollapsed.util.ts    → Pure: whether every foldable group is already folded, by membership rather than size
 │   │   ├── toggleCollapsedGroupPath.util.ts → Pure: one group's expansion flipped, as a new set
 │   │   ├── setCollapsedGroupLevel.util.ts  → Pure: one level folded or unfolded as a whole, everything outside it carried through; same instance back when nothing moved
@@ -144,10 +144,10 @@ TableConfig/
 │   │   ├── utils/resolveOutermostGroupPathKey.util.ts   → Pure: which ancestor that is when a collapse-all folds every level at once and names no single path (#774)
 │   │   ├── utils/resolveFoldedAncestorPathKey.util.ts  → Pure: which of the groups a level fold closed the focused row was inside, when the fold names many and none is the row's own (#1020)
 │   │   ├── utils/applyGroupFoldFocus.service.ts       → Effect: hand focus to the row a fold left standing, or leave it alone — the tail all three fold actions share
-│   │   ├── useToggleTableGroupExpansion.hook.ts → Open or close one group by path — or fetch it, when it is a drillable leaf; moves focus first when the collapse takes the focused row with it
+│   │   ├── useToggleTableGroupExpansion.hook.ts → Open or close one group by path; moves focus first when the collapse takes the focused row with it
 │   │   ├── useSetAllTableGroupsExpanded.hook.ts → Open every group, or fold to the outermost level — the tree's own foldable set, so it closes exactly what the chevrons offer (#774)
-│   │   ├── useSetTableGroupLevelExpanded.hook.ts → Fold or unfold one level, named by the column stating it — the same foldable set filtered to one depth, so every other level's expansion is carried through (#1020)
-│   │   └── usePruneTableGroupExpansion.hook.ts  → Reconcile the collapsed paths against the rows just loaded, and discard every drilled page
+│   │   ├── useSetTableGroupLevelExpanded.hook.ts → Fold or unfold the groups one column states, named by that column — every other level's expansion carried through (ADR-097)
+│   │   └── usePruneTableGroupExpansion.hook.ts  → Reconcile the collapsed paths against the rows just loaded
 │   │
 │   └── selectors/
 │       ├── useGetTableCollapsedGroupPaths.hook.ts → The paths whose subtree is hidden
