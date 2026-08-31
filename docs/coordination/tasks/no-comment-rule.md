@@ -6,22 +6,34 @@ status: active
 branch: chore/1028-no-comment-rule
 area:
   - packages/eslint-local-rules/**
+  - packages/vite-configs/src/**
   - packages/ui/src/**
-  - packages/repo-standards/scripts/**
   - packages/server/src/**
+  - packages/api/src/**
+  - packages/utils/src/**
+  - packages/node-runtime/src/**
+  - packages/tsconfig/src/**
+  - packages/ts-configs/**
+  - packages/repo-standards/scripts/**
+  - apps/showcase/src/**
 started: 2026-08-31
 updated: 2026-08-31
 plan: (none)
-pr: (none)
+pr: #1045
 issue: #1028
 ---
 
 ## What
 
-Enforce the no-comment rule, then sweep the code that predates it
+Enforce ADR-095 mechanically — `local-rules/no-explanatory-comments` in
+`@lcabrera/eslint-plugin`, turned on by both shared flat configs — then sweep the
+comments that predate it out of every workspace the eslint pass reaches.
+
+The sweep is repo-wide, so the `area` above is wide on purpose. Coordinate before
+starting anything that edits source in those workspaces.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: rule landed and wired; sweeping the covered positions
 - Blockers: none
-- Next:
+- Next: full gate, then `gh pr edit` #1045

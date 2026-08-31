@@ -443,9 +443,13 @@ The record is
 [ADR-095](docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
 which also states what the rule costs and which paragraph of
 [ADR-088](docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)
-it corrects. Applying it to the code that predates it, and the lint rule in
-`@lcabrera/eslint-plugin` that will enforce it, are
-[#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028).
+it corrects. `local-rules/no-explanatory-comments` in
+`@lcabrera/eslint-plugin` enforces it, and both shared flat configs turn it on
+for `.ts`/`.tsx` sources — so a comment in either position is a lint error, not a
+review note. The rule's own README states the three positions it exempts and the
+two options that widen them. It stops at the eslint pass's reach: a workspace
+whose sources sit under `scripts/` is globally ignored by those configs, so a
+`.mjs` script there is held to this rule by review alone.
 
 **Never put a changing number in a comment or a doc.** Counts, file totals,
 finding tallies and measurements are true on the day they are written and wrong

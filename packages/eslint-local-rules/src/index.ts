@@ -16,6 +16,7 @@ import destructuringForFunctions from './destructuring-for-functions.ts';
 import domainFolderFilename from './domain-folder-filename.ts';
 import filenameConvention from './filename-convention.ts';
 import mergeDuplicateImports from './merge-duplicate-imports.ts';
+import noExplanatoryComments from './no-explanatory-comments.ts';
 import noHabitReturnTypes from './no-habit-return-types.ts';
 import noInlineTypeImports from './no-inline-type-imports.ts';
 import noTypeDefinitionsInComponents from './no-type-definitions-in-components.ts';
@@ -29,6 +30,7 @@ export const rules = {
   'domain-folder-filename': domainFolderFilename,
   'filename-convention': filenameConvention,
   'merge-duplicate-imports': mergeDuplicateImports,
+  'no-explanatory-comments': noExplanatoryComments,
   'no-habit-return-types': noHabitReturnTypes,
   'no-inline-type-imports': noInlineTypeImports,
   'no-type-definitions-in-components': noTypeDefinitionsInComponents,

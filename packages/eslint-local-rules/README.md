@@ -51,6 +51,7 @@ explicit extensions are **required**, would be actively wrong.
 | `domain-folder-filename`            |         | A folder's shared `*.types`/`*.constants` is named after it |
 | `filename-convention`               |         | Base-name case follows the file's type suffix               |
 | `merge-duplicate-imports`           | ✅      | One import statement per source module                      |
+| `no-explanatory-comments`           |         | No comment above or inside a function, component or type    |
 | `no-habit-return-types`             | ✅      | No return type TypeScript would infer identically           |
 | `no-inline-type-imports`            | ✅      | `import type { X }` over `import { type X }`                |
 | `no-type-definitions-in-components` |         | Types live in `*.types.ts`, not in component files          |
@@ -58,7 +59,7 @@ explicit extensions are **required**, would be actively wrong.
 | `single-component-export`           |         | One component per `*.component.tsx`                         |
 | `type-suffix-naming`                | ✅      | `Args`/`Props` suffixes over `Arguments`/`Properties`       |
 
-Three rules take options; the rest take none.
+Four rules take options; the rest take none.
 
 ### `clean-import-paths`
 
@@ -356,6 +357,84 @@ does not recognise. Closing it properly needs a type-aware rule.
 The trade is deliberate and worth knowing: `(): string` on a body returning a
 `string` is a habit this rule will not catch, because the same annotation over a
 body returning `'a' | 'b'` is a widening. Reviews still own that half.
+
+### `no-explanatory-comments`
+
+Reports a comment written above a function, component or type declaration, or
+inside one. Not fixable — see below.
+
+A name, a signature and a type already say what the code is, and prose repeating
+them is a second copy of a fact kept in the one place nothing checks. The failure
+is not cosmetic: a helper in the repository this plugin comes from documented
+itself as "shared by the cookie and sessionStorage readers" when no
+sessionStorage reader had ever existed, and two later designs went on to offer
+that reader as a free fallback before review caught it.
+
+**❌ Disallowed:**
+
+```tsx
+// Reads the persisted slices, falling back to the defaults.
+export const read = () => collect(defaults);
+
+export const Panel = () => {
+  // The chevron points down while the panel is open.
+  return <div>{/* and again, in JSX */}</div>;
+};
+
+type Result = {
+  /** Absent while the first read is in flight. */
+  readonly value?: string;
+};
+```
+
+**✅ Left alone:**
+
+```tsx
+/**
+ * The file-level header: it describes the module, not a declaration.
+ */
+
+import { render } from '@testing-library/react';
+
+// @vitest-environment jsdom
+import { Panel } from './Panel.component.tsx';
+
+export const mount = () => {
+  // oxlint-disable-next-line no-console
+  console.log('a directive is not prose');
+  return render(<Panel />);
+};
+```
+
+Three positions are exempt, each for a reason the rule can check.
+
+The **file-level header** — every comment before the file's first token — stays,
+because it describes the module rather than a declaration.
+
+A **tool directive** stays, because deleting one changes what another engine
+reports. `@vitest-environment` is why this matters beyond principle: import
+sorting leaves it below the imports, so it is not in header position, and a rule
+without this exemption would demand its removal from every jsdom suite.
+
+An **annotated JSDoc block in a JavaScript file** stays, and only there. A
+TypeScript declaration carries its own types, so `@param` beside one is prose; a
+published `.mjs` package's `.d.mts` is derived from the block, so dropping it
+ships an option defaulting to `[]` as `never[]`. The exemption covers the whole
+block, because the description a tool emits and prose that merely shares the
+block are the same text to a parser.
+
+| Option           | Default                                                                                                                                                                         | Effect                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `directives`     | `eslint-disable`, `oxlint-disable`, `biome-ignore`, `prettier-ignore`, `@ts-expect-error`, `@vitest-environment`, `v8 ignore` and the rest of the engine prefixes in the source | Comment prefixes read as a directive rather than as prose        |
+| `annotationTags` | `@param`, `@returns`, `@type`, `@template`, `@satisfies`, `@callback`, `@property`, `@overload`                                                                                 | JSDoc tags whose block a build reads, exempt in JavaScript files |
+
+Setting either option **replaces** its default list rather than adding to it.
+
+**Deliberately not fixable.** Deleting the comment is the right outcome for most
+findings and the wrong one for the few carrying a trap nothing else records, and
+the rule cannot tell those apart. An autofix would erase that difference exactly
+where it matters — and in this repository `vp run lint` chains `--fix`, so it
+would erase it silently.
 
 ### `merge-duplicate-imports`
 
