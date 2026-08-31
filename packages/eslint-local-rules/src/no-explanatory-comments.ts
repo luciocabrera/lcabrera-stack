@@ -77,6 +77,7 @@ const DEFAULT_DIRECTIVES = [
   'eslint-disable',
   'eslint-enable',
   'eslint-env',
+  'fallow-ignore',
   'istanbul ignore',
   'oxlint-disable',
   'oxlint-enable',

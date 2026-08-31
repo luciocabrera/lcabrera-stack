@@ -50,6 +50,7 @@ const randomString = (length: number) => {
   ).join('');
 };
 
+// fallow-ignore-next-line complexity -- showcase-only data generator
 const generateCellValue = ({
   colIdx,
   dataType,

@@ -10,6 +10,7 @@ export const TITLE = {
   singular: 'Row',
 };
 
+// fallow-ignore-next-line complexity -- temporary testing suppression
 const getColDataType = (index: number) => {
   const mod = index % 20;
   if (mod === 6) return 'boolean';

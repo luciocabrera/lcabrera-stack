@@ -170,6 +170,10 @@ ruleTester.run('no-explanatory-comments', rule, {
     ok(directive('react-doctor-disable'), 'export const Cell = () => x;'),
     ok(directive('NOSONAR'), 'export const run = () => x;'),
     ok(
+      directive('fallow-ignore-next-line complexity'),
+      'export const walk = () => x;',
+    ),
+    ok(
       'export const read = () => {',
       '  // v8 ignore next',
       '  if (x === undefined) return 0;',

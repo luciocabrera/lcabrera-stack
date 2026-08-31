@@ -441,10 +441,10 @@ ships an option defaulting to `[]` as `never[]`. The exemption covers the whole
 block, because the description a tool emits and prose that merely shares the
 block are the same text to a parser.
 
-| Option           | Default                                                                                                                                                                         | Effect                                                           |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `directives`     | `eslint-disable`, `oxlint-disable`, `biome-ignore`, `prettier-ignore`, `@ts-expect-error`, `@vitest-environment`, `v8 ignore` and the rest of the engine prefixes in the source | Comment prefixes read as a directive rather than as prose        |
-| `annotationTags` | `@param`, `@returns`, `@type`, `@template`, `@satisfies`, `@callback`, `@property`, `@overload`                                                                                 | JSDoc tags whose block a build reads, exempt in JavaScript files |
+| Option           | Default                                                                                                                                                                                                                             | Effect                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `directives`     | `eslint-disable`, `oxlint-disable`, `biome-ignore`, `prettier-ignore`, `react-doctor-disable`, `fallow-ignore`, `NOSONAR`, `@ts-expect-error`, `@vitest-environment`, `v8 ignore` and the rest of the engine prefixes in the source | Comment prefixes read as a directive rather than as prose        |
+| `annotationTags` | `@param`, `@returns`, `@type`, `@template`, `@satisfies`, `@callback`, `@property`, `@overload`                                                                                                                                     | JSDoc tags whose block a build reads, exempt in JavaScript files |
 
 Setting either option **replaces** its default list rather than adding to it.
 

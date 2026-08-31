@@ -7,6 +7,7 @@ import { CardsSection } from './CardsSection';
 import { styles } from './ShowcasePage.stylex';
 import { SidePanelSection } from './SidePanelSection';
 
+// fallow-ignore-next-line complexity -- temporary showcase testing page
 export const ShowcasePage = () => {
   const { isDarkMode, toggleTheme } = useTheme();
 
