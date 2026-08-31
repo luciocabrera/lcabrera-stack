@@ -11,7 +11,7 @@ export const VirtualSelectTrigger = () => {
   const {
     chevron,
     content,
-    isBusy,
+    isInert,
     isOpen,
     listboxId,
     mode,
@@ -35,16 +35,16 @@ export const VirtualSelectTrigger = () => {
   return (
     <button
       aria-controls={listboxId}
-      aria-disabled={isBusy}
+      aria-disabled={isInert}
       aria-expanded={isOpen}
       aria-haspopup='listbox'
-      disabled={isBusy}
-      onClick={isBusy ? undefined : toggleDropdown}
+      disabled={isInert}
+      onClick={isInert ? undefined : toggleDropdown}
       ref={(node) => {
         assignTriggerRef({ node, triggerRef });
       }}
       type='button'
-      {...getTriggerStyleProps({ isBusy, isOpen, mode })}
+      {...getTriggerStyleProps({ isInert, isOpen, mode })}
     >
       {content}
       {chevron}

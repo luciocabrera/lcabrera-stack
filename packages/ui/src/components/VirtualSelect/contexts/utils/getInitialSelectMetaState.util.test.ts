@@ -5,6 +5,7 @@ import { getInitialSelectMetaState } from './getInitialSelectMetaState.util';
 const baseArgs = {
   isAlwaysOpen: false,
   isBusy: false,
+  isDisabled: false,
   isOpen: false,
   listboxId: 'listbox-id',
   mode: 'single' as const,

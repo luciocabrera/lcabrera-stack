@@ -90,7 +90,8 @@ export const AddAggregateSection = ({
       />
       {gapMessage === undefined ? (
         <VirtualSelect
-          isBusy={isBusy || !selectedColumn}
+          isBusy={isBusy}
+          isDisabled={!selectedColumn}
           mode='single'
           onChange={(values) => {
             setSelectedFn(values[0] ?? '');

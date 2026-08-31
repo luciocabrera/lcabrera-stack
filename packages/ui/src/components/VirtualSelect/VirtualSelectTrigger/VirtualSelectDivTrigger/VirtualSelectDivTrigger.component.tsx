@@ -5,7 +5,7 @@ import type { VirtualSelectDivTriggerProps } from './VirtualSelectDivTrigger.typ
 import { useToggleDropdown } from '../../contexts/meta/actions';
 import {
   useGetIsAlwaysOpen,
-  useGetIsBusy,
+  useGetIsInert,
   useGetIsOpen,
   useGetListboxId,
   useGetMode,
@@ -25,13 +25,13 @@ export const VirtualSelectDivTrigger = ({
   triggerRef,
 }: VirtualSelectDivTriggerProps) => {
   const isAlwaysOpen = useGetIsAlwaysOpen();
-  const isBusy = useGetIsBusy();
+  const isInert = useGetIsInert();
   const isOpen = useGetIsOpen();
   const listboxId = useGetListboxId();
   const mode = useGetMode();
   const toggleDropdown = useToggleDropdown();
 
-  const shouldDisableInteraction = isBusy || isAlwaysOpen;
+  const shouldDisableInteraction = isInert || isAlwaysOpen;
   const interactionProps = isAlwaysOpen
     ? undefined
     : {
@@ -56,7 +56,7 @@ export const VirtualSelectDivTrigger = ({
       }}
       {...interactionProps}
       {...getTriggerStyleProps({
-        isBusy,
+        isInert,
         isOpen,
         isStatic: isAlwaysOpen,
         mode,

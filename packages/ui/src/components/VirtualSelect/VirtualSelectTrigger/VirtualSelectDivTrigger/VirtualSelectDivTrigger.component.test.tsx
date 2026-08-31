@@ -16,6 +16,7 @@ const { metaState, setMetaState, toggleDropdownMock } = vi.hoisted(() => {
   const initialMetaState = {
     isAlwaysOpen: false,
     isBusy: false,
+    isDisabled: false,
     isOpen: false,
     listboxId: 'listbox-id',
     mode: 'multi',
@@ -38,6 +39,7 @@ vi.mock('../../contexts/meta/actions', () => ({
 vi.mock('../../contexts/meta/selectors', () => ({
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
   useGetIsBusy: () => metaState.current.isBusy,
+  useGetIsInert: () => metaState.current.isBusy || metaState.current.isDisabled,
   useGetIsOpen: () => metaState.current.isOpen,
   useGetListboxId: () => metaState.current.listboxId,
   useGetMode: () => metaState.current.mode,

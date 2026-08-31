@@ -5,10 +5,9 @@ import { isTableAggregateFn } from './isTableAggregateFn.util';
 const SEPARATOR = ':';
 
 /**
- * A column may carry several aggregates, so neither half identifies an entry on its own —
- * and three unrelated places need one string rather than a pair: the `grouping` param's
- * `agg` and `share` members, the key of the share denominator map, and the React key of a
- * staged aggregate row.
+ * A column may carry several aggregates, so neither half identifies an entry on its own,
+ * and the places that need one string rather than a pair keep growing — the `grouping`
+ * param, the share denominator map, the derived measure column keys, the staged rows.
  * **The encoder and the parser live together on purpose** (ADR-082): the right-split rule
  * below is the only thing that makes this format total, and split across modules the two
  * can disagree in any way at all and still compile.

@@ -6,6 +6,7 @@ export type VirtualSelectMetaState = {
   readonly customStylex?: StyleXStyles;
   readonly isAlwaysOpen: boolean;
   readonly isBusy: boolean;
+  readonly isDisabled: boolean;
   readonly isListVisible: boolean;
   readonly isOpen: boolean;
   readonly listboxId: string;
@@ -25,6 +26,8 @@ export type VirtualSelectProps = {
   readonly dataState?: VirtualListDataState;
   readonly isAlwaysOpen?: boolean;
   readonly isBusy?: boolean;
+  /** Inert, but not loading: no shimmer, unlike `isBusy`. */
+  readonly isDisabled?: boolean;
   readonly listboxId?: string;
   readonly listMaxHeight?: string;
   readonly mode: VirtualSelectMode;

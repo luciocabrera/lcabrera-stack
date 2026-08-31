@@ -2,13 +2,13 @@ import { useState } from 'react';
 
 export type UseVirtualSelectDropdownArgs = {
   readonly isAlwaysOpen: boolean;
-  readonly isBusy: boolean;
+  readonly isInert: boolean;
   readonly onOpenChange?: (isOpen: boolean) => void;
 };
 
 export const useVirtualSelectDropdown = ({
   isAlwaysOpen,
-  isBusy,
+  isInert,
   onOpenChange,
 }: UseVirtualSelectDropdownArgs) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +23,7 @@ export const useVirtualSelectDropdown = ({
   };
 
   const toggleDropdown = () => {
-    if (isBusy) return;
+    if (isInert) return;
     const isNowOpen = !isOpen;
 
     setIsOpen(isNowOpen);
