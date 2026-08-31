@@ -19,6 +19,25 @@
  * resolved here, from `./merge-queue.mjs`; `docs/tooling/merge-queue.md` says
  * why, and ADR-098 is the decision.
  *
+ * Four resolutions here are load-bearing. The repository comes from the flag,
+ * the runner, the event, then the checkout in that order, so an explicit
+ * `--repo` always wins and a gate driven by the sweep cannot resolve a
+ * different repository than the sweep listed. A pull request argument that is
+ * present but not a number throws rather than coercing, because `#738` would
+ * otherwise reach the API path as `pulls/NaN`, where a bare 404 is all anyone
+ * sees. A published status is read against the head the caller resolved, never
+ * against an event payload's SHA, so the comparison it feeds is about one
+ * commit. And a run that cannot name a pull request says so and stops rather
+ * than falling through to a default.
+ *
+ * `--if-changed` is why the publish protocol is shared rather than written per
+ * gate: the reconcile sweep re-runs every gate on a schedule and relies on a
+ * re-run being a no-op. A gate implementing that check slightly differently
+ * would either republish on every sweep or stop correcting a stale status, and
+ * neither is visible from the sweep's own log. `protectSuccess` is opt-in for
+ * the same reason — only a gate that has another publisher may ask for it, and
+ * `verify-review-threads.mjs` must never pass it.
+ *
  * Governed by .claude/rules/scripts.md.
  */
 import { readFileSync } from 'node:fs';
@@ -37,7 +56,6 @@ import {
   shouldPublishStatus,
 } from './review-gate-reconcile.mjs';
 
-/** The Actions event payload, or `undefined` outside Actions. */
 export const readEventPayload = () => {
   const path = process.env.GITHUB_EVENT_PATH;
   return path === undefined || path === ''
@@ -45,11 +63,6 @@ export const readEventPayload = () => {
     : JSON.parse(readFileSync(path, 'utf8'));
 };
 
-/**
- * `owner/name`, from the flag, the runner, the event, or the checkout — in that
- * order, so an explicit `--repo` always wins and a gate driven by the sweep
- * cannot resolve a different repository than the sweep listed.
- */
 export const resolveRepository = (payload) =>
   parseRepository(
     flagValue('--repo') ??
@@ -65,12 +78,6 @@ export const resolveRepository = (payload) =>
       ]),
   );
 
-/**
- * `undefined` when nothing named a pull request — the caller prints its usage
- * for that. A value that is present but not a pull request number throws
- * instead, because `#738` would otherwise become `NaN` and reach the API path as
- * `pulls/NaN`, where a bare 404 is all anyone sees.
- */
 export const resolvePullNumber = (payload) => {
   const raw =
     flagValue('--pr') ??
@@ -82,7 +89,6 @@ export const resolvePullNumber = (payload) => {
 export const resolveStatusSha = (payload) =>
   statusSha({ eventName: process.env.GITHUB_EVENT_NAME, payload });
 
-/** The run that decided a status, so the check links to its own reasoning. */
 const runUrl = () => {
   const { GITHUB_REPOSITORY, GITHUB_RUN_ID, GITHUB_SERVER_URL } = process.env;
   return GITHUB_RUN_ID === undefined
@@ -90,7 +96,6 @@ const runUrl = () => {
     : `${GITHUB_SERVER_URL ?? 'https://github.com'}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
 };
 
-/** Publish one commit status against `sha`. */
 export const postStatus = ({
   context,
   description,
@@ -114,12 +119,6 @@ export const postStatus = ({
   ]);
 };
 
-/**
- * What is published under `context` on `sha` right now, or `undefined`.
- *
- * Read against the head the caller resolved, never against an event payload's
- * SHA, so the comparison it feeds is about one commit.
- */
 export const fetchPublishedStatus = ({ context, repository, sha }) =>
   publishedStatus(
     JSON.parse(
@@ -128,17 +127,6 @@ export const fetchPublishedStatus = ({ context, repository, sha }) =>
     context,
   );
 
-/**
- * The pull request a gate run is about —
- * `{ number, payload, repository, statusSha }` — or `undefined` after printing
- * `usage`.
- *
- * Both gates open the same way, and the interesting part is the failure: a run
- * that cannot name a pull request must say so and stop, never fall through to a
- * default. Sharing it means neither gate can grow its own answer to that. The
- * payload is handed back because a gate may still need what triggered the run,
- * which is the one thing that cannot be re-read from the pull request.
- */
 export const resolveGateTarget = (usage) => {
   const payload = readEventPayload();
   const number = resolvePullNumber(payload);
@@ -154,16 +142,6 @@ export const resolveGateTarget = (usage) => {
   };
 };
 
-/**
- * Publish one gate's verdict, honouring `--if-changed` and `--dry-run`, and
- * return the line describing what became of it.
- *
- * This protocol is shared rather than written per gate because the reconcile
- * sweep depends on it being identical: it re-runs every gate on a schedule and
- * relies on `--if-changed` making a re-run a no-op. A gate that implemented that
- * check slightly differently would either republish on every sweep or stop
- * correcting a stale status, and neither is visible from the sweep's own log.
- */
 export const publishGateStatus = ({
   context,
   description,
@@ -176,8 +154,6 @@ export const publishGateStatus = ({
     !shouldPublishStatus({
       current: fetchPublishedStatus({ context, repository, sha }),
       next: { description, state },
-      // Opt-in, and only a gate that has another publisher may ask for it — see
-      // `shouldPublishStatus`. `verify-review-threads.mjs` must never pass it.
       protectSuccess: process.argv.includes(PROTECT_SUCCESS_FLAG),
     })
   ) {

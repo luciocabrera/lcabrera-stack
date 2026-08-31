@@ -15,13 +15,19 @@
  * what makes E11 and S11 decidable; `docs/tooling/merge-queue.md` has the shape
  * of that failure and ADR-098 the decision.
  *
+ * Two shapes the flattening absorbs rather than trusts. A CheckRun still
+ * running carries `conclusion: null` and its real state in `status`, so reading
+ * `conclusion` alone renders an in-flight check as an empty state — neither
+ * pending nor failed, and so through every filter. And every field of the fact
+ * record is defaulted, because a GraphQL node with a null branch is a real
+ * response rather than a reason to throw partway through a queue.
+ *
  * Governed by .claude/rules/scripts.md. The rules it serves are §2 and §6 of
  * .claude/pr-queue-policy.md.
  */
 
 import { summarizeThreads } from './pr-threads.mjs';
 
-/** Check states that mean "not finished yet" — policy E3 reads these as WAIT. */
 const PENDING_STATES = new Set([
   'ACTION_REQUIRED',
   'EXPECTED',
@@ -32,7 +38,6 @@ const PENDING_STATES = new Set([
   'WAITING',
 ]);
 
-/** Check states that mean "finished, and not successfully". */
 const FAILED_STATES = new Set([
   'CANCELLED',
   'ERROR',
@@ -42,13 +47,6 @@ const FAILED_STATES = new Set([
   'TIMED_OUT',
 ]);
 
-/**
- * One rollup context, flattened across its two incompatible node types.
- *
- * A CheckRun that is still running carries `conclusion: null` and the real state
- * in `status`; reading `conclusion` alone renders an in-flight check as an empty
- * state, which is neither pending nor failed and so falls through every filter.
- */
 export const normalizeCheck = (node) =>
   node.__typename === 'CheckRun'
     ? {
@@ -62,7 +60,6 @@ export const normalizeCheck = (node) =>
         url: node.targetUrl ?? '',
       };
 
-/** Every check, split into the three buckets policy E3 distinguishes. */
 export const summarizeChecks = (contexts) => {
   const all = (contexts ?? []).map(normalizeCheck);
   return {
@@ -88,7 +85,6 @@ export const summarizeQueue = (node) => {
   };
 };
 
-/** Changed paths with their line counts — the input to policy O3 and §5. */
 export const summarizeFiles = (nodes) =>
   (nodes ?? []).map((file) => ({
     additions: file.additions ?? 0,
@@ -96,10 +92,6 @@ export const summarizeFiles = (nodes) =>
     path: file.path ?? '',
   }));
 
-/**
- * The flat fact record. Every field is defaulted, because a GraphQL node with a
- * null branch is a real response — not a reason to throw partway through a queue.
- */
 export const toFacts = (node) => {
   const files = summarizeFiles(node.files?.nodes);
   const rollup = node.commits?.nodes?.[0]?.commit?.statusCheckRollup;
@@ -124,5 +116,4 @@ export const toFacts = (node) => {
   };
 };
 
-/** The whole open queue, oldest PR first. */
 export const toQueue = (nodes) => (nodes ?? []).map(toFacts);

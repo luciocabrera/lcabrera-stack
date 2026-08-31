@@ -7,6 +7,11 @@
  * probe reported a skill as self-contained while it named a file outside itself:
  * a path is as often written in backticks or handed to `node` as an argument as
  * it is written as a markdown link, and only the link form was being read.
+ *
+ * `IMPORT_PATTERNS` use `[ \t]` rather than `\s` deliberately. Beside `^` under
+ * `/m`, `\s` matches newlines too, and the pattern goes super-linear on a long
+ * file. They also anchor on `from` rather than `import`, so an import whose
+ * specifier sits lines below its keyword is not silently missed.
  */
 
 const FENCE_PATTERN = /^```([\w-]*)\s*$/;

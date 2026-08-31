@@ -19,6 +19,29 @@
  * stop or discharged with a probe. Flags exist so the bias toward action does not
  * turn every brush with a risky path into a permanent block.
  *
+ * `OPERATOR_FILES` is enumerated rather than pattern-matched, and is not
+ * maintained by hand: the `S9 covers every file the operator imports` case in
+ * the sibling test walks the real import graph and fails when the two disagree.
+ *
+ * `forbiddenActions` bounds landing a pull request in two structurally opposite
+ * ways. The FLAG vocabulary of `gh pr merge` is closed — A5 authorises
+ * `gh pr merge <n> --squash` and nothing else — so that half is an ALLOW-LIST,
+ * which rejects every other form including flags gh has not shipped yet. A
+ * deny-list of flags did not hold there: it named `--merge` and `--rebase`
+ * while gh also spells them `-m` and `-r`, and each missed spelling was
+ * admitted in silence. Which TRANSPORT writes the protected branch is open —
+ * gh, curl, git itself — so those shapes stay a DENY-LIST keyed on the endpoint
+ * path, the mutation name and the push destination.
+ *
+ * That second half CANNOT BE COMPLETE, and this is the honest statement of what
+ * it is. It refuses the operations that name themselves in plain text; it does
+ * not see one whose text does not name it — a path or ref held in a variable, a
+ * script file, an encoded string, or the next spelling nobody has written down.
+ * Adding shapes narrows the gap and never closes it. So what this bounds is the
+ * decision TEXT, which is the audited artifact, best-effort. It is not
+ * containment: a decision-time audit cannot constrain what the apply pass runs.
+ * That is the apply pass's own tool list, and #1040 records it.
+ *
  * Governed by .claude/rules/scripts.md.
  */
 
@@ -28,18 +51,6 @@ const MIGRATION_FILE = /(?:^|\/)migrations\//;
 const CHANGESET_FILE = /^\.changeset\/(?!README)[^/]+\.md$/;
 const PUBLISH_WORKFLOW = /^\.github\/workflows\/(?:release|publish|changelog)/;
 const ENV_FILE = /(?:^|\/)\.env(?:\.|$)|^docker\/local\//;
-/**
- * The files a PR may not change without stopping the operator: the transitive
- * import closure of `pr-queue-operator.mjs`, plus the policy it reads by path.
- *
- * Not the whole of its input. The never-baseline roster is read by shape from
- * the operator's own checkout, so it cannot be enumerated here; §5 S9 in the
- * policy says what that leaves uncovered and why it is bounded.
- *
- * Enumerated rather than pattern-matched, and not maintained by hand — the
- * `S9 covers every file the operator imports` case in `pr-queue-gate.test.mjs` walks
- * the real import graph and fails when this list and that graph disagree.
- */
 export const OPERATOR_FILES = new Set([
   '.claude/pr-queue-policy.md',
   'packages/repo-standards/scripts/branch-exemption.mjs',
@@ -92,14 +103,12 @@ const ejectionDetail = (queue) =>
 const queuedDetail = (queue) =>
   `already in the merge queue${parenthesised(queue.state)} — any action here removes it and starts the wait again`;
 
-/** A path present in the diff with no additions left — the file is gone. */
 const removedFile = (pr, pattern) =>
   pr.files.some(
     (file) =>
       pattern.test(file.path) && file.additions === 0 && file.deletions > 0,
   );
 
-/** §5 triggers provable from the file list alone. The model cannot clear these. */
 export const detectStops = (pr) =>
   [
     pr.files.length === 0 && {
@@ -135,7 +144,6 @@ export const detectStops = (pr) =>
     },
   ].filter(Boolean);
 
-/** §5 areas the diff touches that need reading before a verdict (see header). */
 export const detectFlags = (pr, packages) =>
   [
     has(pr, MIGRATION_FILE) && {
@@ -168,11 +176,6 @@ export const detectFlags = (pr, packages) =>
     },
   ].filter(Boolean);
 
-/**
- * §2 eligibility. Each blocker carries the verdict it forces, because "unresolved
- * threads" and "a check is still queued" are both "not eligible" and want
- * opposite responses — one is work to do now, the other is work to not do.
- */
 export const detectBlockers = (pr, conformance) =>
   [
     pr.isDraft && {
@@ -240,17 +243,9 @@ const VERDICTS = new Set(PRECEDENCE);
 
 export const isVerdict = (value) => VERDICTS.has(value);
 
-/** The strictest verdict present — escalate outranks act outranks wait. */
 const strictest = (verdicts) =>
   PRECEDENCE.find((verdict) => verdicts.includes(verdict)) ?? 'ENQUEUE';
 
-/**
- * The mechanical ceiling for one PR.
- *
- * `flags` never lower the verdict on their own — they are questions the model
- * must answer, and it answers them by escalating or by recording the probe that
- * discharges them. An unanswered flag is S10 at the model layer, not here.
- */
 export const evaluateGate = (pr, conformance, packages) => {
   const stops = detectStops(pr);
   const blockers = detectBlockers(pr, conformance);
@@ -262,43 +257,8 @@ export const evaluateGate = (pr, conformance, packages) => {
   return { blockers, flags, stops, verdict };
 };
 
-/**
- * Landing a pull request is bounded in two structurally different ways, because
- * the two halves of the problem have opposite shapes.
- *
- * The FLAG vocabulary of `gh pr merge` is closed — A5 authorises
- * `gh pr merge <n> --squash` and nothing else — so that half is an ALLOW-LIST.
- * A deny-list of flags cannot hold there, and did not: it named `--merge` and
- * `--rebase` while gh also spells them `-m` and `-r`, and named the
- * `enablePullRequestAutoMerge` mutation while `--auto` calls it. Each missed
- * spelling is admitted in silence. Matching the one authorised form instead
- * rejects every other, including flags gh has not shipped yet. It matches the
- * pull request as a bare number, so gh's other two spellings of the same
- * argument — `#42` and the pull request's URL — escalate rather than pass.
- *
- * Which TRANSPORT writes `main` is open — gh, curl, git itself — so the shapes
- * below stay a deny-list, keyed on the endpoint path, the mutation name and the
- * push destination rather than on the command carrying them. An allow-list there
- * would have to enumerate every command A1–A8 legitimately proposes, which is
- * open too, and a leash that blocks ordinary work is a leash that gets widened.
- *
- * THAT HALF CANNOT BE COMPLETE, and this is the honest statement of what it is.
- * A deny-list over free text refuses the operations that name themselves in
- * plain text — the two REST merge endpoints, the git-refs endpoint, the merge,
- * enqueue and ref mutations, and a `git push` whose destination refspec is the
- * protected branch. It does not see an operation whose text does not name it: a
- * path or a ref held entirely in a variable, a script file, an encoded string,
- * or the next spelling nobody has written down. Adding shapes narrows the gap
- * and never closes it, because the set of spellings is not enumerable.
- *
- * So what this bounds is the decision TEXT, which is the audited artifact, and
- * it bounds it best-effort. It is not containment: a decision-time audit cannot
- * constrain what the apply pass runs. Containment is that pass's own tool list,
- * which is #1040 and does not exist yet.
- */
 const MERGE_SUBCOMMAND = /\bgh\s+pr\s+merge\b/u;
 
-/** A5's landing command in full. Every other form of it is a way past. */
 const AUTHORISED_LANDING = /^gh\s+pr\s+merge\s+\d+\s+--squash$/u;
 
 const UNAUTHORISED_LANDING =
@@ -331,7 +291,6 @@ const pushesToProtectedBranch = (command) =>
 const PUSH_TO_PROTECTED =
   'a `git push` whose destination refspec is `main` writes the protected branch with no pull request in the operation at all — past the queue, past every required check and past the squash — and the operator account is a ruleset bypass actor, so it succeeds. A1 pushes the head branch and A7 deletes it (`git push origin --delete <branch>`); neither names this destination. A push that reaches `main` under a name this cannot read — a refspec in a variable, a configured `push.default` — is the residual this deny-list cannot close';
 
-/** The same write, reached without naming `gh pr merge`. */
 const FORBIDDEN_SHAPES = [
   {
     pattern: /\brepos\/[^\s/]+\/[^\s/]+\/pulls\/[^\s/]+\/merge\b/u,
@@ -375,14 +334,6 @@ const forbiddenReasons = (command) => [
   ),
 ];
 
-/**
- * Commands no decision may authorise, whatever the model reasoned.
- *
- * This bounds the DECISION TEXT, which is the audited artifact, and bounds it
- * best-effort: see the header above for the operations it cannot see. It is not
- * a sandbox over the apply pass, whose tool allow-list is broader because A1–A8
- * need it. The residual is #1040.
- */
 export const forbiddenActions = (actions) =>
   (actions ?? []).flatMap((action) => {
     const command = action.command ?? '';
@@ -392,7 +343,6 @@ export const forbiddenActions = (actions) =>
     }));
   });
 
-/** True when the model's verdict is at or below the mechanical ceiling. */
 export const isWithinCeiling = (ceiling, proposed) =>
   isVerdict(ceiling) &&
   isVerdict(proposed) &&

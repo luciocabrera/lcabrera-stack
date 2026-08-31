@@ -14,6 +14,22 @@
  * prose: a verdict recovered by regex from a paragraph is a verdict that can be
  * misread, and this one moves code into main.
  *
+ * The claude binary is resolved to an absolute path, never a bare name: a bare
+ * command resolved through the inherited PATH lets a writable directory earlier
+ * in the list shadow the real binary (Sonar S4036). The interpreter's own
+ * directory is the reliable non-PATH answer, since node and the claude CLI are
+ * installed side by side by every version manager.
+ *
+ * The parse back is defensive on three counts: the envelope's `result` is a
+ * string even under `--json-schema`, a model that ignores the schema tends to
+ * fence its JSON, and nothing on that path enforces the schema's own verdict
+ * enum. The first two recover to a real object; a verdict outside policy §1 is
+ * reported as a failed run rather than carried, because one the operator cannot
+ * read is S10.
+ *
+ * `DECIDE_TOOLS` holds `gh api`, which takes a method, so the allow-list cannot
+ * make this pass read-only. #1040 records that hole for the apply pass.
+ *
  * Governed by .claude/rules/scripts.md.
  */
 import { execFileSync } from 'node:child_process';
@@ -22,16 +38,6 @@ import { dirname, join } from 'node:path';
 
 import { isVerdict, PRECEDENCE } from './pr-queue-gate.mjs';
 
-/**
- * The claude binary as an absolute path, never a bare name.
- *
- * Same discipline as `gh-exec.mjs`: resolving a bare command through the
- * inherited PATH lets a writable directory earlier in the list shadow the real
- * binary (Sonar S4036). The node that runs this script and the claude CLI are
- * installed side by side by every version manager, so the interpreter's own
- * directory is the reliable non-PATH answer; the fixed system directories cover
- * a system-wide install, and the env var covers everything else.
- */
 export const resolveClaudeBinary = () =>
   [
     process.env.CLAUDE_BIN,
@@ -40,16 +46,6 @@ export const resolveClaudeBinary = () =>
     '/usr/bin/claude',
   ].find((path) => path !== undefined && existsSync(path));
 
-/**
- * The decide pass's tools. It observes the queue and produces a verdict; nothing
- * here is meant to change anything.
- *
- * `gh api` is the exception to read that carefully — it takes a method, so the
- * allow-list cannot make it read-only, and the same hole `#1040` records for the
- * apply pass exists here. What differs is the consequence: this pass writes no
- * decision log entry for a command it ran, so a departure here is invisible
- * rather than merely unbounded, which is why #1040's guard has to cover both.
- */
 export const DECIDE_TOOLS = [
   'Read',
   'Grep',
@@ -64,7 +60,6 @@ export const DECIDE_TOOLS = [
   'Bash(git show:*)',
 ];
 
-/** The decide pass returns this shape or the run is a failure, not a verdict. */
 export const DECISION_SCHEMA = {
   additionalProperties: false,
   properties: {
@@ -151,7 +146,6 @@ const renderFindings = (label, findings) =>
         .map((finding) => `  ${finding.id}: ${finding.detail}`)
         .join('\n') || label;
 
-/** The queue context one PR is judged in — its position and why it sits there. */
 const renderPosition = (position) =>
   [
     `  merge position: ${position.index + 1} of ${position.total}`,
@@ -161,14 +155,6 @@ const renderPosition = (position) =>
     ),
   ].join('\n');
 
-/**
- * The decide-pass prompt.
- *
- * The policy arrives verbatim and the facts arrive pre-derived, so the model's
- * job is judgement on top of established facts — not fact-gathering it might do
- * differently on the next pass, which is what makes two runs over an unchanged
- * queue comparable.
- */
 export const buildDecisionPrompt = ({ gate, policy, position, pr }) => `
 You are the autonomous PR queue operator for this repository, running one pass
 over one pull request. Your entire authority is the policy below. Follow it.
@@ -232,7 +218,6 @@ export const parseModelName = (raw) => {
   return text;
 };
 
-/** argv for the decide pass. The prompt goes on stdin — it is far past ARG_MAX. */
 export const decideArgs = ({ model }) => [
   '--print',
   '--output-format',
@@ -246,15 +231,6 @@ export const decideArgs = ({ model }) => [
   '--no-session-persistence',
 ];
 
-/**
- * The decision out of the CLI envelope.
- *
- * Defensive on three counts: the envelope's `result` is a string even under
- * `--json-schema`, a model that ignores the schema tends to fence its JSON, and
- * nothing on that path enforces the schema's own verdict enum. The first two
- * recover to a real object; a verdict outside policy §1 is reported as a failed
- * run rather than carried, because one the operator cannot read is S10.
- */
 export const parseDecision = (stdout) => {
   try {
     const envelope = JSON.parse(stdout);
@@ -276,7 +252,6 @@ export const parseDecision = (stdout) => {
   }
 };
 
-/** Runs one headless decide pass. The only effect in this module. */
 export const runDecision = ({ binary, cwd, model, prompt, timeoutMs }) => {
   try {
     const stdout = execFileSync(binary, decideArgs({ model }), {
