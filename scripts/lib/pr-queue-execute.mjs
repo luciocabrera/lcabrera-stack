@@ -25,6 +25,36 @@ import { parseModelName, resolveClaudeBinary } from './pr-queue-claude.mjs';
  * an author-intent judgement the policy never delegates (S7). Nothing here can
  * force-push either — A1 rebases only when the result is conflict-free, and S6
  * covers a branch someone else is holding.
+ *
+ * `gh pr merge` is also the enqueue command, which is why it stays as the one
+ * way to land a pull request: where a merge queue is required, gh adds the pull
+ * request to it instead of merging, and where one is not, it squash-merges. The
+ * flag that breaks that is `--admin`, which merges past the queue and past every
+ * required check — the repository owner's role can bypass, so this is reachable
+ * rather than theoretical.
+ *
+ * An allow-list pattern here matches a command prefix and cannot forbid a flag,
+ * so a bound on what may be AUTHORISED is enforced one layer up:
+ * `forbiddenActions` in `pr-queue-gate.mjs` rejects a DECISION naming `gh pr
+ * merge` in any form but `gh pr merge <n> --squash` — allow-listed, so an
+ * unanticipated flag is refused too — plus the REST merge, branch-merge and
+ * git-refs endpoints, the merge, enqueue and ref GraphQL mutations, and a `git
+ * push` whose destination refspec is the protected branch.
+ *
+ * Read what that is, not what it sounds like. It is a deny-list over free text
+ * for everything but the flags, so it CANNOT BE COMPLETE: a path or a ref held
+ * in a variable, a script file, an encoded string and the next spelling nobody
+ * has written down all name nothing it can match. It refuses the operations that
+ * name themselves, best-effort, in the artifact that is audited.
+ *
+ * And it audits the DECISION, not this pass. `gh api` is here because A4 replies
+ * to a review comment through it and S11 reads the queue timeline through it,
+ * and no prefix admits those while denying `--method PUT …/pulls/<n>/merge` —
+ * gh's method is a flag. `Bash(git:*)` is the same shape: it admits a push to
+ * any destination, `main` included. Between the model and the protected branch
+ * there is only the prompt, which this file's own header says is not a leash.
+ * The containment is this tool list, which is #1040 and does not exist yet;
+ * until it does, what is bounded is what may be authorised, not what may run.
  */
 export const EXECUTE_TOOLS = [
   'Read',
@@ -103,7 +133,32 @@ Hard bounds, in force regardless of what the action list says:
   \`aborted\`.
 - Re-verify §2 eligibility immediately before \`gh pr merge\`. The decision was made
   from a snapshot; the queue has moved since. If any gate now fails, stop.
-- Squash-merge only (A5). Never a merge commit, never a rebase merge.
+- \`gh pr merge <n> --squash\` is the ONLY way you may land a pull request (A5),
+  and the only form of it: add no other flag. Never \`--admin\` — it merges past the
+  merge queue and past every required check, and the account you run as can do it.
+  Never \`--delete-branch\`/\`-d\` — gh refuses it outright where a queue is required,
+  and A7 deletes the branch after the merge is confirmed, not as part of asking for
+  one. Never \`--auto\`, never another merge method, and never the REST merge
+  endpoints or the GraphQL merge mutations, which are the same operation reached
+  through \`gh api\`.
+- Never write the base branch by another route either: no \`git push\` whose
+  destination refspec is \`main\` (\`main\`, \`HEAD:main\`, \`refs/heads/main\`), no
+  \`--method PATCH …/git/refs/heads/main\`, no \`updateRef\`/\`createCommitOnBranch\`,
+  and no \`enqueuePullRequest\` — the queue is entered with A5's command, not with
+  a mutation that can jump the entries already in it. Each of these lands commits
+  on \`main\` past every required check, and the account you run as can do it.
+  This list is not exhaustive and is not what stops you: it names the routes, and
+  the rule is that A5's command is the ONLY one you may use to land anything.
+- Where a merge queue is required, that command ENQUEUES rather than merges, and
+  the pass ends with the pull request queued and not yet merged. Report
+  \`merged: false\` then — it is not a failure. A6 (close the issue), A7 (delete the
+  branch) and A8 (prune the worktree) are for a pull request that has actually
+  landed, so you may not perform them here. NO LATER PASS PERFORMS THEM EITHER:
+  the operator reads only OPEN pull requests, so a merged one never comes back to
+  it. They are unowned until issue #1043 builds that lane, and a human does them
+  after the queue merges. If the action list names one, skip it and say so in
+  \`aborted\`, so the gap shows up in this pass's own report instead of reading as
+  work that was done.
 - Never mark a draft ready (A9). Never force-push over commits you did not make.
 - For a Copilot comment (A4): verify the claim against the tree BEFORE applying it.
   If it is wrong, reply with the probe that disproves it and resolve the thread —

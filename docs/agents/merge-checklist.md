@@ -2,6 +2,32 @@
 
 Verify every item before merging. **If any item fails, abort the merge.**
 
+**Where `main` requires a merge queue, "merging" is asking the queue.** The
+ruleset rule that switches that on is applied separately from the workflows that
+serve it ([ADR-098](../decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)),
+so read which side you are on rather than assuming — `gh pr view <n> --json
+state` will not tell you, but `isMergeQueueEnabled` will
+([the probe](../tooling/merge-queue.md#what-merge-means-now)). `gh pr merge <n>
+--squash` is the right command either way: in front of a queue it adds the pull
+request and GitHub merges it afterwards, having re-run every required check
+against the real merge result; with no queue it squash-merges on the spot.
+
+Three things follow once the queue is on, and
+[`merge-queue.md`](../tooling/merge-queue.md) is where they are explained:
+
+- The checks below become the bar for **entering** the queue. The queue re-derives
+  them for the commit that actually lands, which is what stops a whole-tree gate
+  passing on a superseded base. Until then that recomputation is nobody's job but
+  yours: rebase onto the current `main` and let the gate re-run.
+- Your pull request is **not merged when the command returns**. Anything you do
+  after a merge — close the issue, delete the branch, prune the worktree — waits
+  for `gh pr view <n> --json state` to read `MERGED`. That wait is the correct
+  habit on both sides; without a queue it simply returns immediately.
+- The queue can throw it back out, and **that does not turn any check on this
+  page red.** The failure belongs to the merge group's commit. Read
+  [the ejection probe](../tooling/merge-queue.md#two-answers-this-repository-made-explicit)
+  before queueing it again.
+
 Items marked **[auto]** are already enforced by CI or a git hook — the check
 name is given so you can confirm it ran rather than re-derive it by hand. Items
 marked **[judgement]** are the ones no machine can decide; those are the reason
@@ -73,6 +99,10 @@ trust the check and look at its output.
 
 ## Final merge gate
 
+- [ ] **Landed with `gh pr merge <n> --squash`** — never `--admin`, which merges
+      past the queue and past every required check, and which an admin account
+      can actually do; never `-d`, which gh refuses in front of a queue anyway
+      **[judgement]**
 - [ ] **Does not revert or contradict previous agent work** — check the
       coordination register and any overlapping active claim
       (`vp run coordination:verify`) **[judgement]**

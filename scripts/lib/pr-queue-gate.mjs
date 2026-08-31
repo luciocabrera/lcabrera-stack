@@ -5,9 +5,13 @@
  * Why this exists rather than leaving it all to the model: the stop list is the
  * operator's leash, and a leash a model can reason its way around is not one.
  * What this file returns is therefore a CEILING. The model may move a verdict
- * toward ESCALATE, never past it toward MERGE — so a deleted test escalates even
- * if the model finds the deletion reasonable, and that property is testable here
- * without invoking anything.
+ * toward ESCALATE, never past it toward ENQUEUE — so a deleted test escalates
+ * even if the model finds the deletion reasonable, and that property is testable
+ * here without invoking anything.
+ *
+ * The verdict vocabulary is closed. A value outside policy §1 is not a weaker
+ * verdict but no verdict at all, so the ceiling refuses it instead of ranking it
+ * by a list position it does not have.
  *
  * The split inside §5 is deliberate. A `stop` is mechanically certain (the diff
  * removes a test file). A `flag` is "a §5 area is touched" — a migration, a
@@ -77,8 +81,19 @@ const touchesPublicManifest = (pr, packages) =>
       inPublicPackage(file.path, packages),
   );
 
+const ejectedSinceHeadMoved = (pr) =>
+  pr.queue.ejectedAt !== '' && pr.queue.ejectedAt > pr.headCommittedAt;
+
+const parenthesised = (text) => (text === '' ? '' : ` (${text})`);
+
+const ejectionDetail = (queue) =>
+  `the merge queue removed this pull request${parenthesised(queue.ejectedReason)} and the head has not moved since — read the merge group's checks before queueing it again`;
+
+const queuedDetail = (queue) =>
+  `already in the merge queue${parenthesised(queue.state)} — any action here removes it and starts the wait again`;
+
 /** A path present in the diff with no additions left — the file is gone. */
-const removed = (pr, pattern) =>
+const removedFile = (pr, pattern) =>
   pr.files.some(
     (file) =>
       pattern.test(file.path) && file.additions === 0 && file.deletions > 0,
@@ -91,7 +106,7 @@ export const detectStops = (pr) =>
       detail: 'the PR changes no files — nothing to merge',
       id: 'S7',
     },
-    removed(pr, TEST_FILE) && {
+    removedFile(pr, TEST_FILE) && {
       detail: `test file removed: ${pr.files
         .filter((file) => TEST_FILE.test(file.path) && file.additions === 0)
         .map((file) => file.path)
@@ -146,6 +161,10 @@ export const detectFlags = (pr, packages) =>
       detail:
         'tests changed — confirm no case was removed, skipped or narrowed',
       id: 'S2',
+    },
+    ejectedSinceHeadMoved(pr) && {
+      detail: ejectionDetail(pr.queue),
+      id: 'S11',
     },
   ].filter(Boolean);
 
@@ -202,18 +221,28 @@ export const detectBlockers = (pr, conformance) =>
       id: 'E7',
       verdict: 'ACT',
     },
-    pr.mergeStateStatus === 'BEHIND' && {
-      detail: 'the branch is behind its base — update per A1',
-      id: 'E10',
-      verdict: 'ACT',
+    !pr.queue.enabled &&
+      pr.mergeStateStatus === 'BEHIND' && {
+        detail: 'the branch is behind its base — update per A1',
+        id: 'E10',
+        verdict: 'ACT',
+      },
+    pr.queue.queued && {
+      detail: queuedDetail(pr.queue),
+      id: 'E11',
+      verdict: 'WAIT',
     },
   ].filter(Boolean);
 
-const PRECEDENCE = ['ESCALATE', 'ACT', 'WAIT', 'MERGE'];
+export const PRECEDENCE = Object.freeze(['ESCALATE', 'ACT', 'WAIT', 'ENQUEUE']);
+
+const VERDICTS = new Set(PRECEDENCE);
+
+export const isVerdict = (value) => VERDICTS.has(value);
 
 /** The strictest verdict present — escalate outranks act outranks wait. */
 const strictest = (verdicts) =>
-  PRECEDENCE.find((verdict) => verdicts.includes(verdict)) ?? 'MERGE';
+  PRECEDENCE.find((verdict) => verdicts.includes(verdict)) ?? 'ENQUEUE';
 
 /**
  * The mechanical ceiling for one PR.
@@ -233,6 +262,138 @@ export const evaluateGate = (pr, conformance, packages) => {
   return { blockers, flags, stops, verdict };
 };
 
+/**
+ * Landing a pull request is bounded in two structurally different ways, because
+ * the two halves of the problem have opposite shapes.
+ *
+ * The FLAG vocabulary of `gh pr merge` is closed — A5 authorises
+ * `gh pr merge <n> --squash` and nothing else — so that half is an ALLOW-LIST.
+ * A deny-list of flags cannot hold there, and did not: it named `--merge` and
+ * `--rebase` while gh also spells them `-m` and `-r`, and named the
+ * `enablePullRequestAutoMerge` mutation while `--auto` calls it. Each missed
+ * spelling is admitted in silence. Matching the one authorised form instead
+ * rejects every other, including flags gh has not shipped yet. It matches the
+ * pull request as a bare number, so gh's other two spellings of the same
+ * argument — `#42` and the pull request's URL — escalate rather than pass.
+ *
+ * Which TRANSPORT writes `main` is open — gh, curl, git itself — so the shapes
+ * below stay a deny-list, keyed on the endpoint path, the mutation name and the
+ * push destination rather than on the command carrying them. An allow-list there
+ * would have to enumerate every command A1–A8 legitimately proposes, which is
+ * open too, and a leash that blocks ordinary work is a leash that gets widened.
+ *
+ * THAT HALF CANNOT BE COMPLETE, and this is the honest statement of what it is.
+ * A deny-list over free text refuses the operations that name themselves in
+ * plain text — the two REST merge endpoints, the git-refs endpoint, the merge,
+ * enqueue and ref mutations, and a `git push` whose destination refspec is the
+ * protected branch. It does not see an operation whose text does not name it: a
+ * path or a ref held entirely in a variable, a script file, an encoded string,
+ * or the next spelling nobody has written down. Adding shapes narrows the gap
+ * and never closes it, because the set of spellings is not enumerable.
+ *
+ * So what this bounds is the decision TEXT, which is the audited artifact, and
+ * it bounds it best-effort. It is not containment: a decision-time audit cannot
+ * constrain what the apply pass runs. Containment is that pass's own tool list,
+ * which is #1040 and does not exist yet.
+ */
+const MERGE_SUBCOMMAND = /\bgh\s+pr\s+merge\b/u;
+
+/** A5's landing command in full. Every other form of it is a way past. */
+const AUTHORISED_LANDING = /^gh\s+pr\s+merge\s+\d+\s+--squash$/u;
+
+const UNAUTHORISED_LANDING =
+  '`gh pr merge` in any form but `gh pr merge <n> --squash`, which A5 authorises and this matches as an allow-list — so `--admin` (past the queue and past every required check, and the operator account can), `--auto` (`enablePullRequestAutoMerge` under another name), `-d`/`--delete-branch` (a deletion for a merge that has not happened yet), `-m`/`--merge`, `-r`/`--rebase` (not the permitted method: `--squash` keeps the PR title as the commit subject the changelog reads), `--repo`, a `#42` or URL spelling of the pull request, and any flag gh adds later are all rejected without being enumerated';
+
+const PROTECTED_BRANCH = 'main';
+
+const PROTECTED_REFS = new Set([
+  PROTECTED_BRANCH,
+  `refs/heads/${PROTECTED_BRANCH}`,
+]);
+
+const PUSH_COMMAND = /\bgit\s+push\b([^\n;&|]*)/gu;
+
+const destinationOf = (token) =>
+  token.replaceAll(/["']/gu, '').replace(/^\+/u, '').split(':').at(-1);
+
+const pushDestinations = (args) =>
+  args
+    .split(/\s+/u)
+    .filter((token) => token !== '' && !token.startsWith('-'))
+    .slice(1)
+    .map((token) => destinationOf(token));
+
+const pushesToProtectedBranch = (command) =>
+  [...command.matchAll(PUSH_COMMAND)].some(([, args]) =>
+    pushDestinations(args).some((ref) => PROTECTED_REFS.has(ref)),
+  );
+
+const PUSH_TO_PROTECTED =
+  'a `git push` whose destination refspec is `main` writes the protected branch with no pull request in the operation at all — past the queue, past every required check and past the squash — and the operator account is a ruleset bypass actor, so it succeeds. A1 pushes the head branch and A7 deletes it (`git push origin --delete <branch>`); neither names this destination. A push that reaches `main` under a name this cannot read — a refspec in a variable, a configured `push.default` — is the residual this deny-list cannot close';
+
+/** The same write, reached without naming `gh pr merge`. */
+const FORBIDDEN_SHAPES = [
+  {
+    pattern: /\brepos\/[^\s/]+\/[^\s/]+\/pulls\/[^\s/]+\/merge\b/u,
+    reason:
+      'the REST merge endpoint lands a pull request directly, past the merge queue and past every required check exactly as `--admin` does, and the operator account is a ruleset bypass actor. Its path segments are matched unread, so a shell variable in place of the number is the same endpoint. A5 authorises `gh pr merge <n> --squash` and nothing else',
+  },
+  {
+    pattern: /\brepos\/[^\s/]+\/[^\s/]+\/merges\b/u,
+    reason:
+      'the REST branch-merge endpoint puts a head branch into a base branch with no pull request in the operation at all, so it lands the work past the queue, past every required check and past the squash. A5 authorises `gh pr merge <n> --squash` and nothing else',
+  },
+  {
+    pattern: /\brepos\/[^\s/]+\/[^\s/]+\/git\/refs\b/u,
+    reason:
+      'the REST git-refs endpoint repoints a branch directly — `--method PATCH …/git/refs/heads/main -f sha=…` puts any commit on the protected branch with no pull request, no queue and no required check in the operation. The whole path family is refused rather than the protected ref alone, because these segments are matched unread too and a ref held in a shell variable is the same endpoint; A7 deletes a head branch with `git push origin --delete <branch>`, which is admitted',
+  },
+  {
+    pattern: /\b(?:mergePullRequest|enablePullRequestAutoMerge|mergeBranch)\b/u,
+    reason:
+      'the GraphQL merge mutations land a pull request, or a branch, outside the one audited command, and auto-merge lands it with no pass observing the result. A5 authorises `gh pr merge <n> --squash` and nothing else',
+  },
+  {
+    pattern: /\benqueuePullRequest\b/u,
+    reason:
+      'the GraphQL enqueue mutation puts a pull request into the merge queue outside the one audited command, and its `jump` argument puts that entry at the head of the queue ahead of everything already waiting. A5 authorises `gh pr merge <n> --squash` and nothing else',
+  },
+  {
+    pattern: /\b(?:createRef|updateRef|deleteRef|createCommitOnBranch)\b/u,
+    reason:
+      'the GraphQL ref mutations are the git-refs endpoint reached through the other transport: `updateRef` repoints a branch and `createCommitOnBranch` puts a commit on one, both with no pull request in the operation. A5 authorises `gh pr merge <n> --squash` and nothing else',
+  },
+];
+
+const forbiddenReasons = (command) => [
+  ...(MERGE_SUBCOMMAND.test(command) && !AUTHORISED_LANDING.test(command)
+    ? [UNAUTHORISED_LANDING]
+    : []),
+  ...(pushesToProtectedBranch(command) ? [PUSH_TO_PROTECTED] : []),
+  ...FORBIDDEN_SHAPES.filter(({ pattern }) => pattern.test(command)).map(
+    ({ reason }) => reason,
+  ),
+];
+
+/**
+ * Commands no decision may authorise, whatever the model reasoned.
+ *
+ * This bounds the DECISION TEXT, which is the audited artifact, and bounds it
+ * best-effort: see the header above for the operations it cannot see. It is not
+ * a sandbox over the apply pass, whose tool allow-list is broader because A1–A8
+ * need it. The residual is #1040.
+ */
+export const forbiddenActions = (actions) =>
+  (actions ?? []).flatMap((action) => {
+    const command = action.command ?? '';
+    return forbiddenReasons(command.trim()).map((reason) => ({
+      command,
+      reason,
+    }));
+  });
+
 /** True when the model's verdict is at or below the mechanical ceiling. */
 export const isWithinCeiling = (ceiling, proposed) =>
+  isVerdict(ceiling) &&
+  isVerdict(proposed) &&
   PRECEDENCE.indexOf(proposed) <= PRECEDENCE.indexOf(ceiling);

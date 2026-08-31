@@ -203,19 +203,57 @@ letting a subagent pair loop. Twice in this repo the developer was right (see
 [§6](#6-how-this-goes-wrong)), so a refuted finding is a normal outcome, not a
 process failure — but the escalation bound is what keeps it from becoming one.
 
-### Phase 4 — Merge
+### Phase 4 — Land it
 
-Merge only when [the merge bar](#3-the-merge-bar) is fully met, then:
+`gh pr merge <n> --squash` is the command on both sides of the merge-queue
+change, and it does two different things. Where `main` requires a merge queue it
+hands the PR over and GitHub merges it minutes later, having re-run every
+required check against the real merge result; where no queue is required it
+squash-merges then and there, against whatever base the checks last ran on.
+[`merge-queue.md`](../tooling/merge-queue.md) is the mechanism, and the ruleset
+rule that switches it on is applied separately from the workflows that serve it
+([ADR-098](../decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)),
+so **read which side you are on rather than assuming**:
 
-- squash-merge, delete the branch, remove the worktree
+```bash
+gh api graphql -f query='query($o:String!,$r:String!,$n:Int!){
+  repository(owner:$o,name:$r){ pullRequest(number:$n){ isMergeQueueEnabled } } }' \
+  -f o=luciocabrera -f r=lcabrera-stack -F n=<n> \
+  --jq '.data.repository.pullRequest.isMergeQueueEnabled'
+```
+
+That is the same fact the PR queue operator gates E10 on, read the same way.
+
+Hand it over only when [the merge bar](#3-the-merge-bar) is fully met, then:
+
+- merge with `gh pr merge <n> --squash`. Never `--admin` — it merges past the
+  queue and past every required check, and the account running this can. Never
+  `-d`: gh refuses it in front of a queue, and the branch is deleted below.
+- **wait for the merge before doing anything that assumes one.** `gh pr view <n>
+--json state` reading `MERGED` is the observation; the command returning is not.
+  In front of a queue that wait is minutes; without one it is immediate. The
+  observation is what you act on either way.
+- if the queue ejects it, that is **not** visible in the PR's own checks, which
+  stay green. Read the reason with the timeline probe in
+  [`merge-queue.md`](../tooling/merge-queue.md), and fix the cause before
+  queueing it again — an ejection caused by another entry in the group is
+  ordinary, one caused by this PR is not.
+- once merged: delete the branch, remove the worktree
 - confirm the claim closed (the `coordination-close.yml` workflow deletes the task
   file) and `vp run coordination:verify` reports it gone
 - **before removing a worktree, prove it carries nothing unmerged by content
   diff** — `git diff --stat <branch> origin/main -- <paths>` — never by ancestry.
   A squash-merge defeats `--is-ancestor` and the three-dot diff both.
-- rebase every remaining open PR in the wave. A PR left `CONFLICTING` **silently
-  skips every `pull_request` workflow** — its checks sit "pending" forever and
-  nothing says why.
+- **`isMergeQueueEnabled: false` → rebase every remaining open PR in the wave**,
+  as this workflow has always said. Without a queue that rebase is the only thing
+  that re-runs a whole-tree gate against the base this merge just created, and a
+  wave is exactly where two PRs pass separately and collide — #1034 is this
+  workflow's own near-miss. **`true` → do not**: the queue builds each entry on
+  the live base itself, which is why it was chosen (ADR-098), and an update costs
+  a full CI run and a fresh review request for nothing.
+- either way, a PR left `CONFLICTING` is yours to fix — it **silently skips every
+  `pull_request` workflow**, its checks sit "pending" forever, and nothing says
+  why.
 
 ### Phase 5 — Close the wave
 
@@ -247,7 +285,10 @@ All of it, every time. Any failure aborts the merge.
       silently
 - [ ] `mergeable` is not `CONFLICTING`
 - [ ] The full [quality gate](../../.github/skills/quality-gate-workflow/SKILL.md)
-      passed **on the final commit**, not on an earlier one
+      passed **on the final commit**, not on an earlier one — and only ever
+      against the base it ran on. Making it true of the base the PR _lands_ on is
+      the queue's job where one is required, after this bar is met rather than
+      instead of it; where none is, it is the Phase 4 rebase's job
 - [ ] Docs updated in the **same commit** — inventory, ADR, PATTERNS, and a
       system `ARCHITECTURE.md` only when wiring changed, as the
       [Documentation Update Rule](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule)

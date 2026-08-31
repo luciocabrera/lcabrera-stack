@@ -38,17 +38,28 @@
  *   vp run sonar:report -- --branch main
  *   vp run sonar:verify                    # gate mode: exit 1 if the gate is failing
  *   vp run sonar:verify -- --pr 31 --fail-on-issues
- *   vp run sonar:verify -- --pr 31 --fail-on-issues --wait --since <iso>
+ *   vp run sonar:verify -- --pr 31 --fail-on-issues --wait --head-sha <sha>
  *
- * `--wait` (CI use) polls the Compute Engine until this target's analysis has
- * finished before reading — Automatic Analysis is async, so a bare read races it.
- * `--since <iso>` (the PR head commit time) guards freshness so a previous
- * commit's analysis isn't accepted; on timeout the check is skipped, not failed,
- * so Sonar latency never blocks a merge (the required SonarCloud check still gates).
+ * `--wait` (CI use) polls SonarCloud until this target's analysis has finished
+ * before reading — Automatic Analysis is async, so a bare read races it.
+ * `--head-sha <sha>` is how it knows: SonarCloud reports the commit it analysed
+ * for a pull request, so the wait ends the moment that matches, however long ago
+ * it ran. `--since <iso>` (the head commit time) is the weaker fallback for a
+ * branch target, or for a run given no head sha. On timeout the check is skipped,
+ * not failed, so Sonar latency never blocks an author. `--require-analysis` turns
+ * that skip into a failure, for the one context where nothing else is looking
+ * afterwards: a merge-queue build, the last word before the merge. It IMPLIES
+ * `--require-token`, because the tokenless skip below returns before any
+ * analysis is looked for — without the implication, the flag that means
+ * "nothing else will read Sonar for this change" still exits 0 on a run that
+ * read nothing at all.
  *
- * Exit codes: 0 = report written / gate OK (or skipped when no token / wait
- *             timeout), 1 = gate failing, new issues (--fail-on-issues),
- *             analysis failed, fetch error, or bad arguments.
+ * Exit codes: 0 = report written / gate OK (or skipped when there is no token
+ *             and neither --require-token nor --require-analysis was passed, or
+ *             on a wait timeout without --require-analysis), 1 = gate failing,
+ *             new issues (--fail-on-issues), no token under --require-token,
+ *             no analysis under --require-analysis, analysis failed, fetch
+ *             error, or bad arguments.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -81,12 +92,14 @@ const BOOLEAN_FLAGS = new Map([
   ['--fail-on-issues', 'failOnIssues'],
   ['--wait', 'wait'],
   ['--require-token', 'requireToken'],
+  ['--require-analysis', 'requireAnalysis'],
 ]);
 
 const VALUE_FLAGS = new Map([
   ['--pr', 'pr'],
   ['--branch', 'branch'],
   ['--since', 'since'],
+  ['--head-sha', 'headSha'],
 ]);
 
 const parseArgs = (argv) => {
@@ -95,9 +108,11 @@ const parseArgs = (argv) => {
     failOnIssues: false,
     wait: false,
     requireToken: false,
+    requireAnalysis: false,
     pr: undefined,
     branch: undefined,
     since: undefined,
+    headSha: undefined,
   };
   const queue = [...argv];
   while (queue.length > 0) {
@@ -118,7 +133,10 @@ const parseArgs = (argv) => {
       );
     }
   }
-  return args;
+  return {
+    ...args,
+    requireToken: args.requireToken || args.requireAnalysis,
+  };
 };
 
 /** Current branch from `.git/HEAD` — filesystem only, no subprocess (S4036). */
@@ -312,6 +330,34 @@ const printNoToken = (gateMode) => {
     );
 };
 
+const analysisReady = async ({ args, target, token }) => {
+  const ready = await waitForAnalysis({
+    fetchJson,
+    token,
+    base: CONFIG.base,
+    project: CONFIG.project,
+    target,
+    since: args.since,
+    headSha: args.headSha,
+  });
+  if (ready) {
+    return true;
+  }
+  const at = args.headSha === undefined ? '' : ` at commit ${args.headSha}`;
+  const timedOut = `Timed out waiting for SonarCloud analysis of ${target.type} ${target.value}${at}`;
+  if (args.requireAnalysis) {
+    console.error(
+      `${timedOut} — failing, because --require-analysis says nothing else will read Sonar for this change.`,
+    );
+    process.exitCode = 1;
+    return false;
+  }
+  console.warn(
+    `${timedOut} — skipping the strict issue check rather than failing, because --require-analysis was not passed. So this run is not a verdict on this change's issues, and what holds the merge is whichever checks the ruleset requires, not this one.`,
+  );
+  return false;
+};
+
 const printBranchHint = (branch) => {
   console.log(
     logSafe(
@@ -346,30 +392,17 @@ const main = async () => {
       console.error(
         'SONAR_TOKEN is required in this context but was not provided — ' +
           'refusing to report a gate as passing when it never ran. ' +
-          'Pass --require-token only where the secret is available ' +
-          '(same-repo pull requests); fork PRs must omit it.',
+          'Every run has the secret except a pull request from a fork, which ' +
+          'is the one lane that must omit --require-token (and --require-' +
+          'analysis, which implies it).',
       );
       process.exitCode = 1;
     }
     return;
   }
 
-  if (args.wait) {
-    const ready = await waitForAnalysis({
-      fetchJson,
-      token,
-      base: CONFIG.base,
-      project: CONFIG.project,
-      target,
-      since: args.since,
-    });
-    if (!ready) {
-      console.warn(
-        `Timed out waiting for SonarCloud analysis of ${target.type} ${target.value} — ` +
-          'skipping the strict issue check (the required SonarCloud check still gates).',
-      );
-      return;
-    }
+  if (args.wait && !(await analysisReady({ args, target, token }))) {
+    return;
   }
 
   const api = createSonarApi({

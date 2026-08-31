@@ -20,6 +20,8 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { isVerdict, PRECEDENCE } from './pr-queue-gate.mjs';
+
 /**
  * The claude binary as an absolute path, never a bare name.
  *
@@ -38,7 +40,16 @@ export const resolveClaudeBinary = () =>
     '/usr/bin/claude',
   ].find((path) => path !== undefined && existsSync(path));
 
-/** Read-only tools for the decide pass — it observes the queue, never edits it. */
+/**
+ * The decide pass's tools. It observes the queue and produces a verdict; nothing
+ * here is meant to change anything.
+ *
+ * `gh api` is the exception to read that carefully — it takes a method, so the
+ * allow-list cannot make it read-only, and the same hole `#1040` records for the
+ * apply pass exists here. What differs is the consequence: this pass writes no
+ * decision log entry for a command it ran, so a departure here is invisible
+ * rather than merely unbounded, which is why #1040's guard has to cover both.
+ */
 export const DECIDE_TOOLS = [
   'Read',
   'Grep',
@@ -90,7 +101,7 @@ export const DECISION_SCHEMA = {
       items: { type: 'string' },
       type: 'array',
     },
-    verdict: { enum: ['MERGE', 'ACT', 'WAIT', 'ESCALATE'], type: 'string' },
+    verdict: { enum: [...PRECEDENCE], type: 'string' },
   },
   required: ['verdict', 'ruleIds', 'reasoning', 'evidence', 'actions'],
   type: 'object',
@@ -114,6 +125,24 @@ const renderThreads = (threads) =>
           return `  [${index + 1}] ${thread.author}${where}${outdated}\n      ${body}`;
         })
         .join('\n');
+
+const parenthesised = (text) => (text === '' ? '' : ` (${text})`);
+
+const renderQueue = (queue) => {
+  if (!queue.enabled) {
+    return 'not required on this base branch — landing is a direct squash merge';
+  }
+  if (queue.queued) {
+    const at =
+      queue.position === undefined ? '' : ` at position ${queue.position + 1}`;
+    return `in the queue${parenthesised(queue.state)}${at}`;
+  }
+  if (queue.ejectedAt === '') {
+    return 'required on this base branch; this pull request is not in it';
+  }
+  const why = queue.ejectedReason === '' ? '' : ` — ${queue.ejectedReason}`;
+  return `required; REMOVED from the queue at ${queue.ejectedAt}${why}`;
+};
 
 const renderFindings = (label, findings) =>
   findings.length === 0
@@ -155,6 +184,7 @@ author:   ${pr.author}
 branch:   ${pr.headRefName} -> ${pr.baseRefName}
 draft:    ${pr.isDraft}
 mergeable:${pr.mergeable}   mergeStateStatus: ${pr.mergeStateStatus}   reviewDecision: ${pr.reviewDecision || '(none)'}
+merge queue: ${renderQueue(pr.queue)}
 files (${pr.files.length}, ${pr.size} lines changed):
 ${pr.files.map((file) => `  +${file.additions} -${file.deletions} ${file.path}`).join('\n') || '  (none)'}
 checks:
@@ -183,7 +213,7 @@ Your task:
 3. Cite the policy rule ids the verdict rests on.
 4. Record every probe you ran and what it returned (policy §6). A verdict with no
    probe that could have come out otherwise is S10.
-5. For MERGE or ACT, list the exact §4 actions and the exact shell commands, in
+5. For ENQUEUE or ACT, list the exact §4 actions and the exact shell commands, in
    order. Bias toward action: if the policy permits the action, name it and do not
    defer it to a human. "A human should look at this" is only ESCALATE, and only
    with a §5 trigger id.
@@ -219,10 +249,11 @@ export const decideArgs = ({ model }) => [
 /**
  * The decision out of the CLI envelope.
  *
- * Defensive on two counts: the envelope's `result` is a string even under
- * `--json-schema`, and a model that ignores the schema tends to fence its JSON.
- * Both recover to a real object; anything else is reported as a failed run
- * rather than a verdict, because a half-parsed verdict is worse than none.
+ * Defensive on three counts: the envelope's `result` is a string even under
+ * `--json-schema`, a model that ignores the schema tends to fence its JSON, and
+ * nothing on that path enforces the schema's own verdict enum. The first two
+ * recover to a real object; a verdict outside policy §1 is reported as a failed
+ * run rather than carried, because one the operator cannot read is S10.
  */
 export const parseDecision = (stdout) => {
   try {
@@ -235,9 +266,11 @@ export const parseDecision = (stdout) => {
       typeof raw === 'string'
         ? JSON.parse(raw.replace(/^```(?:json)?\n?|\n?```$/g, '').trim())
         : raw;
-    return typeof decision?.verdict === 'string'
+    return isVerdict(decision?.verdict)
       ? { decision }
-      : { error: 'response carried no verdict' };
+      : {
+          error: `response carried no verdict the policy defines (${PRECEDENCE.join(', ')}): ${JSON.stringify(decision?.verdict)}`,
+        };
   } catch (cause) {
     return { error: `unparseable claude response: ${cause.message}` };
   }

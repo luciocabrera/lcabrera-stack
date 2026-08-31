@@ -760,20 +760,39 @@ Review Gate**.
 
 ### Autonomous PR queue
 
-`vp run pr:queue` reads every open PR, derives the merge order, and decides each
-one against [`.claude/pr-queue-policy.md`](.claude/pr-queue-policy.md) — the
-policy is the operator's only authority, and every verdict in the log cites the
-rule ids behind it. It runs headless Claude twice per PR: a read-only decide pass
-that produces the verdict, then (only with `--apply`) an execute pass bounded to
-the actions that verdict authorised. The decision log is written between them, so
-what ran can be checked against what was approved.
+`vp run pr:queue` reads every open PR, derives the order to land them in, and
+decides each one against [`.claude/pr-queue-policy.md`](.claude/pr-queue-policy.md)
+— the policy is the operator's only authority, and every verdict in the log cites
+the rule ids behind it. It runs headless Claude twice per PR: a read-only decide
+pass that produces the verdict, then (only with `--apply`) an execute pass bounded
+to the actions that verdict authorised. The decision log is written between them,
+so what ran can be checked against what was approved.
 
-| Command                          | Does                                                                                            |
-| -------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `vp run pr:queue`                | dry run: decide every open PR, write the decision log, change nothing                           |
-| `vp run pr:queue -- --apply`     | execute each decision in merge order — rebase, fix, address review threads, squash-merge, close |
-| `vp run pr:queue -- --pr <n>`    | decide one PR, still judged in the context of the whole queue's ordering                        |
-| `vp run pr:queue -- --model <m>` | pick the model for both passes                                                                  |
+Its landing verdict is `ENQUEUE`, not `MERGE`, because `gh pr merge <n> --squash`
+does not always merge: where `main` requires a GitHub merge queue it hands the PR
+over and GitHub merges it afterwards, so the pass ends with the PR queued and not
+yet merged. Where no queue is required the same command squash-merges on the spot.
+The operator reads `isMergeQueueEnabled` per PR rather than assuming either — see
+[`docs/tooling/merge-queue.md`](docs/tooling/merge-queue.md).
+
+**In front of a queue, closing the linked issue, deleting the head branch and
+pruning the worktree (policy A6–A8) are unowned.** They need `state: MERGED`, and
+no pass observes it: the operator's only source of pull requests is
+`pullRequests(states: OPEN, …)` in `scripts/lib/pr-queue-github.mjs`, so a merged
+one never returns to `decide()` or `applyDecisions()`. An `--apply` run therefore
+stops doing those three and reports success, because enqueuing is what it was
+asked to do. Until
+[#1043](https://github.com/luciocabrera/lcabrera-stack/issues/1043) builds the
+merged-pull-request lane they are a human's job after the queue merges — `vp run
+housekeeping:prune -- --apply` is A8's half. Where no queue is required nothing
+changes: the merge is synchronous and A6–A8 run in the pass that made it.
+
+| Command                          | Does                                                                                                                 |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `vp run pr:queue`                | dry run: decide every open PR, write the decision log, change nothing                                                |
+| `vp run pr:queue -- --apply`     | execute each decision in order — rebase, fix, address review threads, land it; A6–A8 only where no queue is required |
+| `vp run pr:queue -- --pr <n>`    | decide one PR, still judged in the context of the whole set's ordering                                               |
+| `vp run pr:queue -- --model <m>` | pick the model for both passes                                                                                       |
 
 Logs land in `reports/pr-queue/runs/<timestamp>/` (`decision-log.md` to read,
 `decisions.json` to diff) — produced on demand, never committed ([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md)).
@@ -889,7 +908,7 @@ Notes on the non-obvious ones:
 | Job              | Steps                                                                                                           |
 | ---------------- | --------------------------------------------------------------------------------------------------------------- |
 | **Quality Gate** | `typegen:all` → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check` |
-| **Fallow Audit** | `typegen:all` → `coverage:merge` → `fallow:audit --base <PR base> --coverage …` (PRs only)                      |
+| **Fallow Audit** | `typegen:all` → `coverage:merge` → `fallow:audit --base $DIFF_BASE --coverage …` (anywhere with a base)         |
 | **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR        |
 
 Each pass is a **separate step on purpose** so a failure names itself instead of
@@ -898,6 +917,16 @@ Biome, and it does not run `tsc`.
 
 The three jobs run in **parallel** — "Biome runs before Fallow" holds within the
 Quality Gate job's step order, not across jobs.
+
+**Every one of them also runs on `merge_group`**, because a workflow without that
+trigger never reports a required check inside a merge queue — the queue then waits
+forever with nothing saying why, so the trigger has to be on `main` before the
+`merge_queue` rule goes on the ruleset. `$DIFF_BASE` is the
+pull-request base on a pull request and the merge group's parent commit in the
+queue, so a diff-scoped gate compares against the tree the change will actually
+land on. [`docs/tooling/merge-queue.md`](docs/tooling/merge-queue.md) is the whole
+mechanism, [ADR-098](docs/decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)
+is why.
 
 [`deps-audit.yml`](.github/workflows/deps-audit.yml) is **scheduled**: it runs
 `deps:audit` daily and opens (or comments on) a single tracking issue when it
@@ -913,8 +942,11 @@ not gate a pull request ([ADR-077](docs/decisions/ADR-077-audit-every-published-
 
 Other workflows: `lighthouse.yml`, `validate-skills.yml`, and
 [`pr-standards.yml`](.github/workflows/pr-standards.yml) — on every pull request
-it runs `pr:verify` (title + description) and `commit:verify` over each non-merge
-commit in the range, so nothing that skipped the local hook reaches `main`.
+and every merge-group build it runs `pr:verify` (title + description) and
+`commit:verify` over each non-merge commit in the range, so nothing that skipped
+the local hook reaches `main`. Inside the queue there is no pull request in the
+payload, so `scripts/resolve-subject-pr.mjs` resolves it from the queue branch's
+ref and exports the same variables both events read.
 [`labeler.yml`](.github/workflows/labeler.yml) auto-labels each PR
 (`app:`/`pkg:`/`type:`), [`sync-labels.yml`](.github/workflows/sync-labels.yml)
 syncs the label set when the manifest/workspace list changes on `main`, and
@@ -931,7 +963,10 @@ commit status against the head SHA, green only while some accepted reviewer's ow
 newest review names that commit. It is the only workflow here triggered by
 `pull_request_review` as well as `pull_request`, because its verdict changes when
 the diff has not — a review landing flips it, and a push takes it back to
-`pending`. It is a required context (2026-08-21), so it blocks the merge. A run
+`pending`. It is a required context (2026-08-21), so it blocks the merge — and
+because it is a **commit status** on the pull request head rather than a check
+run, it also runs on `merge_group` and republishes the same verdict on the merge
+group's commit, which is the only commit the queue reads. A run
 triggered by Copilot's own review currently waits for approval before it
 executes; that caveat, and the way out of it, are in
 [`docs/tooling/copilot-review-gate.md`](docs/tooling/copilot-review-gate.md).

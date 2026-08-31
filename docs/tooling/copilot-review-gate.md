@@ -446,6 +446,20 @@ it sits in while it waits. Promotion was kept separate from the work that built
 the gate for a reason worth keeping in view: a required check that has never
 reported blocks every pull request, including the one that would fix it.
 
+**And it has to report twice.** A merge queue reads the required contexts against
+the merge group's own commit — not the pull request head this status is published
+on — so a status that reports only on the head is one the queue waits for
+forever. The trigger therefore goes on before the `merge_queue` rule does
+([ADR-098](../decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)):
+the workflow also runs on `merge_group`,
+resolves the pull request from the queue branch's ref, and publishes the same
+verdict about the same head on the merge group's commit. The verdict is not
+weakened by the second publication: it still means an accepted reviewer's own
+newest review names the pull request's head, and a queued pull request cannot
+move underneath it, because pushing to one removes it from the queue. The
+scheduled sweep never touches those commits — it walks open pull requests' heads.
+[`merge-queue.md`](./merge-queue.md) has the rest.
+
 ## When the status stays pending
 
 The status stays `pending`. That is the design — an absent verdict must not read

@@ -9,6 +9,12 @@
  * quietly wrong — and a wrong walk here fails toward "clean", which is the
  * direction that merges something it should not.
  *
+ * The merge-queue fields are the same trap one level worse. A pull request the
+ * queue has ejected keeps its own checks green — the failure belongs to the
+ * merge group's commit — so every rollup reads it as ready. `summarizeQueue` is
+ * what makes E11 and S11 decidable; `docs/tooling/merge-queue.md` has the shape
+ * of that failure and ADR-098 the decision.
+ *
  * Governed by .claude/rules/scripts.md. The rules it serves are §2 and §6 of
  * .claude/pr-queue-policy.md.
  */
@@ -68,6 +74,20 @@ export const summarizeChecks = (contexts) => {
 
 export { summarizeThreads };
 
+export const summarizeQueue = (node) => {
+  const latest = node.timelineItems?.nodes?.[0];
+  const ejected =
+    latest?.__typename === 'RemovedFromMergeQueueEvent' ? latest : undefined;
+  return {
+    ejectedAt: ejected?.createdAt ?? '',
+    ejectedReason: ejected?.reason ?? '',
+    enabled: node.isMergeQueueEnabled === true,
+    position: node.mergeQueueEntry?.position ?? undefined,
+    queued: node.isInMergeQueue === true,
+    state: node.mergeQueueEntry?.state ?? '',
+  };
+};
+
 /** Changed paths with their line counts — the input to policy O3 and §5. */
 export const summarizeFiles = (nodes) =>
   (nodes ?? []).map((file) => ({
@@ -89,11 +109,13 @@ export const toFacts = (node) => {
     body: node.body ?? '',
     checks: summarizeChecks(rollup?.contexts?.nodes),
     files,
+    headCommittedAt: node.commits?.nodes?.[0]?.commit?.committedDate ?? '',
     headRefName: node.headRefName ?? '',
     isDraft: node.isDraft === true,
     mergeable: node.mergeable ?? 'UNKNOWN',
     mergeStateStatus: node.mergeStateStatus ?? 'UNKNOWN',
     number: node.number,
+    queue: summarizeQueue(node),
     reviewDecision: node.reviewDecision ?? '',
     size: files.reduce((sum, file) => sum + file.additions + file.deletions, 0),
     threads: summarizeThreads(node.reviewThreads?.nodes),

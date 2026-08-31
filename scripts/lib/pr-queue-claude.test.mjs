@@ -30,6 +30,14 @@ const pr = {
   mergeable: 'MERGEABLE',
   mergeStateStatus: 'CLEAN',
   number: 42,
+  queue: {
+    ejectedAt: '',
+    ejectedReason: '',
+    enabled: false,
+    position: undefined,
+    queued: false,
+    state: '',
+  },
   reviewDecision: '',
   size: 4,
   threads: {
@@ -117,12 +125,9 @@ describe('decideArgs', () => {
 
 describe('DECISION_SCHEMA', () => {
   it('admits exactly the four policy verdicts', () => {
-    expect(DECISION_SCHEMA.properties.verdict.enum).toEqual([
-      'MERGE',
-      'ACT',
-      'WAIT',
-      'ESCALATE',
-    ]);
+    expect(new Set(DECISION_SCHEMA.properties.verdict.enum)).toEqual(
+      new Set(['ENQUEUE', 'ACT', 'WAIT', 'ESCALATE']),
+    );
   });
 
   it('requires evidence, so a bare verdict cannot validate', () => {
@@ -137,7 +142,7 @@ describe('parseDecision', () => {
     evidence: [{ observation: 'clean', probe: 'gh pr checks 42' }],
     reasoning: 'all gates pass',
     ruleIds: ['E1'],
-    verdict: 'MERGE',
+    verdict: 'ENQUEUE',
   };
 
   it('reads the decision out of the CLI envelope', () => {
@@ -149,7 +154,7 @@ describe('parseDecision', () => {
     const stdout = JSON.stringify({
       result: `\`\`\`json\n${JSON.stringify(decision)}\n\`\`\``,
     });
-    expect(parseDecision(stdout).decision.verdict).toBe('MERGE');
+    expect(parseDecision(stdout).decision.verdict).toBe('ENQUEUE');
   });
 
   it('accepts an already-parsed object result', () => {
@@ -169,6 +174,25 @@ describe('parseDecision', () => {
     });
     expect(parseDecision(stdout).decision).toBeUndefined();
     expect(parseDecision(stdout).error).toMatch(/no verdict/);
+  });
+
+  it('refuses MERGE — the spelling the vocabulary used to have', () => {
+    const stdout = JSON.stringify({
+      result: JSON.stringify({ ...decision, verdict: 'MERGE' }),
+    });
+    expect(parseDecision(stdout).decision).toBeUndefined();
+    expect(parseDecision(stdout).error).toMatch(/no verdict/);
+    expect(parseDecision(stdout).error).toContain('"MERGE"');
+  });
+
+  it('refuses a verdict outside the vocabulary entirely', () => {
+    for (const verdict of ['TOTAL_NONSENSE', 'enqueue', '']) {
+      const stdout = JSON.stringify({
+        result: JSON.stringify({ ...decision, verdict }),
+      });
+      expect(parseDecision(stdout).decision).toBeUndefined();
+      expect(parseDecision(stdout).error).toMatch(/no verdict/);
+    }
   });
 
   it('refuses unparseable output', () => {

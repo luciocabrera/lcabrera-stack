@@ -1,43 +1,68 @@
 name: Sonar Issue Gate
 
-# Strict, free-plan-friendly Sonar enforcement. SonarCloud's own required check
-# runs the "Sonar way" quality gate, which is rating-based and lets new *code
-# smells* through (assigning a stricter custom gate is a paid feature). This job
-# closes that gap: it fails the PR on ANY open Sonar issue, using the repo's
-# sonar-report.mjs. `--wait` polls the Compute Engine until THIS commit's
-# analysis has finished (Automatic Analysis runs async, in parallel with CI), so
-# it never races; on timeout it skips rather than blocks. Fork PRs get no
-# secrets, so the script skips there and the job stays green — but on a
-# same-repo PR a missing token now FAILS (--require-token) instead of reporting
-# this required check green without having run.
+# Strict, free-plan-friendly Sonar enforcement. It fails on ANY open Sonar issue
+# using the repo's sonar-report.mjs, and in `--gate` mode on a failing SonarCloud
+# quality gate too — so it covers the rating-based "Sonar way" gate the SonarCloud
+# app reports and the new *code smells* that gate lets through (assigning a
+# stricter custom gate is a paid feature). `--wait` polls SonarCloud until it has
+# analysed THIS run's head commit (Automatic Analysis runs async, in parallel with
+# CI), so it never races. A pull request FROM A FORK gets no secrets, so the
+# script skips there and the job stays green — everywhere else a missing token
+# FAILS (--require-token) instead of reporting this required check green without
+# having run.
+#
+# It answers for a pull request inside the merge queue as well. SonarCloud
+# analyses `main` and pull requests and nothing else — there is no scanner in this
+# repo, the app analyses server-side — so a `gh-readonly-queue/…` branch gets no
+# analysis of its own and the SonarCloud app's own check cannot report there at
+# all. What the queue run reads is therefore the QUEUED PULL REQUEST's analysis,
+# the freshest analysis of that code that exists; and it may not skip on a timeout
+# the way the pull-request run does, because in the queue nothing else is looking.
+# docs/tooling/merge-queue.md carries that reasoning.
 
 on:
   pull_request:
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
+  # The queue run has no pull request in its payload, so it reads the one the
+  # merge group's ref names.
+  pull-requests: read
 
 jobs:
   sonar-issue-gate:
     name: Strict Sonar issue gate
     runs-on: ubuntu-latest
     steps:
-      # Checks out the MERGE ref (actions/checkout's default for pull_request),
-      # not the PR head, and that is load-bearing. GitHub runs the workflow file
-      # from the merge result but a `ref:` checkout brings the PR head's copy of
-      # the repo — so a change that teaches a script a new flag lands in the YAML
-      # immediately while every open PR still carries the old script, and the run
-      # dies on an unknown argument. That is exactly how #175 broke #177: the
-      # step passed --require-token to a sonar-report.mjs that predated it.
+      # Checks out the MERGE ref (actions/checkout's default for pull_request) or
+      # the merge group, never the pull request head, and that is load-bearing.
+      # GitHub runs the workflow file from the merge result but a `ref:` checkout
+      # brings the PR head's copy of the repo — so a change that teaches a script
+      # a new flag lands in the YAML immediately while every open PR still carries
+      # the old script, and the run dies on an unknown argument. That is exactly
+      # how #175 broke #177: the step passed --require-token to a sonar-report.mjs
+      # that predated it.
       #
-      # This job needs nothing from the head except its commit timestamp, which
-      # comes from the event payload below, so the merge ref costs it nothing.
-      # fetch-depth 2 reaches the merge commit's second parent — the PR head —
-      # so that timestamp is resolvable.
-      - name: Check out the PR merge ref
+      # Depth: on a pull request 2 reaches the merge commit's parents, which is
+      # all the scope step needs. A merge group is scoped against the group's
+      # parent commit, which is further back, so that lane takes the full history.
+      # `'0'` is quoted because a bare 0 is falsy in a GitHub expression and the
+      # ternary would silently fall through to the other branch.
+      - name: Check out the ref this event runs from
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 2
+          fetch-depth: ${{ github.event_name == 'merge_group' && '0' || '2' }}
+
+      # Which pull request this run answers for, and over what range — from the
+      # payload on a pull request, from the merge group's ref in the queue. It
+      # fails rather than defaulting: a gate that cannot name its subject would
+      # check nothing and report green.
+      - name: Resolve the pull request this run answers for
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/resolve-subject-pr.mjs
 
       # A docs-only PR has nothing for Sonar to analyse, but this job still sat
       # in `--wait` for the full timeout before giving up — five wasted minutes
@@ -47,25 +72,37 @@ jobs:
       # not a job-level `if:` either. A workflow skipped by `paths` reports
       # nothing at all, and a required check that never reports leaves the PR
       # permanently unmergeable — the exact failure this repo hit when
-      # SonarCloud stopped producing PR analyses. This job must always run and
-      # always report, so it exits early instead of never starting.
+      # SonarCloud stopped producing PR analyses, and the one that hangs a merge
+      # queue forever. This job must always run and always report, so it exits
+      # early instead of never starting.
       #
       # It fails OPEN: only paths that provably carry no analysable code are
       # treated as inert, and anything else — including an unrecognised path —
       # runs the gate. Adding a pattern here narrows Sonar enforcement, so add
       # one only when the path genuinely cannot contain code.
-      - name: Skip when the PR changes nothing Sonar analyses
+      - name: Skip when nothing Sonar analyses changed
         id: scope
+        env:
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          # HEAD^1 is the base and HEAD^2 the PR head: this is the merge ref,
-          # and fetch-depth 2 above reaches both. The two-dot diff is the PR's
-          # net change against the base, with no merge-base walk to fetch.
+          # On a pull request HEAD is the merge ref: HEAD^1 is the base and
+          # HEAD^2 the PR head, so the two-dot diff is the PR's net change with
+          # no merge-base walk to fetch. In a merge group HEAD is the group and
+          # RANGE_BASE_SHA its parent, so the same two-dot diff is this entry's
+          # net change on top of everything ahead of it in the queue.
           #
-          # If HEAD is not a merge commit the second parent does not resolve —
-          # GitHub omits the merge ref when the PR conflicts. Run the gate
-          # rather than letting a failed `git diff` fail this required check.
-          if ! CHANGED="$(git diff --name-only HEAD^1 HEAD^2 2>/dev/null)"; then
-            echo "::notice::Merge parents unresolvable — running the gate."
+          # If either side does not resolve — GitHub omits the merge ref when the
+          # PR conflicts — run the gate rather than letting a failed `git diff`
+          # fail this required check.
+          if [ "$EVENT_NAME" = "merge_group" ]; then
+            LEFT="$RANGE_BASE_SHA"
+            RIGHT="HEAD"
+          else
+            LEFT="HEAD^1"
+            RIGHT="HEAD^2"
+          fi
+          if ! CHANGED="$(git diff --name-only "$LEFT" "$RIGHT" 2>/dev/null)"; then
+            echo "::notice::Diff range $LEFT..$RIGHT unresolvable — running the gate."
             echo "analysable=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -87,24 +124,53 @@ jobs:
       - name: Wait for SonarCloud analysis, then fail on any new issue
         if: steps.scope.outputs.analysable == 'true'
         env:
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          GH_TOKEN: ${{ github.token }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         # sonar-report.mjs needs only Node built-ins + global fetch (present on
-        # ubuntu-latest), so no workspace install. --since = the PR head commit
-        # time, the freshness guard so a previous commit's analysis isn't accepted.
-        # HEAD_SHA comes through env, never a shell interpolation. If it cannot be
-        # resolved the step fails rather than dating the guard from the merge
-        # commit, which would be newer than the analysis and reject every run.
+        # ubuntu-latest), so no workspace install.
+        #
+        # --head-sha is the freshness guard that discriminates: SonarCloud records
+        # which commit it analysed for a pull request, so the wait ends when that
+        # equals this run's head however long ago the analysis ran. --since is the
+        # weaker fallback, and it is why the Compute Engine cannot be the only
+        # probe — `api/ce/activity` is project-wide, takes no pull-request filter
+        # and does not page, so an older pull request's perfectly good analysis
+        # falls out of its window and the wait times out. Under --require-analysis
+        # that timeout fails this required check and the queue ejects the entry.
+        #
+        # Both values are read through the API rather than from git, because in a
+        # merge group the head commit need not be in the checkout at all; if
+        # either cannot be resolved the step fails rather than dating the guard
+        # from a newer commit, which would reject every run. Every value the step
+        # substitutes comes through env, never a shell interpolation.
         run: |
-          SINCE="$(git show -s --format=%cI "$HEAD_SHA")"
-          echo "PR #${{ github.event.pull_request.number }} head committed at $SINCE"
-          # --require-token on same-repo PRs only: there the secret IS available,
-          # so a missing one is a misconfiguration and must fail rather than
-          # report this required check green without ever running. Fork PRs get
-          # no secrets by design, so they omit it and still skip cleanly.
-          REQUIRE_TOKEN=""
-          if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
-            REQUIRE_TOKEN="--require-token"
+          SINCE="$(gh api "repos/$GITHUB_REPOSITORY/commits/$PR_HEAD_SHA" --jq '.commit.committer.date')"
+          echo "PR #$PR_NUMBER head $PR_HEAD_SHA committed at $SINCE"
+          # --require-token wherever the secret IS available: there a missing one
+          # is a misconfiguration and must fail rather than report this required
+          # check green without ever running.
+          #
+          # Availability is a property of the RUN, not of the pull request.
+          # GitHub withholds secrets from "a workflow triggered from a forked
+          # repository", and a merge group is not one: the queue builds it on a
+          # `gh-readonly-queue/…` branch of THIS repository, so a queue run has
+          # the full secret set even for a queued fork pull request. Reading
+          # PR_IS_FORK alone would drop the flag there, where a missing secret
+          # takes sonar-report.mjs's tokenless early return — which precedes
+          # --require-analysis — and reports this required check green having
+          # read nothing, in front of the merge. So only a fork `pull_request`
+          # omits it, and any event added later fails closed.
+          FLAGS=()
+          if [ "$EVENT_NAME" != "pull_request" ] || [ "$PR_IS_FORK" != "true" ]; then
+            FLAGS+=(--require-token)
           fi
-          node scripts/sonar-report.mjs --gate --fail-on-issues $REQUIRE_TOKEN \
-            --pr "${{ github.event.pull_request.number }}" --wait --since "$SINCE"
+          # --require-analysis in the queue only. On a pull request a Sonar
+          # latency spike skips the check rather than blocking an author, and the
+          # queue run catches whatever that let through; in the queue a skip would
+          # be the last word before the merge, so a missing analysis fails there.
+          if [ "$EVENT_NAME" = "merge_group" ]; then
+            FLAGS+=(--require-analysis)
+          fi
+          node scripts/sonar-report.mjs --gate --fail-on-issues "${FLAGS[@]}" \
+            --pr "$PR_NUMBER" --wait --since "$SINCE" --head-sha "$PR_HEAD_SHA"

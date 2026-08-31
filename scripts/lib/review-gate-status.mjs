@@ -13,6 +13,12 @@
  * Everything here touches gh or the environment. The decisions that can be made
  * without either are in `./review-gate-reconcile.mjs`.
  *
+ * "Which pull request" and "which commit" come apart inside a merge queue: the
+ * payload names no pull request, and the commit the queue reads a required
+ * context against is the merge group's, not the pull request's head. Both are
+ * resolved here, from `./merge-queue.mjs`; `docs/tooling/merge-queue.md` says
+ * why, and ADR-098 is the decision.
+ *
  * Governed by .claude/rules/scripts.md.
  */
 import { readFileSync } from 'node:fs';
@@ -24,6 +30,7 @@ import {
   parseRepository,
 } from '../../packages/repo-standards/scripts/cli-input.mjs';
 import { runGh } from './gh-exec.mjs';
+import { pullNumberFromQueueRef, statusSha } from './merge-queue.mjs';
 import {
   PROTECT_SUCCESS_FLAG,
   publishedStatus,
@@ -65,9 +72,15 @@ export const resolveRepository = (payload) =>
  * `pulls/NaN`, where a bare 404 is all anyone sees.
  */
 export const resolvePullNumber = (payload) => {
-  const raw = flagValue('--pr') ?? payload?.pull_request?.number;
+  const raw =
+    flagValue('--pr') ??
+    payload?.pull_request?.number ??
+    pullNumberFromQueueRef(payload?.merge_group?.head_ref);
   return raw === undefined ? undefined : parsePullNumber(raw);
 };
+
+export const resolveStatusSha = (payload) =>
+  statusSha({ eventName: process.env.GITHUB_EVENT_NAME, payload });
 
 /** The run that decided a status, so the check links to its own reasoning. */
 const runUrl = () => {
@@ -116,8 +129,9 @@ export const fetchPublishedStatus = ({ context, repository, sha }) =>
   );
 
 /**
- * The pull request a gate run is about — `{ number, payload, repository }` — or
- * `undefined` after printing `usage`.
+ * The pull request a gate run is about —
+ * `{ number, payload, repository, statusSha }` — or `undefined` after printing
+ * `usage`.
  *
  * Both gates open the same way, and the interesting part is the failure: a run
  * that cannot name a pull request must say so and stop, never fall through to a
@@ -132,7 +146,12 @@ export const resolveGateTarget = (usage) => {
     console.error(`${usage}\n\nGive --pr, or run inside a pull-request event.`);
     return undefined;
   }
-  return { number, payload, repository: resolveRepository(payload) };
+  return {
+    number,
+    payload,
+    repository: resolveRepository(payload),
+    statusSha: resolveStatusSha(payload),
+  };
 };
 
 /**
