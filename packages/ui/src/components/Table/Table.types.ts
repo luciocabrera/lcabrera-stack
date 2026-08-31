@@ -406,6 +406,14 @@ export type TableMetaState = {
   readonly columnSelectedKey?: string;
   readonly columnSettingsSelectedTab: string;
   readonly crud?: TableCrudConfig;
+  /**
+   * The reader's Global Settings answer, read from the settings cookie by the
+   * loader and applied only where this table has expressed nothing of its own:
+   * `preferredGroupingMode` to a grouping the interaction **creates**, and
+   * `defaultGroupFold` to a group nobody has folded. Both absent means the
+   * shipped behaviour — `flat`, and every group expanded.
+   */
+  readonly defaultGroupFold?: TableGroupFold;
   readonly deleteActionPath?: string;
   readonly density: TableDensity;
   readonly drawersSyncNonce?: number;
@@ -466,6 +474,8 @@ export type TableMetaState = {
   readonly overscan: number;
   readonly persistenceKey: string;
   readonly placeholderRowCount: number;
+  /** See `defaultGroupFold`. */
+  readonly preferredGroupingMode?: TableGroupingMode;
   readonly rowHeight: number;
   readonly schemaName?: string;
   readonly tableName?: string;
