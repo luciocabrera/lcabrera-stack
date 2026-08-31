@@ -342,15 +342,15 @@ VirtualListContent [const] () => JSX.Element
 VirtualListDataState [type] { readonly data: readonly string[]; readonly hasMore: boolean; readonly isLoading: boolean; readonly isLoadingMore: boolean; readonly totalCount?: number; }
 
 ## ./components/VirtualSelect
-VirtualSelect [const] ({ customStylex, dataState, isAlwaysOpen, isBusy, listboxId, listMaxHeight, mode, onChange, onFetchInitial, onFetchMore, onOpenChange, options, placeholder, selected, shouldFillHeight, }: VirtualSelectProps) => JSX.Element
+VirtualSelect [const] ({ customStylex, dataState, isAlwaysOpen, isBusy, isDisabled, listboxId, listMaxHeight, mode, onChange, onFetchInitial, onFetchMore, onOpenChange, options, placeholder, selected, shouldFillHeight, }: VirtualSelectProps) => JSX.Element
 
 ## ./components/VirtualSelect/hooks
-useVirtualSelect [const] ({ dataState, isAlwaysOpen, isBusy, listboxId, mode, onChange, onOpenChange, options, selected, }: UseVirtualSelectArgs) => { closeDropdown: () => void; containerRef: RefObject<HTMLDivElement | null>; effectiveDataState: VirtualListDataState | { data: string[]; hasMore: boolean; isLoading: boolean; isLoadingMore: boolean; }; handleListChange: (filter?: SelectFilter) => void; isMulti: boolean; isOpen: boolean; resolvedListboxId: string; selectedLabels: string[]; toggleDropdown: () => void; }
-useVirtualSelectDropdown [const] ({ isAlwaysOpen, isBusy, onOpenChange, }: UseVirtualSelectDropdownArgs) => { closeDropdown: () => void; isListVisible: boolean; isOpen: boolean; toggleDropdown: () => void; }
+useVirtualSelect [const] ({ dataState, isAlwaysOpen, isBusy, isDisabled, listboxId, mode, onChange, onOpenChange, options, selected, }: UseVirtualSelectArgs) => { closeDropdown: () => void; containerRef: RefObject<HTMLDivElement | null>; effectiveDataState: VirtualListDataState | { data: string[]; hasMore: boolean; isLoading: boolean; isLoadingMore: boolean; }; handleListChange: (filter?: SelectFilter) => void; isMulti: boolean; isOpen: boolean; resolvedListboxId: string; selectedLabels: string[]; toggleDropdown: () => void; }
+useVirtualSelectDropdown [const] ({ isAlwaysOpen, isInert, onOpenChange, }: UseVirtualSelectDropdownArgs) => { closeDropdown: () => void; isListVisible: boolean; isOpen: boolean; toggleDropdown: () => void; }
 useVirtualSelectTagOverflow [const] ({ mode, selected, triggerRef, }: UseVirtualSelectTagOverflowArgs) => number
 
 ## ./components/VirtualSelect/VirtualSelectTrigger/hooks
-useVirtualSelectTrigger [const] () => { chevron: JSX.Element | undefined; content: ReactNode; isBusy: boolean; isOpen: boolean; listboxId: string; mode: VirtualSelectMode; shouldUseDivTrigger: boolean; toggleDropdown: () => void; triggerRef: RefObject<HTMLButtonElement | HTMLDivElement | undefined>; }
+useVirtualSelectTrigger [const] () => { chevron: JSX.Element | undefined; content: ReactNode; isInert: boolean; isOpen: boolean; listboxId: string; mode: VirtualSelectMode; shouldUseDivTrigger: boolean; toggleDropdown: () => void; triggerRef: RefObject<HTMLButtonElement | HTMLDivElement | undefined>; }
 
 ## ./contexts/NotificationContext
 AppNotification [type] { readonly durationMs: number; readonly id: string; readonly message: string; readonly placement: NotificationPlacement; readonly title?: string; readonly variant: CardColor; }
