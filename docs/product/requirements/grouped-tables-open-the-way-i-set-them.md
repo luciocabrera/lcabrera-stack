@@ -54,8 +54,12 @@ just made on the table in front of me.
   switching the mode back sticks. Decided by
   `TableDrawerContext.hooks.test.tsx` → "leaves a second key alone, so switching
   the mode back sticks", and by `resolveNewGroupingMode.util.test.ts`.
-- A shared link outranks the preference for the totals position. Decided by
-  `resolveLoaderTotalsPlacement.util.test.ts`.
+- A shared link, and then this table's own cookie, outrank the preference for
+  the totals position — and the preference applies when neither speaks. Decided
+  by `resolveLoaderTotalsPlacement.util.test.ts` → "takes the global preference
+  when neither channel carries one", "lets the param outrank the global
+  preference", and "lets this table's own cookie outrank the global
+  preference".
 - None of it changes a table for a reader who has set nothing. Decided by
   `resolveNewGroupingMode.util.test.ts` → "keeps the previous mode when no
   preference is set", and by every expanded-default case in the expansion
@@ -70,6 +74,13 @@ ones, leaving every expanded-default case green. That is both halves of the
 claim: the new behaviour is tested, and the old behaviour is preserved where it
 applied. The run is in
 [#1053](https://github.com/luciocabrera/lcabrera-stack/pull/1053).
+
+That probe reaches the expansion utils and nothing else, so the totals-position
+criterion above needed its own: dropping the third channel from
+`resolveLoaderTotalsPlacement` (returning `'last'` outright) fails "takes the
+global preference when neither channel carries one" and only that one — the two
+precedence cases stay green, which is what says they are pinning the ordering
+rather than the channel's existence.
 
 The three preferences deliberately do **not** share a seam, and the middle one
 is the reason. The totals position resolves in the loader; the default fold
