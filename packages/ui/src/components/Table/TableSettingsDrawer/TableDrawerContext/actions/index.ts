@@ -9,6 +9,7 @@ export { useRemoveColumnAggregate } from './useRemoveColumnAggregate.hook';
 export { useReorderColumnAggregates } from './useReorderColumnAggregates.hook';
 export { useResetColumnOrderAndVisibility } from './useResetColumnOrderAndVisibility.hook';
 export { useResetFilters } from './useResetFilters.hook';
+export { useResetGrouping } from './useResetGrouping.hook';
 export { useResetSorting } from './useResetSorting.hook';
 export { useResetTableSettings } from './useResetTableSettings.hook';
 export { useSetColumnFilters } from './useSetColumnFilters.hook';

@@ -25,6 +25,7 @@ export { useGetTableLockedFilters } from './useGetTableLockedFilters.hook';
 export { useGetTableOverscan } from './useGetTableOverscan.hook';
 export { useGetTablePersistenceKey } from './useGetTablePersistenceKey.hook';
 export { useGetTablePlaceholderRowCount } from './useGetTablePlaceholderRowCount.hook';
+export { useGetTablePreferredGroupingMode } from './useGetTablePreferredGroupingMode.hook';
 export { useGetTableRowHeight } from './useGetTableRowHeight.hook';
 export { useGetTableSchemaName } from './useGetTableSchemaName.hook';
 export { useGetTableSettingsExpandedFilters } from './useGetTableSettingsExpandedFilters.hook';

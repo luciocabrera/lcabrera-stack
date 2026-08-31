@@ -116,3 +116,39 @@ describe('addTableColumnAggregate', () => {
     ]);
   });
 });
+
+describe('where a new aggregate lands', () => {
+  it('sits beside the column’s existing measures rather than at the tail', () => {
+    const result = addTableColumnAggregate({
+      columnKey: 'total_amount',
+      fn: 'sum',
+      grouping: grouping({
+        aggregates: [
+          { columnKey: 'total_amount', fn: 'min' },
+          { columnKey: 'order_no', fn: 'count' },
+        ],
+      }),
+    });
+
+    expect(result.aggregates).toStrictEqual([
+      { columnKey: 'total_amount', fn: 'min' },
+      { columnKey: 'total_amount', fn: 'sum' },
+      { columnKey: 'order_no', fn: 'count' },
+    ]);
+  });
+
+  it('goes to the tail when the column carries none yet', () => {
+    const result = addTableColumnAggregate({
+      columnKey: 'order_no',
+      fn: 'count',
+      grouping: grouping({
+        aggregates: [{ columnKey: 'total_amount', fn: 'min' }],
+      }),
+    });
+
+    expect(result.aggregates).toStrictEqual([
+      { columnKey: 'total_amount', fn: 'min' },
+      { columnKey: 'order_no', fn: 'count' },
+    ]);
+  });
+});

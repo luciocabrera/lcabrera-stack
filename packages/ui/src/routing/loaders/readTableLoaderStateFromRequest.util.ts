@@ -18,6 +18,8 @@ import {
   readPersistedStateFromCookie,
   readPersistedUiFlagsFromCookie,
 } from '#ui/components/Table/utils';
+import { INITIAL_GLOBAL_SETTINGS } from '#ui/contexts/GlobalSettingsContext/GlobalSettingsContext.constants';
+import { getGlobalSettingsFromCookie } from '#ui/utils/globalSettings';
 import {
   deserializeFiltersFromURL,
   deserializeSortingFromURL,
@@ -75,6 +77,15 @@ export const readTableLoaderStateFromRequest = <
     persistenceKey,
   });
 
+  // Read here rather than passed down from the root loader: this util is a
+  // published entry point a consumer's own loader calls directly, and it
+  // already holds the one thing the read needs — the request's Cookie header.
+  const { grouping: groupingPreferences } = getGlobalSettingsFromCookie({
+    appId,
+    cookieString: cookieHeader ?? undefined,
+    fallback: INITIAL_GLOBAL_SETTINGS,
+  });
+
   const columnOrder = (cookieState.columnOrder ??
     []) as ColumnOrderState<TData>;
 
@@ -120,6 +131,7 @@ export const readTableLoaderStateFromRequest = <
   const totalsPlacement = resolveLoaderTotalsPlacement({
     param: param(TABLE_TOTALS_PLACEMENT_PARAM),
     persisted: metaUiFlags.totalsPlacement,
+    preference: groupingPreferences.totalsPlacement,
   });
 
   return {
@@ -129,6 +141,7 @@ export const readTableLoaderStateFromRequest = <
     columnVisibility,
     filters,
     grouping,
+    groupingPreferences,
     metaUiFlags,
     sorting,
     standaloneFiltersParam,

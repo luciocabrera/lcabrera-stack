@@ -11,6 +11,7 @@ import type { AddSortSectionProps } from './AddSortSection.types';
 
 import { useSetColumnsSortings } from '../../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
+import { useGroupedSortScope } from '../hooks';
 import { styles } from './AddSortSection.stylex';
 
 export const AddSortSection = ({
@@ -20,6 +21,7 @@ export const AddSortSection = ({
   const columns = useGetColumns();
   const sorting = useGetColumnsSorting();
   const onSortChange = useSetColumnsSortings();
+  const isInSortScope = useGroupedSortScope();
 
   const [selectedColumn, setSelectedColumn] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -33,6 +35,7 @@ export const AddSortSection = ({
     .filter(
       (col) =>
         resolveColumnCapabilities(col).isSortable &&
+        isInSortScope(String(col.key)) &&
         sorting.every((s) => s.columnKey !== col.key),
     )
     .map((col) => ({ label: col.label, value: col.key }));

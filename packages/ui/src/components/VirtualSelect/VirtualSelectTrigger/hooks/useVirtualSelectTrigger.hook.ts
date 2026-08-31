@@ -6,7 +6,7 @@ import { useGetSelectedValues } from '#ui/components/VirtualList/contexts/data/s
 import { useToggleDropdown } from '../../contexts/meta/actions';
 import {
   useGetIsAlwaysOpen,
-  useGetIsBusy,
+  useGetIsInert,
   useGetIsOpen,
   useGetListboxId,
   useGetMode,
@@ -22,7 +22,7 @@ export const useVirtualSelectTrigger = () => {
   );
 
   const isAlwaysOpen = useGetIsAlwaysOpen();
-  const isBusy = useGetIsBusy();
+  const isInert = useGetIsInert();
   const isOpen = useGetIsOpen();
   const listboxId = useGetListboxId();
   const mode = useGetMode();
@@ -62,7 +62,7 @@ export const useVirtualSelectTrigger = () => {
   return {
     chevron,
     content,
-    isBusy,
+    isInert,
     isOpen,
     listboxId,
     mode,

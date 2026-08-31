@@ -10,6 +10,7 @@ import {
   GLOBAL_SETTINGS_COOKIE_KEY,
   GLOBAL_SETTINGS_COOKIE_VERSION,
 } from './globalSettings.constants';
+import { toGlobalGroupingPreferences } from './toGlobalGroupingPreferences.util';
 import { toGlobalNavigationPreferences } from './toGlobalNavigationPreferences.util';
 import { toGlobalPinningPreferences } from './toGlobalPinningPreferences.util';
 
@@ -55,8 +56,10 @@ export const getGlobalSettingsFromCookie = ({
     const parsedNavigation = toGlobalNavigationPreferences(
       payload.value.navigation,
     );
+    const parsedGrouping = toGlobalGroupingPreferences(payload.value.grouping);
 
     return {
+      grouping: parsedGrouping ?? fallback.grouping,
       navigation: parsedNavigation ?? fallback.navigation,
       pinning: parsedPinning ?? fallback.pinning,
     };

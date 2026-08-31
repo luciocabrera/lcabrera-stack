@@ -33,6 +33,7 @@ describe('useSetGlobalPinningPreferences', () => {
     persistGlobalSettingsMock.mockReset();
     settingsStoreRef.current = createMockStore<GlobalSettingsState | undefined>(
       {
+        grouping: {},
         navigation: { size: 'small' },
         pinning: {
           orderConflictResolution: 'reset-all-pins',
@@ -50,6 +51,7 @@ describe('useSetGlobalPinningPreferences', () => {
     });
 
     expect(settingsStoreRef.current.get()).toEqual({
+      grouping: {},
       navigation: { size: 'small' },
       pinning: {
         orderConflictResolution: 'reset-all-pins',
@@ -58,6 +60,7 @@ describe('useSetGlobalPinningPreferences', () => {
     });
     expect(persistGlobalSettingsMock).toHaveBeenCalledTimes(1);
     expect(persistGlobalSettingsMock).toHaveBeenCalledWith({
+      grouping: {},
       navigation: { size: 'small' },
       pinning: {
         orderConflictResolution: 'reset-all-pins',
@@ -78,12 +81,14 @@ describe('useSetGlobalPinningPreferences', () => {
     });
 
     expect(settingsStoreRef.current.get()).toEqual({
+      grouping: {},
       navigation: {},
       pinning: {
         pinConflictResolution: 'pin-only',
       },
     });
     expect(persistGlobalSettingsMock).toHaveBeenCalledWith({
+      grouping: {},
       navigation: {},
       pinning: {
         pinConflictResolution: 'pin-only',

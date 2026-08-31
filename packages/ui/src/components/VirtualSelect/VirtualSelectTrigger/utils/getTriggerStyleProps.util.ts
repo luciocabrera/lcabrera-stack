@@ -5,21 +5,21 @@ import type { VirtualSelectMode } from '../../VirtualSelect.types';
 import { styles } from '../VirtualSelectTrigger.stylex';
 
 type GetTriggerStylePropsArgs = {
-  isBusy?: boolean;
+  isInert?: boolean;
   isOpen: boolean;
   isStatic?: boolean;
   mode: VirtualSelectMode;
 };
 
 export const getTriggerStyleProps = ({
-  isBusy = false,
+  isInert = false,
   isOpen,
   isStatic = false,
   mode,
 }: GetTriggerStylePropsArgs) =>
   stylex.props(
     styles.trigger,
-    isBusy && styles.triggerBusy,
+    isInert && styles.triggerBusy,
     isOpen && styles.triggerOpen,
     mode === 'multi' && styles.triggerClamped,
     isStatic && styles.triggerStatic,

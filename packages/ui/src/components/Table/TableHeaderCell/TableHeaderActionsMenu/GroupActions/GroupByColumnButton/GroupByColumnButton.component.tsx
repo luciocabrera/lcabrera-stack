@@ -14,6 +14,7 @@ import {
 } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import {
   MAX_TABLE_GROUP_KEYS,
+  TABLE_GROUP_KEY_APPLIED_LABEL,
   TABLE_GROUP_KEY_REFUSAL_LABELS,
 } from '#ui/components/Table/Table.constants';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
@@ -34,17 +35,33 @@ export const GroupByColumnButton = <TData,>({
     resolveGroupKeyAvailability<TData>({ capability, column });
   const { icon: GroupByColumnCommandIcon, label } = GROUP_BY_COLUMN_COMMAND;
 
+  // A curated grouping is not editable from here either. Hiding the item rather
+  // than disabling it, for the reason the drawer's Add is hidden: the lock is
+  // not a state the user can clear, so an inert control would only ask them to
+  // keep trying (#578).
   if (isGroupingLocked) return;
 
   const isApplied = groupingKeys.includes(String(columnKey));
   const isAtDepthCap = groupingKeys.length >= MAX_TABLE_GROUP_KEYS;
   const { isActive, isEnabled } = deriveToggleCommandState({
     current: isApplied ? String(columnKey) : undefined,
-    isDisabled: !isApplied && (!isGroupable || isAtDepthCap),
+    isDisabled: isApplied || !isGroupable || isAtDepthCap,
     target: String(columnKey),
   });
 
+  const resolveTitle = () => {
+    if (isApplied) return TABLE_GROUP_KEY_APPLIED_LABEL;
+    if (refusal === undefined || isEnabled) return;
+
+    return `Cannot group by this column: ${TABLE_GROUP_KEY_REFUSAL_LABELS[refusal]}.`;
+  };
+
+  const title = resolveTitle();
+
   const handleGroupByColumn = () => {
+    // The granularity goes on with the key: a column the catalogue refuses raw
+    // is offered only truncated, so adding it without one applies a grouping
+    // the server would refuse (ADR-084).
     toggleGroupKey({ columnKey: String(columnKey), period: requiredPeriod });
     onClose();
   };
@@ -62,10 +79,9 @@ export const GroupByColumnButton = <TData,>({
       onClick={handleGroupByColumn}
       orientation='horizontal'
       size='mini'
-      {...(refusal !== undefined &&
-        !isEnabled && {
-          title: `Cannot group by this column: ${TABLE_GROUP_KEY_REFUSAL_LABELS[refusal]}.`,
-        })}
+      // The reason rides the disabled item rather than a tooltip: a disabled
+      // button fires no pointer events, so a tooltip on one never opens.
+      {...(title !== undefined && { title })}
       variant={isActive ? 'primary' : 'ghost'}
     >
       {label}

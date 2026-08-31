@@ -17,8 +17,21 @@ type MockVirtualSelectProps = {
   }[];
 };
 
-const { columnsRef, mockSetColumnsSortings, sortingRef } = vi.hoisted(() => ({
+const {
+  aggregatesRef,
+  columnsRef,
+  groupingKeysRef,
+  mockSetColumnsSortings,
+  sortingRef,
+} = vi.hoisted(() => ({
+  aggregatesRef: {
+    current: [] as readonly {
+      readonly columnKey: string;
+      readonly fn: string;
+    }[],
+  },
   columnsRef: { current: [] as readonly Record<string, unknown>[] },
+  groupingKeysRef: { current: [] as readonly string[] },
   mockSetColumnsSortings: vi.fn(),
   sortingRef: { current: [] as readonly { readonly columnKey: string }[] },
 }));
@@ -46,6 +59,8 @@ vi.mock('../../TableDrawerContext/actions', () => ({
 
 vi.mock('../../TableDrawerContext/selectors', () => ({
   useGetColumnsSorting: () => sortingRef.current,
+  useGetGroupingAggregates: () => aggregatesRef.current,
+  useGetGroupingKeys: () => groupingKeysRef.current,
 }));
 
 import { AddSortSection } from './AddSortSection.component';
@@ -62,6 +77,8 @@ beforeEach(() => {
     { isSortable: true, key: 'status', label: 'Status' },
   ];
   sortingRef.current = [];
+  aggregatesRef.current = [];
+  groupingKeysRef.current = [];
 });
 
 afterEach(() => {
@@ -82,5 +99,38 @@ describe('AddSortSection', () => {
     render(<AddSortSection />);
 
     expect(listedOptions()).toEqual(['Status']);
+  });
+});
+
+describe('under a grouping', () => {
+  it('offers only the group keys, since the read drops every other term', () => {
+    groupingKeysRef.current = ['status'];
+
+    render(<AddSortSection />);
+
+    expect(listedOptions()).toEqual(['Status']);
+  });
+
+  it('offers a measured column no more than an unmeasured one', () => {
+    // `toGroupSort` matches a measure by its `column:fn` token, never by the
+    // bare column, so `status` here would order nothing.
+    columnsRef.current = [
+      { isSortable: true, key: 'region', label: 'Region' },
+      { isSortable: true, key: 'status', label: 'Status' },
+    ];
+    aggregatesRef.current = [{ columnKey: 'status', fn: 'count' }];
+    groupingKeysRef.current = ['region'];
+
+    render(<AddSortSection />);
+
+    expect(listedOptions()).toEqual(['Region']);
+  });
+
+  it('offers every sortable column again once the grouping names nothing declared', () => {
+    groupingKeysRef.current = ['gone'];
+
+    render(<AddSortSection />);
+
+    expect(listedOptions()).toEqual(['ID', 'Status']);
   });
 });

@@ -3,6 +3,7 @@ import { OLAP_GROUP_ROW_FIELD } from '@lcabrera/api/olap/olap.constants';
 import type {
   TableAggregateFn,
   TableColumnLayoutLock,
+  TableGroupFold,
   TableGroupingMode,
   TableGroupKeyRefusalReason,
   TableGroupPeriod,
@@ -105,6 +106,9 @@ export const TABLE_GROUP_KEY_REFUSAL_LABELS: Record<
   'unique-ish': 'nearly every row has its own value',
 };
 
+export const TABLE_GROUP_KEY_APPLIED_LABEL =
+  'Already grouped by this column — use Remove This Group to drop it.';
+
 export const TABLE_COLUMN_LAYOUT_LOCK_LABELS: Record<
   TableColumnLayoutLock,
   string
@@ -124,6 +128,16 @@ export const TABLE_TOTALS_PLACEMENT_LABELS: Record<
 > = {
   first: 'Above their rows',
   last: 'Below their rows',
+};
+
+export const TABLE_GROUP_FOLDS: readonly TableGroupFold[] = [
+  'expanded',
+  'collapsed',
+];
+
+export const TABLE_GROUP_FOLD_LABELS: Record<TableGroupFold, string> = {
+  collapsed: 'Start collapsed',
+  expanded: 'Start expanded',
 };
 
 export const TABLE_TOTALS_PLACEMENT_PARAM = 'totals';

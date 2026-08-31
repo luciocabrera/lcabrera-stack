@@ -33,6 +33,7 @@ export const ActiveAggregateList = ({
 
   const draggableItems: DraggableItem[] = aggregateItems.map((item) => ({
     content: <AggregateItemContent isBusy={isBusy} item={item} />,
+    groupId: item.columnKey,
     id: item.id,
   }));
 

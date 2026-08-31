@@ -6,6 +6,7 @@ import {
   EraserIcon,
   ExpandAllIcon,
   GroupRowsIcon,
+  MenuCloseIcon,
   UngroupRowsIcon,
 } from '#ui/components/Icons';
 import { TABLE_AGGREGATE_LABELS } from '#ui/components/Table/Table.constants';
@@ -19,9 +20,9 @@ export const GROUP_BY_COLUMN_COMMAND = {
 } satisfies CommandDescriptor;
 
 export const REMOVE_GROUP_KEY_COMMAND = {
-  icon: EraserIcon,
+  icon: MenuCloseIcon,
   id: 'column.group.remove' as CommandId,
-  label: 'Remove from Grouping',
+  label: 'Remove This Group',
 } satisfies CommandDescriptor;
 
 export const CLEAR_GROUPING_COMMAND = {

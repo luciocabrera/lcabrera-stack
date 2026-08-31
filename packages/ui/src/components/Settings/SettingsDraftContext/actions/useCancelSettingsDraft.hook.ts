@@ -1,4 +1,5 @@
 import {
+  useGetGlobalGroupingPreferences,
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
 } from '#ui/contexts/GlobalSettingsContext/selectors';
@@ -8,10 +9,17 @@ import { useSettingsDraftContextValue } from '../useSettingsDraftContextValue.ho
 
 export const useCancelSettingsDraft = () => {
   const { draftStore } = useSettingsDraftContextValue();
+  const groupingPreferences = useGetGlobalGroupingPreferences();
   const navigationPreferences = useGetGlobalNavigationPreferences();
   const pinningPreferences = useGetGlobalPinningPreferences();
 
   return () => {
-    draftStore.set(toDraft({ navigationPreferences, pinningPreferences }));
+    draftStore.set(
+      toDraft({
+        groupingPreferences,
+        navigationPreferences,
+        pinningPreferences,
+      }),
+    );
   };
 };

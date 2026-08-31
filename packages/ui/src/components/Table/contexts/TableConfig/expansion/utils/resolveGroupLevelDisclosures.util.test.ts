@@ -53,10 +53,11 @@ const columnsOf = (
 describe('resolveGroupLevelDisclosures', () => {
   it('offers nothing on a detail row, which states no level of its own', () => {
     const disclosures = resolveGroupLevelDisclosures({
-      collapsedGroupPaths: NO_COLLAPSE,
+      defaultFold: 'expanded',
       foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: undefined,
       summary: undefined,
+      toggledGroupPaths: NO_COLLAPSE,
     });
 
     expect(disclosures).toStrictEqual([]);
@@ -64,10 +65,11 @@ describe('resolveGroupLevelDisclosures', () => {
 
   it('offers nothing on the grand total, which is keyed by nothing', () => {
     const disclosures = resolveGroupLevelDisclosures({
-      collapsedGroupPaths: NO_COLLAPSE,
+      defaultFold: 'expanded',
       foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: resolveGroupPathKey([]),
       summary: summaryOf({ isSubtotal: true, path: [] }),
+      toggledGroupPaths: NO_COLLAPSE,
     });
 
     expect(disclosures).toStrictEqual([]);
@@ -75,10 +77,11 @@ describe('resolveGroupLevelDisclosures', () => {
 
   it('offers an ancestor’s control from a row inside it', () => {
     const disclosures = resolveGroupLevelDisclosures({
-      collapsedGroupPaths: NO_COLLAPSE,
+      defaultFold: 'expanded',
       foldableKeys: BOTH_HAVE_ROWS,
       pathKey: CRITICAL_KEY,
       summary: summaryOf({ path: CANCELLED_BUSINESS_CRITICAL }),
+      toggledGroupPaths: NO_COLLAPSE,
     });
 
     expect(columnsOf(disclosures)).toStrictEqual(['status', 'customerType']);
@@ -88,10 +91,11 @@ describe('resolveGroupLevelDisclosures', () => {
 
   it('skips a level nothing sits under', () => {
     const disclosures = resolveGroupLevelDisclosures({
-      collapsedGroupPaths: NO_COLLAPSE,
+      defaultFold: 'expanded',
       foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: CANCELLED_BUSINESS_KEY,
       summary: summaryOf({ path: CANCELLED_BUSINESS }),
+      toggledGroupPaths: NO_COLLAPSE,
     });
 
     expect(columnsOf(disclosures)).toStrictEqual(['status']);
@@ -99,10 +103,11 @@ describe('resolveGroupLevelDisclosures', () => {
 
   it('keeps a group row folding itself when it precedes what it owns', () => {
     const disclosures = resolveGroupLevelDisclosures({
-      collapsedGroupPaths: NO_COLLAPSE,
+      defaultFold: 'expanded',
       foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: CANCELLED_KEY,
       summary: summaryOf({ path: CANCELLED }),
+      toggledGroupPaths: NO_COLLAPSE,
     });
 
     expect(columnsOf(disclosures)).toStrictEqual(['status']);
@@ -110,10 +115,11 @@ describe('resolveGroupLevelDisclosures', () => {
 
   it('takes the control off an open subtotal, which trails its own block', () => {
     const disclosures = resolveGroupLevelDisclosures({
-      collapsedGroupPaths: NO_COLLAPSE,
+      defaultFold: 'expanded',
       foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: CANCELLED_KEY,
       summary: summaryOf({ isSubtotal: true, path: CANCELLED }),
+      toggledGroupPaths: NO_COLLAPSE,
     });
 
     expect(disclosures).toStrictEqual([]);
@@ -121,10 +127,11 @@ describe('resolveGroupLevelDisclosures', () => {
 
   it('returns the control to a collapsed subtotal, the only row left', () => {
     const disclosures = resolveGroupLevelDisclosures({
-      collapsedGroupPaths: CANCELLED_COLLAPSED,
+      defaultFold: 'expanded',
       foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: CANCELLED_KEY,
       summary: summaryOf({ isSubtotal: true, path: CANCELLED }),
+      toggledGroupPaths: CANCELLED_COLLAPSED,
     });
 
     expect(disclosures).toHaveLength(1);
@@ -133,10 +140,11 @@ describe('resolveGroupLevelDisclosures', () => {
 
   it('states a collapsed ancestor as folded', () => {
     const disclosures = resolveGroupLevelDisclosures({
-      collapsedGroupPaths: CANCELLED_COLLAPSED,
+      defaultFold: 'expanded',
       foldableKeys: CANCELLED_HAS_ROWS,
       pathKey: CANCELLED_BUSINESS_KEY,
       summary: summaryOf({ path: CANCELLED_BUSINESS }),
+      toggledGroupPaths: CANCELLED_COLLAPSED,
     });
 
     expect(disclosures).toHaveLength(1);

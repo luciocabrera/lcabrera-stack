@@ -17,6 +17,7 @@ type UseVirtualSelectArgs = {
   readonly dataState: VirtualSelectProps['dataState'];
   readonly isAlwaysOpen: boolean;
   readonly isBusy: boolean;
+  readonly isDisabled: boolean;
   readonly listboxId: VirtualSelectProps['listboxId'];
   readonly mode: VirtualSelectProps['mode'];
   readonly onChange: VirtualSelectProps['onChange'];
@@ -32,6 +33,7 @@ export const useVirtualSelect = ({
   dataState,
   isAlwaysOpen,
   isBusy,
+  isDisabled,
   listboxId,
   mode,
   onChange,
@@ -50,7 +52,7 @@ export const useVirtualSelect = ({
 
   const { closeDropdown, isOpen, toggleDropdown } = useVirtualSelectDropdown({
     isAlwaysOpen,
-    isBusy,
+    isInert: isBusy || isDisabled,
     onOpenChange,
   });
 

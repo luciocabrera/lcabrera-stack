@@ -9,14 +9,14 @@ export const usePruneTableGroupExpansion = <
   const { dataStore } = useTableDataContextValue<TData>();
 
   return () => {
-    const { collapsedGroupPaths } = expansionStore.get();
+    const { toggledGroupPaths } = expansionStore.get();
     const nextCollapsed = pruneCollapsedGroupPaths({
-      collapsedGroupPaths,
       data: dataStore.get().data,
+      toggledGroupPaths,
     });
 
-    if (nextCollapsed !== collapsedGroupPaths) {
-      expansionStore.set({ collapsedGroupPaths: nextCollapsed });
+    if (nextCollapsed !== toggledGroupPaths) {
+      expansionStore.set({ toggledGroupPaths: nextCollapsed });
     }
   };
 };

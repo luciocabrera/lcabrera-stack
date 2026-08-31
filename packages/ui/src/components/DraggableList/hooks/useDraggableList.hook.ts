@@ -5,6 +5,8 @@ import type {
   UseDraggableListProps,
 } from '../DraggableList.types';
 
+import { countFragmentedGroups } from '../utils';
+
 export const useDraggableList = ({
   initialItems,
   onOrderChange,
@@ -55,6 +57,16 @@ export const useDraggableList = ({
     }
 
     updatedItems.splice(toIndex, 0, movedItem);
+
+    // Refused only when the drop leaves **more** groups split than it found,
+    // not whenever the result is imperfect: a list that arrived interleaved
+    // would otherwise be undraggable, and the refusal is silent. A well-formed
+    // list starts at zero, so any drop that splits a group is still refused.
+    if (countFragmentedGroups(updatedItems) > countFragmentedGroups(items)) {
+      dragItemId.current = undefined;
+      dragOverItemId.current = undefined;
+      return;
+    }
 
     setItems(updatedItems);
 

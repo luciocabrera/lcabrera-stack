@@ -1,3 +1,4 @@
+export { useGetGlobalGroupingPreferences } from './useGetGlobalGroupingPreferences.hook';
 export { useGetGlobalNavigationCollapsedPreference } from './useGetGlobalNavigationCollapsedPreference.hook';
 export { useGetGlobalNavigationPreferences } from './useGetGlobalNavigationPreferences.hook';
 export { useGetGlobalNavigationSizePreference } from './useGetGlobalNavigationSizePreference.hook';

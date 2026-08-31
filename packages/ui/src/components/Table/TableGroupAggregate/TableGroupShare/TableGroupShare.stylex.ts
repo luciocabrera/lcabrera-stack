@@ -9,17 +9,10 @@ export const tableGroupShareStyles = stylex.create({
     color: colors.textSecondary,
     opacity: 0.55,
   },
-  /**
-   * The filled portion. Its width is the datum itself, so it is a **dynamic**
-   * style rather than an inline one: StyleX compiles a style function to a
-   * custom property, which keeps the value out of a `style` attribute and so
-   * out of the way of a strict CSP. Same shape `TableBodyCell`'s pinned offsets
-   * take. Do not "simplify" this to an inline style — the CSP compatibility is
-   * the whole reason for the function.
-   */
   barFill: (width: string) => ({
     borderRadius: 'inherit',
-    backgroundColor: colors.brandPrimary,
+    backgroundColor: colors.info,
+    display: 'block',
     height: '100%',
     width,
   }),
@@ -27,6 +20,7 @@ export const tableGroupShareStyles = stylex.create({
     borderRadius: spacing.xxs,
     overflow: 'hidden',
     backgroundColor: colors.borderSecondary,
+    display: 'block',
     flexShrink: 0,
     height: 4,
     width: 48,

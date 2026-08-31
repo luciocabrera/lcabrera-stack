@@ -86,6 +86,7 @@ describe('AppNavigation', () => {
   it('renders the configured route links and theme toggle', () => {
     renderWithGlobalSettings({
       initialSettings: {
+        grouping: {},
         navigation: {
           size: 'medium',
         },
@@ -106,6 +107,7 @@ describe('AppNavigation', () => {
   it('renders as a permanent aside with no dismiss control', () => {
     renderWithGlobalSettings({
       initialSettings: {
+        grouping: {},
         navigation: {
           size: 'medium',
         },
@@ -125,6 +127,7 @@ describe('AppNavigation', () => {
   it('uses compact density from global settings preference', () => {
     renderWithGlobalSettings({
       initialSettings: {
+        grouping: {},
         navigation: {
           size: 'compact',
         },
@@ -142,6 +145,7 @@ describe('AppNavigation', () => {
   it('starts collapsed when global collapsed preference is selected', () => {
     renderWithGlobalSettings({
       initialSettings: {
+        grouping: {},
         navigation: {
           collapsed: 'collapsed',
           size: 'medium',
@@ -157,7 +161,11 @@ describe('AppNavigation', () => {
 
   it('collapses and expands the navigation panel', () => {
     renderWithGlobalSettings({
-      initialSettings: { navigation: { size: 'medium' }, pinning: {} },
+      initialSettings: {
+        grouping: {},
+        navigation: { size: 'medium' },
+        pinning: {},
+      },
     });
 
     expect(screen.getByRole('link', { name: /Home/i })).toBeDefined();
