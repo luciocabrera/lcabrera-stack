@@ -1,4 +1,5 @@
 import {
+  useGetGlobalGroupingPreferences,
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
 } from '#ui/contexts/GlobalSettingsContext/selectors';
@@ -13,11 +14,12 @@ import { SettingsDraftContext } from './SettingsDraftContext.context';
 export const SettingsDraftProvider = ({
   children,
 }: SettingsDraftProviderProps) => {
+  const groupingPreferences = useGetGlobalGroupingPreferences();
   const navigationPreferences = useGetGlobalNavigationPreferences();
   const pinningPreferences = useGetGlobalPinningPreferences();
 
   const draftStore = useStore<SettingsDraft>(
-    toDraft({ navigationPreferences, pinningPreferences }),
+    toDraft({ groupingPreferences, navigationPreferences, pinningPreferences }),
   );
 
   return (

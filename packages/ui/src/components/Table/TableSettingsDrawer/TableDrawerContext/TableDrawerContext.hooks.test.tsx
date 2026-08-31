@@ -6,8 +6,12 @@ import { act, renderHook } from '@testing-library/react';
 import { createElement } from 'react';
 import { beforeEach, describe, expect, it } from 'vite-plus/test';
 
-import type { TableGroupingState } from '#ui/components/Table/Table.types';
+import type {
+  TableGroupingState,
+  TableMetaState,
+} from '#ui/components/Table/Table.types';
 
+import { TableConfigContext } from '#ui/components/Table/contexts/TableConfig/TableConfigContext.context';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 
@@ -68,8 +72,17 @@ const contextValue: TableDrawerContextValue = {
   totalsPlacementStore: totalsPlacementStore as never,
 };
 
+// The drawer only ever mounts inside `TableConfigProvider`, and its grouping
+// actions read the reader's preferred mode off the meta store, so the harness
+// nests the two the way the app does.
+const metaStore = createMockStore<Partial<TableMetaState>>({});
+
 const Wrapper = ({ children }: WrapperProps) =>
-  createElement(TableDrawerContext, { value: contextValue }, children);
+  createElement(
+    TableConfigContext,
+    { value: { metaStore } as never },
+    createElement(TableDrawerContext, { value: contextValue }, children),
+  );
 
 describe('TableDrawerContext hooks', () => {
   it('returns the drawer context value', () => {
@@ -142,6 +155,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       periods: {},
       shares: [],
     });
+    metaStore.reset({});
   });
 
   it('stages a key list, a reorder and an aggregate without any commit path', () => {
@@ -276,5 +290,73 @@ describe('TableDrawerContext grouping draft hooks', () => {
       periods: {},
       shares: [],
     });
+  });
+});
+
+describe("the reader's preferred grouping mode", () => {
+  beforeEach(() => {
+    groupingStore.reset({
+      aggregates: [],
+      keys: [],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+    });
+    metaStore.reset({ preferredGroupingMode: 'rollup' });
+  });
+
+  it('starts a grouping the first staged key creates', () => {
+    const { result } = renderHook(() => useToggleGroupKey(), {
+      wrapper: Wrapper,
+    });
+
+    act(() => {
+      result.current({ columnKey: 'status' });
+    });
+
+    expect(groupingStore.get().mode).toBe('rollup');
+  });
+
+  it('leaves a second key alone, so switching the mode back sticks', () => {
+    const { result } = renderHook(() => useToggleGroupKey(), {
+      wrapper: Wrapper,
+    });
+
+    act(() => {
+      result.current({ columnKey: 'status' });
+    });
+
+    act(() => {
+      groupingStore.set({ mode: 'flat' });
+      result.current({ columnKey: 'country' });
+    });
+
+    expect(groupingStore.get().mode).toBe('flat');
+  });
+
+  it('applies to the Add button path too, not only the toggle', () => {
+    const { result } = renderHook(() => useSetGroupKeys(), {
+      wrapper: Wrapper,
+    });
+
+    act(() => {
+      result.current(['status']);
+    });
+
+    expect(groupingStore.get().mode).toBe('rollup');
+  });
+
+  it('leaves the mode alone when the reader expressed no preference', () => {
+    metaStore.reset({});
+
+    const { result } = renderHook(() => useToggleGroupKey(), {
+      wrapper: Wrapper,
+    });
+
+    act(() => {
+      result.current({ columnKey: 'status' });
+    });
+
+    expect(groupingStore.get().mode).toBe('flat');
   });
 });

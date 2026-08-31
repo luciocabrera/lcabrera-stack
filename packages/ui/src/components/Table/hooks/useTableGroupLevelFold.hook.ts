@@ -1,6 +1,12 @@
 import { useSetTableGroupLevelExpanded } from '#ui/components/Table/contexts/TableConfig/expansion/actions';
-import { useGetTableCollapsedGroupPaths } from '#ui/components/Table/contexts/TableConfig/expansion/selectors';
-import { collectGroupLevelFoldPaths } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
+import {
+  useGetTableDefaultGroupFold,
+  useGetTableToggledGroupPaths,
+} from '#ui/components/Table/contexts/TableConfig/expansion/selectors';
+import {
+  collectGroupLevelFoldPaths,
+  countCollapsedGroups,
+} from '#ui/components/Table/contexts/TableConfig/expansion/utils';
 import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
 
 import { useTableGroupTree } from './useTableGroupTree.hook';
@@ -12,12 +18,15 @@ export const useTableGroupLevelFold = <
 ) => {
   const { rowMeta } = useTableGroupTree<TData>();
   const groupingKeys = useGetTableGroupingKeys();
-  const collapsedGroupPaths = useGetTableCollapsedGroupPaths();
+  const defaultFold = useGetTableDefaultGroupFold();
+  const toggledGroupPaths = useGetTableToggledGroupPaths();
   const setGroupLevelExpanded = useSetTableGroupLevelExpanded<TData>();
   const levelPaths = collectGroupLevelFoldPaths({ columnKey, rowMeta });
-  const collapsedAtLevel = [...levelPaths].filter((pathKey) =>
-    collapsedGroupPaths.has(pathKey),
-  ).length;
+  const collapsedAtLevel = countCollapsedGroups({
+    defaultFold,
+    foldableGroupPaths: levelPaths,
+    toggledGroupPaths,
+  });
 
   return {
     hasGroupLevel: groupingKeys.includes(columnKey),

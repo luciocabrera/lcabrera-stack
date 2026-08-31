@@ -1,9 +1,12 @@
 import type {
+  TableGroupFold,
   TableGroupKeyValue,
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 
 import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
+
+import { isGroupCollapsed } from './isGroupCollapsed.util';
 
 export type GroupTreeNode = {
   readonly isVisible: boolean;
@@ -13,8 +16,9 @@ export type GroupTreeNode = {
 };
 
 type GetHasCollapsedAncestorArgs = {
-  readonly collapsedGroupPaths: ReadonlySet<string>;
+  readonly defaultFold: TableGroupFold;
   readonly path: readonly TableGroupKeyValue[];
+  readonly toggledGroupPaths: ReadonlySet<string>;
 };
 
 type OpenGroup = {
@@ -24,8 +28,9 @@ type OpenGroup = {
 };
 
 type ResolveGroupTreeNodesArgs = {
-  readonly collapsedGroupPaths: ReadonlySet<string>;
+  readonly defaultFold: TableGroupFold;
   readonly summaries: readonly (TableGroupRowSummary | undefined)[];
+  readonly toggledGroupPaths: ReadonlySet<string>;
 };
 
 /**
@@ -54,14 +59,17 @@ const resolveGroupLevel = (path: readonly TableGroupKeyValue[]) =>
  * **are** the prefixes of its own path (ADR-065).
  */
 const getHasCollapsedAncestor = ({
-  collapsedGroupPaths,
+  defaultFold,
   path,
+  toggledGroupPaths,
 }: GetHasCollapsedAncestorArgs) =>
-  path
-    .slice(0, -1)
-    .some((_unused, index) =>
-      collapsedGroupPaths.has(resolveGroupPathKey(path.slice(0, index + 1))),
-    );
+  path.slice(0, -1).some((_unused, index) =>
+    isGroupCollapsed({
+      defaultFold,
+      pathKey: resolveGroupPathKey(path.slice(0, index + 1)),
+      toggledGroupPaths,
+    }),
+  );
 
 /**
  * **A group row's ancestry is the prefixes of its own path, and position never contributes
@@ -72,8 +80,9 @@ const getHasCollapsedAncestor = ({
  * explicit parent, not to reorder the query, whose order #570 fixes.
  */
 export const resolveGroupTreeNodes = ({
-  collapsedGroupPaths,
+  defaultFold,
   summaries,
+  toggledGroupPaths,
 }: ResolveGroupTreeNodesArgs): readonly GroupTreeNode[] => {
   const nodes: GroupTreeNode[] = [];
   let openGroup: OpenGroup | undefined;
@@ -92,7 +101,11 @@ export const resolveGroupTreeNodes = ({
     const { path } = summary;
     const level = resolveGroupLevel(path);
     const pathKey = resolveGroupPathKey(path);
-    const isVisible = !getHasCollapsedAncestor({ collapsedGroupPaths, path });
+    const isVisible = !getHasCollapsedAncestor({
+      defaultFold,
+      path,
+      toggledGroupPaths,
+    });
 
     nodes.push({
       isVisible,
@@ -109,7 +122,9 @@ export const resolveGroupTreeNodes = ({
       pathKey,
     });
     openGroup = {
-      isSubtreeHidden: !isVisible || collapsedGroupPaths.has(pathKey),
+      isSubtreeHidden:
+        !isVisible ||
+        isGroupCollapsed({ defaultFold, pathKey, toggledGroupPaths }),
       level,
       pathKey,
     };

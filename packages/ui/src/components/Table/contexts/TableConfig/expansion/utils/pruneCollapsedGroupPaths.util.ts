@@ -2,8 +2,8 @@ import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/g
 import { getTableGroupRowSummary } from '#ui/components/Table/utils/getTableGroupRowSummary.util';
 
 type PruneCollapsedGroupPathsArgs<TData> = {
-  readonly collapsedGroupPaths: ReadonlySet<string>;
   readonly data: readonly TData[];
+  readonly toggledGroupPaths: ReadonlySet<string>;
 };
 
 /**
@@ -17,10 +17,10 @@ type PruneCollapsedGroupPathsArgs<TData> = {
 export const pruneCollapsedGroupPaths = <
   TData extends Record<string, unknown>,
 >({
-  collapsedGroupPaths,
   data,
+  toggledGroupPaths,
 }: PruneCollapsedGroupPathsArgs<TData>): ReadonlySet<string> => {
-  if (collapsedGroupPaths.size === 0) return collapsedGroupPaths;
+  if (toggledGroupPaths.size === 0) return toggledGroupPaths;
 
   const present = new Set<string>();
 
@@ -30,11 +30,9 @@ export const pruneCollapsedGroupPaths = <
     if (summary !== undefined) present.add(resolveGroupPathKey(summary.path));
   }
 
-  const kept = [...collapsedGroupPaths].filter((pathKey) =>
-    present.has(pathKey),
-  );
+  const kept = [...toggledGroupPaths].filter((pathKey) => present.has(pathKey));
 
-  return kept.length === collapsedGroupPaths.size
-    ? collapsedGroupPaths
+  return kept.length === toggledGroupPaths.size
+    ? toggledGroupPaths
     : new Set(kept);
 };

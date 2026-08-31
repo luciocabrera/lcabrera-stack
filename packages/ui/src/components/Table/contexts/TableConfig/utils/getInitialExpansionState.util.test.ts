@@ -3,9 +3,22 @@ import { describe, expect, it } from 'vite-plus/test';
 import { getInitialExpansionState } from './getInitialExpansionState.util';
 
 describe('getInitialExpansionState', () => {
-  it('starts with nothing collapsed, so a grouped read paints every level it returned', () => {
+  it('starts with nothing folded away from the default, which is expanded', () => {
     expect(getInitialExpansionState()).toStrictEqual({
-      collapsedGroupPaths: new Set<string>(),
+      defaultFold: 'expanded',
+      toggledGroupPaths: new Set<string>(),
+    });
+  });
+
+  it("takes the reader's default and still starts with no exception to it", () => {
+    // Under `collapsed` the empty set is a fully folded grid, which is the
+    // whole point: the fold lands on the first paint, with no path enumerated
+    // and no data needed to name one.
+    expect(
+      getInitialExpansionState({ defaultFold: 'collapsed' }),
+    ).toStrictEqual({
+      defaultFold: 'collapsed',
+      toggledGroupPaths: new Set<string>(),
     });
   });
 
@@ -17,10 +30,10 @@ describe('getInitialExpansionState', () => {
     const first = getInitialExpansionState();
     const second = getInitialExpansionState();
 
-    expect(first.collapsedGroupPaths).not.toBe(second.collapsedGroupPaths);
+    expect(first.toggledGroupPaths).not.toBe(second.toggledGroupPaths);
 
-    (first.collapsedGroupPaths as Set<string>).add('grp:[["city","Paris"]]');
+    (first.toggledGroupPaths as Set<string>).add('grp:[["city","Paris"]]');
 
-    expect(second.collapsedGroupPaths.size).toBe(0);
+    expect(second.toggledGroupPaths.size).toBe(0);
   });
 });

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import type { TableGroupKeyValue } from '#ui/components/Table/Table.types';
+import type {
+  TableGroupFold,
+  TableGroupKeyValue,
+} from '#ui/components/Table/Table.types';
 
 import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
 import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
@@ -55,20 +58,23 @@ const sorted = (paths: ReadonlySet<string>) =>
   [...paths].toSorted((a, b) => a.localeCompare(b));
 
 type LevelArgs = {
-  readonly collapsedGroupPaths?: ReadonlySet<string>;
   readonly columnKey: string;
   readonly data?: readonly Row[];
+  readonly defaultFold?: TableGroupFold;
+  readonly toggledGroupPaths?: ReadonlySet<string>;
 };
 
 const foldPathsFor = ({
-  collapsedGroupPaths = NOTHING_COLLAPSED,
   columnKey,
   data = rollup,
+  defaultFold = 'expanded',
+  toggledGroupPaths = NOTHING_COLLAPSED,
 }: LevelArgs) =>
   sorted(
     collectGroupLevelFoldPaths({
       columnKey,
-      rowMeta: resolveTableGroupTree({ collapsedGroupPaths, data }).rowMeta,
+      rowMeta: resolveTableGroupTree({ data, defaultFold, toggledGroupPaths })
+        .rowMeta,
     }),
   );
 
@@ -112,8 +118,9 @@ describe('collectGroupLevelFoldPaths', () => {
   it('keeps naming a group it has already folded, so the fold can be undone', () => {
     expect(
       foldPathsFor({
-        collapsedGroupPaths: new Set([PHONES]),
         columnKey: 'subcategory',
+        defaultFold: 'expanded',
+        toggledGroupPaths: new Set([PHONES]),
       }),
     ).toStrictEqual(sorted(new Set([PHONES, TABLETS])));
   });
@@ -138,7 +145,7 @@ describe('collectGroupLevelFoldPaths', () => {
 
       it(`on ${columnKey}, with a middle group already folded`, () => {
         expect(
-          foldPathsFor({ collapsedGroupPaths: new Set([PHONES]), columnKey }),
+          foldPathsFor({ columnKey, toggledGroupPaths: new Set([PHONES]) }),
         ).toStrictEqual(EXPECTED[columnKey]);
       });
     }

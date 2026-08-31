@@ -25,20 +25,21 @@ export const useSetTableGroupLevelExpanded = <
   const containerRef = useTableContainerRef();
 
   return ({ columnKey, isExpanded }: SetTableGroupLevelExpandedArgs) => {
-    const { collapsedGroupPaths } = expansionStore.get();
-    const treeArgs = { data: dataStore.get().data };
+    const { defaultFold, toggledGroupPaths } = expansionStore.get();
+    const treeArgs = { data: dataStore.get().data, defaultFold };
     const { rowMeta, rows } = resolveTableGroupTree({
       ...treeArgs,
-      collapsedGroupPaths,
+      toggledGroupPaths,
     });
     const levelPaths = collectGroupLevelFoldPaths({ columnKey, rowMeta });
     const nextCollapsed = setCollapsedGroupLevel({
-      collapsedGroupPaths,
+      defaultFold,
       isCollapsed: !isExpanded,
       levelPaths,
+      toggledGroupPaths,
     });
 
-    if (nextCollapsed === collapsedGroupPaths) return;
+    if (nextCollapsed === toggledGroupPaths) return;
 
     if (!isExpanded) {
       const { columns } = columnsStore.get();
@@ -59,11 +60,11 @@ export const useSetTableGroupLevelExpanded = <
         rowHeight: metaStore.get().rowHeight,
         rows: resolveTableGroupTree({
           ...treeArgs,
-          collapsedGroupPaths: nextCollapsed,
+          toggledGroupPaths: nextCollapsed,
         }).rows,
       });
     }
 
-    expansionStore.set({ collapsedGroupPaths: nextCollapsed });
+    expansionStore.set({ toggledGroupPaths: nextCollapsed });
   };
 };

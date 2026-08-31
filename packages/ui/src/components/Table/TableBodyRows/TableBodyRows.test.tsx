@@ -40,17 +40,17 @@ const {
   useGetColumnsMock,
   useGetPinnedColumnOffsetsMock,
   useGetPinnedColumnPartitionMock,
-  useGetTableCollapsedGroupPathsMock,
   useGetTableDataMock,
   useGetTableGroupingKeysMock,
+  useGetTableToggledGroupPathsMock,
 } = vi.hoisted(() => ({
   useGetColumnSizingMock: vi.fn(),
   useGetColumnsMock: vi.fn(),
   useGetPinnedColumnOffsetsMock: vi.fn(),
   useGetPinnedColumnPartitionMock: vi.fn(),
-  useGetTableCollapsedGroupPathsMock: vi.fn(),
   useGetTableDataMock: vi.fn(),
   useGetTableGroupingKeysMock: vi.fn((): readonly string[] => []),
+  useGetTableToggledGroupPathsMock: vi.fn(),
 }));
 
 const MockTableBodyCell = vi.hoisted(() => {
@@ -161,7 +161,8 @@ vi.mock(
   '#ui/components/Table/contexts/TableConfig/expansion/selectors',
   () => ({
     useGetTableCanDrillGroups: () => false,
-    useGetTableCollapsedGroupPaths: useGetTableCollapsedGroupPathsMock,
+    useGetTableDefaultGroupFold: () => 'expanded',
+    useGetTableToggledGroupPaths: useGetTableToggledGroupPathsMock,
   }),
 );
 
@@ -180,7 +181,7 @@ const setupDefaultMocks = () => {
   ]);
   useGetColumnSizingMock.mockReturnValue({});
   useGetPinnedColumnOffsetsMock.mockReturnValue({});
-  useGetTableCollapsedGroupPathsMock.mockReturnValue(new Set<string>());
+  useGetTableToggledGroupPathsMock.mockReturnValue(new Set<string>());
   useGetTableGroupingKeysMock.mockReturnValue([]);
   useGetTableDataMock.mockReturnValue([
     { amount: 10, name: 'A' },

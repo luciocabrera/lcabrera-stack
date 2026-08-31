@@ -290,11 +290,24 @@ export type TableGroupAggregateValue = {
  */
 export type TableGroupExpansionState = {
   /**
-   * Hidden subtrees. Membership means collapsed; empty is fully expanded.
+   * Which way a group sits when nobody has touched it — the reader's Global
+   * Settings answer, arriving through `TableMetaState.defaultGroupFold`.
+   */
+  readonly defaultFold: TableGroupFold;
+  /**
+   * The groups folded the **other way from `defaultFold`**, and only those.
+   * Under the shipped `expanded` default that is the collapsed set, which is
+   * what it held when it could only mean one thing; under `collapsed` the same
+   * membership means expanded. Storing the exceptions rather than the collapsed
+   * paths is what lets a group that has not loaded yet still follow the
+   * default — the alternative needs the data before it can name a path.
    * Path keys (`resolveGroupPathKey`), never row indexes.
    */
-  readonly collapsedGroupPaths: ReadonlySet<string>;
+  readonly toggledGroupPaths: ReadonlySet<string>;
 };
+
+/** Which way a group sits before anyone has touched it. */
+export type TableGroupFold = 'collapsed' | 'expanded';
 
 /**
  * Duplicated from server `GroupingMode` (ADR-038, ADR-039). `cube` is absent:
@@ -403,6 +416,14 @@ export type TableMetaState = {
   readonly columnSelectedKey?: string;
   readonly columnSettingsSelectedTab: string;
   readonly crud?: TableCrudConfig;
+  /**
+   * The reader's Global Settings answer, read from the settings cookie by the
+   * loader and applied only where this table has expressed nothing of its own:
+   * `preferredGroupingMode` to a grouping the interaction **creates**, and
+   * `defaultGroupFold` to a group nobody has folded. Both absent means the
+   * shipped behaviour — `flat`, and every group expanded.
+   */
+  readonly defaultGroupFold?: TableGroupFold;
   readonly deleteActionPath?: string;
   readonly density: TableDensity;
   readonly drawersSyncNonce?: number;
@@ -463,6 +484,8 @@ export type TableMetaState = {
   readonly overscan: number;
   readonly persistenceKey: string;
   readonly placeholderRowCount: number;
+  /** See `defaultGroupFold`. */
+  readonly preferredGroupingMode?: TableGroupingMode;
   readonly rowHeight: number;
   readonly schemaName?: string;
   readonly tableName?: string;

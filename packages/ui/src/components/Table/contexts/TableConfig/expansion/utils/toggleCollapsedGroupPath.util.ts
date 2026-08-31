@@ -1,6 +1,6 @@
 type ToggleCollapsedGroupPathArgs = {
-  readonly collapsedGroupPaths: ReadonlySet<string>;
   readonly pathKey: string;
+  readonly toggledGroupPaths: ReadonlySet<string>;
 };
 
 /**
@@ -9,10 +9,10 @@ type ToggleCollapsedGroupPathArgs = {
  * its predecessor and no subscriber is ever notified.
  */
 export const toggleCollapsedGroupPath = ({
-  collapsedGroupPaths,
   pathKey,
+  toggledGroupPaths,
 }: ToggleCollapsedGroupPathArgs): ReadonlySet<string> => {
-  const next = new Set(collapsedGroupPaths);
+  const next = new Set(toggledGroupPaths);
 
   if (!next.delete(pathKey)) next.add(pathKey);
 

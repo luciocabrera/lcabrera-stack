@@ -1,7 +1,9 @@
-export { areAllGroupsCollapsed } from './areAllGroupsCollapsed.util';
 export { collectFoldableGroupPaths } from './collectFoldableGroupPaths.util';
 export { collectGroupLevelFoldPaths } from './collectGroupLevelFoldPaths.util';
+export { countCollapsedGroups } from './countCollapsedGroups.util';
+export { isGroupCollapsed } from './isGroupCollapsed.util';
 export { pruneCollapsedGroupPaths } from './pruneCollapsedGroupPaths.util';
+export { resolveFoldAllTarget } from './resolveFoldAllTarget.util';
 export { resolveTableGroupTree } from './resolveTableGroupTree.util';
 export { setCollapsedGroupLevel } from './setCollapsedGroupLevel.util';
 export { toggleCollapsedGroupPath } from './toggleCollapsedGroupPath.util';

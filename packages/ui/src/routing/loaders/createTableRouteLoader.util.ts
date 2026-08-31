@@ -169,6 +169,7 @@ export const createTableRouteLoader = <
       columnVisibility,
       filters,
       grouping,
+      groupingPreferences,
       metaUiFlags,
       sorting,
       totalsPlacement,
@@ -234,6 +235,7 @@ export const createTableRouteLoader = <
         title,
         ...(schemaName !== undefined && { schemaName }),
         ...meta,
+        defaultGroupFold: groupingPreferences.defaultFold,
         // Last, and unconditional — all of them. `metaUiFlags` above is read
         // from the client-controlled UI-flags cookie and validated nowhere, so
         // a route that declares no capability would otherwise inherit one from
@@ -265,6 +267,11 @@ export const createTableRouteLoader = <
         isColumnLayoutTransient,
         isUrlStateNested,
         lockedFilters: lockedFilters ?? declaredLockedFilters,
+        // Request-derived like the four above, and unconditional for the same
+        // reason: read from the settings cookie by
+        // `readTableLoaderStateFromRequest`, so a conditional spread would let a
+        // stale per-table cookie entry stand in for the reader's answer.
+        preferredGroupingMode: groupingPreferences.mode,
         totalsPlacement,
         ...capabilityMeta,
       },

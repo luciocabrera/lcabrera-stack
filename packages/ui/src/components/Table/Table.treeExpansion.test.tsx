@@ -28,7 +28,7 @@ import {
   TableFocusProvider,
 } from '#ui/components/Table/contexts';
 import { useToggleTableGroupExpansion } from '#ui/components/Table/contexts/TableConfig/expansion/actions';
-import { useGetTableCollapsedGroupPaths } from '#ui/components/Table/contexts/TableConfig/expansion/selectors';
+import { useGetTableToggledGroupPaths } from '#ui/components/Table/contexts/TableConfig/expansion/selectors';
 import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
 import { useFocusStore } from '#ui/components/Table/contexts/TableFocus/focus/useFocusStore.hook';
 import { TableWrapperContext } from '#ui/components/Table/contexts/TableWrapper/TableWrapperContext.context';
@@ -139,7 +139,7 @@ const attachScrollMetrics = (container: HTMLDivElement | null) => {
  */
 const ExpansionProbe = () => {
   const toggleExpansion = useToggleTableGroupExpansion<TestRow>();
-  const collapsedGroupPaths = useGetTableCollapsedGroupPaths();
+  const toggledGroupPaths = useGetTableToggledGroupPaths();
   const focusTarget = useFocusStore((state) => state);
 
   return (
@@ -163,7 +163,7 @@ const ExpansionProbe = () => {
         toggle second
       </button>
       <output data-testid='collapsed-paths'>
-        {JSON.stringify([...collapsedGroupPaths])}
+        {JSON.stringify([...toggledGroupPaths])}
       </output>
       <output data-testid='focus-target'>
         {JSON.stringify({

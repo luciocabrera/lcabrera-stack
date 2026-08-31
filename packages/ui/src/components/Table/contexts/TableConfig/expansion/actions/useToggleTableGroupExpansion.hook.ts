@@ -1,6 +1,7 @@
 import type { TableGroupKeyValue } from '#ui/components/Table/Table.types';
 
 import {
+  isGroupCollapsed,
   resolveTableGroupTree,
   toggleCollapsedGroupPath,
 } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
@@ -29,21 +30,31 @@ export const useToggleTableGroupExpansion = <
   const containerRef = useTableContainerRef();
 
   return (path: readonly TableGroupKeyValue[]) => {
-    const { collapsedGroupPaths } = expansionStore.get();
+    const { defaultFold, toggledGroupPaths } = expansionStore.get();
     const groupPathKey = resolveGroupPathKey(path);
 
     const nextCollapsed = toggleCollapsedGroupPath({
-      collapsedGroupPaths,
       pathKey: groupPathKey,
+      toggledGroupPaths,
     });
 
-    if (nextCollapsed.has(groupPathKey)) {
+    // Asked of the predicate, not of membership: under a `collapsed` default
+    // the set holds the groups that are *open*, so a `has` here would move
+    // focus on the expand rather than on the collapse.
+    if (
+      isGroupCollapsed({
+        defaultFold,
+        pathKey: groupPathKey,
+        toggledGroupPaths: nextCollapsed,
+      })
+    ) {
       const focusState = focusStore.get();
       // The same inputs `useTableGroupTree` derives the painted rows from, so
       // the index handed back is an index into the grid actually on screen.
       const { rows } = resolveTableGroupTree({
-        collapsedGroupPaths: nextCollapsed,
         data: dataStore.get().data,
+        defaultFold,
+        toggledGroupPaths: nextCollapsed,
       });
       applyGroupFoldFocus({
         columns: columnsStore.get().columns,
@@ -56,6 +67,6 @@ export const useToggleTableGroupExpansion = <
       });
     }
 
-    expansionStore.set({ collapsedGroupPaths: nextCollapsed });
+    expansionStore.set({ toggledGroupPaths: nextCollapsed });
   };
 };

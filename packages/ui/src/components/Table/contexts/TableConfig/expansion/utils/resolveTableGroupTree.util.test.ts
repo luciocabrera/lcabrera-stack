@@ -56,8 +56,9 @@ const noneCollapsed = new Set<string>();
 
 const tree = (rowsIn: readonly Row[]) =>
   resolveTableGroupTree({
-    collapsedGroupPaths: noneCollapsed,
     data: rowsIn,
+    defaultFold: 'expanded',
+    toggledGroupPaths: noneCollapsed,
   });
 
 describe('resolveTableGroupTree', () => {
@@ -67,8 +68,9 @@ describe('resolveTableGroupTree', () => {
     // does not have.
     const flat: readonly Row[] = [{ id: 1 }, { id: 2 }];
     const tree = resolveTableGroupTree({
-      collapsedGroupPaths: noneCollapsed,
       data: flat,
+      defaultFold: 'expanded',
+      toggledGroupPaths: noneCollapsed,
     });
 
     expect(tree.isTreeGrid).toBe(false);
@@ -87,8 +89,9 @@ describe('resolveTableGroupTree', () => {
     const mapSpy = vi.spyOn(watched, 'map');
 
     resolveTableGroupTree({
-      collapsedGroupPaths: noneCollapsed,
       data: watched,
+      defaultFold: 'expanded',
+      toggledGroupPaths: noneCollapsed,
     });
 
     expect(everySpy).toHaveBeenCalledTimes(1);
@@ -97,8 +100,9 @@ describe('resolveTableGroupTree', () => {
 
   it('leaves every row standing while nothing is collapsed', () => {
     const tree = resolveTableGroupTree({
-      collapsedGroupPaths: noneCollapsed,
       data: rows,
+      defaultFold: 'expanded',
+      toggledGroupPaths: noneCollapsed,
     });
 
     expect(tree.isTreeGrid).toBe(true);
@@ -110,8 +114,9 @@ describe('resolveTableGroupTree', () => {
 
   it('hides a collapsed group’s whole subtree and nothing beside it', () => {
     const tree = resolveTableGroupTree({
-      collapsedGroupPaths: new Set([resolveGroupPathKey(paris)]),
       data: rows,
+      defaultFold: 'expanded',
+      toggledGroupPaths: new Set([resolveGroupPathKey(paris)]),
     });
 
     // Paris survives; its two details are gone; the Berlin branch is untouched.
@@ -126,8 +131,9 @@ describe('resolveTableGroupTree', () => {
     // take Berlin/Open with it, and Berlin/Open is a group row of its own that
     // a per-row "is my path collapsed" test would have left standing.
     const tree = resolveTableGroupTree({
-      collapsedGroupPaths: new Set([resolveGroupPathKey(berlin)]),
       data: rows,
+      defaultFold: 'expanded',
+      toggledGroupPaths: new Set([resolveGroupPathKey(berlin)]),
     });
 
     expect(tree.rows).toHaveLength(4);
@@ -136,8 +142,9 @@ describe('resolveTableGroupTree', () => {
 
   it('counts a row’s position among its own siblings, not across the grid', () => {
     const tree = resolveTableGroupTree({
-      collapsedGroupPaths: noneCollapsed,
       data: rows,
+      defaultFold: 'expanded',
+      toggledGroupPaths: noneCollapsed,
     });
 
     expect(tree.rowMeta?.map((meta) => meta.posInSet)).toStrictEqual([
@@ -150,8 +157,9 @@ describe('resolveTableGroupTree', () => {
 
   it('marks a leaf as having no children, so it is never announced as expandable', () => {
     const tree = resolveTableGroupTree({
-      collapsedGroupPaths: noneCollapsed,
       data: rows,
+      defaultFold: 'expanded',
+      toggledGroupPaths: noneCollapsed,
     });
 
     expect(tree.rowMeta?.map((meta) => meta.hasChildren)).toStrictEqual([
@@ -169,8 +177,9 @@ describe('resolveTableGroupTree', () => {
     // whose children are out of sight is exactly the row that must keep
     // announcing `aria-expanded`.
     const tree = resolveTableGroupTree({
-      collapsedGroupPaths: new Set([resolveGroupPathKey(paris)]),
       data: rows,
+      defaultFold: 'expanded',
+      toggledGroupPaths: new Set([resolveGroupPathKey(paris)]),
     });
 
     expect(tree.rowMeta?.[0]?.hasChildren).toBe(true);
@@ -192,13 +201,14 @@ describe('resolveTableGroupTree', () => {
     ];
 
     const tree = resolveTableGroupTree({
-      collapsedGroupPaths: noneCollapsed,
       data: [
         groupRow(spain),
         groupRow(france),
         subtotalRow(emea),
         subtotalRow([]),
       ],
+      defaultFold: 'expanded',
+      toggledGroupPaths: noneCollapsed,
     });
 
     // Ancestry from the path, so a parent emitted last is still a parent.
@@ -233,8 +243,9 @@ describe('resolveTableGroupTree', () => {
     ];
 
     const tree = resolveTableGroupTree({
-      collapsedGroupPaths: new Set([resolveGroupPathKey(emea)]),
       data: [groupRow(spain), subtotalRow(emea), subtotalRow([])],
+      defaultFold: 'expanded',
+      toggledGroupPaths: new Set([resolveGroupPathKey(emea)]),
     });
 
     // Its child goes, it stays, and it still reports the child it is hiding.
@@ -245,12 +256,13 @@ describe('resolveTableGroupTree', () => {
 
   it('is unmoved by a collapsed path no row carries', () => {
     const tree = resolveTableGroupTree({
-      collapsedGroupPaths: new Set([
+      data: rows,
+      defaultFold: 'expanded',
+      toggledGroupPaths: new Set([
         resolveGroupPathKey([
           { columnKey: 'city', label: 'Madrid', value: 'Madrid' },
         ]),
       ]),
-      data: rows,
     });
 
     expect(tree.rows).toHaveLength(rows.length);
@@ -286,8 +298,9 @@ describe('resolveTableGroupTree', () => {
       expect(foldableGroupPaths.has(parisKey)).toBe(true);
 
       const { rows: standing } = resolveTableGroupTree({
-        collapsedGroupPaths: foldableGroupPaths,
         data: rows,
+        defaultFold: 'expanded',
+        toggledGroupPaths: foldableGroupPaths,
       });
 
       expect(
@@ -331,5 +344,94 @@ describe('resolveTableGroupTree', () => {
         rowMeta?.[0]?.levelDisclosures.map(({ columnKey }) => columnKey),
       ).toStrictEqual(['city']);
     });
+  });
+});
+
+const collapsedTree = (toggled: readonly string[] = []) =>
+  resolveTableGroupTree({
+    data: rows,
+    defaultFold: 'collapsed',
+    toggledGroupPaths: new Set(toggled),
+  });
+
+describe('resolveTableGroupTree under a collapsed default', () => {
+  it('hides every subtree with nothing in the set at all', () => {
+    // The property the exception set exists for: no path is enumerated, no data
+    // is consulted to name one, and the fold is right on the first paint.
+    expect(collapsedTree().rows).toStrictEqual([
+      groupRow(paris),
+      groupRow(berlin),
+    ]);
+  });
+
+  it('opens the one group named in the set, and only its own level', () => {
+    expect(collapsedTree([resolveGroupPathKey(berlin)]).rows).toStrictEqual([
+      groupRow(paris),
+      groupRow(berlin),
+      groupRow(berlinOpen),
+    ]);
+  });
+
+  it('needs the ancestor open too, so opening a child alone shows nothing', () => {
+    expect(collapsedTree([resolveGroupPathKey(berlinOpen)]).rows).toStrictEqual(
+      [groupRow(paris), groupRow(berlin)],
+    );
+  });
+
+  it('reaches the detail rows once the whole chain is open', () => {
+    expect(
+      collapsedTree([
+        resolveGroupPathKey(berlin),
+        resolveGroupPathKey(berlinOpen),
+      ]).rows,
+    ).toStrictEqual([
+      groupRow(paris),
+      groupRow(berlin),
+      groupRow(berlinOpen),
+      { id: 3 },
+    ]);
+  });
+
+  it('announces a folded group as collapsed, not as expanded', () => {
+    // The gap that let two raw membership reads through review: the cases above
+    // assert `rows` and `foldableGroupPaths`, and both are right while
+    // `rowMeta.isExpanded` is inverted. This value reaches `aria-expanded` on
+    // the row and the chevron's direction, so a grid that landed folded because
+    // the reader asked it to would announce every group as open.
+    const expanded = collapsedTree().rowMeta?.map((meta) => meta.isExpanded);
+
+    expect(expanded).toStrictEqual([false, false]);
+  });
+
+  it('points the level chevrons the folded way too', () => {
+    const disclosures = collapsedTree().rowMeta?.flatMap(
+      ({ levelDisclosures }) =>
+        levelDisclosures.map(({ isExpanded }) => isExpanded),
+    );
+
+    expect(disclosures?.every((isExpanded) => !isExpanded)).toBe(true);
+  });
+
+  it('turns one group’s chevron around when the set opens it', () => {
+    const rowMeta = collapsedTree([resolveGroupPathKey(berlin)]).rowMeta ?? [];
+    const berlinMeta = rowMeta.find(
+      ({ pathKey }) => pathKey === resolveGroupPathKey(berlin),
+    );
+    const parisMeta = rowMeta.find(
+      ({ pathKey }) => pathKey === resolveGroupPathKey(paris),
+    );
+
+    expect(berlinMeta?.isExpanded).toBe(true);
+    expect(parisMeta?.isExpanded).toBe(false);
+  });
+
+  it('finds the same foldable groups either way, since that is structural', () => {
+    expect(collapsedTree().foldableGroupPaths).toStrictEqual(
+      resolveTableGroupTree({
+        data: rows,
+        defaultFold: 'expanded',
+        toggledGroupPaths: noneCollapsed,
+      }).foldableGroupPaths,
+    );
   });
 });

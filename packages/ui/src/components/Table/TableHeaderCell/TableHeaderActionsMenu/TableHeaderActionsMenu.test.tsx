@@ -99,7 +99,8 @@ vi.mock(
   '#ui/components/Table/contexts/TableConfig/expansion/selectors',
   () => ({
     useGetTableCanDrillGroups: () => false,
-    useGetTableCollapsedGroupPaths: () => NO_COLLAPSED_GROUP_PATHS,
+    useGetTableDefaultGroupFold: () => 'expanded',
+    useGetTableToggledGroupPaths: () => NO_COLLAPSED_GROUP_PATHS,
   }),
 );
 

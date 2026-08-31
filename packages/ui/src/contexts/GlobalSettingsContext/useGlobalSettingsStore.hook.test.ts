@@ -26,6 +26,7 @@ describe('useGlobalSettingsStore', () => {
   beforeEach(() => {
     settingsStoreRef.current = createMockStore<GlobalSettingsState | undefined>(
       {
+        grouping: {},
         navigation: {
           collapsed: 'expanded',
           size: 'small',
@@ -46,6 +47,7 @@ describe('useGlobalSettingsStore', () => {
 
     act(() => {
       settingsStoreRef.current.set({
+        grouping: {},
         navigation: {
           collapsed: 'expanded',
           size: 'large',
