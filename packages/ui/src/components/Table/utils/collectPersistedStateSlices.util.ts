@@ -37,21 +37,19 @@ export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
       continue;
     }
 
-    let parsed: { value: unknown; version: number };
-
     try {
       const source = transformRaw ? transformRaw(rawValue) : rawValue;
-      parsed = JSON.parse(source) as { value: unknown; version: number };
+      const parsed = JSON.parse(source) as { value: unknown; version: number };
+
+      if (parsed.version === PERSISTENCE_VERSION) {
+        result[slice] = (
+          slice === 'columnVisibility' && Array.isArray(parsed.value)
+            ? new Set(parsed.value as string[])
+            : parsed.value
+        ) as never;
+      }
     } catch {
       continue;
-    }
-
-    if (parsed.version === PERSISTENCE_VERSION) {
-      result[slice] = (
-        slice === 'columnVisibility' && Array.isArray(parsed.value)
-          ? new Set(parsed.value as string[])
-          : parsed.value
-      ) as never;
     }
   }
 
