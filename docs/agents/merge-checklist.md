@@ -4,7 +4,7 @@ Verify every item before merging. **If any item fails, abort the merge.**
 
 **Where `main` requires a merge queue, "merging" is asking the queue.** The
 ruleset rule that switches that on is applied separately from the workflows that
-serve it ([ADR-097](../decisions/ADR-097-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)),
+serve it ([ADR-098](../decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)),
 so read which side you are on rather than assuming — `gh pr view <n> --json
 state` will not tell you, but `isMergeQueueEnabled` will
 ([the probe](../tooling/merge-queue.md#what-merge-means-now)). `gh pr merge <n>

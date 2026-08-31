@@ -925,7 +925,7 @@ forever with nothing saying why, so the trigger has to be on `main` before the
 pull-request base on a pull request and the merge group's parent commit in the
 queue, so a diff-scoped gate compares against the tree the change will actually
 land on. [`docs/tooling/merge-queue.md`](docs/tooling/merge-queue.md) is the whole
-mechanism, [ADR-097](docs/decisions/ADR-097-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)
+mechanism, [ADR-098](docs/decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)
 is why.
 
 [`deps-audit.yml`](.github/workflows/deps-audit.yml) is **scheduled**: it runs

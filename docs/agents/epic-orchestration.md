@@ -212,7 +212,7 @@ required check against the real merge result; where no queue is required it
 squash-merges then and there, against whatever base the checks last ran on.
 [`merge-queue.md`](../tooling/merge-queue.md) is the mechanism, and the ruleset
 rule that switches it on is applied separately from the workflows that serve it
-([ADR-097](../decisions/ADR-097-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)),
+([ADR-098](../decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)),
 so **read which side you are on rather than assuming**:
 
 ```bash
@@ -249,7 +249,7 @@ Hand it over only when [the merge bar](#3-the-merge-bar) is fully met, then:
   that re-runs a whole-tree gate against the base this merge just created, and a
   wave is exactly where two PRs pass separately and collide — #1034 is this
   workflow's own near-miss. **`true` → do not**: the queue builds each entry on
-  the live base itself, which is why it was chosen (ADR-097), and an update costs
+  the live base itself, which is why it was chosen (ADR-098), and an update costs
   a full CI run and a fresh review request for nothing.
 - either way, a PR left `CONFLICTING` is yours to fix — it **silently skips every
   `pull_request` workflow**, its checks sit "pending" forever, and nothing says

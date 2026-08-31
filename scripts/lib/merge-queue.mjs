@@ -10,7 +10,7 @@
  *
  * What the exported values mean, why the range is the merge group's PARENT
  * commit, and why the environment is written as heredocs, are in
- * `docs/tooling/merge-queue.md`; the decision is ADR-097.
+ * `docs/tooling/merge-queue.md`; the decision is ADR-098.
  *
  * A range is refused unless it spans something. An absent or collapsed one is
  * not a smaller check, it is a green one: `git rev-list --no-merges A..A` walks

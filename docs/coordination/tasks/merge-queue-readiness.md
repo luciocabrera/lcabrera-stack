@@ -19,7 +19,7 @@ area:
   - docs/agents/epic-orchestration.md
   - docs/tooling/merge-queue.md
   - docs/tooling/copilot-review-gate.md
-  - docs/decisions/ADR-097-*
+  - docs/decisions/ADR-098-*
   - docs/README.md
   - COMMANDS.md
   - .github/skills/lint-toolchain/SKILL.md
@@ -64,7 +64,7 @@ blocks every merge.
   ```
 
   Every hit it returns is one of three things. The **operator lane**, which now
-  says the three are unowned: `.claude/pr-queue-policy.md` §1 and §4, ADR-097's
+  says the three are unowned: `.claude/pr-queue-policy.md` §1 and §4, ADR-098's
   consequences, `docs/tooling/merge-queue.md`, the apply prompt in
   `scripts/lib/pr-queue-execute.mjs`, and `COMMANDS.md`. The **by-hand lane**,
   which correctly waits on `state: MERGED` before doing any of them:
@@ -76,9 +76,10 @@ blocks every merge.
   re-running the grep, not by taking it
 
 - Blockers: none. The `docs/decisions/**` overlap warning against
-  grouped-column-scope (#1033) is real and already resolved by content: that
-  branch took ADR-096, so this one is ADR-097. The glob here is a single file and
-  cannot be narrowed further.
+  grouped-column-scope (#1033) is real and already resolved by content, twice:
+  that branch took ADR-096, then the fold-control branch (#1042) merged ADR-097
+  while this one was in review, so this one renumbered to ADR-098. The glob here
+  is a single file and cannot be narrowed further.
 - Next: the owner applies the `merge_queue` rule to ruleset 19141543 (payload and
   the drop of `SonarCloud Code Analysis` are in `docs/tooling/merge-queue.md`),
   then runs the #1034 two-PR repro against the live queue. #1034 stays open until

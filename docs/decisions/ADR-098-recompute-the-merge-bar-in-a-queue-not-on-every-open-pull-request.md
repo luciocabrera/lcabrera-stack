@@ -3,7 +3,7 @@ governs:
   - repository
 ---
 
-# ADR-097 — Recompute the merge bar in a queue, not on every open pull request
+# ADR-098 — Recompute the merge bar in a queue, not on every open pull request
 
 **Status:** Accepted
 

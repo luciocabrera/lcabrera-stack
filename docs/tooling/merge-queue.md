@@ -6,7 +6,7 @@ to read a pull request the queue throws out.
 
 The decision — a merge queue rather than strict required checks or a curated
 re-run list — is
-[ADR-097](../decisions/ADR-097-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md).
+[ADR-098](../decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md).
 This document is the operational half.
 
 ## What it is for

@@ -450,7 +450,7 @@ reported blocks every pull request, including the one that would fix it.
 the merge group's own commit — not the pull request head this status is published
 on — so a status that reports only on the head is one the queue waits for
 forever. The trigger therefore goes on before the `merge_queue` rule does
-([ADR-097](../decisions/ADR-097-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)):
+([ADR-098](../decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md)):
 the workflow also runs on `merge_group`,
 resolves the pull request from the queue branch's ref, and publishes the same
 verdict about the same head on the merge group's commit. The verdict is not

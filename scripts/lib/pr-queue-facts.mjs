@@ -13,7 +13,7 @@
  * queue has ejected keeps its own checks green — the failure belongs to the
  * merge group's commit — so every rollup reads it as ready. `summarizeQueue` is
  * what makes E11 and S11 decidable; `docs/tooling/merge-queue.md` has the shape
- * of that failure and ADR-097 the decision.
+ * of that failure and ADR-098 the decision.
  *
  * Governed by .claude/rules/scripts.md. The rules it serves are §2 and §6 of
  * .claude/pr-queue-policy.md.

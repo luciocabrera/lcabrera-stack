@@ -17,7 +17,7 @@
  * is what stops a previous commit's SUCCESS being accepted, since a task carries
  * no commit sha.
  * Why the split, and which parameters SonarCloud ignores unread, is in
- * `docs/decisions/ADR-097-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md`.
+ * `docs/decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md`.
  */
 
 const WAIT_TIMEOUT_MS = 5 * 60 * 1000;

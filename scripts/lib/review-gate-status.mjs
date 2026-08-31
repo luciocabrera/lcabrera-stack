@@ -17,7 +17,7 @@
  * payload names no pull request, and the commit the queue reads a required
  * context against is the merge group's, not the pull request's head. Both are
  * resolved here, from `./merge-queue.mjs`; `docs/tooling/merge-queue.md` says
- * why, and ADR-097 is the decision.
+ * why, and ADR-098 is the decision.
  *
  * Governed by .claude/rules/scripts.md.
  */

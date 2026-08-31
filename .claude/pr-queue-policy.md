@@ -22,7 +22,7 @@ against the real merge result; where no queue is required, the same command
 squash-merges on the spot. The operator never chooses between them and never
 passes `--admin`, which would go past both. Why the queue was chosen over strict
 required checks is
-[ADR-097](../docs/decisions/ADR-097-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md);
+[ADR-098](../docs/decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md);
 what it changes for a reader is
 [`docs/tooling/merge-queue.md`](../docs/tooling/merge-queue.md).
 
