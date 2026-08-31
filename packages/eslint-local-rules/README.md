@@ -439,11 +439,12 @@ declaration is a package's published surface, so the note reaches an installer's
 editor and the API-surface snapshot, and a precondition, a default or an
 encoding is not derivable from the member's type. The shape is checked, not
 asked for: a single line, no longer than `memberNoteMaxLength`, naming no
-ADR by number. Only that citation is checked. An issue or pull request reference
-is not, and neither is a bare `#123`: a colour token, a port and an ordinal take
-the same shape, and every pattern tried for them refused notes that cite nothing
-— refusing a note reading `#000` is the worse error, so review judges the rest — the rationale belongs in the record, and an installer cannot open
-one. The exemption covers the member, not the type, so a comment above an
+ADR by number, because a note pointing at a record an installer cannot open is
+the failure the shape can catch mechanically. An issue or pull request reference
+is not checked, and neither is a bare `#123`: a colour token, a port and an
+ordinal take the same shape, and every pattern tried for them refused notes that
+cite nothing — refusing a note reading `#000` is the worse error, so review
+judges the rest. The exemption covers the member, not the type, so a comment above an
 exported type is still reported, and so is one inside a type the module does not
 export.
 

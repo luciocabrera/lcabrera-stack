@@ -24,8 +24,8 @@ describes the module rather than a declaration. A tool directive is not prose, a
 recognised prefixes is the `directives` option, and it earns its place in two
 ordinary positions the rule reports: a disable comment directly above the
 declaration it covers, and a coverage or type-checker directive inside a body. A note on a member of an exported type is exempt
-while it is a single line within `memberNoteMaxLength` naming no ADR and no
-issue, because that member is a published surface and a precondition, a default
+while it is a single line within `memberNoteMaxLength` naming no ADR by
+number, because that member is a published surface and a precondition, a default
 or an encoding is not derivable from its type; a longer or record-citing note, a
 comment above the type, and one inside a type the module does not export are all
 still reported. An annotated JSDoc

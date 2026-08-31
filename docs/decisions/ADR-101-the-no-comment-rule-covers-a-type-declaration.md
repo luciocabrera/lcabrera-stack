@@ -74,7 +74,7 @@ reported, and so is one inside a type the module does not export, because
 neither has that reader. What stays is one line stating the fact the type cannot
 — not a rationale, and not a pointer to a record an installer cannot open. That
 shape is enforced rather than requested: a member note is exempt only while it
-is a single line within `memberNoteMaxLength` naming no ADR and no issue.
+is a single line within `memberNoteMaxLength` naming no ADR by number.
 Keying the exemption on the export alone left the shape to review, which is the
 arrangement every gate in this repository exists to replace.
 
