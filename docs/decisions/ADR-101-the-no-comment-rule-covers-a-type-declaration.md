@@ -54,14 +54,28 @@ repository forbids for other reasons), an `enum`, a class, a method, and a
 like a function's ([#850](https://github.com/luciocabrera/lcabrera-stack/issues/850)).
 
 **`local-rules/no-explanatory-comments` in `@lcabrera/eslint-plugin` is the
-enforcement**, turned on by both shared flat configs for `.ts`/`.tsx` sources.
+enforcement**, turned on by both shared flat configs for `.ts`, `.tsx`, `.js`,
+`.mjs` and `.cjs` sources.
 It visits `TSTypeAliasDeclaration`, `TSInterfaceDeclaration` and
 `TSEnumDeclaration` for both positions, so a comment above a type alias and a
 comment on one of its members are each reported, and its colocated suite carries
 a fixture for each.
 
-**The exemptions are unchanged**, and they are what keeps the third position
-from being a trap. The file-level header stays — the file's **first comment
+**A fourth exemption comes with the third position: a note on a member of an
+exported type.** The third position is the one that reaches outside this
+repository. An exported descriptor is a package's published surface, and a
+member's precondition, default or encoding is not derivable from its type — an
+installer reads it in their editor and in the API-surface snapshot, and has none
+of this repository's records. Reporting those notes deleted 100 of them from
+five packages' published types before the gate caught it, which is the evidence
+this position needed its own carve-out rather than the general rule. The
+exemption is the member, not the type: a comment above an exported type is still
+reported, and so is one inside a type the module does not export, because
+neither has that reader. What stays is one line stating the fact the type cannot
+— not a rationale, and not a pointer to a record an installer cannot open.
+
+**The other three exemptions are unchanged**, and they are what keeps the third
+position from being a trap. The file-level header stays — the file's **first comment
 block**, in a source file of any extension, describing the module rather than a
 declaration. `.claude/rules/scripts.md` is where that header is additionally
 **mandatory**, for a `.mjs`/`.cjs` script; it is permitted everywhere, and that

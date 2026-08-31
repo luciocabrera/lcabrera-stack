@@ -459,9 +459,11 @@ which also states what the rule costs and which paragraph of
 [ADR-088](docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)
 it corrects. `local-rules/no-explanatory-comments` in
 `@lcabrera/eslint-plugin` enforces it, and both shared flat configs turn it on
-for `.ts`/`.tsx` sources — so a comment in either position is a lint error, not a
-review note. The rule's own README states the three positions it exempts and the
-two options that widen them. It stops at the eslint pass's reach: a workspace
+for `.ts`, `.tsx`, `.js`, `.mjs` and `.cjs` sources — so a comment in any of the
+three positions is a lint error, not a review note. The rule's own README states the four positions it exempts and the
+two options that widen them. A one-line note on a member of an exported type is
+one of them: that member is a published surface, so state the precondition, the
+default or the encoding there and nothing else. It stops at the eslint pass's reach: a workspace
 whose sources sit under `scripts/` is globally ignored by those configs, so a
 `.mjs` script there is held to this rule by review alone.
 

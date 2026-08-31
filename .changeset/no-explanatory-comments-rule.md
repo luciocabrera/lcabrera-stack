@@ -12,19 +12,22 @@ terms as prose in a function body, and "above a declaration" is the general form
 
 `local-rules/no-explanatory-comments` is the new rule, and both shared flat
 configs (`eslint-custom-rules` and `eslint-base-custom-rules`) now turn it on for
-`.ts`/`.tsx` sources. A name, a signature and a type already say what the code
+`.ts`, `.tsx`, `.js`, `.mjs` and `.cjs` sources. A name, a signature and a type already say what the code
 is; prose repeating them is a second copy of a fact kept where nothing checks it,
 which is how a helper came to advertise a storage reader that had never existed
 and two later designs came to offer that reader as a free fallback, and how a
 command descriptor went on naming the derivation it had stopped using.
 
-Three positions are exempt, each decidable from the source. The file-level
-header — every comment before the file's first token — describes the module
-rather than a declaration. A tool directive is not prose, and the list of
+Four positions are exempt, each decidable from the source. The file-level
+header — the file's first comment block, adjacent `//` lines counting as one —
+describes the module rather than a declaration. A tool directive is not prose, and the list of
 recognised prefixes is the `directives` option, and it earns its place in two
 ordinary positions the rule reports: a disable comment directly above the
-declaration it covers, and a coverage or type-checker directive inside a body. An annotated JSDoc block is exempt in a JavaScript file
-and only there, because a published `.mjs` package's `.d.mts` is derived from it
+declaration it covers, and a coverage or type-checker directive inside a body. A one-line note on a member of an exported type is
+exempt, because that member is a published surface and a precondition, a default
+or an encoding is not derivable from its type; a comment above the type, or
+inside one the module does not export, is still reported. An annotated JSDoc
+block is exempt in a JavaScript file and only there, because a published `.mjs` package's `.d.mts` is derived from it
 while a TypeScript declaration carries its own types; the recognised tags are the
 `annotationTags` option. Setting either option replaces its default list.
 
