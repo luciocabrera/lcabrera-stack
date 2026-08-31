@@ -14,15 +14,33 @@ import type { DraggableItem } from '#ui/components/DraggableList';
 
 type MockDraggableListProps = {
   readonly items: readonly DraggableItem[];
+  readonly onOrderChange?: (items: DraggableItem[]) => void;
 };
 
 type MockSortItemContentProps = {
   readonly item: { readonly label: string };
 };
 
-const { columnsRef, mockSetColumnsSortings, sortingRef } = vi.hoisted(() => ({
+const {
+  aggregatesRef,
+  columnsRef,
+  groupingKeysRef,
+  mockSetColumnsSortings,
+  reorderRef,
+  sortingRef,
+} = vi.hoisted(() => ({
+  aggregatesRef: {
+    current: [] as readonly {
+      readonly columnKey: string;
+      readonly fn: string;
+    }[],
+  },
   columnsRef: { current: [] as readonly Record<string, unknown>[] },
+  groupingKeysRef: { current: [] as readonly string[] },
   mockSetColumnsSortings: vi.fn(),
+  reorderRef: {
+    current: undefined as ((items: DraggableItem[]) => void) | undefined,
+  },
   sortingRef: {
     current: [] as readonly {
       readonly columnKey: string;
@@ -32,13 +50,17 @@ const { columnsRef, mockSetColumnsSortings, sortingRef } = vi.hoisted(() => ({
 }));
 
 vi.mock('#ui/components/DraggableList', () => ({
-  DraggableList: ({ items }: MockDraggableListProps) => (
-    <ul data-testid='sort-items'>
-      {items.map((item) => (
-        <li key={item.id}>{item.content}</li>
-      ))}
-    </ul>
-  ),
+  DraggableList: ({ items, onOrderChange }: MockDraggableListProps) => {
+    reorderRef.current = onOrderChange;
+
+    return (
+      <ul data-testid='sort-items'>
+        {items.map((item) => (
+          <li key={item.id}>{item.content}</li>
+        ))}
+      </ul>
+    );
+  },
 }));
 
 vi.mock(
@@ -57,6 +79,8 @@ vi.mock('../../TableDrawerContext/actions', () => ({
 
 vi.mock('../../TableDrawerContext/selectors', () => ({
   useGetColumnsSorting: () => sortingRef.current,
+  useGetGroupingAggregates: () => aggregatesRef.current,
+  useGetGroupingKeys: () => groupingKeysRef.current,
 }));
 
 vi.mock('./SortItemContent', () => ({
@@ -78,6 +102,8 @@ beforeEach(() => {
     { isSortable: false, key: 'notes', label: 'Notes' },
   ];
   sortingRef.current = [];
+  aggregatesRef.current = [];
+  groupingKeysRef.current = [];
 });
 
 afterEach(() => {
@@ -154,5 +180,57 @@ describe('a measure among the sorts', () => {
       'Sum of Total Amount',
       'Minimum of Total Amount',
     ]);
+  });
+});
+
+describe('under a grouping', () => {
+  beforeEach(() => {
+    columnsRef.current = [
+      { isSortable: true, key: 'region', label: 'Region' },
+      { isSortable: true, key: 'email', label: 'Email' },
+      { dataType: 'number', key: 'total_amount', label: 'Total Amount' },
+    ];
+  });
+
+  it('lists only the terms the read applies', () => {
+    aggregatesRef.current = [{ columnKey: 'total_amount', fn: 'sum' }];
+    groupingKeysRef.current = ['region'];
+    sortingRef.current = [
+      { columnKey: 'email', direction: 'asc' },
+      { columnKey: 'region', direction: 'desc' },
+      { columnKey: 'total_amount:sum', direction: 'desc' },
+    ];
+
+    render(<ActiveSortList />);
+
+    expect(listedLabels()).toEqual(['Region', 'Sum of Total Amount']);
+  });
+
+  it('keeps the hidden sort in state, so clearing the grouping brings it back', () => {
+    groupingKeysRef.current = ['region'];
+    sortingRef.current = [
+      { columnKey: 'email', direction: 'asc' },
+      { columnKey: 'region', direction: 'desc' },
+    ];
+
+    render(<ActiveSortList />);
+
+    reorderRef.current?.([{ content: undefined, id: 'region' }]);
+
+    expect(mockSetColumnsSortings).toHaveBeenCalledExactlyOnceWith([
+      { columnKey: 'region', direction: 'desc' },
+      { columnKey: 'email', direction: 'asc' },
+    ]);
+  });
+
+  it('lists every sort again once no declared key is grouped', () => {
+    sortingRef.current = [
+      { columnKey: 'email', direction: 'asc' },
+      { columnKey: 'region', direction: 'desc' },
+    ];
+
+    render(<ActiveSortList />);
+
+    expect(listedLabels()).toEqual(['Email', 'Region']);
   });
 });

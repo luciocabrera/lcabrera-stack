@@ -58,3 +58,21 @@ that caused the shimmer bug in the first place. If you call
 `useVirtualSelectDropdown` or `useVirtualSelectTrigger` directly, rename that
 member; `VirtualSelect` itself is unchanged apart from the added prop. These
 packages are `0.x`, so a break ships as a `minor`.
+
+**The Grouping tab's toolbar matches every other tab's.** Its clear carried the
+header menu's `UngroupRowsIcon` where Filters, Sorting and Columns all carry
+`EraserIcon`, and it had no reset at all — on the stated grounds that grouping
+has no cookie-persisted default to reset _to_. That was never what reset means
+here: `useResetSorting` and its siblings re-seed the draft from the **applied**
+table state, which grouping has like everything else. **`Reset Grouping`** is
+now beside the clear, and `useResetGrouping` is exported from the drawer's
+actions.
+
+**The Sorting tab drops the columns a grouped read cannot order.** `toGroupSort`
+keeps only the terms naming a group key or a staged measure and silently drops
+the rest, so a grid grouped by two keys was offering every other declared column
+as a sort that would never run — and `Sort by Column Order` staged all of them
+at once. Both Sorting surfaces now read one predicate. Note that a measured
+column is out too: summing `total_amount` puts `total_amount:sum` in the read,
+not bare `total_amount`. The entries are filtered from the **view** only —
+they stay in `sorting`, so clearing the grouping brings them back (ADR-102).

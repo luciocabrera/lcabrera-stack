@@ -17,6 +17,7 @@ import type { ActiveSortListProps } from './ActiveSortList.types';
 
 import { useSetColumnsSortings } from '../../TableDrawerContext/actions';
 import { useGetColumnsSorting } from '../../TableDrawerContext/selectors';
+import { useGroupedSortScope } from '../hooks';
 import { SortingSectionToolbar } from '../SortingSectionToolbar';
 import { styles } from './ActiveSortList.stylex';
 import { SortItemContent } from './SortItemContent';
@@ -25,6 +26,7 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
   const columns = useGetColumns();
   const sorting = useGetColumnsSorting();
   const onSortChange = useSetColumnsSortings();
+  const isInSortScope = useGroupedSortScope();
 
   // Filter to only sortable columns
   const sortableColumns = columns.filter(
@@ -44,13 +46,22 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
   const isMeasure = (columnKey: string) =>
     resolveAggregateColumnLabel({ columnKey, columns }) !== undefined;
 
+  // Grouped, `toGroupSort` keeps only the terms naming a group key or a staged
+  // measure and silently drops the rest, so any other sort here is a row that
+  // orders nothing. It stays in state — clearing the grouping brings it back —
+  // and is only kept out of the list and out of the reorder.
+  const scopedSorting = sorting.filter((sort) => isInSortScope(sort.columnKey));
+  const unscopedSorting = sorting.filter(
+    (sort) => !isInSortScope(sort.columnKey),
+  );
+
   // A measure always sorts innermost, whatever its position here:
   // `buildGroupOrderByClause` splices every aggregate term in at the last group
   // key. Showing one above a column sort would state a precedence the read does
   // not apply, so the two are kept as blocks in that order.
   const sortItems: SortItem[] = [
-    ...sorting.filter((sort) => !isMeasure(sort.columnKey)),
-    ...sorting.filter((sort) => isMeasure(sort.columnKey)),
+    ...scopedSorting.filter((sort) => !isMeasure(sort.columnKey)),
+    ...scopedSorting.filter((sort) => isMeasure(sort.columnKey)),
   ].map((sort) => toSortItem(sort));
 
   const handleRemoveSort = (columnKey: string) => {
@@ -75,7 +86,7 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
         direction: existingSort?.direction ?? 'asc',
       };
     });
-    onSortChange(newSorting);
+    onSortChange([...newSorting, ...unscopedSorting]);
   };
 
   // Convert sort items to draggable items

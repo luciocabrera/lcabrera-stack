@@ -1,19 +1,21 @@
-import { CLEAR_GROUPING_COMMAND } from '#ui/components/Table/commands';
+import { EraserIcon, RefreshIcon } from '#ui/components/Icons';
 import { useGetTableIsGroupingLocked } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 
 import type { SectionToolbarButton } from '../../SectionToolbar';
 import type { GroupingSectionToolbarProps } from './GroupingSectionToolbar.types';
 
 import { SectionToolbar } from '../../SectionToolbar';
-import { useClearGrouping } from '../../TableDrawerContext/actions';
+import {
+  useClearGrouping,
+  useResetGrouping,
+} from '../../TableDrawerContext/actions';
 import { useGetGroupingKeys } from '../../TableDrawerContext/selectors';
 
-/**
- * The grouping section's toolbar, in both the header (compact) and footer (labelled)
- * variants the drawer-section pattern defines.
- * It carries the clear command and no reset: grouping has no cookie-persisted default to
- * reset *to*.
- */
+const GROUPING_TOOLBAR = {
+  clear: { label: 'Clear Grouping' },
+  reset: { label: 'Reset Grouping' },
+} as const;
+
 export const GroupingSectionToolbar = ({
   isBusy = false,
   variant = 'footer',
@@ -21,17 +23,24 @@ export const GroupingSectionToolbar = ({
   const groupingKeys = useGetGroupingKeys();
   const isGroupingLocked = useGetTableIsGroupingLocked();
   const clearGrouping = useClearGrouping();
+  const resetGrouping = useResetGrouping();
 
   // Clearing is the largest edit of all, so the lock reaches it first (#578).
   if (isGroupingLocked) return;
 
   const buttons: readonly SectionToolbarButton[] = [
     {
-      icon: CLEAR_GROUPING_COMMAND.icon,
+      icon: EraserIcon,
       isDisabled: groupingKeys.length === 0,
-      key: CLEAR_GROUPING_COMMAND.label,
-      label: CLEAR_GROUPING_COMMAND.label,
+      key: GROUPING_TOOLBAR.clear.label,
+      label: GROUPING_TOOLBAR.clear.label,
       onClick: clearGrouping,
+    },
+    {
+      icon: RefreshIcon,
+      key: GROUPING_TOOLBAR.reset.label,
+      label: GROUPING_TOOLBAR.reset.label,
+      onClick: resetGrouping,
     },
   ];
 
