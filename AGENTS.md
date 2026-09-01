@@ -426,7 +426,8 @@ signature and the types already say what the code is, and an explanation next to
 code is the copy nothing keeps true — which is the failure every gate in this
 file exists to catch. If the code can be made clearer instead, do that.
 
-**Two exemptions, both narrow.** The **file-level header** stays: the file's
+**The exemptions are narrow, and the rule's own README is the list.** Two of
+them bind what you write here. The **file-level header** stays: the file's
 **first comment block**, in a source file of any extension, saying why the module
 exists rather than what a declaration below it is.
 [`.claude/rules/scripts.md`](.claude/rules/scripts.md) is where that header is
@@ -438,9 +439,11 @@ one below it is a comment about the declaration under it, and is reported. And *
 build reads** stays: `@param`, `@returns`, `@type` and the rest of the
 annotations a tool consumes, because a published `.mjs` package's declarations
 are derived from them and dropping one publishes an option defaulting to `[]` as
-`never[]` ([`packages/CLAUDE.md`](packages/CLAUDE.md) owns that contract). The
-second exemption covers the **annotations**, not prose that happens to share
-their block: the test is whether removing the text changes what a tool emits.
+`never[]` ([`packages/CLAUDE.md`](packages/CLAUDE.md) owns that contract). That
+exemption covers the **annotations**, not prose that happens to share
+their block: the test is whether removing the text changes what a tool emits —
+which is also why `@deprecated` and `@internal` stay in a `.ts` file, where the
+rest of the annotations do not.
 
 **The explanation still has to live somewhere, and there are two homes.** A
 decision — why this approach and not the one that looks equally reasonable —
@@ -460,10 +463,12 @@ which also states what the rule costs and which paragraph of
 it corrects. `local-rules/no-explanatory-comments` in
 `@lcabrera/eslint-plugin` enforces it, and both shared flat configs turn it on
 for `.ts`, `.tsx`, `.js`, `.mjs` and `.cjs` sources — so a comment in any of the
-three positions is a lint error, not a review note. The rule's own README states the four positions it exempts and the
-two options that widen them. A one-line note on a member of an exported type is
-one of them: that member is a published surface, so state the precondition, the
-default or the encoding there and nothing else. It stops at the eslint pass's reach: a workspace
+three positions is a lint error, not a review note. The rule's own README states every position it exempts and the
+options that widen them, including the two above. A one-line note on a member of an exported type is
+another: that member is a published surface, so state the precondition, the
+default or the encoding there and nothing else. "Exported" is reachability
+within the module, not the keyword — a note on a member of an unexported type
+that an exported one intersects is still read from an installer's editor. It stops at the eslint pass's reach: a workspace
 whose sources sit under `scripts/` is globally ignored by those configs, so a
 `.mjs` script there is held to this rule by review alone.
 

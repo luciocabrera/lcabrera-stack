@@ -418,7 +418,7 @@ export const mount = () => {
 export { mount as default };
 ```
 
-Four positions are exempt, each for a reason the rule can check.
+These positions are exempt, each for a reason the rule can check.
 
 The **file-level header** — the file's first comment block, with adjacent `//`
 lines counting as one block and a shebang not starting it — stays, because it
@@ -434,6 +434,13 @@ inside a body. Both sit exactly where this rule reports, so without the
 exemption it would order you to delete a suppression another engine is reading —
 and the colocated suite asserts that turning `directives` off reports both.
 
+ESLint's own inline forms are all in the default list, not only the disabling
+ones. `/* global fetch */`, `/* globals … */`, `/* exported handler */` and the
+bare `/* eslint no-console: "off" */` config comment are read by ESLint itself,
+and each of them sits above a declaration; deleting the first makes `no-undef`
+fire on the name it declared. A consumer cannot patch that downstream, because
+setting `directives` replaces the default list rather than extending it.
+
 A note on a **member of an exported type** stays, in one shape only. The
 declaration is a package's published surface, so the note reaches an installer's
 editor and the API-surface snapshot, and a precondition, a default or an
@@ -444,9 +451,18 @@ the failure the shape can catch mechanically. An issue or pull request reference
 is not checked, and neither is a bare `#123`: a colour token, a port and an
 ordinal take the same shape, and every pattern tried for them refused notes that
 cite nothing — refusing a note reading `#000` is the worse error, so review
-judges the rest. The exemption covers the member, not the type, so a comment above an
-exported type is still reported, and so is one inside a type the module does not
-export.
+judges the rest. The exemption covers the member, not the type, so a comment
+above an exported type is still reported.
+
+**Exported** here means reachable from an export within the module, not the
+`export` keyword on the declaration. TypeScript resolves a property's doc
+comment from the type that declares it however that type is reached, so an
+unexported alias intersected into an exported one still reaches an installer's
+editor — and a type exported through a separate `export { … }` list carries no
+keyword at all. Both are exempt. The walk is name-based and stops at the module
+edge: a type imported from another file is that file's to decide, and a type
+reached only from a value — a function parameter, say — is not a published type
+surface, so its member notes are reported like any other prose.
 
 An **annotated JSDoc block in a JavaScript file** stays, and only there. A
 TypeScript declaration carries its own types, so `@param` beside one is prose; a
@@ -455,13 +471,22 @@ ships an option defaulting to `[]` as `never[]`. The exemption covers the whole
 block, because the description a tool emits and prose that merely shares the
 block are the same text to a parser.
 
+**The tags TypeScript itself reads are the exception to "and only there."**
+`@deprecated` and `@internal` change what the compiler emits and reports in
+every language: dropping `@deprecated` takes the strike-through out of an
+installer's editor, takes the tag out of the emitted declarations and silences
+`@typescript-eslint/no-deprecated` at every call site, while `@internal` is what
+`stripInternal` keys on. A block carrying one of those tags stays in a `.ts` or
+`.tsx` file too, and `retainedTags` is that list.
+
 | Option                | Default                                                                                                                                                                                                                             | Effect                                                                 |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | `directives`          | `eslint-disable`, `oxlint-disable`, `biome-ignore`, `prettier-ignore`, `react-doctor-disable`, `fallow-ignore`, `NOSONAR`, `@ts-expect-error`, `@vitest-environment`, `v8 ignore` and the rest of the engine prefixes in the source | Comment prefixes read as a directive rather than as prose              |
 | `annotationTags`      | `@param`, `@returns`, `@type`, `@template`, `@satisfies`, `@callback`, `@property`, `@overload`                                                                                                                                     | JSDoc tags whose block a build reads, exempt in JavaScript files       |
+| `retainedTags`        | `@deprecated`, `@internal`                                                                                                                                                                                                          | JSDoc tags whose block stays in every language, TypeScript included    |
 | `memberNoteMaxLength` | `120`                                                                                                                                                                                                                               | Longest a member note on an exported type may be before it is reported |
 
-Setting either option **replaces** its default list rather than adding to it.
+Setting a list option **replaces** its default rather than adding to it.
 
 **Deliberately not fixable.** Deleting the comment is the right outcome for most
 findings and the wrong one for the few carrying a trap nothing else records, and

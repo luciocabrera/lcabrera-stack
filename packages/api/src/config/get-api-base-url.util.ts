@@ -1,3 +1,14 @@
+/**
+ * `globalThis` is narrowed here to a type whose `window` is optional, because
+ * that is the truth under SSR while the DOM lib types it as always present.
+ * Comparing against the lib type instead is a dead end in both spellings:
+ * `=== undefined` reads as unnecessary to
+ * `@typescript-eslint/no-unnecessary-condition`, and `typeof … === 'undefined'`
+ * trips `unicorn/no-typeof-undefined` — and this is a public package, which may
+ * suppress neither. Correcting the type keeps both rules live and covers the
+ * property being absent (real Node) as well as present-but-undefined.
+ */
+
 import { API_SERVER_PORT, CONFIG } from './config.constants.ts';
 
 const PRIVATE_IP_PATTERNS = [

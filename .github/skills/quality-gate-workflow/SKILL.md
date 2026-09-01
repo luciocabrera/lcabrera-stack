@@ -144,11 +144,12 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
   [ADR-104](../../../docs/decisions/ADR-104-the-no-comment-rule-covers-a-type-declaration.md));
   `local-rules/no-explanatory-comments` reports all three.
   A decision goes in the ADR that owns it; investigation and measurement go in
-  the pull request or the issue. Two exemptions: the short file-level "why"
-  header on a script, in
-  [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md), and JSDoc a
-  build reads (`@param`, `@returns`, …) — the annotations, not prose sharing
-  their block.
+  the pull request or the issue. The exemptions are narrow and the rule's own
+  README is the list; the two you reach for are the short file-level "why"
+  header, mandatory on a script per
+  [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md) and permitted
+  anywhere, and JSDoc a build reads (`@param`, `@returns`, …) — the annotations,
+  not prose sharing their block.
 
 ### Where a new ADR goes
 

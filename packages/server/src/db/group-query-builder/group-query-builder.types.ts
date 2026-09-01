@@ -30,7 +30,7 @@ export type BuiltGroupAggregate = {
 
 export type BuiltGroupQuery = {
   readonly aggregates: readonly BuiltGroupAggregate[];
-  /** Bit `keys.length - 1 - i` is 1 when `keys[i]` was rolled up in that set. */
+  /** A GROUPING() value per emitted set, in emission order; bit `keys.length - 1 - i` is 1 when `keys[i]` rolled up. */
   readonly groupingSetMasks: readonly number[];
   readonly guardRails: GroupGuardRails;
   /** Ordered; the mask bit positions are relative to this. */

@@ -3,6 +3,7 @@
 '@lcabrera/vite-config': patch
 '@lcabrera/devkit': patch
 '@lcabrera/server': patch
+'@lcabrera/tsconfig': patch
 '@lcabrera/node': patch
 '@lcabrera/api': patch
 '@lcabrera/ui': patch

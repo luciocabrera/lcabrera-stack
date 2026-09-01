@@ -49,6 +49,13 @@ describe('toBuiltPaths', () => {
       './dist/db/src-helpers/parse.util.mjs',
     );
   });
+
+  it('writes types before default, the order a resolver reads', () => {
+    expect(Object.keys(toBuiltPaths('./src/index.ts'))).toEqual([
+      'types',
+      'default',
+    ]);
+  });
 });
 
 describe('isBuiltPublicPackage', () => {

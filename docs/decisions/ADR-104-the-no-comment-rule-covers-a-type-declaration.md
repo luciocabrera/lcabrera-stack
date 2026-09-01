@@ -70,13 +70,28 @@ of this repository's records. Reporting those notes deleted 100 of them from
 five packages' published types before the gate caught it, which is the evidence
 this position needed its own carve-out rather than the general rule. The
 exemption is the member, not the type: a comment above an exported type is still
-reported, and so is one inside a type the module does not export, because
-neither has that reader. What stays is one line stating the fact the type cannot
+reported. What stays is one line stating the fact the type cannot
 — not a rationale, and not a pointer to a record an installer cannot open. That
 shape is enforced rather than requested: a member note is exempt only while it
 is a single line within `memberNoteMaxLength` naming no ADR by number.
 Keying the exemption on the export alone left the shape to review, which is the
 arrangement every gate in this repository exists to replace.
+
+**"Exported" is reachability within the module, not the `export` keyword.** The
+first spelling of the rule keyed on the keyword and justified it with "a type
+that is not exported has no such reader". That is false, and the probe is short:
+`tsc`'s own checker resolves a property's documentation comment from the type
+that _declares_ it however that type is reached, so
+`type Shared = { /** … */ readonly periods: … }` intersected into an exported
+alias hands the note to an installer's editor with no `export` anywhere near it.
+The same holds for a type exported through a separate `export { … }` list, which
+carries no keyword on its declaration at all. Keying on the keyword reported
+both, and in this repository's own sweep it deleted a usage precondition from a
+published member for being "private". The rule therefore seeds the exempt set
+from the module's exports and walks type references outward from there. The walk
+stops at the module edge — a type imported from another file is that file's to
+decide — and it follows type positions only, so a type reached only from a value
+is not treated as a published type surface.
 
 **The other three exemptions are unchanged**, and they are what keeps the third
 position from being a trap. The file-level header stays — the file's **first comment
@@ -86,11 +101,21 @@ declaration. `.claude/rules/scripts.md` is where that header is additionally
 is what makes it a home for a trap in a `.ts` file with no other one. Stating it
 as only the header a script mandates would leave the TypeScript headers this
 sweep wrote unsanctioned, and deleting one takes the trap with it. A tool
-directive stays, because deleting one changes what another engine reports. And JSDoc a build reads stays — the annotations, not prose sharing
+directive stays, because deleting one changes what another engine reports — and
+that covers ESLint's non-disabling inline forms too (`global`, `globals`,
+`exported`, and the bare `eslint rule: "off"` config comment), each of which
+sits above a declaration and each of which changes what `no-undef` reports when
+it is deleted. And JSDoc a build reads stays — the annotations, not prose sharing
 their block. That last one is why the rule exempts an annotated block only in a
 JavaScript file: a TypeScript declaration carries its own types, so `@param`
 beside one is prose, while a published `.mjs` package's `.d.mts` is derived from
-the block.
+the block. The tags TypeScript itself reads are the exception to "only there":
+`@deprecated` and `@internal` change the emitted declarations, the strike-through
+in an installer's editor, what `@typescript-eslint/no-deprecated` reports at
+every call site and what `stripInternal` removes, so a block carrying one stays
+in a `.ts` file as well. ADR-095's own test — whether removing the text changes
+what a tool emits — is what decides that, and it decides it the same way in
+either language.
 
 `AGENTS.md` §7 states the three positions for agents; this record is why the
 list grew. ADR-095's Decision is not rewritten — it is a dated record, and the

@@ -62,7 +62,7 @@ AggregateFn [type] 'avg' | 'boolAnd' | 'boolOr' | 'count' | 'countDistinct' | 'm
 AggregateSpec [type] { readonly distinct: boolean; readonly sql: string; }
 AliasedGroupAggregate [type] { readonly aggregate: GroupAggregate; readonly alias: string; }
 BuiltGroupAggregate [type] { readonly alias: string; readonly column?: string; readonly fn: AggregateFn; }
-BuiltGroupQuery [type] { readonly aggregates: readonly BuiltGroupAggregate[]; /** Bit `keys.length - 1 - i` is 1 when `keys[i]` was rolled up in that set. */ readonly groupingSetMasks: readonly number[]; readonly guardRails: GroupGuardRails; /** Ordered; the mask bit positions are relative to this. */ readonly keys: readonly string[]; readonly maskAlias: 'group_mask'; readonly text: string; readonly values: readonly unknown[]; }
+BuiltGroupQuery [type] { readonly aggregates: readonly BuiltGroupAggregate[]; /** A GROUPING() value per emitted set, in emission order; bit `keys.length - 1 - i` is 1 when `keys[i]` rolled up. */ readonly groupingSetMasks: readonly number[]; readonly guardRails: GroupGuardRails; /** Ordered; the mask bit positions are relative to this. */ readonly keys: readonly string[]; readonly maskAlias: 'group_mask'; readonly text: string; readonly values: readonly unknown[]; }
 ColumnAnalyticalRole [type] 'dimension' | 'fact' | 'unsupported'
 ColumnCapabilitiesQueryDescriptor [type] { readonly columns: readonly string[]; readonly schema: string; readonly table: string; }
 ColumnCapabilityRow [type] { readonly aggregates: readonly string[]; readonly column: string; readonly hasEquality: boolean; readonly hasStats: boolean; readonly nDistinct: number; readonly relTuples: number; readonly spanDays?: number; readonly typeCategory: string; readonly typeName: string; readonly typeNamespace: string; }
@@ -184,7 +184,7 @@ withTransaction [const] <TResult>({ run }: WithTransactionArgs<TResult>) => Prom
 ## ./errors/errors.types
 GroupingRefusalReason [type] 'aggregate-not-legal' | 'column-not-groupable' | 'duplicate-keys' | 'estimate-too-large' | 'no-keys' | 'row-limit-reached' | 'too-many-keys' | 'unknown-column'
 PgErrorFields [type] { readonly code?: string; readonly column?: string; readonly constraint?: string; }
-SerializableDbError [type] { readonly code?: string; readonly kind: 'db-failed'; readonly message: string; } | { readonly column?: string; readonly estimatedRows?: number; readonly kind: 'grouping-refused'; readonly message: string; readonly reason: GroupingRefusalReason; } | { readonly kind: 'db-canceled'; readonly message: string; } | { readonly kind: 'unexpected'; readonly message: string; }
+SerializableDbError [type] { /** The raw SQLSTATE, when the driver supplied one. Never the message. */ readonly code?: string; readonly kind: 'db-failed'; readonly message: string; } | { readonly column?: string; readonly estimatedRows?: number; readonly kind: 'grouping-refused'; readonly message: string; readonly reason: GroupingRefusalReason; } | { readonly kind: 'db-canceled'; readonly message: string; } | { readonly kind: 'unexpected'; readonly message: string; }
 
 ## ./errors/foreign-key-violation.error
 ForeignKeyViolationError [class] ForeignKeyViolationError

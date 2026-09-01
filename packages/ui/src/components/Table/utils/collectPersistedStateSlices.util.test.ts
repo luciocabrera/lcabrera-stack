@@ -9,13 +9,6 @@ const collectFrom = (raw: Readonly<Record<string, string>>) =>
     readRawSlice: (sliceKey) => raw[sliceKey],
   });
 
-const collectDecoded = (raw: Readonly<Record<string, string>>) =>
-  collectPersistedStateSlices({
-    persistenceKey: 'table',
-    readRawSlice: (sliceKey) => raw[sliceKey],
-    transformRaw: decodeURIComponent,
-  });
-
 const sliceKey = (slice: string) => `table-state-table-${slice}`;
 
 describe('collectPersistedStateSlices', () => {
@@ -57,11 +50,24 @@ describe('collectPersistedStateSlices', () => {
     expect(result.sorting).toBeUndefined();
   });
 
-  it('skips a slice whose transformRaw throws on the raw value', () => {
+  it('skips a slice whose stored value is a malformed URI encoding', () => {
     const raw = { [sliceKey('sorting')]: '%E0%A4%A' };
 
-    expect(() => collectDecoded(raw)).not.toThrow();
-    expect(collectDecoded(raw)).toEqual({});
+    expect(() => collectFrom(raw)).not.toThrow();
+    expect(collectFrom(raw)).toEqual({});
+  });
+
+  it('decodes a percent-encoded slice, as a cookie stores it', () => {
+    const result = collectFrom({
+      [sliceKey('sorting')]: encodeURIComponent(
+        JSON.stringify({
+          value: [{ desc: true, id: 'name' }],
+          version: PERSISTENCE_VERSION,
+        }),
+      ),
+    });
+
+    expect(result.sorting).toEqual([{ desc: true, id: 'name' }]);
   });
 
   it('rebuilds columnVisibility as a Set', () => {

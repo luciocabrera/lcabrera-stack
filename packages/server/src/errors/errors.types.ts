@@ -22,6 +22,7 @@ export type PgErrorFields = {
 
 export type SerializableDbError =
   | {
+      /** The raw SQLSTATE, when the driver supplied one. Never the message. */
       readonly code?: string;
       readonly kind: 'db-failed';
       readonly message: string;

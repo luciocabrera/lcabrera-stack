@@ -10,7 +10,7 @@
  * two durable homes instead: the decision record for a choice whose alternative
  * looks equally reasonable, and the pull request or issue for an investigation.
  *
- * Four positions are exempt, each for a reason the AST can check.
+ * These positions are exempt, each for a reason the AST can check.
  *
  * The **file-level header** stays: it describes the module, not a declaration,
  * and `.claude/rules/scripts.md` mandates one for every `.mjs`/`.cjs` script.
@@ -25,7 +25,10 @@
  * ordinary ones: a disable comment immediately above the declaration it covers,
  * and a coverage or type-checker directive inside a body. Both are positions
  * this rule reports, so without the exemption it would order a suppression
- * another engine reads to be deleted.
+ * another engine reads to be deleted. ESLint's own inline forms are all in the
+ * default list, not just the disabling ones: `global`, `globals`, `exported`
+ * and the bare `eslint rule: "off"` config comment are read by ESLint too, and
+ * deleting one makes `no-undef` fire on the name it declared.
  *
  * A note on a **member of an exported type** stays, in one shape only: a single
  * line, within `memberNoteMaxLength`, naming no record. The declaration is the
@@ -33,9 +36,17 @@
  * API-surface snapshot, and a precondition, a default or an encoding is not
  * derivable from the member's type — while the rationale behind it, and a
  * pointer to a record that installer cannot open, are exactly what does not
- * belong there. Keying the exemption on the export alone would permit both. A
- * type that is not exported has no such reader, so its members are reported like
- * any other prose.
+ * belong there. Keying the exemption on the export alone would permit both.
+ *
+ * "Exported" is resolved by reachability within the module rather than by the
+ * `export` keyword on the declaration itself. TypeScript reads a property's doc
+ * comment from the type that declares it however that type is reached, so an
+ * unexported alias intersected into an exported one still reaches an installer's
+ * editor, and a type exported through a separate `export { … }` list carries no
+ * keyword at all. Keying on the keyword reported both, which is how a usage
+ * precondition on a published member came to be deleted for being "private".
+ * The walk is name-based and stops at the module edge: a type imported from
+ * another file is that file's to decide.
  *
  * An **annotated JSDoc block in a JavaScript file** stays, and only there. A
  * TypeScript declaration carries its own types, so a `@param` beside one is
@@ -44,6 +55,14 @@
  * covers the whole block because the description a tool emits and prose that
  * merely shares the block are the same text to a parser — narrowing that is a
  * review's job, not this rule's.
+ *
+ * The tags TypeScript itself reads are the exception to "and only there".
+ * `@deprecated` and `@internal` change what the compiler emits and reports in
+ * every language: dropping `@deprecated` takes the strike-through out of an
+ * installer's editor, takes the tag out of the emitted declarations and
+ * silences `no-deprecated` at every call site, and `@internal` is what
+ * `stripInternal` keys on. They stay in a `.ts` file as well, which is what
+ * `retainedTags` names.
  *
  * Deliberately not fixable. Deleting the comment is the right outcome for most
  * findings and the wrong one for the few that carry a trap nothing else records,
@@ -64,6 +83,7 @@ type Options = readonly [
     readonly annotationTags?: readonly string[];
     readonly directives?: readonly string[];
     readonly memberNoteMaxLength?: number;
+    readonly retainedTags?: readonly string[];
   }?,
 ];
 
@@ -89,10 +109,14 @@ const DEFAULT_DIRECTIVES = [
   'NOSONAR',
   'biome-ignore',
   'c8 ignore',
+  'eslint ',
   'eslint-disable',
   'eslint-enable',
   'eslint-env',
+  'exported ',
   'fallow-ignore',
+  'global ',
+  'globals ',
   'istanbul ignore',
   'oxlint-disable',
   'oxlint-enable',
@@ -104,6 +128,8 @@ const DEFAULT_DIRECTIVES = [
   'webpackChunkName',
   'webpackIgnore',
 ] as const;
+
+const DEFAULT_RETAINED_TAGS = ['@deprecated', '@internal'] as const;
 
 const DEFAULT_ANNOTATION_TAGS = [
   '@callback',
@@ -121,6 +147,17 @@ const EXPORT_TYPES = new Set<string>([
   AST_NODE_TYPES.ExportNamedDeclaration,
 ]);
 
+const TYPE_DECLARATION_TYPES = new Set<string>([
+  AST_NODE_TYPES.TSEnumDeclaration,
+  AST_NODE_TYPES.TSInterfaceDeclaration,
+  AST_NODE_TYPES.TSTypeAliasDeclaration,
+]);
+
+type NamedTypeDeclaration =
+  | TSESTree.TSEnumDeclaration
+  | TSESTree.TSInterfaceDeclaration
+  | TSESTree.TSTypeAliasDeclaration;
+
 const TYPESCRIPT_FILE = /\.[cm]?tsx?$/;
 
 const contentLines = (comment: TSESTree.Comment) =>
@@ -137,6 +174,14 @@ type StartsWithAnyArgs = {
 const startsWithAny = ({ line, prefixes }: StartsWithAnyArgs) =>
   prefixes.some((prefix) => line.startsWith(prefix));
 
+type CarriesTagArgs = {
+  readonly lines: readonly string[];
+  readonly prefixes: readonly string[];
+};
+
+const carriesTag = ({ lines, prefixes }: CarriesTagArgs) =>
+  lines.some((line) => startsWithAny({ line, prefixes }));
+
 type FlagArgs = {
   readonly comment: TSESTree.Comment;
   readonly messageId: MessageIds;
@@ -145,6 +190,108 @@ type FlagArgs = {
 const attachmentTarget = (node: TSESTree.Node) => {
   const { parent } = node;
   return parent !== undefined && EXPORT_TYPES.has(parent.type) ? parent : node;
+};
+
+const namedTypeDeclarations = (program: TSESTree.Program) => {
+  const declarations = new Map<string, NamedTypeDeclaration>();
+  for (const statement of program.body) {
+    const node =
+      statement.type === AST_NODE_TYPES.ExportNamedDeclaration &&
+      statement.declaration !== null
+        ? statement.declaration
+        : statement;
+    if (TYPE_DECLARATION_TYPES.has(node.type)) {
+      const declaration = node as NamedTypeDeclaration;
+      declarations.set(declaration.id.name, declaration);
+    }
+  }
+  return declarations;
+};
+
+const directlyExportedNames = (program: TSESTree.Program) => {
+  const names = new Set<string>();
+  for (const statement of program.body) {
+    if (statement.type !== AST_NODE_TYPES.ExportNamedDeclaration) continue;
+    const { declaration, specifiers } = statement;
+    if (declaration !== null && TYPE_DECLARATION_TYPES.has(declaration.type)) {
+      names.add((declaration as NamedTypeDeclaration).id.name);
+    }
+    for (const specifier of specifiers) {
+      if (specifier.local.type === AST_NODE_TYPES.Identifier) {
+        names.add(specifier.local.name);
+      }
+    }
+  }
+  return names;
+};
+
+const referencedTypeName = (record: Record<string, unknown>) => {
+  const referenced =
+    record.type === AST_NODE_TYPES.TSTypeReference
+      ? record.typeName
+      : record.expression;
+  const identifier = referenced as undefined | { name?: string; type?: string };
+  return identifier?.type === AST_NODE_TYPES.Identifier
+    ? identifier.name
+    : undefined;
+};
+
+const collectTypeReferences = (root: TSESTree.Node) => {
+  const names = new Set<string>();
+  const visit = (value: unknown) => {
+    if (Array.isArray(value)) {
+      for (const item of value) visit(item);
+      return;
+    }
+    if (value === null || typeof value !== 'object') return;
+    const record = value as Record<string, unknown>;
+    if (
+      record.type === AST_NODE_TYPES.TSTypeReference ||
+      record.type === AST_NODE_TYPES.TSInterfaceHeritage
+    ) {
+      const name = referencedTypeName(record);
+      if (name !== undefined) names.add(name);
+    }
+    for (const [key, child] of Object.entries(record)) {
+      if (key !== 'parent') visit(child);
+    }
+  };
+  visit(root);
+  return names;
+};
+
+type UnseenReferencesArgs = {
+  readonly declaration: NamedTypeDeclaration;
+  readonly declarations: ReadonlyMap<string, NamedTypeDeclaration>;
+  readonly seen: ReadonlySet<string>;
+};
+
+const unseenReferences = ({
+  declaration,
+  declarations,
+  seen,
+}: UnseenReferencesArgs) =>
+  [...collectTypeReferences(declaration)].filter(
+    (name) => declarations.has(name) && !seen.has(name),
+  );
+
+const resolveExportedTypeNames = (program: TSESTree.Program) => {
+  const declarations = namedTypeDeclarations(program);
+  const exported = directlyExportedNames(program);
+  const pending = [...exported];
+  while (pending.length > 0) {
+    const name = pending.pop();
+    const declaration = name === undefined ? undefined : declarations.get(name);
+    const referenced =
+      declaration === undefined
+        ? []
+        : unseenReferences({ declaration, declarations, seen: exported });
+    for (const reference of referenced) {
+      exported.add(reference);
+      pending.push(reference);
+    }
+  }
+  return exported;
 };
 
 const resolveHeaderEnd = (sourceCode: TSESLint.SourceCode) => {
@@ -177,11 +324,13 @@ export default createRule<Options, MessageIds>({
     const [options] = context.options;
     const directives = options?.directives ?? DEFAULT_DIRECTIVES;
     const annotationTags = options?.annotationTags ?? DEFAULT_ANNOTATION_TAGS;
+    const retainedTags = options?.retainedTags ?? DEFAULT_RETAINED_TAGS;
     const memberNoteMaxLength =
       options?.memberNoteMaxLength ?? DEFAULT_MEMBER_NOTE_MAX_LENGTH;
     const { sourceCode } = context;
     const isTypeScript = TYPESCRIPT_FILE.test(context.filename);
     const headerEnd = resolveHeaderEnd(sourceCode);
+    const exportedTypeNames = resolveExportedTypeNames(sourceCode.ast);
     const reported = new Set<TSESTree.Comment>();
 
     const isExempt = (comment: TSESTree.Comment) => {
@@ -192,10 +341,10 @@ export default createRule<Options, MessageIds>({
         startsWithAny({ line: first, prefixes: directives })
       )
         return true;
+      if (comment.type !== AST_TOKEN_TYPES.Block) return false;
       return (
-        !isTypeScript &&
-        comment.type === AST_TOKEN_TYPES.Block &&
-        lines.some((line) => startsWithAny({ line, prefixes: annotationTags }))
+        carriesTag({ lines, prefixes: retainedTags }) ||
+        (!isTypeScript && carriesTag({ lines, prefixes: annotationTags }))
       );
     };
 
@@ -240,9 +389,9 @@ export default createRule<Options, MessageIds>({
       }
     };
 
-    const flagTypeDeclaration = (node: TSESTree.Node) => {
-      if (attachmentTarget(node) === node) flagInside(node);
-      else flagInsideExportedType(node);
+    const flagTypeDeclaration = (node: NamedTypeDeclaration) => {
+      if (exportedTypeNames.has(node.id.name)) flagInsideExportedType(node);
+      else flagInside(node);
       flagAbove(node);
     };
 
@@ -280,6 +429,7 @@ export default createRule<Options, MessageIds>({
           annotationTags: { items: { type: 'string' }, type: 'array' },
           directives: { items: { type: 'string' }, type: 'array' },
           memberNoteMaxLength: { minimum: 0, type: 'number' },
+          retainedTags: { items: { type: 'string' }, type: 'array' },
         },
         type: 'object',
       },

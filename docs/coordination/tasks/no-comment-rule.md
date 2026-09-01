@@ -19,7 +19,7 @@ area:
   - scripts/**
   - docs/agents/planning/table-row-grouping-plan.md
 started: 2026-08-31
-updated: 2026-08-31
+updated: 2026-09-01
 plan: (none)
 pr: #1045
 issue: #1028

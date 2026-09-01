@@ -437,6 +437,7 @@ type TableColumnCapabilityShared = {
   readonly aggregates: readonly TableAggregateFn[];
   readonly column: string;
   readonly distinctEstimate?: number;
+  /** Read instead of `canGroup`, not after it. */
   readonly periods: readonly TableGroupPeriod[];
   readonly role: TableColumnAnalyticalRole;
   readonly typeName: string;

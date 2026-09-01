@@ -9,6 +9,16 @@
  * adding a `build` script enrols a package automatically. A package may omit
  * `build` on purpose — one whose identity is tied to its source path, which is
  * what StyleX themes do — and is gated by its own workspace check instead.
+ *
+ * Two traps live in the export-target mapping and nowhere else. Node matches
+ * export conditions in the order they are written, so `types` must be the first
+ * key or a resolver can take `default` and never look for the declarations; the
+ * gate serialises the mapped object straight into the manifest with `--write`,
+ * so the key order written here is the order that ships, and the colocated
+ * suite compares with `toEqual`, which is key-order-insensitive. And the source
+ * extension is dropped rather than `.ts` specifically, because a package
+ * exporting ESLint flat configs exports `.mjs` and tsdown builds those too —
+ * stripping only `.ts` produced `x.mjs.d.mts`, which resolves for nobody.
  */
 
 export const isBuiltPublicPackage = (manifest) =>
