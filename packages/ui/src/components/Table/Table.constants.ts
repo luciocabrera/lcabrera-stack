@@ -119,6 +119,9 @@ export const TABLE_COLUMN_LAYOUT_LOCK_LABELS: Record<
   measure: 'a measure shares the pinning of the column it measures',
 };
 
+export const TABLE_MEASURE_AGGREGATE_SCOPE_LABEL =
+  'these functions are the measures of the column this one measures';
+
 export const TABLE_TOTALS_PLACEMENTS: readonly TableTotalsPlacement[] = [
   'last',
   'first',

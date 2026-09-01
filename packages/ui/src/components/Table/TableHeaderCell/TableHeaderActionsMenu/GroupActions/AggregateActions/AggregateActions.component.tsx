@@ -7,6 +7,7 @@ import {
 import { useGetTableColumnGroupingCapability } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { TableActionsPopoverSeparator } from '#ui/components/Table/TableActionsPopover';
 import { resolveAffordableAggregates } from '#ui/components/Table/utils/resolveAffordableAggregates.util';
+import { resolveMeasureAggregateTitle } from '#ui/components/Table/utils/resolveMeasureAggregateTitle.util';
 
 import type { AggregateActionsProps } from './AggregateActions.types';
 
@@ -31,13 +32,33 @@ export const AggregateActions = <TData,>({
 
   if (groupingKeys.length === 0 || affordable.length === 0) return;
 
+  const isMeasure = key !== String(columnKey);
+  const functionTitle = resolveMeasureAggregateTitle({
+    isMeasure,
+    target: 'function',
+  });
+  const clearTitle = resolveMeasureAggregateTitle({
+    isMeasure,
+    target: 'clear',
+  });
+
   return (
     <>
       <TableActionsPopoverSeparator />
       {affordable.map((fn) => (
-        <AggregateButton columnKey={key} fn={fn} key={fn} onClose={onClose} />
+        <AggregateButton
+          columnKey={key}
+          fn={fn}
+          key={fn}
+          onClose={onClose}
+          {...(functionTitle !== undefined && { title: functionTitle })}
+        />
       ))}
-      <ClearColumnAggregateButton columnKey={key} onClose={onClose} />
+      <ClearColumnAggregateButton
+        columnKey={key}
+        onClose={onClose}
+        {...(clearTitle !== undefined && { title: clearTitle })}
+      />
     </>
   );
 };

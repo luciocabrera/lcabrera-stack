@@ -360,9 +360,13 @@ row to state a value in, so `AggregateActions` renders nothing while
 `groupingKeys` is empty — the grouping commands beside it stay, because they are
 how a grouping starts. Once grouped, the menu resolves its column through
 `toDeclaredColumnKey` before asking, so opening it on `Sum` asks the capability
-of `Total Amount`: the applied function reads pressed, and picking another
-changes the band from the column it produced rather than from the one it
-measures.
+of `Total Amount`: the applied functions read pressed, and picking another adds
+a measure to the band rather than replacing the one the menu is anchored to —
+`addTableColumnAggregate` appends. That widening is the same one the pinning
+items carry, so it is stated the same way: `resolveMeasureAggregateTitle` gives
+the function toggles and `No Aggregate` a `title` whenever the menu is anchored
+on a measure, and the clear's sentence says it takes every measure of the band
+with it.
 
 **The row-actions column is the one thing the scope keeps that the grouping does
 not name**, because it is not a data column: its cell is the grid's own

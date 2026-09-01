@@ -40,6 +40,14 @@ ancestor, and the offset moves when the start chevron mounts. Client rects put
 both on one origin, so the arithmetic holds wherever the strip is rendered and
 without a `position` rule in another file being kept true.
 
+A scroll container clips on both axes — the y axis simply does not scroll — so
+the tab button's focus ring is drawn **inside** its own box
+(`outlineOffset: -2px` on `:focus-visible`) rather than 2px outside it. Outside,
+its top and bottom fell beyond the viewport's padding box and were cut off
+whenever no chevron made the header taller than the strip, which is the common
+case. Vertical padding on the viewport was the alternative, and it moves the
+tabList's bottom rule out of line with the chevrons' own.
+
 The chevrons are `aria-hidden` with `tabIndex={-1}`. They are a pointer
 affordance for a strip the keyboard already reaches: arrow keys move through
 every tab, focus scrolls the target into view, and `scrollTabIntoView` covers

@@ -14,6 +14,7 @@ import type { ClearColumnAggregateButtonProps } from './ClearColumnAggregateButt
 export const ClearColumnAggregateButton = ({
   columnKey,
   onClose,
+  title,
 }: ClearColumnAggregateButtonProps) => {
   const removeColumnAggregate = useRemoveTableColumnAggregate();
   const applied = useGetTableGroupingAggregates();
@@ -41,6 +42,7 @@ export const ClearColumnAggregateButton = ({
       }
       isDisabled={!isEnabled}
       onClick={handleClearAggregate}
+      {...(title !== undefined && { title })}
       orientation='horizontal'
       size='mini'
       variant='ghost'

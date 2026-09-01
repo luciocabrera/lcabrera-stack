@@ -415,6 +415,32 @@ describe('GroupActions', () => {
       });
     });
 
+    it('states the band those items reach, and what a clear takes', () => {
+      capabilityRef.current = numericCapability;
+      columnsRef.current = [{ key: 'total_amount', label: 'Total Amount' }];
+      appliedAggregatesRef.current = [{ columnKey: 'total_amount', fn: 'sum' }];
+
+      render(
+        <GroupActions columnKey='total_amount:sum' onClose={mockOnClose} />,
+      );
+
+      expect(getButton('Average').getAttribute('title')).toBe(
+        'Applies to the whole band: these functions are the measures of the column this one measures.',
+      );
+      expect(getButton('No Aggregate').getAttribute('title')).toBe(
+        'Clears every measure in the band: these functions are the measures of the column this one measures.',
+      );
+    });
+
+    it('says none of that on the column that declares them', () => {
+      capabilityRef.current = numericCapability;
+
+      render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+      expect(getButton('Average').getAttribute('title')).toBeNull();
+      expect(getButton('No Aggregate').getAttribute('title')).toBeNull();
+    });
+
     it('offers nothing when the route resolved no capability for the column', () => {
       render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 

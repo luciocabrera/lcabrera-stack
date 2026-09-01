@@ -238,6 +238,7 @@ TABLE_GROUP_ROW_FIELD [const] "tableGroup"
 TABLE_GROUP_SUBTOTAL_SUFFIX [const] "total"
 TABLE_GROUPING_MODE_LABELS [const] Record<TableGroupingMode, string>
 TABLE_GROUPING_MODES [const] readonly TableGroupingMode[]
+TABLE_MEASURE_AGGREGATE_SCOPE_LABEL [const] "these functions are the measures of the column this one measures"
 TABLE_NESTED_URL_STATE_PREFIX [const] "nested."
 TABLE_SHARE_OF_TOTAL_LABEL [const] "of the grand total"
 TABLE_SHARE_OF_TOTAL_TOGGLE_LABEL [const] "Show share of grand total"

@@ -33,7 +33,7 @@ export const styles = stylex.create({
     fontWeight: 500,
     outlineOffset: {
       default: '0px',
-      ':focus-visible': '2px',
+      ':focus-visible': '-2px',
     },
     position: 'relative',
     borderBottomColor: 'transparent',

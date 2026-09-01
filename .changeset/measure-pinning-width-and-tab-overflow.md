@@ -28,8 +28,12 @@ aggregate applied with no group keys has no group row to state a value in, so
 the function list and `No Aggregate` are offered only once a grouping is
 applied. The grouping commands beside them are unchanged, because they are how
 a grouping starts. Once grouped, opening the menu **on a measure** now offers
-its source column's functions with the applied one pressed, so a `Sum` column
-can be switched to `Average` without going back to the column it measures.
+its source column's functions with the applied ones pressed, so the band can be
+changed — another function added, or one dropped — without going back to the
+column it measures, which a grouped grid does not paint. The functions are a
+multi-select, not a radio: picking `Average` beside an applied `Sum` adds an
+`Average` column, and `No Aggregate` clears every measure of that column. Both
+items say so on hover.
 
 **Measure columns start wider.** A derived measure inherited the `minWidth` of
 the column it measures, leaving no room for the share-of-grand-total bar and its
