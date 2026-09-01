@@ -283,13 +283,13 @@ TableDataState [type] { readonly data: readonly TData[]; readonly error: TableRe
 TableDensity [type] 'comfortable' | 'compact'
 TableFocusState [type] { readonly columnKey: string | undefined; /** Bumped so re-entering the cell that already holds focus is still a change. */ readonly focusRequestId: number; /** Written from the container's focus/blur, not inferred from the DOM. */ readonly isGridFocused: boolean; readonly rowIndex: number | undefined; readonly rowKey: string | undefined; }
 TableGroupAggregateValue [type] { readonly columnKey: string; readonly fn: TableAggregateFn; readonly value: unknown; }
-TableGroupExpansionState [type] { readonly defaultFold: TableGroupFold; readonly toggledGroupPaths: ReadonlySet<string>; }
+TableGroupExpansionState [type] { readonly defaultFold: TableGroupFold; /** The groups folded the other way from `defaultFold`, and only those; path keys, never row indexes. */ readonly toggledGroupPaths: ReadonlySet<string>; }
 TableGroupFold [type] 'collapsed' | 'expanded'
 TableGroupingMode [type] 'flat' | 'rollup'
 TableGroupingRefusalReason [type] | 'aggregate-not-legal' | 'column-not-groupable' | 'duplicate-keys' | 'estimate-too-large' | 'no-keys' | 'row-limit-reached' | 'too-many-keys' | 'unknown-column'
 TableGroupingState [type] { /** Order is listing/render order; it shapes no SQL. */ readonly aggregates: readonly TableColumnAggregate[]; /** Order is the grouped query's nesting order. */ readonly keys: readonly string[]; readonly mode: TableGroupingMode; readonly periods: Readonly<Record<string, TableGroupPeriod>>; readonly shares: readonly TableColumnAggregate[]; }
 TableGroupKeyRefusalReason [type] | 'no-equality-operator' | 'not-a-dimension' | 'stats-unavailable' | 'too-many-distinct' | 'unique-ish'
-TableGroupKeyValue [type] { readonly columnKey: string; readonly label: string; readonly value: unknown; }
+TableGroupKeyValue [type] { readonly columnKey: string; readonly label: string; /** `null` is a legitimate group, not a missing value; `label` renders it as `(empty)`. */ readonly value: unknown; }
 TableGroupPeriod [type] OlapGroupPeriod
 TableGroupRow [type] Record<'tableGroup', TableGroupRowSummary>
 TableGroupRowSummary [type] { readonly aggregates: readonly TableGroupAggregateValue[]; readonly count: number; readonly isSubtotal: boolean; readonly path: readonly TableGroupKeyValue[]; }

@@ -234,6 +234,7 @@ export type TableGroupAggregateValue = {
 
 export type TableGroupExpansionState = {
   readonly defaultFold: TableGroupFold;
+  /** The groups folded the other way from `defaultFold`, and only those; path keys, never row indexes. */
   readonly toggledGroupPaths: ReadonlySet<string>;
 };
 
@@ -271,6 +272,7 @@ export type TableGroupKeyRefusalReason =
 export type TableGroupKeyValue = {
   readonly columnKey: string;
   readonly label: string;
+  /** `null` is a legitimate group, not a missing value; `label` renders it as `(empty)`. */
   readonly value: unknown;
 };
 
