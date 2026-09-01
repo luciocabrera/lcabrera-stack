@@ -11,16 +11,15 @@ governs:
 
 **Issue:** [#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028)
 
-**Amends:** [ADR-095](ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md) — its Decision names two positions, and the accurate list is three. Nothing else there changes: the two exemptions, the two homes, and the reason a positional rule replaced a judgement one all stand, and ADR-095's body keeps its original reasoning.
+**Amends:** [ADR-095](ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md) — its Decision names two positions, and the accurate list is three. Nothing else there changes: the exemptions, the two homes, and the reason a positional rule replaced a judgement one all stand, and ADR-095's body keeps its original reasoning.
 
 **Relates to:** [ADR-088](ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md) (the record ADR-095 corrects), [`AGENTS.md`](../../AGENTS.md) §7
 
 ## Context
 
-ADR-095 states the rule positionally, which is the property that lets a linter
-decide it: **no comment sits above a function or component declaration, and no
-prose sits inside its body.** `AGENTS.md` §7 says the same two positions.
-#1028 builds the rule that enforces them.
+ADR-095 states the rule positionally: **no comment sits above a function or
+component declaration, and no prose sits inside its body.** `AGENTS.md` §7 says
+the same two positions.
 
 A third position was never named. `type Args = { … }` is a declaration, a
 comment above it is the same shape as a comment above the function that takes
@@ -41,143 +40,130 @@ body.
 And an unstated position is not merely unenforced, it is unnoticed. A rule that
 names two positions reads as complete. A reviewer applying it to a type
 declaration is going beyond what is written, which is not a thing reviews do
-reliably, and #1028's own §6 criteria — which a verifier reads as the bar —
-name only the two.
+reliably.
+
+#1028 set out to close both halves at once — name the third position, and make a
+linter decide all three. The first half held. The second did not, and why it did
+not is the second decision below.
 
 ## Decision
 
-**The rule covers three positions, not two.** A comment does not sit above a
-declaration, inside a function or component body, or inside a type declaration.
-"Above a declaration" is the general form: a `type`, an `interface` (which this
-repository forbids for other reasons), an `enum`, a class, a method, and a
-`const` holding anything at all — a command descriptor's JSDoc rotted exactly
-like a function's ([#850](https://github.com/luciocabrera/lcabrera-stack/issues/850)).
+**The convention covers three positions, not two.** A comment does not sit above
+a declaration, inside a function or component body, or inside a type
+declaration. "Above a declaration" is the general form: a `type`, an `interface`
+(which this repository forbids for other reasons), an `enum`, a class, a method,
+and a `const` holding anything at all — a command descriptor's JSDoc rotted
+exactly like a function's
+([#850](https://github.com/luciocabrera/lcabrera-stack/issues/850)).
 
-**`local-rules/no-explanatory-comments` in `@lcabrera/eslint-plugin` is the
-enforcement**, turned on by both shared flat configs for `.ts`, `.tsx`, `.js`,
-`.mjs` and `.cjs` sources.
-It visits `TSTypeAliasDeclaration`, `TSInterfaceDeclaration` and
-`TSEnumDeclaration` for both positions, so a comment above a type alias and a
-comment on one of its members are each reported, and its colocated suite carries
-a fixture for each.
-
-**A fourth exemption comes with the third position: a note on a member of an
-exported type.** The third position is the one that reaches outside this
+**A third exemption comes with the third position: a one-line note on a member
+of an exported type.** The third position is the one that reaches outside this
 repository. An exported descriptor is a package's published surface, and a
 member's precondition, default or encoding is not derivable from its type — an
 installer reads it in their editor and in the API-surface snapshot, and has none
-of this repository's records. Reporting those notes deleted 100 of them from
-five packages' published types before the gate caught it, which is the evidence
-this position needed its own carve-out rather than the general rule. The
-exemption is the member, not the type: a comment above an exported type is still
-reported. What stays is one line stating the fact the type cannot
-— not a rationale, and not a pointer to a record an installer cannot open. That
-shape is enforced rather than requested: a member note is exempt only while it
-is a single line within `memberNoteMaxLength` naming no ADR by number.
-Keying the exemption on the export alone left the shape to review, which is the
-arrangement every gate in this repository exists to replace.
+of this repository's records. What stays is one line stating the fact the type
+cannot: not a rationale, and not a pointer to a record an installer cannot open.
 
-**"Exported" is reachability within the module, not the `export` keyword.** The
-first spelling of the rule keyed on the keyword and justified it with "a type
-that is not exported has no such reader". That is false, and the probe is short:
-`tsc`'s own checker resolves a property's documentation comment from the type
-that _declares_ it however that type is reached, so
-`type Shared = { /** … */ readonly periods: … }` intersected into an exported
-alias hands the note to an installer's editor with no `export` anywhere near it.
-The same holds for a type exported through a separate `export { … }` list, which
-carries no keyword on its declaration at all. Keying on the keyword reported
-both, and in this repository's own sweep it deleted a usage precondition from a
-published member for being "private". The rule therefore seeds the exempt set
-from the module's exports and walks type references outward from there. The walk
-stops at the module edge — a type imported from another file is that file's to
-decide — and it follows type positions only, so a type reached only from a value
-is not treated as a published type surface.
+**The other two exemptions are unchanged**, and they are what keeps the third
+position from being a trap. The file-level header stays — the file's **first
+comment block**, in a source file of any extension, describing the module rather
+than a declaration. `.claude/rules/scripts.md` is where that header is
+additionally **mandatory**, for a `.mjs`/`.cjs` script; it is permitted
+everywhere, and that is what makes it a home for a trap in a `.ts` file with no
+other one. Stating it as only the header a script mandates would leave the
+TypeScript headers this sweep wrote unsanctioned, and deleting one takes the
+trap with it. And JSDoc a build reads stays — the annotations, not prose sharing
+their block, the test being whether removing the text changes what a tool emits.
 
-**The other three exemptions are unchanged**, and they are what keeps the third
-position from being a trap. The file-level header stays — the file's **first comment
-block**, in a source file of any extension, describing the module rather than a
-declaration. `.claude/rules/scripts.md` is where that header is additionally
-**mandatory**, for a `.mjs`/`.cjs` script; it is permitted everywhere, and that
-is what makes it a home for a trap in a `.ts` file with no other one. Stating it
-as only the header a script mandates would leave the TypeScript headers this
-sweep wrote unsanctioned, and deleting one takes the trap with it. A tool
-directive stays, because deleting one changes what another engine reports — and
-that covers ESLint's non-disabling inline forms too (`global`, `globals`,
-`exported`, and the bare `eslint rule: "off"` config comment), each of which
-sits above a declaration and each of which changes what `no-undef` reports when
-it is deleted. And JSDoc a build reads stays — the annotations, not prose sharing
-their block. That last one is why the rule exempts an annotated block only in a
-JavaScript file: a TypeScript declaration carries its own types, so `@param`
-beside one is prose, while a published `.mjs` package's `.d.mts` is derived from
-the block. The tags TypeScript itself reads are the exception to "only there":
-`@deprecated` and `@internal` change the emitted declarations, the strike-through
-in an installer's editor, what `@typescript-eslint/no-deprecated` reports at
-every call site and what `stripInternal` removes, so a block carrying one stays
-in a `.ts` file as well. ADR-095's own test — whether removing the text changes
-what a tool emits — is what decides that, and it decides it the same way in
-either language.
-
-`AGENTS.md` §7 states the three positions for agents; this record is why the
-list grew. ADR-095's Decision is not rewritten — it is a dated record, and the
-header pointer above is a statement about the record rather than a revision of
-it, the same practice ADR-088 carries.
+**The convention is held by review. Nothing enforces it mechanically, and that
+is the decision, not an omission.** A lint rule was written, turned on in both
+shared flat configs, proven live by a planted violation, and then removed
+unmerged. What it cost is stated below.
 
 ## Consequences
 
-**What it costs.** A type's members lose the one place a per-member note could
-sit, and a wide state type is the case where that hurts most: `TableMetaState`
-has members whose meaning is genuinely not obvious from `readonly
-groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>`. Those notes move
-to the ADR that owns the decision or to the system's `ARCHITECTURE.md`, both
-further away than the line above the member. The bet is ADR-095's, unchanged:
-the note was being missed more often than it was being read, and a positional
-rule a linter decides beats a judgement rule nothing could.
+**What removing the linter cost, and why it was still right.** A rule nothing
+checks is the failure mode this repository has paid for three times —
+`commands:verify`, `docs:verify` and `scripts:verify` all exist because prose
+drifted from fact with nothing watching — so choosing review here is choosing
+that risk knowingly.
 
-**A second cost is specific to this position.** A member's note is often the
-only statement of an invariant that is not a decision — "absent means off",
-"never a function, it crosses the loader boundary". Those have no ADR of their
-own, and writing one per member is not proportionate. The honest destination is
-the system `ARCHITECTURE.md` when the invariant is about wiring and the pull
-request otherwise, and the failure mode to watch in review is the author writing
-nothing at all.
+It was still right because the thing being decided is not positional after all.
+"Does this comment carry something the declaration cannot say?" is a judgement,
+and every mechanical proxy tried for it drew the line somewhere a reader would
+not:
 
-**What it buys.** The rule is the same rule in every position a declaration can
-take, so there is no boundary to argue about and nothing that reads as complete
-while leaving a gap. And it is decided by the linter rather than by a reader
-noticing, which is the whole reason ADR-095 made the rule positional.
+- **The `export` keyword** as a stand-in for "an installer can read this". False:
+  `tsc` resolves a property's documentation comment from the type that declares
+  it however that type is reached, so an unexported alias intersected into an
+  exported one, or reached through an exported function's signature, is read in
+  an installer's editor with no `export` anywhere near it.
+- **A character budget** as a stand-in for "a note, not a rationale". It refuses
+  a correct sentence one character long and accepts a wrong one at ninety.
+- **An adjacency walk over the file's leading comments** as a stand-in for "the
+  file-level header". A block comment written flush against the header was
+  absorbed into it, so a missing blank line turned the whole rule off for that
+  file.
 
-**What is not affected.** ADR-095's two homes, its two exemptions, and its
-statement that deleting the reasoning instead of moving it is not compliance all
-stand as decided.
+Each of those was a real defect, each was found by review of the rule rather
+than by the rule, and each round of fixing one produced the next. That is the
+signal: the review effort was going into the proxy instead of into the code. The
+same effort spent on the comments themselves is the trade this record accepts.
+
+**What the convention costs, unchanged from ADR-095.** A type's members lose the
+one place a per-member note could sit, and a wide state type is where that hurts
+most: `TableMetaState` has members whose meaning is genuinely not obvious from
+`readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>`. Those
+notes move to the ADR that owns the decision or to the system's
+`ARCHITECTURE.md`, both further away than the line above the member.
+
+**A second cost is specific to this position.** A member's note is often the only
+statement of an invariant that is not a decision — "absent means off", "never a
+function, it crosses the loader boundary". Those have no ADR of their own, and
+writing one per member is not proportionate. The honest destination is the
+system `ARCHITECTURE.md` when the invariant is about wiring and the pull request
+otherwise, and the failure mode to watch in review is the author writing nothing
+at all.
+
+**The tie-breaker in review.** When a comment is the only thing in dispute,
+delete it rather than debate it. Keep one where its omission would cost a reader
+something the code does not say — that is the whole test, and it is a person's
+to apply.
+
+**What is not affected.** ADR-095's two homes, its exemptions, and its statement
+that deleting the reasoning instead of moving it is not compliance all stand as
+decided.
 
 ## Alternatives considered
 
-1. **Leave type declarations out and rely on review.** Rejected: it is the
-   position the repository writes these comments in most, and "the rule names
-   two positions but means three" is the judgement rule ADR-095 replaced. The
-   evidence is that the gap survived #993, ADR-095 and #1028's own acceptance
-   criteria without anyone noticing until a verifier read the rule against the
-   tree.
+1. **Leave type declarations out and rely on review for the other two.**
+   Rejected: it is the position the repository writes these comments in most,
+   and "the rule names two positions but means three" is exactly the gap that
+   survived #993 and ADR-095 without anyone noticing.
 2. **Rewrite ADR-095's Decision to say three.** Rejected:
    [`docs/README.md`](../README.md) states that a conclusion is superseded by a
    new record, never edited into a different one. A reader six months out needs
    to see that the rule was stated as two positions and grew, not a record that
    reads as though it always said three.
-3. **Supersede ADR-095 entirely.** Rejected: nothing in it was reversed. The
-   homes, the exemptions and the reasoning for a positional rule are all live,
-   and marking the record superseded would retire decisions nobody changed.
-4. **Cover the type declaration but not a plain `const`.** Rejected on evidence:
+3. **Keep the lint rule and narrow its exemptions further.** Rejected on the
+   evidence above: three successive narrowings each fixed a real false positive
+   and each exposed the next, in a rule that public packages may not suppress
+   (Non-Negotiable Rule 11), so a false positive has nowhere to go. The proxy
+   was the thing under review, which is the wrong thing to be reviewing.
+4. **Keep the lint rule as a warning rather than an error.** Rejected: the
+   repository runs every eslint pass with `--max-warnings 0`, so a warning is an
+   error with a longer name, and softening it for one rule would make the flag
+   mean two things.
+5. **Cover the type declaration but not a plain `const`.** Rejected on evidence:
    [#850](https://github.com/luciocabrera/lcabrera-stack/issues/850) is a JSDoc
    above `CLEAR_COLUMN_AGGREGATE_COMMAND`, a `const` object, naming a derivation
-   its only consumer stopped using. Drawing the line at "declarations that
-   declare types or functions" would have left that one unreported, and it is
-   one of the two worked examples the rule exists for.
+   its only consumer stopped using.
 
 ## References
 
 - [ADR-095](ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md) — the rule this amends, and why explanations move rather than being deleted
 - [`AGENTS.md`](../../AGENTS.md) §7 — the three positions as agents read them
 - [`.claude/rules/scripts.md`](../../.claude/rules/scripts.md) — the file-level header that survives
-- [#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028) — the lint rule and the sweep
+- [#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028) — the sweep, and the lint rule that was built and removed
 - [#850](https://github.com/luciocabrera/lcabrera-stack/issues/850) — a comment above a `const` naming a derivation its consumer does not use
 - [#627](https://github.com/luciocabrera/lcabrera-stack/issues/627) — a comment above a function advertising a reader that never existed

@@ -67,11 +67,6 @@ export const createBaseCustomRulesLintConfig = ({
     { rules: { ...SHARED_PLUGIN_RULE_SEVERITIES } },
     createNodeScriptFileConfig({ globals }),
     {
-      files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
-      plugins: { 'local-rules': localRules },
-      rules: { 'local-rules/no-explanatory-comments': 'error' },
-    },
-    {
       ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
     },
     {
@@ -89,7 +84,6 @@ export const createBaseCustomRulesLintConfig = ({
         'local-rules/domain-folder-filename': 'error',
         'local-rules/filename-convention': 'error',
         'local-rules/merge-duplicate-imports': 'error',
-        'local-rules/no-explanatory-comments': 'error',
         'local-rules/no-habit-return-types': 'error',
         'local-rules/no-inline-type-imports': 'error',
         'local-rules/type-suffix-naming': 'error',

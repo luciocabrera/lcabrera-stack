@@ -27,15 +27,16 @@ issue: #1028
 
 ## What
 
-Enforce ADR-095 mechanically — `local-rules/no-explanatory-comments` in
-`@lcabrera/eslint-plugin`, turned on by both shared flat configs — then sweep the
-comments that predate it out of every workspace the eslint pass reaches.
+Sweep the comments ADR-095 moves out of every workspace, and name the third
+position the convention had never stated — a note between a type's members.
 
-The sweep is repo-wide, so the `area` above is wide on purpose. Coordinate before
-starting anything that edits source in those workspaces.
+A lint rule for it was built here and removed before merge: ADR-104 records why
+the convention is held by review instead. The sweep is repo-wide, so the `area`
+above is wide on purpose. Coordinate before starting anything that edits source
+in those workspaces.
 
 ## Status / next
 
-- Current step: rule landed and wired; sweep applied, gate green
+- Current step: sweep applied, lint rule removed, gate green
 - Blockers: none
-- Next: `gh pr edit` #1045, then hold for the verifier
+- Next: hold for the verifier

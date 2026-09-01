@@ -141,15 +141,16 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
   sits inside a type declaration
   ([ADR-095](../../../docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
   amended for the third position by
-  [ADR-104](../../../docs/decisions/ADR-104-the-no-comment-rule-covers-a-type-declaration.md));
-  `local-rules/no-explanatory-comments` reports all three.
+  [ADR-104](../../../docs/decisions/ADR-104-the-no-comment-rule-covers-a-type-declaration.md)).
+  No linter reports this — ADR-104 says why — so it is yours to apply, and when a
+  comment is the only thing in dispute, delete it rather than debate it.
   A decision goes in the ADR that owns it; investigation and measurement go in
-  the pull request or the issue. The exemptions are narrow and the rule's own
-  README is the list; the two you reach for are the short file-level "why"
+  the pull request or the issue. Three exemptions: the short file-level "why"
   header, mandatory on a script per
   [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md) and permitted
-  anywhere, and JSDoc a build reads (`@param`, `@returns`, …) — the annotations,
-  not prose sharing their block.
+  anywhere; JSDoc a build reads (`@param`, `@returns`, …) — the annotations, not
+  prose sharing their block; and a one-line note on a member of an exported
+  type, which is a published surface.
 
 ### Where a new ADR goes
 

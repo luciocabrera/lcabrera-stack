@@ -16,7 +16,18 @@
  * Effects live here; the rules are pure in `./lib/eslint-pass-probe.mjs`.
  *
  * Usage: node scripts/verify-eslint-pass.mjs
+ *
+ * The binary probed is the **workspace's own**, which is what
+ * `lint:eslint:check` resolves from its bare `eslint` — and, under pnpm's
+ * isolated layout, not the same install as any other workspace's. There is no
+ * `eslint` in the root `.bin` at all, so probing with a root path silently
+ * fails to spawn and reads as a crashed rule; it is absolute so it cannot be
+ * resolved through a writeable `PATH` entry (Sonar S4036). The probe file is
+ * written inside the workspace so it resolves that workspace's flat config, and
+ * eslint's non-zero exit on findings is expected, so the JSON report is read
+ * off the thrown error rather than treated as a failure.
  */
+
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
@@ -24,8 +35,9 @@ import process from 'node:process';
 
 import {
   classifyProbe,
+  PROBE_RULE,
   PROBE_WORKSPACES,
-  PROBES,
+  probeSource,
 } from './lib/eslint-pass-probe.mjs';
 
 const REPO_ROOT = process.cwd();
@@ -33,22 +45,13 @@ const REPO_ROOT = process.cwd();
 const eslintBin = (workspace) =>
   join(REPO_ROOT, workspace, 'node_modules', '.bin', 'eslint');
 
-const probeRoot = (workspace) => {
-  const src = join(REPO_ROOT, workspace, 'src');
-
-  return existsSync(src)
-    ? { dir: src, prefix: 'src/' }
-    : { dir: join(REPO_ROOT, workspace), prefix: '' };
-};
-
-const withProbeFile = (workspace, probe, run) => {
-  const { dir: root, prefix } = probeRoot(workspace);
-  const dir = mkdtempSync(join(root, '.eslint-probe-'));
+const withProbeFile = (workspace, run) => {
+  const dir = mkdtempSync(join(REPO_ROOT, workspace, '.eslint-probe-'));
 
   try {
-    writeFileSync(join(dir, 'probe.ts'), probe.source(), 'utf8');
+    writeFileSync(join(dir, 'probe.ts'), probeSource(), 'utf8');
 
-    return run(`${prefix}${basename(dir)}/probe.ts`);
+    return run(`${basename(dir)}/probe.ts`);
   } finally {
     rmSync(dir, { force: true, recursive: true });
   }
@@ -79,43 +82,37 @@ const FAILURE_HINT = {
     `  and read the TypeError. If it names \`isExternalModuleNameRelative\`, the\n` +
     `  \`packageExtensions\` entry for eslint-plugin-perfectionist in\n` +
     `  pnpm-workspace.yaml has been lost or overridden (#472).`,
+  silent:
+    `the pass ran but never reported \`${PROBE_RULE}\` for a deliberately\n` +
+    `  misordered import, so the rule is not loaded. Check the shared eslint\n` +
+    `  configs in @lcabrera/vite-config.`,
 };
 
-const silentHint = (probe) =>
-  `the pass ran but never reported \`${probe.rule}\` for\n  ${probe.silentHint}`;
-
-const hintFor = (verdict, probe) =>
-  verdict === 'silent' ? silentHint(probe) : FAILURE_HINT[verdict];
-
-const verdictFor = (workspace, probe) => {
+const verdictFor = (workspace) => {
   if (!existsSync(eslintBin(workspace))) {
     return 'no-binary';
   }
 
-  return withProbeFile(workspace, probe, (file) =>
-    classifyProbe(lintProbe(workspace, file), probe.rule),
+  return withProbeFile(workspace, (file) =>
+    classifyProbe(lintProbe(workspace, file)),
   );
 };
 
-const failures = PROBE_WORKSPACES.flatMap((workspace) =>
-  PROBES.flatMap((probe) => {
-    const verdict = verdictFor(workspace, probe);
+const failures = PROBE_WORKSPACES.flatMap((workspace) => {
+  const verdict = verdictFor(workspace);
 
-    return verdict === 'reported' ? [] : [{ probe, verdict, workspace }];
-  }),
-);
+  return verdict === 'reported' ? [] : [{ verdict, workspace }];
+});
 
 if (failures.length > 0) {
-  for (const { probe, verdict, workspace } of failures) {
-    process.stderr.write(
-      `✗ ${workspace} (${probe.rule}): ${hintFor(verdict, probe)}\n`,
-    );
+  for (const { verdict, workspace } of failures) {
+    process.stderr.write(`✗ ${workspace}: ${FAILURE_HINT[verdict]}\n`);
   }
 
   process.exitCode = 1;
 } else {
   process.stdout.write(
-    `eslint pass verified: ${PROBES.length} rule(s) report the planted ` +
-      `violation in ${PROBE_WORKSPACES.join(', ')}.\n`,
+    `eslint pass verified: \`${PROBE_RULE}\` reports the planted violation in ` +
+      `${PROBE_WORKSPACES.join(', ')}.\n`,
   );
 }

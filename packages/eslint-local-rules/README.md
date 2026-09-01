@@ -44,22 +44,21 @@ explicit extensions are **required**, would be actively wrong.
 
 ## Rules
 
-| Rule                                | Fixable | What it enforces                                             |
-| ----------------------------------- | ------- | ------------------------------------------------------------ |
-| `clean-import-paths`                | ✅      | No file extensions or trailing `/index` on internal imports  |
-| `destructuring-for-functions`       |         | An object parameter once a function takes 2+ arguments       |
-| `domain-folder-filename`            |         | A folder's shared `*.types`/`*.constants` is named after it  |
-| `filename-convention`               |         | Base-name case follows the file's type suffix                |
-| `merge-duplicate-imports`           | ✅      | One import statement per source module                       |
-| `no-explanatory-comments`           |         | No comment above a declaration, or inside a function or type |
-| `no-habit-return-types`             | ✅      | No return type TypeScript would infer identically            |
-| `no-inline-type-imports`            | ✅      | `import type { X }` over `import { type X }`                 |
-| `no-type-definitions-in-components` |         | Types live in `*.types.ts`, not in component files           |
-| `readonly-props`                    | ✅      | Every member of a `*Props` type is `readonly`                |
-| `single-component-export`           |         | One component per `*.component.tsx`                          |
-| `type-suffix-naming`                | ✅      | `Args`/`Props` suffixes over `Arguments`/`Properties`        |
+| Rule                                | Fixable | What it enforces                                            |
+| ----------------------------------- | ------- | ----------------------------------------------------------- |
+| `clean-import-paths`                | ✅      | No file extensions or trailing `/index` on internal imports |
+| `destructuring-for-functions`       |         | An object parameter once a function takes 2+ arguments      |
+| `domain-folder-filename`            |         | A folder's shared `*.types`/`*.constants` is named after it |
+| `filename-convention`               |         | Base-name case follows the file's type suffix               |
+| `merge-duplicate-imports`           | ✅      | One import statement per source module                      |
+| `no-habit-return-types`             | ✅      | No return type TypeScript would infer identically           |
+| `no-inline-type-imports`            | ✅      | `import type { X }` over `import { type X }`                |
+| `no-type-definitions-in-components` |         | Types live in `*.types.ts`, not in component files          |
+| `readonly-props`                    | ✅      | Every member of a `*Props` type is `readonly`               |
+| `single-component-export`           |         | One component per `*.component.tsx`                         |
+| `type-suffix-naming`                | ✅      | `Args`/`Props` suffixes over `Arguments`/`Properties`       |
 
-Four rules take options; the rest take none.
+Three rules take options; the rest take none.
 
 ### `clean-import-paths`
 
@@ -357,142 +356,6 @@ does not recognise. Closing it properly needs a type-aware rule.
 The trade is deliberate and worth knowing: `(): string` on a body returning a
 `string` is a habit this rule will not catch, because the same annotation over a
 body returning `'a' | 'b'` is a widening. Reviews still own that half.
-
-### `no-explanatory-comments`
-
-Reports a comment written above a declaration, or inside a function, component
-or type declaration. Not fixable — see below.
-
-Three positions, and the third is the one most often missed: a note between a
-type's members. An `Args`/`Props`/`Result` type is where a prose block explaining
-a shape feels most justified, because the members carry no bodies to read
-instead — and it is where it rots identically. "Above a declaration" is the
-general form, so a plain `const` is covered too.
-
-A name, a signature and a type already say what the code is, and prose repeating
-them is a second copy of a fact kept in the one place nothing checks. The failure
-is not cosmetic: a helper in the repository this plugin comes from documented
-itself as "shared by the cookie and sessionStorage readers" when no
-sessionStorage reader had ever existed, and two later designs went on to offer
-that reader as a free fallback before review caught it.
-
-**❌ Disallowed:**
-
-```tsx
-// Reads the persisted slices, falling back to the defaults.
-export const read = () => collect(defaults);
-
-// The clear half of the set — `deriveToggle`'s `target: undefined`.
-export const CLEAR_COMMAND = { id: 'column.aggregate.clear' };
-
-export const Panel = () => {
-  // The chevron points down while the panel is open.
-  return <div>{/* and again, in JSX */}</div>;
-};
-
-type Result = {
-  /** Absent while the first read is in flight. */
-  readonly value?: string;
-};
-```
-
-**✅ Left alone:**
-
-```tsx
-/**
- * The file-level header: it describes the module, not a declaration.
- */
-
-import { render } from '@testing-library/react';
-
-import { Panel } from './Panel.component.tsx';
-
-// oxlint-disable-next-line no-console
-export const mount = () => {
-  // v8 ignore next
-  if (Panel === undefined) return;
-  return render(<Panel />);
-};
-
-// Above a statement rather than a declaration, so out of scope.
-export { mount as default };
-```
-
-These positions are exempt, each for a reason the rule can check.
-
-The **file-level header** — the file's first comment block, with adjacent `//`
-lines counting as one block and a shebang not starting it — stays, because it
-describes the module rather than a declaration. Only the first block: a second
-one, separated by a blank line, is a comment about the declaration under it and
-is reported even when nothing but the header precedes it.
-
-A **tool directive** stays, because deleting one changes what another engine
-reports. This is the exemption that carries real weight, and the two positions
-where it does are the ordinary ones: an `eslint-disable-next-line` immediately
-above the declaration it covers, and a `v8 ignore next` or a `@ts-expect-error`
-inside a body. Both sit exactly where this rule reports, so without the
-exemption it would order you to delete a suppression another engine is reading —
-and the colocated suite asserts that turning `directives` off reports both.
-
-ESLint's own inline forms are all in the default list, not only the disabling
-ones. `/* global fetch */`, `/* globals … */`, `/* exported handler */` and the
-bare `/* eslint no-console: "off" */` config comment are read by ESLint itself,
-and each of them sits above a declaration; deleting the first makes `no-undef`
-fire on the name it declared. A consumer cannot patch that downstream, because
-setting `directives` replaces the default list rather than extending it.
-
-A note on a **member of an exported type** stays, in one shape only. The
-declaration is a package's published surface, so the note reaches an installer's
-editor and the API-surface snapshot, and a precondition, a default or an
-encoding is not derivable from the member's type. The shape is checked, not
-asked for: a single line, no longer than `memberNoteMaxLength`, naming no
-ADR by number, because a note pointing at a record an installer cannot open is
-the failure the shape can catch mechanically. An issue or pull request reference
-is not checked, and neither is a bare `#123`: a colour token, a port and an
-ordinal take the same shape, and every pattern tried for them refused notes that
-cite nothing — refusing a note reading `#000` is the worse error, so review
-judges the rest. The exemption covers the member, not the type, so a comment
-above an exported type is still reported.
-
-**Exported** here means reachable from an export within the module, not the
-`export` keyword on the declaration. TypeScript resolves a property's doc
-comment from the type that declares it however that type is reached, so an
-unexported alias intersected into an exported one still reaches an installer's
-editor — and a type exported through a separate `export { … }` list carries no
-keyword at all. Both are exempt. The walk is name-based and stops at the module
-edge: a type imported from another file is that file's to decide, and a type
-reached only from a value — a function parameter, say — is not a published type
-surface, so its member notes are reported like any other prose.
-
-An **annotated JSDoc block in a JavaScript file** stays, and only there. A
-TypeScript declaration carries its own types, so `@param` beside one is prose; a
-published `.mjs` package's `.d.mts` is derived from the block, so dropping it
-ships an option defaulting to `[]` as `never[]`. The exemption covers the whole
-block, because the description a tool emits and prose that merely shares the
-block are the same text to a parser.
-
-**The tags TypeScript itself reads are the exception to "and only there."**
-`@deprecated` and `@internal` change what the compiler emits and reports in
-every language: dropping `@deprecated` takes the strike-through out of an
-installer's editor, takes the tag out of the emitted declarations and silences
-`@typescript-eslint/no-deprecated` at every call site, while `@internal` is what
-`stripInternal` keys on. A block carrying one of those tags stays in a `.ts` or
-`.tsx` file too, and `retainedTags` is that list.
-
-| Option                | Default                                                                                                                                                                                                                             | Effect                                                                 |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `directives`          | `eslint-disable`, `oxlint-disable`, `biome-ignore`, `prettier-ignore`, `react-doctor-disable`, `fallow-ignore`, `NOSONAR`, `@ts-expect-error`, `@vitest-environment`, `v8 ignore` and the rest of the engine prefixes in the source | Comment prefixes read as a directive rather than as prose              |
-| `annotationTags`      | `@param`, `@returns`, `@type`, `@template`, `@satisfies`, `@callback`, `@property`, `@overload`                                                                                                                                     | JSDoc tags whose block a build reads, exempt in JavaScript files       |
-| `retainedTags`        | `@deprecated`, `@internal`                                                                                                                                                                                                          | JSDoc tags whose block stays in every language, TypeScript included    |
-| `memberNoteMaxLength` | `120`                                                                                                                                                                                                                               | Longest a member note on an exported type may be before it is reported |
-
-Setting a list option **replaces** its default rather than adding to it.
-
-**Deliberately not fixable.** Deleting the comment is the right outcome for most
-findings and the wrong one for the few carrying a trap nothing else records, and
-the rule cannot tell those apart. An autofix would erase that difference exactly
-where it matters — and in this repository `vp run lint` chains `--fix`, so it
-would erase it silently.
 
 ### `merge-duplicate-imports`
 

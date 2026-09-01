@@ -30,7 +30,6 @@ Custom ESLint rules, used across this monorepo and published for use outside it.
   - `domain-folder-filename`
   - `filename-convention`
   - `merge-duplicate-imports`
-  - `no-explanatory-comments`
   - `no-inline-type-imports`
   - `type-suffix-naming`
 - React-only rules (enabled only in React app lint overrides):

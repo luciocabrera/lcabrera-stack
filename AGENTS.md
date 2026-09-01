@@ -426,8 +426,7 @@ signature and the types already say what the code is, and an explanation next to
 code is the copy nothing keeps true — which is the failure every gate in this
 file exists to catch. If the code can be made clearer instead, do that.
 
-**The exemptions are narrow, and the rule's own README is the list.** Two of
-them bind what you write here. The **file-level header** stays: the file's
+**The exemptions are narrow.** The **file-level header** stays: the file's
 **first comment block**, in a source file of any extension, saying why the module
 exists rather than what a declaration below it is.
 [`.claude/rules/scripts.md`](.claude/rules/scripts.md) is where that header is
@@ -435,7 +434,7 @@ additionally **mandatory** — for a `.mjs`/`.cjs` script, one short block givin
 the file's purpose, its usage and its exit codes, exactly as that rule specifies.
 It is permitted everywhere, which is what makes it the home for a trap in a
 `.ts` file that has no ADR or issue to carry it. Only the first block: a second
-one below it is a comment about the declaration under it, and is reported. And **JSDoc a
+one below it is a comment about the declaration under it. **JSDoc a
 build reads** stays: `@param`, `@returns`, `@type` and the rest of the
 annotations a tool consumes, because a published `.mjs` package's declarations
 are derived from them and dropping one publishes an option defaulting to `[]` as
@@ -443,7 +442,10 @@ are derived from them and dropping one publishes an option defaulting to `[]` as
 exemption covers the **annotations**, not prose that happens to share
 their block: the test is whether removing the text changes what a tool emits —
 which is also why `@deprecated` and `@internal` stay in a `.ts` file, where the
-rest of the annotations do not.
+rest of the annotations do not. And a **one-line note on a member of an exported
+type** stays: that member is a published surface, so state the precondition, the
+default or the encoding there and nothing else — not the rationale, and not a
+pointer to a record an installer cannot open.
 
 **The explanation still has to live somewhere, and there are two homes.** A
 decision — why this approach and not the one that looks equally reasonable —
@@ -460,17 +462,18 @@ amended by
 for the third position,
 which also states what the rule costs and which paragraph of
 [ADR-088](docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)
-it corrects. `local-rules/no-explanatory-comments` in
-`@lcabrera/eslint-plugin` enforces it, and both shared flat configs turn it on
-for `.ts`, `.tsx`, `.js`, `.mjs` and `.cjs` sources — so a comment in any of the
-three positions is a lint error, not a review note. The rule's own README states every position it exempts and the
-options that widen them, including the two above. A one-line note on a member of an exported type is
-another: that member is a published surface, so state the precondition, the
-default or the encoding there and nothing else. "Exported" is reachability
-within the module, not the keyword — a note on a member of an unexported type
-that an exported one intersects is still read from an installer's editor. It stops at the eslint pass's reach: a workspace
-whose sources sit under `scripts/` is globally ignored by those configs, so a
-`.mjs` script there is held to this rule by review alone.
+it corrects.
+
+**Nothing enforces this mechanically, and that is deliberate.** A lint rule for
+it was built and removed: deciding whether a given comment carries something no
+declaration can say is a judgement, and every mechanical proxy for it —
+the `export` keyword, a character budget, an adjacency walk over the file's
+leading comments — drew the line somewhere a reader would not, so the rounds
+went to arguing the proxy rather than the code
+([#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028)). Hold this
+by review, and when a comment is the only thing in dispute, delete it rather
+than debate it — keep it only where its omission would cost a reader something
+the code does not say.
 
 **Never put a changing number in a comment or a doc.** Counts, file totals,
 finding tallies and measurements are true on the day they are written and wrong
