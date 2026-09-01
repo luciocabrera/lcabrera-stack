@@ -49,12 +49,16 @@ useful.
 and Clear Pinning are disabled under `'group-key'` alone. Under `'measure'` they
 are enabled and carry a `title` from the new `resolveColumnPinningTitle`, which
 turns the lock into the sentence the item states: the refusal on a group key,
-the band it travels with on a measure. Hide Column is unchanged — refused on a
+the band it applies to on a measure. That second sentence names no verb —
+"Applies to the whole band", not "Pins with its band" — because the same string
+lands on Clear Pinning, which unpins. Hide Column is unchanged — refused on a
 group key, and taking the band with it on a measure.
 
 **The drawer asks the same hook and maps the same half.** `PinningSection`
-reads `useTableColumnLayoutLock` and disables both toggles and its Clear Pinning
-on a group key. `resolveBatchColumnSettingsUpdate` resolves the **pinning** key
+reads `useTableColumnLayoutLock` and hands the lock to both toggles and to
+`PinningSectionToolbar`, which disables its Clear Pinning on a group key and
+carries the same `title` — the toolbar derives both answers from the lock rather
+than being told them separately, so the button and the sentence cannot disagree. `resolveBatchColumnSettingsUpdate` resolves the **pinning** key
 through `toDeclaredColumnKey`, and so do the draft the drawer opens with and its
 Reset. Sorting, sizing and filtering stay on the token, because those act on the
 measure column itself.

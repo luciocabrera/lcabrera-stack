@@ -64,7 +64,7 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
           toolbar={
             <PinningSectionToolbar
               isBusy={isBusy}
-              isLocked={isPinningLocked}
+              {...(layoutLock !== undefined && { layoutLock })}
               variant='toolbar'
             />
           }
@@ -94,7 +94,10 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
           </Button>
         </div>
       </SidePanelSection>
-      <PinningSectionToolbar isBusy={isBusy} isLocked={isPinningLocked} />
+      <PinningSectionToolbar
+        isBusy={isBusy}
+        {...(layoutLock !== undefined && { layoutLock })}
+      />
     </SidePanelSectionMain>
   );
 };

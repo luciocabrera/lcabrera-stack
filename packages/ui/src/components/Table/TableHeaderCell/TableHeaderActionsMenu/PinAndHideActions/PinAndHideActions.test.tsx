@@ -118,9 +118,9 @@ describe('PinAndHideActions under a layout lock', () => {
     expect(
       PINNING_ITEMS.map((item) => getButton(item).getAttribute('title')),
     ).toStrictEqual([
-      'Pins with its band: a measure shares the pinning of the column it measures.',
-      'Pins with its band: a measure shares the pinning of the column it measures.',
-      'Pins with its band: a measure shares the pinning of the column it measures.',
+      'Applies to the whole band: a measure shares the pinning of the column it measures.',
+      'Applies to the whole band: a measure shares the pinning of the column it measures.',
+      'Applies to the whole band: a measure shares the pinning of the column it measures.',
     ]);
   });
 

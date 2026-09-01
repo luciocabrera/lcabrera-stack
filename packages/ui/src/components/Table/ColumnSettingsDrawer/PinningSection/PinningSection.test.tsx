@@ -124,9 +124,14 @@ describe('PinningSection', () => {
     expect(getToggle('Pin Left').disabled).toBe(true);
     expect(getToggle('Pin Right').disabled).toBe(true);
     expect(getToggle('Clear Pinning').disabled).toBe(true);
-    expect(getToggle('Pin Left').getAttribute('title')).toBe(
+    expect(
+      ['Pin Left', 'Clear Pinning'].map((label) =>
+        getToggle(label).getAttribute('title'),
+      ),
+    ).toStrictEqual([
       'Cannot pin this column: a grouped column is always shown and always pinned to the left.',
-    );
+      'Cannot pin this column: a grouped column is always shown and always pinned to the left.',
+    ]);
   });
 
   it('leaves a measure pinnable, saying the pinning covers its band', () => {
@@ -136,8 +141,13 @@ describe('PinningSection', () => {
 
     expect(getToggle('Pin Left').disabled).toBe(false);
     expect(getToggle('Pin Right').disabled).toBe(false);
-    expect(getToggle('Pin Right').getAttribute('title')).toBe(
-      'Pins with its band: a measure shares the pinning of the column it measures.',
-    );
+    expect(
+      ['Pin Right', 'Clear Pinning'].map((label) =>
+        getToggle(label).getAttribute('title'),
+      ),
+    ).toStrictEqual([
+      'Applies to the whole band: a measure shares the pinning of the column it measures.',
+      'Applies to the whole band: a measure shares the pinning of the column it measures.',
+    ]);
   });
 });

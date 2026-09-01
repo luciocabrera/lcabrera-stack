@@ -14,11 +14,11 @@ describe('resolveColumnPinningTitle', () => {
     );
   });
 
-  it('states the band a measure pins with, rather than a refusal', () => {
+  it('states the band a measure carries, rather than a refusal', () => {
     const title = resolveColumnPinningTitle('measure');
 
     expect(title).toBe(
-      `Pins with its band: ${TABLE_COLUMN_LAYOUT_LOCK_LABELS.measure}.`,
+      `Applies to the whole band: ${TABLE_COLUMN_LAYOUT_LOCK_LABELS.measure}.`,
     );
     expect(title).not.toContain('Cannot');
   });

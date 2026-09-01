@@ -6,6 +6,7 @@ import type { ClearResetToolbarButtonsProps } from './ClearResetToolbarButtons.t
 
 export const ClearResetToolbarButtons = ({
   clearLabel,
+  clearTitle,
   hasValue,
   isBusy = false,
   onClear,
@@ -27,6 +28,7 @@ export const ClearResetToolbarButtons = ({
         isDisabled={!hasValue}
         onClick={onClear}
         size={buttonSize}
+        {...(clearTitle !== undefined && { title: clearTitle })}
         tooltipContent={isToolbar ? clearLabel : undefined}
         variant={buttonVariant}
       >
