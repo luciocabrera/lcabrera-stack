@@ -9,6 +9,12 @@ governs:
 
 **Issue:** [#1048](https://github.com/luciocabrera/lcabrera-stack/issues/1048)
 
+**Amended by**
+[ADR-105](./ADR-105-a-measure-is-a-column-of-its-own.md) — the `'measure'` half
+of the pinning refusal is reversed: the three pinning items are offered on a
+measure and state the band they move. The `'group-key'` half stands, as does
+everything below about Hide Column and the per-column ungroup.
+
 **Extends**
 [ADR-080](./ADR-080-a-group-key-renders-in-its-own-column.md) — the layout
 derivation whose force-pin and force-show are what these two items would be

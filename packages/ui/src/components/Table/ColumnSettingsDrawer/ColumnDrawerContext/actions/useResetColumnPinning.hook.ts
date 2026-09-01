@@ -18,12 +18,14 @@ export const useResetColumnPinning = () => {
       return;
     }
 
+    const columnsState = columnsStore.get();
+
     const columnPinning = getColumnPinSide({
       columnKey: toDeclaredColumnKey({
         columnKey,
-        columns: columnsStore.get()?.columns ?? [],
+        columns: columnsState?.columns ?? [],
       }),
-      pinning: columnsStore.get()?.columnPinning,
+      pinning: columnsState?.columnPinning,
     });
 
     columnStore.set({ columnPinning });
