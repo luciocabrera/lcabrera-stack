@@ -6,6 +6,7 @@ import type {
   TableColumnAggregate,
 } from '../Table.types';
 
+import { DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH } from '../Table.constants';
 import { withAggregateColumns } from './withAggregateColumns.util';
 
 type Row = {
@@ -34,6 +35,7 @@ type RunArgs = {
   readonly aggregates: readonly TableColumnAggregate[];
   readonly columnOrder?: readonly string[];
   readonly columnPinning?: ColumnPinningState<Row>;
+  readonly columns?: readonly TableColumn<Row>[];
   readonly columnVisibility?: ReadonlySet<string>;
   readonly groupingKeys?: readonly string[];
 };
@@ -42,6 +44,7 @@ const run = ({
   aggregates,
   columnOrder = ['order_id', 'customer_type', 'total_amount', 'order_count'],
   columnPinning = noPinning,
+  columns: runColumns = columns,
   columnVisibility = new Set<string>(),
   groupingKeys = ['customer_type'],
 }: RunArgs) =>
@@ -49,10 +52,15 @@ const run = ({
     aggregates,
     columnOrder: columnOrder as never,
     columnPinning,
-    columns,
+    columns: runColumns,
     columnVisibility: columnVisibility as never,
     groupingKeys,
   });
+
+const withTotalAmount = (patch: Partial<TableColumn<Row>>) =>
+  columns.map((column) =>
+    column.key === 'total_amount' ? { ...column, ...patch } : column,
+  );
 
 const keysOf = (result: ReturnType<typeof run>) =>
   result.columns.map((column) => String(column.key));
@@ -107,7 +115,7 @@ describe('withAggregateColumns', () => {
     ]);
   });
 
-  it('inherits the source column format and width, and resolves the aggregate data type', () => {
+  it('inherits the source column format, and resolves the aggregate data type', () => {
     const result = run({
       aggregates: [
         { columnKey: 'total_amount', fn: 'sum' },
@@ -122,10 +130,40 @@ describe('withAggregateColumns', () => {
       format: { currency: { currency: 'USD' } },
       headerGroupLabel: 'Total Amount',
       label: 'Sum',
-      minWidth: 160,
     });
     expect(count?.dataType).toBe('number');
     expect(count?.label).toBe('Count');
+  });
+
+  it('widens a measure past the source width, which the share bar shares', () => {
+    const measure = columnAt({
+      key: 'total_amount:sum',
+      result: run({ aggregates: [{ columnKey: 'total_amount', fn: 'sum' }] }),
+    });
+
+    expect(measure?.minWidth).toBe(DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH);
+  });
+
+  it('keeps a source column already wider than that floor', () => {
+    const result = run({
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+      columns: withTotalAmount({
+        minWidth: DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH + 80,
+      }),
+    });
+
+    expect(columnAt({ key: 'total_amount:sum', result })?.minWidth).toBe(
+      DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH + 80,
+    );
+  });
+
+  it('never widens a measure past the source maximum', () => {
+    const result = run({
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+      columns: withTotalAmount({ maxWidth: 120 }),
+    });
+
+    expect(columnAt({ key: 'total_amount:sum', result })?.minWidth).toBe(120);
   });
 
   it('makes a measure sortable but neither filterable nor groupable', () => {

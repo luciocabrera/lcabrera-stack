@@ -13,7 +13,9 @@ import {
 } from '#ui/components/Table/commands';
 import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useGetTableColumnSelectedKey } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import { useTableColumnLayoutLock } from '#ui/components/Table/hooks';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
+import { resolveColumnPinningTitle } from '#ui/components/Table/utils/resolveColumnPinningTitle.util';
 import { ICON_SIZE_MD } from '#ui/design-system/constants';
 
 import type { PinningSectionProps } from './PinningSection.types';
@@ -28,20 +30,24 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
   const setColumnPinning = useSetColumnPinning();
   const columnKey = useGetTableColumnSelectedKey();
   const column = useGetNormalizedColumn<Record<string, unknown>>(columnKey);
+  const layoutLock =
+    useTableColumnLayoutLock<Record<string, unknown>>(columnKey);
   const { isStatic } = resolveColumnCapabilities(column);
 
+  const isPinningLocked = layoutLock === 'group-key';
+  const title = resolveColumnPinningTitle(layoutLock);
   const { icon: PinLeftCommandIcon, label: pinLeftLabel } = PIN_LEFT_COMMAND;
   const { icon: PinRightCommandIcon, label: pinRightLabel } = PIN_RIGHT_COMMAND;
   const { isActive: isPinnedLeft, isEnabled: isPinLeftEnabled } =
     deriveToggleCommandState({
       current: columnPinning,
-      isDisabled: isStatic,
+      isDisabled: isStatic || isPinningLocked,
       target: 'left',
     });
   const { isActive: isPinnedRight, isEnabled: isPinRightEnabled } =
     deriveToggleCommandState({
       current: columnPinning,
-      isDisabled: isStatic,
+      isDisabled: isStatic || isPinningLocked,
       target: 'right',
     });
 
@@ -55,7 +61,13 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
       <SidePanelSection>
         <SidePanelSectionHeader
           title='Column Pinning'
-          toolbar={<PinningSectionToolbar isBusy={isBusy} variant='toolbar' />}
+          toolbar={
+            <PinningSectionToolbar
+              isBusy={isBusy}
+              isLocked={isPinningLocked}
+              variant='toolbar'
+            />
+          }
         />
         <div {...stylex.props(styles.buttonGroup)}>
           <Button
@@ -64,6 +76,7 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
             isDisabled={!isPinLeftEnabled}
             onClick={handlePinLeft}
             size='sm'
+            {...(title !== undefined && { title })}
             variant={isPinnedLeft ? 'primary' : 'outline'}
           >
             {pinLeftLabel}
@@ -74,13 +87,14 @@ export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
             isDisabled={!isPinRightEnabled}
             onClick={handlePinRight}
             size='sm'
+            {...(title !== undefined && { title })}
             variant={isPinnedRight ? 'primary' : 'outline'}
           >
             {pinRightLabel}
           </Button>
         </div>
       </SidePanelSection>
-      <PinningSectionToolbar isBusy={isBusy} />
+      <PinningSectionToolbar isBusy={isBusy} isLocked={isPinningLocked} />
     </SidePanelSectionMain>
   );
 };

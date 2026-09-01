@@ -3,6 +3,7 @@ import type {
   TableColumnsState,
 } from '#ui/components/Table/Table.types';
 
+import { toDeclaredColumnKey } from '#ui/components/Table/contexts/TableConfig/columns/actions/utils/toDeclaredColumnKey.util';
 import { getColumnPinSide } from '#ui/components/Table/utils';
 
 type GetTableColumnDrawerStateArgs<TData> = {
@@ -31,7 +32,10 @@ export const getTableColumnDrawerState = <TData>({
   )?.direction;
 
   const columnPinning = getColumnPinSide({
-    columnKey,
+    columnKey: toDeclaredColumnKey<TData>({
+      columnKey,
+      columns: columnsState?.columns ?? [],
+    }),
     pinning: columnsState?.columnPinning,
   });
 

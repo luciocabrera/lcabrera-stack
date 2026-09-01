@@ -1,7 +1,14 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 import type { TableColumnGroupingCapability } from '#ui/components/Table/Table.types';
 
@@ -13,6 +20,7 @@ import {
 const {
   appliedAggregatesRef,
   capabilityRef,
+  columnsRef,
   dataRef,
   groupingKeysRef,
   isGroupingEnabledRef,
@@ -30,6 +38,7 @@ const {
     current: [] as readonly { columnKey: string; fn: string }[],
   },
   capabilityRef: { current: undefined as unknown },
+  columnsRef: { current: [] as readonly Record<string, unknown>[] },
   dataRef: { current: [] as readonly Record<string, unknown>[] },
   groupingKeysRef: { current: [] as readonly string[] },
 
@@ -58,6 +67,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/grouping/selectors', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetColumns: () => columnsRef.current,
   useGetNormalizedColumn: () => normalizedColumnRef.current,
 }));
 
@@ -157,6 +167,7 @@ afterEach(() => {
   vi.clearAllMocks();
   appliedAggregatesRef.current = [];
   capabilityRef.current = undefined;
+  columnsRef.current = [];
   toggledGroupPathsRef.current = new Set<string>();
   dataRef.current = [];
   groupingKeysRef.current = [];
@@ -368,6 +379,42 @@ describe('GroupActions', () => {
   });
 
   describe('aggregation-mode commands', () => {
+    beforeEach(() => {
+      groupingKeysRef.current = ['city'];
+    });
+
+    it('offers nothing at all until the table is grouped', () => {
+      capabilityRef.current = numericCapability;
+      groupingKeysRef.current = [];
+
+      render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
+
+      expect(screen.queryByText('Sum')).toBeNull();
+      expect(screen.queryByText('Average')).toBeNull();
+      expect(screen.queryByText('No Aggregate')).toBeNull();
+      expect(screen.getByText('Group by This')).not.toBeNull();
+    });
+
+    it('offers the source column functions on the measure it derived', () => {
+      capabilityRef.current = numericCapability;
+      columnsRef.current = [{ key: 'total_amount', label: 'Total Amount' }];
+      appliedAggregatesRef.current = [{ columnKey: 'total_amount', fn: 'sum' }];
+
+      render(
+        <GroupActions columnKey='total_amount:sum' onClose={mockOnClose} />,
+      );
+
+      expect(getButton('Sum').getAttribute('aria-pressed')).toBe('true');
+      expect(getButton('Average').getAttribute('aria-pressed')).toBe('false');
+
+      fireEvent.click(getButton('Average'));
+
+      expect(mockAddColumnAggregate).toHaveBeenCalledWith({
+        columnKey: 'total_amount',
+        fn: 'avg',
+      });
+    });
+
     it('offers nothing when the route resolved no capability for the column', () => {
       render(<GroupActions columnKey='order_status' onClose={mockOnClose} />);
 
@@ -389,7 +436,7 @@ describe('GroupActions', () => {
 
     it('offers nothing at all while the column is an applied group key', () => {
       capabilityRef.current = numericCapability;
-      groupingKeysRef.current = ['total_amount'];
+      groupingKeysRef.current = ['city', 'total_amount'];
 
       render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
 
@@ -402,7 +449,7 @@ describe('GroupActions', () => {
 
     it('leaves the rest of the grouping section untouched by that suppression', () => {
       capabilityRef.current = numericCapability;
-      groupingKeysRef.current = ['total_amount'];
+      groupingKeysRef.current = ['city', 'total_amount'];
 
       render(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
 
@@ -414,7 +461,7 @@ describe('GroupActions', () => {
 
     it('restores the functions when the column leaves the grouping', () => {
       capabilityRef.current = numericCapability;
-      groupingKeysRef.current = ['total_amount'];
+      groupingKeysRef.current = ['city', 'total_amount'];
 
       const { rerender } = render(
         <GroupActions columnKey='total_amount' onClose={mockOnClose} />,
@@ -422,7 +469,7 @@ describe('GroupActions', () => {
 
       expect(screen.queryByText('Sum')).toBeNull();
 
-      groupingKeysRef.current = [];
+      groupingKeysRef.current = ['city'];
       rerender(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
 
       expect(screen.getByText('Sum')).not.toBeNull();
@@ -433,7 +480,7 @@ describe('GroupActions', () => {
 
     it('is unmoved when a *different* column joins or leaves the grouping', () => {
       capabilityRef.current = numericCapability;
-      groupingKeysRef.current = ['priority'];
+      groupingKeysRef.current = ['city', 'priority'];
 
       const { rerender } = render(
         <GroupActions columnKey='total_amount' onClose={mockOnClose} />,
@@ -441,7 +488,7 @@ describe('GroupActions', () => {
 
       expect(screen.getByText('Sum')).not.toBeNull();
 
-      groupingKeysRef.current = [];
+      groupingKeysRef.current = ['city'];
       rerender(<GroupActions columnKey='total_amount' onClose={mockOnClose} />);
 
       expect(screen.getByText('Sum')).not.toBeNull();
@@ -820,6 +867,7 @@ describe('GroupActions', () => {
 
     it('still offers the aggregate commands, which measure rather than group', () => {
       isGroupingLockedRef.current = true;
+      groupingKeysRef.current = ['city'];
       normalizedColumnRef.current = { isGroupable: true, key: 'total_amount' };
       capabilityRef.current = {
         aggregates: ['sum'],

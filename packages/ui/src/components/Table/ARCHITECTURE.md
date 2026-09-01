@@ -331,15 +331,38 @@ layout persists through nor the list the drawer offers — which is what makes
 ungrouping free, and what means a deselected aggregate needs no pruning: the
 next derivation simply does not produce its column.
 
-**Two of those derivations are what the header menu refuses over.** A group key
-is force-pinned left and forced visible on every derivation, so pinning or
-hiding one writes state the next derivation discards; a measure resolves every
-layout action back to the column it measures, which then expands into _all_ of
-that column's measures. `resolveColumnLayoutLock` answers which of the two a
-column is, `PinAndHideActions` asks it once through `useTableColumnLayoutLock`
-and drills the answer to its four delegates, and the item states the reason in a
-`title` because a disabled button fires no pointer events. Hide Column is refused on a group key only — hiding a measure
-works, and takes its siblings with it.
+**Two of those derivations are what the header menu answers for, and it answers
+differently.** A group key is force-pinned left and forced visible on every
+derivation, so pinning or hiding one writes state the next derivation discards —
+both are refused. A measure resolves every layout action back to the column it
+measures, which then expands into _all_ of that column's measures: a wider
+gesture than the one asked for, not an impossible one, so pinning a measure is
+offered and moves its whole band. `resolveColumnLayoutLock` answers which of the
+two a column is, `PinAndHideActions` asks it once through
+`useTableColumnLayoutLock` and drills the answer to its four delegates, and
+`resolveColumnPinningTitle` turns it into the sentence the item carries — the
+refusal on a group key, the band on a measure — in a `title`, because a disabled
+button fires no pointer events. Hide Column is refused on a group key only —
+hiding a measure works, and takes its siblings with it.
+
+**The per-column settings drawer asks the same question through the same
+hook.** Its Pinning tab would otherwise offer a group key a side the next
+derivation discards, and its Clear Pinning would appear to undo the hoist; it
+disables all three on a group key and carries the same `title`. Its write path
+is separate from the menu's, so `resolveBatchColumnSettingsUpdate` maps the
+pinning half — and only that half — through `toDeclaredColumnKey`, and the draft
+the drawer opens with reads its side from the declared key too. Sorting, sizing
+and filtering stay keyed by the token, which is the column they act on.
+
+**The aggregate functions are offered only while the grid is grouped, and a
+measure offers its source's.** An aggregate applied to a flat read has no group
+row to state a value in, so `AggregateActions` renders nothing while
+`groupingKeys` is empty — the grouping commands beside it stay, because they are
+how a grouping starts. Once grouped, the menu resolves its column through
+`toDeclaredColumnKey` before asking, so opening it on `Sum` asks the capability
+of `Total Amount`: the applied function reads pressed, and picking another
+changes the band from the column it produced rather than from the one it
+measures.
 
 **The row-actions column is the one thing the scope keeps that the grouping does
 not name**, because it is not a data column: its cell is the grid's own
@@ -455,6 +478,14 @@ key is dropped — that column already carries its key's value. The em dash
 ADR-065 defined survives only for a measure column whose value the payload did
 not carry, which is what `TableGroupAggregate` renders when a group row states
 no aggregate for it.
+
+**A measure is wider than the column it measures**, because it carries more:
+`withAggregateColumns` floors each derived column at
+`DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH` rather than inheriting the source's
+`minWidth`, since a share of the grand total puts a bar and a percentage beside
+a value that is already the widest the column ever holds. The floor never
+crosses a `maxWidth` the consumer declared, and a source already wider than it
+keeps its own width.
 
 A measure column's key is the aggregate's token — `total_amount:avg` — which
 `DataKey` admits for the same reason it admits `'actions'`: a column identity

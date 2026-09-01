@@ -6,3 +6,5 @@ export type TabsHeaderProps = {
   readonly onSelectTab: (tabKey: string) => void;
   readonly tabs: readonly TabItem[];
 };
+
+export type TabsScrollDirection = 'end' | 'start';

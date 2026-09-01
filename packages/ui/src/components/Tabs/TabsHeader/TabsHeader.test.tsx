@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { TabsHeader } from './TabsHeader.component';
@@ -174,5 +180,122 @@ describe('TabsHeader', () => {
     );
     fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' });
     expect(onSelectTab).toHaveBeenCalledWith('b');
+  });
+});
+
+type StubViewportArgs = {
+  readonly clientWidth: number;
+  readonly scrollLeft?: number;
+  readonly scrollWidth: number;
+  readonly tabOffsetLeft?: number;
+};
+
+const stubViewport = ({
+  clientWidth,
+  scrollLeft = 0,
+  scrollWidth,
+  tabOffsetLeft = scrollLeft,
+}: StubViewportArgs) => {
+  const position = { current: scrollLeft };
+
+  vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(
+    clientWidth,
+  );
+  vi.spyOn(Element.prototype, 'scrollWidth', 'get').mockReturnValue(
+    scrollWidth,
+  );
+  vi.spyOn(Element.prototype, 'scrollLeft', 'get').mockImplementation(
+    () => position.current,
+  );
+  vi.spyOn(Element.prototype, 'scrollLeft', 'set').mockImplementation(
+    (next: number) => {
+      position.current = next;
+    },
+  );
+  vi.spyOn(HTMLElement.prototype, 'offsetLeft', 'get').mockReturnValue(
+    tabOffsetLeft,
+  );
+  vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(0);
+
+  return position;
+};
+
+const renderHeader = async () => {
+  render(
+    <TabsHeader
+      activeTab='a'
+      isBusy={false}
+      onSelectTab={vi.fn()}
+      tabs={tabs}
+    />,
+  );
+
+  await act(async () => {});
+};
+
+describe('TabsHeader when the tabs do not fit', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('offers no scroll affordance while every tab fits', async () => {
+    stubViewport({ clientWidth: 400, scrollWidth: 400 });
+    await renderHeader();
+
+    expect(screen.queryByTestId('tabs-scroll-start')).toBeNull();
+    expect(screen.queryByTestId('tabs-scroll-end')).toBeNull();
+  });
+
+  it('offers only the forward affordance at the start of the strip', async () => {
+    stubViewport({ clientWidth: 200, scrollWidth: 600 });
+    await renderHeader();
+
+    expect(screen.queryByTestId('tabs-scroll-start')).toBeNull();
+    expect(screen.getByTestId('tabs-scroll-end')).not.toBeNull();
+  });
+
+  it('offers only the backward affordance at the end of the strip', async () => {
+    stubViewport({ clientWidth: 200, scrollLeft: 400, scrollWidth: 600 });
+    await renderHeader();
+
+    expect(screen.getByTestId('tabs-scroll-start')).not.toBeNull();
+    expect(screen.queryByTestId('tabs-scroll-end')).toBeNull();
+  });
+
+  it('offers both once the strip is scrolled part way', async () => {
+    stubViewport({ clientWidth: 200, scrollLeft: 100, scrollWidth: 600 });
+    await renderHeader();
+
+    expect(screen.getByTestId('tabs-scroll-start')).not.toBeNull();
+    expect(screen.getByTestId('tabs-scroll-end')).not.toBeNull();
+  });
+
+  it('brings the active tab back into view on mount', async () => {
+    const position = stubViewport({
+      clientWidth: 200,
+      scrollLeft: 300,
+      scrollWidth: 600,
+      tabOffsetLeft: 0,
+    });
+
+    await renderHeader();
+
+    expect(position.current).toBe(0);
+  });
+
+  it('moves the strip by most of a viewport in the direction clicked', async () => {
+    const position = stubViewport({
+      clientWidth: 200,
+      scrollLeft: 100,
+      scrollWidth: 600,
+    });
+
+    await renderHeader();
+
+    fireEvent.click(screen.getByTestId('tabs-scroll-end'));
+    expect(position.current).toBe(260);
+
+    fireEvent.click(screen.getByTestId('tabs-scroll-start'));
+    expect(position.current).toBe(100);
   });
 });

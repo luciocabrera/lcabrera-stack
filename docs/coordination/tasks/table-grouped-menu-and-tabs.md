@@ -10,7 +10,7 @@ area:
 started: 2026-09-01
 updated: 2026-09-01
 plan: (none)
-pr: (none)
+pr: #1055
 issue: #1054
 ---
 
@@ -20,6 +20,8 @@ Settle the grouped Table's aggregate menu, measure pinning and Tabs overflow
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented and under the quality gate — measure pinning, the
+  aggregate menu, the measure width floor and the Tabs overflow scroll, with
+  ADR-105/106 and a changeset.
 - Blockers: none
-- Next:
+- Next: run the gate from the root, push, and flip PR #1055 out of draft.

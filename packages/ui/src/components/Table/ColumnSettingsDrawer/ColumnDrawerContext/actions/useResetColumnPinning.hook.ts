@@ -1,4 +1,5 @@
 import { useColumnDrawerContextValue } from '#ui/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/useColumnDrawerContextValue.hook';
+import { toDeclaredColumnKey } from '#ui/components/Table/contexts/TableConfig/columns/actions/utils/toDeclaredColumnKey.util';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { getColumnPinSide } from '#ui/components/Table/utils';
 import { logger } from '#ui/utils/logger';
@@ -18,7 +19,10 @@ export const useResetColumnPinning = () => {
     }
 
     const columnPinning = getColumnPinSide({
-      columnKey,
+      columnKey: toDeclaredColumnKey({
+        columnKey,
+        columns: columnsStore.get()?.columns ?? [],
+      }),
       pinning: columnsStore.get()?.columnPinning,
     });
 

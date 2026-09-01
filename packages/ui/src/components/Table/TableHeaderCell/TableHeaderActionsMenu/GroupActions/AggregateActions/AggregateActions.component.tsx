@@ -1,3 +1,5 @@
+import { toDeclaredColumnKey } from '#ui/components/Table/contexts/TableConfig/columns/actions/utils/toDeclaredColumnKey.util';
+import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useGetTableGroupingAggregates,
   useGetTableGroupingKeys,
@@ -15,7 +17,8 @@ export const AggregateActions = <TData,>({
   columnKey,
   onClose,
 }: AggregateActionsProps<TData>) => {
-  const key = String(columnKey);
+  const columns = useGetColumns<TData>();
+  const key = String(toDeclaredColumnKey<TData>({ columnKey, columns }));
   const capability = useGetTableColumnGroupingCapability(key);
   const groupingKeys = useGetTableGroupingKeys();
   const applied = useGetTableGroupingAggregates();
@@ -26,7 +29,7 @@ export const AggregateActions = <TData,>({
     isGroupKey: groupingKeys.includes(key),
   });
 
-  if (affordable.length === 0) return;
+  if (groupingKeys.length === 0 || affordable.length === 0) return;
 
   return (
     <>

@@ -18,13 +18,14 @@ const PINNING_TOOLBAR = {
 
 export const PinningSectionToolbar = ({
   isBusy = false,
+  isLocked = false,
   variant = 'footer',
 }: PinningSectionToolbarProps) => {
   const columnPinning = useGetColumnPinning();
   const setColumnPinning = useSetColumnPinning();
   const resetColumnPinning = useResetColumnPinning();
 
-  const hasPinning = columnPinning !== undefined;
+  const hasPinning = columnPinning !== undefined && !isLocked;
 
   const handleClear = () => {
     setColumnPinning();

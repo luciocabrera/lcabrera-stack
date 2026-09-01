@@ -179,7 +179,7 @@ beforeEach(() => {
   liveAggregatesRef.current = [];
   offerRef.current = [];
   draftGroupingKeysRef.current = [];
-  liveGroupingKeysRef.current = [];
+  liveGroupingKeysRef.current = ['priority'];
 });
 
 afterEach(() => {
