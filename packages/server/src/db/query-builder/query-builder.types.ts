@@ -80,7 +80,7 @@ export type QuerySort = {
 };
 
 export type SelectQueryDescriptor = {
-  /** Opt-in: when set, every fields/filter/sort column must be a member. */
+  /** Opt-in: every fields/filter/sort column must be a member. Omit only if no column is request-derived. */
   readonly allowedColumns?: readonly string[];
   /** Resumes after this row; `sort` must be a total order ending on its `uniqueColumn`. */
   readonly cursor?: QueryCursor;
