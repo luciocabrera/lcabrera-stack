@@ -11,10 +11,6 @@ import { isEnterpriseOrdersResponse } from './config';
 const PAGINATED_PATH = '/_api/enterprise-orders/paginated';
 
 export type FetchOrderGroupPageArgs = PaginatedFetchArgs & {
-  /**
-   * The modal reads it from its own URL and never rebuilds it, so the request the server
-   * parses is the one the link named.
-   */
   readonly group: string;
 };
 

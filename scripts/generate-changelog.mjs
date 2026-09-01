@@ -26,11 +26,9 @@ import { parseCommitHeader } from '../packages/repo-standards/scripts/commit-con
 import { readRepoSlug } from './lib/git-remote.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
-// Field / record separators matching the git `--format` bytes (%x1f / %x1e).
 const UNIT = String.fromCodePoint(0x1f);
 const RECORD = String.fromCodePoint(0x1e);
 
-/** commit type → section heading, in the order sections should appear. */
 const TYPE_SECTIONS = [
   ['feat', '✨ Features'],
   ['fix', '🐛 Bug Fixes'],
@@ -65,7 +63,6 @@ const parseRecords = (raw) =>
       return { hash, decoration, date, subject, body };
     });
 
-/** Walks newest→oldest, opening a new section at each tagged commit. */
 const groupByVersion = (records) => {
   const versions = [{ version: 'Unreleased', commits: [] }];
   for (const record of records) {
@@ -152,9 +149,6 @@ const main = () => {
     (count, version) => count + version.commits.length,
     0,
   );
-  // Each rendered version ends in a blank line, so the join leaves a trailing
-  // one. Oxfmt strips it, which would make every regeneration produce a diff
-  // the formatter then has to undo — emit the file the way `vp fmt` wants it.
   const body = versions
     .map((version) => renderVersion(version, slug))
     .join('\n')

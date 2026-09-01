@@ -39,7 +39,6 @@ const customDescriptor = ({
 }: CustomDescriptorArgs): TableBodyCellDescriptor<Row> =>
   ({ ...shared, children, dataType, kind: 'custom', label: '' }) as const;
 
-/** The classes the cell's own right-alignment style compiles to, read at run time. */
 const alignRightClasses = () =>
   (stylex.props(tableBodyCellStyles.alignRight).className ?? '').split(' ');
 
@@ -56,10 +55,6 @@ const defaultDescriptor = (value: unknown): TableBodyCellDescriptor<Row> =>
     value,
   }) as const;
 
-/**
- * A cell renders a `td`, which is only valid inside a row — and a grid cell,
- * which reads the grid's focus store.
- */
 const renderCell = (descriptor: TableBodyCellDescriptor<Row>) =>
   render(
     <TableFocusProvider>
@@ -89,16 +84,12 @@ describe('renderFromDescriptor', () => {
   });
 
   it('renders each branch as a single td', () => {
-    // The branches pass disjoint props — `children` on one, `value` on the
-    // other — so the cell must not end up rendering both.
     renderCell(customDescriptor({ children: <span>custom</span> }));
 
     expect(screen.getByRole('gridcell').textContent).toBe('custom');
   });
 
   it('forwards the descriptor’s sizing to the cell', () => {
-    // Guards the props object itself: a field dropped from either branch is
-    // invisible in the text content but changes the rendered cell.
     renderCell(defaultDescriptor('x'));
 
     expect(screen.getByRole('gridcell').getAttribute('style')).toContain(
@@ -107,8 +98,6 @@ describe('renderFromDescriptor', () => {
   });
 
   it('forwards a custom descriptor’s dataType so the cell can align by it', () => {
-    // The branch dropped `dataType` entirely until #1018, which is what left a group
-    // row's currency total flush left in a column of right-aligned numbers.
     renderCell(
       customDescriptor({ children: <span>4,200</span>, dataType: 'currency' }),
     );
@@ -119,8 +108,6 @@ describe('renderFromDescriptor', () => {
   });
 
   it('leaves a custom descriptor without a dataType unaligned', () => {
-    // The consumer-render case, and the control for the assertion above: same branch,
-    // same children, and the only difference is the type the descriptor withheld.
     renderCell(customDescriptor({ children: <span>4,200</span> }));
 
     const applied = classesOnCell();

@@ -30,11 +30,9 @@ type FunctionNode =
 const isArrayMethodCallback = (node: FunctionNode): boolean => {
   const parent = node.parent;
 
-  // Check if this function is a direct argument to a call expression
   if (parent?.type === 'CallExpression') {
     const callee = parent.callee;
 
-    // Check for array methods (map, filter, forEach, find, findIndex, some, every, reduce, etc.)
     if (callee.type === 'MemberExpression') {
       const methodName =
         callee.property.type === 'Identifier'
@@ -69,11 +67,6 @@ const isArrayMethodCallback = (node: FunctionNode): boolean => {
   return false;
 };
 
-/**
- * `new Promise((resolve, reject) => …)`. The executor is invoked by the
- * language with two positional arguments, so an object parameter is not an
- * option — this was the case that had to be suppressed by hand.
- */
 const isPromiseExecutor = (node: FunctionNode): boolean => {
   const parent = node.parent;
 
@@ -85,18 +78,6 @@ const isPromiseExecutor = (node: FunctionNode): boolean => {
   );
 };
 
-/**
- * A function whose shape is fixed by an explicit type annotation it conforms
- * to, in either spelling:
- *
- *   const handler: RequestHandler = (request, response, next) => …
- *   const create = (): RequestHandler => (request, response, next) => …
- *
- * Both say the parameters were dictated elsewhere. This covers every framework
- * handler in the repo (Express, React Router, node:http) without this rule
- * knowing that any of those frameworks exist — the annotation is the signal,
- * not the name it happens to resolve to.
- */
 const isConformingToAnnotatedType = (node: FunctionNode): boolean => {
   const parent = node.parent;
 
@@ -104,8 +85,6 @@ const isConformingToAnnotatedType = (node: FunctionNode): boolean => {
     return parent.id.typeAnnotation !== undefined && parent.init === node;
   }
 
-  // `(): T => (a, b) => …` — the reported function is the returned body of an
-  // arrow that declares its return type, so that type fixes this signature.
   return (
     parent?.type === 'ArrowFunctionExpression' &&
     parent.body === node &&
@@ -122,13 +101,10 @@ const checkFunction = ({
 }) => {
   const params = node.params;
 
-  // Skip if single parameter or no parameters. A lone ObjectPattern — the shape
-  // this rule is asking for — is covered by the same check.
   if (params.length <= 1) {
     return;
   }
 
-  // Skip signatures the author does not control (see the header).
   if (
     isArrayMethodCallback(node) ||
     isPromiseExecutor(node) ||
@@ -137,7 +113,6 @@ const checkFunction = ({
     return;
   }
 
-  // Report violation
   context.report({
     messageId: 'useObjectParam',
     node,

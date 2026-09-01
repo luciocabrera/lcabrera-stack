@@ -8,11 +8,6 @@ type RunInTransactionArgs<TResult> = {
   readonly run: (tx: TransactionClient) => Promise<TResult>;
 };
 
-/**
- * For a caller that already has a `pg.Client` (`withTransaction` covers the
- * pool). Thread `tx` through every write that must be atomic — a call that
- * omits it goes through the pool singleton and is outside the transaction.
- */
 export const runInTransaction = async <TResult>({
   client,
   run,

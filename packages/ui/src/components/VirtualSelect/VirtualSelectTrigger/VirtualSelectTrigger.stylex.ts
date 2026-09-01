@@ -7,7 +7,6 @@ import {
 } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
-/** Maximum visible height (px) for the trigger area before tags overflow */
 export const TRIGGER_MAX_HEIGHT = 88;
 
 export const styles = stylex.create({

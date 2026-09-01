@@ -51,7 +51,6 @@ export const useBatchSetColumnSettings = <TData>() => {
 
     if (!didPersist) return;
 
-    // Only trigger data fetch if query-affecting changes occurred
     if (hasQueryChanged) {
       dataStore.set({
         isLoading: true,

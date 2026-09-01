@@ -12,11 +12,6 @@ type CookieEntry = {
   value: string;
 };
 
-/**
- * Server action to persist cookies via Set-Cookie headers.
- * Sets all cookies server-side via multiple Set-Cookie response headers and redirects only
- * when the requested search param updates effectively change the URL.
- */
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const currentUrl = formData.get('currentUrl');

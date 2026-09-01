@@ -10,10 +10,6 @@ import { buildOrderByClause } from './build-order-by-clause.util.ts';
 import { buildWhereClause } from './build-where-clause.util.ts';
 import { quoteIdentifier } from './quote-identifier.util.ts';
 
-/**
- * Pass `cursor` instead for keyset ("seek") pagination over a total order — O(limit)
- * rather than O(offset), for infinite scroll (ADR-052).
- */
 export const buildSelectQuery = ({
   allowedColumns,
   cursor,

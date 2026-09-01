@@ -71,9 +71,6 @@ describe('signAccessTicket', () => {
   });
 
   it('cannot be collided by shifting the subject/expiry boundary', () => {
-    // The reason the signed payload is structured rather than concatenated:
-    // under `${subject}${expiresAt}` both of these sign the bytes "run12", so
-    // a ticket minted for one would verify for the other.
     const first = signAccessTicket({
       expiresAt: 2,
       secret: 'secret',

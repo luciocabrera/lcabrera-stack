@@ -9,16 +9,6 @@ type VerifyAccessTicketArgs = {
   readonly ticket: string;
 };
 
-/**
- * Returns a boolean and never throws, so a garbage value from the wire simply fails to
- * authorize. Three things must hold:
- * 1. `expiresAt` is an exact integer still in the future, compared against the
- *    caller-supplied `now` (this stays pure).
- * 2. The signature matches one re-derived for **this** `subject` — a ticket for another
- *    subject cannot be replayed sideways.
- * 3. The compare is `timingSafeEqual`, with lengths checked first because that API throws
- *    on a length mismatch.
- */
 export const isAccessTicketValid = ({
   now,
   secret,

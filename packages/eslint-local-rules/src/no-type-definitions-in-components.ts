@@ -5,8 +5,6 @@ import { createRule } from './create-rule.ts';
 
 export default createRule({
   create(context) {
-    // Which suffixes count is `component-files.ts`'s call, not this rule's —
-    // it is shared with `filename-convention`, which enforces the same set.
     if (!isComponentFilename(context.filename)) {
       return {};
     }

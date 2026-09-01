@@ -36,11 +36,6 @@ import {
   WIDE_ALLTYPES_TABLE,
 } from '../config';
 
-/**
- * Server-only Postgres access for `wide_alltypes_150`. Lives in `.server/`, so the build
- * fails if client code imports it. Reaches the pool via `getPool`.
- */
-
 const TARGET = {
   allowedColumns: WIDE_ALLTYPES_ALLOWED_COLUMNS,
   schema: WIDE_ALLTYPES_SCHEMA,
@@ -59,19 +54,10 @@ export type SelectGroupedWideAlltypes150Args = {
   readonly aggregates: TableGroupingState['aggregates'];
   readonly groupKeys: readonly string[];
   readonly groupMode: TableGroupingState['mode'];
-  /** The granularity each temporal key is grouped at, by column (ADR-084). */
   readonly groupPeriods: TableGroupingState['periods'];
   readonly sort: readonly ColumnSort[];
 };
 
-/**
- * **This function is the point of #575.** Every rule a grouped read depends on — the
- * `count(*)`-first aggregate list, the alias pairing, the grouped `ORDER BY`, the
- * `GROUPING()` decode — comes from `@lcabrera/server/db/olap` (ADR-082, #643).
- * What is written here is this table's own: which table, which row ceiling, and turning
- * the UI's aggregate record into a list, which reads a `@lcabrera/ui` type the server
- * package may not depend on (ADR-038).
- */
 const selectGroupedWideAlltypes150 = async ({
   aggregates: selectedAggregates,
   groupKeys,
@@ -92,10 +78,6 @@ const selectGroupedWideAlltypes150 = async ({
         keys: groupKeys,
         maxRows: WIDE_ALLTYPES_GROUP_MAX_ROWS,
         periods: groupPeriods,
-        // `resolveQuerySort` is the same adapter the paginated branch uses, so
-        // the two orderings come from one conversion. Its fallback tiebreaker is
-        // harmless here: `toGroupSort` keeps only terms naming a group key or
-        // one of the requested aggregates, and the primary key is neither.
         sort: toGroupSort({
           groupKeys,
           requested,
@@ -131,14 +113,6 @@ const selectGroupedWideAlltypes150 = async ({
   }
 };
 
-/**
- * What each of this route's columns may do in a grouped read, from the pg catalogue
- * (ADR-058).
- * The wide table is where this matters most: 150 columns of deliberately mixed types, so
- * the coarse `TableColumn.dataType` vocabulary — which reports `numeric`, `jsonb` and
- * `point` alike as `string` (#550) — would offer the wrong aggregates on a large fraction
- * of them.
- */
 export const selectWideAlltypes150GroupingCapabilities = async () =>
   getColumnGroupingCapabilities({
     columns: WIDE_ALLTYPES_ALLOWED_COLUMNS,
@@ -150,11 +124,6 @@ export type SelectWideAlltypes150PageArgs = {
   readonly grouping?: TableGroupingState;
   readonly limit: number;
   readonly offset: number;
-  /**
-   * Narrowing it to what this table can actually order by happens here rather than in each
-   * caller, so the SSR loader and the paginated resource route cannot order a page two
-   * different ways.
-   */
   readonly sorting: readonly ColumnSort[];
 };
 
@@ -205,14 +174,6 @@ export type ReadWideAlltypes150PageArgs = {
   readonly sorting: SortingState<WideAlltypes150>;
 };
 
-/**
- * **`grouping` reaches only the self-hosted branch**, and the loader is what keeps that
- * honest: it declares `isGroupingEnabled` from the same switch, so an external deployment
- * never offers the control and never sends the param.
- * The external endpoint has no grouping API to forward to, and answering a grouped request
- * from this process while the rows came from another one would summarise a different
- * result set than the page it sits above.
- */
 export const readWideAlltypes150Page = async ({
   grouping,
   limit,

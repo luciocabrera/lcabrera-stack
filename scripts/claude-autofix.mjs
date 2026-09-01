@@ -39,7 +39,6 @@ const REPO_ROOT = resolve(import.meta.dirname, '..');
 const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 const STDIN_FD = 0;
 
-/** Directory segments we never touch (generated, vendored, or scratch). */
 const IGNORED_SEGMENTS = new Set([
   'node_modules',
   '.git',
@@ -51,7 +50,6 @@ const IGNORED_SEGMENTS = new Set([
   'reports',
 ]);
 
-/** Extension -> which fixers apply. Mirrors each tool's own file scoping. */
 const OXFMT_EXTS = new Set([
   '.js',
   '.jsx',
@@ -80,9 +78,6 @@ const OXLINT_EXTS = new Set([
   '.cts',
 ]);
 
-// ---- pure core --------------------------------------------------------------
-
-/** Absolute path of the edited file, or empty when the payload has none. */
 const parseFilePath = (raw) => {
   const filePath = JSON.parse(raw)?.tool_input?.file_path;
   return typeof filePath === 'string' && filePath.length > 0
@@ -90,14 +85,12 @@ const parseFilePath = (raw) => {
     : '';
 };
 
-/** True when the path is outside the repo or inside a generated/vendored dir. */
 const isIgnored = (absPath) => {
   const rel = relative(REPO_ROOT, absPath);
   if (rel.length === 0 || rel.startsWith('..')) return true;
   return rel.split(sep).some((segment) => IGNORED_SEGMENTS.has(segment));
 };
 
-/** Ordered fixers that apply to this file's extension. */
 const fixersFor = (absPath) => {
   const ext = extname(absPath).toLowerCase();
   return [
@@ -114,9 +107,6 @@ const fixersFor = (absPath) => {
   ].filter(Boolean);
 };
 
-// ---- effects (edges) --------------------------------------------------------
-
-/** Run one fixer; swallow failures so the hook never blocks Claude. */
 const applyFixer = ({ name, bin, args }) => {
   try {
     execFileSync(bin, args, {
@@ -126,7 +116,7 @@ const applyFixer = ({ name, bin, args }) => {
     });
     return name;
   } catch {
-    return ''; // binary missing, timed out, or unfixable findings remain
+    return '';
   }
 };
 

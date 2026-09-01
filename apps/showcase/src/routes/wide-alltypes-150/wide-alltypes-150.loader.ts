@@ -20,15 +20,6 @@ import {
   TITLE,
 } from './WideAlltypes150.constants';
 
-/**
- * No `filterOptions`, and columns are returned undecorated: this loader appends no
- * distinct filter descriptors because the endpoint behind it supports none. It
- * declares neither `isKeysetEnabled` nor `isServerFilterEnabled` on its `meta`, and
- * absent means off (ADR-063), so load-more carries `limit`, `skip` and `sort` only.
- * `COLUMNS` is fully serializable with no functions (ADR-009), which is what lets the
- * loader return it directly inside `columnsState`.
- * **Grouping is declared from that same switch** (#575).
- */
 const IS_SELF_HOSTED = !isExternalApiEnabled();
 export const loader = createTableRouteLoader<
   WideAlltypes150,
@@ -38,8 +29,6 @@ export const loader = createTableRouteLoader<
   columns: COLUMNS,
   fetchPage: ({ effectiveSorting, grouping, request }) =>
     readWideAlltypes150Page({
-      // Already sanitized against this route's columns, and empty unless the
-      // capability below is declared — so this is a forward, not a decision.
       grouping,
       limit: INITIAL_PAGE_SIZE,
       requestUrl: request.url,

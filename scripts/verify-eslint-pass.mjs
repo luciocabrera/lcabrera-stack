@@ -16,7 +16,18 @@
  * Effects live here; the rules are pure in `./lib/eslint-pass-probe.mjs`.
  *
  * Usage: node scripts/verify-eslint-pass.mjs
+ *
+ * The binary probed is the **workspace's own**, which is what
+ * `lint:eslint:check` resolves from its bare `eslint` — and, under pnpm's
+ * isolated layout, not the same install as any other workspace's. There is no
+ * `eslint` in the root `.bin` at all, so probing with a root path silently
+ * fails to spawn and reads as a crashed rule; it is absolute so it cannot be
+ * resolved through a writeable `PATH` entry (Sonar S4036). The probe file is
+ * written inside the workspace so it resolves that workspace's flat config, and
+ * eslint's non-zero exit on findings is expected, so the JSON report is read
+ * off the thrown error rather than treated as a failure.
  */
+
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
@@ -31,21 +42,9 @@ import {
 
 const REPO_ROOT = process.cwd();
 
-/**
- * The **workspace's own** binary, which is what `lint:eslint:check` resolves
- * from its bare `eslint` — and, under pnpm's isolated layout, not the same
- * install as any other workspace's. There is no `eslint` in the root `.bin` at
- * all, so probing with a root path silently fails to spawn and reads as a
- * crashed rule. Absolute, so it cannot be resolved through a writeable `PATH`
- * entry (Sonar S4036).
- */
 const eslintBin = (workspace) =>
   join(REPO_ROOT, workspace, 'node_modules', '.bin', 'eslint');
 
-/**
- * The probe is linted from inside the workspace so it resolves that workspace's
- * flat config; a file outside it would pick up no config at all.
- */
 const withProbeFile = (workspace, run) => {
   const dir = mkdtempSync(join(REPO_ROOT, workspace, '.eslint-probe-'));
 
@@ -58,11 +57,6 @@ const withProbeFile = (workspace, run) => {
   }
 };
 
-/**
- * eslint's JSON report for the probe. A non-zero exit is expected — findings are
- * the point — so the output is read off the thrown error rather than treated as
- * a failure.
- */
 const lintProbe = (workspace, target) => {
   const args = [target, '--config', 'eslint.config.mjs', '--format', 'json'];
 

@@ -6,10 +6,6 @@ import { POSTAL_CODE_PATTERN } from '../config';
 
 const { field, fieldRow } = createFieldBuilders<EnterpriseOrderValues>();
 
-/**
- * Build the shared `city`/`state` and `country`/`postal_code` rows of an address group,
- * parameterized by the column prefix.
- */
 export const buildAddressLocalityRows = (prefix: 'billing' | 'shipping') => [
   fieldRow({
     fields: [

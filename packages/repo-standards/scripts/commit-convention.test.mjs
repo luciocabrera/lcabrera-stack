@@ -10,12 +10,6 @@ import {
   validatePrTitle,
 } from './commit-convention.mjs';
 
-// This module is the ONE spec behind the commit-msg hook, the PR-standards CI
-// gate, the changelog generator and the PR labeler. AGENTS.md Rule 13 forbids
-// restating its type list anywhere else precisely so those four cannot drift —
-// which makes the spec itself the thing that has to be pinned.
-
-// A Set, matching what the hook and CI gate pass in.
 const workspaces = new Set(['ui', 'server', 'admin', 'api']);
 const errorsOf = (result) => result.errors;
 
@@ -53,7 +47,6 @@ describe('parseCommitHeader', () => {
   });
 
   it('stays lenient about unknown types — shape only', () => {
-    // The changelog generator and labeler need the shape without a verdict.
     expect(parseCommitHeader('wip(ui): something')).toMatchObject({
       type: 'wip',
     });
@@ -85,8 +78,6 @@ describe('validateCommitMessage', () => {
   });
 
   it('only WARNS about an unrecognised scope', () => {
-    // A new area should not be blocked by the gate — deliberate, so scopes can
-    // lead the workspace list rather than lag it.
     const result = validateCommitMessage('feat(nonexistent): x', {
       workspaces,
     });
@@ -132,8 +123,6 @@ describe('validatePrTitle', () => {
   });
 });
 
-// Every section the template ships, as headings. Built once so a test that
-// varies ONE section cannot accidentally pass by dropping another.
 const prSection = {
   what: '## What\n\nDid a thing.',
   why: '## Why\n\nIt was broken.',
@@ -176,7 +165,6 @@ describe('validatePrBody', () => {
   });
 
   it('requires a heading, not the bare word somewhere in the prose', () => {
-    // `body.includes('What')` would pass this; a heading match must not.
     const prose =
       'What we did: a thing. Why: it broke. Verification: ran it. ' +
       'Impact Analysis, Test Coverage and Documentation Updates all considered.';
@@ -223,18 +211,12 @@ describe('validateBranchName', () => {
   });
 
   it('exempts the configured trunk, not the word `main`', () => {
-    // `git init` still produces `master` unless `init.defaultBranch` says
-    // otherwise, so a consumer who installed this package failed the branch
-    // gate on their own trunk with no name that could have passed.
     const onMaster = validateBranchName('master', { defaultBranch: 'master' });
     expect(onMaster.exempt).toBe(true);
     expect(errorsOf(onMaster)).toEqual([]);
   });
 
   it('stops exempting `main` once the trunk is named something else', () => {
-    // The other direction, which is what makes the option load-bearing rather
-    // than merely permissive: in a repository whose trunk is `master`, a branch
-    // literally called `main` is a topic branch like any other.
     expect(validateBranchName('main', { defaultBranch: 'master' }).exempt).toBe(
       false,
     );
@@ -330,15 +312,12 @@ describe('validateIssueBody', () => {
   });
 
   it('rejects the context-free issue this rule exists to stop', () => {
-    // One per missing section, plus one for the absent `dependencies:` block.
     expect(
       errorsOf(validateIssueBody('it is broken, please fix')),
     ).toHaveLength(Object.keys(issueSection).length + 1);
   });
 
   it('rejects a Planning Metadata heading with no dependencies block under it', () => {
-    // The heading alone is what a shape-only check would accept, and it carries
-    // none of the information the convention exists for.
     const empty = fullIssueBody({
       planning: '## 9. Planning Metadata\n\nNone.',
     });

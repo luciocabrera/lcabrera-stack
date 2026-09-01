@@ -13,10 +13,6 @@ type ResolveGroupCellChildrenArgs = {
   readonly summary: TableGroupRowSummary;
 };
 
-/**
- * Key before aggregate (ADR-080): a URL can name one column as both. The
- * actions column carries neither.
- */
 export const EMPTY_CELL = <></>;
 export const resolveGroupCellChildren = ({
   carriedGroupKeys,

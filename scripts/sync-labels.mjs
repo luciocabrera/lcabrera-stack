@@ -31,8 +31,6 @@ const repoSlug = () => {
   return readRepoSlug(REPO_ROOT);
 };
 
-// Retried: a bare `fetch failed` from a reset connection took this job down on
-// two unrelated PRs, and a label sync has nothing to lose by trying again.
 const ghFetch = (token, path, init = {}) =>
   fetchWithRetry(
     () =>
@@ -53,7 +51,6 @@ const ghFetch = (token, path, init = {}) =>
     },
   );
 
-// The repo has well under 100 labels, so a single page covers every existing one.
 const listLabelNames = async (token, owner, repo) => {
   const res = await ghFetch(
     token,

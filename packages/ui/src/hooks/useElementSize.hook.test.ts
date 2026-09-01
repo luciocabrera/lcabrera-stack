@@ -60,8 +60,6 @@ describe('useElementSize', () => {
 
     const { result } = renderHook(() => useElementSize({ ref }));
 
-    // The initial measurement is a microtask away (deferred out of the
-    // effect body), so wait for it rather than asserting synchronously.
     await waitFor(() =>
       expect(result.current).toEqual({ height: 200, width: 300 }),
     );

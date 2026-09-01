@@ -8,8 +8,6 @@ import {
   reviewPayload,
 } from './review-inline-comments.mjs';
 
-// Adds new-file lines 2 and 3 in src/a.ts; src/big.ts changed but GitHub withheld
-// its patch, which is the case that must fail closed rather than anchor blindly.
 const FILES = [
   {
     filename: 'src/a.ts',
@@ -36,9 +34,6 @@ describe('partitionFindings', () => {
     ]);
   });
 
-  // The whole reason this module exists: the API rejects the entire review over
-  // one bad line, so a line the diff did not add must never reach it. Deleting
-  // the isAddedLine check makes this fail.
   it('refuses a line the diff did not add', () => {
     const { anchored, unanchored } = partitionFindings(
       [finding({ line: 4 })],
@@ -109,8 +104,6 @@ describe('bodyWithUnanchored', () => {
     expect(out).toContain('this is wrong');
   });
 
-  // A reader's first question about a finding is whether it holds the merge, and
-  // for these the answer differs from the inline ones on the same review.
   it('says these findings hold nothing', () => {
     const out = bodyWithUnanchored('summary', [
       { finding: finding(), reason: 'whatever' },
@@ -169,8 +162,6 @@ describe('bodyWithNote', () => {
     expect(bodyWithNote('summary', undefined)).toBe('summary');
   });
 
-  // The failure this exists for: without the note, a review whose findings file
-  // was lost is a summary paragraph, which reads exactly like a clean review.
   it('leads with the note so the summary is read in its light', () => {
     const out = bodyWithNote('summary', 'it is not valid JSON');
     expect(out.startsWith('> **Note:**')).toBe(true);

@@ -92,8 +92,6 @@ describe('TabsHeader', () => {
     );
   });
 
-  // The wrap case is the interesting one, and a table puts it directly beside
-  // the ordinary case rather than in a second block of identical scaffolding.
   it.each([
     { activeTab: 'b', expected: 'a', name: 'the previous tab' },
     { activeTab: 'a', expected: 'c', name: 'the last tab, wrapping' },

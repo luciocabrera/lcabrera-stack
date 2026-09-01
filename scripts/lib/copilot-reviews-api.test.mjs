@@ -25,16 +25,12 @@ beforeEach(() => {
 
 describe('fetching a pull request reviews', () => {
   it('asks gh for all pages, and reads the shape --slurp returns', () => {
-    // Without `--slurp` gh documents each page as a separate JSON document,
-    // which `JSON.parse` cannot read; without `--paginate` there is only one.
     expect(fetchPullRequestReviews('luciocabrera/repo', 740)).toEqual([REVIEW]);
     expect(argv()).toContain('--paginate');
     expect(argv()).toContain('--slurp');
   });
 
   it('puts per_page in the path, never in a field argument', () => {
-    // Any `-F`/`-f` makes `gh api` issue a POST, and POST on this endpoint OPENS
-    // a review instead of listing them — a read that silently writes.
     fetchPullRequestReviews('luciocabrera/repo', 740);
     expect(argv()).toEqual([
       'api',

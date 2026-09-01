@@ -10,7 +10,6 @@ import {
   workspacesForFiles,
 } from './workspace-scopes.mjs';
 
-/** A repository skeleton: the roster plus the manifests it points at. */
 const scaffold = (yaml, workspaceDirs) => {
   const root = mkdtempSync(join(tmpdir(), 'workspace-scopes-'));
   writeFileSync(join(root, 'pnpm-workspace.yaml'), yaml);

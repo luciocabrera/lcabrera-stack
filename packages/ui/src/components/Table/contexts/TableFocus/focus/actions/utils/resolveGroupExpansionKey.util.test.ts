@@ -26,9 +26,6 @@ describe('resolveGroupExpansionKey', () => {
   });
 
   it('hands the key back once the row is already in that state', () => {
-    // The fallback is what keeps horizontal navigation reachable: Right on an
-    // open group moves between cells, and pressing it twice on a closed one
-    // opens it and then moves.
     expect(
       resolveGroupExpansionKey({
         ...groupRow,

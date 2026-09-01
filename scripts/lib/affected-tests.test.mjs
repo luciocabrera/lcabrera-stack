@@ -2,14 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { resolveAffected, resolveTestGroups } from './affected-tests.mjs';
 
-// The selector is safety-critical: a wrong answer skips a test that a diff
-// actually affected, and the job stays green while shipping the break. These are
-// its first tests, added with the lint-only carve-out (#353) — a change touching
-// only eslint/oxlint/oxfmt config must select nothing, since the linters gate
-// those on every PR and lint config cannot change how a test builds or runs. The
-// graph is synthetic so the cases are readable and there is no filesystem I/O:
-// vite-configs is a GLOBAL package everything depends on, and the dependent chain
-// is utils -> ui -> showcase.
 const GRAPH = [
   {
     name: 'vite-configs',
@@ -71,8 +63,6 @@ describe('resolveAffected — lint-only carve-out', () => {
       'packages/utils/src/foo.ts',
     ]);
     expect(result.mode).toBe('scoped');
-    // utils changed -> its dependents ui + showcase; vite-configs is NOT
-    // pulled in, because its only changed file was filtered out.
     expect(new Set(result.packages)).toEqual(
       new Set(['@lcabrera/utils', '@lcabrera/ui', 'showcase']),
     );
@@ -123,10 +113,7 @@ describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () =
   it('adds only the root test:scripts group for a scripts-only change', () => {
     const result = groupsFor(['scripts/lib/foo.mjs']);
     expect(result.scripts).toBe(true);
-    // No workspace holds `scripts/`, so the workspace selection is empty…
     expect(result.mode).toBe('none');
-    // …but the filter-less test:scripts group runs (empty packages ->
-    // `vp run test:scripts`), and it is the ONLY group.
     expect(result.groups).toHaveLength(1);
     expect(scriptsGroup(result.groups)).toBeDefined();
   });

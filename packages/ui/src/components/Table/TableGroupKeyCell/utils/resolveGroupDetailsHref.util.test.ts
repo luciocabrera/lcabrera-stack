@@ -31,7 +31,6 @@ const resolve = (
     ...args,
   });
 
-/** A relative href has no origin, so one is supplied purely to parse it. */
 const paramsOf = (href: string | undefined) =>
   new URL(href ?? '', 'http://table.test').searchParams;
 
@@ -51,14 +50,10 @@ describe('resolveGroupDetailsHref', () => {
   });
 
   it('drops the display label from the token', () => {
-    // A formatted string has no business reaching a query, and a label frozen
-    // into a shared link outlives the value it describes.
     expect(groupParamOf(resolve({}))).not.toContain('label');
   });
 
   it('offers nothing when the route serves no group details', () => {
-    // Absent means the affordance is not offered, rather than a link whose
-    // every use 404s.
     expect(resolve({ groupDetailsPath: undefined })).toBeUndefined();
   });
 
@@ -69,24 +64,18 @@ describe('resolveGroupDetailsHref', () => {
   });
 
   it('offers nothing for an incomplete path', () => {
-    // An outer level's children are already on screen as further group rows.
     expect(
       resolve({ groupingKeys: ['shipping_country', 'status'] }),
     ).toBeUndefined();
   });
 
   it('offers nothing for the grand total', () => {
-    // Both lengths are zero with no grouping applied, so the length comparison
-    // alone would call the grand total complete and link it to every row.
     expect(
       resolve({ groupingKeys: [], summary: summaryOf({ path: [] }) }),
     ).toBeUndefined();
   });
 
   it('carries every other search param through', () => {
-    // The list's filters and sorting are the floor the modal inherits: the
-    // group row was computed under them, so a link that dropped them would open
-    // on a larger set than the count it sits beside.
     const href = resolve({
       search: '?filters=%7B%22status%22%3A1%7D&sorting=x',
     });
@@ -97,8 +86,6 @@ describe('resolveGroupDetailsHref', () => {
   });
 
   it('carries the granularity a temporal key was grouped at', () => {
-    // A truncated key is filtered as a range rather than an equality, and the
-    // server cannot know which range without the period (#786).
     const href = resolve({
       groupingKeys: ['order_date'],
       periods: { order_date: 'month' },
@@ -115,9 +102,6 @@ describe('resolveGroupDetailsHref', () => {
   });
 
   it('seeds the nested namespace from the list’s filters and sorting', () => {
-    // The floor the group was computed under, handed to the route serving it as
-    // that route's *own* state — so a reader can narrow further inside it
-    // without re-filtering the list underneath, and a refresh keeps both.
     const href = resolve({
       search: '?filters=%7B%22status%22%3A%22open%22%7D&sorting=abc&page=2',
     });
@@ -125,17 +109,12 @@ describe('resolveGroupDetailsHref', () => {
 
     expect(params.get('nested.filters')).toBe('{"status":"open"}');
     expect(params.get('nested.sorting')).toBe('abc');
-    // The originals survive, so closing returns to the list as it was.
     expect(params.get('filters')).toBe('{"status":"open"}');
     expect(params.get('sorting')).toBe('abc');
     expect(params.get('page')).toBe('2');
   });
 
   it('clears a nested param left behind by another group', () => {
-    // Closing the modal drops `group`, and a nested param written *inside* one
-    // group's route can outlive it on the list's URL. Copied through, the next
-    // group opens under a filter set for a different group — narrower than the
-    // count on the row it was clicked from.
     const href = resolve({
       search: '?nested.filters=%7B%22status%22%3A%22from-group-a%22%7D&page=2',
     });

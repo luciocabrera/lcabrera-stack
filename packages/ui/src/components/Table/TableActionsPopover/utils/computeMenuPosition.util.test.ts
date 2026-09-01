@@ -78,7 +78,6 @@ describe('computeMenuPosition', () => {
         menuElement: createMenuElement(),
         triggerElement: trigger,
       }),
-      // top: trigger bottom + 4px gap; left: cell right - menu width + 2px nudge
     ).toEqual({ left: 362, top: 124 });
   });
 
@@ -117,7 +116,6 @@ describe('computeMenuPosition', () => {
         menuElement: createMenuElement(),
         triggerElement: trigger,
       }),
-      // top: trigger top - menu height - 4px gap
     ).toEqual({ left: 322, top: 546 });
   });
 });

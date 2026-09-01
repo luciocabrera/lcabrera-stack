@@ -52,9 +52,6 @@ describe('getShouldApplyCellFocus', () => {
   });
 
   it('refuses when focus has moved somewhere else on the page', () => {
-    // A row the user scrolled away from re-mounts with its request still
-    // standing; honouring it here would yank focus out of whatever they moved
-    // on to.
     const { cell } = buildGrid();
     const outside = document.createElement('button');
     document.body.append(outside);

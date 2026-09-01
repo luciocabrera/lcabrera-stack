@@ -4,7 +4,6 @@ export type CountVisibleTagsArgs = {
   readonly totalCount: number;
   readonly trigger: HTMLElement;
 };
-/** Reserves 1 slot for the overflow indicator when not all tags fit. */
 export const countVisibleTags = ({
   totalCount,
   trigger,
@@ -26,7 +25,6 @@ export const countVisibleTags = ({
   const overflow = totalCount - fittingCount;
 
   if (overflow > 0) {
-    // Reserve 1 slot for the "+N more" tag, but always show at least 1
     return Math.max(1, fittingCount - 1);
   }
 

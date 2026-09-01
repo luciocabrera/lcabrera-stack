@@ -9,7 +9,6 @@ type ResolveFocusedRowIndexArgs<TData extends Record<string, unknown>> = {
   readonly rowKey: string | undefined;
 };
 
-/** This is ADR-062's focus-recovery rule made executable. */
 export const resolveFocusedRowIndex = <TData extends Record<string, unknown>>({
   columns,
   data,

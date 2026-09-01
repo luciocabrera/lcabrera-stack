@@ -10,7 +10,6 @@ import { buildKeysetClause } from './build-keyset-clause.util.ts';
 
 type BuildWhereClauseArgs = {
   readonly allowedColumns?: readonly string[];
-  /** Keyset cursor to resume after; needs `sort` to describe its tuple. */
   readonly cursor?: QueryCursor;
   readonly filters?: readonly QueryFilter[];
   readonly sort?: readonly QuerySort[];
@@ -23,12 +22,6 @@ type WhereClauseResult = {
   readonly values: readonly unknown[];
 };
 
-/**
- * Values are always parameterized ($1, $2, ...), never interpolated; each filter's column
- * runs through both identifier checks via appendFilterClause.
- * A `cursor` contributes one more conjunct — the keyset seek predicate — bound after the
- * filters, so a filtered keyset page numbers its placeholders in one unbroken run.
- */
 export const buildWhereClause = ({
   allowedColumns,
   cursor,

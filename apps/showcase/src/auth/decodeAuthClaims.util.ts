@@ -4,11 +4,6 @@ type DecodeAuthClaimsArgs = {
   readonly payload: string;
 };
 
-/**
- * Decodes a base64url token payload back into {@link AuthClaims}, returning `undefined` —
- * never throwing — for anything that is not a well-formed claims object (bad base64,
- * invalid JSON, missing/mistyped fields).
- */
 export const decodeAuthClaims = ({
   payload,
 }: DecodeAuthClaimsArgs): AuthClaims | undefined => {

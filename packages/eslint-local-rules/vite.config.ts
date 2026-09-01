@@ -1,11 +1,5 @@
 import { defineConfig } from 'vite-plus';
 
-// Both blocks below are inlined rather than imported from `@lcabrera/vite-config`:
-// vite-configs depends on this package for the custom rules, so importing it
-// back — even for a const — creates a workspace cycle that breaks every
-// recursive `vp run -r` task graph. @lcabrera/utils inlines the same two blocks for
-// the same reason; see packages/vite-configs/vite.pack.shared.config.ts for why
-// these packages are built at all rather than shipping source.
 const COVERAGE_FLAGS = [
   '--coverage',
   '--coverage.provider=v8',

@@ -15,19 +15,9 @@ import {
   restReview,
 } from './copilot-review-fixtures.mjs';
 
-// The gate this file covers is fail-closed, so every assertion below is written
-// to be able to fail. The load-bearing one is the #671 sequence: a review of an
-// earlier commit must never read as success, and a test that only ever exercises
-// the happy path cannot tell a working comparison from one that returns
-// `success` unconditionally.
-
-/** GitHub's commit-status API truncates a description past this. */
 const DESCRIPTION_LIMIT = 140;
 
 describe('reading a paginated review list', () => {
-  // The single-page case passes whether or not pagination is handled, so it
-  // cannot be the only case here. `--slurp` wraps EVERY page, including the
-  // first, so `[[…]]` is what one page looks like.
   it('joins the pages gh returns into one list', () => {
     const first = restReview({ commit: EARLIER });
     const second = restReview({ login: 'luciocabrera' });
@@ -48,8 +38,6 @@ describe('reading a paginated review list', () => {
   });
 
   it('sees a covering review that is not on the first page', () => {
-    // The regression this guards: reading only the first page reports `pending`
-    // on a pull request Copilot has in fact reviewed at its head.
     const pages = [
       [restReview({ commit: EARLIER, submitted: '2026-08-14T08:20:53Z' })],
       [restReview({ submitted: '2026-08-14T08:47:27Z' })],
@@ -134,8 +122,6 @@ describe('the head-versus-review comparison', () => {
   });
 
   it('is not success when the only Copilot review is an earlier commit', () => {
-    // #671, exactly: reviewed ff868c68 at 08:20:53Z, head advanced to dd8fb786
-    // at 08:44:15Z, and no re-review followed.
     const status = decideReviewStatus({
       headSha: HEAD,
       reviews: [restReview({ commit: EARLIER })],
@@ -174,9 +160,6 @@ describe('the head-versus-review comparison', () => {
   });
 
   it('stays pending when the head is rewound to an older reviewed commit', () => {
-    // A force-push back to an already-reviewed commit leaves the newest review
-    // naming something else. Pending, not success — `review_on_push` re-reviews
-    // the rewound head, so this resolves on its own rather than deadlocking.
     const status = decideReviewStatus({
       headSha: EARLIER,
       reviews: [
@@ -190,9 +173,6 @@ describe('the head-versus-review comparison', () => {
 
 describe('a review arriving against a commit that is no longer the head', () => {
   it('fails rather than waits — nothing further is coming on its own', () => {
-    // #671's shape, with the precondition a second reviewer added: `failure`
-    // claims waiting will not help, so it needs EVERY accepted reviewer to have
-    // spoken. Both are stale here, and the trigger is one of them.
     const stale = restReview({ commit: EARLIER });
     const status = decideReviewStatus({
       headSha: HEAD,
@@ -252,8 +232,6 @@ describe('the status it publishes', () => {
   });
 
   it('says a draft is waiting on being marked ready, and names the head', () => {
-    // The SHA is what makes two pushes to a draft distinguishable in the status.
-    // Asserting only on 'marked ready' let it go missing once already.
     const { description } = decideReviewStatus({
       headSha: HEAD,
       isDraft: true,

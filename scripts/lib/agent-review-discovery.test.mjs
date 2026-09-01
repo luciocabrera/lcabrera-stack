@@ -26,7 +26,6 @@ describe('markerSha', () => {
   });
 
   it('ignores a marker that is not the first line', () => {
-    // Otherwise any comment quoting the format would be discovered as a verdict.
     expect(
       markerSha(`Some prose\nAgent-review verdict: ${HEAD}`),
     ).toBeUndefined();
@@ -49,7 +48,6 @@ describe('markerSha', () => {
   });
 
   it('does not confuse the override marker with the verdict marker', () => {
-    // §6's override shares the shape; only the word before the SHA separates them.
     expect(markerSha(`Agent-review override: ${HEAD}`)).toBeUndefined();
   });
 
@@ -76,13 +74,7 @@ describe('jsonBlock', () => {
     ).toBeUndefined();
   });
 
-  // Every case below fails SAFE either way — it yields `error`, never a false
-  // pass. They are fixed because a false positive is what kills a gate like
-  // this (#697 §3): a reviewer whose honest verdict is rejected because its
-  // prose contained a backtick learns to ignore the check.
   it('does not treat a jsonc block as a json one', () => {
-    // '```jsonc'.indexOf('```json') === 0, so a substring match accepts it and
-    // then parses contents that are not JSON. §2.6 says a `json` block.
     expect(
       jsonBlock(
         `Agent-review verdict: ${HEAD}\n\n\`\`\`jsonc\n{"a":1}\n\`\`\`\n`,
@@ -99,8 +91,6 @@ describe('jsonBlock', () => {
   });
 
   it('is not closed by a fence quoted inside the document', () => {
-    // Entirely plausible in a review OF this repository: a finding quoting a
-    // code fence truncated its own verdict, which then failed to parse.
     const document = '{"summary":"the docs show ``` around it"}';
     expect(
       jsonBlock(
@@ -159,7 +149,6 @@ describe('selectVerdictComment', () => {
   });
 
   it('reports duplicate rather than picking the newest', () => {
-    // Picking the newest would let a `pass` be appended after a `fail`.
     const selection = selectVerdictComment(
       [
         comment(verdictBody(HEAD, '{"verdict":"fail"}')),

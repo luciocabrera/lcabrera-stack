@@ -1,34 +1,27 @@
+/**
+ * `@lcabrera/ui` and `@lcabrera/server` each declare the column-filter shapes
+ * independently — neither package depends on the other, so neither can import
+ * the other's definition. This suite keeps the two in step.
+ *
+ * The assertion is the call itself, not a type-level trick: `toQueryFilters`
+ * requires `@lcabrera/server`'s shape and the values below are typed as
+ * `@lcabrera/ui`'s, so the file only compiles while a filter built in the UI is
+ * assignable to the query layer. The call checks one direction; the last case
+ * adds the other.
+ *
+ * The annotation is `: Record<string, ColumnFilter>` and deliberately not
+ * `satisfies`. `satisfies` keeps each value's narrow literal type, so the call
+ * would only ever check the filters written here and an operator added to one
+ * package's union alone would sail through. Verified by adding one and
+ * confirming `typecheck` fails; with `satisfies` it did not.
+ */
+
 import type { ColumnFilter as QueryColumnFilter } from '@lcabrera/server/filters/filters.types';
 import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
 import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
 import { describe, expect, it } from 'vite-plus/test';
 
-/**
- * `@lcabrera/ui` and `@lcabrera/server` each declare the column-filter shapes
- * independently — neither package depends on the other, so neither can import
- * the other's definition (see the header of either `filters.types.ts`). This is
- * the guard that keeps the two in step.
- *
- * The assertion is the **call itself**, not a type-level trick: `toQueryFilters`
- * requires `@lcabrera/server`'s shape, the values below are typed as `@lcabrera/ui`'s,
- * so this file only compiles while a filter built in the UI is assignable to the
- * query layer. Add an operator or a variant on one side and `vp run typecheck`
- * fails here, naming the contract. That call checks one direction only, so the
- * last case adds the other — see the comment there.
- *
- * It lives in the app because the app is the only thing that legitimately
- * depends on both packages — integrating them is precisely what it is for.
- *
- * The annotation below is `: Record<string, ColumnFilter>` and **not**
- * `satisfies`, which matters more than it looks. `satisfies` keeps the narrow
- * literal type of each value, so the call would only ever check the five filters
- * written here — adding an operator to one package's union and not the other's
- * would sail through. The annotation widens them to the union itself, so the
- * call checks the whole `ColumnFilter` against the whole of the query layer's.
- * Verified by deliberately adding an operator to one side and confirming
- * `typecheck` fails; with `satisfies` it did not.
- */
 const uiFilters: Record<string, ColumnFilter> = {
   customer_name: { operator: 'contains', type: 'text', value: 'ac' },
   delivered_at: { operator: 'before', type: 'date', value: '2026-01-01' },
@@ -46,19 +39,11 @@ describe('column-filter contract between @lcabrera/ui and @lcabrera/server', () 
       { column: 'is_vip_customer', operator: 'eq', value: true },
       { column: 'order_status', operator: 'in', value: ['Pending'] },
       { column: 'quantity', operator: 'gt', value: 2 },
-      // No `value` key at all — the one variant that carries none. A `value:
-      // undefined` here would still be a bound parameter's worth of shape, and
-      // `appendFilterClause` reads the operator rather than the presence of a
-      // value, so the difference would go unnoticed until the parameter
-      // indexes of later filters shifted.
       { column: 'shipping_country', operator: 'isNull' },
     ]);
   });
 
   it('carries a number filter left undefined mid-edit without inventing a clause', () => {
-    // The UI shape admits `value: undefined` while the user is still typing, and
-    // the query layer has to tolerate exactly that — the reason its own shape is
-    // laxer than a SQL-facing contract would otherwise be.
     const drafting: Record<string, ColumnFilter> = {
       quantity: { operator: 'equals', type: 'number', value: undefined },
     };
@@ -67,11 +52,6 @@ describe('column-filter contract between @lcabrera/ui and @lcabrera/server', () 
   });
 
   it('accepts every query-layer filter variant as a UI filter', () => {
-    // The `toQueryFilters` call above only proves UI ⊆ query layer, so on its
-    // own it is a one-way guard: an operator added to the *query layer's* union
-    // and not the UI's would sail through it. The round trip below closes that
-    // direction — the second assignment needs query layer ⊆ UI — so a variant
-    // or operator added to either package alone fails to compile here.
     const queryLayerFilters: Record<string, QueryColumnFilter> = uiFilters;
     const backToUiFilters: Record<string, ColumnFilter> = queryLayerFilters;
 

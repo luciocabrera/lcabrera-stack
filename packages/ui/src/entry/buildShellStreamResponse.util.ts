@@ -16,12 +16,10 @@ export const buildShellStreamResponse = ({
 }: BuildShellStreamResponseArgs) => {
   const body = new PassThrough({
     final(callback) {
-      // Clear the timeout to prevent retaining the closure and memory leak.
       clearRenderTimeout();
       callback();
     },
   });
-  // Increase max listeners to prevent warning with compression middleware.
   body.setMaxListeners(20);
   const stream = createReadableStreamFromReadable(body);
 

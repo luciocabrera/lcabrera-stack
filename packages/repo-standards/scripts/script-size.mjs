@@ -11,28 +11,18 @@
  *
  * Pure: callers hand in contents and a baseline and get findings back, so the
  * walking, printing and exit code live in the CLI.
+ *
+ * `ALWAYS_SKIPPED` is deliberately the SMALLEST defensible set: version
+ * control, installed dependencies, build output. Everything else a gate wants
+ * to skip is that gate's judgement, because the two gates reading this do not
+ * agree about the rest. Configuration EXTENDS it rather than replacing it,
+ * since a consumer who wrote their own list and forgot `node_modules` would
+ * get a hang rather than a narrower gate. Adding an entry narrows every gate
+ * at once, silently — a gate reading fewer files reports the same clean pass
+ * as a clean tree, so widening this set is the one change here that running it
+ * cannot catch.
  */
 
-/**
- * Directories no scan of a repository's own files should ever descend into.
- *
- * Deliberately the SMALLEST defensible set: version control, installed
- * dependencies, and build output. Everything else a particular gate wants to
- * skip is that gate's judgement and belongs in its own configuration, because
- * the two gates reading this list do not agree about the rest — the size gate
- * skips a generated reports directory and an agent-config directory, and the
- * stray-config gate must walk both, since a config file nothing reads is exactly
- * the sort of thing that turns up in a repo-authored agent directory.
- *
- * Configuration EXTENDS this rather than replacing it. A consumer who wrote
- * their own list and forgot `node_modules` would not get a narrower gate, they
- * would get one that walks their whole dependency tree — a hang rather than a
- * verdict, and one that reads as the gate being slow rather than misconfigured.
- *
- * Adding an entry here narrows every gate at once, silently. A gate reading
- * fewer files reports exactly the same clean pass as a clean tree, so widening
- * this set is the one change in this module that cannot be caught by running it.
- */
 export const ALWAYS_SKIPPED = [
   '.git',
   'node_modules',
@@ -42,18 +32,11 @@ export const ALWAYS_SKIPPED = [
   '.tmp',
 ];
 
-/** A line carrying no logic: blank, or opening/continuing a comment. */
 const isProse = (line) => /^\s*(\/\/|\/\*|\*|$)/.test(line);
 
 export const countCodeLines = (content) =>
   content.split('\n').filter((line) => !isProse(line)).length;
 
-/**
- * The blocking finding for one file, or undefined when it is within its limit.
- *
- * A grandfathered file is held to its RECORDED size, not to the ceiling: the
- * point of the baseline is that inherited debt may stay and may not grow.
- */
 export const sizeProblem = ({ ceiling, file, grandfathered, lines }) => {
   if (lines <= (grandfathered ?? ceiling)) return undefined;
   return grandfathered === undefined
@@ -61,12 +44,6 @@ export const sizeProblem = ({ ceiling, file, grandfathered, lines }) => {
     : `${file}: ${lines} code lines exceeds its grandfathered ${grandfathered} — it grew. Shrink it, don't raise the baseline.`;
 };
 
-/**
- * A "rebaseline me" hint for a grandfathered file that shrank.
- *
- * Non-blocking on purpose. Making it fail would mean a change that improved a
- * file failed the gate, which teaches people not to improve the file.
- */
 export const baselineWarning = ({ ceiling, file, grandfathered, lines }) => {
   if (grandfathered === undefined) return undefined;
   if (lines <= ceiling) {
@@ -78,10 +55,6 @@ export const baselineWarning = ({ ceiling, file, grandfathered, lines }) => {
   return undefined;
 };
 
-/**
- * The baseline for a set of measurements: every file over the ceiling, at the
- * size it is now, keyed in a stable order so the JSON diff is reviewable.
- */
 export const baselineFor = ({ ceiling, measured }) =>
   Object.fromEntries(
     measured
@@ -90,7 +63,6 @@ export const baselineFor = ({ ceiling, measured }) =>
       .map(({ file, lines }) => [file, lines]),
   );
 
-/** Every finding for a measured set, blocking and advisory kept apart. */
 export const findingsFor = ({ baseline, ceiling, measured }) => ({
   problems: measured
     .map(({ file, lines }) =>

@@ -24,13 +24,6 @@ describe('isExecutableAsset', () => {
   });
 
   test('decides on the group rather than on the shipped file, which loses the bit', () => {
-    // The regression this replaced: the mode was read with `statSync` off the
-    // asset, which is 0755 in this repository and 0644 in every tarball `pnpm
-    // pack` writes. Consumers got hooks git skips without a word. Nothing here
-    // could see it — `workspace:*` resolves the source directory.
-    //
-    // Only the packed-tarball gate can prove the fix; this pins the rule it
-    // now depends on.
     expect(isExecutableAsset('hooks/pre-push')).toBe(true);
   });
 });
@@ -164,10 +157,6 @@ describe('allowedConfigKeys', () => {
   });
 
   test('is the key space, not the keys that happen to resolve', () => {
-    // The same file carries blocks other tools read. One of those resolves
-    // perfectly well here and is still outside what this config is for, so a
-    // shipped asset binding to it could not travel — which is exactly the
-    // difference between this question and hasConfigKey's.
     const config = {
       commands: {},
       paths: DEFAULT_CONFIG.paths,
@@ -187,16 +176,11 @@ describe('resolveConfig on the ci block', () => {
     expect(resolveConfig(raw({ setup })).ci.setup).toEqual(setup);
   });
 
-  // The hook is optional, and a repository whose runner needs nothing must not
-  // be made to declare that it needs nothing.
   test('stays silent when the block is absent', () => {
     expect(resolveConfig('{}').ci.setup).toEqual([]);
     expect(resolveConfig(raw({})).ci.setup).toEqual([]);
   });
 
-  // Resolved quietly to [], each of these deletes the placeholder from every
-  // workflow and the jobs then fail at {{commands.install}} with exit 127 —
-  // indistinguishable from having declared no ci block at all.
   test('refuses the JSON-object spelling of a step', () => {
     expect(() =>
       resolveConfig(
@@ -217,8 +201,6 @@ describe('resolveConfig on the ci block', () => {
     );
   });
 
-  // Named so the consumer can find it: the whole failure this replaces was one
-  // that pointed nowhere.
   test('names the offending entry', () => {
     expect(() => resolveConfig(raw({ setup: ['- name: A', 7] }))).toThrow(
       /"ci\.setup\[1\]"/,

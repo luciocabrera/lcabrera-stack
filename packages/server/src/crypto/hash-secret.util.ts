@@ -6,12 +6,6 @@ type HashSecretArgs = {
   readonly secret: string;
 };
 
-/**
- * Hashes any secret for storage — a user password, an API token's secret half, anything
- * that must be verifiable but never readable back.
- * scrypt (node:crypto, zero new deps — ADR-017), output format `<saltHex>:<hashHex>`,
- * fresh salt per call.
- */
 export const hashSecret = ({ secret }: HashSecretArgs) => {
   const salt = randomBytes(SCRYPT_SALT_BYTES);
   const hash = scryptSync(secret, salt, SCRYPT_KEY_LENGTH);

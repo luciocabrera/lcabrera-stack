@@ -32,8 +32,6 @@ describe('resolveBandPinnedStyle', () => {
   });
 
   it('sticks a right-pinned band at its last column’s offset', () => {
-    // The case the leading/trailing split exists for. Taking `leading` here
-    // would offset the band by the rest of the run's width.
     expect(
       resolveBandPinnedStyle({
         leading: pin({ offset: 220, side: 'right' }),
@@ -49,10 +47,6 @@ describe('resolveBandPinnedStyle', () => {
   });
 
   it('prefers the left edge when a band somehow spans both pins', () => {
-    // Not reachable today — `resolveHeaderBands` is called per pinned
-    // partition, so a band cannot straddle the boundary. Pinned so that the
-    // order of the two checks is a decision on record rather than an accident
-    // of which `if` was written first.
     expect(
       resolveBandPinnedStyle({
         leading: pin({ offset: 12, side: 'left' }),

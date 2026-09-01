@@ -49,7 +49,6 @@ const compositeKeyColumns = [
 
 const UNRESOLVABLE_VALUE = undefined as unknown as Row['order_id'];
 
-/** Half of a surrogate pair — `encodeURIComponent` raises `URIError` on it. */
 const LONE_SURROGATE = '\u{D800}';
 
 describe('resolveRowKey', () => {
@@ -226,9 +225,6 @@ describe('resolveRowKey', () => {
 
   describe('group rows', () => {
     it('derives a group row key from its own values, not from its index', () => {
-      // A grouped read projects the group key and its aggregates, so the
-      // primary-key branch would find nothing and fall through to the index —
-      // giving every group in the result the identity of its position.
       expect(
         resolveRowKey<Row>({
           columns: singleKeyColumns,
@@ -273,9 +269,6 @@ describe('resolveRowKey', () => {
     });
 
     it('identifies a multi-key group by its whole path, not by one level', () => {
-      // Under multi-key grouping the outermost key repeats across every group
-      // beneath it, so a key derived from one level would hand every sibling
-      // the same identity.
       expect(
         resolveRowKey<Row>({
           columns: singleKeyColumns,

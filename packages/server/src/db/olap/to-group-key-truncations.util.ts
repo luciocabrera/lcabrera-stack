@@ -9,11 +9,6 @@ type ToGroupKeyTruncationsArgs = {
   readonly periods: Readonly<Record<string, GroupKeyPeriod>> | undefined;
 };
 
-/**
- * Pairs each requested granularity with whether its column carries a time zone — the two
- * facts `toDrillRead` needs and cannot look up for itself (#786).
- * The route holds one and the catalogue the other, so this is where they meet.
- */
 export const toGroupKeyTruncations = ({
   capabilities,
   periods,

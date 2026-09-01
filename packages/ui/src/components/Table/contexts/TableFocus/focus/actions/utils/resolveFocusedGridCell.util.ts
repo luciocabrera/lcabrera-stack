@@ -22,12 +22,6 @@ type ResolveFocusedGridCellArgs<TData extends Record<string, unknown>> = {
   readonly rowMeta: readonly TableGroupTreeRowMeta[] | undefined;
 };
 
-/**
- * Focus is held as **data** rather than read back from the DOM (ADR-062), because the
- * focused row is unmounted the moment it leaves the virtualization window — so every
- * question about it is a lookup, and there are four of them: which column, whether both
- * axes actually resolved, what the row is in the tree, and whether it is a group.
- */
 export const resolveFocusedGridCell = <TData extends Record<string, unknown>>({
   columnKeys,
   data,

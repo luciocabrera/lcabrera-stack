@@ -14,9 +14,6 @@ describe('assertGroupRowBackstop', () => {
   });
 
   it('refuses a result that reached the backstop', () => {
-    // Returning it would be worse than refusing: the missing rows take their
-    // subtotals with them, so a truncated grouped result reads exactly like a
-    // correct one.
     expect(() =>
       assertGroupRowBackstop({
         rowCount: 5001,
@@ -45,8 +42,6 @@ describe('assertGroupRowBackstop', () => {
   });
 
   it('does nothing when no backstop was set, even at the limit', () => {
-    // A caller that asked for at most 400 rows and got 400 got what it asked
-    // for. Refusing there would turn every deliberate ceiling into an error.
     expect(() =>
       assertGroupRowBackstop({ rowCount: 400, rowLimit: { limit: 400 } }),
     ).not.toThrow();

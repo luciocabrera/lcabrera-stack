@@ -22,7 +22,6 @@
  * Usage: node scripts/bench-array-operations.mjs [--json]
  */
 
-/** The five shapes ADR-054 chooses between. Each returns the same array. */
 const SHAPES = {
   'filter().map()': (rows, keep) => rows.filter(keep).map((row) => row.name),
   'flatMap()': (rows, keep) =>
@@ -52,7 +51,6 @@ const CASES = [
 
 const RUNS = 9;
 const WARMUP = 3;
-/** Total element-visits per sample, so every size does comparable work. */
 const WORK_UNITS = 20_000_000;
 
 /** @returns {number} median of a numeric list, without mutating it */

@@ -28,7 +28,6 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
   const onSortChange = useSetColumnsSortings();
   const isInSortScope = useGroupedSortScope();
 
-  // Filter to only sortable columns
   const sortableColumns = columns.filter(
     (col) => resolveColumnCapabilities(col).isSortable,
   );
@@ -46,19 +45,11 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
   const isMeasure = (columnKey: string) =>
     resolveAggregateColumnLabel({ columnKey, columns }) !== undefined;
 
-  // Grouped, `toGroupSort` keeps only the terms naming a group key or a staged
-  // measure and silently drops the rest, so any other sort here is a row that
-  // orders nothing. It stays in state — clearing the grouping brings it back —
-  // and is only kept out of the list and out of the reorder.
   const scopedSorting = sorting.filter((sort) => isInSortScope(sort.columnKey));
   const unscopedSorting = sorting.filter(
     (sort) => !isInSortScope(sort.columnKey),
   );
 
-  // A measure always sorts innermost, whatever its position here:
-  // `buildGroupOrderByClause` splices every aggregate term in at the last group
-  // key. Showing one above a column sort would state a precedence the read does
-  // not apply, so the two are kept as blocks in that order.
   const sortItems: SortItem[] = [
     ...scopedSorting.filter((sort) => !isMeasure(sort.columnKey)),
     ...scopedSorting.filter((sort) => isMeasure(sort.columnKey)),
@@ -89,7 +80,6 @@ export const ActiveSortList = ({ isBusy = false }: ActiveSortListProps) => {
     onSortChange([...newSorting, ...unscopedSorting]);
   };
 
-  // Convert sort items to draggable items
   const draggableItems: DraggableItem[] = sortItems.map((item) => ({
     content: (
       <SortItemContent

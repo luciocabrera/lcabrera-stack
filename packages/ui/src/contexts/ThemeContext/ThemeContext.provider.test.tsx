@@ -14,11 +14,6 @@ import {
 import { ThemeContext } from './ThemeContext.context';
 import { ThemeProvider } from './ThemeContext.provider';
 
-/**
- * Reads the real ThemeContext value (not the globally-mocked `useTheme` hook)
- * so these tests exercise the provider's own state and callbacks, and exposes
- * buttons to drive `setTheme` / `toggleTheme`.
- */
 const ThemeProbe = () => {
   const context = use(ThemeContext);
 
@@ -44,8 +39,6 @@ const ThemeProbe = () => {
 };
 
 beforeEach(() => {
-  // The provider persists through a router-free fetch — stub it so no real
-  // request escapes the test.
   vi.stubGlobal(
     'fetch',
     vi.fn(() => Promise.resolve(new Response())),

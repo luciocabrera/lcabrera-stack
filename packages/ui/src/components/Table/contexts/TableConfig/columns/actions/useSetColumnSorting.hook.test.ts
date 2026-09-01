@@ -13,13 +13,6 @@ type Row = {
   readonly total_amount: number;
 };
 
-/**
- * The column derivation runs for real here. It used to be mocked away —
- * `vi.mock('#ui/components/Table/utils')` returned a stub `getNormalizedColumns`
- * — and that is exactly why this suite stayed green while a sort click was
- * crashing the grid (#872 review): the assertion could only ever see the stub's
- * empty object, never the lookup the action actually writes.
- */
 const {
   mockColumnsStore,
   mockMetaStore,
@@ -145,20 +138,12 @@ describe('useSetColumnSorting', () => {
 
     expect(mockPersistTableState).toHaveBeenLastCalledWith({
       searchParamKey: 'sorting',
-      // The literal wire string rather than a `JSON.stringify` of an object:
-      // key order here *is* the sort order being asserted, and an object
-      // literal invites a reorder that silently changes what is expected.
       searchParamValue: '{"status":"asc","priority":"desc"}',
     });
     expect(mockMetaStore.set).toHaveBeenCalledWith({ drawersSyncNonce: 2 });
   });
 
   it('writes a lookup that still holds the measure columns', () => {
-    // The store's derived fields are only consistent when they are derived
-    // together. This action used to write `normalizedColumns` alone, rebuilt
-    // from the declared column list, leaving `pinnedColumnPartition` naming
-    // measure columns the lookup no longer had — and `TableHeaderCell`
-    // destructured the resulting `undefined`.
     setAggregates({
       keys: ['status'],
       nextAggregates: [{ columnKey: 'total_amount', fn: 'avg' }],
@@ -178,9 +163,6 @@ describe('useSetColumnSorting', () => {
       >;
     };
 
-    // Every column the partition asks to be rendered resolves in the lookup —
-    // the invariant the crash broke, stated as the assertion rather than as a
-    // spot-check of one column.
     const painted = Object.values(written.pinnedColumnPartition)
       .flat()
       .map((column) => String(column.key));

@@ -13,16 +13,12 @@ describe('groupingCodec', () => {
   });
 
   it('serializes without a transport layer, so the param is readable JSON', () => {
-    // ADR-061: the same plain compact JSON as `sorting` and `filters` — a
-    // Base64 or otherwise encoded param would round-trip just as well, which is
-    // why this asserts the exact text rather than only the round trip.
     expect(groupingCodec.serialize({ keys: ['a', 'b'] })).toBe(
       '{"keys":["a","b"]}',
     );
   });
 
   it('refuses a key that is not a string, dropping the whole payload', () => {
-    // `order_status` is valid and still goes: the refusal is of the payload.
     expect(
       groupingCodec.deserialize('{"keys":["order_status",7]}'),
     ).toStrictEqual({ keys: [] });
@@ -44,10 +40,6 @@ describe('groupingCodec', () => {
   });
 
   it('refuses a mode outside the vocabulary rather than falling back to flat', () => {
-    // Whole-state refusal (ADR-061): the mode decides which grouping sets the
-    // read emits, so substituting one answers a different question from the
-    // one the link describes. `cube` is a real server-side mode and still not
-    // one this package renders (#574).
     expect(
       groupingCodec.deserialize('{"keys":["a"],"mode":"cube"}'),
     ).toStrictEqual({ keys: [] });
@@ -57,8 +49,6 @@ describe('groupingCodec', () => {
   });
 
   it('refuses a member outside the envelope', () => {
-    // The vocabulary was *extended*, member by member, never opened: one outside
-    // the closed set still refuses the payload (ADR-061).
     expect(groupingCodec.deserialize('{"keys":["a"],"depth":2}')).toStrictEqual(
       { keys: [] },
     );
@@ -80,9 +70,6 @@ describe('groupingCodec', () => {
       keys: ['order_status'],
     } as const;
 
-    // The wire form is an ordered array of compact `"<columnKey>:<fn>"`
-    // strings, asserted exactly rather than only round-tripped: any other
-    // encoding would round-trip just as well (#831).
     expect(groupingCodec.serialize(compact)).toBe(
       '{"agg":["total_amount:sum","total_amount:avg"],"keys":["order_status"]}',
     );
@@ -92,8 +79,6 @@ describe('groupingCodec', () => {
   });
 
   it('preserves the aggregate order across the round trip', () => {
-    // The list order is state — it is what the drawer renders and what #832
-    // makes draggable — so a codec that treated it as a set would lose it.
     const reversed = {
       agg: [
         { columnKey: 'total_amount', fn: 'avg' },
@@ -108,8 +93,6 @@ describe('groupingCodec', () => {
   });
 
   it('round-trips a column key that contains a colon', () => {
-    // The right-split rule is the only thing that makes this work, and a naive
-    // `split(':')` passes every other assertion in this file.
     const compact = {
       agg: [{ columnKey: 'odd:col', fn: 'sum' }],
       keys: ['odd:col'],
@@ -124,8 +107,6 @@ describe('groupingCodec', () => {
   });
 
   it('refuses an aggregate token outside the vocabulary, dropping the whole payload', () => {
-    // The keys here are valid and still go: an unrecognised token would index
-    // the SQL aggregate map and resolve to `undefined` (ADR-061).
     expect(
       groupingCodec.deserialize(
         '{"agg":["total_amount:median"],"keys":["order_status"]}',
@@ -145,8 +126,6 @@ describe('groupingCodec', () => {
   });
 
   it('refuses the whole list when only one of its tokens is bad', () => {
-    // Refused, not filtered: a link promising two measures must not open
-    // showing one.
     expect(
       groupingCodec.deserialize(
         '{"agg":["total_amount:sum","total_amount:median"],"keys":["a"]}',
@@ -182,10 +161,6 @@ describe('groupingCodec', () => {
   });
 
   it('carries an aggregate column named __proto__ as data', () => {
-    // The token list is an array, so a `__proto__` column name is a string
-    // inside it rather than anything that reaches a prototype setter — the
-    // per-field drop the refusal contract exists to rule out. The loader's
-    // sanitizer is what then refuses it for not being a column.
     const result = groupingCodec.deserialize(
       '{"agg":["__proto__:sum"],"keys":["a"]}',
     );
@@ -290,8 +265,6 @@ describe('the granularity map', () => {
   });
 
   it('refuses the whole payload for a period outside the vocabulary', () => {
-    // Whole-state refusal (ADR-061): a partly-accepted configuration runs a
-    // query nobody asked for while the URL still reads as the one shared.
     expect(
       groupingCodec.deserialize(
         JSON.stringify({
@@ -303,8 +276,6 @@ describe('the granularity map', () => {
   });
 
   it('refuses a granularity naming a column that is not a key', () => {
-    // Not inert: the server refuses it too, so accepting it here would turn a
-    // shared link into a failed read rather than into a table.
     expect(
       groupingCodec.deserialize(
         JSON.stringify({ gran: { order_date: 'month' }, keys: ['status'] }),
@@ -321,7 +292,6 @@ describe('the granularity map', () => {
   });
 
   it('still refuses a member outside the envelope', () => {
-    // The envelope stays closed; `gran` widened it by exactly one.
     expect(
       groupingCodec.deserialize(
         JSON.stringify({ keys: ['status'], somethingElse: 1 }),

@@ -11,21 +11,15 @@
  * a departed name inside a longer token is still that name. Fenced code is
  * scanned like prose — a fixture naming a departed workspace is exactly the case
  * this exists to catch.
+ *
+ * `CHANGELOG.md` is generated from git history — a dated record of commits,
+ * not a live pointer — so it is exempt from the name check.
  */
 
-/** Generated from git history — a dated record of commits, not a live pointer. */
 const GENERATED = /(^|\/)CHANGELOG\.md$/;
 
-/** The roster names every departed thing, so it can never be its own finding. */
 const ROSTER = /(^|\/)departed-names\.json$/;
 
-/**
- * Everything tracked is text until proven otherwise. An allowlist of extensions
- * was tried first and silently skipped `.gitignore` and `docker/local/.env.example`
- * — both of which carried a departed name — because neither has an extension the
- * list could hold. A gate for prose should err toward reading a file, so the
- * exclusions are the binaries and the two files that are records, not pointers.
- */
 const BINARY_EXTENSIONS = new Set([
   'avif',
   'bmp',
@@ -63,7 +57,6 @@ const BINARY_EXTENSIONS = new Set([
 ]);
 const LOCKFILE = /(^|\/)(pnpm-lock\.yaml|package-lock\.json)$/;
 
-/** A leading dot is a name, not an extension: `.gitignore` is text. */
 const extensionOf = (path) => {
   const name = path.slice(path.lastIndexOf('/') + 1);
   const dot = name.lastIndexOf('.');
@@ -76,10 +69,6 @@ export const isCheckedFile = (path) =>
   !ROSTER.test(path) &&
   !LOCKFILE.test(path);
 
-/**
- * Reads the roster into the two shapes the scan needs. Throws rather than
- * returning an empty roster: a gate that checks no names passes every tree.
- */
 export const parseRoster = (text) => {
   const roster = JSON.parse(text);
   const names = (roster.names ?? []).map(({ name }) => name);
@@ -88,9 +77,6 @@ export const parseRoster = (text) => {
       'departed-names.json lists no names — the gate would pass anything.',
     );
   }
-  // `some`, not `find`: a row missing its `name` key maps to `undefined`, which
-  // `find` also returns for "nothing matched" — so the check would pass exactly
-  // the malformed entry it exists to catch, and die later on `toLowerCase`.
   if (names.some((name) => typeof name !== 'string' || name.trim() === '')) {
     throw new Error(
       'departed-names.json has a missing or empty name — it would match every line.',
@@ -109,16 +95,6 @@ export const parseRoster = (text) => {
   return { allow, names };
 };
 
-/**
- * Paths of REGULAR files in `git ls-files -s -z` output (`<mode> <sha> <stage>\t<path>`).
- *
- * Mode is git's own answer, so no stat call can disagree with it. Both other
- * modes must be dropped, and neither is hypothetical here: `120000` is a
- * symlink — `.claude/skills` points at a directory, so reading it raises EISDIR,
- * while `CLAUDE.md` and two others point at `AGENTS.md`, which git tracks in its
- * own right and which would otherwise be reported once per link. `160000` is a
- * submodule gitlink, which has no blob to read at all.
- */
 export const regularFiles = (output) =>
   output
     .split('\0')
@@ -130,14 +106,6 @@ export const regularFiles = (output) =>
     )
     .map((match) => match[2]);
 
-/**
- * One finding per occurrence: two mentions on two lines are two edits.
- *
- * Allowed findings are flagged rather than dropped, so the caller can both hide
- * them from the report and prove each allowance still matches something. An
- * allowance that silently outlives what it excuses is the rot AGENTS.md §6
- * already forbids for dependency advisories.
- */
 export const departedReferences = ({ allow, names, path, text }) => {
   const allowedNames = allow.get(path) ?? new Set();
   return text.split('\n').flatMap((line, index) => {
@@ -153,12 +121,6 @@ export const departedReferences = ({ allow, names, path, text }) => {
   });
 };
 
-/**
- * A path can name a departed thing while its contents never spell it —
- * a directory named for one is a reference in `git ls-files` output alone.
- * Scanned separately from content so the report can say which one it is, and so
- * a path match still counts toward keeping an allowance alive.
- */
 export const departedPathReferences = ({ allow, names, paths }) =>
   paths.flatMap((path) => {
     const allowedNames = allow.get(path) ?? new Set();
@@ -168,14 +130,6 @@ export const departedPathReferences = ({ allow, names, paths }) =>
       .map((name) => ({ isAllowed: allowedNames.has(name), name, path }));
   });
 
-/**
- * Allowances that no longer excuse anything — the gate's own dead code.
- *
- * `walked` is every path the scan read; `seen` is every `path\0name` it matched.
- * An allowance for a file the scan never read, or for a name that file no longer
- * carries, is stale by exactly the rule that makes an unmatched dependency
- * advisory a failure rather than a courtesy.
- */
 export const staleAllowances = ({ allow, seen, walked }) =>
   [...allow].flatMap(([path, allowedNames]) => {
     if (!walked.has(path)) {

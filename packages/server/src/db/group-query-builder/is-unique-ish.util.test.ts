@@ -13,7 +13,6 @@ describe('isUniqueIsh', () => {
   });
 
   it('flags a near-unique column, since n_distinct is an estimate', () => {
-    // An exact-equality test would miss the primary key this exists to catch.
     expect(
       isUniqueIsh({
         estimate: { kind: 'known', value: 1960 },
@@ -35,8 +34,6 @@ describe('isUniqueIsh', () => {
   });
 
   it('does not flag every column on an empty relation', () => {
-    // Without the row-count guard `value >= 0` holds for anything, so an empty
-    // or unvacuumed table would refuse every key it has.
     expect(
       isUniqueIsh({ estimate: { kind: 'known', value: 3 }, relTuples: 0 }),
     ).toBe(false);

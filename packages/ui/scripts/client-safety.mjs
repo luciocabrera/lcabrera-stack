@@ -11,6 +11,19 @@
  * only the ones this package declares itself, and a scan that opened nothing is
  * reported as a defect instead of as a clean run. The requirement this serves is
  * docs/product/requirements/the-ui-package-stays-client-safe.md.
+ *
+ * The import/export pattern is anchored so that every junction between two
+ * quantifiers is over disjoint character sets, which is what keeps the scan
+ * linear. An earlier pass fixed only half of it: the keyword's own `\s+` sat
+ * directly in front of `[^'"\n]+`, and `\s` is a subset of that class, so a
+ * keyword followed by a long run of spaces still split ambiguously between the
+ * two quantifiers and backtracked quadratically. Anchoring the pre-`from`
+ * segment on `\S` removes the overlap and matches the same strings, because the
+ * preceding `\s+` is greedy and the next character can never have been
+ * whitespace. Do not "simplify" it back.
+ *
+ * The module-level `/g` pattern needs no `lastIndex` reset between calls:
+ * `matchAll` iterates against an internal clone of the regex.
  */
 
 import { deriveWorkspaces } from '@lcabrera/repo-standards/workspace-scopes';
@@ -20,23 +33,9 @@ import { dirname, join, matchesGlob, relative, resolve, sep } from 'node:path';
 const SOURCE_FILE_PATTERN = /\.(?:tsx?|mjs|js)$/;
 const WORKSPACE_PARENT_DIR = { app: 'apps', pkg: 'packages' };
 
-// Every junction between two quantifiers here is over disjoint character sets,
-// which is what keeps the scan linear.
-//
-// An earlier pass fixed only half of this. It replaced a lazy `[^'"\n]+?` beside
-// a greedy `\s+` with a single greedy `[^'"\n]+` and one `\s` separator — but
-// left the keyword's own `\s+` sitting directly in front of `[^'"\n]+`, and `\s`
-// is a subset of `[^'"\n]`. So a line like `export` followed by a long run of
-// spaces still split ambiguously between the two quantifiers and backtracked
-// quadratically. Anchoring the pre-`from` segment on `\S` removes that overlap.
-//
-// The strings matched are unchanged: the preceding `\s+` is greedy, so the next
-// character can never have been whitespace anyway.
 const importExportPattern =
   /(?:import|export)\s+(?:type\s+)?(?:\S[^'"\n]*\sfrom\s+)?['"]([^'"\n]+)['"]/g;
 
-// `matchAll` iterates against an internal clone of the regex, so the module-level
-// /g pattern's `lastIndex` is never advanced and needs no reset between calls.
 const collectStaticSources = (fileText) =>
   [...fileText.matchAll(importExportPattern)].map((match) => match[1]);
 
@@ -90,7 +89,6 @@ const collectStaticDependencies = (filePath, seen = new Set()) => {
   return [...directDependencies, ...nestedDependencies];
 };
 
-/** Every source file under a directory, recursively (node_modules excluded). */
 const collectSourceFiles = (directoryPath) => {
   if (!existsSync(directoryPath)) {
     return [];

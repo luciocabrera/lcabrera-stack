@@ -45,23 +45,15 @@ const execFileAsync = promisify(execFile);
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const REPORT_ROOT = join(REPO_ROOT, 'reports');
-// Repo-wide file count is in the low thousands; 64 MiB leaves ample headroom
-// for the merged JSON on stdout.
 const MAX_BUFFER_BYTES = 64 * 1024 * 1024;
 const ESLINT_CONCURRENCY = 4;
 
 const toRepoRelative = (filePath) =>
   relative(REPO_ROOT, filePath).replaceAll('\\', '/');
 
-/** Both linters exit 1 when they merely report problems — that is expected
- * report content, not a failure. */
 const isFindingsExit = (error) =>
   error.code === 1 && typeof error.stdout === 'string';
 
-/**
- * Runs a linter, returning its stdout even on the "findings" exit code.
- * Anything else (eslint exits 2 on fatal errors) is re-thrown.
- */
 const runLinter = async (command, args, cwd) => {
   try {
     const { stdout } = await execFileAsync(command, args, {
@@ -80,7 +72,6 @@ const runLinter = async (command, args, cwd) => {
   }
 };
 
-/** Writes reports/<tool>/full-latest.json, creating the directory. */
 const writeReport = async (tool, payload) => {
   const outputDir = join(REPORT_ROOT, tool);
   await mkdir(outputDir, { recursive: true });
@@ -90,7 +81,6 @@ const writeReport = async (tool, payload) => {
   );
 };
 
-/** Discovers every workspace directory that owns an eslint.config.mjs. */
 const findEslintWorkspaces = () => {
   const groupDirs = ['apps', 'packages'].map((group) => join(REPO_ROOT, group));
   const candidates = groupDirs.flatMap((groupDir) =>
@@ -103,12 +93,6 @@ const findEslintWorkspaces = () => {
     .sort((left, right) => left.localeCompare(right));
 };
 
-/**
- * Merged standard eslint JSON formatter output: each workspace is linted
- * with its own config from its own directory (config factories resolve
- * plugins per workspace), then the per-file result arrays are concatenated
- * with repo-relative paths.
- */
 const generateEslintReport = async () => {
   const workspaces = findEslintWorkspaces();
   const queue = [...workspaces];
@@ -145,11 +129,6 @@ const generateEslintReport = async () => {
   );
 };
 
-/**
- * One repo-wide oxlint run through vp (so the repo's oxlint config and
- * version apply). Diagnostic filenames are already repo-relative when run
- * from the root; absolute ones are normalized defensively.
- */
 const relativizeDiagnosticPaths = (diagnostics) => {
   for (const diagnostic of diagnostics) {
     if (typeof diagnostic.filename === 'string') {
@@ -175,12 +154,6 @@ const generateOxlintReport = async () => {
   );
 };
 
-/**
- * One repo-wide Biome run — root-only on purpose, mirroring the gate: there is
- * no per-workspace lint:biome, because biome.jsonc's `overrides` already scope
- * the react domain. Diagnostic paths are already repo-relative when run from
- * the root; absolute ones are normalized defensively, as for oxlint.
- */
 const relativizeBiomeDiagnosticPaths = (diagnostics) => {
   for (const diagnostic of diagnostics) {
     const path = diagnostic.location?.path;
@@ -207,7 +180,6 @@ const generateBiomeReport = async () => {
   );
 };
 
-/** Returns the validated --only=<tool> value, or undefined for "all three". */
 const TOOLS = ['biome', 'eslint', 'oxlint'];
 
 const parseOnlyArgument = () => {

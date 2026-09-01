@@ -4,7 +4,6 @@ type ToggleCommandStateArgs<TValue extends string> = {
   readonly target: NoInfer<TValue> | undefined;
 };
 
-/** Active/enabled state for a toggle-to-a-value command against a column (ADR-011). */
 export const deriveToggleCommandState = <TValue extends string>({
   current,
   isDisabled,

@@ -195,8 +195,6 @@ describe('Settings', () => {
   });
 
   it('writes a preference back to undefined when it returns to the default', () => {
-    // The cookie carries only what the user moved away from, so choosing the
-    // shipped default has to clear the member rather than store it.
     useGetGlobalGroupingPreferencesMock.mockReturnValue({
       defaultFold: 'collapsed',
       mode: undefined,

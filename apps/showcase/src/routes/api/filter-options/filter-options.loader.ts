@@ -5,10 +5,6 @@ import { DEFAULT_FILTER_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.co
 
 import { selectDistinctFilterOptions } from './.server/distinct.service';
 
-/**
- * Returns the `{ hasMore, values }` page as a raw JSON Response — the client tool consumes
- * it with plain fetch, not the single-fetch protocol.
- */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const params = parseFilterOptionsParams({

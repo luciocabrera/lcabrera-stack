@@ -5,21 +5,6 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vite-plus/test';
 
-// AGENTS.md is the single source of the repo's instructions; CLAUDE.md,
-// GEMINI.md and .github/copilot-instructions.md are symlinks to it so every
-// agent reads the same file and drift is impossible by construction.
-//
-// They were symlinks until #240, where a mechanical `@repo/` → `@lcabrera/`
-// rewrite followed each link and wrote a regular file back — the behaviour of an
-// in-place text edit on a symlink. Nothing in that PR mentions it, so it was
-// never a decision. Three commits of AGENTS.md later (#257, #259, #266) the
-// copies were 92 lines stale, and #257 was the correction telling agents NOT to
-// put language settings in .sonarcloud.properties — advice the stale copies
-// still gave.
-//
-// This asserts the git mode (120000), not the working tree, so it holds on a
-// checkout where symlinks are materialised as plain files and still fails the
-// moment one is committed as content.
 const GIT_SYMLINK_MODE = '120000';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -30,8 +15,6 @@ const MIRRORS = [
   { path: '.github/copilot-instructions.md', target: '../AGENTS.md' },
 ];
 
-// Scrubbed so an inherited GIT_DIR cannot point this at another repository —
-// the variable outranks `cwd`, which is what corrupted the index in #270.
 const REDIRECTING_VARS = [
   'GIT_ALTERNATE_OBJECT_DIRECTORIES',
   'GIT_COMMON_DIR',

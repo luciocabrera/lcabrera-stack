@@ -2,11 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { toOrderKeysetCursor } from './toOrderKeysetCursor.util';
 
-/**
- * A cursor arrives as JSON off the request, where a NULL column is `null` —
- * parsing it is how it really reaches us, and keeps the literal out of our own
- * source (`unicorn/no-null`).
- */
 const NULL_ORDER_ID_CURSOR = JSON.parse(
   '["2026-01-04", null]',
 ) as readonly unknown[];

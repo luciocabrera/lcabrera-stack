@@ -16,7 +16,6 @@ type StubFetchArgs = {
   readonly isOk?: boolean;
 };
 
-/** Records the requested URL and resolves with `body`. */
 const stubFetch = ({ body, isOk = true }: StubFetchArgs) => {
   const fetchMock = vi.fn<typeof fetch>(
     async () =>
@@ -32,11 +31,6 @@ const stubFetch = ({ body, isOk = true }: StubFetchArgs) => {
   return fetchMock;
 };
 
-/**
- * The URL the single fetch call received, parsed. Narrowing rather than
- * stringifying: the fetcher is supposed to hand `fetch` a string, so a
- * `Request`/`URL` here is a failure to surface, not a value to coerce.
- */
 const requestedUrl = (fetchMock: ReturnType<typeof stubFetch>) => {
   const input = fetchMock.mock.calls[0]?.[0];
 

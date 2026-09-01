@@ -21,16 +21,12 @@ export const formatCurrency = ({
       style: 'currency',
     }).format(value);
 
-    // Normalize format: move minus sign after currency symbol with space
-    // -US$29,032.37 → US$ -29,032.37
-    // US$29,032.37 → US$ 29,032.37
     const normalized = formatted
-      .replace(/^-([^\d]+)/, '$1-') // Move minus after symbol: -US$ → US$-
-      .replace(/^([^\d-]+)([-\d])/, '$1 $2'); // Add space: US$-123 → US$ -123
+      .replace(/^-([^\d]+)/, '$1-')
+      .replace(/^([^\d-]+)([-\d])/, '$1 $2');
 
     return normalized;
   } catch {
-    // Fallback to basic formatting if Intl fails
     return `${currency} ${String(value)}`;
   }
 };

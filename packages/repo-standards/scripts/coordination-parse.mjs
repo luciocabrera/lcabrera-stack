@@ -3,18 +3,17 @@
  * `verify-coordination.mjs` so that script stays under the size ceiling and its
  * effects (fs, git) stay separated from this logic. Everything here is pure —
  * same input, same output, no I/O. See `.claude/rules/scripts.md`.
+ *
+ * `NO_BRANCH` lives here rather than in a caller because three consumers read
+ * the same vocabulary — the verifier, the merged-drift reconciliation and the
+ * close-on-merge resolver — and a private copy in any one of them would drift
+ * silently.
  */
 
-/** `branch:` values that name no branch. Lives here, not in a caller, because
- *  three consumers now read the same vocabulary (the verifier, the merged-drift
- *  reconciliation, and the close-on-merge resolver) and a private copy in any
- *  one of them would drift silently. */
 export const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
 
-/** `pr:` values that name no PR. */
 export const NO_PR = new Set(['(none)', '']);
 
-/** An indented `- item` line → its text, or undefined. */
 const readListItem = (raw) => {
   const trimmed = raw.trimStart();
   return raw !== trimmed && trimmed.startsWith('- ')
@@ -22,8 +21,6 @@ const readListItem = (raw) => {
     : undefined;
 };
 
-/** A column-0 `key: value` line → {key, value}, or undefined. Uses indexOf, not
- *  a `\s*(.*)` regex, which backtracks super-linearly on runs of spaces. */
 const readPair = (raw) => {
   const colon = raw.indexOf(':');
   if (colon <= 0 || raw.startsWith(' ') || raw.startsWith('\t')) {
@@ -35,13 +32,6 @@ const readPair = (raw) => {
     : undefined;
 };
 
-/**
- * A frontmatter parser small enough to own: scalars are `key: value`, and a
- * `key:` with an empty value opens a `- item` list. No deeper nesting is allowed
- * by the register schema, so nothing more is needed. Returns undefined when the
- * source has no `---` frontmatter block. Parses with `indexOf`/`startsWith`
- * rather than backtracking-prone regexes.
- */
 export const parseFrontmatter = (source) => {
   if (!source.startsWith('---\n')) {
     return undefined;
@@ -68,20 +58,12 @@ export const parseFrontmatter = (source) => {
   return data;
 };
 
-/** Two glob heads match when either is `*` or they are the same literal. */
 const headsMatch = (x, y) => x === '*' || y === '*' || x === y;
 
-/** `**` (head of `star`) matches zero or more segments of `other`. */
 const starStarIntersects = (star, other) =>
   segmentsIntersect(star.slice(1), other) ||
   (other.length > 0 && segmentsIntersect(star, other.slice(1)));
 
-/**
- * Glob intersection over path segments: `*` matches one segment, `**` matches
- * zero or more. True when some concrete path could match both globs — exactly
- * the question "do these two areas overlap?". `**` is checked before the empty
- * cases so `['**']` still intersects `[]`.
- */
 const segmentsIntersect = (a, b) => {
   if (a[0] === '**') {
     return starStarIntersects(a, b);
@@ -103,5 +85,4 @@ export const globsOverlap = (x, y) =>
     y.replace(/^\.\//, '').split('/'),
   );
 
-/** A git branch name → its descriptor filename slug (`feat/big` → `feat-big`). */
 export const branchSlug = (branch) => branch.replaceAll(/[^\w-]+/g, '-');

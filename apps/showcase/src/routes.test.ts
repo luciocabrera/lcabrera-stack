@@ -1,15 +1,16 @@
+/**
+ * A fetcher's path and the route that answers it are declared in two files, in
+ * two spellings (`/_api/…` against `_api/…`), and nothing else pairs them:
+ * rename one and the browser gets this app's 404 document where it expected
+ * JSON, with every gate still green. These assertions are that pairing.
+ */
+
 import { describe, expect, it } from 'vite-plus/test';
 
 import routes from './routes';
 import { CAR_SALES_PAGINATED_PATH } from './services/carSales.api';
 import { WIDE_ALLTYPES_150_PAGINATED_PATH } from './services/wideAlltypes150.api';
 
-/**
- * A fetcher's path and the route that answers it are declared in two files, in
- * two spellings (`/_api/…` against `_api/…`), and nothing else pairs them: rename
- * one and the browser gets this app's 404 document where it expected JSON, with
- * every gate still green. These assertions are that pairing.
- */
 const registeredPaths = new Set(
   routes.map((entry) => ('path' in entry ? entry.path : undefined)),
 );

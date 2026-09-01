@@ -9,9 +9,6 @@ describe('isTableGroupingMode', () => {
   });
 
   it('refuses a mode this package does not render', () => {
-    // `cube` is a real server-side mode in the planning document and is
-    // deliberately not one here: its sets are not prefixes, so nothing renders
-    // its rows as a tree (#574).
     expect(isTableGroupingMode('cube')).toBe(false);
   });
 

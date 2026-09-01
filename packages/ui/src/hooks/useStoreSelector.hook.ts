@@ -7,10 +7,6 @@ type UseStoreSelectorArgs<TState, TSelected> = {
   readonly store: TStore<TState>;
 };
 
-/**
- * Selector hooks (`useGet*`) are the intended consumers — view components read through
- * those, never through this hook directly.
- */
 export const useStoreSelector = <
   TState extends Record<string, unknown>,
   TSelected,

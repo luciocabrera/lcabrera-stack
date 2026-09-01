@@ -8,13 +8,6 @@ type ParseApiTokenArgs = {
   readonly prefix?: string;
 };
 
-/**
- * Splits a bearer-token plaintext (`<prefix><tokenId>.<secret>`) back into its lookup and
- * secret halves.
- * Returns undefined — never throws — for anything malformed (wrong/absent prefix, missing
- * separator, empty secret), so a garbage `Authorization` header simply fails to
- * authenticate.
- */
 export const parseApiToken = ({
   plaintext,
   prefix = '',

@@ -9,13 +9,6 @@ type ToTableEmptyStateNoticeArgs = {
 const DEFAULT_MESSAGE =
   'No records match the current view. Try adjusting your filters or refreshing the table.';
 
-/**
- * **The sentence is the endpoint's, the heading is the table's.** Only the endpoint knows
- * why it refused — the catalogue rule, the estimated row count, the threshold — and it has
- * already vetted that text for anything a client may not see.
- * Rewriting the former here would drop the reason; omitting the latter leaves the user
- * with a column name they have never seen on screen.
- */
 export const toTableEmptyStateNotice = ({
   columnName,
   error,

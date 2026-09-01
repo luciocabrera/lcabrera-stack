@@ -29,10 +29,6 @@ describe('classifyLink', () => {
   });
 
   test('a link to a directory the package fills travels with it', () => {
-    // `[in this directory](./)` is the ordinary way a page points at the folder
-    // it sits in. Containment is judged against the shipped FILES, and a
-    // directory is in no set of files, so without this a page is reported as an
-    // escape for naming its own home.
     expect(
       classifyLink({
         fromDirectory: 'docs/decisions',
@@ -44,9 +40,6 @@ describe('classifyLink', () => {
   });
 
   test('a directory the package fills nothing of still escapes', () => {
-    // The prefix has to end at a directory boundary rather than anywhere in a
-    // name: `docs/dec` must not read as internal because a shipped path happens
-    // to start with those characters.
     expect(
       classifyLink({
         fromDirectory: '',
@@ -263,9 +256,6 @@ describe('analyseClosure deduplication and the shipped set', () => {
   });
 
   test('a relative import between two shipped files is not an escape', () => {
-    // Pins the `--shipped` mode, where rootDirectory is empty on purpose: the
-    // shipped set is the ONLY thing making a reference internal, so an import
-    // that does not consult it reports every shipped script as an escape.
     const files = [
       {
         content: "import { scan } from './helper.mjs';",

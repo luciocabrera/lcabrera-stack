@@ -22,14 +22,6 @@ import { TableBody } from '#ui/components/Table/TableBody';
 import { TableHeader } from '#ui/components/Table/TableHeader';
 import { NotificationProvider } from '#ui/contexts/NotificationContext';
 
-/**
- * A grouped grid that actually **renders** the group-details affordance.
- *
- * Every test of this feature before this one was over a pure helper, which is
- * how a
- * `TypeError` on the render path reached a user (#870, #887). These mount the
- * grid and read what it drew.
- */
 type TestRow = Record<string, unknown>;
 
 const ROW_HEIGHT = 40;
@@ -152,7 +144,6 @@ const renderGrid = ({
 
 const detailsLink = () => screen.queryByTestId('table-group-details-link');
 
-/** A relative href has no origin, so one is supplied purely to parse it. */
 const paramsOf = (href: null | string | undefined) =>
   new URL(href ?? '', 'http://table.test').searchParams;
 
@@ -171,8 +162,6 @@ describe('opening a group from the grid', () => {
   });
 
   it('names the whole group path in the link', () => {
-    // Every applied key, not just the innermost: a path short of the key list
-    // is a query for a larger set than the row the reader clicked.
     renderGrid({ rows: [groupRowOf({})] });
 
     const group = paramsOf(detailsLink()?.getAttribute('href')).get('group');
@@ -188,8 +177,6 @@ describe('opening a group from the grid', () => {
   });
 
   it('carries the list filters the group was counted under', () => {
-    // The modal inherits these as its floor. A link that dropped them would
-    // open on a larger set than the count it sits beside.
     renderGrid({
       initialEntry: '/?filters=%7B%22status%22%3A1%7D',
       rows: [groupRowOf({})],
@@ -201,32 +188,24 @@ describe('opening a group from the grid', () => {
   });
 
   it('adds no tab stop to the grid', () => {
-    // ADR-062: exactly one element in the body is tabbable, addressed by row
-    // key plus column key. An anchor that took focus would make tabbing
-    // alternate between the cell and the link inside it.
     renderGrid({ rows: [groupRowOf({})] });
 
     expect(detailsLink()?.getAttribute('tabindex')).toBe('-1');
   });
 
   it('links the innermost level only, not every key cell on the row', () => {
-    // Every filled key cell describes the same group, so linking each one puts
-    // identical links on one row and leaves no cell that means "this group"
-    // rather than "one of its ancestors".
     renderGrid({ rows: [groupRowOf({})] });
 
     expect(screen.getAllByTestId('table-group-details-link')).toHaveLength(1);
   });
 
   it('offers no link on a subtotal', () => {
-    // A subtotal summarises the groups above it rather than rows of its own.
     renderGrid({ rows: [groupRowOf({ isSubtotal: true })] });
 
     expect(detailsLink()).toBeNull();
   });
 
   it('offers no link on an outer level', () => {
-    // Its children are already on screen as further group rows.
     renderGrid({
       rows: [
         groupRowOf({
@@ -245,8 +224,6 @@ describe('opening a group from the grid', () => {
   });
 
   it('still renders the key text where the route serves no group details', () => {
-    // Absent means the affordance is not offered — not that the heading
-    // disappears with it.
     renderGrid({ groupDetailsPath: '', rows: [groupRowOf({})] });
 
     expect(detailsLink()).toBeNull();

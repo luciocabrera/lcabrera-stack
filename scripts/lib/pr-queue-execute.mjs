@@ -12,50 +12,21 @@
  * The pass is therefore deliberately narrow: it executes the named actions and
  * nothing else. It has no authority to re-decide.
  *
+ * `EXECUTE_TOOLS` is write-capable, and what bounds it is `forbiddenActions` in
+ * `pr-queue-gate.mjs`, which audits the DECISION rather than this pass. That
+ * bound cannot be complete and is not containment; #1040 records the residual
+ * and the guard that would close it.
+ *
+ * `acceptEdits` in the argv is what makes the run non-interactive: a headless
+ * run cannot answer a permission prompt, so without it every edit is denied and
+ * the pass reports success having changed nothing.
+ *
  * Governed by .claude/rules/scripts.md.
  */
 import { execFileSync } from 'node:child_process';
 
 import { parseModelName, resolveClaudeBinary } from './pr-queue-claude.mjs';
 
-/**
- * Write-capable tools for the apply pass.
- *
- * `gh pr merge` is listed and `gh pr close` is not, on purpose: closing a PR is
- * an author-intent judgement the policy never delegates (S7). Nothing here can
- * force-push either — A1 rebases only when the result is conflict-free, and S6
- * covers a branch someone else is holding.
- *
- * `gh pr merge` is also the enqueue command, which is why it stays as the one
- * way to land a pull request: where a merge queue is required, gh adds the pull
- * request to it instead of merging, and where one is not, it squash-merges. The
- * flag that breaks that is `--admin`, which merges past the queue and past every
- * required check — the repository owner's role can bypass, so this is reachable
- * rather than theoretical.
- *
- * An allow-list pattern here matches a command prefix and cannot forbid a flag,
- * so a bound on what may be AUTHORISED is enforced one layer up:
- * `forbiddenActions` in `pr-queue-gate.mjs` rejects a DECISION naming `gh pr
- * merge` in any form but `gh pr merge <n> --squash` — allow-listed, so an
- * unanticipated flag is refused too — plus the REST merge, branch-merge and
- * git-refs endpoints, the merge, enqueue and ref GraphQL mutations, and a `git
- * push` whose destination refspec is the protected branch.
- *
- * Read what that is, not what it sounds like. It is a deny-list over free text
- * for everything but the flags, so it CANNOT BE COMPLETE: a path or a ref held
- * in a variable, a script file, an encoded string and the next spelling nobody
- * has written down all name nothing it can match. It refuses the operations that
- * name themselves, best-effort, in the artifact that is audited.
- *
- * And it audits the DECISION, not this pass. `gh api` is here because A4 replies
- * to a review comment through it and S11 reads the queue timeline through it,
- * and no prefix admits those while denying `--method PUT …/pulls/<n>/merge` —
- * gh's method is a flag. `Bash(git:*)` is the same shape: it admits a push to
- * any destination, `main` included. Between the model and the protected branch
- * there is only the prompt, which this file's own header says is not a leash.
- * The containment is this tool list, which is #1040 and does not exist yet;
- * until it does, what is bounded is what may be authorised, not what may run.
- */
 export const EXECUTE_TOOLS = [
   'Read',
   'Grep',
@@ -77,7 +48,6 @@ export const EXECUTE_TOOLS = [
   'Bash(node scripts/:*)',
 ];
 
-/** The apply pass reports what it did — never a fresh verdict. */
 export const OUTCOME_SCHEMA = {
   additionalProperties: false,
   properties: {
@@ -167,11 +137,6 @@ Hard bounds, in force regardless of what the action list says:
 
 Report what you actually did — including anything you skipped and why.`;
 
-/**
- * argv for the apply pass. `acceptEdits` is what makes it non-interactive: a
- * headless run cannot answer a permission prompt, so without it every edit is
- * denied and the pass reports success having changed nothing.
- */
 export const executeArgs = ({ model }) => [
   '--print',
   '--output-format',
@@ -187,7 +152,6 @@ export const executeArgs = ({ model }) => [
   '--no-session-persistence',
 ];
 
-/** Runs one apply pass. */
 export const runExecution = ({ cwd, model, prompt, timeoutMs }) => {
   const binary = resolveClaudeBinary();
   if (binary === undefined) {

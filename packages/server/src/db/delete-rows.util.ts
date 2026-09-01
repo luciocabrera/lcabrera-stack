@@ -6,10 +6,6 @@ import type { DeleteQueryDescriptor } from './query-builder/query-builder.types.
 import { buildDeleteQuery } from './query-builder/build-delete-query.util.ts';
 import { runQuery } from './run-query.util.ts';
 
-/**
- * A delete blocked by a child row arrives as `ForeignKeyViolationError` rather than a raw
- * `pg` message (ADR-050).
- */
 export const deleteRows = async <TRow extends QueryResultRow>({
   tx,
   ...descriptor

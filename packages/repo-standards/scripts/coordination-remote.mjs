@@ -38,16 +38,6 @@ const TASKS_DIR = `${readRegisters().coordinationTasksDir}/`;
 const DEFAULT_BRANCH = readConventions().defaultBranch;
 const HEADS_PREFIX = 'refs/heads/';
 
-/**
- * `<sha>\trefs/heads/<branch>` lines → `{ branch, sha }`, minus the default
- * branch. The sha matters as much as the name: it is what tells a local ref
- * that is merely *behind* origin apart from one that is current, and a stale
- * ref yields stale claims while looking exactly like a successful read.
- *
- * The branch to drop is a parameter so the exclusion can be exercised for a
- * repository whose default is not this one's; production passes nothing and
- * gets the configured value.
- */
 export const parseLsRemoteHeads = (stdout, defaultBranch = DEFAULT_BRANCH) =>
   String(stdout ?? '')
     .split('\n')
@@ -56,7 +46,6 @@ export const parseLsRemoteHeads = (stdout, defaultBranch = DEFAULT_BRANCH) =>
     .map(([sha, ref]) => ({ branch: ref.slice(HEADS_PREFIX.length), sha }))
     .filter(({ branch }) => branch !== defaultBranch);
 
-/** Task file paths in a ref's tree (never the `_`-prefixed template). */
 const taskPathsAt = ({ cwd, git, ref }) => {
   const listed = git({
     args: ['ls-tree', '-r', '--name-only', ref, '--', TASKS_DIR],
@@ -67,11 +56,6 @@ const taskPathsAt = ({ cwd, git, ref }) => {
     .filter((path) => path.endsWith('.md') && !path.includes('/_'));
 };
 
-/**
- * One branch's claims, or `undefined` when its ref is missing locally **or is
- * behind origin** — both mean the same thing to a caller (what is here is not
- * what is on the branch), and both must be reported rather than read.
- */
 const claimsOnBranch = ({ cwd, git, branch, sha }) => {
   const ref = `refs/remotes/origin/${branch}`;
   const local = git({ args: ['rev-parse', '--verify', '--quiet', ref], cwd });
@@ -86,11 +70,6 @@ const claimsOnBranch = ({ cwd, git, branch, sha }) => {
     .filter(({ body }) => body !== undefined)
     .map(({ body, path }) => {
       const data = parseFrontmatter(body);
-      // Named by the branch the claim DECLARES, not the branch it was found
-      // on. Every branch cut from `main` inherits a copy of whatever task
-      // files were live at the time, so "found on" is frequently some
-      // unrelated branch — and sending someone there to coordinate is worse
-      // than not warning at all.
       const declaredOn = data?.branch ?? branch;
       return {
         branch,
@@ -100,13 +79,6 @@ const claimsOnBranch = ({ cwd, git, branch, sha }) => {
     });
 };
 
-/**
- * Claims on every live remote branch.
- *
- * Returns `{ claims, readBranches, unreadBranches, unavailable }`.
- * `unavailable` means git or the remote could not be reached at all — the
- * caller must say so rather than presenting a local-only result as complete.
- */
 export const readRemoteClaims = ({ cwd, git = runGit }) => {
   const heads = git({ args: ['ls-remote', '--heads', 'origin'], cwd });
   if (heads === undefined) {
@@ -144,19 +116,6 @@ export const readRemoteClaims = ({ cwd, git = runGit }) => {
   };
 };
 
-/**
- * Drops claims whose declared branch no longer exists on the remote.
- *
- * This repo deletes a branch when its PR merges, so a claim naming a branch
- * that is gone is finished work. The file nevertheless survives on every
- * branch that was cut from `main` while the claim was live, and those copies
- * outlive the branch itself — without this, a merged claim keeps colliding
- * with live work forever, and deleting the task file from `main` does not stop
- * it. Found by running the check on `main` right after shipping it.
- *
- * Placeholder branches are kept: they name no branch to look up, so absence
- * says nothing about whether the work is done.
- */
 export const withoutMergedBranches = ({ claims, liveBranches }) => {
   const live = new Set([...liveBranches, DEFAULT_BRANCH]);
   return claims.filter(({ data }) => {
@@ -167,15 +126,6 @@ export const withoutMergedBranches = ({ claims, liveBranches }) => {
   });
 };
 
-/**
- * One entry per claim id.
- *
- * A task file is committed to its own branch, but every branch cut from `main`
- * afterwards carries a copy — so a single claim is typically found on several
- * branches at once and would otherwise be reported as several separate
- * collisions with the same task. The copy sitting on the branch its own
- * frontmatter names is the canonical one; any other is an inherited snapshot.
- */
 export const dedupeById = (claims) => {
   const byId = new Map();
   for (const claim of claims) {
@@ -187,11 +137,6 @@ export const dedupeById = (claims) => {
   return [...byId.values()];
 };
 
-/**
- * Remote claims minus any whose id is already in the working tree — the local
- * copy is the authoritative one, and a claim present on both would otherwise
- * collide with itself.
- */
 export const withoutLocalDuplicates = ({ localTasks, remoteClaims }) => {
   const localIds = new Set(localTasks.map(({ data }) => data.id));
   return remoteClaims.filter(({ data }) => !localIds.has(data.id));

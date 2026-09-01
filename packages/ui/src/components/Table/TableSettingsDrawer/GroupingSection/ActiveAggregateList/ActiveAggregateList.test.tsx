@@ -48,14 +48,6 @@ vi.mock('../../TableDrawerContext/selectors', () => ({
 
 import { ActiveAggregateList } from './ActiveAggregateList.component';
 
-/**
- * The real `DraggableList` is deliberately **not** mocked here: whether these
- * rows carry a drag handle at all is the thing #832 changed, and a stubbed
- * primitive answers that question with whatever the stub renders. jsdom
- * implements none of the HTML5 drag behaviour, but the primitive reads no
- * `dataTransfer` — it tracks the source and target ids from the events
- * themselves — so a start/enter/end triple is the whole drop.
- */
 const dragRowOnto = ({ from, onto }: { from: number; onto: number }) => {
   const rows = screen.getAllByRole('listitem');
   const source = rows[from] as HTMLElement;
@@ -126,9 +118,6 @@ describe('ActiveAggregateList', () => {
   });
 
   it('lists them in staged order rather than in column order', () => {
-    // Written against the table's column order, so the two disagree — which is
-    // what makes this assertion discriminating. The staged order is state
-    // (#831), and re-sorting here would discard it.
     aggregatesRef.current = [
       { columnKey: 'total_amount', fn: 'sum' },
       { columnKey: 'quantity', fn: 'max' },
@@ -157,8 +146,6 @@ describe('ActiveAggregateList', () => {
   });
 
   it('reorders two measures of ONE column relative to each other', () => {
-    // The pair is the row identity, so a column's own measures can swap — the
-    // move a column-keyed shape had no way to express.
     aggregatesRef.current = [
       { columnKey: 'total_amount', fn: 'avg' },
       { columnKey: 'total_amount', fn: 'min' },

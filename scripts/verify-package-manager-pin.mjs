@@ -33,14 +33,6 @@ const HINT =
   '  did not complete its write, so the pin is a version preference rather than an\n' +
   '  integrity check. Re-run `corepack use pnpm@latest` and commit the result.';
 
-/**
- * `--manifest` reaches the filesystem, so it is containment-checked rather than
- * passed straight to a read. The refresh only ever points this at the root
- * manifest; the flag exists for tests, and a test argument is still an argument.
- *
- * `JSON.parse` happily returns `null` for the text "null", which would then be
- * dereferenced as an object — so the shape is checked here rather than assumed.
- */
 const readManifest = (path) => {
   const parsed = JSON.parse(readTextWithin(path, REPO_ROOT));
 
@@ -58,10 +50,6 @@ const main = () => {
 
   const after = readManifest(manifestPath).packageManager;
 
-  // Collected rather than thrown one at a time, per .claude/rules/scripts.md.
-  // These three are mutually exclusive by nature — a field cannot be both absent
-  // and malformed — so the list holds at most one today; the shape is what keeps
-  // a fourth check from being bolted on as an early exit.
   const problems = [];
 
   if (after === undefined) {
@@ -88,9 +76,6 @@ const main = () => {
   }
 
   if (problems.length > 0) {
-    // Never `process.exit()` here: stderr is asynchronous when it is a pipe, and
-    // exiting mid-stream can drop the message above — on the one failure path
-    // this script exists to explain, under exactly the CI/`tee` runs that need it.
     process.exitCode = 1;
   }
 };

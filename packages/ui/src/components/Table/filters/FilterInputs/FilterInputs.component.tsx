@@ -23,11 +23,6 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
 
   const [isOperatorOpen, setIsOperatorOpen] = useState(false);
 
-  // A boolean column gets no operator dropdown at all, so `BooleanFilterInput`
-  // carries the empty operators itself and this branch must **forward** an
-  // empty filter rather than drop it. Dropping it left the control reading
-  // "All" while the table was filtered to the null rows, with no way to clear
-  // it — the empty branch below never runs for a boolean column.
   if (dataType === 'boolean') {
     return (
       <BooleanFilterInput
@@ -41,8 +36,6 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
     );
   }
 
-  // A filter that takes no value has nothing to render an input for, and an
-  // empty one would invite a value the operator cannot carry.
   if (filter?.type === 'empty') {
     return (
       <div {...stylex.props(styles.container)}>

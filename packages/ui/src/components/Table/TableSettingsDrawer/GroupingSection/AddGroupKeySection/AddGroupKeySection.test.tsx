@@ -106,8 +106,6 @@ describe('AddGroupKeySection', () => {
   });
 
   it('drops a column the catalogue refuses as a group key', () => {
-    // The declared flag says yes and the endpoint says no — the case a menu
-    // built from the declaration alone offers and the query then empties (#642).
     const refused: TableColumnGroupingCapability = {
       aggregates: ['count'],
       canGroup: false,
@@ -155,8 +153,6 @@ describe('AddGroupKeySection', () => {
   });
 
   it('replaces the control with a message at the configured depth', () => {
-    // An affordance that is refused on every use reads as a bug, so the cap is
-    // stated rather than left to be discovered.
     groupingKeysRef.current = Array.from(
       { length: MAX_TABLE_GROUP_KEYS },
       (_unused, index) => `key_${index}`,
@@ -173,8 +169,6 @@ describe('AddGroupKeySection', () => {
   });
 
   it('offers no way to add a key under a locked preset', () => {
-    // Hidden rather than disabled: the lock is not a state the user can clear,
-    // so an inert Add would only ask them to keep trying (#578).
     columnsRef.current = [
       { isGroupable: true, key: 'region', label: 'Region' },
     ];

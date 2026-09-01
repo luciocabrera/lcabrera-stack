@@ -23,12 +23,6 @@ import { useGetColumnPinning } from '../ColumnDrawerContext/selectors';
 import { styles } from './PinningSection.stylex';
 import { PinningSectionToolbar } from './PinningSectionToolbar';
 
-/**
- * Identity and active-state come from the shared pinning commands (ADR-011); crucially the
- * active-state is derived from the DRAFT store (`useGetColumnPinning` here reads the
- * drawer's per-column draft, not committed state) so the drawer reflects pending edits
- * while open.
- */
 export const PinningSection = ({ isBusy = false }: PinningSectionProps) => {
   const columnPinning = useGetColumnPinning();
   const setColumnPinning = useSetColumnPinning();

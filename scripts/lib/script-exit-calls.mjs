@@ -5,7 +5,6 @@
  */
 import { Project, SyntaxKind } from 'ts-morph';
 
-/** Cheap pre-filter: parsing every script in the repo is not worth it. */
 export const mayContainExitCall = (source) => source.includes('process.exit');
 
 const project = new Project({

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { toWideAlltypes150Row } from './toWideAlltypes150Row.util';
 
-/** One row of every value class this table holds, as the driver hands them back. */
 const driverRow = {
   c_001: 1,
   c_002: '2',

@@ -14,14 +14,12 @@ export const ThemeProvider = ({
   defaultTheme = 'light',
   initialTheme,
 }: ThemeProviderProps) => {
-  // Use initialTheme from loader (cookie) if available, otherwise fall back to defaultTheme
   const [themeState, setThemeState] = useState<ThemeMode>(
     () => initialTheme ?? defaultTheme,
   );
 
   const setTheme = (newTheme: ThemeMode) => {
     setThemeState(newTheme);
-    // Sync to cookie for SSR
     setThemeCookie({ appId, theme: newTheme });
   };
 

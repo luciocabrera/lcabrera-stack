@@ -19,7 +19,6 @@ describe('isTableTotalsPlacement', () => {
   });
 
   it('does not admit an inherited property through the prototype chain', () => {
-    // `Object.hasOwn` rather than `in`, because the value arrives from a URL.
     expect(isTableTotalsPlacement('toString')).toBe(false);
     expect(isTableTotalsPlacement('constructor')).toBe(false);
   });

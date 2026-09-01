@@ -6,10 +6,6 @@ export type ResolveTagOverflowArgs = {
   readonly visibleTagCount: number;
 };
 
-/**
- * Splits the selected labels into the tags that fit in the trigger and the overflow count
- * hidden behind the "+N more" badge.
- */
 export const resolveTagOverflow = ({
   mode,
   selectedLabels,

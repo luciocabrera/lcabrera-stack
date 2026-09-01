@@ -22,7 +22,6 @@ export const VirtualizedOption = ({ index }: VirtualizedOptionProps) => {
   const toggleOption = useToggleOption();
   const toggleSelectAll = useToggleSelectAll();
 
-  // "Select All" is at index 0 (if enabled and more than 1 option)
   if (index === 0 && shouldShowSelectAll) {
     return (
       <SelectAllOption
@@ -33,7 +32,6 @@ export const VirtualizedOption = ({ index }: VirtualizedOptionProps) => {
     );
   }
 
-  // Adjust option index to account for "Select All" at position 0
   const optionIndex = shouldShowSelectAll ? index - 1 : index;
   const option = filteredOptions[optionIndex];
 

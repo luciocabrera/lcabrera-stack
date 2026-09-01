@@ -55,8 +55,6 @@ describe('deserializeFiltersFromURL', () => {
   });
 
   it('drops the whole state for a param that is not a column-keyed object', () => {
-    // A JSON array of otherwise-valid filters is not a filters payload — none
-    // of it is applied, rather than an index being read as a column key.
     expect(deserializeFiltersFromURL('[["ct","hello"]]')).toEqual({});
     expect(deserializeFiltersFromURL('"hello"')).toEqual({});
     expect(deserializeFiltersFromURL('42')).toEqual({});

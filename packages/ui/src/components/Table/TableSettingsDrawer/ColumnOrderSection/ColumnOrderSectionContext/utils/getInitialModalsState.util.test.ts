@@ -22,7 +22,6 @@ describe('getInitialModalsState', () => {
     });
     expect(result.conflictModal.isOpen).toBe(true);
     expect(result.conflictModal.columnKey).toBe('name');
-    // Other fields keep defaults
     expect(result.pinSideModal.isOpen).toBe(false);
   });
 });

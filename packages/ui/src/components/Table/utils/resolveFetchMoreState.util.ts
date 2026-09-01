@@ -6,11 +6,6 @@ type ResolveFetchMoreStateArgs<TData, TResponse> = {
   readonly response: TResponse;
 };
 
-/**
- * `dataTotalSelector` may return `undefined`, and a server is expected to use that: the
- * total cannot change within a scroll session, so re-counting the filtered set on every
- * page is work with a known answer.
- */
 export const resolveFetchMoreState = <TData, TResponse>({
   currentData,
   currentTotalRows,

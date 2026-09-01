@@ -33,58 +33,36 @@
  * API; `passDetail` is counts.
  *
  * Governed by .claude/rules/scripts.md.
+ *
+ * GitHub truncates a commit-status description past the length
+ * `MAX_DESCRIPTION` holds.
  */
 
-/** GitHub truncates a commit-status description past this. */
 const MAX_DESCRIPTION = 140;
 
-/** How much of a reviewer's free-text reason the job summary reproduces. */
 const MAX_SUMMARY_REASON = 600;
 
-/**
- * §2.3's exit codes. Both kinds of `error` exit 2 — the contract's table keys on
- * the state, not on who produced it. `absent` is 0 for now: whether an
- * unreviewed pull request should be stopped is #698's decision, and this gate is
- * advisory regardless.
- */
 const EXIT_CODES = { absent: 0, error: 2, fail: 1, pass: 0 };
 
-/** (pure) */
 const truncate = (text) =>
   text.length <= MAX_DESCRIPTION
     ? text
     : `${text.slice(0, MAX_DESCRIPTION - 1)}…`;
 
-/**
- * One line, whatever came in.
- *
- * A status description holds a single line, and so does an Actions log line —
- * where a runner reads `::` directives at the start of one, so a value that can
- * introduce a newline can introduce a directive. (pure)
- */
 export const oneLine = (text) => String(text).replaceAll(/\s+/gu, ' ').trim();
 
-/**
- * Free text rendered so it cannot pass for the report's own Markdown. Three
- * things, and all three are load-bearing: `oneLine` denies it a line of its own,
- * so it cannot open a block; stripping backticks stops it closing the span
- * early; the span itself renders whatever survives literally. (pure)
- */
 const asInlineCode = (text) =>
   `\`${oneLine(text).replaceAll('`', '').slice(0, MAX_SUMMARY_REASON)}\``;
 
-/** Whether this `error` is the reviewer's conclusion rather than a rejection. */
 const isReviewerError = (result) =>
   result.state === 'error' && result.errorReason !== undefined;
 
-/** (pure) */
 const passDetail = (result) => {
   const criteria = result.document?.criteria?.length ?? 0;
   const findings = result.document?.findings?.length ?? 0;
   return `${criteria} criteria evidenced, ${findings} non-blocking finding(s)`;
 };
 
-/** The one line that appears next to the check. (pure) */
 export const statusDescription = (result) => {
   if (result.state === 'pass') {
     return truncate(`pass — ${passDetail(result)}`);
@@ -107,7 +85,6 @@ export const statusDescription = (result) => {
   );
 };
 
-/** (pure) */
 const summaryLines = (result) => {
   if (isReviewerError(result)) {
     return [
@@ -125,8 +102,6 @@ const summaryLines = (result) => {
       'The verdict on this pull request does not satisfy the contract, so it',
       'is not usable as one. The validator never repairs a verdict (§2.4).',
       '',
-      // Each message quotes the document — a finding id, a file path — so the
-      // whole line is a span rather than the quoted part being escaped.
       ...result.errors.map((error) => `- ${asInlineCode(error)}`),
     ];
   }
@@ -151,7 +126,6 @@ const summaryLines = (result) => {
   return [`The reviewer certified this commit — ${passDetail(result)}.`];
 };
 
-/** The Markdown written to the job summary. (pure) */
 export const summaryMarkdown = (result, { pr, headSha }) =>
   [
     '## Agent review verdict',
@@ -165,5 +139,4 @@ export const summaryMarkdown = (result, { pr, headSha }) =>
     'Contract: `docs/agents/agent-review-contract.md`.',
   ].join('\n');
 
-/** §2.3's exit code for a state, used only under `--strict`. (pure) */
 export const exitCodeFor = (state) => EXIT_CODES[state] ?? 2;

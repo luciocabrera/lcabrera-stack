@@ -13,10 +13,6 @@ import { getFieldKey } from '../utils/getFieldKey.util';
 import { hasScrollOwningChild } from '../utils/hasScrollOwningChild.util';
 import { styles } from './FormFieldsList.stylex';
 
-/**
- * Single recursive walker for group/row/tab/leaf nodes — the render-side counterpart to
- * flattenFields.util.ts (ADR-005).
- */
 export const FormFieldsList = <TValues extends Record<string, unknown>>({
   fields,
 }: FormFieldsListProps<TValues>) => {

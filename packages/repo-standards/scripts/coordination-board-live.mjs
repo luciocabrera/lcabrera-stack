@@ -60,7 +60,6 @@ const FAILING = new Set([
 ]);
 const DONE = new Set(['SUCCESS', 'NEUTRAL', 'SKIPPED']);
 
-/** Roll a PR's check runs up to one glyph: red > pending > green > none. */
 const checksGlyph = (rollup) => {
   if (!Array.isArray(rollup) || rollup.length === 0) {
     return '·';
@@ -77,7 +76,6 @@ const checksGlyph = (rollup) => {
   return '✅';
 };
 
-/** Match a claim to an open PR by branch first, then by its recorded pr number. */
 const prForTask = (data, byBranch, byNumber) =>
   byBranch.get(data.branch) ??
   (data.pr === undefined ? undefined : byNumber.get(String(data.pr).trim()));

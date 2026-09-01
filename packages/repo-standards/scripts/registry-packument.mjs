@@ -22,32 +22,14 @@
 const REGISTRY =
   process.env.npm_config_registry ?? 'https://registry.npmjs.org';
 
-/**
- * The abbreviated packument. Small, and carries `dist-tags` plus a `versions`
- * map with each version's dependency ranges — enough to answer "is this
- * published?" and "what does it depend on?".
- */
 const ABBREVIATED_ACCEPT = 'application/vnd.npm.install-v1+json';
 
-/**
- * The full packument. Asked for only when a caller needs a field the
- * abbreviated document omits — `exports` is the one that matters here, and its
- * absence is silent: an abbreviated version entry simply has no such key, which
- * an `exports` check would read as "no bad target" and pass.
- */
 const FULL_ACCEPT = 'application/json';
 
 export const registryUrl = (name) => `${REGISTRY}/${encodeURIComponent(name)}`;
 
-/** The registry this process will query — for the report's preconditions. */
 export const registryOrigin = () => REGISTRY;
 
-/**
- * The packument for `name`, or `undefined` when the package does not exist.
- *
- * `fetchImpl` is injectable so the failure semantics above are unit-tested
- * rather than inferred from reading them.
- */
 export const fetchPackument = async (
   name,
   { fetchImpl = fetch, full = false } = {},

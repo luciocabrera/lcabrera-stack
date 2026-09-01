@@ -22,9 +22,6 @@ describe('writeTextWithin', () => {
     expect(readFileSync(written, 'utf8')).toBe('{"a":1}');
   });
 
-  // The whole reason this exists: --out comes from argv, so a traversal must be
-  // refused before anything reaches the filesystem. Dropping the containment
-  // check makes this pass silently.
   it('refuses a path that escapes the root', () => {
     expect(() =>
       writeTextWithin(join(root, '..', 'escaped'), 'x', root),

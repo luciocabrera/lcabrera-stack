@@ -29,32 +29,22 @@
  * module's verdict alone.
  *
  * Everything here is pure — callers read the files.
+ *
+ * `GATING_TRIGGERS` are the triggers that fire on a change to the repository.
+ * A `schedule`- or `workflow_dispatch`-only workflow is real CI, but it runs
+ * against a clock or a person rather than a change, so it cannot be what a
+ * `met` claim rests on. `push` is in the set and its `branches:` filter is not
+ * read, which is the over-report described above.
  */
 
-/**
- * Triggers that fire on a change to the repository — a commit, whether it is
- * still on a branch or already on `main`. A `schedule`- or
- * `workflow_dispatch`-only workflow is real CI, but it runs against a clock or
- * a person rather than against a change, so it cannot be what a `met` claim
- * rests on. `push` is in the set and its `branches:` filter is not read, which
- * is the over-report the module header describes.
- */
 export const GATING_TRIGGERS = new Set(['merge_group', 'pull_request', 'push']);
 
 const indentOf = (line) => line.length - line.trimStart().length;
 
-/** YAML reads a bare `on` as the boolean true, so a workflow may quote it. */
 const ON_KEY = /^(?:on|'on'|"on"):(.*)$/;
 
-/** A step's `run:`, with or without the `- ` that opens an unnamed step. The
- *  captured prefix is the indent a block scalar's lines must exceed. */
 const STEP_RUN = /^(\s*(?:-\s+)?)run:(.*)$/;
 
-/**
- * The trigger names a workflow declares. Handles both `on: [push]` and the
- * block form; a nested key such as `types:` is never at the block's own indent,
- * so only the trigger names are collected.
- */
 export const workflowTriggers = (source) => {
   const lines = source.split('\n');
   const start = lines.findIndex((line) => ON_KEY.test(line));
@@ -87,12 +77,6 @@ export const workflowTriggers = (source) => {
   return triggers;
 };
 
-/**
- * The shell text of every `run:` step. Read rather than grepping the whole
- * file, because a workflow COMMENT naming a repair command must not count as
- * CI running it — that is the difference between a check and the appearance of
- * one.
- */
 export const runStepBodies = (source) => {
   const lines = source.split('\n');
   const bodies = [];
@@ -123,18 +107,9 @@ export const runStepBodies = (source) => {
   );
 };
 
-/** Every `vp run <task>` named in a piece of shell. */
 export const commandsIn = (text) =>
   [...text.matchAll(/vp run ([a-z][\w:-]*)/g)].map(([, task]) => task);
 
-/**
- * The tasks CI runs, closed over the root manifest: a workflow step that runs
- * `vp run test:ci` also runs everything `test:ci` chains, which is how a
- * pointer at a task CI never names by hand still resolves.
- *
- * `workflows` are `{ source }` records; `rootScripts` is the root package.json
- * `scripts` object.
- */
 export const commandsRunByCi = ({ rootScripts, workflows }) => {
   const gating = workflows.filter((workflow) =>
     [...workflowTriggers(workflow.source)].some((trigger) =>

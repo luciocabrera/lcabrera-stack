@@ -29,7 +29,6 @@ describe('getInitialColumnsState (TableConfig)', () => {
 
   it('normalizes a partial columnPinning object (cookie miss) without crashing', () => {
     const result = getInitialColumnsState({
-      // A `{}` pinning value can arrive when no pinning cookie is present.
       columnPinning: {} as never,
       columns,
     });
@@ -39,7 +38,6 @@ describe('getInitialColumnsState (TableConfig)', () => {
 
   it('computes normalizedColumns', () => {
     const result = getInitialColumnsState({ columns });
-    // normalizedColumns is a Record keyed by column key, not an array
     expect(typeof result.normalizedColumns).toBe('object');
     expect('id' in result.normalizedColumns).toBe(true);
     expect('name' in result.normalizedColumns).toBe(true);

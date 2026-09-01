@@ -51,9 +51,6 @@ describe('getInitialDataState', () => {
   });
 
   it('names `error` even when the caller omits it, so the store can clear one', () => {
-    // The store merges shallowly, so a key omitted here would keep the previous
-    // read's refusal — leaving it on screen after the navigation that resolved
-    // it. Own-key presence is the assertion, not the value.
     expect(Object.hasOwn(getInitialDataState({}), 'error')).toBe(true);
     expect(getInitialDataState({}).error).toBeUndefined();
   });

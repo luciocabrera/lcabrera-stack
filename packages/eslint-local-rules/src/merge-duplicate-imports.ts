@@ -44,15 +44,6 @@ const getImportedName = (
   imported: TSESTree.Identifier | TSESTree.StringLiteral,
 ): string => (imported.type === 'Identifier' ? imported.name : imported.value);
 
-/**
- * Whether any of these imports binds a namespace (`import * as ns from …`).
- *
- * Such a group is left alone: the merged form this rule builds puts every
- * specifier inside braces, and `import { * as ns }` is not valid JavaScript.
- * The fix used to emit exactly that — a rule whose autofix broke the file it
- * was "fixing". A namespace import genuinely cannot share a statement with
- * named ones, so there is nothing to report here in the first place.
- */
 const hasNamespaceSpecifier = (
   importNodes: readonly TSESTree.ImportDeclaration[],
 ): boolean =>
@@ -62,9 +53,6 @@ const hasNamespaceSpecifier = (
     ),
   );
 
-// Deliberately has no `ImportNamespaceSpecifier` branch: `hasNamespaceSpecifier`
-// filters those groups out before a fix is ever built, and the only text this
-// could return for one (`* as ns`) is invalid inside braces.
 const getSpecifierText = (
   specifier: TSESTree.ImportClause,
 ): string | undefined => {

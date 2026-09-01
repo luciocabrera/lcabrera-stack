@@ -31,10 +31,6 @@ describe('parseDrillGroup', () => {
   });
 
   it('keeps a null key rather than dropping it', () => {
-    // The NULL group is a group, and it is precisely the one a drill would
-    // otherwise silently return nothing for (ADR-079).
-    // Built from JSON rather than a source literal: a NULL key reaches this
-    // parser as the wire value `null`, and that is what the test should send.
     const parsed = parseDrillGroup(
       new URLSearchParams({
         group:
@@ -46,8 +42,6 @@ describe('parseDrillGroup', () => {
   });
 
   it('refuses an entry carrying no value member at all', () => {
-    // Distinct from a null value: this one is malformed, and a drill built from
-    // it would query a different set.
     expect(
       parseDrillGroup(
         params({ ...VALID, keys: ['status'], path: [{ columnKey: 'status' }] }),
@@ -73,7 +67,6 @@ describe('parseDrillGroup', () => {
   });
 
   it('refuses a descriptor missing the subtotal flag', () => {
-    // Defaulting it to `false` would make every malformed request drillable.
     expect(
       parseDrillGroup(params({ keys: VALID.keys, path: VALID.path })),
     ).toBeUndefined();
@@ -93,8 +86,6 @@ describe('parseDrillGroup', () => {
   });
 
   it('accepts an empty path, leaving the refusal to the translation', () => {
-    // A grand total narrows fine and is refused by the translation with a
-    // reason. Rejecting it here would collapse that answer into "malformed".
     expect(
       parseDrillGroup(params({ ...VALID, keys: [], path: [] })),
     ).toStrictEqual({

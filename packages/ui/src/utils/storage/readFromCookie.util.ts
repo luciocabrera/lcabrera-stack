@@ -5,15 +5,12 @@ type ReadFromCookieArgs = {
   readonly key: string;
 };
 
-/** If not provided, uses document.cookie */
 export const readFromCookie = ({ cookieString, key }: ReadFromCookieArgs) => {
-  // In browser, use document.cookie
   if (typeof document !== 'undefined' && !cookieString) {
     const cookies = parseCookies(document.cookie);
     return cookies[key];
   }
 
-  // In SSR or when cookie string is provided
   if (cookieString) {
     const cookies = parseCookies(cookieString);
     return cookies[key];

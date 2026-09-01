@@ -68,8 +68,6 @@ describe('resolveTableCapabilityMeta', () => {
   });
 
   it('returns every capability key even when the meta is empty', () => {
-    // The result is spread over cookie-derived meta, so a missing key would
-    // leave whatever the cookie put there rather than overriding it off.
     expect(
       Object.keys(resolveTableCapabilityMeta({})).toSorted((a, b) =>
         a.localeCompare(b),
@@ -83,9 +81,6 @@ describe('resolveTableCapabilityMeta', () => {
   });
 
   it('treats a non-boolean cookie-shaped value as off', () => {
-    // Parsed rather than written as a literal, because that is how such a value
-    // actually arrives: the persisted payload is cast, not validated, so a
-    // capability key can reach here holding anything at all.
     const cookieShapedMeta = JSON.parse(
       '{"isKeysetEnabled":"yes","isGroupingEnabled":1}',
     ) as Partial<TableMetaState>;

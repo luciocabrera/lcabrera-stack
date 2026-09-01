@@ -2,7 +2,6 @@ import { expect, it } from 'vite-plus/test';
 
 import { enterpriseOrderSchema } from './enterpriseOrders.schema';
 
-/** A fully valid raw form payload (strings as they arrive from FormData). */
 const validInput = () => ({
   billing_address_line1: '221B Baker Street',
   billing_city: 'London',

@@ -41,8 +41,6 @@ describe('silentProbes', () => {
     expect(silent.map(({ plugin }) => plugin)).toEqual(['unicorn']);
   });
 
-  // The regression this whole gate exists for: naming `lint.plugins` replaces
-  // Oxlint's default set, so a dropped family reports nothing at all.
   it('reports every family when Oxlint reported nothing', () => {
     expect(silentProbes({ probes, reportedCodes: [] })).toHaveLength(2);
   });
@@ -88,7 +86,6 @@ describe('configsDeclaringLint', () => {
     expect(configsDeclaringLint(files)).toEqual([]);
   });
 
-  // `lint:eslint` and friends are run-task names, not a `lint` config block.
   it('does not confuse a lint:* task name for a lint block', () => {
     const files = [
       {
@@ -119,8 +116,6 @@ describe('unclassifiedWorkspaces', () => {
     expect(unclassifiedWorkspaces({ runtimes, workspaces })).toEqual([]);
   });
 
-  // The real gap: the lists were derived from which workspaces had a `lint`
-  // block, so several never appeared in any of them.
   it('reports a workspace named in no list', () => {
     const workspaces = ['packages/ui', 'packages/server', 'packages/api'];
     expect(unclassifiedWorkspaces({ runtimes, workspaces })).toEqual([
@@ -175,9 +170,6 @@ describe('the react probe', () => {
   });
 
   it('is a .tsx probe, which is load-bearing', () => {
-    // The same source saved as `.ts` reports only TypeScript parse errors and
-    // no `react(…)` code at all, so a `.ts` probe would pass for the wrong
-    // reason — it would go silent whether or not the family were loaded.
     const react = PLUGIN_PROBES.find(({ plugin }) => plugin === 'react');
     expect(react.ext).toBe('tsx');
   });
@@ -204,8 +196,6 @@ describe('pluginsWithoutCoverage', () => {
     expect(pluginsWithoutCoverage(configured)).toEqual([]);
   });
 
-  // The regression this exists for: a family added to PLUGINS and left
-  // unproven ships green, because a dark family and clean code look identical.
   it('reports a family that is configured but neither probed nor exempt', () => {
     expect(pluginsWithoutCoverage(['eslint', 'jsx_a11y'])).toEqual([
       'jsx_a11y',
@@ -217,7 +207,6 @@ describe('pluginsWithoutCoverage', () => {
   });
 
   it('gives every exemption a stated reason', () => {
-    // An exemption with no reason is indistinguishable from an oversight.
     for (const reason of Object.values(UNPROBED_PLUGINS))
       expect(reason.length).toBeGreaterThan(0);
   });
@@ -272,9 +261,6 @@ describe('workspaceRosters', () => {
     ).toEqual([]);
   });
 
-  // The regression: the Node roster's own comment tells you to write a narrower
-  // whole-workspace block, which a plain shape test reads as a third roster and
-  // reports as a duplicate classification.
   it('excludes a block that is a subset of another', () => {
     expect(
       workspaceRosters([

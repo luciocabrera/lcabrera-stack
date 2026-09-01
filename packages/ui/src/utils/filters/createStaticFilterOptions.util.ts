@@ -8,10 +8,6 @@ type StaticFilterOptions<TData> = Pick<
   'filterOptionsDescriptor'
 >;
 
-/**
- * Creates a serializable static filter-options descriptor for a list of values known at
- * build time.
- */
 export const createStaticFilterOptions = <TData>(
   values: readonly string[],
 ): StaticFilterOptions<TData> => ({

@@ -3,10 +3,6 @@ type GetGridPageRowsArgs = {
   readonly rowHeight: number;
 };
 
-/**
- * Never less than one, so the keys still move by a row before the container has been
- * measured — a page of zero rows would make them silently dead.
- */
 export const getGridPageRows = ({
   container,
   rowHeight,

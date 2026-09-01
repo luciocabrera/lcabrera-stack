@@ -32,8 +32,6 @@ describe('addTableColumnAggregate', () => {
   });
 
   it('adds a second function to a column that already carries one', () => {
-    // The defect #831 exists for: this used to replace the existing entry, and
-    // the earlier selection vanished with no message.
     expect(
       addTableColumnAggregate({
         columnKey: 'total_amount',
@@ -81,8 +79,6 @@ describe('addTableColumnAggregate', () => {
     expect(after.aggregates).toStrictEqual([
       { columnKey: 'total_amount', fn: 'sum' },
     ]);
-    // The same object, so the caller's unchanged-check reports no update and
-    // nothing navigates.
     expect(after).toBe(before);
   });
 

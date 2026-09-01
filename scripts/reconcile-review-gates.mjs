@@ -50,14 +50,8 @@ import {
 const SCRIPTS_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = dirname(SCRIPTS_DIR);
 
-/**
- * This driver's own repo-relative path. Derived, not written down: it goes into
- * every gate's closure, and a literal would stop matching on a rename — which
- * looks exactly like a healthy sweep.
- */
 const DRIVER_MODULE = relative(REPO_ROOT, fileURLToPath(import.meta.url));
 
-/** One repo-relative module's source, or `undefined` when there is none. */
 const readRepoModule = (path) => {
   try {
     return readFileSync(join(REPO_ROOT, path), 'utf8');
@@ -66,25 +60,14 @@ const readRepoModule = (path) => {
   }
 };
 
-/**
- * The files one pull request changes, repo-relative, or `undefined` when they
- * could not be read — which the caller withholds on, rather than publishing as
- * though it had checked. Caught, not thrown: this runs per pull request, so one
- * transient error would otherwise abandon every pull request after it.
- */
 const fetchChangedFiles = ({ number, repository }) => {
   try {
-    // Read before the list, so a push landing between the two shows up as more
-    // files than expected — the direction `completeFileList` does not alarm on.
     const expected = runGh([
       'api',
       `repos/${repository}/pulls/${number}`,
       '--jq',
       '.changed_files',
     ]);
-    // `--jq`, not a payload parse: every entry carries its `patch`, and this is
-    // the only call here whose size scales with diff content against `runGh`'s
-    // 8 MB cap. Overflowing it reads as "could not tell".
     const filenames = runGh([
       'api',
       '--paginate',
@@ -104,12 +87,6 @@ const fetchChangedFiles = ({ number, repository }) => {
   }
 };
 
-/**
- * The gates this sweep republishes, named by gate rather than by the status
- * context each one publishes. The context strings have exactly one definition
- * apiece, inside those scripts, and a second copy here would be free to drift
- * from the ruleset name that has to match it.
- */
 const GATES = [
   // `protectSuccess` says this gate has ANOTHER publisher, so a `success` on the
   // head may have come from better-informed code than this sweep is running (#868).
@@ -126,11 +103,6 @@ const GATES = [
   { name: 'review-threads', script: 'verify-review-threads.mjs' },
 ];
 
-/**
- * Each gate paired with the modules it would execute, resolved from this
- * checkout — the default branch when the schedule runs it. That is the point:
- * the closure is the code THIS sweep runs, this file included.
- */
 const gatesWithClosures = () =>
   GATES.map((gate) => ({
     ...gate,
@@ -146,13 +118,6 @@ const resolveRepository = () =>
   process.env.GITHUB_REPOSITORY ??
   runGh(['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']);
 
-/**
- * Every open pull request, oldest number first.
- *
- * An empty list is a legitimate answer and a failure to read is not: `runGh`
- * throws on a non-zero `gh`, so an unreachable API reaches the top-level catch
- * rather than passing through here as "nothing to do".
- */
 const fetchOpenPullRequests = (repository) =>
   openPullRequestNumbers(
     JSON.parse(
@@ -165,14 +130,6 @@ const fetchOpenPullRequests = (repository) =>
     ),
   );
 
-/**
- * Runs one gate script for one pull request, capturing whatever it printed.
- *
- * The argv is built by `gateArgs`, not here, because two of its entries are
- * load-bearing and neither is visible in the effect: `--if-changed` is the whole
- * of the sweep's idempotence, and `--repo` is what stops a gate resolving a
- * different repository from the one the sweep listed. Both are unit-tested there.
- */
 const runGate = ({ extraArgs, gate, number, repository }) => {
   const args = gateArgs({
     extraArgs,
@@ -184,8 +141,6 @@ const runGate = ({ extraArgs, gate, number, repository }) => {
   try {
     const output = execFileSync(process.execPath, args, {
       encoding: 'utf8',
-      // The gate scripts append their own job summary when they see this. The
-      // sweep writes one report for the whole run instead, so it is withheld.
       env: { ...process.env, GITHUB_STEP_SUMMARY: '' },
       maxBuffer: 8 * 1024 * 1024,
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -202,7 +157,6 @@ const runGate = ({ extraArgs, gate, number, repository }) => {
   }
 };
 
-/** A gate's verdict is its last line; the lines above it are what it read. */
 const lastLine = (text) => {
   const lines = String(text)
     .split('\n')
@@ -211,7 +165,6 @@ const lastLine = (text) => {
   return lines.at(-1) ?? '';
 };
 
-/** Appends the report where the runner shows it, when there is one. */
 const writeSummary = (markdown) => {
   const path = process.env.GITHUB_STEP_SUMMARY;
   if (path === undefined || path === '') {
@@ -220,7 +173,6 @@ const writeSummary = (markdown) => {
   appendFileSync(path, `${markdown}\n`, 'utf8');
 };
 
-/** The swept pull requests, named, or `none` — the count alone hides which. */
 const sweptList = (pullRequests) =>
   pullRequests.length === 0
     ? 'none'
@@ -240,8 +192,6 @@ const summaryMarkdown = ({ pullRequests, repository, results, text }) =>
 
 const main = () => {
   const extraArgs = process.argv.includes('--dry-run') ? ['--dry-run'] : [];
-  // Both parse before anything is read or published, so a bad argument costs one
-  // message rather than a sweep's worth of 404s that never mention the input.
   const repository = parseRepository(resolveRepository());
   const only = flagValue('--pr');
   const pullRequests =

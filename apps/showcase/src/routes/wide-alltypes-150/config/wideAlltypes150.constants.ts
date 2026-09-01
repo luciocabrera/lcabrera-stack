@@ -13,15 +13,10 @@ export const WIDE_ALLTYPES_TABLE = 'wide_alltypes_150';
 
 export const WIDE_ALLTYPES_PRIMARY_KEY = 'id';
 
-/**
- * Every sort term past the first is a tiebreaker over 1M rows on an unindexed column, and
- * this table's UI can hand over one term per visible column.
- */
 export const MAX_WIDE_ALLTYPES_SORT_RULES = 5;
 
 export const MAX_WIDE_ALLTYPES_LIMIT = 200;
 
-/** The row ceiling a grouped read of this table is bounded by (ADR-066). */
 export const WIDE_ALLTYPES_GROUP_MAX_ROWS = 2000;
 
 const GENERATED_COLUMNS = Array.from(
@@ -34,10 +29,6 @@ export const WIDE_ALLTYPES_COLUMNS: readonly string[] = [
   ...GENERATED_COLUMNS,
 ];
 
-/**
- * Passed as `allowedColumns`, so a column never listed here is rejected before it can
- * reach SQL.
- */
 export const WIDE_ALLTYPES_ALLOWED_COLUMNS: readonly string[] =
   WIDE_ALLTYPES_COLUMNS;
 

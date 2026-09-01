@@ -17,14 +17,6 @@ type AssertGroupCardinalityArgs = {
   readonly keys: readonly string[];
 };
 
-/**
- * Three-way verdict on a pre-flight bound: throw `GroupingRefusedError` on refuse, return
- * the warning on warn, `undefined` when there is nothing to say.
- * An unknown estimate warns rather than refusing: statistics are missing on a freshly
- * restored database, and refusing there would make grouping look broken when it is most
- * needed. The refusal names the widest key because "this grouping is too large" leaves a
- * user guessing which column to drop.
- */
 export const assertGroupCardinality = ({
   capabilities,
   estimate,

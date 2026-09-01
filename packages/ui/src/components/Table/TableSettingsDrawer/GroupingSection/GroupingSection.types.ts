@@ -2,11 +2,11 @@ import type { ComponentPropsWithoutRef } from 'react';
 
 import type { TableColumnAggregate } from '#ui/components/Table/Table.types';
 
-export type AggregateItem = {
-  /** `(columnKey, fn)` as one string — neither half is unique. Also `DraggableItem.id`. */
+export type AggregateItem = TableColumnAggregate & {
+  /** `(columnKey, fn)` as one string; neither half is unique. */
   readonly id: string;
   readonly label: string;
-} & TableColumnAggregate;
+};
 
 export type AggregatePickerGap = 'column-exhausted' | 'count-distinct-spent';
 

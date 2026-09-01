@@ -6,10 +6,6 @@ import type { TableRowProps } from './TableRow.types';
 
 import { tableRowStyles } from './TableRow.stylex';
 
-/**
- * `role='row'` is set after `{...rest}` because `display: flex` drops the implicit table
- * role, and a caller must not be able to replace it (ADR-062).
- */
 export const TableRow = ({
   children,
   customStylex,

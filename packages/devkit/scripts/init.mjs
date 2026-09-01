@@ -46,18 +46,6 @@ export const initRefusal = ({
   return undefined;
 };
 
-/**
- * How a consumer's toolchain spells the four things a shipped workflow or hook
- * asks for. Ordered most specific first: a repository on Vite+ also has a pnpm
- * lockfile, and answering `pnpm install` there would work while ignoring the
- * runner the repository actually uses.
- *
- * `npm` is last and matches unconditionally, because every repository with a
- * manifest can run it. That is inference, not a default — the summary names
- * what was inferred so a consumer can correct a wrong guess, and a wrong guess
- * cannot pass silently: a command that resolves to nothing leaves the files
- * that need it unwritten, which `init` treats as a failed run.
- */
 const RUNNERS = [
   {
     // `vp` is a project dependency, so installing it is the step that was about
@@ -129,14 +117,6 @@ const RUNNERS = [
   },
 ];
 
-/**
- * Both spellings of a dependency, because either one puts a bin on the path and
- * a runner is just as declared in one as in the other.
- *
- * Here rather than beside the manifest read it serves, so that the branches —
- * an absent manifest, an absent block, either block alone — are reachable from
- * a test that passes literal objects.
- */
 export const declaredDependencies = (manifest) => [
   ...Object.keys(manifest?.dependencies ?? {}),
   ...Object.keys(manifest?.devDependencies ?? {}),
@@ -225,16 +205,6 @@ export const initialConfig = ({
     : { ...commands };
   return {
     ...existing,
-    // Only written when the runner needs one, so a repository whose CI needs
-    // nothing extra is not left with an empty block inviting someone to fill it.
-    // Under --upgrade an existing `setup` is left exactly as it is: a consumer
-    // who edited the steps meant to.
-    //
-    // Keyed on `ci.setup`, not on `ci`: this run owns that key alone, and the
-    // file is shared. A `ci` block carrying only a sibling another package owns
-    // would otherwise block the write and leave the placeholder resolving to no
-    // steps — the exit 127 this hook exists to remove. The spread keeps that
-    // sibling.
     ...(ciSetup.length > 0 && !(upgrade && existing.ci?.setup !== undefined)
       ? { ci: { ...existing.ci, setup: ciSetup } }
       : {}),
@@ -288,9 +258,6 @@ export const upgradeKeptCommands = ({ commands, existing = {} }) =>
  */
 export const upgradeKeptCiSetup = ({ ciSetup = [], existing = {} }) => {
   const kept = existing.ci?.setup;
-  // Present-or-absent, the same question `initialConfig` asks. The two keyed on
-  // different things is how a `ci` block with no `setup` came to be neither
-  // written nor reported.
   if (
     ciSetup.length === 0 ||
     kept === undefined ||
@@ -306,31 +273,6 @@ export const upgradeKeptCiSetup = ({ ciSetup = [], existing = {} }) => {
   ];
 };
 
-/**
- * The tasks a consumer reaches the gates through, and the profile each one is
- * useful in.
- *
- * Profile-tagged because a task that cannot run is worse than an absent one: it
- * reads as an available gate, and the repository looks covered by a check that
- * has never passed. `adr:*` needs the decisions home, and `issue:verify` and
- * `pr:verify` need the templates they check against — all of which arrive with
- * the `full` profile and with nothing else.
- *
- * The release and publishing gates are deliberately absent. They are meaningful
- * only in a repository that publishes, and this command cannot tell whether
- * this is one.
- *
- * So are the two whose input is data no one can infer. `repo-verify-stray-configs`
- * needs the roster of config files your toolchain does not read, and
- * `repo-verify-docs-paths` needs a baseline; both refuse an empty roster rather
- * than pass over nothing, which is right, and which makes them a task that fails
- * on the day it is written. Add them once you have written the roster.
- *
- * Several of these take arguments — `commit:verify` wants a message file,
- * `pr:verify` a title and a body. Bare, they print usage and exit non-zero, and
- * that is correct: the hook and the workflow `init` also places are what invoke
- * them with the arguments.
- */
 export const GATE_TASKS = {
   'adr:list': { args: ['--list'], bin: 'repo-verify-adrs', profiles: ['full'] },
   'adr:new': { bin: 'repo-adr', profiles: ['full'] },
@@ -422,12 +364,6 @@ export const scriptsAfter = ({ existing = {}, tasks }) => {
   };
 };
 
-/**
- * Every command key the selected profile's files ask for and this config does
- * not answer, taken from the plan rather than from a list held here — a list
- * would be a second place to update every time a shipped file starts asking for
- * a command, and the copy that nothing checks is the one that rots.
- */
 export const unmetCommandKeys = (entries) =>
   [
     ...new Set(
@@ -467,13 +403,6 @@ export const initFailure = ({ planned, unmet }) => {
   return undefined;
 };
 
-/**
- * The hooks directory this plan actually placed files into, or `undefined`.
- *
- * Asked of the plan rather than of the profile, so a profile that carries hooks
- * but placed none — every one already `unresolved`, say — does not produce an
- * instruction about files that are not there.
- */
 export const placedHooksPath = ({ entries, hooksPath }) =>
   entries.some((entry) => entry.path.startsWith(`${hooksPath}/`))
     ? hooksPath
@@ -497,24 +426,15 @@ export const initSummary = ({
 }) => {
   const lines = [
     `${upgrade ? 'Upgraded' : 'Initialised'} for the "${profile}" profile: ${written} file(s) materialised, ${added.length} task(s) added.`,
-    // An upgrade fills in only what is missing, so telling a consumer their
-    // commands "were inferred" would describe a rewrite that did not happen —
-    // and point them at the one thing this path exists to leave alone.
     upgrade
       ? `Only what was missing was added; anything already in devkit.config.json was kept as you wrote it.`
       : `Commands were inferred for ${runner} — check them in devkit.config.json and correct any that are wrong.`,
   ];
-  // Said here because an unwired hook and a passing hook produce the identical
-  // exit 0 — the same silent absence this kit had to fix in the executable bit.
-  // The README documents the step and `COMMANDS.md` repeats it; neither is in
-  // front of the person who just ran the command that placed them.
   if (hooksPath !== undefined) {
     lines.push(
       `The hooks are in \`${hooksPath}/\` and git will NOT run them until you point it there:\n  git config core.hooksPath ${hooksPath}\nUntil you do, they are silently skipped and the gates they carry are absent.`,
     );
   }
-  // Asked of `recordsDefaultBranch`, not of `--upgrade`: an upgrade that finds no
-  // recorded trunk writes one, and that is the run that most needs telling.
   if (recordedTrunk) {
     lines.push(
       `Recorded \`${defaultBranch}\` as this repository's trunk. If you initialised from a topic branch, fix conventions.defaultBranch before the branch gate runs.`,

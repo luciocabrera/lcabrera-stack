@@ -11,13 +11,6 @@ import type { ResizeHandleProps } from './ResizeHandle.types';
 
 import { resizeHandleStyles } from './ResizeHandle.stylex';
 
-/**
- * It is `tabIndex={-1}`, not `0`: a grid has exactly one tab stop, and it is the grid's
- * own roving one (ADR-062).
- * Keyboard access to width does not depend on this element — ADR-011 assigns it to the
- * header command instead, and settled that the splitter's own focusability is a
- * progressive enhancement.
- */
 export const ResizeHandle = <TData,>({
   columnKey,
   columnLabel,

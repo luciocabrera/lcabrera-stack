@@ -15,13 +15,6 @@ import { tableGroupShareStyles } from '../TableGroupShare.stylex';
 import { formatSharePercent } from '../utils/formatSharePercent.util';
 import { resolveShareRatio } from '../utils/resolveShareRatio.util';
 
-/**
- * Split from `TableGroupShare` so the denominator is read **only where a share was asked
- * for**.
- * A hook cannot be called conditionally, so the check and the work have to live in
- * different components — and the work is a fold over every row, which every measure cell
- * would otherwise pay for on a table with no share turned on at all (#648).
- */
 export const TableGroupShareValue = ({
   columnKey,
   fn,
@@ -46,9 +39,6 @@ export const TableGroupShareValue = ({
     );
   }
 
-  // Named rather than nested into the style call below: the clamp is a
-  // decision about the bar, not about the number, and the two read as one
-  // expression when they are written as one.
   const barWidth = `${Math.min(Math.abs(ratio), 1) * 100}%`;
   const formatted = formatSharePercent({ locale, ratio });
 
@@ -68,12 +58,6 @@ export const TableGroupShareValue = ({
         {...stylex.props(tableGroupShareStyles.barTrack)}
         data-testid='table-group-share-bar'
       >
-        {/*
-         * Clamped to the track: a share can exceed 100% where the measure and
-         * the total have opposite signs, and a bar wider than its own track
-         * would paint outside the cell. The number beside it still reads the
-         * unclamped value, which is the one the data supports.
-         */}
         <span {...stylex.props(tableGroupShareStyles.barFill(barWidth))} />
       </span>
     </span>

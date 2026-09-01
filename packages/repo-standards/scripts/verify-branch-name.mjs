@@ -35,8 +35,6 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 
-/** Resolves the git directory, following the `gitdir:` pointer a linked
- *  worktree uses in place of a `.git` directory. */
 const gitDirectory = () => {
   const dotGit = join(REPO_ROOT, '.git');
   if (statSync(dotGit, { throwIfNoEntry: false })?.isDirectory() === true) {
@@ -47,16 +45,6 @@ const gitDirectory = () => {
   return isAbsolute(target) ? target : resolve(dirname(dotGit), target);
 };
 
-/**
- * Reads the checked-out branch from `.git/HEAD` rather than shelling out to
- * `git rev-parse`. No subprocess means no PATH to trust — a `git` resolved
- * through an inherited PATH can be shadowed by a writable directory earlier in
- * it — and nothing to scrub: the `GIT_DIR` family redirects the git BINARY, not
- * a file read, so the class of bug behind #270 cannot apply here either.
- *
- * A detached HEAD holds a raw sha; it is returned as-is and fails validation,
- * which is correct — you cannot push a detached HEAD to a branch by accident.
- */
 const currentBranch = () => {
   try {
     const head = readFileSync(join(gitDirectory(), 'HEAD'), 'utf8').trim();
@@ -70,8 +58,6 @@ const currentBranch = () => {
 const main = () => {
   const branch =
     flagValue('--branch') ?? process.env.BRANCH_NAME ?? currentBranch();
-  // Read here rather than at module scope: the trunk's name is the consumer's
-  // to choose, and importing this file must still touch nothing (#807).
   const { defaultBranch } = readConventions(REPO_ROOT);
   const { errors, exempt } = validateBranchName(branch, { defaultBranch });
 

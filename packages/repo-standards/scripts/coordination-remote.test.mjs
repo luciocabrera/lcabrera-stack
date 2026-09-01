@@ -29,12 +29,6 @@ issue: '#1'
 body
 `;
 
-/**
- * A stand-in for `runGit` driven by a table of `argv.join(' ')` → stdout.
- * Anything not in the table returns `undefined`, exactly as a failing git call
- * does — so a test that forgets to stub something sees the real absent-answer
- * path rather than a crash.
- */
 const fakeGit =
   (responses) =>
   ({ args }) =>
@@ -54,8 +48,6 @@ describe('parseLsRemoteHeads', () => {
     expect(parsed).toEqual([{ branch: 'feat/x', sha: OTHER_SHA }]);
   });
 
-  // A repository whose default branch is not `main` must have ITS default
-  // dropped: leaving it in makes every claim merged to it read as live.
   it('drops the default branch it is given, not the literal `main`', () => {
     const parsed = parseLsRemoteHeads(
       `${SHA}\trefs/heads/trunk\n${OTHER_SHA}\trefs/heads/main\n`,
@@ -96,8 +88,6 @@ describe('readRemoteClaims', () => {
   });
 
   it('reports a branch with no local ref instead of silently skipping it', () => {
-    // The blind spot this module exists to remove: an unread branch that is
-    // not reported reads exactly like a branch with no claims.
     const { claims, readBranches, unreadBranches } = readRemoteClaims({
       cwd: '/repo',
       git: fakeGit({ [LS_REMOTE]: `${SHA}\trefs/heads/theirs` }),
@@ -109,8 +99,6 @@ describe('readRemoteClaims', () => {
   });
 
   it('reports a local ref that is behind origin as unread', () => {
-    // Stale is not the same as absent, but it is just as misleading: the ref
-    // resolves, so the claims read cleanly — they are simply the wrong ones.
     const { readBranches, unreadBranches } = readRemoteClaims({
       cwd: '/repo',
       git: fakeGit({
@@ -148,10 +136,6 @@ describe('withoutMergedBranches', () => {
   const claimOn = (branch) => ({ branch: 'inherited', data: { branch } });
 
   it('drops a claim whose branch was deleted when its PR merged', () => {
-    // Found by running the check on `main` immediately after shipping it: the
-    // task file outlives its branch on every branch cut from `main` while the
-    // claim was live, so a merged claim kept colliding with live work and
-    // deleting it from `main` did not stop it.
     expect(
       withoutMergedBranches({
         claims: [claimOn('merged-and-gone')],
@@ -193,9 +177,6 @@ describe('dedupeById', () => {
   });
 
   it('collapses the copies every branch inherits into one claim', () => {
-    // Found end-to-end, not by unit test: a task file committed to its own
-    // branch is inherited by every branch cut from `main` afterwards, so one
-    // claim was reported as four separate collisions with the same task.
     expect(
       dedupeById([copyOn('release-v0-1-1'), copyOn('ci/other'), copyOn('x')]),
     ).toHaveLength(1);

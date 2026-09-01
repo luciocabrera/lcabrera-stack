@@ -9,8 +9,6 @@ type ResolveDateOperatorChangeArgs = {
   readonly operator: OperatorType;
 };
 
-// Return annotation required: 'date' widens to string without the ColumnFilter
-// contextual type.
 export const resolveDateOperatorChange = ({
   filter,
   operator,

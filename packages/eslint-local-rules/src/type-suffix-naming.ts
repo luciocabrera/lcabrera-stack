@@ -15,7 +15,6 @@ export default createRule({
       TSTypeAliasDeclaration(node: TSESTree.TSTypeAliasDeclaration) {
         const typeName = node.id.name;
 
-        // Check for incorrect 'Arguments' suffix (should be 'Args')
         if (typeName.endsWith('Arguments')) {
           const suggestedName = typeName.replace(/Arguments$/, 'Args');
 
@@ -25,7 +24,6 @@ export default createRule({
               typeName,
             },
             fix(fixer) {
-              // Fix the type definition itself
               const fixes = [fixer.replaceText(node.id, suggestedName)];
 
               return fixes;
@@ -35,7 +33,6 @@ export default createRule({
           });
         }
 
-        // Check for incorrect 'Properties' suffix (should be 'Props')
         if (isReactFile && typeName.endsWith('Properties')) {
           const suggestedName = typeName.replace(/Properties$/, 'Props');
 

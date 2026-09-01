@@ -206,12 +206,6 @@ describe('usePersistTableStateAction', () => {
   });
 
   it('writes a nested table’s params under the nested prefix', () => {
-    // The group-details modal renders over the grouped list as a child route,
-    // so both tables see one `?filters`. Writing the modal's own bare would
-    // overwrite the list's — the very state the modal inherited as its floor.
-    // Writing none at all is not the alternative: the param is the only channel
-    // that reaches the loader, so a suppressed write shows the filter in the
-    // drawer and unfiltered rows in the grid.
     metaStoreGetMock.mockReturnValue({ isUrlStateNested: true });
     serializeStateSliceMock.mockReturnValue({
       key: 'orders-group:filters',

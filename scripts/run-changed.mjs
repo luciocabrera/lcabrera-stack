@@ -33,7 +33,6 @@ import {
   runMain,
 } from './lib/changed-runner.mjs';
 
-/** A friendlier markdown heading per known task; falls back to the task name. */
 const MARKDOWN_TITLES = { typecheck: '🔎 Type-check Selection' };
 
 const main = async () => {

@@ -4,7 +4,6 @@ import type { TableColumnGroupingCapability } from '../Table.types';
 
 import { resolveAffordableAggregates } from './resolveAffordableAggregates.util';
 
-/** A dimension the catalogue offers both count flavours on. */
 const textCapability: TableColumnGroupingCapability = {
   aggregates: ['count', 'countDistinct', 'max', 'min'],
   canGroup: true,
@@ -14,7 +13,6 @@ const textCapability: TableColumnGroupingCapability = {
   typeName: 'text',
 };
 
-/** A measure the catalogue offers no distinct count on. */
 const numericCapability: TableColumnGroupingCapability = {
   aggregates: ['avg', 'count', 'sum'],
   canGroup: false,
@@ -55,10 +53,6 @@ describe('resolveAffordableAggregates', () => {
   });
 
   it('keeps offering it on the column that carries it', () => {
-    // The whole reason the count excludes this column: the header menu's item
-    // for an applied function is the only affordance that removes it, so a rule
-    // withholding it everywhere strands the user with a measure they cannot
-    // clear from the menu it was applied from (#842).
     expect(
       resolveAffordableAggregates({
         applied: [{ columnKey: 'order_status', fn: 'countDistinct' }],
@@ -73,8 +67,6 @@ describe('resolveAffordableAggregates', () => {
   });
 
   it('offers it again everywhere once it is cleared', () => {
-    // Clearing the aggregate is the only thing that changes between this and
-    // the withholding case, so the restoration cannot be anything else.
     expect(
       resolveAffordableAggregates({
         applied: [{ columnKey: 'shipped_city', fn: 'count' }],
@@ -86,9 +78,6 @@ describe('resolveAffordableAggregates', () => {
   });
 
   it('withholds nothing from a column the catalogue never offered it on', () => {
-    // `withheld` says what this rule took away, not what is missing: a column
-    // with no distinct count to offer has nothing to explain, so the picker
-    // stays silent rather than blaming a rail that never bit.
     expect(
       resolveAffordableAggregates({
         applied: [{ columnKey: 'shipped_city', fn: 'countDistinct' }],
@@ -100,8 +89,6 @@ describe('resolveAffordableAggregates', () => {
   });
 
   it('leaves the per-column predicate to answer first', () => {
-    // An active group key offers nothing whatever the budget says (ADR-080),
-    // and the composition must not resurrect a function that predicate dropped.
     expect(
       resolveAffordableAggregates({
         applied: [],
@@ -113,8 +100,6 @@ describe('resolveAffordableAggregates', () => {
   });
 
   it('counts every other column, not only the last one', () => {
-    // A rule reading one entry would pass the case above and let a second
-    // distinct count through the moment a third aggregate was staged after it.
     expect(
       resolveAffordableAggregates({
         applied: [

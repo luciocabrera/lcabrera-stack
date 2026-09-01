@@ -52,7 +52,6 @@ const parsePullRequests = (raw) => {
   }
 };
 
-/** head branch → one PR verdict (open wins; else the most recent merged/closed). */
 const prVerdictsByHead = (pullRequests) => {
   const grouped = new Map();
   for (const pr of pullRequests) {

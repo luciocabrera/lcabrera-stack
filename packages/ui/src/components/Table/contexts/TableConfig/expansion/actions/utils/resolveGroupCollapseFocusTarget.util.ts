@@ -13,13 +13,6 @@ type ResolveGroupCollapseFocusTargetArgs<
   readonly rows: readonly TData[];
 };
 
-/**
- * ADR-062 settles the generic case — a row that disappears hands focus to the nearest
- * survivor at the same absolute index — and says in the same breath that every feature
- * removing rows has to decide whether that answer is its own.
- * The collapsed group row is the nearest surviving ancestor of everything the collapse
- * hid, so focus lands on the row the user just acted on (ADR-067).
- */
 export const resolveGroupCollapseFocusTarget = <
   TData extends Record<string, unknown>,
 >({

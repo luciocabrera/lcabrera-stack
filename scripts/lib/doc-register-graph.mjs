@@ -10,8 +10,6 @@
  */
 import { stringList } from './doc-registers.mjs';
 
-/** Two files declaring one id. Reported on the later file, so the first stays
- *  the one that owns the name. */
 export const duplicateIdFindings = (entries) => {
   const seen = new Map();
   const findings = [];
@@ -31,8 +29,6 @@ export const duplicateIdFindings = (entries) => {
   return findings;
 };
 
-/** The cycle reached from `start`, as a list of ids, or undefined. Iterative:
- *  a recursive walk would report the same cycle once per member. */
 const cycleFrom = (start, edges, settled) => {
   const path = [];
   const onPath = new Set();
@@ -60,10 +56,6 @@ const cycleFrom = (start, edges, settled) => {
   return undefined;
 };
 
-/**
- * `requires` cycles. A cycle is a malformed register — no order satisfies it,
- * and a reader following the chain never reaches a base requirement.
- */
 export const cycleFindings = (entries) => {
   const edges = new Map(
     entries.map((entry) => [

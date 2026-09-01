@@ -16,11 +16,9 @@
  * Governed by .claude/rules/scripts.md.
  */
 
-/** The head of the #671 sequence, and the commit it superseded. */
 export const HEAD = 'dd8fb7867fa4cc57044c6c6808313528d7d7e0d3';
 export const EARLIER = 'ff868c68f40fcd9740ea16cb313b37e5f10cd9b5';
 
-/** A REST review — the shape `GET /pulls/{n}/reviews` returns. */
 export const restReview = ({
   commit = HEAD,
   login = 'copilot-pull-request-reviewer[bot]',
@@ -33,7 +31,6 @@ export const restReview = ({
   user: { login },
 });
 
-/** The same review as `gh pr view --json reviews` prints it (the issue's repro). */
 export const graphqlReview = ({
   commit = HEAD,
   login = 'copilot-pull-request-reviewer',
@@ -46,13 +43,6 @@ export const graphqlReview = ({
   submittedAt: submitted,
 });
 
-/**
- * A review from the in-workflow Claude reviewer.
- *
- * The login is the Claude General Reviewer GitHub App's own, which is the point
- * of #865: it used to be `github-actions[bot]`, the default GITHUB_TOKEN
- * identity, shared with every other workflow here.
- */
 export const claudeReview = ({
   commit = HEAD,
   state = 'COMMENTED',

@@ -31,7 +31,6 @@ const groupRow = (path: readonly TableGroupKeyValue[]): Row => ({
   [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, isSubtotal: true, path },
 });
 
-/** What a fold of `[Berlin]` leaves standing: its own row, and nothing under it. */
 const survivors: readonly Row[] = [groupRow(pathOf('Berlin'))];
 
 const berlin = resolveGroupPathKey(pathOf('Berlin'));
@@ -64,8 +63,6 @@ const focusStateOn = (rowKey: string): TableFocusState => ({
 
 describe('applyGroupFoldFocus', () => {
   it('re-points focus at the row the fold left standing', () => {
-    // The focused row is gone from `rows`, which is what a fold that hid it
-    // looks like from here.
     const focusState = focusStateOn(
       'grp:[["city","Berlin"],["status","Open"]]',
     );
@@ -88,8 +85,6 @@ describe('applyGroupFoldFocus', () => {
   });
 
   it('leaves focus where it was when the fold closed no group around it', () => {
-    // The ordinary case, not an error one: a fold whose focused row survived
-    // names no group, and all three fold actions reach here anyway.
     const focusState = focusStateOn('grp:[["city","Paris"]]');
     const focusStore = createFocusStore(focusState);
 

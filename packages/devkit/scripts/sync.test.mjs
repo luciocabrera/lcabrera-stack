@@ -63,8 +63,6 @@ describe('planSync', () => {
 });
 
 describe('planSync and a declared config requirement', () => {
-  // ONE asset, planned against two configs. A gate that refused everything
-  // would pass the first of these tests and fail the second.
   const declaringAsset = {
     content: [
       '---',
@@ -122,8 +120,6 @@ describe('planSync and a declared config requirement', () => {
   });
 
   test('a requirement is checked before the placeholders it does not carry', () => {
-    // Both faults at once: the declared key is the wider one, so it is what the
-    // consumer is told to fix first.
     const asset = {
       content: [
         '---',
@@ -145,10 +141,6 @@ describe('planSync and a declared config requirement', () => {
   });
 
   test('refuses it in every spelling of the same declaration', () => {
-    // The refusal must not depend on how the author wrote the list. A spelling
-    // the extractor cannot see reads as no declaration at all, so the file is
-    // written into a consumer who cannot satisfy it and nothing says so — the
-    // gate failing open, which is indistinguishable from it passing.
     const spellings = {
       'block sequence': ['requires:', '  - config.commands.install'],
       'flow array': ['requires: [config.commands.install]'],
@@ -179,8 +171,6 @@ describe('planSync and a declared config requirement', () => {
   });
 
   test('an unmet asset never reaches the record sync writes', () => {
-    // What makes `sync` and `doctor` agree: both classify through planSync, and
-    // the only thing sync does extra is gated on these two predicates.
     const [entry] = planFor(DEFAULT_CONFIG);
     expect(
       manifestAfter({

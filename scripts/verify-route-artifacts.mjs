@@ -40,12 +40,6 @@ import {
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 
-/**
- * An empty list and a broken git are the same value unless they are told apart,
- * and a gate that reports a clean pass because it could not read anything is
- * worse than no gate. See `scripts/changed-files.sh` for the version of this
- * that once sat in three required CI checks at once.
- */
 const trackedPaths = () => {
   const output = runGit({ args: ['ls-files'], cwd: REPO_ROOT });
   if (output === undefined) {
@@ -71,11 +65,6 @@ const reportFindings = (findings) => {
   );
 };
 
-/**
- * A folder holding no artifact is skipped, so say how many — an artifact-suffix
- * list that stopped matching would quietly skip everything, and silence is what
- * a passing run looks like.
- */
 const summarise = ({ checked, skipped }) =>
   skipped.length === 0
     ? `Route-artifact gate passed: ${checked} route-folder file(s) name an artifact beside them.`

@@ -6,7 +6,6 @@ import type { UpdateQueryDescriptor } from './query-builder/query-builder.types.
 import { buildUpdateQuery } from './query-builder/build-update-query.util.ts';
 import { runQuery } from './run-query.util.ts';
 
-/** Constraint rejections arrive translated (ADR-050). */
 export const updateRows = async <TRow extends QueryResultRow>({
   tx,
   ...descriptor

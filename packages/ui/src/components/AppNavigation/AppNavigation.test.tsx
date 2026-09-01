@@ -28,8 +28,6 @@ vi.mock('#ui/hooks/useTheme.hook', () => ({
   useTheme: () => useThemeMock(),
 }));
 
-// Fixture only — real route items are supplied by each consuming app through
-// AppConfigContext (see `GetNavigationItems`), not owned by this package.
 const getFixtureNavigationItems = (): readonly NavbarItemConfig[] => [
   { end: true, label: 'Home', to: '/', type: 'link' },
   { label: 'Enterprise Orders', to: '/enterprise-orders', type: 'link' },

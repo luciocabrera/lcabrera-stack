@@ -9,8 +9,6 @@ const keysOfLength = (length: number) =>
 
 describe('areGroupKeysLegal', () => {
   it('accepts an empty list', () => {
-    // Ungrouped is a legal shape; turning it into "no grouping" is the caller's
-    // normalisation, not a refusal.
     expect(areGroupKeysLegal([])).toBe(true);
   });
 
@@ -32,14 +30,10 @@ describe('areGroupKeysLegal', () => {
   });
 
   it('refuses a repeat even well inside the cap', () => {
-    // The two invariants are independent: a short list can still be illegal.
     expect(areGroupKeysLegal(['a', 'a'])).toBe(false);
   });
 
   it('answers the shape question only, not which columns exist', () => {
-    // A key naming no column of the table is a legal *shape* — refusing it is
-    // `sanitizeGroupingByColumns`'s job, which is the only side that has the
-    // columns to check against.
     expect(areGroupKeysLegal(['not_a_column'])).toBe(true);
   });
 });

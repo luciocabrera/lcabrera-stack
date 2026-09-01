@@ -32,7 +32,6 @@ const groupRow = ({ isSubtotal = false, path }: GroupRowArgs): Row => ({
   [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, isSubtotal, path },
 });
 
-/** A rollup block plus a detail row, in the order rollup emits them (#570). */
 const rows: readonly Row[] = [
   groupRow({ path: pathOf('Berlin', 'Open') }),
   { id: 7 },
@@ -61,9 +60,6 @@ describe('resolveFocusedGroupPath', () => {
   });
 
   it('reads ancestry from the row, never from the row below it', () => {
-    // The trap rollup sets: the subtotal for a block is emitted *after* the
-    // rows it totals, so a walk that looked forward would hand row 0 the path
-    // of row 2 — one level shallower than the row the reader is on.
     expect(
       resolveFocusedGroupPath({ columns, focusedRowKey: keyOf(2), rows }),
     ).toStrictEqual(pathOf('Berlin'));

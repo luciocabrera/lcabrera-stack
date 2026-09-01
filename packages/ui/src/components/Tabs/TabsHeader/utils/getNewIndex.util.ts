@@ -4,9 +4,6 @@ type GetNewIndexArgs = {
   readonly tabsLength: number;
 };
 
-/**
- * Resolves the next focused tab index for roving-tabindex keyboard navigation.
- */
 export const getNewIndex = ({
   activeIndex,
   key,

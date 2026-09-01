@@ -4,12 +4,6 @@
  */
 type ColumnCapabilities = {
   readonly isFilterable: boolean;
-  /**
-   * Not vetoed by `isStatic`: static locks a column's *layout* against the user, while
-   * grouping restates the query — a pinned, unmovable column is still a perfectly good
-   * dimension.
-   * The route's endpoint has the final say either way (ADR-058).
-   */
   readonly isGroupable: boolean;
   readonly isResizable: boolean;
   readonly isSortable: boolean;
@@ -26,10 +20,6 @@ const COLUMN_CAPABILITY_DEFAULTS: ColumnCapabilities = {
   isStatic: false,
 };
 
-/**
- * false` at the point of use, and `deriveToggleCommandState` takes its availability from
- * it.
- */
 export const resolveColumnCapabilities = (
   column: ColumnCapabilityFlags | undefined,
 ) => {

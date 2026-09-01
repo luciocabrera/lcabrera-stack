@@ -43,9 +43,7 @@ class MockIntersectionObserver {
     return [];
   }
 
-  unobserve() {
-    // no-op
-  }
+  unobserve() {}
 }
 
 const triggerIntersection = (isIntersecting: boolean) => {
@@ -206,11 +204,9 @@ describe('useInfiniteScrollObserver', () => {
 
     rerender({ onReachEnd: latestOnReachEnd });
 
-    // The observer is not torn down / recreated on a new callback identity.
     expect(disconnectSpy).not.toHaveBeenCalled();
     expect(observeSpy).toHaveBeenCalledOnce();
 
-    // The latest callback is invoked through the ref.
     triggerIntersection(true);
     expect(latestOnReachEnd).toHaveBeenCalledOnce();
   });
@@ -239,7 +235,6 @@ describe('useInfiniteScrollObserver', () => {
       useInfiniteScrollObserver({
         isEnabled: true,
         onReachEnd,
-        // A short/empty client-filtered view: sentinel visible, no overflow.
         rootRef: createSizedRef({ clientHeight: 300, scrollHeight: 32 }),
         sentinelRef: createRef(),
         shouldFetchToFill: false,
@@ -258,7 +253,6 @@ describe('useInfiniteScrollObserver', () => {
       useInfiniteScrollObserver({
         isEnabled: true,
         onReachEnd,
-        // Matches overflow the container: reaching the sentinel is a real bottom.
         rootRef: createSizedRef({ clientHeight: 300, scrollHeight: 1600 }),
         sentinelRef: createRef(),
         shouldFetchToFill: false,

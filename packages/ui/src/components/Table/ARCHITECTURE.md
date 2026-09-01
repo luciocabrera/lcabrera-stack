@@ -514,14 +514,15 @@ reading that serves a tree and a lattice alike (ADR-080).
 
 ## Persistence
 
-Table state uses two write paths with a shared hydration model:
+Table state is written to one channel — the cookie — with the URL carrying
+filters and sorting:
 
 - Cookies + URL for SSR/shareable column state (filters, sorting, pinning, sizing, visibility)
-- sessionStorage (tab-scoped) for per-tab working copies (drawer UI + data rows)
 - Meta UI state is written by the mutation action itself, not by a subscription effect
-- The drawer **open/pinned flags** are additionally mirrored to a `-uiFlags` cookie
-  so the loader can SSR-seed the drawer in its persisted open/pinned state and
-  avoid a hydration layout shift (tab/expanded-filter state stays sessionStorage-only)
+- The drawer's **whole** state travels in a `-uiFlags` cookie — open/pinned, the
+  selected tab and the expanded filters — so the loader SSR-seeds the drawer and
+  there is no hydration layout shift. Nothing is tab-scoped: `contexts/TableConfig/ARCHITECTURE.md`
+  carries why one channel and not two, and what that costs
 - All persisted keys are optionally scoped by an **`appId`** (`table-state-{appId}-{persistenceKey}`)
   so tables in different apps that share a `persistenceKey` never collide
 - Query revalidation is conditional: only effective filter/sort URL changes trigger
@@ -530,7 +531,6 @@ Table state uses two write paths with a shared hydration model:
 ```mermaid
 graph LR
   ColumnChange["column state change"] --> ColumnAction["usePersistTableStateAction()"]
-  ColumnAction --> ColumnSession["sessionStorage write"]
   ColumnAction --> Fetcher["useFetcher.submit()"]
   Fetcher --> Route["POST /_action/persist-cookie"]
   Route --> Cookie["Set-Cookie header"]
@@ -539,15 +539,14 @@ graph LR
   Decision -->|No| Stable["204 response, no revalidation"]
 
   MetaChange["meta UI mutation"] --> MetaAction["usePersistTableUiFlagsAction()"]
-  MetaAction --> MetaSession["sessionStorage write"]
   MetaAction --> MetaRoute["POST /_action/persist-cookie"]
-  MetaRoute --> MetaFlagsCookie["-uiFlags Set-Cookie (open/pinned) for SSR seed"]
+  MetaRoute --> MetaFlagsCookie["-uiFlags Set-Cookie (whole drawer state) for SSR seed"]
 
   Load["Page load"] --> CookieRead["readPersistedStateFromCookie() + readPersistedUiFlagsFromCookie()"]
   CookieRead --> Init["Provider initial state (columns + drawer flags)"]
   Load --> Mount["client mount"]
-  Mount --> SessionRead["TableConfigProvider / TableDataProvider hydration effects"]
-  SessionRead --> Init
+  Mount --> Hydrate["TableConfigProvider / TableDataProvider hydration effects"]
+  Hydrate --> Init
 ```
 
 **A route can declare its column layout transient.**

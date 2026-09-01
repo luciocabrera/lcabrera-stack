@@ -35,15 +35,12 @@ describe('reportPathFor', () => {
   });
 
   it('makes a branch name safe to use as a filename', () => {
-    // `fix/304-x` unescaped would open a directory that does not exist.
     expect(reportPathFor({ type: 'branch', value: 'fix/304-Snapshot' })).toBe(
       `${RUNS_DIRECTORY}/branch-fix-304-snapshot.json`,
     );
   });
 
   it('cannot be walked out of the runs directory', () => {
-    // Not a likely attack — a branch name reaches this from `.git/HEAD` — but a
-    // path built from an outside name should not depend on that to be safe.
     for (const value of ['../../etc/passwd', '..', './../x']) {
       const path = reportPathFor({ type: 'branch', value });
       expect(path.startsWith(`${RUNS_DIRECTORY}/`)).toBe(true);
@@ -52,10 +49,6 @@ describe('reportPathFor', () => {
   });
 
   it('still lands inside the runs directory for a malformed target', () => {
-    // A missing value becomes `unknown`; a value with no type takes the default
-    // `branch` prefix. Neither can escape the runs directory, which is the only
-    // property that matters now that nothing is tracked — under the old tracked
-    // path a malformed target had to be kept away from `main`'s snapshot.
     for (const target of [undefined, {}, { type: 'branch' }]) {
       expect(reportPathFor(target)).toBe(
         `${RUNS_DIRECTORY}/branch-unknown.json`,

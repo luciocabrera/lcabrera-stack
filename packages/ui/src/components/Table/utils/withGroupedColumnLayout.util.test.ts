@@ -87,8 +87,6 @@ describe('withGroupedColumnLayout', () => {
   });
 
   it('forces a hidden key visible', () => {
-    // Under one column per key a hidden key erases a level rather than merely
-    // hiding a column, because the depth signal is which columns are filled.
     const result = layout({
       groupingKeys: ['city'],
       overrides: {
@@ -100,7 +98,6 @@ describe('withGroupedColumnLayout', () => {
   });
 
   it('keeps the caller’s visibility set when no key is hidden', () => {
-    // Reallocating on every grouped render would churn the memo below it.
     const columnVisibility = new Set<'amount'>(['amount']);
 
     expect(

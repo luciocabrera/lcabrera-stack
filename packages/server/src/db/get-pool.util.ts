@@ -1,11 +1,12 @@
+/**
+ * This package is public-facing and never baselines a finding, so the lazy
+ * singleton below is expressed rather than suppressed.
+ */
+
 import { Pool } from 'pg';
 
 import { readEnvConfig } from './env.schema.ts';
 
-/**
- * packages/server is public-facing and never baselines a finding, so the lazy singleton is
- * expressed this way rather than suppressed.
- */
 const poolRef: { current: Pool | undefined } = { current: undefined };
 
 export const getPool = (): Pool => {

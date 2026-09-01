@@ -20,9 +20,6 @@ describe('resolveAggregateAlias', () => {
   });
 
   it('keeps count and countDistinct apart on the same column', () => {
-    // They share one SQL function, so deriving from the SQL name alone would
-    // put both projections on `count_total_amount` — a collision Postgres
-    // reports as nothing at all.
     expect(
       resolveAggregateAlias({ column: 'total_amount', fn: 'count' }),
     ).not.toBe(
@@ -34,8 +31,6 @@ describe('resolveAggregateAlias', () => {
   });
 
   it('keeps two different functions apart on the same column', () => {
-    // What `@lcabrera/ui` leans on since #831: a column may carry several
-    // measures, so the projection has to give each one a field of its own.
     const aliases = (['avg', 'max', 'min', 'sum'] as const).map((fn) =>
       resolveAggregateAlias({ column: 'total_amount', fn }),
     );
@@ -54,8 +49,6 @@ describe('resolveAggregateAlias', () => {
   });
 
   it('derives an alias that is always a safe identifier for a safe column', () => {
-    // Every derived alias is `<lowercase sql name>_<column>`, so it passes the
-    // same pattern the column did.
     expect(
       resolveAggregateAlias({ column: 'a_b_c', fn: 'countDistinct' }),
     ).toMatch(/^[a-z_][a-z0-9_]*$/);

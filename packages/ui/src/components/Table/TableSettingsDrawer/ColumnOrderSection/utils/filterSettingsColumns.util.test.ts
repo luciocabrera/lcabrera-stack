@@ -41,11 +41,6 @@ describe('filterSettingsColumns', () => {
   });
 
   it('keeps a group key listed rather than filtering it out', () => {
-    // The grid no longer injects a synthetic column to exclude, and a group key
-    // is one of the consumer's own columns (ADR-080). It stays listed and is
-    // locked in its row by `createDraggableItems` — filtering it out here would
-    // take the row away in the one configuration where a user most wants to see
-    // which columns the grouping is holding.
     expect(filterSettingsColumns<Row>(columns).map((col) => col.key)).toContain(
       'id',
     );

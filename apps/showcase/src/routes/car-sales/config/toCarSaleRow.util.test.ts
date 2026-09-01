@@ -49,10 +49,6 @@ describe('toCarSaleRow', () => {
   });
 
   it('matches what `Response.json` does to the same row', async () => {
-    // The load-more page goes through `Response.json` — literally the call
-    // below, in the resource route's loader. The SSR page goes through this
-    // function instead, and the two have to produce the same shape. This is the
-    // only assertion that compares them directly.
     const throughJson = (await Response.json(driverRow).json()) as unknown;
 
     expect(toCarSaleRow(driverRow)).toStrictEqual(throughJson);

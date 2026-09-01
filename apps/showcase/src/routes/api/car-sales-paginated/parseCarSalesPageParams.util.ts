@@ -15,14 +15,6 @@ export type ParsedCarSalesPageParams = {
   readonly sorting: ReturnType<typeof sanitizeSorting<CarSale>>;
 };
 
-/**
- * `sort` is JSON from the table client; structural narrowing is enough here because the
- * column identifiers are re-validated at the SQL layer (`allowedColumns` +
- * `assertSafeIdentifier`), and the fallback ordering is applied by the service rather than
- * here — so this parser cannot be the reason a page comes back unordered.
- * The floor is because `LIMIT 0` is a page with no rows and a `hasMore` that says the set
- * is exhausted — a scroll session that silently ends.
- */
 export const parseCarSalesPageParams = (
   params: URLSearchParams,
 ): ParsedCarSalesPageParams => {

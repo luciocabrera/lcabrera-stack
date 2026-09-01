@@ -6,14 +6,6 @@ type AssertGroupAliasesArgs = {
   readonly allowedColumns: readonly string[];
 };
 
-/**
- * **Length.** Postgres truncates an identifier past its limit with only a `NOTICE`, and
- * `pg` then returns one row object in which the second of two truncation-equal aliases has
- * overwritten the first — the first column is not mangled, it is gone.
- * **Collision with a real column.** `group_mask` and `count_rows` are fixed names, so a
- * table that already has one would produce a duplicate output column with the same silent
- * overwrite.
- */
 export const assertGroupAliases = ({
   aliases,
   allowedColumns,
@@ -23,8 +15,6 @@ export const assertGroupAliases = ({
   for (const alias of aliases) {
     assertSafeIdentifier(alias);
 
-    // `assertSafeIdentifier` admits ASCII only, so character length is byte
-    // length — which is what Postgres counts.
     if (alias.length > MAX_IDENTIFIER_LENGTH) {
       throw new Error(
         `Alias "${alias}" is longer than Postgres's ${MAX_IDENTIFIER_LENGTH}-character identifier limit and would be truncated; pass a shorter explicit alias.`,

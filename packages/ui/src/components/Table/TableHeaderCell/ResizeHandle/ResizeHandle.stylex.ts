@@ -3,17 +3,6 @@ import * as stylex from '@stylexjs/stylex';
 import { zIndex } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
-/**
- * The splitter is a transparent 8px grab zone straddling the header cell's
- * right border (4px either side, both landing in the 6px inline padding of the
- * cell they overlap, so neither the label nor the actions menu loses clicks).
- * The visible 2px line is painted by `::before` and driven by a custom
- * property: a `:hover` on the pseudo-element itself would only match over the
- * 2px line, not across the whole grab zone.
- *
- * The focus ring is left to the user agent — lighting the line on
- * `:focus-visible` is a reinforcement, not the sole focus indicator.
- */
 export const resizeHandleStyles = stylex.create({
   resizeHandle: {
     '--resize-handle-line-color': {

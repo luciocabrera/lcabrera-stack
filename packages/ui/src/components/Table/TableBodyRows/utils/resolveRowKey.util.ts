@@ -10,12 +10,6 @@ type ResolveRowKeyArgs<TData extends Record<string, unknown>> = {
   readonly row: TData;
 };
 
-/**
- * No prefix may be a prefix of another, so the three kinds of key occupy
- * disjoint namespaces whatever any one of them encodes. The tuple encoding
- * below already makes a cross-namespace collision unconstructible on its own —
- * these prefixes are what keeps that true if the encoding ever changes.
- */
 const GROUP_KEY_PREFIX = 'grp:';
 const INDEX_KEY_PREFIX = 'idx:';
 const VALUE_KEY_PREFIX = 'pk:';
@@ -24,12 +18,6 @@ const isScalarKeyValue = (value: unknown): value is number | string =>
   typeof value === 'string' ||
   (typeof value === 'number' && Number.isFinite(value));
 
-/**
- * Row identity for React reconciliation, derived from the primary-key column(s) — the same
- * columns `resolveCrudRowId` reads, through the shared `resolvePrimaryKeyColumnKeys`, but
- * neither the same encoding nor the same failure mode.
- * It never throws.
- */
 export const resolveRowKey = <TData extends Record<string, unknown>>({
   columns,
   index,

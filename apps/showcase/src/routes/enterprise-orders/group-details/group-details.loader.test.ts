@@ -29,7 +29,6 @@ const groupToken = encodeDrillGroup({
   groupKeys: GROUP_PATH.map((entry) => entry.columnKey),
 });
 
-/** `APP_ID`, never a literal: `getStorageKey` namespaces every slice with it. */
 const layoutCookie = ({
   slice,
   value,

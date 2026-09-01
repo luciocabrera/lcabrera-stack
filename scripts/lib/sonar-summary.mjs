@@ -9,12 +9,6 @@
  */
 import { freshnessLine } from './sonar-freshness.mjs';
 
-/**
- * Strip line breaks from anything interpolated into a log line. The report data
- * is fetched from the SonarCloud API and the target comes from CLI args /
- * `.git/HEAD` — external input a log-forging payload could ride in on (CWE-117).
- * Sonar's S5145 flags logging it unsanitised; this is Sonar's own recommended fix.
- */
 export const logSafe = (value) => String(value).replaceAll(/[\n\r]/gu, ' ');
 
 const severitySuffix = (bySeverity) => {
@@ -24,15 +18,6 @@ const severitySuffix = (bySeverity) => {
   return severities ? ` (${severities})` : '';
 };
 
-/**
- * What the analysis actually covered, printed because an issue count alone
- * cannot distinguish a clean project from one whose findings were all
- * accepted, or from one whose files are excluded and never read.
- *
- * The languages are listed rather than summarised: "which analyser claimed
- * our `.sql` files" is precisely the question that took several rounds to
- * answer while the report could only say "0 issues".
- */
 const scopeLine = ({ accepted, analysed }) => {
   const languages = Object.entries(analysed?.byLanguage ?? {})
     .toSorted(([a], [b]) => a.localeCompare(b))
@@ -47,13 +32,6 @@ const scopeLine = ({ accepted, analysed }) => {
   );
 };
 
-/**
- * The summary as `{ findings, freshness, stale }`.
- *
- * `freshness` is returned separately so the caller can send it to stderr when
- * stale — that way it survives a `| tail` or a grep for the gate line, which is
- * how a stale analysis got mistaken for a current one in the first place.
- */
 export const summaryLines = (report, outRel, now) => {
   const { qualityGate, summary, target } = report;
   const { line, stale } = freshnessLine(report.analysisDate, now);

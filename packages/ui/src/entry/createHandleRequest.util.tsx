@@ -13,12 +13,9 @@ import { buildShellStreamResponse } from './buildShellStreamResponse.util';
 import { getStreamTimeout } from './getStreamTimeout.util';
 
 type CreateHandleRequestArgs = {
-  /** The app's own compiled StyleX stylesheet URL (`import stylexCssHref from './stylex.css?url'`) — a per-app build artifact, cannot be sourced from this package. */
   readonly stylexCssHref: string;
 };
 
-// Positional signature is React Router's entry.server contract — status code
-// second, headers third. Do not reorder (or alphabetize) these parameters.
 type HandleRequest = (
   request: Request,
   responseStatusCode: number,
@@ -38,7 +35,6 @@ export const createHandleRequest = ({
     responseHeaders,
     routerContext,
   ) => {
-    // https://httpwg.org/specs/rfc9110.html#HEAD
     if (request.method.toUpperCase() === 'HEAD') {
       return Promise.resolve(
         new Response(undefined, {
@@ -51,8 +47,6 @@ export const createHandleRequest = ({
     const cspNonce = getRequestCspNonce(request);
     addPreloadHeaders({ responseHeaders, stylexCssHref });
 
-    // A render error after the shell is committed bumps the status to 500 —
-    // tracked in a local (noParameterAssign) rather than mutating the param.
     let statusCode = responseStatusCode;
 
     const { promise, reject, resolve } = Promise.withResolvers<Response>();
@@ -60,15 +54,11 @@ export const createHandleRequest = ({
     let isShellRendered = false;
     const userAgent = request.headers.get('user-agent');
 
-    // Ensure requests from bots and SPA Mode renders wait for all content
-    // to load before responding — see React Router's renderToPipeableStream docs.
     const readyOption: keyof RenderToPipeableStreamOptions =
       (userAgent && isbot(userAgent)) || routerContext.isSpaMode
         ? 'onAllReady'
         : 'onShellReady';
 
-    // Abort the rendering stream after the timeout so it has time to
-    // flush down the rejected boundaries.
     let timeoutId: ReturnType<typeof setTimeout> | undefined = setTimeout(
       () => abort(),
       abortDelay,
@@ -85,9 +75,6 @@ export const createHandleRequest = ({
         nonce: cspNonce,
         onError(error: unknown) {
           statusCode = 500;
-          // Log streaming rendering errors from inside the shell. Don't
-          // log errors encountered during initial shell rendering since
-          // they'll reject and get logged via onShellError.
           if (isShellRendered) {
             console.error(toError(error));
           }

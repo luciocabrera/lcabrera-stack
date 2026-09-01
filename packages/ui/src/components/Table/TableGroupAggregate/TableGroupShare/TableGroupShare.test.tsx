@@ -48,8 +48,6 @@ describe('TableGroupShare', () => {
   });
 
   it('names the denominator in the accessible text', () => {
-    // The same measure appears at several levels at once, so position cannot
-    // carry which total a percentage is of (ADR-086).
     denominatorRef.current = 200;
 
     render(<TableGroupShare columnKey='revenue' fn='sum' value={50} />);
@@ -58,8 +56,6 @@ describe('TableGroupShare', () => {
   });
 
   it('hides the bar from the accessibility tree', () => {
-    // It depicts a value that is already text beside it; announcing it again
-    // would read the same quantity twice.
     denominatorRef.current = 200;
 
     render(<TableGroupShare columnKey='revenue' fn='sum' value={50} />);
@@ -79,14 +75,10 @@ describe('TableGroupShare', () => {
       ':scope [data-testid="table-group-share-bar"] > span',
     );
 
-    // The width is a StyleX dynamic style, so it arrives as a custom property
-    // rather than as a `style` attribute value.
     expect(fill?.getAttribute('style')).toContain('25%');
   });
 
   it('clamps the bar to its track without clamping the number', () => {
-    // A measure and a total with opposite signs produce a share past 100%; the
-    // bar must not paint outside the cell, and the number must still be true.
     denominatorRef.current = 50;
 
     const { container } = render(
@@ -101,8 +93,6 @@ describe('TableGroupShare', () => {
   });
 
   it('renders an explicit absence when there is no denominator', () => {
-    // Never `0.0%` and never `NaN` — a share nobody could compute is not a
-    // share of nothing.
     render(<TableGroupShare columnKey='revenue' fn='sum' value={50} />);
 
     expect(screen.getByTestId('table-group-share-absent')).toBeTruthy();

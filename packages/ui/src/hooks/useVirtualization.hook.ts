@@ -51,8 +51,6 @@ export const useVirtualization = ({
 
     const updateHeight = () => {
       const measured = container?.offsetHeight ?? 0;
-      // Skip zero measurements (e.g. display:none from Activity hidden)
-      // to preserve the last valid height and avoid layout shifts
       if (measured > 0) {
         setContainerHeight(measured);
       }

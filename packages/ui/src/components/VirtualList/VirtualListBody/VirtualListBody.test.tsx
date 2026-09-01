@@ -76,10 +76,6 @@ describe('VirtualListBody', () => {
     expect(screen.getByText('No options found')).toBeTruthy();
   });
 
-  // The sentinel is an in-flow sibling of the content inside the scroll
-  // container, so in the empty and loading modes it would be the only thing
-  // giving that container a scrollHeight — a phantom overflow that paints a
-  // scrollbar and reads as a real scrolled-to-bottom to the observer.
   it('renders no infinite-scroll sentinel in the empty state', () => {
     render(
       <ProviderShell

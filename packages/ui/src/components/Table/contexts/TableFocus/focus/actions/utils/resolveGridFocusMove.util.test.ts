@@ -47,8 +47,6 @@ describe('resolveGridFocusMove', () => {
   });
 
   it('focuses the first cell when the grid has not been entered yet', () => {
-    // There is no current cell to step from, so any grid key means "start
-    // here" rather than "one step from a position that does not exist".
     expect(
       move({ columnIndex: -1, hasFocusedCell: false, key: 'ArrowDown' }),
     ).toEqual({ columnIndex: 0, rowIndex: 0 });
@@ -68,7 +66,6 @@ describe('resolveGridFocusMove', () => {
   });
 
   it('treats a page of no rows as a page of one', () => {
-    // The container has not been measured yet. Zero would make the key dead.
     expect(move({ key: 'PageDown', pageRows: 0 })).toEqual({
       columnIndex: 1,
       rowIndex: 6,
@@ -76,8 +73,6 @@ describe('resolveGridFocusMove', () => {
   });
 
   it('recovers from a stored position that no longer exists', () => {
-    // The data shrank under the focus target; the move still lands inside the
-    // grid rather than off the end of it.
     expect(move({ key: 'ArrowDown', rowCount: 4, rowIndex: 80 })).toEqual({
       columnIndex: 1,
       rowIndex: 3,

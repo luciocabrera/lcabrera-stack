@@ -27,8 +27,6 @@ describe('treeFor', () => {
   });
 
   it('matches nothing for a file outside every tree', () => {
-    // `packages/api` and `packages/utils` carry no INVENTORY.md — a file there
-    // must not silently join `packages/ui/src` because it starts with `packages/`.
     expect(
       treeFor('packages/api/src/fetchAndValidate.util.ts'),
     ).toBeUndefined();
@@ -78,8 +76,6 @@ describe('exportedSymbolNames', () => {
   });
 
   it('dedupes a name matched by more than one export declaration', () => {
-    // Two matches of the same name, so this would still pass without the
-    // `new Set(...)` wrapping unless the regex genuinely produced a dupe.
     expect(
       exportedSymbolNames(
         'export const getThing = () => 1;\nexport const getThing = () => 2;',
@@ -94,10 +90,6 @@ describe('exportedSymbolNames', () => {
   });
 
   it('ignores an "export" inside a JSDoc example, only a real declaration', () => {
-    // A real file: readPersistedStateFromCookie.util.ts's docblock shows a
-    // consumer's loader in a `* export async function loader(...)` example
-    // line. The leading `*` is not whitespace, so the anchored regex cannot
-    // reach "export" from the start of that line.
     const source = [
       '/**',
       ' * @example',
@@ -218,9 +210,6 @@ describe('describeFinding', () => {
 
 describe('describeStaleEntry', () => {
   it('makes the opposite claim to describeFinding, not the same one', () => {
-    // A stale entry means the symbol IS now documented (or its file is gone)
-    // — reusing describeFinding's "is not named…" wording here would be
-    // self-contradictory in the printed warning.
     const message = describeStaleEntry({
       file: 'packages/ui/src/utils/x.util.ts',
       symbol: 'nowDocumented',

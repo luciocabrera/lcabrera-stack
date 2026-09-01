@@ -14,10 +14,6 @@ type FetchDistinctValuesArgs = {
   readonly timeoutMs?: number;
 };
 
-/**
- * This path is the one that pages: a filter dropdown scrolled quickly issues overlapping
- * requests, and `signal` is how a superseded one gets cancelled.
- */
 export const fetchDistinctValues = async ({
   baseUrl,
   columnName,

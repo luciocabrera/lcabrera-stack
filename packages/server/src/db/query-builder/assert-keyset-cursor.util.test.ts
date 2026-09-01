@@ -2,11 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { assertKeysetCursor } from './assert-keyset-cursor.util.ts';
 
-/**
- * A cursor reaches the builder as JSON off a request, where a NULL column is
- * `null` — parsing it here is how it actually arrives, and keeps the literal
- * out of our own source (`unicorn/no-null`).
- */
 const NULL_ORDER_ID_CURSOR = JSON.parse(
   '["2026-01-04", null]',
 ) as readonly unknown[];

@@ -30,13 +30,9 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
     >;
   }
 
-  // Set<string> rather than .includes() on the raw arrays, for the reason
-  // splitColumnsByPinning documents: DataKey<unknown> narrows to the literal
-  // 'actions' and stops accepting the broader keys the columns carry.
   const leftPinnedSet = new Set<string>(leftPinned);
   const rightPinnedSet = new Set<string>(rightPinned);
 
-  // Compute left offsets (cumulative from left)
   let leftOffset = 0;
   const leftPinnedInEffectiveOrder = effectiveColumns.filter((c) =>
     leftPinnedSet.has(c.key),
@@ -53,7 +49,6 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
     leftOffset += width;
   }
 
-  // Mark last left-pinned column (for shadow separator)
   const lastLeftKey = leftPinnedInEffectiveOrder.at(-1)?.key;
   if (lastLeftKey) {
     const entry = result.get(lastLeftKey);
@@ -65,7 +60,6 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
     }
   }
 
-  // Compute right offsets (cumulative from right)
   let rightOffset = 0;
   const rightPinnedInReverseEffectiveOrder = effectiveColumns
     .toReversed()
@@ -82,7 +76,6 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
     rightOffset += width;
   }
 
-  // Mark first right-pinned column (for shadow separator)
   const firstRightKey = rightPinnedInReverseEffectiveOrder.at(-1)?.key;
   if (firstRightKey) {
     const entry = result.get(firstRightKey);

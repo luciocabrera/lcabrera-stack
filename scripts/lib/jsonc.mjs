@@ -11,15 +11,12 @@
  * measured for React Doctor, documented for Biome in AGENTS.md §4. A parse
  * error here is therefore a real finding about the repo, not a nuisance: it is
  * the only signal that a config everyone believes is in force is being ignored.
+ *
+ * The string scanner skips the character after a backslash, so an escaped
+ * quote does not end the literal early — which would put the scanner back in
+ * code mode mid-string and let the rest of the line be read as syntax.
  */
 
-/**
- * Index just past the string literal opening at `start`.
- *
- * Skips the character after a backslash so an escaped quote does not end the
- * literal early — which would put the scanner back in "code" mode mid-string
- * and let the rest of the line be read as syntax.
- */
 const endOfString = (text, start) => {
   for (let index = start + 1; index < text.length; index += 1) {
     if (text[index] === '\\') index += 1;
@@ -28,22 +25,11 @@ const endOfString = (text, start) => {
   return text.length;
 };
 
-/** Index of the newline ending the line comment at `start`, or end of text. */
 const endOfLineComment = (text, start) => {
   const newline = text.indexOf('\n', start);
   return newline === -1 ? text.length : newline;
 };
 
-/**
- * Strips `//` line comments, leaving string literals untouched.
- *
- * String-aware by necessity: a `$schema` value contains `//`, and a naive strip
- * truncates the document into invalid JSON.
- *
- * Written as a scan over literals rather than a per-character state machine:
- * the flag-juggling version was correct but scored cognitive complexity 17, and
- * "skip to the end of this construct" is what the code actually means.
- */
 export const stripJsoncComments = (text) => {
   let out = '';
   let index = 0;
@@ -62,6 +48,5 @@ export const stripJsoncComments = (text) => {
   return out;
 };
 
-/** Parses JSONC — JSON plus `//` comments and trailing commas. */
 export const parseJsonc = (text) =>
   JSON.parse(stripJsoncComments(text).replaceAll(/,(?=\s*[}\]])/gu, ''));

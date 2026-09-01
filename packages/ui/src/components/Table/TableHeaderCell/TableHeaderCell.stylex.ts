@@ -6,7 +6,7 @@ import { skeleton } from '#ui/design-system/tokens/commons.stylex';
 
 export const tableHeaderCellStyles = stylex.create({
   base: (minWidth?: number | string, width?: number | string) => ({
-    paddingInline: '6px', // 'var(--table-padding-inline)',
+    paddingInline: '6px',
     alignItems: 'center',
     boxSizing: 'border-box',
     color: colors.textSecondary,

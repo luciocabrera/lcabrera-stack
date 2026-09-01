@@ -1,13 +1,12 @@
 import type { PersistedState } from './persistence.types';
 
 import { getStorageKey } from './getStorageKey.util';
-import { PERSISTENCE_VERSION } from './persistence.constants';
+import { parseVersionedPayload } from './parseVersionedPayload.util';
 
 type CollectPersistedStateSlicesArgs = {
   readonly appId?: string;
   readonly persistenceKey: string;
   readonly readRawSlice: (sliceKey: string) => null | string | undefined;
-  readonly transformRaw?: (raw: string) => string;
 };
 
 const PERSISTED_SLICES = [
@@ -19,16 +18,10 @@ const PERSISTED_SLICES = [
   'columnVisibility',
 ] as const;
 
-/**
- * Shared by the cookie and sessionStorage readers — each supplies how to read a raw slice
- * value (and, for cookies, how to decode it) while this helper owns the slice list,
- * version check, and `columnVisibility` array→Set conversion.
- */
 export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
   appId,
   persistenceKey,
   readRawSlice,
-  transformRaw,
 }: CollectPersistedStateSlicesArgs) => {
   const result: {
     -readonly [K in keyof PersistedState<TData>]?: PersistedState<TData>[K];
@@ -42,22 +35,17 @@ export const collectPersistedStateSlices = <TData = Record<string, unknown>>({
       continue;
     }
 
-    try {
-      const source = transformRaw ? transformRaw(rawValue) : rawValue;
-      const parsed = JSON.parse(source) as {
-        value: unknown;
-        version: number;
-      };
-      if (parsed.version === PERSISTENCE_VERSION) {
-        result[slice] = (
-          slice === 'columnVisibility' && Array.isArray(parsed.value)
-            ? new Set(parsed.value as string[])
-            : parsed.value
-        ) as never;
-      }
-    } catch {
-      // Invalid JSON — skip
+    const value = parseVersionedPayload({ rawValue });
+
+    if (value === undefined) {
+      continue;
     }
+
+    result[slice] = (
+      slice === 'columnVisibility' && Array.isArray(value)
+        ? new Set(value as string[])
+        : value
+    ) as never;
   }
 
   return result;

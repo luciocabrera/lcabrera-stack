@@ -26,9 +26,6 @@ describe('requiredConfigKeys', () => {
   });
 
   test('reads a flow array a formatter has broken over several lines', () => {
-    // `.claude/rules/routes-data.md` is already written this way, so a matcher
-    // bounded to one line would read a real declaration as absent — the silent
-    // form of this gate not firing.
     expect(
       requiredConfigKeys(
         withFrontmatter(
@@ -56,9 +53,6 @@ describe('requiredConfigKeys', () => {
   });
 
   test('reads a lone scalar, however it is quoted', () => {
-    // Valid YAML for the single-key case, and the shape an author reaches for
-    // first. Reading only the two list spellings would leave this one silently
-    // requiring nothing, which is a gate that has stopped firing.
     expect(
       requiredConfigKeys(withFrontmatter('requires: config.commands.install')),
     ).toEqual(['commands.install']);
@@ -71,9 +65,6 @@ describe('requiredConfigKeys', () => {
   });
 
   test('reads the same list however the spelling is styled', () => {
-    // The gate must not depend on how the list is written: restyling a
-    // declaration from one valid spelling into another is an edit nobody would
-    // review as a behaviour change, and it must not be one.
     const spellings = {
       'block sequence': [
         'requires:',
@@ -151,9 +142,6 @@ describe('requiredConfigKeys', () => {
   });
 
   test('ignores a requires: that is not about this config', () => {
-    // The exact declaration a shipped reference file already carries. Reading a
-    // library version range as a config key would refuse to write a file that
-    // needs nothing from the consumer.
     expect(
       requiredConfigKeys(
         withFrontmatter(

@@ -40,10 +40,6 @@ export const mergedTaskDriftWarnings = ({
     if (!realBranch || !realPr) {
       continue;
     }
-    // Only the stale-ref blind spot: the filesystem still "resolves" the branch
-    // (so checkTaskBranches stays silent), yet the live remote says it is gone.
-    // When the ref is genuinely absent, checkTaskBranches already warns — no
-    // need to say it twice.
     if (refExists(branch) && !live.has(branch)) {
       warnings.push(
         `${name}: records PR ${pr} but branch \`${branch}\` is gone from origin — ` +

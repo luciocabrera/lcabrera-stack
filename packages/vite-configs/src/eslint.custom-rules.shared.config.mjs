@@ -25,20 +25,6 @@ import {
  *   One `no-restricted-imports` pattern entry: specifier globs and what to say.
  */
 
-// Resolved from tsconfigRootDir (each consuming app's own directory), never
-// process.cwd() — process.cwd() is a single, fixed value for the entire
-// lifetime of whatever process imports this module. That's harmless for
-// this repo's own `eslint .` package.json scripts (each `cd`s into one
-// app's directory before running, so cwd always matches the app being
-// linted), but breaks for any single long-lived process serving multiple
-// apps — e.g. an editor's ESLint extension, which stays running for the
-// whole workspace and never re-execs per app. In that scenario
-// process.cwd() lands on the workspace root, which has none of these
-// plugins as direct dependencies (they're only installed under each app's
-// own node_modules), so resolution either fails outright or falls back to
-// an inconsistent module instance — which is what actually produces the
-// "multiple candidate TSConfigRootDirs" symptom, not just a missing
-// tsconfigRootDir parser option (that fix alone wasn't sufficient).
 const resolveWorkspaceImportSpecifier = (workspaceRequire, specifier) => {
   try {
     return workspaceRequire.resolve(specifier);
@@ -52,11 +38,6 @@ const resolveWorkspaceImportSpecifier = (workspaceRequire, specifier) => {
       throw error;
     }
 
-    // `require` of a `.json` path parses it, so the manifest is read through
-    // the same resolver that found it rather than through a second `fs` call on
-    // a computed path — which is also what keeps this file free of the
-    // `security/detect-non-literal-fs-filename` finding a public package may
-    // not suppress (AGENTS.md §4).
     const packageJsonPath = workspaceRequire.resolve(
       `${specifier}/package.json`,
     );
@@ -141,9 +122,6 @@ export const createCustomRulesLintConfig = async ({
   serverOnlySyntaxRestrictions = [],
   tsconfigRootDir = process.cwd(),
 } = {}) => {
-  // Scoped to tsconfigRootDir, not process.cwd() — see the comment above
-  // resolveWorkspaceImportSpecifier for why this distinction is the actual
-  // fix, not just a style preference.
   const workspaceRequire = createRequire(`${tsconfigRootDir}/package.json`);
   const fromWorkspace = (specifier) =>
     importFromWorkspace(workspaceRequire, specifier);
@@ -191,22 +169,14 @@ export const createCustomRulesLintConfig = async ({
 
   return [
     {
-      // See the matching block in `eslint.base-custom-rules.shared.config.mjs`
-      // for why this was off and what had to change before it could be on: in
-      // short, `eslint-disable` is for ESLint findings and `oxlint-disable` for
-      // Oxlint's, so "unused" now means the directive is either dead or
-      // misnamed — never load-bearing.
       linterOptions: {
         reportUnusedDisableDirectives: 'error',
       },
     },
-    // 1. Core ESLint
     eslint.configs.recommended,
-    // Add security recommended config here (good spot: after core but before styling/sorting)
     security.configs.recommended,
     unicorn.configs.recommended,
 
-    // 2. React Hooks and Refresh
     reactHooks.configs.flat.recommended,
     reactRefresh.configs.recommended,
     {
@@ -215,16 +185,11 @@ export const createCustomRulesLintConfig = async ({
         'react-refresh/only-export-components': 'off',
       },
     },
-    // Other configs...
-    // Enable lint rules for React
     reactX.configs['recommended-typescript'],
-    // Enable lint rules for React DOM
     reactDom.configs.recommended,
 
-    // 3. Sorting (Perfectionist)
     perfectionist.configs['recommended-natural'],
 
-    // 4. Formatting (Prettier - Must be last to disable conflicts)
     eslintConfigPrettier,
 
     ...(Array.isArray(tseslint.configs.recommended)
@@ -234,21 +199,14 @@ export const createCustomRulesLintConfig = async ({
     {
       rules: {
         ...SHARED_PLUGIN_RULE_SEVERITIES,
-        // React-only, so it stays here rather than in the shared block: the
-        // base factory loads no React plugin to escalate.
         'react-x/set-state-in-effect': 'error',
       },
     },
-    // 5. JavaScript files configuration (for Node.js server files, etc.)
     createNodeScriptFileConfig({ globals }),
     {
       ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
     },
     {
-      // Always on, and deliberately BEFORE the server/client boundary block:
-      // flat config replaces a rule wholesale on a later match, so the boundary
-      // block composes these restrictions into its own value. `.server` files,
-      // which that block ignores, still land here.
       files: ['src/**/*.ts', 'src/**/*.tsx'],
       rules: {
         'no-restricted-syntax': ['error', ...BARREL_SYNTAX_RESTRICTIONS],
@@ -262,10 +220,6 @@ export const createCustomRulesLintConfig = async ({
               'src/entry.server.tsx',
               'src/**/*.server.ts',
               'src/**/*.server.tsx',
-              // A `.server/` directory is a React Router server-only module
-              // (every file inside is stripped from the client bundle), so the
-              // server-only import bans do not apply to its contents — the same
-              // exemption the `.server.ts` suffix gets.
               'src/**/.server/**',
             ],
             rules: {
@@ -302,9 +256,6 @@ export const createCustomRulesLintConfig = async ({
         'local-rules/merge-duplicate-imports': 'error',
         'local-rules/no-habit-return-types': 'error',
         'local-rules/no-inline-type-imports': 'error',
-        // One value per rule: ESLint flat config replaces a rule wholesale when
-        // a later config sets it again, so every restriction that applies to
-        // these files is composed here rather than split across blocks.
         'local-rules/readonly-props': 'error',
         'local-rules/type-suffix-naming': 'error',
         'no-restricted-imports': [

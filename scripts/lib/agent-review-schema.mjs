@@ -53,27 +53,17 @@ const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/;
 const isFilledString = (value) =>
   typeof value === 'string' && value.trim() !== '';
 
-/**
- * §2.2 says `file` is a "repository-relative path". An `in-diff` finding's file
- * is checked against the diff by §2.4 step 5, but an `omission` names where
- * something *should* be, so nothing else looks at it — and a reader following an
- * absolute path or a `..` out of the tree is what the row exists to prevent.
- * (pure)
- */
 const isRepositoryRelative = (path) =>
   !path.startsWith('/') && !path.split('/').includes('..');
 
-/** The keys present on `object` that `allowed` does not name. (pure) */
 const unknownKeys = (object, allowed) =>
   Object.keys(object).filter((key) => !allowed.has(key));
 
-/** `undefined` when `value` is an object literal, an error string otherwise. */
 const objectError = (value, where) =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
     ? undefined
     : `${where} is not an object`;
 
-/** §2.2's per-finding shape. Anchoring rules are §2.4 step 5, not here. (pure) */
 const findingShapeErrors = (finding, at) => {
   const notAnObject = objectError(finding, at);
   if (notAnObject !== undefined) {
@@ -113,10 +103,6 @@ const findingShapeErrors = (finding, at) => {
   return errors;
 };
 
-/**
- * §2.2's per-criterion shape — the evidence a `pass` is required to carry, one
- * entry per acceptance criterion. (pure)
- */
 const criterionShapeErrors = (criterion, at) => {
   const notAnObject = objectError(criterion, at);
   if (notAnObject !== undefined) {
@@ -145,7 +131,6 @@ const criterionShapeErrors = (criterion, at) => {
   return errors;
 };
 
-/** The `error_reason` / `criteria` rules that depend on `verdict`. (pure) */
 const conditionalFieldErrors = (document) => {
   const errors = [];
   const isError = document.verdict === 'error';
@@ -168,7 +153,6 @@ const conditionalFieldErrors = (document) => {
   return errors;
 };
 
-/** (pure) */
 const criteriaShapeErrors = (criteria) => {
   if (!Array.isArray(criteria)) {
     return ['`criteria` is not an array'];
@@ -184,13 +168,6 @@ const criteriaShapeErrors = (criteria) => {
   ];
 };
 
-/**
- * §2.2 says an `id` is "unique within the document", of a finding and of a
- * criterion alike, and both are named by id in something that matters: §6's
- * override discharges a finding by id — and is built so that a finding it does
- * not name still blocks — while §2.4 step 6 reports unmet criteria by id.
- * A duplicate makes both ambiguous. (pure)
- */
 const duplicateIdErrors = (entries, label) => {
   const seen = new Set();
   const duplicates = new Set();
@@ -208,7 +185,6 @@ const duplicateIdErrors = (entries, label) => {
   );
 };
 
-/** §2.4 steps 2 and 3, over the whole document. (pure) */
 export const documentShapeErrors = (document) => {
   const errors = unknownKeys(document, DOCUMENT_FIELDS).map(
     (key) => `the verdict carries the unknown field \`${key}\``,

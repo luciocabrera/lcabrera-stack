@@ -11,10 +11,6 @@ RuleTester.it = it;
 
 const ruleTester = new RuleTester();
 
-// The rule gates on `context.filename`, so every case below is the SAME source
-// under a different name. That is the point: a rule keyed to a filename suffix
-// goes silently dead when the suffix convention moves, and a dead rule reports
-// exactly as many findings as compliant code does — zero.
 const typeAlias = 'type CardProps = { readonly title: string };';
 const interfaceDeclaration = 'interface CardProps { title: string }';
 

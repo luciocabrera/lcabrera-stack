@@ -39,10 +39,6 @@ describe('checkoutIsolationFinding', () => {
   });
 
   it('treats the configured trunk as an anchor, not only `main`', () => {
-    // Hardcoded as `main`, this reported every consumer whose git produced
-    // `master` as parked on a feature branch — on their own trunk, with a clean
-    // tree, as a `problem`, advising `git checkout main` to a branch that does
-    // not exist.
     expect(
       checkoutIsolationFinding({
         ...facts({ branch: 'master' }),
@@ -103,7 +99,6 @@ describe('checkoutIsolationFinding', () => {
 });
 
 describe('readCheckoutFacts', () => {
-  /** A real repository, because these facts come from git rather than from a shape. */
   const repository = () => {
     const repositoryRoot = mkdtempSync(join(tmpdir(), 'checkout-facts-'));
     runGit({

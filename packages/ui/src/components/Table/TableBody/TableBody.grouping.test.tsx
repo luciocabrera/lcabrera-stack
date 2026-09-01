@@ -27,17 +27,6 @@ const columns: TableColumn<TestRow>[] = [
   { key: 'order_status', label: 'Status' },
 ];
 
-/**
- * A rollup body rather than sixty identical rows: every fourth row is a
- * subtotal and the last is the grand total, so the window under test contains
- * more than one **kind** of group row.
- *
- * That matters because the kinds no longer paint alike. `resolveGroupRowStyle`
- * gives each its own ground, and the grand total additionally carries a
- * `border-top` — the one variant that could add to a row's box. It only stays
- * free because `box-sizing: border-box` paints it inside the pinned height, and
- * this fixture is what would catch that assumption breaking.
- */
 const groupRows: readonly TestRow[] = Array.from(
   { length: GROUP_COUNT },
   (_unused, index) => {
@@ -63,7 +52,6 @@ const groupRows: readonly TestRow[] = Array.from(
   },
 );
 
-/** One of each kind, short enough that the whole set is in the window. */
 const SMALL_ROWS: readonly TestRow[] = [
   {
     [TABLE_GROUP_ROW_FIELD]: {
@@ -133,12 +121,6 @@ const BodyHarness = ({ data }: HarnessProps) => {
 const Harness = () => <BodyHarness data={groupRows} />;
 const SmallHarness = () => <BodyHarness data={SMALL_ROWS} />;
 
-/**
- * StyleX resolves to atomic classes against a stylesheet jsdom never loads, so
- * dynamic values arrive as inline custom properties. Each element here declares
- * exactly one pixel-valued dynamic style — the body its total height, a spacer
- * its own — so reading the single `px` token off the attribute is unambiguous.
- */
 const readPixelValue = (element: Element) => {
   const match = /(\d+)px/.exec(element.getAttribute('style') ?? '');
 
@@ -149,12 +131,6 @@ describe('TableBody under grouping', () => {
   afterEach(cleanup);
 
   it('keeps offsetY + rendered rows + bottom spacer equal to the body height', () => {
-    // The invariant recorded in TableRow/ARCHITECTURE.md, measured off a body
-    // whose every row is a group row. It is worth measuring rather than
-    // restating because grouping is the first feature to render a row through a
-    // component other than the plain cell path: a group row that painted taller,
-    // or that emitted a second <tr>, would break this sum while every unit test
-    // around it still passed.
     render(<Harness />);
 
     const body = screen.getByTestId('table-body');
@@ -193,17 +169,6 @@ describe('TableBody under grouping', () => {
   });
 
   it('gives every kind of group row the same declared height', () => {
-    // The register gives group, subtotal and grand-total rows three different
-    // grounds, and the grand total a rule above it. What this catches is a kind
-    // that stops going through `TableRow` — rendering its own `<tr>`, or
-    // falling out of the group path altogether, which is what a grand total
-    // does the moment anything reads its empty path as malformed.
-    //
-    // **It cannot catch a variant that paints taller.** jsdom runs no layout,
-    // so `readPixelValue` reads the height `TableRow` *declares*, not one
-    // measured off a box. A padding or line-height regression inside a variant
-    // would pass here and has to be held by review of the StyleX file, where
-    // the rule is colour and weight only.
     render(<SmallHarness />);
 
     const kinds = screen.getAllByTestId('table-group-header-row');

@@ -4,11 +4,6 @@ import type { EnterpriseOrder } from './enterpriseOrders.types';
 
 import { toOrderFormValues } from './toOrderFormValues.util';
 
-/**
- * The nullable columns arrive as SQL NULL from the driver — build them from
- * parsed JSON rather than with `null` literals (repo convention, mirrors
- * `drop-nullish-values.util.test.ts`).
- */
 const nullableColumns = () =>
   JSON.parse(
     '{"delivery_date":null,"internal_notes":null,"payment_date":null,"payment_reference":null,"shipped_date":null,"shipping_address_line2":null,"tracking_number":null}',

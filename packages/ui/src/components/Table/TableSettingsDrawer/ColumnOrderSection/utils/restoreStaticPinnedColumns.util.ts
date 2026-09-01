@@ -23,9 +23,6 @@ export const restoreStaticPinnedColumns = <TData>({
   const finalLeft = new Set<string>(finalPinning.left);
   const finalRight = new Set<string>(finalPinning.right);
 
-  // `staticKeys` is a Set, so every key is distinct and a membership test taken
-  // up front cannot be invalidated by a later restore — which is what lets the
-  // loop's evolving `nextPinning` reduce to two independent selections.
   const staticKeyList = [...staticKeys];
   const leftToRestore = staticKeyList.filter(
     (key) => defaultLeft.has(key) && !finalLeft.has(key),
@@ -34,8 +31,6 @@ export const restoreStaticPinnedColumns = <TData>({
     (key) => defaultRight.has(key) && !finalRight.has(key),
   ) as DataKey<TData>[];
 
-  // Returning the input unchanged keeps its identity, which the previous
-  // implementation did by never reassigning when nothing was restored.
   if (leftToRestore.length === 0 && rightToRestore.length === 0) {
     return finalPinning;
   }

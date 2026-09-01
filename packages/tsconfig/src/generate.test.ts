@@ -49,9 +49,6 @@ describe('renderTsConfig', () => {
     );
   });
 
-  // `JSON.stringify` RETURNS undefined for these three rather than throwing, so
-  // without the guard each one interpolates to the literal text "undefined" and
-  // ships as a committed tsconfig. Easy to assert, easy to forget.
   it.each([
     { config: undefined, label: 'undefined' },
     { config: () => 'nope', label: 'a function' },
@@ -61,9 +58,6 @@ describe('renderTsConfig', () => {
     expect(() => renderTsConfig(config)).toThrow(/not representable as JSON/);
   });
 
-  // The other half of the same contract, and the reason the guard tests for
-  // `undefined` rather than for "anything JSON dislikes": a circular structure
-  // already fails loudly on its own.
   it('lets JSON.stringify throw on its own for a circular structure', () => {
     const circular: Record<string, unknown> = {};
     circular.self = circular;
@@ -77,11 +71,6 @@ describe('writeTsConfigs', () => {
     vi.clearAllMocks();
   });
 
-  // Asserted as a path → contents map rather than as an ordered array: the
-  // writer dispatches through `Promise.all`, so completion order is not part of
-  // the contract, and an ordered assertion would be pinning the recording
-  // filesystem's synchronicity instead. The length check is what keeps a
-  // duplicated path from collapsing into the map unnoticed.
   it('writes each entry through the supplied file system', async () => {
     const { fileSystem, writes } = createRecordingFileSystem();
 
@@ -150,9 +139,6 @@ describe('writeTsConfigs', () => {
     ).rejects.toThrow(/^\/repo\/a\/tsconfig\.app\.json: not representable/);
   });
 
-  // The reason every entry is rendered before any is written: a run that fails
-  // halfway leaves a tree in which some configs are new and some are stale, and
-  // nothing says which.
   it('writes nothing at all when one entry cannot be represented', async () => {
     const { directories, fileSystem, writes } = createRecordingFileSystem();
 

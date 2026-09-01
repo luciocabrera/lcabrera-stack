@@ -13,12 +13,6 @@ import { gateArgs, PROTECT_SUCCESS_FLAG } from './review-gate-reconcile.mjs';
 import { readRepoFile } from './workflow-inspect.mjs';
 
 describe('the argv the sweep hands each gate', () => {
-  // Asserted on the ARGV rather than on the effect, deliberately: both entries
-  // below are invisible in the outcome of getting them wrong — a sweep missing
-  // `--if-changed` still reports "ok" on every line while quietly re-posting an
-  // identical status every pass, and one missing `--repo` still works whenever
-  // the gate happens to resolve the same repository by itself. An end-to-end
-  // test would need a live pull request and would still not fail on the second.
   const args = () =>
     gateArgs({
       number: 738,
@@ -85,11 +79,6 @@ describe('the argv the sweep hands each gate', () => {
   });
 
   it('hands the gate the flag the gate itself reads', () => {
-    // The two sides used to spell the string separately, and a rename of either
-    // one left the whole suite green while every gate quietly went unprotected
-    // — the argv test above asserts the default, and the roster test only reads
-    // the text of `GATES`. Sharing the constant is what fixes it; this asserts
-    // the read side still reads it rather than growing its own copy back.
     const source = readRepoFile('scripts/lib/review-gate-status.mjs');
     expect(source).toMatch(
       /protectSuccess:\s*process\.argv\.includes\(PROTECT_SUCCESS_FLAG\)/,
@@ -98,11 +87,6 @@ describe('the argv the sweep hands each gate', () => {
   });
 
   it('only lets a gate opt in if its script can read the flag', () => {
-    // `--protect-success` is read inside `publishGateStatus`. A gate that posts
-    // its own status instead — `verify-agent-review.mjs` does — would take the
-    // flag and ignore it, which is the same silent no-op this flag already had
-    // once. The roster test next door pins WHICH gates opt in; this pins that
-    // opting in can do anything at all.
     const sweep = readRepoFile('scripts/reconcile-review-gates.mjs');
     const optedIn = [...sweep.matchAll(/\{[^}]*script:\s*'([\w.-]+)'[^}]*\}/gu)]
       .filter((entry) => entry[0].includes('protectSuccess'))
@@ -115,9 +99,6 @@ describe('the argv the sweep hands each gate', () => {
   });
 
   it('is what the sweep actually spawns — not a parallel definition', () => {
-    // The assertions above are worth nothing if the sweep builds its own argv
-    // beside them, so this pins the wiring: one child spawn in that file, and it
-    // takes the argv from `gateArgs`.
     const source = readRepoFile('scripts/reconcile-review-gates.mjs');
     expect(source.match(/execFileSync\(/g)).toHaveLength(1);
     expect(source).toMatch(/execFileSync\(\s*process\.execPath,\s*args\b/);
@@ -160,31 +141,18 @@ describe('the scripts that take a pull request on the command line', () => {
   for (const script of DELEGATE) {
     it(`${script} takes both from review-gate-status, never from argv`, () => {
       const source = readRepoFile(script);
-      // Either entry point counts: the gates take the whole target through
-      // `resolveGateTarget`, while `pr-threads.mjs` calls the two resolvers
-      // itself because it also falls back to the current branch. What matters
-      // is that the parsing happens in the shared module, not here.
       expect(source).toMatch(
         /import \{[^}]*(?:resolveGateTarget|resolvePullNumber)[^}]*\} from '\.\/lib\/review-gate-status\.mjs'/s,
       );
-      // The failure this forbids: a script that reaches past the shared
-      // resolver and reads the flag itself, which is how one of them would
-      // drift back to an unparsed `#738`.
       expect(source).not.toMatch(/flagValue\('--pr'\)/);
       expect(source).not.toMatch(/flagValue\('--repo'\)/);
     });
   }
 
   it('the sweep parses both before it can read or publish anything', () => {
-    // Specifically these two call sites, because the failure they prevent is a
-    // sweep that runs both gates against `#NaN` — or, for a typo, one that falls
-    // through and reconciles every open pull request.
     const source = readRepoFile(PARSE_DIRECTLY[0]);
     expect(source).toMatch(/parseRepository\(resolveRepository\(\)\)/);
     expect(source).toMatch(/parsePullNumber\(only\)/);
-    // `\b` is load-bearing: `Number(only)` is a substring of
-    // `parsePullNumber(only)`, so without it this negative can never hold — the
-    // same shared-anchor mistake this file's other tests were rewritten to avoid.
     expect(source).not.toMatch(/\bNumber\(only\)/);
   });
 });

@@ -35,10 +35,6 @@ const {
   const offer = { current: [] as readonly TableAggregateFn[] };
 
   return {
-    // The drawer stages its grouping in a draft store and the header menu reads
-    // the live one, so each surface feeds the predicate from its own commit
-    // context. Two refs per slice, so a surface reading the wrong one is
-    // visible.
     draftAggregatesRef: {
       current: [] as readonly { columnKey: string; fn: TableAggregateFn }[],
     },
@@ -146,7 +142,6 @@ const numericCapability: TableColumnGroupingCapability = {
   typeName: 'numeric',
 };
 
-/** A column the catalogue can aggregate in no way — the type-illegal case. */
 const unsupportedCapability: TableColumnGroupingCapability = {
   aggregates: [],
   canGroup: false,
@@ -209,8 +204,6 @@ describe('resolveOfferableAggregates across both offering surfaces', () => {
 
     render(<AggregateActions columnKey='total_amount' onClose={vi.fn()} />);
 
-    // The catalogue reports `count` and `sum` here, so a menu shaped from it
-    // would still show both.
     expect(screen.queryByText('Sum')).toBeNull();
     expect(screen.queryByText('Count')).toBeNull();
     expect(screen.queryByText('No Aggregate')).toBeNull();
@@ -225,8 +218,6 @@ describe('resolveOfferableAggregates across both offering surfaces', () => {
   });
 
   it('fills the header menu from the predicate, over the catalogue', () => {
-    // `doc` is the column the catalogue offers nothing for. The stub offers
-    // `sum`, and the menu follows the stub.
     offerRef.current = ['sum'];
 
     render(<AggregateActions columnKey='doc' onClose={vi.fn()} />);
@@ -241,8 +232,6 @@ describe('resolveOfferableAggregates across both offering surfaces', () => {
 
     render(<AddAggregateSection />);
 
-    // Every column, including the one the catalogue refuses and the one staged
-    // as a group key — both of which the picker's own filter used to drop.
     expect(listedColumns()).toEqual(['Status', 'Total', 'Document']);
   });
 
@@ -266,8 +255,6 @@ describe('resolveOfferableAggregates across both offering surfaces', () => {
       capability: textCapability,
       isGroupKey: true,
     });
-    // And that the columns beside it are not — a surface passing a constant
-    // would satisfy the assertion above on its own.
     expect(mockResolveOfferableAggregates).toHaveBeenCalledWith({
       capability: numericCapability,
       isGroupKey: false,
@@ -310,12 +297,9 @@ describe('what the two surfaces do with an applied aggregate', () => {
   it('keeps it on the header menu, which toggles it off', () => {
     render(<AggregateActions columnKey='total_amount' onClose={vi.fn()} />);
 
-    // Offered *and* pressed: the item is the affordance that removes it.
     expect(
       screen.getByText('Sum').closest('button')?.getAttribute('aria-pressed'),
     ).toBe('true');
-    // The unapplied one is still there too, so the menu is not simply showing
-    // everything the stub returned regardless of state.
     expect(
       screen.getByText('Count').closest('button')?.getAttribute('aria-pressed'),
     ).toBe('false');
@@ -358,8 +342,6 @@ describe('the read-wide countDistinct budget on both surfaces', () => {
     );
 
     expect(screen.queryByText('Distinct Count')).toBeNull();
-    // `getBy*` for the presence half: a menu that had lost `Count` as well
-    // should report what it did render, not merely that this was not null.
     expect(screen.getByText('Count')).not.toBeNull();
 
     unmount();

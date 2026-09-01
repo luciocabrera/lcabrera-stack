@@ -8,10 +8,6 @@ import type { EnterTableGridArgs } from './useEnterTableGrid.types';
 
 import { commitTableFocusTarget, resolveGridFocusContext } from './utils';
 
-/**
- * This is what makes the grid "one stop in the page's tab order, entered where it was
- * left" (ADR-062).
- */
 export const useEnterTableGrid = <TData extends Record<string, unknown>>() => {
   const { focusStore } = useTableFocusContextValue();
   const { columnsStore, expansionStore, groupingStore, metaStore } =

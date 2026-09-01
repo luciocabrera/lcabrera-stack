@@ -25,15 +25,11 @@ describe('toGroupLabel', () => {
   });
 
   it('reads a NULL key as a group rather than a missing one', () => {
-    // Parsed rather than written as a literal, because that is how a SQL NULL
-    // reaches this function — as the driver's own `null`.
     expect(toGroupLabel(JSON.parse('null'))).toBe('(empty)');
     expect(toGroupLabel(undefined)).toBe('(empty)');
   });
 
   it('refuses a value outside the dimension vocabulary rather than guessing', () => {
-    // `String({})` is `[object Object]`, which reads as a group name and is not
-    // one — the whole reason this is a lookup rather than a coercion.
     expect(toGroupLabel({ nested: true })).toBe('(empty)');
     expect(toGroupLabel([1, 2])).toBe('(empty)');
   });

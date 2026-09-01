@@ -18,25 +18,18 @@ describe('renderPlan and an acknowledged edit', () => {
   });
 
   test('lists it under --verbose, with the reason recorded for it', () => {
-    // Quiet is not gone. An acknowledgement nobody can read is one nobody can
-    // revisit, and revisiting it is the only way it is ever removed.
     expect(renderPlan([acknowledged], { verbose: true })).toBe(
       `  acknowledged ${PATH}  (left alone — acknowledged: our epic protocol has no wave cap)`,
     );
   });
 
   test('still reports an unacknowledged edit at the same verbosity', () => {
-    // Otherwise "quiet under --verbose" and "quiet because acknowledged" would
-    // be the same observation.
     expect(renderPlan([modified])).toBe(
       `  modified     ${PATH}  (left alone — locally modified)`,
     );
   });
 
   test('lines its path column up with the rows around it', () => {
-    // `acknowledged` is the longest state name there is, so a column sized to
-    // anything narrower puts every other row two characters out of true — in the
-    // one report that exists to be scanned.
     const [first, second] = renderPlan([acknowledged, modified], {
       verbose: true,
     }).split('\n');
@@ -46,8 +39,6 @@ describe('renderPlan and an acknowledged edit', () => {
 
 describe('countsFor and an acknowledged edit', () => {
   test('counts as neither reported nor written, so --check stays green', () => {
-    // The reason this exists: one deliberate edit must not make a CI gate red
-    // for ever.
     expect(countsFor([acknowledged])).toEqual({ reported: 0, written: 0 });
     expect(countsFor([modified])).toEqual({ reported: 1, written: 0 });
   });

@@ -65,11 +65,9 @@ const loaderData = {
   metaState,
 };
 
-/** The props the mocked `TableLayout` last received. */
 const lastProps = () =>
   tableLayoutMock.mock.calls.at(-1)?.[0] as TableLayoutProps<Row, Response>;
 
-/** Typed with the real fetcher signature so assertions can read the built query. */
 const fetchPage = vi.fn<(query: PaginatedQuery) => Promise<Response>>(
   async () => ({ data: [], hasMore: false }),
 );
@@ -114,9 +112,6 @@ describe('TableRouteView', () => {
   });
 
   it('defaults dataErrorSelector to the response error', () => {
-    // The default is what makes a refusal visible without every route wiring it
-    // up: a response carrying `error` and nobody reading it is the silent empty
-    // table this closed (#642).
     render(<TableRouteView<Row, Response> fetchPage={fetchPage} />);
 
     const error = { kind: 'db-canceled', message: 'Cancelled.' } as const;
@@ -164,8 +159,6 @@ describe('TableRouteView', () => {
     expect(lastProps().actions).toBeDefined();
   });
 
-  // The view takes no capability prop at all (ADR-063), so the only way a
-  // filter can reach the query is the loader meta — which is what this asserts.
   it('shapes the request from the loader meta rather than from a prop', async () => {
     useLoaderDataMock.mockReturnValue({
       ...loaderData,

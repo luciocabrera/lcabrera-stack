@@ -64,25 +64,18 @@ describe('FormFieldsList', () => {
   it('scrolls at the outermost list and no other', () => {
     const { container } = renderList(NESTED_FIELDS);
 
-    // Without this the scroll assertion below would also pass on a tree that
-    // never recursed — the case it is meant to catch.
     expect(
       findByStyle({ container, style: styles.stack }).length,
     ).toBeGreaterThan(1);
 
-    // A nested list inheriting `scroll` would make every group/row/tab its own
-    // scroll container, clipping VirtualSelect dropdowns inside them.
     expect(findByStyle({ container, style: styles.scroll })).toHaveLength(1);
   });
 
   it('yields the scroll boundary to a lone tab node', () => {
     const { container } = renderList(TABBED_FIELDS);
 
-    // The tab panel is the scroll container here. A second one on the root
-    // would reserve a scrollbar gutter it can never use, and the insets stack.
     expect(findByStyle({ container, style: styles.scroll })).toHaveLength(0);
 
-    // It still owns the height — the tab panel's `height: 100%` needs it.
     expect(findByStyle({ container, style: styles.region })).toHaveLength(1);
   });
 });

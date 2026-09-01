@@ -14,15 +14,6 @@ import {
   writeIn,
 } from './doc-register-fixtures.mjs';
 
-// What this defends: the EXIT CODE, which is all CI reads.
-//
-// Every case below plants a violation in a tree that has just been shown to
-// pass, and then puts it back. A rule that is not wired produces exactly the
-// clean pass a correct register produces, so the passing run alone is evidence
-// of nothing — only the pair is (AGENTS.md Rule 14). The correction is the same
-// tree with the one edit reversed, so the exit code can only be answering that
-// edit.
-
 const GATE = resolve(
   dirname(fileURLToPath(import.meta.url)),
   '..',
@@ -41,7 +32,6 @@ const runGate = (root) => {
   return { ...result, output: `${result.stdout}${result.stderr}` };
 };
 
-/** Plant, assert the failure names its own cause, correct, assert the pass. */
 const expectPlantedFailure = (root, plant, correct, expected) => {
   plant();
   const planted = runGate(root);
@@ -115,8 +105,6 @@ describe('verify-doc-registers', () => {
     );
   });
 
-  // A pointer climbing out of the tree resolves to nothing, rather than to a
-  // file on the machine that happens to exist.
   it('fails an evidence pointer that leaves the repository', () => {
     const root = makeRegisterRepo();
     const edit = editIn(root);
@@ -164,9 +152,6 @@ describe('verify-doc-registers', () => {
     );
   });
 
-  // The roster is derived, not listed: adding the workspace makes the same name
-  // legal, which is what proves the check reads `pnpm-workspace.yaml` rather
-  // than a copy of it.
   it('accepts a package name once that workspace exists', () => {
     const root = makeRegisterRepo();
     editIn(root)(REQUIREMENT_FILE, '  - ui\n', '  - utils\n');
@@ -192,9 +177,6 @@ describe('verify-doc-registers', () => {
     );
   });
 
-  // `suppressions:list` is a real task in the fixture manifest, so the failure
-  // above is answering "CI runs it", not "the task exists". Removing the
-  // workflow — the only thing that runs `test:ci` — must fail the same claim.
   it('fails a `met` pointer once nothing in CI runs it', () => {
     const root = makeRegisterRepo();
     expect(runGate(root).status).toBe(0);
@@ -219,8 +201,6 @@ describe('verify-doc-registers', () => {
     );
   });
 
-  // The drafts exclusion, which is the difference between a gate people can use
-  // and one that fires on the first draft anyone files.
   it('holds a draft carrying no block to nothing, and its charter to the schema', () => {
     const root = makeRegisterRepo();
     const write = writeIn(root);
@@ -228,9 +208,6 @@ describe('verify-doc-registers', () => {
     write(`${PLANNING_DIR}/adr-drafts/second-draft.md`, '# Another draft\n');
     expect(runGate(root).status).toBe(0);
 
-    // A draft that declares a block anyway is held to it — `adr-drafts/README.md`
-    // is itself a charter and carries one, so the exclusion drops the
-    // requirement to have a block, not the schema for one.
     write(
       `${PLANNING_DIR}/adr-drafts/README.md`,
       '---\nkind: charter\nstatus: live\nrecorded: not-a-date\nissues: []\npackages: []\n---\n\n# Drafts\n',

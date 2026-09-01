@@ -55,15 +55,6 @@ const loaderData = {
 
 const lastRow: Row = { order_id: 42, order_status: 'shipped' };
 
-/**
- * Renders the hook with a fetcher spy and returns both. The spy is typed with
- * the real fetcher signature so the assertions below read the query the hook
- * actually built, rather than `never`.
- *
- * Capabilities arrive on the loader's `metaState` (ADR-063), so this is where a
- * test declares them. Passing nothing leaves the base meta identical, which is
- * what the absent-means-off assertions rely on.
- */
 const setup = (metaOverrides?: Partial<TableMetaState>) => {
   useLoaderDataMock.mockReturnValue(
     metaOverrides
@@ -138,11 +129,6 @@ describe('useTableRoutePage', () => {
     expect(fetchPage.mock.calls[0]?.[0]?.cursor).toStrictEqual(['shipped', 42]);
   });
 
-  // ADR-063's safety property, carried over from ADR-056 §4: moving the two
-  // capabilities onto the meta must not let a route that declares nothing start
-  // sending a filter or a cursor. Comparing the two queries — rather than
-  // asserting each key is undefined — is what makes "behaves exactly as" the
-  // claim, and it fails if absence ever stops meaning off.
   it('builds the same query from absent capability meta as from meta declaring both off', async () => {
     const absent = setup();
     await absent.result.current.onLoadMore({ lastRow, limit: 50, skip: 50 });

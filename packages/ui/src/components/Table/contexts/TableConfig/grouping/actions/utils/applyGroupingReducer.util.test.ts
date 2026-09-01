@@ -50,9 +50,6 @@ describe('applyGroupingReducer', () => {
   });
 
   it('passes the snapshot to the reducer rather than re-reading anything', () => {
-    // The reducer is the only thing that sees the current state, and it sees
-    // exactly what the caller read — which is what makes the single-read rule
-    // enforceable at the call site instead of by convention.
     const seen: TableGroupingState[] = [];
 
     applyGroupingReducer({

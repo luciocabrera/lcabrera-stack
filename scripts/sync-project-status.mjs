@@ -44,8 +44,6 @@ import { targetStatus } from './lib/project-status.mjs';
 
 const GRAPHQL_URL = 'https://api.github.com/graphql';
 
-// Safe to retry despite being a POST: the only mutation here sets a board field
-// to a given value, so applying it twice lands the same state.
 const graphql = async ({ query, token, variables }) => {
   const response = await fetchWithRetry(() =>
     fetch(GRAPHQL_URL, {
@@ -62,8 +60,6 @@ const graphql = async ({ query, token, variables }) => {
     const error = new Error(
       `GraphQL: ${body.errors.map((e) => e.message).join('; ')}`,
     );
-    // Carried so callers can branch on a specific failure instead of matching
-    // against the joined message, which is built for humans.
     error.graphqlErrors = body.errors;
     throw error;
   }
@@ -105,7 +101,6 @@ const CLOSING_ISSUES_QUERY = `
     }
   }`;
 
-/** The node ids of every issue this PR closes, so they move with the PR. */
 const closingIssueIds = async ({ prNodeId, token }) => {
   const data = await graphql({
     query: CLOSING_ISSUES_QUERY,
@@ -138,7 +133,6 @@ const EXISTING_ITEM_QUERY = `
     }
   }`;
 
-/** The id of this content's existing card on our board, if it has one. */
 const findBoardItemId = async ({ contentId, projectId, token }) => {
   const data = await graphql({
     query: EXISTING_ITEM_QUERY,
@@ -149,13 +143,6 @@ const findBoardItemId = async ({ contentId, projectId, token }) => {
   return items.find((item) => item.project?.id === projectId)?.id;
 };
 
-/**
- * Adding is not exclusive to this workflow: `add-to-project.yml` fires on the
- * same `pull_request` events and adds the same content, so on every new PR the
- * two race and whichever loses is told the content is already there. That is
- * not a failure — the card exists, which is all this step wanted — so recover
- * the existing item's id and carry on. Any other GraphQL error still throws.
- */
 const addOrFindBoardItem = async ({ contentId, meta, token }) => {
   try {
     const added = await graphql({
@@ -175,7 +162,6 @@ const addOrFindBoardItem = async ({ contentId, meta, token }) => {
   }
 };
 
-/** Add the content to the board if needed, then set its Status. */
 const applyStatus = async ({ contentId, meta, optionId, token }) => {
   const itemId = await addOrFindBoardItem({ contentId, meta, token });
   if (!itemId) {
@@ -193,7 +179,6 @@ const applyStatus = async ({ contentId, meta, optionId, token }) => {
   });
 };
 
-/** The content node ids this event should move: the subject + a PR's issues. */
 const contentIdsFor = async ({ eventName, payload, token }) => {
   if (eventName === 'issues') {
     return [payload.issue.node_id];

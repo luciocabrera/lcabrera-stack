@@ -10,13 +10,6 @@ import type { GroupKeyItemContentProps } from './GroupKeyItemContent.types';
 import { GroupKeyPeriodSelect } from '../GroupKeyPeriodSelect';
 import { styles } from './GroupKeyItemContent.stylex';
 
-/**
- * A temporal key also carries a granularity control, which renders itself away on every
- * other column (#786).
- * It sits here rather than in the add-key control above because a granularity is a
- * property of an **applied** key: it is chosen, changed and read back long after the key
- * was added.
- */
 export const GroupKeyItemContent = ({
   isBusy,
   item,
@@ -34,12 +27,6 @@ export const GroupKeyItemContent = ({
       <span {...stylex.props(styles.groupKeyItemLabel)}>
         {`${level}. ${item.label}`}
       </span>
-      {/*
-       * Under a lock the row still says which column it groups by and at which
-       * level — the grouping is rendered, only the edits are gone (#578). The
-       * granularity goes with the remove control because it reshapes the key
-       * rather than describing it.
-       */}
       {!isGroupingLocked && (
         <div {...stylex.props(styles.groupKeyItemControls)}>
           <GroupKeyPeriodSelect

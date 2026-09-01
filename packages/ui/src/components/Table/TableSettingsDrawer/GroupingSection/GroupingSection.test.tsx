@@ -66,9 +66,6 @@ const stores = {
   metaStore: createMockStore<Record<string, unknown>>({}),
 };
 
-// `vi.hoisted` runs before the module body, so the value it returns must be
-// self-contained — it may only reference `stores` when called, never at hoist
-// time. Same shape as `TableConfig/grouping/grouping.hooks.test.tsx`.
 const getTableConfigContextValue = vi.hoisted(() => {
   return function getTableConfigContextValue() {
     return {
@@ -85,11 +82,6 @@ const getTableDataContextValue = vi.hoisted(() => {
   };
 });
 
-/**
- * The navigation proxy. Every grouping and column commit reaches the router
- * through `persistTableState` → `usePersistCookieAction` → `fetcher.submit`,
- * so counting calls here counts navigations without a router in the test.
- */
 const persistTableState = vi.hoisted(() =>
   vi.fn<(entries: readonly TablePersistenceEntry[]) => boolean>(() => true),
 );
@@ -169,11 +161,6 @@ const renderDrawer = () =>
     </TableDrawerProvider>,
   );
 
-/**
- * The two "Add" buttons — group key, then aggregate — in the order
- * `GroupingSection` composes them. The length assertion is what stops a
- * structural change silently re-pointing these clicks at the other control.
- */
 const getAddButtons = () => {
   const addButtons = screen.getAllByRole('button', { name: 'Add' });
 
@@ -199,12 +186,6 @@ const stageAggregate = ({
   fireEvent.click(getAddButtons().addAggregate as HTMLElement);
 };
 
-/**
- * The two reverse controls the mocked `DraggableList` stands in for — group
- * keys, then aggregates, in the order `GroupingSection` composes the two lists.
- * Each list renders one only while it has rows, so the length assertion is
- * what stops a click landing on the other list.
- */
 const getReverseButtons = () => {
   const reverseButtons = screen.getAllByRole('button', { name: 'Reverse' });
 
@@ -216,13 +197,11 @@ const getReverseButtons = () => {
   };
 };
 
-/** The `grouping` param value the one commit wrote. */
 const getCommittedGroupingParam = () =>
   (persistTableState.mock.calls[0]?.[0] ?? []).find(
     (entry) => entry.searchParamKey === 'grouping',
   )?.searchParamValue;
 
-/** The labelled aggregate rows, in the order the drawer renders them. */
 const getAggregateLabels = () =>
   screen.getAllByText(/^\w+ of /).map((node) => node.textContent);
 
@@ -240,8 +219,6 @@ beforeEach(() => {
   stores.groupingStore = createMockStore<TableGroupingState>(NO_GROUPING);
   stores.metaStore = createMockStore<Record<string, unknown>>({
     groupingCapabilities: CAPABILITIES,
-    // Pinned so Accept and Cancel leave the drawer mounted, which is what lets
-    // the assertions below read the section after either.
     isTableSettingsPinned: true,
     persistenceKey: 'orders-table',
   });
@@ -258,9 +235,6 @@ afterEach(() => {
 
 describe('GroupingSection staging', () => {
   it('stages a multi-edit sequence without a single navigation, then commits it in exactly one', () => {
-    // The count is the whole point. Asserting only the final grouping would
-    // pass identically against the old live-write section, which produced the
-    // same end state through one navigation per edit.
     renderDrawer();
 
     stageGroupKey('Status');
@@ -291,9 +265,6 @@ describe('GroupingSection staging', () => {
   });
 
   it('stages TWO aggregates on one column and commits both', () => {
-    // The defect #831 exists for, end to end through the drawer: the second
-    // selection used to replace the first, and "Aggregates (1)" listed only the
-    // survivor with nothing saying the other had gone.
     renderDrawer();
 
     stageGroupKey('Status');
@@ -333,10 +304,6 @@ describe('GroupingSection staging', () => {
   });
 
   it('stages a drag ACROSS columns and commits the dragged order in one navigation', () => {
-    // Reordering happens across columns, which is the whole reason the wire
-    // format is an ordered array rather than a map of lists (#831/#832). The
-    // navigation count is asserted here too: the reorder is one more staged
-    // edit, not a commit path of its own.
     renderDrawer();
 
     stageGroupKey('Status');
@@ -369,9 +336,6 @@ describe('GroupingSection staging', () => {
   });
 
   it('reads the dragged order back out of the committed URL param', () => {
-    // The round trip a shared link takes: commit → `grouping` param → a fresh
-    // load seeding the store from it. Asserting the store alone would pass on
-    // an order the param cannot carry.
     const firstOpen = renderDrawer();
 
     stageGroupKey('Status');
@@ -447,8 +411,6 @@ describe('GroupingSection staging', () => {
   });
 
   it('stages the totals mode and carries it in the same commit', () => {
-    // The mode decides which grouping sets the read emits, so it travels in the
-    // `grouping` param with the keys rather than as a display setting.
     renderDrawer();
 
     stageGroupKey('Status');
@@ -468,8 +430,6 @@ describe('GroupingSection staging', () => {
   });
 
   it('leaves the mode out of the param while it is the default', () => {
-    // A table left on `flat` produces the param it produced before rollup
-    // existed, so an existing shared link and a new one are the same string.
     renderDrawer();
 
     stageGroupKey('Status');
@@ -546,8 +506,6 @@ describe('GroupingSection staging', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     firstOpen.unmount();
 
-    // A fresh provider is what re-opening the drawer does — `TableDrawersSection`
-    // mounts it only while the drawer is open, keyed on the drawers sync nonce.
     renderDrawer();
 
     expect(screen.getByText('1. Country')).not.toBeNull();
@@ -566,8 +524,6 @@ describe('GroupingSection staging', () => {
 
     renderDrawer();
 
-    // Rendered twice by design — the section header's compact variant and the
-    // labelled footer one — and both must stage rather than apply.
     const clearButtons = screen.getAllByRole('button', {
       name: 'Clear Grouping',
     });

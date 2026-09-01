@@ -38,16 +38,10 @@ export const useSetColumnSorting = <TData>() => {
 
     if (result.kind !== 'updated') return;
 
-    // Persist to cookie and sync URL params in one action.
-    // Abort before loading/state changes when persistence would be oversized.
     if (!persistTableState(result.persistenceEntry)) return;
 
-    // Show loading feedback immediately
     dataStore.set({ isLoading: true });
 
-    // Every derived field at once. A partial write here is what let
-    // `normalizedColumns` fall out of step with `pinnedColumnPartition` once
-    // measure columns existed — see `resolveColumnSortingUpdate`.
     columnsStore.set({ ...result.viewState, sorting: result.sorting });
 
     metaStore.set({ drawersSyncNonce: drawersSyncNonce + 1 });

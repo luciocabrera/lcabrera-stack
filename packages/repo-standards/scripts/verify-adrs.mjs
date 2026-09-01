@@ -85,17 +85,8 @@ const INDEX_FILE = 'README.md';
 const BASELINE_REL = readRegisters(REPO_ROOT).adrContentBaseline;
 const BASELINE_PATH = join(REPO_ROOT, BASELINE_REL);
 
-/**
- * The workspace names a record's `governs` may hold, derived from
- * pnpm-workspace.yaml rather than declared — so a workspace added today is a
- * legal answer today. An empty roster is not treated as "allow anything": the
- * finding says the roster could not be derived, because a gate that accepts
- * every name when it can read none is a gate reporting a clean pass over
- * nothing.
- */
 const WORKSPACES = deriveWorkspaceScopes(REPO_ROOT);
 
-/** Directories that never hold governed documentation. */
 const SKIPPED_DIRS = new Set([
   '.git',
   '.react-router',
@@ -113,11 +104,6 @@ const listMarkdown = (dir) => {
     : [];
 };
 
-/**
- * One record, read once. The heading is taken from the BODY rather than from the
- * file: a `#` comment inside the block would otherwise be picked up as the H1,
- * and the number check would stop firing without saying so.
- */
 const entryFor = (dir, filename) => {
   const markdown = readFileSync(join(REPO_ROOT, dir, filename), 'utf8');
   const body = adrBody(markdown);
@@ -138,15 +124,6 @@ const readHomes = () =>
       .map((filename) => entryFor(home.dir, filename)),
   }));
 
-/**
- * Every `ADR-*.md` anywhere in the tree that is not in a declared home and not a
- * draft. Walked rather than globbed so a new directory is caught the day it
- * appears, which is the failure mode this whole file exists for: the four homes
- * were each reasonable in isolation and nothing ever compared them.
- *
- * A linked worktree or nested clone is skipped — descending into one reports
- * that checkout's files as strays in this one.
- */
 const walkStrays = (dir, prefix = '') => {
   const entries = readdirSync(dir, { withFileTypes: true });
   if (prefix !== '' && entries.some((entry) => entry.name === '.git')) {
@@ -170,11 +147,6 @@ const strayPaths = () =>
     (path) => !KNOWN_DIRS.has(path.slice(0, path.lastIndexOf('/'))),
   );
 
-/**
- * Homes whose committed index no longer says what the directory says. Compared
- * through `normalizeIndex`, because Oxfmt reformats these files after they are
- * generated and a byte comparison would loop forever against it.
- */
 const staleIndexes = (homes) =>
   homes.filter((home) => {
     const path = join(REPO_ROOT, home.dir, INDEX_FILE);
@@ -197,8 +169,6 @@ const writeIndexes = (homes) => {
   );
 };
 
-/** What every record says about itself, with where it lives, for the baseline
- *  arithmetic and for the findings alike. */
 const recordsOf = (homes) =>
   homes.flatMap((home) =>
     home.entries.map((entry) => ({
@@ -216,18 +186,11 @@ const readBaseline = () =>
     ? readableBaseline(JSON.parse(readFileSync(BASELINE_PATH, 'utf8')))
     : EMPTY_BASELINE;
 
-/** The directory is created rather than assumed: a repository adopting the gate
- *  need not already have one where the baseline is configured to live. */
 const saveBaseline = (baseline) => {
   mkdirSync(dirname(BASELINE_PATH), { recursive: true });
   writeFileSync(BASELINE_PATH, `${JSON.stringify(baseline, undefined, 2)}\n`);
 };
 
-/**
- * A workspace called `repository` would make the two meanings of `governs`
- * indistinguishable. Reported once against the roster rather than per record,
- * because it is the roster that is wrong.
- */
 const rosterFindings = () =>
   WORKSPACES.has(REPOSITORY_SCOPE)
     ? [
@@ -235,15 +198,6 @@ const rosterFindings = () =>
       ]
     : [];
 
-/**
- * What the records themselves get wrong — everything `--write` cannot fix for
- * you, and so everything it must refuse on.
- *
- * Kept apart from the baseline's own findings because those two answer to
- * different commands. "Prune me" is a finding `--write` exists to act on, so
- * refusing on it would leave no command able to shrink the baseline; a record
- * with no `governs` block is a finding only its author can act on.
- */
 const recordContentFindings = ({ baseline, records }) => {
   const grandfathered = baselinedFiles(baseline);
   return [
@@ -269,35 +223,15 @@ const report = (findings, stale) => {
     console.error(`  - ${finding}`);
   }
   for (const home of stale) {
-    // The home's OWN spelling of the command, not this repository's. A consumer
-    // reading `vp run …` is being told to run something they do not have — the
-    // reason `registers.adrCommands` exists, and the reason the generated index
-    // already uses it. Pre-dates this change; corrected here because the
-    // adoption recipe added to the README in the same commit tells a consumer to
-    // run the other spelling. Through `commandsFor`, which carries the fallback
-    // for a home that declares none — `DEFAULT_REGISTERS`'s homes do not, which
-    // is every consumer with no config file at all.
     console.error(
       `  - ${home.dir}/${INDEX_FILE} is out of date — run \`${commandsFor(home).write}\``,
     );
   }
-  // The rule itself, not a pointer to this repository's copy of it: a path
-  // printed into a consumer's terminal is one they cannot open, and there is no
-  // link for anything to catch — it just quietly does not exist.
   console.error(
     `\nEvery ADR lives in one of the declared homes and takes the next free number, and one number names one ADR across all of them. The homes are \`registers.adrHomes\` in ${CONFIG_FILE_NAME}.`,
   );
 };
 
-/**
- * Adoption, refused over a baseline that is already there.
- *
- * The refusal stops the reflex of re-running `--adopt` to make a failing run go
- * away. It is not a claim that nothing can grandfather afresh — deleting the
- * file first is an ordinary thing to be able to do. What holds either way is
- * `adr-baseline.mjs`'s bound: at most `maxEntries` records escape the content
- * rules, whatever wrote the list.
- */
 const runAdopt = (records) => {
   if (existsSync(BASELINE_PATH)) {
     console.error(
@@ -313,28 +247,6 @@ const runAdopt = (records) => {
   );
 };
 
-/**
- * Prune-only. `--write` may drop an entry that no longer earns its place; it may
- * never absorb a new one.
- *
- * **It never exits 0 on a tree the plain run rejects.** This is the command the
- * gate NAMES — the staleness finding tells an author to run it, and
- * `registers.adrCommands.write` puts it in every generated index — so an author
- * who adds an unclassified record, is told the index is stale, runs the command
- * named and gets a clean exit has been told the record is fine, by the gate.
- *
- * It still does its work first, then reports: the index is regenerated and the
- * baseline pruned, and the record's own findings are printed with a non-zero
- * exit. Refusing to write instead would leave a stale index unfixable while any
- * record failed, which is a different job. `verify-docs-paths.mjs --write` splits
- * the same way, for the same reason.
- *
- * The exception is a STRUCTURAL finding — a malformed name, a stray — because
- * the index is generated from those names and would be written wrong. And a
- * baseline that has already grown is refused rather than rewritten: pruning it
- * would set the bound to whatever the grown list kept, which is exactly how a
- * hand-added entry would become a baseline the next run reports as clean.
- */
 const runWrite = (homes, records) => {
   const baseline = readBaseline();
   const structural = adrFindings({
@@ -361,10 +273,6 @@ const runWrite = (homes, records) => {
 
   const pruned = prunedBaseline({ baseline, records });
   const dropped = baseline.files.length - pruned.files.length;
-  // The bound is reported off its own comparison, not off `dropped`. A baseline
-  // whose list was shortened by hand has slack in it, so a run that prunes
-  // nothing still tightens the bound — and saying "unchanged" while rewriting
-  // the file is the one thing a gate's output must not do.
   const tightened = pruned.maxEntries !== baseline.maxEntries;
   if (existsSync(BASELINE_PATH)) {
     saveBaseline(pruned);
@@ -376,7 +284,6 @@ const runWrite = (homes, records) => {
   }
   writeIndexes(homes);
 
-  // Everything this command cannot fix for the author, after everything it can.
   const remaining = recordContentFindings({ baseline: pruned, records });
   if (remaining.length > 0) {
     report(remaining, []);
@@ -384,17 +291,6 @@ const runWrite = (homes, records) => {
   }
 };
 
-/**
- * `--package <name>` — `undefined` when the flag is absent, the empty string
- * when it is there with nothing usable after it. (pure)
- *
- * The two are different answers and must not collapse: reading a missing name as
- * "no filter" prints every record under no heading, which answers a question the
- * reader did not ask. A following `--flag` is treated as missing for the same
- * reason, since `--package --write` names no workspace either — as is
- * `--package=` with nothing after the equals. Both spellings of the flag are
- * matched, because the `=` form is a single argv entry.
- */
 const PACKAGE_FLAG = '--package';
 
 const packageArg = (argv) => {
@@ -404,8 +300,6 @@ const packageArg = (argv) => {
   if (at === -1) {
     return undefined;
   }
-  // `--package=ui` is one argv entry, so `indexOf` never saw it and the whole
-  // flag read as absent — the unasked-for full listing, with a clean exit.
   if (argv[at] !== PACKAGE_FLAG) {
     return argv[at].slice(PACKAGE_FLAG.length + 1);
   }
@@ -413,13 +307,6 @@ const packageArg = (argv) => {
   return value === undefined || value.startsWith('--') ? '' : value;
 };
 
-/**
- * How many records the listing cannot see.
- *
- * Printed under the tables because an empty one is ambiguous otherwise: "no
- * decision governs this package" and "every decision predates the block" read
- * the same, and only one of them is a fact about the package.
- */
 const unclassifiedCount = (homes) =>
   homes.reduce(
     (count, home) =>
@@ -496,16 +383,6 @@ const main = () => {
   console.log(
     `ADR gate passed: ${total} ADR(s) across ${homes.length} home(s); next free number is ADR-${pad(nextFreeNumber(homes))}.`,
   );
-  // Two counts, because they are two sets and they come apart on the very
-  // workflow this gate exists to invite. Adding `governs` to an old record is
-  // allowed while rewriting its body is not, so a record can be classified —
-  // visible to `--list --package` — and still grandfathered, because it still
-  // fails a section rule. One number reported as both was false on a green run.
-  //
-  // The bound is deliberately not printed. Every command that writes the
-  // baseline leaves it equal to the list's length, so on a clean run it cannot
-  // differ from the first count, and the one place it can — a list that has
-  // grown — is a finding that prints both.
   console.log(
     `${baseline.files.length} record(s) are grandfathered in ${BASELINE_REL} and exempt from the content rules; ${unclassifiedCount(homes)} carry no \`governs\` block, so \`--list --package\` cannot see those. A record can be in one set and not the other.`,
   );

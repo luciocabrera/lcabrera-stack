@@ -37,7 +37,6 @@ const ProviderShell = ({
   </VirtualListProvider>
 );
 
-// Window covering select-all (index 0) plus the three options.
 const fullWindowProps: VirtualListBodyOptionsProps = {
   endIndex: 4,
   offsetY: 0,

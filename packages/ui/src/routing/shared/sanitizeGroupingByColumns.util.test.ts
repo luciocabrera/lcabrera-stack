@@ -14,9 +14,6 @@ type Row = {
   readonly status: string;
 };
 
-// Spelled from `createActionsColumn`'s own flags rather than by hand, so this
-// suite reads the actions column the table actually builds — the point being
-// that this util refuses it through `isGroupable`, never through its key.
 const { isGroupable, isStatic } = createActionsColumn<Row>();
 
 const columns: TableColumn<Row>[] = [
@@ -99,8 +96,6 @@ describe('sanitizeGroupingByColumns', () => {
   });
 
   it('refuses the whole configuration when one key names no column', () => {
-    // `status` is legal and still goes: a partly-applied key list would run a
-    // query nobody described.
     expect(
       sanitizeGroupingByColumns({
         columns,
@@ -157,8 +152,6 @@ describe('sanitizeGroupingByColumns', () => {
   });
 
   it('refuses a key list past the depth cap while accepting the cap itself', () => {
-    // Every key here is legal on its own; the list is one too long. Truncating
-    // would group by a prefix of what the URL describes and say nothing.
     const declaredColumns: TableColumn<Record<string, unknown>>[] = Array.from(
       { length: MAX_TABLE_GROUP_KEYS + 1 },
       (_, index) => ({ key: `key_${index}`, label: `Key ${index}` }),
@@ -208,10 +201,6 @@ describe('sanitizeGroupingByColumns', () => {
   });
 
   it('refuses the whole configuration for a share on a non-additive one', () => {
-    // Whole-state refusal, like every other illegal member (ADR-061): a link
-    // promising a percentage column that silently does not appear is the
-    // failure that rule exists to avoid — and here the percentage it promised
-    // would have been wrong rather than merely missing (#648).
     expect(
       sanitizeGroupingByColumns({
         columns,
@@ -237,8 +226,6 @@ describe('sanitizeGroupingByColumns', () => {
   });
 
   it('refuses a share whose function the column does not carry', () => {
-    // The pair is the identity: `count(name)` is applied and `sum(name)` is not,
-    // so a share of the second names a measure the read will not produce (#831).
     expect(
       sanitizeGroupingByColumns({
         columns,
@@ -270,8 +257,6 @@ describe('sanitizeGroupingByColumns', () => {
   });
 
   it('refuses a repeated aggregate pair, as it refuses a repeated key', () => {
-    // The pair is an aggregate's identity, so a repeat gives the staged list two
-    // rows nothing can tell apart (#831).
     expect(
       sanitizeGroupingByColumns({
         columns,
@@ -287,11 +272,6 @@ describe('sanitizeGroupingByColumns', () => {
   });
 
   it('refuses a URL naming two countDistinct aggregates', () => {
-    // Not a duplicated pair and not an undeclared column — two individually
-    // legal aggregates the *read* cannot carry together, because
-    // `count(DISTINCT …)` re-sorts every group and the builder budgets one
-    // (#842). Refused here so the link states a refusal instead of making a
-    // round trip that ends in one.
     expect(
       sanitizeGroupingByColumns({
         columns,
@@ -307,9 +287,6 @@ describe('sanitizeGroupingByColumns', () => {
   });
 
   it('keeps a single countDistinct beside other aggregates', () => {
-    // The discriminating half: a rule counting aggregates rather than
-    // *distinct-count* ones would refuse this too, and one keyed on the column
-    // would have let the pair above through, since those name two columns.
     const applied = grouping({
       aggregates: [
         { columnKey: 'name', fn: 'countDistinct' },
@@ -325,9 +302,6 @@ describe('sanitizeGroupingByColumns', () => {
   });
 
   it('refuses a repeated share, as it refuses a repeated key', () => {
-    // Every reader downstream treats the shares as a set, so a duplicate makes
-    // the change detector compare a length against a set's size and report a
-    // change where there is none (#648).
     expect(
       sanitizeGroupingByColumns({
         columns,

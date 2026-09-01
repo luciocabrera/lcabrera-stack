@@ -14,8 +14,6 @@ describe('getInitialFocusState', () => {
   });
 
   it('starts the request id at zero, which is how a cell reads "not me"', () => {
-    // A cell answers `0` when it is not the target, so the initial value must
-    // be one no real request can ever take.
     expect(getInitialFocusState().focusRequestId).toBe(0);
   });
 

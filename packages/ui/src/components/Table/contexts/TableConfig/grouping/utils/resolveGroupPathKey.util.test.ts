@@ -22,7 +22,6 @@ describe('resolveGroupPathKey', () => {
   });
 
   it('keeps two paths distinct when a label contains the encoding characters', () => {
-    // A delimiter-joined key collides here; the JSON tuple does not.
     const first = resolveGroupPathKey([
       { columnKey: 'city', label: 'a","b', value: 'a","b' },
       { columnKey: 'status', label: 'c', value: 'c' },
@@ -36,14 +35,6 @@ describe('resolveGroupPathKey', () => {
   });
 
   it('ignores `value`, so a collapse stored before it existed still matches', () => {
-    // The compatibility guarantee #775 has to keep. Expansion is persisted
-    // under this string, so if `value` entered the encoding every stored
-    // collapse would stop matching its row and silently re-expand. Two entries
-    // differing only in `value` — including a NULL key, whose value and label
-    // disagree most — must encode identically.
-    // The NULL key is parsed rather than written as a literal — it is the
-    // shape a SQL NULL actually arrives in, and the case where value and label
-    // disagree most.
     const nullKey = JSON.parse(
       '{"columnKey":"status","label":"(empty)","value":null}',
     ) as TableGroupKeyValue;
@@ -60,7 +51,6 @@ describe('resolveGroupPathKey', () => {
   });
 
   it('still distinguishes two paths that differ only in label', () => {
-    // The other half: ignoring `value` must not make the encoding coarser.
     const first = resolveGroupPathKey([
       { columnKey: 'city', label: 'Paris', value: 1 },
     ]);
@@ -72,9 +62,6 @@ describe('resolveGroupPathKey', () => {
   });
 
   it('is the same encoding a rendered group row is keyed by', () => {
-    // The load-bearing agreement: expansion is stored under this key and the
-    // rendered row is identified by `resolveRowKey`, so a collapse could not be
-    // re-applied after a refetch if the two encodings drifted.
     const path = [{ columnKey: 'city', label: 'Paris', value: 'Paris' }];
     const rowKey = resolveRowKey({
       columns: [],

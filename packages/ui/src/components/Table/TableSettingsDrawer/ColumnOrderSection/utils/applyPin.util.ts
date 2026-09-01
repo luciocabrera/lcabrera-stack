@@ -23,7 +23,6 @@ export const applyPin = <TData>({
 
   if (side === 'left') {
     if (staticKeys) {
-      // Insert after static columns on left
       const lastStaticIndex = newPinning.left.findLastIndex((k) =>
         staticKeys.has(k),
       );
@@ -35,7 +34,6 @@ export const applyPin = <TData>({
   }
 
   if (staticKeys) {
-    // Insert before static columns on right
     const firstStaticIndex = newPinning.right.findIndex((k) =>
       staticKeys.has(k),
     );

@@ -3,10 +3,6 @@ import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableC
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 import { buildBatchTableSettingsUpdate } from './buildBatchTableSettingsUpdate.util';
 
-/**
- * The grouping draft is re-seeded here too, and that is what makes Cancel cancel a
- * grouping edit.
- */
 export const useResetTableSettings = () => {
   const { columnsStore, groupingStore } = useTableConfigContextValue();
   const {

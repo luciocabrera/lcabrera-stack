@@ -20,21 +20,19 @@
  *
  * Pure: callers hand in already-collected paths, so the traversal stays in the
  * CLI and this half needs no fixture tree.
+ *
+ * A prefix rule as well as a name set, because some tools accept a family of
+ * spellings — `.prettierrc`, `.prettierrc.json`, `.prettierrc.yaml` — that
+ * exact names cannot cover without listing every variant and still missing the
+ * next one.
  */
 
-/**
- * A prefix rule as well as a name set, because some tools accept a family of
- * spellings — `.prettierrc`, `.prettierrc.json`, `.prettierrc.yaml` — that a set
- * of exact names cannot cover without listing every variant and still missing
- * the next one.
- */
 export const isStrayConfig = ({ filename, unreadNames, unreadPrefixes }) =>
   unreadNames.includes(filename) ||
   unreadPrefixes.some((prefix) => filename.startsWith(prefix));
 
 const basename = (path) => path.slice(path.lastIndexOf('/') + 1);
 
-/** The offending entries among `paths`, in the order they were given. */
 export const strayConfigsIn = ({ paths, unreadNames, unreadPrefixes }) =>
   paths.filter((path) =>
     isStrayConfig({
@@ -44,14 +42,6 @@ export const strayConfigsIn = ({ paths, unreadNames, unreadPrefixes }) =>
     }),
   );
 
-/**
- * Why the gate cannot run, or undefined when it can.
- *
- * An empty roster is refused rather than passed. The gate would otherwise report
- * success having compared every file against nothing, which is indistinguishable
- * from a repository that is genuinely clean — and a consumer who wired the task
- * without configuring it would believe they were covered.
- */
 export const rosterProblem = ({ unreadNames, unreadPrefixes }) =>
   unreadNames.length === 0 && unreadPrefixes.length === 0
     ? 'gates.strayConfigs names no unread config files, so this gate would compare every file against an empty list. Declare `unreadNames` and/or `unreadPrefixes`, or drop the task.'

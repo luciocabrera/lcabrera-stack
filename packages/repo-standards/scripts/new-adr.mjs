@@ -44,11 +44,8 @@ const TIERS = ADR_HOMES.map((home) => home.tier);
 
 const USAGE = `usage: repo-adr "<title>" [--home ${TIERS.join('|')}] [--slug <slug>] [--dry-run]`;
 
-/** Argument parsing kept explicit rather than pulled from a library: this runs
- *  before install in a fresh worktree often enough to be worth the lines. */
 const parseArgs = (argv) => {
   const options = { dryRun: false, home: 'repo', slug: '', title: '' };
-  // `--` is how `vp run` ends its own options; it carries no meaning here.
   const rest = argv.filter((arg) => arg !== '--');
   while (rest.length > 0) {
     const arg = rest.shift();

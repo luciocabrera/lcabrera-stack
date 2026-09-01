@@ -38,7 +38,6 @@ export const fetchInitialFilterData = <TData, TResponse>({
       throw new Error(`Filter data not initialized for column: ${columnKey}`);
     }
 
-    // Skip if already loaded or currently loading.
     if (shouldSkipInitialFetch({ currentFilter })) {
       return;
     }

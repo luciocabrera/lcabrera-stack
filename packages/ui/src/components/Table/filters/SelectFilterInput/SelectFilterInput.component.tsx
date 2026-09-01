@@ -52,7 +52,6 @@ export const SelectFilterInput = <TData,>({
 
   const selectedValues = filter?.values ?? [];
 
-  // Map FilterData → VirtualListDataState (totalRows → totalCount)
   const dataState = {
     data: filterData.data,
     hasMore: filterData.hasMore,

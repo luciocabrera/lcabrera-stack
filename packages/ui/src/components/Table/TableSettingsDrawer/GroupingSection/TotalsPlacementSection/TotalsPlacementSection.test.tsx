@@ -53,8 +53,6 @@ describe('TotalsPlacementSection', () => {
   });
 
   it('renders nothing under flat, where there is no total to place', () => {
-    // `flat` emits one row per group and no subtotal at all, so the control
-    // would have nothing to position.
     useGetGroupingModeMock.mockReturnValue('flat');
 
     render(<TotalsPlacementSection />);

@@ -50,21 +50,6 @@ import {
 
 const STATUS_CONTEXT = 'Agent review verdict';
 
-/**
- * Every line this gate prints goes through one of these two.
- *
- * A runner reads a `::` directive at the **start of a log line**, so any value
- * that can introduce a newline can introduce a directive — and every value
- * printed below is untrusted: the validator's messages quote the verdict
- * document, and a caught error carries `gh`'s stderr.
- *
- * Routing the writes through one pair is the point. Flattening was added to the
- * success path first and the `catch` was missed, because the fix chased the
- * reported instance instead of enumerating the sinks; a new `console.` call is
- * now the thing to notice, and
- * `scripts/lib/agent-review-workflow.test.mjs` fails on one that does not use
- * these.
- */
 const printLine = (text) => {
   console.log(oneLine(text));
 };
@@ -73,7 +58,6 @@ const printProblem = (text) => {
   console.error(oneLine(text));
 };
 
-/** Runs `gh api --paginate --jq`, whose output is one JSON value per line. */
 const ghJsonLines = (path, jq) =>
   runGh(['api', '--paginate', path, '--jq', jq])
     .split('\n')
@@ -102,14 +86,6 @@ const readFiles = (repo, pr) =>
     '.[] | {filename: .filename, patch: .patch, changes: .changes}',
   );
 
-/**
- * Publishes the state as a commit status.
- *
- * The state is pinned to `success` during the advisory period — this check
- * cannot be the reason a merge is refused, and #698 is where that changes. A
- * token without `statuses: write` (a fork's pull request) is a warning, not a
- * failure: the state is already in the log and the job summary.
- */
 const postStatus = (repo, headSha, description) => {
   const target = process.env.GITHUB_RUN_ID
     ? `${process.env.GITHUB_SERVER_URL ?? 'https://github.com'}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}`
@@ -135,13 +111,6 @@ const postStatus = (repo, headSha, description) => {
   }
 };
 
-/**
- * Whether this description is worth posting over what the head already carries.
- *
- * Only consulted under `--if-changed`, which the reconcile sweep passes: a sweep
- * that re-posted an identical status every half hour would fill the timeline
- * with noise and make "the status moved" stop meaning anything.
- */
 const changedOnHead = (repo, headSha, description) =>
   shouldPublishStatus({
     current: publishedStatus(
@@ -153,7 +122,6 @@ const changedOnHead = (repo, headSha, description) =>
     next: { description, state: 'success' },
   });
 
-/** Appends the summary where the runner shows it, when there is one. */
 const writeSummary = async (markdown) => {
   const path = process.env.GITHUB_STEP_SUMMARY;
   if (path === undefined || path === '') {
@@ -163,11 +131,6 @@ const writeSummary = async (markdown) => {
   await appendFile(path, `${markdown}\n`, 'utf8');
 };
 
-/**
- * `--repo` first, matching `copilot-review-status.mjs`, so the reconcile sweep
- * can tell both gates which repository it listed instead of each one resolving
- * its own and agreeing by coincidence.
- */
 const resolveRepo = () =>
   parseRepository(
     flagValue('--repo') ??
@@ -182,11 +145,6 @@ const resolveRepo = () =>
       ]),
   );
 
-/**
- * Absent and malformed are different failures and now say different things.
- * "Pass `--pr <n>`" is the wrong advice for someone who passed `--pr '#738'` —
- * they did exactly that, and the old message sent them round the same loop.
- */
 const resolvePrNumber = () => {
   const raw = flagValue('--pr') ?? process.env.PR_NUMBER;
   if (raw === undefined || String(raw).trim() === '') {

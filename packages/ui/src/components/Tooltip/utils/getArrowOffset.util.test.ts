@@ -4,13 +4,12 @@ import { getArrowOffset } from './getArrowOffset.util';
 
 describe('getArrowOffset', () => {
   it('computes the arrow offset correctly', () => {
-    // triggerCenter - tooltipStart - HALF_ARROW (6)
     const result = getArrowOffset({
       placement: 'top',
       tooltipStart: 100,
       triggerCenter: 150,
     });
-    expect(result).toBe(150 - 100 - 6); // = 44
+    expect(result).toBe(150 - 100 - 6);
   });
 
   it('returns negative offset when triggerCenter is less than tooltipStart + HALF_ARROW', () => {
@@ -19,6 +18,6 @@ describe('getArrowOffset', () => {
       tooltipStart: 200,
       triggerCenter: 150,
     });
-    expect(result).toBe(150 - 200 - 6); // = -56
+    expect(result).toBe(150 - 200 - 6);
   });
 });

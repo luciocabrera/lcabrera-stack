@@ -10,9 +10,7 @@ type StartColumnResizeSessionArgs<TData> = {
   readonly currentWidth: number | undefined;
   readonly maxWidth?: number;
   readonly minWidth?: number;
-  /** Runs on mouse up only — not when the session is torn down by unmount */
   readonly onGestureEnd: () => void;
-  /** Runs on every teardown path: mouse up, unmount, or a superseding drag */
   readonly onSessionEnd: () => void;
   readonly setColumnWidth: (args: ColumnSizingArgs<TData>) => void;
   readonly syncColumnWidth: () => void;
@@ -37,7 +35,6 @@ export const startColumnResizeSession = <TData>({
   });
   const listenerController = new AbortController();
   let animationFrameId: number | undefined;
-  // The most recent width no frame has written to the store yet.
   let pendingWidth: number | undefined;
 
   const handleMouseMove = (moveEvent: MouseEvent) => {
@@ -46,7 +43,6 @@ export const startColumnResizeSession = <TData>({
       ...startData,
     });
 
-    // Keep only the latest pending frame so moves render at most once per frame
     if (animationFrameId !== undefined) {
       cancelAnimationFrame(animationFrameId);
     }
@@ -71,10 +67,6 @@ export const startColumnResizeSession = <TData>({
     endDragSession();
     onGestureEnd();
 
-    // `endDragSession` just cancelled any frame still in flight, so flush its
-    // width here. A quick drag delivers its last move and the release in the
-    // same frame, and would otherwise be discarded — leaving the column at the
-    // previous frame's width and persisting that instead of where it was let go.
     if (pendingWidth !== undefined) {
       setColumnWidth({ columnKey, width: pendingWidth });
     }
@@ -82,7 +74,6 @@ export const startColumnResizeSession = <TData>({
     syncColumnWidth();
   };
 
-  // Prevent text selection during drag
   document.body.style.userSelect = 'none';
   document.body.style.cursor = 'col-resize';
 

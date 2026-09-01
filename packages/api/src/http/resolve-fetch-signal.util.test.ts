@@ -34,8 +34,6 @@ describe('resolveFetchSignal', () => {
   });
 
   it('still honours the caller signal when a timeout is also given', () => {
-    // The regression this composition exists to prevent: passing only the
-    // timeout signal would leave the caller unable to cancel.
     const controller = new AbortController();
     const signal = resolveFetchSignal({
       signal: controller.signal,

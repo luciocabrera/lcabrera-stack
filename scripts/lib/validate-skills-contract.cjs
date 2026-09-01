@@ -21,7 +21,6 @@ const path = require('node:path');
 
 const REQUIRED_FRONTMATTER_FIELDS = ['name', 'description'];
 
-/** Directories under `.github/skills/` that are shared support, not skills. */
 const SUPPORT_DIRECTORIES = new Set(['code-smell-shared']);
 
 const SCRIPT_PATH_PATTERN =

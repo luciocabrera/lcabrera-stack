@@ -13,14 +13,6 @@ type ToAggregatableColumnOptionsArgs<TData extends Record<string, unknown>> = {
   readonly groupingKeys: readonly string[];
 };
 
-/**
- * The columns an aggregate may be applied to, as select options.
- * Which columns those are is `resolveOfferableAggregates`' answer and nothing this util
- * decides — the same call the column header menu builds its aggregation block from, so the
- * picker cannot drop a column the menu still offers functions on (#830).
- * Both conditions therefore live there: the catalogue's type legality (#550, ADR-058) and
- * the column being an active group key (ADR-080).
- */
 export const toAggregatableColumnOptions = <
   TData extends Record<string, unknown>,
 >({

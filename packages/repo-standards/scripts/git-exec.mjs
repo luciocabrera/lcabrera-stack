@@ -28,30 +28,14 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 
-/** Fixed, non-writable system directories — never the inherited PATH. */
 const TRUSTED_DIRECTORIES = ['/usr/local/bin', '/usr/bin', '/bin'];
 const TRUSTED_PATH = TRUSTED_DIRECTORIES.join(':');
 
-/**
- * The git binary as an absolute path from a fixed directory.
- *
- * Spawning the bare name `git` would have the OS resolve it through PATH, and
- * a writable directory earlier in that list could shadow the real binary
- * (Sonar S4036). Pinning PATH for the child mitigates what git itself then
- * spawns; naming the executable outright removes the lookup for this call
- * altogether. `undefined` when git is not installed, which callers already
- * handle as "no answer".
- */
 const gitBinary = () =>
   TRUSTED_DIRECTORIES.map((directory) => `${directory}/git`).find((path) =>
     existsSync(path),
   );
 
-/**
- * Every variable through which git can be told which repository to operate on.
- * `GIT_CEILING_DIRECTORIES` and `GIT_DISCOVERY_ACROSS_FILESYSTEM` are
- * deliberately absent: they only ever make discovery stricter.
- */
 export const GIT_REPOSITORY_VARIABLES = [
   'GIT_ALTERNATE_OBJECT_DIRECTORIES',
   'GIT_COMMON_DIR',
@@ -62,7 +46,6 @@ export const GIT_REPOSITORY_VARIABLES = [
   'GIT_WORK_TREE',
 ];
 
-/** A denylist, not an allowlist — git still needs HOME, the locale, and so on. */
 export const buildGitEnv = (env) => ({
   ...Object.fromEntries(
     Object.entries(env).filter(
@@ -72,11 +55,6 @@ export const buildGitEnv = (env) => ({
   PATH: TRUSTED_PATH,
 });
 
-/**
- * Trimmed stdout, or `undefined` when git fails for any reason — a missing
- * binary, a missing ref, no network. Callers decide what an absent answer
- * means; none of them should treat it as "nothing to report".
- */
 export const runGit = ({ args, cwd }) => {
   const binary = gitBinary();
   if (binary === undefined) {
@@ -95,16 +73,6 @@ export const runGit = ({ args, cwd }) => {
   }
 };
 
-/**
- * `{ status, stdout }` under the same environment discipline as `runGit`.
- *
- * Some git commands answer with their exit code rather than their output, and
- * for those `runGit`'s collapse of every failure to `undefined` loses the
- * answer: `check-ignore` exits 1 for "nothing matched" and 128 for a real
- * fault, and a caller that reads both as "nothing" reports an empty result
- * while git is actually broken. `status` is `null` only when git could not be
- * spawned at all, which no exit code can mean.
- */
 export const runGitStatus = ({ args, cwd }) => {
   const binary = gitBinary();
   if (binary === undefined) {

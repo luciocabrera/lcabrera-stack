@@ -26,10 +26,6 @@ export type DateFilter = {
   readonly value2?: string;
 };
 
-/**
- * Empty is SQL NULL and deliberately not the empty string; see the mirror of this type in
- * `@lcabrera/ui` for why.
- */
 export type EmptyFilter = {
   readonly operator: 'isEmpty' | 'isNotEmpty';
   readonly type: 'empty';
@@ -50,7 +46,7 @@ export type NumberFilter = {
 };
 
 export type SelectFilter = {
-  /** Defaults to `'equals'` if omitted. */
+  /** Defaults to `'equals'`. */
   readonly operator?: 'equals' | 'notEquals';
   readonly type: 'multiSelect' | 'select';
   /** Single value for `'select'`. */

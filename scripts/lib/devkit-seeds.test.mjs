@@ -51,28 +51,16 @@ describe('forbiddenWords', () => {
   });
 
   it('carries a workspace directory whose package name is spelled differently', () => {
-    // The two are independent strings: `packages/ui` publishes as
-    // `@lcabrera/ui`, and neither contains the other. Reading only the manifests
-    // leaves the directory unwatched — lifting `routes-data.md`'s exemption
-    // showed exactly that, with the gate reporting its three package-name lines
-    // and not its blueprint path (#860).
     expect(words).toContain('packages/ui');
     expect(words).toContain('apps/showcase');
   });
 
   it('carries the owner and the slug, which no manifest holds', () => {
-    // The list was first written believing the package name covered the slug
-    // and that an owner needed no entry. Both are false here — the manifest is
-    // named something else and no manifest holds the owner at all — so the
-    // commonest leak in a shipped markdown file, a
-    // `https://github.com/<owner>/<repo>/…` link, matched nothing and passed.
     expect(words).toContain('an-owner');
     expect(words).toContain('a-slug');
   });
 
   it('leaves the token every repository has', () => {
-    // A seed legitimately reads `secrets.GITHUB_TOKEN`; forbidding it would make
-    // the only portable way to authenticate a workflow a finding.
     expect(words).not.toContain('secrets.GITHUB_TOKEN');
   });
 });
@@ -90,9 +78,6 @@ describe('findingsIn', () => {
   });
 
   it('does not read the runner out of an ordinary word', () => {
-    // `vp` bounded by a trailing space, so prose about a `.vphrase` or a
-    // `vpn` is not a finding. Without the boundary the gate would report
-    // findings nobody can act on, and be ignored.
     expect(
       findingsIn({ content: 'a vpn and a vp.', path: 'a.md', words }),
     ).toEqual([]);
@@ -112,8 +97,6 @@ describe('reportFor', () => {
   });
 
   it('fails an exemption that covers nothing', () => {
-    // The failure this catches is silent: an exemption that outlived its reason
-    // goes on exempting whatever that file becomes next.
     const { reported, unused } = reportFor({ exemptions, findings: [] });
     expect(reported).toEqual([]);
     expect(unused).toEqual(exemptions);
@@ -134,10 +117,6 @@ describe('brokenPlaceholdersIn', () => {
   });
 
   it('reports the shape the formatter leaves behind', () => {
-    // The exact rewrite: the formatter reads an unquoted `{{…}}` in a workflow
-    // as a nested YAML flow mapping. The substituter's pattern then misses it,
-    // so the braces are written into the consumer's tree and `sync` calls the
-    // file materialised.
     expect(at('        run: { { commands.install } }')).toEqual([
       { line: 1, path: 'a.yml' },
     ]);
@@ -157,11 +136,6 @@ describe('inlinePlaceholdersIn', () => {
     inlinePlaceholdersIn({ content: line, path });
 
   it('reports a placeholder sharing its line with run:', () => {
-    // Substitution does not escape, so on a `run:` line the consumer's value
-    // lands inside a YAML scalar. A command with a quote in it — an ordinary
-    // thing to configure — ends the scalar early, GitHub refuses the whole
-    // workflow, and every job in it stops running while `sync` and `doctor` both
-    // report the file as fine.
     expect(at("        run: '{{commands.install}}'")).toEqual([
       { line: 1, path: 'workflows/check.yml' },
     ]);
@@ -179,8 +153,6 @@ describe('inlinePlaceholdersIn', () => {
   });
 
   it('leaves a non-YAML seed alone', () => {
-    // The hook seeds are shell, where a placeholder on its own line is exactly
-    // right and there is no scalar to break.
     expect(at('{{commands.check}}', 'hooks/pre-push')).toEqual([]);
   });
 });
@@ -195,12 +167,6 @@ describe('every exemption names where it is tracked', () => {
 
 describe('the seeded decision index', () => {
   it('is byte-identical to what the gate generates for a default home', () => {
-    // The home AND every count come from DEFAULT_REGISTERS, deliberately.
-    // This asset is what a repository with no config of its own receives, so it
-    // has to match what the gate renders THERE. Letting the count fall through
-    // to this repository's register would compare the seed against whatever
-    // `adrHomes` happens to hold here, and the seed would drift the day someone
-    // declared a second home locally.
     const seeded = readFileSync(
       join(REPO_ROOT, 'packages/devkit/assets/decisions/README.md'),
       'utf8',
@@ -225,9 +191,6 @@ describe('repositoryIdentity', () => {
     ].join('\n');
 
   it('reads the owner and name out of every remote spelling', () => {
-    // Taken as the last two path segments rather than by matching a host, so the
-    // SSH, HTTPS and ssh:// forms answer alike and a self-hosted forge answers
-    // too. Guessing one spelling would drop the owner silently on the others.
     for (const url of [
       'https://github.com/an-owner/a-slug.git',
       'https://github.com/an-owner/a-slug',
@@ -242,17 +205,11 @@ describe('repositoryIdentity', () => {
   });
 
   it('answers nothing when there is no origin, so the caller can refuse', () => {
-    // The caller turns this into a failure rather than an empty word list: a
-    // list missing the owner and slug reports a clean pass over the leak shape
-    // the gate exists to catch.
     expect(repositoryIdentity('[core]\n\tbare = false\n')).toBeUndefined();
     expect(repositoryIdentity(config('not-a-url'))).toBeUndefined();
   });
 
   it('does not read a url out of the section after origin', () => {
-    // Line by line, stopping at the next section header — otherwise a second
-    // remote listed below would answer for `origin` and the gate would forbid a
-    // name belonging to somewhere else entirely.
     const twoRemotes = [
       '[remote "origin"]',
       '\tfetch = +refs/heads/*:refs/remotes/origin/*',

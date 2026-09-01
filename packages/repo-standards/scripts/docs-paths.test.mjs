@@ -7,7 +7,6 @@ import {
   isRootAnchored,
 } from './docs-paths.mjs';
 
-/** A stand-in for whatever layout a consumer declares. */
 const REPO_ROOTS = [
   '.claude',
   '.github',
@@ -44,13 +43,11 @@ describe('isRootAnchored', () => {
   });
 
   it('rejects a bare name with no slash', () => {
-    // `packages` alone is prose, not a pointer at anything checkable.
     expect(isRootAnchored('packages', REPO_ROOTS)).toBe(false);
     expect(isRootAnchored('AGENTS.md', REPO_ROOTS)).toBe(false);
   });
 
   it('rejects globs, placeholders and regex-ish tokens', () => {
-    // The disqualifiers that keep teaching material out of the gate.
     expect(isRootAnchored('apps/*/config/**', REPO_ROOTS)).toBe(false);
     expect(isRootAnchored('.claude/rules/<topic>.md', REPO_ROOTS)).toBe(false);
     expect(isRootAnchored('packages/{ui,server}/src', REPO_ROOTS)).toBe(false);
@@ -77,10 +74,6 @@ describe('extractCandidates', () => {
   });
 
   it('enforces a relative link whatever the target extension', () => {
-    // The bug this covers: the filter asked for `.md`, so a relative link to a
-    // .tsx was never a candidate and could rot indefinitely (#756). Both
-    // spellings of the SAME dead pointer must be picked up, or the gate's
-    // verdict depends on the file type rather than on whether it resolves.
     expect(extractCandidates('[a](../../apps/x/Nope.tsx)', REPO_ROOTS)).toEqual(
       ['../../apps/x/Nope.tsx'],
     );
@@ -93,8 +86,6 @@ describe('extractCandidates', () => {
   });
 
   it('still ignores anchors, URLs and bare parenthesised prose', () => {
-    // The counterweight: widening to relative links must not start reporting
-    // things that were never paths, or the gate cries wolf and gets bypassed.
     expect(extractCandidates('[a](#section)', REPO_ROOTS)).toEqual([]);
     expect(
       extractCandidates('[a](https://example.com/x.tsx)', REPO_ROOTS),
@@ -108,8 +99,6 @@ describe('extractCandidates', () => {
   });
 
   it('ignores everything inside a fenced block', () => {
-    // Fenced blocks are examples; their paths are illustrative far more often
-    // than not, and including them was most of the original false-positive mass.
     const markdown = [
       'Real: `scripts/verify-docs-paths.mjs`',
       '```bash',
@@ -160,8 +149,6 @@ describe('extractCandidates', () => {
   });
 
   it('strips heading anchors and trailing sentence punctuation', () => {
-    // A path named mid-sentence keeps the comma or full stop attached, and a
-    // link may target a heading inside the file.
     const markdown =
       'Read `docs/README.md`, then `scripts/lib/labels.mjs`. Also [x](../a/b.md#why).';
 
@@ -199,7 +186,6 @@ describe('isDatedRecord', () => {
   it('does not treat an ordinary document as a dated record', () => {
     expect(isDatedRecord('docs/README.md')).toBe(false);
     expect(isDatedRecord('packages/ui/src/PATTERNS.md')).toBe(false);
-    // Guards the substring match: a path merely CONTAINING "decision".
     expect(isDatedRecord('docs/agents/decision-making.md')).toBe(false);
   });
 });
@@ -220,9 +206,6 @@ describe('enforcedTokens', () => {
   });
 
   it('still enforces a relative link inside an ADR', () => {
-    // Navigational: the reader is invited to follow it, so it resolves or it
-    // is dead. This is the case the old blanket exemption hid — four links
-    // broke when 20 ADRs moved up a directory level and nothing reported it.
     expect(
       enforcedTokens({
         docPath: adr,
@@ -233,8 +216,6 @@ describe('enforcedTokens', () => {
   });
 
   it('exempts a root-anchored path named inside an ADR', () => {
-    // Descriptive: the record of a package rename is where its old name
-    // belongs, so naming that path is its content, not a dead reference.
     expect(
       enforcedTokens({
         docPath: adr,

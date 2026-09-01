@@ -9,10 +9,6 @@ import type { ShareOfTotalToggleProps } from './ShareOfTotalToggle.types';
 import { useToggleGroupShare } from '../../../TableDrawerContext/actions';
 import { useGetGroupingShares } from '../../../TableDrawerContext/selectors';
 
-/**
- * Renders nothing where a share is not defined. The label names the
- * denominator (ADR-086), not the operation.
- */
 export const ShareOfTotalToggle = ({
   columnKey,
   fn,

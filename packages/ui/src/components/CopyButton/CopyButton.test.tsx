@@ -46,11 +46,6 @@ describe('CopyButton', () => {
   it('shows a confirmation label after copying, then reverts', async () => {
     render(<CopyButton label='Copy JSON' value='{"a":1}' />);
 
-    // Sonar flags this act() as redundant because fireEvent supplies its own.
-    // It is not: the label flips only once the clipboard promise resolves, and
-    // an `await act(async …)` is what flushes that microtask. `findByRole`
-    // cannot substitute — this suite runs on fake timers, so waitFor's polling
-    // never advances and the query times out.
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Copy JSON' }));
     });

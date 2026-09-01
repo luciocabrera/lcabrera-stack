@@ -30,7 +30,6 @@ const publishedPackageDirectories = () =>
     .filter((relative) => isPublished(resolve(REPO_ROOT, relative)))
     .map((relative) => dirname(relative));
 
-// A directory has no extension either, so glob hits must be narrowed to files.
 const filesIn = (directory) =>
   globSync(`${directory}/**/*`, {
     cwd: REPO_ROOT,
@@ -41,7 +40,6 @@ const filesIn = (directory) =>
 
 const main = () => {
   const directories = publishedPackageDirectories();
-  // A run that walked nothing must not report the same success as a clean tree.
   if (directories.length === 0) {
     throw new Error(
       'found no published packages under packages/ — check the glob.',

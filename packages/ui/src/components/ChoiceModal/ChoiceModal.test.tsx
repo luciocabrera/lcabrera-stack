@@ -30,9 +30,7 @@ const dialogMocksRef: {
   };
 } = {
   current: {
-    restoreMockDialog: () => {
-      // no-op before setup
-    },
+    restoreMockDialog: () => {},
   },
 };
 

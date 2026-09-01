@@ -12,9 +12,6 @@ const createInitialColumnsState = () => {
     columnOrder: ['id', 'name', 'age'],
     columnPinning: { left: ['id'], right: [] },
     columns: [
-      // Declared static as well as listed in `staticKeys` below — the two are
-      // the same fact, and the fixture asserting only one of them is what let
-      // a measure of a static column reach the write path unnoticed.
       { isStatic: true, key: 'id', label: 'ID' },
       { isStatic: false, key: 'name', label: 'Name' },
       { isStatic: false, key: 'age', label: 'Age' },
@@ -149,13 +146,6 @@ describe('hiding a measure column', () => {
   });
 
   it('hides the column it measures, so the drawer can bring it back', () => {
-    // Writing the derived key here was a trap state: `columnVisibility` is
-    // persisted to the layout cookie, but the settings drawer lists the
-    // **declared** columns, so nothing in the UI could remove `amount:avg`
-    // again except the blanket "Clear Visibility & Pinning" — which discards
-    // every other hidden column and every pin with it. Symmetric with
-    // `useSetColumnPinning`, and it is what `toDeclaredColumnKey`'s own rule
-    // says: the layout state stays declared-only.
     const { result } = renderHook(() =>
       useSetColumnVisibility<Record<string, unknown>>(),
     );
@@ -192,12 +182,6 @@ describe('hiding a measure of a static column', () => {
   });
 
   it('refuses, because the guard runs on the column actually being written', () => {
-    // `staticKeys` is built from the **declared** columns, so it can never
-    // hold `amount:avg` — guarding on the raw key let a measure walk straight
-    // past a lock that `useSetColumnPinning` enforces, because its guard sits
-    // downstream of the same mapping. The write then hid `amount` itself, a
-    // column the consumer marked unhideable, and the drawer does not list
-    // static columns — so only "Clear Visibility & Pinning" got it back.
     const { result } = renderHook(() =>
       useSetColumnVisibility<Record<string, unknown>>(),
     );

@@ -46,8 +46,6 @@ const reportFindings = (findings) => {
   console.error('change that moved it — there is nothing to baseline here.');
 };
 
-/** How many `met` requirements have a command pointer CI runs. Reported so the
- *  success line names what was checked instead of implying more. */
 const backedCount = (requirements, ciCommands) =>
   requirements.filter(
     (entry) =>
@@ -66,9 +64,6 @@ const main = () => {
     return;
   }
   const { ciCommands, planning, requirements } = registers;
-  // Drafts are reported rather than left implicit: a reader has to be able to
-  // see that files were skipped, or an exclusion that grew too wide would look
-  // exactly like a register with nothing wrong in it.
   const checked = planning.filter(carriesPlanningBlock);
   console.log(
     `Doc registers hold: ${requirements.length} requirement(s), ` +

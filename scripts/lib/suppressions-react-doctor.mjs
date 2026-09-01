@@ -21,16 +21,8 @@
 
 import { globMatches } from './suppressions.mjs';
 
-/** A severity that stops a finding failing the gate. */
 const WEAK_LEVELS = new Set(['off', 'warn']);
 
-/**
- * Config keys that silence globally, with the label each row reports under.
- *
- * All four reach every scanned project, the public packages included, so they
- * are repo-wide policy by construction — there is no glob that could scope one
- * to a single package. They land in the register's `acknowledged` list.
- */
 const GLOBAL_SOURCES = [
   { label: 'rule', pick: (config) => weakKeys(config.rules) },
   { label: 'category', pick: (config) => weakKeys(config.categories) },
@@ -39,21 +31,11 @@ const GLOBAL_SOURCES = [
   { label: 'ignored tag', pick: (config) => config.ignore?.tags ?? [] },
 ];
 
-/** Keys of a `{ rule: severity }` map whose severity is below `error`. */
 const weakKeys = (entries) =>
   Object.entries(entries ?? {})
     .filter(([, level]) => WEAK_LEVELS.has(level))
     .map(([name]) => name);
 
-/**
- * Every path a glob in this config could be written against.
- *
- * React Doctor scans each detected project separately and reports paths
- * relative to THAT project, not to the repo root — `packages/ui` is its own
- * project, so a rule silenced for `src/components/**` there is written without
- * the `packages/ui/` prefix. Matching only the repo-relative form silently
- * misses precisely the entries this gate exists to catch, so both are tried.
- */
 const candidatePaths = ({ path, projectDirs }) => [
   path,
   ...projectDirs
@@ -68,13 +50,6 @@ const globHits = ({ glob, paths, projectDirs }) =>
     ),
   );
 
-/**
- * One row per (glob, rule) pair that reaches a public package.
- *
- * `scope` follows the same rule as the Biome detector: a glob that also matches
- * something outside the public packages is repo-wide policy, and one that does
- * not is that package opting out — the strictest lane.
- */
 const globRows = ({ context, globs, kind, rules }) =>
   globs.flatMap((glob) => {
     const hits = globHits({
@@ -98,13 +73,6 @@ const globRows = ({ context, globs, kind, rules }) =>
     }));
   });
 
-/**
- * Every config-level React Doctor suppression that reaches a public package.
- *
- * `ignore.files` is folded in with a rule of `(all rules)` because excluding a
- * file from scanning is the widest suppression available here — wider than any
- * named rule — and would otherwise be the one mechanism with no row at all.
- */
 export const findReactDoctorSuppressions = ({
   config,
   otherFiles,

@@ -3,10 +3,6 @@ type MergeObjectsArgs<T extends object> = {
   readonly overrideValue?: Partial<T>;
 };
 
-/**
- * Shallow merges two optional objects while preserving undefined when both are
- * undefined.
- */
 export const mergeObjects = <T extends object>({
   baseValue,
   overrideValue,

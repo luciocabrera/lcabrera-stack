@@ -22,8 +22,6 @@ export const getFilteredOptions = ({
 
   if (listFilterMode === 'all') return result;
 
-  // Built once per call, not once per option: this runs from useSetSearchTerm
-  // on every keystroke, over a list large enough to be virtualized.
   const selected = new Set(selectedValues);
 
   return listFilterMode === 'selected'

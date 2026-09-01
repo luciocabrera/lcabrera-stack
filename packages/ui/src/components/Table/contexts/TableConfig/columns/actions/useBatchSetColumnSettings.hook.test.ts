@@ -320,12 +320,11 @@ describe('useBatchSetColumnSettings', () => {
   });
 
   it('does not set isLoading when only UI-only changes occur (column width, pinning)', () => {
-    // Mock resolved update with same filters/sorting (UI-only changes)
     mockResolveBatchColumnSettingsUpdate.mockReturnValue({
       columnFilters: {},
-      columnOrder: ['id', 'age', 'name'], // Changed order
-      columnPinning: { left: ['id'], right: ['name'] }, // Changed pinning
-      columnSizing: { actions: 0, age: 80, id: 100, name: 220 }, // Changed size
+      columnOrder: ['id', 'age', 'name'],
+      columnPinning: { left: ['id'], right: ['name'] },
+      columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
       effectiveColumns: [
         { key: 'id', label: 'ID' },
         { key: 'age', label: 'Age' },
@@ -354,7 +353,7 @@ describe('useBatchSetColumnSettings', () => {
         leftPinnedCols: [{ key: 'id', label: 'ID' }],
         rightPinnedCols: [{ key: 'name', label: 'Name' }],
       },
-      sorting: [], // Same as current state (empty)
+      sorting: [],
     } as unknown as Parameters<
       typeof mockResolveBatchColumnSettingsUpdate.mockReturnValue
     >[0]);
@@ -375,7 +374,6 @@ describe('useBatchSetColumnSettings', () => {
       });
     });
 
-    // isLoading should NOT be set when only UI changes occur
     expect(mockDataStore.set).not.toHaveBeenCalled();
     expect(mockPersistTableState).toHaveBeenCalledTimes(1);
     expect(mockColumnsStore.set).toHaveBeenCalledWith(
@@ -384,7 +382,6 @@ describe('useBatchSetColumnSettings', () => {
   });
 
   it('sets isLoading when query-affecting changes occur (filters or sorting)', () => {
-    // Mock resolved update with different sorting (query-affecting change)
     mockResolveBatchColumnSettingsUpdate.mockReturnValue({
       columnFilters: {
         name: {
@@ -424,7 +421,7 @@ describe('useBatchSetColumnSettings', () => {
         leftPinnedCols: [{ key: 'id', label: 'ID' }],
         rightPinnedCols: [{ key: 'name', label: 'Name' }],
       },
-      sorting: [{ columnKey: 'name', direction: 'desc' }], // Different from current state (was empty)
+      sorting: [{ columnKey: 'name', direction: 'desc' }],
     });
 
     const { result } = renderHook(() =>
@@ -442,7 +439,6 @@ describe('useBatchSetColumnSettings', () => {
       });
     });
 
-    // isLoading SHOULD be set when query-affecting changes occur
     expect(mockDataStore.set).toHaveBeenCalledWith({
       isLoading: true,
     });

@@ -49,7 +49,6 @@ const findScripts = (directory) =>
 const main = () => {
   const scripts = findScripts(REPO_ROOT);
 
-  // Every offender, not the first: the same rule asks for that too.
   const offences = scripts.flatMap((file) => {
     const source = readFileSync(join(REPO_ROOT, file), 'utf8');
 

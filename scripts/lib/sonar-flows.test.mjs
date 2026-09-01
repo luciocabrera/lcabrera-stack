@@ -71,8 +71,6 @@ describe('normalizeFlows', () => {
   });
 
   it('nulls a missing file rather than throwing out of the whole report', () => {
-    // relPath calls String.startsWith, so an unguarded absent component takes
-    // down every sonar-report run, the sonar-issue-gate job included.
     expect(
       normalizeFlows(
         [{ locations: [{ textRange: { startLine: 3 }, msg: 'step' }] }],

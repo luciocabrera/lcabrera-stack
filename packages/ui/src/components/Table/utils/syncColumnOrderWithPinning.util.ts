@@ -25,11 +25,9 @@ export const syncColumnOrderWithPinning = <TData>({
   newPinning,
   previousPinning,
 }: SyncColumnOrderWithPinningArgs<TData>) => {
-  // Build base order: use currentOrder if populated, otherwise derive from columns
   const baseOrder =
     currentOrder.length > 0 ? currentOrder : columns.map((c) => c.key);
 
-  // Remove the column from its current position
   const orderWithoutColumn = baseOrder.filter((k) => k !== columnKey);
 
   if (columnPinning === undefined) {

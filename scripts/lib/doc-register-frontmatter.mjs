@@ -19,14 +19,12 @@
 
 const QUOTES = new Set(["'", '"']);
 
-/** Strips one matching pair of surrounding quotes. */
 const unquote = (value) => {
   const first = value.slice(0, 1);
   const quoted = QUOTES.has(first) && value.length > 1 && value.endsWith(first);
   return quoted ? value.slice(1, -1) : value;
 };
 
-/** `[a, 'b']` → `['a', 'b']`. Trailing commas and spacing are tolerated. */
 const parseFlowList = (value) =>
   value
     .slice(1, -1)
@@ -34,11 +32,6 @@ const parseFlowList = (value) =>
     .map((item) => unquote(item.trim()))
     .filter((item) => item !== '');
 
-/**
- * `key: value` → `{ key, value }`, or undefined when the text is not a pair.
- * Split on the FIRST colon with `indexOf`, so `ref: vp run docs:verify` keeps
- * its own colons and no regex backtracks over a long line.
- */
 const readPair = (text) => {
   const colon = text.indexOf(':');
   if (colon <= 0) {
@@ -50,8 +43,6 @@ const readPair = (text) => {
     : undefined;
 };
 
-/** The value a `key:` line declares — a string, a list, or `undefined` when the
- *  line opens a block that the following lines fill in. */
 const scalarOrFlow = (value, line, errors) => {
   if (value === '') {
     return undefined;
@@ -68,7 +59,6 @@ const scalarOrFlow = (value, line, errors) => {
 
 const indentOf = (line) => line.length - line.trimStart().length;
 
-/** Splits the `---` block off the top of a document, or undefined if absent. */
 const frontmatterBlock = (source) => {
   if (!source.startsWith('---\n')) {
     return undefined;
@@ -77,8 +67,6 @@ const frontmatterBlock = (source) => {
   return end === -1 ? undefined : source.slice(4, end);
 };
 
-/** Everything after the frontmatter — the prose the body rules are about. A
- *  document with no block is all body. */
 export const bodyOf = (source) => {
   if (!source.startsWith('---\n')) {
     return source;
@@ -87,8 +75,6 @@ export const bodyOf = (source) => {
   return end === -1 ? source : source.slice(source.indexOf('\n', end + 1) + 1);
 };
 
-/** Appends a value to the block the last `key:` line opened. A key that opened
- *  one holds `[]` from that moment, so there is always a list to append to. */
 const pushItem = (state, value, line) => {
   if (state.key === undefined) {
     state.errors.push(`line ${line}: list item outside any field`);
@@ -97,7 +83,6 @@ const pushItem = (state, value, line) => {
   state.fields[state.key].push(value);
 };
 
-/** A `- ` item: either a scalar or the first key of a map item. */
 const readListItem = (state, text, line) => {
   const pair = readPair(text);
   if (pair === undefined) {
@@ -109,7 +94,6 @@ const readListItem = (state, text, line) => {
   pushItem(state, state.map, line);
 };
 
-/** A line indented past the `- ` that opened a map item: another of its keys. */
 const readMapKey = (state, text, line) => {
   const pair = readPair(text);
   if (state.map === undefined || pair === undefined) {
@@ -131,14 +115,6 @@ const readTopLevel = (state, text, line) => {
   state.map = undefined;
 };
 
-/**
- * Parses a document's frontmatter into `{ fields, errors }`, or returns
- * undefined when the document opens with no `---` block at all. `fields` maps
- * each key to a string, a list of strings, or a list of maps; a key whose block
- * turns out to be empty reads as `[]`, which is how `requires: []` and a
- * `requires:` with no items below it stay indistinguishable — they mean the
- * same thing.
- */
 export const parseFrontmatter = (source) => {
   const block = frontmatterBlock(source);
   if (block === undefined) {

@@ -34,12 +34,6 @@ const components: Components = {
   ul: (props) => <ul {...props} {...stylex.props(styles.list)} />,
 };
 
-/**
- * Renders LLM-authored Markdown (scan reports) as sanitized HTML — safe by
- * default: `react-markdown` never interprets raw HTML embedded in the
- * source text unless the `rehype-raw` plugin is added, which this
- * deliberately omits, so no separate sanitizer is needed on top.
- */
 export const MarkdownRenderer = ({ content }: MarkdownRendererProps) => (
   <div {...stylex.props(styles.container)}>
     <Markdown components={components}>{content}</Markdown>

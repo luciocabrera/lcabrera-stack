@@ -19,7 +19,6 @@ type Row = Record<string, unknown>;
 
 const SIZES = [10, 30, 150, 1000, 10_000] as const;
 
-/** Consumed so V8 cannot delete the allocation under test. */
 const sink = { total: 0 };
 
 const buildColumns = (size: number): readonly TableColumn<Row>[] =>
@@ -95,11 +94,6 @@ for (const size of SIZES) {
     });
   });
 
-  // ---- AddSortSection options — filter(nested every).map() -----------------
-  // Transcribed from AddSortSection.component.tsx: the expression is inline in
-  // the component, so it cannot be imported. The nested `sorting.every` is the
-  // point — it makes the filter O(columns x sorting), which is the term the
-  // react-doctor suggestion does not touch.
   const sorting: SortingState<Row> = Array.from(
     { length: Math.min(5, size) },
     (_, index) => ({ columnKey: `col_${index}`, direction: 'asc' as const }),
@@ -140,8 +134,6 @@ for (const size of SIZES) {
     });
   });
 
-  // ---- useAddFilterSection options — filter().map() with Object.hasOwn -----
-  // Transcribed from useAddFilterSection.hook.ts for the same reason.
   const activeFilters: Record<string, unknown> = Object.fromEntries(
     Array.from({ length: Math.min(3, size) }, (_, i) => [`col_${i}`, {}]),
   );

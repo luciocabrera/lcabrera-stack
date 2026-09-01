@@ -128,8 +128,6 @@ describe('VirtualSelect meta hooks', () => {
       .result.current;
     closeDropdown();
 
-    // Not routed through the toggle: a toggle no-ops while the list is busy,
-    // so a dismissal expressed as one would silently do nothing.
     expect(onCloseDropdown).toHaveBeenCalledTimes(1);
     expect(onToggleDropdown).not.toHaveBeenCalled();
   });

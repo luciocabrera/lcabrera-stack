@@ -21,10 +21,6 @@ type ResolveGridFocusContextArgs<TData extends Record<string, unknown>> = {
   readonly metaState: TableMetaState;
 };
 
-/**
- * Collapsing changes the index space the grid navigates, which is exactly why focus is
- * keyed by row identity and re-resolved here on every move (ADR-062, ADR-067).
- */
 export const resolveGridFocusContext = <TData extends Record<string, unknown>>({
   columnsState,
   dataState,

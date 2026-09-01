@@ -66,9 +66,6 @@ beforeEach(() => {
 });
 
 describe('enterprise-orders loader', () => {
-  // Single-fetch serialization silently replaces functions with undefined on
-  // the client (SingleFetchFallback), so everything the loader returns —
-  // including the descriptor-bearing columns — must be function-free.
   it('returns fully serializable columnsState (columns included) and metaState', async () => {
     const result = await invokeLoader();
 
@@ -120,8 +117,6 @@ describe('enterprise-orders loader', () => {
     expect(orderId?.filterOptionsDescriptor).toBeUndefined();
   });
 
-  // The route's whole grouping opt-in is `isGroupingEnabled: true` on its
-  // loader meta (ADR-063). Everything below is a consequence of that one flag.
   describe('grouping', () => {
     it('declares the capability so the table offers grouping at all', async () => {
       const { metaState } = await invokeLoader();
@@ -130,8 +125,6 @@ describe('enterprise-orders loader', () => {
     });
 
     it('applies a group key from the URL, so a shared link restores it', async () => {
-      // A cold Request with nothing but the URL — the fresh-tab case: no
-      // cookies, no client state, no prior navigation.
       const result = await invokeLoader(
         groupingSearch('{"keys":["order_status"]}'),
       );
@@ -166,8 +159,6 @@ describe('enterprise-orders loader', () => {
         groupingSearch('{"keys":["internal_notes"]}'),
       );
 
-      // A real column of the table, but not one the list view renders — so it
-      // is not a key this route can offer, and the whole grouping is dropped.
       expect(result.metaState.groupingKeys).toEqual([]);
     });
 
@@ -212,8 +203,6 @@ describe('enterprise-orders loader', () => {
     });
 
     it('refuses a key list past the configured depth', async () => {
-      // Five real, groupable columns of this route — so the refusal is the cap
-      // and nothing else about them.
       const result = await invokeLoader(
         groupingSearch(
           '{"keys":["order_status","shipping_country","priority","carrier","payment_status"]}',
@@ -245,8 +234,6 @@ describe('enterprise-orders loader', () => {
     });
 
     it('applies two aggregates on one column from the URL', async () => {
-      // The whole point of #831, through the route's real loader: the param
-      // carries both and the grouped read is issued for both.
       const result = await invokeLoader(
         groupingSearch(
           '{"agg":["total_amount:sum","total_amount:avg"],"keys":["order_status"]}',
@@ -272,8 +259,6 @@ describe('enterprise-orders loader', () => {
     it('ships the catalogue capabilities so the aggregate menu can be built', async () => {
       const result = await invokeLoader();
 
-      // `total_amount` is a `numeric` this route declares as `dataType:
-      // 'currency'`; the menu it drives is the catalogue's answer, not that one.
       expect(
         result.metaState.groupingCapabilities?.total_amount?.aggregates,
       ).toEqual(['avg', 'sum']);

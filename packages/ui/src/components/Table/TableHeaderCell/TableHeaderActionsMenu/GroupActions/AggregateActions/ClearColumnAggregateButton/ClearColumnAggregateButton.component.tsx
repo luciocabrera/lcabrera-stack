@@ -11,14 +11,6 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 
 import type { ClearColumnAggregateButtonProps } from './ClearColumnAggregateButton.types';
 
-/**
- * It **does** take a `columnKey`, unlike `ClearGroupingButton` beside it, and the
- * difference is not an oversight: an aggregate belongs to one column, so clearing is a
- * question about that column, where clearing grouping is a whole-table action that asks
- * about none.
- * `target: undefined` is `deriveAggregateCommandState`'s clear command, so "is there
- * anything to clear" is answered there rather than restated here.
- */
 export const ClearColumnAggregateButton = ({
   columnKey,
   onClose,

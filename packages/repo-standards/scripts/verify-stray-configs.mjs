@@ -33,7 +33,6 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 
-/** Every file under the repository, as a root-relative POSIX path. */
 const walk = ({ directory, prefix = '', skipped }) =>
   readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = prefix === '' ? entry.name : `${prefix}/${entry.name}`;

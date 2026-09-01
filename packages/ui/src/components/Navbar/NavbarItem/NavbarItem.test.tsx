@@ -24,8 +24,6 @@ type MockNavLinkProps = {
 };
 
 const MockButton = vi.hoisted(() => {
-  // Mirrors the real Button, which renders disabled={isDisabled || isBusy}.
-  // A stub that drops them silently makes disabled-state assertions vacuous.
   return function MockButton({
     'aria-label': ariaLabel,
     children,

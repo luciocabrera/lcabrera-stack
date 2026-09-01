@@ -25,7 +25,6 @@ export const GroupingSectionToolbar = ({
   const clearGrouping = useClearGrouping();
   const resetGrouping = useResetGrouping();
 
-  // Clearing is the largest edit of all, so the lock reaches it first (#578).
   if (isGroupingLocked) return;
 
   const buttons: readonly SectionToolbarButton[] = [

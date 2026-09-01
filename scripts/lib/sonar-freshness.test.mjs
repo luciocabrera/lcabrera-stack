@@ -8,13 +8,6 @@ import {
   isStale,
 } from './sonar-freshness.mjs';
 
-// The case these assertions exist for: on 2026-07-21 `sonar:report` printed
-// `quality gate: OK` from an analysis that had run on 2026-07-11, because
-// SonarCloud had been rejecting analyses for ten days. Nothing in the output
-// distinguished that from a fresh pass. The most important assertions here are
-// therefore the ones about an UNKNOWN age — "we could not tell" must never
-// render as "fine".
-
 const NOW = Date.parse('2026-07-21T12:00:00Z');
 const ago = (ms) => new Date(NOW - ms).toISOString();
 
@@ -34,8 +27,6 @@ describe('analysisAgeMs', () => {
   });
 
   it('clamps a future analysis to zero rather than a negative age', () => {
-    // Clock skew between the runner and SonarCloud would otherwise render as
-    // "-5 minutes ago", which reads as a bug in the tool rather than the clock.
     expect(analysisAgeMs(new Date(NOW + 5 * MINUTE).toISOString(), NOW)).toBe(
       0,
     );
@@ -73,7 +64,6 @@ describe('isStale', () => {
   });
 
   it('treats an unknown age as stale', () => {
-    // The load-bearing one: an unknown age must not be reported as fresh.
     expect(isStale(null)).toBe(true);
     expect(isStale(null, 9999)).toBe(true);
   });

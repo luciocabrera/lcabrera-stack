@@ -18,8 +18,6 @@ describe('addedLines', () => {
   });
 
   it('does not record a context line', () => {
-    // §2.4 step 5: a context line is code this change did not introduce, and
-    // §3 forbids blocking on that — so admitting one would break the anchor.
     const added = addedLines(PATCH);
     expect(added.has(1)).toBe(false);
     expect(added.has(4)).toBe(false);
@@ -63,7 +61,6 @@ describe('diffIndex', () => {
   });
 
   it('marks a changed file whose patch GitHub withheld as unreadable', () => {
-    // Failing open here would admit any line number in a large or binary file.
     const index = diffIndex([{ changes: 9000, filename: 'huge.json' }]);
     expect(index.unreadable.has('huge.json')).toBe(true);
     expect(isAddedLine(index, 'huge.json', 1)).toBe(false);

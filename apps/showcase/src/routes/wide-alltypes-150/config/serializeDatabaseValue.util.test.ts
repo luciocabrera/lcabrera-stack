@@ -20,9 +20,6 @@ describe('serializeDatabaseValue', () => {
   });
 
   it('renders a date column as a quoted JSON string, as this table always has', () => {
-    // Deliberately preserved rather than corrected: this is what every page of
-    // this grid has displayed for its date/timestamp columns. See the util's
-    // header for why.
     expect(serializeDatabaseValue(new Date('2020-01-01T23:00:00.000Z'))).toBe(
       '"2020-01-01T23:00:00.000Z"',
     );
@@ -36,10 +33,6 @@ describe('serializeDatabaseValue', () => {
     expect(serializeDatabaseValue('vchar_7_1')).toBe('vchar_7_1');
     expect(serializeDatabaseValue(12)).toBe(12);
     expect(serializeDatabaseValue(false)).toBe(false);
-    // Parsed rather than written as a literal: a NULL column is what the driver
-    // hands back for every nullable column of this table, and it must not fall
-    // into the `typeof value === 'object'` branch and become the string
-    // `"null"`.
     expect(serializeDatabaseValue(JSON.parse('null'))).toBeNull();
   });
 });

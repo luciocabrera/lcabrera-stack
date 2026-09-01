@@ -3,15 +3,12 @@
  *
  * taze writes the version bare; corepack adds the `+sha…`. Neither exit code
  * says what the field holds, so read the field. Background: #927.
+ *
+ * The pin pattern's name excludes `@` so the split point is unambiguous, and
+ * its version excludes `+` so the hash cannot be swallowed into it. No nested
+ * quantifier, which is what keeps this off Sonar's backtracking rule (S8786).
  */
 
-/**
- * `name@version` with corepack's optional `+algorithm.digest` suffix.
- *
- * The name excludes `@` so the split point is unambiguous, and the version
- * excludes `+` so the hash cannot be swallowed into it. No nested quantifier,
- * which is what keeps this off Sonar's backtracking rule (S8786).
- */
 const PIN_PATTERN =
   /^(?<name>[^@\s]+)@(?<version>[^+\s]+)(?:\+(?<algorithm>[a-z0-9]+)\.(?<digest>[a-f0-9]+))?$/u;
 
@@ -47,8 +44,6 @@ export const parsePackageManagerPin = (value) => {
 export const hasIntegrityHash = (value) => {
   const pin = parsePackageManagerPin(value);
 
-  // Both halves arrive together or not at all — the pattern cannot match one
-  // without the other — so this asserts the pair rather than either alone.
   return Boolean(pin?.algorithm && pin.digest);
 };
 

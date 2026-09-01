@@ -52,9 +52,6 @@ describe('resolveConventions', () => {
     );
   });
 
-  // The gates print a single line, so `Unexpected end of JSON input` on its own
-  // would leave a reader with nothing to open. Asserted for every block, since
-  // which one a consumer reaches first depends only on which gate they ran.
   it('names the file when the config is not valid JSON at all', () => {
     for (const resolve of [
       resolveConventions,
@@ -83,8 +80,6 @@ describe('resolveRegisters', () => {
       resolveRegisters(JSON.stringify({ registers: { adrHomes: homes } }))
         .adrHomes,
     ).toEqual(
-      // Every home carries the repository's command spellings, because the index
-      // renderer takes a home and nothing else.
       homes.map((home) => ({ ...home, commands: DEFAULT_ADR_COMMANDS })),
     );
   });
@@ -153,9 +148,6 @@ describe('containment of the configured locations', () => {
     expect(() => tasksDir('/tmp/claims')).toThrow(/must be relative/);
   });
 
-  // One spelling per location: these values are compared as strings, not only
-  // joined onto a root. An ADR home spelled `docs/decisions/` matched nothing
-  // in the stray check, so every ADR in it was reported as a stray.
   it('canonicalises the spellings that would otherwise fail to match', () => {
     expect(tasksDir('docs/coordination/tasks/')).toBe(
       'docs/coordination/tasks',
@@ -166,10 +158,6 @@ describe('containment of the configured locations', () => {
     expect(tasksDir(String.raw`ops\claims`)).toBe('ops/claims');
   });
 
-  // The value is checked into git and read wherever the gate runs, so the
-  // verdict must not depend on the host's separator. Parsing with the platform
-  // `normalize` made this guard inert on Windows: `../../etc` became
-  // `..\..\etc`, which the segment check read as one ordinary name.
   it('refuses a backslash-separated climb the way it refuses a slashed one', () => {
     expect(() => tasksDir(String.raw`..\..\etc`)).toThrow(/leaves it/);
   });
@@ -180,9 +168,6 @@ describe('containment of the configured locations', () => {
     expect(() => tasksDir('//server/share')).toThrow(/must be relative/);
   });
 
-  // `..` only climbs when it is a whole segment. A directory whose NAME starts
-  // with two dots stays put, so matching the prefix would refuse a location
-  // that never left.
   it('keeps a directory whose name merely starts with two dots', () => {
     expect(tasksDir('..data/claims')).toBe('..data/claims');
     expect(tasksDir('...claims')).toBe('...claims');
@@ -192,8 +177,6 @@ describe('containment of the configured locations', () => {
     expect(() => tasksDir('..')).toThrow(/leaves it/);
   });
 
-  // The tier is a lookup key (`--home <tier>`), so a padded one would pass
-  // validation and then match nothing a caller asks for.
   it('trims an ADR home tier so it can still be looked up', () => {
     const [home] = resolveRegisters(
       JSON.stringify({
@@ -246,9 +229,6 @@ describe('readCoordinationPaths', () => {
     expect(paths.boardDoc).toBe(join(root, 'docs/coordination/BOARD.md'));
   });
 
-  // The regression: the closer read `coordinationTasksDir` for its message and
-  // joined a hardcoded `docs/coordination/tasks` for the delete, so a consumer
-  // who moved the register was told one path and had another one read.
   it('moves the directory it reads, not only the one it prints', () => {
     const root = withConfig({
       conventions: { sharedBranchesDir: 'ops/branches' },
@@ -274,9 +254,6 @@ describe('resolvePublishing', () => {
     expect(resolvePublishing(undefined)).toEqual(DEFAULT_PUBLISHING);
   });
 
-  // The roster cannot be guessed, so it defaults to empty — and every gate that
-  // reads it refuses to run on empty rather than passing over nothing. A
-  // default roster would turn that loud state into a wrong one.
   it('leaves an unconfigured roster empty rather than inventing one', () => {
     expect(resolvePublishing(undefined).publicPackageDirs).toEqual([]);
     expect(publishing({ publishing: {} }).publicPackageDirs).toEqual([]);
@@ -302,9 +279,6 @@ describe('resolvePublishing', () => {
     expect(resolved.workspaceDirs).toEqual(DEFAULT_PUBLISHING.workspaceDirs);
   });
 
-  // These gates write: the surface gate writes a snapshot per package and the
-  // publish gate rewrites a manifest. A location that leaves the repository is
-  // refused by name, not normalised into something harmless.
   it('refuses a location that leaves the repository', () => {
     expect(() =>
       publishing({ publishing: { apiSurfaceDir: '../../elsewhere' } }),
@@ -317,8 +291,6 @@ describe('resolvePublishing', () => {
     ).toThrow(/must be relative to the repository root/);
   });
 
-  // A roster entry is joined onto the packages directory, so it escapes the
-  // same way — `a/../..` climbs out of both once they are joined.
   it('holds every roster and workspace entry to the same rule', () => {
     expect(() =>
       publishing({ publishing: { publicPackageDirs: ['ui', '../../etc'] } }),
@@ -331,8 +303,6 @@ describe('resolvePublishing', () => {
     ).toThrow(/must stay inside the repository/);
   });
 
-  // One spelling per location: the snapshot path is built by string
-  // concatenation, so `reports/api-surface/` would name `…//ui.txt`.
   it('canonicalises a location to one spelling', () => {
     expect(
       publishing({ publishing: { apiSurfaceDir: 'reports/api-surface/' } })
@@ -344,7 +314,6 @@ describe('resolvePublishing', () => {
     ).toEqual(['ui']);
   });
 
-  // `..data` is an ordinary name; only a whole `..` segment climbs.
   it('does not mistake a leading-dots name for a parent', () => {
     expect(
       publishing({ publishing: { packagesDir: '..packages' } }).packagesDir,

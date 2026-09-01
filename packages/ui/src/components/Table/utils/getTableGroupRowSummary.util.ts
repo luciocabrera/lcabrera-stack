@@ -9,11 +9,6 @@ import type {
 import { TABLE_GROUP_ROW_FIELD } from '../Table.constants';
 import { isTableAggregateFn } from './isTableAggregateFn.util';
 
-/**
- * A key is whatever its column is, and `null` is a legitimate key rather than a missing
- * one: a NULL group is a group, and it is precisely the group whose rows an equality would
- * silently return nothing for.
- */
 const toKeyValue = (entry: unknown): TableGroupKeyValue | undefined => {
   if (!isObject(entry)) {
     return;
@@ -57,12 +52,6 @@ const narrowEvery = <TValue>({ narrow, values }: NarrowEveryArgs<TValue>) => {
     : undefined;
 };
 
-/**
- * **An empty `path` is a legal summary**, not a malformed one: it is the rollup's grand
- * total, the row that totals every group and is keyed by none (ADR-065).
- * Refusing it — which this did while `flat` was the only mode — would drop the one row a
- * rollup exists to produce, silently, as an ordinary data row with no columns in it.
- */
 export const getTableGroupRowSummary = (
   row: Record<string, unknown>,
 ): TableGroupRowSummary | undefined => {

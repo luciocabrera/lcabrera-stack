@@ -23,17 +23,8 @@
  * Pure by design — the caller owns the filesystem.
  */
 
-/** Per-run artifacts, gitignored. Sibling of the fallow convention. */
 export const RUNS_DIRECTORY = 'reports/sonar/runs';
 
-/** A branch name is not a filename: `fix/304-x` would open a directory. Only
- *  `[a-z0-9-]` survives — a run of anything else becomes a single `-`. `.` is
- *  excluded deliberately, so no segment can ever spell `..`; the cost is that
- *  `release-v0.1.1` reads as `release-v0-1-1`, which is no less legible.
- *
- *  Split/filter/join rather than a replace and a `/^-+|-+$/` trim: that trim is
- *  super-linear on a long run of separators (Sonar S8786), and splitting drops
- *  the leading and trailing ones for free. */
 const asFileSegment = (value) =>
   String(value)
     .toLowerCase()
@@ -41,11 +32,6 @@ const asFileSegment = (value) =>
     .filter((part) => part !== '')
     .join('-');
 
-/**
- * The repo-relative path a run targeting `target` writes to. Every target gets
- * its own file, so no run can overwrite another's — the property that used to
- * need a special case for `main`.
- */
 export const reportPathFor = (target) => {
   const prefix = target?.type === 'pullRequest' ? 'pr' : 'branch';
   const segment = asFileSegment(target?.value ?? 'unknown') || 'unknown';

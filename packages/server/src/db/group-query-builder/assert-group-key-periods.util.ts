@@ -16,14 +16,6 @@ const toAlternatives = (capability: ColumnGroupingCapability) =>
     ? '; it holds no date or timestamp to truncate'
     : `; it offers ${capability.periods.join(', ')}`;
 
-/**
- * Every reason a **granularity** can be refused, checked before anything is emitted
- * (#786).
- * Separate from `assertGroupKeys` rather than folded into its loop, because the two ask
- * different questions of different things: that one walks the keys and asks the catalogue
- * whether each may be grouped, this one walks the granularities and asks whether each
- * names a key that can carry it.
- */
 export const assertGroupKeyPeriods = ({
   capabilities,
   keys,

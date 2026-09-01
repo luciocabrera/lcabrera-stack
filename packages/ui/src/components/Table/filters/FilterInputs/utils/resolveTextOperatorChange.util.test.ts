@@ -29,9 +29,6 @@ describe('resolveTextOperatorChange', () => {
     ).toEqual({ operator: 'notEquals', type: 'select', values: ['alpha'] });
   });
 
-  // Regression: this used to return `{ type: 'select', operator: 'contains' }`,
-  // which SelectFilter's operator does not model, so serializeSelectFilter kept
-  // filtering by the stale values as `equals` behind a text input.
   it('converts a select filter to text when the operator leaves equals/notEquals', () => {
     expect(
       resolveTextOperatorChange({

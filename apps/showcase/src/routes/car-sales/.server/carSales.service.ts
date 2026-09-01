@@ -25,11 +25,6 @@ import {
   toCarSaleRow,
 } from '../config';
 
-/**
- * Server-only Postgres access for `car_sales`. Lives in `.server/`, so the build fails if
- * client code imports it. Reaches the pool via `getPool`.
- */
-
 const TARGET = {
   allowedColumns: CAR_SALES_ALLOWED_COLUMNS,
   schema: CAR_SALES_SCHEMA,
@@ -39,14 +34,9 @@ const TARGET = {
 export type SelectCarSalesPageArgs = {
   readonly limit: number;
   readonly offset: number;
-  /**
-   * Resolved against `CAR_SALES_FALLBACK_SORT` here rather than by each caller, so the SSR
-   * loader and the paginated resource route cannot order a page two different ways.
-   */
   readonly sorting: readonly ColumnSort[];
 };
 
-/** There is no filter argument: this endpoint never filtered server-side. */
 export const selectCarSalesPage = async ({
   limit,
   offset,

@@ -25,8 +25,6 @@ type ButtonProps = {
 };
 
 vi.mock('#ui/components/Button', () => ({
-  // Mirrors the real Button, which renders disabled={isDisabled || isBusy}.
-  // A stub that drops them silently makes disabled-state assertions vacuous.
   Button: ({ children, isBusy, isDisabled, onClick }: ButtonProps) => (
     <button disabled={isDisabled || isBusy} onClick={onClick} type='button'>
       {children}

@@ -7,7 +7,6 @@
  * in `verify-coordination.mjs` owns the file writes. See `.claude/rules/scripts.md`.
  */
 
-/** Wrap a value in backticks (own function so the template literal isn't nested). */
 const code = (value) => `\`${value}\``;
 const renderArea = (area) => area.map(code).join('<br>');
 
@@ -46,11 +45,6 @@ const renderBranches = (branches, tasks) =>
     })
     .join('\n');
 
-/**
- * `tasksRel` is passed in rather than read here: the register's location is
- * configurable, and the empty-board message is the one place a reader is told
- * where to go, so a renderer that guessed would send them to the wrong path.
- */
 export const renderBoard = (tasks, branches, { tasksRel } = {}) => {
   const hasTasks = tasks.some(({ data }) => data !== undefined);
   const hasBranches = branches.some(({ data }) => data !== undefined);

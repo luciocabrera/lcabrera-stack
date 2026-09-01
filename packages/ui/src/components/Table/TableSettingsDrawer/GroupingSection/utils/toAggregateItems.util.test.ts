@@ -46,8 +46,6 @@ describe('toAggregateItems', () => {
   });
 
   it('gives each row an id unique per entry, not per column', () => {
-    // The list key: a column key alone repeats the moment a column carries two
-    // measures, and React would reconcile two distinct rows as one (#831).
     const ids = toAggregateItems({
       aggregates: [
         { columnKey: 'total_amount', fn: 'avg' },
@@ -60,9 +58,6 @@ describe('toAggregateItems', () => {
   });
 
   it('lists them in staged order rather than in column order', () => {
-    // Written against the table's column order, so the two disagree — which is
-    // what makes this assertion discriminating. The staged order is state, and
-    // re-sorting here would silently discard it.
     expect(
       toAggregateItems({
         aggregates: [

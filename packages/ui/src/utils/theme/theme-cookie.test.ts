@@ -68,7 +68,6 @@ describe('setThemeCookie', () => {
   it('does nothing when fetch is unavailable', () => {
     vi.stubGlobal('fetch', undefined);
 
-    // Should not throw
     expect(() => setThemeCookie({ theme: 'light' })).not.toThrow();
   });
 

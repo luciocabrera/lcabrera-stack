@@ -42,12 +42,10 @@ describe('the code a gate actually runs', () => {
   });
 
   it('reaches a module only the second hop can find', () => {
-    // A walk that read the entry and stopped passes every other assertion here.
     expect(closure()).toContain('scripts/lib/deep.mjs');
   });
 
   it('unions the driver that runs the gate into the gate’s closure', () => {
-    // The driver picks the gate's argv, so editing it alone changes every run.
     const withDriver = gateClosure({
       driverEntry: 'scripts/driver.mjs',
       entry: 'scripts/gate.mjs',
@@ -57,7 +55,6 @@ describe('the code a gate actually runs', () => {
           : { ...FIXTURE, 'scripts/lib/driver-only.mjs': '' }[path],
     });
     expect(withDriver).toContain('scripts/driver.mjs');
-    // Transitive, not just the entry; and the gate's own side survives.
     expect(withDriver).toContain('scripts/lib/driver-only.mjs');
     expect(withDriver).toContain('scripts/lib/deep.mjs');
   });
@@ -87,7 +84,6 @@ describe('the code a gate actually runs', () => {
   });
 
   it('is what the real gates resolve to, not just the fixture', () => {
-    // The derivation is worth nothing if it cannot walk the actual tree.
     const real = localModuleClosure({
       entry: 'scripts/copilot-review-status.mjs',
       readFile: (path) => {
@@ -101,8 +97,6 @@ describe('the code a gate actually runs', () => {
     expect(real).toContain('scripts/copilot-review-status.mjs');
     expect(real).toContain('scripts/lib/copilot-review.mjs');
     expect(real).toContain('scripts/lib/review-gate-reconcile.mjs');
-    // No gate imports the driver — the gap `gateClosure` closes. Asserted so the
-    // union test below measures a real absence, not an assumed one.
     expect(real).not.toContain('scripts/reconcile-review-gates.mjs');
   });
 
@@ -130,9 +124,6 @@ describe('the code a gate actually runs', () => {
 });
 
 describe('the precondition the walk depends on', () => {
-  // The walk follows relative, single-quoted specifiers only. A gate that later
-  // imports a workspace package, or uses `"`, would drop silently out of its own
-  // closure — so the convention is asserted rather than trusted.
   const GATE_ENTRIES = [
     'scripts/copilot-review-status.mjs',
     'scripts/verify-agent-review.mjs',
@@ -150,10 +141,6 @@ describe('the precondition the walk depends on', () => {
       },
     });
 
-  /**
-   * The specifier on every real import line, comments excluded — `pr-threads-api.mjs`
-   * has `from "could not read it"` in prose, which a raw scan reads as an import.
-   */
   const importSpecifiers = (source) =>
     source
       .split('\n')
@@ -213,16 +200,12 @@ describe('what the sweep does instead of running a gate', () => {
   });
 
   it('judges a pull request whose diff is empty', () => {
-    // An open pull request can have zero files (head force-pushed to the merge
-    // base), so `[]` and `undefined` are different answers.
     expect(
       withheldResult({ changedFiles: [], gate, number: 7 }),
     ).toBeUndefined();
   });
 
   it('withholds an unreadable file list, and calls it a FAILURE', () => {
-    // A rate limit part-way through a sweep withholds every remaining gate.
-    // Reporting those as `ok` exits 0 having corrected nothing.
     const result = withheldResult({ changedFiles: undefined, gate, number: 7 });
     expect(result?.ok).toBe(false);
     expect(result?.output).toMatch(
@@ -231,7 +214,6 @@ describe('what the sweep does instead of running a gate', () => {
   });
 
   it('is counted as a failure by the summary the sweep exits on', () => {
-    // Through `sweepSummary`: the flag only matters via the exit-code count.
     const unreadable = withheldResult({
       changedFiles: undefined,
       gate,
@@ -256,11 +238,8 @@ describe('what the sweep does instead of running a gate', () => {
 });
 
 describe('the sweep actually consults it — not a parallel definition', () => {
-  // Every assertion above passes with the decision never called — #866 and #868
-  // were both wiring, not logic.
   const source = () => readRepoFile('scripts/reconcile-review-gates.mjs');
 
-  /** One top-level `const <name> = …;` declaration, whole. */
   const declarationOf = (name) => {
     const text = source();
     const start = text.indexOf(`const ${name} =`);
@@ -268,8 +247,6 @@ describe('the sweep actually consults it — not a parallel definition', () => {
     const end = text.indexOf('\n};', start);
     expect(end).toBeGreaterThan(start);
     const slice = text.slice(start, end);
-    // `\n};` only terminates a BLOCK-bodied arrow; on an expression-bodied one it
-    // runs into the next declaration. Fail here rather than silently widen.
     expect(slice).not.toMatch(/\n(?:const|export) /u);
     return slice;
   };
@@ -280,16 +257,11 @@ describe('the sweep actually consults it — not a parallel definition', () => {
   });
 
   it('closes over the driver too, not just the gate script', () => {
-    // Whole-file because `gatesWithClosures` is expression-bodied, so
-    // `declarationOf` cannot bound it. The un-unioned walk is named, so its
-    // absence anywhere in the driver is the assertion.
     expect(source()).toMatch(/gateClosure\(/u);
     expect(source()).not.toMatch(/localModuleClosure\(/u);
   });
 
   it('derives its own path rather than writing it down', () => {
-    // A literal would stop matching on a rename, and a sweep that publishes where
-    // it should withhold looks exactly like a healthy one.
     expect(source()).not.toMatch(/'scripts\/reconcile-review-gates\.mjs'/u);
     expect(source()).toMatch(/driverEntry: DRIVER_MODULE/u);
   });
@@ -299,27 +271,20 @@ describe('the sweep actually consults it — not a parallel definition', () => {
   });
 
   it('asks gh for filenames, not for the diff', () => {
-    // Every entry carries its `patch`, so parsing the payload puts the sweep's
-    // only diff-sized response against `runGh`'s 8 MB cap.
     expect(source()).toMatch(/'--jq',\s*'\.\[\]\.filename'/u);
-    // Scoped, not windowed: the only `JSON.parse(` here is in
-    // `fetchOpenPullRequests`, so a window measures that function's formatting.
     expect(declarationOf('fetchChangedFiles')).not.toMatch(/JSON\.parse\(/u);
   });
 
   it('asks how many files the pull request changed, and consults the check', () => {
-    // Without the count there is nothing to compare a capped list against.
     expect(source()).toMatch(/'\.changed_files'/u);
     expect(source()).toMatch(/return completeFileList\(/u);
   });
 
   it('derives each gate’s closure from its own script', () => {
-    // Exact, not a window: each gate's entry is that gate's own script.
     expect(source()).toMatch(/entry: `scripts\/\$\{gate\.script\}`/u);
   });
 
   it('does not let one pull request’s failure end the sweep', () => {
-    // Runs per pull request, so an unguarded throw abandons every one after it.
     expect(declarationOf('fetchChangedFiles')).toMatch(/\}\s*catch\s*\(/u);
   });
 });
@@ -332,13 +297,10 @@ describe('whether the changed-file list can be trusted', () => {
   });
 
   it('accepts an empty list for a pull request whose diff has gone empty', () => {
-    // `gh` exits 0 printing nothing; that is an answer, not a failure to read.
     expect(completeFileList({ expected: '0', filenames: [] })).toEqual([]);
   });
 
   it('rejects a list the files endpoint capped', () => {
-    // The one wrong answer that never reaches a `catch`: `gh --paginate` exits 0
-    // on a capped list, and the missing files are the ones a gate closure names.
     expect(
       completeFileList({
         expected: '3200',
@@ -348,8 +310,6 @@ describe('whether the changed-file list can be trusted', () => {
   });
 
   it('rejects a count that came back empty', () => {
-    // `Number('')` is 0, which every list satisfies — so this passes with
-    // `Number` in place of `parseInt` and is the reason the parse is spelled out.
     expect(
       completeFileList({ expected: '', filenames: ['a.mjs'] }),
     ).toBeUndefined();
@@ -390,7 +350,6 @@ describe('whether the sweep should judge a pull request at all', () => {
   });
 
   it('matches on the path, not on the file name', () => {
-    // `helper.mjs` somewhere else is a different file and must not withhold.
     expect(
       gateJudgesItsOwnEdit({
         changedFiles: ['apps/showcase/helper.mjs'],

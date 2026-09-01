@@ -11,7 +11,6 @@ type ResolveOrdersGroupReadArgs = Omit<
   'maxLimit' | 'primaryKey' | 'selectTruncations'
 >;
 
-/** This route's binding of the generic group read (ADR-082, ADR-087). */
 export const resolveOrdersGroupRead = (args: ResolveOrdersGroupReadArgs) =>
   resolveGroupRead({
     ...args,

@@ -23,7 +23,6 @@ import { dirname, join } from 'node:path';
 export const REQUIREMENT_DIR = 'docs/product/requirements';
 export const PLANNING_DIR = 'docs/agents/planning';
 
-/** Unmet, so `state` and the `met` rule can each be planted independently. */
 export const REQUIREMENT = `---
 id: render-a-table
 lines:
@@ -54,7 +53,6 @@ I have rows and columns and want a table on the page.
 - The package's entry map resolves a component taking both.
 `;
 
-/** Met, and backed by the one command the fixture's workflow runs. */
 export const MET_REQUIREMENT = `---
 id: sql-is-safe
 lines:
@@ -94,8 +92,6 @@ packages: [ui, server]
 Its reasoning.
 `;
 
-/** A draft carries no block, by the planning charter. The gate must read this
- *  file and hold it to nothing — that is the whole exclusion. */
 export const DRAFT = `# A proposed decision
 
 Holding no number until it is adopted.
@@ -135,8 +131,6 @@ export const writeIn = (root) => (path, text) => {
   writeFileSync(join(root, path), text);
 };
 
-/** Rewrites one fragment of one file — the single difference between a run that
- *  passes and a run that must not. */
 export const editIn = (root) => (path, from, to) => {
   const full = join(root, path);
   const before = readFileSync(full, 'utf8');
@@ -147,10 +141,7 @@ export const editIn = (root) => (path, from, to) => {
   writeFileSync(full, after);
 };
 
-/** A tree both registers can be read from, with every input the gate needs. */
 export const makeRegisterRepo = () => {
-  // Realpath because a temp dir can sit behind a symlink, and the readers refuse
-  // a path that does not resolve inside the root they were given.
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'doc-registers-')));
   roots.push(root);
   const write = writeIn(root);
@@ -166,7 +157,6 @@ export const makeRegisterRepo = () => {
   return root;
 };
 
-/** Removes every tree this module made. Call from an `afterEach`. */
 export const removeRegisterRepos = () => {
   for (const root of roots.splice(0)) {
     rmSync(root, { force: true, recursive: true });

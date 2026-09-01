@@ -11,11 +11,6 @@ import {
   removeRegisterRepos,
 } from './doc-register-fixtures.mjs';
 
-// Both reports run against a synthetic tree that is not a git repository, has
-// no node_modules and no toolchain on PATH. Succeeding there is what "offline"
-// means here: nothing is fetched, nothing is resolved through a package
-// manager, and the answer comes from the files alone.
-
 const SCRIPTS = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 afterEach(removeRegisterRepos);
@@ -28,8 +23,6 @@ const run = (script, root, args = []) => {
   return { ...result, output: `${result.stdout}${result.stderr}` };
 };
 
-/** Every file in the tree with its size and mtime — enough to catch a report
- *  that wrote one, whether new or rewritten. */
 const treeSnapshot = (root) =>
   readdirSync(root, { recursive: true, withFileTypes: true })
     .filter((entry) => entry.isFile())
@@ -51,8 +44,6 @@ describe('product-distance', () => {
     expect(result.stdout).toContain('2 requirement(s) read');
     expect(result.stdout).toContain('met       1');
     expect(result.stdout).toContain('unmet     1');
-    // A tracked distance is a measurement in git, right the day it is written
-    // and wrong from the next commit (ADR-049).
     expect(treeSnapshot(root)).toEqual(before);
   });
 
@@ -90,9 +81,6 @@ describe('docs-for-package', () => {
     expect(treeSnapshot(root)).toEqual(before);
   });
 
-  // The discriminator: `server` and `ui` are both real workspaces here, and the
-  // fixture's requirements name one each — so a listing that ignored the
-  // argument would return the same rows for both.
   it('lists only what the named workspace declares', () => {
     const root = makeRegisterRepo();
 

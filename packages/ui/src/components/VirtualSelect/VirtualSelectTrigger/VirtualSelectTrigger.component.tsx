@@ -2,11 +2,6 @@ import { useVirtualSelectTrigger } from './hooks/useVirtualSelectTrigger.hook';
 import { assignTriggerRef, getTriggerStyleProps } from './utils';
 import { VirtualSelectDivTrigger } from './VirtualSelectDivTrigger/VirtualSelectDivTrigger.component';
 
-/**
- * Combobox trigger: placeholder, single-value label, or tag chips with the "+N more"
- * overflow badge.
- * Owns the trigger ref + the ResizeObserver-driven tag-overflow measurement.
- */
 export const VirtualSelectTrigger = () => {
   const {
     chevron,
@@ -20,9 +15,6 @@ export const VirtualSelectTrigger = () => {
     triggerRef,
   } = useVirtualSelectTrigger();
 
-  // VirtualSelectDivTrigger owns both div variants (static isAlwaysOpen and
-  // interactive tag mode). The <button> branch stays separate for native
-  // semantics.
   if (shouldUseDivTrigger) {
     return (
       <VirtualSelectDivTrigger triggerRef={triggerRef}>

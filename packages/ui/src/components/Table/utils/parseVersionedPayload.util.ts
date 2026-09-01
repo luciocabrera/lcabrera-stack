@@ -13,10 +13,10 @@ export const parseVersionedPayload = <T>({
       version: number;
     };
 
-    if (parsed.version === PERSISTENCE_VERSION) {
-      return parsed.value as T;
-    }
+    return parsed.version === PERSISTENCE_VERSION
+      ? (parsed.value as T)
+      : undefined;
   } catch {
-    // Invalid JSON — skip
+    return;
   }
 };

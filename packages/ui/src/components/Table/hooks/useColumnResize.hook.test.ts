@@ -184,7 +184,6 @@ describe('useColumnResize', () => {
     });
 
     expect(mockSetColumnSizing).not.toHaveBeenCalled();
-    // An unowned key must keep bubbling — the table still handles it
     expect(preventDefault).not.toHaveBeenCalled();
     expect(stopPropagation).not.toHaveBeenCalled();
   });

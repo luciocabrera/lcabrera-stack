@@ -9,10 +9,6 @@ import { NavigationBody } from './NavigationBody/NavigationBody.component';
 import { NavigationFooter } from './NavigationFooter/NavigationFooter.component';
 import { NavigationHeader } from './NavigationHeader/NavigationHeader.component';
 
-/**
- * The panel is permanent — it collapses to an icon rail but is never dismissed, so every
- * route keeps its primary navigation reachable in one click.
- */
 export const AppNavigation = () => {
   const navigationCollapsedPreference =
     useGetGlobalNavigationCollapsedPreference();

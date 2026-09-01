@@ -10,11 +10,6 @@ type WidestGroupKey = {
   readonly distinctEstimate: number;
 };
 
-/**
- * A caller reaching here with none has already been refused by `assertGroupDepth`, but a
- * bound of zero keys is one this function genuinely cannot answer, and inventing a name
- * for it would put `"undefined"` in a user-facing sentence.
- */
 export const resolveWidestGroupKey = ({
   capabilities,
   keys,

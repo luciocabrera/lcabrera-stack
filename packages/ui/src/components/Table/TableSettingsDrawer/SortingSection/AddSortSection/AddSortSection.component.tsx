@@ -31,7 +31,6 @@ export const AddSortSection = ({
     onDropdownOpenChange?.(isOpen);
   };
 
-  // Filter to only sortable columns not already in the sort list
   const availableColumnOptions = columns
     .filter(
       (col) =>
@@ -44,7 +43,6 @@ export const AddSortSection = ({
   const handleAddSort = () => {
     if (!selectedColumn) return;
 
-    // Check if column is already in sort list
     if (sorting.some((s) => s.columnKey === selectedColumn)) {
       setSelectedColumn('');
       return;

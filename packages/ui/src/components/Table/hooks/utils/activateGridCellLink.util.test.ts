@@ -18,8 +18,6 @@ describe('activateGridCellLink', () => {
     const anchor = cell.querySelector('a');
     const click = vi.fn();
 
-    // `preventDefault` only to keep jsdom from warning that it cannot
-    // navigate; the click itself is what is being asserted.
     anchor?.addEventListener('click', (event) => {
       event.preventDefault();
       click();
@@ -30,8 +28,6 @@ describe('activateGridCellLink', () => {
   });
 
   it('declines a cell with no link, leaving the key to the page', () => {
-    // The grid claims `Enter` only where it acts; claiming it everywhere would
-    // swallow the key on every ordinary cell.
     expect(activateGridCellLink(cellWith('<span>Iberia</span>'))).toBe(false);
   });
 
@@ -44,11 +40,6 @@ describe('activateGridCellLink', () => {
   });
 
   it('declines the grid element, which contains every cell', () => {
-    // The key handler admits the grid container as its own target, and that
-    // container holds the tab stop whenever the focused row is outside the
-    // virtualization window. Searching its subtree would find the first link in
-    // the whole table, so `Enter` with no cell focused would navigate into some
-    // unrelated group's hand-off.
     const grid = document.createElement('table');
 
     grid.setAttribute('role', 'grid');
@@ -76,8 +67,6 @@ describe('activateGridCellLink', () => {
   });
 
   it('takes the first link when a cell holds more than one', () => {
-    // A cell with two actions has no unambiguous "the" action; this states
-    // which one is taken rather than leaving it to DOM order by accident.
     const cell = cellWith('<a href="/first">one</a><a href="/second">two</a>');
     const clicks: string[] = [];
 

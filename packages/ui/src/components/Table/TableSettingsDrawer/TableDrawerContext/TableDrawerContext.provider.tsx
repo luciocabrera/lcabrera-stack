@@ -46,8 +46,6 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     periods,
     shares,
   });
-  // Seeded from the applied placement, defaulting the way every other reader of
-  // it does — absent is `last`, the order the rows on screen are already in.
   const totalsPlacementStore = useStore<TableDrawerTotalsPlacementState>({
     totalsPlacement: metaStore.get()?.totalsPlacement ?? 'last',
   });

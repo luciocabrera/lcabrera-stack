@@ -29,7 +29,6 @@ const groupRow = (path: readonly TableGroupKeyValue[]): Row => ({
 const paris = [{ columnKey: 'city', label: 'Paris', value: 'Paris' }];
 const berlin = [{ columnKey: 'city', label: 'Berlin', value: 'Berlin' }];
 
-/** What is left once Paris is collapsed: its two details are gone. */
 const survivingRows: readonly Row[] = [
   groupRow(paris),
   groupRow(berlin),
@@ -61,10 +60,6 @@ describe('resolveGroupCollapseFocusTarget', () => {
   });
 
   it('is the ancestor and not the row that shifted into the vacated index', () => {
-    // The discriminating case against ADR-062's generic rule. The focused row
-    // sat at index 3 before the collapse and the nearest survivor at that index
-    // is `{ id: 4 }` — a row in a *different* group. Answering the ancestor is
-    // what keeps a fold from moving the user sideways in the data.
     const target = resolveGroupCollapseFocusTarget({
       columns,
       focusedRowKey: rowKeyOf({ index: 2, row: { id: 2 } }),

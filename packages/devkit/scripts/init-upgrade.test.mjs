@@ -16,7 +16,6 @@ const INFERRED = {
   test: 'vp run test',
 };
 
-/** A repository set up by an older version: corrected commands, no `ci` block. */
 const settled = {
   commands: {
     ...INFERRED,
@@ -61,9 +60,6 @@ describe('initialConfig under --upgrade', () => {
     upgrade: true,
   });
 
-  // The whole reason --upgrade exists rather than --force: `init` tells a
-  // consumer to correct what it guessed, so an upgrade that re-guessed would
-  // undo the one thing it asked for.
   test('keeps every command the consumer set', () => {
     expect(upgraded.commands.audit).toBe('vp run deps:audit --strict');
     expect(upgraded.commands.test).toBe('vp run test:all');
@@ -83,7 +79,6 @@ describe('initialConfig under --upgrade', () => {
     expect(upgraded.registers).toEqual(settled.registers);
   });
 
-  // An edited `ci` block is the consumer's, the same as an edited command.
   test('does not overwrite a ci block that is already there', () => {
     expect(
       initialConfig({
@@ -96,8 +91,6 @@ describe('initialConfig under --upgrade', () => {
     ).toEqual({ setup: ['- name: Mine'] });
   });
 
-  // Guards the contrast this whole path is built on, so a change that made
-  // --force additive (or --upgrade destructive) cannot pass quietly.
   test('--force still rewrites what --upgrade keeps', () => {
     const forced = initialConfig({
       ciSetup: [],
@@ -133,7 +126,6 @@ describe('upgradeKeptCommands', () => {
     expect(upgradeKeptCommands({ commands: INFERRED })).toEqual([]);
   });
 
-  // A key the consumer invented is theirs, not a kept inference.
   test('ignores a command this version does not infer', () => {
     expect(
       upgradeKeptCommands({
@@ -147,9 +139,6 @@ describe('upgradeKeptCommands', () => {
 describe('upgradeKeptCiSetup', () => {
   const inferred = ['- name: Set up Vite+', '  uses: o/setup-vp@newsha'];
 
-  // The case the sha pinning exists for: a later devkit bumps the pinned action
-  // and a consumer with their own block keeps the superseded one. Kept silently,
-  // that is a supply-chain fix they are never shown.
   test('prints the steps this version would have set up', () => {
     expect(
       upgradeKeptCiSetup({
@@ -180,16 +169,12 @@ describe('upgradeKeptCiSetup', () => {
     ).toEqual([]);
   });
 
-  // A runner that needs no setup steps infers nothing, so there is no
-  // alternative to report a hand-written block against.
   test('says nothing when this version would set up no steps', () => {
     expect(
       upgradeKeptCiSetup({ existing: { ci: { setup: ['- name: Mine'] } } }),
     ).toEqual([]);
   });
 
-  // A `ci` block carrying only a sibling another package owns is not a kept
-  // setup — the block gets filled in, so there is nothing to report.
   test('says nothing about a ci block that has no setup key', () => {
     expect(
       upgradeKeptCiSetup({ ciSetup: inferred, existing: { ci: { other: 1 } } }),
@@ -223,9 +208,6 @@ describe('a ci block that carries no setup key', () => {
 });
 
 describe('recordsDefaultBranch', () => {
-  // The regression: an upgrade whose config predates `conventions.defaultBranch`
-  // DOES record the branch it is standing on — and a consumer taking a new
-  // version by PR is standing on a topic branch when they run it.
   test('records when an upgrade finds no trunk recorded', () => {
     expect(
       recordsDefaultBranch({
@@ -250,13 +232,10 @@ describe('recordsDefaultBranch', () => {
     expect(recordsDefaultBranch({ defaultBranch: 'main' })).toBe(true);
   });
 
-  // `currentBranch` answers '' on a detached HEAD, and '' is not a branch name.
   test('records nothing when the branch could not be read', () => {
     expect(recordsDefaultBranch({ defaultBranch: '' })).toBe(false);
   });
 
-  // The predicate and the write must not drift: this is the same question asked
-  // of the config `initialConfig` produced from the same inputs.
   test('agrees with what initialConfig wrote', () => {
     const args = {
       defaultBranch: 'fix/123-take-devkit-0.2.0',
@@ -289,8 +268,6 @@ describe('initSummary under --upgrade', () => {
     expect(summary({ upgrade: true })).not.toContain('were inferred');
   });
 
-  // Keyed on the write, not on the flag. Keyed on `!upgrade`, the one upgrade
-  // that records a trunk was the one told nothing about it.
   test('warns whenever a trunk was recorded', () => {
     expect(summary({ recordedTrunk: true, upgrade: true })).toContain(
       "repository's trunk",

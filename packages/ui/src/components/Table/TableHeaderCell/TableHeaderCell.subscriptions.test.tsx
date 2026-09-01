@@ -70,12 +70,6 @@ type WriteWidthArgs = {
   readonly width: number;
 };
 
-/**
- * Applies one column's width to the store the same way a resize drag frame does
- * (`writeColumnSizing` → `columnsStore.set({ columnSizing, pinnedColumnOffsets })`):
- * a new `columnSizing` map reference plus a new `pinnedColumnOffsets` reference.
- * Reproduced inline so the test needs only the slices these cells subscribe to.
- */
 const writeWidth = ({ columnKey, width }: WriteWidthArgs) => {
   const state = storesRef.columnsStore.get();
   storesRef.columnsStore.set({
@@ -106,7 +100,6 @@ describe('TableHeaderCell store subscriptions', () => {
 
     renderCells(bump);
 
-    // Baseline: exactly one mount render per cell.
     expect(COLUMN_KEYS.map((key) => renders.get(key))).toEqual([1, 1, 1, 1]);
     renders.clear();
 
@@ -116,10 +109,6 @@ describe('TableHeaderCell store subscriptions', () => {
 
     const rerendered = COLUMN_KEYS.filter((key) => (renders.get(key) ?? 0) > 0);
 
-    // AFTER the granular-selector fix: TableHeaderCell subscribes to its own
-    // width via useGetColumnWidth(columnKey), a number — so Object.is short-
-    // circuits every unaffected cell and only col0 re-renders. (Before the fix,
-    // useGetColumnSizing returned the whole map and all four re-rendered.)
     expect(rerendered).toEqual(['col0']);
   });
 });

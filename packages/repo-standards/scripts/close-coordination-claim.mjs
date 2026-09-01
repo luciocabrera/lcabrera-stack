@@ -37,8 +37,6 @@ const USAGE =
   'usage: repo-close-claim --pr <number> ' +
   '[--branch <head-ref>] [--dry-run]';
 
-/** What was searched for, so a no-op says which PR it found no claim for
- *  rather than just "nothing to do". */
 const describeSignals = (prNumber, headRef) =>
   [
     prNumber === undefined ? undefined : `PR #${prNumber}`,

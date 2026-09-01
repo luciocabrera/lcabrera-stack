@@ -26,9 +26,6 @@ describe('isAccessTicketValid', () => {
   });
 
   it('rejects a ticket minted for a different subject', () => {
-    // The core guarantee: a ticket is a capability for one subject, not a
-    // pass to the channel. Without this, any authorized bearer could listen
-    // in on every other subject.
     expect(
       isAccessTicketValid({
         now: NOW,
@@ -79,8 +76,6 @@ describe('isAccessTicketValid', () => {
   });
 
   it('rejects an expiry rewritten to a later time', () => {
-    // Extending a ticket by editing the cleartext half must fail: the expiry
-    // is inside the signed payload, so the signature no longer matches.
     const [, signature] = validTicket.split('.', 2);
     const forged = `${NOW + 86_400_000}.${signature}`;
 
@@ -115,8 +110,6 @@ describe('isAccessTicketValid', () => {
   });
 
   it('rejects a signature of the right length but wrong content', () => {
-    // Guards the length pre-check in front of timingSafeEqual: equal lengths
-    // must still reach a real comparison, not short-circuit to accepted.
     const [expiresAt, signature] = validTicket.split('.', 2);
     const flipped = signature?.startsWith('A')
       ? `B${signature.slice(1)}`

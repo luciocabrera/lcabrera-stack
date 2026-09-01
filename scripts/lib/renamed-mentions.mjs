@@ -42,10 +42,8 @@ import {
   normaliseToken,
 } from '../../packages/repo-standards/scripts/docs-paths.mjs';
 
-/** Git reports `/`-separated paths on every platform, so this needs no `path`. */
 const basenameOf = (filePath) => filePath.slice(filePath.lastIndexOf('/') + 1);
 
-/** `git diff --diff-filter=R --name-status -M` into `{ from, to }` pairs. */
 export const parseRenameDiff = (output) =>
   output
     .split('\n')
@@ -58,20 +56,6 @@ export const parseRenameDiff = (output) =>
     )
     .map(([, from, to]) => ({ from, to }));
 
-/**
- * The basenames the change made unresolvable, each with the path that replaced
- * it. A file that only moved between directories keeps its basename resolving,
- * so only its root-anchored path went stale — which `docs:verify` already
- * checks.
- *
- * `renames` is applied to `trackedPaths` before the live set is taken, because
- * the two arrive from different snapshots: the caller diffs the working tree but
- * lists the index. Half-stage a rename — new path added, old one not yet removed
- * from the index — and the old basename still looks live, so the rename is
- * skipped and the gate reports a pass it did not earn. Rebuilding the "after"
- * set here makes both sides describe the same tree. (Diffing `--cached` instead
- * would not do it: in that same half-staged state git sees no rename at all.)
- */
 export const vanishedNames = ({ renames, trackedPaths }) => {
   const renamedAway = new Set(renames.map((rename) => rename.from));
   const live = new Set(
@@ -94,13 +78,6 @@ export const vanishedNames = ({ renames, trackedPaths }) => {
 
 const FENCE = '```';
 
-/**
- * Prose lines of a document, each with its 1-based number — fenced blocks
- * dropped, since the paths inside them are illustrative far more often than not.
- *
- * Tracked line by line rather than by splitting the whole document on the fence
- * delimiter, because a finding is only actionable with a line number on it.
- */
 export const proseLines = (markdown) =>
   markdown.split('\n').reduce(
     (state, text, index) => {
@@ -116,19 +93,12 @@ export const proseLines = (markdown) =>
     { fenced: false, lines: [] },
   ).lines;
 
-/** A line naming a filename pattern is teaching a convention, not pointing. */
 const describesAConvention = (tokens) =>
   tokens.some((token) => token.includes('*'));
 
-/** A line naming the replacement too is describing the move, not following it. */
 const recordsTheMove = (text, entry) =>
   text.includes(basenameOf(entry.replacedBy));
 
-/**
- * Entries whose name appears in an inline code span on this line. Compared by
- * basename so a partial path (`ingestion/gone.constants.ts`) counts as the same
- * mention as the bare name.
- */
 const mentionedOn = (text, vanished) => {
   const tokens = inlineCodeTokens(text);
   if (describesAConvention(tokens)) {
@@ -142,7 +112,6 @@ const mentionedOn = (text, vanished) => {
     .filter((entry) => !recordsTheMove(text, entry));
 };
 
-/** Every stale mention, in document then line order. */
 export const staleMentions = ({ docs, vanished }) =>
   vanished.length === 0
     ? []
@@ -157,6 +126,5 @@ export const staleMentions = ({ docs, vanished }) =>
         ),
       );
 
-/** One reported line: where the stale name is, and what it should become. */
 export const describeFinding = (finding) =>
   `${finding.doc}:${finding.line}: \`${finding.name}\` — renamed to \`${finding.replacedBy}\``;

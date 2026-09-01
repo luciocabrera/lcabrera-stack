@@ -24,9 +24,6 @@ describe('setTableGroupKeyPeriod', () => {
   });
 
   it('clears one by leaving no entry behind, not an undefined value', () => {
-    // The server refuses a granularity map naming a column that is not a group
-    // key, and an `undefined` entry still has a key — so `delete`-shaped
-    // clearing would send a map with a member the request must not carry.
     const next = setTableGroupKeyPeriod({
       columnKey: 'order_date',
       grouping,

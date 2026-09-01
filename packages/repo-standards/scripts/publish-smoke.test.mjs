@@ -6,12 +6,6 @@ import {
   unimportableProblems,
 } from './publish-smoke.mjs';
 
-// What these assertions defend: the consumer smoke run is only evidence if it
-// actually imports the subpath that would break. Both selectors below narrow
-// what is attempted, and a selector that quietly narrows to nothing is the
-// failure this whole gate exists to stop — which is why narrowing all the way
-// to zero is itself a reported problem.
-
 const packed = ({ dependencies = {}, exports_ = {}, name }) => ({
   manifest: { dependencies, exports: exports_ },
   name,
@@ -35,8 +29,6 @@ describe('importSpecifiers', () => {
   });
 
   it('attempts a target that still points at TypeScript source', () => {
-    // The state an npm-packed tarball is in. Filtering to "looks importable"
-    // would skip precisely the entry that fails, and the run would go green.
     expect(
       importSpecifiers(
         packed({
@@ -87,10 +79,6 @@ describe('selfContained', () => {
     ]);
   });
 
-  // The check has to walk the whole closure, not one level. `@lcabrera/vite-config`
-  // depends only on `@lcabrera/eslint-plugin`, which is packed — so a direct-only
-  // check admits it, and the consumer then dies importing that plugin's own
-  // `@typescript-eslint/utils`, which no tarball carries.
   it('drops a package whose packed dependency needs a registry', () => {
     const plugin = packed({
       dependencies: { '@typescript-eslint/utils': '^8.0.0' },
@@ -118,10 +106,6 @@ describe('selfContained', () => {
 });
 
 describe('unimportableProblems', () => {
-  // The vacuity this gate would otherwise keep: a package that reaches the
-  // consumer lane and contributes no import. The run would print "0 subpath(s)
-  // imported" and exit 0 — a cheerful pass over nothing, which is the shape of
-  // the defect the whole change is about.
   const lane = ({ name, specifiers }) => ({ packed: { name }, specifiers });
 
   it('reports a lane package that contributes no specifier', () => {

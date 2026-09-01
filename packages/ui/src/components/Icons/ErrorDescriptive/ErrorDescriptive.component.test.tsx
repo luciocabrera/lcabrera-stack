@@ -29,8 +29,6 @@ describe('ErrorDescriptive', () => {
   it('composes the illustration parts, including the disruption particles', () => {
     const { container } = render(<ErrorDescriptive />);
 
-    // The particle group emits several <circle> nodes — asserting they exist
-    // confirms the DisruptionParticles sub-illustration rendered.
     expect(container.querySelectorAll('circle').length).toBeGreaterThan(0);
   });
 });

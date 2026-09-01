@@ -31,7 +31,6 @@ const groupRow = ({ isSubtotal = false, path }: GroupRowArgs): Row => ({
   [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, isSubtotal, path },
 });
 
-/** A three-level rollup in the order rollup emits it (#570), the grand total last. */
 const rollup: readonly Row[] = [
   groupRow({ path: pathOf('Elec', 'Phones', 'Retail') }),
   groupRow({ path: pathOf('Elec', 'Phones', 'Corporate') }),
@@ -42,7 +41,6 @@ const rollup: readonly Row[] = [
   groupRow({ isSubtotal: true, path: pathOf() }),
 ];
 
-/** The same key list with no subtotals: one grouping set, every row full depth. */
 const flat: readonly Row[] = [
   groupRow({ path: pathOf('Elec', 'Phones', 'Retail') }),
   groupRow({ path: pathOf('Elec', 'Phones', 'Corporate') }),

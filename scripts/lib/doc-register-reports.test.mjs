@@ -63,8 +63,6 @@ describe('distanceReport', () => {
     expect(report).not.toContain('\n  a  ');
   });
 
-  // The claim the report makes about itself has to be one it earns: it really
-  // does resolve every pointer, and really does run none of them.
   it('resolves the pointers it counts, and says that is what it did', () => {
     expect(report).toContain('2/2 pointer(s) resolve');
     expect(report).toContain(RESOLUTION_NOTICE);
@@ -112,9 +110,6 @@ describe('packageDocsReport', () => {
     expect(report).toContain('[plan] docs/agents/planning/a-plan.md  #547');
   });
 
-  // Neither report makes a GitHub call, so "open" is not a fact either one has:
-  // the registers hold bare numbers read from the working tree. The empty case
-  // reports what was read (AGENTS.md Rule 14).
   it('says a document names no issue, not that none is open', () => {
     const report = packageDocsReport({
       planning: [],

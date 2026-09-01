@@ -18,11 +18,12 @@
  * drops the first one's restrictions. That is why they are exported at all — a
  * consumer adding its own `no-restricted-syntax` has to re-compose them, and
  * cannot do that without being able to name them.
+ *
+ * `export *` re-exports whatever a module happens to expose today, so a barrel
+ * silently grows a public surface nobody reviewed and dead exports stay
+ * invisible. Barrels list what they publish.
  */
 
-// `export *` re-exports whatever a module happens to expose today, so a barrel
-// silently grows a public surface nobody reviewed and dead exports stay
-// invisible. Barrels list what they publish (PATTERNS.md, react-components.md).
 export const BARREL_SYNTAX_RESTRICTIONS = [
   {
     message:
@@ -31,16 +32,6 @@ export const BARREL_SYNTAX_RESTRICTIONS = [
   },
 ];
 
-// The store pattern is the only shared-state approach here (AGENTS.md Rule 5).
-// Adding a state library is a one-line change that no other check would notice,
-// so name them here rather than relying on review.
-// React's `PropsWithChildren<P>` expands to `P & { children?: ReactNode |
-// undefined }` — the child is OPTIONAL and NOT readonly, so it cannot satisfy
-// Non-Negotiable Rule 1, and it silently makes `children` optional on
-// components that require it (a provider cannot render without them). The
-// convention here: a component wrapping a native element takes
-// `ComponentPropsWithoutRef<'x'>` (which already carries `children`); anything
-// else declares `readonly children: ReactNode` itself.
 export const REACT_TYPE_IMPORT_PATHS = [
   {
     importNames: ['PropsWithChildren'],
@@ -50,11 +41,6 @@ export const REACT_TYPE_IMPORT_PATHS = [
   },
 ];
 
-// Tests import test utilities from `vite-plus/test`, not `vitest` directly — it
-// re-exports the vite-plus-bundled Vitest, so the test runtime always matches
-// the toolchain and there is no self-managed `vitest` to drift (ADR-045). This
-// is what enforces that convention; the earlier `vitest`-direct rule drifted
-// precisely because nothing gated it. Ban the bare specifier and any subpath.
 export const TEST_RUNNER_IMPORT_PATTERNS = [
   {
     group: ['vitest', 'vitest/*'],
@@ -83,22 +69,15 @@ export const STATE_LIBRARY_IMPORT_PATTERNS = [
   },
 ];
 
-/** Import and both re-export forms, so a barrel cannot launder a restriction. */
 const IMPORT_AND_REEXPORT_DECLARATIONS = [
   'ExportAllDeclaration',
   'ExportNamedDeclaration',
   'ImportDeclaration',
 ];
 
-/** `importKind`/`exportKind` — the property that says "type-only" per form. */
 const kindProperty = (declaration) =>
   declaration === 'ImportDeclaration' ? 'importKind' : 'exportKind';
 
-/**
- * Node built-ins are server-only in anything that also runs in a browser. Keyed
- * on the `node:` protocol rather than on a module list, so a built-in nobody has
- * used yet is covered the day someone does.
- */
 export const NODE_BUILTIN_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS =
   IMPORT_AND_REEXPORT_DECLARATIONS.map((declaration) => ({
     message:
@@ -106,12 +85,6 @@ export const NODE_BUILTIN_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS =
     selector: `${declaration}[source.value=/^node:/]`,
   }));
 
-/**
- * Runtime database access is server-only, and the raw driver is the one import
- * that says so without naming anybody's package. Type-only imports are erased at
- * compile time, so they stay allowed; the guard is on runtime access, which is
- * what pulls the DB connection into the bundle.
- */
 export const PG_DRIVER_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS =
   IMPORT_AND_REEXPORT_DECLARATIONS.map((declaration) => ({
     message:

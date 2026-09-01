@@ -35,53 +35,23 @@
  * writing and the exit code are `verify-adrs.mjs`.
  */
 
-/** What `governs` says when a decision constrains no single workspace. */
 export const REPOSITORY_SCOPE = 'repository';
 
 const GOVERNS = 'governs';
 
-/**
- * Every key the block may carry.
- *
- * An unknown key is a finding rather than something ignored: `package:` written
- * for `governs:` would otherwise parse cleanly and leave the required key
- * absent, and the reader would be told the block is missing a key they can see
- * on the screen.
- */
 const KNOWN_KEYS = new Set([GOVERNS]);
 
-/** The three sections a decision record is not a decision record without. */
 export const REQUIRED_SECTIONS = ['Context', 'Decision', 'Consequences'];
 
-/**
- * The template's own rule, not a new one: a decision that chose between
- * comparable designs writes `Options considered`, one that answered objections
- * writes `Alternatives considered`, and a small decision needs only one of the
- * two. So at least one of them, filled.
- */
 export const ALTERNATIVE_SECTIONS = [
   'Options considered',
   'Alternatives considered',
 ];
 
-/**
- * Every line ending, because a consumer's checkout decides this and not us.
- * git-for-windows installs with `core.autocrlf=true` by default, so a record
- * there begins `---\r\n`; matching only `\n` reported every well-formed ADR as
- * having no block at all, and no section either. `workspace-scopes.mjs` and
- * `commit-convention.mjs` in this package already split this way.
- */
 const LINE = /\r?\n/;
 
 const OPENING = /^---\r?\n/;
 
-/**
- * Where the block's text starts and where its closing fence begins, or undefined
- * when the record opens no block.
- *
- * The search for the closing fence starts one character INSIDE the opening one,
- * so an empty block — `---` immediately followed by `---` — is still a block.
- */
 const blockRange = (markdown) => {
   const opening = OPENING.exec(markdown);
   if (opening === null) {
@@ -91,14 +61,6 @@ const blockRange = (markdown) => {
   return end === -1 ? undefined : { end, start: opening[0].length };
 };
 
-/**
- * The record itself, with any block taken off the front.
- *
- * Every body rule reads this rather than the raw file, including the heading
- * number the gate already checked: a `# comment` line inside the block would
- * otherwise be picked up as the H1 and the number check would silently stop
- * firing.
- */
 export const adrBody = (markdown) => {
   const range = blockRange(markdown);
   if (range === undefined) {
@@ -108,14 +70,8 @@ export const adrBody = (markdown) => {
   return newline === -1 ? '' : markdown.slice(newline + 1);
 };
 
-/** Lower-case, dash-separated: narrow enough that `__proto__` is not a key. */
 const KEY = /^[a-z][a-z-]*$/;
 
-/**
- * `key: value` → its parts, or undefined when the text is not a pair. Split on
- * the FIRST colon with `indexOf`, so a value keeps its own colons and no regex
- * backtracks over a long line.
- */
 const readPair = (text) => {
   const colon = text.indexOf(':');
   if (colon <= 0) {
@@ -127,7 +83,6 @@ const readPair = (text) => {
     : undefined;
 };
 
-/** `[a, b]` → `['a', 'b']`; spacing and a trailing comma are tolerated. */
 const flowList = (value) =>
   value
     .slice(1, -1)
@@ -169,11 +124,6 @@ const readItem = (state, text, line) => {
   state.fields[state.open].push(text.slice(2).trim());
 };
 
-/**
- * The block as `{ errors, fields }`, or undefined when the record opens with no
- * `---` block at all — which the caller reports as its own finding, since a
- * missing block and an unreadable one are different mistakes.
- */
 export const parseAdrBlock = (markdown) => {
   const range = blockRange(markdown);
   if (range === undefined) {
@@ -199,7 +149,6 @@ export const parseAdrBlock = (markdown) => {
   return { errors: state.errors, fields: state.fields };
 };
 
-/** The workspaces a record declares, or none when it declares no readable block. */
 export const governedBy = (markdown) => {
   const value = parseAdrBlock(markdown)?.fields[GOVERNS];
   return Array.isArray(value) ? value : [];
@@ -210,11 +159,6 @@ const unknownName = (name, workspaces) =>
     ? `\`${GOVERNS}\` names \`${name}\`, but no workspace roster could be derived from pnpm-workspace.yaml — a decision that governs no one workspace declares \`${REPOSITORY_SCOPE}\``
     : `\`${GOVERNS}\` names \`${name}\`, which is no workspace in this repository (${[...workspaces].toSorted((left, right) => left.localeCompare(right)).join(', ')})`;
 
-/**
- * What `governs` has to be. The empty list is rejected rather than read as
- * repository-wide: a record that governs everything says so, so that "nobody
- * filled this in" cannot be spelled the same way as an answer.
- */
 const governsFindings = (value, workspaces) => {
   if (value === undefined) {
     return [
@@ -239,7 +183,6 @@ const governsFindings = (value, workspaces) => {
     .map((name) => unknownName(name, workspaces));
 };
 
-/** The classification block's findings for one record. */
 export const blockFindings = ({ markdown, workspaces }) => {
   const block = parseAdrBlock(markdown);
   if (block === undefined) {
@@ -256,43 +199,10 @@ export const blockFindings = ({ markdown, workspaces }) => {
   ];
 };
 
-/**
- * A `##` heading and its title.
- *
- * The title group is required to START with a non-space, which is what keeps
- * this linear: the run of spaces after `##` and the title itself must not both
- * be able to match the same character, or the engine has a choice at every space
- * and backtracks super-linearly over a long run of them (Sonar S8786; the first
- * spelling here measured quadratic). Trailing spaces are left to `trim`, where
- * there is no second quantifier to be ambiguous with.
- *
- * The group is optional so that `##` followed by nothing but spaces still parses
- * — it yields no title, and the caller treats that as not a heading.
- *
- * `###` does not match, because the character after `##` must be a space or a
- * tab — so a subsection stays part of the section it sits in.
- */
 const SECTION = /^##[ \t]+([^ \t].*)?$/;
 const TITLE = /^#[ \t]+/;
-/**
- * An HTML comment, INCLUDING an unterminated one, which runs to the end of the
- * input — which is what a markdown renderer does with it too, so a heading swept
- * up by one is a heading no reader sees either.
- *
- * Matching only the terminated form left `<!--` in the stripped text, so a
- * section whose sole content was an unterminated comment read as filled: the
- * `not empty` check was lenient in exactly the direction it exists to catch.
- * CodeQL flags the same shape as incomplete sanitization; the injection it has
- * in mind needs an HTML sink and there is none here, but the incompleteness was
- * real on its own terms.
- */
 const COMMENT = /<!--[\s\S]*?(?:-->|$)/g;
 
-/**
- * Each `##` section's lines, keyed by its lower-cased title. Comments are
- * stripped first, so the prompts the template ships do not read as content —
- * a scaffolded record with every prompt still in place has said nothing.
- */
 export const sectionsOf = (body) => {
   const sections = new Map();
   let open;
@@ -322,7 +232,6 @@ const sectionProblem = (sections, title) => {
     : `\`## ${title}\` is empty`;
 };
 
-/** The required sections, plus the one-of-two rule the template states. */
 export const sectionFindings = (body) => {
   const sections = sectionsOf(body);
   const required = REQUIRED_SECTIONS.map((title) =>
@@ -340,7 +249,6 @@ export const sectionFindings = (body) => {
       ];
 };
 
-/** Everything one record gets wrong, block and body together. */
 export const recordFindings = ({ markdown, workspaces }) => [
   ...blockFindings({ markdown, workspaces }),
   ...sectionFindings(adrBody(markdown)),

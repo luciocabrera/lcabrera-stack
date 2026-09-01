@@ -7,14 +7,6 @@ import { createUrlStateCodec } from './createUrlStateCodec.util';
 import { deserializeFilter } from './deserializeFilter.util';
 import { serializeFilter } from './serializeFilter.util';
 
-/**
- * Each value goes through `deserializeFilter`, whose `undefined` drops that entry. That
- * per-entry drop is the pre-existing filter contract.
- * `deserializeFilter` does not reject an unknown operator code: its last branch reads any
- * all-strings array as a select-equals filter, so `["ZZ","x"]` yields a select filter
- * rather than nothing. Unknown column keys are dropped later by `sanitizeFiltersByColumns`
- * when the loader passes `columns`.
- */
 const narrowCompactFilters = (parsed: unknown) => {
   if (!isObject(parsed) || Array.isArray(parsed)) {
     return;

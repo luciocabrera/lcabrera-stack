@@ -76,9 +76,6 @@ describe('resolveGroupLevelDisclosures', () => {
   });
 
   it('offers an ancestor’s control from a row inside it', () => {
-    // The defect (#802): the reader is looking at the first row of the
-    // `Cancelled` block and the control has to be here, not on a subtotal ten
-    // rows below.
     const disclosures = resolveGroupLevelDisclosures({
       defaultFold: 'expanded',
       foldableKeys: BOTH_HAVE_ROWS,
@@ -88,8 +85,6 @@ describe('resolveGroupLevelDisclosures', () => {
     });
 
     expect(columnsOf(disclosures)).toStrictEqual(['status', 'customerType']);
-    // Each control names its own prefix, not the row's whole path — folding
-    // `Cancelled` from here must not fold the row's own group instead.
     expect(disclosures[0]?.path).toStrictEqual(CANCELLED);
     expect(disclosures[1]?.path).toStrictEqual(CANCELLED_BUSINESS);
   });
@@ -107,10 +102,6 @@ describe('resolveGroupLevelDisclosures', () => {
   });
 
   it('keeps a group row folding itself when it precedes what it owns', () => {
-    // The regression this guards: an ordinary grouped grid emits its group row
-    // *before* its rows, so that row is the only one stating the level and
-    // taking its control away would leave the grid unfoldable. Only a subtotal
-    // trails its block, which is why `isSubtotal` and not identity decides it.
     const disclosures = resolveGroupLevelDisclosures({
       defaultFold: 'expanded',
       foldableKeys: CANCELLED_HAS_ROWS,
@@ -135,8 +126,6 @@ describe('resolveGroupLevelDisclosures', () => {
   });
 
   it('returns the control to a collapsed subtotal, the only row left', () => {
-    // Every row inside the group is hidden once it folds, so without this the
-    // group could be closed and never reopened.
     const disclosures = resolveGroupLevelDisclosures({
       defaultFold: 'expanded',
       foldableKeys: CANCELLED_HAS_ROWS,

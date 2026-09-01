@@ -15,10 +15,6 @@ import { getInitialListDataState, getInitialListState } from './utils';
 import { INITIAL_LIST_STATE } from './VirtualListContext.constants';
 import { VirtualListContext } from './VirtualListContext.context';
 
-/**
- * The list sync effect re-passes the current UI fields from the store so a config re-sync
- * never clobbers in-flight UI state (search term, filter mode).
- */
 export const VirtualListProvider = ({
   children,
   dataState,

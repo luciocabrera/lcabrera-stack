@@ -65,10 +65,6 @@ describe('createAppTsConfig', () => {
     expect(compilerOptions.types).toStrictEqual(['vite/client', 'node']);
   });
 
-  // The negative case for the one default that is a toolchain fact rather than
-  // a config-variant fact: `vite/client` does not resolve outside a Vite
-  // project, so a consumer that cannot drop it gets a config that fails to
-  // load. Appending was the only thing `types` allowed before this.
   it('lets a caller drop vite/client entirely', () => {
     const { compilerOptions } = createAppTsConfig({
       baseTypes: [],

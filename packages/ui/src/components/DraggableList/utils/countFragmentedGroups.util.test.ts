@@ -44,8 +44,6 @@ describe('countFragmentedGroups', () => {
   });
 
   it('counts each split group separately, which is what makes it comparable', () => {
-    // A yes/no answer reads this and `['a', 'b', 'a']` the same, so a drop that
-    // splits a second group could not be told from one that split none.
     expect(run(['a', 'b', 'a', 'b'])).toBe(2);
     expect(run(['a', 'b', 'a'])).toBe(1);
   });

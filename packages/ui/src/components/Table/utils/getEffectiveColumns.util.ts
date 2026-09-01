@@ -21,18 +21,15 @@ export const getEffectiveColumns = <TData>({
   columns,
   columnVisibility,
 }: GetEffectiveColumnsArgs<TData>) => {
-  // Filter visible columns
   const visibleColumns = columns.filter(
     (col) => !(columnVisibility?.has(col.key) ?? false),
   );
 
-  // Apply column order
   const orderedColumns =
     columnOrder && columnOrder.length > 0
       ? orderColumnsByKeys<TData>({ columnOrder, columns: visibleColumns })
       : visibleColumns;
 
-  // Apply pinning order: left pinned → unpinned → right pinned
   if (!columnPinning) return orderedColumns;
 
   const leftPinned = columnPinning.left ?? [];

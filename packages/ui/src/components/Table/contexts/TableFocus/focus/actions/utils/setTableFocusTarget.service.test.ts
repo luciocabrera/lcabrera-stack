@@ -46,8 +46,6 @@ describe('setTableFocusTarget', () => {
   });
 
   it('raises a new request even for the cell that already holds focus', () => {
-    // Re-entering the grid asks for the same cell again, and the cell watches
-    // the id: a boolean would already be set and the re-entry would be lost.
     const focusStore = createFocusStore({
       columnKey: 'id',
       focusRequestId: 3,

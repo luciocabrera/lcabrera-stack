@@ -25,9 +25,7 @@ const dialogMocksRef: {
 } = {
   current: {
     closeMock: vi.fn(),
-    restoreMockDialog: () => {
-      // no-op default restore before setup
-    },
+    restoreMockDialog: () => {},
     showModalMock: vi.fn(),
   },
 };

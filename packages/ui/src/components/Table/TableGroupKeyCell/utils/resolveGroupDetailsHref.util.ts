@@ -11,20 +11,11 @@ import { TABLE_NESTED_URL_STATE_PREFIX } from '#ui/components/Table/Table.consta
 type ResolveGroupDetailsHrefArgs = {
   readonly groupDetailsPath: string | undefined;
   readonly groupingKeys: readonly string[];
-  /** The granularity each temporal key was grouped at, by column. */
   readonly periods: Readonly<Record<string, TableGroupPeriod>>;
   readonly search: string;
   readonly summary: TableGroupRowSummary;
 };
 
-/**
- * **A complete grouping set, and not a subtotal.** One path entry per applied key: a
- * shorter path is an outer level whose children are already on screen as further group
- * rows, and a rollup subtotal is shorter by definition.
- * The empty-path check is not redundant with the length comparison — with no grouping
- * applied both are zero, and the grand total would otherwise offer a link to every row in
- * the table.
- */
 export const resolveGroupDetailsHref = ({
   groupDetailsPath,
   groupingKeys,
@@ -41,11 +32,6 @@ export const resolveGroupDetailsHref = ({
     return;
   }
 
-  // Built without the nested params rather than copying and deleting: one
-  // already in `search` was written inside a *different* group's route and
-  // describes that group's set. Carried through, it would open this group
-  // narrower than the count on the row it was clicked from — the mismatch the
-  // seeding below prevents, in the other direction.
   const params = new URLSearchParams(
     [...new URLSearchParams(search)].filter(
       ([key]) => !key.startsWith(TABLE_NESTED_URL_STATE_PREFIX),

@@ -20,26 +20,17 @@
  * loudly, at the point someone is already reading Actions output — whereas a
  * validator here could only reject the shapes it knew about, which is the bound
  * this design exists to avoid.
+ *
+ * The placeholder is written as a YAML COMMENT in the templates and matched as
+ * one here. A bare `{{ci.setup}}` line sits where a sequence item belongs, so
+ * the template stops being valid YAML and `vp fmt` refuses the whole run. As a
+ * comment it parses like any workflow, and the whole line is still what gets
+ * replaced.
  */
 
-/*
- * Written as a YAML COMMENT in the templates, and matched as one here. A bare
- * `{{ci.setup}}` line sits where a sequence item belongs, so the template stops
- * being valid YAML — `vp fmt` parses these files and refuses the whole run
- * ("All mapping items must start at the same column"), and every other YAML
- * tool would too. As a comment the template parses like any workflow, and the
- * whole line is still what gets replaced.
- */
 const PLACEHOLDER =
   /^([ \t]*)#[ \t]*\{\{[ \t]*ci\.setup[ \t]*\}\}[ \t]*\r?\n/gm;
 
-/**
- * The lines indented to sit where the placeholder sat.
- *
- * A blank line keeps no indentation: trailing whitespace on an otherwise empty
- * line is what most YAML linters flag first, and it would arrive in every
- * consumer's repository.
- */
 const indented = ({ indent, lines }) =>
   lines
     .map((line) => (line.trim() === '' ? '' : `${indent}${line}`))
@@ -51,8 +42,5 @@ const indented = ({ indent, lines }) =>
  */
 export const substituteCiSetup = ({ content, setup = [] }) =>
   content.replaceAll(PLACEHOLDER, (_match, indent) =>
-    // No steps means the placeholder's whole LINE goes, not just its text —
-    // otherwise every workflow in a repository that needs no setup carries a
-    // stray blank line where the hook used to be.
     setup.length === 0 ? '' : `${indented({ indent, lines: setup })}\n\n`,
   );

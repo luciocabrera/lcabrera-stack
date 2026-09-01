@@ -71,9 +71,6 @@ describe('car-sales loader', () => {
   });
 
   it('requests a bounded slice rather than the whole table', async () => {
-    // car_sales holds 500k rows. Reading it unbounded produced a ~421MB body
-    // and killed SSR with a V8 zone allocation failure, so this route must
-    // always ask for a limit.
     readCarSalesPageMock.mockClear();
 
     await invokeLoader();
@@ -88,9 +85,6 @@ describe('car-sales loader', () => {
   });
 
   it("reads through the route's own server service, not an external API URL", async () => {
-    // The route renders with no API server running, so its first page must come
-    // from the service that reads Postgres in this process. `readCarSalesPage`
-    // owns the external-override branch behind that call.
     readCarSalesPageMock.mockClear();
 
     await invokeLoader();
@@ -99,8 +93,6 @@ describe('car-sales loader', () => {
   });
 
   it('carries the primary-key tiebreaker into the sort it asks for', async () => {
-    // `createTableRouteLoader` appends it (ADR-008); without it a page boundary
-    // inside a tie group repeats and skips rows.
     readCarSalesPageMock.mockClear();
 
     await invokeLoader();

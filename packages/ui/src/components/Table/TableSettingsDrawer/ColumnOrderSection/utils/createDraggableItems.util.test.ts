@@ -66,9 +66,6 @@ describe('createDraggableItems', () => {
       renderItemContent,
     });
 
-    // Undraggable for its own reason: the hoist would silently undo the drag.
-    // `isStatic` stays false, so the key keeps its width and its header menu —
-    // borrowing that flag is exactly what ADR-080 refuses.
     expect(result[0]).toMatchObject({ id: 'first', isDraggable: false });
     expect(result[0]?.content).toBe('true:false');
   });

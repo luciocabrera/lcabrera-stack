@@ -66,11 +66,6 @@ const BASELINE_PATH = join(REPO_ROOT, GATES.baselineFile);
 const governedDocs = () =>
   documentedFiles({ ignoredDocs: GATES.ignoredDocs, repoRoot: REPO_ROOT });
 
-/**
- * The anchors that make a token unambiguously a path. Declared when a repository
- * wants to narrow them; otherwise every top-level directory that is not build
- * output, which is the honest reading of "a real top-level directory".
- */
 const REPO_ROOTS =
   GATES.repoRoots.length > 0
     ? GATES.repoRoots
@@ -79,15 +74,6 @@ const REPO_ROOTS =
         .map((entry) => entry.name)
         .filter((name) => !ALWAYS_SKIPPED.includes(name));
 
-/**
- * Paths that are generated or local-only and therefore *expected* to be absent
- * from a fresh checkout — documenting them is correct, not a broken link.
- *
- * Declared rather than detected. Asking the VCS what it ignores would be more
- * general but needs a subprocess, and it disagrees with CI for anything ignored
- * through a developer's *global* config — so the gate would pass locally and
- * fail on the runner, or the reverse.
- */
 const isOnDemandReport = (token) => {
   const parts = token.split('/');
   return (
@@ -101,12 +87,6 @@ const isExpectedAbsent = (token) =>
   isOnDemandReport(token) ||
   GATES.expectedAbsentPrefixes.some((prefix) => token.startsWith(prefix));
 
-/**
- * The workspace directory owning a doc, if any.
- *
- * A doc inside a workspace may point at a file relative to that workspace's own
- * root, which is correct in context and would otherwise be reported broken.
- */
 const WORKSPACE_DIRS = readPublishing(REPO_ROOT).workspaceDirs;
 
 const workspaceOf = (docPath) => {
@@ -116,11 +96,6 @@ const workspaceOf = (docPath) => {
     : undefined;
 };
 
-/**
- * Root-anchored tokens resolve from the repo root. A relative markdown link
- * resolves from the document's own directory. A doc may also point at a file
- * inside its own workspace, so that root is tried too.
- */
 const resolvesSomewhere = (token, docPath) => {
   const roots = isRootAnchored(token, REPO_ROOTS)
     ? [REPO_ROOT, workspaceOf(docPath)]
@@ -149,7 +124,6 @@ const saveBaseline = (baseline) =>
     `${JSON.stringify(sortBaseline(baseline), undefined, 2)}\n`,
   );
 
-/** `--accept <doc> <reference> --reason "<why>"`, or undefined. (pure) */
 const parseAccept = (argv) => {
   const at = argv.indexOf('--accept');
   if (at === -1) {
@@ -163,12 +137,6 @@ const parseAccept = (argv) => {
   };
 };
 
-/**
- * Grandfather exactly one reference. Refuses anything that is not currently
- * failing: an entry for a reference that already resolves is either a typo or a
- * pre-emptive exemption, and both rot into "why is this here?" lines that nobody
- * dares delete.
- */
 const runAccept = (accept, findings, baseline) => {
   const { doc, reason, token } = accept;
   if (doc === undefined || token === undefined || reason === undefined) {
@@ -194,11 +162,6 @@ const runAccept = (accept, findings, baseline) => {
   console.log(`Grandfathered ${doc} \`${token}\` — ${reason}`);
 };
 
-/**
- * Prune-only. `--write` may drop entries that now resolve; it may never absorb a
- * new failure, which is what made the old rebaseline a one-keystroke way to make
- * real breakage disappear.
- */
 const runWrite = (findings, baseline) => {
   const dropped = prunedCount(baseline, findings);
   saveBaseline(prunedBaseline(baseline, findings));

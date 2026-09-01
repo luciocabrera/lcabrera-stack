@@ -22,9 +22,6 @@ describe('buildGitEnv', () => {
   });
 
   it('keeps the rest of the environment', () => {
-    // A denylist on purpose: git needs HOME for global config, which is where
-    // safe.directory lives. Dropping it would trade one silent failure for
-    // another.
     expect(buildGitEnv({ HOME: '/home/dev', LANG: 'C' })).toMatchObject({
       HOME: '/home/dev',
       LANG: 'C',
@@ -46,8 +43,6 @@ describe('runGit', () => {
   });
 
   it('returns undefined rather than throwing when git fails', () => {
-    // Callers branch on the absent answer; a throw here would take out the
-    // whole gate because one branch could not be read.
     expect(
       runGit({ args: ['rev-parse', '--verify', 'nope'], cwd: '/' }),
     ).toBeUndefined();
@@ -62,8 +57,6 @@ describe('runGitStatus', () => {
   });
 
   it('reports the exit code, which is the answer for commands that signal by it', () => {
-    // `check-ignore` exits 1 for "nothing matched" — a real answer that
-    // collapsing every failure to undefined would lose.
     const nothing = runGitStatus({
       args: ['check-ignore', 'definitely-not-ignored-xyz'],
       cwd: process.cwd(),

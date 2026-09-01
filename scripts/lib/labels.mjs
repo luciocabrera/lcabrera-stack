@@ -6,8 +6,6 @@
  * `.claude/rules/scripts.md`.
  */
 
-// [commitType, labelName, color, description] — tuples (not repeated object
-// literals) so the table doesn't read as self-duplication.
 const TYPE_LABELS = [
   ['feat', 'type: feature', '0e8a16', 'A new feature'],
   ['fix', 'type: bug', 'd73a4a', 'A bug fix'],
@@ -36,14 +34,11 @@ const BREAKING_LABEL = {
 const APP_COLOR = '1d76db';
 const PKG_COLOR = '5319e7';
 
-/** commit type → its label name (undefined for an unknown type). */
 export const typeLabelName = (type) =>
   TYPE_LABELS.find(([commitType]) => commitType === type)?.[1];
 
-/** workspace `{ name, kind }` → its scope label name. */
 export const workspaceLabelName = ({ name, kind }) => `${kind}: ${name}`;
 
-/** The full canonical label set given the derived workspaces. */
 export const buildLabelDefinitions = (workspaces) => [
   ...TYPE_LABELS.map(([, name, color, description]) => ({
     name,

@@ -34,7 +34,6 @@ const ROW_HEIGHT = 40;
 const OVERSCAN = 2;
 const CONTAINER_HEIGHT = 400;
 const TOTAL_ROWS = 200;
-/** `getVerticalVirtualizationWindow`: `ceil(containerHeight / itemHeight)`. */
 const VISIBLE_ROWS = CONTAINER_HEIGHT / ROW_HEIGHT;
 
 const columns: TableColumn<TestRow>[] = [
@@ -52,16 +51,6 @@ const rows: readonly TestRow[] = Array.from(
   }),
 );
 
-/**
- * jsdom lays nothing out, so the scroll container reports zero for every box
- * metric and ignores writes to `scrollTop`. These are the three numbers the
- * virtualization window and the grid's paging are computed from, installed on
- * the real element the component scrolls, so the code under test is untouched.
- *
- * Installed once per element: a callback ref re-runs whenever its identity
- * changes, and re-defining `scrollTop` would silently rewind the container to
- * the top on the next render.
- */
 const attachScrollMetrics = (container: HTMLDivElement | null) => {
   if (!container) return;
   if (Object.getOwnPropertyDescriptor(container, 'scrollTop')) return;
@@ -115,7 +104,6 @@ const getScrollContainer = () => screen.getByTestId('scroll-container');
 
 const getTabStops = () => [...getGrid().querySelectorAll('[tabindex="0"]')];
 
-/** The whole grid's tab stops, the container itself included. */
 const getAllTabStops = () => {
   const grid = getGrid();
 
@@ -127,7 +115,6 @@ const getRenderedRowIndices = () =>
     .getAllByRole('row')
     .map((row) => Number(row.getAttribute('aria-rowindex')));
 
-/** The row and column the DOM is actually focused on, read back off the node. */
 const readFocusedCell = () => {
   const cell = document.activeElement;
 
@@ -137,19 +124,6 @@ const readFocusedCell = () => {
   };
 };
 
-/**
- * A browser raises `scroll` for a programmatic `scrollTop` write; jsdom does
- * not. Every scroll the grid performs on its own therefore needs this to reach
- * the virtualization window, which is exactly what a real browser would do for
- * it one frame later.
- *
- * The **awaited async** `act` is load-bearing and is the only one in this file
- * that is: the scroll listener defers its state update through
- * `requestAnimationFrame`, so nothing but an act that drains microtasks flushes
- * the re-render. Every other helper here ends by awaiting this one, which is
- * why none of them needs an `act` of its own — `fireEvent` and a plain
- * `.focus()` both settle before this returns.
- */
 const flushScroll = async () => {
   await act(async () => {
     getScrollContainer().dispatchEvent(new Event('scroll'));
@@ -174,7 +148,6 @@ const pressKey = async ({ isRangeModifier = false, key }: PressKeyArgs) => {
   await flushScroll();
 };
 
-/** Tab into the grid: focus lands on the container, which delegates onwards. */
 const enterGrid = async () => {
   getGrid().focus();
   await flushScroll();
@@ -182,11 +155,6 @@ const enterGrid = async () => {
 
 describe('grid focus model', () => {
   beforeEach(() => {
-    // A frame, deferred. Running the callback synchronously would be the
-    // obvious stub and is wrong: the scroll listener stores the handle this
-    // call returns and clears it from inside the callback, so a synchronous
-    // one clears it first and the assignment then leaves a handle behind that
-    // suppresses every later scroll.
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
       queueMicrotask(() => {
         callback(0);
@@ -203,15 +171,6 @@ describe('grid focus model', () => {
   });
 
   it('declares grid, rowgroup, row and gridcell roles on the elements that carry them', () => {
-    // Every assertion here reads the `role` ATTRIBUTE, not a role query.
-    // Testing Library resolves implicit roles, and `<tr>` implicitly maps to
-    // `row` and `<tbody>` to `rowgroup` — so `getAllByRole('row')` returns the
-    // same elements whether or not the attribute is present, and a test written
-    // that way passes with the attribute deleted. In a real browser those
-    // implicit roles are gone, because `display: flex`/`grid` removes them
-    // (ADR-062), which is the whole reason the attributes exist. The attribute
-    // is therefore the only thing worth asserting, and the only thing whose
-    // deletion this suite can catch.
     render(<Harness />);
 
     const grid = getGrid();
@@ -247,8 +206,6 @@ describe('grid focus model', () => {
     const spacers = [...body.querySelectorAll('tr[aria-hidden="true"]')];
     const rowElements = [...body.querySelectorAll('tr')];
 
-    // Both spacers are present at this scroll offset — the filler is real and
-    // is still not announced.
     expect(spacers.length).toBe(2);
     expect(screen.getAllByRole('row').length).toBe(
       rowElements.length - spacers.length,
@@ -275,8 +232,6 @@ describe('grid focus model', () => {
     const renderedIndices = getRenderedRowIndices();
     const [first, second] = renderedIndices;
 
-    // Window-relative indexing would number the rendered rows 2, 3, 4… — the
-    // header being row 1 — regardless of where the window sits.
     expect(first).toBe(100 - OVERSCAN + 2);
     expect(second).toBe(100 - OVERSCAN + 3);
     expect(renderedIndices).not.toContain(2);
@@ -289,9 +244,6 @@ describe('grid focus model', () => {
     const renderedIndices = getRenderedRowIndices();
     const lastIndex = renderedIndices.at(-1);
 
-    // The count and the indices are only meaningful against one another: if
-    // they are derived from different bases, one of them is wrong and neither
-    // rule alone would show it.
     expect(lastIndex).toBe(Number(getGrid().getAttribute('aria-rowcount')));
   });
 
@@ -309,8 +261,6 @@ describe('grid focus model', () => {
     expect(getAllTabStops().length).toBe(1);
 
     await scrollTo(ROW_HEIGHT * 150);
-    // The focused row is unmounted, so no cell can hold the stop — the grid
-    // container takes it back rather than leaving the grid with none.
     expect(getAllTabStops()).toEqual([getGrid()]);
   });
 
@@ -380,7 +330,6 @@ describe('grid focus model', () => {
     const claimed = fireEvent.keyDown(grid, { key: 'ArrowDown' });
     const unclaimed = fireEvent.keyDown(grid, { key: 'a' });
 
-    // fireEvent answers false when a handler called preventDefault.
     expect(claimed).toBe(false);
     expect(unclaimed).toBe(true);
   });
@@ -396,9 +345,6 @@ describe('grid focus model', () => {
 
     await scrollTo(ROW_HEIGHT * 150);
 
-    // The proof the criterion is about: the focused node is gone and DOM focus
-    // has fallen to the document body, exactly the failure this model exists to
-    // survive.
     expect(getRenderedRowIndices()).not.toContain(5);
     expect(document.activeElement).toBe(document.body);
 
@@ -419,12 +365,9 @@ describe('grid focus model', () => {
     expect(document.activeElement).toBe(document.body);
     expect(getRenderedRowIndices()).not.toContain(4);
 
-    // Tabbing back in scrolls the remembered row into view and focuses it —
-    // the grid is one stop in the page's tab order, entered where it was left.
     await enterGrid();
     expect(readFocusedCell()).toEqual({ ariaRowIndex: '4', text: 'City 2' });
 
-    // And navigation continues from there rather than from the top.
     await pressKey({ key: 'ArrowDown' });
     expect(readFocusedCell()).toEqual({ ariaRowIndex: '5', text: 'City 3' });
   });
@@ -433,10 +376,6 @@ describe('grid focus model', () => {
     render(<Harness />);
 
     const cell = screen.getAllByRole('gridcell')[4];
-    // The one `act` outside `flushScroll` that is needed, and needed precisely
-    // because this is the only interaction here that does not scroll: nothing
-    // awaits `flushScroll` afterwards, so the focus effects have nothing else
-    // to be flushed by.
     await act(async () => {
       (cell as HTMLElement).focus();
     });

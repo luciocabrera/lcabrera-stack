@@ -45,8 +45,6 @@ const getSplitter = () =>
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // The handle self-connects: it reads bounds from the normalized column and
-  // its width from useGetColumnWidth, then feeds them to useColumnResize.
   mockUseGetNormalizedColumn.mockReturnValue({ maxWidth: 400, minWidth: 80 });
   mockUseGetColumnWidth.mockReturnValue(120);
   mockUseColumnResize.mockReturnValue({
@@ -81,9 +79,6 @@ describe('ResizeHandle', () => {
   });
 
   it('is not a tab stop, because the grid owns the only one', () => {
-    // A grid has exactly one tab stop and it roves over cells (ADR-062). One
-    // splitter per column, each its own stop, is what that model replaces —
-    // keyboard access to width comes from the header command instead (ADR-011).
     renderHandle();
 
     expect(getSplitter().tabIndex).toBe(-1);

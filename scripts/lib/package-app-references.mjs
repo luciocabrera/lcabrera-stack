@@ -13,25 +13,12 @@
 
 import { proseLines } from './renamed-mentions.mjs';
 
-/** A path segment, so prose about "the apps directory" is not a finding. */
 const APP_PATH = /\bapps\/[a-z0-9][a-z0-9_-]*/g;
 
-/** Generated from git history — a dated record, not a live pointer. */
 const GENERATED = /(^|\/)CHANGELOG\.md$/;
 
-/**
- * `.test.*` is what every published package excludes from `files`. `.spec.*` is
- * a sanctioned suffix here but no manifest excludes it, so one would ship and is
- * checked — widen this only alongside the manifests.
- */
 const TEST = /\.test\.[a-z]+$/;
 
-/**
- * Text a package ships. A comment in `src` reaches consumers like prose does,
- * and so does a workflow template's `paths:` filter — `@lcabrera/devkit` ships
- * `.yml` and two extensionless git hooks, which is why this is not a source
- * extension list. Anything without an extension is text here; binaries carry one.
- */
 const SHIPPED_TEXT = /\.(css|js|md|mjs|ts|tsx|ya?ml)$/;
 const NO_EXTENSION = /(^|\/)[^./]+$/;
 
@@ -40,7 +27,6 @@ export const isCheckedFile = (path) =>
   !GENERATED.test(path) &&
   !TEST.test(path);
 
-/** Whole-text scanning for source; markdown drops fences via `proseLines`. */
 const numberedLines = (path, text) =>
   path.endsWith('.md')
     ? proseLines(text)
@@ -48,12 +34,6 @@ const numberedLines = (path, text) =>
         .split('\n')
         .map((line, index) => ({ number: index + 1, text: line }));
 
-/**
- * One finding per occurrence, not per distinct name: two mentions on different
- * lines are two separate edits, and a verify script lists every discrepancy.
- *
- * `exists` takes a repo-relative path; injected so this stays testable.
- */
 export const appReferences = ({ exists, path, text }) =>
   numberedLines(path, text).flatMap((line) =>
     [...line.text.matchAll(APP_PATH)]

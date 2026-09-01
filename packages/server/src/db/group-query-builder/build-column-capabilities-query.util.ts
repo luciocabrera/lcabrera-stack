@@ -6,10 +6,6 @@ import {
   PERIOD_CAPABLE_TYPE_NAMES,
 } from './group-query-builder.constants.ts';
 
-/**
- * Bare type names: `bt.typname` carries no schema, so this over-selects
- * `app.date` and the gate refuses it. Over-selecting is the safe direction.
- */
 const PERIOD_CAPABLE_TYPE_SQL_NAMES = [
   ...new Set(
     [...PERIOD_CAPABLE_TYPE_NAMES].map(
@@ -18,13 +14,6 @@ const PERIOD_CAPABLE_TYPE_SQL_NAMES = [
   ),
 ].toSorted((a, b) => a.localeCompare(b));
 
-/**
- * Bound parameters only — no identifier interpolation (ADR-058).
- * `spanDays` is measured in the truncation's frame: casting `date` to `timestamptz`
- * under-counts across DST, which is the wrong direction for an upper bound.
- * `extract(epoch)` is `numeric` (a string from `pg`); `::float8` keeps the arithmetic
- * numeric.
- */
 export const buildColumnCapabilitiesQuery = ({
   columns,
   schema,

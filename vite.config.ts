@@ -1,8 +1,3 @@
-import { defineConfig } from 'vite-plus';
-
-import { createFmtConfig } from '@lcabrera/vite-config/fmt';
-import { createLintConfig } from '@lcabrera/vite-config/lint';
-
 /**
  * Every workspace in this repo, classified by runtime.
  *
@@ -17,7 +12,16 @@ import { createLintConfig } from '@lcabrera/vite-config/lint';
  * today, so these are inert as rules and exact as documentation. They become
  * load-bearing the moment a category containing `no-undef` is turned on, which
  * is why they are kept correct rather than deleted.
+ *
+ * `lintConfig` is exported for the same reason: `scripts/verify-lint-plugins.mjs`
+ * reads the live plugin list off it.
  */
+
+import { defineConfig } from 'vite-plus';
+
+import { createFmtConfig } from '@lcabrera/vite-config/fmt';
+import { createLintConfig } from '@lcabrera/vite-config/lint';
+
 export const WORKSPACE_RUNTIMES = {
   /**
    * Neither runtime, and so neither set of globals. `@lcabrera/utils` guarantees
@@ -65,7 +69,6 @@ const fmtConfig = createFmtConfig({
   ],
 });
 
-/** Exported so `scripts/verify-lint-plugins.mjs` can read the live plugin list. */
 export const lintConfig = createLintConfig({
   workspaceRuntimes: WORKSPACE_RUNTIMES,
 });

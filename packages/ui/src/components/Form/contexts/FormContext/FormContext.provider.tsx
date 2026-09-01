@@ -52,8 +52,6 @@ export const FormProvider = <TValues extends Record<string, unknown>>({
     metaStore.set({ mode });
   }, [mode, metaStore]);
 
-  // Field definitions may be rebuilt from fresh loader data — re-sync them
-  // (and their flattened leaves) whenever the prop identity changes.
   useEffect(() => {
     if (metaStore.get()?.fields === fields) return;
     metaStore.set({ fields, leafFields: flattenFields(fields) });

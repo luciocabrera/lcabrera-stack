@@ -10,10 +10,6 @@ type CookiePair = {
   readonly value: string;
 };
 
-/**
- * Build a fresh `Headers` carrying one `Set-Cookie` per entry that has both a non-empty
- * `key` and `value`.
- */
 export const buildSetCookieHeaders = ({
   entries,
   expiresAt,

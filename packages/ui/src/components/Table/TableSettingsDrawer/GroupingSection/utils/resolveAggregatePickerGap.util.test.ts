@@ -30,8 +30,6 @@ describe('resolveAggregatePickerGap', () => {
   });
 
   it('reports exhaustion when the withheld function is one the column carries', () => {
-    // The ordering's discriminating case: the budget is spent *by this column*,
-    // so nothing was taken from it and the user is sent to its own measures.
     expect(
       resolveAggregatePickerGap({
         affordable: ['count', 'countDistinct'],
@@ -43,8 +41,6 @@ describe('resolveAggregatePickerGap', () => {
   });
 
   it('prefers the budget over exhaustion when both could describe the empty list', () => {
-    // `count` is applied and `countDistinct` withheld, so the column is neither
-    // fully measured nor free to add: the control to act on is another column's.
     expect(
       resolveAggregatePickerGap({
         affordable: ['count'],
@@ -67,8 +63,6 @@ describe('resolveAggregatePickerGap', () => {
   });
 
   it('reports nothing when there was never anything to offer', () => {
-    // An unaggregatable column, a staged group key, or no column chosen: all
-    // empty, and none of them has anything to tell the user.
     expect(
       resolveAggregatePickerGap({
         affordable: NONE,

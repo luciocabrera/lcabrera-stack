@@ -249,12 +249,6 @@ describe('fetchMoreFilterData', () => {
   });
 
   it('blocks every later page while a request has not settled, which is why requests must be time-bounded', async () => {
-    // Characterizes the in-flight guard rather than asserting a fix here. The
-    // guard is what makes concurrent pages impossible, and it is cleared only
-    // when the request settles — so an endpoint that goes silent leaves this
-    // filter unable to load anything more, permanently. The bound that stops
-    // that is FILTER_OPTIONS_TIMEOUT_MS, applied where the request is built
-    // (resolveDistinctFilterOptions), not here.
     const { result } = renderHook(() =>
       fetchMoreFilterData<TestData, TestResponse>({
         columnKey: 'status',
@@ -265,8 +259,6 @@ describe('fetchMoreFilterData', () => {
       }),
     );
 
-    // A loader that accepts the request and never answers — the failure mode a
-    // rejection would not produce.
     const neverSettles = vi.fn(() => new Promise<TestResponse>(() => {}));
     const args = {
       dataSelector: (response: TestResponse) => [...response.rows],

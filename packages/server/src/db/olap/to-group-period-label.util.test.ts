@@ -47,10 +47,6 @@ describe('toGroupPeriodLabel', () => {
   });
 
   it('reads an unzoned value in the frame it was written in', () => {
-    // The defect this exists to prevent: a January group whose `toISOString()`
-    // is the previous December under any positive UTC offset, so an ISO heading
-    // names the wrong month. Constructed from local fields, read back from
-    // local fields.
     expect(
       toGroupPeriodLabel({
         isZoned: false,
@@ -71,7 +67,6 @@ describe('toGroupPeriodLabel', () => {
   });
 
   it('pads a year below four digits rather than shortening the heading', () => {
-    // `Date.UTC` maps 0–99 onto 1900–1999, so the year is set explicitly.
     const ancient = new Date(Date.UTC(2000, 2, 1));
 
     ancient.setUTCFullYear(7);

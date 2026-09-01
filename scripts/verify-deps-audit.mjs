@@ -50,11 +50,6 @@ import {
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REGISTER = 'docs/agents/dependency-advisories.json';
 
-/**
- * The gate's floor. `moderate` rather than `high` because the advisory that
- * prompted this gate was a moderate one, and rather than `low` because npm
- * classifies a great deal of build-time noise there.
- */
 const DEFAULT_MINIMUM = 'moderate';
 
 const readRegister = () => {
@@ -65,7 +60,6 @@ const readRegister = () => {
   }
 };
 
-/** `YYYY-MM-DD` in UTC, so the gate does not flip at a contributor's midnight. */
 const todayUtc = () => new Date().toISOString().slice(0, 10);
 
 const reportBlocking = (blocking) => {

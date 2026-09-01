@@ -3,12 +3,6 @@ type ToGroupingSetMaskArgs = {
   readonly set: readonly string[];
 };
 
-/**
- * The value `GROUPING(k₁, …, kₙ)` returns for one grouping set: bit `n-1-i` is 1 when
- * `keys[i]` is **absent** from the set, so the first key owns the most significant bit.
- * Each key contributes a distinct power of two, so summing is exact; it is written as
- * addition rather than `|` because the bits never overlap.
- */
 export const toGroupingSetMask = ({ keys, set }: ToGroupingSetMaskArgs) => {
   const present = new Set(set);
 

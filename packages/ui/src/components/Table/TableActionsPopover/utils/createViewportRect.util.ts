@@ -5,10 +5,6 @@ type CreateViewportRectArgs = {
   readonly width: number;
 };
 
-/**
- * Builds a whole-viewport BoundsRect from the given window dimensions — the
- * fallback container bounds used while the table container ref is unmounted.
- */
 export const createViewportRect = ({ height, width }: CreateViewportRectArgs) =>
   ({
     bottom: height,

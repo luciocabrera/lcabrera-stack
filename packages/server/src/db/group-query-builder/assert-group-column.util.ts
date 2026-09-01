@@ -7,12 +7,6 @@ type AssertGroupColumnArgs = {
   readonly column: string;
 };
 
-/**
- * The two shared column assertions, raised as a **typed** grouping refusal.
- * `assertSafeIdentifier` and `assertColumnAllowed` are shared with the flat builder, so
- * they cannot throw a grouping-shaped error of their own — a flat `selectRows` refusing a
- * column has nothing to do with grouping.
- */
 export const assertGroupColumn = ({
   allowedColumns,
   column,

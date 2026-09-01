@@ -7,11 +7,6 @@ const ORDER_DATE_DESC_THEN_ID = [
   { column: 'order_id', direction: 'asc' },
 ] as const;
 
-/**
- * A cursor reaches the builder as JSON off a request, where a NULL column is
- * `null` — parsing it here is how it actually arrives, and keeps the literal
- * out of our own source (`unicorn/no-null`).
- */
 const NULL_LEADING_CURSOR = JSON.parse('[null, 4821]') as readonly unknown[];
 
 describe('buildKeysetClause', () => {

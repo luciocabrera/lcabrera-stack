@@ -12,10 +12,6 @@ import type { ColumnSort } from '@lcabrera/server/sort/sort.types';
 export const CAR_SALES_SCHEMA = 'public';
 export const CAR_SALES_TABLE = 'car_sales';
 
-/**
- * The primary key — and so the column that makes any order over this table a
- * total order (ADR-008).
- */
 export const CAR_SALES_PRIMARY_KEY = 'car_id';
 
 export const CAR_SALES_COLUMNS = [
@@ -51,37 +47,14 @@ export const CAR_SALES_COLUMNS = [
   'year',
 ] as const;
 
-/**
- * Passed as `allowedColumns`, so a column never listed here is rejected before it can
- * reach SQL.
- */
 export const CAR_SALES_ALLOWED_COLUMNS: readonly string[] = CAR_SALES_COLUMNS;
 
-/**
- * The Table client never needs it: `buildTablePageQuery` appends the primary key via
- * `appendPrimaryKeySorting`, so a scrolled page always arrives sorted.
- * It exists because `/_api/car-sales/paginated` is a public URL and that guarantee lives
- * in another package's client-side code — a direct request, or a column config that loses
- * `isPrimaryKey`, would otherwise get a paginated read with no ORDER BY, which repeats and
- * skips rows.
- */
 export const CAR_SALES_FALLBACK_SORT = [
   { columnKey: CAR_SALES_PRIMARY_KEY, direction: 'asc' },
 ] as const satisfies readonly ColumnSort[];
 
-/**
- * The only caller of that route is `/car-sales-infinite`'s load-more, which asks for
- * `INITIAL_PAGE_SIZE`; the `/car-sales` route takes its larger slice through the service
- * directly and never passes through the parser.
- */
 export const MAX_CAR_SALES_LIMIT = 1000;
 
-/**
- * Wide-alltypes caps at a number well below its column count, because 150 columns of
- * tiebreakers over 1M rows is work no user asked for.
- * So this cannot truncate a sort a user could express — it only stops a hand-made request
- * from growing the SQL text without limit.
- */
 export const MAX_CAR_SALES_SORT_RULES = CAR_SALES_COLUMNS.length;
 
 export const CAR_SALES_DISTINCT_FILTER_COLUMNS: Readonly<

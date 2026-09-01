@@ -11,11 +11,6 @@ describe('errorMessage', () => {
     expect(errorMessage(new Error('boom'))).toBe('boom');
   });
 
-  // The fixture is built by clearing the message rather than constructing an
-  // empty one: Biome's useErrorMessage rejects both `new TypeError('')` and the
-  // no-arg form, and rightly — it governs how errors are AUTHORED. This is a
-  // deliberately degenerate value being fed to the helper, not an error anyone
-  // throws, and mutating it says exactly that.
   it('falls back to the name when an Error has no message', () => {
     const cleared = new TypeError('emptied on the next line');
     cleared.message = '';
@@ -43,9 +38,6 @@ describe('errorMessage', () => {
     expect(errorMessage(circular)).toBe('unprintable failure value');
   });
 
-  // A helper whose job is rescuing a failure message must not become the
-  // failure. A throwing getter is contrived, but so is every input this exists
-  // for — and here it would replace the original error with its own.
   it('does not throw when a message getter throws', () => {
     const hostile = new Error('x');
     Object.defineProperty(hostile, 'message', {

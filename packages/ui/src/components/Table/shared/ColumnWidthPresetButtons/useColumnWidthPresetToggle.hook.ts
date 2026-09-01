@@ -16,7 +16,6 @@ export const useColumnWidthPresetToggle = ({
     setSelectedPreset(newPreset);
 
     if (newPreset === undefined) {
-      // Deselected — revert to current state (no write).
       return;
     }
 

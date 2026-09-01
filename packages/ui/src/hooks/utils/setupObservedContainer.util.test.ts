@@ -47,7 +47,6 @@ describe('setupObservedContainer', () => {
     });
 
     expect(onMeasure).toHaveBeenCalledTimes(1);
-    // syncScrollPosition() runs synchronously at setup.
     expect(setScroll).toHaveBeenCalledExactlyOnceWith(12);
 
     cleanup();
@@ -69,7 +68,6 @@ describe('setupObservedContainer', () => {
     setScroll.mockClear();
     scrollValue = 40;
 
-    // Two scrolls in the same frame → only one requestAnimationFrame scheduled.
     container.dispatchEvent(new Event('scroll'));
     container.dispatchEvent(new Event('scroll'));
     expect(frameCallbacks).toHaveLength(1);
@@ -78,7 +76,6 @@ describe('setupObservedContainer', () => {
     flushFrame();
     expect(setScroll).toHaveBeenCalledExactlyOnceWith(40);
 
-    // A subsequent scroll schedules a fresh frame now the flag is cleared.
     container.dispatchEvent(new Event('scroll'));
     expect(frameCallbacks).toHaveLength(1);
 
@@ -106,7 +103,6 @@ describe('setupObservedContainer', () => {
       setScroll: vi.fn(),
     });
 
-    // Schedule a frame, then tear down before it flushes.
     container.dispatchEvent(new Event('scroll'));
     expect(frameCallbacks).toHaveLength(1);
 
@@ -128,7 +124,6 @@ describe('setupObservedContainer', () => {
       setScroll: vi.fn(),
     });
 
-    // No throw, and cleanup is still safe to call without a resize observer.
     expect(() => cleanup()).not.toThrow();
   });
 

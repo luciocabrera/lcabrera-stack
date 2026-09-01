@@ -32,8 +32,6 @@ describe('parsePackageManagerPin', () => {
   });
 
   it('reports a bare pin as parsed but unhashed, not as malformed', () => {
-    // What taze writes. pnpm accepts it, so it must not read as an error here —
-    // only as the missing integrity half.
     expect(parsePackageManagerPin(BARE)).toEqual({
       algorithm: null,
       digest: null,
@@ -65,9 +63,6 @@ describe('describePinOutcome', () => {
   });
 
   it('says the pin moved even though corepack exited non-zero', () => {
-    // The #927 case. corepack installs pnpm, rewrites the field, then dies
-    // launching it. Announcing "continuing with the current pnpm" here — which
-    // is what the exit code invites — states the opposite of the truth.
     const outcome = describePinOutcome({
       after: HASHED,
       before: PREVIOUS,
@@ -80,8 +75,6 @@ describe('describePinOutcome', () => {
   });
 
   it('errors when corepack died before its write and left taze bare version', () => {
-    // The dangerous inverse: the version moved, so every version-based check
-    // sees a successful refresh, while the pin has silently lost its hash.
     const outcome = describePinOutcome({
       after: BARE,
       before: PREVIOUS,
@@ -93,7 +86,6 @@ describe('describePinOutcome', () => {
   });
 
   it('errors on a missing hash even when corepack reported success', () => {
-    // Exit code 0 is not evidence either — the verdict comes from the field.
     const outcome = describePinOutcome({ after: BARE, before: PREVIOUS });
 
     expect(outcome.level).toBe('error');

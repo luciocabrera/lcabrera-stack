@@ -28,10 +28,6 @@ describe('parseCarSalesPageParams', () => {
   });
 
   it('clamps the window to the endpoint ceiling', () => {
-    // `/_api/car-sales/paginated` is public and unauthenticated over a 500k-row
-    // table, so an uncapped `?limit=` is a whole-table read and a whole-table
-    // JSON body. Asserting an OVER-cap request is what makes this test fail
-    // without the clamp — a normal request passes either way (#701 review).
     expect(parse(`limit=${MAX_CAR_SALES_LIMIT + 1}`).limit).toBe(
       MAX_CAR_SALES_LIMIT,
     );
@@ -46,8 +42,6 @@ describe('parseCarSalesPageParams', () => {
   });
 
   it('never asks for a page of zero rows', () => {
-    // `LIMIT 0` is an empty page whose `hasMore` says the set is exhausted —
-    // a scroll session that ends without a word.
     expect(parse('limit=0').limit).toBe(1);
   });
 

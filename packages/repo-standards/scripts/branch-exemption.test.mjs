@@ -13,8 +13,6 @@ describe('isExemptBranch', () => {
   });
 
   it('does not exempt `main` in a repository whose trunk is not `main`', () => {
-    // What makes the option load-bearing rather than merely permissive: with a
-    // `master` trunk, a branch called `main` is a topic branch like any other.
     expect(isExemptBranch({ branch: 'main', defaultBranch: 'master' })).toBe(
       false,
     );

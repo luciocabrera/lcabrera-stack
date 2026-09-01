@@ -229,9 +229,6 @@ describe('TableEmptyState', () => {
     });
 
     it('blames no column when a key combination is what was refused', () => {
-      // `estimate-too-large` names the **widest** key, not the one just picked,
-      // so a heading built from it would tell a user who added a third column
-      // that the first was refused. Clearing is still the way out.
       useGetTableDataErrorMock.mockReturnValue({
         column: 'delivery_date',
         estimatedRows: 73_600,

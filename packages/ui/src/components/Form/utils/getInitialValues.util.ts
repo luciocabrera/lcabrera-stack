@@ -7,8 +7,6 @@ const getDefaultValueForField = <TValues extends Record<string, unknown>>(
     case 'boolean': {
       return false;
     }
-    // A number field stores `undefined` when cleared, so it must start there
-    // too — seeding `''` makes an untouched-then-cleared field read as dirty.
     case 'number': {
       return undefined;
     }

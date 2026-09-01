@@ -35,14 +35,6 @@ query($owner:String!, $repo:String!, $number:Int!) {
   }
 }`;
 
-/**
- * The pull request node, or `undefined` when GitHub returned none.
- *
- * `undefined` rather than a throw, because the two callers want different things
- * from "could not read it": the report exits non-zero, and the gate refuses to
- * post a status against an unknown SHA. Deciding that here would take the choice
- * away from both.
- */
 export const fetchPullRequestThreads = ({ number, repository }) => {
   const [owner, repo] = repository.split('/');
   const raw = runGh([

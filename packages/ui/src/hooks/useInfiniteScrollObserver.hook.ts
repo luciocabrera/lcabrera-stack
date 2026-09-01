@@ -12,10 +12,6 @@ export type UseInfiniteScrollObserverArgs = {
   readonly threshold: number;
 };
 
-/**
- * `onReachEnd` is read through a ref so inline callbacks do not reconnect the observer.
- * The handler must be idempotent: the sentinel can stay in view and fire repeatedly.
- */
 export const useInfiniteScrollObserver = ({
   isEnabled,
   onReachEnd,
@@ -41,11 +37,6 @@ export const useInfiniteScrollObserver = ({
       (entries) => {
         const [entry] = entries;
         if (!entry?.isIntersecting) return;
-        // A visible sentinel in a container that isn't overflowing means the
-        // content doesn't fill the viewport, not that a real bottom was
-        // reached. Only fill in that case when the caller allows it — a
-        // client-side filter must not, or an empty/short result would keep
-        // fetching pages forever.
         if (!shouldFetchToFill && root.scrollHeight <= root.clientHeight)
           return;
         onReachEndRef.current();

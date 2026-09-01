@@ -22,9 +22,6 @@ export const toQueryFilters = ({
         return toDateQueryFilters({ column, filter });
       }
       if (filter.type === 'empty') {
-        // The one arm producing a **unary** filter: `appendFilterClause` gives
-        // it a branch that binds no parameter, so it must not be handed a
-        // `value` slot here either.
         return [
           {
             column,
@@ -39,7 +36,6 @@ export const toQueryFilters = ({
         return toTextQueryFilters({ column, filter });
       }
 
-      // Remaining: 'select' | 'multiSelect'.
       return toSelectQueryFilters({ column, filter });
     },
   );

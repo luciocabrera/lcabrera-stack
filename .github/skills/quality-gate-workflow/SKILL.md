@@ -137,14 +137,20 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
   query builders). Not a Props table, not a file tree, not a mermaid of the
   function body, and not a new file because a folder is new.
 - **A trap, a measurement, or a why** → **not a comment.** No comment sits above
-  a function or component declaration and no prose sits inside its body
-  ([ADR-095](../../../docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md)).
+  a declaration, no prose sits inside a function or component body, and none
+  sits inside a type declaration
+  ([ADR-095](../../../docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
+  amended for the third position by
+  [ADR-104](../../../docs/decisions/ADR-104-the-no-comment-rule-covers-a-type-declaration.md)).
+  No linter reports this — ADR-104 says why — so it is yours to apply, and when a
+  comment is the only thing in dispute, delete it rather than debate it.
   A decision goes in the ADR that owns it; investigation and measurement go in
-  the pull request or the issue. Two exemptions: the short file-level "why"
-  header on a script, in
-  [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md), and JSDoc a
-  build reads (`@param`, `@returns`, …) — the annotations, not prose sharing
-  their block.
+  the pull request or the issue. Three exemptions: the short file-level "why"
+  header, mandatory on a script per
+  [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md) and permitted
+  anywhere; JSDoc a build reads (`@param`, `@returns`, …) — the annotations, not
+  prose sharing their block; and a one-line note on a member of an exported
+  type, which is a published surface.
 
 ### Where a new ADR goes
 

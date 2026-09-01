@@ -30,24 +30,12 @@ type ToGroupSortArgs = {
   readonly sort: readonly QuerySort[];
 };
 
-/**
- * **This and `decodeGroupedRows` are two halves of one convention** and live together for
- * the reason ADR-082 keeps an encoder beside its parser: the position `count` occupies
- * here is the position the decode skips, and nothing in the type system relates the two.
- */
 export const toGroupAggregates = ({
   requested,
 }: {
   readonly requested: readonly RequestedGroupAggregate[];
 }): readonly GroupAggregate[] => [{ fn: 'count' }, ...requested];
 
-/**
- * The rows of a grouped read, decoded into the group rows a grid renders.
- * Pairs each requested aggregate with the alias the builder projected it under, reading
- * the alias off the builder's own result rather than re-deriving the name — so the string
- * the SQL emitted and the string this decodes by are one string, and a change to the
- * builder's alias rule cannot silently strand a caller.
- */
 export const decodeGroupedRows = ({
   aggregates,
   columnKeys,
@@ -71,8 +59,6 @@ export const decodeGroupedRows = ({
   }
 
   const decoded = requested.map((aggregate, index) => {
-    // Non-null by the length guard above; the fallback is unreachable and
-    // present only for `noUncheckedIndexedAccess`.
     const emitted = selected[index] ?? count;
 
     if (emitted.fn !== aggregate.fn || emitted.column !== aggregate.column) {
@@ -100,28 +86,9 @@ export const decodeGroupedRows = ({
   );
 };
 
-/**
- * **Duplicated from `@lcabrera/ui`'s `toTableAggregateToken`** rather than imported, for
- * the reason every grouping shape in this package is
- * ([ADR-039](../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)): a
- * client-safe package and a Node-only one may not depend on each other, and a shared
- * contracts package needs a third *consumer*, not a third copy.
- * `groupingContract.test.ts` pins the aggregate vocabulary, the depth cap and the refusal
- * unions; it says nothing about this format, because neither half is reachable from it —
- * `toTableAggregateToken` is not on `@lcabrera/ui`'s export map and this is
- * module-private.
- */
 const toAggregateSortKey = ({ column, fn }: RequestedGroupAggregate) =>
   `${column}:${fn}`;
 
-/**
- * The nesting order is not negotiable — it *is* the tree — so a user's sort sets a level's
- * direction rather than reordering the levels, and under a rollup the `GROUPING` term
- * keeps its own placement so a subtotal stays a footer whichever way its key runs (#570).
- * The alias is derived by `resolveAggregateAlias` — the builder's own function, not a
- * second spelling of its rule — so the term the sort emits and the column the projection
- * emits cannot come to disagree.
- */
 export const toGroupSort = ({
   groupKeys,
   requested = [],

@@ -52,44 +52,20 @@ const FENCE = '---';
 
 const CONFIG_PREFIX = 'config.';
 
-/**
- * The keys read here, one literal regex each rather than one built from a
- * string: a computed pattern is both a lint finding and a way for a key to stop
- * matching without the change looking like one.
- */
 const REQUIRES_KEY = /^requires:[ \t]*/;
 
 const PEER_KEY = /^peer:[ \t]*/;
 
-/** What a peer entry declaring no range means: installed, at any version. */
 const ANY_VERSION = '*';
 
-/**
- * One item of a block sequence, at any indent YAML would accept for one. The
- * capture opens at the first space after the dash rather than after the whole
- * run of them, so that no two quantifiers can split that run between them — the
- * shape that costs an expression its linear runtime. `ITEM_SPACING` takes the
- * rest of the run off in JS, where it is one pass.
- */
 const SEQUENCE_ITEM = /^[ \t]*-([ \t].*)$/;
 
-/**
- * The spaces or tabs a `SEQUENCE_ITEM` capture still opens with. Not
- * `trimStart()`, which also takes non-breaking and vertical space — characters
- * an item may open with and this reader has always kept.
- */
 const ITEM_SPACING = /^[ \t]+/;
 
 const QUOTES = /^['"]|['"]$/g;
 
-/** A `# comment` running to end of line, which YAML does not read as value. */
 const COMMENT = /(?:^|[ \t])#.*$/;
 
-/**
- * The frontmatter body, line by line, or nothing when the file does not open
- * with a fence. The first line must be exactly the fence so that a horizontal
- * rule or a longer run of dashes is not read as the start of a block.
- */
 const frontmatterLines = (content) => {
   if (!content.startsWith(FENCE)) return [];
   const lines = content.replaceAll('\r\n', '\n').split('\n');
@@ -100,38 +76,20 @@ const frontmatterLines = (content) => {
   return end === -1 ? [] : lines.slice(1, end);
 };
 
-/**
- * The lines that carry value: comments removed, then anything left blank
- * dropped. Done once, up front, so every spelling below reads a declaration the
- * same way — a note above the first item of a block sequence is where an author
- * most naturally puts one, and it would otherwise separate the key from its own
- * list.
- */
 const significantLines = (lines) =>
   lines
     .map((line) => line.replace(COMMENT, ''))
     .filter((line) => line.trim() !== '');
 
-/** Whether a line's first non-space character is the given one. */
 const opensWith = (line, character) =>
   (line ?? '').trimStart().startsWith(character);
 
-/**
- * The comma-separated body of a flow array. The caller establishes that the
- * value opens with a bracket before calling, so this cannot reach forward and
- * adopt a bracket belonging to a later key. It is read across lines because a
- * formatter breaks a long array over several — `.claude/rules/routes-data.md` is
- * already written that way — and a matcher bound to a single line would read
- * such a declaration as absent, which is the silent form of this gate not
- * firing.
- */
 const flowArrayBody = (value) => {
   const open = value.indexOf('[');
   const close = value.indexOf(']', open + 1);
   return close === -1 ? undefined : value.slice(open + 1, close);
 };
 
-/** The same body from the block spelling, up to the next key. */
 const blockSequenceBody = (lines) => {
   const end = lines.findIndex((line) => !SEQUENCE_ITEM.test(line));
   const items = (end === -1 ? lines : lines.slice(0, end)).map(
@@ -140,11 +98,6 @@ const blockSequenceBody = (lines) => {
   return items.length === 0 ? undefined : items.join(',');
 };
 
-/**
- * The entries a declaration holds, whichever way it is spelled. A scalar is its
- * own single entry; anything the value cannot be read out of is undefined,
- * which is also how "no declaration" is reported.
- */
 const declaredEntries = (inline, following) => {
   if (inline !== '') {
     return opensWith(inline, '[')
@@ -156,12 +109,6 @@ const declaredEntries = (inline, following) => {
     : blockSequenceBody(following);
 };
 
-/**
- * One key's declaration: its line in the file, and its entries as one delimited
- * string. Taking the key as a parameter is what keeps `peer:` from growing a
- * second reader — a spelling either key can be written in is read for both, so
- * the two gates cannot drift apart in what they can see.
- */
 const declarationFor = ({ content, key }) => {
   const lines = frontmatterLines(content);
   const index = lines.findIndex((line) => key.test(line));
@@ -171,7 +118,6 @@ const declarationFor = ({ content, key }) => {
   return entries === undefined ? undefined : { entries, line: index + 2 };
 };
 
-/** The individual entries of a declaration, unquoted and stripped of padding. */
 const entriesOf = (declaration) =>
   declaration === undefined
     ? []
@@ -180,7 +126,6 @@ const entriesOf = (declaration) =>
         .map((entry) => entry.trim().replaceAll(QUOTES, ''))
         .filter((entry) => entry !== '');
 
-/** The config keys a piece of content declares it cannot run without. */
 export const requiredConfigKeys = (content) => [
   ...new Set(
     entriesOf(declarationFor({ content, key: REQUIRES_KEY }))
@@ -190,13 +135,6 @@ export const requiredConfigKeys = (content) => [
   ),
 ];
 
-/**
- * One `name@range` entry. Split at the LAST `@`, because a scoped package name
- * opens with one and a semver range never contains one — `@repo/x@>=1 <2` has
- * to read as that package and that range, not as a package called `repo/x@>=1`.
- * An entry with no separator declares a package and no constraint, which still
- * has to be installed for the file to be written.
- */
 const peerFromEntry = (entry) => {
   const separator = entry.lastIndexOf('@');
   if (separator <= 0) return { name: entry, range: ANY_VERSION };
@@ -207,11 +145,6 @@ const peerFromEntry = (entry) => {
   };
 };
 
-/**
- * The peer packages, with their ranges, a piece of content declares it cannot
- * run against. A name declared twice keeps its first range, matching how
- * `requiredConfigKeys` keeps the first of a repeated key.
- */
 export const requiredPeers = (content) => {
   const byName = new Map();
   for (const entry of entriesOf(declarationFor({ content, key: PEER_KEY }))) {
@@ -221,10 +154,5 @@ export const requiredPeers = (content) => {
   return [...byName.values()];
 };
 
-/**
- * Where the declaration sits, so a closure finding points at the line a reader
- * has to edit. Undefined when there is no declaration — which is also when
- * there is nothing to report.
- */
 export const requiresDeclarationLine = (content) =>
   declarationFor({ content, key: REQUIRES_KEY })?.line;

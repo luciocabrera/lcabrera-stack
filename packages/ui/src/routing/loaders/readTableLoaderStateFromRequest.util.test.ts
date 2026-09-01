@@ -305,9 +305,6 @@ describe('readTableLoaderStateFromRequest', () => {
     });
 
     it('answers no grouping when the caller passed no columns to check against', () => {
-      // Unsanitized keys have no safe consumer — they reach SQL as identifiers
-      // — so this is the opposite of the filters branch, which passes values
-      // through when it cannot check them.
       vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
 
       const result = readTableLoaderStateFromRequest<TestRow>({
@@ -348,9 +345,6 @@ describe('readTableLoaderStateFromRequest', () => {
 
   describe('a table nested in another route’s URL', () => {
     it('reads its own prefixed params, not the ones belonging to the table it sits over', () => {
-      // The half that makes the write side worth doing: without it the nested
-      // table writes `nested.filters` and its loader keeps answering from the
-      // list's `filters` — the drawer updates and the rows never do.
       const state = readTableLoaderStateFromRequest<TestRow>({
         appId: 'test-app',
         columns: testColumns,

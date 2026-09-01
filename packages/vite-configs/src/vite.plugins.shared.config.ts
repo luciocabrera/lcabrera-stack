@@ -14,12 +14,6 @@ type CreateReactRouterPluginsConfigArgs = {
   readonly isTestTaskRun?: boolean;
   readonly pluginsAfter?: PluginOption[];
   readonly pluginsBefore?: PluginOption[];
-  /**
-   * Extra StyleX aliases beyond `@/*`, each a URL pattern resolved against
-   * `appRootUrl`. Empty by default: a monorepo that compiles a sibling
-   * package's StyleX needs one, and its path is that repo's layout, not
-   * something a consumer of this package should inherit (ADR-069).
-   */
   readonly stylexAliases?: Readonly<Record<string, string>>;
   readonly stylexAliasPattern?: string;
   readonly stylexDev?: boolean;
@@ -88,11 +82,6 @@ const patchDeprecatedOptimizeDeps = (pluginOption: unknown): unknown => {
   };
 };
 
-// The stylex unplugin's configureServer hook starts a 150ms setInterval that
-// is only cleared on `server.httpServer.close`. Vitest runs Vite in middleware
-// mode with no httpServer, so the interval is never cleared and keeps the test
-// process alive ("close timed out after 10000ms"). Dev-server hooks are
-// irrelevant under vitest, so strip the hook for test task runs only.
 const stripConfigureServerHook = (pluginOption: PluginOption): PluginOption => {
   if (Array.isArray(pluginOption)) {
     return pluginOption.map((option) => stripConfigureServerHook(option));
@@ -102,9 +91,6 @@ const stripConfigureServerHook = (pluginOption: PluginOption): PluginOption => {
     return pluginOption;
   }
 
-  // Rebuilt by filtering rather than by rest-destructuring the key away: the
-  // omitted binding is unused by construction, and an unused binding is a
-  // finding this package may not suppress (AGENTS.md §4).
   return Object.fromEntries(
     Object.entries(pluginOption).filter(([key]) => key !== 'configureServer'),
   ) as PluginOption;

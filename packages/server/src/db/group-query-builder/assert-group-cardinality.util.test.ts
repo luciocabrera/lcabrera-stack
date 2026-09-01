@@ -51,7 +51,6 @@ describe('assertGroupCardinality', () => {
   });
 
   it('runs a grouping right at the refuse threshold', () => {
-    // The ceiling is inclusive: 50 000 is allowed, 50 001 is not.
     expect(assert(50_000)).toEqual({
       estimatedRows: 50_000,
       kind: 'estimate-above-warn-threshold',
@@ -64,8 +63,6 @@ describe('assertGroupCardinality', () => {
   });
 
   it('carries the offending column and the bound on the typed error', () => {
-    // The message is for a human; these two are what the loader edge maps into
-    // the serializable union.
     let caught: unknown;
 
     try {
@@ -83,9 +80,6 @@ describe('assertGroupCardinality', () => {
   });
 
   it('warns and proceeds when the statistics are unavailable', () => {
-    // The direction that matters: a freshly restored database has no statistics
-    // for anything, and refusing there would make grouping look broken exactly
-    // where it is most needed. The row limit is the backstop instead.
     expect(
       assertGroupCardinality({
         capabilities: CAPABILITIES,

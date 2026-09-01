@@ -106,16 +106,10 @@ describe('RadioOptionGroup', () => {
       />,
     );
 
-    // Guard the string, not the split array: `''.split(' ')` is `['']`, so a
-    // length check after splitting would pass even if the recipe compiled to
-    // nothing — and this assertion exists precisely to rule that out.
     const surfaceClassName =
       stylex.props(surfaceStyles.interactiveCard).className ?? '';
     expect(surfaceClassName.length).toBeGreaterThan(0);
 
-    // Asserted on an UNSELECTED card on purpose: `optionSelected` legitimately
-    // replaces the recipe's `borderColor` and `backgroundColor` keys — the
-    // hover included — on the chosen one.
     const unselectedCard = screen
       .getByRole<HTMLInputElement>('radio', { name: /Option A/i })
       .closest('label') as HTMLLabelElement;

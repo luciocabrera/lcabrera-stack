@@ -20,13 +20,6 @@ type KeysetClauseResult = {
   readonly values: readonly unknown[];
 };
 
-/**
- * The keyset ("seek") predicate for `cursor`: the rows that sort strictly after it under
- * `sort`.
- * Expanded lexicographic form — one OR-branch per sort position — rather than the compact
- * row comparison `(a, b) > ($1, $2)`, which cannot express mixed sort directions and is
- * wrong across NULLs (ADR-052).
- */
 export const buildKeysetClause = ({
   allowedColumns,
   cursor,

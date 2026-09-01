@@ -16,10 +16,6 @@ export const getNormalizedColumns = <TData>({
       sortIndex?: number;
     }
   >;
-  // Index the active sorts once. The previous shape ran both `sorting.find`
-  // and `sorting.indexOf` per column, so a wide table rescanned the sort list
-  // twice for every column. First entry wins, which is what `find` did when a
-  // key appears more than once.
   const sortByColumnKey = new Map<
     DataKey<TData>,
     { direction: SortingState<TData>[number]['direction']; index: number }

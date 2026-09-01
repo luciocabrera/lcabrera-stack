@@ -12,10 +12,6 @@ import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveCol
 
 import type { SortAscendingButtonProps } from './SortAscendingButton.types';
 
-/**
- * Identity and active-state come from the shared `SORT_ASCENDING_COMMAND` (ADR-011); this
- * surface owns only its live commit-context and menu presentation.
- */
 export const SortAscendingButton = <TData,>({
   columnKey,
   onClose,

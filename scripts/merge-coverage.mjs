@@ -50,21 +50,11 @@ const OUTPUT_PATH = join(
   'reports/fallow/coverage/coverage-final.json',
 );
 
-// The workspace's own vp shim by absolute path — never a bare `vp` off $PATH
-// (the Sonar S4036 hotspot). `vp install` always provides it.
 const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 
 const shouldRun = !process.argv.includes('--no-run');
 const changedOnly = process.argv.includes('--changed');
 
-/**
- * The workspaces to measure. With `--changed`, scopes to the covered workspaces
- * a diff (paths on stdin) DIRECTLY changed — so the fallow job stops running
- * coverage for workspaces the change never touched. The audit is new-only (it
- * scores only the diff's own files), so only a directly-changed workspace's
- * coverage is ever consulted; dependents don't need it. A root/shared change
- * (mode `full`) keeps the whole set.
- */
 const targetWorkspaces = () => {
   if (!changedOnly) {
     return COVERAGE_WORKSPACES;
@@ -111,10 +101,6 @@ const readWorkspaceCoverage = async ({ dir, name }) => {
   return JSON.parse(await readFile(path, 'utf8'));
 };
 
-/**
- * Istanbul keys every entry by absolute source path, so entries from different
- * workspaces never collide and a shallow merge is exactly right.
- */
 const mergeCoverage = (reports) => Object.assign({}, ...reports);
 
 const writeMerged = async (merged) => {
@@ -125,9 +111,6 @@ const writeMerged = async (merged) => {
 const main = async () => {
   const workspaces = targetWorkspaces();
 
-  // Scoped run that touched no covered workspace: still write an empty (valid)
-  // coverage file so `fallow audit --coverage` has an input and falls back to
-  // estimation for the diff's files. Nothing to measure is a success.
   if (changedOnly && workspaces.length === 0) {
     await writeMerged({});
     process.stdout.write(

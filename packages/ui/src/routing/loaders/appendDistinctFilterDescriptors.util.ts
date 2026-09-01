@@ -12,11 +12,6 @@ type AppendDistinctFilterDescriptorsArgs<TData> = {
   readonly transport: FilterOptionsTransport;
 };
 
-/**
- * Pure and fully serializable — works identically for hardcoded column constants and
- * future DB-introspected columns (`columnName` comes from `column.key`, schema/table from
- * the route, transport from app config).
- */
 export const appendDistinctFilterDescriptors = <TData>({
   columns,
   schemaName,

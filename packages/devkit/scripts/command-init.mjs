@@ -49,31 +49,15 @@ const readJsonIfPresent = (path) =>
 const readTextIfPresent = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
 
-/** Trailing newline included: every other file this kit writes has one. */
 const writeJson = (path, value) =>
   writeFileSync(path, `${JSON.stringify(value, undefined, 2)}\n`);
 
-/**
- * What the consumer can actually run, read from the link directory rather than
- * from any manifest's `bin` map. A declared bin that failed to link is exactly
- * the case a task must not be written for, and the two package managers link by
- * different mechanisms, so the directory is the only answer true under both.
- */
 const installedBins = (root) => {
   const binDir = join(root, 'node_modules', '.bin');
   if (!existsSync(binDir)) return [];
   return readdirSync(binDir);
 };
 
-/**
- * The branch this repository is on, read from `.git/HEAD` rather than by
- * shelling out — no subprocess means no PATH to trust, the same reasoning
- * `verify-branch-name.mjs` records for the same read.
- *
- * At init time this is the trunk: init runs before any topic branch exists, and
- * a consumer adopting the kit from a feature branch is told which name was
- * recorded so they can correct it.
- */
 const currentBranch = (root) => {
   try {
     const head = readFileSync(join(root, '.git', 'HEAD'), 'utf8').trim();
@@ -93,10 +77,6 @@ const writeConfig = ({ profile, root, upgrade }) => {
   });
   const defaultBranch = currentBranch(root);
   const existing = readJsonIfPresent(join(root, CONFIG_FILE_NAME));
-  // Layered over what is already there, not written over it: this file is shared
-  // with the gate runtime, so replacing it deletes that package's blocks. Read
-  // RAW rather than through `resolveConfig`, which answers with devkit's keys
-  // resolved and every other package's dropped.
   writeJson(
     join(root, CONFIG_FILE_NAME),
     initialConfig({
@@ -121,11 +101,6 @@ const writeConfig = ({ profile, root, upgrade }) => {
   };
 };
 
-/**
- * Tasks are written into the consumer's manifest, and only into one that is
- * already there: creating a `package.json` would be this command guessing a
- * package name and a version for a repository whose author has not chosen them.
- */
 const writeTasks = ({ profile, root }) => {
   const path = join(root, MANIFEST);
   const manifest = readJsonIfPresent(path);
@@ -145,36 +120,18 @@ const writeTasks = ({ profile, root }) => {
   return { added, skipped, warning: undefined };
 };
 
-/**
- * The same steps `sync` takes, through the same plan and the same writer — see
- * `applyPlan`. The plan is returned rather than only applied, because `init`
- * decides whether the run succeeded from the plan itself; a command re-deriving
- * that from its own printed output would be reading its own guess.
- */
 const materialise = ({ profile, root }) => {
   const { entries, manifest } = buildPlan({ profile, root });
   applyPlan({ entries, manifest, root });
   return entries;
 };
 
-/**
- * Everything past the refusals: write the config and the tasks, materialise,
- * then decide whether that amounted to setting the repository up.
- *
- * Separate from `runInit` so neither half carries both the argument handling
- * and the outcome handling. The refusals come first and independently, because
- * a refusal must leave the tree exactly as it found it.
- */
 const applyInit = ({ profile, root, upgrade }) => {
   const runner = writeConfig({ profile, root, upgrade });
   const { added, skipped, warning } = writeTasks({ profile, root });
   const entries = materialise({ profile, root });
   const { written } = countsFor(entries);
 
-  // Read AFTER the write, so it is the same layout `materialise` just used.
-  // Taken from the pre-write config, a custom `paths.hooks` made this compare
-  // the entries against the old directory, match nothing, and drop the one
-  // instruction without which the hooks never run.
   const hooksPath = resolveConfig(
     readTextIfPresent(join(root, CONFIG_FILE_NAME)),
   ).paths.hooks;
@@ -191,9 +148,6 @@ const applyInit = ({ profile, root, upgrade }) => {
     return 1;
   }
 
-  // Said out loud, because the whole point of --upgrade over --force is that it
-  // does NOT re-guess these, and a consumer who corrected one needs to know it
-  // survived rather than assume it did.
   if (runner.kept.length > 0) {
     const kept = runner.kept.map((line) => `  ${line}`).join('\n');
     console.log(`\nLeft alone, because you set them:\n${kept}`);
@@ -222,19 +176,6 @@ export const runInit = (argv, root) => {
     return 1;
   }
 
-  // The default is the profile ALREADY configured, not this package's. `--force`
-  // rewrites the config; it does not re-choose the profile. Reading the built-in
-  // default instead silently downgraded a `full` repository to `agent` — again
-  // reachable from this command's own advice to create a `package.json` and
-  // "re-run with --force" — and the workflows and hooks then stayed on disk
-  // while dropping out of every later plan, so `doctor --check` reported clean
-  // over a repository whose hooks could be deleted without a word.
-  //
-  // Validated BEFORE anything is written. `readProfileFlag` only checks that a
-  // value follows the flag, so `--profile fulll` used to reach `writeConfig`,
-  // land in `devkit.config.json`, and only then throw from `buildPlan` — leaving
-  // a repository where `sync` and `doctor` throw the same error and `init`
-  // refuses because a config it never chose to create is already there.
   const configured = resolveConfig(
     readTextIfPresent(join(root, CONFIG_FILE_NAME)),
   );

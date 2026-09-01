@@ -15,13 +15,6 @@ import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopo
 
 import type { ClearGroupingButtonProps } from './ClearGroupingButton.types';
 
-/**
- * "Clear Grouping" item of the grouping section: always shown to keep the menu layout
- * stable, disabled until some column is grouped.
- * It clears every applied key and every selected aggregate, not only the column whose menu
- * is open — grouping is one whole-table state, so an ungrouped column's menu can still
- * switch it off.
- */
 export const ClearGroupingButton = ({ onClose }: ClearGroupingButtonProps) => {
   const clearGrouping = useClearTableGrouping();
   const groupingKeys = useGetTableGroupingKeys();
@@ -34,9 +27,6 @@ export const ClearGroupingButton = ({ onClose }: ClearGroupingButtonProps) => {
     target: undefined,
   });
 
-  // The one exception to "always shown to keep the menu layout stable" above: a
-  // locked grouping has nothing to clear *to*, and an item permanently disabled
-  // for a reason the user cannot act on is worse than an absent one (#578).
   if (isGroupingLocked) return;
 
   const handleClearGrouping = () => {

@@ -22,9 +22,6 @@ describe('toGroupKeyItems', () => {
   });
 
   it('keeps the keys in nesting order, not in column display order', () => {
-    // The probe that discriminates: these two keys are declared in the opposite
-    // order on `columns`, so a version driven off the columns would pass a
-    // same-order case and fail only here.
     expect(
       toGroupKeyItems({
         columns,

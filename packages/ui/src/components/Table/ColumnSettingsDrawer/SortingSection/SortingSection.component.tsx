@@ -23,12 +23,6 @@ import { useGetColumnSorting } from '../ColumnDrawerContext/selectors';
 import { styles } from './SortingSection.stylex';
 import { SortingSectionToolbar } from './SortingSectionToolbar';
 
-/**
- * Mirrors `PinningSection`: identity and active-state come from the shared sorting
- * commands (ADR-011), and the active-state is derived from the DRAFT store
- * (`useGetColumnSorting` reads the drawer's per-column draft, not committed state) so the
- * drawer reflects pending edits while open.
- */
 export const SortingSection = ({ isBusy = false }: SortingSectionProps) => {
   const sortDirection = useGetColumnSorting();
   const setColumnSorting = useSetColumnSorting();

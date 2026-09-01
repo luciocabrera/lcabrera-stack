@@ -26,9 +26,6 @@ describe('declaredDependencies', () => {
 
 describe('inferRunner', () => {
   test('prefers the declared runner over the lockfile beneath it', () => {
-    // A Vite+ repository also has a pnpm lockfile. Answering `pnpm install`
-    // there would work and would still be wrong: it names a toolchain the
-    // repository deliberately does not drive itself through.
     expect(
       inferRunner({
         dependencies: ['vite-plus'],
@@ -52,11 +49,6 @@ describe('inferRunner', () => {
     expect(inferRunner().name).toBe('npm');
   });
 
-  // GitHub's ubuntu image, probed directly (#892): after `actions/setup-node`,
-  // `npm` and `yarn` are on PATH and `pnpm` and `bun` are not, while `corepack`
-  // is — so the workflows enable corepack unconditionally and only these two
-  // runners need a step of their own. `vp` is the sharper case: it is a project
-  // dependency, so installing it is the step that was about to run.
   test('only the runners a runner image lacks bring their own setup step', () => {
     const setupFor = (context) => inferRunner(context).ciSetup;
 
@@ -72,8 +64,6 @@ describe('inferRunner', () => {
     expect(setupFor()).toEqual([]);
   });
 
-  // An unpinned `uses:` runs whatever that tag points at today, which is the
-  // supply-chain hazard every other action reference in this package avoids.
   test('pins every setup action to a commit sha', () => {
     for (const context of [
       { dependencies: ['vite-plus'] },
@@ -87,9 +77,6 @@ describe('inferRunner', () => {
   });
 
   test('every runner answers all four keys the shipped files ask for', () => {
-    // The keys are read off the assets at runtime, so this is the standing
-    // half: a runner missing one would leave the files that use it unwritten
-    // for every consumer it matched.
     for (const files of [
       ['pnpm-lock.yaml'],
       ['yarn.lock'],

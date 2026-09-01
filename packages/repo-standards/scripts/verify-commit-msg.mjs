@@ -35,12 +35,6 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 
-/**
- * Roots the message file may legitimately come from. Git owns `COMMIT_EDITMSG`,
- * and in a linked worktree it lives under the primary checkout's
- * `.git/worktrees/<name>/` — outside this working tree — so the git directory
- * is admitted alongside the repo root. Everything else is still refused.
- */
 const allowedRoots = () => [resolveGitDir(REPO_ROOT)].filter(Boolean);
 
 const readMessage = (source) =>

@@ -30,23 +30,15 @@ describe('deps-refresh.sh and the packageManager pin', () => {
       tazeWrote,
       'the taze --write call moved or was renamed',
     ).toBeGreaterThan(-1);
-    // The whole point: taze writes `packageManager` too, so a read after it can
-    // never differ from the final value.
     expect(captured).toBeLessThan(tazeWrote);
   });
 
   it('decides on the field rather than on corepack exit status', () => {
     expect(script).toContain('scripts/verify-package-manager-pin.mjs');
-    // The old message announced the opposite of what a post-write failure did.
     expect(script).not.toContain('continuing with the current pnpm');
   });
 
   it('expands the corepack flag array in the bash-3.2-safe form', () => {
-    // `"${a[@]}"` on an EMPTY array aborts under `set -u` before bash 4.4, and
-    // this array is empty on the success path — so the plain form breaks the
-    // normal run, not the failing one. Nothing under scripts/ uses a bash-4-only
-    // construct, so the 3.2 floor is deliberate and this must stay guarded.
-    // Regex, not a string: a literal `${` trips noTemplateCurlyInString.
     expect(script).toMatch(
       /\$\{corepack_failed\[@\]\+"\$\{corepack_failed\[@\]\}"\}/u,
     );
@@ -54,8 +46,6 @@ describe('deps-refresh.sh and the packageManager pin', () => {
   });
 
   it('no longer claims taze leaves packageManager alone', () => {
-    // This sentence is what put the capture in the wrong place. If it comes
-    // back, the reasoning that produced the bug has come back with it.
     expect(script).not.toContain('taze does not touch the `packageManager`');
   });
 });

@@ -78,7 +78,6 @@ describe('DraggableList', () => {
   it('renders busy overlay for each item when isBusy is true', () => {
     const { container } = render(<DraggableList isBusy items={items} />);
 
-    // Each <li> gets an overlay div when busy
     const listItems = container.querySelectorAll('li');
 
     for (const li of listItems) {

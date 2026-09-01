@@ -27,17 +27,12 @@ describe('countCodeLines', () => {
   });
 
   it('counts a line whose comment follows code', () => {
-    // Only a line that STARTS a comment is prose. Discounting trailing ones
-    // would let a file hide logic behind them.
     expect(countCodeLines('const a = 1; // why')).toBe(1);
   });
 });
 
 describe('ALWAYS_SKIPPED', () => {
   it('holds the directory whose omission turns the gate into a hang', () => {
-    // Configuration extends this list rather than replacing it precisely so a
-    // consumer cannot drop this entry and end up walking their whole
-    // dependency tree.
     expect(ALWAYS_SKIPPED).toContain('node_modules');
   });
 });
@@ -66,9 +61,6 @@ describe('sizeProblem', () => {
   });
 
   it('holds a baselined file to its recorded size, not to the ceiling', () => {
-    // The whole point of the baseline: inherited debt may stay and may not
-    // grow. Measuring it against the ceiling instead would report every
-    // grandfathered file on every run.
     const args = { ceiling: CEILING, file: 'a.mjs', grandfathered: 500 };
 
     expect(sizeProblem({ ...args, lines: 500 })).toBeUndefined();
@@ -138,9 +130,6 @@ describe('baselineFor', () => {
   });
 
   it('orders by name so the diff a reviewer reads is stable', () => {
-    // The measured set arrives sorted by size, which reorders on any edit. A
-    // baseline written in that order would produce a diff nobody can read, and
-    // accepting new debt is meant to be a visible act.
     const baseline = baselineFor({
       ceiling: CEILING,
       measured: [

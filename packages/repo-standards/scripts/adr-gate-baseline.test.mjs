@@ -39,15 +39,11 @@ describe('the grandfathering baseline', () => {
     expect(runGate(root).status).toBe(0);
     expect(runGate(root).stdout).toContain('1 record(s) are grandfathered');
 
-    // The one that is not grandfathered is still held to the rules.
     editIn(root)(RECORD, '## Context', '## Not context');
     expect(runGate(root).output).toContain('no `## Context` section');
   });
 
   it('refuses a second --adopt over a baseline that is still there', () => {
-    // Named for what it asserts and no more: `--adopt` cannot refuse a baseline
-    // that has been DELETED, so a name like "no command absorbs new failures"
-    // would claim something neither this test nor the code keeps.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
 
@@ -57,9 +53,6 @@ describe('the grandfathering baseline', () => {
   });
 
   it('grandfathers afresh when the baseline is deleted, moving the bound', () => {
-    // Pinned as behaviour, not as a refusal: re-adoption after deletion exempts
-    // whatever fails at that moment, and leaves the bound intact — which is all
-    // the gate promises.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
     expect(readBaseline(root).maxEntries).toBe(1);
@@ -99,10 +92,6 @@ describe('the grandfathering baseline', () => {
   });
 
   it('refuses a list longer than its bound, whatever the entry is numbered', () => {
-    // What a number window leaves open: this repository's own sequence has gaps,
-    // so a record taking a retired number lands INSIDE any window and is
-    // grandfathered by one appended line. The bound is a count, which no
-    // numbering can slip past.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
     const write = writeIn(root);
@@ -113,8 +102,6 @@ describe('the grandfathering baseline', () => {
   });
 
   it('refuses to prune a grown baseline, rather than absorbing the entry', () => {
-    // `--write` prunes. If it also ratcheted the bound UP it would launder the
-    // edit above into a baseline the next run reports as clean.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
     const write = writeIn(root);
@@ -126,10 +113,6 @@ describe('the grandfathering baseline', () => {
   });
 
   it('does not say "unchanged" about a run that tightened the bound', () => {
-    // Reachable by hand-shortening the list without running --write, which
-    // leaves slack. The file is rewritten either way, so the message is the only
-    // thing that could be wrong — and a gate telling a reader nothing happened
-    // is the same defect as a gate claiming more than it checks.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
     const baseline = readBaseline(root);
@@ -144,12 +127,6 @@ describe('the grandfathering baseline', () => {
   });
 
   it('lets a count-preserving swap through, leaving the bound intact', () => {
-    // The residual, pinned as behaviour rather than argued away. Classifying a
-    // record frees its line; spending that line on a content-less new record
-    // keeps the count at its bound and reports nothing. Each new exemption still
-    // costs an old one, so the list cannot grow — but `maxEntries` does not move.
-    // Whether the gate should refuse a swap, and whether an exemption should be
-    // keyed on a record rather than on its filename, is #1014.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
     const write = writeIn(root);
@@ -173,11 +150,6 @@ describe('the grandfathering baseline', () => {
   });
 
   it('counts grandfathered and unclassified separately, because they differ', () => {
-    // The workflow this gate exists to invite: adding `governs` to an old record
-    // is allowed, rewriting its body is not. So classify one that still fails a
-    // section rule — it becomes visible to `--list --package` while staying
-    // grandfathered, and one number reported as both would be false on a green
-    // run, in output that ships.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
     runGate(root, ['--write']);
@@ -198,11 +170,6 @@ describe('the grandfathering baseline', () => {
   });
 
   it('exempts the filename, so a record can change under a listed name', () => {
-    // The root cause behind three separate counterexamples, pinned as a fact
-    // rather than left in a comment: the gate asks whether a record's FILENAME
-    // is on the list. Rewrite a grandfathered record and the register does not
-    // move, because nothing about it was ever keyed on the record. Whether
-    // identity should mean the name or the record is #1014.
     const root = makeAdrRepo({ legacy: true });
     runGate(root, ['--adopt']);
     const before = readFileSync(join(root, BASELINE), 'utf8');

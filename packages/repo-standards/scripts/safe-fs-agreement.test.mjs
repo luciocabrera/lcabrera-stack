@@ -5,9 +5,9 @@
  * security check only bite when one can be hardened without the other, and this
  * fails the moment they stop agreeing about which paths are inside.
  */
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve, sep } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { readTextWithin } from './safe-read.mjs';
@@ -27,7 +27,6 @@ afterAll(() => {
   }
 });
 
-/** Whether this reader/writer let the path through at all. */
 const readAccepts = (path, roots) => {
   try {
     readTextWithin(path, roots[0], roots.slice(1));
@@ -52,7 +51,6 @@ describe('safe-read and safe-write agree on containment', () => {
     ['a file nested inside the root', (r) => join(r.root, 'a', 'b.txt'), true],
     ['the root itself', (r) => r.root, true],
     ['a traversal out of the root', (r) => join(r.root, '..', 'x'), false],
-    // The sibling case the `+ sep` in the comparison exists for.
     [
       'a sibling sharing the root prefix',
       (r) => `${r.root}-other${sep}f`,
@@ -61,23 +59,11 @@ describe('safe-read and safe-write agree on containment', () => {
     ['a path under an unrelated root', (r) => join(r.outside, 'f'), false],
   ])('%s', (_label, build, expected) => {
     const path = build({ outside, root });
-    // The file has to exist for the read to get past containment to the fs call.
-    // Seed only what is genuinely inside the sandbox, decided from the RESOLVED
-    // path rather than the spelling: `join` normalises, so the traversal row
-    // arrives here already collapsed with no `..` left to test for — and seeding
-    // it would have this containment test write outside its own sandbox.
     if (resolve(path).startsWith(root + sep)) {
-      try {
-        writeFileSync(path, 'seed', 'utf8');
-      } catch {
-        // The directory may not exist; the containment verdict is unaffected.
-      }
+      mkdirSync(dirname(path), { recursive: true });
+      writeFileSync(path, 'seed', 'utf8');
     }
     const accepted = readAccepts(path, [root]);
-    // Agreement alone is not enough. Both copies losing their containment
-    // together would leave every row `true === true` and this file green, which
-    // is the clean-pass-from-either-cause failure AGENTS.md §7 names — so the
-    // row's own verdict is asserted too.
     expect(accepted).toBe(writeAccepts(path, [root]));
     expect(accepted).toBe(expected);
   });

@@ -4,8 +4,6 @@ import { resolveTreeRowAriaProps } from './resolveTreeRowAriaProps.util';
 
 describe('resolveTreeRowAriaProps', () => {
   it('emits nothing at all when the grid is not a tree', () => {
-    // React omits an absent prop, so an ungrouped grid's markup is byte-for-byte
-    // what it was before tree semantics existed.
     expect(resolveTreeRowAriaProps(undefined)).toStrictEqual({});
   });
 

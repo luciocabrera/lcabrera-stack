@@ -8,12 +8,6 @@ type AssertGroupDepthArgs = {
   readonly keys: readonly string[];
 };
 
-/**
- * Split out of `assertGroupKeys` because it is the half that needs **no catalogue
- * answer**, which is what lets `selectGroupedRows` run it before it borrows a connection.
- * A request at depth 9 costing a catalogue round trip before being refused is a request
- * that pays for the mistake it is about to be told about (ADR-066).
- */
 export const assertGroupDepth = ({ grouping, keys }: AssertGroupDepthArgs) => {
   if (keys.length === 0) {
     throw new GroupingRefusedError({

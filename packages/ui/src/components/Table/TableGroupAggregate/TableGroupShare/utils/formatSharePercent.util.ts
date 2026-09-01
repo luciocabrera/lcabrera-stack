@@ -5,8 +5,6 @@
 const formatterCache = new Map<string, Intl.NumberFormat>();
 
 const getFormatter = (locale: string | undefined) => {
-  // `undefined` is a real key here rather than a missing one: it means "the
-  // runtime's own locale", which is a different formatter from any named one.
   const key = locale ?? '';
   const cached = formatterCache.get(key);
 

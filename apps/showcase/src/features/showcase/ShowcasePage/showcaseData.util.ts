@@ -11,14 +11,6 @@ import type {
   MockRow,
 } from './ShowcasePage.types';
 
-// ACCEPTED PURITY DEVIATION (demo-only, WP8c triage 2026-07-12): this module
-// deliberately keeps two pieces of module-level state — the seeded RNG below
-// (deterministic run-to-run so the demo data is SSR/hydration-stable) and the
-// tableDataPromiseCache (module-level Suspense promise memoization). Both are
-// confined to the showcase feature; do not copy this pattern into product
-// code — use loaders/actions and services instead.
-
-// --- Seeded RNG (deterministic pseudo-random for consistent test data) ---
 const mulberry32 = (seed: number) => {
   let value = seed;
   return () => {
@@ -32,8 +24,6 @@ const mulberry32 = (seed: number) => {
 };
 
 const rng = mulberry32(123_456_789);
-
-// --- Table columns & data ---
 
 const COLUMNS: TableColumn<MockRow>[] = Array.from({ length: 20 }, (_, i) => ({
   dataType: (['number', 'string', 'boolean', 'date', 'currency'] as const)[
@@ -83,8 +73,6 @@ const tableData: MockRow[] = Array.from({ length: 10_000 }, (_, rowIdx) =>
   ),
 );
 
-// --- Table config ---
-
 export const FAKE_API_DELAY_MS = 2000;
 
 const PERSISTENCE_KEY = 'app-showcase-table';
@@ -108,7 +96,6 @@ const fetchTableData = () =>
     }, FAKE_API_DELAY_MS);
   });
 
-// Created once at module level to avoid refetching on re-renders
 const tableDataPromiseCache: { current: Promise<MockResponse> | undefined } = {
   current: undefined,
 };
@@ -121,8 +108,6 @@ export const getTableDataPromise = () => {
 export const resetTableDataPromise = () => {
   tableDataPromiseCache.current = undefined;
 };
-
-// --- VirtualSelect config ---
 
 export const STATIC_FRUITS = [
   'Apple',

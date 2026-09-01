@@ -4,12 +4,6 @@ type ScrollRowIntoViewArgs = {
   readonly rowIndex: number;
 };
 
-/**
- * Scrolls the virtualization container so the row at `rowIndex` is inside it.
- * A row's offset is computed from `rowIndex × rowHeight` rather than measured off a node,
- * because the node is exactly what does not exist when this is needed: a focus move whose
- * target lies outside the rendered window has to scroll first and focus after (ADR-062).
- */
 export const scrollRowIntoView = ({
   container,
   rowHeight,

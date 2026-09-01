@@ -42,8 +42,6 @@ const PG_TYPE_LABELS: Readonly<Record<number, string>> = {
   19: 'Int[]',
 };
 
-// ─── Column definitions ───────────────────────────────────────────────────────
-
 const ID_COLUMN: TableColumn<WideAlltypes150> = {
   dataType: 'number',
   isPrimaryKey: true,
@@ -65,7 +63,7 @@ const buildGeneratedColumn = ({ index }: BuildGeneratedColumnArgs) => {
   return {
     dataType: getColDataType(index),
     isFilterable,
-    isSortable: mod !== 19, // integer[] columns are not meaningfully sortable
+    isSortable: mod !== 19,
     key,
     label: `${typeLabel} ${index}`,
     minWidth: 130,

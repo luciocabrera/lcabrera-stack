@@ -81,12 +81,6 @@ describe('getInitialGroupingState', () => {
     expect(state.aggregates).toStrictEqual(groupingAggregates);
   });
 
-  // Seeding the store is a write path like any other, and it is the one a
-  // consumer outside this repo reaches: `createTableRouteLoader` sanitizes
-  // before it gets here, but `@lcabrera/ui` is published and a hand-written
-  // loader is the intended use. Without the guard such a route seeds a store
-  // the package renders as grouped and the query then throws at
-  // `assertGroupKeys` — a 500 out of a state the package itself accepted.
   describe('depth cap', () => {
     it('seeds exactly the cap', () => {
       const groupingKeys = keysOfLength(MAX_TABLE_GROUP_KEYS);
@@ -97,9 +91,6 @@ describe('getInitialGroupingState', () => {
     });
 
     it('refuses one key past the cap, whole rather than truncated', () => {
-      // Truncating to the cap would group by a prefix of what was asked for and
-      // answer a different question in silence — keys are ordered, and the
-      // order is the query's nesting order.
       const groupingKeys = keysOfLength(MAX_TABLE_GROUP_KEYS + 1);
 
       expect(getInitialGroupingState({ groupingKeys })).toStrictEqual(
@@ -108,9 +99,6 @@ describe('getInitialGroupingState', () => {
     });
 
     it('drops the aggregates with the refused keys', () => {
-      // An aggregate is computed per group, so a seed with no surviving key has
-      // nothing for it to describe — and leaving it would resurrect it on the
-      // next grouping the user applies.
       expect(
         getInitialGroupingState({
           groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
@@ -129,13 +117,8 @@ describe('getInitialGroupingState', () => {
     });
   });
 
-  // The same invariant `sanitizeGroupingByColumns` and the server's
-  // `assertGroupKeys` already enforce. The store was the odd one out, and it is
-  // the boundary a hand-written loader reaches.
   describe('duplicate keys', () => {
     it('refuses a repeated key, whole rather than de-duplicated', () => {
-      // De-duplicating would group by fewer levels than were asked for, which
-      // is a different question — the same reason the cap refuses whole.
       expect(
         getInitialGroupingState({
           groupingKeys: ['order_status', 'order_status'],
@@ -169,15 +152,8 @@ describe('getInitialGroupingState', () => {
     });
   });
 
-  // The map shape made a repeated pair unrepresentable, so nothing had to check
-  // for one; the list shape admits it (#831). This is the same boundary the
-  // duplicate-key guard above sits at, and the same refusal.
   describe('duplicate aggregates', () => {
     it('refuses a repeated (columnKey, fn) pair, whole rather than de-duplicated', () => {
-      // De-duplicating would silently correct a request the consumer made.
-      // Left unchecked it gives `toAggregateItems` two rows sharing the id
-      // `total_amount:sum`, which React reconciles as one, and reaches the
-      // server as two projections deriving one alias, which it refuses.
       expect(
         getInitialGroupingState({
           groupingAggregates: [
@@ -203,9 +179,6 @@ describe('getInitialGroupingState', () => {
     });
 
     it('still seeds several functions on ONE column', () => {
-      // The discriminating case: this is what #831 exists to allow, so a guard
-      // that refused it would pass the two assertions above and break the
-      // feature.
       const groupingAggregates = [
         { columnKey: 'total_amount', fn: 'sum' },
         { columnKey: 'total_amount', fn: 'avg' },

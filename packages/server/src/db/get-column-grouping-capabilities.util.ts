@@ -9,12 +9,6 @@ import { buildColumnCapabilitiesQuery } from './group-query-builder/build-column
 import { resolveColumnCapability } from './group-query-builder/resolve-column-capability.util.ts';
 import { runQuery } from './run-query.util.ts';
 
-/**
- * Resolves what each requested column may do in a grouped read — both ADR-058 gates — in
- * **one** catalogue round trip.
- * A column the table does not have (or the role cannot see) is simply absent from the
- * result.
- */
 export const getColumnGroupingCapabilities = async ({
   tx,
   ...descriptor

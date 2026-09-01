@@ -28,9 +28,6 @@
 import { isExemptBranch } from './branch-exemption.mjs';
 import { DEFAULT_CONVENTIONS } from './config.mjs';
 
-/** Allowed commit/PR-title types. Includes `revert` (git history uses it) and
- *  `build`/`style` (Conventional-Commit standard; pre-empt bot false-positives).
- *  This array is the canonical type list — prose docs link here, not restate it. */
 const ALLOWED_TYPES = [
   'feat',
   'fix',
@@ -45,12 +42,9 @@ const ALLOWED_TYPES = [
   'style',
 ];
 
-/** Hard ceiling for the header (first) line; soft target above which we hint. */
 const HEADER_MAX = 100;
 const HEADER_SOFT = 72;
 
-/** Cross-cutting scopes that are not a single workspace. Kept generous so real
- *  practice does not trip the (non-blocking) unknown-scope hint. */
 const CROSSCUTTING_SCOPES = new Set([
   'ci',
   'build',
@@ -74,12 +68,6 @@ const CROSSCUTTING_SCOPES = new Set([
   'hooks',
 ]);
 
-/** Required PR-description sections (heading match, any level, case-insensitive).
- *  The pull-request template mirrors these labels exactly.
- *
- *  Matched as HEADINGS, not substrings: `body.includes('What')` passes on any
- *  prose containing the word, so it would accept a description answering none
- *  of these. A heading is the cheapest proof the author saw the prompt. */
 const REQUIRED_PR_SECTIONS = [
   { label: 'What', re: /^#{1,6}\s+what\b/im },
   { label: 'Why', re: /^#{1,6}\s+why\b/im },
@@ -92,11 +80,6 @@ const REQUIRED_PR_SECTIONS = [
   { label: 'Documentation Updates', re: /^#{1,6}\s+documentation\b/im },
 ];
 
-/** Required issue-description sections. Nothing enforced these before, and the
- *  cost showed up as issues carrying no reproduction, no scope and no
- *  acceptance criteria — which then had to be re-investigated from scratch
- *  before anyone could act on them. Numbering is optional, so both
- *  `## 1. Problem Statement` and `## Problem Statement` pass. */
 const REQUIRED_ISSUE_SECTIONS = [
   {
     label: 'Problem Statement',
@@ -115,21 +98,8 @@ const REQUIRED_ISSUE_SECTIONS = [
   },
 ];
 
-/** The relationship keys `docs/agents/dependency-conventions.md` requires of
- *  every issue. Checked in ADDITION to the `Planning Metadata` heading above,
- *  because a heading on its own accepts a section with nothing under it — and
- *  the block, not the heading, is what a reader and the planning layer act on.
- *
- *  This is the one place an issue's CONTENT is checked rather than its shape.
- *  It earns that: the convention said "every issue must include" this block
- *  while no template offered it and nothing read it, so it was unfilled in
- *  practice (#409). An empty answer still passes — `blocking: []` and
- *  `parent: null` are valid — so the cost of compliance is copying the block. */
 const DEPENDENCY_KEYS = ['blocking', 'blockedBy', 'parent', 'children'];
 
-/** `[ \t]`, never `\s`: under `m`, `\s` matches the newline the anchor just
- *  matched, so `^\s*` rescans the following lines and backtracks (S8786). Indent
- *  is spaces or tabs anyway. */
 const DEPENDENCIES_BLOCK = /^[ \t]*dependencies:/im;
 
 const dependencyErrors = (body) => {
@@ -146,19 +116,10 @@ const dependencyErrors = (body) => {
   );
 };
 
-/** Branch names: `<type>/<issue>-<kebab-slug>`, `<type>` being the SAME
- *  vocabulary as commits. A second set of words (feature/bugfix/hotfix) would
- *  mean two names for one idea, which is the inconsistency this removes —
- *  `feat` is `feat` whether it labels a branch or a commit.
- *
- *  The issue number is required: it is what ties a branch to the context that
- *  justified it, which is exactly what was missing. */
 const BRANCH_RE = new RegExp(
   String.raw`^(?:${ALLOWED_TYPES.join('|')})/\d+-[a-z0-9]+(?:-[a-z0-9]+)*$`,
 );
 
-/** Subject words that describe nothing. A vague subject is cheap to write and
- *  expensive to read later, when it is the only surviving record of intent. */
 const VAGUE_SUBJECT_WORDS = [
   'stuff',
   'things',
@@ -168,7 +129,6 @@ const VAGUE_SUBJECT_WORDS = [
   'wip',
 ];
 
-/** Auto-generated message shapes that are NOT authored subjects — skip them. */
 const SKIP_PATTERNS = [
   /^Merge (branch|pull request|remote-tracking branch|tag|commit) /,
   /^Revert "/,
@@ -181,9 +141,6 @@ const SCOPE_TOKEN = /^[a-z0-9]+(?:[/_.-][a-z0-9]+)*$/;
 const ADR_SCOPE = /^adr-\d+$/;
 const SCISSORS = /^#\s*-+\s*>8\s*-+/;
 
-/** Splits a raw commit-message file into its subject line and body, replicating
- *  git `cleanup=strip`: drop `#` comment lines, cut everything after a scissors
- *  line, then trim surrounding blank lines. `header` is undefined when empty. */
 const parseCommitMessage = (raw) => {
   const kept = [];
   for (const line of raw.split(/\r?\n/)) {
@@ -203,11 +160,9 @@ const parseCommitMessage = (raw) => {
   return { header: kept[0], body: kept.slice(1).join('\n') };
 };
 
-/** True for auto-generated merge/revert/autosquash headers we must not validate. */
 const shouldSkip = (header) =>
   header !== undefined && SKIP_PATTERNS.some((re) => re.test(header));
 
-/** First path segment of a scope part — `ui/table` → `ui`. */
 const scopeRoot = (part) => part.split('/')[0];
 
 const isRecognizedScope = (part, workspaces) => {
@@ -257,9 +212,6 @@ const validateSubject = (subject) => {
   if (subject.trimEnd().endsWith('.')) {
     errors.push('subject must not end with a period.');
   }
-  // Whole words, and only in the subject — a body may legitimately discuss
-  // "miscellaneous" or quote a "WIP" label, but a subject built from these
-  // words records nothing about what changed.
   const vague = VAGUE_SUBJECT_WORDS.filter((word) =>
     new RegExp(String.raw`\b${word}\b`, 'i').test(subject),
   );
@@ -291,11 +243,6 @@ const validateLength = (header) => {
   return { errors: [], warnings: [] };
 };
 
-/**
- * Validates one Conventional-Commit header line (a commit subject or a PR title).
- * `kind` labels messages ("commit message" | "PR title"). Returns
- * `{ errors, warnings }` — never throws.
- */
 const validateHeader = (header, { workspaces, kind }) => {
   const match = HEADER_RE.exec(header ?? '');
   if (match === null) {
@@ -325,12 +272,6 @@ const validateHeader = (header, { workspaces, kind }) => {
   return { errors, warnings };
 };
 
-/**
- * Parses a Conventional-Commit header into `{ type, scope, breaking, subject }`,
- * or null when it doesn't match. Lenient about the type value (does not check it
- * against ALLOWED_TYPES) — callers that only need the shape (the changelog
- * generator, the PR labeler) decide what to do with an unknown type.
- */
 export const parseCommitHeader = (header) => {
   const match = HEADER_RE.exec(header ?? '');
   if (match === null) {
@@ -345,7 +286,6 @@ export const parseCommitHeader = (header) => {
   };
 };
 
-/** Validates a full raw commit-message file. Returns `{ skipped, errors, warnings }`. */
 export const validateCommitMessage = (raw, { workspaces }) => {
   const { header } = parseCommitMessage(raw);
   if (header === undefined) {
@@ -364,11 +304,9 @@ export const validateCommitMessage = (raw, { workspaces }) => {
   };
 };
 
-/** Validates a PR title (a Conventional-Commit header). */
 export const validatePrTitle = (title, { workspaces }) =>
   validateHeader(title, { workspaces, kind: 'PR title' });
 
-/** Validates a PR description body — required sections must be present. */
 export const validatePrBody = (body) => {
   const errors = [];
   if ((body ?? '').trim() === '') {
@@ -387,9 +325,6 @@ export const validatePrBody = (body) => {
   return { errors, warnings: [] };
 };
 
-/** Validates an issue description body — required sections must be present.
- *  An issue is the context a future reader has; without these it has to be
- *  investigated again before it can be worked. */
 export const validateIssueBody = (body) => {
   const errors = [];
   if ((body ?? '').trim() === '') {
@@ -409,13 +344,6 @@ export const validateIssueBody = (body) => {
   return { errors, warnings: [] };
 };
 
-/** Validates a PR's BASE branch. A PR must target `main` (or a release branch,
- *  or a declared shared branch) — never another feature branch. Merging a
- *  stacked PR into its base instead of `main` orphans the work: PR #367 was
- *  squash-merged into an already-merged base branch and its changes never
- *  reached `main`, until they were recovered by hand. `allowedBases` are the
- *  shared branches declared under docs/coordination/branches/; an empty base
- *  (a local simulation with no PR context) is not checked. */
 export const validatePrBase = (
   base,
   {
@@ -449,10 +377,6 @@ export const validatePrBase = (
   };
 };
 
-/** Validates a git branch name against `<type>/<issue>-<kebab-slug>`.
- *  The configured trunk and `release-*` are exempt; they are not topic branches.
- *  `defaultBranch` is passed in rather than read here, so importing this module
- *  still touches nothing (#807). */
 export const validateBranchName = (
   branch,
   { defaultBranch = DEFAULT_CONVENTIONS.defaultBranch } = {},

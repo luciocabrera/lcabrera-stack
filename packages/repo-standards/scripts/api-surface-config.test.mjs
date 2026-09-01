@@ -6,11 +6,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { readPublicPackages, snapshotPathFor } from './api-surface-config.mjs';
 
-// A roster entry is a directory name under `publishing.packagesDir`. Spelling it
-// as a path from the repository root passes validation — it is a perfectly good
-// repo-relative string — and only fails at the read, which is why the read has
-// to name the config rather than the directory it could not find.
-
 const scaffold = ({ manifests = {}, publishing }) => {
   const root = mkdtempSync(join(tmpdir(), 'api-surface-config-'));
   writeFileSync(
@@ -43,7 +38,6 @@ describe('readPublicPackages', () => {
 
     expect(only.name).toBe('@scope/thing');
     expect(only.directory).toBe('workspaces/thing');
-    // No `build` script, so it ships source and the entry is the source file.
     expect(only.source).toBe(true);
     expect(only.entries).toEqual([
       {
@@ -72,10 +66,6 @@ describe('readPublicPackages', () => {
     );
   });
 
-  // A single-entry roster never runs the sort comparator, so a nameless manifest
-  // used to travel on as `{ name: undefined }` with nothing said. Both sizes are
-  // asserted because only the two-entry one failed loudly before, and it failed
-  // as a bare `localeCompare` TypeError naming neither the config nor the file.
   it('names the config and the manifest when a rostered package has no name', () => {
     for (const publicPackageDirs of [['b'], ['a', 'b']]) {
       const root = scaffold({
@@ -103,8 +93,6 @@ describe('readPublicPackages', () => {
 });
 
 describe('snapshotPathFor', () => {
-  // Any scope, not one this package knows. Left whole, `@scope/thing.txt` would
-  // put a separator in the filename and write outside the snapshot directory.
   it('drops the scope of any package, and files under the configured directory', () => {
     const root = scaffold({
       publishing: { apiSurfaceDir: 'artifacts/surface' },
@@ -118,9 +106,6 @@ describe('snapshotPathFor', () => {
     );
   });
 
-  // The result is concatenated into a path that `--write` writes to, so the name
-  // is held to the same rule as a configured location. A manifest is no more
-  // trusted an origin than a config file — both are text somebody edited.
   it('refuses a name that would write outside the snapshot directory', () => {
     const root = scaffold({ publishing: {} });
 
@@ -129,10 +114,6 @@ describe('snapshotPathFor', () => {
     }
   });
 
-  // Backslash is refused wherever it appears, not only where it separates: the
-  // verdict must not depend on which platform reads it. That is the containment
-  // guard's own history — it was inert on Windows until it stopped relying on
-  // the platform's semantics.
   it('refuses a Windows traversal read on any platform', () => {
     const root = scaffold({ publishing: {} });
 

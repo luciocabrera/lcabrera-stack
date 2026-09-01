@@ -25,10 +25,6 @@ describe('setStatementTimeout', () => {
 
     const [text, values] = txQuery.mock.calls[0] ?? [];
 
-    // `SET LOCAL statement_timeout = $1` is a syntax error — `SET` is a utility
-    // statement and cannot be prepared — so the value would have to be spliced
-    // into the SQL text. `set_config` is an ordinary function call, so it is a
-    // parameter like any other.
     expect(text).toBe(`SELECT set_config('statement_timeout', $1, true)`);
     expect(values).toEqual(['10000']);
   });
@@ -38,18 +34,12 @@ describe('setStatementTimeout', () => {
 
     const [text] = txQuery.mock.calls[0] ?? [];
 
-    // Without the third argument the setting persists on the pooled connection
-    // and silently re-tunes every later query that borrows it — the classic
-    // pooling bug, and one nothing fails on.
     expect(text).toContain(', true)');
   });
 
   it('never runs on the pool singleton', async () => {
     await setStatementTimeout({ timeoutMs: 10_000, tx: tx() });
 
-    // On the pool this would scope itself to its own implicit transaction and
-    // expire before the query it was meant to bound — silently, since the query
-    // still succeeds.
     expect(poolQuery).not.toHaveBeenCalled();
   });
 

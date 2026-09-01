@@ -3,11 +3,6 @@ import { expect, it } from 'vite-plus/test';
 
 import { rules } from './index.ts';
 
-// Read with the literal `'src'` rather than a path built from
-// `import.meta.dirname`: a computed argument trips
-// security/detect-non-literal-fs-filename, and there is nothing to compute here.
-// Vitest runs with its project root as the cwd — the package root, where
-// vite.config.ts sits — so the rules are one level down, in `src`.
 const entries = readdirSync('src');
 
 const TEST_FILE_SUFFIX = '.test.ts';
@@ -41,16 +36,6 @@ it('has a colocated test for every registered rule', () => {
   expect(untested).toEqual([]);
 });
 
-// The other way a rule stops being right without failing anything. ESLint prints
-// `meta.docs.url` beside every finding it reports, so this string lands in a
-// consumer's terminal — and nothing in this repository ever renders it, which is
-// how eight of the ten rules shipped `https://example.com/rule/<name>`, the
-// placeholder the first one was scaffolded from, while two pointed at a
-// `/rules/<name>` path that has never existed.
-//
-// Asserting the URL against the factory that built it would pass whatever the
-// factory said. These two assertions do not: the location is a literal here, and
-// the anchor has to match a heading the README really carries.
 const README = readFileSync('README.md', 'utf8');
 const DOCS_LOCATION =
   'https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/eslint-local-rules/README.md';

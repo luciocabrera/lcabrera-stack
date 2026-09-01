@@ -26,8 +26,6 @@ const unsupportedCapability: TableColumnGroupingCapability = {
 
 describe('resolveOfferableAggregates', () => {
   it('offers what the catalogue reported, in menu order', () => {
-    // The catalogue answers as a set sorted by SQL name; a menu needs count
-    // first, arithmetic next.
     expect(
       resolveOfferableAggregates({
         capability: numericCapability,
@@ -46,16 +44,12 @@ describe('resolveOfferableAggregates', () => {
   });
 
   it('offers nothing when no capability was resolved for the column', () => {
-    // Absent means "no aggregate is legal here", never "all of them are".
     expect(
       resolveOfferableAggregates({ capability: undefined, isGroupKey: false }),
     ).toStrictEqual([]);
   });
 
   it('offers nothing while the column is a group key, whatever its type says', () => {
-    // The discriminating half: the same capability that yields three functions
-    // above yields none here, so the group-key condition is doing the work and
-    // not the type legality (#830, ADR-080).
     expect(
       resolveOfferableAggregates({
         capability: numericCapability,

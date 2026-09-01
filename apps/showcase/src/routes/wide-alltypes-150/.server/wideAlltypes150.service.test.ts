@@ -76,10 +76,6 @@ afterEach(() => {
 
 describe('a truncated group key on this route too', () => {
   it('carries the granularity into the read and back into the decode', async () => {
-    // #786 landed on `enterprise-orders` first, and a second route wired to
-    // the same helpers is where "the seam is generic" stops being a claim.
-    // Without this the route silently groups by raw values and hits the
-    // cardinality refusal every date column on this table has.
     await selectWideAlltypes150Page({
       grouping: {
         aggregates: [],
@@ -116,8 +112,6 @@ describe('selectWideAlltypes150Page', () => {
   });
 
   it('drops the point column from the sort rather than letting it fail the query', async () => {
-    // `point` has no btree ordering, so Postgres rejects the whole read — not
-    // just that term — if it reaches the ORDER BY.
     await selectWideAlltypes150Page({
       limit: 10,
       offset: 0,
@@ -230,9 +224,6 @@ describe('readWideAlltypes150Page', () => {
     expect(selectRows).not.toHaveBeenCalled();
   });
 
-  // #575 — grouping on a *second* SQL-backed route. What is asserted here is
-  // the wiring this route owns; the rules themselves belong to
-  // `@lcabrera/server` and are tested there, which is the whole claim.
   describe('grouping', () => {
     it('reads the grouped branch when keys are applied, not the paginated one', async () => {
       await selectWideAlltypes150Page({
@@ -266,8 +257,6 @@ describe('readWideAlltypes150Page', () => {
         sorting: [],
       });
 
-      // `toGroupAggregates` owns this order and its decode counterpart reads
-      // it back — the route states neither (ADR-082, #643).
       expect(
         vi.mocked(selectGroupedRows).mock.calls[0]?.[0]?.aggregates,
       ).toEqual([{ fn: 'count' }, { column: 'c_002', fn: 'sum' }]);
@@ -313,10 +302,6 @@ describe('readWideAlltypes150Page', () => {
     });
 
     it('answers a refusal as plain data, never as a thrown class', async () => {
-      // A refused key is a refusal from `@lcabrera/server`, raised as a class
-      // whose prototype single fetch strips on the way to the client — so the
-      // loader edge has to map it (ADR-050, ADR-066). This is the route's half
-      // of AC "refused with the specific reason, not by failing at execution".
       vi.mocked(selectGroupedRows).mockRejectedValueOnce(
         new Error('column "c_014" is not a grouping dimension'),
       );
@@ -339,9 +324,6 @@ describe('readWideAlltypes150Page', () => {
     });
 
     it('resolves capability for every column it allows, from the catalogue', async () => {
-      // AC: a column whose real type supports aggregates the coarse vocabulary
-      // hides must be offered them. The route's job is to ask about all of its
-      // columns; deciding what each may do is the catalogue's (ADR-058, #550).
       await selectWideAlltypes150GroupingCapabilities();
 
       expect(vi.mocked(getColumnGroupingCapabilities)).toHaveBeenCalledWith({

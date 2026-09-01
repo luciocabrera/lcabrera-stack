@@ -162,8 +162,6 @@ describe('Form', () => {
       mode: 'view',
     });
 
-    // View mode renders each leaf as label + value text, so there is no
-    // editable input for the field at all — just its formatted value.
     expect(screen.queryByLabelText('Name', { exact: false })).toBeNull();
     expect(screen.getByText('Ada')).not.toBeNull();
     expect(screen.queryByRole('button', { name: 'Save' })).toBeNull();

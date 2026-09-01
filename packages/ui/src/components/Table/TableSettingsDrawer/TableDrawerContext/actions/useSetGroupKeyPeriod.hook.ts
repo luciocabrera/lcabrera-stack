@@ -9,11 +9,6 @@ type SetGroupKeyPeriodArgs = {
   readonly period: TableGroupPeriod | undefined;
 };
 
-/**
- * Stage the granularity one temporal group key is truncated to (#786),
- * resolving through the same reducer the live path would, so a staged
- * granularity is exactly what Accept commits.
- */
 export const useSetGroupKeyPeriod = () => {
   const setGrouping = useSetGrouping();
 

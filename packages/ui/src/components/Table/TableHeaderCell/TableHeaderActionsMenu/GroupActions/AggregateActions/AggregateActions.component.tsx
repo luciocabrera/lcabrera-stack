@@ -11,16 +11,6 @@ import type { AggregateActionsProps } from './AggregateActions.types';
 import { AggregateButton } from './AggregateButton';
 import { ClearColumnAggregateButton } from './ClearColumnAggregateButton';
 
-/**
- * Two surfaces answering "may this column be aggregated" separately is how they came to
- * disagree: the menu kept offering functions on a column the picker had already dropped,
- * and clicking one wrote the grouping store and changed nothing on screen (#830).
- * So all three conditions live there, not here: the catalogue's type legality (ADR-058,
- * ADR-063, #550) and the column being an active group key (ADR-080), both from
- * `resolveOfferableAggregates`, plus the read's `countDistinct` budget — a property of the
- * whole request rather than of this column, which is why it composes on top of that
- * predicate instead of widening it (#842).
- */
 export const AggregateActions = <TData,>({
   columnKey,
   onClose,

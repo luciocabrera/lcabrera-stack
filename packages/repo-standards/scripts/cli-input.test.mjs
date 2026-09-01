@@ -22,8 +22,6 @@ describe('flagValue', () => {
   });
 
   it('returns undefined for a trailing flag with no value', () => {
-    // Every caller treats "absent" and "given nothing" alike; throwing here
-    // would replace a gate's usage message with a stack trace.
     expect(flagValue('--write', argv)).toBeUndefined();
   });
 
@@ -49,8 +47,6 @@ describe('readStdin', () => {
   });
 
   it('returns empty string for a TTY rather than hanging', async () => {
-    // The guard that stops an interactive run blocking on a read that will
-    // never receive data.
     await expect(readStdin({ isTTY: true })).resolves.toBe('');
   });
 
@@ -79,8 +75,6 @@ describe('parsePullNumber — what it accepts', () => {
   });
 
   it('takes the #738 form this repository writes everywhere else', () => {
-    // The reason the parser exists. `Number('#738')` is NaN, and NaN reaching a
-    // gate runs it against `pulls/NaN`.
     expect(parsePullNumber('#738')).toBe(738);
   });
 
@@ -90,13 +84,9 @@ describe('parsePullNumber — what it accepts', () => {
 });
 
 describe('parsePullNumber — what it refuses, and how loudly', () => {
-  // Each of these reached an API path before, or fell through to "no pull
-  // request named" — which for the sweep meant reconciling every open one.
   for (const bad of ['abc', '', '   ', '0', '-1', '738x', '#', '#abc', '7.5']) {
     it(`refuses ${JSON.stringify(bad)}, naming it in the message`, () => {
       expect(() => parsePullNumber(bad)).toThrow('--pr must be');
-      // A string, not a regex: `7.5` and `../../user` contain metacharacters, so
-      // a regex built from the fixture would match more than the fixture.
       expect(() => parsePullNumber(bad)).toThrow(JSON.stringify(bad));
     });
   }
@@ -123,9 +113,6 @@ describe('parseRepository', () => {
 
   for (const bad of ['', 'foo', 'a/b/c', '/name', 'owner/', '../../user']) {
     it(`refuses ${JSON.stringify(bad)}, naming it in the message`, () => {
-      // `''` is the one that mattered: `??` never caught it, so it reached the
-      // log as "Reconciling 1 pull request(s) in ." — the repository invisible
-      // behind a full stop — and then a 404 per gate.
       expect(() => parseRepository(bad)).toThrow('--repo must be owner/name');
       expect(() => parseRepository(bad)).toThrow(JSON.stringify(bad));
     });

@@ -23,10 +23,6 @@ import { TableTitle } from '../TableTitle';
 import { styles } from './TableContent.stylex';
 import { TableTitleActions } from './TableTitleActions/TableTitleActions.component';
 
-/**
- * Table layout shell: title bar, the scrollable table area with the infinite-scroll
- * sentinel, and the drawers section.
- */
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
   dataSelector,

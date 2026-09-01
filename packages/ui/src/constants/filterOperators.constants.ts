@@ -24,12 +24,6 @@ export const OPERATOR_TO_SHORT: Record<string, string> = {
   startsWith: 'sw',
 };
 
-/**
- * The empty-operator codes live here and **deliberately not** in the per-type sets below.
- * `parseEmptyFilter` reads them instead — but only inside the object form `{ op: 'ie' }`,
- * never as a bare array element, which is already how a select filter carries a value
- * someone typed.
- */
 export const SHORT_TO_OPERATOR = new Map([
   ['af', 'after'],
   ['bf', 'before'],

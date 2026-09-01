@@ -68,8 +68,6 @@ describe('removeTableColumnAggregate', () => {
   });
 
   it('prunes only the removed measure share', () => {
-    // Both measures on one column are shareable, so a column-keyed share could
-    // not have told these two apart (#831).
     expect(
       removeTableColumnAggregate({
         columnKey: 'total_amount',

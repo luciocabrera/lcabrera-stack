@@ -11,8 +11,6 @@ import {
 
 describe('car_sales entity configuration', () => {
   it('projects every column the table renders', () => {
-    // A column rendered but not projected renders blank, with nothing in the
-    // type system to catch it — the read model and the grid have to agree.
     const projected = new Set<string>(CAR_SALES_COLUMNS);
     const missing = COLUMNS.map((column) => String(column.key)).filter(
       (key) => !projected.has(key),

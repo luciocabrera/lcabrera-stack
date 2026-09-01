@@ -113,11 +113,6 @@ describe('renderTableBodyPinnedGroup', () => {
   });
 
   it('forwards the structural marker rather than dropping it', () => {
-    // The regression case. With `hasStructuralMarker` missing from this
-    // function's
-    // destructuring the call object has no such key, and every other case here
-    // passes whether or not it does — an `undefined` expectation cannot tell
-    // "not forwarded" from "forwarded as undefined".
     const renderCell = vi.fn(({ col }: { readonly col: string }) => col);
 
     renderTableBodyPinnedGroup({

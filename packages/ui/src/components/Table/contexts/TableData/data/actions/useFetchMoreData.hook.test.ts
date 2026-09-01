@@ -250,8 +250,6 @@ describe('useFetchMoreData', () => {
       });
 
       expect(onLoadMore).toHaveBeenCalledTimes(2);
-      // The prefetch anchors on the row the just-committed page ended with, so
-      // a keyset source resumes from the right place rather than re-seeking.
       expect(onLoadMore).toHaveBeenNthCalledWith(1, {
         lastRow: { id: 1 },
         limit: 50,

@@ -57,8 +57,6 @@ describe('useStoreSelector', () => {
       result.current.store.set({ label: 'updated' });
     });
 
-    // The store notifies on any change, so the selector re-runs — but it
-    // returns the same `count`, so useSyncExternalStore skips the re-render.
     expect(result.current.selected).toBe(0);
     expect(renders.count).toBe(rendersBefore);
   });

@@ -17,5 +17,4 @@ export const readPersistedStateFromCookie = ({
     appId,
     persistenceKey,
     readRawSlice: (sliceKey) => readFromCookie({ cookieString, key: sliceKey }),
-    transformRaw: decodeURIComponent,
   });

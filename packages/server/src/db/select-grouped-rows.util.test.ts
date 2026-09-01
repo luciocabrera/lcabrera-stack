@@ -9,14 +9,7 @@ import { selectGroupedRows } from './select-grouped-rows.util.ts';
 // suite DB-free (ADR-032) while still asserting the exact SQL that reaches pg.
 vi.mock('./get-pool.util.ts', () => ({ getPool: vi.fn() }));
 
-/** The borrowed transaction client. */
 const query = vi.fn();
-/**
- * The pool singleton's own spy, deliberately **not** the same function as the
- * client's. Sharing one made every "runs on the transaction" assertion
- * unfalsifiable: a pool call and a client call landed in the same call list, so
- * dropping `tx` anywhere left the suite green.
- */
 const poolQuery = vi.fn();
 const release = vi.fn();
 const connect = vi.fn();
@@ -42,10 +35,8 @@ const DESCRIPTOR = {
   table: 'orders',
 } as const;
 
-/** Every statement the borrowed connection saw, in order. */
 const statements = () => query.mock.calls.map(([text]) => String(text));
 
-/** The BEGIN + `set_config` preamble every grouped read now issues. */
 const resolvePreamble = () => {
   query
     .mockResolvedValueOnce({ rows: [] })
@@ -97,8 +88,6 @@ describe('selectGroupedRows', () => {
     const [begin, timeout] = statements();
 
     expect(begin).toBe('BEGIN');
-    // `is_local = true` is the whole point: without it the setting outlives the
-    // transaction and re-tunes every later query on this pooled connection.
     expect(timeout).toBe(`SELECT set_config('statement_timeout', $1, true)`);
     expect(statements().at(-1)).toBe('COMMIT');
     expect(release).toHaveBeenCalledTimes(1);
@@ -120,10 +109,6 @@ describe('selectGroupedRows', () => {
       expect.stringContaining('GROUP BY GROUPING SETS'),
       'COMMIT',
     ]);
-    // The assertion that makes the one above mean anything. An executor called
-    // without `tx` runs on the pool singleton — outside the transaction,
-    // unbounded, and with no symptom, because the query still succeeds. Only a
-    // spy the pool does not share with the client can see that.
     expect(poolQuery).not.toHaveBeenCalled();
   });
 
@@ -182,8 +167,6 @@ describe('selectGroupedRows', () => {
       selectGroupedRows({ ...DESCRIPTOR, maxRows: 20_000 }),
     ).rejects.toThrow('past the ceiling');
 
-    // The backstop is what the guard capped the read at, not what the caller
-    // asked for.
     expect(statements()[3]).toContain('LIMIT $1');
     expect(query.mock.calls[3]?.[1]).toEqual([5001]);
   });
@@ -207,8 +190,6 @@ describe('selectGroupedRows', () => {
   });
 
   it('checks depth before borrowing a connection at all', async () => {
-    // The reason the depth check is pure and runs first: a request past the cap
-    // must not cost a pooled connection, a BEGIN, or a catalogue query.
     await expect(
       selectGroupedRows({ ...DESCRIPTOR, keys: ['a', 'b', 'c', 'd', 'e'] }),
     ).rejects.toThrow('at most 4 group keys');
@@ -250,8 +231,6 @@ describe('selectGroupedRows', () => {
 
     await selectGroupedRows({ ...DESCRIPTOR, tx: { query: txQuery } as never });
 
-    // The timeout still applies: the caller's transaction is already a
-    // transaction, so `is_local` scopes the setting to it exactly the same way.
     expect(txQuery.mock.calls.map(([text]) => String(text))).toEqual([
       expect.stringContaining('set_config'),
       expect.stringContaining('pg_stats'),

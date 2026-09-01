@@ -6,7 +6,6 @@ import {
   strayConfigsIn,
 } from './stray-configs.mjs';
 
-/** A representative roster, standing in for whatever a consumer declares. */
 const ROSTER = {
   unreadNames: [
     '.claudelintignore',
@@ -26,8 +25,6 @@ describe('isStrayConfig', () => {
   });
 
   it('flags a whole prefix family, not just the bare name', () => {
-    // A set of exact names cannot cover `.prettierrc.json`, `.prettierrc.yaml`
-    // and whichever spelling the tool adds next.
     for (const filename of [
       '.prettierrc',
       '.prettierrc.json',
@@ -39,8 +36,6 @@ describe('isStrayConfig', () => {
   });
 
   it('leaves the configs that ARE read alone', () => {
-    // Flagging one of these would disable real configuration, a worse failure
-    // than the drift the gate prevents.
     for (const filename of [
       'eslint.config.mjs',
       'biome.jsonc',
@@ -62,8 +57,6 @@ describe('isStrayConfig', () => {
   });
 
   it('answers for the roster it is given, not for a fixed toolchain', () => {
-    // The point of the move: a repository formatted BY Prettier reads
-    // `.prettierrc`, so the same filename must be able to come back clean.
     expect(
       isStrayConfig({
         filename: '.prettierrc',
@@ -113,10 +106,6 @@ describe('strayConfigsIn', () => {
 
 describe('rosterProblem', () => {
   it('refuses an empty roster rather than passing over nothing', () => {
-    // Without this the gate compares every file against an empty list and
-    // reports success — indistinguishable from a genuinely clean repository,
-    // so a consumer who wired the task but never configured it would believe
-    // they were covered.
     expect(rosterProblem({ unreadNames: [], unreadPrefixes: [] })).toContain(
       'names no unread config files',
     );

@@ -23,7 +23,6 @@ const BODIES = JSON.parse(
   ),
 );
 
-/** A captured body as the REST reviews endpoint returns it. */
 const asRestReview = ({ body, id, login, submittedAt }) => ({
   body,
   id,
@@ -32,54 +31,30 @@ const asRestReview = ({ body, id, login, submittedAt }) => ({
   user: { login },
 });
 
-/** Three suppressed comments — two in one file, one in another. */
 export const REVIEW_WITH_THREE_SUPPRESSED = asRestReview(
   BODIES.withThreeSuppressed,
 );
 
-/** One suppressed comment, in the shortest body that carries a block. */
 export const REVIEW_WITH_ONE_SUPPRESSED = asRestReview(
   BODIES.withOneSuppressed,
 );
 
-/**
- * One suppressed comment whose quoted source contains a fence of its own, so
- * the block GitHub emitted is unbalanced. Real, and the reason the reader closes
- * a quote at the last fence rather than the next one.
- */
 export const REVIEW_WITH_NESTED_FENCE = asRestReview(BODIES.withNestedFence);
 
-/** A full review with a collapsed section of its own and no suppressed block. */
 export const REVIEW_WITH_NO_SUPPRESSED = asRestReview(BODIES.withNoSuppressed);
 
 const DETAILS_OPEN = '<details>';
 const DETAILS_CLOSE = '</details>';
 
-/** One captured body's collapsed section, markers included. */
 const detailsSection = (body) =>
   body.slice(
     body.indexOf(DETAILS_OPEN),
     body.indexOf(DETAILS_CLOSE) + DETAILS_CLOSE.length,
   );
 
-/**
- * A review body carrying TWO suppressed blocks.
- *
- * The only fixture here that GitHub did not emit whole, and it says so: a body
- * with two blocks has not been observed in this repository, which is why this
- * one is composed rather than captured. It is built from two captured bodies
- * rather than written by hand, so the markup inside each block is still
- * GitHub's.
- *
- * It exists because "GitHub does not do this today" is not a property the reader
- * can rely on. A second block dropped silently is a confident undercount, and
- * the declared-count check cannot catch it: each block's own count would agree
- * with its own parse.
- */
 export const REVIEW_WITH_TWO_BLOCKS = asRestReview({
   ...BODIES.withOneSuppressed,
   body: `${BODIES.withOneSuppressed.body}\n${detailsSection(BODIES.withThreeSuppressed.body)}\n`,
 });
 
-/** Copilot refusing the review outright — no template, and no findings. */
 export const REVIEW_DECLINED = asRestReview(BODIES.declined);

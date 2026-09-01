@@ -2,7 +2,6 @@ import type { IconProps } from '../Icons.types';
 
 import { IconBase } from '../IconBase';
 
-/** The grouped-rows glyph struck through — the "clear grouping" affordance. */
 export const UngroupRowsIcon = ({ size = 16, ...props }: IconProps) => (
   <IconBase size={size} {...props}>
     <path d='M3 5h18' />

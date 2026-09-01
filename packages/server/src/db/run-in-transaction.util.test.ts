@@ -68,9 +68,6 @@ describe('runInTransaction', () => {
   });
 
   it('does not swallow a failing COMMIT, and translates it', async () => {
-    // BEGIN and COMMIT are the two statements that used to reach the driver
-    // untranslated. `could not serialize access` is a real serialization
-    // failure message; it must not be what a consumer sees.
     const failure = Object.assign(new Error('could not serialize access'), {
       code: '40001',
     });
@@ -92,11 +89,6 @@ describe('runInTransaction', () => {
   });
 
   it('rethrows the callback’s own rejection untouched', async () => {
-    // The other half of the rule, and the one that would break the loader-edge
-    // union if it were dropped: `run` has already been translated by whatever
-    // executor raised it, and a `GroupingRefusedError` is not a driver failure
-    // at all — re-mapping here would bury both under a generic
-    // `PersistenceError`.
     const refusal = new GroupingRefusedError({
       message: 'too deep',
       reason: 'too-many-keys',

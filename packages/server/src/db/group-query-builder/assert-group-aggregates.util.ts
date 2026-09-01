@@ -13,12 +13,6 @@ type AssertGroupAggregatesArgs = {
   readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>;
 };
 
-/**
- * Legality of every requested aggregate, from the same catalogue answer the group keys are
- * checked against (ADR-058).
- * `countDistinct` is capped because it costs a per-group tuplesort that is redone for
- * every grouping set, so a second one multiplies the most expensive part of the query.
- */
 export const assertGroupAggregates = ({
   aggregates,
   allowedColumns,

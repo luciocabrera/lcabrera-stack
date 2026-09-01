@@ -413,23 +413,39 @@ reader will actually get, and when someone reports that a claim does not
 reproduce, **look for the confound before defending or retracting** — both of
 those are conclusions, and each needs its own discriminating evidence.
 
-**No comment above a function or component declaration, and no prose inside its
-body.** Both positions are covered: the JSDoc block over the declaration and any
-explanation within it. A name, a signature and the types already say what the
-code is, and an explanation next to code is the copy nothing keeps true — which
-is the failure every gate in this file exists to catch. If the code can be made
-clearer instead, do that.
+**No comment above a declaration, no prose inside a function or component body,
+and none inside a type declaration either.** Three positions, not two: the JSDoc
+block over the declaration, any explanation within a body, and a note between a
+type's members — an `Args`/`Props`/`Result` type is where this repository writes
+them most, and it is where they rot identically
+([ADR-104](docs/decisions/ADR-104-the-no-comment-rule-covers-a-type-declaration.md)).
+"Above a declaration" is the general form and covers a plain `const` too; a
+command descriptor's JSDoc named a derivation its only consumer had stopped using
+([#850](https://github.com/luciocabrera/lcabrera-stack/issues/850)). A name, a
+signature and the types already say what the code is, and an explanation next to
+code is the copy nothing keeps true — which is the failure every gate in this
+file exists to catch. If the code can be made clearer instead, do that.
 
-**Two exemptions, both narrow.** The **file-level header** that
-[`.claude/rules/scripts.md`](.claude/rules/scripts.md) mandates for a `.mjs`/`.cjs`
-script — one short block at the top of the file saying why the file exists, its
-usage and its exit codes — stays exactly as that rule specifies. And **JSDoc a
+**The exemptions are narrow.** The **file-level header** stays: the file's
+**first comment block**, in a source file of any extension, saying why the module
+exists rather than what a declaration below it is.
+[`.claude/rules/scripts.md`](.claude/rules/scripts.md) is where that header is
+additionally **mandatory** — for a `.mjs`/`.cjs` script, one short block giving
+the file's purpose, its usage and its exit codes, exactly as that rule specifies.
+It is permitted everywhere, which is what makes it the home for a trap in a
+`.ts` file that has no ADR or issue to carry it. Only the first block: a second
+one below it is a comment about the declaration under it. **JSDoc a
 build reads** stays: `@param`, `@returns`, `@type` and the rest of the
 annotations a tool consumes, because a published `.mjs` package's declarations
 are derived from them and dropping one publishes an option defaulting to `[]` as
-`never[]` ([`packages/CLAUDE.md`](packages/CLAUDE.md) owns that contract). The
-second exemption covers the **annotations**, not prose that happens to share
-their block: the test is whether removing the text changes what a tool emits.
+`never[]` ([`packages/CLAUDE.md`](packages/CLAUDE.md) owns that contract). That
+exemption covers the **annotations**, not prose that happens to share
+their block: the test is whether removing the text changes what a tool emits —
+which is also why `@deprecated` and `@internal` stay in a `.ts` file, where the
+rest of the annotations do not. And a **one-line note on a member of an exported
+type** stays: that member is a published surface, so state the precondition, the
+default or the encoding there and nothing else — not the rationale, and not a
+pointer to a record an installer cannot open.
 
 **The explanation still has to live somewhere, and there are two homes.** A
 decision — why this approach and not the one that looks equally reasonable —
@@ -441,11 +457,23 @@ moving it is not compliance.
 
 The record is
 [ADR-095](docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
+amended by
+[ADR-104](docs/decisions/ADR-104-the-no-comment-rule-covers-a-type-declaration.md)
+for the third position,
 which also states what the rule costs and which paragraph of
 [ADR-088](docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)
-it corrects. Applying it to the code that predates it, and the lint rule in
-`@lcabrera/eslint-plugin` that will enforce it, are
-[#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028).
+it corrects.
+
+**Nothing enforces this mechanically, and that is deliberate.** A lint rule for
+it was built and removed: deciding whether a given comment carries something no
+declaration can say is a judgement, and every mechanical proxy for it —
+the `export` keyword, a character budget, an adjacency walk over the file's
+leading comments — drew the line somewhere a reader would not, so the rounds
+went to arguing the proxy rather than the code
+([#1028](https://github.com/luciocabrera/lcabrera-stack/issues/1028)). Hold this
+by review, and when a comment is the only thing in dispute, delete it rather
+than debate it — keep it only where its omission would cost a reader something
+the code does not say.
 
 **Never put a changing number in a comment or a doc.** Counts, file totals,
 finding tallies and measurements are true on the day they are written and wrong

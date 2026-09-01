@@ -104,9 +104,7 @@ export const createPaginatedFetchActionMocks = <TDataState, TResponse>({
             skip: nextSkip,
           };
         })
-        .catch(() => {
-          /* mock: swallow the rejection */
-        });
+        .catch((): undefined => undefined);
     },
   ) as CallableMock<[FirePrefetchArgs<TResponse>], void>;
 

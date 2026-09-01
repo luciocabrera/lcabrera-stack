@@ -8,13 +8,6 @@ type ResolveFocusedGroupFoldArgs = {
   readonly meta: TableGroupTreeRowMeta | undefined;
 };
 
-/**
- * **A key column answers for itself and never falls back**, which is the whole of the
- * agreement.
- * A key cell that deliberately draws no control — an open subtotal in the level it totals
- * — must not fold from the keyboard either; falling back to the row there would collapse
- * the group from the one cell whose blank space says it cannot.
- */
 export const resolveFocusedGroupFold = ({
   columnKey,
   groupPath,
@@ -46,7 +39,5 @@ export const resolveFocusedGroupFold = ({
 
   const isInnermost = groupPath?.at(-1)?.columnKey === columnKey;
 
-  // A key cell folds the level it names and nothing else, so the innermost one
-  // — the level the row *is* — has nothing under it to fold (#870).
   return isInnermost ? { ...fromRow, hasChildren: false } : fromRow;
 };

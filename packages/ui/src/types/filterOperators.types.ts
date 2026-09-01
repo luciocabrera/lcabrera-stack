@@ -29,10 +29,6 @@ export type DateFilter = {
 
 export type DateOperatorType = DateFilter['operator'];
 
-/**
- * **Empty means SQL NULL, and deliberately not the empty string.** A text column can hold
- * both and they are different facts — `''` is a value someone stored.
- */
 export type EmptyFilter = {
   readonly operator: 'isEmpty' | 'isNotEmpty';
   readonly type: 'empty';
@@ -50,7 +46,7 @@ export type NumberFilter = {
     | 'lessThanOrEqual'
     | 'notEquals';
   readonly type: 'number';
-  /** Undefined while the user is drafting — this union is the editing contract, not the query one. */
+  /** Undefined while the user is drafting; the editing contract, not the query one. */
   readonly value: number | undefined;
   readonly value2?: number;
 };
@@ -69,7 +65,7 @@ export type OperatorType =
   | TextOperatorType;
 
 export type SelectFilter = {
-  /** Defaults to `'equals'` if omitted. */
+  /** Defaults to `'equals'`. */
   readonly operator?: 'equals' | 'notEquals';
   readonly type: 'multiSelect' | 'select';
   /** Single value for `'select'`. */

@@ -6,7 +6,6 @@ export const MagnifyingGlass = () => (
   <g {...stylex.props(styles.magnifierGroup)}>
     <circle {...stylex.props(styles.lensFill)} cx='170' cy='120' r='22' />
     <circle {...stylex.props(styles.lensStroke)} cx='170' cy='120' r='22' />
-    {/* subtle empty hint inside the lens */}
     <line
       {...stylex.props(styles.emptyHint)}
       x1='161'
@@ -14,7 +13,6 @@ export const MagnifyingGlass = () => (
       y1='120'
       y2='120'
     />
-    {/* handle */}
     <line
       {...stylex.props(styles.handle)}
       x1='187'

@@ -68,45 +68,22 @@ const USAGE =
   'usage: node scripts/copilot-review-status.mjs --pr <number> ' +
   '[--repo <owner/name>] [--dry-run] [--if-changed] [--protect-success]';
 
-/**
- * The review that triggered this run, when one did.
- *
- * Only a `submitted` review counts: a `dismissed` one has stopped covering
- * anything, and treating it as a fresh verdict would report a terminal failure
- * for a review that was withdrawn rather than ignored.
- */
 const triggeringReviewFrom = (payload) =>
   process.env.GITHUB_EVENT_NAME === 'pull_request_review' &&
   payload?.action === 'submitted'
     ? payload.review
     : undefined;
 
-/** The pull request as it stands now — not as the event payload described it. */
 const fetchPullRequest = (repository, number) =>
   JSON.parse(runGh(['api', `repos/${repository}/pulls/${number}`]));
 
-/**
- * What was read, so a `pending` status is diagnosable from the run log alone —
- * and WHO satisfied it when someone did, so a reviewer monoculture is visible in
- * the log as well as in the status description.
- *
- * Printed early on purpose. The last line this script writes is the one the
- * reconcile sweep records as the gate's outcome, so nothing may be appended
- * after it.
- */
 const describeReviews = (reviews, verdict) => {
   const counted = `${reviews.length} review(s) on the pull request, ${acceptedReviews(reviews).length} counted from an accepted reviewer`;
-  // `verdict.reviewer` is set on `failure` too, where that login is by definition
-  // the one whose review does NOT name the head — so the state is what gates this
-  // clause, not the presence of a login. Without it the log said
-  // "…; X covers the head" directly above "failure — X reviewed <old>, which is no
-  // longer the head".
   return verdict.state === 'success'
     ? `${counted}; ${verdict.reviewer} covers the head`
     : counted;
 };
 
-/** Appends the suppressed-comment report where the runner shows it, if it can. */
 const writeSummary = (markdown) => {
   const path = process.env.GITHUB_STEP_SUMMARY;
   if (path === undefined || path === '') {
@@ -115,21 +92,9 @@ const writeSummary = (markdown) => {
   appendFileSync(path, `${markdown}\n`, 'utf8');
 };
 
-/** The gate's own verdict. */
 const verdictLine = ({ description, state }) =>
   `${STATUS_CONTEXT}: ${state} — ${description}`;
 
-/**
- * The suppressed comments, reported alongside the verdict but never folded into
- * it: the state stays a statement about whether Copilot reviewed the head, and
- * the findings ride in the description and the job summary. ADR-078 has the
- * reason a suppressed comment does not move a merge bar.
- *
- * Printed above the verdict, and therefore above the line that says what became
- * of the status — which is the last one, and the one the reconcile sweep records
- * as this gate's outcome for the pull request. A finding printed below them
- * would take that line's place.
- */
 const reportSuppressed = (report, number) => {
   for (const line of suppressedLines(report, { pr: number })) {
     console.log(line);

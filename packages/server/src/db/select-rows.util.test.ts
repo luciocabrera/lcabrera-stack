@@ -99,8 +99,6 @@ describe('selectRows', () => {
     ).rejects;
 
     await rejects.toThrow(PersistenceError);
-    // The safe message, not the driver's — asserting the exact string is what
-    // proves the column name did not survive the translation.
     await rejects.toThrow('The database rejected the operation.');
   });
 });

@@ -13,12 +13,6 @@ import { loginSchema } from './login.schema';
 import { resolveRedirectTo } from './resolveRedirectTo.util';
 import { toLoginFieldErrors } from './toLoginFieldErrors.util';
 
-/**
- * Re-validates with the shared Zod schema (the `clientAction` already validated in the
- * browser, but the server never trusts that), verifies the credential against the demo
- * account's stored hash, then mints a signed auth token, sets it as an httpOnly cookie,
- * and redirects to the sanitized `redirectTo`.
- */
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const parsed = loginSchema.safeParse({
@@ -43,13 +37,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const { AUTH_TOKEN_SECRET } = readAuthEnvConfig({ env: process.env });
   const nowSeconds = Math.floor(Date.now() / 1000);
-  // A plain random nonce. This used to call `generateApiToken()` and keep only
-  // its `tokenId`, which minted a 256-bit bearer secret and a full plaintext
-  // token to throw both away — and made a token *identifier* stand in for a
-  // nonce, so the claim read as a credential to CodeQL. Web Crypto rather than
-  // `node:crypto`: a nonce needs nothing Node-specific, and this file is not a
-  // `.server.ts`, where the import boundary confines built-ins. 122 bits of
-  // entropy, against that tokenId's 64.
   const jti = crypto.randomUUID();
   const token = signAuthToken({
     claims: {

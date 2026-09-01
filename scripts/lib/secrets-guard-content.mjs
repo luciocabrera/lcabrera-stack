@@ -14,14 +14,9 @@
  * Governed by .claude/rules/scripts.md.
  */
 
-/** Extension of a path, including the dot ("" when there is none). */
 export const fileExtension = (name) =>
   name.includes('.') ? name.slice(name.lastIndexOf('.')) : '';
 
-// ---- content secret patterns ------------------------------------------------
-
-// High-confidence, provider-specific formats. ReDoS-safe (no nested quantifiers
-// over overlapping classes). Applied to EVERY write, regardless of file type.
 const PROVIDER_PATTERNS = [
   {
     id: 'aws-access-key-id',
@@ -85,37 +80,13 @@ const PROVIDER_PATTERNS = [
   },
 ];
 
-// A quoted value of 16+ non-space chars. Linear, no backtracking — unlike a
-// key+value regex whose unanchored identifier scan is quadratic (S8786). The
-// key-name test is done in JS (below).
 const QUOTED_VALUE = /["']([^"'\s]{16,})["']/g;
 const ENV_ASSIGNMENT =
   /^\s*[A-Z][A-Z0-9_]{2,}\s*=\s*([A-Za-z0-9+/=._-]{20,})\s*$/;
 
-// A module specifier is never a credential — but one naming a secret-related
-// module is exactly the generic rule's shape: a long, high-entropy quoted
-// string on a line containing "secret"/"token"/"password". Four committed
-// source files match (`from '@lcabrera/server/crypto/is-secret-hash-valid.util'`
-// and friends), so without this carve-out the guard blocks writing real code.
-//
-// Keyed on the syntactic POSITION — a `from` clause, `require(…)`, dynamic
-// `import(…)` — rather than on the value looking path-like, because a base64
-// credential also contains slashes and dots. Nothing can be smuggled through:
-// an import specifier is resolved as a module, never read as a value.
 const MODULE_SPECIFIER =
   /(?:\bfrom\s*|\b(?:require|import)\s*\(\s*)["']([^"'\s]+)["']/g;
 
-// A path to a SOURCE file is never a credential, and one naming a secret-related
-// script has the generic rule's exact shape — a long, high-entropy quoted string
-// on a line containing "secret". `.claude/settings.json`'s hook command
-// (`node "$CLAUDE_PROJECT_DIR/scripts/claude-secrets-guard.mjs"`) is the case
-// that forced this: the guard blocked edits to its own wiring, and JSON has no
-// comment syntax to carry the `gitleaks:allow` escape.
-//
-// Keyed on the EXTENSION plus a per-segment check (see `isSourceFilePathValue`),
-// never on the value merely looking path-like. Key material (`.pem`, `.key`, …)
-// is deliberately absent: the test pairs one high-entropy path spelled `.mjs`
-// against the same path spelled `.pem` to prove the extension is what decides.
 const SOURCE_FILE_EXTENSIONS = new Set([
   '.cjs',
   '.js',
@@ -130,12 +101,6 @@ const SOURCE_FILE_EXTENSIONS = new Set([
   '.tsx',
 ]);
 
-// The capture keeps a trailing escape backslash when the value sits inside an
-// escaped string (`"node \"…/x.mjs\""` in JSON, the same in a shell command),
-// which is exactly the context this carve-out exists for — so strip it before
-// reading the extension. Done by index rather than a `/\\+$/` replace: a
-// quantifier anchored at the end backtracks super-linearly on a long run of
-// backslashes (Sonar S8786), and this is linear.
 const withoutTrailingBackslashes = (value) => {
   let end = value.length;
   while (end > 0 && value[end - 1] === '\\') {
@@ -144,21 +109,8 @@ const withoutTrailingBackslashes = (value) => {
   return value.slice(0, end);
 };
 
-// Both separators, matching `hasDirectoryComponent` in the entry module — a
-// Windows-spelled path is no more a credential than a POSIX one.
 const PATH_SEPARATOR = /[/\\]/;
 
-// The extension alone is not enough: appending `/x.ts` to a credential would
-// otherwise buy an exemption, since the generic rule reads the whole quoted
-// string as one value. So every SEGMENT must also fail the secret test — a real
-// path is a run of readable names, while a smuggled credential keeps one long
-// high-entropy segment wherever the extension is bolted on.
-//
-// This is the shape check the module-specifier carve-out above deliberately
-// avoids ("a base64 credential also contains slashes and dots"); it is sound
-// here only because the per-segment test is what carries the weight, not the
-// slashes. Provider patterns are unaffected either way — they run independently
-// of this exemption, so a known-format key is still caught with any suffix.
 const isSourceFilePathValue = (value) => {
   const unescaped = withoutTrailingBackslashes(value);
   if (!SOURCE_FILE_EXTENSIONS.has(fileExtension(unescaped))) {
@@ -168,8 +120,6 @@ const isSourceFilePathValue = (value) => {
   return segments.length >= 2 && !segments.some(looksLikeRealSecret);
 };
 
-// Key names (normalized: lowercased, separators stripped) that mark a value as
-// credential-bearing when it is also high-entropy.
 const SECRET_KEY_HINTS = [
   'password',
   'passwd',
@@ -183,7 +133,6 @@ const SECRET_KEY_HINTS = [
   'authtoken',
   'credential',
 ];
-// Value prefixes that mark an obvious placeholder rather than a real secret.
 const PLACEHOLDER_WORDS = [
   'your',
   'my',
@@ -232,8 +181,6 @@ const shannonEntropy = (value) => {
   }, 0);
 };
 
-// `word` followed by a word boundary (mirrors the old /word\b/): the next char
-// must be absent or a non-word char.
 const startsWithWord = ({ text, word }) => {
   if (!text.startsWith(word)) {
     return false;
@@ -279,9 +226,6 @@ const genericSecretValue = (line) => {
     );
 };
 
-// Paths where the entropy-based generic rules do more harm than good: test
-// fixtures, doc/decision records, and the secret-guard sources themselves all
-// legitimately contain secret-shaped literals.
 const isGenericScanExempt = (filePath) => {
   const value = String(filePath);
   return (
@@ -317,7 +261,6 @@ const matchLine = ({ allowGeneric, line, lineNumber }) => {
   ];
 };
 
-/** Scan write content; returns one finding per matched line/rule. */
 export const scanForSecrets = ({ filePath, text }) => {
   if (typeof text !== 'string' || text.length === 0) {
     return [];

@@ -18,10 +18,6 @@ import { toAggregateItems } from '../utils';
 import { styles } from './ActiveAggregateList.stylex';
 import { AggregateItemContent } from './AggregateItemContent';
 
-/**
- * Drag order is state: the `grouping` param's `agg` array carries it, so a shared link
- * reads back what was dragged (#832).
- */
 export const ActiveAggregateList = ({
   isBusy = false,
 }: ActiveAggregateListProps) => {

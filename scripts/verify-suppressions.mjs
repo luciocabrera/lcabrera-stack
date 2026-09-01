@@ -51,14 +51,6 @@ const REPO_ROOT = process.cwd();
 const REGISTER_PATH = 'docs/agents/public-package-suppressions.json';
 const BASELINE_DIR = 'reports/fallow/baselines';
 
-/**
- * Directories that hold build output, dependencies or another agent's checkout —
- * never reviewed source.
- *
- * `.claude` matters here: it can contain linked worktrees holding a full second
- * copy of the repo, and counting those files would classify every glob as
- * repo-wide (a public-package file's twin always sits outside the package path).
- */
 const SKIP_DIRS = new Set([
   'node_modules',
   'dist',
@@ -73,7 +65,6 @@ const SKIP_DIRS = new Set([
 
 const SCANNED_EXTENSIONS = ['.ts', '.tsx', '.mjs', '.cjs', '.js', '.jsx'];
 
-/** Every scannable file under a directory, as repo-relative paths. */
 const walk = (directory) => {
   let entries = [];
   try {
@@ -95,7 +86,6 @@ const walk = (directory) => {
 const readJson = (path) =>
   parseJsonc(readTextWithin(join(REPO_ROOT, path), REPO_ROOT));
 
-/** Every fallow baseline document, keyed by its bare filename. */
 const readBaselines = () => {
   let names = [];
   try {
@@ -120,7 +110,6 @@ const report = (label, rows, render) => {
   return rows.length;
 };
 
-/** Prints every failing condition for one lane and returns how many rows failed. */
 const reportLane = (lane) => {
   const { grew, provisional, stale, unapproved, undeclared, undocumented } =
     diffAgainstRegister(lane);
@@ -182,8 +171,6 @@ const main = () => {
 
   const isPublicPath = (path) =>
     packageDirs.some((dir) => path.startsWith(`${dir}/`));
-  // The whole tree, so a Biome glob can be classified by whether anything
-  // OUTSIDE the public packages also matches it.
   const allFiles = walk(REPO_ROOT);
   const publicFiles = allFiles.filter((path) => isPublicPath(path));
   const otherFiles = allFiles.filter((path) => !isPublicPath(path));
@@ -193,14 +180,6 @@ const main = () => {
     text: readTextWithin(join(REPO_ROOT, file), REPO_ROOT),
   });
 
-  // Every workspace React Doctor could treat as its own project. It reports
-  // paths relative to the project, so the detector needs these to recognise a
-  // glob written without the `packages/ui/` prefix.
-  //
-  // Derived from the scanned paths, NOT by looking for `package.json`: `walk`
-  // only yields source extensions, so a manifest-based version silently found
-  // nothing and every project-relative glob went unmatched — the gate passed a
-  // planted `packages/ui` suppression.
   const projectDirs = [
     ...new Set(
       allFiles.flatMap((path) => {
@@ -242,16 +221,6 @@ const main = () => {
   }
 
   const register = readJson(REGISTER_PATH);
-  // Two lists, one bar. `approved` is an exemption FOR a public package;
-  // `acknowledged` is a repo-wide decision that happens to reach one. Both must
-  // be listed, so no override can widen onto these packages unnoticed — the hole
-  // the first version of this gate left open.
-  //
-  // `requireStatus` is where the two lanes genuinely differ: an exemption a
-  // package chose has to say whether it is permanent or provisional, while a
-  // repo-wide policy it merely falls inside is nobody's per-package decision to
-  // state (ADR-035 §7), so those entries carry no status and must not be failed
-  // for it.
   const lanes = [
     {
       found: own,

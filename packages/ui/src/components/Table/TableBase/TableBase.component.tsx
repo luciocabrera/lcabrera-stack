@@ -20,14 +20,6 @@ import {
 } from '../contexts/TableData/data/selectors';
 import { tableStyles } from './TableBase.stylex';
 
-/**
- * `role="grid"` is declared rather than inherited, and so are the roles on every row, cell
- * and column header below it: this table's `<tbody>` is `display: grid` and its rows and
- * cells are `display: flex`, and a browser drops an element's implicit table role along
- * with its table `display`.
- * The roles are therefore the only source of the grid's semantics, not a belt-and-braces
- * duplicate of native ones (ADR-062).
- */
 export const TableBase = <TData extends Record<string, unknown>, TResponse>({
   children,
   customStylex,

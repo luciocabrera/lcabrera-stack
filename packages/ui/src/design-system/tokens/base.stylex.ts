@@ -1,11 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
 
-/**
- * Base Design Tokens
- * These are the foundational values that themes will reference
- */
-
-// Spacing scale
 export const spacing = stylex.defineVars({
   lg: '1.5rem', // 24px
   md: '1rem', // 16px
@@ -17,7 +11,6 @@ export const spacing = stylex.defineVars({
   xxxl: '4rem', // 64px
 });
 
-// Typography scale
 export const typography = stylex.defineVars({
   fontFamily:
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -41,7 +34,6 @@ export const typography = stylex.defineVars({
   lineHeightTight: '1.25',
 });
 
-// Border radius scale
 export const borderRadius = stylex.defineVars({
   full: '9999px',
   lg: '0.75rem', // 12px
@@ -51,7 +43,6 @@ export const borderRadius = stylex.defineVars({
   xl: '1rem', // 16px
 });
 
-// Shadow scale
 export const shadows = stylex.defineVars({
   lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
   md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
@@ -60,7 +51,6 @@ export const shadows = stylex.defineVars({
   xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
 });
 
-// Z-index scale
 export const zIndex = stylex.defineVars({
   base: '0',
   dropdown: '1000',
@@ -70,7 +60,6 @@ export const zIndex = stylex.defineVars({
   tooltip: '1500',
 });
 
-// Transition durations
 export const transitions = stylex.defineVars({
   fast: '150ms',
   normal: '200ms',
@@ -78,7 +67,6 @@ export const transitions = stylex.defineVars({
   slower: '500ms',
 });
 
-// Easing functions
 export const easing = stylex.defineVars({
   easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
   easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -86,7 +74,6 @@ export const easing = stylex.defineVars({
   linear: 'linear',
 });
 
-// Tooltip tokens
 export const tooltip = stylex.defineVars({
   arrowOffset: '-6px',
   arrowSize: '12px',

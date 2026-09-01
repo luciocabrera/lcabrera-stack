@@ -34,10 +34,6 @@ export const useSetColumnPinning = <TData>() => {
     const grouping = groupingStore.get();
 
     const { newColumnOrder, newPinning } = resolveColumnPinningUpdate<TData>({
-      // A measure column pins the column it measures — see
-      // `toDeclaredColumnKey`. Order and pinning are persisted layout state and
-      // stay declared-only, or they accumulate keys that mean nothing without
-      // the grouping that produced them.
       columnKey: toDeclaredColumnKey<TData>({ columnKey, columns }),
       columns,
       currentOrder: columnOrder,

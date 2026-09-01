@@ -1,3 +1,22 @@
+/**
+ * This repo's own workspace roster, as data — exactly what `@lcabrera/tsconfig`
+ * must not carry (ADR-069).
+ *
+ * It is kept apart from `generate.ts` so the set can be asserted without running
+ * the generator: importing the runner would rewrite every config in the repo as
+ * a side effect of the import, which no test can do.
+ *
+ * `JS_SOURCE_WORKSPACES` is read by two tools for two reasons, both off the
+ * tsconfig on disk. `@lcabrera/vite-config` builds, and ESLint flat config is
+ * `.mjs`, so `vp pack` must emit a `.d.mts` beside each one or the subpath
+ * resolves untyped and `attw:verify` fails. `@lcabrera/devkit` and
+ * `@lcabrera/repo-standards` ship their `.mjs` source and need no build, but
+ * they are on the API-surface ratchet and ts-morph resolves their entry through
+ * this config — without the flag it loads no `.mjs` at all and every subpath
+ * snapshots as an empty surface, a ratchet over nothing that passes exactly like
+ * a correct one.
+ */
+
 import {
   createAppTsConfig,
   createNodeTsConfig,
@@ -8,41 +27,11 @@ import { fileURLToPath } from 'node:url';
 const packageDirectory = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(packageDirectory, '..', '..');
 
-/**
- * The published workspaces whose sources are JavaScript, not TypeScript. Two
- * different tools need the flag, for two different reasons, and both read it
- * from the tsconfig on disk rather than from an option passed to them.
- *
- * `@lcabrera/vite-config` **builds**: ESLint flat config is `.mjs`, so `vp pack`
- * has to emit a `.d.mts` beside each one or the subpath resolves untyped and
- * `attw:verify` fails. Passing the flag through the `dts` build option instead
- * is silently ignored, and the build fails with "tsgo did not generate dts
- * file".
- *
- * `@lcabrera/devkit` and `@lcabrera/repo-standards` **ship their `.mjs` source**
- * — loadable from `node_modules` as-is, so they need no build — but they are on
- * the API-surface ratchet, and ts-morph resolves the entry file through this
- * config. Without the flag it loads no `.mjs` at all and every subpath
- * snapshots as an empty surface: a ratchet over nothing, which passes exactly
- * like a correct one.
- *
- * A local merge rather than a `createNodeTsConfig` option: it is this repo's own
- * fact about its own workspaces, and `@lcabrera/tsconfig` is the half of the
- * split that must not carry those (ADR-069).
- */
 const withAllowJs = (config: ReturnType<typeof createNodeTsConfig>) => ({
   ...config,
   compilerOptions: { ...config.compilerOptions, allowJs: true },
 });
 
-/**
- * Every generated tsconfig, as data — this repo's own workspace roster, which
- * is exactly what `@lcabrera/tsconfig` must not carry (ADR-069).
- *
- * Kept apart from `generate.ts` so the set can be asserted without running the
- * generator: importing the runner would rewrite every config in the repo as a
- * side effect of the import, which no test can do.
- */
 export const configs = [
   {
     // This package's own source (the runner + tsconfig.entries.ts) is

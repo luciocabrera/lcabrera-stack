@@ -38,11 +38,6 @@ const parseBooleanFilter = (value: unknown): ColumnFilter | undefined => {
   return { type: 'boolean', value };
 };
 
-/**
- * `parseEqualsSelectFilter` accepts any all-string array, so a one-element `['ie']` is
- * already a select filter over the literal value `ie` and has to stay one; an object
- * cannot collide with it, or with any other shape this codec writes.
- */
 const parseEmptyFilter = (value: unknown): ColumnFilter | undefined => {
   if (!isObject(value) || Array.isArray(value)) {
     return undefined;
@@ -183,7 +178,6 @@ const parseEqualsSelectFilter = (
   return { operator: 'equals', type: 'select', values };
 };
 
-/** Returns undefined if the value cannot be parsed. */
 export const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
   const booleanFilter = parseBooleanFilter(value);
   if (booleanFilter) {
@@ -199,7 +193,6 @@ export const deserializeFilter = (value: unknown): ColumnFilter | undefined => {
 
   const arr = value as unknown[];
 
-  // Empty array — skip
   if (arr.length === 0) return undefined;
 
   return (

@@ -48,19 +48,12 @@ const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 
 const git = (args) => runGit({ args, cwd: REPO_ROOT });
 
-/** `--base <ref>`, else the shared env var, else the default branch. (pure) */
 const parseBase = (argv, env) => {
   const at = argv.indexOf('--base');
   const explicit = at === -1 ? undefined : argv[at + 1];
   return explicit ?? env.TEST_CHANGED_BASE ?? 'origin/main';
 };
 
-/**
- * An unresolvable base must be loud. The same trap sat in three required CI
- * checks at once: an unfetched or renamed base ref made the command
- * substitution empty, the diff degraded to nothing, and the gate reported green
- * having checked nothing. See `scripts/changed-files.sh`.
- */
 class BaseRefError extends Error {}
 
 const mergeBaseWith = (baseRef) => {
@@ -80,10 +73,6 @@ const mergeBaseWith = (baseRef) => {
   return mergeBase;
 };
 
-/**
- * Renames between the merge base and the working tree — the working tree, not
- * HEAD, so a rename is caught before it is committed.
- */
 const renamesSince = (mergeBase) => {
   const output = git([
     'diff',
@@ -112,9 +101,6 @@ const trackedPaths = () => {
 
 const corpus = () =>
   documentedFiles({
-    // The same corpus the documented-path gate reads. Two walkers drift, and a
-    // doc gate quietly reading fewer files reports the same clean pass as a
-    // corpus with nothing wrong in it.
     ignoredDocs: readGates(REPO_ROOT).docsPaths.ignoredDocs,
     repoRoot: REPO_ROOT,
   }).map((path) => ({

@@ -100,8 +100,6 @@ const MockTableGroupKeyCell = vi.hoisted(() => {
     const entry = summary.path.find((level) => level.columnKey === columnKey);
 
     if (entry === undefined) {
-      // Mirrors the real component's grand-total placement, which is the one
-      // behaviour that depends on *which* key is first.
       return summary.path.length === 0 && groupingKeys[0] === columnKey
         ? `key:${columnKey}:grand`
         : `key:${columnKey}:absent`;
@@ -190,11 +188,6 @@ const setupDefaultMocks = () => {
   ]);
 };
 
-/**
- * The partition a grouped table actually paints: the group key hoisted to the
- * head of the left-pinned group — its **own** column, not a synthetic one —
- * then the remaining data columns (ADR-080).
- */
 const setupGroupedMocks = () => {
   setupDefaultMocks();
   useGetTableGroupingKeysMock.mockReturnValue(['name']);
@@ -354,10 +347,6 @@ describe('TableBodyRows', () => {
       </table>,
     );
 
-    // One cell per rendered column, not one spanning cell, and no synthetic
-    // column among them: the key's value sits under the key's own header and
-    // every other column carries that group's aggregate (ADR-080). The row
-    // paints exactly the columns the consumer declared.
     const cells = [...(screen.getByRole('row').querySelectorAll('td') ?? [])];
 
     expect(cells.map((cell) => cell.textContent)).toStrictEqual([
@@ -412,8 +401,6 @@ describe('TableBodyRows', () => {
 
     const rows = [...container.querySelectorAll('tr')];
 
-    // The window's first row refills every level; the sibling below it carries
-    // `name` and still states its own innermost level (ADR-080).
     expect(
       [...(rows[0]?.querySelectorAll('td') ?? [])].map((c) => c.textContent),
     ).toStrictEqual(['key:name:A:1', 'key:amount:10:1']);
@@ -458,8 +445,6 @@ describe('TableBodyRows', () => {
       },
     ]);
 
-    // Same data, window starting at the row that WOULD carry. Its ancestor was
-    // scrolled past, so carrying it would state the block nowhere.
     render(
       <table>
         <tbody>
@@ -502,9 +487,6 @@ describe('TableBodyRows', () => {
   });
 
   it('blanks a grouped-by column on a detail row, leaving the ungrouped ones', () => {
-    // The value is stated once, by the group row above, in the same column —
-    // which is what a group row after a block of detail rows reads as
-    // (ADR-065 sub-decision 2, ADR-080).
     setupGroupedMocks();
     useGetTableDataMock.mockReturnValue([{ amount: 10, name: 'A' }]);
 
@@ -543,10 +525,6 @@ describe('TableBodyRows', () => {
       </table>,
     );
 
-    // The configuration says nothing is grouped, so there is no key column for
-    // a level to render in — and the summary-carrying row is *still* rendered
-    // as a group, from its own summary, beside an ordinary detail row. That is
-    // the property: what a row is comes from the row (ADR-065).
     expect(container.querySelectorAll('tr')).toHaveLength(2);
     expect(screen.getAllByTestId('table-group-header-row')).toHaveLength(1);
     expect(screen.getByText('agg:name')).toBeTruthy();
@@ -554,10 +532,6 @@ describe('TableBodyRows', () => {
   });
 
   it('emits exactly one row per data row under grouping, which is what the window math counts', () => {
-    // `TableBody` sizes <tbody> from a row count times rowHeight and derives
-    // both spacers from that same number, so a grouped result that emitted a
-    // header *plus* a detail row per entry would desynchronize the body from
-    // its contents. One row in, one <tr> out, whatever kind of row it is.
     setupGroupedMocks();
     useGetTableDataMock.mockReturnValue([
       {
@@ -664,10 +638,6 @@ describe('TableBodyRows', () => {
   });
 
   it('places the grand total on the first key that has a column', () => {
-    // Grouping is URL state, so it can name a column this route never declared.
-    // `withGroupedColumnLayout` hoists only the declared keys; the render path
-    // has to skip the same ones, or the grand total is looked for in a column
-    // that is never painted and renders nowhere at all.
     setupGroupedMocks();
     useGetTableGroupingKeysMock.mockReturnValue(['not_a_column', 'name']);
     useGetTableDataMock.mockReturnValue([
@@ -689,8 +659,6 @@ describe('TableBodyRows', () => {
       </table>,
     );
 
-    // The mock key cell reports `absent` when the row carries no entry for the
-    // column, so a grand total placed nowhere would show that instead.
     const cells = [...(screen.getByRole('row').querySelectorAll('td') ?? [])];
 
     expect(cells.map((cell) => cell.textContent)).toStrictEqual([

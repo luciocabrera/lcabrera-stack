@@ -10,13 +10,6 @@ import { useGetIsTableGridTabStop } from '#ui/components/Table/contexts/TableFoc
 import { activateGridCellLink } from './utils/activateGridCellLink.util';
 import { getIsGridNavigationTarget } from './utils/getIsGridNavigationTarget.util';
 
-/**
- * Everything the `role="grid"` element needs to be the grid's tab stop and its keyboard
- * surface.
- * The container is focusable whenever no rendered cell holds the tab stop, so the grid is
- * always exactly one stop in the page's tab order — including while the focused row sits
- * outside the virtualization window and therefore has no node at all (ADR-062).
- */
 export const useTableGridFocus = <TData extends Record<string, unknown>>() => {
   const isTabStop = useGetIsTableGridTabStop();
   const enterTableGrid = useEnterTableGrid<TData>();
@@ -41,9 +34,6 @@ export const useTableGridFocus = <TData extends Record<string, unknown>>() => {
 
     if (!isOwnEvent) return;
 
-    // `Enter` acts on the focused cell rather than moving it. The grid claims
-    // it only when the cell actually holds a link, so an ordinary cell leaves
-    // the key to the page.
     if (event.key === 'Enter' && activateGridCellLink(event.target)) {
       event.preventDefault();
 

@@ -18,15 +18,10 @@ describe('appReferences', () => {
   });
 
   it('ignores an app path that does not exist here', () => {
-    // The whole point: `apps/web` in a config example is generic illustration.
     expect(find('a consumer might have apps/web/**')).toEqual([]);
   });
 
   it('matches an app name containing an underscore', () => {
-    // A class excluding `_` matches only the prefix, which then fails the
-    // existence test — a silent pass on exactly what the gate is for. The
-    // name is synthetic so the case keeps its underscore whatever this repo's
-    // apps are called.
     expect(
       appReferences({
         exists: (path) => path === 'apps/docs_site',
@@ -41,8 +36,6 @@ describe('appReferences', () => {
   });
 
   it('reports every occurrence, not just the first per name', () => {
-    // Each mention is its own edit, so collapsing them would hide work behind
-    // a gate that has to be re-run to reveal it.
     const findings = find(
       'apps/docs-site\n\napps/showcase\napps/docs-site again',
     );
@@ -57,7 +50,6 @@ describe('appReferences', () => {
 
 describe('isCheckedFile', () => {
   it('checks every text form a package ships, not just markdown', () => {
-    // A comment in shipped `src` reaches a consumer the same way prose does.
     for (const shipped of [
       'packages/ui/README.md',
       'packages/ui/src/design-system/reset.css',
@@ -76,8 +68,6 @@ describe('isCheckedFile', () => {
   });
 
   it('checks the non-source text a package ships', () => {
-    // devkit ships workflow templates and two extensionless git hooks; a
-    // `paths:` filter naming an app is exactly what this gate is for.
     expect(isCheckedFile('packages/devkit/assets/workflows/check.yml')).toBe(
       true,
     );
@@ -94,16 +84,12 @@ describe('isCheckedFile', () => {
   });
 
   it('checks .spec.*, which no manifest excludes', () => {
-    // Skipping it would ship an unchecked file — the exclusions are the
-    // authority, not the suffix convention.
     expect(isCheckedFile('packages/ui/src/Table.spec.ts')).toBe(true);
   });
 });
 
 describe('fenced code', () => {
   it('does not flag a worked example inside a fence', () => {
-    // `apps/web` is illustration in several shipped READMEs; it must keep
-    // passing on the day this repo gains an app by that name.
     expect(find('intro\n```ts\napps/showcase\n```\n')).toEqual([]);
   });
 

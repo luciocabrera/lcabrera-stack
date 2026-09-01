@@ -14,8 +14,6 @@ describe('assertGroupSort', () => {
   });
 
   it('accepts an aggregate sort listed after every key', () => {
-    // The innermost-level sort: legal, and the one shape that orders leaves
-    // within their parent without touching the tree above them.
     expect(() =>
       assert([
         { direction: 'asc', key: 'order_status' },
@@ -32,8 +30,6 @@ describe('assertGroupSort', () => {
   });
 
   it('refuses an aggregate listed ahead of a group key', () => {
-    // The ancestor-ranking request. Refused rather than demoted behind the key,
-    // because a demoted term orders nothing and reads as having been applied.
     expect(() =>
       assert([
         { aggregateAlias: 'sum_total_amount', direction: 'desc' },
@@ -52,9 +48,6 @@ describe('assertGroupSort', () => {
   });
 
   it('refuses an aggregate ahead of a key even at the innermost level', () => {
-    // Both keys are still sorted, so the tree is intact by every other
-    // measure — but the aggregate now separates rows that key order had not,
-    // one level above where it may act.
     expect(() =>
       assert([
         { direction: 'asc', key: 'order_status' },

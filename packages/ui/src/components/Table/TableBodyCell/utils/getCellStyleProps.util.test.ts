@@ -64,8 +64,6 @@ describe('getCellStyleProps', () => {
   });
 
   it('skips alignment styles for consumer content and supports right pinning', () => {
-    // A consumer's own `render()` output: the cell holds content nothing here chose the
-    // layout of, so no alignment class is applied even though the column is a boolean.
     const result = getCellStyleProps({
       customStylex: undefined,
       dataType: 'boolean',
@@ -94,10 +92,6 @@ describe('getCellStyleProps', () => {
     });
   });
 
-  // The discriminating pair for #1018: identical arguments but for the flag, so the only
-  // thing either case can be reporting is the flag. A group row's aggregate reaches here
-  // as content that is already rendered — the old `hasCustomContent` — and must still take
-  // the column's alignment.
   it('right-aligns a currency column whose content was supplied', () => {
     const result = getCellStyleProps({
       customStylex: undefined,

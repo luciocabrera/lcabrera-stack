@@ -49,7 +49,6 @@ describe('resolveOpenMenuReposition', () => {
     const outcome = resolveOpenMenuReposition({
       getContainerRect: () => CONTAINER_RECT,
       menuElement: createMenuElement(true),
-      // Same null-producing lookup the hook uses for an unmounted trigger
       triggerElement: document.getElementById('missing-trigger'),
     });
 

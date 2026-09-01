@@ -5,9 +5,4 @@
  */
 export const SQLSTATE_FOREIGN_KEY_VIOLATION = '23503';
 export const SQLSTATE_UNIQUE_VIOLATION = '23505';
-/**
- * Raised by `statement_timeout` **and** by `pg_cancel_backend`, which is why the error it
- * maps to is named for the SQLSTATE rather than for the timeout: the code says the query
- * stopped early, not why.
- */
 export const SQLSTATE_QUERY_CANCELED = '57014';

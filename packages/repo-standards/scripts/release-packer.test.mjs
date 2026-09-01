@@ -2,12 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { releasePackerProblems, stripComments } from './release-packer.mjs';
 
-// What these assertions defend: the published `exports` come from
-// `publishConfig.exports`, and substituting that field is a pnpm extension, so
-// the tarball is only correct because changesets shells out to `pnpm publish`.
-// That a given repository is still wired that way is asserted where the
-// repository is — `scripts/lib/publish-wiring.test.mjs` here.
-
 const healthy = {
   lockfiles: ['package.json', 'pnpm-lock.yaml'],
   packageManager: 'pnpm@11.21.0',
@@ -38,9 +32,6 @@ describe('releasePackerProblems', () => {
   });
 
   it('does not read `pnpm publish` as `npm publish`', () => {
-    // The substring is there; the word boundary is not. Checking with
-    // `includes` would fail the healthy path and teach the next reader to
-    // weaken the assertion.
     expect(
       releasePackerProblems({
         ...healthy,

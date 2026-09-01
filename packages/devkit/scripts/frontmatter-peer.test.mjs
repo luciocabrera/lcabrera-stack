@@ -15,9 +15,6 @@ describe('requiredPeers', () => {
   });
 
   test('splits at the last @, so a scoped name survives', () => {
-    // The one thing this spelling has to get right: a scoped name opens with an
-    // `@` and a range never contains one. Splitting at the FIRST would read the
-    // package as `repo/repo-standards@>=1` and never resolve anything.
     expect(
       requiredPeers(withFrontmatter('peer: "@scope/name@^2.3.4"')),
     ).toEqual([{ name: '@scope/name', range: '^2.3.4' }]);
@@ -27,9 +24,6 @@ describe('requiredPeers', () => {
   });
 
   test('reads the same declaration however the spelling is styled', () => {
-    // A restyle is an edit nobody reviews as a behaviour change, so it must not
-    // be one. A spelling this cannot see reads as no declaration at all — the
-    // file is written into a consumer whose runtime cannot run it, silently.
     const spellings = {
       'block sequence': [
         'peer:',
@@ -143,8 +137,6 @@ describe('requiredPeers', () => {
   });
 
   test('leaves a requires: declaration alone, and is left alone by one', () => {
-    // The two keys are read by the same machinery. Reading either as the other
-    // would refuse a file for a requirement it never made.
     const content = withFrontmatter(
       'requires: [config.commands.install]',
       "peer: '@repo/a@^1.0.0'",

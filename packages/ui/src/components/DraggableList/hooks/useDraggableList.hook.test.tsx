@@ -182,12 +182,6 @@ describe('a drop that would split a group', () => {
   });
 });
 
-/**
- * A `grouping` link written before `addTableColumnAggregate` inserted beside a
- * column's existing measures carries an interleaved `agg`, and
- * `deserializeGroupingFromURL` passes it straight through. So this list arrives
- * without anyone crafting it.
- */
 const interleaved: DraggableItem[] = [
   { content: 'Sum', groupId: 'total', id: 'total:sum' },
   { content: 'Count', groupId: 'order', id: 'order:count' },
@@ -234,10 +228,6 @@ describe('a list that arrived already interleaved', () => {
   });
 
   it('accepts a drop that leaves it no worse, rather than freezing the list', () => {
-    // One group is already split, and this drop does not split a second. A
-    // predicate that asked "is the result contiguous" refused this, silently,
-    // and a sufficiently fragmented list had no single drop it would accept at
-    // all — the only way out was deleting entries.
     const { ids, onOrderChange } = dropOn({
       from: 'unit:avg',
       initialItems: interleaved,
@@ -255,8 +245,6 @@ describe('a list that arrived already interleaved', () => {
 
   it('still refuses a drop that splits a second group', () => {
     const { ids, onOrderChange } = dropOn({
-      // `total` is already split; dropping its stray member between the two
-      // `order` rows splits `order` too, taking the count from one to two.
       from: 'total:avg',
       initialItems: [
         { content: 'Sum', groupId: 'total', id: 'total:sum' },

@@ -42,15 +42,11 @@ describe('resolveGroupKeyCellDisclosure', () => {
       }),
     });
 
-    // The ancestor's path, not the row's: folding `Paris` from a row inside it
-    // must not fold that row's own group instead.
     expect(resolved?.path).toStrictEqual(PARIS);
     expect(resolved?.disclosure?.isExpanded).toBe(true);
   });
 
   it('draws nothing for a column naming a level this row cannot fold', () => {
-    // The row's own innermost level is the level it *is*, so it has nothing
-    // under it to fold — its rows open in their own route instead (#870).
     expect(
       resolveGroupKeyCellDisclosure({
         columnKey: 'district',
@@ -64,8 +60,6 @@ describe('resolveGroupKeyCellDisclosure', () => {
   });
 
   it('rebuilds the disclosure from the level rather than passing the row’s', () => {
-    // The row's own state answers for the row; this cell draws the ancestor its
-    // column names, which is open or shut independently of it.
     const resolved = resolveGroupKeyCellDisclosure({
       columnKey: 'city',
       disclosure: stateOf({

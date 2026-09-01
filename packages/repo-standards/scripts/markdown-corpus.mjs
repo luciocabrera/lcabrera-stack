@@ -7,25 +7,36 @@
  * behind?"). One definition on purpose: two walkers drift, and the symptom of a
  * doc gate quietly reading fewer files is a clean pass — indistinguishable from
  * a corpus with nothing wrong in it.
+ *
+ * The always-ignored list carries universal entries only, for that same reason:
+ * a wrong entry makes the gate neither stricter nor looser, it makes it silently
+ * read fewer documents. Everything else a repository exempts arrives as
+ * configuration. There is deliberately no `/decisions/` fragment — exempting
+ * dated records wholesale hid every dead link in them, so they are filtered per
+ * token by `enforcedTokens` instead, which keeps the paths an ADR names exempt
+ * as historical record while the links it asks you to follow are not.
+ *
+ * The walk stops at a separate checkout — a directory holding a `.git` entry,
+ * which is a linked worktree or a nested clone. Descending into one scans every
+ * document a second time and resolves its relative references against THIS
+ * root, so a doc correct in its own tree is reported broken here. That path is
+ * gitignored or outside the tree entirely, so CI's fresh checkout never has one
+ * and the gate failed only on the machine that had run `coordination:claim` —
+ * the command the agent instructions recommend. A gate that fires locally and
+ * nowhere else trains people into `--no-verify`, which then stops catching
+ * everything else the hook guards.
+ *
+ * It is matched by "is a checkout" and deliberately NOT by reading
+ * `.gitignore`. A root-only reader is incomplete wherever nested gitignore
+ * files exist, and gitignore lines are patterns rather than names, so a naive
+ * reader risks skipping a directory of real documents — and the symptom of that
+ * is the gate quietly checking less, which is the failure these gates exist to
+ * prevent. `markdown-corpus.test.mjs` pins the behaviour; this is the argument
+ * against replacing it.
  */
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-/**
- * Documents whose paths are illustrative or forward-looking by design.
- *
- * Universal entries only. A changelog names paths as they were, a report is
- * generated, and a template's paths are placeholders to be replaced — those hold
- * anywhere. Everything else a repository exempts is its own, and arrives as
- * configuration, because a wrong entry here does not make the gate stricter or
- * looser: it makes it silently read fewer documents, and a doc gate reading less
- * reports the same clean pass as a corpus with nothing wrong in it.
- *
- * Deliberately NOT a `/decisions/` fragment. Exempting dated records wholesale
- * hid every dead link in them; they are filtered per TOKEN by `enforcedTokens`
- * instead, so the paths an ADR *names* stay exempt as historical record while
- * the links it asks you to *follow* do not.
- */
 const ALWAYS_IGNORED = ['CHANGELOG.md', 'node_modules/', '_TEMPLATE.md'];
 
 export const isIgnoredDoc = ({ docPath, ignoredDocs }) =>
@@ -33,7 +44,6 @@ export const isIgnoredDoc = ({ docPath, ignoredDocs }) =>
     docPath.includes(fragment),
   );
 
-/** Directories that never contain governed documentation. */
 const SKIPPED_DIRS = new Set([
   '.git',
   '.react-router',
@@ -44,39 +54,9 @@ const SKIPPED_DIRS = new Set([
   'node_modules',
 ]);
 
-/**
- * Whether this directory is a *separate checkout of the repo* rather than part
- * of this one — a linked worktree (where `.git` is a file) or a nested clone
- * (where it is a directory). Both are visible to the `readdirSync` the walk
- * already performs, so this costs nothing and needs no subprocess.
- *
- * Descending into one scans every document a second time and resolves its
- * relative references against THIS root, so a doc that is correct in its own
- * tree gets reported broken here. `coordination:claim` — which AGENTS.md
- * recommends whenever other agents are active — puts a full linked checkout
- * beside the repo, and because that path is gitignored (or outside the tree
- * entirely), CI's fresh checkout never has one: the gate failed only on the
- * machine that ran the recommended command, and the only way past it was
- * `--no-verify`. A gate that fires locally and nowhere else trains people to
- * bypass the pre-push hook, which then stops catching everything else it
- * guards.
- *
- * Matched by "is a checkout" rather than "is gitignored" deliberately. Reading
- * `.gitignore` would cover this case too, but root-only is incomplete (this
- * repo has nine nested gitignore files) and gitignore lines are patterns, not
- * names — a naive reader risks skipping a directory of real documents, and the
- * symptom of that is the gate quietly checking less. Silent loss of coverage is
- * the failure these gates exist to prevent.
- */
 const isSeparateCheckout = (entries, prefix) =>
   prefix !== '' && entries.some((entry) => entry.name === '.git');
 
-/**
- * Every markdown file under the repo, found by walking rather than by shelling
- * out to `git ls-files`: `verify-docs-paths.mjs` launches no subprocess at all,
- * so a PATH-resolved process can never be substituted underneath a gate that
- * runs on every push.
- */
 const walkMarkdown = (dir, prefix = '') => {
   const entries = readdirSync(dir, { withFileTypes: true });
   if (isSeparateCheckout(entries, prefix)) {
@@ -93,7 +73,6 @@ const walkMarkdown = (dir, prefix = '') => {
   });
 };
 
-/** Repo-relative paths of every governed document. */
 export const documentedFiles = ({ ignoredDocs = [], repoRoot }) =>
   walkMarkdown(repoRoot).filter(
     (docPath) => !isIgnoredDoc({ docPath, ignoredDocs }),

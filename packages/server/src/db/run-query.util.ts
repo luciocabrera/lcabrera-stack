@@ -10,10 +10,6 @@ type RunQueryArgs = ExecutorOptions & {
   readonly values: readonly unknown[];
 };
 
-/**
- * getPool()` client: `Pool.query` and `ClientBase.query` are both overloaded, and
- * TypeScript cannot synthesise a call signature for a union of overloaded methods.
- */
 export const runQuery = async <TRow extends QueryResultRow>({
   text,
   tx,

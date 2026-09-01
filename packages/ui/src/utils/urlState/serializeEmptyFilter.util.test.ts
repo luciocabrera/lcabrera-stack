@@ -20,7 +20,6 @@ describe('serializeEmptyFilter', () => {
   });
 
   it('round-trips both operators', () => {
-    // The codec is two halves and nothing but this asserts they agree.
     for (const filter of [
       emptyFilter,
       notEmptyFilter,
@@ -32,12 +31,6 @@ describe('serializeEmptyFilter', () => {
   });
 
   it('leaves a select filter whose value is an operator code alone', () => {
-    // The collision the object shape exists to avoid, asserted from the side
-    // that would break: `serializeSelectFilter` writes an equals select filter
-    // as its bare values, so `['ie']` is already that filter's compact form.
-    // `ie` is a real country code and this package is published, so claiming
-    // the array form would silently turn "country is ie" into "country is
-    // empty" in a consumer's URL.
     for (const code of ['ie', 'nie']) {
       expect(deserializeFilter([code])).toStrictEqual({
         operator: 'equals',
@@ -48,8 +41,6 @@ describe('serializeEmptyFilter', () => {
   });
 
   it('round-trips such a select filter through the dispatcher', () => {
-    // The same boundary end to end, so a future short code cannot be added to
-    // the array form without this failing.
     const filter = {
       operator: 'equals',
       type: 'select',
@@ -62,9 +53,6 @@ describe('serializeEmptyFilter', () => {
   });
 
   it('refuses an object that is not this shape', () => {
-    // The object arm is read before the array guard, so it must claim only
-    // what it writes — anything else has to fall through as unparseable rather
-    // than becoming an arbitrary empty filter.
     expect(deserializeFilter({ op: 'zz' })).toBeUndefined();
     expect(deserializeFilter({ op: 7 })).toBeUndefined();
     expect(deserializeFilter({ operator: 'isEmpty' })).toBeUndefined();

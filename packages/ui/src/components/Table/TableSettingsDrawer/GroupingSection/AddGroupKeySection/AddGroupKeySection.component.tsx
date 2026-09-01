@@ -20,12 +20,6 @@ import { useGetGroupingKeys } from '../../TableDrawerContext/selectors';
 import { toGroupKeyColumnOptions } from '../utils';
 import { styles } from './AddGroupKeySection.stylex';
 
-/**
- * Which columns those are is `toGroupKeyColumnOptions`' answer, so this list and the
- * header menu's enabled items come from one derivation — the column's own declaration
- * narrowed by the catalogue (ADR-058, #642).
- * Offering a key the endpoint refuses would empty the table instead of grouping it.
- */
 export const AddGroupKeySection = ({
   isBusy = false,
   onDropdownOpenChange,
@@ -39,10 +33,6 @@ export const AddGroupKeySection = ({
   const [selectedColumn, setSelectedColumn] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // A curated grouping offers no key to add. Rendered away rather than
-  // disabled: a disabled Add reads as "not yet", where the answer is "not
-  // here" (#578). Every hook above still runs, so the order of hooks is the
-  // same on either branch.
   if (isGroupingLocked) return;
 
   const isAtDepthCap = groupingKeys.length >= MAX_TABLE_GROUP_KEYS;
@@ -55,18 +45,12 @@ export const AddGroupKeySection = ({
   const availableColumnOptions = toGroupKeyColumnOptions({
     capabilities,
     columns,
-    // A Set rather than `groupingKeys.includes` inside the filter: the filter is
-    // the loop, so an array scan per column is quadratic in the column count.
     stagedKeys: new Set(groupingKeys),
   });
 
   const handleAddGroupKey = () => {
     if (!selectedColumn) return;
 
-    // The granularity goes on with the key: a column the catalogue refuses raw
-    // is offered only truncated, so adding it without one stages a grouping the
-    // server would refuse (ADR-084). The list above admits such a column for
-    // exactly that reason, from the same resolver.
     toggleGroupKey({
       columnKey: selectedColumn,
       period: resolveGroupKeyAvailability({

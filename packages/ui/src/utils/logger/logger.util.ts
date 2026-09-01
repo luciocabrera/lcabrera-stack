@@ -2,9 +2,7 @@ import type { CreateLoggerArgs, LogLevel } from './logger.types';
 
 import { DEFAULT_LOG_LEVEL, LOG_LEVEL_PRIORITY } from './logger.constants';
 
-const noop = () => {
-  /* intentional no-op — replaces log methods below the active level */
-};
+const noop = (): void => undefined;
 
 const resolveLogLevel = (override?: LogLevel) => {
   if (override) return override;
@@ -16,10 +14,6 @@ const resolveLogLevel = (override?: LogLevel) => {
   return DEFAULT_LOG_LEVEL;
 };
 
-/**
- * Methods below the configured level become no-ops at creation. In production, `debug` /
- * `info` / `warn` bodies are tree-shaken because they are guarded by `import.meta.env.PROD`.
- */
 export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}) => {
   const activeLevel = resolveLogLevel(level);
   const priority = LOG_LEVEL_PRIORITY[activeLevel];

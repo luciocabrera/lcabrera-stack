@@ -49,9 +49,6 @@ describe('inferTableColumnsFromJson', () => {
   });
 
   it('ignores null/undefined observations when inferring a type', () => {
-    // Parsed rather than written as a literal: the null under test is a JSON
-    // null from real scanner output, which unicorn/no-null would otherwise
-    // reject as a hand-written null literal.
     const rowsWithJsonNull = JSON.parse(
       '[{ "count": null }, { "count": 5 }]',
     ) as readonly Record<string, unknown>[];

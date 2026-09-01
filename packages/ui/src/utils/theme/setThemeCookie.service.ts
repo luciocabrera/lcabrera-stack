@@ -11,10 +11,6 @@ type SetThemeCookieArgs = {
   readonly theme: ThemeMode;
 };
 
-/**
- * Persist the theme through the same `/_action/persist-cookie` action every other cookie
- * write uses, so the `Set-Cookie` comes from the server.
- */
 const persistThemeCookieServerSide = ({ appId, theme }: SetThemeCookieArgs) => {
   if (
     globalThis.fetch === undefined ||
@@ -43,6 +39,5 @@ const persistThemeCookieServerSide = ({ appId, theme }: SetThemeCookieArgs) => {
 };
 
 export const setThemeCookie = ({ appId, theme }: SetThemeCookieArgs) => {
-  // Persist through the React Router action so Set-Cookie comes from the server.
   persistThemeCookieServerSide({ appId, theme });
 };

@@ -16,11 +16,6 @@ type UseTableActionsPopoverPositionArgs = {
   readonly triggerId: string;
 };
 
-/**
- * Repositioning is recomputed on resize/intersection while open, and across several
- * animation frames right after opening because virtualization/load-more can shift trigger
- * geometry immediately after the click.
- */
 export const useTableActionsPopoverPosition = ({
   containerRef,
   isEnabled,
@@ -94,7 +89,6 @@ export const useTableActionsPopoverPosition = ({
         closeMenu,
         getContainerRect: () =>
           containerRef.current?.getBoundingClientRect() ??
-          // Read the window size at reposition time, not import time
           createViewportRect({
             height: globalThis.innerHeight,
             width: globalThis.innerWidth,

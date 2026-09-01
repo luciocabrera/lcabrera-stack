@@ -51,7 +51,6 @@ const readInputs = () => {
   return { base, body, title };
 };
 
-/** Shared branches declared in the register are legitimate PR bases. */
 const declaredSharedBranches = () =>
   readEntries(BRANCHES_DIR)
     .map(({ data }) => data?.branch)
@@ -63,11 +62,6 @@ const main = () => {
 
   const titleResult = validatePrTitle(title, { workspaces });
   const bodyResult = validatePrBody(body);
-  // The trunk and the shared-branch home are the consumer's to name, and read
-  // here rather than at module scope so importing this file touches nothing
-  // (#807). Left unpassed, this gate told a consumer whose trunk is `master` to
-  // "retarget to `main`" — a branch that does not exist — on every PR they
-  // opened, and pointed the remedy at the wrong directory.
   const { defaultBranch, sharedBranchesDir } = readConventions(REPO_ROOT);
   const baseResult = validatePrBase(base, {
     allowedBases: declaredSharedBranches(),

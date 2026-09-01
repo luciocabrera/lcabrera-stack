@@ -7,14 +7,6 @@ type ReorderTableColumnAggregatesArgs = {
   readonly orderedIds: readonly string[];
 };
 
-/**
- * A **permutation**, never a replacement: it takes ids and sorts the entries it was
- * handed, so it can neither invent an aggregate nor drop one.
- * That matters because the aggregate list a surface renders is not always the whole staged
- * list — `toAggregateItems` hides an aggregate whose column the route no longer declares,
- * which a consumer's own loader can still seed — and rebuilding the list from the visible
- * rows would silently un-stage it.
- */
 export const reorderTableColumnAggregates = ({
   grouping,
   orderedIds,

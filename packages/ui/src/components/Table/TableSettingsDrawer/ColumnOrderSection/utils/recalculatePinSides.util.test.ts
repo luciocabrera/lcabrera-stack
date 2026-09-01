@@ -22,7 +22,6 @@ describe('recalculatePinSides', () => {
   });
 
   it('preserves equidistant column original side', () => {
-    // 1 column total, index 0 is equidistant (distance 0 both sides)
     const result = recalculatePinSides({
       columnPinning: { left: ['id'], right: [] },
       newOrder: ['id'],

@@ -21,8 +21,6 @@ describe('assertGroupAliases', () => {
   });
 
   it('refuses an alias that collides with a real column', () => {
-    // A table with its own `group_mask` column would otherwise project two
-    // columns of that name and the driver would keep one.
     expect(() =>
       assertGroupAliases({
         aliases: ['group_mask'],
@@ -53,8 +51,6 @@ describe('assertGroupAliases', () => {
   });
 
   it('refuses two aliases that differ only past the limit', () => {
-    // The failure this whole rule exists for. Both truncate to the same 63
-    // characters, which Postgres reports as a NOTICE and nothing else.
     const shared = 'a'.repeat(62);
 
     expect(() =>

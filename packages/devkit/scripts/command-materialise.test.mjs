@@ -10,9 +10,6 @@ const entry = (state, missing) => ({
 
 describe('renderPlan', () => {
   test('names what is missing behind each refusal, and keeps the two apart', () => {
-    // A missing command and a missing config key need different edits to
-    // devkit.config.json, so one shared wording would name the file without
-    // saying what to do about it.
     expect(
       renderPlan([
         entry('unresolved', ['install']),

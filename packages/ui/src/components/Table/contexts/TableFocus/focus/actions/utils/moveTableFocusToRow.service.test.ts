@@ -54,15 +54,10 @@ describe('moveTableFocusToRow', () => {
     expect(next.rowKey).toBe('grp:[["city","Paris"]]');
     expect(next.rowIndex).toBe(2);
     expect(next.columnKey).toBe('city');
-    // The request id is what a mounted cell watches to take DOM focus.
     expect(next.focusRequestId).toBe(5);
   });
 
   it('hands the tab stop back to the grid, because the focused node is going away', () => {
-    // The discriminating case: the cell that held DOM focus is removed by the
-    // same interaction, so its own release cannot fire — the store no longer
-    // names it. Without this the grid is left with no `tabIndex={0}` anywhere
-    // and stops being reachable by Tab at all.
     const focusStore = createFocusStore(targetedState);
 
     moveTableFocusToRow({
@@ -78,8 +73,6 @@ describe('moveTableFocusToRow', () => {
   });
 
   it('repositions the target quietly when focus is elsewhere on the page', () => {
-    // A collapse is not the user asking for focus. Raising a request here would
-    // yank focus back into the grid from whatever they had moved on to.
     const focusState = focusStateFor({
       columnKey: 'city',
       focusRequestId: 4,

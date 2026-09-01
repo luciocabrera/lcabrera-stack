@@ -17,7 +17,6 @@ export const SCHEMA_NAME = 'public';
 
 export const PERSISTENCE_KEY = 'enterprise-orders-table';
 
-/** The group-details modal's own persistence key, deliberately not the list's. */
 export const GROUP_DETAILS_PERSISTENCE_KEY = 'enterprise-orders-group-table';
 
 export const DELETE_ACTION_PATH = '/_action/enterprise-orders/delete';

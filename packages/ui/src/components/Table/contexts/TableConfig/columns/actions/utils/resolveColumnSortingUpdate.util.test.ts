@@ -26,10 +26,6 @@ type BaseArgsOverrides = {
   readonly groupingKeys?: readonly string[];
 };
 
-/**
- * The declared column list and no grouping — the shape every caller had before
- * measure columns existed. Overridden per test where the two diverge.
- */
 const baseArgs = ({
   aggregates = [],
   groupingKeys = [],
@@ -83,10 +79,6 @@ describe('resolveColumnSortingUpdate', () => {
   });
 
   it('keeps the measure columns in the lookup it hands back', () => {
-    // The regression (#872 review): this resolved `normalizedColumns` from the
-    // **declared** list, which never contains a measure column, so every sort
-    // click dropped `total_amount:avg` from the lookup while
-    // `pinnedColumnPartition` still asked for it to be rendered.
     const result = resolveColumnSortingUpdate<Row>({
       ...baseArgs({
         aggregates: [
@@ -101,8 +93,6 @@ describe('resolveColumnSortingUpdate', () => {
 
     if (result.kind !== 'updated') throw new Error('expected an update');
 
-    // The source column is gone — replaced by its measures, which is what
-    // `withAggregateColumns` does — and both measures are addressable.
     expect(Object.keys(result.viewState.normalizedColumns)).toContain(
       'total_amount:avg',
     );
@@ -115,8 +105,6 @@ describe('resolveColumnSortingUpdate', () => {
   });
 
   it('records the sort it just applied against a measure column', () => {
-    // Sorting a measure is the whole feature; the lookup has to carry the
-    // direction or the header renders unsorted right after the click.
     const result = resolveColumnSortingUpdate<Row>({
       ...baseArgs({
         aggregates: [{ columnKey: 'total_amount', fn: 'avg' }],

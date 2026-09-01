@@ -42,7 +42,6 @@ const CONTAINER_HEIGHT = 400;
 
 const GROUPING_KEYS = ['status', 'customerType', 'priority'];
 
-/** Every key, plus a column that is no key at all — the withheld case. */
 const MENU_COLUMNS = [...GROUPING_KEYS, 'id'];
 
 const columns: TableColumn<TestRow>[] = [
@@ -52,10 +51,6 @@ const columns: TableColumn<TestRow>[] = [
   { key: 'priority', label: 'Priority' },
 ];
 
-/**
- * Where each key lands once the grouped layout hoists the key columns to the
- * front (ADR-080) — not the order `columns` declares them in.
- */
 const STATUS_CELL = 0;
 const CUSTOMER_CELL = 1;
 
@@ -75,23 +70,6 @@ const groupRow = ({ isSubtotal = false, path }: GroupRowArgs): TestRow => ({
   [TABLE_GROUP_ROW_FIELD]: { aggregates: [], count: 2, isSubtotal, path },
 });
 
-/**
- * A three-level rollup, in the order rollup emits it — every subtotal after the
- * rows it totals (#570), and the grand total last of all (ADR-065).
- *
- * ```
- * 0  Cancelled Business Critical
- * 1  Cancelled Business High
- * 2  Cancelled Business ·total·
- * 3  Cancelled Retail   Critical
- * 4  Cancelled Retail   ·total·
- * 5  Cancelled ·total·
- * 6  Active    Business Critical
- * 7  Active    Business ·total·
- * 8  Active    ·total·
- * 9  ·total·                        ← keyed by nothing
- * ```
- */
 const rows: readonly TestRow[] = [
   groupRow({ path: pathOf('Cancelled', 'Business', 'Critical') }),
   groupRow({ path: pathOf('Cancelled', 'Business', 'High') }),
@@ -120,11 +98,6 @@ type LevelFoldControlProps = {
   readonly columnKey: string;
 };
 
-/**
- * One column's pair as the header menu wires it — the real hook, so both the
- * enabled states and the "is it offered at all" gate asserted here are the ones
- * the menu items get.
- */
 const LevelFoldControl = ({ columnKey }: LevelFoldControlProps) => {
   const {
     hasGroupLevel,
@@ -236,10 +209,6 @@ const cellOf = ({ index, row }: CellArgs) =>
 const chevronIn = (args: CellArgs) =>
   cellOf(args)?.querySelector('[data-testid="table-group-disclosure"]');
 
-/**
- * StyleX writes the body's computed total to a custom property rather than to
- * `height`, so that is where the declared height actually lives.
- */
 const readBodyHeight = () =>
   screen.getByTestId('table-body').style.getPropertyValue('--x-height');
 
@@ -249,11 +218,6 @@ const getFocusTarget = () =>
     readonly rowKey?: string;
   };
 
-/**
- * The labels each row actually **draws**, read off the drawn cells rather than
- * `textContent`, which would also collect the visually-hidden restatement a
- * carried level renders (ADR-080).
- */
 const drawnLabels = () =>
   getRows().map((row) =>
     [...row.querySelectorAll('[data-testid="table-group-key-cell"]')]
@@ -261,7 +225,6 @@ const drawnLabels = () =>
       .join(' | '),
   );
 
-/** The scroll listener defers through `requestAnimationFrame`; only an awaited act drains it. */
 const flushFrame = async () => {
   await act(async () => {
     screen.getByTestId('scroll-container').dispatchEvent(new Event('scroll'));
@@ -278,7 +241,6 @@ const enterGrid = async () => {
   await flushFrame();
 };
 
-/** What the grid draws once the customer-type groups are folded. */
 const CUSTOMER_TYPE_FOLDED = [
   'Cancelled | Business total',
   'Retail total',
@@ -288,7 +250,6 @@ const CUSTOMER_TYPE_FOLDED = [
   'Grand total',
 ];
 
-/** And once the status groups are, from the outermost key’s own column. */
 const STATUS_FOLDED = ['Cancelled total', 'Active total', 'Grand total'];
 
 const openChevronIn = (index: number) =>

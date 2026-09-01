@@ -63,11 +63,6 @@ export const ActiveGroupKeyList = ({
       />
       {groupKeyItems.length === 0 && (
         <InfoBox>
-          {/*
-           * The locked wording describes the lock and does not claim a grouping
-           * exists: a route may declare `isGroupingLocked` with no default and
-           * no keys in the URL, and this branch is exactly that case.
-           */}
           {isGroupingLocked
             ? 'No grouping applied, and it cannot be changed here.'
             : 'No grouping applied. Add a column above to group the rows.'}
@@ -75,11 +70,6 @@ export const ActiveGroupKeyList = ({
       )}
       {groupKeyItems.length > 0 && (
         <div {...stylex.props(styles.groupKeyList)}>
-          {/*
-           * A locked list renders the same rows without the drag handles: the
-           * order is the query's nesting order, so reordering is an edit and a
-           * lock has to cover it as much as it covers removal (#578).
-           */}
           {isGroupingLocked ? (
             draggableItems.map((item) => (
               <div key={item.id}>{item.content}</div>

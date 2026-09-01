@@ -49,8 +49,6 @@ describe('estimateGroupCardinality', () => {
   });
 
   it('adds one row per rolled-up level plus the grand total', () => {
-    // 3·5 detail + 3 subtotal + 1 grand total. Derived from the emitted sets, so
-    // it cannot drift from the SQL the same expander builds.
     expect(estimate({ grouping: 'rollup', keys: ['a', 'b'] })).toEqual({
       kind: 'known',
       rows: 19,
@@ -72,9 +70,6 @@ describe('estimateGroupCardinality', () => {
   });
 
   it('refuses to guess when one factor is missing', () => {
-    // Treating the missing factor as 1 would let the widest column in the
-    // request be the one that hides the cost — the guard would then pass exactly
-    // the query it exists to catch.
     const known = estimate({ grouping: 'flat', keys: ['a'] });
     const withUnknown = estimate({
       grouping: 'flat',
@@ -86,9 +81,6 @@ describe('estimateGroupCardinality', () => {
   });
 
   it('reaches ∏(dₖ+1) for a cube with no formula of its own', () => {
-    // 4·6·8. The `+1` per key is the subset that omits it, and it falls out of
-    // summing over the emitted sets — nothing in the estimator knows what a
-    // cube is, which is the property worth pinning.
     expect(estimate({ grouping: 'cube', keys: ['a', 'b', 'c'] })).toEqual({
       kind: 'known',
       rows: 192,
@@ -96,9 +88,6 @@ describe('estimateGroupCardinality', () => {
   });
 
   it('bounds a cube above the rollup over the same keys', () => {
-    // Cube's sets are a superset of rollup's, so its bound can never be the
-    // smaller of the two — the ordering a guard rail depends on to refuse the
-    // more expensive mode first.
     const keys = ['a', 'b', 'c'];
     const cube = estimate({ grouping: 'cube', keys });
     const rollup = estimate({ grouping: 'rollup', keys });
@@ -109,10 +98,6 @@ describe('estimateGroupCardinality', () => {
   });
 
   it('refuses to guess for a cube too, on one missing factor', () => {
-    // The rail that cannot enforce cube's depth cap, stated where it is
-    // observable: an unanalysed key makes the whole bound unknown, and ADR-066
-    // answers unknown with warn-and-proceed. That is why the cap is asserted at
-    // construction instead (`assert-group-depth.util.ts`).
     expect(estimate({ grouping: 'cube', keys: ['a', 'unanalysed'] })).toEqual({
       columns: ['unanalysed'],
       kind: 'unknown',

@@ -5,11 +5,6 @@ type IsIdentifierTypeArgs = {
   readonly typeNamespace: string;
 };
 
-/**
- * Whether a column's type is one of the named identifier exceptions to Gate 1's category
- * derivation (ADR-058, #599).
- * Matching is schema-qualified — a user-defined `app.uuid` is not `pg_catalog.uuid`.
- */
 export const isIdentifierType = ({
   typeName,
   typeNamespace,

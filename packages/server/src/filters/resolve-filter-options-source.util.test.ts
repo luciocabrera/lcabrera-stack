@@ -81,10 +81,6 @@ it('refuses a column name inherited from Object.prototype', () => {
 // `column in columns` walks the prototype chain, so it would let the inherited
 // one back through.
 it('allows a column the registry really lists, prototype name or not', () => {
-  // `as const` is load-bearing here, and for the same reason the rule above
-  // exists: TypeScript resolves a `constructor` property to `Object.prototype`'s
-  // rather than to the index signature, so the literal is never contextually
-  // typed and widens to `string`.
   const sources: FilterOptionsSources = {
     'public.audit': { constructor: 'text' as const },
   };

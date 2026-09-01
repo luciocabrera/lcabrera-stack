@@ -9,14 +9,6 @@ type ResolveHeaderBandsArgs<TData> = {
   readonly columns: readonly TableColumn<TData>[];
 };
 
-/**
- * A band is a visual span, so it can only cover columns that are actually next to each
- * other; grouping by label alone would produce a band claiming to cover two columns with a
- * third between them.
- * Called per pinned partition rather than over the whole grid, so a band can never
- * straddle the boundary between the pinned and scrolling regions, which are separately
- * positioned and would tear a span in half.
- */
 export const resolveHeaderBands = <TData>({
   columns,
 }: ResolveHeaderBandsArgs<TData>): readonly TableHeaderBand<TData>[] => {

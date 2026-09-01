@@ -29,7 +29,6 @@ const baseDataState: VirtualListDataState = {
   isLoadingMore: false,
 };
 
-/** Same shape as `baseDataState`, wired for infinite scroll (`onFetchMore`). */
 const pagedDataState: VirtualListDataState = {
   ...baseDataState,
   hasMore: true,
@@ -40,17 +39,13 @@ const observeSpy = vi.fn();
 class MockIntersectionObserver {
   observe = observeSpy;
 
-  disconnect() {
-    // no-op
-  }
+  disconnect() {}
 
   takeRecords(): readonly IntersectionObserverEntry[] {
     return [];
   }
 
-  unobserve() {
-    // no-op
-  }
+  unobserve() {}
 }
 
 beforeEach(() => {

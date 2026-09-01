@@ -9,17 +9,9 @@ import {
 } from './review-gate-reconcile.mjs';
 import { readRepoFile } from './workflow-inspect.mjs';
 
-// The sweep exists to correct a status nobody recomputed, so every assertion
-// here is written to be able to fail on the shape that would make it useless:
-// a selection that leaked a head SHA, a "publish" decision that always says
-// yes (the sweep then rewrites every status every half hour and idempotence is
-// a claim rather than a property), and one that always says no (the sweep
-// corrects nothing and looks exactly as healthy).
-
 const HEAD = 'ba4876dc51c6eb0f55401d60676e4fb215f4c015';
 const CONTEXT = 'Copilot review complete';
 
-/** One entry of the combined-status payload for a commit. */
 const statusEntry = ({
   context = CONTEXT,
   created = '2026-08-16T09:00:00Z',
@@ -38,9 +30,6 @@ describe('choosing what to sweep', () => {
   });
 
   it('hands on numbers only, never the head SHA sitting beside them', () => {
-    // The load-bearing one. A SHA read here and used later is a SHA that can
-    // stop being the head between the listing and the publish, which is the one
-    // way a reconcile could publish a stale verdict of its own.
     const selected = openPullRequestNumbers([
       [{ head: { sha: HEAD }, number: 738 }],
     ]);
@@ -132,9 +121,6 @@ describe('deciding whether to publish', () => {
   });
 
   it('publishes nothing when the head already says exactly this', () => {
-    // Idempotence, and "a pull request with no reviews is unaffected" — both are
-    // this one rule. The event path already published the waiting state; the
-    // sweep recomputes it and has nothing to add.
     expect(shouldPublishStatus({ current: pending, next: pending })).toBe(
       false,
     );
@@ -143,11 +129,6 @@ describe('deciding whether to publish', () => {
     );
   });
 
-  // #868. The sweep runs from the default branch, so on a pull request that
-  // changes what a gate decides it is judging that pull request with the code it
-  // is replacing — measured on #866, where one head and one review list produced
-  // opposite verdicts from the two copies. These pin the asymmetry: a `success`
-  // can be re-described but not weakened.
   const failure = {
     description: 'Copilot reviewed a08de9e, no longer the head.',
     state: 'failure',
@@ -171,8 +152,6 @@ describe('deciding whether to publish', () => {
   });
 
   it('still refreshes a success whose description went stale', () => {
-    // Not blanket-frozen: naming a different reviewer is the signal that makes a
-    // reviewer monoculture visible, so it must survive the rule above.
     expect(
       shouldPublishStatus({
         current: success,
@@ -186,24 +165,11 @@ describe('deciding whether to publish', () => {
     ).toBe(true);
   });
 
-  // The protection is OPT-IN, and this is the case that made it so. The sweep
-  // publishes `Review threads resolved` and NOTHING else does — no workflow invokes
-  // `verify-review-threads.mjs` — while `decideThreadStatus` legitimately moves
-  // `success` to `failure` under an UNCHANGED head: a reviewer opens a thread, or a
-  // draft is marked ready. Neither moves the SHA. Protecting that gate's `success`
-  // would freeze it green for the life of the head with threads open, which is the
-  // opposite of what it exists to say.
   it('leaves a gate that did not ask for it free to downgrade', () => {
     expect(shouldPublishStatus({ current: success, next: pending })).toBe(true);
     expect(shouldPublishStatus({ current: success, next: failure })).toBe(true);
   });
 
-  // WHICH gates opt in, pinned against the sweep's own source. The rule is only
-  // sound for a gate that has another publisher; `review-threads` has none, and its
-  // verdict legitimately changes under a fixed head, so opting it in would freeze
-  // `Review threads resolved` green while threads sat open. Nothing else fails if
-  // this roster regresses — the unit tests above all pass `protectSuccess`
-  // explicitly, so they cannot see the wiring.
   it('protects a success only for the gate that has another publisher', () => {
     const source = readRepoFile('scripts/reconcile-review-gates.mjs');
     const block = /const GATES = \[([\s\S]*?)\n\];/u.exec(source);
@@ -235,10 +201,6 @@ describe('deciding whether to publish', () => {
   });
 
   it('never downgrades a terminal state to pending', () => {
-    // `failure` means a run WATCHED a review land against a superseded commit.
-    // The sweep sees only that the newest review is not of the head, which is
-    // the state that produced the failure — republishing pending over it would
-    // turn a red check yellow and read as progress.
     expect(
       shouldPublishStatus({
         current: {

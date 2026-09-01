@@ -24,8 +24,6 @@ export const FormFooter = ({ children }: FormFooterProps) => {
       <FormFooterActions onCancelClick={handleCancelClick}>
         {children}
       </FormFooterActions>
-      {/* Stays mounted — Modal owns the native dialog lifecycle via isOpen
-          (ADR-001), so closing keeps the <dialog> in the DOM with open=false */}
       <ConfirmDialog
         cancelLabel='Keep Editing'
         confirmLabel='Discard Changes'

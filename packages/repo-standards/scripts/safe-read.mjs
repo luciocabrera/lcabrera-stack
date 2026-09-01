@@ -16,9 +16,6 @@ import { resolve, sep } from 'node:path';
 
 export const readTextWithin = (path, repoRoot, extraRoots = []) => {
   const resolved = resolve(path);
-  // The read lives inside the containment branch on purpose: the resolved path
-  // comes from argv, so it must be provably validated before it reaches the
-  // filesystem — for a reader and for taint analysis alike.
   for (const root of [repoRoot, ...extraRoots]) {
     if (typeof root !== 'string' || root === '') {
       continue;

@@ -4,10 +4,6 @@ import type { ColumnCapabilityRow } from './group-query-builder.types.ts';
 
 import { resolveColumnCapability } from './resolve-column-capability.util.ts';
 
-/**
- * Every row below is a real catalogue answer, read off a live Postgres fixture
- * carrying these types rather than composed to fit the assertions.
- */
 const row = (overrides: Partial<ColumnCapabilityRow>): ColumnCapabilityRow => ({
   aggregates: ['count', 'max', 'min'],
   column: 'c',
@@ -39,7 +35,6 @@ describe('resolveColumnCapability', () => {
     expect(resolveColumnCapability(row({}))).not.toHaveProperty('refusal');
   });
 
-  // ADR-058's central case: Postgres would group this happily.
   it('refuses jsonb as not a dimension even though it has equality', () => {
     const capability = resolveColumnCapability(
       row({
@@ -58,8 +53,6 @@ describe('resolveColumnCapability', () => {
   });
 
   it('prefers the role refusal over the operator one for a point column', () => {
-    // Both apply. "Not a dimension" is a sentence a user understands; "no
-    // equality operator for type point" is not.
     expect(
       resolveColumnCapability(
         row({
@@ -75,7 +68,6 @@ describe('resolveColumnCapability', () => {
   });
 
   it('refuses a dimension-categorised type that resolves no equality operator', () => {
-    // Gate 2's real job: an extension or domain type Gate 1 cannot know about.
     expect(
       resolveColumnCapability(
         row({
@@ -114,7 +106,6 @@ describe('resolveColumnCapability', () => {
 
     expect(capability.refusal).toBe('unique-ish');
     expect(capability.distinctEstimate).toBe(2000);
-    // Still a perfectly good measure — the refusal is about the key only.
     expect(capability.aggregates).toContain('sum');
   });
 
@@ -148,8 +139,6 @@ describe('resolveColumnCapability', () => {
   });
 
   it('still groups a dimension whose statistics are unavailable', () => {
-    // Warn and proceed: refusing here would make grouping dead on a freshly
-    // restored database, and the row-limit backstop covers the risk.
     const capability = resolveColumnCapability(
       row({ column: 'country', hasStats: false, nDistinct: 0 }),
     );
@@ -184,8 +173,6 @@ describe('resolveColumnCapability', () => {
   });
 
   it('treats inet and cidr as dimensions', () => {
-    // Both are category `I`, and `cidr` reaches `min`/`max` through the binary
-    // cast to `inet` rather than owning aggregates of its own.
     const capability = resolveColumnCapability(
       row({
         aggregates: ['count', 'max', 'min'],
@@ -207,10 +194,6 @@ describe('resolveColumnCapability', () => {
   });
 
   it('groups a low-cardinality uuid while still refusing the jsonb beside it', () => {
-    // These two rows differ in `typeName` alone — same category, same equality
-    // answer, same aggregate set — so the name is the only thing that can
-    // separate them, and this pair is what proves the exception is named rather
-    // than a widened category (#599).
     const uuidRow = row({
       aggregates: ['count'],
       column: 'tenant',
@@ -234,8 +217,6 @@ describe('resolveColumnCapability', () => {
   });
 
   it('refuses a uuid whose low cardinality cannot be demonstrated', () => {
-    // An identifier clears the fact's bar, not the dimension's: a `text` column
-    // with no statistics is grouped anyway, a `uuid` is not.
     expect(
       resolveColumnCapability(
         row({
@@ -251,9 +232,6 @@ describe('resolveColumnCapability', () => {
   });
 
   it('refuses a composite type that merely shares the uuid name', () => {
-    // The whole capability path, not just Gate 1: a `CREATE TYPE app.uuid`
-    // composite must come back refused, or a bare-name exception would have let
-    // an unrenderable type through as a group key.
     const capability = resolveColumnCapability(
       row({
         aggregates: [],
@@ -321,15 +299,12 @@ describe('resolveColumnCapability', () => {
       typeName: 'numeric',
     },
   ])('always pairs a refusal with its reason, for $typeName', (overrides) => {
-    // The type makes the unpaired state unrepresentable; this pins that the
-    // producer never has to be talked into it, on one row per refusal reason.
     const capability = resolveColumnCapability(row(overrides));
 
     expect(capability.canGroup).toBe(false);
     expect(capability.refusal).toBeDefined();
   });
   describe('the granularities a temporal column offers', () => {
-    /** `order_date` on the seeded fixture: ~1800 daily values over 1799 days. */
     const orderDate = row({
       aggregates: ['count', 'max', 'min'],
       column: 'order_date',
@@ -341,11 +316,6 @@ describe('resolveColumnCapability', () => {
     });
 
     it('refuses the raw column and still offers the periods that clear the guard', () => {
-      // The whole point of #786, in one assertion: `canGroup` is false because
-      // one group per calendar day is exactly the tree the guard exists to
-      // refuse, and `periods` is non-empty because the same guard is
-      // comfortable at a month. A surface reading `canGroup` alone would hide
-      // the one dimension every report is organised by.
       const capability = resolveColumnCapability(orderDate);
 
       expect(capability.canGroup).toBe(false);
@@ -361,9 +331,6 @@ describe('resolveColumnCapability', () => {
     });
 
     it('offers nothing on a column no granularity applies to', () => {
-      // A `time` column is category `D` and `date_trunc` accepts it; truncating
-      // a time of day to a month is not a question anybody asked, so the gate
-      // is by type name rather than by category.
       expect(
         resolveColumnCapability({
           ...orderDate,
@@ -374,18 +341,12 @@ describe('resolveColumnCapability', () => {
     });
 
     it('refuses a type name borrowed by another schema', () => {
-      // A composite `app.date` reports `typname = 'date'` exactly like the
-      // built-in, and `date_trunc` would be handed a record.
       expect(
         resolveColumnCapability({ ...orderDate, typeNamespace: 'app' }).periods,
       ).toEqual([]);
     });
 
     it('measures the period rather than the raw column, and both bounds apply', () => {
-      // Five centuries of daily rows: the raw estimate is far above the guard
-      // at every granularity, and only the span says how few years there are.
-      // A quarter is still 2190 groups here, which is what makes this pair
-      // discriminating rather than a restatement of the guard.
       expect(
         resolveColumnCapability({
           ...orderDate,
@@ -394,9 +355,6 @@ describe('resolveColumnCapability', () => {
         }).periods,
       ).toEqual(['year']);
 
-      // And the other bound, which the span alone gets wrong: one day of data,
-      // so every granularity collapses to a single group whatever the span
-      // arithmetic would allow.
       expect(
         resolveColumnCapability({ ...orderDate, nDistinct: 1, spanDays: 0 })
           .periods,
@@ -404,8 +362,6 @@ describe('resolveColumnCapability', () => {
     });
 
     it('offers every granularity when there is no span to measure', () => {
-      // Warn-and-proceed, the same answer the raw guard gives an unanalysed
-      // column (ADR-066) — grouping must not be dead on a fresh restore.
       expect(
         resolveColumnCapability({
           ...orderDate,
@@ -416,8 +372,6 @@ describe('resolveColumnCapability', () => {
     });
 
     it('never lets a granularity buy past a rule that is not about cardinality', () => {
-      // `n_distinct = 0` is Postgres saying the type has no equality operator.
-      // A period changes how many values there are, not whether they compare.
       expect(
         resolveColumnCapability({
           ...orderDate,

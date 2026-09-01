@@ -90,7 +90,6 @@ describe('resolveGridFocusContext', () => {
 
     expect(context.columnKeys).toEqual(['id', 'city']);
     expect(context.columns).toBe(columnsState.columns);
-    // Ungrouped rows come back by reference: no tree, no per-row allocation.
     expect(context.data).toBe(rows);
     expect(context.rowMeta).toBeUndefined();
     expect(context.rowHeight).toBe(44);
@@ -123,14 +122,10 @@ describe('resolveGridFocusContext', () => {
       metaState,
     });
 
-    // The stored index is stale — identity is what decides, not position.
     expect(context.focusedRowIndex).toBe(2);
   });
 
   it('navigates the rows a collapse leaves standing, not every loaded row', () => {
-    // The discriminating case: a row hidden under a collapsed ancestor has no
-    // cell to receive focus, so a move that still counted it would consume a
-    // key press and land nowhere.
     const groupedDataState = getInitialDataState<Row>({
       data: groupedRows,
       totalRows: groupedRows.length,

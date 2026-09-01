@@ -30,8 +30,6 @@ describe('resolveGates', () => {
   });
 
   it('refuses a ceiling that is not a positive whole number', () => {
-    // A typo here does not make the gate stricter or looser, it makes every
-    // file breach or none — so it is named rather than coerced.
     for (const ceiling of [0, -1, 12.5, '350']) {
       expect(() => gates({ scriptSize: { ceiling } })).toThrow(
         /gates\.scriptSize\.ceiling/,
@@ -49,12 +47,6 @@ describe('resolveGates', () => {
   });
 
   it('keeps a match fragment exactly as written, trailing slash and all', () => {
-    // The distinction that matters most in this block. These values are
-    // compared as substrings against paths already collected, so nothing joins
-    // them onto a root and there is nothing to canonicalise. Canonicalising
-    // them anyway strips the trailing slash, and the slash IS the meaning:
-    // `reports/` excludes a directory, `reports` excludes every document whose
-    // name contains the word — which silently dropped one out of the corpus.
     const resolved = gates({
       docsPaths: {
         expectedAbsentPrefixes: ['docker/local/'],
@@ -125,8 +117,6 @@ describe('resolveGates', () => {
   });
 
   it('drops empty strings from a list rather than matching everything', () => {
-    // An empty fragment is a substring of every path, so one left in a list
-    // would exempt the entire corpus.
     expect(
       gates({ docsPaths: { ignoredDocs: ['', '  ', 'vendor/'] } }).docsPaths
         .ignoredDocs,

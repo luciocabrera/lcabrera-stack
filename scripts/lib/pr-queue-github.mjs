@@ -72,7 +72,6 @@ query($owner:String!, $repo:String!, $limit:Int!) {
   }
 }`;
 
-/** `owner/repo` for the checkout this runs in. */
 export const resolveRepository = () => {
   const nameWithOwner = runGh([
     'repo',
@@ -86,7 +85,6 @@ export const resolveRepository = () => {
   return { owner, repo };
 };
 
-/** Every open PR, as raw GraphQL nodes, from one snapshot. */
 const fetchOnce = ({ limit, owner, repo }) => {
   const raw = runGh([
     'api',
@@ -103,24 +101,12 @@ const fetchOnce = ({ limit, owner, repo }) => {
   return JSON.parse(raw).data?.repository?.pullRequests?.nodes ?? [];
 };
 
-/** Blocks the thread without a timer — this is a CLI pass, not a server. */
 const pause = (ms) =>
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 
-/** True while GitHub has not finished computing a PR's mergeability. */
 const unsettled = (nodes) =>
   nodes.some((node) => (node.mergeable ?? 'UNKNOWN') === 'UNKNOWN');
 
-/**
- * The queue, with mergeability actually resolved.
- *
- * GitHub computes `mergeable` lazily: the first query after a quiet period
- * returns `UNKNOWN` for every PR and *starts* the computation, and a second one
- * moments later returns the real answer. Without this retry the operator reads a
- * whole healthy queue as E2/`WAIT` and does nothing on its first run of the day —
- * a false clean pass, which §6 names as the failure mode to design against.
- * Persisting `UNKNOWN` is a real answer and still maps to WAIT.
- */
 export const fetchQueue = ({ attempts = 3, limit, owner, repo }) => {
   const nodes = fetchOnce({ limit, owner, repo });
   if (attempts <= 1 || nodes.length === 0 || !unsettled(nodes)) {
@@ -130,18 +116,11 @@ export const fetchQueue = ({ attempts = 3, limit, owner, repo }) => {
   return fetchQueue({ attempts: attempts - 1, limit, owner, repo });
 };
 
-/**
- * Policy E6 and E7, checked in-process against the repo's own single spec rather
- * than by shelling out to the verify scripts that wrap it. Same rules, no second
- * copy to drift, and no temp file — `verify-pr.mjs` only reads a body from a path
- * inside the repo, so a spawned check would have to write one first.
- */
 export const checkConformance = (pr, workspaces) => ({
   body: validatePrBody(pr.body).errors,
   title: validatePrTitle(pr.title, { workspaces }).errors,
 });
 
-/** The issues a merged PR would close, as declared by the body's keywords. */
 const CLOSING_KEYWORD =
   /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
 

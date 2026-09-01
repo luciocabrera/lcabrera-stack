@@ -5,7 +5,6 @@ import { styles } from './LaptopClient.stylex';
 
 export const LaptopClient = () => (
   <g transform='translate(210,70)'>
-    {/* screen */}
     <rect
       {...stylex.props(styles.laptopFill)}
       height='60'
@@ -22,7 +21,6 @@ export const LaptopClient = () => (
       x='8'
       y='8'
     />
-    {/* keyboard base */}
     <KeyboardBase />
   </g>
 );

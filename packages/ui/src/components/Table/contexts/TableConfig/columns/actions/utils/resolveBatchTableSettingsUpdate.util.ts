@@ -24,18 +24,8 @@ export type BatchTableSettingsUpdate<TData> = {
 };
 
 type ResolveBatchTableSettingsUpdateArgs<TData> = {
-  /**
-   * The aggregates the same Accept is committing — the **next** ones, so the
-   * measure columns appear and disappear in the same write that turns grouping
-   * on or off.
-   */
   readonly aggregates: readonly TableColumnAggregate[];
   readonly columns: readonly TableColumn<TData>[];
-  /**
-   * The group keys the same Accept is committing — the **next** ones, not the
-   * applied ones, so the hierarchy column appears and disappears in the same
-   * write that turns grouping on or off (ADR-065).
-   */
   readonly groupingKeys: readonly string[];
   readonly settings: BatchTableSettingsUpdate<TData>;
 };
@@ -68,17 +58,6 @@ export const resolveBatchTableSettingsUpdate = <TData>({
     normalizedColumns,
     pinnedColumnOffsets,
     pinnedColumnPartition,
-    // A measure column exists only while its aggregate is applied, so this
-    // Accept can take away the very column the sort names — and the ungrouped
-    // read refuses an unknown column rather than ignoring it.
-    //
-    // The declared columns go in beside the painted ones: a measured column is
-    // *replaced* while grouped, so pruning against the grid alone would discard
-    // a pre-existing sort on a perfectly ordinary column.
-    //
-    // `normalizedColumns` rather than `effectiveColumns` for the painted half:
-    // the latter is visibility-filtered, so pruning against it would drop the
-    // sort of a column this same Accept merely hid.
     sorting: pruneSortingToColumns<TData>({
       declaredColumnKeys: columns.map((column) => String(column.key)),
       gridColumnKeys: Object.keys(normalizedColumns),

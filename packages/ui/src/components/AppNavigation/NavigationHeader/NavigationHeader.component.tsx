@@ -24,7 +24,6 @@ export const NavigationHeader = () => {
   const density = NAV_DENSITY[navigationSizePreference ?? 'medium'];
   const controlTooltipPlacement = isCollapsed ? 'right' : undefined;
 
-  // Brand icon box matches button height per density for visual consistency
   const brandIconSizeStyle = getBrandIconSizeStyle(density.brandIconBoxSize);
   const headerDensityStyle = getHeaderDensityStyle(navigationSizePreference);
 

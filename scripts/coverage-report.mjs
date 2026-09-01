@@ -59,24 +59,14 @@ const execFileAsync = promisify(execFile);
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const OUTPUT_PATH = join(REPO_ROOT, 'coverage/monorepo-coverage-summary.json');
 
-// The workspace's own vp shim by absolute path — never a bare `vp` off $PATH
-// (the Sonar S4036 hotspot). `vp install` always provides it.
 const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 
-/** The four metrics Istanbul's json-summary exposes on `.total` that we report. */
 const METRICS = ['lines', 'statements', 'functions', 'branches'];
 
 const runAll = process.argv.includes('--all');
 const shouldRun = !process.argv.includes('--no-run');
 const changedOnly = process.argv.includes('--changed');
 
-/**
- * The workspaces to report on. With `--changed`, scopes the list to the ones a
- * diff (paths on stdin) actually affected — changed workspaces plus their
- * dependents — so an unrelated PR does not re-run coverage the test step
- * already skipped. A root/shared change (mode `full`) keeps the whole list.
- * Without the flag, reports every workspace (local + main-branch behaviour).
- */
 const reportedWorkspaces = () => {
   if (!changedOnly) {
     return COVERAGE_REPORT_WORKSPACES;
@@ -109,19 +99,12 @@ const runCoverage = async ({ name }) => {
       maxBuffer: 64 * 1024 * 1024,
     });
   } catch {
-    // Non-fatal: `test:ci` is the authoritative test gate. Warn and let the
-    // read step surface whatever (if any) summary the run left behind.
     process.stderr.write(
       `  ⚠ ${name}: test:coverage failed — its coverage may be missing from the report.\n`,
     );
   }
 };
 
-/**
- * Reads one workspace's json-summary `.total`, narrowed to the reported metrics.
- * Callers filter to workspaces whose summary exists first, so this never has to
- * represent an absent report.
- */
 const readWorkspaceTotal = async (workspace) => {
   const summary = JSON.parse(await readFile(summaryPathFor(workspace), 'utf8'));
   const total = Object.fromEntries(
@@ -130,12 +113,6 @@ const readWorkspaceTotal = async (workspace) => {
   return { name: workspace.name, dir: workspace.dir, total };
 };
 
-/**
- * Aggregates the reported workspaces into a monorepo total. Istanbul totals key
- * disjoint file sets across workspaces, so summing `total`/`covered`/`skipped`
- * and recomputing `pct` is exact. A metric with no code (total 0) reports 100%,
- * matching Istanbul's own convention for an empty denominator.
- */
 const aggregateTotal = (workspaces) =>
   Object.fromEntries(
     METRICS.map((metric) => {
@@ -181,9 +158,6 @@ const printTable = (workspaces, total) => {
 const main = async () => {
   const workspaces = reportedWorkspaces();
 
-  // Scoped run that touched no reported workspace: there is nothing to measure,
-  // and that is a success, not a failure. The PR-comment step already treats a
-  // missing summary gracefully.
   if (changedOnly && workspaces.length === 0) {
     process.stdout.write(
       'coverage: no coverage-reported workspace changed — skipping report.\n',
@@ -197,8 +171,6 @@ const main = async () => {
     }
   }
 
-  // Filter the absent summaries out before reading — a missing suite degrades
-  // the report gracefully (warned + skipped) instead of crashing it.
   const missing = workspaces.filter(
     (workspace) => !existsSync(summaryPathFor(workspace)),
   );
@@ -212,8 +184,6 @@ const main = async () => {
     existsSync(summaryPathFor(workspace)),
   );
   if (present.length === 0) {
-    // In --changed mode a coverage hiccup must not fail the job (test:changed is
-    // the gate); elsewhere an empty result means the run was misconfigured.
     if (changedOnly) {
       process.stdout.write(
         'coverage: no summaries produced for the changed workspaces — skipping report.\n',

@@ -63,8 +63,6 @@ describe('commitTableFocusTarget', () => {
   });
 
   it('scrolls the row in before the request that will focus it', () => {
-    // The order is the contract: a request raised before the row is on its way
-    // in would be applied against a window that has not moved yet.
     const container = createContainer();
     const order: string[] = [];
 

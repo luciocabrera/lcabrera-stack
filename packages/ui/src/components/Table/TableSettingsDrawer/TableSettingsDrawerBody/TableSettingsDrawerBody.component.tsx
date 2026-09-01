@@ -18,13 +18,6 @@ import { GeneralSettingsSection } from '../GeneralSettingsSection';
 import { GroupingSection } from '../GroupingSection';
 import { SortingSection } from '../SortingSection';
 
-/**
- * Builds the General/Filters/Sorting/Grouping/Columns/Details tab set and wires the
- * selected tab through the table meta store so it survives drawer re-opens.
- * The Grouping tab appears only where the route declared the capability (ADR-063).
- * A table whose endpoint cannot group would otherwise offer a control whose every use is
- * refused; absent means off, as everywhere else.
- */
 export const TableSettingsDrawerBody = ({
   isBusy = false,
 }: TableSettingsDrawerBodyProps) => {

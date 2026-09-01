@@ -61,7 +61,6 @@ It costs this.
 The other thing, and why it lost.
 `;
 
-/** Written before the block existed: no block, and no alternatives section. */
 export const LEGACY_TEXT = `# ADR-002 — An older record
 
 ## Context
@@ -103,8 +102,6 @@ export const writeIn = (root) => (path, text) => {
   writeFileSync(join(root, path), text);
 };
 
-/** Rewrites one fragment of one file — the single difference between a run that
- *  passes and a run that must not. */
 export const editIn = (root) => (path, from, to) => {
   const full = join(root, path);
   const before = readFileSync(full, 'utf8');
@@ -115,14 +112,7 @@ export const editIn = (root) => (path, from, to) => {
   writeFileSync(full, after);
 };
 
-/**
- * A repository the gate can read: a workspace roster, one home, one complete
- * record, and the generated index — produced by the gate itself, so the fixture
- * cannot disagree with what the gate would write.
- */
 export const makeAdrRepo = ({ legacy = false } = {}) => {
-  // Realpath because a temp dir can sit behind a symlink, and the config reader
-  // refuses a path that does not resolve inside the root it was given.
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'adr-gate-')));
   roots.push(root);
   const write = writeIn(root);
@@ -141,7 +131,6 @@ export const makeAdrRepo = ({ legacy = false } = {}) => {
 export const readBaseline = (root) =>
   JSON.parse(readFileSync(join(root, BASELINE), 'utf8'));
 
-/** One line appended to the grandfathered list — the whole of the hand edit. */
 export const appendEntry = (root, filename) => {
   const baseline = readBaseline(root);
   writeFileSync(
@@ -159,7 +148,6 @@ export const appendEntry = (root, filename) => {
   );
 };
 
-/** Removes every tree this module made. Call from an `afterEach`. */
 export const removeAdrRepos = () => {
   for (const root of roots.splice(0)) {
     rmSync(root, { force: true, recursive: true });

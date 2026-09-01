@@ -48,19 +48,12 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 
-/**
- * Every workspace that can reach the registry, with the one classification the
- * audit needs. `isBuiltPublicPackage` is `repo-verify-publish`'s own predicate:
- * a package that does not build ships source deliberately, and for it a `./src/`
- * export target is the intended surface rather than a defect.
- */
 const readWorkspaceTargets = () =>
   readPublishableManifests(REPO_ROOT).map((manifest) => ({
     name: manifest.name,
     shipsSource: !isBuiltPublicPackage(manifest),
   }));
 
-/** `@scope/name@1.2.3` — the last `@` wins, so a scoped name stays intact. */
 const parseSpec = (spec) => {
   const separator = spec.lastIndexOf('@');
 
@@ -72,12 +65,6 @@ const parseSpec = (spec) => {
 const describeSpec = ({ name, only }) =>
   only === undefined ? name : `${name}@${only}`;
 
-/**
- * A name given on the command line need not be a workspace here — a renamed or
- * withdrawn package is exactly what someone would point this at. Unknown names
- * are audited strictly (source exports are a defect), which is the safe
- * direction to guess in.
- */
 const toTargets = (specs) => {
   const workspaces = readWorkspaceTargets();
 
@@ -116,11 +103,6 @@ const auditTarget = async ({ explicit, name, only, shipsSource }) => {
   };
 };
 
-/**
- * A named spec that resolved to nothing is a failure, never a quiet pass: the
- * caller asked about a specific artifact and got no answer, which is the shape
- * of a check that reports success having established nothing.
- */
 const selectUnresolved = (audited) =>
   audited
     .filter(({ explicit, versions }) => explicit && versions.length === 0)

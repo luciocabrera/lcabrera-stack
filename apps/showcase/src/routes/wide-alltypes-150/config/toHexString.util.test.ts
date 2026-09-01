@@ -10,8 +10,6 @@ describe('toHexString', () => {
   });
 
   it('pads a byte below 0x10 rather than emitting one character', () => {
-    // Without the pad, `[0x0a, 0xbc]` and `[0xab, 0xc0]` would both render
-    // `abc` — the whole string would silently shift.
     expect(toHexString(new Uint8Array([0x00, 0x0a, 0xff]))).toBe('000aff');
   });
 

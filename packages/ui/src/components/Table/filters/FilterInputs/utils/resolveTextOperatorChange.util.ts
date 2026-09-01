@@ -11,8 +11,6 @@ type ResolveTextOperatorChangeArgs = {
   readonly operator: OperatorType;
 };
 
-// Return annotation required: 'text' widens to string without the ColumnFilter
-// contextual type.
 export const resolveTextOperatorChange = ({
   filter,
   operator,
@@ -27,8 +25,6 @@ export const resolveTextOperatorChange = ({
   return {
     operator: operator as TextOperatorType,
     type: 'text',
-    // Carry the chosen option across so "equals alpha" becomes "contains alpha"
-    // rather than silently emptying the filter the user just built.
     value: getDraftedText(filter),
   };
 };

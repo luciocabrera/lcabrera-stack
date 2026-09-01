@@ -56,10 +56,6 @@ describe('toKeysetCursorValues', () => {
   });
 
   it('preserves a SQL NULL rather than dropping the column', () => {
-    // A nullable column arrives as JSON `null`, and the cursor is positional:
-    // dropping the slot would misalign every later value against the server's
-    // sort. Parsed rather than written as a literal, which is both how the row
-    // really reaches this code and what keeps `unicorn/no-null` on for the file.
     const rowWithSqlNull = JSON.parse(
       '{"order_id":42,"order_status":"shipped","total_amount":null}',
     ) as Row;

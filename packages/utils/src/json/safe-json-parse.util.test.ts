@@ -7,7 +7,6 @@ it('parses valid JSON', () => {
 });
 
 it('returns undefined for null or empty input', () => {
-  // `URLSearchParams.get` returns null for a missing key (no null literal).
   expect(safeJsonParse(new URLSearchParams().get('missing'))).toBeUndefined();
   expect(safeJsonParse('')).toBeUndefined();
 });

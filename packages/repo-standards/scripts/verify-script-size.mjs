@@ -84,7 +84,6 @@ const writeBaseline = ({ baselineFile, ceiling, measured }) => {
   );
 };
 
-/** A warning is annotated in Actions and indented locally; either way it is not a failure. */
 const printWarnings = (warnings) => {
   for (const warning of warnings) {
     console.error(

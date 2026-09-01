@@ -21,12 +21,6 @@ type ResolveColumnPeriodsArgs = {
 
 const NO_PERIODS: readonly GroupKeyPeriod[] = [];
 
-/**
- * It runs the **same refusal ladder** the raw column runs, with the period's estimate
- * substituted — deliberately, rather than checking cardinality alone.
- * A period changes exactly one input; role, equality and the unique-ish rule are facts
- * about the column and must not become negotiable because a granularity was asked for.
- */
 export const resolveColumnPeriods = ({
   estimate,
   hasEquality,

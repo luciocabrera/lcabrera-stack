@@ -34,9 +34,6 @@ describe('toDeclaredColumnKey', () => {
   });
 
   it('prefers a real column over the token grammar', () => {
-    // A published package cannot assume a consumer's column keys avoid the
-    // token shape. A column literally named `total_amount:avg` is a column,
-    // and must not be rewritten to `total_amount`.
     const literal = [
       ...columns,
       { key: 'total_amount:avg', label: 'Odd' },
@@ -51,8 +48,6 @@ describe('toDeclaredColumnKey', () => {
   });
 
   it('leaves a token whose source column is not declared alone', () => {
-    // Nothing to resolve to, so rewriting it would invent a key. Returning it
-    // unchanged lets the ordinary "unknown order entry" path drop it.
     expect(
       toDeclaredColumnKey<Row>({
         columnKey: 'not_a_column:avg' as never,

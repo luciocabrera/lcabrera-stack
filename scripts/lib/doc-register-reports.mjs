@@ -13,11 +13,6 @@
  */
 import { packagesOf, pointerFailure } from './doc-registers.mjs';
 
-/**
- * What the distance report is NOT, said in the report rather than only here.
- * It resolves pointers — it never executes one — so a `met` requirement is a
- * declaration this restates, not a result it reproduced.
- */
 export const RESOLUTION_NOTICE = [
   'Pointers were resolved, not run.',
   'Each `evidence` ref was checked to name something that exists — a path in this',
@@ -33,7 +28,6 @@ export const RESOLUTION_NOTICE = [
 
 const pad = (text, width) => text.padEnd(width, ' ');
 
-/** `label  n/m met` rows, widest label first setting the column. */
 const tallyRows = (tallies) => {
   const width = Math.max(...[...tallies.keys()].map((key) => key.length), 0);
   return [...tallies.entries()]
@@ -43,7 +37,6 @@ const tallyRows = (tallies) => {
     );
 };
 
-/** Counts by some key each requirement declares one or more of. */
 const tallyBy = (requirements, keysOf) => {
   const tallies = new Map();
   for (const entry of requirements) {
@@ -63,10 +56,6 @@ const issuesOf = (entry) => {
   return issues.map((issue) => (issue.startsWith('#') ? issue : `#${issue}`));
 };
 
-/** Nothing in either report knows whether an issue is OPEN: the registers hold
- *  numbers and both reports read the working tree with no GitHub call. So the
- *  empty case says what was read — the document names none — rather than
- *  asserting a state nothing here checked (AGENTS.md Rule 14). */
 const describeIssues = (entry) => {
   const issues = issuesOf(entry);
   return issues.length === 0 ? 'names no issue' : issues.join(', ');
@@ -87,8 +76,6 @@ const unmetRows = (requirements) => {
 
 const section = (title, rows) => [title, ...rows, ''].join('\n');
 
-/** Every evidence pointer in the register, with the reason it does not resolve
- *  (or undefined). Resolving is not running — see RESOLUTION_NOTICE. */
 const resolvePointers = (requirements, context) =>
   requirements.flatMap((entry) =>
     (Array.isArray(entry.fields.evidence) ? entry.fields.evidence : []).map(
@@ -105,13 +92,6 @@ const unresolvedRows = (pointers) =>
     .filter(({ reason }) => reason !== undefined)
     .map(({ entry, reason, ref }) => `  ${entry.slug}  ${ref} (${reason})`);
 
-/**
- * The distance report: what the register declares, counted three ways, then
- * every unmet requirement with the issues that would move it.
- *
- * `resolves` and `rootTasks` come from `readRegisters`; they are what makes the
- * pointer line a fact rather than a claim.
- */
 export const distanceReport = ({ requirements, resolves, rootTasks }) => {
   const met = requirements.filter((entry) => entry.fields.state === 'met');
   const pointers = resolvePointers(requirements, { resolves, rootTasks });
@@ -165,11 +145,6 @@ const documentRows = (entries) => {
   return entries.map((entry) => documentRow(entry, width));
 };
 
-/**
- * Every document that declares `workspace` in its `packages` field, from both
- * registers. The question this answers used to be a grep, which returns every
- * file that merely mentions the name.
- */
 export const packageDocsReport = ({ planning, requirements, workspace }) => {
   const found = requirements.length + planning.length;
   return [

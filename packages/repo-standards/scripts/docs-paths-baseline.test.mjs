@@ -8,13 +8,6 @@ import {
   withAccepted,
 } from './docs-paths-baseline.mjs';
 
-// The contract these functions encode: the baseline may SHRINK freely and may
-// only GROW one reference at a time, with a reason. The previous shape let
-// `--write` serialise whatever the current scan found, so rebaselining silently
-// absorbed new breakage — and four of the five references it had absorbed
-// turned out to be real broken links. `prunedBaseline` never adding is
-// therefore the single most important assertion in this file.
-
 const finding = (doc, token) => ({ doc, token });
 
 describe('isBaselined', () => {
@@ -31,8 +24,6 @@ describe('isBaselined', () => {
   });
 
   it('is not fooled by inherited Object properties', () => {
-    // `constructor`/`toString` are on every object; a naive `in` or truthiness
-    // check would report them as baselined.
     expect(isBaselined(baseline, 'a.md', 'constructor')).toBe(false);
     expect(isBaselined({}, 'toString', 'toString')).toBe(false);
   });
@@ -56,8 +47,6 @@ describe('prunedBaseline', () => {
   });
 
   it('NEVER adds a finding that is not already baselined', () => {
-    // The whole point. A new failure must not become grandfathered by running
-    // the rebaseline command.
     const baseline = { 'a.md': { 'packages/known': 'why' } };
     const findings = [
       finding('a.md', 'packages/known'),
@@ -79,7 +68,6 @@ describe('prunedBaseline', () => {
 
   it('does not match a reference against the wrong document', () => {
     const baseline = { 'a.md': { 'packages/x': 'why' } };
-    // Same token, different doc — the entry for a.md is not still failing.
     expect(prunedBaseline(baseline, [finding('b.md', 'packages/x')])).toEqual(
       {},
     );

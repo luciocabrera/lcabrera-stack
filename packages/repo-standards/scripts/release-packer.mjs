@@ -11,14 +11,8 @@
  * why they are asserted rather than removed.
  */
 
-/** Lockfiles that would make changesets publish with something other than pnpm. */
 const FOREIGN_LOCKFILES = ['package-lock.json', 'yarn.lock', 'bun.lockb'];
 
-/**
- * Comments cannot publish anything, and a release workflow that explains why it
- * avoids npm and npx says both words in its own — checking the raw text would
- * flag the explanation for the thing it explains.
- */
 export const stripComments = (text) =>
   text
     .split('\n')
@@ -37,10 +31,6 @@ const lockfileProblems = (lockfiles) => [
   ),
 ];
 
-/**
- * Every problem with the assumption that a publish goes through pnpm. Pure: the
- * caller reads the workflow, the manifest and the directory listing.
- */
 export const releasePackerProblems = ({
   lockfiles,
   packageManager,

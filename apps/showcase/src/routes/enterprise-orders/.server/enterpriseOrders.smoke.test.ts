@@ -1,5 +1,25 @@
 // @vitest-environment node
 
+/**
+ * Live-database smoke test for the secured enterprise-orders showcase: the
+ * env-configured login credential, a full create → read → update → list/count →
+ * delete round trip through the generic `@lcabrera/server` builders, and the
+ * grouped read.
+ *
+ * A `toContain('GROUP BY GROUPING SETS')` on a query string proves the string
+ * was assembled, not that Postgres parses it, that the projection names real
+ * columns, or that the `GROUPING()` mask and the aggregate alias come back as
+ * the builder said. Those are only observable against a real table.
+ *
+ * Gated behind `SMOKE_DB`, so the DB-less CI unit job and a bare `vp run test`
+ * skip it. Run it with a local Postgres up:
+ *
+ *   vp run db:up            # once, from the repo root
+ *   vp run test:smoke       # from apps/showcase (sources DB_* + sets SMOKE_DB)
+ *
+ * The suite cleans up the single row it creates, so it is safe to re-run.
+ */
+
 import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
 import { MAX_GROUP_KEYS } from '@lcabrera/server/db/group-query-builder/group-query-builder.constants';
 import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
@@ -25,30 +45,6 @@ import { buildValidOrderInput } from '@/routes/enterprise-orders/config/enterpri
 import { toOrderInsertValues } from '@/routes/enterprise-orders/config/toOrderInsertValues.util';
 import { toOrderUpdateValues } from '@/routes/enterprise-orders/config/toOrderUpdateValues.util';
 
-/**
- * Live-database smoke test for the secured enterprise-orders showcase. Unlike the
- * unit suites — which mock the pg pool and fetch — this exercises the real path
- * against a running Postgres: the env-configured login credential, a full
- * create → read → update → list/count → delete round-trip through the generic
- * `@lcabrera/server` builders, and the grouped read. It is the one check that
- * proves the wiring works end to end at runtime, which no mocked test can.
- *
- * The grouped cases below exist because the mocked ones cannot reach the thing
- * that matters: a `toContain('GROUP BY GROUPING SETS')` on a query string proves
- * the string was assembled, not that Postgres parses it, that the projection
- * names real columns, or that the `GROUPING()` mask and the aggregate alias come
- * back as the builder said they would. Those are only observable against a real
- * table.
- *
- * Gated behind `SMOKE_DB` so the DB-less CI unit job (and a bare `vp run test`)
- * skips it. Run it with a local Postgres up:
- *
- *   vp run db:up            # once, from the repo root
- *   vp run test:smoke       # from apps/showcase (sources DB_* + sets SMOKE_DB)
- *
- * The suite cleans up the single row it creates (the delete step is part of the
- * flow), so it is safe to re-run.
- */
 const IS_SMOKE_ENABLED = Boolean(process.env.SMOKE_DB);
 
 const ACTOR = 'smoke@example.com';
@@ -116,8 +112,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     expect(page.total).toBe(1);
     expect(page.data[0]?.order_id).toBe(orderId);
 
-    // Real-Postgres check that the keyset predicate is valid SQL and seeks:
-    // resuming after this order's own id must return nothing.
     const afterCursor = await selectOrdersPage({
       cursor: [orderId],
       filters: [{ column: 'order_id', operator: 'eq', value: orderId }],
@@ -156,25 +150,18 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
       expect(rows.length).toBeGreaterThan(0);
       expect(keys).toStrictEqual([GROUP_KEY]);
-      // Flat grouping is one grouping set, so every row is a real group rather
-      // than a structural total.
       expect(groupingSetMasks).toStrictEqual([0]);
 
       const [alias] = aggregates.map((aggregate) => aggregate.alias);
       const [first] = rows;
 
       expect(alias).toBeDefined();
-      // The decode contract: every name the caller reads a grouped row by is one
-      // the result advertised, not one spelled here.
       expect(first).toHaveProperty(GROUP_KEY);
       expect(first).toHaveProperty(maskAlias, 0);
       expect(first).toHaveProperty(alias ?? '');
     });
 
     it('counts every row of the table exactly once across the groups', async () => {
-      // The check a string assertion cannot make: the aggregate is arithmetically
-      // right, not merely present. A wrong GROUP BY, a stray join or a lost row
-      // all break this sum while leaving the SQL syntactically valid.
       const { rows } = await groupedQuery();
       const grouped = rows.reduce(
         (total, row) => total + Number(row.count_rows),
@@ -236,9 +223,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('refuses a key the catalogue rejects, with the reason attached', async () => {
-      // The primary key is the likeliest user mistake and the gate ADR-058 cares
-      // most about; this is the runtime half of that rule, not a re-assertion of
-      // the pure one.
       await expect(groupedQuery({ keys: ['order_id'] })).rejects.toThrow(
         /is not a legal group key: unique-ish/,
       );
@@ -270,7 +254,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       expect(
         Object.keys(grouped).toSorted((a, b) => a.localeCompare(b)),
       ).toStrictEqual(Object.keys(flat).toSorted((a, b) => a.localeCompare(b)));
-      // A grouped read is not paginated, so it never reports more to come.
       expect(grouped.hasMore).toBe(false);
       expect(grouped.total).toBe(grouped.data.length);
 
@@ -285,16 +268,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('formats the key types Postgres actually returns for this table', async () => {
-      // `pg` hands back a boolean for `bool`, a number for `int4`, a string for
-      // `numeric` and a `Date` for `date`. Each takes a different branch of the
-      // label formatting, and only a live read proves which branch is
-      // reachable — a fixture would just restate the branch it was written for.
-      //
-      // The date key carries a **granularity**, and has to: this table's date
-      // columns hold one value per calendar day, which is exactly the tree the
-      // cardinality guard refuses, so the raw form returned no rows at all and
-      // asserted nothing about a `Date` (#786). At a month it returns groups and
-      // the value is still a `Date`.
       for (const [key, periods] of [
         ['is_vip_customer', {}],
         ['quantity', {}],
@@ -328,23 +301,10 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
   });
 
-  /**
-   * Multi-key grouping and aggregate selection, against real Postgres.
-   *
-   * This block exists because of what #568 taught: its mocked suite asserted
-   * the generated SQL with `toContain` and passed 6/6 while the same query
-   * failed 7/7 against a live database, because the `GROUP BY GROUPING SETS`
-   * clause named a column that does not exist. Every string assertion was
-   * satisfied by a query Postgres rejects outright. So each case below is
-   * either arithmetic the database has to agree with, or a query it has to
-   * accept — never a claim about the text of one.
-   */
   describe('multi-key grouping and aggregate selection', () => {
     const KEYS = ['order_status', 'shipping_country'] as const;
 
     it('groups by two keys and counts every row exactly once across the pairs', async () => {
-      // The check no string assertion can make: a wrong GROUP BY, a lost row or
-      // a stray cross product all break this sum while leaving the SQL valid.
       const { data } = await selectOrdersPage({
         filters: [],
         grouping: {
@@ -401,9 +361,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('groups to the configured maximum depth', async () => {
-      // The cap is the client's `MAX_TABLE_GROUP_KEYS` and the server's
-      // `MAX_GROUP_KEYS`, pinned together by `groupingContract.test.ts`. This is
-      // the live half: a query at exactly that depth has to run.
       const deepKeys = [
         'order_status',
         'shipping_country',
@@ -435,9 +392,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('refuses one key past the cap, as plain data rather than a class', async () => {
-      // The loader edge maps every refusal into the serializable union, because
-      // React Router single fetch strips a class of its prototype on the way to
-      // the client without a word (ADR-066).
       const page = await selectOrdersPage({
         filters: [],
         grouping: {
@@ -469,8 +423,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('computes a selected aggregate the database agrees with', async () => {
-      // `sum(total_amount)` per group has to equal the sum over the same
-      // filtered set — arithmetic Postgres itself settles, which is the point.
       const { data } = await selectOrdersPage({
         filters: [],
         grouping: {
@@ -505,9 +457,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('accepts every aggregate the catalogue offers for a column', async () => {
-      // The legality claim, made against the live catalogue rather than against
-      // a fixture: what `getColumnGroupingCapabilities` reports for a column is
-      // exactly what the grouped query then accepts for it.
       const capabilities = await selectOrderGroupingCapabilities();
       const offered = capabilities.total_amount?.aggregates ?? [];
 
@@ -535,9 +484,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('refuses an aggregate the catalogue does not offer for a column', async () => {
-      // The other direction, and the one a mocked suite cannot reach: `sum` on
-      // a `varchar` is a query Postgres rejects, and the builder's own gate is
-      // what turns it into a named refusal instead.
       const page = await selectOrdersPage({
         filters: [],
         grouping: {
@@ -564,9 +510,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('resolves a capability for every column the route allows', async () => {
-      // What the loader ships to the client on every grouping-enabled page
-      // load. A column missing here is a column whose aggregate menu would be
-      // silently empty.
       const capabilities = await selectOrderGroupingCapabilities();
 
       expect(Object.keys(capabilities).length).toBeGreaterThan(0);
@@ -576,11 +519,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
   });
 
   describe('rollup, subtotals and the grand total', () => {
-    // The ordering claims of #570 are string assertions everywhere else: the
-    // builder's suite proves what SQL was written, not what Postgres does with
-    // it. These are the live half — a subtotal that landed above its children,
-    // a grand total that was not last, or a mask decoded the wrong way round
-    // all leave the SQL valid and only show up against a real database.
     const KEYS = ['order_status', 'shipping_country'] as const;
 
     type RollupPageArgs = {
@@ -588,11 +526,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       readonly totalsPlacement?: 'first' | 'last';
     };
 
-    /**
-     * `totalsPlacement` is spread rather than defaulted, so omitting it really
-     * omits it: a default here would pass `'last'` explicitly and the
-     * default-placement case below would never exercise the absent one.
-     */
     const rollupPage = ({
       direction = 'asc',
       totalsPlacement,
@@ -619,8 +552,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
       expect(summaries.length).toBeGreaterThan(0);
 
-      // Depths 2, 1 and 0 all occur: leaves, per-status subtotals, and the one
-      // row keyed by nothing. A flat read would produce only depth 2.
       const depths = new Set(summaries.map((summary) => summary?.path.length));
 
       expect([...depths].toSorted((a, b) => (a ?? 0) - (b ?? 0))).toStrictEqual(
@@ -637,10 +568,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
       expect(summaries.at(-1)?.path).toStrictEqual([]);
 
-      // Every subtotal is immediately preceded by a row of the level below it
-      // that belongs to the same parent — which is what "subtotals follow their
-      // children" means as a property of the emitted order rather than of the
-      // ORDER BY text.
       for (const [index, summary] of summaries.entries()) {
         if (summary === undefined || summary.path.length !== 1) continue;
 
@@ -655,10 +582,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       const { data } = await rollupPage({ direction: 'desc' });
       const summaries = data.map((row) => row[TABLE_GROUP_ROW_FIELD]);
 
-      // The parents reverse; each parent's subtotal still follows its own
-      // children, and the grand total is still last. A `GROUPING` term that
-      // took the user's direction would float every subtotal to the top of its
-      // block instead.
       expect(summaries.at(-1)?.path).toStrictEqual([]);
 
       for (const [index, summary] of summaries.entries()) {
@@ -669,19 +592,11 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('puts every total above its rows when the placement says first', async () => {
-      // The live half of #578's fourth criterion. Placement is emitted as the
-      // direction of the `GROUPING()` term, so it can only be observed in the
-      // order Postgres returns — a setting that reached the renderer alone
-      // would leave this order untouched and every assertion below passing on
-      // the `last` arrangement.
       const { data } = await rollupPage({ totalsPlacement: 'first' });
       const summaries = data.map((row) => row[TABLE_GROUP_ROW_FIELD]);
 
       expect(summaries.length).toBeGreaterThan(0);
 
-      // The mirror image of the `last` case above: the grand total leads, and
-      // each subtotal precedes the children it totals rather than following
-      // them.
       expect(summaries[0]?.path).toStrictEqual([]);
 
       for (const [index, summary] of summaries.entries()) {
@@ -695,9 +610,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('leaves the totals below their rows by default', async () => {
-      // Pins the default rather than assuming it: `last` is what the query
-      // builder applies for an absent placement, so a route that forwarded
-      // nothing would still have to produce this.
       const { data } = await rollupPage();
 
       expect(
@@ -706,13 +618,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('gives a grand total the leaves add up to, at every level', async () => {
-      // #648's second criterion, and the half a fixture cannot supply. The
-      // client's derivation picks the grand-total row where a rollup emitted
-      // one and sums the non-subtotal rows where it did not
-      // (`resolveShareDenominators`, unit-tested against fixtures); what only a
-      // real database can show is that those two rules agree, and that the
-      // shares they produce sum to one at every level. A denominator drawn from
-      // the wrong scope fails this and passes every mocked test.
       const { data } = await rollupPage();
       const summaries = data
         .map((row) => row[TABLE_GROUP_ROW_FIELD])
@@ -724,13 +629,11 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
           )?.value,
         );
 
-      // Rule one: the row the read emitted keyed by nothing.
       const fromGrandTotalRow = amountOf(
         summaries.find(
           (summary) => summary.isSubtotal && summary.path.length === 0,
         ),
       );
-      // Rule two: every row that totals nothing below it.
       const fromSummedLeaves = summaries
         .filter((summary) => !summary.isSubtotal)
         .reduce((acc, summary) => acc + amountOf(summary), 0);
@@ -738,8 +641,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
       expect(fromGrandTotalRow).toBeGreaterThan(0);
       expect(fromSummedLeaves / fromGrandTotalRow).toBeCloseTo(1, 10);
 
-      // And the shares that denominator produces sum to one per level — the
-      // property that fails when the denominator comes from one level only.
       const shareAtDepth = (depth: number) =>
         summaries
           .filter((summary) => summary.path.length === depth)
@@ -754,11 +655,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('cannot derive a share from a non-additive measure', async () => {
-      // Why the share is offered on `sum` and `count` alone. Summing each
-      // group's `countDistinct` counts a country once per group it appears in,
-      // so the "shares" it yields still add to one while being wrong — the
-      // failure that reads as correct, and the reason this is a legality rule
-      // rather than a rounding note (#648).
       const { data } = await selectOrdersPage({
         filters: [],
         grouping: {
@@ -791,7 +687,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('reconciles the leaves, the subtotals and the grand total', async () => {
-      // Arithmetic Postgres itself settles: the same rows summed three ways.
       const { data } = await rollupPage();
       const summaries = data
         .map((row) => row[TABLE_GROUP_ROW_FIELD])
@@ -811,9 +706,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     });
 
     it('tells a structural NULL from a real one by the mask, not the text', async () => {
-      // Both render an empty label from the same column. Only `isSubtotal`,
-      // decoded from `GROUPING()`, separates them — so a decode that read the
-      // bits the wrong way round would mark leaves as totals and vice versa.
       const { data } = await rollupPage();
       const summaries = data
         .map((row) => row[TABLE_GROUP_ROW_FIELD])
@@ -840,10 +732,6 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
         sort: [{ column: 'order_status', direction: 'asc' }],
       });
 
-      // The route requests key sorts only, so this one runs; the refusal itself
-      // is unit-tested at the builder, where the sort list can be spelled
-      // directly. What is checked here is that the legal shape still runs
-      // against a real database rather than being refused by mistake.
       expect(page.error).toBeUndefined();
       expect(page.data.length).toBeGreaterThan(0);
     });

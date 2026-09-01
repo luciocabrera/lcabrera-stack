@@ -8,13 +8,6 @@ type GroupingRefusedErrorArgs = {
   readonly reason: GroupingRefusalReason;
 };
 
-/**
- * Deliberately **not** a `PersistenceError`: nothing here came from the driver, there are
- * no pg diagnostics to carry, and most of these are raised before any connection is
- * borrowed.
- * Widening `PersistenceError` to cover them would make `instanceof PersistenceError` stop
- * meaning "the database rejected this", which is the one thing it is for (ADR-050).
- */
 export class GroupingRefusedError extends Error {
   public readonly column: string | undefined;
   public readonly estimatedRows: number | undefined;

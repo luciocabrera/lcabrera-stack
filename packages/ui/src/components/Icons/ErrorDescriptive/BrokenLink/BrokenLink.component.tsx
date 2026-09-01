@@ -5,7 +5,6 @@ import { styles } from './BrokenLink.stylex';
 export const BrokenLink = () => (
   <g {...stylex.props(styles.linkGroup)} fill='none'>
     <path {...stylex.props(styles.link)} d='M150 100 L210 100' opacity='0.55' />
-    {/* animated crack segments */}
     <path
       {...stylex.props(styles.crack)}
       d='M178 88 L186 100 L178 112'

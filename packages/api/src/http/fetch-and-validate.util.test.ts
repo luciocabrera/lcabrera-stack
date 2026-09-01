@@ -13,7 +13,6 @@ const args = {
   url: 'https://example.test/thing',
 };
 
-/** A fetch that resolves immediately with the given JSON body. */
 const stubOkFetch = (body: unknown) => {
   const okFetch: typeof fetch = async () =>
     ({
@@ -28,12 +27,6 @@ const stubOkFetch = (body: unknown) => {
   return fetchMock;
 };
 
-/**
- * A fetch that never settles on its own and rejects with the signal's reason
- * when aborted — what a hung endpoint looks like to the caller. Typed as
- * `typeof fetch` so the stub is provably the real signature; a mock that
- * ignored the signal would make every abort test below pass vacuously.
- */
 const hangingFetch: typeof fetch = async (_input, init) =>
   new Promise<Response>((_resolve, reject) => {
     const { signal } = init ?? {};

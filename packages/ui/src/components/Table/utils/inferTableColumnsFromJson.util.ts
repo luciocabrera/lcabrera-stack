@@ -13,9 +13,6 @@ type InferTableColumnsFromJsonArgs = {
 };
 
 const ISO_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-// `(x|)` is behaviorally identical to `(x)?` but avoids the
-// optional-group-wrapping-a-quantifier shape that
-// security/detect-unsafe-regex (safe-regex) rejects as backtracking-prone.
 const ISO_DATE_TIME_PATTERN =
   /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2}|)(\.\d+|)([Z+-][\d:]*|)$/;
 
@@ -69,10 +66,6 @@ const observeValueType = ({ key, typeByKey, value }: ObserveValueTypeArgs) => {
   if (existingType === undefined) {
     typeByKey.set(key, inferredType);
   } else if (existingType !== inferredType) {
-    // A column observed with conflicting types across rows falls back to
-    // 'string' rather than silently picking one — mixed-shape JSON
-    // (common across different scanners' raw output) renders as text
-    // instead of guessing wrong.
     typeByKey.set(key, 'string');
   }
 };
@@ -97,10 +90,6 @@ const toTableColumnDataType = (inferredType: InferredValueType) => {
   }
 };
 
-/**
- * Computes TableColumn definitions from the union of keys across an arbitrary array of
- * JSON objects — the runtime counterpart to a hand-authored `COLUMNS[]` constant.
- */
 export const inferTableColumnsFromJson = ({
   rows,
 }: InferTableColumnsFromJsonArgs): readonly TableColumn<
@@ -130,10 +119,6 @@ export const inferTableColumnsFromJson = ({
       ...(dataType !== undefined && { dataType }),
       key,
       label: humanizeKey(key),
-      // Without an explicit minWidth, an inferred column with a short
-      // label (or an empty/short-valued column) collapses to little more
-      // than its sort-icon width — a real issue previously caught in
-      // hand-authored columns, and inferred ones are no different.
       minWidth: 120,
       ...(isComplex && {
         render: (row: Record<string, unknown>) => JSON.stringify(row[key]),

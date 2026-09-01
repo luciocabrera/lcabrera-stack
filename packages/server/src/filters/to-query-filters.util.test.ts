@@ -37,10 +37,6 @@ it('returns an empty array for no filters', () => {
 });
 
 it('maps an empty filter to a unary query filter carrying no value', () => {
-  // No `value` key at all, not `value: undefined`. `appendFilterClause`
-  // branches on the operator rather than on whether a value is present, so
-  // the difference would go unnoticed here and surface as a wrong parameter
-  // index on a *later* filter.
   expect(
     toQueryFilters({
       filters: { shipping_country: { operator: 'isEmpty', type: 'empty' } },
@@ -49,17 +45,6 @@ it('maps an empty filter to a unary query filter carrying no value', () => {
 });
 
 it('reaches SQL as IS NULL, binding no parameter and shifting no index', () => {
-  // End to end, because that is the claim worth pinning: a filter with no
-  // value must not consume a `$n` slot. If it did, every filter after it
-  // would bind the wrong parameter — a silent failure landing on a different
-  // filter than the one that caused it.
-  //
-  // **The empty filter must come first or this proves nothing**, since only a
-  // filter *after* it can show the shift. `toQueryFilters` walks
-  // `Object.entries`, so the order here is the literal's order — and
-  // `perfectionist/sort-objects` requires that to be alphabetical. The column
-  // names are chosen so the sorted order is the order under test; renaming
-  // either one to sort the other way silently disarms this.
   const { text, values } = buildWhereClause({
     filters: toQueryFilters({
       filters: {

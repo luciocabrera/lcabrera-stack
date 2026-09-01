@@ -33,8 +33,6 @@ const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const REQUIREMENT_ISSUE = /^\d+$/;
 const PLANNING_ISSUE = /^#\d+$/;
 
-/** How a wrong value reads in a message — an absent field and a list are the
- *  two ways a scalar goes wrong, and both have to be legible. */
 const describe = (value) => {
   if (value === undefined) {
     return '(absent)';
@@ -45,8 +43,6 @@ const describe = (value) => {
 const sorted = (values) =>
   [...values].sort((a, b) => a.localeCompare(b)).join(', ');
 
-/** A closed schema: every declared field is known, and every known one is
- *  declared. A typo'd key would otherwise read as an absent optional field. */
 const schemaProblems = (fields, allowed) => {
   const declared = Object.keys(fields);
   return [
@@ -66,8 +62,6 @@ const scalarProblems = (label, value, allowed) =>
         `\`${label}\` must be one of ${sorted(allowed)} — got ${describe(value)}`,
       ];
 
-/** A list field, with a per-item predicate. `expected` completes "each item
- *  must be …". */
 const listProblems = (label, value, expected, accepts) => {
   if (!Array.isArray(value)) {
     return [`\`${label}\` must be a list — got ${describe(value)}`];
@@ -87,7 +81,6 @@ const idProblems = (entry) => {
     : [`\`id\` is \`${id}\` but the filename slug is \`${entry.slug}\``];
 };
 
-/** `type` and `ref`, and nothing else, on every evidence entry. */
 const evidenceShapeProblems = (pointer, index) => {
   if (typeof pointer !== 'object' || Array.isArray(pointer)) {
     return [`\`evidence\` item ${index + 1} must be a \`type\`/\`ref\` pair`];
@@ -97,12 +90,6 @@ const evidenceShapeProblems = (pointer, index) => {
   );
 };
 
-/**
- * A pointer resolves when the thing it names exists: a repo-relative path in
- * the tree, or — for `type: command` — a task the root manifest declares. An
- * evidence pointer nobody can follow is the register's characteristic rot, so
- * this is the check that has to hold.
- */
 const pointerProblems = (pointer, index, context) => {
   const { ref, type } = pointer;
   const at = `\`evidence\` item ${index + 1}`;
@@ -132,11 +119,6 @@ const evidenceProblems = (entry, context) => {
   });
 };
 
-/**
- * The half of the `met` rule a script can decide. The other half — that the
- * command COULD fail — is not in any file here, so this reports what it
- * checked and names the part it did not: see the module header.
- */
 const metProblems = (entry, { ciCommands }) => {
   if (entry.fields.state !== 'met') {
     return [];
@@ -160,14 +142,8 @@ const metProblems = (entry, { ciCommands }) => {
 
 const H1 = /^# \S/m;
 const REQUIRED_SECTIONS = [/^## Statement$/m, /^## Acceptance$/m];
-// `[ \t]*`, not `\s*`: with the `m` flag `\s` matches a newline too, so `^\s*`
-// can backtrack across blank lines super-linearly (Sonar S8786). A bullet's
-// indent is spaces or tabs, so the narrower class is also the correct one.
 const CHECKBOX = /^[ \t]*[*-] \[[ xX]\]/m;
 
-/** The body shape `docs/product/README.md` fixes, plus its one prohibition:
- *  an acceptance checkbox is a second declaration of `state`, and two copies of
- *  one fact drift. */
 const bodyProblems = (entry) => {
   const problems = [];
   if (!H1.test(entry.body)) {
@@ -186,7 +162,6 @@ const bodyProblems = (entry) => {
   return problems;
 };
 
-/** Every rule for one requirement, in the order a reader would check them. */
 export const requirementProblems = (entry, context) => {
   if (!entry.hasBlock) {
     return ['has no `---` frontmatter block'];
@@ -251,8 +226,6 @@ const isRealDate = (value) => {
   );
 };
 
-/** Every rule for one planning document. A draft carrying no block is not one
- *  of these documents at all — the caller filters it out. */
 export const planningProblems = (entry, context) => {
   if (!entry.hasBlock) {
     return ['has no `---` frontmatter block'];
@@ -297,16 +270,9 @@ export const planningProblems = (entry, context) => {
   ];
 };
 
-/** A planning document the block applies to: drafts are out of scope unless
- *  one declares a block anyway, in which case it is held to it. */
 export const carriesPlanningBlock = (entry) =>
   !isDraft(entry.file) || entry.hasBlock;
 
-/**
- * Every finding across both registers, including the refusal to pass on no
- * data: an empty read and a clean read are indistinguishable in an exit code,
- * so the empty one is made to fail instead.
- */
 export const registerFindings = ({
   ciCommands,
   planning,

@@ -9,11 +9,6 @@ type ResolveOpenMenuRepositionArgs = {
   readonly triggerElement: HTMLElement | null;
 };
 
-/**
- * Decision core shared by the observer and post-open stabilization reposition paths:
- * `keep` while the menu is not open, `close` when the trigger left the DOM (virtualization
- * can unmount it), otherwise `reposition` with freshly computed menu coordinates.
- */
 export const resolveOpenMenuReposition = ({
   getContainerRect,
   menuElement,

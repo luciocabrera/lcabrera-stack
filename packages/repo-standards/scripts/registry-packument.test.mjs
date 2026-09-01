@@ -36,8 +36,6 @@ describe('fetchPackument', () => {
   });
 
   it('asks for the full document when a caller needs exports', async () => {
-    // The abbreviated packument omits `exports` silently — an audit reading it
-    // would see no target at all and pass every package.
     const { calls, fetchImpl } = respondWith({ status: 200 });
 
     await fetchPackument('@lcabrera/utils', { fetchImpl, full: true });
@@ -62,9 +60,6 @@ describe('fetchPackument', () => {
   });
 
   it('propagates a transport failure', async () => {
-    // An unroutable registry rejects here rather than resolving to `undefined`.
-    // A supply-chain check that goes green because it could not run is worse
-    // than none, because it is believed.
     const fetchImpl = () => Promise.reject(new Error('fetch failed'));
 
     await expect(

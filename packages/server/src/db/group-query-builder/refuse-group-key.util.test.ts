@@ -31,8 +31,6 @@ describe('refuseGroupKey', () => {
     expect(refuseGroupKey(args({}))).toBeUndefined();
   });
 
-  // The priority that decides which message a user sees. A `point` column trips
-  // both rules, and only one of the two reads as an explanation.
   it('reports the role before the missing operator when both apply', () => {
     expect(
       refuseGroupKey(
@@ -58,7 +56,6 @@ describe('refuseGroupKey', () => {
   });
 
   it('reports a unique-ish column before a too-large one', () => {
-    // Both would refuse a primary key. Only one tells the user what they did.
     expect(
       refuseGroupKey(
         args({ estimate: { kind: 'known', value: 2000 }, relTuples: 2000 }),
@@ -98,7 +95,6 @@ describe('refuseGroupKey', () => {
   });
 
   it('accepts a uuid whose low cardinality is demonstrated', () => {
-    // The case the exception exists for: a foreign key, not a primary one.
     expect(
       refuseGroupKey(
         args({ estimate: { kind: 'known', value: 4 }, typeName: 'uuid' }),
@@ -107,9 +103,6 @@ describe('refuseGroupKey', () => {
   });
 
   it('refuses a uuid with no statistics, unlike an ordinary dimension', () => {
-    // The pair that pins the identifier rule. Same role, same estimate, same
-    // everything but the type name — and the answers differ, because a uuid is
-    // far more often a key than a label and warn-and-proceed is too generous.
     const noStats = { estimate: { kind: 'unknown' } as DistinctEstimate };
 
     expect(refuseGroupKey(args({ ...noStats, typeName: 'uuid' }))).toBe(
@@ -121,9 +114,6 @@ describe('refuseGroupKey', () => {
   });
 
   it('does not apply the identifier rule to a uuid from another schema', () => {
-    // `app.uuid` never reaches the identifier rule because Gate 1 already made
-    // it `unsupported`. Pinned anyway: the two utils consult the same predicate,
-    // and a bare-name match here would be just as wrong as one there.
     expect(
       refuseGroupKey(
         args({
@@ -136,8 +126,6 @@ describe('refuseGroupKey', () => {
   });
 
   it('still refuses a primary-key uuid as unique-ish', () => {
-    // The pre-existing guard is what covers the common uuid mistake; the
-    // identifier rule only adds the no-statistics case on top of it.
     expect(
       refuseGroupKey(
         args({

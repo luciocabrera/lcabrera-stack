@@ -9,11 +9,6 @@ import type { FormFieldGroupProps } from './FormFieldGroup.types';
 
 import { styles } from './FormFieldGroup.stylex';
 
-/**
- * When `collapsible`, the header becomes a button that expands/collapses the body;
- * collapsed fields are hidden with `display:none` (not unmounted), so their values still
- * submit.
- */
 export const FormFieldGroup = <TValues extends Record<string, unknown>>({
   field,
 }: FormFieldGroupProps<TValues>) => {

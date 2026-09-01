@@ -108,9 +108,6 @@ describe('isWritten / isReported', () => {
   });
 
   test('a refusal is reported, never written and never recorded', () => {
-    // `unresolved` is a command the consumer has not mapped, `unmet` a config
-    // key they have not set. Recording either would make the next run read the
-    // file's absence as a deletion they chose.
     for (const state of ['unmet', 'unresolved']) {
       expect(isReported(state)).toBe(true);
       expect(isWritten(state)).toBe(false);

@@ -10,7 +10,6 @@ import { styles } from './TabsHeader.stylex';
 import { TabsHeaderButton } from './TabsHeaderButton/TabsHeaderButton.component';
 import { getNewIndex } from './utils/getNewIndex.util';
 
-/** Tab strip with roving-tabindex keyboard navigation (ArrowLeft/ArrowRight/Home/End). */
 export const TabsHeader = ({
   activeTab,
   isBusy,

@@ -63,8 +63,6 @@ const capabilities: Readonly<Record<string, TableColumnGroupingCapability>> = {
 
 describe('toGroupKeyColumnOptions', () => {
   it('leaves out the columns the catalogue refuses as a group key', () => {
-    // The defect this closes: both refused columns were offered here, because
-    // the filter read only the declared `isGroupable` — which defaults to true.
     expect(
       toGroupKeyColumnOptions({
         capabilities,
@@ -88,8 +86,6 @@ describe('toGroupKeyColumnOptions', () => {
   });
 
   it('offers every declared-groupable column when the route resolved no capabilities', () => {
-    // A route may group without shipping a capability map, and reading the
-    // empty map as "everything is refused" would switch its drawer off.
     expect(
       toGroupKeyColumnOptions({
         capabilities: {},

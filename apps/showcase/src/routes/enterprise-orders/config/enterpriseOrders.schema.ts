@@ -16,11 +16,6 @@ export const PHONE_PATTERN = /^\+?\d[\d\s().-]{6,29}$/;
 export const POSTAL_CODE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9\s-]{2,19}$/;
 export const ORDER_NUMBER_PATTERN = /^ORD-\d{8}$/;
 
-/**
- * Optional numeric field: an empty form value becomes `undefined` (absent)
- * rather than coercing to `0`, so a blank rating is not silently stored as a
- * real zero.
- */
 const optionalRating = z.preprocess(
   (value) => (value === '' || value === null ? undefined : value),
   z.coerce

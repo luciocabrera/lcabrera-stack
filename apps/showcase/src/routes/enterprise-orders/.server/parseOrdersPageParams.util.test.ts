@@ -57,9 +57,7 @@ it.each([
 it('orders by the primary key when every rule sanitizes away', () => {
   const params = new URLSearchParams({
     sort: JSON.stringify([
-      // The synthetic UI-only column, which is not a real database column.
       { columnKey: 'actions', direction: 'asc' },
-      // A column the user cycled back to unsorted.
       { columnKey: 'order_number' },
     ]),
   });
@@ -77,8 +75,6 @@ it('leaves a request that did send a sort untouched', () => {
     ]),
   });
 
-  // No fallback appended, no reordering — the fallback applies only to an
-  // empty sort, never as an extra tiebreaker on one the caller supplied.
   expect(parseOrdersPageParams(params).sort).toStrictEqual([
     { column: 'order_date', direction: 'desc' },
     { column: 'order_id', direction: 'asc' },

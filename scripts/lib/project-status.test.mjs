@@ -6,12 +6,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { targetStatus } from './project-status.mjs';
 
-// This map decides what the Planning board says, and it had no tests — a pure
-// function extracted specifically to be testable (its own header says so) while
-// every other pure helper here has a colocated suite. A missing transition is
-// invisible in a function nothing exercises, which is how `issues: closed` went
-// unmapped until two cards were found stuck in In Progress (#249, #255, #307).
-
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const WORKFLOW = '.github/workflows/project-status.yml';
 
@@ -30,14 +24,10 @@ describe('issue events', () => {
   });
 
   it('finishes the card when the issue closes, PR or no PR', () => {
-    // The defect: a merging PR moves the issues it closes, but an issue closed
-    // by hand emitted an event nothing subscribed to, so its card stayed put.
     expect(issue('closed')).toBe('Done');
   });
 
   it('returns a reopened issue to the backlog, not to In Progress', () => {
-    // Assigning is what says someone has started; reopening only says the work
-    // is not finished.
     expect(issue('reopened')).toBe('Todo');
   });
 
@@ -95,9 +85,6 @@ describe('unrelated events', () => {
 });
 
 describe('the workflow subscribes to what the map handles', () => {
-  // A mapped transition the workflow does not listen for is dead code that
-  // looks live: the test above passes and the card never moves — exactly the
-  // shape of the original defect.
   const workflow = () => readFileSync(join(REPO_ROOT, WORKFLOW), 'utf8');
 
   const subscribedTypes = (block) => {

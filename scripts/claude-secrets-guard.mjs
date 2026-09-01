@@ -33,7 +33,7 @@ const STDIN_FD = 0;
 
 const emitDecision = (result) => {
   if (result.decision !== 'deny') {
-    return; // allow → stay silent, exit 0, let normal permission flow continue
+    return;
   }
   const output = {
     hookSpecificOutput: {

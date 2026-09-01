@@ -182,8 +182,6 @@ describe('useBatchSetTableSettings', () => {
     });
     mockGroupingStore.set.mockClear();
     mockMetaStore.get.mockClear();
-    // Restored rather than only cleared: one case below pins the drawer, and
-    // without this every later case would inherit that.
     mockMetaStore.get.mockReturnValue({
       isTableSettingsPinned: false,
       persistenceKey: 'orders-table',
@@ -240,8 +238,6 @@ describe('useBatchSetTableSettings', () => {
         { key: 'name', label: 'Name' },
         { key: 'age', label: 'Age' },
       ],
-      // Empty because this Accept stages no grouping: the hierarchy column
-      // follows the grouping being committed, not the one already applied.
       groupingKeys: [],
       settings,
     });
@@ -254,10 +250,6 @@ describe('useBatchSetTableSettings', () => {
       columnSizing: { actions: 0, age: 80, id: 100, name: 220 },
       columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(['age']),
       persistenceKey: 'orders-table',
-      // The **resolved** sorting, not the staged `settings.sorting` (`desc`):
-      // this Accept may have deselected the aggregate whose measure column the
-      // sort names, and the sort travels in the URL — persisting the staged
-      // value would leave the loader reading a column the grid no longer has.
       sorting: [{ columnKey: 'name', direction: 'asc' }],
     });
     expect(mockPersistTableState).toHaveBeenCalledWith([
@@ -406,9 +398,6 @@ describe('useBatchSetTableSettings', () => {
       });
     });
 
-    // One call, not two: a second submission on the shared persist fetcher key
-    // would abort this one, so the grouping entry has to ride along with the
-    // column entries rather than follow them.
     expect(mockPersistTableState).toHaveBeenCalledTimes(1);
     expect(mockPersistTableState).toHaveBeenCalledWith([
       {

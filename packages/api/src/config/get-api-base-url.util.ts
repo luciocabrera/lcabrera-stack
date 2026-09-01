@@ -1,8 +1,16 @@
+/**
+ * `globalThis` is narrowed here to a type whose `window` is optional, because
+ * that is the truth under SSR while the DOM lib types it as always present.
+ * Comparing against the lib type instead is a dead end in both spellings:
+ * `=== undefined` reads as unnecessary to
+ * `@typescript-eslint/no-unnecessary-condition`, and `typeof … === 'undefined'`
+ * trips `unicorn/no-typeof-undefined` — and this is a public package, which may
+ * suppress neither. Correcting the type keeps both rules live and covers the
+ * property being absent (real Node) as well as present-but-undefined.
+ */
+
 import { API_SERVER_PORT, CONFIG } from './config.constants.ts';
 
-// Private IP ranges (10.x.x.x, 172.16-31.x.x, 192.168.x.x). Module-level so the
-// three regexes are compiled once rather than on every getApiBaseUrl call, which
-// runs on every service request.
 const PRIVATE_IP_PATTERNS = [
   /^10\./,
   /^172\.(1[6-9]|2\d|3[01])\./,
@@ -10,7 +18,6 @@ const PRIVATE_IP_PATTERNS = [
 ];
 
 const isLocalIp = (hostname: string): boolean => {
-  // Check for localhost aliases
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return true;
   }
@@ -18,71 +25,51 @@ const isLocalIp = (hostname: string): boolean => {
   return PRIVATE_IP_PATTERNS.some((pattern) => pattern.test(hostname));
 };
 
-/**
- * `VITE_API_URL` outranks `requestUrl` (ADR-072): a loader has a request URL and
- * the browser does not, so ranking the request first resolved two hosts on one
- * page. Under SSR, `requestUrl` is still the only way to learn the served origin.
- */
+const resolveFromRequestUrl = (requestUrl: string) => {
+  try {
+    const { hostname, protocol } = new URL(requestUrl);
+
+    return isLocalIp(hostname)
+      ? CONFIG.localhost.apiHost
+      : `${protocol}//${hostname}/api`;
+  } catch {
+    return;
+  }
+};
+
 export const getApiBaseUrl = (requestUrl?: string): string => {
-  // Priority 1: an explicit override outranks every derived source.
   const envApiUrl = import.meta.env.VITE_API_URL as string | undefined;
   if (envApiUrl) {
     return envApiUrl;
   }
 
-  // Priority 2: a request URL (from loader/action) names the host being served.
-  if (requestUrl) {
-    try {
-      const url = new URL(requestUrl);
-      const { hostname, protocol } = url;
+  const fromRequestUrl =
+    requestUrl === undefined ? undefined : resolveFromRequestUrl(requestUrl);
 
-      // Check if it's localhost or a private IP
-      if (isLocalIp(hostname)) {
-        return CONFIG.localhost.apiHost;
-      }
-
-      // For deployed environments, use same origin with /api path
-      return `${protocol}//${hostname}/api`;
-    } catch {
-      // Invalid URL, fall through to other strategies
-    }
+  if (fromRequestUrl !== undefined) {
+    return fromRequestUrl;
   }
 
-  // Priority 3: Server-side rendering without either.
-  //
-  // `globalThis` is narrowed to a type where `window` is optional, because that
-  // is the truth under SSR — the DOM lib types it as always present. Comparing
-  // against the lib type directly is a dead end in both spellings: `=== undefined`
-  // reads as unnecessary to the type checker (@typescript-eslint/no-unnecessary-condition)
-  // and `typeof … === 'undefined'` trips unicorn/no-typeof-undefined. Correcting
-  // the type instead of silencing the rule keeps both live, and covers the
-  // property being absent (real Node) as well as present-but-undefined.
   const { window: maybeWindow } = globalThis as { readonly window?: unknown };
 
   if (maybeWindow === undefined) {
     return CONFIG.localhost.apiHost;
   }
 
-  // Priority 4: Client-side resolution
   const { hostname, protocol } = globalThis.location;
   const isDev = import.meta.env.DEV;
 
-  // In development, always use the Vite proxy
   if (isDev) {
     return '/api';
   }
 
-  // Check if it's localhost or a private IP
   if (isLocalIp(hostname)) {
-    // For localhost aliases, use the configured localhost URL
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return CONFIG.localhost.apiHost;
     }
 
-    // For private IPs, use the same IP but with API server port
     return `${protocol}//${hostname}:${API_SERVER_PORT}/api`;
   }
 
-  // Use appropriate config based on environment
   return `${protocol}//${hostname}${CONFIG.prod.apiHost}`;
 };

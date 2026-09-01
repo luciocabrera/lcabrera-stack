@@ -22,10 +22,6 @@ export type ParsedOrdersPageParams = {
   readonly sort: readonly QuerySort[];
 };
 
-/**
- * The paginated-orders search params as generic query descriptor pieces, for both
- * `/paginated` and the group-details route (ADR-087).
- */
 export const parseOrdersPageParams = (
   params: URLSearchParams,
 ): ParsedOrdersPageParams => {

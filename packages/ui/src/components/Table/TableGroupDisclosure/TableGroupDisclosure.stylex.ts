@@ -2,7 +2,6 @@ import * as stylex from '@stylexjs/stylex';
 
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
-/** The box the chevron occupies, reserved whether or not one is drawn. */
 const CONTROL_SIZE_PX = 16;
 
 export const tableGroupDisclosureStyles = stylex.create({

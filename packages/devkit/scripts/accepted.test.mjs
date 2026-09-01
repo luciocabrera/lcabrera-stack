@@ -24,8 +24,6 @@ describe('parseAccepted', () => {
   });
 
   test('treats absent, blank and malformed records as no record', () => {
-    // Failing towards "everything is reported" is the safe direction: an
-    // unreadable acceptance record must not quiet a file.
     expect(parseAccepted(undefined)).toEqual({});
     expect(parseAccepted('')).toEqual({});
     expect(parseAccepted('{ not json')).toEqual({});
@@ -42,8 +40,6 @@ describe('parseAccepted', () => {
   });
 
   test('drops an entry with no stated reason, so a hand-edit cannot skip --reason', () => {
-    // The only way an acknowledgement gets reconsidered is by someone reading
-    // why it was made, so an entry without one is not an acknowledgement.
     const raw = JSON.stringify({
       'blank.md': { hash: EDIT, reason: '   ' },
       'missing.md': { hash: EDIT },
@@ -71,8 +67,6 @@ describe('serialiseAccepted', () => {
 
 describe('isAccepted', () => {
   test('matches only the exact content that was acknowledged', () => {
-    // The whole re-surfacing mechanism is this one comparison: same path, other
-    // content, no match.
     expect(isAccepted({ accepted: record(), hash: EDIT, path: PATH })).toBe(
       true,
     );
@@ -82,8 +76,6 @@ describe('isAccepted', () => {
   });
 
   test('two absences do not read as a match', () => {
-    // `withAccepted` can be handed an undefined hash, and without the guard
-    // `undefined === undefined` would quiet a path that is not even on disk.
     const broken = withAccepted(
       {},
       { hash: undefined, path: PATH, reason: 'x' },
@@ -131,8 +123,6 @@ describe('parseAcceptArgs', () => {
   });
 
   test('a flag where a value should be reads as no value', () => {
-    // Otherwise `--accept --reason x` reports `--reason` as a file nobody
-    // edited, which names the wrong fault.
     expect(parseAcceptArgs(['--accept', '--reason', 'ours'])).toEqual({
       path: undefined,
       reason: 'ours',
@@ -162,8 +152,6 @@ describe('acceptDecision', () => {
   });
 
   test('refuses an acknowledgement with no stated reason', () => {
-    // An acknowledgement nobody justified is the one that rots, so a blank
-    // reason is refused as hard as a missing file — no hash comes back.
     for (const reason of [undefined, '', '   ']) {
       const decision = acceptDecision({
         entries: [modified],
@@ -192,9 +180,6 @@ describe('acceptDecision', () => {
   });
 
   test('refuses every state that is not a live divergence, naming the one it found', () => {
-    // A gate that accepted anything would pass the accepting cases too, so both
-    // directions are asserted. `acknowledged` is refused because it is already
-    // acknowledged; the rest are nothing a consumer diverged on.
     const refusals = ['acknowledged', 'added', 'current', 'unmet', 'unresolved']
       .map((state) =>
         acceptDecision({
@@ -209,10 +194,6 @@ describe('acceptDecision', () => {
   });
 
   test('accepts a conflict, which is the state that made --check unusable', () => {
-    // A repository that authored its own register before adopting the kit holds
-    // `conflict` permanently and legitimately. Refusing it left `doctor --check`
-    // red on a correct tree, and a gate that is always red is read exactly like
-    // one that is always green.
     const decision = acceptDecision({
       entries: [{ ...modified, state: 'conflict' }],
       path: PATH,

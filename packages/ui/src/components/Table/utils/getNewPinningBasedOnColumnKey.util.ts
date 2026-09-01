@@ -14,7 +14,6 @@ export const getNewPinningBasedOnColumnKey = <TData>({
   existingPinning,
   staticKeys,
 }: GetNewPinningBasedOnColumnKeyArgs<TData>) => {
-  // Pinning: remove from both sides, then re-add respecting static column positions
   const currentPinning = existingPinning ?? {
     left: [],
     right: [],

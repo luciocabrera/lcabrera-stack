@@ -58,8 +58,6 @@ describe('getHasPinOrderConflict', () => {
   });
 
   it('excludes static keys from conflict detection', () => {
-    // Without static exclusion this would be a conflict (left pin 'a' not at position 0)
-    // but 'static' is excluded so effective order is ['a', 'b'] with 'a' at position 0
     expect(
       getHasPinOrderConflict({
         columnPinning: { left: ['a'], right: [] },

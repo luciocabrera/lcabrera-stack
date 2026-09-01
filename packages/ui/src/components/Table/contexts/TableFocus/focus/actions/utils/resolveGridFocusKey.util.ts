@@ -13,14 +13,6 @@ type ResolveGridFocusKeyArgs = {
   readonly rowIndex: number;
 };
 
-/**
- * `undefined` means the grid does not claim the key, which is also what tells the caller
- * not to call `preventDefault`.
- * This is the WAI-ARIA grid pattern, which `role="grid"` commits the Table to (ADR-062):
- * arrows move one cell, `Home`/`End` move within the row, the same two with a range
- * modifier move to the first/last cell of the grid, and `PageUp`/`PageDown` move by a
- * viewport of rows.
- */
 export const resolveGridFocusKey = ({
   columnIndex,
   isRangeModifier,

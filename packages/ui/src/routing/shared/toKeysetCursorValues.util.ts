@@ -7,10 +7,6 @@ type ToKeysetCursorValuesArgs<TData extends Record<string, unknown>> = {
   readonly sorting: SortingState<TData>;
 };
 
-/**
- * Read the sort-key tuple out of the last loaded row, in `sorting` order — the keyset
- * cursor an endpoint seeks past instead of counting `skip` rows (ADR-052).
- */
 export const toKeysetCursorValues = <TData extends Record<string, unknown>>({
   lastRow,
   sorting,

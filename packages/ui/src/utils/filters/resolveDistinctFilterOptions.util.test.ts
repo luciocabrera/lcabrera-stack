@@ -53,10 +53,6 @@ describe('resolveDistinctFilterOptions', () => {
   });
 
   it('bounds every page request so a hung endpoint cannot wedge the dropdown', async () => {
-    // Without this the request never settles, the fetch chain's in-flight guard
-    // is never cleared, and the filter can load no further page — see
-    // FILTER_OPTIONS_TIMEOUT_MS. Asserted on both transports because both go
-    // over the network.
     const bff = resolveDistinctFilterOptions(descriptor);
     const loader = resolveDistinctFilterOptions({
       ...descriptor,

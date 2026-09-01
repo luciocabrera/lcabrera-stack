@@ -8,10 +8,6 @@ type SetTableFocusTargetArgs = {
   readonly rowKey: string;
 };
 
-/**
- * The one place `focusRequestId` is incremented, so a request can never be raised without
- * the target it refers to, nor a target set without a request that would apply it.
- */
 export const setTableFocusTarget = ({
   columnKey,
   focusStore,

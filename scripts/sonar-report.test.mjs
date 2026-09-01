@@ -18,6 +18,11 @@
  * entry is the CLI; and the poll bounds are module constants in
  * `lib/sonar-wait.mjs` (`WAIT_TIMEOUT_MS` 5 minutes, `WAIT_INTERVAL_MS` 15
  * seconds), so the CLI takes five minutes of wall clock to get there. Covering it
+ * The token is emptied rather than deleted in each run: the script loads a
+ * gitignored root environment file if one is present, and `process.loadEnvFile`
+ * leaves alone a variable the environment already carries — so these cases hold
+ * on a machine that has one.
+ *
  * means making those two injectable or exporting the branch — a change to the
  * script's shape, not to this file, and not this pull request's subject.
  */
@@ -33,10 +38,6 @@ const SCRIPT = resolve(
   'sonar-report.mjs',
 );
 
-// SONAR_TOKEN is emptied rather than deleted: the script loads a gitignored root
-// environment file if one is present, and `process.loadEnvFile` leaves alone a
-// variable the environment already carries — so this holds on a machine that
-// has one.
 const run = (...flags) =>
   spawnSync(
     process.execPath,

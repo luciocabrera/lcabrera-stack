@@ -17,11 +17,6 @@ import {
 import { VirtualListBodyOptions } from '../VirtualListBodyOptions';
 import { styles } from './VirtualListBodyChildren.stylex';
 
-/**
- * Runs virtualization against the scroll container (Table analog: TableBody)
- * and dispatches by content mode: loading skeleton, empty-state message, or
- * the virtualized options window.
- */
 export const VirtualListBodyChildren = ({
   scrollContainerRef,
 }: VirtualListBodyChildrenProps) => {
