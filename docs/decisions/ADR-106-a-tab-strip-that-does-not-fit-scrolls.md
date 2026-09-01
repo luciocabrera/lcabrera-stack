@@ -31,6 +31,15 @@ and the list, and on a rAF-batched `scroll` handler — the shape
 listener itself. Each chevron scrolls by 80% of the viewport, through
 `scrollLeft` with `scroll-behavior: smooth` doing the animation in CSS.
 
+`scrollTabIntoView` measures with `getBoundingClientRect()` on both elements
+rather than with `offsetLeft`. `offsetLeft` is relative to the nearest
+positioned ancestor, which for a `Tabs` instance is whatever happens to wrap it
+— a drawer panel, or the body — while `scrollLeft` is relative to the viewport's
+own content box. Comparing the two is off by the viewport's offset inside that
+ancestor, and the offset moves when the start chevron mounts. Client rects put
+both on one origin, so the arithmetic holds wherever the strip is rendered and
+without a `position` rule in another file being kept true.
+
 The chevrons are `aria-hidden` with `tabIndex={-1}`. They are a pointer
 affordance for a strip the keyboard already reaches: arrow keys move through
 every tab, focus scrolls the target into view, and `scrollTabIntoView` covers

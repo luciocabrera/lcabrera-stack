@@ -190,14 +190,16 @@ type StubViewportArgs = {
   readonly clientWidth: number;
   readonly scrollLeft?: number;
   readonly scrollWidth: number;
-  readonly tabOffsetLeft?: number;
+  readonly tabLeft?: number;
 };
+
+const VIEWPORT_LEFT = 640;
 
 const stubViewport = ({
   clientWidth,
   scrollLeft = 0,
   scrollWidth,
-  tabOffsetLeft = scrollLeft,
+  tabLeft = VIEWPORT_LEFT,
 }: StubViewportArgs) => {
   const position = { current: scrollLeft };
 
@@ -215,10 +217,17 @@ const stubViewport = ({
       position.current = next;
     },
   );
-  vi.spyOn(HTMLElement.prototype, 'offsetLeft', 'get').mockReturnValue(
-    tabOffsetLeft,
+  vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+    function boundingBox(this: Element) {
+      const isTab = this.getAttribute('role') === 'tab';
+      const left = isTab ? tabLeft : VIEWPORT_LEFT;
+
+      return {
+        left,
+        right: isTab ? left : VIEWPORT_LEFT + clientWidth,
+      } as DOMRect;
+    },
   );
-  vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(0);
 
   return position;
 };
@@ -278,7 +287,7 @@ describe('TabsHeader when the tabs do not fit', () => {
       clientWidth: 200,
       scrollLeft: 300,
       scrollWidth: 600,
-      tabOffsetLeft: 0,
+      tabLeft: VIEWPORT_LEFT - 300,
     });
 
     await renderHeader();

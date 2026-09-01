@@ -38,7 +38,7 @@ export const TabsHeader = ({
       tab: tabRefs.current.get(activeTab),
       viewport: viewportRef.current,
     });
-  }, [activeTab, viewportRef]);
+  }, [activeTab, tabs.length, viewportRef]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (isBusy || tabs.length === 0) return;

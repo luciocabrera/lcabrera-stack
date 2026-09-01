@@ -6,14 +6,15 @@ type ScrollTabIntoViewArgs = {
 export const scrollTabIntoView = ({ tab, viewport }: ScrollTabIntoViewArgs) => {
   if (!tab || !viewport) return;
 
-  if (tab.offsetLeft < viewport.scrollLeft) {
-    viewport.scrollLeft = tab.offsetLeft;
+  const tabBox = tab.getBoundingClientRect();
+  const viewportBox = viewport.getBoundingClientRect();
+
+  if (tabBox.left < viewportBox.left) {
+    viewport.scrollLeft += tabBox.left - viewportBox.left;
     return;
   }
 
-  const end = tab.offsetLeft + tab.offsetWidth;
-
-  if (end > viewport.scrollLeft + viewport.clientWidth) {
-    viewport.scrollLeft = end - viewport.clientWidth;
+  if (tabBox.right > viewportBox.right) {
+    viewport.scrollLeft += tabBox.right - viewportBox.right;
   }
 };
