@@ -9,6 +9,7 @@ import { busyStyles, styles } from './TabsHeaderButton.stylex';
 export const TabsHeaderButton = ({
   activeTab,
   isBusy,
+  onKeyDown,
   onSelectTab,
   setTabRef,
   tab,
@@ -33,6 +34,7 @@ export const TabsHeaderButton = ({
       disabled={isBusy}
       id={`tab-${tab.key}`}
       onClick={handleTabSelect}
+      onKeyDown={onKeyDown}
       role='tab'
       tabIndex={activeTab === tab.key ? 0 : -1}
       type='button'

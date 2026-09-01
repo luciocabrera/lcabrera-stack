@@ -21,6 +21,8 @@ const tabs = [
   { children: <span>Content C</span>, header: 'Tab C', key: 'c' },
 ];
 
+const focusedTab = () => screen.getByRole('tab', { selected: true });
+
 describe('TabsHeader', () => {
   it('renders one tab button per tab', () => {
     render(
@@ -91,7 +93,7 @@ describe('TabsHeader', () => {
         tabs={tabs}
       />,
     );
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' });
+    fireEvent.keyDown(focusedTab(), { key: 'ArrowRight' });
     expect(onSelectTab).toHaveBeenCalledWith('b');
     expect(document.activeElement).toBe(
       screen.getByRole('tab', { name: 'Tab B' }),
@@ -112,7 +114,7 @@ describe('TabsHeader', () => {
       />,
     );
 
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowLeft' });
+    fireEvent.keyDown(focusedTab(), { key: 'ArrowLeft' });
 
     expect(onSelectTab).toHaveBeenCalledWith(expected);
   });
@@ -127,10 +129,9 @@ describe('TabsHeader', () => {
         tabs={tabs}
       />,
     );
-    const tablist = screen.getByRole('tablist');
-    fireEvent.keyDown(tablist, { key: 'Home' });
+    fireEvent.keyDown(focusedTab(), { key: 'Home' });
     expect(onSelectTab).toHaveBeenCalledWith('a');
-    fireEvent.keyDown(tablist, { key: 'End' });
+    fireEvent.keyDown(focusedTab(), { key: 'End' });
     expect(onSelectTab).toHaveBeenCalledWith('c');
   });
 
@@ -144,7 +145,7 @@ describe('TabsHeader', () => {
         tabs={tabs}
       />,
     );
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'Enter' });
+    fireEvent.keyDown(focusedTab(), { key: 'Enter' });
     expect(onSelectTab).not.toHaveBeenCalled();
   });
 
@@ -164,7 +165,7 @@ describe('TabsHeader', () => {
     render(
       <TabsHeader activeTab='a' isBusy onSelectTab={onSelectTab} tabs={tabs} />,
     );
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' });
+    fireEvent.keyDown(focusedTab(), { key: 'ArrowRight' });
     expect(onSelectTab).not.toHaveBeenCalled();
   });
 
@@ -178,7 +179,9 @@ describe('TabsHeader', () => {
         tabs={tabs}
       />,
     );
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' });
+    fireEvent.keyDown(screen.getByRole('tab', { name: 'Tab A' }), {
+      key: 'ArrowRight',
+    });
     expect(onSelectTab).toHaveBeenCalledWith('b');
   });
 });

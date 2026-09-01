@@ -40,7 +40,7 @@ export const TabsHeader = ({
     });
   }, [activeTab, viewportRef]);
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (isBusy || tabs.length === 0) return;
 
     const newIndexResult = getNewIndex({
@@ -77,7 +77,6 @@ export const TabsHeader = ({
           ref={listRef}
           {...stylex.props(styles.tabList)}
           aria-label='Settings tabs'
-          onKeyDown={handleKeyDown}
           role='tablist'
         >
           {tabs.map((tab) => (
@@ -85,6 +84,7 @@ export const TabsHeader = ({
               activeTab={activeTab}
               isBusy={isBusy}
               key={tab.key}
+              onKeyDown={handleKeyDown}
               onSelectTab={onSelectTab}
               setTabRef={setTabRef}
               tab={tab}

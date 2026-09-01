@@ -15,6 +15,8 @@ const tabs = [
   { children: <span>Content C</span>, header: 'Tab C', key: 'c' },
 ];
 
+const focusedTab = () => screen.getByRole('tab', { selected: true });
+
 describe('Tabs', () => {
   it('renders all tab buttons', () => {
     render(<Tabs tabs={tabs} />);
@@ -46,8 +48,7 @@ describe('Tabs', () => {
 
   it('navigates to next tab with ArrowRight key', () => {
     render(<Tabs tabs={tabs} />);
-    const tablist = screen.getByRole('tablist');
-    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
+    fireEvent.keyDown(focusedTab(), { key: 'ArrowRight' });
     const tabB = screen.getByRole('tab', { name: 'Tab B' });
     expect(tabB.getAttribute('aria-selected')).toBe('true');
   });
@@ -58,7 +59,7 @@ describe('Tabs', () => {
   ])('moves selection to $expected on $key', ({ expected, from, key }) => {
     render(<Tabs defaultSelectedTab={from} tabs={tabs} />);
 
-    fireEvent.keyDown(screen.getByRole('tablist'), { key });
+    fireEvent.keyDown(focusedTab(), { key });
 
     expect(
       screen.getByRole('tab', { name: expected }).getAttribute('aria-selected'),
@@ -67,16 +68,14 @@ describe('Tabs', () => {
 
   it('navigates to last tab with End key', () => {
     render(<Tabs tabs={tabs} />);
-    const tablist = screen.getByRole('tablist');
-    fireEvent.keyDown(tablist, { key: 'End' });
+    fireEvent.keyDown(focusedTab(), { key: 'End' });
     const tabC = screen.getByRole('tab', { name: 'Tab C' });
     expect(tabC.getAttribute('aria-selected')).toBe('true');
   });
 
   it('wraps around from last tab to first with ArrowRight', () => {
     render(<Tabs defaultSelectedTab='c' tabs={tabs} />);
-    const tablist = screen.getByRole('tablist');
-    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
+    fireEvent.keyDown(focusedTab(), { key: 'ArrowRight' });
     const tabA = screen.getByRole('tab', { name: 'Tab A' });
     expect(tabA.getAttribute('aria-selected')).toBe('true');
   });
