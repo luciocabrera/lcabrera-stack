@@ -9,6 +9,7 @@ import type {
 
 import { TABLE_AGGREGATE_LABELS } from '../Table.constants';
 import { resolveAggregateDataType } from '../TableGroupAggregate/utils/resolveAggregateDataType.util';
+import { resolveAggregateColumnMinWidth } from './resolveAggregateColumnMinWidth.util';
 import { toTableAggregateToken } from './tableAggregateToken.util';
 
 type WithAggregateColumnsArgs<TData> = {
@@ -54,13 +55,16 @@ export const withAggregateColumns = <TData>({
       isSortable: true,
       key: toTableAggregateToken(aggregate) as DataKey<TData>,
       label: TABLE_AGGREGATE_LABELS[aggregate.fn],
+      minWidth: resolveAggregateColumnMinWidth({
+        ...(source.maxWidth !== undefined && { maxWidth: source.maxWidth }),
+        ...(source.minWidth !== undefined && { minWidth: source.minWidth }),
+      }),
       ...(source.format !== undefined && { format: source.format }),
       ...(source.isResizable !== undefined && {
         isResizable: source.isResizable,
       }),
       ...(source.isStatic !== undefined && { isStatic: source.isStatic }),
       ...(source.maxWidth !== undefined && { maxWidth: source.maxWidth }),
-      ...(source.minWidth !== undefined && { minWidth: source.minWidth }),
     };
 
     derivedBySource.set(aggregate.columnKey, [

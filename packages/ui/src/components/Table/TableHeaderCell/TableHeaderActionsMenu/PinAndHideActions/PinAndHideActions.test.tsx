@@ -103,13 +103,25 @@ describe('PinAndHideActions under a layout lock', () => {
     expect(getButton('Hide Column').disabled).toBe(true);
   });
 
-  it('refuses only the pinning on a measure, leaving Hide Column working', () => {
+  it('leaves a measure pinnable, alongside a working Hide Column', () => {
     renderLocked('measure');
 
     expect(PINNING_ITEMS.map((item) => getButton(item).disabled)).toStrictEqual(
-      [true, true, true],
+      [false, false, false],
     );
     expect(getButton('Hide Column').disabled).toBe(false);
+  });
+
+  it('says on a measure that the pinning it applies covers the whole band', () => {
+    renderLocked('measure');
+
+    expect(
+      PINNING_ITEMS.map((item) => getButton(item).getAttribute('title')),
+    ).toStrictEqual([
+      'Applies to the whole band: a measure shares the pinning of the column it measures.',
+      'Applies to the whole band: a measure shares the pinning of the column it measures.',
+      'Applies to the whole band: a measure shares the pinning of the column it measures.',
+    ]);
   });
 
   it('states the reason on each refused item, which fires no pointer events', () => {

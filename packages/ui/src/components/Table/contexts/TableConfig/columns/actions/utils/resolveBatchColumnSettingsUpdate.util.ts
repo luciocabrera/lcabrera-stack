@@ -17,6 +17,8 @@ import { getNewColumnSizingBasedOnColumnKey } from '#ui/components/Table/utils/g
 import { getNewPinningBasedOnColumnKey } from '#ui/components/Table/utils/getNewPinningBasedOnColumnKey.util';
 import { getNewSortingBasedOnColumnKey } from '#ui/components/Table/utils/getNewSortingBasedOnColumnKey.util';
 
+import { toDeclaredColumnKey } from './toDeclaredColumnKey.util';
+
 export type BatchColumnSettingsUpdate<TData> = {
   readonly columnFilter?: ColumnFilter;
   readonly columnKey: DataKey<TData>;
@@ -61,15 +63,17 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
     columnSizing,
   });
 
+  const pinningKey = toDeclaredColumnKey<TData>({ columnKey, columns });
+
   const newPinning = getNewPinningBasedOnColumnKey<TData>({
-    columnKey,
+    columnKey: pinningKey,
     columnPinning,
     existingPinning: columnsState?.columnPinning,
     staticKeys: columnsState?.staticKeys,
   });
 
   const previousColumnPinning = getColumnPinSide<TData>({
-    columnKey,
+    columnKey: pinningKey,
     pinning: columnsState?.columnPinning,
   });
 
@@ -77,7 +81,7 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
     previousColumnPinning === columnPinning
       ? (columnsState?.columnOrder ?? columns.map((column) => column.key))
       : syncColumnOrderWithPinning<TData>({
-          columnKey,
+          columnKey: pinningKey,
           columnPinning,
           columns,
           currentOrder: columnsState?.columnOrder,

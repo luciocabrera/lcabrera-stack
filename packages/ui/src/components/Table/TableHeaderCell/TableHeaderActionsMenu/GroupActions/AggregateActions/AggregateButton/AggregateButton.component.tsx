@@ -18,6 +18,7 @@ export const AggregateButton = ({
   columnKey,
   fn,
   onClose,
+  title,
 }: AggregateButtonProps) => {
   const addColumnAggregate = useAddTableColumnAggregate();
   const removeColumnAggregate = useRemoveTableColumnAggregate();
@@ -51,6 +52,7 @@ export const AggregateButton = ({
       }
       isDisabled={!isEnabled}
       onClick={handleSetAggregate}
+      {...(title !== undefined && { title })}
       orientation='horizontal'
       size='mini'
       variant={isActive ? 'primary' : 'ghost'}

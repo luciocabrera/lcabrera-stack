@@ -10,13 +10,19 @@ import {
   vi,
 } from 'vite-plus/test';
 
+import type { TableColumnLayoutLock } from '#ui/components/Table/Table.types';
+
 const {
   columnPinningRef,
+  layoutLockRef,
   mockResetColumnPinning,
   mockSetColumnPinning,
   normalizedColumnRef,
 } = vi.hoisted(() => ({
   columnPinningRef: { current: undefined as 'left' | 'right' | undefined },
+  layoutLockRef: {
+    current: undefined as TableColumnLayoutLock | undefined,
+  },
   mockResetColumnPinning: vi.fn(),
   mockSetColumnPinning: vi.fn(),
   normalizedColumnRef: { current: {} as Record<string, unknown> },
@@ -39,6 +45,10 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableColumnSelectedKey: () => 'name',
 }));
 
+vi.mock('#ui/components/Table/hooks', () => ({
+  useTableColumnLayoutLock: () => layoutLockRef.current,
+}));
+
 import { PinningSection } from './PinningSection.component';
 
 const getToggle = (label: string) => {
@@ -52,6 +62,7 @@ const getToggle = (label: string) => {
 
 beforeEach(() => {
   columnPinningRef.current = undefined;
+  layoutLockRef.current = undefined;
   normalizedColumnRef.current = { key: 'name', label: 'Name' };
 });
 
@@ -102,5 +113,41 @@ describe('PinningSection', () => {
 
     expect(getToggle('Pin Left').disabled).toBe(true);
     expect(getToggle('Pin Right').disabled).toBe(true);
+  });
+
+  it('refuses the pinning a group key holds, and says why', () => {
+    columnPinningRef.current = 'left';
+    layoutLockRef.current = 'group-key';
+
+    render(<PinningSection />);
+
+    expect(getToggle('Pin Left').disabled).toBe(true);
+    expect(getToggle('Pin Right').disabled).toBe(true);
+    expect(getToggle('Clear Pinning').disabled).toBe(true);
+    expect(
+      ['Pin Left', 'Clear Pinning'].map((label) =>
+        getToggle(label).getAttribute('title'),
+      ),
+    ).toStrictEqual([
+      'Cannot pin this column: a grouped column is always shown and always pinned to the left.',
+      'Cannot pin this column: a grouped column is always shown and always pinned to the left.',
+    ]);
+  });
+
+  it('leaves a measure pinnable, saying the pinning covers its band', () => {
+    layoutLockRef.current = 'measure';
+
+    render(<PinningSection />);
+
+    expect(getToggle('Pin Left').disabled).toBe(false);
+    expect(getToggle('Pin Right').disabled).toBe(false);
+    expect(
+      ['Pin Right', 'Clear Pinning'].map((label) =>
+        getToggle(label).getAttribute('title'),
+      ),
+    ).toStrictEqual([
+      'Applies to the whole band: a measure shares the pinning of the column it measures.',
+      'Applies to the whole band: a measure shares the pinning of the column it measures.',
+    ]);
   });
 });

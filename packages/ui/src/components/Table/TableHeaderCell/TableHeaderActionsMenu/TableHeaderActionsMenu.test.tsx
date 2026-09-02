@@ -351,6 +351,7 @@ describe('TableHeaderActionsMenu', () => {
 
     it('adds the aggregation-mode block only once a capability is resolved', () => {
       isGroupingEnabledRef.current = true;
+      groupingKeysRef.current = ['region'];
       capabilityRef.current = {
         aggregates: ['count', 'sum'],
         canGroup: false,
@@ -481,13 +482,13 @@ describe('the layout actions a grouped column cannot take', () => {
     expect(getMenuButton('Remove This Group').disabled).toBe(false);
   });
 
-  it('refuses only the pinning on a measure, and leaves Hide Column working', () => {
+  it('leaves every layout action open on a measure', () => {
     groupingKeysRef.current = ['region'];
     columnsRef.current = [{ key: 'amount', label: 'Amount' }];
 
     expect(
       renderGroupedMenu({ columnKey: 'amount:sum', columnLabel: 'Sum' }),
-    ).toStrictEqual([true, true, true, false]);
+    ).toStrictEqual([false, false, false, false]);
   });
 
   it('leaves an ungrouped column’s menu exactly as it was', () => {

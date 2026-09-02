@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { ClearResetToolbarButtons } from '#ui/components/Table/ColumnSettingsDrawer/ClearResetToolbarButtons/ClearResetToolbarButtons.component';
+import { resolveColumnPinningTitle } from '#ui/components/Table/utils/resolveColumnPinningTitle.util';
 
 import type { PinningSectionToolbarProps } from './PinningSectionToolbar.types';
 
@@ -18,13 +19,15 @@ const PINNING_TOOLBAR = {
 
 export const PinningSectionToolbar = ({
   isBusy = false,
+  layoutLock,
   variant = 'footer',
 }: PinningSectionToolbarProps) => {
   const columnPinning = useGetColumnPinning();
   const setColumnPinning = useSetColumnPinning();
   const resetColumnPinning = useResetColumnPinning();
 
-  const hasPinning = columnPinning !== undefined;
+  const clearTitle = resolveColumnPinningTitle(layoutLock);
+  const hasPinning = columnPinning !== undefined && layoutLock !== 'group-key';
 
   const handleClear = () => {
     setColumnPinning();
@@ -38,6 +41,7 @@ export const PinningSectionToolbar = ({
     >
       <ClearResetToolbarButtons
         clearLabel={PINNING_TOOLBAR.clear.label}
+        {...(clearTitle !== undefined && { clearTitle })}
         hasValue={hasPinning}
         isBusy={isBusy}
         onClear={handleClear}

@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { TabsHeader } from './TabsHeader.component';
@@ -14,6 +20,8 @@ const tabs = [
   { children: <span>Content B</span>, header: 'Tab B', key: 'b' },
   { children: <span>Content C</span>, header: 'Tab C', key: 'c' },
 ];
+
+const focusedTab = () => screen.getByRole('tab', { selected: true });
 
 describe('TabsHeader', () => {
   it('renders one tab button per tab', () => {
@@ -85,7 +93,7 @@ describe('TabsHeader', () => {
         tabs={tabs}
       />,
     );
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' });
+    fireEvent.keyDown(focusedTab(), { key: 'ArrowRight' });
     expect(onSelectTab).toHaveBeenCalledWith('b');
     expect(document.activeElement).toBe(
       screen.getByRole('tab', { name: 'Tab B' }),
@@ -106,7 +114,7 @@ describe('TabsHeader', () => {
       />,
     );
 
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowLeft' });
+    fireEvent.keyDown(focusedTab(), { key: 'ArrowLeft' });
 
     expect(onSelectTab).toHaveBeenCalledWith(expected);
   });
@@ -121,10 +129,9 @@ describe('TabsHeader', () => {
         tabs={tabs}
       />,
     );
-    const tablist = screen.getByRole('tablist');
-    fireEvent.keyDown(tablist, { key: 'Home' });
+    fireEvent.keyDown(focusedTab(), { key: 'Home' });
     expect(onSelectTab).toHaveBeenCalledWith('a');
-    fireEvent.keyDown(tablist, { key: 'End' });
+    fireEvent.keyDown(focusedTab(), { key: 'End' });
     expect(onSelectTab).toHaveBeenCalledWith('c');
   });
 
@@ -138,7 +145,7 @@ describe('TabsHeader', () => {
         tabs={tabs}
       />,
     );
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'Enter' });
+    fireEvent.keyDown(focusedTab(), { key: 'Enter' });
     expect(onSelectTab).not.toHaveBeenCalled();
   });
 
@@ -158,7 +165,7 @@ describe('TabsHeader', () => {
     render(
       <TabsHeader activeTab='a' isBusy onSelectTab={onSelectTab} tabs={tabs} />,
     );
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' });
+    fireEvent.keyDown(focusedTab(), { key: 'ArrowRight' });
     expect(onSelectTab).not.toHaveBeenCalled();
   });
 
@@ -172,7 +179,135 @@ describe('TabsHeader', () => {
         tabs={tabs}
       />,
     );
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' });
+    fireEvent.keyDown(screen.getByRole('tab', { name: 'Tab A' }), {
+      key: 'ArrowRight',
+    });
     expect(onSelectTab).toHaveBeenCalledWith('b');
+  });
+});
+
+type StubViewportArgs = {
+  readonly clientWidth: number;
+  readonly scrollLeft?: number;
+  readonly scrollWidth: number;
+  readonly tabLeft?: number;
+};
+
+const VIEWPORT_LEFT = 640;
+
+const stubViewport = ({
+  clientWidth,
+  scrollLeft = 0,
+  scrollWidth,
+  tabLeft = VIEWPORT_LEFT,
+}: StubViewportArgs) => {
+  const position = { current: scrollLeft };
+
+  vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(
+    clientWidth,
+  );
+  vi.spyOn(Element.prototype, 'scrollWidth', 'get').mockReturnValue(
+    scrollWidth,
+  );
+  vi.spyOn(Element.prototype, 'scrollLeft', 'get').mockImplementation(
+    () => position.current,
+  );
+  vi.spyOn(Element.prototype, 'scrollLeft', 'set').mockImplementation(
+    (next: number) => {
+      position.current = next;
+    },
+  );
+  vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+    function boundingBox(this: Element) {
+      const isTab = this.getAttribute('role') === 'tab';
+      const left = isTab ? tabLeft : VIEWPORT_LEFT;
+
+      return {
+        left,
+        right: isTab ? left : VIEWPORT_LEFT + clientWidth,
+      } as DOMRect;
+    },
+  );
+
+  return position;
+};
+
+const renderHeader = async () => {
+  render(
+    <TabsHeader
+      activeTab='a'
+      isBusy={false}
+      onSelectTab={vi.fn()}
+      tabs={tabs}
+    />,
+  );
+
+  await act(async () => {});
+};
+
+describe('TabsHeader when the tabs do not fit', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('offers no scroll affordance while every tab fits', async () => {
+    stubViewport({ clientWidth: 400, scrollWidth: 400 });
+    await renderHeader();
+
+    expect(screen.queryByTestId('tabs-scroll-start')).toBeNull();
+    expect(screen.queryByTestId('tabs-scroll-end')).toBeNull();
+  });
+
+  it('offers only the forward affordance at the start of the strip', async () => {
+    stubViewport({ clientWidth: 200, scrollWidth: 600 });
+    await renderHeader();
+
+    expect(screen.queryByTestId('tabs-scroll-start')).toBeNull();
+    expect(screen.getByTestId('tabs-scroll-end')).not.toBeNull();
+  });
+
+  it('offers only the backward affordance at the end of the strip', async () => {
+    stubViewport({ clientWidth: 200, scrollLeft: 400, scrollWidth: 600 });
+    await renderHeader();
+
+    expect(screen.getByTestId('tabs-scroll-start')).not.toBeNull();
+    expect(screen.queryByTestId('tabs-scroll-end')).toBeNull();
+  });
+
+  it('offers both once the strip is scrolled part way', async () => {
+    stubViewport({ clientWidth: 200, scrollLeft: 100, scrollWidth: 600 });
+    await renderHeader();
+
+    expect(screen.getByTestId('tabs-scroll-start')).not.toBeNull();
+    expect(screen.getByTestId('tabs-scroll-end')).not.toBeNull();
+  });
+
+  it('brings the active tab back into view on mount', async () => {
+    const position = stubViewport({
+      clientWidth: 200,
+      scrollLeft: 300,
+      scrollWidth: 600,
+      tabLeft: VIEWPORT_LEFT - 300,
+    });
+
+    await renderHeader();
+
+    expect(position.current).toBe(0);
+  });
+
+  it('moves the strip by most of a viewport in the direction clicked', async () => {
+    const position = stubViewport({
+      clientWidth: 200,
+      scrollLeft: 100,
+      scrollWidth: 600,
+    });
+
+    await renderHeader();
+
+    fireEvent.click(screen.getByTestId('tabs-scroll-end'));
+    expect(position.current).toBe(260);
+
+    fireEvent.click(screen.getByTestId('tabs-scroll-start'));
+    expect(position.current).toBe(100);
   });
 });

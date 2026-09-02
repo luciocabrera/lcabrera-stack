@@ -15,6 +15,8 @@ export const DEFAULT_MIN_COLUMN_WIDTH = 60;
 
 export const DEFAULT_MAX_COLUMN_WIDTH = 600;
 
+export const DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH = 200;
+
 export const COLUMN_RESIZE_KEYBOARD_STEP = 8;
 
 export const COLUMN_RESIZE_KEYBOARD_COARSE_STEP = 40;
@@ -116,6 +118,9 @@ export const TABLE_COLUMN_LAYOUT_LOCK_LABELS: Record<
   'group-key': 'a grouped column is always shown and always pinned to the left',
   measure: 'a measure shares the pinning of the column it measures',
 };
+
+export const TABLE_MEASURE_AGGREGATE_SCOPE_LABEL =
+  'these functions are the measures of the column this one measures';
 
 export const TABLE_TOTALS_PLACEMENTS: readonly TableTotalsPlacement[] = [
   'last',
