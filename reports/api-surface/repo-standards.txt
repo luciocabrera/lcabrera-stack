@@ -25,6 +25,7 @@ adrFilename [const] (number: any, title: any) => string
 pad [const] (number: any) => string
 renderAdr [const] ({ number, template, title }: { number: any; template: any; title: any; }) => any
 resolveHome [const] (homes: any, tier: any) => any
+scaffoldSummary [const] ({ number, path, title }: { number: any; path: any; title: any; }) => string
 slugify [const] (title: any) => any
 
 ## ./cli-input

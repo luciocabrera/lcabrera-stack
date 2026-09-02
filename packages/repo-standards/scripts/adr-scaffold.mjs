@@ -42,5 +42,8 @@ export const renderAdr = ({ number, template, title }) => {
   return block === '' ? record : `${block}\n${record}`;
 };
 
+export const scaffoldSummary = ({ number, path, title }) =>
+  `would write ${path} as ADR-${pad(number)} — ${title}`;
+
 export const resolveHome = (homes, tier) =>
   homes.find((home) => home.tier === tier);

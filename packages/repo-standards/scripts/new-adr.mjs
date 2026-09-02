@@ -32,6 +32,7 @@ import {
   pad,
   renderAdr,
   resolveHome,
+  scaffoldSummary,
   slugify,
 } from './adr-scaffold.mjs';
 import { resolveHostRoot } from './host-root.mjs';
@@ -112,8 +113,7 @@ const main = () => {
   });
 
   if (options.dryRun) {
-    console.log(`would write ${path}\n`);
-    console.log(contents);
+    console.log(scaffoldSummary({ number, path, title: options.title }));
     return;
   }
 
