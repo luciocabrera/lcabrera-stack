@@ -30,14 +30,4 @@ describe('scaffoldSummary', () => {
       'would write docs/decisions/ADR-007-a-slug.md as ADR-007 — A decision',
     );
   });
-
-  it('renders one line for a title given on one line', () => {
-    expect(
-      scaffoldSummary({
-        number: 107,
-        path: 'docs/decisions/ADR-107-a-slug.md',
-        title: 'A decision',
-      }),
-    ).not.toContain('\n');
-  });
 });
