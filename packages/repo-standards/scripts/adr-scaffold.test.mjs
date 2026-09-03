@@ -1,14 +1,15 @@
 /**
- * What the scaffold is allowed to say, and what it refuses. The dry run used to
- * print the rendered record, so `repo-adr --dry-run` wrote the bytes of a file
- * whose directory the host repository picks (`registers.adrTemplateHome`) to
- * stdout — Sonar `jssecurity:S8689`, issue #1056. `scaffoldSummary` is built
- * from the decision alone, and the tests below pin both halves of that: what it
- * names, and that a record cannot ride along inside it.
+ * The scaffold's pure functions over strings: what each renders, and what
+ * `renderAdr` refuses.
  *
- * `renderAdr` is here for the same reason. It is what refuses a template that
- * has lost its heading, and the dry run still calls it, so a scaffold that would
- * fail on the write fails on the preview too.
+ * These do not pin the dry run's output. `scaffoldSummary` is never handed a
+ * template, so no test here can tell a dry run that prints the record from one
+ * that does not — `new-adr.test.mjs` runs the bin for that, and is the file to
+ * read for issue #1056.
+ *
+ * `renderAdr`'s throw earns a test of its own: it is what refuses a template
+ * that has lost its heading, and the dry run still calls it, so a scaffold that
+ * would fail on the write fails on the preview too.
  */
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -50,7 +51,7 @@ describe('scaffoldSummary', () => {
     );
   });
 
-  it('stays one line, so no rendered record can ride along in it', () => {
+  it('renders one line for a title given on one line', () => {
     const summary = scaffoldSummary({
       number: 107,
       path: 'docs/decisions/ADR-107-a-slug.md',
@@ -58,8 +59,6 @@ describe('scaffoldSummary', () => {
     });
 
     expect(summary).not.toContain('\n');
-    expect(summary).not.toContain('governs:');
-    expect(summary).not.toContain('## Context');
   });
 });
 

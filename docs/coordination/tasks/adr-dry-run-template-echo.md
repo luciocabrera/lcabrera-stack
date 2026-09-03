@@ -2,15 +2,15 @@
 id: adr-dry-run-template-echo
 title: The ADR scaffold's dry run prints the template file it read
 owner: agent:claude
-status: active
+status: review
 branch: fix/1056-adr-dry-run-template-echo
 area:
   - packages/repo-standards/scripts/adr-scaffold*
   - packages/repo-standards/scripts/new-adr.mjs
 started: 2026-09-02
-updated: 2026-09-02
+updated: 2026-09-03
 plan: (none)
-pr: (none)
+pr: #1057
 issue: #1056
 ---
 
@@ -27,8 +27,9 @@ from the template.
 
 ## Status / next
 
-- Current step: fix written, tested, and the API-surface snapshot regenerated;
-  running the full gate.
-- Blockers: none
-- Next: push, open the PR, and re-read `vp run sonar:report -- --branch main`
+- Current step: in review on #1057, with the dry-run probe moved to the bin
+  after review found the helper-level test could not fail.
+- Blockers: #1060 (the qs advisory) has to merge first, or this PR's
+  `deps:audit` step stays red.
+- Next: merge #1060, rebase, then merge this.
   once the merge is analysed.
