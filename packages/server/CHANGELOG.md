@@ -1,5 +1,138 @@
 # @lcabrera/server
 
+## 0.6.0
+
+### Minor Changes
+
+- 38dd86c: A table can state a restriction it cannot change, and a view arrived at can open
+  at its declared columns every time (ADR-094).
+
+  **`@lcabrera/ui` gains `lockedFilters` on the loader `meta`.** Entries of
+  `{ columnKey, label, value }` plus an optional `refusal`, rendered by the filters
+  panel as its own section above the reader's own filters, with its own heading and
+  count. It offers no control, so `Clear Filters` and `Reset Filters` cannot reach
+  it and `Active Filters (n)` still counts only what a reader can take off. A
+  restriction that could not be read renders its `refusal` rather than an empty
+  list. `toLockedFiltersHeading` renders the same entries as one line for a surface
+  with a title rather than a panel. Nothing here is a `ColumnFilter` and nothing
+  derived from it narrows a read.
+
+  **`@lcabrera/ui` gains `isColumnLayoutTransient` on the loader `meta`.** With it,
+  `columnOrder`, `columnPinning`, `columnSizing` and `columnVisibility` are neither
+  restored from the persistence cookie nor written to it, so the grid paints its
+  declared columns in declared order on every request. The write half is part of the
+  feature: without it a layout change costs a `Set-Cookie` and a header carried on
+  every later request for state nothing reads, and the persistence action reports
+  success for a write it did not make. Filters and sorting are untouched — they
+  travel in the URL.
+
+  Both are route-declared and re-asserted unconditionally by
+  `createTableRouteLoader`, so the client-controlled UI-flags cookie can neither
+  claim nor deny either one.
+
+  `resolveLockedFilters` may answer synchronously or with a promise, and it is
+  started alongside the grouping-capability resolver rather than after it. Whichever
+  way either one fails — a throw where it stands, or a rejected promise — the loader
+  rejects with the first failure while the other's promise stays attended, so a
+  failing pair leaves no unhandled rejection behind.
+
+  **Breaking, `@lcabrera/server`: `toGroupHeading` is replaced by
+  `resolveGroupRestriction`,** at
+  `@lcabrera/server/db/olap/resolve-group-restriction.util`. It answers the same
+  request as a list — one `{ columnKey, label, value }` per group key, outermost
+  first — instead of a joined string, and it refuses rather than returning nothing.
+  It refuses on the same conditions as `resolveGroupRead`, in the same order and
+  out of the same message map, so a surface stating the restriction and a surface
+  rendering the refused page cannot say different things about one request. A
+  caller that wants the old string joins the entries, or uses `@lcabrera/ui`'s
+  `toLockedFiltersHeading`.
+
+  Migration: replace
+
+  ```ts
+  toGroupHeading({ columns, params, truncations });
+  ```
+
+  with
+
+  ```ts
+  const restriction = await resolveGroupRestriction({
+    columns,
+    isGroupRequired: true,
+    params,
+    selectTruncations,
+  });
+  ```
+
+  `truncations` is no longer passed in; `selectTruncations` is the same catalogue
+  lookup `resolveGroupRead` already takes, and it is called only when the token
+  carries granularities.
+
+### Patch Changes
+
+- 62bb601: Stop shipping documents a consumer cannot read, and gate the recurrence.
+
+  `@lcabrera/ui`, `@lcabrera/server` and `@lcabrera/utils` shipped the whole
+  markdown set beside their source — every `ARCHITECTURE.md`, the artifact
+  inventory, the pattern guide. Those are written for a reader who has the
+  repository cloned: in an install they are pages of relative links to a decisions
+  directory that is not in the tarball, plus decision citations by bare number.
+  `files` now carries `"!src/**/*.md"`, so the source arrives without them and the
+  README states what a consumer needs, linking the rest by absolute URL.
+
+  Every other published package carries the same negation for whichever directory
+  it publishes its source from — `src`, or `scripts` for the two `.mjs` packages.
+  It is inert in each of them today and changes nothing that ships, which a
+  before/after comparison of every packed file list confirms. It is there
+  because it is the only guard that makes a newly added `src/ARCHITECTURE.md`
+  fail to ship outright, rather than merely be likely to trip the content gate on
+  its way out. `@lcabrera/devkit`'s `assets` are the deliberate exception: that
+  markdown is what the package exists to copy.
+
+  `@lcabrera/repo-standards` adds `repo-verify-shipped-docs`, which packs each
+  package named in `publishing.publicPackageDirs` and reads the markdown back out
+  of the tarball — `files` decides its corpus, not the working tree, which is the
+  only way to see a negated pattern at all. It reports a relative link that leaves
+  the package, a link to a file the package does not ship, a path anchored at one
+  of the author repository's own directories (`gates.shippedDocs.repoOnlyDirs`,
+  defaulting to the conventional monorepo layout), and a decision cited with no
+  absolute URL on the line. An empty package roster, and any package that ships no
+  readable document, are refused rather than passed.
+
+  The remaining published READMEs stop naming the repository's own tree in
+  passing: the source directory each package lives in is now a link a reader can
+  open.
+
+- a26ff71: Remove the comments a declaration's name, signature and types already state,
+  from every package source.
+
+  Nothing about behaviour changes, but the removal is visible in an editor: a
+  declaration's JSDoc is carried into the published `.d.mts`, so a tooltip that
+  used to show a paragraph now shows the signature. What the paragraph said lives
+  where it is dated — the ADR that owns the decision, or the pull request that
+  made it — and the annotations a build reads (`@param`, `@returns` and the rest,
+  in the JavaScript sources that ship them) are untouched, as are the one-line
+  notes on a member of an exported type, which reach an installer and state what
+  the member's own type cannot.
+
+  Four declarations changed shape rather than only losing prose, because their
+  only body was a comment and removing it left an empty block: `getApiBaseUrl`
+  resolves a request URL through a helper instead of swallowing the parse in an
+  empty `catch`, `parseVersionedPayload` and `collectPersistedStateSlices` return
+  and `continue` explicitly, and the logger's no-op is an expression. Each behaves
+  as it did. `collectPersistedStateSlices` also drops its `transformRaw`
+  parameter, which every caller filled with the percent-decode
+  `parseVersionedPayload` already performs.
+
+  Two union member orders moved with them — `TableResponseError`'s arms and
+  `AggregateItem`'s intersection — because the sort those rules apply reads the
+  member's source text, and the text no longer carries a comment. A union is
+  unordered to a consumer.
+
+- Updated dependencies [62bb601]
+- Updated dependencies [a26ff71]
+  - @lcabrera/api@0.4.2
+
 ## 0.5.0
 
 ### Minor Changes

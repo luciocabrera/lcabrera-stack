@@ -1,5 +1,438 @@
 # @lcabrera/ui
 
+## 0.6.0
+
+### Minor Changes
+
+- 58db8e8: Fold and unfold one group level from its column's header menu.
+
+  A column that is an applied group key now offers `Expand This Level` and
+  `Collapse This Level` beside the two all-groups items. Collapsing folds every
+  group at that column's level at once and leaves every other level's expansion
+  exactly as the reader left it; expanding restores them.
+
+  Both items read the same foldable set the per-row chevrons are drawn from, so
+  neither can close a group the grid refused to offer, and a fold made from the
+  menu is undone from the chevron on the row it left standing.
+
+- 3e5ce01: Add a **Grouping** tab to Global Settings, holding three preferences that apply
+  to every table: the totals mode, the totals position, and the default group
+  fold.
+
+  Each is stored only when it differs from the shipped default, so choosing the
+  default clears the member rather than pinning it — which is what keeps a later
+  change to a default from being overridden by a cookie written before it moved.
+  The settings cookie version is deliberately **not** bumped: a v1 payload carries
+  no `grouping` key, which already reads as an empty preference set, so bumping
+  would discard everyone's navigation and pinning for nothing.
+
+  **Where each one applies, because they do not share a seam.**
+
+  - **Totals position** resolves in the loader, behind the two channels that
+    already answer it: the search param wins over this table's cookie, which wins
+    over the preference. A shared link still opens the way its author saw it.
+  - **Totals mode** applies at the interaction that **creates** a grouping from no
+    keys, not in the loader. The codec drops a `flat` mode rather than emitting
+    it, so a link whose author chose flat and one whose author chose nothing are
+    the same string; a preference read from the param would reinstate itself every
+    time the reader switched back.
+  - **Default group fold** seeds the expansion store, so a `collapsed` preference
+    lands on the first paint rather than one paint later.
+
+  Both reach the Table through the loader's meta rather than through
+  `GlobalSettingsContext`, so a Table still renders outside the settings provider.
+
+  Every read of the set's membership goes through one predicate, including the two
+  that decide `aria-expanded` on a group row and which way a level's chevron
+  points — both of which announced a fully folded grid as open until they were
+  routed through it.
+
+  **Breaking, and why it is `minor`:** `TableGroupExpansionState` renamed
+  `collapsedGroupPaths` to **`toggledGroupPaths`** and gained a required
+  `defaultFold`. The set now holds the groups folded the _other way from the
+  default_ — identical to the old model under the shipped `expanded` default,
+  where membership still means collapsed and empty still means fully open. The
+  selector `useGetTableCollapsedGroupPaths` is now
+  `useGetTableToggledGroupPaths`, and `areAllGroupsCollapsed` is replaced by
+  `countCollapsedGroups`. If you read the store you are unaffected; if you
+  construct the state or call those two, rename. `GlobalSettingsState` also gained
+  a required `grouping` slice. These packages are `0.x`, so a break ships as a
+  `minor` (ADR-103).
+
+- 38dd86c: A table can state a restriction it cannot change, and a view arrived at can open
+  at its declared columns every time (ADR-094).
+
+  **`@lcabrera/ui` gains `lockedFilters` on the loader `meta`.** Entries of
+  `{ columnKey, label, value }` plus an optional `refusal`, rendered by the filters
+  panel as its own section above the reader's own filters, with its own heading and
+  count. It offers no control, so `Clear Filters` and `Reset Filters` cannot reach
+  it and `Active Filters (n)` still counts only what a reader can take off. A
+  restriction that could not be read renders its `refusal` rather than an empty
+  list. `toLockedFiltersHeading` renders the same entries as one line for a surface
+  with a title rather than a panel. Nothing here is a `ColumnFilter` and nothing
+  derived from it narrows a read.
+
+  **`@lcabrera/ui` gains `isColumnLayoutTransient` on the loader `meta`.** With it,
+  `columnOrder`, `columnPinning`, `columnSizing` and `columnVisibility` are neither
+  restored from the persistence cookie nor written to it, so the grid paints its
+  declared columns in declared order on every request. The write half is part of the
+  feature: without it a layout change costs a `Set-Cookie` and a header carried on
+  every later request for state nothing reads, and the persistence action reports
+  success for a write it did not make. Filters and sorting are untouched — they
+  travel in the URL.
+
+  Both are route-declared and re-asserted unconditionally by
+  `createTableRouteLoader`, so the client-controlled UI-flags cookie can neither
+  claim nor deny either one.
+
+  `resolveLockedFilters` may answer synchronously or with a promise, and it is
+  started alongside the grouping-capability resolver rather than after it. Whichever
+  way either one fails — a throw where it stands, or a rejected promise — the loader
+  rejects with the first failure while the other's promise stays attended, so a
+  failing pair leaves no unhandled rejection behind.
+
+  **Breaking, `@lcabrera/server`: `toGroupHeading` is replaced by
+  `resolveGroupRestriction`,** at
+  `@lcabrera/server/db/olap/resolve-group-restriction.util`. It answers the same
+  request as a list — one `{ columnKey, label, value }` per group key, outermost
+  first — instead of a joined string, and it refuses rather than returning nothing.
+  It refuses on the same conditions as `resolveGroupRead`, in the same order and
+  out of the same message map, so a surface stating the restriction and a surface
+  rendering the refused page cannot say different things about one request. A
+  caller that wants the old string joins the entries, or uses `@lcabrera/ui`'s
+  `toLockedFiltersHeading`.
+
+  Migration: replace
+
+  ```ts
+  toGroupHeading({ columns, params, truncations });
+  ```
+
+  with
+
+  ```ts
+  const restriction = await resolveGroupRestriction({
+    columns,
+    isGroupRequired: true,
+    params,
+    selectTruncations,
+  });
+  ```
+
+  `truncations` is no longer passed in; `selectTruncations` is the same catalogue
+  lookup `resolveGroupRead` already takes, and it is called only when the token
+  carries granularities.
+
+- 870c355: Paint a grouped grid's measures in the order the aggregate list was staged in,
+  and stop the header menu offering the layout actions a grouped column cannot
+  take.
+
+  **The measure columns move.** `withAggregateColumns` spliced each measure into
+  the slot of the column it measured, so the painted order across columns was the
+  declared column order — a table declaring `order_no` before `total_amount`
+  painted `Count of Order #` first however the user had arranged the aggregate
+  list, while the settings drawer beside it listed that entry last. A fourth
+  derivation step, `withAggregateColumnOrder`, now orders the measure run by the
+  staged list, ranking each measured column by its **first** entry so that
+  column's measures stay contiguous — the header band is a visual span and only
+  covers neighbours. **If your grouping stages measures across more than one
+  column, its painted column order changes on upgrade.** Nothing persisted moves;
+  the derivation writes no state, and the aggregate list is now the one control
+  that decides the order. An ungrouped grid is untouched, and the settings
+  drawer's Columns tab follows, since it reads the same derivation.
+
+  **The header menu refuses what it cannot do.** A group key is force-pinned left
+  and forced visible by the layout derivation on every pass, so Pin Left, Pin
+  Right, Clear Pinning and Hide Column on one wrote state the next derivation
+  discarded — the click was accepted and nothing moved. A measure resolves every
+  layout action back to the column it measures, which then expands into all of
+  that column's measures, so pinning one subtotal pinned its siblings; its three
+  pinning items are now disabled while Hide Column stays enabled. Each disabled
+  item states the reason in a `title`, because a disabled button fires no pointer
+  events. Neither refusal applies to an ungrouped grid.
+
+  **A new `Remove from Grouping` item** sits between `Group by This` and the
+  whole-table `Clear Grouping`, dropping one key and leaving the rest of the
+  grouping standing. `Group by This` still toggles off, so nothing that worked
+  before stops working.
+
+- 288bc6f: While a grouping is applied, the grid shows the columns the grouping names — the
+  group keys in key order, then the measures — and the settings drawer's Columns
+  tab shows that same set.
+
+  A grouped grid used to paint every remaining declared column beside them, each
+  one an em dash on every row, because nothing removed the columns the grouping did
+  not name. A third derivation step now does, alongside the two that already
+  measure and hoist, so it reaches neither the persisted column layout nor the list
+  the drawer offers: clearing the grouping restores the consumer's own order,
+  pinning and visibility exactly, as before.
+
+  A measured **primary-key** column is now replaced by its measures like any other,
+  so its header band spans its measures alone and no empty column is rendered
+  beside them. A row id is resolved from the columns a consumer declared and never
+  from the painted list, so row actions keep resolving wherever they did.
+
+  The Columns tab reads that one derivation rather than building a second answer of
+  its own: `Show` is on for a column the grid paints, the painted columns are listed
+  first in the order the grid paints them, and the header count is the size of that
+  set. Every declared column is still listed. Turning one **on** while grouped is
+  now a request to add it to the grouping, so a prompt asks how — as a group key, or
+  with one of the aggregates that column supports — and applies the choice to the
+  grouping, taking the column off the hidden set at the same time. A column the
+  grouping already names is simply shown again, with no prompt. When there is
+  nothing to offer, the report names its cause — the key limit, an exhausted
+  column, the distinct-count budget, or a column the endpoint offers in neither
+  role — rather than claiming the column can be neither. Turning a column off is
+  unchanged.
+
+  While grouping is applied no row in that tab is draggable, because the order it
+  shows is derived for its whole length and a drag would persist a derivation as
+  the consumer's own column order. Dragging is unaffected once the grouping clears.
+
+  The Filters tab is unaffected by the narrower painted set: it reads the columns
+  a consumer declared, so a filter on a column the grouping neither keys nor
+  measures stays listed and removable while the grouping is applied, and adding one
+  from the picker works for every column the picker offers. A filter restates the
+  read rather than the layout, so it takes effect without waiting for the grouping
+  to clear.
+
+  An applied grouping that names no column the table declares — a shared link from
+  a table with a different column set, or a hand-edited parameter — now leaves the
+  settings drawer's Columns tab behaving exactly as an ungrouped one: rows in the
+  consumer's own order, every row draggable, and a hidden column shown by ticking
+  it rather than being asked which grouping role it should take. The grid already
+  ignored such a grouping; the tab now agrees with it.
+
+- 48d8ce6: Fix the grouped Table's share bar and the function picker, keep a column's
+  aggregates together, and settle the grouping menu.
+
+  **The share bar never filled.** `TableGroupShare`'s track sits in an
+  `inline-flex` container, so it is blockified as a flex item and draws — but it
+  set no `display` of its own, leaving the fill span inline, and `width` and
+  `height` do not apply to an inline non-replaced box. The percentage read
+  correctly beside a bar that was empty at every ratio. Both track and fill now
+  declare `display: block`. Note for anyone reading the old comment there: it
+  claimed the dynamic style keeps the value out of a `style` attribute for CSP
+  reasons. It does not — StyleX emits `style="--x-width: 10%"` — and the comment
+  is gone.
+
+  **The "Select a function…" picker shimmered permanently.** `VirtualSelect` had
+  no disabled state, so the caller reached for `isBusy`, which is what draws the
+  loading overlay. It now takes **`isDisabled`**: inert exactly as busy is, with
+  no shimmer.
+
+  **A column's aggregates stay contiguous.** `DraggableItem` takes an optional
+  `groupId`, and `DraggableList` refuses a drop that leaves **more** groups split
+  than it found (`countFragmentedGroups`) — other consumers pass none and are
+  unaffected. Compared rather than judged outright, because an interleaved list
+  arrives without anyone crafting one: a `grouping` link written before this
+  release carries an interleaved `agg`, and refusing every imperfect result would
+  leave a sufficiently fragmented list with no drop it would accept at all. `addTableColumnAggregate` also stops
+  appending to the tail, which could build an interleaved list with no drag at
+  all. The grid already clamped this at paint time; the drawer can no longer
+  express the state it clamped.
+
+  **Menu.** A separator between the grouping items and the fold items, and
+  `Remove from Grouping` is now **`Remove This Group`**, carrying the same icon as
+  the remove button on the draggable rows. **`Group by This` adds only** — applied,
+  it is disabled and names its own cause, because `Remove This Group` is now the
+  removal (ADR-101).
+
+  **An open settings drawer follows a live grouping change.** Its drafts are
+  seeded at mount, and the grouping write path bumped nothing it watches, so
+  removing a key from the header menu left the Grouping tab still listing it.
+  `useSetTableGrouping` now bumps `drawersSyncNonce`, which sorting, pinning and
+  visibility already did.
+
+  **The Sorting tab reads a measure properly.** It looked labels up in the
+  declared columns only, so a measure sort painted its raw `total_amount:min`
+  token; it now reads `Minimum of Total Amount`, from a resolver the Grouping tab
+  shares so the two cannot drift. Measure sorts are also listed after the column
+  sorts, which is the only order the read applies —
+  `buildGroupOrderByClause` splices every aggregate term in at the innermost group
+  key however the rows are dragged.
+
+  **The share bar is legible.** Its fill was `brandPrimary`, which is
+  `#ffffff00` in the light theme and near-black in the dark one. It is now `info`.
+
+  **Breaking, and why it is `minor`:** two composition hooks under
+  `@lcabrera/ui/components/VirtualSelect/hooks` and
+  `.../VirtualSelectTrigger/hooks` renamed their `isBusy` member to `isInert`,
+  because it now means "busy **or** disabled" and the old name is the confusion
+  that caused the shimmer bug in the first place. If you call
+  `useVirtualSelectDropdown` or `useVirtualSelectTrigger` directly, rename that
+  member; `VirtualSelect` itself is unchanged apart from the added prop. These
+  packages are `0.x`, so a break ships as a `minor`.
+
+  **The Grouping tab's toolbar matches every other tab's.** Its clear carried the
+  header menu's `UngroupRowsIcon` where Filters, Sorting and Columns all carry
+  `EraserIcon`, and it had no reset at all — on the stated grounds that grouping
+  has no cookie-persisted default to reset _to_. That was never what reset means
+  here: `useResetSorting` and its siblings re-seed the draft from the **applied**
+  table state, which grouping has like everything else. **`Reset Grouping`** is
+  now beside the clear, and `useResetGrouping` is exported from the drawer's
+  actions.
+
+  **The Sorting tab drops the columns a grouped read cannot order.** `toGroupSort`
+  keeps only the terms naming a group key or a staged measure and silently drops
+  the rest, so a grid grouped by two keys was offering every other declared column
+  as a sort that would never run — and `Sort by Column Order` staged all of them
+  at once. Both Sorting surfaces now read one predicate. Note that a measured
+  column is out too: summing `total_amount` puts `total_amount:sum` in the read,
+  not bare `total_amount`. The entries are filtered from the **view** only —
+  they stay in `sorting`, so clearing the grouping brings them back (ADR-102).
+
+- 44135f9: Let a measure be pinned, offer the aggregate functions only where they do
+  something, widen the measure columns for their share bar, and reach a tab the
+  drawer is too narrow to show.
+
+  **Pinning a measure is allowed again, and it moves the whole band.** The
+  previous release disabled Pin Left, Pin Right and Clear Pinning on a measure
+  because the action resolves back to the column it measures and expands into all
+  of that column's measures. Pinning `Sum` therefore pins `Total Amount`, and
+  `Minimum`, `Maximum` and `Sum` travel together — a wider gesture than the one
+  asked for, but the one their shared header band can draw. The three items are
+  enabled, each carrying a `title` that says so. A group key still refuses all
+  three: it is force-pinned left on every derivation, so the click would be
+  discarded.
+
+  **The per-column settings drawer answers the same way.** Its Pinning tab
+  offered a group key a side the next derivation threw away, and its Clear Pinning
+  appeared to undo the hoist. Both are disabled there now, with the same sentence.
+  The drawer's write path maps a measure's pinning — and only its pinning — back
+  to the column it measures, so the drawer and the header menu do the same thing,
+  and the tab opens on the side the band actually holds.
+
+  **The aggregate functions leave the header menu while the grid is flat.** An
+  aggregate applied with no group keys has no group row to state a value in, so
+  the function list and `No Aggregate` are offered only once a grouping is
+  applied. The grouping commands beside them are unchanged, because they are how
+  a grouping starts. Once grouped, opening the menu **on a measure** now offers
+  its source column's functions with the applied ones pressed, so the band can be
+  changed — another function added, or one dropped — without going back to the
+  column it measures, which a grouped grid does not paint. The functions are a
+  multi-select, not a radio: picking `Average` beside an applied `Sum` adds an
+  `Average` column, and `No Aggregate` clears every measure of that column. Both
+  items say so on hover.
+
+  **Measure columns start wider.** A derived measure inherited the `minWidth` of
+  the column it measures, leaving no room for the share-of-grand-total bar and its
+  percentage beside a value that is already the widest thing the column holds.
+  Each measure column now starts at a floor of its own, never crossing a
+  `maxWidth` the column declares and never narrowing a source already wider than
+  it. **A grouped grid's measure columns are wider on upgrade.** Resizing one
+  still works and still persists.
+
+  **A tab strip too wide for its panel can now be scrolled.** `Tabs` clipped the
+  tabs that did not fit — in a narrow settings drawer the last tabs were
+  unreachable by mouse. The strip scrolls horizontally, with a chevron appearing
+  at each edge only while there is something in that direction, and the selected
+  tab is brought into view when it changes. Keyboard navigation is unchanged.
+
+### Patch Changes
+
+- 6c91da2: `Collapse This Level` folds the groups its own column states.
+
+  It folded the level above the open column instead, so the column acted on was
+  the one whose rows disappeared, and the three fold controls in a key cell — the
+  chevron, the expansion keys and the menu pair — did not agree with each other.
+  They now answer from one derivation: a level command is the union of the folds
+  the chevrons in that column offer.
+
+  The pair is offered on every applied group key and withheld on a column that is
+  none. It is disabled wherever that column's groups own no rows, which is the
+  innermost key's ordinary state and every key column's state under `flat`. On the
+  outermost key it is live, and folding from there leaves that key's own rows on
+  screen carrying a working chevron (ADR-097).
+
+- 2f6c694: Align a group row's cells by their column's data type, as detail rows already
+  were.
+
+  A `currency` or `number` column now renders its group-row content flush right and
+  a `boolean` or `date` column centred, so a `Sum`, an `Average` and the numbers
+  beneath them share one edge and can be compared down the column. The em dash on a
+  column carrying no aggregate, a group key cell, and a detail row's blanked key
+  column follow the same rule.
+
+  Every group-row cell reaches `TableBodyCell` as already-rendered content, and one
+  flag used to answer both "do not wrap this in the text span" and "do not align
+  this". The second answer was written for a consumer's own `render()` output and
+  was being applied to grid-supplied content as well. The two questions are now
+  separate: `TableBodyCellDescriptor` carries the column's `dataType` on its custom
+  branch and the cell aligns by it, while a consumer's `render()` output carries
+  none and is unchanged — no alignment class is applied to it.
+
+  Nothing changes for an ungrouped grid.
+
+- ad03a24: Make the published READMEs readable with only the installed package on disk.
+  Every relative link that escaped the package directory is now the absolute URL
+  the other READMEs already use, the two-package split states its reasoning
+  instead of only citing the ADR that holds it, and the three references to files
+  that travel in the repository but not in an install say so.
+- 62bb601: Stop shipping documents a consumer cannot read, and gate the recurrence.
+
+  `@lcabrera/ui`, `@lcabrera/server` and `@lcabrera/utils` shipped the whole
+  markdown set beside their source — every `ARCHITECTURE.md`, the artifact
+  inventory, the pattern guide. Those are written for a reader who has the
+  repository cloned: in an install they are pages of relative links to a decisions
+  directory that is not in the tarball, plus decision citations by bare number.
+  `files` now carries `"!src/**/*.md"`, so the source arrives without them and the
+  README states what a consumer needs, linking the rest by absolute URL.
+
+  Every other published package carries the same negation for whichever directory
+  it publishes its source from — `src`, or `scripts` for the two `.mjs` packages.
+  It is inert in each of them today and changes nothing that ships, which a
+  before/after comparison of every packed file list confirms. It is there
+  because it is the only guard that makes a newly added `src/ARCHITECTURE.md`
+  fail to ship outright, rather than merely be likely to trip the content gate on
+  its way out. `@lcabrera/devkit`'s `assets` are the deliberate exception: that
+  markdown is what the package exists to copy.
+
+  `@lcabrera/repo-standards` adds `repo-verify-shipped-docs`, which packs each
+  package named in `publishing.publicPackageDirs` and reads the markdown back out
+  of the tarball — `files` decides its corpus, not the working tree, which is the
+  only way to see a negated pattern at all. It reports a relative link that leaves
+  the package, a link to a file the package does not ship, a path anchored at one
+  of the author repository's own directories (`gates.shippedDocs.repoOnlyDirs`,
+  defaulting to the conventional monorepo layout), and a decision cited with no
+  absolute URL on the line. An empty package roster, and any package that ships no
+  readable document, are refused rather than passed.
+
+  The remaining published READMEs stop naming the repository's own tree in
+  passing: the source directory each package lives in is now a link a reader can
+  open.
+
+- a26ff71: Remove the comments a declaration's name, signature and types already state,
+  from every package source.
+
+  Nothing about behaviour changes, but the removal is visible in an editor: a
+  declaration's JSDoc is carried into the published `.d.mts`, so a tooltip that
+  used to show a paragraph now shows the signature. What the paragraph said lives
+  where it is dated — the ADR that owns the decision, or the pull request that
+  made it — and the annotations a build reads (`@param`, `@returns` and the rest,
+  in the JavaScript sources that ship them) are untouched, as are the one-line
+  notes on a member of an exported type, which reach an installer and state what
+  the member's own type cannot.
+
+  Four declarations changed shape rather than only losing prose, because their
+  only body was a comment and removing it left an empty block: `getApiBaseUrl`
+  resolves a request URL through a helper instead of swallowing the parse in an
+  empty `catch`, `parseVersionedPayload` and `collectPersistedStateSlices` return
+  and `continue` explicitly, and the logger's no-op is an expression. Each behaves
+  as it did. `collectPersistedStateSlices` also drops its `transformRaw`
+  parameter, which every caller filled with the percent-decode
+  `parseVersionedPayload` already performs.
+
+  Two union member orders moved with them — `TableResponseError`'s arms and
+  `AggregateItem`'s intersection — because the sort those rules apply reads the
+  member's source text, and the text no longer carries a comment. A union is
+  unordered to a consumer.
+
+- Updated dependencies [62bb601]
+- Updated dependencies [a26ff71]
+  - @lcabrera/api@0.4.2
+  - @lcabrera/utils@0.2.2
+
 ## 0.5.0
 
 ### Minor Changes

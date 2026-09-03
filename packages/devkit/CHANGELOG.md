@@ -1,5 +1,120 @@
 # @lcabrera/devkit
 
+## 0.3.0
+
+### Minor Changes
+
+- 9b58238: Make the ADR gate read the record rather than only its name.
+
+  Every ADR now opens with a `---` block declaring `governs` — workspace directory
+  names, or the single value `repository` when the decision constrains no one
+  workspace — and `repo-verify-adrs` fails a record that omits it, names a
+  workspace the roster does not answer to, or is missing `## Context`,
+  `## Decision`, `## Consequences` or one of the two alternatives sections. A
+  heading whose only content is a template prompt counts as missing. The gate does
+  not judge what a section says, and its success line says so.
+
+  `repo-verify-adrs --list --package <workspace>` prints the decisions governing
+  one workspace, separated from the repository-wide ones it inherits.
+
+  **Upgrading an existing decision home takes two commands, and the gate is red
+  until you run them.** Every record already in the home predates the block, so on
+  first run each one fails on `no metadata block` and on whichever sections it
+  lacks. `repo-verify-adrs --adopt` writes the baseline once from exactly those
+  failures, grandfathering them; `repo-verify-adrs --write` then regenerates the
+  index. After that the gate is green, and only NEW records are held to the rules.
+  `--adopt` refuses to overwrite a baseline that is already there, so running it
+  blind either writes the first one or fails — it will not quietly replace yours.
+  That is not a claim that nothing can grandfather afresh: deleting the file and
+  adopting again is an ordinary thing to be able to do. What holds either way is
+  the bound above.
+
+  Records written before the block are grandfathered in that baseline rather than
+  edited into shape. The gate guarantees one thing about it: the list
+  may hold at most `maxEntries` entries, and every exemption beyond that count
+  fails. A count rather than a number window, because a sequence has gaps and a
+  record taking a retired number falls inside any window. `--write` only prunes,
+  lowers the bound to what it kept, and refuses to rewrite a baseline that has
+  already grown; it regenerates the indexes and then still fails on any record
+  finding it cannot fix, so the command the gate names never reports a tree clean
+  that a plain run rejects.
+
+  It is not proof against an editor, and it exempts filenames rather than records:
+  the list pins how many records escape the content rules, not which. A slot freed
+  by classifying one record can be spent on another, and a record can be rewritten
+  under a name already on the list without the list moving. Review the records'
+  diffs alongside the register's. The path is `registers.adrContentBaseline`.
+
+  `@lcabrera/devkit` ships the template carrying the block with generic
+  placeholders, so a scaffolded record fails the gate until its author says what
+  the decision governs.
+
+### Patch Changes
+
+- ad03a24: Make the published READMEs readable with only the installed package on disk.
+  Every relative link that escaped the package directory is now the absolute URL
+  the other READMEs already use, the two-package split states its reasoning
+  instead of only citing the ADR that holds it, and the three references to files
+  that travel in the repository but not in an install say so.
+- 62bb601: Stop shipping documents a consumer cannot read, and gate the recurrence.
+
+  `@lcabrera/ui`, `@lcabrera/server` and `@lcabrera/utils` shipped the whole
+  markdown set beside their source — every `ARCHITECTURE.md`, the artifact
+  inventory, the pattern guide. Those are written for a reader who has the
+  repository cloned: in an install they are pages of relative links to a decisions
+  directory that is not in the tarball, plus decision citations by bare number.
+  `files` now carries `"!src/**/*.md"`, so the source arrives without them and the
+  README states what a consumer needs, linking the rest by absolute URL.
+
+  Every other published package carries the same negation for whichever directory
+  it publishes its source from — `src`, or `scripts` for the two `.mjs` packages.
+  It is inert in each of them today and changes nothing that ships, which a
+  before/after comparison of every packed file list confirms. It is there
+  because it is the only guard that makes a newly added `src/ARCHITECTURE.md`
+  fail to ship outright, rather than merely be likely to trip the content gate on
+  its way out. `@lcabrera/devkit`'s `assets` are the deliberate exception: that
+  markdown is what the package exists to copy.
+
+  `@lcabrera/repo-standards` adds `repo-verify-shipped-docs`, which packs each
+  package named in `publishing.publicPackageDirs` and reads the markdown back out
+  of the tarball — `files` decides its corpus, not the working tree, which is the
+  only way to see a negated pattern at all. It reports a relative link that leaves
+  the package, a link to a file the package does not ship, a path anchored at one
+  of the author repository's own directories (`gates.shippedDocs.repoOnlyDirs`,
+  defaulting to the conventional monorepo layout), and a decision cited with no
+  absolute URL on the line. An empty package roster, and any package that ships no
+  readable document, are refused rather than passed.
+
+  The remaining published READMEs stop naming the repository's own tree in
+  passing: the source directory each package lives in is now a link a reader can
+  open.
+
+- a26ff71: Remove the comments a declaration's name, signature and types already state,
+  from every package source.
+
+  Nothing about behaviour changes, but the removal is visible in an editor: a
+  declaration's JSDoc is carried into the published `.d.mts`, so a tooltip that
+  used to show a paragraph now shows the signature. What the paragraph said lives
+  where it is dated — the ADR that owns the decision, or the pull request that
+  made it — and the annotations a build reads (`@param`, `@returns` and the rest,
+  in the JavaScript sources that ship them) are untouched, as are the one-line
+  notes on a member of an exported type, which reach an installer and state what
+  the member's own type cannot.
+
+  Four declarations changed shape rather than only losing prose, because their
+  only body was a comment and removing it left an empty block: `getApiBaseUrl`
+  resolves a request URL through a helper instead of swallowing the parse in an
+  empty `catch`, `parseVersionedPayload` and `collectPersistedStateSlices` return
+  and `continue` explicitly, and the logger's no-op is an expression. Each behaves
+  as it did. `collectPersistedStateSlices` also drops its `transformRaw`
+  parameter, which every caller filled with the percent-decode
+  `parseVersionedPayload` already performs.
+
+  Two union member orders moved with them — `TableResponseError`'s arms and
+  `AggregateItem`'s intersection — because the sort those rules apply reads the
+  member's source text, and the text no longer carries a comment. A union is
+  unordered to a consumer.
+
 ## 0.2.1
 
 ### Patch Changes
