@@ -41,20 +41,20 @@ catalogs:
   lint:
     '@biomejs/biome': ^2.5.11
     '@eslint/js': ^10.0.1
-    '@typescript-eslint/rule-tester': ^8.68.0
-    '@typescript-eslint/utils': ^8.68.0
+    '@typescript-eslint/rule-tester': ^8.69.0
+    '@typescript-eslint/utils': ^8.69.0
     eslint: ^10.9.1
     eslint-config-prettier: ^10.1.8
-    eslint-plugin-perfectionist: ^5.10.1
-    eslint-plugin-react-dom: ^5.18.6
+    eslint-plugin-perfectionist: ^5.11.0
+    eslint-plugin-react-dom: ^5.18.7
     eslint-plugin-react-hooks: ^7.1.1
     eslint-plugin-react-refresh: ^0.5.5
-    eslint-plugin-react-x: ^5.18.6
+    eslint-plugin-react-x: ^5.18.7
     eslint-plugin-security: ^4.0.1
     eslint-plugin-unicorn: ^73.0.0
-    globals: ^17.11.0
-    react-doctor: ^0.9.12
-    typescript-eslint: ^8.68.0
+    globals: ^17.12.0
+    react-doctor: ^0.9.13
+    typescript-eslint: ^8.69.0
 
   react:
     '@react-router/dev': ^8.3.1
@@ -71,7 +71,7 @@ catalogs:
     react-router: ^8.3.1
 
   runtime:
-    zod: ^4.5.2
+    zod: ^4.5.4
 
   test:
     '@testing-library/react': ^16.3.3
@@ -96,14 +96,14 @@ catalogs:
     '@arethetypeswrong/core': ^0.18.5
     '@changesets/cli': ^2.31.1
     '@changesets/get-release-plan': ^4.0.16
-    fallow: ^3.20.0
-    knip: ^6.33.0
+    fallow: ^3.22.0
+    knip: ^6.34.0
     lighthouse: ^13.4.1
     semver: ^7.8.5
     ts-morph: ^28.0.0
 
   types:
-    '@types/node': ^26.4.0
+    '@types/node': ^26.4.1
     '@types/pg': ^8.23.1
     '@types/react': ^19.2.18
     '@types/react-dom': ^19.2.5

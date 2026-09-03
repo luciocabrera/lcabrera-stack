@@ -94,7 +94,7 @@ jobs:
       # It is NOT to be "fixed" with pull_request_target; that trades a visible failure for
       # secret exposure on untrusted code.
       - name: Run the Claude review
-        uses: anthropics/claude-code-action@a874e9ecd7bb36efdad65429c6b35815f5a08f10 # v1.0.210
+        uses: anthropics/claude-code-action@8251c103ac8c1d761882c86aba1412c7f583c844 # v1.0.213
         with:
           # A subscription token, not an API key, and exactly one credential is passed on
           # purpose: a static key takes precedence where both are given, so leaving the key
@@ -162,8 +162,8 @@ jobs:
           # So the model does not post at all. It writes a file, and the step below submits it.
           # No pattern has to anticipate how a command will be spelled.
           claude_args: >-
-            --model claude-opus-5
-            --allowedTools "Read,Grep,Glob,Write,Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --model claude-opus-5 --allowedTools "Read,Grep,Glob,Write,Bash(gh
+            pr diff:*),Bash(gh pr view:*)"
 
       # The reviewer's own identity. The App holds `pull_requests: write` and nothing more,
       # and this token is used by exactly one step — the submit step below, where it covers
