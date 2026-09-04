@@ -4,8 +4,12 @@
  * produces the same empty tally as a harness nobody used. These checks pin the
  * shapes it counts, the ones it must not count, and that it says when it read
  * nothing at all.
+ *
+ * The unreadable-directory case is driven by mode bits, so it is skipped for a
+ * root user, for whom mode bits deny nothing. The unreadable-file case beside it
+ * needs no such guard and covers the same contract.
  */
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -159,6 +163,40 @@ describe('readTranscriptUsage', () => {
     expect(result.available).toBe(true);
     expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
   });
+
+  it('reports a transcript it could not read rather than abandoning the run', () => {
+    const { root, tree } = transcriptRootWith({
+      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
+    });
+    mkdirSync(join(root, transcriptDirectoryFor(tree), 'vanished.jsonl'));
+
+    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+
+    expect(result.available).toBe(true);
+    expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
+    expect(result.unreadable).toHaveLength(1);
+    expect(result.unreadable[0].path).toContain('vanished.jsonl');
+  });
+
+  it.skipIf(process.getuid?.() === 0)(
+    'reports a transcript directory it could not list rather than abandoning the run',
+    () => {
+      const { root, tree } = transcriptRootWith({
+        entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
+      });
+      const sealed = join(root, transcriptDirectoryFor(join(tree, 'apps')));
+      mkdirSync(sealed);
+      chmodSync(sealed, 0o000);
+
+      const result = readTranscriptUsage({ root, workingTrees: [tree] });
+      chmodSync(sealed, 0o700);
+
+      expect(result.available).toBe(true);
+      expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
+      expect(result.unreadable).toHaveLength(1);
+      expect(result.unreadable[0].path).toBe(sealed);
+    },
+  );
 
   it('reads no transcript filed for another repository', () => {
     const { root } = transcriptRootWith({

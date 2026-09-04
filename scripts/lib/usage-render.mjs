@@ -40,9 +40,11 @@ const table = (columns, rows) =>
 const windowLabel = (window) =>
   `${window.start} → ${window.end} (${window.days}d)`;
 
+const skippedCount = (transcripts) => (transcripts.unreadable ?? []).length;
+
 const transcriptStatus = (transcripts) =>
   transcripts.available
-    ? `read (${transcripts.files} transcript file(s))`
+    ? `read (${transcripts.files} transcript file(s)${skippedCount(transcripts) === 0 ? '' : `, ${skippedCount(transcripts)} skipped as unreadable`})`
     : `NOT READ — ${transcripts.reason}`;
 
 const countCell = (transcripts, row) =>
@@ -268,6 +270,16 @@ const coverageNote = (report) => {
   ].join(' ');
 };
 
+const unreadableTranscriptNote = (transcripts) =>
+  skippedCount(transcripts) === 0
+    ? []
+    : [
+        '',
+        `> **${skippedCount(transcripts)} transcript path(s) could not be read** and were skipped, so the skill and subagent counts are a lower bound rather than a total: ${transcripts.unreadable
+          .map((entry) => `\`${entry.path}\` (${inline(entry.reason)})`)
+          .join('; ')}.`,
+      ];
+
 const snapshotNote = (snapshot) =>
   snapshot.setAside === undefined
     ? []
@@ -300,6 +312,7 @@ const header = (report) => [
   'coverage before it is evidence of absence.',
   '',
   coverageNote(report),
+  ...unreadableTranscriptNote(report.transcripts),
   ...snapshotNote(report.transcripts.snapshot),
   '',
   '## Sources',

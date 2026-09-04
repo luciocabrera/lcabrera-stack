@@ -224,6 +224,38 @@ describe('renderReport', () => {
     );
   });
 
+  it('says a skipped transcript makes the counts a lower bound', () => {
+    const markdown = reportWith({
+      transcripts: {
+        available: true,
+        files: 3,
+        retentionDays: 30,
+        simulatedHorizon: false,
+        snapshot: {
+          earliestDay: '2026-08-01',
+          path: 'reports/usage/snapshot.json',
+        },
+        unreadable: [
+          {
+            path: '/home/dev/.claude/projects/-home-dev-repo/gone.jsonl',
+            reason: 'ENOENT: no such file or directory',
+          },
+        ],
+      },
+    });
+
+    expect(markdown).toContain('1 transcript path(s) could not be read');
+    expect(markdown).toContain('a lower bound rather than a total');
+    expect(markdown).toContain('gone.jsonl');
+    expect(markdown).toContain('3 transcript file(s), 1 skipped as unreadable');
+  });
+
+  it('says nothing about skipped transcripts when every one was read', () => {
+    expect(reportWith({})).not.toContain(
+      'could not be read** and were skipped',
+    );
+  });
+
   it('says in the report itself that a shallow clone bounds the git counts', () => {
     const markdown = reportWith({ shallowClone: true });
 
