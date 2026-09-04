@@ -65,8 +65,11 @@ What already exists is worth knowing, so this requirement is not read as coverin
 more than it does. `vp run publish:verify` packs every public package that builds
 and has a fresh Node process import each published subpath from a temporary
 directory, so `api`, `server`, `utils` and `node-runtime` are already resolved
-outside this tree. `@lcabrera/ui` is not: both that gate and `tarball:verify` key
-on a `build` script, and `ui` has none.
+outside this tree. `@lcabrera/ui` is not, and neither gate would take it as
+things stand: `publish:verify` selects on a `build` script, which `ui` has none
+of, and `tarball:verify` selects from a hardcoded roster holding the two `.mjs`
+packages. Adding a build script would enrol `ui` in the first and not the
+second.
 
 So this requirement adds two things rather than one. It covers `ui` at all, and
 it changes the question for the rest from "does the import resolve" to "does the

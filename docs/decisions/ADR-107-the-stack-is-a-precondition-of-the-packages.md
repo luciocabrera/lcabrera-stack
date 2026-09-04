@@ -29,10 +29,12 @@ process import each published subpath; `attw:verify` then checks the published
 types resolve for a consumer. `vp run tarball:verify` covers `devkit` and
 `repo-standards`, which ship `.mjs` source and deliberately do not build.
 
-Both gates key on a `build` script, so one package falls through both:
-`@lcabrera/ui`, which publishes TypeScript source and has no build. It is packed
-and imported by nothing, and it is also the package the rest of this ADR is
-about. What stays uncovered for all of them is narrower and more specific:
+One package falls through both, for two different reasons. `publish:verify`
+selects on a `build` script, and `@lcabrera/ui` publishes TypeScript source and
+has none. `tarball:verify` selects from a hardcoded roster of the two packages
+that ship `.mjs`, which `ui` is not on. So adding a build script to `ui` would
+enrol it in the first gate and not the second. It is packed and imported by
+nothing today, and it is also the package the rest of this ADR is about. What stays uncovered for all of them is narrower and more specific:
 being installed into a repository **on the declared stack** and used there.
 Resolving an import is not the same as compiling StyleX in someone else's
 build.
