@@ -17,7 +17,7 @@ const TABLE_RULE = (columns) => `| ${columns.map(() => '---').join(' | ')} |`;
 
 const inline = (value) => String(value).replaceAll(/\s+/gu, ' ').trim();
 
-const cell = (value) => inline(value).replaceAll('|', '\\|');
+const cell = (value) => inline(value).replaceAll('|', String.raw`\|`);
 
 const table = (columns, rows) =>
   [
