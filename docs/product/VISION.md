@@ -29,22 +29,21 @@ the package wins.
 ## The stack the packages require
 
 Both lines assume a stack, and it is a **precondition of using them** rather
-than a detail of how they are built: **React 19, React Router in framework mode,
-StyleX, Vite+, and pnpm.**
+than a detail of how they are built.
+[ADR-107](../decisions/ADR-107-the-stack-is-a-precondition-of-the-packages.md)
+names it and is the only place it is listed. Versions are not in that list: the
+catalog in `pnpm-workspace.yaml` declares those.
 
-This is the one place that stack is stated. `@lcabrera/ui` publishes TypeScript
-source rather than a build, so a consumer's own toolchain compiles it, and it
-needs StyleX wired into that build — off this stack the package does not work at
-all, and saying so bounds the promise instead of implying a portability nothing
-here tests. A consumer on a different framework or styling system is not an
-unlucky consumer; they were never a consumer.
+Why it has to be said out loud. `@lcabrera/ui` publishes TypeScript source rather
+than a build, so a consumer's own toolchain compiles it, and it needs StyleX
+wired into that build. Off the stack the package does not work at all. Saying so
+bounds the promise instead of implying a portability nothing here tests. A
+consumer on a different framework or styling system is not an unlucky consumer.
+They were never a consumer.
 
-Two rules follow, and both are load-bearing. A package may assume the stack, and
-may **not** assume anything a bootstrapper wrote — the existing "no relying on a
-consumer's tsconfig `paths`" rule, one level up. And the mechanism is the
-catalog: a bootstrapped repository receives a `pnpm-workspace.yaml` that pins
-these at install time, because a contract with no mechanism is a sentence. The
-decision is [ADR-107](../decisions/ADR-107-the-stack-is-a-precondition-of-the-packages.md).
+One rule follows and it is load-bearing. A package may assume the stack. It may
+not assume anything a bootstrapper wrote, which is the existing "no relying on a
+consumer's tsconfig `paths`" rule one level up.
 
 ## The four personas
 
@@ -117,8 +116,7 @@ The application stack is installed by the application developer, and reaches the
 data user through them — so a requirement in the data user's vocabulary is still
 a claim about packages, and still names the packages it concerns. The toolchain
 is installed by the repository maintainer. The project starter installs **both
-lines at once**, which is why their requirement is the only one that declares
-both.
+lines at once**, so their requirement declares both.
 
 **That is a statement about who installs what, and it is not a rule for which
 persona a requirement declares.** The two fields answer different questions:

@@ -77,22 +77,29 @@ modes never appeared until something installed one elsewhere
 **The packages require a stack, and that stack is a precondition of using them
 rather than an implementation detail of building them.**
 
-The stack is: **React 19, React Router in framework mode, StyleX, Vite+, and
-pnpm.** It is named in [`docs/product/VISION.md`](../product/VISION.md), which is
-the one place it is stated. No other tracked file restates the version numbers —
-a version belongs in prose only where it is a floor a reader must clear.
+The stack is **React, React Router in framework mode, StyleX, Vite+ and pnpm**,
+and this ADR is where that list lives. `docs/product/VISION.md` and the
+requirements point here rather than repeating it.
+
+No version appears in that list, deliberately. The catalog in
+`pnpm-workspace.yaml` is where a version is declared, and prose repeating one is
+a second declaration nothing keeps in step. That already went wrong once, when
+the docs said React Router 7 while the catalog pinned 8 (#962). A version belongs
+in prose only where it is a floor a reader must clear, and none of these is.
 
 Two consequences of that statement are themselves rules.
 
 **A package may not depend on anything the bootstrapper wrote.** This is the
 existing "a package may not rely on a consumer's tsconfig `paths`" rule at the
 next level up. A package may assume the stack; it may not assume the generated
-repository. The distinction is what keeps both promises — the bootstrapper's and
-the standalone one — true at the same time.
+repository. That distinction is what keeps both promises true at once: the
+bootstrapper's, and the standalone one.
 
 **The catalog is the mechanism.** A bootstrapped repository receives a
 `pnpm-workspace.yaml` carrying the catalog, so React, React Router and StyleX are
-pinned by the install rather than by a sentence. A contract with no mechanism is
+pinned by the install rather than by a sentence. It also means the versions have
+one home and the frameworks another, which is the split the rule above asks for.
+A contract with no mechanism is
 a sentence, and this repository has enough of those already.
 
 The gate that enforces the invariant is

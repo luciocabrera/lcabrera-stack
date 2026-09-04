@@ -34,8 +34,8 @@ not generated.
 ## Acceptance
 
 - A package installs from its published tarball into a repository built by hand
-  on the declared stack — React 19, React Router in framework mode, StyleX,
-  Vite+, pnpm — and its documented public surface can be used there.
+  on the declared stack (ADR-107), and its documented public surface can be used
+  there.
 - That repository contains **no file the bootstrapper emits**. This is what the
   criterion is for: a package tested only inside a generated repository can
   depend on the generator's output without anything noticing.
@@ -51,12 +51,13 @@ not generated.
 
 ## Notes
 
-Off the declared stack this requirement makes no claim, and that is deliberate
-rather than a gap — see
-[ADR-107](../../decisions/ADR-107-the-stack-is-a-precondition-of-the-packages.md).
-`@lcabrera/ui` publishes TypeScript source and needs StyleX in the consumer's
-build; there is no configuration of a Tailwind-and-Next.js repository in which it
-works, and pretending otherwise would make this requirement unfalsifiable.
+Off the declared stack this requirement makes no claim. That is deliberate rather
+than a gap, and
+[ADR-107](../../decisions/ADR-107-the-stack-is-a-precondition-of-the-packages.md)
+says why. `@lcabrera/ui` publishes TypeScript source and needs StyleX in the
+consumer's build, so there is no configuration of a Tailwind-and-Next.js
+repository in which it works. Pretending otherwise would make this requirement
+unfalsifiable.
 
 The scratch repository is the hard part to keep honest. It has to be minimal
 enough that its contents are visibly not the bootstrapper's output, and it has to
