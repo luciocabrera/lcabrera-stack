@@ -12,6 +12,14 @@
  * `git-remote.mjs` gives: nothing resolves through PATH. The pointer inside a
  * worktree's `.git` file is split on lines rather than matched with a pattern,
  * so the cost of reading it stays linear in the file it was handed.
+ *
+ * A session is launched from a directory, not from a tree, so the directory a
+ * transcript is filed under is named for wherever the session started — often a
+ * package or an app below the tree root. Matching a transcript directory is
+ * therefore a prefix test, and it is deliberately loose: a sibling tree whose
+ * path merely starts the same way matches too, and the reader re-checks every
+ * entry's own `cwd` against the roots anyway. Over-collecting a directory costs
+ * a read; missing one drops every invocation recorded in it.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -65,3 +73,9 @@ export const isWithinAny = ({ path, roots }) =>
 
 export const transcriptDirectoryFor = (workingTree) =>
   workingTree.replaceAll(/[^\dA-Za-z]/gu, '-');
+
+export const namesADirectoryUnderAny = ({ directoryName, roots }) =>
+  roots.some((root) => {
+    const encoded = transcriptDirectoryFor(root);
+    return directoryName === encoded || directoryName.startsWith(`${encoded}-`);
+  });

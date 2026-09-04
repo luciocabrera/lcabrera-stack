@@ -192,6 +192,54 @@ describe('renderReport', () => {
     );
   });
 
+  it('says the earlier part of a window neither source reaches is unobserved', () => {
+    const markdown = reportWith({});
+
+    expect(markdown).toContain('reach back only to 2026-08-06');
+    expect(markdown).toContain(
+      'the earliest day either source has a record for is 2026-08-01',
+    );
+    expect(markdown).toContain(
+      'Neither source reaches 2026-06-07, so the window above is observed only from 2026-08-01 onward',
+    );
+    expect(markdown).not.toContain('cover the whole window');
+  });
+
+  it('claims whole-window transcript coverage only when a source reaches its start', () => {
+    const markdown = reportWith({
+      transcripts: {
+        available: true,
+        files: 3,
+        retentionDays: 30,
+        simulatedHorizon: false,
+        snapshot: {
+          earliestDay: '2026-06-01',
+          path: 'reports/usage/snapshot.json',
+        },
+      },
+    });
+
+    expect(markdown).toContain(
+      'Together they reach back to 2026-06-07, so the invocation counts above cover the whole window',
+    );
+  });
+
+  it('says in the report itself that a shallow clone bounds the git counts', () => {
+    const markdown = reportWith({ shallowClone: true });
+
+    expect(markdown).toContain('This is a shallow clone');
+    expect(markdown).toContain(
+      '| `docs/product/requirements/one.md` | 3 | 2026-09-01 | `git log` over `docs/product/requirements` | 2026-06-07 → 2026-09-04 (90d), bounded by the fetched history |',
+    );
+    expect(markdown).toContain(
+      '| `git log` | requirement and coordination register activity | 2026-06-07 → 2026-09-04 (90d), bounded by the fetched history |',
+    );
+  });
+
+  it('leaves the git windows unqualified when the clone is complete', () => {
+    expect(reportWith({})).not.toContain('shallow clone');
+  });
+
   it('keeps a multi-line reason with a pipe inside one table cell', () => {
     const markdown = reportWith({
       workflows: {

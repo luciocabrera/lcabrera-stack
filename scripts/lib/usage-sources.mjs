@@ -9,8 +9,16 @@
  * unauthenticated `gh`, an unreachable API and a workflow nobody has triggered
  * all produce no runs, and reporting that as a count would make the three
  * indistinguishable.
+ *
+ * Both readers take the whole window, not just its start. A store keeps growing
+ * after the day a report is dated, so a query bounded below only answers with
+ * everything that has happened since — which would print today's activity under
+ * a window that ended weeks ago, and make `--now` unable to reproduce the run it
+ * names. The git day is re-checked against the window after parsing, because the
+ * day the report prints comes from the commit's own date field rather than from
+ * the revision filter that selected it.
  */
-const workflowRunCount = ({ file, runGh, since }) => {
+const workflowRunCount = ({ file, runGh, window }) => {
   try {
     const total = runGh([
       'api',
@@ -18,7 +26,7 @@ const workflowRunCount = ({ file, runGh, since }) => {
       'GET',
       `repos/{owner}/{repo}/actions/workflows/${file}/runs`,
       '-f',
-      `created=>=${since}`,
+      `created=${window.start}..${window.end}`,
       '-f',
       'per_page=1',
       '--jq',
@@ -33,7 +41,7 @@ const workflowRunCount = ({ file, runGh, since }) => {
   }
 };
 
-export const readWorkflowRuns = ({ runGh, since, workflows }) => {
+export const readWorkflowRuns = ({ runGh, window, workflows }) => {
   try {
     runGh(['api', 'repos/{owner}/{repo}', '--jq', '.full_name']);
   } catch (error) {
@@ -42,7 +50,10 @@ export const readWorkflowRuns = ({ runGh, since, workflows }) => {
   return {
     available: true,
     runs: Object.fromEntries(
-      workflows.map((file) => [file, workflowRunCount({ file, runGh, since })]),
+      workflows.map((file) => [
+        file,
+        workflowRunCount({ file, runGh, window }),
+      ]),
     ),
   };
 };
@@ -79,11 +90,17 @@ export const tallyFiles = (commits) => {
   return tally;
 };
 
-export const readRegisterActivity = ({ cwd, directory, runGit, sinceDay }) => {
+export const withinWindow = ({ commits, window }) =>
+  commits.filter(
+    (commit) => commit.day >= window.start && commit.day <= window.end,
+  );
+
+export const readRegisterActivity = ({ cwd, directory, runGit, window }) => {
   const log = runGit({
     args: [
       'log',
-      `--since=${sinceDay}T00:00:00Z`,
+      `--since=${window.start}T00:00:00Z`,
+      `--until=${window.end}T23:59:59Z`,
       '--name-only',
       '--date=short',
       '--pretty=format:%x01%H %ad',
@@ -99,7 +116,7 @@ export const readRegisterActivity = ({ cwd, directory, runGit, sinceDay }) => {
       reason: `git log over ${directory} could not be read — git is unavailable, or this is not a work tree`,
     };
   }
-  const commits = parseCommitFiles(log);
+  const commits = withinWindow({ commits: parseCommitFiles(log), window });
   return {
     available: true,
     commits: commits.length,

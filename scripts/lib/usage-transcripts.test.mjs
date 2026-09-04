@@ -100,14 +100,15 @@ describe('tallyByDay', () => {
   });
 });
 
-const transcriptRootWith = (entries) => {
+const transcriptRootWith = ({ entries, launchedIn }) => {
   const tree = mkdtempSync(join(tmpdir(), 'usage-tree-'));
   const root = mkdtempSync(join(tmpdir(), 'usage-transcripts-'));
-  const directory = join(root, transcriptDirectoryFor(tree));
+  const cwd = launchedIn === undefined ? tree : join(tree, launchedIn);
+  const directory = join(root, transcriptDirectoryFor(cwd));
   mkdirSync(directory);
   writeFileSync(
     join(directory, 'session.jsonl'),
-    entries.map((entry) => JSON.stringify({ ...entry, cwd: tree })).join('\n'),
+    entries.map((entry) => JSON.stringify({ ...entry, cwd })).join('\n'),
   );
   return { root, tree };
 };
@@ -132,10 +133,12 @@ describe('readTranscriptUsage', () => {
   });
 
   it('counts an invocation older than the retention default when no horizon is given', () => {
-    const { root, tree } = transcriptRootWith([
-      skillEntryOn('2026-06-10T09:00:00.000Z'),
-      skillEntryOn('2026-09-04T09:00:00.000Z'),
-    ]);
+    const { root, tree } = transcriptRootWith({
+      entries: [
+        skillEntryOn('2026-06-10T09:00:00.000Z'),
+        skillEntryOn('2026-09-04T09:00:00.000Z'),
+      ],
+    });
 
     const result = readTranscriptUsage({ root, workingTrees: [tree] });
 
@@ -145,11 +148,40 @@ describe('readTranscriptUsage', () => {
     });
   });
 
+  it('reads a session launched from a directory below a working tree', () => {
+    const { root, tree } = transcriptRootWith({
+      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
+      launchedIn: join('apps', 'showcase'),
+    });
+
+    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+
+    expect(result.available).toBe(true);
+    expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
+  });
+
+  it('reads no transcript filed for another repository', () => {
+    const { root } = transcriptRootWith({
+      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
+    });
+    const elsewhere = mkdtempSync(join(tmpdir(), 'usage-other-tree-'));
+
+    const result = readTranscriptUsage({
+      root,
+      workingTrees: [elsewhere],
+    });
+
+    expect(result.available).toBe(false);
+    expect(result.reason).toContain('matches a working tree');
+  });
+
   it('drops what falls before a simulated horizon', () => {
-    const { root, tree } = transcriptRootWith([
-      skillEntryOn('2026-06-10T09:00:00.000Z'),
-      skillEntryOn('2026-09-04T09:00:00.000Z'),
-    ]);
+    const { root, tree } = transcriptRootWith({
+      entries: [
+        skillEntryOn('2026-06-10T09:00:00.000Z'),
+        skillEntryOn('2026-09-04T09:00:00.000Z'),
+      ],
+    });
 
     const result = readTranscriptUsage({
       root,

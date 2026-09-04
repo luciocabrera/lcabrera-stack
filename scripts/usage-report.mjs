@@ -88,11 +88,7 @@ const invocationRowsFor = ({ inventory, kind, live, merged, window }) =>
     }));
 
 const workflowSection = ({ inventory, window }) => {
-  const read = readWorkflowRuns({
-    runGh,
-    since: window.start,
-    workflows: inventory,
-  });
+  const read = readWorkflowRuns({ runGh, window, workflows: inventory });
   return {
     ...read,
     rows: inventory.map((file) => ({
@@ -109,12 +105,7 @@ const registerSection = ({ detail, directory, heading, note, window }) => ({
   heading,
   note,
   window,
-  ...readRegisterActivity({
-    cwd: REPO_ROOT,
-    directory,
-    runGit,
-    sinceDay: window.start,
-  }),
+  ...readRegisterActivity({ cwd: REPO_ROOT, directory, runGit, window }),
 });
 
 const REGISTERS = [

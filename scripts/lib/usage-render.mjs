@@ -12,7 +12,16 @@
  * comes from a tool this report does not control — a `gh` failure spans lines
  * and may hold a pipe — and either character silently ends a markdown table one
  * row early, which turns the rows below it into prose a reader skips.
+ *
+ * Where a number covers less than the window it sits under, the caveat is
+ * rendered into the markdown rather than printed on the console of the run that
+ * produced it. The file is what gets read later, and a count under a window
+ * label that is false for it is the failure this report exists to avoid — so
+ * both the shallow-clone bound on git history and the retention bound on
+ * transcripts are stated in the artifact itself.
  */
+import { shiftDay } from './usage-window.mjs';
+
 const TABLE_RULE = (columns) => `| ${columns.map(() => '---').join(' | ')} |`;
 
 const inline = (value) => String(value).replaceAll(/\s+/gu, ' ').trim();
@@ -91,7 +100,15 @@ const workflowSection = (workflows) =>
     'bounded by that retention, not only by the window requested here.',
   ].join('\n');
 
-const registerRows = (register) =>
+const SHALLOW_CLONE_NOTE =
+  '> **This is a shallow clone**, so `git log` sees only the commits that were fetched. Every count here is bounded by that history rather than by the window named beside it, and is a lower bound on what the window actually holds.';
+
+const registerWindowLabel = ({ shallowClone, window }) =>
+  shallowClone
+    ? `${windowLabel(window)}, bounded by the fetched history`
+    : windowLabel(window);
+
+const registerRows = ({ register, shallowClone }) =>
   Object.entries(register.files)
     .toSorted(([a], [b]) => a.localeCompare(b))
     .map(([file, entry]) => [
@@ -99,56 +116,55 @@ const registerRows = (register) =>
       String(entry.commits),
       entry.lastTouched,
       `\`git log\` over \`${register.directory}\``,
-      windowLabel(register.window),
+      registerWindowLabel({ shallowClone, window: register.window }),
     ]);
 
-const registerDetail = (register) =>
+const registerDetail = ({ register, shallowClone }) =>
   Object.keys(register.files).length === 0
     ? '_No file in this register was touched in the window._'
     : table(
         ['File', 'Commits', 'Last touched', 'Source', 'Window'],
-        registerRows(register),
+        registerRows({ register, shallowClone }),
       );
 
-const registerSummary = (register) =>
-  table(
+const registerSummary = ({ register, shallowClone }) => {
+  const source = `\`git log\` over \`${register.directory}\``;
+  const covers = registerWindowLabel({ shallowClone, window: register.window });
+  return table(
     ['Measure', 'Value', 'Source', 'Window'],
     [
-      [
-        'Commits',
-        String(register.commits),
-        `\`git log\` over \`${register.directory}\``,
-        windowLabel(register.window),
-      ],
+      ['Commits', String(register.commits), source, covers],
       [
         'Distinct files touched',
         String(Object.keys(register.files).length),
-        `\`git log\` over \`${register.directory}\``,
-        windowLabel(register.window),
+        source,
+        covers,
       ],
       [
         'Last activity',
         register.lastActivity ?? 'none in window',
-        `\`git log\` over \`${register.directory}\``,
-        windowLabel(register.window),
+        source,
+        covers,
       ],
     ],
   );
+};
 
-const registerBody = (register) =>
+const registerBody = ({ register, shallowClone }) =>
   register.detail === 'per-file'
-    ? registerDetail(register)
-    : registerSummary(register);
+    ? registerDetail({ register, shallowClone })
+    : registerSummary({ register, shallowClone });
 
-const registerSection = (register) =>
+const registerSection = ({ register, shallowClone }) =>
   [
     `## ${register.heading}`,
     '',
     register.note,
     '',
     register.available
-      ? registerBody(register)
+      ? registerBody({ register, shallowClone })
       : `> This register could not be read, so there is nothing to count here — not a count of zero. ${inline(register.reason)}`,
+    ...(register.available && shallowClone ? ['', SHALLOW_CLONE_NOTE] : []),
   ].join('\n');
 
 const pathRuleSection = (pathRules) =>
@@ -205,17 +221,52 @@ const sourceRows = (report) => [
   [
     '`git log`',
     'requirement and coordination register activity',
-    windowLabel(report.window),
+    registerWindowLabel({
+      shallowClone: report.shallowClone,
+      window: report.window,
+    }),
     report.registers.every((register) => register.available)
       ? 'read'
       : 'NOT READ — see the register sections below',
   ],
 ];
 
-const horizonNote = (transcripts) =>
+const transcriptReachBack = ({ transcripts, window }) =>
+  transcripts.readFrom ??
+  shiftDay(window.end, -(transcripts.retentionDays - 1));
+
+const retentionSentence = ({ reachBack, transcripts }) =>
   transcripts.simulatedHorizon
-    ? `**This run used a simulated transcript horizon of ${transcripts.retentionDays} day(s)** (\`--transcript-retention-days\`), so the transcript columns cover ${transcripts.readFrom} onward rather than the whole window. The totals still include everything the snapshot carries.`
-    : `Transcripts are kept for ${transcripts.retentionDays} day(s) (\`cleanupPeriodDays\` in \`.claude/settings.json\`), and every transcript still on disk was read whatever its age, so the transcript columns cover the whole window above. The snapshot carries the days that have already been deleted.`;
+    ? `**This run used a simulated transcript horizon of ${transcripts.retentionDays} day(s)** (\`--transcript-retention-days\`), so the transcript columns cover ${reachBack} onward.`
+    : `Transcripts are kept for ${transcripts.retentionDays} day(s) (\`cleanupPeriodDays\` in \`.claude/settings.json\`), so a transcript read is guaranteed to reach back only to ${reachBack}; every transcript still on disk was read whatever its age, which may reach further but is not promised to.`;
+
+const snapshotSentence = (snapshot) =>
+  snapshot.earliestDay === undefined
+    ? 'The snapshot holds no day yet, so nothing is carried from before that.'
+    : `The snapshot carries the days the transcripts have already dropped, and the earliest day either source has a record for is ${snapshot.earliestDay}.`;
+
+const observedFrom = ({ reachBack, snapshot }) =>
+  snapshot.earliestDay !== undefined && snapshot.earliestDay < reachBack
+    ? snapshot.earliestDay
+    : reachBack;
+
+const coverageSentence = ({ observed, window }) =>
+  observed <= window.start
+    ? `Together they reach back to ${window.start}, so the invocation counts above cover the whole window.`
+    : `Neither source reaches ${window.start}, so the window above is observed only from ${observed} onward and the earlier part of it is unobserved rather than empty — a zero in the invocation counts settles nothing about those days.`;
+
+const coverageNote = (report) => {
+  const reachBack = transcriptReachBack(report);
+  const { snapshot } = report.transcripts;
+  return [
+    retentionSentence({ reachBack, transcripts: report.transcripts }),
+    snapshotSentence(snapshot),
+    coverageSentence({
+      observed: observedFrom({ reachBack, snapshot }),
+      window: report.window,
+    }),
+  ].join(' ');
+};
 
 const snapshotNote = (snapshot) =>
   snapshot.setAside === undefined
@@ -248,7 +299,7 @@ const header = (report) => [
   'subagent counts therefore describe this machine, so a low number is partial',
   'coverage before it is evidence of absence.',
   '',
-  horizonNote(report.transcripts),
+  coverageNote(report),
   ...snapshotNote(report.transcripts.snapshot),
   '',
   '## Sources',
@@ -274,6 +325,9 @@ export const renderReport = (report) =>
     '',
     workflowSection(report.workflows),
     '',
-    ...report.registers.flatMap((register) => [registerSection(register), '']),
+    ...report.registers.flatMap((register) => [
+      registerSection({ register, shallowClone: report.shallowClone }),
+      '',
+    ]),
     pathRuleSection(report.pathRules),
   ].join('\n')}\n`;

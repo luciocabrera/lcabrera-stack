@@ -15,12 +15,18 @@
  * is still on disk can only shrink a count the report will then label with a
  * wider window, so the bound exists for a run that is deliberately simulating
  * expiry and for nothing else.
+ *
+ * Discovery walks every directory under the transcript root and keeps the ones
+ * whose name is a working tree's, or descends from one. Claude Code files a
+ * transcript under the directory the session was launched from, so a session
+ * started in a package or an app is filed under that path, never under the tree
+ * root — naming the roots alone would silently drop every one of those.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-import { isWithinAny, transcriptDirectoryFor } from './usage-scope.mjs';
+import { isWithinAny, namesADirectoryUnderAny } from './usage-scope.mjs';
 import { dayOf } from './usage-window.mjs';
 
 const SKILL_TOOL = 'Skill';
@@ -87,9 +93,16 @@ export const tallyByDay = (invocations) => {
 };
 
 const transcriptFilesFor = ({ root, workingTrees }) =>
-  workingTrees
-    .map((tree) => join(root, transcriptDirectoryFor(tree)))
-    .filter((directory) => existsSync(directory))
+  readdirSync(root, { withFileTypes: true })
+    .filter(
+      (entry) =>
+        entry.isDirectory() &&
+        namesADirectoryUnderAny({
+          directoryName: entry.name,
+          roots: workingTrees,
+        }),
+    )
+    .map((entry) => join(root, entry.name))
     .flatMap((directory) =>
       readdirSync(directory)
         .filter((name) => name.endsWith('.jsonl'))
