@@ -1,6 +1,6 @@
 # Vision — who this is for, and what they get
 
-Two products ship from this repository, and four kinds of person judge them.
+Two products ship from this repository, and several kinds of person judge them.
 Every requirement in [`requirements/`](./requirements/) is written for exactly
 one of those people, in their words. This page defines the lines, the stack they
 assume, and those people.
@@ -51,10 +51,11 @@ One rule follows and it is load-bearing. A package may assume the stack. It may
 not assume anything a bootstrapper wrote, which is the existing "no relying on a
 consumer's tsconfig `paths`" rule one level up.
 
-## The four personas
+## The personas
 
 A persona earns a place here by having a **different definition of "it works"**.
-Four do; a fifth would have to bring a fifth definition, not a fifth job title.
+Each one below brings its own. A new one has to bring a further definition, not a
+further job title, and the sections below are the roster.
 
 ### The application developer
 
@@ -111,9 +112,9 @@ would otherwise collapse into one, and folding this persona into the maintainer
 "at time zero" was the live alternative when it was added
 ([#1066](https://github.com/luciocabrera/lcabrera-stack/issues/1066)).
 
-Worth stating because it is the trap: this persona's failures are the easiest of
-the four to miss from inside this repository, which already has everything a
-starter lacks. Nothing here can observe a missing piece, which is why the
+Worth stating because it is the trap: of every persona here, this one's failures
+are the easiest to miss from inside this repository, which already has everything
+a starter lacks. Nothing here can observe a missing piece, which is why the
 requirement they own is checked by building a repository elsewhere.
 
 ## How the lines and personas meet

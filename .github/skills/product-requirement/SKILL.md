@@ -152,7 +152,7 @@ them still parses.
 - [`docs/product/README.md`](../../../docs/product/README.md) — the schema, and
   what the layer is canonical for versus the four things it is not
 - [`docs/product/VISION.md`](../../../docs/product/VISION.md) — the two product
-  lines and the four personas
+  lines and the personas
 - [ADR-093](../../../docs/decisions/ADR-093-declare-a-requirement-state-rather-than-derive-it.md)
   — why `state` is declared, and what that costs
 - the `refactor-verified` skill — an issue's §6 is the bar for one change; a

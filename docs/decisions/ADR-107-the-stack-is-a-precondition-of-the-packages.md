@@ -31,8 +31,8 @@ types resolve for a consumer. `vp run tarball:verify` covers `devkit` and
 
 One package falls through both, for two different reasons. `publish:verify`
 selects on a `build` script, and `@lcabrera/ui` publishes TypeScript source and
-has none. `tarball:verify` selects from a hardcoded roster of the two packages
-that ship `.mjs`, which `ui` is not on. So adding a build script to `ui` would
+has none. `tarball:verify` selects from a hardcoded roster of the packages that
+ship `.mjs`, which `ui` is not on. So adding a build script to `ui` would
 enrol it in the first gate and not the second. It is packed and imported by
 nothing today, and it is also the package the rest of this ADR is about.
 

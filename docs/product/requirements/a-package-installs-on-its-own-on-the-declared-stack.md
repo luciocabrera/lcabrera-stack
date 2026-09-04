@@ -74,8 +74,7 @@ not in the packed set.
 
 `@lcabrera/ui` is neither packed nor imported, and neither gate would take it as
 things stand. `publish:verify` selects on a `build` script, which `ui` has none
-of, and `tarball:verify` selects from a hardcoded roster holding the two `.mjs`
-packages. Adding a build script would enrol `ui` in the first and not the
+of, and `tarball:verify` selects from a hardcoded roster of the `.mjs` packages. Adding a build script would enrol `ui` in the first and not the
 second.
 
 So this requirement adds two things rather than one. It covers `ui` at all, and

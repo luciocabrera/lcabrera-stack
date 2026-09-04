@@ -7,7 +7,7 @@ One file per requirement, under [`requirements/`](./requirements/). Each states
 the requirement in its persona's vocabulary, lists acceptance criteria that are
 decidable rather than aspirational, and carries typed pointers to where the
 answer lives. [`VISION.md`](./VISION.md) names the two product lines and the
-four personas those statements are written for.
+personas those statements are written for.
 
 A requirement outlives the issue that implements it. That is the whole reason
 this layer exists: acceptance criteria authored on an issue are read once and
