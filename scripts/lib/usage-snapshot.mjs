@@ -32,6 +32,9 @@ export const emptySnapshot = () => ({
 const isSpan = (span) =>
   typeof span?.from === 'string' && typeof span?.to === 'string';
 
+const laterDay = (...days) =>
+  days.toSorted((a, b) => a.localeCompare(b)).at(-1);
+
 const absorb = (merged, span) => {
   const last = merged.at(-1);
   if (last === undefined || span.from > shiftDay(last.to, 1)) {
@@ -39,7 +42,7 @@ const absorb = (merged, span) => {
   }
   return [
     ...merged.slice(0, -1),
-    { from: last.from, to: span.to > last.to ? span.to : last.to },
+    { from: last.from, to: laterDay(last.to, span.to) },
   ];
 };
 
