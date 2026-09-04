@@ -31,9 +31,14 @@ const windowLabel = (window) =>
 
 const skippedCount = (transcripts) => (transcripts.unreadable ?? []).length;
 
+const skippedSuffix = (transcripts) =>
+  skippedCount(transcripts) === 0
+    ? ''
+    : `, ${skippedCount(transcripts)} skipped as unreadable`;
+
 const transcriptStatus = (transcripts) =>
   transcripts.available
-    ? `read (${transcripts.files} transcript file(s)${skippedCount(transcripts) === 0 ? '' : `, ${skippedCount(transcripts)} skipped as unreadable`})`
+    ? `read (${transcripts.files} transcript file(s)${skippedSuffix(transcripts)})`
     : `NOT READ — ${transcripts.reason}`;
 
 const countCell = (transcripts, row) =>
