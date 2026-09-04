@@ -1,8 +1,9 @@
 # Vision — who this is for, and what they get
 
-Two products ship from this repository, and three kinds of person judge them.
+Two products ship from this repository, and several kinds of person judge them.
 Every requirement in [`requirements/`](./requirements/) is written for exactly
-one of those people, in their words. This page defines them and nothing else.
+one of those people, in their words. This page defines the lines, the stack they
+assume, and those people.
 
 ## The two product lines
 
@@ -26,11 +27,35 @@ The apps in this repository are neither line. They are the harness that puts the
 packages under load, and when app convenience and package cleanliness pull apart,
 the package wins.
 
-## The three personas
+## The stack, and which packages require it
+
+Some packages require a stack, and where one does it is a **precondition of
+using it** rather than a detail of how it is built.
+[ADR-107](../decisions/ADR-107-the-stack-is-a-precondition-of-the-packages.md)
+names it and is the only place it is listed. Versions are not in that list: the
+catalog in `pnpm-workspace.yaml` declares those.
+
+It is not every package. A package states what it needs in its own
+`peerDependencies`, and several here declare none — they install and run with
+none of the stack present. `@lcabrera/ui` is the one the stack matters most for,
+and the paragraph below says why.
+
+Why it has to be said out loud. `@lcabrera/ui` publishes TypeScript source rather
+than a build, so a consumer's own toolchain compiles it, and it needs StyleX
+wired into that build. Off the stack the package does not work at all. Saying so
+bounds the promise instead of implying a portability nothing here tests. A
+consumer on a different framework or styling system is not an unlucky consumer.
+They were never a consumer.
+
+One rule follows and it is load-bearing. A package may assume the stack. It may
+not assume anything a bootstrapper wrote, which is the existing "no relying on a
+consumer's tsconfig `paths`" rule one level up.
+
+## The personas
 
 A persona earns a place here by having a **different definition of "it works"**.
-Three do; a fourth would have to bring a fourth definition, not a fourth job
-title.
+Each one below brings its own. A new one has to bring a further definition, not a
+further job title, and the sections below are the roster.
 
 ### The application developer
 
@@ -69,12 +94,36 @@ any one package, which is exactly why they are easy to lose: every package can
 pass its own tests while the thing the data user needs is reachable only by
 assembling an application by hand.
 
+### The project starter
+
+Has neither product yet, and no repository to install into — they are beginning
+one. They reach the product through a single command and judge it before they
+have read anything: it works when that command leaves them a repository that
+installs, builds, tests, lints, gates itself, and has an agent able to work in it,
+with an ADR register and a coordination register present and empty, ready to be
+written into.
+
+Their requirements are the ones that fail as **absence** rather than as
+misbehaviour — a command that half-finishes, a repository that looks configured
+and does not build, a harness that arrives without the rules it references. That
+is what separates them from the repository maintainer, whose failures are all
+about something behaving wrongly in a repository that already works. The two
+would otherwise collapse into one, and folding this persona into the maintainer
+"at time zero" was the live alternative when it was added
+([#1066](https://github.com/luciocabrera/lcabrera-stack/issues/1066)).
+
+Worth stating because it is the trap: of every persona here, this one's failures
+are the easiest to miss from inside this repository, which already has everything
+a starter lacks. Nothing here can observe a missing piece, which is why the
+requirement they own is checked by building a repository elsewhere.
+
 ## How the lines and personas meet
 
 The application stack is installed by the application developer, and reaches the
 data user through them — so a requirement in the data user's vocabulary is still
 a claim about packages, and still names the packages it concerns. The toolchain
-is installed by the repository maintainer.
+is installed by the repository maintainer. The project starter installs **both
+lines at once**, so their requirement declares both.
 
 **That is a statement about who installs what, and it is not a rule for which
 persona a requirement declares.** The two fields answer different questions:

@@ -39,6 +39,7 @@ export const PRODUCT_LINES = new Set(['application', 'toolchain']);
 export const PERSONAS = new Set([
   'application-developer',
   'data-user',
+  'project-starter',
   'repository-maintainer',
 ]);
 export const REQUIREMENT_STATES = new Set(['met', 'unmet']);

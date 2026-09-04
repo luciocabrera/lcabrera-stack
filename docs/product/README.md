@@ -7,7 +7,7 @@ One file per requirement, under [`requirements/`](./requirements/). Each states
 the requirement in its persona's vocabulary, lists acceptance criteria that are
 decidable rather than aspirational, and carries typed pointers to where the
 answer lives. [`VISION.md`](./VISION.md) names the two product lines and the
-three personas those statements are written for.
+personas those statements are written for.
 
 A requirement outlives the issue that implements it. That is the whole reason
 this layer exists: acceptance criteria authored on an issue are read once and
@@ -53,7 +53,7 @@ unenforceable convention is a convention that rots.
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `id`       | kebab-case, equal to the filename slug. Unique across the directory                                                                                   |
 | `lines`    | one or more of `application`, `toolchain` — the product lines it is a requirement of ([`VISION.md`](./VISION.md))                                     |
-| `persona`  | exactly one of `application-developer`, `repository-maintainer`, `data-user`                                                                          |
+| `persona`  | exactly one of `application-developer`, `repository-maintainer`, `data-user`, `project-starter`                                                       |
 | `state`    | `met` or `unmet`, declared ([ADR-093](../decisions/ADR-093-declare-a-requirement-state-rather-than-derive-it.md)). No third value, no date, no number |
 | `packages` | workspace directory names (`ui`, `server`, `repo-standards`, …) — the roster derived from `pnpm-workspace.yaml`, not npm package names                |
 | `requires` | ids of requirements this one leans on. A cycle is a malformed register                                                                                |
