@@ -104,10 +104,11 @@ export const readRegisterActivity = ({ cwd, directory, runGit, sinceDay }) => {
     available: true,
     commits: commits.length,
     files: tallyFiles(commits),
-    lastActivity: commits
-      .map((commit) => commit.day)
-      .toSorted()
-      .at(-1),
+    lastActivity: commits.reduce(
+      (latest, commit) =>
+        latest === undefined || commit.day > latest ? commit.day : latest,
+      undefined,
+    ),
   };
 };
 

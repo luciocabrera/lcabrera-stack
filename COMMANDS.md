@@ -523,6 +523,10 @@ and the window it covers, and a source it could not read is reported as unread
 rather than as a count of zero. `-- --days <n>` moves the window;
 `-- --transcript-retention-days <n>` narrows the transcript horizon, which is how
 you watch the local snapshot carry a period the transcripts have already dropped.
+An ordinary run reads every transcript still on disk whatever its age, so the
+transcript column never covers less than the window printed above it; the
+retention flag is the only thing that narrows the read, and a run that uses it
+says so and names the day it starts from.
 
 **Path rules are excluded, deliberately.** Nothing invokes one — it is loaded by
 glob — so there is no invocation to count, and the only proxy available (the

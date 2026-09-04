@@ -20,9 +20,6 @@ export const windowOf = ({ days, now }) => {
   return { days, end, start: shiftDay(end, -(days - 1)) };
 };
 
-export const isWithinWindow = ({ day, window }) =>
-  day >= window.start && day <= window.end;
-
 export const sumDays = ({ counts, from, to }) =>
   Object.entries(counts)
     .filter(([day]) => day >= from && day <= to)

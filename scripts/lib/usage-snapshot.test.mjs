@@ -4,7 +4,7 @@
  * day the transcripts no longer hold is still counted, and is still attributed
  * to the snapshot rather than to a source that could not have supplied it.
  */
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -110,22 +110,65 @@ describe('earliestDay', () => {
   });
 });
 
+const snapshotPath = () =>
+  join(mkdtempSync(join(tmpdir(), 'usage-')), 'snapshot.json');
+
+const TIMESTAMP = '2026-09-04T10:00:00.000Z';
+
 describe('readSnapshot', () => {
   it('starts empty rather than throwing on an unreadable file', () => {
-    const path = join(mkdtempSync(join(tmpdir(), 'usage-')), 'snapshot.json');
+    const path = snapshotPath();
     writeFileSync(path, 'not json');
 
-    expect(readSnapshot(path)).toEqual(emptySnapshot());
+    expect(readSnapshot({ path, timestamp: TIMESTAMP }).days).toEqual(
+      emptySnapshot().days,
+    );
   });
 
   it('round-trips what was written', () => {
-    const path = join(mkdtempSync(join(tmpdir(), 'usage-')), 'snapshot.json');
+    const path = snapshotPath();
     writeSnapshot({
       days: storedDays,
       path,
       updatedAt: '2026-09-04T00:00:00Z',
     });
 
-    expect(readSnapshot(path).days).toEqual(storedDays);
+    expect(readSnapshot({ path, timestamp: TIMESTAMP }).days).toEqual(
+      storedDays,
+    );
+  });
+
+  it('keeps an unreadable snapshot instead of letting the next write replace it', () => {
+    const path = snapshotPath();
+    writeFileSync(path, '{"version": 1, "days": {"skills": {"unslop"');
+
+    const { setAside } = readSnapshot({ path, timestamp: TIMESTAMP });
+    writeSnapshot({ days: {}, path, updatedAt: TIMESTAMP });
+
+    expect(setAside.movedTo).toContain('.unreadable');
+    expect(existsSync(setAside.movedTo)).toBe(true);
+    expect(readFileSync(setAside.movedTo, 'utf8')).toContain('unslop');
+  });
+
+  it('keeps a snapshot written by a different version rather than overwriting it', () => {
+    const path = snapshotPath();
+    writeFileSync(path, JSON.stringify({ days: storedDays, version: 0 }));
+
+    const { days, setAside } = readSnapshot({ path, timestamp: TIMESTAMP });
+
+    expect(days).toEqual(emptySnapshot().days);
+    expect(setAside.reason).toContain('version');
+    expect(JSON.parse(readFileSync(setAside.movedTo, 'utf8')).days).toEqual(
+      storedDays,
+    );
+  });
+
+  it('reports nothing set aside when the file reads cleanly', () => {
+    const path = snapshotPath();
+    writeSnapshot({ days: storedDays, path, updatedAt: TIMESTAMP });
+
+    expect(
+      readSnapshot({ path, timestamp: TIMESTAMP }).setAside,
+    ).toBeUndefined();
   });
 });

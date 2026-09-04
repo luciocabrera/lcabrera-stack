@@ -10,6 +10,11 @@
  * The reader reports whether it could read, separately from what it found: a
  * missing transcript directory and a repository nobody has used produce the same
  * empty tally, and those are opposite conclusions.
+ *
+ * `since` is optional and is meant to stay that way. Dropping an invocation that
+ * is still on disk can only shrink a count the report will then label with a
+ * wider window, so the bound exists for a run that is deliberately simulating
+ * expiry and for nothing else.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -109,7 +114,7 @@ export const readTranscriptUsage = ({ root, since, workingTrees }) => {
   }
   const invocations = files
     .flatMap((path) => invocationsInFile({ path, roots: workingTrees }))
-    .filter((invocation) => invocation.day >= since);
+    .filter((invocation) => since === undefined || invocation.day >= since);
   return {
     available: true,
     files: files.length,

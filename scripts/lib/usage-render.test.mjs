@@ -161,11 +161,12 @@ describe('renderReport', () => {
     expect(markdown).toContain('authentication required');
   });
 
-  it('flags a simulated transcript horizon so the columns are not misread', () => {
+  it('flags a simulated transcript horizon and names the day it starts at', () => {
     const markdown = reportWith({
       transcripts: {
         available: true,
         files: 3,
+        readFrom: '2026-09-04',
         retentionDays: 1,
         simulatedHorizon: true,
         snapshot: {
@@ -176,5 +177,86 @@ describe('renderReport', () => {
     });
 
     expect(markdown).toContain('simulated transcript horizon of 1 day(s)');
+    expect(markdown).toContain('cover 2026-09-04 onward');
+    expect(markdown).toContain('2026-09-04 → 2026-09-04 (simulated horizon)');
+  });
+
+  it('says an ordinary run read every transcript on disk, under the window it prints', () => {
+    const markdown = reportWith({});
+
+    expect(markdown).toContain(
+      'every transcript still on disk was read whatever its age',
+    );
+    expect(markdown).toContain(
+      '| Claude Code transcripts | skill and subagent invocations | 2026-06-07 → 2026-09-04 (90d) |',
+    );
+  });
+
+  it('keeps a multi-line reason with a pipe inside one table cell', () => {
+    const markdown = reportWith({
+      workflows: {
+        available: true,
+        rows: [
+          {
+            file: 'check-safe.yml',
+            reason: 'gh api failed\nwith: a | b\n\n  and a trailing line',
+            window: WINDOW,
+          },
+        ],
+      },
+    });
+    const rows = markdown
+      .split('\n')
+      .filter((line) => line.includes('check-safe.yml'));
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toBe(
+      '| `check-safe.yml` | not read — gh api failed with: a \\| b and a trailing line | GitHub Actions run history (`gh api`) | 2026-06-07 → 2026-09-04 (90d) |',
+    );
+    expect(rows[0].split(' | ')).toHaveLength(4);
+  });
+
+  it('keeps a multi-line reason on one line when a whole source is unread', () => {
+    const markdown = reportWith({
+      workflows: {
+        available: false,
+        reason: 'gh: To get started with GitHub CLI\nplease run: gh auth login',
+        rows: [{ file: 'check-safe.yml', window: WINDOW }],
+      },
+    });
+    const carrying = markdown
+      .split('\n')
+      .filter((line) => line.includes('gh auth login'));
+
+    expect(carrying.length).toBeGreaterThan(0);
+    expect(
+      carrying.every((line) => line.startsWith('|') || line.startsWith('>')),
+    ).toBe(true);
+    expect(markdown).not.toContain('\nplease run');
+  });
+
+  it('says the previous snapshot was kept rather than overwritten', () => {
+    const markdown = reportWith({
+      transcripts: {
+        available: true,
+        files: 3,
+        retentionDays: 30,
+        simulatedHorizon: false,
+        snapshot: {
+          earliestDay: '2026-09-04',
+          path: 'reports/usage/snapshot.json',
+          setAside: {
+            movedTo:
+              'reports/usage/snapshot.json.20260904T100000000Z.unreadable',
+            reason: 'Unexpected end of JSON input',
+          },
+        },
+      },
+    });
+
+    expect(markdown).toContain('The previous snapshot could not be read');
+    expect(markdown).toContain(
+      'reports/usage/snapshot.json.20260904T100000000Z.unreadable',
+    );
   });
 });

@@ -5,10 +5,13 @@
  * shapes it counts, the ones it must not count, and that it says when it read
  * nothing at all.
  */
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vite-plus/test';
 
+import { transcriptDirectoryFor } from './usage-scope.mjs';
 import {
   invocationsInEntry,
   readTranscriptUsage,
@@ -97,6 +100,25 @@ describe('tallyByDay', () => {
   });
 });
 
+const transcriptRootWith = (entries) => {
+  const tree = mkdtempSync(join(tmpdir(), 'usage-tree-'));
+  const root = mkdtempSync(join(tmpdir(), 'usage-transcripts-'));
+  const directory = join(root, transcriptDirectoryFor(tree));
+  mkdirSync(directory);
+  writeFileSync(
+    join(directory, 'session.jsonl'),
+    entries.map((entry) => JSON.stringify({ ...entry, cwd: tree })).join('\n'),
+  );
+  return { root, tree };
+};
+
+const skillEntryOn = (timestamp) => ({
+  message: {
+    content: [{ input: { skill: 'unslop' }, name: 'Skill', type: 'tool_use' }],
+  },
+  timestamp,
+});
+
 describe('readTranscriptUsage', () => {
   it('reports that it could not read, rather than an empty tally', () => {
     const result = readTranscriptUsage({
@@ -107,5 +129,34 @@ describe('readTranscriptUsage', () => {
 
     expect(result.available).toBe(false);
     expect(result.reason).toContain('no transcript directory');
+  });
+
+  it('counts an invocation older than the retention default when no horizon is given', () => {
+    const { root, tree } = transcriptRootWith([
+      skillEntryOn('2026-06-10T09:00:00.000Z'),
+      skillEntryOn('2026-09-04T09:00:00.000Z'),
+    ]);
+
+    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+
+    expect(result.tally.skills.unslop).toEqual({
+      '2026-06-10': 1,
+      '2026-09-04': 1,
+    });
+  });
+
+  it('drops what falls before a simulated horizon', () => {
+    const { root, tree } = transcriptRootWith([
+      skillEntryOn('2026-06-10T09:00:00.000Z'),
+      skillEntryOn('2026-09-04T09:00:00.000Z'),
+    ]);
+
+    const result = readTranscriptUsage({
+      root,
+      since: '2026-09-04',
+      workingTrees: [tree],
+    });
+
+    expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
   });
 });

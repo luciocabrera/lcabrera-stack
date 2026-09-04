@@ -7,14 +7,25 @@
  * Two things it always prints, because a number without them misleads: the
  * source and window behind every count, and the fact that a count of zero is a
  * question rather than a verdict.
+ *
+ * Every cell and every interpolated reason goes through one sanitiser. A reason
+ * comes from a tool this report does not control — a `gh` failure spans lines
+ * and may hold a pipe — and either character silently ends a markdown table one
+ * row early, which turns the rows below it into prose a reader skips.
  */
 const TABLE_RULE = (columns) => `| ${columns.map(() => '---').join(' | ')} |`;
 
+const inline = (value) => String(value).replaceAll(/\s+/gu, ' ').trim();
+
+const cell = (value) => inline(value).replaceAll('|', '\\|');
+
 const table = (columns, rows) =>
   [
-    `| ${columns.join(' | ')} |`,
+    `| ${columns.map((column) => cell(column)).join(' | ')} |`,
     TABLE_RULE(columns),
-    ...rows.map((cells) => `| ${cells.join(' | ')} |`),
+    ...rows.map(
+      (cells) => `| ${cells.map((value) => cell(value)).join(' | ')} |`,
+    ),
   ].join('\n');
 
 const windowLabel = (window) =>
@@ -56,7 +67,7 @@ const invocationSection = ({ heading, rows, transcripts }) =>
       ? []
       : [
           '',
-          `> The transcript source could not be read, so no number here is an observation of absence. ${transcripts.reason}`,
+          `> The transcript source could not be read, so no number here is an observation of absence. ${inline(transcripts.reason)}`,
         ]),
   ].join('\n');
 
@@ -74,7 +85,7 @@ const workflowSection = (workflows) =>
     '',
     workflows.available
       ? table(['Workflow', 'Runs', 'Source', 'Window'], workflowRows(workflows))
-      : `> The GitHub API could not be read, so there is no run count to report — not a run count of zero. ${workflows.reason}`,
+      : `> The GitHub API could not be read, so there is no run count to report — not a run count of zero. ${inline(workflows.reason)}`,
     '',
     'GitHub retains workflow runs for a limited period, so this window is also',
     'bounded by that retention, not only by the window requested here.',
@@ -124,6 +135,11 @@ const registerSummary = (register) =>
     ],
   );
 
+const registerBody = (register) =>
+  register.detail === 'per-file'
+    ? registerDetail(register)
+    : registerSummary(register);
+
 const registerSection = (register) =>
   [
     `## ${register.heading}`,
@@ -131,10 +147,8 @@ const registerSection = (register) =>
     register.note,
     '',
     register.available
-      ? register.detail === 'per-file'
-        ? registerDetail(register)
-        : registerSummary(register)
-      : `> This register could not be read, so there is nothing to count here — not a count of zero. ${register.reason}`,
+      ? registerBody(register)
+      : `> This register could not be read, so there is nothing to count here — not a count of zero. ${inline(register.reason)}`,
   ].join('\n');
 
 const pathRuleSection = (pathRules) =>
@@ -160,11 +174,16 @@ const pathRuleSection = (pathRules) =>
     ),
   ].join('\n');
 
+const transcriptWindow = (report) =>
+  report.transcripts.readFrom === undefined
+    ? windowLabel(report.window)
+    : `${report.transcripts.readFrom} → ${report.window.end} (simulated horizon)`;
+
 const sourceRows = (report) => [
   [
     'Claude Code transcripts',
     'skill and subagent invocations',
-    windowLabel(report.window),
+    transcriptWindow(report),
     transcriptStatus(report.transcripts),
   ],
   [
@@ -193,6 +212,19 @@ const sourceRows = (report) => [
   ],
 ];
 
+const horizonNote = (transcripts) =>
+  transcripts.simulatedHorizon
+    ? `**This run used a simulated transcript horizon of ${transcripts.retentionDays} day(s)** (\`--transcript-retention-days\`), so the transcript columns cover ${transcripts.readFrom} onward rather than the whole window. The totals still include everything the snapshot carries.`
+    : `Transcripts are kept for ${transcripts.retentionDays} day(s) (\`cleanupPeriodDays\` in \`.claude/settings.json\`), and every transcript still on disk was read whatever its age, so the transcript columns cover the whole window above. The snapshot carries the days that have already been deleted.`;
+
+const snapshotNote = (snapshot) =>
+  snapshot.setAside === undefined
+    ? []
+    : [
+        '',
+        `> **The previous snapshot could not be read**, so it was moved to \`${snapshot.setAside.movedTo}\` rather than overwritten and this run starts a new one. Until it is restored, the carried columns hold only what the transcripts still show. ${inline(snapshot.setAside.reason)}`,
+      ];
+
 const header = (report) => [
   '# Harness usage',
   '',
@@ -216,9 +248,8 @@ const header = (report) => [
   'subagent counts therefore describe this machine, so a low number is partial',
   'coverage before it is evidence of absence.',
   '',
-  report.transcripts.simulatedHorizon
-    ? `**This run used a simulated transcript horizon of ${report.transcripts.retentionDays} day(s)** (\`--transcript-retention-days\`), so the transcript columns show less than the machine holds. The totals still include everything the snapshot carries.`
-    : `Transcripts are kept for ${report.transcripts.retentionDays} day(s) (\`cleanupPeriodDays\` in \`.claude/settings.json\`); the snapshot carries what falls off.`,
+  horizonNote(report.transcripts),
+  ...snapshotNote(report.transcripts.snapshot),
   '',
   '## Sources',
   '',

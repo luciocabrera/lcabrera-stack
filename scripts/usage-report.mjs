@@ -24,16 +24,27 @@
  *   vp run usage:report -- --transcript-retention-days 1   # simulate expiry
  *   vp run usage:report -- --now 2026-09-01T00:00:00Z --out reports/usage
  *
+ * Every transcript still on disk is read, whatever its age — a narrower read can
+ * only drop invocations that belong in the reported window. The retention
+ * horizon is applied only when `--transcript-retention-days` asks for expiry to
+ * be simulated, and the report labels that run's transcript columns with it.
+ *
  * Exit codes: 0 = a report was written, including when a source could not be
- * read (it is reported as unread, never as a count of zero); 1 = bad arguments
- * or the report could not be written.
+ * read (it is reported as unread, never as a count of zero); 1 = bad arguments,
+ * an unusable `cleanupPeriodDays`, or the report could not be written.
  */
-import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 import { runGh } from './lib/gh-exec.mjs';
+import {
+  parseArgs,
+  positiveInteger,
+  resolveRetention,
+  transcriptHorizon,
+} from './lib/usage-args.mjs';
 import { readHarnessInventory } from './lib/usage-inventory.mjs';
 import { renderReport } from './lib/usage-render.mjs';
 import { repositoryWorkingTrees } from './lib/usage-scope.mjs';
@@ -53,70 +64,13 @@ import {
   readTranscriptUsage,
   transcriptsRoot,
 } from './lib/usage-transcripts.mjs';
-import { shiftDay, windowOf } from './lib/usage-window.mjs';
+import { windowOf } from './lib/usage-window.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const COMMAND = 'vp run usage:report';
 const DEFAULT_WINDOW_DAYS = 90;
-const DOCUMENTED_CLEANUP_DEFAULT = 30;
 
-const VALUE_FLAGS = new Map([
-  ['--days', 'days'],
-  ['--now', 'now'],
-  ['--out', 'out'],
-  ['--snapshot', 'snapshot'],
-  ['--transcript-retention-days', 'retentionDays'],
-]);
-
-const parseArgs = (argv) => {
-  const queue = [...argv];
-  const args = {};
-  while (queue.length > 0) {
-    const flag = queue.shift();
-    if (flag === '--') continue;
-    const key = VALUE_FLAGS.get(flag);
-    if (key === undefined) {
-      throw new Error(
-        `unknown argument: ${flag} (see the header comment for usage)`,
-      );
-    }
-    args[key] = queue.shift();
-  }
-  return args;
-};
-
-const positiveInteger = (value, label) => {
-  const parsed = Number.parseInt(value, 10);
-  if (Number.isNaN(parsed) || parsed < 1) {
-    throw new Error(`${label} must be a positive whole number of days`);
-  }
-  return parsed;
-};
-
-const configuredRetentionDays = () => {
-  const settingsPath = join(REPO_ROOT, '.claude', 'settings.json');
-  if (!existsSync(settingsPath)) return undefined;
-  try {
-    return JSON.parse(readFileSync(settingsPath, 'utf8')).cleanupPeriodDays;
-  } catch {
-    return undefined;
-  }
-};
-
-const resolveRetention = (args) => {
-  if (args.retentionDays !== undefined) {
-    return {
-      days: positiveInteger(args.retentionDays, '--transcript-retention-days'),
-      simulated: true,
-    };
-  }
-  const configured = configuredRetentionDays();
-  return {
-    days:
-      typeof configured === 'number' ? configured : DOCUMENTED_CLEANUP_DEFAULT,
-    simulated: false,
-  };
-};
+const relativeToRepo = (path) => path.replace(`${REPO_ROOT}/`, '');
 
 const invocationRowsFor = ({ inventory, kind, live, merged, window }) =>
   [...new Set([...inventory, ...Object.keys(merged[kind])])]
@@ -178,6 +132,11 @@ const REGISTERS = [
   },
 ];
 
+const setAsideNotice = (setAside) =>
+  setAside === undefined
+    ? undefined
+    : { movedTo: relativeToRepo(setAside.movedTo), reason: setAside.reason };
+
 const buildReport = ({
   args,
   generatedAt,
@@ -185,24 +144,27 @@ const buildReport = ({
   snapshotPath,
   window,
 }) => {
-  const retention = resolveRetention(args);
+  const retention = resolveRetention({ args, repoRoot: REPO_ROOT });
+  const readFrom = transcriptHorizon({ retention, window });
   const workingTrees = repositoryWorkingTrees(REPO_ROOT);
   const live = readTranscriptUsage({
     root: transcriptsRoot(),
-    since: shiftDay(window.end, -(retention.days - 1)),
+    since: readFrom,
     workingTrees,
   });
-  const stored = readSnapshot(snapshotPath);
+  const stored = readSnapshot({ path: snapshotPath, timestamp: generatedAt });
   const merged = mergeTally(stored.days, live.tally);
   writeSnapshot({ days: merged, path: snapshotPath, updatedAt: generatedAt });
 
   const transcripts = {
     ...live,
+    readFrom,
     retentionDays: retention.days,
     simulatedHorizon: retention.simulated,
     snapshot: {
       earliestDay: earliestDay(merged),
-      path: snapshotPath.replace(`${REPO_ROOT}/`, ''),
+      path: relativeToRepo(snapshotPath),
+      setAside: setAsideNotice(stored.setAside),
     },
     workingTrees,
   };
@@ -243,20 +205,14 @@ const writeOutputs = ({ outDir, report }) => {
   return { jsonPath, markdownPath };
 };
 
-const printSummary = ({ paths, report }) => {
-  const relative = (path) => path.replace(`${REPO_ROOT}/`, '');
-  console.log(
-    `Harness usage — window ${report.window.start} → ${report.window.end}`,
-  );
-  console.log(
-    `  transcripts: ${report.transcripts.available ? 'read' : `NOT READ — ${report.transcripts.reason}`}`,
-  );
-  console.log(
-    `  workflow runs: ${report.workflows.available ? 'read' : `NOT READ — ${report.workflows.reason}`}`,
-  );
-  for (const register of report.registers) {
-    console.log(
-      `  ${register.directory}: ${register.available ? 'read' : `NOT READ — ${register.reason}`}`,
+const statusOf = ({ available, reason }) =>
+  available ? 'read' : `NOT READ — ${reason}`;
+
+const printWarnings = (report) => {
+  const { setAside } = report.transcripts.snapshot;
+  if (setAside !== undefined) {
+    console.warn(
+      `  warning: the previous snapshot could not be read (${setAside.reason}), so it was moved to ${setAside.movedTo} rather than overwritten, and this run starts a new one.`,
     );
   }
   if (report.shallowClone) {
@@ -264,8 +220,20 @@ const printSummary = ({ paths, report }) => {
       '  warning: this is a shallow clone, so the git-sourced numbers are bounded by the fetched history.',
     );
   }
-  console.log(`  wrote ${relative(paths.markdownPath)}`);
-  console.log(`  wrote ${relative(paths.jsonPath)}`);
+};
+
+const printSummary = ({ paths, report }) => {
+  console.log(
+    `Harness usage — window ${report.window.start} → ${report.window.end}`,
+  );
+  console.log(`  transcripts: ${statusOf(report.transcripts)}`);
+  console.log(`  workflow runs: ${statusOf(report.workflows)}`);
+  for (const register of report.registers) {
+    console.log(`  ${register.directory}: ${statusOf(register)}`);
+  }
+  printWarnings(report);
+  console.log(`  wrote ${relativeToRepo(paths.markdownPath)}`);
+  console.log(`  wrote ${relativeToRepo(paths.jsonPath)}`);
   console.log(`  snapshot ${report.transcripts.snapshot.path}`);
   console.log(
     'Every number in the report is reproduced by re-running this command; do not copy one into a tracked file.',

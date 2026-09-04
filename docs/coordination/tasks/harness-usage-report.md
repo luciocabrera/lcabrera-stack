@@ -25,6 +25,6 @@ Report how the harness is actually used
 
 ## Status / next
 
-- Current step: implemented, full gate green, awaiting verification
+- Current step: review findings addressed, full gate green, awaiting re-review
 - Blockers: none
 - Next: independent verification against the issue's acceptance criteria

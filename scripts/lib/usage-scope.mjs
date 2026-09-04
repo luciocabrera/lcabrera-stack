@@ -9,12 +9,22 @@
  * partial-coverage failure the report exists to avoid.
  *
  * Read off the filesystem rather than through a git subprocess, for the reason
- * `git-remote.mjs` gives: nothing resolves through PATH.
+ * `git-remote.mjs` gives: nothing resolves through PATH. The pointer inside a
+ * worktree's `.git` file is split on lines rather than matched with a pattern,
+ * so the cost of reading it stays linear in the file it was handed.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
-const GITDIR_LINE = /^gitdir:\s*(?<path>.+)$/mu;
+const GITDIR_PREFIX = 'gitdir:';
+
+export const gitdirPointer = (contents) => {
+  const line = String(contents)
+    .split('\n')
+    .find((candidate) => candidate.startsWith(GITDIR_PREFIX));
+  const pointer = line?.slice(GITDIR_PREFIX.length).trim();
+  return pointer === undefined || pointer.length === 0 ? undefined : pointer;
+};
 
 const commonGitDir = (repoRoot) => {
   const dotGit = join(repoRoot, '.git');
@@ -24,7 +34,7 @@ const commonGitDir = (repoRoot) => {
   if (statSync(dotGit).isDirectory()) {
     return dotGit;
   }
-  const pointer = GITDIR_LINE.exec(readFileSync(dotGit, 'utf8'))?.groups?.path;
+  const pointer = gitdirPointer(readFileSync(dotGit, 'utf8'));
   return pointer === undefined
     ? undefined
     : resolve(repoRoot, pointer, '..', '..');
