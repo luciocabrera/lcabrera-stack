@@ -6,9 +6,12 @@
  * unauthenticated `gh`, an unreachable API and a workflow nobody triggered all
  * produce no runs. Each takes the whole window rather than its start alone,
  * since a store keeps growing after the day a report is dated. The git day is
- * re-checked after parsing, and the log prints the committer date the revision
- * filter itself selects on, so the check cannot discard a commit git chose.
+ * re-checked after parsing against the same instant the revision filter used:
+ * the log emits the committer date as epoch seconds, so no timezone sits between
+ * what git selected and what the report prints.
  */
+import { dayOf } from './usage-window.mjs';
+
 const workflowRunCount = ({ file, runGh, window }) => {
   try {
     const total = runGh([
@@ -51,6 +54,13 @@ export const readWorkflowRuns = ({ runGh, window, workflows }) => {
 
 const RECORD_MARK = String.fromCodePoint(1);
 
+const utcDayOf = (epochSeconds) => {
+  const seconds = Number.parseInt(epochSeconds, 10);
+  return Number.isNaN(seconds)
+    ? ''
+    : dayOf(new Date(seconds * 1000).toISOString());
+};
+
 export const parseCommitFiles = (log) =>
   log
     .split(RECORD_MARK)
@@ -59,7 +69,7 @@ export const parseCommitFiles = (log) =>
     .map((record) => {
       const lines = record.split('\n');
       return {
-        day: (lines[0] ?? '').split(' ')[1] ?? '',
+        day: utcDayOf((lines[0] ?? '').split(' ')[1] ?? ''),
         files: lines.slice(1).filter((line) => line.length > 0),
       };
     });
@@ -93,8 +103,7 @@ export const readRegisterActivity = ({ cwd, directory, runGit, window }) => {
       `--since=${window.start}T00:00:00Z`,
       `--until=${window.end}T23:59:59Z`,
       '--name-only',
-      '--date=short',
-      '--pretty=format:%x01%H %cd',
+      '--pretty=format:%x01%H %ct',
       '--',
       directory,
     ],

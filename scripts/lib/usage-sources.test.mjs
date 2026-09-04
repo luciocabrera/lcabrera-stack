@@ -21,10 +21,10 @@ const WINDOW = { days: 90, end: '2026-09-01', start: '2026-06-04' };
 const MARK = String.fromCodePoint(1);
 
 const LOG = [
-  `${MARK}aaa 2026-09-04`,
+  `${MARK}aaa 1788526800`,
   'docs/coordination/tasks/one.md',
   'docs/coordination/tasks/two.md',
-  `${MARK}bbb 2026-08-30`,
+  `${MARK}bbb 1788080400`,
   'docs/coordination/tasks/one.md',
 ].join('\n');
 
@@ -118,6 +118,12 @@ describe('parseCommitFiles', () => {
       { day: '2026-08-30', files: ['docs/coordination/tasks/one.md'] },
     ]);
   });
+
+  it('reads the day in UTC, whatever timezone the commit was written in', () => {
+    expect(
+      parseCommitFiles(`${MARK}ccc 1788526800\ndocs/coordination/tasks/x.md`),
+    ).toEqual([{ day: '2026-09-04', files: ['docs/coordination/tasks/x.md'] }]);
+  });
 });
 
 describe('tallyFiles', () => {
@@ -175,7 +181,7 @@ describe('readRegisterActivity', () => {
     expect(asked[0]).toContain('--until=2026-09-01T23:59:59Z');
   });
 
-  it('prints the same date field the revision filter selects on', () => {
+  it('asks for the committer instant, so no timezone sits between filter and day', () => {
     const asked = [];
     readRegisterActivity({
       cwd: '/repo',
@@ -187,8 +193,11 @@ describe('readRegisterActivity', () => {
       window: WINDOW,
     });
 
-    expect(asked[0]).toContain(`--pretty=format:%x01%H %cd`);
+    expect(asked[0]).toContain('--pretty=format:%x01%H %ct');
     expect(asked[0].join(' ')).not.toContain('%ad');
+    expect(asked[0].some((argument) => argument.startsWith('--date='))).toBe(
+      false,
+    );
   });
 
   it('reports no activity from after the window, whatever the log holds', () => {
