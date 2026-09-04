@@ -71,3 +71,9 @@ docs/coordination/BOARD.md
 # Sonar per-run artifacts — every target, main included (scripts/lib/sonar-report-path.mjs)
 reports/sonar/runs/*
 !reports/sonar/runs/.gitkeep
+
+# Harness usage report and its local snapshot — produced on demand by
+# `vp run usage:report` (ADR-049). The snapshot is one machine's own record of
+# the days Claude Code transcripts no longer hold; it is local state, not a
+# shared measurement, so it is never committed either.
+reports/usage/

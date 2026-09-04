@@ -2,7 +2,7 @@
 id: harness-usage-report
 title: Report how the harness is actually used
 owner: agent:claude
-status: active
+status: review
 branch: feat/1068-harness-usage-report
 area:
   - scripts/usage-report.mjs
@@ -15,7 +15,7 @@ area:
 started: 2026-09-04
 updated: 2026-09-04
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1088
 issue: #1068
 ---
 
@@ -25,6 +25,6 @@ Report how the harness is actually used
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented, full gate green, awaiting verification
 - Blockers: none
-- Next:
+- Next: independent verification against the issue's acceptance criteria

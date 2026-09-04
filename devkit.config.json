@@ -26,7 +26,8 @@
       "expectedAbsentPrefixes": [
         "docker/local/",
         "reports/fallow/runs/",
-        "reports/sonar/runs/"
+        "reports/sonar/runs/",
+        "reports/usage/"
       ],
       "ignoredDocs": [
         "reports/",
@@ -40,7 +41,8 @@
         "reports/oxlint",
         "reports/react-doctor",
         "reports/skills",
-        "reports/sonar"
+        "reports/sonar",
+        "reports/usage"
       ],
       "repoRoots": [
         ".claude",

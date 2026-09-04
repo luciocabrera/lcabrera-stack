@@ -512,7 +512,26 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 | `vp run configs:verify`        | check no formatter/linter config file exists that no engine reads — fmt and lint are configured once in the root `vite.config.ts` (ADR-042), so a `.oxfmtrc.json`/`.prettierrc` beside it is a decoy                                                                                                                             |
 | `vp run skills:validate`       | validate skill definitions                                                                                                                                                                                                                                                                                                       |
 | `vp run skills:report`         | skills compliance report                                                                                                                                                                                                                                                                                                         |
+| `vp run usage:report`          | report how the harness is actually used — skill, subagent and workflow activity read out of stores that already retain it, written to `reports/usage/` and never committed ([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md))                                                                        |
 | `vp run prepare`               | `vp config` — runs automatically on install                                                                                                                                                                                                                                                                                      |
+
+`usage:report` reads four stores and collects nothing of its own: Claude Code
+transcripts on this machine for skill and subagent invocations, the GitHub
+Actions run history for workflows, and `git log` over the requirement and
+coordination registers. Every number it prints carries the source it came from
+and the window it covers, and a source it could not read is reported as unread
+rather than as a count of zero. `-- --days <n>` moves the window;
+`-- --transcript-retention-days <n>` narrows the transcript horizon, which is how
+you watch the local snapshot carry a period the transcripts have already dropped.
+
+**Path rules are excluded, deliberately.** Nothing invokes one — it is loaded by
+glob — so there is no invocation to count, and the only proxy available (the
+violation rate of the gate behind the rule) reads the same whether the rule is
+perfectly internalised or completely dead. The report lists them as unmeasurable
+with that reason rather than giving them a number.
+
+**Do not copy a number out of it into a tracked file.** It measures one machine
+over one window; name the command instead.
 
 `adr:verify` reads the record, not only its name. Every ADR opens with a
 `---` block declaring **`governs`** — workspace directory names (`ui`,
