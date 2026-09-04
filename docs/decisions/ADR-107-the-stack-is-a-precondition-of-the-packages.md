@@ -147,11 +147,12 @@ truth conditions and no gate could have been written for it.
 
 ## Alternatives considered
 
-**Put the stack in each package's README instead of `VISION.md`.** Rejected: ten
-copies of one fact, which is the failure mode this repository has repeatedly paid
-for — `commands:verify`, `docs:verify` and `seeds:verify` all exist because a
-fact was stated in more than one place and the copies drifted. A package README
-may point at the statement; it may not restate it.
+**Put the stack in each package's README instead of stating it once here.**
+Rejected: one copy per published package of a single fact, which is the failure
+mode this repository has repeatedly paid for. `commands:verify`, `docs:verify`
+and `seeds:verify` all exist because a fact was stated in more than one place and
+the copies drifted. A package README may point at this decision; it may not
+restate it.
 
 **Encode the stack as peer dependencies and stop there.** Peer ranges are the
 right mechanism for the packages that can express it, and they are not
