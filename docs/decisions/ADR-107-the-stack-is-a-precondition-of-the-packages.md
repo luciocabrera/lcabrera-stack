@@ -101,9 +101,12 @@ requirements point here rather than repeating it.
 
 It is **not** a blanket precondition of every published package, and saying so
 would be false against gates this repository already runs. `api`, `server`,
-`utils`, `node` and `repo-standards` declare no peer dependencies at all, and
-`publish:verify` imports their published subpaths from a bare temporary directory
-with none of the stack present. `tarball:verify` goes further: `scratchConsumer`
+`utils`, `node` and `repo-standards` declare no peer dependencies at all.
+`publish:verify` packs the ones that build and imports the subset whose whole
+dependency closure it packed, from a bare temporary directory with none of the
+stack present: `api`, `utils` and `node` are imported there. `server` is packed
+and not imported, because it depends on `pg` and `zod`, which are not in the
+packed set. `tarball:verify` goes further: `scratchConsumer`
 writes a manifest with no dependencies, installs the packed tarballs with npm,
 and runs `devkit init` there. That is `devkit` working with no React, no StyleX,
 no Vite+ and no pnpm, on every `check:safe` run.

@@ -67,9 +67,13 @@ unfalsifiable.
 What already exists is worth knowing, so this requirement is not read as covering
 more than it does. `vp run publish:verify` packs every public package that builds
 and has a fresh Node process import each published subpath from a temporary
-directory, so `api`, `server`, `utils` and `node-runtime` are already resolved
-outside this tree. `@lcabrera/ui` is not, and neither gate would take it as
-things stand: `publish:verify` selects on a `build` script, which `ui` has none
+directory. It imports only the packages whose whole dependency closure it packed,
+so `api`, `utils` and `node-runtime` are already resolved outside this tree.
+`server` is packed and never imported: it depends on `pg` and `zod`, which are
+not in the packed set.
+
+`@lcabrera/ui` is neither packed nor imported, and neither gate would take it as
+things stand. `publish:verify` selects on a `build` script, which `ui` has none
 of, and `tarball:verify` selects from a hardcoded roster holding the two `.mjs`
 packages. Adding a build script would enrol `ui` in the first and not the
 second.
