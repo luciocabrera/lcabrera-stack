@@ -16,12 +16,18 @@ governs:
 
 ## Context
 
-Ten packages publish from this repository under `@lcabrera/*`, and each is held
-to standing on its own: declared dependencies, a resolvable public surface, no
-reliance on a consumer's tsconfig `paths`. That rule is about what a package may
-_assume about the repository it lands in_, and it is enforced —
-`vp run tarball:verify` packs the distributed packages and installs them into a
-scratch repository holding none of this tree's files.
+The packages that publish from this repository under `@lcabrera/*` are each held
+to standing on their own: declared dependencies, a resolvable public surface, no
+reliance on a consumer's tsconfig `paths`. `vp run suppressions:packages` prints
+that roster. The rule is about what a package may _assume about the repository it
+lands in_.
+
+It is only partly enforced, and the gap matters here. `vp run tarball:verify`
+packs the two distributed packages, `devkit` and `repo-standards`, and installs
+them into a scratch repository holding none of this tree's files. Every other
+published package is installed nowhere outside this tree, so its standalone
+property rests on review. That is the contrast this decision is built on, and it
+is weaker than "already enforced".
 
 What no rule covers is what a package may assume about the **stack** it lands
 on. `@lcabrera/ui` publishes TypeScript source rather than a build, so the

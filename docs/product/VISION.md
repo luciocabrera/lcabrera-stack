@@ -2,7 +2,8 @@
 
 Two products ship from this repository, and four kinds of person judge them.
 Every requirement in [`requirements/`](./requirements/) is written for exactly
-one of those people, in their words. This page defines them and nothing else.
+one of those people, in their words. This page defines the lines, the stack they
+assume, and those people.
 
 ## The two product lines
 

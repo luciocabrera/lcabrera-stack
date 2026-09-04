@@ -22,7 +22,8 @@ this directory or above it. The rules below are stated in full in
 Frontmatter:
   id        kebab-case, equal to the filename slug, unique in this directory
   lines     one or more of: application | toolchain   (see ../VISION.md)
-  persona   application-developer | repository-maintainer | data-user — exactly ONE.
+  persona   application-developer | repository-maintainer | data-user |
+            project-starter — exactly ONE.
             A requirement may be owed by both lines; it is still written in one
             voice, so pick the persona it fails hardest for.
   state     met | unmet. DECLARED, not derived, and flipped in the same commit as

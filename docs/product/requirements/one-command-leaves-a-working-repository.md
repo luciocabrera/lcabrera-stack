@@ -49,8 +49,12 @@ I have to finish assembling.
   resolves inside that repository: `devkit closure`.
 - It contains an ADR register and a coordination register, each with its template
   and **no records**, so the first record written is the project's own.
-- No file in the produced repository names this repository — not a package name,
-  not a secret, not a task only this repository defines: `vp run seeds:verify`.
+- No file in the produced repository names this repository: not a package name,
+  not a secret, not a task only this repository defines. The decider is a check
+  run against the **produced** tree, and it does not exist yet.
+  `vp run seeds:verify` is not it: that gate reads the seeds devkit ships from
+  this checkout, so it reports the same clean pass whatever the produced
+  repository contains. #1075 and #1076 build the one that can settle this.
 - Every `@lcabrera/*` dependency it declares is a semver range resolved from the
   registry. No `workspace:` specifier appears anywhere in the produced tree.
 - **The check is run outside this repository.** The gate builds the repository in

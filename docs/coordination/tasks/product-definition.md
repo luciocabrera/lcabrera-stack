@@ -11,7 +11,7 @@ area:
 started: 2026-09-04
 updated: 2026-09-04
 plan: (none)
-pr: (none)
+pr: '#1084'
 issue: #1066
 ---
 
@@ -21,6 +21,6 @@ The stack contract, the project-starter persona, and the six requirements the to
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review on #1084; all review threads addressed
 - Blockers: none
 - Next:
