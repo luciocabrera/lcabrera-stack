@@ -34,10 +34,11 @@ selects on a `build` script, and `@lcabrera/ui` publishes TypeScript source and
 has none. `tarball:verify` selects from a hardcoded roster of the two packages
 that ship `.mjs`, which `ui` is not on. So adding a build script to `ui` would
 enrol it in the first gate and not the second. It is packed and imported by
-nothing today, and it is also the package the rest of this ADR is about. What stays uncovered for all of them is narrower and more specific:
+nothing today, and it is also the package the rest of this ADR is about.
+
+For the packages the two gates do cover, something narrower stays uncovered:
 being installed into a repository **on the declared stack** and used there.
-Resolving an import is not the same as compiling StyleX in someone else's
-build.
+Resolving an import is not the same as compiling StyleX in someone else's build.
 
 What no rule covers is what a package may assume about the **stack** it lands
 on. `@lcabrera/ui` publishes TypeScript source rather than a build, so the
