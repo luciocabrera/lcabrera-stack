@@ -3,6 +3,10 @@
  * so the property under test is the one that matters after the window rolls: a
  * day the transcripts no longer hold is still counted, and is still attributed
  * to the snapshot rather than to a source that could not have supplied it.
+ *
+ * The observed spans are the other half, and they exist because a recorded day
+ * is not a covered day: a day with no invocation leaves no entry, so the days
+ * the snapshot holds can never say how far back anything was actually read.
  */
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -14,7 +18,9 @@ import {
   countsFor,
   earliestDay,
   emptySnapshot,
+  mergeObserved,
   mergeTally,
+  observedBackTo,
   readSnapshot,
   writeSnapshot,
 } from './usage-snapshot.mjs';
@@ -25,6 +31,76 @@ const storedDays = {
   skills: { unslop: { '2026-08-10': 4, '2026-09-04': 1 } },
   subagents: { 'refactor-verifier': { '2026-08-10': 9 } },
 };
+
+describe('mergeObserved', () => {
+  it('joins two runs that meet or overlap into one span', () => {
+    expect(
+      mergeObserved([{ from: '2026-08-06', to: '2026-09-04' }], {
+        from: '2026-07-08',
+        to: '2026-08-06',
+      }),
+    ).toEqual([{ from: '2026-07-08', to: '2026-09-04' }]);
+  });
+
+  it('joins two runs that leave no day between them', () => {
+    expect(
+      mergeObserved([{ from: '2026-08-06', to: '2026-09-04' }], {
+        from: '2026-07-08',
+        to: '2026-08-05',
+      }),
+    ).toEqual([{ from: '2026-07-08', to: '2026-09-04' }]);
+  });
+
+  it('keeps a gap between two runs as two spans', () => {
+    expect(
+      mergeObserved([{ from: '2026-05-04', to: '2026-06-02' }], {
+        from: '2026-08-06',
+        to: '2026-09-04',
+      }),
+    ).toEqual([
+      { from: '2026-05-04', to: '2026-06-02' },
+      { from: '2026-08-06', to: '2026-09-04' },
+    ]);
+  });
+
+  it('records nothing for a run that observed nothing', () => {
+    expect(
+      mergeObserved([{ from: '2026-08-06', to: '2026-09-04' }], undefined),
+    ).toEqual([{ from: '2026-08-06', to: '2026-09-04' }]);
+  });
+});
+
+describe('observedBackTo', () => {
+  it('reaches back only as far as the span covering the window end', () => {
+    const observed = mergeObserved([{ from: '2026-05-04', to: '2026-06-02' }], {
+      from: '2026-08-06',
+      to: '2026-09-04',
+    });
+
+    expect(observedBackTo({ observed, to: '2026-09-04' })).toBe('2026-08-06');
+  });
+
+  it('reaches the whole way once the gap between runs is filled', () => {
+    const observed = mergeObserved(
+      mergeObserved([{ from: '2026-05-04', to: '2026-06-02' }], {
+        from: '2026-08-06',
+        to: '2026-09-04',
+      }),
+      { from: '2026-06-03', to: '2026-08-05' },
+    );
+
+    expect(observedBackTo({ observed, to: '2026-09-04' })).toBe('2026-05-04');
+  });
+
+  it('is undefined when no run reached the day asked about', () => {
+    expect(
+      observedBackTo({
+        observed: [{ from: '2026-05-04', to: '2026-06-02' }],
+        to: '2026-09-04',
+      }),
+    ).toBeUndefined();
+  });
+});
 
 describe('mergeTally', () => {
   it('keeps a day the live transcripts no longer hold', () => {
@@ -129,13 +205,21 @@ describe('readSnapshot', () => {
     const path = snapshotPath();
     writeSnapshot({
       days: storedDays,
+      observed: [{ from: '2026-08-06', to: '2026-09-04' }],
       path,
       updatedAt: '2026-09-04T00:00:00Z',
     });
+    const read = readSnapshot({ path, timestamp: TIMESTAMP });
 
-    expect(readSnapshot({ path, timestamp: TIMESTAMP }).days).toEqual(
-      storedDays,
-    );
+    expect(read.days).toEqual(storedDays);
+    expect(read.observed).toEqual([{ from: '2026-08-06', to: '2026-09-04' }]);
+  });
+
+  it('reads a snapshot written before observed spans existed as having observed nothing', () => {
+    const path = snapshotPath();
+    writeFileSync(path, JSON.stringify({ days: storedDays, version: 1 }));
+
+    expect(readSnapshot({ path, timestamp: TIMESTAMP }).observed).toEqual([]);
   });
 
   it('keeps an unreadable snapshot instead of letting the next write replace it', () => {

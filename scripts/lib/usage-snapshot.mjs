@@ -4,7 +4,9 @@
  *
  * It is deliberately monotone — a day is added and never removed, and a day seen
  * twice keeps the larger count — so a run that reads fewer transcripts than the
- * last one cannot lower a number. That only holds while the file survives, so an
+ * last one cannot lower a number. It also records the spans each run could
+ * observe, because a day with no invocation leaves no entry and a recorded day
+ * is therefore evidence of a record, never of coverage. That only holds while the file survives, so an
  * unreadable or version-mismatched snapshot is moved aside rather than replaced.
  * It is local and gitignored (ADR-049).
  */
@@ -17,14 +19,38 @@ import {
 } from 'node:fs';
 import { dirname } from 'node:path';
 
-import { sumDays } from './usage-window.mjs';
+import { shiftDay, sumDays } from './usage-window.mjs';
 
 export const SNAPSHOT_VERSION = 1;
 
 export const emptySnapshot = () => ({
   days: { skills: {}, subagents: {} },
+  observed: [],
   version: SNAPSHOT_VERSION,
 });
+
+const isSpan = (span) =>
+  typeof span?.from === 'string' && typeof span?.to === 'string';
+
+const absorb = (merged, span) => {
+  const last = merged.at(-1);
+  if (last === undefined || span.from > shiftDay(last.to, 1)) {
+    return [...merged, span];
+  }
+  return [
+    ...merged.slice(0, -1),
+    { from: last.from, to: span.to > last.to ? span.to : last.to },
+  ];
+};
+
+export const mergeObserved = (kept, span) =>
+  [...kept, ...(span === undefined ? [] : [span])]
+    .filter((entry) => isSpan(entry))
+    .toSorted((a, b) => a.from.localeCompare(b.from))
+    .reduce((merged, entry) => absorb(merged, entry), []);
+
+export const observedBackTo = ({ observed, to }) =>
+  observed.find((span) => span.from <= to && span.to >= to)?.from;
 
 const mergeDays = (kept, seen) => {
   const merged = { ...kept };
@@ -113,9 +139,9 @@ export const readSnapshot = ({ path, timestamp }) => {
       });
 };
 
-export const writeSnapshot = ({ days, path, updatedAt }) => {
+export const writeSnapshot = ({ days, observed, path, updatedAt }) => {
   mkdirSync(dirname(path), { recursive: true });
-  const snapshot = { days, updatedAt, version: SNAPSHOT_VERSION };
+  const snapshot = { days, observed, updatedAt, version: SNAPSHOT_VERSION };
   writeFileSync(path, `${JSON.stringify(snapshot, null, 2)}\n`);
   return snapshot;
 };

@@ -65,6 +65,8 @@ describe('renderReport coverage caveats', () => {
       transcripts: {
         available: true,
         files: 3,
+        observedBackTo: '2026-09-04',
+        reachBack: '2026-09-04',
         readFrom: '2026-09-04',
         retentionDays: 1,
         simulatedHorizon: true,
@@ -102,6 +104,8 @@ describe('renderReport coverage caveats', () => {
       transcripts: {
         available: true,
         files: 3,
+        observedBackTo: '2026-08-06',
+        reachBack: '2026-08-06',
         retentionDays: 30,
         simulatedHorizon: false,
         snapshot: {
@@ -118,25 +122,29 @@ describe('renderReport coverage caveats', () => {
     expect(markdown).not.toContain('Transcripts are kept for 30 day(s)');
   });
 
-  it('says the earlier part of a window neither source reaches is unobserved', () => {
+  it('says the unobserved part of the window is unobserved, not empty', () => {
     const markdown = reportWith({});
 
     expect(markdown).toContain('reach back only to 2026-08-06');
     expect(markdown).toContain(
-      'the earliest day either source has a record for is 2026-08-01',
+      'the earliest day it holds a record for is 2026-08-01',
     );
     expect(markdown).toContain(
-      'Neither source reaches 2026-06-07, so the window above is observed only from 2026-08-01 onward',
+      'Observation runs continuously back only to 2026-08-06',
     );
-    expect(markdown).not.toContain('cover the whole window');
+    expect(markdown).toContain('unobserved rather than empty');
+    expect(markdown).not.toContain('cover it in full');
   });
 
-  it('claims whole-window transcript coverage only when a source reaches its start', () => {
+  it('does not read a recorded day earlier than observation as coverage', () => {
     const markdown = reportWith({
       transcripts: {
         available: true,
         files: 3,
+        observedBackTo: '2026-08-06',
+        reachBack: '2026-08-06',
         retentionDays: 30,
+        retentionDeclaredIn: '.claude/settings.json',
         simulatedHorizon: false,
         snapshot: {
           earliestDay: '2026-06-01',
@@ -146,7 +154,31 @@ describe('renderReport coverage caveats', () => {
     });
 
     expect(markdown).toContain(
-      'Together they reach back to 2026-06-07, so the invocation counts above cover the whole window',
+      'Observation runs continuously back only to 2026-08-06',
+    );
+    expect(markdown).toContain('A recorded day earlier than that is a record');
+    expect(markdown).not.toContain('cover it in full');
+  });
+
+  it('claims whole-window coverage only when observation reaches the start', () => {
+    const markdown = reportWith({
+      transcripts: {
+        available: true,
+        files: 3,
+        observedBackTo: '2026-05-30',
+        reachBack: '2026-08-06',
+        retentionDays: 30,
+        retentionDeclaredIn: '.claude/settings.json',
+        simulatedHorizon: false,
+        snapshot: {
+          earliestDay: '2026-06-01',
+          path: 'reports/usage/snapshot.json',
+        },
+      },
+    });
+
+    expect(markdown).toContain(
+      'observed the window continuously back to 2026-06-07, so the invocation counts above cover it in full',
     );
   });
 
@@ -155,7 +187,10 @@ describe('renderReport coverage caveats', () => {
       transcripts: {
         available: true,
         files: 3,
+        observedBackTo: '2026-08-06',
+        reachBack: '2026-08-06',
         retentionDays: 30,
+        retentionDeclaredIn: '.claude/settings.json',
         simulatedHorizon: false,
         snapshot: {
           earliestDay: '2026-08-01',
@@ -203,7 +238,10 @@ describe('renderReport coverage caveats', () => {
       transcripts: {
         available: true,
         files: 3,
+        observedBackTo: '2026-08-06',
+        reachBack: '2026-08-06',
         retentionDays: 30,
+        retentionDeclaredIn: '.claude/settings.json',
         simulatedHorizon: false,
         snapshot: {
           earliestDay: '2026-09-04',

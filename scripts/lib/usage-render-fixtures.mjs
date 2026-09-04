@@ -3,9 +3,10 @@
  * is about.
  *
  * The default is deliberately the awkward one: a 90-day window over a 30-day
- * retention, with a snapshot that starts later still. Most of the wording this
- * module's tests pin exists for exactly that mismatch, so a fixture that avoided
- * it would let a false coverage claim pass.
+ * retention, observed back only to the day retention reaches, with a recorded
+ * day that is earlier still. Most of the wording this module's tests pin exists
+ * for exactly that mismatch, so a fixture that avoided it would let a false
+ * coverage claim pass.
  */
 import { renderReport } from './usage-render.mjs';
 
@@ -57,6 +58,8 @@ export const reportWith = (overrides) =>
     transcripts: {
       available: true,
       files: 3,
+      observedBackTo: '2026-08-06',
+      reachBack: '2026-08-06',
       retentionDays: 30,
       retentionDeclaredIn: '.claude/settings.json',
       simulatedHorizon: false,

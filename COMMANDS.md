@@ -527,11 +527,13 @@ you watch the local snapshot carry a period the transcripts have already dropped
 **The transcript read is bounded by retention, not by the window.** An ordinary
 run reads every transcript still on disk whatever its age, but Claude Code
 deletes one after `cleanupPeriodDays`, so a window longer than that reaches
-further back than the transcripts are guaranteed to. The local snapshot carries
-the days already deleted, and the report says in its own output how far back the
-two together hold a record: where that day is later than the window's start, the
-earlier part of the window is unobserved rather than empty. `git log` is bounded
-the same way in a shallow clone, and the report marks those windows too.
+further back than the transcripts are guaranteed to. The snapshot carries the
+days already deleted **and** the spans past runs could observe, because a day
+with no invocation leaves no record and a recorded day therefore cannot say what
+was covered. The report states how far back observation runs continuously, and
+where that is later than the window's start it says the earlier part is
+unobserved rather than empty. `git log` is bounded the same way in a shallow
+clone, and the report marks those windows too.
 
 **Path rules are excluded, deliberately.** Nothing invokes one — it is loaded by
 glob — so there is no invocation to count, and the only proxy available (the

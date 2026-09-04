@@ -40,7 +40,9 @@ import { repositoryWorkingTrees } from './lib/usage-scope.mjs';
 import {
   countsFor,
   earliestDay,
+  mergeObserved,
   mergeTally,
+  observedBackTo,
   readSnapshot,
   writeSnapshot,
 } from './lib/usage-snapshot.mjs';
@@ -53,7 +55,7 @@ import {
   readTranscriptUsage,
   transcriptsRoot,
 } from './lib/usage-transcripts.mjs';
-import { windowOf } from './lib/usage-window.mjs';
+import { shiftDay, windowOf } from './lib/usage-window.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const COMMAND = 'vp run usage:report';
@@ -130,6 +132,7 @@ const buildReport = ({
     userHome: homedir(),
   });
   const readFrom = transcriptHorizon({ retention, window });
+  const reachBack = readFrom ?? shiftDay(window.end, -(retention.days - 1));
   const workingTrees = repositoryWorkingTrees(REPO_ROOT);
   const live = readTranscriptUsage({
     root: transcriptsRoot(),
@@ -138,10 +141,21 @@ const buildReport = ({
   });
   const stored = readSnapshot({ path: snapshotPath, timestamp: generatedAt });
   const merged = mergeTally(stored.days, live.tally);
-  writeSnapshot({ days: merged, path: snapshotPath, updatedAt: generatedAt });
+  const observed = mergeObserved(
+    stored.observed ?? [],
+    live.available ? { from: reachBack, to: window.end } : undefined,
+  );
+  writeSnapshot({
+    days: merged,
+    observed,
+    path: snapshotPath,
+    updatedAt: generatedAt,
+  });
 
   const transcripts = {
     ...live,
+    observedBackTo: observedBackTo({ observed, to: window.end }),
+    reachBack,
     readFrom,
     retentionDays: retention.days,
     retentionDeclaredIn:
@@ -151,6 +165,7 @@ const buildReport = ({
     simulatedHorizon: retention.simulated,
     snapshot: {
       earliestDay: earliestDay(merged),
+      observed,
       path: relativeToRepo(snapshotPath),
       setAside: setAsideNotice(stored.setAside),
     },

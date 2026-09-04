@@ -9,8 +9,6 @@
  * one sanitiser — a newline or a pipe out of a tool this report does not control
  * ends a markdown table one row early.
  */
-import { shiftDay } from './usage-window.mjs';
-
 const TABLE_RULE = (columns) => `| ${columns.map(() => '---').join(' | ')} |`;
 
 const inline = (value) => String(value).replaceAll(/\s+/gu, ' ').trim();
@@ -227,34 +225,30 @@ const sourceRows = (report) => [
   ],
 ];
 
-const transcriptReachBack = ({ transcripts, window }) =>
-  transcripts.readFrom ??
-  shiftDay(window.end, -(transcripts.retentionDays - 1));
-
 const retentionAuthority = (transcripts) =>
   transcripts.retentionDeclaredIn === undefined
     ? `No \`cleanupPeriodDays\` is declared in any settings file this run could read, so Claude Code's documented default of ${transcripts.retentionDays} day(s) is assumed rather than observed`
     : `Transcripts are kept for ${transcripts.retentionDays} day(s) (\`cleanupPeriodDays\` in \`${transcripts.retentionDeclaredIn}\`)`;
 
-const retentionSentence = ({ reachBack, transcripts }) =>
+const retentionSentence = (transcripts) =>
   transcripts.simulatedHorizon
-    ? `**This run used a simulated transcript horizon of ${transcripts.retentionDays} day(s)** (\`--transcript-retention-days\`), so the transcript columns cover ${reachBack} onward.`
-    : `${retentionAuthority(transcripts)}, so a transcript read is guaranteed to reach back only to ${reachBack}; every transcript still on disk was read whatever its age, which may reach further but is not promised to.`;
+    ? `**This run used a simulated transcript horizon of ${transcripts.retentionDays} day(s)** (\`--transcript-retention-days\`), so the transcript columns cover ${transcripts.reachBack} onward.`
+    : `${retentionAuthority(transcripts)}, so a transcript read is guaranteed to reach back only to ${transcripts.reachBack}; every transcript still on disk was read whatever its age, which may reach further but is not promised to.`;
 
 const snapshotSentence = (snapshot) =>
   snapshot.earliestDay === undefined
     ? 'The snapshot holds no day yet, so nothing is carried from before that.'
-    : `The snapshot carries the days the transcripts have already dropped, and the earliest day either source has a record for is ${snapshot.earliestDay}.`;
+    : `The snapshot carries the days the transcripts have already dropped, and the earliest day it holds a record for is ${snapshot.earliestDay}.`;
 
-const observedFrom = ({ reachBack, snapshot }) =>
-  snapshot.earliestDay !== undefined && snapshot.earliestDay < reachBack
-    ? snapshot.earliestDay
-    : reachBack;
-
-const coverageSentence = ({ observed, window }) =>
-  observed <= window.start
-    ? `Together they reach back to ${window.start}, so the invocation counts above cover the whole window.`
-    : `Neither source reaches ${window.start}, so the window above is observed only from ${observed} onward and the earlier part of it is unobserved rather than empty — a zero in the invocation counts settles nothing about those days.`;
+const coverageSentence = ({ observedBackTo, window }) => {
+  if (observedBackTo === undefined) {
+    return 'No run of this report has observed any part of the window above, so a zero in the invocation counts settles nothing at all.';
+  }
+  if (observedBackTo <= window.start) {
+    return `Runs of this report have observed the window continuously back to ${window.start}, so the invocation counts above cover it in full.`;
+  }
+  return `Observation runs continuously back only to ${observedBackTo}, so the earlier part of the window above is unobserved rather than empty — a zero in the invocation counts settles nothing about those days. A recorded day earlier than that is a record, not coverage.`;
+};
 
 const unreadCoverageNote = (report) => {
   const { earliestDay } = report.transcripts.snapshot;
@@ -265,18 +259,15 @@ const unreadCoverageNote = (report) => {
   return `**The transcripts could not be read**, so no part of the window above was observed through them and ${carried}. ${inline(report.transcripts.reason)}`;
 };
 
-const readCoverageNote = (report) => {
-  const reachBack = transcriptReachBack(report);
-  const { snapshot } = report.transcripts;
-  return [
-    retentionSentence({ reachBack, transcripts: report.transcripts }),
-    snapshotSentence(snapshot),
+const readCoverageNote = (report) =>
+  [
+    retentionSentence(report.transcripts),
+    snapshotSentence(report.transcripts.snapshot),
     coverageSentence({
-      observed: observedFrom({ reachBack, snapshot }),
+      observedBackTo: report.transcripts.observedBackTo,
       window: report.window,
     }),
   ].join(' ');
-};
 
 const coverageNote = (report) =>
   report.transcripts.available
