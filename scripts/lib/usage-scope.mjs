@@ -4,12 +4,16 @@
  *
  * A session is filed under the directory it was launched from, which is often
  * below a tree root, so the directory match is a deliberately loose prefix —
- * every entry's own `cwd` is re-checked against the roots anyway. Read off the
- * filesystem rather than through a git subprocess, for the reason
+ * every entry's own `cwd` is re-checked against the roots anyway. That looseness
+ * is only safe while the roots themselves are tight, which is why a `.git`
+ * pointer is climbed only when it names a `worktrees/` entry: the other shapes
+ * it takes (`--separate-git-dir`, a submodule) would otherwise resolve to an
+ * ancestor directory and silently count every repository beneath it. Read off
+ * the filesystem rather than through a git subprocess, for the reason
  * `git-remote.mjs` gives: nothing resolves through PATH.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 
 const GITDIR_PREFIX = 'gitdir:';
 
@@ -21,6 +25,11 @@ export const gitdirPointer = (contents) => {
   return pointer === undefined || pointer.length === 0 ? undefined : pointer;
 };
 
+const WORKTREES_DIRECTORY = 'worktrees';
+
+const namesALinkedWorktree = (gitdir) =>
+  basename(dirname(gitdir)) === WORKTREES_DIRECTORY;
+
 const commonGitDir = (repoRoot) => {
   const dotGit = join(repoRoot, '.git');
   if (!existsSync(dotGit)) {
@@ -30,13 +39,18 @@ const commonGitDir = (repoRoot) => {
     return dotGit;
   }
   const pointer = gitdirPointer(readFileSync(dotGit, 'utf8'));
-  return pointer === undefined
-    ? undefined
-    : resolve(repoRoot, pointer, '..', '..');
+  if (pointer === undefined) {
+    return undefined;
+  }
+  const gitdir = resolve(repoRoot, pointer);
+  return namesALinkedWorktree(gitdir) ? resolve(gitdir, '..', '..') : gitdir;
 };
 
+const mainWorkingTree = (gitDir) =>
+  basename(gitDir) === '.git' ? [dirname(gitDir)] : [];
+
 const linkedWorktrees = (gitDir) => {
-  const worktreesDir = join(gitDir, 'worktrees');
+  const worktreesDir = join(gitDir, WORKTREES_DIRECTORY);
   if (!existsSync(worktreesDir)) {
     return [];
   }
@@ -51,7 +65,13 @@ export const repositoryWorkingTrees = (repoRoot) => {
   if (gitDir === undefined) {
     return [repoRoot];
   }
-  return [...new Set([dirname(gitDir), repoRoot, ...linkedWorktrees(gitDir)])];
+  return [
+    ...new Set([
+      ...mainWorkingTree(gitDir),
+      repoRoot,
+      ...linkedWorktrees(gitDir),
+    ]),
+  ];
 };
 
 export const isWithinAny = ({ path, roots }) =>
