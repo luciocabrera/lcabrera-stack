@@ -7,8 +7,9 @@ branch: docs/1066-product-definition
 area:
   - docs/product/**
   - docs/decisions/**
+  - packages/devkit/CLASSIFICATION.md
 started: 2026-09-04
-updated: 2026-09-03
+updated: 2026-09-04
 plan: (none)
 pr: (none)
 issue: #1066
