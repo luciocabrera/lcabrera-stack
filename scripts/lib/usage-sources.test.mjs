@@ -175,6 +175,22 @@ describe('readRegisterActivity', () => {
     expect(asked[0]).toContain('--until=2026-09-01T23:59:59Z');
   });
 
+  it('prints the same date field the revision filter selects on', () => {
+    const asked = [];
+    readRegisterActivity({
+      cwd: '/repo',
+      directory: 'docs/coordination/tasks',
+      runGit: ({ args }) => {
+        asked.push(args);
+        return '';
+      },
+      window: WINDOW,
+    });
+
+    expect(asked[0]).toContain(`--pretty=format:%x01%H %cd`);
+    expect(asked[0].join(' ')).not.toContain('%ad');
+  });
+
   it('reports no activity from after the window, whatever the log holds', () => {
     const result = readRegisterActivity({
       cwd: '/repo',

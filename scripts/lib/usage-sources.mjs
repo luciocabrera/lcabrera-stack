@@ -6,8 +6,8 @@
  * unauthenticated `gh`, an unreachable API and a workflow nobody triggered all
  * produce no runs. Each takes the whole window rather than its start alone,
  * since a store keeps growing after the day a report is dated. The git day is
- * re-checked after parsing, because the day the report prints comes from the
- * commit's own date field rather than from the revision filter that selected it.
+ * re-checked after parsing, and the log prints the committer date the revision
+ * filter itself selects on, so the check cannot discard a commit git chose.
  */
 const workflowRunCount = ({ file, runGh, window }) => {
   try {
@@ -94,7 +94,7 @@ export const readRegisterActivity = ({ cwd, directory, runGit, window }) => {
       `--until=${window.end}T23:59:59Z`,
       '--name-only',
       '--date=short',
-      '--pretty=format:%x01%H %ad',
+      '--pretty=format:%x01%H %cd',
       '--',
       directory,
     ],

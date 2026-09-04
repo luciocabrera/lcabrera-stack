@@ -256,7 +256,16 @@ const coverageSentence = ({ observed, window }) =>
     ? `Together they reach back to ${window.start}, so the invocation counts above cover the whole window.`
     : `Neither source reaches ${window.start}, so the window above is observed only from ${observed} onward and the earlier part of it is unobserved rather than empty — a zero in the invocation counts settles nothing about those days.`;
 
-const coverageNote = (report) => {
+const unreadCoverageNote = (report) => {
+  const { earliestDay } = report.transcripts.snapshot;
+  const carried =
+    earliestDay === undefined
+      ? 'the snapshot holds no day either, so the invocation counts below are not observations of absence at all'
+      : `the invocation counts below hold only what the local snapshot carries, which reaches back to ${earliestDay}`;
+  return `**The transcripts could not be read**, so no part of the window above was observed through them and ${carried}. ${inline(report.transcripts.reason)}`;
+};
+
+const readCoverageNote = (report) => {
   const reachBack = transcriptReachBack(report);
   const { snapshot } = report.transcripts;
   return [
@@ -268,6 +277,11 @@ const coverageNote = (report) => {
     }),
   ].join(' ');
 };
+
+const coverageNote = (report) =>
+  report.transcripts.available
+    ? readCoverageNote(report)
+    : unreadCoverageNote(report);
 
 const unreadableTranscriptNote = (transcripts) =>
   skippedCount(transcripts) === 0
