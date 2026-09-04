@@ -1,16 +1,13 @@
 /**
- * Parses the usage report's flags and resolves the transcript horizon the flags
- * and `.claude/settings.json` imply.
+ * Parses the usage report's flags and resolves the transcript retention that
+ * the flags and the Claude Code settings files imply.
  *
- * Both jobs are pure decisions over strings, and both have a failure mode the
- * report cannot absorb quietly: a flag whose value was swallowed, and a
- * `cleanupPeriodDays` that is not a number of days. Either one would print a
- * count under a window that did not produce it, which is the one thing this
- * report exists not to do — so both are refused loudly instead.
- *
- * The horizon is only narrowed when a run is deliberately simulating expiry.
- * Reading fewer transcripts than are on disk can only lose invocations that
- * belong in the reported window, so an ordinary run reads all of them.
+ * Both are pure decisions over strings with a failure the report cannot absorb
+ * quietly — a flag whose value was swallowed, a `cleanupPeriodDays` that is not
+ * a number of days — so both are refused loudly. The resolved value carries the
+ * file it came from, because a documented default and a declared number must
+ * not be printed as though they had the same authority. The horizon is narrowed
+ * only when a run is deliberately simulating expiry.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -68,41 +65,56 @@ export const positiveInteger = (value, label) => {
   return Number.parseInt(value, 10);
 };
 
-const configuredCleanupPeriod = (repoRoot) => {
-  const settingsPath = join(repoRoot, '.claude', 'settings.json');
-  if (!existsSync(settingsPath)) {
-    return { configured: undefined, settingsPath };
+export const settingsFiles = ({ repoRoot, userHome }) => [
+  join(repoRoot, '.claude', 'settings.local.json'),
+  join(repoRoot, '.claude', 'settings.json'),
+  join(userHome, '.claude', 'settings.json'),
+];
+
+const declaredCleanupPeriod = (path) => {
+  if (!existsSync(path)) {
+    return undefined;
   }
+  let settings;
   try {
-    return {
-      configured: JSON.parse(readFileSync(settingsPath, 'utf8'))
-        .cleanupPeriodDays,
-      settingsPath,
-    };
+    settings = JSON.parse(readFileSync(path, 'utf8'));
   } catch (error) {
     throw new Error(
-      `${settingsPath} is not readable JSON (${error.message}), so the transcript retention it declares cannot be read`,
+      `${path} is not readable JSON (${error.message}), so the transcript retention it declares cannot be read`,
     );
   }
+  return settings?.cleanupPeriodDays === undefined
+    ? undefined
+    : { path, value: settings.cleanupPeriodDays };
 };
 
-export const resolveRetention = ({ args, repoRoot }) => {
+const firstDeclaration = (paths) => {
+  for (const path of paths) {
+    const declared = declaredCleanupPeriod(path);
+    if (declared !== undefined) {
+      return declared;
+    }
+  }
+  return undefined;
+};
+
+export const resolveRetention = ({ args, repoRoot, userHome }) => {
   if (args.retentionDays !== undefined) {
     return {
       days: positiveInteger(args.retentionDays, '--transcript-retention-days'),
       simulated: true,
     };
   }
-  const { configured, settingsPath } = configuredCleanupPeriod(repoRoot);
-  if (configured === undefined) {
+  const declared = firstDeclaration(settingsFiles({ repoRoot, userHome }));
+  if (declared === undefined) {
     return { days: DOCUMENTED_CLEANUP_DEFAULT, simulated: false };
   }
-  if (!Number.isInteger(configured) || configured < 1) {
+  if (!Number.isInteger(declared.value) || declared.value < 1) {
     throw new Error(
-      `cleanupPeriodDays in ${settingsPath} must be a positive whole number of days, got \`${JSON.stringify(configured)}\``,
+      `cleanupPeriodDays in ${declared.path} must be a positive whole number of days, got \`${JSON.stringify(declared.value)}\``,
     );
   }
-  return { days: configured, simulated: false };
+  return { days: declared.value, declaredIn: declared.path, simulated: false };
 };
 
 export const transcriptHorizon = ({ retention, window }) =>

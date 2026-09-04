@@ -1,33 +1,13 @@
 /**
- * Counts Skill and subagent invocations out of the Claude Code transcripts on
- * this machine, per day, for the working trees of this repository.
+ * Counts Skill and subagent invocations per day, out of the Claude Code
+ * transcripts on this machine, for the working trees of this repository.
  *
- * Transcripts are the only store that records an invocation at all — a skill
- * leaves no other trace — so this is the source for the two harness parts that
- * are called by name. It is also the only expiring one, which is why the caller
- * merges it with a local snapshot rather than reading it alone.
- *
- * The reader reports whether it could read, separately from what it found: a
- * missing transcript directory and a repository nobody has used produce the same
- * empty tally, and those are opposite conclusions.
- *
- * `since` is optional and is meant to stay that way. Dropping an invocation that
- * is still on disk can only shrink a count the report will then label with a
- * wider window, so the bound exists for a run that is deliberately simulating
- * expiry and for nothing else.
- *
- * Discovery walks every directory under the transcript root and keeps the ones
- * whose name is a working tree's, or descends from one. Claude Code files a
- * transcript under the directory the session was launched from, so a session
- * started in a package or an app is filed under that path, never under the tree
- * root — naming the roots alone would silently drop every one of those.
- *
- * A path that vanishes between being listed and being read is reported and
- * skipped, never thrown. Claude Code sweeps expired transcripts when a session
- * starts and this report is most often run from inside one, so the race is
- * ordinary rather than exotic; letting it escape would abandon the whole run,
- * including the snapshot write that is the only durable copy of the days the
- * transcripts are about to lose.
+ * Transcripts are the only store that records an invocation at all, and the
+ * only one that expires, which is why the caller merges them with a snapshot.
+ * Three constraints hold here: the reader reports whether it could read
+ * separately from what it found; `since` narrows the read only for a run
+ * simulating expiry, never for the window; and a path that vanishes between
+ * being listed and being read is reported and skipped rather than thrown.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';

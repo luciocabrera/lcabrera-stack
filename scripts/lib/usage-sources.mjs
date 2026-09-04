@@ -2,21 +2,12 @@
  * Reads the two harness signals that live outside this machine's transcripts:
  * workflow runs from the GitHub API, and register activity from git history.
  *
- * Both stores already retain what is needed, which is the design constraint —
- * nothing here collects, so nothing here can drift from what actually happened.
- *
- * Every reader returns its availability separately from its findings. An
- * unauthenticated `gh`, an unreachable API and a workflow nobody has triggered
- * all produce no runs, and reporting that as a count would make the three
- * indistinguishable.
- *
- * Both readers take the whole window, not just its start. A store keeps growing
- * after the day a report is dated, so a query bounded below only answers with
- * everything that has happened since — which would print today's activity under
- * a window that ended weeks ago, and make `--now` unable to reproduce the run it
- * names. The git day is re-checked against the window after parsing, because the
- * day the report prints comes from the commit's own date field rather than from
- * the revision filter that selected it.
+ * Each reader reports its availability separately from its findings, because an
+ * unauthenticated `gh`, an unreachable API and a workflow nobody triggered all
+ * produce no runs. Each takes the whole window rather than its start alone,
+ * since a store keeps growing after the day a report is dated. The git day is
+ * re-checked after parsing, because the day the report prints comes from the
+ * commit's own date field rather than from the revision filter that selected it.
  */
 const workflowRunCount = ({ file, runGh, window }) => {
   try {

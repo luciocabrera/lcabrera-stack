@@ -1,8 +1,9 @@
 /*
  * Both of these parsers decide what window a printed count belongs to, so the
  * failures worth pinning are the quiet ones: a flag whose value was actually the
- * next flag, a `cleanupPeriodDays` that is not a number of days, and a horizon
- * that narrows the transcript read when no expiry is being simulated.
+ * next flag, a `cleanupPeriodDays` that is not a number of days, a horizon that
+ * narrows the transcript read when no expiry is being simulated, and a default
+ * reported as though a settings file had declared it.
  */
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -20,10 +21,23 @@ import {
 
 const WINDOW = { days: 90, end: '2026-09-04', start: '2026-06-07' };
 
+const claudeDirIn = (root) => {
+  const directory = join(root, '.claude');
+  mkdirSync(directory);
+  return directory;
+};
+
 const repoWith = (settings) => {
   const root = mkdtempSync(join(tmpdir(), 'usage-args-'));
-  mkdirSync(join(root, '.claude'));
-  writeFileSync(join(root, '.claude', 'settings.json'), settings);
+  writeFileSync(join(claudeDirIn(root), 'settings.json'), settings);
+  return root;
+};
+
+const emptyHome = () => mkdtempSync(join(tmpdir(), 'usage-home-'));
+
+const homeWith = (settings) => {
+  const root = emptyHome();
+  writeFileSync(join(claudeDirIn(root), 'settings.json'), settings);
   return root;
 };
 
@@ -68,18 +82,56 @@ describe('resolveRetention', () => {
   it('reads cleanupPeriodDays when it is a whole number of days', () => {
     const repoRoot = repoWith('{ "cleanupPeriodDays": 45 }');
 
-    expect(resolveRetention({ args: {}, repoRoot })).toEqual({
+    expect(
+      resolveRetention({ args: {}, repoRoot, userHome: emptyHome() }),
+    ).toEqual({
       days: 45,
+      declaredIn: join(repoRoot, '.claude', 'settings.json'),
       simulated: false,
     });
   });
 
-  it('falls back to the documented default when the key is unset', () => {
-    const repoRoot = repoWith('{}');
+  it('says nothing declared it when it falls back to the documented default', () => {
+    const resolved = resolveRetention({
+      args: {},
+      repoRoot: repoWith('{}'),
+      userHome: emptyHome(),
+    });
 
-    expect(resolveRetention({ args: {}, repoRoot }).days).toBe(
-      DOCUMENTED_CLEANUP_DEFAULT,
+    expect(resolved.days).toBe(DOCUMENTED_CLEANUP_DEFAULT);
+    expect(resolved.declaredIn).toBeUndefined();
+  });
+
+  it('prefers the local project settings over the shared and the user file', () => {
+    const repoRoot = repoWith('{ "cleanupPeriodDays": 45 }');
+    writeFileSync(
+      join(repoRoot, '.claude', 'settings.local.json'),
+      '{ "cleanupPeriodDays": 7 }',
     );
+
+    expect(
+      resolveRetention({
+        args: {},
+        repoRoot,
+        userHome: homeWith('{ "cleanupPeriodDays": 90 }'),
+      }),
+    ).toEqual({
+      days: 7,
+      declaredIn: join(repoRoot, '.claude', 'settings.local.json'),
+      simulated: false,
+    });
+  });
+
+  it('reads the user settings file when the project declares nothing', () => {
+    const userHome = homeWith('{ "cleanupPeriodDays": 90 }');
+
+    expect(
+      resolveRetention({ args: {}, repoRoot: repoWith('{}'), userHome }),
+    ).toEqual({
+      days: 90,
+      declaredIn: join(userHome, '.claude', 'settings.json'),
+      simulated: false,
+    });
   });
 
   it('refuses a cleanupPeriodDays that is not a number of days', () => {
@@ -88,6 +140,7 @@ describe('resolveRetention', () => {
         resolveRetention({
           args: {},
           repoRoot: repoWith(`{ "cleanupPeriodDays": ${value} }`),
+          userHome: emptyHome(),
         }),
       ).toThrow('must be a positive whole number of days');
     }
@@ -95,7 +148,11 @@ describe('resolveRetention', () => {
 
   it('refuses settings that are not readable JSON', () => {
     expect(() =>
-      resolveRetention({ args: {}, repoRoot: repoWith('{ oops') }),
+      resolveRetention({
+        args: {},
+        repoRoot: repoWith('{ oops'),
+        userHome: emptyHome(),
+      }),
     ).toThrow('not readable JSON');
   });
 
@@ -104,6 +161,7 @@ describe('resolveRetention', () => {
       resolveRetention({
         args: { retentionDays: '1' },
         repoRoot: repoWith('{}'),
+        userHome: emptyHome(),
       }),
     ).toEqual({ days: 1, simulated: true });
   });

@@ -1,22 +1,12 @@
 /**
- * Keeps the per-day skill and subagent tallies that the transcripts will stop
- * being able to answer for.
+ * Keeps the per-day skill and subagent tallies the transcripts will stop being
+ * able to answer for, so expiry does not quietly shrink every count.
  *
- * Claude Code deletes transcripts after `cleanupPeriodDays`, so a pure reader
- * loses a retention period of history every retention period — quietly, because
- * the numbers simply get smaller. This snapshot is the one piece of local state
- * the report keeps, and it is deliberately monotone: a day is added and never
- * removed, and a day seen twice keeps the larger count, so a run that reads
- * fewer transcripts than the last one cannot lower a number.
- *
- * Monotone only holds while the file survives, so an unreadable or
- * version-mismatched snapshot is moved aside rather than replaced: the run that
- * cannot read it is also the run that would overwrite it, and there is no other
- * copy.
- *
- * It is local and gitignored (ADR-049). It is a record of one machine's own
- * work, not a shared measurement, and committing it would put a count in git
- * that is stale from the next run onward.
+ * It is deliberately monotone — a day is added and never removed, and a day seen
+ * twice keeps the larger count — so a run that reads fewer transcripts than the
+ * last one cannot lower a number. That only holds while the file survives, so an
+ * unreadable or version-mismatched snapshot is moved aside rather than replaced.
+ * It is local and gitignored (ADR-049).
  */
 import {
   existsSync,

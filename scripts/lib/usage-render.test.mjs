@@ -57,6 +57,7 @@ const reportWith = (overrides) =>
       available: true,
       files: 3,
       retentionDays: 30,
+      retentionDeclaredIn: '.claude/settings.json',
       simulatedHorizon: false,
       snapshot: {
         earliestDay: '2026-08-01',
@@ -190,6 +191,33 @@ describe('renderReport', () => {
     expect(markdown).toContain(
       '| Claude Code transcripts | skill and subagent invocations | 2026-06-07 → 2026-09-04 (90d) |',
     );
+  });
+
+  it('names the file that declared the retention it reports', () => {
+    expect(reportWith({})).toContain(
+      'Transcripts are kept for 30 day(s) (`cleanupPeriodDays` in `.claude/settings.json`)',
+    );
+  });
+
+  it('says an assumed retention was assumed rather than declared', () => {
+    const markdown = reportWith({
+      transcripts: {
+        available: true,
+        files: 3,
+        retentionDays: 30,
+        simulatedHorizon: false,
+        snapshot: {
+          earliestDay: '2026-08-01',
+          path: 'reports/usage/snapshot.json',
+        },
+      },
+    });
+
+    expect(markdown).toContain(
+      'No `cleanupPeriodDays` is declared in any settings file this run could read',
+    );
+    expect(markdown).toContain('assumed rather than observed');
+    expect(markdown).not.toContain('Transcripts are kept for 30 day(s)');
   });
 
   it('says the earlier part of a window neither source reaches is unobserved', () => {

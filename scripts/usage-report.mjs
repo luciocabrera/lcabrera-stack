@@ -3,20 +3,13 @@
  * subagent or workflow still earning its place" is a lookup rather than an
  * argument.
  *
- * It reads four stores that already retain history — Claude Code transcripts on
- * this machine, GitHub Actions run history, and git history over the requirement
- * and coordination registers — and adds no collector of its own. One of them
- * expires, so a local gitignored snapshot carries the days the transcripts drop.
- *
- * Path rules are excluded on purpose. A path rule is auto-loaded by glob and
- * nothing invokes it, so there is no invocation to count; the only proxy, the
- * violation rate of the gate behind the rule, reads identically whether the rule
- * is perfectly internalised or completely dead. Those are opposite conclusions
- * from the same data, so the report lists the rules as unmeasurable and gives
- * them no number.
- *
- * The report is produced on demand and never committed (ADR-049), and no count
- * it prints may be copied into a tracked file — name this command instead.
+ * It reads stores that already retain history — Claude Code transcripts, the
+ * GitHub Actions run history, git over the requirement and coordination
+ * registers — and adds no collector of its own; a local gitignored snapshot
+ * carries the days the transcripts expire. Path rules get no number, because
+ * nothing invokes one and the only proxy reads the same whether a rule is
+ * internalised or dead. Produced on demand and never committed (ADR-049): no
+ * count it prints may be copied into a tracked file — name this command.
  *
  * Usage (from the repo root):
  *   vp run usage:report
@@ -24,16 +17,12 @@
  *   vp run usage:report -- --transcript-retention-days 1   # simulate expiry
  *   vp run usage:report -- --now 2026-09-01T00:00:00Z --out reports/usage
  *
- * Every transcript still on disk is read, whatever its age — a narrower read can
- * only drop invocations that belong in the reported window. The retention
- * horizon is applied only when `--transcript-retention-days` asks for expiry to
- * be simulated, and the report labels that run's transcript columns with it.
- *
  * Exit codes: 0 = a report was written, including when a source could not be
  * read (it is reported as unread, never as a count of zero); 1 = bad arguments,
  * an unusable `cleanupPeriodDays`, or the report could not be written.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -135,7 +124,11 @@ const buildReport = ({
   snapshotPath,
   window,
 }) => {
-  const retention = resolveRetention({ args, repoRoot: REPO_ROOT });
+  const retention = resolveRetention({
+    args,
+    repoRoot: REPO_ROOT,
+    userHome: homedir(),
+  });
   const readFrom = transcriptHorizon({ retention, window });
   const workingTrees = repositoryWorkingTrees(REPO_ROOT);
   const live = readTranscriptUsage({
@@ -151,6 +144,10 @@ const buildReport = ({
     ...live,
     readFrom,
     retentionDays: retention.days,
+    retentionDeclaredIn:
+      retention.declaredIn === undefined
+        ? undefined
+        : relativeToRepo(retention.declaredIn),
     simulatedHorizon: retention.simulated,
     snapshot: {
       earliestDay: earliestDay(merged),

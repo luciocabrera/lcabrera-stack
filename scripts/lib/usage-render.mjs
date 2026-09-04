@@ -1,24 +1,13 @@
 /**
- * Renders the harness usage model as markdown.
- *
- * Pure on purpose: the readers decide what is true and this decides only how it
- * reads, so the wording of a caveat can be reviewed without running anything.
+ * Renders the harness usage model as markdown. Pure on purpose: the readers
+ * decide what is true and this decides only how it reads.
  *
  * Two things it always prints, because a number without them misleads: the
- * source and window behind every count, and the fact that a count of zero is a
- * question rather than a verdict.
- *
- * Every cell and every interpolated reason goes through one sanitiser. A reason
- * comes from a tool this report does not control — a `gh` failure spans lines
- * and may hold a pipe — and either character silently ends a markdown table one
- * row early, which turns the rows below it into prose a reader skips.
- *
- * Where a number covers less than the window it sits under, the caveat is
- * rendered into the markdown rather than printed on the console of the run that
- * produced it. The file is what gets read later, and a count under a window
- * label that is false for it is the failure this report exists to avoid — so
- * both the shallow-clone bound on git history and the retention bound on
- * transcripts are stated in the artifact itself.
+ * source and window behind every count, and the fact that a zero is a question.
+ * A caveat is rendered here rather than printed on the console, because the file
+ * is what gets read later. Every cell and every interpolated reason goes through
+ * one sanitiser — a newline or a pipe out of a tool this report does not control
+ * ends a markdown table one row early.
  */
 import { shiftDay } from './usage-window.mjs';
 
@@ -237,10 +226,15 @@ const transcriptReachBack = ({ transcripts, window }) =>
   transcripts.readFrom ??
   shiftDay(window.end, -(transcripts.retentionDays - 1));
 
+const retentionAuthority = (transcripts) =>
+  transcripts.retentionDeclaredIn === undefined
+    ? `No \`cleanupPeriodDays\` is declared in any settings file this run could read, so Claude Code's documented default of ${transcripts.retentionDays} day(s) is assumed rather than observed`
+    : `Transcripts are kept for ${transcripts.retentionDays} day(s) (\`cleanupPeriodDays\` in \`${transcripts.retentionDeclaredIn}\`)`;
+
 const retentionSentence = ({ reachBack, transcripts }) =>
   transcripts.simulatedHorizon
     ? `**This run used a simulated transcript horizon of ${transcripts.retentionDays} day(s)** (\`--transcript-retention-days\`), so the transcript columns cover ${reachBack} onward.`
-    : `Transcripts are kept for ${transcripts.retentionDays} day(s) (\`cleanupPeriodDays\` in \`.claude/settings.json\`), so a transcript read is guaranteed to reach back only to ${reachBack}; every transcript still on disk was read whatever its age, which may reach further but is not promised to.`;
+    : `${retentionAuthority(transcripts)}, so a transcript read is guaranteed to reach back only to ${reachBack}; every transcript still on disk was read whatever its age, which may reach further but is not promised to.`;
 
 const snapshotSentence = (snapshot) =>
   snapshot.earliestDay === undefined
