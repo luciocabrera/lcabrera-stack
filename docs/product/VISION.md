@@ -27,13 +27,18 @@ The apps in this repository are neither line. They are the harness that puts the
 packages under load, and when app convenience and package cleanliness pull apart,
 the package wins.
 
-## The stack the packages require
+## The stack, and which packages require it
 
-Both lines assume a stack, and it is a **precondition of using them** rather
-than a detail of how they are built.
+Some packages require a stack, and where one does it is a **precondition of
+using it** rather than a detail of how it is built.
 [ADR-107](../decisions/ADR-107-the-stack-is-a-precondition-of-the-packages.md)
 names it and is the only place it is listed. Versions are not in that list: the
 catalog in `pnpm-workspace.yaml` declares those.
+
+It is not every package. A package states what it needs in its own
+`peerDependencies`, and several here declare none — they install and run with
+none of the stack present. `@lcabrera/ui` is the one the stack matters most for,
+and the paragraph below says why.
 
 Why it has to be said out loud. `@lcabrera/ui` publishes TypeScript source rather
 than a build, so a consumer's own toolchain compiles it, and it needs StyleX

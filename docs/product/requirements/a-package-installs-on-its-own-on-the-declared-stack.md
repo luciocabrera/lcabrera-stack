@@ -53,8 +53,11 @@ not generated.
 
 ## Notes
 
-Off the declared stack this requirement makes no claim. That is deliberate rather
-than a gap, and
+Off the declared stack this requirement makes no claim **for the packages that
+require it**, which their `peerDependencies` name. Several of the packages listed
+above declare none and already resolve outside this tree with none of the stack
+present, so for those the stack is not what is in question here; using them in a
+real application is. That split is deliberate rather than a gap, and
 [ADR-107](../../decisions/ADR-107-the-stack-is-a-precondition-of-the-packages.md)
 says why. `@lcabrera/ui` publishes TypeScript source and needs StyleX in the
 consumer's build, so there is no configuration of a Tailwind-and-Next.js

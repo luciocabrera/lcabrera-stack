@@ -61,8 +61,8 @@ it. `verify-devkit-seeds.mjs` exists because of this and covers part of the gap
 by grepping for the originating repository's identity, which is a different
 question from whether a reference resolves.
 
-As the shipped set grows from three skills to the whole harness, and then to
-configs and scripts, the unread fraction grows with it. An artifact kind closure
+As the shipped set grows to the whole harness, and then to configs and scripts,
+the unread fraction grows with it. An artifact kind closure
 cannot parse has to be reported as unchecked, or the coverage number means
 nothing.
 

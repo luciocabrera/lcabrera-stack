@@ -91,12 +91,28 @@ modes never appeared until something installed one elsewhere
 
 ## Decision
 
-**The packages require a stack, and that stack is a precondition of using them
-rather than an implementation detail of building them.**
+**Where a package requires a stack, that stack is a precondition of using it
+rather than an implementation detail of building it, and the requirement is
+declared in the package's own `peerDependencies`.**
 
 The stack is **React, React Router in framework mode, StyleX, Vite+ and pnpm**,
 and this ADR is where that list lives. `docs/product/VISION.md` and the
 requirements point here rather than repeating it.
+
+It is **not** a blanket precondition of every published package, and saying so
+would be false against gates this repository already runs. `api`, `server`,
+`utils`, `node` and `repo-standards` declare no peer dependencies at all, and
+`publish:verify` imports their published subpaths from a bare temporary directory
+with none of the stack present. `tarball:verify` goes further: `scratchConsumer`
+writes a manifest with no dependencies, installs the packed tarballs with npm,
+and runs `devkit init` there. That is `devkit` working with no React, no StyleX,
+no Vite+ and no pnpm, on every `check:safe` run.
+
+So the list above is what `@lcabrera/ui` requires, and `ui` is the package this
+decision is about. Its `peerDependencies` name React, React Router and StyleX;
+`vite-config` and `eslint-plugin` declare their own, narrower ones. A package's
+peer ranges are the machine-readable half of this decision, and where they and
+this list disagree, the peer ranges are what a consumer's installer acts on.
 
 No version appears in that list, deliberately. The catalog in
 `pnpm-workspace.yaml` is where a version is declared, and prose repeating one is
