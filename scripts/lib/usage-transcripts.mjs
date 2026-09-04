@@ -18,6 +18,7 @@ import { dayOf } from './usage-window.mjs';
 
 const SKILL_TOOL = 'Skill';
 const SUBAGENT_TOOLS = new Set(['Agent', 'Task']);
+const UNNAMED_SUBAGENT = 'unnamed subagent';
 
 export const transcriptsRoot = () => join(homedir(), '.claude', 'projects');
 
@@ -36,7 +37,11 @@ const invocationIn = (block) => {
   }
   if (SUBAGENT_TOOLS.has(block.name)) {
     const name = block.input?.subagent_type ?? block.input?.agent_type;
-    return typeof name === 'string' ? { kind: 'subagents', name } : undefined;
+    return {
+      kind: 'subagents',
+      name:
+        typeof name === 'string' && name.length > 0 ? name : UNNAMED_SUBAGENT,
+    };
   }
   return undefined;
 };

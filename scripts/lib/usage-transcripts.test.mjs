@@ -62,6 +62,28 @@ describe('invocationsInEntry', () => {
     ]);
   });
 
+  it('counts a subagent call that records no type, under a name saying so', () => {
+    const entry = entryWith({
+      content: [{ input: { prompt: 'go' }, name: 'Agent', type: 'tool_use' }],
+    });
+
+    expect(invocationsInEntry({ entry, roots: ROOTS })).toEqual([
+      { day: '2026-09-04', kind: 'subagents', name: 'unnamed subagent' },
+    ]);
+  });
+
+  it('does not attribute an untyped subagent call to a type it did not name', () => {
+    const entry = entryWith({
+      content: [
+        { input: { subagent_type: 7 }, name: 'Task', type: 'tool_use' },
+      ],
+    });
+
+    expect(invocationsInEntry({ entry, roots: ROOTS })).toEqual([
+      { day: '2026-09-04', kind: 'subagents', name: 'unnamed subagent' },
+    ]);
+  });
+
   it('counts a call made from a linked worktree of the same repository', () => {
     const entry = entryWith({
       content: [{ input: { skill: 'epic' }, name: 'Skill', type: 'tool_use' }],
