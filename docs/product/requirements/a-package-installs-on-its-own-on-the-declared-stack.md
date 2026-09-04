@@ -17,7 +17,9 @@ evidence:
   - type: doc
     ref: docs/decisions/ADR-107-the-stack-is-a-precondition-of-the-packages.md
   - type: command
-    ref: vp run tarball:verify
+    ref: vp run publish:verify
+  - type: code
+    ref: packages/repo-standards/scripts/publish-smoke.mjs
 ---
 
 # One package, in my own repository, on my own stack
@@ -58,6 +60,18 @@ says why. `@lcabrera/ui` publishes TypeScript source and needs StyleX in the
 consumer's build, so there is no configuration of a Tailwind-and-Next.js
 repository in which it works. Pretending otherwise would make this requirement
 unfalsifiable.
+
+What already exists is worth knowing, so this requirement is not read as covering
+more than it does. `vp run publish:verify` packs every public package that builds
+and has a fresh Node process import each published subpath from a temporary
+directory, so `api`, `server`, `utils` and `node-runtime` are already resolved
+outside this tree. `@lcabrera/ui` is not: both that gate and `tarball:verify` key
+on a `build` script, and `ui` has none.
+
+So this requirement adds two things rather than one. It covers `ui` at all, and
+it changes the question for the rest from "does the import resolve" to "does the
+package work in a repository on the declared stack" — compiling StyleX in
+someone else's build is not something resolving a subpath can answer.
 
 The scratch repository is the hard part to keep honest. It has to be minimal
 enough that its contents are visibly not the bootstrapper's output, and it has to

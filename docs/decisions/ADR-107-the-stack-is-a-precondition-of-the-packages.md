@@ -22,12 +22,20 @@ reliance on a consumer's tsconfig `paths`. `vp run suppressions:packages` prints
 that roster. The rule is about what a package may _assume about the repository it
 lands in_.
 
-It is only partly enforced, and the gap matters here. `vp run tarball:verify`
-packs the two distributed packages, `devkit` and `repo-standards`, and installs
-them into a scratch repository holding none of this tree's files. Every other
-published package is installed nowhere outside this tree, so its standalone
-property rests on review. That is the contrast this decision is built on, and it
-is weaker than "already enforced".
+Most of it is enforced, and the shape of the exception is what this decision is
+built on. `vp run publish:verify` packs every public package that builds, lays
+the tarballs out as `node_modules` in a temporary directory and has a fresh Node
+process import each published subpath; `attw:verify` then checks the published
+types resolve for a consumer. `vp run tarball:verify` covers `devkit` and
+`repo-standards`, which ship `.mjs` source and deliberately do not build.
+
+Both gates key on a `build` script, so one package falls through both:
+`@lcabrera/ui`, which publishes TypeScript source and has no build. It is packed
+and imported by nothing, and it is also the package the rest of this ADR is
+about. What stays uncovered for all of them is narrower and more specific:
+being installed into a repository **on the declared stack** and used there.
+Resolving an import is not the same as compiling StyleX in someone else's
+build.
 
 What no rule covers is what a package may assume about the **stack** it lands
 on. `@lcabrera/ui` publishes TypeScript source rather than a build, so the
