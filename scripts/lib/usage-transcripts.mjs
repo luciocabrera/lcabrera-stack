@@ -69,12 +69,27 @@ const readLines = (path) => {
   }
 };
 
-const invocationsInFile = ({ path, roots }) => {
+const recordedCwd = (lines) => {
+  for (const line of lines) {
+    if (!line.includes('"cwd"')) continue;
+    const cwd = parseEntry(line)?.cwd;
+    if (typeof cwd === 'string') {
+      return cwd;
+    }
+  }
+  return undefined;
+};
+
+const readTranscriptFile = ({ path, roots }) => {
   const { lines, unreadable } = readLines(path);
   if (unreadable !== undefined) {
-    return { invocations: [], unreadable };
+    return { inScope: false, invocations: [], unreadable };
+  }
+  if (!isWithinAny({ path: recordedCwd(lines), roots })) {
+    return { inScope: false, invocations: [] };
   }
   return {
+    inScope: true,
     invocations: lines
       .filter((line) => line.length > 0 && mightHoldInvocation(line))
       .map((line) => parseEntry(line))
@@ -141,6 +156,11 @@ const transcriptFilesFor = ({ root, workingTrees }) => {
   };
 };
 
+const unreadableReason = ({ root, unreadable }) =>
+  unreadable.length === 0
+    ? `no transcript under ${root} records a working tree of this repository as its directory`
+    : `no readable transcript under ${root} records a working tree of this repository as its directory, and ${unreadable.length} path(s) could not be read`;
+
 export const readTranscriptUsage = ({ root, since, workingTrees }) => {
   if (!existsSync(root)) {
     return {
@@ -157,26 +177,28 @@ export const readTranscriptUsage = ({ root, since, workingTrees }) => {
       tally: {},
     };
   }
-  if (listed.files.length === 0) {
+  const reads = listed.files.map((path) =>
+    readTranscriptFile({ path, roots: workingTrees }),
+  );
+  const unreadable = [
+    ...listed.unreadable,
+    ...reads.map((read) => read.unreadable).filter((e) => e !== undefined),
+  ];
+  const inScope = reads.filter((read) => read.inScope);
+  if (inScope.length === 0) {
     return {
       available: false,
-      reason: `no transcript file under ${root} matches a working tree of this repository`,
+      reason: unreadableReason({ root, unreadable }),
       tally: {},
     };
   }
-  const reads = listed.files.map((path) =>
-    invocationsInFile({ path, roots: workingTrees }),
-  );
-  const invocations = reads
+  const invocations = inScope
     .flatMap((read) => read.invocations)
     .filter((invocation) => since === undefined || invocation.day >= since);
   return {
     available: true,
-    files: listed.files.length,
+    files: inScope.length,
     tally: tallyByDay(invocations),
-    unreadable: [
-      ...listed.unreadable,
-      ...reads.map((read) => read.unreadable).filter((e) => e !== undefined),
-    ],
+    unreadable,
   };
 };

@@ -107,7 +107,7 @@ describe('repositoryWorkingTrees', () => {
     expect(trees).not.toContain(superproject);
   });
 
-  it('keeps a stray root from matching every transcript under an ancestor', () => {
+  it('keeps an external git dir from putting an ancestor in the roster', () => {
     const external = join(scratch(), 'gitdirs', 'repo.git');
     mkdirSync(external, { recursive: true });
     const root = treeWithGitFile(external);

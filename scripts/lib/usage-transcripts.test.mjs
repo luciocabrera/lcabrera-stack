@@ -15,7 +15,10 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vite-plus/test';
 
-import { transcriptDirectoryFor } from './usage-scope.mjs';
+import {
+  namesADirectoryUnderAny,
+  transcriptDirectoryFor,
+} from './usage-scope.mjs';
 import {
   invocationsInEntry,
   readTranscriptUsage,
@@ -198,6 +201,55 @@ describe('readTranscriptUsage', () => {
     },
   );
 
+  it("ignores a sibling repository whose path shares this one's encoded prefix", () => {
+    const { root, tree } = transcriptRootWith({
+      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
+    });
+    const sibling = `${tree}-docs`;
+    const siblingDirectory = join(root, transcriptDirectoryFor(sibling));
+    mkdirSync(siblingDirectory);
+    writeFileSync(
+      join(siblingDirectory, 'session.jsonl'),
+      [
+        JSON.stringify({
+          ...skillEntryOn('2026-09-04T10:00:00.000Z'),
+          cwd: sibling,
+        }),
+      ].join('\n'),
+    );
+
+    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+
+    expect(
+      namesADirectoryUnderAny({
+        directoryName: transcriptDirectoryFor(sibling),
+        roots: [tree],
+      }),
+    ).toBe(true);
+    expect(result.files).toBe(1);
+    expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
+  });
+
+  it('reports not read when only a prefix sibling has transcripts', () => {
+    const root = mkdtempSync(join(tmpdir(), 'usage-transcripts-'));
+    const tree = mkdtempSync(join(tmpdir(), 'usage-tree-'));
+    const sibling = `${tree}-docs`;
+    const siblingDirectory = join(root, transcriptDirectoryFor(sibling));
+    mkdirSync(siblingDirectory);
+    writeFileSync(
+      join(siblingDirectory, 'session.jsonl'),
+      JSON.stringify({
+        ...skillEntryOn('2026-09-04T10:00:00.000Z'),
+        cwd: sibling,
+      }),
+    );
+
+    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+
+    expect(result.available).toBe(false);
+    expect(result.reason).toContain('records a working tree');
+  });
+
   it('reads no transcript filed for another repository', () => {
     const { root } = transcriptRootWith({
       entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
@@ -210,7 +262,7 @@ describe('readTranscriptUsage', () => {
     });
 
     expect(result.available).toBe(false);
-    expect(result.reason).toContain('matches a working tree');
+    expect(result.reason).toContain('records a working tree');
   });
 
   it('drops what falls before a simulated horizon', () => {
