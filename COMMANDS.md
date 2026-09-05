@@ -515,17 +515,18 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 | `vp run usage:report`          | report how the harness is actually used — skill, subagent and workflow activity read out of stores that already retain it, written to `reports/usage/` and never committed ([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md))                                                                        |
 | `vp run prepare`               | `vp config` — runs automatically on install                                                                                                                                                                                                                                                                                      |
 
-`usage:report` reads four stores and collects nothing of its own: Claude Code
-transcripts on this machine for skill and subagent invocations, the GitHub
-Actions run history for workflows, and `git log` over the requirement and
-coordination registers. Every number it prints carries the source it came from
-and the window it covers, and a source it could not read is reported as unread
-rather than as a count of zero. `-- --days <n>` moves the window;
-`-- --transcript-retention-days <n>` makes the run ignore every invocation older
-than `<n>` days, which is how you watch the local snapshot carry a period the
-transcripts have already dropped. It bounds that one run's read and nothing else:
-a value above the real `cleanupPeriodDays` reads no further back than a plain run
-does, because Claude Code has already deleted those days.
+`usage:report` reads stores that already retain history and collects nothing of
+its own: Claude Code transcripts on this machine for skill and subagent
+invocations, the GitHub Actions run history for workflows, and `git log` over
+the requirement and coordination registers. Every number it prints carries the
+source it came from and the window it covers, and a source it could not read is
+reported as unread rather than as a count of zero. `-- --days <n>` moves the
+window; `-- --transcript-retention-days <n>` makes the run ignore every
+invocation older than `<n>` days, which is how you watch the local snapshot
+carry a period the transcripts have already dropped. It bounds that one run's
+read and nothing else: a value above the real `cleanupPeriodDays` reads no
+further back than a plain run does, because Claude Code has already deleted
+those days.
 
 **The transcript read is bounded by retention, not by the window.** An ordinary
 run reads every transcript still on disk whatever its age, but Claude Code

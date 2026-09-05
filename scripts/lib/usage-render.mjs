@@ -2,8 +2,8 @@
  * Renders the harness usage model as markdown. Pure on purpose: the readers
  * decide what is true and this decides only how it reads.
  *
- * Two things it always prints, because a number without them misleads: the
- * source and window behind every count, and the fact that a zero is a question.
+ * What it always prints, because a number without them misleads: the source
+ * and window behind every count, and the fact that a zero is a question.
  * A caveat is rendered here rather than printed on the console, because the file
  * is what gets read later. Every cell and every interpolated reason goes through
  * one sanitiser — a newline or a pipe out of a tool this report does not control
@@ -320,7 +320,7 @@ const header = (report) => [
   '',
   '## How to read this',
   '',
-  '**A zero is a question, not a verdict.** Three causes end differently, and',
+  '**A zero is a question, not a verdict.** The causes end differently, and',
   'the number alone does not tell you which one you have:',
   '',
   '1. The description does not trigger — a reachability defect. Fix the',

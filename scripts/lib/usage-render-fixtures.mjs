@@ -2,11 +2,11 @@
  * One rendered report the render tests vary, so a case states only the field it
  * is about.
  *
- * The default is deliberately the awkward one: a 90-day window over a 30-day
- * retention, observed back only to the day retention reaches, with a recorded
- * day that is earlier still. Most of the wording this module's tests pin exists
- * for exactly that mismatch, so a fixture that avoided it would let a false
- * coverage claim pass.
+ * The default is deliberately the awkward one: a window longer than the
+ * retention it is read under, observed back only to the day retention reaches,
+ * with a recorded day that is earlier still. Most of the wording this module's
+ * tests pin exists for exactly that mismatch, so a fixture that avoided it
+ * would let a false coverage claim pass.
  */
 import { renderReport } from './usage-render.mjs';
 

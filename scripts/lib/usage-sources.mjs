@@ -1,5 +1,5 @@
 /**
- * Reads the two harness signals that live outside this machine's transcripts:
+ * Reads the harness signals that live outside this machine's transcripts:
  * workflow runs from the GitHub API, and register activity from git history.
  *
  * Each reader reports its availability separately from its findings, because an

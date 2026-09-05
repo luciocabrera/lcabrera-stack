@@ -4,7 +4,7 @@
  *
  * Transcripts are the only store that records an invocation at all, and the
  * only one that expires, which is why the caller merges them with a snapshot.
- * Three constraints hold here: the reader reports whether it could read
+ * The constraints that hold here: the reader reports whether it could read
  * separately from what it found; `since` narrows the read only for a run
  * simulating expiry, never for the window; and a path that vanishes between
  * being listed and being read is reported and skipped rather than thrown.
