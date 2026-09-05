@@ -57,11 +57,13 @@ export const reportWith = (overrides) =>
     ],
     transcripts: {
       available: true,
+      clockOverridden: false,
       files: 3,
       observedBackTo: '2026-08-06',
       reachBack: '2026-08-06',
       retentionDays: 30,
       retentionDeclaredIn: '.claude/settings.json',
+      retentionSeenSince: '2026-08-06',
       simulatedHorizon: false,
       snapshot: {
         earliestDay: '2026-08-01',

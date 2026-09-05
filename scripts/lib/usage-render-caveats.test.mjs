@@ -182,6 +182,60 @@ describe('renderReport coverage caveats', () => {
     );
   });
 
+  it('says a run that set its own clock observed nothing of its own', () => {
+    const markdown = reportWith({
+      transcripts: {
+        available: true,
+        clockOverridden: true,
+        files: 3,
+        observedBackTo: '2026-08-06',
+        reachBack: '2026-08-06',
+        retentionDays: 30,
+        retentionDeclaredIn: '.claude/settings.json',
+        retentionSeenSince: '2026-08-06',
+        simulatedHorizon: false,
+        snapshot: {
+          earliestDay: '2026-08-01',
+          path: 'reports/usage/snapshot.json',
+        },
+      },
+    });
+
+    expect(markdown).toContain('This run set its own clock with `--now`');
+    expect(markdown).toContain('recorded no observation of its own');
+  });
+
+  it('says how far back it vouches when the retention changed since the last run', () => {
+    const markdown = reportWith({
+      transcripts: {
+        available: true,
+        clockOverridden: false,
+        files: 3,
+        observedBackTo: '2026-09-04',
+        reachBack: '2026-08-06',
+        retentionDays: 30,
+        retentionDeclaredIn: '.claude/settings.json',
+        retentionSeenSince: '2026-09-04',
+        simulatedHorizon: false,
+        snapshot: {
+          earliestDay: '2026-08-01',
+          path: 'reports/usage/snapshot.json',
+        },
+      },
+    });
+
+    expect(markdown).toContain(
+      'This run claims observation only from 2026-09-04',
+    );
+    expect(markdown).toContain('does not vouch for it');
+  });
+
+  it('says nothing about vouching when the retention has held the whole horizon', () => {
+    expect(reportWith({})).not.toContain(
+      'This run claims observation only from',
+    );
+  });
+
   it('says a skipped transcript makes the counts a lower bound', () => {
     const markdown = reportWith({
       transcripts: {

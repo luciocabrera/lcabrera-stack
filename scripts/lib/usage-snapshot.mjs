@@ -6,9 +6,17 @@
  * twice keeps the larger count — so a run that reads fewer transcripts than the
  * last one cannot lower a number. It also records the spans each run could
  * observe, because a day with no invocation leaves no entry and a recorded day
- * is therefore evidence of a record, never of coverage. That only holds while the file survives, so an
- * unreadable or version-mismatched snapshot is moved aside rather than replaced.
- * It is local and gitignored (ADR-049).
+ * is therefore evidence of a record, never of coverage.
+ *
+ * A span is the one thing here that can be wrong in the dangerous direction: the
+ * merge is monotone and nothing prunes, so a span claiming a day nothing read
+ * turns "not observed" into "observed and empty" for good. So a span is measured
+ * against the real clock rather than the window a run prints, it never reaches
+ * back past the day this snapshot first recorded the retention now in force —
+ * raising `cleanupPeriodDays` cannot back-date the days the old value already
+ * deleted — and a run that sets its own clock records none at all. That only
+ * holds while the file survives, so an unreadable or version-mismatched snapshot
+ * is moved aside rather than replaced. It is local and gitignored (ADR-049).
  */
 import {
   existsSync,
@@ -51,6 +59,42 @@ export const mergeObserved = (kept, span) =>
     .filter((entry) => isSpan(entry))
     .toSorted((a, b) => a.from.localeCompare(b.from))
     .reduce((merged, entry) => absorb(merged, entry), []);
+
+const trackedRetention = ({ days, recorded, today }) =>
+  recorded?.days === days ? recorded : { days, since: today };
+
+const spanFor = ({ available, days, since, today }) =>
+  available
+    ? { from: laterDay(shiftDay(today, -(days - 1)), since), to: today }
+    : undefined;
+
+export const observationFor = ({
+  available,
+  clockOverridden,
+  retention,
+  stored,
+  today,
+}) => {
+  if (clockOverridden) {
+    return { retention: stored.retention, span: undefined };
+  }
+  const tracked = retention.simulated
+    ? stored.retention
+    : trackedRetention({
+        days: retention.days,
+        recorded: stored.retention,
+        today,
+      });
+  return {
+    retention: tracked,
+    span: spanFor({
+      available,
+      days: retention.days,
+      since: tracked?.since ?? today,
+      today,
+    }),
+  };
+};
 
 export const observedBackTo = ({ observed, to }) =>
   observed.find((span) => span.from <= to && span.to >= to)?.from;
@@ -142,9 +186,21 @@ export const readSnapshot = ({ path, timestamp }) => {
       });
 };
 
-export const writeSnapshot = ({ days, observed, path, updatedAt }) => {
+export const writeSnapshot = ({
+  days,
+  observed,
+  path,
+  retention,
+  updatedAt,
+}) => {
   mkdirSync(dirname(path), { recursive: true });
-  const snapshot = { days, observed, updatedAt, version: SNAPSHOT_VERSION };
+  const snapshot = {
+    days,
+    observed,
+    retention,
+    updatedAt,
+    version: SNAPSHOT_VERSION,
+  };
   writeFileSync(path, `${JSON.stringify(snapshot, null, 2)}\n`);
   return snapshot;
 };

@@ -7,6 +7,13 @@
  * The observed spans are the other half, and they exist because a recorded day
  * is not a covered day: a day with no invocation leaves no entry, so the days
  * the snapshot holds can never say how far back anything was actually read.
+ *
+ * Which makes a span the one value here that must never be generous. The merge
+ * is monotone and nothing prunes, so a span over days no run read is permanent,
+ * and it reads as the opposite of the truth: not "unobserved" but "observed and
+ * empty". The `observationFor` cases below are that guard — the two ways a span
+ * could be claimed for days nothing read are a retention raised since the last
+ * run, and a run told to date itself in the past.
  */
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -20,6 +27,7 @@ import {
   emptySnapshot,
   mergeObserved,
   mergeTally,
+  observationFor,
   observedBackTo,
   readSnapshot,
   writeSnapshot,
@@ -186,6 +194,105 @@ describe('earliestDay', () => {
   });
 });
 
+const TODAY = '2026-09-04';
+
+const RETENTION = {
+  days: 30,
+  declaredIn: '.claude/settings.json',
+  simulated: false,
+};
+
+describe('observationFor', () => {
+  it('measures the span back to where retention reaches, once the setting has held', () => {
+    const { span } = observationFor({
+      available: true,
+      clockOverridden: false,
+      retention: RETENTION,
+      stored: { retention: { days: 30, since: '2026-01-01' } },
+      today: TODAY,
+    });
+
+    expect(span).toEqual({ from: '2026-08-06', to: TODAY });
+  });
+
+  it('claims nothing older than the day it first saw the retention now in force', () => {
+    const { retention, span } = observationFor({
+      available: true,
+      clockOverridden: false,
+      retention: RETENTION,
+      stored: { retention: { days: 7, since: '2026-01-01' } },
+      today: TODAY,
+    });
+
+    expect(span).toEqual({ from: TODAY, to: TODAY });
+    expect(retention).toEqual({ days: 30, since: TODAY });
+  });
+
+  it('claims nothing older than today when no run has recorded a retention', () => {
+    const { retention, span } = observationFor({
+      available: true,
+      clockOverridden: false,
+      retention: RETENTION,
+      stored: {},
+      today: TODAY,
+    });
+
+    expect(span).toEqual({ from: TODAY, to: TODAY });
+    expect(retention).toEqual({ days: 30, since: TODAY });
+  });
+
+  it('keeps the day it first saw a retention that has not changed', () => {
+    const { retention } = observationFor({
+      available: true,
+      clockOverridden: false,
+      retention: RETENTION,
+      stored: { retention: { days: 30, since: '2026-01-01' } },
+      today: TODAY,
+    });
+
+    expect(retention).toEqual({ days: 30, since: '2026-01-01' });
+  });
+
+  it('records no span and touches no retention when the clock was set with --now', () => {
+    const stored = { retention: { days: 30, since: '2026-01-01' } };
+
+    expect(
+      observationFor({
+        available: true,
+        clockOverridden: true,
+        retention: RETENTION,
+        stored,
+        today: TODAY,
+      }),
+    ).toEqual({ retention: stored.retention, span: undefined });
+  });
+
+  it('records no span when the transcripts could not be read', () => {
+    const { span } = observationFor({
+      available: false,
+      clockOverridden: false,
+      retention: RETENTION,
+      stored: { retention: { days: 30, since: '2026-01-01' } },
+      today: TODAY,
+    });
+
+    expect(span).toBeUndefined();
+  });
+
+  it('leaves the recorded retention alone for a simulated horizon', () => {
+    const { retention, span } = observationFor({
+      available: true,
+      clockOverridden: false,
+      retention: { days: 1, simulated: true },
+      stored: { retention: { days: 30, since: '2026-01-01' } },
+      today: TODAY,
+    });
+
+    expect(retention).toEqual({ days: 30, since: '2026-01-01' });
+    expect(span).toEqual({ from: TODAY, to: TODAY });
+  });
+});
+
 const snapshotPath = () =>
   join(mkdtempSync(join(tmpdir(), 'usage-')), 'snapshot.json');
 
@@ -207,12 +314,14 @@ describe('readSnapshot', () => {
       days: storedDays,
       observed: [{ from: '2026-08-06', to: '2026-09-04' }],
       path,
+      retention: { days: 30, since: '2026-08-06' },
       updatedAt: '2026-09-04T00:00:00Z',
     });
     const read = readSnapshot({ path, timestamp: TIMESTAMP });
 
     expect(read.days).toEqual(storedDays);
     expect(read.observed).toEqual([{ from: '2026-08-06', to: '2026-09-04' }]);
+    expect(read.retention).toEqual({ days: 30, since: '2026-08-06' });
   });
 
   it('reads a snapshot written before observed spans existed as having observed nothing', () => {
@@ -220,6 +329,17 @@ describe('readSnapshot', () => {
     writeFileSync(path, JSON.stringify({ days: storedDays, version: 1 }));
 
     expect(readSnapshot({ path, timestamp: TIMESTAMP }).observed).toEqual([]);
+  });
+
+  it('reads a snapshot written before the retention was recorded rather than setting it aside', () => {
+    const path = snapshotPath();
+    writeFileSync(path, JSON.stringify({ days: storedDays, version: 1 }));
+
+    const read = readSnapshot({ path, timestamp: TIMESTAMP });
+
+    expect(read.days).toEqual(storedDays);
+    expect(read.retention).toBeUndefined();
+    expect(read.setAside).toBeUndefined();
   });
 
   it('keeps an unreadable snapshot instead of letting the next write replace it', () => {

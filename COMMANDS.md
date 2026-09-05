@@ -530,7 +530,11 @@ deletes one after `cleanupPeriodDays`, so a window longer than that reaches
 further back than the transcripts are guaranteed to. The snapshot carries the
 days already deleted **and** the spans past runs could observe, because a day
 with no invocation leaves no record and a recorded day therefore cannot say what
-was covered. The report states how far back observation runs continuously, and
+was covered. A span is measured against the clock the run really ran on, and it
+never reaches back past the day the snapshot first recorded the
+`cleanupPeriodDays` now in force — raising the setting cannot back-date days the
+old value had already deleted, and a run given `--now` records no span at all.
+The report states how far back observation runs continuously, and
 where that is later than the window's start it says the earlier part is
 unobserved rather than empty. `git log` is bounded the same way in a shallow
 clone, and the report marks those windows too.

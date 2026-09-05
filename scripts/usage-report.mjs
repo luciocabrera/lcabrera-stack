@@ -11,6 +11,12 @@
  * internalised or dead. Produced on demand and never committed (ADR-049): no
  * count it prints may be copied into a tracked file — name this command.
  *
+ * The span a run records as observed is measured against the real clock, not
+ * against the window it prints, and a run given `--now` records none: the window
+ * is a reporting choice, while what a run could read is whatever is on disk when
+ * it runs. A span is what lets a zero be read as absence, so it may never claim
+ * a day the run did not read.
+ *
  * Usage (from the repo root):
  *   vp run usage:report
  *   vp run usage:report -- --days 30
@@ -42,6 +48,7 @@ import {
   earliestDay,
   mergeObserved,
   mergeTally,
+  observationFor,
   observedBackTo,
   readSnapshot,
   writeSnapshot,
@@ -55,7 +62,7 @@ import {
   readTranscriptUsage,
   transcriptsRoot,
 } from './lib/usage-transcripts.mjs';
-import { shiftDay, windowOf } from './lib/usage-window.mjs';
+import { dayOf, shiftDay, windowOf } from './lib/usage-window.mjs';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '../..');
 const COMMAND = 'vp run usage:report';
@@ -123,6 +130,7 @@ const buildReport = ({
   args,
   generatedAt,
   inventory,
+  observedAt,
   snapshotPath,
   window,
 }) => {
@@ -132,7 +140,9 @@ const buildReport = ({
     userHome: homedir(),
   });
   const readFrom = transcriptHorizon({ retention, window });
-  const reachBack = readFrom ?? shiftDay(window.end, -(retention.days - 1));
+  const today = dayOf(observedAt);
+  const clockOverridden = args.now !== undefined;
+  const reachBack = readFrom ?? shiftDay(today, -(retention.days - 1));
   const workingTrees = repositoryWorkingTrees(REPO_ROOT);
   const live = readTranscriptUsage({
     root: transcriptsRoot(),
@@ -141,19 +151,25 @@ const buildReport = ({
   });
   const stored = readSnapshot({ path: snapshotPath, timestamp: generatedAt });
   const merged = mergeTally(stored.days, live.tally);
-  const observed = mergeObserved(
-    stored.observed ?? [],
-    live.available ? { from: reachBack, to: window.end } : undefined,
-  );
+  const observation = observationFor({
+    available: live.available,
+    clockOverridden,
+    retention,
+    stored,
+    today,
+  });
+  const observed = mergeObserved(stored.observed ?? [], observation.span);
   writeSnapshot({
     days: merged,
     observed,
     path: snapshotPath,
+    retention: observation.retention,
     updatedAt: generatedAt,
   });
 
   const transcripts = {
     ...live,
+    clockOverridden,
     observedBackTo: observedBackTo({ observed, to: window.end }),
     reachBack,
     readFrom,
@@ -162,6 +178,7 @@ const buildReport = ({
       retention.declaredIn === undefined
         ? undefined
         : relativeToRepo(retention.declaredIn),
+    retentionSeenSince: observation.retention?.since,
     simulatedHorizon: retention.simulated,
     snapshot: {
       earliestDay: earliestDay(merged),
@@ -245,7 +262,8 @@ const printSummary = ({ paths, report }) => {
 
 const main = () => {
   const args = parseArgs(process.argv.slice(2));
-  const generatedAt = args.now ?? new Date().toISOString();
+  const observedAt = new Date().toISOString();
+  const generatedAt = args.now ?? observedAt;
   const window = windowOf({
     days:
       args.days === undefined
@@ -262,6 +280,7 @@ const main = () => {
     args,
     generatedAt,
     inventory: readHarnessInventory(REPO_ROOT),
+    observedAt,
     snapshotPath,
     window,
   });

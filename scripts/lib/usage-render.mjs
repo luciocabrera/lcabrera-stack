@@ -250,6 +250,19 @@ const coverageSentence = ({ observedBackTo, window }) => {
   return `Observation runs continuously back only to ${observedBackTo}, so the earlier part of the window above is unobserved rather than empty — a zero in the invocation counts settles nothing about those days. A recorded day earlier than that is a record, not coverage.`;
 };
 
+const observationSentence = (transcripts) => {
+  if (transcripts.clockOverridden) {
+    return 'This run set its own clock with `--now`, so it recorded no observation of its own: what it read is the transcripts on disk today, not the ones the window above covers.';
+  }
+  if (
+    transcripts.retentionSeenSince === undefined ||
+    transcripts.retentionSeenSince <= transcripts.reachBack
+  ) {
+    return undefined;
+  }
+  return `This run claims observation only from ${transcripts.retentionSeenSince}, the day the snapshot first recorded the current retention of ${transcripts.retentionDays} day(s); an earlier day fell under a setting this report never read, so this run does not vouch for it.`;
+};
+
 const unreadCoverageNote = (report) => {
   const { earliestDay } = report.transcripts.snapshot;
   const carried =
@@ -267,7 +280,10 @@ const readCoverageNote = (report) =>
       observedBackTo: report.transcripts.observedBackTo,
       window: report.window,
     }),
-  ].join(' ');
+    observationSentence(report.transcripts),
+  ]
+    .filter((sentence) => sentence !== undefined)
+    .join(' ');
 
 const coverageNote = (report) =>
   report.transcripts.available

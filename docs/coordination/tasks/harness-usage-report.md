@@ -5,7 +5,7 @@ owner: agent:claude
 status: review
 branch: feat/1068-harness-usage-report
 area:
-  - scripts/usage-report.mjs
+  - scripts/usage-report*.mjs
   - scripts/lib/usage-*.mjs
   - .claude/settings.json
   - devkit.config.json
@@ -13,7 +13,7 @@ area:
   - package.json
   - COMMANDS.md
 started: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-05
 plan: (none)
 pr: https://github.com/luciocabrera/lcabrera-stack/pull/1088
 issue: #1068
