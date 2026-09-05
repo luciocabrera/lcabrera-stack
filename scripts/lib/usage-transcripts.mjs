@@ -9,10 +9,16 @@
  * simulating expiry, never for the window; and a path that vanishes between
  * being listed and being read is reported and skipped rather than thrown.
  *
- * What the caller may record as observed hangs on `complete`, so that claim is
- * built to under-claim: every result comes from one constructor whose default
- * vouches for nothing, and `complete` holds only for a result built from at
- * least one in-scope transcript with nothing on the skipped list. Everything
+ * What the caller may record as observed hangs on what this reader says about
+ * its own read, so both of those claims are built to under-claim. `complete`
+ * says nothing was left out: every result comes from one constructor whose
+ * default vouches for nothing, and `complete` holds only for a result built from
+ * at least one in-scope transcript with nothing on the skipped list. `readFrom`
+ * says how far back the read was allowed to look — it echoes the `since` this
+ * reader was handed, so a run that read under a horizon of its own is visible as
+ * such to the caller rather than being mistaken for a read of everything on
+ * disk. The two are separate because a narrowed read is not a failed one; it
+ * counts what it found honestly, and only the coverage claim is off. Everything
  * left out lands on that one list — a directory that would not list, a file
  * that would not open, a file recording a tool call it names no directory for,
  * a record naming a tool call that would not parse — so a new way to leave
@@ -213,6 +219,7 @@ const unreadableReason = ({ root, unreadable }) =>
 
 export const transcriptRead = ({
   files = 0,
+  readFrom,
   reason,
   skipped = [],
   tally = {},
@@ -220,6 +227,7 @@ export const transcriptRead = ({
   available: files > 0,
   complete: files > 0 && skipped.length === 0,
   files,
+  readFrom,
   reason,
   tally,
   unreadable: skipped,
@@ -228,12 +236,14 @@ export const transcriptRead = ({
 export const readTranscriptUsage = ({ root, since, workingTrees }) => {
   if (!existsSync(root)) {
     return transcriptRead({
+      readFrom: since,
       reason: `no transcript directory at ${root} — Claude Code has not run here, or transcripts live elsewhere`,
     });
   }
   const listed = transcriptFilesFor({ root, workingTrees });
   if (listed.files === undefined) {
     return transcriptRead({
+      readFrom: since,
       reason: `the transcript directory ${root} could not be listed — ${listed.reason}`,
     });
   }
@@ -247,6 +257,7 @@ export const readTranscriptUsage = ({ root, since, workingTrees }) => {
   const inScope = reads.filter((read) => read.inScope);
   if (inScope.length === 0) {
     return transcriptRead({
+      readFrom: since,
       reason: unreadableReason({ root, unreadable: skipped }),
       skipped,
     });
@@ -256,6 +267,7 @@ export const readTranscriptUsage = ({ root, since, workingTrees }) => {
     .filter((invocation) => since === undefined || invocation.day >= since);
   return transcriptRead({
     files: inScope.length,
+    readFrom: since,
     skipped,
     tally: tallyByDay(invocations),
   });

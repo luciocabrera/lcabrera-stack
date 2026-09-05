@@ -232,7 +232,7 @@ const retentionAuthority = (transcripts) =>
 
 const retentionSentence = (transcripts) =>
   transcripts.simulatedHorizon
-    ? `**This run used a simulated transcript horizon of ${transcripts.retentionDays} day(s)** (\`--transcript-retention-days\`), so the transcript columns cover ${transcripts.reachBack} onward.`
+    ? `**This run used a simulated transcript horizon of ${transcripts.retentionDays} day(s)** (\`--transcript-retention-days\`), so it counted no invocation dated before ${transcripts.reachBack}; the flag bounds what this run read and cannot make the store hold a day Claude Code has already deleted.`
     : `${retentionAuthority(transcripts)}, so a transcript read is guaranteed to reach back only to ${transcripts.reachBack}; every transcript still on disk was read whatever its age, which may reach further but is not promised to.`;
 
 const snapshotSentence = (snapshot) =>
@@ -253,6 +253,9 @@ const coverageSentence = ({ observedBackTo, window }) => {
 const observationSentence = (transcripts) => {
   if (transcripts.clockOverridden) {
     return 'This run set its own clock with `--now`, so it recorded no observation of its own: what it read is the transcripts on disk today, not the ones the window above covers.';
+  }
+  if (transcripts.simulatedHorizon) {
+    return 'This run read under a horizon it was handed rather than the retention in force, so it recorded no observation of its own: the days it covers are a choice this run made, not the days the transcripts on disk can still answer for.';
   }
   if (
     transcripts.retentionSeenSince === undefined ||

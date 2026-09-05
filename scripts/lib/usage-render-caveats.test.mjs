@@ -60,7 +60,7 @@ describe('renderReport coverage caveats', () => {
     );
   });
 
-  it('flags a simulated transcript horizon and names the day it starts at', () => {
+  it('flags a simulated transcript horizon, names the day it starts at, and says it vouches for nothing', () => {
     const markdown = reportWith({
       transcripts: {
         available: true,
@@ -78,7 +78,11 @@ describe('renderReport coverage caveats', () => {
     });
 
     expect(markdown).toContain('simulated transcript horizon of 1 day(s)');
-    expect(markdown).toContain('cover 2026-09-04 onward');
+    expect(markdown).toContain('counted no invocation dated before 2026-09-04');
+    expect(markdown).toContain(
+      'cannot make the store hold a day Claude Code has already deleted',
+    );
+    expect(markdown).toContain('recorded no observation of its own');
     expect(markdown).toContain('2026-09-04 → 2026-09-04 (simulated horizon)');
   });
 

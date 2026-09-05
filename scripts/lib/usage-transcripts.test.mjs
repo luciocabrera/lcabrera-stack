@@ -14,6 +14,10 @@
  * it holds only for a read that took in every transcript it found — one skipped
  * path, one unparsable tool-call record, or nothing in scope at all, and the
  * read vouches for no day.
+ *
+ * `readFrom` is the other half of that: a read handed a horizon looked at fewer
+ * days than the store holds, whatever day the horizon names, so it is reported
+ * back rather than left for the caller to re-derive from the flag it passed.
  */
 import { chmodSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -46,6 +50,7 @@ describe('transcriptRead', () => {
       available: false,
       complete: false,
       files: 0,
+      readFrom: undefined,
       reason: undefined,
       tally: {},
       unreadable: [],
@@ -57,6 +62,13 @@ describe('transcriptRead', () => {
 
     expect(transcriptRead({ files: 2 }).complete).toBe(true);
     expect(transcriptRead({ files: 2, skipped }).complete).toBe(false);
+  });
+
+  it('reports the horizon it was handed, so the caller can tell a narrowed read', () => {
+    expect(transcriptRead({ files: 2 }).readFrom).toBeUndefined();
+    expect(transcriptRead({ files: 2, readFrom: '2026-09-04' }).readFrom).toBe(
+      '2026-09-04',
+    );
   });
 });
 
@@ -389,5 +401,23 @@ describe('readTranscriptUsage', () => {
     });
 
     expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
+    expect(result.readFrom).toBe('2026-09-04');
+  });
+
+  it('reads every day on disk and reports no horizon when it was given none', () => {
+    const { root, tree } = transcriptRootWith({
+      entries: [
+        skillEntryOn('2026-06-10T09:00:00.000Z'),
+        skillEntryOn('2026-09-04T09:00:00.000Z'),
+      ],
+    });
+
+    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+
+    expect(result.readFrom).toBeUndefined();
+    expect(result.tally.skills.unslop).toEqual({
+      '2026-06-10': 1,
+      '2026-09-04': 1,
+    });
   });
 });

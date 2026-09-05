@@ -15,6 +15,12 @@
  * process wrote, never off this process's clock: the two are different clocks,
  * and a run that straddles midnight would otherwise fail a correct
  * implementation.
+ *
+ * `--transcript-retention-days` gets two of these rather than one. A value below
+ * the retention in force lands on the same day either way, so it cannot tell a
+ * span bounded by the retention this run records from one bounded by the number
+ * the run asked for; the case that separates them asks for a horizon far wider
+ * than the store can supply.
  */
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
@@ -69,11 +75,15 @@ const workspace = () => {
   };
 };
 
-const seedSnapshot = ({ retention, snapshotPath }) =>
+const seedSnapshot = ({
+  days = { skills: {}, subagents: {} },
+  retention,
+  snapshotPath,
+}) =>
   writeFileSync(
     snapshotPath,
     `${JSON.stringify({
-      days: { skills: {}, subagents: {} },
+      days,
       observed: [],
       retention,
       updatedAt: '2020-01-01T00:00:00.000Z',
@@ -223,6 +233,48 @@ describe('usage-report observed spans', () => {
     expect(report.transcripts.complete).toBe(false);
     expect(snapshot.observed).toEqual([]);
     expect(snapshot.days.skills.unslop).toBeDefined();
+  });
+
+  it('records no span for a run asking to reach further back than retention does', () => {
+    const workspaceUnderTest = workspace();
+    const { retentionDays, snapshotPath } = workspaceUnderTest;
+    const seeded = { days: retentionDays, since: '2020-01-01' };
+    seedSnapshot({ retention: seeded, snapshotPath });
+    const asked = retentionDays * 12;
+
+    const { report, snapshot, status, stderr } = run({
+      ...workspaceUnderTest,
+      args: ['--transcript-retention-days', String(asked)],
+    });
+    const day = dayReported(report);
+
+    expect(status, stderr).toBe(0);
+    expect(report.transcripts.complete).toBe(true);
+    expect(report.transcripts.readFrom).toBe(shiftDay(day, -(asked - 1)));
+    expect(snapshot.observed).toEqual([]);
+    expect(snapshot.retention).toEqual(seeded);
+  });
+
+  it('still carries a period the transcripts have dropped while it records no span', () => {
+    const workspaceUnderTest = workspace();
+    const { retentionDays, snapshotPath } = workspaceUnderTest;
+    const dropped = shiftDay(dayOf(new Date().toISOString()), -400);
+    seedSnapshot({
+      days: { skills: { unslop: { [dropped]: 3 } }, subagents: {} },
+      retention: { days: retentionDays, since: '2020-01-01' },
+      snapshotPath,
+    });
+
+    const { report, snapshot, status, stderr } = run({
+      ...workspaceUnderTest,
+      args: ['--days', '500', '--transcript-retention-days', '1'],
+    });
+    const carried = report.skills.find((row) => row.name === 'unslop');
+
+    expect(status, stderr).toBe(0);
+    expect(carried.carriedFromSnapshot).toBe(3);
+    expect(snapshot.days.skills.unslop[dropped]).toBe(3);
+    expect(snapshot.observed).toEqual([]);
   });
 
   it('records no span at all for a run told to date itself in the past', () => {

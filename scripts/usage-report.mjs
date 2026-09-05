@@ -15,9 +15,12 @@
  * against the window it prints, and a run given `--now` records none: the window
  * is a reporting choice, while what a run could read is whatever is on disk when
  * it runs. A span is what lets a zero be read as absence, so it may never claim
- * a day the run did not read — which is why it is claimed only for a
- * transcript read that reports itself complete, and never for one that
- * skipped a path or a record on the way.
+ * a day the run did not read — which is why it is claimed only for a transcript
+ * read that reports itself complete and unnarrowed, and never for one that
+ * skipped a path or a record on the way, nor for one given a horizon of its own
+ * with `--transcript-retention-days`. That flag bounds this run's read and
+ * nothing else; it cannot make the store hold a day already deleted, so a value
+ * above the retention in force reads no further back than a plain run does.
  *
  * Usage (from the repo root):
  *   vp run usage:report
@@ -155,7 +158,7 @@ const buildReport = ({
   const merged = mergeTally(stored.days, live.tally);
   const observation = observationFor({
     clockOverridden,
-    complete: live.complete,
+    read: live,
     retention,
     stored,
     today,
@@ -174,7 +177,6 @@ const buildReport = ({
     clockOverridden,
     observedBackTo: observedBackTo({ observed, to: window.end }),
     reachBack,
-    readFrom,
     retentionDays: retention.days,
     retentionDeclaredIn:
       retention.declaredIn === undefined

@@ -521,8 +521,11 @@ Actions run history for workflows, and `git log` over the requirement and
 coordination registers. Every number it prints carries the source it came from
 and the window it covers, and a source it could not read is reported as unread
 rather than as a count of zero. `-- --days <n>` moves the window;
-`-- --transcript-retention-days <n>` narrows the transcript horizon, which is how
-you watch the local snapshot carry a period the transcripts have already dropped.
+`-- --transcript-retention-days <n>` makes the run ignore every invocation older
+than `<n>` days, which is how you watch the local snapshot carry a period the
+transcripts have already dropped. It bounds that one run's read and nothing else:
+a value above the real `cleanupPeriodDays` reads no further back than a plain run
+does, because Claude Code has already deleted those days.
 
 **The transcript read is bounded by retention, not by the window.** An ordinary
 run reads every transcript still on disk whatever its age, but Claude Code
@@ -533,7 +536,10 @@ with no invocation leaves no record and a recorded day therefore cannot say what
 was covered. A span is measured against the clock the run really ran on, and it
 never reaches back past the day the snapshot first recorded the
 `cleanupPeriodDays` now in force — raising the setting cannot back-date days the
-old value had already deleted, and a run given `--now` records no span at all.
+old value had already deleted. A span's reach is read off that recorded setting
+rather than off whatever a run asked for, and a run given `--now` or
+`-- --transcript-retention-days <n>` records no span at all, because neither ran
+against the clock and the horizon the snapshot is keeping.
 The report states how far back observation runs continuously, and
 where that is later than the window's start it says the earlier part is
 unobserved rather than empty. `git log` is bounded the same way in a shallow
