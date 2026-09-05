@@ -70,6 +70,17 @@ file, and may be assumed by anything placed there:
 | `monorepo` | Adds workspaces: several packages, a catalog, task fan-out, gates that read across packages. |
 | `full`     | Adds the application and its database.                                                       |
 
+Two of the four rungs are built. `PROFILES` in
+`packages/devkit/scripts/config.mjs` knows `agent` and `full`, and `withProfile`
+refuses any other name, so the profile column below is what #1073 executes rather
+than a description of what `devkit sync` places today. A row on `repo` or
+`monorepo` names a rung nothing implements yet. One row disagrees with a rung
+that is implemented: the `decisions` group is listed under `full` only, while
+both `decisions/*` seeds sit at `agent` below. The sorting rule gives `agent` —
+a record template and its home README are prose a directory holds, and neither
+needs git or a runner — so the grouping is what moves, and it moves with the
+ladder.
+
 **The sorting rule: a file lands on the lowest rung whose preconditions it can
 assume.** Ask what it would do with only the rung below. If it still does its
 whole job, it belongs lower. A workflow needing a pnpm workspace is `monorepo`,
@@ -286,29 +297,36 @@ may carry a decision of its own.
 Rows are named by the file in this repository. Where a seed exists under a
 different name, the reason says so.
 
-| Workflow                    | Profile | Update | Reason                                                                                                                                                                                                                                                                                                                                                                          |
-| --------------------------- | ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pr-standards.yml`          | `repo`  | seed   | The procedure is the gate runtime's; the install step is the consumer's. Refused outright without `commands.install`, since a workflow that cannot install cannot check anything.                                                                                                                                                                                               |
-| `issue-standards.yml`       | `repo`  | seed   | One step — `repo-verify-issue` over the issue body the event carries — and the consumer's install before it.                                                                                                                                                                                                                                                                    |
-| `coordination-close.yml`    | `repo`  | seed   | Deletes the task file a merged pull request claimed. The register's location comes from the runtime's own config, so the workflow never repeats it.                                                                                                                                                                                                                             |
-| `deps-audit.yml`            | `repo`  | seed   | Ships as `workflows/dependency-audit.yml`. The audit command is the consumer's; filing the finding as an issue against the seeded template is not.                                                                                                                                                                                                                              |
-| `check-safe.yml`            | `repo`  | seed   | Ships as `workflows/check.yml` — format, lint, types and tests from the command map, registers and decisions from the runtime. The rest of this file is this repository's own gate and stays.                                                                                                                                                                                   |
-| `add-to-project.yml`        | —       | —      | Adds an issue to this repository's planning board, named by a repository variable and reached with a personal access token.                                                                                                                                                                                                                                                     |
-| `project-status.yml`        | —       | —      | Moves the cards on that board's Status column. The owner and the board number are written into the file, and the token is the same one.                                                                                                                                                                                                                                         |
-| `labeler.yml`               | —       | —      | Applies labels computed from `scripts/lib/labels.mjs`, this repository's taxonomy, after re-syncing it.                                                                                                                                                                                                                                                                         |
-| `sync-labels.yml`           | —       | —      | Writes that same taxonomy file back to the code host, and triggers on the manifests it is derived from.                                                                                                                                                                                                                                                                         |
-| `claude-review.yml`         | —       | —      | Runs a hosted reviewer under `CLAUDE_CODE_OAUTH_TOKEN` and a reviewer app's key. Credentials do not arrive further up the ladder, and a job that skips every step without them reports success to a consumer who has nothing working.                                                                                                                                           |
-| `copilot-review-gate.yml`   | —       | —      | Publishes a status that is green only while a named review bot's newest review matches the head. It needs no secret — what does not travel is the accepted-reviewer roster in `scripts/lib/copilot-review.mjs` and the ruleset that requires the status.                                                                                                                        |
-| `copilot-setup-steps.yml`   | `repo`  | seed   | Provisions a coding agent's container: checkout, toolchain setup, install, and nothing else. It holds no secret and gates nothing, so its whole body is the bootstrap `check.yml` already parameterises. The job name is the code host's contract with that agent and is not a consumer's to choose.                                                                            |
-| `agent-review-verdict.yml`  | —       | —      | Validates a posted verdict against `docs/agents/agent-review-contract.md`, which does not ship. The automatic token is all it needs, so the contract is what keeps it here, not a credential.                                                                                                                                                                                   |
-| `review-gate-reconcile.yml` | —       | —      | Republishes the statuses the two gates above own, and files its own failures as an issue against this repository's label taxonomy. It holds no secret either; it cannot travel further than they do.                                                                                                                                                                            |
-| `sonar-issue-gate.yml`      | —       | —      | Bound to an external account and its project key. A seed carrying it is a workflow that fails on its first run.                                                                                                                                                                                                                                                                 |
-| `lighthouse.yml`            | —       | —      | Path-scoped to the example application and built around it: that app's build, its serve entry and port, its report directory, and the threshold config and score checker that live inside it. It needs no credential and no deployment — it serves the build itself — but nothing in it is a gate-runtime bin, and removing the application's own audit leaves nothing to seed. |
-| `secret-scan.yml`           | —       | —      | Configured against this repository's scanner and its allowlist.                                                                                                                                                                                                                                                                                                                 |
-| `validate-skills.yml`       | —       | —      | Checks the skills **this** repository authors, against its own layout. A consumer's skills are the ones it materialised, and the manifest already reports those.                                                                                                                                                                                                                |
-| `release.yml`               | —       | —      | Publishing is a flag on `monorepo`, not a rung, and a bootstrapped repository is a leaf by default (#1073).                                                                                                                                                                                                                                                                     |
-| `release-audit.yml`         | —       | —      | Audits daily what the registry actually serves and files the drift as an issue. Publishing is a flag, so there is no published manifest to audit.                                                                                                                                                                                                                               |
-| `changelog.yml`             | —       | —      | Its only trigger is a pushed `v*` tag, and it turns that tag's commit range into release notes. A leaf repository has no release flow to tag.                                                                                                                                                                                                                                   |
+| Workflow                    | Profile | Update | Verdict           | Dependency | Reason                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------- | ------- | ------ | ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pr-standards.yml`          | `repo`  | seed   | **parameterise**  | **hard**   | The procedure is the gate runtime's; the install step is the consumer's. Refused outright without `commands.install`, since a workflow that cannot install cannot check anything.                                                                                                                                                                                               |
+| `issue-standards.yml`       | `repo`  | seed   | **parameterise**  | **hard**   | One step — `repo-verify-issue` over the issue body the event carries — and the consumer's install before it.                                                                                                                                                                                                                                                                    |
+| `coordination-close.yml`    | `repo`  | seed   | **parameterise**  | **hard**   | Deletes the task file a merged pull request claimed. The register's location comes from the runtime's own config, so the workflow never repeats it.                                                                                                                                                                                                                             |
+| `deps-audit.yml`            | `repo`  | seed   | **parameterise**  | **hard**   | Ships as `workflows/dependency-audit.yml`. The audit command is the consumer's; filing the finding as an issue against the seeded template is not.                                                                                                                                                                                                                              |
+| `check-safe.yml`            | `repo`  | seed   | **parameterise**  | **hard**   | Ships as `workflows/check.yml` — format, lint, types and tests from the command map, registers and decisions from the runtime. The rest of this file is this repository's own gate and stays.                                                                                                                                                                                   |
+| `add-to-project.yml`        | —       | —      | **repo-specific** | —          | Adds an issue to this repository's planning board, named by a repository variable and reached with a personal access token.                                                                                                                                                                                                                                                     |
+| `project-status.yml`        | —       | —      | **repo-specific** | —          | Moves the cards on that board's Status column. The owner and the board number are written into the file, and the token is the same one.                                                                                                                                                                                                                                         |
+| `labeler.yml`               | —       | —      | **repo-specific** | —          | Applies labels computed from `scripts/lib/labels.mjs`, this repository's taxonomy, after re-syncing it.                                                                                                                                                                                                                                                                         |
+| `sync-labels.yml`           | —       | —      | **repo-specific** | —          | Writes that same taxonomy file back to the code host, and triggers on the manifests it is derived from.                                                                                                                                                                                                                                                                         |
+| `claude-review.yml`         | —       | —      | **repo-specific** | —          | Runs a hosted reviewer under `CLAUDE_CODE_OAUTH_TOKEN` and a reviewer app's key. Credentials do not arrive further up the ladder, and a job that skips every step without them reports success to a consumer who has nothing working.                                                                                                                                           |
+| `copilot-review-gate.yml`   | —       | —      | **repo-specific** | —          | Publishes a status that is green only while a named review bot's newest review matches the head. It needs no secret — what does not travel is the accepted-reviewer roster in `scripts/lib/copilot-review.mjs` and the ruleset that requires the status.                                                                                                                        |
+| `copilot-setup-steps.yml`   | `repo`  | seed   | **parameterise**  | **hard**   | Provisions a coding agent's container: checkout, toolchain setup, install, and nothing else. It holds no secret and gates nothing, so its whole body is the bootstrap `check.yml` already parameterises. The job name is the code host's contract with that agent and is not a consumer's to choose.                                                                            |
+| `agent-review-verdict.yml`  | —       | —      | **repo-specific** | —          | Validates a posted verdict against `docs/agents/agent-review-contract.md`, which does not ship. The automatic token is all it needs, so the contract is what keeps it here, not a credential.                                                                                                                                                                                   |
+| `review-gate-reconcile.yml` | —       | —      | **repo-specific** | —          | Republishes the statuses the two gates above own, and files its own failures as an issue against this repository's label taxonomy. It holds no secret either; it cannot travel further than they do.                                                                                                                                                                            |
+| `sonar-issue-gate.yml`      | —       | —      | **repo-specific** | —          | Bound to an external account and its project key. A seed carrying it is a workflow that fails on its first run.                                                                                                                                                                                                                                                                 |
+| `lighthouse.yml`            | —       | —      | **repo-specific** | —          | Path-scoped to the example application and built around it: that app's build, its serve entry and port, its report directory, and the threshold config and score checker that live inside it. It needs no credential and no deployment — it serves the build itself — but nothing in it is a gate-runtime bin, and removing the application's own audit leaves nothing to seed. |
+| `secret-scan.yml`           | —       | —      | **repo-specific** | —          | Configured against this repository's scanner and its allowlist.                                                                                                                                                                                                                                                                                                                 |
+| `validate-skills.yml`       | —       | —      | **repo-specific** | —          | Checks the skills **this** repository authors, against its own layout. A consumer's skills are the ones it materialised, and the manifest already reports those.                                                                                                                                                                                                                |
+| `release.yml`               | —       | —      | **repo-specific** | —          | Publishing is a flag on `monorepo`, not a rung, and a bootstrapped repository is a leaf by default (#1073).                                                                                                                                                                                                                                                                     |
+| `release-audit.yml`         | —       | —      | **repo-specific** | —          | Audits daily what the registry actually serves and files the drift as an issue. Publishing is a flag, so there is no published manifest to audit.                                                                                                                                                                                                                               |
+| `changelog.yml`             | —       | —      | **repo-specific** | —          | Its only trigger is a pushed `v*` tag, and it turns that tag's commit range into release notes. A leaf repository has no release flow to tag.                                                                                                                                                                                                                                   |
+
+Every shipping row is **parameterise**, and every one is **hard**. A workflow is
+executed rather than read, so a step whose command is unset installs nothing or
+runs nothing while the job still reports a result. These are the most
+repository-coupled files in the set, which is why each seed is a rewrite of the
+file it is named for rather than a copy of it — `cmp` separates every seed under
+`assets/workflows/` from the workflow whose row names it.
 
 ## Scaffolding seeds
 
@@ -336,137 +354,161 @@ artifact and the consumer owns it — those rows are `seed`.
 
 ### Already resolved from a package
 
-These are `@lcabrera/repo-standards` bins today, so the update path is settled
-and only the rung is a judgement.
+These are `@lcabrera/repo-standards` bins today, so the update path is settled.
+The verdict follows from it: the runtime is published, and every repository fact
+these bins read — the ADR homes, the gate options, the register locations — is
+already a key in `devkit.config.json` rather than a constant. That leaves the
+rung as the judgement.
 
-| Task                      | Profile | Update  | Reason                                                                                                                   |
-| ------------------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `adr:new`                 | `repo`  | package | Scaffolds into the seeded ADR home. The template is `agent`; running a bin is not.                                       |
-| `adr:list`                | `repo`  | package | Prints every record in that same home.                                                                                   |
-| `adr:verify`              | `repo`  | package | Gates placement, numbering and required sections.                                                                        |
-| `branch:verify`           | `repo`  | package | Branch naming, which needs git and nothing above it.                                                                     |
-| `commit:verify`           | `repo`  | package | The one commit-convention spec.                                                                                          |
-| `issue:verify`            | `repo`  | package | Issue template sections, against a code host.                                                                            |
-| `pr:verify`               | `repo`  | package | Pull request template sections.                                                                                          |
-| `coordination:verify`     | `repo`  | package | Register integrity, read across live branches.                                                                           |
-| `coordination:board`      | `repo`  | package | The local board view over the coordination register.                                                                     |
-| `coordination:board:live` | `repo`  | package | The same board rendered from the code host's open pull requests, through a second bin.                                   |
-| `coordination:close`      | `repo`  | package | Deletes the claim a merge closed.                                                                                        |
-| `docs:verify`             | `repo`  | package | Resolves the repository paths documents name.                                                                            |
-| `configs:verify`          | `repo`  | package | Fails a formatter or linter config no engine reads. Needs the engine topology, which arrives with the runner at `repo`.  |
-| `scripts:verify`          | `repo`  | package | The script-size ceiling over a source tree.                                                                              |
-| `api-surface:verify`      | —       | —       | Publishing is a flag, not a rung (#1073).                                                                                |
-| `attw:verify`             | —       | —       | Checks how a published package's types resolve for an installer. Nothing is published, so nothing resolves wrongly.      |
-| `publish:verify`          | —       | —       | Checks the tarball the source tree would pack before it can reach a registry. There is no tarball to pack.               |
-| `shipped-docs:verify`     | —       | —       | Checks that a published package's documents are self-contained. Without publishing there is no shipped document to read. |
-| `release:plan`            | —       | —       | Release machinery; a leaf repository has none.                                                                           |
-| `release:audit`           | —       | —       | Compares the manifests on the registry against what the tree intends. Nothing here is on a registry.                     |
+| Task                      | Profile | Update  | Verdict      | Dependency | Reason                                                                                                                   |
+| ------------------------- | ------- | ------- | ------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `adr:new`                 | `repo`  | package | **portable** | —          | Scaffolds into the seeded ADR home. The template is `agent`; running a bin is not.                                       |
+| `adr:list`                | `repo`  | package | **portable** | —          | Prints every record in that same home.                                                                                   |
+| `adr:verify`              | `repo`  | package | **portable** | —          | Gates placement, numbering and required sections.                                                                        |
+| `branch:verify`           | `repo`  | package | **portable** | —          | Branch naming, which needs git and nothing above it.                                                                     |
+| `commit:verify`           | `repo`  | package | **portable** | —          | The one commit-convention spec.                                                                                          |
+| `issue:verify`            | `repo`  | package | **portable** | —          | Issue template sections, against a code host.                                                                            |
+| `pr:verify`               | `repo`  | package | **portable** | —          | Pull request template sections.                                                                                          |
+| `coordination:verify`     | `repo`  | package | **portable** | —          | Register integrity, read across live branches.                                                                           |
+| `coordination:board`      | `repo`  | package | **portable** | —          | The local board view over the coordination register.                                                                     |
+| `coordination:board:live` | `repo`  | package | **portable** | —          | The same board rendered from the code host's open pull requests, through a second bin.                                   |
+| `coordination:close`      | `repo`  | package | **portable** | —          | Deletes the claim a merge closed.                                                                                        |
+| `docs:verify`             | `repo`  | package | **portable** | —          | Resolves the repository paths documents name.                                                                            |
+| `configs:verify`          | `repo`  | package | **portable** | —          | Fails a formatter or linter config no engine reads. Needs the engine topology, which arrives with the runner at `repo`.  |
+| `scripts:verify`          | `repo`  | package | **portable** | —          | The script-size ceiling over a source tree.                                                                              |
+| `api-surface:verify`      | —       | —       | **portable** | —          | Publishing is a flag, not a rung (#1073).                                                                                |
+| `attw:verify`             | —       | —       | **portable** | —          | Checks how a published package's types resolve for an installer. Nothing is published, so nothing resolves wrongly.      |
+| `publish:verify`          | —       | —       | **portable** | —          | Checks the tarball the source tree would pack before it can reach a registry. There is no tarball to pack.               |
+| `shipped-docs:verify`     | —       | —       | **portable** | —          | Checks that a published package's documents are self-contained. Without publishing there is no shipped document to read. |
+| `release:plan`            | —       | —       | **portable** | —          | Release machinery; a leaf repository has none.                                                                           |
+| `release:audit`           | —       | —       | **portable** | —          | Compares the manifests on the registry against what the tree intends. Nothing here is on a registry.                     |
+
+The rows on no rung are **portable** too. The bin sits in the published package
+and reads its repository facts from config like the rest, so the publishing flag
+turns it on rather than a rewrite.
 
 ### The devkit bins and the gate chains
 
-| Task             | Profile | Update  | Reason                                                                                                                                     |
-| ---------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `devkit:sync`    | `agent` | package | The materialiser itself, and the only executable that has to work before any rung exists. It is run from the package, never from the tree. |
-| `devkit:doctor`  | `repo`  | package | Reports what the materialised copies have diverged into.                                                                                   |
-| `devkit:check`   | `repo`  | package | The same read as a gate, which needs somewhere to fail.                                                                                    |
-| `devkit:closure` | `repo`  | package | The closure probe behind this document.                                                                                                    |
-| `check:safe`     | `repo`  | seed    | A chain of the consumer's own task names. Which gates belong in it is theirs, so it is a seeded manifest line and grows with the rung.     |
-| `check:push`     | `repo`  | seed    | The same chain with the slow tail dropped, so a pre-push hook can afford it. Where the cut falls is the consumer's.                        |
-| `ready`          | `repo`  | seed    | `check:safe` followed by a build, composed in the manifest.                                                                                |
+| Task             | Profile | Update  | Verdict          | Dependency | Reason                                                                                                                                     |
+| ---------------- | ------- | ------- | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `devkit:sync`    | `agent` | package | **portable**     | —          | The materialiser itself, and the only executable that has to work before any rung exists. It is run from the package, never from the tree. |
+| `devkit:doctor`  | `repo`  | package | **portable**     | —          | Reports what the materialised copies have diverged into.                                                                                   |
+| `devkit:check`   | `repo`  | package | **portable**     | —          | The same read as a gate, which needs somewhere to fail.                                                                                    |
+| `devkit:closure` | `repo`  | package | **portable**     | —          | The closure probe behind this document.                                                                                                    |
+| `check:safe`     | `repo`  | seed    | **parameterise** | **hard**   | A chain of the consumer's own task names. Which gates belong in it is theirs, so it is a seeded manifest line and grows with the rung.     |
+| `check:push`     | `repo`  | seed    | **parameterise** | **hard**   | The same chain with the slow tail dropped, so a pre-push hook can afford it. Where the cut falls is the consumer's.                        |
+| `ready`          | `repo`  | seed    | **parameterise** | **hard**   | `check:safe` followed by a build, composed in the manifest.                                                                                |
 
 `devkit:sync` is the one exception to "nothing executable lands on `agent`", and
 it is not really an exception: it runs from the package that is placing the rung,
 not from inside the rung it placed.
 
+The gate chains are the exception in the verdict column. Each is a manifest line
+naming the consumer's own tasks, so it is **parameterise**, and **hard** because
+a chain is only as real as the names in it: one the consumer's manifest does not
+define stops the run at that name, and the gates behind it never execute.
+
 ### Gates and tools that ship
 
-| Task                    | Profile    | Update  | Reason                                                                                                                                                              |
-| ----------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `commands:verify`       | `repo`     | package | Keeps a command document honest against what the runner reports. `root/COMMANDS.md` already ships, and an unchecked command document is the rot it was written for. |
-| `coordination:claim`    | `repo`     | package | Scaffolds the task, branches, commits and opens the draft pull request. The safe path stays the easy one only if it is one command.                                 |
-| `deps:audit`            | `repo`     | package | Fails on an advisory at moderate or above, reading the allowance register. The register is a seed; the gate is not.                                                 |
-| `departed:verify`       | `repo`     | package | Fails when anything names a departed product or workspace. The roster in `scripts/departed-names.json` is the consumer's; the gate is not.                          |
-| `renames:verify`        | `repo`     | package | Fails a rename that left a document naming the old file.                                                                                                            |
-| `registers:verify`      | `repo`     | package | Gates the requirement and planning registers the `product-requirement` skill drives.                                                                                |
-| `product:distance`      | `repo`     | package | Reads the same register and prints how far the product is from its intent. Ships with the skill that fills it.                                                      |
-| `scripts:exits:verify`  | `repo`     | package | No script calls `process.exit()` (ADR-090). A rule from `scripts.md`, which ships.                                                                                  |
-| `lint:eslint:verify`    | `repo`     | package | Proves the eslint pass ran its rules rather than dying on one — a pass that checks nothing exits the same way as a pass that found something.                       |
-| `viteplus:verify`       | `repo`     | package | Keeps the runner's managed block from refilling the agent document with guidance that contradicts it.                                                               |
-| `worktree:env`          | `repo`     | package | Links the gitignored env files into a linked worktree, so a fresh one does not run with the env silently unloaded.                                                  |
-| `pr:threads`            | `repo`     | package | Lists and resolves the review threads holding a pull request. The code host's CLI has no command for it.                                                            |
-| `review-threads:verify` | `repo`     | package | Publishes the open-thread count as a commit status, so a silent block becomes a red check.                                                                          |
-| `housekeeping:prune`    | `repo`     | package | Deletes merged branches and clean worktrees, and only reports anything that might be real work.                                                                     |
-| `usage:report`          | `repo`     | package | Reports how the harness is used. The harness is placed at `agent`, but the report reads git and the code host.                                                      |
-| `lint:report`           | `repo`     | package | The report producer `linter-checker` is blocked on. Which engines run comes from the command map.                                                                   |
-| `fallow:report`         | `repo`     | package | The fixed invocation `fallow-code-checker` and `fallow-scan` are blocked on. Shipping it and `lint:report` is what discharges those verdicts.                       |
-| `test:changed`          | `monorepo` | package | Resolves the workspaces a diff touched plus their dependents. Nothing to resolve with one package.                                                                  |
-| `typecheck:changed`     | `monorepo` | package | The same affected-set runner for a uniform per-workspace task.                                                                                                      |
-| `coverage:merge`        | `monorepo` | package | Merges the per-workspace Istanbul reports into the one file the audit consumes.                                                                                     |
-| `coverage:report`       | `monorepo` | package | Builds the per-workspace summary the coverage comment renders.                                                                                                      |
-| `docs:for-package`      | `monorepo` | package | Lists the documents that declare a workspace, by reading the registers rather than grepping.                                                                        |
-| `inventory:verify`      | `monorepo` | package | Fails a util export named in no `INVENTORY.md`. One package has no inventory discipline to gate.                                                                    |
-| `lint:plugins:verify`   | `monorepo` | package | Proves every plugin family loaded and every workspace is classified exactly once — the second half needs workspaces.                                                |
-| `package-refs:verify`   | `monorepo` | package | Fails a package whose shipped text names an app. Needs both to exist.                                                                                               |
-| `deps:refresh`          | `monorepo` | package | Moves the catalog, the pinned package manager and the node version in one pass. The catalog is a workspace artifact.                                                |
-| `react-doctor:verify`   | `full`     | package | Gates React Doctor's error findings, and there is no React source below `full`.                                                                                     |
-| `react-doctor:report`   | `full`     | package | The same run, reporting rather than gating.                                                                                                                         |
-| `route-names:verify`    | `full`     | package | Names a route folder's artifacts against what the folder holds. Needs the router and its routes.                                                                    |
+Every one of these is a script under the root `scripts/` directory, which is why
+every verdict is **blocked**: the script would ship, and the package that would
+carry it does not exist yet. Where a reason names a register or a roster, that is
+the parameterising the row inherits the day it moves, not a second verdict now.
+
+| Task                    | Profile    | Update  | Verdict     | Dependency | Reason                                                                                                                                                              |
+| ----------------------- | ---------- | ------- | ----------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `commands:verify`       | `repo`     | package | **blocked** | —          | Keeps a command document honest against what the runner reports. `root/COMMANDS.md` already ships, and an unchecked command document is the rot it was written for. |
+| `coordination:claim`    | `repo`     | package | **blocked** | —          | Scaffolds the task, branches, commits and opens the draft pull request. The safe path stays the easy one only if it is one command.                                 |
+| `deps:audit`            | `repo`     | package | **blocked** | —          | Fails on an advisory at moderate or above, reading the allowance register. The register is a seed; the gate is not.                                                 |
+| `departed:verify`       | `repo`     | package | **blocked** | —          | Fails when anything names a departed product or workspace. The roster in `scripts/departed-names.json` is the consumer's; the gate is not.                          |
+| `renames:verify`        | `repo`     | package | **blocked** | —          | Fails a rename that left a document naming the old file.                                                                                                            |
+| `registers:verify`      | `repo`     | package | **blocked** | —          | Gates the requirement and planning registers the `product-requirement` skill drives.                                                                                |
+| `product:distance`      | `repo`     | package | **blocked** | —          | Reads the same register and prints how far the product is from its intent. Ships with the skill that fills it.                                                      |
+| `scripts:exits:verify`  | `repo`     | package | **blocked** | —          | No script calls `process.exit()` (ADR-090). A rule from `scripts.md`, which ships.                                                                                  |
+| `lint:eslint:verify`    | `repo`     | package | **blocked** | —          | Proves the eslint pass ran its rules rather than dying on one — a pass that checks nothing exits the same way as a pass that found something.                       |
+| `viteplus:verify`       | `repo`     | package | **blocked** | —          | Keeps the runner's managed block from refilling the agent document with guidance that contradicts it.                                                               |
+| `worktree:env`          | `repo`     | package | **blocked** | —          | Links the gitignored env files into a linked worktree, so a fresh one does not run with the env silently unloaded.                                                  |
+| `pr:threads`            | `repo`     | package | **blocked** | —          | Lists and resolves the review threads holding a pull request. The code host's CLI has no command for it.                                                            |
+| `review-threads:verify` | `repo`     | package | **blocked** | —          | Publishes the open-thread count as a commit status, so a silent block becomes a red check.                                                                          |
+| `housekeeping:prune`    | `repo`     | package | **blocked** | —          | Deletes merged branches and clean worktrees, and only reports anything that might be real work.                                                                     |
+| `usage:report`          | `repo`     | package | **blocked** | —          | Reports how the harness is used. The harness is placed at `agent`, but the report reads git and the code host.                                                      |
+| `lint:report`           | `repo`     | package | **blocked** | —          | The report producer `linter-checker` is blocked on. Which engines run comes from the command map.                                                                   |
+| `fallow:report`         | `repo`     | package | **blocked** | —          | The fixed invocation `fallow-code-checker` and `fallow-scan` are blocked on. Shipping it and `lint:report` is what discharges those verdicts.                       |
+| `test:changed`          | `monorepo` | package | **blocked** | —          | Resolves the workspaces a diff touched plus their dependents. Nothing to resolve with one package.                                                                  |
+| `typecheck:changed`     | `monorepo` | package | **blocked** | —          | The same affected-set runner for a uniform per-workspace task.                                                                                                      |
+| `coverage:merge`        | `monorepo` | package | **blocked** | —          | Merges the per-workspace Istanbul reports into the one file the audit consumes.                                                                                     |
+| `coverage:report`       | `monorepo` | package | **blocked** | —          | Builds the per-workspace summary the coverage comment renders.                                                                                                      |
+| `docs:for-package`      | `monorepo` | package | **blocked** | —          | Lists the documents that declare a workspace, by reading the registers rather than grepping.                                                                        |
+| `inventory:verify`      | `monorepo` | package | **blocked** | —          | Fails a util export named in no `INVENTORY.md`. One package has no inventory discipline to gate.                                                                    |
+| `lint:plugins:verify`   | `monorepo` | package | **blocked** | —          | Proves every plugin family loaded and every workspace is classified exactly once — the second half needs workspaces.                                                |
+| `package-refs:verify`   | `monorepo` | package | **blocked** | —          | Fails a package whose shipped text names an app. Needs both to exist.                                                                                               |
+| `deps:refresh`          | `monorepo` | package | **blocked** | —          | Moves the catalog, the pinned package manager and the node version in one pass. The catalog is a workspace artifact.                                                |
+| `react-doctor:verify`   | `full`     | package | **blocked** | —          | Gates React Doctor's error findings, and there is no React source below `full`.                                                                                     |
+| `react-doctor:report`   | `full`     | package | **blocked** | —          | The same run, reporting rather than gating.                                                                                                                         |
+| `route-names:verify`    | `full`     | package | **blocked** | —          | Names a route folder's artifacts against what the folder holds. Needs the router and its routes.                                                                    |
 
 ### Manifest lines the consumer owns
 
 Their whole body is a tool invocation or a fan-out, so the line is the artifact.
+Every row is **parameterise** and **hard**: the body names this repository's
+runner, its analysers, its workspaces or its compose file, and a line naming a
+tool nobody installed is a step nobody defined.
 
-| Task               | Profile    | Update | Reason                                                                                             |
-| ------------------ | ---------- | ------ | -------------------------------------------------------------------------------------------------- |
-| `prepare`          | `repo`     | seed   | The runner's own install hook.                                                                     |
-| `format:all`       | `repo`     | seed   | One formatter invocation.                                                                          |
-| `lint:all`         | `repo`     | seed   | A chain of the consumer's lint tasks.                                                              |
-| `lint:biome`       | `repo`     | seed   | One analyser invocation; which analysers a consumer runs is theirs.                                |
-| `lint:biome:check` | `repo`     | seed   | The same analyser without `--write` — the form a gate runs.                                        |
-| `test:scripts`     | `repo`     | seed   | Runs the suites that live in no workspace.                                                         |
-| `fallow:full`      | `repo`     | seed   | One analyser invocation, configured by a seeded config file.                                       |
-| `fallow:audit`     | `repo`     | seed   | Its `audit` subcommand.                                                                            |
-| `fallow:dead-code` | `repo`     | seed   | Its `dead-code` subcommand.                                                                        |
-| `fallow:dupes`     | `repo`     | seed   | Its `dupes` subcommand.                                                                            |
-| `fallow:health`    | `repo`     | seed   | Its `health` subcommand, plus the flags to print with it — the line is the artifact.               |
-| `build:all`        | `monorepo` | seed   | Fan-out in dependency order.                                                                       |
-| `typecheck:all`    | `monorepo` | seed   | Fan-out.                                                                                           |
-| `typegen:all`      | `monorepo` | seed   | Fan-out.                                                                                           |
-| `test:all`         | `monorepo` | seed   | Fan-out plus the root script suites.                                                               |
-| `test:ci`          | `monorepo` | seed   | The same fan-out ordered so the coverage summary is the fresh one. The ordering is the consumer's. |
-| `packages:build`   | `monorepo` | seed   | Fan-out over the package workspaces.                                                               |
-| `dev:showcase`     | `full`     | seed   | Starts the example application. The line ships; the application's name is the consumer's.          |
-| `start:showcase`   | `full`     | seed   | Runs that application in production mode.                                                          |
-| `db:up`            | `full`     | seed   | The database lane. Image, ports and env file are the consumer's.                                   |
-| `db:down`          | `full`     | seed   | Stops it, through the same compose file.                                                           |
-| `db:status`        | `full`     | seed   | Reports what that compose file has running.                                                        |
+| Task               | Profile    | Update | Verdict          | Dependency | Reason                                                                                             |
+| ------------------ | ---------- | ------ | ---------------- | ---------- | -------------------------------------------------------------------------------------------------- |
+| `prepare`          | `repo`     | seed   | **parameterise** | **hard**   | The runner's own install hook.                                                                     |
+| `format:all`       | `repo`     | seed   | **parameterise** | **hard**   | One formatter invocation.                                                                          |
+| `lint:all`         | `repo`     | seed   | **parameterise** | **hard**   | A chain of the consumer's lint tasks.                                                              |
+| `lint:biome`       | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation; which analysers a consumer runs is theirs.                                |
+| `lint:biome:check` | `repo`     | seed   | **parameterise** | **hard**   | The same analyser without `--write` — the form a gate runs.                                        |
+| `test:scripts`     | `repo`     | seed   | **parameterise** | **hard**   | Runs the suites that live in no workspace.                                                         |
+| `fallow:full`      | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation, configured by a seeded config file.                                       |
+| `fallow:audit`     | `repo`     | seed   | **parameterise** | **hard**   | Its `audit` subcommand.                                                                            |
+| `fallow:dead-code` | `repo`     | seed   | **parameterise** | **hard**   | Its `dead-code` subcommand.                                                                        |
+| `fallow:dupes`     | `repo`     | seed   | **parameterise** | **hard**   | Its `dupes` subcommand.                                                                            |
+| `fallow:health`    | `repo`     | seed   | **parameterise** | **hard**   | Its `health` subcommand, plus the flags to print with it — the line is the artifact.               |
+| `build:all`        | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out in dependency order.                                                                       |
+| `typecheck:all`    | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out.                                                                                           |
+| `typegen:all`      | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out.                                                                                           |
+| `test:all`         | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out plus the root script suites.                                                               |
+| `test:ci`          | `monorepo` | seed   | **parameterise** | **hard**   | The same fan-out ordered so the coverage summary is the fresh one. The ordering is the consumer's. |
+| `packages:build`   | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out over the package workspaces.                                                               |
+| `dev:showcase`     | `full`     | seed   | **parameterise** | **hard**   | Starts the example application. The line ships; the application's name is the consumer's.          |
+| `start:showcase`   | `full`     | seed   | **parameterise** | **hard**   | Runs that application in production mode.                                                          |
+| `db:up`            | `full`     | seed   | **parameterise** | **hard**   | The database lane. Image, ports and env file are the consumer's.                                   |
+| `db:down`          | `full`     | seed   | **parameterise** | **hard**   | Stops it, through the same compose file.                                                           |
+| `db:status`        | `full`     | seed   | **parameterise** | **hard**   | Reports what that compose file has running.                                                        |
 
 ### Root scripts that do not ship
 
-| Task                        | Profile | Update | Reason                                                                                                                                       |
-| --------------------------- | ------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `agent-review:verify`       | —       | —      | Validates a verdict against this repository's agent-review contract, and needs the review integration that produces one.                     |
-| `copilot-review:status`     | —       | —      | Computes the status the review gate publishes, against a roster of accepted reviewers written into `scripts/lib/copilot-review.mjs`.         |
-| `copilot-review:suppressed` | —       | —      | Parses the findings that same reviewer puts in a review body instead of a thread. It reads one reviewer's output format.                     |
-| `review-gates:reconcile`    | —       | —      | Republishes the statuses those gates own.                                                                                                    |
-| `sonar:report`              | —       | —      | An external account and its project key; there is no scanner in this tree to point elsewhere.                                                |
-| `sonar:verify`              | —       | —      | The same script under `--gate`, so it fails a build instead of printing. It reads the same external account.                                 |
-| `labels:sync`               | —       | —      | This repository's label taxonomy.                                                                                                            |
-| `plan:issues`               | —       | —      | Checks a backlog against this repository's label taxonomy, milestones and issue template.                                                    |
-| `pr:queue`                  | —       | —      | Acts on open pull requests against this repository's merge policy and its review gates. The policy is prose; the gates it reads do not ship. |
-| `skills:validate`           | —       | —      | Checks the skills **this** repository authors. A consumer's are the ones it materialised, and the manifest already reports those.            |
-| `skills:report`             | —       | —      | The reporting half of the same check.                                                                                                        |
-| `seeds:verify`              | —       | —      | Checks what `packages/devkit` ships. A consumer ships nothing.                                                                               |
-| `tarball:verify`            | —       | —      | Packs and installs **these** packages (ADR-073).                                                                                             |
-| `suppressions:verify`       | —       | —      | The public-package suppressions register. Publishing is a flag, and the register is this repository's.                                       |
-| `suppressions:list`         | —       | —      | The same script under `--list`, printing that register's entries.                                                                            |
-| `suppressions:packages`     | —       | —      | The same script under `--packages`, printing which workspaces here are public.                                                               |
-| `bench:array-ops`           | —       | —      | The measurement behind one of this repository's ADRs. A consumer inherits the conclusion, not the probe.                                     |
-| `changelog:generate`        | —       | —      | Release material; a leaf repository has none (#1073).                                                                                        |
-| `release:add`               | —       | —      | Opens a changeset. A leaf repository runs none.                                                                                              |
-| `release:status`            | —       | —      | Reports the changesets pending since the default branch.                                                                                     |
-| `release:version`           | —       | —      | Consumes them into version bumps and a lockfile update.                                                                                      |
-| `fallow:refresh-report`     | —       | —      | Refreshes a derived complexity document keyed to this repository's thresholds and baselines.                                                 |
+Every verdict here is **repo-specific**, so the ladder and the update path have
+nothing to record. Each row reads an external account, this repository's own
+registers, or a release flow a leaf repository does not run.
+
+| Task                        | Profile | Update | Verdict           | Dependency | Reason                                                                                                                                       |
+| --------------------------- | ------- | ------ | ----------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent-review:verify`       | —       | —      | **repo-specific** | —          | Validates a verdict against this repository's agent-review contract, and needs the review integration that produces one.                     |
+| `copilot-review:status`     | —       | —      | **repo-specific** | —          | Computes the status the review gate publishes, against a roster of accepted reviewers written into `scripts/lib/copilot-review.mjs`.         |
+| `copilot-review:suppressed` | —       | —      | **repo-specific** | —          | Parses the findings that same reviewer puts in a review body instead of a thread. It reads one reviewer's output format.                     |
+| `review-gates:reconcile`    | —       | —      | **repo-specific** | —          | Republishes the statuses those gates own.                                                                                                    |
+| `sonar:report`              | —       | —      | **repo-specific** | —          | An external account and its project key; there is no scanner in this tree to point elsewhere.                                                |
+| `sonar:verify`              | —       | —      | **repo-specific** | —          | The same script under `--gate`, so it fails a build instead of printing. It reads the same external account.                                 |
+| `labels:sync`               | —       | —      | **repo-specific** | —          | This repository's label taxonomy.                                                                                                            |
+| `plan:issues`               | —       | —      | **repo-specific** | —          | Checks a backlog against this repository's label taxonomy, milestones and issue template.                                                    |
+| `pr:queue`                  | —       | —      | **repo-specific** | —          | Acts on open pull requests against this repository's merge policy and its review gates. The policy is prose; the gates it reads do not ship. |
+| `skills:validate`           | —       | —      | **repo-specific** | —          | Checks the skills **this** repository authors. A consumer's are the ones it materialised, and the manifest already reports those.            |
+| `skills:report`             | —       | —      | **repo-specific** | —          | The reporting half of the same check.                                                                                                        |
+| `seeds:verify`              | —       | —      | **repo-specific** | —          | Checks what `packages/devkit` ships. A consumer ships nothing.                                                                               |
+| `tarball:verify`            | —       | —      | **repo-specific** | —          | Packs and installs **these** packages (ADR-073).                                                                                             |
+| `suppressions:verify`       | —       | —      | **repo-specific** | —          | The public-package suppressions register. Publishing is a flag, and the register is this repository's.                                       |
+| `suppressions:list`         | —       | —      | **repo-specific** | —          | The same script under `--list`, printing that register's entries.                                                                            |
+| `suppressions:packages`     | —       | —      | **repo-specific** | —          | The same script under `--packages`, printing which workspaces here are public.                                                               |
+| `bench:array-ops`           | —       | —      | **repo-specific** | —          | The measurement behind one of this repository's ADRs. A consumer inherits the conclusion, not the probe.                                     |
+| `changelog:generate`        | —       | —      | **repo-specific** | —          | Release material; a leaf repository has none (#1073).                                                                                        |
+| `release:add`               | —       | —      | **repo-specific** | —          | Opens a changeset. A leaf repository runs none.                                                                                              |
+| `release:status`            | —       | —      | **repo-specific** | —          | Reports the changesets pending since the default branch.                                                                                     |
+| `release:version`           | —       | —      | **repo-specific** | —          | Consumes them into version bumps and a lockfile update.                                                                                      |
+| `fallow:refresh-report`     | —       | —      | **repo-specific** | —          | Refreshes a derived complexity document keyed to this repository's thresholds and baselines.                                                 |
 
 ## Applying the criteria to files this pass did not cover
 
@@ -574,11 +616,13 @@ the generic half is what a consumer needs, and it is currently interleaved with
 ADR citations and gate wiring that are ours alone.
 
 The two axes add one ordering fact the earlier pass did not have. Every gate in
-the root-script tables above is `package`, and none of them has moved yet, so
-every `repo`-rung workflow seed that names a bin is waiting on one that is only
-partly there. Moving those scripts is what unblocks the workflow seeds, the hook
-seeds and the blocked analyser skills at once. `copilot-setup-steps.yml` is the
-exception and needs none of it: it names no bin, only the bootstrap.
+the root-script tables above is `package`, and the ones still living in the root
+`scripts/` directory are **blocked** for that reason alone, so every `repo`-rung
+workflow seed that names one of them is waiting on a runtime only half in place.
+Moving those scripts is what discharges the blocked verdicts, the workflow seeds,
+the hook seeds and the blocked analyser skills at once.
+`copilot-setup-steps.yml` is the exception and needs none of it: it names no bin,
+only the bootstrap.
 
 ## Mechanisms considered and not adopted
 
