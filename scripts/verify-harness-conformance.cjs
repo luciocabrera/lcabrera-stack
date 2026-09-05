@@ -14,10 +14,18 @@ const { checkConformance } = require('./lib/conformance-check.cjs');
 const { reportConformance } = require('./lib/conformance-report.cjs');
 
 const KIND_LABELS = {
-  rule: 'path rules',
-  skill: 'skills',
-  subagent: 'subagents',
+  rule: { many: 'path rules', one: 'path rule' },
+  skill: { many: 'skills', one: 'skill' },
+  subagent: { many: 'subagents', one: 'subagent' },
 };
+
+/**
+ * @param {string} kind
+ * @param {number} count
+ * @returns {string}
+ */
+const labelFor = (kind, count) =>
+  (count === 1 ? KIND_LABELS[kind]?.one : KIND_LABELS[kind]?.many) ?? kind;
 
 /**
  * @param {Record<string, readonly string[]>} checked
@@ -25,7 +33,7 @@ const KIND_LABELS = {
  */
 const renderCounts = (checked) =>
   Object.entries(checked)
-    .map(([kind, names]) => `${names.length} ${KIND_LABELS[kind] ?? kind}`)
+    .map(([kind, names]) => `${names.length} ${labelFor(kind, names.length)}`)
     .join(', ');
 
 const runCli = () => {

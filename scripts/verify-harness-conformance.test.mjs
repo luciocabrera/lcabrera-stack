@@ -164,6 +164,35 @@ describe('harness conformance — planted dead path references', () => {
     );
   });
 
+  it('reports a skill link that only resolves from the repository root', () => {
+    const repoRoot = makeRepo({
+      '.github/skills/demo/SKILL.md': `${SKILL}\nSee [the register](docs/coordination/README.md).\n`,
+      'docs/coordination/README.md': '# Register\n',
+    });
+
+    expect(messages(repoRoot)).toContain(
+      'Broken relative link in .github/skills/demo/SKILL.md: "docs/coordination/README.md"',
+    );
+  });
+
+  it('keeps a root-absolute link, which a renderer does resolve that way', () => {
+    const repoRoot = makeRepo({
+      '.github/skills/demo/SKILL.md': `${SKILL}\nSee [the register](/docs/coordination/README.md).\n`,
+      'docs/coordination/README.md': '# Register\n',
+    });
+
+    expect(messages(repoRoot)).toEqual([]);
+  });
+
+  it('resolves a bare script path from the repository root, not the file', () => {
+    const repoRoot = makeRepo({
+      '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash scripts/run.sh\`.\n`,
+      'scripts/run.sh': '#!/bin/sh\n',
+    });
+
+    expect(messages(repoRoot)).toEqual([]);
+  });
+
   it('does not treat a node_modules consumer path as a missing repo script', () => {
     const repoRoot = makeRepo({
       '.github/skills/demo/SKILL.md': `${SKILL}\nruns \`node_modules/@repo/reporter/scripts/run-fallow.sh\`.\n`,
@@ -250,9 +279,35 @@ describe('harness conformance — the gate itself', () => {
       { cwd, encoding: 'utf8', stdio: 'pipe' },
     );
 
+  const triggerBlock = (workflow) => {
+    const lines = workflow.split('\n');
+    const start = lines.indexOf('on:');
+    if (start === -1) {
+      return '';
+    }
+
+    const rest = lines.slice(start + 1);
+    const end = rest.findIndex((line) => /^\S/.test(line));
+
+    return rest.slice(0, end === -1 ? rest.length : end).join('\n');
+  };
+
   it('exits zero and names what it read when nothing is wrong', () => {
     expect(runCli(makeRepo())).toContain(
-      'Harness conformance passed: 1 path rules, 1 skills, 1 subagents.',
+      'Harness conformance passed: 1 path rule, 1 skill, 1 subagent.',
+    );
+  });
+
+  it('reads back a plural count in the plural', () => {
+    const repoRoot = makeRepo({
+      '.claude/agents/second-agent.md': SUBAGENT.replace(
+        'demo-agent',
+        'second-agent',
+      ),
+    });
+
+    expect(runCli(repoRoot)).toContain(
+      'Harness conformance passed: 1 path rule, 1 skill, 2 subagents.',
     );
   });
 
@@ -271,13 +326,27 @@ describe('harness conformance — the gate itself', () => {
       join(REPO_ROOT, '.github/workflows/check-safe.yml'),
       'utf8',
     );
+    const triggers = triggerBlock(workflow);
 
     expect(workflow).toContain('vp run harness:verify');
-    expect(workflow).not.toMatch(/^\s+paths:/m);
+    expect(triggers).toContain('pull_request:');
+    expect(triggers).not.toMatch(/^[ \t]*paths(-ignore)?:/m);
     expect(
       JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf8')).scripts[
         'check:safe'
       ],
     ).toContain('vp run harness:verify');
+  });
+
+  it('would catch a path filter on the trigger, in either spelling', () => {
+    const filtered = [
+      'on:',
+      '  pull_request:',
+      "    paths-ignore: ['**/*.md']",
+      'jobs:',
+      '  quality-gate:',
+    ].join('\n');
+
+    expect(triggerBlock(filtered)).toMatch(/^[ \t]*paths(-ignore)?:/m);
   });
 });

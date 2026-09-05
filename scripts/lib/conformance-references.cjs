@@ -4,6 +4,9 @@
  *
  * Why: a skill, rule or subagent that points at a moved file fails silently;
  * the stale fallow-scan runner path is the case this was written for.
+ * The two classes resolve differently and must not share a resolver: a
+ * markdown link is read by a renderer, so it is file-relative unless it leads
+ * with `/`, while a bare script path is typed at the repository root.
  * Matching stays narrow on purpose: the word boundary after a script extension
  * keeps `.json` out, and `node_modules/` and URLs are consumer paths this
  * repository cannot resolve.
@@ -90,9 +93,23 @@ const withoutFragment = (link) => link.split('#')[0]?.split('?')[0] ?? '';
  * @param {{ fromFile: string, reference: string, repoRoot: string }} args
  * @returns {boolean}
  */
-const resolves = ({ fromFile, reference, repoRoot }) =>
-  fs.existsSync(path.resolve(path.dirname(fromFile), reference)) ||
-  fs.existsSync(path.resolve(repoRoot, reference.replace(/^\//, '')));
+const linkResolves = ({ fromFile, reference, repoRoot }) =>
+  fs.existsSync(
+    reference.startsWith('/')
+      ? path.resolve(repoRoot, reference.slice(1))
+      : path.resolve(path.dirname(fromFile), reference),
+  );
+
+/**
+ * @param {{ fromFile: string, reference: string, repoRoot: string }} args
+ * @returns {boolean}
+ */
+const scriptPathResolves = ({ fromFile, reference, repoRoot }) =>
+  fs.existsSync(
+    reference.startsWith('./') || reference.startsWith('../')
+      ? path.resolve(path.dirname(fromFile), reference)
+      : path.resolve(repoRoot, reference),
+  );
 
 /**
  * @param {{
@@ -108,7 +125,7 @@ const referenceFindings = ({ filePath, label, markdown, repoRoot }) => {
     .filter((link) => withoutFragment(link).length > 0)
     .filter(
       (link) =>
-        !resolves({
+        !linkResolves({
           fromFile: filePath,
           reference: withoutFragment(link),
           repoRoot,
@@ -122,7 +139,11 @@ const referenceFindings = ({ filePath, label, markdown, repoRoot }) => {
   const scripts = extractScriptPaths(markdown)
     .filter(
       (scriptPath) =>
-        !resolves({ fromFile: filePath, reference: scriptPath, repoRoot }),
+        !scriptPathResolves({
+          fromFile: filePath,
+          reference: scriptPath,
+          repoRoot,
+        }),
     )
     .map((scriptPath) => ({
       message: `Broken script path in ${label}: "${scriptPath}"`,

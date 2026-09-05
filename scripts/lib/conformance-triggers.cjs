@@ -7,6 +7,9 @@
  * label like "code quality helper" never triggers and reads, in a usage report,
  * exactly like an artifact nobody needed. Judgement of a description that
  * clears this floor is the model-in-the-loop tier, not this one.
+ * Each concrete-token branch tests one character beside its marker: an
+ * unbounded `+` over a class that can also match that marker backtracks
+ * quadratically over a long description read from disk.
  * Usage: `require('./lib/conformance-triggers.cjs').descriptionFindings(...)`.
  */
 'use strict';
@@ -19,7 +22,7 @@ const TRIGGER_PATTERN =
   /\b(when|whenever|before|after|while|applies to|triggers on|invoked? as|dispatched by|use for)\b/i;
 
 const CONCRETE_TOKEN =
-  /`[^`]+`|[\w@.-]+\/|\/[\w@.-]+|\b\w+\.[a-z]{2,5}\b|\b[A-Z][\w+-]*\b|\b\w*\d\w*\b|\b\w+(?:-\w+)+\b/;
+  /`[^`]+`|[\w@.-]\/|\/[\w@.-]|\w\.[a-z]{2,5}\b|\b[A-Z]|\d|\w-\w/;
 
 const SENTENCE_START = /(^|[.!?:;—]\s+)([A-Z])/g;
 

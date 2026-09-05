@@ -21,8 +21,10 @@ Shared repository-level automation scripts.
   - Frontmatter must parse and carry the fields its loader reads — `name` and
     `description` for a skill or subagent, `paths` for a rule — with `name`
     matching the directory or file it sits in.
-  - Every relative markdown link and every script path named in prose or a
-    command must resolve, from the file or from the repository root.
+  - Every relative markdown link must resolve from the file it is written in,
+    which is where a renderer resolves it; a leading `/` means the repository
+    root. Every script path named in prose or a command must resolve from the
+    repository root, or from the file when it is written `./` or `../`.
   - A description must clear a mechanical floor: long enough to carry a
     situation, naming something concrete, and saying when the artifact applies
     rather than what it is. Judging a description that clears the floor is the

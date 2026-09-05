@@ -27,6 +27,7 @@ structural conformance for skills, rules and subagents
 
 ## Status / next
 
-- Current step: gate green, pushed, PR #1090 open as draft
+- Current step: review findings addressed — link resolution split back apart,
+  the concrete-token regex made linear, count labels singularised
 - Blockers: none
-- Next: independent verification, then the orchestrator readies the PR
+- Next: reviewers re-read, then the orchestrator readies the PR
