@@ -15,7 +15,9 @@
  * against the window it prints, and a run given `--now` records none: the window
  * is a reporting choice, while what a run could read is whatever is on disk when
  * it runs. A span is what lets a zero be read as absence, so it may never claim
- * a day the run did not read.
+ * a day the run did not read — which is why it is claimed only for a
+ * transcript read that reports itself complete, and never for one that
+ * skipped a path or a record on the way.
  *
  * Usage (from the repo root):
  *   vp run usage:report
@@ -152,8 +154,8 @@ const buildReport = ({
   const stored = readSnapshot({ path: snapshotPath, timestamp: generatedAt });
   const merged = mergeTally(stored.days, live.tally);
   const observation = observationFor({
-    available: live.available,
     clockOverridden,
+    complete: live.complete,
     retention,
     stored,
     today,
@@ -229,6 +231,12 @@ const statusOf = ({ available, reason }) =>
   available ? 'read' : `NOT READ — ${reason}`;
 
 const printWarnings = (report) => {
+  const skipped = report.transcripts.unreadable ?? [];
+  if (skipped.length > 0) {
+    console.warn(
+      `  warning: ${skipped.length} transcript path(s) could not be read in full, so this run added no day of its own to the observed coverage; the report names them.`,
+    );
+  }
   const { setAside } = report.transcripts.snapshot;
   if (setAside !== undefined) {
     console.warn(

@@ -10,13 +10,18 @@
  *
  * A span is the one thing here that can be wrong in the dangerous direction: the
  * merge is monotone and nothing prunes, so a span claiming a day nothing read
- * turns "not observed" into "observed and empty" for good. So a span is measured
- * against the real clock rather than the window a run prints, it never reaches
- * back past the day this snapshot first recorded the retention now in force —
- * raising `cleanupPeriodDays` cannot back-date the days the old value already
- * deleted — and a run that sets its own clock records none at all. That only
- * holds while the file survives, so an unreadable or version-mismatched snapshot
- * is moved aside rather than replaced. It is local and gitignored (ADR-049).
+ * turns "not observed" into "observed and empty" for good. It is therefore built
+ * from three terms and nothing else, each of which can only narrow it: how far a
+ * read could reach (the retention in force, never back past the day this
+ * snapshot first recorded it — raising `cleanupPeriodDays` cannot back-date the
+ * days the old value already deleted), whether the read left anything out
+ * (`complete`, which the transcript reader derives from what it skipped and
+ * under-claims on purpose), and the real clock (a run that sets its own with
+ * `--now` records no span at all). A new reason to distrust a read is not a
+ * fourth term: it belongs on the reader's skipped list, which `complete` already
+ * follows from. That only holds while the file survives, so an unreadable or
+ * version-mismatched snapshot is moved aside rather than replaced. It is local
+ * and gitignored (ADR-049).
  */
 import {
   existsSync,
@@ -63,14 +68,14 @@ export const mergeObserved = (kept, span) =>
 const trackedRetention = ({ days, recorded, today }) =>
   recorded?.days === days ? recorded : { days, since: today };
 
-const spanFor = ({ available, days, since, today }) =>
-  available
+const spanFor = ({ complete, days, since, today }) =>
+  complete
     ? { from: laterDay(shiftDay(today, -(days - 1)), since), to: today }
     : undefined;
 
 export const observationFor = ({
-  available,
   clockOverridden,
+  complete,
   retention,
   stored,
   today,
@@ -88,7 +93,7 @@ export const observationFor = ({
   return {
     retention: tracked,
     span: spanFor({
-      available,
+      complete,
       days: retention.days,
       since: tracked?.since ?? today,
       today,

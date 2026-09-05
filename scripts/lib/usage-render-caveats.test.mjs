@@ -259,15 +259,20 @@ describe('renderReport coverage caveats', () => {
       },
     });
 
-    expect(markdown).toContain('1 transcript path(s) could not be read');
+    expect(markdown).toContain(
+      '1 transcript path(s) could not be read in full',
+    );
     expect(markdown).toContain('a lower bound rather than a total');
+    expect(markdown).toContain(
+      'this run added no day of its own to the coverage above',
+    );
     expect(markdown).toContain('gone.jsonl');
     expect(markdown).toContain('3 transcript file(s), 1 skipped as unreadable');
   });
 
   it('says nothing about skipped transcripts when every one was read', () => {
     expect(reportWith({})).not.toContain(
-      'could not be read** and were skipped',
+      'could not be read in full** and were skipped',
     );
   });
 

@@ -8,6 +8,12 @@
  * The unreadable-directory case is driven by mode bits, so it is skipped for a
  * root user, for whom mode bits deny nothing. The unreadable-file case beside it
  * needs no such guard and covers the same contract.
+ *
+ * `complete` is the same failure one step further on. It is what lets the caller
+ * write a permanent record that a day was observed, so the cases below pin that
+ * it holds only for a read that took in every transcript it found — one skipped
+ * path, one unparsable tool-call record, or nothing in scope at all, and the
+ * read vouches for no day.
  */
 import { chmodSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -23,6 +29,7 @@ import {
   invocationsInEntry,
   readTranscriptUsage,
   tallyByDay,
+  transcriptRead,
 } from './usage-transcripts.mjs';
 
 const ROOTS = ['/home/dev/repo', '/home/dev/worktree'];
@@ -31,6 +38,26 @@ const entryWith = ({ content, cwd = '/home/dev/repo' }) => ({
   cwd,
   message: { content },
   timestamp: '2026-09-04T09:12:00.000Z',
+});
+
+describe('transcriptRead', () => {
+  it('vouches for nothing until it is given transcripts it read', () => {
+    expect(transcriptRead({})).toEqual({
+      available: false,
+      complete: false,
+      files: 0,
+      reason: undefined,
+      tally: {},
+      unreadable: [],
+    });
+  });
+
+  it('vouches for what it read only while it skipped nothing', () => {
+    const skipped = [{ path: '/gone.jsonl', reason: 'ENOENT' }];
+
+    expect(transcriptRead({ files: 2 }).complete).toBe(true);
+    expect(transcriptRead({ files: 2, skipped }).complete).toBe(false);
+  });
 });
 
 describe('invocationsInEntry', () => {
@@ -158,6 +185,7 @@ describe('readTranscriptUsage', () => {
     });
 
     expect(result.available).toBe(false);
+    expect(result.complete).toBe(false);
     expect(result.reason).toContain('no transcript directory');
   });
 
@@ -186,6 +214,7 @@ describe('readTranscriptUsage', () => {
     const result = readTranscriptUsage({ root, workingTrees: [tree] });
 
     expect(result.available).toBe(true);
+    expect(result.complete).toBe(true);
     expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
   });
 
@@ -198,6 +227,7 @@ describe('readTranscriptUsage', () => {
     const result = readTranscriptUsage({ root, workingTrees: [tree] });
 
     expect(result.available).toBe(true);
+    expect(result.complete).toBe(false);
     expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
     expect(result.unreadable).toHaveLength(1);
     expect(result.unreadable[0].path).toContain('vanished.jsonl');
@@ -217,6 +247,7 @@ describe('readTranscriptUsage', () => {
       chmodSync(sealed, 0o700);
 
       expect(result.available).toBe(true);
+      expect(result.complete).toBe(false);
       expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
       expect(result.unreadable).toHaveLength(1);
       expect(result.unreadable[0].path).toBe(sealed);
@@ -285,6 +316,62 @@ describe('readTranscriptUsage', () => {
 
     expect(result.available).toBe(false);
     expect(result.reason).toContain('records a working tree');
+  });
+
+  it('vouches for no day when a record naming a tool call will not parse', () => {
+    const { root, tree } = transcriptRootWith({
+      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
+    });
+    writeFileSync(
+      join(root, transcriptDirectoryFor(tree), 'session.jsonl'),
+      [
+        JSON.stringify({
+          ...skillEntryOn('2026-09-04T09:00:00.000Z'),
+          cwd: tree,
+        }),
+        '{"type":"tool_use","name":"Skill","input":{"skill":"unsl',
+      ].join('\n'),
+    );
+
+    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+
+    expect(result.available).toBe(true);
+    expect(result.complete).toBe(false);
+    expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
+    expect(result.unreadable[0].reason).toContain('could not be parsed');
+  });
+
+  it('vouches for no day when a transcript records a tool call it names no directory for', () => {
+    const { root, tree } = transcriptRootWith({
+      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
+    });
+    writeFileSync(
+      join(root, transcriptDirectoryFor(tree), 'headless.jsonl'),
+      `${JSON.stringify(skillEntryOn('2026-09-04T09:30:00.000Z'))}\n`,
+    );
+
+    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+
+    expect(result.available).toBe(true);
+    expect(result.complete).toBe(false);
+    expect(result.unreadable[0].path).toContain('headless.jsonl');
+  });
+
+  it('counts a transcript holding no tool call as nothing skipped, whatever else it lacks', () => {
+    const { root, tree } = transcriptRootWith({
+      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
+    });
+    const directory = join(root, transcriptDirectoryFor(tree));
+    writeFileSync(join(directory, 'empty.jsonl'), '');
+    writeFileSync(
+      join(directory, 'pointer.jsonl'),
+      `${JSON.stringify({ messageCount: 0, type: 'teleported-from' })}\n`,
+    );
+
+    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+
+    expect(result.complete).toBe(true);
+    expect(result.unreadable).toEqual([]);
   });
 
   it('drops what falls before a simulated horizon', () => {

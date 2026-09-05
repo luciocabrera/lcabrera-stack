@@ -295,7 +295,7 @@ const unreadableTranscriptNote = (transcripts) =>
     ? []
     : [
         '',
-        `> **${skippedCount(transcripts)} transcript path(s) could not be read** and were skipped, so the skill and subagent counts are a lower bound rather than a total: ${transcripts.unreadable
+        `> **${skippedCount(transcripts)} transcript path(s) could not be read in full** and were skipped, so the skill and subagent counts are a lower bound rather than a total, and this run added no day of its own to the coverage above: ${transcripts.unreadable
           .map((entry) => `\`${entry.path}\` (${inline(entry.reason)})`)
           .join('; ')}.`,
       ];

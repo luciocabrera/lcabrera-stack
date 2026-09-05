@@ -11,9 +11,11 @@
  * Which makes a span the one value here that must never be generous. The merge
  * is monotone and nothing prunes, so a span over days no run read is permanent,
  * and it reads as the opposite of the truth: not "unobserved" but "observed and
- * empty". The `observationFor` cases below are that guard — the two ways a span
- * could be claimed for days nothing read are a retention raised since the last
- * run, and a run told to date itself in the past.
+ * empty". The `observationFor` cases below are that guard, one per term the span
+ * is built from: how far the retention in force reaches, whether the transcript
+ * read left anything out, and whether the run dated itself with `--now`. A read
+ * that skipped a path is not a case of its own here — it reaches this decision
+ * as `complete: false`, which is the whole point of deriving the term there.
  */
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -205,8 +207,8 @@ const RETENTION = {
 describe('observationFor', () => {
   it('measures the span back to where retention reaches, once the setting has held', () => {
     const { span } = observationFor({
-      available: true,
       clockOverridden: false,
+      complete: true,
       retention: RETENTION,
       stored: { retention: { days: 30, since: '2026-01-01' } },
       today: TODAY,
@@ -217,8 +219,8 @@ describe('observationFor', () => {
 
   it('claims nothing older than the day it first saw the retention now in force', () => {
     const { retention, span } = observationFor({
-      available: true,
       clockOverridden: false,
+      complete: true,
       retention: RETENTION,
       stored: { retention: { days: 7, since: '2026-01-01' } },
       today: TODAY,
@@ -230,8 +232,8 @@ describe('observationFor', () => {
 
   it('claims nothing older than today when no run has recorded a retention', () => {
     const { retention, span } = observationFor({
-      available: true,
       clockOverridden: false,
+      complete: true,
       retention: RETENTION,
       stored: {},
       today: TODAY,
@@ -243,8 +245,8 @@ describe('observationFor', () => {
 
   it('keeps the day it first saw a retention that has not changed', () => {
     const { retention } = observationFor({
-      available: true,
       clockOverridden: false,
+      complete: true,
       retention: RETENTION,
       stored: { retention: { days: 30, since: '2026-01-01' } },
       today: TODAY,
@@ -258,8 +260,8 @@ describe('observationFor', () => {
 
     expect(
       observationFor({
-        available: true,
         clockOverridden: true,
+        complete: true,
         retention: RETENTION,
         stored,
         today: TODAY,
@@ -267,10 +269,10 @@ describe('observationFor', () => {
     ).toEqual({ retention: stored.retention, span: undefined });
   });
 
-  it('records no span when the transcripts could not be read', () => {
+  it('records no span when the transcript read was not complete', () => {
     const { span } = observationFor({
-      available: false,
       clockOverridden: false,
+      complete: false,
       retention: RETENTION,
       stored: { retention: { days: 30, since: '2026-01-01' } },
       today: TODAY,
@@ -279,10 +281,23 @@ describe('observationFor', () => {
     expect(span).toBeUndefined();
   });
 
+  it('still records the retention it saw for a read it cannot claim a span for', () => {
+    const { retention, span } = observationFor({
+      clockOverridden: false,
+      complete: false,
+      retention: RETENTION,
+      stored: {},
+      today: TODAY,
+    });
+
+    expect(span).toBeUndefined();
+    expect(retention).toEqual({ days: 30, since: TODAY });
+  });
+
   it('leaves the recorded retention alone for a simulated horizon', () => {
     const { retention, span } = observationFor({
-      available: true,
       clockOverridden: false,
+      complete: true,
       retention: { days: 1, simulated: true },
       stored: { retention: { days: 30, since: '2026-01-01' } },
       today: TODAY,

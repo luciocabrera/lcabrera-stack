@@ -8,6 +8,21 @@
  * separately from what it found; `since` narrows the read only for a run
  * simulating expiry, never for the window; and a path that vanishes between
  * being listed and being read is reported and skipped rather than thrown.
+ *
+ * What the caller may record as observed hangs on `complete`, so that claim is
+ * built to under-claim: every result comes from one constructor whose default
+ * vouches for nothing, and `complete` holds only for a result built from at
+ * least one in-scope transcript with nothing on the skipped list. Everything
+ * left out lands on that one list — a directory that would not list, a file
+ * that would not open, a file recording a tool call it names no directory for,
+ * a record naming a tool call that would not parse — so a new way to leave
+ * something out suppresses the claim by recording itself, rather than by a new
+ * test where the claim is made. The unit of loss is a call that went uncounted,
+ * which is why a file holding no tool call at all is no loss whatever else it
+ * is missing: session pointers carrying neither are ordinary. The one thing the
+ * list cannot hold: a truncation that also removed the tool-call marker reads
+ * exactly like a line that holds no invocation, and nothing can tell those
+ * apart.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -85,22 +100,52 @@ const recordedCwd = (lines) => {
   return undefined;
 };
 
+const unattributed = ({ path, records }) =>
+  records.some((line) => mightHoldInvocation(line))
+    ? {
+        path,
+        reason:
+          'it records a tool call but no record in it names the directory the session ran in, so that call can be neither counted for this repository nor ruled out of it',
+      }
+    : undefined;
+
+const invocationsIn = ({ path, records, roots }) => {
+  const entries = records
+    .filter((line) => mightHoldInvocation(line))
+    .map((line) => parseEntry(line));
+  const unparsed = entries.filter((entry) => entry === undefined).length;
+  return {
+    inScope: true,
+    invocations: entries
+      .filter((entry) => entry !== undefined)
+      .flatMap((entry) => invocationsInEntry({ entry, roots })),
+    unreadable:
+      unparsed === 0
+        ? undefined
+        : {
+            path,
+            reason: `${unparsed} of its record(s) name a tool call and could not be parsed`,
+          },
+  };
+};
+
 const readTranscriptFile = ({ path, roots }) => {
   const { lines, unreadable } = readLines(path);
   if (unreadable !== undefined) {
     return { inScope: false, invocations: [], unreadable };
   }
-  if (!isWithinAny({ path: recordedCwd(lines), roots })) {
-    return { inScope: false, invocations: [] };
+  const records = lines.filter((line) => line.length > 0);
+  const cwd = recordedCwd(records);
+  if (cwd === undefined) {
+    return {
+      inScope: false,
+      invocations: [],
+      unreadable: unattributed({ path, records }),
+    };
   }
-  return {
-    inScope: true,
-    invocations: lines
-      .filter((line) => line.length > 0 && mightHoldInvocation(line))
-      .map((line) => parseEntry(line))
-      .filter((entry) => entry !== undefined)
-      .flatMap((entry) => invocationsInEntry({ entry, roots })),
-  };
+  return isWithinAny({ path: cwd, roots })
+    ? invocationsIn({ path, records, roots })
+    : { inScope: false, invocations: [] };
 };
 
 export const tallyByDay = (invocations) => {
@@ -166,44 +211,52 @@ const unreadableReason = ({ root, unreadable }) =>
     ? `no transcript under ${root} records a working tree of this repository as its directory`
     : `no readable transcript under ${root} records a working tree of this repository as its directory, and ${unreadable.length} path(s) could not be read`;
 
+export const transcriptRead = ({
+  files = 0,
+  reason,
+  skipped = [],
+  tally = {},
+}) => ({
+  available: files > 0,
+  complete: files > 0 && skipped.length === 0,
+  files,
+  reason,
+  tally,
+  unreadable: skipped,
+});
+
 export const readTranscriptUsage = ({ root, since, workingTrees }) => {
   if (!existsSync(root)) {
-    return {
-      available: false,
+    return transcriptRead({
       reason: `no transcript directory at ${root} — Claude Code has not run here, or transcripts live elsewhere`,
-      tally: {},
-    };
+    });
   }
   const listed = transcriptFilesFor({ root, workingTrees });
   if (listed.files === undefined) {
-    return {
-      available: false,
+    return transcriptRead({
       reason: `the transcript directory ${root} could not be listed — ${listed.reason}`,
-      tally: {},
-    };
+    });
   }
   const reads = listed.files.map((path) =>
     readTranscriptFile({ path, roots: workingTrees }),
   );
-  const unreadable = [
+  const skipped = [
     ...listed.unreadable,
     ...reads.map((read) => read.unreadable).filter((e) => e !== undefined),
   ];
   const inScope = reads.filter((read) => read.inScope);
   if (inScope.length === 0) {
-    return {
-      available: false,
-      reason: unreadableReason({ root, unreadable }),
-      tally: {},
-    };
+    return transcriptRead({
+      reason: unreadableReason({ root, unreadable: skipped }),
+      skipped,
+    });
   }
   const invocations = inScope
     .flatMap((read) => read.invocations)
     .filter((invocation) => since === undefined || invocation.day >= since);
-  return {
-    available: true,
+  return transcriptRead({
     files: inScope.length,
+    skipped,
     tally: tallyByDay(invocations),
-    unreadable,
-  };
+  });
 };
