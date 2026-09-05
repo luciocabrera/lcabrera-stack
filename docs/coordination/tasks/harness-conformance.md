@@ -2,7 +2,7 @@
 id: harness-conformance
 title: structural conformance for skills, rules and subagents
 owner: agent:claude
-status: active
+status: review
 branch: feat/1071-harness-conformance
 area:
   - scripts/validate-skills.cjs
@@ -27,6 +27,6 @@ structural conformance for skills, rules and subagents
 
 ## Status / next
 
-- Current step: implemented; running the gate before review
+- Current step: gate green, pushed, PR #1090 open as draft
 - Blockers: none
-- Next: push and hand the PR to the verifier
+- Next: independent verification, then the orchestrator readies the PR
