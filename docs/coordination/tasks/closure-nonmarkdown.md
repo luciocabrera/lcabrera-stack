@@ -2,16 +2,18 @@
 id: closure-nonmarkdown
 title: extend closure to workflows, subagents and scripts
 owner: agent:claude
-status: active
+status: review
 branch: feat/1069-closure-nonmarkdown
 area:
   - packages/devkit/scripts/closure*
   - packages/devkit/scripts/command-closure.mjs
-  - packages/devkit/scripts/frontmatter.mjs
+  - packages/devkit/scripts/init.mjs
+  - packages/devkit/ARCHITECTURE.md
+  - packages/devkit/README.md
 started: 2026-09-05
 updated: 2026-09-05
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1091
 issue: #1069
 ---
 
@@ -21,6 +23,6 @@ extend closure to workflows, subagents and scripts
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; full gate green, awaiting verification
 - Blockers: none
-- Next:
+- Next: verifier review

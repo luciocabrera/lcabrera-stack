@@ -83,12 +83,24 @@ your `commands` block invokes are added to the baseline for the run. Otherwise
 parameterising a command, the very thing that makes a file portable, would make
 the closure gate fail.
 
-It reports four kinds of escape, because they fail differently for a consumer: a
+It reports escapes by kind, because they fail differently for a consumer: a
 **link** is a file they will not have, a **command** is a tool their shell may
-not resolve, an **import** is a module their install will not provide, and a
-**requires** is a config key outside what `devkit.config.json` is for — so no
-consumer could set it, however reliably it resolves in the repository that wrote
-the file.
+not resolve, an **import** is a module their install will not provide, a **bin**
+is an executable their install will not place, a **secret** is a value only
+their repository settings can supply, and a **requires** is a config key outside
+what `devkit.config.json` is for — so no consumer could set it, however reliably
+it resolves in the repository that wrote the file.
+
+Reading a file is what makes those answers worth anything, and not every shipped
+file is markdown. A workflow's actions, step scripts and secret expressions, the
+executables a hook or a step invokes out of the install's bin directory, and the
+paths a definition in your `paths.agents` directory names in its frontmatter or
+its plain prose are all read. Without them a file with no markdown structure
+reports the same clean pass as one that is genuinely self-contained.
+
+Two of those answer themselves. An executable a gate task already names is
+placed by this kit, so it is not an escape; neither is a secret the expression
+around it answers — one with a fallback, or the token the platform sets itself.
 
 Run it against **materialised** output, never against `assets/`. A shipped file's
 links are written for where the file lands, so resolving them from the asset tree

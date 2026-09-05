@@ -23,11 +23,14 @@ import {
   configuredCommandWords,
   PROFILES,
 } from './config.mjs';
+import { gateBinNames } from './init.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
 
 const shippedContext = ({ profile, root }) => {
   const { config, entries } = buildPlan({ profile, root });
   return {
+    agentDirectory: config.paths.agents,
+    allowedBins: gateBinNames(),
     allowedCommands: [...BASELINE_COMMANDS, ...configuredCommandWords(config)],
     configKeys: allowedConfigKeys(config),
     entries,
@@ -36,16 +39,22 @@ const shippedContext = ({ profile, root }) => {
 };
 
 const shippedEscapes = ({ profile, root }) => {
-  const { allowedCommands, configKeys, entries, shipped } = shippedContext({
-    profile,
-    root,
-  });
+  const {
+    agentDirectory,
+    allowedBins,
+    allowedCommands,
+    configKeys,
+    entries,
+    shipped,
+  } = shippedContext({ profile, root });
   const files = entries.map((entry) => ({
     content: entry.content,
     path: entry.path,
   }));
 
   const { escapes } = analyseClosure({
+    agentDirectory,
+    allowedBins,
     allowedCommands,
     allowedConfigKeys: configKeys,
     exists: (path) => existsSync(resolve(root, path)),
@@ -105,12 +114,12 @@ const runDirectoryClosure = ({ directories, profile, root }) => {
     return 1;
   }
 
-  const { allowedCommands, configKeys, shipped } = shippedContext({
-    profile,
-    root,
-  });
+  const { agentDirectory, allowedBins, allowedCommands, configKeys, shipped } =
+    shippedContext({ profile, root });
   const results = directories.map((directory) =>
     analyseDirectory({
+      agentDirectory,
+      allowedBins,
       allowedCommands,
       allowedConfigKeys: configKeys,
       directory: resolve(root, directory),

@@ -311,6 +311,15 @@ export const GATE_TASKS = {
   },
 };
 
+/**
+ * Every executable the gate tasks name, whatever profile places them.
+ *
+ * @returns {string[]}
+ */
+export const gateBinNames = () => [
+  ...new Set(Object.values(GATE_TASKS).map((task) => task.bin)),
+];
+
 const commandLine = ({ args = [], bin }) => [bin, ...args].join(' ');
 
 /**

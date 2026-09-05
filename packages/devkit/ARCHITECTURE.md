@@ -8,6 +8,10 @@ can travel, and **moving** it into a consumer's tree.
 | Module                              | Responsibility                                                                                                    |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `closure-extract.mjs`               | Pull references out of a file: markdown links, prose and command-line paths, shell commands, module imports.      |
+| `closure-yaml.mjs`                  | Pull the actions, step scripts and secrets out of a workflow file. A narrow reader, not a parser. Pure.           |
+| `closure-bins.mjs`                  | Pull out the executables a file invokes from the install's bin directory, named or bound to a variable. Pure.     |
+| `closure-classify.mjs`              | The one containment rule every resolver shares: does this reference travel? Pure.                                 |
+| `closure-artifacts.mjs`             | The escapes of the kinds that are not markdown: workflows, invoked executables, subagent definitions. Pure.       |
 | `closure.mjs`                       | Decide whether each reference escapes the directory being shipped. Pure.                                          |
 | `closure-report.mjs`                | Walk a directory, run the analysis, render it.                                                                    |
 | `config.mjs`                        | Resolve `devkit.config.json`, map an asset onto its destination, and answer both questions about a key. Pure.     |
