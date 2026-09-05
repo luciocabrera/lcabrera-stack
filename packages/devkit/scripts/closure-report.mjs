@@ -30,7 +30,7 @@ export const BASELINE_COMMANDS = [
  */
 export const analyseDirectory = ({
   agentDirectory,
-  allowedBins = [],
+  allowedBins,
   allowedCommands = BASELINE_COMMANDS,
   allowedConfigKeys = [],
   directory,

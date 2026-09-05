@@ -172,6 +172,48 @@ describe('bin invocations', () => {
 
     expect(escapes).toEqual([]);
   });
+
+  test('no roster at all leaves every invocation unanswered', () => {
+    const { escapes } = analyseClosure({
+      files: [
+        {
+          content: 'exec ./node_modules/.bin/repo-verify-invented "$1"\n',
+          path: 'hooks/commit-msg',
+        },
+      ],
+      rootDirectory: '',
+      shipped: new Set(['hooks/commit-msg']),
+    });
+
+    expect(escapes).toEqual([]);
+  });
+
+  test('an empty roster answers that the install places nothing', () => {
+    const { escapes } = analyseClosure({
+      allowedBins: [],
+      files: [
+        {
+          content: 'exec ./node_modules/.bin/repo-verify-commit "$1"\n',
+          path: 'hooks/commit-msg',
+        },
+      ],
+      rootDirectory: '',
+      shipped: new Set(['hooks/commit-msg']),
+    });
+
+    expect(kinds(escapes)).toEqual(['bin']);
+  });
+
+  test('a name glued to the token before it binds no directory', () => {
+    const escapes = analyse({
+      content: ['9GATES=node_modules/.bin', 'exec "$GATES/repo-adr"'].join(
+        '\n',
+      ),
+      path: 'hooks/commit-msg',
+    });
+
+    expect(escapes).toEqual([]);
+  });
 });
 
 describe('subagent definitions', () => {

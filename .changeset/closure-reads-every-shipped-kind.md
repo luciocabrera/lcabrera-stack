@@ -17,6 +17,9 @@ secret the expression around it already answers — one with a fallback, or the
 token the platform sets itself — is not one of them.
 
 Two new escape kinds appear in the report, `bin` and `secret`, alongside `link`,
-`command`, `import` and `requires`. `analyseClosure` takes `allowedBins` and
-`agentDirectory`; both are optional, and omitting them leaves the analysis as it
-was.
+`command`, `import` and `requires`. Reading a workflow file is unconditional, and
+that is the release. The two new `analyseClosure` options widen what else it can
+answer, and each is inert when omitted: `allowedBins` is the roster of
+executables the install places, and without it no invocation is resolved;
+`agentDirectory` names the directory whose definitions are read as prose, and
+without it none is.

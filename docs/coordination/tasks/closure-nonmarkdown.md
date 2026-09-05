@@ -23,6 +23,6 @@ extend closure to workflows, subagents and scripts
 
 ## Status / next
 
-- Current step: implemented; full gate green, awaiting verification
+- Current step: review findings addressed (backtracking patterns, `allowedBins`)
 - Blockers: none
 - Next: verifier review

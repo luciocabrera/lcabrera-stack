@@ -82,7 +82,7 @@ const toRequiresEscapes = ({ allowedKeys, file }) =>
  */
 export const analyseClosure = ({
   agentDirectory,
-  allowedBins = [],
+  allowedBins,
   allowedCommands = [],
   allowedConfigKeys = [],
   exists,
@@ -92,7 +92,7 @@ export const analyseClosure = ({
 }) => {
   const allowed = new Set(allowedCommands);
   const allowedKeys = new Set(allowedConfigKeys);
-  const bins = new Set(allowedBins);
+  const bins = allowedBins === undefined ? undefined : new Set(allowedBins);
 
   const linkEscapes = files.flatMap((file) => {
     const fromDirectory = directoryOf(file.path);

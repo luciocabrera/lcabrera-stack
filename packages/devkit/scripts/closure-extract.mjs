@@ -12,6 +12,10 @@
  * `/m`, `\s` matches newlines too, and the pattern goes super-linear on a long
  * file. They also anchor on `from` rather than `import`, so an import whose
  * specifier sits lines below its keyword is not silently missed.
+ *
+ * One constraint binds every reader in this package: a pattern must not be able
+ * to restart inside a run it has already read, so a negated class excludes its
+ * own opening delimiter.
  */
 
 const FENCE_PATTERN = /^```([\w-]*)\s*$/;
@@ -180,9 +184,39 @@ export const extractPathTokens = (content) => {
   return [...inline, ...shellPathTokens(shellBlockLines(content))];
 };
 
-const MARKDOWN_LINK_LABEL = /\[[^\]]*\]\(/g;
+const MARKDOWN_LINK_LABEL = /\[[^[\]]*\]\(/g;
 
-const PROSE_EDGES = /^[([{<"'`*_]+|[)\]}>"'`*_,.:;!?]+$/g;
+const OPENING_EDGES = new Set(['(', '[', '{', '<', '"', "'", '`', '*', '_']);
+
+const CLOSING_EDGES = new Set([
+  ')',
+  ']',
+  '}',
+  '>',
+  '"',
+  "'",
+  '`',
+  '*',
+  '_',
+  ',',
+  '.',
+  ':',
+  ';',
+  '!',
+  '?',
+]);
+
+const withoutProseEdges = (token) => {
+  const characters = [...token];
+  const first = characters.findIndex(
+    (character) => !OPENING_EDGES.has(character),
+  );
+  if (first === -1) return '';
+  const last = characters.findLastIndex(
+    (character) => !CLOSING_EDGES.has(character),
+  );
+  return characters.slice(first, last + 1).join('');
+};
 
 const proseLines = (content) => {
   const collected = [];
@@ -201,9 +235,9 @@ export const extractProsePathTokens = (content) =>
   proseLines(content)
     .flatMap(({ line, text }) =>
       text
-        .replaceAll(MARKDOWN_LINK_LABEL, '')
+        .replaceAll(MARKDOWN_LINK_LABEL, ' ')
         .split(/\s+/)
-        .map((token) => ({ line, token: token.replaceAll(PROSE_EDGES, '') })),
+        .map((token) => ({ line, token: withoutProseEdges(token) })),
     )
     .filter((entry) => isPathToken(entry.token));
 

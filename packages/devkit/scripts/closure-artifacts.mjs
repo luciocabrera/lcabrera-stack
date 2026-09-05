@@ -121,7 +121,7 @@ const agentEscapes = ({ containment, exists, file }) =>
 
 /**
  * @param {{ agentDirectory?: string, allowed: Set<string>,
- *   allowedBins: Set<string>, containment: object,
+ *   allowedBins?: Set<string>, containment: object,
  *   exists?: (repoRelativePath: string) => boolean,
  *   file: { path: string, content: string } }} args
  */
@@ -136,7 +136,7 @@ export const artifactEscapes = ({
   ...(isWorkflowFile(file.path)
     ? workflowEscapes({ allowed, containment, exists, file })
     : []),
-  ...binEscapes({ allowedBins, file }),
+  ...(allowedBins === undefined ? [] : binEscapes({ allowedBins, file })),
   ...(isAgentFile({ agentDirectory, path: file.path })
     ? agentEscapes({ containment, exists, file })
     : []),

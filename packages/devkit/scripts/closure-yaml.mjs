@@ -5,19 +5,22 @@
  * Reads three constructs out of a document that is otherwise none of this
  * package's business, so it is a narrow reader rather than a YAML parser — the
  * same bargain `frontmatter.mjs` makes, for the same reason.
+ *
+ * The patterns hold the constraint `closure-extract.mjs` records: none of them
+ * restarts a scan inside a run it has already read.
  */
 
-const USES_KEY = /^[ \t]*(?:-[ \t]+)?uses:[ \t]*(.+)$/;
+const USES_KEY = /^[ \t]*(?:-[ \t]+)?uses:(.+)/;
 
-const RUN_KEY = /^[ \t]*(?:-[ \t]+)?run:[ \t]*(.*)$/;
+const RUN_KEY = /^[ \t]*(?:-[ \t]+)?run:(.*)/;
 
 const BLOCK_SCALAR = /^[|>][-+\d]*$/;
 
-const TRAILING_COMMENT = /(?:^|[ \t])#.*$/;
+const TRAILING_COMMENT = /(?:^|[ \t])#.*/;
 
 const QUOTED = /^(['"])(.*)\1$/;
 
-const EXPRESSION = /\$\{\{([^}]*)\}\}/g;
+const EXPRESSION = /\$\{\{([^{}]*)\}\}/g;
 
 const SECRET_REFERENCE = /\bsecrets\.([A-Za-z_][A-Za-z0-9_-]*)/g;
 

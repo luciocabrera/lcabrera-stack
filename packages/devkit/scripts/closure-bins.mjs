@@ -5,17 +5,20 @@
  *
  * A hook and a workflow step both reach a gate that way, and neither is markdown,
  * so nothing else in this package can see the name they depend on.
+ *
+ * `BIN_DIRECTORY` consumes the character before the name, so no scan restarts
+ * inside a name it has already read. `closure-extract.mjs` records why.
  */
 
 const BIN_PATH = /node_modules\/\.bin\/([\w.-]+)/g;
 
 const BIN_DIRECTORY =
-  /([A-Za-z_]\w*)[ \t]*[:=][ \t]*["']?\.{0,2}\/?node_modules\/\.bin["']?[ \t]*$/;
+  /(?:^|\W)([A-Za-z_]\w*)[ \t]*[:=][ \t]*["']?\.{0,2}\/?node_modules\/\.bin["']?[ \t]*$/;
 
 const VARIABLE_REFERENCE = /\$\{?([A-Za-z_]\w*)\}?\/([\w.-]+)/g;
 
 const bindingIn = (line) => {
-  const bound = BIN_DIRECTORY.exec(line.replace(/[ \t]*#.*$/, ''))?.[1];
+  const bound = BIN_DIRECTORY.exec(line.split('#')[0] ?? '')?.[1];
   return bound === undefined ? [] : [bound];
 };
 

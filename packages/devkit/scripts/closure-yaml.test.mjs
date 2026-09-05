@@ -82,4 +82,10 @@ describe('extractSecretReferences', () => {
       extractSecretReferences('# set secrets.PUBLISH_TOKEN first\n'),
     ).toEqual([]);
   });
+
+  test('an expression carrying a stray brace is left unread', () => {
+    expect(
+      extractSecretReferences(`          A: \${{ secrets.PUBLISH_TOKEN{ }}\n`),
+    ).toEqual([]);
+  });
 });
