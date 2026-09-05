@@ -184,10 +184,21 @@ describe('harness conformance — planted dead path references', () => {
     expect(messages(repoRoot)).toEqual([]);
   });
 
-  it('resolves a bare script path from the repository root, not the file', () => {
+  it('reads a bare script path from the repository root, where it is typed', () => {
     const repoRoot = makeRepo({
       '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash scripts/run.sh\`.\n`,
-      'scripts/run.sh': '#!/bin/sh\n',
+      '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
+    });
+
+    expect(messages(repoRoot)).toContain(
+      'Broken script path in .github/skills/demo/SKILL.md: "scripts/run.sh"',
+    );
+  });
+
+  it('reads a dot-prefixed script path from the file that names it', () => {
+    const repoRoot = makeRepo({
+      '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash ./scripts/run.sh\`.\n`,
+      '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
     });
 
     expect(messages(repoRoot)).toEqual([]);
