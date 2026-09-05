@@ -2,7 +2,7 @@
 id: harness-classification
 title: classify every harness file by profile and by update path
 owner: agent:claude
-status: active
+status: review
 branch: chore/1070-harness-classification
 area:
   - packages/devkit/CLASSIFICATION.md
