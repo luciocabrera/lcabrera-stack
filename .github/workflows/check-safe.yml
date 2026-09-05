@@ -274,6 +274,15 @@ jobs:
         # inherited breakage is grandfathered in scripts/docs-paths-baseline.json.
         run: vp run docs:verify
 
+      - name: Skills, path rules and subagents conform
+        id: harness_gate
+        # A skill, rule or subagent whose frontmatter does not parse, whose
+        # references point at moved files, or whose description is too vague to
+        # ever be selected is simply never used — indistinguishable from one
+        # nobody needed. The roster is read from disk on every run, so a new
+        # artifact is covered the day it lands. See scripts/ARCHITECTURE.md.
+        run: vp run harness:verify
+
       - name: Requirement and planning registers hold
         id: registers_gate
         # Both registers are prose until something reads them, and an
