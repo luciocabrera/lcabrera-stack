@@ -15,8 +15,9 @@ export const DOCUMENTED_CLEANUP_DEFAULT = 30;
 
 const WHOLE_NUMBER = /^\d+$/u;
 
-const UTC_INSTANT =
-  /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?Z?)?$/u;
+const UTC_DAY = /^\d{4}-\d{2}-\d{2}$/u;
+
+const UTC_TIME = /^T\d{2}:\d{2}(?::\d{2})?(?:\.\d{1,3})?Z$/u;
 
 const VALUE_FLAGS = new Map([
   ['--days', 'days'],
@@ -65,11 +66,18 @@ export const positiveInteger = (value, label) => {
   return Number.parseInt(value, 10);
 };
 
+const isUtcShape = (text) => {
+  const time = text.slice(10);
+  return (
+    UTC_DAY.test(text.slice(0, 10)) && (time === '' || UTC_TIME.test(time))
+  );
+};
+
 export const utcInstant = (value, label) => {
   const text = String(value);
   const day = text.slice(0, 10);
   if (
-    !UTC_INSTANT.test(text) ||
+    !isUtcShape(text) ||
     Number.isNaN(Date.parse(text)) ||
     shiftDay(day, 0) !== day
   ) {
