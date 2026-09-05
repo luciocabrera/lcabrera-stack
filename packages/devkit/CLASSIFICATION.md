@@ -128,8 +128,9 @@ green anyway", it is a package.
 **A path-discovered file is a seed by necessity, and necessity is not
 permission.** Git finds a hook at `.git/hooks/`, GitHub finds a workflow at
 `.github/workflows/`, an agent finds a skill at `.github/skills/`. Every one of
-those is `seed` in the tables below, and every one of them is a shell whose body
-invokes a package bin rather than deciding anything itself.
+those is `seed` in the tables below. Where the file is executable — a hook, a
+workflow — its body is a shell invoking a package bin rather than deciding
+anything itself. Where it is prose, adapting it is what the consumer is for.
 
 **A root script is a package; the manifest line that names it is a seed.** So a
 task whose whole body is a tool invocation or a workspace fan-out — `format:all`,
@@ -189,9 +190,9 @@ naturally, because prose citations read better than links.
 
 ## Skills
 
-Every skill is prose an agent reads at a discovered path, so every row is
-`seed`. The executable half a skill drives — a convention spec, a report
-producer — is classified with the root scripts below.
+Every skill that ships is prose an agent reads at a discovered path, so every
+shipping row is `seed`. The executable half a skill drives — a convention spec, a
+report producer — is classified with the root scripts below.
 
 | Skill                         | Profile | Update | Verdict           | Dependency | Reason                                                                                                                                                                                                                                                                                                                                                 |
 | ----------------------------- | ------- | ------ | ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
