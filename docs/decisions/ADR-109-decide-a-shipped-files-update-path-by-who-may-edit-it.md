@@ -47,8 +47,12 @@ Two consequences of that rule are load-bearing enough to state directly.
 **Path-discovered files are seeds by necessity, and necessity is not
 permission.** Git finds a hook at `.git/hooks/`, GitHub finds a workflow at
 `.github/workflows/`, an agent finds a skill at `.github/skills/`. Those files
-have to be materialised. So a path-discovered file is a seed **shell** whose body
-invokes a package bin, and carries no decision of its own.
+have to be materialised, and what the seed may hold follows from what the finder
+does with it. A path-discovered file that **runs** — a hook, a workflow — is a
+seed **shell** whose body invokes a package bin, and carries no decision of its
+own. A path-discovered file that is **read** — a skill, a rule, a template — is a
+seed carrying its own content, because prose an agent reads is exactly what the
+sorting rule hands the consumer to adapt.
 
 **The `agent` rung takes no executables.** It places prose, and there is no
 runner at that rung to invoke a bin nor a gate to fail. An asset that must run

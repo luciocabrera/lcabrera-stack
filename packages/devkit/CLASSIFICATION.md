@@ -103,9 +103,11 @@ column says so rather than parking them at `full`.
 question.** Credentials and project keys do not become available further up the
 ladder, so those files do not ship at any rung.
 
-A `—` in the profile column means the file lands on no rung. For a **blocked**
-row it means the opposite of "never": the rung is recorded, and the ship verdict
-carries the blocker.
+A `—` in the profile column means the file lands on no rung. On a **portable**
+row it does not mean the file stays behind: it arrives with the publishing flag
+instead of at a rung, its update path is recorded like any other shipping row's,
+and only a `—` in the update column means "does not ship". For a **blocked** row
+the rung is recorded, and the ship verdict carries the blocker.
 
 ## Seed or package
 
@@ -128,9 +130,10 @@ green anyway", it is a package.
 **A path-discovered file is a seed by necessity, and necessity is not
 permission.** Git finds a hook at `.git/hooks/`, GitHub finds a workflow at
 `.github/workflows/`, an agent finds a skill at `.github/skills/`. Every one of
-those is `seed` in the tables below. Where the file is executable — a hook, a
-workflow — its body is a shell invoking a package bin rather than deciding
-anything itself. Where it is prose, adapting it is what the consumer is for.
+those is `seed` in the tables below. A path-discovered file that **runs** — a
+hook, a workflow — is a shell invoking a package bin, and carries no decision of
+its own. One that is **read** — a skill, a rule, a template — is a seed carrying
+its own content, and adapting it is what the consumer is for.
 
 **A root script is a package; the manifest line that names it is a seed.** So a
 task whose whole body is a tool invocation or a workspace fan-out — `format:all`,
@@ -377,16 +380,17 @@ rung as the judgement.
 | `docs:verify`             | `repo`  | package | **portable** | —          | Resolves the repository paths documents name.                                                                            |
 | `configs:verify`          | `repo`  | package | **portable** | —          | Fails a formatter or linter config no engine reads. Needs the engine topology, which arrives with the runner at `repo`.  |
 | `scripts:verify`          | `repo`  | package | **portable** | —          | The script-size ceiling over a source tree.                                                                              |
-| `api-surface:verify`      | —       | —       | **portable** | —          | Publishing is a flag, not a rung (#1073).                                                                                |
-| `attw:verify`             | —       | —       | **portable** | —          | Checks how a published package's types resolve for an installer. Nothing is published, so nothing resolves wrongly.      |
-| `publish:verify`          | —       | —       | **portable** | —          | Checks the tarball the source tree would pack before it can reach a registry. There is no tarball to pack.               |
-| `shipped-docs:verify`     | —       | —       | **portable** | —          | Checks that a published package's documents are self-contained. Without publishing there is no shipped document to read. |
-| `release:plan`            | —       | —       | **portable** | —          | Release machinery; a leaf repository has none.                                                                           |
-| `release:audit`           | —       | —       | **portable** | —          | Compares the manifests on the registry against what the tree intends. Nothing here is on a registry.                     |
+| `api-surface:verify`      | —       | package | **portable** | —          | Publishing is a flag, not a rung (#1073).                                                                                |
+| `attw:verify`             | —       | package | **portable** | —          | Checks how a published package's types resolve for an installer. Nothing is published, so nothing resolves wrongly.      |
+| `publish:verify`          | —       | package | **portable** | —          | Checks the tarball the source tree would pack before it can reach a registry. There is no tarball to pack.               |
+| `shipped-docs:verify`     | —       | package | **portable** | —          | Checks that a published package's documents are self-contained. Without publishing there is no shipped document to read. |
+| `release:plan`            | —       | package | **portable** | —          | Release machinery; a leaf repository has none.                                                                           |
+| `release:audit`           | —       | package | **portable** | —          | Compares the manifests on the registry against what the tree intends. Nothing here is on a registry.                     |
 
-The rows on no rung are **portable** too. The bin sits in the published package
-and reads its repository facts from config like the rest, so the publishing flag
-turns it on rather than a rewrite.
+The rows on no rung ship too. The bin sits in the published package and reads
+its repository facts from config like the rest, so it is `package` and
+**portable**; the publishing flag, not a rung, is what turns it on. What no rung
+places is the manifest line that names it.
 
 ### The devkit bins and the gate chains
 
