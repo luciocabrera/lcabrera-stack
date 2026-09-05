@@ -290,6 +290,23 @@ describe('subagent definitions', () => {
     expect(escapes).toEqual([]);
   });
 
+  test('an indented fence is a fence, so its sample is not read as prose', () => {
+    const escapes = analyse({
+      agentDirectory,
+      content: [
+        '1. Claim it.',
+        '',
+        '   ```text',
+        '   docs/agents/review-contract.md',
+        '   ```',
+      ].join('\n'),
+      path,
+      present: ['docs/agents/review-contract.md'],
+    });
+
+    expect(escapes).toEqual([]);
+  });
+
   test('the same prose outside the agent directory is not read this way', () => {
     const escapes = analyse({
       agentDirectory,

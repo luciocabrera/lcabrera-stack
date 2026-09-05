@@ -45,6 +45,11 @@ describe('extractCommands', () => {
     ]);
   });
 
+  test('reads a shell block whose fence is indented, as under a list item', () => {
+    const content = ['   ```bash', '   vp run test', '   ```'].join('\n');
+    expect(extractCommands(content)).toEqual([{ line: 2, word: 'vp' }]);
+  });
+
   test('ignores a fenced block that is not shell', () => {
     const content = ['```ts', "import { vp } from 'x';", '```'].join('\n');
     expect(extractCommands(content)).toEqual([]);

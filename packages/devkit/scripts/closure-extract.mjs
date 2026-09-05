@@ -18,7 +18,7 @@
  * own opening delimiter.
  */
 
-const FENCE_PATTERN = /^```([\w-]*)\s*$/;
+const FENCE_PATTERN = /^[ \t]*```([\w-]*)[ \t]*$/;
 const INLINE_CODE_PATTERN = /`([^`\n]+)`/g;
 
 const IMPORT_PATTERNS = [
