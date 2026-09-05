@@ -4,11 +4,7 @@
  *
  * Each reader reports its availability separately from its findings, because an
  * unauthenticated `gh`, an unreachable API and a workflow nobody triggered all
- * produce no runs. Each takes the whole window rather than its start alone,
- * since a store keeps growing after the day a report is dated. The git day is
- * re-checked after parsing against the same instant the revision filter used:
- * the log emits the committer date as epoch seconds, so no timezone sits between
- * what git selected and what the report prints.
+ * produce no runs.
  */
 import { dayOf } from './usage-window.mjs';
 

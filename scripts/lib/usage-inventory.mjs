@@ -2,10 +2,8 @@
  * Lists the harness parts a usage report has to account for: the skills, the
  * subagents, the workflows and the path rules this repository ships.
  *
- * The inventory is read from disk rather than configured, so a part added today
- * appears in tomorrow's report — including with a count of zero, which is the
- * whole point. A roster kept by hand would list only what someone remembered,
- * and an unused part is exactly the one nobody remembers.
+ * Read off disk rather than configured, so a part nobody remembers still appears
+ * — with a count of zero, which is the point.
  */
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';

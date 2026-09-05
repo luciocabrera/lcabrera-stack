@@ -1,10 +1,9 @@
 /**
  * Day arithmetic for the usage report, in UTC.
  *
- * Every source the report reads carries a timestamp in a different shape, and
- * every number it prints has to name the window it covers — so the window is
- * one value computed once and handed to each reader, never re-derived per
- * source. The clock is an argument so a run can be reproduced.
+ * The window is one value computed once and handed to each reader, so sources
+ * whose timestamps differ in shape still report against one span. The clock is
+ * an argument so a run can be reproduced.
  */
 const MS_PER_DAY = 86_400_000;
 

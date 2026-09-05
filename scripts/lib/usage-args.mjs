@@ -1,13 +1,10 @@
 /**
- * Parses the usage report's flags and resolves the transcript retention that
- * the flags and the Claude Code settings files imply.
+ * Parses the usage report's flags and resolves the transcript retention the
+ * flags and the Claude Code settings files imply.
  *
- * Both are pure decisions over strings with a failure the report cannot absorb
- * quietly — a flag whose value was swallowed, a `cleanupPeriodDays` that is not
- * a number of days — so both are refused loudly. The resolved value carries the
- * file it came from, because a documented default and a declared number must
- * not be printed as though they had the same authority. The horizon is narrowed
- * only when a run is deliberately simulating expiry.
+ * A swallowed flag value or an unusable `cleanupPeriodDays` is refused loudly
+ * rather than absorbed, and the resolved value carries the file it came from, so
+ * a documented default is not printed as though it were a declared one.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';

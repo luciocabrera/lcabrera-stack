@@ -2,17 +2,9 @@
  * Resolves which working trees belong to this repository, and which transcript
  * directory names belong to those trees.
  *
- * A session is filed under the directory it was launched from, which is often
- * below a tree root, so the directory match is a deliberately loose prefix; the
- * encoding is lossy, so it also accepts a sibling checkout whose path merely
- * starts the same way, and the caller settles scope per file by the `cwd` the
- * transcript itself records. That looseness is only safe while the roots
- * themselves are tight, which is why a `.git` pointer is climbed only when it
- * names a `worktrees/` entry: the other shapes it takes (`--separate-git-dir`, a
- * submodule) would otherwise resolve to an ancestor directory and put every
- * repository beneath it in scope. Read off the filesystem rather than through a
- * git subprocess, for the reason `git-remote.mjs` gives: nothing resolves
- * through PATH.
+ * The directory match is a loose prefix, so the roots must be tight: a `.git`
+ * pointer is climbed only when it names a `worktrees/` entry, since the other
+ * shapes would put every repository under an ancestor in scope.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';

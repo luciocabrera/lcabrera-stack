@@ -1,28 +1,7 @@
 /**
- * Reports how this repository's harness is actually used, so "is this skill,
- * subagent or workflow still earning its place" is a lookup rather than an
- * argument.
- *
- * It reads stores that already retain history — Claude Code transcripts, the
- * GitHub Actions run history, git over the requirement and coordination
- * registers — and adds no collector of its own; a local gitignored snapshot
- * carries the days the transcripts expire. Path rules get no number, because
- * nothing invokes one and the only proxy reads the same whether a rule is
- * internalised or dead. Produced on demand and never committed (ADR-049): no
- * count it prints may be copied into a tracked file — name this command.
- *
- * The span a run records as observed is measured against the real clock, not
- * against the window it prints, and a run given `--now` records none: the window
- * is a reporting choice, while what a run could read is whatever is on disk when
- * it runs. Everything the run writes about the snapshot file itself takes the
- * same clock — the moment it records having written it, and the name it moves an
- * unreadable one aside to — because those describe the run, not the window. A span is what lets a zero be read as absence, so it may never claim
- * a day the run did not read — which is why it is claimed only for a transcript
- * read that reports itself complete and unnarrowed, and never for one that
- * skipped a path or a record on the way, nor for one given a horizon of its own
- * with `--transcript-retention-days`. That flag bounds this run's read and
- * nothing else; it cannot make the store hold a day already deleted, so a value
- * above the retention in force reads no further back than a plain run does.
+ * Reports how this repository's harness is actually used, so "is this skill or
+ * subagent still earning its place" is a lookup rather than an argument. It is
+ * produced on demand: name this command rather than copy a count (ADR-049).
  *
  * Usage (from the repo root):
  *   vp run usage:report
@@ -30,9 +9,8 @@
  *   vp run usage:report -- --transcript-retention-days 1   # simulate expiry
  *   vp run usage:report -- --now 2026-09-01T00:00:00Z --out reports/usage
  *
- * Exit codes: 0 = a report was written, including when a source could not be
- * read (it is reported as unread, never as a count of zero); 1 = bad arguments,
- * an unusable `cleanupPeriodDays`, or the report could not be written.
+ * Exit codes: 0 = a report was written, even if a source could not be read;
+ * 1 = bad arguments, or the report could not be written.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';

@@ -2,45 +2,9 @@
  * Keeps the per-day skill and subagent tallies the transcripts will stop being
  * able to answer for, so expiry does not quietly shrink every count.
  *
- * It is deliberately monotone — a day is added and never removed, and a day seen
- * twice keeps the larger count — so a run that reads fewer transcripts than the
- * last one cannot lower a number. It also records the spans each run could
- * observe, because a day with no invocation leaves no entry and a recorded day
- * is therefore evidence of a record, never of coverage.
- *
- * A span is the one thing here that can be wrong in the dangerous direction: the
- * merge is monotone and nothing prunes, so a span claiming a day nothing read
- * turns "not observed" into "observed and empty" for good. Its end is the real
- * clock, and a run that sets its own with `--now` records no span at all. Its
- * start can only be too early through a claim about the store or a claim about
- * the read, and neither is computed here. That is what makes the set of terms
- * complete.
- *
- * The store's term is the retention record this same run writes, never the
- * retention a run asked for. `--transcript-retention-days` is a request the
- * store never honoured, and a value larger than the setting in force would slide
- * the reach behind `since` and leave that day — the day the snapshot first
- * recorded the current setting, months old on a snapshot that has been running —
- * as the only bound. Reading the reach off the record that is being written
- * keeps the two in step, and `since` still binds the other way round, because
- * raising `cleanupPeriodDays` cannot back-date the days the old value already
- * deleted.
- *
- * The read's term is whatever the transcript reader says about its own read, and
- * it says two things, each under-claimed on purpose: `complete` (it left nothing
- * out) and `readFrom` (the horizon it was handed). A span needs both — nothing
- * left out, and no horizon of the run's own — so a new way to read less
- * suppresses the span by being reported at the reader rather than by a new test
- * here.
- *
- * That only holds while the file survives, so an unreadable or
- * version-mismatched snapshot is moved aside rather than replaced. The name it
- * is moved to is stamped with the clock the run really ran on, never with the
- * date the report carries: a run may be told to date itself, and two such runs
- * would then agree on the name and the second would destroy the copy this path
- * exists to keep. The stamp is a name and not a claim, so a name already taken
- * is stepped past rather than written over. It is local and gitignored
- * (ADR-049).
+ * The merge is monotone and nothing prunes, so a recorded observation span can
+ * never be taken back: one is claimed only from a read that reports itself
+ * complete and unnarrowed. An unreadable snapshot is moved aside, not replaced.
  */
 import {
   existsSync,

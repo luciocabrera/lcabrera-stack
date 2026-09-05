@@ -2,33 +2,9 @@
  * Counts Skill and subagent invocations per day, out of the Claude Code
  * transcripts on this machine, for the working trees of this repository.
  *
- * Transcripts are the only store that records an invocation at all, and the
- * only one that expires, which is why the caller merges them with a snapshot.
- * The constraints that hold here: the reader reports whether it could read
- * separately from what it found; `since` narrows the read only for a run
- * simulating expiry, never for the window; and a path that vanishes between
- * being listed and being read is reported and skipped rather than thrown.
- *
- * What the caller may record as observed hangs on what this reader says about
- * its own read, so both of those claims are built to under-claim. `complete`
- * says nothing was left out: every result comes from one constructor whose
- * default vouches for nothing, and `complete` holds only for a result built from
- * at least one in-scope transcript with nothing on the skipped list. `readFrom`
- * says how far back the read was allowed to look — it echoes the `since` this
- * reader was handed, so a run that read under a horizon of its own is visible as
- * such to the caller rather than being mistaken for a read of everything on
- * disk. The two are separate because a narrowed read is not a failed one; it
- * counts what it found honestly, and only the coverage claim is off. Everything
- * left out lands on that one list — a directory that would not list, a file
- * that would not open, a file recording a tool call it names no directory for,
- * a record naming a tool call that would not parse — so a new way to leave
- * something out suppresses the claim by recording itself, rather than by a new
- * test where the claim is made. The unit of loss is a call that went uncounted,
- * which is why a file holding no tool call at all is no loss whatever else it
- * is missing: session pointers carrying neither are ordinary. The one thing the
- * list cannot hold: a truncation that also removed the tool-call marker reads
- * exactly like a line that holds no invocation, and nothing can tell those
- * apart.
+ * Transcripts are the only store that records an invocation and the only one
+ * that expires, so the caller merges them with a snapshot. The read reports its
+ * own completeness and horizon separately from what it found.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';

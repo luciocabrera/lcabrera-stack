@@ -2,12 +2,9 @@
  * Renders the harness usage model as markdown. Pure on purpose: the readers
  * decide what is true and this decides only how it reads.
  *
- * What it always prints, because a number without them misleads: the source
- * and window behind every count, and the fact that a zero is a question.
- * A caveat is rendered here rather than printed on the console, because the file
- * is what gets read later. Every cell and every interpolated reason goes through
- * one sanitiser — a newline or a pipe out of a tool this report does not control
- * ends a markdown table one row early.
+ * Every cell and every interpolated reason goes through one sanitiser, because a
+ * newline or a pipe out of a tool this report does not control ends a markdown
+ * table one row early.
  */
 const TABLE_RULE = (columns) => `| ${columns.map(() => '---').join(' | ')} |`;
 
