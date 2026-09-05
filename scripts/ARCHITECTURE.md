@@ -29,10 +29,12 @@ Shared repository-level automation scripts.
     situation, naming something concrete, and saying when the artifact applies
     rather than what it is. Judging a description that clears the floor is the
     model-in-the-loop tier, which this is deliberately not.
-- `validate-skills.cjs` - the skills-shaped view of that same run, for the
+- `validate-skills.cjs` - the skills-only view of that same run, for the
   compliance report below (implementation in `lib/validate-skills-contract.cjs`,
-  which projects the conformance result onto the report's shape). One
-  implementation, two entry points: the gate cannot diverge from the report.
+  which keeps the skill findings and projects them onto the report's shape).
+  One implementation, two entry points: the gate cannot diverge from the
+  report, and a rule or subagent finding is the gate's alone, since the report
+  places everything it lists under `.github/skills/`.
 - `generate-skills-compliance-report.cjs` - emits markdown compliance artifacts from skill validation.
   - Writes `reports/skills/code-smell-compliance-report.md`.
   - Appends run history to `reports/skills/agenting-plan-progress.md`.

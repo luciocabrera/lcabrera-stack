@@ -25,8 +25,8 @@ Repository automation and agent-assistance assets.
 - `scripts/verify-harness-conformance.cjs` checks the frontmatter contract, the
   path references and the description quality of every skill, path rule and
   subagent; it is a step in `.github/workflows/check-safe.yml`.
-- `scripts/validate-skills.cjs` runs the same checks and reports them in the
-  skills shape the compliance report reads.
+- `scripts/validate-skills.cjs` runs the same checks and reports the skill
+  findings alone, in the shape the compliance report reads.
 - `scripts/generate-skills-compliance-report.cjs` generates a markdown compliance report and appends progress logs.
 - `.github/workflows/validate-skills.yml` runs skill validation plus report generation on pull requests and on pushes to `main`.
 

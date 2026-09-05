@@ -3,7 +3,10 @@
  * `scripts/validate-skills.cjs` and the compliance report that reads it.
  *
  * Why: the checks live once in `lib/conformance-*.cjs`, so the merge-bar gate
- * and this report can never diverge on what conformance means.
+ * and this report can never diverge on what conformance means. Only the
+ * projection narrows: the report stamps every finding as a skill-contract
+ * finding under `.github/skills/`, so a rule or subagent finding here would be
+ * placed where it is not. `verify-harness-conformance.cjs` carries those.
  * Usage: `require('./lib/validate-skills-contract.cjs').validateSkills(...)`.
  */
 'use strict';
@@ -39,7 +42,9 @@ const validateSkills = (args = {}) => {
   return {
     checkedSkillCount: checkedSkills.length,
     checkedSkills,
-    errors: result.findings.map((found) => found.message),
+    errors: result.findings
+      .filter((found) => found.kind === 'skill')
+      .map((found) => found.message),
     skippedDirectories: result.skippedDirectories,
   };
 };

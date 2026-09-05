@@ -5,9 +5,10 @@ import { fileURLToPath } from 'node:url';
 
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
-import { makeConformanceRepo } from './lib/conformance-fixtures.mjs';
+import { RULE, makeConformanceRepo } from './lib/conformance-fixtures.mjs';
 
 const require = createRequire(import.meta.url);
+const { checkConformance } = require('./lib/conformance-check.cjs');
 const { validateSkills } = require('./lib/validate-skills-contract.cjs');
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -54,6 +55,44 @@ describe('validateSkills — missing SKILL.md', () => {
     expect(result.errors).toEqual([]);
     expect(result.skippedDirectories).toEqual(['code-smell-shared']);
     expect(result.checkedSkillCount).toBe(1);
+  });
+});
+
+describe('validateSkills — the projection is skills only', () => {
+  const findingMessages = (repoRoot) =>
+    checkConformance({ repoRoot }).findings.map((found) => found.message);
+
+  it('leaves a rule finding to the harness gate', () => {
+    const repoRoot = makeRepo({
+      '.claude/rules/demo.md': `${RULE}\nSee [the decision](../../docs/decisions/ADR-000-gone.md).\n`,
+    });
+    const message =
+      'Broken relative link in .claude/rules/demo.md: "../../docs/decisions/ADR-000-gone.md"';
+
+    expect(findingMessages(repoRoot)).toContain(message);
+    expect(validateSkills({ repoRoot }).errors).not.toContain(message);
+  });
+
+  it('leaves a subagent finding to the harness gate', () => {
+    const repoRoot = makeRepo({
+      '.claude/agents/demo-agent.md': '---\nname: demo-agent\n---\n\n# Bare\n',
+    });
+    const message =
+      'Missing required frontmatter field "description" in .claude/agents/demo-agent.md';
+
+    expect(findingMessages(repoRoot)).toContain(message);
+    expect(validateSkills({ repoRoot }).errors).not.toContain(message);
+  });
+
+  it('reports a skill finding in both views', () => {
+    const repoRoot = makeRepo({
+      '.github/skills/bare/SKILL.md': '---\nname: bare\n---\n\n# Bare\n',
+    });
+    const message =
+      'Missing required frontmatter field "description" in .github/skills/bare/SKILL.md';
+
+    expect(findingMessages(repoRoot)).toContain(message);
+    expect(validateSkills({ repoRoot }).errors).toContain(message);
   });
 });
 
