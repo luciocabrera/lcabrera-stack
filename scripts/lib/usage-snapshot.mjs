@@ -34,8 +34,13 @@
  * here.
  *
  * That only holds while the file survives, so an unreadable or
- * version-mismatched snapshot is moved aside rather than replaced. It is local
- * and gitignored (ADR-049).
+ * version-mismatched snapshot is moved aside rather than replaced. The name it
+ * is moved to is stamped with the clock the run really ran on, never with the
+ * date the report carries: a run may be told to date itself, and two such runs
+ * would then agree on the name and the second would destroy the copy this path
+ * exists to keep. The stamp is a name and not a claim, so a name already taken
+ * is stepped past rather than written over. It is local and gitignored
+ * (ADR-049).
  */
 import {
   existsSync,
@@ -168,8 +173,17 @@ export const countsFor = ({ live, merged, name, window }) => {
   };
 };
 
-const setAside = ({ path, reason, timestamp }) => {
-  const movedTo = `${path}.${String(timestamp).replaceAll(/[^\dA-Za-z]/gu, '')}.unreadable`;
+const freeTarget = ({ observedAt, path }) => {
+  const base = `${path}.${String(observedAt).replaceAll(/[^\dA-Za-z]/gu, '')}`;
+  let target = `${base}.unreadable`;
+  for (let taken = 2; existsSync(target); taken += 1) {
+    target = `${base}-${taken}.unreadable`;
+  }
+  return target;
+};
+
+const setAside = ({ observedAt, path, reason }) => {
+  const movedTo = freeTarget({ observedAt, path });
   try {
     renameSync(path, movedTo);
   } catch (error) {
@@ -188,20 +202,20 @@ const parseFile = (path) => {
   }
 };
 
-export const readSnapshot = ({ path, timestamp }) => {
+export const readSnapshot = ({ observedAt, path }) => {
   if (!existsSync(path)) {
     return emptySnapshot();
   }
   const { parsed, unreadable } = parseFile(path);
   if (unreadable !== undefined) {
-    return setAside({ path, reason: unreadable, timestamp });
+    return setAside({ observedAt, path, reason: unreadable });
   }
   return parsed?.version === SNAPSHOT_VERSION
     ? { ...emptySnapshot(), ...parsed }
     : setAside({
+        observedAt,
         path,
         reason: `it declares version ${JSON.stringify(parsed?.version)} and this report writes version ${SNAPSHOT_VERSION}`,
-        timestamp,
       });
 };
 

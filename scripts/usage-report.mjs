@@ -14,7 +14,9 @@
  * The span a run records as observed is measured against the real clock, not
  * against the window it prints, and a run given `--now` records none: the window
  * is a reporting choice, while what a run could read is whatever is on disk when
- * it runs. A span is what lets a zero be read as absence, so it may never claim
+ * it runs. Everything the run writes about the snapshot file itself takes the
+ * same clock — the moment it records having written it, and the name it moves an
+ * unreadable one aside to — because those describe the run, not the window. A span is what lets a zero be read as absence, so it may never claim
  * a day the run did not read — which is why it is claimed only for a transcript
  * read that reports itself complete and unnarrowed, and never for one that
  * skipped a path or a record on the way, nor for one given a horizon of its own
@@ -154,7 +156,7 @@ const buildReport = ({
     since: readFrom,
     workingTrees,
   });
-  const stored = readSnapshot({ path: snapshotPath, timestamp: generatedAt });
+  const stored = readSnapshot({ observedAt, path: snapshotPath });
   const merged = mergeTally(stored.days, live.tally);
   const observation = observationFor({
     clockOverridden,
@@ -169,7 +171,7 @@ const buildReport = ({
     observed,
     path: snapshotPath,
     retention: observation.retention,
-    updatedAt: generatedAt,
+    updatedAt: observedAt,
   });
 
   const transcripts = {

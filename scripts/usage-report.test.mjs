@@ -21,6 +21,14 @@
  * span bounded by the retention this run records from one bounded by the number
  * the run asked for; the case that separates them asks for a horizon far wider
  * than the store can supply.
+ *
+ * The set-aside cases below are the same wiring on the other clock. The path
+ * exists so an unreadable snapshot is kept rather than destroyed, so a name
+ * taken from the date the report carries hands that loss straight back: `--now`
+ * is repeatable, and the second run of a pair would land on the name the first
+ * one wrote. They run that pair, and they pin the name against the date the run
+ * was told to carry rather than merely against itself, because the guard that
+ * keeps a taken name would separate the two copies either way.
  */
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
@@ -292,5 +300,50 @@ describe('usage-report observed spans', () => {
     expect(report.transcripts.complete).toBe(true);
     expect(snapshot.observed).toEqual([]);
     expect(snapshot.retention).toEqual(seeded);
+  });
+});
+
+describe('usage-report set-aside snapshots', () => {
+  const setAsideOf = ({ args, contents, workspaceUnderTest }) => {
+    writeFileSync(workspaceUnderTest.snapshotPath, contents);
+    const { report, snapshot, status, stderr } = run({
+      ...workspaceUnderTest,
+      args,
+    });
+
+    expect(status, stderr).toBe(0);
+    return { ...report.transcripts.snapshot.setAside, snapshot };
+  };
+
+  it('keeps every set-aside copy of a run told to date itself in the past', () => {
+    const workspaceUnderTest = workspace();
+    const args = ['--now', '2020-06-01T00:00:00Z'];
+    const first = setAsideOf({
+      args,
+      contents: '{"version": 1, "days"',
+      workspaceUnderTest,
+    });
+    const second = setAsideOf({
+      args,
+      contents: '{"version": 1, "days": {"skills"',
+      workspaceUnderTest,
+    });
+
+    expect(second.movedTo).not.toBe(first.movedTo);
+    expect(readFileSync(first.movedTo, 'utf8')).toBe('{"version": 1, "days"');
+    expect(readFileSync(second.movedTo, 'utf8')).toBe(
+      '{"version": 1, "days": {"skills"',
+    );
+  });
+
+  it('stamps a set-aside copy with the clock it ran on, not the date it carries', () => {
+    const { movedTo, snapshot } = setAsideOf({
+      args: ['--now', '2020-06-01T00:00:00Z'],
+      contents: 'not json',
+      workspaceUnderTest: workspace(),
+    });
+
+    expect(movedTo).not.toContain('20200601');
+    expect(movedTo).toContain(dayOf(snapshot.updatedAt).replaceAll('-', ''));
   });
 });

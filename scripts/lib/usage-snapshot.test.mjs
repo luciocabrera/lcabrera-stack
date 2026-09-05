@@ -344,14 +344,14 @@ describe('observationFor', () => {
 const snapshotPath = () =>
   join(mkdtempSync(join(tmpdir(), 'usage-')), 'snapshot.json');
 
-const TIMESTAMP = '2026-09-04T10:00:00.000Z';
+const OBSERVED_AT = '2026-09-04T10:00:00.000Z';
 
 describe('readSnapshot', () => {
   it('starts empty rather than throwing on an unreadable file', () => {
     const path = snapshotPath();
     writeFileSync(path, 'not json');
 
-    expect(readSnapshot({ path, timestamp: TIMESTAMP }).days).toEqual(
+    expect(readSnapshot({ observedAt: OBSERVED_AT, path }).days).toEqual(
       emptySnapshot().days,
     );
   });
@@ -365,7 +365,7 @@ describe('readSnapshot', () => {
       retention: { days: 30, since: '2026-08-06' },
       updatedAt: '2026-09-04T00:00:00Z',
     });
-    const read = readSnapshot({ path, timestamp: TIMESTAMP });
+    const read = readSnapshot({ observedAt: OBSERVED_AT, path });
 
     expect(read.days).toEqual(storedDays);
     expect(read.observed).toEqual([{ from: '2026-08-06', to: '2026-09-04' }]);
@@ -376,14 +376,16 @@ describe('readSnapshot', () => {
     const path = snapshotPath();
     writeFileSync(path, JSON.stringify({ days: storedDays, version: 1 }));
 
-    expect(readSnapshot({ path, timestamp: TIMESTAMP }).observed).toEqual([]);
+    expect(readSnapshot({ observedAt: OBSERVED_AT, path }).observed).toEqual(
+      [],
+    );
   });
 
   it('reads a snapshot written before the retention was recorded rather than setting it aside', () => {
     const path = snapshotPath();
     writeFileSync(path, JSON.stringify({ days: storedDays, version: 1 }));
 
-    const read = readSnapshot({ path, timestamp: TIMESTAMP });
+    const read = readSnapshot({ observedAt: OBSERVED_AT, path });
 
     expect(read.days).toEqual(storedDays);
     expect(read.retention).toBeUndefined();
@@ -394,19 +396,31 @@ describe('readSnapshot', () => {
     const path = snapshotPath();
     writeFileSync(path, '{"version": 1, "days": {"skills": {"unslop"');
 
-    const { setAside } = readSnapshot({ path, timestamp: TIMESTAMP });
-    writeSnapshot({ days: {}, path, updatedAt: TIMESTAMP });
+    const { setAside } = readSnapshot({ observedAt: OBSERVED_AT, path });
+    writeSnapshot({ days: {}, path, updatedAt: OBSERVED_AT });
 
     expect(setAside.movedTo).toContain('.unreadable');
     expect(existsSync(setAside.movedTo)).toBe(true);
     expect(readFileSync(setAside.movedTo, 'utf8')).toContain('unslop');
   });
 
+  it('keeps both copies when a second set-aside lands on the same stamp', () => {
+    const path = snapshotPath();
+    writeFileSync(path, '{"first"');
+    const first = readSnapshot({ observedAt: OBSERVED_AT, path }).setAside;
+    writeFileSync(path, '{"second"');
+    const second = readSnapshot({ observedAt: OBSERVED_AT, path }).setAside;
+
+    expect(second.movedTo).not.toBe(first.movedTo);
+    expect(readFileSync(first.movedTo, 'utf8')).toBe('{"first"');
+    expect(readFileSync(second.movedTo, 'utf8')).toBe('{"second"');
+  });
+
   it('keeps a snapshot written by a different version rather than overwriting it', () => {
     const path = snapshotPath();
     writeFileSync(path, JSON.stringify({ days: storedDays, version: 0 }));
 
-    const { days, setAside } = readSnapshot({ path, timestamp: TIMESTAMP });
+    const { days, setAside } = readSnapshot({ observedAt: OBSERVED_AT, path });
 
     expect(days).toEqual(emptySnapshot().days);
     expect(setAside.reason).toContain('version');
@@ -417,10 +431,10 @@ describe('readSnapshot', () => {
 
   it('reports nothing set aside when the file reads cleanly', () => {
     const path = snapshotPath();
-    writeSnapshot({ days: storedDays, path, updatedAt: TIMESTAMP });
+    writeSnapshot({ days: storedDays, path, updatedAt: OBSERVED_AT });
 
     expect(
-      readSnapshot({ path, timestamp: TIMESTAMP }).setAside,
+      readSnapshot({ observedAt: OBSERVED_AT, path }).setAside,
     ).toBeUndefined();
   });
 });
