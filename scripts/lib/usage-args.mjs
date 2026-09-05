@@ -15,6 +15,9 @@ export const DOCUMENTED_CLEANUP_DEFAULT = 30;
 
 const WHOLE_NUMBER = /^\d+$/u;
 
+const UTC_INSTANT =
+  /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?Z?)?$/u;
+
 const VALUE_FLAGS = new Map([
   ['--days', 'days'],
   ['--now', 'now'],
@@ -60,6 +63,21 @@ export const positiveInteger = (value, label) => {
     );
   }
   return Number.parseInt(value, 10);
+};
+
+export const utcInstant = (value, label) => {
+  const text = String(value);
+  const day = text.slice(0, 10);
+  if (
+    !UTC_INSTANT.test(text) ||
+    Number.isNaN(Date.parse(text)) ||
+    shiftDay(day, 0) !== day
+  ) {
+    throw new Error(
+      `${label} must be a UTC day or timestamp shaped YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ, got \`${text}\``,
+    );
+  }
+  return text;
 };
 
 export const settingsFiles = ({ repoRoot, userHome }) => [

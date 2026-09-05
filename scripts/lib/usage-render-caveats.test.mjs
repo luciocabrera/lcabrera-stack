@@ -164,6 +164,31 @@ describe('renderReport coverage caveats', () => {
     expect(markdown).not.toContain('cover it in full');
   });
 
+  it('confines the claim to the end of the window when nothing covers it', () => {
+    const markdown = reportWith({
+      transcripts: {
+        available: true,
+        files: 3,
+        observedBackTo: undefined,
+        reachBack: '2026-08-06',
+        retentionDays: 30,
+        retentionDeclaredIn: '.claude/settings.json',
+        simulatedHorizon: false,
+        snapshot: {
+          earliestDay: '2026-06-01',
+          observed: [{ from: '2026-06-07', to: '2026-09-03' }],
+          path: 'reports/usage/snapshot.json',
+        },
+      },
+    });
+
+    expect(markdown).toContain(
+      'No run of this report has observed 2026-09-04, the last day of the window above',
+    );
+    expect(markdown).not.toContain('observed any part of the window');
+    expect(markdown).not.toContain('settles nothing at all');
+  });
+
   it('claims whole-window coverage only when observation reaches the start', () => {
     const markdown = reportWith({
       transcripts: {

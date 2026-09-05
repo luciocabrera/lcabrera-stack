@@ -24,6 +24,7 @@ import {
   positiveInteger,
   resolveRetention,
   transcriptHorizon,
+  utcInstant,
 } from './lib/usage-args.mjs';
 import { readHarnessInventory } from './lib/usage-inventory.mjs';
 import { renderReport } from './lib/usage-render.mjs';
@@ -253,7 +254,8 @@ const printSummary = ({ paths, report }) => {
 const main = () => {
   const args = parseArgs(process.argv.slice(2));
   const observedAt = new Date().toISOString();
-  const generatedAt = args.now ?? observedAt;
+  const generatedAt =
+    args.now === undefined ? observedAt : utcInstant(args.now, '--now');
   const window = windowOf({
     days:
       args.days === undefined

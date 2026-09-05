@@ -239,7 +239,7 @@ const snapshotSentence = (snapshot) =>
 
 const coverageSentence = ({ observedBackTo, window }) => {
   if (observedBackTo === undefined) {
-    return 'No run of this report has observed any part of the window above, so a zero in the invocation counts settles nothing at all.';
+    return `No run of this report has observed ${window.end}, the last day of the window above, so coverage cannot be traced continuously back from it and a zero in the invocation counts settles nothing about the window as a whole.`;
   }
   if (observedBackTo <= window.start) {
     return `Runs of this report have observed the window continuously back to ${window.start}, so the invocation counts above cover it in full.`;

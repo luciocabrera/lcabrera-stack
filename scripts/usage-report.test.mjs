@@ -31,7 +31,13 @@
  * keeps a taken name would separate the two copies either way.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -120,8 +126,8 @@ const clockAheadBy = ({ days, root }) => {
   return { NODE_OPTIONS: `--import ${pathToFileURL(path).href}` };
 };
 
-const run = ({ args = [], env = {}, home, out, snapshotPath }) => {
-  const finished = spawnSync(
+const spawnReport = ({ args = [], env = {}, home, out, snapshotPath }) =>
+  spawnSync(
     process.execPath,
     [SCRIPT, '--out', out, '--snapshot', snapshotPath, ...args],
     {
@@ -136,6 +142,10 @@ const run = ({ args = [], env = {}, home, out, snapshotPath }) => {
       },
     },
   );
+
+const run = (options) => {
+  const finished = spawnReport(options);
+  const { out, snapshotPath } = options;
   return {
     report: JSON.parse(readFileSync(join(out, 'harness-usage.json'), 'utf8')),
     snapshot: JSON.parse(readFileSync(snapshotPath, 'utf8')),
@@ -345,5 +355,38 @@ describe('usage-report set-aside snapshots', () => {
 
     expect(movedTo).not.toContain('20200601');
     expect(movedTo).toContain(dayOf(snapshot.updatedAt).replaceAll('-', ''));
+  });
+});
+
+describe('usage-report --now', () => {
+  it('refuses a value that is not a real UTC day, naming the flag', () => {
+    for (const value of ['2026-9-5', '2026-02-31', '2026-09-05T99:99:99Z']) {
+      const workspaceUnderTest = workspace();
+      const finished = spawnReport({
+        ...workspaceUnderTest,
+        args: ['--now', value],
+      });
+
+      expect(finished.status, finished.stderr).toBe(1);
+      expect(finished.stderr).toContain('--now must be a UTC day');
+      expect(finished.stderr).toContain(value);
+      expect(
+        existsSync(join(workspaceUnderTest.out, 'harness-usage.json')),
+      ).toBe(false);
+    }
+  });
+
+  it('still accepts the UTC day and timestamp forms the report documents', () => {
+    for (const value of ['2020-06-01', '2020-06-01T00:00:00Z']) {
+      const workspaceUnderTest = workspace();
+      const { report, status, stderr } = run({
+        ...workspaceUnderTest,
+        args: ['--now', value, '--days', '5'],
+      });
+
+      expect(status, stderr).toBe(0);
+      expect(report.window.end).toBe('2020-06-01');
+      expect(report.window.start).toBe('2020-05-28');
+    }
   });
 });
