@@ -35,7 +35,7 @@ const reportConformance = ({
 
   if (skippedDirectories.length > 0) {
     console.log(
-      `Skipped non-skill directories: ${skippedDirectories.join(', ')}`,
+      `Skipped support directories: ${skippedDirectories.join(', ')}`,
     );
   }
 

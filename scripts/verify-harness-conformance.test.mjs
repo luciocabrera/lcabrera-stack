@@ -253,6 +253,18 @@ description: ${description}
     );
   });
 
+  it('does not take a lone mid-sentence capital as something concrete', () => {
+    const repoRoot = makeRepo({
+      '.github/skills/demo/SKILL.md': skillWith(
+        'Helps whenever the work I am asked to do starts to feel messy, slow or hard to reason about.',
+      ),
+    });
+
+    expect(messages(repoRoot)).toContain(
+      'Vague description in .github/skills/demo/SKILL.md: names nothing concrete — no path, command or named subject',
+    );
+  });
+
   it('reports a description that never says when it applies', () => {
     const repoRoot = makeRepo({
       '.github/skills/demo/SKILL.md': skillWith(
