@@ -19,9 +19,18 @@ const TRIGGER_PATTERN =
   /\b(when|whenever|before|after|while|applies to|triggers on|invoked? as|dispatched by|use for)\b/i;
 
 const CONCRETE_TOKEN =
-  /`[^`]+`|[\w@.-]\/|\/[\w@.-]|\w\.[a-z]{2,5}\b|\b[A-Z]\w|\d|\w-\w/;
+  /`[^`]+`|[\w@.-]\/[\w@.-]|\w\.[a-z]{2,5}\b|\b[A-Z]\w|\d|\w-\w/;
+
+const CONJUNCTION_SLASH = /\b(?:and\/or|or\/and)\b/gi;
 
 const SENTENCE_START = /(^|[.!?:;—]\s+)([A-Z])/g;
+
+/**
+ * @param {string} description
+ * @returns {string}
+ */
+const withoutConjunctionSlashes = (description) =>
+  description.replaceAll(CONJUNCTION_SLASH, ' ');
 
 /**
  * @param {string} description
@@ -73,7 +82,9 @@ const descriptionFindings = (artifact) => {
           ),
         ]
       : []),
-    ...(CONCRETE_TOKEN.test(withoutSentenceInitialCapitals(description))
+    ...(CONCRETE_TOKEN.test(
+      withoutConjunctionSlashes(withoutSentenceInitialCapitals(description)),
+    )
       ? []
       : [
           finding('names nothing concrete — no path, command or named subject'),

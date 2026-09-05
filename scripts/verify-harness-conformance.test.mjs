@@ -91,134 +91,137 @@ describe('harness conformance — the roster comes from disk', () => {
   });
 });
 
+const findingsFor = (files) => messages(makeRepo(files));
+
 describe('harness conformance — planted malformed frontmatter', () => {
-  it('reports a skill whose frontmatter block never closes', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/broken/SKILL.md': '---\nname: broken\n\n# Broken\n',
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Unparseable or missing frontmatter in .github/skills/broken/SKILL.md',
-    );
-  });
-
-  it('reports a rule with no paths to match on', () => {
-    const repoRoot = makeRepo({
-      '.claude/rules/no-paths.md': '---\ndescription: none\n---\n\n# Rule\n',
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Missing required frontmatter field "paths" in .claude/rules/no-paths.md',
-    );
-  });
-
-  it('reports a subagent whose name does not match its file', () => {
-    const repoRoot = makeRepo({
-      '.claude/agents/renamed.md': SUBAGENT,
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Frontmatter name in .claude/agents/renamed.md does not match its file name: expected "renamed", got "demo-agent"',
-    );
-  });
-
-  it('reports a skill with no description field at all', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/bare/SKILL.md': '---\nname: bare\n---\n\n# Bare\n',
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Missing required frontmatter field "description" in .github/skills/bare/SKILL.md',
-    );
+  it.each([
+    {
+      files: {
+        '.github/skills/broken/SKILL.md': '---\nname: broken\n\n# Broken\n',
+      },
+      message:
+        'Unparseable or missing frontmatter in .github/skills/broken/SKILL.md',
+      planted: 'a skill whose frontmatter block never closes',
+    },
+    {
+      files: {
+        '.claude/rules/no-paths.md': '---\ndescription: none\n---\n\n# Rule\n',
+      },
+      message:
+        'Missing required frontmatter field "paths" in .claude/rules/no-paths.md',
+      planted: 'a rule with no paths to match on',
+    },
+    {
+      files: { '.claude/agents/renamed.md': SUBAGENT },
+      message:
+        'Frontmatter name in .claude/agents/renamed.md does not match its file name: expected "renamed", got "demo-agent"',
+      planted: 'a subagent whose name does not match its file',
+    },
+    {
+      files: {
+        '.github/skills/bare/SKILL.md': '---\nname: bare\n---\n\n# Bare\n',
+      },
+      message:
+        'Missing required frontmatter field "description" in .github/skills/bare/SKILL.md',
+      planted: 'a skill with no description field at all',
+    },
+  ])('reports $planted', ({ files, message }) => {
+    expect(findingsFor(files)).toContain(message);
   });
 });
 
 describe('harness conformance — planted dead path references', () => {
-  it('reports a rule that links a document that is not there', () => {
-    const repoRoot = makeRepo({
-      '.claude/rules/demo.md': `${RULE}\nSee [the decision](../../docs/decisions/ADR-000-gone.md).\n`,
-    });
+  it.each([
+    {
+      files: {
+        '.claude/rules/demo.md': `${RULE}\nSee [the decision](../../docs/decisions/ADR-000-gone.md).\n`,
+      },
+      message:
+        'Broken relative link in .claude/rules/demo.md: "../../docs/decisions/ADR-000-gone.md"',
+      planted: 'a rule that links a document that is not there',
+    },
+    {
+      files: {
+        '.claude/agents/demo-agent.md': `${SUBAGENT}\nRun \`bash .github/skills/demo/scripts/missing.sh\`.\n`,
+      },
+      message:
+        'Broken script path in .claude/agents/demo-agent.md: ".github/skills/demo/scripts/missing.sh"',
+      planted: 'a subagent that names a script that is not there',
+    },
+    {
+      files: {
+        '.claude/agents/demo-agent.md': `---
+name: demo-agent
+description: Demo subagent for the conformance fixture. Use when a test needs one that runs .github/skills/demo/scripts/missing.sh on request.
+---
 
-    expect(messages(repoRoot)).toContain(
-      'Broken relative link in .claude/rules/demo.md: "../../docs/decisions/ADR-000-gone.md"',
-    );
+# Demo agent
+`,
+      },
+      message:
+        'Broken script path in .claude/agents/demo-agent.md: ".github/skills/demo/scripts/missing.sh"',
+      planted: 'a subagent whose description names a script that is not there',
+    },
+    {
+      files: {
+        '.github/skills/demo/SKILL.md': `${SKILL}\nSee [the guide](./references/gone.md).\n`,
+      },
+      message:
+        'Broken relative link in .github/skills/demo/SKILL.md: "./references/gone.md"',
+      planted: 'a skill that links a document that is not there',
+    },
+    {
+      files: {
+        '.github/skills/demo/SKILL.md': `${SKILL}\nSee [the register](docs/coordination/README.md).\n`,
+        'docs/coordination/README.md': '# Register\n',
+      },
+      message:
+        'Broken relative link in .github/skills/demo/SKILL.md: "docs/coordination/README.md"',
+      planted: 'a skill link that only resolves from the repository root',
+    },
+    {
+      files: {
+        '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash scripts/run.sh\`.\n`,
+        '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
+      },
+      message:
+        'Broken script path in .github/skills/demo/SKILL.md: "scripts/run.sh"',
+      planted: 'a bare script path that exists only beside the file naming it',
+    },
+  ])('reports $planted', ({ files, message }) => {
+    expect(findingsFor(files)).toContain(message);
   });
 
-  it('reports a subagent that names a script that is not there', () => {
-    const repoRoot = makeRepo({
-      '.claude/agents/demo-agent.md': `${SUBAGENT}\nRun \`bash .github/skills/demo/scripts/missing.sh\`.\n`,
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Broken script path in .claude/agents/demo-agent.md: ".github/skills/demo/scripts/missing.sh"',
-    );
-  });
-
-  it('reports a skill that links a document that is not there', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `${SKILL}\nSee [the guide](./references/gone.md).\n`,
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Broken relative link in .github/skills/demo/SKILL.md: "./references/gone.md"',
-    );
-  });
-
-  it('reports a skill link that only resolves from the repository root', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `${SKILL}\nSee [the register](docs/coordination/README.md).\n`,
-      'docs/coordination/README.md': '# Register\n',
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Broken relative link in .github/skills/demo/SKILL.md: "docs/coordination/README.md"',
-    );
-  });
-
-  it('keeps a root-absolute link, which a renderer does resolve that way', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `${SKILL}\nSee [the register](/docs/coordination/README.md).\n`,
-      'docs/coordination/README.md': '# Register\n',
-    });
-
-    expect(messages(repoRoot)).toEqual([]);
-  });
-
-  it('reads a bare script path from the repository root, where it is typed', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash scripts/run.sh\`.\n`,
-      '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Broken script path in .github/skills/demo/SKILL.md: "scripts/run.sh"',
-    );
-  });
-
-  it('reads a dot-prefixed script path from the file that names it', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash ./scripts/run.sh\`.\n`,
-      '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
-    });
-
-    expect(messages(repoRoot)).toEqual([]);
-  });
-
-  it('does not treat a node_modules consumer path as a missing repo script', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `${SKILL}\nruns \`node_modules/@repo/reporter/scripts/run-fallow.sh\`.\n`,
-    });
-
-    expect(messages(repoRoot)).toEqual([]);
-  });
-
-  it('keeps a resolving reference and an in-file anchor out of the findings', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `${SKILL}\n[here](#demo) and \`bash .github/skills/demo/scripts/run.sh\`\n`,
-      '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
-    });
-
-    expect(messages(repoRoot)).toEqual([]);
+  it.each([
+    {
+      files: {
+        '.github/skills/demo/SKILL.md': `${SKILL}\nSee [the register](/docs/coordination/README.md).\n`,
+        'docs/coordination/README.md': '# Register\n',
+      },
+      kept: 'a root-absolute link, which a renderer does resolve that way',
+    },
+    {
+      files: {
+        '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash ./scripts/run.sh\`.\n`,
+        '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
+      },
+      kept: 'a dot-prefixed script path read from the file that names it',
+    },
+    {
+      files: {
+        '.github/skills/demo/SKILL.md': `${SKILL}\nruns \`node_modules/@repo/reporter/scripts/run-fallow.sh\`.\n`,
+      },
+      kept: 'a node_modules consumer path, which is not a missing repo script',
+    },
+    {
+      files: {
+        '.github/skills/demo/SKILL.md': `${SKILL}\n[here](#demo) and \`bash .github/skills/demo/scripts/run.sh\`\n`,
+        '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
+      },
+      kept: 'a resolving reference and an in-file anchor',
+    },
+  ])('keeps $kept out of the findings', ({ files }) => {
+    expect(findingsFor(files)).toEqual([]);
   });
 });
 
@@ -230,56 +233,65 @@ description: ${description}
 
 # Demo
 `;
+  const vague = (reason) =>
+    `Vague description in .github/skills/demo/SKILL.md: ${reason}`;
+  const nothingConcrete = vague(
+    'names nothing concrete — no path, command or named subject',
+  );
 
-  it('reports a description too short to carry a situation', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': skillWith('Code quality helper.'),
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Vague description in .github/skills/demo/SKILL.md: 3 words is under the 12-word floor',
-    );
-  });
-
-  it('reports a description that names nothing concrete', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': skillWith(
+  it.each([
+    {
+      description: 'Code quality helper.',
+      message: vague('3 words is under the 12-word floor'),
+      planted: 'a description too short to carry a situation',
+    },
+    {
+      description:
         'Helps the team keep things in good shape whenever the work starts to feel messy or slow.',
-      ),
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Vague description in .github/skills/demo/SKILL.md: names nothing concrete — no path, command or named subject',
-    );
-  });
-
-  it('does not take a lone mid-sentence capital as something concrete', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': skillWith(
+      message: nothingConcrete,
+      planted: 'a description that names nothing concrete',
+    },
+    {
+      description:
+        'Helps the team keep things tidy and/or fast whenever the work starts to feel messy or slow.',
+      message: nothingConcrete,
+      planted: 'a description whose only slash is the one in "and/or"',
+    },
+    {
+      description:
         'Helps whenever the work I am asked to do starts to feel messy, slow or hard to reason about.',
+      message: nothingConcrete,
+      planted: 'a description whose only capital is a lone mid-sentence "I"',
+    },
+    {
+      description:
+        'Runs `vp run check:safe` across apps/showcase and packages/ui, then writes a JSON report into reports/.',
+      message: vague(
+        'names no situation that selects it — say when it applies, what it follows, or what dispatches it',
       ),
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Vague description in .github/skills/demo/SKILL.md: names nothing concrete — no path, command or named subject',
-    );
+      planted: 'a description that never says when it applies',
+    },
+  ])('reports $planted', ({ description, message }) => {
+    expect(
+      findingsFor({ '.github/skills/demo/SKILL.md': skillWith(description) }),
+    ).toContain(message);
   });
 
-  it('reports a description that never says when it applies', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': skillWith(
-        'Runs `vp run check:safe` across apps/showcase and packages/ui, then writes a JSON report into reports/.',
-      ),
-    });
-
-    expect(messages(repoRoot)).toContain(
-      'Vague description in .github/skills/demo/SKILL.md: names no situation that selects it — say when it applies, what it follows, or what dispatches it',
-    );
+  it('takes a script path as something concrete', () => {
+    expect(
+      findingsFor({
+        '.github/skills/demo/SKILL.md': skillWith(
+          'Runs scripts/foo.mjs whenever the fixture asks for a concrete path to be named in a description.',
+        ),
+        'scripts/foo.mjs': 'export {};\n',
+      }),
+    ).toEqual([]);
   });
 
   it('reads a block-scalar description as its text, not as the block marker', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `---
+    expect(
+      findingsFor({
+        '.github/skills/demo/SKILL.md': `---
 name: demo
 description: |
   Standards for the demo fixture, which nothing else in scripts/lib covers.
@@ -288,9 +300,8 @@ description: |
 
 # Demo
 `,
-    });
-
-    expect(messages(repoRoot)).toEqual([]);
+      }),
+    ).toEqual([]);
   });
 });
 

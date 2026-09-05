@@ -7,6 +7,9 @@
  * The two classes resolve differently and must not share a resolver: a
  * markdown link is read by a renderer, so it is file-relative unless it leads
  * with `/`, while a bare script path is typed at the repository root.
+ * A script path is read over the whole file, frontmatter included, because a
+ * description routinely names the thing it runs; a link is read over the body,
+ * since frontmatter is never rendered.
  * Matching stays narrow on purpose: the word boundary after a script extension
  * keeps `.json` out, and `node_modules/` and URLs are consumer paths this
  * repository cannot resolve.
@@ -113,15 +116,16 @@ const scriptPathResolves = ({ fromFile, reference, repoRoot }) =>
 
 /**
  * @param {{
+ *   body: string;
+ *   contents: string;
  *   filePath: string;
  *   label: string;
- *   markdown: string;
  *   repoRoot: string;
  * }} args
  * @returns {readonly { message: string, reference: string }[]}
  */
-const referenceFindings = ({ filePath, label, markdown, repoRoot }) => {
-  const links = extractRelativeLinks(markdown)
+const referenceFindings = ({ body, contents, filePath, label, repoRoot }) => {
+  const links = extractRelativeLinks(body)
     .filter((link) => withoutFragment(link).length > 0)
     .filter(
       (link) =>
@@ -136,7 +140,7 @@ const referenceFindings = ({ filePath, label, markdown, repoRoot }) => {
       reference: link,
     }));
 
-  const scripts = extractScriptPaths(markdown)
+  const scripts = extractScriptPaths(contents)
     .filter(
       (scriptPath) =>
         !scriptPathResolves({

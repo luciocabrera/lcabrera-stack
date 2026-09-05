@@ -20,10 +20,10 @@ const { descriptionFindings } = require('./conformance-triggers.cjs');
  */
 const artifactReferenceFindings = (artifact, repoRoot) =>
   referenceFindings({
+    body: artifact.parsed?.body ?? '',
+    contents: fs.readFileSync(artifact.filePath, 'utf8'),
     filePath: artifact.filePath,
     label: artifact.label,
-    markdown:
-      artifact.parsed?.body ?? fs.readFileSync(artifact.filePath, 'utf8'),
     repoRoot,
   }).map((found) => ({
     kind: artifact.kind,
