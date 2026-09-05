@@ -195,9 +195,9 @@ producer — is classified with the root scripts below.
 | `releasing`                   | —       | —      | **repo-specific** | —          | The Changesets flow, the publish gates and the label taxonomy of the `@lcabrera/*` packages specifically. Independently off the ladder: publishing is a flag on `monorepo`, not a rung.                                                                                                                                                                |
 | `linter-checker`              | `repo`  | seed   | **blocked**       | —          | Runs `vp run lint:report`, a root repository task. Ships at `repo` the day that task has a home a consumer can install.                                                                                                                                                                                                                                |
 | `fallow-code-checker`         | `repo`  | seed   | **blocked**       | —          | Runs `vp run fallow:report` and reads the root `.fallowrc.json`; also coverage-merge from the repository root. The analyser itself works on one package, so the rung is `repo`, not `monorepo`.                                                                                                                                                        |
-| `code-smell-checker`          | `repo`  | seed   | **blocked**       | —          | Same root tasks. Its report contract ships beside it in `code-smell-shared/`.                                                                                                                                                                                                                                                                          |
-| `code-smell-zen`              | `repo`  | seed   | **blocked**       | —          | Same root tasks.                                                                                                                                                                                                                                                                                                                                       |
-| `code-smell-shared`           | `repo`  | seed   | **blocked**       | —          | The shared half of the two `code-smell` skills; it ships if and when they do. It carries no `SKILL.md` and is an allowlisted support directory, which is why no usage measurement names it.                                                                                                                                                            |
+| `code-smell-checker`          | `repo`  | seed   | **parameterise**  | **soft**   | Names no task and runs nothing. Every escape is a link into `code-smell-shared/`, which ships alongside — the same shape as `refactor-verified`, and the reason the row is not `portable`. `repo` rather than `agent` because it scopes to a pull request's changed files and reads lint, type-check and test signals.                                 |
+| `code-smell-zen`              | `repo`  | seed   | **parameterise**  | **soft**   | Step 1 runs a script that ships in its own `scripts/`, and that script needs git and a base branch — which is what puts the row at `repo`. Its other escapes are the same links into `code-smell-shared/`.                                                                                                                                             |
+| `code-smell-shared`           | `repo`  | seed   | **parameterise**  | **soft**   | The report contract the two `code-smell` skills read; it ships if and when they do. Its README cites an ADR and its quick reference names this repository's task runner in a verification cell, and both drop to generic prose. It carries no `SKILL.md` and is an allowlisted support directory, which is why no usage measurement names it.          |
 
 Reading the **hard** rows: `epic` names the consumer's root agent document
 through config, so without it an orchestrator is told to read a file nobody
@@ -207,13 +207,20 @@ nothing. `health-swarm`'s scouts write to report locations that come from config
 unset, a scout produces its findings nowhere. Every **soft** row loses
 specificity and keeps every instruction followable.
 
-The blocked group is one decision, not one per row: each skill's first
-instruction runs a task defined in this repository's root manifest, which a
-consumer installing the skill would not have. ADR-081 blocked them on the
-scanner runtime being private; [ADR-091](../../docs/decisions/ADR-091-retire-the-scan-report-pipeline.md)
-retired that runtime and moved the report contract in beside the skills, so what
-remains is the root tasks. The root-script table below records where each of
-those tasks lands, which is what discharging this blocker now costs.
+The blocked rows are one decision, not one per row: `linter-checker` and
+`fallow-code-checker` each open by running a task defined in this repository's
+root manifest, which a consumer installing the skill would not have. The
+root-script table below records where `lint:report` and `fallow:report` land,
+which is what discharging the blocker costs.
+
+The `code-smell` rows carried that verdict too, and the closure probe took it off
+them. ADR-081 blocked them alongside the analyser skills, on a private scanner
+runtime; [ADR-091](../../docs/decisions/ADR-091-retire-the-scan-report-pipeline.md)
+retired it and moved the report contract in beside the skills. That left the
+analyser skills standing on root tasks and left the `code-smell` skills naming no
+task at all — `code-smell-zen` runs a script from its own `scripts/`,
+`code-smell-checker` runs nothing — while the rows kept the old reason. Re-run
+the probe over them rather than trusting this paragraph's age.
 
 ## Path rules
 
@@ -516,8 +523,8 @@ every zero-usage artifact carries one of three:
 | `lint-toolchain`              | **reachability** | Consulted when an analyser misbehaves, and none did.                                                                                                                                    |
 | `linter-checker`              | **reachability** | Its first instruction runs a task it is blocked on, and the findings arrive from the gate instead. Blocked and unused argue in the same direction and neither settles it.               |
 | `fallow-code-checker`         | **reachability** | Same, plus the audit already runs on every pull request.                                                                                                                                |
-| `code-smell-checker`          | **reachability** | Same class.                                                                                                                                                                             |
-| `code-smell-zen`              | **reachability** | Same class.                                                                                                                                                                             |
+| `code-smell-checker`          | **reachability** | An audit invoked on demand, and none was asked for in the window. Its neighbours' blocker does not reach it.                                                                            |
+| `code-smell-zen`              | **reachability** | Same, against a diff rather than a tree.                                                                                                                                                |
 | `health-swarm`                | **reachability** | A periodic sweep, and one quarter on one machine is not a window that settles it.                                                                                                       |
 | `fallow-scan` (subagent)      | **reachability** | Inherits `fallow-code-checker`'s blocker.                                                                                                                                               |
 | `changelog.yml`               | **reachability** | It fires only on a hand-pushed `v*` tag, and none was pushed in the window. The zero measures the tag, not the workflow.                                                                |
@@ -560,7 +567,7 @@ The two axes add one ordering fact the earlier pass did not have. Every gate in
 the root-script tables above is `package`, and none of them has moved yet, so
 each `repo`-rung workflow seed currently names a bin that is only partly there.
 Moving those scripts is what unblocks the workflow seeds, the hook seeds and the
-four blocked analyser skills at once.
+blocked analyser skills at once.
 
 ## Mechanisms considered and not adopted
 
