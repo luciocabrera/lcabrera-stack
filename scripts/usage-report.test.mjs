@@ -1,0 +1,392 @@
+/*
+ * What the CLI writes into the snapshot as observed, which is the one value in
+ * this report that cannot be corrected later: the merge is monotone and nothing
+ * prunes, so a span over days no run read is permanent, and it reads as the
+ * opposite of the truth — not "unobserved" but "observed and empty".
+ *
+ * The unit cases beside `observationFor` pin the decision; these pin the wiring,
+ * because the decision is only worth anything if the CLI hands it the real
+ * clock, its own retention, and a read that vouches for itself. Every route runs
+ * against a synthetic `HOME` holding one transcript, so the transcripts are
+ * genuinely readable — a run that could not read them records no span for a
+ * reason that has nothing to do with the fix, and would pass either way.
+ *
+ * The day each expectation is written against comes out of the report the child
+ * process wrote, never off this process's clock: the two are different clocks,
+ * and a run that straddles midnight would otherwise fail a correct
+ * implementation.
+ *
+ * `--transcript-retention-days` gets two of these rather than one. A value below
+ * the retention in force lands on the same day either way, so it cannot tell a
+ * span bounded by the retention this run records from one bounded by the number
+ * the run asked for; the case that separates them asks for a horizon far wider
+ * than the store can supply.
+ *
+ * The set-aside cases below are the same wiring on the other clock. The path
+ * exists so an unreadable snapshot is kept rather than destroyed, so a name
+ * taken from the date the report carries hands that loss straight back: `--now`
+ * is repeatable, and the second run of a pair would land on the name the first
+ * one wrote. They run that pair, and they pin the name against the date the run
+ * was told to carry rather than merely against itself, because the guard that
+ * keeps a taken name would separate the two copies either way.
+ */
+import { spawnSync } from 'node:child_process';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+import { describe, expect, it } from 'vite-plus/test';
+
+import { resolveRetention } from './lib/usage-args.mjs';
+import { transcriptDirectoryFor } from './lib/usage-scope.mjs';
+import { dayOf, shiftDay } from './lib/usage-window.mjs';
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const SCRIPT = join(REPO_ROOT, 'scripts', 'usage-report.mjs');
+
+const dayReported = (report) => dayOf(report.generatedAt);
+
+const transcriptLine = () =>
+  JSON.stringify({
+    cwd: REPO_ROOT,
+    message: {
+      content: [
+        { input: { skill: 'unslop' }, name: 'Skill', type: 'tool_use' },
+      ],
+    },
+    timestamp: new Date().toISOString(),
+  });
+
+const workspace = () => {
+  const root = mkdtempSync(join(tmpdir(), 'usage-report-'));
+  const home = join(root, 'home');
+  const projects = join(
+    home,
+    '.claude',
+    'projects',
+    transcriptDirectoryFor(REPO_ROOT),
+  );
+  mkdirSync(projects, { recursive: true });
+  writeFileSync(join(projects, 'session.jsonl'), `${transcriptLine()}\n`);
+  return {
+    home,
+    out: join(root, 'out'),
+    projects,
+    root,
+    retentionDays: resolveRetention({
+      args: {},
+      repoRoot: REPO_ROOT,
+      userHome: home,
+    }).days,
+    snapshotPath: join(root, 'snapshot.json'),
+  };
+};
+
+const seedSnapshot = ({
+  days = { skills: {}, subagents: {} },
+  retention,
+  snapshotPath,
+}) =>
+  writeFileSync(
+    snapshotPath,
+    `${JSON.stringify({
+      days,
+      observed: [],
+      retention,
+      updatedAt: '2020-01-01T00:00:00.000Z',
+      version: 1,
+    })}\n`,
+  );
+
+const clockAheadBy = ({ days, root }) => {
+  const path = join(root, 'clock.mjs');
+  writeFileSync(
+    path,
+    [
+      `const ahead = 86400000 * ${days};`,
+      'const Real = Date;',
+      'globalThis.Date = class extends Real {',
+      '  constructor(...args) {',
+      '    super(...(args.length === 0 ? [Real.now() + ahead] : args));',
+      '  }',
+      '  static now() {',
+      '    return Real.now() + ahead;',
+      '  }',
+      '};',
+      '',
+    ].join('\n'),
+  );
+  return { NODE_OPTIONS: `--import ${pathToFileURL(path).href}` };
+};
+
+const spawnReport = ({ args = [], env = {}, home, out, snapshotPath }) =>
+  spawnSync(
+    process.execPath,
+    [SCRIPT, '--out', out, '--snapshot', snapshotPath, ...args],
+    {
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        GH_CONFIG_DIR: join(home, 'gh'),
+        GH_TOKEN: '',
+        GITHUB_TOKEN: '',
+        HOME: home,
+        ...env,
+      },
+    },
+  );
+
+const run = (options) => {
+  const finished = spawnReport(options);
+  const { out, snapshotPath } = options;
+  return {
+    report: JSON.parse(readFileSync(join(out, 'harness-usage.json'), 'utf8')),
+    snapshot: JSON.parse(readFileSync(snapshotPath, 'utf8')),
+    status: finished.status,
+    stderr: finished.stderr,
+  };
+};
+
+describe('usage-report observed spans', () => {
+  it('records the horizon it read when the retention it has been seeing still holds', () => {
+    const workspaceUnderTest = workspace();
+    const { retentionDays, snapshotPath } = workspaceUnderTest;
+    seedSnapshot({
+      retention: { days: retentionDays, since: '2020-01-01' },
+      snapshotPath,
+    });
+
+    const { report, snapshot, status, stderr } = run(workspaceUnderTest);
+    const day = dayReported(report);
+
+    expect(status, stderr).toBe(0);
+    expect(report.transcripts.complete).toBe(true);
+    expect(snapshot.observed).toEqual([
+      { from: shiftDay(day, -(retentionDays - 1)), to: day },
+    ]);
+    expect(snapshot.observed.at(-1).to).toBe(dayOf(snapshot.updatedAt));
+  });
+
+  it('claims no day the retention in force before this run had already deleted', () => {
+    const workspaceUnderTest = workspace();
+    const { retentionDays, snapshotPath } = workspaceUnderTest;
+    seedSnapshot({
+      retention: { days: retentionDays + 1, since: '2020-01-01' },
+      snapshotPath,
+    });
+
+    const { report, snapshot } = run(workspaceUnderTest);
+    const day = dayReported(report);
+
+    expect(report.transcripts.retentionDays).toBe(retentionDays);
+    expect(report.transcripts.complete).toBe(true);
+    expect(snapshot.observed).toEqual([{ from: day, to: day }]);
+    expect(snapshot.retention).toEqual({
+      days: retentionDays,
+      since: day,
+    });
+  });
+
+  it('dates the span it records by the clock the run itself read', () => {
+    const workspaceUnderTest = workspace();
+    const { retentionDays, root, snapshotPath } = workspaceUnderTest;
+    seedSnapshot({
+      retention: { days: retentionDays, since: '2020-01-01' },
+      snapshotPath,
+    });
+
+    const { report, snapshot, status, stderr } = run({
+      ...workspaceUnderTest,
+      env: clockAheadBy({ days: 5, root }),
+    });
+    const day = dayReported(report);
+
+    expect(status, stderr).toBe(0);
+    expect(day).not.toBe(dayOf(new Date().toISOString()));
+    expect(snapshot.observed).toEqual([
+      { from: shiftDay(day, -(retentionDays - 1)), to: day },
+    ]);
+  });
+
+  it('records no span for a run that could not read every transcript it found', () => {
+    const workspaceUnderTest = workspace();
+    const { projects, retentionDays, snapshotPath } = workspaceUnderTest;
+    seedSnapshot({
+      retention: { days: retentionDays, since: '2020-01-01' },
+      snapshotPath,
+    });
+    mkdirSync(join(projects, 'vanished.jsonl'));
+
+    const { report, snapshot, status, stderr } = run(workspaceUnderTest);
+
+    expect(status, stderr).toBe(0);
+    expect(report.transcripts.available).toBe(true);
+    expect(report.transcripts.complete).toBe(false);
+    expect(report.transcripts.unreadable).toHaveLength(1);
+    expect(snapshot.observed).toEqual([]);
+  });
+
+  it('records no span for a run whose transcript held a record it could not parse', () => {
+    const workspaceUnderTest = workspace();
+    const { projects, retentionDays, snapshotPath } = workspaceUnderTest;
+    seedSnapshot({
+      retention: { days: retentionDays, since: '2020-01-01' },
+      snapshotPath,
+    });
+    writeFileSync(
+      join(projects, 'session.jsonl'),
+      `${transcriptLine()}\n{"type":"tool_use","name":"Skill","input":{"skill":"unsl\n`,
+    );
+
+    const { report, snapshot } = run(workspaceUnderTest);
+
+    expect(report.transcripts.available).toBe(true);
+    expect(report.transcripts.complete).toBe(false);
+    expect(snapshot.observed).toEqual([]);
+    expect(snapshot.days.skills.unslop).toBeDefined();
+  });
+
+  it('records no span for a run asking to reach further back than retention does', () => {
+    const workspaceUnderTest = workspace();
+    const { retentionDays, snapshotPath } = workspaceUnderTest;
+    const seeded = { days: retentionDays, since: '2020-01-01' };
+    seedSnapshot({ retention: seeded, snapshotPath });
+    const asked = retentionDays * 12;
+
+    const { report, snapshot, status, stderr } = run({
+      ...workspaceUnderTest,
+      args: ['--transcript-retention-days', String(asked)],
+    });
+    const day = dayReported(report);
+
+    expect(status, stderr).toBe(0);
+    expect(report.transcripts.complete).toBe(true);
+    expect(report.transcripts.readFrom).toBe(shiftDay(day, -(asked - 1)));
+    expect(snapshot.observed).toEqual([]);
+    expect(snapshot.retention).toEqual(seeded);
+  });
+
+  it('still carries a period the transcripts have dropped while it records no span', () => {
+    const workspaceUnderTest = workspace();
+    const { retentionDays, snapshotPath } = workspaceUnderTest;
+    const dropped = shiftDay(dayOf(new Date().toISOString()), -400);
+    seedSnapshot({
+      days: { skills: { unslop: { [dropped]: 3 } }, subagents: {} },
+      retention: { days: retentionDays, since: '2020-01-01' },
+      snapshotPath,
+    });
+
+    const { report, snapshot, status, stderr } = run({
+      ...workspaceUnderTest,
+      args: ['--days', '500', '--transcript-retention-days', '1'],
+    });
+    const carried = report.skills.find((row) => row.name === 'unslop');
+
+    expect(status, stderr).toBe(0);
+    expect(carried.carriedFromSnapshot).toBe(3);
+    expect(snapshot.days.skills.unslop[dropped]).toBe(3);
+    expect(snapshot.observed).toEqual([]);
+  });
+
+  it('records no span at all for a run told to date itself in the past', () => {
+    const workspaceUnderTest = workspace();
+    const { retentionDays, snapshotPath } = workspaceUnderTest;
+    const seeded = { days: retentionDays, since: '2020-01-01' };
+    seedSnapshot({ retention: seeded, snapshotPath });
+
+    const { report, snapshot, status } = run({
+      ...workspaceUnderTest,
+      args: ['--now', '2020-06-01T00:00:00Z'],
+    });
+
+    expect(status).toBe(0);
+    expect(report.transcripts.complete).toBe(true);
+    expect(snapshot.observed).toEqual([]);
+    expect(snapshot.retention).toEqual(seeded);
+  });
+});
+
+describe('usage-report set-aside snapshots', () => {
+  const setAsideOf = ({ args, contents, workspaceUnderTest }) => {
+    writeFileSync(workspaceUnderTest.snapshotPath, contents);
+    const { report, snapshot, status, stderr } = run({
+      ...workspaceUnderTest,
+      args,
+    });
+
+    expect(status, stderr).toBe(0);
+    return { ...report.transcripts.snapshot.setAside, snapshot };
+  };
+
+  it('keeps every set-aside copy of a run told to date itself in the past', () => {
+    const workspaceUnderTest = workspace();
+    const args = ['--now', '2020-06-01T00:00:00Z'];
+    const first = setAsideOf({
+      args,
+      contents: '{"version": 1, "days"',
+      workspaceUnderTest,
+    });
+    const second = setAsideOf({
+      args,
+      contents: '{"version": 1, "days": {"skills"',
+      workspaceUnderTest,
+    });
+
+    expect(second.movedTo).not.toBe(first.movedTo);
+    expect(readFileSync(first.movedTo, 'utf8')).toBe('{"version": 1, "days"');
+    expect(readFileSync(second.movedTo, 'utf8')).toBe(
+      '{"version": 1, "days": {"skills"',
+    );
+  });
+
+  it('stamps a set-aside copy with the clock it ran on, not the date it carries', () => {
+    const { movedTo, snapshot } = setAsideOf({
+      args: ['--now', '2020-06-01T00:00:00Z'],
+      contents: 'not json',
+      workspaceUnderTest: workspace(),
+    });
+
+    expect(movedTo).not.toContain('20200601');
+    expect(movedTo).toContain(dayOf(snapshot.updatedAt).replaceAll('-', ''));
+  });
+});
+
+describe('usage-report --now', () => {
+  it('refuses a value that is not a real UTC day, naming the flag', () => {
+    for (const value of ['2026-9-5', '2026-02-31', '2026-09-05T99:99:99Z']) {
+      const workspaceUnderTest = workspace();
+      const finished = spawnReport({
+        ...workspaceUnderTest,
+        args: ['--now', value],
+      });
+
+      expect(finished.status, finished.stderr).toBe(1);
+      expect(finished.stderr).toContain('--now must be a UTC day');
+      expect(finished.stderr).toContain(value);
+      expect(
+        existsSync(join(workspaceUnderTest.out, 'harness-usage.json')),
+      ).toBe(false);
+    }
+  });
+
+  it('still accepts the UTC day and timestamp forms the report documents', () => {
+    for (const value of ['2020-06-01', '2020-06-01T00:00:00Z']) {
+      const workspaceUnderTest = workspace();
+      const { report, status, stderr } = run({
+        ...workspaceUnderTest,
+        args: ['--now', value, '--days', '5'],
+      });
+
+      expect(status, stderr).toBe(0);
+      expect(report.window.end).toBe('2020-06-01');
+      expect(report.window.start).toBe('2020-05-28');
+    }
+  });
+});

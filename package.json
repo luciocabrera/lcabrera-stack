@@ -101,6 +101,7 @@
     "typecheck:all": "vp run -r typecheck",
     "typecheck:changed": "bash scripts/changed-files.sh node scripts/run-changed.mjs typecheck",
     "typegen:all": "vp run -r typegen",
+    "usage:report": "node scripts/usage-report.mjs",
     "viteplus:verify": "node scripts/verify-viteplus-block.mjs",
     "worktree:env": "node scripts/worktree-link-env.mjs"
   },
