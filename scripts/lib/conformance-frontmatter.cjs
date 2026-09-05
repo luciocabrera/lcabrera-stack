@@ -82,7 +82,8 @@ const scalarValue = (lines) => {
 
 /**
  * @param {readonly string[]} lines
- * @returns {readonly string[]}
+ * @returns {readonly string[] | undefined} the entries when the value is
+ *   written as a list, `undefined` for a scalar
  */
 const listValues = (lines) => {
   const text = lines.join(' ').trim();
@@ -96,8 +97,12 @@ const listValues = (lines) => {
       .filter((entry) => entry.length > 0);
   }
 
-  return lines
-    .filter((line) => line.startsWith('- '))
+  const items = lines.filter((line) => line.startsWith('- '));
+  if (items.length === 0) {
+    return undefined;
+  }
+
+  return items
     .map((line) => unquote(line.slice(2)))
     .filter((entry) => entry.length > 0);
 };
@@ -124,7 +129,10 @@ const parseFrontmatterContent = (rawContent) => {
       entries.map((entry) => [entry.key, scalarValue(entry.lines)]),
     ),
     lists: Object.fromEntries(
-      entries.map((entry) => [entry.key, listValues(entry.lines)]),
+      entries.flatMap((entry) => {
+        const values = listValues(entry.lines);
+        return values === undefined ? [] : [[entry.key, values]];
+      }),
     ),
   };
 };

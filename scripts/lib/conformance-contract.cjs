@@ -5,7 +5,8 @@
  *
  * Why: a skill or subagent whose frontmatter does not parse is never loaded,
  * and a rule with no `paths` never matches a file — both look exactly like an
- * artifact nobody happened to need.
+ * artifact nobody happened to need. A value written as a list is judged as a
+ * list: `[]` is an absent field, not a two-character string.
  * Usage: `require('./lib/conformance-contract.cjs').contractFindings(...)`.
  */
 'use strict';
@@ -23,6 +24,21 @@ const finding = (artifact, message) => ({
 });
 
 /**
+ * @param {{ frontmatter: Record<string, string>, lists: Record<string, readonly string[]> } | null} parsed
+ * @param {string} field
+ * @returns {boolean}
+ */
+const hasValue = (parsed, field) => {
+  const list = parsed?.lists[field];
+  if (list !== undefined) {
+    return list.length > 0;
+  }
+
+  const value = parsed?.frontmatter[field];
+  return typeof value === 'string' && value.trim().length > 0;
+};
+
+/**
  * @param {{
  *   kind: string;
  *   label: string;
@@ -32,14 +48,7 @@ const finding = (artifact, message) => ({
  */
 const missingFieldFindings = (artifact) =>
   KINDS[artifact.kind].requiredFields
-    .filter((field) => {
-      const value = artifact.parsed?.frontmatter[field];
-      const list = artifact.parsed?.lists[field] ?? [];
-      return (
-        (typeof value !== 'string' || value.trim().length === 0) &&
-        list.length === 0
-      );
-    })
+    .filter((field) => !hasValue(artifact.parsed, field))
     .map((field) =>
       finding(
         artifact,

@@ -1,39 +1,29 @@
-import { readFileSync, rmSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { afterEach, describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it } from 'vite-plus/test';
 
-import { RULE, makeConformanceRepo } from './lib/conformance-fixtures.mjs';
+import {
+  RULE,
+  conformanceMessages,
+  withConformanceRepo,
+} from './lib/conformance-fixtures.mjs';
 
 const require = createRequire(import.meta.url);
-const { checkConformance } = require('./lib/conformance-check.cjs');
 const { validateSkills } = require('./lib/validate-skills-contract.cjs');
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-const temporaryDirectories = [];
-
-afterEach(() => {
-  for (const directory of temporaryDirectories.splice(0)) {
-    rmSync(directory, { force: true, recursive: true });
-  }
-});
-
-const makeRepo = (files) => {
-  const root = makeConformanceRepo(files);
-  temporaryDirectories.push(root);
-  return root;
-};
+const skillsView = (files) =>
+  withConformanceRepo(files, (repoRoot) => validateSkills({ repoRoot }));
 
 describe('validateSkills — missing SKILL.md', () => {
   it('fails a scripts-only folder that is not on the support allowlist', () => {
-    const repoRoot = makeRepo({
+    const result = skillsView({
       '.github/skills/scripts-only/scripts/generate.mjs': 'export {}\n',
     });
-
-    const result = validateSkills({ repoRoot });
 
     expect(result.errors.some((error) => error.includes('scripts-only'))).toBe(
       true,
@@ -46,11 +36,9 @@ describe('validateSkills — missing SKILL.md', () => {
   });
 
   it('skips an explicit support directory without SKILL.md', () => {
-    const repoRoot = makeRepo({
+    const result = skillsView({
       '.github/skills/code-smell-shared/README.md': '# Shared\n',
     });
-
-    const result = validateSkills({ repoRoot });
 
     expect(result.errors).toEqual([]);
     expect(result.skippedDirectories).toEqual(['code-smell-shared']);
@@ -59,40 +47,37 @@ describe('validateSkills — missing SKILL.md', () => {
 });
 
 describe('validateSkills — the projection is skills only', () => {
-  const findingMessages = (repoRoot) =>
-    checkConformance({ repoRoot }).findings.map((found) => found.message);
-
   it('leaves a rule finding to the harness gate', () => {
-    const repoRoot = makeRepo({
+    const files = {
       '.claude/rules/demo.md': `${RULE}\nSee [the decision](../../docs/decisions/ADR-000-gone.md).\n`,
-    });
+    };
     const message =
       'Broken relative link in .claude/rules/demo.md: "../../docs/decisions/ADR-000-gone.md"';
 
-    expect(findingMessages(repoRoot)).toContain(message);
-    expect(validateSkills({ repoRoot }).errors).not.toContain(message);
+    expect(conformanceMessages(files)).toContain(message);
+    expect(skillsView(files).errors).not.toContain(message);
   });
 
   it('leaves a subagent finding to the harness gate', () => {
-    const repoRoot = makeRepo({
+    const files = {
       '.claude/agents/demo-agent.md': '---\nname: demo-agent\n---\n\n# Bare\n',
-    });
+    };
     const message =
       'Missing required frontmatter field "description" in .claude/agents/demo-agent.md';
 
-    expect(findingMessages(repoRoot)).toContain(message);
-    expect(validateSkills({ repoRoot }).errors).not.toContain(message);
+    expect(conformanceMessages(files)).toContain(message);
+    expect(skillsView(files).errors).not.toContain(message);
   });
 
   it('reports a skill finding in both views', () => {
-    const repoRoot = makeRepo({
+    const files = {
       '.github/skills/bare/SKILL.md': '---\nname: bare\n---\n\n# Bare\n',
-    });
+    };
     const message =
       'Missing required frontmatter field "description" in .github/skills/bare/SKILL.md';
 
-    expect(findingMessages(repoRoot)).toContain(message);
-    expect(validateSkills({ repoRoot }).errors).toContain(message);
+    expect(conformanceMessages(files)).toContain(message);
+    expect(skillsView(files).errors).toContain(message);
   });
 });
 
@@ -110,6 +95,6 @@ describe('validateSkills — this repository', () => {
       'utf8',
     );
 
-    expect(yaml).not.toMatch(/^\s+paths:/m);
+    expect(yaml).not.toMatch(/^[ \t]+paths:/m);
   });
 });
