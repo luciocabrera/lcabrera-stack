@@ -173,17 +173,16 @@ export const countsFor = ({ live, merged, name, window }) => {
   };
 };
 
-const freeTarget = ({ observedAt, path }) => {
-  const base = `${path}.${String(observedAt).replaceAll(/[^\dA-Za-z]/gu, '')}`;
-  let target = `${base}.unreadable`;
-  for (let taken = 2; existsSync(target); taken += 1) {
-    target = `${base}-${taken}.unreadable`;
-  }
-  return target;
+const freeTarget = (base, taken = 0) => {
+  const target =
+    taken === 0 ? `${base}.unreadable` : `${base}-${taken}.unreadable`;
+  return existsSync(target) ? freeTarget(base, taken + 1) : target;
 };
 
 const setAside = ({ observedAt, path, reason }) => {
-  const movedTo = freeTarget({ observedAt, path });
+  const movedTo = freeTarget(
+    `${path}.${String(observedAt).replaceAll(/[^\dA-Za-z]/gu, '')}`,
+  );
   try {
     renameSync(path, movedTo);
   } catch (error) {
