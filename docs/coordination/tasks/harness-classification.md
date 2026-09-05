@@ -10,16 +10,19 @@ area:
 started: 2026-09-05
 updated: 2026-09-05
 plan: (none)
-pr: (none)
+pr: '#1089'
 issue: #1070
 ---
 
 ## What
 
-classify every harness file by profile and by update path
+Record two verdicts per harness file in `packages/devkit/CLASSIFICATION.md` —
+which profile rung it lands on, and whether it updates by `sync` or by version
+bump — and write both sorting criteria down. ADR-109 carries the update-path
+criterion.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: classification written; gate running
 - Blockers: none
-- Next:
+- Next: push, then hold for the verifier
