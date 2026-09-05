@@ -23,6 +23,6 @@ criterion.
 
 ## Status / next
 
-- Current step: round 3 — every inherited reason re-derived from the file it names
+- Current step: round 4 — the path-rule rows re-derived from their own `paths:` frontmatter
 - Blockers: none
 - Next: push, then hold for the verifier
