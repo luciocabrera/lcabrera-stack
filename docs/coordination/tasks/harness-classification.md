@@ -23,6 +23,6 @@ criterion.
 
 ## Status / next
 
-- Current step: classification written; gate running
+- Current step: round 3 — every inherited reason re-derived from the file it names
 - Blockers: none
 - Next: push, then hold for the verifier
