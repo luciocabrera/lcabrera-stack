@@ -114,12 +114,15 @@ skill-name/
 └── scripts/          ← executable shell scripts invoked from SKILL.md
 ```
 
-**Frontmatter contract** (enforced by `scripts/validate-skills.cjs`): every
+**Frontmatter contract** (enforced by `vp run harness:verify`): every
 directory under `.github/skills/` must have a `SKILL.md` unless it is on the
 explicit support allowlist (`code-smell-shared`). `name` (must match folder) and
-`description` (must contain trigger phrases — it drives auto-invocation) are
-required. Relative markdown links must resolve, and a relative script path
-named from a `SKILL.md` or `.claude/agents/*.md` must exist. Optional:
+`description` are required, and the description must say **when** to use the
+skill — it drives auto-invocation, so a label that names no situation never
+triggers. Relative markdown links must resolve, and a relative script path
+named from a `SKILL.md` or `.claude/agents/*.md` must exist. The same gate holds
+a subagent to `name` (matching its file) plus that description, and a path rule
+to a non-empty `paths`. Optional:
 `argument-hint`, `user-invocable`, `allowed-tools`, `paths` (globs for
 file-scoped auto-invoke), `context: fork` (isolates verbose output in a
 sub-agent — used by the scan/report skills).
@@ -240,13 +243,13 @@ There is no `SessionStart` hook and no `Stop` hook. The two above — `PreToolUs
 
 ## Quick Reference
 
-| I want to…                                               | Go to…                                                                           |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Change universal project instructions                    | `AGENTS.md`                                                                      |
-| Change a file-type convention (TS, components, tests)    | `.claude/rules/<topic>.md`                                                       |
-| Add a new skill                                          | `.github/skills/<skill-name>/SKILL.md` (then `node scripts/validate-skills.cjs`) |
-| Add or change an automated behaviour (on stop, on start) | `hooks` block in `.claude/settings.json`                                         |
-| Pre-approve a Bash command for the team                  | `.claude/settings.json` → `permissions.allow`                                    |
-| Pre-approve a Bash command just for me                   | `.claude/settings.local.json` → `permissions.allow`                              |
-| Add a background/isolated agent                          | `.claude/agents/<name>.md`                                                       |
-| Understand the Table store architecture                  | `.github/skills/store-pattern/SKILL.md`                                          |
+| I want to…                                               | Go to…                                                                |
+| -------------------------------------------------------- | --------------------------------------------------------------------- |
+| Change universal project instructions                    | `AGENTS.md`                                                           |
+| Change a file-type convention (TS, components, tests)    | `.claude/rules/<topic>.md`                                            |
+| Add a new skill                                          | `.github/skills/<skill-name>/SKILL.md` (then `vp run harness:verify`) |
+| Add or change an automated behaviour (on stop, on start) | `hooks` block in `.claude/settings.json`                              |
+| Pre-approve a Bash command for the team                  | `.claude/settings.json` → `permissions.allow`                         |
+| Pre-approve a Bash command just for me                   | `.claude/settings.local.json` → `permissions.allow`                   |
+| Add a background/isolated agent                          | `.claude/agents/<name>.md`                                            |
+| Understand the Table store architecture                  | `.github/skills/store-pattern/SKILL.md`                               |
