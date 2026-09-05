@@ -65,14 +65,21 @@ export const extractRunScripts = (content) => {
   });
 };
 
+const referencesIn = ({ expression, line }) =>
+  expression.split('||').flatMap((operand, position, operands) =>
+    [...operand.matchAll(SECRET_REFERENCE)].map((reference) => ({
+      fallback: position < operands.length - 1,
+      line,
+      name: reference[1],
+    })),
+  );
+
 /** @param {string} content */
 export const extractSecretReferences = (content) =>
-  content.split('\n').flatMap((line, index) =>
-    [...line.matchAll(EXPRESSION)].flatMap((expression) =>
-      [...expression[1].matchAll(SECRET_REFERENCE)].map((reference) => ({
-        fallback: expression[1].includes('||'),
-        line: index + 1,
-        name: reference[1],
-      })),
-    ),
-  );
+  content
+    .split('\n')
+    .flatMap((line, index) =>
+      [...line.matchAll(EXPRESSION)].flatMap((expression) =>
+        referencesIn({ expression: expression[1], line: index + 1 }),
+      ),
+    );

@@ -13,8 +13,8 @@ it reported the same clean pass as a file that was genuinely self-contained.
 Expect new findings on a tree that has such files: a step running a script the
 install does not carry, a local action that does not travel, an executable no
 gate task places, and a secret only a repository's own settings could supply. A
-secret the expression around it already answers — one with a fallback, or the
-token the platform sets itself — is not one of them.
+secret that something after its own `||` answers is not one of them, and neither
+is the token the platform sets itself.
 
 Two new escape kinds appear in the report, `bin` and `secret`, alongside `link`,
 `command`, `import` and `requires`. Reading a workflow file is unconditional, and

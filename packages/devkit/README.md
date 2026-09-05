@@ -99,8 +99,8 @@ its plain prose are all read. Without them a file with no markdown structure
 reports the same clean pass as one that is genuinely self-contained.
 
 Two of those answer themselves. An executable a gate task already names is
-placed by this kit, so it is not an escape; neither is a secret the expression
-around it answers — one with a fallback, or the token the platform sets itself.
+placed by this kit, so it is not an escape; neither is a secret that something
+after its own `||` answers, nor the token the platform sets itself.
 
 Run it against **materialised** output, never against `assets/`. A shipped file's
 links are written for where the file lands, so resolving them from the asset tree

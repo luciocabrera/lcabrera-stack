@@ -115,6 +115,28 @@ describe('workflow files', () => {
     expect(escapes).toEqual([]);
   });
 
+  test('the last of a chain of secrets is answered by nothing', () => {
+    const escapes = analyse({
+      content: [
+        'jobs:',
+        '  check:',
+        '    steps:',
+        '      - env:',
+        `          A: \${{ secrets.PUBLISH_TOKEN || secrets.FALLBACK_TOKEN }}`,
+      ].join('\n'),
+      path,
+    });
+
+    expect(escapes).toEqual([
+      {
+        file: path,
+        kind: 'secret',
+        line: 5,
+        reference: 'secrets.FALLBACK_TOKEN',
+      },
+    ]);
+  });
+
   test('markdown carrying the same lines is left to the markdown resolvers', () => {
     const escapes = analyse({
       content: [

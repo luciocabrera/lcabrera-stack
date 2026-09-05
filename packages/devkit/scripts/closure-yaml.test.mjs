@@ -83,6 +83,19 @@ describe('extractSecretReferences', () => {
     ).toEqual([]);
   });
 
+  test('a secret is answered by what follows its own `||`, not the expression', () => {
+    const content = [
+      `          A: \${{ secrets.PUBLISH_TOKEN || secrets.FALLBACK_TOKEN }}`,
+      `          B: \${{ inputs.ref || secrets.REPO_ADMIN_TOKEN }}`,
+    ].join('\n');
+
+    expect(extractSecretReferences(content)).toEqual([
+      { fallback: true, line: 1, name: 'PUBLISH_TOKEN' },
+      { fallback: false, line: 1, name: 'FALLBACK_TOKEN' },
+      { fallback: false, line: 2, name: 'REPO_ADMIN_TOKEN' },
+    ]);
+  });
+
   test('an expression carrying a stray brace is left unread', () => {
     expect(
       extractSecretReferences(`          A: \${{ secrets.PUBLISH_TOKEN{ }}\n`),
