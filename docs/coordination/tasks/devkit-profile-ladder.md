@@ -2,7 +2,7 @@
 id: devkit-profile-ladder
 title: rename the full profile to repo, and add the monorepo rung
 owner: agent:claude
-status: active
+status: review
 branch: feat/1073-devkit-profile-ladder
 area:
   - packages/devkit/scripts/config.mjs
