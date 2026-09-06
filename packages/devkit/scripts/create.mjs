@@ -47,16 +47,19 @@ export const ancestorsOf = (directory) => {
  * `init`, which is the command for a repository that already exists.
  *
  * @param {{ enclosingRepository?: string, targetEntries?: string[],
- *           targetIsDirectory?: boolean, targets: string[] }} args
+ *           targetIsDirectory?: boolean, targetIsReadable?: boolean,
+ *           targets: string[] }} args
  * `targetEntries` is `undefined` when the target does not exist, which is the
  * case create is for; `targetIsDirectory` is `false` when something that is not
- * a directory already holds the name.
+ * a directory already holds the name, and `targetIsReadable` is `false` when a
+ * directory is there and its contents cannot be listed.
  * @returns {string | undefined}
  */
 export const createRefusal = ({
   enclosingRepository,
   targetEntries,
   targetIsDirectory = true,
+  targetIsReadable = true,
   targets,
 }) => {
   if (targets.length === 0) {
@@ -72,6 +75,9 @@ export const createRefusal = ({
   }
   if (!targetIsDirectory) {
     return `create: \`${target}\` is already there and is not a directory — create makes the directory, so the name has to be free. Pick one nothing occupies, or move what is there.`;
+  }
+  if (!targetIsReadable) {
+    return `create: \`${target}\` is already there and cannot be read, so create cannot tell whether it is empty. Fix its permissions, or pick a name nothing occupies.`;
   }
   if (targetEntries !== undefined && targetEntries.length > 0) {
     const [first] = targetEntries.toSorted((left, right) =>
@@ -146,15 +152,14 @@ export const commitIdentityArgs = ({ email = '', name = '' } = {}) =>
 /**
  * `create` makes a git repository, so a machine without git cannot be told
  * afterwards — the directory would be written and then have nothing to commit
- * to. The searched directories are named because they are fixed: a git found
- * anywhere else is one the inherited PATH chose, which is the lookup this
- * package does not do.
+ * to. The fixed install locations are named because they are what was looked at
+ * first; PATH was searched after them, so reaching this means git is nowhere.
  *
  * @param {{ searched: string[] }} args
  * @returns {string}
  */
 export const missingGitRefusal = ({ searched }) =>
-  `create: no git executable in ${searched.map(quoted).join(', ')} — create makes a git repository, so install git before running it.`;
+  `create: no git executable in ${searched.map(quoted).join(', ')}, nor anywhere on this machine's PATH — create makes a git repository, so install git before running it.`;
 
 /**
  * @param {{ target: string }} args

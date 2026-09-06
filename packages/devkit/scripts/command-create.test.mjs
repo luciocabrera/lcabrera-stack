@@ -8,6 +8,7 @@
 
 import { execFileSync } from 'node:child_process';
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -141,6 +142,20 @@ describe('what devkit create refuses', () => {
     expect(readFileSync(join(parent, 'demo'), 'utf8')).toBe(
       'not a directory\n',
     );
+  });
+
+  test('a directory it cannot list, rather than letting the read throw', () => {
+    const parent = scratch();
+    const locked = join(parent, 'locked');
+    mkdirSync(locked);
+    chmodSync(locked, 0o000);
+
+    const { code, errors } = quietly(() => runCreate(['locked'], parent));
+    chmodSync(locked, 0o755);
+
+    expect(code).toBe(1);
+    expect(errors).toContain('cannot be read');
+    expect(errors).not.toContain('EACCES');
   });
 
   test('a target nested inside an existing repository, creating nothing', () => {

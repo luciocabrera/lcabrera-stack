@@ -57,6 +57,15 @@ describe('createRefusal', () => {
     expect(refusal).not.toContain('a directory it made');
   });
 
+  test('refuses a directory it cannot read, rather than guessing it is empty', () => {
+    const refusal = createRefusal({
+      targetIsReadable: false,
+      targets: ['demo'],
+    });
+    expect(refusal).toContain('cannot be read');
+    expect(refusal).toContain('permissions');
+  });
+
   test('refuses a name a file already holds, without offering init on it', () => {
     const refusal = createRefusal({
       targetIsDirectory: false,

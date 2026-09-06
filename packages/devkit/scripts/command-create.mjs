@@ -50,14 +50,23 @@ const enclosingRepositoryOf = (absolute) =>
     existsSync(join(directory, '.git')),
   );
 
+const ABSENT = { entries: undefined, isDirectory: true, isReadable: true };
+
 const targetState = (absolute) => {
-  if (lstatSync(absolute, { throwIfNoEntry: false }) === undefined) {
-    return { entries: undefined, isDirectory: true };
-  }
+  if (lstatSync(absolute, { throwIfNoEntry: false }) === undefined)
+    return ABSENT;
   if (statSync(absolute, { throwIfNoEntry: false })?.isDirectory() !== true) {
-    return { entries: undefined, isDirectory: false };
+    return { entries: undefined, isDirectory: false, isReadable: true };
   }
-  return { entries: readdirSync(absolute), isDirectory: true };
+  try {
+    return {
+      entries: readdirSync(absolute),
+      isDirectory: true,
+      isReadable: true,
+    };
+  } catch {
+    return { entries: undefined, isDirectory: true, isReadable: false };
+  }
 };
 
 const positionals = (argv) => argv.filter((entry) => !entry.startsWith('-'));
@@ -125,16 +134,14 @@ export const runCreate = (argv, root) => {
   const [target] = targets;
   const absolute = target === undefined ? undefined : resolve(root, target);
 
-  const state =
-    absolute === undefined
-      ? { entries: undefined, isDirectory: true }
-      : targetState(absolute);
+  const state = absolute === undefined ? ABSENT : targetState(absolute);
 
   const refusal = createRefusal({
     enclosingRepository:
       absolute === undefined ? undefined : enclosingRepositoryOf(absolute),
     targetEntries: state.entries,
     targetIsDirectory: state.isDirectory,
+    targetIsReadable: state.isReadable,
     targets,
   });
   if (refusal !== undefined) {

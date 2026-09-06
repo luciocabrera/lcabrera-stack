@@ -3,19 +3,23 @@ import { describe, expect, test } from 'vite-plus/test';
 import {
   GIT_REPOSITORY_VARIABLES,
   TRUSTED_GIT_DIRECTORIES,
-  gitEnvironment,
   gitBinary,
+  gitEnvironment,
   readGit,
+  resolveGit,
   runGit,
 } from './git-exec.mjs';
 
 describe('gitEnvironment', () => {
   test('drops every variable that would select another repository', () => {
     const env = gitEnvironment({
-      GIT_DIR: '/elsewhere/.git',
-      GIT_INDEX_FILE: '/elsewhere/index',
-      GIT_WORK_TREE: '/elsewhere',
-      HOME: '/home/dev',
+      binary: '/usr/bin/git',
+      env: {
+        GIT_DIR: '/elsewhere/.git',
+        GIT_INDEX_FILE: '/elsewhere/index',
+        GIT_WORK_TREE: '/elsewhere',
+        HOME: '/home/dev',
+      },
     });
 
     for (const name of GIT_REPOSITORY_VARIABLES) {
@@ -24,28 +28,71 @@ describe('gitEnvironment', () => {
   });
 
   test('keeps the rest of the environment', () => {
-    expect(gitEnvironment({ HOME: '/home/dev', LANG: 'C' })).toMatchObject({
-      HOME: '/home/dev',
-      LANG: 'C',
-    });
+    expect(
+      gitEnvironment({
+        binary: '/usr/bin/git',
+        env: { HOME: '/home/dev', LANG: 'C' },
+      }),
+    ).toMatchObject({ HOME: '/home/dev', LANG: 'C' });
   });
 
-  test('pins PATH to the fixed directories, overriding an inherited one', () => {
-    expect(gitEnvironment({ PATH: '/tmp/writable:/usr/bin' }).PATH).toBe(
-      TRUSTED_GIT_DIRECTORIES.join(':'),
-    );
+  test('pins PATH, dropping the inherited entries git did not come from', () => {
+    const { PATH } = gitEnvironment({
+      binary: '/usr/bin/git',
+      env: { PATH: '/tmp/writable:/usr/bin' },
+    });
+    expect(PATH).not.toContain('/tmp/writable');
+    for (const directory of TRUSTED_GIT_DIRECTORIES) {
+      expect(PATH).toContain(directory);
+    }
+  });
+
+  test('keeps the directory git itself came from, so its helpers resolve', () => {
+    const { PATH } = gitEnvironment({
+      binary: '/home/dev/.nix-profile/bin/git',
+      env: { PATH: '/tmp/writable' },
+    });
+    expect(PATH.split(':')[0]).toBe('/home/dev/.nix-profile/bin');
+    expect(PATH).not.toContain('/tmp/writable');
+  });
+
+  test('names each directory once, however git was found', () => {
+    const { PATH } = gitEnvironment({ binary: '/usr/bin/git', env: {} });
+    const entries = PATH.split(':');
+    expect(new Set(entries).size).toBe(entries.length);
   });
 });
 
-describe('gitBinary', () => {
-  test('names the executable outright, from a fixed directory', () => {
+describe('finding git', () => {
+  test('names the executable outright, never by bare name', () => {
     const binary = gitBinary();
     expect(binary).toBeDefined();
+    expect(binary.startsWith('/') || /^[A-Za-z]:\\/.test(binary)).toBe(true);
+    expect(binary.endsWith('git') || binary.endsWith('git.exe')).toBe(true);
+  });
+
+  test('prefers a fixed install location over the rest of PATH', () => {
     expect(
-      TRUSTED_GIT_DIRECTORIES.some((directory) =>
-        binary.startsWith(`${directory}/`),
-      ),
-    ).toBe(true);
+      resolveGit({
+        directories: TRUSTED_GIT_DIRECTORIES,
+        pathEntries: ['/tmp/writable'],
+      }),
+    ).toBe(gitBinary());
+  });
+
+  test('falls back to PATH, so a machine whose git is elsewhere is not refused', () => {
+    expect(
+      resolveGit({
+        directories: ['/nowhere/at/all'],
+        pathEntries: ['/tmp/writable', ...TRUSTED_GIT_DIRECTORIES],
+      }),
+    ).toBe(gitBinary());
+  });
+
+  test('answers undefined only when git is in neither, which is what the refusal reports', () => {
+    expect(
+      resolveGit({ directories: ['/nowhere'], pathEntries: ['/nowhere/else'] }),
+    ).toBeUndefined();
   });
 });
 
