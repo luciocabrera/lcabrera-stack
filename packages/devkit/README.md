@@ -152,6 +152,7 @@ It **refuses** three things, and each names what to run instead:
 | A target that is not empty          | `create` writes a whole tree and cannot tell your project from an abandoned attempt |
 | A target inside a git repository    | the inner tree would sit under the outer repository's index and gates               |
 | A profile that is not on the ladder | the same refusal every command makes — an unknown profile places nothing, silently  |
+| Any other option                    | `--profile=<name>` would otherwise be dropped and the default rung run instead      |
 
 The first two both point at `devkit init`, which is the command for a
 repository that already exists. Nothing overrides them: `init`'s refusals and

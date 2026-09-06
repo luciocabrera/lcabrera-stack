@@ -48,9 +48,12 @@ export const ancestorsOf = (directory) => {
  *
  * @param {{ enclosingRepository?: string, targetEntries?: string[],
  *           targetIsDirectory?: boolean, targetIsReadable?: boolean,
- *           targets: string[] }} args
- * `targetEntries` is `undefined` when the target does not exist, which is the
- * case create is for; `targetIsDirectory` is `false` when something that is not
+ *           targets: string[], unrecognised?: string[] }} args
+ * `unrecognised` is every flag-shaped argument left after the options this
+ * command knows were taken out — refused rather than dropped, because
+ * `--profile=repo` is the likelier typo of the two the flag has and dropping it
+ * runs the default rung while reporting success. `targetEntries` is `undefined`
+ * when the target does not exist, which is the case create is for; `targetIsDirectory` is `false` when something that is not
  * a directory already holds the name, and `targetIsReadable` is `false` when a
  * directory is there and its contents cannot be listed.
  * @returns {string | undefined}
@@ -58,10 +61,14 @@ export const ancestorsOf = (directory) => {
 export const createRefusal = ({
   enclosingRepository,
   targetEntries,
+  unrecognised = [],
   targetIsDirectory = true,
   targetIsReadable = true,
   targets,
 }) => {
+  if (unrecognised.length > 0) {
+    return `create: ${unrecognised.map(quoted).join(', ')} is not an option this command takes — \`--profile <name>\` is the only one, and it is spelled with a space. Run \`${CREATE_USAGE}\`.`;
+  }
   if (targets.length === 0) {
     return `create: no target directory — run \`${CREATE_USAGE}\`, or run \`devkit init\` in the repository you already have.`;
   }
@@ -71,7 +78,7 @@ export const createRefusal = ({
   }
   const [target] = targets;
   if (enclosingRepository !== undefined) {
-    return `create: \`${target}\` is inside the git repository at \`${enclosingRepository}\` — create makes a repository, and nesting one inside another puts this tree under the outer repository's index and gates. Run \`devkit init\` in \`${enclosingRepository}\` to set that repository up, or run create outside it.`;
+    return `create: \`${target}\` is inside the git repository at \`${enclosingRepository}\` — create makes a repository, and nesting one inside another puts this tree under the outer repository's index and gates. Run \`devkit init\` in \`${enclosingRepository}\` to set that repository up, or run \`devkit create\` outside it.`;
   }
   if (!targetIsDirectory) {
     return `create: \`${target}\` is already there and is not a directory — create makes the directory, so the name has to be free. Pick one nothing occupies, or move what is there.`;

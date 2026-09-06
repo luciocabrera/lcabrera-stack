@@ -33,7 +33,8 @@ import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import process from 'node:process';
 
-import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
+import { runGitStatus } from '../packages/repo-standards/scripts/git-exec.mjs';
+import { shimFindings } from './lib/devkit-tarball-shim.mjs';
 import {
   binsWithoutShebang,
   binStartupFailure,
@@ -44,7 +45,6 @@ import {
   materialisationFailure,
   bareTaskFindings,
   clobberedConfigKeys,
-  createShimFindings,
   noCommandsDeclared,
   tarballFindings,
   taskFindings,
@@ -103,12 +103,21 @@ const packedPathsOf = (tarball) =>
     .filter((line) => line !== '' && !line.endsWith('/'))
     .map((line) => line.replace(/^package\//, ''));
 
+const gitOrFail = ({ args, cwd, step }) => {
+  if (runGitStatus({ args, cwd }).status !== 0) {
+    throw new Error(
+      `the scratch consumer's \`${step}\` did not succeed, so everything after it would have run against a directory that is not a repository`,
+    );
+  }
+};
+
 const scratchConsumer = () => {
   const root = mkdtempSync(join(tmpdir(), 'devkit-tarball-'));
-  runGit({ args: ['init', '-q', '.'], cwd: root });
-  runGit({
+  gitOrFail({ args: ['init', '-q', '.'], cwd: root, step: 'git init' });
+  gitOrFail({
     args: ['remote', 'add', 'origin', 'https://example.invalid/x/y.git'],
     cwd: root,
+    step: 'git remote add',
   });
   writeFileSync(
     join(root, 'package.json'),
@@ -236,40 +245,14 @@ const binFailures = ({ consumer, manifest }) =>
     return failure === undefined ? [] : [`${manifest.name}: ${failure}`];
   });
 
-const gitIn = (cwd, args) => runGit({ args, cwd }) ?? '';
-
-const consumerStepFailure = ({ args, bin, consumer, label = 'devkit' }) => {
+const consumerStepFailure = ({ args, bin, consumer }) => {
   try {
     run(bin, args, consumer);
     return [];
   } catch (error) {
     const output = `${error.stdout ?? ''}${error.stderr ?? ''}`.trim();
     const detail = output === '' ? error.message : failureLine(output);
-    return [`\`${label} ${args.join(' ')}\` failed in the consumer: ${detail}`];
-  }
-};
-
-const shimFindings = (consumer) => {
-  const parent = mkdtempSync(join(tmpdir(), 'devkit-create-'));
-  try {
-    const failure = consumerStepFailure({
-      args: ['made', '--profile', 'agent'],
-      bin: join(consumer, 'node_modules', '.bin', 'create-lcabrera-stack'),
-      consumer: parent,
-      label: 'create-lcabrera-stack',
-    });
-    const made = join(parent, 'made');
-    return [
-      ...failure,
-      ...createShimFindings({
-        commitSubject: gitIn(made, ['log', '-1', '--pretty=%s']),
-        isRepository: existsSync(join(made, '.git')),
-        status: gitIn(made, ['status', '--porcelain']),
-        tracked: gitIn(made, ['ls-files']).split('\n'),
-      }),
-    ];
-  } finally {
-    rmSync(parent, { force: true, recursive: true });
+    return [`\`devkit ${args.join(' ')}\` failed in the consumer: ${detail}`];
   }
 };
 

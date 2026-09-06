@@ -25,6 +25,31 @@ describe('createRefusal', () => {
     ).toBeUndefined();
   });
 
+  test('refuses an option it does not take, rather than dropping it', () => {
+    const refusal = createRefusal({
+      targets: ['demo'],
+      unrecognised: ['--profile=repo'],
+    });
+    expect(refusal).toContain('--profile=repo');
+    expect(refusal).toContain('--profile <name>');
+    expect(refusal).toContain('spelled with a space');
+  });
+
+  test('reports the unrecognised option before anything about the target', () => {
+    expect(
+      createRefusal({ targets: [], unrecognised: ['--profile=repo'] }),
+    ).toContain('--profile=repo');
+  });
+
+  test('names the command in full where it points at itself', () => {
+    expect(
+      createRefusal({
+        enclosingRepository: '/home/dev/stack',
+        targets: ['demo'],
+      }),
+    ).toContain('`devkit create` outside it');
+  });
+
   test('refuses no target, naming init as the command for a repository that exists', () => {
     const refusal = createRefusal({ targets: [] });
     expect(refusal).toContain('devkit create <directory>');

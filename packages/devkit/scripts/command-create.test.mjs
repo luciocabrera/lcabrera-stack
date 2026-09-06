@@ -169,6 +169,18 @@ describe('what devkit create refuses', () => {
     expect(existsSync(join(parent, 'demo'))).toBe(false);
   });
 
+  test('--profile=<name>, which would otherwise run the default rung and report success', () => {
+    const parent = scratch();
+
+    const { code, errors } = quietly(() =>
+      runCreate(['demo', '--profile=repo'], parent),
+    );
+
+    expect(code).toBe(1);
+    expect(errors).toContain('--profile=repo');
+    expect(existsSync(join(parent, 'demo'))).toBe(false);
+  });
+
   test('an unknown profile, before it makes the directory', () => {
     const parent = scratch();
 

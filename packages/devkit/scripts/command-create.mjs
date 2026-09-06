@@ -70,7 +70,11 @@ const targetState = (absolute) => {
   }
 };
 
-const positionals = (argv) => argv.filter((entry) => !entry.startsWith('-'));
+const isOption = (entry) => entry.startsWith('-');
+
+const positionals = (argv) => argv.filter((entry) => !isOption(entry));
+
+const unrecognisedOptions = (argv) => argv.filter(isOption);
 
 const resolvedProfile = (flagged) => {
   try {
@@ -137,6 +141,7 @@ export const runCreate = (argv, root) => {
   }
 
   const targets = positionals(rest);
+  const unrecognised = unrecognisedOptions(rest);
   const [target] = targets;
   const absolute = target === undefined ? undefined : resolve(root, target);
 
@@ -149,6 +154,7 @@ export const runCreate = (argv, root) => {
     targetIsDirectory: state.isDirectory,
     targetIsReadable: state.isReadable,
     targets,
+    unrecognised,
   });
   if (refusal !== undefined) {
     console.error(refusal);
