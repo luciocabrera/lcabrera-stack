@@ -82,6 +82,7 @@ describe('groupsFor', () => {
       'agents',
       'docs',
       'coordination',
+      'decisions',
     ]);
   });
 });

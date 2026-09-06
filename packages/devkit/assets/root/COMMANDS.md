@@ -37,9 +37,10 @@ this repository.
 | `devkit closure --shipped` | Measure whether the shipped set references anything it does not carry.                                         |
 
 **Choose your profile in `devkit.config.json`, not on the command line.**
-`"profile": "agent"` places the skills, the path rules, the subagent definitions
-and the coordination register; `"profile": "full"` adds the workflows, the git
-hooks, the templates, the decision home and this file.
+`"profile": "agent"` places the skills, the path rules, the subagent definitions,
+the coordination register and the decision home; `"profile": "repo"` adds the
+workflows, the git hooks, the templates and this file. `monorepo` and `full` are
+the rungs above, and place what `repo` places until their content lands.
 
 Every command accepts `--profile <name>` as a one-off, and using it is how the
 two get out of step: sync the wider profile by flag, let CI run

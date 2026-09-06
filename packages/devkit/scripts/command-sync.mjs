@@ -20,6 +20,7 @@ import {
   applyPlan,
   buildPlan,
   countsFor,
+  printPlacementNotice,
   renderPlan,
 } from './command-materialise.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
@@ -31,9 +32,10 @@ export const runSync = (argv, root) => {
     return 1;
   }
 
-  const { entries, manifest } = buildPlan({ profile, root });
+  const { config, entries, manifest } = buildPlan({ profile, root });
   const { reported } = countsFor(entries);
 
+  printPlacementNotice(config.profile);
   console.log(renderPlan(entries));
 
   applyPlan({ entries, manifest, root });
@@ -73,9 +75,10 @@ const runAccept = ({ accept, accepted, entries, root }) => {
   return 0;
 };
 
-const reportDrift = ({ argv, entries }) => {
+const reportDrift = ({ argv, config, entries }) => {
   const { reported, written } = countsFor(entries);
 
+  printPlacementNotice(config.profile);
   console.log(renderPlan(entries, { verbose: argv.includes('--verbose') }));
 
   const drifted = written + reported;
@@ -94,12 +97,12 @@ export const runDoctor = (argv, root) => {
     return 1;
   }
 
-  const { accepted, entries } = buildPlan({ profile, root });
+  const { accepted, config, entries } = buildPlan({ profile, root });
 
   const accept = parseAcceptArgs(argv);
   if (accept !== undefined) {
     return runAccept({ accept, accepted, entries, root });
   }
 
-  return reportDrift({ argv, entries });
+  return reportDrift({ argv, config, entries });
 };

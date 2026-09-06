@@ -70,16 +70,22 @@ file, and may be assumed by anything placed there:
 | `monorepo` | Adds workspaces: several packages, a catalog, task fan-out, gates that read across packages. |
 | `full`     | Adds the application and its database.                                                       |
 
-Two of the four rungs are built. `PROFILES` in
-`packages/devkit/scripts/config.mjs` knows `agent` and `full`, and `withProfile`
-refuses any other name, so the profile column below is what #1073 executes rather
-than a description of what `devkit sync` places today. A row on `repo` or
-`monorepo` names a rung nothing implements yet. One row disagrees with a rung
-that is implemented: the `decisions` group is listed under `full` only, while
-both `decisions/*` seeds sit at `agent` below. The sorting rule gives `agent` —
-a record template and its home README are prose a directory holds, and neither
-needs git or a runner — so the grouping is what moves, and it moves with the
-ladder.
+All four rungs are accepted. `PROFILES` in
+`packages/devkit/scripts/config.mjs` is derived from the ladder, `withProfile`
+refuses any other name, and each gate task in `init.mjs` names the rung it lands
+on. `agent` and `repo` place groups; `monorepo` and `full` place what `repo`
+places until #1075 and #1078 land their content, and a run under either says so
+rather than reporting files it did not add. The `decisions` group sits at
+`agent`, where both `decisions/*` seeds are classified below: a record template
+and its home README are prose a directory holds, and neither needs git or a
+runner.
+
+The task rows below and `GATE_TASKS` in `init.mjs` have not converged.
+`branch:verify`, `commit:verify`, `coordination:verify`, `coordination:close`
+and `devkit:check` are tagged `agent` in the code, so a run under that profile
+writes them; the rows below place them at `repo`. Where the two disagree the
+code is what a run does today, and the table is the placement a later issue
+executes.
 
 **The sorting rule: a file lands on the lowest rung whose preconditions it can
 assume.** Ask what it would do with only the rung below. If it still does its
@@ -91,7 +97,8 @@ Three corollaries, each of which decided rows below.
 **Nothing executable lands on `agent`.** That rung places prose. There is no
 runner to invoke a bin and no gate to fail, so a verifier starts at `repo` even
 when the register it reads is placed at `agent`. The ADR template is `agent`;
-`adr:verify` is `repo`.
+`adr:verify` is `repo`. `init.mjs` does not hold to this yet: the verifier rows
+named under the ladder are tagged `agent` there.
 
 **Publishing is a flag on `monorepo`, not a rung.** A bootstrapped repository is
 a leaf by default — no changesets, no release workflow, no API-surface gate, no
@@ -404,9 +411,10 @@ places is the manifest line that names it.
 | `check:push`     | `repo`  | seed    | **parameterise** | **hard**   | The same chain with the slow tail dropped, so a pre-push hook can afford it. Where the cut falls is the consumer's.                        |
 | `ready`          | `repo`  | seed    | **parameterise** | **hard**   | `check:safe` followed by a build, composed in the manifest.                                                                                |
 
-`devkit:sync` is the one exception to "nothing executable lands on `agent`", and
-it is not really an exception: it runs from the package that is placing the rung,
-not from inside the rung it placed.
+`devkit:sync` is the one row this table sets against "nothing executable lands
+on `agent`", and it is not really an exception: it runs from the package that is
+placing the rung, not from inside the rung it placed. `init.mjs` tags other tasks
+`agent` too; they are named under the ladder.
 
 The gate chains are the exception in the verdict column. Each is a manifest line
 naming the consumer's own tasks, so it is **parameterise**, and **hard** because

@@ -201,16 +201,35 @@ be seen by checking the smaller set on its own.
 
 ## Profiles
 
-A profile decides which groups of files a sync places, and the split is by who
-reads the result.
+A profile is a rung on a ladder, and each rung contains the one below it. A
+file lands on the lowest rung whose preconditions it can assume, and a rung
+without a gate of its own is a flag, not a rung.
 
-| Profile | What it places                                                                                                                                   |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `agent` | What an agent reads: skills, path rules, subagent definitions, and the contracts and coordination register they bind to.                         |
-| `full`  | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, the decision home, and `COMMANDS.md`. |
+| Rung       | What it places                                                                                                                                                    |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent`    | What an agent reads: skills, path rules, subagent definitions, the contracts and coordination register they bind to, and the decision home's template and README. |
+| `repo`     | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, and `COMMANDS.md`.                                     |
+| `monorepo` | What `repo` places. The workspace shape — several packages, a catalog, task fan-out, gates that read across packages — is its content, and none of it ships yet.  |
+| `full`     | What `monorepo` places. The application and its database are its content, and none of it ships yet.                                                               |
 
 A consumer who wants the prose and keeps their own process takes `agent` and
-receives none of the scaffolding. `full` is the whole setup.
+receives none of the scaffolding. `repo` is a governed single-package
+repository. The two rungs above it are accepted today so a config can name the
+rung it means, and every run under one of them prints the line saying so:
+
+```
+The "monorepo" profile places what "repo" places — nothing above "repo" ships in this version.
+```
+
+The line goes away on its own the day the rung places a group of its own.
+
+**`full` used to be the name of what is now `repo`.** A config naming `full`
+from before the rename still resolves, to the top rung, which places what `repo`
+places and in this version nothing more — so a run neither breaks nor
+materialises anything different. There is no separate notice for the old
+meaning: the placement line above is what such a run prints, and the changelog
+records the rename. If the harness is what you meant, set `repo`; `full` will
+grow.
 
 **Set it in `devkit.config.json` rather than passing `--profile`.** Every
 command takes the flag, and that is how the commands get out of step: sync the

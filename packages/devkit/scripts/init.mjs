@@ -10,6 +10,8 @@
  * The effects live in `command-init.mjs`.
  */
 
+import { includesRung } from './config.mjs';
+
 /**
  * A repository that already holds a config was initialised before, and the
  * second run is the dangerous one: it would overwrite a consumer's command map
@@ -18,7 +20,7 @@
  * and it is the one that knows how to leave local edits alone.
  *
  * Not being a git repository is refused for a different reason: the manifest
- * and the acceptance record are tracked files, and the hooks the `full` profile
+ * and the acceptance record are tracked files, and the hooks the `repo` rung
  * places are only ever run by git. Materialising them outside a repository
  * produces a directory that looks set up and is inert.
  *
@@ -274,41 +276,18 @@ export const upgradeKeptCiSetup = ({ ciSetup = [], existing = {} }) => {
 };
 
 export const GATE_TASKS = {
-  'adr:list': { args: ['--list'], bin: 'repo-verify-adrs', profiles: ['full'] },
-  'adr:new': { bin: 'repo-adr', profiles: ['full'] },
-  'adr:verify': { bin: 'repo-verify-adrs', profiles: ['full'] },
-  'branch:verify': {
-    bin: 'repo-verify-branch',
-    profiles: ['agent', 'full'],
-  },
-  'commit:verify': {
-    bin: 'repo-verify-commit',
-    profiles: ['agent', 'full'],
-  },
-  'coordination:close': {
-    bin: 'repo-close-claim',
-    profiles: ['agent', 'full'],
-  },
-  'coordination:verify': {
-    bin: 'repo-verify-claims',
-    profiles: ['agent', 'full'],
-  },
-  'devkit:check': {
-    args: ['doctor', '--check'],
-    bin: 'devkit',
-    profiles: ['agent', 'full'],
-  },
-  'devkit:sync': {
-    args: ['sync'],
-    bin: 'devkit',
-    profiles: ['agent', 'full'],
-  },
-  'issue:verify': { bin: 'repo-verify-issue', profiles: ['full'] },
-  'pr:verify': { bin: 'repo-verify-pr', profiles: ['full'] },
-  'scripts:verify': {
-    bin: 'repo-verify-script-size',
-    profiles: ['full'],
-  },
+  'adr:list': { args: ['--list'], bin: 'repo-verify-adrs', rung: 'repo' },
+  'adr:new': { bin: 'repo-adr', rung: 'repo' },
+  'adr:verify': { bin: 'repo-verify-adrs', rung: 'repo' },
+  'branch:verify': { bin: 'repo-verify-branch', rung: 'agent' },
+  'commit:verify': { bin: 'repo-verify-commit', rung: 'agent' },
+  'coordination:close': { bin: 'repo-close-claim', rung: 'agent' },
+  'coordination:verify': { bin: 'repo-verify-claims', rung: 'agent' },
+  'devkit:check': { args: ['doctor', '--check'], bin: 'devkit', rung: 'agent' },
+  'devkit:sync': { args: ['sync'], bin: 'devkit', rung: 'agent' },
+  'issue:verify': { bin: 'repo-verify-issue', rung: 'repo' },
+  'pr:verify': { bin: 'repo-verify-pr', rung: 'repo' },
+  'scripts:verify': { bin: 'repo-verify-script-size', rung: 'repo' },
 };
 
 /** @returns {string[]} */
@@ -322,7 +301,7 @@ const commandLine = ({ args = [], bin }) => [bin, ...args].join(' ');
  * The tasks to write, restricted to bins that are actually installed.
  *
  * A task naming a bin the consumer does not have is the same failure the
- * profile tagging avoids, arriving by a different route: `repo-standards` is an
+ * rung tagging avoids, arriving by a different route: `repo-standards` is an
  * optional half of this kit, and a repository that took only `devkit` would
  * otherwise be given a dozen tasks that all exit with a command-not-found.
  *
@@ -335,7 +314,7 @@ export const tasksFor = ({ availableBins, profile }) => {
     Object.entries(GATE_TASKS)
       .filter(
         ([, task]) =>
-          task.profiles.includes(profile) && available.has(task.bin),
+          includesRung({ profile, rung: task.rung }) && available.has(task.bin),
       )
       .map(([name, task]) => [name, commandLine(task)]),
   );

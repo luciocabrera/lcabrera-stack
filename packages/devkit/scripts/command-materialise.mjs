@@ -17,6 +17,7 @@ import { ACCEPTED_FILE, parseAccepted } from './accepted.mjs';
 import {
   CONFIG_FILE_NAME,
   isExecutableAsset,
+  placementNotice,
   resolveConfig,
   withProfile,
 } from './config.mjs';
@@ -153,6 +154,11 @@ export const renderPlan = (entries, { verbose = false } = {}) => {
         `  ${entry.state.padEnd(STATE_COLUMN_WIDTH)} ${entry.path}  (${detailFor(entry)})`,
     )
     .join('\n');
+};
+
+export const printPlacementNotice = (profile) => {
+  const notice = placementNotice(profile);
+  if (notice !== undefined) console.log(notice);
 };
 
 export const countsFor = (entries) => ({
