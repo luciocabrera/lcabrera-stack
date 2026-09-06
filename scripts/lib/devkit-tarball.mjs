@@ -262,6 +262,47 @@ export const inertHooks = ({ hooksPath, materialised }) => {
 };
 
 /**
+ * Whether the published initializer actually produced a repository.
+ *
+ * The package is one spawn, and the way a spawn fails here is quiet: a shim
+ * that cannot resolve the CLI it wraps prints, exits, and leaves an empty
+ * directory — which reads afterwards exactly like a consumer who never ran it.
+ * So the tree it made is what is asserted, never the exit code alone.
+ *
+ * @param {{ commitSubject?: string, isRepository: boolean, status?: string,
+ *           tracked?: string[] }} args
+ */
+export const createShimFindings = ({
+  commitSubject = '',
+  isRepository,
+  status = '',
+  tracked = [],
+}) => {
+  if (!isRepository) {
+    return [
+      'the `create-lcabrera-stack` initializer left no git repository, so it produced nothing a consumer could commit to',
+    ];
+  }
+  return [
+    ...(commitSubject === ''
+      ? [
+          'the `create-lcabrera-stack` initializer left a repository with no commit in it',
+        ]
+      : []),
+    ...(tracked.includes('devkit.config.json')
+      ? []
+      : [
+          'the `create-lcabrera-stack` initializer committed no devkit.config.json, so the profile it was given placed nothing',
+        ]),
+    ...(status === ''
+      ? []
+      : [
+          `the \`create-lcabrera-stack\` initializer left an uncommitted path behind: ${status.split('\n')[0]}`,
+        ]),
+  ];
+};
+
+/**
  * What running a gate bin inside the consumer proved.
  *
  * A bin that resolves and exits 0 on a fresh repository has shown it can load

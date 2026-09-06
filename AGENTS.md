@@ -50,6 +50,13 @@ Do not "tidy" the two into one ([ADR-040](docs/decisions/ADR-040-npm-scope-for-t
 A package in **neither** scope means that question was never asked — that is how
 the custom lint rules sat unscoped until they became `@lcabrera/eslint-plugin`
 ([ADR-057](docs/decisions/ADR-057-publish-the-custom-lint-rules.md)).
+`create-lcabrera-stack` is the one package that is unscoped on purpose, and it
+is the only one: `pnpm create lcabrera-stack` resolves `create-lcabrera-stack`,
+so the package manager writes the name and no scoped one can answer that
+spelling. It is a shim over `devkit create` with no surface of its own, held
+there by the API-surface ratchet
+([ADR-110](docs/decisions/ADR-110-publish-the-unscoped-initializer-as-a-shim.md)).
+Any other unscoped package is the oversight above, not this exception.
 
 **The toolchain packages that used to sit in `@repo/*` publish, with this
 repo's data taken out of them.**

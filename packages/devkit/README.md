@@ -128,6 +128,43 @@ npm install --save-dev /tmp/kit/*.tgz   # in the consumer
 ranges at pack time, and an `npm pack` tarball carries the literal strings, which
 resolve for nobody.
 
+## Starting a repository that does not exist yet
+
+```bash
+devkit create <directory> [--profile <name>]
+```
+
+Or, without knowing this package's name first:
+
+```bash
+pnpm create lcabrera-stack <directory> [--profile <name>]
+```
+
+`create` makes the directory, runs `git init` on the trunk branch this kit's
+gates expect, writes a minimal manifest, sets the repository up exactly as
+`init` does, and commits the result. What comes out is a repository with a
+history, not a directory you still have to turn into one.
+
+It **refuses** three things, and each names what to run instead:
+
+| Refused                             | Why                                                                                 |
+| ----------------------------------- | ----------------------------------------------------------------------------------- |
+| A target that is not empty          | `create` writes a whole tree and cannot tell your project from an abandoned attempt |
+| A target inside a git repository    | the inner tree would sit under the outer repository's index and gates               |
+| A profile that is not on the ladder | the same refusal every command makes — an unknown profile places nothing, silently  |
+| Any other option                    | `--profile=<name>` would otherwise be dropped and the default rung run instead      |
+
+The first two both point at `devkit init`, which is the command for a
+repository that already exists. Nothing overrides them: `init`'s refusals and
+these are the two halves of one rule, and a flag that got past either would put
+this kit's files somewhere it cannot record or restore them.
+
+No gate task is wired by a `create` run, because a repository made a second ago
+has installed nothing, and a task naming a binary you do not have is a
+`command not found` on your first run. Install your dependencies and then run
+`devkit init --upgrade` inside the new repository: it adds the tasks whose
+binaries have arrived and leaves the config as you have it.
+
 ## Setting up a repository
 
 ```bash
@@ -181,6 +218,7 @@ runner it guessed so you can correct it. Check them before you rely on them.
 ## Commands
 
 ```bash
+devkit create <directory> [--profile <name>]   # make a repository that does not exist yet
 devkit init [--profile <name>] [--force]   # set up a repository that has none of this
 devkit sync [--profile <name>]        # materialise into the current repository
 devkit doctor [--profile <name>] [--check] [--verbose]   # report divergence; --check makes it fail
