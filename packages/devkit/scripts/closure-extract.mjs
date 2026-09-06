@@ -12,9 +12,13 @@
  * `/m`, `\s` matches newlines too, and the pattern goes super-linear on a long
  * file. They also anchor on `from` rather than `import`, so an import whose
  * specifier sits lines below its keyword is not silently missed.
+ *
+ * One constraint binds every reader in this package: a pattern must not be able
+ * to restart inside a run it has already read, so a negated class excludes its
+ * own opening delimiter.
  */
 
-const FENCE_PATTERN = /^```([\w-]*)\s*$/;
+const FENCE_PATTERN = /^[ \t]*```([\w-]*)[ \t]*$/;
 const INLINE_CODE_PATTERN = /`([^`\n]+)`/g;
 
 const IMPORT_PATTERNS = [
@@ -122,17 +126,20 @@ const inlineCodeSpans = (content) =>
     })),
   );
 
-export const extractCommands = (content) => {
-  const fenced = shellBlockLines(content).flatMap(({ line, text }) =>
+/** @param {{ line: number, text: string }[]} lines */
+export const shellCommandWords = (lines) =>
+  lines.flatMap(({ line, text }) =>
     shellSegments(text)
       .map(commandWordIn)
       .filter((word) => !SHELL_NOISE.has(word) && INVOKERS.has(word))
       .map((word) => ({ line, word })),
   );
+
+export const extractCommands = (content) => {
   const inline = inlineCodeSpans(content)
     .map((span) => ({ line: span.line, word: span.text.split(/\s+/)[0] ?? '' }))
     .filter((entry) => INVOKERS.has(entry.word));
-  return [...fenced, ...inline];
+  return [...shellCommandWords(shellBlockLines(content)), ...inline];
 };
 
 const HAS_EXTENSION = /\.[a-z0-9]+$/i;
@@ -153,6 +160,16 @@ export const isPathToken = (token) => {
   return token.includes('/') && HAS_EXTENSION.test(token);
 };
 
+/** @param {{ line: number, text: string }[]} lines */
+export const shellPathTokens = (lines) =>
+  lines
+    .flatMap(({ line, text }) =>
+      shellSegments(text)
+        .flatMap((segment) => segment.split(/\s+/).slice(1))
+        .map((token) => ({ line, token: token.replace(/^["']|["']$/g, '') })),
+    )
+    .filter((entry) => isPathToken(entry.token));
+
 export const extractPathTokens = (content) => {
   const inline = inlineCodeSpans(content)
     .flatMap((span) =>
@@ -161,16 +178,68 @@ export const extractPathTokens = (content) => {
     .map(({ line, token }) => ({
       line,
       token: withoutTrailingPunctuation(token),
-    }));
+    }))
+    .filter((entry) => isPathToken(entry.token));
 
-  const arguments_ = shellBlockLines(content).flatMap(({ line, text }) =>
-    shellSegments(text)
-      .flatMap((segment) => segment.split(/\s+/).slice(1))
-      .map((token) => ({ line, token: token.replace(/^["']|["']$/g, '') })),
-  );
-
-  return [...inline, ...arguments_].filter((entry) => isPathToken(entry.token));
+  return [...inline, ...shellPathTokens(shellBlockLines(content))];
 };
+
+const MARKDOWN_LINK_LABEL = /\[[^[\]]*\]\(/g;
+
+const OPENING_EDGES = new Set(['(', '[', '{', '<', '"', "'", '`', '*', '_']);
+
+const CLOSING_EDGES = new Set([
+  ')',
+  ']',
+  '}',
+  '>',
+  '"',
+  "'",
+  '`',
+  '*',
+  '_',
+  ',',
+  '.',
+  ':',
+  ';',
+  '!',
+  '?',
+]);
+
+const withoutProseEdges = (token) => {
+  const characters = [...token];
+  const first = characters.findIndex(
+    (character) => !OPENING_EDGES.has(character),
+  );
+  if (first === -1) return '';
+  const last = characters.findLastIndex(
+    (character) => !CLOSING_EDGES.has(character),
+  );
+  return characters.slice(first, last + 1).join('');
+};
+
+const proseLines = (content) => {
+  const collected = [];
+  let fenced = false;
+  for (const [index, line] of content.split('\n').entries()) {
+    if (FENCE_PATTERN.test(line)) {
+      fenced = !fenced;
+      continue;
+    }
+    if (!fenced) collected.push({ line: index + 1, text: line });
+  }
+  return collected;
+};
+
+export const extractProsePathTokens = (content) =>
+  proseLines(content)
+    .flatMap(({ line, text }) =>
+      text
+        .replaceAll(MARKDOWN_LINK_LABEL, ' ')
+        .split(/\s+/)
+        .map((token) => ({ line, token: withoutProseEdges(token) })),
+    )
+    .filter((entry) => isPathToken(entry.token));
 
 export const extractImportSpecifiers = (content) =>
   IMPORT_PATTERNS.flatMap((pattern) =>

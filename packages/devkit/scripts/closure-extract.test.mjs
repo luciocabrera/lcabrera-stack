@@ -5,6 +5,7 @@ import {
   extractImportSpecifiers,
   extractLinkTargets,
   extractPathTokens,
+  extractProsePathTokens,
   isPathToken,
 } from './closure-extract.mjs';
 
@@ -42,6 +43,11 @@ describe('extractCommands', () => {
       { line: 2, word: 'vp' },
       { line: 2, word: 'gh' },
     ]);
+  });
+
+  test('reads a shell block whose fence is indented, as under a list item', () => {
+    const content = ['   ```bash', '   vp run test', '   ```'].join('\n');
+    expect(extractCommands(content)).toEqual([{ line: 2, word: 'vp' }]);
   });
 
   test('ignores a fenced block that is not shell', () => {
@@ -126,5 +132,25 @@ describe('extractPathTokens', () => {
     expect(extractPathTokens('see `docs/a.md`, then stop')).toEqual([
       { line: 1, token: 'docs/a.md' },
     ]);
+  });
+});
+
+describe('extractProsePathTokens', () => {
+  test('reads a bare path out of prose and strips what surrounds it', () => {
+    expect(extractProsePathTokens('Read (`docs/a.md`), then stop.')).toEqual([
+      { line: 1, token: 'docs/a.md' },
+    ]);
+  });
+
+  test('a link label does not travel into the target it labels', () => {
+    expect(extractProsePathTokens('see[the contract](docs/a.md).')).toEqual([
+      { line: 1, token: 'docs/a.md' },
+    ]);
+  });
+
+  test('a path inside a fenced block is left to the other readers', () => {
+    expect(
+      extractProsePathTokens(['```text', 'docs/a.md', '```'].join('\n')),
+    ).toEqual([]);
   });
 });

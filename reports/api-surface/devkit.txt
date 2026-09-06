@@ -3,7 +3,7 @@
 # One line per export: <name> <signature>. Do not edit by hand.
 
 ## ./closure
-analyseClosure [const] ({ allowedCommands, allowedConfigKeys, exists, files, rootDirectory, shipped, }: { files: { path: string; content: string; }[]; rootDirectory: string; allowedCommands?: Iterable<string>; allowedConfigKeys?: Iterable<string>; exists?: (repoRelativePath: string) => boolean; shipped?: Set<string>; }) => { escapes: any; }
+analyseClosure [const] ({ agentDirectory, allowedBins, allowedCommands, allowedConfigKeys, exists, files, rootDirectory, shipped, }: { files: { path: string; content: string; }[]; rootDirectory: string; agentDirectory?: string; allowedBins?: Iterable<string>; allowedCommands?: Iterable<string>; allowedConfigKeys?: Iterable<string>; exists?: (repoRelativePath: string) => boolean; shipped?: Set<string>; }) => { escapes: any; }
 classifyLink [const] ({ fromDirectory, rootDirectory, shipped, target, }: { fromDirectory: any; rootDirectory: any; shipped?: Set<any> | undefined; target: any; }) => { kind: string; resolved?: undefined; } | { kind: string; resolved: any; }
 classifyPathToken [const] ({ exists, fromDirectory, rootDirectory, shipped, token, }: { exists: any; fromDirectory: any; rootDirectory: any; shipped?: Set<any> | undefined; token: any; }) => { kind: string; resolved?: undefined; } | { kind: string; resolved: string; }
 

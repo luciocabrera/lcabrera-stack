@@ -311,6 +311,11 @@ export const GATE_TASKS = {
   },
 };
 
+/** @returns {string[]} */
+export const gateBinNames = () => [
+  ...new Set(Object.values(GATE_TASKS).map((task) => task.bin)),
+];
+
 const commandLine = ({ args = [], bin }) => [bin, ...args].join(' ');
 
 /**

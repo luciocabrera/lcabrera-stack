@@ -24,10 +24,13 @@ export const BASELINE_COMMANDS = [
 ];
 
 /**
- * @param {{ allowedCommands?: string[], allowedConfigKeys?: string[],
+ * @param {{ agentDirectory?: string, allowedBins?: string[],
+ *   allowedCommands?: string[], allowedConfigKeys?: string[],
  *   directory: string, root: string }} args
  */
 export const analyseDirectory = ({
+  agentDirectory,
+  allowedBins,
   allowedCommands = BASELINE_COMMANDS,
   allowedConfigKeys = [],
   directory,
@@ -37,6 +40,8 @@ export const analyseDirectory = ({
   const files = readFilesUnder({ directory, root });
   const rootDirectory = relative(root, directory).replaceAll('\\', '/');
   const { escapes } = analyseClosure({
+    agentDirectory,
+    allowedBins,
     allowedCommands,
     allowedConfigKeys,
     exists: (path) => existsSync(resolve(root, path)),
@@ -48,10 +53,12 @@ export const analyseDirectory = ({
 };
 
 const ESCAPE_VERBS = {
+  bin: 'invokes',
   command: 'runs',
   import: 'imports',
   link: 'needs',
   requires: 'declares',
+  secret: 'reads',
 };
 
 export const describeEscape = (finding) =>
