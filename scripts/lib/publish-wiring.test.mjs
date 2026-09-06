@@ -24,7 +24,7 @@ import getReleasePlan from '@changesets/get-release-plan';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { readPublishing } from '../../packages/repo-standards/scripts/config.mjs';
-import { publicPackageDirs as derivedPublicPackageDirs } from '../../packages/repo-standards/scripts/coverage-workspaces.mjs';
+import { publicPackageDirs as derivedPublicPackageDirs } from '../../packages/repo-standards/scripts/public-package-dirs.mjs';
 import {
   buildPublishExports,
   isBuiltPublicPackage,

@@ -429,7 +429,7 @@ repository's exact setup.
 
 | Gate                      | Why it stays                                                                                                                                                                                                                                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `verify-suppressions.mjs` | Which of four analysers wrote a suppression, in which file format, and whether the public-package register argues for it. The register is one repository's, and publishing is a flag rather than a rung, so the gate reads it by path from the repository that owns it and imports `coverage-workspaces` and `jsonc` from here. |
+| `verify-suppressions.mjs` | Which of four analysers wrote a suppression, in which file format, and whether the public-package register argues for it. The register is one repository's, and publishing is a flag rather than a rung, so the gate reads it by path from the repository that owns it and imports `public-package-dirs` and `jsonc` from here. |
 
 The analyser gates that read a runner and a config a consumer of the same
 toolchain also has — `repo-verify-lint-plugins`, `repo-verify-eslint-pass`,

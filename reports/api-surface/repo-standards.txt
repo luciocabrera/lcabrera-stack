@@ -130,9 +130,6 @@ branchErrors [const] ({ slug, data }: { slug: any; data: any; }) => any[]
 ISO_DATE [const] RegExp
 taskErrors [const] ({ slug, data }: { slug: any; data: any; }, seen: any) => any[]
 
-## ./coverage-workspaces
-publicPackageDirs [const] (repoRoot: any) => string[]
-
 ## ./error-message
 errorMessage [const] (value: any) => string
 
@@ -160,6 +157,9 @@ pullNumberFromQueueRef [const] (ref: any) => number | undefined
 statusSha [const] ({ eventName, payload }: { eventName: any; payload: any; }) => any
 subjectEnv [const] ({ pullRequest, range, repository }: { pullRequest: any; range: any; repository: any; }) => { BRANCH_NAME: any; PR_BASE: any; PR_BODY: any; PR_HEAD_SHA: any; PR_IS_FORK: string; PR_NUMBER: string; PR_TITLE: any; RANGE_BASE_SHA: string; RANGE_HEAD_SHA: string; }
 subjectRequest [const] ({ eventName, payload }: { eventName: any; payload: any; }) => any
+
+## ./public-package-dirs
+publicPackageDirs [const] (repoRoot: any) => string[]
 
 ## ./publish-surface
 buildPublishExports [const] (exports_: any) => { [k: string]: { types: string; default: string; }; }

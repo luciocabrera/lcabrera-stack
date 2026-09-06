@@ -77,7 +77,7 @@ That membership is **asserted, not just documented**:
 [`scripts/lib/coverage-workspaces.test.mjs`](../../scripts/lib/coverage-workspaces.test.mjs)
 (under `test:scripts`) resolves the never-baseline packages with
 `publicPackageDirs` from
-[`packages/repo-standards/scripts/coverage-workspaces.mjs`](../../packages/repo-standards/scripts/coverage-workspaces.mjs)
+[`packages/repo-standards/scripts/public-package-dirs.mjs`](../../packages/repo-standards/scripts/public-package-dirs.mjs)
 — the gitignore rule AGENTS.md §1 names as the authority, which
 `vp run suppressions:packages` prints — and fails if any of them is absent from
 either lane. It keys on the directory rather than the package name, so an npm

@@ -59,7 +59,7 @@ export const OPERATOR_FILES = new Set([
   'packages/repo-standards/scripts/config-tree-gates.mjs',
   'packages/repo-standards/scripts/config-values.mjs',
   'packages/repo-standards/scripts/config.mjs',
-  'packages/repo-standards/scripts/coverage-workspaces.mjs',
+  'packages/repo-standards/scripts/public-package-dirs.mjs',
   'packages/repo-standards/scripts/error-message.mjs',
   'packages/repo-standards/scripts/gh-exec.mjs',
   'packages/repo-standards/scripts/host-root.mjs',

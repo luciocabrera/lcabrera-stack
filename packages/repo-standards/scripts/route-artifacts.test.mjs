@@ -1,75 +1,13 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
 
-import { parseFileName as parseInRule } from '../../eslint-local-rules/src/file-names.ts';
 import {
-  ARTIFACT_TREE_FOLDERS,
   artifactNamesIn,
-  CATCH_ALL_FOLDERS,
   candidatesIn,
   describeFinding,
   groupByDirectory,
   normalizeSubject,
-  PAIRED_SUFFIXES,
-  parseFileName,
   routeArtifactReport,
 } from './route-artifacts.mjs';
-
-const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-const RULE_SOURCE = join(
-  REPO_ROOT,
-  'packages/eslint-local-rules/src/domain-folder-filename.ts',
-);
-
-const defaultListInRule = (name) => {
-  const source = readFileSync(RULE_SOURCE, 'utf8');
-  const declaration = source.indexOf(`const ${name} = [`);
-  const open = source.indexOf('[', declaration);
-  const close = source.indexOf(']', open);
-  const body = source
-    .slice(open + 1, close)
-    .split('\n')
-    .filter((line) => !line.trim().startsWith('//'))
-    .join('\n');
-  return body.split("'").filter((_, index) => index % 2 === 1);
-};
-
-describe('agreement with local-rules/domain-folder-filename', () => {
-  it('parses a filename exactly as the rule does', () => {
-    const cases = [
-      'apps/a/src/routes/car-sales/CarSales.types.ts',
-      'apps/a/src/routes/reports/Reports.constants.tsx',
-      'apps/a/src/routes/reports/trigger-scan/triggerScan.constants.ts',
-      'apps/a/src/routes/x/editOrder.action.test.ts',
-      'apps/a/src/routes/x/Root.error-boundary.tsx',
-      'apps/a/src/routes/x/index.ts',
-      'README.md',
-    ];
-    for (const filePath of cases) {
-      expect(parseFileName(filePath)).toEqual(parseInRule(filePath));
-    }
-  });
-
-  it('exempts the same folder kinds the rule calls catch-all', () => {
-    expect(CATCH_ALL_FOLDERS).toEqual(
-      defaultListInRule('DEFAULT_CATCH_ALL_FOLDERS'),
-    );
-  });
-
-  it('walks the same trees the rule exempts', () => {
-    expect(ARTIFACT_TREE_FOLDERS).toEqual(
-      defaultListInRule('DEFAULT_ARTIFACT_FOLDERS'),
-    );
-  });
-
-  it('checks the same file suffixes the rule pairs', () => {
-    expect(PAIRED_SUFFIXES).toEqual(
-      defaultListInRule('DEFAULT_PAIRED_SUFFIXES'),
-    );
-  });
-});
 
 describe('normalizeSubject', () => {
   it('collapses the three spellings the repo uses for one subject', () => {

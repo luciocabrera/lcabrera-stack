@@ -39,7 +39,7 @@ import {
   runDecision,
 } from './lib/pr-queue-claude.mjs';
 import { buildExecutionPrompt, runExecution } from './lib/pr-queue-execute.mjs';
-import { publicPackageDirs } from '../packages/repo-standards/scripts/coverage-workspaces.mjs';
+import { publicPackageDirs } from '../packages/repo-standards/scripts/public-package-dirs.mjs';
 import {
   evaluateGate,
   forbiddenActions,

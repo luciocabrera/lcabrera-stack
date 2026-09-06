@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vite-plus/test';
 
-import { publicPackageDirs } from '../../packages/repo-standards/scripts/coverage-workspaces.mjs';
+import { publicPackageDirs } from '../../packages/repo-standards/scripts/public-package-dirs.mjs';
 import {
   detectBlockers,
   detectFlags,

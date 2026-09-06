@@ -94,7 +94,7 @@
     "./coordination-reconcile": "./scripts/coordination-reconcile.mjs",
     "./coordination-remote": "./scripts/coordination-remote.mjs",
     "./coordination-schema": "./scripts/coordination-schema.mjs",
-    "./coverage-workspaces": "./scripts/coverage-workspaces.mjs",
+    "./public-package-dirs": "./scripts/public-package-dirs.mjs",
     "./error-message": "./scripts/error-message.mjs",
     "./gh-exec": "./scripts/gh-exec.mjs",
     "./git-dir": "./scripts/git-dir.mjs",

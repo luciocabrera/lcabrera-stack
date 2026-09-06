@@ -43,6 +43,6 @@ stdin, so a repository wiring either into a task feeds that list itself and gets
 a full run when it does not.
 
 The modules a repository's own scripts may need beside the bins are exported:
-`affected-tests`, `coverage-workspaces`, `gh-exec`, `jsonc`, `merge-queue`,
+`affected-tests`, `gh-exec`, `jsonc`, `merge-queue`, `public-package-dirs`,
 `review-gate-reconcile`, `review-gate-status`, `review-threads`,
 `route-artifacts`, and the `conformance-*` readers behind the harness gate.
