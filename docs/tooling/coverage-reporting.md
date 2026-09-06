@@ -74,7 +74,7 @@ workspace's `test:coverage`; `run: false` means its summary is already produced
 upstream. A roster naming no workspace is refused rather than reported over.
 
 That membership is **asserted, not just documented**:
-[`scripts/lib/coverage-workspaces.test.mjs`](../../scripts/lib/coverage-workspaces.test.mjs)
+[`scripts/lib/public-package-coverage.test.mjs`](../../scripts/lib/public-package-coverage.test.mjs)
 (under `test:scripts`) resolves the never-baseline packages with
 `publicPackageDirs` from
 [`packages/repo-standards/scripts/public-package-dirs.mjs`](../../packages/repo-standards/scripts/public-package-dirs.mjs)
