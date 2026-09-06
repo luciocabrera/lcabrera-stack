@@ -59,7 +59,7 @@ ADR-069's rule: the factory ships, the data it is called with does not.
 | The StyleX `@lcabrera/ui/*` source alias                | each app's `config/vite.plugins.config.ts`        | `stylexAliases`                           |
 | The `docker/local/.env` path                            | each app's `config/vite.run.config.ts`            | `envFiles`                                |
 
-Two of those are visible outside this package: `scripts/verify-lint-plugins.mjs`
+Two of those are visible outside this package: `packages/repo-standards/scripts/verify-lint-plugins.mjs`
 reads the roster from the root config, and every workspace that enforces an
 import boundary imports the repo tables. Neither is a behaviour change, and both
 are Rule 14 territory — an empty table reports exactly the clean pass that

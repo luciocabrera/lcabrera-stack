@@ -24,7 +24,7 @@ import getReleasePlan from '@changesets/get-release-plan';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { readPublishing } from '../../packages/repo-standards/scripts/config.mjs';
-import { publicPackageDirs as derivedPublicPackageDirs } from './coverage-workspaces.mjs';
+import { publicPackageDirs as derivedPublicPackageDirs } from '../../packages/repo-standards/scripts/public-package-dirs.mjs';
 import {
   buildPublishExports,
   isBuiltPublicPackage,
@@ -119,7 +119,7 @@ describe('this repository publishes what it develops against', () => {
       ].filter((target) => target !== './package.json');
 
       expect(targets.length).toBeGreaterThan(0);
-      expect(targets.filter((target) => !target.endsWith('.mjs'))).toEqual([]);
+      expect(targets.filter((target) => !/\.[mc]js$/.test(target))).toEqual([]);
     }
   });
 

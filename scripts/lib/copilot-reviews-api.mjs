@@ -10,7 +10,7 @@
  * Governed by .claude/rules/scripts.md.
  */
 import { reviewsFromPages } from './copilot-review.mjs';
-import { runGh } from './gh-exec.mjs';
+import { runGh } from '../../packages/repo-standards/scripts/gh-exec.mjs';
 
 export const fetchPullRequestReviews = (repository, number) =>
   reviewsFromPages(

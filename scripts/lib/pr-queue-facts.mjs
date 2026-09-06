@@ -26,7 +26,7 @@
  * .claude/pr-queue-policy.md.
  */
 
-import { summarizeThreads } from './pr-threads.mjs';
+import { summarizeThreads } from '../../packages/repo-standards/scripts/review-threads.mjs';
 
 const PENDING_STATES = new Set([
   'ACTION_REQUIRED',

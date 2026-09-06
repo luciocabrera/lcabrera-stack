@@ -128,7 +128,7 @@ meta module. `routes/car-sales-infinite/CarSales.types.ts` passes because the
 component sits beside it; `routes/car-sales/zzz-nope.constants.ts` fails.
 
 One convention with two homes, so keep them in step: the shared lists live in
-`scripts/lib/route-artifacts.mjs`, and its test asserts they still match the
+`packages/repo-standards/scripts/route-artifacts.mjs`, and its test asserts they still match the
 rule's own defaults — a change made to one and not the other fails the build
 rather than silently narrowing what is checked.
 

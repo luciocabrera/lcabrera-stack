@@ -64,7 +64,7 @@ Reply in the thread before resolving. `gh pr review --comment` posts a top-level
 comment, not a thread reply — use the thread's own reply endpoint, or the web UI.
 
 For the underlying GraphQL — listing threads, or the `resolveReviewThread`
-mutation — read [`scripts/pr-threads.mjs`](../../scripts/pr-threads.mjs); it is
+mutation — read [`packages/repo-standards/scripts/pr-threads.mjs`](../../packages/repo-standards/scripts/pr-threads.mjs); it is
 the same two queries, and copying them out of here is how the copies drift.
 
 ## Disagreeing with a finding
@@ -82,7 +82,7 @@ the reviewer; if it survives **two** rounds, escalate rather than looping.
 ## What reports on it
 
 `Review threads resolved` is an advisory commit status published by
-[`scripts/verify-review-threads.mjs`](../../scripts/verify-review-threads.mjs)
+[`packages/repo-standards/scripts/verify-review-threads.mjs`](../../packages/repo-standards/scripts/verify-review-threads.mjs)
 and republished for every open pull request by the reconcile sweep
 ([`review-gate-reconcile.md`](../tooling/review-gate-reconcile.md)). It exists so
 a blocked pull request shows a red check next to the others instead of waiting

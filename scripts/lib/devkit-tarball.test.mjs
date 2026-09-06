@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   binsWithoutShebang,
   binStartupFailure,
-  createShimFindings,
   declaredBins,
   failureLine,
+  gateProbeFindings,
   materialisationFailure,
   noCommandsDeclared,
   missingFromTarball,
@@ -310,39 +310,67 @@ describe('noCommandsDeclared', () => {
   });
 });
 
-describe('createShimFindings', () => {
-  const good = {
-    commitSubject: 'chore: initialise the repository with devkit',
-    isRepository: true,
-    status: '',
-    tracked: ['devkit.config.json', '.devkit-manifest.json'],
+describe('gateProbeFindings', () => {
+  const clean = {
+    output: 'No script exits mid-stream.',
+    spawned: true,
+    status: 0,
+  };
+  const planted = {
+    output: '  - planted-exit.mjs:1  process.exit(1)',
+    status: 1,
   };
 
-  it('accepts a repository that was made, filled and committed', () => {
-    expect(createShimFindings(good)).toEqual([]);
-  });
-
-  it('reports a run that left no repository, and says nothing else about it', () => {
-    expect(createShimFindings({ ...good, isRepository: false })).toEqual([
-      expect.stringContaining('left no git repository'),
+  it('reports a bin the install did not place', () => {
+    expect(
+      gateProbeFindings({
+        clean: { output: '', spawned: false, status: null },
+        name: 'repo-verify-script-exits',
+        planted,
+        plantedFile: 'planted-exit.mjs',
+      }),
+    ).toEqual([
+      '`repo-verify-script-exits` is not installed in the consumer, so no gate ran through it',
     ]);
   });
 
-  it('reports a repository with no commit', () => {
-    expect(
-      createShimFindings({ ...good, commitSubject: '' }).join('\n'),
-    ).toContain('no commit');
+  it('reports a bin that fails on a clean consumer', () => {
+    const [finding] = gateProbeFindings({
+      clean: { output: 'Error: boom', spawned: true, status: 1 },
+      name: 'repo-verify-script-exits',
+      planted,
+      plantedFile: 'planted-exit.mjs',
+    });
+    expect(finding).toContain('failed on a clean consumer');
+    expect(finding).toContain('Error: boom');
   });
 
-  it('reports a run that committed no config, which is a profile that placed nothing', () => {
-    expect(createShimFindings({ ...good, tracked: [] }).join('\n')).toContain(
-      'placed nothing',
-    );
+  it('reports a bin that passes the planted violation, or fails without naming it', () => {
+    const passed = gateProbeFindings({
+      clean,
+      name: 'repo-verify-script-exits',
+      planted: { output: '', status: 0 },
+      plantedFile: 'planted-exit.mjs',
+    });
+    const silent = gateProbeFindings({
+      clean,
+      name: 'repo-verify-script-exits',
+      planted: { output: 'something else broke', status: 1 },
+      plantedFile: 'planted-exit.mjs',
+    });
+    expect(passed).toHaveLength(1);
+    expect(passed[0]).toContain('proved nothing');
+    expect(silent).toHaveLength(1);
   });
 
-  it('reports anything left uncommitted, naming the first path', () => {
+  it('accepts a bin that passes clean and fails naming the planted file', () => {
     expect(
-      createShimFindings({ ...good, status: '?? stray.txt' }).join('\n'),
-    ).toContain('stray.txt');
+      gateProbeFindings({
+        clean,
+        name: 'repo-verify-script-exits',
+        planted,
+        plantedFile: 'planted-exit.mjs',
+      }),
+    ).toEqual([]);
   });
 });

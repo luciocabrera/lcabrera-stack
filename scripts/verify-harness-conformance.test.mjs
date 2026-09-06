@@ -17,10 +17,12 @@ import {
   SUBAGENT,
   conformanceMessages,
   withConformanceRepo,
-} from './lib/conformance-fixtures.mjs';
+} from '../packages/repo-standards/scripts/conformance-fixtures.mjs';
 
 const require = createRequire(import.meta.url);
-const { checkConformance } = require('./lib/conformance-check.cjs');
+const {
+  checkConformance,
+} = require('../packages/repo-standards/scripts/conformance-check.cjs');
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -87,7 +89,12 @@ describe('harness conformance — the gate itself', () => {
   const runCli = (cwd) =>
     execFileSync(
       process.execPath,
-      [join(REPO_ROOT, 'scripts/verify-harness-conformance.cjs')],
+      [
+        join(
+          REPO_ROOT,
+          'packages/repo-standards/scripts/verify-harness-conformance.cjs',
+        ),
+      ],
       { cwd, encoding: 'utf8', stdio: 'pipe' },
     );
 

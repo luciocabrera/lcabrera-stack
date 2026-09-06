@@ -26,7 +26,7 @@ this, and `packages/ui`'s `check:public-api` enforces it.
 - **Workspace `vitest` deps** — the `test` tasks ultimately invoke Vitest's own
   entry point from `node_modules` by path, so the dependency is load-bearing
   even where no import references it.
-- **`react-doctor`** — `scripts/verify-react-doctor.mjs` spawns its binary by
+- **`react-doctor`** — `packages/repo-standards/scripts/verify-react-doctor.mjs` spawns its binary by
   explicit path, invisible to an import-graph scanner, so fallow reports it
   unused on every run.
 

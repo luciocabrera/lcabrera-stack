@@ -70,11 +70,12 @@ const currentBranch = (root) => {
   }
 };
 
-const writeConfig = ({ profile, root, upgrade }) => {
+const writeConfig = ({ profile, root, upgrade, userAgent }) => {
   const manifest = readJsonIfPresent(join(root, MANIFEST));
   const runner = inferRunner({
     dependencies: declaredDependencies(manifest),
     files: readdirSync(root),
+    userAgent,
   });
   const defaultBranch = currentBranch(root);
   const existing = readJsonIfPresent(join(root, CONFIG_FILE_NAME));
@@ -127,8 +128,8 @@ const materialise = ({ profile, root }) => {
   return entries;
 };
 
-export const applyInit = ({ profile, root, upgrade }) => {
-  const runner = writeConfig({ profile, root, upgrade });
+export const applyInit = ({ profile, root, upgrade, userAgent }) => {
+  const runner = writeConfig({ profile, root, upgrade, userAgent });
   const { added, skipped, warning } = writeTasks({ profile, root });
   const entries = materialise({ profile, root });
   const { written } = countsFor(entries);

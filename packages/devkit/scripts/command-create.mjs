@@ -17,6 +17,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
+import process from 'node:process';
 
 import { applyInit } from './command-init.mjs';
 import { DEFAULT_CONFIG, withProfile } from './config.mjs';
@@ -95,7 +96,12 @@ const scaffold = ({ absolute, profile, target }) => {
     `${JSON.stringify(initialManifest({ name: packageNameFor(basename(absolute)) }), undefined, 2)}\n`,
   );
 
-  const code = applyInit({ profile, root: absolute, upgrade: false });
+  const code = applyInit({
+    profile,
+    root: absolute,
+    upgrade: false,
+    userAgent: process.env.npm_config_user_agent,
+  });
   if (code !== 0) {
     console.error(`\n${unfinishedNotice({ target })}`);
     return code;

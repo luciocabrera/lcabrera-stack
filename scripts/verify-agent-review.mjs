@@ -35,7 +35,7 @@ import {
   parseRepository,
 } from '../packages/repo-standards/scripts/cli-input.mjs';
 import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
-import { runGh } from './lib/gh-exec.mjs';
+import { runGh } from '../packages/repo-standards/scripts/gh-exec.mjs';
 import {
   exitCodeFor,
   oneLine,
@@ -46,7 +46,7 @@ import { validatePullRequestVerdict } from './lib/agent-review-validate.mjs';
 import {
   publishedStatus,
   shouldPublishStatus,
-} from './lib/review-gate-reconcile.mjs';
+} from '../packages/repo-standards/scripts/review-gate-reconcile.mjs';
 
 const STATUS_CONTEXT = 'Agent review verdict';
 

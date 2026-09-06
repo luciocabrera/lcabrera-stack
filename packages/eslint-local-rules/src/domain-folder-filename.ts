@@ -30,10 +30,10 @@
 // directory-reading version, and its false-positive set is empty.
 //
 // What that exemption leaves unchecked is covered by the OTHER home of this
-// convention: `scripts/verify-route-artifacts.mjs` (`route-names:verify`), a
+// convention: `packages/repo-standards/scripts/verify-route-artifacts.mjs` (`route-names:verify`), a
 // repo-level gate that MAY read a directory, and so can require a route folder's
 // file to name an artifact the folder actually holds. One convention in two
-// homes by necessity — `scripts/lib/route-artifacts.mjs` copies the three option
+// homes by necessity — `packages/repo-standards/scripts/route-artifacts.mjs` copies the three option
 // defaults below, and its test asserts they still match this file, so changing
 // one without the other fails instead of quietly narrowing what is checked.
 

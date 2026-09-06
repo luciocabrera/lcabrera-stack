@@ -33,7 +33,7 @@ export default defineConfig({
         cache: false,
         command: 'node node_modules/vitest/vitest.mjs run',
       },
-      // Feeds scripts/merge-coverage.mjs, which feeds `fallow audit --coverage`.
+      // Feeds packages/repo-standards/scripts/merge-coverage.mjs, which feeds `fallow audit --coverage`.
       // Matters more here than elsewhere: packages/ui is heading for public
       // release, so its complexity findings should gate on measured coverage
       // rather than fallow's colocated-test-file guess.

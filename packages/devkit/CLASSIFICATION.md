@@ -423,42 +423,45 @@ define stops the run at that name, and the gates behind it never execute.
 
 ### Gates and tools that ship
 
-Every one of these is a script under the root `scripts/` directory, which is why
-every verdict is **blocked**: the script would ship, and the package that would
-carry it does not exist yet. Where a reason names a register or a roster, that is
-the parameterising the row inherits the day it moves, not a second verdict now.
+Each **portable** row is a bin of `@lcabrera/repo-standards`, named in the Bin
+column, and every repository fact the bin reads — a roster file, a baseline, a
+register directory, a report path — is a key in `devkit.config.json` (#1072).
+The three shell scripts stay under the root `scripts/` directory and keep the
+verdict **blocked**: porting a shell script to node is a rewrite, not a move,
+and it has its own issue.
 
-| Task                    | Profile    | Update  | Verdict     | Dependency | Reason                                                                                                                                                              |
-| ----------------------- | ---------- | ------- | ----------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `commands:verify`       | `repo`     | package | **blocked** | —          | Keeps a command document honest against what the runner reports. `root/COMMANDS.md` already ships, and an unchecked command document is the rot it was written for. |
-| `coordination:claim`    | `repo`     | package | **blocked** | —          | Scaffolds the task, branches, commits and opens the draft pull request. The safe path stays the easy one only if it is one command.                                 |
-| `deps:audit`            | `repo`     | package | **blocked** | —          | Fails on an advisory at moderate or above, reading the allowance register. The register is a seed; the gate is not.                                                 |
-| `departed:verify`       | `repo`     | package | **blocked** | —          | Fails when anything names a departed product or workspace. The roster in `scripts/departed-names.json` is the consumer's; the gate is not.                          |
-| `renames:verify`        | `repo`     | package | **blocked** | —          | Fails a rename that left a document naming the old file.                                                                                                            |
-| `registers:verify`      | `repo`     | package | **blocked** | —          | Gates the requirement and planning registers the `product-requirement` skill drives.                                                                                |
-| `product:distance`      | `repo`     | package | **blocked** | —          | Reads the same register and prints how far the product is from its intent. Ships with the skill that fills it.                                                      |
-| `scripts:exits:verify`  | `repo`     | package | **blocked** | —          | No script calls `process.exit()` (ADR-090). A rule from `scripts.md`, which ships.                                                                                  |
-| `lint:eslint:verify`    | `repo`     | package | **blocked** | —          | Proves the eslint pass ran its rules rather than dying on one — a pass that checks nothing exits the same way as a pass that found something.                       |
-| `viteplus:verify`       | `repo`     | package | **blocked** | —          | Keeps the runner's managed block from refilling the agent document with guidance that contradicts it.                                                               |
-| `worktree:env`          | `repo`     | package | **blocked** | —          | Links the gitignored env files into a linked worktree, so a fresh one does not run with the env silently unloaded.                                                  |
-| `pr:threads`            | `repo`     | package | **blocked** | —          | Lists and resolves the review threads holding a pull request. The code host's CLI has no command for it.                                                            |
-| `review-threads:verify` | `repo`     | package | **blocked** | —          | Publishes the open-thread count as a commit status, so a silent block becomes a red check.                                                                          |
-| `housekeeping:prune`    | `repo`     | package | **blocked** | —          | Deletes merged branches and clean worktrees, and only reports anything that might be real work.                                                                     |
-| `usage:report`          | `repo`     | package | **blocked** | —          | Reports how the harness is used. The harness is placed at `agent`, but the report reads git and the code host.                                                      |
-| `lint:report`           | `repo`     | package | **blocked** | —          | The report producer `linter-checker` is blocked on. Which engines run comes from the command map.                                                                   |
-| `fallow:report`         | `repo`     | package | **blocked** | —          | The fixed invocation `fallow-code-checker` and `fallow-scan` are blocked on. Shipping it and `lint:report` is what discharges those verdicts.                       |
-| `test:changed`          | `monorepo` | package | **blocked** | —          | Resolves the workspaces a diff touched plus their dependents. Nothing to resolve with one package.                                                                  |
-| `typecheck:changed`     | `monorepo` | package | **blocked** | —          | The same affected-set runner for a uniform per-workspace task.                                                                                                      |
-| `coverage:merge`        | `monorepo` | package | **blocked** | —          | Merges the per-workspace Istanbul reports into the one file the audit consumes.                                                                                     |
-| `coverage:report`       | `monorepo` | package | **blocked** | —          | Builds the per-workspace summary the coverage comment renders.                                                                                                      |
-| `docs:for-package`      | `monorepo` | package | **blocked** | —          | Lists the documents that declare a workspace, by reading the registers rather than grepping.                                                                        |
-| `inventory:verify`      | `monorepo` | package | **blocked** | —          | Fails a util export named in no `INVENTORY.md`. One package has no inventory discipline to gate.                                                                    |
-| `lint:plugins:verify`   | `monorepo` | package | **blocked** | —          | Proves every plugin family loaded and every workspace is classified exactly once — the second half needs workspaces.                                                |
-| `package-refs:verify`   | `monorepo` | package | **blocked** | —          | Fails a package whose shipped text names an app. Needs both to exist.                                                                                               |
-| `deps:refresh`          | `monorepo` | package | **blocked** | —          | Moves the catalog, the pinned package manager and the node version in one pass. The catalog is a workspace artifact.                                                |
-| `react-doctor:verify`   | `full`     | package | **blocked** | —          | Gates React Doctor's error findings, and there is no React source below `full`.                                                                                     |
-| `react-doctor:report`   | `full`     | package | **blocked** | —          | The same run, reporting rather than gating.                                                                                                                         |
-| `route-names:verify`    | `full`     | package | **blocked** | —          | Names a route folder's artifacts against what the folder holds. Needs the router and its routes.                                                                    |
+| Task                    | Profile    | Update  | Verdict      | Dependency | Bin                            | Reason                                                                                                                                                                                           |
+| ----------------------- | ---------- | ------- | ------------ | ---------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `commands:verify`       | `repo`     | package | **portable** | —          | `repo-verify-commands`         | Keeps a command document honest against what the runner reports. `root/COMMANDS.md` already ships, and an unchecked command document is the rot it was written for.                              |
+| `coordination:claim`    | `repo`     | package | **blocked**  | —          | —                              | Scaffolds the task, branches, commits and opens the draft pull request. The safe path stays the easy one only if it is one command.                                                              |
+| `deps:audit`            | `repo`     | package | **portable** | —          | `repo-verify-deps-audit`       | Fails on an advisory at moderate or above, reading the allowance register. The register is a seed; the gate is not.                                                                              |
+| `departed:verify`       | `repo`     | package | **portable** | —          | `repo-verify-departed-names`   | Fails when anything names a departed product or workspace. The roster in `scripts/departed-names.json` is the consumer's; the gate is not.                                                       |
+| `renames:verify`        | `repo`     | package | **portable** | —          | `repo-verify-renamed-mentions` | Fails a rename that left a document naming the old file.                                                                                                                                         |
+| `registers:verify`      | `repo`     | package | **portable** | —          | `repo-verify-doc-registers`    | Gates the requirement and planning registers the `product-requirement` skill drives.                                                                                                             |
+| `product:distance`      | `repo`     | package | **portable** | —          | `repo-product-distance`        | Reads the same register and prints how far the product is from its intent. Ships with the skill that fills it.                                                                                   |
+| `scripts:exits:verify`  | `repo`     | package | **portable** | —          | `repo-verify-script-exits`     | No script calls `process.exit()` (ADR-090). A rule from `scripts.md`, which ships.                                                                                                               |
+| `lint:eslint:verify`    | `repo`     | package | **portable** | —          | `repo-verify-eslint-pass`      | Proves the eslint pass ran its rules rather than dying on one — a pass that checks nothing exits the same way as a pass that found something.                                                    |
+| `viteplus:verify`       | `repo`     | package | **portable** | —          | `repo-verify-viteplus-block`   | Keeps the runner's managed block from refilling the agent document with guidance that contradicts it.                                                                                            |
+| `worktree:env`          | `repo`     | package | **portable** | —          | `repo-worktree-env`            | Links the gitignored env files into a linked worktree, so a fresh one does not run with the env silently unloaded.                                                                               |
+| `harness:verify`        | `repo`     | package | **portable** | —          | `repo-verify-harness`          | Checks every materialised skill, path rule and subagent: the frontmatter its loader reads, every path it names resolving, a description that says when it applies. The roster is read from disk. |
+| `pr:threads`            | `repo`     | package | **portable** | —          | `repo-pr-threads`              | Lists and resolves the review threads holding a pull request. The code host's CLI has no command for it.                                                                                         |
+| `review-threads:verify` | `repo`     | package | **portable** | —          | `repo-verify-review-threads`   | Publishes the open-thread count as a commit status, so a silent block becomes a red check.                                                                                                       |
+| `housekeeping:prune`    | `repo`     | package | **portable** | —          | `repo-housekeeping-prune`      | Deletes merged branches and clean worktrees, and only reports anything that might be real work.                                                                                                  |
+| `usage:report`          | `repo`     | package | **portable** | —          | `repo-usage-report`            | Reports how the harness is used. The harness is placed at `agent`, but the report reads git and the code host.                                                                                   |
+| `lint:report`           | `repo`     | package | **portable** | —          | `repo-lint-report`             | The report producer `linter-checker` is blocked on. Which engines run comes from the command map.                                                                                                |
+| `fallow:report`         | `repo`     | package | **blocked**  | —          | —                              | The fixed invocation `fallow-code-checker` and `fallow-scan` are blocked on. Shipping it and `lint:report` is what discharges those verdicts.                                                    |
+| `test:changed`          | `monorepo` | package | **portable** | —          | `repo-test-changed`            | Resolves the workspaces a diff touched plus their dependents. Nothing to resolve with one package.                                                                                               |
+| `typecheck:changed`     | `monorepo` | package | **portable** | —          | `repo-run-changed`             | The same affected-set runner for a uniform per-workspace task.                                                                                                                                   |
+| `coverage:merge`        | `monorepo` | package | **portable** | —          | `repo-merge-coverage`          | Merges the per-workspace Istanbul reports into the one file the audit consumes.                                                                                                                  |
+| `coverage:report`       | `monorepo` | package | **portable** | —          | `repo-coverage-report`         | Builds the per-workspace summary the coverage comment renders.                                                                                                                                   |
+| `docs:for-package`      | `monorepo` | package | **portable** | —          | `repo-docs-for-package`        | Lists the documents that declare a workspace, by reading the registers rather than grepping.                                                                                                     |
+| `inventory:verify`      | `monorepo` | package | **portable** | —          | `repo-verify-inventory`        | Fails a util export named in no `INVENTORY.md`. One package has no inventory discipline to gate.                                                                                                 |
+| `lint:plugins:verify`   | `monorepo` | package | **portable** | —          | `repo-verify-lint-plugins`     | Proves every plugin family loaded and every workspace is classified exactly once — the second half needs workspaces.                                                                             |
+| `package-refs:verify`   | `monorepo` | package | **portable** | —          | `repo-verify-package-refs`     | Fails a package whose shipped text names an app. Needs both to exist.                                                                                                                            |
+| `deps:refresh`          | `monorepo` | package | **blocked**  | —          | —                              | Moves the catalog, the pinned package manager and the node version in one pass. The catalog is a workspace artifact.                                                                             |
+| `react-doctor:verify`   | `full`     | package | **portable** | —          | `repo-verify-react-doctor`     | Gates React Doctor's error findings, and there is no React source below `full`.                                                                                                                  |
+| `react-doctor:report`   | `full`     | package | **portable** | —          | `repo-verify-react-doctor`     | The same run, reporting rather than gating.                                                                                                                                                      |
+| `route-names:verify`    | `full`     | package | **portable** | —          | `repo-verify-route-artifacts`  | Names a route folder's artifacts against what the folder holds. Needs the router and its routes.                                                                                                 |
 
 ### Manifest lines the consumer owns
 
@@ -629,11 +632,11 @@ the generic half is what a consumer needs, and it is currently interleaved with
 ADR citations and gate wiring that are ours alone.
 
 The two axes add one ordering fact the earlier pass did not have. Every gate in
-the root-script tables above is `package`, and the ones still living in the root
-`scripts/` directory are **blocked** for that reason alone, so every `repo`-rung
-workflow seed that names one of them is waiting on a runtime only half in place.
-Moving those scripts is what discharges the blocked verdicts, the workflow seeds,
-the hook seeds and the blocked analyser skills at once.
+the root-script tables above is `package`, and since #1072 each one is a bin of
+`@lcabrera/repo-standards`, so a `repo`-rung workflow seed that names one names
+something an install places. What is still waiting is the manifest line that
+reaches the bin (#1077) and the three shell scripts that keep a **blocked**
+verdict above.
 `copilot-setup-steps.yml` is the exception and needs none of it: it names no bin,
 only the bootstrap.
 

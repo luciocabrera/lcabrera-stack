@@ -11,13 +11,19 @@
  */
 'use strict';
 
-const { SUPPORT_DIRECTORIES } = require('./conformance-artifacts.cjs');
-const { checkConformance } = require('./conformance-check.cjs');
-const { parseFrontmatter } = require('./conformance-frontmatter.cjs');
+const {
+  SUPPORT_DIRECTORIES,
+} = require('../../packages/repo-standards/scripts/conformance-artifacts.cjs');
+const {
+  checkConformance,
+} = require('../../packages/repo-standards/scripts/conformance-check.cjs');
+const {
+  parseFrontmatter,
+} = require('../../packages/repo-standards/scripts/conformance-frontmatter.cjs');
 const {
   extractRelativeLinks,
   extractScriptPaths,
-} = require('./conformance-references.cjs');
+} = require('../../packages/repo-standards/scripts/conformance-references.cjs');
 
 /**
  * @typedef {Object} ValidateSkillsResult

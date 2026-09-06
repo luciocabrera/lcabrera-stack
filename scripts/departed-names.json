@@ -1,5 +1,5 @@
 {
-  "$comment": "Names of products and workspaces that left this repository. Read by scripts/verify-departed-names.mjs; see COMMANDS.md and docs/README.md. Add a name here the same commit you remove its last mention — the gate is what stops it coming back.",
+  "$comment": "Names of products and workspaces that left this repository. Read by packages/repo-standards/scripts/verify-departed-names.mjs; see COMMANDS.md and docs/README.md. Add a name here the same commit you remove its last mention — the gate is what stops it coming back.",
   "names": [
     {
       "name": "CQMS",

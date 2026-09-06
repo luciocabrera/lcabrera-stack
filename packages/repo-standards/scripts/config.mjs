@@ -26,6 +26,7 @@ import {
   repoRelative,
   verbatimList,
 } from './config-values.mjs';
+import { DEFAULT_TREE_GATES, resolveTreeGates } from './config-tree-gates.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 // Re-exported rather than moved out of reach: `CONFIG_FILE_NAME` is part of this
@@ -60,6 +61,8 @@ export const DEFAULT_REGISTERS = {
   adrTemplateHome: 'docs/decisions',
   coordinationBoardDoc: 'docs/coordination/BOARD.md',
   coordinationTasksDir: 'docs/coordination/tasks',
+  planningDir: 'docs/agents/planning',
+  requirementsDir: 'docs/product/requirements',
 };
 
 export const DEFAULT_CONVENTIONS = {
@@ -159,6 +162,16 @@ export const resolveRegisters = (raw) => {
       DEFAULT_REGISTERS.coordinationTasksDir,
       'registers.coordinationTasksDir',
     ),
+    planningDir: repoRelative(
+      block.planningDir,
+      DEFAULT_REGISTERS.planningDir,
+      'registers.planningDir',
+    ),
+    requirementsDir: repoRelative(
+      block.requirementsDir,
+      DEFAULT_REGISTERS.requirementsDir,
+      'registers.requirementsDir',
+    ),
   };
 };
 
@@ -193,6 +206,7 @@ export const DEFAULT_GATES = {
   shippedDocs: {
     repoOnlyDirs: ['apps', 'docs', 'packages', 'scripts'],
   },
+  ...DEFAULT_TREE_GATES,
 };
 
 export const resolveGates = (raw) => {
@@ -225,6 +239,7 @@ export const resolveGates = (raw) => {
       skipDirs: verbatimList(
         scriptSize.skipDirs,
         DEFAULT_GATES.scriptSize.skipDirs,
+        'gates.scriptSize.skipDirs[]',
       ),
     },
     strayConfigs: {
@@ -235,14 +250,17 @@ export const resolveGates = (raw) => {
       skipDirs: verbatimList(
         strayConfigs.skipDirs,
         DEFAULT_GATES.strayConfigs.skipDirs,
+        'gates.strayConfigs.skipDirs[]',
       ),
       unreadNames: verbatimList(
         strayConfigs.unreadNames,
         DEFAULT_GATES.strayConfigs.unreadNames,
+        'gates.strayConfigs.unreadNames[]',
       ),
       unreadPrefixes: verbatimList(
         strayConfigs.unreadPrefixes,
         DEFAULT_GATES.strayConfigs.unreadPrefixes,
+        'gates.strayConfigs.unreadPrefixes[]',
       ),
     },
     docsPaths: {
@@ -259,10 +277,12 @@ export const resolveGates = (raw) => {
       expectedAbsentPrefixes: verbatimList(
         docsPaths.expectedAbsentPrefixes,
         DEFAULT_GATES.docsPaths.expectedAbsentPrefixes,
+        'gates.docsPaths.expectedAbsentPrefixes[]',
       ),
       ignoredDocs: verbatimList(
         docsPaths.ignoredDocs,
         DEFAULT_GATES.docsPaths.ignoredDocs,
+        'gates.docsPaths.ignoredDocs[]',
       ),
       onDemandReportDirs: containedList(
         docsPaths.onDemandReportDirs,
@@ -272,14 +292,17 @@ export const resolveGates = (raw) => {
       repoRoots: verbatimList(
         docsPaths.repoRoots,
         DEFAULT_GATES.docsPaths.repoRoots,
+        'gates.docsPaths.repoRoots[]',
       ),
     },
     shippedDocs: {
       repoOnlyDirs: verbatimList(
         shippedDocs.repoOnlyDirs,
         DEFAULT_GATES.shippedDocs.repoOnlyDirs,
+        'gates.shippedDocs.repoOnlyDirs[]',
       ),
     },
+    ...resolveTreeGates(block),
   };
 };
 

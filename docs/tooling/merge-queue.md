@@ -84,7 +84,7 @@ per-workflow copy:
   `git rev-list --no-merges A..A` walks no commit, so the commit-message gate
   exits 0 having validated none, and `git diff A A` is empty, which the Sonar
   gate reads as "no analysable file changed" and skips. The decisions are
-  `scripts/lib/merge-queue.mjs` and are unit-tested.
+  `packages/repo-standards/scripts/merge-queue.mjs` and are unit-tested.
 
 Two gates need more than a base.
 

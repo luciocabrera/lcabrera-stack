@@ -151,8 +151,8 @@ project-specific belongs in that project's own `package.json`.
 | `vp run test:changed`                 | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below |
 | `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                 |
 | `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                          |
-| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only)                                      |
-| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router)            |
+| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only) — see below                          |
+| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment — see below                           |
 
 `test:all` vs `test:ci`: neither runs a suite that needs a database, so the two
 differ only in ordering — `test:ci` runs `showcase` last so the PR's coverage
@@ -182,14 +182,14 @@ that transitively **depends on** them — so a `packages/ui` edit still exercise
 `apps/showcase`. It prints a per-workspace summary of what runs and what is
 skipped. Only the few files that change how every workspace resolves its tests —
 `pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root `vite.config.ts`, and the
-shared config packages `GLOBAL_PACKAGES` names in
-[`scripts/lib/affected-tests.mjs`](scripts/lib/affected-tests.mjs) — force the
+shared config packages `gates.affectedTests.globalPackages` names in
+[`devkit.config.json`](devkit.config.json) — force the
 full suite (a real dependency change always bumps the lockfile). A change to a
 code file under root `scripts/` (`.mjs`, `.cjs` or `.js`) adds the
 `test:scripts` group, which no workspace selection would ever reach; every other
 out-of-workspace change (root package.json scripts, lint/tsconfig configs, docs)
 affects no suite and runs nothing. Affected workspaces run plain `test`; with
-`--ci` (`node scripts/test-changed.mjs --ci`) `showcase` runs its coverage
+`--ci` (`repo-test-changed --ci`) `showcase` runs its coverage
 `test:ci` last, mirroring the root `test:ci` ordering. `--dry-run` prints the
 `vp run` commands without executing them. CI's Unit Tests job (and its coverage
 report) scope to the diff on pull requests; pushes to `main` still run the full
@@ -200,15 +200,30 @@ slowest per-workspace step — real `tsc` across all 13 workspaces. It runs
 `typecheck` only for the changed workspaces plus their dependents (a type error a
 diff introduces surfaces where the type is used, which the dependents walk covers),
 falling back to the full run on the same shared/root triggers and on pushes to
-`main`. The generic runner is `scripts/run-changed.mjs <task>`; `vp check`'s
+`main`. The generic runner is `repo-run-changed <task>`; `vp check`'s
 repo-wide tsgolint pass still type-checks every PR as a net. CI's Quality Gate uses
 it on pull requests and posts the per-workspace selection to the job summary.
+
+The **coverage pair** has the same two modes, and which one you get is the
+argument, not the task. `vp run coverage:merge` and `vp run coverage:report` run
+every workspace on their roster; adding `-- --changed` scopes each to the
+workspaces the diff touched, which is what CI does on a pull request. Both
+rosters live in `devkit.config.json` under `gates.coverage` — no list is copied
+here, and
+[`docs/tooling/coverage-reporting.md`](docs/tooling/coverage-reporting.md) is
+where the two lanes are told apart. `--changed` takes the file list on **stdin**,
+so both root scripts route through `scripts/changed-files.sh --if-arg --changed`,
+which feeds the diff only when that flag is present and otherwise execs the bin
+untouched — a full run then needs no merge base, and a changed run cannot
+silently read an empty list. That last part is not theoretical: an unfed
+`--changed` writes an empty coverage file and exits 0, and the fallow audit
+falls back to the estimate that reports simple code as a CRAP breach.
 
 ### Dependencies
 
 | Command               | Runs                                                                                              |
 | --------------------- | ------------------------------------------------------------------------------------------------- |
-| `vp run deps:audit`   | the advisory gate — `vp pm audit --json` piped into `scripts/verify-deps-audit.mjs`               |
+| `vp run deps:audit`   | the advisory gate — `vp pm audit --json` piped into `repo-verify-deps-audit`                      |
 | `vp run deps:refresh` | one-command dependency refresh — pnpm clean → taze (catalog) → vp install → open a build(deps) PR |
 
 `deps:audit` fails on a known vulnerability at `moderate` or above that has no
@@ -217,7 +232,7 @@ allowance that has expired or that matches nothing in the tree. It **needs the
 registry**, and refuses a report that walked no dependencies — an unreachable
 registry produces the same empty advisory list as a healthy tree, so the gate
 fails rather than reporting clean. Raise the floor for one run with
-`vp pm audit --json | node scripts/verify-deps-audit.mjs --minimum high`.
+`vp pm audit --json | repo-verify-deps-audit --minimum high`.
 It runs in CI's Quality Gate and daily in `deps-audit.yml`, but deliberately not
 in the `pre-push` hook, which must work offline. What to do when it fires is
 [`docs/agents/dependency-advisories.md`](docs/agents/dependency-advisories.md).
@@ -948,11 +963,11 @@ Notes on the non-obvious ones:
 
 [`.github/workflows/check-safe.yml`](.github/workflows/check-safe.yml) — three jobs:
 
-| Job              | Steps                                                                                                           |
-| ---------------- | --------------------------------------------------------------------------------------------------------------- |
-| **Quality Gate** | `typegen:all` → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check` |
-| **Fallow Audit** | `typegen:all` → `coverage:merge` → `fallow:audit --base $DIFF_BASE --coverage …` (anywhere with a base)         |
-| **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR        |
+| Job              | Steps                                                                                                                |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Quality Gate** | `typegen:all` → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check`      |
+| **Fallow Audit** | `typegen:all` → `coverage:merge -- --changed` → `fallow:audit --base $DIFF_BASE --coverage …` (anywhere with a base) |
+| **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR             |
 
 Each pass is a **separate step on purpose** so a failure names itself instead of
 hiding behind a neighbour. `vp check` does not run the eslint pass, it does not run

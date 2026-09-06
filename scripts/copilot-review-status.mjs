@@ -58,11 +58,11 @@ import {
 } from './lib/copilot-suppressed-report.mjs';
 import { collectSuppressedComments } from './lib/copilot-suppressed.mjs';
 import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
-import { runGh } from './lib/gh-exec.mjs';
+import { runGh } from '../packages/repo-standards/scripts/gh-exec.mjs';
 import {
   publishGateStatus,
   resolveGateTarget,
-} from './lib/review-gate-status.mjs';
+} from '../packages/repo-standards/scripts/review-gate-status.mjs';
 
 const USAGE =
   'usage: node scripts/copilot-review-status.mjs --pr <number> ' +

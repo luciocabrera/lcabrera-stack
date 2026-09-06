@@ -25,7 +25,7 @@ import {
   validatePrBody,
   validatePrTitle,
 } from '../../packages/repo-standards/scripts/commit-convention.mjs';
-import { runGh } from './gh-exec.mjs';
+import { runGh } from '../../packages/repo-standards/scripts/gh-exec.mjs';
 
 const QUEUE_QUERY = `
 query($owner:String!, $repo:String!, $limit:Int!) {

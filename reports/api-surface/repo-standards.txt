@@ -28,6 +28,17 @@ resolveHome [const] (homes: any, tier: any) => any
 scaffoldSummary [const] ({ number, path, title }: { number: any; path: any; title: any; }) => string
 slugify [const] (title: any) => any
 
+## ./affected-tests
+buildDependents [const] (graph: any) => Map<any, any>
+partitionTasks [const] (affectedPackages: any, { ci, coverageTaskPackage }?: { ci?: boolean | undefined; }) => { task: string; packages: any[]; }[]
+readWorkspaceGraph [const] (repoRoot: any) => { name: string; kind: string; dir: string; pkgName: any; deps: Set<string>; }[]
+renderSelectionMarkdown [const] (mode: any, dispositions: any, { title, scripts }?: { title?: string | undefined; scripts?: boolean | undefined; }) => string
+resolveAffected [const] ({ files, globalPackages, graph, lintOnlyPatterns, }: { files: any; globalPackages: any; graph: any; lintOnlyPatterns?: never[] | undefined; }) => { mode: string; packages: any; changed: any; scripts: any; }
+resolveTestGroups [const] ({ files, graph, ci, coverageTaskPackage, globalPackages, lintOnlyPatterns, }: { files: any; graph: any; ci?: boolean | undefined; coverageTaskPackage: any; globalPackages: any; lintOnlyPatterns: any; }) => { mode: string; packages: any; changed: any; scripts: any; groups: { task: string; packages: any[]; }[]; }
+SCRIPTS_TEST_TASK [const] "test:scripts"
+withDependents [const] (seeds: any, dependents: any) => Set<any>
+workspaceDispositions [const] ({ graph, affected, changed, groups }: { graph: any; affected: any; changed: any; groups: any; }) => any
+
 ## ./cli-input
 flagValue [const] (name: any, argv?: string[]) => string | undefined
 parsePullNumber [const] (raw: any) => number
@@ -50,18 +61,38 @@ validatePrTitle [const] (title: any, { workspaces }: { workspaces: any; }) => { 
 CONFIG_FILE_NAME [const] "devkit.config.json"
 DEFAULT_ADR_COMMANDS [const] { list: string; new: string; write: string; }
 DEFAULT_CONVENTIONS [const] { defaultBranch: string; sharedBranchesDir: string; }
-DEFAULT_GATES [const] { scriptSize: { baselineFile: string; ceiling: number; guideDoc: string; skipDirs: never[]; }; strayConfigs: { configuredIn: string; skipDirs: never[]; unreadNames: never[]; unreadPrefixes: never[]; }; docsPaths: { baselineFile: string; expectedAbsent: never[]; expectedAbsentPrefixes: never[]; ignoredDocs: never[]; onDemandReportDirs: never[]; repoRoots: never[]; }; shippedDocs: { repoOnlyDirs: string[]; }; }
+DEFAULT_GATES [const] { affectedTests: { coverageTaskPackage: string; globalPackages: never[]; lintOnlyPatterns: never[]; }; commandsDoc: { file: string; }; coverage: { mergeWorkspaces: never[]; mergedFile: string; reportWorkspaces: never[]; summaryFile: string; }; departedNames: { rosterFile: string; }; depsAudit: { allowanceFile: string; }; eslintPass: { probeWorkspaces: never[]; }; inventory: { baselineFile: string; trees: never[]; }; lintReport: { reportsDir: string; }; reactDoctor: { reportFile: string; }; usageReport: { outDir: string; }; vitePlusBlock: { agentDoc: string; }; scriptSize: { baselineFile: string; ceiling: number; guideDoc: string; skipDirs: never[]; }; strayConfigs: { configuredIn: string; skipDirs: never[]; unreadNames: never[]; unreadPrefixes: never[]; }; docsPaths: { baselineFile: string; expectedAbsent: never[]; expectedAbsentPrefixes: never[]; ignoredDocs: never[]; onDemandReportDirs: never[]; repoRoots: never[]; }; shippedDocs: { repoOnlyDirs: string[]; }; }
 DEFAULT_PUBLISHING [const] { apiSurfaceDir: string; packagesDir: string; publicPackageDirs: never[]; releaseWorkflow: string; workspaceDirs: string[]; }
-DEFAULT_REGISTERS [const] { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
+DEFAULT_REGISTERS [const] { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; planningDir: string; requirementsDir: string; }
 readConventions [const] (root?: any) => { defaultBranch: any; sharedBranchesDir: string; }
 readCoordinationPaths [const] (root?: any) => { boardDoc: string; boardRel: string; branchesDir: string; branchesRel: string; tasksDir: string; tasksRel: string; }
-readGates [const] (root?: any) => { scriptSize: { baselineFile: string; ceiling: any; guideDoc: any; skipDirs: any; }; strayConfigs: { configuredIn: any; skipDirs: any; unreadNames: any; unreadPrefixes: any; }; docsPaths: { baselineFile: string; expectedAbsent: any; expectedAbsentPrefixes: any; ignoredDocs: any; onDemandReportDirs: any; repoRoots: any; }; shippedDocs: { repoOnlyDirs: any; }; }
+readGates [const] (root?: any) => { affectedTests: { coverageTaskPackage: any; globalPackages: any; lintOnlyPatterns: any; }; commandsDoc: { file: string; }; coverage: { mergeWorkspaces: any; mergedFile: string; reportWorkspaces: any; summaryFile: string; }; departedNames: { rosterFile: string; }; depsAudit: { allowanceFile: string; }; eslintPass: { probeWorkspaces: any; }; inventory: { baselineFile: string; trees: any; }; lintReport: { reportsDir: string; }; reactDoctor: { reportFile: string; }; usageReport: { outDir: string; }; vitePlusBlock: { agentDoc: string; }; scriptSize: { baselineFile: string; ceiling: any; guideDoc: any; skipDirs: any; }; strayConfigs: { configuredIn: any; skipDirs: any; unreadNames: any; unreadPrefixes: any; }; docsPaths: { baselineFile: string; expectedAbsent: any; expectedAbsentPrefixes: any; ignoredDocs: any; onDemandReportDirs: any; repoRoots: any; }; shippedDocs: { repoOnlyDirs: any; }; }
 readPublishing [const] (root?: any) => { apiSurfaceDir: string; packagesDir: string; publicPackageDirs: any; releaseWorkflow: string; workspaceDirs: any; }
-readRegisters [const] (root?: any) => { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; } | { adrCommands: { [k: string]: any; }; adrGrandfatheredDuplicates: any; adrHomes: any; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
+readRegisters [const] (root?: any) => { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; planningDir: string; requirementsDir: string; } | { adrCommands: { [k: string]: any; }; adrGrandfatheredDuplicates: any; adrHomes: any; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; planningDir: string; requirementsDir: string; }
 resolveConventions [const] (raw: any) => { defaultBranch: any; sharedBranchesDir: string; }
-resolveGates [const] (raw: any) => { scriptSize: { baselineFile: string; ceiling: any; guideDoc: any; skipDirs: any; }; strayConfigs: { configuredIn: any; skipDirs: any; unreadNames: any; unreadPrefixes: any; }; docsPaths: { baselineFile: string; expectedAbsent: any; expectedAbsentPrefixes: any; ignoredDocs: any; onDemandReportDirs: any; repoRoots: any; }; shippedDocs: { repoOnlyDirs: any; }; }
+resolveGates [const] (raw: any) => { affectedTests: { coverageTaskPackage: any; globalPackages: any; lintOnlyPatterns: any; }; commandsDoc: { file: string; }; coverage: { mergeWorkspaces: any; mergedFile: string; reportWorkspaces: any; summaryFile: string; }; departedNames: { rosterFile: string; }; depsAudit: { allowanceFile: string; }; eslintPass: { probeWorkspaces: any; }; inventory: { baselineFile: string; trees: any; }; lintReport: { reportsDir: string; }; reactDoctor: { reportFile: string; }; usageReport: { outDir: string; }; vitePlusBlock: { agentDoc: string; }; scriptSize: { baselineFile: string; ceiling: any; guideDoc: any; skipDirs: any; }; strayConfigs: { configuredIn: any; skipDirs: any; unreadNames: any; unreadPrefixes: any; }; docsPaths: { baselineFile: string; expectedAbsent: any; expectedAbsentPrefixes: any; ignoredDocs: any; onDemandReportDirs: any; repoRoots: any; }; shippedDocs: { repoOnlyDirs: any; }; }
 resolvePublishing [const] (raw: any) => { apiSurfaceDir: string; packagesDir: string; publicPackageDirs: any; releaseWorkflow: string; workspaceDirs: any; }
-resolveRegisters [const] (raw: any) => { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; } | { adrCommands: { [k: string]: any; }; adrGrandfatheredDuplicates: any; adrHomes: any; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; }
+resolveRegisters [const] (raw: any) => { adrCommands: { list: string; new: string; write: string; }; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; planningDir: string; requirementsDir: string; } | { adrCommands: { [k: string]: any; }; adrGrandfatheredDuplicates: any; adrHomes: any; adrContentBaseline: string; adrDraftDir: string; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; planningDir: string; requirementsDir: string; }
+
+## ./conformance-artifacts
+collectArtifacts [value] ({ repoRoot }: { repoRoot: string; }) => { artifacts: { filePath: string; kind: string; label: string; name: string; parsed: { body: string; frontmatter: Record<string, string>; lists: Record<string, readonly string[]>; } | null; }[]; findings: { kind: string; label: any; message: string; }[]; skippedDirectories: string[] | never[]; unreadableNames: string[] | never[]; }
+KINDS [value] { rule: { nameSource: string; requiredFields: string[]; root: string; triggerField: string; }; skill: { nameSource: string; requiredFields: string[]; root: string; triggerField: string; }; subagent: { nameSource: string; requiredFields: string[]; root: string; triggerField: string; }; }
+SUPPORT_DIRECTORIES [value] Set<string>
+
+## ./conformance-check
+checkConformance [value] (args?: { repoRoot?: string; }) => { checked: { [k: string]: string[]; }; findings: any[]; skippedDirectories: string[] | never[]; unreadableSkills: string[] | never[]; }
+
+## ./conformance-frontmatter
+parseFrontmatter [value] (filePath: string) => ReturnType<typeof parseFrontmatterContent>
+parseFrontmatterContent [value] (rawContent: string) => { body: string; frontmatter: Record<string, string>; lists: Record<string, readonly string[]>; } | null
+
+## ./conformance-references
+extractRelativeLinks [value] (markdown: string) => readonly string[]
+extractScriptPaths [value] (markdown: string) => readonly string[]
+referenceFindings [value] ({ body, contents, filePath, label, repoRoot }: { body: string; contents: string; filePath: string; label: string; repoRoot: string; }) => readonly { message: string; reference: string; }[]
+
+## ./conformance-report
+reportConformance [value] ({ failureHeading, messages, passedMessage, skippedDirectories, }: { failureHeading: string; messages: readonly string[]; passedMessage: string; skippedDirectories: readonly string[]; }) => number
 
 ## ./coordination-board
 renderBoard [const] (tasks: any, branches: any, { tasksRel }?: {}) => string
@@ -102,6 +133,11 @@ taskErrors [const] ({ slug, data }: { slug: any; data: any; }, seen: any) => any
 ## ./error-message
 errorMessage [const] (value: any) => string
 
+## ./gh-exec
+assertGhArguments [const] (args: any) => any[]
+ghBinary [const] () => string | undefined
+runGh [const] (args: any) => string
+
 ## ./git-dir
 resolveGitDir [const] (repoRoot: any) => any
 
@@ -110,6 +146,20 @@ findRepositoryRoot [const] (startDirectory: any) => any
 HOST_ROOT_ENV [const] "REPO_STANDARDS_HOST_ROOT"
 resolveHostRoot [const] ({ env, envName, moduleDirectory, }: { env?: NodeJS.ProcessEnv | undefined; envName?: string | undefined; moduleDirectory: any; }) => any
 rootFromInstallPath [const] (moduleDirectory: any) => any
+
+## ./jsonc
+parseJsonc [const] (text: any) => any
+stripJsoncComments [const] (text: any) => string
+
+## ./merge-queue
+envBlock [const] (values: any, delimiter: any) => string
+pullNumberFromQueueRef [const] (ref: any) => number | undefined
+statusSha [const] ({ eventName, payload }: { eventName: any; payload: any; }) => any
+subjectEnv [const] ({ pullRequest, range, repository }: { pullRequest: any; range: any; repository: any; }) => { BRANCH_NAME: any; PR_BASE: any; PR_BODY: any; PR_HEAD_SHA: any; PR_IS_FORK: string; PR_NUMBER: string; PR_TITLE: any; RANGE_BASE_SHA: string; RANGE_HEAD_SHA: string; }
+subjectRequest [const] ({ eventName, payload }: { eventName: any; payload: any; }) => any
+
+## ./public-package-dirs
+publicPackageDirs [const] (repoRoot: any) => string[]
 
 ## ./publish-surface
 buildPublishExports [const] (exports_: any) => { [k: string]: { types: string; default: string; }; }
@@ -139,6 +189,49 @@ selectPublishable [const] (classified: any) => any
 
 ## ./report-warnings
 reportWarnings [const] (warnings: any) => void
+
+## ./review-gate-reconcile
+completeFileList [const] ({ expected, filenames }: { expected: any; filenames: any; }) => any
+gateArgs [const] ({ extraArgs, number, protectSuccess, repository, script, }: { extraArgs?: never[] | undefined; number: any; protectSuccess?: boolean | undefined; repository: any; script: any; }) => any[]
+gateClosure [const] ({ driverEntry, entry, readFile }: { driverEntry: any; entry: any; readFile: any; }) => any[]
+gateJudgesItsOwnEdit [const] ({ changedFiles, closure }: { changedFiles?: never[] | undefined; closure?: never[] | undefined; }) => boolean
+localModuleClosure [const] ({ entry, readFile }: { entry: any; readFile: any; }) => any[]
+openPullRequestNumbers [const] (pages: any) => any[]
+outcomeLine [const] ({ gate, number, ok, output }: { gate: any; number: any; ok: any; output: any; }) => string
+PROTECT_SUCCESS_FLAG [const] "--protect-success"
+publishedStatus [const] (combined: any, context: any) => { description: any; state: any; } | undefined
+shouldPublishStatus [const] ({ current, next, protectSuccess, }?: { protectSuccess?: boolean | undefined; }) => boolean
+sweepSummary [const] ({ pullRequests, results }: { pullRequests: any; results: any; }) => { failures: any; text: string; }
+withheldResult [const] ({ changedFiles, gate, number }: { changedFiles: any; gate: any; number: any; }) => { gate: any; number: any; ok: boolean; output: string; } | undefined
+
+## ./review-gate-status
+fetchPublishedStatus [const] ({ context, repository, sha }: { context: any; repository: any; sha: any; }) => { description: any; state: any; } | undefined
+postStatus [const] ({ context, description, repository, sha, state, }: { context: any; description: any; repository: any; sha: any; state: any; }) => void
+publishGateStatus [const] ({ context, description, repository, sha, state, }: { context: any; description: any; repository: any; sha: any; state: any; }) => string
+readEventPayload [const] () => any
+resolveGateTarget [const] (usage: any) => { number: number; payload: any; repository: string; statusSha: any; } | undefined
+resolvePullNumber [const] (payload: any) => number | undefined
+resolveRepository [const] (payload: any) => string
+resolveStatusSha [const] (payload: any) => any
+
+## ./review-threads
+decideThreadStatus [const] ({ isDraft, threads }: { isDraft: any; threads: any; }) => { description: string; state: string; }
+formatThreads [const] ({ number, repository, threads }: { number: any; repository: any; threads: any; }) => any[]
+STATUS_CONTEXT [const] "Review threads resolved"
+summarizeThreads [const] (nodes: any) => { total: any; unresolved: any; }
+
+## ./route-artifacts
+ARTIFACT_SUFFIXES [const] Set<string>
+ARTIFACT_TREE_FOLDERS [const] string[]
+artifactNamesIn [const] (siblings: any) => any[]
+candidatesIn [const] (paths: any) => any
+CATCH_ALL_FOLDERS [const] string[]
+describeFinding [const] (finding: any) => string
+groupByDirectory [const] (paths: any) => Map<any, any>
+normalizeSubject [const] (value: any) => any
+PAIRED_SUFFIXES [const] string[]
+parseFileName [const] (filePath: any) => { name: any; suffix: any; } | undefined
+routeArtifactReport [const] (trackedPaths: any) => { checked: number; findings: { artifacts: any[]; filePath: any; }[]; skipped: any[]; }
 
 ## ./safe-read
 readTextWithin [const] (path: any, repoRoot: any, extraRoots?: any[]) => string

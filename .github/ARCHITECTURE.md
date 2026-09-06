@@ -22,7 +22,7 @@ Repository automation and agent-assistance assets.
 
 ## Tooling
 
-- `scripts/verify-harness-conformance.cjs` checks the frontmatter contract, the
+- `packages/repo-standards/scripts/verify-harness-conformance.cjs` checks the frontmatter contract, the
   path references and the description quality of every skill, path rule and
   subagent; it is a step in `.github/workflows/check-safe.yml`.
 - `scripts/validate-skills.cjs` runs the same checks and reports the skill
