@@ -13,7 +13,10 @@
  * executing live in the CLI.
  *
  * npm always includes the files in `ALWAYS_PACKED` regardless of `files`, so
- * their absence is a real fault rather than a packaging choice.
+ * their absence is a real fault rather than a packaging choice. Every check here
+ * reads the PACKED manifest, never the workspace one — `files`, `publishConfig`
+ * and `engines` are what an installer acts on, and only the packed copy has
+ * them as they ship (ADR-110).
  */
 
 const ALWAYS_PACKED = ['package.json'];
@@ -125,6 +128,16 @@ export const materialisationFailure = ({ manifestFiles, presentPaths }) => {
     ? undefined
     : `\`devkit sync\` recorded ${absent.length} file(s) the tree does not hold, starting with \`${absent.toSorted((left, right) => left.localeCompare(right))[0]}\``;
 };
+
+/**
+ * @param {{ bin?: Record<string, string>, engines?: { node?: string }, name: string }} manifest
+ */
+export const binsWithoutNodeFloor = (manifest) =>
+  declaredBins(manifest).length === 0 || manifest.engines?.node !== undefined
+    ? []
+    : [
+        `${manifest.name} declares ${declaredBins(manifest).length} bin(s) and no \`engines.node\` in the packed manifest, so nothing holds a consumer to the Node they were written for`,
+      ];
 
 export const noCommandsDeclared = (manifest) =>
   declaredBins(manifest).length === 0

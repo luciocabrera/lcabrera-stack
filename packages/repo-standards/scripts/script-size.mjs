@@ -9,6 +9,12 @@
  * The measurement is CODE lines — non-blank, non-comment — so the "why" header
  * every script here should carry is free and only logic counts.
  *
+ * Which files count is `isToolingScript`, and it follows the file rather than
+ * the extension: `.mjs` and `.cjs` anywhere, plus `.js`, `.ts`, `.mts` and
+ * `.cts` under a `scripts/` directory — the set `.claude/rules/scripts.md`
+ * binds. Extension alone would let a script leave the ceiling by being renamed,
+ * and a gate measuring fewer files reports the same clean pass as a clean tree.
+ *
  * Pure: callers hand in contents and a baseline and get findings back, so the
  * walking, printing and exit code live in the CLI.
  *
@@ -31,6 +37,21 @@ export const ALWAYS_SKIPPED = [
   'coverage',
   '.tmp',
 ];
+
+const ANYWHERE_EXTENSIONS = ['.mjs', '.cjs'];
+const SCRIPTS_DIRECTORY_EXTENSIONS = ['.js', '.ts', '.mts', '.cts'];
+const SCRIPTS_DIRECTORY = 'scripts';
+
+const endsWithOneOf = ({ extensions, path }) =>
+  extensions.some((extension) => path.endsWith(extension));
+
+export const isToolingScript = (posixPath) =>
+  endsWithOneOf({ extensions: ANYWHERE_EXTENSIONS, path: posixPath }) ||
+  (posixPath.split('/').slice(0, -1).includes(SCRIPTS_DIRECTORY) &&
+    endsWithOneOf({
+      extensions: SCRIPTS_DIRECTORY_EXTENSIONS,
+      path: posixPath,
+    }));
 
 const isProse = (line) => /^\s*(\/\/|\/\*|\*|$)/.test(line);
 
