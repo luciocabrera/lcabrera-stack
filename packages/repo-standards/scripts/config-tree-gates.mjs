@@ -7,16 +7,20 @@
  * Split from `config.mjs` by size only; `readGates` returns both halves as one
  * block. The workspace rosters default to nothing, like `publicPackageDirs`:
  * a roster is the repository's own data, and each gate that reads one refuses
- * an empty roster rather than passing over no workspaces. A pattern roster is
- * held as regular-expression sources and compiled by its gate; this validates
- * that each one compiles, so a typo fails at read time rather than by matching
- * nothing.
+ * an empty roster rather than passing over no workspaces.
+ *
+ * A malformed ENTRY is refused too, not dropped. A roster one short still runs,
+ * still exits 0 and still prints a count nobody reads, which is how a package
+ * went missing from a report for the life of a release; the empty-roster guards
+ * downstream only catch the all-or-nothing case. So a typo in an entry throws
+ * naming the key, as an escaping path and an uncompilable pattern already do.
  */
 
 import {
   isPlainObject,
   patternList,
   readableString,
+  rejectMalformed,
   repoRelative,
   verbatimList,
 } from './config-values.mjs';
@@ -59,7 +63,12 @@ const isWorkspaceEntry = (entry) =>
 
 const workspaceList = (value, fallback, key) =>
   Array.isArray(value)
-    ? value.filter(isWorkspaceEntry).map((entry) => ({
+    ? rejectMalformed({
+        entries: value,
+        isValid: isWorkspaceEntry,
+        key,
+        requirement: 'must name a `dir` and a `name`',
+      }).map((entry) => ({
         dir: repoRelative(entry.dir, entry.dir, `${key}[].dir`),
         name: entry.name.trim(),
         ...(typeof entry.run === 'boolean' ? { run: entry.run } : {}),
@@ -75,7 +84,12 @@ const isTreeEntry = (entry) =>
 
 const treeList = (value, fallback, key) =>
   Array.isArray(value)
-    ? value.filter(isTreeEntry).map((entry) => ({
+    ? rejectMalformed({
+        entries: value,
+        isValid: isTreeEntry,
+        key,
+        requirement: 'must name a `root` and an `inventory`',
+      }).map((entry) => ({
         inventory: repoRelative(
           entry.inventory,
           entry.inventory,
@@ -87,9 +101,12 @@ const treeList = (value, fallback, key) =>
 
 const pathList = (value, fallback, key) =>
   Array.isArray(value)
-    ? value
-        .filter((entry) => typeof entry === 'string' && entry.trim() !== '')
-        .map((entry) => repoRelative(entry, entry, `${key}[]`))
+    ? rejectMalformed({
+        entries: value,
+        isValid: (entry) => typeof entry === 'string' && entry.trim() !== '',
+        key,
+        requirement: 'must be a non-empty string',
+      }).map((entry) => repoRelative(entry, entry, `${key}[]`))
     : fallback;
 
 const resolvePath = (block, key, fallback, name) =>
@@ -118,6 +135,7 @@ export const resolveTreeGates = (gates) => {
       globalPackages: verbatimList(
         affectedTests.globalPackages,
         defaults.affectedTests.globalPackages,
+        'gates.affectedTests.globalPackages[]',
       ),
       lintOnlyPatterns: patternList(
         affectedTests.lintOnlyPatterns,

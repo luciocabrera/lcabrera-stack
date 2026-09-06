@@ -24,15 +24,12 @@ describe('resolveTreeGates', () => {
     expect(gates.depsAudit).toEqual(DEFAULT_TREE_GATES.depsAudit);
   });
 
-  it('keeps a workspace entry only when it names a directory and a package', () => {
+  it('reads a workspace entry that names a directory and a package', () => {
     const gates = resolveTreeGates({
       coverage: {
         reportWorkspaces: [
           { dir: 'packages/one', name: '@scope/one', run: true },
           { dir: 'packages/two', name: '@scope/two' },
-          { dir: '', name: '@scope/three' },
-          { name: '@scope/four' },
-          'packages/five',
         ],
       },
     });
@@ -42,7 +39,26 @@ describe('resolveTreeGates', () => {
     ]);
   });
 
-  it('keeps a tree entry only when it names an inventory and a root', () => {
+  it('refuses a workspace entry missing a name or a dir, rather than shrinking the roster', () => {
+    for (const entry of [
+      { dir: '', name: '@scope/three' },
+      { name: '@scope/four' },
+      'packages/five',
+    ]) {
+      expect(() =>
+        resolveTreeGates({
+          coverage: {
+            reportWorkspaces: [
+              { dir: 'packages/one', name: '@scope/one' },
+              entry,
+            ],
+          },
+        }),
+      ).toThrow(/gates\.coverage\.reportWorkspaces/u);
+    }
+  });
+
+  it('reads a tree entry that names an inventory and a root', () => {
     const gates = resolveTreeGates({
       inventory: {
         trees: [
@@ -50,8 +66,6 @@ describe('resolveTreeGates', () => {
             inventory: 'packages/one/src/INVENTORY.md',
             root: 'packages/one/src',
           },
-          { inventory: 'packages/two/src/INVENTORY.md' },
-          { root: 'packages/three/src' },
         ],
       },
     });
@@ -60,11 +74,29 @@ describe('resolveTreeGates', () => {
     ]);
   });
 
-  it('drops a probe workspace that is not a non-empty string', () => {
-    const gates = resolveTreeGates({
-      eslintPass: { probeWorkspaces: ['packages/one', '', 3, null] },
-    });
-    expect(gates.eslintPass.probeWorkspaces).toEqual(['packages/one']);
+  it('refuses a tree entry missing an inventory or a root', () => {
+    for (const entry of [
+      { inventory: 'packages/two/src/INVENTORY.md' },
+      { root: 'packages/three/src' },
+    ]) {
+      expect(() => resolveTreeGates({ inventory: { trees: [entry] } })).toThrow(
+        /gates\.inventory\.trees/u,
+      );
+    }
+  });
+
+  it('refuses a probe workspace that is not a non-empty string', () => {
+    for (const entry of ['', 3, null]) {
+      expect(() =>
+        resolveTreeGates({
+          eslintPass: { probeWorkspaces: ['packages/one', entry] },
+        }),
+      ).toThrow(/gates\.eslintPass\.probeWorkspaces/u);
+    }
+    expect(
+      resolveTreeGates({ eslintPass: { probeWorkspaces: ['packages/one'] } })
+        .eslintPass.probeWorkspaces,
+    ).toEqual(['packages/one']);
   });
 
   it('refuses a path that leaves the repository, naming the key', () => {

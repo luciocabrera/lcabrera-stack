@@ -239,6 +239,7 @@ export const resolveGates = (raw) => {
       skipDirs: verbatimList(
         scriptSize.skipDirs,
         DEFAULT_GATES.scriptSize.skipDirs,
+        'gates.scriptSize.skipDirs[]',
       ),
     },
     strayConfigs: {
@@ -249,14 +250,17 @@ export const resolveGates = (raw) => {
       skipDirs: verbatimList(
         strayConfigs.skipDirs,
         DEFAULT_GATES.strayConfigs.skipDirs,
+        'gates.strayConfigs.skipDirs[]',
       ),
       unreadNames: verbatimList(
         strayConfigs.unreadNames,
         DEFAULT_GATES.strayConfigs.unreadNames,
+        'gates.strayConfigs.unreadNames[]',
       ),
       unreadPrefixes: verbatimList(
         strayConfigs.unreadPrefixes,
         DEFAULT_GATES.strayConfigs.unreadPrefixes,
+        'gates.strayConfigs.unreadPrefixes[]',
       ),
     },
     docsPaths: {
@@ -273,10 +277,12 @@ export const resolveGates = (raw) => {
       expectedAbsentPrefixes: verbatimList(
         docsPaths.expectedAbsentPrefixes,
         DEFAULT_GATES.docsPaths.expectedAbsentPrefixes,
+        'gates.docsPaths.expectedAbsentPrefixes[]',
       ),
       ignoredDocs: verbatimList(
         docsPaths.ignoredDocs,
         DEFAULT_GATES.docsPaths.ignoredDocs,
+        'gates.docsPaths.ignoredDocs[]',
       ),
       onDemandReportDirs: containedList(
         docsPaths.onDemandReportDirs,
@@ -286,12 +292,14 @@ export const resolveGates = (raw) => {
       repoRoots: verbatimList(
         docsPaths.repoRoots,
         DEFAULT_GATES.docsPaths.repoRoots,
+        'gates.docsPaths.repoRoots[]',
       ),
     },
     shippedDocs: {
       repoOnlyDirs: verbatimList(
         shippedDocs.repoOnlyDirs,
         DEFAULT_GATES.shippedDocs.repoOnlyDirs,
+        'gates.shippedDocs.repoOnlyDirs[]',
       ),
     },
     ...resolveTreeGates(block),

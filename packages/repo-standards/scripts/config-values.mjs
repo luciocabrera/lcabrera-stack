@@ -73,19 +73,41 @@ export const parseConfig = (raw) => {
   }
   return parsed;
 };
+export const rejectMalformed = ({ entries, isValid, key, requirement }) => {
+  const malformed = entries.filter((entry) => !isValid(entry));
+  if (malformed.length > 0) {
+    throw new Error(
+      `${CONFIG_FILE_NAME}: every entry in \`${key}\` ${requirement}, but these do not: ${malformed
+        .map((entry) => JSON.stringify(entry) ?? String(entry))
+        .join(', ')}.`,
+    );
+  }
+  return entries;
+};
+
+const isNamed = (entry) => typeof entry === 'string' && entry.trim() !== '';
+
+const NAMED = 'must be a non-empty string';
+
 export const containedList = (value, fallback, key) => {
   if (!Array.isArray(value)) return fallback;
-  const entries = value
-    .filter((entry) => typeof entry === 'string' && entry.trim() !== '')
-    .map((entry) => repoRelative(entry, entry, key));
+  const entries = rejectMalformed({
+    entries: value,
+    isValid: isNamed,
+    key,
+    requirement: NAMED,
+  }).map((entry) => repoRelative(entry, entry, key));
   return entries.length > 0 ? entries : fallback;
 };
 
-export const verbatimList = (value, fallback) => {
+export const verbatimList = (value, fallback, key) => {
   if (!Array.isArray(value)) return fallback;
-  const entries = value.filter(
-    (entry) => typeof entry === 'string' && entry.trim() !== '',
-  );
+  const entries = rejectMalformed({
+    entries: value,
+    isValid: isNamed,
+    key,
+    requirement: NAMED,
+  });
   return entries.length > 0 ? entries : fallback;
 };
 
@@ -98,7 +120,7 @@ const compiled = (source) => {
 };
 
 export const patternList = (value, fallback, key) => {
-  const entries = verbatimList(value, fallback);
+  const entries = verbatimList(value, fallback, key);
   const broken = entries.filter((source) => compiled(source) === undefined);
   if (broken.length > 0) {
     throw new Error(

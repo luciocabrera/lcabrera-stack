@@ -116,10 +116,12 @@ describe('resolveGates', () => {
     ).toEqual(DEFAULT_GATES.docsPaths.repoRoots);
   });
 
-  it('drops empty strings from a list rather than matching everything', () => {
+  it('refuses an empty string in a list rather than matching everything', () => {
+    expect(() =>
+      gates({ docsPaths: { ignoredDocs: ['', '  ', 'vendor/'] } }),
+    ).toThrow(/gates\.docsPaths\.ignoredDocs/u);
     expect(
-      gates({ docsPaths: { ignoredDocs: ['', '  ', 'vendor/'] } }).docsPaths
-        .ignoredDocs,
+      gates({ docsPaths: { ignoredDocs: ['vendor/'] } }).docsPaths.ignoredDocs,
     ).toEqual(['vendor/']);
   });
 });
