@@ -100,28 +100,37 @@ const verdictFor = (workspace) => {
   );
 };
 
-if (PROBE_WORKSPACES.length === 0) {
-  process.stderr.write(
-    '✗ `gates.eslintPass.probeWorkspaces` names no workspace in devkit.config.json, so no eslint pass was probed.\n',
-  );
-  process.exitCode = 1;
-}
+const probeFailures = () =>
+  PROBE_WORKSPACES.flatMap((workspace) => {
+    const verdict = verdictFor(workspace);
 
-const failures = PROBE_WORKSPACES.flatMap((workspace) => {
-  const verdict = verdictFor(workspace);
+    return verdict === 'reported' ? [] : [{ verdict, workspace }];
+  });
 
-  return verdict === 'reported' ? [] : [{ verdict, workspace }];
-});
-
-if (failures.length > 0) {
-  for (const { verdict, workspace } of failures) {
-    process.stderr.write(`✗ ${workspace}: ${FAILURE_HINT[verdict]}\n`);
+const report = () => {
+  if (PROBE_WORKSPACES.length === 0) {
+    process.stderr.write(
+      '✗ `gates.eslintPass.probeWorkspaces` names no workspace in devkit.config.json, so no eslint pass was probed.\n',
+    );
+    return 1;
   }
 
-  process.exitCode = 1;
-} else {
+  const failures = probeFailures();
+
+  if (failures.length > 0) {
+    for (const { verdict, workspace } of failures) {
+      process.stderr.write(`✗ ${workspace}: ${FAILURE_HINT[verdict]}\n`);
+    }
+
+    return 1;
+  }
+
   process.stdout.write(
     `eslint pass verified: \`${PROBE_RULE}\` reports the planted violation in ` +
       `${PROBE_WORKSPACES.join(', ')}.\n`,
   );
-}
+
+  return 0;
+};
+
+process.exitCode = report();

@@ -26,9 +26,11 @@ under `gates` the blocks `commandsDoc`, `depsAudit`, `departedNames`,
 `reactDoctor`, `usageReport` and `vitePlusBlock`. Every file-path key
 defaults to the conventional location and is validated as repo-relative. The
 workspace rosters (`coverage.mergeWorkspaces`, `coverage.reportWorkspaces`,
-`eslintPass.probeWorkspaces`, `inventory.trees`,
-`affectedTests.coverageTaskPackage`) default to nothing, and a gate handed an
-empty roster refuses to pass rather than passing over no workspaces.
+`eslintPass.probeWorkspaces`, `inventory.trees`) default to nothing, and a gate
+handed an empty roster refuses to pass rather than passing over no workspaces.
+`affectedTests.coverageTaskPackage` is not one of them: it names the single
+workspace whose coverage task substitutes for its plain one, and no value means
+no substitution rather than a refusal.
 
 Two of the bins read their input rather than resolving it: under `--changed`,
 `repo-merge-coverage` and `repo-coverage-report` take the changed-file list on

@@ -20,8 +20,6 @@ import { bodyOf, parseFrontmatter } from './doc-register-frontmatter.mjs';
 export const REQUIREMENTS_DIR = 'docs/product/requirements';
 export const PLANNING_DIR = 'docs/agents/planning';
 
-export const PLANNING_DRAFTS_DIR = `${PLANNING_DIR}/adr-drafts`;
-
 export const TEMPLATE_FILE = '_TEMPLATE.md';
 
 export const REQUIREMENT_FIELDS = [
