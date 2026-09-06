@@ -47,13 +47,16 @@ export const ancestorsOf = (directory) => {
  * `init`, which is the command for a repository that already exists.
  *
  * @param {{ enclosingRepository?: string, targetEntries?: string[],
- *           targets: string[] }} args `targetEntries` is `undefined` when the
- * target does not exist, which is the case create is for.
+ *           targetIsDirectory?: boolean, targets: string[] }} args
+ * `targetEntries` is `undefined` when the target does not exist, which is the
+ * case create is for; `targetIsDirectory` is `false` when something that is not
+ * a directory already holds the name.
  * @returns {string | undefined}
  */
 export const createRefusal = ({
   enclosingRepository,
   targetEntries,
+  targetIsDirectory = true,
   targets,
 }) => {
   if (targets.length === 0) {
@@ -67,11 +70,14 @@ export const createRefusal = ({
   if (enclosingRepository !== undefined) {
     return `create: \`${target}\` is inside the git repository at \`${enclosingRepository}\` — create makes a repository, and nesting one inside another puts this tree under the outer repository's index and gates. Run \`devkit init\` in \`${enclosingRepository}\` to set that repository up, or run create outside it.`;
   }
+  if (!targetIsDirectory) {
+    return `create: \`${target}\` is already there and is not a directory — create makes the directory, so the name has to be free. Pick one nothing occupies, or move what is there.`;
+  }
   if (targetEntries !== undefined && targetEntries.length > 0) {
     const [first] = targetEntries.toSorted((left, right) =>
       left.localeCompare(right),
     );
-    return `create: \`${target}\` is not empty — it already holds \`${first}\`, and create only ever writes into a directory it made. Choose a name that is not taken, or run \`devkit init\` inside \`${target}\`.`;
+    return `create: \`${target}\` is not empty — it already holds \`${first}\`, and create writes only into a directory with nothing in it. Pick a name nothing occupies, or run \`devkit init\` inside \`${target}\` if that is the project you meant.`;
   }
   return undefined;
 };

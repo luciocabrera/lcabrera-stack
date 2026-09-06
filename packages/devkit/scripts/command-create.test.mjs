@@ -93,6 +93,18 @@ describe('devkit create, from an empty parent directory', () => {
     );
   });
 
+  test('accepts a directory that is already there and empty', () => {
+    const parent = scratch();
+    mkdirSync(join(parent, 'empty'));
+
+    const { code } = quietly(() => runCreate(['empty'], parent));
+
+    expect(code).toBe(0);
+    expect(git(['log', '-1', '--pretty=%s'], join(parent, 'empty'))).toBe(
+      INITIAL_COMMIT_MESSAGE,
+    );
+  });
+
   test('names the package after the directory it made', () => {
     const parent = scratch();
     quietly(() => runCreate(['My App'], parent));
@@ -115,6 +127,20 @@ describe('what devkit create refuses', () => {
     expect(errors).toContain('is not empty');
     expect(errors).toContain('devkit init');
     expect(readdirSync(join(parent, 'demo'))).toEqual(['README.md']);
+  });
+
+  test('a name a file already holds, rather than letting the read throw', () => {
+    const parent = scratch();
+    writeFileSync(join(parent, 'demo'), 'not a directory\n');
+
+    const { code, errors } = quietly(() => runCreate(['demo'], parent));
+
+    expect(code).toBe(1);
+    expect(errors).toContain('is not a directory');
+    expect(errors).not.toContain('ENOTDIR');
+    expect(readFileSync(join(parent, 'demo'), 'utf8')).toBe(
+      'not a directory\n',
+    );
   });
 
   test('a target nested inside an existing repository, creating nothing', () => {

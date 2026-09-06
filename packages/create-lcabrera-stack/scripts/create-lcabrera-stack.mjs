@@ -9,7 +9,8 @@
  * would be a second implementation nobody runs the other way round.
  *
  * Usage: create-lcabrera-stack <directory> [--profile <name>]
- * Exit codes: whatever `devkit create` exits with; 1 if it could not be run.
+ * Exit codes: whatever `devkit create` exits with; 1 if it could not be run,
+ * and a run that never started says so rather than exiting quietly.
  */
 
 import { spawnSync } from 'node:child_process';
@@ -35,7 +36,11 @@ try {
     [devkitCli(), SUBCOMMAND, ...process.argv.slice(2)],
     { stdio: 'inherit' },
   );
-  process.exitCode = result.status ?? 1;
+  if (result.error !== undefined) throw result.error;
+  if (result.status === null) {
+    throw new Error(`terminated by ${result.signal ?? 'an unknown signal'}`);
+  }
+  process.exitCode = result.status;
 } catch (error) {
   process.stderr.write(
     `create-lcabrera-stack: could not run \`devkit ${SUBCOMMAND}\` — ${error instanceof Error ? error.message : String(error)}\n`,

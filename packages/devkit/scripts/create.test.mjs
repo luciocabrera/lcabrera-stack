@@ -48,6 +48,24 @@ describe('createRefusal', () => {
     expect(refusal).toContain('devkit init');
   });
 
+  test('says what create actually allows, since an existing empty directory is fine', () => {
+    const refusal = createRefusal({
+      targetEntries: ['src'],
+      targets: ['demo'],
+    });
+    expect(refusal).toContain('a directory with nothing in it');
+    expect(refusal).not.toContain('a directory it made');
+  });
+
+  test('refuses a name a file already holds, without offering init on it', () => {
+    const refusal = createRefusal({
+      targetIsDirectory: false,
+      targets: ['demo'],
+    });
+    expect(refusal).toContain('is not a directory');
+    expect(refusal).not.toContain('devkit init');
+  });
+
   test('refuses a target inside a repository, naming that repository', () => {
     const refusal = createRefusal({
       enclosingRepository: '/home/dev/stack',

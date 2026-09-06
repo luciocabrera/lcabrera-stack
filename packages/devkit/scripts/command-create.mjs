@@ -8,7 +8,14 @@
  * drift on the day it was made.
  */
 
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 
 import { applyInit } from './command-init.mjs';
@@ -43,8 +50,15 @@ const enclosingRepositoryOf = (absolute) =>
     existsSync(join(directory, '.git')),
   );
 
-const entriesOf = (absolute) =>
-  existsSync(absolute) ? readdirSync(absolute) : undefined;
+const targetState = (absolute) => {
+  if (lstatSync(absolute, { throwIfNoEntry: false }) === undefined) {
+    return { entries: undefined, isDirectory: true };
+  }
+  if (statSync(absolute, { throwIfNoEntry: false })?.isDirectory() !== true) {
+    return { entries: undefined, isDirectory: false };
+  }
+  return { entries: readdirSync(absolute), isDirectory: true };
+};
 
 const positionals = (argv) => argv.filter((entry) => !entry.startsWith('-'));
 
@@ -111,10 +125,16 @@ export const runCreate = (argv, root) => {
   const [target] = targets;
   const absolute = target === undefined ? undefined : resolve(root, target);
 
+  const state =
+    absolute === undefined
+      ? { entries: undefined, isDirectory: true }
+      : targetState(absolute);
+
   const refusal = createRefusal({
     enclosingRepository:
       absolute === undefined ? undefined : enclosingRepositoryOf(absolute),
-    targetEntries: absolute === undefined ? undefined : entriesOf(absolute),
+    targetEntries: state.entries,
+    targetIsDirectory: state.isDirectory,
     targets,
   });
   if (refusal !== undefined) {
