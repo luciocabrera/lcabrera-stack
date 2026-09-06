@@ -1,45 +1,34 @@
 #!/usr/bin/env node
 
 /*
- * Why: a skill folder without SKILL.md, or a SKILL.md / agent file pointing
- * at a script that is not there, used to pass this gate — the same silent
- * skip that hid a scripts-only skill directory and the stale fallow-scan runner
- * path. Usage: `node scripts/validate-skills.cjs` (optional `--json`).
- * Exit 0 only when every skill directory is a skill or an explicit support
- * allowlist entry, every SKILL.md contract holds, and every referenced
- * script path exists.
+ * Why: a skill folder without SKILL.md, or a SKILL.md pointing at a script
+ * that is not there, used to pass this gate — the same silent skip that hid a
+ * scripts-only skill directory and the stale fallow-scan runner path. This is
+ * the skills-only view of the conformance run that
+ * `verify-harness-conformance.cjs` gates on, and it feeds the compliance report.
+ * Usage: `node scripts/validate-skills.cjs` (optional `--json`).
+ * Exit 0 only when that run reports nothing against a skill.
  */
 
+const { reportConformance } = require('./lib/conformance-report.cjs');
 const {
   parseFrontmatter,
   validateSkills,
 } = require('./lib/validate-skills-contract.cjs');
 
 const runCli = () => {
-  const shouldOutputJson = process.argv.includes('--json');
   const result = validateSkills({ repoRoot: process.cwd() });
 
-  if (shouldOutputJson) {
+  if (process.argv.includes('--json')) {
     console.log(JSON.stringify(result, null, 2));
   }
 
-  if (result.errors.length > 0) {
-    console.error('Skill validation failed:');
-    for (const error of result.errors) {
-      console.error(`- ${error}`);
-    }
-    process.exitCode = 1;
-    return;
-  }
-
-  console.log(
-    `Skill validation passed for ${result.checkedSkillCount} skill directories.`,
-  );
-  if (result.skippedDirectories.length > 0) {
-    console.log(
-      `Skipped non-skill directories: ${result.skippedDirectories.join(', ')}`,
-    );
-  }
+  process.exitCode = reportConformance({
+    failureHeading: 'Skill validation failed:',
+    messages: result.errors,
+    passedMessage: `Skill validation passed for ${result.checkedSkillCount} skill directories.`,
+    skippedDirectories: result.skippedDirectories,
+  });
 };
 
 if (require.main === module) {

@@ -1,57 +1,29 @@
-import {
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { afterEach, describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it } from 'vite-plus/test';
+
+import {
+  RULE,
+  conformanceMessages,
+  withConformanceRepo,
+} from './lib/conformance-fixtures.mjs';
 
 const require = createRequire(import.meta.url);
 const { validateSkills } = require('./lib/validate-skills-contract.cjs');
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-const temporaryDirectories = [];
-
-afterEach(() => {
-  for (const directory of temporaryDirectories.splice(0)) {
-    rmSync(directory, { force: true, recursive: true });
-  }
-});
-
-const makeRepo = (files) => {
-  const root = mkdtempSync(join(tmpdir(), 'validate-skills-'));
-  temporaryDirectories.push(root);
-  for (const [relative, contents] of Object.entries(files)) {
-    const full = join(root, relative);
-    mkdirSync(dirname(full), { recursive: true });
-    writeFileSync(full, contents);
-  }
-  return root;
-};
-
-const SKILL = `---
-name: demo
-description: A fixture skill used to pin the validator contract.
----
-
-# Demo
-`;
+const skillsView = (files) =>
+  withConformanceRepo(files, (repoRoot) => validateSkills({ repoRoot }));
 
 describe('validateSkills — missing SKILL.md', () => {
   it('fails a scripts-only folder that is not on the support allowlist', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': SKILL,
+    const result = skillsView({
       '.github/skills/scripts-only/scripts/generate.mjs': 'export {}\n',
     });
-
-    const result = validateSkills({ repoRoot });
 
     expect(result.errors.some((error) => error.includes('scripts-only'))).toBe(
       true,
@@ -60,73 +32,52 @@ describe('validateSkills — missing SKILL.md', () => {
       result.errors.some((error) => error.includes('Missing SKILL.md')),
     ).toBe(true);
     expect(result.skippedDirectories).not.toContain('scripts-only');
+    expect(result.checkedSkills).toContain('scripts-only');
   });
 
   it('skips an explicit support directory without SKILL.md', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': SKILL,
+    const result = skillsView({
       '.github/skills/code-smell-shared/README.md': '# Shared\n',
     });
 
-    const result = validateSkills({ repoRoot });
-
     expect(result.errors).toEqual([]);
     expect(result.skippedDirectories).toEqual(['code-smell-shared']);
+    expect(result.checkedSkillCount).toBe(1);
   });
 });
 
-describe('validateSkills — dangling script paths', () => {
-  it('fails when a SKILL.md names a relative script that does not exist', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash .github/skills/demo/scripts/missing.sh\`.\n`,
-    });
+describe('validateSkills — the projection is skills only', () => {
+  it('leaves a rule finding to the harness gate', () => {
+    const files = {
+      '.claude/rules/demo.md': `${RULE}\nSee [the decision](../../docs/decisions/ADR-000-gone.md).\n`,
+    };
+    const message =
+      'Broken relative link in .claude/rules/demo.md: "../../docs/decisions/ADR-000-gone.md"';
 
-    const result = validateSkills({ repoRoot });
-
-    expect(
-      result.errors.some(
-        (error) =>
-          error.includes('Broken script path') &&
-          error.includes('.github/skills/demo/scripts/missing.sh'),
-      ),
-    ).toBe(true);
+    expect(conformanceMessages(files)).toContain(message);
+    expect(skillsView(files).errors).not.toContain(message);
   });
 
-  it('fails when an agent file names a relative script that does not exist', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': SKILL,
-      '.claude/agents/fallow-scan.md':
-        'pass a glob to `bash .github/skills/fallow-code-checker/scripts/run-fallow.sh`.\n',
-    });
+  it('leaves a subagent finding to the harness gate', () => {
+    const files = {
+      '.claude/agents/demo-agent.md': '---\nname: demo-agent\n---\n\n# Bare\n',
+    };
+    const message =
+      'Missing required frontmatter field "description" in .claude/agents/demo-agent.md';
 
-    const result = validateSkills({ repoRoot });
-
-    expect(
-      result.errors.some(
-        (error) =>
-          error.includes('.claude/agents/fallow-scan.md') &&
-          error.includes(
-            '.github/skills/fallow-code-checker/scripts/run-fallow.sh',
-          ),
-      ),
-    ).toBe(true);
+    expect(conformanceMessages(files)).toContain(message);
+    expect(skillsView(files).errors).not.toContain(message);
   });
 
-  it('accepts a SKILL.md that names a script that exists', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash .github/skills/demo/scripts/run.sh\`.\n`,
-      '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
-    });
+  it('reports a skill finding in both views', () => {
+    const files = {
+      '.github/skills/bare/SKILL.md': '---\nname: bare\n---\n\n# Bare\n',
+    };
+    const message =
+      'Missing required frontmatter field "description" in .github/skills/bare/SKILL.md';
 
-    expect(validateSkills({ repoRoot }).errors).toEqual([]);
-  });
-
-  it('does not treat a node_modules consumer path as a missing repo script', () => {
-    const repoRoot = makeRepo({
-      '.github/skills/demo/SKILL.md': `${SKILL}\nruns \`node_modules/@repo/reporter/scripts/run-fallow.sh\`.\n`,
-    });
-
-    expect(validateSkills({ repoRoot }).errors).toEqual([]);
+    expect(conformanceMessages(files)).toContain(message);
+    expect(skillsView(files).errors).toContain(message);
   });
 });
 
@@ -144,6 +95,6 @@ describe('validateSkills — this repository', () => {
       'utf8',
     );
 
-    expect(yaml).not.toMatch(/^\s+paths:/m);
+    expect(yaml).not.toMatch(/^[ \t]+paths:/m);
   });
 });

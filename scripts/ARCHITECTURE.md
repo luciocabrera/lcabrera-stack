@@ -10,15 +10,31 @@ Shared repository-level automation scripts.
 
 ## Current Scripts
 
-- `validate-skills.cjs` - validates agent skill contracts in `.github/skills`
-  (implementation in `lib/validate-skills-contract.cjs`).
-  - Every directory under `.github/skills/` must have a `SKILL.md`, unless it
-    is on the explicit support allowlist (`code-smell-shared`).
-  - Checks required frontmatter fields (`name`, `description`).
-  - Verifies frontmatter `name` matches the skill folder.
-  - Verifies relative markdown links in each `SKILL.md` resolve.
-  - Verifies relative script paths named from a `SKILL.md` or
-    `.claude/agents/*.md` exist.
+- `verify-harness-conformance.cjs` - structural conformance for every
+  agent-facing artifact (implementation in `lib/conformance-*.cjs`).
+  - Reads its roster from disk on every run: skill directories under
+    `.github/skills`, path rules under `.claude/rules`, subagent definitions
+    under `.claude/agents`. Nothing lists them; a new artifact is covered the
+    day it lands.
+  - Every skill directory must have a `SKILL.md`, unless it is on the explicit
+    support allowlist (`code-smell-shared`).
+  - Frontmatter must parse and carry the fields its loader reads — `name` and
+    `description` for a skill or subagent, `paths` for a rule — with `name`
+    matching the directory or file it sits in.
+  - Every relative markdown link must resolve from the file it is written in,
+    which is where a renderer resolves it; a leading `/` means the repository
+    root. Every script path named in prose or a command must resolve from the
+    repository root, or from the file when it is written `./` or `../`.
+  - A description must clear a mechanical floor: long enough to carry a
+    situation, naming something concrete, and saying when the artifact applies
+    rather than what it is. Judging a description that clears the floor is the
+    model-in-the-loop tier, which this is deliberately not.
+- `validate-skills.cjs` - the skills-only view of that same run, for the
+  compliance report below (implementation in `lib/validate-skills-contract.cjs`,
+  which keeps the skill findings and projects them onto the report's shape).
+  One implementation, two entry points: the gate cannot diverge from the
+  report, and a rule or subagent finding is the gate's alone, since the report
+  places everything it lists under `.github/skills/`.
 - `generate-skills-compliance-report.cjs` - emits markdown compliance artifacts from skill validation.
   - Writes `reports/skills/code-smell-compliance-report.md`.
   - Appends run history to `reports/skills/agenting-plan-progress.md`.
@@ -34,6 +50,8 @@ Defined in root `package.json`:
 - `db:up` - starts local postgres via `docker/local/docker-compose.yml`.
 - `db:status` - shows local docker compose status.
 - `db:down` - stops local postgres.
+- `harness:verify` - runs `node scripts/verify-harness-conformance.cjs`, which
+  is also its own step in `.github/workflows/check-safe.yml`.
 - `skills:validate` - runs `node scripts/validate-skills.cjs`.
 - `skills:report` - runs `node scripts/generate-skills-compliance-report.cjs`.
   - Outcome: source findings report plus refreshed fix-plan/prompts/runbooks.
