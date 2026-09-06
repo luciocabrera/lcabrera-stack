@@ -20,8 +20,6 @@ const TRAILING_COMMENT = /(?:^|[ \t])#.*/;
 
 const QUOTED = /^(['"])(.*)\1$/;
 
-const EXPRESSION = /\$\{\{([^{}]*)\}\}/g;
-
 const SECRET_REFERENCE = /\bsecrets\.([A-Za-z_][A-Za-z0-9_-]*)/g;
 
 const unquote = (value) => QUOTED.exec(value)?.[2] ?? value;
@@ -65,6 +63,18 @@ export const extractRunScripts = (content) => {
   });
 };
 
+const expressionsIn = (line) => {
+  const bodies = [];
+  let open = line.indexOf('${{');
+  while (open !== -1) {
+    const close = line.indexOf('}}', open + 3);
+    if (close === -1) return bodies;
+    bodies.push(line.slice(open + 3, close));
+    open = line.indexOf('${{', close + 2);
+  }
+  return bodies;
+};
+
 const referencesIn = ({ expression, line }) =>
   expression.split('||').flatMap((operand, position, operands) =>
     [...operand.matchAll(SECRET_REFERENCE)].map((reference) => ({
@@ -79,7 +89,7 @@ export const extractSecretReferences = (content) =>
   content
     .split('\n')
     .flatMap((line, index) =>
-      [...line.matchAll(EXPRESSION)].flatMap((expression) =>
-        referencesIn({ expression: expression[1], line: index + 1 }),
+      expressionsIn(line).flatMap((expression) =>
+        referencesIn({ expression, line: index + 1 }),
       ),
     );

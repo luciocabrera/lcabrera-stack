@@ -96,9 +96,19 @@ describe('extractSecretReferences', () => {
     ]);
   });
 
-  test('an expression carrying a stray brace is left unread', () => {
+  test('a secret interpolated through format() is read past its braces', () => {
     expect(
-      extractSecretReferences(`          A: \${{ secrets.PUBLISH_TOKEN{ }}\n`),
+      extractSecretReferences(
+        `          A: \${{ format('Bearer {0}', secrets.PUBLISH_TOKEN) }}\n`,
+      ),
+    ).toEqual([{ fallback: false, line: 1, name: 'PUBLISH_TOKEN' }]);
+  });
+
+  test('a braced expression naming no secret declares nothing', () => {
+    expect(
+      extractSecretReferences(
+        `          A: \${{ format('{0}-{1}', inputs.ref, github.run_id) }}\n`,
+      ),
     ).toEqual([]);
   });
 });
