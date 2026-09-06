@@ -42,6 +42,7 @@ import {
   materialisationFailure,
   bareTaskFindings,
   clobberedConfigKeys,
+  createShimFindings,
   noCommandsDeclared,
   tarballFindings,
   taskFindings,
@@ -49,7 +50,7 @@ import {
 
 const REPO_ROOT = process.cwd();
 
-const DISTRIBUTED = ['devkit', 'repo-standards'];
+const DISTRIBUTED = ['devkit', 'repo-standards', 'create-lcabrera-stack'];
 
 const run = (command, args, cwd) =>
   execFileSync(command, args, {
@@ -196,14 +197,50 @@ const binFailures = ({ consumer, manifest }) =>
     return failure === undefined ? [] : [`${manifest.name}: ${failure}`];
   });
 
-const consumerStepFailure = ({ args, bin, consumer }) => {
+const gitIn = (cwd, args) => {
+  try {
+    return execFileSync('git', args, {
+      cwd,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }).trim();
+  } catch {
+    return '';
+  }
+};
+
+const consumerStepFailure = ({ args, bin, consumer, label = 'devkit' }) => {
   try {
     run(bin, args, consumer);
     return [];
   } catch (error) {
     const output = `${error.stdout ?? ''}${error.stderr ?? ''}`.trim();
     const detail = output === '' ? error.message : failureLine(output);
-    return [`\`devkit ${args.join(' ')}\` failed in the consumer: ${detail}`];
+    return [`\`${label} ${args.join(' ')}\` failed in the consumer: ${detail}`];
+  }
+};
+
+const shimFindings = (consumer) => {
+  const parent = mkdtempSync(join(tmpdir(), 'devkit-create-'));
+  try {
+    const failure = consumerStepFailure({
+      args: ['made', '--profile', 'agent'],
+      bin: join(consumer, 'node_modules', '.bin', 'create-lcabrera-stack'),
+      consumer: parent,
+      label: 'create-lcabrera-stack',
+    });
+    const made = join(parent, 'made');
+    return [
+      ...failure,
+      ...createShimFindings({
+        commitSubject: gitIn(made, ['log', '-1', '--pretty=%s']),
+        isRepository: existsSync(join(made, '.git')),
+        status: gitIn(made, ['status', '--porcelain']),
+        tracked: gitIn(made, ['ls-files']).split('\n'),
+      }),
+    ];
+  } finally {
+    rmSync(parent, { force: true, recursive: true });
   }
 };
 
@@ -294,6 +331,7 @@ const main = () => {
         materialised: materialisedModes(consumer),
       }),
       ...reinitConfigFindings(consumer),
+      ...shimFindings(consumer),
       ...bareTaskFindings({
         expected: BARE_TASKS,
         failures: bareTaskFailures(consumer),
@@ -323,7 +361,7 @@ const main = () => {
     ).length;
 
     process.stdout.write(
-      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, and \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, ${tasks} runnable task(s) wired.\n`,
+      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, ${tasks} runnable task(s) wired — and the \`create-lcabrera-stack\` initializer made a committed repository from an empty directory.\n`,
     );
   } finally {
     rmSync(staging, { force: true, recursive: true });

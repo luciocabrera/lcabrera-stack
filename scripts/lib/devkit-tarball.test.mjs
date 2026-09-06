@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   binsWithoutShebang,
   binStartupFailure,
+  createShimFindings,
   declaredBins,
   failureLine,
   materialisationFailure,
@@ -306,5 +307,42 @@ describe('noCommandsDeclared', () => {
     expect(
       noCommandsDeclared({ bin: { kit: './scripts/kit.mjs' }, name: 'p' }),
     ).toBeUndefined();
+  });
+});
+
+describe('createShimFindings', () => {
+  const good = {
+    commitSubject: 'chore: initialise the repository with devkit',
+    isRepository: true,
+    status: '',
+    tracked: ['devkit.config.json', '.devkit-manifest.json'],
+  };
+
+  it('accepts a repository that was made, filled and committed', () => {
+    expect(createShimFindings(good)).toEqual([]);
+  });
+
+  it('reports a run that left no repository, and says nothing else about it', () => {
+    expect(createShimFindings({ ...good, isRepository: false })).toEqual([
+      expect.stringContaining('left no git repository'),
+    ]);
+  });
+
+  it('reports a repository with no commit', () => {
+    expect(
+      createShimFindings({ ...good, commitSubject: '' }).join('\n'),
+    ).toContain('no commit');
+  });
+
+  it('reports a run that committed no config, which is a profile that placed nothing', () => {
+    expect(createShimFindings({ ...good, tracked: [] }).join('\n')).toContain(
+      'placed nothing',
+    );
+  });
+
+  it('reports anything left uncommitted, naming the first path', () => {
+    expect(
+      createShimFindings({ ...good, status: '?? stray.txt' }).join('\n'),
+    ).toContain('stray.txt');
   });
 });

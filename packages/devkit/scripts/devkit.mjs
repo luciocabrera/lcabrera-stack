@@ -10,6 +10,7 @@
  * package have diverged, and measure whether a directory can travel at all.
  *
  * Usage:
+ *   devkit create <directory> [--profile <name>]
  *   devkit init [--profile <name>] [--force] [--upgrade]
  *   devkit sync [--profile <name>]
  *   devkit doctor [--profile <name>] [--check] [--verbose]
@@ -22,11 +23,13 @@
  */
 
 import { runClosure } from './command-closure.mjs';
+import { runCreate } from './command-create.mjs';
 import { runInit } from './command-init.mjs';
 import { runDoctor, runSync } from './command-sync.mjs';
 
 const USAGE = [
   'usage:',
+  '  devkit create <directory> [--profile <name>]',
   '  devkit init [--profile <name>] [--force] [--upgrade]',
   '  devkit sync [--profile <name>]',
   '  devkit doctor [--profile <name>] [--check] [--verbose]',
@@ -37,6 +40,7 @@ const USAGE = [
 
 const COMMANDS = {
   closure: runClosure,
+  create: runCreate,
   doctor: runDoctor,
   init: runInit,
   sync: runSync,

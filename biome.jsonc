@@ -208,6 +208,7 @@
       // own narrower block, not this one.
       "includes": [
         "packages/api/**",
+        "packages/create-lcabrera-stack/**",
         "packages/devkit/**",
         "packages/eslint-local-rules/**",
         "packages/node-runtime/**",

@@ -80,6 +80,7 @@
   "publishing": {
     "publicPackageDirs": [
       "api",
+      "create-lcabrera-stack",
       "devkit",
       "eslint-local-rules",
       "node-runtime",

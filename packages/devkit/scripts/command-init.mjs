@@ -127,7 +127,7 @@ const materialise = ({ profile, root }) => {
   return entries;
 };
 
-const applyInit = ({ profile, root, upgrade }) => {
+export const applyInit = ({ profile, root, upgrade }) => {
   const runner = writeConfig({ profile, root, upgrade });
   const { added, skipped, warning } = writeTasks({ profile, root });
   const entries = materialise({ profile, root });

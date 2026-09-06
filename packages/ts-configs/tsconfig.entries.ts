@@ -266,4 +266,20 @@ export const configs = [
     ),
     filePath: path.resolve(workspaceRoot, 'packages/devkit/tsconfig.app.json'),
   },
+  {
+    // A published shim whose whole content is one `.mjs` bin that spawns
+    // devkit. It has no `exports` beyond its manifest, so the API-surface
+    // ratchet reads no entry here at all — `allowJs` is what makes tsc check
+    // the bin itself rather than skip the workspace.
+    config: withAllowJs(
+      createNodeTsConfig({
+        include: ['scripts', 'vite.config.ts'],
+        tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+      }),
+    ),
+    filePath: path.resolve(
+      workspaceRoot,
+      'packages/create-lcabrera-stack/tsconfig.app.json',
+    ),
+  },
 ] as const;

@@ -57,6 +57,14 @@ export const COVERAGE_REPORT_WORKSPACES = [
   // are pure; the filesystem is reached only by the thin command shells around
   // them, so the suite runs without one.
   { dir: 'packages/devkit', name: '@lcabrera/devkit', run: true },
+  // The published initializer, which is one spawn: its suite runs the bin and
+  // reads what the wrapped CLI printed, so the file itself is loaded in a child
+  // process and contributes no lines here (ADR-110).
+  {
+    dir: 'packages/create-lcabrera-stack',
+    name: 'create-lcabrera-stack',
+    run: true,
+  },
   // The convention spec and the four gates built on it: pure parsing and
   // validation, with the git and filesystem reads at the command edges.
   {
@@ -72,6 +80,7 @@ export const COVERAGE_REPORT_WORKSPACES = [
 
 export const COVERAGE_MERGE_WORKSPACES = [
   { dir: 'packages/api', name: '@lcabrera/api' },
+  { dir: 'packages/create-lcabrera-stack', name: 'create-lcabrera-stack' },
   { dir: 'packages/devkit', name: '@lcabrera/devkit' },
   { dir: 'packages/repo-standards', name: '@lcabrera/repo-standards' },
   { dir: 'packages/eslint-local-rules', name: '@lcabrera/eslint-plugin' },
