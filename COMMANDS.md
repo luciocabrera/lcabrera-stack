@@ -919,7 +919,7 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | `packages/tsconfig`              | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                                             |
 | `packages/eslint-local-rules`    | `@lcabrera/eslint-plugin`  | —                                                                                                                                    |
 | `packages/devkit`                | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                              |
-| `packages/create-lcabrera-stack` | `create-lcabrera-stack`    | —                                                                                                                                    |
+| `packages/create-lcabrera-stack` | `create-lcabrera-stack`    | `test`, `test:coverage`                                                                                                              |
 | `packages/repo-standards`        | `@lcabrera/repo-standards` | `test`, `test:coverage`                                                                                                              |
 | `packages/utils`                 | `@lcabrera/utils`          | —                                                                                                                                    |
 | `packages/vite-configs`          | `@lcabrera/vite-config`    | `build`, `test`, `test:coverage`                                                                                                     |

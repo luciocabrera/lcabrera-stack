@@ -72,6 +72,18 @@ export const gitBinary = () =>
     pathEntries: pathDirectories(),
   });
 
+const PATH_NAME = 'PATH';
+
+const isPathName = (name) => name.toUpperCase() === PATH_NAME;
+
+/**
+ * @param {Record<string, string | undefined>} env
+ * @returns {string} the spelling this environment already uses for PATH —
+ * Windows writes `Path`, and adding a second key beside it leaves which one
+ * the child reads undefined
+ */
+const pathNameIn = (env) => Object.keys(env).find(isPathName) ?? PATH_NAME;
+
 /**
  * @param {{ binary: string, env: Record<string, string | undefined> }} args
  * @returns {Record<string, string | undefined>}
@@ -79,10 +91,10 @@ export const gitBinary = () =>
 export const gitEnvironment = ({ binary, env }) =>
   Object.fromEntries([
     ...Object.entries(env).filter(
-      ([name]) => !GIT_REPOSITORY_VARIABLES.has(name),
+      ([name]) => !GIT_REPOSITORY_VARIABLES.has(name) && !isPathName(name),
     ),
     [
-      'PATH',
+      pathNameIn(env),
       [...new Set([dirname(binary), ...TRUSTED_GIT_DIRECTORIES])].join(
         delimiter,
       ),

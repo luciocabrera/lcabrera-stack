@@ -56,6 +56,17 @@ describe('gitEnvironment', () => {
     expect(PATH).not.toContain('/tmp/writable');
   });
 
+  test('writes PATH under the spelling the environment already uses', () => {
+    const windowsish = gitEnvironment({
+      binary: '/usr/bin/git',
+      env: { Path: '/tmp/writable' },
+    });
+    expect(
+      Object.keys(windowsish).filter((name) => name.toUpperCase() === 'PATH'),
+    ).toEqual(['Path']);
+    expect(windowsish.Path).not.toContain('/tmp/writable');
+  });
+
   test('names each directory once, however git was found', () => {
     const { PATH } = gitEnvironment({ binary: '/usr/bin/git', env: {} });
     const entries = PATH.split(':');
