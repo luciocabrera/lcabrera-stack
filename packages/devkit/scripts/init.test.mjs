@@ -130,18 +130,32 @@ describe('tasksFor', () => {
     });
   });
 
-  test('holds back the tasks whose inputs only arrive with the full profile', () => {
+  test('holds back the tasks whose inputs only arrive at the repo rung', () => {
     const agent = tasksFor({ availableBins: allBins, profile: 'agent' });
     expect(Object.hasOwn(agent, 'adr:verify')).toBe(false);
     expect(Object.hasOwn(agent, 'pr:verify')).toBe(false);
     expect(Object.hasOwn(agent, 'commit:verify')).toBe(true);
   });
 
-  test('the full profile adds them', () => {
-    const full = tasksFor({ availableBins: allBins, profile: 'full' });
-    expect(full['adr:verify']).toBe('repo-verify-adrs');
-    expect(full['adr:list']).toBe('repo-verify-adrs --list');
-    expect(full['pr:verify']).toBe('repo-verify-pr');
+  test('the repo rung adds them', () => {
+    const repo = tasksFor({ availableBins: allBins, profile: 'repo' });
+    expect(repo['adr:verify']).toBe('repo-verify-adrs');
+    expect(repo['adr:list']).toBe('repo-verify-adrs --list');
+    expect(repo['pr:verify']).toBe('repo-verify-pr');
+  });
+
+  test('a rung above repo writes every task repo writes', () => {
+    const repo = tasksFor({ availableBins: allBins, profile: 'repo' });
+    expect(tasksFor({ availableBins: allBins, profile: 'monorepo' })).toEqual(
+      repo,
+    );
+    expect(tasksFor({ availableBins: allBins, profile: 'full' })).toEqual(repo);
+  });
+
+  test('every gate task names a rung on the ladder', () => {
+    for (const task of Object.values(GATE_TASKS)) {
+      expect(['agent', 'repo']).toContain(task.rung);
+    }
   });
 
   test('an unknown profile writes nothing rather than everything', () => {

@@ -10,5 +10,13 @@
   "docs/coordination/tasks/_TEMPLATE.md": {
     "hash": "b84b438460be8932ede118d4c4be75357a79d0284e1245f4f3a82cfc8be5b31c",
     "reason": "same divergence as the register README: the seed's field guidance is generic, this one names this repository's gate and board commands and routes the plan field to the planning charter"
+  },
+  "docs/decisions/_TEMPLATE.md": {
+    "hash": "ed455636db7019374c76e0bd37cc50a88b74d5261e8a6fb672261770bd66d554",
+    "reason": "this repository authored its ADR template before the kit existed; the seed is the generalised version and this one names vp tasks, the baseline file and the one home settled here"
+  },
+  "docs/decisions/README.md": {
+    "hash": "a9d7ef2de41049296f40cc4598fcd867e20dc3efc74e665101bc110d6efbfce5",
+    "reason": "same divergence as the template: the seed's index header is generic, this one carries the home's title and blurb from devkit.config.json and names the vp tasks"
   }
 }

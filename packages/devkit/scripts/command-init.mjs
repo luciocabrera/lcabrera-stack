@@ -15,6 +15,7 @@ import {
   applyPlan,
   buildPlan,
   countsFor,
+  printPlacementNotice,
   renderPlan,
 } from './command-materialise.mjs';
 import {
@@ -136,6 +137,7 @@ const applyInit = ({ profile, root, upgrade }) => {
     readTextIfPresent(join(root, CONFIG_FILE_NAME)),
   ).paths.hooks;
 
+  printPlacementNotice(profile);
   console.log(renderPlan(entries));
   if (warning !== undefined) console.error(warning);
 

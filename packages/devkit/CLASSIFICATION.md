@@ -70,16 +70,15 @@ file, and may be assumed by anything placed there:
 | `monorepo` | Adds workspaces: several packages, a catalog, task fan-out, gates that read across packages. |
 | `full`     | Adds the application and its database.                                                       |
 
-Two of the four rungs are built. `PROFILES` in
-`packages/devkit/scripts/config.mjs` knows `agent` and `full`, and `withProfile`
-refuses any other name, so the profile column below is what #1073 executes rather
-than a description of what `devkit sync` places today. A row on `repo` or
-`monorepo` names a rung nothing implements yet. One row disagrees with a rung
-that is implemented: the `decisions` group is listed under `full` only, while
-both `decisions/*` seeds sit at `agent` below. The sorting rule gives `agent` —
-a record template and its home README are prose a directory holds, and neither
-needs git or a runner — so the grouping is what moves, and it moves with the
-ladder.
+All four rungs are accepted. `PROFILES` in
+`packages/devkit/scripts/config.mjs` is derived from the ladder, `withProfile`
+refuses any other name, and each gate task in `init.mjs` names the rung it lands
+on. `agent` and `repo` place groups; `monorepo` and `full` place what `repo`
+places until #1075 and #1078 land their content, and a run under either says so
+rather than reporting files it did not add. The `decisions` group sits at
+`agent`, where both `decisions/*` seeds are classified below: a record template
+and its home README are prose a directory holds, and neither needs git or a
+runner.
 
 **The sorting rule: a file lands on the lowest rung whose preconditions it can
 assume.** Ask what it would do with only the rung below. If it still does its

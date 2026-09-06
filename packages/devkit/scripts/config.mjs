@@ -31,18 +31,57 @@ export const DEFAULT_CONFIG = {
   profile: 'agent',
 };
 
-const AGENT_GROUPS = ['skills', 'rules', 'agents', 'docs', 'coordination'];
+/** @type {Record<string, string[]>} */
+const RUNG_GROUPS = {
+  agent: ['skills', 'rules', 'agents', 'docs', 'coordination', 'decisions'],
+  repo: ['templates', 'workflows', 'hooks', 'root'],
+  monorepo: [],
+  full: [],
+};
 
-export const PROFILES = {
-  agent: AGENT_GROUPS,
-  full: [
-    ...AGENT_GROUPS,
-    'decisions',
-    'templates',
-    'workflows',
-    'hooks',
-    'root',
-  ],
+export const PROFILE_LADDER = Object.keys(RUNG_GROUPS);
+
+const rungIndex = (name) => PROFILE_LADDER.indexOf(name);
+
+/**
+ * @param {{ profile: string, rung: string }} args
+ * @returns {boolean} whether `profile` is `rung` or a rung above it; `false`
+ * for a name off the ladder on either side
+ */
+export const includesRung = ({ profile, rung }) => {
+  const held = rungIndex(profile);
+  const asked = rungIndex(rung);
+  return held !== -1 && asked !== -1 && asked <= held;
+};
+
+export const PROFILES = Object.fromEntries(
+  PROFILE_LADDER.map((name) => [
+    name,
+    PROFILE_LADDER.filter((rung) =>
+      includesRung({ profile: name, rung }),
+    ).flatMap((rung) => RUNG_GROUPS[rung] ?? []),
+  ]),
+);
+
+/**
+ * @param {string} profile
+ * @returns {string | undefined} the lowest rung below `profile` placing the
+ * same groups, or `undefined` when `profile` places a group of its own
+ */
+export const rungPlacedAs = (profile) =>
+  PROFILE_LADDER.slice(0, Math.max(rungIndex(profile), 0)).find(
+    (rung) => PROFILES[rung].length === PROFILES[profile].length,
+  );
+
+/**
+ * @param {string} profile
+ * @returns {string | undefined} the line a run prints for a rung that places
+ * nothing of its own yet
+ */
+export const placementNotice = (profile) => {
+  const placedAs = rungPlacedAs(profile);
+  if (placedAs === undefined) return undefined;
+  return `The "${profile}" profile places what "${placedAs}" places — nothing above "${placedAs}" ships in this version.`;
 };
 
 const isPlainObject = (value) =>

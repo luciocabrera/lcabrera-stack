@@ -37,10 +37,33 @@ const ASSETS_DIR = join(
 
 const scratch = () => mkdtempSync(join(tmpdir(), 'devkit-exec-'));
 
+const REPO_COMMANDS = { check: 'true', install: 'true', test: 'true' };
+
+const scratchRepo = (commands = REPO_COMMANDS) => {
+  const root = scratch();
+  writeFileSync(
+    join(root, 'devkit.config.json'),
+    JSON.stringify({ commands, profile: 'repo' }),
+  );
+  return root;
+};
+
+const silenced = () => {
+  const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+  const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  return {
+    log,
+    restore: () => {
+      log.mockRestore();
+      error.mockRestore();
+    },
+  };
+};
+
 const plan = (assets, { manifest = { files: {} }, onDiskHash } = {}) =>
   planSync({
     assets,
-    config: { ...DEFAULT_CONFIG, profile: 'full' },
+    config: { ...DEFAULT_CONFIG, profile: 'repo' },
     manifest,
     onDiskHash: onDiskHash ?? (() => undefined),
   });
@@ -180,22 +203,10 @@ describe('the mode this package ships its hooks with', () => {
 });
 
 describe('through the command, not just the applier', () => {
-  const scratchRepo = () => {
-    const root = scratch();
-    writeFileSync(
-      join(root, 'devkit.config.json'),
-      JSON.stringify({
-        commands: { check: 'true', install: 'true', test: 'true' },
-        profile: 'full',
-      }),
-    );
-    return root;
-  };
-
   test('a second sync puts back a bit the tree lost', () => {
     const root = scratchRepo();
     const hook = join(root, '.githooks/pre-push');
-    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const { restore } = silenced();
 
     runSync([], root);
     expect(statSync(hook).mode & EXECUTABLE_BITS).not.toBe(0);
@@ -204,32 +215,44 @@ describe('through the command, not just the applier', () => {
     runSync([], root);
 
     expect(statSync(hook).mode & EXECUTABLE_BITS).not.toBe(0);
-    log.mockRestore();
+    restore();
   });
 });
 
 describe('doctor reads the same set sync wrote', () => {
   test('a file deleted from the wider profile is reported under that profile', () => {
-    const root = scratch();
-    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-    const error = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined);
+    const root = scratchRepo();
+    const { restore } = silenced();
 
-    writeFileSync(
-      join(root, 'devkit.config.json'),
-      JSON.stringify({
-        commands: { check: 'true', install: 'true', test: 'true' },
-        profile: 'full',
-      }),
-    );
     runSync([], root);
     rmSync(join(root, '.githooks/pre-push'));
 
-    expect(runDoctor(['--check', '--profile', 'full'], root)).toBe(1);
+    expect(runDoctor(['--check', '--profile', 'repo'], root)).toBe(1);
     expect(runDoctor(['--check', '--profile', 'agent'], root)).toBe(0);
 
-    log.mockRestore();
-    error.mockRestore();
+    restore();
+  });
+
+  test('a rung above repo reads the same set and says it adds nothing yet', () => {
+    const root = scratchRepo({ ...REPO_COMMANDS, audit: 'true' });
+    const { log, restore } = silenced();
+
+    runSync([], root);
+
+    expect(runDoctor(['--check', '--profile', 'monorepo'], root)).toBe(0);
+    expect(runDoctor(['--check', '--profile', 'full'], root)).toBe(0);
+    expect(
+      log.mock.calls
+        .flat()
+        .filter((line) => /places what "repo" places/.test(line)),
+    ).toEqual([
+      expect.stringMatching(/^The "monorepo" profile/),
+      expect.stringMatching(/^The "full" profile/),
+    ]);
+
+    rmSync(join(root, '.githooks/pre-push'));
+    expect(runDoctor(['--check', '--profile', 'full'], root)).toBe(1);
+
+    restore();
   });
 });

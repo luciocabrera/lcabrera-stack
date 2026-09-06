@@ -162,7 +162,10 @@ become two. The `/`-prefixed form is the one worth naming: `join` still writes i
 where it belongs, so the only symptom is closure reporting the file as an escape
 from a shipped set it is in.
 
-A profile is a list of those groups, and the split is by who reads the result:
-`agent` is what an agent reads, `full` adds what CI and git run. A group named by
-a profile with no `paths` entry is dropped from the plan without a word, which is
-why a test asserts every grouped name is placed.
+A profile is a rung on a ladder of those groups, each rung holding the one
+below it: `agent` is what an agent reads, `repo` adds what CI and git run, and
+`monorepo` and `full` sit above with no group of their own yet. Each gate task
+names the rung it lands on, and one containment check answers both which groups
+a profile places and which tasks it writes. A group named by a rung with no
+`paths` entry is dropped from the plan without a word, which is why a test
+asserts every grouped name is placed.
