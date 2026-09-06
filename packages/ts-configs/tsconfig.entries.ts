@@ -268,9 +268,12 @@ export const configs = [
   },
   {
     // A published shim whose whole content is one `.mjs` bin that spawns
-    // devkit. It has no `exports` beyond its manifest, so the API-surface
-    // ratchet reads no entry here at all — `allowJs` is what makes tsc check
-    // the bin itself rather than skip the workspace.
+    // devkit. It names no subpath in `exports`, so the API-surface ratchet
+    // reads no entry here today and tsc checks only this workspace's
+    // `vite.config.ts` — `allowJs` admits `.mjs` to the program but nothing
+    // sets `checkJs`, so the bin is not type-checked. It is set for the day a
+    // subpath IS added: without it ts-morph loads no `.mjs`, snapshots an
+    // empty surface and passes, which is the trap packages/CLAUDE.md records.
     config: withAllowJs(
       createNodeTsConfig({
         include: ['scripts', 'vite.config.ts'],

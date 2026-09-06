@@ -101,30 +101,47 @@ export const gitEnvironment = ({ binary, env }) =>
     ],
   ]);
 
-const execute = ({ args, cwd }) => {
-  const binary = gitBinary();
-  return execFileSync(binary, args, {
+/**
+ * @param {string | undefined} binary
+ * @returns {string} the same path; throws rather than letting `undefined` reach
+ * a spawn, where it reports as an argument-type error naming no cause
+ */
+export const requireGitBinary = (binary) => {
+  if (binary === undefined) {
+    throw new Error(
+      `no git executable in ${TRUSTED_GIT_DIRECTORIES.join(', ')}, nor anywhere on PATH`,
+    );
+  }
+  return binary;
+};
+
+const execute = ({ args, binary, cwd }) =>
+  execFileSync(binary, args, {
     cwd,
     encoding: 'utf8',
     env: gitEnvironment({ binary, env: process.env }),
     stdio: ['ignore', 'pipe', 'pipe'],
   }).trim();
-};
 
 /**
  * @param {{ args: string[], cwd: string }} args
  * @returns {string} stdout, trimmed; throws when git fails
  */
-export const runGit = ({ args, cwd }) => execute({ args, cwd });
+export const runGit = ({ args, cwd }) =>
+  execute({ args, binary: requireGitBinary(gitBinary()), cwd });
 
 /**
+ * A command that failed answers `''` — which is what an unset `git config` key
+ * means. A missing git does not: it is resolved before the `try`, so "no git on
+ * this machine" can never be read as "the key is unset".
+ *
  * @param {{ args: string[], cwd: string }} args
- * @returns {string} stdout, trimmed, or `''` for a command that failed — which
- * is what an unset `git config` key answers, not an error
+ * @returns {string}
  */
 export const readGit = ({ args, cwd }) => {
+  const binary = requireGitBinary(gitBinary());
   try {
-    return execute({ args, cwd });
+    return execute({ args, binary, cwd });
   } catch {
     return '';
   }

@@ -6,6 +6,7 @@ import {
   gitBinary,
   gitEnvironment,
   readGit,
+  requireGitBinary,
   resolveGit,
   runGit,
 } from './git-exec.mjs';
@@ -104,6 +105,16 @@ describe('finding git', () => {
     expect(
       resolveGit({ directories: ['/nowhere'], pathEntries: ['/nowhere/else'] }),
     ).toBeUndefined();
+  });
+});
+
+describe('requireGitBinary', () => {
+  test('passes a resolved path straight through', () => {
+    expect(requireGitBinary('/usr/bin/git')).toBe('/usr/bin/git');
+  });
+
+  test('names the cause instead of letting undefined reach the spawn', () => {
+    expect(() => requireGitBinary(undefined)).toThrow(/no git executable/);
   });
 });
 
