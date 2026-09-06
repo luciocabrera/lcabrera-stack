@@ -1,14 +1,19 @@
 {
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
   "entry": [
-    "scripts/**/*.{cjs,mjs,js}",
-    "packages/devkit/scripts/*.mjs",
-    "packages/repo-standards/scripts/*.mjs",
-    "packages/ui/scripts/*.mjs",
+    "scripts/build-review-payload.mjs",
+    "scripts/claude-autofix.mjs",
+    "scripts/claude-secrets-guard.mjs",
+    "scripts/pr-labels.mjs",
+    "scripts/release-notes.mjs",
+    "scripts/resolve-subject-pr.mjs",
+    "scripts/sync-project-status.mjs",
+    "scripts/verify-package-manager-pin.mjs",
+    "scripts/**/*.test.mjs",
+    "packages/*/scripts/**/*.test.mjs",
     "apps/showcase/lighthouse.config.js",
     "apps/showcase/config/*.ts",
-    "packages/ui/config/*.ts",
-    "apps/*/scripts/**/*.{ts,js,mjs}"
+    "packages/ui/config/*.ts"
   ],
   "ignorePatterns": [
     "**/build/**",
@@ -84,9 +89,10 @@
   "rules": {
     "circular-dependencies": "error",
     "unused-files": "error",
-    "unused-exports": "warn",
-    "unused-types": "warn",
-    "unused-dependencies": "warn",
+    "unused-exports": "error",
+    "unused-types": "error",
+    "unused-dependencies": "error",
+    "unused-dev-dependencies": "error",
     "prop-drilling": "error",
     "thin-wrapper": "error",
     "duplicate-prop-shape": "warn"
@@ -106,7 +112,20 @@
   ],
   "duplicates": {
     "mode": "mild",
-    "ignoreImports": true
+    "ignoreImports": true,
+    "ignoreDefaults": false,
+    "threshold": 0.001,
+    "ignore": [
+      "**/.next/**",
+      "**/.nuxt/**",
+      "**/.svelte-kit/**",
+      "**/.turbo/**",
+      "**/.parcel-cache/**",
+      "**/.vite/**",
+      "**/.cache/**",
+      "**/out/**",
+      "**/storybook-static/**"
+    ]
   },
   "audit": {
     "gate": "new-only",

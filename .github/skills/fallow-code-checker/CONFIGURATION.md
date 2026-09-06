@@ -10,10 +10,33 @@ every pnpm workspace — **never add per-app fallow configs or dependencies.**
 Scope any command's output with `-w`, e.g.
 `vp run fallow:dead-code -w 'apps/showcase'`.
 
-**Entry policy**: `entry` in `.fallowrc.json` is only for files invoked outside
-the import graph (root/app scripts, skill runner scripts, vite config fragments
-in `config/` dirs, CLIs run via `node`). Package/framework entry points are
-auto-detected — do not enumerate workspaces.
+**Entry policy.** Fallow derives most entry points itself: every file a
+`package.json` `scripts` block runs with `node` or `bash`, and every package's
+`bin`. `vp run fallow:full list --entry-points` prints the resolved roster
+(no `--` before `list`; fallow rejects it as an argument). `entry` in
+`.fallowrc.json` names only what fallow cannot see:
+
+- a script that a workflow, a Claude hook (`.claude/settings.json`) or a shell
+  script under `scripts/` runs with `node`, one line per file;
+- the `*.test.mjs` files under `scripts/` and `packages/*/scripts/`, as a
+  pattern, because fallow's vitest detection lists a `.test.js` planted in
+  `packages/utils/src` and not the `.test.mjs` planted beside it;
+- the Vite config fragments in `config/` directories and the Lighthouse config,
+  which a tool reads rather than imports.
+
+Never a glob over a source tree. An entry file's exports are all marked used,
+so `scripts/**/*.mjs` made every unused export under `scripts/` invisible and
+removing it moved the repository from single digits of unused exports to
+dozens (#1068, #1095). The CLI scripts stay entry points either way; what
+changed is that the library modules beside them are read like any other code.
+
+`scripts/lib/fallow-entries.test.mjs` keeps the hand-listed part honest from
+disk. Every `node scripts/...` invocation in a workflow, the Claude hooks or a
+root shell script must be a root `package.json` script (fallow sees it) or an
+exact `entry`; every exact `entry` under `scripts/` must exist and be invoked
+that way; every pattern must name test files or config fragments. Fallow does
+not warn about an entry that matches nothing (probed with a path that does not
+exist), so that test is the only thing that catches a stale line.
 
 Caution: fallow's `*` glob **crosses `/`**, so a pattern like `apps/*/config/**`
 also swallows `src/config/` files and silently masks real findings — keep
@@ -49,9 +72,91 @@ The commands live in
 [COMMANDS.md §4 → Fallow](../../../COMMANDS.md#fallow-static-analysis). Before a
 PR, run `vp run fallow:audit --base main`.
 
-CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fails
-only on newly-introduced dead code, complexity, or duplication; inherited debt is
-covered by baselines in `reports/fallow/baselines/`.
+CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`). It fails
+only on newly-introduced findings; inherited ones are attributed to the base
+snapshot fallow builds from `--base`. The tracked baselines in
+`reports/fallow/baselines/` are a second filter, not the first: the dead-code
+baseline records no findings and a clean tree still passes.
+
+The verdict fails (exit 1) only for a rule at `error` severity. A `warn` rule
+yields verdict `warn` and exit 0, which is how a new unused export passed the
+gate until `unused-exports`, `unused-types`, `unused-dependencies` and
+`unused-dev-dependencies` were raised to `error` (#1095). New-only attribution
+keeps the inherited ones from failing.
+
+A clone group has no entry in `rules`, so on its own an introduced one is
+warn-severity: the audit counts it under `duplication_introduced`, gives
+verdict `warn` and exits 0. `duplicates.threshold` is what makes it fail. The
+audit measures the groups it attributes to the change against the whole
+corpus's line count and ignores inherited ones (probed with a trivial edit to
+a test file carrying nine of them: verdict `pass`), so the value has to sit
+below one minimal group, `minLines` in two places, over the tree's line count.
+`0.001` does; `0` means no limit. `vp run fallow:dupes` reads the same
+threshold against the whole tree and exits 1 on the inherited groups; it is
+on demand, and `fallow:report` already tolerates that exit.
+
+## What the pull-request gate covers, and the plant that proved it
+
+Each row is a planted violation, observed, reverted and observed clean; the
+commands and their output are in the pull request for #1095. Repeat a row when
+the config or the fallow version moves. Run the audit as CI does:
+`fallow audit --base origin/main --coverage reports/fallow/coverage/coverage-final.json --format json --quiet`.
+
+| Analysis                  | Plant                                                                                                                                | Observed                                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| unused export             | `export const probeUnused = 1;` appended to `scripts/lib/affected-tests.mjs` and `packages/repo-standards/scripts/config-values.mjs` | `fallow dead-code` reports both; audit `fail`, exit 1                                                                                    |
+| unused file               | a new one-export module dropped into `scripts/lib/` and into `packages/repo-standards/scripts/`, imported by nothing                 | `unused_files` for both; audit `fail`                                                                                                    |
+| unused dependency         | `probe-unused-dep` added to `devDependencies` in the root and `packages/repo-standards` manifests                                    | `unused_dev_dependencies`; audit `fail`. Pass `--no-cache` when probing a manifest: the incremental cache once missed the workspace edit |
+| cycle                     | `affected-tests.mjs` and `ci-commands.mjs` import each other; same in `config-values.mjs` and `error-message.mjs`                    | `circular_dependencies` for both pairs; audit `fail`                                                                                     |
+| duplication, source files | one identical block appended to the two source files above                                                                           | `fallow dupes` clone group; audit `fail`, exit 1 under `duplicates.threshold`, and `warn`, exit 0 without it                             |
+| duplication, test files   | the same block appended to `scripts/lib/affected-tests.test.mjs` and `packages/repo-standards/scripts/config.test.mjs`               | nothing under `ignoreDefaults: true`; with it `false`, a `fallow dupes` clone group and audit `fail`, exit 1. See the next section       |
+| complexity                | a 22-branch function appended to the two source files above                                                                          | `fallow health` finding; audit `fail`. Under `scripts/**` `exceeded` is `both`, since only CRAP is relaxed there                         |
+| coverage gap              | an untested cyclomatic-7 function in `packages/utils`, that workspace's `test:coverage` re-run and fed                               | `exceeded: crap`, `coverage_source: istanbul`; audit `fail`. Unfed, the estimate passes it; with a test that covers it, it passes        |
+
+## Test files and duplication
+
+Fallow's built-in duplication ignore list drops test files, and
+`duplicates.ignoreDefaults: false` is the switch. The reference documents that
+list as generated-output globs (`**/.next/**`, `**/out/**` and the like) and
+says nothing about tests, so the exclusion was found by probe, not by
+reading: an identical block in two `*.test.mjs` files reports no clone group
+with the default and one with the switch off, while the clean tree reports the
+same source-file groups either way. `.fallowrc.json` sets the switch off and
+restates the documented globs under `duplicates.ignore`, so what is excluded
+is written where it can be read. An earlier version of this section
+said no key included test files; the fail→pass pair in the pull request for
+#1095 is what corrected it.
+
+With the switch off, the inherited test-file clone groups join the full scan
+(`vp run fallow:dupes` prints them) and the new-only gate attributes them to
+the base, so a clean tree still passes the audit.
+
+The corpus now matches Sonar's. The sensitivity does not, and PR #1090 is the
+measure. At `6fa3457b` Sonar failed `new_duplicated_lines_density` on
+`scripts/verify-harness-conformance.test.mjs`; with the switch off, fallow
+reports no group in that file at the configured `minTokens`, because the
+repeated `it()` blocks there are shorter than that floor in tokens.
+`fallow dupes --min-tokens 39` is the first setting that reports the pair, and
+the group count it prints for the whole tree is what that setting would cost.
+Lowering the floor to Sonar's sensitivity is a separate decision. Until it is
+made, Sonar's gate is the check for short repeated blocks in any file, and it
+stays required on every pull request; do not add a Sonar exclusion to make the
+two agree.
+
+## What stays on demand, and why
+
+`fallow health --coverage-gaps` is static and advisory (exit 0). A "test root"
+is what the vitest plugin discovered, so it lists `scripts/lib/affected-tests.mjs`
+as a gap although `affected-tests.test.mjs` imports it. The gated form of a
+coverage gap is the CRAP row above, which reads measured coverage.
+
+`vp run fallow:dead-code`, `fallow:health` and `fallow:dupes` scan the whole
+tree and exit 1 on the inherited findings the new-only gate attributes to the
+base. Run them before a PR anyway: a change that makes an export in an
+unchanged file unreachable is outside a changed-file audit's scope, and the
+full scan is the only thing that sees it. The findings the unblinded scan
+surfaces are listed in the pull request for #1095, not fixed there;
+`vp run fallow:dead-code` prints the current set.
 
 ## Always feed the audit real coverage
 
