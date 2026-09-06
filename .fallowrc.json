@@ -112,7 +112,20 @@
   ],
   "duplicates": {
     "mode": "mild",
-    "ignoreImports": true
+    "ignoreImports": true,
+    "ignoreDefaults": false,
+    "threshold": 0.001,
+    "ignore": [
+      "**/.next/**",
+      "**/.nuxt/**",
+      "**/.svelte-kit/**",
+      "**/.turbo/**",
+      "**/.parcel-cache/**",
+      "**/.vite/**",
+      "**/.cache/**",
+      "**/out/**",
+      "**/storybook-static/**"
+    ]
   },
   "audit": {
     "gate": "new-only",

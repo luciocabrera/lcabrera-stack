@@ -12,9 +12,9 @@ Scope any command's output with `-w`, e.g.
 
 **Entry policy.** Fallow derives most entry points itself: every file a
 `package.json` `scripts` block runs with `node` or `bash`, and every package's
-`bin`. `npx fallow list --entry-points` prints the resolved roster (no root
-script wraps the `list` subcommand). `entry` in `.fallowrc.json` names only
-what fallow cannot see:
+`bin`. `vp run fallow:full list --entry-points` prints the resolved roster
+(no `--` before `list`; fallow rejects it as an argument). `entry` in
+`.fallowrc.json` names only what fallow cannot see:
 
 - a script that a workflow, a Claude hook (`.claude/settings.json`) or a shell
   script under `scripts/` runs with `node`, one line per file;
@@ -84,6 +84,17 @@ gate until `unused-exports`, `unused-types`, `unused-dependencies` and
 `unused-dev-dependencies` were raised to `error` (#1095). New-only attribution
 keeps the inherited ones from failing.
 
+A clone group has no entry in `rules`, so on its own an introduced one is
+warn-severity: the audit counts it under `duplication_introduced`, gives
+verdict `warn` and exits 0. `duplicates.threshold` is what makes it fail. The
+audit measures the groups it attributes to the change against the whole
+corpus's line count and ignores inherited ones (probed with a trivial edit to
+a test file carrying nine of them: verdict `pass`), so the value has to sit
+below one minimal group, `minLines` in two places, over the tree's line count.
+`0.001` does; `0` means no limit. `vp run fallow:dupes` reads the same
+threshold against the whole tree and exits 1 on the inherited groups; it is
+on demand, and `fallow:report` already tolerates that exit.
+
 ## What the pull-request gate covers, and the plant that proved it
 
 Each row is a planted violation, observed, reverted and observed clean; the
@@ -97,26 +108,40 @@ the config or the fallow version moves. Run the audit as CI does:
 | unused file               | a new one-export module dropped into `scripts/lib/` and into `packages/repo-standards/scripts/`, imported by nothing                 | `unused_files` for both; audit `fail`                                                                                                    |
 | unused dependency         | `probe-unused-dep` added to `devDependencies` in the root and `packages/repo-standards` manifests                                    | `unused_dev_dependencies`; audit `fail`. Pass `--no-cache` when probing a manifest: the incremental cache once missed the workspace edit |
 | cycle                     | `affected-tests.mjs` and `ci-commands.mjs` import each other; same in `config-values.mjs` and `error-message.mjs`                    | `circular_dependencies` for both pairs; audit `fail`                                                                                     |
-| duplication, source files | one identical block appended to the two source files above                                                                           | `fallow dupes` clone group; `duplication_introduced`; audit `fail`                                                                       |
-| duplication, test files   | the same block appended to two `*.test.mjs` files                                                                                    | nothing, in any mode. See the next section                                                                                               |
+| duplication, source files | one identical block appended to the two source files above                                                                           | `fallow dupes` clone group; audit `fail`, exit 1 under `duplicates.threshold`, and `warn`, exit 0 without it                             |
+| duplication, test files   | the same block appended to `scripts/lib/affected-tests.test.mjs` and `packages/repo-standards/scripts/config.test.mjs`               | nothing under `ignoreDefaults: true`; with it `false`, a `fallow dupes` clone group and audit `fail`, exit 1. See the next section       |
 | complexity                | a 22-branch function appended to the two source files above                                                                          | `fallow health` finding; audit `fail`. Under `scripts/**` `exceeded` is `both`, since only CRAP is relaxed there                         |
 | coverage gap              | an untested cyclomatic-7 function in `packages/utils`, that workspace's `test:coverage` re-run and fed                               | `exceeded: crap`, `coverage_source: istanbul`; audit `fail`. Unfed, the estimate passes it; with a test that covers it, it passes        |
 
 ## Test files and duplication
 
-Fallow's duplication corpus skips test files, and nothing switches that off.
-An identical block planted in two `*.test.mjs` files, then in two `*.test.ts`
-files, reports no clone group in `mild`, `weak` or `semantic` mode, nor at
-`--min-lines 3 --min-tokens 20`; the same block in two source files reports
-one. `DuplicatesConfig` has no key that includes them and `--production` only
-narrows the corpus. That is why PR #1090 failed SonarCloud's
-`new_duplicated_lines_density` on `scripts/verify-harness-conformance.test.mjs`
-while `vp run fallow:audit` reported nothing: the duplicated `it()` blocks
-were in a file fallow never tokenized.
+Fallow's built-in duplication ignore list drops test files, and
+`duplicates.ignoreDefaults: false` is the switch. The reference documents that
+list as generated-output globs (`**/.next/**`, `**/out/**` and the like) and
+says nothing about tests, so the exclusion was found by probe, not by
+reading: an identical block in two `*.test.mjs` files reports no clone group
+with the default and one with the switch off, while the clean tree reports the
+same source-file groups either way. `.fallowrc.json` sets the switch off and
+restates the documented globs under `duplicates.ignore`, so what is excluded
+is written where it can be read. An earlier version of this section
+said no key included test files; the fail→pass pair in the pull request for
+#1095 is what corrected it.
 
-Sonar counts test files and its quality gate is required on every pull
-request, so it is the check for test-file duplication. Do not add a Sonar
-exclusion to make the two agree; fallow is the one that cannot see.
+With the switch off, the inherited test-file clone groups join the full scan
+(`vp run fallow:dupes` prints them) and the new-only gate attributes them to
+the base, so a clean tree still passes the audit.
+
+The corpus now matches Sonar's. The sensitivity does not, and PR #1090 is the
+measure. At `6fa3457b` Sonar failed `new_duplicated_lines_density` on
+`scripts/verify-harness-conformance.test.mjs`; with the switch off, fallow
+reports no group in that file at the configured `minTokens`, because the
+repeated `it()` blocks there are shorter than that floor in tokens.
+`fallow dupes --min-tokens 39` is the first setting that reports the pair, and
+the group count it prints for the whole tree is what that setting would cost.
+Lowering the floor to Sonar's sensitivity is a separate decision. Until it is
+made, Sonar's gate is the check for short repeated blocks in any file, and it
+stays required on every pull request; do not add a Sonar exclusion to make the
+two agree.
 
 ## What stays on demand, and why
 

@@ -25,6 +25,6 @@ prove every fallow check fires, including over the tooling trees
 
 ## Status / next
 
-- Current step: entries named, severities raised, probes recorded, gate running
+- Current step: round 2 — test files in the duplication corpus, threshold makes a new clone group fail, invocation reader split; gate running
 - Blockers: none
-- Next: push, PR body with the plant evidence and the unblinded findings
+- Next: push, PR body with the round-2 plant evidence and the inherited clone groups

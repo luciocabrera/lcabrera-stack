@@ -98,17 +98,19 @@ describe('fallow entries — every hand-listed entry earns its line', () => {
 });
 
 describe('scriptInvocationsIn', () => {
-  it('reads a root-relative script whether bare, quoted or behind a shell variable', () => {
+  it('reads a root-relative script whether bare, quoted, behind a shell variable or inside a substitution', () => {
     const text = [
       'run: node scripts/one.mjs --flag',
       '"command": "node \\"$CLAUDE_PROJECT_DIR/scripts/two.mjs\\""',
       'bash scripts/changed-files.sh node scripts/lib/three.cjs',
+      'labels=$(git diff --name-only | node scripts/four.mjs)',
     ].join('\n');
 
     expect(scriptInvocationsIn(text)).toEqual([
       'scripts/one.mjs',
       'scripts/two.mjs',
       'scripts/lib/three.cjs',
+      'scripts/four.mjs',
     ]);
   });
 
