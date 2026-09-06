@@ -76,8 +76,14 @@ it is a judgement, not a default:
 One workflow serves every gate rather than one each. There is a single mechanism
 here — recompute a review-gate status without the event that normally would — and
 a copy per gate would mean a schedule apiece to keep in step, and that many ways
-for one of them to stop running unnoticed. Adding a gate is one entry in the
-sweep's `GATES` list; it is deliberately not a new workflow.
+for one of them to stop running unnoticed. Adding a gate is one entry in
+`scripts/lib/review-gate-roster.mjs`; it is deliberately not a new workflow. Each
+entry spells its script from the repository root, because the gates no longer
+share a directory — one lives in `@lcabrera/repo-standards` — and a path that
+resolves to nothing fails twice over: the run reports the gate FAILED, and the
+gate's self-edit closure collapses to the missing path, so the withholding below
+stops firing for it. The roster is a module rather than a literal in the driver
+so the sweep and the test that checks it cannot hold different copies.
 
 ## What it will and will not publish
 
@@ -118,7 +124,7 @@ together and posts against **the head it read**. Three consequences:
   above needs some OTHER publisher to have posted the `success` from
   better-informed code. That holds for `Copilot review complete`, which
   `copilot-review-gate.yml` also runs on events, and it is the only gate that opts
-  in (`protectSuccess` in the sweep's `GATES`). It is **false** for
+  in (`protectSuccess` in `scripts/lib/review-gate-roster.mjs`). It is **false** for
   `Review threads resolved`: nothing in `.github/workflows/` invokes
   `verify-review-threads.mjs`, so the sweep is that context's only publisher and
   therefore always its best-informed one — and `decideThreadStatus` legitimately
@@ -230,7 +236,7 @@ What follows from it:
   working, not overreaching: it is code the gate runs. Read a closure rather than guessing
   at one — `localModuleClosure` is exported and the tests walk the real tree with it.
 - **The sweep's own driver is in every gate's closure, and no gate imports it.**
-  `reconcile-review-gates.mjs` decides what each gate run _is_ — `GATES` carries the
+  `reconcile-review-gates.mjs` decides what each gate run _is_ — the roster carries the
   `protectSuccess` flags and `gateArgs` turns them into `--protect-success` — so a pull
   request editing only the driver changes every gate run while matching nothing in any
   gate's own closure. Left out, that reopens #884 through the one file the walk cannot

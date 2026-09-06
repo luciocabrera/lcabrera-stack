@@ -89,6 +89,26 @@ export const verbatimList = (value, fallback) => {
   return entries.length > 0 ? entries : fallback;
 };
 
+const compiles = (source) => {
+  try {
+    RegExp(source, 'u');
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const patternList = (value, fallback, key) => {
+  const entries = verbatimList(value, fallback);
+  const broken = entries.filter((source) => !compiles(source));
+  if (broken.length > 0) {
+    throw new Error(
+      `${CONFIG_FILE_NAME}: \`${key}\` must hold regular expressions, but these do not compile: ${broken.join(', ')}.`,
+    );
+  }
+  return entries;
+};
+
 export const positiveInteger = (value, fallback, key) => {
   if (value === undefined) return fallback;
   if (!Number.isInteger(value) || value <= 0) {

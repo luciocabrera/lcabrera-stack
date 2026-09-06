@@ -33,7 +33,21 @@ const GRAPH = [
   },
 ];
 
-const affected = (files) => resolveAffected({ files, graph: GRAPH });
+const FIXTURE_GLOBAL_PACKAGES = ['@lcabrera/vite-config'];
+
+const FIXTURE_LINT_ONLY_PATTERNS = [
+  '^packages/vite-configs/eslint\\.',
+  '^packages/vite-configs/vite\\.(lint|fmt)\\.shared\\.config\\.ts$',
+  '(^|/)eslint\\.config\\.mjs$',
+];
+
+const affected = (files) =>
+  resolveAffected({
+    files,
+    globalPackages: FIXTURE_GLOBAL_PACKAGES,
+    graph: GRAPH,
+    lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
+  });
 
 describe('resolveAffected — lint-only carve-out', () => {
   it('selects nothing for an eslint-factory-only change in vite-configs', () => {
@@ -104,7 +118,13 @@ describe('resolveAffected — ordinary scoping is unchanged', () => {
 });
 
 describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () => {
-  const groupsFor = (files) => resolveTestGroups({ files, graph: GRAPH });
+  const groupsFor = (files) =>
+    resolveTestGroups({
+      files,
+      globalPackages: FIXTURE_GLOBAL_PACKAGES,
+      graph: GRAPH,
+      lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
+    });
   const scriptsGroup = (groups) =>
     groups.find(
       (group) => group.task === 'test:scripts' && group.packages.length === 0,
@@ -132,10 +152,7 @@ describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () =
   });
 
   it('detects a scripts test file, not just a source script', () => {
-    expect(
-      resolveAffected({ files: ['scripts/lib/foo.test.mjs'], graph: GRAPH })
-        .scripts,
-    ).toBe(true);
+    expect(affected(['scripts/lib/foo.test.mjs']).scripts).toBe(true);
   });
 
   it('adds no test:scripts group when scripts/ is untouched', () => {
@@ -145,14 +162,50 @@ describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () =
   });
 
   it('ignores a non-code file under scripts/ (docs, JSON data)', () => {
-    expect(
-      resolveAffected({ files: ['scripts/README.md'], graph: GRAPH }).scripts,
-    ).toBe(false);
+    expect(affected(['scripts/README.md']).scripts).toBe(false);
+    expect(affected(['scripts/script-size-baseline.json']).scripts).toBe(false);
+  });
+});
+
+describe('resolveAffected — the rosters are the caller’s to supply', () => {
+  it('refuses a run with no global packages rather than scoping it', () => {
+    expect(() =>
+      resolveAffected({
+        files: ['packages/vite-configs/vite.run.shared.config.ts'],
+        globalPackages: [],
+        graph: GRAPH,
+        lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
+      }),
+    ).toThrow(/globalPackages/u);
+  });
+
+  it('refuses a run that never mentions them at all', () => {
+    expect(() => resolveAffected({ files: [], graph: GRAPH })).toThrow(
+      /globalPackages/u,
+    );
+  });
+
+  it('forces the full run only for the packages it was handed', () => {
     expect(
       resolveAffected({
-        files: ['scripts/script-size-baseline.json'],
+        files: ['packages/utils/src/foo.ts'],
+        globalPackages: ['@lcabrera/utils'],
         graph: GRAPH,
-      }).scripts,
-    ).toBe(false);
+        lintOnlyPatterns: [],
+      }).mode,
+    ).toBe('full');
+    expect(affected(['packages/utils/src/foo.ts']).mode).toBe('scoped');
+  });
+
+  it('selects a lint-only file when no pattern drops it, never the reverse', () => {
+    expect(
+      resolveAffected({
+        files: ['packages/ui/eslint.config.mjs'],
+        globalPackages: FIXTURE_GLOBAL_PACKAGES,
+        graph: GRAPH,
+        lintOnlyPatterns: [],
+      }).mode,
+    ).toBe('scoped');
+    expect(affected(['packages/ui/eslint.config.mjs']).mode).toBe('none');
   });
 });

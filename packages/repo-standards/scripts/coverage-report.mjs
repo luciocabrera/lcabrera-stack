@@ -46,8 +46,9 @@ const execFileAsync = promisify(execFile);
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
+const GATES = readGates(REPO_ROOT);
 const { reportWorkspaces: REPORT_WORKSPACES, summaryFile: SUMMARY_FILE } =
-  readGates(REPO_ROOT).coverage;
+  GATES.coverage;
 const OUTPUT_PATH = join(REPO_ROOT, SUMMARY_FILE);
 
 const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
@@ -68,7 +69,9 @@ const reportedWorkspaces = () => {
     .filter(Boolean);
   const { mode, packages } = resolveAffected({
     files,
+    globalPackages: GATES.affectedTests.globalPackages,
     graph: readWorkspaceGraph(REPO_ROOT),
+    lintOnlyPatterns: GATES.affectedTests.lintOnlyPatterns,
   });
   if (mode === 'full') {
     return REPORT_WORKSPACES;

@@ -7,7 +7,7 @@ import {
   shouldPublishStatus,
   sweepSummary,
 } from './review-gate-reconcile.mjs';
-import { readRepoFile } from '../../../scripts/lib/workflow-inspect.mjs';
+import { REVIEW_GATES } from '../../../scripts/lib/review-gate-roster.mjs';
 
 const HEAD = 'ba4876dc51c6eb0f55401d60676e4fb215f4c015';
 const CONTEXT = 'Copilot review complete';
@@ -171,14 +171,8 @@ describe('deciding whether to publish', () => {
   });
 
   it('protects a success only for the gate that has another publisher', () => {
-    const source = readRepoFile('scripts/reconcile-review-gates.mjs');
-    const block = /const GATES = \[([\s\S]*?)\n\];/u.exec(source);
-    expect(block).not.toBeNull();
-
     const optIns = Object.fromEntries(
-      [...block[1].matchAll(/\{[^}]*name:\s*'([a-z-]+)'[^}]*\}/gu)].map(
-        (entry) => [entry[1], entry[0].includes('protectSuccess')],
-      ),
+      REVIEW_GATES.map((gate) => [gate.name, gate.protectSuccess === true]),
     );
 
     expect(optIns).toEqual({

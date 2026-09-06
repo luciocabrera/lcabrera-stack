@@ -182,8 +182,8 @@ that transitively **depends on** them — so a `packages/ui` edit still exercise
 `apps/showcase`. It prints a per-workspace summary of what runs and what is
 skipped. Only the few files that change how every workspace resolves its tests —
 `pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root `vite.config.ts`, and the
-shared config packages `GLOBAL_PACKAGES` names in
-[`packages/repo-standards/scripts/affected-tests.mjs`](packages/repo-standards/scripts/affected-tests.mjs) — force the
+shared config packages `gates.affectedTests.globalPackages` names in
+[`devkit.config.json`](devkit.config.json) — force the
 full suite (a real dependency change always bumps the lockfile). A change to a
 code file under root `scripts/` (`.mjs`, `.cjs` or `.js`) adds the
 `test:scripts` group, which no workspace selection would ever reach; every other

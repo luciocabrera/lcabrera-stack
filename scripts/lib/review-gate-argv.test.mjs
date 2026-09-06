@@ -13,6 +13,7 @@ import {
   gateArgs,
   PROTECT_SUCCESS_FLAG,
 } from '../../packages/repo-standards/scripts/review-gate-reconcile.mjs';
+import { REVIEW_GATES } from './review-gate-roster.mjs';
 import { readRepoFile } from './workflow-inspect.mjs';
 
 describe('the argv the sweep hands each gate', () => {
@@ -92,14 +93,11 @@ describe('the argv the sweep hands each gate', () => {
   });
 
   it('only lets a gate opt in if its script can read the flag', () => {
-    const sweep = readRepoFile('scripts/reconcile-review-gates.mjs');
-    const optedIn = [...sweep.matchAll(/\{[^}]*script:\s*'([\w.-]+)'[^}]*\}/gu)]
-      .filter((entry) => entry[0].includes('protectSuccess'))
-      .map((entry) => entry[1]);
+    const optedIn = REVIEW_GATES.filter((gate) => gate.protectSuccess === true);
 
     expect(optedIn).not.toHaveLength(0);
-    for (const script of optedIn) {
-      expect(readRepoFile(`scripts/${script}`)).toContain('publishGateStatus');
+    for (const { script } of optedIn) {
+      expect(readRepoFile(script)).toContain('publishGateStatus');
     }
   });
 

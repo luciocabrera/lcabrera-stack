@@ -33,6 +33,7 @@ import {
   runGroupsAsGate,
   runMain,
 } from './changed-runner.mjs';
+import { readGates } from './config.mjs';
 
 const MARKDOWN_TITLES = { typecheck: '🔎 Type-check Selection' };
 
@@ -48,7 +49,14 @@ const main = async () => {
 
   const files = readChangedFiles();
   const graph = readWorkspaceGraph(REPO_ROOT);
-  const { mode, packages, changed } = resolveAffected({ files, graph });
+  const { globalPackages, lintOnlyPatterns } =
+    readGates(REPO_ROOT).affectedTests;
+  const { mode, packages, changed } = resolveAffected({
+    files,
+    globalPackages,
+    graph,
+    lintOnlyPatterns,
+  });
   const groups = packages.length === 0 ? [] : [{ task, packages }];
   const dispositions = workspaceDispositions({
     graph,

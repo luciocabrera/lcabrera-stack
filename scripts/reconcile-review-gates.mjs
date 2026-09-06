@@ -46,6 +46,7 @@ import {
   sweepSummary,
   withheldResult,
 } from '../packages/repo-standards/scripts/review-gate-reconcile.mjs';
+import { REVIEW_GATES } from './lib/review-gate-roster.mjs';
 
 const SCRIPTS_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = dirname(SCRIPTS_DIR);
@@ -87,28 +88,12 @@ const fetchChangedFiles = ({ number, repository }) => {
   }
 };
 
-const GATES = [
-  // `protectSuccess` says this gate has ANOTHER publisher, so a `success` on the
-  // head may have come from better-informed code than this sweep is running (#868).
-  // Only true where a workflow also runs the gate: `copilot-review-gate.yml` runs
-  // this one on events. `verify-review-threads.mjs` is invoked by nothing else, so
-  // the sweep is its only publisher AND its verdict legitimately changes under a
-  // fixed head — it must keep its downgrade.
-  {
-    name: 'copilot-review',
-    protectSuccess: true,
-    script: 'copilot-review-status.mjs',
-  },
-  { name: 'agent-review', script: 'verify-agent-review.mjs' },
-  { name: 'review-threads', script: 'verify-review-threads.mjs' },
-];
-
 const gatesWithClosures = () =>
-  GATES.map((gate) => ({
+  REVIEW_GATES.map((gate) => ({
     ...gate,
     closure: gateClosure({
       driverEntry: DRIVER_MODULE,
-      entry: `scripts/${gate.script}`,
+      entry: gate.script,
       readFile: readRepoModule,
     }),
   }));
@@ -136,7 +121,7 @@ const runGate = ({ extraArgs, gate, number, repository }) => {
     number,
     protectSuccess: gate.protectSuccess === true,
     repository,
-    script: join(SCRIPTS_DIR, gate.script),
+    script: join(REPO_ROOT, gate.script),
   });
   try {
     const output = execFileSync(process.execPath, args, {

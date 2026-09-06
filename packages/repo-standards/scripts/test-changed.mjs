@@ -41,11 +41,15 @@ const main = async () => {
 
   const files = readChangedFiles();
   const graph = readWorkspaceGraph(REPO_ROOT);
+  const { coverageTaskPackage, globalPackages, lintOnlyPatterns } =
+    readGates(REPO_ROOT).affectedTests;
   const { mode, groups, packages, changed, scripts } = resolveTestGroups({
     files,
     graph,
     ci,
-    coverageTaskPackage: readGates(REPO_ROOT).affectedTests.coverageTaskPackage,
+    coverageTaskPackage,
+    globalPackages,
+    lintOnlyPatterns,
   });
   const dispositions = workspaceDispositions({
     graph,

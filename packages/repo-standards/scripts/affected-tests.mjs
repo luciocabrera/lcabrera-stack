@@ -6,12 +6,15 @@
  * (built from each package.json's `workspace:*` deps) to add transitive
  * dependents. Only the few files that change how every workspace resolves its
  * tests — the lockfile, the workspace manifest, the root Vite+ config, and the
- * shared config packages `GLOBAL_PACKAGES` names below — force the FULL suite;
- * every other out-of-workspace file (root package.json scripts, docs, tooling)
- * affects no suite and is ignored. Lint/format-only configs (the `vite-configs`
- * eslint/oxlint/oxfmt factories, any `eslint.config.mjs`) are dropped before
- * selection and force nothing — the linters gate them on every PR regardless
- * (see `LINT_ONLY_PATTERNS`).
+ * shared config packages `gates.affectedTests.globalPackages` names — force the
+ * FULL suite; every other out-of-workspace file (root package.json scripts,
+ * docs, tooling) affects no suite and is ignored. Which packages those are is
+ * the repository's own data, so an empty roster is refused: selecting a scoped
+ * run where the full one was due leaves the dependents untested and reports a
+ * plausible subset. `gates.affectedTests.lintOnlyPatterns` is the opposite case
+ * — a file matching one is dropped before selection because the linters gate it
+ * on every pull request anyway, so an empty list only ever over-selects and is
+ * accepted.
  *
  * The per-workspace task substitution mirrors `test:ci` exactly so the two never
  * diverge: in CI mode the configured coverage workspace
@@ -32,12 +35,6 @@ import { join } from 'node:path';
 
 import { deriveWorkspaces, workspacesForFiles } from './workspace-scopes.mjs';
 
-const GLOBAL_PACKAGES = new Set([
-  '@lcabrera/tsconfig',
-  '@repo/ts-configs',
-  '@lcabrera/vite-config',
-]);
-
 const FORCE_FULL_PATTERNS = [
   /^pnpm-lock\.yaml$/,
   /^pnpm-workspace\.yaml$/,
@@ -49,14 +46,11 @@ const forcesFullRun = (files) =>
     FORCE_FULL_PATTERNS.some((pattern) => pattern.test(file)),
   );
 
-const LINT_ONLY_PATTERNS = [
-  /^packages\/vite-configs\/eslint\./,
-  /^packages\/vite-configs\/vite\.(lint|fmt)\.shared\.config\.ts$/,
-  /(^|\/)eslint\.config\.mjs$/,
-];
+const compiledPatterns = (sources) =>
+  sources.map((source) => new RegExp(source, 'u'));
 
-const isLintOnly = (file) =>
-  LINT_ONLY_PATTERNS.some((pattern) => pattern.test(file));
+const isLintOnly = (file, patterns) =>
+  patterns.some((pattern) => pattern.test(file));
 
 export const SCRIPTS_TEST_TASK = 'test:scripts';
 
@@ -136,8 +130,20 @@ export const partitionTasks = (
   ].filter((group) => group.packages.length > 0);
 };
 
-export const resolveAffected = ({ files, graph }) => {
-  const relevant = files.filter((file) => !isLintOnly(file));
+export const resolveAffected = ({
+  files,
+  globalPackages,
+  graph,
+  lintOnlyPatterns = [],
+}) => {
+  if (globalPackages === undefined || globalPackages.length === 0) {
+    throw new Error(
+      '`gates.affectedTests.globalPackages` names no package in devkit.config.json — refusing to select tests, because a change to a shared config package would then be scoped and its dependents would go untested.',
+    );
+  }
+  const lintOnly = compiledPatterns(lintOnlyPatterns);
+  const global = new Set(globalPackages);
+  const relevant = files.filter((file) => !isLintOnly(file, lintOnly));
   const scripts = touchesScripts(relevant);
   if (relevant.length === 0) {
     return { mode: 'none', packages: [], changed: [], scripts };
@@ -146,9 +152,7 @@ export const resolveAffected = ({ files, graph }) => {
   const changed = changedWorkspaces.map((workspace) => workspace.pkgName);
   const forceFull =
     forcesFullRun(relevant) ||
-    changedWorkspaces.some((workspace) =>
-      GLOBAL_PACKAGES.has(workspace.pkgName),
-    );
+    changedWorkspaces.some((workspace) => global.has(workspace.pkgName));
   if (forceFull) {
     return {
       mode: 'full',
@@ -169,10 +173,14 @@ export const resolveTestGroups = ({
   graph,
   ci = false,
   coverageTaskPackage,
+  globalPackages,
+  lintOnlyPatterns,
 }) => {
   const { mode, packages, changed, scripts } = resolveAffected({
     files,
+    globalPackages,
     graph,
+    lintOnlyPatterns,
   });
   const groups = partitionTasks(packages, { ci, coverageTaskPackage });
   if (scripts) {

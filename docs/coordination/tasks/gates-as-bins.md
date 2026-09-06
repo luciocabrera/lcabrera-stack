@@ -18,7 +18,10 @@ area:
   - reports/api-surface/repo-standards.txt
   - .changeset/gates-as-bins.md
   - packages/devkit/CLASSIFICATION.md
+  - devkit.config.json
+  - AGENTS.md
   - docs/tooling/coverage-reporting.md
+  - docs/tooling/review-gate-reconcile.md
   - .github/skills/fallow-code-checker/CONFIGURATION.md
 started: 2026-09-06
 updated: 2026-09-06
@@ -34,7 +37,8 @@ expose the gates as bins and drop the root wrappers
 ## Status / next
 
 - Current step: round 2 — the coverage tasks feed `--changed` on stdin again,
-  and the review threads on #1099 are answered
+  the repository facts left in `affected-tests.mjs` are config, and every review
+  thread on #1099 is answered
 - Blockers: none
 - Next: verifier round; `#1096` (the TypeScript port) runs as its own claim
   immediately after this one merges, so this issue moves the files as `.mjs`

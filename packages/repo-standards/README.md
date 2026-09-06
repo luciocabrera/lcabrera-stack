@@ -269,7 +269,11 @@ hardcode:
       ]
     },
     "eslintPass": { "probeWorkspaces": ["packages/ui"] },
-    "affectedTests": { "coverageTaskPackage": "" },
+    "affectedTests": {
+      "coverageTaskPackage": "",
+      "globalPackages": ["@scope/tsconfig", "@scope/vite-config"],
+      "lintOnlyPatterns": ["(^|/)eslint\\.config\\.mjs$"]
+    },
     "lintReport": { "reportsDir": "reports" },
     "reactDoctor": { "reportFile": "reports/react-doctor/full-latest.json" },
     "usageReport": { "outDir": "reports/usage" },
@@ -282,13 +286,22 @@ The blocks from `commandsDoc` down carry what the tree-reading gates read. Each
 file-path key defaults to the conventional location shown and is held to the
 same containment rule as every other path here. The workspace rosters —
 `inventory.trees`, `coverage.mergeWorkspaces`, `coverage.reportWorkspaces`,
-`eslintPass.probeWorkspaces` and `affectedTests.coverageTaskPackage` — default
-to nothing, for the reason `publicPackageDirs` does: which workspaces a gate
-visits is the repository's own data. `repo-verify-inventory`,
-`repo-merge-coverage`, `repo-coverage-report` and `repo-verify-eslint-pass`
-refuse an empty roster rather than passing over no workspaces, and an empty
-`coverageTaskPackage` means no workspace runs a separate coverage task under
-`repo-test-changed --ci`.
+`eslintPass.probeWorkspaces` and `affectedTests.globalPackages` — default to
+nothing, for the reason `publicPackageDirs` does: which workspaces a gate visits
+is the repository's own data. `repo-verify-inventory`, `repo-merge-coverage`,
+`repo-coverage-report`, `repo-verify-eslint-pass` and the change-scoped runners
+refuse an empty roster rather than passing over no workspaces.
+
+`affectedTests` carries the two that are not rosters of workspaces to visit.
+`globalPackages` names the shared config packages whose change must force the
+full run instead of a scoped one — that is the refusing one, because scoping a
+run that was due in full leaves the dependents untested and still reports a
+plausible subset. `lintOnlyPatterns` holds regular-expression sources matched
+against changed paths, and a file matching one is dropped before selection
+because the linters gate it on every pull request anyway; an empty list only
+ever over-selects, so it is accepted. An empty `coverageTaskPackage` means no
+workspace runs a separate coverage task under `repo-test-changed --ci`, which is
+likewise a valid answer rather than a refusal.
 
 Four things about it are easy to get wrong.
 

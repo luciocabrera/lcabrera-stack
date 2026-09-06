@@ -28,9 +28,14 @@ defaults to the conventional location and is validated as repo-relative. The
 workspace rosters (`coverage.mergeWorkspaces`, `coverage.reportWorkspaces`,
 `eslintPass.probeWorkspaces`, `inventory.trees`) default to nothing, and a gate
 handed an empty roster refuses to pass rather than passing over no workspaces.
-`affectedTests.coverageTaskPackage` is not one of them: it names the single
-workspace whose coverage task substitutes for its plain one, and no value means
-no substitution rather than a refusal.
+`affectedTests.globalPackages` joins them: it names the shared config packages
+whose change must force the full run, and an empty one is refused because a
+scoped run in their place leaves the dependents untested while still reporting a
+plausible subset. Its two neighbours are accepted empty on purpose —
+`affectedTests.lintOnlyPatterns` (regular-expression sources for the paths the
+linters already gate, whose absence only over-selects) and
+`affectedTests.coverageTaskPackage` (one workspace, whose absence means no task
+substitution).
 
 Two of the bins read their input rather than resolving it: under `--changed`,
 `repo-merge-coverage` and `repo-coverage-report` take the changed-file list on

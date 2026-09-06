@@ -7,17 +7,26 @@
  * Split from `config.mjs` by size only; `readGates` returns both halves as one
  * block. The workspace rosters default to nothing, like `publicPackageDirs`:
  * a roster is the repository's own data, and each gate that reads one refuses
- * an empty roster rather than passing over no workspaces.
+ * an empty roster rather than passing over no workspaces. A pattern roster is
+ * held as regular-expression sources and compiled by its gate; this validates
+ * that each one compiles, so a typo fails at read time rather than by matching
+ * nothing.
  */
 
 import {
   isPlainObject,
+  patternList,
   readableString,
   repoRelative,
+  verbatimList,
 } from './config-values.mjs';
 
 export const DEFAULT_TREE_GATES = {
-  affectedTests: { coverageTaskPackage: '' },
+  affectedTests: {
+    coverageTaskPackage: '',
+    globalPackages: [],
+    lintOnlyPatterns: [],
+  },
   commandsDoc: { file: 'COMMANDS.md' },
   coverage: {
     mergeWorkspaces: [],
@@ -105,6 +114,15 @@ export const resolveTreeGates = (gates) => {
       coverageTaskPackage: readableString(
         affectedTests.coverageTaskPackage,
         defaults.affectedTests.coverageTaskPackage,
+      ),
+      globalPackages: verbatimList(
+        affectedTests.globalPackages,
+        defaults.affectedTests.globalPackages,
+      ),
+      lintOnlyPatterns: patternList(
+        affectedTests.lintOnlyPatterns,
+        defaults.affectedTests.lintOnlyPatterns,
+        'gates.affectedTests.lintOnlyPatterns',
       ),
     },
     commandsDoc: {

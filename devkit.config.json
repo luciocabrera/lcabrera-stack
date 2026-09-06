@@ -187,7 +187,17 @@
       "probeWorkspaces": ["packages/ui", "packages/vite-configs"]
     },
     "affectedTests": {
-      "coverageTaskPackage": "showcase"
+      "coverageTaskPackage": "showcase",
+      "globalPackages": [
+        "@lcabrera/tsconfig",
+        "@lcabrera/vite-config",
+        "@repo/ts-configs"
+      ],
+      "lintOnlyPatterns": [
+        "^packages/vite-configs/eslint\\.",
+        "^packages/vite-configs/vite\\.(lint|fmt)\\.shared\\.config\\.ts$",
+        "(^|/)eslint\\.config\\.mjs$"
+      ]
     }
   },
   "registers": {
