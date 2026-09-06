@@ -47,6 +47,16 @@ bounds the promise instead of implying a portability nothing here tests. A
 consumer on a different framework or styling system is not an unlucky consumer.
 They were never a consumer.
 
+Node is the one version the stack states, and it is stated because it is a floor
+a reader has to clear rather than a pin to match. A package that ships a bin
+hands that file to the consumer's Node with nothing of ours in between, so the
+runtime is a precondition of using it. Each such package declares the floor in
+its own `engines.node`, which is the only place the number lives, and
+`vp run tarball:verify` reads the packed manifest and reports one that declares
+bins without it.
+[ADR-110](../decisions/ADR-110-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md)
+is the decision and says what the floor costs.
+
 One rule follows and it is load-bearing. A package may assume the stack. It may
 not assume anything a bootstrapper wrote, which is the existing "no relying on a
 consumer's tsconfig `paths`" rule one level up.

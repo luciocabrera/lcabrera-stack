@@ -27,7 +27,7 @@
     "assets",
     "scripts",
     "CHANGELOG.md",
-    "!scripts/**/*.test.mjs",
+    "!scripts/**/*.test.*",
     "!scripts/**/*.md"
   ],
   "type": "module",
@@ -69,5 +69,8 @@
     "@lcabrera/repo-standards": {
       "optional": true
     }
+  },
+  "engines": {
+    "node": ">=26"
   }
 }

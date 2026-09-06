@@ -126,6 +126,30 @@ export const materialisationFailure = ({ manifestFiles, presentPaths }) => {
     : `\`devkit sync\` recorded ${absent.length} file(s) the tree does not hold, starting with \`${absent.toSorted((left, right) => left.localeCompare(right))[0]}\``;
 };
 
+/**
+ * Whether a packed manifest that declares bins says which Node they need.
+ *
+ * A bin is executed by the consumer's Node straight out of `node_modules/.bin`,
+ * with none of this repository's toolchain in front of it, so the runtime it was
+ * written for is a precondition an installer can act on and prose cannot
+ * (ADR-110). Without `engines.node` the first sign of a mismatch is the bin
+ * failing after it is already installed.
+ *
+ * The packed manifest is what is read, not the workspace one: `files` and
+ * `publishConfig` differ between them, and only the packed one reaches an
+ * installer.
+ *
+ * A package declaring no bins is not asked, because nothing of it is executed.
+ *
+ * @param {{ bin?: Record<string, string>, engines?: { node?: string }, name: string }} manifest
+ */
+export const binsWithoutNodeFloor = (manifest) =>
+  declaredBins(manifest).length === 0 || manifest.engines?.node !== undefined
+    ? []
+    : [
+        `${manifest.name} declares ${declaredBins(manifest).length} bin(s) and no \`engines.node\` in the packed manifest, so nothing holds a consumer to the Node they were written for`,
+      ];
+
 export const noCommandsDeclared = (manifest) =>
   declaredBins(manifest).length === 0
     ? `${manifest.name} declares no bins in the packed manifest, so there is nothing for a consumer to run`

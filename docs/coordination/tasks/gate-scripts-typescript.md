@@ -9,18 +9,18 @@ area:
   - packages/devkit/package.json
   - .claude/rules/scripts.md
   - .claude/rules/typescript.md
-  - devkit.config.json
   - docs/decisions/ADR-*.md
   - docs/product/**
   - reports/api-surface/repo-standards.txt
-  - reports/api-surface/devkit.txt
   - .changeset/*.md
-  - packages/ts-configs/tsconfig.entries.ts
   - scripts/verify-devkit-tarball.mjs
+  - scripts/lib/devkit-tarball*.mjs
+  - AGENTS.md
+  - packages/CLAUDE.md
 started: 2026-09-06
 updated: 2026-09-06
 plan: (none)
-pr: (none)
+pr: '#1102'
 issue: #1096
 ---
 
@@ -30,6 +30,7 @@ port the gate scripts to TypeScript as they move into the packages
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: the delivery decision is recorded in ADR-110 and the work that
+  does not depend on the port is landing
 - Blockers: none
-- Next:
+- Next: the port itself does not proceed as scoped — see ADR-110 and the PR body

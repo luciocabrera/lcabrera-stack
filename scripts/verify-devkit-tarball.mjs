@@ -22,6 +22,7 @@
 import { execFileSync } from 'node:child_process';
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -30,10 +31,11 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, relative } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import process from 'node:process';
 
 import {
+  binsWithoutNodeFloor,
   binsWithoutShebang,
   binStartupFailure,
   declaredBins,
@@ -171,10 +173,22 @@ const reinitConfigFindings = (consumer) => {
   });
 };
 
+const OVERSIZED_LINES = 400;
+
+const oversizedScript = () =>
+  `${Array.from(
+    { length: OVERSIZED_LINES },
+    (_unused, index) => `export const value${index} = ${index};`,
+  ).join('\n')}\n`;
+
 const GATE_BINS = [
   {
     name: 'repo-verify-script-exits',
     plant: { file: 'planted-exit.mjs', source: 'process.exit(1);\n' },
+  },
+  {
+    name: 'repo-verify-script-size',
+    plant: { file: 'scripts/planted-oversized.ts', source: oversizedScript() },
   },
 ];
 
@@ -195,6 +209,7 @@ const gateBinFailures = (consumer) =>
     const bin = join(consumer, 'node_modules', '.bin', name);
     const clean = runBin({ bin, consumer });
     const plantedPath = join(consumer, plant.file);
+    mkdirSync(dirname(plantedPath), { recursive: true });
     writeFileSync(plantedPath, plant.source);
     try {
       const planted = runBin({ bin, consumer });
@@ -293,6 +308,7 @@ const main = () => {
         manifest,
         readPackedFile: packedFileReader(tarball),
       }),
+      ...binsWithoutNodeFloor(manifest),
     ]);
 
     run(

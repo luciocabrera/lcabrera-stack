@@ -86,7 +86,28 @@ by inspection:
   the entry file through that config, and without the flag it loads no `.mjs`,
   snapshots an empty surface, and passes. Untyped JavaScript still yields a real
   surface — export names, arity and inferred shapes — so the ratchet catches a
-  removed or reshaped export.
+  removed or reshaped export. **Where the flag protects you and where it does
+  not** is worth stating exactly, because the two look identical from a green
+  run. Drop `allowJs` from a package whose committed snapshot already holds a
+  surface and `api-surface:verify` fails, listing every export as removed —
+  checked by deleting the key from `packages/repo-standards/tsconfig.app.json`
+  and running the gate. Take the **first** snapshot of a new `.mjs` package
+  without the flag and it records nothing, after which an empty surface and a
+  correct one are the same file forever. So the thing to check when a package
+  joins the roster is that its snapshot is not empty; nothing else will.
+- **A package that ships a `bin` declares `engines.node`, and ships that bin as
+  JavaScript.** A bin is the one published artifact a consumer's Node executes
+  as it is, out of `node_modules/.bin`, so the runtime it needs is a
+  precondition an installer can act on rather than a sentence in a README. A
+  `.ts` bin is not a slower option, it is a broken one: Node refuses to strip
+  types anywhere under `node_modules`
+  (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`), and running the same file
+  from the source directory is what makes the opposite look true. The floor is a
+  floor and not a band — an upper bound on a published package is a breakage
+  scheduled for whenever the next Node major ships. `vp run tarball:verify`
+  reads the **packed** manifest and reports a package that declares bins with no
+  floor. The decision is
+  [ADR-110](../docs/decisions/ADR-110-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md).
 - **Shipping source changes how `@lcabrera/ui` may import itself, and the rule is
   not cosmetic.** A consumer compiles _our_ files, so every self-reference in
   them resolves through our own `exports` map. A wildcard target is a directory

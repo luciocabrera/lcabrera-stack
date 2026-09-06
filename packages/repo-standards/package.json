@@ -69,8 +69,8 @@
   "files": [
     "scripts",
     "CHANGELOG.md",
-    "!scripts/**/*.test.mjs",
-    "!scripts/**/*-fixtures.mjs",
+    "!scripts/**/*.test.*",
+    "!scripts/**/*-fixtures.*",
     "!scripts/**/*.md"
   ],
   "type": "module",
@@ -138,5 +138,8 @@
     "vite": "catalog:build",
     "vite-plus": "catalog:build",
     "vitest": "catalog:test"
+  },
+  "engines": {
+    "node": ">=26"
   }
 }

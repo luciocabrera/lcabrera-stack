@@ -34,13 +34,12 @@ import {
   baselineFor,
   countCodeLines,
   findingsFor,
+  isToolingScript,
 } from './script-size.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
-
-const SCRIPT_FILE = /\.[mc]js$/;
 
 const toPosix = (value) => value.replaceAll('\\', '/');
 
@@ -52,9 +51,8 @@ const findScripts = ({ directory, skipped }) =>
         ? []
         : findScripts({ directory: full, skipped });
     }
-    return SCRIPT_FILE.test(entry.name)
-      ? [toPosix(relative(REPO_ROOT, full))]
-      : [];
+    const path = toPosix(relative(REPO_ROOT, full));
+    return isToolingScript(path) ? [path] : [];
   });
 
 const measure = (skipped) =>
