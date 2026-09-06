@@ -104,6 +104,14 @@ describe('extractSecretReferences', () => {
     ).toEqual([{ fallback: false, line: 1, name: 'PUBLISH_TOKEN' }]);
   });
 
+  test('a commented-out line declares no secret', () => {
+    expect(
+      extractSecretReferences(
+        `#          TOKEN: \${{ secrets.PUBLISH_TOKEN }}\n          A: \${{ secrets.LIVE }}\n`,
+      ),
+    ).toEqual([{ fallback: false, line: 2, name: 'LIVE' }]);
+  });
+
   test('a braced expression naming no secret declares nothing', () => {
     expect(
       extractSecretReferences(

@@ -65,6 +65,7 @@ export const extractRunScripts = (content) => {
 
 const expressionsIn = (line) => {
   const bodies = [];
+  if (line.trimStart().startsWith('#')) return bodies;
   let open = line.indexOf('${{');
   while (open !== -1) {
     const close = line.indexOf('}}', open + 3);
