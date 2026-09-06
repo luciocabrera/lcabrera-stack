@@ -8,7 +8,6 @@
  * drift on the day it was made.
  */
 
-import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 
@@ -22,29 +21,21 @@ import {
   createRefusal,
   createSummary,
   initialManifest,
+  missingGitRefusal,
   packageNameFor,
   unfinishedNotice,
 } from './create.mjs';
+import {
+  TRUSTED_GIT_DIRECTORIES,
+  gitBinary,
+  readGit,
+  runGit,
+} from './git-exec.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
 
-const git = (args, cwd) =>
-  execFileSync('git', args, {
-    cwd,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-
-const gitConfigValue = ({ cwd, key }) => {
-  try {
-    return git(['config', '--get', key], cwd).trim();
-  } catch {
-    return '';
-  }
-};
-
 const identityIn = (cwd) => ({
-  email: gitConfigValue({ cwd, key: 'user.email' }),
-  name: gitConfigValue({ cwd, key: 'user.name' }),
+  email: readGit({ args: ['config', '--get', 'user.email'], cwd }),
+  name: readGit({ args: ['config', '--get', 'user.name'], cwd }),
 });
 
 const enclosingRepositoryOf = (absolute) =>
@@ -72,7 +63,10 @@ const resolvedProfile = (flagged) => {
 
 const scaffold = ({ absolute, profile, target }) => {
   mkdirSync(absolute, { recursive: true });
-  git(['init', '--quiet', '--initial-branch', CREATE_BRANCH, '.'], absolute);
+  runGit({
+    args: ['init', '--quiet', '--initial-branch', CREATE_BRANCH, '.'],
+    cwd: absolute,
+  });
   writeFileSync(
     join(absolute, 'package.json'),
     `${JSON.stringify(initialManifest({ name: packageNameFor(basename(absolute)) }), undefined, 2)}\n`,
@@ -84,17 +78,17 @@ const scaffold = ({ absolute, profile, target }) => {
     return code;
   }
 
-  git(['add', '-A'], absolute);
-  git(
-    [
+  runGit({ args: ['add', '-A'], cwd: absolute });
+  runGit({
+    args: [
       ...commitIdentityArgs(identityIn(absolute)),
       'commit',
       '--quiet',
       '-m',
       INITIAL_COMMIT_MESSAGE,
     ],
-    absolute,
-  );
+    cwd: absolute,
+  });
 
   console.log(`\n${createSummary({ branch: CREATE_BRANCH, target })}`);
   return 0;
@@ -125,6 +119,11 @@ export const runCreate = (argv, root) => {
   });
   if (refusal !== undefined) {
     console.error(refusal);
+    return 1;
+  }
+
+  if (gitBinary() === undefined) {
+    console.error(missingGitRefusal({ searched: TRUSTED_GIT_DIRECTORIES }));
     return 1;
   }
 

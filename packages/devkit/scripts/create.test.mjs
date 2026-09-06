@@ -9,6 +9,7 @@ import {
   createRefusal,
   createSummary,
   initialManifest,
+  missingGitRefusal,
   packageNameFor,
   unfinishedNotice,
 } from './create.mjs';
@@ -139,6 +140,13 @@ describe('what a run says afterwards', () => {
     expect(summary).toContain('demo');
     expect(summary).toContain(CREATE_BRANCH);
     expect(summary).toContain('devkit init --upgrade');
+  });
+
+  test('a machine without git is refused, naming where it looked', () => {
+    const refusal = missingGitRefusal({ searched: ['/usr/local/bin', '/bin'] });
+    expect(refusal).toContain('/usr/local/bin');
+    expect(refusal).toContain('/bin');
+    expect(refusal).toContain('install git');
   });
 
   test('a failed run says the directory is still there, rather than leaving it unexplained', () => {

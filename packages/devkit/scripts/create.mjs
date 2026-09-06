@@ -13,6 +13,8 @@ import { dirname } from 'node:path';
 
 const CREATE_USAGE = 'devkit create <directory> [--profile <name>]';
 
+const quoted = (value) => `\`${value}\``;
+
 export const CREATE_BRANCH = 'main';
 
 export const INITIAL_COMMIT_MESSAGE =
@@ -58,7 +60,8 @@ export const createRefusal = ({
     return `create: no target directory — run \`${CREATE_USAGE}\`, or run \`devkit init\` in the repository you already have.`;
   }
   if (targets.length > 1) {
-    return `create: one target directory at a time, and this run named ${targets.map((named) => `\`${named}\``).join(', ')} — run \`${CREATE_USAGE}\`.`;
+    const named = targets.map(quoted).join(', ');
+    return `create: one target directory at a time, and this run named ${named} — run \`${CREATE_USAGE}\`.`;
   }
   const [target] = targets;
   if (enclosingRepository !== undefined) {
@@ -74,17 +77,30 @@ export const createRefusal = ({
 };
 
 const NAME_SEPARATORS = /[^a-z0-9._-]+/g;
-const NAME_EDGES = /^[-._]+|[-._]+$/g;
+
+const isEdgeCharacter = (character) =>
+  character === '-' || character === '.' || character === '_';
+
+const withoutEdges = (value) => {
+  const characters = value.split('');
+  const start = characters.findIndex(
+    (character) => !isEdgeCharacter(character),
+  );
+  if (start === -1) return '';
+  const end = characters.findLastIndex(
+    (character) => !isEdgeCharacter(character),
+  );
+  return value.slice(start, end + 1);
+};
 
 /**
  * @param {string} directoryName
  * @returns {string} an npm-installable name derived from it
  */
 export const packageNameFor = (directoryName) => {
-  const cleaned = directoryName
-    .toLowerCase()
-    .replaceAll(NAME_SEPARATORS, '-')
-    .replaceAll(NAME_EDGES, '');
+  const cleaned = withoutEdges(
+    directoryName.toLowerCase().replaceAll(NAME_SEPARATORS, '-'),
+  );
   return cleaned === '' ? 'app' : cleaned;
 };
 
@@ -120,6 +136,19 @@ export const commitIdentityArgs = ({ email = '', name = '' } = {}) =>
         '-c',
         `user.email=${DEFAULT_COMMIT_IDENTITY.email}`,
       ];
+
+/**
+ * `create` makes a git repository, so a machine without git cannot be told
+ * afterwards — the directory would be written and then have nothing to commit
+ * to. The searched directories are named because they are fixed: a git found
+ * anywhere else is one the inherited PATH chose, which is the lookup this
+ * package does not do.
+ *
+ * @param {{ searched: string[] }} args
+ * @returns {string}
+ */
+export const missingGitRefusal = ({ searched }) =>
+  `create: no git executable in ${searched.map(quoted).join(', ')} — create makes a git repository, so install git before running it.`;
 
 /**
  * @param {{ target: string }} args

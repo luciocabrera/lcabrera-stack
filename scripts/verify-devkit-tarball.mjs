@@ -33,6 +33,7 @@ import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import process from 'node:process';
 
+import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 import {
   binsWithoutShebang,
   binStartupFailure,
@@ -103,12 +104,11 @@ const packedPathsOf = (tarball) =>
 
 const scratchConsumer = () => {
   const root = mkdtempSync(join(tmpdir(), 'devkit-tarball-'));
-  run('git', ['init', '-q', '.'], root);
-  run(
-    'git',
-    ['remote', 'add', 'origin', 'https://example.invalid/x/y.git'],
-    root,
-  );
+  runGit({ args: ['init', '-q', '.'], cwd: root });
+  runGit({
+    args: ['remote', 'add', 'origin', 'https://example.invalid/x/y.git'],
+    cwd: root,
+  });
   writeFileSync(
     join(root, 'package.json'),
     `${JSON.stringify({ name: 'consumer', private: true, type: 'module', version: '1.0.0' }, undefined, 2)}\n`,
@@ -197,17 +197,7 @@ const binFailures = ({ consumer, manifest }) =>
     return failure === undefined ? [] : [`${manifest.name}: ${failure}`];
   });
 
-const gitIn = (cwd, args) => {
-  try {
-    return execFileSync('git', args, {
-      cwd,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    }).trim();
-  } catch {
-    return '';
-  }
-};
+const gitIn = (cwd, args) => runGit({ args, cwd }) ?? '';
 
 const consumerStepFailure = ({ args, bin, consumer, label = 'devkit' }) => {
   try {
