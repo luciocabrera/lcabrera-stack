@@ -46,10 +46,8 @@ const execFileAsync = promisify(execFile);
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
-const {
-  reportWorkspaces: COVERAGE_REPORT_WORKSPACES,
-  summaryFile: SUMMARY_FILE,
-} = readGates(REPO_ROOT).coverage;
+const { reportWorkspaces: REPORT_WORKSPACES, summaryFile: SUMMARY_FILE } =
+  readGates(REPO_ROOT).coverage;
 const OUTPUT_PATH = join(REPO_ROOT, SUMMARY_FILE);
 
 const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
@@ -62,7 +60,7 @@ const changedOnly = process.argv.includes('--changed');
 
 const reportedWorkspaces = () => {
   if (!changedOnly) {
-    return COVERAGE_REPORT_WORKSPACES;
+    return REPORT_WORKSPACES;
   }
   const files = readFileSync(0, 'utf8')
     .split('\n')
@@ -73,12 +71,10 @@ const reportedWorkspaces = () => {
     graph: readWorkspaceGraph(REPO_ROOT),
   });
   if (mode === 'full') {
-    return COVERAGE_REPORT_WORKSPACES;
+    return REPORT_WORKSPACES;
   }
   const affected = new Set(packages);
-  return COVERAGE_REPORT_WORKSPACES.filter((workspace) =>
-    affected.has(workspace.name),
-  );
+  return REPORT_WORKSPACES.filter((workspace) => affected.has(workspace.name));
 };
 
 const summaryPathFor = ({ dir }) =>
@@ -149,7 +145,7 @@ const printTable = (workspaces, total) => {
 };
 
 const main = async () => {
-  if (COVERAGE_REPORT_WORKSPACES.length === 0) {
+  if (REPORT_WORKSPACES.length === 0) {
     throw new Error(
       '`gates.coverage.reportWorkspaces` names no workspace in devkit.config.json — refusing to report coverage for nothing.',
     );
