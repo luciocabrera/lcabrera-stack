@@ -13,7 +13,10 @@
  * executing live in the CLI.
  *
  * npm always includes the files in `ALWAYS_PACKED` regardless of `files`, so
- * their absence is a real fault rather than a packaging choice.
+ * their absence is a real fault rather than a packaging choice. Every check here
+ * reads the PACKED manifest, never the workspace one — `files`, `publishConfig`
+ * and `engines` are what an installer acts on, and only the packed copy has
+ * them as they ship (ADR-110).
  */
 
 const ALWAYS_PACKED = ['package.json'];
@@ -127,20 +130,6 @@ export const materialisationFailure = ({ manifestFiles, presentPaths }) => {
 };
 
 /**
- * Whether a packed manifest that declares bins says which Node they need.
- *
- * A bin is executed by the consumer's Node straight out of `node_modules/.bin`,
- * with none of this repository's toolchain in front of it, so the runtime it was
- * written for is a precondition an installer can act on and prose cannot
- * (ADR-110). Without `engines.node` the first sign of a mismatch is the bin
- * failing after it is already installed.
- *
- * The packed manifest is what is read, not the workspace one: `files` and
- * `publishConfig` differ between them, and only the packed one reaches an
- * installer.
- *
- * A package declaring no bins is not asked, because nothing of it is executed.
- *
  * @param {{ bin?: Record<string, string>, engines?: { node?: string }, name: string }} manifest
  */
 export const binsWithoutNodeFloor = (manifest) =>

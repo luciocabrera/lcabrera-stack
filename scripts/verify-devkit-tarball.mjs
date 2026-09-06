@@ -178,7 +178,7 @@ const OVERSIZED_LINES = 400;
 const oversizedScript = () =>
   `${Array.from(
     { length: OVERSIZED_LINES },
-    (_unused, index) => `export const value${index} = ${index};`,
+    (_, index) => `export const value${index} = ${index};`,
   ).join('\n')}\n`;
 
 const GATE_BINS = [
