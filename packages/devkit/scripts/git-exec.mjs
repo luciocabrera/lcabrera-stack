@@ -31,7 +31,10 @@ import { delimiter, dirname, join } from 'node:path';
 const ON_WINDOWS = process.platform === 'win32';
 
 export const TRUSTED_GIT_DIRECTORIES = ON_WINDOWS
-  ? ['C:\\Program Files\\Git\\cmd', 'C:\\Program Files (x86)\\Git\\cmd']
+  ? [
+      String.raw`C:\Program Files\Git\cmd`,
+      String.raw`C:\Program Files (x86)\Git\cmd`,
+    ]
   : ['/usr/local/bin', '/usr/bin', '/bin'];
 
 const GIT_FILENAMES = ON_WINDOWS ? ['git.exe', 'git'] : ['git'];
