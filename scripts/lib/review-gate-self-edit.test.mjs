@@ -14,7 +14,8 @@ import {
   localModuleClosure,
   sweepSummary,
   withheldResult,
-} from './review-gate-reconcile.mjs';
+} from '../../packages/repo-standards/scripts/review-gate-reconcile.mjs';
+import { REVIEW_GATES } from './review-gate-roster.mjs';
 import { readRepoFile } from './workflow-inspect.mjs';
 
 describe('the code a gate actually runs', () => {
@@ -96,16 +97,14 @@ describe('the code a gate actually runs', () => {
     });
     expect(real).toContain('scripts/copilot-review-status.mjs');
     expect(real).toContain('scripts/lib/copilot-review.mjs');
-    expect(real).toContain('scripts/lib/review-gate-reconcile.mjs');
+    expect(real).toContain(
+      'packages/repo-standards/scripts/review-gate-reconcile.mjs',
+    );
     expect(real).not.toContain('scripts/reconcile-review-gates.mjs');
   });
 
   it('puts the real driver into every real gate’s closure', () => {
-    for (const script of [
-      'scripts/copilot-review-status.mjs',
-      'scripts/verify-agent-review.mjs',
-      'scripts/verify-review-threads.mjs',
-    ]) {
+    for (const { script } of REVIEW_GATES) {
       expect(
         gateClosure({
           driverEntry: 'scripts/reconcile-review-gates.mjs',
@@ -124,11 +123,7 @@ describe('the code a gate actually runs', () => {
 });
 
 describe('the precondition the walk depends on', () => {
-  const GATE_ENTRIES = [
-    'scripts/copilot-review-status.mjs',
-    'scripts/verify-agent-review.mjs',
-    'scripts/verify-review-threads.mjs',
-  ];
+  const GATE_ENTRIES = REVIEW_GATES.map((gate) => gate.script);
   const closureOf = (entry) =>
     localModuleClosure({
       entry,
@@ -281,11 +276,40 @@ describe('the sweep actually consults it — not a parallel definition', () => {
   });
 
   it('derives each gate’s closure from its own script', () => {
-    expect(source()).toMatch(/entry: `scripts\/\$\{gate\.script\}`/u);
+    expect(source()).toMatch(/entry: gate\.script/u);
+  });
+
+  it('reads the roster instead of declaring a second one', () => {
+    expect(source()).toMatch(/REVIEW_GATES\.map\(/u);
+    expect(source()).not.toMatch(/const GATES =/u);
   });
 
   it('does not let one pull request’s failure end the sweep', () => {
     expect(declarationOf('fetchChangedFiles')).toMatch(/\}\s*catch\s*\(/u);
+  });
+});
+
+describe('the roster the sweep runs', () => {
+  it('names a script that exists, for every gate', () => {
+    const missing = REVIEW_GATES.flatMap(({ name, script }) => {
+      try {
+        readRepoFile(script);
+        return [];
+      } catch {
+        return [`${name} -> ${script}`];
+      }
+    });
+    expect(missing).toEqual([]);
+  });
+
+  it('spells every script from the repository root', () => {
+    const bare = REVIEW_GATES.filter(({ script }) => !script.includes('/'));
+    expect(bare).toEqual([]);
+  });
+
+  it('names each gate once', () => {
+    const names = REVIEW_GATES.map((gate) => gate.name);
+    expect(new Set(names).size).toBe(names.length);
   });
 });
 

@@ -8,7 +8,7 @@
  * be wired by hand in the UI. Sub-issues attach by database id rather than
  * issue number, which is the detail that makes this worth having in code.
  */
-import { runGh } from './gh-exec.mjs';
+import { runGh } from '../../packages/repo-standards/scripts/gh-exec.mjs';
 
 export const startsWithDash = (value) => String(value ?? '').startsWith('-');
 

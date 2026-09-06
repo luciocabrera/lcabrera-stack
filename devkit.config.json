@@ -58,6 +58,146 @@
     },
     "shippedDocs": {
       "repoOnlyDirs": ["apps", "docker", "docs", "packages", "scripts"]
+    },
+    "departedNames": {
+      "rosterFile": "scripts/departed-names.json"
+    },
+    "depsAudit": {
+      "allowanceFile": "docs/agents/dependency-advisories.json"
+    },
+    "inventory": {
+      "baselineFile": "scripts/inventory-drift-baseline.json",
+      "trees": [
+        {
+          "inventory": "packages/ui/src/INVENTORY.md",
+          "root": "packages/ui/src"
+        },
+        {
+          "inventory": "packages/server/src/INVENTORY.md",
+          "root": "packages/server/src"
+        },
+        {
+          "inventory": "apps/showcase/src/INVENTORY.md",
+          "root": "apps/showcase/src"
+        }
+      ]
+    },
+    "coverage": {
+      "mergeWorkspaces": [
+        {
+          "dir": "packages/api",
+          "name": "@lcabrera/api"
+        },
+        {
+          "dir": "packages/devkit",
+          "name": "@lcabrera/devkit"
+        },
+        {
+          "dir": "packages/repo-standards",
+          "name": "@lcabrera/repo-standards"
+        },
+        {
+          "dir": "packages/eslint-local-rules",
+          "name": "@lcabrera/eslint-plugin"
+        },
+        {
+          "dir": "packages/node-runtime",
+          "name": "@lcabrera/node"
+        },
+        {
+          "dir": "packages/server",
+          "name": "@lcabrera/server"
+        },
+        {
+          "dir": "packages/tsconfig",
+          "name": "@lcabrera/tsconfig"
+        },
+        {
+          "dir": "packages/ui",
+          "name": "@lcabrera/ui"
+        },
+        {
+          "dir": "packages/utils",
+          "name": "@lcabrera/utils"
+        },
+        {
+          "dir": "packages/vite-configs",
+          "name": "@lcabrera/vite-config"
+        }
+      ],
+      "reportWorkspaces": [
+        {
+          "dir": "packages/ui",
+          "name": "@lcabrera/ui",
+          "run": true
+        },
+        {
+          "dir": "packages/server",
+          "name": "@lcabrera/server",
+          "run": true
+        },
+        {
+          "dir": "packages/api",
+          "name": "@lcabrera/api",
+          "run": true
+        },
+        {
+          "dir": "apps/showcase",
+          "name": "showcase",
+          "run": false
+        },
+        {
+          "dir": "packages/node-runtime",
+          "name": "@lcabrera/node",
+          "run": true
+        },
+        {
+          "dir": "packages/utils",
+          "name": "@lcabrera/utils",
+          "run": true
+        },
+        {
+          "dir": "packages/eslint-local-rules",
+          "name": "@lcabrera/eslint-plugin",
+          "run": true
+        },
+        {
+          "dir": "packages/tsconfig",
+          "name": "@lcabrera/tsconfig",
+          "run": true
+        },
+        {
+          "dir": "packages/devkit",
+          "name": "@lcabrera/devkit",
+          "run": true
+        },
+        {
+          "dir": "packages/repo-standards",
+          "name": "@lcabrera/repo-standards",
+          "run": true
+        },
+        {
+          "dir": "packages/vite-configs",
+          "name": "@lcabrera/vite-config",
+          "run": true
+        }
+      ]
+    },
+    "eslintPass": {
+      "probeWorkspaces": ["packages/ui", "packages/vite-configs"]
+    },
+    "affectedTests": {
+      "coverageTaskPackage": "showcase",
+      "globalPackages": [
+        "@lcabrera/tsconfig",
+        "@lcabrera/vite-config",
+        "@repo/ts-configs"
+      ],
+      "lintOnlyPatterns": [
+        "^packages/vite-configs/eslint\\.",
+        "^packages/vite-configs/vite\\.(lint|fmt)\\.shared\\.config\\.ts$",
+        "(^|/)eslint\\.config\\.mjs$"
+      ]
     }
   },
   "registers": {
@@ -75,7 +215,9 @@
       "list": "vp run adr:list",
       "new": "vp run adr:new",
       "write": "vp run adr:verify -- --write"
-    }
+    },
+    "planningDir": "docs/agents/planning",
+    "requirementsDir": "docs/product/requirements"
   },
   "publishing": {
     "publicPackageDirs": [

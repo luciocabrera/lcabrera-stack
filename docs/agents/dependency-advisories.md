@@ -95,7 +95,7 @@ hidden, so "we do not gate on low" stays a visible choice.
 Override for a one-off run with `--minimum`:
 
 ```bash
-vp pm audit --json | node scripts/verify-deps-audit.mjs --minimum high
+vp pm audit --json | repo-verify-deps-audit --minimum high
 ```
 
 ## Where it runs

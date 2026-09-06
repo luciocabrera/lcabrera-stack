@@ -3,7 +3,7 @@
  * be asserted against what the repository invokes (`fallow-entries.test.mjs`).
  * The entry policy is in .github/skills/fallow-code-checker/CONFIGURATION.md.
  */
-import { stripJsoncComments } from './jsonc.mjs';
+import { stripJsoncComments } from '../../packages/repo-standards/scripts/jsonc.mjs';
 
 const NODE_ARGUMENT = /\bnode[ \t]+([^ \t\r\n]+)/g;
 

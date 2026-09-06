@@ -15,11 +15,6 @@
         "count": 1
       }
     },
-    "scripts/generate-lint-reports.mjs": {
-      "crap_high": {
-        "count": 1
-      }
-    },
     "scripts/generate-source-smell-report.cjs": {
       "crap_moderate": {
         "count": 3
@@ -39,11 +34,6 @@
     "scripts/seed-db.cjs": {
       "crap_high": {
         "count": 1
-      }
-    },
-    "scripts/verify-commands-doc.mjs": {
-      "crap_moderate": {
-        "count": 3
       }
     }
   },

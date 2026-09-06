@@ -31,8 +31,8 @@ import { readdirSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import process from 'node:process';
 
-import { publicPackageDirs } from './lib/coverage-workspaces.mjs';
-import { parseJsonc } from './lib/jsonc.mjs';
+import { publicPackageDirs } from '../packages/repo-standards/scripts/public-package-dirs.mjs';
+import { parseJsonc } from '../packages/repo-standards/scripts/jsonc.mjs';
 import { readTextWithin } from '../packages/repo-standards/scripts/safe-read.mjs';
 import { findReactDoctorSuppressions } from './lib/suppressions-react-doctor.mjs';
 import {

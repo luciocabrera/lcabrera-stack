@@ -5,6 +5,7 @@ import {
   binStartupFailure,
   declaredBins,
   failureLine,
+  gateProbeFindings,
   materialisationFailure,
   noCommandsDeclared,
   missingFromTarball,
@@ -306,5 +307,70 @@ describe('noCommandsDeclared', () => {
     expect(
       noCommandsDeclared({ bin: { kit: './scripts/kit.mjs' }, name: 'p' }),
     ).toBeUndefined();
+  });
+});
+
+describe('gateProbeFindings', () => {
+  const clean = {
+    output: 'No script exits mid-stream.',
+    spawned: true,
+    status: 0,
+  };
+  const planted = {
+    output: '  - planted-exit.mjs:1  process.exit(1)',
+    status: 1,
+  };
+
+  it('reports a bin the install did not place', () => {
+    expect(
+      gateProbeFindings({
+        clean: { output: '', spawned: false, status: null },
+        name: 'repo-verify-script-exits',
+        planted,
+        plantedFile: 'planted-exit.mjs',
+      }),
+    ).toEqual([
+      '`repo-verify-script-exits` is not installed in the consumer, so no gate ran through it',
+    ]);
+  });
+
+  it('reports a bin that fails on a clean consumer', () => {
+    const [finding] = gateProbeFindings({
+      clean: { output: 'Error: boom', spawned: true, status: 1 },
+      name: 'repo-verify-script-exits',
+      planted,
+      plantedFile: 'planted-exit.mjs',
+    });
+    expect(finding).toContain('failed on a clean consumer');
+    expect(finding).toContain('Error: boom');
+  });
+
+  it('reports a bin that passes the planted violation, or fails without naming it', () => {
+    const passed = gateProbeFindings({
+      clean,
+      name: 'repo-verify-script-exits',
+      planted: { output: '', status: 0 },
+      plantedFile: 'planted-exit.mjs',
+    });
+    const silent = gateProbeFindings({
+      clean,
+      name: 'repo-verify-script-exits',
+      planted: { output: 'something else broke', status: 1 },
+      plantedFile: 'planted-exit.mjs',
+    });
+    expect(passed).toHaveLength(1);
+    expect(passed[0]).toContain('proved nothing');
+    expect(silent).toHaveLength(1);
+  });
+
+  it('accepts a bin that passes clean and fails naming the planted file', () => {
+    expect(
+      gateProbeFindings({
+        clean,
+        name: 'repo-verify-script-exits',
+        planted,
+        plantedFile: 'planted-exit.mjs',
+      }),
+    ).toEqual([]);
   });
 });

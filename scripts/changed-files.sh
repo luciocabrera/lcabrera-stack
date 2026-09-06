@@ -21,19 +21,46 @@
 # It feeds the runner tracked changes since the merge base AND untracked,
 # non-ignored files, because the gate that uses it runs before a commit.
 #
+# A task that has both a full mode and a changed-only mode cannot be wrapped
+# unconditionally: the full mode needs no merge base, and resolving one it will
+# not use would make it fail wherever the base ref is absent. `--if-arg <flag>`
+# feeds the runner only when <flag> is among its arguments, and otherwise execs
+# it untouched without resolving anything.
+#
 # Usage:
 #   bash scripts/changed-files.sh <runner> [args…]
-#   bash scripts/changed-files.sh node scripts/run-changed.mjs typecheck
+#   bash scripts/changed-files.sh repo-run-changed typecheck
+#   bash scripts/changed-files.sh --if-arg --changed repo-merge-coverage [args…]
 #
 # Env:
 #   TEST_CHANGED_BASE  base ref to compare against (default: origin/main)
 #
-# Exit codes: the runner's, or 1 when the merge base cannot be resolved.
+# Exit codes: the runner's, or 1 when the merge base cannot be resolved or the
+# arguments are unusable.
 set -euo pipefail
 
 if [[ $# -eq 0 ]]; then
-  echo "usage: changed-files.sh <runner> [args...]" >&2
+  echo "usage: changed-files.sh [--if-arg <flag>] <runner> [args...]" >&2
   exit 1
+fi
+
+if [[ ${1} == "--if-arg" ]]; then
+  if [[ $# -lt 3 ]]; then
+    echo "usage: changed-files.sh --if-arg <flag> <runner> [args...]" >&2
+    exit 1
+  fi
+  gate_flag="$2"
+  shift 2
+  feed=0
+  for arg in "$@"; do
+    if [[ $arg == "$gate_flag" ]]; then
+      feed=1
+      break
+    fi
+  done
+  if [[ $feed -eq 0 ]]; then
+    exec "$@"
+  fi
 fi
 
 base_ref="${TEST_CHANGED_BASE:-origin/main}"

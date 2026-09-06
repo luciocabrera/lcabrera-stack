@@ -2,9 +2,9 @@
  * Emits two Istanbul-shaped reports under `coverage/` via the v8 provider:
  *
  * - `coverage-final.json` (`json` reporter) — the per-statement detail
- *   `fallow audit --coverage` reads (via scripts/merge-coverage.mjs).
+ *   `fallow audit --coverage` reads (via packages/repo-standards/scripts/merge-coverage.mjs).
  * - `coverage-summary.json` (`json-summary` reporter) — the per-workspace
- *   totals the CI coverage comment reads (via scripts/coverage-report.mjs).
+ *   totals the CI coverage comment reads (via packages/repo-standards/scripts/coverage-report.mjs).
  *
  * Shared so every workspace reports coverage identically and both consumers —
  * the fallow gate and the PR coverage matrix — stay consistent. Without real

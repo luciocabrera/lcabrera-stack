@@ -44,12 +44,21 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { describe, expect, it } from 'vite-plus/test';
 
-import { resolveRetention } from './lib/usage-args.mjs';
-import { transcriptDirectoryFor } from './lib/usage-scope.mjs';
-import { dayOf, shiftDay } from './lib/usage-window.mjs';
+import { resolveRetention } from '../packages/repo-standards/scripts/usage-args.mjs';
+import { transcriptDirectoryFor } from '../packages/repo-standards/scripts/usage-scope.mjs';
+import {
+  dayOf,
+  shiftDay,
+} from '../packages/repo-standards/scripts/usage-window.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SCRIPT = join(REPO_ROOT, 'scripts', 'usage-report.mjs');
+const SCRIPT = join(
+  REPO_ROOT,
+  'packages',
+  'repo-standards',
+  'scripts',
+  'usage-report.mjs',
+);
 
 const dayReported = (report) => dayOf(report.generatedAt);
 
