@@ -6,13 +6,13 @@ status — `Copilot review complete`, `Agent review verdict` and
 stale by an event that never arrived corrects itself without anybody noticing it
 was stale.
 
-| Piece                                                                                              | What it is                                               |
-| -------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| [`.github/workflows/review-gate-reconcile.yml`](../../.github/workflows/review-gate-reconcile.yml) | the schedule, the dispatch, and what it does on failure  |
-| [`scripts/reconcile-review-gates.mjs`](../../scripts/reconcile-review-gates.mjs)                   | the sweep — lists open pull requests, runs each gate     |
-| [`scripts/lib/review-gate-reconcile.mjs`](../../scripts/lib/review-gate-reconcile.mjs)             | the two decisions, pure and unit-tested                  |
-| `vp run review-gates:reconcile`                                                                    | the same sweep by hand                                   |
-| `vp run review-gates:reconcile -- --pr <n> --dry-run`                                              | what it would do about one pull request, posting nothing |
+| Piece                                                                                                                          | What it is                                               |
+| ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| [`.github/workflows/review-gate-reconcile.yml`](../../.github/workflows/review-gate-reconcile.yml)                             | the schedule, the dispatch, and what it does on failure  |
+| [`scripts/reconcile-review-gates.mjs`](../../scripts/reconcile-review-gates.mjs)                                               | the sweep — lists open pull requests, runs each gate     |
+| [`packages/repo-standards/scripts/review-gate-reconcile.mjs`](../../packages/repo-standards/scripts/review-gate-reconcile.mjs) | the two decisions, pure and unit-tested                  |
+| `vp run review-gates:reconcile`                                                                                                | the same sweep by hand                                   |
+| `vp run review-gates:reconcile -- --pr <n> --dry-run`                                                                          | what it would do about one pull request, posting nothing |
 
 ## Why it exists
 

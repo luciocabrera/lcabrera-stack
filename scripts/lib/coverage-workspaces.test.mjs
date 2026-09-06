@@ -4,13 +4,15 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vite-plus/test';
 
-import {
-  COVERAGE_MERGE_WORKSPACES,
-  COVERAGE_REPORT_WORKSPACES,
-  publicPackageDirs,
-} from './coverage-workspaces.mjs';
+import { readGates } from '../../packages/repo-standards/scripts/config.mjs';
+import { publicPackageDirs } from '../../packages/repo-standards/scripts/coverage-workspaces.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+const {
+  mergeWorkspaces: COVERAGE_MERGE_WORKSPACES,
+  reportWorkspaces: COVERAGE_REPORT_WORKSPACES,
+} = readGates(REPO_ROOT).coverage;
 
 const dirsOf = (workspaces) => workspaces.map((workspace) => workspace.dir);
 

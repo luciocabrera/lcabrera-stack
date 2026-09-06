@@ -11,7 +11,7 @@
  *
  * Writes `BRANCH_NAME`, `PR_TITLE`, `PR_BODY`, `PR_BASE`, `PR_NUMBER`,
  * `PR_HEAD_SHA`, `PR_IS_FORK`, `RANGE_BASE_SHA` and `RANGE_HEAD_SHA`. The
- * decisions are `scripts/lib/merge-queue.mjs`; the queue itself is
+ * decisions are `packages/repo-standards/scripts/merge-queue.mjs`; the queue itself is
  * `docs/tooling/merge-queue.md`.
  *
  * `PR_IS_FORK` says where the pull request came from. It does NOT say whether
@@ -29,8 +29,12 @@ import { appendFileSync, readFileSync } from 'node:fs';
 import process from 'node:process';
 
 import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
-import { runGh } from './lib/gh-exec.mjs';
-import { envBlock, subjectEnv, subjectRequest } from './lib/merge-queue.mjs';
+import { runGh } from '../packages/repo-standards/scripts/gh-exec.mjs';
+import {
+  envBlock,
+  subjectEnv,
+  subjectRequest,
+} from '../packages/repo-standards/scripts/merge-queue.mjs';
 
 const readEventPayload = () => {
   const path = process.env.GITHUB_EVENT_PATH;

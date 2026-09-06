@@ -102,16 +102,16 @@ commands and their output are in the pull request for #1095. Repeat a row when
 the config or the fallow version moves. Run the audit as CI does:
 `fallow audit --base origin/main --coverage reports/fallow/coverage/coverage-final.json --format json --quiet`.
 
-| Analysis                  | Plant                                                                                                                                | Observed                                                                                                                                 |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| unused export             | `export const probeUnused = 1;` appended to `scripts/lib/affected-tests.mjs` and `packages/repo-standards/scripts/config-values.mjs` | `fallow dead-code` reports both; audit `fail`, exit 1                                                                                    |
-| unused file               | a new one-export module dropped into `scripts/lib/` and into `packages/repo-standards/scripts/`, imported by nothing                 | `unused_files` for both; audit `fail`                                                                                                    |
-| unused dependency         | `probe-unused-dep` added to `devDependencies` in the root and `packages/repo-standards` manifests                                    | `unused_dev_dependencies`; audit `fail`. Pass `--no-cache` when probing a manifest: the incremental cache once missed the workspace edit |
-| cycle                     | `affected-tests.mjs` and `ci-commands.mjs` import each other; same in `config-values.mjs` and `error-message.mjs`                    | `circular_dependencies` for both pairs; audit `fail`                                                                                     |
-| duplication, source files | one identical block appended to the two source files above                                                                           | `fallow dupes` clone group; audit `fail`, exit 1 under `duplicates.threshold`, and `warn`, exit 0 without it                             |
-| duplication, test files   | the same block appended to `scripts/lib/affected-tests.test.mjs` and `packages/repo-standards/scripts/config.test.mjs`               | nothing under `ignoreDefaults: true`; with it `false`, a `fallow dupes` clone group and audit `fail`, exit 1. See the next section       |
-| complexity                | a 22-branch function appended to the two source files above                                                                          | `fallow health` finding; audit `fail`. Under `scripts/**` `exceeded` is `both`, since only CRAP is relaxed there                         |
-| coverage gap              | an untested cyclomatic-7 function in `packages/utils`, that workspace's `test:coverage` re-run and fed                               | `exceeded: crap`, `coverage_source: istanbul`; audit `fail`. Unfed, the estimate passes it; with a test that covers it, it passes        |
+| Analysis                  | Plant                                                                                                                                                    | Observed                                                                                                                                 |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| unused export             | `export const probeUnused = 1;` appended to `packages/repo-standards/scripts/affected-tests.mjs` and `packages/repo-standards/scripts/config-values.mjs` | `fallow dead-code` reports both; audit `fail`, exit 1                                                                                    |
+| unused file               | a new one-export module dropped into `scripts/lib/` and into `packages/repo-standards/scripts/`, imported by nothing                                     | `unused_files` for both; audit `fail`                                                                                                    |
+| unused dependency         | `probe-unused-dep` added to `devDependencies` in the root and `packages/repo-standards` manifests                                                        | `unused_dev_dependencies`; audit `fail`. Pass `--no-cache` when probing a manifest: the incremental cache once missed the workspace edit |
+| cycle                     | `affected-tests.mjs` and `ci-commands.mjs` import each other; same in `config-values.mjs` and `error-message.mjs`                                        | `circular_dependencies` for both pairs; audit `fail`                                                                                     |
+| duplication, source files | one identical block appended to the two source files above                                                                                               | `fallow dupes` clone group; audit `fail`, exit 1 under `duplicates.threshold`, and `warn`, exit 0 without it                             |
+| duplication, test files   | the same block appended to `packages/repo-standards/scripts/affected-tests.test.mjs` and `packages/repo-standards/scripts/config.test.mjs`               | nothing under `ignoreDefaults: true`; with it `false`, a `fallow dupes` clone group and audit `fail`, exit 1. See the next section       |
+| complexity                | a 22-branch function appended to the two source files above                                                                                              | `fallow health` finding; audit `fail`. Under `scripts/**` `exceeded` is `both`, since only CRAP is relaxed there                         |
+| coverage gap              | an untested cyclomatic-7 function in `packages/utils`, that workspace's `test:coverage` re-run and fed                                                   | `exceeded: crap`, `coverage_source: istanbul`; audit `fail`. Unfed, the estimate passes it; with a test that covers it, it passes        |
 
 ## Test files and duplication
 
@@ -146,7 +146,7 @@ two agree.
 ## What stays on demand, and why
 
 `fallow health --coverage-gaps` is static and advisory (exit 0). A "test root"
-is what the vitest plugin discovered, so it lists `scripts/lib/affected-tests.mjs`
+is what the vitest plugin discovered, so it lists `packages/repo-standards/scripts/affected-tests.mjs`
 as a gap although `affected-tests.test.mjs` imports it. The gated form of a
 coverage gap is the CRAP row above, which reads measured coverage.
 
@@ -177,9 +177,9 @@ at all have nothing to measure and still fall back to the estimate.
 
 ## The coverage lane
 
-`vp run coverage:merge` (`scripts/merge-coverage.mjs`) runs `test:coverage` in
+`vp run coverage:merge` (`packages/repo-standards/scripts/merge-coverage.mjs`) runs `test:coverage` in
 the **DB-free** workspaces only and merges their reports — the membership is
-`COVERAGE_MERGE_WORKSPACES` in `scripts/lib/coverage-workspaces.mjs`, **not a
+`COVERAGE_MERGE_WORKSPACES` in `packages/repo-standards/scripts/coverage-workspaces.mjs`, **not a
 list here**, because a copy in prose is a copy nothing checks (this one had gone
 two workspaces stale). That module also holds the PR comment's
 `COVERAGE_REPORT_WORKSPACES`, so `test:scripts` can assert both — dropping a

@@ -9,7 +9,7 @@ import {
   RULE,
   conformanceMessages,
   withConformanceRepo,
-} from './lib/conformance-fixtures.mjs';
+} from '../packages/repo-standards/scripts/conformance-fixtures.mjs';
 
 const require = createRequire(import.meta.url);
 const { validateSkills } = require('./lib/validate-skills-contract.cjs');

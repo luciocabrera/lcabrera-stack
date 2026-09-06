@@ -252,7 +252,7 @@ trips `unicorn/no-null`, so lean on arrays/objects always being truthy
 ## Reports
 
 **Lint JSON reports** follow the fallow output convention: `vp run lint:report`
-(script: `scripts/generate-lint-reports.mjs`, supports
+(script: `packages/repo-standards/scripts/generate-lint-reports.mjs`, supports
 `--only=biome|eslint|oxlint`) regenerates `reports/oxlint/full-latest.json` (one
 repo-wide `vp lint . --format=json` run), `reports/eslint/full-latest.json` (the
 standard eslint `--format json` result array merged across every workspace,

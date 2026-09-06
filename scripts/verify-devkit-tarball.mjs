@@ -38,6 +38,7 @@ import {
   binStartupFailure,
   declaredBins,
   failureLine,
+  gateProbeFindings,
   inertHooks,
   materialisationFailure,
   bareTaskFindings,
@@ -170,6 +171,44 @@ const reinitConfigFindings = (consumer) => {
   });
 };
 
+const GATE_BINS = [
+  {
+    name: 'repo-verify-script-exits',
+    plant: { file: 'planted-exit.mjs', source: 'process.exit(1);\n' },
+  },
+];
+
+const runBin = ({ args = [], bin, consumer }) => {
+  try {
+    return { output: run(bin, args, consumer), spawned: true, status: 0 };
+  } catch (error) {
+    return {
+      output: `${error.stdout ?? ''}${error.stderr ?? ''}`,
+      spawned: error.code !== 'ENOENT',
+      status: error.status ?? null,
+    };
+  }
+};
+
+const gateBinFailures = (consumer) =>
+  GATE_BINS.flatMap(({ name, plant }) => {
+    const bin = join(consumer, 'node_modules', '.bin', name);
+    const clean = runBin({ bin, consumer });
+    const plantedPath = join(consumer, plant.file);
+    writeFileSync(plantedPath, plant.source);
+    try {
+      const planted = runBin({ bin, consumer });
+      return gateProbeFindings({
+        clean,
+        name,
+        planted,
+        plantedFile: plant.file,
+      });
+    } finally {
+      rmSync(plantedPath, { force: true });
+    }
+  });
+
 const EXECUTABLE_BITS = 0o111;
 
 const materialisedModes = (consumer) =>
@@ -301,6 +340,7 @@ const main = () => {
           readFileSync(join(consumer, 'package.json'), 'utf8'),
         ).scripts,
       }),
+      ...gateBinFailures(consumer),
     ];
 
     const findings = [...contents, ...bins, ...materialised];
@@ -323,7 +363,7 @@ const main = () => {
     ).length;
 
     process.stdout.write(
-      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, and \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, ${tasks} runnable task(s) wired.\n`,
+      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, and \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, ${tasks} runnable task(s) wired, ${GATE_BINS.length} gate bin(s) proven against a planted violation.\n`,
     );
   } finally {
     rmSync(staging, { force: true, recursive: true });

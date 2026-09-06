@@ -260,3 +260,35 @@ export const inertHooks = ({ hooksPath, materialised }) => {
         `\`${file.path}\` arrived without the executable bit — git skips it silently, so the gate it carries is absent`,
     );
 };
+
+/**
+ * What running a gate bin inside the consumer proved.
+ *
+ * A bin that resolves and exits 0 on a fresh repository has shown it can load
+ * its own modules from the install, and nothing else: a gate that reads no
+ * file passes exactly like one that read every file. So the same bin is run
+ * again over a planted violation, and only a failure that names the planted
+ * file counts as the gate having run.
+ *
+ * @param {{ clean: { output: string, spawned: boolean, status: number | null },
+ *           name: string, planted: { output: string, status: number | null },
+ *           plantedFile: string }} args
+ */
+export const gateProbeFindings = ({ clean, name, planted, plantedFile }) => {
+  if (!clean.spawned) {
+    return [
+      `\`${name}\` is not installed in the consumer, so no gate ran through it`,
+    ];
+  }
+  if (clean.status !== 0) {
+    return [
+      `\`${name}\` failed on a clean consumer: ${failureLine(clean.output)}`,
+    ];
+  }
+  if (planted.status === 0 || !planted.output.includes(plantedFile)) {
+    return [
+      `\`${name}\` passed a planted violation in \`${plantedFile}\`, so its run proved nothing`,
+    ];
+  }
+  return [];
+};

@@ -23,7 +23,7 @@
 #
 # Usage:
 #   bash scripts/changed-files.sh <runner> [args…]
-#   bash scripts/changed-files.sh node scripts/run-changed.mjs typecheck
+#   bash scripts/changed-files.sh repo-run-changed typecheck
 #
 # Env:
 #   TEST_CHANGED_BASE  base ref to compare against (default: origin/main)

@@ -13,7 +13,7 @@
  * load-bearing the moment a category containing `no-undef` is turned on, which
  * is why they are kept correct rather than deleted.
  *
- * `lintConfig` is exported for the same reason: `scripts/verify-lint-plugins.mjs`
+ * `lintConfig` is exported for the same reason: `packages/repo-standards/scripts/verify-lint-plugins.mjs`
  * reads the live plugin list off it.
  */
 

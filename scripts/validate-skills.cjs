@@ -10,7 +10,9 @@
  * Exit 0 only when that run reports nothing against a skill.
  */
 
-const { reportConformance } = require('./lib/conformance-report.cjs');
+const {
+  reportConformance,
+} = require('../packages/repo-standards/scripts/conformance-report.cjs');
 const {
   parseFrontmatter,
   validateSkills,

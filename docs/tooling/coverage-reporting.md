@@ -26,7 +26,7 @@ one `coverage-summary.json`.
 ```
 per-workspace test:coverage
    └─ vitest v8 → coverage/coverage-summary.json   (json-summary reporter)
-        └─ scripts/coverage-report.mjs
+        └─ packages/repo-standards/scripts/coverage-report.mjs
              ├─ reads each reported workspace's .total
              ├─ aggregates a monorepo total (sum covered/total, recompute pct)
              └─ writes coverage/monorepo-coverage-summary.json
@@ -41,7 +41,7 @@ Three moving parts:
    detail) and `coverage-summary.json` (the `json-summary` reporter, totals).
    Every workspace's `test:coverage` inherits it, so coverage is reported
    identically everywhere.
-2. **The aggregator.** [`scripts/coverage-report.mjs`](../../scripts/coverage-report.mjs)
+2. **The aggregator.** [`packages/repo-standards/scripts/coverage-report.mjs`](../../packages/repo-standards/scripts/coverage-report.mjs)
    (`vp run coverage:report`) reads each reported workspace's summary, tags it
    with the project name, and computes the monorepo total. Best-effort: a
    workspace whose summary is missing is warned about and skipped, never fatal.
@@ -60,13 +60,13 @@ They feed different consumers and must not be merged:
 | `coverage:report` | the **PR comment**        | `json-summary`  | the reported set below                        | **included** (it is a critical surface)                 |
 
 Coupling them would drag react-router into the fallow merge it is deliberately
-kept out of. See [`scripts/merge-coverage.mjs`](../../scripts/merge-coverage.mjs)
+kept out of. See [`packages/repo-standards/scripts/merge-coverage.mjs`](../../packages/repo-standards/scripts/merge-coverage.mjs)
 for the fallow side.
 
 ## Reported workspaces
 
 Defined in `COVERAGE_REPORT_WORKSPACES` in
-[`scripts/lib/coverage-workspaces.mjs`](../../scripts/lib/coverage-workspaces.mjs),
+[`packages/repo-standards/scripts/coverage-workspaces.mjs`](../../packages/repo-standards/scripts/coverage-workspaces.mjs),
 most-critical first — that module is the roster, and this page deliberately does
 not copy it. `run: true` means the reporter runs the workspace's `test:coverage`;
 `run: false` means its summary is already produced upstream.
@@ -98,7 +98,7 @@ only once its coverage runs clean and means something.** Checklist:
 3. **It emits `coverage-summary.json`.** Automatic once `test:coverage` uses the
    shared `VITEST_COVERAGE_FLAGS` (all current ones do).
 4. **Append it** to `COVERAGE_REPORT_WORKSPACES` in
-   `scripts/lib/coverage-workspaces.mjs` with `run: true` (or `false` if its
+   `packages/repo-standards/scripts/coverage-workspaces.mjs` with `run: true` (or `false` if its
    summary is already produced upstream). No other change needed — the comment
    scales row-by-row and the total re-aggregates automatically.
 

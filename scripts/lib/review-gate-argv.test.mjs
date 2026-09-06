@@ -9,7 +9,10 @@
  */
 import { describe, expect, it } from 'vite-plus/test';
 
-import { gateArgs, PROTECT_SUCCESS_FLAG } from './review-gate-reconcile.mjs';
+import {
+  gateArgs,
+  PROTECT_SUCCESS_FLAG,
+} from '../../packages/repo-standards/scripts/review-gate-reconcile.mjs';
 import { readRepoFile } from './workflow-inspect.mjs';
 
 describe('the argv the sweep hands each gate', () => {
@@ -79,7 +82,9 @@ describe('the argv the sweep hands each gate', () => {
   });
 
   it('hands the gate the flag the gate itself reads', () => {
-    const source = readRepoFile('scripts/lib/review-gate-status.mjs');
+    const source = readRepoFile(
+      'packages/repo-standards/scripts/review-gate-status.mjs',
+    );
     expect(source).toMatch(
       /protectSuccess:\s*process\.argv\.includes\(PROTECT_SUCCESS_FLAG\)/,
     );
@@ -121,13 +126,13 @@ describe('the scripts that take a pull request on the command line', () => {
   const PARSE_DIRECTLY = [
     'scripts/reconcile-review-gates.mjs',
     'scripts/verify-agent-review.mjs',
-    'scripts/lib/review-gate-status.mjs',
+    'packages/repo-standards/scripts/review-gate-status.mjs',
   ];
 
   const DELEGATE = [
     'scripts/copilot-review-status.mjs',
-    'scripts/pr-threads.mjs',
-    'scripts/verify-review-threads.mjs',
+    'packages/repo-standards/scripts/pr-threads.mjs',
+    'packages/repo-standards/scripts/verify-review-threads.mjs',
   ];
 
   for (const script of PARSE_DIRECTLY) {
@@ -142,7 +147,7 @@ describe('the scripts that take a pull request on the command line', () => {
     it(`${script} takes both from review-gate-status, never from argv`, () => {
       const source = readRepoFile(script);
       expect(source).toMatch(
-        /import \{[^}]*(?:resolveGateTarget|resolvePullNumber)[^}]*\} from '\.\/lib\/review-gate-status\.mjs'/s,
+        /import \{[^}]*(?:resolveGateTarget|resolvePullNumber)[^}]*\} from '(?:\.\.\/packages\/repo-standards\/scripts|\.)\/review-gate-status\.mjs'/s,
       );
       expect(source).not.toMatch(/flagValue\('--pr'\)/);
       expect(source).not.toMatch(/flagValue\('--repo'\)/);

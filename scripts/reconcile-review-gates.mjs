@@ -36,7 +36,7 @@ import {
   parseRepository,
 } from '../packages/repo-standards/scripts/cli-input.mjs';
 import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
-import { runGh } from './lib/gh-exec.mjs';
+import { runGh } from '../packages/repo-standards/scripts/gh-exec.mjs';
 import {
   completeFileList,
   gateArgs,
@@ -45,7 +45,7 @@ import {
   outcomeLine,
   sweepSummary,
   withheldResult,
-} from './lib/review-gate-reconcile.mjs';
+} from '../packages/repo-standards/scripts/review-gate-reconcile.mjs';
 
 const SCRIPTS_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = dirname(SCRIPTS_DIR);

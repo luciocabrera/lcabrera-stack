@@ -14,7 +14,7 @@ import {
   localModuleClosure,
   sweepSummary,
   withheldResult,
-} from './review-gate-reconcile.mjs';
+} from '../../packages/repo-standards/scripts/review-gate-reconcile.mjs';
 import { readRepoFile } from './workflow-inspect.mjs';
 
 describe('the code a gate actually runs', () => {
@@ -96,7 +96,9 @@ describe('the code a gate actually runs', () => {
     });
     expect(real).toContain('scripts/copilot-review-status.mjs');
     expect(real).toContain('scripts/lib/copilot-review.mjs');
-    expect(real).toContain('scripts/lib/review-gate-reconcile.mjs');
+    expect(real).toContain(
+      'packages/repo-standards/scripts/review-gate-reconcile.mjs',
+    );
     expect(real).not.toContain('scripts/reconcile-review-gates.mjs');
   });
 
@@ -104,7 +106,7 @@ describe('the code a gate actually runs', () => {
     for (const script of [
       'scripts/copilot-review-status.mjs',
       'scripts/verify-agent-review.mjs',
-      'scripts/verify-review-threads.mjs',
+      'packages/repo-standards/scripts/verify-review-threads.mjs',
     ]) {
       expect(
         gateClosure({
@@ -127,7 +129,7 @@ describe('the precondition the walk depends on', () => {
   const GATE_ENTRIES = [
     'scripts/copilot-review-status.mjs',
     'scripts/verify-agent-review.mjs',
-    'scripts/verify-review-threads.mjs',
+    'packages/repo-standards/scripts/verify-review-threads.mjs',
   ];
   const closureOf = (entry) =>
     localModuleClosure({

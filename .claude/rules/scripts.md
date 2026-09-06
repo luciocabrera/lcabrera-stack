@@ -14,7 +14,7 @@ application source, and these four analysers are what govern the rest. These fil
 outside the app bundle, so the TypeScript rules (`type` vs `interface`, `readonly`,
 no-`any`) don't apply — but **structure, purity, size, and the enforcement below
 do.** They are real code and rot the same way. The exemplar to copy is
-`scripts/verify-commands-doc.mjs`.
+`packages/repo-standards/scripts/verify-commands-doc.mjs`.
 
 ## Structure & size
 

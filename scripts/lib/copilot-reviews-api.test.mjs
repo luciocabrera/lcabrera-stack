@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { fetchPullRequestReviews } from './copilot-reviews-api.mjs';
-import { runGh } from './gh-exec.mjs';
+import { runGh } from '../../packages/repo-standards/scripts/gh-exec.mjs';
 
 // What this pins is the ARGV, and the limit is worth stating plainly because the
 // subject suggests more: `gh` is mocked, so gh's own pagination never runs here
@@ -12,7 +12,9 @@ import { runGh } from './gh-exec.mjs';
 //
 // Nothing pinned even that while this was a private function inside one script.
 // It is now the single client two readers share.
-vi.mock('./gh-exec.mjs', () => ({ runGh: vi.fn() }));
+vi.mock('../../packages/repo-standards/scripts/gh-exec.mjs', () => ({
+  runGh: vi.fn(),
+}));
 
 const REVIEW = { id: 1, state: 'COMMENTED', user: { login: 'copilot' } };
 

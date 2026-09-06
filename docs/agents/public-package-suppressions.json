@@ -15,6 +15,12 @@
   },
   "acknowledged": [
     {
+      "key": "biome **/*.cjs noConsole",
+      "count": 1,
+      "reason": "The CommonJS half of the same tooling-script exemption: the harness gate and its readers in @lcabrera/repo-standards are `.cjs`, and console output is their product exactly as it is for the `.mjs` bins beside them.",
+      "ref": "ADR-035 §7"
+    },
+    {
       "key": "biome **/*.config.mjs noDefaultExport",
       "count": 1,
       "reason": "The same config-module contract for eslint.config.mjs, which every public package owns.",

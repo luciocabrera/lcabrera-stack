@@ -91,8 +91,7 @@ jobs:
         env:
           TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: |
-          bash scripts/changed-files.sh \
-            node scripts/run-changed.mjs typecheck --markdown >> "$GITHUB_STEP_SUMMARY"
+          vp run typecheck:changed -- --markdown >> "$GITHUB_STEP_SUMMARY"
 
       - name: ESLint custom-rules pass
         id: eslint_gate
@@ -532,11 +531,11 @@ jobs:
         # DB-free suites ONLY — this job has no Postgres. Every suite here is
         # DB-free today, but the
         # constraint stands: it is what broke the previous attempt at this
-        # (reverted 2026-07-14). See scripts/merge-coverage.mjs.
+        # (reverted 2026-07-14). See merge-coverage.mjs in @lcabrera/repo-standards.
         env:
           TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: |
-          bash scripts/changed-files.sh node scripts/merge-coverage.mjs --changed
+          vp run coverage:merge -- --changed
 
       - name: Fallow audit vs base branch
         id: fallow_audit
@@ -636,8 +635,7 @@ jobs:
         env:
           TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: |
-          bash scripts/changed-files.sh \
-            node scripts/test-changed.mjs --ci --markdown \
+          vp run test:changed -- --ci --markdown \
             | tee test-selection.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Post test selection to PR
@@ -696,7 +694,7 @@ jobs:
           if [ "${{ github.event_name }}" = "push" ]; then
             vp run coverage:report
           else
-            bash scripts/changed-files.sh node scripts/coverage-report.mjs --changed
+            vp run coverage:report -- --changed
           fi
 
       - name: Upload coverage report

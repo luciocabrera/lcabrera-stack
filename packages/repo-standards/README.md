@@ -76,23 +76,46 @@ until you acknowledge it.
 
 ## Commands
 
-| Bin                                          | Checks                                                                                     |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `repo-verify-commit <file>`                  | a commit message against the Conventional Commit spec                                      |
-| `repo-verify-branch [name]`                  | a branch name against the same type vocabulary                                             |
-| `repo-verify-pr --title <t> --body-file <f>` | a pull request's title and every required section                                          |
-| `repo-verify-issue --body-file <f>`          | an issue body's required sections                                                          |
-| `repo-verify-claims`                         | the coordination register's integrity, overlap and staleness                               |
-| `repo-verify-adrs`                           | every ADR home, and every record's block and sections (`--adopt` once on an existing home) |
-| `repo-verify-publish`                        | the tarball each built package would publish, by packing it                                |
-| `repo-verify-api-surface`                    | each published package's exported surface against a snapshot                               |
-| `repo-verify-types`                          | that a built package's published types resolve for a consumer                              |
-| `repo-verify-shipped-docs`                   | that every document in the packed tarball reads with only that package on disk             |
-| `repo-audit-release`                         | every version already on the registry, after the fact                                      |
-| `repo-plan-release`                          | which packages have a version the registry does not have                                   |
-| `repo-adr "<title>"`                         | — scaffolds an ADR in the home you name                                                    |
-| `repo-claim-board`                           | — renders the live claims, including ones on other branches                                |
-| `repo-close-claim --pr <n>`                  | — deletes the task file a merged pull request closes                                       |
+| Bin                                                    | Checks                                                                                                      |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `repo-verify-commit <file>`                            | a commit message against the Conventional Commit spec                                                       |
+| `repo-verify-branch [name]`                            | a branch name against the same type vocabulary                                                              |
+| `repo-verify-pr --title <t> --body-file <f>`           | a pull request's title and every required section                                                           |
+| `repo-verify-issue --body-file <f>`                    | an issue body's required sections                                                                           |
+| `repo-verify-claims`                                   | the coordination register's integrity, overlap and staleness                                                |
+| `repo-verify-adrs`                                     | every ADR home, and every record's block and sections (`--adopt` once on an existing home)                  |
+| `repo-verify-publish`                                  | the tarball each built package would publish, by packing it                                                 |
+| `repo-verify-api-surface`                              | each published package's exported surface against a snapshot                                                |
+| `repo-verify-types`                                    | that a built package's published types resolve for a consumer                                               |
+| `repo-verify-shipped-docs`                             | that every document in the packed tarball reads with only that package on disk                              |
+| `repo-audit-release`                                   | every version already on the registry, after the fact                                                       |
+| `repo-plan-release`                                    | which packages have a version the registry does not have                                                    |
+| `repo-adr "<title>"`                                   | — scaffolds an ADR in the home you name                                                                     |
+| `repo-claim-board`                                     | — renders the live claims, including ones on other branches                                                 |
+| `repo-close-claim --pr <n>`                            | — deletes the task file a merged pull request closes                                                        |
+| `repo-verify-commands`                                 | the command document against what the runner lists, and its links and counts                                |
+| `repo-verify-deps-audit --minimum <level>`             | the audit report on stdin against the allowance register, refusing one that walked nothing                  |
+| `repo-verify-departed-names`                           | that nothing names a product or workspace on the departed roster                                            |
+| `repo-verify-renamed-mentions [--base <ref>]`          | that no document names a file the diff renamed away                                                         |
+| `repo-verify-doc-registers`                            | the requirement and planning registers' entries, pointers, cycles and `met` claims                          |
+| `repo-verify-script-exits`                             | that no script calls `process.exit()`                                                                       |
+| `repo-verify-eslint-pass`                              | that the eslint pass reports a planted violation, so a crashed rule cannot read as clean                    |
+| `repo-verify-viteplus-block`                           | that the runner's managed region in the agent document renders nothing (`--write` repairs)                  |
+| `repo-verify-inventory [--write]`                      | that every util export is named in its tree's inventory, with a baseline                                    |
+| `repo-verify-lint-plugins`                             | that every configured lint plugin family reports a planted violation and every workspace is classified once |
+| `repo-verify-package-refs`                             | that no published package's shipped text names an application directory                                     |
+| `repo-verify-react-doctor [--report]`                  | React Doctor's error-severity findings, asserting the run completed                                         |
+| `repo-verify-route-artifacts`                          | that a route folder's shared modules are named for an artifact the folder holds                             |
+| `repo-verify-harness`                                  | every skill, path rule and subagent: frontmatter, resolving paths, a description that says when             |
+| `repo-verify-review-threads --pr <n>`                  | — publishes how many review threads still hold a pull request, as a commit status                           |
+| `repo-pr-threads [--pr <n>] [--resolve <id>]`          | — lists the unresolved review threads, or resolves one                                                      |
+| `repo-test-changed`, `repo-run-changed <task>`         | — run a task only for the workspaces the diff on stdin touched, plus their dependents                       |
+| `repo-merge-coverage`, `repo-coverage-report`          | — merge the coverage lanes into one report, and summarise them per workspace                                |
+| `repo-lint-report`                                     | — writes the analysers' JSON reports on demand                                                              |
+| `repo-usage-report`                                    | — reports how the harness is used, from stores that already retain it                                       |
+| `repo-product-distance`, `repo-docs-for-package <dir>` | — read the requirement register: distance from intent, and the documents one workspace owes                 |
+| `repo-housekeeping-prune [--apply]`                    | — deletes merged branches and clean worktrees, reporting anything that might be work                        |
+| `repo-worktree-env`                                    | — links the primary checkout's gitignored env files into a linked worktree                                  |
 
 In the repository this is published from they are the root `vp run` tasks of the
 same name — `commit:verify`, `pr:verify`, `coordination:verify`,
@@ -129,7 +152,9 @@ one that cannot prevent anything.
     "adrDraftDir": "docs/agents/planning/adr-drafts",
     "adrTemplateHome": "docs/decisions",
     "coordinationBoardDoc": "docs/coordination/BOARD.md",
-    "coordinationTasksDir": "docs/coordination/tasks"
+    "coordinationTasksDir": "docs/coordination/tasks",
+    "planningDir": "docs/agents/planning",
+    "requirementsDir": "docs/product/requirements"
   },
   "publishing": {
     "publicPackageDirs": [],
@@ -222,10 +247,48 @@ hardcode:
     },
     "shippedDocs": {
       "repoOnlyDirs": ["apps", "docs", "packages", "scripts"]
-    }
+    },
+    "commandsDoc": { "file": "COMMANDS.md" },
+    "depsAudit": { "allowanceFile": "docs/agents/dependency-advisories.json" },
+    "departedNames": { "rosterFile": "scripts/departed-names.json" },
+    "inventory": {
+      "baselineFile": "scripts/inventory-drift-baseline.json",
+      "trees": [
+        {
+          "inventory": "packages/ui/src/INVENTORY.md",
+          "root": "packages/ui/src"
+        }
+      ]
+    },
+    "coverage": {
+      "mergedFile": "reports/fallow/coverage/coverage-final.json",
+      "summaryFile": "coverage/monorepo-coverage-summary.json",
+      "mergeWorkspaces": [{ "dir": "packages/ui", "name": "@scope/ui" }],
+      "reportWorkspaces": [
+        { "dir": "packages/ui", "name": "@scope/ui", "run": true }
+      ]
+    },
+    "eslintPass": { "probeWorkspaces": ["packages/ui"] },
+    "affectedTests": { "coverageTaskPackage": "" },
+    "lintReport": { "reportsDir": "reports" },
+    "reactDoctor": { "reportFile": "reports/react-doctor/full-latest.json" },
+    "usageReport": { "outDir": "reports/usage" },
+    "vitePlusBlock": { "agentDoc": "AGENTS.md" }
   }
 }
 ```
+
+The blocks from `commandsDoc` down carry what the tree-reading gates read. Each
+file-path key defaults to the conventional location shown and is held to the
+same containment rule as every other path here. The workspace rosters —
+`inventory.trees`, `coverage.mergeWorkspaces`, `coverage.reportWorkspaces`,
+`eslintPass.probeWorkspaces` and `affectedTests.coverageTaskPackage` — default
+to nothing, for the reason `publicPackageDirs` does: which workspaces a gate
+visits is the repository's own data. `repo-verify-inventory`,
+`repo-merge-coverage`, `repo-coverage-report` and `repo-verify-eslint-pass`
+refuse an empty roster rather than passing over no workspaces, and an empty
+`coverageTaskPackage` means no workspace runs a separate coverage task under
+`repo-test-changed --ci`.
 
 Four things about it are easy to get wrong.
 
@@ -329,9 +392,10 @@ plain `node` precisely to decide whether installing is worth it.
 The package does have runtime dependencies — `@arethetypeswrong/core` and
 `ts-morph` — and the boundary is what keeps that safe: only the three gates that
 read build artifacts reach them (`repo-verify-publish`, `repo-verify-types`,
-`repo-verify-api-surface`), and none of those is ever run before an install,
-because a build has already had to happen. Adding a dependency to anything else
-here is the change to think twice about.
+`repo-verify-api-surface`), plus `repo-verify-script-exits`, which parses every
+script with `ts-morph`, and none of those is ever run before an install, because
+a build or a full gate has already had to happen. Adding a dependency to anything
+else here is the change to think twice about.
 
 `declared-imports.test.mjs` enforces both halves — every bare import declared,
 and a module a consumer runs restricted to `dependencies`. It exists because
@@ -350,17 +414,15 @@ parameterising it would mean shipping an abstraction over "which analysers you
 run", and a consumer could not use the result without reproducing this
 repository's exact setup.
 
-| Gate                                                    | Why it stays                                                                                                                                                                                                                                                                                             |
-| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `verify-lint-plugins.mjs`                               | Its subject _is_ the Oxlint topology: it imports the root `vite.config.ts` for `WORKSPACE_RUNTIMES` and `lintConfig.plugins`, shells out to this toolchain's runner, and proves each plugin family live by planting a violation per family. None of that is a repository fact wrapped in a general rule. |
-| `verify-suppressions.mjs`                               | The same subject from the other side — which of four analysers wrote a suppression, in which file format, and whether the public-package register argues for it. It also reads the React Doctor triage and the coverage workspace roster, which #798 already places out of scope.                        |
-| `verify-react-doctor.mjs`, `verify-route-artifacts.mjs` | Named in #798 as inherently this repository's: one analyser's triage, and one framework's generated route artifacts.                                                                                                                                                                                     |
+| Gate                      | Why it stays                                                                                                                                                                                                                                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verify-suppressions.mjs` | Which of four analysers wrote a suppression, in which file format, and whether the public-package register argues for it. The register is one repository's, and publishing is a flag rather than a rung, so the gate reads it by path from the repository that owns it and imports `coverage-workspaces` and `jsonc` from here. |
 
-The prose side already reads it the same way: `lint-toolchain` is classified
-**repo-specific** in [devkit's classification table](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/devkit/CLASSIFICATION.md)
-because "it documents
-_this_ repository's analyser topology". A gate and the document describing it
-should not disagree about whether they travel.
+The analyser gates that read a runner and a config a consumer of the same
+toolchain also has — `repo-verify-lint-plugins`, `repo-verify-eslint-pass`,
+`repo-verify-react-doctor` — travel, on the rung that has workspaces or React
+source to point them at; [devkit's classification table](https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/devkit/CLASSIFICATION.md)
+places each one.
 
 ## The one thing to know before moving a file here
 

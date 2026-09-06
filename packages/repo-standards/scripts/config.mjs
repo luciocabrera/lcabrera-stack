@@ -26,6 +26,7 @@ import {
   repoRelative,
   verbatimList,
 } from './config-values.mjs';
+import { DEFAULT_TREE_GATES, resolveTreeGates } from './config-tree-gates.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 // Re-exported rather than moved out of reach: `CONFIG_FILE_NAME` is part of this
@@ -60,6 +61,8 @@ export const DEFAULT_REGISTERS = {
   adrTemplateHome: 'docs/decisions',
   coordinationBoardDoc: 'docs/coordination/BOARD.md',
   coordinationTasksDir: 'docs/coordination/tasks',
+  planningDir: 'docs/agents/planning',
+  requirementsDir: 'docs/product/requirements',
 };
 
 export const DEFAULT_CONVENTIONS = {
@@ -159,6 +162,16 @@ export const resolveRegisters = (raw) => {
       DEFAULT_REGISTERS.coordinationTasksDir,
       'registers.coordinationTasksDir',
     ),
+    planningDir: repoRelative(
+      block.planningDir,
+      DEFAULT_REGISTERS.planningDir,
+      'registers.planningDir',
+    ),
+    requirementsDir: repoRelative(
+      block.requirementsDir,
+      DEFAULT_REGISTERS.requirementsDir,
+      'registers.requirementsDir',
+    ),
   };
 };
 
@@ -193,6 +206,7 @@ export const DEFAULT_GATES = {
   shippedDocs: {
     repoOnlyDirs: ['apps', 'docs', 'packages', 'scripts'],
   },
+  ...DEFAULT_TREE_GATES,
 };
 
 export const resolveGates = (raw) => {
@@ -280,6 +294,7 @@ export const resolveGates = (raw) => {
         DEFAULT_GATES.shippedDocs.repoOnlyDirs,
       ),
     },
+    ...resolveTreeGates(block),
   };
 };
 
