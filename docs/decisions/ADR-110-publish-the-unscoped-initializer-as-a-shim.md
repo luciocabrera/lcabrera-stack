@@ -54,9 +54,14 @@ but its manifest, it parses no argument, and it holds no default.
 
 Two gates hold it to that shape rather than a review habit:
 
-- It is on the API-surface ratchet (`publishing.publicPackageDirs`). A shim's
-  snapshot under `reports/api-surface/` carries no export at all, so the first
-  one added is a diff a reviewer has to accept deliberately.
+- It is on the API-surface ratchet (`publishing.publicPackageDirs`), and what
+  the ratchet reads is the manifest's `exports` map — what a consumer can
+  import, not what the files happen to declare. The shim names no subpath there,
+  so its snapshot under `reports/api-surface/` is empty; adding one puts every
+  symbol that entry reaches into the snapshot, which is a diff a reviewer has to
+  accept deliberately. A bare `export` in the bin with no subpath pointing at it
+  is unreachable from an install — dead code inside the tarball rather than a
+  second surface — so it is deliberately not what this gate answers for.
 - `vp run tarball:verify` packs it, installs it beside the packages it wraps in
   a scratch repository outside this tree, and runs it. The finding it asserts is
   the tree that comes out — a repository, with a commit, with the config the
