@@ -89,18 +89,17 @@ export const verbatimList = (value, fallback) => {
   return entries.length > 0 ? entries : fallback;
 };
 
-const compiles = (source) => {
+const compiled = (source) => {
   try {
-    RegExp(source, 'u');
-    return true;
+    return new RegExp(source, 'u');
   } catch {
-    return false;
+    return undefined;
   }
 };
 
 export const patternList = (value, fallback, key) => {
   const entries = verbatimList(value, fallback);
-  const broken = entries.filter((source) => !compiles(source));
+  const broken = entries.filter((source) => compiled(source) === undefined);
   if (broken.length > 0) {
     throw new Error(
       `${CONFIG_FILE_NAME}: \`${key}\` must hold regular expressions, but these do not compile: ${broken.join(', ')}.`,
