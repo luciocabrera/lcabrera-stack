@@ -9,10 +9,7 @@ import { publicPackageDirs } from '../../packages/repo-standards/scripts/coverag
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-const {
-  mergeWorkspaces: COVERAGE_MERGE_WORKSPACES,
-  reportWorkspaces: COVERAGE_REPORT_WORKSPACES,
-} = readGates(REPO_ROOT).coverage;
+const { mergeWorkspaces, reportWorkspaces } = readGates(REPO_ROOT).coverage;
 
 const dirsOf = (workspaces) => workspaces.map((workspace) => workspace.dir);
 
@@ -37,39 +34,39 @@ describe('publicPackageDirs', () => {
   });
 });
 
-describe('COVERAGE_REPORT_WORKSPACES', () => {
+describe('gates.coverage.reportWorkspaces', () => {
   it('includes every public package', () => {
-    expect(dirsOf(COVERAGE_REPORT_WORKSPACES)).toEqual(
+    expect(dirsOf(reportWorkspaces)).toEqual(
       expect.arrayContaining(publicPackageDirs(REPO_ROOT)),
     );
   });
 
   it('points only at real workspace directories', () => {
-    for (const dir of dirsOf(COVERAGE_REPORT_WORKSPACES)) {
+    for (const dir of dirsOf(reportWorkspaces)) {
       expect(existsSync(join(REPO_ROOT, dir, 'package.json'))).toBe(true);
     }
   });
 
   it('lists each workspace once', () => {
-    const dirs = dirsOf(COVERAGE_REPORT_WORKSPACES);
+    const dirs = dirsOf(reportWorkspaces);
     expect(new Set(dirs).size).toBe(dirs.length);
   });
 });
 
-describe('COVERAGE_MERGE_WORKSPACES', () => {
+describe('gates.coverage.mergeWorkspaces', () => {
   it('includes every public package', () => {
-    expect(dirsOf(COVERAGE_MERGE_WORKSPACES)).toEqual(
+    expect(dirsOf(mergeWorkspaces)).toEqual(
       expect.arrayContaining(publicPackageDirs(REPO_ROOT)),
     );
   });
 
   it('points only at real workspace directories', () => {
-    for (const dir of dirsOf(COVERAGE_MERGE_WORKSPACES)) {
+    for (const dir of dirsOf(mergeWorkspaces)) {
       expect(existsSync(join(REPO_ROOT, dir, 'package.json'))).toBe(true);
     }
   });
 
   it('excludes the showcase app the fallow merge deliberately skips', () => {
-    expect(dirsOf(COVERAGE_MERGE_WORKSPACES)).not.toContain('apps/showcase');
+    expect(dirsOf(mergeWorkspaces)).not.toContain('apps/showcase');
   });
 });

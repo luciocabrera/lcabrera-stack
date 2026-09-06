@@ -1,50 +1,34 @@
 #!/usr/bin/env node
 /**
- * Builds the per-workspace + monorepo coverage summary the CI "Coverage Report"
- * PR comment renders:
+ * Aggregates each reported workspace's `coverage-summary.json` into the one
+ * per-workspace + monorepo summary a coverage comment renders,
+ * `gates.coverage.summaryFile`.
  *
- *   coverage/monorepo-coverage-summary.json
- *
- * (Under the repo-root `coverage/` dir, which .gitignore already ignores — it is
- * a build product, regenerated every run, never a tracked snapshot.)
- *
- * WHY THIS EXISTS
- * ---------------
- * The coverage comment used to read a single workspace's `coverage-summary.json`
- * (the showcase's, because `test:ci` runs its coverage last), so the PR only ever
- * saw one app's numbers with no label. This collects each reported workspace's
- * own `coverage-summary.json`, tags it with the project name, and aggregates a
- * monorepo-wide total, so the comment shows one row per workspace plus a total.
+ * The roster is `gates.coverage.reportWorkspaces`, and an empty one is refused
+ * rather than reported over. `run: true` means this runs that workspace's
+ * `test:coverage` first; `run: false` means its summary is already produced
+ * upstream.
  *
  * WHY A SEPARATE SCRIPT FROM merge-coverage.mjs
  * ---------------------------------------------
- * merge-coverage.mjs feeds the *fallow gate* — detailed `coverage-final.json`,
- * DB-free workspaces only, and the showcase is deliberately excluded (its suite
- * is the largest and its fallow findings are baselined, so coverage buys that
- * gate nothing). This feeds the *PR comment* — per-workspace `coverage-summary`
- * totals for the public-facing surfaces, which explicitly include the showcase.
- * Different workspace sets, different inputs, different consumers; coupling them
- * would drag the showcase into the fallow merge it is meant to stay out of.
+ * Different roster, different reporter, different consumer. That one feeds a
+ * *gate* with detailed `coverage-final.json` from the workspaces whose suites
+ * need no external service; this one feeds a *comment* with
+ * `coverage-summary` totals for the surfaces worth showing a reviewer, which
+ * can include a workspace the gate deliberately leaves out. Coupling them
+ * would drag each roster into the other.
  *
- * ROLLOUT
- * -------
- * The reported set is `gates.coverage.reportWorkspaces`, defaulting to
- * COVERAGE_REPORT_WORKSPACES in ./coverage-workspaces.mjs — shared with the
- * fallow merge's own list so both can be asserted by a test that fails if a
- * public package drops out.
- * The phased plan for adding the rest lives in docs/tooling/coverage-reporting.md.
- *
- * Usage (from the repo root):
- *   vp run coverage:report        # run test:coverage for `run:true` workspaces, read the rest, aggregate
- *   repo-coverage-report          # same, direct
- *   repo-coverage-report --all    # also run the `run:false` workspaces' test:coverage (standalone local use)
- *   repo-coverage-report --no-run # aggregate already-generated summaries only, run nothing
- *   git diff --name-only BASE | repo-coverage-report --changed  # only workspaces a diff affected (CI PRs)
+ * Usage (from the repository root):
+ *   repo-coverage-report                 # run the `run: true` workspaces, aggregate
+ *   repo-coverage-report --all           # run every workspace's test:coverage
+ *   repo-coverage-report --no-run        # aggregate existing summaries, run nothing
+ *   … | repo-coverage-report --changed   # only the workspaces the diff on stdin affects
  *
  * Best-effort by design: a workspace whose coverage is missing or whose suite
- * fails is warned about and skipped, not fatal — the actual test gate is
- * `test:ci`, and a partial coverage comment is more useful than none. It exits
- * non-zero only when it can produce no report at all.
+ * fails is warned about and skipped, because the test task is the real gate and
+ * a partial report is more useful than none. Exit codes: 0 = a report was
+ * written, or there was nothing to report; 1 = the roster is empty, or no
+ * summary could be read at all.
  */
 import { execFile } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';

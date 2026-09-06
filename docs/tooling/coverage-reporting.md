@@ -54,10 +54,10 @@ Three moving parts:
 
 They feed different consumers and must not be merged:
 
-| Script            | Feeds                     | Reporter        | Workspaces                                    | react-router?                                           |
-| ----------------- | ------------------------- | --------------- | --------------------------------------------- | ------------------------------------------------------- |
-| `coverage:merge`  | the **fallow audit gate** | `json` (detail) | the DB-free set — `COVERAGE_MERGE_WORKSPACES` | **excluded** (largest suite; fallow findings baselined) |
-| `coverage:report` | the **PR comment**        | `json-summary`  | the reported set below                        | **included** (it is a critical surface)                 |
+| Script            | Feeds                     | Reporter        | Workspaces                                         | react-router?                                           |
+| ----------------- | ------------------------- | --------------- | -------------------------------------------------- | ------------------------------------------------------- |
+| `coverage:merge`  | the **fallow audit gate** | `json` (detail) | the DB-free set — `gates.coverage.mergeWorkspaces` | **excluded** (largest suite; fallow findings baselined) |
+| `coverage:report` | the **PR comment**        | `json-summary`  | the reported set below                             | **included** (it is a critical surface)                 |
 
 Coupling them would drag react-router into the fallow merge it is deliberately
 kept out of. See [`packages/repo-standards/scripts/merge-coverage.mjs`](../../packages/repo-standards/scripts/merge-coverage.mjs)
@@ -65,18 +65,24 @@ for the fallow side.
 
 ## Reported workspaces
 
-Defined in `COVERAGE_REPORT_WORKSPACES` in
-[`packages/repo-standards/scripts/coverage-workspaces.mjs`](../../packages/repo-standards/scripts/coverage-workspaces.mjs),
-most-critical first — that module is the roster, and this page deliberately does
-not copy it. `run: true` means the reporter runs the workspace's `test:coverage`;
-`run: false` means its summary is already produced upstream.
+Defined in `gates.coverage.reportWorkspaces` in
+[`devkit.config.json`](../../devkit.config.json), most-critical first — which
+workspaces this repository reports is the repository's own data, so the roster
+lives with the rest of it and the gate that reads it holds no list. This page
+deliberately does not copy it. `run: true` means the reporter runs the
+workspace's `test:coverage`; `run: false` means its summary is already produced
+upstream. A roster naming no workspace is refused rather than reported over.
 
-That membership is **asserted, not just documented**: `test:scripts` resolves the
-never-baseline packages from the gitignore rule AGENTS.md §1 names as the
-authority (`vp run suppressions:packages` prints them) and fails if any of them
-is absent from either lane. It keys on the directory rather than the package
-name, so an npm scope rename cannot defeat it. A new public package extends the
-check with no edit here.
+That membership is **asserted, not just documented**:
+[`scripts/lib/coverage-workspaces.test.mjs`](../../scripts/lib/coverage-workspaces.test.mjs)
+(under `test:scripts`) resolves the never-baseline packages with
+`publicPackageDirs` from
+[`packages/repo-standards/scripts/coverage-workspaces.mjs`](../../packages/repo-standards/scripts/coverage-workspaces.mjs)
+— the gitignore rule AGENTS.md §1 names as the authority, which
+`vp run suppressions:packages` prints — and fails if any of them is absent from
+either lane. It keys on the directory rather than the package name, so an npm
+scope rename cannot defeat it. A new public package extends the check with no
+edit here.
 
 `--all` forces every workspace to run (standalone local use, where `test:ci` has
 not run first).
@@ -97,10 +103,10 @@ only once its coverage runs clean and means something.** Checklist:
    reverted the first coverage-into-CI attempt (2026-07-14).
 3. **It emits `coverage-summary.json`.** Automatic once `test:coverage` uses the
    shared `VITEST_COVERAGE_FLAGS` (all current ones do).
-4. **Append it** to `COVERAGE_REPORT_WORKSPACES` in
-   `packages/repo-standards/scripts/coverage-workspaces.mjs` with `run: true` (or `false` if its
-   summary is already produced upstream). No other change needed — the comment
-   scales row-by-row and the total re-aggregates automatically.
+4. **Append it** to `gates.coverage.reportWorkspaces` in `devkit.config.json`
+   with `run: true` (or `false` if its summary is already produced upstream).
+   No other change needed — the comment scales row-by-row and the total
+   re-aggregates automatically.
 
 ### Phased rollout
 

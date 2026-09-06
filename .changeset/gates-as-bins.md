@@ -30,6 +30,11 @@ workspace rosters (`coverage.mergeWorkspaces`, `coverage.reportWorkspaces`,
 `affectedTests.coverageTaskPackage`) default to nothing, and a gate handed an
 empty roster refuses to pass rather than passing over no workspaces.
 
+Two of the bins read their input rather than resolving it: under `--changed`,
+`repo-merge-coverage` and `repo-coverage-report` take the changed-file list on
+stdin, so a repository wiring either into a task feeds that list itself and gets
+a full run when it does not.
+
 The modules a repository's own scripts may need beside the bins are exported:
 `affected-tests`, `coverage-workspaces`, `gh-exec`, `jsonc`, `merge-queue`,
 `review-gate-reconcile`, `review-gate-status`, `review-threads`,

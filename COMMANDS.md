@@ -151,8 +151,8 @@ project-specific belongs in that project's own `package.json`.
 | `vp run test:changed`                 | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below |
 | `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                 |
 | `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                          |
-| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only)                                      |
-| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment (ui, server, react-router)            |
+| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only) — see below                          |
+| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment — see below                           |
 
 `test:all` vs `test:ci`: neither runs a suite that needs a database, so the two
 differ only in ordering — `test:ci` runs `showcase` last so the PR's coverage
@@ -203,6 +203,21 @@ falling back to the full run on the same shared/root triggers and on pushes to
 `main`. The generic runner is `repo-run-changed <task>`; `vp check`'s
 repo-wide tsgolint pass still type-checks every PR as a net. CI's Quality Gate uses
 it on pull requests and posts the per-workspace selection to the job summary.
+
+The **coverage pair** has the same two modes, and which one you get is the
+argument, not the task. `vp run coverage:merge` and `vp run coverage:report` run
+every workspace on their roster; adding `-- --changed` scopes each to the
+workspaces the diff touched, which is what CI does on a pull request. Both
+rosters live in `devkit.config.json` under `gates.coverage` — no list is copied
+here, and
+[`docs/tooling/coverage-reporting.md`](docs/tooling/coverage-reporting.md) is
+where the two lanes are told apart. `--changed` takes the file list on **stdin**,
+so both root scripts route through `scripts/changed-files.sh --if-arg --changed`,
+which feeds the diff only when that flag is present and otherwise execs the bin
+untouched — a full run then needs no merge base, and a changed run cannot
+silently read an empty list. That last part is not theoretical: an unfed
+`--changed` writes an empty coverage file and exits 0, and the fallow audit
+falls back to the estimate that reports simple code as a CRAP breach.
 
 ### Dependencies
 
@@ -947,11 +962,11 @@ Notes on the non-obvious ones:
 
 [`.github/workflows/check-safe.yml`](.github/workflows/check-safe.yml) — three jobs:
 
-| Job              | Steps                                                                                                           |
-| ---------------- | --------------------------------------------------------------------------------------------------------------- |
-| **Quality Gate** | `typegen:all` → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check` |
-| **Fallow Audit** | `typegen:all` → `coverage:merge` → `fallow:audit --base $DIFF_BASE --coverage …` (anywhere with a base)         |
-| **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR        |
+| Job              | Steps                                                                                                                |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Quality Gate** | `typegen:all` → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check`      |
+| **Fallow Audit** | `typegen:all` → `coverage:merge -- --changed` → `fallow:audit --base $DIFF_BASE --coverage …` (anywhere with a base) |
+| **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR             |
 
 Each pass is a **separate step on purpose** so a failure names itself instead of
 hiding behind a neighbour. `vp check` does not run the eslint pass, it does not run

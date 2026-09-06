@@ -1,33 +1,27 @@
 #!/usr/bin/env node
 /**
- * Runs the DB-free coverage suites and merges their Istanbul reports into the
- * single file the fallow audit gate consumes:
- *
- *   reports/fallow/coverage/coverage-final.json
- *
- * (Under reports/fallow/ per the canonical fallow output convention; the
- * `coverage/` segment means the repo's existing .gitignore rule already
- * ignores it — it is a build product, not a tracked report snapshot.)
+ * Runs the coverage suites named by `gates.coverage.mergeWorkspaces` and merges
+ * their Istanbul reports into the one file `fallow audit --coverage` reads,
+ * `gates.coverage.mergedFile`.
  *
  * WHY THIS EXISTS
  * ---------------
  * `fallow audit` scores CRAP as `cyclomatic² × (1 − coverage)³ + cyclomatic`
- * against a threshold of 30. Given no coverage data it *estimates* coverage
- * from whether a colocated test file exists (none → 0%, partial → 40%), so
- * every function with cyclomatic ≥ 5 and no colocated test breaches the
- * threshold on complexity it does not actually have. Feeding real coverage via
- * `fallow audit --coverage <this file>` replaces the guess with measurement.
+ * against a threshold. Given no coverage data it *estimates* coverage from
+ * whether a colocated test file exists (none → 0%, partial → 40%), so every
+ * function with cyclomatic ≥ 5 and no colocated test breaches the threshold on
+ * complexity it does not have. Feeding measured coverage replaces the guess.
  *
- * ONLY DB-FREE SUITES RUN HERE. An earlier attempt to feed coverage into the
- * audit was reverted (2026-07-14) because it ran real-Postgres
- * `queries/*` tests in CI, where `getPool()` → `readEnvConfig()` throws on the
- * missing `DB_*`. Every workspace merged here is DB-free today — a new one
- * must earn its place the same way.
+ * A workspace joins the roster only if its coverage run needs no external
+ * service — this runs wherever the audit runs, which is not where a database
+ * is. An empty roster is refused rather than merged over.
  *
- * Usage (from the repo root):
- *   vp run coverage:merge            # run suites + merge
- *   repo-merge-coverage              # same, direct
- *   repo-merge-coverage --no-run     # merge already-generated reports
+ * Usage (from the repository root):
+ *   repo-merge-coverage                  # run the suites, then merge
+ *   repo-merge-coverage --no-run         # merge already-generated reports
+ *   … | repo-merge-coverage --changed    # only the workspaces the diff on
+ *                                        # stdin touches; a new-only audit
+ *                                        # never consults the others
  *
  * Exit codes: 0 = merged report written, 1 = a suite failed or produced no
  * coverage (a partial merge is worse than none — it would silently score

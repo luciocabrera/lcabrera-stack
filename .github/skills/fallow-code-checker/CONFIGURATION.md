@@ -179,12 +179,17 @@ at all have nothing to measure and still fall back to the estimate.
 
 `vp run coverage:merge` (`packages/repo-standards/scripts/merge-coverage.mjs`) runs `test:coverage` in
 the **DB-free** workspaces only and merges their reports — the membership is
-`COVERAGE_MERGE_WORKSPACES` in `packages/repo-standards/scripts/coverage-workspaces.mjs`, **not a
-list here**, because a copy in prose is a copy nothing checks (this one had gone
-two workspaces stale). That module also holds the PR comment's
-`COVERAGE_REPORT_WORKSPACES`, so `test:scripts` can assert both — dropping a
-public package from either lane fails the suite rather than quietly shrinking a
-report.
+`gates.coverage.mergeWorkspaces` in `devkit.config.json`, **not a list here**,
+because a copy in prose is a copy nothing checks (this one had gone two
+workspaces stale). The PR comment's `gates.coverage.reportWorkspaces` sits
+beside it, and `test:scripts` asserts both — dropping a public package from
+either lane fails the suite rather than quietly shrinking a report.
+
+On a pull request the task runs as `vp run coverage:merge -- --changed`, and
+the changed-file list reaches it on **stdin** via `scripts/changed-files.sh`.
+Invoked without that feed, `--changed` resolves no workspace, writes an empty
+`coverage-final.json` and exits 0 — the audit then falls back to the estimate
+this lane exists to replace, and reports CRAP breaches on simple code.
 
 Coverage must never require Postgres: the first attempt at this lever was
 reverted (2026-07-14) because it ran a workspace's real-Postgres `queries/*`
