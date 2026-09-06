@@ -2,7 +2,7 @@
 id: devkit-create-command
 title: create a new repository, not only initialise an existing one
 owner: agent:claude
-status: active
+status: review
 branch: feat/1074-devkit-create-command
 area:
   - packages/devkit/scripts/create.mjs
