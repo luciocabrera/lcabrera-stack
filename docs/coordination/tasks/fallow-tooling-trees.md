@@ -2,7 +2,7 @@
 id: fallow-tooling-trees
 title: prove every fallow check fires, including over the tooling trees
 owner: agent:claude
-status: active
+status: review
 branch: test/1095-fallow-tooling-trees
 area:
   - .fallowrc.json
