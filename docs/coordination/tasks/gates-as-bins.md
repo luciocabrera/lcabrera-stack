@@ -2,7 +2,7 @@
 id: gates-as-bins
 title: expose the gates as bins and drop the root wrappers
 owner: agent:claude
-status: active
+status: review
 branch: refactor/1072-gates-as-bins
 area:
   - scripts/*.mjs
