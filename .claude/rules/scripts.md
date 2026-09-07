@@ -10,10 +10,12 @@ paths:
 
 # Build & Tooling Script Standards
 
-Covers every `.mjs` and `.cjs` in the repo, and every file under a `scripts/`
-directory whatever its extension — the verify gates, report generators, seeders,
-and skill runners under `scripts/`, `.github/skills/*/scripts/`,
-`apps/*/scripts/` and `packages/repo-standards/scripts/`. Both shared eslint
+Covers every `.mjs` and `.cjs` in the repo, and a `.js`, `.ts`, `.mts` or
+`.cts` under a `scripts/` directory — the frontmatter above is the list, and a
+file there under any other extension matches none of it. These are the verify
+gates, report generators, seeders and skill runners under `scripts/`,
+`.github/skills/*/scripts/`, `apps/*/scripts/` and
+`packages/repo-standards/scripts/`. Both shared eslint
 configs globally ignore a `scripts/` directory, which is why a workspace's
 tooling scripts belong there rather than in its `src/`: the eslint custom-rules
 pass is aimed at library and application source, and these four analysers are
