@@ -2,6 +2,13 @@
 /**
  * Gate: no repo script calls `process.exit()` (ADR-090).
  *
+ * Which files count is `isToolingScript`, shared with the size gate, so the two
+ * select the same extensions: `.mjs` and `.cjs` anywhere, plus `.js`, `.ts`,
+ * `.mts` and `.cts` under a `scripts/` directory. Which DIRECTORIES get walked
+ * is not shared: `SKIP_DIRS` below is this gate's alone, and the size gate skips
+ * `ALWAYS_SKIPPED` plus whatever `gates.scriptSize.skipDirs` names. A file under
+ * a directory only one of them skips is read by only one of them.
+ *
  * Usage (from the repo root):
  *   repo-verify-script-exits
  *
@@ -19,11 +26,11 @@ import {
   findProcessExitCalls,
   mayContainExitCall,
 } from './script-exit-calls.mjs';
+import { isToolingScript } from './script-size.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
-const SCRIPT_FILE = /\.[mc]js$/u;
 const SKIP_DIRS = new Set([
   '.git',
   '.tmp',
@@ -44,9 +51,8 @@ const findScripts = (directory) =>
       return SKIP_DIRS.has(entry.name) ? [] : findScripts(full);
     }
 
-    return SCRIPT_FILE.test(entry.name)
-      ? [toPosix(relative(REPO_ROOT, full))]
-      : [];
+    const path = toPosix(relative(REPO_ROOT, full));
+    return isToolingScript(path) ? [path] : [];
   });
 
 const main = () => {
@@ -73,7 +79,7 @@ const main = () => {
     }
 
     console.error(
-      '\nSet `process.exitCode` and return instead, with a top-level try/catch. See .claude/rules/scripts.md.',
+      '\nSet `process.exitCode` and return instead, with a top-level try/catch.',
     );
     process.exitCode = 1;
     return;

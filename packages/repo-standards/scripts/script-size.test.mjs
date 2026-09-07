@@ -6,6 +6,7 @@ import {
   baselineWarning,
   countCodeLines,
   findingsFor,
+  isToolingScript,
   sizeProblem,
 } from './script-size.mjs';
 
@@ -158,5 +159,35 @@ describe('findingsFor', () => {
     expect(problems[0]).toContain('grew.mjs');
     expect(warnings).toHaveLength(1);
     expect(warnings[0]).toContain('shrank.mjs');
+  });
+});
+
+describe('isToolingScript', () => {
+  it('counts a .mjs or .cjs wherever it sits', () => {
+    expect(isToolingScript('vite.config.mjs')).toBe(true);
+    expect(isToolingScript('packages/kit/hooks/pre-push.cjs')).toBe(true);
+  });
+
+  it('counts a .js, .ts, .mts or .cts under a scripts directory', () => {
+    expect(isToolingScript('scripts/report.js')).toBe(true);
+    expect(isToolingScript('packages/kit/scripts/verify-thing.ts')).toBe(true);
+    expect(isToolingScript('scripts/lib/walk.mts')).toBe(true);
+    expect(isToolingScript('scripts/lib/walk.cts')).toBe(true);
+  });
+
+  it('leaves source outside a scripts directory to the rules that govern it', () => {
+    expect(isToolingScript('packages/ui/src/index.ts')).toBe(false);
+    expect(isToolingScript('apps/showcase/app/root.tsx')).toBe(false);
+    expect(isToolingScript('vite.config.ts')).toBe(false);
+  });
+
+  it('reads scripts as a directory segment, not as part of a name', () => {
+    expect(isToolingScript('packages/kit/src/scripts.ts')).toBe(false);
+    expect(isToolingScript('packages/kit/src/my-scripts/thing.ts')).toBe(false);
+  });
+
+  it('does not count a non-script file that happens to live there', () => {
+    expect(isToolingScript('scripts/README.md')).toBe(false);
+    expect(isToolingScript('scripts/departed-names.json')).toBe(false);
   });
 });

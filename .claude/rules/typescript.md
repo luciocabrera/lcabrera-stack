@@ -1,5 +1,5 @@
 ---
-paths: ['**/*.ts', '**/*.tsx']
+paths: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts']
 ---
 
 # TypeScript Standards

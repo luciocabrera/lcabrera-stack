@@ -45,6 +45,23 @@ describe('findProcessExitCalls', () => {
   it('does not flag an exit call on some other object', () => {
     expect(findProcessExitCalls('child.exit(1);')).toEqual([]);
   });
+
+  it('reads a TypeScript source, whose annotations a JavaScript parse rejects', () => {
+    const source = [
+      'type Args = { readonly code: number };',
+      '',
+      'export const fail = <T,>(args: Args, value: T) => {',
+      '  process.exit(args.code);',
+      '  return value satisfies T;',
+      '};',
+    ].join('\n');
+
+    for (const name of ['scripts/f.ts', 'scripts/f.mts', 'scripts/f.cts']) {
+      expect(findProcessExitCalls(source, name)).toEqual([
+        { line: 4, text: 'process.exit(args.code)' },
+      ]);
+    }
+  });
 });
 
 describe('mayContainExitCall', () => {

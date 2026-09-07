@@ -1,20 +1,40 @@
 ---
-paths: ['**/*.mjs', '**/*.cjs', '**/scripts/**/*.js']
+paths:
+  - '**/*.mjs'
+  - '**/*.cjs'
+  - '**/scripts/**/*.js'
+  - '**/scripts/**/*.ts'
+  - '**/scripts/**/*.mts'
+  - '**/scripts/**/*.cts'
 ---
 
 # Build & Tooling Script Standards
 
-Covers the repo's `.mjs` / `.cjs` (and `scripts/**/*.js`) — the verify gates,
-report generators, seeders, and skill runners under `scripts/`,
+Covers every `.mjs` and `.cjs` in the repo, and a `.js`, `.ts`, `.mts` or
+`.cts` under a `scripts/` directory — the frontmatter above is the list, and a
+file there under any other extension matches none of it. These are the verify
+gates, report generators, seeders and skill runners under `scripts/`,
 `.github/skills/*/scripts/`, `apps/*/scripts/` and
-`packages/repo-standards/scripts/`. Both shared eslint configs globally ignore a
-`scripts/` directory, which is why a workspace's tooling scripts belong there
-rather than in its `src/`: the eslint custom-rules pass is aimed at library and
-application source, and these four analysers are what govern the rest. These files run under Node,
-outside the app bundle, so the TypeScript rules (`type` vs `interface`, `readonly`,
-no-`any`) don't apply — but **structure, purity, size, and the enforcement below
-do.** They are real code and rot the same way. The exemplar to copy is
+`packages/repo-standards/scripts/`. Both shared eslint
+configs globally ignore a `scripts/` directory, which is why a workspace's
+tooling scripts belong there rather than in its `src/`: the eslint custom-rules
+pass is aimed at library and application source, and these four analysers are
+what govern the rest. These files run under Node, outside the app bundle, and
+they are real code that rots the same way. The exemplar to copy is
 `packages/repo-standards/scripts/verify-commands-doc.mjs`.
+
+**A `.mjs`, `.cjs` or `.js` has no types to hold, so the TypeScript rules
+(`type` vs `interface`, `readonly`, no-`any`) do not reach it; structure,
+purity, size and the enforcement below still do.** A `.ts`, `.mts` or `.cts`
+under a `scripts/` directory is held to both: `.claude/rules/typescript.md` for
+what it says about types, this file for the header, the size ceiling, effects at
+the edges, the Node conventions and the exit codes. Nothing in the tree is on
+that side of the line today —
+[ADR-111](../../docs/decisions/ADR-111-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md)
+decided a published bin ships as JavaScript, and the gate scripts are bins. The
+paths above name it anyway, because the failure to avoid is a tooling script
+leaving both this rule and the size ceiling by being renamed, which nothing
+would report.
 
 ## Structure & size
 
@@ -34,8 +54,10 @@ do.** They are real code and rot the same way. The exemplar to copy is
   shared logic imported by the CLI shells beside it, not copy-pasted (fallow
   flags the dupes when it isn't).
 - **Hard ceiling: 350 code lines** (non-blank, non-comment) per file — aim well
-  under. Over it, split. Enforced by `vp run scripts:verify`; inherited offenders
-  are grandfathered in `scripts/script-size-baseline.json` and may not grow.
+  under. Over it, split. Enforced by `vp run scripts:verify`, over exactly the
+  paths in this file's frontmatter (`isToolingScript` in
+  `packages/repo-standards/scripts/script-size.mjs`); inherited offenders are
+  grandfathered in `scripts/script-size-baseline.json` and may not grow.
 
 ## Purity & effects
 
@@ -76,7 +98,12 @@ these files lean on the repo-wide passes plus one dedicated gate:
 fallow's `maxUnitSize`/complexity limits apply to root `scripts/` but are
 **relaxed for `packages/eslint-local-rules/**`** in
 `.fallowrc.json` (deliberately — procedural CLI/AST-walker code). The size gate
-has no such carve-out: it covers every `.mjs`/`.cjs`, skills included.
+has no such carve-out: it covers every file this rule binds, skills included.
+The exits gate picks files with the same predicate, so neither gate reads fewer
+extensions than this rule names. Directory skipping is **not** shared: the size
+gate skips what `gates.scriptSize.skipDirs` adds in `devkit.config.json`, the
+exits gate has its own fixed list, and a file under a directory only one of them
+skips is read by only one of them.
 
 Rule 11 applies here too: never silence a finding — fix the code. `packages/ui`
 scripts are held to the same never-baseline bar as the rest of that package.

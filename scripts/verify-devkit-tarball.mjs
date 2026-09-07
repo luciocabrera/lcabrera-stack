@@ -15,6 +15,11 @@
  * The deciding half is `./lib/devkit-tarball.mjs` (pure); this file is the
  * packing, the installing, the executing and the exit code.
  *
+ * The size gate's planted file is sized from the ceiling the scratch consumer
+ * resolves, not from a constant: a fixed plant stops being oversized the moment
+ * `gates.scriptSize.ceiling` is raised past it, and the control then proves
+ * nothing while still reporting success.
+ *
  * Usage: node scripts/verify-devkit-tarball.mjs
  * Exit codes: 0 = a consumer would get a working install, 1 = they would not.
  */
@@ -22,6 +27,7 @@
 import { execFileSync } from 'node:child_process';
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -30,12 +36,14 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, relative } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import process from 'node:process';
 
+import { readGates } from '../packages/repo-standards/scripts/config.mjs';
 import { runGitStatus } from '../packages/repo-standards/scripts/git-exec.mjs';
 import { shimFindings } from './lib/devkit-tarball-shim.mjs';
 import {
+  binsWithoutNodeFloor,
   binsWithoutShebang,
   binStartupFailure,
   declaredBins,
@@ -43,6 +51,7 @@ import {
   gateProbeFindings,
   inertHooks,
   materialisationFailure,
+  oversizedScript,
   bareTaskFindings,
   clobberedConfigKeys,
   noCommandsDeclared,
@@ -181,10 +190,17 @@ const reinitConfigFindings = (consumer) => {
   });
 };
 
-const GATE_BINS = [
+const GATE_PLANTS = [
   {
+    file: 'planted-exit.mjs',
     name: 'repo-verify-script-exits',
-    plant: { file: 'planted-exit.mjs', source: 'process.exit(1);\n' },
+    source: () => 'process.exit(1);\n',
+  },
+  {
+    file: 'scripts/planted-oversized.ts',
+    name: 'repo-verify-script-size',
+    source: (consumer) =>
+      oversizedScript(readGates(consumer).scriptSize.ceiling),
   },
 ];
 
@@ -201,18 +217,19 @@ const runBin = ({ args = [], bin, consumer }) => {
 };
 
 const gateBinFailures = (consumer) =>
-  GATE_BINS.flatMap(({ name, plant }) => {
+  GATE_PLANTS.flatMap(({ file, name, source }) => {
     const bin = join(consumer, 'node_modules', '.bin', name);
     const clean = runBin({ bin, consumer });
-    const plantedPath = join(consumer, plant.file);
-    writeFileSync(plantedPath, plant.source);
+    const plantedPath = join(consumer, file);
+    mkdirSync(dirname(plantedPath), { recursive: true });
+    writeFileSync(plantedPath, source(consumer));
     try {
       const planted = runBin({ bin, consumer });
       return gateProbeFindings({
         clean,
         name,
         planted,
-        plantedFile: plant.file,
+        plantedFile: file,
       });
     } finally {
       rmSync(plantedPath, { force: true });
@@ -303,6 +320,7 @@ const main = () => {
         manifest,
         readPackedFile: packedFileReader(tarball),
       }),
+      ...binsWithoutNodeFloor(manifest),
     ]);
 
     run(
@@ -374,7 +392,7 @@ const main = () => {
     ).length;
 
     process.stdout.write(
-      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, ${tasks} runnable task(s) wired, ${GATE_BINS.length} gate bin(s) proven against a planted violation — and the \`create-lcabrera-stack\` initializer made a committed repository from an empty directory.\n`,
+      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, ${tasks} runnable task(s) wired, ${GATE_PLANTS.length} gate bin(s) proven against a planted violation — and the \`create-lcabrera-stack\` initializer made a committed repository from an empty directory.\n`,
     );
   } finally {
     rmSync(staging, { force: true, recursive: true });

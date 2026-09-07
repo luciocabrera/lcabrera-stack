@@ -13,7 +13,10 @@
  * executing live in the CLI.
  *
  * npm always includes the files in `ALWAYS_PACKED` regardless of `files`, so
- * their absence is a real fault rather than a packaging choice.
+ * their absence is a real fault rather than a packaging choice. Every check here
+ * reads the PACKED manifest, never the workspace one — `files`, `publishConfig`
+ * and `engines` are what an installer acts on, and only the packed copy has
+ * them as they ship (ADR-111).
  */
 
 const ALWAYS_PACKED = ['package.json'];
@@ -133,6 +136,18 @@ export const materialisationFailure = ({ manifestFiles, presentPaths }) => {
   return absent.length === 0
     ? undefined
     : `\`devkit sync\` recorded ${absent.length} file(s) the tree does not hold, starting with \`${absent.toSorted((left, right) => left.localeCompare(right))[0]}\``;
+};
+
+/**
+ * @param {{ bin?: Record<string, string>, engines?: { node?: string }, name: string }} manifest
+ */
+export const binsWithoutNodeFloor = (manifest) => {
+  const bins = declaredBins(manifest);
+  return bins.length === 0 || (manifest.engines?.node ?? '').trim() !== ''
+    ? []
+    : [
+        `${manifest.name} declares ${bins.length} bin(s) and no \`engines.node\` in the packed manifest, so nothing holds a consumer to the Node they were written for`,
+      ];
 };
 
 export const noCommandsDeclared = (manifest) =>
@@ -324,6 +339,14 @@ export const createShimFindings = ({
  *           name: string, planted: { output: string, status: number | null },
  *           plantedFile: string }} args
  */
+const PLANT_MARGIN_LINES = 50;
+
+export const oversizedScript = (ceiling) =>
+  `${Array.from(
+    { length: ceiling + PLANT_MARGIN_LINES },
+    (_, index) => `export const value${index} = ${index};`,
+  ).join('\n')}\n`;
+
 export const gateProbeFindings = ({ clean, name, planted, plantedFile }) => {
   if (!clean.spawned) {
     return [
