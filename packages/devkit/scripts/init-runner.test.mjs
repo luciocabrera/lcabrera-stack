@@ -1,6 +1,10 @@
 import { describe, expect, test } from 'vite-plus/test';
 
-import { declaredDependencies, inferRunner } from './init.mjs';
+import {
+  declaredDependencies,
+  inferRunner,
+  runnerFromUserAgent,
+} from './init.mjs';
 
 describe('declaredDependencies', () => {
   test('reads both blocks, since either puts a bin on the path', () => {
@@ -90,5 +94,52 @@ describe('inferRunner', () => {
         'test',
       ]);
     }
+  });
+});
+
+describe('runnerFromUserAgent', () => {
+  test('reads the runner a package manager names for what it launched', () => {
+    expect(runnerFromUserAgent('pnpm/11.25.0 npm/? node/v26 linux x64')).toBe(
+      'pnpm',
+    );
+    expect(runnerFromUserAgent('yarn/4.0.0 npm/? node/v22')).toBe('yarn');
+    expect(runnerFromUserAgent('bun/1.1.0')).toBe('bun');
+  });
+
+  test('answers undefined for an agent this kit has no commands for', () => {
+    expect(runnerFromUserAgent('deno/2.0.0')).toBeUndefined();
+    expect(runnerFromUserAgent('')).toBeUndefined();
+    expect(runnerFromUserAgent(undefined)).toBeUndefined();
+  });
+});
+
+describe('the launching agent as evidence', () => {
+  test('decides an empty tree, which is the only tree that has no other evidence', () => {
+    expect(inferRunner({ userAgent: 'pnpm/11.25.0 npm/? node/v26' }).name).toBe(
+      'pnpm',
+    );
+    expect(
+      inferRunner({ userAgent: 'pnpm/11.25.0' }).commands.install,
+    ).toContain('pnpm');
+  });
+
+  test('never outranks a lockfile, which is a fact about the repository', () => {
+    expect(
+      inferRunner({
+        files: ['yarn.lock'],
+        userAgent: 'pnpm/11.25.0 npm/? node/v26',
+      }).name,
+    ).toBe('yarn');
+    expect(
+      inferRunner({
+        dependencies: ['vite-plus'],
+        userAgent: 'npm/11.19.0 node/v26',
+      }).name,
+    ).toBe('vite-plus');
+  });
+
+  test('leaves the npm fallback in place when nothing named a runner', () => {
+    expect(inferRunner({ userAgent: 'deno/2.0.0' }).name).toBe('npm');
+    expect(inferRunner().name).toBe('npm');
   });
 });

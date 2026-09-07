@@ -89,6 +89,10 @@
           "name": "@lcabrera/api"
         },
         {
+          "dir": "packages/create-lcabrera-stack",
+          "name": "create-lcabrera-stack"
+        },
+        {
           "dir": "packages/devkit",
           "name": "@lcabrera/devkit"
         },
@@ -172,6 +176,11 @@
           "run": true
         },
         {
+          "dir": "packages/create-lcabrera-stack",
+          "name": "create-lcabrera-stack",
+          "run": true
+        },
+        {
           "dir": "packages/repo-standards",
           "name": "@lcabrera/repo-standards",
           "run": true
@@ -222,6 +231,7 @@
   "publishing": {
     "publicPackageDirs": [
       "api",
+      "create-lcabrera-stack",
       "devkit",
       "eslint-local-rules",
       "node-runtime",
