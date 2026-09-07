@@ -34,6 +34,34 @@ const BLUEPRINT = join(
 const read = (...segments) =>
   readFileSync(join(BLUEPRINT, ...segments), 'utf8');
 
+const CATALOGS_KEY = 'catalogs:';
+
+const GROUP_HEADER = /^ {2}([\w-]+):[ \t]*$/;
+
+const GROUP_ENTRY = /^ {4}'?([^':]+)'?:/;
+
+const catalogGroups = (workspaceFile) => {
+  const lines = workspaceFile.split('\n');
+  const start = lines.indexOf(CATALOGS_KEY);
+  const groups = new Map();
+  if (start === -1) return groups;
+
+  let current;
+  for (const line of lines.slice(start + 1)) {
+    if (line.trim() === '' || line.trimStart().startsWith('#')) continue;
+    const header = GROUP_HEADER.exec(line);
+    if (header) {
+      current = header[1];
+      groups.set(current, []);
+      continue;
+    }
+    const entry = GROUP_ENTRY.exec(line);
+    if (entry === null || current === undefined) break;
+    groups.get(current).push(entry[1]);
+  }
+  return groups;
+};
+
 describe('nodeEngineBand', () => {
   test('admits the whole major the pin sits in, and nothing above it', () => {
     expect(nodeEngineBand('26.8.1')).toBe('>=26 <27');
@@ -79,12 +107,24 @@ describe('the tasks name what the blueprint holds', () => {
     expect(catalogued).toEqual([]);
   });
 
-  test('every catalog a dependency names is one the blueprint declares', () => {
-    const workspaceFile = read('pnpm-workspace.yaml');
-    for (const specifier of Object.values(WORKSPACE_DEPENDENCIES)) {
-      expect(workspaceFile).toContain(
-        `\n  ${specifier.slice('catalog:'.length)}:\n`,
-      );
+  test('the catalog a dependency names holds that dependency', () => {
+    const groups = catalogGroups(read('pnpm-workspace.yaml'));
+    expect([...groups.keys()].length).toBeGreaterThan(0);
+    for (const [name, specifier] of Object.entries(WORKSPACE_DEPENDENCIES)) {
+      expect(groups.get(specifier.slice('catalog:'.length))).toContain(name);
+    }
+  });
+
+  test('the blueprint workspace resolves through the catalog too', () => {
+    const groups = catalogGroups(read('pnpm-workspace.yaml'));
+    const manifest = JSON.parse(
+      read('packages', 'typescript-config', 'package.json'),
+    );
+    const declared = Object.entries(manifest.devDependencies ?? {});
+    expect(declared.length).toBeGreaterThan(0);
+    for (const [name, specifier] of declared) {
+      expect(specifier.startsWith('catalog:')).toBe(true);
+      expect(groups.get(specifier.slice('catalog:'.length))).toContain(name);
     }
   });
 });
