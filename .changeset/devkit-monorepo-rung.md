@@ -22,33 +22,15 @@ whose config says `"profile": "monorepo"` or `"profile": "full"` receives files
 it did not receive before, and `sync` will place them on the next run. Set
 `"profile": "repo"` to keep receiving exactly what you received before.
 
-A tree that already holds a `vite.config.ts` or a `biome.jsonc` of its own sees
-each reported as `conflict` and left alone, which is the end of it: nothing else
-the rung places depends on either file. Acknowledge one with
+A tree that already holds a `pnpm-workspace.yaml`, a `vite.config.ts` or a
+`biome.jsonc` of its own sees each reported as `conflict` and left alone, and
+that is the end of it: nothing the rung places stops working because your file
+was kept. Acknowledge one with
 `devkit doctor --accept <path> --reason "<why>"`, or move yours aside and let
-`sync` place the seed.
-
-**`pnpm-workspace.yaml` is not like that, and a conflict on it leaves the tree
-broken rather than unchanged.** The rung places a `typescript-config` workspace,
-under your `packages/` directory, whose dependencies resolve through `catalog:` —
-against catalogs only that file declares. When your own workspace file is held
-back, the workspace package is still written, so if your `packages:` globs cover
-it your next install stops with:
-
-```
-ERR_PNPM_CATALOG_ENTRY_NOT_FOUND_FOR_SPEC
-No catalog entry '@lcabrera/tsconfig' was found for catalog 'stack'.
-```
-
-Before installing again, do one of these:
-
-- copy the `catalogs:` block out of the seed into your own
-  `pnpm-workspace.yaml`. The seed is in the installed package, at
-  `assets/workspace/pnpm-workspace.yaml`; `devkit doctor --verbose` lists the
-  conflict so you can see which files this applies to.
-- keep the workspace package out of your `packages:` globs, or delete it if you
-  do not want the generated tsconfigs.
-- stay on `"profile": "repo"`.
+`sync` place the seed. The `typescript-config` workspace the rung writes under
+your `packages/` directory pins its own dependencies outright rather than through
+`catalog:`, so it installs whether or not your workspace file declares the
+catalogs. The catalog is for the packages you author.
 
 **Moving an existing repository up to this rung leaves it half-configured, and
 nothing says so.** Flip `"profile": "repo"` to `"profile": "monorepo"` and run

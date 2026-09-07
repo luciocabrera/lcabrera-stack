@@ -40,7 +40,7 @@ const CATALOGS_KEY = 'catalogs:';
 
 const GROUP_HEADER = /^ {2}([\w-]+):[ \t]*$/;
 
-const GROUP_ENTRY = /^ {4}'?([^':]+)'?:/;
+const GROUP_ENTRY = /^ {4}'?([^':]+)'?:[ \t]*(.+)$/;
 
 const catalogGroups = (workspaceFile) => {
   const lines = workspaceFile.split('\n');
@@ -59,7 +59,7 @@ const catalogGroups = (workspaceFile) => {
     }
     const entry = GROUP_ENTRY.exec(line);
     if (entry === null || current === undefined) break;
-    groups.get(current).push(entry[1]);
+    groups.get(current).push([entry[1], entry[2].trim()]);
   }
   return groups;
 };
@@ -113,7 +113,8 @@ describe('the tasks name what the blueprint holds', () => {
     const groups = catalogGroups(read('pnpm-workspace.yaml'));
     expect([...groups.keys()].length).toBeGreaterThan(0);
     for (const [name, specifier] of Object.entries(WORKSPACE_DEPENDENCIES)) {
-      expect(groups.get(specifier.slice('catalog:'.length))).toContain(name);
+      const group = groups.get(specifier.slice('catalog:'.length)) ?? [];
+      expect(group.map(([entry]) => entry)).toContain(name);
     }
   });
 
@@ -144,16 +145,20 @@ describe('the tasks name what the blueprint holds', () => {
     }
   });
 
-  test('the blueprint workspace resolves through the catalog too', () => {
-    const groups = catalogGroups(read('pnpm-workspace.yaml'));
-    const manifest = JSON.parse(
-      read('packages', 'typescript-config', 'package.json'),
+  test('the blueprint workspace pins the range the catalog declares', () => {
+    const ranges = new Map(
+      [...catalogGroups(read('pnpm-workspace.yaml')).values()].flatMap(
+        (group) => [...group],
+      ),
     );
-    const declared = Object.entries(manifest.devDependencies ?? {});
+    const declared = Object.entries(
+      JSON.parse(read('packages', 'typescript-config', 'package.json'))
+        .devDependencies ?? {},
+    );
     expect(declared.length).toBeGreaterThan(0);
-    for (const [name, specifier] of declared) {
-      expect(specifier.startsWith('catalog:')).toBe(true);
-      expect(groups.get(specifier.slice('catalog:'.length))).toContain(name);
+    for (const [name, range] of declared) {
+      expect(range.startsWith('catalog:')).toBe(false);
+      expect(ranges.get(name)).toBe(range);
     }
   });
 });

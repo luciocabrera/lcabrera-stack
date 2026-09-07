@@ -313,10 +313,14 @@ the package manager **refuse** rather than warn. The band is deliberately wider
 than the pin, so a patch release does not hard-fail every install before someone
 moves it.
 
-The catalog is the one place a version is declared. Reference it as
-`catalog:<group>` from any workspace, and add a new dependency to the group that
-matches its role — a version repeated in prose is a second declaration nothing
-keeps in step.
+The catalog is the one place a version is declared for the packages you author.
+Reference it as `catalog:<group>` from any workspace, and add a new dependency to
+the group that matches its role — a version repeated in prose is a second
+declaration nothing keeps in step. The `typescript-config` workspace the rung
+places is the exception, and deliberately: it pins its dependencies outright, so
+it installs into a tree whose own `pnpm-workspace.yaml` was kept on a conflict
+and declares no catalogs. Its ranges and the catalog's are held equal by a test
+in this package.
 
 **Your first install fetches an ESLint toolchain this rung does not use**, and it
 is worth knowing why before you go looking for the config that wants it. There is

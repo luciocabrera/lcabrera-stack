@@ -9,10 +9,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "devDependencies": {
-    "@lcabrera/tsconfig": "catalog:stack",
-    "@types/node": "catalog:types",
-    "typescript": "catalog:build",
-    "vite-plus": "catalog:build",
-    "vitest": "catalog:test"
+    "@lcabrera/tsconfig": "^0.2.2",
+    "@types/node": "^26.4.1",
+    "typescript": "^6.0.3",
+    "vite-plus": "0.3.0",
+    "vitest": "4.1.11"
   }
 }
