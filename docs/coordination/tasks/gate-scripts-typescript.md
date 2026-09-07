@@ -18,6 +18,7 @@ area:
   - scripts/lib/devkit-tarball*.mjs
   - AGENTS.md
   - packages/CLAUDE.md
+  - COMMANDS.md
 started: 2026-09-06
 updated: 2026-09-07
 plan: (none)
@@ -37,5 +38,8 @@ port the gate scripts to TypeScript as they move into the packages
   named is closed here, which also closes #1104
 - Blockers: none
 - Next: the port itself does not proceed as scoped — see ADR-111 and the PR
-  body. Follow-ups filed: #1103 (`checkJs`), #1105 (the rules table has no
-  gate). Whether #1096 closes on this answer is the owner's call
+  body. Review findings addressed: the packed-manifest Node floor now rejects an
+  empty or whitespace value, and `scripts:exits:verify` selects with the same
+  predicate as the size gate, so #1111 is redundant. Follow-ups filed: #1103
+  (`checkJs`), #1105 (the rules table has no gate). Whether #1096 closes on this
+  answer is the owner's call

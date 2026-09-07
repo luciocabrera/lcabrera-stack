@@ -10,13 +10,17 @@ of something you find out from a syntax error on the first run. The floor is a
 floor and not a band: no upper bound, so the next Node major will not refuse an
 install nobody has looked at.
 
-The size ceiling follows the file rather than the extension. `repo-verify-script-size`
+The size ceiling follows the file rather than the extension, and so does the
+mid-stream-exit gate. `repo-verify-script-size`
 measured `.mjs` and `.cjs` alone, which meant a tooling script left the ceiling
 by being renamed and nothing reported it — a gate reading fewer files passes
 exactly like a clean tree. It now also measures a `.js`, `.ts`, `.mts` or `.cts`
 under a `scripts/` directory, which is the set the shipped script rule already
-described. Expect a finding on a repository that keeps an oversized script there
-under one of those extensions; nothing else changes about what it decides.
+described. `repo-verify-script-exits` had the same narrow selection and now
+shares the one predicate, so the two gates cannot disagree about which files the
+rule governs. Expect a finding on a repository that keeps an oversized script
+there under one of those extensions, or one that calls `process.exit()`; nothing
+else changes about what either gate decides.
 
 `files` in both packages excludes a colocated test by name rather than by
 extension, so a test beside a script never reaches your install regardless of

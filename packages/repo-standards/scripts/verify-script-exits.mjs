@@ -2,6 +2,9 @@
 /**
  * Gate: no repo script calls `process.exit()` (ADR-090).
  *
+ * Which files count is `isToolingScript`, the same predicate the size gate
+ * uses, so both cover exactly the set .claude/rules/scripts.md binds.
+ *
  * Usage (from the repo root):
  *   repo-verify-script-exits
  *
@@ -19,11 +22,11 @@ import {
   findProcessExitCalls,
   mayContainExitCall,
 } from './script-exit-calls.mjs';
+import { isToolingScript } from './script-size.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
-const SCRIPT_FILE = /\.[mc]js$/u;
 const SKIP_DIRS = new Set([
   '.git',
   '.tmp',
@@ -44,9 +47,8 @@ const findScripts = (directory) =>
       return SKIP_DIRS.has(entry.name) ? [] : findScripts(full);
     }
 
-    return SCRIPT_FILE.test(entry.name)
-      ? [toPosix(relative(REPO_ROOT, full))]
-      : [];
+    const path = toPosix(relative(REPO_ROOT, full));
+    return isToolingScript(path) ? [path] : [];
   });
 
 const main = () => {

@@ -109,7 +109,8 @@ manifest of every distributed package and reports one that declares bins and no
 the point: `files` and `publishConfig` can differ between them, and only the
 packed one is what an installer reads.
 
-**The size ceiling follows the file, not the extension.** `scripts:verify` used
+**The size ceiling follows the file, not the extension, and so does the exits
+gate.** `scripts:verify` used
 to measure `.mjs` and `.cjs` alone, so a tooling script renamed to `.ts` left the
 ceiling silently — and a gate measuring fewer files reports the same clean pass
 as a clean tree. It now measures any `.js`, `.ts`, `.mts` or `.cts` under a
@@ -117,6 +118,14 @@ as a clean tree. It now measures any `.js`, `.ts`, `.mts` or `.cts` under a
 claimed to govern. Nothing in the tree matches the widened half today, so it adds
 no baseline entry; it is there so that the day one of these files is ported, the
 ceiling ports with it.
+
+`scripts:exits:verify` ([ADR-090](ADR-090-gate-the-no-mid-stream-exit-rule-by-parsing.md))
+selected on its own `.mjs`/`.cjs` regex and is widened with it, by importing the
+same predicate rather than restating the set. Two gates deriving one file list
+from one function is the point: the rule file names a set once, and neither gate
+can claim it while covering less. There is no parser cost — the exits gate reads
+with `ts-morph`, which takes a TypeScript source with annotations, generics and
+`satisfies` as readily as a JavaScript one.
 
 ## Consequences
 
