@@ -98,7 +98,7 @@ these files lean on the repo-wide passes plus one dedicated gate:
 fallow's `maxUnitSize`/complexity limits apply to root `scripts/` but are
 **relaxed for `packages/eslint-local-rules/**`** in
 `.fallowrc.json` (deliberately — procedural CLI/AST-walker code). The size gate
-has no such carve-out: it covers every `.mjs`/`.cjs`, skills included.
+has no such carve-out: it covers every file this rule binds, skills included.
 
 Rule 11 applies here too: never silence a finding — fix the code. `packages/ui`
 scripts are held to the same never-baseline bar as the rest of that package.
