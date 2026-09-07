@@ -13,6 +13,7 @@ import {
   lstatSync,
   mkdirSync,
   readdirSync,
+  realpathSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
@@ -48,8 +49,23 @@ const identityIn = (cwd) => ({
   name: readGit({ args: ['config', '--get', 'user.name'], cwd }),
 });
 
+const realPathOf = (path) => {
+  try {
+    return realpathSync(path);
+  } catch {
+    return undefined;
+  }
+};
+
+const realTargetOf = (absolute) => {
+  const resolved = realPathOf(absolute);
+  if (resolved !== undefined) return resolved;
+  const parent = realPathOf(dirname(absolute));
+  return parent === undefined ? absolute : join(parent, basename(absolute));
+};
+
 const enclosingRepositoryOf = (absolute) =>
-  ancestorsOf(dirname(absolute)).find((directory) =>
+  ancestorsOf(dirname(realTargetOf(absolute))).find((directory) =>
     existsSync(join(directory, '.git')),
   );
 

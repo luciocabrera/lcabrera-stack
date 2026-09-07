@@ -11,6 +11,7 @@ import {
   chmodSync,
   existsSync,
   mkdirSync,
+  symlinkSync,
   mkdtempSync,
   readFileSync,
   readdirSync,
@@ -122,6 +123,22 @@ describe('devkit create, from an empty parent directory', () => {
     );
   });
 
+  test('follows a symlink to an empty directory outside any repository', () => {
+    const parent = scratch();
+    const real = join(parent, 'real');
+    const side = join(parent, 'side');
+    mkdirSync(real);
+    mkdirSync(side);
+    symlinkSync(real, join(side, 'demo'));
+
+    const { code } = quietly(() => runCreate(['demo'], side));
+
+    expect(code).toBe(0);
+    expect(git(['log', '-1', '--pretty=%s'], real)).toBe(
+      INITIAL_COMMIT_MESSAGE,
+    );
+  });
+
   test('names the package after the directory it made', () => {
     const parent = scratch();
     quietly(() => runCreate(['My App'], parent));
@@ -195,6 +212,37 @@ describe('what devkit create refuses', () => {
     expect(code).toBe(1);
     expect(errors).toContain('--profile=repo');
     expect(existsSync(join(parent, 'demo'))).toBe(false);
+  });
+
+  test('a symlink whose destination is inside a repository, not just its own path', () => {
+    const parent = scratch();
+    const outer = join(parent, 'outer');
+    mkdirSync(join(outer, 'sub'), { recursive: true });
+    git(['init', '--quiet', '.'], outer);
+    const side = join(parent, 'side');
+    mkdirSync(side);
+    symlinkSync(join(outer, 'sub'), join(side, 'demo'));
+
+    const { code, errors } = quietly(() => runCreate(['demo'], side));
+
+    expect(code).toBe(1);
+    expect(errors).toContain(outer);
+    expect(readdirSync(join(outer, 'sub'))).toEqual([]);
+  });
+
+  test('a symlinked ancestor whose destination is inside a repository', () => {
+    const parent = scratch();
+    const outer = join(parent, 'outer');
+    mkdirSync(join(outer, 'sub'), { recursive: true });
+    git(['init', '--quiet', '.'], outer);
+    const alias = join(parent, 'alias');
+    symlinkSync(join(outer, 'sub'), alias);
+
+    const { code, errors } = quietly(() => runCreate(['demo'], alias));
+
+    expect(code).toBe(1);
+    expect(errors).toContain(outer);
+    expect(readdirSync(join(outer, 'sub'))).toEqual([]);
   });
 
   test('an unknown profile, before it makes the directory', () => {
