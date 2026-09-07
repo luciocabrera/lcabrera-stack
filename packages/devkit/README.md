@@ -425,7 +425,8 @@ moves on**. `--verbose` is how you find what is being held back.
     "rules": ".claude/rules",
     "skills": ".github/skills",
     "templates": ".github",
-    "workflows": ".github/workflows"
+    "workflows": ".github/workflows",
+    "workspace": "."
   },
   "commands": {
     "install": "vp install",
