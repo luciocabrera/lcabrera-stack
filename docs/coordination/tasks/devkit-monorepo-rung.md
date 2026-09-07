@@ -14,15 +14,25 @@ area:
   - packages/devkit/scripts/workspace.mjs
   - packages/devkit/scripts/workspace.test.mjs
   - packages/devkit/scripts/closure.mjs
+  - packages/devkit/scripts/closure-classify.mjs
   - packages/devkit/scripts/command-closure.mjs
+  - packages/devkit/scripts/sync-executable.test.mjs
+  - packages/devkit/scripts/command-create.test.mjs
+  - packages/devkit/vite.config.ts
+  - packages/devkit/package.json
   - packages/devkit/README.md
   - scripts/lib/devkit-seeds.mjs
+  - scripts/lib/devkit-seeds.test.mjs
   - scripts/verify-devkit-seeds.mjs
-  - .changeset/*.md
+  - scripts/lib/devkit-tarball.mjs
+  - scripts/lib/devkit-tarball.test.mjs
+  - reports/api-surface/devkit.txt
+  - biome.jsonc
+  - .changeset/devkit-monorepo-rung.md
 started: 2026-09-07
 updated: 2026-09-07
 plan: (none)
-pr: (none)
+pr: '#1106'
 issue: #1075
 ---
 
@@ -32,6 +42,10 @@ emit the workspace, catalog and configs for a monorepo
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: the rung places the blueprint; gate running
 - Blockers: none
-- Next:
+- Next: full gate, then push
+- Overlap: #1096 (`refactor/1096-gate-scripts-typescript`, in review) also claims
+  `packages/devkit/package.json` and `scripts/lib/devkit-tarball*.mjs`. Both
+  touches here are additive — one devDependency, and one prefix skip in the
+  stray-file rule — so whichever lands second rebases onto the other.

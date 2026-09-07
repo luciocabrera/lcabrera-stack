@@ -41,13 +41,28 @@ export const missingFromTarball = ({ manifest, packedPaths }) => {
   );
 };
 
+/**
+ * A package's assets are payload: bytes it hands to a consumer's tree rather
+ * than code it runs. `@lcabrera/devkit` ships a whole workspace skeleton that
+ * way — a Vite config, a tsconfig roster and a test among it — and every one of
+ * those is a file the consumer is meant to receive and run in their own tree.
+ *
+ * The patterns below are about a package packing its OWN configs and tests,
+ * which is the packing mistake this gate was built for. Under this prefix the
+ * same names are the product, so matching them there would report the feature as
+ * the fault.
+ */
+const PAYLOAD_PREFIX = 'assets/';
+
 export const strayFromTarball = (packedPaths) =>
-  packedPaths.filter(
-    (path) =>
-      /(^|\/)[^/]*\.test\.[cm]?[jt]s$/.test(path) ||
-      /(^|\/)(eslint\.config|vite\.config)\./.test(path) ||
-      /(^|\/)tsconfig(\.\w+)?\.json$/.test(path),
-  );
+  packedPaths
+    .filter((path) => !path.startsWith(PAYLOAD_PREFIX))
+    .filter(
+      (path) =>
+        /(^|\/)[^/]*\.test\.[cm]?[jt]s$/.test(path) ||
+        /(^|\/)(eslint\.config|vite\.config)\./.test(path) ||
+        /(^|\/)tsconfig(\.\w+)?\.json$/.test(path),
+    );
 
 export const declaredBins = (manifest) =>
   Object.entries(manifest.bin ?? {}).map(([name, target]) => ({

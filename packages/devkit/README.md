@@ -247,28 +247,62 @@ A profile is a rung on a ladder, and each rung contains the one below it. A
 file lands on the lowest rung whose preconditions it can assume, and a rung
 without a gate of its own is a flag, not a rung.
 
-| Rung       | What it places                                                                                                                                                    |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `agent`    | What an agent reads: skills, path rules, subagent definitions, the contracts and coordination register they bind to, and the decision home's template and README. |
-| `repo`     | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, and `COMMANDS.md`.                                     |
-| `monorepo` | What `repo` places. The workspace shape — several packages, a catalog, task fan-out, gates that read across packages — is its content, and none of it ships yet.  |
-| `full`     | What `monorepo` places. The application and its database are its content, and none of it ships yet.                                                               |
+| Rung       | What it places                                                                                                                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent`    | What an agent reads: skills, path rules, subagent definitions, the contracts and coordination register they bind to, and the decision home's template and README.                                             |
+| `repo`     | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, and `COMMANDS.md`.                                                                                 |
+| `monorepo` | All of that, plus the workspace itself: the pnpm workspace file and its catalog, the Node pin and engine band, the root lint/format config, the Biome config, and a tsconfig roster with the generator wired. |
+| `full`     | What `monorepo` places. The application and its database are its content, and none of it ships yet.                                                                                                           |
 
 A consumer who wants the prose and keeps their own process takes `agent` and
 receives none of the scaffolding. `repo` is a governed single-package
-repository. The two rungs above it are accepted today so a config can name the
-rung it means, and every run under one of them prints the line saying so:
+repository. `monorepo` is a workspace that installs, lints, formats,
+type-checks and tests on the command after the one that made it. `full` is
+accepted today so a config can name the rung it means, and a run under it prints
+the line saying so:
 
 ```
-The "monorepo" profile places what "repo" places — nothing above "repo" ships in this version.
+The "full" profile places what "monorepo" places — nothing above "monorepo" ships in this version.
 ```
 
 The line goes away on its own the day the rung places a group of its own.
 
+### What the `monorepo` rung emits
+
+```bash
+devkit create my-repo --profile monorepo
+cd my-repo && <your package manager> install
+```
+
+The install is not optional and is not a convenience: the tree is written before
+anything is on disk, so the root task block names binaries the manifest declares
+and nothing has fetched yet. The install also runs `prepare`, which is what
+writes every `tsconfig.app.json` in the tree. **No tsconfig here is written by
+hand** — you edit the roster (`tsconfig.entries.ts`, in the workspace the rung
+places for it) and the generator writes the JSON; a hand edit survives exactly
+until the next regeneration reverts it.
+
+Three files carry the engine guarantee and only work together: `.node-version`
+holds the exact version, the root manifest's `engines.node` holds the band an
+install may proceed in, and `engineStrict` in `pnpm-workspace.yaml` is what makes
+the package manager **refuse** rather than warn. The band is deliberately wider
+than the pin, so a patch release does not hard-fail every install before someone
+moves it.
+
+The catalog is the one place a version is declared. Reference it as
+`catalog:<group>` from any workspace, and add a new dependency to the group that
+matches its role — a version repeated in prose is a second declaration nothing
+keeps in step.
+
+The root manifest is the one file this rung does not materialise, because it
+carries the repository's own name. Its task block is written once, by `create`,
+and never rewritten: edit it freely, and expect a later version's additions not
+to arrive on their own.
+
 **`full` used to be the name of what is now `repo`.** A config naming `full`
-from before the rename still resolves, to the top rung, which places what `repo`
-places and in this version nothing more — so a run neither breaks nor
-materialises anything different. There is no separate notice for the old
+from before the rename still resolves, to the top rung — which now places the
+workspace blueprint as well, so such a run materialises more than it did before
+the rename. There is no separate notice for the old
 meaning: the placement line above is what such a run prints, and the changelog
 records the rename. If the harness is what you meant, set `repo`; `full` will
 grow.
