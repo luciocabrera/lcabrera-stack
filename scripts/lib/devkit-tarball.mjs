@@ -132,12 +132,14 @@ export const materialisationFailure = ({ manifestFiles, presentPaths }) => {
 /**
  * @param {{ bin?: Record<string, string>, engines?: { node?: string }, name: string }} manifest
  */
-export const binsWithoutNodeFloor = (manifest) =>
-  declaredBins(manifest).length === 0 || manifest.engines?.node !== undefined
+export const binsWithoutNodeFloor = (manifest) => {
+  const bins = declaredBins(manifest);
+  return bins.length === 0 || (manifest.engines?.node ?? '').trim() !== ''
     ? []
     : [
-        `${manifest.name} declares ${declaredBins(manifest).length} bin(s) and no \`engines.node\` in the packed manifest, so nothing holds a consumer to the Node they were written for`,
+        `${manifest.name} declares ${bins.length} bin(s) and no \`engines.node\` in the packed manifest, so nothing holds a consumer to the Node they were written for`,
       ];
+};
 
 export const noCommandsDeclared = (manifest) =>
   declaredBins(manifest).length === 0

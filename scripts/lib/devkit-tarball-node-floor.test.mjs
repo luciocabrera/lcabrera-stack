@@ -39,4 +39,16 @@ describe('binsWithoutNodeFloor', () => {
       binsWithoutNodeFloor({ ...MANIFEST, engines: { pnpm: '>=11' } }),
     ).toHaveLength(1);
   });
+
+  it('is not satisfied by an empty floor', () => {
+    expect(
+      binsWithoutNodeFloor({ ...MANIFEST, engines: { node: '' } }),
+    ).toHaveLength(1);
+  });
+
+  it('is not satisfied by a whitespace-only floor', () => {
+    expect(
+      binsWithoutNodeFloor({ ...MANIFEST, engines: { node: ' \t ' } }),
+    ).toHaveLength(1);
+  });
 });
