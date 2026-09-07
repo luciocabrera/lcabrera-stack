@@ -51,6 +51,22 @@ const quietly = (run) => {
   }
 };
 
+const createUnderGitConfig = ({ contents, parent }) => {
+  const config = join(parent, 'gitconfig');
+  writeFileSync(config, contents);
+  const inherited = process.env.GIT_CONFIG_GLOBAL;
+  process.env.GIT_CONFIG_GLOBAL = config;
+  try {
+    return quietly(() => runCreate(['demo', '--profile', 'agent'], parent));
+  } finally {
+    if (inherited === undefined) {
+      delete process.env.GIT_CONFIG_GLOBAL;
+    } else {
+      process.env.GIT_CONFIG_GLOBAL = inherited;
+    }
+  }
+};
+
 afterEach(() => {
   for (const root of scratches.splice(0)) {
     rmSync(root, { force: true, recursive: true });
@@ -216,64 +232,34 @@ describe('what devkit create refuses', () => {
   });
 });
 
-describe('when a git step fails part way through', () => {
-  test('says what git said and that the directory is still there', () => {
+describe('when a git step fails', () => {
+  test('the commit failing says what git said, and that the tree is still there', () => {
     const parent = scratch();
-    const config = join(parent, 'gitconfig');
-    writeFileSync(
-      config,
-      '[commit]\n\tgpgsign = true\n[gpg]\n\tprogram = /nonexistent/gpg\n',
-    );
-    const inherited = process.env.GIT_CONFIG_GLOBAL;
-    process.env.GIT_CONFIG_GLOBAL = config;
+    const { code, errors } = createUnderGitConfig({
+      contents:
+        '[commit]\n\tgpgsign = true\n[gpg]\n\tprogram = /nonexistent/gpg\n',
+      parent,
+    });
 
-    let outcome;
-    try {
-      outcome = quietly(() =>
-        runCreate(['demo', '--profile', 'agent'], parent),
-      );
-    } finally {
-      if (inherited === undefined) {
-        delete process.env.GIT_CONFIG_GLOBAL;
-      } else {
-        process.env.GIT_CONFIG_GLOBAL = inherited;
-      }
-    }
-
-    expect(outcome.code).toBe(1);
-    expect(outcome.errors).toContain('`git commit` failed in `demo`');
-    expect(outcome.errors).toContain('gpg failed to sign the data');
-    expect(outcome.errors).toContain('left in place');
-    expect(outcome.errors).not.toContain('user.name=');
+    expect(code).toBe(1);
+    expect(errors).toContain('`git commit` failed in `demo`');
+    expect(errors).toContain('gpg failed to sign the data');
+    expect(errors).toContain('the repository is real');
+    expect(errors).not.toContain('user.name=');
     expect(existsSync(join(parent, 'demo', '.git'))).toBe(true);
   });
-});
 
-describe('when git cannot make the repository at all', () => {
-  test('says the directory is empty, not that the repository is real', () => {
+  test('the init failing says the directory is empty, not that the repository is real', () => {
     const parent = scratch();
-    const config = join(parent, 'gitconfig');
-    writeFileSync(config, 'this is not a git config\n');
-    const inherited = process.env.GIT_CONFIG_GLOBAL;
-    process.env.GIT_CONFIG_GLOBAL = config;
+    const { code, errors } = createUnderGitConfig({
+      contents: 'this is not a git config\n',
+      parent,
+    });
 
-    let outcome;
-    try {
-      outcome = quietly(() =>
-        runCreate(['demo', '--profile', 'agent'], parent),
-      );
-    } finally {
-      if (inherited === undefined) {
-        delete process.env.GIT_CONFIG_GLOBAL;
-      } else {
-        process.env.GIT_CONFIG_GLOBAL = inherited;
-      }
-    }
-
-    expect(outcome.code).toBe(1);
-    expect(outcome.errors).toContain('`git init` failed in `demo`');
-    expect(outcome.errors).toContain('it is not a repository');
-    expect(outcome.errors).not.toContain('the repository is real');
+    expect(code).toBe(1);
+    expect(errors).toContain('`git init` failed in `demo`');
+    expect(errors).toContain('it is not a repository');
+    expect(errors).not.toContain('the repository is real');
     expect(existsSync(join(parent, 'demo', '.git'))).toBe(false);
     expect(readdirSync(join(parent, 'demo'))).toEqual([]);
   });
