@@ -6,12 +6,6 @@
  * running it — importing the runner rewrites every config in the tree as a side
  * effect of the import, which no test can do.
  *
- * A workspace with no entry here gets no tsconfig, and nothing then type-checks
- * it: this tree ships no root `tsconfig.json` to fall back to, the generated root
- * config reaches only the files beside it, and a workspace with no config of its
- * own has no `typecheck` task to run — so `typecheck:all` passes over it and
- * exits 0. Point the compiler at those files by hand and you get its defaults,
- * without `noUncheckedIndexedAccess` or anything else these factories add.
  * Adding an entry is part of adding a workspace, not a later tidy-up.
  */
 
