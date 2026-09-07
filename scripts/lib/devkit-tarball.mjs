@@ -330,6 +330,14 @@ export const createShimFindings = ({
  *           name: string, planted: { output: string, status: number | null },
  *           plantedFile: string }} args
  */
+const PLANT_MARGIN_LINES = 50;
+
+export const oversizedScript = (ceiling) =>
+  `${Array.from(
+    { length: ceiling + PLANT_MARGIN_LINES },
+    (_, index) => `export const value${index} = ${index};`,
+  ).join('\n')}\n`;
+
 export const gateProbeFindings = ({ clean, name, planted, plantedFile }) => {
   if (!clean.spawned) {
     return [
