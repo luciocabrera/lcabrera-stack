@@ -135,7 +135,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run ready`                        | `check:safe` + `build:all` — the full "is it shippable" check                                      |
 | `vp run check:safe`                   | typegen → `vp check` → typecheck → eslint → biome → tests                                          |
 | `vp run check:push`                   | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed`  |
-| `vp run typecheck:all`                | real tsc in all 12 workspaces, dependency order                                                    |
+| `vp run typecheck:all`                | real tsc in all 13 workspaces, dependency order                                                    |
 | `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                  |
 | `vp run typegen:all`                  | route types for both React Router apps                                                             |
 | `vp run lint:all`                     | Oxlint + eslint + Biome **with autofix**, every workspace                                          |
@@ -196,7 +196,7 @@ report) scope to the diff on pull requests; pushes to `main` still run the full
 `test:ci`.
 
 `typecheck:changed` applies the same change-based selection to the Quality Gate's
-slowest per-workspace step — real `tsc` across all 12 workspaces. It runs
+slowest per-workspace step — real `tsc` across all 13 workspaces. It runs
 `typecheck` only for the changed workspaces plus their dependents (a type error a
 diff introduces surfaces where the type is used, which the dependents walk covers),
 falling back to the full run on the same shared/root triggers and on pushes to
@@ -916,7 +916,7 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 
 ## 5. Per-workspace tasks
 
-**Every one of the 12 workspaces** defines these seven:
+**Every one of the 13 workspaces** defines these seven:
 
 `format` · `format:check` · `lint` · `lint:check` · `lint:eslint` ·
 `lint:eslint:check` · `typecheck`
@@ -924,19 +924,20 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 Beyond that, tasks are per-workspace. `build` and `test` are common but come from
 `vite.config.ts` rather than `scripts` in most workspaces (see §1).
 
-| Workspace                     | Package name               | Notable extra tasks                                                                                                                  |
-| ----------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `apps/showcase`               | `showcase`                 | `typegen`, `test:ci`, `test:smoke`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
-| `packages/ui`                 | `@lcabrera/ui`             | `check:public-api`, `test:coverage`, `bench`                                                                                         |
-| `packages/server`             | `@lcabrera/server`         | `test:coverage`                                                                                                                      |
-| `packages/node-runtime`       | `@lcabrera/node`           | `build`, `test:coverage`                                                                                                             |
-| `packages/ts-configs`         | `@repo/ts-configs`         | `generate`                                                                                                                           |
-| `packages/tsconfig`           | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                                             |
-| `packages/eslint-local-rules` | `@lcabrera/eslint-plugin`  | —                                                                                                                                    |
-| `packages/devkit`             | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                              |
-| `packages/repo-standards`     | `@lcabrera/repo-standards` | `test`, `test:coverage`                                                                                                              |
-| `packages/utils`              | `@lcabrera/utils`          | —                                                                                                                                    |
-| `packages/vite-configs`       | `@lcabrera/vite-config`    | `build`, `test`, `test:coverage`                                                                                                     |
+| Workspace                        | Package name               | Notable extra tasks                                                                                                                  |
+| -------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `apps/showcase`                  | `showcase`                 | `typegen`, `test:ci`, `test:smoke`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
+| `packages/ui`                    | `@lcabrera/ui`             | `check:public-api`, `test:coverage`, `bench`                                                                                         |
+| `packages/server`                | `@lcabrera/server`         | `test:coverage`                                                                                                                      |
+| `packages/node-runtime`          | `@lcabrera/node`           | `build`, `test:coverage`                                                                                                             |
+| `packages/ts-configs`            | `@repo/ts-configs`         | `generate`                                                                                                                           |
+| `packages/tsconfig`              | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                                             |
+| `packages/eslint-local-rules`    | `@lcabrera/eslint-plugin`  | —                                                                                                                                    |
+| `packages/devkit`                | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                              |
+| `packages/create-lcabrera-stack` | `create-lcabrera-stack`    | `test`, `test:coverage`                                                                                                              |
+| `packages/repo-standards`        | `@lcabrera/repo-standards` | `test`, `test:coverage`                                                                                                              |
+| `packages/utils`                 | `@lcabrera/utils`          | —                                                                                                                                    |
+| `packages/vite-configs`          | `@lcabrera/vite-config`    | `build`, `test`, `test:coverage`                                                                                                     |
 
 Notes on the non-obvious ones:
 

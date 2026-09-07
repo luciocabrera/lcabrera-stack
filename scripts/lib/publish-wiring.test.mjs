@@ -86,7 +86,12 @@ describe('this repository publishes what it develops against', () => {
       (directory) => !isBuiltPublicPackage(readManifest(directory)),
     );
 
-    expect(sourceShipping).toEqual(['devkit', 'repo-standards', 'ui']);
+    expect(sourceShipping).toEqual([
+      'create-lcabrera-stack',
+      'devkit',
+      'repo-standards',
+      'ui',
+    ]);
   });
 
   it('declares no workspace-protocol peer on a published package', () => {

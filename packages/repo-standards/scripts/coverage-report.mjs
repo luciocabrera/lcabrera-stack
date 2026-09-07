@@ -38,6 +38,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 import { readWorkspaceGraph, resolveAffected } from './affected-tests.mjs';
+import { normaliseMetric, percentageOf } from './coverage-metrics.mjs';
 import { readGates } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
@@ -100,7 +101,7 @@ const runCoverage = async ({ name }) => {
 const readWorkspaceTotal = async (workspace) => {
   const summary = JSON.parse(await readFile(summaryPathFor(workspace), 'utf8'));
   const total = Object.fromEntries(
-    METRICS.map((metric) => [metric, summary.total[metric]]),
+    METRICS.map((metric) => [metric, normaliseMetric(summary.total[metric])]),
   );
   return { name: workspace.name, dir: workspace.dir, total };
 };
@@ -116,9 +117,7 @@ const aggregateTotal = (workspaces) =>
         }),
         { total: 0, covered: 0, skipped: 0 },
       );
-      const pct =
-        summed.total === 0 ? 100 : (summed.covered / summed.total) * 100;
-      return [metric, { ...summed, pct }];
+      return [metric, { ...summed, pct: percentageOf(summed) }];
     }),
   );
 

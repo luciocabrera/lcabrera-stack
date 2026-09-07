@@ -40,6 +40,7 @@ export const WORKSPACE_RUNTIMES = {
   ],
   /** Workspaces whose code runs in Node — services and build tooling alike. */
   node: [
+    'packages/create-lcabrera-stack/**',
     'packages/devkit/**',
     'packages/node-runtime/**',
     'packages/repo-standards/**',

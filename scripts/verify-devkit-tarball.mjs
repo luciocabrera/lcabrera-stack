@@ -33,6 +33,8 @@ import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import process from 'node:process';
 
+import { runGitStatus } from '../packages/repo-standards/scripts/git-exec.mjs';
+import { shimFindings } from './lib/devkit-tarball-shim.mjs';
 import {
   binsWithoutShebang,
   binStartupFailure,
@@ -50,7 +52,7 @@ import {
 
 const REPO_ROOT = process.cwd();
 
-const DISTRIBUTED = ['devkit', 'repo-standards'];
+const DISTRIBUTED = ['devkit', 'repo-standards', 'create-lcabrera-stack'];
 
 const run = (command, args, cwd) =>
   execFileSync(command, args, {
@@ -101,14 +103,22 @@ const packedPathsOf = (tarball) =>
     .filter((line) => line !== '' && !line.endsWith('/'))
     .map((line) => line.replace(/^package\//, ''));
 
+const gitOrFail = ({ args, cwd, step }) => {
+  if (runGitStatus({ args, cwd }).status !== 0) {
+    throw new Error(
+      `the scratch consumer's \`${step}\` did not succeed, so everything after it would have run against a directory that is not a repository`,
+    );
+  }
+};
+
 const scratchConsumer = () => {
   const root = mkdtempSync(join(tmpdir(), 'devkit-tarball-'));
-  run('git', ['init', '-q', '.'], root);
-  run(
-    'git',
-    ['remote', 'add', 'origin', 'https://example.invalid/x/y.git'],
-    root,
-  );
+  gitOrFail({ args: ['init', '-q', '.'], cwd: root, step: 'git init' });
+  gitOrFail({
+    args: ['remote', 'add', 'origin', 'https://example.invalid/x/y.git'],
+    cwd: root,
+    step: 'git remote add',
+  });
   writeFileSync(
     join(root, 'package.json'),
     `${JSON.stringify({ name: 'consumer', private: true, type: 'module', version: '1.0.0' }, undefined, 2)}\n`,
@@ -333,6 +343,7 @@ const main = () => {
         materialised: materialisedModes(consumer),
       }),
       ...reinitConfigFindings(consumer),
+      ...shimFindings(consumer),
       ...bareTaskFindings({
         expected: BARE_TASKS,
         failures: bareTaskFailures(consumer),
@@ -363,7 +374,7 @@ const main = () => {
     ).length;
 
     process.stdout.write(
-      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, and \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, ${tasks} runnable task(s) wired, ${GATE_BINS.length} gate bin(s) proven against a planted violation.\n`,
+      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, ${tasks} runnable task(s) wired, ${GATE_BINS.length} gate bin(s) proven against a planted violation — and the \`create-lcabrera-stack\` initializer made a committed repository from an empty directory.\n`,
     );
   } finally {
     rmSync(staging, { force: true, recursive: true });

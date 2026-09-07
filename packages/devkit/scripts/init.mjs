@@ -124,16 +124,50 @@ export const declaredDependencies = (manifest) => [
   ...Object.keys(manifest?.devDependencies ?? {}),
 ];
 
+const FALLBACK_RUNNER = 'npm';
+
 /**
- * @param {{ dependencies?: Iterable<string>, files?: Iterable<string> }} args
+ * The runner a `npm_config_user_agent` names, if this kit knows it.
+ *
+ * A package manager sets that variable for whatever it launches, and it is the
+ * only evidence there is in a tree with no lockfile and no dependencies yet —
+ * which is every tree `create` makes. It is deliberately not consulted when
+ * anything real was detected: a lockfile is a fact about the repository, while
+ * the launching agent is a fact about one command someone typed.
+ *
+ * @param {string | undefined} userAgent
+ * @returns {string | undefined}
+ */
+export const runnerFromUserAgent = (userAgent) => {
+  const [named] = (userAgent ?? '').split('/');
+  return RUNNERS.some((candidate) => candidate.name === named)
+    ? named
+    : undefined;
+};
+
+/**
+ * @param {{ dependencies?: Iterable<string>, files?: Iterable<string>,
+ *           userAgent?: string }} args
  * @returns {{ commands: Record<string, string>, name: string }}
  */
-export const inferRunner = ({ dependencies = [], files = [] } = {}) => {
+export const inferRunner = ({
+  dependencies = [],
+  files = [],
+  userAgent,
+} = {}) => {
   const context = {
     dependencies: new Set(dependencies),
     files: new Set(files),
   };
-  const runner = RUNNERS.find((candidate) => candidate.detect(context));
+  const detected = RUNNERS.find((candidate) => candidate.detect(context));
+  const named =
+    detected.name === FALLBACK_RUNNER
+      ? runnerFromUserAgent(userAgent)
+      : undefined;
+  const runner =
+    named === undefined
+      ? detected
+      : RUNNERS.find((candidate) => candidate.name === named);
   return {
     ciSetup: [...(runner.ciSetup ?? [])],
     commands: { ...runner.commands },

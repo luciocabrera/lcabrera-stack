@@ -1,0 +1,3 @@
+# create-lcabrera-stack — public API surface
+# Generated. Regenerate with: repo-verify-api-surface --write
+# One line per export: <name> <signature>. Do not edit by hand.
