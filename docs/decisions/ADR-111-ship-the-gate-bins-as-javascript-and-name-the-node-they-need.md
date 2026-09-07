@@ -1,5 +1,6 @@
 ---
 governs:
+  - create-lcabrera-stack
   - devkit
   - repo-standards
 ---
