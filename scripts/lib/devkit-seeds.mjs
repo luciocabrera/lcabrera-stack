@@ -128,9 +128,9 @@ export const forbiddenWords = ({
  * skeleton whose whole content is which packages the tree depends on — and it
  * cannot declare a dependency without naming it.
  */
-export const BLUEPRINT_PREFIX = 'workspace/';
+const BLUEPRINT_PREFIX = 'workspace/';
 
-export const isBlueprintSeed = (path) => path.startsWith(BLUEPRINT_PREFIX);
+const isBlueprintSeed = (path) => path.startsWith(BLUEPRINT_PREFIX);
 
 /**
  * The words one seed is read against.

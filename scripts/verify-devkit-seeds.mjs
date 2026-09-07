@@ -58,17 +58,11 @@ const workspaceDirectories = () =>
   );
 
 const workspaceManifests = () =>
-  WORKSPACE_DIRS.filter((group) => isDirectory(join(REPO_ROOT, group))).flatMap(
-    (group) =>
-      readdirSync(join(REPO_ROOT, group), { withFileTypes: true })
-        .filter((entry) => entry.isDirectory())
-        .map((entry) => join(REPO_ROOT, group, entry.name, 'package.json'))
-        .filter(
-          (path) => statSync(path, { throwIfNoEntry: false }) !== undefined,
-        )
-        .map((path) => readJson(path))
-        .filter((manifest) => typeof manifest.name === 'string'),
-  );
+  workspaceDirectories()
+    .map((directory) => join(REPO_ROOT, directory, 'package.json'))
+    .filter((path) => statSync(path, { throwIfNoEntry: false }) !== undefined)
+    .map((path) => readJson(path))
+    .filter((manifest) => typeof manifest.name === 'string');
 
 const workspacePackageNames = (manifests) =>
   manifests.map((manifest) => manifest.name);

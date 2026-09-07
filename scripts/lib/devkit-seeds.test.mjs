@@ -34,12 +34,30 @@ import {
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
+/*
+ * The workspaces are manifests rather than two hand-written name lists, and
+ * `installableNames` is derived from them the way `verify-devkit-seeds.mjs`
+ * derives it. Written as a separate list it drifted immediately: it held one
+ * published package, so the other published one read as forbidden in a blueprint
+ * and a test asserted that — a green pass that would have been green whatever
+ * `wordsFor` did, over behaviour production has the opposite of.
+ */
+const WORKSPACE_MANIFESTS = [
+  { name: '@lcabrera/ui', private: false },
+  { name: '@lcabrera/devkit', private: false },
+  { name: '@repo/ts-configs', private: true },
+];
+
+const installableNames = WORKSPACE_MANIFESTS.filter(
+  (manifest) => manifest.private !== true,
+).map((manifest) => manifest.name);
+
 const words = forbiddenWords({
   repositoryName: 'a-manifest-name',
   repositoryOwner: 'an-owner',
   repositorySlug: 'a-slug',
   secretNames: ['GITHUB_TOKEN', 'SONAR_TOKEN'],
-  workspaceNames: ['@lcabrera/ui', '@lcabrera/devkit'],
+  workspaceNames: WORKSPACE_MANIFESTS.map((manifest) => manifest.name),
   workspacePaths: ['apps/showcase', 'packages/ui'],
 });
 
@@ -67,18 +85,17 @@ describe('forbiddenWords', () => {
 });
 
 describe('wordsFor', () => {
-  const installableNames = ['@lcabrera/ui'];
-
-  it('lets a blueprint seed name a package a consumer can install', () => {
+  it('lets a blueprint seed name every package a consumer can install', () => {
     const scoped = wordsFor({
       installableNames,
       path: 'workspace/package.json',
       words,
     });
-    expect(scoped).not.toContain('@lcabrera/ui');
+    expect(installableNames.length).toBeGreaterThan(1);
+    for (const name of installableNames) expect(scoped).not.toContain(name);
     expect(
       findingsIn({
-        content: '    "@lcabrera/ui": "catalog:stack"',
+        content: '    "@lcabrera/devkit": "catalog:stack"',
         path: 'workspace/package.json',
         words: scoped,
       }),
@@ -97,11 +114,24 @@ describe('wordsFor', () => {
       'a-manifest-name',
       'packages/ui',
       'apps/showcase',
-      '@lcabrera/devkit',
+      '@repo/ts-configs',
       'vp ',
     ]) {
       expect(scoped).toContain(word);
     }
+    expect(
+      findingsIn({
+        content: '  - name: @repo/ts-configs',
+        path: 'workspace/pnpm-workspace.yaml',
+        words: scoped,
+      }),
+    ).toEqual([
+      {
+        line: 1,
+        path: 'workspace/pnpm-workspace.yaml',
+        word: '@repo/ts-configs',
+      },
+    ]);
   });
 
   it('leaves a seed outside the blueprint held to every word', () => {

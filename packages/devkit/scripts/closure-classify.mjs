@@ -100,7 +100,7 @@ export const classifyPathToken = ({
  * @param {string} specifier
  * @returns {string}
  */
-export const packageNameOf = (specifier) => {
+const packageNameOf = (specifier) => {
   const segments = specifier.split('/');
   return specifier.startsWith('@')
     ? segments.slice(0, 2).join('/')

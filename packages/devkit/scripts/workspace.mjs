@@ -15,7 +15,7 @@
 
 export const NODE_VERSION = '26.8.1';
 
-export const PACKAGE_MANAGER =
+const PACKAGE_MANAGER =
   'pnpm@11.25.0+sha256.33dd0748f27e7916c4f1c8b6943461983e3453b06bbda6312a6280130b4881e5';
 
 export const TSCONFIG_WORKSPACE = '@repo/typescript-config';
@@ -35,7 +35,7 @@ export const TSCONFIG_WORKSPACE = '@repo/typescript-config';
 export const nodeEngineBand = (version) => {
   const major = Number.parseInt(version.split('.')[0] ?? '', 10);
   if (!Number.isInteger(major)) {
-    throw new Error(
+    throw new TypeError(
       `workspace: \`${version}\` does not start with a major version, so no engine band can be derived from it`,
     );
   }
