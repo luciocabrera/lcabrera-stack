@@ -7,9 +7,15 @@
 `devkit create <dir> --profile monorepo` now emits the workspace itself: a pnpm
 workspace file with a catalog and `engineStrict`, the exact Node pin beside the
 band an install may proceed in, the root Vite+ lint and format config, a Biome
-config, and a tsconfig roster with the generator wired to it. After one install
-the tree lints, formats, type-checks and tests, and the install is what writes
-every tsconfig — none of them is written by hand.
+config, and a tsconfig roster with the generator wired to it. On that path, one
+install leaves a tree that lints, formats, type-checks and tests, and the install
+is what writes every tsconfig — none of them is written by hand.
+
+**That last sentence is about `create` and only `create`.** The root manifest is
+the one file this rung does not materialise, so `sync` and `init` never write the
+task block, the dependencies or the engine pin into a repository that already
+exists. What makes the tsconfigs appear is `prepare`, and `prepare` is part of
+that manifest.
 
 **Breaking, landing as a `minor` because this package is pre-1.0.** A repository
 whose config says `"profile": "monorepo"` or `"profile": "full"` receives files
@@ -44,10 +50,29 @@ Before installing again, do one of these:
   do not want the generated tsconfigs.
 - stay on `"profile": "repo"`.
 
-Withholding a file whose precondition another file supplies is not something the
-materialiser can express yet — every precondition it understands is a claim about
-your config or your installed packages, never about another file in the same
-plan. Until that exists, this sequence is yours to complete by hand.
+**Moving an existing repository up to this rung leaves it half-configured, and
+nothing says so.** Flip `"profile": "repo"` to `"profile": "monorepo"` and run
+`sync`: every file lands as `added`, `doctor --check` reports everything up to
+date, and the install succeeds. There is no conflict here and no warning — that
+is what makes this one worth reading twice. But your root manifest still has no
+`prepare`, no task block and no `vite-plus`, so nothing runs the generator, and
+the workspace the rung just placed carries a `typecheck` task pointing at a
+`tsconfig.app.json` that was never written:
+
+```
+error TS5058: The specified path does not exist: 'tsconfig.app.json'.
+```
+
+`devkit init --upgrade` does not close this either: it adds tasks whose binaries
+are already installed, and these name a binary the same manifest would have to
+declare. Run `devkit create` into a scratch directory with this profile and copy
+the `scripts`, `devDependencies`, `engines` and `packageManager` fields out of
+its root `package.json` into yours, then install again.
+
+Neither this nor the catalog case above is something the materialiser can express
+yet. Every precondition it understands is a claim about your config or your
+installed packages — never about another file in the same plan, and never about
+the root manifest, which is not one of the files it places.
 
 The root manifest is the one file the rung does not materialise, because it
 carries the repository's own name: its task block, engine band, package manager

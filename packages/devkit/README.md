@@ -282,6 +282,21 @@ hand** — you edit the roster (`tsconfig.entries.ts`, in the workspace the rung
 places for it) and the generator writes the JSON; a hand edit survives exactly
 until the next regeneration reverts it.
 
+**All of that is the `create` path.** The root manifest is the one file this rung
+does not materialise, because it carries the repository's own name — so `sync`
+and `init` never write the task block, the dependencies or the engine pin into a
+repository that already exists, and `prepare` is part of that manifest.
+
+Raising an existing repository to this rung therefore takes a second step, and
+**nothing tells you so**: every file lands as `added`, `doctor --check` reports
+everything up to date, and the install succeeds, while no `tsconfig.app.json` is
+written anywhere and the workspace the rung just placed carries a `typecheck`
+task pointing at one. `devkit init --upgrade` does not close it either — it adds
+tasks whose binaries are already installed, and these name a binary the same
+manifest would have to declare. Run `devkit create` into a scratch directory with
+this profile and copy the `scripts`, `devDependencies`, `engines` and
+`packageManager` fields out of its root `package.json` into yours.
+
 Three files carry the engine guarantee and only work together: `.node-version`
 holds the exact version, the root manifest's `engines.node` holds the band an
 install may proceed in, and `engineStrict` in `pnpm-workspace.yaml` is what makes
