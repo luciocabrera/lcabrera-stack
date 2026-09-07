@@ -286,8 +286,9 @@ until the next regeneration reverts it.
 does not materialise, because it carries the repository's own name — so `sync`
 and `init` never write the task block, the dependencies or the engine pin into a
 repository that already exists, and `prepare` is part of that manifest. `create`
-writes it once and nothing rewrites it afterwards: edit it freely, and expect a
-later version's additions not to arrive on their own.
+writes the workspace block once and nothing rewrites it: edit it freely, and
+expect a later version's additions not to arrive on their own. `devkit init
+--upgrade` still adds its own gate tasks.
 
 Raising an existing repository to this rung therefore takes a second step, and
 **nothing tells you so**: every file lands as `added`, `doctor --check` reports
@@ -323,9 +324,9 @@ none: `lint:all` runs Oxlint and Biome, and no ESLint config is placed.
 `@lcabrera/vite-config` also publishes shareable ESLint flat configs, and it
 declares their plugins as required peers of the package rather than of those
 subpaths, which npm and pnpm give it no way to express. pnpm installs missing
-peers by default, so `eslint`, `typescript-eslint` and eight plugins arrive with
-it — measured on a fresh `create`, 274 packages against 106 with
-`autoInstallPeers: false`. Nothing here imports them, and nothing breaks: the two
+peers by default, so `eslint`, `typescript-eslint` and its plugins arrive with
+it; grep your `pnpm-lock.yaml` for `eslint` after the first install to see what
+that comes to on your tree. Nothing here imports them and nothing breaks: the two
 subpaths this rung uses pull in `vite-plus` types and nothing else. Set
 `autoInstallPeers: false` in `pnpm-workspace.yaml` if you would rather not carry
 them, and take an unmet-peer warning on each resolving install instead.
