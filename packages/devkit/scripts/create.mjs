@@ -169,6 +169,21 @@ export const missingGitRefusal = ({ searched }) =>
   `create: no git executable in ${searched.map(quoted).join(', ')}, nor anywhere on this machine's PATH — create makes a git repository, so install git before running it.`;
 
 /**
+ * A git step that failed, reported as git reported it.
+ *
+ * `create` runs git with a pinned PATH and a placeholder identity, so the
+ * command line it built says almost nothing to the person reading it — a
+ * failure quoting `-c user.name=devkit` names flags they did not pass. What git
+ * said on its own stderr is the part that identifies the cause: an unreachable
+ * `gpg` under `commit.gpgsign`, or a global `core.hooksPath` whose hook refused.
+ *
+ * @param {{ detail: string, step: string, target: string }} args
+ * @returns {string}
+ */
+export const gitStepFailure = ({ detail, step, target }) =>
+  `create: \`git ${step}\` failed in \`${target}\`, so the repository was not finished:\n${detail}`;
+
+/**
  * @param {{ target: string }} args
  * @returns {string} what a run that materialised nothing usable leaves behind
  */

@@ -28,6 +28,7 @@ import {
   commitIdentityArgs,
   createRefusal,
   createSummary,
+  gitStepFailure,
   initialManifest,
   missingGitRefusal,
   packageNameFor,
@@ -89,12 +90,44 @@ const resolvedProfile = (flagged) => {
   }
 };
 
+const gitFailureDetail = (error) => {
+  const said = String(error.stderr ?? '').trim();
+  if (said !== '') return said;
+  return typeof error.status === 'number'
+    ? `git exited ${error.status} and said nothing`
+    : String(error.message ?? error);
+};
+
+const gitStep = ({ args, cwd, step, target }) => {
+  try {
+    runGit({ args, cwd });
+    return undefined;
+  } catch (error) {
+    return gitStepFailure({
+      detail: gitFailureDetail(error),
+      step,
+      target,
+    });
+  }
+};
+
+const unfinished = ({ failure, target }) => {
+  if (failure !== undefined) console.error(`\n${failure}`);
+  console.error(`\n${unfinishedNotice({ target })}`);
+  return 1;
+};
+
 const scaffold = ({ absolute, profile, target }) => {
   mkdirSync(absolute, { recursive: true });
-  runGit({
+  const initFailure = gitStep({
     args: ['init', '--quiet', '--initial-branch', CREATE_BRANCH, '.'],
     cwd: absolute,
+    step: 'init',
+    target,
   });
+  if (initFailure !== undefined) {
+    return unfinished({ failure: initFailure, target });
+  }
   writeFileSync(
     join(absolute, 'package.json'),
     `${JSON.stringify(initialManifest({ name: packageNameFor(basename(absolute)) }), undefined, 2)}\n`,
@@ -106,22 +139,25 @@ const scaffold = ({ absolute, profile, target }) => {
     upgrade: false,
     userAgent: process.env.npm_config_user_agent,
   });
-  if (code !== 0) {
-    console.error(`\n${unfinishedNotice({ target })}`);
-    return code;
-  }
+  if (code !== 0) return unfinished({ target });
 
-  runGit({ args: ['add', '-A'], cwd: absolute });
-  runGit({
-    args: [
-      ...commitIdentityArgs(identityIn(absolute)),
-      'commit',
-      '--quiet',
-      '-m',
-      INITIAL_COMMIT_MESSAGE,
-    ],
-    cwd: absolute,
-  });
+  const committed =
+    gitStep({ args: ['add', '-A'], cwd: absolute, step: 'add', target }) ??
+    gitStep({
+      args: [
+        ...commitIdentityArgs(identityIn(absolute)),
+        'commit',
+        '--quiet',
+        '-m',
+        INITIAL_COMMIT_MESSAGE,
+      ],
+      cwd: absolute,
+      step: 'commit',
+      target,
+    });
+  if (committed !== undefined) {
+    return unfinished({ failure: committed, target });
+  }
 
   console.log(`\n${createSummary({ branch: CREATE_BRANCH, target })}`);
   return 0;

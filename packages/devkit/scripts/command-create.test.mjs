@@ -216,6 +216,39 @@ describe('what devkit create refuses', () => {
   });
 });
 
+describe('when a git step fails part way through', () => {
+  test('says what git said and that the directory is still there', () => {
+    const parent = scratch();
+    const config = join(parent, 'gitconfig');
+    writeFileSync(
+      config,
+      '[commit]\n\tgpgsign = true\n[gpg]\n\tprogram = /nonexistent/gpg\n',
+    );
+    const inherited = process.env.GIT_CONFIG_GLOBAL;
+    process.env.GIT_CONFIG_GLOBAL = config;
+
+    let outcome;
+    try {
+      outcome = quietly(() =>
+        runCreate(['demo', '--profile', 'agent'], parent),
+      );
+    } finally {
+      if (inherited === undefined) {
+        delete process.env.GIT_CONFIG_GLOBAL;
+      } else {
+        process.env.GIT_CONFIG_GLOBAL = inherited;
+      }
+    }
+
+    expect(outcome.code).toBe(1);
+    expect(outcome.errors).toContain('`git commit` failed in `demo`');
+    expect(outcome.errors).toContain('gpg failed to sign the data');
+    expect(outcome.errors).toContain('left in place');
+    expect(outcome.errors).not.toContain('user.name=');
+    expect(existsSync(join(parent, 'demo', '.git'))).toBe(true);
+  });
+});
+
 describe('a rung above repo', () => {
   test('says what it places, rather than looking like it placed more', () => {
     const parent = scratch();

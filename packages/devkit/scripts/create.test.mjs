@@ -8,6 +8,7 @@ import {
   commitIdentityArgs,
   createRefusal,
   createSummary,
+  gitStepFailure,
   initialManifest,
   missingGitRefusal,
   packageNameFor,
@@ -199,6 +200,18 @@ describe('what a run says afterwards', () => {
     expect(refusal).toContain('/usr/local/bin');
     expect(refusal).toContain('/bin');
     expect(refusal).toContain('install git');
+  });
+
+  test('a failed git step is reported as git reported it, not as the command line', () => {
+    const failure = gitStepFailure({
+      detail:
+        'error: gpg failed to sign the data:\nfatal: failed to write commit object',
+      step: 'commit',
+      target: 'demo',
+    });
+    expect(failure).toContain('`git commit` failed in `demo`');
+    expect(failure).toContain('gpg failed to sign the data');
+    expect(failure).not.toContain('user.name=');
   });
 
   test('a failed run says the directory is still there, rather than leaving it unexplained', () => {
