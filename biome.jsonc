@@ -17,8 +17,8 @@
       // included, and Biome reads a `biome.jsonc` anywhere in the tree as a
       // nested root and refuses the whole run. Excluding the file alone does
       // not help — discovery walks directories — so the blueprint is out as a
-      // directory, and the cost is that Biome lints none of it here. Nothing in
-      // this repository lints it in Biome's place.
+      // directory. Oxlint still reaches it; what goes uncovered here is the
+      // Biome-only rules, which the tree it is emitted into runs for itself.
       "!packages/devkit/assets/workspace",
       "!**/dist",
       "!**/build",
