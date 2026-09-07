@@ -11,6 +11,10 @@
  * The versions are deliberately absent. Every dependency here resolves through
  * `catalog:`, so `pnpm-workspace.yaml` is the one place a version is declared
  * and a second copy cannot drift from it.
+ *
+ * The generate task formats what it wrote because the published writer emits
+ * plain `JSON.stringify` output that Oxfmt then collapses; without that step
+ * every regenerated config is left dirty.
  */
 
 export const NODE_VERSION = '26.8.1';
@@ -20,16 +24,6 @@ const PACKAGE_MANAGER =
 
 export const TSCONFIG_WORKSPACE = '@repo/typescript-config';
 
-/**
- * What the generator wrote, and the whole of what the task that runs it formats.
- *
- * The writer emits plain `JSON.stringify` output and Oxfmt collapses a short
- * array inline, so a format pass has to follow the generator or every config it
- * touched is left dirty. Formatting the tree instead would make an install
- * rewrite the consumer's own sources: `prepare` runs this task, so any
- * dependency change reformats files nobody edited, and an install in CI ends on
- * a dirty working tree.
- */
 export const GENERATED_TSCONFIGS = '**/tsconfig.*.json';
 
 /**
