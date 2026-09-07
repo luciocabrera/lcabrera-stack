@@ -82,12 +82,27 @@ existing package is renamed to match.
 A permanent npm name is taken for a package that will never have a feature. That
 is the price, and it is paid once.
 
-The version story is the cost that recurs. The shim resolves the CLI at runtime,
-so its own version says nothing about the behaviour a consumer gets; a
-`pnpm create` run installs the shim fresh each time and takes whatever
-`@lcabrera/devkit` its dependency range admits. Read the shim's changelog as a
-record of the wrapper, never of the setup — `@lcabrera/devkit`'s changelog is
-where the setup's history is.
+The version story is the cost that recurs, and it is a pin rather than a range.
+The shim declares `@lcabrera/devkit` as `workspace:*`, which pnpm substitutes at
+pack time with the **exact** version — `workspace:~` and `workspace:^` are the
+forms that keep a range — so each published shim installs one named devkit and
+no other. That is deliberate: below `1.0.0` a caret admits only the same minor
+series, and this repository ships a pre-1.0 breaking change as a minor, so a
+caret would not have meant "whatever devkit is current" either. It would have
+meant "until the next minor", silently.
+
+What makes the pin safe is the release tooling rather than the range.
+`updateInternalDependencies` is `patch` in the changesets config, so a devkit
+release bumps and republishes the shim whether or not the shim changed —
+verified by running `changeset version` over devkit's changeset with the shim's
+removed, which still bumped the shim by a patch. `pnpm create
+lcabrera-stack` resolves the newest shim, and the newest shim carries the newest
+devkit.
+
+The cost that leaves: a devkit version published outside that path strands the
+shim on the previous one, with nothing to report it. And the shim's own version
+number describes the wrapper, never the setup — `@lcabrera/devkit`'s changelog
+is where the setup's history is.
 
 Being unscoped also means the name is squattable in a way a scoped one is not,
 so it is worth publishing before it is needed rather than after.

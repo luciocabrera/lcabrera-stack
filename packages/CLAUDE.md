@@ -177,16 +177,27 @@ by inspection:
   they are then inferred, an option defaulting to `[]` publishes as `never[]`
   unless the source carries a JSDoc `@param`.
 - **`catalog:` and `workspace:*` need no special handling _on the pnpm publish
-  path_** — pnpm rewrites both to real version ranges at pack time, in
-  `peerDependencies` as well as `dependencies` (verified by packing and reading
-  the tarball's manifest). Read that as narrowly as it is written: the
-  substitution is pnpm's, exactly like the `publishConfig` swap above, so a
-  tarball produced by `npm pack` carries the literal `catalog:lint` and a
+  path_** — pnpm substitutes both at pack time, in `peerDependencies` as well as
+  `dependencies` (verified by packing and reading the tarball's manifest). Read
+  that as narrowly as it is written: the substitution is pnpm's, exactly like
+  the `publishConfig` swap above, so a tarball produced by `npm pack` carries
+  the literal `catalog:lint` and a
   consumer installing it gets an unresolvable range. That is not hypothetical —
   `@lcabrera/eslint-plugin@0.1.0` is on the registry in that state, with `.ts`
   `exports` and `catalog:` dependencies, which is what an `npm publish` of a
   pnpm workspace produces (#730). Release through changesets, which shells out
   to `pnpm publish`.
+- **What each of the two becomes is not the same thing**, and the difference
+  decides what a consumer installs. `catalog:` publishes the **range** the
+  catalog declares for that entry. **`workspace:*` publishes the exact version**
+  the workspace happened to be on — a pin, not a range; `workspace:~` and
+  `workspace:^` are the forms that keep one. A literal range is passed through
+  untouched, which is why a published range meant to outlive a single release is
+  written out by hand: `@lcabrera/devkit`'s peer on `@lcabrera/repo-standards`
+  is that case, and
+  [ADR-110](../docs/decisions/ADR-110-publish-the-unscoped-initializer-as-a-shim.md)
+  is the case for taking the pin instead and letting the release tooling
+  republish.
 - **`publishConfig.access: "public"`** on each. npm defaults a scoped package to
   restricted and a free org cannot host private packages, so without it the first
   publish fails on permissions without naming the missing field.

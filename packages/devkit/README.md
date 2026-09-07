@@ -145,19 +145,23 @@ gates expect, writes a minimal manifest, sets the repository up exactly as
 `init` does, and commits the result. What comes out is a repository with a
 history, not a directory you still have to turn into one.
 
-It **refuses** three things, and each names what to run instead:
+It **refuses** the following, and each refusal names what to do instead:
 
-| Refused                             | Why                                                                                 |
-| ----------------------------------- | ----------------------------------------------------------------------------------- |
-| A target that is not empty          | `create` writes a whole tree and cannot tell your project from an abandoned attempt |
-| A target inside a git repository    | the inner tree would sit under the outer repository's index and gates               |
-| A profile that is not on the ladder | the same refusal every command makes — an unknown profile places nothing, silently  |
-| Any other option                    | `--profile=<name>` would otherwise be dropped and the default rung run instead      |
+| Refused                                 | Why                                                                                       |
+| --------------------------------------- | ----------------------------------------------------------------------------------------- |
+| A target that is not empty              | `create` writes a whole tree and cannot tell your project from an abandoned attempt       |
+| A target inside a git repository        | the inner tree would sit under the outer repository's index and gates                     |
+| A name something else already holds     | a file, or a link to nothing, occupying the name is not a directory `create` can write to |
+| A directory it cannot list              | an unreadable directory and an empty one are indistinguishable, and it must not guess     |
+| No target, or more than one             | `create` makes one repository, and which one has to be said                               |
+| A profile that is not on the ladder     | the same refusal every command makes — an unknown profile places nothing, silently        |
+| An option other than `--profile <name>` | `--profile=<name>` is dropped by the parser, so it would run the default rung and exit 0  |
+| A machine with no git                   | `create` makes a git repository, so this cannot be discovered after the directory exists  |
 
-The first two both point at `devkit init`, which is the command for a
-repository that already exists. Nothing overrides them: `init`'s refusals and
-these are the two halves of one rule, and a flag that got past either would put
-this kit's files somewhere it cannot record or restore them.
+The first two point at `devkit init`, which is the command for a repository
+that already exists. Nothing overrides them: `init`'s refusals and these are the
+two halves of one rule, and a flag that got past either would put this kit's
+files somewhere it cannot record or restore them.
 
 No gate task is wired by a `create` run, because a repository made a second ago
 has installed nothing, and a task naming a binary you do not have is a
