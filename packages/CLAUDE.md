@@ -107,7 +107,7 @@ by inspection:
   scheduled for whenever the next Node major ships. `vp run tarball:verify`
   reads the **packed** manifest and reports a package that declares bins with no
   floor. The decision is
-  [ADR-110](../docs/decisions/ADR-110-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md).
+  [ADR-111](../docs/decisions/ADR-111-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md).
 - **Shipping source changes how `@lcabrera/ui` may import itself, and the rule is
   not cosmetic.** A consumer compiles _our_ files, so every self-reference in
   them resolves through our own `exports` map. A wildcard target is a directory

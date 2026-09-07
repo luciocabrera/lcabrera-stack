@@ -54,7 +54,7 @@ runtime is a precondition of using it. Each such package declares the floor in
 its own `engines.node`, which is the only place the number lives, and
 `vp run tarball:verify` reads the packed manifest and reports one that declares
 bins without it.
-[ADR-110](../decisions/ADR-110-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md)
+[ADR-111](../decisions/ADR-111-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md)
 is the decision and says what the floor costs.
 
 One rule follows and it is load-bearing. A package may assume the stack. It may

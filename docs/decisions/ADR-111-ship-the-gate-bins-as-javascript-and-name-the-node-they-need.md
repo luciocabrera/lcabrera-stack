@@ -4,7 +4,7 @@ governs:
   - repo-standards
 ---
 
-# ADR-110 — Ship the gate bins as JavaScript, and name the Node they need
+# ADR-111 — Ship the gate bins as JavaScript, and name the Node they need
 
 **Status:** Accepted
 
@@ -130,9 +130,10 @@ only says that renaming the files is not how they get written.
 compile their `.mjs` through `allowJs`. Adding `checkJs` puts every gate script
 under the same strict checker with the same 1,334 errors to answer, and none of
 the packaging consequences, because the published artifact does not change. That
-is the follow-up this decision leaves open, and it is a different shape of work:
-typing 15,000 lines of existing behaviour, one module at a time, against tests
-that must keep deciding what they decided before.
+is the follow-up this decision leaves open, filed as
+[#1103](https://github.com/luciocabrera/lcabrera-stack/issues/1103), and it is a
+different shape of work: typing 15,000 lines of existing behaviour, one module at
+a time, against tests that must keep deciding what they decided before.
 
 **`.mjs` keeps a trap the ratchet only just reaches.** The API-surface extractor
 reads a package's entries through its workspace tsconfig, and without `allowJs`
@@ -171,3 +172,5 @@ from a bug is one they will file as a bug.
 - [#1099](https://github.com/luciocabrera/lcabrera-stack/pull/1099) — the move that raised it
 - [ADR-073](./ADR-073-publishing-gates-check-the-packed-tarball.md) — why only a packed tarball answers
 - [ADR-107](./ADR-107-the-stack-is-a-precondition-of-the-packages.md) — the stack this floor joins
+- [#1103](https://github.com/luciocabrera/lcabrera-stack/issues/1103) — `checkJs`, the follow-up this leaves open
+- [#1104](https://github.com/luciocabrera/lcabrera-stack/issues/1104) — the package that ships a bin and is not yet held to this

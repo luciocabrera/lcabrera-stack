@@ -16,7 +16,7 @@
  * their absence is a real fault rather than a packaging choice. Every check here
  * reads the PACKED manifest, never the workspace one — `files`, `publishConfig`
  * and `engines` are what an installer acts on, and only the packed copy has
- * them as they ship (ADR-110).
+ * them as they ship (ADR-111).
  */
 
 const ALWAYS_PACKED = ['package.json'];

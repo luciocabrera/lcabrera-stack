@@ -30,7 +30,7 @@ port the gate scripts to TypeScript as they move into the packages
 
 ## Status / next
 
-- Current step: the delivery decision is recorded in ADR-110 and the work that
+- Current step: the delivery decision is recorded in ADR-111 and the work that
   does not depend on the port is landing
 - Blockers: none
-- Next: the port itself does not proceed as scoped — see ADR-110 and the PR body
+- Next: the port itself does not proceed as scoped — see ADR-111 and the PR body

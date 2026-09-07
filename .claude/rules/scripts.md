@@ -28,7 +28,7 @@ under a `scripts/` directory is held to both: `.claude/rules/typescript.md` for
 what it says about types, this file for the header, the size ceiling, effects at
 the edges, the Node conventions and the exit codes. Nothing in the tree is on
 that side of the line today —
-[ADR-110](../../docs/decisions/ADR-110-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md)
+[ADR-111](../../docs/decisions/ADR-111-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md)
 decided a published bin ships as JavaScript, and the gate scripts are bins. The
 paths above name it anyway, because the failure to avoid is a tooling script
 leaving both this rule and the size ceiling by being renamed, which nothing

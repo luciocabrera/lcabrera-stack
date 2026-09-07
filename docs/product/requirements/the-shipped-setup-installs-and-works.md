@@ -21,7 +21,7 @@ evidence:
   - type: doc
     ref: docs/decisions/ADR-073-publishing-gates-check-the-packed-tarball.md
   - type: doc
-    ref: docs/decisions/ADR-110-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md
+    ref: docs/decisions/ADR-111-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md
 ---
 
 # The shipped setup works as installed
@@ -51,7 +51,7 @@ install it, rather than by a syntax error the first time a hook fires.
 - The Node the shipped bins need is declared in the **packed** manifest, so my
   installer can refuse an unsupported runtime: `vp run tarball:verify` reports a
   distributed package that declares bins and no `engines.node`. The floor lives
-  in `engines.node` and nowhere else; ADR-110 is why it is a floor rather than
+  in `engines.node` and nowhere else; ADR-111 is why it is a floor rather than
   the band the repository's own root declares.
 
 ## Notes
