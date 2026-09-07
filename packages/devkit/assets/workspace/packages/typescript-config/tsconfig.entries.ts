@@ -6,9 +6,11 @@
  * running it — importing the runner rewrites every config in the tree as a side
  * effect of the import, which no test can do.
  *
- * A workspace with no entry here falls back to the near-empty root config and is
- * checked far more loosely than every other one, so adding an entry is part of
- * adding a workspace rather than a later tidy-up.
+ * A workspace with no entry here gets no config at all — this tree ships no root
+ * `tsconfig.json` to fall back to — so its files are read with tsc's own
+ * defaults, without `strict` or `noUncheckedIndexedAccess`, and an editor
+ * opening one resolves no project. Adding an entry is part of adding a
+ * workspace, not a later tidy-up.
  */
 
 import { createNodeTsConfig } from '@lcabrera/tsconfig/shared';
