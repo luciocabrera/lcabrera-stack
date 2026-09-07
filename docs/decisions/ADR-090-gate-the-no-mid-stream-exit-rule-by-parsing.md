@@ -24,8 +24,8 @@ Enforce it with a repo-wide gate, `vp run scripts:exits:verify`, which **parses*
 each tooling script and reports `process.exit` call expressions. That set was
 `.mjs`/`.cjs` when this was decided;
 [ADR-111](ADR-111-ship-the-gate-bins-as-javascript-and-name-the-node-they-need.md)
-widened it to the files `.claude/rules/scripts.md` binds, shared with the size
-gate.
+widened it to the extensions `.claude/rules/scripts.md` binds, by sharing the
+size gate's file predicate. The directories each gate walks stay its own.
 
 ## Why not an eslint rule
 

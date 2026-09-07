@@ -2,8 +2,12 @@
 /**
  * Gate: no repo script calls `process.exit()` (ADR-090).
  *
- * Which files count is `isToolingScript`, the same predicate the size gate
- * uses, so both cover exactly the set .claude/rules/scripts.md binds.
+ * Which files count is `isToolingScript`, shared with the size gate, so the two
+ * agree about extensions and neither reads fewer than .claude/rules/scripts.md
+ * binds. Which DIRECTORIES get walked is not shared: `SKIP_DIRS` below is this
+ * gate's alone, and the size gate skips `ALWAYS_SKIPPED` plus whatever
+ * `gates.scriptSize.skipDirs` names. A file under a directory only one of them
+ * skips is read by only one of them.
  *
  * Usage (from the repo root):
  *   repo-verify-script-exits

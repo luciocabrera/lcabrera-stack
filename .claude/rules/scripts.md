@@ -99,8 +99,11 @@ fallow's `maxUnitSize`/complexity limits apply to root `scripts/` but are
 **relaxed for `packages/eslint-local-rules/**`** in
 `.fallowrc.json` (deliberately — procedural CLI/AST-walker code). The size gate
 has no such carve-out: it covers every file this rule binds, skills included.
-The exits gate selects with the same predicate, so the two cover one set and a
-file cannot be under one and outside the other.
+The exits gate picks files with the same predicate, so neither gate reads fewer
+extensions than this rule names. Directory skipping is **not** shared: the size
+gate skips what `gates.scriptSize.skipDirs` adds in `devkit.config.json`, the
+exits gate has its own fixed list, and a file under a directory only one of them
+skips is read by only one of them.
 
 Rule 11 applies here too: never silence a finding — fix the code. `packages/ui`
 scripts are held to the same never-baseline bar as the rest of that package.

@@ -121,11 +121,20 @@ ceiling ports with it.
 
 `scripts:exits:verify` ([ADR-090](ADR-090-gate-the-no-mid-stream-exit-rule-by-parsing.md))
 selected on its own `.mjs`/`.cjs` regex and is widened with it, by importing the
-same predicate rather than restating the set. Two gates deriving one file list
-from one function is the point: the rule file names a set once, and neither gate
-can claim it while covering less. There is no parser cost — the exits gate reads
+same predicate rather than restating the set. Deriving the extensions from one
+function is the point: the rule file names them once, and neither gate can claim
+that set while reading fewer. There is no parser cost — the exits gate reads
 with `ts-morph`, which takes a TypeScript source with annotations, generics and
 `satisfies` as readily as a JavaScript one.
+
+**This buys agreement about extensions, and not about directories.** Each of the
+three walkers here keeps its own skip list, and the configurable ones are keyed
+per gate — `gates.scriptSize.skipDirs`, `gates.strayConfigs.skipDirs` — so a
+directory one gate skips is still walked by another. In this repository the size
+gate skips `.claude` and `.react-router` and the exits gate does not; under the
+published defaults the exits gate skips `reports` and the size gate does not.
+Closing that needs a config key that is not named after one gate, which is a
+consumer-visible redesign of a published surface and is not decided here.
 
 ## Consequences
 
