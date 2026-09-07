@@ -63,11 +63,18 @@ the workspace the rung just placed carries a `typecheck` task pointing at a
 error TS5058: The specified path does not exist: 'tsconfig.app.json'.
 ```
 
-`devkit init --upgrade` does not close this either: it adds tasks whose binaries
-are already installed, and these name a binary the same manifest would have to
-declare. Run `devkit create` into a scratch directory with this profile and copy
-the `scripts`, `devDependencies`, `engines` and `packageManager` fields out of
-its root `package.json` into yours, then install again.
+The placed workspace's `test` task is broken for the same reason, and reports it
+differently — it cannot resolve `@lcabrera/vite-config` or `vite-plus` from the
+root `vite.config.ts`, because only the root manifest declares them.
+
+`devkit init --upgrade` does not close this, and the reason is not that the
+binaries are missing: with `vp` and `devkit` both installed it still adds only
+`devkit:check` and `devkit:sync`. The workspace task block belongs to no rung of
+the gate-task table at all, so no set of installed binaries reaches it. Run
+`devkit create` into a scratch directory with this profile and copy the
+`scripts`, `devDependencies`, `engines` and `packageManager` fields out of its
+root `package.json` into yours, then install again; that one step fixes both
+tasks.
 
 Neither this nor the catalog case above is something the materialiser can express
 yet. Every precondition it understands is a claim about your config or your

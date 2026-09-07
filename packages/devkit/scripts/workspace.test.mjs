@@ -17,6 +17,7 @@ import { describe, expect, test } from 'vite-plus/test';
 
 import { initialManifest } from './create.mjs';
 import {
+  GENERATED_TSCONFIGS,
   NODE_VERSION,
   TSCONFIG_WORKSPACE,
   WORKSPACE_DEPENDENCIES,
@@ -113,6 +114,13 @@ describe('the tasks name what the blueprint holds', () => {
     for (const [name, specifier] of Object.entries(WORKSPACE_DEPENDENCIES)) {
       expect(groups.get(specifier.slice('catalog:'.length))).toContain(name);
     }
+  });
+
+  test('the generator task formats what it wrote, never the whole tree', () => {
+    const task = WORKSPACE_SCRIPTS['tsconfig:generate'];
+    expect(task).toContain(`vp fmt '${GENERATED_TSCONFIGS}'`);
+    expect(task).not.toMatch(/vp fmt[ \t]+\.(?:[ \t]|$)/);
+    expect(GENERATED_TSCONFIGS.endsWith('.json')).toBe(true);
   });
 
   test('the blueprint workspace resolves through the catalog too', () => {

@@ -271,7 +271,7 @@ The line goes away on its own the day the rung places a group of its own.
 
 ```bash
 devkit create my-repo --profile monorepo
-cd my-repo && <your package manager> install
+cd my-repo && pnpm install
 ```
 
 The install is not optional and is not a convenience: the tree is written before
@@ -289,13 +289,19 @@ repository that already exists, and `prepare` is part of that manifest.
 
 Raising an existing repository to this rung therefore takes a second step, and
 **nothing tells you so**: every file lands as `added`, `doctor --check` reports
-everything up to date, and the install succeeds, while no `tsconfig.app.json` is
-written anywhere and the workspace the rung just placed carries a `typecheck`
-task pointing at one. `devkit init --upgrade` does not close it either — it adds
-tasks whose binaries are already installed, and these name a binary the same
-manifest would have to declare. Run `devkit create` into a scratch directory with
-this profile and copy the `scripts`, `devDependencies`, `engines` and
-`packageManager` fields out of its root `package.json` into yours.
+everything up to date, and the install succeeds. What is left behind is the
+workspace the rung placed, and both of its tasks are broken. `typecheck` points
+at a `tsconfig.app.json` nothing wrote, because `prepare` is what writes those.
+`test` cannot resolve `@lcabrera/vite-config` or `vite-plus` from the root
+`vite.config.ts`, because only the root manifest declares them.
+
+`devkit init --upgrade` does not close it, and the reason is not that the
+binaries are missing: with `vp` and `devkit` both installed it still adds only
+`devkit:check` and `devkit:sync`. The workspace task block belongs to no rung of
+the gate-task table at all, so no set of installed binaries reaches it. Run
+`devkit create` into a scratch directory with this profile and copy the
+`scripts`, `devDependencies`, `engines` and `packageManager` fields out of its
+root `package.json` into yours; that one step fixes both tasks.
 
 Three files carry the engine guarantee and only work together: `.node-version`
 holds the exact version, the root manifest's `engines.node` holds the band an

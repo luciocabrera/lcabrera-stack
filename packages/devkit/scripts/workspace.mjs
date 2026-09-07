@@ -21,6 +21,18 @@ const PACKAGE_MANAGER =
 export const TSCONFIG_WORKSPACE = '@repo/typescript-config';
 
 /**
+ * What the generator wrote, and the whole of what the task that runs it formats.
+ *
+ * The writer emits plain `JSON.stringify` output and Oxfmt collapses a short
+ * array inline, so a format pass has to follow the generator or every config it
+ * touched is left dirty. Formatting the tree instead would make an install
+ * rewrite the consumer's own sources: `prepare` runs this task, so any
+ * dependency change reformats files nobody edited, and an install in CI ends on
+ * a dirty working tree.
+ */
+export const GENERATED_TSCONFIGS = '**/tsconfig.*.json';
+
+/**
  * The band an install may proceed in, derived from the exact pin.
  *
  * Derived rather than written, because the two have to move together and only
@@ -60,7 +72,7 @@ export const WORKSPACE_SCRIPTS = {
   'lint:check': 'vp lint . && vp run lint:biome:check',
   prepare: 'vp run tsconfig:generate',
   'test:all': 'vp run -r test',
-  'tsconfig:generate': `vp run --filter ${TSCONFIG_WORKSPACE} generate && vp fmt .`,
+  'tsconfig:generate': `vp run --filter ${TSCONFIG_WORKSPACE} generate && vp fmt '${GENERATED_TSCONFIGS}'`,
   'typecheck:all': 'tsc --noEmit -p tsconfig.app.json && vp run -r typecheck',
 };
 
