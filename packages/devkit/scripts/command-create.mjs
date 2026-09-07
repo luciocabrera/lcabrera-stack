@@ -27,6 +27,7 @@ import {
   ancestorsOf,
   commitIdentityArgs,
   createRefusal,
+  abandonedNotice,
   createSummary,
   gitStepFailure,
   initialManifest,
@@ -111,9 +112,9 @@ const gitStep = ({ args, cwd, step, target }) => {
   }
 };
 
-const unfinished = ({ failure, target }) => {
+const halted = ({ failure, notice }) => {
   if (failure !== undefined) console.error(`\n${failure}`);
-  console.error(`\n${unfinishedNotice({ target })}`);
+  console.error(`\n${notice}`);
   return 1;
 };
 
@@ -126,7 +127,10 @@ const scaffold = ({ absolute, profile, target }) => {
     target,
   });
   if (initFailure !== undefined) {
-    return unfinished({ failure: initFailure, target });
+    return halted({
+      failure: initFailure,
+      notice: abandonedNotice({ target }),
+    });
   }
   writeFileSync(
     join(absolute, 'package.json'),
@@ -139,7 +143,7 @@ const scaffold = ({ absolute, profile, target }) => {
     upgrade: false,
     userAgent: process.env.npm_config_user_agent,
   });
-  if (code !== 0) return unfinished({ target });
+  if (code !== 0) return halted({ notice: unfinishedNotice({ target }) });
 
   const committed =
     gitStep({ args: ['add', '-A'], cwd: absolute, step: 'add', target }) ??
@@ -156,7 +160,10 @@ const scaffold = ({ absolute, profile, target }) => {
       target,
     });
   if (committed !== undefined) {
-    return unfinished({ failure: committed, target });
+    return halted({
+      failure: committed,
+      notice: unfinishedNotice({ target }),
+    });
   }
 
   console.log(`\n${createSummary({ branch: CREATE_BRANCH, target })}`);

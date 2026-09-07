@@ -7,6 +7,7 @@ import {
   ancestorsOf,
   commitIdentityArgs,
   createRefusal,
+  abandonedNotice,
   createSummary,
   gitStepFailure,
   initialManifest,
@@ -216,6 +217,21 @@ describe('what a run says afterwards', () => {
 
   test('a failed run says the directory is still there, rather than leaving it unexplained', () => {
     expect(unfinishedNotice({ target: 'demo' })).toContain('left in place');
+  });
+
+  test('the two failure notices give opposite advice, because the states are opposite', () => {
+    const unfinished = unfinishedNotice({ target: 'demo' });
+    const abandoned = abandonedNotice({ target: 'demo' });
+
+    expect(unfinished).toContain('the repository is real');
+    expect(abandoned).toContain('it is not a repository');
+    expect(abandoned).not.toContain('the repository is real');
+  });
+
+  test('a run that never made the repository points back at create, never at init', () => {
+    const abandoned = abandonedNotice({ target: 'demo' });
+    expect(abandoned).toContain('devkit create demo');
+    expect(abandoned).not.toContain('devkit init');
   });
 
   test('the initial commit message is a conventional commit, since the kit ships that gate', () => {

@@ -181,7 +181,21 @@ export const missingGitRefusal = ({ searched }) =>
  * @returns {string}
  */
 export const gitStepFailure = ({ detail, step, target }) =>
-  `create: \`git ${step}\` failed in \`${target}\`, so the repository was not finished:\n${detail}`;
+  `create: \`git ${step}\` failed in \`${target}\`, and the run stopped there:\n${detail}`;
+
+/**
+ * What a run that never got a repository made leaves behind.
+ *
+ * Separate from `unfinishedNotice` because the two states take opposite advice.
+ * Nothing was set up here, so the commands for a repository that already exists
+ * do not apply — `devkit init` in this directory would refuse for the same
+ * reason `git init` did, and neither refusal would explain the other.
+ *
+ * @param {{ target: string }} args
+ * @returns {string}
+ */
+export const abandonedNotice = ({ target }) =>
+  `\`${target}\` is there and empty — nothing was set up in it, so it is not a repository. Fix what the failure above names, then run \`devkit create ${target}\` again; an empty directory is a target create accepts, so there is nothing to remove first.`;
 
 /**
  * @param {{ target: string }} args
