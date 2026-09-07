@@ -52,6 +52,24 @@ const quietly = (run) => {
   }
 };
 
+const repositoryBehindALink = ({ linkedFrom, parent }) => {
+  const outer = join(parent, 'outer');
+  const sub = join(outer, 'sub');
+  mkdirSync(sub, { recursive: true });
+  git(['init', '--quiet', '.'], outer);
+
+  if (linkedFrom === undefined) {
+    const alias = join(parent, 'alias');
+    symlinkSync(sub, alias);
+    return { link: alias, outer, sub };
+  }
+
+  const side = join(parent, linkedFrom);
+  mkdirSync(side);
+  symlinkSync(sub, join(side, 'demo'));
+  return { link: side, outer, sub };
+};
+
 const createUnderGitConfig = ({ contents, parent }) => {
   const config = join(parent, 'gitconfig');
   writeFileSync(config, contents);
@@ -214,36 +232,27 @@ describe('what devkit create refuses', () => {
     expect(existsSync(join(parent, 'demo'))).toBe(false);
   });
 
-  test('a symlink whose destination is inside a repository, not just its own path', () => {
-    const parent = scratch();
-    const outer = join(parent, 'outer');
-    mkdirSync(join(outer, 'sub'), { recursive: true });
-    git(['init', '--quiet', '.'], outer);
-    const side = join(parent, 'side');
-    mkdirSync(side);
-    symlinkSync(join(outer, 'sub'), join(side, 'demo'));
+  for (const { linkedFrom, what } of [
+    {
+      linkedFrom: 'side',
+      what: 'a symlink whose destination is inside a repository',
+    },
+    { linkedFrom: undefined, what: 'a symlinked ancestor of the target' },
+  ]) {
+    test(`${what}, not just the path it was named by`, () => {
+      const parent = scratch();
+      const { link, outer, sub } = repositoryBehindALink({
+        linkedFrom,
+        parent,
+      });
 
-    const { code, errors } = quietly(() => runCreate(['demo'], side));
+      const { code, errors } = quietly(() => runCreate(['demo'], link));
 
-    expect(code).toBe(1);
-    expect(errors).toContain(outer);
-    expect(readdirSync(join(outer, 'sub'))).toEqual([]);
-  });
-
-  test('a symlinked ancestor whose destination is inside a repository', () => {
-    const parent = scratch();
-    const outer = join(parent, 'outer');
-    mkdirSync(join(outer, 'sub'), { recursive: true });
-    git(['init', '--quiet', '.'], outer);
-    const alias = join(parent, 'alias');
-    symlinkSync(join(outer, 'sub'), alias);
-
-    const { code, errors } = quietly(() => runCreate(['demo'], alias));
-
-    expect(code).toBe(1);
-    expect(errors).toContain(outer);
-    expect(readdirSync(join(outer, 'sub'))).toEqual([]);
-  });
+      expect(code).toBe(1);
+      expect(errors).toContain(outer);
+      expect(readdirSync(sub)).toEqual([]);
+    });
+  }
 
   test('an unknown profile, before it makes the directory', () => {
     const parent = scratch();
