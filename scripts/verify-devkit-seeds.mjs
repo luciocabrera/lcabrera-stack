@@ -28,6 +28,7 @@ import {
   inlinePlaceholdersIn,
   repositoryIdentity,
   reportFor,
+  wordsFor,
 } from './lib/devkit-seeds.mjs';
 
 const REPO_ROOT = process.cwd();
@@ -56,7 +57,7 @@ const workspaceDirectories = () =>
         .map((entry) => `${group}/${entry.name}`),
   );
 
-const workspacePackageNames = () =>
+const workspaceManifests = () =>
   WORKSPACE_DIRS.filter((group) => isDirectory(join(REPO_ROOT, group))).flatMap(
     (group) =>
       readdirSync(join(REPO_ROOT, group), { withFileTypes: true })
@@ -65,9 +66,17 @@ const workspacePackageNames = () =>
         .filter(
           (path) => statSync(path, { throwIfNoEntry: false }) !== undefined,
         )
-        .map((path) => readJson(path).name)
-        .filter((name) => typeof name === 'string'),
+        .map((path) => readJson(path))
+        .filter((manifest) => typeof manifest.name === 'string'),
   );
+
+const workspacePackageNames = (manifests) =>
+  manifests.map((manifest) => manifest.name);
+
+const installableNames = (manifests) =>
+  manifests
+    .filter((manifest) => manifest.private !== true)
+    .map((manifest) => manifest.name);
 
 const configuredSecretNames = () =>
   filesUnder(WORKFLOWS_DIR)
@@ -118,20 +127,30 @@ const readSeeds = () =>
 
 const main = () => {
   const { name: slug, owner } = identity();
+  const manifests = workspaceManifests();
   const words = forbiddenWords({
     repositoryName: readJson(join(REPO_ROOT, 'package.json')).name,
     repositoryOwner: owner,
     repositorySlug: slug,
     secretNames: configuredSecretNames(),
-    workspaceNames: workspacePackageNames(),
+    workspaceNames: workspacePackageNames(manifests),
     workspacePaths: workspaceDirectories(),
   });
+  const installable = installableNames(manifests);
 
   const seeds = readSeeds();
   const { reported, unused } = reportFor({
     exemptions: EXEMPTIONS,
     findings: seeds.flatMap((seed) =>
-      findingsIn({ content: seed.content, path: seed.path, words }),
+      findingsIn({
+        content: seed.content,
+        path: seed.path,
+        words: wordsFor({
+          installableNames: installable,
+          path: seed.path,
+          words,
+        }),
+      }),
     ),
   });
 

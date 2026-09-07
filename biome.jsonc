@@ -13,6 +13,13 @@
       "**/*.mjs",
       "**/*.cjs",
       "!**/node_modules",
+      // The kit ships a whole workspace as an asset, root Biome config included,
+      // and Biome reads a `biome.jsonc` anywhere in the tree as a nested root
+      // and refuses the whole run. Excluding the file alone does not help —
+      // discovery walks directories — so the blueprint is out as a directory.
+      // What lints it is the tree it is emitted into, whose own gates this
+      // repository proves end to end.
+      "!packages/devkit/assets/workspace",
       "!**/dist",
       "!**/build",
       "!**/coverage",

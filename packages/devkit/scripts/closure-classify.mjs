@@ -90,6 +90,23 @@ export const classifyPathToken = ({
   };
 };
 
+/**
+ * The package a bare specifier names, with any subpath taken off.
+ *
+ * `@scope/name/deep` keeps two segments and everything else keeps one, so a
+ * subpath import is answered by the same name as the bare one — which is what a
+ * dependency list declares.
+ *
+ * @param {string} specifier
+ * @returns {string}
+ */
+export const packageNameOf = (specifier) => {
+  const segments = specifier.split('/');
+  return specifier.startsWith('@')
+    ? segments.slice(0, 2).join('/')
+    : (segments[0] ?? specifier);
+};
+
 export const classifyImport = ({
   fromDirectory,
   rootDirectory,
@@ -105,7 +122,7 @@ export const classifyImport = ({
       target: specifier,
     });
   }
-  return { kind: 'package' };
+  return { kind: 'package', packageName: packageNameOf(specifier) };
 };
 
 export const toCommandEscapes = ({ allowed, commands, file }) =>

@@ -29,6 +29,7 @@ import {
   inlinePlaceholdersIn,
   repositoryIdentity,
   reportFor,
+  wordsFor,
 } from './devkit-seeds.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -62,6 +63,51 @@ describe('forbiddenWords', () => {
 
   it('leaves the token every repository has', () => {
     expect(words).not.toContain('secrets.GITHUB_TOKEN');
+  });
+});
+
+describe('wordsFor', () => {
+  const installableNames = ['@lcabrera/ui'];
+
+  it('lets a blueprint seed name a package a consumer can install', () => {
+    const scoped = wordsFor({
+      installableNames,
+      path: 'workspace/package.json',
+      words,
+    });
+    expect(scoped).not.toContain('@lcabrera/ui');
+    expect(
+      findingsIn({
+        content: '    "@lcabrera/ui": "catalog:stack"',
+        path: 'workspace/package.json',
+        words: scoped,
+      }),
+    ).toEqual([]);
+  });
+
+  it('holds a blueprint seed to everything else, the runner included', () => {
+    const scoped = wordsFor({
+      installableNames,
+      path: 'workspace/pnpm-workspace.yaml',
+      words,
+    });
+    for (const word of [
+      'a-slug',
+      'an-owner',
+      'a-manifest-name',
+      'packages/ui',
+      'apps/showcase',
+      '@lcabrera/devkit',
+      'vp ',
+    ]) {
+      expect(scoped).toContain(word);
+    }
+  });
+
+  it('leaves a seed outside the blueprint held to every word', () => {
+    expect(
+      wordsFor({ installableNames, path: 'skills/x/SKILL.md', words }),
+    ).toEqual(words);
   });
 });
 

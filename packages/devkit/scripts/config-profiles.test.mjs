@@ -49,9 +49,13 @@ describe('profiles', () => {
     expect(PROFILES.agent).toContain('decisions');
   });
 
-  test('monorepo and full place what repo places until their content lands', () => {
-    expect(PROFILES.monorepo).toEqual(PROFILES.repo);
-    expect(PROFILES.full).toEqual(PROFILES.repo);
+  test('the workspace blueprint arrives at monorepo and is out of repo', () => {
+    expect(PROFILES.monorepo).toContain('workspace');
+    expect(PROFILES.repo).not.toContain('workspace');
+  });
+
+  test('full places what monorepo places until its content lands', () => {
+    expect(PROFILES.full).toEqual(PROFILES.monorepo);
   });
 });
 
@@ -75,18 +79,19 @@ describe('includesRung', () => {
 
 describe('placementNotice', () => {
   test('a rung that adds nothing of its own names the rung it places as', () => {
-    expect(rungPlacedAs('monorepo')).toBe('repo');
-    expect(rungPlacedAs('full')).toBe('repo');
-    expect(placementNotice('monorepo')).toMatch(
-      /"monorepo" profile places what "repo" places/,
+    expect(rungPlacedAs('full')).toBe('monorepo');
+    expect(placementNotice('full')).toMatch(
+      /"full" profile places what "monorepo" places/,
     );
-    expect(placementNotice('full')).toMatch(/nothing above "repo" ships/);
+    expect(placementNotice('full')).toMatch(/nothing above "monorepo" ships/);
   });
 
   test('a rung that places a group of its own says nothing', () => {
     expect(rungPlacedAs('agent')).toBeUndefined();
     expect(rungPlacedAs('repo')).toBeUndefined();
+    expect(rungPlacedAs('monorepo')).toBeUndefined();
     expect(placementNotice('repo')).toBeUndefined();
+    expect(placementNotice('monorepo')).toBeUndefined();
   });
 
   test('a name off the ladder says nothing rather than throwing', () => {
@@ -157,5 +162,29 @@ describe('targetPathFor', () => {
     expect(
       targetPathFor({ assetPath: 'nowhere/file.md', config: DEFAULT_CONFIG }),
     ).toBeUndefined();
+  });
+
+  test('lands the name a tarball keeps as the name git reads', () => {
+    expect(
+      targetPathFor({
+        assetPath: 'workspace/gitignore',
+        config: DEFAULT_CONFIG,
+      }),
+    ).toBe('.gitignore');
+  });
+
+  test('renames only the last segment, and only that one name', () => {
+    expect(
+      targetPathFor({
+        assetPath: 'workspace/gitignore/keep.md',
+        config: DEFAULT_CONFIG,
+      }),
+    ).toBe('gitignore/keep.md');
+    expect(
+      targetPathFor({
+        assetPath: 'workspace/vite.config.ts',
+        config: DEFAULT_CONFIG,
+      }),
+    ).toBe('vite.config.ts');
   });
 });

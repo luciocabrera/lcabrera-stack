@@ -233,22 +233,32 @@ describe('doctor reads the same set sync wrote', () => {
     restore();
   });
 
-  test('a rung above repo reads the same set and says it adds nothing yet', () => {
+  test('the rung that adds a group of its own says nothing about placement', () => {
     const root = scratchRepo({ ...REPO_COMMANDS, audit: 'true' });
     const { log, restore } = silenced();
 
-    runSync([], root);
+    runSync(['--profile', 'monorepo'], root);
 
+    expect(
+      log.mock.calls.flat().filter((line) => /places what/.test(line)),
+    ).toEqual([]);
     expect(runDoctor(['--check', '--profile', 'monorepo'], root)).toBe(0);
+
+    restore();
+  });
+
+  test('a rung above monorepo reads the same set and says it adds nothing yet', () => {
+    const root = scratchRepo({ ...REPO_COMMANDS, audit: 'true' });
+    const { log, restore } = silenced();
+
+    runSync(['--profile', 'monorepo'], root);
+
     expect(runDoctor(['--check', '--profile', 'full'], root)).toBe(0);
     expect(
       log.mock.calls
         .flat()
-        .filter((line) => /places what "repo" places/.test(line)),
-    ).toEqual([
-      expect.stringMatching(/^The "monorepo" profile/),
-      expect.stringMatching(/^The "full" profile/),
-    ]);
+        .filter((line) => /places what "monorepo" places/.test(line)),
+    ).toEqual([expect.stringMatching(/^The "full" profile/)]);
 
     rmSync(join(root, '.githooks/pre-push'));
     expect(runDoctor(['--check', '--profile', 'full'], root)).toBe(1);

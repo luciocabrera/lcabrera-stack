@@ -412,6 +412,9 @@ importers:
       '@lcabrera/repo-standards':
         specifier: workspace:*
         version: link:../repo-standards
+      '@lcabrera/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:../vite-configs

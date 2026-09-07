@@ -329,12 +329,37 @@ describe('a rung above repo', () => {
     const error = vi
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
+    const code = runCreate(['demo', '--profile', 'full'], parent);
+    const printed = log.mock.calls.flat().join('\n');
+    log.mockRestore();
+    error.mockRestore();
+
+    expect(code).toBe(0);
+    expect(printed).toContain('"full" profile places what "monorepo" places');
+  });
+
+  test('the monorepo rung places its own files and claims nothing else', () => {
+    const parent = scratch();
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const error = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
     const code = runCreate(['demo', '--profile', 'monorepo'], parent);
     const printed = log.mock.calls.flat().join('\n');
     log.mockRestore();
     error.mockRestore();
 
     expect(code).toBe(0);
-    expect(printed).toContain('"monorepo" profile places what "repo" places');
+    expect(printed).not.toContain('places what');
+    for (const path of [
+      'pnpm-workspace.yaml',
+      '.node-version',
+      '.gitignore',
+      'vite.config.ts',
+      'biome.jsonc',
+      'packages/typescript-config/tsconfig.entries.ts',
+    ]) {
+      expect(existsSync(join(parent, 'demo', path))).toBe(true);
+    }
   });
 });

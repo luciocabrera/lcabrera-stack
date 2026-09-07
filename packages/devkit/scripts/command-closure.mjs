@@ -21,10 +21,54 @@ import { buildPlan } from './command-materialise.mjs';
 import {
   allowedConfigKeys,
   configuredCommandWords,
+  includesRung,
   PROFILES,
 } from './config.mjs';
 import { gateBinNames } from './init.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
+import { WORKSPACE_DEPENDENCIES } from './workspace.mjs';
+
+const MANIFEST_NAME = 'package.json';
+
+const isManifest = (path) =>
+  path === MANIFEST_NAME || path.endsWith(`/${MANIFEST_NAME}`);
+
+const dependencyNamesIn = (content) => {
+  try {
+    const manifest = JSON.parse(content);
+    return [
+      ...Object.keys(manifest.dependencies ?? {}),
+      ...Object.keys(manifest.devDependencies ?? {}),
+    ];
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * The packages a shipped file may import without escaping its tree.
+ *
+ * A bare import is an escape when nothing the consumer receives provides it.
+ * From the `monorepo` rung up something does: the rung emits the manifests that
+ * declare its own dependencies, so those names are read back off the very files
+ * being analysed rather than listed a second time here. The root manifest is
+ * the one create writes rather than materialises, so its block is added from the
+ * module that defines it.
+ *
+ * @param {{ entries: { path: string, content: string }[], profile: string }} args
+ * @returns {string[]}
+ */
+const providedPackages = ({ entries, profile }) => {
+  if (!includesRung({ profile, rung: 'monorepo' })) return [];
+  return [
+    ...new Set([
+      ...Object.keys(WORKSPACE_DEPENDENCIES),
+      ...entries
+        .filter((entry) => isManifest(entry.path))
+        .flatMap((entry) => dependencyNamesIn(entry.content)),
+    ]),
+  ];
+};
 
 const shippedContext = ({ profile, root }) => {
   const { config, entries } = buildPlan({ profile, root });
@@ -32,6 +76,7 @@ const shippedContext = ({ profile, root }) => {
     agentDirectory: config.paths.agents,
     allowedBins: gateBinNames(),
     allowedCommands: [...BASELINE_COMMANDS, ...configuredCommandWords(config)],
+    allowedPackages: providedPackages({ entries, profile }),
     configKeys: allowedConfigKeys(config),
     entries,
     shipped: new Set(entries.map((entry) => entry.path)),
@@ -43,6 +88,7 @@ const shippedEscapes = ({ profile, root }) => {
     agentDirectory,
     allowedBins,
     allowedCommands,
+    allowedPackages,
     configKeys,
     entries,
     shipped,
@@ -57,6 +103,7 @@ const shippedEscapes = ({ profile, root }) => {
     allowedBins,
     allowedCommands,
     allowedConfigKeys: configKeys,
+    allowedPackages,
     exists: (path) => existsSync(resolve(root, path)),
     files,
     rootDirectory: '',
