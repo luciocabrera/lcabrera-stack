@@ -34,14 +34,6 @@ import {
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-/*
- * The workspaces are manifests rather than two hand-written name lists, and
- * `installableNames` is derived from them the way `verify-devkit-seeds.mjs`
- * derives it. Written as a separate list it drifted immediately: it held one
- * published package, so the other published one read as forbidden in a blueprint
- * and a test asserted that — a green pass that would have been green whatever
- * `wordsFor` did, over behaviour production has the opposite of.
- */
 const WORKSPACE_MANIFESTS = [
   { name: '@lcabrera/ui', private: false },
   { name: '@lcabrera/devkit', private: false },
