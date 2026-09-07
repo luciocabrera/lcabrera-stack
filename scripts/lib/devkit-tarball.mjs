@@ -41,19 +41,6 @@ export const missingFromTarball = ({ manifest, packedPaths }) => {
   );
 };
 
-/**
- * A package's assets are payload: bytes it hands to a consumer's tree rather
- * than code it runs. `@lcabrera/devkit` ships a workspace skeleton that way,
- * with a Vite config and a test among it, and both are files the consumer is
- * meant to receive and run in their own tree. Reading those two as a package
- * packing its own tooling would report the feature as the fault.
- *
- * A tsconfig is not in that set, and the difference is the point: a blueprint
- * ships the entries file a generator reads, never a generated tsconfig. One
- * appearing under here is a tsconfig somebody wrote by hand, which is precisely
- * what the consumer's next install reverts — so that rule keeps applying inside
- * the payload, and this is its only mechanical backstop.
- */
 const PAYLOAD_PREFIX = 'assets/';
 
 const OWN_TOOLING = [

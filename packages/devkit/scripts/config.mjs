@@ -9,6 +9,10 @@
  *
  * Absence is a normal state: a consumer who accepts every default writes no
  * config file at all.
+ *
+ * An asset whose name a packer drops travels under one it keeps: `pnpm pack`
+ * omits a file called `.gitignore` from the archive entirely, so that one ships
+ * spelled `gitignore` and is renamed on the way out.
  */
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
@@ -154,14 +158,6 @@ export const resolveConfig = (raw) => {
 
 const ROOT_BASES = new Set(['', '.', './']);
 
-/**
- * The names a tarball cannot carry, and what each one lands as.
- *
- * `pnpm pack` drops a file called `.gitignore` from the archive entirely — an
- * installed copy of this package holds no such file, so an asset spelled that
- * way ships to nobody while reading, in this tree, exactly like one that ships.
- * It travels under a name the packer keeps and is renamed on the way out.
- */
 const SHIPPED_AS = { gitignore: '.gitignore' };
 
 const targetNameOf = (segments) => {

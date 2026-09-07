@@ -118,16 +118,6 @@ export const forbiddenWords = ({
   ]),
 ];
 
-/**
- * The group whose files ARE a stack rather than describe one.
- *
- * Every other seed is toolchain-agnostic on purpose: a skill carries a procedure
- * and takes the command that runs it from the consumer's config, so a package
- * name written into one is this repository leaking into a document about
- * something else. The blueprint group is the opposite artifact — a workspace
- * skeleton whose whole content is which packages the tree depends on — and it
- * cannot declare a dependency without naming it.
- */
 const BLUEPRINT_PREFIX = 'workspace/';
 
 const isBlueprintSeed = (path) => path.startsWith(BLUEPRINT_PREFIX);

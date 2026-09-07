@@ -10,11 +10,12 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, matchesGlob, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, test } from 'vite-plus/test';
 
+import { configs } from '../assets/workspace/packages/typescript-config/tsconfig.entries.ts';
 import { initialManifest } from './create.mjs';
 import {
   GENERATED_TSCONFIGS,
@@ -120,7 +121,27 @@ describe('the tasks name what the blueprint holds', () => {
     const task = WORKSPACE_SCRIPTS['tsconfig:generate'];
     expect(task).toContain(`vp fmt '${GENERATED_TSCONFIGS}'`);
     expect(task).not.toMatch(/vp fmt[ \t]+\.(?:[ \t]|$)/);
-    expect(GENERATED_TSCONFIGS.endsWith('.json')).toBe(true);
+  });
+
+  test('the glob reaches every config the roster writes, at every depth', () => {
+    const written = configs.map((entry) =>
+      relative(BLUEPRINT, entry.filePath).split(sep).join('/'),
+    );
+    expect(written.length).toBeGreaterThan(1);
+    expect(new Set(written.map((path) => path.split('/').length)).size).toBe(2);
+    for (const path of written) {
+      expect(matchesGlob(path, GENERATED_TSCONFIGS)).toBe(true);
+    }
+  });
+
+  test('and reaches nothing the roster did not write', () => {
+    for (const path of [
+      'packages/typescript-config/tsconfig.entries.ts',
+      'vite.config.ts',
+      'package.json',
+    ]) {
+      expect(matchesGlob(path, GENERATED_TSCONFIGS)).toBe(false);
+    }
   });
 
   test('the blueprint workspace resolves through the catalog too', () => {
