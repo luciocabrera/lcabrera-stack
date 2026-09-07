@@ -90,6 +90,17 @@ describe('missingFromTarball', () => {
 });
 
 describe('strayFromTarball', () => {
+  it('splits the payload: a config or a test travels, a tsconfig never does', () => {
+    expect(
+      strayFromTarball([
+        'assets/workspace/vite.config.ts',
+        'assets/workspace/roster.test.ts',
+        'assets/workspace/tsconfig.app.json',
+        'vite.config.ts',
+      ]),
+    ).toEqual(['assets/workspace/tsconfig.app.json', 'vite.config.ts']);
+  });
+
   it('reports what no consumer should receive', () => {
     expect(
       strayFromTarball([

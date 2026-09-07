@@ -118,6 +118,30 @@ export const forbiddenWords = ({
   ]),
 ];
 
+const BLUEPRINT_PREFIX = 'workspace/';
+
+const isBlueprintSeed = (path) => path.startsWith(BLUEPRINT_PREFIX);
+
+/**
+ * The words one seed is read against.
+ *
+ * A blueprint seed is held to everything except the names of packages this
+ * repository publishes. Those are registry identifiers any consumer can install,
+ * so a manifest or an import naming one hands the reader something they can
+ * fetch — which is the opposite of the failure this gate exists for, a shipped
+ * file pointing at a tree only this repository has. The repository's own slug,
+ * its owner, its secrets, its workspace directories, the names it does NOT
+ * publish and the runner word stay forbidden in every seed, blueprint included.
+ *
+ * @param {{ installableNames: string[], path: string, words: string[] }} args
+ * @returns {string[]}
+ */
+export const wordsFor = ({ installableNames, path, words }) => {
+  if (!isBlueprintSeed(path)) return words;
+  const installable = new Set(installableNames);
+  return words.filter((word) => !installable.has(word));
+};
+
 export const findingsIn = ({ content, path, words }) =>
   content
     .split('\n')

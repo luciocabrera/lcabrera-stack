@@ -41,12 +41,21 @@ export const missingFromTarball = ({ manifest, packedPaths }) => {
   );
 };
 
+const PAYLOAD_PREFIX = 'assets/';
+
+const OWN_TOOLING = [
+  /(^|\/)[^/]*\.test\.[cm]?[jt]s$/,
+  /(^|\/)(eslint\.config|vite\.config)\./,
+];
+
+const GENERATED_TSCONFIG = /(^|\/)tsconfig(\.\w+)?\.json$/;
+
 export const strayFromTarball = (packedPaths) =>
   packedPaths.filter(
     (path) =>
-      /(^|\/)[^/]*\.test\.[cm]?[jt]s$/.test(path) ||
-      /(^|\/)(eslint\.config|vite\.config)\./.test(path) ||
-      /(^|\/)tsconfig(\.\w+)?\.json$/.test(path),
+      GENERATED_TSCONFIG.test(path) ||
+      (!path.startsWith(PAYLOAD_PREFIX) &&
+        OWN_TOOLING.some((pattern) => pattern.test(path))),
   );
 
 export const declaredBins = (manifest) =>

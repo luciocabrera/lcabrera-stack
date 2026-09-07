@@ -45,12 +45,20 @@ const quietly = (run) => {
   const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
   const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
   try {
-    return { code: run(), errors: error.mock.calls.flat().join('\n') };
+    const code = run();
+    return {
+      code,
+      errors: error.mock.calls.flat().join('\n'),
+      printed: log.mock.calls.flat().join('\n'),
+    };
   } finally {
     log.mockRestore();
     error.mockRestore();
   }
 };
+
+const createUnder = ({ parent, profile }) =>
+  quietly(() => runCreate(['demo', '--profile', profile], parent));
 
 const repositoryBehindALink = ({ linkedFrom, parent }) => {
   const outer = join(parent, 'outer');
@@ -325,16 +333,27 @@ describe('when a git step fails', () => {
 describe('a rung above repo', () => {
   test('says what it places, rather than looking like it placed more', () => {
     const parent = scratch();
-    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-    const error = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined);
-    const code = runCreate(['demo', '--profile', 'monorepo'], parent);
-    const printed = log.mock.calls.flat().join('\n');
-    log.mockRestore();
-    error.mockRestore();
+    const { code, printed } = createUnder({ parent, profile: 'full' });
 
     expect(code).toBe(0);
-    expect(printed).toContain('"monorepo" profile places what "repo" places');
+    expect(printed).toContain('"full" profile places what "monorepo" places');
+  });
+
+  test('the monorepo rung places its own files and claims nothing else', () => {
+    const parent = scratch();
+    const { code, printed } = createUnder({ parent, profile: 'monorepo' });
+
+    expect(code).toBe(0);
+    expect(printed).not.toContain('places what');
+    for (const path of [
+      'pnpm-workspace.yaml',
+      '.node-version',
+      '.gitignore',
+      'vite.config.ts',
+      'biome.jsonc',
+      'packages/typescript-config/tsconfig.entries.ts',
+    ]) {
+      expect(existsSync(join(parent, 'demo', path))).toBe(true);
+    }
   });
 });

@@ -11,6 +11,7 @@
     "scripts/verify-package-manager-pin.mjs",
     "scripts/**/*.test.mjs",
     "packages/*/scripts/**/*.test.mjs",
+    "packages/devkit/assets/workspace/packages/typescript-config/generate.ts",
     "apps/showcase/lighthouse.config.js",
     "apps/showcase/config/*.ts",
     "packages/ui/config/*.ts"

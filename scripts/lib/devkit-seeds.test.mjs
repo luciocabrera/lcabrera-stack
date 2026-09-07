@@ -29,16 +29,27 @@ import {
   inlinePlaceholdersIn,
   repositoryIdentity,
   reportFor,
+  wordsFor,
 } from './devkit-seeds.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+const WORKSPACE_MANIFESTS = [
+  { name: '@lcabrera/ui', private: false },
+  { name: '@lcabrera/devkit', private: false },
+  { name: '@repo/ts-configs', private: true },
+];
+
+const installableNames = WORKSPACE_MANIFESTS.filter(
+  (manifest) => manifest.private !== true,
+).map((manifest) => manifest.name);
 
 const words = forbiddenWords({
   repositoryName: 'a-manifest-name',
   repositoryOwner: 'an-owner',
   repositorySlug: 'a-slug',
   secretNames: ['GITHUB_TOKEN', 'SONAR_TOKEN'],
-  workspaceNames: ['@lcabrera/ui', '@lcabrera/devkit'],
+  workspaceNames: WORKSPACE_MANIFESTS.map((manifest) => manifest.name),
   workspacePaths: ['apps/showcase', 'packages/ui'],
 });
 
@@ -62,6 +73,63 @@ describe('forbiddenWords', () => {
 
   it('leaves the token every repository has', () => {
     expect(words).not.toContain('secrets.GITHUB_TOKEN');
+  });
+});
+
+describe('wordsFor', () => {
+  it('lets a blueprint seed name every package a consumer can install', () => {
+    const scoped = wordsFor({
+      installableNames,
+      path: 'workspace/package.json',
+      words,
+    });
+    expect(installableNames.length).toBeGreaterThan(1);
+    for (const name of installableNames) expect(scoped).not.toContain(name);
+    expect(
+      findingsIn({
+        content: '    "@lcabrera/devkit": "catalog:stack"',
+        path: 'workspace/package.json',
+        words: scoped,
+      }),
+    ).toEqual([]);
+  });
+
+  it('holds a blueprint seed to everything else, the runner included', () => {
+    const scoped = wordsFor({
+      installableNames,
+      path: 'workspace/pnpm-workspace.yaml',
+      words,
+    });
+    for (const word of [
+      'a-slug',
+      'an-owner',
+      'a-manifest-name',
+      'packages/ui',
+      'apps/showcase',
+      '@repo/ts-configs',
+      'vp ',
+    ]) {
+      expect(scoped).toContain(word);
+    }
+    expect(
+      findingsIn({
+        content: '  - name: @repo/ts-configs',
+        path: 'workspace/pnpm-workspace.yaml',
+        words: scoped,
+      }),
+    ).toEqual([
+      {
+        line: 1,
+        path: 'workspace/pnpm-workspace.yaml',
+        word: '@repo/ts-configs',
+      },
+    ]);
+  });
+
+  it('leaves a seed outside the blueprint held to every word', () => {
+    expect(
+      wordsFor({ installableNames, path: 'skills/x/SKILL.md', words }),
+    ).toEqual(words);
   });
 });
 

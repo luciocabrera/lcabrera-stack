@@ -1,0 +1,87 @@
+{
+  // The installed copy, so the schema always matches the CLI that reads it.
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main",
+  },
+  "files": {
+    "includes": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.mjs",
+      "**/*.cjs",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/coverage",
+      "!**/*.d.ts",
+    ],
+  },
+  // Formatting is Oxfmt's job, and two formatters on one file fight.
+  "formatter": { "enabled": false },
+  "assist": { "enabled": false },
+  "linter": {
+    "enabled": true,
+    "domains": { "project": "recommended" },
+    "rules": {
+      "preset": "recommended",
+      "complexity": { "useArrayFind": "error", "noImplicitCoercions": "error" },
+      "performance": { "noDelete": "error" },
+      "style": {
+        "noDefaultExport": "error",
+        "noEnum": "error",
+        "noInferrableTypes": "error",
+        "noParameterAssign": "error",
+        "noParameterProperties": "error",
+        "noUselessElse": "error",
+        "noYodaExpression": "error",
+        "useCollapsedElseIf": "error",
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": { "syntax": "shorthand" },
+        },
+        "useConsistentTypeDefinitions": {
+          "level": "error",
+          "options": { "style": "type" },
+        },
+        "useImportType": {
+          "level": "error",
+          "options": { "style": "separatedType" },
+        },
+      },
+      "suspicious": {
+        "noConsole": {
+          "level": "error",
+          "options": { "allow": ["error", "warn", "info"] },
+        },
+        "noEmptyBlockStatements": "error",
+        "noShadow": "error",
+        "noTsIgnore": "error",
+        "noVar": "error",
+        "useErrorMessage": "error",
+      },
+    },
+  },
+  "overrides": [
+    {
+      // Console output IS the product in tooling scripts and CLIs.
+      "includes": ["**/*.mjs", "**/*.cjs", "**/*.cli.ts"],
+      "linter": { "rules": { "suspicious": { "noConsole": "off" } } },
+    },
+    {
+      // Files whose default export is a framework contract.
+      "includes": [
+        "**/routes/**",
+        "**/routes.ts",
+        "**/*.config.ts",
+        "**/*.config.mjs",
+        "**/entry.*.tsx",
+        "**/root.tsx",
+      ],
+      "linter": { "rules": { "style": { "noDefaultExport": "off" } } },
+    },
+  ],
+}

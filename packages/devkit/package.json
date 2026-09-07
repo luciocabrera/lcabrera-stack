@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@lcabrera/repo-standards": "workspace:*",
+    "@lcabrera/tsconfig": "workspace:*",
     "@lcabrera/vite-config": "workspace:*",
     "@types/node": "catalog:types",
     "eslint": "catalog:lint",

@@ -11,6 +11,9 @@
 
 import { dirname } from 'node:path';
 
+import { includesRung } from './config.mjs';
+import { withWorkspaceFields } from './workspace.mjs';
+
 const CREATE_USAGE = 'devkit create <directory> [--profile <name>]';
 
 const quoted = (value) => `\`${value}\``;
@@ -124,15 +127,34 @@ export const packageNameFor = (directoryName) => {
 };
 
 /**
- * @param {{ name: string }} args
- * @returns {object} the manifest a created repository starts from
+ * The manifest a created repository starts from.
+ *
+ * From the `monorepo` rung up it also carries the workspace's own fields: the
+ * task block, the engine band, the package manager pin and the dependencies the
+ * tasks resolve through. Those are written here rather than materialised with
+ * the rest of the rung because this file is the one a consumer's tree cannot
+ * receive verbatim — it carries the repository's name, which only `create`
+ * knows. `init` leaves an existing repository's manifest alone for the same
+ * reason it leaves their tasks alone.
+ *
+ * They are written before anything is installed, deliberately: the tree create
+ * writes is a tree about to be installed FROM this manifest, so a task naming a
+ * binary the manifest declares is a task that runs on the consumer's next step.
+ *
+ * @param {{ name: string, profile?: string }} args
+ * @returns {object}
  */
-export const initialManifest = ({ name }) => ({
-  name,
-  version: '0.0.0',
-  private: true,
-  type: 'module',
-});
+export const initialManifest = ({ name, profile = '' }) => {
+  const base = {
+    name,
+    version: '0.0.0',
+    private: true,
+    type: 'module',
+  };
+  return includesRung({ profile, rung: 'monorepo' })
+    ? withWorkspaceFields({ manifest: base })
+    : base;
+};
 
 /**
  * The `-c` arguments the initial commit needs, if any.
@@ -210,5 +232,5 @@ export const unfinishedNotice = ({ target }) =>
 export const createSummary = ({ branch, target }) =>
   [
     `Created \`${target}\`: a git repository on \`${branch}\`, with everything above committed.`,
-    `No gate task was wired, because none of their binaries is installed yet. Install your dependencies in \`${target}\`, then run \`devkit init --upgrade\` there to add the tasks whose binaries have arrived, keeping the config as you have it.`,
+    `Nothing is installed yet, so install your dependencies in \`${target}\` first. Then run \`devkit init --upgrade\` there to add the gate tasks whose binaries have arrived, keeping the config as you have it.`,
   ].join('\n');

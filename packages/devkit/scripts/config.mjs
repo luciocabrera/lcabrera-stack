@@ -9,6 +9,10 @@
  *
  * Absence is a normal state: a consumer who accepts every default writes no
  * config file at all.
+ *
+ * An asset whose name a packer drops travels under one it keeps: `pnpm pack`
+ * omits a file called `.gitignore` from the archive entirely, so that one ships
+ * spelled `gitignore` and is renamed on the way out.
  */
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
@@ -27,6 +31,7 @@ export const DEFAULT_CONFIG = {
     skills: '.github/skills',
     templates: '.github',
     workflows: '.github/workflows',
+    workspace: '.',
   },
   profile: 'agent',
 };
@@ -35,7 +40,7 @@ export const DEFAULT_CONFIG = {
 const RUNG_GROUPS = {
   agent: ['skills', 'rules', 'agents', 'docs', 'coordination', 'decisions'],
   repo: ['templates', 'workflows', 'hooks', 'root'],
-  monorepo: [],
+  monorepo: ['workspace'],
   full: [],
 };
 
@@ -153,11 +158,21 @@ export const resolveConfig = (raw) => {
 
 const ROOT_BASES = new Set(['', '.', './']);
 
+const SHIPPED_AS = { gitignore: '.gitignore' };
+
+const targetNameOf = (segments) => {
+  const last = segments.at(-1);
+  return SHIPPED_AS[last] === undefined
+    ? segments
+    : [...segments.slice(0, -1), SHIPPED_AS[last]];
+};
+
 export const targetPathFor = ({ assetPath, config }) => {
   const [group, ...rest] = assetPath.split('/');
   const base = config.paths[group];
   if (base === undefined || rest.length === 0) return undefined;
-  return ROOT_BASES.has(base) ? rest.join('/') : [base, ...rest].join('/');
+  const named = targetNameOf(rest);
+  return ROOT_BASES.has(base) ? named.join('/') : [base, ...named].join('/');
 };
 
 export const groupsFor = (config) => PROFILES[config.profile] ?? [];

@@ -1,0 +1,80 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Refuse to install on a Node outside the root `engines.node` band. Without this
+# the field is advisory: pnpm ignores it, nothing else reads it, and an install
+# on an unsupported runtime proceeds silently. The band is deliberately wider
+# than `.node-version`, so a patch release does not hard-fail every install
+# before someone moves the pin.
+engineStrict: true
+
+# A workspace dependency cycle is an architecture error; make it fail the
+# install rather than the default warning that scrolls past unnoticed.
+disallowWorkspaceCycles: true
+
+# Supply chain security (https://pnpm.io/supply-chain-security)
+blockExoticSubdeps: true
+
+allowBuilds:
+  esbuild: true
+
+# Dependencies are grouped by purpose (named catalogs) so a release cohort shows
+# and upgrades together. Reference one from a package.json as `catalog:<group>`.
+# This file is the only place a version is declared; prose repeating one is a
+# second declaration nothing keeps in step.
+catalogs:
+  build:
+    typescript: ^6.0.3
+    # `vite` is aliased to Vite+ core so the whole workspace resolves ONE Vite
+    # instance; the `overrides` below redirect every `vite` edge here. Without
+    # it the graph splits across separate Vite+, Vite and Vitest copies. Keep in
+    # lockstep with `vite-plus` (same Vite+ release).
+    vite: npm:@voidzero-dev/vite-plus-core@0.3.0
+    vite-plus: 0.3.0
+
+  lint:
+    '@biomejs/biome': ^2.5.11
+
+  react:
+    '@react-router/dev': ^8.3.1
+    '@react-router/node': ^8.3.1
+    '@react-router/serve': ^8.3.1
+    '@stylexjs/stylex': ^0.19.0
+    '@stylexjs/unplugin': ^0.19.0
+    isbot: 5.2.1
+    react: ^19.2.8
+    react-dom: ^19.2.8
+    react-router: ^8.3.1
+
+  stack:
+    '@lcabrera/tsconfig': ^0.2.2
+    '@lcabrera/vite-config': ^0.4.1
+
+  test:
+    # Declared because every workspace invokes the binary by path, and pnpm only
+    # materialises `node_modules/vitest` for a direct dependency.
+    vitest: 4.1.11
+
+  types:
+    '@types/node': ^26.4.1
+    '@types/react': ^19.2.18
+    '@types/react-dom': ^19.2.5
+
+catalogMode: prefer
+
+# Redirect every `vite`/`vitest` edge to the toolchain catalog so the workspace
+# resolves a single Vite+ instance. The core alias does not satisfy plugins'
+# `vite` peer ranges, so allow any peer for these two: the single resolved
+# version is the source of truth, not the range.
+overrides:
+  vite: catalog:build
+  vitest: catalog:test
+
+peerDependencyRules:
+  allowAny:
+    - vite
+    - vitest
+  allowedVersions:
+    vite: '*'
+    vitest: '*'

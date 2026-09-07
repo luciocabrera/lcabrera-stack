@@ -77,6 +77,7 @@ const toRequiresEscapes = ({ allowedKeys, file }) =>
  *   allowedBins?: Iterable<string>,
  *   allowedCommands?: Iterable<string>,
  *   allowedConfigKeys?: Iterable<string>,
+ *   allowedPackages?: Iterable<string>,
  *   exists?: (repoRelativePath: string) => boolean,
  *   shipped?: Set<string> }} args
  */
@@ -85,6 +86,7 @@ export const analyseClosure = ({
   allowedBins,
   allowedCommands = [],
   allowedConfigKeys = [],
+  allowedPackages = [],
   exists,
   files,
   rootDirectory,
@@ -92,6 +94,7 @@ export const analyseClosure = ({
 }) => {
   const allowed = new Set(allowedCommands);
   const allowedKeys = new Set(allowedConfigKeys);
+  const packages = new Set(allowedPackages);
   const bins = allowedBins === undefined ? undefined : new Set(allowedBins);
 
   const linkEscapes = files.flatMap((file) => {
@@ -145,6 +148,7 @@ export const analyseClosure = ({
         }))
         .filter((entry) => entry.kind === 'escape' || entry.kind === 'package')
         .filter((entry) => !allowed.has(entry.specifier))
+        .filter((entry) => !packages.has(entry.packageName))
         .map((entry) => ({
           file: file.path,
           kind: 'import',
