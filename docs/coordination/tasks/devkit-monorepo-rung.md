@@ -42,9 +42,9 @@ emit the workspace, catalog and configs for a monorepo
 
 ## Status / next
 
-- Current step: the rung places the blueprint; gate running
+- Current step: round 2 review findings addressed; gate green
 - Blockers: none
-- Next: full gate, then push
+- Next: awaiting the coordinator to ready the PR
 - Overlap: #1096 (`refactor/1096-gate-scripts-typescript`, in review) also claims
   `packages/devkit/package.json` and `scripts/lib/devkit-tarball*.mjs`. Both
   touches here are additive — one devDependency, and one prefix skip in the

@@ -43,26 +43,33 @@ export const missingFromTarball = ({ manifest, packedPaths }) => {
 
 /**
  * A package's assets are payload: bytes it hands to a consumer's tree rather
- * than code it runs. `@lcabrera/devkit` ships a whole workspace skeleton that
- * way — a Vite config, a tsconfig roster and a test among it — and every one of
- * those is a file the consumer is meant to receive and run in their own tree.
+ * than code it runs. `@lcabrera/devkit` ships a workspace skeleton that way,
+ * with a Vite config and a test among it, and both are files the consumer is
+ * meant to receive and run in their own tree. Reading those two as a package
+ * packing its own tooling would report the feature as the fault.
  *
- * The patterns below are about a package packing its OWN configs and tests,
- * which is the packing mistake this gate was built for. Under this prefix the
- * same names are the product, so matching them there would report the feature as
- * the fault.
+ * A tsconfig is not in that set, and the difference is the point: a blueprint
+ * ships the entries file a generator reads, never a generated tsconfig. One
+ * appearing under here is a tsconfig somebody wrote by hand, which is precisely
+ * what the consumer's next install reverts — so that rule keeps applying inside
+ * the payload, and this is its only mechanical backstop.
  */
 const PAYLOAD_PREFIX = 'assets/';
 
+const OWN_TOOLING = [
+  /(^|\/)[^/]*\.test\.[cm]?[jt]s$/,
+  /(^|\/)(eslint\.config|vite\.config)\./,
+];
+
+const GENERATED_TSCONFIG = /(^|\/)tsconfig(\.\w+)?\.json$/;
+
 export const strayFromTarball = (packedPaths) =>
-  packedPaths
-    .filter((path) => !path.startsWith(PAYLOAD_PREFIX))
-    .filter(
-      (path) =>
-        /(^|\/)[^/]*\.test\.[cm]?[jt]s$/.test(path) ||
-        /(^|\/)(eslint\.config|vite\.config)\./.test(path) ||
-        /(^|\/)tsconfig(\.\w+)?\.json$/.test(path),
-    );
+  packedPaths.filter(
+    (path) =>
+      GENERATED_TSCONFIG.test(path) ||
+      (!path.startsWith(PAYLOAD_PREFIX) &&
+        OWN_TOOLING.some((pattern) => pattern.test(path))),
+  );
 
 export const declaredBins = (manifest) =>
   Object.entries(manifest.bin ?? {}).map(([name, target]) => ({
