@@ -3,11 +3,11 @@
  * Gate: no repo script calls `process.exit()` (ADR-090).
  *
  * Which files count is `isToolingScript`, shared with the size gate, so the two
- * agree about extensions and neither reads fewer than .claude/rules/scripts.md
- * binds. Which DIRECTORIES get walked is not shared: `SKIP_DIRS` below is this
- * gate's alone, and the size gate skips `ALWAYS_SKIPPED` plus whatever
- * `gates.scriptSize.skipDirs` names. A file under a directory only one of them
- * skips is read by only one of them.
+ * select the same extensions: `.mjs` and `.cjs` anywhere, plus `.js`, `.ts`,
+ * `.mts` and `.cts` under a `scripts/` directory. Which DIRECTORIES get walked
+ * is not shared: `SKIP_DIRS` below is this gate's alone, and the size gate skips
+ * `ALWAYS_SKIPPED` plus whatever `gates.scriptSize.skipDirs` names. A file under
+ * a directory only one of them skips is read by only one of them.
  *
  * Usage (from the repo root):
  *   repo-verify-script-exits
@@ -79,7 +79,7 @@ const main = () => {
     }
 
     console.error(
-      '\nSet `process.exitCode` and return instead, with a top-level try/catch. See .claude/rules/scripts.md.',
+      '\nSet `process.exitCode` and return instead, with a top-level try/catch.',
     );
     process.exitCode = 1;
     return;

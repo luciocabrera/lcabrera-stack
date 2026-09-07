@@ -40,6 +40,9 @@ port the gate scripts to TypeScript as they move into the packages
 - Next: the port itself does not proceed as scoped — see ADR-111 and the PR
   body. Review findings addressed: the packed-manifest Node floor now rejects an
   empty or whitespace value, and `scripts:exits:verify` selects with the same
-  predicate as the size gate, so #1111 is redundant. Follow-ups filed: #1103
+  predicate as the size gate (extensions only — the skip-list divergence is
+  #1112), so #1111 is redundant. ADR-111 no longer states the Node floor as an
+  install-time refusal, and the changeset no longer cites an unshipped rule
+  file. Follow-ups filed: #1103
   (`checkJs`), #1105 (the rules table has no gate). Whether #1096 closes on this
   answer is the owner's call

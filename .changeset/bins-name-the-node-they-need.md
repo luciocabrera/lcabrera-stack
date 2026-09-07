@@ -15,10 +15,9 @@ mid-stream-exit gate. `repo-verify-script-size`
 measured `.mjs` and `.cjs` alone, which meant a tooling script left the ceiling
 by being renamed and nothing reported it — a gate reading fewer files passes
 exactly like a clean tree. It now also measures a `.js`, `.ts`, `.mts` or `.cts`
-under a `scripts/` directory, which is the set the shipped script rule already
-described. `repo-verify-script-exits` had the same narrow selection and now
-shares the one predicate, so the two agree about which extensions the rule
-governs. They still keep separate directory skip lists, and only the size gate
+under a `scripts/` directory. `repo-verify-script-exits` had the same narrow
+selection and now shares the one predicate, so the two select the same
+extensions. They still keep separate directory skip lists, and only the size gate
 reads `gates.scriptSize.skipDirs`. Expect a finding on a repository that keeps an oversized script
 there under one of those extensions, or one that calls `process.exit()`; nothing
 else changes about what either gate decides.

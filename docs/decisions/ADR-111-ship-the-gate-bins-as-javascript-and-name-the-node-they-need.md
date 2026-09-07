@@ -161,10 +161,18 @@ one would. Both generated tsconfigs set `allowJs` for that reason
 (`packages/ts-configs/tsconfig.entries.ts`), and this decision keeps the
 condition load-bearing rather than retiring it.
 
-**A consumer on an older Node now fails at install rather than at first run.**
-That is louder and earlier, and it is still a refusal: someone who would have got
-away with Node 24 no longer will. The floor names what is exercised, not what
-happens to work.
+**The floor is enforced for a consumer who has opted into strictness, and
+advisory for everyone else.** `engines.node` does not refuse an install on its
+own: pnpm ignores it without `engineStrict`, which is what this repository says
+about its own root band in `pnpm-workspace.yaml`, and npm ships `engine-strict`
+defaulting to `false`, so the mismatch is a warning rather than a failure. On the
+default configuration someone on a Node below the floor still installs.
+
+What the declaration buys regardless is that the number is in the packed manifest
+at all — the one place a strict installer can refuse on and a human can read
+before the first run. Without it there is nothing to refuse on and no version to
+read, which is the state `vp run tarball:verify` now reports. The floor names
+what is exercised, not what happens to work.
 
 ## Alternatives considered
 
