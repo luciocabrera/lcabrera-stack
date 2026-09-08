@@ -290,6 +290,11 @@ a wide display is handed back on a narrow one, where the gesture has not run and
 only the CSS stands between the panel and the far edge of the screen.
 
 The handle is the ARIA window-splitter pattern: focusable, `role='separator'`
-with `aria-valuenow`/`min`/`max`, arrows and Home/End on the keyboard. That role
-on a focusable element is what `useSemanticElements` misreads as an `<hr>`, which
-is why `biome.jsonc` names both splitters in the repo.
+with `aria-valuenow`/`min`/`max`, arrows and Home/End on the keyboard. Its host
+is a `<button>`, not a `<div>` with a `tabIndex` — the keyboard half is only
+reachable if the splitter is in the tab order, and a native button is focusable
+by construction rather than by attribute. What remains is the role itself, which
+`useSemanticElements` and Sonar's `S6819` both read as an `<hr>` they could
+substitute; `<hr>` can take neither focus nor a value, so both splitters in the
+repo are named in `biome.jsonc` and the Sonar findings are accepted the same
+way.

@@ -144,6 +144,29 @@ describe('SidePanel', () => {
     }).toStrictEqual({ committed: [500], resized: [500] });
   });
 
+  it('puts the splitter in the tab order without a tabIndex of its own', () => {
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={vi.fn()}
+        width={400}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const handle = screen.getByTestId('side-panel-resize-handle');
+    handle.focus();
+
+    expect({
+      focused: document.activeElement === handle,
+      tabIndex: handle.getAttribute('tabindex') ?? undefined,
+      tag: handle.tagName,
+    }).toStrictEqual({ focused: true, tabIndex: undefined, tag: 'BUTTON' });
+  });
+
   it('resizes from the keyboard, which a pointer gesture is not needed for', () => {
     const onWidthChange = vi.fn();
 

@@ -19,7 +19,7 @@ export const SidePanelResizeHandle = ({
   });
 
   return (
-    <div
+    <button
       aria-label='Resize settings panel'
       aria-orientation='vertical'
       aria-valuemax={Math.round(bounds.maxWidth)}
@@ -30,7 +30,7 @@ export const SidePanelResizeHandle = ({
       onKeyDown={onKeyDown}
       onMouseDown={onMouseDown}
       role='separator'
-      tabIndex={0}
+      type='button'
       {...stylex.props(
         styles.handle,
         styles[position],

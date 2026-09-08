@@ -54,7 +54,16 @@ tab.
 **The panel resizes from its inner edge, within a band it owns.**
 `SidePanel` takes `isResizable`, `width`, `onWidthChange` and `onWidthCommit`;
 `SidePanelResizeHandle` is the ARIA window-splitter, focusable, carrying
-`aria-valuenow`/`min`/`max`, driven by pointer and by arrow keys plus Home/End. The
+`aria-valuenow`/`min`/`max`, driven by pointer and by arrow keys plus Home/End.
+**Its host element is a `<button type='button'>` carrying `role='separator'`,
+not a `<div>` with a `tabIndex`** — the splitter has to be in the tab order for
+its keyboard half to be reachable at all, and a native button is focusable by
+construction. That also settles what the analysers say about it: a focusable
+separator on a `<div>` draws three findings (`prefer-tag-over-role`,
+`no-noninteractive-tabindex`, `no-noninteractive-element-interactions`), of
+which the last two are only true of a non-interactive host. On a button they
+cannot fire, and the one that remains is the role→tag mapping already accepted
+for the column splitter. The
 band is `SIDE_PANEL_MIN_WIDTH` (320px) to `SIDE_PANEL_MAX_WIDTH_RATIO` (90%) of the
 viewport, enforced twice: in the gesture, and again in CSS as
 `max(320px, min(<width>px, 90vw))`, so a width persisted on a wide display cannot
