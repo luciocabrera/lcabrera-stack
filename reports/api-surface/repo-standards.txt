@@ -103,7 +103,7 @@ tasksClosedBy [const] ({ entries, headRef, prNumber }: { entries: any; headRef: 
 
 ## ./coordination-overlap
 NO_BRANCH [const] Set<string>
-overlapWarnings [const] (tasks: any) => any[]
+overlapWarnings [const] (tasks: any) => string[]
 
 ## ./coordination-parse
 branchSlug [const] (branch: any) => any

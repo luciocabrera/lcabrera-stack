@@ -25,6 +25,7 @@ const firstClash = (a, b) =>
 const isSameBranch = (a, b) =>
   a.branch === b.branch && !NO_BRANCH.has(a.branch);
 
+/** @returns {string[]} */
 const warningsAgainst = ({ from, live }) =>
   live.slice(from + 1).flatMap((other) => {
     const a = live[from].data;
