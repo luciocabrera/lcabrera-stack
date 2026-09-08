@@ -2,7 +2,7 @@
 id: settings-advanced-tab
 title: Move totals and tabs order into an Advanced settings tab
 owner: agent:claude
-status: active
+status: review
 branch: feat/1118-settings-advanced-tab
 area:
   - packages/ui/src/components/Table/TableSettingsDrawer/**
@@ -13,7 +13,7 @@ area:
 started: 2026-09-08
 updated: 2026-09-08
 plan: (none)
-pr: (none)
+pr: #1119
 issue: #1118
 ---
 
@@ -28,6 +28,6 @@ instead of wrapping. ADR-115.
 
 ## Status / next
 
-- Current step: implemented; running the full gate before the PR
+- Current step: draft PR #1119 open, gate green
 - Blockers: none
-- Next: open the PR against #1118
+- Next: address review threads, then mark ready
