@@ -117,9 +117,9 @@ const normalizePath = (path) => {
 };
 
 const relativeSpecifiers = (source) =>
-  source.matchAll(/(?:from|import)\s*(?:\(\s*)?'(\.[^']*)'/gu).toArray().map(
-    (match) => match[1],
-  );
+  source.matchAll(/(?:from|import)\s*(?:\(\s*)?'(\.[^']*)'/gu).map(
+        (match) => match[1],
+      ).toArray();
 
 const resolveFrom = ({ from, specifier }) =>
   normalizePath(`${from.split('/').slice(0, -1).join('/')}/${specifier}`);

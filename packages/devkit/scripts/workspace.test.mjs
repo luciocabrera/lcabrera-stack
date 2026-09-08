@@ -146,9 +146,9 @@ describe('the tasks name what the blueprint holds', () => {
 
   test('the blueprint workspace pins the range the catalog declares', () => {
     const ranges = new Map(
-      catalogGroups(read('pnpm-workspace.yaml')).values().toArray().flatMap(
-        (group) => [...group],
-      ),
+      catalogGroups(read('pnpm-workspace.yaml')).values().flatMap(
+                (group) => [...group],
+              ).toArray(),
     );
     const declared = Object.entries(
       JSON.parse(read('packages', 'typescript-config', 'package.json'))

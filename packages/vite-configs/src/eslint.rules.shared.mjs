@@ -81,15 +81,26 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
  * it differently: the base one imports it statically, and the React one resolves
  * it from the consumer's own `tsconfigRootDir`.
  *
- * `security/detect-non-literal-fs-filename` is off here, and it is the one entry
- * that is a judgement rather than a fact about the runtime. The rule flags any
- * `readFileSync(x)` whose path is computed, because it cannot trace where `x`
- * came from and a path built from a request is how directory traversal works. A
- * file in this block has no request: it is a command a developer ran, reading
- * paths the repository or the command line gave it, and building those paths
- * with `join()` is the whole job. Left on, it reports every correct call site
- * and nothing else. Scope it back the moment one of these files starts serving
- * something.
+ * The three `security/*` entries are the judgements here; the rest are facts
+ * about the runtime. Each of those rules exists to catch untrusted input
+ * reaching a dangerous construct, and a file in this block has no untrusted
+ * input: it is a command a developer ran, over paths and text the repository or
+ * the command line gave it.
+ *
+ * `detect-non-literal-fs-filename` flags any `readFileSync(x)` with a computed
+ * path, because it cannot trace where `x` came from and a path built from a
+ * request is how directory traversal works. Building that path with `join()` is
+ * the whole job here.
+ *
+ * `detect-unsafe-regex` and `detect-non-literal-regexp` are the same argument
+ * about a different construct: catastrophic backtracking is an attack when the
+ * subject is a request, and a slow scan of the repository's own markdown when it
+ * is not. The heuristic behind the first is a star-height approximation that
+ * reports ordinary anchored patterns.
+ *
+ * All three stay on wherever a request could reach, which is everywhere this
+ * block does not match. Scope them back the moment one of these files starts
+ * serving something.
  *
  * @param {{ globals: { node: Record<string, unknown> } }} args
  */
@@ -104,6 +115,8 @@ export const createNodeScriptFileConfig = ({ globals }) => ({
   rules: {
     'no-console': 'off',
     'security/detect-non-literal-fs-filename': 'off',
+    'security/detect-non-literal-regexp': 'off',
+    'security/detect-unsafe-regex': 'off',
     'unicorn/prefer-module': 'off',
     'unicorn/prevent-abbreviations': 'off',
   },

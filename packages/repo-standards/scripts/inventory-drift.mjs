@@ -32,7 +32,7 @@ const EXPORT_NAME =
   /^[ \t]*export[ \t]+(?:const|(?:async[ \t]+)?function)[ \t]+([A-Za-z_$][\w$]*)/gm;
 
 export const exportedSymbolNames = (source) => [
-  ...new Set(source.matchAll(EXPORT_NAME).toArray().map(([, name]) => name)),
+  ...new Set(source.matchAll(EXPORT_NAME).map(([, name]) => name).toArray()),
 ];
 
 export const isDocumented = (inventoryText, symbol) =>

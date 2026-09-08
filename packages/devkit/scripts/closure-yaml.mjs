@@ -78,11 +78,11 @@ const expressionsIn = (line) => {
 
 const referencesIn = ({ expression, line }) =>
   expression.split('||').flatMap((operand, position, operands) =>
-    operand.matchAll(SECRET_REFERENCE).toArray().map((reference) => ({
-      fallback: position < operands.length - 1,
-      line,
-      name: reference[1],
-    })),
+    operand.matchAll(SECRET_REFERENCE).map((reference) => ({
+            fallback: position < operands.length - 1,
+            line,
+            name: reference[1],
+          })).toArray(),
   );
 
 /** @param {string} content */

@@ -113,17 +113,17 @@ const findWorkspaceTaskClaims = (doc) => {
       if (packageName === undefined) {
         return [];
       }
-      const tasks = (cells[3] ?? '').matchAll(/`([^`]+)`/g).toArray().map(
-        ([, task]) => task,
-      );
+      const tasks = (cells[3] ?? '').matchAll(/`([^`]+)`/g).map(
+              ([, task]) => task,
+            ).toArray();
       return tasks.map((task) => ({ packageName, task }));
     });
 };
 
 const findLinks = (doc) =>
-  doc.matchAll(/\]\((?!https?:)([^)#]+)(?:#([^)]+))?\)/g).toArray().map(
-    ([, path, anchor]) => ({ anchor, path }),
-  );
+  doc.matchAll(/\]\((?!https?:)([^)#]+)(?:#([^)]+))?\)/g).map(
+        ([, path, anchor]) => ({ anchor, path }),
+      ).toArray();
 
 const toAnchor = (heading) =>
   heading
@@ -134,9 +134,9 @@ const toAnchor = (heading) =>
 
 const collectAnchors = (markdown) =>
   new Set(
-    markdown.matchAll(/^#{2,4}\s+(\S.*)$/gm).toArray().map(([, heading]) =>
-      toAnchor(heading),
-    ),
+    markdown.matchAll(/^#{2,4}\s+(\S.*)$/gm).map(([, heading]) =>
+            toAnchor(heading),
+          ).toArray(),
   );
 
 const checkRootScriptsDocumented = (documented, problems) => {
@@ -152,7 +152,7 @@ const checkRootScriptsDocumented = (documented, problems) => {
 const checkDocumentedCommandsExist = (documented, inventory, problems) => {
   const everyTask = new Set([
     ...inventory.rootTasks,
-    ...inventory.packageTasks.values().toArray().flatMap((tasks) => [...tasks]),
+    ...inventory.packageTasks.values().flatMap((tasks) => [...tasks]).toArray(),
   ]);
   for (const task of documented) {
     if (!everyTask.has(task)) {
