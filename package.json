@@ -49,7 +49,7 @@
     "fallow:preflight": "bash scripts/fallow-preflight.sh",
     "fallow:refresh-report": "node scripts/refresh-fallow-complexity-report.cjs",
     "fallow:report": "bash scripts/fallow-report.sh",
-    "fix": "vp run format:all && vp run lint:all",
+    "fix": "vp run lint:all && vp run format:all",
     "format:all": "vp fmt .",
     "harness:verify": "repo-verify-harness",
     "housekeeping:prune": "gh pr list --state all --json number,headRefName,state --limit 400 | repo-housekeeping-prune",

@@ -106,12 +106,19 @@ export default defineConfig({
     // lint-staged appends the filenames, and a leading `-` is legal in one.
     // It resolves each path to the
     // workspace whose `eslint.config.mjs` governs it and fixes there — there is
-    // no root ESLint config to point a single invocation at. All three ignore
+    // no root ESLint config to point a single invocation at. They all ignore
     // what they cannot lint, so one glob can carry files of any type.
+    //
+    // `vp fmt` closes the chain because a lint fixer only edits its own range:
+    // deleting a `undefined,` argument can leave a call broken across lines that
+    // now fits on one, which the formatter — the first stage, already past —
+    // would print differently, so the commit succeeds and the push then fails on
+    // formatting. Nothing may write after the formatter.
     '*': [
       'vp check --fix',
       'biome lint --write --no-errors-on-unmatched',
       'repo-eslint-staged --',
+      'vp fmt',
     ],
   },
 });

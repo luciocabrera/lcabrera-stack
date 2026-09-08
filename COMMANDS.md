@@ -139,7 +139,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run typecheck:all`                | real tsc in all 13 workspaces, dependency order                                                                        |
 | `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                                      |
 | `vp run typegen:all`                  | route types for both React Router apps                                                                                 |
-| `vp run fix`                          | `format:all` then `lint:all` — one command for everything a tool can fix itself                                        |
+| `vp run fix`                          | `lint:all` then `format:all` — one command for everything a tool can fix itself; the formatter writes last             |
 | `vp run lint:all`                     | Oxlint + eslint + Biome **with autofix**, every workspace                                                              |
 | `vp run lint:biome`                   | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                                          |
 | `vp run lint:biome:check`             | Biome repo-wide, check only — what CI runs                                                                             |
@@ -1098,11 +1098,11 @@ Vite+ owns the git hooks — `core.hooksPath` points at `.vite-hooks/`, installe
 `.vite-hooks/pre-commit` runs `vp staged`, which reads the `staged` block in the
 root `vite.config.ts`:
 
-| Glob | Commands, in order                                                                      |
-| ---- | --------------------------------------------------------------------------------------- |
-| `*`  | `vp check --fix` → `biome lint --write --no-errors-on-unmatched` → `repo-eslint-staged` |
+| Glob | Commands, in order                                                                                    |
+| ---- | ----------------------------------------------------------------------------------------------------- |
+| `*`  | `vp check --fix` → `biome lint --write --no-errors-on-unmatched` → `repo-eslint-staged --` → `vp fmt` |
 
-All three write, and that is safe in this hook and nowhere else in the flow:
+They all write, and that is safe in this hook and nowhere else in the flow:
 lint-staged re-stages what a task changes, so a fix lands in the commit being
 made rather than in the working tree behind it. They share one glob deliberately
 — the reason is in the `staged` block's own comment. Biome sat here check-only
