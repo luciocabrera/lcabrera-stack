@@ -2,7 +2,7 @@
 id: eslint-covers-scripts
 title: Lint the workspace scripts directories
 owner: agent:claude
-status: active
+status: review
 branch: chore/1117-eslint-covers-scripts
 area:
   - packages/vite-configs/src/eslint.base-custom-rules.shared.config.mjs
