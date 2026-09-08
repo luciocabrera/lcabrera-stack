@@ -1,3 +1,5 @@
+export const SIDE_PANEL_RESIZE_LABEL = 'Resize panel';
+
 export const SIDE_PANEL_MIN_WIDTH = 320;
 
 export const SIDE_PANEL_MAX_WIDTH_RATIO = 0.9;

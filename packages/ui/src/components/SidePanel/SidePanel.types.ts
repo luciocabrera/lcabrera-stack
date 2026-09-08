@@ -13,6 +13,8 @@ export type SidePanelProps = ComponentPropsWithoutRef<'dialog'> & {
   readonly onWidthCommit?: (width: number) => void;
   readonly portalContainer?: RefObject<HTMLElement | null>;
   readonly position?: SidePanelPosition;
+  /** Names what the splitter resizes, for a consumer whose panel is not "the panel". */
+  readonly resizeLabel?: string;
   readonly shouldShowOverlay?: boolean;
   readonly size?: SidePanelSize;
   /** Overrides `size`, clamped to the panel's own band. */

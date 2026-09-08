@@ -37,6 +37,7 @@ export const TableSettingsDrawer = () => {
       onWidthChange={setPanelWidth}
       onWidthCommit={syncPanelWidth}
       position='right'
+      resizeLabel='Resize table settings panel'
       size='md'
       {...(panelWidth !== undefined && { width: panelWidth })}
     >

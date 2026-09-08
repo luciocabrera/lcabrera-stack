@@ -39,6 +39,7 @@ export const ColumnSettingsDrawer = () => {
       onWidthCommit={syncPanelWidth}
       portalContainer={wrapperRef}
       position='right'
+      resizeLabel='Resize column settings panel'
       size='md'
       {...(panelWidth !== undefined && { width: panelWidth })}
     >

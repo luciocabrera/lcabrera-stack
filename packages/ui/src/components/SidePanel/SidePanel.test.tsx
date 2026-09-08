@@ -219,6 +219,59 @@ describe('SidePanel', () => {
     expect(onWidthChange).toHaveBeenCalledWith(432);
   });
 
+  it('names the splitter for the package, and lets a consumer say otherwise', () => {
+    const { rerender } = render(
+      <SidePanel isOpen isPinned isResizable onWidthChange={vi.fn()}>
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const named = screen.getByTestId('side-panel-resize-handle');
+    const packageLabel = named.getAttribute('aria-label');
+
+    rerender(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={vi.fn()}
+        resizeLabel='Resize table settings panel'
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    expect({
+      consumer: screen
+        .getByTestId('side-panel-resize-handle')
+        .getAttribute('aria-label'),
+      package: packageLabel,
+    }).toStrictEqual({
+      consumer: 'Resize table settings panel',
+      package: 'Resize panel',
+    });
+  });
+
+  it('announces a range the panel width sits inside, viewport or not', async () => {
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={vi.fn()}
+        width={400}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const handle = screen.getByTestId('side-panel-resize-handle');
+    const read = (name: string) => Number(handle.getAttribute(name));
+
+    expect(read('aria-valuemax')).toBeGreaterThanOrEqual(read('aria-valuenow'));
+    expect(read('aria-valuemin')).toBeLessThanOrEqual(read('aria-valuenow'));
+  });
+
   it('renders a pinned panel into the provided portal container', () => {
     const portalNode = document.createElement('div');
     document.body.append(portalNode);

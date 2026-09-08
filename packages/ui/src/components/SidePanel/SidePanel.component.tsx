@@ -14,6 +14,7 @@ export const SidePanel = ({
   onWidthCommit,
   portalContainer,
   position = 'right',
+  resizeLabel,
   shouldShowOverlay = true,
   size = 'md',
   width,
@@ -22,6 +23,7 @@ export const SidePanel = ({
   const resizeHandle =
     isResizable && onWidthChange ? (
       <SidePanelResizeHandle
+        {...(resizeLabel !== undefined && { label: resizeLabel })}
         onWidthChange={onWidthChange}
         {...(onWidthCommit !== undefined && { onWidthCommit })}
         position={position}

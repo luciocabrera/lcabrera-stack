@@ -297,6 +297,20 @@ clamps again as `max(320px, min(<width>px, 90vw))` — because a width persisted
 a wide display is handed back on a narrow one, where the gesture has not run and
 only the CSS stands between the panel and the far edge of the screen.
 
+**The splitter's accessible name is the consumer's to give.** It defaults to
+`SIDE_PANEL_RESIZE_LABEL` — "Resize panel", the package's own noun — and
+`resizeLabel` overrides it, the way the column splitter builds its label from
+the `columnLabel` it is handed. A published component naming one consumer's use
+of it ("settings panel") is the same mistake `.claude/rules/package-rationale.md`
+governs in prose.
+
+**The announced band never excludes the width being announced.**
+`resolveSidePanelWidthBounds` takes `currentWidth` and floors its ceiling at it,
+because the server renders with no viewport at all: `useViewportWidth` reports
+`0` there, so a ceiling derived from the viewport alone would announce
+`aria-valuemax` below `aria-valuenow` until hydration. The pointer session
+resolves its bounds the same way, so keyboard and drag agree.
+
 The handle is the ARIA window-splitter pattern: focusable, `role='separator'`
 with `aria-valuenow`/`min`/`max`, arrows and Home/End on the keyboard. Its host
 is a `<button>`, not a `<div>` with a `tabIndex` — the keyboard half is only

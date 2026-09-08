@@ -5,10 +5,14 @@ import type { SidePanelResizeHandleProps } from './SidePanelResizeHandle.types';
 
 import { useSidePanelHostWidth } from '../hooks/useSidePanelHostWidth.hook';
 import { useSidePanelResize } from '../hooks/useSidePanelResize.hook';
-import { SIDE_PANEL_MIN_WIDTH } from '../SidePanel.constants';
+import {
+  SIDE_PANEL_MIN_WIDTH,
+  SIDE_PANEL_RESIZE_LABEL,
+} from '../SidePanel.constants';
 import { styles } from './SidePanelResizeHandle.stylex';
 
 export const SidePanelResizeHandle = ({
+  label = SIDE_PANEL_RESIZE_LABEL,
   onWidthChange,
   onWidthCommit,
   position,
@@ -28,7 +32,7 @@ export const SidePanelResizeHandle = ({
 
   return (
     <button
-      aria-label='Resize settings panel'
+      aria-label={label}
       aria-orientation='vertical'
       aria-valuemax={Math.round(bounds.maxWidth)}
       aria-valuemin={bounds.minWidth}

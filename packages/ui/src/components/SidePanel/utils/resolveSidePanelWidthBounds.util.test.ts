@@ -11,6 +11,12 @@ describe('resolveSidePanelWidthBounds', () => {
     });
   });
 
+  it('never hands back a ceiling under the width being announced', () => {
+    expect(
+      resolveSidePanelWidthBounds({ currentWidth: 400, viewportWidth: 0 }),
+    ).toStrictEqual({ maxWidth: 400, minWidth: SIDE_PANEL_MIN_WIDTH });
+  });
+
   it('never hands back a ceiling under the floor', () => {
     expect(resolveSidePanelWidthBounds({ viewportWidth: 200 }).maxWidth).toBe(
       SIDE_PANEL_MIN_WIDTH,

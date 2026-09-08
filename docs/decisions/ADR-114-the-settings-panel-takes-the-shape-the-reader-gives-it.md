@@ -81,6 +81,14 @@ viewport, enforced twice: in the gesture, and again in CSS as
 `max(320px, min(<width>px, 90vw))`, so a width persisted on a wide display cannot
 paint off the edge of a narrow one.
 
+**The splitter is named by whoever opens the panel.** `SidePanel` is published,
+so its default is the package's own noun (`SIDE_PANEL_RESIZE_LABEL`, "Resize
+panel") and `resizeLabel` is how a consumer says what it actually resizes — the
+two drawers pass "Resize table settings panel" and "Resize column settings
+panel". A default that named the settings drawer would put a consumer's
+vocabulary in the package, which is what `.claude/rules/package-rationale.md`
+forbids in prose for the same reason.
+
 **The drag and the commit are separate calls, and the Table decides what each
 means.** `onWidthChange` runs per animation frame and writes the meta store only;
 `onWidthCommit` runs once the gesture ends and writes the cookie — the split

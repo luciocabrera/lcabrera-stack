@@ -32,10 +32,11 @@ export const useSidePanelResize = ({
     };
   }, []);
 
-  const measuredViewportWidth = useViewportWidth();
-  const viewportWidth =
-    measuredViewportWidth === 0 ? width : measuredViewportWidth;
-  const bounds = resolveSidePanelWidthBounds({ viewportWidth });
+  const viewportWidth = useViewportWidth();
+  const bounds = resolveSidePanelWidthBounds({
+    currentWidth: width,
+    viewportWidth,
+  });
 
   const commitWidth = (nextWidth: number) => {
     onWidthCommit?.(nextWidth);
