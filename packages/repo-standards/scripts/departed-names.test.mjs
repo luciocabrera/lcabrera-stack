@@ -154,10 +154,9 @@ describe('formatFinding', () => {
     );
   });
 });
+const entry = (mode, path) => `${mode} abc123 0\t${path}`;
 
 describe('regularFiles', () => {
-  const entry = (mode, path) => `${mode} abc123 0\t${path}`;
-
   it('keeps a regular file', () => {
     expect(regularFiles(`${entry('100644', 'a.md')}\0`)).toEqual(['a.md']);
   });

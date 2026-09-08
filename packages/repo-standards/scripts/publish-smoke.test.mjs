@@ -104,10 +104,9 @@ describe('selfContained', () => {
     ]);
   });
 });
+const lane = ({ name, specifiers }) => ({ packed: { name }, specifiers });
 
 describe('unimportableProblems', () => {
-  const lane = ({ name, specifiers }) => ({ packed: { name }, specifiers });
-
   it('reports a lane package that contributes no specifier', () => {
     expect(
       unimportableProblems([

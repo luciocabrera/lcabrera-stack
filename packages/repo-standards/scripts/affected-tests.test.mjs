@@ -116,20 +116,20 @@ describe('resolveAffected — ordinary scoping is unchanged', () => {
     expect(affected([]).mode).toBe('none');
   });
 });
+const scriptsGroup = (groups) =>
+    groups.find(
+      (group) => group.task === 'test:scripts' && group.packages.length === 0,
+    );
 
-describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () => {
-  const groupsFor = (files) =>
+const groupsFor = (files) =>
     resolveTestGroups({
       files,
       globalPackages: FIXTURE_GLOBAL_PACKAGES,
       graph: GRAPH,
       lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
     });
-  const scriptsGroup = (groups) =>
-    groups.find(
-      (group) => group.task === 'test:scripts' && group.packages.length === 0,
-    );
 
+describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () => {
   it('adds only the root test:scripts group for a scripts-only change', () => {
     const result = groupsFor(['scripts/lib/foo.mjs']);
     expect(result.scripts).toBe(true);

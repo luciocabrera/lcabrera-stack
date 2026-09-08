@@ -128,17 +128,26 @@ describe('resolveRegisters', () => {
     expect(resolved.adrTemplateHome).toBe(DEFAULT_REGISTERS.adrTemplateHome);
   });
 });
+const publishing = (block) => resolvePublishing(JSON.stringify(block));
+
+const withConfig = (config) => {
+    const root = mkdtempSync(join(tmpdir(), 'repo-standards-config-'));
+    if (config !== undefined) {
+      writeFileSync(join(root, CONFIG_FILE_NAME), JSON.stringify(config));
+    }
+    return root;
+  };
+
+const tasksDir = (value) =>
+    resolveRegisters(
+      JSON.stringify({ registers: { coordinationTasksDir: value } }),
+    ).coordinationTasksDir;
 
 // These gates write and delete — the ADR scaffolder writes, the index and the
 // board are overwritten, the claim closer unlinks. A configured location that
 // leaves the repository must be refused by name, not normalised into something
 // that quietly points somewhere else.
 describe('containment of the configured locations', () => {
-  const tasksDir = (value) =>
-    resolveRegisters(
-      JSON.stringify({ registers: { coordinationTasksDir: value } }),
-    ).coordinationTasksDir;
-
   it('refuses a value that climbs out of the repository', () => {
     expect(() => tasksDir('../../etc')).toThrow(/leaves it/);
   });
@@ -211,14 +220,6 @@ describe('containment of the configured locations', () => {
 });
 
 describe('readCoordinationPaths', () => {
-  const withConfig = (config) => {
-    const root = mkdtempSync(join(tmpdir(), 'repo-standards-config-'));
-    if (config !== undefined) {
-      writeFileSync(join(root, CONFIG_FILE_NAME), JSON.stringify(config));
-    }
-    return root;
-  };
-
   it('resolves the three register locations against the given root', () => {
     const root = withConfig(undefined);
     const paths = readCoordinationPaths(root);
@@ -247,8 +248,6 @@ describe('readCoordinationPaths', () => {
 });
 
 describe('resolvePublishing', () => {
-  const publishing = (block) => resolvePublishing(JSON.stringify(block));
-
   it('an absent config is the documented default, not an error', () => {
     expect(resolvePublishing(undefined)).toEqual(DEFAULT_PUBLISHING);
   });

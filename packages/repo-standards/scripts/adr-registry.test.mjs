@@ -244,6 +244,8 @@ describe('isAdrFilename', () => {
     }
   });
 });
+const index = (options) =>
+    renderIndex(ADR_HOMES[0], { exemptionCount: 0, homeCount: 1, ...options });
 
 describe('renderIndex', () => {
   it('links the template relative to the home it renders', () => {
@@ -278,10 +280,6 @@ describe('renderIndex', () => {
     expect(rendered).toContain(ADR_HOMES[0].commands.new);
     expect(rendered).not.toContain('npx repo-adr');
   });
-
-  const index = (options) =>
-    renderIndex(ADR_HOMES[0], { exemptionCount: 0, homeCount: 1, ...options });
-
   it('says what numbering means for a single-home repository', () => {
     const rendered = index({});
 

@@ -27,6 +27,21 @@ const planFor = (versions) =>
     onDiskHash: () => {},
     peerVersions: versions,
   });
+const outcome = ([spelling, lines]) => {
+      const [entry] = planSync({
+        assets: [
+          {
+            content: ['---', ...lines, '---', '', 'Body.'].join('\n'),
+            path: 'skills/demo/SKILL.md',
+          },
+        ],
+        config: DEFAULT_CONFIG,
+        manifest: emptyManifest,
+        onDiskHash: () => {},
+        peerVersions: new Map([['@lcabrera/repo-standards', '2.0.0']]),
+      });
+      return [spelling, { missing: entry.missing, state: entry.state }];
+    };
 
 describe('planSync and a declared peer', () => {
   test('refuses to write it when the peer is not installed at all', () => {
@@ -77,21 +92,6 @@ describe('planSync and a declared peer', () => {
       ],
       'flow array': ["peer: ['@lcabrera/repo-standards@>=0.1.0 <1.0.0']"],
       scalar: ["peer: '@lcabrera/repo-standards@>=0.1.0 <1.0.0'"],
-    };
-    const outcome = ([spelling, lines]) => {
-      const [entry] = planSync({
-        assets: [
-          {
-            content: ['---', ...lines, '---', '', 'Body.'].join('\n'),
-            path: 'skills/demo/SKILL.md',
-          },
-        ],
-        config: DEFAULT_CONFIG,
-        manifest: emptyManifest,
-        onDiskHash: () => {},
-        peerVersions: new Map([['@lcabrera/repo-standards', '2.0.0']]),
-      });
-      return [spelling, { missing: entry.missing, state: entry.state }];
     };
     expect(Object.fromEntries(Object.entries(spellings).map((value) => outcome(value)))).toEqual(
       Object.fromEntries(

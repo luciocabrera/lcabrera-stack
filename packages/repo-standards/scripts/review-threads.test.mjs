@@ -58,13 +58,15 @@ describe('summarizeThreads', () => {
     expect(summarizeThreads(undefined)).toEqual({ total: 0, unresolved: [] });
   });
 });
+const report = (threads) =>
+    formatThreads({ number: 780, repository: 'o/r', threads }).join('\n');
 
-describe('decideThreadStatus', () => {
-  const threads = (open) => ({
+const threads = (open) => ({
     total: open,
     unresolved: Array.from({ length: open }, () => ({})),
   });
 
+describe('decideThreadStatus', () => {
   it('fails while any thread is open', () => {
     expect(decideThreadStatus({ isDraft: false, threads: threads(2) })).toEqual(
       {
@@ -91,9 +93,6 @@ describe('decideThreadStatus', () => {
 });
 
 describe('formatThreads', () => {
-  const report = (threads) =>
-    formatThreads({ number: 780, repository: 'o/r', threads }).join('\n');
-
   it('prints the id and location of each open thread', () => {
     const text = report(summarizeThreads([thread()]));
     expect(text).toContain('src/a.ts:39');

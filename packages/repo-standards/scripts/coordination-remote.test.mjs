@@ -131,10 +131,15 @@ describe('readRemoteClaims', () => {
     expect(claims).toEqual([]);
   });
 });
+const copyOn = (branch) => ({
+    branch,
+    data: { branch: 'package-readmes', id: 'package-readmes' },
+    name: `package-readmes.md (branch package-readmes)`,
+  });
+
+const claimOn = (branch) => ({ branch: 'inherited', data: { branch } });
 
 describe('withoutMergedBranches', () => {
-  const claimOn = (branch) => ({ branch: 'inherited', data: { branch } });
-
   it('drops a claim whose branch was deleted when its PR merged', () => {
     expect(
       withoutMergedBranches({
@@ -170,12 +175,6 @@ describe('withoutMergedBranches', () => {
 });
 
 describe('dedupeById', () => {
-  const copyOn = (branch) => ({
-    branch,
-    data: { branch: 'package-readmes', id: 'package-readmes' },
-    name: `package-readmes.md (branch package-readmes)`,
-  });
-
   it('collapses the copies every branch inherits into one claim', () => {
     expect(
       dedupeById([copyOn('release-v0-1-1'), copyOn('ci/other'), copyOn('x')]),

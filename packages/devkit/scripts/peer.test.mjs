@@ -131,15 +131,14 @@ describe('unmetPeers', () => {
     ]);
   });
 });
-
-describe('declaredPeerNames', () => {
-  const asset = (name, ...peers) => ({
+const asset = (name, ...peers) => ({
     content: ['---', `peer: [${peers.join(', ')}]`, '---', '', 'Body.'].join(
       '\n',
     ),
     path: `skills/${name}/SKILL.md`,
   });
 
+describe('declaredPeerNames', () => {
   test('names each distinct peer once across every asset', () => {
     expect(
       declaredPeerNames([

@@ -72,7 +72,7 @@ const toTargets = (specs) => {
     return workspaces.map((target) => ({ ...target, explicit: false }));
   }
 
-  const isSourceShipped = new Map(
+  const shippingByName = new Map(
     workspaces.map(({ isSourceShipped: ships, name }) => [name, ships]),
   );
 
@@ -81,7 +81,7 @@ const toTargets = (specs) => {
 
     return {
       explicit: true,
-      isSourceShipped: isSourceShipped.get(name) ?? false,
+      isSourceShipped: shippingByName.get(name) ?? false,
       name,
       only,
     };

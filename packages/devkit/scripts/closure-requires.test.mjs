@@ -1,11 +1,7 @@
 import { describe, expect, test } from 'vite-plus/test';
 
 import { analyseClosure } from './closure.mjs';
-
-describe('analyseClosure and declared config requirements', () => {
-  const rootDirectory = 'skills/epic';
-
-  const declaring = (...keys) => [
+const declaring = (...keys) => [
     {
       content: [
         '---',
@@ -19,6 +15,8 @@ describe('analyseClosure and declared config requirements', () => {
     },
   ];
 
+describe('analyseClosure and declared config requirements', () => {
+  const rootDirectory = 'skills/epic';
   test('a key outside the config key space is an escape of its own kind', () => {
     const { escapes } = analyseClosure({
       allowedConfigKeys: ['profile', 'paths.skills'],

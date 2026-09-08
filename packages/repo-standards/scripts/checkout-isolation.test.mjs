@@ -95,9 +95,7 @@ describe('checkoutIsolationFinding', () => {
     ).not.toBe(undefined);
   });
 });
-
-describe('readCheckoutFacts', () => {
-  const repository = () => {
+const repository = () => {
     const repositoryRoot = mkdtempSync(join(tmpdir(), 'checkout-facts-'));
     runGit({
       args: ['init', '--initial-branch=main', '.'],
@@ -114,6 +112,7 @@ describe('readCheckoutFacts', () => {
     return repositoryRoot;
   };
 
+describe('readCheckoutFacts', () => {
   it('reads the branch, and reports a clean primary checkout as clean', () => {
     const checkout = repository();
     const result = readCheckoutFacts(checkout);

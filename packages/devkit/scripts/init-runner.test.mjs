@@ -27,6 +27,7 @@ describe('declaredDependencies', () => {
     ).toEqual(['vite-plus']);
   });
 });
+const setupFor = (context) => inferRunner(context).ciSetup;
 
 describe('inferRunner', () => {
   test('prefers the declared runner over the lockfile beneath it', () => {
@@ -54,8 +55,6 @@ describe('inferRunner', () => {
   });
 
   test('only the runners a runner image lacks bring their own setup step', () => {
-    const setupFor = (context) => inferRunner(context).ciSetup;
-
     expect(setupFor({ dependencies: ['vite-plus'] }).join('\n')).toContain(
       'voidzero-dev/setup-vp@',
     );

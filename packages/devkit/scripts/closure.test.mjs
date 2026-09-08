@@ -173,16 +173,19 @@ describe('analyseClosure', () => {
     ).toEqual([]);
   });
 });
+const hasSchemaDoc = (path) => path === 'packages/example-scan/SCHEMA_V1.md';
+
+const hasAdvancedReference = (path) =>
+  path === 'skills/epic/references/advanced.md';
 
 describe('classifyPathToken', () => {
   const rootDirectory = 'skills/epic';
   const fromDirectory = 'skills/epic';
 
   test('prefers the file-relative reading when that is the file that exists', () => {
-    const hasFile = (path) => path === 'skills/epic/references/advanced.md';
     expect(
       classifyPathToken({
-        exists: hasFile,
+        exists: hasAdvancedReference,
         fromDirectory,
         rootDirectory,
         token: 'references/advanced.md',
@@ -194,10 +197,9 @@ describe('classifyPathToken', () => {
   });
 
   test('falls back to the repository root, which is where prose usually means', () => {
-    const hasFile = (path) => path === 'packages/example-scan/SCHEMA_V1.md';
     expect(
       classifyPathToken({
-        exists: hasFile,
+        exists: hasSchemaDoc,
         fromDirectory,
         rootDirectory,
         token: 'packages/example-scan/SCHEMA_V1.md',

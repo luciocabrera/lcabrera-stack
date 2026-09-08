@@ -61,6 +61,20 @@ describe('planSync', () => {
     expect(plan[0].state).toBe('updated');
   });
 });
+const outcome = ([spelling, lines]) => {
+      const [entry] = planSync({
+        assets: [
+          {
+            content: ['---', ...lines, '---', '', 'Body.'].join('\n'),
+            path: 'skills/demo/SKILL.md',
+          },
+        ],
+        config: DEFAULT_CONFIG,
+        manifest: emptyManifest,
+        onDiskHash: () => {},
+      });
+      return [spelling, { missing: entry.missing, state: entry.state }];
+    };
 
 describe('planSync and a declared config requirement', () => {
   const declaringAsset = {
@@ -145,20 +159,6 @@ describe('planSync and a declared config requirement', () => {
       'block sequence': ['requires:', '  - config.commands.install'],
       'flow array': ['requires: [config.commands.install]'],
       scalar: ['requires: config.commands.install'],
-    };
-    const outcome = ([spelling, lines]) => {
-      const [entry] = planSync({
-        assets: [
-          {
-            content: ['---', ...lines, '---', '', 'Body.'].join('\n'),
-            path: 'skills/demo/SKILL.md',
-          },
-        ],
-        config: DEFAULT_CONFIG,
-        manifest: emptyManifest,
-        onDiskHash: () => {},
-      });
-      return [spelling, { missing: entry.missing, state: entry.state }];
     };
     expect(Object.fromEntries(Object.entries(spellings).map((value) => outcome(value)))).toEqual(
       Object.fromEntries(

@@ -184,6 +184,17 @@ describe('upgradeKeptCiSetup', () => {
 
 // The two halves must ask the same question. Keyed differently, a `ci` block
 // with no `setup` was neither written nor reported: `devkit init --upgrade &&
+const summary = ({ recordedTrunk = false, upgrade }) =>
+    initSummary({
+      added: [],
+      defaultBranch: 'main',
+      profile: 'full',
+      recordedTrunk,
+      runner: 'vite-plus',
+      skipped: [],
+      upgrade,
+      written: 0,
+    });
 // devkit sync` reported success, the placeholder was deleted from every
 // workflow, and every job failed at {{commands.install}} with exit 127.
 describe('a ci block that carries no setup key', () => {
@@ -251,18 +262,6 @@ describe('isDefaultBranchRecorded', () => {
 });
 
 describe('initSummary under --upgrade', () => {
-  const summary = ({ recordedTrunk = false, upgrade }) =>
-    initSummary({
-      added: [],
-      defaultBranch: 'main',
-      profile: 'full',
-      recordedTrunk,
-      runner: 'vite-plus',
-      skipped: [],
-      upgrade,
-      written: 0,
-    });
-
   test('does not claim commands were inferred', () => {
     expect(summary({ upgrade: true })).toContain('kept as you wrote it');
     expect(summary({ upgrade: true })).not.toContain('were inferred');

@@ -43,6 +43,7 @@ const expectRejects = (root, from, to, expected) => {
     expected,
   );
 };
+const crlf = (text) => text.replaceAll('\n', '\r\n');
 
 describe('the ADR gate reading the record', () => {
   it('passes a complete record and says what it did not check', () => {
@@ -55,7 +56,6 @@ describe('the ADR gate reading the record', () => {
 
   it('reads a record checked out with CRLF, and still judges it', () => {
     const root = makeAdrRepo();
-    const crlf = (text) => text.replaceAll('\n', '\r\n');
     const write = writeIn(root);
 
     write(RECORD, crlf(RECORD_TEXT));
