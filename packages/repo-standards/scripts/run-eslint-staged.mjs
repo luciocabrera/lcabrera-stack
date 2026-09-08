@@ -123,4 +123,9 @@ const main = () => {
   process.exitCode = exitCodeFor(outcomes.map((entry) => entry.outcome));
 };
 
-main();
+try {
+  main();
+} catch (error) {
+  console.error(`repo-eslint-staged: ${error.message}`);
+  process.exitCode = 2;
+}

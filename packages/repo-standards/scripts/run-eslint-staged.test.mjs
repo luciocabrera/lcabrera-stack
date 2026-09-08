@@ -72,6 +72,16 @@ describe('run-eslint-staged against the real ESLint', () => {
     expect(lint(root, 'good.js').status).toBe(0);
   });
 
+  it('blames the manifest, not the code, when one cannot be read', () => {
+    const root = makeWorkspace();
+    writeFileSync(join(root, 'package.json'), '{ "scripts": { , } }');
+    writeFileSync(join(root, 'good.js'), 'export const good = () => 2;\n');
+    const { status, stderr } = lint(root, 'good.js');
+    expect(stderr).toContain('repo-eslint-staged:');
+    expect(stderr).not.toContain('findings remain');
+    expect(status).toBe(2);
+  });
+
   it('never reports no files matching "--"', () => {
     const root = makeWorkspace();
     writeFileSync(join(root, 'good.js'), 'export const good = () => 2;\n');
