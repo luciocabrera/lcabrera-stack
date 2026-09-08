@@ -507,13 +507,14 @@ data context is re-created on every navigation.
 
 ### `src/utils/tests/`
 
-| Function                              | Location                                                  | Description                                                                                  |
-| ------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `createMockStore`                     | `utils/tests/createMockStore.util.ts`                     | Generic external-store-like test scaffold (`get`, `set`, `reset`, `subscribe`, SSR snapshot) |
-| `createPaginatedFetchActionMocks`     | `utils/tests/createPaginatedFetchActionMocks.util.ts`     | Shared harness for paginated Table fetch-hook tests with stores + prefetch mocks             |
-| `createTableConfigColumnsActionMocks` | `utils/tests/createTableConfigColumnsActionMocks.util.ts` | Shared TableConfig columns-action test scaffold with mocked stores + persistence wiring      |
-| `createColumnOrderSectionActionMocks` | `utils/tests/createColumnOrderSectionActionMocks.util.ts` | Shared ColumnOrderSection action test scaffold with mocked stores + persistence wiring       |
-| `mockDialogElement`                   | `utils/tests/mockDialogElement.util.ts`                   | Mocks HTMLDialogElement prototype behavior with restore handles for test teardown            |
+| Function                              | Location                                                  | Description                                                                                                                       |
+| ------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `createMockStore`                     | `utils/tests/createMockStore.util.ts`                     | Generic external-store-like test scaffold (`get`, `set`, `reset`, `subscribe`, SSR snapshot)                                      |
+| `createPaginatedFetchActionMocks`     | `utils/tests/createPaginatedFetchActionMocks.util.ts`     | Shared harness for paginated Table fetch-hook tests with stores + prefetch mocks                                                  |
+| `createTableConfigColumnsActionMocks` | `utils/tests/createTableConfigColumnsActionMocks.util.ts` | Shared TableConfig columns-action test scaffold with mocked stores + persistence wiring                                           |
+| `createColumnOrderSectionActionMocks` | `utils/tests/createColumnOrderSectionActionMocks.util.ts` | Shared ColumnOrderSection action test scaffold with mocked stores + persistence wiring                                            |
+| `mockDialogElement`                   | `utils/tests/mockDialogElement.util.ts`                   | Mocks HTMLDialogElement prototype behavior with restore handles for test teardown                                                 |
+| `createMockVirtualSelect`             | `utils/tests/createMockVirtualSelect.util.tsx`            | The option-list stand-in every suite that mocks `VirtualSelect` renders; `testId` overrides the placeholder-derived `data-testid` |
 
 ### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/`
 
