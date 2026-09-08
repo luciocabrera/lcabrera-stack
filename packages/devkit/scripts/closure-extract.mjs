@@ -142,7 +142,7 @@ export const extractCommands = (content) => {
   return [...shellCommandWords(shellBlockLines(content)), ...inline];
 };
 
-const HAS_EXTENSION = /\.[a-z0-9]+$/i;
+const EXTENSION_PATTERN = /\.[a-z0-9]+$/i;
 
 const TRAILING_PUNCTUATION = new Set([')', ',', '.', ':', ';']);
 
@@ -157,7 +157,7 @@ const withoutTrailingPunctuation = (token) => {
 export const isPathToken = (token) => {
   if (token.includes('://') || /\s/.test(token)) return false;
   if (token.startsWith('./') || token.startsWith('../')) return true;
-  return token.includes('/') && HAS_EXTENSION.test(token);
+  return token.includes('/') && EXTENSION_PATTERN.test(token);
 };
 
 /** @param {{ line: number, text: string }[]} lines */

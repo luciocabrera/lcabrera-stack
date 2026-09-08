@@ -64,7 +64,7 @@ import {
   DRAFT_DIR,
   headingNumber,
   headingTitle,
-  looksLikeAdr,
+  isAdrFilename,
   nextFreeNumber,
   NON_ADR_FILES,
   normalizeIndex,
@@ -136,7 +136,7 @@ const walkStrays = (dir, prefix = '') => {
         ? []
         : walkStrays(join(dir, entry.name), path);
     }
-    return looksLikeAdr(entry.name) && entry.name.endsWith('.md') ? [path] : [];
+    return isAdrFilename(entry.name) && entry.name.endsWith('.md') ? [path] : [];
   });
 };
 

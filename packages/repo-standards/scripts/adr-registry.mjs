@@ -37,7 +37,7 @@ export const parseAdrFilename = (filename) => {
     : { number: Number(match[1]), slug: match[2] };
 };
 
-export const looksLikeAdr = (filename) => /^ADR[-_ ]?\d/i.test(filename);
+export const isAdrFilename = (filename) => /^ADR[-_ ]?\d/i.test(filename);
 
 export const headingNumber = (markdown) => {
   const line = markdown.split('\n').find((text) => text.startsWith('# '));
@@ -97,7 +97,7 @@ const duplicateFindings = (homes, grandfathered = GRANDFATHERED_DUPLICATES) => {
 
 const draftFindings = (draftFilenames) =>
   draftFilenames
-    .filter((filename) => looksLikeAdr(filename))
+    .filter((filename) => isAdrFilename(filename))
     .map(
       (filename) =>
         `${DRAFT_DIR}/${filename} — a draft must not carry an ADR number; it gets one when it is adopted`,

@@ -52,7 +52,7 @@ const FENCE = '---';
 
 const CONFIG_PREFIX = 'config.';
 
-const REQUIRES_KEY = /^requires:[ \t]*/;
+const REQUIREMENT_KEY = /^requires:[ \t]*/;
 
 const PEER_KEY = /^peer:[ \t]*/;
 
@@ -128,7 +128,7 @@ const entriesOf = (declaration) =>
 
 export const requiredConfigKeys = (content) => [
   ...new Set(
-    entriesOf(declarationFor({ content, key: REQUIRES_KEY }))
+    entriesOf(declarationFor({ content, key: REQUIREMENT_KEY }))
       .filter((entry) => entry.startsWith(CONFIG_PREFIX))
       .map((entry) => entry.slice(CONFIG_PREFIX.length))
       .filter((key) => key !== ''),
@@ -156,4 +156,4 @@ export const requiredPeers = (content) => {
 };
 
 export const requiresDeclarationLine = (content) =>
-  declarationFor({ content, key: REQUIRES_KEY })?.line;
+  declarationFor({ content, key: REQUIREMENT_KEY })?.line;

@@ -21,7 +21,7 @@ export const gitdirPointer = (contents) => {
 
 const WORKTREES_DIRECTORY = 'worktrees';
 
-const namesALinkedWorktree = (gitdir) =>
+const isLinkedWorktree = (gitdir) =>
   basename(dirname(gitdir)) === WORKTREES_DIRECTORY;
 
 const commonGitDir = (repoRoot) => {
@@ -37,7 +37,7 @@ const commonGitDir = (repoRoot) => {
     return;
   }
   const gitdir = resolve(repoRoot, pointer);
-  return namesALinkedWorktree(gitdir) ? resolve(gitdir, '..', '..') : gitdir;
+  return isLinkedWorktree(gitdir) ? resolve(gitdir, '..', '..') : gitdir;
 };
 
 const mainWorkingTree = (gitDir) =>

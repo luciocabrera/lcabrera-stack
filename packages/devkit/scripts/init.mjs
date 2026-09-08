@@ -189,7 +189,7 @@ export const inferRunner = ({
  *
  * @param {{ defaultBranch?: string, existing?: object, upgrade?: boolean }} args
  */
-export const recordsDefaultBranch = ({
+export const isDefaultBranchRecorded = ({
   defaultBranch,
   existing = {},
   upgrade = false,
@@ -247,7 +247,7 @@ export const initialConfig = ({
         left.localeCompare(right),
       ),
     ),
-    ...(recordsDefaultBranch({ defaultBranch, existing, upgrade }) && { conventions: { ...existing.conventions, defaultBranch } }),
+    ...(isDefaultBranchRecorded({ defaultBranch, existing, upgrade }) && { conventions: { ...existing.conventions, defaultBranch } }),
     profile,
   };
 };

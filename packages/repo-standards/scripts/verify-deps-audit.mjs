@@ -18,7 +18,7 @@
  *
  * The important consequence is that an empty stdin — the audit crashed, the
  * registry was unreachable, the pipe broke — must NOT read as "nothing found".
- * `auditDidRun` refuses a report that did not walk the tree, so the gate fails
+ * `didAuditRun` refuses a report that did not walk the tree, so the gate fails
  * loudly instead of passing quietly. A supply-chain check that goes green when
  * it could not run is worse than none, because it is believed.
  *
@@ -39,8 +39,8 @@ import { fileURLToPath } from 'node:url';
 import { flagValue, readStdin } from './cli-input.mjs';
 import { readGates } from './config.mjs';
 import {
-  auditDidRun,
   classifyAdvisories,
+  didAuditRun,
   formatAdvisory,
   readAdvisories,
 } from './deps-audit.mjs';
@@ -101,7 +101,7 @@ const main = async () => {
     return;
   }
 
-  if (!auditDidRun(report)) {
+  if (!didAuditRun(report)) {
     console.error(
       'deps audit gate failed: the report counts no dependencies, so the audit\n' +
         'did not walk the tree (an unreachable registry looks exactly like a\n' +

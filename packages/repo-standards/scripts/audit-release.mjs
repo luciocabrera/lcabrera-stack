@@ -50,8 +50,8 @@ const REPO_ROOT = resolveHostRoot({
 
 const readWorkspaceTargets = () =>
   readPublishableManifests(REPO_ROOT).map((manifest) => ({
+    isSourceShipped: !isBuiltPublicPackage(manifest),
     name: manifest.name,
-    shipsSource: !isBuiltPublicPackage(manifest),
   }));
 
 const parseSpec = (spec) => {
@@ -72,8 +72,8 @@ const toTargets = (specs) => {
     return workspaces.map((target) => ({ ...target, explicit: false }));
   }
 
-  const shipsSource = new Map(
-    workspaces.map(({ name, shipsSource: ships }) => [name, ships]),
+  const isSourceShipped = new Map(
+    workspaces.map(({ isSourceShipped: ships, name }) => [name, ships]),
   );
 
   return specs.map((spec) => {
@@ -81,14 +81,14 @@ const toTargets = (specs) => {
 
     return {
       explicit: true,
+      isSourceShipped: isSourceShipped.get(name) ?? false,
       name,
       only,
-      shipsSource: shipsSource.get(name) ?? false,
     };
   });
 };
 
-const auditTarget = async ({ explicit, name, only, shipsSource }) => {
+const auditTarget = async ({ explicit, isSourceShipped, name, only }) => {
   const packument = await fetchPackument(name, { full: true });
 
   return {
@@ -99,7 +99,7 @@ const auditTarget = async ({ explicit, name, only, shipsSource }) => {
     versions:
       packument === undefined
         ? []
-        : auditPackument({ only, packument, shipsSource }),
+        : auditPackument({ isSourceShipped, only, packument }),
   };
 };
 

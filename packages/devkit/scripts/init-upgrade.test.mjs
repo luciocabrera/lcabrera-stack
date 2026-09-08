@@ -4,7 +4,7 @@ import {
   initialConfig,
   initRefusal,
   initSummary,
-  recordsDefaultBranch,
+  isDefaultBranchRecorded,
   upgradeKeptCiSetup,
   upgradeKeptCommands,
 } from './init.mjs';
@@ -207,10 +207,10 @@ describe('a ci block that carries no setup key', () => {
   });
 });
 
-describe('recordsDefaultBranch', () => {
+describe('isDefaultBranchRecorded', () => {
   test('records when an upgrade finds no trunk recorded', () => {
     expect(
-      recordsDefaultBranch({
+      isDefaultBranchRecorded({
         defaultBranch: 'fix/123-take-devkit-0.2.0',
         existing: { conventions: { sharedBranchesDir: 'docs/branches' } },
         upgrade: true,
@@ -220,7 +220,7 @@ describe('recordsDefaultBranch', () => {
 
   test('leaves a trunk the consumer already recorded', () => {
     expect(
-      recordsDefaultBranch({
+      isDefaultBranchRecorded({
         defaultBranch: 'fix/123-take-devkit-0.2.0',
         existing: settled,
         upgrade: true,
@@ -229,11 +229,11 @@ describe('recordsDefaultBranch', () => {
   });
 
   test('records on a fresh init', () => {
-    expect(recordsDefaultBranch({ defaultBranch: 'main' })).toBe(true);
+    expect(isDefaultBranchRecorded({ defaultBranch: 'main' })).toBe(true);
   });
 
   test('records nothing when the branch could not be read', () => {
-    expect(recordsDefaultBranch({ defaultBranch: '' })).toBe(false);
+    expect(isDefaultBranchRecorded({ defaultBranch: '' })).toBe(false);
   });
 
   test('agrees with what initialConfig wrote', () => {
@@ -246,7 +246,7 @@ describe('recordsDefaultBranch', () => {
       initialConfig({ ...args, commands: INFERRED, profile: 'full' })
         .conventions.defaultBranch,
     ).toBe('fix/123-take-devkit-0.2.0');
-    expect(recordsDefaultBranch(args)).toBe(true);
+    expect(isDefaultBranchRecorded(args)).toBe(true);
   });
 });
 

@@ -58,7 +58,7 @@ export const parseFrontmatter = (source) => {
   return data;
 };
 
-const headsMatch = (x, y) => x === '*' || y === '*' || x === y;
+const isMatchingHead = (x, y) => x === '*' || y === '*' || x === y;
 
 const starStarIntersects = (star, other) =>
   segmentsIntersect(star.slice(1), other) ||
@@ -74,7 +74,7 @@ const segmentsIntersect = (a, b) => {
   if (a.length === 0 || b.length === 0) {
     return a.length === 0 && b.length === 0;
   }
-  return headsMatch(a[0], b[0])
+  return isMatchingHead(a[0], b[0])
     ? segmentsIntersect(a.slice(1), b.slice(1))
     : false;
 };

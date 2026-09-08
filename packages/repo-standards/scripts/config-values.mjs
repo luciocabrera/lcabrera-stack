@@ -41,7 +41,7 @@ const isRooted = (value) => {
   return posix.isAbsolute(withSlashes) || DRIVE_OR_UNC.test(withSlashes);
 };
 
-const leavesRoot = (candidate) => candidate.split('/', 1)[0] === '..';
+const isOutsideRoot = (candidate) => candidate.split('/', 1)[0] === '..';
 
 export const repoRelative = (value, fallback, key) => {
   const raw = readableString(value, fallback);
@@ -51,7 +51,7 @@ export const repoRelative = (value, fallback, key) => {
     );
   }
   const candidate = canonical(raw);
-  if (leavesRoot(candidate)) {
+  if (isOutsideRoot(candidate)) {
     throw new Error(
       `${CONFIG_FILE_NAME}: \`${key}\` must stay inside the repository, but \`${raw}\` leaves it.`,
     );

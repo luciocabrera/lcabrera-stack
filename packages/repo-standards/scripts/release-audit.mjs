@@ -95,8 +95,8 @@ export const localProtocolProblems = (manifest) =>
       }),
   );
 
-export const manifestProblems = ({ manifest, shipsSource }) => [
-  ...(shipsSource ? [] : sourceExportProblems(manifest)),
+export const manifestProblems = ({ isSourceShipped, manifest }) => [
+  ...(isSourceShipped ? [] : sourceExportProblems(manifest)),
   ...localProtocolProblems(manifest),
 ];
 
@@ -112,9 +112,9 @@ export const classifyAuditedVersion = ({ deprecated, problems, tags }) => {
   return deprecated ? 'deprecated' : 'broken';
 };
 
-export const auditVersion = ({ manifest, shipsSource, tags, version }) => {
+export const auditVersion = ({ isSourceShipped, manifest, tags, version }) => {
   const isDeprecated = manifest.deprecated !== undefined;
-  const problems = manifestProblems({ manifest, shipsSource });
+  const problems = manifestProblems({ isSourceShipped, manifest });
 
   return {
     deprecated: isDeprecated,
@@ -132,15 +132,15 @@ export const tagsByVersion = (distTags = {}) =>
     return byVersion;
   }, new Map());
 
-export const auditPackument = ({ only, packument, shipsSource }) => {
+export const auditPackument = ({ isSourceShipped, only, packument }) => {
   const tags = tagsByVersion(packument['dist-tags']);
 
   return Object.entries(packument.versions ?? {})
     .filter(([version]) => only === undefined || only === version)
     .map(([version, manifest]) =>
       auditVersion({
+        isSourceShipped,
         manifest,
-        shipsSource,
         tags: tags.get(version) ?? [],
         version,
       }),

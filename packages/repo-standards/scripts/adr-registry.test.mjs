@@ -12,7 +12,7 @@ import {
   adrFindings,
   headingNumber,
   headingTitle,
-  looksLikeAdr,
+  isAdrFilename,
   nextFreeNumber,
   normalizeIndex,
   parseAdrFilename,
@@ -226,7 +226,7 @@ describe('nextFreeNumber', () => {
   });
 });
 
-describe('looksLikeAdr', () => {
+describe('isAdrFilename', () => {
   it('catches near-misses, so a badly named ADR is a finding not a silent skip', () => {
     for (const name of [
       'ADR-001-x.md',
@@ -234,13 +234,13 @@ describe('looksLikeAdr', () => {
       'ADR 003 x.md',
       'ADR47.md',
     ]) {
-      expect(looksLikeAdr(name)).toBe(true);
+      expect(isAdrFilename(name)).toBe(true);
     }
   });
 
   it('needs a digit, so an ordinary doc starting with those letters is not an ADR', () => {
     for (const name of ['ADRIFT.md', 'adr-taxonomy.md', 'adrs-explained.md']) {
-      expect(looksLikeAdr(name)).toBe(false);
+      expect(isAdrFilename(name)).toBe(false);
     }
   });
 });

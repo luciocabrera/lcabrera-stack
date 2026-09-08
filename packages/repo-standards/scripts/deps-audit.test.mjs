@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  auditDidRun,
   classifyAdvisories,
+  didAuditRun,
   formatAdvisory,
   isAtLeast,
   readAdvisories,
@@ -29,16 +29,16 @@ const report = (advisories = {}, totalDependencies = 1122) => ({
   metadata: { totalDependencies, vulnerabilities: {} },
 });
 
-describe('auditDidRun', () => {
+describe('didAuditRun', () => {
   it('rejects a report that walked no dependencies', () => {
-    expect(auditDidRun(report({}, 0))).toBe(false);
-    expect(auditDidRun({ advisories: {} })).toBe(false);
-    expect(auditDidRun({})).toBe(false);
-    expect(auditDidRun()).toBe(false);
+    expect(didAuditRun(report({}, 0))).toBe(false);
+    expect(didAuditRun({ advisories: {} })).toBe(false);
+    expect(didAuditRun({})).toBe(false);
+    expect(didAuditRun()).toBe(false);
   });
 
   it('accepts a report that counted a real tree', () => {
-    expect(auditDidRun(report())).toBe(true);
+    expect(didAuditRun(report())).toBe(true);
   });
 });
 

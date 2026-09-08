@@ -23,7 +23,7 @@ import { toBuiltPaths } from './publish-surface.mjs';
 const isContractSubpath = (subpath) =>
   subpath !== './package.json' && !subpath.includes('*');
 
-const shipsSource = (manifest) => manifest.scripts?.build === undefined;
+const isSourceShipped = (manifest) => manifest.scripts?.build === undefined;
 
 const entryForBuilt = (sourceTarget) => toBuiltPaths(sourceTarget).types;
 
@@ -53,7 +53,7 @@ const readRosteredManifest = ({ directory, packagesDir, repoRoot }) => {
 const toPackageConfig = ({ dir, packagesDir, repoRoot }) => {
   const directory = `${packagesDir}/${dir}`;
   const manifest = readRosteredManifest({ directory, packagesDir, repoRoot });
-  const isSource = shipsSource(manifest);
+  const isSource = isSourceShipped(manifest);
   const entries = Object.entries(manifest.exports ?? {})
     .filter(([subpath]) => isContractSubpath(subpath))
     .map(([subpath, target]) => ({

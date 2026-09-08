@@ -179,10 +179,10 @@ describe('classifyPathToken', () => {
   const fromDirectory = 'skills/epic';
 
   test('prefers the file-relative reading when that is the file that exists', () => {
-    const exists = (path) => path === 'skills/epic/references/advanced.md';
+    const hasFile = (path) => path === 'skills/epic/references/advanced.md';
     expect(
       classifyPathToken({
-        exists,
+        exists: hasFile,
         fromDirectory,
         rootDirectory,
         token: 'references/advanced.md',
@@ -194,10 +194,10 @@ describe('classifyPathToken', () => {
   });
 
   test('falls back to the repository root, which is where prose usually means', () => {
-    const exists = (path) => path === 'packages/example-scan/SCHEMA_V1.md';
+    const hasFile = (path) => path === 'packages/example-scan/SCHEMA_V1.md';
     expect(
       classifyPathToken({
-        exists,
+        exists: hasFile,
         fromDirectory,
         rootDirectory,
         token: 'packages/example-scan/SCHEMA_V1.md',

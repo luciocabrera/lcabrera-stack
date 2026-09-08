@@ -31,8 +31,8 @@ import {
   initialConfig,
   initRefusal,
   initSummary,
+  isDefaultBranchRecorded,
   placedHooksPath,
-  recordsDefaultBranch,
   scriptsAfter,
   tasksFor,
   unmetCommandKeys,
@@ -99,7 +99,7 @@ const writeConfig = ({ profile, root, upgrade, userAgent }) => {
           ...upgradeKeptCiSetup({ ciSetup: runner.ciSetup, existing }),
         ]
       : [],
-    recordedTrunk: recordsDefaultBranch({ defaultBranch, existing, upgrade }),
+    recordedTrunk: isDefaultBranchRecorded({ defaultBranch, existing, upgrade }),
   };
 };
 

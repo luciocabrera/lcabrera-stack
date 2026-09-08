@@ -95,7 +95,7 @@ export const resolveConventions = (raw) => {
   };
 };
 
-const readableHome = (home) =>
+const isReadableHome = (home) =>
   typeof home === 'object' &&
   home !== null &&
   typeof home.dir === 'string' &&
@@ -124,7 +124,7 @@ export const resolveRegisters = (raw) => {
   const parsed = parseConfig(raw);
   const block = isPlainObject(parsed.registers) ? parsed.registers : {};
   const homes = Array.isArray(block.adrHomes)
-    ? block.adrHomes.filter((entry) => readableHome(entry)).map((value) => containedHome(value))
+    ? block.adrHomes.filter((entry) => isReadableHome(entry)).map((value) => containedHome(value))
     : [];
   const adrCommands = resolveAdrCommands(block.adrCommands);
   const declaredHomes = homes.length > 0 ? homes : DEFAULT_REGISTERS.adrHomes;

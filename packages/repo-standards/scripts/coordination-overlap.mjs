@@ -22,7 +22,7 @@ const isLive = ({ data }) => data !== undefined && data.status !== 'done';
 const firstClash = (a, b) =>
   a.area?.find((x) => b.area?.some((y) => globsOverlap(x, y)));
 
-const sameBranch = (a, b) => a.branch === b.branch && !NO_BRANCH.has(a.branch);
+const isSameBranch = (a, b) => a.branch === b.branch && !NO_BRANCH.has(a.branch);
 
 export const overlapWarnings = (tasks) => {
   const live = tasks.filter((value) => isLive(value));
@@ -31,7 +31,7 @@ export const overlapWarnings = (tasks) => {
     for (let j = i + 1; j < live.length; j += 1) {
       const a = live[i].data;
       const b = live[j].data;
-      if (sameBranch(a, b)) {
+      if (isSameBranch(a, b)) {
         continue;
       }
       const clash = firstClash(a, b);

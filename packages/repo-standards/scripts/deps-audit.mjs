@@ -8,7 +8,7 @@
  * audit` needs the registry. If it cannot reach it, the honest answer is "no
  * answer" — but the shape of "no advisories" is an empty object either way, and
  * a supply-chain gate that reports green because the network was down is worse
- * than no gate, because it is trusted. `auditDidRun` is the discriminator: a
+ * than no gate, because it is trusted. `didAuditRun` is the discriminator: a
  * real audit always counts the tree it walked, so a report claiming zero
  * dependencies did not run.
  *
@@ -33,7 +33,7 @@ const rankOf = (severity) => {
 export const isAtLeast = ({ minimum, severity }) =>
   rankOf(severity) >= rankOf(minimum);
 
-export const auditDidRun = (report) =>
+export const didAuditRun = (report) =>
   typeof report?.metadata?.totalDependencies === 'number' &&
   report.metadata.totalDependencies > 0;
 
