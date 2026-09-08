@@ -35,7 +35,8 @@ const buildInstalledPackage = (packageDirectory) => {
 
   const root = `/node_modules/${manifest.name}`;
   const files = { [`${root}/package.json`]: JSON.stringify(published) };
-  for (const file of listFilesRecursively(join(packageDirectory, 'dist'))) {
+  const built = listFilesRecursively(join(packageDirectory, 'dist'));
+  for (const file of built) {
     files[`${root}/${relative(packageDirectory, file)}`] = readFileSync(
       file,
       'utf8',

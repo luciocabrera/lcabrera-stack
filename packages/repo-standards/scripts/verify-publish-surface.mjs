@@ -95,9 +95,8 @@ const checkSubpathCoverage = ({ directory, manifest }, problems) => {
 };
 
 const checkTargets = ({ directory, manifest }, problems) => {
-  for (const [subpath, sourceTarget] of Object.entries(
-    manifest.exports ?? {},
-  )) {
+  const declared = Object.entries(manifest.exports ?? {});
+  for (const [subpath, sourceTarget] of declared) {
     const published = manifest.publishConfig?.exports?.[subpath];
     if (published === undefined) {
       continue;

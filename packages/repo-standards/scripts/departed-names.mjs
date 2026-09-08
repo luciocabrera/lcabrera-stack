@@ -83,7 +83,8 @@ export const parseRoster = (text) => {
     );
   }
   const allow = new Map();
-  for (const entry of roster.allow ?? []) {
+  const allowed = roster.allow ?? [];
+  for (const entry of allowed) {
     if (!Array.isArray(entry.names) || entry.names.length === 0) {
       throw new Error(
         `departed-names.json allows ${entry.path} without naming which names — ` +

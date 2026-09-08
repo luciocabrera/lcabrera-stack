@@ -48,7 +48,8 @@ const catalogGroups = (workspaceFile) => {
   if (start === -1) return groups;
 
   let current;
-  for (const line of lines.slice(start + 1)) {
+  const rest = lines.slice(start + 1);
+  for (const line of rest) {
     if (line.trim() === '' || line.trimStart().startsWith('#')) continue;
     const header = GROUP_HEADER.exec(line);
     if (header) {

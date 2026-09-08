@@ -51,10 +51,12 @@ export const deriveWorkspaces = (repoRoot) => {
     return [];
   }
   const workspaces = [];
-  for (const glob of parsePackageGlobs(readFileSync(yamlPath, 'utf8'))) {
+  const globs = parsePackageGlobs(readFileSync(yamlPath, 'utf8'));
+  for (const glob of globs) {
     const kind = kindOf(glob);
     if (glob.endsWith('/*')) {
-      for (const name of expandStarGlob(repoRoot, glob.slice(0, -2))) {
+      const expanded = expandStarGlob(repoRoot, glob.slice(0, -2));
+      for (const name of expanded) {
         workspaces.push({ kind, name });
       }
     } else if (existsSync(join(repoRoot, glob, 'package.json'))) {

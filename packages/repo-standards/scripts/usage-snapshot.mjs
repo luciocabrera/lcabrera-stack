@@ -97,7 +97,8 @@ const mergeDays = (kept, seen) => {
 
 const mergeKind = (kept, seen) => {
   const merged = {};
-  for (const name of new Set([...Object.keys(kept), ...Object.keys(seen)])) {
+  const names = new Set([...Object.keys(kept), ...Object.keys(seen)]);
+  for (const name of names) {
     merged[name] = mergeDays(kept[name] ?? {}, seen[name] ?? {});
   }
   return merged;

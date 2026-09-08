@@ -75,7 +75,8 @@ export const parseCommitFiles = (log) =>
 export const tallyFiles = (commits) => {
   const tally = {};
   for (const commit of commits) {
-    for (const file of new Set(commit.files)) {
+    const touched = new Set(commit.files);
+    for (const file of touched) {
       const previous = tally[file];
       tally[file] = {
         commits: (previous?.commits ?? 0) + 1,

@@ -147,7 +147,8 @@ const peerFromEntry = (entry) => {
 
 export const requiredPeers = (content) => {
   const byName = new Map();
-  for (const entry of entriesOf(declarationFor({ content, key: PEER_KEY }))) {
+  const declared = entriesOf(declarationFor({ content, key: PEER_KEY }));
+  for (const entry of declared) {
     const peer = peerFromEntry(entry);
     if (peer.name !== '' && !byName.has(peer.name)) byName.set(peer.name, peer);
   }

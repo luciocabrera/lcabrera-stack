@@ -67,8 +67,7 @@ describe('documentedFiles', () => {
       'src/index.ts': 'export const a = 1;',
     });
 
-    expect(documentedFiles({ repoRoot: root }).toSorted((left, right) =>
-        left.localeCompare(right),
+    expect(documentedFiles({ repoRoot: root }).toSorted((left, right) => Number(left > right) - Number(left < right),
       )).toEqual([
       'README.md',
       'docs/guide/deep/NOTES.md',

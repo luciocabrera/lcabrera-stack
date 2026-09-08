@@ -87,8 +87,7 @@ describe('inferRunner', () => {
       ['bun.lockb'],
       ['package.json'],
     ]) {
-      expect(Object.keys(inferRunner({ files }).commands).toSorted((left, right) =>
-        left.localeCompare(right),
+      expect(Object.keys(inferRunner({ files }).commands).toSorted((left, right) => Number(left > right) - Number(left < right),
       )).toEqual([
         'audit',
         'check',

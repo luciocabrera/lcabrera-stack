@@ -115,7 +115,8 @@ const main = () => {
       ),
     );
   } else {
-    for (const line of formatThreads({ number, repository, threads })) {
+    const rendered = formatThreads({ number, repository, threads });
+    for (const line of rendered) {
       console.log(line);
     }
   }

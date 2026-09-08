@@ -50,7 +50,8 @@ const git = (args, cwd) => {
 const isNestedCheckout = (dir) => existsSync(join(dir, '.git'));
 
 const findEnvFiles = (root, current = root, found = []) => {
-  for (const entry of readdirSync(current, { withFileTypes: true })) {
+  const entries = readdirSync(current, { withFileTypes: true });
+  for (const entry of entries) {
     const full = join(current, entry.name);
     if (entry.isDirectory()) {
       if (!SKIPPED_DIRS.has(entry.name) && !isNestedCheckout(full)) {
