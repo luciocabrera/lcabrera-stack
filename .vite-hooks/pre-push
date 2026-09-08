@@ -75,9 +75,8 @@ fi
 
 if ! vp run fallow:preflight; then
   echo ""
-  echo "✗ pre-push: the fallow audit attributes new dead code, complexity or"
-  echo "  duplication to this diff. Inherited findings are baselined and do not"
-  echo "  fail here; only what the diff introduces does."
+  echo "✗ pre-push: the fallow preflight failed — it says above whether the diff"
+  echo "  introduced findings or the audit could not run."
   echo "  To push work-in-progress anyway: git push --no-verify"
   exit 1
 fi

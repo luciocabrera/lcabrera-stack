@@ -12,8 +12,10 @@
  * Usage:
  *   repo-eslint-staged <file>…
  *   repo-eslint-staged --check <file>…
+ *   repo-eslint-staged [--check] -- <file>…   (names starting with `-`)
  *
- * Exit codes: 0 = clean, 1 = findings remain, 2 = no files given.
+ * Exit codes: 0 = clean, 1 = findings remain, 2 = nothing to lint or a bad
+ * option.
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -21,7 +23,11 @@ import { dirname, join, relative, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import { eslintArguments, planLintGroups } from './eslint-staged.mjs';
+import {
+  eslintArguments,
+  parseArguments,
+  planLintGroups,
+} from './eslint-staged.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
@@ -59,24 +65,35 @@ const reportFailures = (failed) => {
   );
 };
 
-const main = () => {
-  const args = process.argv.slice(2);
-  const given = args.filter((arg) => !arg.startsWith('-'));
+const usage = (message) => {
+  console.error(message);
+  console.error('usage: repo-eslint-staged [--check] [--] <file>…');
+  process.exitCode = 2;
+};
 
-  if (given.length === 0) {
-    console.error('usage: repo-eslint-staged [--check] <file>…');
-    process.exitCode = 2;
+const main = () => {
+  const { check, paths, unknown } = parseArguments(process.argv.slice(2));
+
+  if (unknown.length > 0) {
+    usage(
+      `repo-eslint-staged: unknown option ${unknown.join(', ')}. ` +
+        'A file whose name starts with "-" goes after "--".',
+    );
     return;
   }
 
-  const fix = !args.includes('--check');
+  if (paths.length === 0) {
+    usage('repo-eslint-staged: no files given.');
+    return;
+  }
+
   const groups = planLintGroups({
-    paths: given
+    paths: paths
       .map((arg) => resolve(REPO_ROOT, arg))
       .filter((path) => existsSync(path)),
     repoRoot: REPO_ROOT,
   });
-  const failed = groups.filter((group) => !runGroup({ ...group, fix }));
+  const failed = groups.filter((group) => !runGroup({ ...group, fix: !check }));
 
   if (failed.length > 0) {
     reportFailures(failed);

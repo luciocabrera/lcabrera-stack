@@ -9,7 +9,10 @@
  * workspace and belongs to no config at all.
  *
  * The file list comes after `--` because a leading `-` is legal in a filename
- * and the CLI would otherwise read one as an option.
+ * and the CLI would otherwise read one as an option. This module's own argv is
+ * read the same way, and for the same reason: a staged `-weird.ts` dropped as an
+ * unrecognised flag would silently escape the gate, so an unknown `-` token is an
+ * error and `--` ends the options here too.
  *
  * `--no-warn-ignored` is what keeps that rule from contradicting the config:
  * naming a file the config ignores is a warning, and at `--max-warnings 0` a
@@ -75,3 +78,14 @@ export const eslintArguments = ({ files, fix }) => [
   '--',
   ...files,
 ];
+
+export const parseArguments = (args) => {
+  const end = args.indexOf('--');
+  const flags = end === -1 ? args : args.slice(0, end);
+  const literal = end === -1 ? [] : args.slice(end + 1);
+  return {
+    check: flags.includes('--check'),
+    paths: [...flags.filter((arg) => !arg.startsWith('-')), ...literal],
+    unknown: flags.filter((arg) => arg !== '--check' && arg.startsWith('-')),
+  };
+};

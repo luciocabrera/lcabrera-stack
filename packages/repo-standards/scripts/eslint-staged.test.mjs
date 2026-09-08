@@ -4,6 +4,7 @@ import {
   eslintArguments,
   findConfigDirectory,
   isLintablePath,
+  parseArguments,
   planLintGroups,
 } from './eslint-staged.mjs';
 
@@ -126,5 +127,37 @@ describe('eslintArguments', () => {
         2 + args.indexOf('--max-warnings'),
       ),
     ).toEqual(['--max-warnings', '0']);
+  });
+});
+
+describe('parseArguments', () => {
+  it('reads bare paths and the one flag', () => {
+    expect(parseArguments(['--check', 'a.ts', 'b.ts'])).toEqual({
+      check: true,
+      paths: ['a.ts', 'b.ts'],
+      unknown: [],
+    });
+  });
+
+  it('fixes when --check is absent', () => {
+    expect(parseArguments(['a.ts']).check).toBe(false);
+  });
+
+  it('takes everything after -- as a path, dash or not', () => {
+    expect(parseArguments(['--check', '--', '-weird.ts', '--check'])).toEqual({
+      check: true,
+      paths: ['-weird.ts', '--check'],
+      unknown: [],
+    });
+  });
+
+  it('reports an unrecognised option rather than dropping it', () => {
+    expect(parseArguments(['--fix', 'a.ts']).unknown).toEqual(['--fix']);
+  });
+
+  it('does not silently swallow a dash-led filename given without --', () => {
+    const { paths, unknown } = parseArguments(['-weird.ts']);
+    expect(paths).toEqual([]);
+    expect(unknown).toEqual(['-weird.ts']);
   });
 });
