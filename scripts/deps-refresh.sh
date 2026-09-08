@@ -274,6 +274,22 @@ taze_log="$(mktemp)"
 trap 'rm -f "$taze_log"' EXIT
 npx --yes taze@latest -r --write "${taze_exclude[@]}" | tee "$taze_log"
 
+# biome.jsonc's `$schema` pins the same version the catalog holds, and taze does
+# not read it, so it only moves if something moves it here. A stale pin is not a
+# gate failure — biome reports it as an info diagnostic and passes — so nothing
+# stops it from drifting a major behind.
+log "Syncing biome.jsonc's \$schema pin with the catalog"
+biome_version="$(sed -nE "s/^[[:space:]]*'@biomejs\/biome':[[:space:]]*[^0-9]*([0-9][^[:space:]]*).*/\1/p" pnpm-workspace.yaml | head -1)"
+if [[ -z "$biome_version" ]]; then
+  echo "deps-refresh: WARNING — no @biomejs/biome version found in the catalog; biome.jsonc left alone." >&2
+elif [[ -f biome.jsonc ]]; then
+  biome_tmp="$(mktemp)"
+  sed -E "s|(https://biomejs\.dev/schemas/)[^/]+(/schema\.json)|\1${biome_version}\2|" biome.jsonc > "$biome_tmp"
+  cat "$biome_tmp" > biome.jsonc
+  rm -f "$biome_tmp"
+  echo "  biome.jsonc \$schema -> ${biome_version}"
+fi
+
 # corepack can fail AFTER writing the field, so the guard reads the field (#927).
 log "Updating pnpm itself (the pinned packageManager) to the latest release"
 corepack_failed=()
@@ -296,7 +312,7 @@ log "Reinstalling with the refreshed versions (vp install)"
 # is idempotent, so a clean lockfile regenerates byte-identical and a diff here is
 # always a real resolution change. Reverting discarded the cleanup on every
 # already-current day, which is how 127 orphaned peer-suffix entries survived.
-if git diff --quiet -- pnpm-workspace.yaml pnpm-lock.yaml '**/package.json'; then
+if git diff --quiet -- pnpm-workspace.yaml pnpm-lock.yaml biome.jsonc '**/package.json'; then
   log "Dependencies already current and the lockfile regenerated identically — nothing to do"
   exit 0
 fi
@@ -321,10 +337,10 @@ moved="$(grep -E '·|→|->' "$taze_log" | sed -E 's/^[[:space:]]+//' | sed -E '
 # because regenerating it from nothing dropped resolutions nothing reaches. Say so
 # rather than pointing at a manifest diff that is empty.
 if [[ -z "$moved" ]]; then
-  if git diff --quiet -- pnpm-workspace.yaml '**/package.json'; then
+  if git diff --quiet -- pnpm-workspace.yaml biome.jsonc '**/package.json'; then
     moved="(no version moved — the regenerated lockfile dropped resolutions no manifest reaches)"
   else
-    moved="(see the pnpm-workspace.yaml / package.json diff)"
+    moved="(see the pnpm-workspace.yaml / biome.jsonc / package.json diff)"
   fi
 fi
 

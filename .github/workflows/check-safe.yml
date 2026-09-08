@@ -21,7 +21,9 @@ env:
   # actually land on, not against the base it was opened from. Recomputing that
   # is the whole point of the queue (#1034). On a push to `main` it resolves to
   # `origin/`, which no step then uses: that lane runs the full suites.
-  DIFF_BASE: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || format('origin/{0}', github.base_ref) }}
+  DIFF_BASE: ${{ github.event_name == 'merge_group' &&
+    github.event.merge_group.base_sha || format('origin/{0}', github.base_ref)
+    }}
 
 jobs:
   quality-gate:
@@ -38,7 +40,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@1b32467adbe183473499fd9d5d372c3ed9641754 # v1.18.0
+        uses: voidzero-dev/setup-vp@49c3e4e92c52e7f8392712a9267bbe71c5ab30e5 # v1.19.0
         with:
           cache: false
           run-install: false
@@ -504,7 +506,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@1b32467adbe183473499fd9d5d372c3ed9641754 # v1.18.0
+        uses: voidzero-dev/setup-vp@49c3e4e92c52e7f8392712a9267bbe71c5ab30e5 # v1.19.0
         with:
           cache: true
           run-install: false
@@ -597,7 +599,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@1b32467adbe183473499fd9d5d372c3ed9641754 # v1.18.0
+        uses: voidzero-dev/setup-vp@49c3e4e92c52e7f8392712a9267bbe71c5ab30e5 # v1.19.0
         with:
           cache: true
           run-install: false
