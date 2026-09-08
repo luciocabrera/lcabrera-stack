@@ -130,29 +130,30 @@ project-specific belongs in that project's own `package.json`.
 
 ### Gate & CI
 
-| Command                               | Does                                                                                               |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `vp run ready`                        | `check:safe` + `build:all` — the full "is it shippable" check                                      |
-| `vp run check:safe`                   | typegen → `vp check` → typecheck → eslint → biome → tests                                          |
-| `vp run check:push`                   | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this then `test:changed`  |
-| `vp run typecheck:all`                | real tsc in all 13 workspaces, dependency order                                                    |
-| `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                  |
-| `vp run typegen:all`                  | route types for both React Router apps                                                             |
-| `vp run lint:all`                     | Oxlint + eslint + Biome **with autofix**, every workspace                                          |
-| `vp run lint:biome`                   | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                      |
-| `vp run lint:biome:check`             | Biome repo-wide, check only — what CI runs                                                         |
-| `vp run lint:report`                  | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)           |
-| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails on error severity; writes the report too           |
-| `vp run react-doctor:report`          | the same scan, never failing — writes `reports/react-doctor/full-latest.json` (gitignored)         |
-| `vp run format:all`                   | `vp fmt .` across the tree                                                                         |
-| `vp run build:all`                    | build every workspace                                                                              |
-| `vp run test:all`                     | every workspace suite plus the root `scripts/` suites — no database needed                         |
-| `vp run test:ci`                      | the same suites, `showcase` last so its coverage summary is fresh — run before pushing             |
-| `vp run test:changed`                 | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below |
-| `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                 |
-| `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                          |
-| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only) — see below                          |
-| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment — see below                           |
+| Command                               | Does                                                                                                                   |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `vp run ready`                        | `check:safe` + `build:all` — the full "is it shippable" check                                                          |
+| `vp run check:safe`                   | typegen → `vp check` → typecheck → eslint → biome → tests                                                              |
+| `vp run check:push`                   | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this, `test:changed`, then `fallow:preflight` |
+| `vp run typecheck:all`                | real tsc in all 13 workspaces, dependency order                                                                        |
+| `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                                      |
+| `vp run typegen:all`                  | route types for both React Router apps                                                                                 |
+| `vp run fix`                          | `format:all` then `lint:all` — one command for everything a tool can fix itself                                        |
+| `vp run lint:all`                     | Oxlint + eslint + Biome **with autofix**, every workspace                                                              |
+| `vp run lint:biome`                   | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                                          |
+| `vp run lint:biome:check`             | Biome repo-wide, check only — what CI runs                                                                             |
+| `vp run lint:report`                  | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)                               |
+| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails on error severity; writes the report too                               |
+| `vp run react-doctor:report`          | the same scan, never failing — writes `reports/react-doctor/full-latest.json` (gitignored)                             |
+| `vp run format:all`                   | `vp fmt .` across the tree                                                                                             |
+| `vp run build:all`                    | build every workspace                                                                                                  |
+| `vp run test:all`                     | every workspace suite plus the root `scripts/` suites — no database needed                                             |
+| `vp run test:ci`                      | the same suites, `showcase` last so its coverage summary is fresh — run before pushing                                 |
+| `vp run test:changed`                 | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below                     |
+| `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                                     |
+| `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                                              |
+| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only) — see below                                              |
+| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment — see below                                               |
 
 `test:all` vs `test:ci`: neither runs a suite that needs a database, so the two
 differ only in ordering — `test:ci` runs `showcase` last so the PR's coverage
@@ -322,15 +323,16 @@ workspace. Scope any of these with `-w`, e.g. `-w 'apps/showcase'`. Full
 policy — entry rules, the CRAP/coverage trap, output conventions — is in
 [AGENTS.md → Fallow Static Analysis](AGENTS.md#fallow-static-analysis-run-from-repo-root).
 
-| Command                        | Does                                                                   |
-| ------------------------------ | ---------------------------------------------------------------------- |
-| `vp run fallow:full`           | full scan                                                              |
-| `vp run fallow:dead-code`      | dead code only                                                         |
-| `vp run fallow:health`         | complexity / health                                                    |
-| `vp run fallow:dupes`          | duplication                                                            |
-| `vp run fallow:audit`          | PR-style gate (`--base main`)                                          |
-| `vp run fallow:refresh-report` | regenerate the complexity threshold report                             |
-| `vp run fallow:report`         | full scan + `fallow.raw.json` in a timestamped run dir; echoes the dir |
+| Command                        | Does                                                                                                                                                             |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vp run fallow:full`           | full scan                                                                                                                                                        |
+| `vp run fallow:dead-code`      | dead code only                                                                                                                                                   |
+| `vp run fallow:health`         | complexity / health                                                                                                                                              |
+| `vp run fallow:dupes`          | duplication                                                                                                                                                      |
+| `vp run fallow:audit`          | PR-style gate (`--base main`)                                                                                                                                    |
+| `vp run fallow:refresh-report` | regenerate the complexity threshold report                                                                                                                       |
+| `vp run fallow:report`         | full scan + `fallow.raw.json` in a timestamped run dir; echoes the dir                                                                                           |
+| `vp run fallow:preflight`      | the audit exactly as CI runs it: `coverage:merge -- --changed`, then the gate against `TEST_CHANGED_BASE` (default `origin/main`). The `pre-push` hook runs this |
 
 Always feed the audit real coverage:
 `vp run fallow:audit --base main --coverage reports/fallow/coverage/coverage-final.json`

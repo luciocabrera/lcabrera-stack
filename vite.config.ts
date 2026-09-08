@@ -89,13 +89,27 @@ export default defineConfig({
     },
   },
   staged: {
-    '*': 'vp check --fix',
-    // `vp check` is fmt + Oxlint + tsgolint and knows nothing about Biome, so
-    // without this entry the Biome gate would only ever fail in CI — after the
-    // commit it was supposed to block. Check-only on purpose: unlike the
-    // `--fix` above, a Biome autofix here could rewrite a staged file after it
-    // was reviewed, so a violation fails the commit and `vp run lint:biome`
-    // applies the fix deliberately.
-    '*.{ts,tsx,mjs,cjs}': 'biome lint --no-errors-on-unmatched',
+    // Every autofixer the repo has, ordered, under ONE glob.
+    //
+    // One glob because lint-staged runs separate entries concurrently: a second
+    // entry that also writes would race the first over the same file, while
+    // commands inside one entry run in sequence. Biome sat here check-only for
+    // exactly that reason, which left its gate first failing in CI — after the
+    // commit it was meant to block.
+    //
+    // Writing is safe in this hook and nowhere else in the flow: lint-staged
+    // re-stages what a task changes, so a fix lands in the commit being made
+    // rather than in the working tree behind it.
+    //
+    // `vp check --fix` is Oxfmt + Oxlint + the tsgolint type pass. Biome writes
+    // its safe fixes only. `repo-eslint-staged` resolves each path to the
+    // workspace whose `eslint.config.mjs` governs it and fixes there — there is
+    // no root ESLint config to point a single invocation at. All three ignore
+    // what they cannot lint, so one glob can carry files of any type.
+    '*': [
+      'vp check --fix',
+      'biome lint --write --no-errors-on-unmatched',
+      'repo-eslint-staged',
+    ],
   },
 });
