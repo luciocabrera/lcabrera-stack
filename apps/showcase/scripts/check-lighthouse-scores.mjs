@@ -18,6 +18,28 @@ const colors = {
   yellow: '\u{1B}[33m',
 };
 
+const scoreRow = ({ baselineScores, category, data, thresholds }) => {
+  const current = Math.round(data.score * 100);
+  const threshold = thresholds[category] || 0;
+  return {
+    baseline: baselineScores[category] || 0,
+    category,
+    current,
+    passed: current >= threshold,
+    threshold,
+  };
+};
+
+const scoreLine = ({ baseline, category, current, threshold }) => {
+  const diff = current - baseline;
+  const diffStr = diff >= 0 ? `+${diff}` : String(diff);
+  const diffColor = diff >= 0 ? colors.green : colors.red;
+  return [
+    `${getScoreEmoji(current, threshold)} ${category.padEnd(18)} ${String(current).padStart(3)}/100 (threshold: ${threshold}) ${diffColor}[${diffStr}]${colors.reset}`,
+    getScoreColor(current, threshold),
+  ];
+};
+
 async function checkLighthouseScores(reportPath) {
   if (!existsSync(reportPath)) {
     log(`\n❌ Report not found: ${reportPath}`, colors.red);
@@ -41,36 +63,11 @@ async function checkLighthouseScores(reportPath) {
   const thresholds = baseline.thresholds;
   const baselineScores = baseline.scores;
 
-  let isAllPassed = true;
-  const results = [];
-
-  for (const [category, data] of Object.entries(categories)) {
-    const currentScore = Math.round(data.score * 100);
-    const threshold = thresholds[category] || 0;
-    const baselineScore = baselineScores[category] || 0;
-    const diff = currentScore - baselineScore;
-    const diffStr = diff >= 0 ? `+${diff}` : String(diff);
-    const diffColor = diff >= 0 ? colors.green : colors.red;
-
-    const isPassed = currentScore >= threshold;
-    if (!isPassed) isAllPassed = false;
-
-    const emoji = getScoreEmoji(currentScore, threshold);
-    const scoreColor = getScoreColor(currentScore, threshold);
-
-    log(
-      `${emoji} ${category.padEnd(18)} ${currentScore.toString().padStart(3)}/100 (threshold: ${threshold}) ${diffColor}[${diffStr}]${colors.reset}`,
-      scoreColor,
-    );
-
-    results.push({
-      baseline: baselineScore,
-      category,
-      current: currentScore,
-      passed: isPassed,
-      threshold,
-    });
-  }
+  const results = Object.entries(categories).map(([category, data]) =>
+    scoreRow({ baselineScores, category, data, thresholds }),
+  );
+  for (const row of results) log(...scoreLine(row));
+  const isAllPassed = results.every((row) => row.passed);
 
   log('\n📈 Comparison to Baseline:', colors.blue);
   for (const { baseline: base, category, current } of results) {
