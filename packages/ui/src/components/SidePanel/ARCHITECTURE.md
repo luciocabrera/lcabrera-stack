@@ -330,3 +330,10 @@ by construction rather than by attribute. What remains is the role itself, which
 substitute; `<hr>` can take neither focus nor a value, so both splitters in the
 repo are named in `biome.jsonc` and the Sonar findings are accepted the same
 way.
+
+**Both surfaces render the handle after their content div, not before it.** It
+is absolutely positioned, so where it paints does not depend on where it sits in
+the DOM — but where it lands in the tab order does. As the panel's first
+focusable descendant it took the initial focus a modal `<dialog>` gives when
+nothing carries `autofocus`, so opening the drawer announced the splitter
+instead of the first control in the header.

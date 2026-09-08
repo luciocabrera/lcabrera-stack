@@ -65,8 +65,8 @@ export const DialogSidePanel = ({
       {...props}
       {...panelStyles}
     >
-      {resizeHandle}
       <div {...stylex.props(sidePanelStyles.content)}>{children}</div>
+      {resizeHandle}
     </dialog>
   );
 };

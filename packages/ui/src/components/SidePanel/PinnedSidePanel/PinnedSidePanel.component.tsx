@@ -31,8 +31,8 @@ export const PinnedSidePanel = ({
       {...props}
       {...panelStyles}
     >
-      {resizeHandle}
       <div {...stylex.props(sidePanelStyles.content)}>{children}</div>
+      {resizeHandle}
     </aside>
   );
 

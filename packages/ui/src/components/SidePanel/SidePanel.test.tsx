@@ -48,6 +48,13 @@ beforeEach(() => {
   };
 });
 
+const readPanelTabOrder = () => {
+  const panel = screen.getByTestId('side-panel');
+  const buttons = [...panel.querySelectorAll('button')];
+
+  return [buttons[0]?.textContent, buttons.at(-1)?.dataset.testid];
+};
+
 describe('SidePanel', () => {
   it('renders children content', () => {
     render(
@@ -148,6 +155,27 @@ describe('SidePanel', () => {
       committed: onWidthCommit.mock.calls.at(-1),
       resized: onWidthChange.mock.calls.at(-1),
     }).toStrictEqual({ committed: [500], resized: [500] });
+  });
+
+  it('puts the splitter after the content, so opening the panel does not focus it', () => {
+    render(
+      <SidePanel isOpen isResizable onWidthChange={vi.fn()}>
+        <button type='button'>First control</button>
+      </SidePanel>,
+    );
+    const dialogOrder = readPanelTabOrder();
+
+    cleanup();
+    render(
+      <SidePanel isOpen isPinned isResizable onWidthChange={vi.fn()}>
+        <button type='button'>First control</button>
+      </SidePanel>,
+    );
+
+    expect([dialogOrder, readPanelTabOrder()]).toStrictEqual([
+      ['First control', 'side-panel-resize-handle'],
+      ['First control', 'side-panel-resize-handle'],
+    ]);
   });
 
   it('puts the splitter in the tab order without a tabIndex of its own', () => {

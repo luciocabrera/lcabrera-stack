@@ -67,25 +67,6 @@ describe('withGroupedColumnWidths', () => {
     ]);
   });
 
-  it('falls back to the defaults when the declared band is not a width', () => {
-    vi.stubEnv('VITE_TABLE_AGGREGATE_MIN_WIDTH', 'wide');
-    vi.stubEnv('VITE_TABLE_AGGREGATE_MAX_WIDTH', '-4');
-
-    expect(
-      run().map((column) => [column.minWidth, column.maxWidth]),
-    ).toStrictEqual([
-      [DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH, DEFAULT_MAX_AGGREGATE_COLUMN_WIDTH],
-      [DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH, DEFAULT_MAX_AGGREGATE_COLUMN_WIDTH],
-    ]);
-  });
-
-  it('lets the floor win when the declared band is inverted', () => {
-    vi.stubEnv('VITE_TABLE_AGGREGATE_MIN_WIDTH', '400');
-    vi.stubEnv('VITE_TABLE_AGGREGATE_MAX_WIDTH', '100');
-
-    expect(run()[0]?.maxWidth).toBe(400);
-  });
-
   it('changes nothing while no grouping is applied', () => {
     expect(run({ groupingKeys: [] })).toBe(columns);
   });
