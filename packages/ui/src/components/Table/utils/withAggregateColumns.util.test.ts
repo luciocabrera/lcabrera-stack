@@ -6,7 +6,10 @@ import type {
   TableColumnAggregate,
 } from '../Table.types';
 
-import { DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH } from '../Table.constants';
+import {
+  DEFAULT_MAX_AGGREGATE_COLUMN_WIDTH,
+  DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH,
+} from '../Table.constants';
 import { withAggregateColumns } from './withAggregateColumns.util';
 
 type Row = {
@@ -135,35 +138,20 @@ describe('withAggregateColumns', () => {
     expect(count?.label).toBe('Count');
   });
 
-  it('widens a measure past the source width, which the share bar shares', () => {
-    const measure = columnAt({
-      key: 'total_amount:sum',
-      result: run({ aggregates: [{ columnKey: 'total_amount', fn: 'sum' }] }),
-    });
-
-    expect(measure?.minWidth).toBe(DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH);
-  });
-
-  it('keeps a source column already wider than that floor', () => {
+  it('takes the band rather than the widths its source declared', () => {
     const result = run({
       aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
-      columns: withTotalAmount({
-        minWidth: DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH + 80,
-      }),
+      columns: withTotalAmount({ maxWidth: 120, minWidth: 90 }),
     });
+    const measure = columnAt({ key: 'total_amount:sum', result });
 
-    expect(columnAt({ key: 'total_amount:sum', result })?.minWidth).toBe(
-      DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH + 80,
-    );
-  });
-
-  it('never widens a measure past the source maximum', () => {
-    const result = run({
-      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
-      columns: withTotalAmount({ maxWidth: 120 }),
+    expect({
+      maxWidth: measure?.maxWidth,
+      minWidth: measure?.minWidth,
+    }).toStrictEqual({
+      maxWidth: DEFAULT_MAX_AGGREGATE_COLUMN_WIDTH,
+      minWidth: DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH,
     });
-
-    expect(columnAt({ key: 'total_amount:sum', result })?.minWidth).toBe(120);
   });
 
   it('makes a measure sortable but neither filterable nor groupable', () => {

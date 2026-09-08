@@ -310,4 +310,15 @@ describe('TabsHeader when the tabs do not fit', () => {
     fireEvent.click(screen.getByTestId('tabs-scroll-start'));
     expect(position.current).toBe(100);
   });
+
+  it('refuses the focus a press would otherwise move onto it', async () => {
+    stubViewport({ clientWidth: 200, scrollLeft: 100, scrollWidth: 600 });
+    await renderHeader();
+
+    const button = screen.getByTestId('tabs-scroll-end');
+    const wasHandled = fireEvent.mouseDown(button);
+
+    expect(wasHandled).toBe(false);
+    expect(document.activeElement).not.toBe(button);
+  });
 });

@@ -8,14 +8,18 @@ SidePanel/
 ├── SidePanel.component.tsx           → Root selector: isPinned ? PinnedSidePanel : DialogSidePanel
 ├── SidePanel.types.ts               → SidePanelProps + variant types
 ├── SidePanel.stylex.ts               → All root styles (local variants)
+├── SidePanel.constants.ts            → The resize band: min width, max viewport ratio, keyboard steps
+├── hooks/useSidePanelResize.hook.ts  → Pointer + keyboard resize gesture, and the band it stays inside
+├── hooks/useSidePanelHostWidth.hook.ts → The panel's painted width, for a panel with no width of its own
+├── utils/                            → Bounds, the width a drag resolves to, the keyboard action, the surface styles, the drag session
 │
 ├── PinnedSidePanel/                  → Private delegate (no barrel): always-visible aside, optional portal, zero effects
 │   ├── PinnedSidePanel.component.tsx
-│   └── PinnedSidePanel.types.ts      → children, portalContainer?, position, size
+│   └── PinnedSidePanel.types.ts      → children, portalContainer?, position, resizeHandle?, size, width?
 │
 ├── DialogSidePanel/                  → Private delegate (no barrel): native dialog lifecycle + close-event forwarding
 │   ├── DialogSidePanel.component.tsx
-│   └── DialogSidePanel.types.ts      → children, isOpen, onClose?, position, shouldShowOverlay, size
+│   └── DialogSidePanel.types.ts      → children, isOpen, onClose?, position, resizeHandle?, shouldShowOverlay, size, width?
 │
 ├── SidePanelHeader/                  → Top section with actions slot
 │   ├── index.ts
@@ -27,6 +31,12 @@ SidePanel/
 │   ├── index.ts
 │   ├── SidePanelHeaderToolbar.component.tsx
 │   └── SidePanelHeaderToolbar.types.ts → isPinned, onClose, onTogglePin
+│
+├── SidePanelResizeHandle/            → ARIA window splitter on the panel's inner edge
+│   ├── index.ts
+│   ├── SidePanelResizeHandle.component.tsx
+│   ├── SidePanelResizeHandle.types.ts → onWidthChange, onWidthCommit?, position, width
+│   └── SidePanelResizeHandle.stylex.ts
 │
 ├── SidePanelTitle/                   → h2 heading with optional icon
 │   ├── index.ts
@@ -78,6 +88,9 @@ graph LR
   SidePanel --> SidePanel.types
   SidePanel --> PinnedSidePanel
   SidePanel --> DialogSidePanel
+  SidePanel --> SidePanelResizeHandle
+  SidePanelResizeHandle --> useSidePanelResize
+  useSidePanelResize --> useViewportWidth
 
   PinnedSidePanel --> SidePanel.stylex
   PinnedSidePanel --> ReactDOM["createPortal (react-dom)"]
@@ -256,3 +269,71 @@ Used heavily in Table settings drawers:
   states
 - `ColumnSettingsDrawer` — FilterSection, PinningSection, GeneralSection, SortingSection
 - `TableSettingsDrawer` — SortingSection, GeneralSettingsSection, AddSortSection, ActiveSortList, ColumnOrderSection
+
+## The panel resizes, and the width belongs to whoever opened it
+
+`SidePanel` owns the gesture and not the number. `isResizable` puts
+`SidePanelResizeHandle` on the panel's inner edge — left of a right-hand panel,
+right of a left-hand one — and the consumer says how wide the panel is through
+`width`, which overrides the `size` variant.
+
+**The handle speaks for the width the panel paints, not the width it was told.**
+`useSidePanelHostWidth` measures the host element and that measurement wins: a
+panel that has never been resized carries no `width` at all and paints from its
+`size` variant, and a panel handed a stored width wider than the CSS ceiling
+paints the ceiling. Starting a gesture from either declared value would snap the
+edge on the first move. It measures `offsetWidth` rather than `clientWidth`
+because the panel has a border and the width written back is a border-box one.
+
+**The grab strip sits inside the panel, and it has to.** Both delegates set
+`overflow: hidden` on the panel element, which is also the handle's containing
+block — so a strip straddling the edge with a negative offset is clipped to half
+its declared width, indicator included. The strip starts at the panel's inner
+edge instead, and each position variant places the indicator on that edge. The imperative half
+of the gesture is `startHorizontalDragSession`, shared with the column splitter —
+the frame throttling, the `AbortController` teardown and the document's drag
+cursor were written twice before.
+
+The two callbacks are the point of the split. `onWidthChange` fires once per
+animation frame while the pointer moves, and `onWidthCommit` fires once the
+gesture ends, so a consumer can hold the live width somewhere cheap and persist
+only the settled one. That is what the Table drawers do: the meta store on every
+frame, the UI-flags cookie once
+([ADR-114](../../../../../docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md)).
+
+**The band is enforced twice, and both are load-bearing.** The gesture clamps to
+`SIDE_PANEL_MIN_WIDTH`–`SIDE_PANEL_MAX_WIDTH_RATIO × viewport`, and the style
+clamps again as `max(320px, min(<width>px, 90vw))` — because a width persisted on
+a wide display is handed back on a narrow one, where the gesture has not run and
+only the CSS stands between the panel and the far edge of the screen.
+
+**The splitter's accessible name is the consumer's to give.** It defaults to
+`SIDE_PANEL_RESIZE_LABEL` — "Resize panel", the package's own noun — and
+`resizeLabel` overrides it, the way the column splitter builds its label from
+the `columnLabel` it is handed. A published component naming one consumer's use
+of it ("settings panel") is the same mistake `.claude/rules/package-rationale.md`
+governs in prose.
+
+**The announced band never excludes the width being announced.**
+`resolveSidePanelWidthBounds` takes `currentWidth` and floors its ceiling at it,
+because the server renders with no viewport at all: `useViewportWidth` reports
+`0` there, so a ceiling derived from the viewport alone would announce
+`aria-valuemax` below `aria-valuenow` until hydration. The pointer session
+resolves its bounds the same way, so keyboard and drag agree.
+
+The handle is the ARIA window-splitter pattern: focusable, `role='separator'`
+with `aria-valuenow`/`min`/`max`, arrows and Home/End on the keyboard. Its host
+is a `<button>`, not a `<div>` with a `tabIndex` — the keyboard half is only
+reachable if the splitter is in the tab order, and a native button is focusable
+by construction rather than by attribute. What remains is the role itself, which
+`useSemanticElements` and Sonar's `S6819` both read as an `<hr>` they could
+substitute; `<hr>` can take neither focus nor a value, so both splitters in the
+repo are named in `biome.jsonc` and the Sonar findings are accepted the same
+way.
+
+**Both surfaces render the handle after their content div, not before it.** It
+is absolutely positioned, so where it paints does not depend on where it sits in
+the DOM — but where it lands in the tab order does. As the panel's first
+focusable descendant it took the initial focus a modal `<dialog>` gives when
+nothing carries `autofocus`, so opening the drawer announced the splitter
+instead of the first control in the header.

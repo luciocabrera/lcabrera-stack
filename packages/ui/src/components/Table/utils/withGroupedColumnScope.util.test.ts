@@ -68,12 +68,12 @@ describe('withGroupedColumnScope', () => {
     ]);
   });
 
-  it('keeps the row-actions column, which carries no field of the row', () => {
+  it('drops the row-actions column, which a grouped row has no row to act on', () => {
     const result = run({
       columns: [...columns, { key: 'actions', label: 'Actions' }],
     });
 
-    expect(keysOf(result)).toStrictEqual(['region', 'actions']);
+    expect(keysOf(result)).toStrictEqual(['region']);
   });
 
   it('changes nothing while no grouping is applied', () => {

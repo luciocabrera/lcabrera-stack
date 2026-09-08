@@ -311,22 +311,26 @@ copy left to drift.
 
 ### Layout
 
-While grouping is applied, four derivations reshape the column list, in an
+While grouping is applied, five derivations reshape the column list, in an
 order that matters. `withAggregateColumns` runs first and replaces each
 **measured** column with one column per aggregate applied to it —
 the primary key included, since a row id is resolved from the declared columns
 and never from the painted list. `withGroupedColumnScope` then drops every
-column the grouping neither keys nor measures, so the grid holds the group keys,
-the measures and the row-actions column and nothing else
-([ADR-096](../../../../../docs/decisions/ADR-096-the-grouping-decides-which-columns-the-grid-shows.md)).
+column the grouping neither keys nor measures, so the grid holds the group keys
+and the measures and nothing else
+([ADR-096](../../../../../docs/decisions/ADR-096-the-grouping-decides-which-columns-the-grid-shows.md),
+[ADR-112](../../../../../docs/decisions/ADR-112-a-grouped-grid-drops-the-row-actions-column.md)).
 `withAggregateColumnOrder` then arranges the measures the grouping kept: the
 staged aggregate list orders them, each measured column ranked by its first
 entry in that list so a column's measures stay contiguous
 ([ADR-099](../../../../../docs/decisions/ADR-099-the-staged-aggregate-list-orders-the-measure-columns.md)).
+`withGroupedColumnWidths` then gives every column the band the build declares, in
+place of the widths the consumer declared for the ungrouped field
+([ADR-113](../../../../../docs/decisions/ADR-113-a-grouped-grids-column-widths-come-from-the-build.md)).
 `withGroupedColumnLayout` runs last and hoists each group key to the head of the
 order and of the left pin, in key order, forcing it visible
 ([ADR-080](../../../../../docs/decisions/ADR-080-a-group-key-renders-in-its-own-column.md)).
-All four are derivations and never state, so none reaches the cookie the column
+All five are derivations and never state, so none reaches the cookie the column
 layout persists through nor the list the drawer offers — which is what makes
 ungrouping free, and what means a deselected aggregate needs no pruning: the
 next derivation simply does not produce its column.
@@ -368,10 +372,14 @@ the function toggles and `No Aggregate` a `title` whenever the menu is anchored
 on a measure, and the clear's sentence says it takes every measure of the band
 with it.
 
-**The row-actions column is the one thing the scope keeps that the grouping does
-not name**, because it is not a data column: its cell is the grid's own
-affordance rather than a field of the row, so a grouped grid keeps its row
-menus.
+**The scope keeps the group keys and the measures, and nothing else.** The
+row-actions column used to be the one exception, on the reasoning that its cell is
+the grid's own affordance rather than a field of the row. It painted nothing: a
+group row is not a row anything can be done to, and a grouped read returns no
+detail row to act on — so the column drew an empty strip down every grouped grid.
+[ADR-112](../../../../../docs/decisions/ADR-112-a-grouped-grid-drops-the-row-actions-column.md)
+removes it, and ADR-087's drill-down route is where a group's own rows are acted
+on.
 
 **The settings drawer's Columns tab reads that same derivation, over its own
 draft** — `resolveRenderedColumnKeys` runs `getPinnedDerivedColumnsState` and
@@ -483,13 +491,18 @@ ADR-065 defined survives only for a measure column whose value the payload did
 not carry, which is what `TableGroupAggregate` renders when a group row states
 no aggregate for it.
 
-**A measure is wider than the column it measures**, because it carries more:
-`withAggregateColumns` floors each derived column at
-`DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH` rather than inheriting the source's
-`minWidth`, since a share of the grand total puts a bar and a percentage beside
-a value that is already the widest the column ever holds. The floor never
-crosses a `maxWidth` the consumer declared, and a source already wider than it
-keeps its own width.
+**A grouped grid sizes every column it paints from one band, and the band comes
+from the build.** A column's declared `minWidth`/`maxWidth` describe the field it
+shows ungrouped, and a measure shows a value that field never held — so
+`withGroupedColumnWidths` replaces both, with
+`VITE_TABLE_AGGREGATE_MIN_WIDTH`/`VITE_TABLE_AGGREGATE_MAX_WIDTH` and the 200/600
+defaults behind them. Deriving the two separately is what broke resizing:
+flooring a measure at 200 and then clamping it back under a source `maxWidth` of
+180 left `minWidth === maxWidth`, so the splitter rendered, took the pointer and
+moved nothing
+([ADR-113](../../../../../docs/decisions/ADR-113-a-grouped-grids-column-widths-come-from-the-build.md)).
+A measure carries no width of its own for that reason: there is one place a
+grouped column's width is decided, and it is not the declared column.
 
 A measure column's key is the aggregate's token — `total_amount:avg` — which
 `DataKey` admits for the same reason it admits `'actions'`: a column identity

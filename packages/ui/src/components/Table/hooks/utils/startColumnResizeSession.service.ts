@@ -1,6 +1,8 @@
 import type { ColumnSizingArgs } from '#ui/components/Table/contexts/TableConfig/columns/actions/useSetColumnSizingWithoutSync.hook';
 import type { DataKey } from '#ui/components/Table/Table.types';
 
+import { startHorizontalDragSession } from '#ui/utils/dragSession/startHorizontalDragSession.service';
+
 import { createResizeStartData } from './createResizeStartData.util';
 import { resolveResizeWidth } from './resolveResizeWidth.util';
 
@@ -33,56 +35,16 @@ export const startColumnResizeSession = <TData>({
     maxWidth,
     minWidth,
   });
-  const listenerController = new AbortController();
-  let animationFrameId: number | undefined;
-  let pendingWidth: number | undefined;
 
-  const handleMouseMove = (moveEvent: MouseEvent) => {
-    pendingWidth = resolveResizeWidth({
-      clientX: moveEvent.clientX,
-      ...startData,
-    });
-
-    if (animationFrameId !== undefined) {
-      cancelAnimationFrame(animationFrameId);
-    }
-    animationFrameId = requestAnimationFrame(() => {
-      setColumnWidth({ columnKey, width: pendingWidth });
-      animationFrameId = undefined;
-      pendingWidth = undefined;
-    });
-  };
-
-  const endDragSession = () => {
-    if (animationFrameId !== undefined) {
-      cancelAnimationFrame(animationFrameId);
-    }
-    listenerController.abort();
-    document.body.style.userSelect = '';
-    document.body.style.cursor = '';
-    onSessionEnd();
-  };
-
-  const handleMouseUp = () => {
-    endDragSession();
-    onGestureEnd();
-
-    if (pendingWidth !== undefined) {
-      setColumnWidth({ columnKey, width: pendingWidth });
-    }
-
-    syncColumnWidth();
-  };
-
-  document.body.style.userSelect = 'none';
-  document.body.style.cursor = 'col-resize';
-
-  document.addEventListener('mousemove', handleMouseMove, {
-    signal: listenerController.signal,
+  return startHorizontalDragSession({
+    initialWidth: startData.initialWidth,
+    onCommit: syncColumnWidth,
+    onGestureEnd,
+    onSessionEnd,
+    onWidth: (width: number) => {
+      setColumnWidth({ columnKey, width });
+    },
+    resolveWidth: (pointerX: number) =>
+      resolveResizeWidth({ clientX: pointerX, ...startData }),
   });
-  document.addEventListener('mouseup', handleMouseUp, {
-    signal: listenerController.signal,
-  });
-
-  return endDragSession;
 };

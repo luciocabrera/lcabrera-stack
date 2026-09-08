@@ -1,3 +1,5 @@
+import type { MouseEvent } from 'react';
+
 import * as stylex from '@stylexjs/stylex';
 
 import { DisclosureIcon } from '#ui/components/Icons';
@@ -6,6 +8,10 @@ import { ICON_SIZE_SM } from '#ui/design-system/constants';
 import type { TabsHeaderScrollButtonProps } from './TabsHeaderScrollButton.types';
 
 import { styles } from './TabsHeaderScrollButton.stylex';
+
+const preventFocusShift = (event: MouseEvent<HTMLButtonElement>) => {
+  event.preventDefault();
+};
 
 export const TabsHeaderScrollButton = ({
   direction,
@@ -21,6 +27,7 @@ export const TabsHeaderScrollButton = ({
       aria-hidden='true'
       data-testid={`tabs-scroll-${direction}`}
       onClick={handleScroll}
+      onMouseDown={preventFocusShift}
       tabIndex={-1}
       type='button'
     >

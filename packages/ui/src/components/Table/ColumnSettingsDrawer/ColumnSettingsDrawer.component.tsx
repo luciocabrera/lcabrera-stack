@@ -1,5 +1,12 @@
 import { SidePanel } from '#ui/components/SidePanel';
-import { useGetTableIsColumnSettingsPinned } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import {
+  useSetTableSettingsPanelWidth,
+  useSyncTableSettingsPanelWidth,
+} from '#ui/components/Table/contexts/TableConfig/meta/actions';
+import {
+  useGetTableIsColumnSettingsPinned,
+  useGetTableSettingsPanelWidth,
+} from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
@@ -18,15 +25,23 @@ export const ColumnSettingsDrawer = () => {
   const isBusy = isLoading || isLoadingMore;
   const cancelColumnSettings = useCancelColumnSettings({ isBusy });
   const wrapperRef = useTableWrapperRef();
+  const panelWidth = useGetTableSettingsPanelWidth();
+  const setPanelWidth = useSetTableSettingsPanelWidth();
+  const syncPanelWidth = useSyncTableSettingsPanelWidth();
 
   return (
     <SidePanel
       isOpen={true}
       isPinned={isPinned}
+      isResizable
       onClose={cancelColumnSettings}
+      onWidthChange={setPanelWidth}
+      onWidthCommit={syncPanelWidth}
       portalContainer={wrapperRef}
       position='right'
+      resizeLabel='Resize column settings panel'
       size='md'
+      {...(panelWidth !== undefined && { width: panelWidth })}
     >
       <ColumnSettingsDrawerHeader />
       <ColumnSettingsDrawerBody />

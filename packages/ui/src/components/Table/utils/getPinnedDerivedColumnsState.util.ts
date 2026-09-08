@@ -15,6 +15,7 @@ import { withAggregateColumnOrder } from './withAggregateColumnOrder.util';
 import { withAggregateColumns } from './withAggregateColumns.util';
 import { withGroupedColumnLayout } from './withGroupedColumnLayout.util';
 import { withGroupedColumnScope } from './withGroupedColumnScope.util';
+import { withGroupedColumnWidths } from './withGroupedColumnWidths.util';
 
 type GetPinnedDerivedColumnsStateArgs<TData> = {
   readonly aggregates: readonly TableColumnAggregate[];
@@ -70,7 +71,10 @@ export const getPinnedDerivedColumnsState = <TData>({
   } = withGroupedColumnLayout<TData>({
     columnOrder: staged.columnOrder,
     columnPinning: staged.columnPinning,
-    columns: staged.columns,
+    columns: withGroupedColumnWidths<TData>({
+      columns: staged.columns,
+      groupingKeys,
+    }),
     columnVisibility: staged.columnVisibility,
     groupingKeys,
   });

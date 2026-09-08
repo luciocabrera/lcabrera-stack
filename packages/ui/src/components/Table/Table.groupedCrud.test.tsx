@@ -123,7 +123,7 @@ const renderGrid = (rows: readonly TestRow[]) =>
 
 afterEach(cleanup);
 
-describe('a grouped grid with row actions', () => {
+describe('a grouped grid configured for row actions', () => {
   it('renders a group row without asking it for a row id', () => {
     expect(() => renderGrid([groupRow])).not.toThrow();
     expect(screen.getAllByTestId('table-group-header-row')).toHaveLength(1);
@@ -147,7 +147,7 @@ describe('a grouped grid with row actions', () => {
     }).toStrictEqual({ menus: 0, rows: 2, titled: 0 });
   });
 
-  it('gives a detail row with no primary key no menu, not no application', () => {
+  it('renders a detail row with no primary key rather than asking it for one', () => {
     const idless: TestRow = { customer_type: 'Business', total_amount: 4200 };
 
     renderGrid([groupRow, detailRow, idless]);
@@ -155,11 +155,15 @@ describe('a grouped grid with row actions', () => {
     expect({
       menus: screen.queryAllByLabelText('Row actions').length,
       rows: screen.queryAllByRole('row').length,
-    }).toStrictEqual({ menus: 1, rows: 4 });
+    }).toStrictEqual({ menus: 0, rows: 4 });
   });
 
-  it('renders a detail row, which does carry a row id', () => {
-    expect(() => renderGrid([groupRow, detailRow])).not.toThrow();
-    expect(screen.getAllByLabelText('Row actions').length).toBeGreaterThan(0);
+  it('paints no row-actions column, which a grouped read gives nothing to act on', () => {
+    renderGrid([groupRow, detailRow]);
+
+    expect({
+      headers: screen.getAllByRole('columnheader').length,
+      menus: screen.queryAllByLabelText('Row actions').length,
+    }).toStrictEqual({ headers: 2, menus: 0 });
   });
 });

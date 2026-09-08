@@ -1,30 +1,28 @@
 import * as stylex from '@stylexjs/stylex';
 import { createPortal } from 'react-dom';
 
-import { surfaceStyles } from '#ui/design-system/tokens/surfaces.stylex';
-
 import type { PinnedSidePanelProps } from './PinnedSidePanel.types';
 
 import { sidePanelStyles } from '../SidePanel.stylex';
+import { resolveSidePanelSurfaceStyles } from '../utils';
 
 export const PinnedSidePanel = ({
   children,
   portalContainer,
   position,
+  resizeHandle,
   size,
+  width,
   ...props
 }: PinnedSidePanelProps) => {
-  const openStyle =
-    position === 'left' ? ('leftOpen' as const) : ('rightOpen' as const);
-  const panelStyles = stylex.props(
-    surfaceStyles.glassPanel,
-    sidePanelStyles.base,
-    sidePanelStyles.size[size],
-    sidePanelStyles.position[position],
-    sidePanelStyles.position[openStyle],
-    sidePanelStyles.withoutBackdrop,
-    sidePanelStyles.pinned,
-  );
+  const panelStyles = resolveSidePanelSurfaceStyles({
+    isOpen: true,
+    isPinned: true,
+    position,
+    shouldShowOverlay: false,
+    size,
+    ...(width !== undefined && { width }),
+  });
 
   const aside = (
     <aside
@@ -34,6 +32,7 @@ export const PinnedSidePanel = ({
       {...panelStyles}
     >
       <div {...stylex.props(sidePanelStyles.content)}>{children}</div>
+      {resizeHandle}
     </aside>
   );
 

@@ -6,7 +6,6 @@ import type {
   TableColumnAggregate,
 } from '../Table.types';
 
-import { ACTIONS_COLUMN_KEY } from '../Table.constants';
 import { resolveDeclaredGroupingKeys } from './resolveDeclaredGroupingKeys.util';
 import { toTableAggregateToken } from './tableAggregateToken.util';
 
@@ -36,7 +35,6 @@ export const withGroupedColumnScope = <TData>({
   const scopedKeys = new Set<string>([
     ...keys,
     ...aggregates.map((aggregate) => toTableAggregateToken(aggregate)),
-    ACTIONS_COLUMN_KEY,
   ]);
 
   return {

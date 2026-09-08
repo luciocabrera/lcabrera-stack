@@ -7,6 +7,8 @@ export type DialogSidePanelProps = ComponentPropsWithoutRef<'dialog'> & {
   readonly isOpen: boolean;
   readonly onClose?: () => void;
   readonly position: SidePanelPosition;
+  readonly resizeHandle?: ReactNode;
   readonly shouldShowOverlay: boolean;
   readonly size: SidePanelSize;
+  readonly width?: number;
 };

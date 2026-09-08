@@ -8,6 +8,11 @@ import {
 } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
+import {
+  SIDE_PANEL_MAX_WIDTH_RATIO,
+  SIDE_PANEL_MIN_WIDTH,
+} from './SidePanel.constants';
+
 const baseStyles = stylex.create({
   dialog: {
     margin: 0,
@@ -100,6 +105,12 @@ const positionVariants = stylex.create({
   },
 });
 
+const widthVariants = stylex.create({
+  resized: (width: number) => ({
+    width: `max(${SIDE_PANEL_MIN_WIDTH}px, min(${width}px, ${SIDE_PANEL_MAX_WIDTH_RATIO * 100}vw))`,
+  }),
+});
+
 const sizeVariants = stylex.create({
   lg: {
     width: '32rem', // 512px
@@ -129,4 +140,5 @@ export const sidePanelStyles = {
   content: baseStyles.content,
   position: positionVariants,
   size: sizeVariants,
+  width: widthVariants,
 };

@@ -258,6 +258,16 @@ See [TableDrawerContext/ARCHITECTURE.md](TableDrawerContext/ARCHITECTURE.md) for
 - **Pin state**: `isTableSettingsPinned` is owned by `TableConfig.metaStore`, not local component state
 - **Expanded filter children state**: `tableSettingsExpandedFilters` is owned by `TableConfig.metaStore` and restored by `FiltersSection`
 - **Selected tab state**: `tableSettingsSelectedTab` is owned by `TableConfig.metaStore` and wired through controlled `Tabs`
+- **Tab order**: `settingsTabOrder` is owned by `TableConfig.metaStore` too, and
+  it governs the column drawer's strip as well as this one — the order is stated
+  in roles, and each drawer's own tab keys map onto them, so the column drawer's
+  `pinning` fills the `columns` role. `GeneralSettingsSection/TabsOrderSection`
+  is where the reader drags it, and a drop commits immediately rather than
+  staging behind Accept: it is the shape of the panel, not a setting the panel is
+  editing
+  ([ADR-114](../../../../../../docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md))
+- **Panel width**: `settingsPanelWidth` is owned by `TableConfig.metaStore`, written
+  per frame while the splitter is dragged and persisted once the gesture ends
 - **Cancel**: `hooks/useCancelTableSettings` (shared by the panel close, the
   header toolbar close, and the footer Cancel button) calls
   `useResetTableSettings()` to read current table state back into the drawer

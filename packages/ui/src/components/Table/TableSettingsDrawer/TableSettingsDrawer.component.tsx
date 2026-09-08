@@ -1,6 +1,13 @@
 import { SidePanel } from '#ui/components/SidePanel';
 
-import { useGetTableIsTableSettingsPinned } from '../contexts/TableConfig/meta/selectors';
+import {
+  useSetTableSettingsPanelWidth,
+  useSyncTableSettingsPanelWidth,
+} from '../contexts/TableConfig/meta/actions';
+import {
+  useGetTableIsTableSettingsPinned,
+  useGetTableSettingsPanelWidth,
+} from '../contexts/TableConfig/meta/selectors';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
@@ -17,14 +24,22 @@ export const TableSettingsDrawer = () => {
 
   const isBusy = isLoading || isLoadingMore;
   const cancelTableSettings = useCancelTableSettings({ isBusy });
+  const panelWidth = useGetTableSettingsPanelWidth();
+  const setPanelWidth = useSetTableSettingsPanelWidth();
+  const syncPanelWidth = useSyncTableSettingsPanelWidth();
 
   return (
     <SidePanel
       isOpen={true}
       isPinned={isPinned}
+      isResizable
       onClose={cancelTableSettings}
+      onWidthChange={setPanelWidth}
+      onWidthCommit={syncPanelWidth}
       position='right'
+      resizeLabel='Resize table settings panel'
       size='md'
+      {...(panelWidth !== undefined && { width: panelWidth })}
     >
       <TableSettingsDrawerHeader isBusy={isBusy} />
       <TableSettingsDrawerBody isBusy={isBusy} />

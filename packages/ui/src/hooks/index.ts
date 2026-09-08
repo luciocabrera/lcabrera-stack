@@ -10,4 +10,5 @@ export type { TStore } from './useStore.hook';
 export { useStore } from './useStore.hook';
 
 export { useTableRoutePage } from './useTableRoutePage.hook';
+export { useViewportWidth } from './useViewportWidth.hook';
 export { useVirtualization } from './useVirtualization.hook';

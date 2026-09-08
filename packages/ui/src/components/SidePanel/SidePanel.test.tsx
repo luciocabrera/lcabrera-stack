@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
 import {
   afterEach,
   beforeEach,
@@ -41,6 +47,13 @@ beforeEach(() => {
     showModalMock: setup.showModalMock,
   };
 });
+
+const readPanelTabOrder = () => {
+  const panel = screen.getByTestId('side-panel');
+  const buttons = [...panel.querySelectorAll('button')];
+
+  return [buttons[0]?.textContent, buttons.at(-1)?.dataset.testid];
+};
 
 describe('SidePanel', () => {
   it('renders children content', () => {
@@ -103,6 +116,214 @@ describe('SidePanel', () => {
     fireEvent(screen.getByTestId('side-panel'), new Event('close'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers no resize handle unless the consumer asks for one', () => {
+    render(
+      <SidePanel isOpen onClose={() => void 0}>
+        <span>Dialog content</span>
+      </SidePanel>,
+    );
+
+    expect(screen.queryByTestId('side-panel-resize-handle')).toBeNull();
+  });
+
+  it('resizes from the drag, and commits once the gesture ends', () => {
+    const onWidthChange = vi.fn();
+    const onWidthCommit = vi.fn();
+
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={onWidthChange}
+        onWidthCommit={onWidthCommit}
+        width={400}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const handle = screen.getByTestId('side-panel-resize-handle');
+
+    fireEvent.mouseDown(handle, { clientX: 1000 });
+    fireEvent.mouseMove(document, { clientX: 900 });
+    fireEvent.mouseUp(document);
+
+    expect({
+      committed: onWidthCommit.mock.calls.at(-1),
+      resized: onWidthChange.mock.calls.at(-1),
+    }).toStrictEqual({ committed: [500], resized: [500] });
+  });
+
+  it('puts the splitter after the content, so opening the panel does not focus it', () => {
+    render(
+      <SidePanel isOpen isResizable onWidthChange={vi.fn()}>
+        <button type='button'>First control</button>
+      </SidePanel>,
+    );
+    const dialogOrder = readPanelTabOrder();
+
+    cleanup();
+    render(
+      <SidePanel isOpen isPinned isResizable onWidthChange={vi.fn()}>
+        <button type='button'>First control</button>
+      </SidePanel>,
+    );
+
+    expect([dialogOrder, readPanelTabOrder()]).toStrictEqual([
+      ['First control', 'side-panel-resize-handle'],
+      ['First control', 'side-panel-resize-handle'],
+    ]);
+  });
+
+  it('puts the splitter in the tab order without a tabIndex of its own', () => {
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={vi.fn()}
+        width={400}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const handle = screen.getByTestId('side-panel-resize-handle');
+    handle.focus();
+
+    expect({
+      focused: document.activeElement === handle,
+      tabIndex: handle.getAttribute('tabindex') ?? undefined,
+      tag: handle.tagName,
+    }).toStrictEqual({ focused: true, tabIndex: undefined, tag: 'BUTTON' });
+  });
+
+  it('resizes from the keyboard, which a pointer gesture is not needed for', () => {
+    const onWidthChange = vi.fn();
+
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={onWidthChange}
+        width={400}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    fireEvent.keyDown(screen.getByTestId('side-panel-resize-handle'), {
+      key: 'ArrowLeft',
+    });
+
+    expect(onWidthChange).toHaveBeenCalledWith(416);
+  });
+
+  it('starts a gesture from the width the panel paints, not from its floor', async () => {
+    const onWidthChange = vi.fn();
+
+    render(
+      <SidePanel isOpen isPinned isResizable onWidthChange={onWidthChange}>
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const handle = screen.getByTestId('side-panel-resize-handle');
+    Object.defineProperty(handle.parentElement, 'offsetWidth', {
+      configurable: true,
+      value: 416,
+    });
+
+    await act(async () => {});
+
+    expect(handle.getAttribute('aria-valuenow')).toBe('416');
+
+    fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+
+    expect(onWidthChange).toHaveBeenCalledWith(432);
+  });
+
+  it('reports the width it paints, not a stored one the CSS has clamped', async () => {
+    const onWidthChange = vi.fn();
+
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={onWidthChange}
+        width={2000}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const handle = screen.getByTestId('side-panel-resize-handle');
+    Object.defineProperty(handle.parentElement, 'offsetWidth', {
+      configurable: true,
+      value: 900,
+    });
+
+    await act(async () => {});
+
+    expect(handle.getAttribute('aria-valuenow')).toBe('900');
+  });
+
+  it('names the splitter for the package, and lets a consumer say otherwise', () => {
+    const { rerender } = render(
+      <SidePanel isOpen isPinned isResizable onWidthChange={vi.fn()}>
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const named = screen.getByTestId('side-panel-resize-handle');
+    const packageLabel = named.getAttribute('aria-label');
+
+    rerender(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={vi.fn()}
+        resizeLabel='Resize table settings panel'
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    expect({
+      consumer: screen
+        .getByTestId('side-panel-resize-handle')
+        .getAttribute('aria-label'),
+      package: packageLabel,
+    }).toStrictEqual({
+      consumer: 'Resize table settings panel',
+      package: 'Resize panel',
+    });
+  });
+
+  it('announces a range the panel width sits inside, viewport or not', async () => {
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={vi.fn()}
+        width={400}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const handle = screen.getByTestId('side-panel-resize-handle');
+    const read = (name: string) => Number(handle.getAttribute(name));
+
+    expect(read('aria-valuemax')).toBeGreaterThanOrEqual(read('aria-valuenow'));
+    expect(read('aria-valuemin')).toBeLessThanOrEqual(read('aria-valuenow'));
   });
 
   it('renders a pinned panel into the provided portal container', () => {
