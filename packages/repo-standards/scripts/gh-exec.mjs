@@ -64,6 +64,17 @@ export const runGh = (args) => {
   }
 };
 
+const UNUSABLE = { list: [], usable: false };
+
+const readList = (raw) => {
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? { list: parsed, usable: true } : UNUSABLE;
+  } catch {
+    return UNUSABLE;
+  }
+};
+
 /**
  * `gh pr list --json …` output as an array, or an empty one.
  *
@@ -80,17 +91,6 @@ export const runGh = (args) => {
  * @param {{ warning: string }} args
  * @returns {unknown[]}
  */
-const UNUSABLE = { list: [], usable: false };
-
-const readList = (raw) => {
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? { list: parsed, usable: true } : UNUSABLE;
-  } catch {
-    return UNUSABLE;
-  }
-};
-
 export const parsePullRequests = (raw, { warning }) => {
   if (!raw.trim()) return [];
   const { list, usable } = readList(raw);
