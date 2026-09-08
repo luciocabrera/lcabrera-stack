@@ -55,16 +55,18 @@ const positional = ({ arg, options }) => {
   return { ...options, title: arg };
 };
 
-const applyArg = ({ arg, options, rest }) => {
+const VALUE_FLAGS = new Set(['--home', '--slug']);
+
+const applyArg = ({ arg, next, options }) => {
   switch (arg) {
     case '--dry-run': {
       return { ...options, dryRun: true };
     }
     case '--home': {
-      return { ...options, home: rest.shift() ?? '' };
+      return { ...options, home: next ?? '' };
     }
     case '--slug': {
-      return { ...options, slug: rest.shift() ?? '' };
+      return { ...options, slug: next ?? '' };
     }
     default: {
       return positional({ arg, options });
@@ -73,10 +75,13 @@ const applyArg = ({ arg, options, rest }) => {
 };
 
 const parseArgs = (argv) => {
-  let options = { dryRun: false, home: 'repo', slug: '', title: '' };
   const rest = argv.filter((arg) => arg !== '--');
-  while (rest.length > 0) {
-    options = applyArg({ arg: rest.shift(), options, rest });
+  let options = { dryRun: false, home: 'repo', slug: '', title: '' };
+  let index = 0;
+  while (index < rest.length) {
+    const arg = rest[index];
+    options = applyArg({ arg, next: rest[index + 1], options });
+    index += VALUE_FLAGS.has(arg) ? 2 : 1;
   }
   return options;
 };
