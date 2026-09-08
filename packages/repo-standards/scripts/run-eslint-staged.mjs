@@ -32,6 +32,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
+import { errorMessage } from './error-message.mjs';
 import {
   argumentError,
   eslintArguments,
@@ -42,7 +43,6 @@ import {
   spawnOutcome,
   workspaceEslintFlags,
 } from './eslint-staged.mjs';
-import { errorMessage } from './error-message.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
@@ -51,7 +51,7 @@ const REPO_ROOT = resolveHostRoot({
 
 const manifestScripts = (directory) => {
   const manifest = join(directory, 'package.json');
-  if (!existsSync(manifest)) return undefined;
+  if (!existsSync(manifest)) return;
   return JSON.parse(readFileSync(manifest, 'utf8')).scripts;
 };
 

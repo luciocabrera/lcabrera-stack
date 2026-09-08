@@ -163,7 +163,7 @@ export const argumentError = ({ missing, paths, unknown }) => {
     const listed = missing.map((path) => `  • ${path}`).join('\n');
     return `no such file(s), so nothing would lint them:\n${listed}`;
   }
-  return undefined;
+  return;
 };
 
 export const lintScriptOf = (scripts) =>
