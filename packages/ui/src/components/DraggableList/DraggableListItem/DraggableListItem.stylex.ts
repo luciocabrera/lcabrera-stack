@@ -60,8 +60,11 @@ const localStyles = stylex.create({
     lineHeight: 1,
   },
   content: {
+    overflow: 'hidden',
     flexGrow: 1,
     flexShrink: 1,
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
     minWidth: 0,
   },
   busyOverlay: {

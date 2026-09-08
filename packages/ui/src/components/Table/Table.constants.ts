@@ -50,12 +50,14 @@ export const TABLE_SETTINGS_TAB_ROLES: readonly TableSettingsTabRole[] = [
   'sorting',
   'grouping',
   'details',
+  'advanced',
 ];
 
 export const TABLE_SETTINGS_TAB_ROLE_LABELS: Record<
   TableSettingsTabRole,
   string
 > = {
+  advanced: 'Advanced',
   columns: 'Columns',
   details: 'Details',
   filters: 'Filters',
@@ -67,6 +69,7 @@ export const TABLE_SETTINGS_TAB_ROLE_LABELS: Record<
 export const TABLE_SETTINGS_TAB_ROLE_BY_KEY: Readonly<
   Record<string, TableSettingsTabRole>
 > = {
+  advanced: 'advanced',
   columns: 'columns',
   details: 'details',
   filter: 'filters',

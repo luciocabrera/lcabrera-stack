@@ -310,7 +310,7 @@ TablePersistenceEntry [type] { readonly persistenceKey?: string; readonly search
 TablePersistenceSliceEntry [type] Required< Pick<TablePersistenceEntry<TSlice>, 'persistenceKey' | 'slice' | 'valueSlice'> >
 TableProps [type] BaseProps & InfiniteScroll<TData, TResponse> & { readonly dataErrorSelector?: ( response: TResponse, ) => TableResponseError | undefined; readonly isFlexWrapperEnabled?: boolean; readonly isLoading?: boolean; readonly response: TResponse; }
 TableResponseError [type] | { /** Present when the refusal is about exactly one column. */ readonly column?: string; readonly estimatedRows?: number; readonly kind: 'grouping-refused'; readonly message: string; readonly reason: TableGroupingRefusalReason; } | { /** Raw SQLSTATE when supplied. Never the message. */ readonly code?: string; readonly kind: 'db-failed'; readonly message: string; } | { readonly kind: 'db-canceled'; readonly message: string } | { readonly kind: 'unexpected'; readonly message: string }
-TableSettingsTabRole [type] | 'columns' | 'details' | 'filters' | 'general' | 'grouping' | 'sorting'
+TableSettingsTabRole [type] | 'advanced' | 'columns' | 'details' | 'filters' | 'general' | 'grouping' | 'sorting'
 TableTitle [type] { readonly plural: string; readonly singular: string; }
 TableTotalsPlacement [type] 'first' | 'last'
 

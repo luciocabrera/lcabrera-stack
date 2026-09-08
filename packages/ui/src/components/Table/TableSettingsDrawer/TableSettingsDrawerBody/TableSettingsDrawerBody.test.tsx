@@ -72,6 +72,10 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableSettingsTabOrder: () => tabOrderRef.current,
 }));
 
+vi.mock('../AdvancedSettingsSection', () => ({
+  AdvancedSettingsSection: () => <div>Advanced settings section</div>,
+}));
+
 vi.mock('../ColumnOrderSection', () => ({
   ColumnOrderSection: () => <div>Column order section</div>,
 }));
@@ -132,6 +136,7 @@ describe('TableSettingsDrawerBody', () => {
     );
     expect(screen.getByText('Columns').textContent).toBe('Columns');
     expect(screen.getByText('Details').textContent).toBe('Details');
+    expect(screen.getByText('Advanced').textContent).toBe('Advanced');
   });
 
   it('offers no Grouping tab for a route that cannot group', () => {
@@ -168,6 +173,7 @@ describe('TableSettingsDrawerBody', () => {
       'Sorting',
       'Grouping',
       'Details',
+      'Advanced',
     ]);
   });
 
@@ -188,6 +194,7 @@ describe('TableSettingsDrawerBody', () => {
       'Columns',
       'Filters',
       'Sorting',
+      'Advanced',
     ]);
   });
 
@@ -206,6 +213,7 @@ describe('TableSettingsDrawerBody', () => {
       'Columns',
       'Filters',
       'Details',
+      'Advanced',
     ]);
   });
 

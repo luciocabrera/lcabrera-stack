@@ -11,7 +11,6 @@ import { ActiveAggregateList } from './ActiveAggregateList';
 import { ActiveGroupKeyList } from './ActiveGroupKeyList';
 import { AddAggregateSection } from './AddAggregateSection';
 import { AddGroupKeySection } from './AddGroupKeySection';
-import { GroupingModeSection } from './GroupingModeSection';
 import { GroupingSectionToolbar } from './GroupingSectionToolbar';
 
 export const GroupingSection = ({ isBusy = false }: GroupingSectionProps) => {
@@ -26,7 +25,6 @@ export const GroupingSection = ({ isBusy = false }: GroupingSectionProps) => {
 
       <SidePanelSectionOverlay isOpen={isDropdownOpen}>
         <ActiveGroupKeyList isBusy={isBusy} />
-        <GroupingModeSection isBusy={isBusy} />
         <AddAggregateSection isBusy={isBusy} />
         <ActiveAggregateList isBusy={isBusy} />
         <GroupingSectionToolbar isBusy={isBusy} />

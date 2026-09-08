@@ -7,7 +7,12 @@ vi.mock('#ui/components/Table/utils', () => ({
   readPersistedUiFlagsFromCookie: vi.fn(() => ({})),
 }));
 
-import { readPersistedStateFromCookie } from '#ui/components/Table/utils';
+import {
+  readPersistedStateFromCookie,
+  readPersistedUiFlagsFromCookie,
+} from '#ui/components/Table/utils';
+import { GLOBAL_SETTINGS_COOKIE_KEY } from '#ui/utils/globalSettings';
+import { GLOBAL_SETTINGS_COOKIE_VERSION } from '#ui/utils/globalSettings/globalSettings.constants';
 import { serializeFiltersToURL } from '#ui/utils/urlState/serializeFiltersToURL.util';
 import { serializeSortingToURL } from '#ui/utils/urlState/serializeSortingToURL.util';
 
@@ -41,6 +46,14 @@ const filtersFor = (value: string) =>
   serializeFiltersToURL({
     status: { operator: 'equals', type: 'text', value },
   }) ?? '';
+
+const globalSettingsCookie = (settingsTabOrder: readonly string[]) =>
+  `${GLOBAL_SETTINGS_COOKIE_KEY}=${encodeURIComponent(
+    JSON.stringify({
+      value: { tablePanel: { settingsTabOrder } },
+      version: GLOBAL_SETTINGS_COOKIE_VERSION,
+    }),
+  )}`;
 
 const sortingFor = (columnKey: 'amount' | 'status') =>
   serializeSortingToURL([{ columnKey, direction: 'asc' }]) ?? '';
@@ -430,6 +443,53 @@ describe('readTableLoaderStateFromRequest', () => {
       expect(state.sorting).toStrictEqual([
         { columnKey: 'amount', direction: 'asc' },
       ]);
+    });
+  });
+
+  describe('settingsTabOrder', () => {
+    it('starts a table that stored no order from the global preference', () => {
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+      vi.mocked(readPersistedUiFlagsFromCookie).mockReturnValue({});
+
+      const state = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        persistenceKey: 'orders',
+        request: new Request('https://example.com/orders', {
+          headers: { Cookie: globalSettingsCookie(['details']) },
+        }),
+      });
+
+      expect(state.settingsTabOrder?.[0]).toBe('details');
+    });
+
+    it('keeps the order this table stored over the global preference', () => {
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+      vi.mocked(readPersistedUiFlagsFromCookie).mockReturnValue({
+        settingsTabOrder: ['sorting'],
+      });
+
+      const state = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        persistenceKey: 'orders',
+        request: new Request('https://example.com/orders', {
+          headers: { Cookie: globalSettingsCookie(['details']) },
+        }),
+      });
+
+      expect(state.settingsTabOrder).toStrictEqual(['sorting']);
+    });
+
+    it('states no order when neither the table nor the reader has one', () => {
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+      vi.mocked(readPersistedUiFlagsFromCookie).mockReturnValue({});
+
+      const state = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        persistenceKey: 'orders',
+        request: new Request('https://example.com/orders'),
+      });
+
+      expect(state.settingsTabOrder).toBeUndefined();
     });
   });
 });

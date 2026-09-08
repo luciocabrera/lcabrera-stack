@@ -13,6 +13,7 @@ import { Tabs } from '#ui/components/Tabs';
 
 import type { TableSettingsDrawerBodyProps } from './TableSettingsDrawerBody.types';
 
+import { AdvancedSettingsSection } from '../AdvancedSettingsSection';
 import { ColumnOrderSection } from '../ColumnOrderSection';
 import { ColumnOrderSectionProvider } from '../ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
 import { DetailsSection } from '../DetailsSection';
@@ -67,6 +68,11 @@ export const TableSettingsDrawerBody = ({
         children: <DetailsSection isBusy={isBusy} />,
         header: 'Details',
         key: 'details',
+      },
+      {
+        children: <AdvancedSettingsSection isBusy={isBusy} />,
+        header: 'Advanced',
+        key: 'advanced',
       },
     ],
   });

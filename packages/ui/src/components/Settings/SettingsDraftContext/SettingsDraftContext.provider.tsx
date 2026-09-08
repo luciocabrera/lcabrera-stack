@@ -2,6 +2,7 @@ import {
   useGetGlobalGroupingPreferences,
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
+  useGetGlobalTablePanelPreferences,
 } from '#ui/contexts/GlobalSettingsContext/selectors';
 import { useStore } from '#ui/hooks';
 
@@ -17,9 +18,15 @@ export const SettingsDraftProvider = ({
   const groupingPreferences = useGetGlobalGroupingPreferences();
   const navigationPreferences = useGetGlobalNavigationPreferences();
   const pinningPreferences = useGetGlobalPinningPreferences();
+  const tablePanelPreferences = useGetGlobalTablePanelPreferences();
 
   const draftStore = useStore<SettingsDraft>(
-    toDraft({ groupingPreferences, navigationPreferences, pinningPreferences }),
+    toDraft({
+      groupingPreferences,
+      navigationPreferences,
+      pinningPreferences,
+      tablePanelPreferences,
+    }),
   );
 
   return (

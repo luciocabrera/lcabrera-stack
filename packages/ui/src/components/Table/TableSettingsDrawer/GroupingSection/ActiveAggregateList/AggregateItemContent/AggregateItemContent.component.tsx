@@ -22,7 +22,9 @@ export const AggregateItemContent = ({
 
   return (
     <div {...stylex.props(styles.aggregateItem)}>
-      <span {...stylex.props(styles.aggregateItemLabel)}>{label}</span>
+      <span {...stylex.props(styles.aggregateItemLabel)} title={label}>
+        {label}
+      </span>
       <div {...stylex.props(styles.aggregateItemControls)}>
         <ShareOfTotalToggle
           columnKey={columnKey}

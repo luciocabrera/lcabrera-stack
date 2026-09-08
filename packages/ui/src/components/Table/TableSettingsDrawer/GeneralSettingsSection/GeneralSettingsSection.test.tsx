@@ -3,11 +3,22 @@
 import type { ReactNode } from 'react';
 
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 type MockToolbarProps = {
   readonly isBusy?: boolean;
 };
+
+const { isGroupingEnabledRef } = vi.hoisted(() => ({
+  isGroupingEnabledRef: { current: true },
+}));
 
 vi.mock('#ui/components/InfoBox', () => ({
   InfoBox: ({ children }: { readonly children: ReactNode }) => (
@@ -39,6 +50,16 @@ vi.mock('../FiltersSection/FiltersSectionToolbar', () => ({
   ),
 }));
 
+vi.mock('../GroupingSection/GroupingSectionToolbar', () => ({
+  GroupingSectionToolbar: ({ isBusy }: MockToolbarProps) => (
+    <div data-busy={String(isBusy)}>Grouping toolbar</div>
+  ),
+}));
+
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
+}));
+
 vi.mock('../SortingSection/SortingSectionToolbar', () => ({
   SortingSectionToolbar: ({ isBusy }: MockToolbarProps) => (
     <div data-busy={String(isBusy)}>Sorting toolbar</div>
@@ -57,22 +78,14 @@ vi.mock('./ColumnWidthsSection/ColumnWidthsSection.component', () => ({
   ),
 }));
 
-vi.mock('./TabsOrderSection', () => ({
-  TabsOrderSection: ({ isBusy }: MockToolbarProps) => (
-    <div data-busy={String(isBusy)}>Tabs order section</div>
-  ),
-}));
-
-vi.mock('./TotalsPlacementSection', () => ({
-  TotalsPlacementSection: ({ isBusy }: MockToolbarProps) => (
-    <div data-busy={String(isBusy)}>Totals placement section</div>
-  ),
-}));
-
 import { GeneralSettingsSection } from './GeneralSettingsSection.component';
 
 afterEach(() => {
   cleanup();
+});
+
+beforeEach(() => {
+  isGroupingEnabledRef.current = true;
 });
 
 describe('GeneralSettingsSection', () => {
@@ -86,8 +99,8 @@ describe('GeneralSettingsSection', () => {
     expect(screen.getByText('Sorting toolbar')).not.toBeNull();
     expect(screen.getByRole('heading', { name: 'Columns' })).not.toBeNull();
     expect(screen.getByText('Column order toolbar')).not.toBeNull();
-    expect(screen.getByText('Totals placement section')).not.toBeNull();
-    expect(screen.getByText('Tabs order section')).not.toBeNull();
+    expect(screen.getByRole('heading', { name: 'Grouping' })).not.toBeNull();
+    expect(screen.getByText('Grouping toolbar')).not.toBeNull();
     expect(screen.getByText('All settings section')).not.toBeNull();
     expect(
       screen.getByText(/Select a preset to adjust all column widths/),
@@ -102,13 +115,21 @@ describe('GeneralSettingsSection', () => {
       'Filters toolbar',
       'Sorting toolbar',
       'Column order toolbar',
-      'Totals placement section',
-      'Tabs order section',
+      'Grouping toolbar',
       'All settings section',
     ].map((label) => screen.getByText(label));
 
     for (const node of busyNodes) {
       expect(node.dataset.busy).toBe('true');
     }
+  });
+
+  it('offers no grouping actions for a route that cannot group', () => {
+    isGroupingEnabledRef.current = false;
+
+    render(<GeneralSettingsSection />);
+
+    expect(screen.queryByRole('heading', { name: 'Grouping' })).toBeNull();
+    expect(screen.queryByText('Grouping toolbar')).toBeNull();
   });
 });

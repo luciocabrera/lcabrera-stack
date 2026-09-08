@@ -73,6 +73,7 @@ describe('TabsOrderSection', () => {
       'Sorting',
       'Grouping',
       'Details',
+      'Advanced',
     ]);
   });
 
@@ -90,6 +91,7 @@ describe('TabsOrderSection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Reverse' }));
 
     expect(setTabOrderMock).toHaveBeenCalledWith([
+      'advanced',
       'details',
       'grouping',
       'sorting',

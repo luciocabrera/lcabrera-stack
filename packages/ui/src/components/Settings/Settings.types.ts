@@ -1,6 +1,7 @@
 import type {
   TableGroupFold,
   TableGroupingMode,
+  TableSettingsTabRole,
   TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
 import type { useGetGlobalNavigationPreferences } from '#ui/contexts/GlobalSettingsContext/selectors';
@@ -30,6 +31,7 @@ export type SettingsDraft = {
   readonly orderConflictResolution: OrderConflictResolutionPreferenceOption;
   readonly pinConflictResolution: PinConflictResolutionPreferenceOption;
   readonly pinSide: PinSidePreferenceOption;
+  readonly settingsTabOrder: readonly TableSettingsTabRole[];
   readonly totalsPlacement: TableTotalsPlacement;
   readonly unpinConflictResolution: UnpinConflictResolutionPreferenceOption;
 };

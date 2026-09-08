@@ -149,6 +149,7 @@ vi.mock('#ui/components/VirtualSelect', () => ({
   ),
 }));
 
+import { GroupingModeSection } from '../AdvancedSettingsSection/GroupingModeSection';
 import { TableDrawerProvider } from '../TableDrawerContext/TableDrawerContext.provider';
 import { TableSettingsDrawerFooter } from '../TableSettingsDrawerFooter/TableSettingsDrawerFooter.component';
 import { GroupingSection } from './GroupingSection.component';
@@ -157,6 +158,7 @@ const renderDrawer = () =>
   render(
     <TableDrawerProvider>
       <GroupingSection />
+      <GroupingModeSection />
       <TableSettingsDrawerFooter />
     </TableDrawerProvider>,
   );

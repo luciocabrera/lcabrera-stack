@@ -34,6 +34,7 @@ describe('useGlobalSettingsStore', () => {
         pinning: {
           pinSide: 'left',
         },
+        tablePanel: {},
       },
     );
   });

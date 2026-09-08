@@ -111,6 +111,7 @@ export const createTableRouteLoader = <
       grouping,
       groupingPreferences,
       metaUiFlags,
+      settingsTabOrder,
       sorting,
       totalsPlacement,
     } = readTableLoaderStateFromRequest<TData>({
@@ -161,6 +162,7 @@ export const createTableRouteLoader = <
       dataPromise,
       metaState: {
         ...metaUiFlags,
+        ...(settingsTabOrder !== undefined && { settingsTabOrder }),
         appId,
         persistenceKey,
         tableName,
