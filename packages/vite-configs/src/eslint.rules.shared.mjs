@@ -102,6 +102,21 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
  * block does not match. Scope them back the moment one of these files starts
  * serving something.
  *
+ * `unicorn/max-nested-calls` goes from three to four here and nowhere else.
+ * Four is what `JSON.parse(readFileSync(join(root, name), 'utf8'))` costs, and
+ * a script that reads a file it composed a path for is the shape of every file
+ * in this block. Naming an intermediate for each is longer, not clearer. TypeScript
+ * source keeps three, and real complexity is measured rather than approximated
+ * by nesting depth — that is what the fallow health thresholds are for.
+ *
+ * `unicorn/no-null` is off for a reason that is not style. In a file like this
+ * `null` is usually somebody else's value or a visible one: it is what
+ * `RegExp#exec` returns and what `child_process` puts in `status` for a signal,
+ * it is the second argument `JSON.stringify` takes, and in a report it is an
+ * absence a reader can see where `undefined` is a key that vanishes. The rest
+ * are tests whose subject is `null` itself. `undefined` remains the repository's
+ * absent value everywhere the rule still applies.
+ *
  * @param {{ globals: { node: Record<string, unknown> } }} args
  */
 export const createNodeScriptFileConfig = ({ globals }) => ({
@@ -117,6 +132,8 @@ export const createNodeScriptFileConfig = ({ globals }) => ({
     'security/detect-non-literal-fs-filename': 'off',
     'security/detect-non-literal-regexp': 'off',
     'security/detect-unsafe-regex': 'off',
+    'unicorn/max-nested-calls': ['error', { max: 4 }],
+    'unicorn/no-null': 'off',
     'unicorn/prefer-module': 'off',
     'unicorn/prevent-abbreviations': 'off',
   },

@@ -109,7 +109,7 @@ const repoPathFindings = ({ docPath, holds, lines, repoOnlyDirs }) => {
   const candidates = lines.flatMap(({ number, text }) =>
     [
       ...inlineCodeTokens(text),
-      ...text.matchAll(LINK).map((m) => m[1]).toArray(),
+      ...text.matchAll(LINK).map((m) => m[1]),
     ].map((raw) => ({ number, token: normaliseToken(raw) })),
   );
 

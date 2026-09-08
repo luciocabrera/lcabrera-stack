@@ -148,7 +148,7 @@ describe('the tasks name what the blueprint holds', () => {
     const ranges = new Map(
       catalogGroups(read('pnpm-workspace.yaml')).values().flatMap(
                 (group) => [...group],
-              ).toArray(),
+              ),
     );
     const declared = Object.entries(
       JSON.parse(read('packages', 'typescript-config', 'package.json'))

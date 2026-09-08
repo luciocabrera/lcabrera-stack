@@ -136,7 +136,7 @@ const collectAnchors = (markdown) =>
   new Set(
     markdown.matchAll(/^#{2,4}\s+(\S.*)$/gm).map(([, heading]) =>
             toAnchor(heading),
-          ).toArray(),
+          ),
   );
 
 const checkRootScriptsDocumented = (documented, problems) => {
@@ -152,7 +152,7 @@ const checkRootScriptsDocumented = (documented, problems) => {
 const checkDocumentedCommandsExist = (documented, inventory, problems) => {
   const everyTask = new Set([
     ...inventory.rootTasks,
-    ...inventory.packageTasks.values().flatMap((tasks) => [...tasks]).toArray(),
+    ...inventory.packageTasks.values().flatMap((tasks) => [...tasks]),
   ]);
   for (const task of documented) {
     if (!everyTask.has(task)) {
