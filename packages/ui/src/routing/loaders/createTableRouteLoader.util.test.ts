@@ -84,6 +84,14 @@ const uiFlagsCookie = (state: Record<string, unknown>) =>
     JSON.stringify({ value: state, version: 1 }),
   )}`;
 
+const globalSettingsCookie = (settingsTabOrder: readonly string[]) =>
+  `${baseConfig.appId}-global-settings=${encodeURIComponent(
+    JSON.stringify({
+      value: { tablePanel: { settingsTabOrder } },
+      version: 1,
+    }),
+  )}`;
+
 const watchUnhandledRejections = async (run: () => Promise<void>) => {
   const unhandled: unknown[] = [];
   const record = (reason: unknown) => {
@@ -316,6 +324,25 @@ describe('createTableRouteLoader', () => {
       });
 
       expect(result.metaState.lockedFilters).toBeUndefined();
+    });
+
+    it('ignores a settingsTabOrder an earlier release left in the UI-flags cookie', async () => {
+      const { result } = await invoke({
+        cookie: uiFlagsCookie({ settingsTabOrder: ['details'] }),
+      });
+
+      expect(result.metaState.settingsTabOrder).toBeUndefined();
+    });
+
+    it('takes the settings tab order from the reader global preference', async () => {
+      const { result } = await invoke({
+        cookie: [
+          uiFlagsCookie({ settingsTabOrder: ['sorting'] }),
+          globalSettingsCookie(['details']),
+        ].join('; '),
+      });
+
+      expect(result.metaState.settingsTabOrder?.[0]).toBe('details');
     });
 
     it('takes groupDetailsPath from the route meta, over any cookie value', async () => {

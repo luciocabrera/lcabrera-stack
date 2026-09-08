@@ -22,7 +22,9 @@ export const SortItemContent = ({
   };
   return (
     <div {...stylex.props(styles.sortItem)}>
-      <span {...stylex.props(styles.sortItemLabel)}>{item.label}</span>
+      <span {...stylex.props(styles.sortItemLabel)} title={item.label}>
+        {item.label}
+      </span>
       <div {...stylex.props(styles.sortItemControls)}>
         <Button
           aria-label={`Sort ${item.label} ${item.direction === 'asc' ? 'ascending' : 'descending'}`}

@@ -9,6 +9,7 @@ export type SettingsDraftChanges = {
   readonly hasGroupingChanges: boolean;
   readonly hasNavigationChanges: boolean;
   readonly hasPinningChanges: boolean;
+  readonly hasTablePanelChanges: boolean;
 };
 
 export type SettingsDraftContextValue = {

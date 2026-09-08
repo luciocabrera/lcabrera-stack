@@ -19,15 +19,6 @@ import { MAX_TABLE_COUNT_DISTINCT_AGGREGATES } from '#ui/components/Table/Table.
 
 import { AGGREGATE_PICKER_GAP_MESSAGES } from './AddAggregateSection.constants';
 
-type MockVirtualSelectProps = {
-  readonly onChange: (values: readonly string[]) => void;
-  readonly options: readonly {
-    readonly label: string;
-    readonly value: string;
-  }[];
-  readonly placeholder: string;
-};
-
 const {
   aggregatesRef,
   capabilitiesRef,
@@ -62,28 +53,12 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableGroupingCapabilities: () => capabilitiesRef.current,
 }));
 
-vi.mock('#ui/components/VirtualSelect', () => ({
-  VirtualSelect: ({
-    onChange,
-    options,
-    placeholder,
-  }: MockVirtualSelectProps) => (
-    <ul data-testid={placeholder}>
-      {options.map((option) => (
-        <li key={option.value}>
-          <button
-            onClick={() => {
-              onChange([option.value]);
-            }}
-            type='button'
-          >
-            {option.label}
-          </button>
-        </li>
-      ))}
-    </ul>
-  ),
-}));
+vi.mock('#ui/components/VirtualSelect', async () => {
+  const { createMockVirtualSelect } =
+    await import('#ui/utils/tests/createMockVirtualSelect.util');
+
+  return { VirtualSelect: createMockVirtualSelect() };
+});
 
 import { AddAggregateSection } from './AddAggregateSection.component';
 

@@ -13,6 +13,7 @@ import {
 import { toGlobalGroupingPreferences } from './toGlobalGroupingPreferences.util';
 import { toGlobalNavigationPreferences } from './toGlobalNavigationPreferences.util';
 import { toGlobalPinningPreferences } from './toGlobalPinningPreferences.util';
+import { toGlobalTablePanelPreferences } from './toGlobalTablePanelPreferences.util';
 
 type GetGlobalSettingsFromCookieArgs = {
   readonly appId?: string;
@@ -57,11 +58,15 @@ export const getGlobalSettingsFromCookie = ({
       payload.value.navigation,
     );
     const parsedGrouping = toGlobalGroupingPreferences(payload.value.grouping);
+    const parsedTablePanel = toGlobalTablePanelPreferences(
+      payload.value.tablePanel,
+    );
 
     return {
       grouping: parsedGrouping ?? fallback.grouping,
       navigation: parsedNavigation ?? fallback.navigation,
       pinning: parsedPinning ?? fallback.pinning,
+      tablePanel: parsedTablePanel ?? fallback.tablePanel,
     };
   } catch (error) {
     logger.debug('[globalSettings] Failed to parse settings cookie:', error);

@@ -39,6 +39,7 @@ describe('useSetGlobalPinningPreferences', () => {
           orderConflictResolution: 'reset-all-pins',
           pinSide: 'left',
         },
+        tablePanel: {},
       },
     );
   });
@@ -57,6 +58,7 @@ describe('useSetGlobalPinningPreferences', () => {
         orderConflictResolution: 'reset-all-pins',
         pinSide: 'right',
       },
+      tablePanel: {},
     });
     expect(persistGlobalSettingsMock).toHaveBeenCalledTimes(1);
     expect(persistGlobalSettingsMock).toHaveBeenCalledWith({
@@ -66,6 +68,7 @@ describe('useSetGlobalPinningPreferences', () => {
         orderConflictResolution: 'reset-all-pins',
         pinSide: 'right',
       },
+      tablePanel: {},
     });
   });
 
@@ -86,6 +89,7 @@ describe('useSetGlobalPinningPreferences', () => {
       pinning: {
         pinConflictResolution: 'pin-only',
       },
+      tablePanel: {},
     });
     expect(persistGlobalSettingsMock).toHaveBeenCalledWith({
       grouping: {},
@@ -93,6 +97,7 @@ describe('useSetGlobalPinningPreferences', () => {
       pinning: {
         pinConflictResolution: 'pin-only',
       },
+      tablePanel: {},
     });
   });
 });

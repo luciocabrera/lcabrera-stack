@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { TABLE_SETTINGS_TAB_ROLES } from '#ui/components/Table/Table.constants';
+
 import type { SettingsDraft } from '../Settings.types';
 
 import { getSettingsDraftChanges } from './getSettingsDraftChanges.util';
@@ -12,6 +14,7 @@ const baseline: SettingsDraft = {
   orderConflictResolution: 'always-ask',
   pinConflictResolution: 'always-ask',
   pinSide: 'always-ask',
+  settingsTabOrder: TABLE_SETTINGS_TAB_ROLES,
   totalsPlacement: 'last',
   unpinConflictResolution: 'always-ask',
 };
@@ -23,6 +26,7 @@ describe('getSettingsDraftChanges', () => {
       hasGroupingChanges: false,
       hasNavigationChanges: false,
       hasPinningChanges: false,
+      hasTablePanelChanges: false,
     });
   });
 
@@ -34,6 +38,7 @@ describe('getSettingsDraftChanges', () => {
       hasGroupingChanges: false,
       hasNavigationChanges: true,
       hasPinningChanges: false,
+      hasTablePanelChanges: false,
     });
   });
 
@@ -45,6 +50,7 @@ describe('getSettingsDraftChanges', () => {
       hasGroupingChanges: false,
       hasNavigationChanges: false,
       hasPinningChanges: true,
+      hasTablePanelChanges: false,
     });
   });
 
@@ -60,6 +66,7 @@ describe('getSettingsDraftChanges', () => {
       hasGroupingChanges: false,
       hasNavigationChanges: true,
       hasPinningChanges: true,
+      hasTablePanelChanges: false,
     });
   });
 });
@@ -75,6 +82,7 @@ describe('getSettingsDraftChanges — grouping', () => {
       hasGroupingChanges: true,
       hasNavigationChanges: false,
       hasPinningChanges: false,
+      hasTablePanelChanges: false,
     });
   });
 
@@ -94,6 +102,39 @@ describe('getSettingsDraftChanges — grouping', () => {
       hasGroupingChanges: true,
       hasNavigationChanges: true,
       hasPinningChanges: true,
+      hasTablePanelChanges: false,
     });
+  });
+});
+
+describe('getSettingsDraftChanges — table panel', () => {
+  it('flags a reordered settings tab order on its own', () => {
+    const draft: SettingsDraft = {
+      ...baseline,
+      settingsTabOrder: [...TABLE_SETTINGS_TAB_ROLES].toReversed(),
+    };
+
+    expect(getSettingsDraftChanges({ baseline, draft })).toEqual({
+      hasChanges: true,
+      hasGroupingChanges: false,
+      hasNavigationChanges: false,
+      hasPinningChanges: false,
+      hasTablePanelChanges: true,
+    });
+  });
+
+  it('reads a same-length order with one role moved as a change', () => {
+    const [first, second, ...rest] = TABLE_SETTINGS_TAB_ROLES;
+
+    const draft: SettingsDraft = {
+      ...baseline,
+      settingsTabOrder: [second, first, ...rest].filter(
+        (role) => role !== undefined,
+      ),
+    };
+
+    expect(
+      getSettingsDraftChanges({ baseline, draft }).hasTablePanelChanges,
+    ).toBe(true);
   });
 });

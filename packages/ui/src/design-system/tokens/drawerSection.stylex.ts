@@ -72,13 +72,18 @@ export const drawerSectionStyles = stylex.create({
     gap: spacing.sm,
     alignItems: 'center',
     display: 'flex',
+    minWidth: 0,
   },
-  /** Text label inside an item row: primary color, grows to fill space. */
+  /** Text label inside an item row: primary color, grows to fill space, truncates. */
   itemLabel: {
+    overflow: 'hidden',
     color: colors.textPrimary,
     flexGrow: 1,
     flexShrink: 1,
     fontSize: typography.fontSizeSm,
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
   },
   /** Inline controls group (e.g. sort direction + remove buttons). */
   itemControls: {

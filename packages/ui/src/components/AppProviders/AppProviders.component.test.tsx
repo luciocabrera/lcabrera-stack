@@ -95,6 +95,7 @@ const globalSettings: GlobalSettingsState = {
     size: 'medium',
   },
   pinning: {},
+  tablePanel: {},
 };
 
 afterEach(() => {

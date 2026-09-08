@@ -2,6 +2,7 @@ import {
   useGetGlobalGroupingPreferences,
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
+  useGetGlobalTablePanelPreferences,
 } from '#ui/contexts/GlobalSettingsContext/selectors';
 
 import { toDraft } from '../../utils';
@@ -12,6 +13,7 @@ export const useCancelSettingsDraft = () => {
   const groupingPreferences = useGetGlobalGroupingPreferences();
   const navigationPreferences = useGetGlobalNavigationPreferences();
   const pinningPreferences = useGetGlobalPinningPreferences();
+  const tablePanelPreferences = useGetGlobalTablePanelPreferences();
 
   return () => {
     draftStore.set(
@@ -19,6 +21,7 @@ export const useCancelSettingsDraft = () => {
         groupingPreferences,
         navigationPreferences,
         pinningPreferences,
+        tablePanelPreferences,
       }),
     );
   };

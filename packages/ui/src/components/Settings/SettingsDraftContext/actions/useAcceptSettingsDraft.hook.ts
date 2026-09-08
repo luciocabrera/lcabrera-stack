@@ -2,11 +2,13 @@ import {
   useSetGlobalGroupingPreferences,
   useSetGlobalNavigationPreferences,
   useSetGlobalPinningPreferences,
+  useSetGlobalTablePanelPreferences,
 } from '#ui/contexts/GlobalSettingsContext/actions';
 import {
   useGetGlobalGroupingPreferences,
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
+  useGetGlobalTablePanelPreferences,
 } from '#ui/contexts/GlobalSettingsContext/selectors';
 
 import {
@@ -15,6 +17,7 @@ import {
   toGlobalGroupingPreferencesUpdate,
   toGlobalNavigationPreferencesUpdate,
   toGlobalPinningPreferencesUpdate,
+  toGlobalTablePanelPreferencesUpdate,
 } from '../../utils';
 import { useSettingsDraftContextValue } from '../useSettingsDraftContextValue.hook';
 
@@ -23,9 +26,11 @@ export const useAcceptSettingsDraft = () => {
   const groupingPreferences = useGetGlobalGroupingPreferences();
   const navigationPreferences = useGetGlobalNavigationPreferences();
   const pinningPreferences = useGetGlobalPinningPreferences();
+  const tablePanelPreferences = useGetGlobalTablePanelPreferences();
   const setGlobalGroupingPreferences = useSetGlobalGroupingPreferences();
   const setGlobalNavigationPreferences = useSetGlobalNavigationPreferences();
   const setGlobalPinningPreferences = useSetGlobalPinningPreferences();
+  const setGlobalTablePanelPreferences = useSetGlobalTablePanelPreferences();
 
   return () => {
     const draft = draftStore.get();
@@ -35,12 +40,14 @@ export const useAcceptSettingsDraft = () => {
       groupingPreferences,
       navigationPreferences,
       pinningPreferences,
+      tablePanelPreferences,
     });
     const {
       hasChanges,
       hasGroupingChanges,
       hasNavigationChanges,
       hasPinningChanges,
+      hasTablePanelChanges,
     } = getSettingsDraftChanges({ baseline, draft });
 
     if (!hasChanges) return;
@@ -64,6 +71,12 @@ export const useAcceptSettingsDraft = () => {
 
     if (hasPinningChanges) {
       setGlobalPinningPreferences(toGlobalPinningPreferencesUpdate({ draft }));
+    }
+
+    if (hasTablePanelChanges) {
+      setGlobalTablePanelPreferences(
+        toGlobalTablePanelPreferencesUpdate({ draft }),
+      );
     }
   };
 };

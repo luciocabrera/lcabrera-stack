@@ -17,6 +17,7 @@ describe('serializeGlobalSettingsForCookie', () => {
           pinSide: 'right',
           unpinConflictResolution: 'unpin-beyond',
         },
+        tablePanel: {},
       },
     });
 
@@ -32,6 +33,7 @@ describe('serializeGlobalSettingsForCookie', () => {
           pinSide: 'right',
           unpinConflictResolution: 'unpin-beyond',
         },
+        tablePanel: {},
       },
       version: GLOBAL_SETTINGS_COOKIE_VERSION,
     });

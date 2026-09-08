@@ -2,7 +2,10 @@ import type {
   useGetGlobalGroupingPreferences,
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
+  useGetGlobalTablePanelPreferences,
 } from '#ui/contexts/GlobalSettingsContext/selectors';
+
+import { resolveSettingsTabOrder } from '#ui/components/Table/utils/resolveSettingsTabOrder.util';
 
 import type { SettingsDraft } from '../Settings.types';
 
@@ -25,12 +28,16 @@ type ToDraftArgs = {
   readonly pinningPreferences: ReturnType<
     typeof useGetGlobalPinningPreferences
   >;
+  readonly tablePanelPreferences: ReturnType<
+    typeof useGetGlobalTablePanelPreferences
+  >;
 };
 
 export const toDraft = ({
   groupingPreferences,
   navigationPreferences,
   pinningPreferences,
+  tablePanelPreferences,
 }: ToDraftArgs): SettingsDraft => {
   return {
     groupFold: groupingPreferences.defaultFold ?? DEFAULT_GROUP_FOLD_PREFERENCE,
@@ -45,6 +52,9 @@ export const toDraft = ({
     pinConflictResolution:
       pinningPreferences.pinConflictResolution ?? DEFAULT_PINNING_PREFERENCE,
     pinSide: pinningPreferences.pinSide ?? DEFAULT_PINNING_PREFERENCE,
+    settingsTabOrder: resolveSettingsTabOrder(
+      tablePanelPreferences.settingsTabOrder,
+    ),
     totalsPlacement:
       groupingPreferences.totalsPlacement ??
       DEFAULT_TOTALS_PLACEMENT_PREFERENCE,

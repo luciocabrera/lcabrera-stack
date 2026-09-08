@@ -1,6 +1,7 @@
 import type {
   TableGroupFold,
   TableGroupingMode,
+  TableSettingsTabRole,
   TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
 
@@ -40,4 +41,9 @@ export type GlobalSettingsState = {
   readonly grouping: GlobalGroupingPreferences;
   readonly navigation: GlobalNavigationPreferences;
   readonly pinning: GlobalPinningPreferences;
+  readonly tablePanel: GlobalTablePanelPreferences;
+};
+
+export type GlobalTablePanelPreferences = {
+  readonly settingsTabOrder?: readonly TableSettingsTabRole[];
 };

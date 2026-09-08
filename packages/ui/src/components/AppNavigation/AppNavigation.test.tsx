@@ -91,6 +91,7 @@ describe('AppNavigation', () => {
           size: 'medium',
         },
         pinning: {},
+        tablePanel: {},
       },
     });
 
@@ -112,6 +113,7 @@ describe('AppNavigation', () => {
           size: 'medium',
         },
         pinning: {},
+        tablePanel: {},
       },
     });
 
@@ -132,6 +134,7 @@ describe('AppNavigation', () => {
           size: 'compact',
         },
         pinning: {},
+        tablePanel: {},
       },
     });
 
@@ -151,6 +154,7 @@ describe('AppNavigation', () => {
           size: 'medium',
         },
         pinning: {},
+        tablePanel: {},
       },
     });
 
@@ -165,6 +169,7 @@ describe('AppNavigation', () => {
         grouping: {},
         navigation: { size: 'medium' },
         pinning: {},
+        tablePanel: {},
       },
     });
 

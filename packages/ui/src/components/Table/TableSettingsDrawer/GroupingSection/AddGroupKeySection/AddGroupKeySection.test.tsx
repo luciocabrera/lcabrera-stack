@@ -14,14 +14,6 @@ import type { TableColumnGroupingCapability } from '#ui/components/Table/Table.t
 
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 
-type MockVirtualSelectProps = {
-  readonly onChange: (values: readonly string[]) => void;
-  readonly options: readonly {
-    readonly label: string;
-    readonly value: string;
-  }[];
-};
-
 const {
   capabilitiesRef,
   columnsRef,
@@ -56,24 +48,14 @@ vi.mock('../../TableDrawerContext/selectors', () => ({
   useGetGroupingKeys: () => groupingKeysRef.current,
 }));
 
-vi.mock('#ui/components/VirtualSelect', () => ({
-  VirtualSelect: ({ onChange, options }: MockVirtualSelectProps) => (
-    <ul data-testid='column-options'>
-      {options.map((option) => (
-        <li key={option.value}>
-          <button
-            onClick={() => {
-              onChange([option.value]);
-            }}
-            type='button'
-          >
-            {option.label}
-          </button>
-        </li>
-      ))}
-    </ul>
-  ),
-}));
+vi.mock('#ui/components/VirtualSelect', async () => {
+  const { createMockVirtualSelect } =
+    await import('#ui/utils/tests/createMockVirtualSelect.util');
+
+  return {
+    VirtualSelect: createMockVirtualSelect({ testId: 'column-options' }),
+  };
+});
 
 import { AddGroupKeySection } from './AddGroupKeySection.component';
 

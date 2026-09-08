@@ -4,21 +4,27 @@ import {
   SidePanelSectionHeader,
   SidePanelSectionMain,
 } from '#ui/components/SidePanel';
+import {
+  useGetTableIsGroupingEnabled,
+  useGetTableIsGroupingLocked,
+} from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 
 import type { GeneralSettingsSectionProps } from './GeneralSettingsSection.types';
 
 import { ColumnOrderSectionToolbar } from '../ColumnOrderSection/ColumnOrderSectionToolbar';
 import { FiltersSectionToolbar } from '../FiltersSection/FiltersSectionToolbar';
+import { GroupingSectionToolbar } from '../GroupingSection/GroupingSectionToolbar';
 import { SortingSectionToolbar } from '../SortingSection/SortingSectionToolbar';
 import { AllSettingsSection } from './AllSettingsSection/AllSettingsSection.component';
 import { ColumnWidthsSection } from './ColumnWidthsSection/ColumnWidthsSection.component';
-import { TabsOrderSection } from './TabsOrderSection';
-import { TotalsPlacementSection } from './TotalsPlacementSection';
 
 export const GeneralSettingsSection = ({
   isBusy = false,
   ...props
 }: GeneralSettingsSectionProps) => {
+  const isGroupingEnabled = useGetTableIsGroupingEnabled();
+  const isGroupingLocked = useGetTableIsGroupingLocked();
+
   return (
     <SidePanelSectionMain {...props}>
       <ColumnWidthsSection isBusy={isBusy} />
@@ -43,9 +49,12 @@ export const GeneralSettingsSection = ({
         <ColumnOrderSectionToolbar isBusy={isBusy} />
       </SidePanelSection>
 
-      <TotalsPlacementSection isBusy={isBusy} />
-
-      <TabsOrderSection isBusy={isBusy} />
+      {isGroupingEnabled && !isGroupingLocked && (
+        <SidePanelSection>
+          <SidePanelSectionHeader title='Grouping' />
+          <GroupingSectionToolbar isBusy={isBusy} />
+        </SidePanelSection>
+      )}
 
       <AllSettingsSection isBusy={isBusy} />
     </SidePanelSectionMain>

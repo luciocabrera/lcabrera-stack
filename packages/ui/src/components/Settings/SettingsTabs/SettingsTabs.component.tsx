@@ -5,6 +5,7 @@ import { Tabs } from '#ui/components/Tabs';
 import { GroupingSettingsTab } from '../GroupingSettingsTab';
 import { NavigationSettingsTab } from '../NavigationSettingsTab';
 import { PinningSettingsTab } from '../PinningSettingsTab';
+import { TablePanelSettingsTab } from '../TablePanelSettingsTab';
 
 const TABS: readonly TabItem[] = [
   {
@@ -21,6 +22,11 @@ const TABS: readonly TabItem[] = [
     children: <GroupingSettingsTab />,
     header: 'Grouping',
     key: 'grouping',
+  },
+  {
+    children: <TablePanelSettingsTab />,
+    header: 'Table Panel',
+    key: 'table-panel',
   },
 ];
 

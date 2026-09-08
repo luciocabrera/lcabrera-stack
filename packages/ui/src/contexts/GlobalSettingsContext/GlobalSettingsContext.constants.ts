@@ -4,4 +4,5 @@ export const INITIAL_GLOBAL_SETTINGS: GlobalSettingsState = {
   grouping: {},
   navigation: {},
   pinning: {},
+  tablePanel: {},
 };

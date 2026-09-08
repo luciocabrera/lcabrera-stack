@@ -24,7 +24,10 @@ export const GroupKeyItemContent = ({
 
   return (
     <div {...stylex.props(styles.groupKeyItem)}>
-      <span {...stylex.props(styles.groupKeyItemLabel)}>
+      <span
+        {...stylex.props(styles.groupKeyItemLabel)}
+        title={`${level}. ${item.label}`}
+      >
         {`${level}. ${item.label}`}
       </span>
       {!isGroupingLocked && (

@@ -13,11 +13,13 @@ import {
 } from 'vite-plus/test';
 
 const {
+  hasAdvancedSettingsRef,
   isGroupingEnabledRef,
   selectedTabMock,
   setSelectedTabMock,
   tabOrderRef,
 } = vi.hoisted(() => ({
+  hasAdvancedSettingsRef: { current: false },
   isGroupingEnabledRef: { current: false },
   selectedTabMock: vi.fn(() => 'general'),
   setSelectedTabMock: vi.fn(),
@@ -72,6 +74,11 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableSettingsTabOrder: () => tabOrderRef.current,
 }));
 
+vi.mock('../AdvancedSettingsSection', () => ({
+  AdvancedSettingsSection: () => <div>Advanced settings section</div>,
+  useHasAdvancedSettings: () => hasAdvancedSettingsRef.current,
+}));
+
 vi.mock('../ColumnOrderSection', () => ({
   ColumnOrderSection: () => <div>Column order section</div>,
 }));
@@ -114,6 +121,7 @@ afterEach(() => {
 });
 
 beforeEach(() => {
+  hasAdvancedSettingsRef.current = false;
   isGroupingEnabledRef.current = false;
   tabOrderRef.current = undefined;
   selectedTabMock.mockReset();
@@ -134,6 +142,13 @@ describe('TableSettingsDrawerBody', () => {
     expect(screen.getByText('Details').textContent).toBe('Details');
   });
 
+  it('offers no Advanced tab for a route that cannot group', () => {
+    render(<TableSettingsDrawerBody />);
+
+    expect(screen.queryByText('Advanced')).toBeNull();
+    expect(screen.queryByText('Advanced settings section')).toBeNull();
+  });
+
   it('offers no Grouping tab for a route that cannot group', () => {
     render(<TableSettingsDrawerBody />);
 
@@ -143,6 +158,7 @@ describe('TableSettingsDrawerBody', () => {
 
   it('adds the Grouping tab where the route declared the capability', () => {
     isGroupingEnabledRef.current = true;
+    hasAdvancedSettingsRef.current = true;
 
     render(<TableSettingsDrawerBody />);
 
@@ -154,6 +170,7 @@ describe('TableSettingsDrawerBody', () => {
 
   it('puts Columns after General and Grouping after Sorting', () => {
     isGroupingEnabledRef.current = true;
+    hasAdvancedSettingsRef.current = true;
 
     render(<TableSettingsDrawerBody />);
 
@@ -168,11 +185,13 @@ describe('TableSettingsDrawerBody', () => {
       'Sorting',
       'Grouping',
       'Details',
+      'Advanced',
     ]);
   });
 
   it('paints the tabs in the order the reader arranged them', () => {
     isGroupingEnabledRef.current = true;
+    hasAdvancedSettingsRef.current = true;
     tabOrderRef.current = ['details', 'grouping', 'general'];
 
     render(<TableSettingsDrawerBody />);
@@ -188,6 +207,7 @@ describe('TableSettingsDrawerBody', () => {
       'Columns',
       'Filters',
       'Sorting',
+      'Advanced',
     ]);
   });
 

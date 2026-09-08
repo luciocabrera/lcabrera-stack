@@ -15,13 +15,15 @@ evidence:
   - type: test
     ref: packages/ui/src/components/SidePanel/SidePanel.test.tsx
   - type: test
-    ref: packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/TabsOrderSection/TabsOrderSection.test.tsx
-  - type: test
     ref: packages/ui/src/components/Table/utils/orderSettingsTabs.util.test.ts
+  - type: test
+    ref: packages/ui/src/routing/loaders/readTableLoaderStateFromRequest.util.test.ts
   - type: code
     ref: packages/ui/src/components/SidePanel/SidePanelResizeHandle/SidePanelResizeHandle.component.tsx
   - type: doc
     ref: docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md
+  - type: doc
+    ref: docs/decisions/ADR-115-the-settings-panel-separates-what-the-table-asks-from-how-the-panel-is-shaped.md
 ---
 
 # The settings panel fits the way I work
@@ -31,9 +33,15 @@ evidence:
 I spend the day in one or two tabs of the table settings and I reach past the
 rest every time. The panel should let me put the tab I use first, and it should
 be as wide as the work needs — the column list and the filter editors do not fit
-in a fixed strip on a display with room to spare. What I set should still be
-there tomorrow, and it should never leave the panel wider than the screen I open
-it on.
+in a fixed strip on a display with room to spare. I want to state that order
+once and have every table I open follow it, because it is the same answer every
+time and I do not want to repeat it per table. What I set should still be there
+tomorrow, and it should never leave the panel wider than the screen I open it
+on.
+
+I also want each tab to be about one thing. Clearing a filter and deciding where
+a subtotal row sits are different questions, and reading past one to reach the
+other is the same cost as reaching past a tab.
 
 ## Acceptance
 
@@ -47,9 +55,36 @@ it on.
   `resolveSidePanelWidthBounds.util.test.ts` → "never hands back a ceiling under
   the floor", and by the `width` style in `SidePanel.stylex.ts`, which clamps the
   same band again in CSS.
-- The General tab lists every settings tab and a drop states the whole order, not
-  the tab that moved. Decided by `TabsOrderSection.test.tsx` → "states a drop as
-  the whole order, not the moved tab alone".
+- Settings carries a Table Panel tab listing every settings tab, and Accept
+  persists the order the reader arranged as a whole rather than the tab that
+  moved. Decided by `Settings.component.test.tsx` → "persists the settings tab
+  order from the Table Panel tab".
+- Every table opens in that one order, and no table carries an order of its own —
+  including a table whose cookie still holds one from an earlier release. Decided
+  by `createTableRouteLoader.util.test.ts` → "ignores a settingsTabOrder an
+  earlier release left in the UI-flags cookie" and "takes the settings tab order
+  from the reader global preference", by `toPersistedUiState.util.test.ts` →
+  "drops a key a previous release wrote and this one no longer declares", and by
+  `readTableLoaderStateFromRequest.util.test.ts` → "takes the order the reader set
+  globally" and "states no order when the reader has set none".
+- Arranging the tabs to the declared order clears the preference rather than
+  storing it. Decided by `toGlobalTablePanelPreferencesUpdate.util.test.ts` →
+  "writes the order back to undefined when it is the declared one".
+- The General tab holds the clear and the reset for each part of the table's
+  query state, including grouping, and holds nothing that writes a search param.
+  Decided by `GeneralSettingsSection.test.tsx` → "composes width presets, section
+  toolbars, and all-settings actions" and "offers no grouping actions for a route
+  that cannot group".
+- The Advanced tab carries the two totals controls, and is absent rather than
+  empty wherever both of them render nothing. Decided by
+  `AdvancedSettingsSection.test.tsx` → "composes the two totals controls", by
+  `useHasAdvancedSettings.hook.test.ts` → its locked and non-rollup cases, and by
+  `TableSettingsDrawerBody.test.tsx` → "offers no Advanced tab for a route that
+  cannot group".
+- The General tab's Grouping heading never stands over an empty toolbar. Decided
+  by `GeneralSettingsSection.test.tsx` → "offers no grouping actions for a route
+  that cannot group" and "offers no grouping actions under a locked preset,
+  heading included".
 - That one order governs both the table settings tabs and a single column's tabs,
   matching them by what each tab is for rather than by its name. Decided by
   `orderSettingsTabs.util.test.ts` → "ranks a column drawer tab by the role it
@@ -59,15 +94,34 @@ it on.
   name that is not a tab of either drawer" and "keeps the stored order and
   appends what it did not name", and by `TableSettingsDrawerBody.test.tsx` →
   "ignores a stored order naming a tab the drawer does not have".
-- Both the order and the width survive a reload, through the same UI-flags cookie
-  as the selected tab. Decided by `getPersistedUiState.util.ts`, which carries
-  `settingsTabOrder` and `settingsPanelWidth`, and by the round trip
-  `readPersistedUiFlagsFromCookie` closes into the loader's `metaState`.
+- The width survives a reload through the same UI-flags cookie as the selected
+  tab. Decided by `getPersistedUiState.util.ts`, which carries
+  `settingsPanelWidth`, and by the round trip `readPersistedUiFlagsFromCookie`
+  closes into the loader's `metaState`.
+- The order survives a reload through the global-settings cookie. Decided by
+  `toGlobalTablePanelPreferences.util.test.ts` → "keeps a stored order and
+  appends the roles it did not name" and "drops a name that is not a role".
 
 ## Notes
 
-The order is per table, because the cookie is keyed by the table's
-`persistenceKey` — the same scope the selected tab and the pinned state already
-have. A reader who wants one order everywhere sets it per table today; making it
-an account-wide preference would mean moving it to the global settings cookie,
-which is a different decision and not one this requirement asks for.
+The order has exactly one home, and that is the point. It was per table when
+ADR-114 introduced it, keyed by `persistenceKey` like the selected tab and the
+pinned state. Those are answers about the table in front of you; which order the
+tabs sit in is not. Keeping both scopes was tried and produced a table whose own
+order won for good with no control to clear it, so ADR-115 dropped the per-table
+form rather than adding a third control to undo the second.
+
+The cost is that the order is read in the loader, so changing it on the Settings
+page shows up on the next table opened rather than in a drawer already on screen.
+
+The `command` pointer was checked rather than assumed, and the first probe was
+not good enough. Replacing the read in `readTableLoaderStateFromRequest` with
+`undefined` fails "takes the order the reader set globally" and only that one,
+which pins the channel. But that suite mocks `readPersistedUiFlagsFromCookie`, so
+no case there could see a stale per-table order at all — review caught that the
+key survives `parseVersionedPayload`'s cast. Restoring both halves of the old
+behaviour (a pass-through `toPersistedUiState` and the conditional spread in
+`createTableRouteLoader`) fails "ignores a settingsTabOrder an earlier release
+left in the UI-flags cookie" plus two `toPersistedUiState` cases, on the
+unmocked cookie path. The runs are on
+[#1119](https://github.com/luciocabrera/lcabrera-stack/pull/1119).

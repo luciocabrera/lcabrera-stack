@@ -111,6 +111,7 @@ export const createTableRouteLoader = <
       grouping,
       groupingPreferences,
       metaUiFlags,
+      settingsTabOrder,
       sorting,
       totalsPlacement,
     } = readTableLoaderStateFromRequest<TData>({
@@ -181,6 +182,7 @@ export const createTableRouteLoader = <
         isUrlStateNested,
         lockedFilters: lockedFilters ?? declaredLockedFilters,
         preferredGroupingMode: groupingPreferences.mode,
+        settingsTabOrder,
         totalsPlacement,
         ...capabilityMeta,
       },

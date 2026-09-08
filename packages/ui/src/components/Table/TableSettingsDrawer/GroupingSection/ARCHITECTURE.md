@@ -65,9 +65,7 @@ GroupingSection/
 ├── ActiveAggregateList/                → DraggableList of staged aggregates — one row per (column, function)
 │   ├── AggregateItemContent/           → One measure row: label, share toggle, remove
 │   └── ShareOfTotalToggle/             → Share of the grand total, on the measures it is defined for
-├── GroupingModeSection/                → Totals mode: groups only, or groups with subtotals
-├── TotalsPlacementSection/             → Totals position: above or below their rows (rollup only)
-├── GroupingSectionToolbar/             → Clear/reset grouping (toolbar + footer)
+├── GroupingSectionToolbar/             → Clear/reset grouping (toolbar + footer, and reused in the General tab)
 └── utils/
     ├── toGroupKeyItems.util.ts         → Staged keys + labels, in nesting order
     ├── toAggregateItems.util.ts        → Staged aggregates + labels + a per-entry id, in staged order
@@ -236,19 +234,30 @@ that removes an applied distinct count, so the column carrying one goes on being
 offered it while every other column is not. This picker never sees the
 difference, since it subtracts what the column carries anyway.
 
-## Totals placement is not staged here, and never was part of the grouping
+## Neither totals control is here any more
 
-`TotalsPlacementSection` used to sit beside the mode control. It stages like
-everything else, but what it stages lives in its **own** draft store rather than
-in the grouping draft, because it commits somewhere else: the grouping goes to
-the `grouping` search param, while the placement goes to the `totals` param
-**and** the UI-flags cookie, since it is a preference that outlives the table it
-was set on (ADR-085). Sitting in this section said the opposite of all three, so
-it now lives in the General tab
+This section's subject is which dimensions the read groups by and which measures
+it aggregates. Two controls used to sit between the two, and both have moved to
+the Advanced tab.
+
+`TotalsPlacementSection` went first. It stages like everything else, but what it
+stages lives in its **own** draft store rather than in the grouping draft,
+because it commits somewhere else: the grouping goes to the `grouping` search
+param, while the placement goes to the `totals` param **and** the UI-flags
+cookie, since it is a preference that outlives the table it was set on
+(ADR-085). Sitting in this section said the opposite of all three
 ([ADR-114](../../../../../../../docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md)).
 
-It still renders only under `rollup`. `flat` emits no subtotal and no grand
-total, so there would be nothing to position.
+`GroupingModeSection` followed. It does stage into the grouping draft and does
+ride the `grouping` param, so nothing about its commit path was wrong. What was
+wrong is the subject: whether the read emits subtotal rows is a totals question,
+and it sat between the keys and the measures
+([ADR-115](../../../../../../../docs/decisions/ADR-115-the-settings-panel-separates-what-the-table-asks-from-how-the-panel-is-shaped.md)).
+`GroupingSection.test.tsx` renders it alongside this section, because the
+staging-to-one-commit flow it pins spans both.
+
+Totals position still renders only under `rollup`. `flat` emits no subtotal and
+no grand total, so there would be nothing to position.
 
 ## A column carries as many aggregates as the user asks for
 

@@ -427,6 +427,7 @@ export type TableResponseError =
   | { readonly kind: 'unexpected'; readonly message: string };
 
 export type TableSettingsTabRole =
+  | 'advanced'
   | 'columns'
   | 'details'
   | 'filters'

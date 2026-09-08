@@ -77,11 +77,14 @@ export const readTableLoaderStateFromRequest = <
     persistenceKey,
   });
 
-  const { grouping: groupingPreferences } = getGlobalSettingsFromCookie({
-    appId,
-    cookieString: cookieHeader ?? undefined,
-    fallback: INITIAL_GLOBAL_SETTINGS,
-  });
+  const { grouping: groupingPreferences, tablePanel: tablePanelPreferences } =
+    getGlobalSettingsFromCookie({
+      appId,
+      cookieString: cookieHeader ?? undefined,
+      fallback: INITIAL_GLOBAL_SETTINGS,
+    });
+
+  const settingsTabOrder = tablePanelPreferences.settingsTabOrder;
 
   const columnOrder = (cookieState.columnOrder ??
     []) as ColumnOrderState<TData>;
@@ -140,6 +143,7 @@ export const readTableLoaderStateFromRequest = <
     grouping,
     groupingPreferences,
     metaUiFlags,
+    settingsTabOrder,
     sorting,
     standaloneFiltersParam,
     standaloneGroupingParam,

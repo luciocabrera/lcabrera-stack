@@ -1,13 +1,19 @@
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TableColumn } from '#ui/components/Table';
+import type { PersistedUiState } from '#ui/components/Table/utils/persistence.types';
 
 vi.mock('#ui/components/Table/utils', () => ({
   readPersistedStateFromCookie: vi.fn(),
   readPersistedUiFlagsFromCookie: vi.fn(() => ({})),
 }));
 
-import { readPersistedStateFromCookie } from '#ui/components/Table/utils';
+import {
+  readPersistedStateFromCookie,
+  readPersistedUiFlagsFromCookie,
+} from '#ui/components/Table/utils';
+import { GLOBAL_SETTINGS_COOKIE_KEY } from '#ui/utils/globalSettings';
+import { GLOBAL_SETTINGS_COOKIE_VERSION } from '#ui/utils/globalSettings/globalSettings.constants';
 import { serializeFiltersToURL } from '#ui/utils/urlState/serializeFiltersToURL.util';
 import { serializeSortingToURL } from '#ui/utils/urlState/serializeSortingToURL.util';
 
@@ -41,6 +47,46 @@ const filtersFor = (value: string) =>
   serializeFiltersToURL({
     status: { operator: 'equals', type: 'text', value },
   }) ?? '';
+
+const expectListState = (
+  state: ReturnType<typeof readTableLoaderStateFromRequest<TestRow>>,
+) => {
+  expect(state.filters).toStrictEqual({
+    status: { operator: 'equals', type: 'text', value: 'list' },
+  });
+  expect(state.sorting).toStrictEqual([
+    { columnKey: 'amount', direction: 'asc' },
+  ]);
+};
+
+type ReadTabOrderArgs = {
+  readonly globalOrder?: readonly string[];
+  readonly uiFlags?: PersistedUiState & {
+    readonly settingsTabOrder?: readonly string[];
+  };
+};
+
+const readTabOrder = ({ globalOrder, uiFlags = {} }: ReadTabOrderArgs) => {
+  vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+  vi.mocked(readPersistedUiFlagsFromCookie).mockReturnValue(uiFlags);
+
+  const cookie = globalOrder
+    ? `${GLOBAL_SETTINGS_COOKIE_KEY}=${encodeURIComponent(
+        JSON.stringify({
+          value: { tablePanel: { settingsTabOrder: globalOrder } },
+          version: GLOBAL_SETTINGS_COOKIE_VERSION,
+        }),
+      )}`
+    : undefined;
+
+  return readTableLoaderStateFromRequest<TestRow>({
+    columns: testColumns,
+    persistenceKey: 'orders',
+    request: new Request('https://example.com/orders', {
+      ...(cookie !== undefined && { headers: { Cookie: cookie } }),
+    }),
+  }).settingsTabOrder;
+};
 
 const sortingFor = (columnKey: 'amount' | 'status') =>
   serializeSortingToURL([{ columnKey, direction: 'asc' }]) ?? '';
@@ -371,12 +417,7 @@ describe('readTableLoaderStateFromRequest', () => {
         request: nestedRequest(),
       });
 
-      expect(state.filters).toStrictEqual({
-        status: { operator: 'equals', type: 'text', value: 'list' },
-      });
-      expect(state.sorting).toStrictEqual([
-        { columnKey: 'amount', direction: 'asc' },
-      ]);
+      expectListState(state);
     });
   });
 
@@ -424,12 +465,32 @@ describe('readTableLoaderStateFromRequest', () => {
         ),
       });
 
-      expect(state.filters).toStrictEqual({
-        status: { operator: 'equals', type: 'text', value: 'list' },
-      });
-      expect(state.sorting).toStrictEqual([
-        { columnKey: 'amount', direction: 'asc' },
-      ]);
+      expectListState(state);
+    });
+  });
+
+  describe('settingsTabOrder', () => {
+    it('takes the order the reader set globally', () => {
+      expect(readTabOrder({ globalOrder: ['details'] })?.[0]).toBe('details');
+    });
+
+    it('drops an order a previous release left in the table UI flags', () => {
+      expect(
+        readTabOrder({ uiFlags: { settingsTabOrder: ['sorting'] } }),
+      ).toBeUndefined();
+    });
+
+    it('leaves a stale table order behind the reader global one', () => {
+      expect(
+        readTabOrder({
+          globalOrder: ['details'],
+          uiFlags: { settingsTabOrder: ['sorting'] },
+        })?.[0],
+      ).toBe('details');
+    });
+
+    it('states no order when the reader has set none', () => {
+      expect(readTabOrder({})).toBeUndefined();
     });
   });
 });
