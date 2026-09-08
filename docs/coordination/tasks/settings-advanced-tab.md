@@ -1,6 +1,6 @@
 ---
 id: settings-advanced-tab
-title: Move totals and tabs order into an Advanced settings tab
+title: Split the table settings panel by what each tab is for
 owner: agent:claude
 status: review
 branch: feat/1118-settings-advanced-tab
@@ -20,11 +20,11 @@ issue: #1118
 ## What
 
 Split the table settings panel by what each tab is for. A new Advanced tab holds
-the totals mode, the totals position and the tab order; General goes back to
-being the query state's clear and reset, and gains the Grouping pair it was
-missing; Grouping keeps only dimensions and measures. The tab order also gains a
-global default on the Settings page, and a draggable row's label truncates
-instead of wrapping. ADR-115.
+the totals mode and the totals position; General goes back to being the query
+state's clear and reset, and gains the Grouping pair it was missing; Grouping
+keeps only dimensions and measures. The tab order leaves the table entirely and
+becomes a global preference on the Settings page, and a draggable row's label
+truncates instead of wrapping. ADR-115.
 
 ## Status / next
 
