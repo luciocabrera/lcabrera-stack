@@ -41,12 +41,12 @@ fi
 vp run fallow:audit --base "$BASE" --coverage "$COVERAGE" "$@"
 status=$?
 
-if [ "$status" -eq 1 ]; then
+if [[ "$status" -eq 1 ]]; then
   echo ""
   echo "✗ fallow preflight: the audit attributes new dead code, complexity or"
   echo "  duplication to this diff. Inherited findings are baselined and do not"
   echo "  fail here; only what the diff introduces does."
-elif [ "$status" -ne 0 ]; then
+elif [[ "$status" -ne 0 ]]; then
   echo ""
   echo "✗ fallow preflight: the audit could not run (exit $status) — a runtime or"
   echo "  configuration failure, not a finding. Nothing has been attributed to"
