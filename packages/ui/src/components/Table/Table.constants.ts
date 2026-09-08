@@ -8,6 +8,7 @@ import type {
   TableGroupKeyRefusalReason,
   TableGroupPeriod,
   TableGroupRow,
+  TableSettingsTabRole,
   TableTotalsPlacement,
 } from './Table.types';
 
@@ -16,6 +17,8 @@ export const DEFAULT_MIN_COLUMN_WIDTH = 60;
 export const DEFAULT_MAX_COLUMN_WIDTH = 600;
 
 export const DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH = 200;
+
+export const DEFAULT_MAX_AGGREGATE_COLUMN_WIDTH = DEFAULT_MAX_COLUMN_WIDTH;
 
 export const COLUMN_RESIZE_KEYBOARD_STEP = 8;
 
@@ -39,6 +42,40 @@ export const IS_PREFETCH_ENABLED = true;
 export const PRIMARY_KEY_ID_DELIMITER = '_';
 
 export const ACTIONS_COLUMN_KEY = 'actions';
+
+export const TABLE_SETTINGS_TAB_ROLES: readonly TableSettingsTabRole[] = [
+  'general',
+  'columns',
+  'filters',
+  'sorting',
+  'grouping',
+  'details',
+];
+
+export const TABLE_SETTINGS_TAB_ROLE_LABELS: Record<
+  TableSettingsTabRole,
+  string
+> = {
+  columns: 'Columns',
+  details: 'Details',
+  filters: 'Filters',
+  general: 'General',
+  grouping: 'Grouping',
+  sorting: 'Sorting',
+};
+
+export const TABLE_SETTINGS_TAB_ROLE_BY_KEY: Readonly<
+  Record<string, TableSettingsTabRole>
+> = {
+  columns: 'columns',
+  details: 'details',
+  filter: 'filters',
+  filters: 'filters',
+  general: 'general',
+  grouping: 'grouping',
+  pinning: 'columns',
+  sorting: 'sorting',
+};
 
 export const TABLE_GROUP_ROW_FIELD: keyof TableGroupRow = OLAP_GROUP_ROW_FIELD;
 

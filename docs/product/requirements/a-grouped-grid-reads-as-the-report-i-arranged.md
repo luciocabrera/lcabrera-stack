@@ -18,6 +18,10 @@ evidence:
     ref: packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/TableHeaderActionsMenu.test.tsx
   - type: code
     ref: packages/ui/src/components/Table/utils/withAggregateColumnOrder.util.ts
+  - type: code
+    ref: packages/ui/src/components/Table/utils/withGroupedColumnWidths.util.ts
+  - type: doc
+    ref: docs/decisions/ADR-113-a-grouped-grids-column-widths-come-from-the-build.md
   - type: doc
     ref: docs/decisions/ADR-099-the-staged-aggregate-list-orders-the-measure-columns.md
 ---
@@ -50,6 +54,15 @@ accept, and find nothing changed.
   says why, and a grouped column can be ungrouped on its own. Decided by
   `TableHeaderActionsMenu.test.tsx` → "the layout actions a grouped column
   cannot take", and by `GroupActions.test.tsx` → "Remove from Grouping".
+- A grouped grid paints no column it cannot fill: the row-actions column is gone
+  while a grouping is applied, because a group row has no row to act on and the
+  grouped read returns none. Decided by `Table.groupedCrud.test.tsx` → "paints no
+  row-actions column, which a grouped read gives nothing to act on".
+- Every measure column can actually be resized — its width band comes from the
+  build rather than from the widths the consumer declared for the ungrouped
+  field, which collapsed to a range of zero on any column narrower than the
+  aggregate floor. Decided by `withGroupedColumnWidths.util.test.ts` → "leaves the
+  band wide enough to drag, which the source widths were not".
 - None of the above changes an ungrouped grid. Decided by
   `TableHeaderActionsMenu.test.tsx` → "leaves an ungrouped column's menu exactly
   as it was", and by `withAggregateColumnOrder.util.test.ts` → the three
