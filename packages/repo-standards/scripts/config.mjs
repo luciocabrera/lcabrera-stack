@@ -143,7 +143,7 @@ export const resolveRegisters = (raw) => {
     ),
     adrGrandfatheredDuplicates: Array.isArray(block.adrGrandfatheredDuplicates)
       ? block.adrGrandfatheredDuplicates.filter(
-          (value) => Number.isInteger(value) && value > 0,
+          (value) => Number.isSafeInteger(value) && value > 0,
         )
       : DEFAULT_REGISTERS.adrGrandfatheredDuplicates,
     adrHomes: declaredHomes.map((home) => ({ ...home, commands: adrCommands })),

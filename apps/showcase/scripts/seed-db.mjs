@@ -47,7 +47,8 @@ const REQUIRED_ENV_KEYS = [
 
 const MAINTENANCE_DATABASE = 'postgres';
 
-const missingEnvKeys = (env) => REQUIRED_ENV_KEYS.filter((key) => !env[key]);
+const missingEnvKeys = (env) =>
+  REQUIRED_ENV_KEYS.filter((key) => (env[key] ?? '') === '');
 
 const readSettings = (env) => ({
   connection: {

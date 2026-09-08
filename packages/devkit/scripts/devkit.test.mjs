@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vite-plus/test';
 
-import { runCommand } from './devkit.mjs';
+import { runCommand } from './command-router.mjs';
 
 describe('runCommand', () => {
   test('refuses an unknown command rather than doing nothing quietly', () => {

@@ -105,7 +105,7 @@ export const writeIn = (root) => (path, text) => {
 export const editIn = (root) => (path, from, to) => {
   const full = join(root, path);
   const before = readFileSync(full, 'utf8');
-  const after = before.replace(from, to);
+  const after = before.replace(from, () => to);
   if (after === before) {
     throw new Error(`fixture: \`${from}\` is not in ${path}`);
   }
@@ -149,7 +149,9 @@ export const appendEntry = (root, filename) => {
 };
 
 export const removeAdrRepos = () => {
-  for (const root of roots.splice(0)) {
+  const drained = [...roots];
+  roots.length = 0;
+  for (const root of drained) {
     rmSync(root, { force: true, recursive: true });
   }
 };

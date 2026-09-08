@@ -37,7 +37,7 @@ export const renderAdr = ({ number, template, title }) => {
   }
   const record = withoutInstructions.replace(
     HEADING_LINE,
-    `# ADR-${pad(number)} — ${title}`,
+    () => `# ADR-${pad(number)} — ${title}`,
   );
   return block === '' ? record : `${block}\n${record}`;
 };

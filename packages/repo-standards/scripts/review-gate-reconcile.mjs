@@ -21,7 +21,7 @@
 const TERMINAL_STATES = new Set(['error', 'failure']);
 
 const pullNumber = (pull) =>
-  Number.isInteger(pull?.number) && pull.number > 0 ? pull.number : undefined;
+  Number.isSafeInteger(pull?.number) && pull.number > 0 ? pull.number : undefined;
 
 export const openPullRequestNumbers = (pages) => {
   if (!Array.isArray(pages)) {
@@ -125,7 +125,8 @@ const resolveFrom = ({ from, specifier }) =>
   normalizePath(`${from.split('/').slice(0, -1).join('/')}/${specifier}`);
 
 export const completeFileList = ({ expected, filenames }) => {
-  const count = Number.parseInt(String(expected).trim(), 10);
+  const declared = String(expected).trim();
+  const count = declared === '' ? Number.NaN : Number(declared);
   return filenames.length >= count ? filenames : undefined;
 };
 

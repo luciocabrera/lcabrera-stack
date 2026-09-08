@@ -138,7 +138,7 @@ const documentRow = (entry, width) => {
 const documentRows = (entries) => {
   const width = Math.max(
     ...entries.map(
-      (entry) => `${entry.fields.state ?? entry.fields.kind ?? '?'}`.length,
+      (entry) => String(entry.fields.state ?? entry.fields.kind ?? '?').length,
     ),
     0,
   );

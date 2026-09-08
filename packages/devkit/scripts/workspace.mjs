@@ -40,7 +40,7 @@ export const GENERATED_TSCONFIGS = '**/tsconfig.*.json';
  */
 export const nodeEngineBand = (version) => {
   const major = Number.parseInt(version.split('.', 1)[0] ?? '', 10);
-  if (!Number.isInteger(major)) {
+  if (!Number.isSafeInteger(major)) {
     throw new TypeError(
       `workspace: \`${version}\` does not start with a major version, so no engine band can be derived from it`,
     );

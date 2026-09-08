@@ -52,7 +52,9 @@ describe('the exit code a consumer sees', () => {
   const scratches = [];
 
   afterEach(() => {
-    for (const root of scratches.splice(0)) {
+    const drained = [...scratches];
+  scratches.length = 0;
+  for (const root of drained) {
       rmSync(root, { force: true, recursive: true });
     }
   });

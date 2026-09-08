@@ -22,7 +22,7 @@ const workflowRunCount = ({ file, runGh, window }) => {
       '--jq',
       '.total_count',
     ]);
-    const parsed = Number.parseInt(total, 10);
+    const parsed = Number(total);
     return Number.isNaN(parsed)
       ? { reason: `unreadable run total for ${file}` }
       : { count: parsed };
@@ -51,7 +51,7 @@ export const readWorkflowRuns = ({ runGh, window, workflows }) => {
 const RECORD_MARK = String.fromCodePoint(1);
 
 const utcDayOf = (epochSeconds) => {
-  const seconds = Number.parseInt(epochSeconds, 10);
+  const seconds = Number(epochSeconds);
   return Number.isNaN(seconds)
     ? ''
     : dayOf(new Date(seconds * 1000).toISOString());

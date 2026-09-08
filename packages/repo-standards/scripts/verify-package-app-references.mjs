@@ -27,7 +27,7 @@ const isPublished = (manifestPath) => {
   try {
     return JSON.parse(readFileSync(manifestPath, 'utf8')).private !== true;
   } catch (error) {
-    throw new Error(`${manifestPath}: ${error.message}`);
+    throw new Error(`${manifestPath}: ${error.message}`, { cause: error });
   }
 };
 

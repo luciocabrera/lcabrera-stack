@@ -60,7 +60,7 @@ const lintCodes = (dir) => {
     stdio: ['ignore', 'pipe', 'ignore'],
   };
   const args = ['lint', '--format=json', relative(REPO_ROOT, dir)];
-  let raw = '';
+  let raw;
   try {
     raw = execFileSync(VP, args, options);
   } catch (error) {

@@ -101,7 +101,7 @@ export const createRefusal = ({
 const NAME_SEPARATORS = /[^a-z0-9._-]+/g;
 
 const isEdgeCharacter = (character) =>
-  character === '-' || character === '.' || character === '_';
+  '-._'.includes(character);
 
 const withoutEdges = (value) => {
   const characters = value.split('');

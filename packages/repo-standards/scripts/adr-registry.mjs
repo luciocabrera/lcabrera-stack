@@ -135,7 +135,7 @@ const ESCAPED_PIPE = String.raw`\|`;
 const listingRow = (home, entry) => {
   const parsed = parseAdrFilename(entry.filename);
   const number = parsed === undefined ? '?' : pad(parsed.number);
-  const title = entry.title.replaceAll('|', ESCAPED_PIPE);
+  const title = entry.title.replaceAll('|', () => ESCAPED_PIPE);
   return `| [ADR-${number}](${home.dir}/${entry.filename}) | ${title} |`;
 };
 

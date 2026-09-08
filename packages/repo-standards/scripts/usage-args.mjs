@@ -58,12 +58,12 @@ export const parseArgs = (argv) => {
 };
 
 export const positiveInteger = (value, label) => {
-  if (!WHOLE_NUMBER.test(String(value)) || Number.parseInt(value, 10) < 1) {
+  if (!WHOLE_NUMBER.test(String(value)) || Number(value) < 1) {
     throw new Error(
       `${label} must be a positive whole number of days, got \`${value}\``,
     );
   }
-  return Number.parseInt(value, 10);
+  return Number(value);
 };
 
 const isUtcShape = (text) => {
@@ -104,6 +104,7 @@ const declaredCleanupPeriod = (path) => {
   } catch (error) {
     throw new Error(
       `${path} is not readable JSON (${error.message}), so the transcript retention it declares cannot be read`,
+      { cause: error },
     );
   }
   return settings?.cleanupPeriodDays === undefined
@@ -132,7 +133,7 @@ export const resolveRetention = ({ args, repoRoot, userHome }) => {
   if (declared === undefined) {
     return { days: DOCUMENTED_CLEANUP_DEFAULT, simulated: false };
   }
-  if (!Number.isInteger(declared.value) || declared.value < 1) {
+  if (!Number.isSafeInteger(declared.value) || declared.value < 1) {
     throw new Error(
       `cleanupPeriodDays in ${declared.path} must be a positive whole number of days, got \`${JSON.stringify(declared.value)}\``,
     );

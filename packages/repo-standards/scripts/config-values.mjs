@@ -66,6 +66,7 @@ export const parseConfig = (raw) => {
   } catch (error) {
     throw new Error(
       `${CONFIG_FILE_NAME} is not valid JSON: ${errorMessage(error)}`,
+      { cause: error },
     );
   }
   if (!isPlainObject(parsed)) {
@@ -132,7 +133,7 @@ export const patternList = (value, fallback, key) => {
 
 export const positiveInteger = (value, fallback, key) => {
   if (value === undefined) return fallback;
-  if (!Number.isInteger(value) || value <= 0) {
+  if (!Number.isSafeInteger(value) || value <= 0) {
     throw new Error(
       `${CONFIG_FILE_NAME}: \`${key}\` must be a positive whole number, but is \`${JSON.stringify(value)}\`.`,
     );

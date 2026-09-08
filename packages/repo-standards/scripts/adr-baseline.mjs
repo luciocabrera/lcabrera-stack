@@ -64,7 +64,7 @@ export const readableBaseline = (parsed) => {
       ? parsed.files.filter((name) => typeof name === 'string')
       : [],
     maxEntries:
-      Number.isInteger(parsed.maxEntries) && parsed.maxEntries >= 0
+      Number.isSafeInteger(parsed.maxEntries) && parsed.maxEntries >= 0
         ? parsed.maxEntries
         : 0,
   };

@@ -60,7 +60,9 @@ const makeRoot = (contents = template()) => {
 };
 
 afterEach(() => {
-  for (const root of roots.splice(0)) {
+  const drained = [...roots];
+  roots.length = 0;
+  for (const root of drained) {
     rmSync(root, { force: true, recursive: true });
   }
 });

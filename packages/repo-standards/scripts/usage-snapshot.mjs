@@ -152,6 +152,7 @@ const setAside = ({ observedAt, path, reason }) => {
   } catch (error) {
     throw new Error(
       `the snapshot at ${path} could not be read (${reason}) and could not be moved aside (${error.message}); refusing to overwrite the only copy`,
+      { cause: error },
     );
   }
   return { ...emptySnapshot(), setAside: { movedTo, reason } };

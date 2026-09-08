@@ -86,6 +86,7 @@ const runCoverage = async ({ dir, name }) => {
   } catch (error) {
     throw new Error(
       `${name}: test:coverage failed — the merged report would be incomplete.\n${error.stdout ?? ''}${error.stderr ?? ''}`,
+      { cause: error },
     );
   }
   return { dir, name };

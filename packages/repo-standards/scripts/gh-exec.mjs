@@ -58,6 +58,8 @@ export const runGh = (args) => {
     }).trim();
   } catch (error) {
     const detail = (error.stderr ?? '').toString().trim();
-    throw new Error(`gh ${args[0]} failed: ${detail || error.message}`);
+    throw new Error(`gh ${args[0]} failed: ${detail || error.message}`, {
+      cause: error,
+    });
   }
 };

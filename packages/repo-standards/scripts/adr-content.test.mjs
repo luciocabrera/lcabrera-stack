@@ -174,7 +174,10 @@ describe('sectionFindings', () => {
   });
 
   it.each(ALTERNATIVE_SECTIONS)('accepts %s on its own', (heading) => {
-    const only = BODY.replace('## Alternatives considered', `## ${heading}`);
+    const only = BODY.replace(
+      '## Alternatives considered',
+      () => `## ${heading}`,
+    );
     expect(sectionFindings(only)).toEqual([]);
   });
 

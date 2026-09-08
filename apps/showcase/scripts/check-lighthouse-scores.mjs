@@ -18,7 +18,7 @@ const colors = {
   yellow: '\u{1B}[33m',
 };
 
-export async function checkLighthouseScores(reportPath) {
+async function checkLighthouseScores(reportPath) {
   if (!existsSync(reportPath)) {
     log(`\n❌ Report not found: ${reportPath}`, colors.red);
     process.exitCode = 1;
@@ -31,8 +31,8 @@ export async function checkLighthouseScores(reportPath) {
     return false;
   }
 
-  const report = JSON.parse(readFileSync(reportPath, 'utf-8'));
-  const baseline = JSON.parse(readFileSync(BASELINE_FILE, 'utf-8'));
+  const report = JSON.parse(readFileSync(reportPath, 'utf8'));
+  const baseline = JSON.parse(readFileSync(BASELINE_FILE, 'utf8'));
 
   log('\n📊 Lighthouse Score Report', colors.blue);
   log('=====================================\n');
@@ -49,7 +49,7 @@ export async function checkLighthouseScores(reportPath) {
     const threshold = thresholds[category] || 0;
     const baselineScore = baselineScores[category] || 0;
     const diff = currentScore - baselineScore;
-    const diffStr = diff >= 0 ? `+${diff}` : `${diff}`;
+    const diffStr = diff >= 0 ? `+${diff}` : String(diff);
     const diffColor = diff >= 0 ? colors.green : colors.red;
 
     const isPassed = currentScore >= threshold;
