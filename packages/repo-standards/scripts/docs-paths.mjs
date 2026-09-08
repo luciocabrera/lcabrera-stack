@@ -67,15 +67,17 @@ export const extractCandidates = (markdown, repoRoots) => {
     .map((token) => normaliseToken(token))
     .filter((token) => isRootAnchored(token, repoRoots));
 
-  const linked = prose.matchAll(/\]\(([^)\s]{1,512})\)/g)
-      .map((match) => normaliseToken(match[1]))
-      .filter(
-        (token) =>
-          !isDisqualified(token) &&
-          (isRootAnchored(token, repoRoots) ||
-            isExplicitlyRelative(token) ||
-            token.endsWith('.md')),
-      ).toArray();
+  const linked = prose
+    .matchAll(/\]\(([^)\s]{1,512})\)/g)
+    .map((match) => normaliseToken(match[1]))
+    .filter(
+      (token) =>
+        !isDisqualified(token) &&
+        (isRootAnchored(token, repoRoots) ||
+          isExplicitlyRelative(token) ||
+          token.endsWith('.md')),
+    )
+    .toArray();
 
   return [...new Set([...backticked, ...linked])];
 };

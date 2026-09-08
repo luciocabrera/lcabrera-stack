@@ -131,17 +131,17 @@ describe('resolveRegisters', () => {
 const publishing = (block) => resolvePublishing(JSON.stringify(block));
 
 const withConfig = (config) => {
-    const root = mkdtempSync(join(tmpdir(), 'repo-standards-config-'));
-    if (config !== undefined) {
-      writeFileSync(join(root, CONFIG_FILE_NAME), JSON.stringify(config));
-    }
-    return root;
-  };
+  const root = mkdtempSync(join(tmpdir(), 'repo-standards-config-'));
+  if (config !== undefined) {
+    writeFileSync(join(root, CONFIG_FILE_NAME), JSON.stringify(config));
+  }
+  return root;
+};
 
 const tasksDir = (value) =>
-    resolveRegisters(
-      JSON.stringify({ registers: { coordinationTasksDir: value } }),
-    ).coordinationTasksDir;
+  resolveRegisters(
+    JSON.stringify({ registers: { coordinationTasksDir: value } }),
+  ).coordinationTasksDir;
 
 // These gates write and delete — the ADR scaffolder writes, the index and the
 // board are overwritten, the claim closer unlinks. A configured location that
@@ -215,7 +215,9 @@ describe('containment of the configured locations', () => {
 
   it('trims a padded value and falls back on a blank one', () => {
     expect(tasksDir(' ops/claims ')).toBe('ops/claims');
-    expect(tasksDir(' '.repeat(3))).toBe(DEFAULT_REGISTERS.coordinationTasksDir);
+    expect(tasksDir(' '.repeat(3))).toBe(
+      DEFAULT_REGISTERS.coordinationTasksDir,
+    );
   });
 });
 

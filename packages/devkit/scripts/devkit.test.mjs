@@ -6,7 +6,7 @@ describe('runCommand', () => {
   test('refuses an unknown command rather than doing nothing quietly', () => {
     const error = vi
       .spyOn(console, 'error')
-      .mockImplementation(() => {});
+      .mockImplementation(() => undefined);
     expect(runCommand({ argv: ['bogus'], root: '/nowhere' })).toBe(1);
     expect(error).toHaveBeenCalled();
     error.mockRestore();
@@ -15,17 +15,17 @@ describe('runCommand', () => {
   test('refuses no command at all', () => {
     const error = vi
       .spyOn(console, 'error')
-      .mockImplementation(() => {});
+      .mockImplementation(() => undefined);
     expect(runCommand({ argv: [], root: '/nowhere' })).toBe(1);
     error.mockRestore();
   });
 
   for (const request of ['--help', '-h', 'help']) {
     test(`answers ${request} on stdout, and succeeds`, () => {
-      const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
       const error = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => undefined);
 
       expect(runCommand({ argv: [request], root: '/nowhere' })).toBe(0);
       expect(log).toHaveBeenCalledWith(expect.stringContaining('devkit sync'));
@@ -38,10 +38,10 @@ describe('runCommand', () => {
 
   for (const command of ['sync', 'doctor', 'closure']) {
     test(`answers ${command} --help instead of running ${command}`, () => {
-      const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
       const error = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => undefined);
 
       expect(runCommand({ argv: [command, '--help'], root: '/nowhere' })).toBe(
         0,
@@ -55,10 +55,10 @@ describe('runCommand', () => {
   }
 
   test('treats the bare word as a value everywhere but the command position', () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     const error = vi
       .spyOn(console, 'error')
-      .mockImplementation(() => {});
+      .mockImplementation(() => undefined);
 
     expect(
       runCommand({ argv: ['closure', 'help'], root: '/nowhere' }),
@@ -74,7 +74,7 @@ describe('runCommand', () => {
   test('does not treat an inherited Object property as a command', () => {
     const error = vi
       .spyOn(console, 'error')
-      .mockImplementation(() => {});
+      .mockImplementation(() => undefined);
     expect(runCommand({ argv: ['constructor'], root: '/nowhere' })).toBe(1);
     expect(runCommand({ argv: ['toString'], root: '/nowhere' })).toBe(1);
     error.mockRestore();
@@ -83,7 +83,7 @@ describe('runCommand', () => {
   test('ignores the separator a task runner forwards', () => {
     const error = vi
       .spyOn(console, 'error')
-      .mockImplementation(() => {});
+      .mockImplementation(() => undefined);
     expect(runCommand({ argv: ['--', 'closure'], root: '/nowhere' })).toBe(1);
     expect(error).toHaveBeenCalledWith(
       'closure needs at least one directory to analyse',
@@ -94,7 +94,7 @@ describe('runCommand', () => {
   test('refuses a flag-shaped argument instead of filtering it away', () => {
     const error = vi
       .spyOn(console, 'error')
-      .mockImplementation(() => {});
+      .mockImplementation(() => undefined);
     expect(
       runCommand({
         argv: ['closure', '--profile', '--shipped'],
@@ -108,7 +108,7 @@ describe('runCommand', () => {
   test('reports rather than analyses when closure is given nothing to analyse', () => {
     const error = vi
       .spyOn(console, 'error')
-      .mockImplementation(() => {});
+      .mockImplementation(() => undefined);
     expect(runCommand({ argv: ['closure'], root: '/nowhere' })).toBe(1);
     expect(error).toHaveBeenCalledWith(
       'closure needs at least one directory to analyse',
@@ -122,7 +122,7 @@ describe('the profile flag, on every command that takes it', () => {
     test(`${command} refuses --profile with no name after it`, () => {
       const error = vi
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => undefined);
 
       expect(
         runCommand({

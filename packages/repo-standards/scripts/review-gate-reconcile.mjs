@@ -21,7 +21,9 @@
 const TERMINAL_STATES = new Set(['error', 'failure']);
 
 const pullNumber = (pull) =>
-  Number.isSafeInteger(pull?.number) && pull.number > 0 ? pull.number : undefined;
+  Number.isSafeInteger(pull?.number) && pull.number > 0
+    ? pull.number
+    : undefined;
 
 export const openPullRequestNumbers = (pages) => {
   if (!Array.isArray(pages)) {
@@ -117,9 +119,10 @@ const normalizePath = (path) => {
 };
 
 const relativeSpecifiers = (source) =>
-  source.matchAll(/(?:from|import)\s*(?:\(\s*)?'(\.[^']*)'/gu).map(
-        (match) => match[1],
-      ).toArray();
+  source
+    .matchAll(/(?:from|import)\s*(?:\(\s*)?'(\.[^']*)'/gu)
+    .map((match) => match[1])
+    .toArray();
 
 const resolveFrom = ({ from, specifier }) =>
   normalizePath(`${from.split('/').slice(0, -1).join('/')}/${specifier}`);

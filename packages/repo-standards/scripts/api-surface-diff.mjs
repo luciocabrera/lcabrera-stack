@@ -57,7 +57,8 @@ export const diffSurfaces = ({ base, next }) => {
 export const isBreakingChange = (change) =>
   change.kind === 'removed' || change.kind === 'changed';
 
-export const hasBreakingChange = (changes) => changes.some((value) => isBreakingChange(value));
+export const hasBreakingChange = (changes) =>
+  changes.some((value) => isBreakingChange(value));
 
 export const formatChange = (change) => {
   const at = `${change.subpath} › ${change.name}`;

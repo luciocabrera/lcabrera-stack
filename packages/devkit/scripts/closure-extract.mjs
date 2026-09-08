@@ -120,10 +120,13 @@ const commandWordIn = (segment) => {
 
 const inlineCodeSpans = (content) =>
   content.split('\n').flatMap((line, index) =>
-    line.matchAll(INLINE_CODE_PATTERN).map((match) => ({
-            line: index + 1,
-            text: match[1].trim(),
-          })).toArray(),
+    line
+      .matchAll(INLINE_CODE_PATTERN)
+      .map((match) => ({
+        line: index + 1,
+        text: match[1].trim(),
+      }))
+      .toArray(),
   );
 
 /** @param {{ line: number, text: string }[]} lines */
@@ -137,7 +140,10 @@ export const shellCommandWords = (lines) =>
 
 export const extractCommands = (content) => {
   const inline = inlineCodeSpans(content)
-    .map((span) => ({ line: span.line, word: span.text.split(/\s+/, 1)[0] ?? '' }))
+    .map((span) => ({
+      line: span.line,
+      word: span.text.split(/\s+/, 1)[0] ?? '',
+    }))
     .filter((entry) => INVOKERS.has(entry.word));
   return [...shellCommandWords(shellBlockLines(content)), ...inline];
 };
@@ -166,7 +172,10 @@ export const shellPathTokens = (lines) =>
     .flatMap(({ line, text }) =>
       shellSegments(text)
         .flatMap((segment) => segment.split(/\s+/).slice(1))
-        .map((token) => ({ line, token: token.replaceAll(/^["']|["']$/g, '') })),
+        .map((token) => ({
+          line,
+          token: token.replaceAll(/^["']|["']$/g, ''),
+        })),
     )
     .filter((entry) => isPathToken(entry.token));
 
@@ -243,8 +252,11 @@ export const extractProsePathTokens = (content) =>
 
 export const extractImportSpecifiers = (content) =>
   IMPORT_PATTERNS.flatMap((pattern) =>
-    content.matchAll(pattern).map((match) => ({
-            line: lineOf(content, match.index ?? 0),
-            specifier: match[1],
-          })).toArray(),
+    content
+      .matchAll(pattern)
+      .map((match) => ({
+        line: lineOf(content, match.index ?? 0),
+        specifier: match[1],
+      }))
+      .toArray(),
   );

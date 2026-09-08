@@ -51,7 +51,7 @@ describe('installedPeerVersion', () => {
           readManifest: () => manifest,
         }),
       ),
-    ).toEqual(readings.map(() => {}));
+    ).toEqual(readings.map(() => undefined));
   });
 });
 
@@ -132,11 +132,11 @@ describe('unmetPeers', () => {
   });
 });
 const asset = (name, ...peers) => ({
-    content: ['---', `peer: [${peers.join(', ')}]`, '---', '', 'Body.'].join(
-      '\n',
-    ),
-    path: `skills/${name}/SKILL.md`,
-  });
+  content: ['---', `peer: [${peers.join(', ')}]`, '---', '', 'Body.'].join(
+    '\n',
+  ),
+  path: `skills/${name}/SKILL.md`,
+});
 
 describe('declaredPeerNames', () => {
   test('names each distinct peer once across every asset', () => {

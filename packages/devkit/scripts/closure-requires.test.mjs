@@ -2,18 +2,18 @@ import { describe, expect, test } from 'vite-plus/test';
 
 import { analyseClosure } from './closure.mjs';
 const declaring = (...keys) => [
-    {
-      content: [
-        '---',
-        'name: epic',
-        `requires: [${keys.join(', ')}]`,
-        '---',
-        '',
-        '# Epic',
-      ].join('\n'),
-      path: 'skills/epic/SKILL.md',
-    },
-  ];
+  {
+    content: [
+      '---',
+      'name: epic',
+      `requires: [${keys.join(', ')}]`,
+      '---',
+      '',
+      '# Epic',
+    ].join('\n'),
+    path: 'skills/epic/SKILL.md',
+  },
+];
 
 describe('analyseClosure and declared config requirements', () => {
   const rootDirectory = 'skills/epic';

@@ -24,24 +24,24 @@ const planFor = (versions) =>
     assets: [declaringAsset],
     config: DEFAULT_CONFIG,
     manifest: emptyManifest,
-    onDiskHash: () => {},
+    onDiskHash: () => undefined,
     peerVersions: versions,
   });
 const outcome = ([spelling, lines]) => {
-      const [entry] = planSync({
-        assets: [
-          {
-            content: ['---', ...lines, '---', '', 'Body.'].join('\n'),
-            path: 'skills/demo/SKILL.md',
-          },
-        ],
-        config: DEFAULT_CONFIG,
-        manifest: emptyManifest,
-        onDiskHash: () => {},
-        peerVersions: new Map([['@lcabrera/repo-standards', '2.0.0']]),
-      });
-      return [spelling, { missing: entry.missing, state: entry.state }];
-    };
+  const [entry] = planSync({
+    assets: [
+      {
+        content: ['---', ...lines, '---', '', 'Body.'].join('\n'),
+        path: 'skills/demo/SKILL.md',
+      },
+    ],
+    config: DEFAULT_CONFIG,
+    manifest: emptyManifest,
+    onDiskHash: () => undefined,
+    peerVersions: new Map([['@lcabrera/repo-standards', '2.0.0']]),
+  });
+  return [spelling, { missing: entry.missing, state: entry.state }];
+};
 
 describe('planSync and a declared peer', () => {
   test('refuses to write it when the peer is not installed at all', () => {
@@ -93,7 +93,11 @@ describe('planSync and a declared peer', () => {
       'flow array': ["peer: ['@lcabrera/repo-standards@>=0.1.0 <1.0.0']"],
       scalar: ["peer: '@lcabrera/repo-standards@>=0.1.0 <1.0.0'"],
     };
-    expect(Object.fromEntries(Object.entries(spellings).map((value) => outcome(value)))).toEqual(
+    expect(
+      Object.fromEntries(
+        Object.entries(spellings).map((value) => outcome(value)),
+      ),
+    ).toEqual(
       Object.fromEntries(
         Object.keys(spellings).map((spelling) => [
           spelling,
@@ -113,7 +117,7 @@ describe('planSync and a declared peer', () => {
       assets: [declaringAsset],
       config: DEFAULT_CONFIG,
       manifest: emptyManifest,
-      onDiskHash: () => {},
+      onDiskHash: () => undefined,
     });
     expect(entry.state).toBe('unmet');
   });
@@ -133,7 +137,7 @@ describe('planSync and a declared peer', () => {
       ],
       config: DEFAULT_CONFIG,
       manifest: emptyManifest,
-      onDiskHash: () => {},
+      onDiskHash: () => undefined,
       peerVersions: new Map(),
     });
     expect(entry.unmetKind).toBe('config');

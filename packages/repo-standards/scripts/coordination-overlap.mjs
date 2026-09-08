@@ -22,7 +22,8 @@ const isLive = ({ data }) => data !== undefined && data.status !== 'done';
 const firstClash = (a, b) =>
   a.area?.find((x) => b.area?.some((y) => globsOverlap(x, y)));
 
-const isSameBranch = (a, b) => a.branch === b.branch && !NO_BRANCH.has(a.branch);
+const isSameBranch = (a, b) =>
+  a.branch === b.branch && !NO_BRANCH.has(a.branch);
 
 const warningsAgainst = ({ from, live }) =>
   live.slice(from + 1).flatMap((other) => {

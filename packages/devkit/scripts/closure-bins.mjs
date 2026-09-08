@@ -31,16 +31,21 @@ export const extractBinInvocations = (content) => {
   const directories = new Set(lines.flatMap((value) => bindingIn(value)));
 
   const named = lines.flatMap((line, index) =>
-    line.matchAll(BIN_PATH).map((match) => ({
-            line: index + 1,
-            name: match[1],
-          })).toArray(),
+    line
+      .matchAll(BIN_PATH)
+      .map((match) => ({
+        line: index + 1,
+        name: match[1],
+      }))
+      .toArray(),
   );
 
   const bound = lines.flatMap((line, index) =>
-    line.matchAll(VARIABLE_REFERENCE)
-            .filter((match) => directories.has(match[1]))
-            .map((match) => ({ line: index + 1, name: match[2] })).toArray(),
+    line
+      .matchAll(VARIABLE_REFERENCE)
+      .filter((match) => directories.has(match[1]))
+      .map((match) => ({ line: index + 1, name: match[2] }))
+      .toArray(),
   );
 
   return [...named, ...bound];

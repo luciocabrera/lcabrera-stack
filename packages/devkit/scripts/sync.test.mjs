@@ -17,7 +17,7 @@ describe('planSync', () => {
       assets,
       config: DEFAULT_CONFIG,
       manifest: emptyManifest,
-      onDiskHash: () => {},
+      onDiskHash: () => undefined,
     });
     expect(plan.map((entry) => entry.path)).toEqual([
       '.github/skills/epic/SKILL.md',
@@ -32,7 +32,7 @@ describe('planSync', () => {
       assets: [{ content: 'x', path: 'hooks/pre-push' }],
       config,
       manifest: emptyManifest,
-      onDiskHash: () => {},
+      onDiskHash: () => undefined,
     });
     expect(plan).toEqual([]);
   });
@@ -62,19 +62,19 @@ describe('planSync', () => {
   });
 });
 const outcome = ([spelling, lines]) => {
-      const [entry] = planSync({
-        assets: [
-          {
-            content: ['---', ...lines, '---', '', 'Body.'].join('\n'),
-            path: 'skills/demo/SKILL.md',
-          },
-        ],
-        config: DEFAULT_CONFIG,
-        manifest: emptyManifest,
-        onDiskHash: () => {},
-      });
-      return [spelling, { missing: entry.missing, state: entry.state }];
-    };
+  const [entry] = planSync({
+    assets: [
+      {
+        content: ['---', ...lines, '---', '', 'Body.'].join('\n'),
+        path: 'skills/demo/SKILL.md',
+      },
+    ],
+    config: DEFAULT_CONFIG,
+    manifest: emptyManifest,
+    onDiskHash: () => undefined,
+  });
+  return [spelling, { missing: entry.missing, state: entry.state }];
+};
 
 describe('planSync and a declared config requirement', () => {
   const declaringAsset = {
@@ -94,7 +94,7 @@ describe('planSync and a declared config requirement', () => {
       assets: [declaringAsset],
       config,
       manifest: emptyManifest,
-      onDiskHash: () => {},
+      onDiskHash: () => undefined,
     });
 
   test('refuses to write it when the consumer has not set that key', () => {
@@ -128,7 +128,7 @@ describe('planSync and a declared config requirement', () => {
       assets: [asset],
       config: { ...DEFAULT_CONFIG, commands: { install: 'vp install' } },
       manifest: emptyManifest,
-      onDiskHash: () => {},
+      onDiskHash: () => undefined,
     });
     expect(entry.missing).toEqual(['commands.claim']);
   });
@@ -148,7 +148,7 @@ describe('planSync and a declared config requirement', () => {
       assets: [asset],
       config: DEFAULT_CONFIG,
       manifest: emptyManifest,
-      onDiskHash: () => {},
+      onDiskHash: () => undefined,
     });
     expect(entry.state).toBe('unmet');
     expect(entry.missing).toEqual(['paths.dashboards']);
@@ -160,7 +160,11 @@ describe('planSync and a declared config requirement', () => {
       'flow array': ['requires: [config.commands.install]'],
       scalar: ['requires: config.commands.install'],
     };
-    expect(Object.fromEntries(Object.entries(spellings).map((value) => outcome(value)))).toEqual(
+    expect(
+      Object.fromEntries(
+        Object.entries(spellings).map((value) => outcome(value)),
+      ),
+    ).toEqual(
       Object.fromEntries(
         Object.keys(spellings).map((spelling) => [
           spelling,

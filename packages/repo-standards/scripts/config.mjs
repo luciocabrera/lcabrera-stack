@@ -32,7 +32,6 @@ import { resolveHostRoot } from './host-root.mjs';
 // Re-exported rather than moved out of reach: `CONFIG_FILE_NAME` is part of this
 // package's published surface, and gates name the file in their own messages.
 
-
 export const DEFAULT_ADR_COMMANDS = {
   list: 'npx repo-verify-adrs --list',
   new: 'npx repo-adr',
@@ -124,7 +123,9 @@ export const resolveRegisters = (raw) => {
   const parsed = parseConfig(raw);
   const block = isPlainObject(parsed.registers) ? parsed.registers : {};
   const homes = Array.isArray(block.adrHomes)
-    ? block.adrHomes.filter((entry) => isReadableHome(entry)).map((value) => containedHome(value))
+    ? block.adrHomes
+        .filter((entry) => isReadableHome(entry))
+        .map((value) => containedHome(value))
     : [];
   const adrCommands = resolveAdrCommands(block.adrCommands);
   const declaredHomes = homes.length > 0 ? homes : DEFAULT_REGISTERS.adrHomes;
@@ -374,4 +375,4 @@ export const readCoordinationPaths = (root = hostRoot()) => {
   };
 };
 
-export {CONFIG_FILE_NAME} from './config-values.mjs';
+export { CONFIG_FILE_NAME } from './config-values.mjs';

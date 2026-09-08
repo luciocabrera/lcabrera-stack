@@ -56,9 +56,13 @@ describe('isAtLeast', () => {
   });
 });
 
+const REGISTRY_ASSIGNED_ID = '1106913';
+
 describe('readAdvisories', () => {
   it('keys on the GHSA id, not the registry-assigned number', () => {
-    const [found] = readAdvisories(report({ 1_106_913: advisory() }));
+    const [found] = readAdvisories(
+      report({ [REGISTRY_ASSIGNED_ID]: advisory() }),
+    );
     expect(found.ghsa).toBe('GHSA-35jh-r3h4-6jhm');
   });
 

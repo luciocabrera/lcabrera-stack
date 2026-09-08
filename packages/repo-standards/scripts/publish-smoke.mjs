@@ -48,8 +48,8 @@ const install = ({ nodeModules, packed }) => {
 const isImportable = ([subpath, target]) =>
   subpath !== './package.json' &&
   !subpath.includes('*') &&
-  collectTargets(target).some(
-    (path) => ASSET_EXTENSIONS.every((extension) => !path.endsWith(extension)),
+  collectTargets(target).some((path) =>
+    ASSET_EXTENSIONS.every((extension) => !path.endsWith(extension)),
   );
 
 export const importSpecifiers = ({ manifest, name }) =>

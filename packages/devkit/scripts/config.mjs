@@ -188,13 +188,14 @@ export const configuredCommandWords = (config) =>
     .map((command) => command.trim().split(/\s+/, 1)[0] ?? '')
     .filter((word) => word !== '');
 
-const valueAt = ({ config, path }) =>
-  path.split('.').reduce((cursor, segment) => {
-    if (!isPlainObject(cursor) || !Object.hasOwn(cursor, segment)) {
-      return;
-    }
-    return cursor[segment];
-  }, config);
+const valueAt = ({ config, path }) => {
+  let cursor = config;
+  for (const segment of path.split('.')) {
+    if (!isPlainObject(cursor) || !Object.hasOwn(cursor, segment)) return;
+    cursor = cursor[segment];
+  }
+  return cursor;
+};
 
 export const hasConfigKey = ({ config, path }) => {
   const value = valueAt({ config, path });

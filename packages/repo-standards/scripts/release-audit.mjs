@@ -171,7 +171,9 @@ export const readNothing = ({ named, registry }) =>
 const STATE_MARK = { broken: '✗', clean: '✓', deprecated: '⚠' };
 
 const renderTags = (tags) => {
-  const ordered = [...tags].toSorted((left, right) => left.localeCompare(right));
+  const ordered = [...tags].toSorted((left, right) =>
+    left.localeCompare(right),
+  );
 
   return tags.length === 0 ? '' : ` (${ordered.join(', ')})`;
 };

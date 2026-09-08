@@ -216,12 +216,11 @@ describe('buildPlan — the safety buckets end to end', () => {
   });
 
   it('deletes only the merged-PR and cruft branches', () => {
-    expect(plan.deleteBranches
+    expect(
+      plan.deleteBranches
         .map((b) => b.name)
-        .toSorted((left, right) => Number(left > right) - Number(left < right))).toEqual([
-      'feat/cruft',
-      'feat/merged',
-    ]);
+        .toSorted((left, right) => Number(left > right) - Number(left < right)),
+    ).toEqual(['feat/cruft', 'feat/merged']);
   });
 
   it('never deletes the branch with unmerged unique commits', () => {

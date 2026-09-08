@@ -245,7 +245,7 @@ describe('isAdrFilename', () => {
   });
 });
 const index = (options) =>
-    renderIndex(ADR_HOMES[0], { exemptionCount: 0, homeCount: 1, ...options });
+  renderIndex(ADR_HOMES[0], { exemptionCount: 0, homeCount: 1, ...options });
 
 describe('renderIndex', () => {
   it('links the template relative to the home it renders', () => {

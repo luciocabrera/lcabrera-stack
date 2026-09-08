@@ -117,17 +117,17 @@ describe('resolveAffected — ordinary scoping is unchanged', () => {
   });
 });
 const scriptsGroup = (groups) =>
-    groups.find(
-      (group) => group.task === 'test:scripts' && group.packages.length === 0,
-    );
+  groups.find(
+    (group) => group.task === 'test:scripts' && group.packages.length === 0,
+  );
 
 const groupsFor = (files) =>
-    resolveTestGroups({
-      files,
-      globalPackages: FIXTURE_GLOBAL_PACKAGES,
-      graph: GRAPH,
-      lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
-    });
+  resolveTestGroups({
+    files,
+    globalPackages: FIXTURE_GLOBAL_PACKAGES,
+    graph: GRAPH,
+    lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
+  });
 
 describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () => {
   it('adds only the root test:scripts group for a scripts-only change', () => {

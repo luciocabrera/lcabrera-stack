@@ -37,7 +37,10 @@ const importExportPattern =
   /(?:import|export)\s+(?:type\s+)?(?:\S[^'"\n]*\sfrom\s+)?['"]([^'"\n]+)['"]/g;
 
 const collectStaticSources = (fileText) =>
-  fileText.matchAll(importExportPattern).map((match) => match[1]).toArray();
+  fileText
+    .matchAll(importExportPattern)
+    .map((match) => match[1])
+    .toArray();
 
 const resolveLocalModuleFilePath = (fromFilePath, source) => {
   const basePath = resolve(dirname(fromFilePath), source);
@@ -129,8 +132,10 @@ const isPublished = ({ filePath, packageDir, unpublishedGlobs }) => {
 
   return unpublishedGlobs.every(
     (glob) =>
-      !(matchesGlob(packageRelativePath, glob) ||
-      matchesGlob(packageRelativePath, `${glob}/**`)),
+      !(
+        matchesGlob(packageRelativePath, glob) ||
+        matchesGlob(packageRelativePath, `${glob}/**`)
+      ),
   );
 };
 
@@ -315,7 +320,9 @@ export const collectClientSafetyReport = ({
     reportLines: [
       ...formatScanDefects(collectScanDefects(scans)),
       ...formatGraphViolations(graphViolations),
-      ...formatDependencyViolations(scans.flatMap((value) => collectServerOnlyUsage(value))),
+      ...formatDependencyViolations(
+        scans.flatMap((value) => collectServerOnlyUsage(value)),
+      ),
     ],
     scannedPackageNames: scans.map(({ packageName }) => packageName),
   };

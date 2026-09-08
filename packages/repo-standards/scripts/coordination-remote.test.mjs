@@ -132,10 +132,10 @@ describe('readRemoteClaims', () => {
   });
 });
 const copyOn = (branch) => ({
-    branch,
-    data: { branch: 'package-readmes', id: 'package-readmes' },
-    name: `package-readmes.md (branch package-readmes)`,
-  });
+  branch,
+  data: { branch: 'package-readmes', id: 'package-readmes' },
+  name: `package-readmes.md (branch package-readmes)`,
+});
 
 const claimOn = (branch) => ({ branch: 'inherited', data: { branch } });
 

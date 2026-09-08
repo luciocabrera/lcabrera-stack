@@ -41,8 +41,8 @@ const git = (args, cwd) =>
   }).trim();
 
 const quietly = (run) => {
-  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
-  const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+  const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
   try {
     const code = run();
     return {

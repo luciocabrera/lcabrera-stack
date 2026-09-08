@@ -191,7 +191,9 @@ const main = async () => {
     );
   }
 
-  const totals = await Promise.all(present.map((value) => readWorkspaceTotal(value)));
+  const totals = await Promise.all(
+    present.map((value) => readWorkspaceTotal(value)),
+  );
 
   const total = aggregateTotal(totals);
   const report = { total, workspaces: totals };

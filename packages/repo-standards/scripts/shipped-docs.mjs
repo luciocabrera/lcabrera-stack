@@ -67,10 +67,13 @@ export const proseLines = (text) => {
 
 const linkTargets = (lines) =>
   lines.flatMap(({ number, text }) =>
-    text.matchAll(LINK).map((match) => ({
-            number,
-            target: normaliseToken(match[1]),
-          })).toArray(),
+    text
+      .matchAll(LINK)
+      .map((match) => ({
+        number,
+        target: normaliseToken(match[1]),
+      }))
+      .toArray(),
   );
 
 const resolveTarget = ({ docPath, target }) => {
@@ -107,10 +110,9 @@ const repoAnchored = ({ holds, repoOnlyDirs, token }) =>
 
 const repoPathFindings = ({ docPath, holds, lines, repoOnlyDirs }) => {
   const candidates = lines.flatMap(({ number, text }) =>
-    [
-      ...inlineCodeTokens(text),
-      ...text.matchAll(LINK).map((m) => m[1]),
-    ].map((raw) => ({ number, token: normaliseToken(raw) })),
+    [...inlineCodeTokens(text), ...text.matchAll(LINK).map((m) => m[1])].map(
+      (raw) => ({ number, token: normaliseToken(raw) }),
+    ),
   );
 
   const seen = new Set();

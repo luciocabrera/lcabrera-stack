@@ -48,8 +48,8 @@ const scratchRepo = (commands = REPO_COMMANDS) => {
 };
 
 const silenced = () => {
-  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
-  const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+  const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
   return {
     log,
     restore: () => {
@@ -64,7 +64,7 @@ const plan = (assets, { manifest = { files: {} }, onDiskHash } = {}) =>
     assets,
     config: { ...DEFAULT_CONFIG, profile: 'repo' },
     manifest,
-    onDiskHash: onDiskHash ?? (() => {}),
+    onDiskHash: onDiskHash ?? (() => undefined),
   });
 
 describe('planSync carries the asset mode', () => {

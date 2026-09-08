@@ -26,6 +26,10 @@ in `@lcabrera/repo-standards`, 6 of 64 in `@lcabrera/devkit` (none its own
 source) and 2 of 4 in `create-lcabrera-stack`. Remove the ignore and fix what
 surfaces.
 
+Both copies of `GLOBAL_IGNORES` carried it — the base factory and the React one
+— so `packages/ui/scripts` and `apps/showcase/scripts` were hidden too. 1,398
+findings across five workspaces, now zero.
+
 Branched off `chore/1115-local-gate-parity` (#1116), whose new files live in
 `packages/repo-standards/scripts/` and are linted by this change. Retarget to
 `main` once that merges.
@@ -38,6 +42,6 @@ that would then be untrue.
 
 ## Status / next
 
-- Current step: measuring the findings after the ignore comes off
-- Blockers: the `security/detect-non-literal-fs-filename` decision is with Lucio
-- Next: autofix, then the manual tail
+- Current step: zero findings; running the gate
+- Blockers: none
+- Next: PR body, then review

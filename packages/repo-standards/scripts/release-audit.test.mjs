@@ -119,9 +119,9 @@ describe('manifestProblems', () => {
   });
 
   it('finds nothing in the corrected one', () => {
-    expect(manifestProblems({ isSourceShipped: false, manifest: CORRECT })).toEqual(
-      [],
-    );
+    expect(
+      manifestProblems({ isSourceShipped: false, manifest: CORRECT }),
+    ).toEqual([]);
   });
 
   it('allows src exports for a package that ships source', () => {
@@ -251,7 +251,10 @@ describe('selectBroken', () => {
       {
         name: '@lcabrera/eslint-plugin',
         published: true,
-        versions: auditPackument({ isSourceShipped: false, packument: PACKUMENT }),
+        versions: auditPackument({
+          isSourceShipped: false,
+          packument: PACKUMENT,
+        }),
       },
     ];
 
@@ -313,7 +316,10 @@ describe('renderAudit', () => {
     {
       name: '@lcabrera/eslint-plugin',
       published: true,
-      versions: auditPackument({ isSourceShipped: false, packument: PACKUMENT }),
+      versions: auditPackument({
+        isSourceShipped: false,
+        packument: PACKUMENT,
+      }),
     },
     { name: '@lcabrera/new', published: false, versions: [] },
     { name: '@lcabrera/known', published: true, versions: [] },

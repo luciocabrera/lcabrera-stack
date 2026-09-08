@@ -3,11 +3,11 @@ import { describe, expect, it } from 'vite-plus/test';
 import { cycleFindings, duplicateIdFindings } from './doc-register-graph.mjs';
 import { toEntry } from './doc-registers.mjs';
 const entryFor = (id, requires) =>
-    toEntry({
-      file: `docs/product/requirements/${id}.md`,
-      register: 'requirement',
-      source: `---\nid: ${id}\nrequires:\n${requires.map((name) => `  - ${name}\n`).join('')}---\n`,
-    });
+  toEntry({
+    file: `docs/product/requirements/${id}.md`,
+    register: 'requirement',
+    source: `---\nid: ${id}\nrequires:\n${requires.map((name) => `  - ${name}\n`).join('')}---\n`,
+  });
 
 // Both rules here are about the register rather than one entry, so both are
 // planted: a register with no duplicate and no cycle reports exactly what an

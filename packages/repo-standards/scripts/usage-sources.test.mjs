@@ -146,7 +146,7 @@ describe('readRegisterActivity', () => {
     const result = readRegisterActivity({
       cwd: '/repo',
       directory: 'docs/product/requirements',
-      runGit: () => {},
+      runGit: () => undefined,
       window: WINDOW,
     });
 
@@ -218,7 +218,7 @@ describe('isShallowClone', () => {
   it('is true only when git says so', () => {
     expect(isShallowClone({ cwd: '/repo', runGit: () => 'true' })).toBe(true);
     expect(isShallowClone({ cwd: '/repo', runGit: () => 'false' })).toBe(false);
-    expect(isShallowClone({ cwd: '/repo', runGit: () => {} })).toBe(
+    expect(isShallowClone({ cwd: '/repo', runGit: () => undefined })).toBe(
       false,
     );
   });

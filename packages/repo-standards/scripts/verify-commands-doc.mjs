@@ -100,7 +100,9 @@ const findDocumentedCommands = (doc) => {
 };
 
 const findWorkspaceTaskClaims = (doc) => {
-  const section = doc.split('## 5. Per-workspace tasks', 2)[1]?.split('\n---', 1)[0];
+  const section = doc
+    .split('## 5. Per-workspace tasks', 2)[1]
+    ?.split('\n---', 1)[0];
   if (section === undefined) {
     return [];
   }
@@ -113,17 +115,19 @@ const findWorkspaceTaskClaims = (doc) => {
       if (packageName === undefined) {
         return [];
       }
-      const tasks = (cells[3] ?? '').matchAll(/`([^`]+)`/g).map(
-              ([, task]) => task,
-            ).toArray();
+      const tasks = (cells[3] ?? '')
+        .matchAll(/`([^`]+)`/g)
+        .map(([, task]) => task)
+        .toArray();
       return tasks.map((task) => ({ packageName, task }));
     });
 };
 
 const findLinks = (doc) =>
-  doc.matchAll(/\]\((?!https?:)([^)#]+)(?:#([^)]+))?\)/g).map(
-        ([, path, anchor]) => ({ anchor, path }),
-      ).toArray();
+  doc
+    .matchAll(/\]\((?!https?:)([^)#]+)(?:#([^)]+))?\)/g)
+    .map(([, path, anchor]) => ({ anchor, path }))
+    .toArray();
 
 const toAnchor = (heading) =>
   heading
@@ -134,9 +138,9 @@ const toAnchor = (heading) =>
 
 const collectAnchors = (markdown) =>
   new Set(
-    markdown.matchAll(/^#{2,4}\s+(\S.*)$/gm).map(([, heading]) =>
-            toAnchor(heading),
-          ),
+    markdown
+      .matchAll(/^#{2,4}\s+(\S.*)$/gm)
+      .map(([, heading]) => toAnchor(heading)),
   );
 
 const checkRootScriptsDocumented = (documented, problems) => {

@@ -241,13 +241,18 @@ export const initialConfig = ({
     : { ...commands };
   return {
     ...existing,
-    ...(ciSetup.length > 0 && (!upgrade || existing.ci?.setup === undefined) && { ci: { ...existing.ci, setup: ciSetup } }),
+    ...(ciSetup.length > 0 &&
+      (!upgrade || existing.ci?.setup === undefined) && {
+        ci: { ...existing.ci, setup: ciSetup },
+      }),
     commands: Object.fromEntries(
       Object.entries(merged).toSorted(([left], [right]) =>
         left.localeCompare(right),
       ),
     ),
-    ...(isDefaultBranchRecorded({ defaultBranch, existing, upgrade }) && { conventions: { ...existing.conventions, defaultBranch } }),
+    ...(isDefaultBranchRecorded({ defaultBranch, existing, upgrade }) && {
+      conventions: { ...existing.conventions, defaultBranch },
+    }),
     profile,
   };
 };

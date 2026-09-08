@@ -96,21 +96,21 @@ describe('checkoutIsolationFinding', () => {
   });
 });
 const repository = () => {
-    const repositoryRoot = mkdtempSync(join(tmpdir(), 'checkout-facts-'));
-    runGit({
-      args: ['init', '--initial-branch=main', '.'],
-      cwd: repositoryRoot,
-    });
-    runGit({
-      args: ['config', 'user.email', 'test@example.com'],
-      cwd: repositoryRoot,
-    });
-    runGit({ args: ['config', 'user.name', 'Test'], cwd: repositoryRoot });
-    writeFileSync(join(repositoryRoot, 'a.txt'), 'one\n');
-    runGit({ args: ['add', 'a.txt'], cwd: repositoryRoot });
-    runGit({ args: ['commit', '-m', 'chore: first'], cwd: repositoryRoot });
-    return repositoryRoot;
-  };
+  const repositoryRoot = mkdtempSync(join(tmpdir(), 'checkout-facts-'));
+  runGit({
+    args: ['init', '--initial-branch=main', '.'],
+    cwd: repositoryRoot,
+  });
+  runGit({
+    args: ['config', 'user.email', 'test@example.com'],
+    cwd: repositoryRoot,
+  });
+  runGit({ args: ['config', 'user.name', 'Test'], cwd: repositoryRoot });
+  writeFileSync(join(repositoryRoot, 'a.txt'), 'one\n');
+  runGit({ args: ['add', 'a.txt'], cwd: repositoryRoot });
+  runGit({ args: ['commit', '-m', 'chore: first'], cwd: repositoryRoot });
+  return repositoryRoot;
+};
 
 describe('readCheckoutFacts', () => {
   it('reads the branch, and reports a clean primary checkout as clean', () => {

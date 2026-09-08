@@ -88,13 +88,11 @@ describe('inferRunner', () => {
       ['bun.lockb'],
       ['package.json'],
     ]) {
-      expect(Object.keys(inferRunner({ files }).commands).toSorted((left, right) => Number(left > right) - Number(left < right),
-      )).toEqual([
-        'audit',
-        'check',
-        'install',
-        'test',
-      ]);
+      expect(
+        Object.keys(inferRunner({ files }).commands).toSorted(
+          (left, right) => Number(left > right) - Number(left < right),
+        ),
+      ).toEqual(['audit', 'check', 'install', 'test']);
     }
   });
 });

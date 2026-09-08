@@ -144,8 +144,8 @@ export const routeArtifactReport = (trackedPaths) => {
     }
     const named = normalizeSubject(parseFileName(filePath).name);
     if (
-      artifacts.every((artifact) =>
-        !named.startsWith(normalizeSubject(artifact)),
+      artifacts.every(
+        (artifact) => !named.startsWith(normalizeSubject(artifact)),
       )
     ) {
       findings.push({ artifacts, filePath });

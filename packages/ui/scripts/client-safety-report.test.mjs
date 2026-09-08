@@ -202,7 +202,7 @@ describe('collectClientSafetyReport', () => {
   });
 });
 const readPackageManifest = (packageDir) =>
-    JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8'));
+  JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8'));
 
 describe('the guard as this repository wires it', () => {
   const uiRootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');

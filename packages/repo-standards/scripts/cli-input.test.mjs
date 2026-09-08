@@ -83,7 +83,17 @@ describe('parsePullNumber — what it accepts', () => {
 });
 
 describe('parsePullNumber — what it refuses, and how loudly', () => {
-  for (const bad of ['abc', '', ' '.repeat(3), '0', '-1', '738x', '#', '#abc', '7.5']) {
+  for (const bad of [
+    'abc',
+    '',
+    ' '.repeat(3),
+    '0',
+    '-1',
+    '738x',
+    '#',
+    '#abc',
+    '7.5',
+  ]) {
     it(`refuses ${JSON.stringify(bad)}, naming it in the message`, () => {
       expect(() => parsePullNumber(bad)).toThrow('--pr must be');
       expect(() => parsePullNumber(bad)).toThrow(JSON.stringify(bad));
@@ -159,7 +169,16 @@ describe('parseThreadId — what it refuses', () => {
     expect(() => parseThreadId('--paginate')).toThrow('--resolve must be');
   });
 
-  for (const bad of ['', ' '.repeat(3), undefined, null, 'a b', 'a;b', 'a/b', 'a$b']) {
+  for (const bad of [
+    '',
+    ' '.repeat(3),
+    undefined,
+    null,
+    'a b',
+    'a;b',
+    'a/b',
+    'a$b',
+  ]) {
     it(`refuses ${JSON.stringify(bad)}`, () => {
       expect(() => parseThreadId(bad)).toThrow('--resolve must be');
     });

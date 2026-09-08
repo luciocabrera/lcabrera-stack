@@ -71,7 +71,7 @@ const workspaceList = (value, fallback, key) =>
       }).map((entry) => ({
         dir: repoRelative(entry.dir, entry.dir, `${key}[].dir`),
         name: entry.name.trim(),
-        ...((typeof entry.run === 'boolean') && { run: entry.run }),
+        ...(typeof entry.run === 'boolean' && { run: entry.run }),
       }))
     : fallback;
 

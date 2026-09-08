@@ -47,16 +47,25 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   ],
   'unicorn/name-replacements': 'off',
   'unicorn/no-array-reduce': 'off',
-  // `checkArguments` off, because in argument position the rule cannot tell a
-  // redundant `undefined` from a load-bearing one, and its fixer deletes both.
-  // `reduce(fn, undefined)` is the case that proves it: dropping the initial
-  // value changes an empty array from `undefined` to a thrown TypeError, and
-  // the fixer did exactly that to `earliestDay` before a suite caught it. The
-  // same hazard applies to any call that distinguishes an absent argument from
-  // an explicit `undefined` one. A useless `undefined` in a return or a
-  // variable is still reported; only the position the fixer is unsafe in is
-  // exempt.
-  'unicorn/no-useless-undefined': ['error', { checkArguments: false }],
+  // Two positions are exempt, both because the fixer is unsafe there rather
+  // than because the rule is wrong.
+  //
+  // `checkArguments`: in argument position the rule cannot tell a redundant
+  // `undefined` from a load-bearing one, and its fixer deletes both.
+  // `reduce(fn, undefined)` proves it — dropping the initial value changes an
+  // empty array from `undefined` to a thrown TypeError, which is what it did
+  // to `earliestDay` before a suite caught it.
+  //
+  // `checkArrowFunctionBody`: it rewrites `() => undefined` to `() => {}`,
+  // which is the same value and a worse callback. Biome then reports the
+  // result twice over — `noEmptyBlockStatements`, and
+  // `useIterableCallbackReturn` where the callback feeds `map()`.
+  //
+  // A useless `undefined` in a return or a variable is still reported.
+  'unicorn/no-useless-undefined': [
+    'error',
+    { checkArguments: false, checkArrowFunctionBody: false },
+  ],
   // The auto-fixer rewrites http:// to https:// inside string literals, which
   // silently corrupts test fixtures and local-dev URLs — a fixture asserting
   // that an http origin is rejected became https, and the test inverted.

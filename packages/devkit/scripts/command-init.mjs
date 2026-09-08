@@ -99,7 +99,11 @@ const writeConfig = ({ profile, root, upgrade, userAgent }) => {
           ...upgradeKeptCiSetup({ ciSetup: runner.ciSetup, existing }),
         ]
       : [],
-    recordedTrunk: isDefaultBranchRecorded({ defaultBranch, existing, upgrade }),
+    recordedTrunk: isDefaultBranchRecorded({
+      defaultBranch,
+      existing,
+      upgrade,
+    }),
   };
 };
 

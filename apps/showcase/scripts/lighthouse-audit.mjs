@@ -26,7 +26,8 @@ const CHROME_DEBUG_PORT = 9222;
 const REPORT_DIR = './lighthouse-reports';
 const SERVER_ENTRY_PATH = 'build/server/index.js';
 const TIMESTAMP = new Date()
-  .toISOString().replaceAll(/[:.]/g, '-')
+  .toISOString()
+  .replaceAll(/[:.]/g, '-')
   .slice(0, -5);
 
 const colors = {

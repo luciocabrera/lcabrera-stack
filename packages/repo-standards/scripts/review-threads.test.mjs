@@ -58,13 +58,15 @@ describe('summarizeThreads', () => {
     expect(summarizeThreads(undefined)).toEqual({ total: 0, unresolved: [] });
   });
 });
-const report = (threads) =>
-    formatThreads({ number: 780, repository: 'o/r', threads }).join('\n');
+const rendered = (summarised) =>
+  formatThreads({ number: 780, repository: 'o/r', threads: summarised }).join(
+    '\n',
+  );
 
 const threads = (open) => ({
-    total: open,
-    unresolved: Array.from({ length: open }, () => ({})),
-  });
+  total: open,
+  unresolved: Array.from({ length: open }, () => ({})),
+});
 
 describe('decideThreadStatus', () => {
   it('fails while any thread is open', () => {
@@ -94,33 +96,33 @@ describe('decideThreadStatus', () => {
 
 describe('formatThreads', () => {
   it('prints the id and location of each open thread', () => {
-    const text = report(summarizeThreads([thread()]));
+    const text = rendered(summarizeThreads([thread()]));
     expect(text).toContain('src/a.ts:39');
     expect(text).toContain('id: PRRT_1');
     expect(text).toContain('docs/agents/pr-review-threads.md');
   });
 
   it('marks an outdated thread as still counting', () => {
-    expect(report(summarizeThreads([thread({ isOutdated: true })]))).toContain(
-      'outdated — still counts',
-    );
+    expect(
+      rendered(summarizeThreads([thread({ isOutdated: true })])),
+    ).toContain('outdated — still counts');
   });
 
   it('collapses a multi-line comment onto one line', () => {
     const wordy = thread({
       comments: { nodes: [{ body: 'first\n\n   second', path: 'a.ts' }] },
     });
-    expect(report(summarizeThreads([wordy]))).toContain('first second');
+    expect(rendered(summarizeThreads([wordy]))).toContain('first second');
   });
 
   it('names a placeholder for a thread anchored to no file', () => {
-    const text = report(summarizeThreads([{ comments: null, id: 'z' }]));
+    const text = rendered(summarizeThreads([{ comments: null, id: 'z' }]));
     expect(text).toContain('• (no file)');
   });
 
   it('says so plainly when nothing is open', () => {
-    expect(report(summarizeThreads([thread({ isResolved: true })]))).toContain(
-      'no unresolved review threads (1 total)',
-    );
+    expect(
+      rendered(summarizeThreads([thread({ isResolved: true })])),
+    ).toContain('no unresolved review threads (1 total)');
   });
 });
