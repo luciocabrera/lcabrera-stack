@@ -1,8 +1,8 @@
 name: Check Safe
 
 on:
-  pull_request: # The merge queue builds each entry on a temporary `gh-readonly-queue/…`
-
+  pull_request:
+  # The merge queue builds each entry on a temporary `gh-readonly-queue/…`
   # branch and dispatches `merge_group` for it. A workflow without this trigger
   # never reports its required contexts there, and the queue then waits for a
   # check that will never arrive, with nothing saying why. See
