@@ -106,7 +106,7 @@ const auditTarget = async ({ explicit, name, only, shipsSource }) => {
 const selectUnresolved = (audited) =>
   audited
     .filter(({ explicit, versions }) => explicit && versions.length === 0)
-    .map(describeSpec);
+    .map((value) => describeSpec(value));
 
 const REMEDIATION = [
   '',
@@ -149,7 +149,7 @@ const report = ({ audited, blind, broken, unresolved }) => {
 
 const main = async () => {
   const specs = process.argv.slice(2).filter((arg) => !arg.startsWith('-'));
-  const audited = await Promise.all(toTargets(specs).map(auditTarget));
+  const audited = await Promise.all(toTargets(specs).map((value) => auditTarget(value)));
   const blind = resolvedNothing(audited);
   const broken = selectBroken(audited);
   const unresolved = selectUnresolved(audited);

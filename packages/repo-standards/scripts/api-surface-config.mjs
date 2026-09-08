@@ -64,7 +64,7 @@ const toPackageConfig = ({ dir, packagesDir, repoRoot }) => {
       ),
       subpath,
     }))
-    .sort((left, right) => left.subpath.localeCompare(right.subpath));
+    .toSorted((left, right) => left.subpath.localeCompare(right.subpath));
 
   return {
     directory,
@@ -82,7 +82,7 @@ export const readPublicPackages = (repoRoot) => {
 
   return publicPackageDirs
     .map((dir) => toPackageConfig({ dir, packagesDir, repoRoot }))
-    .sort((left, right) => left.name.localeCompare(right.name));
+    .toSorted((left, right) => left.name.localeCompare(right.name));
 };
 
 const unscoped = (packageName) => {

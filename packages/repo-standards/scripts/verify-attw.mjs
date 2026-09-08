@@ -49,7 +49,7 @@ const checkResolution = async (packageConfig) => {
     ? []
     : [
         `${packageConfig.name}: published types do not resolve:\n${problems
-          .map(formatProblem)
+          .map((value) => formatProblem(value))
           .join('\n')}`,
       ];
 };
@@ -70,7 +70,7 @@ const main = async () => {
       (packageConfig) =>
         `${packageConfig.name}: no dist/, so its published types were not checked — build the packages first.`,
     );
-  for (const packageConfig of packages.filter(isBuilt)) {
+  for (const packageConfig of packages.filter((value) => isBuilt(value))) {
     failures.push(...(await checkResolution(packageConfig)));
   }
 

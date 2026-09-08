@@ -93,7 +93,7 @@ const listValues = (lines) => {
       .replace(/^\[/, '')
       .replace(/\]$/, '')
       .split(',')
-      .map(unquote)
+      .map((value) => unquote(value))
       .filter((entry) => entry.length > 0);
   }
 

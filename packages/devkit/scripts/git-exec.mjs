@@ -55,7 +55,7 @@ const gitUnder = (directory) =>
   );
 
 const firstGitIn = (directories) =>
-  directories.map(gitUnder).find((path) => path !== undefined);
+  directories.map((value) => gitUnder(value)).find((path) => path !== undefined);
 
 const pathDirectories = () =>
   (process.env.PATH ?? '').split(delimiter).filter((entry) => entry !== '');
@@ -85,7 +85,7 @@ const isPathName = (name) => name.toUpperCase() === PATH_NAME;
  * Windows writes `Path`, and adding a second key beside it leaves which one
  * the child reads undefined
  */
-const pathNameIn = (env) => Object.keys(env).find(isPathName) ?? PATH_NAME;
+const pathNameIn = (env) => Object.keys(env).find((value) => isPathName(value)) ?? PATH_NAME;
 
 /**
  * @param {{ binary: string, env: Record<string, string | undefined> }} args

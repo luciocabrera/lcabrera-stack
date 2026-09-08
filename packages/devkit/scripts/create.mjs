@@ -70,13 +70,13 @@ export const createRefusal = ({
   unrecognised = [],
 }) => {
   if (unrecognised.length > 0) {
-    return `create: ${unrecognised.map(quoted).join(', ')} is not an option this command takes — \`--profile <name>\` is the only one, and it is spelled with a space. Run \`${CREATE_USAGE}\`.`;
+    return `create: ${unrecognised.map((value) => quoted(value)).join(', ')} is not an option this command takes — \`--profile <name>\` is the only one, and it is spelled with a space. Run \`${CREATE_USAGE}\`.`;
   }
   if (targets.length === 0) {
     return `create: no target directory — run \`${CREATE_USAGE}\`, or run \`devkit init\` in the repository you already have.`;
   }
   if (targets.length > 1) {
-    const named = targets.map(quoted).join(', ');
+    const named = targets.map((value) => quoted(value)).join(', ');
     return `create: one target directory at a time, and this run named ${named} — run \`${CREATE_USAGE}\`.`;
   }
   const [target] = targets;
@@ -188,7 +188,7 @@ export const commitIdentityArgs = ({ email = '', name = '' } = {}) =>
  * @returns {string}
  */
 export const missingGitRefusal = ({ searched }) =>
-  `create: no git executable in ${searched.map(quoted).join(', ')}, nor anywhere on this machine's PATH — create makes a git repository, so install git before running it.`;
+  `create: no git executable in ${searched.map((value) => quoted(value)).join(', ')}, nor anywhere on this machine's PATH — create makes a git repository, so install git before running it.`;
 
 /**
  * A git step that failed, reported as git reported it.

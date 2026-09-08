@@ -51,7 +51,7 @@ export const readAdvisories = (report) =>
       url: advisory.url,
       vulnerable: advisory.vulnerable_versions,
     }))
-    .sort(
+    .toSorted(
       (left, right) =>
         rankOf(right.severity) - rankOf(left.severity) ||
         left.ghsa.localeCompare(right.ghsa),

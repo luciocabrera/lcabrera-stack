@@ -98,7 +98,7 @@ const findEslintWorkspaces = () => {
     .filter((workspaceDir) =>
       existsSync(join(workspaceDir, 'eslint.config.mjs')),
     )
-    .sort((left, right) => left.localeCompare(right));
+    .toSorted((left, right) => left.localeCompare(right));
 };
 
 const generateEslintReport = async () => {

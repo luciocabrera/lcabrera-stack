@@ -15,7 +15,7 @@ describe('describeEscape', () => {
         reference: 'config.paths.dashboards',
       },
     ];
-    expect(findings.map(describeEscape)).toEqual([
+    expect(findings.map((value) => describeEscape(value))).toEqual([
       'a.md:4  needs docs/a.md',
       'a.md:7  runs vp',
       'a.mjs:1  imports ts-morph',

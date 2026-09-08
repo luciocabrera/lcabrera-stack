@@ -130,7 +130,7 @@ const inlineCodeSpans = (content) =>
 export const shellCommandWords = (lines) =>
   lines.flatMap(({ line, text }) =>
     shellSegments(text)
-      .map(commandWordIn)
+      .map((value) => commandWordIn(value))
       .filter((word) => !SHELL_NOISE.has(word) && INVOKERS.has(word))
       .map((word) => ({ line, word })),
   );

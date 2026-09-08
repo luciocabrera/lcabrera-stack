@@ -172,7 +172,7 @@ export const applySync = ({ entries, root }) => {
     writeFileSync(destination, entry.content);
   }
 
-  for (const entry of entries.filter(needsExecutableBit)) {
+  for (const entry of entries.filter((value) => needsExecutableBit(value))) {
     chmodSync(join(root, entry.path), EXECUTABLE_MODE);
   }
 };

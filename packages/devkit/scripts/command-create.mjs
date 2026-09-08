@@ -92,7 +92,7 @@ const isOption = (entry) => entry.startsWith('-');
 
 const positionals = (argv) => argv.filter((entry) => !isOption(entry));
 
-const unrecognisedOptions = (argv) => argv.filter(isOption);
+const unrecognisedOptions = (argv) => argv.filter((value) => isOption(value));
 
 const resolvedProfile = (flagged) => {
   try {

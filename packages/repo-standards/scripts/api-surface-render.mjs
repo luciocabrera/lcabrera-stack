@@ -20,12 +20,12 @@ const headerLines = (packageName) => [
 
 const renderExports = (subpathExports) =>
   Object.entries(subpathExports)
-    .sort(([left], [right]) => left.localeCompare(right))
+    .toSorted(([left], [right]) => left.localeCompare(right))
     .map(([name, signature]) => `${name} ${signature}`);
 
 export const renderSurface = ({ packageName, surface }) => {
   const sections = Object.keys(surface)
-    .sort((left, right) => left.localeCompare(right))
+    .toSorted((left, right) => left.localeCompare(right))
     .flatMap((subpath) => [
       '',
       `${SUBPATH_PREFIX}${subpath}`,

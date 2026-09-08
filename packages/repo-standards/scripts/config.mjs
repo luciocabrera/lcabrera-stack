@@ -124,7 +124,7 @@ export const resolveRegisters = (raw) => {
   const parsed = parseConfig(raw);
   const block = isPlainObject(parsed.registers) ? parsed.registers : {};
   const homes = Array.isArray(block.adrHomes)
-    ? block.adrHomes.filter(readableHome).map(containedHome)
+    ? block.adrHomes.filter((entry) => readableHome(entry)).map((value) => containedHome(value))
     : [];
   const adrCommands = resolveAdrCommands(block.adrCommands);
   const declaredHomes = homes.length > 0 ? homes : DEFAULT_REGISTERS.adrHomes;

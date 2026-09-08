@@ -30,7 +30,7 @@ const treeSnapshot = (root) =>
       const { mtimeMs, size } = statSync(path);
       return `${path} ${size} ${mtimeMs}`;
     })
-    .sort((a, b) => a.localeCompare(b));
+    .toSorted((a, b) => a.localeCompare(b));
 
 describe('product-distance', () => {
   it('reports the register and writes no file', () => {

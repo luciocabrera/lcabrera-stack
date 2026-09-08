@@ -94,7 +94,7 @@ const writeGithub = (classified, publishable, firstPublish) => {
 
 const main = async () => {
   const classified = await Promise.all(
-    readReleaseTargets().map(classifyPackage),
+    readReleaseTargets().map((value) => classifyPackage(value)),
   );
   const publishable = selectPublishable(classified);
   const firstPublish = selectFirstPublish(classified);

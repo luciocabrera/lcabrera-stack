@@ -82,7 +82,7 @@ describe('analyseClosure and declared config requirements', () => {
     expect(
       escapes
         .map((finding) => finding.kind)
-        .sort((left, right) => left.localeCompare(right)),
+        .toSorted((left, right) => left.localeCompare(right)),
     ).toEqual(['command', 'import', 'link', 'requires']);
   });
 });

@@ -66,7 +66,7 @@ export const extractChangelogSection = ({ changelog, version }) => {
 
 export const renderSummary = (classified) => {
   const rows = [...classified]
-    .sort(compareRows)
+    .toSorted(compareRows)
     .map(
       ({ localVersion, name, publishedVersion, state }) =>
         `| \`${name}\` | ${localVersion} | ${publishedVersion ?? '—'} | ${STATE_LABEL[state]} |`,

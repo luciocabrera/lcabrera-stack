@@ -102,7 +102,7 @@ export const unmetPeers = ({ peers, versions = new Map() }) =>
       };
     })
     .filter(({ status }) => status !== PEER_OK)
-    .map(describeUnmet);
+    .map((value) => describeUnmet(value));
 
 export const declaredPeerNames = (assets) => [
   ...new Set(

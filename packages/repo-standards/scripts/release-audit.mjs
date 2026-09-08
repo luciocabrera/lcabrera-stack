@@ -145,7 +145,7 @@ export const auditPackument = ({ only, packument, shipsSource }) => {
         version,
       }),
     )
-    .sort((left, right) => compareVersions(left.version, right.version));
+    .toSorted((left, right) => compareVersions(left.version, right.version));
 };
 
 export const selectBroken = (audited) =>
@@ -171,7 +171,7 @@ export const readNothing = ({ named, registry }) =>
 const STATE_MARK = { broken: '✗', clean: '✓', deprecated: '⚠' };
 
 const renderTags = (tags) => {
-  const ordered = [...tags].sort((left, right) => left.localeCompare(right));
+  const ordered = [...tags].toSorted((left, right) => left.localeCompare(right));
 
   return tags.length === 0 ? '' : ` (${ordered.join(', ')})`;
 };
@@ -189,7 +189,7 @@ const renderEmpty = (published) =>
 const renderPackage = ({ name, published, versions }) =>
   versions.length === 0
     ? [name, renderEmpty(published)]
-    : [name, ...versions.flatMap(renderVersion)];
+    : [name, ...versions.flatMap((value) => renderVersion(value))];
 
 export const renderAudit = ({ audited, registry }) =>
   [

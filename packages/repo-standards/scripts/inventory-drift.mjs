@@ -55,10 +55,10 @@ export const toBaseline = (findings) => {
   }
   return Object.fromEntries(
     [...byFile]
-      .sort(([a], [b]) => a.localeCompare(b))
+      .toSorted(([a], [b]) => a.localeCompare(b))
       .map(([file, symbols]) => [
         file,
-        [...new Set(symbols)].sort((a, b) => a.localeCompare(b)),
+        [...new Set(symbols)].toSorted((a, b) => a.localeCompare(b)),
       ]),
   );
 };

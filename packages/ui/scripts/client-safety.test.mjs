@@ -196,7 +196,7 @@ describe('collectPublishedSourceFiles', () => {
     ]);
 
     expect(
-      collectPublishedSourceFiles(join(root, 'packages', 'utils')).sort(),
+      collectPublishedSourceFiles(join(root, 'packages', 'utils')).toSorted(),
     ).toEqual([
       join(root, 'packages', 'utils', 'src', 'merge.test.ts'),
       join(root, 'packages', 'utils', 'src', 'merge.ts'),

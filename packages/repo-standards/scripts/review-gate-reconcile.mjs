@@ -31,7 +31,7 @@ export const openPullRequestNumbers = (pages) => {
     .flat()
     .map((pull) => pullNumber(pull))
     .filter((number) => number !== undefined);
-  return [...new Set(numbers)].sort((left, right) => left - right);
+  return [...new Set(numbers)].toSorted((left, right) => left - right);
 };
 
 export const publishedStatus = (combined, context) => {

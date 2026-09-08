@@ -175,7 +175,7 @@ const isRecognizedScope = (part, workspaces) => {
 };
 
 const sampleWorkspaces = (workspaces) => {
-  const names = [...workspaces].sort((a, b) => a.localeCompare(b));
+  const names = [...workspaces].toSorted((a, b) => a.localeCompare(b));
   return names.length > 4
     ? `${names.slice(0, 4).join(', ')}, …`
     : names.join(', ');

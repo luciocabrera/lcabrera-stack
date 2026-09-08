@@ -43,7 +43,7 @@ const describe = (value) => {
 };
 
 const sorted = (values) =>
-  [...values].sort((a, b) => a.localeCompare(b)).join(', ');
+  [...values].toSorted((a, b) => a.localeCompare(b)).join(', ');
 
 const schemaProblems = (fields, allowed) => {
   const declared = Object.keys(fields);

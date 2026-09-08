@@ -51,7 +51,7 @@ const main = () => {
       `found no published packages under ${PACKAGES_DIR}/ — check the glob.`,
     );
   }
-  const files = directories.flatMap(filesIn);
+  const files = directories.flatMap((value) => filesIn(value));
   if (files.length === 0) {
     throw new Error(
       'found no shipped text in any published package — check the glob.',

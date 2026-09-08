@@ -140,7 +140,7 @@ describe('analyseClosure', () => {
     expect(
       escapes
         .map((finding) => finding.kind)
-        .sort((left, right) => left.localeCompare(right)),
+        .toSorted((left, right) => left.localeCompare(right)),
     ).toEqual(['command', 'import', 'link']);
     expect(escapes.find((finding) => finding.kind === 'link')?.resolved).toBe(
       'docs/agents/contract.md',

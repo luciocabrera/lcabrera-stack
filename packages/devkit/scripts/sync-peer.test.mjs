@@ -93,7 +93,7 @@ describe('planSync and a declared peer', () => {
       });
       return [spelling, { missing: entry.missing, state: entry.state }];
     };
-    expect(Object.fromEntries(Object.entries(spellings).map(outcome))).toEqual(
+    expect(Object.fromEntries(Object.entries(spellings).map((value) => outcome(value)))).toEqual(
       Object.fromEntries(
         Object.keys(spellings).map((spelling) => [
           spelling,

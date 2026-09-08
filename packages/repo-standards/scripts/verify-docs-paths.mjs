@@ -228,7 +228,7 @@ const main = () => {
     return;
   }
 
-  const grandfathered = Object.values(baseline).flatMap(Object.keys).length;
+  const grandfathered = Object.values(baseline).flatMap((value) => Object.keys(value)).length;
   console.log(
     `Documented-path gate passed: ${governedDocs().length} doc(s) checked, ${grandfathered} grandfathered.`,
   );

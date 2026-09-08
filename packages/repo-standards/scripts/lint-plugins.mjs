@@ -89,7 +89,7 @@ const stripComments = (text) =>
 const globWorkspace = (glob) => glob.replace(/\/\*\*$/u, '');
 
 export const unclassifiedWorkspaces = ({ runtimes, workspaces }) => {
-  const classified = new Set(Object.values(runtimes).flat().map(globWorkspace));
+  const classified = new Set(Object.values(runtimes).flat().map((value) => globWorkspace(value)));
   return workspaces.filter((workspace) => !classified.has(workspace));
 };
 
@@ -115,8 +115,8 @@ const isWorkspaceGlob = (glob) =>
 export const workspaceRosters = (overrides) => {
   const blocks = overrides
     .map((override) => override.includes ?? [])
-    .filter((globs) => globs.length > 0 && globs.every(isWorkspaceGlob))
-    .map((globs) => globs.map(globWorkspace));
+    .filter((globs) => globs.length > 0 && globs.every((value) => isWorkspaceGlob(value)))
+    .map((globs) => globs.map((value) => globWorkspace(value)));
   return blocks
     .filter(
       (block, index) =>

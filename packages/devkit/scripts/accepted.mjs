@@ -61,7 +61,7 @@ export const parseAccepted = (raw) => {
 export const serialiseAccepted = (accepted) =>
   `${JSON.stringify(
     Object.fromEntries(
-      Object.entries(accepted).sort(([left], [right]) =>
+      Object.entries(accepted).toSorted(([left], [right]) =>
         left.localeCompare(right),
       ),
     ),

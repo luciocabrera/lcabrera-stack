@@ -21,7 +21,7 @@ const diffSubpath = ({ base, next, subpath }) => {
   const after = exportsOf(next, subpath);
   const names = [
     ...new Set([...Object.keys(before), ...Object.keys(after)]),
-  ].sort((left, right) => left.localeCompare(right));
+  ].toSorted((left, right) => left.localeCompare(right));
 
   return names.flatMap((name) => {
     const isHad = Object.hasOwn(before, name);
@@ -50,14 +50,14 @@ const diffSubpath = ({ base, next, subpath }) => {
 export const diffSurfaces = ({ base, next }) => {
   const subpaths = [
     ...new Set([...subpathsOf(base), ...subpathsOf(next)]),
-  ].sort((left, right) => left.localeCompare(right));
+  ].toSorted((left, right) => left.localeCompare(right));
   return subpaths.flatMap((subpath) => diffSubpath({ base, next, subpath }));
 };
 
 export const isBreakingChange = (change) =>
   change.kind === 'removed' || change.kind === 'changed';
 
-export const hasBreakingChange = (changes) => changes.some(isBreakingChange);
+export const hasBreakingChange = (changes) => changes.some((value) => isBreakingChange(value));
 
 export const formatChange = (change) => {
   const at = `${change.subpath} › ${change.name}`;

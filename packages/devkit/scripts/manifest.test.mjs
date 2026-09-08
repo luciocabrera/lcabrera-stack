@@ -90,7 +90,7 @@ describe('classifyMaterialisation', () => {
 describe('isWritten / isReported', () => {
   test('only the three write states write', () => {
     expect(['added', 'restored', 'updated'].every(isWritten)).toBe(true);
-    expect(['conflict', 'current', 'modified'].some(isWritten)).toBe(false);
+    expect(['conflict', 'current', 'modified'].some((value) => isWritten(value))).toBe(false);
   });
 
   test('a surviving edit and a refused adoption are both reported', () => {
@@ -104,7 +104,7 @@ describe('isWritten / isReported', () => {
   });
 
   test('an edit and a refused adoption are never recorded', () => {
-    expect(['conflict', 'modified'].some(isRecorded)).toBe(false);
+    expect(['conflict', 'modified'].some((value) => isRecorded(value))).toBe(false);
   });
 
   test('a refusal is reported, never written and never recorded', () => {

@@ -116,7 +116,7 @@ export const serialiseManifest = (manifest) =>
   `${JSON.stringify(
     {
       files: Object.fromEntries(
-        Object.entries(manifest.files).sort(([left], [right]) =>
+        Object.entries(manifest.files).toSorted(([left], [right]) =>
           left.localeCompare(right),
         ),
       ),

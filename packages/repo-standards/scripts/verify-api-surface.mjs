@@ -128,7 +128,7 @@ const verifyPackage = (packageConfig) => {
     });
     drift.push(
       `${packageConfig.name}: the published surface changed but ${relativePath} was not regenerated:\n${changes
-        .map(formatChange)
+        .map((value) => formatChange(value))
         .join(
           '\n',
         )}\n  → run \`repo-verify-api-surface --write\` and commit the snapshot.`,
@@ -175,10 +175,10 @@ const changesetProblems = (changedPackages) => {
 const runVerify = (packages) => {
   const active = packages.filter((packageConfig) => !isUnbuilt(packageConfig));
   const unbuilt = packages
-    .filter(isUnbuilt)
+    .filter((value) => isUnbuilt(value))
     .map((packageConfig) => unreadableProblem(packageConfig));
 
-  const results = active.map(verifyPackage);
+  const results = active.map((value) => verifyPackage(value));
   const drift = results.flatMap((result) => result.drift);
   const changedPackages = results
     .map((result) => result.changed)

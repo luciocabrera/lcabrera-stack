@@ -28,7 +28,7 @@ const bindingIn = (line) => {
  */
 export const extractBinInvocations = (content) => {
   const lines = content.split('\n');
-  const directories = new Set(lines.flatMap(bindingIn));
+  const directories = new Set(lines.flatMap((value) => bindingIn(value)));
 
   const named = lines.flatMap((line, index) =>
     [...line.matchAll(BIN_PATH)].map((match) => ({

@@ -147,7 +147,7 @@ export const renderListing = (homes) =>
       '| ADR | Decision |',
       '| --- | --- |',
       ...[...home.entries]
-        .sort((a, b) => a.filename.localeCompare(b.filename))
+        .toSorted((a, b) => a.filename.localeCompare(b.filename))
         .map((entry) => listingRow(home, entry)),
       '',
     ])
@@ -156,7 +156,7 @@ export const renderListing = (homes) =>
 const sortedRows = (homes, matches) =>
   homes.flatMap((home) =>
     [...home.entries]
-      .sort((a, b) => a.filename.localeCompare(b.filename))
+      .toSorted((a, b) => a.filename.localeCompare(b.filename))
       .filter((entry) => matches(entry.governs ?? []))
       .map((entry) => listingRow(home, entry)),
   );

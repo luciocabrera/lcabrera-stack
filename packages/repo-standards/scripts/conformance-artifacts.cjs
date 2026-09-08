@@ -62,7 +62,7 @@ const markdownFileNames = (directory) =>
     .readdirSync(directory, { withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
     .map((entry) => entry.name)
-    .sort(byName);
+    .toSorted(byName);
 
 /**
  * @param {string} repoRoot
@@ -90,7 +90,7 @@ const collectSkills = (repoRoot) => {
     .readdirSync(root, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
-    .sort(byName)
+    .toSorted(byName)
     .map((name) => ({ filePath: path.join(root, name, 'SKILL.md'), name }));
 
   const present = directories.filter((entry) => fs.existsSync(entry.filePath));

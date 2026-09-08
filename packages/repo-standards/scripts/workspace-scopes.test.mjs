@@ -27,7 +27,7 @@ describe('deriveWorkspaces', () => {
       'packages/api',
     ]);
     expect(
-      deriveWorkspaces(root).sort((a, b) => a.name.localeCompare(b.name)),
+      deriveWorkspaces(root).toSorted((a, b) => a.name.localeCompare(b.name)),
     ).toEqual([
       { kind: 'pkg', name: 'api' },
       { kind: 'app', name: 'site' },

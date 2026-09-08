@@ -25,7 +25,7 @@ const firstClash = (a, b) =>
 const sameBranch = (a, b) => a.branch === b.branch && !NO_BRANCH.has(a.branch);
 
 export const overlapWarnings = (tasks) => {
-  const live = tasks.filter(isLive);
+  const live = tasks.filter((value) => isLive(value));
   const warnings = [];
   for (let i = 0; i < live.length; i += 1) {
     for (let j = i + 1; j < live.length; j += 1) {

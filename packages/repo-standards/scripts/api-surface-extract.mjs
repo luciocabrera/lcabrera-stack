@@ -51,7 +51,7 @@ const extractEntry = (sourceFile) => {
   return Object.fromEntries(
     [...exported.entries()]
       .map(([name, declarations]) => [name, signatureFor(declarations)])
-      .sort(([left], [right]) => left.localeCompare(right)),
+      .toSorted(([left], [right]) => left.localeCompare(right)),
   );
 };
 

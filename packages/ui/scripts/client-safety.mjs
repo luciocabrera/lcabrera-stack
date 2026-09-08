@@ -315,7 +315,7 @@ export const collectClientSafetyReport = ({
     reportLines: [
       ...formatScanDefects(collectScanDefects(scans)),
       ...formatGraphViolations(graphViolations),
-      ...formatDependencyViolations(scans.flatMap(collectServerOnlyUsage)),
+      ...formatDependencyViolations(scans.flatMap((value) => collectServerOnlyUsage(value))),
     ],
     scannedPackageNames: scans.map(({ packageName }) => packageName),
   };

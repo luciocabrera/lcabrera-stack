@@ -34,7 +34,7 @@ const markdownFilesIn = (root, dir) => {
     .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
     .map((entry) => toPosix(relative(root, join(entry.parentPath, entry.name))))
     .filter((file) => !isTemplate(file))
-    .sort((a, b) => a.localeCompare(b));
+    .toSorted((a, b) => a.localeCompare(b));
 };
 
 const readEntries = (root, dir, register) =>
