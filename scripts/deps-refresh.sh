@@ -274,6 +274,19 @@ taze_log="$(mktemp)"
 trap 'rm -f "$taze_log"' EXIT
 npx --yes taze@latest -r --write "${taze_exclude[@]}" | tee "$taze_log"
 
+# biome.jsonc's `$schema` pins the same version the catalog holds, and taze does
+# not read it, so it only moves if something moves it here. A stale pin is not a
+# gate failure — biome reports it as an info diagnostic and passes — so nothing
+# stops it from drifting a major behind.
+log "Syncing biome.jsonc's \$schema pin with the catalog"
+biome_version="$(sed -nE "s/^[[:space:]]*'@biomejs\/biome':[[:space:]]*[^0-9]*([0-9][^[:space:]]*).*/\1/p" pnpm-workspace.yaml | head -1)"
+if [[ -z "$biome_version" ]]; then
+  echo "deps-refresh: WARNING — no @biomejs/biome version found in the catalog; biome.jsonc left alone." >&2
+elif [[ -f biome.jsonc ]]; then
+  sed -i -E "s|(https://biomejs\.dev/schemas/)[^/]+(/schema\.json)|\1${biome_version}\2|" biome.jsonc
+  echo "  biome.jsonc \$schema -> ${biome_version}"
+fi
+
 # corepack can fail AFTER writing the field, so the guard reads the field (#927).
 log "Updating pnpm itself (the pinned packageManager) to the latest release"
 corepack_failed=()
