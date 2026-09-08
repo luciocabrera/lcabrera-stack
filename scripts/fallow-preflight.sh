@@ -25,7 +25,7 @@
 # merge base could not be resolved sends a developer looking for code that is not
 # there. `vp run` propagates a task's exit code verbatim, so the distinction
 # survives.
-set -uo pipefail
+set -euo pipefail
 
 BASE="${TEST_CHANGED_BASE:-origin/main}"
 COVERAGE="reports/fallow/coverage/coverage-final.json"
@@ -38,8 +38,8 @@ if ! vp run coverage:merge -- --changed; then
   exit 2
 fi
 
-vp run fallow:audit --base "$BASE" --coverage "$COVERAGE" "$@"
-status=$?
+status=0
+vp run fallow:audit --base "$BASE" --coverage "$COVERAGE" "$@" || status=$?
 
 if [[ "$status" -eq 1 ]]; then
   echo ""

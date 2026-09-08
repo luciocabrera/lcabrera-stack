@@ -14,6 +14,12 @@
  * unrecognised flag would silently escape the gate, so an unknown `-` token is an
  * error and `--` ends the options here too.
  *
+ * The remaining flags are read from the governing workspace's own
+ * `lint:eslint:check` script rather than restated here. A second list drifts,
+ * and it had: a workspace whose own gate refuses inline disables was being
+ * linted here by a call that honoured them, so the commit hook passed exactly
+ * the finding that workspace's gate goes on to report.
+ *
  * `--no-warn-ignored` is what keeps that rule from contradicting the config:
  * naming a file the config ignores is a warning, and at `--max-warnings 0` a
  * staged `dist/` or `build/` path would fail the commit for being ignored. A
@@ -49,8 +55,9 @@ export const findConfigDirectory = ({
   repoRoot,
 }) => {
   let directory = dirname(filePath);
-  while (directory.startsWith(repoRoot + sep)) {
+  while (directory === repoRoot || directory.startsWith(repoRoot + sep)) {
     if (exists(join(directory, CONFIG_NAME))) return directory;
+    if (directory === repoRoot) break;
     directory = dirname(directory);
   }
   return undefined;
@@ -68,12 +75,32 @@ export const planLintGroups = ({ exists = existsSync, paths, repoRoot }) => {
   return [...groups].map(([directory, files]) => ({ directory, files }));
 };
 
-export const eslintArguments = ({ files, fix }) => [
+const RUNNER_OWNED = new Set(['--config', '--fix', '--no-warn-ignored']);
+
+const DEFAULT_FLAGS = ['--max-warnings', '0'];
+
+export const workspaceEslintFlags = (script) => {
+  const tokens =
+    typeof script === 'string' ? script.split(/\s+/u).filter(Boolean) : [];
+  const kept = [];
+  let mode = 'idle';
+  for (const token of tokens.slice(1)) {
+    if (token.startsWith('-')) {
+      mode = RUNNER_OWNED.has(token) ? 'drop' : 'keep';
+      if (mode === 'keep') kept.push(token);
+      continue;
+    }
+    if (mode === 'keep') kept.push(token);
+    mode = 'idle';
+  }
+  return kept.length > 0 ? kept : DEFAULT_FLAGS;
+};
+
+export const eslintArguments = ({ files, fix, workspaceFlags }) => [
   '--config',
   CONFIG_NAME,
-  '--max-warnings',
-  '0',
   '--no-warn-ignored',
+  ...(workspaceFlags ?? DEFAULT_FLAGS),
   ...(fix ? ['--fix'] : []),
   '--',
   ...files,
@@ -88,4 +115,33 @@ export const parseArguments = (args) => {
     paths: [...flags.filter((arg) => !arg.startsWith('-')), ...literal],
     unknown: flags.filter((arg) => arg !== '--check' && arg.startsWith('-')),
   };
+};
+
+const USAGE = 'usage: repo-eslint-staged [--check] [--] <file>…';
+
+export const argumentError = ({ missing, paths, unknown }) => {
+  if (unknown.length > 0) {
+    return `unknown option ${unknown.join(', ')}. A file whose name starts with "-" goes after "--".\n${USAGE}`;
+  }
+  if (paths.length === 0) return USAGE;
+  if (missing.length > 0) {
+    const listed = missing.map((path) => `  • ${path}`).join('\n');
+    return `no such file(s), so nothing would lint them:\n${listed}`;
+  }
+  return undefined;
+};
+
+export const lintScriptOf = (scripts) =>
+  scripts?.['lint:eslint:check'] ?? scripts?.['lint:eslint'];
+
+export const spawnOutcome = (status) => {
+  if (status === 0) return 'clean';
+  if (status === 1) return 'findings';
+  return 'broken';
+};
+
+export const exitCodeFor = (outcomes) => {
+  if (outcomes.includes('broken')) return 2;
+  if (outcomes.includes('findings')) return 1;
+  return 0;
 };
