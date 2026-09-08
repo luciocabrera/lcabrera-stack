@@ -6,6 +6,10 @@ import type {
   TableColumnAggregate,
 } from '../Table.types';
 
+import {
+  DEFAULT_MAX_AGGREGATE_COLUMN_WIDTH,
+  DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH,
+} from '../Table.constants';
 import { withAggregateColumns } from './withAggregateColumns.util';
 
 type Row = {
@@ -134,7 +138,7 @@ describe('withAggregateColumns', () => {
     expect(count?.label).toBe('Count');
   });
 
-  it('carries no width of its own, which the grouped band states instead', () => {
+  it('takes the band rather than the widths its source declared', () => {
     const result = run({
       aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
       columns: withTotalAmount({ maxWidth: 120, minWidth: 90 }),
@@ -144,7 +148,10 @@ describe('withAggregateColumns', () => {
     expect({
       maxWidth: measure?.maxWidth,
       minWidth: measure?.minWidth,
-    }).toStrictEqual({ maxWidth: undefined, minWidth: undefined });
+    }).toStrictEqual({
+      maxWidth: DEFAULT_MAX_AGGREGATE_COLUMN_WIDTH,
+      minWidth: DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH,
+    });
   });
 
   it('makes a measure sortable but neither filterable nor groupable', () => {

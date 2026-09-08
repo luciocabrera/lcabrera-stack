@@ -93,3 +93,25 @@ describe('getPinnedDerivedColumnsState while grouping is applied', () => {
     });
   });
 });
+
+const ungrouped = () => run({ groupingKeys: [] });
+
+describe('getPinnedDerivedColumnsState while a measure is painted ungrouped', () => {
+  it('still paints the measure, because removing the last group key keeps the aggregates', () => {
+    expect(keysOf(ungrouped())).toStrictEqual([
+      'order_id',
+      'customer_type',
+      'total_amount:sum',
+      'actions',
+    ]);
+  });
+
+  it('bands the measure and leaves every other column its declared widths', () => {
+    expect(bandsOf(ungrouped())).toStrictEqual([
+      [undefined, undefined],
+      [130, 180],
+      [DEFAULT_MIN_AGGREGATE_COLUMN_WIDTH, DEFAULT_MAX_AGGREGATE_COLUMN_WIDTH],
+      [undefined, undefined],
+    ]);
+  });
+});

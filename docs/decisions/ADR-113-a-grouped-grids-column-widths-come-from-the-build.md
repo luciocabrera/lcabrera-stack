@@ -47,9 +47,21 @@ is a derivation, so ungrouping restores them.
 fallback, and an inverted band resolves to its own floor rather than to a range the
 splitter could not move within.
 
-**`resolveAggregateColumnMinWidth` is deleted, and `withAggregateColumns` states no
-width at all.** A derived measure carries no `minWidth`/`maxWidth` of its own —
-there is exactly one place a grouped column's width is decided.
+**`resolveAggregateColumnMinWidth` is deleted, and a derived measure takes the same
+band at the moment it is created.** `withAggregateColumns` reads
+`resolveGroupedColumnWidthBand` too, rather than clamping a floor against the
+source's `maxWidth` the way the deleted resolver did — that clamp is what collapsed
+the band. So the band has one definition and two application points, and the second
+one matters: a measure is derived whenever `aggregates` is non-empty, which
+`toggleTableGroupKey` leaves standing when the last group key is removed. A grid in
+that state paints `total_amount:sum` with no grouping applied, and sizing it only
+inside `withGroupedColumnWidths` would drop it to the table-wide `60–600` —
+narrower than any measure the floor was written for.
+
+**Every other column keeps its declared widths until a grouping is applied.** The
+band replaces them for the whole grid only while a declared key is grouped; an
+ungrouped grid that happens to paint a measure bands that one column and leaves the
+rest alone.
 
 ## Consequences
 
