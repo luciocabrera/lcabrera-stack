@@ -65,9 +65,18 @@ resolved once. Biome is here for **lint rules only**.
   those paths against Biome's own `--staged` detection. There is deliberately no
   `lint:biome:staged` — one existed briefly, was invoked by nothing, and claimed
   in the docs to be what the hook ran.
-- Check-only in the hook, unlike the `vp check --fix` beside it: a Biome autofix
-  there could rewrite a staged file _after_ it was reviewed. A violation fails
-  the commit and `vp run lint:biome` applies the fix deliberately.
+- It writes in the hook, like the `vp check --fix` beside it. This reverses what
+  this ADR decided first — check-only there, because an autofix could rewrite a
+  staged file _after_ it was reviewed. What that bought was a violation the
+  commit hook could see and refuse to fix, so the fix landed a push or a CI run
+  later: the round trip the hook exists to remove. Writing is safe in this hook
+  and nowhere else in the flow, because lint-staged re-stages what a task
+  changes, so the fix lands in the commit being made rather than in the working
+  tree behind it. Two constraints came with the reversal (#1116): every fixer
+  shares one glob, since lint-staged runs separate entries concurrently and two
+  writers would race the same file, and the chain ends with a format-only pass,
+  since a lint fixer edits only its own range and can leave text the formatter
+  would print differently.
 
 ### 5. Rule 11 applies unchanged
 

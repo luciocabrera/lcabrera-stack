@@ -35,7 +35,8 @@ Make the local gate run what CI runs. Three parts:
   hook calls it. The fallow job was the gate `check-safe` failed on most, and it
   was the only gate with no local form.
 
-`vp run fix` is the by-hand entry point: `format:all` then `lint:all`.
+`vp run fix` is the by-hand entry point: `lint:all` then `format:all`, so the
+formatter is the last thing that writes.
 
 ## Status / next
 
