@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 # pre-push: run the DB-free CI gate locally, before anything reaches CI.
 #
-# Why this exists: the pre-commit hook runs `vp staged` (fmt + Oxlint + tsgolint
-# + Biome on staged files) but NOT the ESLint pass or a full type-check, so an
-# ESLint-only finding (unicorn / perfectionist / local-rules) or a cross-file
-# type error first turns red in CI. `check:push` mirrors the
+# Why this exists: the pre-commit hook runs `vp staged` over the STAGED FILES
+# only — Oxfmt, Oxlint, tsgolint, Biome and the per-workspace ESLint pass, each
+# with its fixer. What it cannot see is the rest of the tree: a cross-file type
+# error, or a finding in a file this commit did not touch. `check:push` mirrors the
 # "Quality Gate (Format · Lint · Types)" job in
 # .github/workflows/check-safe.yml — the same checks, run the same way — so a
 # push that would fail that job fails here first.

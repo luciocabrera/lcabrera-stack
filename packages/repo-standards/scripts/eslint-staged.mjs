@@ -8,6 +8,9 @@
  * `eslint.config.mjs` above it, and a file with none above it is outside every
  * workspace and belongs to no config at all.
  *
+ * The file list comes after `--` because a leading `-` is legal in a filename
+ * and the CLI would otherwise read one as an option.
+ *
  * `--no-warn-ignored` is what keeps that rule from contradicting the config:
  * naming a file the config ignores is a warning, and at `--max-warnings 0` a
  * staged `dist/` or `build/` path would fail the commit for being ignored. A
@@ -69,5 +72,6 @@ export const eslintArguments = ({ files, fix }) => [
   '0',
   '--no-warn-ignored',
   ...(fix ? ['--fix'] : []),
+  '--',
   ...files,
 ];

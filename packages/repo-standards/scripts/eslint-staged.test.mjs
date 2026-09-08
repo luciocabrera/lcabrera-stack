@@ -107,6 +107,11 @@ describe('eslintArguments', () => {
     );
   });
 
+  it('ends the options before the files, so a leading dash is a path', () => {
+    const args = eslintArguments({ files: ['-weird.ts'], fix: false });
+    expect(args.indexOf('--')).toBeLessThan(args.indexOf('-weird.ts'));
+  });
+
   it('leaves a path the config ignores to the config', () => {
     expect(eslintArguments({ files: ['dist/a.js'], fix: false })).toContain(
       '--no-warn-ignored',

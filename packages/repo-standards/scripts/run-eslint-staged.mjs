@@ -35,11 +35,20 @@ const eslintBinary = (directory) => {
     : join(REPO_ROOT, 'node_modules', '.bin', 'eslint');
 };
 
-const runGroup = ({ directory, files, fix }) =>
-  spawnSync(eslintBinary(directory), eslintArguments({ files, fix }), {
-    cwd: directory,
-    stdio: 'inherit',
-  }).status === 0;
+const runGroup = ({ directory, files, fix }) => {
+  const { error, status } = spawnSync(
+    eslintBinary(directory),
+    eslintArguments({ files, fix }),
+    { cwd: directory, stdio: 'inherit' },
+  );
+  if (status === null) {
+    console.error(
+      `\nESLint could not be run in ${relative(REPO_ROOT, directory)}: ` +
+        `${error?.message ?? 'the process was terminated by a signal'}\n`,
+    );
+  }
+  return status === 0;
+};
 
 const reportFailures = (failed) => {
   const listed = failed
