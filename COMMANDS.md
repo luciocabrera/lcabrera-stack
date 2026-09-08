@@ -88,18 +88,19 @@ The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` �
 `renames:verify`, `route-names:verify`,
 `inventory:verify`, `adr:verify`, `viteplus:verify` and `configs:verify`, mirroring the
 "Quality Gate (Format · Lint · Types)" job in
-`check-safe.yml`) — and then
-`vp run test:changed`. This closes the gap the pre-commit hook leaves: `vp staged` covers
-only fmt + Oxlint + tsgolint + Biome on staged files, so the ESLint pass and a full
-type-check first turn red in CI otherwise. **Tests are scoped, not the full suite**:
-`test:changed` selects on the diff and covers both halves — the affected
-workspaces and the root `scripts/` suites — so a docs-only push runs none, while
-a tooling-script edit still runs its tests here. Exactly what it selects, and
-what forces the full suite instead, is under [Gate & CI](#gate--ci) below; this
-section does not restate it.
-The **fallow audit** stays CI-only — it is a new-only gate scored against the merge base,
-needing full history and a coverage merge. `vp run` caches per task, so a warm push is
-quick; bypass a WIP push with `git push --no-verify`.
+`check-safe.yml`) — then `vp run test:changed`, and finally
+`vp run fallow:preflight`. This closes the gap the pre-commit hook leaves: `vp
+staged` fixes what it can on the staged files, but it cannot see a cross-file
+type error or a finding in a file this commit did not touch. **Tests are scoped,
+not the full suite**: `test:changed` selects on the diff and covers both halves —
+the affected workspaces and the root `scripts/` suites — so a docs-only push runs
+none, while a tooling-script edit still runs its tests here. Exactly what it
+selects, and what forces the full suite instead, is under
+[Gate & CI](#gate--ci) below; this section does not restate it.
+The **fallow audit** runs last, and locally: `fallow:preflight` is the same
+new-only gate CI runs, given the merge base and a `--changed` coverage merge.
+`vp run` caches per task, so a warm push is quick; bypass a WIP push with
+`git push --no-verify`.
 
 Before running anything the hook sources
 [`.vite-hooks/scrub-git-env.sh`](.vite-hooks/scrub-git-env.sh), and **must** keep
@@ -1097,14 +1098,16 @@ Vite+ owns the git hooks — `core.hooksPath` points at `.vite-hooks/`, installe
 `.vite-hooks/pre-commit` runs `vp staged`, which reads the `staged` block in the
 root `vite.config.ts`:
 
-| Glob                 | Command                               |
-| -------------------- | ------------------------------------- |
-| `*`                  | `vp check --fix`                      |
-| `*.{ts,tsx,mjs,cjs}` | `biome lint --no-errors-on-unmatched` |
+| Glob | Commands, in order                                                                      |
+| ---- | --------------------------------------------------------------------------------------- |
+| `*`  | `vp check --fix` → `biome lint --write --no-errors-on-unmatched` → `repo-eslint-staged` |
 
-Biome is **check-only** here on purpose: `vp check --fix` autofixes, but a Biome
-autofix could rewrite a staged file after you reviewed it, so a violation fails the
-commit and you apply the fix deliberately with `vp run lint:biome`.
+All three write, and that is safe in this hook and nowhere else in the flow:
+lint-staged re-stages what a task changes, so a fix lands in the commit being
+made rather than in the working tree behind it. They share one glob deliberately
+— the reason is in the `staged` block's own comment. Biome sat here check-only
+until #1116, which left its gate first failing in CI, after the commit it was
+meant to block.
 
 `.vite-hooks/commit-msg` runs `node packages/repo-standards/scripts/verify-commit-msg.mjs "$1"`, validating
 the commit message against the Conventional-Commit standard before the commit is
@@ -1114,8 +1117,9 @@ but the committed sibling hooks (`pre-commit`, `commit-msg`) persist across ever
 
 The hooks only see **staged** files / the local message — CI's repo-wide passes
 (`check-safe.yml` for code, `pr-standards.yml` for commits + the PR) are what catch
-anything arriving via `--no-verify` or an unhooked push. Note the eslint pass is not
-in a hook either; it is a CI-and-local-gate step.
+anything arriving via `--no-verify` or an unhooked push. The eslint pass is in
+both hooks now: `repo-eslint-staged` over the staged files at commit time, and
+the full per-workspace fan-out inside `check:push` at push time.
 
 ---
 
