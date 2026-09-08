@@ -44,12 +44,9 @@ describe('AdvancedSettingsSection', () => {
   it('forwards the busy flag to every subsection', () => {
     render(<AdvancedSettingsSection isBusy />);
 
-    const busyNodes = ['Grouping mode section', 'Totals placement section'].map(
-      (label) => screen.getByText(label),
+    expect(screen.getByText('Grouping mode section').dataset.busy).toBe('true');
+    expect(screen.getByText('Totals placement section').dataset.busy).toBe(
+      'true',
     );
-
-    for (const node of busyNodes) {
-      expect(node.dataset.busy).toBe('true');
-    }
   });
 });

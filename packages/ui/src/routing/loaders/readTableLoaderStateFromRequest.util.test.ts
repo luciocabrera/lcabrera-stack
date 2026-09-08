@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TableColumn } from '#ui/components/Table';
+import type { PersistedUiState } from '#ui/components/Table/utils/persistence.types';
 
 vi.mock('#ui/components/Table/utils', () => ({
   readPersistedStateFromCookie: vi.fn(),
@@ -47,13 +48,43 @@ const filtersFor = (value: string) =>
     status: { operator: 'equals', type: 'text', value },
   }) ?? '';
 
-const globalSettingsCookie = (settingsTabOrder: readonly string[]) =>
-  `${GLOBAL_SETTINGS_COOKIE_KEY}=${encodeURIComponent(
-    JSON.stringify({
-      value: { tablePanel: { settingsTabOrder } },
-      version: GLOBAL_SETTINGS_COOKIE_VERSION,
+const expectListState = (
+  state: ReturnType<typeof readTableLoaderStateFromRequest<TestRow>>,
+) => {
+  expect(state.filters).toStrictEqual({
+    status: { operator: 'equals', type: 'text', value: 'list' },
+  });
+  expect(state.sorting).toStrictEqual([
+    { columnKey: 'amount', direction: 'asc' },
+  ]);
+};
+
+type ReadTabOrderArgs = {
+  readonly globalOrder?: readonly string[];
+  readonly uiFlags?: PersistedUiState;
+};
+
+const readTabOrder = ({ globalOrder, uiFlags = {} }: ReadTabOrderArgs) => {
+  vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
+  vi.mocked(readPersistedUiFlagsFromCookie).mockReturnValue(uiFlags);
+
+  const cookie = globalOrder
+    ? `${GLOBAL_SETTINGS_COOKIE_KEY}=${encodeURIComponent(
+        JSON.stringify({
+          value: { tablePanel: { settingsTabOrder: globalOrder } },
+          version: GLOBAL_SETTINGS_COOKIE_VERSION,
+        }),
+      )}`
+    : undefined;
+
+  return readTableLoaderStateFromRequest<TestRow>({
+    columns: testColumns,
+    persistenceKey: 'orders',
+    request: new Request('https://example.com/orders', {
+      ...(cookie !== undefined && { headers: { Cookie: cookie } }),
     }),
-  )}`;
+  }).settingsTabOrder;
+};
 
 const sortingFor = (columnKey: 'amount' | 'status') =>
   serializeSortingToURL([{ columnKey, direction: 'asc' }]) ?? '';
@@ -384,12 +415,7 @@ describe('readTableLoaderStateFromRequest', () => {
         request: nestedRequest(),
       });
 
-      expect(state.filters).toStrictEqual({
-        status: { operator: 'equals', type: 'text', value: 'list' },
-      });
-      expect(state.sorting).toStrictEqual([
-        { columnKey: 'amount', direction: 'asc' },
-      ]);
+      expectListState(state);
     });
   });
 
@@ -437,57 +463,23 @@ describe('readTableLoaderStateFromRequest', () => {
         ),
       });
 
-      expect(state.filters).toStrictEqual({
-        status: { operator: 'equals', type: 'text', value: 'list' },
-      });
-      expect(state.sorting).toStrictEqual([
-        { columnKey: 'amount', direction: 'asc' },
-      ]);
+      expectListState(state);
     });
   });
 
   describe('settingsTabOrder', () => {
     it('takes the order the reader set globally', () => {
-      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
-      vi.mocked(readPersistedUiFlagsFromCookie).mockReturnValue({});
-
-      const state = readTableLoaderStateFromRequest<TestRow>({
-        columns: testColumns,
-        persistenceKey: 'orders',
-        request: new Request('https://example.com/orders', {
-          headers: { Cookie: globalSettingsCookie(['details']) },
-        }),
-      });
-
-      expect(state.settingsTabOrder?.[0]).toBe('details');
+      expect(readTabOrder({ globalOrder: ['details'] })?.[0]).toBe('details');
     });
 
     it('reads no order out of the table UI-flags cookie', () => {
-      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
-      vi.mocked(readPersistedUiFlagsFromCookie).mockReturnValue({
-        tableSettingsSelectedTab: 'sorting',
-      });
-
-      const state = readTableLoaderStateFromRequest<TestRow>({
-        columns: testColumns,
-        persistenceKey: 'orders',
-        request: new Request('https://example.com/orders'),
-      });
-
-      expect(state.settingsTabOrder).toBeUndefined();
+      expect(
+        readTabOrder({ uiFlags: { tableSettingsSelectedTab: 'sorting' } }),
+      ).toBeUndefined();
     });
 
     it('states no order when the reader has set none', () => {
-      vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
-      vi.mocked(readPersistedUiFlagsFromCookie).mockReturnValue({});
-
-      const state = readTableLoaderStateFromRequest<TestRow>({
-        columns: testColumns,
-        persistenceKey: 'orders',
-        request: new Request('https://example.com/orders'),
-      });
-
-      expect(state.settingsTabOrder).toBeUndefined();
+      expect(readTabOrder({})).toBeUndefined();
     });
   });
 });

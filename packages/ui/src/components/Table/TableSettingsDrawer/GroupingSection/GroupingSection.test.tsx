@@ -29,14 +29,6 @@ type MockDraggableListProps = {
   readonly onOrderChange?: (items: readonly { readonly id: string }[]) => void;
 };
 
-type MockVirtualSelectProps = {
-  readonly onChange: (values: readonly string[]) => void;
-  readonly options: readonly {
-    readonly label: string;
-    readonly value: string;
-  }[];
-};
-
 type Row = Record<string, unknown>;
 
 const COLUMNS = [
@@ -130,35 +122,23 @@ vi.mock('#ui/components/DraggableList', () => ({
   ),
 }));
 
-vi.mock('#ui/components/VirtualSelect', () => ({
-  VirtualSelect: ({ onChange, options }: MockVirtualSelectProps) => (
-    <ul>
-      {options.map((option) => (
-        <li key={option.value}>
-          <button
-            onClick={() => {
-              onChange([option.value]);
-            }}
-            type='button'
-          >
-            {option.label}
-          </button>
-        </li>
-      ))}
-    </ul>
-  ),
-}));
+vi.mock('#ui/components/VirtualSelect', async () => {
+  const { createMockVirtualSelect } =
+    await import('#ui/utils/tests/createMockVirtualSelect.util');
+
+  return { VirtualSelect: createMockVirtualSelect() };
+});
 
 import { GroupingModeSection } from '../AdvancedSettingsSection/GroupingModeSection';
 import { TableDrawerProvider } from '../TableDrawerContext/TableDrawerContext.provider';
 import { TableSettingsDrawerFooter } from '../TableSettingsDrawerFooter/TableSettingsDrawerFooter.component';
 import { GroupingSection } from './GroupingSection.component';
 
-const renderDrawer = () =>
+const renderDrawer = (extras?: ReactNode) =>
   render(
     <TableDrawerProvider>
       <GroupingSection />
-      <GroupingModeSection />
+      {extras}
       <TableSettingsDrawerFooter />
     </TableDrawerProvider>,
   );
@@ -413,7 +393,7 @@ describe('GroupingSection staging', () => {
   });
 
   it('stages the totals mode and carries it in the same commit', () => {
-    renderDrawer();
+    renderDrawer(<GroupingModeSection />);
 
     stageGroupKey('Status');
     fireEvent.click(

@@ -15,15 +15,6 @@ import type {
   TableColumnGroupingCapability,
 } from '../Table.types';
 
-type MockVirtualSelectProps = {
-  readonly onChange: (values: readonly string[]) => void;
-  readonly options: readonly {
-    readonly label: string;
-    readonly value: string;
-  }[];
-  readonly placeholder: string;
-};
-
 const {
   draftAggregatesRef,
   draftGroupingKeysRef,
@@ -94,28 +85,12 @@ vi.mock('#ui/components/Table/TableActionsPopover', () => ({
   tableActionsPopoverStyles: { menuIcon: {}, menuItem: {} },
 }));
 
-vi.mock('#ui/components/VirtualSelect', () => ({
-  VirtualSelect: ({
-    onChange,
-    options,
-    placeholder,
-  }: MockVirtualSelectProps) => (
-    <ul data-testid={placeholder}>
-      {options.map((option) => (
-        <li key={option.value}>
-          <button
-            onClick={() => {
-              onChange([option.value]);
-            }}
-            type='button'
-          >
-            {option.label}
-          </button>
-        </li>
-      ))}
-    </ul>
-  ),
-}));
+vi.mock('#ui/components/VirtualSelect', async () => {
+  const { createMockVirtualSelect } =
+    await import('#ui/utils/tests/createMockVirtualSelect.util');
+
+  return { VirtualSelect: createMockVirtualSelect() };
+});
 
 import { AggregateActions } from '#ui/components/Table/TableHeaderCell/TableHeaderActionsMenu/GroupActions/AggregateActions';
 import { AddAggregateSection } from '#ui/components/Table/TableSettingsDrawer/GroupingSection/AddAggregateSection';
