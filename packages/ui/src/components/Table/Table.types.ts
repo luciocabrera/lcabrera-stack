@@ -356,6 +356,10 @@ export type TableMetaState = {
   readonly preferredGroupingMode?: TableGroupingMode;
   readonly rowHeight: number;
   readonly schemaName?: string;
+  /** Width the settings drawers open at, clamped to the panel's own band. */
+  readonly settingsPanelWidth?: number;
+  /** The reader's tab order, applied to both settings drawers. */
+  readonly settingsTabOrder?: readonly string[];
   readonly tableName?: string;
   readonly tableSettingsExpandedFilters: readonly string[];
   readonly tableSettingsSelectedTab: string;
@@ -421,6 +425,14 @@ export type TableResponseError =
     }
   | { readonly kind: 'db-canceled'; readonly message: string }
   | { readonly kind: 'unexpected'; readonly message: string };
+
+export type TableSettingsTabRole =
+  | 'columns'
+  | 'details'
+  | 'filters'
+  | 'general'
+  | 'grouping'
+  | 'sorting';
 
 export type TableTitle = {
   readonly plural: string;

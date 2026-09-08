@@ -6,12 +6,15 @@ import { useSetTableColumnSettingsSelectedTab } from '#ui/components/Table/conte
 import {
   useGetTableColumnSelectedKey,
   useGetTableColumnSettingsSelectedTab,
+  useGetTableSettingsTabOrder,
 } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
 } from '#ui/components/Table/contexts/TableData/data/selectors';
+import { orderSettingsTabs } from '#ui/components/Table/utils/orderSettingsTabs.util';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
+import { resolveSettingsTabOrder } from '#ui/components/Table/utils/resolveSettingsTabOrder.util';
 import { Tabs } from '#ui/components/Tabs';
 
 import { DetailsSection } from '../DetailsSection';
@@ -30,49 +33,53 @@ export const ColumnSettingsDrawerBody = <
   const column = useGetNormalizedColumn<TData>(columnKey);
   const selectedTab = useGetTableColumnSettingsSelectedTab();
   const setSelectedTab = useSetTableColumnSettingsSelectedTab();
+  const tabOrder = useGetTableSettingsTabOrder();
 
   const { isFilterable, isSortable, isStatic } =
     resolveColumnCapabilities(column);
 
-  const tabs: TabItem[] = [
-    {
-      children: <GeneralSection columnKey={columnKey} isBusy={isBusy} />,
-      header: 'General',
-      key: 'general',
-    },
-    ...(isFilterable && column.dataType
-      ? [
-          {
-            children: <FilterSection columnKey={columnKey} isBusy={isBusy} />,
-            header: 'Filter',
-            key: 'filter',
-          },
-        ]
-      : []),
-    ...(isSortable
-      ? [
-          {
-            children: <SortingSection isBusy={isBusy} />,
-            header: 'Sorting',
-            key: 'sorting',
-          },
-        ]
-      : []),
-    ...(isStatic
-      ? []
-      : [
-          {
-            children: <PinningSection isBusy={isBusy} />,
-            header: 'Pinning',
-            key: 'pinning',
-          },
-        ]),
-    {
-      children: <DetailsSection columnKey={columnKey} />,
-      header: 'Details',
-      key: 'details',
-    },
-  ];
+  const tabs: TabItem[] = orderSettingsTabs({
+    order: resolveSettingsTabOrder(tabOrder),
+    tabs: [
+      {
+        children: <GeneralSection columnKey={columnKey} isBusy={isBusy} />,
+        header: 'General',
+        key: 'general',
+      },
+      ...(isStatic
+        ? []
+        : [
+            {
+              children: <PinningSection isBusy={isBusy} />,
+              header: 'Pinning',
+              key: 'pinning',
+            },
+          ]),
+      ...(isFilterable && column.dataType
+        ? [
+            {
+              children: <FilterSection columnKey={columnKey} isBusy={isBusy} />,
+              header: 'Filter',
+              key: 'filter',
+            },
+          ]
+        : []),
+      ...(isSortable
+        ? [
+            {
+              children: <SortingSection isBusy={isBusy} />,
+              header: 'Sorting',
+              key: 'sorting',
+            },
+          ]
+        : []),
+      {
+        children: <DetailsSection columnKey={columnKey} />,
+        header: 'Details',
+        key: 'details',
+      },
+    ],
+  });
 
   return (
     <SidePanelBody>

@@ -120,6 +120,13 @@
       "ref": "ADR-035 §5, docs/decisions/ADR-012-column-width.md"
     },
     {
+      "key": "biome **/SidePanelResizeHandle.component.tsx useSemanticElements",
+      "count": 1,
+      "status": "permanent",
+      "reason": "The settings panel's edge is the same window splitter as the column one above, and the argument is the same: role=separator with keyboard resize semantics, and HTML has no native element carrying it. It is worth stating what the substitution would cost here specifically — the handle is focusable and announces aria-valuenow/min/max as it is dragged, and an <hr> can express neither, so the rewrite deletes the interaction rather than restating it. The rule maps role to element and does not model the focusable case at all.",
+      "ref": "ADR-035 §5, docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md"
+    },
+    {
       "key": "biome **/SpacerRow.component.tsx noAriaHiddenOnFocusable",
       "count": 1,
       "status": "permanent",

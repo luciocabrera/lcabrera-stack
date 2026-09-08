@@ -29,7 +29,9 @@ export { useGetTablePreferredGroupingMode } from './useGetTablePreferredGrouping
 export { useGetTableRowHeight } from './useGetTableRowHeight.hook';
 export { useGetTableSchemaName } from './useGetTableSchemaName.hook';
 export { useGetTableSettingsExpandedFilters } from './useGetTableSettingsExpandedFilters.hook';
+export { useGetTableSettingsPanelWidth } from './useGetTableSettingsPanelWidth.hook';
 export { useGetTableSettingsSelectedTab } from './useGetTableSettingsSelectedTab.hook';
+export { useGetTableSettingsTabOrder } from './useGetTableSettingsTabOrder.hook';
 export { useGetTableTableName } from './useGetTableTableName.hook';
 export { useGetTableThreshold } from './useGetTableThreshold.hook';
 export { useGetTableTitlePlural } from './useGetTableTitlePlural.hook';

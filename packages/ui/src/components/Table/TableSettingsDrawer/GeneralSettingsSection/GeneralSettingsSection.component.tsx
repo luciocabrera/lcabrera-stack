@@ -12,6 +12,8 @@ import { FiltersSectionToolbar } from '../FiltersSection/FiltersSectionToolbar';
 import { SortingSectionToolbar } from '../SortingSection/SortingSectionToolbar';
 import { AllSettingsSection } from './AllSettingsSection/AllSettingsSection.component';
 import { ColumnWidthsSection } from './ColumnWidthsSection/ColumnWidthsSection.component';
+import { TabsOrderSection } from './TabsOrderSection';
+import { TotalsPlacementSection } from './TotalsPlacementSection';
 
 export const GeneralSettingsSection = ({
   isBusy = false,
@@ -40,6 +42,10 @@ export const GeneralSettingsSection = ({
         <SidePanelSectionHeader title='Columns' />
         <ColumnOrderSectionToolbar isBusy={isBusy} />
       </SidePanelSection>
+
+      <TotalsPlacementSection isBusy={isBusy} />
+
+      <TabsOrderSection isBusy={isBusy} />
 
       <AllSettingsSection isBusy={isBusy} />
     </SidePanelSectionMain>

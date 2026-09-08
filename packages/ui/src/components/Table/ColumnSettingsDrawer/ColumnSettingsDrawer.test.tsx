@@ -214,12 +214,16 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
   useSetTableColumnSettingsSelectedTab: () =>
     setTableColumnSettingsSelectedTabMock,
   useSetTableIsColumnSettingsPinned: () => setTableIsColumnSettingsPinnedMock,
+  useSetTableSettingsPanelWidth: () => vi.fn(),
+  useSyncTableSettingsPanelWidth: () => vi.fn(),
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableColumnSelectedKey: () => 'customer',
   useGetTableColumnSettingsSelectedTab: () => 'general',
   useGetTableIsColumnSettingsPinned: () => false,
+  useGetTableSettingsPanelWidth: vi.fn(),
+  useGetTableSettingsTabOrder: vi.fn(),
 }));
 
 vi.mock('#ui/components/Table/contexts/TableWrapper', () => ({
@@ -287,7 +291,7 @@ describe('ColumnSettingsDrawer', () => {
     render(<ColumnSettingsDrawer />);
 
     expect(screen.getByTestId('tabs').textContent).toBe(
-      'General|Filter|Sorting|Pinning|Details',
+      'General|Pinning|Filter|Sorting|Details',
     );
     expect(
       screen.getByRole('heading', { name: /Revenue/i }).textContent,

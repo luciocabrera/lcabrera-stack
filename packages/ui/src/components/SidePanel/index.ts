@@ -1,4 +1,8 @@
 export { SidePanel } from './SidePanel.component';
+export {
+  SIDE_PANEL_MAX_WIDTH_RATIO,
+  SIDE_PANEL_MIN_WIDTH,
+} from './SidePanel.constants';
 export type { SidePanelSize } from './SidePanel.types';
 export { SidePanelBody } from './SidePanelBody';
 export { SidePanelFooter } from './SidePanelFooter';

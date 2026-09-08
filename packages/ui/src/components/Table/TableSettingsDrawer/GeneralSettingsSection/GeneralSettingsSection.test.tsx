@@ -57,6 +57,18 @@ vi.mock('./ColumnWidthsSection/ColumnWidthsSection.component', () => ({
   ),
 }));
 
+vi.mock('./TabsOrderSection', () => ({
+  TabsOrderSection: ({ isBusy }: MockToolbarProps) => (
+    <div data-busy={String(isBusy)}>Tabs order section</div>
+  ),
+}));
+
+vi.mock('./TotalsPlacementSection', () => ({
+  TotalsPlacementSection: ({ isBusy }: MockToolbarProps) => (
+    <div data-busy={String(isBusy)}>Totals placement section</div>
+  ),
+}));
+
 import { GeneralSettingsSection } from './GeneralSettingsSection.component';
 
 afterEach(() => {
@@ -74,6 +86,8 @@ describe('GeneralSettingsSection', () => {
     expect(screen.getByText('Sorting toolbar')).not.toBeNull();
     expect(screen.getByRole('heading', { name: 'Columns' })).not.toBeNull();
     expect(screen.getByText('Column order toolbar')).not.toBeNull();
+    expect(screen.getByText('Totals placement section')).not.toBeNull();
+    expect(screen.getByText('Tabs order section')).not.toBeNull();
     expect(screen.getByText('All settings section')).not.toBeNull();
     expect(
       screen.getByText(/Select a preset to adjust all column widths/),
@@ -88,6 +102,8 @@ describe('GeneralSettingsSection', () => {
       'Filters toolbar',
       'Sorting toolbar',
       'Column order toolbar',
+      'Totals placement section',
+      'Tabs order section',
       'All settings section',
     ].map((label) => screen.getByText(label));
 

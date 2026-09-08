@@ -297,7 +297,12 @@
       // separator `<hr>` Biome suggests. `<hr>` cannot take focus or express a
       // value, so the suggested rewrite would delete the whole interaction.
       // The rule only maps role→element and does not model the focusable case.
-      "includes": ["**/ResizeHandle.component.tsx"],
+      // Both splitters in the repo are the same pattern: a column edge and the
+      // settings panel edge.
+      "includes": [
+        "**/ResizeHandle.component.tsx",
+        "**/SidePanelResizeHandle.component.tsx",
+      ],
       "linter": {
         "rules": { "a11y": { "useSemanticElements": "off" } },
       },

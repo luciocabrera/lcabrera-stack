@@ -236,17 +236,19 @@ that removes an applied distinct count, so the column carrying one goes on being
 offered it while every other column is not. This picker never sees the
 difference, since it subtracts what the column carries anyway.
 
-## Totals placement is staged here but is not part of the grouping
+## Totals placement is not staged here, and never was part of the grouping
 
-`TotalsPlacementSection` sits beside the mode control and stages like everything
-else, but what it stages lives in its **own** draft store rather than in the
-grouping draft, because it commits somewhere else: the grouping goes to the
-`grouping` search param, while the placement goes to the `totals` param **and**
-the UI-flags cookie, since it is a preference that outlives the table it was set
-on (ADR-085).
+`TotalsPlacementSection` used to sit beside the mode control. It stages like
+everything else, but what it stages lives in its **own** draft store rather than
+in the grouping draft, because it commits somewhere else: the grouping goes to
+the `grouping` search param, while the placement goes to the `totals` param
+**and** the UI-flags cookie, since it is a preference that outlives the table it
+was set on (ADR-085). Sitting in this section said the opposite of all three, so
+it now lives in the General tab
+([ADR-114](../../../../../../../docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md)).
 
-It renders only under `rollup`. `flat` emits no subtotal and no grand total, so
-there would be nothing to position.
+It still renders only under `rollup`. `flat` emits no subtotal and no grand
+total, so there would be nothing to position.
 
 ## A column carries as many aggregates as the user asks for
 

@@ -12,8 +12,10 @@ export const DialogSidePanel = ({
   isOpen,
   onClose,
   position,
+  resizeHandle,
   shouldShowOverlay,
   size,
+  width,
   ...props
 }: DialogSidePanelProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -26,6 +28,7 @@ export const DialogSidePanel = ({
     surfaceStyles.glassPanel,
     sidePanelStyles.base,
     sidePanelStyles.size[size],
+    width !== undefined && sidePanelStyles.width.resized(width),
     sidePanelStyles.position[position],
     sidePanelStyles.position[isOpen ? openStyle : closedStyle],
     shouldShowOverlay
@@ -71,6 +74,7 @@ export const DialogSidePanel = ({
       {...props}
       {...panelStyles}
     >
+      {resizeHandle}
       <div {...stylex.props(sidePanelStyles.content)}>{children}</div>
     </dialog>
   );

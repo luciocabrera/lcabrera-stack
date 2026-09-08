@@ -50,6 +50,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableColumnSelectedKey: () => 'revenue',
   useGetTableColumnSettingsSelectedTab: () => selectedTabMock(),
+  useGetTableSettingsTabOrder: vi.fn(),
 }));
 
 vi.mock('#ui/components/Table/contexts/TableData/data/selectors', () => ({
@@ -126,7 +127,7 @@ describe('ColumnSettingsDrawerBody', () => {
     render(<ColumnSettingsDrawerBody />);
 
     expect(screen.getByTestId('tabs').textContent).toContain(
-      'General|Filter|Sorting|Pinning|Details',
+      'General|Pinning|Filter|Sorting|Details',
     );
   });
 

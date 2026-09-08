@@ -105,6 +105,67 @@ describe('SidePanel', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('offers no resize handle unless the consumer asks for one', () => {
+    render(
+      <SidePanel isOpen onClose={() => void 0}>
+        <span>Dialog content</span>
+      </SidePanel>,
+    );
+
+    expect(screen.queryByTestId('side-panel-resize-handle')).toBeNull();
+  });
+
+  it('resizes from the drag, and commits once the gesture ends', () => {
+    const onWidthChange = vi.fn();
+    const onWidthCommit = vi.fn();
+
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={onWidthChange}
+        onWidthCommit={onWidthCommit}
+        width={400}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const handle = screen.getByTestId('side-panel-resize-handle');
+
+    fireEvent.mouseDown(handle, { clientX: 1000 });
+    fireEvent.mouseMove(document, { clientX: 900 });
+    fireEvent.mouseUp(document);
+
+    expect({
+      committed: onWidthCommit.mock.calls.at(-1),
+      resized: onWidthChange.mock.calls.at(-1),
+    }).toStrictEqual({ committed: [500], resized: [500] });
+  });
+
+  it('resizes from the keyboard, which a pointer gesture is not needed for', () => {
+    const onWidthChange = vi.fn();
+
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={onWidthChange}
+        width={400}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    fireEvent.keyDown(screen.getByTestId('side-panel-resize-handle'), {
+      key: 'ArrowLeft',
+    });
+
+    expect(onWidthChange).toHaveBeenCalledWith(416);
+  });
+
   it('renders a pinned panel into the provided portal container', () => {
     const portalNode = document.createElement('div');
     document.body.append(portalNode);

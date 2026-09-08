@@ -16,11 +16,14 @@ const {
   batchSetTableDrawerSettingsMock,
   isTableSettingsPinnedMock,
   notifyMock,
+  panelWidthMock,
   resetTableDrawerSettingsMock,
   selectedTabMock,
+  setPanelWidthMock,
   setSelectedTabMock,
   setTableIsTableSettingsOpenMock,
   setTableIsTableSettingsPinnedMock,
+  syncPanelWidthMock,
   tableColumnFiltersMock,
   useGetTableIsLoadingMock,
   useGetTableIsLoadingMoreMock,
@@ -28,11 +31,14 @@ const {
   batchSetTableDrawerSettingsMock: vi.fn(),
   isTableSettingsPinnedMock: vi.fn(() => false),
   notifyMock: vi.fn(),
+  panelWidthMock: vi.fn<() => number | undefined>(),
   resetTableDrawerSettingsMock: vi.fn(),
   selectedTabMock: vi.fn(() => 'general'),
+  setPanelWidthMock: vi.fn(),
   setSelectedTabMock: vi.fn(),
   setTableIsTableSettingsOpenMock: vi.fn(),
   setTableIsTableSettingsPinnedMock: vi.fn(),
+  syncPanelWidthMock: vi.fn(),
   tableColumnFiltersMock: {} as Record<string, unknown>,
   useGetTableIsLoadingMock: vi.fn(() => false),
   useGetTableIsLoadingMoreMock: vi.fn(() => false),
@@ -188,13 +194,17 @@ vi.mock('#ui/components/Tabs', () => ({
 vi.mock('../contexts/TableConfig/meta/actions', () => ({
   useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
   useSetTableIsTableSettingsPinned: () => setTableIsTableSettingsPinnedMock,
+  useSetTableSettingsPanelWidth: () => setPanelWidthMock,
   useSetTableSettingsSelectedTab: () => setSelectedTabMock,
+  useSyncTableSettingsPanelWidth: () => syncPanelWidthMock,
 }));
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableIsGroupingEnabled: () => false,
   useGetTableIsTableSettingsPinned: () => isTableSettingsPinnedMock(),
+  useGetTableSettingsPanelWidth: () => panelWidthMock(),
   useGetTableSettingsSelectedTab: () => selectedTabMock(),
+  useGetTableSettingsTabOrder: vi.fn(),
 }));
 
 vi.mock('../contexts/TableData/data/selectors', () => ({

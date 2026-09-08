@@ -5,5 +5,8 @@ export { useSetTableIsColumnSettingsPinned } from './useSetTableIsColumnSettings
 export { useSetTableIsTableSettingsOpen } from './useSetTableIsTableSettingsOpen.hook';
 export { useSetTableIsTableSettingsPinned } from './useSetTableIsTableSettingsPinned.hook';
 export { useSetTableSettingsExpandedFilters } from './useSetTableSettingsExpandedFilters.hook';
+export { useSetTableSettingsPanelWidth } from './useSetTableSettingsPanelWidth.hook';
 export { useSetTableSettingsSelectedTab } from './useSetTableSettingsSelectedTab.hook';
+export { useSetTableSettingsTabOrder } from './useSetTableSettingsTabOrder.hook';
+export { useSyncTableSettingsPanelWidth } from './useSyncTableSettingsPanelWidth.hook';
 export { useToogleTableIsTableSettingsOpen } from './useToogleTableIsTableSettingsOpen.hook';

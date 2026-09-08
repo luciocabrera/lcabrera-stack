@@ -6,6 +6,8 @@ export const getPersistedUiState = (state: TableMetaState | undefined) => ({
   isColumnSettingsPinned: state?.isColumnSettingsPinned,
   isTableSettingsOpen: state?.isTableSettingsOpen,
   isTableSettingsPinned: state?.isTableSettingsPinned,
+  settingsPanelWidth: state?.settingsPanelWidth,
+  settingsTabOrder: state?.settingsTabOrder,
   tableSettingsExpandedFilters: state?.tableSettingsExpandedFilters,
   tableSettingsSelectedTab: state?.tableSettingsSelectedTab,
   totalsPlacement: state?.totalsPlacement,

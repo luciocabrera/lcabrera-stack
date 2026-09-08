@@ -11,7 +11,9 @@ export const PinnedSidePanel = ({
   children,
   portalContainer,
   position,
+  resizeHandle,
   size,
+  width,
   ...props
 }: PinnedSidePanelProps) => {
   const openStyle =
@@ -20,6 +22,7 @@ export const PinnedSidePanel = ({
     surfaceStyles.glassPanel,
     sidePanelStyles.base,
     sidePanelStyles.size[size],
+    width !== undefined && sidePanelStyles.width.resized(width),
     sidePanelStyles.position[position],
     sidePanelStyles.position[openStyle],
     sidePanelStyles.withoutBackdrop,
@@ -33,6 +36,7 @@ export const PinnedSidePanel = ({
       {...props}
       {...panelStyles}
     >
+      {resizeHandle}
       <div {...stylex.props(sidePanelStyles.content)}>{children}</div>
     </aside>
   );

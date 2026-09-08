@@ -5,7 +5,10 @@ import { useSetTableSettingsSelectedTab } from '#ui/components/Table/contexts/Ta
 import {
   useGetTableIsGroupingEnabled,
   useGetTableSettingsSelectedTab,
+  useGetTableSettingsTabOrder,
 } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import { orderSettingsTabs } from '#ui/components/Table/utils/orderSettingsTabs.util';
+import { resolveSettingsTabOrder } from '#ui/components/Table/utils/resolveSettingsTabOrder.util';
 import { Tabs } from '#ui/components/Tabs';
 
 import type { TableSettingsDrawerBodyProps } from './TableSettingsDrawerBody.types';
@@ -24,6 +27,7 @@ export const TableSettingsDrawerBody = ({
   const selectedTab = useGetTableSettingsSelectedTab();
   const setSelectedTab = useSetTableSettingsSelectedTab();
   const isGroupingEnabled = useGetTableIsGroupingEnabled();
+  const tabOrder = useGetTableSettingsTabOrder();
 
   const groupingTabs: TabItem[] = isGroupingEnabled
     ? [
@@ -35,35 +39,37 @@ export const TableSettingsDrawerBody = ({
       ]
     : [];
 
-  const tabs: TabItem[] = [
-    {
-      children: <GeneralSettingsSection isBusy={isBusy} />,
-      header: 'General',
-      key: 'general',
-    },
-
-    {
-      children: <FiltersSection isBusy={isBusy} />,
-      header: 'Filters',
-      key: 'filters',
-    },
-    {
-      children: <SortingSection isBusy={isBusy} />,
-      header: 'Sorting',
-      key: 'sorting',
-    },
-    ...groupingTabs,
-    {
-      children: <ColumnOrderSection isBusy={isBusy} />,
-      header: 'Columns',
-      key: 'columns',
-    },
-    {
-      children: <DetailsSection isBusy={isBusy} />,
-      header: 'Details',
-      key: 'details',
-    },
-  ];
+  const tabs: TabItem[] = orderSettingsTabs({
+    order: resolveSettingsTabOrder(tabOrder),
+    tabs: [
+      {
+        children: <GeneralSettingsSection isBusy={isBusy} />,
+        header: 'General',
+        key: 'general',
+      },
+      {
+        children: <ColumnOrderSection isBusy={isBusy} />,
+        header: 'Columns',
+        key: 'columns',
+      },
+      {
+        children: <FiltersSection isBusy={isBusy} />,
+        header: 'Filters',
+        key: 'filters',
+      },
+      {
+        children: <SortingSection isBusy={isBusy} />,
+        header: 'Sorting',
+        key: 'sorting',
+      },
+      ...groupingTabs,
+      {
+        children: <DetailsSection isBusy={isBusy} />,
+        header: 'Details',
+        key: 'details',
+      },
+    ],
+  });
 
   return (
     <SidePanelBody>

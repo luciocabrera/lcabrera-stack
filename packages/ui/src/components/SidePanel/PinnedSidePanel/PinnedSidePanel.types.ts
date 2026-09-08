@@ -6,5 +6,7 @@ export type PinnedSidePanelProps = ComponentPropsWithoutRef<'dialog'> & {
   readonly children: ReactNode;
   readonly portalContainer?: RefObject<HTMLElement | null>;
   readonly position: SidePanelPosition;
+  readonly resizeHandle?: ReactNode;
   readonly size: SidePanelSize;
+  readonly width?: number;
 };

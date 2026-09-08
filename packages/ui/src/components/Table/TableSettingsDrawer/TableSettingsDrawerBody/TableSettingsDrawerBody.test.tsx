@@ -12,12 +12,17 @@ import {
   vi,
 } from 'vite-plus/test';
 
-const { isGroupingEnabledRef, selectedTabMock, setSelectedTabMock } =
-  vi.hoisted(() => ({
-    isGroupingEnabledRef: { current: false },
-    selectedTabMock: vi.fn(() => 'general'),
-    setSelectedTabMock: vi.fn(),
-  }));
+const {
+  isGroupingEnabledRef,
+  selectedTabMock,
+  setSelectedTabMock,
+  tabOrderRef,
+} = vi.hoisted(() => ({
+  isGroupingEnabledRef: { current: false },
+  selectedTabMock: vi.fn(() => 'general'),
+  setSelectedTabMock: vi.fn(),
+  tabOrderRef: { current: undefined as readonly string[] | undefined },
+}));
 
 type MockTabsProps = {
   readonly isBusy?: boolean;
@@ -64,6 +69,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
   useGetTableSettingsSelectedTab: () => selectedTabMock(),
+  useGetTableSettingsTabOrder: () => tabOrderRef.current,
 }));
 
 vi.mock('../ColumnOrderSection', () => ({
@@ -109,6 +115,7 @@ afterEach(() => {
 
 beforeEach(() => {
   isGroupingEnabledRef.current = false;
+  tabOrderRef.current = undefined;
   selectedTabMock.mockReset();
   selectedTabMock.mockReturnValue('general');
   setSelectedTabMock.mockReset();
@@ -145,7 +152,7 @@ describe('TableSettingsDrawerBody', () => {
     expect(screen.getByText('Grouping section')).not.toBeNull();
   });
 
-  it('puts Grouping after Sorting and before Columns', () => {
+  it('puts Columns after General and Grouping after Sorting', () => {
     isGroupingEnabledRef.current = true;
 
     render(<TableSettingsDrawerBody />);
@@ -156,10 +163,48 @@ describe('TableSettingsDrawerBody', () => {
 
     expect(headers).toEqual([
       'General',
+      'Columns',
       'Filters',
       'Sorting',
       'Grouping',
+      'Details',
+    ]);
+  });
+
+  it('paints the tabs in the order the reader arranged them', () => {
+    isGroupingEnabledRef.current = true;
+    tabOrderRef.current = ['details', 'grouping', 'general'];
+
+    render(<TableSettingsDrawerBody />);
+
+    const headers = screen
+      .getAllByRole('heading')
+      .map((heading) => heading.textContent);
+
+    expect(headers).toEqual([
+      'Details',
+      'Grouping',
+      'General',
       'Columns',
+      'Filters',
+      'Sorting',
+    ]);
+  });
+
+  it('ignores a stored order naming a tab the drawer does not have', () => {
+    tabOrderRef.current = ['sorting', 'nonsense'];
+
+    render(<TableSettingsDrawerBody />);
+
+    const headers = screen
+      .getAllByRole('heading')
+      .map((heading) => heading.textContent);
+
+    expect(headers).toEqual([
+      'Sorting',
+      'General',
+      'Columns',
+      'Filters',
       'Details',
     ]);
   });

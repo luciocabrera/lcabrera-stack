@@ -8,14 +8,17 @@ SidePanel/
 ├── SidePanel.component.tsx           → Root selector: isPinned ? PinnedSidePanel : DialogSidePanel
 ├── SidePanel.types.ts               → SidePanelProps + variant types
 ├── SidePanel.stylex.ts               → All root styles (local variants)
+├── SidePanel.constants.ts            → The resize band: min width, max viewport ratio, keyboard steps
+├── hooks/useSidePanelResize.hook.ts  → Pointer + keyboard resize gesture, and the band it stays inside
+├── utils/                            → Bounds, the width a drag resolves to, the keyboard action, the drag session
 │
 ├── PinnedSidePanel/                  → Private delegate (no barrel): always-visible aside, optional portal, zero effects
 │   ├── PinnedSidePanel.component.tsx
-│   └── PinnedSidePanel.types.ts      → children, portalContainer?, position, size
+│   └── PinnedSidePanel.types.ts      → children, portalContainer?, position, resizeHandle?, size, width?
 │
 ├── DialogSidePanel/                  → Private delegate (no barrel): native dialog lifecycle + close-event forwarding
 │   ├── DialogSidePanel.component.tsx
-│   └── DialogSidePanel.types.ts      → children, isOpen, onClose?, position, shouldShowOverlay, size
+│   └── DialogSidePanel.types.ts      → children, isOpen, onClose?, position, resizeHandle?, shouldShowOverlay, size, width?
 │
 ├── SidePanelHeader/                  → Top section with actions slot
 │   ├── index.ts
@@ -27,6 +30,12 @@ SidePanel/
 │   ├── index.ts
 │   ├── SidePanelHeaderToolbar.component.tsx
 │   └── SidePanelHeaderToolbar.types.ts → isPinned, onClose, onTogglePin
+│
+├── SidePanelResizeHandle/            → ARIA window splitter on the panel's inner edge
+│   ├── index.ts
+│   ├── SidePanelResizeHandle.component.tsx
+│   ├── SidePanelResizeHandle.types.ts → onWidthChange, onWidthCommit?, position, width
+│   └── SidePanelResizeHandle.stylex.ts
 │
 ├── SidePanelTitle/                   → h2 heading with optional icon
 │   ├── index.ts
@@ -78,6 +87,9 @@ graph LR
   SidePanel --> SidePanel.types
   SidePanel --> PinnedSidePanel
   SidePanel --> DialogSidePanel
+  SidePanel --> SidePanelResizeHandle
+  SidePanelResizeHandle --> useSidePanelResize
+  useSidePanelResize --> useViewportWidth
 
   PinnedSidePanel --> SidePanel.stylex
   PinnedSidePanel --> ReactDOM["createPortal (react-dom)"]
@@ -256,3 +268,28 @@ Used heavily in Table settings drawers:
   states
 - `ColumnSettingsDrawer` — FilterSection, PinningSection, GeneralSection, SortingSection
 - `TableSettingsDrawer` — SortingSection, GeneralSettingsSection, AddSortSection, ActiveSortList, ColumnOrderSection
+
+## The panel resizes, and the width belongs to whoever opened it
+
+`SidePanel` owns the gesture and not the number. `isResizable` puts
+`SidePanelResizeHandle` on the panel's inner edge — left of a right-hand panel,
+right of a left-hand one — and the consumer says how wide the panel is through
+`width`, which overrides the `size` variant.
+
+The two callbacks are the point of the split. `onWidthChange` fires once per
+animation frame while the pointer moves, and `onWidthCommit` fires once the
+gesture ends, so a consumer can hold the live width somewhere cheap and persist
+only the settled one. That is what the Table drawers do: the meta store on every
+frame, the UI-flags cookie once
+([ADR-114](../../../../../docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md)).
+
+**The band is enforced twice, and both are load-bearing.** The gesture clamps to
+`SIDE_PANEL_MIN_WIDTH`–`SIDE_PANEL_MAX_WIDTH_RATIO × viewport`, and the style
+clamps again as `max(320px, min(<width>px, 90vw))` — because a width persisted on
+a wide display is handed back on a narrow one, where the gesture has not run and
+only the CSS stands between the panel and the far edge of the screen.
+
+The handle is the ARIA window-splitter pattern: focusable, `role='separator'`
+with `aria-valuenow`/`min`/`max`, arrows and Home/End on the keyboard. That role
+on a focusable element is what `useSemanticElements` misreads as an `<hr>`, which
+is why `biome.jsonc` names both splitters in the repo.
