@@ -20,27 +20,26 @@ export const SidePanel = ({
   width,
   ...props
 }: SidePanelProps) => {
-  const resizeHandle =
-    isResizable && onWidthChange ? (
-      <SidePanelResizeHandle
-        {...(resizeLabel !== undefined && { label: resizeLabel })}
-        onWidthChange={onWidthChange}
-        {...(onWidthCommit !== undefined && { onWidthCommit })}
-        position={position}
-        {...(width !== undefined && { width })}
-      />
-    ) : undefined;
+  const surfaceProps = {
+    position,
+    resizeHandle:
+      isResizable && onWidthChange ? (
+        <SidePanelResizeHandle
+          label={resizeLabel}
+          onWidthChange={onWidthChange}
+          onWidthCommit={onWidthCommit}
+          position={position}
+          width={width}
+        />
+      ) : undefined,
+    size,
+    ...(width !== undefined && { width }),
+    ...props,
+  };
 
   if (isPinned) {
     return (
-      <PinnedSidePanel
-        portalContainer={portalContainer}
-        position={position}
-        resizeHandle={resizeHandle}
-        size={size}
-        {...(width !== undefined && { width })}
-        {...props}
-      >
+      <PinnedSidePanel portalContainer={portalContainer} {...surfaceProps}>
         {children}
       </PinnedSidePanel>
     );
@@ -50,12 +49,8 @@ export const SidePanel = ({
     <DialogSidePanel
       isOpen={isOpen}
       onClose={onClose}
-      position={position}
-      resizeHandle={resizeHandle}
       shouldShowOverlay={shouldShowOverlay}
-      size={size}
-      {...(width !== undefined && { width })}
-      {...props}
+      {...surfaceProps}
     >
       {children}
     </DialogSidePanel>

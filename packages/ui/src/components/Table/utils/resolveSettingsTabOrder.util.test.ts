@@ -30,4 +30,16 @@ describe('resolveSettingsTabOrder', () => {
       TABLE_SETTINGS_TAB_ROLES.length,
     );
   });
+
+  it('falls back to the declared order for what a cookie can hold but an order cannot be', () => {
+    expect([
+      resolveSettingsTabOrder(5),
+      resolveSettingsTabOrder({}),
+      resolveSettingsTabOrder('sorting'),
+    ]).toStrictEqual([
+      [...TABLE_SETTINGS_TAB_ROLES],
+      [...TABLE_SETTINGS_TAB_ROLES],
+      [...TABLE_SETTINGS_TAB_ROLES],
+    ]);
+  });
 });
