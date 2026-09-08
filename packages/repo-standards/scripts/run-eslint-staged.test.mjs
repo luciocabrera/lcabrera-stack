@@ -82,6 +82,22 @@ describe('run-eslint-staged against the real ESLint', () => {
     expect(status).toBe(2);
   });
 
+  it('lints only the file named, never the whole workspace', () => {
+    const root = makeWorkspace();
+    writeFileSync(
+      join(root, 'package.json'),
+      '{ "scripts": { "lint:eslint:check": "eslint --max-warnings 0 --no-inline-config ." } }',
+    );
+    writeFileSync(join(root, 'good.js'), 'export const good = () => 2;\n');
+    writeFileSync(
+      join(root, 'other.js'),
+      'export const other = () => {\n  const unused = 1;\n  return 2;\n};\n',
+    );
+    const { status, stdout } = lint(root, 'good.js');
+    expect(stdout).not.toContain('other.js');
+    expect(status).toBe(0);
+  });
+
   it('never reports no files matching "--"', () => {
     const root = makeWorkspace();
     writeFileSync(join(root, 'good.js'), 'export const good = () => 2;\n');

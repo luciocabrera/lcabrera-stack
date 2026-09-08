@@ -20,6 +20,13 @@
  * linted here by a call that honoured them, so the commit hook passed exactly
  * the finding that workspace's gate goes on to report.
  *
+ * Only a flag is carried across, never a bare token: a lint target written
+ * after a boolean flag (`eslint --no-inline-config .`) would otherwise be read
+ * as that flag's value, and one `.` reaching ESLint ahead of the `--` turns a
+ * staged-file run into a whole-workspace one, silently. A value is taken only
+ * for the flags known to want one; an unknown flag that wants one loses its
+ * value and ESLint says so, which is the failure worth having.
+ *
  * `--no-warn-ignored` is what keeps that rule from contradicting the config:
  * naming a file the config ignores is a warning, and at `--max-warnings 0` a
  * staged `dist/` or `build/` path would fail the commit for being ignored. A
@@ -77,7 +84,34 @@ export const planLintGroups = ({ exists = existsSync, paths, repoRoot }) => {
 
 const RUNNER_OWNED = new Set(['--config', '--fix', '--no-warn-ignored']);
 
+const VALUE_FLAGS = new Set([
+  '--cache-location',
+  '--cache-strategy',
+  '--concurrency',
+  '--config',
+  '--env',
+  '--ext',
+  '--flag',
+  '--format',
+  '--global',
+  '--ignore-pattern',
+  '--max-warnings',
+  '--output-file',
+  '--parser',
+  '--parser-options',
+  '--plugin',
+  '--report-unused-disable-directives-severity',
+  '--resolve-plugins-relative-to',
+  '--rule',
+  '--rulesdir',
+]);
+
 const DEFAULT_FLAGS = ['--max-warnings', '0'];
+
+const modeAfter = (token) => {
+  if (!VALUE_FLAGS.has(token)) return 'idle';
+  return RUNNER_OWNED.has(token) ? 'drop' : 'keep';
+};
 
 export const workspaceEslintFlags = (script) => {
   const tokens =
@@ -85,13 +119,13 @@ export const workspaceEslintFlags = (script) => {
   const kept = [];
   let mode = 'idle';
   for (const token of tokens.slice(1)) {
-    if (token.startsWith('-')) {
-      mode = RUNNER_OWNED.has(token) ? 'drop' : 'keep';
+    if (!token.startsWith('-')) {
       if (mode === 'keep') kept.push(token);
+      mode = 'idle';
       continue;
     }
-    if (mode === 'keep') kept.push(token);
-    mode = 'idle';
+    if (!RUNNER_OWNED.has(token)) kept.push(token);
+    mode = modeAfter(token);
   }
   return kept.length > 0 ? kept : DEFAULT_FLAGS;
 };

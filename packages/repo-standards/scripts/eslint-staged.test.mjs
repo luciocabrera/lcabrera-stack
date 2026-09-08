@@ -218,6 +218,18 @@ describe('workspaceEslintFlags', () => {
     ).toEqual(['--max-warnings', '0']);
   });
 
+  it('leaves the lint target behind when it trails a boolean flag', () => {
+    expect(
+      workspaceEslintFlags(
+        'eslint --config eslint.config.mjs --max-warnings 0 --no-inline-config .',
+      ),
+    ).toEqual(['--max-warnings', '0', '--no-inline-config']);
+  });
+
+  it('never carries a bare token across', () => {
+    expect(workspaceEslintFlags('eslint --cache src')).toEqual(['--cache']);
+  });
+
   it('falls back to failing on a warning when there is no script', () => {
     expect(workspaceEslintFlags(undefined)).toEqual(['--max-warnings', '0']);
   });

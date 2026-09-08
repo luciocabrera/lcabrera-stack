@@ -42,6 +42,7 @@ import {
   spawnOutcome,
   workspaceEslintFlags,
 } from './eslint-staged.mjs';
+import { errorMessage } from './error-message.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
@@ -126,6 +127,6 @@ const main = () => {
 try {
   main();
 } catch (error) {
-  console.error(`repo-eslint-staged: ${error.message}`);
+  console.error(`repo-eslint-staged: ${errorMessage(error)}`);
   process.exitCode = 2;
 }
