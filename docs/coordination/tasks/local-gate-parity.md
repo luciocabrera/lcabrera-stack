@@ -2,7 +2,7 @@
 id: local-gate-parity
 title: Run the autofixable linters before the push and close the fallow gap
 owner: agent:claude
-status: active
+status: review
 branch: chore/1115-local-gate-parity
 area:
   - .vite-hooks/**
@@ -39,6 +39,6 @@ Make the local gate run what CI runs. Three parts:
 
 ## Status / next
 
-- Current step: gate green locally; PR body and review next
+- Current step: pushed, PR #1116 ready for review
 - Blockers: none
 - Next: the ESLint coverage hole in `packages/*/scripts` is separate work
