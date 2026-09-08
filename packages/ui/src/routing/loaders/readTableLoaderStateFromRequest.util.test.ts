@@ -61,7 +61,9 @@ const expectListState = (
 
 type ReadTabOrderArgs = {
   readonly globalOrder?: readonly string[];
-  readonly uiFlags?: PersistedUiState;
+  readonly uiFlags?: PersistedUiState & {
+    readonly settingsTabOrder?: readonly string[];
+  };
 };
 
 const readTabOrder = ({ globalOrder, uiFlags = {} }: ReadTabOrderArgs) => {
@@ -472,10 +474,19 @@ describe('readTableLoaderStateFromRequest', () => {
       expect(readTabOrder({ globalOrder: ['details'] })?.[0]).toBe('details');
     });
 
-    it('reads no order out of the table UI-flags cookie', () => {
+    it('drops an order a previous release left in the table UI flags', () => {
       expect(
-        readTabOrder({ uiFlags: { tableSettingsSelectedTab: 'sorting' } }),
+        readTabOrder({ uiFlags: { settingsTabOrder: ['sorting'] } }),
       ).toBeUndefined();
+    });
+
+    it('leaves a stale table order behind the reader global one', () => {
+      expect(
+        readTabOrder({
+          globalOrder: ['details'],
+          uiFlags: { settingsTabOrder: ['sorting'] },
+        })?.[0],
+      ).toBe('details');
     });
 
     it('states no order when the reader has set none', () => {

@@ -54,10 +54,16 @@ gains the Grouping pair it was missing, rendered only where the route declared
 of it, into `AdvancedSettingsSection/`, alongside the `TotalsPlacementSection`
 that ADR-114 had already moved out of it once.
 
-**Advanced rides `isGroupingEnabled`, the same condition as the Grouping tab.**
-Both its controls are about subtotals, so on a table that cannot group there is
-nothing for it to render and an empty tab is not an option. Totals position stays
-gated on `rollup` on top of that.
+**Advanced is registered only when it has something to render, and it says so
+itself.** Both its controls are about subtotals, and each carries its own guard:
+`GroupingModeSection` renders nothing under a locked preset, and
+`TotalsPlacementSection` renders nothing outside `rollup`. `isGroupingEnabled`
+alone therefore still paints an empty tab on a locked, flat table.
+`useHasAdvancedSettings` is the one place those conditions are combined, and
+`TableSettingsDrawerBody` asks it rather than restating them — the same reason
+the General tab's Grouping heading is gated on `!isGroupingLocked` as well as on
+`isGroupingEnabled`, since `GroupingSectionToolbar` has an early return the other
+three toolbars do not.
 
 **The tab order is a global preference and has no per-table form.** A new Table
 Panel tab on the Settings page holds the `DraggableList` of roles, staged in the
@@ -89,12 +95,19 @@ rather than relocating it: Advanced stages behind Accept like General and
 Grouping, and the Settings page stages behind its own Accept like every other
 global preference.
 
-**An order stored per table under ADR-114 stops being read.** `getPersistedUiState`
-no longer carries `settingsTabOrder`, so a reader who dragged a table's tabs after
-#1114 merged gets the declared order back until they set one on the Settings page.
-The stale key sits in that table's cookie doing nothing, and is dropped the next
-time anything else writes the UI flags. The degradation is visible and one action
-fixes it for every table at once, which is the trade this ADR is making.
+**An order stored per table under ADR-114 stops being read, and dropping the key
+from a type was not enough to do it.** `parseVersionedPayload` casts rather than
+checks, so `readPersistedUiFlagsFromCookie` handed back whatever keys the JSON
+carried and the stale `settingsTabOrder` still reached the meta store — where,
+for a reader with no global preference, it still governed. `toPersistedUiState`
+now narrows the parsed payload to the keys `PersistedUiState` declares, which is
+what makes that type true of the value rather than merely asserted about it, and
+the loader states `settingsTabOrder` from the global preference unconditionally
+rather than only when one exists. Either alone closes this; both are cheap, and
+the first also covers the next key this type drops. A reader who dragged a
+table's tabs after #1114 merged gets the declared order back until they set one
+on the Settings page. The degradation is visible and one action fixes it for
+every table at once, which is the trade this ADR is making.
 
 **Changing the order needs a navigation to take effect on an open table.** It is
 read in the loader, like `preferredGroupingMode` and `defaultGroupFold`, so a

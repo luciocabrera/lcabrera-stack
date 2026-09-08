@@ -1,10 +1,9 @@
 import { readFromCookie } from '#ui/utils/storage';
 
-import type { PersistedUiState } from './persistence.types';
-
 import { getStorageKey } from './getStorageKey.util';
 import { parseVersionedPayload } from './parseVersionedPayload.util';
 import { UI_FLAGS_COOKIE_KEY_SUFFIX } from './persistence.constants';
+import { toPersistedUiState } from './toPersistedUiState.util';
 
 type ReadPersistedUiFlagsFromCookieArgs = {
   readonly appId?: string;
@@ -22,5 +21,5 @@ export const readPersistedUiFlagsFromCookie = ({
 
   if (!rawValue) return {};
 
-  return parseVersionedPayload<PersistedUiState>({ rawValue }) ?? {};
+  return toPersistedUiState(parseVersionedPayload({ rawValue }));
 };

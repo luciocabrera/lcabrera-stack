@@ -16,8 +16,9 @@ type MockToolbarProps = {
   readonly isBusy?: boolean;
 };
 
-const { isGroupingEnabledRef } = vi.hoisted(() => ({
+const { isGroupingEnabledRef, isGroupingLockedRef } = vi.hoisted(() => ({
   isGroupingEnabledRef: { current: true },
+  isGroupingLockedRef: { current: false },
 }));
 
 vi.mock('#ui/components/InfoBox', () => ({
@@ -58,6 +59,7 @@ vi.mock('../GroupingSection/GroupingSectionToolbar', () => ({
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableIsGroupingEnabled: () => isGroupingEnabledRef.current,
+  useGetTableIsGroupingLocked: () => isGroupingLockedRef.current,
 }));
 
 vi.mock('../SortingSection/SortingSectionToolbar', () => ({
@@ -86,6 +88,7 @@ afterEach(() => {
 
 beforeEach(() => {
   isGroupingEnabledRef.current = true;
+  isGroupingLockedRef.current = false;
 });
 
 describe('GeneralSettingsSection', () => {
@@ -126,6 +129,15 @@ describe('GeneralSettingsSection', () => {
 
   it('offers no grouping actions for a route that cannot group', () => {
     isGroupingEnabledRef.current = false;
+
+    render(<GeneralSettingsSection />);
+
+    expect(screen.queryByRole('heading', { name: 'Grouping' })).toBeNull();
+    expect(screen.queryByText('Grouping toolbar')).toBeNull();
+  });
+
+  it('offers no grouping actions under a locked preset, heading included', () => {
+    isGroupingLockedRef.current = true;
 
     render(<GeneralSettingsSection />);
 

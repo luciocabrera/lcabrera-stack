@@ -162,9 +162,9 @@ export const createTableRouteLoader = <
       dataPromise,
       metaState: {
         ...metaUiFlags,
-        ...(settingsTabOrder !== undefined && { settingsTabOrder }),
         appId,
         persistenceKey,
+        settingsTabOrder,
         tableName,
         title,
         ...(schemaName !== undefined && { schemaName }),

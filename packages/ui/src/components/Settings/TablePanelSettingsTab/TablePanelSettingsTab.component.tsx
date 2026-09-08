@@ -30,7 +30,7 @@ export const TablePanelSettingsTab = () => {
   return (
     <div {...stylex.props(styles.tabSections)}>
       <SectionCard
-        description='The order every table settings panel opens its tabs in. A table keeps its own order once someone drags one there.'
+        description='The order every table settings panel opens its tabs in. It is set here and applies to every table.'
         title='Settings Tabs Order'
       >
         <div data-testid='table-panel-tabs-order'>

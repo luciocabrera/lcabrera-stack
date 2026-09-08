@@ -4,7 +4,10 @@ import {
   SidePanelSectionHeader,
   SidePanelSectionMain,
 } from '#ui/components/SidePanel';
-import { useGetTableIsGroupingEnabled } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import {
+  useGetTableIsGroupingEnabled,
+  useGetTableIsGroupingLocked,
+} from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 
 import type { GeneralSettingsSectionProps } from './GeneralSettingsSection.types';
 
@@ -20,6 +23,7 @@ export const GeneralSettingsSection = ({
   ...props
 }: GeneralSettingsSectionProps) => {
   const isGroupingEnabled = useGetTableIsGroupingEnabled();
+  const isGroupingLocked = useGetTableIsGroupingLocked();
 
   return (
     <SidePanelSectionMain {...props}>
@@ -45,7 +49,7 @@ export const GeneralSettingsSection = ({
         <ColumnOrderSectionToolbar isBusy={isBusy} />
       </SidePanelSection>
 
-      {isGroupingEnabled && (
+      {isGroupingEnabled && !isGroupingLocked && (
         <SidePanelSection>
           <SidePanelSectionHeader title='Grouping' />
           <GroupingSectionToolbar isBusy={isBusy} />

@@ -59,10 +59,14 @@ other is the same cost as reaching past a tab.
   persists the order the reader arranged as a whole rather than the tab that
   moved. Decided by `Settings.component.test.tsx` → "persists the settings tab
   order from the Table Panel tab".
-- Every table opens in that one order, and no table carries an order of its own.
-  Decided by `readTableLoaderStateFromRequest.util.test.ts` → "takes the order
-  the reader set globally", "reads no order out of the table UI-flags cookie" and
-  "states no order when the reader has set none".
+- Every table opens in that one order, and no table carries an order of its own —
+  including a table whose cookie still holds one from an earlier release. Decided
+  by `createTableRouteLoader.util.test.ts` → "ignores a settingsTabOrder an
+  earlier release left in the UI-flags cookie" and "takes the settings tab order
+  from the reader global preference", by `toPersistedUiState.util.test.ts` →
+  "drops a key a previous release wrote and this one no longer declares", and by
+  `readTableLoaderStateFromRequest.util.test.ts` → "takes the order the reader set
+  globally" and "states no order when the reader has set none".
 - Arranging the tabs to the declared order clears the preference rather than
   storing it. Decided by `toGlobalTablePanelPreferencesUpdate.util.test.ts` →
   "writes the order back to undefined when it is the declared one".
@@ -71,11 +75,16 @@ other is the same cost as reaching past a tab.
   Decided by `GeneralSettingsSection.test.tsx` → "composes width presets, section
   toolbars, and all-settings actions" and "offers no grouping actions for a route
   that cannot group".
-- The Advanced tab carries the two totals controls, and is absent on a table that
-  cannot group rather than opening empty. Decided by
-  `AdvancedSettingsSection.test.tsx` → "composes the two totals controls", and by
+- The Advanced tab carries the two totals controls, and is absent rather than
+  empty wherever both of them render nothing. Decided by
+  `AdvancedSettingsSection.test.tsx` → "composes the two totals controls", by
+  `useHasAdvancedSettings.hook.test.ts` → its locked and non-rollup cases, and by
   `TableSettingsDrawerBody.test.tsx` → "offers no Advanced tab for a route that
   cannot group".
+- The General tab's Grouping heading never stands over an empty toolbar. Decided
+  by `GeneralSettingsSection.test.tsx` → "offers no grouping actions for a route
+  that cannot group" and "offers no grouping actions under a locked preset,
+  heading included".
 - That one order governs both the table settings tabs and a single column's tabs,
   matching them by what each tab is for rather than by its name. Decided by
   `orderSettingsTabs.util.test.ts` → "ranks a column drawer tab by the role it
@@ -105,9 +114,14 @@ form rather than adding a third control to undo the second.
 The cost is that the order is read in the loader, so changing it on the Settings
 page shows up on the next table opened rather than in a drawer already on screen.
 
-The `command` pointer was checked rather than assumed. Replacing the read in
-`readTableLoaderStateFromRequest` with `undefined` fails "takes the order the
-reader set globally" and only that one; "reads no order out of the table
-UI-flags cookie" and "states no order when the reader has set none" stay green,
-which is what says they pin the channel rather than the value. The run is on
-[#1118](https://github.com/luciocabrera/lcabrera-stack/issues/1118).
+The `command` pointer was checked rather than assumed, and the first probe was
+not good enough. Replacing the read in `readTableLoaderStateFromRequest` with
+`undefined` fails "takes the order the reader set globally" and only that one,
+which pins the channel. But that suite mocks `readPersistedUiFlagsFromCookie`, so
+no case there could see a stale per-table order at all — review caught that the
+key survives `parseVersionedPayload`'s cast. Restoring both halves of the old
+behaviour (a pass-through `toPersistedUiState` and the conditional spread in
+`createTableRouteLoader`) fails "ignores a settingsTabOrder an earlier release
+left in the UI-flags cookie" plus two `toPersistedUiState` cases, on the
+unmocked cookie path. The runs are on
+[#1119](https://github.com/luciocabrera/lcabrera-stack/pull/1119).

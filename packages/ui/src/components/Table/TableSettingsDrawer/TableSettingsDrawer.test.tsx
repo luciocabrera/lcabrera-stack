@@ -214,6 +214,7 @@ vi.mock('../contexts/TableData/data/selectors', () => ({
 
 vi.mock('./AdvancedSettingsSection', () => ({
   AdvancedSettingsSection: () => <div>Advanced settings section</div>,
+  useHasAdvancedSettings: () => false,
 }));
 
 vi.mock('./ColumnOrderSection', () => ({

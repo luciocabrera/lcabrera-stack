@@ -13,11 +13,13 @@ import {
 } from 'vite-plus/test';
 
 const {
+  hasAdvancedSettingsRef,
   isGroupingEnabledRef,
   selectedTabMock,
   setSelectedTabMock,
   tabOrderRef,
 } = vi.hoisted(() => ({
+  hasAdvancedSettingsRef: { current: false },
   isGroupingEnabledRef: { current: false },
   selectedTabMock: vi.fn(() => 'general'),
   setSelectedTabMock: vi.fn(),
@@ -74,6 +76,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
 
 vi.mock('../AdvancedSettingsSection', () => ({
   AdvancedSettingsSection: () => <div>Advanced settings section</div>,
+  useHasAdvancedSettings: () => hasAdvancedSettingsRef.current,
 }));
 
 vi.mock('../ColumnOrderSection', () => ({
@@ -118,6 +121,7 @@ afterEach(() => {
 });
 
 beforeEach(() => {
+  hasAdvancedSettingsRef.current = false;
   isGroupingEnabledRef.current = false;
   tabOrderRef.current = undefined;
   selectedTabMock.mockReset();
@@ -154,6 +158,7 @@ describe('TableSettingsDrawerBody', () => {
 
   it('adds the Grouping tab where the route declared the capability', () => {
     isGroupingEnabledRef.current = true;
+    hasAdvancedSettingsRef.current = true;
 
     render(<TableSettingsDrawerBody />);
 
@@ -165,6 +170,7 @@ describe('TableSettingsDrawerBody', () => {
 
   it('puts Columns after General and Grouping after Sorting', () => {
     isGroupingEnabledRef.current = true;
+    hasAdvancedSettingsRef.current = true;
 
     render(<TableSettingsDrawerBody />);
 
@@ -185,6 +191,7 @@ describe('TableSettingsDrawerBody', () => {
 
   it('paints the tabs in the order the reader arranged them', () => {
     isGroupingEnabledRef.current = true;
+    hasAdvancedSettingsRef.current = true;
     tabOrderRef.current = ['details', 'grouping', 'general'];
 
     render(<TableSettingsDrawerBody />);
