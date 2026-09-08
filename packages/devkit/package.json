@@ -28,6 +28,7 @@
     "scripts",
     "CHANGELOG.md",
     "!scripts/**/*.test.*",
+    "!scripts/**/*-fixtures.*",
     "!scripts/**/*.md"
   ],
   "type": "module",

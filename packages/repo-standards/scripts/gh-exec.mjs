@@ -65,7 +65,12 @@ export const runGh = (args) => {
 };
 
 /**
- * `gh pr list --json …` output as an array, or an empty one with a warning.
+ * `gh pr list --json …` output as an array, or an empty one.
+ *
+ * Output that is not JSON, or is JSON that is not an array, is unusable in the
+ * same way and takes the same path: the caller's `warning` on stderr, then an
+ * empty array. No output at all is silent — the command printed nothing, and
+ * there is nothing to say about it.
  *
  * Empty rather than throwing because both callers degrade rather than stop: the
  * board still renders its claims and the prune still counts commits. `warning`
@@ -75,15 +80,21 @@ export const runGh = (args) => {
  * @param {{ warning: string }} args
  * @returns {unknown[]}
  */
-export const parsePullRequests = (raw, { warning }) => {
-  if (!raw.trim()) {
-    return [];
-  }
+const UNUSABLE = { list: [], usable: false };
+
+const readList = (raw) => {
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? { list: parsed, usable: true } : UNUSABLE;
   } catch {
-    process.stderr.write(warning);
-    return [];
+    return UNUSABLE;
   }
+};
+
+export const parsePullRequests = (raw, { warning }) => {
+  if (!raw.trim()) return [];
+  const { list, usable } = readList(raw);
+  if (usable) return list;
+  process.stderr.write(warning);
+  return [];
 };

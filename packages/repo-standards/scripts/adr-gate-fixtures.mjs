@@ -19,7 +19,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { createFixtureRoots, writeIn } from './fixture-repo.mjs';
+import { createFixtureRoots, writeIn } from './repo-fixtures.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const GATE = resolve(HERE, 'verify-adrs.mjs');
@@ -128,4 +128,4 @@ export const appendEntry = (root, filename) => {
 
 export const removeAdrRepos = () => fixtureRoots.removeAll();
 
-export { editIn, writeIn } from './fixture-repo.mjs';
+export { editIn, writeIn } from './repo-fixtures.mjs';

@@ -10,8 +10,8 @@
  * — a fallow entry for one of these packages is a suppression, and they take
  * none.
  *
- * Test scaffolding: excluded from the package by the `files` entry beside the
- * test exclusion, because a consumer has no use for it.
+ * Test scaffolding: the `files` negation for `*-fixtures.*` keeps it out of the
+ * tarball, because a consumer has no use for it.
  */
 import {
   mkdirSync,

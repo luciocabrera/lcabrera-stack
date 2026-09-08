@@ -90,6 +90,33 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
  * it differently: the base one imports it statically, and the React one resolves
  * it from the consumer's own `tsconfigRootDir`.
  *
+ * @param {{ globals: { node: Record<string, unknown> } }} args
+ */
+export const createNodeScriptFileConfig = ({ globals }) => ({
+  files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+  languageOptions: {
+    ecmaVersion: 'latest',
+    globals: {
+      ...globals.node,
+    },
+  },
+  rules: {
+    'no-console': 'off',
+    'unicorn/prefer-module': 'off',
+    'unicorn/prevent-abbreviations': 'off',
+  },
+});
+
+/**
+ * The narrower block for the scripts a repository runs on itself.
+ *
+ * These five settings rest on one fact, and it is a fact about a file's
+ * position rather than its language: a file under `scripts/`, or a config file
+ * a tool loads, is a command a developer ran. The block above cannot carry
+ * them, because it is every plain-JavaScript file a consumer has — including
+ * the `.mjs` that serves a request, which is the code `detect-non-literal-fs-filename`
+ * exists for.
+ *
  * The three `security/*` entries are the judgements here; the rest are facts
  * about the runtime. Each of those rules exists to catch untrusted input
  * reaching a dangerous construct, and a file in this block has no untrusted
@@ -126,25 +153,15 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
  * are tests whose subject is `null` itself. `undefined` remains the repository's
  * absent value everywhere the rule still applies.
  *
- * @param {{ globals: { node: Record<string, unknown> } }} args
  */
-export const createNodeScriptFileConfig = ({ globals }) => ({
-  files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
-  languageOptions: {
-    ecmaVersion: 'latest',
-    globals: {
-      ...globals.node,
-    },
-  },
+export const createToolingScriptFileConfig = () => ({
+  files: ['**/scripts/**/*.{js,mjs,cjs}', '**/*.config.{js,mjs,cjs}'],
   rules: {
-    'no-console': 'off',
     'security/detect-non-literal-fs-filename': 'off',
     'security/detect-non-literal-regexp': 'off',
     'security/detect-unsafe-regex': 'off',
     'unicorn/max-nested-calls': ['error', { max: 4 }],
     'unicorn/no-null': 'off',
-    'unicorn/prefer-module': 'off',
-    'unicorn/prevent-abbreviations': 'off',
   },
 });
 

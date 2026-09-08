@@ -29,9 +29,6 @@ import {
 } from './config-values.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
-// Re-exported rather than moved out of reach: `CONFIG_FILE_NAME` is part of this
-// package's published surface, and gates name the file in their own messages.
-
 export const DEFAULT_ADR_COMMANDS = {
   list: 'npx repo-verify-adrs --list',
   new: 'npx repo-adr',
@@ -375,4 +372,6 @@ export const readCoordinationPaths = (root = hostRoot()) => {
   };
 };
 
+// Re-exported rather than moved out of reach: `CONFIG_FILE_NAME` is part of this
+// package's published surface, and gates name the file in their own messages.
 export { CONFIG_FILE_NAME } from './config-values.mjs';

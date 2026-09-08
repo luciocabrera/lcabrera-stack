@@ -8,7 +8,8 @@
  * package is a suppression, which these packages take none of, so it could not
  * be baselined away.
  *
- * Test scaffolding, excluded from the package by the `files` test exclusion.
+ * Test scaffolding: the `files` negation for `*-fixtures.*` keeps it out of the
+ * tarball, because a consumer has no use for it.
  */
 import { DEFAULT_CONFIG } from './config.mjs';
 import { planSync } from './sync.mjs';

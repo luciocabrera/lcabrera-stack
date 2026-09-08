@@ -9,7 +9,7 @@
  * two registers — which is also what makes each planted violation the ONLY
  * difference between a failing run and a passing one.
  */
-import { createFixtureRoots, writeIn } from './fixture-repo.mjs';
+import { createFixtureRoots, writeIn } from './repo-fixtures.mjs';
 
 export const REQUIREMENT_DIR = 'docs/product/requirements';
 export const PLANNING_DIR = 'docs/agents/planning';
@@ -134,4 +134,4 @@ export const makeRegisterRepo = () => {
 
 export const removeRegisterRepos = () => fixtureRoots.removeAll();
 
-export { editIn, writeIn } from './fixture-repo.mjs';
+export { editIn, writeIn } from './repo-fixtures.mjs';

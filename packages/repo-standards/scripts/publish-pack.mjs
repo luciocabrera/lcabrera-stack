@@ -1,4 +1,3 @@
-import { createPackageFromTarballData } from '@arethetypeswrong/core';
 /**
  * Produces the tarball a package would publish, and reads it back
  * (verify-publish-surface.mjs).
@@ -14,6 +13,7 @@ import { createPackageFromTarballData } from '@arethetypeswrong/core';
  * gate exists to check is pnpm's, so no other packer answers the question. It
  * must therefore be run from a context that has pnpm on PATH.
  */
+import { createPackageFromTarballData } from '@arethetypeswrong/core';
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { delimiter, join } from 'node:path';

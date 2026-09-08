@@ -1,4 +1,3 @@
-import { checkPackage, Package } from '@arethetypeswrong/core';
 /**
  * Runs Are The Types Wrong? over a built public package
  * (verify-attw.mjs).
@@ -15,6 +14,7 @@ import { checkPackage, Package } from '@arethetypeswrong/core';
  * exactly the substitution pnpm applies at pack time, which `repo-verify-publish`
  * independently validates — so no package manager subprocess is needed.
  */
+import { checkPackage, Package } from '@arethetypeswrong/core';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 

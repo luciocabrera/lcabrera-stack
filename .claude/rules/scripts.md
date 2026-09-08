@@ -15,12 +15,15 @@ Covers every `.mjs` and `.cjs` in the repo, and a `.js`, `.ts`, `.mts` or
 file there under any other extension matches none of it. These are the verify
 gates, report generators, seeders and skill runners under `scripts/`,
 `.github/skills/*/scripts/`, `apps/*/scripts/` and
-`packages/repo-standards/scripts/`. Both shared eslint
-configs globally ignore a `scripts/` directory, which is why a workspace's
-tooling scripts belong there rather than in its `src/`: the eslint custom-rules
-pass is aimed at library and application source, and these four analysers are
-what govern the rest. These files run under Node, outside the app bundle, and
-they are real code that rots the same way. The exemplar to copy is
+`packages/repo-standards/scripts/`. The eslint pass reads a workspace's
+`scripts/` directory: both shared configs ignored it until #1117, which meant a
+package whose source lives there was reported clean without being read. A
+`scripts/` path still changes which rules apply — the three `security/*` rules
+about untrusted input reaching a dangerous construct are off there, and
+`unicorn/max-nested-calls` allows four — because a file in that position is a
+command a developer ran rather than anything serving a request. These files run
+under Node, outside the app bundle, and they are real code that rots the same
+way. The exemplar to copy is
 `packages/repo-standards/scripts/verify-commands-doc.mjs`.
 
 **A `.mjs`, `.cjs` or `.js` has no types to hold, so the TypeScript rules
@@ -85,15 +88,17 @@ would report.
 ## What enforces this
 
 The eslint fan-out is per-workspace and **root `scripts/` is not a workspace**, so
-these files lean on the repo-wide passes plus one dedicated gate:
+a file there is still covered only by the repo-wide passes plus one dedicated
+gate; a file under a workspace's own `scripts/` is covered by the eslint pass too:
 
-| Layer                       | Covers                                                             |
-| --------------------------- | ------------------------------------------------------------------ |
-| **Oxlint** (`vp lint`)      | correctness, repo-wide — includes `scripts/` and skill scripts     |
-| **Biome** (root)            | correctness / react-domain, repo-wide                              |
-| **fallow** (`fallow audit`) | per-function complexity, CRAP, dead exports, dupes — new-only gate |
-| **`scripts:verify`**        | per-file size ceiling, repo-wide, baselined                        |
-| **`scripts:exits:verify`**  | `process.exit()` calls, repo-wide, parsed not grepped              |
+| Layer                       | Covers                                                              |
+| --------------------------- | ------------------------------------------------------------------- |
+| **Oxlint** (`vp lint`)      | correctness, repo-wide — includes `scripts/` and skill scripts      |
+| **eslint** (per-workspace)  | the custom-rules pass, in a workspace's own `scripts/` — not root's |
+| **Biome** (root)            | correctness / react-domain, repo-wide                               |
+| **fallow** (`fallow audit`) | per-function complexity, CRAP, dead exports, dupes — new-only gate  |
+| **`scripts:verify`**        | per-file size ceiling, repo-wide, baselined                         |
+| **`scripts:exits:verify`**  | `process.exit()` calls, repo-wide, parsed not grepped               |
 
 fallow's `maxUnitSize`/complexity limits apply to root `scripts/` but are
 **relaxed for `packages/eslint-local-rules/**`** in
