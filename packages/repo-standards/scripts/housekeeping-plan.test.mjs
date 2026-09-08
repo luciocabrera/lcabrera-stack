@@ -216,7 +216,9 @@ describe('buildPlan — the safety buckets end to end', () => {
   });
 
   it('deletes only the merged-PR and cruft branches', () => {
-    expect(plan.deleteBranches.map((b) => b.name).toSorted()).toEqual([
+    expect(plan.deleteBranches
+        .map((b) => b.name)
+        .toSorted((left, right) => left.localeCompare(right))).toEqual([
       'feat/cruft',
       'feat/merged',
     ]);

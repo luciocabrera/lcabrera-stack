@@ -106,9 +106,6 @@ const main = () => {
   }
 
   const { errorCount = 0, warningCount = 0 } = report.summary ?? {};
-  const errors = report.diagnostics.filter(
-    (finding) => finding.severity === 'error',
-  );
 
   if (process.argv.includes('--report')) {
     process.stdout.write(
@@ -116,6 +113,10 @@ const main = () => {
     );
     return;
   }
+
+  const errors = report.diagnostics.filter(
+    (finding) => finding.severity === 'error',
+  );
 
   if (errors.length > 0) {
     process.stderr.write('\nReact Doctor error-severity finding(s):\n');

@@ -155,7 +155,7 @@ const registerSection = ({ register, shallowClone }) =>
     register.available
       ? registerBody({ register, shallowClone })
       : `> This register could not be read, so there is nothing to count here — not a count of zero. ${inline(register.reason)}`,
-    ...(register.available && shallowClone ? ['', SHALLOW_CLONE_NOTE] : []),
+    ...(shallowClone && register.available ? ['', SHALLOW_CLONE_NOTE] : []),
   ].join('\n');
 
 const pathRuleSection = (pathRules) =>

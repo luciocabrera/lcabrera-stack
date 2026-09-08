@@ -126,7 +126,7 @@ const resolveFrom = ({ from, specifier }) =>
 
 export const completeFileList = ({ expected, filenames }) => {
   const declared = String(expected).trim();
-  const count = declared === '' ? Number.NaN : Number(declared);
+  const count = declared === '' ? NaN : Number(declared);
   return filenames.length >= count ? filenames : undefined;
 };
 

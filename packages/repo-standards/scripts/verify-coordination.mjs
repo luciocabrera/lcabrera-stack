@@ -212,8 +212,8 @@ const checkGhostTasks = (tasks, warnings) => {
     }
     const prless = data.pr === undefined || NO_PR.has(String(data.pr).trim());
     if (
-      !NO_BRANCH.has(data.branch) ||
       !prless ||
+      !NO_BRANCH.has(data.branch) ||
       !ISO_DATE.test(data.updated ?? '')
     ) {
       continue;

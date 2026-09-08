@@ -163,7 +163,7 @@ const main = async () => {
 
   if (shouldRun) {
     for (const workspace of workspaces) {
-      if (workspace.run || runAll) await runCoverage(workspace);
+      if (runAll || workspace.run) await runCoverage(workspace);
     }
   }
 

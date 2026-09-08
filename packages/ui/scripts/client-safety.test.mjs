@@ -196,7 +196,9 @@ describe('collectPublishedSourceFiles', () => {
     ]);
 
     expect(
-      collectPublishedSourceFiles(join(root, 'packages', 'utils')).toSorted(),
+      collectPublishedSourceFiles(join(root, 'packages', 'utils')).toSorted(
+        (left, right) => left.localeCompare(right),
+      ),
     ).toEqual([
       join(root, 'packages', 'utils', 'src', 'merge.test.ts'),
       join(root, 'packages', 'utils', 'src', 'merge.ts'),

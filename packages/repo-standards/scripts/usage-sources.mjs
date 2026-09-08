@@ -8,13 +8,15 @@
  */
 import { dayOf } from './usage-window.mjs';
 
+const REPO_SCOPE = 'repos/{owner}/{repo}';
+
 const workflowRunCount = ({ file, runGh, window }) => {
   try {
     const total = runGh([
       'api',
       '-X',
       'GET',
-      `repos/{owner}/{repo}/actions/workflows/${file}/runs`,
+      `${REPO_SCOPE}/actions/workflows/${file}/runs`,
       '-f',
       `created=${window.start}..${window.end}`,
       '-f',

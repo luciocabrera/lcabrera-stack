@@ -50,10 +50,11 @@ const pullForCurrentBranch = () => {
 const USAGE =
   'Usage: vp run pr:threads -- [--pr <number>] [--repo <owner/name>] [--json] [--resolve <thread-id>]';
 
-const RESOLVE_MUTATION = `
-mutation($thread:ID!) {
-  resolveReviewThread(input:{threadId:$thread}) { thread { isResolved } }
-}`;
+const RESOLVE_MUTATION = [
+  'mutation($thread:ID!) {',
+  '  resolveReviewThread(input:{threadId:$thread}) { thread { isResolved } }',
+  '}',
+].join('\n');
 
 const resolveThread = (threadId) => {
   const raw = runGh([

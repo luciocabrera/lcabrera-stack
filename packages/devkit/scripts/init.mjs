@@ -291,8 +291,8 @@ export const upgradeKeptCommands = ({ commands, existing = {} }) =>
 export const upgradeKeptCiSetup = ({ ciSetup = [], existing = {} }) => {
   const kept = existing.ci?.setup;
   if (
-    ciSetup.length === 0 ||
     kept === undefined ||
+    ciSetup.length === 0 ||
     (Array.isArray(kept) &&
       kept.length === ciSetup.length &&
       kept.every((line, index) => line === ciSetup[index]))

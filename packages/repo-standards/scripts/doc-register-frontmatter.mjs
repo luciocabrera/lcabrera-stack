@@ -96,7 +96,7 @@ const readListItem = (state, text, line) => {
 
 const readMapKey = (state, text, line) => {
   const pair = readPair(text);
-  if (state.map === undefined || pair === undefined) {
+  if (pair === undefined || state.map === undefined) {
     state.errors.push(`line ${line}: cannot read \`${text}\``);
     return;
   }
