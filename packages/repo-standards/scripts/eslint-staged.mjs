@@ -67,7 +67,6 @@ export const findConfigDirectory = ({
     if (directory === repoRoot) break;
     directory = dirname(directory);
   }
-  return;
 };
 
 export const planLintGroups = ({ exists = existsSync, paths, repoRoot }) => {
@@ -163,7 +162,6 @@ export const argumentError = ({ missing, paths, unknown }) => {
     const listed = missing.map((path) => `  • ${path}`).join('\n');
     return `no such file(s), so nothing would lint them:\n${listed}`;
   }
-  return;
 };
 
 export const lintScriptOf = (scripts) =>

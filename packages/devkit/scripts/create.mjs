@@ -95,7 +95,6 @@ export const createRefusal = ({
     );
     return `create: \`${target}\` is not empty — it already holds \`${first}\`, and create writes only into a directory with nothing in it. Pick a name nothing occupies, or run \`devkit init\` inside \`${target}\` if that is the project you meant.`;
   }
-  return;
 };
 
 const NAME_SEPARATORS = /[^a-z0-9._-]+/g;

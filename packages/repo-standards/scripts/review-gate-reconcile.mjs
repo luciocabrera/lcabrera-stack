@@ -129,8 +129,10 @@ const resolveFrom = ({ from, specifier }) =>
 
 export const completeFileList = ({ expected, filenames }) => {
   const declared = String(expected).trim();
-  const count = declared === '' ? NaN : Number(declared);
-  return filenames.length >= count ? filenames : undefined;
+  const count = Number(declared);
+  return declared !== '' && Number.isFinite(count) && filenames.length >= count
+    ? filenames
+    : undefined;
 };
 
 export const gateClosure = ({ driverEntry, entry, readFile }) =>

@@ -119,7 +119,6 @@ const firstDeclaration = (paths) => {
       return declared;
     }
   }
-  return;
 };
 
 export const resolveRetention = ({ args, repoRoot, userHome }) => {

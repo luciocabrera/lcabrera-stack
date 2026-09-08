@@ -136,6 +136,7 @@ errorMessage [const] (value: any) => string
 ## ./gh-exec
 assertGhArguments [const] (args: any) => any[]
 ghBinary [const] () => string | undefined
+parsePullRequests [const] (raw: string, { warning }: { warning: string; }) => unknown[]
 runGh [const] (args: any) => string
 
 ## ./git-dir

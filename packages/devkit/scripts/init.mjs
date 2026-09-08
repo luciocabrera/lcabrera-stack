@@ -45,7 +45,6 @@ export const initRefusal = ({
   if (manifestExists) {
     return 'init: a devkit manifest is already here — this repository is initialised. Run `devkit sync` to materialise, `devkit init --upgrade` to add config a newer version infers, or --force to start over.';
   }
-  return;
 };
 
 const RUNNERS = [
@@ -419,7 +418,6 @@ export const initFailure = ({ planned, unmet }) => {
   if (planned === 0) {
     return 'init: nothing was materialised. The selected profile placed no files, so this repository has not been set up.';
   }
-  return;
 };
 
 export const placedHooksPath = ({ entries, hooksPath }) =>

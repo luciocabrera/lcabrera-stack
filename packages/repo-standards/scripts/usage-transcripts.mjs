@@ -40,7 +40,6 @@ const invocationIn = (block) => {
         typeof name === 'string' && name.length > 0 ? name : UNNAMED_SUBAGENT,
     };
   }
-  return;
 };
 
 export const invocationsInEntry = ({ entry, roots }) => {
@@ -79,7 +78,6 @@ const recordedCwd = (lines) => {
       return cwd;
     }
   }
-  return;
 };
 
 const unattributed = ({ path, records }) =>

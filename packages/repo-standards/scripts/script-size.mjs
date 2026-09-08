@@ -73,7 +73,6 @@ export const baselineWarning = ({ ceiling, file, grandfathered, lines }) => {
   if (lines < grandfathered) {
     return `${file}: shrank to ${lines} (baseline ${grandfathered}) — ratchet down with \`--write\`.`;
   }
-  return;
 };
 
 export const baselineFor = ({ ceiling, measured }) =>
