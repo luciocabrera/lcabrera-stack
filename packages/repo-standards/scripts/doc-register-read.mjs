@@ -11,8 +11,6 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 
-import { readTextWithin } from './safe-read.mjs';
-import { deriveWorkspaces } from './workspace-scopes.mjs';
 import { commandsRunByCi } from './ci-commands.mjs';
 import {
   isTemplate,
@@ -20,6 +18,8 @@ import {
   REQUIREMENTS_DIR,
   toEntry,
 } from './doc-registers.mjs';
+import { readTextWithin } from './safe-read.mjs';
+import { deriveWorkspaces } from './workspace-scopes.mjs';
 
 const WORKFLOW_DIR = '.github/workflows';
 

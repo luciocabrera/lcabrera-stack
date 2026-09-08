@@ -65,7 +65,7 @@ export const parseCommitFiles = (log) =>
     .map((record) => {
       const lines = record.split('\n');
       return {
-        day: utcDayOf((lines[0] ?? '').split(' ')[1] ?? ''),
+        day: utcDayOf((lines[0] ?? '').split(' ', 2)[1] ?? ''),
         files: lines.slice(1).filter((line) => line.length > 0),
       };
     });

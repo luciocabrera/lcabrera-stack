@@ -8,13 +8,13 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  ALTERNATIVE_SECTIONS,
-  REPOSITORY_SCOPE,
   adrBody,
+  ALTERNATIVE_SECTIONS,
   blockFindings,
   governedBy,
   parseAdrBlock,
   recordFindings,
+  REPOSITORY_SCOPE,
   sectionFindings,
   sectionsOf,
 } from './adr-content.mjs';

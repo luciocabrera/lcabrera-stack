@@ -74,15 +74,15 @@ export const readWorkspaceGraph = (repoRoot) => {
     const manifest = JSON.parse(
       readFileSync(join(repoRoot, dir, 'package.json'), 'utf8'),
     );
-    return { ...workspace, dir, pkgName: manifest.name, manifest };
+    return { ...workspace, dir, manifest, pkgName: manifest.name };
   });
   const packageNames = new Set(located.map((workspace) => workspace.pkgName));
   return located.map((workspace) => ({
-    name: workspace.name,
-    kind: workspace.kind,
-    dir: workspace.dir,
-    pkgName: workspace.pkgName,
     deps: workspaceDeps(workspace.manifest, packageNames),
+    dir: workspace.dir,
+    kind: workspace.kind,
+    name: workspace.name,
+    pkgName: workspace.pkgName,
   }));
 };
 
@@ -104,10 +104,12 @@ export const withDependents = (seeds, dependents) => {
   while (worklist.length > 0) {
     const pkg = worklist.pop();
     for (const dependent of dependents.get(pkg) ?? []) {
-      if (!affected.has(dependent)) {
-        affected.add(dependent);
-        worklist.push(dependent);
+      if (affected.has(dependent)) {
+      	continue;
       }
+
+      affected.add(dependent);
+      worklist.push(dependent);
     }
   }
   return affected;
@@ -123,9 +125,9 @@ export const partitionTasks = (
     (pkg) => !useCoverage || pkg !== coverageTaskPackage,
   );
   return [
-    { task: 'test', packages: plain },
+    { packages: plain, task: 'test' },
     ...(useCoverage
-      ? [{ task: 'test:ci', packages: [coverageTaskPackage] }]
+      ? [{ packages: [coverageTaskPackage], task: 'test:ci' }]
       : []),
   ].filter((group) => group.packages.length > 0);
 };
@@ -146,7 +148,7 @@ export const resolveAffected = ({
   const relevant = files.filter((file) => !isLintOnly(file, lintOnly));
   const scripts = touchesScripts(relevant);
   if (relevant.length === 0) {
-    return { mode: 'none', packages: [], changed: [], scripts };
+    return { changed: [], mode: 'none', packages: [], scripts };
   }
   const changedWorkspaces = workspacesForFiles(relevant, graph);
   const changed = changedWorkspaces.map((workspace) => workspace.pkgName);
@@ -155,28 +157,28 @@ export const resolveAffected = ({
     changedWorkspaces.some((workspace) => global.has(workspace.pkgName));
   if (forceFull) {
     return {
+      changed,
       mode: 'full',
       packages: graph.map((workspace) => workspace.pkgName),
-      changed,
       scripts,
     };
   }
   if (changed.length === 0) {
-    return { mode: 'none', packages: [], changed: [], scripts };
+    return { changed: [], mode: 'none', packages: [], scripts };
   }
   const affected = withDependents(changed, buildDependents(graph));
-  return { mode: 'scoped', packages: [...affected], changed, scripts };
+  return { changed, mode: 'scoped', packages: [...affected], scripts };
 };
 
 export const resolveTestGroups = ({
-  files,
-  graph,
   ci = false,
   coverageTaskPackage,
+  files,
   globalPackages,
+  graph,
   lintOnlyPatterns,
 }) => {
-  const { mode, packages, changed, scripts } = resolveAffected({
+  const { changed, mode, packages, scripts } = resolveAffected({
     files,
     globalPackages,
     graph,
@@ -184,9 +186,9 @@ export const resolveTestGroups = ({
   });
   const groups = partitionTasks(packages, { ci, coverageTaskPackage });
   if (scripts) {
-    groups.push({ task: SCRIPTS_TEST_TASK, packages: [] });
+    groups.push({ packages: [], task: SCRIPTS_TEST_TASK });
   }
-  return { mode, packages, changed, scripts, groups };
+  return { changed, groups, mode, packages, scripts };
 };
 
 const dispositionReason = (running, isChanged) => {
@@ -196,19 +198,19 @@ const dispositionReason = (running, isChanged) => {
   return isChanged ? 'changed' : 'depends on a changed package';
 };
 
-export const workspaceDispositions = ({ graph, affected, changed, groups }) => {
+export const workspaceDispositions = ({ affected, changed, graph, groups }) => {
   const affectedSet = new Set(affected);
   const changedSet = new Set(changed);
   const taskByPackage = new Map(
     groups.flatMap((group) => group.packages.map((pkg) => [pkg, group.task])),
   );
   return graph.map((workspace) => {
-    const running = affectedSet.has(workspace.pkgName);
+    const isRunning = affectedSet.has(workspace.pkgName);
     return {
       dir: workspace.dir,
       pkgName: workspace.pkgName,
-      running,
-      reason: dispositionReason(running, changedSet.has(workspace.pkgName)),
+      reason: dispositionReason(isRunning, changedSet.has(workspace.pkgName)),
+      running: isRunning,
       task: taskByPackage.get(workspace.pkgName),
     };
   });
@@ -217,7 +219,7 @@ export const workspaceDispositions = ({ graph, affected, changed, groups }) => {
 export const renderSelectionMarkdown = (
   mode,
   dispositions,
-  { title = '🧪 Test Selection', scripts = false } = {},
+  { scripts = false, title = '🧪 Test Selection' } = {},
 ) => {
   const running = dispositions.filter((disposition) => disposition.running);
   const skipped = dispositions.filter((disposition) => !disposition.running);
@@ -238,7 +240,7 @@ export const renderSelectionMarkdown = (
           '| Workspace | Task | Why |',
           '| --- | --- | --- |',
           ...running.map(
-            ({ dir, task, reason }) =>
+            ({ dir, reason, task }) =>
               `| \`${dir}\` | \`${task}\` | ${reason} |`,
           ),
           '',

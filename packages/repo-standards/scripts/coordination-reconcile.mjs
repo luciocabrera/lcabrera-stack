@@ -35,9 +35,9 @@ export const mergedTaskDriftWarnings = ({
       continue;
     }
     const { branch, pr } = data;
-    const realBranch = branch !== undefined && !noBranch.has(branch);
-    const realPr = pr !== undefined && !noPr.has(String(pr).trim());
-    if (!realBranch || !realPr) {
+    const isRealBranch = branch !== undefined && !noBranch.has(branch);
+    const isRealPr = pr !== undefined && !noPr.has(String(pr).trim());
+    if (!isRealBranch || !isRealPr) {
       continue;
     }
     if (refExists(branch) && !live.has(branch)) {

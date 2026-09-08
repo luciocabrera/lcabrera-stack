@@ -44,8 +44,8 @@ describe('importSpecifiers', () => {
       importSpecifiers(
         packed({
           exports_: {
-            './package.json': './package.json',
             './components/*': './dist/components/*.mjs',
+            './package.json': './package.json',
             './reset.css': './dist/reset.css',
           },
           name: '@lcabrera/ui',

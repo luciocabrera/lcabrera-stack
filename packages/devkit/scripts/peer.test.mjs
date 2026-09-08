@@ -51,7 +51,7 @@ describe('installedPeerVersion', () => {
           readManifest: () => manifest,
         }),
       ),
-    ).toEqual(readings.map(() => undefined));
+    ).toEqual(readings.map(() => {}));
   });
 });
 
@@ -110,8 +110,8 @@ describe('unmetPeers', () => {
     { name: '@repo/fine', range: '>=1.0.0' },
   ];
   const versions = new Map([
-    ['@repo/stale', '1.4.2'],
     ['@repo/fine', '1.4.2'],
+    ['@repo/stale', '1.4.2'],
   ]);
 
   test('names only what is unmet, and says which way it is unmet', () => {

@@ -32,7 +32,7 @@ describe('renderPlan and an acknowledged edit', () => {
   test('lines its path column up with the rows around it', () => {
     const [first, second] = renderPlan([acknowledged, modified], {
       verbose: true,
-    }).split('\n');
+    }).split('\n', 2);
     expect(first.indexOf(PATH)).toBe(second.indexOf(PATH));
   });
 });

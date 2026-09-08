@@ -2,13 +2,12 @@ import { spawnSync } from 'node:child_process';
 import { readdirSync, rmSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   makeRegisterRepo,
-  REQUIREMENT_DIR,
   removeRegisterRepos,
+  REQUIREMENT_DIR,
 } from './doc-register-fixtures.mjs';
 
 const SCRIPTS = dirname(fileURLToPath(import.meta.url));

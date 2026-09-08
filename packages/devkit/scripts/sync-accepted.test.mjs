@@ -43,9 +43,9 @@ describe('planSync surfaces the hash acceptance is keyed to', () => {
       state: 'unmet',
     },
     'unresolved, on a placeholder': {
+      body: 'Run {{commands.install}} first.',
       lines: [],
       state: 'unresolved',
-      body: 'Run {{commands.install}} first.',
     },
   };
 

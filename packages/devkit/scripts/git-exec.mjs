@@ -28,16 +28,16 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { delimiter, dirname, join } from 'node:path';
 
-const ON_WINDOWS = process.platform === 'win32';
+const IS_ON_WINDOWS = process.platform === 'win32';
 
-export const TRUSTED_GIT_DIRECTORIES = ON_WINDOWS
+export const TRUSTED_GIT_DIRECTORIES = IS_ON_WINDOWS
   ? [
       String.raw`C:\Program Files\Git\cmd`,
       String.raw`C:\Program Files (x86)\Git\cmd`,
     ]
   : ['/usr/local/bin', '/usr/bin', '/bin'];
 
-const GIT_FILENAMES = ON_WINDOWS ? ['git.exe', 'git'] : ['git'];
+const GIT_FILENAMES = IS_ON_WINDOWS ? ['git.exe', 'git'] : ['git'];
 
 export const GIT_REPOSITORY_VARIABLES = new Set([
   'GIT_ALTERNATE_OBJECT_DIRECTORIES',

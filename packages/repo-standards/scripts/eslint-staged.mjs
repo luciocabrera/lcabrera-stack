@@ -67,7 +67,7 @@ export const findConfigDirectory = ({
     if (directory === repoRoot) break;
     directory = dirname(directory);
   }
-  return undefined;
+  return;
 };
 
 export const planLintGroups = ({ exists = existsSync, paths, repoRoot }) => {

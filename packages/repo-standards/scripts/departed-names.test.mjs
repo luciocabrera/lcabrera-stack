@@ -4,8 +4,8 @@ import {
   departedPathReferences,
   departedReferences,
   formatFinding,
-  isCheckedFile,
   formatPathFinding,
+  isCheckedFile,
   parseRoster,
   regularFiles,
   staleAllowances,
@@ -196,7 +196,7 @@ describe('staleAllowances', () => {
     expect(
       staleAllowances({
         allow,
-        seen: new Set(['a.md\u0000Oldprod']),
+        seen: new Set(['a.md\u{0}Oldprod']),
         walked: new Set(['a.md']),
       }),
     ).toEqual([]);

@@ -8,8 +8,8 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { mergedTaskDriftWarnings } from './coordination-reconcile.mjs';
 
-const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
-const NO_PR = new Set(['(none)', '']);
+const NO_BRANCH = new Set(['(none)', '(uncommitted)', '(worktree)']);
+const NO_PR = new Set(['', '(none)']);
 
 const task = (overrides) => ({
   data: {

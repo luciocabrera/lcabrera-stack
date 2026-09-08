@@ -36,7 +36,7 @@ query($owner:String!, $repo:String!, $number:Int!) {
 }`;
 
 export const fetchPullRequestThreads = ({ number, repository }) => {
-  const [owner, repo] = repository.split('/');
+  const [owner, repo] = repository.split('/', 2);
   const raw = runGh([
     'api',
     'graphql',

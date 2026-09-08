@@ -11,7 +11,6 @@
 import { mkdirSync, mkdtempSync, realpathSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
@@ -77,7 +76,7 @@ describe('repositoryWorkingTrees', () => {
     writeFileSync(join(linked, '.git'), `gitdir: ${worktreeGitDir}\n`);
 
     expect(new Set(repositoryWorkingTrees(linked))).toEqual(
-      new Set([main, linked]),
+      new Set([linked, main]),
     );
   });
 

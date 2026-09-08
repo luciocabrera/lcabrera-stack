@@ -16,16 +16,16 @@
  * Exit codes: 0 = written, 1 = bad arguments, an occupied path, or a template
  * that no longer has a heading to fill in.
  */
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
   ADR_HOMES,
+  nextFreeNumber,
   NON_ADR_FILES,
   TEMPLATE_FILE,
   TEMPLATE_HOME,
-  nextFreeNumber,
 } from './adr-registry.mjs';
 import {
   adrFilename,
@@ -50,18 +50,31 @@ const parseArgs = (argv) => {
   const rest = argv.filter((arg) => arg !== '--');
   while (rest.length > 0) {
     const arg = rest.shift();
-    if (arg === '--dry-run') {
+    switch (arg) {
+    case '--dry-run': {
       options.dryRun = true;
-    } else if (arg === '--home') {
+    
+    break;
+    }
+    case '--home': {
       options.home = rest.shift() ?? '';
-    } else if (arg === '--slug') {
+    
+    break;
+    }
+    case '--slug': {
       options.slug = rest.shift() ?? '';
-    } else if (arg.startsWith('--')) {
+    
+    break;
+    }
+    default: { if (arg.startsWith('--')) {
       throw new Error(`unknown flag: ${arg}\n${USAGE}`);
-    } else if (options.title === '') {
+    }
+    if (options.title === '') {
       options.title = arg;
     } else {
       throw new Error(`unexpected argument: ${arg}\n${USAGE}`);
+    }
+    }
     }
   }
   return options;

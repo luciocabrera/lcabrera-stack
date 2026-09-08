@@ -181,7 +181,7 @@ describe('probeFilename', () => {
   });
 
   it('honours an explicit extension', () => {
-    expect(probeFilename({ plugin: 'react', ext: 'tsx' })).toBe(
+    expect(probeFilename({ ext: 'tsx', plugin: 'react' })).toBe(
       'react.probe.tsx',
     );
   });

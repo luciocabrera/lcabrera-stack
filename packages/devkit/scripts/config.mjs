@@ -39,12 +39,12 @@ export const DEFAULT_CONFIG = {
 /** @type {Record<string, string[]>} */
 const RUNG_GROUPS = {
   agent: ['skills', 'rules', 'agents', 'docs', 'coordination', 'decisions'],
-  repo: ['templates', 'workflows', 'hooks', 'root'],
-  monorepo: ['workspace'],
   full: [],
+  monorepo: ['workspace'],
+  repo: ['templates', 'workflows', 'hooks', 'root'],
 };
 
-export const PROFILE_LADDER = Object.keys(RUNG_GROUPS);
+export const PROFILE_LADDER = ['agent', 'repo', 'monorepo', 'full'];
 
 const rungIndex = (name) => PROFILE_LADDER.indexOf(name);
 
@@ -85,7 +85,7 @@ export const rungPlacedAs = (profile) =>
  */
 export const placementNotice = (profile) => {
   const placedAs = rungPlacedAs(profile);
-  if (placedAs === undefined) return undefined;
+  if (placedAs === undefined) return;
   return `The "${profile}" profile places what "${placedAs}" places — nothing above "${placedAs}" ships in this version.`;
 };
 
@@ -150,7 +150,7 @@ export const resolveConfig = (raw) => {
       : DEFAULT_CONFIG.commands,
     paths: {
       ...DEFAULT_CONFIG.paths,
-      ...(isPlainObject(parsed.paths) ? parsed.paths : {}),
+      ...(isPlainObject(parsed.paths) && parsed.paths),
     },
     profile,
   };
@@ -170,7 +170,7 @@ const targetNameOf = (segments) => {
 export const targetPathFor = ({ assetPath, config }) => {
   const [group, ...rest] = assetPath.split('/');
   const base = config.paths[group];
-  if (base === undefined || rest.length === 0) return undefined;
+  if (base === undefined || rest.length === 0) return;
   const named = targetNameOf(rest);
   return ROOT_BASES.has(base) ? named.join('/') : [base, ...named].join('/');
 };
@@ -180,18 +180,18 @@ export const groupsFor = (config) => PROFILES[config.profile] ?? [];
 const EXECUTABLE_GROUPS = new Set(['hooks']);
 
 export const isExecutableAsset = (assetPath) =>
-  EXECUTABLE_GROUPS.has(assetPath.split('/')[0]);
+  EXECUTABLE_GROUPS.has(assetPath.split('/', 1)[0]);
 
 export const configuredCommandWords = (config) =>
   Object.values(config.commands ?? {})
     .filter((command) => typeof command === 'string')
-    .map((command) => command.trim().split(/\s+/)[0] ?? '')
+    .map((command) => command.trim().split(/\s+/, 1)[0] ?? '')
     .filter((word) => word !== '');
 
 const valueAt = ({ config, path }) =>
   path.split('.').reduce((cursor, segment) => {
     if (!isPlainObject(cursor) || !Object.hasOwn(cursor, segment)) {
-      return undefined;
+      return;
     }
     return cursor[segment];
   }, config);

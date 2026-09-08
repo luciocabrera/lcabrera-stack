@@ -63,7 +63,7 @@ export const workflowTriggers = (source) => {
   }
   const triggers = new Set();
   for (const line of lines.slice(start + 1)) {
-    if (line.trim() === '' || line.trim().startsWith('#')) {
+    if (line.trim() === '' || line.trimStart().startsWith('#')) {
       continue;
     }
     if (indentOf(line) === 0) {
@@ -126,10 +126,12 @@ export const commandsRunByCi = ({ rootScripts, workflows }) => {
   while (pending.length > 0) {
     const task = pending.pop();
     for (const chained of commandsIn(scripts.get(task) ?? '')) {
-      if (!run.has(chained)) {
-        run.add(chained);
-        pending.push(chained);
+      if (run.has(chained)) {
+      	continue;
       }
+
+      run.add(chained);
+      pending.push(chained);
     }
   }
   return run;

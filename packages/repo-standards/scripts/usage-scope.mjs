@@ -27,14 +27,14 @@ const namesALinkedWorktree = (gitdir) =>
 const commonGitDir = (repoRoot) => {
   const dotGit = join(repoRoot, '.git');
   if (!existsSync(dotGit)) {
-    return undefined;
+    return;
   }
   if (statSync(dotGit).isDirectory()) {
     return dotGit;
   }
   const pointer = gitdirPointer(readFileSync(dotGit, 'utf8'));
   if (pointer === undefined) {
-    return undefined;
+    return;
   }
   const gitdir = resolve(repoRoot, pointer);
   return namesALinkedWorktree(gitdir) ? resolve(gitdir, '..', '..') : gitdir;

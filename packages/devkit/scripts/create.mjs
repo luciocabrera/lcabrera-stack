@@ -64,10 +64,10 @@ export const ancestorsOf = (directory) => {
 export const createRefusal = ({
   enclosingRepository,
   targetEntries,
-  unrecognised = [],
   targetIsDirectory = true,
   targetIsReadable = true,
   targets,
+  unrecognised = [],
 }) => {
   if (unrecognised.length > 0) {
     return `create: ${unrecognised.map(quoted).join(', ')} is not an option this command takes — \`--profile <name>\` is the only one, and it is spelled with a space. Run \`${CREATE_USAGE}\`.`;
@@ -95,7 +95,7 @@ export const createRefusal = ({
     );
     return `create: \`${target}\` is not empty — it already holds \`${first}\`, and create writes only into a directory with nothing in it. Pick a name nothing occupies, or run \`devkit init\` inside \`${target}\` if that is the project you meant.`;
   }
-  return undefined;
+  return;
 };
 
 const NAME_SEPARATORS = /[^a-z0-9._-]+/g;
@@ -147,9 +147,9 @@ export const packageNameFor = (directoryName) => {
 export const initialManifest = ({ name, profile = '' }) => {
   const base = {
     name,
-    version: '0.0.0',
     private: true,
     type: 'module',
+    version: '0.0.0',
   };
   return includesRung({ profile, rung: 'monorepo' })
     ? withWorkspaceFields({ manifest: base })

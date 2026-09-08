@@ -35,30 +35,30 @@ import { readGates } from './config.mjs';
 
 const main = async () => {
   const args = new Set(process.argv.slice(2));
-  const markdown = args.has('--markdown');
-  const dryRun = args.has('--dry-run');
-  const ci = args.has('--ci');
+  const isMarkdown = args.has('--markdown');
+  const isDryRun = args.has('--dry-run');
+  const isCi = args.has('--ci');
 
   const files = readChangedFiles();
   const graph = readWorkspaceGraph(REPO_ROOT);
   const { coverageTaskPackage, globalPackages, lintOnlyPatterns } =
     readGates(REPO_ROOT).affectedTests;
-  const { mode, groups, packages, changed, scripts } = resolveTestGroups({
-    files,
-    graph,
-    ci,
+  const { changed, groups, mode, packages, scripts } = resolveTestGroups({
+    ci: isCi,
     coverageTaskPackage,
+    files,
     globalPackages,
+    graph,
     lintOnlyPatterns,
   });
   const dispositions = workspaceDispositions({
-    graph,
     affected: packages,
     changed,
+    graph,
     groups,
   });
 
-  if (markdown) {
+  if (isMarkdown) {
     process.stdout.write(
       `${renderSelectionMarkdown(mode, dispositions, { scripts })}\n`,
     );
@@ -80,7 +80,7 @@ const main = async () => {
     return;
   }
 
-  await runGroupsAsGate(groups, { dryRun });
+  await runGroupsAsGate(groups, { dryRun: isDryRun });
 };
 
 await runMain(main);

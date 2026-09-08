@@ -11,8 +11,8 @@ const CONTEXT = {
   ciCommands: new Set(['test:ci']),
   ids: new Set(['render-a-table', 'sql-is-safe']),
   resolves: (ref) => ref === 'packages/ui/src/public-api.ts',
-  rootTasks: new Set(['test:ci', 'suppressions:list']),
-  roster: new Set(['ui', 'server']),
+  rootTasks: new Set(['suppressions:list', 'test:ci']),
+  roster: new Set(['server', 'ui']),
 };
 
 const REQUIREMENT = `---

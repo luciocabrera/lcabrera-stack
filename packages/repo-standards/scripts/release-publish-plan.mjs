@@ -33,7 +33,10 @@ import { appendFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { errorMessage } from './error-message.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 import { readPublishableManifests } from './publishable-workspaces.mjs';
+import { fetchPackument } from './registry-packument.mjs';
 import {
   classifyRelease,
   findBlockingFirstPublish,
@@ -41,10 +44,7 @@ import {
   selectFirstPublish,
   selectPublishable,
 } from './release-publishable.mjs';
-import { errorMessage } from './error-message.mjs';
-import { fetchPackument } from './registry-packument.mjs';
 import { annotationData } from './workflow-annotation.mjs';
-import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),

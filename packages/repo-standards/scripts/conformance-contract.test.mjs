@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { SUBAGENT, conformanceMessages } from './conformance-fixtures.mjs';
+import { conformanceMessages, SUBAGENT } from './conformance-fixtures.mjs';
 
 describe('conformance contract — planted malformed frontmatter', () => {
   it.each([

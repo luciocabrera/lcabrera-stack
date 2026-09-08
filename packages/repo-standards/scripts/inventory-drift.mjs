@@ -54,7 +54,7 @@ export const toBaseline = (findings) => {
     byFile.set(file, symbols);
   }
   return Object.fromEntries(
-    [...byFile.entries()]
+    [...byFile]
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([file, symbols]) => [
         file,

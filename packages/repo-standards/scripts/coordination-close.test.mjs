@@ -109,7 +109,7 @@ describe('tasksClosedBy — the pass direction', () => {
 });
 
 describe('prNumberOf', () => {
-  it.each([['(none)'], [''], ['   '], ['#'], ['no-pr'], [undefined], [[]]])(
+  it.each([['(none)'], [''], [' '.repeat(3)], ['#'], ['no-pr'], [undefined], [[]]])(
     'reads no number from %s',
     (value) => {
       expect(prNumberOf(value)).toBeUndefined();

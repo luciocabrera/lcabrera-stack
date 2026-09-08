@@ -127,10 +127,10 @@ const isPublished = ({ filePath, packageDir, unpublishedGlobs }) => {
     .split(sep)
     .join('/');
 
-  return !unpublishedGlobs.some(
+  return unpublishedGlobs.every(
     (glob) =>
-      matchesGlob(packageRelativePath, glob) ||
-      matchesGlob(packageRelativePath, `${glob}/**`),
+      !(matchesGlob(packageRelativePath, glob) ||
+      matchesGlob(packageRelativePath, `${glob}/**`)),
   );
 };
 

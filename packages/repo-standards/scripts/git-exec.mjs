@@ -58,7 +58,7 @@ export const buildGitEnv = (env) => ({
 export const runGit = ({ args, cwd }) => {
   const binary = gitBinary();
   if (binary === undefined) {
-    return undefined;
+    return;
   }
   try {
     return execFileSync(binary, args, {
@@ -69,7 +69,7 @@ export const runGit = ({ args, cwd }) => {
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
   } catch {
-    return undefined;
+    return;
   }
 };
 

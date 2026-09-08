@@ -10,8 +10,8 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
-  ACCEPTED_FILE,
   acceptDecision,
+  ACCEPTED_FILE,
   parseAcceptArgs,
   serialiseAccepted,
   withAccepted,

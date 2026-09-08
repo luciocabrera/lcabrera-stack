@@ -41,7 +41,7 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 const UPSTREAM = `origin/${readConventions(REPO_ROOT).defaultBranch}`;
-const KEEP = new Set([]);
+const KEEP = new Set();
 
 const parsePullRequests = (raw) => {
   if (!raw.trim()) {

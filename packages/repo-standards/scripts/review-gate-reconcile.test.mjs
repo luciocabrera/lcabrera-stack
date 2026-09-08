@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { REVIEW_GATES } from '../../../scripts/lib/review-gate-roster.mjs';
 import {
   openPullRequestNumbers,
   outcomeLine,
@@ -7,7 +8,6 @@ import {
   shouldPublishStatus,
   sweepSummary,
 } from './review-gate-reconcile.mjs';
-import { REVIEW_GATES } from '../../../scripts/lib/review-gate-roster.mjs';
 
 const HEAD = 'ba4876dc51c6eb0f55401d60676e4fb215f4c015';
 const CONTEXT = 'Copilot review complete';

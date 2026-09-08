@@ -53,14 +53,14 @@ const readRosteredManifest = ({ directory, packagesDir, repoRoot }) => {
 const toPackageConfig = ({ dir, packagesDir, repoRoot }) => {
   const directory = `${packagesDir}/${dir}`;
   const manifest = readRosteredManifest({ directory, packagesDir, repoRoot });
-  const source = shipsSource(manifest);
+  const isSource = shipsSource(manifest);
   const entries = Object.entries(manifest.exports ?? {})
     .filter(([subpath]) => isContractSubpath(subpath))
     .map(([subpath, target]) => ({
       entryFile: join(
         repoRoot,
         directory,
-        source ? target : entryForBuilt(target),
+        isSource ? target : entryForBuilt(target),
       ),
       subpath,
     }))
@@ -70,8 +70,8 @@ const toPackageConfig = ({ dir, packagesDir, repoRoot }) => {
     directory,
     entries,
     name: manifest.name,
-    source,
-    tsConfigFilePath: source
+    source: isSource,
+    tsConfigFilePath: isSource
       ? join(repoRoot, directory, 'tsconfig.app.json')
       : undefined,
   };

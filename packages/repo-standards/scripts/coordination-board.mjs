@@ -34,7 +34,7 @@ const renderTasks = (tasks) =>
 const renderBranches = (branches, tasks) =>
   branches
     .filter(({ data }) => data !== undefined)
-    .map(({ slug, data }) => {
+    .map(({ data, slug }) => {
       const participants = tasks
         .filter((t) => t.data?.branch === data.branch)
         .map((t) => t.data.id);

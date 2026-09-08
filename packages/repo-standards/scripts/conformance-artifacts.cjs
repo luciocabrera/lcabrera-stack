@@ -112,11 +112,11 @@ const collectSkills = (repoRoot) => {
         label: `${KINDS.skill.root}/${entry.name}`,
         message: `Missing SKILL.md in ${KINDS.skill.root}/${entry.name} (not on the support allowlist: ${[...SUPPORT_DIRECTORIES].join(', ')})`,
       })),
-    unreadableNames: missing
-      .filter((entry) => !SUPPORT_DIRECTORIES.has(entry.name))
-      .map((entry) => entry.name),
     skippedDirectories: missing
       .filter((entry) => SUPPORT_DIRECTORIES.has(entry.name))
+      .map((entry) => entry.name),
+    unreadableNames: missing
+      .filter((entry) => !SUPPORT_DIRECTORIES.has(entry.name))
       .map((entry) => entry.name),
   };
 };
@@ -173,7 +173,7 @@ const collectArtifacts = ({ repoRoot }) => {
 };
 
 module.exports = {
+  collectArtifacts,
   KINDS,
   SUPPORT_DIRECTORIES,
-  collectArtifacts,
 };

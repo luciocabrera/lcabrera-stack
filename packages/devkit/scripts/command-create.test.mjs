@@ -11,16 +11,15 @@ import {
   chmodSync,
   existsSync,
   mkdirSync,
-  symlinkSync,
   mkdtempSync,
-  readFileSync,
   readdirSync,
+  readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runCreate } from './command-create.mjs';
@@ -42,8 +41,8 @@ const git = (args, cwd) =>
   }).trim();
 
 const quietly = (run) => {
-  const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-  const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  const error = vi.spyOn(console, 'error').mockImplementation(() => {});
   try {
     const code = run();
     return {

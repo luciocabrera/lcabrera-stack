@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
@@ -13,10 +13,12 @@ const makeWorkspace = () => {
 };
 
 afterEach(() => {
-  if (workspace !== undefined) {
-    rmSync(workspace, { force: true, recursive: true });
-    workspace = undefined;
+  if (workspace === undefined) {
+  	return;
   }
+
+  rmSync(workspace, { force: true, recursive: true });
+  workspace = undefined;
 });
 
 describe('readTextWithin', () => {

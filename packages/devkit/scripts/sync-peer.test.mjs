@@ -24,7 +24,7 @@ const planFor = (versions) =>
     assets: [declaringAsset],
     config: DEFAULT_CONFIG,
     manifest: emptyManifest,
-    onDiskHash: () => undefined,
+    onDiskHash: () => {},
     peerVersions: versions,
   });
 
@@ -88,7 +88,7 @@ describe('planSync and a declared peer', () => {
         ],
         config: DEFAULT_CONFIG,
         manifest: emptyManifest,
-        onDiskHash: () => undefined,
+        onDiskHash: () => {},
         peerVersions: new Map([['@lcabrera/repo-standards', '2.0.0']]),
       });
       return [spelling, { missing: entry.missing, state: entry.state }];
@@ -113,7 +113,7 @@ describe('planSync and a declared peer', () => {
       assets: [declaringAsset],
       config: DEFAULT_CONFIG,
       manifest: emptyManifest,
-      onDiskHash: () => undefined,
+      onDiskHash: () => {},
     });
     expect(entry.state).toBe('unmet');
   });
@@ -133,7 +133,7 @@ describe('planSync and a declared peer', () => {
       ],
       config: DEFAULT_CONFIG,
       manifest: emptyManifest,
-      onDiskHash: () => undefined,
+      onDiskHash: () => {},
       peerVersions: new Map(),
     });
     expect(entry.unmetKind).toBe('config');

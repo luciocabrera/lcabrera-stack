@@ -6,7 +6,7 @@ import {
   isCheckedFile,
 } from './package-app-references.mjs';
 
-const inRepo = new Set(['apps/showcase', 'apps/docs-site']);
+const inRepo = new Set(['apps/docs-site', 'apps/showcase']);
 const find = (text) =>
   appReferences({ exists: (path) => inRepo.has(path), path: 'doc.md', text });
 

@@ -310,7 +310,7 @@ describe('renderIndex', () => {
     expect(index({})).not.toContain('adrGrandfatheredDuplicates');
   });
 
-  it('renders the branch this repository\u2019s registers imply', () => {
+  it('renders the branch this repository\u{2019}s registers imply', () => {
     const rendered = renderIndex(ADR_HOMES[0]);
 
     expect(rendered).toContain(

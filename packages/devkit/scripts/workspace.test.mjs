@@ -12,7 +12,6 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join, matchesGlob, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { describe, expect, test } from 'vite-plus/test';
 
 import { configs } from '../assets/workspace/packages/typescript-config/tsconfig.entries.ts';
@@ -20,11 +19,11 @@ import { initialManifest } from './create.mjs';
 import {
   GENERATED_TSCONFIGS,
   NODE_VERSION,
+  nodeEngineBand,
   TSCONFIG_WORKSPACE,
+  withWorkspaceFields,
   WORKSPACE_DEPENDENCIES,
   WORKSPACE_SCRIPTS,
-  nodeEngineBand,
-  withWorkspaceFields,
 } from './workspace.mjs';
 
 const BLUEPRINT = join(

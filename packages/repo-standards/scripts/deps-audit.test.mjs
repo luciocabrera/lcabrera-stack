@@ -14,7 +14,7 @@ const advisory = (overrides = {}) => ({
   cwe: 'CWE-77',
   findings: [{ dev: true, optional: false, paths: ['.>lodash'], version: '1' }],
   github_advisory_id: 'GHSA-35jh-r3h4-6jhm',
-  id: 1106913,
+  id: 1_106_913,
   module_name: 'lodash',
   patched_versions: '>=4.17.21',
   severity: 'high',
@@ -58,7 +58,7 @@ describe('isAtLeast', () => {
 
 describe('readAdvisories', () => {
   it('keys on the GHSA id, not the registry-assigned number', () => {
-    const [found] = readAdvisories(report({ 1106913: advisory() }));
+    const [found] = readAdvisories(report({ 1_106_913: advisory() }));
     expect(found.ghsa).toBe('GHSA-35jh-r3h4-6jhm');
   });
 

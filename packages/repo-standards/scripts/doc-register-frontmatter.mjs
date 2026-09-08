@@ -17,7 +17,7 @@
  * the rest.
  */
 
-const QUOTES = new Set(["'", '"']);
+const QUOTES = new Set(['"', "'"]);
 
 const unquote = (value) => {
   const first = value.slice(0, 1);
@@ -35,7 +35,7 @@ const parseFlowList = (value) =>
 const readPair = (text) => {
   const colon = text.indexOf(':');
   if (colon <= 0) {
-    return undefined;
+    return;
   }
   const key = text.slice(0, colon);
   return /^[A-Za-z][\w-]*$/.test(key)
@@ -45,7 +45,7 @@ const readPair = (text) => {
 
 const scalarOrFlow = (value, line, errors) => {
   if (value === '') {
-    return undefined;
+    return;
   }
   if (!value.startsWith('[')) {
     return unquote(value);
@@ -61,7 +61,7 @@ const indentOf = (line) => line.length - line.trimStart().length;
 
 const frontmatterBlock = (source) => {
   if (!source.startsWith('---\n')) {
-    return undefined;
+    return;
   }
   const end = source.indexOf('\n---', 3);
   return end === -1 ? undefined : source.slice(4, end);
@@ -118,7 +118,7 @@ const readTopLevel = (state, text, line) => {
 export const parseFrontmatter = (source) => {
   const block = frontmatterBlock(source);
   if (block === undefined) {
-    return undefined;
+    return;
   }
   const state = { errors: [], fields: {}, key: undefined, map: undefined };
   for (const [index, raw] of block.split('\n').entries()) {

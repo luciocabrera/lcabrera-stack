@@ -44,7 +44,7 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 const GATES = readGates(REPO_ROOT);
-const { mergeWorkspaces: COVERAGE_WORKSPACES, mergedFile: MERGED_FILE } =
+const { mergedFile: MERGED_FILE, mergeWorkspaces: COVERAGE_WORKSPACES } =
   GATES.coverage;
 const OUTPUT_PATH = join(REPO_ROOT, MERGED_FILE);
 
@@ -61,7 +61,7 @@ const targetWorkspaces = () => {
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean);
-  const { mode, changed } = resolveAffected({
+  const { changed, mode } = resolveAffected({
     files,
     globalPackages: GATES.affectedTests.globalPackages,
     graph: readWorkspaceGraph(REPO_ROOT),

@@ -10,9 +10,9 @@
  * silently.
  */
 
-export const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
+export const NO_BRANCH = new Set(['(none)', '(uncommitted)', '(worktree)']);
 
-export const NO_PR = new Set(['(none)', '']);
+export const NO_PR = new Set(['', '(none)']);
 
 const readListItem = (raw) => {
   const trimmed = raw.trimStart();
@@ -24,7 +24,7 @@ const readListItem = (raw) => {
 const readPair = (raw) => {
   const colon = raw.indexOf(':');
   if (colon <= 0 || raw.startsWith(' ') || raw.startsWith('\t')) {
-    return undefined;
+    return;
   }
   const key = raw.slice(0, colon);
   return /^[A-Za-z]\w*$/.test(key)
@@ -34,11 +34,11 @@ const readPair = (raw) => {
 
 export const parseFrontmatter = (source) => {
   if (!source.startsWith('---\n')) {
-    return undefined;
+    return;
   }
   const end = source.indexOf('\n---', 4);
   if (end === -1) {
-    return undefined;
+    return;
   }
   const data = {};
   let listKey;

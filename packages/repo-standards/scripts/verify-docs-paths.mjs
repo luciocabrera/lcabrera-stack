@@ -127,7 +127,7 @@ const saveBaseline = (baseline) =>
 const parseAccept = (argv) => {
   const at = argv.indexOf('--accept');
   if (at === -1) {
-    return undefined;
+    return;
   }
   const reasonAt = argv.indexOf('--reason');
   return {

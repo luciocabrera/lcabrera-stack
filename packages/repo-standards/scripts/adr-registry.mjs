@@ -85,7 +85,7 @@ const duplicateFindings = (homes, grandfathered = GRANDFATHERED_DUPLICATES) => {
       uses.set(parsed.number, [...at, `${home.dir}/${entry.filename}`]);
     }
   }
-  return [...uses.entries()]
+  return [...uses]
     .filter(([number, at]) =>
       grandfathered.has(number) ? at.length > 2 : at.length > 1,
     )

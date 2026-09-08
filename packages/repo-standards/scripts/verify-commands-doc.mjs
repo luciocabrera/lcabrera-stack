@@ -100,7 +100,7 @@ const findDocumentedCommands = (doc) => {
 };
 
 const findWorkspaceTaskClaims = (doc) => {
-  const section = doc.split('## 5. Per-workspace tasks')[1]?.split('\n---')[0];
+  const section = doc.split('## 5. Per-workspace tasks', 2)[1]?.split('\n---', 1)[0];
   if (section === undefined) {
     return [];
   }

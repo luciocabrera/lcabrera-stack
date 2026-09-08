@@ -41,7 +41,7 @@ describe('parseAccepted', () => {
 
   test('drops an entry with no stated reason, so a hand-edit cannot skip --reason', () => {
     const raw = JSON.stringify({
-      'blank.md': { hash: EDIT, reason: '   ' },
+      'blank.md': { hash: EDIT, reason: ' '.repeat(3) },
       'missing.md': { hash: EDIT },
       'stated.md': { hash: EDIT, reason: 'deliberate' },
     });
@@ -57,8 +57,8 @@ describe('parseAccepted', () => {
 describe('serialiseAccepted', () => {
   test('orders paths so re-recording produces no incidental diff', () => {
     const raw = serialiseAccepted({
-      'b.md': { hash: EDIT, reason: 'x' },
       'a.md': { hash: OTHER_EDIT, reason: 'y' },
+      'b.md': { hash: EDIT, reason: 'x' },
     });
     expect(raw.indexOf('a.md')).toBeLessThan(raw.indexOf('b.md'));
     expect(raw.endsWith('\n')).toBe(true);
@@ -152,7 +152,7 @@ describe('acceptDecision', () => {
   });
 
   test('refuses an acknowledgement with no stated reason', () => {
-    for (const reason of [undefined, '', '   ']) {
+    for (const reason of [undefined, '', ' '.repeat(3)]) {
       const decision = acceptDecision({
         entries: [modified],
         path: PATH,

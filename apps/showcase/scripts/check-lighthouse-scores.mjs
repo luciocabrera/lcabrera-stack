@@ -10,16 +10,94 @@ import { resolve } from 'node:path';
 
 const BASELINE_FILE = resolve(process.cwd(), 'lighthouse-baseline.json');
 const colors = {
-  reset: '\x1b[0m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-  blue: '\x1b[34m',
-  dim: '\x1b[2m',
+  blue: '\u{1B}[34m',
+  dim: '\u{1B}[2m',
+  green: '\u{1B}[32m',
+  red: '\u{1B}[31m',
+  reset: '\u{1B}[0m',
+  yellow: '\u{1B}[33m',
 };
 
-function log(message, color = colors.reset) {
-  console.log(`${color}${message}${colors.reset}`);
+export async function checkLighthouseScores(reportPath) {
+  if (!existsSync(reportPath)) {
+    log(`\n❌ Report not found: ${reportPath}`, colors.red);
+    process.exitCode = 1;
+    return false;
+  }
+
+  if (!existsSync(BASELINE_FILE)) {
+    log(`\n❌ Baseline file not found: ${BASELINE_FILE}`, colors.red);
+    process.exitCode = 1;
+    return false;
+  }
+
+  const report = JSON.parse(readFileSync(reportPath, 'utf-8'));
+  const baseline = JSON.parse(readFileSync(BASELINE_FILE, 'utf-8'));
+
+  log('\n📊 Lighthouse Score Report', colors.blue);
+  log('=====================================\n');
+
+  const { categories } = report;
+  const thresholds = baseline.thresholds;
+  const baselineScores = baseline.scores;
+
+  let isAllPassed = true;
+  const results = [];
+
+  Object.entries(categories).forEach(([category, data]) => {
+    const currentScore = Math.round(data.score * 100);
+    const threshold = thresholds[category] || 0;
+    const baselineScore = baselineScores[category] || 0;
+    const diff = currentScore - baselineScore;
+    const diffStr = diff >= 0 ? `+${diff}` : `${diff}`;
+    const diffColor = diff >= 0 ? colors.green : colors.red;
+
+    const isPassed = currentScore >= threshold;
+    if (!isPassed) isAllPassed = false;
+
+    const emoji = getScoreEmoji(currentScore, threshold);
+    const scoreColor = getScoreColor(currentScore, threshold);
+
+    log(
+      `${emoji} ${category.padEnd(18)} ${currentScore.toString().padStart(3)}/100 (threshold: ${threshold}) ${diffColor}[${diffStr}]${colors.reset}`,
+      scoreColor,
+    );
+
+    results.push({
+      baseline: baselineScore,
+      category,
+      current: currentScore,
+      passed: isPassed,
+      threshold,
+    });
+  });
+
+  log('\n📈 Comparison to Baseline:', colors.blue);
+  for (const { baseline: base, category, current } of results) {
+    const diff = current - base;
+    const { color, symbol } = getTrendPresentation(diff);
+    log(`  ${symbol} ${category.padEnd(18)} ${base} → ${current}`, color);
+  }
+
+  log('\n=====================================');
+
+  if (isAllPassed) {
+    log('\n✅ All scores meet thresholds!', colors.green);
+    return true;
+  }
+
+  log('\n❌ Some scores are below thresholds', colors.red);
+  log('\nFailed categories:', colors.red);
+  results
+    .filter((result) => !result.passed)
+    .forEach(({ category, current, threshold }) => {
+      const gap = threshold - current;
+      log(
+        `  • ${category}: ${current}/100 (need +${gap} to reach ${threshold})`,
+        colors.red,
+      );
+    });
+  return false;
 }
 
 function getScoreColor(score, threshold) {
@@ -55,86 +133,8 @@ function getTrendPresentation(diff) {
   };
 }
 
-export async function checkLighthouseScores(reportPath) {
-  if (!existsSync(reportPath)) {
-    log(`\n❌ Report not found: ${reportPath}`, colors.red);
-    process.exitCode = 1;
-    return false;
-  }
-
-  if (!existsSync(BASELINE_FILE)) {
-    log(`\n❌ Baseline file not found: ${BASELINE_FILE}`, colors.red);
-    process.exitCode = 1;
-    return false;
-  }
-
-  const report = JSON.parse(readFileSync(reportPath, 'utf-8'));
-  const baseline = JSON.parse(readFileSync(BASELINE_FILE, 'utf-8'));
-
-  log('\n📊 Lighthouse Score Report', colors.blue);
-  log('=====================================\n');
-
-  const { categories } = report;
-  const thresholds = baseline.thresholds;
-  const baselineScores = baseline.scores;
-
-  let allPassed = true;
-  const results = [];
-
-  Object.entries(categories).forEach(([category, data]) => {
-    const currentScore = Math.round(data.score * 100);
-    const threshold = thresholds[category] || 0;
-    const baselineScore = baselineScores[category] || 0;
-    const diff = currentScore - baselineScore;
-    const diffStr = diff >= 0 ? `+${diff}` : `${diff}`;
-    const diffColor = diff >= 0 ? colors.green : colors.red;
-
-    const passed = currentScore >= threshold;
-    if (!passed) allPassed = false;
-
-    const emoji = getScoreEmoji(currentScore, threshold);
-    const scoreColor = getScoreColor(currentScore, threshold);
-
-    log(
-      `${emoji} ${category.padEnd(18)} ${currentScore.toString().padStart(3)}/100 (threshold: ${threshold}) ${diffColor}[${diffStr}]${colors.reset}`,
-      scoreColor,
-    );
-
-    results.push({
-      category,
-      current: currentScore,
-      baseline: baselineScore,
-      threshold,
-      passed,
-    });
-  });
-
-  log('\n📈 Comparison to Baseline:', colors.blue);
-  results.forEach(({ category, current, baseline: base }) => {
-    const diff = current - base;
-    const { color, symbol } = getTrendPresentation(diff);
-    log(`  ${symbol} ${category.padEnd(18)} ${base} → ${current}`, color);
-  });
-
-  log('\n' + '=====================================');
-
-  if (allPassed) {
-    log('\n✅ All scores meet thresholds!', colors.green);
-    return true;
-  }
-
-  log('\n❌ Some scores are below thresholds', colors.red);
-  log('\nFailed categories:', colors.red);
-  results
-    .filter((result) => !result.passed)
-    .forEach(({ category, current, threshold }) => {
-      const gap = threshold - current;
-      log(
-        `  • ${category}: ${current}/100 (need +${gap} to reach ${threshold})`,
-        colors.red,
-      );
-    });
-  return false;
+function log(message, color = colors.reset) {
+  console.log(`${color}${message}${colors.reset}`);
 }
 
 const args = process.argv.slice(2);

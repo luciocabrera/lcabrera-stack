@@ -96,7 +96,7 @@ export const settingsFiles = ({ repoRoot, userHome }) => [
 
 const declaredCleanupPeriod = (path) => {
   if (!existsSync(path)) {
-    return undefined;
+    return;
   }
   let settings;
   try {
@@ -118,7 +118,7 @@ const firstDeclaration = (paths) => {
       return declared;
     }
   }
-  return undefined;
+  return;
 };
 
 export const resolveRetention = ({ args, repoRoot, userHome }) => {

@@ -12,11 +12,11 @@ const ISSUE_REF = /^(#?\d+|https?:\/\/\S+\/issues\/\d+)$/;
 const TASK_STATUSES = new Set([
   'active',
   'blocked',
-  'review',
-  'paused',
   'done',
+  'paused',
+  'review',
 ]);
-const BRANCH_STATUSES = new Set(['active', 'merging', 'done']);
+const BRANCH_STATUSES = new Set(['active', 'done', 'merging']);
 const TASK_REQUIRED = [
   'id',
   'title',
@@ -90,7 +90,7 @@ const slugForBranch = (slug, branch) =>
     ? `filename must be the branch slug \`${branchSlug(branch)}.md\``
     : undefined;
 
-export const taskErrors = ({ slug, data }, seen) =>
+export const taskErrors = ({ data, slug }, seen) =>
   [
     ...missingFields(data, TASK_REQUIRED),
     enumError('status', data.status, TASK_STATUSES),
@@ -102,7 +102,7 @@ export const taskErrors = ({ slug, data }, seen) =>
     dupId(data.id, seen),
   ].filter(Boolean);
 
-export const branchErrors = ({ slug, data }) =>
+export const branchErrors = ({ data, slug }) =>
   [
     ...missingFields(data, BRANCH_REQUIRED),
     enumError('status', data.status, BRANCH_STATUSES),

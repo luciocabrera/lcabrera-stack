@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  conformanceMessages,
   RULE,
   SKILL,
   SUBAGENT,
-  conformanceMessages,
 } from './conformance-fixtures.mjs';
 
 describe('conformance references — planted dead path references', () => {
@@ -58,8 +58,8 @@ description: Demo subagent for the conformance fixture. Use when a test needs on
     },
     {
       files: {
-        '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash scripts/run.sh\`.\n`,
         '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
+        '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash scripts/run.sh\`.\n`,
       },
       message:
         'Broken script path in .github/skills/demo/SKILL.md: "scripts/run.sh"',
@@ -79,8 +79,8 @@ description: Demo subagent for the conformance fixture. Use when a test needs on
     },
     {
       files: {
-        '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash ./scripts/run.sh\`.\n`,
         '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
+        '.github/skills/demo/SKILL.md': `${SKILL}\nRun \`bash ./scripts/run.sh\`.\n`,
       },
       kept: 'a dot-prefixed script path read from the file that names it',
     },
@@ -92,8 +92,8 @@ description: Demo subagent for the conformance fixture. Use when a test needs on
     },
     {
       files: {
-        '.github/skills/demo/SKILL.md': `${SKILL}\n[here](#demo) and \`bash .github/skills/demo/scripts/run.sh\`\n`,
         '.github/skills/demo/scripts/run.sh': '#!/bin/sh\n',
+        '.github/skills/demo/SKILL.md': `${SKILL}\n[here](#demo) and \`bash .github/skills/demo/scripts/run.sh\`\n`,
       },
       kept: 'a resolving reference and an in-file anchor',
     },

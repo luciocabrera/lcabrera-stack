@@ -59,21 +59,21 @@ export const countCodeLines = (content) =>
   content.split('\n').filter((line) => !isProse(line)).length;
 
 export const sizeProblem = ({ ceiling, file, grandfathered, lines }) => {
-  if (lines <= (grandfathered ?? ceiling)) return undefined;
+  if (lines <= (grandfathered ?? ceiling)) return;
   return grandfathered === undefined
     ? `${file}: ${lines} code lines exceeds the ${ceiling} ceiling — split cohesive helpers into a sibling module.`
     : `${file}: ${lines} code lines exceeds its grandfathered ${grandfathered} — it grew. Shrink it, don't raise the baseline.`;
 };
 
 export const baselineWarning = ({ ceiling, file, grandfathered, lines }) => {
-  if (grandfathered === undefined) return undefined;
+  if (grandfathered === undefined) return;
   if (lines <= ceiling) {
     return `${file}: now ${lines} (≤ ${ceiling}) — remove its baseline entry with \`--write\`.`;
   }
   if (lines < grandfathered) {
     return `${file}: shrank to ${lines} (baseline ${grandfathered}) — ratchet down with \`--write\`.`;
   }
-  return undefined;
+  return;
 };
 
 export const baselineFor = ({ ceiling, measured }) =>

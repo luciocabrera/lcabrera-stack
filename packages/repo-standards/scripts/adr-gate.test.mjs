@@ -11,12 +11,12 @@
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
+  editIn,
   HOME,
   LEGACY_FILE,
+  makeAdrRepo,
   RECORD,
   RECORD_TEXT,
-  editIn,
-  makeAdrRepo,
   removeAdrRepos,
   runGate,
   writeIn,

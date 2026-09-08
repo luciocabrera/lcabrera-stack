@@ -10,7 +10,7 @@ import {
   validatePrTitle,
 } from './commit-convention.mjs';
 
-const workspaces = new Set(['ui', 'server', 'admin', 'api']);
+const workspaces = new Set(['admin', 'api', 'server', 'ui']);
 const errorsOf = (result) => result.errors;
 
 describe('parseCommitHeader', () => {
@@ -124,12 +124,12 @@ describe('validatePrTitle', () => {
 });
 
 const prSection = {
-  what: '## What\n\nDid a thing.',
-  why: '## Why\n\nIt was broken.',
-  verification: '## Verification\n\nRan the gate.',
-  impact: '## Impact Analysis\n\nNone.',
   coverage: '## Test Coverage\n\nNone.',
   documentation: '## Documentation Updates\n\nNone.',
+  impact: '## Impact Analysis\n\nNone.',
+  verification: '## Verification\n\nRan the gate.',
+  what: '## What\n\nDid a thing.',
+  why: '## Why\n\nIt was broken.',
 };
 const fullPrBody = (overrides = {}) =>
   Object.entries({ ...prSection, ...overrides })
@@ -282,12 +282,12 @@ const DEPENDENCIES_BLOCK = [
 ].join('\n');
 
 const issueSection = {
-  problem: '## 1. Problem Statement\n\nIt is broken.',
-  objective: '## 2. Objective / Desired Outcome\n\nNot broken.',
-  context: '## 3. Context & Background\n\nSince #12.',
-  scope: '## 5. Scope Definition\n\nIn: x. Out: y.',
   acceptance: '## 6. Acceptance Criteria\n\n- [ ] Fixed',
+  context: '## 3. Context & Background\n\nSince #12.',
+  objective: '## 2. Objective / Desired Outcome\n\nNot broken.',
   planning: `## 9. Planning Metadata\n\n${DEPENDENCIES_BLOCK}`,
+  problem: '## 1. Problem Statement\n\nIt is broken.',
+  scope: '## 5. Scope Definition\n\nIn: x. Out: y.',
 };
 const fullIssueBody = (overrides = {}) =>
   Object.entries({ ...issueSection, ...overrides })

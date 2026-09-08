@@ -76,7 +76,7 @@ const fail = (message) => {
 };
 
 const render = ({ id, line, message, normalizedFilePath, rule }) => {
-  const [repoPath] = (id ?? '').split('::');
+  const [repoPath] = (id ?? '').split('::', 1);
   return `  ${repoPath || normalizedFilePath}:${line}  ${rule}\n      ${message}`;
 };
 

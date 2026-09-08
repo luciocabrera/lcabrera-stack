@@ -193,7 +193,7 @@ const TOOLS = ['biome', 'eslint', 'oxlint'];
 const parseOnlyArgument = () => {
   const argument = process.argv.find((entry) => entry.startsWith('--only='));
   if (argument === undefined) {
-    return undefined;
+    return;
   }
   const only = argument.slice('--only='.length);
   if (!TOOLS.includes(only)) {

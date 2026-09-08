@@ -3,13 +3,13 @@ import { describe, expect, it } from 'vite-plus/test';
 import { gateClosure, localModuleClosure } from './review-gate-reconcile.mjs';
 
 const FILES = {
+  'packages/kit/shared.mjs': 'export const shared = 1;\n',
+  'scripts/driver.mjs': "import { run } from './lib/driver-only.mjs';\n",
   'scripts/gate.mjs':
     "import { a } from './lib/a.mjs';\nimport('./lib/b.mjs');\nimport { x } from 'node:fs';\n",
   'scripts/lib/a.mjs':
     "import { shared } from '../../packages/kit/shared.mjs';\n",
   'scripts/lib/b.mjs': "export { a } from './a.mjs';\n",
-  'packages/kit/shared.mjs': 'export const shared = 1;\n',
-  'scripts/driver.mjs': "import { run } from './lib/driver-only.mjs';\n",
   'scripts/lib/driver-only.mjs': 'export const run = () => {};\n',
 };
 

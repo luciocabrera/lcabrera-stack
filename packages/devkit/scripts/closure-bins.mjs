@@ -18,7 +18,7 @@ const BIN_DIRECTORY =
 const VARIABLE_REFERENCE = /\$\{?([A-Za-z_]\w*)\}?\/([\w.-]+)/g;
 
 const bindingIn = (line) => {
-  const bound = BIN_DIRECTORY.exec(line.split('#')[0] ?? '')?.[1];
+  const bound = BIN_DIRECTORY.exec(line.split('#', 1)[0] ?? '')?.[1];
   return bound === undefined ? [] : [bound];
 };
 

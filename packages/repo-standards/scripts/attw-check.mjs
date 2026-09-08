@@ -1,3 +1,4 @@
+import { checkPackage, Package } from '@arethetypeswrong/core';
 /**
  * Runs Are The Types Wrong? over a built public package
  * (verify-attw.mjs).
@@ -16,8 +17,6 @@
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
-
-import { checkPackage, Package } from '@arethetypeswrong/core';
 
 const RELEVANT_RESOLUTION_KINDS = new Set(['bundler', 'node16-esm']);
 

@@ -33,12 +33,12 @@ import process from 'node:process';
 
 import { errorMessage } from './error-message.mjs';
 import { fetchPullRequestThreads } from './pr-threads-api.mjs';
+import { publishGateStatus, resolveGateTarget } from './review-gate-status.mjs';
 import {
   decideThreadStatus,
   STATUS_CONTEXT,
   summarizeThreads,
 } from './review-threads.mjs';
-import { publishGateStatus, resolveGateTarget } from './review-gate-status.mjs';
 
 const USAGE =
   'usage: repo-verify-review-threads --pr <number> ' +

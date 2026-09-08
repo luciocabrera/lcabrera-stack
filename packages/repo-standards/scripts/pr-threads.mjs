@@ -34,8 +34,8 @@ import { flagValue, parsePullNumber, parseThreadId } from './cli-input.mjs';
 import { errorMessage } from './error-message.mjs';
 import { runGh } from './gh-exec.mjs';
 import { fetchPullRequestThreads } from './pr-threads-api.mjs';
-import { formatThreads, summarizeThreads } from './review-threads.mjs';
 import { resolvePullNumber, resolveRepository } from './review-gate-status.mjs';
+import { formatThreads, summarizeThreads } from './review-threads.mjs';
 
 const pullForCurrentBranch = () => {
   try {
@@ -43,7 +43,7 @@ const pullForCurrentBranch = () => {
       runGh(['pr', 'view', '--json', 'number', '--jq', '.number']),
     );
   } catch {
-    return undefined;
+    return;
   }
 };
 

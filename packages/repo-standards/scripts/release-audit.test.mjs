@@ -195,8 +195,8 @@ describe('tagsByVersion', () => {
       tagsByVersion({ latest: '0.1.1', next: '0.1.1', old: '0.1.0' }),
     ).toEqual(
       new Map([
-        ['0.1.1', ['latest', 'next']],
         ['0.1.0', ['old']],
+        ['0.1.1', ['latest', 'next']],
       ]),
     );
   });

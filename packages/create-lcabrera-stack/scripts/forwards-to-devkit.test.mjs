@@ -17,7 +17,6 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { afterEach, describe, expect, test } from 'vite-plus/test';
 
 const BIN = join(

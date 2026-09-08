@@ -112,7 +112,7 @@ const declaredEntries = (inline, following) => {
 const declarationFor = ({ content, key }) => {
   const lines = frontmatterLines(content);
   const index = lines.findIndex((line) => key.test(line));
-  if (index === -1) return undefined;
+  if (index === -1) return;
   const [declared = '', ...following] = significantLines(lines.slice(index));
   const entries = declaredEntries(declared.replace(key, '').trim(), following);
   return entries === undefined ? undefined : { entries, line: index + 2 };

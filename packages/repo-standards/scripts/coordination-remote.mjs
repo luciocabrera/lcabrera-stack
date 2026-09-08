@@ -56,16 +56,16 @@ const taskPathsAt = ({ cwd, git, ref }) => {
     .filter((path) => path.endsWith('.md') && !path.includes('/_'));
 };
 
-const claimsOnBranch = ({ cwd, git, branch, sha }) => {
+const claimsOnBranch = ({ branch, cwd, git, sha }) => {
   const ref = `refs/remotes/origin/${branch}`;
   const local = git({ args: ['rev-parse', '--verify', '--quiet', ref], cwd });
   if (local === undefined || local !== sha) {
-    return undefined;
+    return;
   }
   return taskPathsAt({ cwd, git, ref })
     .map((path) => ({
-      path,
       body: git({ args: ['show', `${ref}:${path}`], cwd }),
+      path,
     }))
     .filter(({ body }) => body !== undefined)
     .map(({ body, path }) => {

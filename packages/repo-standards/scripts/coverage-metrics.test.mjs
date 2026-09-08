@@ -30,7 +30,7 @@ describe('normaliseMetric', () => {
       undefined,
       {},
       { pct: null },
-      { pct: Number.NaN, total: 0 },
+      { pct: NaN, total: 0 },
       { covered: 1, pct: 'Unknown', total: 2 },
     ]) {
       expect(typeof normaliseMetric(metric).pct).toBe('number');

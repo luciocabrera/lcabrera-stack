@@ -113,13 +113,13 @@ export const classifyAuditedVersion = ({ deprecated, problems, tags }) => {
 };
 
 export const auditVersion = ({ manifest, shipsSource, tags, version }) => {
-  const deprecated = manifest.deprecated !== undefined;
+  const isDeprecated = manifest.deprecated !== undefined;
   const problems = manifestProblems({ manifest, shipsSource });
 
   return {
-    deprecated,
+    deprecated: isDeprecated,
     problems,
-    state: classifyAuditedVersion({ deprecated, problems, tags }),
+    state: classifyAuditedVersion({ deprecated: isDeprecated, problems, tags }),
     tags,
     version,
   };

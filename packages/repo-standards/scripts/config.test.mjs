@@ -1,14 +1,13 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
   CONFIG_FILE_NAME,
+  DEFAULT_ADR_COMMANDS,
   DEFAULT_CONVENTIONS,
   DEFAULT_PUBLISHING,
-  DEFAULT_ADR_COMMANDS,
   DEFAULT_REGISTERS,
   readCoordinationPaths,
   resolveConventions,
@@ -207,7 +206,7 @@ describe('containment of the configured locations', () => {
 
   it('trims a padded value and falls back on a blank one', () => {
     expect(tasksDir(' ops/claims ')).toBe('ops/claims');
-    expect(tasksDir('   ')).toBe(DEFAULT_REGISTERS.coordinationTasksDir);
+    expect(tasksDir(' '.repeat(3))).toBe(DEFAULT_REGISTERS.coordinationTasksDir);
   });
 });
 
@@ -299,7 +298,7 @@ describe('resolvePublishing', () => {
       publishing({ publishing: { publicPackageDirs: ['a/../../etc'] } }),
     ).toThrow(/must stay inside the repository/);
     expect(() =>
-      publishing({ publishing: { workspaceDirs: ['..\\..\\etc'] } }),
+      publishing({ publishing: { workspaceDirs: [String.raw`..\..\etc`] } }),
     ).toThrow(/must stay inside the repository/);
   });
 

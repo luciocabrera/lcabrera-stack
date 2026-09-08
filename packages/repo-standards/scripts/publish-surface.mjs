@@ -29,7 +29,10 @@ export const toBuiltPaths = (sourceTarget) => {
   const built = sourceTarget
     .replace(/^\.\/src\//, './dist/')
     .replace(/\.(?:tsx?|mts|mjs|js)$/, '');
-  return { types: `${built}.d.mts`, default: `${built}.mjs` };
+  return Object.fromEntries([
+    ['types', `${built}.d.mts`],
+    ['default', `${built}.mjs`],
+  ]);
 };
 
 export const diffSubpaths = ({ published, source }) => ({

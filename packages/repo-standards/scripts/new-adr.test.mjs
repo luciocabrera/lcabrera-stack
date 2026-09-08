@@ -24,7 +24,6 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 const BIN = join(dirname(fileURLToPath(import.meta.url)), 'new-adr.mjs');

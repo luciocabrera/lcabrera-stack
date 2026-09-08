@@ -26,8 +26,8 @@ const KIND_LABELS = {
 
 const normalizeSignature = (text) =>
   text
-    .replace(/import\("[^"]*"\)\./g, '')
-    .replace(/\s+/g, ' ')
+    .replaceAll(/import\("[^"]*"\)\./g, '')
+    .replaceAll(/\s+/g, ' ')
     .trim();
 
 const rawSignatureFor = (declaration) => {

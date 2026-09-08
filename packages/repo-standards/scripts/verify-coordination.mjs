@@ -77,17 +77,17 @@ import {
   checkoutIsolationFinding,
   readCheckoutFacts,
 } from './checkout-isolation.mjs';
+import { readConventions, readCoordinationPaths } from './config.mjs';
 import { renderBoard } from './coordination-board.mjs';
-import { branchSlug, NO_BRANCH, NO_PR } from './coordination-parse.mjs';
-import { mergedTaskDriftWarnings } from './coordination-reconcile.mjs';
 import { overlapWarnings } from './coordination-overlap.mjs';
+import { branchSlug, NO_BRANCH, NO_PR } from './coordination-parse.mjs';
 import { readEntries } from './coordination-read.mjs';
+import { mergedTaskDriftWarnings } from './coordination-reconcile.mjs';
 import {
   readRemoteClaims,
   withoutLocalDuplicates,
 } from './coordination-remote.mjs';
 import { branchErrors, ISO_DATE, taskErrors } from './coordination-schema.mjs';
-import { readConventions, readCoordinationPaths } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
@@ -158,7 +158,7 @@ const undeclaredSharedWarning = (branch, ids, declared) =>
       `but has no descriptor — add \`branches/${branchSlug(branch)}.md\` or move to independent branches.`
     : undefined;
 
-const orphanBranchWarning = ({ name, data }, byBranch) =>
+const orphanBranchWarning = ({ data, name }, byBranch) =>
   data !== undefined && data.status !== 'done' && !byBranch.has(data.branch)
     ? `${name}: shared branch \`${data.branch}\` has no active task — delete the descriptor or add its tasks.`
     : undefined;
@@ -184,7 +184,7 @@ const checkSharedBranches = (tasks, branches, warnings) => {
 
 const checkStale = (tasks, warnings) => {
   const today = new Date();
-  for (const { name, data } of tasks) {
+  for (const { data, name } of tasks) {
     if (
       data === undefined ||
       data.status === 'done' ||
@@ -206,7 +206,7 @@ const checkStale = (tasks, warnings) => {
 
 const checkGhostTasks = (tasks, warnings) => {
   const today = new Date();
-  for (const { name, data } of tasks) {
+  for (const { data, name } of tasks) {
     if (data === undefined || data.status === 'done') {
       continue;
     }
@@ -258,7 +258,7 @@ const gitRefExists = (branch) => {
 };
 
 const checkTaskBranches = (tasks, warnings) => {
-  for (const { name, data } of tasks) {
+  for (const { data, name } of tasks) {
     const branch = data?.branch;
     if (branch === undefined || NO_BRANCH.has(branch) || gitRefExists(branch)) {
       continue;
@@ -308,9 +308,9 @@ const gatherRemoteClaims = (tasks, warnings) => {
 };
 
 const report = (warnings) => {
-  const underActions = process.env.GITHUB_ACTIONS === 'true';
+  const isUnderActions = process.env.GITHUB_ACTIONS === 'true';
   for (const warning of warnings) {
-    console.error(underActions ? `::warning::${warning}` : `  ⚠ ${warning}`);
+    console.error(isUnderActions ? `::warning::${warning}` : `  ⚠ ${warning}`);
   }
 };
 

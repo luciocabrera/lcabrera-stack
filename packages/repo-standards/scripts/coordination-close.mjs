@@ -16,12 +16,12 @@ const QUOTES = /["']/g;
 
 export const prNumberOf = (value) => {
   if (value === undefined || value === null || Array.isArray(value)) {
-    return undefined;
+    return;
   }
   const text = String(value).replaceAll(QUOTES, '').trim();
   const marker = text.lastIndexOf(PULL_PATH);
   const tail = marker === -1 ? text : text.slice(marker + PULL_PATH.length);
-  const digits = (tail.startsWith('#') ? tail.slice(1) : tail).split('/')[0];
+  const digits = (tail.startsWith('#') ? tail.slice(1) : tail).split('/', 1)[0];
   return DIGITS.test(digits) ? Number(digits) : undefined;
 };
 

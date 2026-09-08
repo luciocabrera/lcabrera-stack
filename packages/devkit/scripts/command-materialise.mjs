@@ -23,10 +23,10 @@ import {
 } from './config.mjs';
 import { readFilesUnder } from './files.mjs';
 import {
-  MANIFEST_FILE,
   isAcknowledged,
   isReported,
   isWritten,
+  MANIFEST_FILE,
   parseManifest,
   serialiseManifest,
 } from './manifest.mjs';

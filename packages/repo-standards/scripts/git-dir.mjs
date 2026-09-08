@@ -29,7 +29,7 @@ const GITDIR_PREFIX = 'gitdir:';
 
 const asExistingDirectory = (path) => {
   if (!existsSync(path)) {
-    return undefined;
+    return;
   }
   return statSync(path).isDirectory() ? path : undefined;
 };
@@ -37,11 +37,11 @@ const asExistingDirectory = (path) => {
 const readGitDirPointer = (gitPath, repoRoot) => {
   const line = readFileSync(gitPath, 'utf8').trim();
   if (!line.startsWith(GITDIR_PREFIX)) {
-    return undefined;
+    return;
   }
   const target = line.slice(GITDIR_PREFIX.length).trim();
   if (target === '') {
-    return undefined;
+    return;
   }
   const base = isAbsolute(target) ? target : join(repoRoot, target);
   return asExistingDirectory(resolve(base));
@@ -51,16 +51,16 @@ export const resolveGitDir = (repoRoot) => {
   const root = resolve(repoRoot);
   const gitPath = join(root, '.git');
   if (!gitPath.startsWith(root + sep)) {
-    return undefined;
+    return;
   }
   if (!existsSync(gitPath)) {
-    return undefined;
+    return;
   }
   try {
     return statSync(gitPath).isDirectory()
       ? gitPath
       : readGitDirPointer(gitPath, root);
   } catch {
-    return undefined;
+    return;
   }
 };

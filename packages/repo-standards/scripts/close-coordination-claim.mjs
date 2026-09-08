@@ -22,10 +22,10 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import { flagValue } from './cli-input.mjs';
+import { readCoordinationPaths } from './config.mjs';
 import { tasksClosedBy } from './coordination-close.mjs';
 import { readEntries } from './coordination-read.mjs';
 import { resolveHostRoot } from './host-root.mjs';
-import { readCoordinationPaths } from './config.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),

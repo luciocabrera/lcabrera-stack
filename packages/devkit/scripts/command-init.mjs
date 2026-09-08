@@ -26,18 +26,18 @@ import {
 } from './config.mjs';
 import {
   declaredDependencies,
+  inferRunner,
   initFailure,
+  initialConfig,
   initRefusal,
   initSummary,
-  inferRunner,
-  initialConfig,
-  recordsDefaultBranch,
-  upgradeKeptCiSetup,
-  upgradeKeptCommands,
   placedHooksPath,
+  recordsDefaultBranch,
   scriptsAfter,
   tasksFor,
   unmetCommandKeys,
+  upgradeKeptCiSetup,
+  upgradeKeptCommands,
 } from './init.mjs';
 import { MANIFEST_FILE } from './manifest.mjs';
 import { readProfileFlag } from './profile-flag.mjs';

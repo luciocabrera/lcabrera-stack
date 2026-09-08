@@ -131,7 +131,7 @@ const buildReport = ({
   });
   const readFrom = transcriptHorizon({ retention, window });
   const today = dayOf(observedAt);
-  const clockOverridden = args.now !== undefined;
+  const isClockOverridden = args.now !== undefined;
   const reachBack = readFrom ?? shiftDay(today, -(retention.days - 1));
   const workingTrees = repositoryWorkingTrees(REPO_ROOT);
   const live = readTranscriptUsage({
@@ -142,7 +142,7 @@ const buildReport = ({
   const stored = readSnapshot({ observedAt, path: snapshotPath });
   const merged = mergeTally(stored.days, live.tally);
   const observation = observationFor({
-    clockOverridden,
+    clockOverridden: isClockOverridden,
     read: live,
     retention,
     stored,
@@ -159,7 +159,7 @@ const buildReport = ({
 
   const transcripts = {
     ...live,
-    clockOverridden,
+    clockOverridden: isClockOverridden,
     observedBackTo: observedBackTo({ observed, to: window.end }),
     reachBack,
     retentionDays: retention.days,

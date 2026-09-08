@@ -11,13 +11,13 @@
 import { dirname, relative, resolve } from 'node:path';
 
 export const SKIPPED_DIRS = new Set([
-  'node_modules',
   '.git',
+  '.react-router',
   '.tmp',
-  'dist',
   'build',
   'coverage',
-  '.react-router',
+  'dist',
+  'node_modules',
   'reports',
 ]);
 
@@ -25,7 +25,7 @@ export const TEMPLATE_SUFFIXES = ['.example', '.sample', '.template'];
 
 export const isEnvFileName = (name) =>
   /^\.env(\..+)?$/.test(name) &&
-  !TEMPLATE_SUFFIXES.some((suffix) => name.endsWith(suffix));
+  TEMPLATE_SUFFIXES.every((suffix) => !name.endsWith(suffix));
 
 export const linkTextFor = (sourceAbs, destinationAbs) =>
   relative(dirname(destinationAbs), sourceAbs);
@@ -35,7 +35,7 @@ export const parseArgs = (argv, cwd) => {
   const candidate = flag === -1 ? undefined : argv[flag + 1];
   const usable =
     candidate !== undefined && !candidate.startsWith('-') ? candidate : cwd;
-  return { target: resolve(usable), dryRun: argv.includes('--dry-run') };
+  return { dryRun: argv.includes('--dry-run'), target: resolve(usable) };
 };
 
 export const summarize = (results, dryRun, destinationLabel) => {

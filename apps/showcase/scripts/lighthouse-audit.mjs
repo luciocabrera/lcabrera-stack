@@ -14,11 +14,10 @@
  * server or the audit failed.
  */
 
+import lighthouse from 'lighthouse';
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-
-import lighthouse from 'lighthouse';
 import { chromium } from 'playwright';
 
 const PORT = 3000;
@@ -27,26 +26,16 @@ const CHROME_DEBUG_PORT = 9222;
 const REPORT_DIR = './lighthouse-reports';
 const SERVER_ENTRY_PATH = 'build/server/index.js';
 const TIMESTAMP = new Date()
-  .toISOString()
-  .replaceAll(':', '-')
-  .replaceAll('.', '-')
+  .toISOString().replaceAll(/[:.]/g, '-')
   .slice(0, -5);
 
 const colors = {
-  reset: '\x1b[0m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-  blue: '\x1b[34m',
+  blue: '\u{1B}[34m',
+  green: '\u{1B}[32m',
+  red: '\u{1B}[31m',
+  reset: '\u{1B}[0m',
+  yellow: '\u{1B}[33m',
 };
-
-function log(message, color = colors.reset) {
-  console.log(`${color}${message}${colors.reset}`);
-}
-
-function logStep(step) {
-  log(`\n📋 ${step}`, colors.blue);
-}
 
 function getErrorMessage(error) {
   if (error instanceof Error) {
@@ -75,32 +64,6 @@ function getScoreColor(score) {
   return colors.red;
 }
 
-async function runProcess(command, args = [], stdio = 'inherit') {
-  return new Promise((resolvePromise, rejectPromise) => {
-    const processHandle = spawn(command, args, {
-      stdio,
-    });
-
-    processHandle.on('error', (error) => {
-      rejectPromise(error);
-    });
-
-    processHandle.on('close', (code) => {
-      if (code === 0) {
-        resolvePromise();
-        return;
-      }
-
-      rejectPromise(new Error(`Command failed with code ${code}`));
-    });
-  });
-}
-
-async function runBuild() {
-  logStep('Building for production...');
-  await runProcess(getLocalBinaryPath('react-router'), ['build']);
-}
-
 async function isServerResponding(url) {
   try {
     const response = await fetch(url);
@@ -110,50 +73,46 @@ async function isServerResponding(url) {
   }
 }
 
-async function waitForServer(url, maxAttempts = 30) {
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    if (await isServerResponding(url)) {
-      log('✓ Server is ready', colors.green);
-      return;
-    }
-
-    await new Promise((resolvePromise) => setTimeout(resolvePromise, 1000));
-  }
-
-  throw new Error('Server failed to start');
+function log(message, color = colors.reset) {
+  console.log(`${color}${message}${colors.reset}`);
 }
 
-async function startProductionServer() {
-  logStep('Starting production server...');
+function logStep(step) {
+  log(`\n📋 ${step}`, colors.blue);
+}
 
-  const serverProcess = spawn(
-    getLocalBinaryPath('react-router-serve'),
-    [SERVER_ENTRY_PATH],
-    {
-      stdio: 'pipe',
-    },
-  );
+async function runAudit() {
+  log('\n🚀 Lighthouse Audit Pipeline', colors.blue);
+  log('=====================================\n');
 
-  serverProcess.stdout?.on('data', (data) => {
-    console.log(`[server] ${data}`);
-  });
-
-  serverProcess.stderr?.on('data', (data) => {
-    console.error(`[server] ${data}`);
-  });
-
-  serverProcess.on('error', (error) => {
-    log(`\n❌ Server process error: ${getErrorMessage(error)}`, colors.red);
-  });
+  await runBuild();
+  const serverProcess = await startProductionServer();
 
   try {
-    await waitForServer(AUDIT_URL, 60);
-  } catch (error) {
-    serverProcess.kill();
-    throw error;
-  }
+    const scores = await runLighthouse(AUDIT_URL);
 
-  return serverProcess;
+    logStep('Audit Complete!');
+    log(
+      `\nFull HTML report: ${REPORT_DIR}/lighthouse-${TIMESTAMP}.html\n`,
+      colors.blue,
+    );
+
+    log('Summary:', colors.blue);
+    const average =
+      Object.values(scores.categories).reduce((sum, category) => {
+        return sum + category.score;
+      }, 0) / Object.keys(scores.categories).length;
+
+    log(`  Average score: ${Math.round(average * 100)}/100\n`);
+  } finally {
+    logStep('Stopping server...');
+    serverProcess.kill();
+  }
+}
+
+async function runBuild() {
+  logStep('Building for production...');
+  await runProcess(getLocalBinaryPath('react-router'), ['build']);
 }
 
 async function runLighthouse(url) {
@@ -167,8 +126,8 @@ async function runLighthouse(url) {
   try {
     const options = {
       logLevel: 'info',
-      output: ['json', 'html'],
       onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
+      output: ['json', 'html'],
       port: CHROME_DEBUG_PORT,
     };
 
@@ -206,33 +165,71 @@ async function runLighthouse(url) {
   }
 }
 
-async function runAudit() {
-  log('\n🚀 Lighthouse Audit Pipeline', colors.blue);
-  log('=====================================\n');
+async function runProcess(command, args = [], stdio = 'inherit') {
+  return new Promise((resolvePromise, rejectPromise) => {
+    const processHandle = spawn(command, args, {
+      stdio,
+    });
 
-  await runBuild();
-  const serverProcess = await startProductionServer();
+    processHandle.on('error', (error) => {
+      rejectPromise(error);
+    });
+
+    processHandle.on('close', (code) => {
+      if (code === 0) {
+        resolvePromise();
+        return;
+      }
+
+      rejectPromise(new Error(`Command failed with code ${code}`));
+    });
+  });
+}
+
+async function startProductionServer() {
+  logStep('Starting production server...');
+
+  const serverProcess = spawn(
+    getLocalBinaryPath('react-router-serve'),
+    [SERVER_ENTRY_PATH],
+    {
+      stdio: 'pipe',
+    },
+  );
+
+  serverProcess.stdout?.on('data', (data) => {
+    console.log(`[server] ${data}`);
+  });
+
+  serverProcess.stderr?.on('data', (data) => {
+    console.error(`[server] ${data}`);
+  });
+
+  serverProcess.on('error', (error) => {
+    log(`\n❌ Server process error: ${getErrorMessage(error)}`, colors.red);
+  });
 
   try {
-    const scores = await runLighthouse(AUDIT_URL);
-
-    logStep('Audit Complete!');
-    log(
-      `\nFull HTML report: ${REPORT_DIR}/lighthouse-${TIMESTAMP}.html\n`,
-      colors.blue,
-    );
-
-    log('Summary:', colors.blue);
-    const average =
-      Object.values(scores.categories).reduce((sum, category) => {
-        return sum + category.score;
-      }, 0) / Object.keys(scores.categories).length;
-
-    log(`  Average score: ${Math.round(average * 100)}/100\n`);
-  } finally {
-    logStep('Stopping server...');
+    await waitForServer(AUDIT_URL, 60);
+  } catch (error) {
     serverProcess.kill();
+    throw error;
   }
+
+  return serverProcess;
+}
+
+async function waitForServer(url, maxAttempts = 30) {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    if (await isServerResponding(url)) {
+      log('✓ Server is ready', colors.green);
+      return;
+    }
+
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 1000));
+  }
+
+  throw new Error('Server failed to start');
 }
 
 try {

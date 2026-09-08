@@ -82,7 +82,7 @@ export const withAccepted = (accepted, { hash, path, reason }) => ({
 
 const valueAfter = (argv, flag) => {
   const at = argv.indexOf(flag);
-  if (at === -1) return undefined;
+  if (at === -1) return;
   const value = argv[at + 1];
   return value === undefined || value.startsWith('--') ? undefined : value;
 };

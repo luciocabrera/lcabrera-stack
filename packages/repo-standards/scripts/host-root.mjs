@@ -24,7 +24,7 @@ export const HOST_ROOT_ENV = 'REPO_STANDARDS_HOST_ROOT';
 export const rootFromInstallPath = (moduleDirectory) => {
   const segments = moduleDirectory.split(sep);
   const index = segments.indexOf(NODE_MODULES);
-  if (index <= 0) return undefined;
+  if (index <= 0) return;
   const root = segments.slice(0, index).join(sep);
   return root.length > 0 ? root : undefined;
 };

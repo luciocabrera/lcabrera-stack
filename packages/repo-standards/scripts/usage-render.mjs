@@ -258,7 +258,7 @@ const observationSentence = (transcripts) => {
     transcripts.retentionSeenSince === undefined ||
     transcripts.retentionSeenSince <= transcripts.reachBack
   ) {
-    return undefined;
+    return;
   }
   return `This run claims observation only from ${transcripts.retentionSeenSince}, the day the snapshot first recorded the current retention of ${transcripts.retentionDays} day(s); an earlier day fell under a setting this report never read, so this run does not vouch for it.`;
 };

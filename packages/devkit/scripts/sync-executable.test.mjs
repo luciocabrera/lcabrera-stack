@@ -19,7 +19,6 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { describe, expect, test, vi } from 'vite-plus/test';
 
 import { runDoctor, runSync } from './command-sync.mjs';
@@ -49,8 +48,8 @@ const scratchRepo = (commands = REPO_COMMANDS) => {
 };
 
 const silenced = () => {
-  const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-  const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  const error = vi.spyOn(console, 'error').mockImplementation(() => {});
   return {
     log,
     restore: () => {
@@ -65,7 +64,7 @@ const plan = (assets, { manifest = { files: {} }, onDiskHash } = {}) =>
     assets,
     config: { ...DEFAULT_CONFIG, profile: 'repo' },
     manifest,
-    onDiskHash: onDiskHash ?? (() => undefined),
+    onDiskHash: onDiskHash ?? (() => {}),
   });
 
 describe('planSync carries the asset mode', () => {

@@ -90,7 +90,7 @@ const extractScriptPaths = (markdown) => {
  * @param {string} link
  * @returns {string}
  */
-const withoutFragment = (link) => link.split('#')[0]?.split('?')[0] ?? '';
+const withoutFragment = (link) => link.split('#', 1)[0]?.split('?', 1)[0] ?? '';
 
 /**
  * @param {{ fromFile: string, reference: string, repoRoot: string }} args

@@ -32,8 +32,10 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { errorMessage } from './error-message.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 import { isBuiltPublicPackage } from './publish-surface.mjs';
 import { readPublishableManifests } from './publishable-workspaces.mjs';
+import { fetchPackument, registryOrigin } from './registry-packument.mjs';
 import {
   auditPackument,
   readNothing,
@@ -41,8 +43,6 @@ import {
   resolvedNothing,
   selectBroken,
 } from './release-audit.mjs';
-import { fetchPackument, registryOrigin } from './registry-packument.mjs';
-import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),

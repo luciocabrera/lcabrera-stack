@@ -15,7 +15,7 @@
  */
 import { globsOverlap } from './coordination-parse.mjs';
 
-export const NO_BRANCH = new Set(['(uncommitted)', '(none)', '(worktree)']);
+export const NO_BRANCH = new Set(['(none)', '(uncommitted)', '(worktree)']);
 
 const isLive = ({ data }) => data !== undefined && data.status !== 'done';
 

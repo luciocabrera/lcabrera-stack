@@ -67,7 +67,7 @@ const INVOKERS = new Set([
 
 const lineOf = (content, index) => content.slice(0, index).split('\n').length;
 
-const linkTargetOf = (raw) => raw.trim().split(/\s+/)[0] ?? '';
+const linkTargetOf = (raw) => raw.trim().split(/\s+/, 1)[0] ?? '';
 
 const parseLinkTargets = (line) => {
   const targets = [];
@@ -137,7 +137,7 @@ export const shellCommandWords = (lines) =>
 
 export const extractCommands = (content) => {
   const inline = inlineCodeSpans(content)
-    .map((span) => ({ line: span.line, word: span.text.split(/\s+/)[0] ?? '' }))
+    .map((span) => ({ line: span.line, word: span.text.split(/\s+/, 1)[0] ?? '' }))
     .filter((entry) => INVOKERS.has(entry.word));
   return [...shellCommandWords(shellBlockLines(content)), ...inline];
 };
@@ -166,7 +166,7 @@ export const shellPathTokens = (lines) =>
     .flatMap(({ line, text }) =>
       shellSegments(text)
         .flatMap((segment) => segment.split(/\s+/).slice(1))
-        .map((token) => ({ line, token: token.replace(/^["']|["']$/g, '') })),
+        .map((token) => ({ line, token: token.replaceAll(/^["']|["']$/g, '') })),
     )
     .filter((entry) => isPathToken(entry.token));
 
@@ -186,24 +186,24 @@ export const extractPathTokens = (content) => {
 
 const MARKDOWN_LINK_LABEL = /\[[^[\]]*\]\(/g;
 
-const OPENING_EDGES = new Set(['(', '[', '{', '<', '"', "'", '`', '*', '_']);
+const OPENING_EDGES = new Set(['"', "'", '(', '*', '<', '[', '_', '`', '{']);
 
 const CLOSING_EDGES = new Set([
-  ')',
-  ']',
-  '}',
-  '>',
+  '!',
   '"',
   "'",
-  '`',
+  ')',
   '*',
-  '_',
   ',',
   '.',
   ':',
   ';',
-  '!',
+  '>',
   '?',
+  ']',
+  '_',
+  '`',
+  '}',
 ]);
 
 const withoutProseEdges = (token) => {
@@ -220,13 +220,13 @@ const withoutProseEdges = (token) => {
 
 const proseLines = (content) => {
   const collected = [];
-  let fenced = false;
+  let isFenced = false;
   for (const [index, line] of content.split('\n').entries()) {
     if (FENCE_PATTERN.test(line)) {
-      fenced = !fenced;
+      isFenced = !isFenced;
       continue;
     }
-    if (!fenced) collected.push({ line: index + 1, text: line });
+    if (!isFenced) collected.push({ line: index + 1, text: line });
   }
   return collected;
 };

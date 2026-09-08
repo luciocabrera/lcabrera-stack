@@ -29,7 +29,7 @@ const QUEUE_PREFIX = 'refs/heads/gh-readonly-queue/';
 
 export const pullNumberFromQueueRef = (ref) => {
   if (typeof ref !== 'string' || !ref.startsWith(QUEUE_PREFIX)) {
-    return undefined;
+    return;
   }
   const match = QUEUE_ENTRY.exec(ref);
   return match === null ? undefined : Number(match[1]);

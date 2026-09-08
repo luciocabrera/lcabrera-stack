@@ -30,7 +30,6 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { errorMessage } from './error-message.mjs';
 import {
   collectBumpedPackages,
   missingChangesets,
@@ -48,6 +47,7 @@ import {
 import { extractSurface } from './api-surface-extract.mjs';
 import { parseSurface, renderSurface } from './api-surface-render.mjs';
 import { CONFIG_FILE_NAME, readConventions } from './config.mjs';
+import { errorMessage } from './error-message.mjs';
 import { runGit } from './git-exec.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 

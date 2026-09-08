@@ -43,7 +43,9 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { readPublishing } from './config.mjs';
 import { errorMessage } from './error-message.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 import { packAndRead } from './publish-pack.mjs';
 import { runConsumerSmoke } from './publish-smoke.mjs';
 import {
@@ -54,8 +56,6 @@ import {
   packedSurfaceProblems,
   toBuiltPaths,
 } from './publish-surface.mjs';
-import { readPublishing } from './config.mjs';
-import { resolveHostRoot } from './host-root.mjs';
 import { releasePackerProblems } from './release-packer.mjs';
 
 const REPO_ROOT = resolveHostRoot({

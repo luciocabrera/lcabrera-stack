@@ -52,13 +52,13 @@ const parsePullRequests = (raw) => {
 };
 
 const FAILING = new Set([
-  'FAILURE',
-  'ERROR',
-  'TIMED_OUT',
-  'CANCELLED',
   'ACTION_REQUIRED',
+  'CANCELLED',
+  'ERROR',
+  'FAILURE',
+  'TIMED_OUT',
 ]);
-const DONE = new Set(['SUCCESS', 'NEUTRAL', 'SKIPPED']);
+const DONE = new Set(['NEUTRAL', 'SKIPPED', 'SUCCESS']);
 
 const checksGlyph = (rollup) => {
   if (!Array.isArray(rollup) || rollup.length === 0) {

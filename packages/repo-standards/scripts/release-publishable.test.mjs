@@ -155,7 +155,7 @@ describe('renderSummary', () => {
     const names = summary
       .split('\n')
       .filter((line) => line.startsWith('| `'))
-      .map((line) => line.split(' ')[1]);
+      .map((line) => line.split(' ', 2)[1]);
 
     expect(names).toStrictEqual([
       '`@lcabrera/utils`',

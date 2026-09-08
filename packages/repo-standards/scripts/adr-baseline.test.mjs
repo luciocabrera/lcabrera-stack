@@ -8,10 +8,10 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  EMPTY_BASELINE,
   adoptedBaseline,
-  baselineFindings,
   baselinedFiles,
+  baselineFindings,
+  EMPTY_BASELINE,
   hasGrown,
   prunedBaseline,
   readableBaseline,

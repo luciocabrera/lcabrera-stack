@@ -59,7 +59,7 @@ export const UNPROBED_PLUGINS = {
     'TypeScript error first, so a probe passes whether or not the plugin loaded',
 };
 
-export const probeFilename = ({ plugin, ext }) =>
+export const probeFilename = ({ ext, plugin }) =>
   `${plugin}.probe.${ext ?? 'ts'}`;
 
 export const pluginsWithoutCoverage = (plugins) => {
@@ -120,11 +120,11 @@ export const workspaceRosters = (overrides) => {
   return blocks
     .filter(
       (block, index) =>
-        !blocks.some(
+        blocks.every(
           (other, otherIndex) =>
-            otherIndex !== index &&
+            !(otherIndex !== index &&
             other.length > block.length &&
-            block.every((workspace) => other.includes(workspace)),
+            block.every((workspace) => other.includes(workspace))),
         ),
     )
     .map((block) => block.map((workspace) => `${workspace}/**`));

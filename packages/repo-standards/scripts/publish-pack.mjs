@@ -1,3 +1,4 @@
+import { createPackageFromTarballData } from '@arethetypeswrong/core';
 /**
  * Produces the tarball a package would publish, and reads it back
  * (verify-publish-surface.mjs).
@@ -16,8 +17,6 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { delimiter, join } from 'node:path';
-
-import { createPackageFromTarballData } from '@arethetypeswrong/core';
 
 const pnpmBinary = () =>
   (process.env.PATH ?? '')
@@ -57,7 +56,7 @@ const readPackedPackage = (tarballPath) => {
   const root = `/node_modules/${packed.packageName}/`;
   return {
     files: packed.listFiles().map((path) => path.slice(root.length)),
-    manifest: JSON.parse(packed.readFile(`${root}package.json`)),
+    manifest: JSON.parse(packed.readFile(`${root}package.json`, 'utf8')),
     name: packed.packageName,
     readFile: (relativePath) => packed.readFile(`${root}${relativePath}`),
   };

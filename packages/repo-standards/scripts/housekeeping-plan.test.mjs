@@ -193,24 +193,24 @@ describe('buildPlan — the safety buckets end to end', () => {
     ]),
     stashes: ['stash@{0}: WIP on main: something'],
     uniqueByBranch: new Map([
-      ['feat/merged', 2],
       ['feat/cruft', 0],
-      ['feat/unmerged-work', 4],
+      ['feat/merged', 2],
       ['feat/open', 1],
+      ['feat/unmerged-work', 4],
     ]),
     worktrees: [
-      { branch: 'main', isPrimary: true, path: '/repo', dirty: false },
+      { branch: 'main', dirty: false, isPrimary: true, path: '/repo' },
       {
         branch: 'feat/merged',
+        dirty: false,
         isPrimary: false,
         path: '/wt-merged',
-        dirty: false,
       },
       {
         branch: 'feat/unmerged-work',
+        dirty: true,
         isPrimary: false,
         path: '/wt-dirty',
-        dirty: true,
       },
     ],
   });

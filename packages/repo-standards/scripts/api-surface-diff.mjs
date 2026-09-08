@@ -24,12 +24,12 @@ const diffSubpath = ({ base, next, subpath }) => {
   ].sort((left, right) => left.localeCompare(right));
 
   return names.flatMap((name) => {
-    const had = Object.hasOwn(before, name);
-    const has = Object.hasOwn(after, name);
-    if (had && !has) {
+    const isHad = Object.hasOwn(before, name);
+    const isHas = Object.hasOwn(after, name);
+    if (isHad && !isHas) {
       return [{ kind: 'removed', name, subpath }];
     }
-    if (!had && has) {
+    if (!isHad && isHas) {
       return [{ kind: 'added', name, signature: after[name], subpath }];
     }
     if (before[name] !== after[name]) {

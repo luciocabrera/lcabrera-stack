@@ -178,7 +178,7 @@ describe('nextManifest', () => {
 describe('serialiseManifest', () => {
   test('orders paths so a re-sync produces no incidental diff', () => {
     const raw = serialiseManifest({
-      files: { 'b.md': A, 'a.md': B },
+      files: { 'a.md': B, 'b.md': A },
       packageVersion: '1.0.0',
       version: 1,
     });

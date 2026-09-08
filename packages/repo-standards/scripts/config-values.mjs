@@ -41,7 +41,7 @@ const isRooted = (value) => {
   return posix.isAbsolute(withSlashes) || DRIVE_OR_UNC.test(withSlashes);
 };
 
-const leavesRoot = (candidate) => candidate.split('/')[0] === '..';
+const leavesRoot = (candidate) => candidate.split('/', 1)[0] === '..';
 
 export const repoRelative = (value, fallback, key) => {
   const raw = readableString(value, fallback);
@@ -115,7 +115,7 @@ const compiled = (source) => {
   try {
     return new RegExp(source, 'u');
   } catch {
-    return undefined;
+    return;
   }
 };
 

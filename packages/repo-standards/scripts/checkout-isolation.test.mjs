@@ -1,9 +1,6 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
-import { runGit } from './git-exec.mjs';
-
 /**
  * The failure this guards is a feature branch checked out in the SHARED clone,
  * which moves HEAD under every other agent working there. It must fire on that
@@ -21,6 +18,7 @@ import {
   checkoutIsolationFinding,
   readCheckoutFacts,
 } from './checkout-isolation.mjs';
+import { runGit } from './git-exec.mjs';
 
 const facts = (overrides) => ({
   branch: 'feat/123-something',

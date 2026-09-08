@@ -4,41 +4,41 @@ import { resolveAffected, resolveTestGroups } from './affected-tests.mjs';
 
 const GRAPH = [
   {
-    name: 'vite-configs',
-    kind: 'pkg',
-    dir: 'packages/vite-configs',
-    pkgName: '@lcabrera/vite-config',
     deps: new Set(),
+    dir: 'packages/vite-configs',
+    kind: 'pkg',
+    name: 'vite-configs',
+    pkgName: '@lcabrera/vite-config',
   },
   {
-    name: 'utils',
-    kind: 'pkg',
-    dir: 'packages/utils',
-    pkgName: '@lcabrera/utils',
     deps: new Set(['@lcabrera/vite-config']),
-  },
-  {
-    name: 'ui',
+    dir: 'packages/utils',
     kind: 'pkg',
-    dir: 'packages/ui',
-    pkgName: '@lcabrera/ui',
-    deps: new Set(['@lcabrera/vite-config', '@lcabrera/utils']),
+    name: 'utils',
+    pkgName: '@lcabrera/utils',
   },
   {
-    name: 'showcase',
-    kind: 'app',
+    deps: new Set(['@lcabrera/utils', '@lcabrera/vite-config']),
+    dir: 'packages/ui',
+    kind: 'pkg',
+    name: 'ui',
+    pkgName: '@lcabrera/ui',
+  },
+  {
+    deps: new Set(['@lcabrera/ui', '@lcabrera/vite-config']),
     dir: 'apps/showcase',
+    kind: 'app',
+    name: 'showcase',
     pkgName: 'showcase',
-    deps: new Set(['@lcabrera/vite-config', '@lcabrera/ui']),
   },
 ];
 
 const FIXTURE_GLOBAL_PACKAGES = ['@lcabrera/vite-config'];
 
 const FIXTURE_LINT_ONLY_PATTERNS = [
-  '^packages/vite-configs/eslint\\.',
-  '^packages/vite-configs/vite\\.(lint|fmt)\\.shared\\.config\\.ts$',
-  '(^|/)eslint\\.config\\.mjs$',
+  String.raw`^packages/vite-configs/eslint\.`,
+  String.raw`^packages/vite-configs/vite\.(lint|fmt)\.shared\.config\.ts$`,
+  String.raw`(^|/)eslint\.config\.mjs$`,
 ];
 
 const affected = (files) =>
@@ -78,7 +78,7 @@ describe('resolveAffected — lint-only carve-out', () => {
     ]);
     expect(result.mode).toBe('scoped');
     expect(new Set(result.packages)).toEqual(
-      new Set(['@lcabrera/utils', '@lcabrera/ui', 'showcase']),
+      new Set(['@lcabrera/ui', '@lcabrera/utils', 'showcase']),
     );
   });
 });
@@ -108,7 +108,7 @@ describe('resolveAffected — ordinary scoping is unchanged', () => {
     const result = affected(['packages/utils/src/foo.ts']);
     expect(result.mode).toBe('scoped');
     expect(new Set(result.packages)).toEqual(
-      new Set(['@lcabrera/utils', '@lcabrera/ui', 'showcase']),
+      new Set(['@lcabrera/ui', '@lcabrera/utils', 'showcase']),
     );
   });
 
