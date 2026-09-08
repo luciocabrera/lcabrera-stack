@@ -31,7 +31,7 @@ jobs:
           fetch-depth: 1
 
       - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@1b32467adbe183473499fd9d5d372c3ed9641754 # v1.18.0
+        uses: voidzero-dev/setup-vp@49c3e4e92c52e7f8392712a9267bbe71c5ab30e5 # v1.19.0
         with:
           cache: true
           run-install: false
@@ -153,13 +153,16 @@ jobs:
           retention-days: 3
 
       - name: Warn if scores are below thresholds on PR
-        if: github.event_name == 'pull_request' && steps.check_scores.outcome == 'failure'
+        if: github.event_name == 'pull_request' && steps.check_scores.outcome ==
+          'failure'
         run: |
           echo "⚠️ Lighthouse audit results are below thresholds for this PR."
           echo "Review the PR comment and artifact report for details."
 
       - name: Fail if scores are below thresholds
-        if: steps.find_report.outputs.report_found != 'true' || (github.event_name == 'workflow_dispatch' && steps.check_scores.outcome == 'failure')
+        if:
+          steps.find_report.outputs.report_found != 'true' || (github.event_name ==
+          'workflow_dispatch' && steps.check_scores.outcome == 'failure')
         run: |
           if [ "${{ steps.find_report.outputs.report_found }}" != 'true' ]; then
             echo "❌ Lighthouse report was not generated"
