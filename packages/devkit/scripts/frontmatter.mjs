@@ -151,7 +151,7 @@ export const requiredPeers = (content) => {
     const peer = peerFromEntry(entry);
     if (peer.name !== '' && !byName.has(peer.name)) byName.set(peer.name, peer);
   }
-  return [...byName.values()];
+  return byName.values().toArray();
 };
 
 export const requiresDeclarationLine = (content) =>

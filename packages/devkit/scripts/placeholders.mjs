@@ -15,7 +15,7 @@
 const PLACEHOLDER = /\{\{[ \t]*commands\.([a-zA-Z][\w-]*)[ \t]*\}\}/g;
 
 export const requiredCommands = (content) => [
-  ...new Set([...content.matchAll(PLACEHOLDER)].map((match) => match[1])),
+  ...new Set(content.matchAll(PLACEHOLDER).toArray().map((match) => match[1])),
 ];
 
 /**

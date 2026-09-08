@@ -49,7 +49,7 @@ const signatureFor = (declarations) => {
 const extractEntry = (sourceFile) => {
   const exported = sourceFile.getExportedDeclarations();
   return Object.fromEntries(
-    [...exported.entries()]
+    exported.entries().toArray()
       .map(([name, declarations]) => [name, signatureFor(declarations)])
       .toSorted(([left], [right]) => left.localeCompare(right)),
   );

@@ -187,7 +187,7 @@ describe('sectionFindings', () => {
 
   it('does not read a `##` with no title as a section', () => {
     const blank = '## Decision\n\ntext\n\n##   \n\nloose\n';
-    expect([...sectionsOf(blank).keys()]).toEqual(['decision']);
+    expect(sectionsOf(blank).keys().toArray()).toEqual(['decision']);
     expect(sectionsOf(blank).get('decision')).toContain('loose');
   });
 

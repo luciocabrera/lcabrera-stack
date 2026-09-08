@@ -29,8 +29,8 @@ export const RESOLUTION_NOTICE = [
 const pad = (text, width) => text.padEnd(width, ' ');
 
 const tallyRows = (tallies) => {
-  const width = Math.max(...[...tallies.keys()].map((key) => key.length), 0);
-  return [...tallies.entries()]
+  const width = Math.max(...tallies.keys().toArray().map((key) => key.length), 0);
+  return tallies.entries().toArray()
     .toSorted(([a], [b]) => a.localeCompare(b))
     .map(
       ([key, { met, total }]) => `  ${pad(key, width)}  ${met}/${total} met`,

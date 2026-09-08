@@ -134,7 +134,7 @@ export const dedupeById = (claims) => {
       byId.set(claim.data?.id, claim);
     }
   }
-  return [...byId.values()];
+  return byId.values().toArray();
 };
 
 export const withoutLocalDuplicates = ({ localTasks, remoteClaims }) => {

@@ -67,7 +67,7 @@ export const extractCandidates = (markdown, repoRoots) => {
     .map((token) => normaliseToken(token))
     .filter((token) => isRootAnchored(token, repoRoots));
 
-  const linked = [...prose.matchAll(/\]\(([^)\s]{1,512})\)/g)]
+  const linked = prose.matchAll(/\]\(([^)\s]{1,512})\)/g).toArray()
     .map((match) => normaliseToken(match[1]))
     .filter(
       (token) =>

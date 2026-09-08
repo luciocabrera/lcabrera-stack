@@ -113,7 +113,7 @@ const findWorkspaceTaskClaims = (doc) => {
       if (packageName === undefined) {
         return [];
       }
-      const tasks = [...(cells[3] ?? '').matchAll(/`([^`]+)`/g)].map(
+      const tasks = (cells[3] ?? '').matchAll(/`([^`]+)`/g).toArray().map(
         ([, task]) => task,
       );
       return tasks.map((task) => ({ packageName, task }));
@@ -121,7 +121,7 @@ const findWorkspaceTaskClaims = (doc) => {
 };
 
 const findLinks = (doc) =>
-  [...doc.matchAll(/\]\((?!https?:)([^)#]+)(?:#([^)]+))?\)/g)].map(
+  doc.matchAll(/\]\((?!https?:)([^)#]+)(?:#([^)]+))?\)/g).toArray().map(
     ([, path, anchor]) => ({ anchor, path }),
   );
 
@@ -134,7 +134,7 @@ const toAnchor = (heading) =>
 
 const collectAnchors = (markdown) =>
   new Set(
-    [...markdown.matchAll(/^#{2,4}\s+(\S.*)$/gm)].map(([, heading]) =>
+    markdown.matchAll(/^#{2,4}\s+(\S.*)$/gm).toArray().map(([, heading]) =>
       toAnchor(heading),
     ),
   );
@@ -152,7 +152,7 @@ const checkRootScriptsDocumented = (documented, problems) => {
 const checkDocumentedCommandsExist = (documented, inventory, problems) => {
   const everyTask = new Set([
     ...inventory.rootTasks,
-    ...[...inventory.packageTasks.values()].flatMap((tasks) => [...tasks]),
+    ...inventory.packageTasks.values().toArray().flatMap((tasks) => [...tasks]),
   ]);
   for (const task of documented) {
     if (!everyTask.has(task)) {

@@ -37,7 +37,7 @@ const importExportPattern =
   /(?:import|export)\s+(?:type\s+)?(?:\S[^'"\n]*\sfrom\s+)?['"]([^'"\n]+)['"]/g;
 
 const collectStaticSources = (fileText) =>
-  [...fileText.matchAll(importExportPattern)].map((match) => match[1]);
+  fileText.matchAll(importExportPattern).toArray().map((match) => match[1]);
 
 const resolveLocalModuleFilePath = (fromFilePath, source) => {
   const basePath = resolve(dirname(fromFilePath), source);

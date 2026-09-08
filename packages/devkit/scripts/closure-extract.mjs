@@ -120,7 +120,7 @@ const commandWordIn = (segment) => {
 
 const inlineCodeSpans = (content) =>
   content.split('\n').flatMap((line, index) =>
-    [...line.matchAll(INLINE_CODE_PATTERN)].map((match) => ({
+    line.matchAll(INLINE_CODE_PATTERN).toArray().map((match) => ({
       line: index + 1,
       text: match[1].trim(),
     })),
@@ -243,7 +243,7 @@ export const extractProsePathTokens = (content) =>
 
 export const extractImportSpecifiers = (content) =>
   IMPORT_PATTERNS.flatMap((pattern) =>
-    [...content.matchAll(pattern)].map((match) => ({
+    content.matchAll(pattern).toArray().map((match) => ({
       line: lineOf(content, match.index ?? 0),
       specifier: match[1],
     })),

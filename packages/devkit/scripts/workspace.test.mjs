@@ -110,7 +110,7 @@ describe('the tasks name what the blueprint holds', () => {
 
   test('the catalog a dependency names holds that dependency', () => {
     const groups = catalogGroups(read('pnpm-workspace.yaml'));
-    expect([...groups.keys()].length).toBeGreaterThan(0);
+    expect(groups.keys().toArray().length).toBeGreaterThan(0);
     for (const [name, specifier] of Object.entries(WORKSPACE_DEPENDENCIES)) {
       const group = groups.get(specifier.slice('catalog:'.length)) ?? [];
       expect(group.map(([entry]) => entry)).toContain(name);
@@ -146,7 +146,7 @@ describe('the tasks name what the blueprint holds', () => {
 
   test('the blueprint workspace pins the range the catalog declares', () => {
     const ranges = new Map(
-      [...catalogGroups(read('pnpm-workspace.yaml')).values()].flatMap(
+      catalogGroups(read('pnpm-workspace.yaml')).values().toArray().flatMap(
         (group) => [...group],
       ),
     );

@@ -108,7 +108,7 @@ export const runStepBodies = (source) => {
 };
 
 export const commandsIn = (text) =>
-  [...text.matchAll(/vp run ([a-z][\w:-]*)/g)].map(([, task]) => task);
+  text.matchAll(/vp run ([a-z][\w:-]*)/g).toArray().map(([, task]) => task);
 
 export const commandsRunByCi = ({ rootScripts, workflows }) => {
   const gating = workflows.filter((workflow) =>
