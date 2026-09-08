@@ -447,7 +447,7 @@ describe('readTableLoaderStateFromRequest', () => {
   });
 
   describe('settingsTabOrder', () => {
-    it('starts a table that stored no order from the global preference', () => {
+    it('takes the order the reader set globally', () => {
       vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
       vi.mocked(readPersistedUiFlagsFromCookie).mockReturnValue({});
 
@@ -462,24 +462,22 @@ describe('readTableLoaderStateFromRequest', () => {
       expect(state.settingsTabOrder?.[0]).toBe('details');
     });
 
-    it('keeps the order this table stored over the global preference', () => {
+    it('reads no order out of the table UI-flags cookie', () => {
       vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
       vi.mocked(readPersistedUiFlagsFromCookie).mockReturnValue({
-        settingsTabOrder: ['sorting'],
+        tableSettingsSelectedTab: 'sorting',
       });
 
       const state = readTableLoaderStateFromRequest<TestRow>({
         columns: testColumns,
         persistenceKey: 'orders',
-        request: new Request('https://example.com/orders', {
-          headers: { Cookie: globalSettingsCookie(['details']) },
-        }),
+        request: new Request('https://example.com/orders'),
       });
 
-      expect(state.settingsTabOrder).toStrictEqual(['sorting']);
+      expect(state.settingsTabOrder).toBeUndefined();
     });
 
-    it('states no order when neither the table nor the reader has one', () => {
+    it('states no order when the reader has set none', () => {
       vi.mocked(readPersistedStateFromCookie).mockReturnValue({});
       vi.mocked(readPersistedUiFlagsFromCookie).mockReturnValue({});
 

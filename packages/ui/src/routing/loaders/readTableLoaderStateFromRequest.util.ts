@@ -84,8 +84,7 @@ export const readTableLoaderStateFromRequest = <
       fallback: INITIAL_GLOBAL_SETTINGS,
     });
 
-  const settingsTabOrder =
-    metaUiFlags.settingsTabOrder ?? tablePanelPreferences.settingsTabOrder;
+  const settingsTabOrder = tablePanelPreferences.settingsTabOrder;
 
   const columnOrder = (cookieState.columnOrder ??
     []) as ColumnOrderState<TData>;

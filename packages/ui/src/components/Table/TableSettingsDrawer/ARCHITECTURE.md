@@ -78,12 +78,11 @@ TableSettingsDrawer/
 │   ├── utils/                             → buildPresetColumnSizing
 │   └── index.ts
 │
-├── AdvancedSettingsSection/               → Totals + the panel's own shape
+├── AdvancedSettingsSection/               → Totals, away from the dimensions and measures
 │   ├── AdvancedSettingsSection.component.tsx → Thin composition
 │   ├── AdvancedSettingsSection.types.ts
 │   ├── GroupingModeSection/              → Totals mode: groups only, or groups with subtotals
 │   ├── TotalsPlacementSection/           → Totals position: above or below their rows (rollup only)
-│   ├── TabsOrderSection/                 → DraggableList of the tab roles, committed on drop
 │   └── index.ts
 │
 ├── DetailsSection/                        → Read-only table metadata and metrics
@@ -178,7 +177,6 @@ graph LR
 
   AdvancedSettingsSection --> TableDrawerContext
   AdvancedSettingsSection --> TableConfigContext
-  AdvancedSettingsSection --> DraggableList4["DraggableList (tab roles)"]
 
   DetailsSection --> TableConfigContext
   DetailsSection --> TableDataContext
@@ -226,7 +224,7 @@ graph TD
   D --> E2["Tab: Details"]
   E2 --> F2["DetailsSection"]
 
-  D --> E3["Tab: Advanced"]
+  D --> E3["Tab: Advanced (only when isGroupingEnabled)"]
   E3 --> F3["AdvancedSettingsSection"]
 
   D --> G["Tab: Filters"]
@@ -277,11 +275,16 @@ See [TableDrawerContext/ARCHITECTURE.md](TableDrawerContext/ARCHITECTURE.md) for
 - **Tab order**: `settingsTabOrder` is owned by `TableConfig.metaStore` too, and
   it governs the column drawer's strip as well as this one — the order is stated
   in roles, and each drawer's own tab keys map onto them, so the column drawer's
-  `pinning` fills the `columns` role. `GeneralSettingsSection/TabsOrderSection`
-  is where the reader drags it, and a drop commits immediately rather than
-  staging behind Accept: it is the shape of the panel, not a setting the panel is
-  editing
-  ([ADR-114](../../../../../../docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md))
+  `pinning` fills the `columns` role. Nothing in either drawer writes it: the
+  reader sets it once on the Settings page's Table Panel tab, which stores
+  `tablePanel.settingsTabOrder` in the global-settings cookie, and
+  `readTableLoaderStateFromRequest` puts it in `metaState`. Which order the tabs
+  sit in is the same answer on every table, so it is a global preference with no
+  per-table form
+  ([ADR-114](../../../../../../docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md)
+  introduced the order,
+  [ADR-115](../../../../../../docs/decisions/ADR-115-the-settings-panel-separates-what-the-table-asks-from-how-the-panel-is-shaped.md)
+  moved it out of the table)
 - **Panel width**: `settingsPanelWidth` is owned by `TableConfig.metaStore`, written
   per frame while the splitter is dragged and persisted once the gesture ends
 - **Cancel**: `hooks/useCancelTableSettings` (shared by the panel close, the
@@ -299,13 +302,13 @@ a toolbar in dual-variant mode.
 
 | Section                   | Tab      | Features                                                                                                                                                                                                         |
 | ------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GeneralSettingsSection`  | General  | Width presets, cross-section clear/reset, all settings clear/reset                                                                                                                                               |
+| `GeneralSettingsSection`  | General  | Width presets, and the clear/reset pair for filters, sorting, columns and grouping (the last only where the route declared `isGroupingEnabled`), plus all-settings clear/reset                                   |
 | `DetailsSection`          | Details  | Required row counts, optional table/schema, technical metadata                                                                                                                                                   |
 | `FiltersSection`          | Filters  | Add/remove/expand filters, FilterInputs, validation, plus the read-only restrictions below                                                                                                                       |
 | `SortingSection`          | Sorting  | Add/remove/reorder sorts, direction toggle                                                                                                                                                                       |
 | `GroupingSection`         | Grouping | Multi-key group add/remove/reorder, legality-derived aggregate selection. Tab present only where the route declared `isGroupingEnabled`. See [GroupingSection/ARCHITECTURE.md](GroupingSection/ARCHITECTURE.md). |
 | `ColumnOrderSection`      | Columns  | Drag-drop reorder, pin toggle, visibility toggle, conflict and grouping-prompt modals. See [ColumnOrderSection/ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md).                                             |
-| `AdvancedSettingsSection` | Advanced | Totals mode and totals position (both only where the route declared grouping), and the tab order. Always present, since the tab order applies to every table.                                                    |
+| `AdvancedSettingsSection` | Advanced | Totals mode and totals position. Tab present only where the route declared `isGroupingEnabled`, the same condition as Grouping, since subtotals are all it governs.                                              |
 
 ### A filter the table cannot change
 

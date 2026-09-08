@@ -136,7 +136,13 @@ describe('TableSettingsDrawerBody', () => {
     );
     expect(screen.getByText('Columns').textContent).toBe('Columns');
     expect(screen.getByText('Details').textContent).toBe('Details');
-    expect(screen.getByText('Advanced').textContent).toBe('Advanced');
+  });
+
+  it('offers no Advanced tab for a route that cannot group', () => {
+    render(<TableSettingsDrawerBody />);
+
+    expect(screen.queryByText('Advanced')).toBeNull();
+    expect(screen.queryByText('Advanced settings section')).toBeNull();
   });
 
   it('offers no Grouping tab for a route that cannot group', () => {
@@ -213,7 +219,6 @@ describe('TableSettingsDrawerBody', () => {
       'Columns',
       'Filters',
       'Details',
-      'Advanced',
     ]);
   });
 

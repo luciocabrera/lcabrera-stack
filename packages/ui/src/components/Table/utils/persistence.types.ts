@@ -25,7 +25,6 @@ export type PersistedUiState = {
   readonly isTableSettingsOpen?: boolean;
   readonly isTableSettingsPinned?: boolean;
   readonly settingsPanelWidth?: number;
-  readonly settingsTabOrder?: readonly string[];
   readonly tableSettingsExpandedFilters?: readonly string[];
   readonly tableSettingsSelectedTab?: string;
   readonly totalsPlacement?: TableTotalsPlacement;

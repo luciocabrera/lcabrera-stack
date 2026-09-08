@@ -7,7 +7,7 @@ governs:
 
 **Status:** Accepted
 
-**Corrects:** [ADR-114](./ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md), whose two paragraphs placing the tab order and totals position in the General tab this replaces.
+**Corrects:** [ADR-114](./ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md), whose tab-order decision this replaces: the paragraphs placing the drag and the totals position in the General tab, and the scoping of the order to one table.
 
 ## Context
 
@@ -30,17 +30,21 @@ a reset for filters, for sorting and for columns, and carried none for grouping,
 even though `GroupingSectionToolbar` already renders exactly that pair in its
 footer variant.
 
-The order itself is per table, keyed by `persistenceKey`, which ADR-114 accepted
-as matching every other drawer preference. What that leaves is a reader who wants
-Details first everywhere having to drag it on every table they open.
+The order itself was per table, keyed by `persistenceKey`, which ADR-114 accepted
+as matching every other drawer preference. That scoping is the part that does not
+hold up. The pinned state, the selected tab and the expanded filters are all
+answers about the table in front of you. Which order the tabs sit in is not: it
+is the same answer on every table, and it is the same kind of answer as the
+navigation size or the pin-side default, which already live on the Settings page.
+Scoping it per table both made the reader repeat it and put it in the wrong
+register.
 
 ## Decision
 
-**A new `advanced` role, last in `TABLE_SETTINGS_TAB_ROLES`, holds what shapes the
-panel and what governs totals.** The Advanced tab renders the grouping mode, the
-totals position and the tab order. It is a role like the others, so it can be
-dragged anywhere in the strip, and the column drawer maps no key onto it and
-therefore does not paint it.
+**A new `advanced` role, last in `TABLE_SETTINGS_TAB_ROLES`, holds what governs
+totals.** The Advanced tab renders the grouping mode and the totals position. It
+is a role like the others, so it can be placed anywhere in the strip, and the
+column drawer maps no key onto it and therefore does not paint it.
 
 **The General tab is the query state's clear and reset, and nothing else.** It
 gains the Grouping pair it was missing, rendered only where the route declared
@@ -50,24 +54,25 @@ gains the Grouping pair it was missing, rendered only where the route declared
 of it, into `AdvancedSettingsSection/`, alongside the `TotalsPlacementSection`
 that ADR-114 had already moved out of it once.
 
-**Advanced always renders, and its totals half does not.** The tab order is a
-reason for the tab on any table; the two totals controls are gated on
-`isGroupingEnabled`, and totals position stays gated on `rollup` on top of that.
+**Advanced rides `isGroupingEnabled`, the same condition as the Grouping tab.**
+Both its controls are about subtotals, so on a table that cannot group there is
+nothing for it to render and an empty tab is not an option. Totals position stays
+gated on `rollup` on top of that.
 
-**A reader states a default tab order once, in Global Settings.** A new Table
-Panel tab holds the same `DraggableList` of roles, staged in the settings draft
-and written to `tablePanel.settingsTabOrder` in the global-settings cookie on
-Accept, like every other preference on that page. `readTableLoaderStateFromRequest`
-reads it and a table that stored no order of its own opens in it; a table whose
-UI-flags cookie carries an order keeps that one. So the global value is a default,
-not an override, and the per-table drag ADR-114 introduced still wins where it has
-been used.
+**The tab order is a global preference and has no per-table form.** A new Table
+Panel tab on the Settings page holds the `DraggableList` of roles, staged in the
+settings draft and written to `tablePanel.settingsTabOrder` in the global-settings
+cookie on Accept, like every other preference on that page.
+`readTableLoaderStateFromRequest` reads it, and that is the only channel:
+`TabsOrderSection`, `useSetTableSettingsTabOrder` and the `settingsTabOrder` entry
+in `getPersistedUiState` are all deleted, so nothing writes an order into a
+table's UI-flags cookie any more.
 
-**Both reads sanitise through `resolveSettingsTabOrder`.** The global preference is
-a cookie like the per-table one, so it degrades the same way: a name that is not a
-role is dropped, a repeat is stated once, and every role the stored order did not
-name is appended in the declared order. `advanced` therefore appears at the end of
-an order written before it existed, rather than the tab going missing.
+**The order is sanitised on read through `resolveSettingsTabOrder`,** as ADR-114
+already had it: a name that is not a role is dropped, a repeat is stated once, and
+every role the stored order did not name is appended in the declared order.
+`advanced` therefore appears at the end of an order written before it existed,
+rather than the tab going missing.
 
 **A draggable row's label truncates rather than wraps.** `drawerSectionStyles.itemLabel`
 and `DraggableListItem`'s content box get `overflow: hidden`, `text-overflow:
@@ -77,18 +82,26 @@ being dragged past.
 
 ## Consequences
 
-**Advanced mixes a staged control with an immediate one.** The mode and the
-position are drafts behind Accept; the tab order commits on drop, for the reason
-ADR-114 gave. The tab therefore has no single commit rule, which the General tab
-now does. This is the cost of the split, and it is a smaller one: Advanced is
-where a reader goes deliberately, and a drag that did nothing until Accept reads
-as broken.
+**Every tab now has one commit rule.** ADR-114's drag committed on drop while
+everything around it staged behind Accept, which was defensible only while the two
+sat in the same tab. Moving the order to the Settings page removes the mixture
+rather than relocating it: Advanced stages behind Accept like General and
+Grouping, and the Settings page stages behind its own Accept like every other
+global preference.
 
-**Two places now write the same kind of order, and they can disagree.** A reader
-who drags in Global Settings after dragging in a table sees no change on that
-table, because the per-table cookie wins. Nothing surfaces that, and there is no
-control to clear a table's order back to the global one. If it is reported, the
-place to add it is the Advanced tab, beside the drag.
+**An order stored per table under ADR-114 stops being read.** `getPersistedUiState`
+no longer carries `settingsTabOrder`, so a reader who dragged a table's tabs after
+#1114 merged gets the declared order back until they set one on the Settings page.
+The stale key sits in that table's cookie doing nothing, and is dropped the next
+time anything else writes the UI flags. The degradation is visible and one action
+fixes it for every table at once, which is the trade this ADR is making.
+
+**Changing the order needs a navigation to take effect on an open table.** It is
+read in the loader, like `preferredGroupingMode` and `defaultGroupFold`, so a
+reader who reorders on the Settings page sees it on the next table they open
+rather than in a tab already on screen. Reading the global store inside the Table
+instead would make `GlobalSettingsProvider` a hard dependency of a component that
+is meant to work without one.
 
 **`GlobalSettingsState` gained a key without a cookie version bump.** An existing
 cookie carries no `tablePanel`, `toGlobalTablePanelPreferences` returns undefined
@@ -110,10 +123,14 @@ blunter than the risk it guards, deliberately.
 2. **Fold Advanced into Details.** Rejected: Details is read-only metadata about
    the table. Putting the only writes on the panel's shape behind a tab that
    otherwise writes nothing hides them.
-3. **Make the global order an override rather than a default.** Rejected: it would
-   take away the per-table drag ADR-114 added, and a reader who arranged one
-   table's tabs and then set a global default would silently lose the first
-   arrangement.
+3. **Keep the per-table drag and let the global order be its default.** This was
+   built first and rejected on what it produced: once a reader dragged on a table,
+   that table's cookie won for good, nothing cleared it, and a later change to the
+   global order silently skipped that one table. The fix would have been a third
+   control undoing the second. Global-only removes the conflict instead of
+   managing it, and the register argument settles which side to drop — the tab
+   order is the same answer on every table, so the per-table form was the one with
+   no reason to exist.
 4. **A second cookie for the global order.** Rejected: the global-settings cookie
    already carries the reader's cross-table preferences and is read in the same
    loader call. A second one is a second thing to scope by `appId` and expire.
@@ -125,4 +142,5 @@ blunter than the risk it guards, deliberately.
 
 - [ADR-114](./ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md) — the tab order and the panel width this amends
 - [ADR-085](./ADR-085-a-preset-makes-ungrouped-a-real-state.md) — where totals placement commits
+- [#1114](https://github.com/luciocabrera/lcabrera-stack/pull/1114) — the pull request that shipped the per-table order this replaces
 - [#1118](https://github.com/luciocabrera/lcabrera-stack/issues/1118)

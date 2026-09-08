@@ -40,6 +40,16 @@ export const TableSettingsDrawerBody = ({
       ]
     : [];
 
+  const advancedTabs: TabItem[] = isGroupingEnabled
+    ? [
+        {
+          children: <AdvancedSettingsSection isBusy={isBusy} />,
+          header: 'Advanced',
+          key: 'advanced',
+        },
+      ]
+    : [];
+
   const tabs: TabItem[] = orderSettingsTabs({
     order: resolveSettingsTabOrder(tabOrder),
     tabs: [
@@ -69,11 +79,7 @@ export const TableSettingsDrawerBody = ({
         header: 'Details',
         key: 'details',
       },
-      {
-        children: <AdvancedSettingsSection isBusy={isBusy} />,
-        header: 'Advanced',
-        key: 'advanced',
-      },
+      ...advancedTabs,
     ],
   });
 

@@ -96,7 +96,6 @@
   "src/components/Table/TableRow/TableRow.stylex.ts",
   "src/components/Table/TableRowActionsMenu/TableRowActionsMenu.stylex.ts",
   "src/components/Table/TableSettingsDrawer/AdvancedSettingsSection/GroupingModeSection/GroupingModeSection.stylex.ts",
-  "src/components/Table/TableSettingsDrawer/AdvancedSettingsSection/TabsOrderSection/TabsOrderSection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/AdvancedSettingsSection/TotalsPlacementSection/TotalsPlacementSection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionBody/ColumnOrderItemContent/ColumnOrderItemContent.stylex.ts",
   "src/components/Table/TableSettingsDrawer/DetailsSection/DetailsSection.stylex.ts",
