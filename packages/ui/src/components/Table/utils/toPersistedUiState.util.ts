@@ -3,7 +3,9 @@
  *
  * `parseVersionedPayload` casts rather than checks, so a key this type has
  * dropped still reaches the meta store from a cookie written by an older
- * release. Picking the declared keys is what makes the type true of the value.
+ * release. Picking the declared keys is what closes that channel. It narrows the
+ * keys and not the values, so the declared return stays an assertion about what
+ * each one holds — no worse than the cast it replaces, and not a validator.
  *
  * The roster is a `Record<keyof PersistedUiState, true>` rather than an array so
  * that a key added to the type without being added here fails the build, rather

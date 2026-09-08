@@ -33,9 +33,7 @@ export const TablePanelSettingsTab = () => {
         description='The order every table settings panel opens its tabs in. It is set here and applies to every table.'
         title='Settings Tabs Order'
       >
-        <div data-testid='table-panel-tabs-order'>
-          <DraggableList items={items} onOrderChange={handleOrderChange} />
-        </div>
+        <DraggableList items={items} onOrderChange={handleOrderChange} />
       </SectionCard>
     </div>
   );
