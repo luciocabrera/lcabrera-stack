@@ -116,6 +116,7 @@ until you acknowledge it.
 | `repo-product-distance`, `repo-docs-for-package <dir>` | — read the requirement register: distance from intent, and the documents one workspace owes                 |
 | `repo-housekeeping-prune [--apply]`                    | — deletes merged branches and clean worktrees, reporting anything that might be work                        |
 | `repo-worktree-env`                                    | — links the primary checkout's gitignored env files into a linked worktree                                  |
+| `repo-eslint-staged [--check] [--] <file>…`            | — lints the files named with the flat config that governs each, fixing unless `--check`                     |
 
 In the repository this is published from they are the root `vp run` tasks of the
 same name — `commit:verify`, `pr:verify`, `coordination:verify`,

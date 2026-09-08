@@ -82,10 +82,14 @@ describe('inherited git environment', () => {
 
 describe('the pre-push hook', () => {
   const hook = readFileSync(join(REPO_ROOT, '.vite-hooks', 'pre-push'), 'utf8');
+  const executed = hook
+    .split('\n')
+    .map((line) => (line.trimStart().startsWith('#') ? '' : line))
+    .join('\n');
 
   it('sources the scrub before running any task', () => {
-    const scrubAt = hook.indexOf('scrub-git-env.sh');
-    const firstTaskAt = hook.indexOf('vp run');
+    const scrubAt = executed.indexOf('scrub-git-env.sh');
+    const firstTaskAt = executed.indexOf('vp run');
 
     expect(scrubAt).toBeGreaterThan(-1);
     expect(firstTaskAt).toBeGreaterThan(-1);

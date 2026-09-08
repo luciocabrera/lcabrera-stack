@@ -15,10 +15,9 @@
  * Neither the ESLint pass nor Biome is here, for the same reason: each is another
  * process launch per file, and the launch — not the analysis — is the cost. This
  * hook cannot gate anything anyway (it swallows failures and always exits 0), so
- * a fixer omitted here loses no enforcement. Biome runs check-only in the
- * `staged` block of the root vite.config.ts (the same ts/tsx/mjs/cjs glob this
- * hook used), in `check:push`, and repo-wide in check-safe.yml; ESLint stays in
- * the Stop hook + pre-push.
+ * a fixer omitted here loses no enforcement. Both run with their fixers in the
+ * `staged` block of the root vite.config.ts, under the one `*` glob every fixer
+ * shares, as well as in `check:push` and repo-wide in check-safe.yml.
  *
  * Binaries are launched by absolute node_modules/.bin path (never a bare command,
  * so no PATH-based launch) and via `vp` (not bare oxfmt/oxlint) so they read the

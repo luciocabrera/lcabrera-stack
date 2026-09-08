@@ -27,6 +27,7 @@
     "repo-close-claim": "./scripts/close-coordination-claim.mjs",
     "repo-coverage-report": "./scripts/coverage-report.mjs",
     "repo-docs-for-package": "./scripts/docs-for-package.mjs",
+    "repo-eslint-staged": "./scripts/run-eslint-staged.mjs",
     "repo-housekeeping-prune": "./scripts/housekeeping-prune.mjs",
     "repo-lint-report": "./scripts/generate-lint-reports.mjs",
     "repo-merge-coverage": "./scripts/merge-coverage.mjs",

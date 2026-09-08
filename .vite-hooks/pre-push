@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 # pre-push: run the DB-free CI gate locally, before anything reaches CI.
 #
-# Why this exists: the pre-commit hook runs `vp staged` (fmt + Oxlint + tsgolint
-# + Biome on staged files) but NOT the ESLint pass or a full type-check, so an
-# ESLint-only finding (unicorn / perfectionist / local-rules) or a cross-file
-# type error first turns red in CI. `check:push` mirrors the
+# Why this exists: the pre-commit hook runs `vp staged` over the STAGED FILES
+# only — Oxfmt, Oxlint, tsgolint, Biome and the per-workspace ESLint pass, each
+# with its fixer. What it cannot see is the rest of the tree: a cross-file type
+# error, or a finding in a file this commit did not touch. `check:push` mirrors the
 # "Quality Gate (Format · Lint · Types)" job in
 # .github/workflows/check-safe.yml — the same checks, run the same way — so a
 # push that would fail that job fails here first.
@@ -24,8 +24,12 @@
 # DB-free `test:unit` subset that it substitutes. What made it worth bringing forward is that removing the Claude
 # `Stop` hook left nothing running tests locally at all.
 #
-# The fallow audit still stays in CI: it is a new-only gate scored against the
-# merge base, so it needs full history and a coverage merge.
+# The fallow audit runs here too, last, via `vp run fallow:preflight`. It used
+# to be left to CI because it needs full history and a coverage merge — which
+# made it the one gate with no local form, and the one `check-safe` failed on
+# more than every linter combined (measured on the PR that moved it here).
+# The coverage merge is what makes the push slower; `--changed` holds it to the
+# workspaces the diff touched.
 #
 # Bypass for a work-in-progress push: `git push --no-verify`.
 
@@ -65,6 +69,14 @@ fi
 if ! vp run test:changed; then
   echo ""
   echo "✗ pre-push tests failed — the affected workspaces do not pass."
+  echo "  To push work-in-progress anyway: git push --no-verify"
+  exit 1
+fi
+
+if ! vp run fallow:preflight; then
+  echo ""
+  echo "✗ pre-push: the fallow preflight failed — it says above whether the diff"
+  echo "  introduced findings or the audit could not run."
   echo "  To push work-in-progress anyway: git push --no-verify"
   exit 1
 fi
