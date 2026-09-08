@@ -102,14 +102,16 @@ export default defineConfig({
     // rather than in the working tree behind it.
     //
     // `vp check --fix` is Oxfmt + Oxlint + the tsgolint type pass. Biome writes
-    // its safe fixes only. `repo-eslint-staged` resolves each path to the
+    // its safe fixes only. `repo-eslint-staged` takes a trailing `--` because
+    // lint-staged appends the filenames, and a leading `-` is legal in one.
+    // It resolves each path to the
     // workspace whose `eslint.config.mjs` governs it and fixes there — there is
     // no root ESLint config to point a single invocation at. All three ignore
     // what they cannot lint, so one glob can carry files of any type.
     '*': [
       'vp check --fix',
       'biome lint --write --no-errors-on-unmatched',
-      'repo-eslint-staged',
+      'repo-eslint-staged --',
     ],
   },
 });

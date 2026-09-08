@@ -12,6 +12,10 @@
  * Every decision this makes lives in `eslint-staged.mjs`, which is pure and
  * tested; what is left here spawns, reads the filesystem and prints.
  *
+ * The ESLint it runs is the workspace's own, with no fallback: a workspace that
+ * declares none is reported as one this could not lint, rather than silently
+ * linted by whichever version some ancestor happens to hoist.
+ *
  * Usage:
  *   repo-eslint-staged <file>…
  *   repo-eslint-staged --check <file>…
@@ -44,13 +48,6 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 
-const eslintBinary = (directory) => {
-  const local = join(directory, 'node_modules', '.bin', 'eslint');
-  return existsSync(local)
-    ? local
-    : join(REPO_ROOT, 'node_modules', '.bin', 'eslint');
-};
-
 const manifestScripts = (directory) => {
   const manifest = join(directory, 'package.json');
   if (!existsSync(manifest)) return undefined;
@@ -60,20 +57,30 @@ const manifestScripts = (directory) => {
 const flagsFor = (directory) =>
   workspaceEslintFlags(lintScriptOf(manifestScripts(directory)));
 
-const lintGroup = ({ directory, files, fix }) => {
+const reportBroken = (directory, reason) => {
+  console.error(
+    `\nESLint could not be run in ${relative(REPO_ROOT, directory)}: ${reason}\n`,
+  );
+};
+
+const spawnEslint = ({ binary, directory, files, fix }) => {
   const { error, status } = spawnSync(
-    eslintBinary(directory),
+    binary,
     eslintArguments({ files, fix, workspaceFlags: flagsFor(directory) }),
     { cwd: directory, stdio: 'inherit' },
   );
   const outcome = spawnOutcome(status);
   if (outcome === 'broken') {
-    console.error(
-      `\nESLint could not be run in ${relative(REPO_ROOT, directory)}: ` +
-        `${error?.message ?? `it exited ${status}`}\n`,
-    );
+    reportBroken(directory, error?.message ?? `it exited ${status}`);
   }
   return outcome;
+};
+
+const lintGroup = ({ directory, files, fix }) => {
+  const binary = join(directory, 'node_modules', '.bin', 'eslint');
+  if (existsSync(binary)) return spawnEslint({ binary, directory, files, fix });
+  reportBroken(directory, 'it declares no eslint of its own');
+  return 'broken';
 };
 
 const report = (label, outcomes, kind) => {
