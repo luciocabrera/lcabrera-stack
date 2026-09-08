@@ -25,7 +25,7 @@ const workflowRunCount = ({ file, runGh, window }) => {
       '.total_count',
     ]);
     const parsed = Number(total);
-    return Number.isNaN(parsed)
+    return total === '' || Number.isNaN(parsed)
       ? { reason: `unreadable run total for ${file}` }
       : { count: parsed };
   } catch (error) {
@@ -54,7 +54,7 @@ const RECORD_MARK = String.fromCodePoint(1);
 
 const utcDayOf = (epochSeconds) => {
   const seconds = Number(epochSeconds);
-  return Number.isNaN(seconds)
+  return epochSeconds === '' || Number.isNaN(seconds)
     ? ''
     : dayOf(new Date(seconds * 1000).toISOString());
 };

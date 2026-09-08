@@ -57,6 +57,30 @@ describe('readWorkflowRuns', () => {
     });
   });
 
+  it('keeps an empty answer apart from a workflow nobody triggered', () => {
+    const result = readWorkflowRuns({
+      runGh: (args) => (args[1] === 'repos/{owner}/{repo}' ? 'owner/repo' : ''),
+      window: WINDOW,
+      workflows: ['check-safe.yml'],
+    });
+
+    expect(result.runs['check-safe.yml'].count).toBeUndefined();
+    expect(result.runs['check-safe.yml'].reason).toContain(
+      'unreadable run total',
+    );
+  });
+
+  it('still reports a real zero as a count', () => {
+    const result = readWorkflowRuns({
+      runGh: (args) =>
+        args[1] === 'repos/{owner}/{repo}' ? 'owner/repo' : '0',
+      window: WINDOW,
+      workflows: ['check-safe.yml'],
+    });
+
+    expect(result.runs['check-safe.yml']).toEqual({ count: 0 });
+  });
+
   it('carries a reason for the one workflow it could not read', () => {
     const result = readWorkflowRuns({
       runGh: (args) => {
@@ -102,6 +126,16 @@ describe('withinWindow', () => {
         window: WINDOW,
       }),
     ).toEqual([{ day: '2026-08-30', files: ['b.md'] }]);
+  });
+});
+
+describe('parseCommitFiles — an unreadable timestamp', () => {
+  it('is no day rather than the epoch', () => {
+    const [record] = parseCommitFiles(
+      [`${MARK}aaa `, 'docs/coordination/tasks/one.md'].join('\n'),
+    );
+
+    expect(record.day).toBe('');
   });
 });
 
