@@ -127,11 +127,8 @@ export const commandsRunByCi = ({ rootScripts, workflows }) => {
   while (pending.length > 0) {
     const task = pending.pop();
     const chainedCommands = commandsIn(scripts.get(task) ?? '');
-    for (const chained of chainedCommands) {
-      if (run.has(chained)) {
-      	continue;
-      }
-
+    const fresh = chainedCommands.filter((chained) => !run.has(chained));
+    for (const chained of fresh) {
       run.add(chained);
       pending.push(chained);
     }

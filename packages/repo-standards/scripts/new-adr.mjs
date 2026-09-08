@@ -45,37 +45,38 @@ const TIERS = ADR_HOMES.map((home) => home.tier);
 
 const USAGE = `usage: repo-adr "<title>" [--home ${TIERS.join('|')}] [--slug <slug>] [--dry-run]`;
 
-const parseArgs = (argv) => {
-  const options = { dryRun: false, home: 'repo', slug: '', title: '' };
-  const rest = argv.filter((arg) => arg !== '--');
-  while (rest.length > 0) {
-    const arg = rest.shift();
-    switch (arg) {
+const positional = ({ arg, options }) => {
+  if (arg.startsWith('--')) {
+    throw new Error(`unknown flag: ${arg}\n${USAGE}`);
+  }
+  if (options.title !== '') {
+    throw new Error(`unexpected argument: ${arg}\n${USAGE}`);
+  }
+  return { ...options, title: arg };
+};
+
+const applyArg = ({ arg, options, rest }) => {
+  switch (arg) {
     case '--dry-run': {
-      options.dryRun = true;
-    
-    break;
+      return { ...options, dryRun: true };
     }
     case '--home': {
-      options.home = rest.shift() ?? '';
-    
-    break;
+      return { ...options, home: rest.shift() ?? '' };
     }
     case '--slug': {
-      options.slug = rest.shift() ?? '';
-    
-    break;
+      return { ...options, slug: rest.shift() ?? '' };
     }
-    default: { if (arg.startsWith('--')) {
-      throw new Error(`unknown flag: ${arg}\n${USAGE}`);
+    default: {
+      return positional({ arg, options });
     }
-    if (options.title === '') {
-      options.title = arg;
-    } else {
-      throw new Error(`unexpected argument: ${arg}\n${USAGE}`);
-    }
-    }
-    }
+  }
+};
+
+const parseArgs = (argv) => {
+  let options = { dryRun: false, home: 'repo', slug: '', title: '' };
+  const rest = argv.filter((arg) => arg !== '--');
+  while (rest.length > 0) {
+    options = applyArg({ arg: rest.shift(), options, rest });
   }
   return options;
 };

@@ -73,17 +73,20 @@ const homeFindings = (home, entries) =>
         ];
   });
 
+const numberedEntries = (home) =>
+  home.entries
+    .map((entry) => ({ entry, parsed: parseAdrFilename(entry.filename) }))
+    .filter(({ parsed }) => parsed !== undefined)
+    .map(({ entry, parsed }) => [
+      parsed.number,
+      `${home.dir}/${entry.filename}`,
+    ]);
+
 const duplicateFindings = (homes, grandfathered = GRANDFATHERED_DUPLICATES) => {
   const uses = new Map();
-  for (const home of homes) {
-    for (const entry of home.entries) {
-      const parsed = parseAdrFilename(entry.filename);
-      if (parsed === undefined) {
-        continue;
-      }
-      const at = uses.get(parsed.number) ?? [];
-      uses.set(parsed.number, [...at, `${home.dir}/${entry.filename}`]);
-    }
+  const numbered = homes.flatMap((home) => numberedEntries(home));
+  for (const [number, path] of numbered) {
+    uses.set(number, [...(uses.get(number) ?? []), path]);
   }
   return [...uses]
     .filter(([number, at]) =>

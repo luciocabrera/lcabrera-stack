@@ -24,25 +24,25 @@ const firstClash = (a, b) =>
 
 const isSameBranch = (a, b) => a.branch === b.branch && !NO_BRANCH.has(a.branch);
 
+const warningsAgainst = ({ from, live }) =>
+  live.slice(from + 1).flatMap((other) => {
+    const a = live[from].data;
+    const b = other.data;
+    if (isSameBranch(a, b)) return [];
+    const clash = firstClash(a, b);
+    if (clash === undefined) return [];
+    return [
+      `${live[from].name} and ${other.name} claim overlapping areas ` +
+        `(e.g. \`${clash}\`) on different branches — narrow a glob, serialise, ` +
+        'or share one branch (branches/<slug>.md).',
+    ];
+  });
+
 export const overlapWarnings = (tasks) => {
   const live = tasks.filter((value) => isLive(value));
   const warnings = [];
   for (let i = 0; i < live.length; i += 1) {
-    for (let j = i + 1; j < live.length; j += 1) {
-      const a = live[i].data;
-      const b = live[j].data;
-      if (isSameBranch(a, b)) {
-        continue;
-      }
-      const clash = firstClash(a, b);
-      if (clash !== undefined) {
-        warnings.push(
-          `${live[i].name} and ${live[j].name} claim overlapping areas ` +
-            `(e.g. \`${clash}\`) on different branches — narrow a glob, serialise, ` +
-            'or share one branch (branches/<slug>.md).',
-        );
-      }
-    }
+    warnings.push(...warningsAgainst({ from: i, live }));
   }
   return warnings;
 };

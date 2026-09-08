@@ -72,8 +72,10 @@ describe('inferRunner', () => {
       { dependencies: ['vite-plus'] },
       { files: ['bun.lock'] },
     ]) {
-      for (const line of inferRunner(context).ciSetup) {
-        if (!line.includes('uses:')) continue;
+      const actions = inferRunner(context).ciSetup.filter((line) =>
+        line.includes('uses:'),
+      );
+      for (const line of actions) {
         expect(line).toMatch(/uses: [^@]+@[0-9a-f]{40}\b/);
       }
     }

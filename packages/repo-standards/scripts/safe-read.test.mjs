@@ -5,20 +5,19 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { readTextWithin } from './safe-read.mjs';
 
-let workspace;
+const created = [];
 
 const makeWorkspace = () => {
-  workspace = mkdtempSync(join(tmpdir(), 'safe-read-'));
+  const workspace = mkdtempSync(join(tmpdir(), 'safe-read-'));
+  created.push(workspace);
   return workspace;
 };
 
 afterEach(() => {
-  if (workspace === undefined) {
-  	return;
+  for (const workspace of created) {
+    rmSync(workspace, { force: true, recursive: true });
   }
-
-  rmSync(workspace, { force: true, recursive: true });
-  workspace = undefined;
+  created.length = 0;
 });
 
 describe('readTextWithin', () => {

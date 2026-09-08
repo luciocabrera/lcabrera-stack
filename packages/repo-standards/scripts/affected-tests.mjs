@@ -103,12 +103,9 @@ export const withDependents = (seeds, dependents) => {
   const worklist = [...seeds];
   while (worklist.length > 0) {
     const pkg = worklist.pop();
-    const downstream = dependents.get(pkg) ?? [];
-    for (const dependent of downstream) {
-      if (affected.has(dependent)) {
-      	continue;
-      }
-
+    const downstream = [...(dependents.get(pkg) ?? [])];
+    const fresh = downstream.filter((dependent) => !affected.has(dependent));
+    for (const dependent of fresh) {
       affected.add(dependent);
       worklist.push(dependent);
     }
