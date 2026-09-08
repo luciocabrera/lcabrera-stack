@@ -4,5 +4,6 @@ export type SidePanelResizeHandleProps = {
   readonly onWidthChange: (width: number) => void;
   readonly onWidthCommit?: (width: number) => void;
   readonly position: SidePanelPosition;
-  readonly width: number;
+  /** Absent until the reader has resized it: the panel paints from `size`. */
+  readonly width?: number;
 };

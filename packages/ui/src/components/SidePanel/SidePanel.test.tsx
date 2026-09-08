@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
 import {
   afterEach,
   beforeEach,
@@ -187,6 +193,30 @@ describe('SidePanel', () => {
     });
 
     expect(onWidthChange).toHaveBeenCalledWith(416);
+  });
+
+  it('starts a gesture from the width the panel paints, not from its floor', async () => {
+    const onWidthChange = vi.fn();
+
+    render(
+      <SidePanel isOpen isPinned isResizable onWidthChange={onWidthChange}>
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const handle = screen.getByTestId('side-panel-resize-handle');
+    Object.defineProperty(handle.parentElement, 'clientWidth', {
+      configurable: true,
+      value: 416,
+    });
+
+    await act(async () => {});
+
+    expect(handle.getAttribute('aria-valuenow')).toBe('416');
+
+    fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+
+    expect(onWidthChange).toHaveBeenCalledWith(432);
   });
 
   it('renders a pinned panel into the provided portal container', () => {

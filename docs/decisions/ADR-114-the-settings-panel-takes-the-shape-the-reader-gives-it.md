@@ -45,7 +45,19 @@ store and the UI-flags cookie in the same call, like the selected tab. It is not
 part of the drawer's Accept/Cancel draft: this is the shape of the panel, not a
 setting the panel is editing.
 
-**A stored order is sanitised on read, never on write.** `resolveSettingsTabOrder`
+**A panel opened before anyone resized it starts from what it paints, not from
+the band's floor.** The panel carries no `width` until the reader has settled
+one, so it paints from its `size` variant — and a gesture based on the floor
+would snap a 416px panel to 320 on the first drag, while announcing 320 as its
+`aria-valuenow` in the meantime. `useSidePanelHostWidth` measures the host
+element instead, which is also right for a `size` this package does not know
+about and for a panel the CSS ceiling has already clamped.
+
+**Both stored keys are sanitised on read, never on write.**
+`resolveSettingsPanelWidth` narrows the width to a positive finite number, so a
+cookie holding anything else opens the panel at its declared size.
+
+**The order is sanitised the same way.** `resolveSettingsTabOrder`
 drops a name that is not a role, states a repeat once, and appends every role the
 stored order did not name, in the declared order. A cookie written by an older or
 newer version therefore degrades to a partial preference rather than to a missing
@@ -93,6 +105,13 @@ behaves, and the second is what makes one drag answer for both strips.
 sorts to the end and cannot be dragged, silently. The map is the place to look, and
 `orderSettingsTabs.util.test.ts` pins the fallback so the failure is at least
 defined.
+
+**A pinned panel's ceiling is the viewport, not the container it sits in.** The
+column drawer is portalled into the table's own wrapper, so 90vw is looser than
+the space the reader is actually working in: dragging to the ceiling squashes the
+grid beside it rather than stopping at the wrapper's edge. It is direct
+manipulation and visibly reversible, so it is left as it is rather than measured
+a second way.
 
 **The panel's width outlives the session but not the device.** It is a cookie, so a
 width chosen on a desktop follows the reader to a phone, where the CSS ceiling

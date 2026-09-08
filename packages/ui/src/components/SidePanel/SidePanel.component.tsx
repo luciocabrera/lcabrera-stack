@@ -2,7 +2,6 @@ import type { SidePanelProps } from './SidePanel.types';
 
 import { DialogSidePanel } from './DialogSidePanel/DialogSidePanel.component';
 import { PinnedSidePanel } from './PinnedSidePanel/PinnedSidePanel.component';
-import { SIDE_PANEL_MIN_WIDTH } from './SidePanel.constants';
 import { SidePanelResizeHandle } from './SidePanelResizeHandle';
 
 export const SidePanel = ({
@@ -26,7 +25,7 @@ export const SidePanel = ({
         onWidthChange={onWidthChange}
         {...(onWidthCommit !== undefined && { onWidthCommit })}
         position={position}
-        width={width ?? SIDE_PANEL_MIN_WIDTH}
+        {...(width !== undefined && { width })}
       />
     ) : undefined;
 

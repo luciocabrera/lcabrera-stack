@@ -10,7 +10,8 @@ SidePanel/
 ├── SidePanel.stylex.ts               → All root styles (local variants)
 ├── SidePanel.constants.ts            → The resize band: min width, max viewport ratio, keyboard steps
 ├── hooks/useSidePanelResize.hook.ts  → Pointer + keyboard resize gesture, and the band it stays inside
-├── utils/                            → Bounds, the width a drag resolves to, the keyboard action, the drag session
+├── hooks/useSidePanelHostWidth.hook.ts → The panel's painted width, for a panel with no width of its own
+├── utils/                            → Bounds, the width a drag resolves to, the keyboard action, the surface styles, the drag session
 │
 ├── PinnedSidePanel/                  → Private delegate (no barrel): always-visible aside, optional portal, zero effects
 │   ├── PinnedSidePanel.component.tsx
@@ -275,6 +276,13 @@ Used heavily in Table settings drawers:
 `SidePanelResizeHandle` on the panel's inner edge — left of a right-hand panel,
 right of a left-hand one — and the consumer says how wide the panel is through
 `width`, which overrides the `size` variant.
+
+A panel that has never been resized carries no `width`, so it paints from its
+`size` variant; `useSidePanelHostWidth` measures the host element and the handle
+starts its gesture there, rather than from the band's floor. The imperative half
+of the gesture is `startHorizontalDragSession`, shared with the column splitter —
+the frame throttling, the `AbortController` teardown and the document's drag
+cursor were written twice before.
 
 The two callbacks are the point of the split. `onWidthChange` fires once per
 animation frame while the pointer moves, and `onWidthCommit` fires once the

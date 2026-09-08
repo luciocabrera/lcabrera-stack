@@ -1,7 +1,5 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from 'react';
-
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
   afterEach,
@@ -40,15 +38,6 @@ vi.mock('#ui/components/DraggableList', () => ({
         Reverse
       </button>
     </ul>
-  ),
-}));
-
-vi.mock('#ui/components/SidePanel', () => ({
-  SidePanelSection: ({ children }: { readonly children: ReactNode }) => (
-    <section>{children}</section>
-  ),
-  SidePanelSectionHeader: ({ title }: { readonly title: string }) => (
-    <h3>{title}</h3>
   ),
 }));
 

@@ -1,11 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef } from 'react';
 
-import { surfaceStyles } from '#ui/design-system/tokens/surfaces.stylex';
-
 import type { DialogSidePanelProps } from './DialogSidePanel.types';
 
 import { sidePanelStyles } from '../SidePanel.stylex';
+import { resolveSidePanelSurfaceStyles } from '../utils';
 
 export const DialogSidePanel = ({
   children,
@@ -20,21 +19,13 @@ export const DialogSidePanel = ({
 }: DialogSidePanelProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  const openStyle =
-    position === 'left' ? ('leftOpen' as const) : ('rightOpen' as const);
-  const closedStyle =
-    position === 'left' ? ('leftClosed' as const) : ('rightClosed' as const);
-  const panelStyles = stylex.props(
-    surfaceStyles.glassPanel,
-    sidePanelStyles.base,
-    sidePanelStyles.size[size],
-    width !== undefined && sidePanelStyles.width.resized(width),
-    sidePanelStyles.position[position],
-    sidePanelStyles.position[isOpen ? openStyle : closedStyle],
-    shouldShowOverlay
-      ? sidePanelStyles.withBackdrop
-      : sidePanelStyles.withoutBackdrop,
-  );
+  const panelStyles = resolveSidePanelSurfaceStyles({
+    isOpen,
+    position,
+    shouldShowOverlay,
+    size,
+    ...(width !== undefined && { width }),
+  });
 
   useEffect(() => {
     const dialog = dialogRef.current;
