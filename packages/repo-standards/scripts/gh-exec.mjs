@@ -63,3 +63,27 @@ export const runGh = (args) => {
     });
   }
 };
+
+/**
+ * `gh pr list --json …` output as an array, or an empty one with a warning.
+ *
+ * Empty rather than throwing because both callers degrade rather than stop: the
+ * board still renders its claims and the prune still counts commits. `warning`
+ * is the caller's, because what is lost differs between them.
+ *
+ * @param {string} raw
+ * @param {{ warning: string }} args
+ * @returns {unknown[]}
+ */
+export const parsePullRequests = (raw, { warning }) => {
+  if (!raw.trim()) {
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    process.stderr.write(warning);
+    return [];
+  }
+};

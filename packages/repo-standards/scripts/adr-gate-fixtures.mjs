@@ -15,17 +15,11 @@
  * consumer has no use for it.
  */
 import { spawnSync } from 'node:child_process';
-import {
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { createFixtureRoots, writeIn } from './fixture-repo.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const GATE = resolve(HERE, 'verify-adrs.mjs');
@@ -87,7 +81,7 @@ const CONFIG = `{
 }
 `;
 
-const roots = [];
+const fixtureRoots = createFixtureRoots('adr-gate-');
 
 export const runGate = (root, args = []) => {
   const result = spawnSync(process.execPath, [GATE, ...args], {
@@ -97,24 +91,8 @@ export const runGate = (root, args = []) => {
   return { ...result, output: `${result.stdout}${result.stderr}` };
 };
 
-export const writeIn = (root) => (path, text) => {
-  mkdirSync(dirname(join(root, path)), { recursive: true });
-  writeFileSync(join(root, path), text);
-};
-
-export const editIn = (root) => (path, from, to) => {
-  const full = join(root, path);
-  const before = readFileSync(full, 'utf8');
-  const after = before.replace(from, () => to);
-  if (after === before) {
-    throw new Error(`fixture: \`${from}\` is not in ${path}`);
-  }
-  writeFileSync(full, after);
-};
-
 export const makeAdrRepo = ({ legacy = false } = {}) => {
-  const root = realpathSync(mkdtempSync(join(tmpdir(), 'adr-gate-')));
-  roots.push(root);
+  const root = fixtureRoots.make();
   const write = writeIn(root);
   write('pnpm-workspace.yaml', "packages:\n  - 'packages/*'\n");
   write('packages/ui/package.json', '{ "name": "@scope/ui" }\n');
@@ -148,10 +126,6 @@ export const appendEntry = (root, filename) => {
   );
 };
 
-export const removeAdrRepos = () => {
-  const drained = [...roots];
-  roots.length = 0;
-  for (const root of drained) {
-    rmSync(root, { force: true, recursive: true });
-  }
-};
+export const removeAdrRepos = () => fixtureRoots.removeAll();
+
+export { editIn, writeIn } from './fixture-repo.mjs';

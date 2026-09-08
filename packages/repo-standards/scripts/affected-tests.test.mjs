@@ -49,6 +49,13 @@ const affected = (files) =>
     lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
   });
 
+const expectScopedToUtilsAndDependents = (result) => {
+  expect(result.mode).toBe('scoped');
+  expect(new Set(result.packages)).toEqual(
+    new Set(['@lcabrera/ui', '@lcabrera/utils', 'showcase']),
+  );
+};
+
 describe('resolveAffected — lint-only carve-out', () => {
   it('selects nothing for an eslint-factory-only change in vite-configs', () => {
     const result = affected([
@@ -76,10 +83,7 @@ describe('resolveAffected — lint-only carve-out', () => {
       'packages/vite-configs/eslint.custom-rules.shared.config.mjs',
       'packages/utils/src/foo.ts',
     ]);
-    expect(result.mode).toBe('scoped');
-    expect(new Set(result.packages)).toEqual(
-      new Set(['@lcabrera/ui', '@lcabrera/utils', 'showcase']),
-    );
+    expectScopedToUtilsAndDependents(result);
   });
 });
 
@@ -105,11 +109,7 @@ describe('resolveAffected — still forces full where it must', () => {
 
 describe('resolveAffected — ordinary scoping is unchanged', () => {
   it('scopes a workspace change to that workspace and its dependents', () => {
-    const result = affected(['packages/utils/src/foo.ts']);
-    expect(result.mode).toBe('scoped');
-    expect(new Set(result.packages)).toEqual(
-      new Set(['@lcabrera/ui', '@lcabrera/utils', 'showcase']),
-    );
+    expectScopedToUtilsAndDependents(affected(['packages/utils/src/foo.ts']));
   });
 
   it('selects nothing for an empty diff', () => {

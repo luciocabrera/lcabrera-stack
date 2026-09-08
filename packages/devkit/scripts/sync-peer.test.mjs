@@ -1,11 +1,13 @@
 import { describe, expect, test } from 'vite-plus/test';
 
 import { countsFor, renderPlan } from './command-materialise.mjs';
-import { DEFAULT_CONFIG } from './config.mjs';
 import { isRecorded, isReported, isWritten } from './manifest.mjs';
-import { manifestAfter, planSync } from './sync.mjs';
-
-const emptyManifest = { files: {} };
+import { manifestAfter } from './sync.mjs';
+import {
+  outcomePerSpelling,
+  planWith,
+  samePerSpelling,
+} from './test-fixtures.mjs';
 
 const declaringAsset = {
   content: [
@@ -20,24 +22,18 @@ const declaringAsset = {
 };
 
 const planFor = (versions) =>
-  planSync({
+  planWith({
     assets: [declaringAsset],
-    config: DEFAULT_CONFIG,
-    manifest: emptyManifest,
-    onDiskHash: () => undefined,
     peerVersions: versions,
   });
 const outcome = ([spelling, lines]) => {
-  const [entry] = planSync({
+  const [entry] = planWith({
     assets: [
       {
         content: ['---', ...lines, '---', '', 'Body.'].join('\n'),
         path: 'skills/demo/SKILL.md',
       },
     ],
-    config: DEFAULT_CONFIG,
-    manifest: emptyManifest,
-    onDiskHash: () => undefined,
     peerVersions: new Map([['@lcabrera/repo-standards', '2.0.0']]),
   });
   return [spelling, { missing: entry.missing, state: entry.state }];
@@ -93,37 +89,23 @@ describe('planSync and a declared peer', () => {
       'flow array': ["peer: ['@lcabrera/repo-standards@>=0.1.0 <1.0.0']"],
       scalar: ["peer: '@lcabrera/repo-standards@>=0.1.0 <1.0.0'"],
     };
-    expect(
-      Object.fromEntries(
-        Object.entries(spellings).map((value) => outcome(value)),
-      ),
-    ).toEqual(
-      Object.fromEntries(
-        Object.keys(spellings).map((spelling) => [
-          spelling,
-          {
-            missing: [
-              '@lcabrera/repo-standards@>=0.1.0 <1.0.0 (installed 2.0.0)',
-            ],
-            state: 'unmet',
-          },
-        ]),
-      ),
+    expect(outcomePerSpelling(spellings, outcome)).toEqual(
+      samePerSpelling(spellings, {
+        missing: ['@lcabrera/repo-standards@>=0.1.0 <1.0.0 (installed 2.0.0)'],
+        state: 'unmet',
+      }),
     );
   });
 
   test('a plan built without any resolution refuses rather than writes', () => {
-    const [entry] = planSync({
+    const [entry] = planWith({
       assets: [declaringAsset],
-      config: DEFAULT_CONFIG,
-      manifest: emptyManifest,
-      onDiskHash: () => undefined,
     });
     expect(entry.state).toBe('unmet');
   });
 
   test('an unmet config key is still reported first, and as itself', () => {
-    const [entry] = planSync({
+    const [entry] = planWith({
       assets: [
         {
           content: [
@@ -135,9 +117,6 @@ describe('planSync and a declared peer', () => {
           path: 'skills/demo/SKILL.md',
         },
       ],
-      config: DEFAULT_CONFIG,
-      manifest: emptyManifest,
-      onDiskHash: () => undefined,
       peerVersions: new Map(),
     });
     expect(entry.unmetKind).toBe('config');

@@ -29,27 +29,13 @@ import { fileURLToPath } from 'node:url';
 import { readStdin } from './cli-input.mjs';
 import { readCoordinationPaths } from './config.mjs';
 import { readEntries } from './coordination-read.mjs';
+import { parsePullRequests } from './gh-exec.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 const { tasksDir: TASKS_DIR } = readCoordinationPaths(REPO_ROOT);
-
-const parsePullRequests = (raw) => {
-  if (!raw.trim()) {
-    return [];
-  }
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    process.stderr.write(
-      '  ⚠ could not parse `gh pr list` JSON — showing claims only.\n',
-    );
-    return [];
-  }
-};
 
 const FAILING = new Set([
   'ACTION_REQUIRED',
@@ -136,7 +122,9 @@ const printUnclaimedPrs = (pullRequests, claimedBranches) => {
 
 const main = async () => {
   const tasks = readEntries(TASKS_DIR);
-  const pullRequests = parsePullRequests(await readStdin());
+  const pullRequests = parsePullRequests(await readStdin(), {
+    warning: '  ⚠ could not parse `gh pr list` JSON — showing claims only.\n',
+  });
   const byBranch = new Map(pullRequests.map((pr) => [pr.headRefName, pr]));
   const byNumber = new Map(pullRequests.map((pr) => [String(pr.number), pr]));
 

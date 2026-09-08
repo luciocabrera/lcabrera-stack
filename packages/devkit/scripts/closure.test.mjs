@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vite-plus/test';
 
 import { analyseClosure, classifyLink, classifyPathToken } from './closure.mjs';
+import { escapeKinds, escapingSkillFiles } from './test-fixtures.mjs';
 
 describe('classifyLink', () => {
   const rootDirectory = 'skills/epic';
@@ -118,30 +119,10 @@ describe('analyseClosure', () => {
   });
 
   test('reports a link, a command and an import as distinct kinds', () => {
-    const files = [
-      {
-        content: [
-          'Read [the contract](../../docs/agents/contract.md).',
-          '',
-          '```bash',
-          'vp run test',
-          '```',
-        ].join('\n'),
-        path: 'skills/epic/SKILL.md',
-      },
-      {
-        content:
-          "import { scan } from '@repo/example-scan/deterministic-scan';",
-        path: 'skills/epic/scripts/run.mjs',
-      },
-    ];
+    const files = escapingSkillFiles();
 
     const { escapes } = analyseClosure({ files, rootDirectory });
-    expect(
-      escapes
-        .map((finding) => finding.kind)
-        .toSorted((left, right) => left.localeCompare(right)),
-    ).toEqual(['command', 'import', 'link']);
+    expect(escapeKinds(escapes)).toEqual(['command', 'import', 'link']);
     expect(escapes.find((finding) => finding.kind === 'link')?.resolved).toBe(
       'docs/agents/contract.md',
     );

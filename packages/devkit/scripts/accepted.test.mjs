@@ -9,6 +9,7 @@ import {
   serialiseAccepted,
   withAccepted,
 } from './accepted.mjs';
+import { serialisationFacts } from './test-fixtures.mjs';
 
 const PATH = '.github/skills/demo/SKILL.md';
 const EDIT = 'a'.repeat(64);
@@ -60,8 +61,10 @@ describe('serialiseAccepted', () => {
       'a.md': { hash: OTHER_EDIT, reason: 'y' },
       'b.md': { hash: EDIT, reason: 'x' },
     });
-    expect(raw.indexOf('a.md')).toBeLessThan(raw.indexOf('b.md'));
-    expect(raw.endsWith('\n')).toBe(true);
+    expect(serialisationFacts(raw, ['a.md', 'b.md'])).toEqual({
+      endsWithNewline: true,
+      ordered: true,
+    });
   });
 });
 

@@ -3,21 +3,22 @@ import { describe, expect, test } from 'vite-plus/test';
 import { DEFAULT_CONFIG } from './config.mjs';
 import { hashContent, isRecorded, isReported, isWritten } from './manifest.mjs';
 import { manifestAfter, planSync } from './sync.mjs';
+import {
+  noFilesManifest,
+  outcomePerSpelling,
+  planWith,
+  samePerSpelling,
+} from './test-fixtures.mjs';
 
 const assets = [
   { content: 'epic body', path: 'skills/epic/SKILL.md' },
   { content: 'testing body', path: 'rules/testing.md' },
 ];
 
-const emptyManifest = { files: {} };
-
 describe('planSync', () => {
   test('maps each asset onto the directory its group configures', () => {
-    const plan = planSync({
+    const plan = planWith({
       assets,
-      config: DEFAULT_CONFIG,
-      manifest: emptyManifest,
-      onDiskHash: () => undefined,
     });
     expect(plan.map((entry) => entry.path)).toEqual([
       '.github/skills/epic/SKILL.md',
@@ -31,7 +32,7 @@ describe('planSync', () => {
     const plan = planSync({
       assets: [{ content: 'x', path: 'hooks/pre-push' }],
       config,
-      manifest: emptyManifest,
+      manifest: noFilesManifest,
       onDiskHash: () => undefined,
     });
     expect(plan).toEqual([]);
@@ -62,16 +63,13 @@ describe('planSync', () => {
   });
 });
 const outcome = ([spelling, lines]) => {
-  const [entry] = planSync({
+  const [entry] = planWith({
     assets: [
       {
         content: ['---', ...lines, '---', '', 'Body.'].join('\n'),
         path: 'skills/demo/SKILL.md',
       },
     ],
-    config: DEFAULT_CONFIG,
-    manifest: emptyManifest,
-    onDiskHash: () => undefined,
   });
   return [spelling, { missing: entry.missing, state: entry.state }];
 };
@@ -93,7 +91,7 @@ describe('planSync and a declared config requirement', () => {
     planSync({
       assets: [declaringAsset],
       config,
-      manifest: emptyManifest,
+      manifest: noFilesManifest,
       onDiskHash: () => undefined,
     });
 
@@ -127,7 +125,7 @@ describe('planSync and a declared config requirement', () => {
     const [entry] = planSync({
       assets: [asset],
       config: { ...DEFAULT_CONFIG, commands: { install: 'vp install' } },
-      manifest: emptyManifest,
+      manifest: noFilesManifest,
       onDiskHash: () => undefined,
     });
     expect(entry.missing).toEqual(['commands.claim']);
@@ -144,11 +142,8 @@ describe('planSync and a declared config requirement', () => {
       ].join('\n'),
       path: 'skills/demo/SKILL.md',
     };
-    const [entry] = planSync({
+    const [entry] = planWith({
       assets: [asset],
-      config: DEFAULT_CONFIG,
-      manifest: emptyManifest,
-      onDiskHash: () => undefined,
     });
     expect(entry.state).toBe('unmet');
     expect(entry.missing).toEqual(['paths.dashboards']);
@@ -160,17 +155,11 @@ describe('planSync and a declared config requirement', () => {
       'flow array': ['requires: [config.commands.install]'],
       scalar: ['requires: config.commands.install'],
     };
-    expect(
-      Object.fromEntries(
-        Object.entries(spellings).map((value) => outcome(value)),
-      ),
-    ).toEqual(
-      Object.fromEntries(
-        Object.keys(spellings).map((spelling) => [
-          spelling,
-          { missing: ['commands.install'], state: 'unmet' },
-        ]),
-      ),
+    expect(outcomePerSpelling(spellings, outcome)).toEqual(
+      samePerSpelling(spellings, {
+        missing: ['commands.install'],
+        state: 'unmet',
+      }),
     );
   });
 

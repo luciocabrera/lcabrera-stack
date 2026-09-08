@@ -11,6 +11,7 @@ import {
   parseManifest,
   serialiseManifest,
 } from './manifest.mjs';
+import { serialisationFacts } from './test-fixtures.mjs';
 
 const A = hashContent('a');
 const B = hashContent('b');
@@ -186,7 +187,9 @@ describe('serialiseManifest', () => {
       packageVersion: '1.0.0',
       version: 1,
     });
-    expect(raw.indexOf('a.md')).toBeLessThan(raw.indexOf('b.md'));
-    expect(raw.endsWith('\n')).toBe(true);
+    expect(serialisationFacts(raw, ['a.md', 'b.md'])).toEqual({
+      endsWithNewline: true,
+      ordered: true,
+    });
   });
 });
