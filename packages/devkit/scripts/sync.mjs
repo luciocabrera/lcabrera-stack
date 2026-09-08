@@ -164,15 +164,15 @@ const needsExecutableBit = (entry) =>
   entry.executable === true && isRecorded(entry.state);
 
 export const applySync = ({ entries, root }) => {
-  for (const entry of entries.filter((candidate) =>
-    isWritten(candidate.state),
-  )) {
+  for (const entry of entries) {
+    if (!isWritten(entry.state)) continue;
     const destination = join(root, entry.path);
     mkdirSync(dirname(destination), { recursive: true });
     writeFileSync(destination, entry.content);
   }
 
-  for (const entry of entries.filter((value) => needsExecutableBit(value))) {
+  for (const entry of entries) {
+    if (!needsExecutableBit(entry)) continue;
     chmodSync(join(root, entry.path), EXECUTABLE_MODE);
   }
 };

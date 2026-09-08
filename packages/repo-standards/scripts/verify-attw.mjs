@@ -70,7 +70,8 @@ const main = async () => {
       (packageConfig) =>
         `${packageConfig.name}: no dist/, so its published types were not checked — build the packages first.`,
     );
-  for (const packageConfig of packages.filter((value) => isBuilt(value))) {
+  for (const packageConfig of packages) {
+    if (!isBuilt(packageConfig)) continue;
     failures.push(...(await checkResolution(packageConfig)));
   }
 

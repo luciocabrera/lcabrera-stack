@@ -148,9 +148,13 @@ const scaffold = ({ absolute, profile, target }) => {
       notice: abandonedNotice({ target }),
     });
   }
+  const manifest = initialManifest({
+    name: packageNameFor(basename(absolute)),
+    profile,
+  });
   writeFileSync(
     join(absolute, 'package.json'),
-    `${JSON.stringify(initialManifest({ name: packageNameFor(basename(absolute)), profile }), undefined, 2)}\n`,
+    `${JSON.stringify(manifest, undefined, 2)}\n`,
   );
 
   const code = applyInit({

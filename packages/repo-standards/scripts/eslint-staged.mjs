@@ -72,7 +72,8 @@ export const findConfigDirectory = ({
 
 export const planLintGroups = ({ exists = existsSync, paths, repoRoot }) => {
   const groups = new Map();
-  for (const filePath of paths.filter((value) => isLintablePath(value))) {
+  for (const filePath of paths) {
+    if (!isLintablePath(filePath)) continue;
     const directory = findConfigDirectory({ exists, filePath, repoRoot });
     if (directory === undefined) continue;
     const files = groups.get(directory) ?? [];

@@ -154,10 +154,10 @@ async function runLighthouse(url) {
     const { categories } = scores;
 
     logStep('Lighthouse Scores:');
-    Object.entries(categories).forEach(([name, data]) => {
+    for (const [name, data] of Object.entries(categories)) {
       const score = Math.round(data.score * 100);
       log(`  ${name}: ${score}/100`, getScoreColor(score));
-    });
+    }
 
     return scores;
   } finally {

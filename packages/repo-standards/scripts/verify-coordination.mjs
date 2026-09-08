@@ -141,7 +141,9 @@ const checkBranchSchema = (branches, problems) => {
 
 const liveByBranch = (tasks) => {
   const byBranch = new Map();
-  for (const { data } of tasks.filter((value) => isLive(value))) {
+  for (const task of tasks) {
+    if (!isLive(task)) continue;
+    const { data } = task;
     if (!NO_BRANCH.has(data.branch)) {
       byBranch.set(data.branch, [
         ...(byBranch.get(data.branch) ?? []),

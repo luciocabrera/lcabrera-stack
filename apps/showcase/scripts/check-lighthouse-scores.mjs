@@ -44,7 +44,7 @@ async function checkLighthouseScores(reportPath) {
   let isAllPassed = true;
   const results = [];
 
-  Object.entries(categories).forEach(([category, data]) => {
+  for (const [category, data] of Object.entries(categories)) {
     const currentScore = Math.round(data.score * 100);
     const threshold = thresholds[category] || 0;
     const baselineScore = baselineScores[category] || 0;
@@ -70,7 +70,7 @@ async function checkLighthouseScores(reportPath) {
       passed: isPassed,
       threshold,
     });
-  });
+  }
 
   log('\n📈 Comparison to Baseline:', colors.blue);
   for (const { baseline: base, category, current } of results) {
@@ -88,15 +88,14 @@ async function checkLighthouseScores(reportPath) {
 
   log('\n❌ Some scores are below thresholds', colors.red);
   log('\nFailed categories:', colors.red);
-  results
-    .filter((result) => !result.passed)
-    .forEach(({ category, current, threshold }) => {
-      const gap = threshold - current;
-      log(
-        `  • ${category}: ${current}/100 (need +${gap} to reach ${threshold})`,
-        colors.red,
-      );
-    });
+  for (const { category, current, passed, threshold } of results) {
+    if (passed) continue;
+    const gap = threshold - current;
+    log(
+      `  • ${category}: ${current}/100 (need +${gap} to reach ${threshold})`,
+      colors.red,
+    );
+  }
   return false;
 }
 
