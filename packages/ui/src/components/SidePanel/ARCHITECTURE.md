@@ -277,9 +277,19 @@ Used heavily in Table settings drawers:
 right of a left-hand one — and the consumer says how wide the panel is through
 `width`, which overrides the `size` variant.
 
-A panel that has never been resized carries no `width`, so it paints from its
-`size` variant; `useSidePanelHostWidth` measures the host element and the handle
-starts its gesture there, rather than from the band's floor. The imperative half
+**The handle speaks for the width the panel paints, not the width it was told.**
+`useSidePanelHostWidth` measures the host element and that measurement wins: a
+panel that has never been resized carries no `width` at all and paints from its
+`size` variant, and a panel handed a stored width wider than the CSS ceiling
+paints the ceiling. Starting a gesture from either declared value would snap the
+edge on the first move. It measures `offsetWidth` rather than `clientWidth`
+because the panel has a border and the width written back is a border-box one.
+
+**The grab strip sits inside the panel, and it has to.** Both delegates set
+`overflow: hidden` on the panel element, which is also the handle's containing
+block — so a strip straddling the edge with a negative offset is clipped to half
+its declared width, indicator included. The strip starts at the panel's inner
+edge instead, and each position variant places the indicator on that edge. The imperative half
 of the gesture is `startHorizontalDragSession`, shared with the column splitter —
 the frame throttling, the `AbortController` teardown and the document's drag
 cursor were written twice before.

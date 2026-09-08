@@ -19,7 +19,7 @@ export const useSidePanelHostWidth = ({ ref }: UseSidePanelHostWidthArgs) => {
 
   const getTarget = () => ref.current?.parentElement;
   const onMeasure = (element: HTMLElement) => {
-    const measured = element.clientWidth;
+    const measured = element.offsetWidth;
 
     setHostWidth((previous) => (previous === measured ? previous : measured));
   };

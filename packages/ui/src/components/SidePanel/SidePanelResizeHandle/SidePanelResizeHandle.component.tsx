@@ -20,8 +20,8 @@ export const SidePanelResizeHandle = ({
 }: SidePanelResizeHandleProps) => {
   const handleRef = useRef<HTMLButtonElement>(null);
   const hostWidth = useSidePanelHostWidth({ ref: handleRef });
-  const paintedWidth = hostWidth > 0 ? hostWidth : SIDE_PANEL_MIN_WIDTH;
-  const currentWidth = width ?? paintedWidth;
+  const currentWidth =
+    hostWidth > 0 ? hostWidth : (width ?? SIDE_PANEL_MIN_WIDTH);
 
   const { bounds, isResizing, onKeyDown, onMouseDown } = useSidePanelResize({
     onWidthChange,

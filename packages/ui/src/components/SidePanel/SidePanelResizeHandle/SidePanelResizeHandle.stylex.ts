@@ -29,7 +29,6 @@ export const styles = stylex.create({
       content: '',
       position: 'absolute',
       bottom: 0,
-      left: 4,
       top: 0,
       width: 2,
     },
@@ -39,10 +38,18 @@ export const styles = stylex.create({
   },
   left: {
     left: 'auto',
-    right: -5,
+    right: 0,
+    '::before': {
+      left: 'auto',
+      right: 0,
+    },
   },
   right: {
-    left: -5,
+    left: 0,
     right: 'auto',
+    '::before': {
+      left: 0,
+      right: 'auto',
+    },
   },
 });

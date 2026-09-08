@@ -205,7 +205,7 @@ describe('SidePanel', () => {
     );
 
     const handle = screen.getByTestId('side-panel-resize-handle');
-    Object.defineProperty(handle.parentElement, 'clientWidth', {
+    Object.defineProperty(handle.parentElement, 'offsetWidth', {
       configurable: true,
       value: 416,
     });
@@ -217,6 +217,32 @@ describe('SidePanel', () => {
     fireEvent.keyDown(handle, { key: 'ArrowLeft' });
 
     expect(onWidthChange).toHaveBeenCalledWith(432);
+  });
+
+  it('reports the width it paints, not a stored one the CSS has clamped', async () => {
+    const onWidthChange = vi.fn();
+
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={onWidthChange}
+        width={2000}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    const handle = screen.getByTestId('side-panel-resize-handle');
+    Object.defineProperty(handle.parentElement, 'offsetWidth', {
+      configurable: true,
+      value: 900,
+    });
+
+    await act(async () => {});
+
+    expect(handle.getAttribute('aria-valuenow')).toBe('900');
   });
 
   it('names the splitter for the package, and lets a consumer say otherwise', () => {
