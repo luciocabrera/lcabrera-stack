@@ -6,7 +6,9 @@
  * ships verbatim and the manifest records its hash. The root `package.json` is
  * not: it carries the repository's own name, which only `create` knows. So the
  * fields below are merged into the manifest create writes, and a name a consumer
- * already chose is never overwritten.
+ * already chose is never overwritten. The task list is the one part a later run
+ * still reconciles, key by key — `tasks.mjs` — because a block of names is
+ * mergeable where the rest of the manifest is not.
  *
  * The versions are deliberately absent. Every dependency here resolves through
  * `catalog:`, so `pnpm-workspace.yaml` is the one place a version is declared
@@ -57,19 +59,38 @@ export const WORKSPACE_DEPENDENCIES = {
   'vite-plus': 'catalog:build',
 };
 
-export const WORKSPACE_SCRIPTS = {
-  check: 'vp check',
-  'format:all': 'vp fmt .',
-  'format:check': 'vp fmt --check .',
-  'lint:all': 'vp lint . --fix && vp run lint:biome',
-  'lint:biome': 'biome lint . --write',
-  'lint:biome:check': 'biome lint .',
-  'lint:check': 'vp lint . && vp run lint:biome:check',
-  prepare: 'vp run tsconfig:generate',
-  'test:all': 'vp run -r test',
-  'tsconfig:generate': `vp run --filter ${TSCONFIG_WORKSPACE} generate && vp fmt '${GENERATED_TSCONFIGS}'`,
-  'typecheck:all': 'tsc --noEmit -p tsconfig.app.json && vp run -r typecheck',
-};
+/**
+ * The tasks the rung wires, as the list they are rather than as a block.
+ *
+ * One list, in name order, is what lets a consumer's manifest be reconciled key
+ * by key instead of written once and never looked at again: `tasks.mjs` reads
+ * it, and `COMMANDS.md` documents every name in it.
+ *
+ * @type {ReadonlyArray<{ command: string, name: string }>}
+ */
+export const WORKSPACE_TASKS = [
+  { command: 'vp check', name: 'check' },
+  { command: 'vp fmt .', name: 'format:all' },
+  { command: 'vp fmt --check .', name: 'format:check' },
+  { command: 'vp lint . --fix && vp run lint:biome', name: 'lint:all' },
+  { command: 'biome lint . --write', name: 'lint:biome' },
+  { command: 'biome lint .', name: 'lint:biome:check' },
+  { command: 'vp lint . && vp run lint:biome:check', name: 'lint:check' },
+  { command: 'vp run tsconfig:generate', name: 'prepare' },
+  { command: 'vp run -r test', name: 'test:all' },
+  {
+    command: `vp run --filter ${TSCONFIG_WORKSPACE} generate && vp fmt '${GENERATED_TSCONFIGS}'`,
+    name: 'tsconfig:generate',
+  },
+  {
+    command: 'tsc --noEmit -p tsconfig.app.json && vp run -r typecheck',
+    name: 'typecheck:all',
+  },
+];
+
+export const WORKSPACE_SCRIPTS = Object.fromEntries(
+  WORKSPACE_TASKS.map(({ command, name }) => [name, command]),
+);
 
 /**
  * The manifest fields the rung adds, over whatever the caller already has.

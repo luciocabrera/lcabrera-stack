@@ -12,6 +12,12 @@
  * A deliberate local edit is a supported state, not a defect. It is reported on
  * every run and never overwritten, which is the escape valve that stops a
  * consumer forking the kit to change one line.
+ *
+ * The manifest records tasks beside files, for the same reason and by the same
+ * rule: the manifest is written before anything is installed, so a task block
+ * with no record of what this kit last wrote there cannot tell an addition it
+ * owes a consumer from an edit it would destroy. `tasks.mjs` decides; this file
+ * holds the record.
  */
 
 import { createHash } from 'node:crypto';
@@ -69,6 +75,7 @@ export const isAcknowledged = (state) => state === ACKNOWLEDGED_STATE;
 export const emptyManifest = (version) => ({
   files: {},
   packageVersion: version,
+  tasks: {},
   version: MANIFEST_VERSION,
 });
 
@@ -94,6 +101,7 @@ export const parseManifest = (raw, version) => {
         typeof parsed.packageVersion === 'string'
           ? parsed.packageVersion
           : version,
+      tasks: readableEntries(parsed.tasks),
       version: MANIFEST_VERSION,
     };
   } catch {
@@ -101,7 +109,7 @@ export const parseManifest = (raw, version) => {
   }
 };
 
-export const nextManifest = ({ entries, previous, version }) => {
+export const nextManifest = ({ entries, previous, tasks, version }) => {
   const files = entries.reduce(
     (accumulated, entry) => {
       if (isRecorded(entry.state)) accumulated[entry.path] = entry.incomingHash;
@@ -109,20 +117,31 @@ export const nextManifest = ({ entries, previous, version }) => {
     },
     { ...previous.files },
   );
-  return { files, packageVersion: version, version: MANIFEST_VERSION };
+  return {
+    files,
+    packageVersion: version,
+    tasks: tasks ?? previous.tasks ?? {},
+    version: MANIFEST_VERSION,
+  };
 };
 
-export const serialiseManifest = (manifest) =>
-  `${JSON.stringify(
+const sortedByKey = (record) =>
+  Object.fromEntries(
+    Object.entries(record ?? {}).toSorted(([left], [right]) =>
+      left.localeCompare(right),
+    ),
+  );
+
+export const serialiseManifest = (manifest) => {
+  const tasks = sortedByKey(manifest.tasks);
+  return `${JSON.stringify(
     {
-      files: Object.fromEntries(
-        Object.entries(manifest.files).toSorted(([left], [right]) =>
-          left.localeCompare(right),
-        ),
-      ),
+      files: sortedByKey(manifest.files),
       packageVersion: manifest.packageVersion,
+      ...(Object.keys(tasks).length > 0 && { tasks }),
       version: manifest.version,
     },
     undefined,
     2,
   )}\n`;
+};

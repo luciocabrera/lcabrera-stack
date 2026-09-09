@@ -3,25 +3,38 @@
  * the consumer's state, produce the plan, and — for the two commands that
  * write — apply it and record what was written. All three render the same plan.
  *
+ * The plan covers the task block as well as the files. It is the same tree
+ * being materialised, so a command that reconciled the tasks by its own route
+ * would be a second answer to the question this module exists to have one
+ * answer to.
+ *
  * Applying lives here rather than in each command because `init` is `sync` plus
  * wiring. Written twice, the two drift, and the way that shows up is an `init`
  * whose files a later `doctor` does not recognise: a repository reporting drift
  * on the day it was set up.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { ACCEPTED_FILE, parseAccepted } from './accepted.mjs';
 import {
   CONFIG_FILE_NAME,
+  includesRung,
   isExecutableAsset,
   placementNotice,
   resolveConfig,
   withProfile,
 } from './config.mjs';
 import { readFilesUnder } from './files.mjs';
+import {
+  blueprintDependentTasks,
+  GATE_TASKS,
+  tasksFor,
+  unmetCommandKeys,
+  withheldTasks,
+} from './init.mjs';
 import {
   isAcknowledged,
   isReported,
@@ -38,11 +51,95 @@ import {
   planSync,
   withAcceptance,
 } from './sync.mjs';
+import {
+  hasTasksFromKit,
+  isTaskWritten,
+  planTasks,
+  recordedTasks,
+  renderTasks,
+  scriptsAfterTasks,
+} from './tasks.mjs';
+import { WORKSPACE_SCRIPTS } from './workspace.mjs';
 
 const packageRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 
+const PACKAGE_MANIFEST = 'package.json';
+
 const readIfPresent = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
+
+const readJsonIfPresent = (path) => {
+  const raw = readIfPresent(path);
+  return raw === undefined ? undefined : JSON.parse(raw);
+};
+
+const installedBins = (root) => {
+  const binDir = join(root, 'node_modules', '.bin');
+  return existsSync(binDir) ? readdirSync(binDir) : [];
+};
+
+/**
+ * The two sets of tasks a run reconciles, and which of them it may establish.
+ *
+ * `init` is the command that wires the gate tasks into a repository, so it is
+ * the one that may write them where the manifest holds none. The blueprint's
+ * block is never established here: it names binaries only the manifest `create`
+ * writes declares, so a repository that took the rung without them would be
+ * handed tasks that cannot run.
+ *
+ * A gate task that checks what the blueprint places is withheld from a manifest
+ * that does not hold the blueprint, for the same reason a task whose bin is
+ * missing is: it would be wired and failing on the day it arrived.
+ *
+ * @param {{ config: object, establish: boolean, root: string,
+ *           scripts?: Record<string, string>, recorded?: Record<string, string> }} args
+ */
+const taskGroups = ({ config, establish, recorded, root, scripts }) => {
+  const { profile } = config;
+  const blueprint = includesRung({ profile, rung: 'monorepo' });
+  const withoutBlueprint =
+    blueprint &&
+    hasTasksFromKit({ recorded, scripts, tasks: WORKSPACE_SCRIPTS })
+      ? []
+      : blueprintDependentTasks({ profile });
+  const gate = {
+    establish,
+    tasks: tasksFor({ profile }),
+    withheld: new Set([
+      ...withheldTasks({ availableBins: installedBins(root), profile }),
+      ...withoutBlueprint,
+    ]),
+  };
+  return blueprint ? [gate, { tasks: WORKSPACE_SCRIPTS }] : [gate];
+};
+
+const EVERY_TASK_NAME = [
+  ...Object.keys(GATE_TASKS),
+  ...Object.keys(WORKSPACE_SCRIPTS),
+];
+
+/**
+ * A repository with no manifest gets no task plan at all, rather than a plan
+ * nothing can apply: recording tasks as written into a file that does not exist
+ * would leave the record claiming what the tree does not have.
+ */
+const plannedTasks = ({ config, establish, manifest, root }) => {
+  const packageManifest = readJsonIfPresent(join(root, PACKAGE_MANIFEST));
+  if (packageManifest === undefined) return [];
+  const scripts = packageManifest.scripts;
+  return planTasks({
+    groups: taskGroups({
+      config,
+      establish,
+      recorded: manifest.tasks,
+      root,
+      scripts,
+    }),
+    recorded: manifest.tasks,
+    scripts,
+    shipped: EVERY_TASK_NAME,
+  });
+};
 
 const packageVersion = () =>
   JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')).version;
@@ -65,7 +162,7 @@ const resolvePeerVersions = (assets) =>
     ]),
   );
 
-export const buildPlan = ({ profile, root }) => {
+export const buildPlan = ({ establish = false, profile, root }) => {
   const configured = resolveConfig(readIfPresent(join(root, CONFIG_FILE_NAME)));
   const config =
     profile === undefined
@@ -87,16 +184,51 @@ export const buildPlan = ({ profile, root }) => {
       peerVersions: resolvePeerVersions(assets),
     }),
   });
-  return { accepted, config, entries, manifest };
+  return {
+    accepted,
+    config,
+    entries,
+    manifest,
+    tasks: plannedTasks({ config, establish, manifest, root }),
+  };
 };
 
-export const nextManifestFor = ({ entries, manifest }) =>
-  manifestAfter({ entries, previous: manifest, version: packageVersion() });
+const nextManifestFor = ({ entries, manifest, tasks = [] }) =>
+  manifestAfter({
+    entries,
+    previous: manifest,
+    tasks: recordedTasks({ entries: tasks, recorded: manifest.tasks }),
+    version: packageVersion(),
+  });
 
-export const applyPlan = ({ entries, manifest, root }) => {
+const applyTasks = ({ root, tasks }) => {
+  if (tasks.every((entry) => !isTaskWritten(entry.state))) return;
+  const path = join(root, PACKAGE_MANIFEST);
+  const packageManifest = readJsonIfPresent(path);
+  if (packageManifest === undefined) return;
+  writeFileSync(
+    path,
+    `${JSON.stringify(
+      {
+        ...packageManifest,
+        scripts: scriptsAfterTasks({
+          entries: tasks,
+          scripts: packageManifest.scripts,
+        }),
+      },
+      undefined,
+      2,
+    )}\n`,
+  );
+};
+
+export const applyPlan = ({ entries, manifest, root, tasks = [] }) => {
   applySync({ entries, root });
+  applyTasks({ root, tasks });
 
-  const updated = serialiseManifest(nextManifestFor({ entries, manifest }));
+  const updated = serialiseManifest(
+    nextManifestFor({ entries, manifest, tasks }),
+  );
   if (updated !== serialiseManifest(manifest)) {
     writeFileSync(join(root, MANIFEST_FILE), updated);
   }
@@ -154,6 +286,31 @@ export const renderPlan = (entries, { verbose = false } = {}) => {
         `  ${entry.state.padEnd(STATE_COLUMN_WIDTH)} ${entry.path}  (${detailFor(entry)})`,
     )
     .join('\n');
+};
+
+/**
+ * What a run held back for want of a config key, and how to get it.
+ *
+ * Sync is the command every other report sends a reader to, and it is the one
+ * command that cannot clear this: the keys are written by `init`, so a reader
+ * told only to sync runs it, sees the same line, and has nowhere to go. It
+ * names the keys rather than counting them, because the reader's next step is
+ * to look for them.
+ *
+ * @param {{ missing?: string[], state: string }[]} entries
+ * @returns {string | undefined}
+ */
+export const unresolvedNotice = (entries) => {
+  const keys = unmetCommandKeys(entries);
+  if (keys.length === 0) return;
+  return `${keys.length} command key(s) your config does not set: ${keys.join(', ')}. The files that use them were not written, and \`devkit sync\` cannot supply them — run \`devkit init --upgrade\` to add the keys this version infers, keeping everything you have set, or write them into ${CONFIG_FILE_NAME} under "commands" yourself.`;
+};
+
+export const printTaskPlan = (tasks) => {
+  const report = renderTasks(tasks);
+  if (report !== undefined) {
+    console.log(`\nTasks in ${PACKAGE_MANIFEST}:\n${report}`);
+  }
 };
 
 export const printPlacementNotice = (profile) => {

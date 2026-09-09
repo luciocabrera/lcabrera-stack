@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vite-plus/test';
 
+import { PROFILE_LADDER } from './config.mjs';
 import {
   GATE_TASKS,
   initFailure,
@@ -7,9 +8,9 @@ import {
   initRefusal,
   initSummary,
   placedHooksPath,
-  scriptsAfter,
   tasksFor,
   unmetCommandKeys,
+  withheldTasks,
 } from './init.mjs';
 
 describe('initRefusal', () => {
@@ -118,78 +119,79 @@ describe('initialConfig', () => {
   });
 });
 
-describe('tasksFor', () => {
-  const allBins = [
-    ...new Set(Object.values(GATE_TASKS).map((task) => task.bin)),
-  ];
+const allBins = [...new Set(Object.values(GATE_TASKS).map((task) => task.bin))];
 
-  test('writes a task only for a bin that is actually installed', () => {
-    expect(tasksFor({ availableBins: ['devkit'], profile: 'agent' })).toEqual({
+describe('tasksFor', () => {
+  test('names every task the rung wires, whatever is installed', () => {
+    expect(tasksFor({ profile: 'agent' })).toEqual({
+      'branch:verify': 'repo-verify-branch',
+      'commit:verify': 'repo-verify-commit',
+      'coordination:close': 'repo-close-claim',
+      'coordination:verify': 'repo-verify-claims',
       'devkit:check': 'devkit doctor --check',
       'devkit:sync': 'devkit sync',
     });
   });
 
   test('holds back the tasks whose inputs only arrive at the repo rung', () => {
-    const agent = tasksFor({ availableBins: allBins, profile: 'agent' });
+    const agent = tasksFor({ profile: 'agent' });
     expect(Object.hasOwn(agent, 'adr:verify')).toBe(false);
     expect(Object.hasOwn(agent, 'pr:verify')).toBe(false);
     expect(Object.hasOwn(agent, 'commit:verify')).toBe(true);
   });
 
   test('the repo rung adds them', () => {
-    const repo = tasksFor({ availableBins: allBins, profile: 'repo' });
+    const repo = tasksFor({ profile: 'repo' });
     expect(repo['adr:verify']).toBe('repo-verify-adrs');
     expect(repo['adr:list']).toBe('repo-verify-adrs --list');
     expect(repo['pr:verify']).toBe('repo-verify-pr');
   });
 
-  test('a rung above repo writes every task repo writes', () => {
-    const repo = tasksFor({ availableBins: allBins, profile: 'repo' });
-    expect(tasksFor({ availableBins: allBins, profile: 'monorepo' })).toEqual(
-      repo,
+  test('a rung above repo writes every task repo writes, and its own', () => {
+    const repo = tasksFor({ profile: 'repo' });
+    const monorepo = tasksFor({ profile: 'monorepo' });
+    expect(monorepo).toMatchObject(repo);
+    expect(Object.keys(monorepo).length).toBeGreaterThan(
+      Object.keys(repo).length,
     );
-    expect(tasksFor({ availableBins: allBins, profile: 'full' })).toEqual(repo);
+    expect(tasksFor({ profile: 'full' })).toEqual(monorepo);
   });
 
   test('every gate task names a rung on the ladder', () => {
     for (const task of Object.values(GATE_TASKS)) {
-      expect(['agent', 'repo']).toContain(task.rung);
+      expect(PROFILE_LADDER).toContain(task.rung);
     }
   });
 
   test('an unknown profile writes nothing rather than everything', () => {
-    expect(tasksFor({ availableBins: allBins, profile: 'agnet' })).toEqual({});
+    expect(tasksFor({ profile: 'agnet' })).toEqual({});
   });
 });
 
-describe('scriptsAfter', () => {
-  test("keeps the consumer's own task of the same name and reports it", () => {
+describe('withheldTasks', () => {
+  test('names the rung tasks whose bin is not installed, and no other', () => {
     expect(
-      scriptsAfter({
-        existing: { build: 'tsc', 'commit:verify': 'my-own-checker' },
-        tasks: {
-          'branch:verify': 'repo-verify-branch',
-          'commit:verify': 'repo-verify-commit',
-        },
-      }),
-    ).toEqual({
-      added: ['branch:verify'],
-      scripts: {
-        'branch:verify': 'repo-verify-branch',
-        build: 'tsc',
-        'commit:verify': 'my-own-checker',
-      },
-      skipped: ['commit:verify'],
-    });
+      withheldTasks({ availableBins: ['devkit'], profile: 'agent' }).toSorted(
+        (left, right) => left.localeCompare(right),
+      ),
+    ).toEqual([
+      'branch:verify',
+      'commit:verify',
+      'coordination:close',
+      'coordination:verify',
+    ]);
   });
 
-  test('an absent script block is the same as an empty one', () => {
-    expect(scriptsAfter({ tasks: { 'devkit:sync': 'devkit sync' } })).toEqual({
-      added: ['devkit:sync'],
-      scripts: { 'devkit:sync': 'devkit sync' },
-      skipped: [],
-    });
+  test('withholds nothing when every bin resolves', () => {
+    expect(withheldTasks({ availableBins: allBins, profile: 'full' })).toEqual(
+      [],
+    );
+  });
+
+  test('never names a task the rung does not wire', () => {
+    const wired = new Set(Object.keys(tasksFor({ profile: 'agent' })));
+    const withheld = withheldTasks({ availableBins: [], profile: 'agent' });
+    for (const name of withheld) expect(wired.has(name)).toBe(true);
   });
 });
 

@@ -175,6 +175,7 @@ describe('nextManifest', () => {
     expect(nextManifest({ entries, previous, version: '2.0.0' })).toEqual({
       files: { 'adopted.md': A, 'kept.md': B, 'new.md': A, 'skipped.md': A },
       packageVersion: '2.0.0',
+      tasks: {},
       version: 1,
     });
   });

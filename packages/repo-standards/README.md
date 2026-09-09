@@ -140,6 +140,9 @@ one that cannot prevent anything.
 
 ```json
 {
+  "commands": {
+    "run": "npm run"
+  },
   "conventions": {
     "defaultBranch": "main",
     "sharedBranchesDir": "docs/coordination/branches"
@@ -166,6 +169,15 @@ one that cannot prevent anything.
   }
 }
 ```
+
+`commands.run` is how this repository runs a task by name, and the materialiser
+owns that block — one key, one home, since the same value answers the placeholder
+a shipped file carries. `repo-verify-commands` reads it to know how a task is
+spelled in your command reference, and to know where the list of tasks comes
+from: a runner that runs manifest scripts and nothing else is read from the
+manifests, while a toolchain that also resolves a config's own tasks is asked for
+its list. It defaults to the spelling that gate assumed before the key existed,
+so a repository that has never set it is read exactly as it was.
 
 `adrContentBaseline` is where the ADR gate keeps the records it grandfathers.
 It is held to the same containment rule as every other path here, and its default
