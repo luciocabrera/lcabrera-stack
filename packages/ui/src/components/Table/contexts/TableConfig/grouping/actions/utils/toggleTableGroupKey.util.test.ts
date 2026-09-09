@@ -15,6 +15,7 @@ describe('toggleTableGroupKey', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toStrictEqual({
@@ -23,6 +24,7 @@ describe('toggleTableGroupKey', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -36,6 +38,7 @@ describe('toggleTableGroupKey', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toStrictEqual({
@@ -44,6 +47,7 @@ describe('toggleTableGroupKey', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -54,6 +58,7 @@ describe('toggleTableGroupKey', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     };
 
     expect(toggleTableGroupKey({ columnKey: 'g', grouping }).keys).toHaveLength(
@@ -73,6 +78,7 @@ describe('toggleTableGroupKey', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }).aggregates,
     ).toStrictEqual(aggregates);
@@ -85,6 +91,7 @@ describe('toggleTableGroupKey', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }).aggregates,
     ).toStrictEqual(aggregates);
@@ -98,6 +105,7 @@ describe('toggleTableGroupKey', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     };
 
     toggleTableGroupKey({ columnKey: 'ship_country', grouping });

@@ -65,6 +65,7 @@ const NO_GROUPING: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 type GroupingArgs = {
@@ -87,6 +88,7 @@ const grouping = ({
   mode,
   periods,
   shares,
+  totalsPlacement: 'last',
 });
 
 beforeEach(() => {

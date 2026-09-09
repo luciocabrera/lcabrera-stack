@@ -12,11 +12,8 @@ import type {
 import { TableDrawerContext } from './TableDrawerContext.context';
 
 export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
-  const {
-    columnsStore: tableColumnsStore,
-    groupingStore: tableGroupingStore,
-    metaStore,
-  } = useTableConfigContextValue();
+  const { columnsStore: tableColumnsStore, groupingStore: tableGroupingStore } =
+    useTableConfigContextValue();
 
   const tableColumnsState = tableColumnsStore.get();
   const {
@@ -27,7 +24,8 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     columnVisibility,
     sorting,
   } = tableColumnsState;
-  const { aggregates, keys, mode, periods, shares } = tableGroupingStore.get();
+  const { aggregates, keys, mode, periods, shares, totalsPlacement } =
+    tableGroupingStore.get();
 
   const columnsStore = useStore<
     TableDrawerColumnsState<Record<string, unknown>>
@@ -45,9 +43,10 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     mode,
     periods,
     shares,
+    totalsPlacement,
   });
   const totalsPlacementStore = useStore<TableDrawerTotalsPlacementState>({
-    totalsPlacement: metaStore.get()?.totalsPlacement ?? 'last',
+    totalsPlacement,
   });
 
   return (

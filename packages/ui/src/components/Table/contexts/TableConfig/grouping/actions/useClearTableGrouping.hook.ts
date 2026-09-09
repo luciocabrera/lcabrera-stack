@@ -4,12 +4,13 @@ export const useClearTableGrouping = () => {
   const setGrouping = useSetTableGrouping();
 
   return () => {
-    setGrouping(() => ({
+    setGrouping((current) => ({
       aggregates: [],
       keys: [],
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: current.totalsPlacement,
     }));
   };
 };

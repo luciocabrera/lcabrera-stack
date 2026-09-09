@@ -29,6 +29,7 @@ const NO_GROUPING: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 type GroupingArgs = {
@@ -37,6 +38,7 @@ type GroupingArgs = {
   readonly mode?: TableGroupingState['mode'];
   readonly periods?: TableGroupingState['periods'];
   readonly shares?: TableGroupingState['shares'];
+  readonly totalsPlacement?: TableGroupingState['totalsPlacement'];
 };
 
 const grouping = ({
@@ -45,12 +47,14 @@ const grouping = ({
   mode = 'flat',
   periods = {},
   shares = [],
+  totalsPlacement = 'last',
 }: GroupingArgs): TableGroupingState => ({
   aggregates,
   keys,
   mode,
   periods,
   shares,
+  totalsPlacement,
 });
 
 describe('sanitizeGroupingByColumns', () => {
@@ -82,6 +86,7 @@ describe('sanitizeGroupingByColumns', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         }),
       }),
     ).toStrictEqual(
@@ -91,6 +96,7 @@ describe('sanitizeGroupingByColumns', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       }),
     );
   });
@@ -114,6 +120,7 @@ describe('sanitizeGroupingByColumns', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         }),
       }),
     ).toStrictEqual(NO_GROUPING);

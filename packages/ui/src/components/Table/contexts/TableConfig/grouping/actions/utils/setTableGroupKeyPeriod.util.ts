@@ -26,5 +26,6 @@ export const setTableGroupKeyPeriod = ({
       period === undefined ? remaining : [...remaining, [columnKey, period]],
     ),
     shares: grouping.shares,
+    totalsPlacement: grouping.totalsPlacement,
   };
 };

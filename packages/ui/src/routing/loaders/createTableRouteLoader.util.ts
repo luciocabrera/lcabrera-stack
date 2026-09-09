@@ -160,6 +160,10 @@ export const createTableRouteLoader = <
         sorting: sanitizedSorting,
       },
       dataPromise,
+      groupingState: {
+        ...grouping,
+        totalsPlacement,
+      },
       metaState: {
         ...metaUiFlags,
         appId,
@@ -170,12 +174,7 @@ export const createTableRouteLoader = <
         ...meta,
         defaultGroupFold: groupingPreferences.defaultFold,
         groupDetailsPath,
-        groupingAggregates: grouping.aggregates,
         groupingCapabilities,
-        groupingKeys: grouping.keys,
-        groupingMode: grouping.mode,
-        groupingPeriods: grouping.periods,
-        groupingShares: grouping.shares,
         hasDefaultGrouping:
           defaultGrouping !== undefined && capabilityMeta.isGroupingEnabled,
         isColumnLayoutTransient,
@@ -183,7 +182,6 @@ export const createTableRouteLoader = <
         lockedFilters: lockedFilters ?? declaredLockedFilters,
         preferredGroupingMode: groupingPreferences.mode,
         settingsTabOrder,
-        totalsPlacement,
         ...capabilityMeta,
       },
     };

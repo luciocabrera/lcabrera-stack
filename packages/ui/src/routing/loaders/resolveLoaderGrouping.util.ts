@@ -17,6 +17,7 @@ const NO_GROUPING: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 export const resolveLoaderGrouping = <TData extends Record<string, unknown>>({

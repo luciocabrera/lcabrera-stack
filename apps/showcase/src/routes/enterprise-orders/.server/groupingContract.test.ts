@@ -121,6 +121,7 @@ const uiGroupingState: TableGroupingState = {
   mode: 'rollup',
   periods: { order_date: 'month' },
   shares: [{ columnKey: 'total_amount', fn: 'sum' }],
+  totalsPlacement: 'last',
 };
 
 const descriptorKeys: GroupQueryDescriptor['keys'] = uiGroupingState.keys;

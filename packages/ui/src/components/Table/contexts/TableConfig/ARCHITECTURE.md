@@ -138,7 +138,7 @@ TableConfig/
 ├── utils/
   ├── getInitialColumnsState.util.ts       → Build initial columns state from props; synthesizes the `actions` column via `resolveTableActionsColumn` when `crud.read/update/delete` is enabled (or a consumer `actions` column is declared), and only force-pins it right when it actually exists
   ├── getInitialExpansionState.util.ts     → No group folded away from `defaultFold`. Expansion does not travel in the URL, but that default does: it is the reader's Global Settings answer, arriving through the loader's meta (ADR-067, ADR-103)
-  ├── getInitialGroupingState.util.ts      → Build initial grouping state from the configuration the loader applied (`metaState.groupingKeys` + `metaState.groupingAggregates` + `metaState.groupingMode`)
+  ├── getInitialGroupingState.util.ts      → Build initial grouping state from the grouping seed the loader applied (`TableGroupingState`, including `totalsPlacement`)
   ├── getInitialMetaState.util.ts          → Build initial meta state from props
   └── index.ts                             → Barrel: utils
 ```
@@ -206,6 +206,7 @@ TableGroupingState = {
   shares: readonly TableColumnAggregate[];     // Which measures render as a share of the grand total. It names an aggregate rather than a column, because `sum` and `count` are both shareable and a column may carry both (ADR-086, widened by #831)
   keys: readonly string[];           // Applied group keys, in the query's nesting order
   mode: TableGroupingMode;           // `flat` (one set) or `rollup` (one per prefix, plus the grand total). Duplicated from `@lcabrera/server`'s `GroupingMode`; `cube` is deliberately absent because its sets are not prefixes and nothing renders a lattice as a tree (#574)
+  totalsPlacement: TableTotalsPlacement; // Query setting: the grouped `ORDER BY` direction for totals (ADR-118)
 };
 ```
 
@@ -237,44 +238,16 @@ type is also the URL codec's and `createTableRouteLoader`'s — everything in it
 crosses the single-fetch boundary, where a `Set` does not survive (ADR-009,
 ADR-067).
 
-## Meta State Shape
+## Meta snapshot
 
-```typescript
-TableMetaState = {
-  appId?: string;                    // App id used to namespace persisted cookie/storage keys
-  columnSelectedKey: string | null;  // Currently selected column key
-  crud?: TableCrudConfig;            // CRUD feature flags (create/read/update/delete) for row actions + create link (read via useGetTableCrud)
-  deleteActionPath?: string;         // Action route the row delete submit posts to (required when crud.delete)
-  density: TableDensity;             // compact | normal | comfortable
-  drawersSyncNonce?: number;          // Monotonic nonce used to force drawer provider re-seed
-  enablePrefetch: boolean;           // Prefetch next page after load-more (ADR-006)
-  error: Error | null;               // Table-level error
-  groupingAggregates?: Readonly<Record<string, TableAggregateFn>>; // Per-column aggregate the loader applied, sanitized from the same param; seeds the grouping store
-  groupingCapabilities?: Readonly<Record<string, TableColumnGroupingCapability>>; // What each column may do in a grouped read, from the pg catalogue (ADR-058) and shipped by the loader (ADR-063). The aggregate menu is built from this and nothing else — `dataType` cannot answer it (#550). Absent = nothing is legal, never everything
-  groupingKeys?: readonly string[];  // Group keys the loader applied, read from the `grouping` param and sanitized (ADR-061); seeds the grouping store
-  groupingMode?: TableGroupingMode;  // Grouping mode the loader applied, from the same param. Absent = `flat`, which is what a link written before rollup existed means
-  initialPageSize: number;           // First page row count
-  isBordered: boolean;               // Show borders
-  isColumnSettingsOpen: boolean;     // Column settings drawer open
-  isGroupingEnabled?: boolean;       // Endpoint capability: the route's read can group server-side (ADR-063); absent = off
-  isKeysetEnabled?: boolean;         // Endpoint capability: load-more sends a keyset cursor (ADR-052/ADR-063); absent = off
-  isRounded: boolean;                // Round the table card's corners (default false)
-  isServerFilterEnabled?: boolean;   // Endpoint capability: load-more sends the column filters (ADR-063); absent = off
-  isStriped: boolean;                // Striped rows
-  isTableSettingsPinned: boolean;    // Table settings pinned as side panel
-  isTableSettingsOpen: boolean;      // Table settings drawer open
-  loadMorePageSize: number;          // Subsequent page row count
-  overscan: number;                  // Virtual scroll overscan count
-  persistenceKey: string;            // Key for URL/cookie persistence
-  placeholderRowCount: number;       // Skeleton row count while loading
-  rowHeight: number;                 // Row height in px
-  tableSettingsExpandedFilters: string[]; // Expanded filter keys in table settings drawer
-  tableSettingsSelectedTab: string;  // Last selected tab in table settings drawer
-  threshold: number;                 // Scroll threshold for fetch-more
-  title: string;                     // Table display title
-  wasTableSettingsOpenBeforeColumnSettings: boolean; // Snapshot used to restore table settings after column drawer closes
-};
-```
+`metaStore` holds capability and chrome as `TableMetaState` =
+`TableCapabilityState & TableChromeState`. The grouping query is not on that
+snapshot: it lives on `groupingStore` as `TableGroupingState`, including
+`totalsPlacement`. Filter-options failures write `TableResponseError` on the
+column in `filtersDataStore`. Grid load-more writes the same union on
+`dataStore`. There is no string `error` on meta ([ADR-118](../../../../../../../docs/decisions/ADR-118-split-tablemetastate-into-capability-grouping-query-and-chrome.md)).
+
+The members of each slice are declared on the types in `Table.types.ts`.
 
 ## Provider Initialization
 

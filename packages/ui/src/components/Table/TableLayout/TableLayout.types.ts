@@ -1,5 +1,6 @@
 import type {
   TableColumnsStateInput,
+  TableGroupingState,
   TableMetaState,
   TableProps,
 } from '#ui/components/Table';
@@ -17,5 +18,6 @@ export type TableLayoutProps<
 > & {
   readonly columnsState: TableColumnsStateInput<TData>;
   readonly dataPromise: Promise<TResponse>;
+  readonly groupingState?: Partial<TableGroupingState>;
   readonly metaState: Partial<TableMetaState>;
 };

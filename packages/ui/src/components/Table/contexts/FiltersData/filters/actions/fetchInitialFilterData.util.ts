@@ -1,7 +1,6 @@
-import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
-
 import { DEFAULT_FILTER_PAGE_SIZE } from '#ui/components/Table/Table.constants';
 import { getRequiredOnLoadMore } from '#ui/components/Table/utils/getRequiredOnLoadMore.util';
+import { toTableResponseError } from '#ui/components/Table/utils/toTableResponseError.util';
 import { logger } from '#ui/utils/logger';
 
 import type {
@@ -65,6 +64,7 @@ export const fetchInitialFilterData = <TData, TResponse>({
         filter: {
           ...currentFilter,
           data,
+          error: undefined,
           hasMore,
           isLoading: false,
           totalLoadedRows: data.length,
@@ -85,15 +85,17 @@ export const fetchInitialFilterData = <TData, TResponse>({
       });
     } catch (error) {
       logger.error('[useFetchFilterData] Error fetching filter data:', error);
-      const message = getErrorMessage({
-        error,
-        fallback: 'Failed to load filter data',
-      });
-      metaStore.set({ error: message });
 
       setFilterSlice({
         columnKey,
-        filter: { ...currentFilter, isLoading: false },
+        filter: {
+          ...currentFilter,
+          error: toTableResponseError({
+            error,
+            fallback: 'Failed to load filter data',
+          }),
+          isLoading: false,
+        },
         filtersDataStore,
       });
     }

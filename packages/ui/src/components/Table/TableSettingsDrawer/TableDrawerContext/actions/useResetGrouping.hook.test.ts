@@ -13,6 +13,7 @@ const { configGroupingStore, drawerGroupingStore, setConfigGrouping } =
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     };
 
     return {
@@ -51,6 +52,7 @@ beforeEach(() => {
     mode: 'flat',
     periods: {},
     shares: [],
+    totalsPlacement: 'last',
   });
 });
 
@@ -62,6 +64,7 @@ describe('useResetGrouping', () => {
       mode: 'rollup',
       periods: { ordered_at: 'month' },
       shares: [{ columnKey: 'total_amount', fn: 'sum' }],
+      totalsPlacement: 'last',
     });
 
     resetGrouping();
@@ -72,6 +75,7 @@ describe('useResetGrouping', () => {
       mode: 'rollup',
       periods: { ordered_at: 'month' },
       shares: [{ columnKey: 'total_amount', fn: 'sum' }],
+      totalsPlacement: 'last',
     });
   });
 
@@ -84,6 +88,7 @@ describe('useResetGrouping', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -96,6 +101,7 @@ describe('useResetGrouping', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
     act(() => {
       result.current();
@@ -107,6 +113,7 @@ describe('useResetGrouping', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
     act(() => {
       result.current();
@@ -118,6 +125,7 @@ describe('useResetGrouping', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 });

@@ -10,6 +10,12 @@ import { useFetchMoreData } from './useFetchMoreData.hook';
 
 type TestDataState = {
   readonly data: readonly TestRow[];
+  readonly error:
+    | undefined
+    | {
+        readonly kind: 'db-canceled' | 'db-failed' | 'unexpected';
+        readonly message: string;
+      };
   readonly hasMore: boolean;
   readonly isLoading: boolean;
   readonly isLoadingMore: boolean;
@@ -30,6 +36,7 @@ const createHarness = () => {
   return createPaginatedFetchActionMocks<TestDataState, TestResponse>({
     initialDataState: {
       data: [{ id: 1 }],
+      error: undefined,
       hasMore: true,
       isLoading: false,
       isLoadingMore: false,
@@ -91,6 +98,7 @@ describe('useFetchMoreData', () => {
     currentHarness.resetMocks();
     currentHarness.setDataState({
       data: [{ id: 1 }],
+      error: undefined,
       hasMore: true,
       isLoading: false,
       isLoadingMore: false,
@@ -178,6 +186,7 @@ describe('useFetchMoreData', () => {
   it('returns early when hasMore is false', async () => {
     getHarness().setDataState({
       data: [{ id: 1 }, { id: 2 }, { id: 3 }],
+      error: undefined,
       hasMore: false,
       isLoading: false,
       isLoadingMore: false,
@@ -209,10 +218,8 @@ describe('useFetchMoreData', () => {
       await result.current({ ...defaultSelectors, onLoadMore });
     });
 
-    expect(getHarness().metaStore.get()).toMatchObject({
-      error: 'network down',
-    });
     expect(getHarness().dataStore.get()).toMatchObject({
+      error: { kind: 'db-failed', message: 'network down' },
       isLoadingMore: false,
     });
   });
@@ -304,6 +311,7 @@ describe('useFetchMoreData', () => {
 
       getHarness().setDataState({
         data: [{ id: 1 }, { id: 2 }],
+        error: undefined,
         hasMore: true,
         isLoading: false,
         isLoadingMore: false,
@@ -340,6 +348,7 @@ describe('useFetchMoreData', () => {
 
       getHarness().setDataState({
         data: [{ id: 1 }, { id: 2 }],
+        error: undefined,
         hasMore: true,
         isLoading: false,
         isLoadingMore: false,

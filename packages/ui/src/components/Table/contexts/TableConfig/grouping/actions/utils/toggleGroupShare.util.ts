@@ -40,5 +40,6 @@ export const toggleGroupShare = ({
           (share) => toTableAggregateToken(share) !== token,
         )
       : [...grouping.shares, { columnKey, fn }],
+    totalsPlacement: grouping.totalsPlacement,
   };
 };

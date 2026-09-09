@@ -27,6 +27,7 @@ const NO_GROUPING: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 const {
@@ -71,6 +72,7 @@ const {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       })),
       set: vi.fn(),
     },
@@ -179,6 +181,7 @@ describe('useBatchSetTableSettings', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
     mockGroupingStore.set.mockClear();
     mockMetaStore.get.mockClear();
@@ -270,6 +273,7 @@ describe('useBatchSetTableSettings', () => {
       nextStatePatch: {
         isTableSettingsOpen: false,
       },
+      totalsPlacement: 'last',
     });
     expect(mockMetaStore.set).toHaveBeenCalledWith({
       isTableSettingsOpen: false,
@@ -385,6 +389,7 @@ describe('useBatchSetTableSettings', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
         settings: {
           columnFilters: {} as ColumnFiltersState<Row>,
@@ -416,6 +421,7 @@ describe('useBatchSetTableSettings', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
     expect(mockDataStore.set).toHaveBeenCalledWith({ isLoading: true });
   });
@@ -427,6 +433,7 @@ describe('useBatchSetTableSettings', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     const { result } = renderHook(() => useBatchSetTableSettings<Row>());
@@ -439,6 +446,7 @@ describe('useBatchSetTableSettings', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
         settings: {
           columnFilters: {
@@ -480,6 +488,7 @@ describe('useBatchSetTableSettings', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
         settings: {
           columnFilters: {} as ColumnFiltersState<Row>,

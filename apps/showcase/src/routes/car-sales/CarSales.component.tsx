@@ -6,7 +6,7 @@ import type { CarSale, CarSalesResponse } from '@/services';
 import type { loader } from './car-sales.loader';
 
 export const CarSales = () => {
-  const { columnsState, dataPromise, metaState } =
+  const { columnsState, dataPromise, groupingState, metaState } =
     useLoaderData<typeof loader>();
 
   return (
@@ -15,6 +15,7 @@ export const CarSales = () => {
       dataPromise={dataPromise}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.data.length}
+      groupingState={groupingState}
       metaState={metaState}
     />
   );

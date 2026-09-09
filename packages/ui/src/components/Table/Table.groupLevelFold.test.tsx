@@ -159,8 +159,8 @@ const Harness = () => {
   return (
     <TableConfigProvider<TestRow>
       columnsState={{ columns }}
+      groupingState={{ keys: GROUPING_KEYS }}
       metaState={{
-        groupingKeys: GROUPING_KEYS,
         overscan: 2,
         rowHeight: ROW_HEIGHT,
       }}

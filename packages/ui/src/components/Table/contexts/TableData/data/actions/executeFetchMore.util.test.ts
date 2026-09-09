@@ -35,6 +35,7 @@ const onLoadMore = vi.fn(() => Promise.resolve({ rows: [], total: 0 }));
 const createStores = (dataOverrides?: Partial<DataState<TestData>>) => ({
   dataStore: createMockStore<DataState<TestData>>({
     data: [{ id: 1 }],
+    error: undefined,
     hasMore: true,
     isLoading: false,
     isLoadingMore: false,
@@ -99,6 +100,7 @@ describe('executeFetchMore', () => {
 
     expect(dataStore.get()).toMatchObject({
       data: [{ id: 1 }, { id: 2 }, { id: 3 }],
+      error: undefined,
       hasMore: true,
       isLoadingMore: false,
       totalLoadedRows: 3,
@@ -138,7 +140,7 @@ describe('executeFetchMore', () => {
     expect(resolveFromCacheOrFetchMock).not.toHaveBeenCalled();
   });
 
-  it('writes error message to metaStore and clears isLoadingMore on fetch failure', async () => {
+  it('writes a db-failed error onto dataStore and clears isLoadingMore on fetch failure', async () => {
     const { dataStore, metaStore } = createStores();
     const fetchingRef = { current: false };
     const prefetchRef = makePrefetchRef();
@@ -153,8 +155,10 @@ describe('executeFetchMore', () => {
       prefetchRef,
     });
 
-    expect(metaStore.get()).toMatchObject({ error: 'server error' });
-    expect(dataStore.get()).toMatchObject({ isLoadingMore: false });
+    expect(dataStore.get()).toMatchObject({
+      error: { kind: 'db-failed', message: 'server error' },
+      isLoadingMore: false,
+    });
   });
 
   it('resets isFetchingRef to false after completion regardless of outcome', async () => {

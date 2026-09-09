@@ -20,6 +20,7 @@ const DEFAULT_GROUPING: TableGroupingState = {
   mode: 'rollup',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 describe('resolveLoaderGrouping', () => {
@@ -42,6 +43,7 @@ describe('resolveLoaderGrouping', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -58,6 +60,7 @@ describe('resolveLoaderGrouping', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -81,6 +84,7 @@ describe('resolveLoaderGrouping', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
         param: ABSENT_PARAM,
       }).keys,

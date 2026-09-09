@@ -42,5 +42,6 @@ export const toggleTableGroupKey = ({
         ? pruned
         : { ...pruned, [columnKey]: period },
     shares: grouping.shares,
+    totalsPlacement: grouping.totalsPlacement,
   };
 };

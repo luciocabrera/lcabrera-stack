@@ -48,6 +48,7 @@ const NO_GROUPING: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 const groupingUrl = (param: string) =>
@@ -273,6 +274,7 @@ describe('createTableRouteLoader', () => {
     expect(Object.keys(result).toSorted((a, b) => a.localeCompare(b))).toEqual([
       'columnsState',
       'dataPromise',
+      'groupingState',
       'metaState',
     ]);
   });
@@ -400,10 +402,11 @@ describe('createTableRouteLoader', () => {
             mode: 'flat',
             periods: {},
             shares: [],
+            totalsPlacement: 'last',
           },
         }),
       );
-      expect(result.metaState.groupingKeys).toEqual(['status']);
+      expect(result.groupingState.keys).toEqual(['status']);
     });
 
     it('ignores the same param entirely when the route declares no flag', async () => {
@@ -414,7 +417,7 @@ describe('createTableRouteLoader', () => {
       expect(fetchPage).toHaveBeenCalledWith(
         expect.objectContaining({ grouping: NO_GROUPING }),
       );
-      expect(result.metaState.groupingKeys).toEqual([]);
+      expect(result.groupingState.keys).toEqual([]);
       expect(result.metaState.isGroupingEnabled).toBe(false);
     });
 
@@ -436,7 +439,7 @@ describe('createTableRouteLoader', () => {
         cookie: uiFlagsCookie({ groupingKeys: ['status'] }),
       });
 
-      expect(result.metaState.groupingKeys).toEqual([]);
+      expect(result.groupingState.keys).toEqual([]);
     });
 
     it('degrades a malformed grouping param to grouping off', async () => {
@@ -452,7 +455,7 @@ describe('createTableRouteLoader', () => {
           url: groupingUrl(param),
         });
 
-        expect(result.metaState.groupingKeys).toEqual([]);
+        expect(result.groupingState.keys).toEqual([]);
         expect(fetchPage).toHaveBeenCalledWith(
           expect.objectContaining({ grouping: NO_GROUPING }),
         );
@@ -465,7 +468,7 @@ describe('createTableRouteLoader', () => {
         url: groupingUrl('{"keys":["status; DROP TABLE rows"]}'),
       });
 
-      expect(result.metaState.groupingKeys).toEqual([]);
+      expect(result.groupingState.keys).toEqual([]);
       expect(fetchPage).toHaveBeenCalledWith(
         expect.objectContaining({ grouping: NO_GROUPING }),
       );
@@ -477,7 +480,7 @@ describe('createTableRouteLoader', () => {
         url: groupingUrl('{"keys":["status","nope"]}'),
       });
 
-      expect(result.metaState.groupingKeys).toEqual([]);
+      expect(result.groupingState.keys).toEqual([]);
     });
 
     it('leaves the returned key set unchanged for a grouped route', async () => {
@@ -490,6 +493,7 @@ describe('createTableRouteLoader', () => {
       expect(returnedKeys.toSorted((a, b) => a.localeCompare(b))).toEqual([
         'columnsState',
         'dataPromise',
+        'groupingState',
         'metaState',
       ]);
     });
@@ -522,7 +526,7 @@ describe('createTableRouteLoader', () => {
         url: groupingUrl('{"keys":["status","name"]}'),
       });
 
-      expect(result.metaState.groupingKeys).toEqual(['status', 'name']);
+      expect(result.groupingState.keys).toEqual(['status', 'name']);
       expect(fetchPage).toHaveBeenCalledWith(
         expect.objectContaining({
           grouping: {
@@ -531,6 +535,7 @@ describe('createTableRouteLoader', () => {
             mode: 'flat',
             periods: {},
             shares: [],
+            totalsPlacement: 'last',
           },
         }),
       );
@@ -542,7 +547,7 @@ describe('createTableRouteLoader', () => {
         url: groupingUrl('{"agg":["id:sum"],"keys":["status"]}'),
       });
 
-      expect(result.metaState.groupingAggregates).toEqual([
+      expect(result.groupingState.aggregates).toEqual([
         { columnKey: 'id', fn: 'sum' },
       ]);
       expect(fetchPage).toHaveBeenCalledWith(
@@ -553,6 +558,7 @@ describe('createTableRouteLoader', () => {
             mode: 'flat',
             periods: {},
             shares: [],
+            totalsPlacement: 'last',
           },
         }),
       );
@@ -564,8 +570,8 @@ describe('createTableRouteLoader', () => {
         url: groupingUrl('{"agg":["id:median"],"keys":["status"]}'),
       });
 
-      expect(result.metaState.groupingKeys).toEqual([]);
-      expect(result.metaState.groupingAggregates).toEqual([]);
+      expect(result.groupingState.keys).toEqual([]);
+      expect(result.groupingState.aggregates).toEqual([]);
     });
 
     it('cannot have its applied aggregates forged through the UI-flags cookie', async () => {
@@ -576,7 +582,7 @@ describe('createTableRouteLoader', () => {
         }),
       });
 
-      expect(result.metaState.groupingAggregates).toEqual([]);
+      expect(result.groupingState.aggregates).toEqual([]);
     });
   });
 
@@ -660,6 +666,7 @@ describe('createTableRouteLoader', () => {
       mode: 'rollup',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     };
 
     const groupingConfig = {
@@ -673,8 +680,8 @@ describe('createTableRouteLoader', () => {
       expect(fetchPage.mock.calls[0]?.[0].grouping.keys).toStrictEqual([
         'status',
       ]);
-      expect(result.metaState.groupingKeys).toStrictEqual(['status']);
-      expect(result.metaState.groupingMode).toBe('rollup');
+      expect(result.groupingState.keys).toStrictEqual(['status']);
+      expect(result.groupingState.mode).toBe('rollup');
     });
 
     it('lets the URL override it', async () => {
@@ -735,7 +742,7 @@ describe('createTableRouteLoader', () => {
       const { fetchPage, result } = await invoke();
 
       expect(fetchPage.mock.calls[0]?.[0].totalsPlacement).toBe('last');
-      expect(result.metaState.totalsPlacement).toBe('last');
+      expect(result.groupingState.totalsPlacement).toBe('last');
     });
 
     it('reads the persisted preference out of the UI-flags cookie', async () => {

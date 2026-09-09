@@ -18,6 +18,7 @@ const NO_GROUPING: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 export const sanitizeGroupingByColumns = <
@@ -26,10 +27,10 @@ export const sanitizeGroupingByColumns = <
   columns,
   grouping,
 }: SanitizeGroupingByColumnsArgs<TData>): TableGroupingState => {
-  const { aggregates, keys, mode, periods, shares } = grouping;
+  const { aggregates, keys, mode, periods, shares, totalsPlacement } = grouping;
 
   if (keys.length === 0 || keys.length > MAX_TABLE_GROUP_KEYS) {
-    return NO_GROUPING;
+    return { ...NO_GROUPING, totalsPlacement };
   }
 
   const groupableKeys = new Set(
@@ -76,6 +77,7 @@ export const sanitizeGroupingByColumns = <
         mode,
         periods: { ...periods },
         shares: [...shares],
+        totalsPlacement,
       }
-    : NO_GROUPING;
+    : { ...NO_GROUPING, totalsPlacement };
 };

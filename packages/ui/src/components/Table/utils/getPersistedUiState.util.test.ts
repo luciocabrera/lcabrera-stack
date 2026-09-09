@@ -1,18 +1,16 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import type { TableMetaState } from '../Table.types';
+import type { TableChromeState } from '../Table.types';
 
 import { getPersistedUiState } from './getPersistedUiState.util';
 
 describe('getPersistedUiState', () => {
-  it('extracts only the persisted UI fields from table meta state', () => {
-    const state = {
+  it('extracts only the persisted UI fields from chrome and placement', () => {
+    const chrome = {
       columnSelectedKey: 'status',
       columnSettingsSelectedTab: 'general',
       density: 'compact',
       drawersSyncNonce: 1,
-      enablePrefetch: true,
-      error: 'Failed to load',
       initialPageSize: 20,
       isBordered: true,
       isColumnSettingsOpen: true,
@@ -26,36 +24,37 @@ describe('getPersistedUiState', () => {
       persistenceKey: 'orders',
       placeholderRowCount: 8,
       rowHeight: 44,
+      settingsPanelWidth: 420,
       tableSettingsExpandedFilters: ['status'],
       tableSettingsSelectedTab: 'filters',
       threshold: 200,
-      title: {
-        plural: 'Orders',
-        singular: 'Order',
-      },
       wasTableSettingsOpenBeforeColumnSettings: true,
-    } satisfies TableMetaState;
+    } satisfies TableChromeState;
 
-    expect(getPersistedUiState(state)).toEqual({
+    expect(getPersistedUiState({ chrome, totalsPlacement: 'first' })).toEqual({
       columnSettingsSelectedTab: 'general',
       isColumnSettingsOpen: true,
       isColumnSettingsPinned: false,
       isTableSettingsOpen: false,
       isTableSettingsPinned: true,
+      settingsPanelWidth: 420,
       tableSettingsExpandedFilters: ['status'],
       tableSettingsSelectedTab: 'filters',
+      totalsPlacement: 'first',
     });
   });
 
-  it('returns an empty persisted slice for undefined meta state', () => {
-    expect(getPersistedUiState(undefined)).toEqual({
+  it('returns an empty persisted slice when nothing is passed', () => {
+    expect(getPersistedUiState()).toEqual({
       columnSettingsSelectedTab: undefined,
       isColumnSettingsOpen: undefined,
       isColumnSettingsPinned: undefined,
       isTableSettingsOpen: undefined,
       isTableSettingsPinned: undefined,
+      settingsPanelWidth: undefined,
       tableSettingsExpandedFilters: undefined,
       tableSettingsSelectedTab: undefined,
+      totalsPlacement: undefined,
     });
   });
 });

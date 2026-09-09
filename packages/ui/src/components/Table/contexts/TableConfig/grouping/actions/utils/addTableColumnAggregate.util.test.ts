@@ -18,6 +18,7 @@ const grouping = ({
   mode: 'flat',
   periods: { created_at: 'month' },
   shares,
+  totalsPlacement: 'last',
 });
 
 describe('addTableColumnAggregate', () => {

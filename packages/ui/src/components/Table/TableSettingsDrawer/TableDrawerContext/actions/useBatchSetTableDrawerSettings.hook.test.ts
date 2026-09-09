@@ -21,6 +21,7 @@ const {
     mode: 'flat',
     periods: {},
     shares: [],
+    totalsPlacement: 'last',
   };
   let drawerTotalsPlacement = 'last';
 
@@ -64,6 +65,7 @@ beforeEach(() => {
     mode: 'flat',
     periods: {},
     shares: [],
+    totalsPlacement: 'last',
   });
   setDrawerTotalsPlacement('last');
 });
@@ -88,6 +90,7 @@ describe('useBatchSetTableDrawerSettings', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
       settings: {
         columnFilters: {},
@@ -115,6 +118,7 @@ describe('useBatchSetTableDrawerSettings', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
       settings: {
         columnFilters: {},
@@ -136,6 +140,7 @@ describe('useBatchSetTableDrawerSettings', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     const { result } = renderHook(() => useBatchSetTableDrawerSettings());
@@ -151,6 +156,7 @@ describe('useBatchSetTableDrawerSettings', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
       settings: {
         columnFilters: {},

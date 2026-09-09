@@ -49,6 +49,14 @@ const loaderData = {
     sorting: [{ columnKey: 'order_status', direction: 'desc' }],
   },
   dataPromise,
+  groupingState: {
+    aggregates: [],
+    keys: [],
+    mode: 'flat' as const,
+    periods: {},
+    shares: [],
+    totalsPlacement: 'last' as const,
+  },
   key: '',
   metaState,
 };

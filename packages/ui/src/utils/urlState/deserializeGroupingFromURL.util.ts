@@ -13,5 +13,6 @@ export const deserializeGroupingFromURL = (
     mode: mode ?? 'flat',
     periods: gran ?? {},
     shares: share ?? [],
+    totalsPlacement: 'last',
   };
 };

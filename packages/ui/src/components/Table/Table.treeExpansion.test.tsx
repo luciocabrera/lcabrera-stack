@@ -154,9 +154,11 @@ const Harness = ({ data }: HarnessProps) => {
   return (
     <TableConfigProvider<TestRow>
       columnsState={{ columns }}
+      groupingState={{
+        aggregates: [{ columnKey: 'id', fn: 'count' }],
+        keys: ['city'],
+      }}
       metaState={{
-        groupingAggregates: [{ columnKey: 'id', fn: 'count' }],
-        groupingKeys: ['city'],
         overscan: 2,
         rowHeight: ROW_HEIGHT,
       }}

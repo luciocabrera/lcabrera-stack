@@ -13,7 +13,6 @@ const createInitialMetaState = (): TableMetaState => {
     columnSettingsSelectedTab: 'general',
     density: 'compact',
     enablePrefetch: true,
-    error: undefined,
     initialPageSize: 20,
     isBordered: true,
     isColumnSettingsOpen: false,

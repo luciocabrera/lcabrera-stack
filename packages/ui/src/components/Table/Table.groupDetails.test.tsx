@@ -77,8 +77,8 @@ const Harness = ({ groupDetailsPath, groupingKeys, rows }: HarnessProps) => {
     <NotificationProvider>
       <TableConfigProvider<TestRow>
         columnsState={{ columns }}
+        groupingState={{ keys: groupingKeys }}
         metaState={{
-          groupingKeys,
           overscan: 2,
           rowHeight: ROW_HEIGHT,
           title: { plural: 'Orders', singular: 'Order' },

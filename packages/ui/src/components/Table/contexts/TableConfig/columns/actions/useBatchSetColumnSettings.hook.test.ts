@@ -49,6 +49,7 @@ const {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       })),
       set: vi.fn(),
     },

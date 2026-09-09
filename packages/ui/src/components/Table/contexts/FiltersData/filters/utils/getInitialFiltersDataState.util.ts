@@ -13,6 +13,7 @@ export const getInitialFiltersDataState = <TData>({
   for (const col of columns) {
     cols[col.key] = {
       data: [],
+      error: undefined,
       hasMore: false,
       isLoading: false,
       isLoadingMore: false,

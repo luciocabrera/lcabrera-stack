@@ -90,9 +90,9 @@ Context providers over external stores, one graph per provider:
 graph LR
   subgraph "TableConfigProvider"
     CS["columnsStore<br/><small>columns, filters, sorting,<br/>pinning, sizing, visibility</small>"]
-    GS["groupingStore<br/><small>applied group keys,<br/>aggregates, mode</small>"]
+    GS["groupingStore<br/><small>applied group keys, aggregates,<br/>mode, totals placement</small>"]
     ES["expansionStore<br/><small>toggled group paths + default fold</small>"]
-    MS["metaStore<br/><small>density, title, drawer toggles,<br/>row height, overscan</small>"]
+    MS["metaStore<br/><small>capability + chrome:<br/>density, title, drawer toggles</small>"]
   end
 
   subgraph "TableFocusProvider"
@@ -100,11 +100,11 @@ graph LR
   end
 
   subgraph "FiltersDataProvider"
-    FS["filtersDataStore<br/><small>per-column filter options</small>"]
+    FS["filtersDataStore<br/><small>per-column options + fetch error</small>"]
   end
 
   subgraph "TableDataProvider"
-    DS["dataStore<br/><small>rows, loading, pagination</small>"]
+    DS["dataStore<br/><small>rows, loading, pagination, error</small>"]
   end
 
   subgraph "TableWrapperContext"
@@ -116,7 +116,7 @@ All stores use `useSyncExternalStore` for granular subscriptions.
 See [contexts/ARCHITECTURE.md](contexts/ARCHITECTURE.md) for details.
 
 **Grouping is split across two of them, and the split is the loader boundary.**
-`groupingStore` holds the applied keys, aggregates and mode — the _configuration_,
+`groupingStore` holds the applied keys, aggregates, mode and totals placement — the _configuration_,
 which is URL state and travels through the loader
 ([ADR-061](../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)).
 `expansionStore` holds which paths are folded, which is _client_ state and does

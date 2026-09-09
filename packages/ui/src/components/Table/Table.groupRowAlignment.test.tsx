@@ -103,9 +103,11 @@ const Harness = ({
     <NotificationProvider>
       <TableConfigProvider<TestRow>
         columnsState={{ columns }}
+        groupingState={{
+          aggregates,
+          keys: groupingKeys,
+        }}
         metaState={{
-          groupingAggregates: aggregates,
-          groupingKeys,
           overscan: 2,
           rowHeight: ROW_HEIGHT,
         }}

@@ -21,6 +21,12 @@ type TestData = {
 type TestFiltersState = {
   readonly status: {
     readonly data: readonly string[];
+    readonly error:
+      | undefined
+      | {
+          readonly kind: 'db-canceled' | 'db-failed' | 'unexpected';
+          readonly message: string;
+        };
     readonly hasMore: boolean;
     readonly isLoading: boolean;
     readonly isLoadingMore: boolean;
@@ -39,6 +45,7 @@ const createHarness = () => {
     initialDataState: {
       status: {
         data: ['Alpha'],
+        error: undefined,
         hasMore: true,
         isLoading: false,
         isLoadingMore: false,
@@ -131,6 +138,7 @@ describe('fetchMoreFilterData', () => {
     getHarness().dataStore.set({
       status: {
         data: ['Alpha'],
+        error: undefined,
         hasMore: false,
         isLoading: false,
         isLoadingMore: false,
@@ -164,6 +172,7 @@ describe('fetchMoreFilterData', () => {
     getHarness().dataStore.set({
       status: {
         data: ['Alpha'],
+        error: undefined,
         hasMore: true,
         isLoading: false,
         isLoadingMore: true,
@@ -240,7 +249,10 @@ describe('fetchMoreFilterData', () => {
       });
     });
 
-    expect(getHarness().metaStore.get().error).toBe('Network down');
+    expect(getHarness().dataStore.get().status.error).toEqual({
+      kind: 'db-failed',
+      message: 'Network down',
+    });
     expect(getHarness().dataStore.get()).toMatchObject({
       status: {
         isLoadingMore: false,

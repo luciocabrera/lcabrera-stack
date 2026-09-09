@@ -76,11 +76,13 @@ const Harness = ({ rows }: HarnessProps) => {
     <NotificationProvider>
       <TableConfigProvider<TestRow>
         columnsState={{ columns }}
+        groupingState={{
+          aggregates: [{ columnKey: 'total_amount', fn: 'avg' }],
+          keys: GROUPING_KEYS,
+        }}
         metaState={{
           crud: { delete: true, read: true, update: true },
           deleteActionPath: '/_action/delete',
-          groupingAggregates: [{ columnKey: 'total_amount', fn: 'avg' }],
-          groupingKeys: GROUPING_KEYS,
           overscan: 2,
           rowHeight: ROW_HEIGHT,
           title: { plural: 'Orders', singular: 'Order' },

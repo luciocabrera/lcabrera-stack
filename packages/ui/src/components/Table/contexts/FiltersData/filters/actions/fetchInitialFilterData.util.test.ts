@@ -21,6 +21,12 @@ type TestData = {
 type TestFiltersState = {
   readonly status: {
     readonly data: readonly string[];
+    readonly error:
+      | undefined
+      | {
+          readonly kind: 'db-canceled' | 'db-failed' | 'unexpected';
+          readonly message: string;
+        };
     readonly hasMore: boolean;
     readonly isLoading: boolean;
     readonly isLoadingMore: boolean;
@@ -39,6 +45,7 @@ const createHarness = () => {
     initialDataState: {
       status: {
         data: [],
+        error: undefined,
         hasMore: false,
         isLoading: false,
         isLoadingMore: false,
@@ -83,6 +90,7 @@ describe('fetchInitialFilterData', () => {
     currentHarness.setDataState({
       status: {
         data: [],
+        error: undefined,
         hasMore: false,
         isLoading: false,
         isLoadingMore: false,
@@ -128,5 +136,34 @@ describe('fetchInitialFilterData', () => {
       skip: 0,
     });
     expect(getHarness().firePrefetchMock).toHaveBeenCalled();
+  });
+
+  it('writes a db-failed error onto the column when the request fails', async () => {
+    const onLoadMore = vi.fn(() => Promise.reject(new Error('Network down')));
+
+    const { result } = renderHook(() =>
+      fetchInitialFilterData<TestData, TestResponse>({
+        columnKey: 'status',
+        filtersDataStore: getHarness().dataStore as unknown as TStore<
+          FiltersDataState<TestData>
+        >,
+        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
+      }),
+    );
+
+    await act(async () => {
+      await result.current({
+        dataSelector: (response) => [...response.rows],
+        dataTotalSelector: (response) => response.total,
+        onLoadMore,
+      });
+    });
+
+    expect(getHarness().dataStore.get().status.error).toEqual({
+      kind: 'db-failed',
+      message: 'Network down',
+    });
+    expect(getHarness().dataStore.get().status.isLoading).toBe(false);
+    expect(loggerMock.error).toHaveBeenCalled();
   });
 });

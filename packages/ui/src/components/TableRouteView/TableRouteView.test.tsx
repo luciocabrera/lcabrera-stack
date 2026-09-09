@@ -61,6 +61,14 @@ const loaderData = {
     sorting: [],
   },
   dataPromise,
+  groupingState: {
+    aggregates: [],
+    keys: [],
+    mode: 'flat' as const,
+    periods: {},
+    shares: [],
+    totalsPlacement: 'last' as const,
+  },
   key: '',
   metaState,
 };
@@ -88,6 +96,7 @@ describe('TableRouteView', () => {
     const props = lastProps();
     expect(props.columnsState).toBe(loaderData.columnsState);
     expect(props.dataPromise).toBe(dataPromise);
+    expect(props.groupingState).toBe(loaderData.groupingState);
     expect(props.metaState).toBe(metaState);
   });
 

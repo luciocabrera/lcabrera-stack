@@ -53,6 +53,7 @@ export const createTableConfigColumnsActionMocks = <
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last' as const,
     })),
     set: vi.fn(),
   };

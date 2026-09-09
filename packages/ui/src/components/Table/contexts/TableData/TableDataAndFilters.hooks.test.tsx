@@ -27,6 +27,7 @@ type WrapperProps = {
 const filtersDataStore = createMockStore({
   status: {
     data: ['Paid'],
+    error: undefined,
     hasMore: false,
     isLoading: false,
     isLoadingMore: false,
@@ -37,6 +38,7 @@ const filtersDataStore = createMockStore({
 
 const dataStore = createMockStore({
   data: [{ id: 1 }],
+  error: undefined,
   hasMore: true,
   isLoading: false,
   isLoadingMore: false,
@@ -74,6 +76,7 @@ describe('table data and filters hooks', () => {
         .result.current,
     ).toEqual({
       data: ['Paid'],
+      error: undefined,
       hasMore: false,
       isLoading: false,
       isLoadingMore: false,
@@ -94,6 +97,7 @@ describe('table data and filters hooks', () => {
       filtersDataStore.set({
         status: {
           data: ['Paid', 'Pending'],
+          error: undefined,
           hasMore: false,
           isLoading: false,
           isLoadingMore: false,

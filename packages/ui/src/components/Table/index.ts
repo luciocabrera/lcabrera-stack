@@ -15,6 +15,7 @@ export type {
   SortingState,
   TableColumn,
   TableColumnsStateInput,
+  TableGroupingState,
   TableMetaState,
   TableProps,
 } from './Table.types';

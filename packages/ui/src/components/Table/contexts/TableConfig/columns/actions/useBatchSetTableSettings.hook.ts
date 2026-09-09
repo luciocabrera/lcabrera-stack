@@ -38,9 +38,10 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
   }: BatchSetTableSettingsArgs<TData>) => {
     const columnsState = columnsStore.get();
     const metaState = metaStore.get();
+    const currentGrouping = groupingStore.get();
     const persistenceKey = metaState?.persistenceKey ?? '';
     const groupingUpdate = resolveTableGroupingUpdate({
-      existingGrouping: groupingStore.get(),
+      existingGrouping: currentGrouping,
       hasDefaultGrouping: metaState?.hasDefaultGrouping === true,
       nextGrouping: grouping,
     });
@@ -68,7 +69,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     });
 
     const hasPlacementChanged =
-      totalsPlacement !== (metaState?.totalsPlacement ?? 'last');
+      totalsPlacement !== (currentGrouping?.totalsPlacement ?? 'last');
 
     if (
       !persistTableState([
@@ -100,22 +101,30 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
     }
 
     columnsStore.set(resolvedUpdate);
-    if (groupingUpdate.kind === 'updated') {
-      groupingStore.set(groupingUpdate.grouping);
+    if (hasPlacementChanged || groupingUpdate.kind === 'updated') {
+      groupingStore.set({
+        ...(groupingUpdate.kind === 'updated'
+          ? groupingUpdate.grouping
+          : currentGrouping),
+        totalsPlacement,
+      });
     }
 
     const nextStatePatch = {
-      ...(hasPlacementChanged && { totalsPlacement }),
       ...(metaState?.isTableSettingsPinned !== true && {
         isTableSettingsOpen: false,
       }),
     };
 
-    if (Object.keys(nextStatePatch).length > 0) {
+    if (hasPlacementChanged || Object.keys(nextStatePatch).length > 0) {
       persistUiFlags({
         currentState: metaState,
         nextStatePatch,
+        totalsPlacement,
       });
+    }
+
+    if (Object.keys(nextStatePatch).length > 0) {
       metaStore.set(nextStatePatch);
     }
   };

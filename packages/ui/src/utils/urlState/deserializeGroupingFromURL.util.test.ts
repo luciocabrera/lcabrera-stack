@@ -9,6 +9,7 @@ const NO_GROUPING = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 describe('deserializeGroupingFromURL', () => {
@@ -21,6 +22,7 @@ describe('deserializeGroupingFromURL', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -41,6 +43,7 @@ describe('deserializeGroupingFromURL', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -61,6 +64,7 @@ describe('deserializeGroupingFromURL', () => {
       mode: 'rollup',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     } as const;
     const param = serializeGroupingToURL({ grouping });
 
@@ -79,6 +83,7 @@ describe('deserializeGroupingFromURL', () => {
       mode: 'rollup',
       periods: {},
       shares: [{ columnKey: 'total_amount', fn: 'count' }],
+      totalsPlacement: 'last',
     } as const;
     const param = serializeGroupingToURL({ grouping });
 
@@ -95,6 +100,7 @@ describe('deserializeGroupingFromURL', () => {
       mode: 'flat',
       periods: {},
       shares: [{ columnKey: 'ns:total', fn: 'sum' }],
+      totalsPlacement: 'last',
     } as const;
     const param = serializeGroupingToURL({ grouping });
 

@@ -1,12 +1,16 @@
-import type { TableMetaState } from '#ui/components/Table/Table.types';
+import type {
+  TableChromeState,
+  TableTotalsPlacement,
+} from '#ui/components/Table/Table.types';
 
 import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
 
 import { buildUiFlagsCookieEntry } from './utils';
 
 type PersistTableUiFlagsArgs = {
-  readonly currentState: Partial<TableMetaState> | undefined;
-  readonly nextStatePatch: Partial<TableMetaState>;
+  readonly currentState: Partial<TableChromeState> | undefined;
+  readonly nextStatePatch: Partial<TableChromeState>;
+  readonly totalsPlacement?: TableTotalsPlacement;
 };
 
 export const usePersistTableUiFlagsAction = () => {
@@ -14,8 +18,16 @@ export const usePersistTableUiFlagsAction = () => {
     fetcherKey: 'persist-table-ui-flags',
   });
 
-  return ({ currentState, nextStatePatch }: PersistTableUiFlagsArgs) => {
-    const entry = buildUiFlagsCookieEntry({ currentState, nextStatePatch });
+  return ({
+    currentState,
+    nextStatePatch,
+    totalsPlacement,
+  }: PersistTableUiFlagsArgs) => {
+    const entry = buildUiFlagsCookieEntry({
+      currentState,
+      nextStatePatch,
+      totalsPlacement,
+    });
 
     if (entry) {
       persistCookie([entry]);

@@ -136,7 +136,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
       const columnKey = refusedKeys[0] ?? '';
       const loaderData = await loadRoute([columnKey]);
 
-      expect(loaderData.metaState.groupingKeys).toEqual([columnKey]);
+      expect(loaderData.groupingState.keys).toEqual([columnKey]);
 
       await renderRoute(loaderData);
 
