@@ -134,11 +134,15 @@ export const createTableRouteLoader = <
       columns,
       sorting: sanitizedSorting,
     });
+    const groupingState = {
+      ...grouping,
+      totalsPlacement,
+    };
 
     const dataPromise = fetchPage({
       effectiveSorting,
       filters,
-      grouping,
+      grouping: groupingState,
       request,
       totalsPlacement,
     });
@@ -163,10 +167,7 @@ export const createTableRouteLoader = <
         sorting: sanitizedSorting,
       },
       dataPromise,
-      groupingState: {
-        ...grouping,
-        totalsPlacement,
-      },
+      groupingState,
       metaState: {
         ...chromeUiFlags,
         appId,

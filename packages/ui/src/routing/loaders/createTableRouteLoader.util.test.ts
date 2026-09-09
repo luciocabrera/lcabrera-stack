@@ -744,7 +744,9 @@ describe('createTableRouteLoader', () => {
         cookie: uiFlagsCookie({ totalsPlacement: 'first' }),
       });
 
-      expect(fetchPage.mock.calls[0]?.[0].totalsPlacement).toBe('first');
+      const args = fetchPage.mock.calls[0]?.[0];
+      expect(args?.totalsPlacement).toBe('first');
+      expect(args?.grouping.totalsPlacement).toBe('first');
       expect(result.groupingState.totalsPlacement).toBe('first');
       expect(result.metaState).not.toHaveProperty('totalsPlacement');
     });
@@ -755,9 +757,24 @@ describe('createTableRouteLoader', () => {
         url: 'http://localhost/rows?totals=last',
       });
 
-      expect(fetchPage.mock.calls[0]?.[0].totalsPlacement).toBe('last');
+      const args = fetchPage.mock.calls[0]?.[0];
+      expect(args?.totalsPlacement).toBe('last');
+      expect(args?.grouping.totalsPlacement).toBe('last');
       expect(result.groupingState.totalsPlacement).toBe('last');
       expect(result.metaState).not.toHaveProperty('totalsPlacement');
+    });
+
+    it('puts the cookie placement on the grouping fetchPage receives, not the grouping-param default', async () => {
+      const { fetchPage } = await invoke({
+        config: { meta: { isGroupingEnabled: true } },
+        cookie: uiFlagsCookie({ totalsPlacement: 'first' }),
+        url: groupingUrl('{"keys":["status"]}'),
+      });
+
+      const args = fetchPage.mock.calls[0]?.[0];
+      expect(args?.grouping.keys).toEqual(['status']);
+      expect(args?.totalsPlacement).toBe('first');
+      expect(args?.grouping.totalsPlacement).toBe('first');
     });
 
     it('falls back to last for a token outside the vocabulary', async () => {

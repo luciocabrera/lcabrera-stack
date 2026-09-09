@@ -57,6 +57,24 @@ describe('deserializeGroupingFromURL', () => {
     ).toBe('rollup');
   });
 
+  it('does not read totals placement from the grouping param, which does not carry it', () => {
+    const param = serializeGroupingToURL({
+      grouping: {
+        aggregates: [],
+        keys: ['order_status'],
+        mode: 'flat',
+        periods: {},
+        shares: [],
+        totalsPlacement: 'first',
+      },
+    });
+
+    expect(param).toBe('{"keys":["order_status"]}');
+    expect(deserializeGroupingFromURL(param ?? '').totalsPlacement).toBe(
+      'last',
+    );
+  });
+
   it('round-trips what serializeGroupingToURL wrote', () => {
     const grouping = {
       aggregates: [{ columnKey: 'total_amount', fn: 'avg' }],

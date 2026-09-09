@@ -683,7 +683,7 @@ inventory and is not backfilled here.
 | `serializeSortingToURL`      | `utils/urlState/serializeSortingToURL.util.ts`      | `SortingState[]` → compact `{ [key]: 'asc' \| 'desc' }` object                                                                                                                                                            |
 | `deserializeSortingFromURL`  | `utils/urlState/deserializeSortingFromURL.util.ts`  | Compact sorting URL param → `SortingState[]`                                                                                                                                                                              |
 | `serializeGroupingToURL`     | `utils/urlState/serializeGroupingToURL.util.ts`     | `TableGroupingState` → the compact `grouping` param; `undefined` for no keys, so the param leaves the URL, and `agg` omitted when nothing is selected                                                                     |
-| `deserializeGroupingFromURL` | `utils/urlState/deserializeGroupingFromURL.util.ts` | Compact grouping URL param → `TableGroupingState`; empty for anything the codec refuses                                                                                                                                   |
+| `deserializeGroupingFromURL` | `utils/urlState/deserializeGroupingFromURL.util.ts` | Compact grouping URL param → `TableGroupingState`; empty for anything the codec refuses. Placement is not in this param (`totals` / cookie); the factory default is `'last'`                                              |
 
 ### `src/routing/`
 
