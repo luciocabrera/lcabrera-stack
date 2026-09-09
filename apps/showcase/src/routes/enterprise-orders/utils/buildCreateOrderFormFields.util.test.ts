@@ -2,6 +2,8 @@ import { expect, it } from 'vite-plus/test';
 
 import { buildCreateOrderFormFields } from './buildCreateOrderFormFields.util';
 import { collectOrderFormAccessors } from './collectOrderFormAccessors.util';
+import { ORDER_FORM_TAB_LABELS } from './orderFormTabLabels.constants';
+import { readOrderFormTabLabels } from './readOrderFormTabLabels.util';
 
 it('omits order_number and the audit group', () => {
   const accessors = collectOrderFormAccessors(buildCreateOrderFormFields());
@@ -29,19 +31,7 @@ it('still exposes the required input fields', () => {
 });
 
 it('keeps the eight tabs in roster order', () => {
-  const [root, ...rest] = buildCreateOrderFormFields();
-
-  expect(rest).toHaveLength(0);
-  expect(
-    root?.type === 'tab' ? root.tabs.map((tab) => tab.label) : undefined,
-  ).toStrictEqual([
-    'Order',
-    'Customer',
-    'Product',
-    'Pricing',
-    'Shipping',
-    'Billing',
-    'Payment',
-    'Notes & Audit',
+  expect(readOrderFormTabLabels(buildCreateOrderFormFields())).toStrictEqual([
+    ...ORDER_FORM_TAB_LABELS,
   ]);
 });

@@ -74,6 +74,7 @@ Create and edit each have their own builder. Shared tab helpers are one util per
 | `buildPricingInputsGroup`    | `buildPricingInputsGroup.util.ts`    | Discount, shipping cost, and paid amount.                                                        |
 | `buildNotesGroup`            | `buildNotesGroup.util.ts`            | Order and internal notes.                                                                        |
 | `collectOrderFormAccessors`  | `collectOrderFormAccessors.util.ts`  | Leaf accessors from an order-form field tree.                                                    |
+| `readOrderFormTabLabels`     | `readOrderFormTabLabels.util.ts`     | Tab labels from an order-form field tree, in roster order.                                       |
 
 ---
 
