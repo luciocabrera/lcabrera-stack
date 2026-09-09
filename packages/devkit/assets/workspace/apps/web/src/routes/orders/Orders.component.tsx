@@ -1,20 +1,9 @@
-import { TableLayout } from '@lcabrera/ui/components/Table/TableLayout';
-import { useLoaderData } from 'react-router';
+import { TableRouteView } from '@lcabrera/ui';
 
-import type { loader } from './orders.loader';
 import type { Order, OrdersPage } from './orders.types';
 
-export const Orders = () => {
-  const { columnsState, dataPromise, metaState } =
-    useLoaderData<typeof loader>();
+import { readOrdersPage } from './readOrdersPage.util';
 
-  return (
-    <TableLayout<Order, OrdersPage>
-      columnsState={columnsState}
-      dataPromise={dataPromise}
-      dataSelector={(response) => response.data}
-      dataTotalSelector={(response) => response.total}
-      metaState={metaState}
-    />
-  );
-};
+export const Orders = () => (
+  <TableRouteView<Order, OrdersPage> fetchPage={readOrdersPage} />
+);
