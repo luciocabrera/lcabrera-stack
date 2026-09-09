@@ -13,6 +13,8 @@ import {
   useGetColumns,
   useGetColumnSizing,
 } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetTableDrawersSyncNonce } from '#ui/components/Table/contexts/TableConfig/meta/selectors/useGetTableDrawersSyncNonce.hook';
+import { useGetTableIsTableSettingsOpen } from '#ui/components/Table/contexts/TableConfig/meta/selectors/useGetTableIsTableSettingsOpen.hook';
 import { useGetTableData } from '#ui/components/Table/contexts/TableData/data/selectors';
 import { TableDataProvider } from '#ui/components/Table/contexts/TableData/TableDataContext.provider';
 
@@ -59,11 +61,14 @@ const GROUPING_ORDER_STATUS = { keys: ['order_status'] };
 const META_STATE = { persistenceKey: 'orders' };
 
 const Probe = () => {
-  const { columnsStore, groupingStore } = useTableConfigContextValue<TestRow>();
+  const { columnsStore, groupingStore, metaStore } =
+    useTableConfigContextValue<TestRow>();
   const groupingKeys = useGetTableGroupingKeys();
   const columns = useGetColumns<TestRow>();
   const columnSizing = useGetColumnSizing<TestRow>();
   const data = useGetTableData<TestRow>();
+  const drawersSyncNonce = useGetTableDrawersSyncNonce();
+  const isTableSettingsOpen = useGetTableIsTableSettingsOpen();
 
   const handleRegroup = () => {
     groupingStore.set({ keys: ['priority'] });
@@ -75,6 +80,14 @@ const Probe = () => {
     });
   };
 
+  const handleOpenSettings = () => {
+    const meta = metaStore.get();
+    metaStore.set({
+      drawersSyncNonce: (meta.drawersSyncNonce ?? 0) + 1,
+      isTableSettingsOpen: true,
+    });
+  };
+
   return (
     <>
       <button onClick={handleRegroup} type='button'>
@@ -83,11 +96,16 @@ const Probe = () => {
       <button onClick={handleResize} type='button'>
         resize
       </button>
+      <button onClick={handleOpenSettings} type='button'>
+        open-settings
+      </button>
       <output data-testid='grouping'>{groupingKeys.join(',')}</output>
       <output data-testid='columns'>
         {columns.map((column) => column.key).join(',')}
       </output>
       <output data-testid='sizing'>{JSON.stringify(columnSizing)}</output>
+      <output data-testid='nonce'>{String(drawersSyncNonce)}</output>
+      <output data-testid='settings-open'>{String(isTableSettingsOpen)}</output>
       <output data-testid='data'>{data.map((row) => row.id).join(',')}</output>
     </>
   );
@@ -162,6 +180,17 @@ describe('TableConfigProvider', () => {
     expect(mounts.config).toBe(1);
     expect(readProbe('data')).toBe('2');
     expect(readProbe('grouping')).toBe('priority');
+
+    rerender(
+      <Harness
+        columnsState={WIDER_COLUMNS_STATE}
+        groupingState={GROUPING_ORDER_STATUS}
+        revalidation={2}
+      />,
+    );
+
+    expect(readProbe('columns')).toBe('id,name');
+    expect(readProbe('grouping')).toBe('priority');
   });
 
   it('replaces columns when the incoming columns snapshot identity changes', () => {
@@ -209,6 +238,22 @@ describe('TableConfigProvider', () => {
     );
 
     expect(readProbe('sizing')).toBe('{"id":180}');
+  });
+
+  it('keeps drawer chrome when a later meta snapshot omits it', () => {
+    const { rerender } = render(<Harness revalidation={1} />);
+
+    fireEvent.click(screen.getByText('open-settings'));
+    expect(readProbe('settings-open')).toBe('true');
+    expect(readProbe('nonce')).toBe('1');
+
+    rerender(
+      <Harness metaState={{ persistenceKey: 'other' }} revalidation={1} />,
+    );
+
+    expect(mounts.config).toBe(1);
+    expect(readProbe('settings-open')).toBe('true');
+    expect(readProbe('nonce')).toBe('1');
   });
 
   it('replaces grouping when the incoming grouping snapshot identity changes', () => {

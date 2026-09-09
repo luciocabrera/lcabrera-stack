@@ -55,14 +55,24 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   );
 
   useEffect(() => {
-    const nextGrouping = getInitialGroupingState({ ...groupingState });
-    syncStoreFromProps({ next: nextGrouping, store: groupingStore });
     syncStoreFromProps({
-      next: getInitialMetaState({ ...metaState }),
+      next: getInitialGroupingState({ ...groupingState }),
+      store: groupingStore,
+    });
+  }, [groupingState, groupingStore]);
+
+  useEffect(() => {
+    syncStoreFromProps({
+      next: getInitialMetaState({ ...metaStore.get(), ...metaState }),
       store: metaStore,
     });
+  }, [metaState, metaStore]);
+
+  useEffect(() => {
     const currentColumns = columnsStore.get();
-    const isLayoutTransient = metaState?.isColumnLayoutTransient === true;
+    const grouping = groupingStore.get();
+    const meta = metaStore.get();
+    const isLayoutTransient = meta.isColumnLayoutTransient === true;
     syncStoreFromProps({
       next: getInitialColumnsState<TData>({
         ...currentColumns,
@@ -73,9 +83,9 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
           columnSizing: currentColumns.columnSizing,
           columnVisibility: currentColumns.columnVisibility,
         }),
-        aggregates: nextGrouping.aggregates,
-        crud: metaState?.crud,
-        groupingKeys: nextGrouping.keys,
+        aggregates: grouping.aggregates,
+        crud: meta.crud,
+        groupingKeys: grouping.keys,
       }),
       store: columnsStore,
     });
