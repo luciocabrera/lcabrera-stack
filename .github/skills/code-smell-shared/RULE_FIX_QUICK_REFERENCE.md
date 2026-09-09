@@ -53,18 +53,28 @@ Use this with:
 
 ## Clean Code and GoF quick pointers
 
-| Rule ID                | Preferred fix pattern                                       |
-| ---------------------- | ----------------------------------------------------------- |
-| CC.G5                  | Extract duplicate logic into one function/module and reuse  |
-| CC.G25                 | Replace literal values with named constants                 |
-| CC.G30                 | Split multi-purpose function into focused units             |
-| CC.N4                  | Rename ambiguous identifiers to domain-specific names       |
-| GOF.STRATEGY-MISSING   | Replace repeated branching with strategy map/object         |
-| GOF.FACTORY-MISSING    | Introduce factory boundary for concrete construction        |
-| GOF.OBSERVER-MISSING   | Use event subscription model with unsubscribe lifecycle     |
-| GOF.FACADE-MISSING     | Introduce facade API to hide subsystem internals            |
-| DS.NEEDLESS-REPETITION | Consolidate repeated flows and standardize extension points |
-| DS.OPACITY             | Improve module boundaries and naming to expose intent       |
+| Rule ID                      | Preferred fix pattern                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------ |
+| CC.G5                        | Extract duplicate logic into one function/module and reuse                                             |
+| CC.G10                       | Move the declaration next to its only caller; do not park helpers at file top by default               |
+| CC.G25                       | Replace literal values with named constants                                                            |
+| CC.G30                       | Split multi-purpose function into focused units                                                        |
+| CC.G31                       | Pass the dependency as an argument, or return a closure from a factory that already holds it           |
+| CC.G33                       | Put `length - 1` / next-index / last-row math in one helper and call that                              |
+| CC.G35                       | Lift limits, timeouts, and page sizes to the factory or route; the helper takes them as args           |
+| CC.N4                        | Rename ambiguous identifiers to domain-specific names                                                  |
+| CC.N6                        | Drop type prefixes (`I`, `str`, `arr`, `fn`); keep `is`/`has`/`should` booleans                        |
+| CHK.FUNC.LONG                | Split mixed stages (parse / map / write) into named units; leave a long single-stage table alone       |
+| CHK.FUNC.SIDE-EFFECT         | Keep the util pure; inject `now` / move `fetch` and store writes to a loader, action, or handler       |
+| CHK.TYPE.PRIMITIVE-OBSESSION | Brand or wrap IDs, money, and keys that can be swapped in one signature                                |
+| CHK.TEST.DEPENDENT           | Each test (or `beforeEach`) builds its own state; do not read leftovers from the case above            |
+| CHK.TEST.NONDETERMINISTIC    | Inject the clock or freeze timers; pass a `draw` instead of calling `Math.random` inside the assertion |
+| GOF.STRATEGY-MISSING         | Replace repeated branching with strategy map/object                                                    |
+| GOF.FACTORY-MISSING          | Introduce factory boundary for concrete construction                                                   |
+| GOF.OBSERVER-MISSING         | Use event subscription model with unsubscribe lifecycle                                                |
+| GOF.FACADE-MISSING           | Introduce facade API to hide subsystem internals                                                       |
+| DS.NEEDLESS-REPETITION       | Consolidate repeated flows and standardize extension points                                            |
+| DS.OPACITY                   | Improve module boundaries and naming to expose intent                                                  |
 
 ## Snippet examples
 
