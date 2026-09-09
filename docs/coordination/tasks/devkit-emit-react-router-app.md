@@ -5,6 +5,8 @@ owner: agent:claude
 status: review
 branch: feat/1076-devkit-emit-react-router-app
 area:
+  - .changeset/monorepo-rung-emits-an-application.md
+  - packages/devkit/ARCHITECTURE.md
   - packages/devkit/README.md
   - packages/devkit/assets/workspace/apps/**
   - packages/devkit/assets/workspace/gitignore
@@ -23,9 +25,11 @@ issue: #1076
 
 ## What
 
-The `monorepo` rung places an application: React Router in framework mode, one
-route rendering a table from static rows, through `@lcabrera/ui`,
-`@lcabrera/api` and `@lcabrera/utils` declared as registry semver ranges.
+The `monorepo` rung places an application: React Router in framework mode, a
+page route rendering a table from static rows and an action route answering the
+path the component library submits that table's persisted state to, through
+`@lcabrera/ui`, `@lcabrera/api` and `@lcabrera/utils` declared as registry
+semver ranges.
 
 The catalog gains the entries that application needs (`@testing-library/react`,
 `jsdom`, the babel toolchain the shared plugins config composes); the tsconfig
@@ -34,8 +38,8 @@ produced file carries a `workspace:` specifier.
 
 ## Status / next
 
-- Current step: review findings addressed — the emitted route's row set covers
-  the page it reads, the fixture test discriminates, and the README's run block
-  spells the runner as the created repository resolves it
+- Current step: review findings addressed — the application now routes the path
+  the component library submits persisted state to, so a sort and a theme toggle
+  are answered rather than left unmatched
 - Blockers: none
 - Next: review

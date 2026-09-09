@@ -160,6 +160,19 @@ syntactically valid and every gate stays green. A range is checked here for
 admitting the minor above its own floor, so writing a caret fails rather than
 merely ages.
 
+**It declares a route for every path the library it renders submits to, and
+that set is not derivable from the application's own source.** The component
+library persists a grid's state by submitting to one fixed path, from the sort,
+the resize, the pin, the global preferences and the theme alike; the path is the
+library's, not the application's, so nothing in the emitted tree mentions it
+except the route that answers it. Leaving it undeclared costs no build error and
+no failing type — the application serves, renders and then replaces its table
+with an error boundary on the first interaction, because the router has nothing
+to match the submission against. The route is therefore part of the rung rather
+than an example a consumer adds, and what checks it is a test over the emitted
+tree here plus one inside the application that submits through the library's own
+hook and asserts the router answered.
+
 **A seed refers to its own directory relatively, so the layout is never
 interpolated.** There is no `{{paths.*}}` placeholder and none is needed: the
 register's README ships _into_ the register, so it links `tasks/_TEMPLATE.md`;

@@ -3,11 +3,12 @@
  *
  * Nothing at run time can check these: the blueprint is inert data, and the one
  * place it is exercised — an install in a directory with no link to this
- * repository — is not where the tree that would fail is written. So the two
+ * repository — is not where the tree that would fail is written. So the
  * failures that reach a consumer silently are asserted here. A `workspace:`
- * specifier resolves a sibling directory, which no bootstrapped repository has,
- * and a caret on a package below 1.0.0 stops at the next minor, so a release
- * lands outside the range with every gate still green.
+ * specifier resolves a sibling directory, which no bootstrapped repository has;
+ * a caret on a package below 1.0.0 stops at the next minor, so a release lands
+ * outside the range with every gate still green; and an unrouted submission
+ * path answers a first interaction with a 404 rather than a build failure.
  */
 
 import { readFileSync } from 'node:fs';
@@ -30,7 +31,32 @@ const STACK_SCOPE = '@lcabrera/';
 
 const WORKSPACE_SPECIFIER = 'workspace:';
 
+const COOKIE_ACTION_MODULE = 'routes/api/persist-cookie/root.ts';
+
+const COOKIE_ACTION_PATH = '_action/persist-cookie';
+
+const COOKIE_ACTION_EXPORT =
+  "export { action } from '@lcabrera/ui/routing/actions/persist-cookie.action';";
+
 const read = (...segments) => readFileSync(join(...segments), 'utf8');
+
+const appSourceRoot = () => join(BLUEPRINT, ...APP_DIRECTORY.split('/'), 'src');
+
+const appSource = (path) => read(appSourceRoot(), ...path.split('/'));
+
+const declaredModules = () =>
+  appSource('routes.ts')
+    .matchAll(/'(routes\/[^']+)'/g)
+    .map((match) => match[1])
+    .toArray();
+
+const shippedRouteModules = () =>
+  readFilesUnder({
+    directory: join(appSourceRoot(), 'routes'),
+    root: appSourceRoot(),
+  })
+    .map((file) => file.path)
+    .filter((path) => path.endsWith('/root.ts'));
 
 const appManifest = JSON.parse(
   read(BLUEPRINT, ...APP_DIRECTORY.split('/'), 'package.json'),
@@ -73,25 +99,10 @@ describe('the application the rung emits', () => {
   });
 
   test('names a route module the kit also ships', () => {
-    const routes = read(
-      BLUEPRINT,
-      ...APP_DIRECTORY.split('/'),
-      'src/routes.ts',
-    );
-    const referenced = routes
-      .matchAll(/'(routes\/[^']+)'/g)
-      .map((match) => match[1])
-      .toArray();
+    const referenced = declaredModules();
     expect(referenced.length).toBeGreaterThan(0);
     for (const route of referenced) {
-      expect(() =>
-        read(
-          BLUEPRINT,
-          ...APP_DIRECTORY.split('/'),
-          'src',
-          ...route.split('/'),
-        ),
-      ).not.toThrow();
+      expect(() => appSource(route)).not.toThrow();
     }
   });
 
@@ -132,6 +143,26 @@ describe('a shipped range survives the next release of what it names', () => {
       .filter((entry) => semver.satisfies(entry.nextMajor, entry.range))
       .map((entry) => `${entry.range} admits ${entry.name}@${entry.nextMajor}`);
     expect(admitted).toEqual([]);
+  });
+});
+
+describe('the application answers every state change its table makes', () => {
+  test('routes the path the library submits persisted state to', () => {
+    expect(appSource('routes.ts')).toContain(
+      `route('${COOKIE_ACTION_PATH}', '${COOKIE_ACTION_MODULE}')`,
+    );
+  });
+
+  test('answers that path with the action the library ships', () => {
+    expect(appSource(COOKIE_ACTION_MODULE).trim()).toBe(COOKIE_ACTION_EXPORT);
+  });
+
+  test('leaves no route module it ships undeclared', () => {
+    const declared = new Set(declaredModules());
+    const undeclared = shippedRouteModules().filter(
+      (path) => !declared.has(path),
+    );
+    expect(undeclared).toEqual([]);
   });
 });
 

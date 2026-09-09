@@ -297,12 +297,23 @@ pnpm exec vp run --filter web build
 pnpm exec vp run --filter web start   # then open http://localhost:3000
 ```
 
-It is React Router in framework mode with one route, and that route renders a
-table from rows the module holds — no server, no database, no fetch. Every
+It is React Router in framework mode with one page route and one action route.
+The page renders a table from rows the module holds — no server, no database, no
+fetch. Every
 `@lcabrera/*` package it names is declared as a semver range and resolved from
 the registry, which is the point of it: what renders there is the published
 surface, with none of the authoring repository's wiring available to make up a
 difference. Everything else it depends on resolves through the catalog.
+
+The action route is not optional decoration, and deleting it costs no build
+error. The component library persists a grid's own state — a sort, a column
+width, a pinned column, a global preference, the theme — by submitting it to one
+fixed path, and it re-exports the handler that answers there; the route is that
+re-export. Without it the application still builds and serves, and the first sort
+then submits to a path the router cannot match, which the page's error boundary
+answers by replacing the table. The page route also exports the library's
+revalidation predicate, which keeps a state write that changed no search
+parameter from re-running the loader.
 
 Three settings in that workspace's Vite config are load-bearing and travel
 together, because the component library publishes TypeScript source rather than
