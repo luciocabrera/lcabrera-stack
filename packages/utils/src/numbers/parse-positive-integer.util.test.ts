@@ -15,4 +15,9 @@ describe('parsePositiveInteger', () => {
     expect(parsePositiveInteger({ fallback: 50, value: '12.5' })).toBe(50);
     expect(parsePositiveInteger({ fallback: 50, value: '-5' })).toBe(50);
   });
+
+  it('falls back at each guard boundary', () => {
+    expect(parsePositiveInteger({ fallback: 50, value: '-1' })).toBe(50);
+    expect(parsePositiveInteger({ fallback: 50, value: '1e21' })).toBe(50);
+  });
 });

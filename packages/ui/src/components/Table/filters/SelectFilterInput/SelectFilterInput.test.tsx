@@ -75,6 +75,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
 vi.mock('#ui/components/Table/contexts/FiltersData/filters/selectors', () => ({
   useGetFilterData: vi.fn(() => ({
     data: [],
+    error: undefined,
     hasMore: false,
     isLoading: false,
     isLoadingMore: false,

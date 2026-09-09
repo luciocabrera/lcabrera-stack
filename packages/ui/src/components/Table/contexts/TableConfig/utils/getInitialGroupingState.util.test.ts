@@ -10,6 +10,7 @@ const NO_GROUPING = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 const keysOfLength = (length: number) =>
@@ -19,35 +20,34 @@ describe('getInitialGroupingState', () => {
   it('seeds the mode the loader applied', () => {
     expect(
       getInitialGroupingState({
-        groupingKeys: ['order_status'],
-        groupingMode: 'rollup',
+        keys: ['order_status'],
+        mode: 'rollup',
       }).mode,
     ).toBe('rollup');
   });
 
   it('defaults the mode to flat, which is what a pre-rollup link means', () => {
-    expect(
-      getInitialGroupingState({ groupingKeys: ['order_status'] }).mode,
-    ).toBe('flat');
+    expect(getInitialGroupingState({ keys: ['order_status'] }).mode).toBe(
+      'flat',
+    );
   });
 
   it('seeds the keys the loader applied', () => {
-    expect(
-      getInitialGroupingState({ groupingKeys: ['order_status'] }),
-    ).toStrictEqual({
+    expect(getInitialGroupingState({ keys: ['order_status'] })).toStrictEqual({
       aggregates: [],
       keys: ['order_status'],
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
   it('seeds the aggregates the loader applied', () => {
     expect(
       getInitialGroupingState({
-        groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
-        groupingKeys: ['order_status'],
+        aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+        keys: ['order_status'],
       }),
     ).toStrictEqual({
       aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
@@ -55,6 +55,7 @@ describe('getInitialGroupingState', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -65,6 +66,7 @@ describe('getInitialGroupingState', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -73,7 +75,10 @@ describe('getInitialGroupingState', () => {
       { columnKey: 'total_amount', fn: 'sum' },
     ] as const;
     const groupingKeys = ['order_status'];
-    const state = getInitialGroupingState({ groupingAggregates, groupingKeys });
+    const state = getInitialGroupingState({
+      aggregates: groupingAggregates,
+      keys: groupingKeys,
+    });
 
     expect(state.keys).not.toBe(groupingKeys);
     expect(state.keys).toStrictEqual(groupingKeys);
@@ -85,15 +90,15 @@ describe('getInitialGroupingState', () => {
     it('seeds exactly the cap', () => {
       const groupingKeys = keysOfLength(MAX_TABLE_GROUP_KEYS);
 
-      expect(getInitialGroupingState({ groupingKeys }).keys).toStrictEqual(
-        groupingKeys,
-      );
+      expect(
+        getInitialGroupingState({ keys: groupingKeys }).keys,
+      ).toStrictEqual(groupingKeys);
     });
 
     it('refuses one key past the cap, whole rather than truncated', () => {
       const groupingKeys = keysOfLength(MAX_TABLE_GROUP_KEYS + 1);
 
-      expect(getInitialGroupingState({ groupingKeys })).toStrictEqual(
+      expect(getInitialGroupingState({ keys: groupingKeys })).toStrictEqual(
         NO_GROUPING,
       );
     });
@@ -101,8 +106,8 @@ describe('getInitialGroupingState', () => {
     it('drops the aggregates with the refused keys', () => {
       expect(
         getInitialGroupingState({
-          groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
-          groupingKeys: keysOfLength(MAX_TABLE_GROUP_KEYS + 1),
+          aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+          keys: keysOfLength(MAX_TABLE_GROUP_KEYS + 1),
         }),
       ).toStrictEqual(NO_GROUPING);
     });
@@ -110,8 +115,8 @@ describe('getInitialGroupingState', () => {
     it('drops an aggregate the loader supplied with no key at all', () => {
       expect(
         getInitialGroupingState({
-          groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
-          groupingKeys: [],
+          aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+          keys: [],
         }),
       ).toStrictEqual(NO_GROUPING);
     });
@@ -121,7 +126,7 @@ describe('getInitialGroupingState', () => {
     it('refuses a repeated key, whole rather than de-duplicated', () => {
       expect(
         getInitialGroupingState({
-          groupingKeys: ['order_status', 'order_status'],
+          keys: ['order_status', 'order_status'],
         }),
       ).toStrictEqual(NO_GROUPING);
     });
@@ -129,7 +134,7 @@ describe('getInitialGroupingState', () => {
     it('refuses a repeat buried among distinct keys', () => {
       expect(
         getInitialGroupingState({
-          groupingKeys: ['order_status', 'priority', 'order_status'],
+          keys: ['order_status', 'priority', 'order_status'],
         }),
       ).toStrictEqual(NO_GROUPING);
     });
@@ -137,8 +142,8 @@ describe('getInitialGroupingState', () => {
     it('drops the aggregates with the refused keys', () => {
       expect(
         getInitialGroupingState({
-          groupingAggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
-          groupingKeys: ['order_status', 'order_status'],
+          aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+          keys: ['order_status', 'order_status'],
         }),
       ).toStrictEqual(NO_GROUPING);
     });
@@ -146,9 +151,9 @@ describe('getInitialGroupingState', () => {
     it('still seeds a list whose keys are all distinct', () => {
       const groupingKeys = ['order_status', 'priority'];
 
-      expect(getInitialGroupingState({ groupingKeys }).keys).toStrictEqual(
-        groupingKeys,
-      );
+      expect(
+        getInitialGroupingState({ keys: groupingKeys }).keys,
+      ).toStrictEqual(groupingKeys);
     });
   });
 
@@ -156,11 +161,11 @@ describe('getInitialGroupingState', () => {
     it('refuses a repeated (columnKey, fn) pair, whole rather than de-duplicated', () => {
       expect(
         getInitialGroupingState({
-          groupingAggregates: [
+          aggregates: [
             { columnKey: 'total_amount', fn: 'sum' },
             { columnKey: 'total_amount', fn: 'sum' },
           ],
-          groupingKeys: ['order_status'],
+          keys: ['order_status'],
         }),
       ).toStrictEqual(NO_GROUPING);
     });
@@ -168,12 +173,12 @@ describe('getInitialGroupingState', () => {
     it('refuses a repeat buried among distinct pairs', () => {
       expect(
         getInitialGroupingState({
-          groupingAggregates: [
+          aggregates: [
             { columnKey: 'total_amount', fn: 'sum' },
             { columnKey: 'quantity', fn: 'max' },
             { columnKey: 'total_amount', fn: 'sum' },
           ],
-          groupingKeys: ['order_status'],
+          keys: ['order_status'],
         }),
       ).toStrictEqual(NO_GROUPING);
     });
@@ -186,8 +191,8 @@ describe('getInitialGroupingState', () => {
 
       expect(
         getInitialGroupingState({
-          groupingAggregates,
-          groupingKeys: ['order_status'],
+          aggregates: groupingAggregates,
+          keys: ['order_status'],
         }).aggregates,
       ).toStrictEqual(groupingAggregates);
     });

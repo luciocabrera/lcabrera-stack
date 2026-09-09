@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
+import { getInitialGroupingState } from '#ui/components/Table/contexts/TableConfig/utils';
+
 import { addTableColumnAggregate } from './addTableColumnAggregate.util';
 
 type GroupingArgs = {
@@ -9,16 +11,13 @@ type GroupingArgs = {
   readonly shares?: TableGroupingState['shares'];
 };
 
-const grouping = ({
-  aggregates = [],
-  shares = [],
-}: GroupingArgs = {}): TableGroupingState => ({
-  aggregates,
-  keys: ['order_status'],
-  mode: 'flat',
-  periods: { created_at: 'month' },
-  shares,
-});
+const grouping = ({ aggregates = [], shares = [] }: GroupingArgs = {}) =>
+  getInitialGroupingState({
+    aggregates,
+    keys: ['order_status'],
+    periods: { created_at: 'month' },
+    shares,
+  });
 
 describe('addTableColumnAggregate', () => {
   it('applies an aggregate to a column that had none', () => {

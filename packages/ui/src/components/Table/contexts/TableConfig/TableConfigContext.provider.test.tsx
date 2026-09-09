@@ -61,7 +61,8 @@ const Probe = () => {
 const Harness = ({ groupingKeys, revalidation }: HarnessProps) => (
   <TableConfigProvider<TestRow>
     columnsState={{ columns: [{ key: 'id', label: 'ID' }] }}
-    metaState={{ groupingKeys, persistenceKey: 'orders' }}
+    groupingState={{ keys: groupingKeys }}
+    metaState={{ persistenceKey: 'orders' }}
   >
     <ConfigMountCounter />
     <TableDataProvider<TestRow>

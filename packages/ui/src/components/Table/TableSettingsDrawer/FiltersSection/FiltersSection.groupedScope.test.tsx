@@ -94,9 +94,9 @@ const Harness = ({ columnFilters }: HarnessProps) => (
   <NotificationProvider>
     <TableConfigProvider<Row>
       columnsState={{ columnFilters, columns }}
-      metaState={{
-        groupingAggregates: AGGREGATES,
-        groupingKeys: GROUPING_KEYS,
+      groupingState={{
+        aggregates: AGGREGATES,
+        keys: GROUPING_KEYS,
       }}
     >
       <TableDrawerProvider>

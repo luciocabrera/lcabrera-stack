@@ -1,12 +1,11 @@
-import { getErrorMessage } from '@lcabrera/utils/errors/get-error-message.util';
-
 import type {
   DataKey,
   FilterData,
   FiltersDataState,
-  TableMetaState,
 } from '#ui/components/Table/Table.types';
 import type { TStore } from '#ui/hooks/useStore.hook';
+
+import { toTableResponseError } from '#ui/components/Table/utils/toTableResponseError.util';
 
 import { setFilterSlice } from './setFilterSlice.util';
 
@@ -15,7 +14,6 @@ type HandleFetchMoreFilterDataErrorArgs<TData> = {
   readonly currentFilter: FilterData;
   readonly error: unknown;
   readonly filtersDataStore: TStore<FiltersDataState<TData>>;
-  readonly metaStore: TStore<TableMetaState>;
 };
 
 export const handleFetchMoreFilterDataError = <TData>({
@@ -23,17 +21,17 @@ export const handleFetchMoreFilterDataError = <TData>({
   currentFilter,
   error,
   filtersDataStore,
-  metaStore,
 }: HandleFetchMoreFilterDataErrorArgs<TData>) => {
-  const message = getErrorMessage({
-    error,
-    fallback: 'Failed to load more data',
-  });
-  metaStore.set({ error: message });
-
   setFilterSlice({
     columnKey,
-    filter: { ...currentFilter, isLoadingMore: false },
+    filter: {
+      ...currentFilter,
+      error: toTableResponseError({
+        error,
+        fallback: 'Failed to load more data',
+      }),
+      isLoadingMore: false,
+    },
     filtersDataStore,
   });
 };

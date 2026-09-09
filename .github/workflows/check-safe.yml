@@ -193,6 +193,15 @@ jobs:
         # scripts/verify-devkit-seeds.mjs.
         run: vp run seeds:verify
 
+      - name: Shipped ranges admit the versions this repository publishes
+        id: shipped_ranges_gate
+        # A range in a shipped asset decides which release a bootstrapped
+        # repository installs. Below 1.0.0 a caret admits no minor at all, so a
+        # literal that is correct today hands a consumer the release before last
+        # the day one ships — and the asset stays valid, so nothing else reports
+        # it. See scripts/verify-shipped-ranges.mjs.
+        run: vp run shipped-ranges:verify
+
       - name: Shipped files reference only what ships with them
         id: devkit_closure_gate
         # The other half of the same question, by a different instrument: this

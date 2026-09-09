@@ -1,6 +1,9 @@
 import type { RefObject } from 'react';
 
-import type { TableMetaState } from '#ui/components/Table/Table.types';
+import type {
+  TableMetaState,
+  TableResponseError,
+} from '#ui/components/Table/Table.types';
 import type { TStore } from '#ui/hooks/useStore.hook';
 import type {
   InfiniteScroll,
@@ -23,6 +26,7 @@ export type CommitFetchMoreSuccessArgs<TData, TResponse> = {
 
 export type DataState<TData> = {
   readonly data: readonly TData[];
+  readonly error?: TableResponseError;
   readonly hasMore: boolean;
   readonly isLoading: boolean;
   readonly isLoadingMore: boolean;

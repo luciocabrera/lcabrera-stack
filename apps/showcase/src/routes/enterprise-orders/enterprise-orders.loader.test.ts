@@ -53,6 +53,7 @@ const NO_GROUPING = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 const sortKeys = (value: object) =>
@@ -129,7 +130,7 @@ describe('enterprise-orders loader', () => {
         groupingSearch('{"keys":["order_status"]}'),
       );
 
-      expect(result.metaState.groupingKeys).toEqual(['order_status']);
+      expect(result.groupingState.keys).toEqual(['order_status']);
       expect(selectOrdersPage).toHaveBeenCalledWith(
         expect.objectContaining({
           grouping: {
@@ -138,6 +139,7 @@ describe('enterprise-orders loader', () => {
             mode: 'flat',
             periods: {},
             shares: [],
+            totalsPlacement: 'last',
           },
         }),
       );
@@ -148,7 +150,7 @@ describe('enterprise-orders loader', () => {
         groupingSearch('{"keys":["order_status",1]}'),
       );
 
-      expect(result.metaState.groupingKeys).toEqual([]);
+      expect(result.groupingState.keys).toEqual([]);
       expect(selectOrdersPage).toHaveBeenCalledWith(
         expect.objectContaining({ grouping: NO_GROUPING }),
       );
@@ -159,15 +161,15 @@ describe('enterprise-orders loader', () => {
         groupingSearch('{"keys":["internal_notes"]}'),
       );
 
-      expect(result.metaState.groupingKeys).toEqual([]);
+      expect(result.groupingState.keys).toEqual([]);
     });
 
     it('refuses the row-actions column as a group key', async () => {
-      const { metaState } = await invokeLoader(
+      const { groupingState } = await invokeLoader(
         groupingSearch('{"keys":["actions"]}'),
       );
 
-      expect(metaState.groupingKeys).toEqual([]);
+      expect(groupingState.keys).toEqual([]);
     });
 
     it('returns the same loader fields whether or not the route is grouped', async () => {
@@ -177,7 +179,12 @@ describe('enterprise-orders loader', () => {
       );
 
       expect(grouped).toEqual(ungrouped);
-      expect(grouped).toEqual(['columnsState', 'dataPromise', 'metaState']);
+      expect(grouped).toEqual([
+        'columnsState',
+        'dataPromise',
+        'groupingState',
+        'metaState',
+      ]);
     });
 
     it('applies several keys from one shared link, in nesting order', async () => {
@@ -185,7 +192,7 @@ describe('enterprise-orders loader', () => {
         groupingSearch('{"keys":["order_status","shipping_country"]}'),
       );
 
-      expect(result.metaState.groupingKeys).toEqual([
+      expect(result.groupingState.keys).toEqual([
         'order_status',
         'shipping_country',
       ]);
@@ -197,6 +204,7 @@ describe('enterprise-orders loader', () => {
             mode: 'flat',
             periods: {},
             shares: [],
+            totalsPlacement: 'last',
           },
         }),
       );
@@ -209,7 +217,7 @@ describe('enterprise-orders loader', () => {
         ),
       );
 
-      expect(result.metaState.groupingKeys).toEqual([]);
+      expect(result.groupingState.keys).toEqual([]);
     });
 
     it('applies a selected aggregate from the URL', async () => {
@@ -217,7 +225,7 @@ describe('enterprise-orders loader', () => {
         groupingSearch('{"agg":["total_amount:sum"],"keys":["order_status"]}'),
       );
 
-      expect(result.metaState.groupingAggregates).toEqual([
+      expect(result.groupingState.aggregates).toEqual([
         { columnKey: 'total_amount', fn: 'sum' },
       ]);
       expect(selectOrdersPage).toHaveBeenCalledWith(
@@ -228,6 +236,7 @@ describe('enterprise-orders loader', () => {
             mode: 'flat',
             periods: {},
             shares: [],
+            totalsPlacement: 'last',
           },
         }),
       );
@@ -240,7 +249,7 @@ describe('enterprise-orders loader', () => {
         ),
       );
 
-      expect(result.metaState.groupingAggregates).toEqual([
+      expect(result.groupingState.aggregates).toEqual([
         { columnKey: 'total_amount', fn: 'sum' },
         { columnKey: 'total_amount', fn: 'avg' },
       ]);

@@ -53,7 +53,6 @@ export const fetchMoreFilterData = <TData, TResponse>({
         currentFilter,
         error,
         filtersDataStore,
-        metaStore,
       });
     }
   };

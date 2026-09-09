@@ -10,6 +10,12 @@ import { useFetchMoreData } from './useFetchMoreData.hook';
 
 type TestDataState = {
   readonly data: readonly TestRow[];
+  readonly error:
+    | undefined
+    | {
+        readonly kind: 'db-canceled' | 'db-failed' | 'unexpected';
+        readonly message: string;
+      };
   readonly hasMore: boolean;
   readonly isLoading: boolean;
   readonly isLoadingMore: boolean;
@@ -26,10 +32,21 @@ type TestRow = {
   readonly id: number;
 };
 
+const TWO_LOADED_ROWS = {
+  data: [{ id: 1 }, { id: 2 }],
+  error: undefined,
+  hasMore: true,
+  isLoading: false,
+  isLoadingMore: false,
+  totalLoadedRows: 2,
+  totalRows: 5,
+} as const;
+
 const createHarness = () => {
   return createPaginatedFetchActionMocks<TestDataState, TestResponse>({
     initialDataState: {
       data: [{ id: 1 }],
+      error: undefined,
       hasMore: true,
       isLoading: false,
       isLoadingMore: false,
@@ -91,6 +108,7 @@ describe('useFetchMoreData', () => {
     currentHarness.resetMocks();
     currentHarness.setDataState({
       data: [{ id: 1 }],
+      error: undefined,
       hasMore: true,
       isLoading: false,
       isLoadingMore: false,
@@ -178,6 +196,7 @@ describe('useFetchMoreData', () => {
   it('returns early when hasMore is false', async () => {
     getHarness().setDataState({
       data: [{ id: 1 }, { id: 2 }, { id: 3 }],
+      error: undefined,
       hasMore: false,
       isLoading: false,
       isLoadingMore: false,
@@ -209,10 +228,8 @@ describe('useFetchMoreData', () => {
       await result.current({ ...defaultSelectors, onLoadMore });
     });
 
-    expect(getHarness().metaStore.get()).toMatchObject({
-      error: 'network down',
-    });
     expect(getHarness().dataStore.get()).toMatchObject({
+      error: { kind: 'db-failed', message: 'network down' },
       isLoadingMore: false,
     });
   });
@@ -302,14 +319,7 @@ describe('useFetchMoreData', () => {
 
       expect(onLoadMore).toHaveBeenCalledTimes(2);
 
-      getHarness().setDataState({
-        data: [{ id: 1 }, { id: 2 }],
-        hasMore: true,
-        isLoading: false,
-        isLoadingMore: false,
-        totalLoadedRows: 2,
-        totalRows: 5,
-      });
+      getHarness().setDataState(TWO_LOADED_ROWS);
 
       await act(async () => {
         await result.current({ ...defaultSelectors, onLoadMore });
@@ -338,14 +348,7 @@ describe('useFetchMoreData', () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
-      getHarness().setDataState({
-        data: [{ id: 1 }, { id: 2 }],
-        hasMore: true,
-        isLoading: false,
-        isLoadingMore: false,
-        totalLoadedRows: 2,
-        totalRows: 5,
-      });
+      getHarness().setDataState(TWO_LOADED_ROWS);
 
       await act(async () => {
         await result.current({ ...defaultSelectors, onLoadMore });

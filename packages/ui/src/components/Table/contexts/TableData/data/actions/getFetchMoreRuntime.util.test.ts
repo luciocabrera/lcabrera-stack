@@ -35,6 +35,7 @@ describe('getFetchMoreRuntime', () => {
       args: { onLoadMore },
       dataState: {
         data: rows,
+        error: undefined,
         hasMore: true,
         isLoading: false,
         isLoadingMore: false,

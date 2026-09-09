@@ -19,6 +19,7 @@ const NO_GROUPING: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 const createColumnsState = () =>
@@ -335,6 +336,7 @@ describe('TableConfig grouping hooks', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     const { result } = renderHook(() => useAddTableColumnAggregate());
@@ -366,6 +368,7 @@ describe('TableConfig grouping hooks', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
     storesRef.columnsStore.set({
       columns: [
@@ -418,6 +421,7 @@ describe('TableConfig grouping hooks', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     const { result } = renderHook(() => useClearTableGrouping());
@@ -442,6 +446,7 @@ describe('TableConfig grouping hooks', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     const { result } = renderHook(() => useToggleTableGroupKey());

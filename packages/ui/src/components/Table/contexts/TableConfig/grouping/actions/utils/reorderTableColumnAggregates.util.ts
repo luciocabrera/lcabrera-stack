@@ -25,5 +25,6 @@ export const reorderTableColumnAggregates = ({
     mode: grouping.mode,
     periods: grouping.periods,
     shares: grouping.shares,
+    totalsPlacement: grouping.totalsPlacement,
   };
 };

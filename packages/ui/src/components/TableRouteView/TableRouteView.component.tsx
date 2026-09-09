@@ -15,7 +15,7 @@ export const TableRouteView = <
   dataTotalSelector = (response) => response.total,
   fetchPage,
 }: TableRouteViewProps<TData, TResponse>) => {
-  const { columnsState, dataPromise, metaState, onLoadMore } =
+  const { columnsState, dataPromise, groupingState, metaState, onLoadMore } =
     useTableRoutePage<TData, TResponse>({ fetchPage });
 
   return (
@@ -26,6 +26,7 @@ export const TableRouteView = <
       dataPromise={dataPromise}
       dataSelector={dataSelector}
       dataTotalSelector={dataTotalSelector}
+      groupingState={groupingState}
       metaState={metaState}
       onLoadMore={onLoadMore}
     />

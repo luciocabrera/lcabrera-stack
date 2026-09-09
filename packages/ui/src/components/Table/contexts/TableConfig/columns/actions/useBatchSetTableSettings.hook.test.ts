@@ -10,8 +10,9 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
-  TableGroupingState,
 } from '#ui/components/Table/Table.types';
+
+import { getInitialGroupingState } from '#ui/components/Table/contexts/TableConfig/utils';
 
 import { useBatchSetTableSettings } from './useBatchSetTableSettings.hook';
 
@@ -21,19 +22,26 @@ type Row = {
   readonly name: string;
 };
 
-const NO_GROUPING: TableGroupingState = {
-  aggregates: [],
-  keys: [],
-  mode: 'flat',
-  periods: {},
-  shares: [],
+const NO_GROUPING = getInitialGroupingState({});
+const NAME_GROUPING = getInitialGroupingState({ keys: ['name'] });
+const NAME_AGE_SUM_GROUPING = getInitialGroupingState({
+  aggregates: [{ columnKey: 'age', fn: 'sum' }],
+  keys: ['name'],
+});
+const UNPINNED_EMPTY_SETTINGS = {
+  columnFilters: {} as ColumnFiltersState<Row>,
+  columnOrder: ['id', 'age', 'name'] as ColumnOrderState<Row>,
+  columnPinning: { left: [], right: [] } as ColumnPinningState<Row>,
+  columnSizing: {} as ColumnSizingState<Row>,
+  columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(),
+  sorting: [] as SortingState<Row>,
 };
 
 const {
   mockBuildPersistencePayload,
   mockColumnsStore,
   mockDataStore,
-  mockGroupingStore,
+  mockLiveGroupingStore,
   mockMetaStore,
   mockPersistTableState,
   mockPersistUiFlags,
@@ -64,14 +72,8 @@ const {
     mockDataStore: {
       set: vi.fn(),
     },
-    mockGroupingStore: {
-      get: vi.fn((): TableGroupingState => ({
-        aggregates: [],
-        keys: [],
-        mode: 'flat',
-        periods: {},
-        shares: [],
-      })),
+    mockLiveGroupingStore: {
+      get: vi.fn((): typeof NO_GROUPING | undefined => undefined),
       set: vi.fn(),
     },
     mockMetaStore: {
@@ -134,7 +136,7 @@ vi.mock(
   () => ({
     useTableConfigContextValue: () => ({
       columnsStore: mockColumnsStore,
-      groupingStore: mockGroupingStore,
+      groupingStore: mockLiveGroupingStore,
       metaStore: mockMetaStore,
     }),
   }),
@@ -172,15 +174,9 @@ describe('useBatchSetTableSettings', () => {
     mockColumnsStore.get.mockClear();
     mockColumnsStore.set.mockClear();
     mockDataStore.set.mockClear();
-    mockGroupingStore.get.mockClear();
-    mockGroupingStore.get.mockReturnValue({
-      aggregates: [],
-      keys: [],
-      mode: 'flat',
-      periods: {},
-      shares: [],
-    });
-    mockGroupingStore.set.mockClear();
+    mockLiveGroupingStore.get.mockClear();
+    mockLiveGroupingStore.get.mockReturnValue(NO_GROUPING);
+    mockLiveGroupingStore.set.mockClear();
     mockMetaStore.get.mockClear();
     mockMetaStore.get.mockReturnValue({
       isTableSettingsPinned: false,
@@ -270,6 +266,7 @@ describe('useBatchSetTableSettings', () => {
       nextStatePatch: {
         isTableSettingsOpen: false,
       },
+      totalsPlacement: 'last',
     });
     expect(mockMetaStore.set).toHaveBeenCalledWith({
       isTableSettingsOpen: false,
@@ -379,21 +376,8 @@ describe('useBatchSetTableSettings', () => {
 
     act(() => {
       result.current({
-        grouping: {
-          aggregates: [{ columnKey: 'age', fn: 'sum' }],
-          keys: ['name'],
-          mode: 'flat',
-          periods: {},
-          shares: [],
-        },
-        settings: {
-          columnFilters: {} as ColumnFiltersState<Row>,
-          columnOrder: ['id', 'age', 'name'],
-          columnPinning: { left: [], right: [] },
-          columnSizing: {} as ColumnSizingState<Row>,
-          columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(),
-          sorting: [] as SortingState<Row>,
-        },
+        grouping: NAME_AGE_SUM_GROUPING,
+        settings: UNPINNED_EMPTY_SETTINGS,
         totalsPlacement: 'last',
       });
     });
@@ -410,44 +394,25 @@ describe('useBatchSetTableSettings', () => {
         searchParamValue: '{"agg":["age:sum"],"keys":["name"]}',
       },
     ]);
-    expect(mockGroupingStore.set).toHaveBeenCalledWith({
-      aggregates: [{ columnKey: 'age', fn: 'sum' }],
-      keys: ['name'],
-      mode: 'flat',
-      periods: {},
-      shares: [],
-    });
+    expect(mockLiveGroupingStore.set).toHaveBeenCalledWith(
+      NAME_AGE_SUM_GROUPING,
+    );
     expect(mockDataStore.set).toHaveBeenCalledWith({ isLoading: true });
   });
 
   it('adds no grouping entry when the staged grouping is the applied one', () => {
-    mockGroupingStore.get.mockReturnValue({
-      aggregates: [],
-      keys: ['name'],
-      mode: 'flat',
-      periods: {},
-      shares: [],
-    });
+    mockLiveGroupingStore.get.mockReturnValue(NAME_GROUPING);
 
     const { result } = renderHook(() => useBatchSetTableSettings<Row>());
 
     act(() => {
       result.current({
-        grouping: {
-          aggregates: [],
-          keys: ['name'],
-          mode: 'flat',
-          periods: {},
-          shares: [],
-        },
+        grouping: NAME_GROUPING,
         settings: {
+          ...UNPINNED_EMPTY_SETTINGS,
           columnFilters: {
             name: { operator: 'contains', type: 'text', value: 'ali' },
           } as ColumnFiltersState<Row>,
-          columnOrder: ['id', 'age', 'name'],
-          columnPinning: { left: [], right: [] },
-          columnSizing: {} as ColumnSizingState<Row>,
-          columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(),
           sorting: [
             { columnKey: 'name', direction: 'asc' },
           ] as SortingState<Row>,
@@ -463,7 +428,7 @@ describe('useBatchSetTableSettings', () => {
         valueSlice: ['id', 'age', 'name'],
       },
     ]);
-    expect(mockGroupingStore.set).not.toHaveBeenCalled();
+    expect(mockLiveGroupingStore.set).not.toHaveBeenCalled();
     expect(mockDataStore.set).not.toHaveBeenCalled();
   });
 
@@ -474,26 +439,13 @@ describe('useBatchSetTableSettings', () => {
 
     act(() => {
       result.current({
-        grouping: {
-          aggregates: [],
-          keys: ['name'],
-          mode: 'flat',
-          periods: {},
-          shares: [],
-        },
-        settings: {
-          columnFilters: {} as ColumnFiltersState<Row>,
-          columnOrder: ['id', 'age', 'name'],
-          columnPinning: { left: [], right: [] },
-          columnSizing: {} as ColumnSizingState<Row>,
-          columnVisibility: new Set<'actions' | 'age' | 'id' | 'name'>(),
-          sorting: [] as SortingState<Row>,
-        },
+        grouping: NAME_GROUPING,
+        settings: UNPINNED_EMPTY_SETTINGS,
         totalsPlacement: 'last',
       });
     });
 
-    expect(mockGroupingStore.set).not.toHaveBeenCalled();
+    expect(mockLiveGroupingStore.set).not.toHaveBeenCalled();
     expect(mockColumnsStore.set).not.toHaveBeenCalled();
   });
 });

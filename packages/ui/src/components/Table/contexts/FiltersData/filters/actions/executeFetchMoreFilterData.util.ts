@@ -80,6 +80,7 @@ export const executeFetchMoreFilterData = async <TData, TResponse>({
     filter: {
       ...currentFilter,
       data: combinedData,
+      error: undefined,
       hasMore,
       isLoading: false,
       isLoadingMore: false,

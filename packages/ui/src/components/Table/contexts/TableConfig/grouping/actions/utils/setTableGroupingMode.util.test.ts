@@ -10,6 +10,7 @@ const grouping: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 describe('setTableGroupingMode', () => {
@@ -41,6 +42,7 @@ describe('setTableGroupingMode', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
         mode: 'rollup',
       }),
@@ -50,6 +52,7 @@ describe('setTableGroupingMode', () => {
       mode: 'rollup',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 });

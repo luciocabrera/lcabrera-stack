@@ -57,9 +57,10 @@ const NO_GROUPING: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
-export type SelectGroupedOrdersArgs = {
+type SelectGroupedOrdersArgs = {
   readonly aggregates: TableGroupingState['aggregates'];
   readonly filters: readonly QueryFilter[];
   readonly groupKeys: readonly string[];

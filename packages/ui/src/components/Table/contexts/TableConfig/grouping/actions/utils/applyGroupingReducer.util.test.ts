@@ -12,6 +12,7 @@ const NO_GROUPING: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 describe('applyGroupingReducer', () => {
@@ -24,6 +25,7 @@ describe('applyGroupingReducer', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         }),
         existingGrouping: {
           aggregates: [],
@@ -31,6 +33,7 @@ describe('applyGroupingReducer', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toStrictEqual({
@@ -40,6 +43,7 @@ describe('applyGroupingReducer', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
       kind: 'updated',
       persistenceEntry: {
@@ -63,6 +67,7 @@ describe('applyGroupingReducer', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
     });
 
@@ -73,6 +78,7 @@ describe('applyGroupingReducer', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
     ]);
   });
@@ -87,6 +93,7 @@ describe('applyGroupingReducer', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -104,6 +111,7 @@ describe('applyGroupingReducer', () => {
           mode: 'flat' as const,
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         }),
         existingGrouping: NO_GROUPING,
       }),

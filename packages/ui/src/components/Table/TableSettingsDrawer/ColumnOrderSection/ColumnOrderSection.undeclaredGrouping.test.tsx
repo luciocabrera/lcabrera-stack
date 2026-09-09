@@ -102,7 +102,7 @@ const Harness = ({ columnVisibility, groupingKeys }: HarnessProps) => (
     <NotificationProvider>
       <TableConfigProvider<Row>
         columnsState={{ columns, columnVisibility }}
-        metaState={{ groupingKeys }}
+        groupingState={{ keys: groupingKeys }}
       >
         <TableDrawerProvider>
           <ColumnOrderSectionProvider>

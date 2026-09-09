@@ -13,7 +13,7 @@ describe('isObject', () => {
   });
 
   it('returns false for null', () => {
-    expect(isObject(undefined)).toBe(false);
+    expect(isObject(new URLSearchParams().get('missing'))).toBe(false);
   });
 
   it('returns false for primitives', () => {

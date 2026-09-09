@@ -27,5 +27,6 @@ export const removeTableColumnAggregate = ({
     mode: grouping.mode,
     periods: grouping.periods,
     shares: pruneGroupShares({ aggregates, shares: grouping.shares }),
+    totalsPlacement: grouping.totalsPlacement,
   };
 };

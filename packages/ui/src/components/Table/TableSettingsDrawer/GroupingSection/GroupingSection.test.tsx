@@ -49,6 +49,7 @@ const NO_GROUPING: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 const stores = {
@@ -243,6 +244,7 @@ describe('GroupingSection staging', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -352,6 +354,7 @@ describe('GroupingSection staging', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     renderDrawer();
@@ -450,6 +453,7 @@ describe('GroupingSection staging', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     renderDrawer();
@@ -469,6 +473,7 @@ describe('GroupingSection staging', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
     expect(screen.getByText('1. Country')).not.toBeNull();
   });
@@ -480,6 +485,7 @@ describe('GroupingSection staging', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     const firstOpen = renderDrawer();
@@ -502,6 +508,7 @@ describe('GroupingSection staging', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     renderDrawer();
@@ -526,6 +533,7 @@ describe('GroupingSection staging', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     renderDrawer();
@@ -559,6 +567,7 @@ describe('GroupingSection staging', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     renderDrawer();
