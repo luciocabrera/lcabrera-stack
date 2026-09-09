@@ -1,5 +1,102 @@
 # @lcabrera/ui
 
+## 0.7.0
+
+### Minor Changes
+
+- 4f31059: The table settings panel gains an **Advanced** tab, and the General tab goes back
+  to being one thing. General holds a clear and a reset for each part of the
+  table's query state and nothing else, including the Grouping pair it was missing;
+  that pair renders only where the route declared `isGroupingEnabled`. Totals
+  position leaves General and the totals mode leaves the Grouping tab, so Grouping
+  is dimensions and measures. Both land in Advanced, which is registered only where it
+  has something to render: each of its two controls carries its own guard, so a
+  locked preset outside `rollup` would otherwise paint an empty tab. The General
+  tab's Grouping heading is gated the same way, since `GroupingSectionToolbar`
+  renders nothing under a locked preset.
+
+  **The settings tab order is now a global preference and no longer a per-table
+  one.** The Settings page gains a **Table Panel** tab holding the drag list,
+  written to `tablePanel.settingsTabOrder` in the global-settings cookie on Accept.
+  The drag inside the table drawer is gone, along with `useSetTableSettingsTabOrder`
+  and the `settingsTabOrder` entry in the per-table UI-flags cookie. Which order the
+  tabs sit in is the same answer on every table, so it belongs beside the navigation
+  size and the pin-side default rather than beside the filters. A reader who
+  arranged one table's tabs in the previous release gets the declared order back
+  until they set one on the Settings page; one action then covers every table. The
+  stale key is dropped on read: `readPersistedUiFlagsFromCookie` now narrows the
+  parsed payload to the keys `PersistedUiState` declares, because
+  `parseVersionedPayload` casts rather than checks and a key removed from that type
+  was still reaching the meta store.
+
+  `TableSettingsTabRole` gains `'advanced'`. If you narrow that union or switch
+  exhaustively over it, this is the change to look at. An order stored before this
+  release is read the same way as any other partial one: `advanced` is appended at
+  the end rather than the tab going missing. The column settings drawer maps no key
+  onto the role and does not paint the tab.
+
+  `GlobalSettingsState` gains a `tablePanel` key. The cookie version is unchanged,
+  because a payload written without the key still parses.
+
+  `createTableRouteLoader`'s `metaState` now always carries `settingsTabOrder`,
+  where it previously carried the key only when a value existed. The value is still
+  `undefined` when the reader has set no order, and `TableMetaState` still declares
+  the property optional, so this widens what the loader guarantees rather than
+  narrowing what the Table accepts.
+
+  A draggable row's label truncates with an ellipsis rather than wrapping, and
+  carries the full text in `title`. Two lines in one row changed that row's height
+  while it was being dragged past, which the grouping panel's longer measure labels
+  did routinely.
+
+  `GroupingModeSection` and `TotalsPlacementSection` moved to
+  `TableSettingsDrawer/AdvancedSettingsSection/`. Neither of their `*.stylex.ts`
+  modules calls `defineVars`, so no custom property was renamed and a `createTheme`
+  cannot drift on this.
+
+- c45904c: The settings panel now takes the shape the reader gives it, and a grouped grid
+  stops painting what it cannot use.
+
+  `SidePanel` takes `isResizable`, `width`, `onWidthChange` and `onWidthCommit`: a
+  splitter on the panel's inner edge, drag and keyboard both, held between 320px
+  and 90% of the viewport by the gesture and again in CSS — so a width persisted on
+  a wide display cannot paint off the edge of a narrow one. The change and the
+  commit are separate calls, so a consumer can hold the live width somewhere cheap
+  and persist only the settled one. Both table drawers wire that to the UI-flags
+  cookie.
+
+  The settings tabs are ordered by the reader, from a draggable list in the General
+  tab, and one order governs both drawers: it is stated in roles, so the column
+  drawer's Pinning tab moves with the table drawer's Columns tab. A stored order
+  naming an unknown tab, or missing one, degrades to a partial preference rather
+  than to a missing tab. The declared order is now General, Columns, Filters,
+  Sorting, Grouping, Details. Totals position moves out of the Grouping tab into
+  the General tab, where the rest of the panel-wide preferences already sit.
+
+  Two changes to a grouped grid, both removing something that could not work:
+
+  - **The row-actions column is no longer painted while a grouping is applied.** A
+    group row is not a row anything can be done to and a grouped read returns no
+    detail row, so the column drew an empty strip down every grouped grid. A
+    consumer that relied on it should open a group's rows through the drill-down
+    route, which applies no grouping.
+  - **A grouped grid's columns are sized from one band, and the declared widths no
+    longer apply to them.** Flooring a measure at 200 and then clamping it back
+    under a source column's `maxWidth` of 180 left the splitter a range of zero, so
+    measures could not be resized at all. The band is
+    `VITE_TABLE_AGGREGATE_MIN_WIDTH`/`VITE_TABLE_AGGREGATE_MAX_WIDTH`, read from the
+    consuming build at build time, defaulting to 200 and 600. A column declared
+    narrower than that is no longer narrow while it is grouped.
+
+  Also: the tab strip's scroll buttons no longer take focus on a press, which was
+  putting a focused element inside an `aria-hidden` subtree and printing a console
+  warning on every click.
+
+### Patch Changes
+
+- @lcabrera/api@0.4.2
+- @lcabrera/utils@0.2.2
+
 ## 0.6.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "create-lcabrera-stack",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "description": "Runs `devkit create`, so a new repository on this toolchain starts from `pnpm create lcabrera-stack` without knowing the toolchain's name first.",
   "keywords": [
