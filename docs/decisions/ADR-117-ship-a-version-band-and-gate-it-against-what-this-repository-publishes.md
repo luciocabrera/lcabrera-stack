@@ -3,7 +3,7 @@ governs:
   - devkit
 ---
 
-# ADR-116 — Ship a version band, and gate it against what this repository publishes
+# ADR-117 — Ship a version band, and gate it against what this repository publishes
 
 **Status:** Accepted
 

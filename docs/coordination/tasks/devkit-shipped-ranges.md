@@ -9,7 +9,7 @@ area:
   - packages/devkit/assets/workspace/packages/typescript-config/package.json
   - scripts/verify-shipped-ranges.mjs
   - scripts/lib/shipped-ranges*
-  - docs/decisions/ADR-116-*
+  - docs/decisions/ADR-117-*
   - packages/devkit/scripts/workspace.test.mjs
 started: 2026-09-09
 updated: 2026-09-09
