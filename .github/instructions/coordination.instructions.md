@@ -20,7 +20,10 @@ PR is the convention working.
 
 What is worth reporting about one:
 
-- Its `area` globs do not cover the paths the PR actually changes.
+- Its `area` globs do not cover the paths the PR actually changes — counting the
+  work, not the claim. A claim never lists its own `tasks/<id>.md`: the `area` is
+  the soft lock over territory another agent might touch, and two claims are
+  distinct files that cannot collide, so the file locks nothing.
 - Its `issue:` field is missing or points at nothing.
 - Its `status` still reads `active` on a PR that is ready for review, or its
   stated blockers contradict the PR description.
