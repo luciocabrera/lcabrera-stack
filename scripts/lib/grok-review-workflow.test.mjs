@@ -52,12 +52,15 @@ describe('the catalog review is posted under its own identity', () => {
 });
 
 describe('a run that reviews nothing must fail', () => {
-  it('refuses to submit when grok-review-body.md is missing or empty', () => {
+  it('submits through submit-pr-review.mjs, not a copied shell block', () => {
     const step = stepBlock(readRepoFile(WORKFLOW), SUBMIT_STEP);
     expect(step).toBeDefined();
-    expect(step).toContain('[ ! -s grok-review-body.md ]');
-    expect(step).toContain('(replace this file with the review body)');
-    expect(step).toContain('exit 1');
+    expect(step).toContain('scripts/submit-pr-review.mjs');
+    expect(step).toContain('--body grok-review-body.md');
+    expect(step).toContain('--findings grok-review-findings.json');
+    expect(step).toContain(
+      "--placeholder '(replace this file with the review body)'",
+    );
   });
 
   it('skips drafts so a review is not paid for twice', () => {
@@ -116,6 +119,8 @@ describe('the CLI is pinned', () => {
     expect(step).toBeDefined();
     expect(step).toContain('sha256sum -c');
     expect(step).toContain('linux-x86_64');
+    expect(step).toContain("--proto '=https'");
+    expect(step).toContain('--tlsv1.2');
   });
 });
 

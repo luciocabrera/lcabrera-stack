@@ -69,7 +69,8 @@ jobs:
             exit 1
           fi
 
-          curl -fsSL -o grok.bin "https://x.ai/cli/grok-${GROK_VERSION}-linux-x86_64"
+          curl --proto '=https' --tlsv1.2 -fsSL -o grok.bin \
+            "https://x.ai/cli/grok-${GROK_VERSION}-linux-x86_64"
           echo "${GROK_SHA256}  grok.bin" | sha256sum -c -
           chmod +x grok.bin
           mkdir -p "$HOME/.local/bin"
@@ -147,30 +148,8 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-
-          if [ ! -s grok-review-body.md ] ||
-            grep -qx '(replace this file with the review body)' grok-review-body.md; then
-            echo "::error::The review step wrote no grok-review-body.md, so there is nothing to submit. A run that reviews nothing must not report success."
-            exit 1
-          fi
-
-          current=$(gh api "repos/$REPOSITORY/pulls/$PR_NUMBER" --jq .head.sha)
-          if [ "$current" != "$HEAD_SHA" ]; then
-            echo "::notice::Head moved from $HEAD_SHA to $current while this run was working — not posting a review of a superseded commit."
-            exit 0
-          fi
-
-          gh api "repos/$REPOSITORY/pulls/$PR_NUMBER/files" --paginate --jq '.[]' \
-            | jq -s '.' > pull-request-files.json
-
-          node scripts/build-review-payload.mjs \
-            --body grok-review-body.md \
-            --findings grok-review-findings.json \
-            --files pull-request-files.json \
-            --commit "$HEAD_SHA" \
-            --out review-payload.json
-
-          gh api "repos/$REPOSITORY/pulls/$PR_NUMBER/reviews" --input review-payload.json \
-            --jq '"submitted review \(.id) against \(.commit_id)"'
+        run: >
+          node scripts/submit-pr-review.mjs
+          --body grok-review-body.md
+          --findings grok-review-findings.json
+          --placeholder '(replace this file with the review body)'
