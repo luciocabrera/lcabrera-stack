@@ -25,24 +25,12 @@ export const isBuiltPublicPackage = (manifest) =>
   manifest.scripts?.build !== undefined &&
   manifest.publishConfig?.access === 'public';
 
-/**
- * `types` is written before `default` because a resolver reads the conditions in
- * order, and `Object.fromEntries` is what states that order in a form nothing
- * re-sorts. The annotation is what keeps the published signature precise: the
- * inferred type of `fromEntries` is an index signature, which would drop both
- * names from the `.d.mts` a consumer reads.
- *
- * @param {string} sourceTarget
- * @returns {{ types: string, default: string }}
- */
+/** @param {string} sourceTarget */
 export const toBuiltPaths = (sourceTarget) => {
   const built = sourceTarget
     .replace(/^\.\/src\//, './dist/')
     .replace(/\.(?:tsx?|mts|mjs|js)$/, '');
-  return Object.fromEntries([
-    ['types', `${built}.d.mts`],
-    ['default', `${built}.mjs`],
-  ]);
+  return { types: `${built}.d.mts`, default: `${built}.mjs` };
 };
 
 export const diffSubpaths = ({ published, source }) => ({

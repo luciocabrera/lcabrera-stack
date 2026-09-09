@@ -157,6 +157,14 @@ export const createNodeScriptFileConfig = ({ globals }) => ({
 export const createToolingScriptFileConfig = () => ({
   files: ['**/scripts/**/*.{js,mjs,cjs}', '**/*.config.{js,mjs,cjs}'],
   rules: {
+    'perfectionist/sort-objects': [
+      'error',
+      {
+        type: 'unsorted',
+        useConfigurationIf: { allNamesMatchPattern: '^(?:types|default)$' },
+      },
+      { order: 'asc', type: 'natural' },
+    ],
     'security/detect-non-literal-fs-filename': 'off',
     'security/detect-non-literal-regexp': 'off',
     'security/detect-unsafe-regex': 'off',

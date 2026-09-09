@@ -8,9 +8,9 @@ source lives under `scripts/` was reported clean without being read — a pass
 indistinguishable from a correct one. A consumer upgrading will see findings in
 files this config has been skipping.
 
-Five settings come with it, in a new block scoped to a `scripts/` path or a
+Six settings come with it, in a new block scoped to a `scripts/` path or a
 config file a tool loads (`**/scripts/**/*.{js,mjs,cjs}`,
-`**/*.config.{js,mjs,cjs}`). The reason for all five is a fact about that
+`**/*.config.{js,mjs,cjs}`). The reason for five of them is a fact about that
 position, not about the language: a file there is a command a developer ran,
 rather than anything serving a request. Plain JavaScript elsewhere in your tree
 — an `.mjs` request handler included — keeps every one of these on their
@@ -27,6 +27,12 @@ defaults:
   API's value — `RegExp#exec`, `child_process` `status`, the second argument to
   `JSON.stringify` — or a JSON absence a reader can see, where `undefined` is a
   key that vanishes.
+
+The sixth is about a shape rather than a position. `perfectionist/sort-objects`
+leaves an object alone when every key it has is `types` or `default`: those two
+are export conditions, a resolver reads them in written order, and sorting them
+alphabetically puts `default` first and changes which file a consumer resolves.
+Every other object in that block is still sorted.
 
 Three apply everywhere:
 
