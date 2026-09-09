@@ -51,7 +51,7 @@ const NO_GROUPING: TableGroupingState = {
   totalsPlacement: 'last',
 };
 
-export type SelectGroupedWideAlltypes150Args = {
+type SelectGroupedWideAlltypes150Args = {
   readonly aggregates: TableGroupingState['aggregates'];
   readonly groupKeys: readonly string[];
   readonly groupMode: TableGroupingState['mode'];

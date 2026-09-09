@@ -1,25 +1,14 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { useRef } from 'react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import type { TableColumn } from '#ui/components/Table/Table.types';
 
-import {
-  TableConfigProvider,
-  TableDataProvider,
-  TableFocusProvider,
-} from '#ui/components/Table/contexts';
-import { TableWrapperContext } from '#ui/components/Table/contexts/TableWrapper/TableWrapperContext.context';
 import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
-import { TableBase } from '#ui/components/Table/TableBase';
-import { TableBody } from '#ui/components/Table/TableBody';
+import { GroupedTableTestShell } from '#ui/utils/tests/groupedTableTestShell.util';
 
 type TestRow = Record<string, unknown>;
-
-const ROW_HEIGHT = 40;
-const CONTAINER_HEIGHT = 400;
 
 const GROUPING_KEYS = ['city', 'district'];
 
@@ -63,59 +52,16 @@ const rows: readonly TestRow[] = [
   { city: 'Berlin', district: 'Mitte', id: 4 },
 ];
 
-const attachScrollMetrics = (container: HTMLDivElement | null) => {
-  if (!container) return;
-  if (Object.getOwnPropertyDescriptor(container, 'scrollTop')) return;
-
-  Object.defineProperties(container, {
-    clientHeight: { configurable: true, value: CONTAINER_HEIGHT },
-    offsetHeight: { configurable: true, value: CONTAINER_HEIGHT },
-    scrollTop: { configurable: true, value: 0, writable: true },
-  });
-};
-
-const Harness = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  const setContainer = (node: HTMLDivElement | null) => {
-    containerRef.current = node;
-    attachScrollMetrics(node);
-  };
-
-  return (
-    <TableConfigProvider<TestRow>
-      columnsState={{ columns }}
-      groupingState={{
-        aggregates: [{ columnKey: 'id', fn: 'sum' }],
-        keys: GROUPING_KEYS,
-      }}
-      metaState={{
-        overscan: 2,
-        rowHeight: ROW_HEIGHT,
-      }}
-    >
-      <TableFocusProvider>
-        <TableDataProvider<TestRow>
-          dataState={{
-            data: rows,
-            isLoading: false,
-            isLoadingMore: false,
-            totalRows: rows.length,
-          }}
-        >
-          <TableWrapperContext value={{ containerRef, wrapperRef }}>
-            <div data-testid='scroll-container' ref={setContainer}>
-              <TableBase>
-                <TableBody tableContainerRef={containerRef} />
-              </TableBase>
-            </div>
-          </TableWrapperContext>
-        </TableDataProvider>
-      </TableFocusProvider>
-    </TableConfigProvider>
-  );
-};
+const Harness = () => (
+  <GroupedTableTestShell
+    columns={columns}
+    data={rows}
+    groupingState={{
+      aggregates: [{ columnKey: 'id', fn: 'sum' }],
+      keys: GROUPING_KEYS,
+    }}
+  />
+);
 
 const getGrid = () => screen.getByRole('treegrid');
 

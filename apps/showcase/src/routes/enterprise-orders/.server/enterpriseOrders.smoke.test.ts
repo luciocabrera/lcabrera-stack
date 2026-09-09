@@ -305,18 +305,19 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
   describe('multi-key grouping and aggregate selection', () => {
     const KEYS = ['order_status', 'shipping_country'] as const;
+    const TWO_KEY_GROUPING = {
+      aggregates: [],
+      keys: [...KEYS],
+      mode: 'flat' as const,
+      periods: {},
+      shares: [],
+      totalsPlacement: 'last' as const,
+    };
 
     it('groups by two keys and counts every row exactly once across the pairs', async () => {
       const { data } = await selectOrdersPage({
         filters: [],
-        grouping: {
-          aggregates: [],
-          keys: [...KEYS],
-          mode: 'flat',
-          periods: {},
-          shares: [],
-          totalsPlacement: 'last',
-        },
+        grouping: TWO_KEY_GROUPING,
         includeTotal: true,
         limit: 50,
         offset: 0,
@@ -343,14 +344,7 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
     it('names both levels of every group, in the order the keys were given', async () => {
       const { data } = await selectOrdersPage({
         filters: [],
-        grouping: {
-          aggregates: [],
-          keys: [...KEYS],
-          mode: 'flat',
-          periods: {},
-          shares: [],
-          totalsPlacement: 'last',
-        },
+        grouping: TWO_KEY_GROUPING,
         includeTotal: true,
         limit: 50,
         offset: 0,

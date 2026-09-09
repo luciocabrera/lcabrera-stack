@@ -53,6 +53,22 @@ const makePrefetchRef = () => ({
   current: { data: undefined, promise: undefined, skip: -1 },
 });
 
+const runFetchMore = async ({
+  dataStore,
+  fetchingRef = { current: false },
+  metaStore,
+}: ReturnType<typeof createStores> & {
+  readonly fetchingRef?: { current: boolean };
+}) => {
+  await executeFetchMore({
+    args: { dataSelector, dataTotalSelector, onLoadMore },
+    dataStore: dataStore as never,
+    isFetchingRef: fetchingRef,
+    metaStore: metaStore as never,
+    prefetchRef: makePrefetchRef(),
+  });
+};
+
 describe('executeFetchMore', () => {
   beforeEach(() => {
     resolveFromCacheOrFetchMock.mockReset();
@@ -60,45 +76,29 @@ describe('executeFetchMore', () => {
   });
 
   it('sets isLoadingMore before fetching and resolves to false after success', async () => {
-    const { dataStore, metaStore } = createStores();
-    const fetchingRef = { current: false };
-    const prefetchRef = makePrefetchRef();
+    const stores = createStores();
 
     resolveFromCacheOrFetchMock.mockResolvedValue({
       rows: [{ id: 2 }],
       total: 5,
     });
 
-    await executeFetchMore({
-      args: { dataSelector, dataTotalSelector, onLoadMore },
-      dataStore: dataStore as never,
-      isFetchingRef: fetchingRef,
-      metaStore: metaStore as never,
-      prefetchRef,
-    });
+    await runFetchMore(stores);
 
-    expect(dataStore.get()).toMatchObject({ isLoadingMore: false });
+    expect(stores.dataStore.get()).toMatchObject({ isLoadingMore: false });
   });
 
   it('appends fetched rows and updates store state on success', async () => {
-    const { dataStore, metaStore } = createStores();
-    const fetchingRef = { current: false };
-    const prefetchRef = makePrefetchRef();
+    const stores = createStores();
 
     resolveFromCacheOrFetchMock.mockResolvedValue({
       rows: [{ id: 2 }, { id: 3 }],
       total: 5,
     });
 
-    await executeFetchMore({
-      args: { dataSelector, dataTotalSelector, onLoadMore },
-      dataStore: dataStore as never,
-      isFetchingRef: fetchingRef,
-      metaStore: metaStore as never,
-      prefetchRef,
-    });
+    await runFetchMore(stores);
 
-    expect(dataStore.get()).toMatchObject({
+    expect(stores.dataStore.get()).toMatchObject({
       data: [{ id: 1 }, { id: 2 }, { id: 3 }],
       error: undefined,
       hasMore: true,

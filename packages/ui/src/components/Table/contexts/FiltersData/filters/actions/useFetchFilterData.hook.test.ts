@@ -3,6 +3,8 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import type { FilterData } from '#ui/components/Table/Table.types';
+
 import { DEFAULT_FILTER_PAGE_SIZE } from '#ui/components/Table/Table.constants';
 import { createPaginatedFetchActionMocks } from '#ui/utils/tests/createPaginatedFetchActionMocks.util';
 
@@ -13,20 +15,7 @@ type TestData = {
 };
 
 type TestFiltersState = {
-  readonly status: {
-    readonly data: readonly string[];
-    readonly error:
-      | undefined
-      | {
-          readonly kind: 'db-canceled' | 'db-failed' | 'unexpected';
-          readonly message: string;
-        };
-    readonly hasMore: boolean;
-    readonly isLoading: boolean;
-    readonly isLoadingMore: boolean;
-    readonly totalLoadedRows: number;
-    readonly totalRows: number;
-  };
+  readonly status: FilterData;
 };
 
 type TestResponse = {

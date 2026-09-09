@@ -26,6 +26,6 @@ split TableMetaState into capability, grouping query, and chrome
 
 ## Status / next
 
-- Current step: implementing the type split
+- Current step: gate green, PR body ready
 - Blockers: none
-- Next: quality gate, then PR body
+- Next: none

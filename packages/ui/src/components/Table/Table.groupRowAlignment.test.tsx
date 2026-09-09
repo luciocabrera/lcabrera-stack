@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
 
 import * as stylex from '@stylexjs/stylex';
-import { cleanup, render, screen } from '@testing-library/react';
-import { useRef } from 'react';
-import { createMemoryRouter, RouterProvider } from 'react-router';
+import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import type {
@@ -11,23 +9,15 @@ import type {
   TableColumnAggregate,
 } from '#ui/components/Table/Table.types';
 
-import {
-  TableConfigProvider,
-  TableDataProvider,
-  TableFocusProvider,
-} from '#ui/components/Table/contexts';
-import { TableWrapperContext } from '#ui/components/Table/contexts/TableWrapper/TableWrapperContext.context';
 import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
-import { TableBase } from '#ui/components/Table/TableBase';
-import { TableBody } from '#ui/components/Table/TableBody';
 import { tableBodyCellStyles } from '#ui/components/Table/TableBodyCell/TableBodyCell.stylex';
 import { TableHeader } from '#ui/components/Table/TableHeader';
 import { NotificationProvider } from '#ui/contexts/NotificationContext';
+import { GroupedTableTestShell } from '#ui/utils/tests/groupedTableTestShell.util';
+import { renderGroupedTableRoute } from '#ui/utils/tests/renderGroupedTableRoute.util';
 
 type TestRow = Record<string, unknown>;
 
-const ROW_HEIGHT = 40;
-const CONTAINER_HEIGHT = 400;
 const GROUPING_KEYS = ['order_date'];
 
 const AGGREGATES: readonly TableColumnAggregate[] = [
@@ -69,17 +59,6 @@ const rows: readonly TestRow[] = [
   },
 ];
 
-const attachScrollMetrics = (container: HTMLDivElement | null) => {
-  if (!container) return;
-  if (Object.getOwnPropertyDescriptor(container, 'scrollTop')) return;
-
-  Object.defineProperties(container, {
-    clientHeight: { configurable: true, value: CONTAINER_HEIGHT },
-    offsetHeight: { configurable: true, value: CONTAINER_HEIGHT },
-    scrollTop: { configurable: true, value: 0, writable: true },
-  });
-};
-
 type HarnessProps = {
   readonly aggregates?: readonly TableColumnAggregate[];
   readonly data?: readonly TestRow[];
@@ -90,61 +69,22 @@ const Harness = ({
   aggregates = AGGREGATES,
   data = rows,
   groupingKeys = GROUPING_KEYS,
-}: HarnessProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  const setContainer = (node: HTMLDivElement | null) => {
-    containerRef.current = node;
-    attachScrollMetrics(node);
-  };
-
-  return (
-    <NotificationProvider>
-      <TableConfigProvider<TestRow>
-        columnsState={{ columns }}
-        groupingState={{
-          aggregates,
-          keys: groupingKeys,
-        }}
-        metaState={{
-          overscan: 2,
-          rowHeight: ROW_HEIGHT,
-        }}
-      >
-        <TableFocusProvider>
-          <TableDataProvider<TestRow>
-            dataState={{
-              data,
-              isLoading: false,
-              isLoadingMore: false,
-              totalRows: data.length,
-            }}
-          >
-            <TableWrapperContext value={{ containerRef, wrapperRef }}>
-              <div data-testid='scroll-container' ref={setContainer}>
-                <TableBase>
-                  <TableHeader />
-                  <TableBody tableContainerRef={containerRef} />
-                </TableBase>
-              </div>
-            </TableWrapperContext>
-          </TableDataProvider>
-        </TableFocusProvider>
-      </TableConfigProvider>
-    </NotificationProvider>
-  );
-};
+}: HarnessProps) => (
+  <NotificationProvider>
+    <GroupedTableTestShell
+      columns={columns}
+      data={data}
+      groupingState={{
+        aggregates,
+        keys: groupingKeys,
+      }}
+      header={<TableHeader />}
+    />
+  </NotificationProvider>
+);
 
 const renderGrid = (props: HarnessProps = {}) =>
-  render(
-    <RouterProvider
-      router={createMemoryRouter([
-        { element: <Harness {...props} />, path: '/' },
-        { action: () => ({ ok: true }), path: '/_action/persist-cookie' },
-      ])}
-    />,
-  );
+  renderGroupedTableRoute(<Harness {...props} />);
 
 const classesOf = (className: string | undefined) =>
   (className ?? '').split(' ').filter(Boolean);

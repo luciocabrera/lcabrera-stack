@@ -2,6 +2,7 @@ import type { TableColumn } from '#ui/components/Table';
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
 import { isShareableAggregate } from '#ui/components/Table/contexts/TableConfig/grouping/utils';
+import { getInitialGroupingState } from '#ui/components/Table/contexts/TableConfig/utils';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { isWithinCountDistinctBudget } from '#ui/components/Table/utils/isWithinCountDistinctBudget.util';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
@@ -10,15 +11,6 @@ import { toTableAggregateToken } from '#ui/components/Table/utils/tableAggregate
 type SanitizeGroupingByColumnsArgs<TData extends Record<string, unknown>> = {
   readonly columns: readonly TableColumn<TData>[];
   readonly grouping: TableGroupingState;
-};
-
-const NO_GROUPING: TableGroupingState = {
-  aggregates: [],
-  keys: [],
-  mode: 'flat',
-  periods: {},
-  shares: [],
-  totalsPlacement: 'last',
 };
 
 export const sanitizeGroupingByColumns = <
@@ -30,7 +22,7 @@ export const sanitizeGroupingByColumns = <
   const { aggregates, keys, mode, periods, shares, totalsPlacement } = grouping;
 
   if (keys.length === 0 || keys.length > MAX_TABLE_GROUP_KEYS) {
-    return { ...NO_GROUPING, totalsPlacement };
+    return getInitialGroupingState({ totalsPlacement });
   }
 
   const groupableKeys = new Set(
@@ -79,5 +71,5 @@ export const sanitizeGroupingByColumns = <
         shares: [...shares],
         totalsPlacement,
       }
-    : { ...NO_GROUPING, totalsPlacement };
+    : getInitialGroupingState({ totalsPlacement });
 };

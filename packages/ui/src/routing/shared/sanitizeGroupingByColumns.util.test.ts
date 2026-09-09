@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import type { TableColumn } from '#ui/components/Table';
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
+import { getInitialGroupingState } from '#ui/components/Table/contexts/TableConfig/utils';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { createActionsColumn } from '#ui/components/Table/utils/createActionsColumn.util';
 
@@ -23,14 +24,7 @@ const columns: TableColumn<Row>[] = [
   { isGroupable, isStatic, key: 'actions', label: 'Actions' },
 ];
 
-const NO_GROUPING: TableGroupingState = {
-  aggregates: [],
-  keys: [],
-  mode: 'flat',
-  periods: {},
-  shares: [],
-  totalsPlacement: 'last',
-};
+const NO_GROUPING = getInitialGroupingState({});
 
 type GroupingArgs = {
   readonly aggregates?: TableGroupingState['aggregates'];

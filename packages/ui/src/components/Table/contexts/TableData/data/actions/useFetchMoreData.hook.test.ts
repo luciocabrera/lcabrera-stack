@@ -32,6 +32,16 @@ type TestRow = {
   readonly id: number;
 };
 
+const TWO_LOADED_ROWS = {
+  data: [{ id: 1 }, { id: 2 }],
+  error: undefined,
+  hasMore: true,
+  isLoading: false,
+  isLoadingMore: false,
+  totalLoadedRows: 2,
+  totalRows: 5,
+} as const;
+
 const createHarness = () => {
   return createPaginatedFetchActionMocks<TestDataState, TestResponse>({
     initialDataState: {
@@ -309,15 +319,7 @@ describe('useFetchMoreData', () => {
 
       expect(onLoadMore).toHaveBeenCalledTimes(2);
 
-      getHarness().setDataState({
-        data: [{ id: 1 }, { id: 2 }],
-        error: undefined,
-        hasMore: true,
-        isLoading: false,
-        isLoadingMore: false,
-        totalLoadedRows: 2,
-        totalRows: 5,
-      });
+      getHarness().setDataState(TWO_LOADED_ROWS);
 
       await act(async () => {
         await result.current({ ...defaultSelectors, onLoadMore });
@@ -346,15 +348,7 @@ describe('useFetchMoreData', () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
-      getHarness().setDataState({
-        data: [{ id: 1 }, { id: 2 }],
-        error: undefined,
-        hasMore: true,
-        isLoading: false,
-        isLoadingMore: false,
-        totalLoadedRows: 2,
-        totalRows: 5,
-      });
+      getHarness().setDataState(TWO_LOADED_ROWS);
 
       await act(async () => {
         await result.current({ ...defaultSelectors, onLoadMore });

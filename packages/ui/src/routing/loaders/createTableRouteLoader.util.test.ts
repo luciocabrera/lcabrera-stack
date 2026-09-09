@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 import type { TableColumn } from '#ui/components/Table';
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
+import { getInitialGroupingState } from '#ui/components/Table/contexts/TableConfig/utils';
 import { serializeSortingToURL } from '#ui/utils/urlState';
 
 import { createTableRouteLoader } from './createTableRouteLoader.util';
@@ -42,14 +43,7 @@ type FetchPageArgs = {
   readonly totalsPlacement: 'first' | 'last';
 };
 
-const NO_GROUPING: TableGroupingState = {
-  aggregates: [],
-  keys: [],
-  mode: 'flat',
-  periods: {},
-  shares: [],
-  totalsPlacement: 'last',
-};
+const NO_GROUPING = getInitialGroupingState({});
 
 const groupingUrl = (param: string) =>
   `http://localhost/rows?grouping=${encodeURIComponent(param)}`;
