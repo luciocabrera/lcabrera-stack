@@ -14,6 +14,8 @@ import type {
   TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
 
+import { toChromeUiFlags } from '#ui/components/Table/utils/toChromeUiFlags.util';
+
 import { appendPrimaryKeySorting } from '../shared/appendPrimaryKeySorting.util';
 import { sanitizeSorting } from '../shared/sanitizeSorting.util';
 import { appendDistinctFilterDescriptors } from './appendDistinctFilterDescriptors.util';
@@ -125,6 +127,7 @@ export const createTableRouteLoader = <
       persistenceKey,
       request,
     });
+    const chromeUiFlags = toChromeUiFlags(metaUiFlags);
 
     const sanitizedSorting = sanitizeSorting<TData>(sorting);
     const effectiveSorting = appendPrimaryKeySorting<TData>({
@@ -165,7 +168,7 @@ export const createTableRouteLoader = <
         totalsPlacement,
       },
       metaState: {
-        ...metaUiFlags,
+        ...chromeUiFlags,
         appId,
         persistenceKey,
         tableName,

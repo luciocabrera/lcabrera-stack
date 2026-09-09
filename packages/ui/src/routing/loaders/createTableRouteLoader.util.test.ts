@@ -740,20 +740,24 @@ describe('createTableRouteLoader', () => {
     });
 
     it('reads the persisted preference out of the UI-flags cookie', async () => {
-      const { fetchPage } = await invoke({
+      const { fetchPage, result } = await invoke({
         cookie: uiFlagsCookie({ totalsPlacement: 'first' }),
       });
 
       expect(fetchPage.mock.calls[0]?.[0].totalsPlacement).toBe('first');
+      expect(result.groupingState.totalsPlacement).toBe('first');
+      expect(result.metaState).not.toHaveProperty('totalsPlacement');
     });
 
     it('lets the param win over the cookie', async () => {
-      const { fetchPage } = await invoke({
+      const { fetchPage, result } = await invoke({
         cookie: uiFlagsCookie({ totalsPlacement: 'first' }),
         url: 'http://localhost/rows?totals=last',
       });
 
       expect(fetchPage.mock.calls[0]?.[0].totalsPlacement).toBe('last');
+      expect(result.groupingState.totalsPlacement).toBe('last');
+      expect(result.metaState).not.toHaveProperty('totalsPlacement');
     });
 
     it('falls back to last for a token outside the vocabulary', async () => {

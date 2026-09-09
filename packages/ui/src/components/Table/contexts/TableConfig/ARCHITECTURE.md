@@ -262,7 +262,7 @@ graph TD
   A["TableConfigProvider receives columns + config props"]
   A --> B["getInitialColumnsState(columnsState, crud)"]
   A --> C["getInitialMetaState(metaState)"]
-  A --> G["getInitialGroupingState(metaState.groupingKeys)"]
+  A --> G["getInitialGroupingState(groupingState)"]
   A --> GE["getInitialExpansionState() — nothing collapsed, no loader seed"]
   B --> B1["resolveTableActionsColumn(columns, crud)"]
   B1 --> D["useStore(columnsInitial) → columnsStore"]
