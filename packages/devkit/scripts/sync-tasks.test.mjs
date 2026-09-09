@@ -88,6 +88,17 @@ afterEach(() => {
   roots.length = 0;
 });
 
+/**
+ * A removal is two claims, and a test asserting only the first would pass over
+ * a run that deleted a task and said nothing.
+ */
+const expectRemoved = ({ log, name, root }) => {
+  expect(readJson(root, 'package.json').scripts[name]).toBeUndefined();
+  expect(log.mock.calls.flat().join('\n')).toMatch(
+    new RegExp(String.raw`removed\s+${name}`),
+  );
+};
+
 describe('sync reconciles the task block', () => {
   test('a task the consumer added survives a run that adds one of ours', () => {
     const root = settledRepo();
@@ -122,10 +133,7 @@ describe('sync reconciles the task block', () => {
 
     runSync([], root);
 
-    expect(readJson(root, 'package.json').scripts[DEPARTED]).toBeUndefined();
-    expect(log.mock.calls.flat().join('\n')).toMatch(
-      new RegExp(String.raw`removed\s+${DEPARTED}`),
-    );
+    expectRemoved({ log, name: DEPARTED, root });
     restore();
   });
 
@@ -263,10 +271,7 @@ describe('sync reconciles the gate tasks too', () => {
 
     runSync([], root);
 
-    expect(readJson(root, 'package.json').scripts[DEPARTED]).toBeUndefined();
-    expect(log.mock.calls.flat().join('\n')).toMatch(
-      new RegExp(String.raw`removed\s+${DEPARTED}`),
-    );
+    expectRemoved({ log, name: DEPARTED, root });
     restore();
   });
 
