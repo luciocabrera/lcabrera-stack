@@ -1,4 +1,7 @@
-import type { TableMetaState } from '#ui/components/Table/Table.types';
+import type {
+  TableChromeState,
+  TableTotalsPlacement,
+} from '#ui/components/Table/Table.types';
 
 import { getPersistedUiState } from '#ui/components/Table/utils/getPersistedUiState.util';
 import { getStorageKey } from '#ui/components/Table/utils/getStorageKey.util';
@@ -9,18 +12,20 @@ import {
 import { buildPersistCookieEntry } from '#ui/routing/actions/buildPersistCookieEntry.util';
 
 type BuildUiFlagsCookieEntryArgs = {
-  readonly currentState: Partial<TableMetaState> | undefined;
-  readonly nextStatePatch: Partial<TableMetaState>;
+  readonly currentState: Partial<TableChromeState> | undefined;
+  readonly nextStatePatch: Partial<TableChromeState>;
+  readonly totalsPlacement?: TableTotalsPlacement;
 };
 
 export const buildUiFlagsCookieEntry = ({
   currentState,
   nextStatePatch,
+  totalsPlacement,
 }: BuildUiFlagsCookieEntryArgs) => {
   const nextState = {
     ...currentState,
     ...nextStatePatch,
-  } as TableMetaState;
+  };
   const persistenceKey = nextState.persistenceKey ?? '';
 
   if (persistenceKey === '') {
@@ -29,7 +34,10 @@ export const buildUiFlagsCookieEntry = ({
 
   const key = `${getStorageKey({ appId: nextState.appId, persistenceKey })}-${UI_FLAGS_COOKIE_KEY_SUFFIX}`;
   const value = JSON.stringify({
-    value: getPersistedUiState(nextState),
+    value: getPersistedUiState({
+      chrome: nextState,
+      totalsPlacement,
+    }),
     version: PERSISTENCE_VERSION,
   });
 

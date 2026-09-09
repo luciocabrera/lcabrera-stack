@@ -51,6 +51,7 @@ export type DistinctFilterOptionsDescriptor = {
 
 export type FilterData = {
   readonly data: string[];
+  readonly error: TableResponseError | undefined;
   readonly hasMore: boolean;
   readonly isLoading: boolean;
   readonly isLoadingMore: boolean;
@@ -117,6 +118,65 @@ export type TableAggregateFn =
   | 'max'
   | 'min'
   | 'sum';
+
+export type TableCapabilityState = {
+  readonly additionalMetadata?: Readonly<
+    Record<string, null | TableMetadataValue | undefined>
+  >;
+  readonly crud?: TableCrudConfig;
+  readonly deleteActionPath?: string;
+  readonly enablePrefetch: boolean;
+  readonly groupDetailsPath?: string;
+  readonly groupingCapabilities?: Readonly<
+    Record<string, TableColumnGroupingCapability>
+  >;
+  readonly hasDefaultGrouping?: boolean;
+  readonly isGroupingEnabled?: boolean;
+  /** Locks keys, mode and per-key granularity — not aggregates. */
+  readonly isGroupingLocked?: boolean;
+  readonly isKeysetEnabled?: boolean;
+  readonly isServerFilterEnabled?: boolean;
+  readonly isUrlStateNested?: boolean;
+  readonly locale?: string;
+  readonly lockedFilters?: TableLockedFilters;
+  readonly schemaName?: string;
+  readonly tableName?: string;
+  readonly title?: TableTitle;
+};
+
+export type TableChromeState = {
+  /** Namespaces persisted keys so apps sharing a `persistenceKey` do not clash. */
+  readonly appId?: string;
+  readonly columnSelectedKey?: string;
+  readonly columnSettingsSelectedTab: string;
+  readonly defaultGroupFold?: TableGroupFold;
+  readonly density: TableDensity;
+  readonly drawersSyncNonce?: number;
+  readonly initialPageSize: number;
+  readonly isBordered: boolean;
+  readonly isColumnLayoutTransient?: boolean;
+  readonly isColumnSettingsOpen: boolean;
+  readonly isColumnSettingsPinned: boolean;
+  /** Off by default — the table is square. */
+  readonly isRounded: boolean;
+  readonly isStriped: boolean;
+  readonly isTableSettingsOpen: boolean;
+  readonly isTableSettingsPinned: boolean;
+  readonly loadMorePageSize: number;
+  readonly overscan: number;
+  readonly persistenceKey: string;
+  readonly placeholderRowCount: number;
+  readonly preferredGroupingMode?: TableGroupingMode;
+  readonly rowHeight: number;
+  /** Width the settings drawers open at, clamped to the panel's own band. */
+  readonly settingsPanelWidth?: number;
+  /** The reader's tab order, applied to both settings drawers. */
+  readonly settingsTabOrder?: readonly string[];
+  readonly tableSettingsExpandedFilters: readonly string[];
+  readonly tableSettingsSelectedTab: string;
+  readonly threshold: number;
+  readonly wasTableSettingsOpenBeforeColumnSettings?: boolean;
+};
 
 export type TableColumn<TData> = {
   readonly dataType?: TableColumnDataType;
@@ -260,6 +320,8 @@ export type TableGroupingState = {
   readonly mode: TableGroupingMode;
   readonly periods: Readonly<Record<string, TableGroupPeriod>>;
   readonly shares: readonly TableColumnAggregate[];
+  /** Query setting, not display: emitted as the `GROUPING()` `ORDER BY` direction. */
+  readonly totalsPlacement: TableTotalsPlacement;
 };
 
 export type TableGroupKeyRefusalReason =
@@ -300,75 +362,7 @@ export type TableLockedFilters = {
 
 export type TableMetadataValue = boolean | number | string;
 
-export type TableMetaState = {
-  readonly additionalMetadata?: Readonly<
-    Record<string, null | TableMetadataValue | undefined>
-  >;
-  /** Namespaces persisted keys so apps sharing a `persistenceKey` do not clash. */
-  readonly appId?: string;
-  readonly columnSelectedKey?: string;
-  readonly columnSettingsSelectedTab: string;
-  readonly crud?: TableCrudConfig;
-  readonly defaultGroupFold?: TableGroupFold;
-  readonly deleteActionPath?: string;
-  readonly density: TableDensity;
-  readonly drawersSyncNonce?: number;
-  readonly enablePrefetch: boolean;
-  readonly error?: string;
-  readonly groupDetailsPath?: string;
-  /** `(columnKey, fn)` pairs, not a column-to-function map (#831). */
-  readonly groupingAggregates?: readonly TableColumnAggregate[];
-  readonly groupingCapabilities?: Readonly<
-    Record<string, TableColumnGroupingCapability>
-  >;
-  /** Empty whenever grouping is off, refused, or unsupported. */
-  readonly groupingKeys?: readonly string[];
-  /** Absent means `flat` — what a link written before rollup existed says. */
-  readonly groupingMode?: TableGroupingMode;
-  /** Absent means every key is grouped at its raw values (#786). */
-  readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>;
-  /** Names an aggregate, not a column (#831). Absent means none. */
-  readonly groupingShares?: readonly TableColumnAggregate[];
-  readonly hasDefaultGrouping?: boolean;
-  readonly initialPageSize: number;
-  readonly isBordered: boolean;
-  readonly isColumnLayoutTransient?: boolean;
-  readonly isColumnSettingsOpen: boolean;
-  readonly isColumnSettingsPinned: boolean;
-  readonly isGroupingEnabled?: boolean;
-  /** Locks keys, mode and per-key granularity — not aggregates. */
-  readonly isGroupingLocked?: boolean;
-  readonly isKeysetEnabled?: boolean;
-  /** Off by default — the table is square. */
-  readonly isRounded: boolean;
-  readonly isServerFilterEnabled?: boolean;
-  readonly isStriped: boolean;
-  readonly isTableSettingsOpen: boolean;
-  readonly isTableSettingsPinned: boolean;
-  readonly isUrlStateNested?: boolean;
-  readonly loadMorePageSize: number;
-  readonly locale?: string;
-  readonly lockedFilters?: TableLockedFilters;
-  readonly overscan: number;
-  readonly persistenceKey: string;
-  readonly placeholderRowCount: number;
-  /** See `defaultGroupFold`. */
-  readonly preferredGroupingMode?: TableGroupingMode;
-  readonly rowHeight: number;
-  readonly schemaName?: string;
-  /** Width the settings drawers open at, clamped to the panel's own band. */
-  readonly settingsPanelWidth?: number;
-  /** The reader's tab order, applied to both settings drawers. */
-  readonly settingsTabOrder?: readonly string[];
-  readonly tableName?: string;
-  readonly tableSettingsExpandedFilters: readonly string[];
-  readonly tableSettingsSelectedTab: string;
-  readonly threshold: number;
-  readonly title?: TableTitle;
-  /** Query setting, not display: emitted as the `GROUPING()` `ORDER BY` direction. */
-  readonly totalsPlacement?: TableTotalsPlacement;
-  readonly wasTableSettingsOpenBeforeColumnSettings?: boolean;
-};
+export type TableMetaState = TableCapabilityState & TableChromeState;
 
 export type TablePersistenceConfig = {
   readonly columnFilters?: StorageType;

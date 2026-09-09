@@ -26,7 +26,7 @@ TableLayout/
 ```mermaid
 graph TD
   TL["TableLayout"] --> container["div.container"]
-  container --> TCP["TableConfigProvider (columnsState + metaState)"]
+  container --> TCP["TableConfigProvider (columnsState + groupingState + metaState)"]
   TCP --> FDP["FiltersDataProvider (columnsState.columns)"]
   FDP --> TSB["TableSuspenseBoundary"]
   TSB -->|pending| SK["TableSkeleton"]
@@ -45,7 +45,8 @@ graph TD
 | `dataPromise`       | `Promise<TResponse>`                                | Yes      | Async data source                                                                                        |
 | `dataSelector`      | `(r: TResponse) => TData[]`                         | Yes      | Extract rows from response                                                                               |
 | `dataTotalSelector` | `(r: TResponse) => number \| undefined`             | No       | Extract total row count; `undefined` on a load-more page keeps the stored total (count once per session) |
-| `metaState`         | `Partial<TableMetaState>`                           | Yes      | Loader-seeded initial meta state (include `crud` + `deleteActionPath` here for row/create actions)       |
+| `groupingState`     | `Partial<TableGroupingState>`                       | No       | Loader-seeded grouping query. Absent seeds empty grouping                                                |
+| `metaState`         | `Partial<TableMetaState>`                           | Yes      | Loader-seeded capability and chrome (include `crud` + `deleteActionPath` here for row/create actions)    |
 | `onLoadMore`        | Infinite scroll callback                            | No       | Fetch next page                                                                                          |
 
 ## suspenseKey Behavior

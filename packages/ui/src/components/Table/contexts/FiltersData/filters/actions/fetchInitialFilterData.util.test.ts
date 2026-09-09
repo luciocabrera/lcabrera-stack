@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
-import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type {
+  FilterData,
   FiltersDataState,
   TableMetaState,
 } from '#ui/components/Table/Table.types';
@@ -11,6 +11,8 @@ import type { TStore } from '#ui/hooks/useStore.hook';
 
 import { DEFAULT_FILTER_PAGE_SIZE } from '#ui/components/Table/Table.constants';
 import { createPaginatedFetchActionMocks } from '#ui/utils/tests/createPaginatedFetchActionMocks.util';
+import { emptyFilterData } from '#ui/utils/tests/emptyFilterData.util';
+import { invokeColumnFilterFetch } from '#ui/utils/tests/invokeColumnFilterFetch.util';
 
 import { fetchInitialFilterData } from './fetchInitialFilterData.util';
 
@@ -19,14 +21,7 @@ type TestData = {
 };
 
 type TestFiltersState = {
-  readonly status: {
-    readonly data: readonly string[];
-    readonly hasMore: boolean;
-    readonly isLoading: boolean;
-    readonly isLoadingMore: boolean;
-    readonly totalLoadedRows: number;
-    readonly totalRows: number;
-  };
+  readonly status: FilterData;
 };
 
 type TestResponse = {
@@ -37,14 +32,7 @@ type TestResponse = {
 const createHarness = () => {
   return createPaginatedFetchActionMocks<TestFiltersState, TestResponse>({
     initialDataState: {
-      status: {
-        data: [],
-        hasMore: false,
-        isLoading: false,
-        isLoadingMore: false,
-        totalLoadedRows: 0,
-        totalRows: 0,
-      },
+      status: emptyFilterData(),
     },
     initialMetaState: {
       enablePrefetch: false,
@@ -81,14 +69,7 @@ describe('fetchInitialFilterData', () => {
     const currentHarness = getHarness();
     currentHarness.resetMocks();
     currentHarness.setDataState({
-      status: {
-        data: [],
-        hasMore: false,
-        isLoading: false,
-        isLoadingMore: false,
-        totalLoadedRows: 0,
-        totalRows: 0,
-      },
+      status: emptyFilterData(),
     });
     currentHarness.setMetaState({ enablePrefetch: false });
     currentHarness.firePrefetchMock.mockReset();
@@ -104,23 +85,18 @@ describe('fetchInitialFilterData', () => {
       current: { data: undefined, promise: undefined, skip: -1 },
     };
 
-    const { result } = renderHook(() =>
-      fetchInitialFilterData<TestData, TestResponse>({
-        columnKey: 'status',
-        filtersDataStore: getHarness().dataStore as unknown as TStore<
-          FiltersDataState<TestData>
-        >,
-        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
-        prefetchRef,
-      }),
-    );
-
-    await act(async () => {
-      await result.current({
-        dataSelector: (response) => [...response.rows],
-        dataTotalSelector: (response) => response.total,
-        onLoadMore,
-      });
+    await invokeColumnFilterFetch({
+      createFetch: () =>
+        fetchInitialFilterData<TestData, TestResponse>({
+          columnKey: 'status',
+          filtersDataStore: getHarness().dataStore as unknown as TStore<
+            FiltersDataState<TestData>
+          >,
+          metaStore: getHarness()
+            .metaStore as unknown as TStore<TableMetaState>,
+          prefetchRef,
+        }),
+      onLoadMore,
     });
 
     expect(onLoadMore).toHaveBeenCalledWith({
@@ -128,5 +104,29 @@ describe('fetchInitialFilterData', () => {
       skip: 0,
     });
     expect(getHarness().firePrefetchMock).toHaveBeenCalled();
+  });
+
+  it('writes a db-failed error onto the column when the request fails', async () => {
+    const onLoadMore = vi.fn(() => Promise.reject(new Error('Network down')));
+
+    await invokeColumnFilterFetch({
+      createFetch: () =>
+        fetchInitialFilterData<TestData, TestResponse>({
+          columnKey: 'status',
+          filtersDataStore: getHarness().dataStore as unknown as TStore<
+            FiltersDataState<TestData>
+          >,
+          metaStore: getHarness()
+            .metaStore as unknown as TStore<TableMetaState>,
+        }),
+      onLoadMore,
+    });
+
+    expect(getHarness().dataStore.get().status.error).toEqual({
+      kind: 'db-failed',
+      message: 'Network down',
+    });
+    expect(getHarness().dataStore.get().status.isLoading).toBe(false);
+    expect(loggerMock.error).toHaveBeenCalled();
   });
 });

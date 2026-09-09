@@ -22,6 +22,7 @@ describe('getInitialFiltersDataState', () => {
     const result = getInitialFiltersDataState({ columns });
     const entry = result.id;
     expect(entry?.data).toEqual([]);
+    expect(entry?.error).toBeUndefined();
     expect(entry?.hasMore).toBe(false);
     expect(entry?.isLoading).toBe(false);
     expect(entry?.isLoadingMore).toBe(false);

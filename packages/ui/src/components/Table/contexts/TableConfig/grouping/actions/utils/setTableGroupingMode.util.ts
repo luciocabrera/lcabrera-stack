@@ -17,4 +17,5 @@ export const setTableGroupingMode = ({
   mode,
   periods: grouping.periods,
   shares: grouping.shares,
+  totalsPlacement: grouping.totalsPlacement,
 });

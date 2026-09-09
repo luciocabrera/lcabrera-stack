@@ -16,5 +16,6 @@ export type TableConfigContextValue<TData = Record<string, unknown>> = {
 export type TableConfigProviderProps<TData extends Record<string, unknown>> = {
   readonly children: React.ReactNode;
   readonly columnsState?: Partial<TableColumnsState<TData>>;
+  readonly groupingState?: Partial<TableGroupingState>;
   readonly metaState?: Partial<TableMetaState>;
 };

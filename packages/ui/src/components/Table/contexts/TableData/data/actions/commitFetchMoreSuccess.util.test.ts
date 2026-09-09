@@ -26,6 +26,7 @@ const requiredOnLoadMore = vi.fn(() => Promise.resolve({ rows: [], total: 0 }));
 const createDataStore = (overrides?: Partial<DataState<TestData>>) =>
   createMockStore<DataState<TestData>>({
     data: [{ id: 1 }],
+    error: undefined,
     hasMore: true,
     isLoading: false,
     isLoadingMore: true,
@@ -66,6 +67,7 @@ describe('commitFetchMoreSuccess', () => {
 
     expect(dataStore.get()).toMatchObject({
       data: [{ id: 1 }, { id: 2 }, { id: 3 }],
+      error: undefined,
       hasMore: true,
       isLoading: false,
       isLoadingMore: false,

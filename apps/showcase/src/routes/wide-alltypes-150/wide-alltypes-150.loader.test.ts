@@ -90,19 +90,19 @@ describe('wide-alltypes-150 loader', () => {
     });
 
     it('degrades a malformed param to grouping off, not to a half-applied read', async () => {
-      const { metaState } = await invokeLoader(
+      const { groupingState } = await invokeLoader(
         `?grouping=${encodeURIComponent('{"keys":["c_001",1]}')}`,
       );
 
-      expect(metaState.groupingKeys).toEqual([]);
+      expect(groupingState.keys).toEqual([]);
     });
 
     it('drops a key naming no column this route declares', async () => {
-      const { metaState } = await invokeLoader(
+      const { groupingState } = await invokeLoader(
         `?grouping=${encodeURIComponent('{"keys":["not_a_column"]}')}`,
       );
 
-      expect(metaState.groupingKeys).toEqual([]);
+      expect(groupingState.keys).toEqual([]);
     });
 
     it('resolves each column’s real capability from the catalogue', async () => {

@@ -12,6 +12,7 @@ const NO_GROUPING: TableGroupingState = {
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 describe('resolveTableGroupingUpdate', () => {
@@ -24,6 +25,7 @@ describe('resolveTableGroupingUpdate', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
     });
 
@@ -34,6 +36,7 @@ describe('resolveTableGroupingUpdate', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
       kind: 'updated',
       persistenceEntry: {
@@ -51,6 +54,7 @@ describe('resolveTableGroupingUpdate', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
       nextGrouping: {
         aggregates: [],
@@ -58,6 +62,7 @@ describe('resolveTableGroupingUpdate', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
     });
 
@@ -68,6 +73,7 @@ describe('resolveTableGroupingUpdate', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
       kind: 'updated',
       persistenceEntry: {
@@ -85,6 +91,7 @@ describe('resolveTableGroupingUpdate', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
       nextGrouping: {
         aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
@@ -92,6 +99,7 @@ describe('resolveTableGroupingUpdate', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
     });
 
@@ -102,6 +110,7 @@ describe('resolveTableGroupingUpdate', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
       kind: 'updated',
       persistenceEntry: {
@@ -127,6 +136,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -147,6 +157,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }).kind,
     ).toBe('updated');
@@ -160,6 +171,7 @@ describe('resolveTableGroupingUpdate', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
       nextGrouping: {
         aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
@@ -167,6 +179,7 @@ describe('resolveTableGroupingUpdate', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       },
     });
 
@@ -187,6 +200,7 @@ describe('resolveTableGroupingUpdate', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     };
 
     expect(
@@ -198,6 +212,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -212,6 +227,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
         nextGrouping: {
           aggregates: [],
@@ -219,6 +235,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }).kind,
     ).toBe('updated');
@@ -233,6 +250,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
         nextGrouping: {
           aggregates: [{ columnKey: 'amount', fn: 'avg' }],
@@ -240,6 +258,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }).kind,
     ).toBe('updated');
@@ -255,6 +274,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -267,6 +287,7 @@ describe('resolveTableGroupingUpdate', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     };
 
     expect(
@@ -278,6 +299,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toStrictEqual({ kind: 'unchanged' });
@@ -293,6 +315,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }).kind,
     ).toBe('updated');
@@ -316,6 +339,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
         nextGrouping: {
           aggregates: [],
@@ -323,6 +347,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toMatchObject({
@@ -343,6 +368,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
         hasDefaultGrouping: true,
         nextGrouping: {
@@ -351,6 +377,7 @@ describe('resolveTableGroupingUpdate', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toMatchObject({

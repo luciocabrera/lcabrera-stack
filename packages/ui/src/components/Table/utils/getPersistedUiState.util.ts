@@ -1,13 +1,21 @@
-import type { TableMetaState } from '../Table.types';
+import type { TableChromeState, TableTotalsPlacement } from '../Table.types';
 
-export const getPersistedUiState = (state: TableMetaState | undefined) => ({
-  columnSettingsSelectedTab: state?.columnSettingsSelectedTab,
-  isColumnSettingsOpen: state?.isColumnSettingsOpen,
-  isColumnSettingsPinned: state?.isColumnSettingsPinned,
-  isTableSettingsOpen: state?.isTableSettingsOpen,
-  isTableSettingsPinned: state?.isTableSettingsPinned,
-  settingsPanelWidth: state?.settingsPanelWidth,
-  tableSettingsExpandedFilters: state?.tableSettingsExpandedFilters,
-  tableSettingsSelectedTab: state?.tableSettingsSelectedTab,
-  totalsPlacement: state?.totalsPlacement,
+type GetPersistedUiStateArgs = {
+  readonly chrome?: Partial<TableChromeState>;
+  readonly totalsPlacement?: TableTotalsPlacement;
+};
+
+export const getPersistedUiState = ({
+  chrome,
+  totalsPlacement,
+}: GetPersistedUiStateArgs = {}) => ({
+  columnSettingsSelectedTab: chrome?.columnSettingsSelectedTab,
+  isColumnSettingsOpen: chrome?.isColumnSettingsOpen,
+  isColumnSettingsPinned: chrome?.isColumnSettingsPinned,
+  isTableSettingsOpen: chrome?.isTableSettingsOpen,
+  isTableSettingsPinned: chrome?.isTableSettingsPinned,
+  settingsPanelWidth: chrome?.settingsPanelWidth,
+  tableSettingsExpandedFilters: chrome?.tableSettingsExpandedFilters,
+  tableSettingsSelectedTab: chrome?.tableSettingsSelectedTab,
+  totalsPlacement,
 });

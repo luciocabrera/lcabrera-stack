@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import type {
-  FiltersDataState,
-  TableMetaState,
-} from '#ui/components/Table/Table.types';
+import type { FiltersDataState } from '#ui/components/Table/Table.types';
 import type { TStore } from '#ui/hooks/useStore.hook';
 
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
@@ -15,10 +12,11 @@ type TestData = {
 };
 
 describe('handleFetchMoreFilterDataError', () => {
-  it('stores the error message and resets loading-more state', () => {
+  it('stores the error kind on the column and resets loading-more state', () => {
     const filtersDataStore = createMockStore({
       status: {
         data: ['Alpha'],
+        error: undefined,
         hasMore: true,
         isLoading: false,
         isLoadingMore: true,
@@ -27,7 +25,6 @@ describe('handleFetchMoreFilterDataError', () => {
         totalRows: 3,
       },
     });
-    const metaStore = createMockStore<TableMetaState>({} as TableMetaState);
 
     handleFetchMoreFilterDataError<TestData>({
       columnKey: 'status',
@@ -36,10 +33,12 @@ describe('handleFetchMoreFilterDataError', () => {
       filtersDataStore: filtersDataStore as unknown as TStore<
         FiltersDataState<TestData>
       >,
-      metaStore: metaStore as unknown as TStore<TableMetaState>,
     });
 
-    expect(metaStore.get().error).toBe('Network down');
+    expect(filtersDataStore.get().status.error).toEqual({
+      kind: 'db-failed',
+      message: 'Network down',
+    });
     expect(filtersDataStore.get().status.isLoadingMore).toBe(false);
   });
 });

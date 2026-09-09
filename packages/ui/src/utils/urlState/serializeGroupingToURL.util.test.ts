@@ -12,6 +12,7 @@ describe('serializeGroupingToURL', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toBe('{"keys":["order_status"]}');
@@ -26,6 +27,7 @@ describe('serializeGroupingToURL', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toBe('{"keys":["b","a"]}');
@@ -40,6 +42,7 @@ describe('serializeGroupingToURL', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toBe('{"agg":["total_amount:sum"],"keys":["order_status"]}');
@@ -54,6 +57,7 @@ describe('serializeGroupingToURL', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toBe('{"keys":["a"]}');
@@ -68,6 +72,7 @@ describe('serializeGroupingToURL', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toBeUndefined();
@@ -82,6 +87,7 @@ describe('serializeGroupingToURL', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toBeUndefined();
@@ -96,6 +102,7 @@ describe('serializeGroupingToURL', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toBeUndefined();
@@ -110,6 +117,7 @@ describe('serializeGroupingToURL', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
         keepWhenEmpty: true,
       }),
@@ -125,6 +133,7 @@ describe('serializeGroupingToURL', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
         keepWhenEmpty: true,
       }),
@@ -140,6 +149,7 @@ describe('serializeGroupingToURL', () => {
           mode: 'flat',
           periods: {},
           shares: [{ columnKey: 'revenue', fn: 'sum' }],
+          totalsPlacement: 'last',
         },
       }),
     ).toBe('{"agg":["revenue:sum"],"keys":["status"],"share":["revenue:sum"]}');
@@ -154,6 +164,7 @@ describe('serializeGroupingToURL', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         },
       }),
     ).toBe('{"keys":["status"]}');

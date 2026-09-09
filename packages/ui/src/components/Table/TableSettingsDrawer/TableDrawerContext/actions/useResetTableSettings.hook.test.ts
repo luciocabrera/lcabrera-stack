@@ -40,7 +40,15 @@ const {
       readonly columnKey: string;
       readonly fn: string;
     }[];
-  } = { aggregates: [], keys: [], mode: 'flat', periods: {}, shares: [] };
+    readonly totalsPlacement: 'first' | 'last';
+  } = {
+    aggregates: [],
+    keys: [],
+    mode: 'flat',
+    periods: {},
+    shares: [],
+    totalsPlacement: 'last',
+  };
 
   return {
     drawerColumnsStore: {
@@ -91,6 +99,7 @@ describe('useResetTableSettings', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
     drawerColumnsStore.set.mockClear();
     drawerGroupingStore.set.mockClear();
@@ -146,6 +155,7 @@ describe('useResetTableSettings', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     const { result } = renderHook(() => useResetTableSettings());
@@ -160,6 +170,7 @@ describe('useResetTableSettings', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 });

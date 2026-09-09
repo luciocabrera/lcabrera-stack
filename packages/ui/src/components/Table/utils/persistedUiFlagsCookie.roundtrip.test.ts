@@ -10,12 +10,14 @@ import type { PersistedUiState } from './persistence.types';
 import { readPersistedUiFlagsFromCookie } from './readPersistedUiFlagsFromCookie.util';
 
 const captureCookieHeader = (uiFlags: PersistedUiState) => {
+  const { totalsPlacement, ...chromePatch } = uiFlags;
   const entry = buildUiFlagsCookieEntry({
     currentState: {
       appId: 'react-router',
       persistenceKey: 'orders',
     } as Partial<TableMetaState>,
-    nextStatePatch: uiFlags,
+    nextStatePatch: chromePatch,
+    ...(totalsPlacement !== undefined && { totalsPlacement }),
   });
 
   const headers = buildSetCookieHeaders({
@@ -36,6 +38,23 @@ describe('persisted UI flags cookie round trip', () => {
       isTableSettingsOpen: true,
       isTableSettingsPinned: true,
     };
+
+    const cookieString = captureCookieHeader(uiFlags);
+
+    expect(
+      readPersistedUiFlagsFromCookie({
+        appId: 'react-router',
+        cookieString,
+        persistenceKey: 'orders',
+      }),
+    ).toEqual(uiFlags);
+  });
+
+  it('reads back totals placement', () => {
+    const uiFlags = {
+      isTableSettingsOpen: true,
+      totalsPlacement: 'first',
+    } as const satisfies PersistedUiState;
 
     const cookieString = captureCookieHeader(uiFlags);
 

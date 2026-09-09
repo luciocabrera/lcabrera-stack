@@ -22,6 +22,7 @@ export const useSetGroupKeys = () => {
       }),
       periods: pruneGroupPeriods({ keys, periods: grouping.periods }),
       shares: grouping.shares,
+      totalsPlacement: grouping.totalsPlacement,
     }));
   };
 };

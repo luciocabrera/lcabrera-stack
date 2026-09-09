@@ -14,6 +14,8 @@ import type {
   TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
 
+import { toChromeUiFlags } from '#ui/components/Table/utils/toChromeUiFlags.util';
+
 import { appendPrimaryKeySorting } from '../shared/appendPrimaryKeySorting.util';
 import { sanitizeSorting } from '../shared/sanitizeSorting.util';
 import { appendDistinctFilterDescriptors } from './appendDistinctFilterDescriptors.util';
@@ -125,17 +127,22 @@ export const createTableRouteLoader = <
       persistenceKey,
       request,
     });
+    const chromeUiFlags = toChromeUiFlags(metaUiFlags);
 
     const sanitizedSorting = sanitizeSorting<TData>(sorting);
     const effectiveSorting = appendPrimaryKeySorting<TData>({
       columns,
       sorting: sanitizedSorting,
     });
+    const groupingState = {
+      ...grouping,
+      totalsPlacement,
+    };
 
     const dataPromise = fetchPage({
       effectiveSorting,
       filters,
-      grouping,
+      grouping: groupingState,
       request,
       totalsPlacement,
     });
@@ -160,8 +167,9 @@ export const createTableRouteLoader = <
         sorting: sanitizedSorting,
       },
       dataPromise,
+      groupingState,
       metaState: {
-        ...metaUiFlags,
+        ...chromeUiFlags,
         appId,
         persistenceKey,
         tableName,
@@ -170,12 +178,7 @@ export const createTableRouteLoader = <
         ...meta,
         defaultGroupFold: groupingPreferences.defaultFold,
         groupDetailsPath,
-        groupingAggregates: grouping.aggregates,
         groupingCapabilities,
-        groupingKeys: grouping.keys,
-        groupingMode: grouping.mode,
-        groupingPeriods: grouping.periods,
-        groupingShares: grouping.shares,
         hasDefaultGrouping:
           defaultGrouping !== undefined && capabilityMeta.isGroupingEnabled,
         isColumnLayoutTransient,
@@ -183,7 +186,6 @@ export const createTableRouteLoader = <
         lockedFilters: lockedFilters ?? declaredLockedFilters,
         preferredGroupingMode: groupingPreferences.mode,
         settingsTabOrder,
-        totalsPlacement,
         ...capabilityMeta,
       },
     };

@@ -7,7 +7,7 @@ import {
   render,
   screen,
 } from '@testing-library/react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import {
   afterEach,
   beforeEach,
@@ -22,24 +22,16 @@ import type {
   TableGroupKeyValue,
 } from '#ui/components/Table/Table.types';
 
-import {
-  TableConfigProvider,
-  TableDataProvider,
-  TableFocusProvider,
-} from '#ui/components/Table/contexts';
 import { useToggleTableGroupExpansion } from '#ui/components/Table/contexts/TableConfig/expansion/actions';
 import { useGetTableToggledGroupPaths } from '#ui/components/Table/contexts/TableConfig/expansion/selectors';
 import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
 import { useFocusStore } from '#ui/components/Table/contexts/TableFocus/focus/useFocusStore.hook';
-import { TableWrapperContext } from '#ui/components/Table/contexts/TableWrapper/TableWrapperContext.context';
 import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
-import { TableBase } from '#ui/components/Table/TableBase';
-import { TableBody } from '#ui/components/Table/TableBody';
+import { GroupedTableTestShell } from '#ui/utils/tests/groupedTableTestShell.util';
 
 type TestRow = Record<string, unknown>;
 
 const ROW_HEIGHT = 40;
-const CONTAINER_HEIGHT = 400;
 
 const columns: TableColumn<TestRow>[] = [
   { isPrimaryKey: true, key: 'id', label: 'Id' },
@@ -88,17 +80,6 @@ const filteredRows: readonly TestRow[] = [
   { city: 'Berlin', id: 5 },
 ];
 
-const attachScrollMetrics = (container: HTMLDivElement | null) => {
-  if (!container) return;
-  if (Object.getOwnPropertyDescriptor(container, 'scrollTop')) return;
-
-  Object.defineProperties(container, {
-    clientHeight: { configurable: true, value: CONTAINER_HEIGHT },
-    offsetHeight: { configurable: true, value: CONTAINER_HEIGHT },
-    scrollTop: { configurable: true, value: 0, writable: true },
-  });
-};
-
 const ExpansionProbe = () => {
   const toggleExpansion = useToggleTableGroupExpansion<TestRow>();
   const toggledGroupPaths = useGetTableToggledGroupPaths();
@@ -142,47 +123,18 @@ type HarnessProps = {
   readonly data: readonly TestRow[];
 };
 
-const Harness = ({ data }: HarnessProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  const setContainer = (node: HTMLDivElement | null) => {
-    containerRef.current = node;
-    attachScrollMetrics(node);
-  };
-
-  return (
-    <TableConfigProvider<TestRow>
-      columnsState={{ columns }}
-      metaState={{
-        groupingAggregates: [{ columnKey: 'id', fn: 'count' }],
-        groupingKeys: ['city'],
-        overscan: 2,
-        rowHeight: ROW_HEIGHT,
-      }}
-    >
-      <TableFocusProvider>
-        <TableDataProvider<TestRow>
-          dataState={{
-            data,
-            isLoading: false,
-            isLoadingMore: false,
-            totalRows: data.length,
-          }}
-        >
-          <TableWrapperContext value={{ containerRef, wrapperRef }}>
-            <div data-testid='scroll-container' ref={setContainer}>
-              <TableBase>
-                <TableBody tableContainerRef={containerRef} />
-              </TableBase>
-            </div>
-            <ExpansionProbe />
-          </TableWrapperContext>
-        </TableDataProvider>
-      </TableFocusProvider>
-    </TableConfigProvider>
-  );
-};
+const Harness = ({ data }: HarnessProps) => (
+  <GroupedTableTestShell
+    columns={columns}
+    data={data}
+    groupingState={{
+      aggregates: [{ columnKey: 'id', fn: 'count' }],
+      keys: ['city'],
+    }}
+  >
+    <ExpansionProbe />
+  </GroupedTableTestShell>
+);
 
 const RefetchingHarness = () => {
   const [data, setData] = useState(rows);

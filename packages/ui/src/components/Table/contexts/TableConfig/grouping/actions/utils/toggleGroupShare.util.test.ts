@@ -18,6 +18,7 @@ const grouping = ({
   mode: 'flat',
   periods: {},
   shares,
+  totalsPlacement: 'last',
 });
 
 describe('toggleGroupShare', () => {
