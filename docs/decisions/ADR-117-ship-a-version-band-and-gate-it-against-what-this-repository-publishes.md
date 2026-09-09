@@ -48,9 +48,15 @@ repository publishes to the next major — `>=0.5.0 <1.0.0`, not `^0.5.0`.
 `vp run shipped-ranges:verify` holds it. It reads every `package.json` and
 `pnpm-workspace.yaml` under `packages/devkit/assets`, keeps the declarations
 naming a package this repository publishes, and fails when one of them excludes
-either that package's current version or the minor after it. It also fails when
-no shipped declaration matched the published roster at all, because a reader
-that has stopped reading reports the same clean pass as assets that are correct.
+either that package's current version or the minor after it.
+
+It refuses a pass **per file**, not per run: a shipped file that names a package
+this repository publishes and yields no declaration of it is a finding, and the
+finding names the file. A whole-run refusal would not have held — one reader
+going quiet while the other still answers produces a finding count above zero
+and a clean exit, which is the same output a correct tree produces. A pointer —
+`catalog:`, `workspace:`, `npm:` — counts as read and is judged no further,
+since it names where the version is declared instead of declaring one.
 
 The gate is chained into `check:safe` and `check:push`, and runs as its own step
 in `check-safe.yml`.
@@ -72,6 +78,20 @@ when it is merely offline.
 `>=x.y.z <1.0.0` is longer than `^x.y.z` and reads as a workaround to someone
 who has not hit the `0.x` caret rule. The gate's failure line says which range
 to write, so the shape is discoverable from a red run rather than from prose.
+
+**The gate reads the shipped assets and not the shipped `scripts/`, and that
+boundary was chosen rather than overlooked.** `@lcabrera/devkit` ships both, and
+the rung's root manifest is written from `WORKSPACE_DEPENDENCIES` in
+`packages/devkit/scripts/workspace.mjs` — so a literal range written there would
+reach a created repository and this gate would not see it. Two things decide it.
+A manifest and a catalog have an exact shape a reader can parse; a range inside
+JavaScript has none, so covering it means guessing which string literal is a
+dependency range, and a gate that guesses reports findings nobody trusts. And
+the hazard already has a stricter reporter of a different kind: `workspace.mjs`
+declares every dependency as `catalog:`, and `workspace.test.mjs` asserts that
+none of them resolves to anything else — which forbids the literal outright
+instead of judging one. If that assertion is ever relaxed, this gate's scope has
+to widen with it; those two are a pair.
 
 ## References
 
