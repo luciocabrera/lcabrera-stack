@@ -2,7 +2,7 @@
 id: mutation-testing-utils
 title: Mutation testing pilot for packages/utils
 owner: agent:claude
-status: active
+status: review
 branch: chore/1147-mutation-testing-utils
 area:
   - packages/utils/**
@@ -10,7 +10,7 @@ area:
 started: 2026-09-09
 updated: 2026-09-09
 plan: (none)
-pr: (none)
+pr: #1148
 issue: #1147
 ---
 
