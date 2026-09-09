@@ -16,6 +16,7 @@ import {
   buildPlan,
   countsFor,
   printPlacementNotice,
+  printTaskPlan,
   renderPlan,
 } from './command-materialise.mjs';
 import {
@@ -33,14 +34,13 @@ import {
   initSummary,
   isDefaultBranchRecorded,
   placedHooksPath,
-  scriptsAfter,
-  tasksFor,
   unmetCommandKeys,
   upgradeKeptCiSetup,
   upgradeKeptCommands,
 } from './init.mjs';
 import { MANIFEST_FILE } from './manifest.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
+import { taskOutcomes } from './tasks.mjs';
 
 const MANIFEST = 'package.json';
 
@@ -52,12 +52,6 @@ const readTextIfPresent = (path) =>
 
 const writeJson = (path, value) =>
   writeFileSync(path, `${JSON.stringify(value, undefined, 2)}\n`);
-
-const installedBins = (root) => {
-  const binDir = join(root, 'node_modules', '.bin');
-  if (!existsSync(binDir)) return [];
-  return readdirSync(binDir);
-};
 
 const currentBranch = (root) => {
   try {
@@ -107,35 +101,32 @@ const writeConfig = ({ profile, root, upgrade, userAgent }) => {
   };
 };
 
-const writeTasks = ({ profile, root }) => {
-  const path = join(root, MANIFEST);
-  const manifest = readJsonIfPresent(path);
-  if (manifest === undefined) {
-    return {
-      added: [],
-      skipped: [],
-      warning: `init: no ${MANIFEST} here, so no gate tasks were written. Create one and re-run with --force to wire them up.`,
-    };
-  }
-
-  const { added, scripts, skipped } = scriptsAfter({
-    existing: manifest.scripts,
-    tasks: tasksFor({ availableBins: installedBins(root), profile }),
-  });
-  if (added.length > 0) writeJson(path, { ...manifest, scripts });
-  return { added, skipped, warning: undefined };
-};
+/**
+ * The tasks are wired by the plan, so the one thing left to say here is that
+ * there was nothing to wire them into: a repository with no manifest gets the
+ * files and none of the tasks, and the run would otherwise report only the
+ * files.
+ */
+const missingManifestWarning = (root) =>
+  existsSync(join(root, MANIFEST))
+    ? undefined
+    : `init: no ${MANIFEST} here, so no gate tasks were written. Create one and re-run with --force to wire them up.`;
 
 const materialise = ({ profile, root }) => {
-  const { entries, manifest } = buildPlan({ profile, root });
-  applyPlan({ entries, manifest, root });
-  return entries;
+  const { entries, manifest, tasks } = buildPlan({
+    establish: true,
+    profile,
+    root,
+  });
+  applyPlan({ entries, manifest, root, tasks });
+  return { entries, tasks };
 };
 
 export const applyInit = ({ profile, root, upgrade, userAgent }) => {
   const runner = writeConfig({ profile, root, upgrade, userAgent });
-  const { added, skipped, warning } = writeTasks({ profile, root });
-  const entries = materialise({ profile, root });
+  const warning = missingManifestWarning(root);
+  const { entries, tasks } = materialise({ profile, root });
+  const { added, skipped } = taskOutcomes(tasks);
   const { written } = countsFor(entries);
 
   const hooksPath = resolveConfig(
@@ -144,6 +135,7 @@ export const applyInit = ({ profile, root, upgrade, userAgent }) => {
 
   printPlacementNotice(profile);
   console.log(renderPlan(entries));
+  printTaskPlan(tasks);
   if (warning !== undefined) console.error(warning);
 
   const failure = initFailure({

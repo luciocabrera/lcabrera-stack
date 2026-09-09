@@ -180,6 +180,15 @@ devkit init [--profile <name>] [--force] [--upgrade]
 gate tasks whose binaries are actually installed, and then materialises the
 selected profile.
 
+Wiring them is the part only `init` does. From then on every run reconciles
+them: a task still holding what this kit wrote is updated, a task you changed is
+kept and reported, and a task this kit stops shipping is removed. A task whose
+binary is not installed here is only ever withheld from a manifest that does not
+already carry it — what is on this machine decides what may be wired, not what
+belongs in the file. One gate is withheld on a second condition: `commands:verify`
+reads the command reference this kit ships, and that document names the
+blueprint's tasks, so it is wired only where the blueprint is.
+
 It **refuses** rather than proceeding when the repository is already set up — a
 config or a manifest already present means `sync` is the command you want, and it
 is the one that knows to leave your edits alone. Nothing overrides the check that
@@ -284,11 +293,17 @@ until the next regeneration reverts it.
 
 **All of that is the `create` path.** The root manifest is the one file this rung
 does not materialise, because it carries the repository's own name — so `sync`
-and `init` never write the task block, the dependencies or the engine pin into a
-repository that already exists, and `prepare` is part of that manifest. `create`
-writes the workspace block once and nothing rewrites it: edit it freely, and
-expect a later version's additions not to arrive on their own. `devkit init
---upgrade` still adds its own gate tasks.
+and `init` never write the dependencies or the engine pin into a repository that
+already exists, and `prepare` is part of that manifest.
+
+**The task block is the exception: it is reconciled rather than copied.** Every
+run merges it key by key against the record of what this kit last wrote there,
+exactly as it does the gate tasks. A task it wrote and you have not touched is
+updated in place, a task you changed is reported and kept as you have it, a task
+it no longer ships is removed, and one it has added since arrives — beside your
+own tasks, which it never touches. What no run but `create` does is establish
+this block: a manifest holding none of it is left alone, so a repository that
+never took it does not acquire tasks naming binaries it does not declare.
 
 Raising an existing repository to this rung therefore takes a second step, and
 **nothing tells you so**: every file lands as `added`, `doctor --check` reports
@@ -304,7 +319,9 @@ binaries are missing: with `vp` and `devkit` both installed it still adds only
 the gate-task table at all, so no set of installed binaries reaches it. Run
 `devkit create` into a scratch directory with this profile and copy the
 `scripts`, `devDependencies`, `engines` and `packageManager` fields out of its
-root `package.json` into yours; that one step fixes both tasks.
+root `package.json` into yours; that one step fixes both tasks. The copied tasks
+hold exactly what this kit ships, which is what it reads as its own, so from then
+on they are reconciled like any other consumer's.
 
 Three files carry the engine guarantee and only work together: `.node-version`
 holds the exact version, the root manifest's `engines.node` holds the band an
@@ -412,6 +429,13 @@ swap places for that file. One consequence follows from that and is worth
 knowing: an acknowledgement quiets the file **even when the package's own copy
 moves on**. `--verbose` is how you find what is being held back.
 
+**`--accept` takes a file, and a task is not a file.** A task in the block that a
+run left alone — one you rewrote, or one of your own under a name this kit ships
+— is divergence, so `doctor --check` counts it and fails, and there is no way to
+say you meant it. Restore the command this kit ships to quiet it, or run `doctor`
+without `--check` where you keep the override. Counting it is still the lesser
+harm: the alternative is a check that prints your changed task and exits zero.
+
 ## Configuration
 
 `devkit.config.json` at the consumer root, all of it optional:
@@ -435,6 +459,7 @@ moves on**. `--verbose` is how you find what is being held back.
   "commands": {
     "install": "vp install",
     "check": "vp run check:push",
+    "run": "vp run",
     "test": "vp run test:changed",
     "audit": "vp run deps:audit"
   }
@@ -448,7 +473,10 @@ put the seeds where a consumer on another runner never looks.
 
 `commands` answers the placeholders a shipped file carries. A skill's procedure
 travels but the command carrying out each step does not, so the file says
-`{{commands.install}}` and this supplies the rest. A file whose placeholders
+`{{commands.install}}` and this supplies the rest. `run` is the one that is a
+prefix rather than a command — how this repository runs a task by name — and the
+shipped command reference spells every task through it, since a task name means
+nothing without it. A file whose placeholders
 cannot all be answered is **not written** — materialising `{{commands.install}}`
 verbatim would hand a reader something that looks like a command and is not one.
 

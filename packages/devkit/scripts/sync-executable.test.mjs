@@ -26,6 +26,7 @@ import { DEFAULT_CONFIG } from './config.mjs';
 import { readFilesUnder } from './files.mjs';
 import { hashContent } from './manifest.mjs';
 import { applySync, planSync } from './sync.mjs';
+import { silencedConsole } from './test-fixtures.mjs';
 
 const EXECUTABLE_BITS = 0o111;
 
@@ -36,7 +37,12 @@ const ASSETS_DIR = join(
 
 const scratch = () => mkdtempSync(join(tmpdir(), 'devkit-exec-'));
 
-const REPO_COMMANDS = { check: 'true', install: 'true', test: 'true' };
+const REPO_COMMANDS = {
+  check: 'true',
+  install: 'true',
+  run: 'true',
+  test: 'true',
+};
 
 const scratchRepo = (commands = REPO_COMMANDS) => {
   const root = scratch();
@@ -47,17 +53,7 @@ const scratchRepo = (commands = REPO_COMMANDS) => {
   return root;
 };
 
-const silenced = () => {
-  const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-  const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-  return {
-    log,
-    restore: () => {
-      log.mockRestore();
-      error.mockRestore();
-    },
-  };
-};
+const silenced = () => silencedConsole(vi);
 
 const plan = (assets, { manifest = { files: {} }, onDiskHash } = {}) =>
   planSync({

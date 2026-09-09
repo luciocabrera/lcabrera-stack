@@ -11,12 +11,14 @@
  * did not exist. Every one of those was invisible to CI, because a wrong
  * sentence fails nothing.
  *
- * Ground truth is `vp run` with no task, which lists every runnable task as
- * `packageName#taskName`. That matters: tasks come from THREE sources
- * (package.json scripts, vite.config.ts `run.tasks`, and shared factories in
- * @lcabrera/vite-config), so reading package.json alone would report false
- * failures for `test`/`build` in most workspaces. Asking the toolchain avoids
- * re-implementing its resolution.
+ * How a task is spelled, and where the list of them comes from, are both the
+ * repository's own facts: `commands.run` in the shared config answers the first,
+ * and the second follows from it. A toolchain that resolves a task from more
+ * than the manifests — a config's own tasks, a shared factory it composes — has
+ * to be ASKED for the list, which is what `vp run` with no task prints; a runner
+ * that runs manifest scripts and nothing else is fully read from the manifests.
+ * Assuming one runner reported every task in the file as undocumented, with a
+ * remedy the reader had already carried out.
  *
  * Checks:
  *   1. Every root package.json script is documented in COMMANDS.md.
@@ -42,7 +44,13 @@ import { dirname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
-import { readGates, readPublishing } from './config.mjs';
+import {
+  documentedTasks,
+  requiresRunnerTaskList,
+  undocumentedScripts,
+  unresolvedDocumented,
+} from './commands-doc.mjs';
+import { readCommands, readGates, readPublishing } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const execFileAsync = promisify(execFile);
@@ -52,10 +60,11 @@ const REPO_ROOT = resolveHostRoot({
 });
 const COMMANDS_DOC = readGates(REPO_ROOT).commandsDoc.file;
 const WORKSPACE_DIRS = readPublishing(REPO_ROOT).workspaceDirs;
+const RUN_PREFIX = readCommands(REPO_ROOT).run;
 
 const TASK_LINE = /^\s{2}([^\s:]+(?::[^\s:]+)*?):\s/;
 
-const readTaskInventory = async () => {
+const askedTaskInventory = async () => {
   const { stdout } = await execFileAsync('vp', ['run'], { cwd: REPO_ROOT });
   const rootTasks = new Set();
   const packageTasks = new Map();
@@ -80,24 +89,40 @@ const readTaskInventory = async () => {
   return { packageTasks, rootTasks };
 };
 
-const readWorkspaceNames = () =>
-  WORKSPACE_DIRS.flatMap((group) =>
-    readdirSync(join(REPO_ROOT, group))
-      .map((name) => join(REPO_ROOT, group, name, 'package.json'))
-      .filter((manifest) => existsSync(manifest))
-      .map((manifest) => JSON.parse(readFileSync(manifest, 'utf8')).name),
+const workspaceManifests = () =>
+  WORKSPACE_DIRS.filter((group) => existsSync(join(REPO_ROOT, group))).flatMap(
+    (group) =>
+      readdirSync(join(REPO_ROOT, group))
+        .map((name) => join(REPO_ROOT, group, name, 'package.json'))
+        .filter((manifest) => existsSync(manifest))
+        .map((manifest) => JSON.parse(readFileSync(manifest, 'utf8'))),
   );
+
+const readManifestInventory = () => ({
+  packageTasks: new Map(
+    workspaceManifests()
+      .filter((manifest) => typeof manifest.name === 'string')
+      .map((manifest) => [
+        manifest.name,
+        new Set(Object.keys(manifest.scripts ?? {})),
+      ]),
+  ),
+  rootTasks: new Set(readRootScripts()),
+});
+
+const readTaskInventory = async () =>
+  requiresRunnerTaskList(RUN_PREFIX)
+    ? await askedTaskInventory()
+    : readManifestInventory();
+
+const readWorkspaceNames = () =>
+  workspaceManifests().map((manifest) => manifest.name);
 
 const readRootScripts = () =>
   Object.keys(
     JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf8')).scripts ??
       {},
   );
-
-const findDocumentedCommands = (doc) => {
-  const matches = doc.matchAll(/vp run ([a-z][\w:-]*)/g);
-  return new Set([...matches].map(([, task]) => task));
-};
 
 const findWorkspaceTaskClaims = (doc) => {
   const section = doc
@@ -144,27 +169,28 @@ const collectAnchors = (markdown) =>
   );
 
 const checkRootScriptsDocumented = (documented, problems) => {
-  for (const script of readRootScripts()) {
-    if (!documented.has(script)) {
-      problems.push(
-        `${COMMANDS_DOC} does not document the root script \`${script}\` — add it, or delete the script.`,
-      );
-    }
-  }
+  problems.push(
+    ...undocumentedScripts({
+      docName: COMMANDS_DOC,
+      documented,
+      rootScripts: readRootScripts(),
+      runPrefix: RUN_PREFIX,
+    }),
+  );
 };
 
 const checkDocumentedCommandsExist = (documented, inventory, problems) => {
-  const everyTask = new Set([
-    ...inventory.rootTasks,
-    ...inventory.packageTasks.values().flatMap((tasks) => [...tasks]),
-  ]);
-  for (const task of documented) {
-    if (!everyTask.has(task)) {
-      problems.push(
-        `${COMMANDS_DOC} documents \`vp run ${task}\`, which is not a task in any workspace — it was renamed or removed.`,
-      );
-    }
-  }
+  problems.push(
+    ...unresolvedDocumented({
+      docName: COMMANDS_DOC,
+      documented,
+      runPrefix: RUN_PREFIX,
+      tasks: new Set([
+        ...inventory.rootTasks,
+        ...inventory.packageTasks.values().flatMap((tasks) => [...tasks]),
+      ]),
+    }),
+  );
 };
 
 const checkWorkspaceClaims = (doc, inventory, problems) => {
@@ -217,7 +243,7 @@ const checkWorkspaceCount = (doc, expected, problems) => {
 const main = async () => {
   const doc = readFileSync(join(REPO_ROOT, COMMANDS_DOC), 'utf8');
   const inventory = await readTaskInventory();
-  const documented = findDocumentedCommands(doc);
+  const documented = documentedTasks({ doc, runPrefix: RUN_PREFIX });
   const problems = [];
 
   checkRootScriptsDocumented(documented, problems);
@@ -239,7 +265,7 @@ const main = async () => {
   }
 
   console.log(
-    `${COMMANDS_DOC} is accurate: ${readRootScripts().length} root scripts documented, ` +
+    `${COMMANDS_DOC} is accurate: ${readRootScripts().length} root scripts documented as \`${RUN_PREFIX} <task>\`, ` +
       `${documented.size} documented commands resolve, ${readWorkspaceNames().length} workspaces.`,
   );
 };
