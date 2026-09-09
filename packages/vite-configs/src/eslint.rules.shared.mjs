@@ -161,7 +161,10 @@ export const createToolingScriptFileConfig = () => ({
       'error',
       {
         type: 'unsorted',
-        useConfigurationIf: { allNamesMatchPattern: '^(?:types|default)$' },
+        useConfigurationIf: {
+          allNamesMatchPattern:
+            '^(?:types|import|require|node|browser|development|production|default)$',
+        },
       },
       { order: 'asc', type: 'natural' },
     ],
