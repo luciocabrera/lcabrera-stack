@@ -2,7 +2,7 @@
 id: devkit-derive-scripts-block
 title: Derive the emitted scripts block instead of copying it
 owner: agent:claude
-status: active
+status: review
 branch: fix/1077-devkit-derive-scripts-block
 area:
   - packages/devkit/scripts/**
@@ -25,6 +25,6 @@ Derive the emitted scripts block instead of copying it
 
 ## Status / next
 
-- Current step: round 3 — the doc gate reads the configured runner
+- Current step: in review — three reviewer findings answered on top of the verified change
 - Blockers: none
-- Next: open the PR for review
+- Next: merge once the review clears
