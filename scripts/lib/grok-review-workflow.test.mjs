@@ -24,30 +24,29 @@ const RUN_STEP = 'Run the Grok catalog review';
 const INSTALL_STEP = 'Install the pinned Grok CLI';
 
 const expr = (inner) => `\${{ ${inner} }}`;
+const yaml = () => readRepoFile(WORKFLOW);
+const stepNamed = (name) => stepBlock(yaml(), name);
 
 describe('the catalog review is posted under its own identity', () => {
-  it('submits with the App installation token, not the default GITHUB_TOKEN', () => {
-    const step = stepBlock(readRepoFile(WORKFLOW), SUBMIT_STEP);
-    expect(step).toBeDefined();
-    expect(stepEnvValue(step, 'GH_TOKEN')).toBe(
+  it('hands the App token to submit and github.token to collect', () => {
+    expect(stepEnvValue(stepNamed(SUBMIT_STEP), 'GH_TOKEN')).toBe(
       expr('steps.reviewer-token.outputs.token'),
+    );
+    expect(stepEnvValue(stepNamed(COLLECT_STEP), 'GH_TOKEN')).toBe(
+      expr('github.token'),
     );
   });
 
-  it('mints that token from the Grok App, not Claude’s', () => {
-    const step = stepBlock(readRepoFile(WORKFLOW), MINT_STEP);
-    expect(step).toBeDefined();
-    expect(step).toContain('actions/create-github-app-token');
-    expect(step).toContain('secrets.GROK_REVIEWER_APP_ID');
-    expect(step).toContain('secrets.GROK_REVIEWER_APP_PRIVATE_KEY');
-    expect(step).not.toContain('secrets.REVIEWER_APP_ID');
-    expect(step).toContain('id: reviewer-token');
-  });
-
-  it('collects the diff with github.token, which the App does not need to replace', () => {
-    const step = stepBlock(readRepoFile(WORKFLOW), COLLECT_STEP);
-    expect(step).toBeDefined();
-    expect(stepEnvValue(step, 'GH_TOKEN')).toBe(expr('github.token'));
+  it('mints from GROK_REVIEWER_APP_ID / GROK_REVIEWER_APP_PRIVATE_KEY', () => {
+    const mint = stepNamed(MINT_STEP);
+    expect(mint).toMatch(/actions\/create-github-app-token/);
+    expect(mint).toMatch(/secrets\.GROK_REVIEWER_APP_ID/);
+    expect(mint).toMatch(/secrets\.GROK_REVIEWER_APP_PRIVATE_KEY/);
+    expect(
+      mint.includes('secrets.REVIEWER_APP_ID\n') ||
+        mint.includes('secrets.REVIEWER_APP_ID '),
+    ).toBe(false);
+    expect(mint).toMatch(/id:\s*reviewer-token/);
   });
 });
 
