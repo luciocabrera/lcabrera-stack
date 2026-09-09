@@ -135,6 +135,6 @@ A report passes when all required fields are present and all checks succeed.
 
 ## 9. Skill Mapping Notes
 
-- code-smell-checker may emit heuristic categories where no catalog ID exists. Use a stable heuristic ID format, for example: CHK.ARCH.CYCLE or CHK.FUNC.LONG.
-- code-smell-zen should preserve catalog IDs exactly as defined in its catalog.
+- code-smell-checker may emit heuristic categories where no catalog ID exists. Prefer an ID listed under `### Repo heuristic IDs` in `../code-smell-zen/SKILL.md` before minting a new `CHK.<DOMAIN>.<LABEL>` (for example `CHK.ARCH.CYCLE`).
+- code-smell-zen should preserve catalog IDs exactly as defined in its catalog, including that `CHK.*` section. It must not mint a new `CHK.*`.
 - Both skills must output the same section order and finding fields for handoff consistency.

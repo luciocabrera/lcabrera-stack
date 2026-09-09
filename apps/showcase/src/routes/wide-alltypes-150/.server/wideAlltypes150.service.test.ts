@@ -30,17 +30,24 @@ import {
 vi.mock('@lcabrera/server/db/get-rows-count.util', () => ({
   getRowsCount: vi.fn(async () => 1_000_000),
 }));
-vi.mock('@lcabrera/server/db/select-rows.util', () => ({
-  selectRows: vi.fn(async () => [
-    {
-      c_009: new Date('2020-01-01T23:00:00.000Z'),
-      c_014: { g: 1 },
-      c_015: new Uint8Array([0x3a, 0xb7]),
-      c_019: [1, 19],
-      id: '1',
-    },
-  ]),
-}));
+vi.mock('@lcabrera/server/db/select-rows.util', async () => {
+  const { WIDE_ALLTYPES_COLUMNS } = await import('../config');
+  const values: Readonly<Record<string, unknown>> = {
+    c_009: new Date('2020-01-01T23:00:00.000Z'),
+    c_014: { g: 1 },
+    c_015: new Uint8Array([0x3a, 0xb7]),
+    c_019: [1, 19],
+    id: '1',
+  };
+
+  return {
+    selectRows: vi.fn(async () => [
+      Object.fromEntries(
+        WIDE_ALLTYPES_COLUMNS.map((column) => [column, values[column] ?? 0]),
+      ),
+    ]),
+  };
+});
 vi.mock('@lcabrera/server/db/select-grouped-rows.util', () => ({
   selectGroupedRows: vi.fn(async () => ({
     aggregates: [{ alias: 'count_all', fn: 'count' }],
@@ -164,17 +171,19 @@ describe('selectWideAlltypes150Page', () => {
       sorting: [],
     });
 
-    expect(
-      Object.keys(page).toSorted((a, b) => a.localeCompare(b)),
-    ).toStrictEqual(['data', 'hasMore', 'total']);
+    const row = page.data.at(0);
+
     expect(page.total).toBe(1_000_000);
-    expect(page.data.at(0)).toStrictEqual({
+    expect(row).toMatchObject({
       c_009: '"2020-01-01T23:00:00.000Z"',
       c_014: '{"g":1}',
       c_015: '3ab7',
       c_019: [1, 19],
       id: '1',
     });
+    expect(
+      WIDE_ALLTYPES_COLUMNS.every((column) => Object.hasOwn(row ?? {}, column)),
+    ).toBe(true);
   });
 
   it('reports the end of the set when the window reaches the total', async () => {

@@ -70,7 +70,8 @@ If inputs are missing, default to:
 - assign severity using the canonical scale: BLOCKER, HIGH, MEDIUM, LOW, NIT
 - estimate fix effort: small, medium, large
 - map each finding to a suggested remediation pattern
-- assign a stable heuristic ID where no catalog ID exists, using the format `CHK.<DOMAIN>.<LABEL>` (e.g. `CHK.ARCH.CYCLE`, `CHK.FUNC.LONG`)
+- assign a catalog ID from `../code-smell-zen/SKILL.md` when one fits (Clean Code, GoF, TS, React, and that file's `### Repo heuristic IDs`)
+- when none fits, mint a new `CHK.<DOMAIN>.<LABEL>` (for example `CHK.ARCH.CYCLE`). Zen must not mint; this skill may.
 
 7. Build the action plan.
 
@@ -93,6 +94,12 @@ Use this branching logic while triaging:
 - If a smell is minor with low maintenance impact: classify LOW and defer.
 - If a smell is a style preference with no real cost: classify NIT.
 - If evidence is weak or tool signal is noisy: mark as potential false positive and request focused validation.
+
+## Catalog IDs
+
+Cite IDs from `../code-smell-zen/SKILL.md`. That file is the roster. Do not copy the definitions here.
+
+When no listed ID fits, mint a new `CHK.<DOMAIN>.<LABEL>` (for example `CHK.ARCH.CYCLE`). Zen must not mint; this skill may.
 
 ## Report Format
 

@@ -146,5 +146,11 @@ What that leaves uncovered is narrower than it sounds: the review those pull req
 do get is the one `Copilot review complete` reads. The verdict check adds criterion
 evidence on top; it is not the only thing looking.
 
+`grok-review.yml` also reviews every ready pull request (catalog IDs, not
+correctness). It is not a required check and not an accepted reviewer. BLOCKER and
+HIGH findings still open threads, and `Review threads resolved` above holds those.
+The job going red — a missing secret, a crashed model — does not hold the merge.
+[ADR-116](../decisions/ADR-116-a-grok-catalog-reviewer-posts-on-pull-requests-and-is-not-an-accepted-reviewer.md).
+
 A green PR means those ran — it does not mean the **[judgement]** items were
 considered. That is the gap this checklist covers.
