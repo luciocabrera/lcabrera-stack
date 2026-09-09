@@ -19,7 +19,7 @@ const MERGED_OR_CLOSED = new Set(['CLOSED', 'MERGED']);
 
 export const summarizePrs = (prs) => {
   if (!Array.isArray(prs) || prs.length === 0) {
-    return undefined;
+    return;
   }
   const open = prs.find((pr) => String(pr.state).toUpperCase() === 'OPEN');
   if (open !== undefined) {

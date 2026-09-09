@@ -8,7 +8,7 @@
  */
 
 const code = (value) => `\`${value}\``;
-const renderArea = (area) => area.map(code).join('<br>');
+const renderArea = (area) => area.map((value) => code(value)).join('<br>');
 
 const HEADER =
   '# Coordination board\n\n' +
@@ -21,7 +21,7 @@ const renderTasks = (tasks) =>
   tasks
     .filter(({ data }) => data !== undefined)
     .map(({ data }) => data)
-    .sort(
+    .toSorted(
       (a, b) => a.status.localeCompare(b.status) || a.id.localeCompare(b.id),
     )
     .map(
@@ -34,7 +34,7 @@ const renderTasks = (tasks) =>
 const renderBranches = (branches, tasks) =>
   branches
     .filter(({ data }) => data !== undefined)
-    .map(({ slug, data }) => {
+    .map(({ data, slug }) => {
       const participants = tasks
         .filter((t) => t.data?.branch === data.branch)
         .map((t) => t.data.id);

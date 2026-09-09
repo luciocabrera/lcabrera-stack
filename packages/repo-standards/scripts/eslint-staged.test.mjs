@@ -20,7 +20,7 @@ const CONFIGS = new Set([
   '/repo/packages/utils/eslint.config.mjs',
 ]);
 
-const exists = (path) => CONFIGS.has(path);
+const hasConfig = (path) => CONFIGS.has(path);
 
 describe('isLintablePath', () => {
   it('accepts every extension ESLint is wired to read', () => {
@@ -44,7 +44,7 @@ describe('findConfigDirectory', () => {
   it('walks up to the nearest config', () => {
     expect(
       findConfigDirectory({
-        exists,
+        exists: hasConfig,
         filePath: '/repo/packages/ui/src/deep/Thing.tsx',
         repoRoot: REPO_ROOT,
       }),
@@ -54,7 +54,7 @@ describe('findConfigDirectory', () => {
   it('returns nothing for a path outside every workspace', () => {
     expect(
       findConfigDirectory({
-        exists,
+        exists: hasConfig,
         filePath: '/repo/scripts/tool.mjs',
         repoRoot: REPO_ROOT,
       }),
@@ -76,7 +76,7 @@ describe('planLintGroups', () => {
   it('groups paths by their governing config and relativises them', () => {
     expect(
       planLintGroups({
-        exists,
+        exists: hasConfig,
         paths: [
           '/repo/packages/ui/src/A.tsx',
           '/repo/packages/utils/src/b.util.ts',
@@ -93,7 +93,7 @@ describe('planLintGroups', () => {
   it('drops unlintable files and files no config governs', () => {
     expect(
       planLintGroups({
-        exists,
+        exists: hasConfig,
         paths: [
           '/repo/packages/ui/README.md',
           '/repo/scripts/tool.mjs',

@@ -11,16 +11,15 @@ import {
   chmodSync,
   existsSync,
   mkdirSync,
-  symlinkSync,
   mkdtempSync,
-  readFileSync,
   readdirSync,
+  readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runCreate } from './command-create.mjs';
@@ -95,7 +94,9 @@ const createUnderGitConfig = ({ contents, parent }) => {
 };
 
 afterEach(() => {
-  for (const root of scratches.splice(0)) {
+  const drained = [...scratches];
+  scratches.length = 0;
+  for (const root of drained) {
     rmSync(root, { force: true, recursive: true });
   }
 });

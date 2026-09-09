@@ -95,8 +95,8 @@ export const localProtocolProblems = (manifest) =>
       }),
   );
 
-export const manifestProblems = ({ manifest, shipsSource }) => [
-  ...(shipsSource ? [] : sourceExportProblems(manifest)),
+export const manifestProblems = ({ isSourceShipped, manifest }) => [
+  ...(isSourceShipped ? [] : sourceExportProblems(manifest)),
   ...localProtocolProblems(manifest),
 ];
 
@@ -112,14 +112,14 @@ export const classifyAuditedVersion = ({ deprecated, problems, tags }) => {
   return deprecated ? 'deprecated' : 'broken';
 };
 
-export const auditVersion = ({ manifest, shipsSource, tags, version }) => {
-  const deprecated = manifest.deprecated !== undefined;
-  const problems = manifestProblems({ manifest, shipsSource });
+export const auditVersion = ({ isSourceShipped, manifest, tags, version }) => {
+  const isDeprecated = manifest.deprecated !== undefined;
+  const problems = manifestProblems({ isSourceShipped, manifest });
 
   return {
-    deprecated,
+    deprecated: isDeprecated,
     problems,
-    state: classifyAuditedVersion({ deprecated, problems, tags }),
+    state: classifyAuditedVersion({ deprecated: isDeprecated, problems, tags }),
     tags,
     version,
   };
@@ -132,20 +132,20 @@ export const tagsByVersion = (distTags = {}) =>
     return byVersion;
   }, new Map());
 
-export const auditPackument = ({ only, packument, shipsSource }) => {
+export const auditPackument = ({ isSourceShipped, only, packument }) => {
   const tags = tagsByVersion(packument['dist-tags']);
 
   return Object.entries(packument.versions ?? {})
     .filter(([version]) => only === undefined || only === version)
     .map(([version, manifest]) =>
       auditVersion({
+        isSourceShipped,
         manifest,
-        shipsSource,
         tags: tags.get(version) ?? [],
         version,
       }),
     )
-    .sort((left, right) => compareVersions(left.version, right.version));
+    .toSorted((left, right) => compareVersions(left.version, right.version));
 };
 
 export const selectBroken = (audited) =>
@@ -171,7 +171,9 @@ export const readNothing = ({ named, registry }) =>
 const STATE_MARK = { broken: '✗', clean: '✓', deprecated: '⚠' };
 
 const renderTags = (tags) => {
-  const ordered = [...tags].sort((left, right) => left.localeCompare(right));
+  const ordered = [...tags].toSorted((left, right) =>
+    left.localeCompare(right),
+  );
 
   return tags.length === 0 ? '' : ` (${ordered.join(', ')})`;
 };
@@ -189,7 +191,7 @@ const renderEmpty = (published) =>
 const renderPackage = ({ name, published, versions }) =>
   versions.length === 0
     ? [name, renderEmpty(published)]
-    : [name, ...versions.flatMap(renderVersion)];
+    : [name, ...versions.flatMap((value) => renderVersion(value))];
 
 export const renderAudit = ({ audited, registry }) =>
   [

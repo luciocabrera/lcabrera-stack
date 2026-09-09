@@ -97,7 +97,8 @@ const mergeDays = (kept, seen) => {
 
 const mergeKind = (kept, seen) => {
   const merged = {};
-  for (const name of new Set([...Object.keys(kept), ...Object.keys(seen)])) {
+  const names = new Set([...Object.keys(kept), ...Object.keys(seen)]);
+  for (const name of names) {
     merged[name] = mergeDays(kept[name] ?? {}, seen[name] ?? {});
   }
   return merged;
@@ -152,6 +153,7 @@ const setAside = ({ observedAt, path, reason }) => {
   } catch (error) {
     throw new Error(
       `the snapshot at ${path} could not be read (${reason}) and could not be moved aside (${error.message}); refusing to overwrite the only copy`,
+      { cause: error },
     );
   }
   return { ...emptySnapshot(), setAside: { movedTo, reason } };

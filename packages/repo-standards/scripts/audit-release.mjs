@@ -32,8 +32,10 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { errorMessage } from './error-message.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 import { isBuiltPublicPackage } from './publish-surface.mjs';
 import { readPublishableManifests } from './publishable-workspaces.mjs';
+import { fetchPackument, registryOrigin } from './registry-packument.mjs';
 import {
   auditPackument,
   readNothing,
@@ -41,8 +43,6 @@ import {
   resolvedNothing,
   selectBroken,
 } from './release-audit.mjs';
-import { fetchPackument, registryOrigin } from './registry-packument.mjs';
-import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
@@ -50,8 +50,8 @@ const REPO_ROOT = resolveHostRoot({
 
 const readWorkspaceTargets = () =>
   readPublishableManifests(REPO_ROOT).map((manifest) => ({
+    isSourceShipped: !isBuiltPublicPackage(manifest),
     name: manifest.name,
-    shipsSource: !isBuiltPublicPackage(manifest),
   }));
 
 const parseSpec = (spec) => {
@@ -72,8 +72,8 @@ const toTargets = (specs) => {
     return workspaces.map((target) => ({ ...target, explicit: false }));
   }
 
-  const shipsSource = new Map(
-    workspaces.map(({ name, shipsSource: ships }) => [name, ships]),
+  const shippingByName = new Map(
+    workspaces.map(({ isSourceShipped: ships, name }) => [name, ships]),
   );
 
   return specs.map((spec) => {
@@ -81,14 +81,14 @@ const toTargets = (specs) => {
 
     return {
       explicit: true,
+      isSourceShipped: shippingByName.get(name) ?? false,
       name,
       only,
-      shipsSource: shipsSource.get(name) ?? false,
     };
   });
 };
 
-const auditTarget = async ({ explicit, name, only, shipsSource }) => {
+const auditTarget = async ({ explicit, isSourceShipped, name, only }) => {
   const packument = await fetchPackument(name, { full: true });
 
   return {
@@ -99,14 +99,14 @@ const auditTarget = async ({ explicit, name, only, shipsSource }) => {
     versions:
       packument === undefined
         ? []
-        : auditPackument({ only, packument, shipsSource }),
+        : auditPackument({ isSourceShipped, only, packument }),
   };
 };
 
 const selectUnresolved = (audited) =>
   audited
     .filter(({ explicit, versions }) => explicit && versions.length === 0)
-    .map(describeSpec);
+    .map((value) => describeSpec(value));
 
 const REMEDIATION = [
   '',
@@ -149,7 +149,9 @@ const report = ({ audited, blind, broken, unresolved }) => {
 
 const main = async () => {
   const specs = process.argv.slice(2).filter((arg) => !arg.startsWith('-'));
-  const audited = await Promise.all(toTargets(specs).map(auditTarget));
+  const audited = await Promise.all(
+    toTargets(specs).map((value) => auditTarget(value)),
+  );
   const blind = resolvedNothing(audited);
   const broken = selectBroken(audited);
   const unresolved = selectUnresolved(audited);

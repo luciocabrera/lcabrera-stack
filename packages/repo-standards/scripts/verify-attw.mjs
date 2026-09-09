@@ -25,10 +25,10 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { errorMessage } from './error-message.mjs';
-import { checkPackageTypes, formatProblem } from './attw-check.mjs';
 import { readPublicPackages } from './api-surface-config.mjs';
+import { checkPackageTypes, formatProblem } from './attw-check.mjs';
 import { CONFIG_FILE_NAME } from './config.mjs';
+import { errorMessage } from './error-message.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
@@ -49,7 +49,7 @@ const checkResolution = async (packageConfig) => {
     ? []
     : [
         `${packageConfig.name}: published types do not resolve:\n${problems
-          .map(formatProblem)
+          .map((value) => formatProblem(value))
           .join('\n')}`,
       ];
 };
@@ -70,7 +70,8 @@ const main = async () => {
       (packageConfig) =>
         `${packageConfig.name}: no dist/, so its published types were not checked — build the packages first.`,
     );
-  for (const packageConfig of packages.filter(isBuilt)) {
+  for (const packageConfig of packages) {
+    if (!isBuilt(packageConfig)) continue;
     failures.push(...(await checkResolution(packageConfig)));
   }
 

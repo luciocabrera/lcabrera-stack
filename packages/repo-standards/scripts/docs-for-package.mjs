@@ -34,7 +34,7 @@ const main = () => {
     readRegisterConfig(process.cwd()),
   );
   const workspace = namedWorkspace();
-  const known = [...roster].sort((a, b) => a.localeCompare(b)).join(', ');
+  const known = [...roster].toSorted((a, b) => a.localeCompare(b)).join(', ');
   if (workspace === undefined) {
     throw new Error(
       `docs:for-package: name a workspace directory. One of: ${known}`,

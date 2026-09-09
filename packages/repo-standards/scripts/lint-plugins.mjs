@@ -59,7 +59,7 @@ export const UNPROBED_PLUGINS = {
     'TypeScript error first, so a probe passes whether or not the plugin loaded',
 };
 
-export const probeFilename = ({ plugin, ext }) =>
+export const probeFilename = ({ ext, plugin }) =>
   `${plugin}.probe.${ext ?? 'ts'}`;
 
 export const pluginsWithoutCoverage = (plugins) => {
@@ -89,7 +89,11 @@ const stripComments = (text) =>
 const globWorkspace = (glob) => glob.replace(/\/\*\*$/u, '');
 
 export const unclassifiedWorkspaces = ({ runtimes, workspaces }) => {
-  const classified = new Set(Object.values(runtimes).flat().map(globWorkspace));
+  const classified = new Set(
+    Object.values(runtimes)
+      .flat()
+      .map((value) => globWorkspace(value)),
+  );
   return workspaces.filter((workspace) => !classified.has(workspace));
 };
 
@@ -115,17 +119,21 @@ const isWorkspaceGlob = (glob) =>
 export const workspaceRosters = (overrides) => {
   const blocks = overrides
     .map((override) => override.includes ?? [])
-    .filter((globs) => globs.length > 0 && globs.every(isWorkspaceGlob))
-    .map((globs) => globs.map(globWorkspace));
-  return blocks
     .filter(
-      (block, index) =>
-        !blocks.some(
-          (other, otherIndex) =>
+      (globs) =>
+        globs.length > 0 && globs.every((value) => isWorkspaceGlob(value)),
+    )
+    .map((globs) => globs.map((value) => globWorkspace(value)));
+  return blocks
+    .filter((block, index) =>
+      blocks.every(
+        (other, otherIndex) =>
+          !(
             otherIndex !== index &&
             other.length > block.length &&
-            block.every((workspace) => other.includes(workspace)),
-        ),
+            block.every((workspace) => other.includes(workspace))
+          ),
+      ),
     )
     .map((block) => block.map((workspace) => `${workspace}/**`));
 };

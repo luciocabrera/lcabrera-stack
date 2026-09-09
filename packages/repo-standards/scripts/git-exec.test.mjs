@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  GIT_REPOSITORY_VARIABLES,
   buildGitEnv,
+  GIT_REPOSITORY_VARIABLES,
   runGit,
   runGitStatus,
 } from './git-exec.mjs';

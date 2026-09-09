@@ -3,9 +3,9 @@ import { describe, expect, test } from 'vite-plus/test';
 import {
   GATE_TASKS,
   initFailure,
+  initialConfig,
   initRefusal,
   initSummary,
-  initialConfig,
   placedHooksPath,
   scriptsAfter,
   tasksFor,
@@ -55,7 +55,7 @@ describe('initialConfig', () => {
   test('writes the commands and the profile, and no path layout', () => {
     expect(
       initialConfig({
-        commands: { install: 'npm ci', audit: 'npm audit' },
+        commands: { audit: 'npm audit', install: 'npm ci' },
         profile: 'full',
       }),
     ).toEqual({

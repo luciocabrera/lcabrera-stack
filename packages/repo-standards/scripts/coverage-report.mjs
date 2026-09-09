@@ -38,8 +38,8 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 import { readWorkspaceGraph, resolveAffected } from './affected-tests.mjs';
-import { normaliseMetric, percentageOf } from './coverage-metrics.mjs';
 import { readGates } from './config.mjs';
+import { normaliseMetric, percentageOf } from './coverage-metrics.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const execFileAsync = promisify(execFile);
@@ -103,7 +103,7 @@ const readWorkspaceTotal = async (workspace) => {
   const total = Object.fromEntries(
     METRICS.map((metric) => [metric, normaliseMetric(summary.total[metric])]),
   );
-  return { name: workspace.name, dir: workspace.dir, total };
+  return { dir: workspace.dir, name: workspace.name, total };
 };
 
 const aggregateTotal = (workspaces) =>
@@ -111,11 +111,11 @@ const aggregateTotal = (workspaces) =>
     METRICS.map((metric) => {
       const summed = workspaces.reduce(
         (acc, { total }) => ({
-          total: acc.total + total[metric].total,
           covered: acc.covered + total[metric].covered,
           skipped: acc.skipped + total[metric].skipped,
+          total: acc.total + total[metric].total,
         }),
-        { total: 0, covered: 0, skipped: 0 },
+        { covered: 0, skipped: 0, total: 0 },
       );
       return [metric, { ...summed, pct: percentageOf(summed) }];
     }),
@@ -163,14 +163,14 @@ const main = async () => {
 
   if (shouldRun) {
     for (const workspace of workspaces) {
-      if (workspace.run || runAll) await runCoverage(workspace);
+      if (runAll || workspace.run) await runCoverage(workspace);
     }
   }
 
   const missing = workspaces.filter(
     (workspace) => !existsSync(summaryPathFor(workspace)),
   );
-  for (const { name, dir } of missing) {
+  for (const { dir, name } of missing) {
     process.stderr.write(
       `  ⚠ ${name}: no coverage-summary.json at ${dir}/coverage/ — skipped.\n`,
     );
@@ -191,10 +191,12 @@ const main = async () => {
     );
   }
 
-  const totals = await Promise.all(present.map(readWorkspaceTotal));
+  const totals = await Promise.all(
+    present.map((value) => readWorkspaceTotal(value)),
+  );
 
   const total = aggregateTotal(totals);
-  const report = { workspaces: totals, total };
+  const report = { total, workspaces: totals };
 
   await mkdir(dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, `${JSON.stringify(report, null, 2)}\n`);

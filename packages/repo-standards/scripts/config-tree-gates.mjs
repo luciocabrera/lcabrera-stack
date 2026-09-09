@@ -33,8 +33,8 @@ export const DEFAULT_TREE_GATES = {
   },
   commandsDoc: { file: 'COMMANDS.md' },
   coverage: {
-    mergeWorkspaces: [],
     mergedFile: 'reports/fallow/coverage/coverage-final.json',
+    mergeWorkspaces: [],
     reportWorkspaces: [],
     summaryFile: 'coverage/monorepo-coverage-summary.json',
   },
@@ -71,7 +71,7 @@ const workspaceList = (value, fallback, key) =>
       }).map((entry) => ({
         dir: repoRelative(entry.dir, entry.dir, `${key}[].dir`),
         name: entry.name.trim(),
-        ...(typeof entry.run === 'boolean' ? { run: entry.run } : {}),
+        ...(typeof entry.run === 'boolean' && { run: entry.run }),
       }))
     : fallback;
 
@@ -152,16 +152,16 @@ export const resolveTreeGates = (gates) => {
       ),
     },
     coverage: {
-      mergeWorkspaces: workspaceList(
-        coverage.mergeWorkspaces,
-        defaults.coverage.mergeWorkspaces,
-        'gates.coverage.mergeWorkspaces',
-      ),
       mergedFile: resolvePath(
         coverage,
         'mergedFile',
         defaults.coverage.mergedFile,
         'gates.coverage.mergedFile',
+      ),
+      mergeWorkspaces: workspaceList(
+        coverage.mergeWorkspaces,
+        defaults.coverage.mergeWorkspaces,
+        'gates.coverage.mergeWorkspaces',
       ),
       reportWorkspaces: workspaceList(
         coverage.reportWorkspaces,

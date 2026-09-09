@@ -35,38 +35,38 @@
 import {
   existsSync,
   mkdirSync,
-  readFileSync,
   readdirSync,
+  readFileSync,
   writeFileSync,
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
-  EMPTY_BASELINE,
   adoptedBaseline,
-  baselineFindings,
   baselinedFiles,
+  baselineFindings,
+  EMPTY_BASELINE,
   hasGrown,
   prunedBaseline,
   readableBaseline,
 } from './adr-baseline.mjs';
 import {
-  REPOSITORY_SCOPE,
   adrBody,
   governedBy,
   recordFindings,
+  REPOSITORY_SCOPE,
 } from './adr-content.mjs';
 import {
   ADR_HOMES,
-  DRAFT_DIR,
-  NON_ADR_FILES,
   adrFindings,
   commandsFor,
+  DRAFT_DIR,
   headingNumber,
   headingTitle,
-  looksLikeAdr,
+  isAdrFilename,
   nextFreeNumber,
+  NON_ADR_FILES,
   normalizeIndex,
   renderGoverned,
   renderIndex,
@@ -136,7 +136,9 @@ const walkStrays = (dir, prefix = '') => {
         ? []
         : walkStrays(join(dir, entry.name), path);
     }
-    return looksLikeAdr(entry.name) && entry.name.endsWith('.md') ? [path] : [];
+    return isAdrFilename(entry.name) && entry.name.endsWith('.md')
+      ? [path]
+      : [];
   });
 };
 
@@ -273,11 +275,11 @@ const runWrite = (homes, records) => {
 
   const pruned = prunedBaseline({ baseline, records });
   const dropped = baseline.files.length - pruned.files.length;
-  const tightened = pruned.maxEntries !== baseline.maxEntries;
+  const isTightened = pruned.maxEntries !== baseline.maxEntries;
   if (existsSync(BASELINE_PATH)) {
     saveBaseline(pruned);
     console.log(
-      dropped === 0 && !tightened
+      dropped === 0 && !isTightened
         ? `${BASELINE_REL} unchanged — every grandfathered record still needs it.`
         : `${BASELINE_REL} rewritten: ${dropped} record(s) no longer need grandfathering; it may now hold at most ${pruned.maxEntries}.`,
     );
@@ -298,7 +300,7 @@ const packageArg = (argv) => {
     (arg) => arg === PACKAGE_FLAG || arg.startsWith(`${PACKAGE_FLAG}=`),
   );
   if (at === -1) {
-    return undefined;
+    return;
   }
   if (argv[at] !== PACKAGE_FLAG) {
     return argv[at].slice(PACKAGE_FLAG.length + 1);

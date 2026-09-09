@@ -26,18 +26,18 @@ import {
 } from './config.mjs';
 import {
   declaredDependencies,
+  inferRunner,
   initFailure,
+  initialConfig,
   initRefusal,
   initSummary,
-  inferRunner,
-  initialConfig,
-  recordsDefaultBranch,
-  upgradeKeptCiSetup,
-  upgradeKeptCommands,
+  isDefaultBranchRecorded,
   placedHooksPath,
   scriptsAfter,
   tasksFor,
   unmetCommandKeys,
+  upgradeKeptCiSetup,
+  upgradeKeptCommands,
 } from './init.mjs';
 import { MANIFEST_FILE } from './manifest.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
@@ -99,7 +99,11 @@ const writeConfig = ({ profile, root, upgrade, userAgent }) => {
           ...upgradeKeptCiSetup({ ciSetup: runner.ciSetup, existing }),
         ]
       : [],
-    recordedTrunk: recordsDefaultBranch({ defaultBranch, existing, upgrade }),
+    recordedTrunk: isDefaultBranchRecorded({
+      defaultBranch,
+      existing,
+      upgrade,
+    }),
   };
 };
 

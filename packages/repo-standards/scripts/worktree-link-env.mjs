@@ -50,7 +50,8 @@ const git = (args, cwd) => {
 const isNestedCheckout = (dir) => existsSync(join(dir, '.git'));
 
 const findEnvFiles = (root, current = root, found = []) => {
-  for (const entry of readdirSync(current, { withFileTypes: true })) {
+  const entries = readdirSync(current, { withFileTypes: true });
+  for (const entry of entries) {
     const full = join(current, entry.name);
     if (entry.isDirectory()) {
       if (!SKIPPED_DIRS.has(entry.name) && !isNestedCheckout(full)) {
@@ -76,7 +77,7 @@ const keepIgnored = (root, relPaths) => {
   );
 };
 
-const linkOne = ({ sourceRoot, targetRoot, relPath, dryRun }) => {
+const linkOne = ({ dryRun, relPath, sourceRoot, targetRoot }) => {
   const destination = join(targetRoot, relPath);
   if (lstatSync(destination, { throwIfNoEntry: false })) {
     return { relPath, status: 'exists' };
@@ -88,7 +89,7 @@ const linkOne = ({ sourceRoot, targetRoot, relPath, dryRun }) => {
 };
 
 const main = () => {
-  const { target, dryRun } = parseArgs(process.argv.slice(2), process.cwd());
+  const { dryRun, target } = parseArgs(process.argv.slice(2), process.cwd());
   const primaryRoot = dirname(
     resolve(target, git(['rev-parse', '--git-common-dir'], target)),
   );
@@ -108,7 +109,7 @@ const main = () => {
   }
 
   const results = candidates.map((relPath) =>
-    linkOne({ sourceRoot: primaryRoot, targetRoot, relPath, dryRun }),
+    linkOne({ dryRun, relPath, sourceRoot: primaryRoot, targetRoot }),
   );
   for (const { relPath, status } of results) {
     process.stdout.write(`  ${status.padEnd(10)} ${relPath}\n`);

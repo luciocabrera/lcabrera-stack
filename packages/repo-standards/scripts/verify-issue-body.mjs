@@ -25,8 +25,8 @@ import { fileURLToPath } from 'node:url';
 
 import { flagValue } from './cli-input.mjs';
 import { validateIssueBody } from './commit-convention.mjs';
-import { readTextWithin } from './safe-read.mjs';
 import { resolveHostRoot } from './host-root.mjs';
+import { readTextWithin } from './safe-read.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),

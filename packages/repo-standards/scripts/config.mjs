@@ -16,6 +16,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { DEFAULT_TREE_GATES, resolveTreeGates } from './config-tree-gates.mjs';
 import {
   CONFIG_FILE_NAME,
   containedList,
@@ -26,12 +27,7 @@ import {
   repoRelative,
   verbatimList,
 } from './config-values.mjs';
-import { DEFAULT_TREE_GATES, resolveTreeGates } from './config-tree-gates.mjs';
 import { resolveHostRoot } from './host-root.mjs';
-
-// Re-exported rather than moved out of reach: `CONFIG_FILE_NAME` is part of this
-// package's published surface, and gates name the file in their own messages.
-export { CONFIG_FILE_NAME };
 
 export const DEFAULT_ADR_COMMANDS = {
   list: 'npx repo-verify-adrs --list',
@@ -41,6 +37,11 @@ export const DEFAULT_ADR_COMMANDS = {
 
 export const DEFAULT_REGISTERS = {
   adrCommands: DEFAULT_ADR_COMMANDS,
+  // Alongside the other two baselines rather than inside this file: it is a
+  // list of the consumer's own filenames, and a register of policy is not where
+  // a file list belongs.
+  adrContentBaseline: 'scripts/adr-content-baseline.json',
+  adrDraftDir: 'docs/agents/planning/adr-drafts',
   // Empty for the same reason as `publicPackageDirs`: an overlap is the
   // repository's own history, and a default carrying one exempts numbers a
   // consumer never duplicated — which is a number the gate lets mean two things.
@@ -53,11 +54,6 @@ export const DEFAULT_REGISTERS = {
       title: 'Architecture decisions',
     },
   ],
-  // Alongside the other two baselines rather than inside this file: it is a
-  // list of the consumer's own filenames, and a register of policy is not where
-  // a file list belongs.
-  adrContentBaseline: 'scripts/adr-content-baseline.json',
-  adrDraftDir: 'docs/agents/planning/adr-drafts',
   adrTemplateHome: 'docs/decisions',
   coordinationBoardDoc: 'docs/coordination/BOARD.md',
   coordinationTasksDir: 'docs/coordination/tasks',
@@ -95,7 +91,7 @@ export const resolveConventions = (raw) => {
   };
 };
 
-const readableHome = (home) =>
+const isReadableHome = (home) =>
   typeof home === 'object' &&
   home !== null &&
   typeof home.dir === 'string' &&
@@ -124,19 +120,15 @@ export const resolveRegisters = (raw) => {
   const parsed = parseConfig(raw);
   const block = isPlainObject(parsed.registers) ? parsed.registers : {};
   const homes = Array.isArray(block.adrHomes)
-    ? block.adrHomes.filter(readableHome).map(containedHome)
+    ? block.adrHomes
+        .filter((entry) => isReadableHome(entry))
+        .map((value) => containedHome(value))
     : [];
   const adrCommands = resolveAdrCommands(block.adrCommands);
   const declaredHomes = homes.length > 0 ? homes : DEFAULT_REGISTERS.adrHomes;
 
   return {
     adrCommands,
-    adrGrandfatheredDuplicates: Array.isArray(block.adrGrandfatheredDuplicates)
-      ? block.adrGrandfatheredDuplicates.filter(
-          (value) => Number.isInteger(value) && value > 0,
-        )
-      : DEFAULT_REGISTERS.adrGrandfatheredDuplicates,
-    adrHomes: declaredHomes.map((home) => ({ ...home, commands: adrCommands })),
     adrContentBaseline: repoRelative(
       block.adrContentBaseline,
       DEFAULT_REGISTERS.adrContentBaseline,
@@ -147,6 +139,12 @@ export const resolveRegisters = (raw) => {
       DEFAULT_REGISTERS.adrDraftDir,
       'registers.adrDraftDir',
     ),
+    adrGrandfatheredDuplicates: Array.isArray(block.adrGrandfatheredDuplicates)
+      ? block.adrGrandfatheredDuplicates.filter(
+          (value) => Number.isSafeInteger(value) && value > 0,
+        )
+      : DEFAULT_REGISTERS.adrGrandfatheredDuplicates,
+    adrHomes: declaredHomes.map((home) => ({ ...home, commands: adrCommands })),
     adrTemplateHome: repoRelative(
       block.adrTemplateHome,
       DEFAULT_REGISTERS.adrTemplateHome,
@@ -176,18 +174,6 @@ export const resolveRegisters = (raw) => {
 };
 
 export const DEFAULT_GATES = {
-  scriptSize: {
-    baselineFile: 'scripts/script-size-baseline.json',
-    ceiling: 350,
-    guideDoc: '',
-    skipDirs: [],
-  },
-  strayConfigs: {
-    configuredIn: '',
-    skipDirs: [],
-    unreadNames: [],
-    unreadPrefixes: [],
-  },
   docsPaths: {
     baselineFile: 'scripts/docs-paths-baseline.json',
     expectedAbsent: [],
@@ -195,6 +181,12 @@ export const DEFAULT_GATES = {
     ignoredDocs: [],
     onDemandReportDirs: [],
     repoRoots: [],
+  },
+  scriptSize: {
+    baselineFile: 'scripts/script-size-baseline.json',
+    ceiling: 350,
+    guideDoc: '',
+    skipDirs: [],
   },
   // The conventional monorepo layout, so a repository that follows it
   // configures nothing. Unlike the exemption lists above, this one is the
@@ -205,6 +197,12 @@ export const DEFAULT_GATES = {
   // as a clean pass.
   shippedDocs: {
     repoOnlyDirs: ['apps', 'docs', 'packages', 'scripts'],
+  },
+  strayConfigs: {
+    configuredIn: '',
+    skipDirs: [],
+    unreadNames: [],
+    unreadPrefixes: [],
   },
   ...DEFAULT_TREE_GATES,
 };
@@ -221,48 +219,6 @@ export const resolveGates = (raw) => {
   const shippedDocs = isPlainObject(block.shippedDocs) ? block.shippedDocs : {};
 
   return {
-    scriptSize: {
-      baselineFile: repoRelative(
-        scriptSize.baselineFile,
-        DEFAULT_GATES.scriptSize.baselineFile,
-        'gates.scriptSize.baselineFile',
-      ),
-      ceiling: positiveInteger(
-        scriptSize.ceiling,
-        DEFAULT_GATES.scriptSize.ceiling,
-        'gates.scriptSize.ceiling',
-      ),
-      guideDoc: readableString(
-        scriptSize.guideDoc,
-        DEFAULT_GATES.scriptSize.guideDoc,
-      ),
-      skipDirs: verbatimList(
-        scriptSize.skipDirs,
-        DEFAULT_GATES.scriptSize.skipDirs,
-        'gates.scriptSize.skipDirs[]',
-      ),
-    },
-    strayConfigs: {
-      configuredIn: readableString(
-        strayConfigs.configuredIn,
-        DEFAULT_GATES.strayConfigs.configuredIn,
-      ),
-      skipDirs: verbatimList(
-        strayConfigs.skipDirs,
-        DEFAULT_GATES.strayConfigs.skipDirs,
-        'gates.strayConfigs.skipDirs[]',
-      ),
-      unreadNames: verbatimList(
-        strayConfigs.unreadNames,
-        DEFAULT_GATES.strayConfigs.unreadNames,
-        'gates.strayConfigs.unreadNames[]',
-      ),
-      unreadPrefixes: verbatimList(
-        strayConfigs.unreadPrefixes,
-        DEFAULT_GATES.strayConfigs.unreadPrefixes,
-        'gates.strayConfigs.unreadPrefixes[]',
-      ),
-    },
     docsPaths: {
       baselineFile: repoRelative(
         docsPaths.baselineFile,
@@ -295,11 +251,53 @@ export const resolveGates = (raw) => {
         'gates.docsPaths.repoRoots[]',
       ),
     },
+    scriptSize: {
+      baselineFile: repoRelative(
+        scriptSize.baselineFile,
+        DEFAULT_GATES.scriptSize.baselineFile,
+        'gates.scriptSize.baselineFile',
+      ),
+      ceiling: positiveInteger(
+        scriptSize.ceiling,
+        DEFAULT_GATES.scriptSize.ceiling,
+        'gates.scriptSize.ceiling',
+      ),
+      guideDoc: readableString(
+        scriptSize.guideDoc,
+        DEFAULT_GATES.scriptSize.guideDoc,
+      ),
+      skipDirs: verbatimList(
+        scriptSize.skipDirs,
+        DEFAULT_GATES.scriptSize.skipDirs,
+        'gates.scriptSize.skipDirs[]',
+      ),
+    },
     shippedDocs: {
       repoOnlyDirs: verbatimList(
         shippedDocs.repoOnlyDirs,
         DEFAULT_GATES.shippedDocs.repoOnlyDirs,
         'gates.shippedDocs.repoOnlyDirs[]',
+      ),
+    },
+    strayConfigs: {
+      configuredIn: readableString(
+        strayConfigs.configuredIn,
+        DEFAULT_GATES.strayConfigs.configuredIn,
+      ),
+      skipDirs: verbatimList(
+        strayConfigs.skipDirs,
+        DEFAULT_GATES.strayConfigs.skipDirs,
+        'gates.strayConfigs.skipDirs[]',
+      ),
+      unreadNames: verbatimList(
+        strayConfigs.unreadNames,
+        DEFAULT_GATES.strayConfigs.unreadNames,
+        'gates.strayConfigs.unreadNames[]',
+      ),
+      unreadPrefixes: verbatimList(
+        strayConfigs.unreadPrefixes,
+        DEFAULT_GATES.strayConfigs.unreadPrefixes,
+        'gates.strayConfigs.unreadPrefixes[]',
       ),
     },
     ...resolveTreeGates(block),
@@ -373,3 +371,7 @@ export const readCoordinationPaths = (root = hostRoot()) => {
     tasksRel: coordinationTasksDir,
   };
 };
+
+// Re-exported rather than moved out of reach: `CONFIG_FILE_NAME` is part of this
+// package's published surface, and gates name the file in their own messages.
+export { CONFIG_FILE_NAME } from './config-values.mjs';

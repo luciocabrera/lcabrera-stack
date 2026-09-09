@@ -4,7 +4,7 @@ import {
   initialConfig,
   initRefusal,
   initSummary,
-  recordsDefaultBranch,
+  isDefaultBranchRecorded,
   upgradeKeptCiSetup,
   upgradeKeptCommands,
 } from './init.mjs';
@@ -184,6 +184,17 @@ describe('upgradeKeptCiSetup', () => {
 
 // The two halves must ask the same question. Keyed differently, a `ci` block
 // with no `setup` was neither written nor reported: `devkit init --upgrade &&
+const summary = ({ recordedTrunk = false, upgrade }) =>
+  initSummary({
+    added: [],
+    defaultBranch: 'main',
+    profile: 'full',
+    recordedTrunk,
+    runner: 'vite-plus',
+    skipped: [],
+    upgrade,
+    written: 0,
+  });
 // devkit sync` reported success, the placeholder was deleted from every
 // workflow, and every job failed at {{commands.install}} with exit 127.
 describe('a ci block that carries no setup key', () => {
@@ -207,10 +218,10 @@ describe('a ci block that carries no setup key', () => {
   });
 });
 
-describe('recordsDefaultBranch', () => {
+describe('isDefaultBranchRecorded', () => {
   test('records when an upgrade finds no trunk recorded', () => {
     expect(
-      recordsDefaultBranch({
+      isDefaultBranchRecorded({
         defaultBranch: 'fix/123-take-devkit-0.2.0',
         existing: { conventions: { sharedBranchesDir: 'docs/branches' } },
         upgrade: true,
@@ -220,7 +231,7 @@ describe('recordsDefaultBranch', () => {
 
   test('leaves a trunk the consumer already recorded', () => {
     expect(
-      recordsDefaultBranch({
+      isDefaultBranchRecorded({
         defaultBranch: 'fix/123-take-devkit-0.2.0',
         existing: settled,
         upgrade: true,
@@ -229,11 +240,11 @@ describe('recordsDefaultBranch', () => {
   });
 
   test('records on a fresh init', () => {
-    expect(recordsDefaultBranch({ defaultBranch: 'main' })).toBe(true);
+    expect(isDefaultBranchRecorded({ defaultBranch: 'main' })).toBe(true);
   });
 
   test('records nothing when the branch could not be read', () => {
-    expect(recordsDefaultBranch({ defaultBranch: '' })).toBe(false);
+    expect(isDefaultBranchRecorded({ defaultBranch: '' })).toBe(false);
   });
 
   test('agrees with what initialConfig wrote', () => {
@@ -246,23 +257,11 @@ describe('recordsDefaultBranch', () => {
       initialConfig({ ...args, commands: INFERRED, profile: 'full' })
         .conventions.defaultBranch,
     ).toBe('fix/123-take-devkit-0.2.0');
-    expect(recordsDefaultBranch(args)).toBe(true);
+    expect(isDefaultBranchRecorded(args)).toBe(true);
   });
 });
 
 describe('initSummary under --upgrade', () => {
-  const summary = ({ recordedTrunk = false, upgrade }) =>
-    initSummary({
-      added: [],
-      defaultBranch: 'main',
-      profile: 'full',
-      recordedTrunk,
-      runner: 'vite-plus',
-      skipped: [],
-      upgrade,
-      written: 0,
-    });
-
   test('does not claim commands were inferred', () => {
     expect(summary({ upgrade: true })).toContain('kept as you wrote it');
     expect(summary({ upgrade: true })).not.toContain('were inferred');

@@ -14,10 +14,9 @@
  * exactly the substitution pnpm applies at pack time, which `repo-verify-publish`
  * independently validates — so no package manager subprocess is needed.
  */
+import { checkPackage, Package } from '@arethetypeswrong/core';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
-
-import { checkPackage, Package } from '@arethetypeswrong/core';
 
 const RELEVANT_RESOLUTION_KINDS = new Set(['bundler', 'node16-esm']);
 
@@ -36,7 +35,8 @@ const buildInstalledPackage = (packageDirectory) => {
 
   const root = `/node_modules/${manifest.name}`;
   const files = { [`${root}/package.json`]: JSON.stringify(published) };
-  for (const file of listFilesRecursively(join(packageDirectory, 'dist'))) {
+  const built = listFilesRecursively(join(packageDirectory, 'dist'));
+  for (const file of built) {
     files[`${root}/${relative(packageDirectory, file)}`] = readFileSync(
       file,
       'utf8',

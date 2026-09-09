@@ -62,8 +62,9 @@ export const workflowTriggers = (source) => {
     );
   }
   const triggers = new Set();
-  for (const line of lines.slice(start + 1)) {
-    if (line.trim() === '' || line.trim().startsWith('#')) {
+  const rest = lines.slice(start + 1);
+  for (const line of rest) {
+    if (line.trim() === '' || line.trimStart().startsWith('#')) {
       continue;
     }
     if (indentOf(line) === 0) {
@@ -108,7 +109,10 @@ export const runStepBodies = (source) => {
 };
 
 export const commandsIn = (text) =>
-  [...text.matchAll(/vp run ([a-z][\w:-]*)/g)].map(([, task]) => task);
+  text
+    .matchAll(/vp run ([a-z][\w:-]*)/g)
+    .map(([, task]) => task)
+    .toArray();
 
 export const commandsRunByCi = ({ rootScripts, workflows }) => {
   const gating = workflows.filter((workflow) =>
@@ -125,11 +129,11 @@ export const commandsRunByCi = ({ rootScripts, workflows }) => {
   const pending = [...run];
   while (pending.length > 0) {
     const task = pending.pop();
-    for (const chained of commandsIn(scripts.get(task) ?? '')) {
-      if (!run.has(chained)) {
-        run.add(chained);
-        pending.push(chained);
-      }
+    const chainedCommands = commandsIn(scripts.get(task) ?? '');
+    const fresh = chainedCommands.filter((chained) => !run.has(chained));
+    for (const chained of fresh) {
+      run.add(chained);
+      pending.push(chained);
     }
   }
   return run;

@@ -51,17 +51,17 @@ const main = async () => {
   const graph = readWorkspaceGraph(REPO_ROOT);
   const { globalPackages, lintOnlyPatterns } =
     readGates(REPO_ROOT).affectedTests;
-  const { mode, packages, changed } = resolveAffected({
+  const { changed, mode, packages } = resolveAffected({
     files,
     globalPackages,
     graph,
     lintOnlyPatterns,
   });
-  const groups = packages.length === 0 ? [] : [{ task, packages }];
+  const groups = packages.length === 0 ? [] : [{ packages, task }];
   const dispositions = workspaceDispositions({
-    graph,
     affected: packages,
     changed,
+    graph,
     groups,
   });
 
@@ -73,7 +73,7 @@ const main = async () => {
     return;
   }
 
-  printReport({ label: `${task}:changed`, verb: task, mode, dispositions });
+  printReport({ dispositions, label: `${task}:changed`, mode, verb: task });
 
   if (groups.length === 0) {
     process.stdout.write(`Nothing to ${task}.\n`);

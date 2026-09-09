@@ -53,7 +53,6 @@ const cycleFrom = (start, edges, settled) => {
       stack.push({ id: next, rest: [...(edges.get(next) ?? [])] });
     }
   }
-  return undefined;
 };
 
 export const cycleFindings = (entries) => {

@@ -32,7 +32,7 @@ const EXPORT_NAME =
   /^[ \t]*export[ \t]+(?:const|(?:async[ \t]+)?function)[ \t]+([A-Za-z_$][\w$]*)/gm;
 
 export const exportedSymbolNames = (source) => [
-  ...new Set([...source.matchAll(EXPORT_NAME)].map(([, name]) => name)),
+  ...new Set(source.matchAll(EXPORT_NAME).map(([, name]) => name)),
 ];
 
 export const isDocumented = (inventoryText, symbol) =>
@@ -54,11 +54,11 @@ export const toBaseline = (findings) => {
     byFile.set(file, symbols);
   }
   return Object.fromEntries(
-    [...byFile.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
+    [...byFile]
+      .toSorted(([a], [b]) => a.localeCompare(b))
       .map(([file, symbols]) => [
         file,
-        [...new Set(symbols)].sort((a, b) => a.localeCompare(b)),
+        [...new Set(symbols)].toSorted((a, b) => a.localeCompare(b)),
       ]),
   );
 };

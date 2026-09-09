@@ -13,11 +13,10 @@
  * gate exists to check is pnpm's, so no other packer answers the question. It
  * must therefore be run from a context that has pnpm on PATH.
  */
+import { createPackageFromTarballData } from '@arethetypeswrong/core';
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { delimiter, join } from 'node:path';
-
-import { createPackageFromTarballData } from '@arethetypeswrong/core';
 
 const pnpmBinary = () =>
   (process.env.PATH ?? '')
@@ -57,7 +56,7 @@ const readPackedPackage = (tarballPath) => {
   const root = `/node_modules/${packed.packageName}/`;
   return {
     files: packed.listFiles().map((path) => path.slice(root.length)),
-    manifest: JSON.parse(packed.readFile(`${root}package.json`)),
+    manifest: JSON.parse(packed.readFile(`${root}package.json`, 'utf8')),
     name: packed.packageName,
     readFile: (relativePath) => packed.readFile(`${root}${relativePath}`),
   };

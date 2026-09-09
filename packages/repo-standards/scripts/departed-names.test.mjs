@@ -4,8 +4,8 @@ import {
   departedPathReferences,
   departedReferences,
   formatFinding,
-  isCheckedFile,
   formatPathFinding,
+  isCheckedFile,
   parseRoster,
   regularFiles,
   staleAllowances,
@@ -154,10 +154,9 @@ describe('formatFinding', () => {
     );
   });
 });
+const entry = (mode, path) => `${mode} abc123 0\t${path}`;
 
 describe('regularFiles', () => {
-  const entry = (mode, path) => `${mode} abc123 0\t${path}`;
-
   it('keeps a regular file', () => {
     expect(regularFiles(`${entry('100644', 'a.md')}\0`)).toEqual(['a.md']);
   });
@@ -196,7 +195,7 @@ describe('staleAllowances', () => {
     expect(
       staleAllowances({
         allow,
-        seen: new Set(['a.md\u0000Oldprod']),
+        seen: new Set(['a.md\u{0}Oldprod']),
         walked: new Set(['a.md']),
       }),
     ).toEqual([]);

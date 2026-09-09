@@ -52,13 +52,13 @@ const isUnresolvable = (token) =>
 
 export const proseLines = (text) => {
   const lines = [];
-  let fenced = false;
+  let isFenced = false;
   let number = 0;
   for (const line of text.split('\n')) {
     number += 1;
     if (FENCE.test(line)) {
-      fenced = !fenced;
-    } else if (!fenced) {
+      isFenced = !isFenced;
+    } else if (!isFenced) {
       lines.push({ number, text: line });
     }
   }
@@ -67,10 +67,13 @@ export const proseLines = (text) => {
 
 const linkTargets = (lines) =>
   lines.flatMap(({ number, text }) =>
-    [...text.matchAll(LINK)].map((match) => ({
-      number,
-      target: normaliseToken(match[1]),
-    })),
+    text
+      .matchAll(LINK)
+      .map((match) => ({
+        number,
+        target: normaliseToken(match[1]),
+      }))
+      .toArray(),
   );
 
 const resolveTarget = ({ docPath, target }) => {
@@ -102,15 +105,14 @@ const linkFindings = ({ docPath, holds, lines }) =>
 const repoAnchored = ({ holds, repoOnlyDirs, token }) =>
   !isUnresolvable(token) &&
   token.includes('/') &&
-  repoOnlyDirs.includes(token.split('/')[0]) &&
+  repoOnlyDirs.includes(token.split('/', 1)[0]) &&
   !holds(token.endsWith('/') ? token.slice(0, -1) : token);
 
 const repoPathFindings = ({ docPath, holds, lines, repoOnlyDirs }) => {
   const candidates = lines.flatMap(({ number, text }) =>
-    [
-      ...inlineCodeTokens(text),
-      ...[...text.matchAll(LINK)].map((m) => m[1]),
-    ].map((raw) => ({ number, token: normaliseToken(raw) })),
+    [...inlineCodeTokens(text), ...text.matchAll(LINK).map((m) => m[1])].map(
+      (raw) => ({ number, token: normaliseToken(raw) }),
+    ),
   );
 
   const seen = new Set();
@@ -167,7 +169,6 @@ export const packageFindings = ({ files, name, readFile, repoOnlyDirs }) => {
 
   return {
     documents,
-    name,
     findings: documents.flatMap((docPath) =>
       documentFindings({
         docPath,
@@ -176,6 +177,7 @@ export const packageFindings = ({ files, name, readFile, repoOnlyDirs }) => {
         text: readFile(docPath),
       }).map((detail) => `${name}: ${detail}`),
     ),
+    name,
   };
 };
 

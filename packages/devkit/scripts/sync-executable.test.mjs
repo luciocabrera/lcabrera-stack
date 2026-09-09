@@ -19,7 +19,6 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { describe, expect, test, vi } from 'vite-plus/test';
 
 import { runDoctor, runSync } from './command-sync.mjs';

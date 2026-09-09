@@ -74,16 +74,16 @@ const lintProbe = (workspace, target) => {
 };
 
 const FAILURE_HINT = {
-  'no-binary':
-    `no eslint binary at \`node_modules/.bin/eslint\`. Run \`vp install\`.\n` +
-    `  Reported separately because a probe that cannot spawn produces the same\n` +
-    `  empty output as a rule that threw, and would otherwise be misread as #472.`,
   crashed:
     `a rule threw, so the pass checked nothing. Run\n` +
     `  vp run -r lint:eslint:check\n` +
     `  and read the TypeError. If it names \`isExternalModuleNameRelative\`, the\n` +
     `  \`packageExtensions\` entry for eslint-plugin-perfectionist in\n` +
     `  pnpm-workspace.yaml has been lost or overridden (#472).`,
+  'no-binary':
+    `no eslint binary at \`node_modules/.bin/eslint\`. Run \`vp install\`.\n` +
+    `  Reported separately because a probe that cannot spawn produces the same\n` +
+    `  empty output as a rule that threw, and would otherwise be misread as #472.`,
   silent:
     `the pass ran but never reported \`${PROBE_RULE}\` for a deliberately\n` +
     `  misordered import, so the rule is not loaded. Check the shared eslint\n` +

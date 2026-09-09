@@ -46,26 +46,26 @@ const HEADER_MAX = 100;
 const HEADER_SOFT = 72;
 
 const CROSSCUTTING_SCOPES = new Set([
-  'ci',
+  'agents',
+  'biome',
   'build',
+  'ci',
+  'config',
+  'coordination',
+  'db',
   'deps',
   'deps-dev',
-  'release',
   'docs',
-  'agents',
+  'eslint',
+  'hooks',
+  'oxlint',
+  'release',
   'repo',
   'scripts',
-  'tooling',
-  'coordination',
-  'biome',
-  'sonar',
-  'eslint',
-  'oxlint',
   'showcase',
-  'db',
-  'config',
+  'sonar',
+  'tooling',
   'workflow',
-  'hooks',
 ]);
 
 const REQUIRED_PR_SECTIONS = [
@@ -157,13 +157,13 @@ const parseCommitMessage = (raw) => {
   while (kept.length > 0 && kept.at(-1).trim() === '') {
     kept.pop();
   }
-  return { header: kept[0], body: kept.slice(1).join('\n') };
+  return { body: kept.slice(1).join('\n'), header: kept[0] };
 };
 
 const shouldSkip = (header) =>
   header !== undefined && SKIP_PATTERNS.some((re) => re.test(header));
 
-const scopeRoot = (part) => part.split('/')[0];
+const scopeRoot = (part) => part.split('/', 1)[0];
 
 const isRecognizedScope = (part, workspaces) => {
   const root = scopeRoot(part);
@@ -175,7 +175,7 @@ const isRecognizedScope = (part, workspaces) => {
 };
 
 const sampleWorkspaces = (workspaces) => {
-  const names = [...workspaces].sort((a, b) => a.localeCompare(b));
+  const names = [...workspaces].toSorted((a, b) => a.localeCompare(b));
   return names.length > 4
     ? `${names.slice(0, 4).join(', ')}, …`
     : names.join(', ');
@@ -243,7 +243,7 @@ const validateLength = (header) => {
   return { errors: [], warnings: [] };
 };
 
-const validateHeader = (header, { workspaces, kind }) => {
+const validateHeader = (header, { kind, workspaces }) => {
   const match = HEADER_RE.exec(header ?? '');
   if (match === null) {
     return {
@@ -254,7 +254,7 @@ const validateHeader = (header, { workspaces, kind }) => {
       warnings: [],
     };
   }
-  const { type, scope, subject } = match.groups;
+  const { scope, subject, type } = match.groups;
   const errors = [];
   const warnings = [];
   if (type !== type.toLowerCase() || !ALLOWED_TYPES.includes(type)) {
@@ -277,12 +277,12 @@ export const parseCommitHeader = (header) => {
   if (match === null) {
     return null;
   }
-  const { type, scope, breaking, subject } = match.groups;
+  const { breaking, scope, subject, type } = match.groups;
   return {
-    type: type.toLowerCase(),
-    scope,
     breaking: breaking === '!',
+    scope,
     subject,
+    type: type.toLowerCase(),
   };
 };
 
@@ -290,22 +290,22 @@ export const validateCommitMessage = (raw, { workspaces }) => {
   const { header } = parseCommitMessage(raw);
   if (header === undefined) {
     return {
-      skipped: false,
       errors: ['commit message is empty.'],
+      skipped: false,
       warnings: [],
     };
   }
   if (shouldSkip(header)) {
-    return { skipped: true, errors: [], warnings: [] };
+    return { errors: [], skipped: true, warnings: [] };
   }
   return {
     skipped: false,
-    ...validateHeader(header, { workspaces, kind: 'commit message' }),
+    ...validateHeader(header, { kind: 'commit message', workspaces }),
   };
 };
 
 export const validatePrTitle = (title, { workspaces }) =>
-  validateHeader(title, { workspaces, kind: 'PR title' });
+  validateHeader(title, { kind: 'PR title', workspaces });
 
 export const validatePrBody = (body) => {
   const errors = [];

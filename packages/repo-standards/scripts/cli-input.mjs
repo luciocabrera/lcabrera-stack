@@ -20,7 +20,7 @@ export const positional = (index, argv = process.argv) =>
 
 export const flagValue = (name, argv = process.argv) => {
   const index = argv.indexOf(name);
-  if (index === -1) return undefined;
+  if (index === -1) return;
   const next = argv[index + 1];
   return next === '--' ? argv[index + 2] : next;
 };
@@ -70,9 +70,6 @@ export const readStdin = async (stream = process.stdin) => {
   if (stream.isTTY) {
     return '';
   }
-  const chunks = [];
-  for await (const chunk of stream) {
-    chunks.push(chunk);
-  }
+  const chunks = await Array.fromAsync(stream);
   return Buffer.concat(chunks).toString('utf8');
 };

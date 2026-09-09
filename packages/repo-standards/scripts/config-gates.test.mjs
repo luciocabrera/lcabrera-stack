@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { DEFAULT_GATES, resolveGates } from './config.mjs';
+const gates = (block) => resolveGates(JSON.stringify({ gates: block }));
 
 // Its own file rather than a section of `config.test.mjs`: that file crossed the
 // script-size ceiling the moment these landed, and the gate that caught it is
 // one of the three this family moved.
 
 describe('resolveGates', () => {
-  const gates = (block) => resolveGates(JSON.stringify({ gates: block }));
-
   it('an absent config is the documented default, not an error', () => {
     expect(resolveGates(undefined)).toEqual(DEFAULT_GATES);
   });

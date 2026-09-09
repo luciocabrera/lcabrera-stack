@@ -16,16 +16,16 @@
  * Exit codes: 0 = written, 1 = bad arguments, an occupied path, or a template
  * that no longer has a heading to fill in.
  */
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
   ADR_HOMES,
+  nextFreeNumber,
   NON_ADR_FILES,
   TEMPLATE_FILE,
   TEMPLATE_HOME,
-  nextFreeNumber,
 } from './adr-registry.mjs';
 import {
   adrFilename,
@@ -45,24 +45,43 @@ const TIERS = ADR_HOMES.map((home) => home.tier);
 
 const USAGE = `usage: repo-adr "<title>" [--home ${TIERS.join('|')}] [--slug <slug>] [--dry-run]`;
 
-const parseArgs = (argv) => {
-  const options = { dryRun: false, home: 'repo', slug: '', title: '' };
-  const rest = argv.filter((arg) => arg !== '--');
-  while (rest.length > 0) {
-    const arg = rest.shift();
-    if (arg === '--dry-run') {
-      options.dryRun = true;
-    } else if (arg === '--home') {
-      options.home = rest.shift() ?? '';
-    } else if (arg === '--slug') {
-      options.slug = rest.shift() ?? '';
-    } else if (arg.startsWith('--')) {
-      throw new Error(`unknown flag: ${arg}\n${USAGE}`);
-    } else if (options.title === '') {
-      options.title = arg;
-    } else {
-      throw new Error(`unexpected argument: ${arg}\n${USAGE}`);
+const positional = ({ arg, options }) => {
+  if (arg.startsWith('--')) {
+    throw new Error(`unknown flag: ${arg}\n${USAGE}`);
+  }
+  if (options.title !== '') {
+    throw new Error(`unexpected argument: ${arg}\n${USAGE}`);
+  }
+  return { ...options, title: arg };
+};
+
+const VALUE_FLAGS = new Set(['--home', '--slug']);
+
+const applyArg = ({ arg, next, options }) => {
+  switch (arg) {
+    case '--dry-run': {
+      return { ...options, dryRun: true };
     }
+    case '--home': {
+      return { ...options, home: next ?? '' };
+    }
+    case '--slug': {
+      return { ...options, slug: next ?? '' };
+    }
+    default: {
+      return positional({ arg, options });
+    }
+  }
+};
+
+const parseArgs = (argv) => {
+  const rest = argv.filter((arg) => arg !== '--');
+  let options = { dryRun: false, home: 'repo', slug: '', title: '' };
+  let index = 0;
+  while (index < rest.length) {
+    const arg = rest[index];
+    options = applyArg({ arg, next: rest[index + 1], options });
+    index += VALUE_FLAGS.has(arg) ? 2 : 1;
   }
   return options;
 };

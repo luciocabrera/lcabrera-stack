@@ -29,12 +29,12 @@ describe('renderSurface', () => {
 
   it('renders deterministically regardless of input key order', () => {
     const shuffled = {
-      './c/empty': {},
-      './b/types': {
-        Baz: '[type] "x" | "y"',
-        Bar: '[type] { readonly a: number; }',
-      },
       './a/first.util': { foo: '[const] (x: string) => void' },
+      './b/types': {
+        Bar: '[type] { readonly a: number; }',
+        Baz: '[type] "x" | "y"',
+      },
+      './c/empty': {},
     };
     expect(
       renderSurface({ packageName: '@lcabrera/x', surface: shuffled }),

@@ -1,15 +1,11 @@
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
+import { afterAll, describe, expect, it } from 'vite-plus/test';
 
 import { writeTextWithin } from './safe-write.mjs';
 
-let root;
-
-beforeAll(() => {
-  root = resolve(mkdtempSync(join(tmpdir(), 'safe-write-')));
-});
+const root = resolve(mkdtempSync(join(tmpdir(), 'safe-write-')));
 
 afterAll(() => {
   rmSync(root, { force: true, recursive: true });

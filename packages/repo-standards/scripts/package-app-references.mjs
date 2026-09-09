@@ -36,9 +36,11 @@ const numberedLines = (path, text) =>
 
 export const appReferences = ({ exists, path, text }) =>
   numberedLines(path, text).flatMap((line) =>
-    [...line.text.matchAll(APP_PATH)]
+    line.text
+      .matchAll(APP_PATH)
       .map((match) => ({ line: line.number, path, reference: match[0] }))
-      .filter(({ reference }) => exists(reference)),
+      .filter(({ reference }) => exists(reference))
+      .toArray(),
   );
 
 export const formatFinding = ({ line, path, reference }) =>

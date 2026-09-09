@@ -10,7 +10,7 @@
 
 const fs = require('node:fs');
 
-const { KINDS, collectArtifacts } = require('./conformance-artifacts.cjs');
+const { collectArtifacts, KINDS } = require('./conformance-artifacts.cjs');
 const { contractFindings } = require('./conformance-contract.cjs');
 const { referenceFindings } = require('./conformance-references.cjs');
 const { descriptionFindings } = require('./conformance-triggers.cjs');

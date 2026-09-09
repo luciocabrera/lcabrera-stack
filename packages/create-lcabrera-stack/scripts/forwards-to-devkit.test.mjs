@@ -17,7 +17,6 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { afterEach, describe, expect, test } from 'vite-plus/test';
 
 const BIN = join(
@@ -53,7 +52,9 @@ describe('the exit code a consumer sees', () => {
   const scratches = [];
 
   afterEach(() => {
-    for (const root of scratches.splice(0)) {
+    const drained = [...scratches];
+    scratches.length = 0;
+    for (const root of drained) {
       rmSync(root, { force: true, recursive: true });
     }
   });

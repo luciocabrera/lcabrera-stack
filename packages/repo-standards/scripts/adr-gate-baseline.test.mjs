@@ -9,20 +9,19 @@
  */
 import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
+  appendEntry,
   BASELINE,
+  editIn,
   HOME,
   LEGACY_FILE,
   LEGACY_TEXT,
-  RECORD,
-  RECORD_TEXT,
-  appendEntry,
-  editIn,
   makeAdrRepo,
   readBaseline,
+  RECORD,
+  RECORD_TEXT,
   removeAdrRepos,
   runGate,
   writeIn,

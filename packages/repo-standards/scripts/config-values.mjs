@@ -41,7 +41,7 @@ const isRooted = (value) => {
   return posix.isAbsolute(withSlashes) || DRIVE_OR_UNC.test(withSlashes);
 };
 
-const leavesRoot = (candidate) => candidate.split('/')[0] === '..';
+const isOutsideRoot = (candidate) => candidate.split('/', 1)[0] === '..';
 
 export const repoRelative = (value, fallback, key) => {
   const raw = readableString(value, fallback);
@@ -51,7 +51,7 @@ export const repoRelative = (value, fallback, key) => {
     );
   }
   const candidate = canonical(raw);
-  if (leavesRoot(candidate)) {
+  if (isOutsideRoot(candidate)) {
     throw new Error(
       `${CONFIG_FILE_NAME}: \`${key}\` must stay inside the repository, but \`${raw}\` leaves it.`,
     );
@@ -66,6 +66,7 @@ export const parseConfig = (raw) => {
   } catch (error) {
     throw new Error(
       `${CONFIG_FILE_NAME} is not valid JSON: ${errorMessage(error)}`,
+      { cause: error },
     );
   }
   if (!isPlainObject(parsed)) {
@@ -115,7 +116,7 @@ const compiled = (source) => {
   try {
     return new RegExp(source, 'u');
   } catch {
-    return undefined;
+    return;
   }
 };
 
@@ -132,7 +133,7 @@ export const patternList = (value, fallback, key) => {
 
 export const positiveInteger = (value, fallback, key) => {
   if (value === undefined) return fallback;
-  if (!Number.isInteger(value) || value <= 0) {
+  if (!Number.isSafeInteger(value) || value <= 0) {
     throw new Error(
       `${CONFIG_FILE_NAME}: \`${key}\` must be a positive whole number, but is \`${JSON.stringify(value)}\`.`,
     );

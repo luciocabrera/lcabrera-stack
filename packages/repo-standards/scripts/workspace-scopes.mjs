@@ -10,13 +10,13 @@ import { basename, join } from 'node:path';
 
 const parsePackageGlobs = (yaml) => {
   const globs = [];
-  let inList = false;
+  let isInList = false;
   for (const line of yaml.split(/\r?\n/)) {
     if (/^packages:\s*$/.test(line)) {
-      inList = true;
+      isInList = true;
       continue;
     }
-    if (!inList) {
+    if (!isInList) {
       continue;
     }
     const entry = /^\s+-\s+['"]?([^'"\s]+)['"]?\s*$/.exec(line);
@@ -51,14 +51,16 @@ export const deriveWorkspaces = (repoRoot) => {
     return [];
   }
   const workspaces = [];
-  for (const glob of parsePackageGlobs(readFileSync(yamlPath, 'utf8'))) {
+  const globs = parsePackageGlobs(readFileSync(yamlPath, 'utf8'));
+  for (const glob of globs) {
     const kind = kindOf(glob);
     if (glob.endsWith('/*')) {
-      for (const name of expandStarGlob(repoRoot, glob.slice(0, -2))) {
-        workspaces.push({ name, kind });
+      const expanded = expandStarGlob(repoRoot, glob.slice(0, -2));
+      for (const name of expanded) {
+        workspaces.push({ kind, name });
       }
     } else if (existsSync(join(repoRoot, glob, 'package.json'))) {
-      workspaces.push({ name: basename(glob), kind });
+      workspaces.push({ kind, name: basename(glob) });
     }
   }
   return workspaces;

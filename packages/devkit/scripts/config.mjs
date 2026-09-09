@@ -36,15 +36,17 @@ export const DEFAULT_CONFIG = {
   profile: 'agent',
 };
 
-/** @type {Record<string, string[]>} */
-const RUNG_GROUPS = {
-  agent: ['skills', 'rules', 'agents', 'docs', 'coordination', 'decisions'],
-  repo: ['templates', 'workflows', 'hooks', 'root'],
-  monorepo: ['workspace'],
-  full: [],
-};
+/** @type {ReadonlyArray<readonly [string, readonly string[]]>} */
+const RUNG_GROUPS = [
+  ['agent', ['skills', 'rules', 'agents', 'docs', 'coordination', 'decisions']],
+  ['repo', ['templates', 'workflows', 'hooks', 'root']],
+  ['monorepo', ['workspace']],
+  ['full', []],
+];
 
-export const PROFILE_LADDER = Object.keys(RUNG_GROUPS);
+const GROUPS_BY_RUNG = new Map(RUNG_GROUPS);
+
+export const PROFILE_LADDER = RUNG_GROUPS.map(([rung]) => rung);
 
 const rungIndex = (name) => PROFILE_LADDER.indexOf(name);
 
@@ -64,7 +66,7 @@ export const PROFILES = Object.fromEntries(
     name,
     PROFILE_LADDER.filter((rung) =>
       includesRung({ profile: name, rung }),
-    ).flatMap((rung) => RUNG_GROUPS[rung] ?? []),
+    ).flatMap((rung) => GROUPS_BY_RUNG.get(rung) ?? []),
   ]),
 );
 
@@ -85,7 +87,7 @@ export const rungPlacedAs = (profile) =>
  */
 export const placementNotice = (profile) => {
   const placedAs = rungPlacedAs(profile);
-  if (placedAs === undefined) return undefined;
+  if (placedAs === undefined) return;
   return `The "${profile}" profile places what "${placedAs}" places — nothing above "${placedAs}" ships in this version.`;
 };
 
@@ -150,7 +152,7 @@ export const resolveConfig = (raw) => {
       : DEFAULT_CONFIG.commands,
     paths: {
       ...DEFAULT_CONFIG.paths,
-      ...(isPlainObject(parsed.paths) ? parsed.paths : {}),
+      ...(isPlainObject(parsed.paths) && parsed.paths),
     },
     profile,
   };
@@ -170,7 +172,7 @@ const targetNameOf = (segments) => {
 export const targetPathFor = ({ assetPath, config }) => {
   const [group, ...rest] = assetPath.split('/');
   const base = config.paths[group];
-  if (base === undefined || rest.length === 0) return undefined;
+  if (base === undefined || rest.length === 0) return;
   const named = targetNameOf(rest);
   return ROOT_BASES.has(base) ? named.join('/') : [base, ...named].join('/');
 };
@@ -180,21 +182,22 @@ export const groupsFor = (config) => PROFILES[config.profile] ?? [];
 const EXECUTABLE_GROUPS = new Set(['hooks']);
 
 export const isExecutableAsset = (assetPath) =>
-  EXECUTABLE_GROUPS.has(assetPath.split('/')[0]);
+  EXECUTABLE_GROUPS.has(assetPath.split('/', 1)[0]);
 
 export const configuredCommandWords = (config) =>
   Object.values(config.commands ?? {})
     .filter((command) => typeof command === 'string')
-    .map((command) => command.trim().split(/\s+/)[0] ?? '')
+    .map((command) => command.trim().split(/\s+/, 1)[0] ?? '')
     .filter((word) => word !== '');
 
-const valueAt = ({ config, path }) =>
-  path.split('.').reduce((cursor, segment) => {
-    if (!isPlainObject(cursor) || !Object.hasOwn(cursor, segment)) {
-      return undefined;
-    }
-    return cursor[segment];
-  }, config);
+const valueAt = ({ config, path }) => {
+  let cursor = config;
+  for (const segment of path.split('.')) {
+    if (!isPlainObject(cursor) || !Object.hasOwn(cursor, segment)) return;
+    cursor = cursor[segment];
+  }
+  return cursor;
+};
 
 export const hasConfigKey = ({ config, path }) => {
   const value = valueAt({ config, path });

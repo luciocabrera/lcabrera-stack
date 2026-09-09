@@ -22,18 +22,18 @@
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { flagValue } from './cli-input.mjs';
 import {
   validatePrBase,
   validatePrBody,
   validatePrTitle,
 } from './commit-convention.mjs';
-import { flagValue } from './cli-input.mjs';
 import { readConventions, readCoordinationPaths } from './config.mjs';
 import { readEntries } from './coordination-read.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 import { reportWarnings } from './report-warnings.mjs';
 import { readTextWithin } from './safe-read.mjs';
 import { deriveWorkspaceScopes } from './workspace-scopes.mjs';
-import { resolveHostRoot } from './host-root.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),

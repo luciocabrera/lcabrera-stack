@@ -5,10 +5,9 @@
  * narrows the transcript read when no expiry is being simulated, and a default
  * reported as though a settings file had declared it.
  */
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import {

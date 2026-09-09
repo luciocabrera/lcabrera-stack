@@ -168,10 +168,9 @@ describe('allowedConfigKeys', () => {
     expect(allowedConfigKeys(config)).not.toContain('registers.adrHomes');
   });
 });
+const raw = (ci) => JSON.stringify({ ci });
 
 describe('resolveConfig on the ci block', () => {
-  const raw = (ci) => JSON.stringify({ ci });
-
   test('reads the setup lines as written', () => {
     const setup = ['- name: Set up Vite+', '  uses: voidzero-dev/setup-vp@sha'];
     expect(resolveConfig(raw({ setup })).ci.setup).toEqual(setup);

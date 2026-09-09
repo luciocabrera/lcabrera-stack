@@ -128,7 +128,7 @@ export const resolveGateTarget = (usage) => {
   const number = resolvePullNumber(payload);
   if (number === undefined) {
     console.error(`${usage}\n\nGive --pr, or run inside a pull-request event.`);
-    return undefined;
+    return;
   }
   return {
     number,

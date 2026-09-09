@@ -9,16 +9,7 @@
  * two registers — which is also what makes each planted violation the ONLY
  * difference between a failing run and a passing one.
  */
-import {
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { createFixtureRoots, writeIn } from './repo-fixtures.mjs';
 
 export const REQUIREMENT_DIR = 'docs/product/requirements';
 export const PLANNING_DIR = 'docs/agents/planning';
@@ -124,26 +115,10 @@ const MANIFEST = `${JSON.stringify(
   2,
 )}\n`;
 
-const roots = [];
-
-export const writeIn = (root) => (path, text) => {
-  mkdirSync(dirname(join(root, path)), { recursive: true });
-  writeFileSync(join(root, path), text);
-};
-
-export const editIn = (root) => (path, from, to) => {
-  const full = join(root, path);
-  const before = readFileSync(full, 'utf8');
-  const after = before.replace(from, to);
-  if (after === before) {
-    throw new Error(`fixture: \`${from}\` is not in ${path}`);
-  }
-  writeFileSync(full, after);
-};
+const fixtureRoots = createFixtureRoots('doc-registers-');
 
 export const makeRegisterRepo = () => {
-  const root = realpathSync(mkdtempSync(join(tmpdir(), 'doc-registers-')));
-  roots.push(root);
+  const root = fixtureRoots.make();
   const write = writeIn(root);
   write('pnpm-workspace.yaml', "packages:\n  - 'packages/*'\n");
   write('packages/ui/package.json', '{ "name": "@lcabrera/ui" }\n');
@@ -157,8 +132,6 @@ export const makeRegisterRepo = () => {
   return root;
 };
 
-export const removeRegisterRepos = () => {
-  for (const root of roots.splice(0)) {
-    rmSync(root, { force: true, recursive: true });
-  }
-};
+export const removeRegisterRepos = () => fixtureRoots.removeAll();
+
+export { editIn, writeIn } from './repo-fixtures.mjs';

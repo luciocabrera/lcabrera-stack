@@ -21,7 +21,9 @@
 const TERMINAL_STATES = new Set(['error', 'failure']);
 
 const pullNumber = (pull) =>
-  Number.isInteger(pull?.number) && pull.number > 0 ? pull.number : undefined;
+  Number.isSafeInteger(pull?.number) && pull.number > 0
+    ? pull.number
+    : undefined;
 
 export const openPullRequestNumbers = (pages) => {
   if (!Array.isArray(pages)) {
@@ -31,7 +33,7 @@ export const openPullRequestNumbers = (pages) => {
     .flat()
     .map((pull) => pullNumber(pull))
     .filter((number) => number !== undefined);
-  return [...new Set(numbers)].sort((left, right) => left - right);
+  return [...new Set(numbers)].toSorted((left, right) => left - right);
 };
 
 export const publishedStatus = (combined, context) => {
@@ -117,16 +119,20 @@ const normalizePath = (path) => {
 };
 
 const relativeSpecifiers = (source) =>
-  [...source.matchAll(/(?:from|import)\s*(?:\(\s*)?'(\.[^']*)'/gu)].map(
-    (match) => match[1],
-  );
+  source
+    .matchAll(/(?:from|import)\s*(?:\(\s*)?'(\.[^']*)'/gu)
+    .map((match) => match[1])
+    .toArray();
 
 const resolveFrom = ({ from, specifier }) =>
   normalizePath(`${from.split('/').slice(0, -1).join('/')}/${specifier}`);
 
 export const completeFileList = ({ expected, filenames }) => {
-  const count = Number.parseInt(String(expected).trim(), 10);
-  return filenames.length >= count ? filenames : undefined;
+  const declared = String(expected).trim();
+  const count = Number.parseInt(declared);
+  return declared !== '' && Number.isFinite(count) && filenames.length >= count
+    ? filenames
+    : undefined;
 };
 
 export const gateClosure = ({ driverEntry, entry, readFile }) =>

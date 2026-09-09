@@ -1,14 +1,13 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
   CONFIG_FILE_NAME,
+  DEFAULT_ADR_COMMANDS,
   DEFAULT_CONVENTIONS,
   DEFAULT_PUBLISHING,
-  DEFAULT_ADR_COMMANDS,
   DEFAULT_REGISTERS,
   readCoordinationPaths,
   resolveConventions,
@@ -129,17 +128,26 @@ describe('resolveRegisters', () => {
     expect(resolved.adrTemplateHome).toBe(DEFAULT_REGISTERS.adrTemplateHome);
   });
 });
+const publishing = (block) => resolvePublishing(JSON.stringify(block));
+
+const withConfig = (config) => {
+  const root = mkdtempSync(join(tmpdir(), 'repo-standards-config-'));
+  if (config !== undefined) {
+    writeFileSync(join(root, CONFIG_FILE_NAME), JSON.stringify(config));
+  }
+  return root;
+};
+
+const tasksDir = (value) =>
+  resolveRegisters(
+    JSON.stringify({ registers: { coordinationTasksDir: value } }),
+  ).coordinationTasksDir;
 
 // These gates write and delete — the ADR scaffolder writes, the index and the
 // board are overwritten, the claim closer unlinks. A configured location that
 // leaves the repository must be refused by name, not normalised into something
 // that quietly points somewhere else.
 describe('containment of the configured locations', () => {
-  const tasksDir = (value) =>
-    resolveRegisters(
-      JSON.stringify({ registers: { coordinationTasksDir: value } }),
-    ).coordinationTasksDir;
-
   it('refuses a value that climbs out of the repository', () => {
     expect(() => tasksDir('../../etc')).toThrow(/leaves it/);
   });
@@ -207,19 +215,13 @@ describe('containment of the configured locations', () => {
 
   it('trims a padded value and falls back on a blank one', () => {
     expect(tasksDir(' ops/claims ')).toBe('ops/claims');
-    expect(tasksDir('   ')).toBe(DEFAULT_REGISTERS.coordinationTasksDir);
+    expect(tasksDir(' '.repeat(3))).toBe(
+      DEFAULT_REGISTERS.coordinationTasksDir,
+    );
   });
 });
 
 describe('readCoordinationPaths', () => {
-  const withConfig = (config) => {
-    const root = mkdtempSync(join(tmpdir(), 'repo-standards-config-'));
-    if (config !== undefined) {
-      writeFileSync(join(root, CONFIG_FILE_NAME), JSON.stringify(config));
-    }
-    return root;
-  };
-
   it('resolves the three register locations against the given root', () => {
     const root = withConfig(undefined);
     const paths = readCoordinationPaths(root);
@@ -248,8 +250,6 @@ describe('readCoordinationPaths', () => {
 });
 
 describe('resolvePublishing', () => {
-  const publishing = (block) => resolvePublishing(JSON.stringify(block));
-
   it('an absent config is the documented default, not an error', () => {
     expect(resolvePublishing(undefined)).toEqual(DEFAULT_PUBLISHING);
   });
@@ -299,7 +299,7 @@ describe('resolvePublishing', () => {
       publishing({ publishing: { publicPackageDirs: ['a/../../etc'] } }),
     ).toThrow(/must stay inside the repository/);
     expect(() =>
-      publishing({ publishing: { workspaceDirs: ['..\\..\\etc'] } }),
+      publishing({ publishing: { workspaceDirs: [String.raw`..\..\etc`] } }),
     ).toThrow(/must stay inside the repository/);
   });
 

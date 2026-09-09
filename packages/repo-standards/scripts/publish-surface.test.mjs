@@ -119,10 +119,12 @@ describe('isPublishedTargetCorrect', () => {
 
 describe('buildPublishExports', () => {
   it('maps every subpath and preserves order', () => {
-    const built = buildPublishExports({
-      './b': './src/b.util.ts',
-      './a': './src/a.util.ts',
-    });
+    const built = buildPublishExports(
+      Object.fromEntries([
+        ['./b', './src/b.util.ts'],
+        ['./a', './src/a.util.ts'],
+      ]),
+    );
 
     expect(Object.keys(built)).toEqual(['./b', './a']);
     expect(built['./a'].types).toBe('./dist/a.util.d.mts');

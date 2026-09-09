@@ -30,7 +30,6 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { errorMessage } from './error-message.mjs';
 import {
   collectBumpedPackages,
   missingChangesets,
@@ -48,6 +47,7 @@ import {
 import { extractSurface } from './api-surface-extract.mjs';
 import { parseSurface, renderSurface } from './api-surface-render.mjs';
 import { CONFIG_FILE_NAME, readConventions } from './config.mjs';
+import { errorMessage } from './error-message.mjs';
 import { runGit } from './git-exec.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
@@ -128,7 +128,7 @@ const verifyPackage = (packageConfig) => {
     });
     drift.push(
       `${packageConfig.name}: the published surface changed but ${relativePath} was not regenerated:\n${changes
-        .map(formatChange)
+        .map((value) => formatChange(value))
         .join(
           '\n',
         )}\n  → run \`repo-verify-api-surface --write\` and commit the snapshot.`,
@@ -175,10 +175,10 @@ const changesetProblems = (changedPackages) => {
 const runVerify = (packages) => {
   const active = packages.filter((packageConfig) => !isUnbuilt(packageConfig));
   const unbuilt = packages
-    .filter(isUnbuilt)
+    .filter((value) => isUnbuilt(value))
     .map((packageConfig) => unreadableProblem(packageConfig));
 
-  const results = active.map(verifyPackage);
+  const results = active.map((value) => verifyPackage(value));
   const drift = results.flatMap((result) => result.drift);
   const changedPackages = results
     .map((result) => result.changed)

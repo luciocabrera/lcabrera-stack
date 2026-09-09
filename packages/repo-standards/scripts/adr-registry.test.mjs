@@ -12,7 +12,7 @@ import {
   adrFindings,
   headingNumber,
   headingTitle,
-  looksLikeAdr,
+  isAdrFilename,
   nextFreeNumber,
   normalizeIndex,
   parseAdrFilename,
@@ -226,7 +226,7 @@ describe('nextFreeNumber', () => {
   });
 });
 
-describe('looksLikeAdr', () => {
+describe('isAdrFilename', () => {
   it('catches near-misses, so a badly named ADR is a finding not a silent skip', () => {
     for (const name of [
       'ADR-001-x.md',
@@ -234,16 +234,18 @@ describe('looksLikeAdr', () => {
       'ADR 003 x.md',
       'ADR47.md',
     ]) {
-      expect(looksLikeAdr(name)).toBe(true);
+      expect(isAdrFilename(name)).toBe(true);
     }
   });
 
   it('needs a digit, so an ordinary doc starting with those letters is not an ADR', () => {
     for (const name of ['ADRIFT.md', 'adr-taxonomy.md', 'adrs-explained.md']) {
-      expect(looksLikeAdr(name)).toBe(false);
+      expect(isAdrFilename(name)).toBe(false);
     }
   });
 });
+const index = (options) =>
+  renderIndex(ADR_HOMES[0], { exemptionCount: 0, homeCount: 1, ...options });
 
 describe('renderIndex', () => {
   it('links the template relative to the home it renders', () => {
@@ -278,10 +280,6 @@ describe('renderIndex', () => {
     expect(rendered).toContain(ADR_HOMES[0].commands.new);
     expect(rendered).not.toContain('npx repo-adr');
   });
-
-  const index = (options) =>
-    renderIndex(ADR_HOMES[0], { exemptionCount: 0, homeCount: 1, ...options });
-
   it('says what numbering means for a single-home repository', () => {
     const rendered = index({});
 
@@ -310,7 +308,7 @@ describe('renderIndex', () => {
     expect(index({})).not.toContain('adrGrandfatheredDuplicates');
   });
 
-  it('renders the branch this repository\u2019s registers imply', () => {
+  it('renders the branch this repository\u{2019}s registers imply', () => {
     const rendered = renderIndex(ADR_HOMES[0]);
 
     expect(rendered).toContain(

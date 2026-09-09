@@ -55,7 +55,7 @@ const OPENING = /^---\r?\n/;
 const blockRange = (markdown) => {
   const opening = OPENING.exec(markdown);
   if (opening === null) {
-    return undefined;
+    return;
   }
   const end = markdown.indexOf('\n---', opening[0].length - 1);
   return end === -1 ? undefined : { end, start: opening[0].length };
@@ -75,7 +75,7 @@ const KEY = /^[a-z][a-z-]*$/;
 const readPair = (text) => {
   const colon = text.indexOf(':');
   if (colon <= 0) {
-    return undefined;
+    return;
   }
   const key = text.slice(0, colon);
   return KEY.test(key)
@@ -127,7 +127,7 @@ const readItem = (state, text, line) => {
 export const parseAdrBlock = (markdown) => {
   const range = blockRange(markdown);
   if (range === undefined) {
-    return undefined;
+    return;
   }
   const state = { errors: [], fields: {}, open: undefined };
   for (const [index, raw] of markdown
@@ -238,10 +238,10 @@ export const sectionFindings = (body) => {
     sectionProblem(sections, title),
   ).filter((finding) => finding !== undefined);
 
-  const alternatives = ALTERNATIVE_SECTIONS.some(
+  const isAlternatives = ALTERNATIVE_SECTIONS.some(
     (title) => sectionProblem(sections, title) === undefined,
   );
-  return alternatives
+  return isAlternatives
     ? required
     : [
         ...required,

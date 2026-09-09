@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
@@ -202,14 +201,14 @@ describe('collectClientSafetyReport', () => {
     ).toContain(`- ${publicApiFilePath} imports node:fs`);
   });
 });
+const readPackageManifest = (packageDir) =>
+  JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8'));
 
 describe('the guard as this repository wires it', () => {
   const uiRootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   const repoRoot = resolve(uiRootDir, '..', '..');
 
   const workspaceDirectories = buildWorkspaceDirectoryIndex(repoRoot);
-  const readPackageManifest = (packageDir) =>
-    JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8'));
   const uiManifest = readPackageManifest(uiRootDir);
   const scanUi = () =>
     scanWorkspaceDependencies({

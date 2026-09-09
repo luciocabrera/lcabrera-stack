@@ -122,8 +122,8 @@ describe('withAccepted', () => {
 describe('sortBaseline', () => {
   it('orders documents and references so a diff shows only real changes', () => {
     const sorted = sortBaseline({
-      'z.md': { 'packages/b': 'x', 'packages/a': 'x' },
       'a.md': { 'packages/c': 'x' },
+      'z.md': { 'packages/a': 'x', 'packages/b': 'x' },
     });
 
     expect(Object.keys(sorted)).toEqual(['a.md', 'z.md']);

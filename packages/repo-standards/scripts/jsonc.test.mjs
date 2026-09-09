@@ -18,7 +18,7 @@ describe('stripJsoncComments', () => {
   });
 
   it('does not end a string at an escaped quote', () => {
-    const text = '{ "quote": "she said \\"hi\\" // still text", "n": 1 }';
+    const text = String.raw`{ "quote": "she said \"hi\" // still text", "n": 1 }`;
     expect(JSON.parse(stripJsoncComments(text))).toEqual({
       n: 1,
       quote: 'she said "hi" // still text',

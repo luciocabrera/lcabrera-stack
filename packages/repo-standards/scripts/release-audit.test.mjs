@@ -114,30 +114,30 @@ describe('localProtocolProblems', () => {
 describe('manifestProblems', () => {
   it('finds both defects in the real broken manifest', () => {
     expect(
-      manifestProblems({ manifest: BROKEN, shipsSource: false }),
+      manifestProblems({ isSourceShipped: false, manifest: BROKEN }),
     ).toHaveLength(3);
   });
 
   it('finds nothing in the corrected one', () => {
-    expect(manifestProblems({ manifest: CORRECT, shipsSource: false })).toEqual(
-      [],
-    );
+    expect(
+      manifestProblems({ isSourceShipped: false, manifest: CORRECT }),
+    ).toEqual([]);
   });
 
   it('allows src exports for a package that ships source', () => {
     expect(
-      manifestProblems({ manifest: SOURCE_SHIPPING, shipsSource: true }),
+      manifestProblems({ isSourceShipped: true, manifest: SOURCE_SHIPPING }),
     ).toEqual([]);
     expect(
-      manifestProblems({ manifest: SOURCE_SHIPPING, shipsSource: false }),
+      manifestProblems({ isSourceShipped: false, manifest: SOURCE_SHIPPING }),
     ).toHaveLength(2);
   });
 
   it('still rejects a local protocol in a source-shipping package', () => {
     expect(
       manifestProblems({
+        isSourceShipped: true,
         manifest: { ...SOURCE_SHIPPING, dependencies: { x: 'workspace:*' } },
-        shipsSource: true,
       }),
     ).toHaveLength(1);
   });
@@ -178,8 +178,8 @@ describe('classifyAuditedVersion', () => {
 describe('auditVersion', () => {
   it('reads deprecation off the published manifest', () => {
     const audited = auditVersion({
+      isSourceShipped: false,
       manifest: { ...BROKEN, deprecated: 'use 0.1.1' },
-      shipsSource: false,
       tags: [],
       version: '0.1.0',
     });
@@ -195,8 +195,8 @@ describe('tagsByVersion', () => {
       tagsByVersion({ latest: '0.1.1', next: '0.1.1', old: '0.1.0' }),
     ).toEqual(
       new Map([
-        ['0.1.1', ['latest', 'next']],
         ['0.1.0', ['old']],
+        ['0.1.1', ['latest', 'next']],
       ]),
     );
   });
@@ -214,8 +214,8 @@ const PACKUMENT = {
 describe('auditPackument', () => {
   it('sweeps every published version, not only latest', () => {
     const versions = auditPackument({
+      isSourceShipped: false,
       packument: PACKUMENT,
-      shipsSource: false,
     });
 
     expect(versions.map(({ state, version }) => [version, state])).toEqual([
@@ -227,9 +227,9 @@ describe('auditPackument', () => {
   it('narrows to one version when asked', () => {
     expect(
       auditPackument({
+        isSourceShipped: false,
         only: '0.1.0',
         packument: PACKUMENT,
-        shipsSource: false,
       }).map(({ version }) => version),
     ).toEqual(['0.1.0']);
   });
@@ -237,9 +237,9 @@ describe('auditPackument', () => {
   it('yields nothing for a version that was never published', () => {
     expect(
       auditPackument({
+        isSourceShipped: false,
         only: '9.9.9',
         packument: PACKUMENT,
-        shipsSource: false,
       }),
     ).toEqual([]);
   });
@@ -251,7 +251,10 @@ describe('selectBroken', () => {
       {
         name: '@lcabrera/eslint-plugin',
         published: true,
-        versions: auditPackument({ packument: PACKUMENT, shipsSource: false }),
+        versions: auditPackument({
+          isSourceShipped: false,
+          packument: PACKUMENT,
+        }),
       },
     ];
 
@@ -313,7 +316,10 @@ describe('renderAudit', () => {
     {
       name: '@lcabrera/eslint-plugin',
       published: true,
-      versions: auditPackument({ packument: PACKUMENT, shipsSource: false }),
+      versions: auditPackument({
+        isSourceShipped: false,
+        packument: PACKUMENT,
+      }),
     },
     { name: '@lcabrera/new', published: false, versions: [] },
     { name: '@lcabrera/known', published: true, versions: [] },

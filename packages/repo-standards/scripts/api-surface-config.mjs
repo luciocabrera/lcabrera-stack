@@ -23,7 +23,7 @@ import { toBuiltPaths } from './publish-surface.mjs';
 const isContractSubpath = (subpath) =>
   subpath !== './package.json' && !subpath.includes('*');
 
-const shipsSource = (manifest) => manifest.scripts?.build === undefined;
+const isSourceShipped = (manifest) => manifest.scripts?.build === undefined;
 
 const entryForBuilt = (sourceTarget) => toBuiltPaths(sourceTarget).types;
 
@@ -53,25 +53,25 @@ const readRosteredManifest = ({ directory, packagesDir, repoRoot }) => {
 const toPackageConfig = ({ dir, packagesDir, repoRoot }) => {
   const directory = `${packagesDir}/${dir}`;
   const manifest = readRosteredManifest({ directory, packagesDir, repoRoot });
-  const source = shipsSource(manifest);
+  const isSource = isSourceShipped(manifest);
   const entries = Object.entries(manifest.exports ?? {})
     .filter(([subpath]) => isContractSubpath(subpath))
     .map(([subpath, target]) => ({
       entryFile: join(
         repoRoot,
         directory,
-        source ? target : entryForBuilt(target),
+        isSource ? target : entryForBuilt(target),
       ),
       subpath,
     }))
-    .sort((left, right) => left.subpath.localeCompare(right.subpath));
+    .toSorted((left, right) => left.subpath.localeCompare(right.subpath));
 
   return {
     directory,
     entries,
     name: manifest.name,
-    source,
-    tsConfigFilePath: source
+    source: isSource,
+    tsConfigFilePath: isSource
       ? join(repoRoot, directory, 'tsconfig.app.json')
       : undefined,
   };
@@ -82,7 +82,7 @@ export const readPublicPackages = (repoRoot) => {
 
   return publicPackageDirs
     .map((dir) => toPackageConfig({ dir, packagesDir, repoRoot }))
-    .sort((left, right) => left.name.localeCompare(right.name));
+    .toSorted((left, right) => left.name.localeCompare(right.name));
 };
 
 const unscoped = (packageName) => {

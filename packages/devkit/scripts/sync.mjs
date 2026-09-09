@@ -11,22 +11,22 @@ import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import { acceptedEntry, isAccepted } from './accepted.mjs';
+import { substituteCiSetup } from './ci-setup.mjs';
 import { groupsFor, hasConfigKey, targetPathFor } from './config.mjs';
 import { requiredConfigKeys, requiredPeers } from './frontmatter.mjs';
-import { unmetPeers } from './peer.mjs';
-import { substituteCiSetup } from './ci-setup.mjs';
-import { substituteCommands } from './placeholders.mjs';
 import {
-  isAcknowledgeable,
   ACKNOWLEDGED_STATE,
   classifyMaterialisation,
   hashContent,
+  isAcknowledgeable,
   isRecorded,
   isWritten,
   nextManifest,
 } from './manifest.mjs';
+import { unmetPeers } from './peer.mjs';
+import { substituteCommands } from './placeholders.mjs';
 
-const unmetDeclaration = ({ content, config, peerVersions }) => {
+const unmetDeclaration = ({ config, content, peerVersions }) => {
   const keys = requiredConfigKeys(content).filter(
     (key) => !hasConfigKey({ config, path: key }),
   );
@@ -47,7 +47,7 @@ const planEntryFor = ({
   peerVersions,
 }) => {
   const targetPath = targetPathFor({ assetPath: asset.path, config });
-  if (targetPath === undefined) return undefined;
+  if (targetPath === undefined) return;
 
   const onDisk = onDiskHash(targetPath);
 
@@ -129,7 +129,7 @@ export const planSync = ({
   const groups = new Set(groupsFor(config));
 
   return assets
-    .filter((asset) => groups.has(asset.path.split('/')[0]))
+    .filter((asset) => groups.has(asset.path.split('/', 1)[0]))
     .map((asset) => {
       const entry = planEntryFor({
         asset,
@@ -164,15 +164,15 @@ const needsExecutableBit = (entry) =>
   entry.executable === true && isRecorded(entry.state);
 
 export const applySync = ({ entries, root }) => {
-  for (const entry of entries.filter((candidate) =>
-    isWritten(candidate.state),
-  )) {
+  for (const entry of entries) {
+    if (!isWritten(entry.state)) continue;
     const destination = join(root, entry.path);
     mkdirSync(dirname(destination), { recursive: true });
     writeFileSync(destination, entry.content);
   }
 
-  for (const entry of entries.filter(needsExecutableBit)) {
+  for (const entry of entries) {
+    if (!needsExecutableBit(entry)) continue;
     chmodSync(join(root, entry.path), EXECUTABLE_MODE);
   }
 };
@@ -192,6 +192,6 @@ export const onDiskHasher = (root) => (targetPath) => {
   try {
     return hashContent(readFileSync(join(root, targetPath)));
   } catch {
-    return undefined;
+    return;
   }
 };

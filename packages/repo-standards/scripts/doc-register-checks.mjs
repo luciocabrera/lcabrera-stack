@@ -16,11 +16,10 @@ import {
   commandTask,
   EVIDENCE_FIELDS,
   EVIDENCE_TYPES,
-  ISSUE_BEARING_KINDS,
   isDraft,
-  PLANNING_DIR,
-  REQUIREMENTS_DIR,
+  ISSUE_BEARING_KINDS,
   PERSONAS,
+  PLANNING_DIR,
   PLANNING_FIELDS,
   PLANNING_KINDS,
   PLANNING_STATUSES,
@@ -28,6 +27,7 @@ import {
   PRODUCT_LINES,
   REQUIREMENT_FIELDS,
   REQUIREMENT_STATES,
+  REQUIREMENTS_DIR,
 } from './doc-registers.mjs';
 
 const KEBAB_CASE = /^[a-z\d]+(?:-[a-z\d]+)*$/;
@@ -43,7 +43,7 @@ const describe = (value) => {
 };
 
 const sorted = (values) =>
-  [...values].sort((a, b) => a.localeCompare(b)).join(', ');
+  [...values].toSorted((a, b) => a.localeCompare(b)).join(', ');
 
 const schemaProblems = (fields, allowed) => {
   const declared = Object.keys(fields);
@@ -289,8 +289,8 @@ export const registerFindings = ({
     ciCommands,
     ids: new Set(requirements.map((entry) => entry.slug)),
     resolves,
-    roster,
     rootTasks,
+    roster,
   };
   const empty = [
     ...(requirements.length === 0

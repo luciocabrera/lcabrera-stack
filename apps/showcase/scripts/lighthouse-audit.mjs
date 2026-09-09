@@ -14,11 +14,10 @@
  * server or the audit failed.
  */
 
+import lighthouse from 'lighthouse';
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-
-import lighthouse from 'lighthouse';
 import { chromium } from 'playwright';
 
 const PORT = 3000;
@@ -28,25 +27,16 @@ const REPORT_DIR = './lighthouse-reports';
 const SERVER_ENTRY_PATH = 'build/server/index.js';
 const TIMESTAMP = new Date()
   .toISOString()
-  .replaceAll(':', '-')
-  .replaceAll('.', '-')
+  .replaceAll(/[:.]/g, '-')
   .slice(0, -5);
 
 const colors = {
-  reset: '\x1b[0m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-  blue: '\x1b[34m',
+  blue: '\u{1B}[34m',
+  green: '\u{1B}[32m',
+  red: '\u{1B}[31m',
+  reset: '\u{1B}[0m',
+  yellow: '\u{1B}[33m',
 };
-
-function log(message, color = colors.reset) {
-  console.log(`${color}${message}${colors.reset}`);
-}
-
-function logStep(step) {
-  log(`\n📋 ${step}`, colors.blue);
-}
 
 function getErrorMessage(error) {
   if (error instanceof Error) {
@@ -75,6 +65,107 @@ function getScoreColor(score) {
   return colors.red;
 }
 
+async function isServerResponding(url) {
+  try {
+    const response = await fetch(url);
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+function log(message, color = colors.reset) {
+  console.log(`${color}${message}${colors.reset}`);
+}
+
+function logStep(step) {
+  log(`\n📋 ${step}`, colors.blue);
+}
+
+async function runAudit() {
+  log('\n🚀 Lighthouse Audit Pipeline', colors.blue);
+  log('=====================================\n');
+
+  await runBuild();
+  const serverProcess = await startProductionServer();
+
+  try {
+    const scores = await runLighthouse(AUDIT_URL);
+
+    logStep('Audit Complete!');
+    log(
+      `\nFull HTML report: ${REPORT_DIR}/lighthouse-${TIMESTAMP}.html\n`,
+      colors.blue,
+    );
+
+    log('Summary:', colors.blue);
+    const average =
+      Object.values(scores.categories).reduce((sum, category) => {
+        return sum + category.score;
+      }, 0) / Object.keys(scores.categories).length;
+
+    log(`  Average score: ${Math.round(average * 100)}/100\n`);
+  } finally {
+    logStep('Stopping server...');
+    serverProcess.kill();
+  }
+}
+
+async function runBuild() {
+  logStep('Building for production...');
+  await runProcess(getLocalBinaryPath('react-router'), ['build']);
+}
+
+async function runLighthouse(url) {
+  logStep('Running Lighthouse audit...');
+
+  const browser = await chromium.launch({
+    args: [`--remote-debugging-port=${CHROME_DEBUG_PORT}`],
+    headless: true,
+  });
+
+  try {
+    const options = {
+      logLevel: 'info',
+      onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
+      output: ['json', 'html'],
+      port: CHROME_DEBUG_PORT,
+    };
+
+    const runnerResult = await lighthouse(url, options);
+
+    if (!runnerResult) {
+      throw new Error('Lighthouse audit failed');
+    }
+
+    if (!existsSync(REPORT_DIR)) {
+      mkdirSync(REPORT_DIR, { recursive: true });
+    }
+
+    const jsonReportPath = `${REPORT_DIR}/lighthouse-${TIMESTAMP}.json`;
+    const htmlReportPath = `${REPORT_DIR}/lighthouse-${TIMESTAMP}.html`;
+
+    writeFileSync(jsonReportPath, runnerResult.report[0]);
+    writeFileSync(htmlReportPath, runnerResult.report[1]);
+
+    log(`✓ JSON report saved: ${jsonReportPath}`, colors.green);
+    log(`✓ HTML report saved: ${htmlReportPath}`, colors.green);
+
+    const scores = JSON.parse(runnerResult.report[0]);
+    const { categories } = scores;
+
+    logStep('Lighthouse Scores:');
+    for (const [name, data] of Object.entries(categories)) {
+      const score = Math.round(data.score * 100);
+      log(`  ${name}: ${score}/100`, getScoreColor(score));
+    }
+
+    return scores;
+  } finally {
+    await browser.close();
+  }
+}
+
 async function runProcess(command, args = [], stdio = 'inherit') {
   return new Promise((resolvePromise, rejectPromise) => {
     const processHandle = spawn(command, args, {
@@ -94,33 +185,6 @@ async function runProcess(command, args = [], stdio = 'inherit') {
       rejectPromise(new Error(`Command failed with code ${code}`));
     });
   });
-}
-
-async function runBuild() {
-  logStep('Building for production...');
-  await runProcess(getLocalBinaryPath('react-router'), ['build']);
-}
-
-async function isServerResponding(url) {
-  try {
-    const response = await fetch(url);
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
-
-async function waitForServer(url, maxAttempts = 30) {
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    if (await isServerResponding(url)) {
-      log('✓ Server is ready', colors.green);
-      return;
-    }
-
-    await new Promise((resolvePromise) => setTimeout(resolvePromise, 1000));
-  }
-
-  throw new Error('Server failed to start');
 }
 
 async function startProductionServer() {
@@ -156,83 +220,17 @@ async function startProductionServer() {
   return serverProcess;
 }
 
-async function runLighthouse(url) {
-  logStep('Running Lighthouse audit...');
-
-  const browser = await chromium.launch({
-    args: [`--remote-debugging-port=${CHROME_DEBUG_PORT}`],
-    headless: true,
-  });
-
-  try {
-    const options = {
-      logLevel: 'info',
-      output: ['json', 'html'],
-      onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
-      port: CHROME_DEBUG_PORT,
-    };
-
-    const runnerResult = await lighthouse(url, options);
-
-    if (!runnerResult) {
-      throw new Error('Lighthouse audit failed');
+async function waitForServer(url, maxAttempts = 30) {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    if (await isServerResponding(url)) {
+      log('✓ Server is ready', colors.green);
+      return;
     }
 
-    if (!existsSync(REPORT_DIR)) {
-      mkdirSync(REPORT_DIR, { recursive: true });
-    }
-
-    const jsonReportPath = `${REPORT_DIR}/lighthouse-${TIMESTAMP}.json`;
-    const htmlReportPath = `${REPORT_DIR}/lighthouse-${TIMESTAMP}.html`;
-
-    writeFileSync(jsonReportPath, runnerResult.report[0]);
-    writeFileSync(htmlReportPath, runnerResult.report[1]);
-
-    log(`✓ JSON report saved: ${jsonReportPath}`, colors.green);
-    log(`✓ HTML report saved: ${htmlReportPath}`, colors.green);
-
-    const scores = JSON.parse(runnerResult.report[0]);
-    const { categories } = scores;
-
-    logStep('Lighthouse Scores:');
-    Object.entries(categories).forEach(([name, data]) => {
-      const score = Math.round(data.score * 100);
-      log(`  ${name}: ${score}/100`, getScoreColor(score));
-    });
-
-    return scores;
-  } finally {
-    await browser.close();
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 1000));
   }
-}
 
-async function runAudit() {
-  log('\n🚀 Lighthouse Audit Pipeline', colors.blue);
-  log('=====================================\n');
-
-  await runBuild();
-  const serverProcess = await startProductionServer();
-
-  try {
-    const scores = await runLighthouse(AUDIT_URL);
-
-    logStep('Audit Complete!');
-    log(
-      `\nFull HTML report: ${REPORT_DIR}/lighthouse-${TIMESTAMP}.html\n`,
-      colors.blue,
-    );
-
-    log('Summary:', colors.blue);
-    const average =
-      Object.values(scores.categories).reduce((sum, category) => {
-        return sum + category.score;
-      }, 0) / Object.keys(scores.categories).length;
-
-    log(`  Average score: ${Math.round(average * 100)}/100\n`);
-  } finally {
-    logStep('Stopping server...');
-    serverProcess.kill();
-  }
+  throw new Error('Server failed to start');
 }
 
 try {

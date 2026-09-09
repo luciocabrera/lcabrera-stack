@@ -39,12 +39,12 @@ export const isRootAnchored = (token, repoRoots) => {
   if (isDisqualified(token) || !token.includes('/')) {
     return false;
   }
-  return repoRoots.includes(token.split('/')[0]);
+  return repoRoots.includes(token.split('/', 1)[0]);
 };
 
 const isExplicitlyRelative = (token) => /^\.\.?\//.test(token);
 
-const TRAILING_PUNCTUATION = new Set(['.', ',', ':', ';', ')']);
+const TRAILING_PUNCTUATION = new Set([')', ',', '.', ':', ';']);
 
 const trimTrailingPunctuation = (value) =>
   TRAILING_PUNCTUATION.has(value.at(-1) ?? '')
@@ -52,7 +52,7 @@ const trimTrailingPunctuation = (value) =>
     : value;
 
 export const normaliseToken = (token) =>
-  trimTrailingPunctuation(token.split('#')[0].trim());
+  trimTrailingPunctuation(token.split('#', 1)[0].trim());
 
 export const inlineCodeTokens = (text) =>
   text.split('`').filter((_, index) => index % 2 === 1);
@@ -67,7 +67,8 @@ export const extractCandidates = (markdown, repoRoots) => {
     .map((token) => normaliseToken(token))
     .filter((token) => isRootAnchored(token, repoRoots));
 
-  const linked = [...prose.matchAll(/\]\(([^)\s]{1,512})\)/g)]
+  const linked = prose
+    .matchAll(/\]\(([^)\s]{1,512})\)/g)
     .map((match) => normaliseToken(match[1]))
     .filter(
       (token) =>
@@ -75,7 +76,8 @@ export const extractCandidates = (markdown, repoRoots) => {
         (isRootAnchored(token, repoRoots) ||
           isExplicitlyRelative(token) ||
           token.endsWith('.md')),
-    );
+    )
+    .toArray();
 
   return [...new Set([...backticked, ...linked])];
 };

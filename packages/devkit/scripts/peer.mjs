@@ -22,7 +22,6 @@
  */
 
 import { createRequire } from 'node:module';
-
 import { satisfies } from 'semver';
 
 import { requiredPeers } from './frontmatter.mjs';
@@ -53,7 +52,7 @@ export const installedPeerVersion = ({
     const version = readManifest({ from, packageName })?.version;
     return typeof version === 'string' && version !== '' ? version : undefined;
   } catch {
-    return undefined;
+    return;
   }
 };
 
@@ -103,7 +102,7 @@ export const unmetPeers = ({ peers, versions = new Map() }) =>
       };
     })
     .filter(({ status }) => status !== PEER_OK)
-    .map(describeUnmet);
+    .map((value) => describeUnmet(value));
 
 export const declaredPeerNames = (assets) => [
   ...new Set(

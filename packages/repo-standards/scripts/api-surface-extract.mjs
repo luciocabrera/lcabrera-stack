@@ -26,8 +26,8 @@ const KIND_LABELS = {
 
 const normalizeSignature = (text) =>
   text
-    .replace(/import\("[^"]*"\)\./g, '')
-    .replace(/\s+/g, ' ')
+    .replaceAll(/import\("[^"]*"\)\./g, '')
+    .replaceAll(/\s+/g, ' ')
     .trim();
 
 const rawSignatureFor = (declaration) => {
@@ -49,9 +49,11 @@ const signatureFor = (declarations) => {
 const extractEntry = (sourceFile) => {
   const exported = sourceFile.getExportedDeclarations();
   return Object.fromEntries(
-    [...exported.entries()]
+    exported
+      .entries()
       .map(([name, declarations]) => [name, signatureFor(declarations)])
-      .sort(([left], [right]) => left.localeCompare(right)),
+      .toArray()
+      .toSorted(([left], [right]) => left.localeCompare(right)),
   );
 };
 

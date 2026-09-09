@@ -23,24 +23,24 @@ import process from 'node:process';
 import { applyInit } from './command-init.mjs';
 import { DEFAULT_CONFIG, withProfile } from './config.mjs';
 import {
-  CREATE_BRANCH,
-  INITIAL_COMMIT_MESSAGE,
+  abandonedNotice,
   ancestorsOf,
   commitIdentityArgs,
+  CREATE_BRANCH,
   createRefusal,
-  abandonedNotice,
   createSummary,
   gitStepFailure,
+  INITIAL_COMMIT_MESSAGE,
   initialManifest,
   missingGitRefusal,
   packageNameFor,
   unfinishedNotice,
 } from './create.mjs';
 import {
-  TRUSTED_GIT_DIRECTORIES,
   gitBinary,
   readGit,
   runGit,
+  TRUSTED_GIT_DIRECTORIES,
 } from './git-exec.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
 
@@ -53,7 +53,7 @@ const realPathOf = (path) => {
   try {
     return realpathSync(path);
   } catch {
-    return undefined;
+    return;
   }
 };
 
@@ -92,7 +92,7 @@ const isOption = (entry) => entry.startsWith('-');
 
 const positionals = (argv) => argv.filter((entry) => !isOption(entry));
 
-const unrecognisedOptions = (argv) => argv.filter(isOption);
+const unrecognisedOptions = (argv) => argv.filter((value) => isOption(value));
 
 const resolvedProfile = (flagged) => {
   try {
@@ -118,7 +118,7 @@ const gitFailureDetail = (error) => {
 const gitStep = ({ args, cwd, step, target }) => {
   try {
     runGit({ args, cwd });
-    return undefined;
+    return;
   } catch (error) {
     return gitStepFailure({
       detail: gitFailureDetail(error),
@@ -148,9 +148,13 @@ const scaffold = ({ absolute, profile, target }) => {
       notice: abandonedNotice({ target }),
     });
   }
+  const manifest = initialManifest({
+    name: packageNameFor(basename(absolute)),
+    profile,
+  });
   writeFileSync(
     join(absolute, 'package.json'),
-    `${JSON.stringify(initialManifest({ name: packageNameFor(basename(absolute)), profile }), undefined, 2)}\n`,
+    `${JSON.stringify(manifest, undefined, 2)}\n`,
   );
 
   const code = applyInit({

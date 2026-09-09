@@ -60,7 +60,7 @@ const lintCodes = (dir) => {
     stdio: ['ignore', 'pipe', 'ignore'],
   };
   const args = ['lint', '--format=json', relative(REPO_ROOT, dir)];
-  let raw = '';
+  let raw;
   try {
     raw = execFileSync(VP, args, options);
   } catch (error) {
@@ -95,7 +95,10 @@ const lintConfigModule = () => {
   return import(join(REPO_ROOT, LINT_CONFIG));
 };
 
-const runtimeLists = async () => (await lintConfigModule()).WORKSPACE_RUNTIMES;
+const runtimeLists = async () => {
+  const module = await lintConfigModule();
+  return module.WORKSPACE_RUNTIMES;
+};
 
 const biomeRosters = () =>
   workspaceRosters(
@@ -103,8 +106,10 @@ const biomeRosters = () =>
       .overrides ?? [],
   );
 
-const configuredPlugins = async () =>
-  (await lintConfigModule()).lintConfig.plugins;
+const configuredPlugins = async () => {
+  const module = await lintConfigModule();
+  return module.lintConfig.plugins;
+};
 
 const workspaceConfigs = () =>
   ['vite.config.ts', ...workspaceDirs('apps'), ...workspaceDirs('packages')]

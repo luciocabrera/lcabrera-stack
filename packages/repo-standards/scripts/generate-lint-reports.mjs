@@ -98,7 +98,7 @@ const findEslintWorkspaces = () => {
     .filter((workspaceDir) =>
       existsSync(join(workspaceDir, 'eslint.config.mjs')),
     )
-    .sort((left, right) => left.localeCompare(right));
+    .toSorted((left, right) => left.localeCompare(right));
 };
 
 const generateEslintReport = async () => {
@@ -193,7 +193,7 @@ const TOOLS = ['biome', 'eslint', 'oxlint'];
 const parseOnlyArgument = () => {
   const argument = process.argv.find((entry) => entry.startsWith('--only='));
   if (argument === undefined) {
-    return undefined;
+    return;
   }
   const only = argument.slice('--only='.length);
   if (!TOOLS.includes(only)) {

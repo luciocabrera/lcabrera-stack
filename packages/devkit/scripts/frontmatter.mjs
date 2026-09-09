@@ -52,7 +52,7 @@ const FENCE = '---';
 
 const CONFIG_PREFIX = 'config.';
 
-const REQUIRES_KEY = /^requires:[ \t]*/;
+const REQUIREMENT_KEY = /^requires:[ \t]*/;
 
 const PEER_KEY = /^peer:[ \t]*/;
 
@@ -112,7 +112,7 @@ const declaredEntries = (inline, following) => {
 const declarationFor = ({ content, key }) => {
   const lines = frontmatterLines(content);
   const index = lines.findIndex((line) => key.test(line));
-  if (index === -1) return undefined;
+  if (index === -1) return;
   const [declared = '', ...following] = significantLines(lines.slice(index));
   const entries = declaredEntries(declared.replace(key, '').trim(), following);
   return entries === undefined ? undefined : { entries, line: index + 2 };
@@ -128,7 +128,7 @@ const entriesOf = (declaration) =>
 
 export const requiredConfigKeys = (content) => [
   ...new Set(
-    entriesOf(declarationFor({ content, key: REQUIRES_KEY }))
+    entriesOf(declarationFor({ content, key: REQUIREMENT_KEY }))
       .filter((entry) => entry.startsWith(CONFIG_PREFIX))
       .map((entry) => entry.slice(CONFIG_PREFIX.length))
       .filter((key) => key !== ''),
@@ -147,12 +147,13 @@ const peerFromEntry = (entry) => {
 
 export const requiredPeers = (content) => {
   const byName = new Map();
-  for (const entry of entriesOf(declarationFor({ content, key: PEER_KEY }))) {
+  const declared = entriesOf(declarationFor({ content, key: PEER_KEY }));
+  for (const entry of declared) {
     const peer = peerFromEntry(entry);
     if (peer.name !== '' && !byName.has(peer.name)) byName.set(peer.name, peer);
   }
-  return [...byName.values()];
+  return byName.values().toArray();
 };
 
 export const requiresDeclarationLine = (content) =>
-  declarationFor({ content, key: REQUIRES_KEY })?.line;
+  declarationFor({ content, key: REQUIREMENT_KEY })?.line;

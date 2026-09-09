@@ -71,7 +71,7 @@ export const parseFileName = (filePath) => {
   const withoutTest = base.replace(EXTENSION, '').replace(TEST_SEGMENT, '');
   const lastDot = withoutTest.lastIndexOf('.');
   if (lastDot <= 0) {
-    return undefined;
+    return;
   }
   return {
     name: withoutTest.slice(0, lastDot),
@@ -144,8 +144,8 @@ export const routeArtifactReport = (trackedPaths) => {
     }
     const named = normalizeSubject(parseFileName(filePath).name);
     if (
-      !artifacts.some((artifact) =>
-        named.startsWith(normalizeSubject(artifact)),
+      artifacts.every(
+        (artifact) => !named.startsWith(normalizeSubject(artifact)),
       )
     ) {
       findings.push({ artifacts, filePath });

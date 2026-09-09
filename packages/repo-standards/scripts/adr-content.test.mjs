@@ -8,13 +8,13 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  ALTERNATIVE_SECTIONS,
-  REPOSITORY_SCOPE,
   adrBody,
+  ALTERNATIVE_SECTIONS,
   blockFindings,
   governedBy,
   parseAdrBlock,
   recordFindings,
+  REPOSITORY_SCOPE,
   sectionFindings,
   sectionsOf,
 } from './adr-content.mjs';
@@ -174,7 +174,10 @@ describe('sectionFindings', () => {
   });
 
   it.each(ALTERNATIVE_SECTIONS)('accepts %s on its own', (heading) => {
-    const only = BODY.replace('## Alternatives considered', `## ${heading}`);
+    const only = BODY.replace(
+      '## Alternatives considered',
+      () => `## ${heading}`,
+    );
     expect(sectionFindings(only)).toEqual([]);
   });
 
@@ -187,7 +190,7 @@ describe('sectionFindings', () => {
 
   it('does not read a `##` with no title as a section', () => {
     const blank = '## Decision\n\ntext\n\n##   \n\nloose\n';
-    expect([...sectionsOf(blank).keys()]).toEqual(['decision']);
+    expect(sectionsOf(blank).keys().toArray()).toEqual(['decision']);
     expect(sectionsOf(blank).get('decision')).toContain('loose');
   });
 

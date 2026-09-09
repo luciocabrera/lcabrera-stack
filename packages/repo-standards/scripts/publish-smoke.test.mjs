@@ -44,8 +44,8 @@ describe('importSpecifiers', () => {
       importSpecifiers(
         packed({
           exports_: {
-            './package.json': './package.json',
             './components/*': './dist/components/*.mjs',
+            './package.json': './package.json',
             './reset.css': './dist/reset.css',
           },
           name: '@lcabrera/ui',
@@ -104,10 +104,9 @@ describe('selfContained', () => {
     ]);
   });
 });
+const lane = ({ name, specifiers }) => ({ packed: { name }, specifiers });
 
 describe('unimportableProblems', () => {
-  const lane = ({ name, specifiers }) => ({ packed: { name }, specifiers });
-
   it('reports a lane package that contributes no specifier', () => {
     expect(
       unimportableProblems([

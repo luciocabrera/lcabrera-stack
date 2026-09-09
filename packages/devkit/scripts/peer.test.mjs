@@ -63,7 +63,7 @@ describe('checkPeerVersion', () => {
         { installedVersion: '1.0.0', range: '>=0.1.0 <1.0.0' },
         { installedVersion: '0.0.9', range: '>=0.1.0 <1.0.0' },
         { installedVersion: undefined, range: '>=0.1.0 <1.0.0' },
-      ].map(checkPeerVersion),
+      ].map((value) => checkPeerVersion(value)),
     ).toEqual(['ok', 'out-of-range', 'out-of-range', 'not-installed']);
   });
 
@@ -77,7 +77,7 @@ describe('checkPeerVersion', () => {
         { installedVersion: '10.0.0', range: '>=9.0.0' },
         { installedVersion: '2.5.0', range: '1.x || >=2.5.0 <3.0.0' },
         { installedVersion: '4.0.0', range: '*' },
-      ].map(checkPeerVersion),
+      ].map((value) => checkPeerVersion(value)),
     ).toEqual(['ok', 'out-of-range', 'ok', 'out-of-range', 'ok', 'ok', 'ok']);
   });
 
@@ -110,8 +110,8 @@ describe('unmetPeers', () => {
     { name: '@repo/fine', range: '>=1.0.0' },
   ];
   const versions = new Map([
-    ['@repo/stale', '1.4.2'],
     ['@repo/fine', '1.4.2'],
+    ['@repo/stale', '1.4.2'],
   ]);
 
   test('names only what is unmet, and says which way it is unmet', () => {
@@ -131,15 +131,14 @@ describe('unmetPeers', () => {
     ]);
   });
 });
+const asset = (name, ...peers) => ({
+  content: ['---', `peer: [${peers.join(', ')}]`, '---', '', 'Body.'].join(
+    '\n',
+  ),
+  path: `skills/${name}/SKILL.md`,
+});
 
 describe('declaredPeerNames', () => {
-  const asset = (name, ...peers) => ({
-    content: ['---', `peer: [${peers.join(', ')}]`, '---', '', 'Body.'].join(
-      '\n',
-    ),
-    path: `skills/${name}/SKILL.md`,
-  });
-
   test('names each distinct peer once across every asset', () => {
     expect(
       declaredPeerNames([

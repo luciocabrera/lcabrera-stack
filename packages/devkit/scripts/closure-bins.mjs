@@ -18,7 +18,7 @@ const BIN_DIRECTORY =
 const VARIABLE_REFERENCE = /\$\{?([A-Za-z_]\w*)\}?\/([\w.-]+)/g;
 
 const bindingIn = (line) => {
-  const bound = BIN_DIRECTORY.exec(line.split('#')[0] ?? '')?.[1];
+  const bound = BIN_DIRECTORY.exec(line.split('#', 1)[0] ?? '')?.[1];
   return bound === undefined ? [] : [bound];
 };
 
@@ -28,19 +28,24 @@ const bindingIn = (line) => {
  */
 export const extractBinInvocations = (content) => {
   const lines = content.split('\n');
-  const directories = new Set(lines.flatMap(bindingIn));
+  const directories = new Set(lines.flatMap((value) => bindingIn(value)));
 
   const named = lines.flatMap((line, index) =>
-    [...line.matchAll(BIN_PATH)].map((match) => ({
-      line: index + 1,
-      name: match[1],
-    })),
+    line
+      .matchAll(BIN_PATH)
+      .map((match) => ({
+        line: index + 1,
+        name: match[1],
+      }))
+      .toArray(),
   );
 
   const bound = lines.flatMap((line, index) =>
-    [...line.matchAll(VARIABLE_REFERENCE)]
+    line
+      .matchAll(VARIABLE_REFERENCE)
       .filter((match) => directories.has(match[1]))
-      .map((match) => ({ line: index + 1, name: match[2] })),
+      .map((match) => ({ line: index + 1, name: match[2] }))
+      .toArray(),
   );
 
   return [...named, ...bound];

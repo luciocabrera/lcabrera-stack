@@ -29,6 +29,7 @@ import { fileURLToPath } from 'node:url';
 
 import { readStdin } from './cli-input.mjs';
 import { readConventions } from './config.mjs';
+import { parsePullRequests } from './gh-exec.mjs';
 import { runGit } from './git-exec.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 import {
@@ -41,22 +42,7 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 const UPSTREAM = `origin/${readConventions(REPO_ROOT).defaultBranch}`;
-const KEEP = new Set([]);
-
-const parsePullRequests = (raw) => {
-  if (!raw.trim()) {
-    return [];
-  }
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    process.stderr.write(
-      '  ⚠ could not parse `gh pr list` JSON — using commit counts only.\n',
-    );
-    return [];
-  }
-};
+const KEEP = new Set();
 
 const prVerdictsByHead = (pullRequests) => {
   const grouped = new Map();
@@ -176,7 +162,12 @@ const applyPlan = (plan) => {
 
 const main = async () => {
   const apply = process.argv.includes('--apply');
-  const prByHead = prVerdictsByHead(parsePullRequests(await readStdin()));
+  const prByHead = prVerdictsByHead(
+    parsePullRequests(await readStdin(), {
+      warning:
+        '  ⚠ could not parse `gh pr list` JSON — using commit counts only.\n',
+    }),
+  );
   const plan = buildPlan(gatherState(prByHead));
 
   printPlan(plan, apply);

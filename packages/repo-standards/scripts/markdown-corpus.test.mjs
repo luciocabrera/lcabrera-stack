@@ -1,7 +1,6 @@
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import { documentedFiles, isIgnoredDoc } from './markdown-corpus.mjs';
@@ -62,24 +61,25 @@ describe('isIgnoredDoc', () => {
 describe('documentedFiles', () => {
   it('finds markdown at any depth and nothing else', () => {
     const root = treeWith({
-      'README.md': '# root',
       'docs/guide/deep/NOTES.md': '# deep',
       'docs/not-markdown.txt': 'ignored',
+      'README.md': '# root',
       'src/index.ts': 'export const a = 1;',
     });
 
-    expect(documentedFiles({ repoRoot: root }).toSorted()).toEqual([
-      'README.md',
-      'docs/guide/deep/NOTES.md',
-    ]);
+    expect(
+      documentedFiles({ repoRoot: root }).toSorted(
+        (left, right) => Number(left > right) - Number(left < right),
+      ),
+    ).toEqual(['README.md', 'docs/guide/deep/NOTES.md']);
   });
 
   it('does not descend into build output or dependencies', () => {
     const root = treeWith({
+      'coverage/REPORT.md': '# report',
+      'dist/GENERATED.md': '# built',
       'KEEP.md': '# keep',
       'node_modules/pkg/README.md': '# dep',
-      'dist/GENERATED.md': '# built',
-      'coverage/REPORT.md': '# report',
     });
 
     expect(documentedFiles({ repoRoot: root })).toEqual(['KEEP.md']);

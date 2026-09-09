@@ -70,7 +70,7 @@ export const vanishedNames = ({ renames, trackedPaths }) => {
       .filter((entry) => !live.has(entry.name))
       .map((entry) => [entry.name, entry]),
   );
-  return [...byName.values()];
+  return byName.values().toArray();
 };
 
 const FENCE = '```';

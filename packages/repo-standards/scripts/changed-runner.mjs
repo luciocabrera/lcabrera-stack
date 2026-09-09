@@ -25,18 +25,18 @@ export const readChangedFiles = () =>
     .map((line) => line.trim())
     .filter(Boolean);
 
-const vpArgsFor = ({ task, packages }) => [
+const vpArgsFor = ({ packages, task }) => [
   'run',
   ...packages.flatMap((pkg) => ['--filter', pkg]),
   task,
 ];
 
 export const printReport = ({
-  label,
-  verb,
-  mode,
   dispositions,
   extra = [],
+  label,
+  mode,
+  verb,
 }) => {
   const running = dispositions.filter((disposition) => disposition.running);
   const skipped = dispositions.filter((disposition) => !disposition.running);

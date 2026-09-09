@@ -28,16 +28,16 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { delimiter, dirname, join } from 'node:path';
 
-const ON_WINDOWS = process.platform === 'win32';
+const IS_ON_WINDOWS = process.platform === 'win32';
 
-export const TRUSTED_GIT_DIRECTORIES = ON_WINDOWS
+export const TRUSTED_GIT_DIRECTORIES = IS_ON_WINDOWS
   ? [
       String.raw`C:\Program Files\Git\cmd`,
       String.raw`C:\Program Files (x86)\Git\cmd`,
     ]
   : ['/usr/local/bin', '/usr/bin', '/bin'];
 
-const GIT_FILENAMES = ON_WINDOWS ? ['git.exe', 'git'] : ['git'];
+const GIT_FILENAMES = IS_ON_WINDOWS ? ['git.exe', 'git'] : ['git'];
 
 export const GIT_REPOSITORY_VARIABLES = new Set([
   'GIT_ALTERNATE_OBJECT_DIRECTORIES',
@@ -55,7 +55,9 @@ const gitUnder = (directory) =>
   );
 
 const firstGitIn = (directories) =>
-  directories.map(gitUnder).find((path) => path !== undefined);
+  directories
+    .map((value) => gitUnder(value))
+    .find((path) => path !== undefined);
 
 const pathDirectories = () =>
   (process.env.PATH ?? '').split(delimiter).filter((entry) => entry !== '');
@@ -85,7 +87,8 @@ const isPathName = (name) => name.toUpperCase() === PATH_NAME;
  * Windows writes `Path`, and adding a second key beside it leaves which one
  * the child reads undefined
  */
-const pathNameIn = (env) => Object.keys(env).find(isPathName) ?? PATH_NAME;
+const pathNameIn = (env) =>
+  Object.keys(env).find((value) => isPathName(value)) ?? PATH_NAME;
 
 /**
  * @param {{ binary: string, env: Record<string, string | undefined> }} args

@@ -21,8 +21,8 @@ export const readEntries = (dir) =>
             e.isFile() && e.name.endsWith('.md') && !e.name.startsWith('_'),
         )
         .map((e) => ({
+          data: parseFrontmatter(readFileSync(join(dir, e.name), 'utf8')),
           name: e.name,
           slug: e.name.replace(/\.md$/, ''),
-          data: parseFrontmatter(readFileSync(join(dir, e.name), 'utf8')),
         }))
     : [];

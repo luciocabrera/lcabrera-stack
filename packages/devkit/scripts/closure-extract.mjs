@@ -67,7 +67,7 @@ const INVOKERS = new Set([
 
 const lineOf = (content, index) => content.slice(0, index).split('\n').length;
 
-const linkTargetOf = (raw) => raw.trim().split(/\s+/)[0] ?? '';
+const linkTargetOf = (raw) => raw.trim().split(/\s+/, 1)[0] ?? '';
 
 const parseLinkTargets = (line) => {
   const targets = [];
@@ -120,29 +120,35 @@ const commandWordIn = (segment) => {
 
 const inlineCodeSpans = (content) =>
   content.split('\n').flatMap((line, index) =>
-    [...line.matchAll(INLINE_CODE_PATTERN)].map((match) => ({
-      line: index + 1,
-      text: match[1].trim(),
-    })),
+    line
+      .matchAll(INLINE_CODE_PATTERN)
+      .map((match) => ({
+        line: index + 1,
+        text: match[1].trim(),
+      }))
+      .toArray(),
   );
 
 /** @param {{ line: number, text: string }[]} lines */
 export const shellCommandWords = (lines) =>
   lines.flatMap(({ line, text }) =>
     shellSegments(text)
-      .map(commandWordIn)
+      .map((value) => commandWordIn(value))
       .filter((word) => !SHELL_NOISE.has(word) && INVOKERS.has(word))
       .map((word) => ({ line, word })),
   );
 
 export const extractCommands = (content) => {
   const inline = inlineCodeSpans(content)
-    .map((span) => ({ line: span.line, word: span.text.split(/\s+/)[0] ?? '' }))
+    .map((span) => ({
+      line: span.line,
+      word: span.text.split(/\s+/, 1)[0] ?? '',
+    }))
     .filter((entry) => INVOKERS.has(entry.word));
   return [...shellCommandWords(shellBlockLines(content)), ...inline];
 };
 
-const HAS_EXTENSION = /\.[a-z0-9]+$/i;
+const EXTENSION_PATTERN = /\.[a-z0-9]+$/i;
 
 const TRAILING_PUNCTUATION = new Set([')', ',', '.', ':', ';']);
 
@@ -157,7 +163,7 @@ const withoutTrailingPunctuation = (token) => {
 export const isPathToken = (token) => {
   if (token.includes('://') || /\s/.test(token)) return false;
   if (token.startsWith('./') || token.startsWith('../')) return true;
-  return token.includes('/') && HAS_EXTENSION.test(token);
+  return token.includes('/') && EXTENSION_PATTERN.test(token);
 };
 
 /** @param {{ line: number, text: string }[]} lines */
@@ -166,7 +172,10 @@ export const shellPathTokens = (lines) =>
     .flatMap(({ line, text }) =>
       shellSegments(text)
         .flatMap((segment) => segment.split(/\s+/).slice(1))
-        .map((token) => ({ line, token: token.replace(/^["']|["']$/g, '') })),
+        .map((token) => ({
+          line,
+          token: token.replaceAll(/^["']|["']$/g, ''),
+        })),
     )
     .filter((entry) => isPathToken(entry.token));
 
@@ -186,24 +195,24 @@ export const extractPathTokens = (content) => {
 
 const MARKDOWN_LINK_LABEL = /\[[^[\]]*\]\(/g;
 
-const OPENING_EDGES = new Set(['(', '[', '{', '<', '"', "'", '`', '*', '_']);
+const OPENING_EDGES = new Set(['"', "'", '(', '*', '<', '[', '_', '`', '{']);
 
 const CLOSING_EDGES = new Set([
-  ')',
-  ']',
-  '}',
-  '>',
+  '!',
   '"',
   "'",
-  '`',
+  ')',
   '*',
-  '_',
   ',',
   '.',
   ':',
   ';',
-  '!',
+  '>',
   '?',
+  ']',
+  '_',
+  '`',
+  '}',
 ]);
 
 const withoutProseEdges = (token) => {
@@ -220,13 +229,13 @@ const withoutProseEdges = (token) => {
 
 const proseLines = (content) => {
   const collected = [];
-  let fenced = false;
+  let isFenced = false;
   for (const [index, line] of content.split('\n').entries()) {
     if (FENCE_PATTERN.test(line)) {
-      fenced = !fenced;
+      isFenced = !isFenced;
       continue;
     }
-    if (!fenced) collected.push({ line: index + 1, text: line });
+    if (!isFenced) collected.push({ line: index + 1, text: line });
   }
   return collected;
 };
@@ -243,8 +252,11 @@ export const extractProsePathTokens = (content) =>
 
 export const extractImportSpecifiers = (content) =>
   IMPORT_PATTERNS.flatMap((pattern) =>
-    [...content.matchAll(pattern)].map((match) => ({
-      line: lineOf(content, match.index ?? 0),
-      specifier: match[1],
-    })),
+    content
+      .matchAll(pattern)
+      .map((match) => ({
+        line: lineOf(content, match.index ?? 0),
+        specifier: match[1],
+      }))
+      .toArray(),
   );

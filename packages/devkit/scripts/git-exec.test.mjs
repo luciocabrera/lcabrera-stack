@@ -2,13 +2,13 @@ import { describe, expect, test } from 'vite-plus/test';
 
 import {
   GIT_REPOSITORY_VARIABLES,
-  TRUSTED_GIT_DIRECTORIES,
   gitBinary,
   gitEnvironment,
   readGit,
   requireGitBinary,
   resolveGit,
   runGit,
+  TRUSTED_GIT_DIRECTORIES,
 } from './git-exec.mjs';
 
 describe('gitEnvironment', () => {
@@ -53,7 +53,7 @@ describe('gitEnvironment', () => {
       binary: '/home/dev/.nix-profile/bin/git',
       env: { PATH: '/tmp/writable' },
     });
-    expect(PATH.split(':')[0]).toBe('/home/dev/.nix-profile/bin');
+    expect(PATH.split(':', 1)[0]).toBe('/home/dev/.nix-profile/bin');
     expect(PATH).not.toContain('/tmp/writable');
   });
 

@@ -23,6 +23,7 @@ describe('registryUrl', () => {
     expect(registryUrl('@lcabrera/utils')).toMatch(/%40lcabrera%2Futils$/);
   });
 });
+const rejectingFetch = () => Promise.reject(new Error('fetch failed'));
 
 describe('fetchPackument', () => {
   it('asks for the abbreviated document by default', async () => {
@@ -60,10 +61,8 @@ describe('fetchPackument', () => {
   });
 
   it('propagates a transport failure', async () => {
-    const fetchImpl = () => Promise.reject(new Error('fetch failed'));
-
     await expect(
-      fetchPackument('@lcabrera/utils', { fetchImpl }),
+      fetchPackument('@lcabrera/utils', { fetchImpl: rejectingFetch }),
     ).rejects.toThrow('fetch failed');
   });
 });

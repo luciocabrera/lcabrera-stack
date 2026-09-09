@@ -16,12 +16,12 @@ const QUOTES = /["']/g;
 
 export const prNumberOf = (value) => {
   if (value === undefined || value === null || Array.isArray(value)) {
-    return undefined;
+    return;
   }
   const text = String(value).replaceAll(QUOTES, '').trim();
   const marker = text.lastIndexOf(PULL_PATH);
   const tail = marker === -1 ? text : text.slice(marker + PULL_PATH.length);
-  const digits = (tail.startsWith('#') ? tail.slice(1) : tail).split('/')[0];
+  const digits = (tail.startsWith('#') ? tail.slice(1) : tail).split('/', 1)[0];
   return DIGITS.test(digits) ? Number(digits) : undefined;
 };
 
@@ -32,7 +32,7 @@ const headRefOf = (value) => {
 
 const isTemplate = ({ name }) => name.startsWith('_');
 
-const claims = (data, prNumber, headRef) =>
+const isClaimedBy = (data, prNumber, headRef) =>
   (prNumber !== undefined && prNumberOf(data.pr) === prNumber) ||
   (headRef !== undefined && data.branch === headRef);
 
@@ -46,6 +46,6 @@ export const tasksClosedBy = ({ entries, headRef, prNumber }) => {
     (entry) =>
       !isTemplate(entry) &&
       entry.data !== undefined &&
-      claims(entry.data, pr, ref),
+      isClaimedBy(entry.data, pr, ref),
   );
 };

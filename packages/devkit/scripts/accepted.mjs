@@ -61,7 +61,7 @@ export const parseAccepted = (raw) => {
 export const serialiseAccepted = (accepted) =>
   `${JSON.stringify(
     Object.fromEntries(
-      Object.entries(accepted).sort(([left], [right]) =>
+      Object.entries(accepted).toSorted(([left], [right]) =>
         left.localeCompare(right),
       ),
     ),
@@ -82,7 +82,7 @@ export const withAccepted = (accepted, { hash, path, reason }) => ({
 
 const valueAfter = (argv, flag) => {
   const at = argv.indexOf(flag);
-  if (at === -1) return undefined;
+  if (at === -1) return;
   const value = argv[at + 1];
   return value === undefined || value.startsWith('--') ? undefined : value;
 };

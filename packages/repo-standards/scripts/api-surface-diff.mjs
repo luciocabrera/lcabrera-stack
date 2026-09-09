@@ -21,15 +21,15 @@ const diffSubpath = ({ base, next, subpath }) => {
   const after = exportsOf(next, subpath);
   const names = [
     ...new Set([...Object.keys(before), ...Object.keys(after)]),
-  ].sort((left, right) => left.localeCompare(right));
+  ].toSorted((left, right) => left.localeCompare(right));
 
   return names.flatMap((name) => {
-    const had = Object.hasOwn(before, name);
-    const has = Object.hasOwn(after, name);
-    if (had && !has) {
+    const isHad = Object.hasOwn(before, name);
+    const isHas = Object.hasOwn(after, name);
+    if (isHad && !isHas) {
       return [{ kind: 'removed', name, subpath }];
     }
-    if (!had && has) {
+    if (!isHad && isHas) {
       return [{ kind: 'added', name, signature: after[name], subpath }];
     }
     if (before[name] !== after[name]) {
@@ -50,14 +50,15 @@ const diffSubpath = ({ base, next, subpath }) => {
 export const diffSurfaces = ({ base, next }) => {
   const subpaths = [
     ...new Set([...subpathsOf(base), ...subpathsOf(next)]),
-  ].sort((left, right) => left.localeCompare(right));
+  ].toSorted((left, right) => left.localeCompare(right));
   return subpaths.flatMap((subpath) => diffSubpath({ base, next, subpath }));
 };
 
 export const isBreakingChange = (change) =>
   change.kind === 'removed' || change.kind === 'changed';
 
-export const hasBreakingChange = (changes) => changes.some(isBreakingChange);
+export const hasBreakingChange = (changes) =>
+  changes.some((value) => isBreakingChange(value));
 
 export const formatChange = (change) => {
   const at = `${change.subpath} › ${change.name}`;

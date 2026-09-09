@@ -12,7 +12,6 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join, matchesGlob, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { describe, expect, test } from 'vite-plus/test';
 
 import { configs } from '../assets/workspace/packages/typescript-config/tsconfig.entries.ts';
@@ -20,11 +19,11 @@ import { initialManifest } from './create.mjs';
 import {
   GENERATED_TSCONFIGS,
   NODE_VERSION,
+  nodeEngineBand,
   TSCONFIG_WORKSPACE,
+  withWorkspaceFields,
   WORKSPACE_DEPENDENCIES,
   WORKSPACE_SCRIPTS,
-  nodeEngineBand,
-  withWorkspaceFields,
 } from './workspace.mjs';
 
 const BLUEPRINT = join(
@@ -49,7 +48,8 @@ const catalogGroups = (workspaceFile) => {
   if (start === -1) return groups;
 
   let current;
-  for (const line of lines.slice(start + 1)) {
+  const rest = lines.slice(start + 1);
+  for (const line of rest) {
     if (line.trim() === '' || line.trimStart().startsWith('#')) continue;
     const header = GROUP_HEADER.exec(line);
     if (header) {
@@ -111,7 +111,7 @@ describe('the tasks name what the blueprint holds', () => {
 
   test('the catalog a dependency names holds that dependency', () => {
     const groups = catalogGroups(read('pnpm-workspace.yaml'));
-    expect([...groups.keys()].length).toBeGreaterThan(0);
+    expect(groups.keys().toArray().length).toBeGreaterThan(0);
     for (const [name, specifier] of Object.entries(WORKSPACE_DEPENDENCIES)) {
       const group = groups.get(specifier.slice('catalog:'.length)) ?? [];
       expect(group.map(([entry]) => entry)).toContain(name);
@@ -147,9 +147,9 @@ describe('the tasks name what the blueprint holds', () => {
 
   test('the blueprint workspace pins the range the catalog declares', () => {
     const ranges = new Map(
-      [...catalogGroups(read('pnpm-workspace.yaml')).values()].flatMap(
-        (group) => [...group],
-      ),
+      catalogGroups(read('pnpm-workspace.yaml'))
+        .values()
+        .flatMap((group) => [...group]),
     );
     const declared = Object.entries(
       JSON.parse(read('packages', 'typescript-config', 'package.json'))

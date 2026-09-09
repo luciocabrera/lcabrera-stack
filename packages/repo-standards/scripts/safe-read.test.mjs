@@ -1,22 +1,23 @@
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { readTextWithin } from './safe-read.mjs';
 
-let workspace;
+const created = [];
 
 const makeWorkspace = () => {
-  workspace = mkdtempSync(join(tmpdir(), 'safe-read-'));
+  const workspace = mkdtempSync(join(tmpdir(), 'safe-read-'));
+  created.push(workspace);
   return workspace;
 };
 
 afterEach(() => {
-  if (workspace !== undefined) {
+  for (const workspace of created) {
     rmSync(workspace, { force: true, recursive: true });
-    workspace = undefined;
   }
+  created.length = 0;
 });
 
 describe('readTextWithin', () => {

@@ -27,6 +27,7 @@ describe('declaredDependencies', () => {
     ).toEqual(['vite-plus']);
   });
 });
+const setupFor = (context) => inferRunner(context).ciSetup;
 
 describe('inferRunner', () => {
   test('prefers the declared runner over the lockfile beneath it', () => {
@@ -54,8 +55,6 @@ describe('inferRunner', () => {
   });
 
   test('only the runners a runner image lacks bring their own setup step', () => {
-    const setupFor = (context) => inferRunner(context).ciSetup;
-
     expect(setupFor({ dependencies: ['vite-plus'] }).join('\n')).toContain(
       'voidzero-dev/setup-vp@',
     );
@@ -73,8 +72,10 @@ describe('inferRunner', () => {
       { dependencies: ['vite-plus'] },
       { files: ['bun.lock'] },
     ]) {
-      for (const line of inferRunner(context).ciSetup) {
-        if (!line.includes('uses:')) continue;
+      const actions = inferRunner(context).ciSetup.filter((line) =>
+        line.includes('uses:'),
+      );
+      for (const line of actions) {
         expect(line).toMatch(/uses: [^@]+@[0-9a-f]{40}\b/);
       }
     }
@@ -87,12 +88,11 @@ describe('inferRunner', () => {
       ['bun.lockb'],
       ['package.json'],
     ]) {
-      expect(Object.keys(inferRunner({ files }).commands).toSorted()).toEqual([
-        'audit',
-        'check',
-        'install',
-        'test',
-      ]);
+      expect(
+        Object.keys(inferRunner({ files }).commands).toSorted(
+          (left, right) => Number(left > right) - Number(left < right),
+        ),
+      ).toEqual(['audit', 'check', 'install', 'test']);
     }
   });
 });

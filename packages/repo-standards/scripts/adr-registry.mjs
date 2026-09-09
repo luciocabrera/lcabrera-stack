@@ -37,7 +37,7 @@ export const parseAdrFilename = (filename) => {
     : { number: Number(match[1]), slug: match[2] };
 };
 
-export const looksLikeAdr = (filename) => /^ADR[-_ ]?\d/i.test(filename);
+export const isAdrFilename = (filename) => /^ADR[-_ ]?\d/i.test(filename);
 
 export const headingNumber = (markdown) => {
   const line = markdown.split('\n').find((text) => text.startsWith('# '));
@@ -73,19 +73,22 @@ const homeFindings = (home, entries) =>
         ];
   });
 
+const numberedEntries = (home) =>
+  home.entries
+    .map((entry) => ({ entry, parsed: parseAdrFilename(entry.filename) }))
+    .filter(({ parsed }) => parsed !== undefined)
+    .map(({ entry, parsed }) => [
+      parsed.number,
+      `${home.dir}/${entry.filename}`,
+    ]);
+
 const duplicateFindings = (homes, grandfathered = GRANDFATHERED_DUPLICATES) => {
   const uses = new Map();
-  for (const home of homes) {
-    for (const entry of home.entries) {
-      const parsed = parseAdrFilename(entry.filename);
-      if (parsed === undefined) {
-        continue;
-      }
-      const at = uses.get(parsed.number) ?? [];
-      uses.set(parsed.number, [...at, `${home.dir}/${entry.filename}`]);
-    }
+  const numbered = homes.flatMap((home) => numberedEntries(home));
+  for (const [number, path] of numbered) {
+    uses.set(number, [...(uses.get(number) ?? []), path]);
   }
-  return [...uses.entries()]
+  return [...uses]
     .filter(([number, at]) =>
       grandfathered.has(number) ? at.length > 2 : at.length > 1,
     )
@@ -97,7 +100,7 @@ const duplicateFindings = (homes, grandfathered = GRANDFATHERED_DUPLICATES) => {
 
 const draftFindings = (draftFilenames) =>
   draftFilenames
-    .filter((filename) => looksLikeAdr(filename))
+    .filter((filename) => isAdrFilename(filename))
     .map(
       (filename) =>
         `${DRAFT_DIR}/${filename} — a draft must not carry an ADR number; it gets one when it is adopted`,
@@ -135,7 +138,7 @@ const ESCAPED_PIPE = String.raw`\|`;
 const listingRow = (home, entry) => {
   const parsed = parseAdrFilename(entry.filename);
   const number = parsed === undefined ? '?' : pad(parsed.number);
-  const title = entry.title.replaceAll('|', ESCAPED_PIPE);
+  const title = entry.title.replaceAll('|', () => ESCAPED_PIPE);
   return `| [ADR-${number}](${home.dir}/${entry.filename}) | ${title} |`;
 };
 
@@ -147,7 +150,7 @@ export const renderListing = (homes) =>
       '| ADR | Decision |',
       '| --- | --- |',
       ...[...home.entries]
-        .sort((a, b) => a.filename.localeCompare(b.filename))
+        .toSorted((a, b) => a.filename.localeCompare(b.filename))
         .map((entry) => listingRow(home, entry)),
       '',
     ])
@@ -156,7 +159,7 @@ export const renderListing = (homes) =>
 const sortedRows = (homes, matches) =>
   homes.flatMap((home) =>
     [...home.entries]
-      .sort((a, b) => a.filename.localeCompare(b.filename))
+      .toSorted((a, b) => a.filename.localeCompare(b.filename))
       .filter((entry) => matches(entry.governs ?? []))
       .map((entry) => listingRow(home, entry)),
   );

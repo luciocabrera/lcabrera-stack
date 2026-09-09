@@ -25,6 +25,7 @@ export const isBuiltPublicPackage = (manifest) =>
   manifest.scripts?.build !== undefined &&
   manifest.publishConfig?.access === 'public';
 
+/** @param {string} sourceTarget */
 export const toBuiltPaths = (sourceTarget) => {
   const built = sourceTarget
     .replace(/^\.\/src\//, './dist/')
@@ -73,7 +74,7 @@ export const isSourceTarget = (target) =>
 
 const targetProblems = ({ files, label, subpath, target }) => {
   const problems = collectTargets(target)
-    .filter(isSourceTarget)
+    .filter((value) => isSourceTarget(value))
     .map(
       (path) =>
         `${label}: the packed tarball exports \`${subpath}\` as ${path} — a TypeScript source file, which Node refuses to load from node_modules (ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING). Only \`publishConfig.exports\` swaps src for dist, and only pnpm applies it.`,

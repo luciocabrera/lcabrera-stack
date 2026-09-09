@@ -8,13 +8,15 @@
  */
 import { dayOf } from './usage-window.mjs';
 
+const REPO_SCOPE = 'repos/{owner}/{repo}';
+
 const workflowRunCount = ({ file, runGh, window }) => {
   try {
     const total = runGh([
       'api',
       '-X',
       'GET',
-      `repos/{owner}/{repo}/actions/workflows/${file}/runs`,
+      `${REPO_SCOPE}/actions/workflows/${file}/runs`,
       '-f',
       `created=${window.start}..${window.end}`,
       '-f',
@@ -22,8 +24,8 @@ const workflowRunCount = ({ file, runGh, window }) => {
       '--jq',
       '.total_count',
     ]);
-    const parsed = Number.parseInt(total, 10);
-    return Number.isNaN(parsed)
+    const parsed = Number(total);
+    return total === '' || Number.isNaN(parsed)
       ? { reason: `unreadable run total for ${file}` }
       : { count: parsed };
   } catch (error) {
@@ -51,8 +53,8 @@ export const readWorkflowRuns = ({ runGh, window, workflows }) => {
 const RECORD_MARK = String.fromCodePoint(1);
 
 const utcDayOf = (epochSeconds) => {
-  const seconds = Number.parseInt(epochSeconds, 10);
-  return Number.isNaN(seconds)
+  const seconds = Number(epochSeconds);
+  return epochSeconds === '' || Number.isNaN(seconds)
     ? ''
     : dayOf(new Date(seconds * 1000).toISOString());
 };
@@ -65,7 +67,7 @@ export const parseCommitFiles = (log) =>
     .map((record) => {
       const lines = record.split('\n');
       return {
-        day: utcDayOf((lines[0] ?? '').split(' ')[1] ?? ''),
+        day: utcDayOf((lines[0] ?? '').split(' ', 2)[1] ?? ''),
         files: lines.slice(1).filter((line) => line.length > 0),
       };
     });
@@ -73,7 +75,8 @@ export const parseCommitFiles = (log) =>
 export const tallyFiles = (commits) => {
   const tally = {};
   for (const commit of commits) {
-    for (const file of new Set(commit.files)) {
+    const touched = new Set(commit.files);
+    for (const file of touched) {
       const previous = tally[file];
       tally[file] = {
         commits: (previous?.commits ?? 0) + 1,

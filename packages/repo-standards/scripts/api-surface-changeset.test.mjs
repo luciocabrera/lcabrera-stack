@@ -47,7 +47,7 @@ describe('collectBumpedPackages', () => {
       '---\n"@lcabrera/server": minor\n---\n',
       '---\n"@lcabrera/server": patch\n"@lcabrera/utils": minor\n---\n',
     ]);
-    expect([...bumped].sort((a, b) => a.localeCompare(b))).toEqual([
+    expect([...bumped].toSorted((a, b) => a.localeCompare(b))).toEqual([
       '@lcabrera/server',
       '@lcabrera/utils',
     ]);

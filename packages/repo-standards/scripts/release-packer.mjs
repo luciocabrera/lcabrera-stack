@@ -16,7 +16,7 @@ const FOREIGN_LOCKFILES = ['package-lock.json', 'yarn.lock', 'bun.lockb'];
 export const stripComments = (text) =>
   text
     .split('\n')
-    .filter((line) => !line.trim().startsWith('#'))
+    .filter((line) => !line.trimStart().startsWith('#'))
     .join('\n');
 
 const lockfileProblems = (lockfiles) => [

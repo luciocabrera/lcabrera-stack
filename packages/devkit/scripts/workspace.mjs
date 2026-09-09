@@ -39,8 +39,9 @@ export const GENERATED_TSCONFIGS = '**/tsconfig.*.json';
  * @returns {string}
  */
 export const nodeEngineBand = (version) => {
-  const major = Number.parseInt(version.split('.')[0] ?? '', 10);
-  if (!Number.isInteger(major)) {
+  const [head = ''] = version.split('.', 1);
+  const major = Number(head);
+  if (head === '' || !Number.isSafeInteger(major)) {
     throw new TypeError(
       `workspace: \`${version}\` does not start with a major version, so no engine band can be derived from it`,
     );
@@ -81,8 +82,8 @@ export const WORKSPACE_SCRIPTS = {
  */
 export const withWorkspaceFields = ({ manifest = {} } = {}) => ({
   ...manifest,
-  scripts: { ...WORKSPACE_SCRIPTS, ...manifest.scripts },
   devDependencies: { ...WORKSPACE_DEPENDENCIES, ...manifest.devDependencies },
   engines: { node: nodeEngineBand(NODE_VERSION), ...manifest.engines },
   packageManager: manifest.packageManager ?? PACKAGE_MANAGER,
+  scripts: { ...WORKSPACE_SCRIPTS, ...manifest.scripts },
 });

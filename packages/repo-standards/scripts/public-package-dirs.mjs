@@ -40,4 +40,4 @@ const workspaceDirsIn = (repoRoot, root) => {
 export const publicPackageDirs = (repoRoot) =>
   WORKSPACE_ROOTS.flatMap((root) => workspaceDirsIn(repoRoot, root))
     .filter((dir) => ignoresSuppressions(repoRoot, dir))
-    .sort((left, right) => left.localeCompare(right));
+    .toSorted((left, right) => left.localeCompare(right));

@@ -4,8 +4,8 @@
  * annotation format lives in one place. See `.claude/rules/scripts.md`.
  */
 export const reportWarnings = (warnings) => {
-  const underActions = process.env.GITHUB_ACTIONS === 'true';
+  const isUnderActions = process.env.GITHUB_ACTIONS === 'true';
   for (const warning of warnings) {
-    console.error(underActions ? `::warning::${warning}` : `  ⚠ ${warning}`);
+    console.error(isUnderActions ? `::warning::${warning}` : `  ⚠ ${warning}`);
   }
 };

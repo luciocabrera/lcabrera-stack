@@ -1,5 +1,4 @@
 import { join } from 'node:path';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
@@ -197,7 +196,9 @@ describe('collectPublishedSourceFiles', () => {
     ]);
 
     expect(
-      collectPublishedSourceFiles(join(root, 'packages', 'utils')).sort(),
+      collectPublishedSourceFiles(join(root, 'packages', 'utils')).toSorted(
+        (left, right) => Number(left > right) - Number(left < right),
+      ),
     ).toEqual([
       join(root, 'packages', 'utils', 'src', 'merge.test.ts'),
       join(root, 'packages', 'utils', 'src', 'merge.ts'),

@@ -27,7 +27,7 @@ const mightHoldInvocation = (line) =>
 
 const invocationIn = (block) => {
   if (block?.type !== 'tool_use') {
-    return undefined;
+    return;
   }
   if (block.name === SKILL_TOOL && typeof block.input?.skill === 'string') {
     return { kind: 'skills', name: block.input.skill };
@@ -40,7 +40,6 @@ const invocationIn = (block) => {
         typeof name === 'string' && name.length > 0 ? name : UNNAMED_SUBAGENT,
     };
   }
-  return undefined;
 };
 
 export const invocationsInEntry = ({ entry, roots }) => {
@@ -59,7 +58,7 @@ const parseEntry = (line) => {
   try {
     return JSON.parse(line);
   } catch {
-    return undefined;
+    return;
   }
 };
 
@@ -79,7 +78,6 @@ const recordedCwd = (lines) => {
       return cwd;
     }
   }
-  return undefined;
 };
 
 const unattributed = ({ path, records }) =>

@@ -39,7 +39,7 @@ export const fetchPackument = async (
   });
 
   if (response.status === 404) {
-    return undefined;
+    return;
   }
 
   if (!response.ok) {

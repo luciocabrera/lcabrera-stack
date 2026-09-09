@@ -1,24 +1,23 @@
 import { describe, expect, test } from 'vite-plus/test';
 
 import { analyseClosure } from './closure.mjs';
+import { escapeKinds, escapingSkillFiles } from './test-fixtures.mjs';
+const declaring = (...keys) => [
+  {
+    content: [
+      '---',
+      'name: epic',
+      `requires: [${keys.join(', ')}]`,
+      '---',
+      '',
+      '# Epic',
+    ].join('\n'),
+    path: 'skills/epic/SKILL.md',
+  },
+];
 
 describe('analyseClosure and declared config requirements', () => {
   const rootDirectory = 'skills/epic';
-
-  const declaring = (...keys) => [
-    {
-      content: [
-        '---',
-        'name: epic',
-        `requires: [${keys.join(', ')}]`,
-        '---',
-        '',
-        '# Epic',
-      ].join('\n'),
-      path: 'skills/epic/SKILL.md',
-    },
-  ];
-
   test('a key outside the config key space is an escape of its own kind', () => {
     const { escapes } = analyseClosure({
       allowedConfigKeys: ['profile', 'paths.skills'],
@@ -56,33 +55,15 @@ describe('analyseClosure and declared config requirements', () => {
   });
 
   test('reports a link, a command, an import and a requires as four kinds', () => {
-    const files = [
-      {
-        content: [
-          '---',
-          'requires: [config.paths.dashboards]',
-          '---',
-          '',
-          'Read [the contract](../../docs/agents/contract.md).',
-          '',
-          '```bash',
-          'vp run test',
-          '```',
-        ].join('\n'),
-        path: 'skills/epic/SKILL.md',
-      },
-      {
-        content:
-          "import { scan } from '@repo/example-scan/deterministic-scan';",
-        path: 'skills/epic/scripts/run.mjs',
-      },
-    ];
-
-    const { escapes } = analyseClosure({ files, rootDirectory });
-    expect(
-      escapes
-        .map((finding) => finding.kind)
-        .sort((left, right) => left.localeCompare(right)),
-    ).toEqual(['command', 'import', 'link', 'requires']);
+    const { escapes } = analyseClosure({
+      files: escapingSkillFiles(['requires: [config.paths.dashboards]']),
+      rootDirectory,
+    });
+    expect(escapeKinds(escapes)).toEqual([
+      'command',
+      'import',
+      'link',
+      'requires',
+    ]);
   });
 });

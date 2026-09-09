@@ -52,7 +52,7 @@ export const checkoutIsolationFinding = ({
   underCI,
 }) => {
   if (underCI || !isPrimary || isExemptBranch({ branch, defaultBranch })) {
-    return undefined;
+    return;
   }
 
   const shared = `the primary checkout is on \`${branch}\`, not \`${defaultBranch}\``;

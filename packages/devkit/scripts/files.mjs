@@ -15,7 +15,7 @@ const EXECUTABLE_BITS = 0o111;
 
 const listFilesUnder = (directory) =>
   readdirSync(directory, { withFileTypes: true })
-    .sort((left, right) => left.name.localeCompare(right.name))
+    .toSorted((left, right) => left.name.localeCompare(right.name))
     .flatMap((entry) => {
       const path = join(directory, entry.name);
       return entry.isDirectory() ? listFilesUnder(path) : [path];

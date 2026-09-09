@@ -8,18 +8,13 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, sep } from 'node:path';
-import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
+import { afterAll, describe, expect, it } from 'vite-plus/test';
 
 import { readTextWithin } from './safe-read.mjs';
 import { writeTextWithin } from './safe-write.mjs';
 
-let root;
-let outside;
-
-beforeAll(() => {
-  root = resolve(mkdtempSync(join(tmpdir(), 'safe-fs-root-')));
-  outside = resolve(mkdtempSync(join(tmpdir(), 'safe-fs-outside-')));
-});
+const root = resolve(mkdtempSync(join(tmpdir(), 'safe-fs-root-')));
+const outside = resolve(mkdtempSync(join(tmpdir(), 'safe-fs-outside-')));
 
 afterAll(() => {
   for (const dir of [root, outside]) {

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vite-plus/test';
 
 import { analyseClosure, classifyLink, classifyPathToken } from './closure.mjs';
+import { escapeKinds, escapingSkillFiles } from './test-fixtures.mjs';
 
 describe('classifyLink', () => {
   const rootDirectory = 'skills/epic';
@@ -118,30 +119,10 @@ describe('analyseClosure', () => {
   });
 
   test('reports a link, a command and an import as distinct kinds', () => {
-    const files = [
-      {
-        content: [
-          'Read [the contract](../../docs/agents/contract.md).',
-          '',
-          '```bash',
-          'vp run test',
-          '```',
-        ].join('\n'),
-        path: 'skills/epic/SKILL.md',
-      },
-      {
-        content:
-          "import { scan } from '@repo/example-scan/deterministic-scan';",
-        path: 'skills/epic/scripts/run.mjs',
-      },
-    ];
+    const files = escapingSkillFiles();
 
     const { escapes } = analyseClosure({ files, rootDirectory });
-    expect(
-      escapes
-        .map((finding) => finding.kind)
-        .sort((left, right) => left.localeCompare(right)),
-    ).toEqual(['command', 'import', 'link']);
+    expect(escapeKinds(escapes)).toEqual(['command', 'import', 'link']);
     expect(escapes.find((finding) => finding.kind === 'link')?.resolved).toBe(
       'docs/agents/contract.md',
     );
@@ -173,16 +154,19 @@ describe('analyseClosure', () => {
     ).toEqual([]);
   });
 });
+const hasSchemaDoc = (path) => path === 'packages/example-scan/SCHEMA_V1.md';
+
+const hasAdvancedReference = (path) =>
+  path === 'skills/epic/references/advanced.md';
 
 describe('classifyPathToken', () => {
   const rootDirectory = 'skills/epic';
   const fromDirectory = 'skills/epic';
 
   test('prefers the file-relative reading when that is the file that exists', () => {
-    const exists = (path) => path === 'skills/epic/references/advanced.md';
     expect(
       classifyPathToken({
-        exists,
+        exists: hasAdvancedReference,
         fromDirectory,
         rootDirectory,
         token: 'references/advanced.md',
@@ -194,10 +178,9 @@ describe('classifyPathToken', () => {
   });
 
   test('falls back to the repository root, which is where prose usually means', () => {
-    const exists = (path) => path === 'packages/example-scan/SCHEMA_V1.md';
     expect(
       classifyPathToken({
-        exists,
+        exists: hasSchemaDoc,
         fromDirectory,
         rootDirectory,
         token: 'packages/example-scan/SCHEMA_V1.md',

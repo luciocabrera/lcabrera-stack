@@ -8,7 +8,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  completeFileList,
   gateClosure,
   gateJudgesItsOwnEdit,
   localModuleClosure,
@@ -310,45 +309,6 @@ describe('the roster the sweep runs', () => {
   it('names each gate once', () => {
     const names = REVIEW_GATES.map((gate) => gate.name);
     expect(new Set(names).size).toBe(names.length);
-  });
-});
-
-describe('whether the changed-file list can be trusted', () => {
-  it('accepts a list that accounts for every changed file', () => {
-    expect(
-      completeFileList({ expected: '2', filenames: ['a.mjs', 'b.mjs'] }),
-    ).toEqual(['a.mjs', 'b.mjs']);
-  });
-
-  it('accepts an empty list for a pull request whose diff has gone empty', () => {
-    expect(completeFileList({ expected: '0', filenames: [] })).toEqual([]);
-  });
-
-  it('rejects a list the files endpoint capped', () => {
-    expect(
-      completeFileList({
-        expected: '3200',
-        filenames: Array.from({ length: 3000 }, () => 'a.mjs'),
-      }),
-    ).toBeUndefined();
-  });
-
-  it('rejects a count that came back empty', () => {
-    expect(
-      completeFileList({ expected: '', filenames: ['a.mjs'] }),
-    ).toBeUndefined();
-  });
-
-  it('rejects a count that came back null', () => {
-    expect(
-      completeFileList({ expected: 'null', filenames: ['a.mjs'] }),
-    ).toBeUndefined();
-  });
-
-  it('accepts a list longer than expected, which is a push mid-read', () => {
-    expect(
-      completeFileList({ expected: '1', filenames: ['a.mjs', 'b.mjs'] }),
-    ).toEqual(['a.mjs', 'b.mjs']);
   });
 });
 

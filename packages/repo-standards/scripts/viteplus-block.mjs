@@ -24,7 +24,7 @@ const stripComments = (text) => {
   let previous;
   do {
     previous = current;
-    current = current.replace(HTML_COMMENT, '');
+    current = current.replaceAll(HTML_COMMENT, '');
   } while (current !== previous);
   return current;
 };
@@ -35,10 +35,10 @@ export const findRegion = (text) => {
   if (start === -1 && end === -1) return { kind: 'absent' };
   if (start === -1 || end === -1 || end < start) return { kind: 'unpaired' };
   return {
-    kind: 'present',
-    innerStart: start + START_MARKER.length,
-    innerEnd: end,
     inner: text.slice(start + START_MARKER.length, end),
+    innerEnd: end,
+    innerStart: start + START_MARKER.length,
+    kind: 'present',
   };
 };
 

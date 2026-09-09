@@ -2,15 +2,14 @@ import { spawnSync } from 'node:child_process';
 import { rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   editIn,
   makeRegisterRepo,
   PLANNING_DIR,
-  REQUIREMENT_DIR,
   removeRegisterRepos,
+  REQUIREMENT_DIR,
   writeIn,
 } from './doc-register-fixtures.mjs';
 

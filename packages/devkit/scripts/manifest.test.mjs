@@ -11,6 +11,7 @@ import {
   parseManifest,
   serialiseManifest,
 } from './manifest.mjs';
+import { serialisationFacts } from './test-fixtures.mjs';
 
 const A = hashContent('a');
 const B = hashContent('b');
@@ -90,7 +91,9 @@ describe('classifyMaterialisation', () => {
 describe('isWritten / isReported', () => {
   test('only the three write states write', () => {
     expect(['added', 'restored', 'updated'].every(isWritten)).toBe(true);
-    expect(['conflict', 'current', 'modified'].some(isWritten)).toBe(false);
+    expect(
+      ['conflict', 'current', 'modified'].some((value) => isWritten(value)),
+    ).toBe(false);
   });
 
   test('a surviving edit and a refused adoption are both reported', () => {
@@ -104,7 +107,9 @@ describe('isWritten / isReported', () => {
   });
 
   test('an edit and a refused adoption are never recorded', () => {
-    expect(['conflict', 'modified'].some(isRecorded)).toBe(false);
+    expect(['conflict', 'modified'].some((value) => isRecorded(value))).toBe(
+      false,
+    );
   });
 
   test('a refusal is reported, never written and never recorded', () => {
@@ -178,11 +183,13 @@ describe('nextManifest', () => {
 describe('serialiseManifest', () => {
   test('orders paths so a re-sync produces no incidental diff', () => {
     const raw = serialiseManifest({
-      files: { 'b.md': A, 'a.md': B },
+      files: { 'a.md': B, 'b.md': A },
       packageVersion: '1.0.0',
       version: 1,
     });
-    expect(raw.indexOf('a.md')).toBeLessThan(raw.indexOf('b.md'));
-    expect(raw.endsWith('\n')).toBe(true);
+    expect(serialisationFacts(raw, ['a.md', 'b.md'])).toEqual({
+      endsWithNewline: true,
+      ordered: true,
+    });
   });
 });

@@ -23,10 +23,10 @@ import { readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { validateCommitMessage } from './commit-convention.mjs';
 import { positional } from './cli-input.mjs';
-import { resolveHostRoot } from './host-root.mjs';
+import { validateCommitMessage } from './commit-convention.mjs';
 import { resolveGitDir } from './git-dir.mjs';
+import { resolveHostRoot } from './host-root.mjs';
 import { reportWarnings } from './report-warnings.mjs';
 import { readTextWithin } from './safe-read.mjs';
 import { deriveWorkspaceScopes } from './workspace-scopes.mjs';
@@ -51,7 +51,7 @@ const main = () => {
   }
 
   const workspaces = deriveWorkspaceScopes(REPO_ROOT);
-  const { skipped, errors, warnings } = validateCommitMessage(
+  const { errors, skipped, warnings } = validateCommitMessage(
     readMessage(source),
     { workspaces },
   );

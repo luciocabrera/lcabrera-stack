@@ -38,14 +38,13 @@ export const initRefusal = ({
   if (!isGitRepository) {
     return 'init: not a git repository — run `git init` first, or run init in the repository root.';
   }
-  if (force || upgrade) return undefined;
+  if (force || upgrade) return;
   if (configExists) {
     return 'init: devkit.config.json is already here — this repository is initialised. Run `devkit sync` to materialise, `devkit init --upgrade` to add config a newer version infers, or --force to rewrite it.';
   }
   if (manifestExists) {
     return 'init: a devkit manifest is already here — this repository is initialised. Run `devkit sync` to materialise, `devkit init --upgrade` to add config a newer version infers, or --force to start over.';
   }
-  return undefined;
 };
 
 const RUNNERS = [
@@ -93,17 +92,17 @@ const RUNNERS = [
     name: 'yarn',
   },
   {
+    // Not on the runner image, and corepack does not provide it.
+    ciSetup: [
+      '- name: Set up Bun',
+      '  uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0',
+    ],
     commands: {
       audit: 'bun audit',
       check: 'bun run check',
       install: 'bun install --frozen-lockfile',
       test: 'bun test',
     },
-    // Not on the runner image, and corepack does not provide it.
-    ciSetup: [
-      '- name: Set up Bun',
-      '  uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0',
-    ],
     detect: ({ files }) => files.has('bun.lockb') || files.has('bun.lock'),
     name: 'bun',
   },
@@ -139,7 +138,7 @@ const FALLBACK_RUNNER = 'npm';
  * @returns {string | undefined}
  */
 export const runnerFromUserAgent = (userAgent) => {
-  const [named] = (userAgent ?? '').split('/');
+  const [named] = (userAgent ?? '').split('/', 1);
   return RUNNERS.some((candidate) => candidate.name === named)
     ? named
     : undefined;
@@ -189,14 +188,14 @@ export const inferRunner = ({
  *
  * @param {{ defaultBranch?: string, existing?: object, upgrade?: boolean }} args
  */
-export const recordsDefaultBranch = ({
+export const isDefaultBranchRecorded = ({
   defaultBranch,
   existing = {},
   upgrade = false,
 }) =>
   defaultBranch !== undefined &&
   defaultBranch !== '' &&
-  !(upgrade && existing.conventions?.defaultBranch !== undefined);
+  (!upgrade || existing.conventions?.defaultBranch === undefined);
 
 /**
  * The config `init` writes, layered OVER whatever is already there.
@@ -241,17 +240,18 @@ export const initialConfig = ({
     : { ...commands };
   return {
     ...existing,
-    ...(ciSetup.length > 0 && !(upgrade && existing.ci?.setup !== undefined)
-      ? { ci: { ...existing.ci, setup: ciSetup } }
-      : {}),
+    ...(ciSetup.length > 0 &&
+      (!upgrade || existing.ci?.setup === undefined) && {
+        ci: { ...existing.ci, setup: ciSetup },
+      }),
     commands: Object.fromEntries(
       Object.entries(merged).toSorted(([left], [right]) =>
         left.localeCompare(right),
       ),
     ),
-    ...(recordsDefaultBranch({ defaultBranch, existing, upgrade })
-      ? { conventions: { ...existing.conventions, defaultBranch } }
-      : {}),
+    ...(isDefaultBranchRecorded({ defaultBranch, existing, upgrade }) && {
+      conventions: { ...existing.conventions, defaultBranch },
+    }),
     profile,
   };
 };
@@ -295,8 +295,8 @@ export const upgradeKeptCommands = ({ commands, existing = {} }) =>
 export const upgradeKeptCiSetup = ({ ciSetup = [], existing = {} }) => {
   const kept = existing.ci?.setup;
   if (
-    ciSetup.length === 0 ||
     kept === undefined ||
+    ciSetup.length === 0 ||
     (Array.isArray(kept) &&
       kept.length === ciSetup.length &&
       kept.every((line, index) => line === ciSetup[index]))
@@ -418,7 +418,6 @@ export const initFailure = ({ planned, unmet }) => {
   if (planned === 0) {
     return 'init: nothing was materialised. The selected profile placed no files, so this repository has not been set up.';
   }
-  return undefined;
 };
 
 export const placedHooksPath = ({ entries, hooksPath }) =>

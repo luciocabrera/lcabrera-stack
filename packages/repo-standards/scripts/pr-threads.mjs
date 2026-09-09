@@ -34,8 +34,8 @@ import { flagValue, parsePullNumber, parseThreadId } from './cli-input.mjs';
 import { errorMessage } from './error-message.mjs';
 import { runGh } from './gh-exec.mjs';
 import { fetchPullRequestThreads } from './pr-threads-api.mjs';
-import { formatThreads, summarizeThreads } from './review-threads.mjs';
 import { resolvePullNumber, resolveRepository } from './review-gate-status.mjs';
+import { formatThreads, summarizeThreads } from './review-threads.mjs';
 
 const pullForCurrentBranch = () => {
   try {
@@ -43,17 +43,18 @@ const pullForCurrentBranch = () => {
       runGh(['pr', 'view', '--json', 'number', '--jq', '.number']),
     );
   } catch {
-    return undefined;
+    return;
   }
 };
 
 const USAGE =
   'Usage: vp run pr:threads -- [--pr <number>] [--repo <owner/name>] [--json] [--resolve <thread-id>]';
 
-const RESOLVE_MUTATION = `
-mutation($thread:ID!) {
-  resolveReviewThread(input:{threadId:$thread}) { thread { isResolved } }
-}`;
+const RESOLVE_MUTATION = [
+  'mutation($thread:ID!) {',
+  '  resolveReviewThread(input:{threadId:$thread}) { thread { isResolved } }',
+  '}',
+].join('\n');
 
 const resolveThread = (threadId) => {
   const raw = runGh([
@@ -114,7 +115,8 @@ const main = () => {
       ),
     );
   } else {
-    for (const line of formatThreads({ number, repository, threads })) {
+    const rendered = formatThreads({ number, repository, threads });
+    for (const line of rendered) {
       console.log(line);
     }
   }

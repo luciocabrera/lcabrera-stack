@@ -29,7 +29,7 @@ const QUEUE_PREFIX = 'refs/heads/gh-readonly-queue/';
 
 export const pullNumberFromQueueRef = (ref) => {
   if (typeof ref !== 'string' || !ref.startsWith(QUEUE_PREFIX)) {
-    return undefined;
+    return;
   }
   const match = QUEUE_ENTRY.exec(ref);
   return match === null ? undefined : Number(match[1]);
@@ -37,11 +37,11 @@ export const pullNumberFromQueueRef = (ref) => {
 
 const sha = (value) => (typeof value === 'string' ? value : '');
 
-const spansNothing = ({ baseSha, headSha }) =>
+const isEmptySpan = ({ baseSha, headSha }) =>
   baseSha === '' || headSha === '' || baseSha === headSha;
 
 const withRange = (subject, range) =>
-  spansNothing(range)
+  isEmptySpan(range)
     ? {
         error: `the commit range \`${range.baseSha || '(absent)'}..${range.headSha || '(absent)'}\` spans no commit`,
       }
@@ -83,7 +83,7 @@ export const statusSha = ({ eventName, payload }) =>
 export const subjectEnv = ({ pullRequest, range, repository }) => {
   const baseSha = sha(range?.baseSha);
   const headSha = sha(range?.headSha);
-  if (spansNothing({ baseSha, headSha })) {
+  if (isEmptySpan({ baseSha, headSha })) {
     throw new Error(
       `refusing to export the commit range \`${baseSha || '(absent)'}..${headSha || '(absent)'}\`, which spans no commit`,
     );

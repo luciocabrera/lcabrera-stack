@@ -1,9 +1,6 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
-import { runGit } from './git-exec.mjs';
-
 /**
  * The failure this guards is a feature branch checked out in the SHARED clone,
  * which moves HEAD under every other agent working there. It must fire on that
@@ -21,6 +18,7 @@ import {
   checkoutIsolationFinding,
   readCheckoutFacts,
 } from './checkout-isolation.mjs';
+import { runGit } from './git-exec.mjs';
 
 const facts = (overrides) => ({
   branch: 'feat/123-something',
@@ -97,25 +95,24 @@ describe('checkoutIsolationFinding', () => {
     ).not.toBe(undefined);
   });
 });
+const repository = () => {
+  const repositoryRoot = mkdtempSync(join(tmpdir(), 'checkout-facts-'));
+  runGit({
+    args: ['init', '--initial-branch=main', '.'],
+    cwd: repositoryRoot,
+  });
+  runGit({
+    args: ['config', 'user.email', 'test@example.com'],
+    cwd: repositoryRoot,
+  });
+  runGit({ args: ['config', 'user.name', 'Test'], cwd: repositoryRoot });
+  writeFileSync(join(repositoryRoot, 'a.txt'), 'one\n');
+  runGit({ args: ['add', 'a.txt'], cwd: repositoryRoot });
+  runGit({ args: ['commit', '-m', 'chore: first'], cwd: repositoryRoot });
+  return repositoryRoot;
+};
 
 describe('readCheckoutFacts', () => {
-  const repository = () => {
-    const repositoryRoot = mkdtempSync(join(tmpdir(), 'checkout-facts-'));
-    runGit({
-      args: ['init', '--initial-branch=main', '.'],
-      cwd: repositoryRoot,
-    });
-    runGit({
-      args: ['config', 'user.email', 'test@example.com'],
-      cwd: repositoryRoot,
-    });
-    runGit({ args: ['config', 'user.name', 'Test'], cwd: repositoryRoot });
-    writeFileSync(join(repositoryRoot, 'a.txt'), 'one\n');
-    runGit({ args: ['add', 'a.txt'], cwd: repositoryRoot });
-    runGit({ args: ['commit', '-m', 'chore: first'], cwd: repositoryRoot });
-    return repositoryRoot;
-  };
-
   it('reads the branch, and reports a clean primary checkout as clean', () => {
     const checkout = repository();
     const result = readCheckoutFacts(checkout);

@@ -62,8 +62,8 @@ bin, because `bin` is not part of the `exports` map the gate walks.
    the probe above. It is not a trade-off with a cost attached; the artifact
    does not execute, and no Node flag reachable from `node_modules/.bin` turns
    it on.
-2. **Build to JavaScript.** Rejected on what one manifest key costs. `shipsSource`
-   in
+2. **Build to JavaScript.** Rejected on what one manifest key costs.
+   `shipsSource` (now `isSourceShipped`) in
    [`packages/repo-standards/scripts/api-surface-config.mjs`](../../packages/repo-standards/scripts/api-surface-config.mjs)
    is `manifest.scripts?.build === undefined`, and `isBuiltPublicPackage` in
    `publish-surface.mjs` is that key plus `publishConfig.access`. Adding a

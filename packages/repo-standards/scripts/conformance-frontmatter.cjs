@@ -67,7 +67,7 @@ const groupEntries = (raw) => {
  * @param {string} value
  * @returns {string}
  */
-const unquote = (value) => value.replace(/^['"]|['"]$/g, '').trim();
+const unquote = (value) => value.replaceAll(/^['"]|['"]$/g, '').trim();
 
 /**
  * @param {readonly string[]} lines
@@ -93,13 +93,13 @@ const listValues = (lines) => {
       .replace(/^\[/, '')
       .replace(/\]$/, '')
       .split(',')
-      .map(unquote)
+      .map((value) => unquote(value))
       .filter((entry) => entry.length > 0);
   }
 
   const items = lines.filter((line) => line.startsWith('- '));
   if (items.length === 0) {
-    return undefined;
+    return;
   }
 
   return items
@@ -116,7 +116,7 @@ const listValues = (lines) => {
  * } | null}
  */
 const parseFrontmatterContent = (rawContent) => {
-  const split = splitFrontmatter(rawContent.replace(/\r\n?/g, '\n'));
+  const split = splitFrontmatter(rawContent.replaceAll(/\r\n?/g, '\n'));
   if (split === null) {
     return null;
   }

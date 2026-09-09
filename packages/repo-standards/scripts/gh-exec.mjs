@@ -58,6 +58,43 @@ export const runGh = (args) => {
     }).trim();
   } catch (error) {
     const detail = (error.stderr ?? '').toString().trim();
-    throw new Error(`gh ${args[0]} failed: ${detail || error.message}`);
+    throw new Error(`gh ${args[0]} failed: ${detail || error.message}`, {
+      cause: error,
+    });
   }
+};
+
+const UNUSABLE = { list: [], usable: false };
+
+const readList = (raw) => {
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? { list: parsed, usable: true } : UNUSABLE;
+  } catch {
+    return UNUSABLE;
+  }
+};
+
+/**
+ * `gh pr list --json …` output as an array, or an empty one.
+ *
+ * Output that is not JSON, or is JSON that is not an array, is unusable in the
+ * same way and takes the same path: the caller's `warning` on stderr, then an
+ * empty array. No output at all is silent — the command printed nothing, and
+ * there is nothing to say about it.
+ *
+ * Empty rather than throwing because both callers degrade rather than stop: the
+ * board still renders its claims and the prune still counts commits. `warning`
+ * is the caller's, because what is lost differs between them.
+ *
+ * @param {string} raw
+ * @param {{ warning: string }} args
+ * @returns {unknown[]}
+ */
+export const parsePullRequests = (raw, { warning }) => {
+  if (!raw.trim()) return [];
+  const { list, usable } = readList(raw);
+  if (usable) return list;
+  process.stderr.write(warning);
+  return [];
 };

@@ -127,7 +127,7 @@ const saveBaseline = (baseline) =>
 const parseAccept = (argv) => {
   const at = argv.indexOf('--accept');
   if (at === -1) {
-    return undefined;
+    return;
   }
   const reasonAt = argv.indexOf('--reason');
   return {
@@ -228,7 +228,9 @@ const main = () => {
     return;
   }
 
-  const grandfathered = Object.values(baseline).flatMap(Object.keys).length;
+  const grandfathered = Object.values(baseline).flatMap((value) =>
+    Object.keys(value),
+  ).length;
   console.log(
     `Documented-path gate passed: ${governedDocs().length} doc(s) checked, ${grandfathered} grandfathered.`,
   );

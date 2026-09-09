@@ -57,8 +57,8 @@ describe('linkTextFor', () => {
 describe('parseArgs', () => {
   it('defaults the target to the current directory', () => {
     expect(parseArgs([], '/repo/wt')).toEqual({
-      target: '/repo/wt',
       dryRun: false,
+      target: '/repo/wt',
     });
   });
 
@@ -66,8 +66,8 @@ describe('parseArgs', () => {
     expect(
       parseArgs(['--dry-run', '--target', '/repo/other'], '/repo/wt'),
     ).toEqual({
-      target: '/repo/other',
       dryRun: true,
+      target: '/repo/other',
     });
   });
 
@@ -77,8 +77,8 @@ describe('parseArgs', () => {
 
   it('treats a flag-like value as no target at all', () => {
     expect(parseArgs(['--target', '--dry-run'], '/repo/wt')).toEqual({
-      target: '/repo/wt',
       dryRun: true,
+      target: '/repo/wt',
     });
   });
 });

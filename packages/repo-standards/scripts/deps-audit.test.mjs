@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  auditDidRun,
   classifyAdvisories,
+  didAuditRun,
   formatAdvisory,
   isAtLeast,
   readAdvisories,
@@ -14,7 +14,7 @@ const advisory = (overrides = {}) => ({
   cwe: 'CWE-77',
   findings: [{ dev: true, optional: false, paths: ['.>lodash'], version: '1' }],
   github_advisory_id: 'GHSA-35jh-r3h4-6jhm',
-  id: 1106913,
+  id: 1_106_913,
   module_name: 'lodash',
   patched_versions: '>=4.17.21',
   severity: 'high',
@@ -29,16 +29,16 @@ const report = (advisories = {}, totalDependencies = 1122) => ({
   metadata: { totalDependencies, vulnerabilities: {} },
 });
 
-describe('auditDidRun', () => {
+describe('didAuditRun', () => {
   it('rejects a report that walked no dependencies', () => {
-    expect(auditDidRun(report({}, 0))).toBe(false);
-    expect(auditDidRun({ advisories: {} })).toBe(false);
-    expect(auditDidRun({})).toBe(false);
-    expect(auditDidRun()).toBe(false);
+    expect(didAuditRun(report({}, 0))).toBe(false);
+    expect(didAuditRun({ advisories: {} })).toBe(false);
+    expect(didAuditRun({})).toBe(false);
+    expect(didAuditRun()).toBe(false);
   });
 
   it('accepts a report that counted a real tree', () => {
-    expect(auditDidRun(report())).toBe(true);
+    expect(didAuditRun(report())).toBe(true);
   });
 });
 
@@ -56,9 +56,13 @@ describe('isAtLeast', () => {
   });
 });
 
+const REGISTRY_ASSIGNED_ID = '1106913';
+
 describe('readAdvisories', () => {
   it('keys on the GHSA id, not the registry-assigned number', () => {
-    const [found] = readAdvisories(report({ 1106913: advisory() }));
+    const [found] = readAdvisories(
+      report({ [REGISTRY_ASSIGNED_ID]: advisory() }),
+    );
     expect(found.ghsa).toBe('GHSA-35jh-r3h4-6jhm');
   });
 

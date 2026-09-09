@@ -4,41 +4,41 @@ import { resolveAffected, resolveTestGroups } from './affected-tests.mjs';
 
 const GRAPH = [
   {
-    name: 'vite-configs',
-    kind: 'pkg',
-    dir: 'packages/vite-configs',
-    pkgName: '@lcabrera/vite-config',
     deps: new Set(),
+    dir: 'packages/vite-configs',
+    kind: 'pkg',
+    name: 'vite-configs',
+    pkgName: '@lcabrera/vite-config',
   },
   {
-    name: 'utils',
-    kind: 'pkg',
-    dir: 'packages/utils',
-    pkgName: '@lcabrera/utils',
     deps: new Set(['@lcabrera/vite-config']),
-  },
-  {
-    name: 'ui',
+    dir: 'packages/utils',
     kind: 'pkg',
-    dir: 'packages/ui',
-    pkgName: '@lcabrera/ui',
-    deps: new Set(['@lcabrera/vite-config', '@lcabrera/utils']),
+    name: 'utils',
+    pkgName: '@lcabrera/utils',
   },
   {
-    name: 'showcase',
-    kind: 'app',
+    deps: new Set(['@lcabrera/utils', '@lcabrera/vite-config']),
+    dir: 'packages/ui',
+    kind: 'pkg',
+    name: 'ui',
+    pkgName: '@lcabrera/ui',
+  },
+  {
+    deps: new Set(['@lcabrera/ui', '@lcabrera/vite-config']),
     dir: 'apps/showcase',
+    kind: 'app',
+    name: 'showcase',
     pkgName: 'showcase',
-    deps: new Set(['@lcabrera/vite-config', '@lcabrera/ui']),
   },
 ];
 
 const FIXTURE_GLOBAL_PACKAGES = ['@lcabrera/vite-config'];
 
 const FIXTURE_LINT_ONLY_PATTERNS = [
-  '^packages/vite-configs/eslint\\.',
-  '^packages/vite-configs/vite\\.(lint|fmt)\\.shared\\.config\\.ts$',
-  '(^|/)eslint\\.config\\.mjs$',
+  String.raw`^packages/vite-configs/eslint\.`,
+  String.raw`^packages/vite-configs/vite\.(lint|fmt)\.shared\.config\.ts$`,
+  String.raw`(^|/)eslint\.config\.mjs$`,
 ];
 
 const affected = (files) =>
@@ -48,6 +48,13 @@ const affected = (files) =>
     graph: GRAPH,
     lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
   });
+
+const expectScopedToUtilsAndDependents = (result) => {
+  expect(result.mode).toBe('scoped');
+  expect(new Set(result.packages)).toEqual(
+    new Set(['@lcabrera/ui', '@lcabrera/utils', 'showcase']),
+  );
+};
 
 describe('resolveAffected — lint-only carve-out', () => {
   it('selects nothing for an eslint-factory-only change in vite-configs', () => {
@@ -76,10 +83,7 @@ describe('resolveAffected — lint-only carve-out', () => {
       'packages/vite-configs/eslint.custom-rules.shared.config.mjs',
       'packages/utils/src/foo.ts',
     ]);
-    expect(result.mode).toBe('scoped');
-    expect(new Set(result.packages)).toEqual(
-      new Set(['@lcabrera/utils', '@lcabrera/ui', 'showcase']),
-    );
+    expectScopedToUtilsAndDependents(result);
   });
 });
 
@@ -105,31 +109,27 @@ describe('resolveAffected — still forces full where it must', () => {
 
 describe('resolveAffected — ordinary scoping is unchanged', () => {
   it('scopes a workspace change to that workspace and its dependents', () => {
-    const result = affected(['packages/utils/src/foo.ts']);
-    expect(result.mode).toBe('scoped');
-    expect(new Set(result.packages)).toEqual(
-      new Set(['@lcabrera/utils', '@lcabrera/ui', 'showcase']),
-    );
+    expectScopedToUtilsAndDependents(affected(['packages/utils/src/foo.ts']));
   });
 
   it('selects nothing for an empty diff', () => {
     expect(affected([]).mode).toBe('none');
   });
 });
+const scriptsGroup = (groups) =>
+  groups.find(
+    (group) => group.task === 'test:scripts' && group.packages.length === 0,
+  );
+
+const groupsFor = (files) =>
+  resolveTestGroups({
+    files,
+    globalPackages: FIXTURE_GLOBAL_PACKAGES,
+    graph: GRAPH,
+    lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
+  });
 
 describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () => {
-  const groupsFor = (files) =>
-    resolveTestGroups({
-      files,
-      globalPackages: FIXTURE_GLOBAL_PACKAGES,
-      graph: GRAPH,
-      lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
-    });
-  const scriptsGroup = (groups) =>
-    groups.find(
-      (group) => group.task === 'test:scripts' && group.packages.length === 0,
-    );
-
   it('adds only the root test:scripts group for a scripts-only change', () => {
     const result = groupsFor(['scripts/lib/foo.mjs']);
     expect(result.scripts).toBe(true);
