@@ -11,9 +11,6 @@
 
 import { inc, satisfies, validRange } from 'semver';
 
-const SCOPED_KEY =
-  /^\s+(?<quote>['"]?)(?<name>@?[\w.-]+(?:\/[\w.-]+)?)\k<quote>:\s*(?<range>\S.*?)\s*$/u;
-
 const LITERAL_FIELDS = [
   'dependencies',
   'devDependencies',
@@ -23,9 +20,34 @@ const LITERAL_FIELDS = [
 
 const PROTOCOL = /^[a-z]+:/u;
 
-const unquoted = (value) => value.replace(/^(['"])(.*)\1$/u, '$2');
+const INDENTED = /^\s/u;
 
-const withoutComment = (line) => line.split(/\s+#/u)[0] ?? '';
+const COMMENT = /\s#/u;
+
+const WHITESPACE = /\s/u;
+
+const QUOTES = new Set(["'", '"']);
+
+const unquoted = (value) =>
+  value.length > 1 && QUOTES.has(value[0]) && value.at(-1) === value[0]
+    ? value.slice(1, -1)
+    : value;
+
+const withoutComment = (line) => {
+  const start = line.search(COMMENT);
+  return start === -1 ? line : line.slice(0, start);
+};
+
+const entryOn = ({ line, path, text }) => {
+  const separator = text.indexOf(':');
+  if (separator === -1 || !INDENTED.test(text)) return [];
+
+  const name = unquoted(text.slice(0, separator).trim());
+  const range = unquoted(text.slice(separator + 1).trim());
+  if (name === '' || range === '' || WHITESPACE.test(name)) return [];
+
+  return [{ line, name, path, range }];
+};
 
 /**
  * Every `name: range` pair a workspace YAML declares, wherever it sits in the
@@ -34,13 +56,11 @@ const withoutComment = (line) => line.split(/\s+#/u)[0] ?? '';
  * @param {{ path: string, text: string }} args
  */
 export const catalogRanges = ({ path, text }) =>
-  text.split('\n').flatMap((line, index) => {
-    const match = SCOPED_KEY.exec(withoutComment(line));
-    if (match?.groups === undefined) return [];
-
-    const { name, range } = match.groups;
-    return [{ line: index + 1, name, path, range: unquoted(range) }];
-  });
+  text
+    .split('\n')
+    .flatMap((line, index) =>
+      entryOn({ line: index + 1, path, text: withoutComment(line) }),
+    );
 
 /**
  * Every literal range a manifest declares. A `catalog:`, `workspace:` or `npm:`
