@@ -5,7 +5,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { Orders } from './Orders.component';
-import { PAGE_LIMIT } from './Orders.constants';
+import { COLUMNS, PAGE_LIMIT } from './Orders.constants';
 import { loader } from './orders.loader';
 import { ORDER_ROWS } from './orders.rows';
 import { readOrdersPage } from './readOrdersPage.util';
@@ -34,12 +34,19 @@ describe('the orders route', () => {
     expect(await screen.findByRole('grid')).toBeDefined();
   });
 
-  it('renders a header for every column it declares', async () => {
+  it('renders a header for every column it declares, and no others', async () => {
     renderRoute();
     await screen.findByRole('grid');
 
-    expect(await screen.findAllByText('Customer')).not.toHaveLength(0);
-    expect(await screen.findAllByText('Total')).not.toHaveLength(0);
+    const headers = await screen.findAllByRole('columnheader');
+    const labelled = headers.map((header, index) => {
+      const label = COLUMNS[index]?.label ?? '';
+      return header.textContent?.startsWith(label) === true
+        ? label
+        : header.textContent;
+    });
+
+    expect(labelled).toEqual(COLUMNS.map((column) => column.label));
   });
 
   it('renders the first row it was given', async () => {
