@@ -124,6 +124,48 @@ export const packageNameFor = (directoryName) => {
   return cleaned === '' ? 'app' : cleaned;
 };
 
+const MANIFEST_KEY_ORDER = [
+  'name',
+  'version',
+  'private',
+  'type',
+  'scripts',
+  'devDependencies',
+  'engines',
+  'packageManager',
+];
+
+/**
+ * The same manifest, with its keys in the order the formatter sorts them into.
+ *
+ * `create` runs before anything is installed in the target, so there is no
+ * formatter there to call and the order has to be written correctly the first
+ * time. It cannot be left to the object literals either: the fields arrive from
+ * two modules, so the file's order would be a property of a spread in the other
+ * one. A key with no place is refused rather than written somewhere, and every
+ * key is checked rather than only the ones a comparator happened to visit.
+ *
+ * @param {object} manifest
+ * @returns {object}
+ */
+export const inFormatterOrder = (manifest) => {
+  const keys = Object.keys(manifest);
+  const unplaced = keys.filter((key) => !MANIFEST_KEY_ORDER.includes(key));
+  if (unplaced.length > 0) {
+    throw new TypeError(
+      `create: ${unplaced.map((key) => quoted(key)).join(', ')} ${unplaced.length === 1 ? 'has' : 'have'} no place in the manifest key order, so where to write ${unplaced.length === 1 ? 'it' : 'them'} is undecided`,
+    );
+  }
+  return Object.fromEntries(
+    keys
+      .toSorted(
+        (left, right) =>
+          MANIFEST_KEY_ORDER.indexOf(left) - MANIFEST_KEY_ORDER.indexOf(right),
+      )
+      .map((key) => [key, manifest[key]]),
+  );
+};
+
 /**
  * The manifest a created repository starts from.
  *
@@ -149,9 +191,11 @@ export const initialManifest = ({ name, profile = '' }) => {
     type: 'module',
     version: '0.0.0',
   };
-  return includesRung({ profile, rung: 'monorepo' })
-    ? withWorkspaceFields({ manifest: base })
-    : base;
+  return inFormatterOrder(
+    includesRung({ profile, rung: 'monorepo' })
+      ? withWorkspaceFields({ manifest: base })
+      : base,
+  );
 };
 
 /**
