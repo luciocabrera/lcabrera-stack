@@ -366,18 +366,6 @@ export const tasksFor = ({ profile }) =>
   );
 
 /**
- * The rung's tasks whose bin is not installed here.
- *
- * A task naming a bin the consumer does not have is the same failure the rung
- * tagging avoids, arriving by a different route: the gate runtime is an
- * optional half of this kit, and a repository that took only the materialiser
- * would otherwise be given a dozen tasks that all exit with a
- * command-not-found.
- *
- * @param {{ availableBins: Iterable<string>, profile: string }} args
- * @returns {string[]}
- */
-/**
  * The rung's tasks that check something the blueprint places.
  *
  * `commands:verify` reads the command reference this kit ships, and that
@@ -394,6 +382,18 @@ export const blueprintDependentTasks = ({ profile }) =>
     .filter(([, task]) => task.needs === BLUEPRINT)
     .map(([name]) => name);
 
+/**
+ * The rung's tasks whose bin is not installed here.
+ *
+ * A task naming a bin the consumer does not have is the same failure the rung
+ * tagging avoids, arriving by a different route: the gate runtime is an
+ * optional half of this kit, and a repository that took only the materialiser
+ * would otherwise be given a dozen tasks that all exit with a
+ * command-not-found.
+ *
+ * @param {{ availableBins: Iterable<string>, profile: string }} args
+ * @returns {string[]}
+ */
 export const withheldTasks = ({ availableBins, profile }) => {
   const available = new Set(availableBins);
   return rungTasks(profile)
