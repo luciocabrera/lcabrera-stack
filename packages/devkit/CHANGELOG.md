@@ -1,5 +1,184 @@
 # @lcabrera/devkit
 
+## 0.4.0
+
+### Minor Changes
+
+- fce7e03: Both packages now declare `engines.node`. A bin is executed by your Node
+  straight out of `node_modules/.bin`, with none of this toolchain in front of it,
+  so the runtime it was written for is something your installer can act on instead
+  of something you find out from a syntax error on the first run. The floor is a
+  floor and not a band: no upper bound, so the next Node major will not refuse an
+  install nobody has looked at.
+
+  The size ceiling follows the file rather than the extension, and so does the
+  mid-stream-exit gate. `repo-verify-script-size`
+  measured `.mjs` and `.cjs` alone, which meant a tooling script left the ceiling
+  by being renamed and nothing reported it — a gate reading fewer files passes
+  exactly like a clean tree. It now also measures a `.js`, `.ts`, `.mts` or `.cts`
+  under a `scripts/` directory. `repo-verify-script-exits` had the same narrow
+  selection and now shares the one predicate, so the two select the same
+  extensions. They still keep separate directory skip lists, and only the size gate
+  reads `gates.scriptSize.skipDirs`. Expect a finding on a repository that keeps an oversized script
+  there under one of those extensions, or one that calls `process.exit()`; nothing
+  else changes about what either gate decides.
+
+  `files` in both packages excludes a colocated test by name rather than by
+  extension, so a test beside a script never reaches your install regardless of
+  what it is written in. `repo-standards` does the same for its fixture modules.
+
+- b0320db: `closure` now reads the shipped files that are not markdown. A workflow's
+  actions, its step scripts and its secret expressions; the executables any shipped
+  file invokes out of the install's bin directory; and the paths a definition in
+  your `paths.agents` directory names in its frontmatter or its plain prose are all
+  resolved against what the package places.
+
+  Until now a file with no markdown structure had nothing for `closure` to read, so
+  it reported the same clean pass as a file that was genuinely self-contained.
+  Expect new findings on a tree that has such files: a step running a script the
+  install does not carry, a local action that does not travel, an executable no
+  gate task places, and a secret only a repository's own settings could supply. A
+  secret that something after its own `||` answers is not one of them, and neither
+  is the token the platform sets itself.
+
+  Two new escape kinds appear in the report, `bin` and `secret`, alongside `link`,
+  `command`, `import` and `requires`. Reading a workflow file is unconditional, and
+  that is the release. The two new `analyseClosure` options widen what else it can
+  answer, and each is inert when omitted: `allowedBins` is the roster of
+  executables the install places, and without it no invocation is resolved;
+  `agentDirectory` names the directory whose definitions are read as prose, and
+  without it none is.
+
+- a5a9e32: `devkit create <directory> [--profile <name>]` makes a repository that does not
+  exist yet. It creates the directory, runs `git init` on the trunk branch the
+  shipped gates expect, writes a minimal manifest, materialises the selected
+  profile through the same plan `sync` and `doctor` read, and leaves an initial
+  commit.
+
+  `init` is unchanged, including both of its refusals. `create` mirrors them from
+  the other side: it refuses a target that is not empty, a target nested inside an
+  existing git repository, and a profile that is not on the ladder — each naming
+  what to run instead.
+
+  No gate task is wired by a `create` run, because nothing is installed in a
+  repository made a second ago. Install, then run `devkit init --upgrade` there to
+  add the tasks whose binaries have arrived.
+
+- ac9ef21: **The `monorepo` rung places a workspace, not a description of one.**
+
+  `devkit create <dir> --profile monorepo` now emits the workspace itself: a pnpm
+  workspace file with a catalog and `engineStrict`, the exact Node pin beside the
+  band an install may proceed in, the root Vite+ lint and format config, a Biome
+  config, and a tsconfig roster with the generator wired to it. On that path, one
+  install leaves a tree that lints, formats, type-checks and tests, and the install
+  is what writes every tsconfig — none of them is written by hand.
+
+  **That last sentence is about `create` and only `create`.** The root manifest is
+  the one file this rung does not materialise, so `sync` and `init` never write the
+  task block, the dependencies or the engine pin into a repository that already
+  exists. What makes the tsconfigs appear is `prepare`, and `prepare` is part of
+  that manifest.
+
+  **Breaking, landing as a `minor` because this package is pre-1.0.** A repository
+  whose config says `"profile": "monorepo"` or `"profile": "full"` receives files
+  it did not receive before, and `sync` will place them on the next run. Set
+  `"profile": "repo"` to keep receiving exactly what you received before.
+
+  A tree that already holds a `pnpm-workspace.yaml`, a `vite.config.ts` or a
+  `biome.jsonc` of its own sees each reported as `conflict` and left alone, and
+  that is the end of it: nothing the rung places stops working because your file
+  was kept. Acknowledge one with
+  `devkit doctor --accept <path> --reason "<why>"`, or move yours aside and let
+  `sync` place the seed. The `typescript-config` workspace the rung writes under
+  your `packages/` directory pins its own dependencies outright rather than through
+  `catalog:`, so it installs whether or not your workspace file declares the
+  catalogs. The catalog is for the packages you author.
+
+  **Moving an existing repository up to this rung leaves it half-configured, and
+  nothing says so.** Flip `"profile": "repo"` to `"profile": "monorepo"` and run
+  `sync`: every file lands as `added`, `doctor --check` reports everything up to
+  date, and the install succeeds. There is no conflict here and no warning — that
+  is what makes this one worth reading twice. But your root manifest still has no
+  `prepare`, no task block and no `vite-plus`, so nothing runs the generator, and
+  the workspace the rung just placed carries a `typecheck` task pointing at a
+  `tsconfig.app.json` that was never written:
+
+  ```
+  error TS5058: The specified path does not exist: 'tsconfig.app.json'.
+  ```
+
+  The placed workspace's `test` task is broken for the same reason, and reports it
+  differently — it cannot resolve `@lcabrera/vite-config` or `vite-plus` from the
+  root `vite.config.ts`, because only the root manifest declares them.
+
+  `devkit init --upgrade` does not close this, and the reason is not that the
+  binaries are missing: with `vp` and `devkit` both installed it still adds only
+  `devkit:check` and `devkit:sync`. The workspace task block belongs to no rung of
+  the gate-task table at all, so no set of installed binaries reaches it. Run
+  `devkit create` into a scratch directory with this profile and copy the
+  `scripts`, `devDependencies`, `engines` and `packageManager` fields out of its
+  root `package.json` into yours, then install again; that one step fixes both
+  tasks.
+
+  Neither this nor the catalog case above is something the materialiser can express
+  yet. Every precondition it understands is a claim about your config or your
+  installed packages — never about another file in the same plan, and never about
+  the root manifest, which is not one of the files it places.
+
+  The root manifest is the one file the rung does not materialise, because it
+  carries the repository's own name: its task block, engine band, package manager
+  pin and dependencies are written by `create`, once, and are never rewritten
+  afterwards. `init` leaves an existing repository's manifest alone, as it always
+  has.
+
+  An asset named `gitignore` now lands as `.gitignore`. A file spelled that way in
+  the package is dropped from the tarball by the packer, so it reached nobody while
+  reading, in a source checkout, exactly like one that shipped.
+
+  `analyseClosure` takes a new optional `allowedPackages`: from this rung up a
+  shipped file may import a package the tree it is emitted into declares, and such
+  an import is no longer reported as an escape.
+
+- 1510ddd: **Breaking, landing as a `minor` because this package is pre-1.0: the profile
+  that placed the harness is now called `repo`, and `full` names a larger rung.**
+
+  The profiles are a ladder of four rungs, each containing the one below it:
+  `agent` (what an agent reads), `repo` (adds what CI and git run: the workflows,
+  the hooks, the templates and `COMMANDS.md`), `monorepo` and `full`. `repo`
+  places exactly what `full` placed before. `monorepo` and `full` are accepted,
+  and in this version place what `repo` places; a run under either prints the
+  line saying so, and the line goes away when the rung places a group of its own.
+
+  A config with `"profile": "full"` still resolves, to the top rung, so nothing
+  breaks and nothing different is materialised today. It will widen when the
+  rungs above `repo` fill in. If the harness is what you wanted, set
+  `"profile": "repo"`: that is the rename. No runtime notice singles the old name
+  out beyond the placement line every rung above `repo` prints, because the name
+  is still valid and its meaning is what changed.
+
+  The `decisions` group, the ADR template and its home README, moves down to
+  `agent`: a record template and the README describing its home are prose a
+  directory holds, needing neither git nor a runner. A repository on `agent` that
+  already holds its own copies of both sees them reported as `conflict` on the
+  next `doctor`; acknowledge each with
+  `devkit doctor --accept <path> --reason "<why>"`, or let `sync` place the seeds
+  where the directory is empty.
+
+  `PROFILE_LADDER`, `includesRung`, `rungPlacedAs` and `placementNotice` are new
+  exports of `./config`; `PROFILES` now has four keys.
+
+### Patch Changes
+
+- 4744b8a: `create` writes the root manifest in the order the formatter sorts a manifest
+  into, so the repository it leaves passes its own `format:check` before anything
+  has been edited in it. The keys were previously written alphabetically, which
+  made the first task a consumer runs fail on the file `create` had just written.
+
+  The order cannot be delegated to the formatter — `create` runs before anything
+  is installed in the target, so there is none there to call — and it is now
+  stated in one place rather than emerging from object literals in two modules. A
+  field with no place in it is refused rather than written somewhere.
+
 ## 0.3.0
 
 ### Minor Changes

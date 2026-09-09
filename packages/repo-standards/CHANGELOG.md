@@ -1,5 +1,122 @@
 # @lcabrera/repo-standards
 
+## 0.5.0
+
+### Minor Changes
+
+- ea0bcdf: `looksLikeAdr` is now `isAdrFilename`, on the `./adr-registry` subpath. It
+  returns a boolean and now says so, which is what the repository asks of every
+  other predicate. Update the import; nothing about the behaviour changed.
+- fce7e03: Both packages now declare `engines.node`. A bin is executed by your Node
+  straight out of `node_modules/.bin`, with none of this toolchain in front of it,
+  so the runtime it was written for is something your installer can act on instead
+  of something you find out from a syntax error on the first run. The floor is a
+  floor and not a band: no upper bound, so the next Node major will not refuse an
+  install nobody has looked at.
+
+  The size ceiling follows the file rather than the extension, and so does the
+  mid-stream-exit gate. `repo-verify-script-size`
+  measured `.mjs` and `.cjs` alone, which meant a tooling script left the ceiling
+  by being renamed and nothing reported it — a gate reading fewer files passes
+  exactly like a clean tree. It now also measures a `.js`, `.ts`, `.mts` or `.cts`
+  under a `scripts/` directory. `repo-verify-script-exits` had the same narrow
+  selection and now shares the one predicate, so the two select the same
+  extensions. They still keep separate directory skip lists, and only the size gate
+  reads `gates.scriptSize.skipDirs`. Expect a finding on a repository that keeps an oversized script
+  there under one of those extensions, or one that calls `process.exit()`; nothing
+  else changes about what either gate decides.
+
+  `files` in both packages excludes a colocated test by name rather than by
+  extension, so a test beside a script never reaches your install regardless of
+  what it is written in. `repo-standards` does the same for its fixture modules.
+
+- 2db6a3b: `repo-eslint-staged` lints a list of files with the ESLint config that governs
+  each one, and fixes what ESLint can fix. A monorepo keeps one flat config per
+  workspace and none at the root, so a single `eslint` invocation has nothing to
+  point at, and the ESLint pass ends up running only after a commit exists — in a
+  pre-push gate or in CI, where a finding that would have fixed itself costs a
+  round trip instead.
+
+  Each path resolves to the nearest directory above it holding an
+  `eslint.config.mjs`, and each group runs from that directory with that config.
+  A path with no config above it is skipped rather than assigned to a config that
+  is some other workspace's: a repository's root scripts and its docs sit outside
+  every workspace. Paths ESLint does not lint are dropped too, so a staged-files
+  runner can hand it a whole changeset without filtering first.
+
+  A path the governing config itself ignores is left alone rather than failed.
+  Naming an ignored file is a warning, and at `--max-warnings 0` a staged `dist/`
+  or `build/` path would otherwise block a commit for being ignored — while a
+  whole-tree `eslint .` never visits it at all.
+
+  `--check` reports without writing. It exits 1 while findings remain, so it
+  gates as well as fixes.
+
+- c6d7b74: The tree-reading gates are bins now, alongside the commit, branch, pull request
+  and register gates that were already here. `repo-verify-commands`,
+  `repo-verify-deps-audit`, `repo-verify-departed-names`,
+  `repo-verify-renamed-mentions`, `repo-verify-doc-registers`,
+  `repo-verify-script-exits`, `repo-verify-eslint-pass`,
+  `repo-verify-viteplus-block`, `repo-verify-inventory`,
+  `repo-verify-lint-plugins`, `repo-verify-package-refs`,
+  `repo-verify-react-doctor`, `repo-verify-route-artifacts`,
+  `repo-verify-harness` and `repo-verify-review-threads` fail a build; the
+  change-scoped runners `repo-test-changed` and `repo-run-changed`, the coverage
+  pair `repo-merge-coverage` and `repo-coverage-report`, and the reports and
+  tools `repo-lint-report`, `repo-usage-report`, `repo-product-distance`,
+  `repo-docs-for-package`, `repo-pr-threads`, `repo-housekeeping-prune` and
+  `repo-worktree-env` do the rest. Each finds the repository by walking up from
+  its own location, the way the existing bins do, so it runs from an install as
+  well as from a checkout.
+
+  The repository facts these gates read are keys in `devkit.config.json` rather
+  than constants: `registers.requirementsDir` and `registers.planningDir`, and
+  under `gates` the blocks `commandsDoc`, `depsAudit`, `departedNames`,
+  `inventory`, `coverage`, `eslintPass`, `affectedTests`, `lintReport`,
+  `reactDoctor`, `usageReport` and `vitePlusBlock`. Every file-path key
+  defaults to the conventional location and is validated as repo-relative. The
+  workspace rosters (`coverage.mergeWorkspaces`, `coverage.reportWorkspaces`,
+  `eslintPass.probeWorkspaces`, `inventory.trees`) default to nothing, and a gate
+  handed an empty roster refuses to pass rather than passing over no workspaces.
+  `affectedTests.globalPackages` joins them: it names the shared config packages
+  whose change must force the full run, and an empty one is refused because a
+  scoped run in their place leaves the dependents untested while still reporting a
+  plausible subset. Its two neighbours are accepted empty on purpose —
+  `affectedTests.lintOnlyPatterns` (regular-expression sources for the paths the
+  linters already gate, whose absence only over-selects) and
+  `affectedTests.coverageTaskPackage` (one workspace, whose absence means no task
+  substitution).
+
+  Two of the bins read their input rather than resolving it: under `--changed`,
+  `repo-merge-coverage` and `repo-coverage-report` take the changed-file list on
+  stdin, so a repository wiring either into a task feeds that list itself and gets
+  a full run when it does not.
+
+  The modules a repository's own scripts may need beside the bins are exported:
+  `affected-tests`, `gh-exec`, `jsonc`, `merge-queue`, `public-package-dirs`,
+  `review-gate-reconcile`, `review-gate-status`, `review-threads`,
+  `route-artifacts`, and the `conformance-*` readers behind the harness gate.
+
+- ea0bcdf: `./gh-exec` gains `parsePullRequests`. It turns the JSON `gh pr list` writes on
+  stdout into an array. Output that is not JSON, or is JSON that is not an array,
+  is unusable in the same way and takes the same path: the warning the caller
+  passes goes to stderr and the result is an empty array. No output at all is an
+  empty array and no warning — the command printed nothing, and there is nothing
+  to say about it. Callers that previously parsed that output themselves no longer
+  have to decide what an unusable response means.
+
+### Patch Changes
+
+- a5a9e32: `repo-coverage-report` no longer fails on a workspace whose suite covers no file
+  of its own. Istanbul's json-summary writes `"pct": "Unknown"` — a string — for a
+  total with nothing in it, and the report formatted every percentage with
+  `toFixed`, so one such workspace ended the run after every other had already
+  been measured.
+
+  A metric is normalised as it is read now, and an empty total reads as complete —
+  which is the rule the monorepo aggregate already applied to itself, so the
+  per-workspace rows and the total no longer answer the same question two ways.
+
 ## 0.4.0
 
 ### Minor Changes
