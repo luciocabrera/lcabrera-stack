@@ -14,12 +14,21 @@ show. It has no server, no database and no fetch, so the rung it belongs to is
 falsifiable on its own: the tree it produces builds, serves a page, and passes
 its own typecheck, test, lint and format tasks.
 
+Every column that page declares turns sorting and filtering off. Both are
+resolved by whatever answers the read rather than in the browser, and a page
+assembled from a module answers the same rows to every request — so a header
+offering a sort would take a click and change nothing. The grid offers what this
+rung can answer instead: pinning, hiding, column widths, column order, the
+settings panel and the theme. Deleting the two flags from a column is what turns
+them back on, and it belongs with a loader that reads a page it can sort.
+
 The action route answers the fixed path the component library submits a grid's
 persisted state to — a sort, a column width, a pin, a global preference, the
 theme — and the page route exports the library's revalidation predicate beside
 its loader. Without that route the application still builds and serves, and the
-first sort then submits to a path the router cannot match: the not-found lands
-on the page and its error boundary takes the place of the table.
+first pin or column resize then submits to a path the router cannot match: the
+not-found lands on the page and its error boundary takes the place of the
+table.
 
 Every stack package the application names is declared as a semver range resolved
 from the registry, and the packed tarball gate now fails any produced file

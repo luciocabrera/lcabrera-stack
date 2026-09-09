@@ -57,6 +57,18 @@ describe('the orders route', () => {
     expect(await screen.findAllByText(customer)).not.toHaveLength(0);
   });
 
+  it('announces no header as sortable, offering no sort the loader cannot apply', async () => {
+    renderRoute();
+    await screen.findByRole('grid');
+
+    const headers = await screen.findAllByRole('columnheader');
+    const announced = headers
+      .filter((header) => header.getAttribute('aria-sort') !== null)
+      .map((header) => header.textContent);
+
+    expect(announced).toEqual([]);
+  });
+
   it('counts no more rows than the page behind it delivers', async () => {
     const page = await readOrdersPage({ limit: PAGE_LIMIT, skip: 0 });
 

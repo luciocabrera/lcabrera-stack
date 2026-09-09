@@ -6,16 +6,29 @@ status: review
 branch: feat/1076-devkit-emit-react-router-app
 area:
   - .changeset/monorepo-rung-emits-an-application.md
+  - .fallowrc.json
+  - biome.jsonc
+  - devkit.config.json
+  - docs/agents/public-package-suppressions.json
+  - docs/coordination/tasks/devkit-emit-react-router-app.md
+  - docs/decisions/ADR-120-the-blueprint-offers-only-what-its-rung-delivers.md
+  - docs/product/requirements/render-a-table-from-rows-alone.md
   - packages/devkit/ARCHITECTURE.md
   - packages/devkit/README.md
   - packages/devkit/assets/workspace/apps/**
   - packages/devkit/assets/workspace/gitignore
   - packages/devkit/assets/workspace/pnpm-workspace.yaml
   - packages/devkit/assets/workspace/packages/typescript-config/tsconfig.entries.ts
+  - packages/devkit/scripts/closure.mjs
+  - packages/devkit/scripts/closure-classify.mjs
+  - packages/devkit/scripts/closure-modules.test.mjs
+  - packages/devkit/scripts/workspace.mjs
   - packages/devkit/scripts/workspace-app.test.mjs
   - scripts/verify-devkit-tarball.mjs
   - scripts/lib/devkit-tarball.mjs
   - scripts/lib/devkit-tarball-consumer.test.mjs
+  - scripts/lib/devkit-tarball-produced.mjs
+  - vite.config.ts
 started: 2026-09-09
 updated: 2026-09-09
 plan: (none)
@@ -38,8 +51,9 @@ produced file carries a `workspace:` specifier.
 
 ## Status / next
 
-- Current step: review findings addressed — the application now routes the path
-  the component library submits persisted state to, so a sort and a theme toggle
-  are answered rather than left unmatched
+- Current step: review findings addressed — the emitted grid now declares
+  sorting and filtering off on every column, so it offers only the controls the
+  page behind it can answer, and the `area` above covers every path the pull
+  request touches
 - Blockers: none
 - Next: review

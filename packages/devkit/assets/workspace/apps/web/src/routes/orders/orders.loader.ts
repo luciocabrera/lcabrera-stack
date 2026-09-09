@@ -1,3 +1,10 @@
+/**
+ * The loader for the page route. `fetchPage` takes no argument because nothing
+ * in the request can change the page it answers: the rows live in the module,
+ * the whole set is one page, and the columns declare no sort and no filter for
+ * a request to carry.
+ */
+
 import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTableRouteLoader.util';
 
 import { APP_ID } from '@/constants/app.constants';

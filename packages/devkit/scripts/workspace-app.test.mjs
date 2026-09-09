@@ -7,13 +7,15 @@
  * failures that reach a consumer silently are asserted here. A `workspace:`
  * specifier resolves a sibling directory, which no bootstrapped repository has;
  * a caret on a package below 1.0.0 stops at the next minor, so a release lands
- * outside the range with every gate still green; and an unrouted submission
- * path answers a first interaction with a 404 rather than a build failure.
+ * outside the range with every gate still green; an unrouted submission path
+ * answers a first interaction with a 404 rather than a build failure; and a
+ * column capability left at its default puts a control on screen that the
+ * loader behind it cannot answer.
  */
 
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import semver from 'semver';
 import { describe, expect, test } from 'vite-plus/test';
 
@@ -163,6 +165,39 @@ describe('the application answers every state change its table makes', () => {
       (path) => !declared.has(path),
     );
     expect(undeclared).toEqual([]);
+  });
+});
+
+const ORDERS_ROUTE = 'routes/orders';
+
+const declaredColumns = async () => {
+  const module = await import(
+    pathToFileURL(join(appSourceRoot(), ORDERS_ROUTE, 'Orders.constants.ts'))
+      .href
+  );
+  return module.COLUMNS;
+};
+
+describe('the table it renders offers only what its loader answers', () => {
+  test('declares the columns the page shows', async () => {
+    const columns = await declaredColumns();
+    expect(columns.length).toBeGreaterThan(0);
+  });
+
+  test('turns sorting off on every one of them', async () => {
+    const columns = await declaredColumns();
+    const sortable = columns
+      .filter((column) => column.isSortable !== false)
+      .map((column) => column.key);
+    expect(sortable).toEqual([]);
+  });
+
+  test('turns filtering off on every one of them', async () => {
+    const columns = await declaredColumns();
+    const filterable = columns
+      .filter((column) => column.isFilterable !== false)
+      .map((column) => column.key);
+    expect(filterable).toEqual([]);
   });
 });
 

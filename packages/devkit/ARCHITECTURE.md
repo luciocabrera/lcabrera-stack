@@ -173,6 +173,18 @@ than an example a consumer adds, and what checks it is a test over the emitted
 tree here plus one inside the application that submits through the library's own
 hook and asserts the router answered.
 
+**The grid it renders offers only what the read behind it answers.** Every
+capability on the component library's column type defaults to on, so a column
+that says nothing offers sorting and filtering and the grid draws the controls
+for both. Neither is resolved in the browser, and the page this rung reads is
+assembled from a module, so both would take a click and change nothing. The
+columns therefore declare them off, and the flags are the one place a rung with a
+real read turns them back on
+([ADR-120](../../docs/decisions/ADR-120-the-blueprint-offers-only-what-its-rung-delivers.md)).
+What checks it is a test here that loads those declarations rather than reading
+the file as text, plus tests inside the application asserting the same thing and
+that a rendered header announces no sort.
+
 **A seed refers to its own directory relatively, so the layout is never
 interpolated.** There is no `{{paths.*}}` placeholder and none is needed: the
 register's README ships _into_ the register, so it links `tasks/_TEMPLATE.md`;
