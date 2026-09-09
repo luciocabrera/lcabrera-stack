@@ -5,8 +5,7 @@ owner: agent:claude
 status: review
 branch: refactor/1140-split-order-form-field-builders
 area:
-  - apps/showcase/src/routes/enterprise-orders/utils/orderFormFields.util.ts
-  - apps/showcase/src/routes/enterprise-orders/utils/orderFormFields.util.test.ts
+  - apps/showcase/src/routes/enterprise-orders/utils/**
   - apps/showcase/src/routes/enterprise-orders/OrderFormModal/**
 started: 2026-09-09
 updated: 2026-09-09

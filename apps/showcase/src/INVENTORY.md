@@ -51,12 +51,29 @@ so they live with the domain rather than inside one of its callers.
 
 ### Order form fields (`routes/enterprise-orders/utils/`)
 
-Create and edit each have their own builder. Shared tab helpers live in the same module; neither builder takes a mode flag.
+Create and edit each have their own builder. Shared tab helpers are one util per file. Neither builder takes a mode flag.
 
-| Artifact                     | Location                  | Description                                                                                      |
-| ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
-| `buildCreateOrderFormFields` | `orderFormFields.util.ts` | Field tree for a new order. Omits `order_number`, computed totals, and the audit group.          |
-| `buildEditOrderFormFields`   | `orderFormFields.util.ts` | Field tree for an existing order. Includes `order_number`, computed totals, and the audit group. |
+| Artifact                     | Location                             | Description                                                                                      |
+| ---------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `buildCreateOrderFormFields` | `buildCreateOrderFormFields.util.ts` | Field tree for a new order. Omits `order_number`, computed totals, and the audit group.          |
+| `buildEditOrderFormFields`   | `buildEditOrderFormFields.util.ts`   | Field tree for an existing order. Includes `order_number`, computed totals, and the audit group. |
+| `toOrderFormFields`          | `toOrderFormFields.util.ts`          | Wraps order-form tabs in a single tab container.                                                 |
+| `buildCreateOrderTab`        | `buildCreateOrderTab.util.ts`        | Order tab without `order_number`.                                                                |
+| `buildEditOrderTab`          | `buildEditOrderTab.util.ts`          | Order tab with a disabled `order_number`.                                                        |
+| `buildCustomerTab`           | `buildCustomerTab.util.ts`           | Customer identity and loyalty fields.                                                            |
+| `buildProductTab`            | `buildProductTab.util.ts`            | Product category, quantity, and measures.                                                        |
+| `buildCreatePricingTab`      | `buildCreatePricingTab.util.ts`      | Pricing inputs only.                                                                             |
+| `buildEditPricingTab`        | `buildEditPricingTab.util.ts`        | Pricing inputs plus read-only computed totals.                                                   |
+| `buildShippingTab`           | `buildShippingTab.util.ts`           | Shipping address and logistics.                                                                  |
+| `buildBillingTab`            | `buildBillingTab.util.ts`            | Billing address.                                                                                 |
+| `buildPaymentTab`            | `buildPaymentTab.util.ts`            | Payment status, method, and reference.                                                           |
+| `buildCreateNotesTab`        | `buildCreateNotesTab.util.ts`        | Notes without the audit group.                                                                   |
+| `buildEditNotesTab`          | `buildEditNotesTab.util.ts`          | Notes plus the collapsed audit group.                                                            |
+| `buildOrderSummaryFields`    | `buildOrderSummaryFields.util.ts`    | Shared summary fields: date, status, priority.                                                   |
+| `buildFlagsGroup`            | `buildFlagsGroup.util.ts`            | Rush, gift, fragile, and signature toggles.                                                      |
+| `buildPricingInputsGroup`    | `buildPricingInputsGroup.util.ts`    | Discount, shipping cost, and paid amount.                                                        |
+| `buildNotesGroup`            | `buildNotesGroup.util.ts`            | Order and internal notes.                                                                        |
+| `collectOrderFormAccessors`  | `collectOrderFormAccessors.util.ts`  | Leaf accessors from an order-form field tree.                                                    |
 
 ---
 

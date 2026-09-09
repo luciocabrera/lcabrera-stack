@@ -6,10 +6,8 @@ import type { EnterpriseOrderValues } from '../config';
 import type { OrderFormModalProps } from './OrderFormModal.types';
 
 import { ENTERPRISE_ORDERS_PATH } from '../config';
-import {
-  buildCreateOrderFormFields,
-  buildEditOrderFormFields,
-} from '../utils/orderFormFields.util';
+import { buildCreateOrderFormFields } from '../utils/buildCreateOrderFormFields.util';
+import { buildEditOrderFormFields } from '../utils/buildEditOrderFormFields.util';
 import { styles } from './OrderFormModal.stylex';
 
 export const OrderFormModal = ({
