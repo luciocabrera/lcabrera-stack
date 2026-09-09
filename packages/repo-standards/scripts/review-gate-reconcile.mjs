@@ -129,7 +129,7 @@ const resolveFrom = ({ from, specifier }) =>
 
 export const completeFileList = ({ expected, filenames }) => {
   const declared = String(expected).trim();
-  const count = Number(declared);
+  const count = Number.parseInt(declared);
   return declared !== '' && Number.isFinite(count) && filenames.length >= count
     ? filenames
     : undefined;
