@@ -52,10 +52,13 @@ const shippedExcept = (name) =>
 
 /**
  * A repository this kit set up, as it stands the day before an upgrade: it
- * holds the block, one task the consumer overrode, one of their own, and one
- * this kit is about to stop shipping.
+ * holds the block, one task of the consumer's own, and one this kit is about to
+ * stop shipping. `overridden` adds the fourth case — a shipped task the
+ * consumer rewrote — which a case wanting only writable drift leaves off.
+ *
+ * @param {{ overridden?: boolean }} [options]
  */
-const settledRepo = () => {
+const settledRepo = ({ overridden = true } = {}) => {
   const root = mkdtempSync(join(tmpdir(), 'devkit-tasks-'));
   roots.push(root);
   const recorded = { ...shippedExcept(ARRIVING), [DEPARTED]: 'kit departed' };
@@ -69,7 +72,7 @@ const settledRepo = () => {
     scripts: {
       ...recorded,
       build: 'their own build',
-      check: 'their own check',
+      ...(overridden && { check: 'their own check' }),
     },
   });
   writeJson(root, MANIFEST_FILE, {
@@ -87,6 +90,18 @@ afterEach(() => {
   for (const root of roots) rmSync(root, { force: true, recursive: true });
   roots.length = 0;
 });
+
+/**
+ * What one run wrote to the error stream, and what it returned. A case asserting
+ * only the text would pass over a run that said the right thing and exited zero.
+ */
+const erroredBy = (run) => {
+  const { error, restore } = silenced();
+  const code = run();
+  const output = error.mock.calls.flat().join('\n');
+  restore();
+  return { code, output };
+};
 
 /**
  * A removal is two claims, and a test asserting only the first would pass over
@@ -163,13 +178,25 @@ describe('sync reconciles the task block', () => {
   });
 
   test('doctor reports the pending block, and stops once it is synced', () => {
-    const root = settledRepo();
+    const root = settledRepo({ overridden: false });
     const { restore } = silenced();
 
     expect(runDoctor(['--check'], root)).toBe(1);
     runSync([], root);
     expect(runDoctor(['--check'], root)).toBe(0);
     restore();
+  });
+
+  test('a task left alone is drift, so doctor keeps reporting it after a sync', () => {
+    const root = settledRepo();
+    const { restore } = silenced();
+    runSync([], root);
+    restore();
+
+    const { code, output } = erroredBy(() => runDoctor(['--check'], root));
+
+    expect(code).toBe(1);
+    expect(output).toContain('1 item(s) differ from the package.');
   });
 
   test('a manifest this kit never wrote a task into is left alone', () => {
@@ -323,19 +350,6 @@ const withoutRunKey = () => {
   });
   writeJson(root, 'package.json', { name: 'consumer', private: true });
   return root;
-};
-
-/**
- * What one run wrote to the error stream, and what it returned. Both cases below
- * read the same two things, and a case asserting only the text would pass over a
- * run that said the right thing and exited zero.
- */
-const erroredBy = (run) => {
-  const { error, restore } = silenced();
-  const code = run();
-  const output = error.mock.calls.flat().join('\n');
-  restore();
-  return { code, output };
 };
 
 describe('what a run says when a command key is missing', () => {

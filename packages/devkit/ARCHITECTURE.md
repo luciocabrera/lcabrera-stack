@@ -48,7 +48,11 @@ route that only added is what left half the block unreachable before.
 
 **Planning is pure and separate from writing**, so `doctor` predicts exactly what
 `sync` would do. A doctor computing its answer by a different route than the
-command it describes is worse than no doctor, because it is believed.
+command it describes is worse than no doctor, because it is believed. The count
+`--check` exits on is the whole plan — what a run would write and what it would
+leave alone, over the files and the task block alike. Drop either half of either
+and the report still names what it found and then exits zero, which is the one
+outcome a drift gate must not produce.
 
 **`init` is `sync` plus wiring, and shares its writer.** Both go through
 `applyPlan`, rather than each applying its own plan. Written twice the two

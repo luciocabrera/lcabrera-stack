@@ -429,6 +429,13 @@ swap places for that file. One consequence follows from that and is worth
 knowing: an acknowledgement quiets the file **even when the package's own copy
 moves on**. `--verbose` is how you find what is being held back.
 
+**`--accept` takes a file, and a task is not a file.** A task in the block that a
+run left alone — one you rewrote, or one of your own under a name this kit ships
+— is divergence, so `doctor --check` counts it and fails, and there is no way to
+say you meant it. Restore the command this kit ships to quiet it, or run `doctor`
+without `--check` where you keep the override. Counting it is still the lesser
+harm: the alternative is a check that prints your changed task and exits zero.
+
 ## Configuration
 
 `devkit.config.json` at the consumer root, all of it optional:

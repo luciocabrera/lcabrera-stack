@@ -13,6 +13,11 @@ job for the gate tasks and `create`'s for the blueprint's, and a task whose
 binary is not installed is still never written into a manifest that lacks it. The
 record lives in a new `tasks` block in `.devkit-manifest.json`.
 
+A task the run left alone counts as divergence, so `doctor --check` fails on a
+block that has diverged. It reports what it counts either way; counting only the
+tasks a run would write would have made a check that names your changed task and
+then exits zero.
+
 The shipped `COMMANDS.md` now documents every task the kit wires, and
 `commands:verify` is wired from the `monorepo` profile up so a consumer's own gate
 holds the two together.

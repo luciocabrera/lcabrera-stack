@@ -100,14 +100,15 @@ const driftAdvice = ({ unresolved, writable }) => {
 };
 
 const reportDrift = ({ argv, config, entries, tasks }) => {
-  const { reported, written } = countsFor(entries);
+  const files = countsFor(entries);
+  const taskDrift = taskCounts(tasks);
 
   printPlacementNotice(config.profile);
   console.log(renderPlan(entries, { verbose: argv.includes('--verbose') }));
   printTaskPlan(tasks);
 
-  const writable = written + taskCounts(tasks).written;
-  const drifted = writable + reported;
+  const writable = files.written + taskDrift.written;
+  const drifted = writable + files.reported + taskDrift.reported;
   if (drifted === 0 || !argv.includes('--check')) return 0;
 
   console.error(
