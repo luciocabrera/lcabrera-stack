@@ -26,6 +26,7 @@ import {
 } from '#ui/utils/urlState';
 
 import { sanitizeFiltersByColumns } from '../shared/sanitizeFiltersByColumns.util';
+import { sanitizeLayoutByColumns } from '../shared/sanitizeLayoutByColumns.util';
 import { resolveLoaderGrouping } from './resolveLoaderGrouping.util';
 import { resolveLoaderTotalsPlacement } from './resolveLoaderTotalsPlacement.util';
 
@@ -86,23 +87,30 @@ export const readTableLoaderStateFromRequest = <
 
   const settingsTabOrder = tablePanelPreferences.settingsTabOrder;
 
-  const columnOrder = (cookieState.columnOrder ??
-    []) as ColumnOrderState<TData>;
-
-  const columnVisibility = (cookieState.columnVisibility ??
-    new Set()) as ColumnVisibilityState<TData>;
-
-  const columnSizing = (cookieState.columnSizing ??
-    {}) as ColumnSizingState<TData>;
-
-  const columnPinning =
-    cookieState.columnPinning ??
-    ({ left: [], right: [] } as ColumnPinningState<TData>);
-
   const standaloneSortParam = param('sorting');
-  const sorting = standaloneSortParam
-    ? deserializeSortingFromURL<TData>(standaloneSortParam)
-    : ([] as SortingState<TData>);
+
+  const persistedLayout = {
+    columnOrder: (cookieState.columnOrder ?? []) as ColumnOrderState<TData>,
+    columnPinning:
+      cookieState.columnPinning ??
+      ({ left: [], right: [] } as ColumnPinningState<TData>),
+    columnSizing: (cookieState.columnSizing ?? {}) as ColumnSizingState<TData>,
+    columnVisibility: (cookieState.columnVisibility ??
+      new Set()) as ColumnVisibilityState<TData>,
+    sorting: standaloneSortParam
+      ? deserializeSortingFromURL<TData>(standaloneSortParam)
+      : ([] as SortingState<TData>),
+  };
+
+  const {
+    columnOrder,
+    columnPinning,
+    columnSizing,
+    columnVisibility,
+    sorting,
+  } = columns
+    ? sanitizeLayoutByColumns({ columns, ...persistedLayout })
+    : persistedLayout;
 
   const standaloneFiltersParam = includeFilters ? param('filters') : undefined;
 

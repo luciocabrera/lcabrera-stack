@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { toWideAlltypes150Row } from './toWideAlltypes150Row.util';
+import { WIDE_ALLTYPES_COLUMNS } from './wideAlltypes150.constants';
 
-const driverRow = {
+const typedValues = {
   c_001: 1,
   c_002: '2',
   c_006: false,
@@ -17,9 +18,14 @@ const driverRow = {
   id: '1',
 };
 
+const driverRow: Readonly<Record<string, unknown>> = {
+  ...Object.fromEntries(WIDE_ALLTYPES_COLUMNS.map((column) => [column, 0])),
+  ...typedValues,
+};
+
 describe('toWideAlltypes150Row', () => {
   it('renders every value class the way the JSON endpoint did', () => {
-    expect(toWideAlltypes150Row(driverRow)).toStrictEqual({
+    expect(toWideAlltypes150Row(driverRow)).toMatchObject({
       c_001: 1,
       c_002: '2',
       c_006: false,
@@ -35,13 +41,13 @@ describe('toWideAlltypes150Row', () => {
     });
   });
 
-  it('keeps every column of the row it was given', () => {
+  it('emits every required column', () => {
     expect(
       Object.keys(toWideAlltypes150Row(driverRow)).toSorted((a, b) =>
         a.localeCompare(b),
       ),
     ).toStrictEqual(
-      Object.keys(driverRow).toSorted((a, b) => a.localeCompare(b)),
+      [...WIDE_ALLTYPES_COLUMNS].toSorted((a, b) => a.localeCompare(b)),
     );
   });
 
@@ -50,5 +56,15 @@ describe('toWideAlltypes150Row', () => {
 
     expect(driverRow.c_009).toBeInstanceOf(Date);
     expect(driverRow.c_015).toBeInstanceOf(Uint8Array);
+  });
+
+  it('throws when a required key is missing', () => {
+    const incomplete = Object.fromEntries(
+      Object.entries(driverRow).filter(([key]) => key !== 'id'),
+    );
+
+    expect(() => toWideAlltypes150Row(incomplete)).toThrow(
+      'wide_alltypes_150 row is missing required key "id"',
+    );
   });
 });
