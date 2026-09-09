@@ -325,44 +325,49 @@ const withoutRunKey = () => {
   return root;
 };
 
+/**
+ * What one run wrote to the error stream, and what it returned. Both cases below
+ * read the same two things, and a case asserting only the text would pass over a
+ * run that said the right thing and exited zero.
+ */
+const erroredBy = (run) => {
+  const { error, restore } = silenced();
+  const code = run();
+  const output = error.mock.calls.flat().join('\n');
+  restore();
+  return { code, output };
+};
+
 describe('what a run says when a command key is missing', () => {
   test('sync names the key it cannot answer, and the command that adds it', () => {
     const root = withoutRunKey();
-    const { error, restore } = silenced();
 
-    runSync([], root);
+    const { output } = erroredBy(() => runSync([], root));
 
-    const output = error.mock.calls.flat().join('\n');
     expect(output).toContain('run');
     expect(output).toContain('devkit init --upgrade');
-    restore();
   });
 
   test('doctor --check names it beside what sync can still write', () => {
     const root = withoutRunKey();
-    const { error, restore } = silenced();
 
-    expect(runDoctor(['--check'], root)).toBe(1);
+    const { code, output } = erroredBy(() => runDoctor(['--check'], root));
 
-    const output = error.mock.calls.flat().join('\n');
+    expect(code).toBe(1);
     expect(output).toContain('Run devkit sync for the rest.');
     expect(output).toContain('devkit init --upgrade');
-    restore();
   });
 
   test('and does not send them to sync when sync would write nothing', () => {
     const root = withoutRunKey();
-    const { error, restore } = silenced();
+    erroredBy(() => runSync([], root));
 
-    runSync([], root);
-    error.mockClear();
-    expect(runDoctor(['--check'], root)).toBe(1);
+    const { code, output } = erroredBy(() => runDoctor(['--check'], root));
 
-    const output = error.mock.calls.flat().join('\n');
+    expect(code).toBe(1);
     expect(output).toContain('would change none of them');
     expect(output).not.toContain('Run devkit sync');
     expect(output).toContain('devkit init --upgrade');
-    restore();
   });
 });
 

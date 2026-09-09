@@ -314,7 +314,7 @@ export const upgradeKeptCiSetup = ({ ciSetup = [], existing = {} }) => {
   ];
 };
 
-export const BLUEPRINT = 'blueprint';
+const BLUEPRINT = 'blueprint';
 
 export const GATE_TASKS = {
   'adr:list': { args: ['--list'], bin: 'repo-verify-adrs', rung: 'repo' },
