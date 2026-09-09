@@ -28,7 +28,7 @@ const toPosix = (value) => value.replaceAll('\\', '/');
  * @param {string} directory
  * @returns {string[]} every file under it, `node_modules` and `.git` aside
  */
-export const materialisedFiles = (directory) =>
+const materialisedFiles = (directory) =>
   readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     if (entry.name === 'node_modules' || entry.name === '.git') return [];
     const path = join(directory, entry.name);

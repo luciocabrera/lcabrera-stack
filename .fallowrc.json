@@ -21,6 +21,7 @@
     "**/.react-router/**",
     "**/.tmp/**",
     "**/coverage/**",
+    "packages/devkit/assets/workspace/apps/**",
     "reports/**"
   ],
   "ignoreDependencies": [

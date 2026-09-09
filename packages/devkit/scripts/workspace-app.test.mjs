@@ -10,11 +10,13 @@
  * lands outside the range with every gate still green.
  */
 
-import { readdirSync, readFileSync } from 'node:fs';
-import { dirname, join, sep } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import semver from 'semver';
 import { describe, expect, test } from 'vite-plus/test';
+
+import { readFilesUnder } from './files.mjs';
 
 const PACKAGE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -29,12 +31,6 @@ const STACK_SCOPE = '@lcabrera/';
 const WORKSPACE_SPECIFIER = 'workspace:';
 
 const read = (...segments) => readFileSync(join(...segments), 'utf8');
-
-const filesUnder = (directory) =>
-  readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(directory, entry.name);
-    return entry.isDirectory() ? filesUnder(path) : [path];
-  });
 
 const appManifest = JSON.parse(
   read(BLUEPRINT, ...APP_DIRECTORY.split('/'), 'package.json'),
@@ -141,14 +137,9 @@ describe('a shipped range survives the next release of what it names', () => {
 
 describe('nothing the kit ships resolves through this repository', () => {
   test('no shipped file carries a workspace specifier', () => {
-    const carriers = filesUnder(ASSETS)
-      .filter((path) => read(path).includes(WORKSPACE_SPECIFIER))
-      .map((path) =>
-        path
-          .slice(ASSETS.length + 1)
-          .split(sep)
-          .join('/'),
-      );
+    const carriers = readFilesUnder({ directory: ASSETS, root: ASSETS })
+      .filter((asset) => asset.content.includes(WORKSPACE_SPECIFIER))
+      .map((asset) => asset.path);
     expect(carriers).toEqual([]);
   });
 });
