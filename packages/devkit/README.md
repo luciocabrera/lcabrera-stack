@@ -180,6 +180,13 @@ devkit init [--profile <name>] [--force] [--upgrade]
 gate tasks whose binaries are actually installed, and then materialises the
 selected profile.
 
+Wiring them is the part only `init` does. From then on every run reconciles
+them: a task still holding what this kit wrote is updated, a task you changed is
+kept and reported, and a task this kit stops shipping is removed. A task whose
+binary is not installed here is only ever withheld from a manifest that does not
+already carry it — what is on this machine decides what may be wired, not what
+belongs in the file.
+
 It **refuses** rather than proceeding when the repository is already set up — a
 config or a manifest already present means `sync` is the command you want, and it
 is the one that knows to leave your edits alone. Nothing overrides the check that
@@ -288,12 +295,13 @@ and `init` never write the dependencies or the engine pin into a repository that
 already exists, and `prepare` is part of that manifest.
 
 **The task block is the exception: it is reconciled rather than copied.** Every
-run merges it key by key against the record of what this kit last wrote there. A
-task it wrote and you have not touched is updated in place, a task you changed is
-reported and kept as you have it, a task it no longer ships is removed, and one
-it has added since arrives — beside your own tasks, which it never touches. A
-manifest holding no task this kit provably wrote is left entirely alone, so a
-repository that never took the block does not acquire one.
+run merges it key by key against the record of what this kit last wrote there,
+exactly as it does the gate tasks. A task it wrote and you have not touched is
+updated in place, a task you changed is reported and kept as you have it, a task
+it no longer ships is removed, and one it has added since arrives — beside your
+own tasks, which it never touches. What no run but `create` does is establish
+this block: a manifest holding none of it is left alone, so a repository that
+never took it does not acquire tasks naming binaries it does not declare.
 
 Raising an existing repository to this rung therefore takes a second step, and
 **nothing tells you so**: every file lands as `added`, `doctor --check` reports

@@ -130,18 +130,21 @@ Each is loud when it is missing except the first, which is why it is first.
 
 ## 6. The tasks in this repository's manifest
 
-The materialiser writes these into `package.json`, and reconciles them on every
-later run rather than writing them once: a task it wrote and you have not
-touched is updated in place, a task you changed is reported and kept as you have
-it, and a task this kit stops shipping is removed. Your own tasks are never
-touched — write them in here as you add them, so this file stays true.
+`devkit init` wires these into `package.json`, and every later run reconciles
+them rather than leaving them as they were first written: a task this kit wrote
+and you have not touched is updated in place, a task you changed is reported and
+kept as you have it, and a task this kit stops shipping is removed. Your own
+tasks are never touched — write them in here as you add them, so this file stays
+true.
 
 They are listed rather than tabulated because the command that runs a task is
 substituted from your config, and no column width fits every repository's.
 
-A task is written only when the package carrying its command is installed, so a
-repository that took the materialiser and not the gate runtime gets the two that
-name `devkit` and none of the rest.
+A task is **wired** only where the package carrying its command is installed, so
+a repository that took the materialiser and not the gate runtime gets the two
+that name `devkit` and none of the rest. A task already in your manifest is
+reconciled either way: what happens to be installed on the machine running the
+command says nothing about what belongs in the file.
 
 From the `agent` profile up:
 
@@ -173,8 +176,11 @@ below are that toolchain's.
 
 ### The blueprint's own tasks
 
-Written from the `monorepo` profile up, alongside the workspace layout, the
-dependency catalog and the lint configuration that rung places.
+These arrive with `devkit create` at the `monorepo` profile, alongside the
+workspace layout, the dependency catalog and the lint configuration that rung
+places. They are the one set no other run wires, because they name binaries only
+the manifest `create` writes declares — and they are reconciled from then on
+exactly like the tasks above.
 
 - `{{commands.run}} check` — format, lint and type-check in one pass.
 - `{{commands.run}} format:all` — format the tree.

@@ -7,12 +7,20 @@
  * decision was right and whose write was not is the same clean output.
  */
 
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
+import { applyInit } from './command-init.mjs';
 import { runDoctor, runSync } from './command-sync.mjs';
+import { GATE_TASKS } from './init.mjs';
 import { MANIFEST_FILE } from './manifest.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
 import { WORKSPACE_SCRIPTS } from './workspace.mjs';
@@ -176,6 +184,164 @@ describe('sync reconciles the task block', () => {
       build: 'their own build',
     });
     expect(readJson(root, MANIFEST_FILE).tasks).toBeUndefined();
+    restore();
+  });
+});
+
+const GATE_TASK = 'adr:verify';
+
+const GATE_COMMAND = GATE_TASKS[GATE_TASK].bin;
+
+/**
+ * A repository holding the gate tasks a previous run wired, with the bins they
+ * name resolvable — which is what separates "not written because it cannot run"
+ * from "not written because this run does not establish this group".
+ */
+const gateRepo = ({ recorded, scripts }) => {
+  const root = mkdtempSync(join(tmpdir(), 'devkit-gate-'));
+  roots.push(root);
+  mkdirSync(join(root, 'node_modules', '.bin'), { recursive: true });
+  mkdirSync(join(root, '.git'));
+  const bins = new Set(Object.values(GATE_TASKS).map((task) => task.bin));
+  for (const bin of bins) {
+    writeFileSync(join(root, 'node_modules', '.bin', bin), '');
+  }
+  writeJson(root, 'devkit.config.json', {
+    commands: COMMANDS,
+    profile: 'repo',
+  });
+  writeJson(root, 'package.json', { name: 'consumer', private: true, scripts });
+  writeJson(root, MANIFEST_FILE, {
+    files: {},
+    packageVersion: '0.0.0',
+    tasks: recorded,
+    version: 1,
+  });
+  return root;
+};
+
+describe('sync reconciles the gate tasks too', () => {
+  test('a gate task still holding what this kit wrote is updated', () => {
+    const root = gateRepo({
+      recorded: { [GATE_TASK]: `${GATE_COMMAND} --old` },
+      scripts: { [GATE_TASK]: `${GATE_COMMAND} --old` },
+    });
+    const { restore } = silenced();
+
+    runSync([], root);
+
+    expect(readJson(root, 'package.json').scripts[GATE_TASK]).toBe(
+      GATE_COMMAND,
+    );
+    restore();
+  });
+
+  test('a gate task the consumer changed is kept and reported', () => {
+    const root = gateRepo({
+      recorded: { [GATE_TASK]: `${GATE_COMMAND} --old` },
+      scripts: { [GATE_TASK]: 'their own checker' },
+    });
+    const { log, restore } = silenced();
+
+    runSync([], root);
+
+    expect(readJson(root, 'package.json').scripts[GATE_TASK]).toBe(
+      'their own checker',
+    );
+    expect(log.mock.calls.flat().join('\n')).toMatch(
+      new RegExp(String.raw`modified\s+${GATE_TASK}`),
+    );
+    restore();
+  });
+
+  test('a gate task this kit stopped shipping goes, and is named', () => {
+    const root = gateRepo({
+      recorded: { [DEPARTED]: 'repo-departed', [GATE_TASK]: GATE_COMMAND },
+      scripts: { [DEPARTED]: 'repo-departed', [GATE_TASK]: GATE_COMMAND },
+    });
+    const { log, restore } = silenced();
+
+    runSync([], root);
+
+    expect(readJson(root, 'package.json').scripts[DEPARTED]).toBeUndefined();
+    expect(log.mock.calls.flat().join('\n')).toMatch(
+      new RegExp(String.raw`removed\s+${DEPARTED}`),
+    );
+    restore();
+  });
+
+  test('a repository with no manifest is planned no tasks, and told so', () => {
+    const root = mkdtempSync(join(tmpdir(), 'devkit-gate-'));
+    roots.push(root);
+    mkdirSync(join(root, '.git'));
+    writeJson(root, 'devkit.config.json', {
+      commands: COMMANDS,
+      profile: 'repo',
+    });
+    const { error, restore } = silenced();
+
+    applyInit({ profile: 'repo', root, upgrade: true });
+
+    expect(readJson(root, MANIFEST_FILE).tasks).toBeUndefined();
+    expect(error.mock.calls.flat().join('\n')).toContain(
+      'no gate tasks were written',
+    );
+    restore();
+  });
+
+  test('sync does not wire a repository that has taken no gate task; init does', () => {
+    const root = gateRepo({ recorded: {}, scripts: { build: 'their own' } });
+    const { restore } = silenced();
+
+    runSync([], root);
+    expect(readJson(root, 'package.json').scripts).toEqual({
+      build: 'their own',
+    });
+
+    applyInit({ profile: 'repo', root, upgrade: true });
+    const { scripts } = readJson(root, 'package.json');
+
+    expect(scripts.build).toBe('their own');
+    expect(scripts[GATE_TASK]).toBe(GATE_COMMAND);
+    restore();
+  });
+});
+
+const withoutRunKey = () => {
+  const root = mkdtempSync(join(tmpdir(), 'devkit-keys-'));
+  roots.push(root);
+  writeJson(root, 'devkit.config.json', {
+    commands: Object.fromEntries(
+      Object.entries(COMMANDS).filter(([key]) => key !== 'run'),
+    ),
+    profile: 'repo',
+  });
+  writeJson(root, 'package.json', { name: 'consumer', private: true });
+  return root;
+};
+
+describe('what a run says when a command key is missing', () => {
+  test('sync names the key it cannot answer, and the command that adds it', () => {
+    const root = withoutRunKey();
+    const { error, restore } = silenced();
+
+    runSync([], root);
+
+    const output = error.mock.calls.flat().join('\n');
+    expect(output).toContain('run');
+    expect(output).toContain('devkit init --upgrade');
+    restore();
+  });
+
+  test('doctor --check says it too, rather than only sending them to sync', () => {
+    const root = withoutRunKey();
+    const { error, restore } = silenced();
+
+    expect(runDoctor(['--check'], root)).toBe(1);
+
+    const output = error.mock.calls.flat().join('\n');
+    expect(output).toContain('Run devkit sync.');
+    expect(output).toContain('devkit init --upgrade');
     restore();
   });
 });

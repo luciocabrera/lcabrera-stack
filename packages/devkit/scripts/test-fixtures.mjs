@@ -38,6 +38,7 @@ export const silencedConsole = (vi) => {
   const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
   const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
   return {
+    error,
     log,
     restore: () => {
       log.mockRestore();

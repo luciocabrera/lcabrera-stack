@@ -13,12 +13,35 @@ const SHIPPED = { check: 'kit check', 'format:all': 'kit format' };
 const stateOf = (entries, name) =>
   entries.find((entry) => entry.name === name)?.state;
 
-const planned = (overrides) => planTasks({ tasks: SHIPPED, ...overrides });
+const planned = ({ group = {}, ...overrides }) =>
+  planTasks({ groups: [{ tasks: SHIPPED, ...group }], ...overrides });
 
 describe('planTasks', () => {
   test('leaves a manifest this kit has never written a task into alone', () => {
     expect(planned({ scripts: { build: 'their own' } })).toEqual([]);
     expect(planned({})).toEqual([]);
+  });
+
+  test('a group this run may establish is written into an empty manifest', () => {
+    const entries = planned({ group: { establish: true } });
+    expect(entries.map((entry) => entry.state)).toEqual(['added', 'added']);
+  });
+
+  test('a task whose command does not resolve is not written into a manifest that lacks it', () => {
+    const entries = planned({
+      group: { establish: true, withheld: new Set(['format:all']) },
+    });
+    expect(stateOf(entries, 'check')).toBe('added');
+    expect(entries.some((entry) => entry.name === 'format:all')).toBe(false);
+  });
+
+  test('a withheld task already in the manifest is still reconciled', () => {
+    const entries = planned({
+      group: { withheld: new Set(['check']) },
+      recorded: { check: 'kit check --old' },
+      scripts: { check: 'kit check --old' },
+    });
+    expect(stateOf(entries, 'check')).toBe('updated');
   });
 
   test('adds what is missing beside a task the consumer wrote themselves', () => {
@@ -79,13 +102,51 @@ describe('planTasks', () => {
   });
 });
 
+describe('planTasks over more than one group', () => {
+  const OTHER = { 'other:task': 'kit other' };
+
+  const overGroups = (overrides) =>
+    planTasks({
+      groups: [{ tasks: SHIPPED }, { tasks: OTHER }],
+      ...overrides,
+    });
+
+  test('a group with no proof of authorship is not unlocked by another', () => {
+    const entries = overGroups({
+      recorded: { 'other:task': 'kit other' },
+      scripts: { 'other:task': 'kit other' },
+    });
+    expect(entries.map((entry) => entry.name)).toEqual(['other:task']);
+  });
+
+  test('a task shipped at another profile is not read as withdrawn', () => {
+    const entries = planTasks({
+      groups: [{ tasks: OTHER }],
+      recorded: { check: 'kit check', 'other:task': 'kit other' },
+      scripts: { check: 'kit check', 'other:task': 'kit other' },
+      shipped: [...Object.keys(SHIPPED), ...Object.keys(OTHER)],
+    });
+    expect(entries.some((entry) => entry.name === 'check')).toBe(false);
+  });
+
+  test('and one shipped nowhere still is', () => {
+    const entries = planTasks({
+      groups: [{ tasks: OTHER }],
+      recorded: { departed: 'kit departed', 'other:task': 'kit other' },
+      scripts: { departed: 'kit departed', 'other:task': 'kit other' },
+      shipped: [...Object.keys(SHIPPED), ...Object.keys(OTHER)],
+    });
+    expect(stateOf(entries, 'departed')).toBe('removed');
+  });
+});
+
 describe('scriptsAfterTasks', () => {
   test("writes what a run adds and keeps the consumer's own", () => {
     const scripts = { build: 'their own', check: 'kit check' };
     const entries = planTasks({
+      groups: [{ tasks: SHIPPED }],
       recorded: { check: 'kit check' },
       scripts,
-      tasks: SHIPPED,
     });
     expect(scriptsAfterTasks({ entries, scripts })).toEqual({
       build: 'their own',
@@ -102,9 +163,9 @@ describe('scriptsAfterTasks', () => {
       'format:all': 'kit format',
     };
     const entries = planTasks({
+      groups: [{ tasks: SHIPPED }],
       recorded: { departed: 'kit departed' },
       scripts,
-      tasks: SHIPPED,
     });
     expect(Object.keys(scriptsAfterTasks({ entries, scripts }))).toEqual([
       'build',

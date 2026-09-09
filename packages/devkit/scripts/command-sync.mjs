@@ -23,6 +23,7 @@ import {
   printPlacementNotice,
   printTaskPlan,
   renderPlan,
+  unresolvedNotice,
 } from './command-materialise.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
 import { taskCounts } from './tasks.mjs';
@@ -43,6 +44,8 @@ export const runSync = (argv, root) => {
 
   applyPlan({ entries, manifest, root, tasks });
 
+  const unresolved = unresolvedNotice(entries);
+  if (unresolved !== undefined) console.error(`\n${unresolved}`);
   if (reported > 0) {
     console.log(
       '\nWhat was left alone is yours to keep. Re-run after resolving it, or leave it diverged.',
@@ -88,8 +91,11 @@ const reportDrift = ({ argv, config, entries, tasks }) => {
   const drifted = written + reported + taskCounts(tasks).written;
   if (drifted === 0 || !argv.includes('--check')) return 0;
 
+  const unresolved = unresolvedNotice(entries);
   console.error(
-    `\n${drifted} item(s) differ from the package. Run devkit sync.`,
+    `\n${drifted} item(s) differ from the package. Run devkit sync.${
+      unresolved === undefined ? '' : `\n${unresolved}`
+    }`,
   );
   return 1;
 };

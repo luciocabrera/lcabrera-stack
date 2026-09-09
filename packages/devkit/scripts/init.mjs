@@ -337,55 +337,45 @@ export const gateBinNames = () => [
 
 const commandLine = ({ args = [], bin }) => [bin, ...args].join(' ');
 
-/**
- * The tasks to write, restricted to bins that are actually installed.
- *
- * A task naming a bin the consumer does not have is the same failure the
- * rung tagging avoids, arriving by a different route: `repo-standards` is an
- * optional half of this kit, and a repository that took only `devkit` would
- * otherwise be given a dozen tasks that all exit with a command-not-found.
- *
- * @param {{ availableBins: Iterable<string>, profile: string }} args
- * @returns {Record<string, string>}
- */
-export const tasksFor = ({ availableBins, profile }) => {
-  const available = new Set(availableBins);
-  return Object.fromEntries(
-    Object.entries(GATE_TASKS)
-      .filter(
-        ([, task]) =>
-          includesRung({ profile, rung: task.rung }) && available.has(task.bin),
-      )
-      .map(([name, task]) => [name, commandLine(task)]),
+const rungTasks = (profile) =>
+  Object.entries(GATE_TASKS).filter(([, task]) =>
+    includesRung({ profile, rung: task.rung }),
   );
-};
 
 /**
- * The consumer's script block wins every collision.
+ * Every gate task the rung wires, whether or not its command resolves.
  *
- * A repository being initialised may already have its own `test` or `check`,
- * and overwriting one would break a working repository in the name of setting
- * it up. The skipped names are reported rather than dropped, so a consumer can
- * see which gate they are not yet reaching and wire it up themselves.
+ * The bins are not filtered here, because a task already in a manifest has to
+ * be reconciled — updated, or removed when this kit stops shipping it —
+ * whatever is installed on the machine the run happens on. Which of them may be
+ * WRITTEN where the manifest holds none is the separate question
+ * `withheldTasks` answers.
  *
- * @param {{ existing?: Record<string, string>, tasks: Record<string, string> }} args
- * @returns {{ added: string[], scripts: Record<string, string>, skipped: string[] }}
+ * @param {{ profile: string }} args
+ * @returns {Record<string, string>}
  */
-export const scriptsAfter = ({ existing = {}, tasks }) => {
-  const names = Object.keys(tasks).toSorted((left, right) =>
-    left.localeCompare(right),
+export const tasksFor = ({ profile }) =>
+  Object.fromEntries(
+    rungTasks(profile).map(([name, task]) => [name, commandLine(task)]),
   );
-  const added = names.filter((name) => !Object.hasOwn(existing, name));
-  return {
-    added,
-    scripts: Object.fromEntries(
-      Object.entries({
-        ...existing,
-        ...Object.fromEntries(added.map((name) => [name, tasks[name]])),
-      }).toSorted(([left], [right]) => left.localeCompare(right)),
-    ),
-    skipped: names.filter((name) => Object.hasOwn(existing, name)),
-  };
+
+/**
+ * The rung's tasks whose bin is not installed here.
+ *
+ * A task naming a bin the consumer does not have is the same failure the rung
+ * tagging avoids, arriving by a different route: the gate runtime is an
+ * optional half of this kit, and a repository that took only the materialiser
+ * would otherwise be given a dozen tasks that all exit with a
+ * command-not-found.
+ *
+ * @param {{ availableBins: Iterable<string>, profile: string }} args
+ * @returns {string[]}
+ */
+export const withheldTasks = ({ availableBins, profile }) => {
+  const available = new Set(availableBins);
+  return rungTasks(profile)
+    .filter(([, task]) => !available.has(task.bin))
+    .map(([name]) => name);
 };
 
 export const unmetCommandKeys = (entries) =>

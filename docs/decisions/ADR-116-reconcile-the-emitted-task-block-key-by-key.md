@@ -14,14 +14,18 @@ records a hash per file, so a later run can tell a file the consumer edited from
 one still holding what the kit wrote. That record is what makes an upstream fix
 safe to apply to one file and impossible to apply to another.
 
-The root manifest was outside it. From the `monorepo` rung up, `create` wrote a
-task block into `package.json` and nothing looked at it again: the block was a
-constant in the package's code, copied once. Adding a task of their own is the
-first thing a consumer does to that file, and there was no route by which a task
-the kit added later could reach them — not `sync`, which never opened the
-manifest, and not `init --upgrade`, whose gate-task table has no rung the block
-belongs to. So every consumer's block froze on the day the repository was made,
-and nothing reported it.
+The task block in the root manifest was outside it, in both of the halves it is
+written from. `create` wrote the blueprint's tasks into `package.json` from a
+constant in the package's code and nothing looked at them again. `init` wired the
+gate tasks by a second route that only ever added: a name already in the block
+was skipped, and a name that left the kit stayed where it was. Neither route was
+reached by `sync`, which never opened the manifest at all.
+
+Adding a task of their own is the first thing a consumer does to that file, and
+there was no route by which an upstream change could reach either half of it: a
+command line corrected upstream never arrived, and a task the kit withdrew went
+on naming a binary it no longer ships. Every consumer's block froze on the day
+the repository was set up, and nothing reported it.
 
 Merging a shipped file into an edited one is the general problem, and it is not
 solved here. This block is not that problem: it is JSON, a map of name to
@@ -29,8 +33,9 @@ command, so a key can be judged without judging the file.
 
 ## Decision
 
-The task block is derived from one list in the package and reconciled on every
-run, by the rule already written for files.
+The task block is derived from the lists in the package and reconciled on every
+run — both halves of it, through one plan — by the rule already written for
+files.
 
 `.devkit-manifest.json` records the command this kit last wrote for each task,
 beside the hashes it records for files. `classifyMaterialisation` then answers
@@ -41,12 +46,29 @@ this kit ships and the manifest lacks is **added**, and a recorded key this kit
 no longer ships is **removed**. Every one of those is named in the run's report,
 so nothing is held back silently.
 
-Two boundaries make that safe. A manifest holding no task this kit provably wrote
-gets nothing: a key whose value is exactly the shipped command is proof of
-authorship and is adopted into the record, and where nothing matches, the plan is
-empty. And the reconciliation runs only from the `monorepo` rung up, so a profile
-below the one that emits the block never removes a key from a manifest it does
-not own.
+Three boundaries make that safe.
+
+**A group says whether a run may establish it.** The tasks arrive as groups
+because they are not established alike: `init` is the command that wires the gate
+tasks into a repository, while the blueprint's block is written once, by
+`create`, into a manifest that declares the binaries it names. A group a run may
+not establish is written into only where this kit provably wrote it before — a
+record, or a key whose value is exactly the shipped command, which no other run
+could have put there. Where a group has neither, its plan is empty, so a
+repository that never took a group does not acquire it.
+
+**Whether a command resolves decides what may be wired, not what belongs in the
+file.** A task whose bin is not installed is withheld from a manifest that does
+not already hold it, for the reason the rung tagging exists — a task naming a
+missing binary is a `command not found` on the consumer's first run. A task
+already in the manifest is reconciled whatever is installed, because what is on
+one machine says nothing about what the file should contain.
+
+**The departed set is read against every name this version ships, at any
+profile**, rather than against the groups one run happens to plan. A recorded key
+is proof of authorship whatever group it came from, so reading it against one
+profile's groups would take a narrower profile to mean the wider rung's tasks had
+been withdrawn, and delete them.
 
 The shipped `COMMANDS.md` documents every task the kit wires, spelling each one
 through the `commands.run` placeholder rather than a literal runner, and the
@@ -67,7 +89,10 @@ else.
 for it. A consumer whose config predates it gets `COMMANDS.md` reported as
 `unresolved` and not written, until `devkit init --upgrade` adds the key — loud,
 by the same rule every other unanswered placeholder follows, rather than a file
-materialised with a placeholder in it.
+materialised with a placeholder in it. That exposed a message this decision also
+corrects: every report for an unanswered key sent the reader to `sync`, which is
+the one command that cannot write a config key, so both `sync` and
+`doctor --check` now name the keys and the command that adds them.
 
 The seed lists the tasks rather than tabulating them. A substituted runner is
 shorter than the placeholder it replaces, so a table's header row no longer

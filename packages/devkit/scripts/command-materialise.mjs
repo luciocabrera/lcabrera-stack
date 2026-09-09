@@ -14,7 +14,7 @@
  * on the day it was set up.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -28,6 +28,12 @@ import {
   withProfile,
 } from './config.mjs';
 import { readFilesUnder } from './files.mjs';
+import {
+  GATE_TASKS,
+  tasksFor,
+  unmetCommandKeys,
+  withheldTasks,
+} from './init.mjs';
 import {
   isAcknowledged,
   isReported,
@@ -65,12 +71,54 @@ const readJsonIfPresent = (path) => {
   return raw === undefined ? undefined : JSON.parse(raw);
 };
 
-const plannedTasks = ({ config, manifest, root }) => {
-  if (!includesRung({ profile: config.profile, rung: 'monorepo' })) return [];
+const installedBins = (root) => {
+  const binDir = join(root, 'node_modules', '.bin');
+  return existsSync(binDir) ? readdirSync(binDir) : [];
+};
+
+/**
+ * The two sets of tasks a run reconciles, and which of them it may establish.
+ *
+ * `init` is the command that wires the gate tasks into a repository, so it is
+ * the one that may write them where the manifest holds none. The blueprint's
+ * block is never established here: it names binaries only the manifest `create`
+ * writes declares, so a repository that took the rung without them would be
+ * handed tasks that cannot run.
+ *
+ * @param {{ config: object, establish: boolean, root: string }} args
+ */
+const taskGroups = ({ config, establish, root }) => {
+  const { profile } = config;
+  const gate = {
+    establish,
+    tasks: tasksFor({ profile }),
+    withheld: new Set(
+      withheldTasks({ availableBins: installedBins(root), profile }),
+    ),
+  };
+  return includesRung({ profile, rung: 'monorepo' })
+    ? [gate, { tasks: WORKSPACE_SCRIPTS }]
+    : [gate];
+};
+
+const EVERY_TASK_NAME = [
+  ...Object.keys(GATE_TASKS),
+  ...Object.keys(WORKSPACE_SCRIPTS),
+];
+
+/**
+ * A repository with no manifest gets no task plan at all, rather than a plan
+ * nothing can apply: recording tasks as written into a file that does not exist
+ * would leave the record claiming what the tree does not have.
+ */
+const plannedTasks = ({ config, establish, manifest, root }) => {
+  const packageManifest = readJsonIfPresent(join(root, PACKAGE_MANIFEST));
+  if (packageManifest === undefined) return [];
   return planTasks({
+    groups: taskGroups({ config, establish, root }),
     recorded: manifest.tasks,
-    scripts: readJsonIfPresent(join(root, PACKAGE_MANIFEST))?.scripts,
-    tasks: WORKSPACE_SCRIPTS,
+    scripts: packageManifest.scripts,
+    shipped: EVERY_TASK_NAME,
   });
 };
 
@@ -95,7 +143,7 @@ const resolvePeerVersions = (assets) =>
     ]),
   );
 
-export const buildPlan = ({ profile, root }) => {
+export const buildPlan = ({ establish = false, profile, root }) => {
   const configured = resolveConfig(readIfPresent(join(root, CONFIG_FILE_NAME)));
   const config =
     profile === undefined
@@ -122,7 +170,7 @@ export const buildPlan = ({ profile, root }) => {
     config,
     entries,
     manifest,
-    tasks: plannedTasks({ config, manifest, root }),
+    tasks: plannedTasks({ config, establish, manifest, root }),
   };
 };
 
@@ -219,6 +267,24 @@ export const renderPlan = (entries, { verbose = false } = {}) => {
         `  ${entry.state.padEnd(STATE_COLUMN_WIDTH)} ${entry.path}  (${detailFor(entry)})`,
     )
     .join('\n');
+};
+
+/**
+ * What a run held back for want of a config key, and how to get it.
+ *
+ * Sync is the command every other report sends a reader to, and it is the one
+ * command that cannot clear this: the keys are written by `init`, so a reader
+ * told only to sync runs it, sees the same line, and has nowhere to go. It
+ * names the keys rather than counting them, because the reader's next step is
+ * to look for them.
+ *
+ * @param {{ missing?: string[], state: string }[]} entries
+ * @returns {string | undefined}
+ */
+export const unresolvedNotice = (entries) => {
+  const keys = unmetCommandKeys(entries);
+  if (keys.length === 0) return;
+  return `${keys.length} command key(s) your config does not set: ${keys.join(', ')}. The files that use them were not written, and \`devkit sync\` cannot supply them — run \`devkit init --upgrade\` to add the keys this version infers, keeping everything you have set, or write them into ${CONFIG_FILE_NAME} under "commands" yourself.`;
 };
 
 export const printTaskPlan = (tasks) => {

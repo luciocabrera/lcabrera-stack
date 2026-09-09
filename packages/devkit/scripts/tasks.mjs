@@ -12,10 +12,18 @@
  * itself rather than a hash of it, because for a task the value IS the content
  * — one short line, which a consumer reading the record can recognise.
  *
- * Nothing is written into a manifest that has never taken the block. A key
- * holding exactly the command this kit ships is proof this kit wrote it, so it
- * is adopted into the record; a manifest where nothing matches is one this kit
- * has never written a task into, and it is left entirely alone.
+ * The tasks arrive in groups, because they are not all established the same way.
+ * `init` wires the gate tasks into any repository — that is what the command is
+ * for — while the blueprint's block is written once, by `create`, into a
+ * manifest that declares the binaries it names. So a group says whether this run
+ * may establish it; a group it may not is written into only where this kit
+ * provably wrote it before. The proof is the record, plus a key holding exactly
+ * the command this kit ships, which no other run could have put there.
+ *
+ * What a group does NOT decide is removal. A recorded key is proof of
+ * authorship whatever group it came from, so the departed set is read against
+ * every name this version ships at any profile — otherwise narrowing the profile
+ * would read the rung's own tasks as withdrawn and delete them.
  */
 
 import { classifyMaterialisation, isRecorded } from './manifest.mjs';
@@ -42,39 +50,83 @@ const removalState = ({ current, recorded }) => {
   return current === recorded ? REMOVED : 'modified';
 };
 
+const recordedFor = ({ names, recorded }) =>
+  Object.fromEntries(
+    Object.entries(recorded).filter(([name]) => names.has(name)),
+  );
+
+const groupPlan = ({ group, recorded, scripts }) => {
+  const { establish = false, tasks, withheld = new Set() } = group;
+  const known = {
+    ...adoptedFrom({ scripts, tasks }),
+    ...recordedFor({ names: new Set(Object.keys(tasks)), recorded }),
+  };
+  if (!establish && Object.keys(known).length === 0) return [];
+
+  return Object.entries(tasks)
+    .filter(([name]) => scripts[name] !== undefined || !withheld.has(name))
+    .map(([name, command]) => ({
+      command,
+      name,
+      state: classifyMaterialisation({
+        incomingHash: command,
+        onDiskHash: scripts[name],
+        recordedHash: known[name],
+      }),
+    }));
+};
+
+const namesIn = (groups) => groups.flatMap((group) => Object.keys(group.tasks));
+
 /**
  * What a run would do to each task, and what it would leave alone.
  *
- * @param {{ recorded?: Record<string, string>, scripts?: Record<string, string>,
- *           tasks: Record<string, string> }} args
- * `recorded` is what this kit last wrote, `scripts` what the manifest holds now
- * and `tasks` what this version ships.
+ * @param {{ groups: { establish?: boolean, tasks: Record<string, string>,
+ *             withheld?: Set<string> }[],
+ *           recorded?: Record<string, string>, scripts?: Record<string, string>,
+ *           shipped?: Iterable<string> }} args
+ * A group's `withheld` names are the ones whose command does not resolve here,
+ * so they are written only where the manifest already holds them. `recorded` is
+ * what this kit last wrote, `scripts` what the manifest holds now, and `shipped`
+ * every task name this version has at any profile — which defaults to the names
+ * the groups carry, so a caller passing every group needs no second argument.
  * @returns {{ command?: string, name: string, state: string }[]}
  */
-export const planTasks = ({ recorded = {}, scripts = {}, tasks }) => {
-  const known = { ...adoptedFrom({ scripts, tasks }), ...recorded };
-  if (Object.keys(known).length === 0) return [];
+export const planTasks = ({
+  groups,
+  recorded = {},
+  scripts = {},
+  shipped = namesIn(groups),
+}) => {
+  const planned = groups.flatMap((group) =>
+    groupPlan({ group, recorded, scripts }),
+  );
 
-  const shipped = Object.entries(tasks).map(([name, command]) => ({
-    command,
-    name,
-    state: classifyMaterialisation({
-      incomingHash: command,
-      onDiskHash: scripts[name],
-      recordedHash: known[name],
-    }),
-  }));
-
-  const dropped = Object.entries(known)
-    .filter(([name]) => !Object.hasOwn(tasks, name))
+  const known = new Set(shipped);
+  const dropped = Object.entries(recorded)
+    .filter(([name]) => !known.has(name))
     .map(([name, command]) => ({
       name,
       state: removalState({ current: scripts[name], recorded: command }),
     }))
     .filter((entry) => entry.state !== undefined);
 
-  return [...shipped, ...dropped].toSorted(byName);
+  return [...planned, ...dropped].toSorted(byName);
 };
+
+/**
+ * @param {{ command?: string, name: string, state: string }[]} entries
+ * @returns {{ added: string[], skipped: string[] }} the names a run wired, and
+ * the ones it left as the consumer has them
+ */
+export const taskOutcomes = (entries) => ({
+  added: entries
+    .filter((entry) => entry.state === 'added' || entry.state === 'restored')
+    .map((entry) => entry.name),
+  skipped: entries
+    .filter((entry) => REPORTED_STATES.has(entry.state))
+    .map((entry) => entry.name),
+});
 
 /**
  * @param {{ entries: { command?: string, name: string, state: string }[],

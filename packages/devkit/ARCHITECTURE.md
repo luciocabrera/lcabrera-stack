@@ -34,9 +34,17 @@ be judged on its own by the rule `classifyMaterialisation` already applies to a
 file's content — which is why the manifest records a value per task beside a hash
 per file. A prose seed has no such key, so it stays all-or-nothing: the two are
 different problems, and this merge is not a first step towards merging markdown.
-What keeps it out of a repository that never took the block is the record: a key
-holding exactly the command this kit ships is proof this kit wrote it, and a
-manifest where nothing matches is left alone entirely.
+
+**The tasks are planned in groups, and every group goes through the one plan.**
+A group carries whether this run may establish it — `init` wires the gate tasks,
+`create` writes the blueprint's — and which of its commands do not resolve here,
+which withholds a task from a manifest that does not already hold it. A group a
+run may not establish reaches only a manifest that provably took it: a record, or
+a key holding exactly the command this kit ships. Removal is the one judgement
+that is not per group, because a record is proof of authorship wherever it came
+from — so it is read against every name the package ships at any profile, and a
+narrower profile does not read the wider rung's tasks as withdrawn. A second
+route that only added is what left half the block unreachable before.
 
 **Planning is pure and separate from writing**, so `doctor` predicts exactly what
 `sync` would do. A doctor computing its answer by a different route than the
