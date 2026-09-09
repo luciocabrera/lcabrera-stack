@@ -77,3 +77,6 @@ reports/sonar/runs/*
 # the days Claude Code transcripts no longer hold; it is local state, not a
 # shared measurement, so it is never committed either.
 reports/usage/
+
+# Stryker sandbox (mutation runs) — scratch, never committed.
+.stryker-tmp/

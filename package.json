@@ -62,6 +62,7 @@
     "lint:eslint:verify": "repo-verify-eslint-pass",
     "lint:plugins:verify": "repo-verify-lint-plugins",
     "lint:report": "repo-lint-report",
+    "mutation:report": "vp run --filter @lcabrera/utils mutation",
     "package-refs:verify": "repo-verify-package-refs",
     "packages:build": "vp run --filter '@lcabrera/*' build",
     "plan:issues": "node scripts/plan-issues.mjs",

@@ -158,10 +158,12 @@
     "lint:check": "vp lint . && vp run lint:eslint:check",
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
+    "mutation": "stryker run",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "devDependencies": {
     "@lcabrera/vite-config": "workspace:*",
+    "@stryker-mutator/core": "catalog:test",
     "eslint": "catalog:lint",
     "typescript": "catalog:build",
     "vite": "catalog:build",
