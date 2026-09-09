@@ -4,9 +4,15 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { useEffect } from 'react';
 import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
-import type { TableColumn } from '#ui/components/Table/Table.types';
+import type {
+  ColumnSizingState,
+  TableColumn,
+} from '#ui/components/Table/Table.types';
 
-import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import {
+  useGetColumns,
+  useGetColumnSizing,
+} from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useGetTableData } from '#ui/components/Table/contexts/TableData/data/selectors';
 import { TableDataProvider } from '#ui/components/Table/contexts/TableData/TableDataContext.provider';
 
@@ -19,6 +25,7 @@ import { useTableConfigContextValue } from './useTableConfigContextValue.hook';
 type HarnessProps = {
   readonly columnsState?: TableConfigProviderProps<TestRow>['columnsState'];
   readonly groupingState?: TableConfigProviderProps<TestRow>['groupingState'];
+  readonly metaState?: TableConfigProviderProps<TestRow>['metaState'];
   readonly revalidation: number;
 };
 
@@ -52,13 +59,20 @@ const GROUPING_ORDER_STATUS = { keys: ['order_status'] };
 const META_STATE = { persistenceKey: 'orders' };
 
 const Probe = () => {
-  const { groupingStore } = useTableConfigContextValue<TestRow>();
+  const { columnsStore, groupingStore } = useTableConfigContextValue<TestRow>();
   const groupingKeys = useGetTableGroupingKeys();
   const columns = useGetColumns<TestRow>();
+  const columnSizing = useGetColumnSizing<TestRow>();
   const data = useGetTableData<TestRow>();
 
   const handleRegroup = () => {
     groupingStore.set({ keys: ['priority'] });
+  };
+
+  const handleResize = () => {
+    columnsStore.set({
+      columnSizing: { id: 180 } as ColumnSizingState<TestRow>,
+    });
   };
 
   return (
@@ -66,10 +80,14 @@ const Probe = () => {
       <button onClick={handleRegroup} type='button'>
         regroup
       </button>
+      <button onClick={handleResize} type='button'>
+        resize
+      </button>
       <output data-testid='grouping'>{groupingKeys.join(',')}</output>
       <output data-testid='columns'>
         {columns.map((column) => column.key).join(',')}
       </output>
+      <output data-testid='sizing'>{JSON.stringify(columnSizing)}</output>
       <output data-testid='data'>{data.map((row) => row.id).join(',')}</output>
     </>
   );
@@ -78,12 +96,13 @@ const Probe = () => {
 const Harness = ({
   columnsState = DEFAULT_COLUMNS_STATE,
   groupingState,
+  metaState = META_STATE,
   revalidation,
 }: HarnessProps) => (
   <TableConfigProvider<TestRow>
     columnsState={columnsState}
     groupingState={groupingState}
-    metaState={META_STATE}
+    metaState={metaState}
   >
     <ConfigMountCounter />
     <TableDataProvider<TestRow>
@@ -97,6 +116,13 @@ const Harness = ({
 );
 
 const readProbe = (testId: string) => screen.getByTestId(testId).textContent;
+
+const SIZED_COLUMNS_STATE = {
+  columns: [ID_COLUMN],
+  columnSizing: { id: 120 } as ColumnSizingState<TestRow>,
+};
+
+const WIDER_COLUMNS_STATE = { columns: [ID_COLUMN, NAME_COLUMN] };
 
 describe('TableConfigProvider', () => {
   beforeEach(() => {
@@ -145,15 +171,44 @@ describe('TableConfigProvider', () => {
 
     expect(readProbe('columns')).toBe('id');
 
+    rerender(<Harness columnsState={WIDER_COLUMNS_STATE} revalidation={1} />);
+
+    expect(mounts.config).toBe(1);
+    expect(readProbe('columns')).toBe('id,name');
+  });
+
+  it('keeps column sizing across later snapshots that omit or empty the layout', () => {
+    const { rerender } = render(
+      <Harness columnsState={SIZED_COLUMNS_STATE} revalidation={1} />,
+    );
+
+    fireEvent.click(screen.getByText('resize'));
+    expect(readProbe('sizing')).toBe('{"id":180}');
+
+    rerender(<Harness columnsState={WIDER_COLUMNS_STATE} revalidation={1} />);
+
+    expect(mounts.config).toBe(1);
+    expect(readProbe('columns')).toBe('id,name');
+    expect(readProbe('sizing')).toBe('{"id":180}');
+
     rerender(
       <Harness
-        columnsState={{ columns: [ID_COLUMN, NAME_COLUMN] }}
+        columnsState={{
+          columnOrder: [],
+          columnPinning: { left: [], right: [] },
+          columns: [ID_COLUMN, NAME_COLUMN],
+          columnSizing: {} as ColumnSizingState<TestRow>,
+          columnVisibility: new Set(),
+        }}
+        metaState={{
+          isColumnLayoutTransient: true,
+          persistenceKey: 'orders',
+        }}
         revalidation={1}
       />,
     );
 
-    expect(mounts.config).toBe(1);
-    expect(readProbe('columns')).toBe('id,name');
+    expect(readProbe('sizing')).toBe('{"id":180}');
   });
 
   it('replaces grouping when the incoming grouping snapshot identity changes', () => {

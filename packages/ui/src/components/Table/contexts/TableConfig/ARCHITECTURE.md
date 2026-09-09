@@ -276,7 +276,7 @@ graph TD
   S --> W["syncStoreFromProps into the matching stores"]
 ```
 
-Later props follow the same hydration rule as `TableDataProvider` (`packages/ui/src/PATTERNS.md` → Store provider hydration): a new snapshot identity replaces the store; the same identity leaves in-flight writes (grouping keys, toggled paths) alone. Expansion only patches `defaultFold` from `metaState`, so the toggled-path set is UI-owned.
+Later props follow the same hydration rule as `TableDataProvider` (`packages/ui/src/PATTERNS.md` → Store provider hydration): a new snapshot identity replaces the store; the same identity leaves in-flight writes alone. The columns sync re-reads the live snapshot first, then overlays the incoming `columnsState`, so omitted layout fields stay. When `isColumnLayoutTransient` is set, order/pin/size/visibility stay on the store even if the incoming snapshot names empty ones. Expansion only patches `defaultFold` from `metaState`, so the toggled-path set is UI-owned.
 
 Consumers no longer need to declare an `actions` column by hand: `crud` is
 threaded from `metaState.crud` into `getInitialColumnsState`, which appends

@@ -61,9 +61,18 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
       next: getInitialMetaState({ ...metaState }),
       store: metaStore,
     });
+    const currentColumns = columnsStore.get();
+    const isLayoutTransient = metaState?.isColumnLayoutTransient === true;
     syncStoreFromProps({
       next: getInitialColumnsState<TData>({
+        ...currentColumns,
         ...columnsState,
+        ...(isLayoutTransient && {
+          columnOrder: currentColumns.columnOrder,
+          columnPinning: currentColumns.columnPinning,
+          columnSizing: currentColumns.columnSizing,
+          columnVisibility: currentColumns.columnVisibility,
+        }),
         aggregates: nextGrouping.aggregates,
         crud: metaState?.crud,
         groupingKeys: nextGrouping.keys,

@@ -18,9 +18,7 @@ export type FetchFilterDataActionArgs<TData, TResponse> = {
 export type FetchFilterDataCallbackArgs<TResponse> = Omit<
   InfiniteScroll<string, TResponse>,
   'hasMore' | 'isLoadingMore'
-> & {
-  readonly signal?: AbortSignal;
-};
+>;
 
 export type MaybePrefetchArgs<TResponse> = {
   readonly enablePrefetch: boolean;

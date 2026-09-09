@@ -25,7 +25,6 @@ export const fetchInitialFilterData = <TData, TResponse>({
     dataSelector,
     dataTotalSelector,
     onLoadMore,
-    signal,
   }: FetchFilterDataCallbackArgs<TResponse>) => {
     const filtersDataState = filtersDataStore.get();
     const currentFilter = filtersDataState?.[columnKey];
@@ -43,13 +42,6 @@ export const fetchInitialFilterData = <TData, TResponse>({
     }
 
     const requiredOnLoadMore = getRequiredOnLoadMore(onLoadMore);
-    const restoreIdleSlice = () => {
-      setFilterSlice({
-        columnKey,
-        filter: { ...currentFilter, isLoading: false },
-        filtersDataStore,
-      });
-    };
 
     try {
       setFilterSlice({
@@ -62,11 +54,6 @@ export const fetchInitialFilterData = <TData, TResponse>({
         limit: DEFAULT_FILTER_PAGE_SIZE,
         skip: 0,
       });
-
-      if (signal?.aborted) {
-        restoreIdleSlice();
-        return;
-      }
 
       const data = dataSelector ? dataSelector(response) : [];
       const totalRows = getTotalRows({ data, dataTotalSelector, response });
@@ -97,11 +84,6 @@ export const fetchInitialFilterData = <TData, TResponse>({
         prefetchRef,
       });
     } catch (error) {
-      if (signal?.aborted) {
-        restoreIdleSlice();
-        return;
-      }
-
       logger.error('[useFetchFilterData] Error fetching filter data:', error);
 
       setFilterSlice({

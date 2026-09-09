@@ -2,7 +2,7 @@
 id: one-hydration-contract
 title: one hydration contract for store providers
 owner: agent:claude
-status: active
+status: review
 branch: fix/1142-one-hydration-contract
 area:
   - packages/ui/src/components/Form/contexts/FormContext/**

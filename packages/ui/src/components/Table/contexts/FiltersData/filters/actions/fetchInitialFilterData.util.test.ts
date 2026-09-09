@@ -106,34 +106,6 @@ describe('fetchInitialFilterData', () => {
     expect(getHarness().firePrefetchMock).toHaveBeenCalled();
   });
 
-  it('does not write options when the signal aborts before the request resolves', async () => {
-    const controller = new AbortController();
-    const pendingResponse = Promise.withResolvers<TestResponse>();
-    const onLoadMore = vi.fn(() => pendingResponse.promise);
-
-    const fetchInitial = fetchInitialFilterData<TestData, TestResponse>({
-      columnKey: 'status',
-      filtersDataStore: getHarness().dataStore as unknown as TStore<
-        FiltersDataState<TestData>
-      >,
-      metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
-    });
-
-    const pending = fetchInitial({
-      dataSelector: (response) => [...response.rows],
-      dataTotalSelector: (response) => response.total,
-      onLoadMore,
-      signal: controller.signal,
-    });
-
-    controller.abort();
-    pendingResponse.resolve({ rows: ['A', 'B'], total: 2 });
-    await pending;
-
-    expect(getHarness().dataStore.get().status.data).toEqual([]);
-    expect(getHarness().dataStore.get().status.isLoading).toBe(false);
-  });
-
   it('writes a db-failed error onto the column when the request fails', async () => {
     const onLoadMore = vi.fn(() => Promise.reject(new Error('Network down')));
 
