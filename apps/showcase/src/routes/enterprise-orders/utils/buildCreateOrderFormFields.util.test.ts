@@ -28,9 +28,20 @@ it('still exposes the required input fields', () => {
   expect(accessors).toContain('priority');
 });
 
-it('returns a single tab container at the root', () => {
+it('keeps the eight tabs in roster order', () => {
   const [root, ...rest] = buildCreateOrderFormFields();
 
   expect(rest).toHaveLength(0);
-  expect(root?.type).toBe('tab');
+  expect(
+    root?.type === 'tab' ? root.tabs.map((tab) => tab.label) : undefined,
+  ).toStrictEqual([
+    'Order',
+    'Customer',
+    'Product',
+    'Pricing',
+    'Shipping',
+    'Billing',
+    'Payment',
+    'Notes & Audit',
+  ]);
 });

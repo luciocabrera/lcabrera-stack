@@ -1,14 +1,27 @@
 import { expect, it } from 'vite-plus/test';
 
-import { buildFlagsGroup } from './buildFlagsGroup.util';
 import { toOrderFormFields } from './toOrderFormFields.util';
 
-it('wraps tabs in a single tab container', () => {
-  const [root, ...rest] = toOrderFormFields([
-    { fields: [buildFlagsGroup()], label: 'Flags' },
-  ]);
+const emptyTab = (label: string) => ({ fields: [], label });
+
+it('places shared tabs between the three variant tabs', () => {
+  const [root, ...rest] = toOrderFormFields({
+    notesTab: emptyTab('Notes & Audit'),
+    orderTab: emptyTab('Order'),
+    pricingTab: emptyTab('Pricing'),
+  });
 
   expect(rest).toHaveLength(0);
-  expect(root?.type).toBe('tab');
-  expect(root?.type === 'tab' ? root.tabs[0]?.label : undefined).toBe('Flags');
+  expect(
+    root?.type === 'tab' ? root.tabs.map((tab) => tab.label) : undefined,
+  ).toStrictEqual([
+    'Order',
+    'Customer',
+    'Product',
+    'Pricing',
+    'Shipping',
+    'Billing',
+    'Payment',
+    'Notes & Audit',
+  ]);
 });

@@ -20,9 +20,20 @@ it('includes computed totals', () => {
   expect(accessors).toContain('total_amount');
 });
 
-it('returns a single tab container at the root', () => {
+it('keeps the eight tabs in roster order', () => {
   const [root, ...rest] = buildEditOrderFormFields();
 
   expect(rest).toHaveLength(0);
-  expect(root?.type).toBe('tab');
+  expect(
+    root?.type === 'tab' ? root.tabs.map((tab) => tab.label) : undefined,
+  ).toStrictEqual([
+    'Order',
+    'Customer',
+    'Product',
+    'Pricing',
+    'Shipping',
+    'Billing',
+    'Payment',
+    'Notes & Audit',
+  ]);
 });

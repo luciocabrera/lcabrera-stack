@@ -57,7 +57,7 @@ Create and edit each have their own builder. Shared tab helpers are one util per
 | ---------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------ |
 | `buildCreateOrderFormFields` | `buildCreateOrderFormFields.util.ts` | Field tree for a new order. Omits `order_number`, computed totals, and the audit group.          |
 | `buildEditOrderFormFields`   | `buildEditOrderFormFields.util.ts`   | Field tree for an existing order. Includes `order_number`, computed totals, and the audit group. |
-| `toOrderFormFields`          | `toOrderFormFields.util.ts`          | Wraps order-form tabs in a single tab container.                                                 |
+| `toOrderFormFields`          | `toOrderFormFields.util.ts`          | Assembles the shared tab roster around the create/edit Order, Pricing, and Notes tabs.           |
 | `buildCreateOrderTab`        | `buildCreateOrderTab.util.ts`        | Order tab without `order_number`.                                                                |
 | `buildEditOrderTab`          | `buildEditOrderTab.util.ts`          | Order tab with a disabled `order_number`.                                                        |
 | `buildCustomerTab`           | `buildCustomerTab.util.ts`           | Customer identity and loyalty fields.                                                            |

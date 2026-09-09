@@ -1,8 +1,8 @@
 import { expect, it } from 'vite-plus/test';
 
+import { buildCreateOrderFormFields } from './buildCreateOrderFormFields.util';
 import { buildFlagsGroup } from './buildFlagsGroup.util';
 import { collectOrderFormAccessors } from './collectOrderFormAccessors.util';
-import { toOrderFormFields } from './toOrderFormFields.util';
 
 it('collects leaf accessors from groups and rows', () => {
   expect(collectOrderFormAccessors([buildFlagsGroup()])).toStrictEqual([
@@ -14,9 +14,7 @@ it('collects leaf accessors from groups and rows', () => {
 });
 
 it('walks a tab container into each tab', () => {
-  const fields = toOrderFormFields([
-    { fields: [buildFlagsGroup()], label: 'Flags' },
-  ]);
-
-  expect(collectOrderFormAccessors(fields)).toContain('is_rush_order');
+  expect(collectOrderFormAccessors(buildCreateOrderFormFields())).toContain(
+    'is_rush_order',
+  );
 });
