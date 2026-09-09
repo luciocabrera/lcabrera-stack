@@ -146,6 +146,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run lint:report`                  | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)                               |
 | `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails on error severity; writes the report too                               |
 | `vp run react-doctor:report`          | the same scan, never failing — writes `reports/react-doctor/full-latest.json` (gitignored)                             |
+| `vp run mutation:report`              | mutation-test `packages/utils` (ADR-119) — writes `reports/mutation/full-latest.json` (gitignored); never fails        |
 | `vp run format:all`                   | `vp fmt .` across the tree                                                                                             |
 | `vp run build:all`                    | build every workspace                                                                                                  |
 | `vp run test:all`                     | every workspace suite plus the root `scripts/` suites — no database needed                                             |
