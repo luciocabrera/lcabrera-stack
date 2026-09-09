@@ -1,5 +1,7 @@
 import type { TableResponseError } from '#ui/components/Table/Table.types';
 
+import { isTableGroupingRefusalReason } from './isTableGroupingRefusalReason.util';
+
 type ToTableResponseErrorArgs = {
   readonly error: unknown;
   readonly fallback: string;
@@ -26,6 +28,24 @@ export const toTableResponseError = ({
         message: error.message,
         ...('code' in error &&
           typeof error.code === 'string' && { code: error.code }),
+      };
+    }
+
+    if (
+      error.kind === 'grouping-refused' &&
+      'reason' in error &&
+      isTableGroupingRefusalReason(error.reason)
+    ) {
+      return {
+        kind: 'grouping-refused',
+        message: error.message,
+        reason: error.reason,
+        ...('column' in error &&
+          typeof error.column === 'string' && { column: error.column }),
+        ...('estimatedRows' in error &&
+          typeof error.estimatedRows === 'number' && {
+            estimatedRows: error.estimatedRows,
+          }),
       };
     }
   }

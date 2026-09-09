@@ -247,6 +247,12 @@ snapshot: it lives on `groupingStore` as `TableGroupingState`, including
 column in `filtersDataStore`. Grid load-more writes the same union on
 `dataStore`. There is no string `error` on meta ([ADR-118](../../../../../../../docs/decisions/ADR-118-split-tablemetastate-into-capability-grouping-query-and-chrome.md)).
 
+UI-flags persistence is a full replacement of `PersistedUiState`.
+`usePersistTableUiFlagsAction` fills `totalsPlacement` from `groupingStore`
+when the caller omits it, so a chrome-only write cannot drop a live `'first'`.
+An explicit argument still wins — that is how a grouping accept writes the
+placement it just applied.
+
 The members of each slice are declared on the types in `Table.types.ts`.
 
 ## Provider Initialization

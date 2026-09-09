@@ -3,7 +3,12 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import type { FilterData } from '#ui/components/Table/Table.types';
+import type {
+  FilterData,
+  FiltersDataState,
+  TableMetaState,
+} from '#ui/components/Table/Table.types';
+import type { TStore } from '#ui/hooks/useStore.hook';
 
 import { DEFAULT_FILTER_PAGE_SIZE } from '#ui/components/Table/Table.constants';
 import { createPaginatedFetchActionMocks } from '#ui/utils/tests/createPaginatedFetchActionMocks.util';
@@ -241,5 +246,12 @@ describe('fetchMoreFilterData', () => {
 
 const loadMoreStatusOptions = createStatusColumnFetch({
   fetchFn: fetchMoreFilterData<TestData, TestResponse>,
-  getStores: () => getHarness(),
+  getStores: () => {
+    const { dataStore, metaStore } = getHarness();
+
+    return {
+      dataStore: dataStore as unknown as TStore<FiltersDataState<TestData>>,
+      metaStore: metaStore as unknown as TStore<TableMetaState>,
+    };
+  },
 });

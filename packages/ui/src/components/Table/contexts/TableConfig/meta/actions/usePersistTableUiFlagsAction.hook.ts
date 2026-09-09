@@ -3,6 +3,7 @@ import type {
   TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
 
+import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
 
 import { buildUiFlagsCookieEntry } from './utils';
@@ -17,6 +18,7 @@ export const usePersistTableUiFlagsAction = () => {
   const persistCookie = usePersistCookieAction({
     fetcherKey: 'persist-table-ui-flags',
   });
+  const { groupingStore } = useTableConfigContextValue();
 
   return ({
     currentState,
@@ -26,7 +28,7 @@ export const usePersistTableUiFlagsAction = () => {
     const entry = buildUiFlagsCookieEntry({
       currentState,
       nextStatePatch,
-      totalsPlacement,
+      totalsPlacement: totalsPlacement ?? groupingStore.get()?.totalsPlacement,
     });
 
     if (entry) {

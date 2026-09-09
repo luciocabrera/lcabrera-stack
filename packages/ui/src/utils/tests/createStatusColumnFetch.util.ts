@@ -2,23 +2,43 @@
  * Builds the per-column fetch used by filter-options action tests.
  */
 
-type CreateStatusColumnFetchArgs<TFetch> = {
-  readonly fetchFn: TFetch;
+type CreateStatusColumnFetchArgs<
+  TFiltersDataStore,
+  TMetaStore,
+  TResult,
+  TPrefetchRef,
+> = {
+  readonly fetchFn: (
+    args: StatusColumnFetchArgs<TFiltersDataStore, TMetaStore, TPrefetchRef>,
+  ) => TResult;
   readonly getStores: () => {
-    readonly dataStore: unknown;
-    readonly metaStore: unknown;
+    readonly dataStore: TFiltersDataStore;
+    readonly metaStore: TMetaStore;
   };
 };
 
-type PrefetchRef = {
-  readonly current: unknown;
+type StatusColumnFetchArgs<TFiltersDataStore, TMetaStore, TPrefetchRef> = {
+  readonly columnKey: 'status';
+  readonly filtersDataStore: TFiltersDataStore;
+  readonly metaStore: TMetaStore;
+  readonly prefetchRef?: TPrefetchRef;
 };
 
-export const createStatusColumnFetch = <TResult>({
+export const createStatusColumnFetch = <
+  TFiltersDataStore,
+  TMetaStore,
+  TResult,
+  TPrefetchRef = { readonly current: unknown },
+>({
   fetchFn,
   getStores,
-}: CreateStatusColumnFetchArgs<(args: never) => TResult>) => {
-  return (prefetchRef?: PrefetchRef) => {
+}: CreateStatusColumnFetchArgs<
+  TFiltersDataStore,
+  TMetaStore,
+  TResult,
+  TPrefetchRef
+>) => {
+  return (prefetchRef?: TPrefetchRef) => {
     const { dataStore, metaStore } = getStores();
 
     return fetchFn({
@@ -26,6 +46,6 @@ export const createStatusColumnFetch = <TResult>({
       filtersDataStore: dataStore,
       metaStore,
       ...(prefetchRef !== undefined && { prefetchRef }),
-    } as never);
+    });
   };
 };

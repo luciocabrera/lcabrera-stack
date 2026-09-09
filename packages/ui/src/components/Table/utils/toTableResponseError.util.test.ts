@@ -45,4 +45,32 @@ describe('toTableResponseError', () => {
       message: 'failed',
     });
   });
+
+  it('passes through a grouping-refused error', () => {
+    const error = {
+      column: 'total_amount',
+      estimatedRows: 73_600,
+      kind: 'grouping-refused',
+      message: 'This grouping was refused.',
+      reason: 'estimate-too-large',
+    } as const;
+
+    expect(toTableResponseError({ error, fallback: 'failed' })).toEqual(error);
+  });
+
+  it('maps a grouping-refused payload with an unknown reason to unexpected', () => {
+    expect(
+      toTableResponseError({
+        error: {
+          kind: 'grouping-refused',
+          message: 'Refused.',
+          reason: 'not-a-dimension',
+        },
+        fallback: 'failed',
+      }),
+    ).toEqual({
+      kind: 'unexpected',
+      message: 'failed',
+    });
+  });
 });

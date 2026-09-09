@@ -568,8 +568,11 @@ filters and sorting:
 - Cookies + URL for SSR/shareable column state (filters, sorting, pinning, sizing, visibility)
 - Meta UI state is written by the mutation action itself, not by a subscription effect
 - The drawer's **whole** state travels in a `-uiFlags` cookie — open/pinned, the
-  selected tab and the expanded filters — so the loader SSR-seeds the drawer and
-  there is no hydration layout shift. Nothing is tab-scoped: `contexts/TableConfig/ARCHITECTURE.md`
+  selected tab, the expanded filters, and totals placement — so the loader
+  SSR-seeds the drawer and there is no hydration layout shift. Chrome-only
+  writers omit placement, so `usePersistTableUiFlagsAction` reads it from
+  `groupingStore` rather than serializing `undefined` (which `JSON.stringify`
+  drops). Nothing is tab-scoped: `contexts/TableConfig/ARCHITECTURE.md`
   carries why one channel and not two, and what that costs
 - All persisted keys are optionally scoped by an **`appId`** (`table-state-{appId}-{persistenceKey}`)
   so tables in different apps that share a `persistenceKey` never collide
