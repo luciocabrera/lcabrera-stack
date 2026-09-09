@@ -3,6 +3,11 @@
  * the consumer's state, produce the plan, and — for the two commands that
  * write — apply it and record what was written. All three render the same plan.
  *
+ * The plan covers the task block as well as the files. It is the same tree
+ * being materialised, so a command that reconciled the tasks by its own route
+ * would be a second answer to the question this module exists to have one
+ * answer to.
+ *
  * Applying lives here rather than in each command because `init` is `sync` plus
  * wiring. Written twice, the two drift, and the way that shows up is an `init`
  * whose files a later `doctor` does not recognise: a repository reporting drift
@@ -16,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 import { ACCEPTED_FILE, parseAccepted } from './accepted.mjs';
 import {
   CONFIG_FILE_NAME,
+  includesRung,
   isExecutableAsset,
   placementNotice,
   resolveConfig,
@@ -38,11 +44,35 @@ import {
   planSync,
   withAcceptance,
 } from './sync.mjs';
+import {
+  isTaskWritten,
+  planTasks,
+  recordedTasks,
+  renderTasks,
+  scriptsAfterTasks,
+} from './tasks.mjs';
+import { WORKSPACE_SCRIPTS } from './workspace.mjs';
 
 const packageRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 
+const PACKAGE_MANIFEST = 'package.json';
+
 const readIfPresent = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
+
+const readJsonIfPresent = (path) => {
+  const raw = readIfPresent(path);
+  return raw === undefined ? undefined : JSON.parse(raw);
+};
+
+const plannedTasks = ({ config, manifest, root }) => {
+  if (!includesRung({ profile: config.profile, rung: 'monorepo' })) return [];
+  return planTasks({
+    recorded: manifest.tasks,
+    scripts: readJsonIfPresent(join(root, PACKAGE_MANIFEST))?.scripts,
+    tasks: WORKSPACE_SCRIPTS,
+  });
+};
 
 const packageVersion = () =>
   JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')).version;
@@ -87,16 +117,51 @@ export const buildPlan = ({ profile, root }) => {
       peerVersions: resolvePeerVersions(assets),
     }),
   });
-  return { accepted, config, entries, manifest };
+  return {
+    accepted,
+    config,
+    entries,
+    manifest,
+    tasks: plannedTasks({ config, manifest, root }),
+  };
 };
 
-export const nextManifestFor = ({ entries, manifest }) =>
-  manifestAfter({ entries, previous: manifest, version: packageVersion() });
+const nextManifestFor = ({ entries, manifest, tasks = [] }) =>
+  manifestAfter({
+    entries,
+    previous: manifest,
+    tasks: recordedTasks({ entries: tasks, recorded: manifest.tasks }),
+    version: packageVersion(),
+  });
 
-export const applyPlan = ({ entries, manifest, root }) => {
+const applyTasks = ({ root, tasks }) => {
+  if (tasks.every((entry) => !isTaskWritten(entry.state))) return;
+  const path = join(root, PACKAGE_MANIFEST);
+  const packageManifest = readJsonIfPresent(path);
+  if (packageManifest === undefined) return;
+  writeFileSync(
+    path,
+    `${JSON.stringify(
+      {
+        ...packageManifest,
+        scripts: scriptsAfterTasks({
+          entries: tasks,
+          scripts: packageManifest.scripts,
+        }),
+      },
+      undefined,
+      2,
+    )}\n`,
+  );
+};
+
+export const applyPlan = ({ entries, manifest, root, tasks = [] }) => {
   applySync({ entries, root });
+  applyTasks({ root, tasks });
 
-  const updated = serialiseManifest(nextManifestFor({ entries, manifest }));
+  const updated = serialiseManifest(
+    nextManifestFor({ entries, manifest, tasks }),
+  );
   if (updated !== serialiseManifest(manifest)) {
     writeFileSync(join(root, MANIFEST_FILE), updated);
   }
@@ -154,6 +219,13 @@ export const renderPlan = (entries, { verbose = false } = {}) => {
         `  ${entry.state.padEnd(STATE_COLUMN_WIDTH)} ${entry.path}  (${detailFor(entry)})`,
     )
     .join('\n');
+};
+
+export const printTaskPlan = (tasks) => {
+  const report = renderTasks(tasks);
+  if (report !== undefined) {
+    console.log(`\nTasks in ${PACKAGE_MANIFEST}:\n${report}`);
+  }
 };
 
 export const printPlacementNotice = (profile) => {

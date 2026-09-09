@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vite-plus/test';
 
+import { PROFILE_LADDER } from './config.mjs';
 import {
   GATE_TASKS,
   initFailure,
@@ -144,17 +145,21 @@ describe('tasksFor', () => {
     expect(repo['pr:verify']).toBe('repo-verify-pr');
   });
 
-  test('a rung above repo writes every task repo writes', () => {
+  test('a rung above repo writes every task repo writes, and its own', () => {
     const repo = tasksFor({ availableBins: allBins, profile: 'repo' });
-    expect(tasksFor({ availableBins: allBins, profile: 'monorepo' })).toEqual(
-      repo,
+    const monorepo = tasksFor({ availableBins: allBins, profile: 'monorepo' });
+    expect(monorepo).toMatchObject(repo);
+    expect(Object.keys(monorepo).length).toBeGreaterThan(
+      Object.keys(repo).length,
     );
-    expect(tasksFor({ availableBins: allBins, profile: 'full' })).toEqual(repo);
+    expect(tasksFor({ availableBins: allBins, profile: 'full' })).toEqual(
+      monorepo,
+    );
   });
 
   test('every gate task names a rung on the ladder', () => {
     for (const task of Object.values(GATE_TASKS)) {
-      expect(['agent', 'repo']).toContain(task.rung);
+      expect(PROFILE_LADDER).toContain(task.rung);
     }
   });
 

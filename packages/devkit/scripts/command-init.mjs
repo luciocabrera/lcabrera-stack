@@ -16,6 +16,7 @@ import {
   buildPlan,
   countsFor,
   printPlacementNotice,
+  printTaskPlan,
   renderPlan,
 } from './command-materialise.mjs';
 import {
@@ -127,15 +128,15 @@ const writeTasks = ({ profile, root }) => {
 };
 
 const materialise = ({ profile, root }) => {
-  const { entries, manifest } = buildPlan({ profile, root });
-  applyPlan({ entries, manifest, root });
-  return entries;
+  const { entries, manifest, tasks } = buildPlan({ profile, root });
+  applyPlan({ entries, manifest, root, tasks });
+  return { entries, tasks };
 };
 
 export const applyInit = ({ profile, root, upgrade, userAgent }) => {
   const runner = writeConfig({ profile, root, upgrade, userAgent });
   const { added, skipped, warning } = writeTasks({ profile, root });
-  const entries = materialise({ profile, root });
+  const { entries, tasks } = materialise({ profile, root });
   const { written } = countsFor(entries);
 
   const hooksPath = resolveConfig(
@@ -144,6 +145,7 @@ export const applyInit = ({ profile, root, upgrade, userAgent }) => {
 
   printPlacementNotice(profile);
   console.log(renderPlan(entries));
+  printTaskPlan(tasks);
   if (warning !== undefined) console.error(warning);
 
   const failure = initFailure({

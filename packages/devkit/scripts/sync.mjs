@@ -177,7 +177,7 @@ export const applySync = ({ entries, root }) => {
   }
 };
 
-export const manifestAfter = ({ entries, previous, version }) =>
+export const manifestAfter = ({ entries, previous, tasks, version }) =>
   nextManifest({
     entries: entries.map((entry) => ({
       incomingHash: entry.incomingHash,
@@ -185,6 +185,7 @@ export const manifestAfter = ({ entries, previous, version }) =>
       state: entry.state,
     })),
     previous,
+    tasks,
     version,
   });
 

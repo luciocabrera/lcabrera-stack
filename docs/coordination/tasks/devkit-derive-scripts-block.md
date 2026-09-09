@@ -7,10 +7,12 @@ branch: fix/1077-devkit-derive-scripts-block
 area:
   - packages/devkit/scripts/**
   - packages/devkit/assets/root/COMMANDS.md
+  - packages/devkit/README.md
+  - packages/devkit/ARCHITECTURE.md
 started: 2026-09-09
 updated: 2026-09-09
 plan: (none)
-pr: (none)
+pr: '#1134'
 issue: #1077
 ---
 
@@ -20,6 +22,6 @@ Derive the emitted scripts block instead of copying it
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; running the gate
 - Blockers: none
-- Next:
+- Next: open the PR for review

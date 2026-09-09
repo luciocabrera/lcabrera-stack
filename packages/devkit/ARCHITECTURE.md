@@ -19,6 +19,7 @@ can travel, and **moving** it into a consumer's tree.
 | `frontmatter.mjs`                   | Read a shipped file's `requires:` and `peer:` declarations, however they are spelled. Pure.                       |
 | `peer.mjs`                          | Resolve an installed peer's version, and decide whether it answers a declared range. Pure but for the resolution. |
 | `manifest.mjs`                      | Hash files, and decide what happens to each on the next run. Pure.                                                |
+| `tasks.mjs`                         | Merge the task block a consumer's manifest carries, one key at a time. Pure.                                      |
 | `accepted.mjs`                      | The record of which local edits the consumer said they meant, and what may go into it. Pure.                      |
 | `sync.mjs`                          | Turn assets plus a manifest into a plan, layer acceptance over it, then apply it.                                 |
 | `init.mjs`                          | What `init` refuses, infers and wires, and when the run failed. Pure.                                             |
@@ -27,6 +28,15 @@ can travel, and **moving** it into a consumer's tree.
 | `command-closure.mjs`, `devkit.mjs` | The commands, and the dispatcher.                                                                                 |
 
 ## Decisions worth not undoing
+
+**The task block is merged, and a file is not.** A block is a map, so each key can
+be judged on its own by the rule `classifyMaterialisation` already applies to a
+file's content — which is why the manifest records a value per task beside a hash
+per file. A prose seed has no such key, so it stays all-or-nothing: the two are
+different problems, and this merge is not a first step towards merging markdown.
+What keeps it out of a repository that never took the block is the record: a key
+holding exactly the command this kit ships is proof this kit wrote it, and a
+manifest where nothing matches is left alone entirely.
 
 **Planning is pure and separate from writing**, so `doctor` predicts exactly what
 `sync` would do. A doctor computing its answer by a different route than the

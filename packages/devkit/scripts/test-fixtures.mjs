@@ -25,6 +25,28 @@ export const planWith = (overrides) =>
   });
 
 /**
+ * `console.log` and `console.error` captured for the length of one case, with
+ * the spies returned so the case can read what was printed and put both back.
+ *
+ * `vi` is passed in rather than imported, for the same reason `expect` is absent
+ * from this module: it stays out of the test runner's import graph.
+ *
+ * @param {{ spyOn: (target: object, method: string) => { mockImplementation:
+ *   (implementation: () => void) => object, mockRestore: () => void } }} vi
+ */
+export const silencedConsole = (vi) => {
+  const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+  const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  return {
+    log,
+    restore: () => {
+      log.mockRestore();
+      error.mockRestore();
+    },
+  };
+};
+
+/**
  * Whether a serialised register is stable: paths in order, trailing newline.
  *
  * Facts rather than assertions, so this module stays out of the test runner's

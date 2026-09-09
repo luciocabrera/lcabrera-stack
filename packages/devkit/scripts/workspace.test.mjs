@@ -24,6 +24,7 @@ import {
   withWorkspaceFields,
   WORKSPACE_DEPENDENCIES,
   WORKSPACE_SCRIPTS,
+  WORKSPACE_TASKS,
 } from './workspace.mjs';
 
 const BLUEPRINT = join(
@@ -92,6 +93,13 @@ describe('the pin and the band arrive together', () => {
 });
 
 describe('the tasks name what the blueprint holds', () => {
+  test('every task is named once, so the block cannot silently lose one', () => {
+    const names = WORKSPACE_TASKS.map(({ name }) => name);
+    expect(names.length).toBeGreaterThan(0);
+    expect(new Set(names).size).toBe(names.length);
+    expect(Object.keys(WORKSPACE_SCRIPTS)).toEqual(names);
+  });
+
   test('the generator task filters for the workspace that is shipped', () => {
     const manifest = JSON.parse(
       read('packages', 'typescript-config', 'package.json'),

@@ -1,10 +1,27 @@
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vite-plus/test';
 
+import { readFilesUnder } from './files.mjs';
 import {
   declaredDependencies,
   inferRunner,
   runnerFromUserAgent,
 } from './init.mjs';
+import { requiredCommands } from './placeholders.mjs';
+
+const ASSETS_DIR = join(
+  dirname(dirname(fileURLToPath(import.meta.url))),
+  'assets',
+);
+
+const askedCommandKeys = () => [
+  ...new Set(
+    readFilesUnder({ directory: ASSETS_DIR, root: ASSETS_DIR }).flatMap(
+      (asset) => requiredCommands(asset.content),
+    ),
+  ),
+];
 
 describe('declaredDependencies', () => {
   test('reads both blocks, since either puts a bin on the path', () => {
@@ -81,18 +98,18 @@ describe('inferRunner', () => {
     }
   });
 
-  test('every runner answers all four keys the shipped files ask for', () => {
+  test('every runner answers every key the shipped files ask for', () => {
+    const asked = askedCommandKeys();
+    expect(asked.length).toBeGreaterThan(0);
     for (const files of [
       ['pnpm-lock.yaml'],
       ['yarn.lock'],
       ['bun.lockb'],
       ['package.json'],
     ]) {
-      expect(
-        Object.keys(inferRunner({ files }).commands).toSorted(
-          (left, right) => Number(left > right) - Number(left < right),
-        ),
-      ).toEqual(['audit', 'check', 'install', 'test']);
+      const answered = Object.keys(inferRunner({ files }).commands);
+      expect(answered.length).toBeGreaterThan(0);
+      for (const key of asked) expect(answered).toContain(key);
     }
   });
 });

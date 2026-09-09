@@ -94,6 +94,7 @@ file never names another repository's toolchain. They are declared once, in
   "commands": {
     "install": "npm ci",
     "check": "npm run check",
+    "run": "npm run",
     "test": "npm test",
     "audit": "npm audit --audit-level=moderate"
   }
@@ -126,3 +127,64 @@ Three things no sync can do for you, in the order they will bite:
    using whatever Node the runner happened to have.
 
 Each is loud when it is missing except the first, which is why it is first.
+
+## 6. The tasks in this repository's manifest
+
+The materialiser writes these into `package.json`, and reconciles them on every
+later run rather than writing them once: a task it wrote and you have not
+touched is updated in place, a task you changed is reported and kept as you have
+it, and a task this kit stops shipping is removed. Your own tasks are never
+touched — write them in here as you add them, so this file stays true.
+
+They are listed rather than tabulated because the command that runs a task is
+substituted from your config, and no column width fits every repository's.
+
+A task is written only when the package carrying its command is installed, so a
+repository that took the materialiser and not the gate runtime gets the two that
+name `devkit` and none of the rest.
+
+From the `agent` profile up:
+
+- `{{commands.run}} branch:verify` — `repo-verify-branch`
+- `{{commands.run}} commit:verify` — `repo-verify-commit`
+- `{{commands.run}} coordination:close` — `repo-close-claim`
+- `{{commands.run}} coordination:verify` — `repo-verify-claims`
+- `{{commands.run}} devkit:check` — `devkit doctor --check`
+- `{{commands.run}} devkit:sync` — `devkit sync`
+
+From the `repo` profile up:
+
+- `{{commands.run}} adr:list` — `repo-verify-adrs --list`
+- `{{commands.run}} adr:new` — `repo-adr`
+- `{{commands.run}} adr:verify` — `repo-verify-adrs`
+- `{{commands.run}} issue:verify` — `repo-verify-issue`
+- `{{commands.run}} pr:verify` — `repo-verify-pr`
+- `{{commands.run}} scripts:verify` — `repo-verify-script-size`
+
+From the `monorepo` profile up:
+
+- `{{commands.run}} commands:verify` — `repo-verify-commands`
+
+That last one is the gate that holds this section to its word: it fails when a
+task in `package.json` is documented nowhere here, and when a task documented
+here is not one this repository has. It is wired from the `monorepo` profile up
+because that is the rung whose blueprint decides the toolchain, and the tasks
+below are that toolchain's.
+
+### The blueprint's own tasks
+
+Written from the `monorepo` profile up, alongside the workspace layout, the
+dependency catalog and the lint configuration that rung places.
+
+- `{{commands.run}} check` — format, lint and type-check in one pass.
+- `{{commands.run}} format:all` — format the tree.
+- `{{commands.run}} format:check` — report formatting without writing, for CI.
+- `{{commands.run}} lint:all` — both linters, fixing what can be fixed.
+- `{{commands.run}} lint:biome` — the second linter alone, fixing what it can.
+- `{{commands.run}} lint:biome:check` — the second linter alone, reporting only.
+- `{{commands.run}} lint:check` — both linters, reporting only, for CI.
+- `{{commands.run}} prepare` — regenerate the generated configs after an install.
+- `{{commands.run}} test:all` — every workspace's tests, in dependency order.
+- `{{commands.run}} tsconfig:generate` — rewrite the generated TypeScript configs
+  and format what it wrote.
+- `{{commands.run}} typecheck:all` — type-check the root, then every workspace.

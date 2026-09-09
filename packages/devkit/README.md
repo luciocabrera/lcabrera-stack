@@ -284,11 +284,16 @@ until the next regeneration reverts it.
 
 **All of that is the `create` path.** The root manifest is the one file this rung
 does not materialise, because it carries the repository's own name — so `sync`
-and `init` never write the task block, the dependencies or the engine pin into a
-repository that already exists, and `prepare` is part of that manifest. `create`
-writes the workspace block once and nothing rewrites it: edit it freely, and
-expect a later version's additions not to arrive on their own. `devkit init
---upgrade` still adds its own gate tasks.
+and `init` never write the dependencies or the engine pin into a repository that
+already exists, and `prepare` is part of that manifest.
+
+**The task block is the exception: it is reconciled rather than copied.** Every
+run merges it key by key against the record of what this kit last wrote there. A
+task it wrote and you have not touched is updated in place, a task you changed is
+reported and kept as you have it, a task it no longer ships is removed, and one
+it has added since arrives — beside your own tasks, which it never touches. A
+manifest holding no task this kit provably wrote is left entirely alone, so a
+repository that never took the block does not acquire one.
 
 Raising an existing repository to this rung therefore takes a second step, and
 **nothing tells you so**: every file lands as `added`, `doctor --check` reports
@@ -304,7 +309,9 @@ binaries are missing: with `vp` and `devkit` both installed it still adds only
 the gate-task table at all, so no set of installed binaries reaches it. Run
 `devkit create` into a scratch directory with this profile and copy the
 `scripts`, `devDependencies`, `engines` and `packageManager` fields out of its
-root `package.json` into yours; that one step fixes both tasks.
+root `package.json` into yours; that one step fixes both tasks. The copied tasks
+hold exactly what this kit ships, which is what it reads as its own, so from then
+on they are reconciled like any other consumer's.
 
 Three files carry the engine guarantee and only work together: `.node-version`
 holds the exact version, the root manifest's `engines.node` holds the band an
@@ -435,6 +442,7 @@ moves on**. `--verbose` is how you find what is being held back.
   "commands": {
     "install": "vp install",
     "check": "vp run check:push",
+    "run": "vp run",
     "test": "vp run test:changed",
     "audit": "vp run deps:audit"
   }
@@ -448,7 +456,10 @@ put the seeds where a consumer on another runner never looks.
 
 `commands` answers the placeholders a shipped file carries. A skill's procedure
 travels but the command carrying out each step does not, so the file says
-`{{commands.install}}` and this supplies the rest. A file whose placeholders
+`{{commands.install}}` and this supplies the rest. `run` is the one that is a
+prefix rather than a command — how this repository runs a task by name — and the
+shipped command reference spells every task through it, since a task name means
+nothing without it. A file whose placeholders
 cannot all be answered is **not written** — materialising `{{commands.install}}`
 verbatim would hand a reader something that looks like a command and is not one.
 
