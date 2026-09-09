@@ -2,7 +2,7 @@
 id: refuse-untrusted-table-state
 title: refuse untrusted table state at cookie, URL, and row boundaries
 owner: agent:claude
-status: active
+status: review
 branch: fix/1139-refuse-untrusted-table-state
 area:
   - packages/ui/src/routing/**
@@ -14,7 +14,7 @@ area:
 started: 2026-09-09
 updated: 2026-09-09
 plan: (none)
-pr: (none)
+pr: #1146
 issue: #1139
 ---
 
@@ -24,6 +24,6 @@ refuse untrusted table state at cookie, URL, and row boundaries
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green, PR ready
 - Blockers: none
-- Next:
+- Next: review

@@ -51,6 +51,7 @@ The folder is split by concern:
 | `toKeysetCursorValues.util.ts`         | Reads the sort-key tuple out of the last loaded row, in sorting order — the keyset cursor (ADR-052)             |
 | `buildTablePageQuery.util.ts`          | Turns the table's columns state into the next page's query — the client-side mirror of `createTableRouteLoader` |
 | `sanitizeFiltersByColumns.util.ts`     | Drops URL filters that don't match a known column                                                               |
+| `sanitizeLayoutByColumns.util.ts`      | Drops cookie and URL column keys that are not in the route's column set                                         |
 | `isFilterCompatibleWithColumn.util.ts` | Guard used when sanitizing URL filters against column definitions                                               |
 | `getRootLoaderData.util.ts`            | Typed access to the root route's loader data                                                                    |
 

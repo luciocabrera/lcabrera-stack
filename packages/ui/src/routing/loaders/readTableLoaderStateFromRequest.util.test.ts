@@ -469,6 +469,40 @@ describe('readTableLoaderStateFromRequest', () => {
     });
   });
 
+  describe('layout keys absent from columns', () => {
+    it('drops them from every cookie slice and from URL sorting', () => {
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({
+        columnOrder: ['status', 'gone', 'amount'],
+        columnPinning: { left: ['gone', 'status'], right: ['amount'] },
+        columnSizing: { amount: 180, gone: 40 },
+        columnVisibility: new Set(['gone', 'status']),
+      });
+
+      const sorting = serializeSortingToURL<Record<string, unknown>>([
+        { columnKey: 'gone', direction: 'asc' },
+        { columnKey: 'amount', direction: 'desc' },
+      ]);
+      const request = new Request(
+        `https://example.com/orders?sorting=${encodeURIComponent(sorting ?? '')}`,
+      );
+
+      const result = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        persistenceKey: 'orders',
+        request,
+      });
+
+      expect(result.columnOrder).not.toContain('gone');
+      expect(result.columnPinning.left).not.toContain('gone');
+      expect(result.columnPinning.right).not.toContain('gone');
+      expect(result.columnSizing).not.toHaveProperty('gone');
+      expect(Array.from(result.columnVisibility, String)).not.toContain('gone');
+      expect(result.sorting.map((entry) => entry.columnKey)).not.toContain(
+        'gone',
+      );
+    });
+  });
+
   describe('settingsTabOrder', () => {
     it('takes the order the reader set globally', () => {
       expect(readTabOrder({ globalOrder: ['details'] })?.[0]).toBe('details');
