@@ -31,3 +31,11 @@
 - Updated dependencies [ac9ef21]
 - Updated dependencies [1510ddd]
   - @lcabrera/devkit@0.4.0
+
+## 0.1.0
+
+Published by hand, to create the package on the registry. npm attaches a trusted
+publisher to a package that already exists, so the first publish of one cannot
+come from the workflow that publishes every release after it.
+
+The shim is the same as 0.2.0's; only the version differs.
