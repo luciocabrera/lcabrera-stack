@@ -49,6 +49,15 @@ so they live with the domain rather than inside one of its callers.
 | `resolveOrdersGroupRestriction` | `.server/resolveOrdersGroupRestriction.util.ts` | This route's binding of `@lcabrera/server`'s `resolveGroupRestriction` — its truncation lookup, and nothing else. What the panel and the dialog title state about the group both come from it (ADR-094)                                            |
 | `resolveOrdersPageRead`         | `.server/resolveOrdersPageRead.util.ts`         | `/paginated`'s fetch-vocabulary params parsed once, then handed to `resolveOrdersGroupRead`. The modal route skips this half — the table factory has already parsed the page vocabulary — so the group rule is stated once for both                |
 
+### Order form fields (`routes/enterprise-orders/utils/`)
+
+Create and edit each have their own builder. Shared tab helpers live in the same module; neither builder takes a mode flag.
+
+| Artifact                     | Location                  | Description                                                                                      |
+| ---------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
+| `buildCreateOrderFormFields` | `orderFormFields.util.ts` | Field tree for a new order. Omits `order_number`, computed totals, and the audit group.          |
+| `buildEditOrderFormFields`   | `orderFormFields.util.ts` | Field tree for an existing order. Includes `order_number`, computed totals, and the audit group. |
+
 ---
 
 ## Database setup (`db/`, `scripts/`)

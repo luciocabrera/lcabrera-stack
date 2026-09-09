@@ -4,7 +4,10 @@ import { expect, it } from 'vite-plus/test';
 
 import type { EnterpriseOrderValues } from '../config';
 
-import { buildOrderFormFields } from './orderFormFields.util';
+import {
+  buildCreateOrderFormFields,
+  buildEditOrderFormFields,
+} from './orderFormFields.util';
 
 const collectAccessors = (
   nodes: readonly FieldNode<EnterpriseOrderValues>[],
@@ -20,36 +23,57 @@ const collectAccessors = (
     return [node.accessor];
   });
 
-it('exposes the required input fields in create mode', () => {
-  const accessors = collectAccessors(buildOrderFormFields({ mode: 'create' }));
+it('create fields omit order_number and the audit group', () => {
+  const accessors = collectAccessors(buildCreateOrderFormFields());
+
+  expect(accessors).not.toContain('order_number');
+  expect(accessors).not.toContain('created_at');
+  expect(accessors).not.toContain('updated_at');
+  expect(accessors).not.toContain('order_id');
+  expect(accessors).not.toContain('last_modified_by');
+});
+
+it('create fields omit computed totals', () => {
+  const accessors = collectAccessors(buildCreateOrderFormFields());
+
+  expect(accessors).not.toContain('subtotal');
+  expect(accessors).not.toContain('total_amount');
+});
+
+it('create fields still expose the required input fields', () => {
+  const accessors = collectAccessors(buildCreateOrderFormFields());
 
   expect(accessors).toContain('customer_name');
   expect(accessors).toContain('quantity');
   expect(accessors).toContain('priority');
 });
 
-it('omits server-managed, computed and audit fields in create mode', () => {
-  const accessors = collectAccessors(buildOrderFormFields({ mode: 'create' }));
-
-  expect(accessors).not.toContain('order_number');
-  expect(accessors).not.toContain('subtotal');
-  expect(accessors).not.toContain('total_amount');
-  expect(accessors).not.toContain('created_at');
-  expect(accessors).not.toContain('order_id');
-});
-
-it('includes the read-only computed and audit fields in edit mode', () => {
-  const accessors = collectAccessors(buildOrderFormFields({ mode: 'edit' }));
+it('edit fields include order_number and the audit group', () => {
+  const accessors = collectAccessors(buildEditOrderFormFields());
 
   expect(accessors).toContain('order_number');
-  expect(accessors).toContain('subtotal');
-  expect(accessors).toContain('total_amount');
   expect(accessors).toContain('created_at');
+  expect(accessors).toContain('updated_at');
   expect(accessors).toContain('order_id');
+  expect(accessors).toContain('last_modified_by');
 });
 
-it('builds a single tab container at the root', () => {
-  const [root, ...rest] = buildOrderFormFields({ mode: 'view' });
+it('edit fields include computed totals', () => {
+  const accessors = collectAccessors(buildEditOrderFormFields());
+
+  expect(accessors).toContain('subtotal');
+  expect(accessors).toContain('total_amount');
+});
+
+it('create builder returns a single tab container at the root', () => {
+  const [root, ...rest] = buildCreateOrderFormFields();
+
+  expect(rest).toHaveLength(0);
+  expect(root?.type).toBe('tab');
+});
+
+it('edit builder returns a single tab container at the root', () => {
+  const [root, ...rest] = buildEditOrderFormFields();
 
   expect(rest).toHaveLength(0);
   expect(root?.type).toBe('tab');

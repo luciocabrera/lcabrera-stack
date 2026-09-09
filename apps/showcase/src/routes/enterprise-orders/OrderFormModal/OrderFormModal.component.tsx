@@ -6,7 +6,10 @@ import type { EnterpriseOrderValues } from '../config';
 import type { OrderFormModalProps } from './OrderFormModal.types';
 
 import { ENTERPRISE_ORDERS_PATH } from '../config';
-import { buildOrderFormFields } from '../utils/orderFormFields.util';
+import {
+  buildCreateOrderFormFields,
+  buildEditOrderFormFields,
+} from '../utils/orderFormFields.util';
 import { styles } from './OrderFormModal.stylex';
 
 export const OrderFormModal = ({
@@ -22,6 +25,11 @@ export const OrderFormModal = ({
     void navigate(ENTERPRISE_ORDERS_PATH);
   };
 
+  const fields =
+    mode === 'create'
+      ? buildCreateOrderFormFields()
+      : buildEditOrderFormFields();
+
   return (
     <Modal
       bodyStylex={styles.flushBody}
@@ -32,7 +40,7 @@ export const OrderFormModal = ({
     >
       <Form<EnterpriseOrderValues>
         cancelTo={ENTERPRISE_ORDERS_PATH}
-        fields={buildOrderFormFields({ mode })}
+        fields={fields}
         initialValues={initialValues}
         method='post'
         mode={mode}

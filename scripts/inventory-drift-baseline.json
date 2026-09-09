@@ -64,9 +64,6 @@
   "apps/showcase/src/routes/enterprise-orders/utils/buildAddressLocalityRows.util.ts": [
     "buildAddressLocalityRows"
   ],
-  "apps/showcase/src/routes/enterprise-orders/utils/orderFormFields.util.ts": [
-    "buildOrderFormFields"
-  ],
   "apps/showcase/src/routes/enterprise-orders/utils/parseOrderIdParam.util.ts": [
     "parseOrderIdParam"
   ],
