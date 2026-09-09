@@ -4,7 +4,7 @@ governs:
   - repo-standards
 ---
 
-# ADR-116 — Reconcile the emitted task block key by key
+# ADR-119 — Reconcile the emitted task block key by key
 
 **Status:** Accepted
 
