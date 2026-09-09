@@ -27,31 +27,39 @@ import {
   manifestRanges,
   mentionsIn,
   shippedRangeFindings,
+  sourceOf,
 } from './lib/shipped-ranges.mjs';
 
 const REPO_ROOT = process.cwd();
 const ASSETS_DIR = join(REPO_ROOT, 'packages', 'devkit', 'assets');
 
-const DECLARING_FILES = new Set(['package.json', 'pnpm-workspace.yaml']);
-
-const declaringFiles = () =>
+const shippedFiles = () =>
   readdirSync(ASSETS_DIR, { recursive: true, withFileTypes: true })
-    .filter((entry) => entry.isFile() && DECLARING_FILES.has(entry.name))
+    .filter((entry) => entry.isFile())
     .map((entry) => join(entry.parentPath, entry.name));
 
 const toPosix = (path) => path.split(sep).join('/');
 
 const sourcesUnder = () =>
-  declaringFiles().map((path) => ({
-    manifest: basename(path) === 'package.json',
-    path: toPosix(relative(REPO_ROOT, path)),
-    text: readFileSync(path, 'utf8'),
-  }));
+  shippedFiles().flatMap((path) => {
+    const source = sourceOf(basename(path));
+    if (source === undefined) return [];
 
-const declarationsIn = ({ manifest, path, text }) =>
-  manifest
-    ? manifestRanges({ manifest: JSON.parse(text), path })
-    : catalogRanges({ path, text });
+    return [
+      {
+        ...source,
+        path: toPosix(relative(REPO_ROOT, path)),
+        text: readFileSync(path, 'utf8'),
+      },
+    ];
+  });
+
+const declarationsIn = ({ kind, path, text }) => {
+  if (kind === 'manifest') {
+    return manifestRanges({ manifest: JSON.parse(text), path });
+  }
+  return kind === 'catalog' ? catalogRanges({ path, text }) : [];
+};
 
 const publishedVersions = () =>
   Object.fromEntries(
@@ -67,8 +75,8 @@ const main = () => {
   const names = Object.keys(versions);
 
   const declarations = sources.flatMap(declarationsIn);
-  const mentions = sources.flatMap(({ path, text }) =>
-    mentionsIn({ names, path, text }),
+  const mentions = sources.flatMap(({ hashComments, path, text }) =>
+    mentionsIn({ hashComments, names, path, text }),
   );
 
   const findings = shippedRangeFindings({
@@ -90,8 +98,10 @@ const main = () => {
     return;
   }
 
+  const read = sources.filter(({ kind }) => kind !== 'scanned').length;
+
   console.log(
-    `Shipped range gate passed: ${declarations.length} declaration(s) read from ${sources.length} shipped file(s), covering ${mentions.length} mention(s) of a package this repository publishes.`,
+    `Shipped range gate passed: ${declarations.length} declaration(s) read from ${read} shipped file(s), out of ${sources.length} scanned for a package this repository publishes — ${mentions.length} mention(s), each one read.`,
   );
 };
 

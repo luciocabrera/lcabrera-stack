@@ -54,11 +54,29 @@ It refuses a pass **per file**, not per run: a shipped file that names a package
 this repository publishes and yields no declaration of it is a finding, and the
 finding names the file. A whole-run refusal would not have held — one reader
 going quiet while the other still answers produces a finding count above zero
-and a clean exit, which is the same output a correct tree produces. It refuses a
-pass **per shape** for the same reason: this gate reads a manifest and a
-workspace catalog, and a run that found neither says so rather than reporting
-the coverage it managed, so narrowing what the walk selects cannot quietly
-narrow what is checked.
+and a clean exit, which is the same output a correct tree produces.
+
+**The names are read from every shipped data file, the declarations from only
+the two shapes a reader parses**, and that gap is deliberate. A declaring file
+that leaves the reader's set — renamed, or a shape nobody has taught this gate —
+would otherwise take its own mentions with it and go quiet with nothing left to
+name it, and a second file of the same shape would keep the run looking complete.
+Scanning wider than it parses is what makes the file itself the unit of refusal.
+Two coarser guards sit behind it: a run that reached no manifest, or no workspace
+catalog, names the shape it did not reach; and a catalog that yielded no entry at
+all names itself, since a catalog is the one shape that promises entries where a
+manifest may legitimately declare none.
+
+A shipped file is a data file by its extension — JSON, JSON5, JSONC, YAML — and
+prose is not scanned, so a range written in a `.md` or a `.txt` reaches a
+consumer unread. That is the same boundary as the shipped `scripts/` below: a
+dependency declaration nothing else would read as one is not a shape this gate
+can be held to.
+
+Comment stripping follows the file's own syntax rather than the reader's habit.
+Dropping YAML's `#` comments from JSON makes the two readers disagree about the
+same file, which is how a per-file refusal is switched off without any reader
+going quiet.
 
 **Only `catalog:` and `workspace:` are exempt from judgement**, because those
 name a _place_ — the version is declared elsewhere and cannot fall behind here.

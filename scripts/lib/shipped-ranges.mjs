@@ -86,44 +86,103 @@ export const manifestRanges = ({ manifest, path }) =>
       .map(([name, range]) => ({ field, name, path, range })),
   );
 
-const tokensIn = (text) =>
+const tokensIn = ({ hashComments, text }) =>
   new Set(
-    text.split('\n').flatMap((line) => withoutComment(line).split(NOT_A_NAME)),
+    text
+      .split('\n')
+      .flatMap((line) =>
+        (hashComments ? withoutComment(line) : line).split(NOT_A_NAME),
+      ),
   );
 
 /**
  * Where a shipped file names a package this repository publishes, whether or
- * not a reader made a declaration of it. Read as whole tokens and with comments
- * dropped, so a longer name that starts with a shorter one is not one mention
- * of each, and prose about a package is not a declaration of it.
+ * not a reader made a declaration of it. Read as whole tokens, so a longer name
+ * that starts with a shorter one is not one mention of each; `hashComments` says
+ * whether this file's syntax has `#` comments to drop, because applying one
+ * syntax's rule to another file makes two readers disagree about it.
  *
- * @param {{ names: readonly string[], path: string, text: string }} args
+ * @param {{ hashComments?: boolean, names: readonly string[], path: string, text: string }} args
  */
-export const mentionsIn = ({ names, path, text }) => {
-  const tokens = tokensIn(text);
+export const mentionsIn = ({ hashComments = false, names, path, text }) => {
+  const tokens = tokensIn({ hashComments, text });
 
   return names
     .filter((name) => tokens.has(name))
     .map((name) => ({ name, path }));
 };
 
+const READER_BY_NAME = new Map([
+  ['package.json', 'manifest'],
+  ['pnpm-workspace.yaml', 'catalog'],
+]);
+
+const SCANNED_EXTENSIONS = new Set([
+  '.json',
+  '.json5',
+  '.jsonc',
+  '.yaml',
+  '.yml',
+]);
+
+const HASH_COMMENT_EXTENSIONS = new Set(['.yaml', '.yml']);
+
+const extensionOf = (fileName) => fileName.slice(fileName.lastIndexOf('.'));
+
+/**
+ * What a shipped file is to this gate: a shape it reads declarations out of, a
+ * data file it only scans for names, or nothing.
+ *
+ * Every shipped data file is scanned even when no reader parses it, because a
+ * declaring file that leaves the reader's set — renamed, or a shape nobody
+ * taught this gate — otherwise takes its own mentions with it and goes quiet
+ * with no finding to name it.
+ *
+ * @param {string} fileName
+ */
+export const sourceOf = (fileName) => {
+  const extension = extensionOf(fileName);
+  if (!SCANNED_EXTENSIONS.has(extension)) return undefined;
+
+  return {
+    hashComments: HASH_COMMENT_EXTENSIONS.has(extension),
+    kind: READER_BY_NAME.get(fileName) ?? 'scanned',
+  };
+};
+
+const REQUIRED_SHAPES = [
+  { kind: 'manifest', shape: 'manifest' },
+  { kind: 'catalog', shape: 'workspace catalog' },
+];
+
 /**
  * The shapes this gate knows how to read, both of which the shipped assets are
  * expected to carry. A run that found neither read less than it was built to
  * read, and says so instead of reporting the coverage it managed.
  *
- * @param {readonly { manifest: boolean }[]} sources
+ * @param {readonly { kind: string }[]} sources
  */
 const missingShapes = (sources) =>
-  [
-    { present: sources.some(({ manifest }) => manifest), shape: 'manifest' },
-    {
-      present: sources.some(({ manifest }) => !manifest),
+  REQUIRED_SHAPES.filter(
+    ({ kind }) => !sources.some((source) => source.kind === kind),
+  ).map(({ shape }) => ({ kind: 'no-source', shape }));
+
+/**
+ * A file the walk selected as a catalog and read nothing out of. A catalog is
+ * the one shape that promises entries — a manifest may legitimately declare
+ * none — so zero of them means the reader, not the file, has gone quiet.
+ *
+ * @param {{ declarations: readonly object[], sources: readonly object[] }} args
+ */
+const quietCatalogs = ({ declarations, sources }) =>
+  sources
+    .filter(({ kind }) => kind === 'catalog')
+    .filter(({ path }) => !declarations.some((entry) => entry.path === path))
+    .map(({ path }) => ({
+      kind: 'no-declarations',
+      path,
       shape: 'workspace catalog',
-    },
-  ]
-    .filter(({ present }) => !present)
-    .map(({ shape }) => ({ kind: 'no-source', shape }));
+    }));
 
 const verdict = ({ declaration, version }) => {
   if (validRange(declaration.range) === null) return 'malformed';
@@ -158,9 +217,8 @@ export const shippedRangeFindings = ({
   sources = [],
   versions,
 }) => {
-  const missing = missingShapes(sources);
-  if (missing.length > 0) return missing;
-  if (mentions.length === 0) return [{ kind: 'nothing-read' }];
+  const structural = missingShapes(sources);
+  if (mentions.length === 0) return [...structural, { kind: 'nothing-read' }];
 
   const owned = declarations.filter(
     ({ name }) => typeof versions[name] === 'string',
@@ -172,6 +230,8 @@ export const shippedRangeFindings = ({
     .map((mention) => ({ ...mention, kind: 'unread' }));
 
   return [
+    ...structural,
+    ...quietCatalogs({ declarations, sources }),
     ...unread,
     ...owned
       .filter((declaration) => !PLACE.test(declaration.range))
@@ -196,6 +256,9 @@ const REASONS = {
 const NOTHING_READ =
   'no shipped file names a package this repository publishes — the assets moved, or the walk stopped reaching them';
 
+const noDeclarationsLine = (finding) =>
+  `${finding.path}  is a ${finding.shape} and yielded no entry — the file changed shape, or the reader stopped reading it`;
+
 const noSourceLine = (finding) =>
   `the shipped assets yielded no ${finding.shape} to read — the walk narrowed, or the assets moved`;
 
@@ -209,6 +272,7 @@ const unreadLine = (finding) =>
  * @param {object} finding
  */
 export const findingLine = (finding) => {
+  if (finding.kind === 'no-declarations') return noDeclarationsLine(finding);
   if (finding.kind === 'no-source') return noSourceLine(finding);
   if (finding.kind === 'nothing-read') return NOTHING_READ;
   if (finding.kind === 'unread') return unreadLine(finding);

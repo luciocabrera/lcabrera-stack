@@ -13,40 +13,23 @@ import {
   manifestRanges,
   mentionsIn,
   shippedRangeFindings,
+  sourceOf,
 } from './shipped-ranges.mjs';
-
-const CATALOG = [
-  'packages:',
-  '  - packages/*',
-  '',
-  'engineStrict: true',
-  '',
-  'catalogs:',
-  '  build:',
-  '    typescript: ^6.0.3',
-  '    # keep in lockstep with the toolchain release',
-  '    vite: npm:@voidzero-dev/vite-plus-core@0.3.0',
-  '',
-  '  stack:',
-  "    '@lcabrera/tsconfig': '>=0.2.2 <1.0.0'",
-  "    '@lcabrera/vite-config': ^0.4.1",
-  '',
-].join('\n');
-
-const VERSIONS = {
-  '@lcabrera/tsconfig': '0.2.2',
-  '@lcabrera/vite-config': '0.5.0',
-};
-
-const YAML = 'pnpm-workspace.yaml';
-const MANIFEST = 'package.json';
+import {
+  ALL_MENTIONS,
+  BOTH_SHAPES,
+  CATALOG,
+  MANIFEST,
+  MANIFEST_DECLARATIONS,
+  VERSIONS,
+  YAML,
+  YAML_DECLARATIONS,
+} from './shipped-ranges-fixtures.mjs';
 
 const mentionsOf = (declarations) =>
   declarations
     .filter(({ name }) => VERSIONS[name] !== undefined)
     .map(({ name, path }) => ({ name, path }));
-
-const BOTH_SHAPES = [{ manifest: true }, { manifest: false }];
 
 const findingsFor = ({
   declarations,
@@ -122,6 +105,37 @@ describe('manifestRanges', () => {
   });
 });
 
+describe('sourceOf', () => {
+  it.each([
+    { file: 'package.json', kind: 'manifest' },
+    { file: 'pnpm-workspace.yaml', kind: 'catalog' },
+  ])('reads $file as a $kind', ({ file, kind }) => {
+    expect(sourceOf(file)?.kind).toBe(kind);
+  });
+
+  it.each(['package.jsonc', 'package.json5', 'biome.jsonc', 'check.yml'])(
+    'scans %s for names even though no reader parses it',
+    (file) => {
+      expect(sourceOf(file)?.kind).toBe('scanned');
+    },
+  );
+
+  it('is nothing to this gate for a file that carries no data', () => {
+    expect(sourceOf('README.md')).toBeUndefined();
+  });
+
+  it.each([
+    { file: 'pnpm-workspace.yaml', hashComments: true },
+    { file: 'package.json', hashComments: false },
+    { file: 'biome.jsonc', hashComments: false },
+  ])(
+    'says whether $file has hash comments to drop',
+    ({ file, hashComments }) => {
+      expect(sourceOf(file)?.hashComments).toBe(hashComments);
+    },
+  );
+});
+
 describe('mentionsIn', () => {
   const names = [...Object.keys(VERSIONS), '@lcabrera/node', '@lcabrera/ui'];
 
@@ -134,14 +148,25 @@ describe('mentionsIn', () => {
     ]);
   });
 
-  it('reads no name out of a comment, which declares nothing', () => {
+  it('reads no name out of a comment, in a syntax that has them', () => {
     expect(
       mentionsIn({
+        hashComments: true,
         names,
         path: YAML,
         text: '  # @lcabrera/ui is installed by the application, not catalogued\n',
       }),
     ).toEqual([]);
+  });
+
+  it('reads a name out of JSON holding a hash, which is no comment there', () => {
+    expect(
+      mentionsIn({
+        names,
+        path: MANIFEST,
+        text: '{"description":"a # b","devDependencies":{"@lcabrera/tsconfig":"^0.2.2"}}',
+      }),
+    ).toEqual([{ name: '@lcabrera/tsconfig', path: MANIFEST }]);
   });
 
   it('reads a whole token, so a longer name is not also the shorter one', () => {
@@ -156,20 +181,17 @@ describe('mentionsIn', () => {
 });
 
 describe('shippedRangeFindings — a shape the walk stopped reaching', () => {
-  const declarations = [
-    {
-      field: 'devDependencies',
-      name: '@lcabrera/tsconfig',
-      path: MANIFEST,
-      range: '>=0.2.2 <1.0.0',
-    },
-  ];
-
   it.each([
-    { missing: 'workspace catalog', sources: [{ manifest: true }] },
-    { missing: 'manifest', sources: [{ manifest: false }] },
+    {
+      missing: 'workspace catalog',
+      sources: [{ kind: 'manifest', path: MANIFEST }],
+    },
+    { missing: 'manifest', sources: [{ kind: 'catalog', path: YAML }] },
   ])('refuses a pass when no $missing was read', ({ missing, sources }) => {
-    const findings = findingsFor({ declarations, sources });
+    const findings = findingsFor({
+      declarations: [...MANIFEST_DECLARATIONS, ...YAML_DECLARATIONS],
+      sources,
+    });
 
     expect(findings.map(({ kind, shape }) => ({ kind, shape }))).toEqual([
       { kind: 'no-source', shape: missing },
@@ -252,37 +274,6 @@ describe('shippedRangeFindings', () => {
 });
 
 describe('shippedRangeFindings — a reader that has gone quiet', () => {
-  const YAML_MENTIONS = [
-    { name: '@lcabrera/tsconfig', path: YAML },
-    { name: '@lcabrera/vite-config', path: YAML },
-  ];
-  const MANIFEST_MENTIONS = [{ name: '@lcabrera/tsconfig', path: MANIFEST }];
-
-  const MANIFEST_DECLARATIONS = [
-    {
-      field: 'devDependencies',
-      name: '@lcabrera/tsconfig',
-      path: MANIFEST,
-      range: '>=0.2.2 <1.0.0',
-    },
-  ];
-  const YAML_DECLARATIONS = [
-    {
-      line: 51,
-      name: '@lcabrera/tsconfig',
-      path: YAML,
-      range: '>=0.2.2 <1.0.0',
-    },
-    {
-      line: 52,
-      name: '@lcabrera/vite-config',
-      path: YAML,
-      range: '>=0.5.0 <1.0.0',
-    },
-  ];
-
-  const ALL_MENTIONS = [...YAML_MENTIONS, ...MANIFEST_MENTIONS];
-
   it('passes while both readers answer', () => {
     expect(
       findingsFor({
@@ -295,20 +286,23 @@ describe('shippedRangeFindings — a reader that has gone quiet', () => {
   it.each([
     {
       answering: MANIFEST_DECLARATIONS,
-      quiet: 'catalog',
-      unread: [
+      expected: [
+        { kind: 'no-declarations', path: YAML },
         { kind: 'unread', name: '@lcabrera/tsconfig', path: YAML },
         { kind: 'unread', name: '@lcabrera/vite-config', path: YAML },
       ],
+      quiet: 'catalog',
     },
     {
       answering: YAML_DECLARATIONS,
+      expected: [
+        { kind: 'unread', name: '@lcabrera/tsconfig', path: MANIFEST },
+      ],
       quiet: 'manifest',
-      unread: [{ kind: 'unread', name: '@lcabrera/tsconfig', path: MANIFEST }],
     },
   ])(
     'fails when the $quiet reader yields nothing, though the other still does',
-    ({ answering, unread }) => {
+    ({ answering, expected }) => {
       const findings = findingsFor({
         declarations: answering,
         mentions: ALL_MENTIONS,
@@ -316,19 +310,19 @@ describe('shippedRangeFindings — a reader that has gone quiet', () => {
 
       expect(
         findings.map(({ kind, name, path }) => ({ kind, name, path })),
-      ).toEqual(unread);
-      expect(findingLine(findings[0])).toContain(unread[0].path);
+      ).toEqual(expected);
+      expect(findingLine(findings[0])).toContain(expected[0].path);
     },
   );
 
   it('counts a name read in one file as unread in the other', () => {
     const findings = findingsFor({
-      declarations: MANIFEST_DECLARATIONS,
-      mentions: [{ name: '@lcabrera/tsconfig', path: YAML }],
+      declarations: YAML_DECLARATIONS,
+      mentions: [{ name: '@lcabrera/tsconfig', path: MANIFEST }],
     });
 
     expect(findings.map(({ kind, path }) => ({ kind, path }))).toEqual([
-      { kind: 'unread', path: YAML },
+      { kind: 'unread', path: MANIFEST },
     ]);
   });
 
