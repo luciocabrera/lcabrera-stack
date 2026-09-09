@@ -21,9 +21,8 @@ Version and publish the pending changesets
 
 ## Status / next
 
-- Current step: versioned, gate running
-- Blockers: `create-lcabrera-stack` has never been published, so `release:plan`
-  refuses the gate for every package until it is published by hand once and its
-  trusted publisher is configured on npmjs.com. That must happen before this
-  merges.
-- Next: merge once the first publish has landed; `release.yml` does the rest
+- Current step: gate green, CI green, open for review
+- Blockers: none. `create-lcabrera-stack@0.1.0` was published by hand and its
+  trusted publisher configured, so `release:plan` now reports every package
+  `already on npm` and the publish gate opens.
+- Next: merge; `release.yml` publishes the five bumped packages

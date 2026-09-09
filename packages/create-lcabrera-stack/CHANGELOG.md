@@ -4,8 +4,8 @@
 
 ### Minor Changes
 
-- a5a9e32: First release. `pnpm create lcabrera-stack <directory>` starts a repository on
-  this toolchain without having to know the toolchain's package name first.
+- a5a9e32: `pnpm create lcabrera-stack <directory>` starts a repository on this toolchain
+  without having to know the toolchain's package name first.
 
   It is a shim: it resolves `@lcabrera/devkit` and runs `devkit create` with the
   arguments it was given. It exports nothing, parses no argument and holds no
