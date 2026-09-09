@@ -1,0 +1,155 @@
+name: Grok Review
+
+# A catalog reviewer, running in-workflow, alongside claude-review.yml.
+# It cites IDs from .github/skills/code-smell-zen/SKILL.md. It is not an
+# accepted reviewer: Copilot review complete stays "Claude or Copilot
+# reviewed this head". ADR-116.
+#
+# The model writes two files. The step after it submits them. The model is
+# never handed a tool that can write to GitHub — the same split as Claude,
+# for the same reason: a write-capable wildcard on a token with
+# pull-requests: write reaches every endpoint that token covers.
+#
+# Deliberately does NOT publish a commit status and does NOT dispatch
+# copilot-review-gate.yml. It is not in ACCEPTED_REVIEWERS, so a dispatch
+# would only republish the same status. Publication of that context stays
+# single-writer in scripts/copilot-review-status.mjs.
+#
+# `synchronize` is what makes this useful: it fires on every push, so the
+# review that lands is against the head that triggered it.
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+# A superseded run produces a review of dead code and pays real tokens to
+# do it. The gate workflows refuse cancel-in-progress because they re-read
+# the head; this job carries the SHA of the event that triggered it, so
+# cancelling is the right call — same as claude-review.yml.
+concurrency:
+  group: grok-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    permissions:
+      contents: read
+      pull-requests: read
+    # Drafts are skipped because a review of a draft is paid for twice —
+    # once now and again when it is marked ready. Skipping here does not
+    # hold the merge: this job is not a required check, and a draft cannot
+    # merge anyway.
+    if: github.event.pull_request.draft == false
+    name: Review the pull request with Grok
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GROK_VERSION: '1.0.24'
+      GROK_SHA256: 'a31a1c270246beb8e18f1fce91121a5e83d9ba8f51a8b24346bbc75fe727bdf5'
+    steps:
+      - name: Check out the merge ref for this pull request
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # Pin the linux-x86_64 binary by version and digest. The installer's
+      # "latest" pointer is not used: a float would review tomorrow's PRs
+      # with a binary nobody reviewed. The URL is the same one install.sh
+      # fetches for this platform; the checksum is of that uncompressed
+      # file, measured from the 1.0.24 artifact.
+      - name: Install the pinned Grok CLI
+        run: |
+          set -euo pipefail
+
+          arch=$(uname -m)
+          if [ "$arch" != 'x86_64' ]; then
+            echo "::error::This install pins the linux-x86_64 Grok binary. Runner arch is $arch."
+            exit 1
+          fi
+
+          curl --proto '=https' --tlsv1.2 -fsSL -o grok.bin \
+            "https://x.ai/cli/grok-${GROK_VERSION}-linux-x86_64"
+          echo "${GROK_SHA256}  grok.bin" | sha256sum -c -
+          chmod +x grok.bin
+          mkdir -p "$HOME/.local/bin"
+          mv grok.bin "$HOME/.local/bin/grok"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/grok" --version
+
+      # The diff is collected here so the model does not need a shell tool.
+      # The two output files are seeded with a placeholder so search_replace
+      # can fill them: that tool edits, it does not create.
+      - name: Collect the pull request diff
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          gh pr diff "$PR_NUMBER" --color=never > grok-review-diff.diff
+          printf '%s\n' '(replace this file with the review body)' > grok-review-body.md
+          printf '%s\n' '[]' > grok-review-findings.json
+
+      # Fork pull requests receive an empty XAI_API_KEY — secrets are not
+      # exposed to them — so this step fails without spending anything and
+      # no review is posted. It ends RED here, not absent. Both this job
+      # and claude-review.yml are fail-closed on a fork; they must not be
+      # "fixed" with pull_request_target.
+      - name: Run the Grok catalog review
+        env:
+          GROK_DISABLE_AUTOUPDATER: '1'
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${XAI_API_KEY}" ]; then
+            echo "::error::XAI_API_KEY is empty, so there is nothing to review with. Forks do not receive secrets; on this repository the operator must add the secret."
+            exit 1
+          fi
+
+          {
+            echo "Pull request #${PR_NUMBER} of ${REPOSITORY}."
+            echo "The unified diff is at grok-review-diff.diff."
+            echo
+            cat .github/workflows/grok-review.prompt.md
+          } > grok-review-prompt.md
+
+          grok --prompt-file grok-review-prompt.md \
+            --model grok-4.6 \
+            --always-approve \
+            --no-subagents \
+            --disable-web-search \
+            --tools 'read_file,grep,list_dir,search_replace' \
+            --max-turns 40 \
+            --cwd "$GITHUB_WORKSPACE" \
+            --no-alt-screen
+
+      # The catalog reviewer's own identity. The App holds pull_requests:
+      # write and nothing more. Checkout and the diff collection keep using
+      # github.token. Reusing REVIEWER_APP_ID would post as Claude, which
+      # is the identity collapse ACCEPTED_REVIEWERS cannot survive.
+      - name: Mint a token for the reviewer's own identity
+        id: reviewer-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.GROK_REVIEWER_APP_ID }}
+          private-key: ${{ secrets.GROK_REVIEWER_APP_PRIVATE_KEY }}
+
+      # Posting is a step, not a tool the model holds. commit_id is the SHA
+      # this run was triggered for, taken from the event. A run that
+      # produced no review FAILS — an empty file is not a clean bill of
+      # health.
+      - name: Submit the review against the head this run was triggered for
+        env:
+          GH_TOKEN: ${{ steps.reviewer-token.outputs.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: >
+          node scripts/submit-pr-review.mjs
+          --body grok-review-body.md
+          --findings grok-review-findings.json
+          --placeholder '(replace this file with the review body)'
