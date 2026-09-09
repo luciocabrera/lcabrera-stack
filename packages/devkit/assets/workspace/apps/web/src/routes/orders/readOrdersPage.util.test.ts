@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { PAGE_LIMIT } from './Orders.constants';
+import { ORDER_ROWS } from './orders.rows';
 import { readOrdersPage } from './readOrdersPage.util';
 
 describe('readOrdersPage', () => {
@@ -10,6 +11,15 @@ describe('readOrdersPage', () => {
     expect(page.data.length).toBeGreaterThan(0);
     expect(page.data.length).toBeLessThanOrEqual(PAGE_LIMIT);
     expect(page.total).toBeGreaterThanOrEqual(page.data.length);
+  });
+
+  it('answers every row the module holds in the page the route asks for', async () => {
+    const page = await readOrdersPage({ limit: PAGE_LIMIT, skip: 0 });
+
+    expect(ORDER_ROWS.length).toBeGreaterThan(0);
+    expect(page.data).toHaveLength(ORDER_ROWS.length);
+    expect(page.total).toBe(page.data.length);
+    expect(page.hasMore).toBe(false);
   });
 
   it('reports more rows when the window ends short of the total', async () => {

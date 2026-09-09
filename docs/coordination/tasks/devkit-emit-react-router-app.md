@@ -5,6 +5,7 @@ owner: agent:claude
 status: review
 branch: feat/1076-devkit-emit-react-router-app
 area:
+  - packages/devkit/README.md
   - packages/devkit/assets/workspace/apps/**
   - packages/devkit/assets/workspace/gitignore
   - packages/devkit/assets/workspace/pnpm-workspace.yaml
@@ -33,7 +34,8 @@ produced file carries a `workspace:` specifier.
 
 ## Status / next
 
-- Current step: implemented, gate run, out-of-tree repository created and
-  exercised
+- Current step: review findings addressed — the emitted route's row set covers
+  the page it reads, the fixture test discriminates, and the README's run block
+  spells the runner as the created repository resolves it
 - Blockers: none
 - Next: review

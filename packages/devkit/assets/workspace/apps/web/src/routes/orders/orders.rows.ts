@@ -1,13 +1,17 @@
 /**
  * The rows this rung renders from, built in the module rather than read from a
  * store: the point being demonstrated is that the table needs rows and columns
- * and nothing else. A later rung replaces the loader behind the same route with
- * one that reads them from a database, and this file goes with it.
+ * and nothing else. There is nothing behind the route to ask for a second page,
+ * so the set is built to the size of the one page the loader reads — the total
+ * the table reports is then the total it can show. A later rung replaces the
+ * loader with one that reads from a database, and this file goes with it.
  */
 
 import { roundToCents } from '@lcabrera/utils/numbers/round-to-cents.util';
 
 import type { Order } from './orders.types';
+
+import { PAGE_LIMIT } from './Orders.constants';
 
 const CUSTOMERS = [
   'Aurora Freight',
@@ -18,8 +22,6 @@ const CUSTOMERS = [
 ] as const;
 
 const STATUSES = ['delivered', 'pending', 'shipped'] as const;
-
-const ROW_COUNT = 120;
 
 const FIRST_ORDER_ID = 1000;
 
@@ -45,6 +47,6 @@ const buildOrder = (index: number) => {
 };
 
 export const ORDER_ROWS: readonly Order[] = Array.from(
-  { length: ROW_COUNT },
+  { length: PAGE_LIMIT },
   (_unused, index) => buildOrder(index),
 );

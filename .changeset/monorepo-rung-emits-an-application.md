@@ -7,10 +7,12 @@ where one should be.
 
 `create --profile monorepo` places a React Router application in framework mode
 — root, one route, error boundary, entry files and route config — whose route
-renders a table from rows the module holds. It has no server, no database and no
-fetch, so the rung it belongs to is falsifiable on its own: the tree it produces
-builds, serves a page, and passes its own typecheck, test, lint and format
-tasks.
+renders a table from rows the module holds. There is nothing behind that route
+to ask for a second page, so the set is sized to the one page the loader reads
+and the row count the table reports is the row count it can show. It has no
+server, no database and no fetch, so the rung it belongs to is falsifiable on
+its own: the tree it produces builds, serves a page, and passes its own
+typecheck, test, lint and format tasks.
 
 Every stack package the application names is declared as a semver range resolved
 from the registry, and the packed tarball gate now fails any produced file

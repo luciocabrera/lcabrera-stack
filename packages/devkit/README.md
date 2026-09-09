@@ -287,11 +287,14 @@ by walking up for that exact name, while a stub referencing a config the
 generator has not written yet fails the very install that would write it.
 
 One of the workspaces it places is an application, and it is there to be run
-rather than read:
+rather than read. Its build and start tasks are declared in its own Vite config,
+so it is the runner that reads them — and the runner is a dependency of the
+created repository, not a command on your PATH. Reach it through the package
+manager:
 
 ```bash
-vp run --filter web build
-vp run --filter web start   # then open http://localhost:3000
+pnpm exec vp run --filter web build
+pnpm exec vp run --filter web start   # then open http://localhost:3000
 ```
 
 It is React Router in framework mode with one route, and that route renders a
