@@ -130,10 +130,11 @@ chrome into its own store is not part of this decision.
 
 ### Filter-fetch failures — `filtersDataStore`, as `TableResponseError`
 
-A filter-options fetch writes `FilterData.error` on the column it was loading,
-typed as `TableResponseError | undefined`. That is the same discriminated union
-the data store already holds. It is not `error?: string` on meta, and it is not
-a new union that copies three of `TableResponseError`'s four arms.
+#1141 adds `error` on `FilterData`. The field is not on that type today. A
+filter-options fetch then writes it on the column it was loading, typed as
+`TableResponseError | undefined` — the same discriminated union the data store
+already holds. It is not `error?: string` on meta, and it is not a new union
+that copies three of `TableResponseError`'s four arms.
 
 A filter-options fetch writes `db-failed`, `db-canceled`, or `unexpected`. It
 never writes `grouping-refused`; that arm stays on the union because the grid
@@ -142,9 +143,25 @@ read uses it.
 The per-column slot is the grain of the fetch. A store-level filter error would
 make one column's failure look like every dropdown's.
 
-Grid reads, including load-more, write `TableDataState.error` as
-`TableResponseError`. Load-more today writes the string on meta and leaves the
-data store's `error` untouched, so `TableEmptyState` cannot see it.
+Grid first-page reads already write `TableDataState.error` as
+`TableResponseError`. That is the empty-state channel: `TableBody` mounts
+`TableEmptyState` only when `totalLoadedRows === 0 && !isLoadingState`.
+
+Load-more is also a grid read, so it writes the same union on the same store.
+It does not use the empty-state channel. A load-more failure happens after a
+first page has rows, so `TableEmptyState` is not mounted. Today's string on
+meta is equally unrendered. Moving the write is not rendering it; a surface
+that paints a load-more failure is a follow-up, same as the filter dropdown.
+
+#1141 must clear `error` on a successful load-more. `dataStore.set` is a
+shallow merge, and `commitFetchMoreSuccess` today patches data and flags
+without naming `error`, so a failure left on the field would survive the next
+page. The provider seed already can clear it: `getInitialDataState` names
+`error` even when the caller omits it, and `TableDataProvider` reseeds from
+`dataState` on a navigation. A later filter that returns zero rows therefore
+gets the loader's error (or none), not a leftover load-more failure — provided
+that seed still replaces the field.
+
 `TableMetaState.error` is deleted. There is no third error channel.
 
 ## Consequences
@@ -167,10 +184,12 @@ literal of that type — tests, the drawer draft, `getInitialGroupingState` —
 gains the field in the same change. The layout cookie still hydrates it; live
 reads move to `groupingStore`.
 
-**A filter-options failure becomes visible on that column's dropdown, or it
-stays as silent as it is today until a surface reads `FilterData.error`.**
-Moving the write is not the same as rendering it. #1141 owns the write. A
-surface that paints the union is a follow-up, not a requirement of the split.
+**A filter-options failure stays as silent as it is today until a surface
+reads the field #1141 adds on `FilterData`.** Moving the write is not the
+same as rendering it. The same is true of load-more: `TableEmptyState` does
+not mount while rows are on screen. #1141 owns both writes, and the
+load-more success path must name `error: undefined`. A surface that paints
+either union is a follow-up, not a requirement of the split.
 
 **Capability readers still share a store with chrome writers.** A density
 change notifies every `metaStore` subscriber; granular selectors keep that off
@@ -184,6 +203,12 @@ silently includes.
 renders `TableDataState.error` as "this table could not be loaded". A failed
 distinct-values fetch is not a failed grid read. Sharing that field would make
 the empty body lie about which request died.
+
+**A separate load-more error field on the data store.** Rejected: it is a
+third channel for the same union and the same fetch family. Clearing `error`
+on success and on the provider seed is what stops a load-more failure leaking
+into a later empty body. A load-more banner is a follow-up surface, not a
+second field.
 
 **A new error store, or a new union beside `TableResponseError`.** Rejected:
 that is the third channel. The data store already holds the union; the filters
