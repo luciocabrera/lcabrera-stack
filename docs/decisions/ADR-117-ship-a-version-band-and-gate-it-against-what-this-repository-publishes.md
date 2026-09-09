@@ -54,9 +54,19 @@ It refuses a pass **per file**, not per run: a shipped file that names a package
 this repository publishes and yields no declaration of it is a finding, and the
 finding names the file. A whole-run refusal would not have held — one reader
 going quiet while the other still answers produces a finding count above zero
-and a clean exit, which is the same output a correct tree produces. A pointer —
-`catalog:`, `workspace:`, `npm:` — counts as read and is judged no further,
-since it names where the version is declared instead of declaring one.
+and a clean exit, which is the same output a correct tree produces. It refuses a
+pass **per shape** for the same reason: this gate reads a manifest and a
+workspace catalog, and a run that found neither says so rather than reporting
+the coverage it managed, so narrowing what the walk selects cannot quietly
+narrow what is checked.
+
+**Only `catalog:` and `workspace:` are exempt from judgement**, because those
+name a _place_ — the version is declared elsewhere and cannot fall behind here.
+`npm:`, `https:` and `file:` are not that: each pins a version or an artifact, so
+each is judged and refused as a shape this gate cannot read a range out of.
+Exempting every protocol was tried and is a hole, not a simplification: an
+`npm:` alias is a legal catalog value, so `npm:<package>@<old version>` would
+otherwise ship an excluded version with the gate reporting a pass.
 
 The gate is chained into `check:safe` and `check:push`, and runs as its own step
 in `check-safe.yml`.

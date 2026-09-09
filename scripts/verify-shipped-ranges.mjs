@@ -71,7 +71,12 @@ const main = () => {
     mentionsIn({ names, path, text }),
   );
 
-  const findings = shippedRangeFindings({ declarations, mentions, versions });
+  const findings = shippedRangeFindings({
+    declarations,
+    mentions,
+    sources,
+    versions,
+  });
 
   for (const finding of findings) {
     console.error(`  ${findingLine(finding)}`);

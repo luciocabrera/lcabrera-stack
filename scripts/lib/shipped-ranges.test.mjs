@@ -46,10 +46,18 @@ const mentionsOf = (declarations) =>
     .filter(({ name }) => VERSIONS[name] !== undefined)
     .map(({ name, path }) => ({ name, path }));
 
-const findingsFor = ({ declarations, mentions, versions = VERSIONS }) =>
+const BOTH_SHAPES = [{ manifest: true }, { manifest: false }];
+
+const findingsFor = ({
+  declarations,
+  mentions,
+  sources = BOTH_SHAPES,
+  versions = VERSIONS,
+}) =>
   shippedRangeFindings({
     declarations,
     mentions: mentions ?? mentionsOf(declarations),
+    sources,
     versions,
   });
 
@@ -115,6 +123,8 @@ describe('manifestRanges', () => {
 });
 
 describe('mentionsIn', () => {
+  const names = [...Object.keys(VERSIONS), '@lcabrera/node', '@lcabrera/ui'];
+
   it('names every published package the text holds, and no other', () => {
     expect(
       mentionsIn({ names: Object.keys(VERSIONS), path: YAML, text: CATALOG }),
@@ -122,6 +132,49 @@ describe('mentionsIn', () => {
       { name: '@lcabrera/tsconfig', path: YAML },
       { name: '@lcabrera/vite-config', path: YAML },
     ]);
+  });
+
+  it('reads no name out of a comment, which declares nothing', () => {
+    expect(
+      mentionsIn({
+        names,
+        path: YAML,
+        text: '  # @lcabrera/ui is installed by the application, not catalogued\n',
+      }),
+    ).toEqual([]);
+  });
+
+  it('reads a whole token, so a longer name is not also the shorter one', () => {
+    expect(
+      mentionsIn({
+        names,
+        path: MANIFEST,
+        text: '    "@lcabrera/node-runtime-helper": "^1.0.0",\n',
+      }),
+    ).toEqual([]);
+  });
+});
+
+describe('shippedRangeFindings — a shape the walk stopped reaching', () => {
+  const declarations = [
+    {
+      field: 'devDependencies',
+      name: '@lcabrera/tsconfig',
+      path: MANIFEST,
+      range: '>=0.2.2 <1.0.0',
+    },
+  ];
+
+  it.each([
+    { missing: 'workspace catalog', sources: [{ manifest: true }] },
+    { missing: 'manifest', sources: [{ manifest: false }] },
+  ])('refuses a pass when no $missing was read', ({ missing, sources }) => {
+    const findings = findingsFor({ declarations, sources });
+
+    expect(findings.map(({ kind, shape }) => ({ kind, shape }))).toEqual([
+      { kind: 'no-source', shape: missing },
+    ]);
+    expect(findingLine(findings[0])).toContain(missing);
   });
 });
 
@@ -159,9 +212,26 @@ describe('shippedRangeFindings', () => {
     ).toEqual([]);
   });
 
-  it('judges no pointer, because it declares no version to fall behind', () => {
-    expect(findingsFor({ declarations: declare('catalog:stack') })).toEqual([]);
-  });
+  it.each(['catalog:stack', 'workspace:*'])(
+    'judges no `%s`, because it names where the version is declared',
+    (place) => {
+      expect(findingsFor({ declarations: declare(place) })).toEqual([]);
+    },
+  );
+
+  it.each([
+    'npm:@lcabrera/vite-config@0.4.1',
+    'https://example.invalid/vite-config.tgz',
+    'file:../vite-config',
+  ])(
+    'judges `%s`, which pins an artifact rather than naming a place',
+    (pin) => {
+      const [finding] = findingsFor({ declarations: declare(pin) });
+
+      expect(finding.kind).toBe('malformed');
+      expect(findingLine(finding)).toContain('>=0.5.0 <1.0.0');
+    },
+  );
 
   it('reports a range that is not a range at all', () => {
     const [finding] = findingsFor({ declarations: declare('latest-ish') });
