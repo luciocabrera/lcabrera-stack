@@ -55,6 +55,17 @@ describe('useStore', () => {
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
+  it('returns the same store object across rerenders', () => {
+    const { rerender, result } = renderHook(() =>
+      useStore<TestState>({ count: 0, label: 'initial' }),
+    );
+
+    const first = result.current;
+    rerender();
+
+    expect(result.current).toBe(first);
+  });
+
   it('resets to the initial snapshot and notifies listeners', () => {
     const listener = vi.fn();
     const { result } = renderHook(() =>

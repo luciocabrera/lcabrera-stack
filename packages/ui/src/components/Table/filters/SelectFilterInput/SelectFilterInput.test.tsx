@@ -35,14 +35,14 @@ const MockVirtualSelect = vi.hoisted(() => {
     onFetchInitial,
     onFetchMore,
   }: {
-    readonly onFetchInitial?: () => Promise<void> | void;
+    readonly onFetchInitial?: (signal: AbortSignal) => Promise<void> | void;
     readonly onFetchMore?: () => Promise<void> | void;
   }) {
     return (
       <div>
         <button
           onClick={() => {
-            void onFetchInitial?.();
+            void onFetchInitial?.(new AbortController().signal);
           }}
           type='button'
         >

@@ -1,6 +1,8 @@
 import { useEffect, useId } from 'react';
 
 import { useStore } from '#ui/hooks';
+import { ProvideStoreContext } from '#ui/hooks/utils/provideStoreContext.util';
+import { syncStoreFromProps } from '#ui/hooks/utils/syncStoreFromProps.util';
 
 import type {
   FormContextValue,
@@ -45,21 +47,27 @@ export const FormProvider = <TValues extends Record<string, unknown>>({
   );
 
   useEffect(() => {
-    if (serverErrors) fieldsStore.set({ errors: serverErrors });
-  }, [serverErrors, fieldsStore]);
+    if (!serverErrors) return;
+    syncStoreFromProps({ next: { errors: serverErrors }, store: fieldsStore });
+  }, [fieldsStore, serverErrors]);
 
   useEffect(() => {
-    metaStore.set({ mode });
-  }, [mode, metaStore]);
+    syncStoreFromProps({ next: { mode }, store: metaStore });
+  }, [metaStore, mode]);
 
   useEffect(() => {
-    if (metaStore.get()?.fields === fields) return;
-    metaStore.set({ fields, leafFields: flattenFields(fields) });
+    if (metaStore.get().fields === fields) return;
+    syncStoreFromProps({
+      next: { fields, leafFields: flattenFields(fields) },
+      store: metaStore,
+    });
   }, [fields, metaStore]);
 
   const value: FormContextValue<TValues> = { fieldsStore, metaStore };
 
   return (
-    <FormContext value={value as FormContextValue}>{children}</FormContext>
+    <ProvideStoreContext context={FormContext} value={value}>
+      {children}
+    </ProvideStoreContext>
   );
 };

@@ -32,7 +32,7 @@ export type VirtualSelectProps = {
   readonly listMaxHeight?: string;
   readonly mode: VirtualSelectMode;
   readonly onChange: (selected: string[]) => void;
-  readonly onFetchInitial?: () => Promise<void> | void;
+  readonly onFetchInitial?: (signal: AbortSignal) => Promise<void> | void;
   readonly onFetchMore?: () => Promise<void> | void;
   readonly onOpenChange?: (isOpen: boolean) => void;
   readonly options?: readonly string[] | readonly VirtualSelectOption[];

@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import type { TableDataState } from '#ui/components/Table/Table.types';
 
 import { useStore } from '#ui/hooks';
+import { ProvideStoreContext } from '#ui/hooks/utils/provideStoreContext.util';
+import { syncStoreFromProps } from '#ui/hooks/utils/syncStoreFromProps.util';
 
 import type {
   TableDataContextValue,
@@ -20,14 +22,17 @@ export const TableDataProvider = <TData extends Record<string, unknown>>({
   const dataStore = useStore<TableDataState<TData>>(initialDataState);
 
   useEffect(() => {
-    dataStore.set(getInitialDataState<TData>(dataState ?? {}));
+    syncStoreFromProps({
+      next: getInitialDataState<TData>(dataState ?? {}),
+      store: dataStore,
+    });
   }, [dataState, dataStore]);
 
   const value: TableDataContextValue<TData> = { dataStore };
 
   return (
-    <TableDataContext value={value as TableDataContextValue}>
+    <ProvideStoreContext context={TableDataContext} value={value}>
       {children}
-    </TableDataContext>
+    </ProvideStoreContext>
   );
 };

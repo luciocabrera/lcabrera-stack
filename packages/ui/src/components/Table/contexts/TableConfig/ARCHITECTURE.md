@@ -10,7 +10,7 @@ sized.
 ```
 TableConfig/
 ├── TableConfigContext.context.ts            → createContext (undefined default)
-├── TableConfigContext.provider.tsx           → Provider: creates all three stores from initial state props
+├── TableConfigContext.provider.tsx           → Provider: seeds stores from the first snapshot, then syncs later prop identities through `syncStoreFromProps`
 ├── TableConfigContext.types.ts              → ContextValue (columnsStore + expansionStore + groupingStore + metaStore + onDrillGroup)
 ├── useTableConfigContextValue.hook.ts       → use(TableConfigContext) with guard
 ├── index.ts                                 → Barrel: TableConfigProvider, hooks
@@ -272,7 +272,12 @@ graph TD
   D --> F["Provide { columnsStore, expansionStore, groupingStore, metaStore } via TableConfigContext"]
   E --> F
   H --> F
+  F --> Gfx["effect on groupingState identity → groupingStore"]
+  F --> Mfx["effect on metaState identity → metaStore, current snapshot under the overlay"]
+  F --> Cfx["effect on columnsState identity → columnsStore, live layout under the overlay"]
 ```
+
+Later props follow the same hydration rule as `TableDataProvider` (`packages/ui/src/PATTERNS.md` → Store provider hydration): one effect per snapshot identity, so a later `columnsState` does not reseed grouping or meta. The columns and meta syncs re-read the live snapshot first, then overlay the incoming prop, so omitted fields stay. When `isColumnLayoutTransient` is set, order/pin/size/visibility stay on the store even if the incoming snapshot names empty ones. Expansion only patches `defaultFold` from `metaState`, so the toggled-path set is UI-owned.
 
 Consumers no longer need to declare an `actions` column by hand: `crud` is
 threaded from `metaState.crud` into `getInitialColumnsState`, which appends

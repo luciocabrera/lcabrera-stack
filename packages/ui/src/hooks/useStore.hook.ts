@@ -1,5 +1,5 @@
 import { isShallowEqual } from '@lcabrera/utils/comparison/is-shallow-equal.util';
-import { useRef } from 'react';
+import { useState } from 'react';
 
 export type TStore<TData> = {
   get: () => TData;
@@ -12,39 +12,42 @@ export type TStore<TData> = {
 export const useStore = <TData extends Record<string, unknown>>(
   initialState: TData,
 ) => {
-  const store = useRef(initialState);
-  const initialRef = useRef(initialState);
-  const listeners = useRef(new Set<() => void>());
+  const [api] = useState(() => {
+    let current = initialState;
+    const initial = initialState;
+    const listeners = new Set<() => void>();
 
-  const get = () => store.current;
+    const get = () => current;
 
-  const getServerSnapshot = () => initialRef.current;
+    const getServerSnapshot = () => initial;
 
-  const set = (value: Partial<TData>) => {
-    const prev = store.current;
-    const next = { ...prev, ...value } as TData;
+    const set = (value: Partial<TData>) => {
+      const next = { ...current, ...value } as TData;
 
-    if (!isShallowEqual({ objA: prev, objB: next })) {
-      store.current = next;
-      for (const callback of listeners.current) callback();
-    }
-  };
+      if (!isShallowEqual({ objA: current, objB: next })) {
+        current = next;
+        for (const callback of listeners) callback();
+      }
+    };
 
-  const reset = () => {
-    store.current = initialRef.current;
-    for (const callback of listeners.current) callback();
-  };
+    const reset = () => {
+      current = initial;
+      for (const callback of listeners) callback();
+    };
 
-  const subscribe = (callback: () => void) => {
-    listeners.current.add(callback);
-    return () => listeners.current.delete(callback);
-  };
+    const subscribe = (callback: () => void) => {
+      listeners.add(callback);
+      return () => listeners.delete(callback);
+    };
 
-  return {
-    get,
-    getServerSnapshot,
-    reset,
-    set,
-    subscribe,
-  };
+    return {
+      get,
+      getServerSnapshot,
+      reset,
+      set,
+      subscribe,
+    };
+  });
+
+  return api;
 };

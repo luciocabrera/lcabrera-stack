@@ -1,6 +1,7 @@
 import type { FiltersDataState } from '#ui/components/Table/Table.types';
 
 import { useStore } from '#ui/hooks';
+import { ProvideStoreContext } from '#ui/hooks/utils/provideStoreContext.util';
 
 import type {
   FiltersDataContextValue,
@@ -18,13 +19,13 @@ export const FiltersDataProvider = <TData extends Record<string, unknown>>({
     getInitialFiltersDataState<TData>({ columns }),
   );
 
-  const value = {
+  const value: FiltersDataContextValue<TData> = {
     filtersDataStore,
-  } as FiltersDataContextValue<TData>;
+  };
 
   return (
-    <FiltersDataContext value={value as FiltersDataContextValue}>
+    <ProvideStoreContext context={FiltersDataContext} value={value}>
       {children}
-    </FiltersDataContext>
+    </ProvideStoreContext>
   );
 };

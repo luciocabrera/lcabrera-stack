@@ -20,7 +20,9 @@ The context value also carries `onChange` and `onFetchMore` (parent callbacks re
 - **Config fields** (`hasCheckboxes`, `hasSelectAll`, `hasFetchInitial`, `hasFetchMore`, `listMaxHeight`, `name`, `shouldFillHeight`) are mirrored from props by the provider's list-sync effect, and by nothing else.
 - **UI fields** (`searchTerm`, `listFilterMode`) are written only by the UI actions, seeded once, and must survive prop re-syncs.
 
-The provider's list-sync effect re-reads the current UI fields from `listStore.get()` and passes them back into `getInitialListState`, so every write is **total** yet never clobbers in-flight UI state. (`VirtualListContext.provider.test.tsx` guards this with a set-search-term-then-change-a-config-prop test.) No value is ever passed to two stores; cross-concern reads (the data-sync effect reading `searchTerm`/`listFilterMode`) snapshot `listStore` directly.
+The provider's list-sync effect re-reads the current UI fields from `listStore.get()` and passes them back into `getInitialListState`, so every write is **total** yet never clobbers in-flight UI state. (`VirtualListContext.provider.test.tsx` guards this with a set-search-term-then-change-a-config-prop test.) No value is ever passed to two stores; cross-concern reads (the data-sync effect reading `searchTerm`/`listFilterMode`) snapshot `listStore` directly. Both sync writes go through `syncStoreFromProps`, the same hydration helper `TableDataProvider` uses (`packages/ui/src/PATTERNS.md` → Store provider hydration).
+
+`onFetchInitial` receives an `AbortSignal`. The mount effect aborts it on cleanup so an unmounted list cannot write `dataStore` after a late resolve.
 
 ## Who Mounts the Provider
 
