@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "devDependencies": {
-    "@lcabrera/tsconfig": "^0.2.2",
+    "@lcabrera/tsconfig": ">=0.2.2 <1.0.0",
     "@types/node": "^26.4.1",
     "typescript": "^6.0.3",
     "vite-plus": "0.3.0",
