@@ -1039,9 +1039,15 @@ review from an ordinary shell step — the model is never handed a tool that can
 write to GitHub. It publishes **no** commit status, deliberately: two writers to
 one context can disagree about the head, which is the failure the gate exists to
 make visible, so publication stays single-writer in
-[`copilot-review-status.mjs`](scripts/copilot-review-status.mjs). It is the only
-job here that spends model tokens, which is why it skips drafts, bounds itself with
-`timeout-minutes`, and cancels superseded runs.
+[`copilot-review-status.mjs`](scripts/copilot-review-status.mjs).
+
+[`grok-review.yml`](.github/workflows/grok-review.yml) is a third in-workflow
+reviewer and a different job: it cites the `code-smell-zen` catalog, posts under
+its own App, and is **not** an accepted reviewer, so it cannot green the status
+above. BLOCKER and HIGH findings still open threads. It uses the same write-files-
+then-submit shape as Claude. Both jobs spend model tokens, which is why they skip
+drafts, bound themselves with `timeout-minutes`, and cancel superseded runs.
+[ADR-116](docs/decisions/ADR-116-a-grok-catalog-reviewer-posts-on-pull-requests-and-is-not-an-accepted-reviewer.md).
 
 [`agent-review-verdict.yml`](.github/workflows/agent-review-verdict.yml) runs
 `scripts/verify-agent-review.mjs` on every pull request and on every comment made

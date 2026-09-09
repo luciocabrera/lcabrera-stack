@@ -44,6 +44,10 @@ const ACCEPTED_REVIEWERS = new Set([
   // from its display name: `gh api "/users/claude-general-reviewer%5Bbot%5D"`.
   // A guess here fails silently — the gate simply never matches.
   CLAUDE_REVIEW_LOGIN,
+  // `.github/workflows/grok-review.yml` posts under its own App and is
+  // deliberately not in this set: a catalog pass must not satisfy this status
+  // in place of Claude. `copilot-review-reviewers.test.mjs` asserts the login
+  // is rejected.
 ]);
 
 export const ACCEPTED_REVIEWER_LOGINS = Object.freeze([...ACCEPTED_REVIEWERS]);

@@ -19,16 +19,17 @@ conversation resolution (ruleset `19141543`, added by #694) does not close this:
 every thread from an old review can be resolved while the newest commit has had
 no review at all.
 
-| Piece                                                                                          | What it is                                                    |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| [`.github/workflows/copilot-review-gate.yml`](../../.github/workflows/copilot-review-gate.yml) | when it recomputes                                            |
-| [`.github/workflows/claude-review.yml`](../../.github/workflows/claude-review.yml)             | the second reviewer — posts a review, publishes no status     |
-| [`scripts/copilot-review-status.mjs`](../../scripts/copilot-review-status.mjs)                 | the I/O — reads the PR, posts the status                      |
-| [`scripts/lib/copilot-review.mjs`](../../scripts/lib/copilot-review.mjs)                       | the comparison, pure and unit-tested                          |
-| [`scripts/lib/copilot-suppressed.mjs`](../../scripts/lib/copilot-suppressed.mjs)               | the suppressed-comment reader, pure and unit-tested           |
-| [`review-gate-reconcile.md`](./review-gate-reconcile.md)                                       | the sweep that recomputes it when the event does not          |
-| `vp run copilot-review:status -- --pr <n> --dry-run`                                           | what the gate would say about a PR right now, posting nothing |
-| `vp run copilot-review:suppressed -- --pr <n>`                                                 | the findings Copilot suppressed rather than filed as threads  |
+| Piece                                                                                          | What it is                                                           |
+| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [`.github/workflows/copilot-review-gate.yml`](../../.github/workflows/copilot-review-gate.yml) | when it recomputes                                                   |
+| [`.github/workflows/claude-review.yml`](../../.github/workflows/claude-review.yml)             | the second reviewer — posts a review, publishes no status            |
+| [`.github/workflows/grok-review.yml`](../../.github/workflows/grok-review.yml)                 | catalog reviewer — posts a review, not accepted, publishes no status |
+| [`scripts/copilot-review-status.mjs`](../../scripts/copilot-review-status.mjs)                 | the I/O — reads the PR, posts the status                             |
+| [`scripts/lib/copilot-review.mjs`](../../scripts/lib/copilot-review.mjs)                       | the comparison, pure and unit-tested                                 |
+| [`scripts/lib/copilot-suppressed.mjs`](../../scripts/lib/copilot-suppressed.mjs)               | the suppressed-comment reader, pure and unit-tested                  |
+| [`review-gate-reconcile.md`](./review-gate-reconcile.md)                                       | the sweep that recomputes it when the event does not                 |
+| `vp run copilot-review:status -- --pr <n> --dry-run`                                           | what the gate would say about a PR right now, posting nothing        |
+| `vp run copilot-review:suppressed -- --pr <n>`                                                 | the findings Copilot suppressed rather than filed as threads         |
 
 ## The states
 
@@ -96,6 +97,18 @@ exhausted `review_on_push: true` keeps requesting reviews that never arrive. Not
 about that configuration was changed, deliberately, so the Copilot half resumes with
 no config change the day credits return. A gate that is permanently non-green because
 its only reviewer cannot review is what this second reviewer answers.
+
+### The catalog reviewer is not in that set
+
+[`.github/workflows/grok-review.yml`](../../.github/workflows/grok-review.yml)
+posts a Clean Code catalog review under its own GitHub App (intended slug
+`grok-clean-code-reviewer`). It is **not** an accepted reviewer. A catalog pass
+must not green this status in place of Claude. The exclusion is asserted in
+`copilot-review-reviewers.test.mjs`. ADR-116.
+
+Its BLOCKER and HIGH findings still open review threads, and
+`required_review_thread_resolution` holds the merge on those. The job itself is
+not a required check. The workflow does not dispatch this gate.
 
 ### Newest per reviewer, not newest overall
 

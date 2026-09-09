@@ -93,6 +93,22 @@ describe('getGlobalSettingsFromCookie', () => {
     ).toEqual(fallbackSettings);
   });
 
+  it('returns fallback when the cookie payload is a JSON array', () => {
+    const cookieString = `${GLOBAL_SETTINGS_COOKIE_KEY}=${encodeURIComponent(JSON.stringify([1]))}`;
+
+    expect(
+      getGlobalSettingsFromCookie({ cookieString, fallback: fallbackSettings }),
+    ).toEqual(fallbackSettings);
+  });
+
+  it('returns fallback when the cookie payload is a JSON string', () => {
+    const cookieString = `${GLOBAL_SETTINGS_COOKIE_KEY}=${encodeURIComponent(JSON.stringify('x'))}`;
+
+    expect(
+      getGlobalSettingsFromCookie({ cookieString, fallback: fallbackSettings }),
+    ).toEqual(fallbackSettings);
+  });
+
   it('scopes the cookie key by appId when one is provided', () => {
     const cookieString = buildCookieString({
       value: { navigation: { size: 'large' } },

@@ -1,4 +1,5 @@
 import { isObject } from '@lcabrera/utils/guards/is-object.util';
+import { safeJsonParse } from '@lcabrera/utils/json/safe-json-parse.util';
 
 import type { GlobalSettingsState } from '#ui/types/globalSettings.types';
 
@@ -21,11 +22,6 @@ type GetGlobalSettingsFromCookieArgs = {
   readonly fallback: GlobalSettingsState;
 };
 
-type GlobalSettingsCookiePayload = {
-  readonly value?: unknown;
-  readonly version?: unknown;
-};
-
 export const getGlobalSettingsFromCookie = ({
   appId,
   cookieString,
@@ -41,9 +37,11 @@ export const getGlobalSettingsFromCookie = ({
   }
 
   try {
-    const payload = JSON.parse(
-      decodeURIComponent(rawCookie),
-    ) as GlobalSettingsCookiePayload;
+    const payload = safeJsonParse(decodeURIComponent(rawCookie));
+
+    if (!isObject(payload) || Array.isArray(payload)) {
+      return fallback;
+    }
 
     if (payload.version !== GLOBAL_SETTINGS_COOKIE_VERSION) {
       return fallback;

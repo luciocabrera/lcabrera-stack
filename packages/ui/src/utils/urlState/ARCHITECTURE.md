@@ -66,8 +66,9 @@ and they have the two codecs above.
 vocabularies; a key is any string. Sorting keys are checked server-side in
 `buildOrderByClause` — `assertSafeIdentifier` on every column with no caller
 opt-out, and `assertColumnAllowed` only for queries that pass `allowedColumns`.
-Filter keys are checked in the loader by `sanitizeFiltersByColumns`, when the
-loader passes it `columns`.
+Filter keys are checked in the loader by `sanitizeFiltersByColumns`, and order,
+visibility, sizing, pinning and sorting keys by `sanitizeLayoutByColumns`, when
+the loader passes them `columns`.
 
 A narrowing rebuilds its state with `Object.fromEntries`, never by assigning
 into `{}`. Plain assignment routes a `__proto__` key to the prototype setter and

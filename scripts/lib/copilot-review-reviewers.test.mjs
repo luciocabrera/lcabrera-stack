@@ -60,6 +60,12 @@ describe('which reviewers the gate accepts', () => {
     expect(isAcceptedReviewer(undefined)).toBe(false);
   });
 
+  it('rejects the Grok catalog reviewer, which must not green this status', () => {
+    expect(isAcceptedReviewer('grok-clean-code-reviewer[bot]')).toBe(false);
+    expect(isAcceptedReviewer('grok-clean-code-reviewer')).toBe(false);
+    expect(isCopilotReviewer('grok-clean-code-reviewer[bot]')).toBe(false);
+  });
+
   it('keeps the Copilot test narrow, because the suppressed reader depends on it', () => {
     expect(isCopilotReviewer('copilot-pull-request-reviewer[bot]')).toBe(true);
     expect(isCopilotReviewer('claude-general-reviewer[bot]')).toBe(false);
@@ -149,6 +155,7 @@ describe('two accepted reviewers', () => {
       'dependabot[bot]',
       'sonarqubecloud[bot]',
       'github-actions-runner[bot]',
+      'grok-clean-code-reviewer[bot]',
     ]) {
       expect(
         decideReviewStatus({ headSha: HEAD, reviews: [restReview({ login })] })
