@@ -11,7 +11,7 @@ This folder contains shared output and validation standards used by:
 - REPORT_TEMPLATE.md: copy/paste handoff template for downstream agents
 - TEST_PLAN.md: repeatable test strategy and scoring rubric
 - EXAMPLE_REPORT.md: fully populated sample report using schema v1.0
-- RULE_FIX_QUICK_REFERENCE.md: TS/React rule-to-fix guidance and verification snippets
+- RULE_FIX_QUICK_REFERENCE.md: TS/React rule-to-fix guidance and verification snippets. Clean Code / `CHK.*` rows live here too; the IDs themselves are listed in `../code-smell-zen/SKILL.md`.
 
 The two contract documents live here, beside the skills that follow them — a
 report shape is agreed between a scanner and whatever reads it, which makes it

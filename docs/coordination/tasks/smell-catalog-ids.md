@@ -2,7 +2,7 @@
 id: smell-catalog-ids
 title: add smell catalog IDs for structure and tests
 owner: agent:claude
-status: active
+status: review
 branch: docs/1132-smell-catalog-ids
 area:
   - .github/skills/code-smell-zen/**
@@ -11,7 +11,7 @@ area:
 started: 2026-09-09
 updated: 2026-09-09
 plan: (none)
-pr: (none)
+pr: #1133
 issue: #1132
 ---
 
@@ -21,6 +21,6 @@ add smell catalog IDs for structure and tests
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: catalog IDs committed; draft PR #1133
 - Blockers: none
-- Next:
+- Next: review

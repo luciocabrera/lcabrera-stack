@@ -50,11 +50,11 @@ Heuristic:
 
 ### Clean Code reminder (Robert C. Martin, 2008)
 
-- **Functions**: small, do one thing, one level of abstraction (G34), ≤3 args (F1), no boolean flag args (F3), no output args (F2).
-- **Names**: reveal intent (N1), unambiguous (N4), longer for longer scopes (N5), describe side effects (N7).
+- **Functions**: small (CHK.FUNC.LONG), do one thing, one level of abstraction (G34), ≤3 args (F1), no boolean flag args (F3), no output args (F2), no side effects in a pure home (CHK.FUNC.SIDE-EFFECT).
+- **Names**: reveal intent (N1), unambiguous (N4), longer for longer scopes (N5), no type encodings (N6), describe side effects (N7).
 - **Comments**: explain _why_ not _what_; delete obsolete (C2), redundant (C3), commented-out (C5).
-- **General**: duplication is the worst smell (G5); polymorphism over switch (G23); encapsulate conditionals (G28); avoid Law-of-Demeter violations (G36); replace magic numbers with named constants (G25).
-- **Tests**: F.I.R.S.T. — Fast, Independent, Repeatable, Self-validating, Timely; test boundary conditions (T5).
+- **General**: duplication is the worst smell (G5); vertical separation (G10); polymorphism over switch (G23); encapsulate conditionals (G28); encapsulate boundary-index math (G33); hidden temporal coupling (G31); config at high levels (G35); avoid Law-of-Demeter violations (G36); replace magic numbers with named constants (G25).
+- **Tests**: F.I.R.S.T. — Fast (T9), Independent (CHK.TEST.DEPENDENT), Repeatable (CHK.TEST.NONDETERMINISTIC), Self-validating, Timely; test boundary conditions (T5).
 
 ### Gang of Four reminder (Gamma/Helm/Johnson/Vlissides, 1994; design smells from Martin)
 
@@ -97,6 +97,7 @@ Walk every hunk. For each issue you find, cite **exactly one** catalog ID from t
 - **CC.G6** Code at Wrong Level of Abstraction
 - **CC.G8** Too Much Information (overly wide interface)
 - **CC.G9** Dead Code (unreachable branches / unused symbols)
+- **CC.G10** Vertical Separation (declaration far from its only use, unrelated code in between)
 - **CC.G11** Inconsistency (same idea expressed two ways)
 - **CC.G12** Clutter (empty ctors, unused vars, useless comments)
 - **CC.G14** Feature Envy (method uses another class's data more than its own)
@@ -109,15 +110,29 @@ Walk every hunk. For each issue you find, cite **exactly one** catalog ID from t
 - **CC.G28** Encapsulate Conditionals (extract booleans into named predicates)
 - **CC.G29** Avoid Negative Conditionals
 - **CC.G30** Functions Should Do One Thing (SRP at function level)
+- **CC.G31** Hidden Temporal Coupling (a function is correct only if something else in the same module already ran)
+- **CC.G33** Encapsulate Boundary Conditions (`length - 1` / next-index / last-row math scattered; not G28, which names a boolean predicate)
 - **CC.G34** Functions Should Descend Only One Level of Abstraction
+- **CC.G35** Keep Configurable Data at High Levels (limits, timeouts, and page sizes buried in a helper the caller cannot change)
 - **CC.G36** Avoid Transitive Navigation (Law of Demeter)
 - **CC.N1** Choose Descriptive Names
 - **CC.N4** Unambiguous Names
 - **CC.N5** Use Long Names for Long Scopes
+- **CC.N6** Avoid Encodings (`IUser`, `strName`, `arrItems`, `fnCallback`; not this repo's `is`/`has`/`should` booleans)
 - **CC.N7** Names Should Describe Side-Effects
 - **CC.T1** Insufficient Tests
 - **CC.T5** Test Boundary Conditions
 - **CC.T9** Tests Should Be Fast
+
+### Repo heuristic IDs
+
+Cite these when no `CC.*` / `GOF.*` / `DS.*` / `TS.*` / `REACT.*` ID fits. Do not mint a new `CHK.*` on a zen scan.
+
+- **CHK.FUNC.LONG** — one unit that is one job only on paper and far past its neighbors; not G30 (two jobs)
+- **CHK.FUNC.SIDE-EFFECT** — `Date.now`, `fetch`, store write, or DOM in a `*.util.ts` or other pure home; not N7 (name the effect)
+- **CHK.TYPE.PRIMITIVE-OBSESSION** — two interchangeable primitives in one public signature (IDs, money, keys); not branding every string
+- **CHK.TEST.DEPENDENT** — a later test reads leftover module state from an earlier one; a shared `beforeEach` harness is fine
+- **CHK.TEST.NONDETERMINISTIC** — assertion depends on `Date.now`, `new Date()`, or `Math.random` without a freeze or injected clock; not T9 (fast)
 
 ### Gang of Four IDs — missing-pattern signals
 
