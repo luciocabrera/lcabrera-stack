@@ -61,6 +61,14 @@ describe('planTasks', () => {
     expect(stateOf(entries, 'check')).toBe('updated');
   });
 
+  test('reads a key the consumer moved to the shipped command as current, past a stale record', () => {
+    const entries = planned({
+      recorded: { check: 'kit check --old' },
+      scripts: { check: 'kit check' },
+    });
+    expect(stateOf(entries, 'check')).toBe('current');
+  });
+
   test('reports an override rather than replacing it', () => {
     const entries = planned({
       recorded: { check: 'kit check --old' },

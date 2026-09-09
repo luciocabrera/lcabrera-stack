@@ -60,8 +60,8 @@ const recordedFor = ({ names, recorded }) =>
   );
 
 const knownFor = ({ recorded, scripts, tasks }) => ({
-  ...adoptedFrom({ scripts, tasks }),
   ...recordedFor({ names: new Set(Object.keys(tasks)), recorded }),
+  ...adoptedFrom({ scripts, tasks }),
 });
 
 /**
