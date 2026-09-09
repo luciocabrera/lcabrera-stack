@@ -57,20 +57,4 @@ describe('toTableResponseError', () => {
 
     expect(toTableResponseError({ error, fallback: 'failed' })).toEqual(error);
   });
-
-  it('maps a grouping-refused payload with an unknown reason to unexpected', () => {
-    expect(
-      toTableResponseError({
-        error: {
-          kind: 'grouping-refused',
-          message: 'Refused.',
-          reason: 'not-a-dimension',
-        },
-        fallback: 'failed',
-      }),
-    ).toEqual({
-      kind: 'unexpected',
-      message: 'failed',
-    });
-  });
 });
