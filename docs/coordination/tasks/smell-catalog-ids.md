@@ -21,6 +21,6 @@ add smell catalog IDs for structure and tests
 
 ## Status / next
 
-- Current step: addressing review threads on #1133
+- Current step: prefix reminder IDs as CC.*
 - Blockers: none
-- Next: resolve threads after the pointer commit
+- Next: push and wait for CI
