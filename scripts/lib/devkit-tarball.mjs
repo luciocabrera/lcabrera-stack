@@ -51,14 +51,29 @@ const OWN_TOOLING = [
   /(^|\/)(eslint\.config|vite\.config)\./,
 ];
 
-const GENERATED_TSCONFIG = /(^|\/)tsconfig(\.\w+)?\.json$/;
+const GENERATED_TSCONFIG = /(^|\/)tsconfig\.\w+\.json$/;
 
+const PROJECT_TSCONFIG = /(^|\/)tsconfig\.json$/;
+
+/**
+ * A tsconfig is stray by which of the two shapes it has, and only the second is
+ * subject to the payload exemption. The generator writes
+ * `tsconfig.<name>.json`, so one of those is generated wherever it turns up and
+ * never belongs in a tarball — the payload included, since a consumer's own
+ * `prepare` writes theirs. A bare `tsconfig.json` is hand-written: this
+ * package's own must not ship, and the one a shipped blueprint carries is part
+ * of what the payload exists to place.
+ *
+ * @param {string[]} packedPaths
+ * @returns {string[]}
+ */
 export const strayFromTarball = (packedPaths) =>
   packedPaths.filter(
     (path) =>
       GENERATED_TSCONFIG.test(path) ||
       (!path.startsWith(PAYLOAD_PREFIX) &&
-        OWN_TOOLING.some((pattern) => pattern.test(path))),
+        (PROJECT_TSCONFIG.test(path) ||
+          OWN_TOOLING.some((pattern) => pattern.test(path)))),
   );
 
 export const declaredBins = (manifest) =>
@@ -284,6 +299,29 @@ export const inertHooks = ({ hooksPath, materialised }) => {
         `\`${file.path}\` arrived without the executable bit — git skips it silently, so the gate it carries is absent`,
     );
 };
+
+const WORKSPACE_SPECIFIER = 'workspace:';
+
+/**
+ * Whether a produced repository still points at a sibling of this one.
+ *
+ * A `workspace:` specifier resolves a directory of the workspace it is written
+ * in. Every manifest here uses one, so writing one into a shipped file is the
+ * easy mistake and nothing in this tree can see it: the specifier resolves,
+ * installs and passes, right up until a bootstrapped repository — which has no
+ * such sibling — tries to install it. Read from the produced tree rather than
+ * from the assets, because the produced tree is what an installer gets.
+ *
+ * @param {{ materialised: { content: string, path: string }[] }} args
+ * @returns {string[]}
+ */
+export const foreignSpecifiers = ({ materialised }) =>
+  materialised
+    .filter((file) => file.content.includes(WORKSPACE_SPECIFIER))
+    .map(
+      (file) =>
+        `\`${file.path}\` carries a \`${WORKSPACE_SPECIFIER}\` specifier, which resolves nothing in a repository that has no such sibling`,
+    );
 
 /**
  * Whether the published initializer actually produced a repository.

@@ -1,0 +1,11 @@
+/// <reference types="vite-plus/client" />
+
+declare module 'virtual:stylex:runtime' {
+  const runtime: unknown;
+  export default runtime;
+}
+
+declare module 'virtual:stylex.css' {
+  const css: string;
+  export default css;
+}

@@ -247,17 +247,18 @@ A profile is a rung on a ladder, and each rung contains the one below it. A
 file lands on the lowest rung whose preconditions it can assume, and a rung
 without a gate of its own is a flag, not a rung.
 
-| Rung       | What it places                                                                                                                                                                                                |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `agent`    | What an agent reads: skills, path rules, subagent definitions, the contracts and coordination register they bind to, and the decision home's template and README.                                             |
-| `repo`     | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, and `COMMANDS.md`.                                                                                 |
-| `monorepo` | All of that, plus the workspace itself: the pnpm workspace file and its catalog, the Node pin and engine band, the root lint/format config, the Biome config, and a tsconfig roster with the generator wired. |
-| `full`     | What `monorepo` places. The application and its database are its content, and none of it ships yet.                                                                                                           |
+| Rung       | What it places                                                                                                                                                                                                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `agent`    | What an agent reads: skills, path rules, subagent definitions, the contracts and coordination register they bind to, and the decision home's template and README.                                                                                                                          |
+| `repo`     | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, and `COMMANDS.md`.                                                                                                                                                              |
+| `monorepo` | All of that, plus the workspace itself: the pnpm workspace file and its catalog, the Node pin and engine band, the root lint/format config, the Biome config, a tsconfig roster with the generator wired, and a React Router application rendering a table through the published packages. |
+| `full`     | What `monorepo` places. The database behind that application's route is its content, and none of it ships yet.                                                                                                                                                                             |
 
 A consumer who wants the prose and keeps their own process takes `agent` and
 receives none of the scaffolding. `repo` is a governed single-package
 repository. `monorepo` is a workspace that installs, lints, formats,
-type-checks and tests on the command after the one that made it. `full` is
+type-checks, tests, builds and serves a page on the command after the one that
+made it. `full` is
 accepted today so a config can name the rung it means, and a run under it prints
 the line saying so:
 
@@ -281,6 +282,35 @@ writes every `tsconfig.app.json` in the tree. **No tsconfig here is written by
 hand** — you edit the roster (`tsconfig.entries.ts`, in the workspace the rung
 places for it) and the generator writes the JSON; a hand edit survives exactly
 until the next regeneration reverts it.
+
+One of the workspaces it places is an application, and it is there to be run
+rather than read:
+
+```bash
+vp run --filter web build
+vp run --filter web start   # then open http://localhost:3000
+```
+
+It is React Router in framework mode with one route, and that route renders a
+table from rows the module holds — no server, no database, no fetch. Every
+`@lcabrera/*` package it names is declared as a semver range and resolved from
+the registry, which is the point of it: what renders there is the published
+surface, with none of the authoring repository's wiring available to make up a
+difference. Everything else it depends on resolves through the catalog.
+
+Three settings in that workspace's Vite config are load-bearing and travel
+together, because the component library publishes TypeScript source rather than
+a build. StyleX has to see the library's own files to emit their styles, so the
+plugin is given an alias resolved from the installed package; the client bundler
+must not pre-bundle those files past the plugin; and the server build must not
+externalise them, because Node refuses to strip types under `node_modules` and
+the failure then lands when the server starts rather than when it builds.
+
+The ranges are written as a floor and a bound at the next major
+(`>=0.7.0 <1.0.0`) rather than as a caret. Below 1.0.0 a caret stops at the next
+minor, so a released minor of one of these packages would fall outside a caret
+range the day it shipped and the created repository would quietly resolve the
+version before it.
 
 **All of that is the `create` path.** The root manifest is the one file this rung
 does not materialise, because it carries the repository's own name — so `sync`

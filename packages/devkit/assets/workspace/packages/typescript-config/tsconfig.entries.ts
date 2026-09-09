@@ -9,7 +9,10 @@
  * Adding an entry is part of adding a workspace, not a later tidy-up.
  */
 
-import { createNodeTsConfig } from '@lcabrera/tsconfig/shared';
+import {
+  createAppTsConfig,
+  createNodeTsConfig,
+} from '@lcabrera/tsconfig/shared';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -32,5 +35,17 @@ export const configs = [
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
     filePath: path.resolve(packageDirectory, 'tsconfig.app.json'),
+  },
+  {
+    config: createAppTsConfig({
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: path.resolve(workspaceRoot, 'apps/web/tsconfig.app.json'),
+  },
+  {
+    config: createNodeTsConfig({
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.node.tsbuildinfo',
+    }),
+    filePath: path.resolve(workspaceRoot, 'apps/web/tsconfig.node.json'),
   },
 ];

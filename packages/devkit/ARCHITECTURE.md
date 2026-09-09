@@ -142,6 +142,24 @@ possible: a file in the small profile pointing at one only the wider profile
 places resolves for a consumer who took everything and dangles for the one who
 did not, so it can only be seen by checking the smaller set on its own.
 
+**The application the monorepo rung places is an asset, not a thing `create`
+writes.** The root manifest is written by `create` because it carries the
+repository's own name; the application's carries nothing a consumer's tree
+decides, so it ships verbatim and the manifest records its hash — which is what
+lets `sync` update it and `doctor` report a local edit to it. The task block it
+declares is what forces the split: a seed may not carry this repository's runner
+word, so a manifest naming `vp` could not ship at all. Its tasks therefore name
+binaries directly, and the tasks that do want the runner live in the Vite config
+beside it, where the shipped-seed rule does not reach.
+
+**Its `@lcabrera/*` ranges are floors bounded at the next major, never carets.**
+Below 1.0.0 a caret admits no minor above the one it names, so `^0.7.0` excludes
+`0.7.1`'s successor the day it is published and a repository created afterwards
+resolves the older one — with nothing to report it, because the range stays
+syntactically valid and every gate stays green. A range is checked here for
+admitting the minor above its own floor, so writing a caret fails rather than
+merely ages.
+
 **A seed refers to its own directory relatively, so the layout is never
 interpolated.** There is no `{{paths.*}}` placeholder and none is needed: the
 register's README ships _into_ the register, so it links `tasks/_TEMPLATE.md`;

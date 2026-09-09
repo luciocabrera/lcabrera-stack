@@ -70,9 +70,26 @@ const fmtConfig = createFmtConfig({
   ],
 });
 
-export const lintConfig = createLintConfig({
+const sharedLintConfig = createLintConfig({
   workspaceRuntimes: WORKSPACE_RUNTIMES,
 });
+
+export const lintConfig = {
+  ...sharedLintConfig,
+  // The application `@lcabrera/devkit` ships is a tree for a repository that
+  // does not exist yet, and the type-aware pass can only read it as if it were
+  // one of ours. Its imports resolve against the packages that repository
+  // installs from the registry and against the tsconfig its own generator
+  // writes; neither is here, so every one of them reports as unresolvable and
+  // the JSX has no `jsx` option to compile under. Formatting still covers it,
+  // and the lint that means anything for it runs where it lands — the created
+  // repository's own `lint:check`, and `vp run tarball:verify`, which
+  // materialises it outside this tree.
+  ignorePatterns: [
+    ...(sharedLintConfig.ignorePatterns ?? []),
+    'packages/devkit/assets/workspace/apps/',
+  ],
+};
 
 export default defineConfig({
   fmt: fmtConfig,

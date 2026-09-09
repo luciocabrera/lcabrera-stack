@@ -12,6 +12,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   bareTaskFindings,
   clobberedConfigKeys,
+  foreignSpecifiers,
   inertHooks,
   taskFindings,
 } from './devkit-tarball.mjs';
@@ -177,5 +178,36 @@ describe('inertHooks', () => {
         ],
       }),
     ).toEqual([]);
+  });
+});
+
+describe('foreignSpecifiers', () => {
+  it('passes a tree whose every dependency names a range a registry answers', () => {
+    expect(
+      foreignSpecifiers({
+        materialised: [
+          {
+            content: '{ "dependencies": { "@lcabrera/ui": ">=0.7.0 <1.0.0" } }',
+            path: 'apps/web/package.json',
+          },
+          { content: 'packages:\n  - apps/*\n', path: 'pnpm-workspace.yaml' },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
+  it('reports a file still pointing at a sibling of the repository that shipped it', () => {
+    expect(
+      foreignSpecifiers({
+        materialised: [
+          {
+            content: '{ "dependencies": { "@lcabrera/ui": "workspace:*" } }',
+            path: 'apps/web/package.json',
+          },
+        ],
+      }),
+    ).toEqual([
+      '`apps/web/package.json` carries a `workspace:` specifier, which resolves nothing in a repository that has no such sibling',
+    ]);
   });
 });

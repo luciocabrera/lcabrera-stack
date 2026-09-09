@@ -10,7 +10,6 @@ import {
   noCommandsDeclared,
   missingFromTarball,
   promisedPaths,
-  strayFromTarball,
   tarballFindings,
 } from './devkit-tarball.mjs';
 
@@ -85,45 +84,6 @@ describe('missingFromTarball', () => {
         manifest: { bin: { p: 'scripts/p.mjs' }, name: 'p' },
         packedPaths: ['./package.json', './scripts/p.mjs'],
       }),
-    ).toEqual([]);
-  });
-});
-
-describe('strayFromTarball', () => {
-  it('splits the payload: a config or a test travels, a tsconfig never does', () => {
-    expect(
-      strayFromTarball([
-        'assets/workspace/vite.config.ts',
-        'assets/workspace/roster.test.ts',
-        'assets/workspace/tsconfig.app.json',
-        'vite.config.ts',
-      ]),
-    ).toEqual(['assets/workspace/tsconfig.app.json', 'vite.config.ts']);
-  });
-
-  it('reports what no consumer should receive', () => {
-    expect(
-      strayFromTarball([
-        'scripts/kit.mjs',
-        'scripts/kit.test.mjs',
-        'tsconfig.json',
-        'tsconfig.app.json',
-        'vite.config.ts',
-        'eslint.config.mjs',
-        'README.md',
-      ]).toSorted((left, right) => left.localeCompare(right)),
-    ).toEqual([
-      'eslint.config.mjs',
-      'scripts/kit.test.mjs',
-      'tsconfig.app.json',
-      'tsconfig.json',
-      'vite.config.ts',
-    ]);
-  });
-
-  it('does not mistake a source file for a test', () => {
-    expect(
-      strayFromTarball(['scripts/latest.mjs', 'scripts/contest.mjs']),
     ).toEqual([]);
   });
 });

@@ -2,28 +2,38 @@
 id: devkit-emit-react-router-app
 title: Emit a React Router app consuming the packages from npm
 owner: agent:claude
-status: active
+status: review
 branch: feat/1076-devkit-emit-react-router-app
 area:
   - packages/devkit/assets/workspace/apps/**
-  - packages/devkit/scripts/app.mjs
-  - packages/devkit/scripts/app.test.mjs
-  - packages/devkit/scripts/create.mjs
-  - packages/devkit/scripts/command-create.mjs
+  - packages/devkit/assets/workspace/gitignore
+  - packages/devkit/assets/workspace/pnpm-workspace.yaml
   - packages/devkit/assets/workspace/packages/typescript-config/tsconfig.entries.ts
+  - packages/devkit/scripts/workspace-app.test.mjs
+  - scripts/verify-devkit-tarball.mjs
+  - scripts/lib/devkit-tarball.mjs
+  - scripts/lib/devkit-tarball-consumer.test.mjs
 started: 2026-09-09
 updated: 2026-09-09
 plan: (none)
-pr: (none)
+pr: #1136
 issue: #1076
 ---
 
 ## What
 
-Emit a React Router app consuming the packages from npm
+The `monorepo` rung places an application: React Router in framework mode, one
+route rendering a table from static rows, through `@lcabrera/ui`,
+`@lcabrera/api` and `@lcabrera/utils` declared as registry semver ranges.
+
+The catalog gains the entries that application needs (`@testing-library/react`,
+`jsdom`, the babel toolchain the shared plugins config composes); the tsconfig
+roster gains its two entries; the packed-tarball gate gains a check that no
+produced file carries a `workspace:` specifier.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented, gate run, out-of-tree repository created and
+  exercised
 - Blockers: none
-- Next:
+- Next: review
