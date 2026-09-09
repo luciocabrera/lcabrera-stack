@@ -131,7 +131,7 @@ scrollTop ──► startIndex / endIndex
 
 ## `useStore`
 
-Creates a ref-based external store that is compatible with `useSyncExternalStore`. Uses shallow equality to suppress no-op updates.
+Creates a stable external store that is compatible with `useSyncExternalStore`. Uses shallow equality to suppress no-op updates. The store object is created once (`useState` lazy init), so a hydration effect can list it without re-running on every render.
 
 ### Signature
 
@@ -159,9 +159,9 @@ produced were unreachable, and one of them (`{} as ColumnVisibilityState`, a
 
 ```mermaid
 graph TD
-  useStore --> store_ref["store (useRef) — current state"]
-  useStore --> initial_ref["initialRef (useRef) — immutable snapshot for SSR"]
-  useStore --> listeners_ref["listeners (useRef<Set>) — subscriber callbacks"]
+  useStore --> store_ref["current — mutable snapshot in the lazy-init closure"]
+  useStore --> initial_ref["initial — immutable snapshot for SSR"]
+  useStore --> listeners_ref["listeners (Set) — subscriber callbacks"]
 
   set --> shallowEqual["shallowEqual(prev, next)"]
   shallowEqual -->|"changed"| notify["notify all listeners"]
@@ -196,7 +196,7 @@ store.set({ count: count + 1 });
 
 ### Design Notes
 
-- **No React state** — the store lives in `useRef`, so mutations never cause the owning component to re-render directly.
+- **No render-driving React state** — the snapshot lives in the lazy-init closure, so mutations never cause the owning component to re-render directly. `useState` only holds the stable API object.
 - **Shallow equality guard** prevents `set` from notifying listeners when the merged object is identical to the previous state.
 - **`getServerSnapshot`** always returns the `initialState` snapshot, satisfying React's SSR hydration contract.
 - The listener `Set` is also a ref, so subscribe/unsubscribe operations are stable across renders.

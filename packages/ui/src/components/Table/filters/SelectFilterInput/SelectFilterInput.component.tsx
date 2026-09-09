@@ -36,11 +36,12 @@ export const SelectFilterInput = <TData,>({
     prefetchRef,
   });
 
-  const handleFetchInitial = async () => {
+  const handleFetchInitial = async (signal: AbortSignal) => {
     if (!column?.filterOptionsDescriptor) return;
-    await fetchInitial(
-      resolveFilterOptionsDescriptor(column.filterOptionsDescriptor),
-    );
+    await fetchInitial({
+      ...resolveFilterOptionsDescriptor(column.filterOptionsDescriptor),
+      signal,
+    });
   };
 
   const handleFetchMore = async () => {

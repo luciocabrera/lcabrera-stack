@@ -477,6 +477,18 @@ export const useMyValue = () => {
 
 Consumers **never** call `store.get()` directly in render — they always use selector hooks that subscribe via `useSyncExternalStore`.
 
+### Store provider hydration
+
+Every store provider hydrates the same way. Seed `useStore` from the first snapshot, then write a later snapshot with `syncStoreFromProps` in an effect whose dependency is the **incoming prop identity**. A `key` remount is not a substitute and is not mixed with a sync effect.
+
+The effect must not depend on a derived object allocated during render. `TableConfigProvider` and `TableDataProvider` both follow this: a new `columnsState` / `dataState` identity replaces the store; the same identity leaves in-flight writes alone.
+
+When a store also holds UI-owned fields (search term, toggled group paths), the effect writes only the config subset and re-passes the current UI fields it just read (rule 8 below).
+
+`onFetchInitial` receives an `AbortSignal`. The mount effect aborts it on cleanup so a closed list cannot write the next open's first page. Forward that signal through `fetchInitialFilterData` when that is the consumer.
+
+A module-level context cannot keep `TData`. Form, TableConfig, and TableData provide their snapshot through `ProvideStoreContext` instead of casting `as *ContextValue` at the call site.
+
 ---
 
 ## Thin Shell + Self-Connected Delegates (Store Wiring Ownership)

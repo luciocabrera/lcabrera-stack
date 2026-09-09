@@ -44,7 +44,7 @@ export type VirtualListProps = {
   readonly listMaxHeight?: string;
   readonly name?: string;
   readonly onChange: (filter?: SelectFilter) => void;
-  readonly onFetchInitial?: () => Promise<void> | void;
+  readonly onFetchInitial?: (signal: AbortSignal) => Promise<void> | void;
   readonly onFetchMore?: () => Promise<void> | void;
   readonly shouldFillHeight?: boolean;
 };

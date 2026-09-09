@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 import { useStore } from '#ui/hooks';
+import { syncStoreFromProps } from '#ui/hooks/utils/syncStoreFromProps.util';
 
 import type {
   VirtualListDataStoreState,
@@ -41,22 +42,23 @@ export const VirtualListProvider = ({
   );
 
   useEffect(() => {
-    const uiState = listStore.get() ?? INITIAL_LIST_STATE;
+    const uiState = listStore.get();
 
-    listStore.set(
-      getInitialListState({
+    syncStoreFromProps({
+      next: getInitialListState({
         ...listState,
         listFilterMode: uiState.listFilterMode,
         searchTerm: uiState.searchTerm,
       }),
-    );
+      store: listStore,
+    });
   }, [listState, listStore]);
 
   useEffect(() => {
-    const uiState = listStore.get() ?? INITIAL_LIST_STATE;
+    const uiState = listStore.get();
 
-    dataStore.set(
-      getInitialListDataState({
+    syncStoreFromProps({
+      next: getInitialListDataState({
         dataState,
         filter,
         hasFetchInitial: Boolean(onFetchInitial),
@@ -64,13 +66,18 @@ export const VirtualListProvider = ({
         listFilterMode: uiState.listFilterMode,
         searchTerm: uiState.searchTerm,
       }),
-    );
+      store: dataStore,
+    });
   }, [dataState, dataStore, filter, hasSelectAll, listStore, onFetchInitial]);
 
   useEffect(() => {
-    if (onFetchInitial) {
-      void onFetchInitial();
-    }
+    if (!onFetchInitial) return;
+
+    const controller = new AbortController();
+    void onFetchInitial(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, [onFetchInitial]);
 
   const value: VirtualListContextValue = {

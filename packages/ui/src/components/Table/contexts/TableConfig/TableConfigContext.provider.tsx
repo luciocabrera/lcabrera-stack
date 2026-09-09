@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import type {
   TableColumnsState,
   TableGroupExpansionState,
@@ -6,6 +8,8 @@ import type {
 } from '#ui/components/Table/Table.types';
 
 import { useStore } from '#ui/hooks';
+import { ProvideStoreContext } from '#ui/hooks/utils/provideStoreContext.util';
+import { syncStoreFromProps } from '#ui/hooks/utils/syncStoreFromProps.util';
 
 import type {
   TableConfigContextValue,
@@ -50,6 +54,39 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     }),
   );
 
+  useEffect(() => {
+    const nextGrouping = getInitialGroupingState({ ...groupingState });
+    syncStoreFromProps({ next: nextGrouping, store: groupingStore });
+    syncStoreFromProps({
+      next: getInitialMetaState({ ...metaState }),
+      store: metaStore,
+    });
+    syncStoreFromProps({
+      next: getInitialColumnsState<TData>({
+        ...columnsState,
+        aggregates: nextGrouping.aggregates,
+        crud: metaState?.crud,
+        groupingKeys: nextGrouping.keys,
+      }),
+      store: columnsStore,
+    });
+  }, [
+    columnsState,
+    columnsStore,
+    groupingState,
+    groupingStore,
+    metaState,
+    metaStore,
+  ]);
+
+  useEffect(() => {
+    if (metaState?.defaultGroupFold === undefined) return;
+    syncStoreFromProps({
+      next: { defaultFold: metaState.defaultGroupFold },
+      store: expansionStore,
+    });
+  }, [expansionStore, metaState]);
+
   const value: TableConfigContextValue<TData> = {
     columnsStore,
     expansionStore,
@@ -58,8 +95,8 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   };
 
   return (
-    <TableConfigContext value={value as TableConfigContextValue}>
+    <ProvideStoreContext context={TableConfigContext} value={value}>
       {children}
-    </TableConfigContext>
+    </ProvideStoreContext>
   );
 };

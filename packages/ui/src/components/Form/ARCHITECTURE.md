@@ -34,7 +34,7 @@ Form/
 │   ├── index.ts               → Barrel: FormProvider + all selectors/actions
 │   └── FormContext/
 │       ├── FormContext.context.ts    → createContext (undefined default)
-│       ├── FormContext.provider.tsx  → Provider: owns init (useId, flattenFields, both store snapshots via utils), syncs serverErrors/mode/fields props
+│       ├── FormContext.provider.tsx  → Provider: owns init (useId, flattenFields, both store snapshots via utils), syncs later serverErrors/mode/fields identities through `syncStoreFromProps`
 │       ├── FormContext.types.ts      → FormFieldsState, FormMetaState, FormContextValue, FormProviderProps
 │       ├── useFormContextValue.hook.ts → use(FormContext) with guard (infra only)
 │       ├── useFieldsStore.hook.ts     → Shared useSyncExternalStore wrapper over fieldsStore (mirrors Table's useColumnsStore/useFiltersStore)

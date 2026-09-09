@@ -8,7 +8,7 @@ the Suspense boundary so loading/error states are handled by React transitions.
 ```
 TableData/
 ├── TableDataContext.context.ts              → createContext (undefined default)
-├── TableDataContext.provider.tsx             → Provider: creates store and syncs incoming loader data into existing store
+├── TableDataContext.provider.tsx             → Provider: seeds the store from the first snapshot, then syncs later `dataState` identities through `syncStoreFromProps`
 ├── TableDataContext.types.ts                → TableDataState, ContextValue
 ├── index.ts                                 → Barrel: TableDataProvider, hooks
 │
@@ -83,7 +83,10 @@ graph TD
 ```
 
 This keeps the same store instance mounted across transitions and atomically
-replaces rows when new loader data resolves.
+replaces rows when new loader data resolves. The write is `syncStoreFromProps`;
+the effect keys on `dataState` identity, the same hydration rule
+`TableConfigProvider` uses (`packages/ui/src/PATTERNS.md` → Store provider
+hydration).
 
 ## Actions
 

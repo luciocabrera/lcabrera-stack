@@ -10,7 +10,7 @@ sized.
 ```
 TableConfig/
 ├── TableConfigContext.context.ts            → createContext (undefined default)
-├── TableConfigContext.provider.tsx           → Provider: creates all three stores from initial state props
+├── TableConfigContext.provider.tsx           → Provider: seeds stores from the first snapshot, then syncs later prop identities through `syncStoreFromProps`
 ├── TableConfigContext.types.ts              → ContextValue (columnsStore + expansionStore + groupingStore + metaStore + onDrillGroup)
 ├── useTableConfigContextValue.hook.ts       → use(TableConfigContext) with guard
 ├── index.ts                                 → Barrel: TableConfigProvider, hooks
@@ -272,7 +272,11 @@ graph TD
   D --> F["Provide { columnsStore, expansionStore, groupingStore, metaStore } via TableConfigContext"]
   E --> F
   H --> F
+  F --> S["effect on columnsState / groupingState / metaState identity"]
+  S --> W["syncStoreFromProps into the matching stores"]
 ```
+
+Later props follow the same hydration rule as `TableDataProvider` (`packages/ui/src/PATTERNS.md` → Store provider hydration): a new snapshot identity replaces the store; the same identity leaves in-flight writes (grouping keys, toggled paths) alone. Expansion only patches `defaultFold` from `metaState`, so the toggled-path set is UI-owned.
 
 Consumers no longer need to declare an `actions` column by hand: `crud` is
 threaded from `metaState.crud` into `getInitialColumnsState`, which appends

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import { VirtualListProvider } from '#ui/components/VirtualList/contexts';
 import { useStore } from '#ui/hooks';
+import { syncStoreFromProps } from '#ui/hooks/utils/syncStoreFromProps.util';
 
 import type { VirtualSelectMetaState } from '../VirtualSelect.types';
 import type {
@@ -25,7 +26,10 @@ export const VirtualSelectProvider = ({
   );
 
   useEffect(() => {
-    metaStore.set(getInitialSelectMetaState(metaState));
+    syncStoreFromProps({
+      next: getInitialSelectMetaState(metaState),
+      store: metaStore,
+    });
   }, [metaState, metaStore]);
 
   const value: VirtualSelectContextValue = {

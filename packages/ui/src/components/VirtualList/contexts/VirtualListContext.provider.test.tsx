@@ -18,6 +18,7 @@ import { useGetHasCheckboxes } from './list/selectors/useGetHasCheckboxes.hook';
 import { useGetHasFetchMore } from './list/selectors/useGetHasFetchMore.hook';
 import { useGetSearchInputName } from './list/selectors/useGetSearchInputName.hook';
 import { useGetSearchTerm } from './list/selectors/useGetSearchTerm.hook';
+import { useVirtualListContextValue } from './useVirtualListContextValue.hook';
 import { VirtualListProvider } from './VirtualListContext.provider';
 
 type WrapperArgs = {
@@ -191,6 +192,46 @@ describe('VirtualListProvider', () => {
     await waitFor(() => {
       expect(onFetchInitial).toHaveBeenCalledTimes(1);
     });
+    expect(onFetchInitial.mock.calls[0]?.[0]).toBeInstanceOf(AbortSignal);
+  });
+
+  it('does not write dataStore when unmounted before onFetchInitial resolves', async () => {
+    const pendingFetch = Promise.withResolvers<void>();
+    const storeRef: {
+      current?: ReturnType<typeof useVirtualListContextValue>;
+    } = {};
+
+    const onFetchInitial = vi.fn(async (signal: AbortSignal) => {
+      await pendingFetch.promise;
+      if (signal.aborted) return;
+      storeRef.current?.dataStore.set({
+        data: ['stale-page'],
+        filteredOptions: ['stale-page'],
+      });
+    });
+
+    const wrapper = createWrapper({
+      listState: { onChange: vi.fn(), onFetchInitial },
+    });
+
+    const { result, unmount } = renderHook(() => useVirtualListContextValue(), {
+      wrapper,
+    });
+
+    storeRef.current = result.current;
+    const dataStore = result.current.dataStore;
+    const snapshot = dataStore.get();
+
+    unmount();
+    expect(onFetchInitial.mock.calls[0]?.[0]?.aborted).toBe(true);
+
+    await act(async () => {
+      pendingFetch.resolve();
+      await pendingFetch.promise;
+    });
+
+    expect(dataStore.get()).toEqual(snapshot);
+    expect(dataStore.get().data).not.toContain('stale-page');
   });
 
   it('preserves the in-flight UI state across a config re-sync', async () => {
