@@ -9,6 +9,7 @@ import {
   createSummary,
   DEFAULT_COMMIT_IDENTITY,
   gitStepFailure,
+  inFormatterOrder,
   INITIAL_COMMIT_MESSAGE,
   initialManifest,
   missingGitRefusal,
@@ -164,6 +165,35 @@ describe('initialManifest', () => {
       type: 'module',
       version: '0.0.0',
     });
+  });
+
+  test('a rung below monorepo is written in the order the formatter wants', () => {
+    expect(
+      Object.keys(initialManifest({ name: 'demo', profile: 'agent' })),
+    ).toEqual(['name', 'version', 'private', 'type']);
+  });
+
+  test('the monorepo rung is written in the order the formatter wants', () => {
+    expect(
+      Object.keys(initialManifest({ name: 'demo', profile: 'monorepo' })),
+    ).toEqual([
+      'name',
+      'version',
+      'private',
+      'type',
+      'scripts',
+      'devDependencies',
+      'engines',
+      'packageManager',
+    ]);
+  });
+});
+
+describe('inFormatterOrder', () => {
+  test('a field with no place in the order is refused rather than misplaced', () => {
+    expect(() =>
+      inFormatterOrder({ description: 'a field nobody placed' }),
+    ).toThrow(/has no place in the manifest key order/);
   });
 });
 
