@@ -12,6 +12,11 @@ list comes from: a runner that runs manifest scripts and nothing else is read
 from the manifests, while a toolchain that resolves a task from more than them is
 asked for its list.
 
+The spelling is matched from its left edge, so a longer runner name ending in
+the configured one — `pnpm run` where the key says `npm run` — is not read as
+yours. Unanchored it was, which both accepted an undocumented task as documented
+and reported a documented command the file does not contain.
+
 Nothing changes for a repository that has not set the key: it defaults to the
 spelling this gate assumed before the key existed, and a failure now names the
 spelling to write in.

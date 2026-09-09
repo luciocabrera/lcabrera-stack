@@ -8,6 +8,11 @@ import {
   unresolvedDocumented,
 } from './commands-doc.mjs';
 
+const OTHER_RUNNER_DOC = '- `pnpm run adr:verify` — how they run it';
+
+const otherRunnerDocumented = () =>
+  documentedTasks({ doc: OTHER_RUNNER_DOC, runPrefix: 'npm run' });
+
 const DOC = [
   '# Commands',
   '',
@@ -47,6 +52,10 @@ describe('documentedTasks', () => {
     expect([...documentedTasks({ doc, runPrefix: 'run.sh' })]).toEqual([
       'build',
     ]);
+  });
+
+  test('reads no task out of a longer runner name that ends in this one', () => {
+    expect([...otherRunnerDocumented()]).toEqual([]);
   });
 });
 
@@ -88,5 +97,31 @@ describe('what the problems say', () => {
     ).toEqual([
       'COMMANDS.md documents `npm run gone`, which is not a task in any workspace — it was renamed or removed.',
     ]);
+  });
+});
+
+describe('a document carrying a longer runner name that ends in ours', () => {
+  test('leaves a script it does not document reported as undocumented', () => {
+    expect(
+      undocumentedScripts({
+        docName: 'COMMANDS.md',
+        documented: otherRunnerDocumented(),
+        rootScripts: ['adr:verify'],
+        runPrefix: 'npm run',
+      }),
+    ).toEqual([
+      'COMMANDS.md does not document the root script `adr:verify` — write it in as `npm run adr:verify`, or delete the script.',
+    ]);
+  });
+
+  test('and is not reported for a command it never wrote', () => {
+    expect(
+      unresolvedDocumented({
+        docName: 'COMMANDS.md',
+        documented: otherRunnerDocumented(),
+        runPrefix: 'npm run',
+        tasks: new Set(['lint:check']),
+      }),
+    ).toEqual([]);
   });
 });

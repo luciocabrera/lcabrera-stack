@@ -9,6 +9,10 @@
  * in the file as undocumented — with a remedy that is already done. The same
  * split decides where the task list comes from: only a toolchain that resolves
  * tasks from more than the manifests has to be asked for it.
+ *
+ * The prefix is matched from its left edge, because one runner's name ends
+ * another's: unanchored, the shorter spelling matches inside the longer one, and
+ * both checks below then answer for a command the document does not carry.
  */
 
 export const DEFAULT_RUN_PREFIX = 'vp run';
@@ -23,6 +27,8 @@ const matchedLiterally = (value) =>
   value
     .replaceAll(REGEXP_SPECIAL, String.raw`\$&`)
     .replaceAll(/\s+/g, String.raw`\s+`);
+
+const LEFT_EDGE = String.raw`(?<!\w)`;
 
 /**
  * Whether the task list has to be asked for rather than read.
@@ -47,7 +53,7 @@ export const documentedTasks = ({ doc, runPrefix = DEFAULT_RUN_PREFIX }) => {
   const word = runPrefix.trim();
   if (word === '') return new Set();
   const pattern = new RegExp(
-    String.raw`${matchedLiterally(word)}\s+([a-z][\w:-]*)`,
+    String.raw`${LEFT_EDGE}${matchedLiterally(word)}\s+([a-z][\w:-]*)`,
     'g',
   );
   return new Set(doc.matchAll(pattern).map(([, task]) => task));
