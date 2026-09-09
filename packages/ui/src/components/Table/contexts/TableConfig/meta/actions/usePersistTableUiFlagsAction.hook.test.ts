@@ -34,6 +34,32 @@ vi.mock(
   }),
 );
 
+const persistChromeOpen = (totalsPlacement?: 'first' | 'last') => {
+  const { result } = renderHook(() => usePersistTableUiFlagsAction());
+
+  act(() => {
+    result.current({
+      currentState: {
+        isTableSettingsOpen: false,
+        persistenceKey: 'orders',
+      } as Partial<TableMetaState>,
+      nextStatePatch: { isTableSettingsOpen: true },
+      ...(totalsPlacement !== undefined && { totalsPlacement }),
+    });
+  });
+};
+
+const expectUiFlagsCookie = (value: Record<string, unknown>) => {
+  expect(persistMock).toHaveBeenCalledWith([
+    {
+      key: 'table-state-orders-uiFlags',
+      searchParamKey: '',
+      searchParamValue: '',
+      value: JSON.stringify({ value, version: 1 }),
+    },
+  ]);
+};
+
 describe('usePersistTableUiFlagsAction', () => {
   beforeEach(() => {
     persistMock.mockReset();
@@ -41,84 +67,26 @@ describe('usePersistTableUiFlagsAction', () => {
   });
 
   it('submits the merged drawer flags as a cookie entry', () => {
-    const { result } = renderHook(() => usePersistTableUiFlagsAction());
-
-    act(() => {
-      result.current({
-        currentState: {
-          isTableSettingsOpen: false,
-          persistenceKey: 'orders',
-        } as Partial<TableMetaState>,
-        nextStatePatch: { isTableSettingsOpen: true },
-      });
-    });
-
-    expect(persistMock).toHaveBeenCalledWith([
-      {
-        key: 'table-state-orders-uiFlags',
-        searchParamKey: '',
-        searchParamValue: '',
-        value: JSON.stringify({
-          value: { isTableSettingsOpen: true },
-          version: 1,
-        }),
-      },
-    ]);
+    persistChromeOpen();
+    expectUiFlagsCookie({ isTableSettingsOpen: true });
   });
 
   it('keeps the live grouping placement when a chrome-only write omits it', () => {
     setGroupingState({ totalsPlacement: 'first' });
-    const { result } = renderHook(() => usePersistTableUiFlagsAction());
-
-    act(() => {
-      result.current({
-        currentState: {
-          isTableSettingsOpen: false,
-          persistenceKey: 'orders',
-        } as Partial<TableMetaState>,
-        nextStatePatch: { isTableSettingsOpen: true },
-      });
+    persistChromeOpen();
+    expectUiFlagsCookie({
+      isTableSettingsOpen: true,
+      totalsPlacement: 'first',
     });
-
-    expect(persistMock).toHaveBeenCalledWith([
-      {
-        key: 'table-state-orders-uiFlags',
-        searchParamKey: '',
-        searchParamValue: '',
-        value: JSON.stringify({
-          value: { isTableSettingsOpen: true, totalsPlacement: 'first' },
-          version: 1,
-        }),
-      },
-    ]);
   });
 
   it('lets an explicit placement win over the live grouping snapshot', () => {
     setGroupingState({ totalsPlacement: 'first' });
-    const { result } = renderHook(() => usePersistTableUiFlagsAction());
-
-    act(() => {
-      result.current({
-        currentState: {
-          isTableSettingsOpen: false,
-          persistenceKey: 'orders',
-        } as Partial<TableMetaState>,
-        nextStatePatch: { isTableSettingsOpen: true },
-        totalsPlacement: 'last',
-      });
+    persistChromeOpen('last');
+    expectUiFlagsCookie({
+      isTableSettingsOpen: true,
+      totalsPlacement: 'last',
     });
-
-    expect(persistMock).toHaveBeenCalledWith([
-      {
-        key: 'table-state-orders-uiFlags',
-        searchParamKey: '',
-        searchParamValue: '',
-        value: JSON.stringify({
-          value: { isTableSettingsOpen: true, totalsPlacement: 'last' },
-          version: 1,
-        }),
-      },
-    ]);
   });
 
   it('does not submit when there is no persistence key', () => {
