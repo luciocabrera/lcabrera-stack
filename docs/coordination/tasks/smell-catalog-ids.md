@@ -21,6 +21,6 @@ add smell catalog IDs for structure and tests
 
 ## Status / next
 
-- Current step: catalog IDs committed; draft PR #1133
+- Current step: addressing review threads on #1133
 - Blockers: none
-- Next: review
+- Next: resolve threads after the pointer commit

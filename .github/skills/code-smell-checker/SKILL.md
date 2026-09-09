@@ -70,8 +70,8 @@ If inputs are missing, default to:
 - assign severity using the canonical scale: BLOCKER, HIGH, MEDIUM, LOW, NIT
 - estimate fix effort: small, medium, large
 - map each finding to a suggested remediation pattern
-- assign a catalog ID from `../code-smell-zen/SKILL.md` (Clean Code, GoF, TS, React) when one fits
-- when none fits, assign a **listed** heuristic ID from the block below. Mint a new `CHK.<DOMAIN>.<LABEL>` only if nothing listed matches (e.g. `CHK.ARCH.CYCLE`)
+- assign a catalog ID from `../code-smell-zen/SKILL.md` when one fits (Clean Code, GoF, TS, React, and that file's `### Repo heuristic IDs`)
+- when none fits, mint a new `CHK.<DOMAIN>.<LABEL>` (for example `CHK.ARCH.CYCLE`). Zen must not mint; this skill may.
 
 7. Build the action plan.
 
@@ -95,23 +95,11 @@ Use this branching logic while triaging:
 - If a smell is a style preference with no real cost: classify NIT.
 - If evidence is weak or tool signal is noisy: mark as potential false positive and request focused validation.
 
-## Stable heuristic IDs
+## Catalog IDs
 
-Prefer a `CC.*` / `GOF.*` / `DS.*` / `TS.*` / `REACT.*` ID from `../code-smell-zen/SKILL.md`. Use a `CHK.*` ID only when that list has no match. These five are first-class (cite them verbatim; do not paraphrase):
+Cite IDs from `../code-smell-zen/SKILL.md`. That file is the roster. Do not copy the definitions here.
 
-- **CHK.FUNC.LONG** — one unit that is one job only on paper and far past its neighbors; not `CC.G30` (two jobs)
-- **CHK.FUNC.SIDE-EFFECT** — `Date.now`, `fetch`, store write, or DOM in a `*.util.ts` or other pure home; not `CC.N7` (name the effect)
-- **CHK.TYPE.PRIMITIVE-OBSESSION** — two interchangeable primitives in one public signature (IDs, money, keys); not branding every string
-- **CHK.TEST.DEPENDENT** — a later test reads leftover module state from an earlier one; a shared `beforeEach` harness is fine
-- **CHK.TEST.NONDETERMINISTIC** — assertion depends on `Date.now`, `new Date()`, or `Math.random` without a freeze or injected clock; not `CC.T9` (fast)
-
-The Clean Code IDs added alongside these, and that a checker scan must also cite when they fire:
-
-- **CC.G10** Vertical Separation
-- **CC.G31** Hidden Temporal Coupling
-- **CC.G33** Encapsulate Boundary Conditions (not `CC.G28`)
-- **CC.G35** Keep Configurable Data at High Levels
-- **CC.N6** Avoid Encodings (not `is`/`has`/`should` booleans)
+When no listed ID fits, mint a new `CHK.<DOMAIN>.<LABEL>` (for example `CHK.ARCH.CYCLE`). Zen must not mint; this skill may.
 
 ## Report Format
 
