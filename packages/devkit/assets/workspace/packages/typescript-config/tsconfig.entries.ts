@@ -7,6 +7,13 @@
  * effect of the import, which no test can do.
  *
  * Adding an entry is part of adding a workspace, not a later tidy-up.
+ *
+ * An application's own project file is written as `tsconfig.json` rather than
+ * as a variant beside a hand-written stub, because the type-aware linter finds
+ * a file's configuration by walking up for that exact name. A stub referencing
+ * a config this generator has not written yet cannot ship either: the first
+ * install is what runs the generator, and loading the task graph before that
+ * follows the reference and fails on a file that does not exist.
  */
 
 import {
@@ -40,7 +47,7 @@ export const configs = [
     config: createAppTsConfig({
       tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
     }),
-    filePath: path.resolve(workspaceRoot, 'apps/web/tsconfig.app.json'),
+    filePath: path.resolve(workspaceRoot, 'apps/web/tsconfig.json'),
   },
   {
     config: createNodeTsConfig({

@@ -51,29 +51,14 @@ const OWN_TOOLING = [
   /(^|\/)(eslint\.config|vite\.config)\./,
 ];
 
-const GENERATED_TSCONFIG = /(^|\/)tsconfig\.\w+\.json$/;
+const GENERATED_TSCONFIG = /(^|\/)tsconfig(\.\w+)?\.json$/;
 
-const PROJECT_TSCONFIG = /(^|\/)tsconfig\.json$/;
-
-/**
- * A tsconfig is stray by which of the two shapes it has, and only the second is
- * subject to the payload exemption. The generator writes
- * `tsconfig.<name>.json`, so one of those is generated wherever it turns up and
- * never belongs in a tarball — the payload included, since a consumer's own
- * `prepare` writes theirs. A bare `tsconfig.json` is hand-written: this
- * package's own must not ship, and the one a shipped blueprint carries is part
- * of what the payload exists to place.
- *
- * @param {string[]} packedPaths
- * @returns {string[]}
- */
 export const strayFromTarball = (packedPaths) =>
   packedPaths.filter(
     (path) =>
       GENERATED_TSCONFIG.test(path) ||
       (!path.startsWith(PAYLOAD_PREFIX) &&
-        (PROJECT_TSCONFIG.test(path) ||
-          OWN_TOOLING.some((pattern) => pattern.test(path)))),
+        OWN_TOOLING.some((pattern) => pattern.test(path))),
   );
 
 export const declaredBins = (manifest) =>

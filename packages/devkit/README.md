@@ -278,10 +278,13 @@ cd my-repo && pnpm install
 The install is not optional and is not a convenience: the tree is written before
 anything is on disk, so the root task block names binaries the manifest declares
 and nothing has fetched yet. The install also runs `prepare`, which is what
-writes every `tsconfig.app.json` in the tree. **No tsconfig here is written by
+writes every tsconfig in the tree. **No tsconfig here is written by
 hand** — you edit the roster (`tsconfig.entries.ts`, in the workspace the rung
 places for it) and the generator writes the JSON; a hand edit survives exactly
-until the next regeneration reverts it.
+until the next regeneration reverts it. That includes the application's own
+project file, and it has to: the type-aware linter finds a file's configuration
+by walking up for that exact name, while a stub referencing a config the
+generator has not written yet fails the very install that would write it.
 
 One of the workspaces it places is an application, and it is there to be run
 rather than read:
