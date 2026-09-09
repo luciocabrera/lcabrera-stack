@@ -36,15 +36,17 @@ export const DEFAULT_CONFIG = {
   profile: 'agent',
 };
 
-/** @type {Record<string, string[]>} */
-const RUNG_GROUPS = {
-  agent: ['skills', 'rules', 'agents', 'docs', 'coordination', 'decisions'],
-  full: [],
-  monorepo: ['workspace'],
-  repo: ['templates', 'workflows', 'hooks', 'root'],
-};
+/** @type {ReadonlyArray<readonly [string, readonly string[]]>} */
+const RUNG_GROUPS = [
+  ['agent', ['skills', 'rules', 'agents', 'docs', 'coordination', 'decisions']],
+  ['repo', ['templates', 'workflows', 'hooks', 'root']],
+  ['monorepo', ['workspace']],
+  ['full', []],
+];
 
-export const PROFILE_LADDER = ['agent', 'repo', 'monorepo', 'full'];
+const GROUPS_BY_RUNG = new Map(RUNG_GROUPS);
+
+export const PROFILE_LADDER = RUNG_GROUPS.map(([rung]) => rung);
 
 const rungIndex = (name) => PROFILE_LADDER.indexOf(name);
 
@@ -64,7 +66,7 @@ export const PROFILES = Object.fromEntries(
     name,
     PROFILE_LADDER.filter((rung) =>
       includesRung({ profile: name, rung }),
-    ).flatMap((rung) => RUNG_GROUPS[rung] ?? []),
+    ).flatMap((rung) => GROUPS_BY_RUNG.get(rung) ?? []),
   ]),
 );
 
