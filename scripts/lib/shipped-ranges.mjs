@@ -71,11 +71,12 @@ export const catalogRanges = ({ path, text }) =>
     );
 
 /**
- * Every dependency a manifest declares, pointers included. A `catalog:`,
- * `workspace:` or `npm:` specifier names where the version is declared instead
- * of declaring it, so nothing there can fall behind — but it is still a
+ * Every dependency a manifest declares, whatever its specifier says. Reading is
+ * not judging: a specifier this gate cannot read a range out of is still a
  * declaration this reader saw, which is what tells it apart from a name it
- * failed to read.
+ * failed to read. Which specifiers are then exempt from judgement is the judge's
+ * question, and only `catalog:` and `workspace:` are — they name where the
+ * version is declared, where `npm:` pins one.
  *
  * @param {{ manifest: object, path: string }} args
  */
