@@ -3,7 +3,7 @@ governs:
   - devkit
 ---
 
-# ADR-120 — The blueprint offers only what its rung delivers
+# ADR-121 — The blueprint offers only what its rung delivers
 
 **Status:** Accepted
 

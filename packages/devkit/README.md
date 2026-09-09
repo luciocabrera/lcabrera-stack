@@ -309,7 +309,7 @@ click and change nothing. What the grid offers instead is what this rung can
 answer: pinning, hiding, column widths, column order, the settings panel and the
 theme. Deleting the two flags from a column is what turns them back on, and doing
 that belongs with a loader that reads a page it can sort
-([ADR-120](https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/decisions/ADR-120-the-blueprint-offers-only-what-its-rung-delivers.md)).
+([ADR-121](https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/decisions/ADR-121-the-blueprint-offers-only-what-its-rung-delivers.md)).
 
 Every
 `@lcabrera/*` package it names is declared as a semver range and resolved from

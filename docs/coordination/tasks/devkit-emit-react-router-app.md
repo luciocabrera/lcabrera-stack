@@ -11,7 +11,7 @@ area:
   - devkit.config.json
   - docs/agents/public-package-suppressions.json
   - docs/coordination/tasks/devkit-emit-react-router-app.md
-  - docs/decisions/ADR-120-the-blueprint-offers-only-what-its-rung-delivers.md
+  - docs/decisions/ADR-121-the-blueprint-offers-only-what-its-rung-delivers.md
   - docs/product/requirements/render-a-table-from-rows-alone.md
   - packages/devkit/ARCHITECTURE.md
   - packages/devkit/README.md
