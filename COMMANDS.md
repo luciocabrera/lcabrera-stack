@@ -83,7 +83,8 @@ the way CI does.
 
 The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` — the
 **DB-free CI Quality Gate** (steps 3–6 plus `commands:verify`, `coordination:verify`,
-`scripts:verify`, `scripts:exits:verify`, `seeds:verify`, `devkit:closure -- --shipped`, `docs:verify`,
+`scripts:verify`, `scripts:exits:verify`, `seeds:verify`, `shipped-ranges:verify`,
+`devkit:closure -- --shipped`, `docs:verify`,
 `registers:verify`, `package-refs:verify`, `departed:verify`,
 `renames:verify`, `route-names:verify`,
 `inventory:verify`, `adr:verify`, `viteplus:verify` and `configs:verify`, mirroring the
@@ -507,6 +508,7 @@ is believed — the same property [`deps:audit`](#dependencies) is built around.
 | `vp run scripts:verify`        | check the tooling-script size ceiling, over the files [`.claude/rules/scripts.md`](.claude/rules/scripts.md) binds (`--write` rebaselines)                                                                                                                                                                                       |
 | `vp run scripts:exits:verify`  | fail any tooling script calling `process.exit()` instead of setting `process.exitCode`, over the same files as `scripts:verify`                                                                                                                                                                                                  |
 | `vp run seeds:verify`          | check no file `packages/devkit` ships names this repository — its package names, its secrets or its task runner; the forbidden words are derived from the repository, so a new workspace is covered the day it is added                                                                                                          |
+| `vp run shipped-ranges:verify` | check every dependency range `packages/devkit` ships admits the version this repository publishes for that package, and the minor after it — the range decides which release a bootstrapped repository installs, and below 1.0.0 a caret admits no minor at all                                                                  |
 | `vp run lint:plugins:verify`   | prove every Oxlint plugin family is loaded, that no workspace config shadows the root ([ADR-042](docs/decisions/ADR-042-oxlint-config-at-the-root.md)), and that the Oxlint and Biome workspace rosters each classify every workspace exactly once                                                                               |
 | `vp run lint:eslint:verify`    | prove the **eslint** pass still runs its rules — plants a misordered import and requires `perfectionist/sort-imports` to report it (#472)                                                                                                                                                                                        |
 | `vp run suppressions:verify`   | check every package on the never-baseline roster carries no unapproved suppression (see [the protocol](docs/agents/public-package-suppressions.md))                                                                                                                                                                              |

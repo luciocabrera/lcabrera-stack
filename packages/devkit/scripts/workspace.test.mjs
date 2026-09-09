@@ -41,6 +41,10 @@ const GROUP_HEADER = /^ {2}([\w-]+):[ \t]*$/;
 
 const GROUP_ENTRY = /^ {4}'?([^':]+)'?:[ \t]*(.+)$/;
 
+const QUOTED = /^(['"])(.*)\1$/;
+
+const unquote = (value) => QUOTED.exec(value)?.[2] ?? value;
+
 const catalogGroups = (workspaceFile) => {
   const lines = workspaceFile.split('\n');
   const start = lines.indexOf(CATALOGS_KEY);
@@ -59,7 +63,7 @@ const catalogGroups = (workspaceFile) => {
     }
     const entry = GROUP_ENTRY.exec(line);
     if (entry === null || current === undefined) break;
-    groups.get(current).push([entry[1], entry[2].trim()]);
+    groups.get(current).push([entry[1], unquote(entry[2].trim())]);
   }
   return groups;
 };
