@@ -23,15 +23,12 @@ import {
 export const TableConfigProvider = <TData extends Record<string, unknown>>({
   children,
   columnsState,
+  groupingState,
   metaState,
 }: TableConfigProviderProps<TData>) => {
   const normalizedMetaState = getInitialMetaState({ ...metaState });
   const normalizedGroupingState = getInitialGroupingState({
-    groupingAggregates: metaState?.groupingAggregates,
-    groupingKeys: metaState?.groupingKeys,
-    groupingMode: metaState?.groupingMode,
-    groupingPeriods: metaState?.groupingPeriods,
-    groupingShares: metaState?.groupingShares,
+    ...groupingState,
   });
   const normalizedColumnsState = getInitialColumnsState<TData>({
     ...columnsState,

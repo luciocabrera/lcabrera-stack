@@ -24,6 +24,7 @@ const createDataStore = () => {
   return createMockStore({
     status: {
       data: ['Alpha'],
+      error: undefined,
       hasMore: true,
       isLoading: false,
       isLoadingMore: false,
@@ -60,6 +61,7 @@ describe('executeFetchMoreFilterData', () => {
     });
     expect(filtersDataStore.get().status).toMatchObject({
       data: ['Alpha', 'Bravo'],
+      error: undefined,
       isLoadingMore: false,
       totalLoadedRows: 2,
       totalRows: 3,

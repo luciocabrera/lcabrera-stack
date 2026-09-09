@@ -4,6 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type {
+  FilterData,
   FiltersDataState,
   TableMetaState,
 } from '#ui/components/Table/Table.types';
@@ -11,6 +12,8 @@ import type { TStore } from '#ui/hooks/useStore.hook';
 
 import { DEFAULT_FILTER_PAGE_SIZE } from '#ui/components/Table/Table.constants';
 import { createPaginatedFetchActionMocks } from '#ui/utils/tests/createPaginatedFetchActionMocks.util';
+import { createStatusColumnFetch } from '#ui/utils/tests/createStatusColumnFetch.util';
+import { invokeColumnFilterFetch } from '#ui/utils/tests/invokeColumnFilterFetch.util';
 
 import { fetchMoreFilterData } from './fetchMoreFilterData.util';
 
@@ -19,14 +22,7 @@ type TestData = {
 };
 
 type TestFiltersState = {
-  readonly status: {
-    readonly data: readonly string[];
-    readonly hasMore: boolean;
-    readonly isLoading: boolean;
-    readonly isLoadingMore: boolean;
-    readonly totalLoadedRows: number;
-    readonly totalRows: number;
-  };
+  readonly status: FilterData;
 };
 
 type TestResponse = {
@@ -39,6 +35,7 @@ const createHarness = () => {
     initialDataState: {
       status: {
         data: ['Alpha'],
+        error: undefined,
         hasMore: true,
         isLoading: false,
         isLoadingMore: false,
@@ -95,23 +92,8 @@ describe('fetchMoreFilterData', () => {
       },
     };
 
-    const { result } = renderHook(() =>
-      fetchMoreFilterData<TestData, TestResponse>({
-        columnKey: 'status',
-        filtersDataStore: getHarness().dataStore as unknown as TStore<
-          FiltersDataState<TestData>
-        >,
-        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
-        prefetchRef,
-      }),
-    );
-
-    await act(async () => {
-      await result.current({
-        dataSelector: (response) => [...response.rows],
-        dataTotalSelector: (response) => response.total,
-        onLoadMore: vi.fn(),
-      });
+    await invokeColumnFilterFetch({
+      createFetch: () => loadMoreStatusOptions(prefetchRef),
     });
 
     expect(getHarness().dataStore.get()).toMatchObject({
@@ -131,6 +113,7 @@ describe('fetchMoreFilterData', () => {
     getHarness().dataStore.set({
       status: {
         data: ['Alpha'],
+        error: undefined,
         hasMore: false,
         isLoading: false,
         isLoadingMore: false,
@@ -139,22 +122,8 @@ describe('fetchMoreFilterData', () => {
       },
     });
 
-    const { result } = renderHook(() =>
-      fetchMoreFilterData<TestData, TestResponse>({
-        columnKey: 'status',
-        filtersDataStore: getHarness().dataStore as unknown as TStore<
-          FiltersDataState<TestData>
-        >,
-        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
-      }),
-    );
-
-    await act(async () => {
-      await result.current({
-        dataSelector: (response) => [...response.rows],
-        dataTotalSelector: (response) => response.total,
-        onLoadMore: vi.fn(),
-      });
+    await invokeColumnFilterFetch({
+      createFetch: loadMoreStatusOptions,
     });
 
     expect(getHarness().resolveFromCacheOrFetchMock).not.toHaveBeenCalled();
@@ -164,6 +133,7 @@ describe('fetchMoreFilterData', () => {
     getHarness().dataStore.set({
       status: {
         data: ['Alpha'],
+        error: undefined,
         hasMore: true,
         isLoading: false,
         isLoadingMore: true,
@@ -172,22 +142,8 @@ describe('fetchMoreFilterData', () => {
       },
     });
 
-    const { result } = renderHook(() =>
-      fetchMoreFilterData<TestData, TestResponse>({
-        columnKey: 'status',
-        filtersDataStore: getHarness().dataStore as unknown as TStore<
-          FiltersDataState<TestData>
-        >,
-        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
-      }),
-    );
-
-    await act(async () => {
-      await result.current({
-        dataSelector: (response) => [...response.rows],
-        dataTotalSelector: (response) => response.total,
-        onLoadMore: vi.fn(),
-      });
+    await invokeColumnFilterFetch({
+      createFetch: loadMoreStatusOptions,
     });
 
     expect(getHarness().resolveFromCacheOrFetchMock).not.toHaveBeenCalled();
@@ -198,15 +154,7 @@ describe('fetchMoreFilterData', () => {
       status: undefined,
     } as unknown as Partial<TestFiltersState>);
 
-    const { result } = renderHook(() =>
-      fetchMoreFilterData<TestData, TestResponse>({
-        columnKey: 'status',
-        filtersDataStore: getHarness().dataStore as unknown as TStore<
-          FiltersDataState<TestData>
-        >,
-        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
-      }),
-    );
+    const { result } = renderHook(() => loadMoreStatusOptions());
 
     await expect(
       result.current({
@@ -219,28 +167,18 @@ describe('fetchMoreFilterData', () => {
 
   it('stores an error and resets loading-more state when the request fails', async () => {
     const onLoadMore = vi.fn(() => {
-      return Promise.reject(new Error('Network down'));
+      return Promise.reject(new Error('page failed'));
     });
 
-    const { result } = renderHook(() =>
-      fetchMoreFilterData<TestData, TestResponse>({
-        columnKey: 'status',
-        filtersDataStore: getHarness().dataStore as unknown as TStore<
-          FiltersDataState<TestData>
-        >,
-        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
-      }),
-    );
-
-    await act(async () => {
-      await result.current({
-        dataSelector: (response) => [...response.rows],
-        dataTotalSelector: (response) => response.total,
-        onLoadMore,
-      });
+    await invokeColumnFilterFetch({
+      createFetch: loadMoreStatusOptions,
+      onLoadMore,
     });
 
-    expect(getHarness().metaStore.get().error).toBe('Network down');
+    expect(getHarness().dataStore.get().status.error).toEqual({
+      kind: 'db-failed',
+      message: 'page failed',
+    });
     expect(getHarness().dataStore.get()).toMatchObject({
       status: {
         isLoadingMore: false,
@@ -249,15 +187,7 @@ describe('fetchMoreFilterData', () => {
   });
 
   it('blocks every later page while a request has not settled, which is why requests must be time-bounded', async () => {
-    const { result } = renderHook(() =>
-      fetchMoreFilterData<TestData, TestResponse>({
-        columnKey: 'status',
-        filtersDataStore: getHarness().dataStore as unknown as TStore<
-          FiltersDataState<TestData>
-        >,
-        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
-      }),
-    );
+    const { result } = renderHook(() => loadMoreStatusOptions());
 
     const neverSettles = vi.fn(() => new Promise<TestResponse>(() => {}));
     const args = {
@@ -300,23 +230,9 @@ describe('fetchMoreFilterData', () => {
       },
     };
 
-    const { result } = renderHook(() =>
-      fetchMoreFilterData<TestData, TestResponse>({
-        columnKey: 'status',
-        filtersDataStore: getHarness().dataStore as unknown as TStore<
-          FiltersDataState<TestData>
-        >,
-        metaStore: getHarness().metaStore as unknown as TStore<TableMetaState>,
-        prefetchRef,
-      }),
-    );
-
-    await act(async () => {
-      await result.current({
-        dataSelector: (response) => [...response.rows],
-        dataTotalSelector: (response) => response.total,
-        onLoadMore,
-      });
+    await invokeColumnFilterFetch({
+      createFetch: () => loadMoreStatusOptions(prefetchRef),
+      onLoadMore,
     });
 
     expect(getHarness().firePrefetchMock).toHaveBeenCalledWith({
@@ -326,4 +242,16 @@ describe('fetchMoreFilterData', () => {
       prefetchRef,
     });
   });
+});
+
+const loadMoreStatusOptions = createStatusColumnFetch({
+  fetchFn: fetchMoreFilterData<TestData, TestResponse>,
+  getStores: () => {
+    const { dataStore, metaStore } = getHarness();
+
+    return {
+      dataStore: dataStore as unknown as TStore<FiltersDataState<TestData>>,
+      metaStore: metaStore as unknown as TStore<TableMetaState>,
+    };
+  },
 });

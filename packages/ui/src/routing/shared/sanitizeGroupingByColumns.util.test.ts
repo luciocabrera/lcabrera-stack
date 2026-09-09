@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import type { TableColumn } from '#ui/components/Table';
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
+import { getInitialGroupingState } from '#ui/components/Table/contexts/TableConfig/utils';
 import { MAX_TABLE_GROUP_KEYS } from '#ui/components/Table/Table.constants';
 import { createActionsColumn } from '#ui/components/Table/utils/createActionsColumn.util';
 
@@ -23,13 +24,7 @@ const columns: TableColumn<Row>[] = [
   { isGroupable, isStatic, key: 'actions', label: 'Actions' },
 ];
 
-const NO_GROUPING: TableGroupingState = {
-  aggregates: [],
-  keys: [],
-  mode: 'flat',
-  periods: {},
-  shares: [],
-};
+const NO_GROUPING = getInitialGroupingState({});
 
 type GroupingArgs = {
   readonly aggregates?: TableGroupingState['aggregates'];
@@ -37,6 +32,7 @@ type GroupingArgs = {
   readonly mode?: TableGroupingState['mode'];
   readonly periods?: TableGroupingState['periods'];
   readonly shares?: TableGroupingState['shares'];
+  readonly totalsPlacement?: TableGroupingState['totalsPlacement'];
 };
 
 const grouping = ({
@@ -45,12 +41,14 @@ const grouping = ({
   mode = 'flat',
   periods = {},
   shares = [],
+  totalsPlacement = 'last',
 }: GroupingArgs): TableGroupingState => ({
   aggregates,
   keys,
   mode,
   periods,
   shares,
+  totalsPlacement,
 });
 
 describe('sanitizeGroupingByColumns', () => {
@@ -82,6 +80,7 @@ describe('sanitizeGroupingByColumns', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         }),
       }),
     ).toStrictEqual(
@@ -91,6 +90,7 @@ describe('sanitizeGroupingByColumns', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       }),
     );
   });
@@ -114,6 +114,7 @@ describe('sanitizeGroupingByColumns', () => {
           mode: 'flat',
           periods: {},
           shares: [],
+          totalsPlacement: 'last',
         }),
       }),
     ).toStrictEqual(NO_GROUPING);

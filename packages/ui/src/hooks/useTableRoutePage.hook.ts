@@ -17,7 +17,7 @@ export const useTableRoutePage = <
 >({
   fetchPage,
 }: UseTableRoutePageArgs<TResponse>) => {
-  const { columnsState, dataPromise, metaState } =
+  const { columnsState, dataPromise, groupingState, metaState } =
     useLoaderData<TableRouteLoaderData<TData, TResponse>>();
 
   const { isKeysetEnabled, isServerFilterEnabled } = metaState;
@@ -33,5 +33,5 @@ export const useTableRoutePage = <
       }),
     );
 
-  return { columnsState, dataPromise, metaState, onLoadMore };
+  return { columnsState, dataPromise, groupingState, metaState, onLoadMore };
 };

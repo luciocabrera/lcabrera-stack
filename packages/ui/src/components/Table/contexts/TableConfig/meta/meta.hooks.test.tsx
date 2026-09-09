@@ -13,7 +13,6 @@ const createInitialMetaState = (): TableMetaState => {
     columnSettingsSelectedTab: 'general',
     density: 'compact',
     enablePrefetch: true,
-    error: undefined,
     initialPageSize: 20,
     isBordered: true,
     isColumnSettingsOpen: false,
@@ -42,9 +41,13 @@ type MetaStoreState = ReturnType<typeof createInitialMetaState>;
 
 const storesRef: {
   columnsStore: MockStore<Record<string, never>>;
+  groupingStore: MockStore<{ readonly totalsPlacement: 'first' | 'last' }>;
   metaStore: MockStore<MetaStoreState>;
 } = {
   columnsStore: createMockStore({}),
+  groupingStore: createMockStore<{
+    readonly totalsPlacement: 'first' | 'last';
+  }>({ totalsPlacement: 'last' }),
   metaStore: createMockStore(createInitialMetaState()),
 };
 
@@ -52,6 +55,7 @@ const getTableConfigContextValue = vi.hoisted(() => {
   return function getTableConfigContextValue() {
     return {
       columnsStore: storesRef.columnsStore,
+      groupingStore: storesRef.groupingStore,
       metaStore: storesRef.metaStore,
     };
   };
@@ -99,6 +103,9 @@ import { useMetaStore } from './useMetaStore.hook';
 describe('TableConfig meta hooks', () => {
   beforeEach(() => {
     storesRef.columnsStore = createMockStore({});
+    storesRef.groupingStore = createMockStore<{
+      readonly totalsPlacement: 'first' | 'last';
+    }>({ totalsPlacement: 'last' });
     storesRef.metaStore = createMockStore(createInitialMetaState());
   });
 

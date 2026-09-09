@@ -7,7 +7,6 @@ import {
   render,
   screen,
 } from '@testing-library/react';
-import { useRef } from 'react';
 import {
   afterEach,
   beforeEach,
@@ -22,23 +21,15 @@ import type {
   TableGroupKeyValue,
 } from '#ui/components/Table/Table.types';
 
-import {
-  TableConfigProvider,
-  TableDataProvider,
-  TableFocusProvider,
-} from '#ui/components/Table/contexts';
 import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
 import { useFocusStore } from '#ui/components/Table/contexts/TableFocus/focus/useFocusStore.hook';
-import { TableWrapperContext } from '#ui/components/Table/contexts/TableWrapper/TableWrapperContext.context';
 import { useTableGroupFoldAll } from '#ui/components/Table/hooks';
 import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
-import { TableBase } from '#ui/components/Table/TableBase';
-import { TableBody } from '#ui/components/Table/TableBody';
+import { GroupedTableTestShell } from '#ui/utils/tests/groupedTableTestShell.util';
 
 type TestRow = Record<string, unknown>;
 
 const ROW_HEIGHT = 40;
-const CONTAINER_HEIGHT = 400;
 
 const GROUPING_KEYS = ['status', 'customerType', 'priority'];
 
@@ -91,17 +82,6 @@ const resorted: readonly TestRow[] = [
   groupRow({ isSubtotal: true, path: pathOf() }),
 ];
 
-const attachScrollMetrics = (container: HTMLDivElement | null) => {
-  if (!container) return;
-  if (Object.getOwnPropertyDescriptor(container, 'scrollTop')) return;
-
-  Object.defineProperties(container, {
-    clientHeight: { configurable: true, value: CONTAINER_HEIGHT },
-    offsetHeight: { configurable: true, value: CONTAINER_HEIGHT },
-    scrollTop: { configurable: true, value: 0, writable: true },
-  });
-};
-
 const FoldAllControls = () => {
   const { isCollapseAllEnabled, isExpandAllEnabled, setAllGroupsExpanded } =
     useTableGroupFoldAll<TestRow>();
@@ -143,46 +123,14 @@ type HarnessProps = {
   readonly data?: readonly TestRow[];
 };
 
-const Harness = ({ data = rows }: HarnessProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  const setContainer = (node: HTMLDivElement | null) => {
-    containerRef.current = node;
-    attachScrollMetrics(node);
-  };
-
-  return (
-    <TableConfigProvider<TestRow>
-      columnsState={{ columns }}
-      metaState={{
-        groupingKeys: GROUPING_KEYS,
-        overscan: 2,
-        rowHeight: ROW_HEIGHT,
-      }}
-    >
-      <TableFocusProvider>
-        <TableDataProvider<TestRow>
-          dataState={{
-            data,
-            isLoading: false,
-            isLoadingMore: false,
-            totalRows: data.length,
-          }}
-        >
-          <TableWrapperContext value={{ containerRef, wrapperRef }}>
-            <FoldAllControls />
-            <div data-testid='scroll-container' ref={setContainer}>
-              <TableBase>
-                <TableBody tableContainerRef={containerRef} />
-              </TableBase>
-            </div>
-          </TableWrapperContext>
-        </TableDataProvider>
-      </TableFocusProvider>
-    </TableConfigProvider>
-  );
-};
+const Harness = ({ data = rows }: HarnessProps) => (
+  <GroupedTableTestShell
+    columns={columns}
+    data={data}
+    groupingState={{ keys: GROUPING_KEYS }}
+    toolbar={<FoldAllControls />}
+  />
+);
 
 const getRows = () => screen.getAllByTestId('table-group-header-row');
 

@@ -10,6 +10,7 @@ const grouping: TableGroupingState = {
   mode: 'rollup',
   periods: { order_date: 'month' },
   shares: [],
+  totalsPlacement: 'last',
 };
 
 describe('setTableGroupKeyPeriod', () => {

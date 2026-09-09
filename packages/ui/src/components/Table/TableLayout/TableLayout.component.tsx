@@ -22,6 +22,7 @@ export const TableLayout = <
   dataPromise,
   dataSelector,
   dataTotalSelector,
+  groupingState,
   metaState,
   onLoadMore,
 }: TableLayoutProps<TData, TResponse>) => {
@@ -29,6 +30,7 @@ export const TableLayout = <
     <div {...stylex.props(styles.container)}>
       <TableConfigProvider<TData>
         columnsState={columnsState}
+        groupingState={groupingState}
         metaState={metaState}
       >
         <TableFocusProvider>

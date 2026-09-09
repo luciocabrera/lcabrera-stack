@@ -96,6 +96,7 @@ describe('TableDataProvider', () => {
     await waitFor(() => {
       expect(result.current).toEqual({
         data: [{ id: 1 }],
+        error: undefined,
         hasMore: true,
         totalLoadedRows: 1,
       });

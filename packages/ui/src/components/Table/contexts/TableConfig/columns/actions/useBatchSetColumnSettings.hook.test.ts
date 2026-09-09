@@ -3,7 +3,11 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { getInitialGroupingState } from '#ui/components/Table/contexts/TableConfig/utils';
+
 import { useBatchSetColumnSettings } from './useBatchSetColumnSettings.hook';
+
+const NO_GROUPING = getInitialGroupingState({});
 
 const {
   mockBuildPersistencePayload,
@@ -43,13 +47,7 @@ const {
       set: vi.fn(),
     },
     mockGroupingStore: {
-      get: vi.fn(() => ({
-        aggregates: [],
-        keys: [],
-        mode: 'flat',
-        periods: {},
-        shares: [],
-      })),
+      get: vi.fn(),
       set: vi.fn(),
     },
     mockMetaStore: {
@@ -163,6 +161,7 @@ describe('useBatchSetColumnSettings', () => {
     mockColumnsStore.get.mockClear();
     mockColumnsStore.set.mockClear();
     mockDataStore.set.mockClear();
+    mockGroupingStore.get.mockReturnValue(NO_GROUPING);
     mockMetaStore.get.mockClear();
     mockMetaStore.set.mockClear();
     mockPersistUiFlags.mockClear();

@@ -6,63 +6,59 @@ import type { DataState } from './fetchMoreData.types';
 
 import { commitFetchMoreError } from './commitFetchMoreError.util';
 
-type MetaState = {
-  readonly enablePrefetch: boolean;
-  readonly error?: string;
-};
-
 type TestData = { readonly id: number };
 
-const createStores = () => ({
-  dataStore: createMockStore<DataState<TestData>>({
+const createDataStore = () =>
+  createMockStore<DataState<TestData>>({
     data: [],
+    error: undefined,
     hasMore: true,
     isLoading: false,
     isLoadingMore: true,
     totalLoadedRows: 0,
     totalRows: 0,
-  }),
-  metaStore: createMockStore<MetaState>({
-    enablePrefetch: false,
-  }),
-});
+  });
 
 describe('commitFetchMoreError', () => {
-  it('writes the error message from an Error instance to metaStore', () => {
-    const { dataStore, metaStore } = createStores();
+  it('writes a db-failed error from an Error instance onto dataStore', () => {
+    const dataStore = createDataStore();
 
     commitFetchMoreError({
       dataStore: dataStore as never,
       error: new Error('network timeout'),
-      metaStore: metaStore as never,
     });
 
-    expect(metaStore.get()).toMatchObject({ error: 'network timeout' });
+    expect(dataStore.get()).toMatchObject({
+      error: { kind: 'db-failed', message: 'network timeout' },
+      isLoadingMore: false,
+    });
   });
 
-  it('writes the fallback message for non-Error values', () => {
-    const { dataStore, metaStore } = createStores();
+  it('writes an unexpected error for non-Error values', () => {
+    const dataStore = createDataStore();
 
     commitFetchMoreError({
       dataStore: dataStore as never,
       error: 'string error',
-      metaStore: metaStore as never,
     });
 
-    expect(metaStore.get()).toMatchObject({
-      error: 'Failed to load more data',
+    expect(dataStore.get()).toMatchObject({
+      error: { kind: 'unexpected', message: 'Failed to load more data' },
+      isLoadingMore: false,
     });
   });
 
-  it('sets isLoadingMore to false in dataStore', () => {
-    const { dataStore, metaStore } = createStores();
+  it('maps an AbortError to db-canceled', () => {
+    const dataStore = createDataStore();
 
     commitFetchMoreError({
       dataStore: dataStore as never,
-      error: new Error('oops'),
-      metaStore: metaStore as never,
+      error: new DOMException('The user aborted a request.', 'AbortError'),
     });
 
-    expect(dataStore.get()).toMatchObject({ isLoadingMore: false });
+    expect(dataStore.get().error).toEqual({
+      kind: 'db-canceled',
+      message: 'The user aborted a request.',
+    });
   });
 });

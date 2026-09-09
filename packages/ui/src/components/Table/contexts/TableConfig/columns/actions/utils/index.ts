@@ -1,3 +1,4 @@
+export { appendQueryPersistenceEntries } from './appendQueryPersistenceEntries.util';
 export { buildColumnSizingCookieEntry } from './buildColumnSizingCookieEntry.util';
 export { buildPersistencePayload } from './buildPersistencePayload.util';
 export { commitResolvedPinningState } from './commitResolvedPinningState.util';
@@ -9,6 +10,7 @@ export { resolveColumnFilterUpdate } from './resolveColumnFilterUpdate.util';
 export { resolveColumnPinningUpdate } from './resolveColumnPinningUpdate.util';
 export { resolveColumnSortingUpdate } from './resolveColumnSortingUpdate.util';
 export { resolveColumnVisibilityUpdate } from './resolveColumnVisibilityUpdate.util';
+export { resolveCommittedGroupingState } from './resolveCommittedGroupingState.util';
 export { resolvePersistenceEntries } from './resolvePersistenceEntries.util';
 export { toDeclaredColumnKey } from './toDeclaredColumnKey.util';
 export { writeColumnSizing } from './writeColumnSizing.util';

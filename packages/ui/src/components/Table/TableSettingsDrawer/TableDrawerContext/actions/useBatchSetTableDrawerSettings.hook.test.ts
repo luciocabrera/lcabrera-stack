@@ -3,7 +3,15 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { getInitialGroupingState } from '#ui/components/Table/contexts/TableConfig/utils';
+
 import { useBatchSetTableDrawerSettings } from './useBatchSetTableDrawerSettings.hook';
+
+const EMPTY_GROUPING = getInitialGroupingState({});
+const STATUS_SUM_GROUPING = getInitialGroupingState({
+  aggregates: [{ columnKey: 'total', fn: 'sum' }],
+  keys: ['status'],
+});
 
 const {
   batchSetTableSettings,
@@ -21,6 +29,7 @@ const {
     mode: 'flat',
     periods: {},
     shares: [],
+    totalsPlacement: 'last',
   };
   let drawerTotalsPlacement = 'last';
 
@@ -64,6 +73,7 @@ beforeEach(() => {
     mode: 'flat',
     periods: {},
     shares: [],
+    totalsPlacement: 'last',
   });
   setDrawerTotalsPlacement('last');
 });
@@ -82,13 +92,7 @@ describe('useBatchSetTableDrawerSettings', () => {
     });
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
-      grouping: {
-        aggregates: [],
-        keys: [],
-        mode: 'flat',
-        periods: {},
-        shares: [],
-      },
+      grouping: EMPTY_GROUPING,
       settings: {
         columnFilters: {},
         columnOrder: ['id', 'name'],
@@ -109,13 +113,7 @@ describe('useBatchSetTableDrawerSettings', () => {
     });
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
-      grouping: {
-        aggregates: [],
-        keys: [],
-        mode: 'flat',
-        periods: {},
-        shares: [],
-      },
+      grouping: EMPTY_GROUPING,
       settings: {
         columnFilters: {},
         columnOrder: [],
@@ -130,13 +128,7 @@ describe('useBatchSetTableDrawerSettings', () => {
 
   it('sends the staged grouping and the column draft in one commit call', () => {
     setDrawerState({ columnOrder: ['id', 'name'] });
-    setDrawerGrouping({
-      aggregates: [{ columnKey: 'total', fn: 'sum' }],
-      keys: ['status'],
-      mode: 'flat',
-      periods: {},
-      shares: [],
-    });
+    setDrawerGrouping(STATUS_SUM_GROUPING);
 
     const { result } = renderHook(() => useBatchSetTableDrawerSettings());
 
@@ -145,13 +137,7 @@ describe('useBatchSetTableDrawerSettings', () => {
     });
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith({
-      grouping: {
-        aggregates: [{ columnKey: 'total', fn: 'sum' }],
-        keys: ['status'],
-        mode: 'flat',
-        periods: {},
-        shares: [],
-      },
+      grouping: STATUS_SUM_GROUPING,
       settings: {
         columnFilters: {},
         columnOrder: ['id', 'name'],

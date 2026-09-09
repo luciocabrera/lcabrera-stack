@@ -90,8 +90,8 @@ const BodyHarness = ({ data }: HarnessProps) => {
   return (
     <TableConfigProvider<TestRow>
       columnsState={{ columns }}
+      groupingState={{ keys: ['order_status'] }}
       metaState={{
-        groupingKeys: ['order_status'],
         overscan: OVERSCAN,
         rowHeight: ROW_HEIGHT,
       }}

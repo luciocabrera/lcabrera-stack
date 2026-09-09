@@ -57,7 +57,6 @@ export const executeFetchMore = async <TData, TResponse>({
     commitFetchMoreError({
       dataStore,
       error,
-      metaStore,
     });
   } finally {
     isFetchingRef.current = false;

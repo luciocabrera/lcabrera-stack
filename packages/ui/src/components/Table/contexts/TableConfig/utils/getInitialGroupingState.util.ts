@@ -1,9 +1,4 @@
-import type {
-  TableColumnAggregate,
-  TableGroupingMode,
-  TableGroupingState,
-  TableGroupPeriod,
-} from '#ui/components/Table/Table.types';
+import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
 import {
   areGroupAggregatesLegal,
@@ -12,48 +7,43 @@ import {
   pruneGroupShares,
 } from '../grouping/utils';
 
-type GetInitialGroupingStateArgs = {
-  readonly groupingAggregates?: readonly TableColumnAggregate[];
-  readonly groupingKeys?: readonly string[];
-  readonly groupingMode?: TableGroupingMode;
-  readonly groupingPeriods?: Readonly<Record<string, TableGroupPeriod>>;
-  readonly groupingShares?: readonly TableColumnAggregate[];
-};
-
 const NO_GROUPING: TableGroupingState = {
   aggregates: [],
   keys: [],
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 };
 
 export const getInitialGroupingState = ({
-  groupingAggregates = [],
-  groupingKeys = [],
-  groupingMode = 'flat',
-  groupingPeriods = {},
-  groupingShares = [],
-}: GetInitialGroupingStateArgs): TableGroupingState => {
+  aggregates = [],
+  keys = [],
+  mode = 'flat',
+  periods = {},
+  shares = [],
+  totalsPlacement = 'last',
+}: Partial<TableGroupingState>): TableGroupingState => {
   if (
-    groupingKeys.length === 0 ||
-    !areGroupKeysLegal(groupingKeys) ||
-    !areGroupAggregatesLegal(groupingAggregates)
+    keys.length === 0 ||
+    !areGroupKeysLegal(keys) ||
+    !areGroupAggregatesLegal(aggregates)
   ) {
-    return NO_GROUPING;
+    return { ...NO_GROUPING, totalsPlacement };
   }
 
   return {
-    aggregates: [...groupingAggregates],
-    keys: [...groupingKeys],
-    mode: groupingMode,
+    aggregates: [...aggregates],
+    keys: [...keys],
+    mode,
     periods: pruneGroupPeriods({
-      keys: groupingKeys,
-      periods: groupingPeriods,
+      keys,
+      periods,
     }),
     shares: pruneGroupShares({
-      aggregates: groupingAggregates,
-      shares: groupingShares,
+      aggregates,
+      shares,
     }),
+    totalsPlacement,
   };
 };

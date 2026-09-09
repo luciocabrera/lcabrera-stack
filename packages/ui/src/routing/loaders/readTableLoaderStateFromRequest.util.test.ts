@@ -327,6 +327,7 @@ describe('readTableLoaderStateFromRequest', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       });
       expect(result.standaloneGroupingParam).not.toBeNull();
     });
@@ -346,6 +347,7 @@ describe('readTableLoaderStateFromRequest', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       });
       expect(result.standaloneGroupingParam).toBeUndefined();
     });
@@ -365,6 +367,7 @@ describe('readTableLoaderStateFromRequest', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       });
     });
 
@@ -384,6 +387,7 @@ describe('readTableLoaderStateFromRequest', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       });
       expect(result.standaloneGroupingParam).toBeNull();
     });

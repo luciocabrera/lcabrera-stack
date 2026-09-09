@@ -3,6 +3,8 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import type { FilterData } from '#ui/components/Table/Table.types';
+
 import { DEFAULT_FILTER_PAGE_SIZE } from '#ui/components/Table/Table.constants';
 import { createPaginatedFetchActionMocks } from '#ui/utils/tests/createPaginatedFetchActionMocks.util';
 
@@ -13,14 +15,7 @@ type TestData = {
 };
 
 type TestFiltersState = {
-  readonly status: {
-    readonly data: readonly string[];
-    readonly hasMore: boolean;
-    readonly isLoading: boolean;
-    readonly isLoadingMore: boolean;
-    readonly totalLoadedRows: number;
-    readonly totalRows: number;
-  };
+  readonly status: FilterData;
 };
 
 type TestResponse = {
@@ -33,6 +28,7 @@ const createHarness = () => {
     initialDataState: {
       status: {
         data: [],
+        error: undefined,
         hasMore: false,
         isLoading: false,
         isLoadingMore: false,
@@ -105,6 +101,7 @@ describe('useFetchFilterData', () => {
     currentHarness.setDataState({
       status: {
         data: [],
+        error: undefined,
         hasMore: false,
         isLoading: false,
         isLoadingMore: false,
@@ -161,6 +158,7 @@ describe('useFetchFilterData', () => {
     getHarness().setDataState({
       status: {
         data: ['Existing'],
+        error: undefined,
         hasMore: false,
         isLoading: false,
         isLoadingMore: false,
@@ -194,6 +192,7 @@ describe('useFetchFilterData', () => {
     getHarness().setDataState({
       status: {
         data: ['Alpha'],
+        error: undefined,
         hasMore: true,
         isLoading: false,
         isLoadingMore: false,
@@ -237,7 +236,7 @@ describe('useFetchFilterData', () => {
     });
   });
 
-  it('captures fetch errors on the meta store and resets loading state', async () => {
+  it('captures fetch errors on the column filter and resets loading state', async () => {
     const onLoadMore = vi.fn(() =>
       Promise.reject(new Error('Broken filter API')),
     );
@@ -255,8 +254,9 @@ describe('useFetchFilterData', () => {
       });
     });
 
-    expect(getHarness().metaStore.get()).toMatchObject({
-      error: 'Broken filter API',
+    expect(getHarness().dataStore.get().status.error).toEqual({
+      kind: 'db-failed',
+      message: 'Broken filter API',
     });
     expect(loggerMock.error).toHaveBeenCalled();
   });

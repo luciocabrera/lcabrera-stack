@@ -30,6 +30,7 @@ export const commitFetchMoreSuccess = <TData, TResponse>({
 
   dataStore.set({
     data: combinedData,
+    error: undefined,
     hasMore,
     isLoading: false,
     isLoadingMore: false,

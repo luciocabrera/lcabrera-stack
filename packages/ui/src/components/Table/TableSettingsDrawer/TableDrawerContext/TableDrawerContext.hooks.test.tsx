@@ -60,6 +60,7 @@ const groupingStore = createMockStore<TableGroupingState>({
   mode: 'flat',
   periods: {},
   shares: [],
+  totalsPlacement: 'last',
 });
 
 const totalsPlacementStore = createMockStore<TableDrawerTotalsPlacementState>({
@@ -151,6 +152,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
     metaStore.reset({});
   });
@@ -179,6 +181,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -190,6 +193,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       }),
       { wrapper: Wrapper },
     );
@@ -201,6 +205,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
         mode: 'flat',
         periods: {},
         shares: [],
+        totalsPlacement: 'last',
       });
     });
 
@@ -217,6 +222,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     const { result } = renderHook(() => useClearGrouping(), {
@@ -233,6 +239,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 
@@ -247,6 +254,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     const { result } = renderHook(() => useToggleGroupKey(), {
@@ -267,6 +275,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
 
     const { result } = renderHook(() => useSetGroupKeys(), {
@@ -283,6 +292,7 @@ describe('TableDrawerContext grouping draft hooks', () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
   });
 });
@@ -295,6 +305,7 @@ describe("the reader's preferred grouping mode", () => {
       mode: 'flat',
       periods: {},
       shares: [],
+      totalsPlacement: 'last',
     });
     metaStore.reset({ preferredGroupingMode: 'rollup' });
   });
