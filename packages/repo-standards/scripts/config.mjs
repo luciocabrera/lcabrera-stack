@@ -16,6 +16,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { DEFAULT_RUN_PREFIX } from './commands-doc.mjs';
 import { DEFAULT_TREE_GATES, resolveTreeGates } from './config-tree-gates.mjs';
 import {
   CONFIG_FILE_NAME,
@@ -60,6 +61,8 @@ export const DEFAULT_REGISTERS = {
   planningDir: 'docs/agents/planning',
   requirementsDir: 'docs/product/requirements',
 };
+
+export const DEFAULT_COMMANDS = { run: DEFAULT_RUN_PREFIX };
 
 export const DEFAULT_CONVENTIONS = {
   defaultBranch: 'main',
@@ -338,6 +341,24 @@ export const resolvePublishing = (raw) => {
   };
 };
 
+/**
+ * How this repository runs a task by name.
+ *
+ * Read from the block the materialiser owns, because it is one fact with one
+ * home: the same key answers the placeholder a shipped file carries. The
+ * default is the spelling this gate assumed before the key existed, so a
+ * repository that has never set it is read exactly as it was.
+ *
+ * @param {string | undefined} raw
+ * @returns {{ run: string }}
+ */
+const resolveCommands = (raw) => {
+  if (raw === undefined) return { ...DEFAULT_COMMANDS };
+  const parsed = parseConfig(raw);
+  const block = isPlainObject(parsed.commands) ? parsed.commands : {};
+  return { run: readableString(block.run, DEFAULT_COMMANDS.run) };
+};
+
 const hostRoot = () =>
   resolveHostRoot({ moduleDirectory: dirname(fileURLToPath(import.meta.url)) });
 
@@ -356,6 +377,9 @@ export const readPublishing = (root = hostRoot()) =>
   resolvePublishing(readRaw(root));
 
 export const readGates = (root = hostRoot()) => resolveGates(readRaw(root));
+
+export const readCommands = (root = hostRoot()) =>
+  resolveCommands(readRaw(root));
 
 export const readCoordinationPaths = (root = hostRoot()) => {
   const raw = readRaw(root);

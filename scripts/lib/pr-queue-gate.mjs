@@ -55,6 +55,7 @@ export const OPERATOR_FILES = new Set([
   '.claude/pr-queue-policy.md',
   'packages/repo-standards/scripts/branch-exemption.mjs',
   'packages/repo-standards/scripts/cli-input.mjs',
+  'packages/repo-standards/scripts/commands-doc.mjs',
   'packages/repo-standards/scripts/commit-convention.mjs',
   'packages/repo-standards/scripts/config-tree-gates.mjs',
   'packages/repo-standards/scripts/config-values.mjs',

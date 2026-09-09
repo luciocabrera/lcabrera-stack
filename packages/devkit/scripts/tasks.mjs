@@ -23,7 +23,11 @@
  * What a group does NOT decide is removal. A recorded key is proof of
  * authorship whatever group it came from, so the departed set is read against
  * every name this version ships at any profile — otherwise narrowing the profile
- * would read the rung's own tasks as withdrawn and delete them.
+ * would read the rung's own tasks as withdrawn and delete them. The cost of that
+ * is a task moved to a rung above the one a consumer is on: it stays in their
+ * block, unreported, because this kit still ships it. A stale task is the
+ * smaller harm than deleting one whose only fault is that the consumer's profile
+ * does not reach it.
  */
 
 import { classifyMaterialisation, isRecorded } from './manifest.mjs';
@@ -55,12 +59,28 @@ const recordedFor = ({ names, recorded }) =>
     Object.entries(recorded).filter(([name]) => names.has(name)),
   );
 
+const knownFor = ({ recorded, scripts, tasks }) => ({
+  ...adoptedFrom({ scripts, tasks }),
+  ...recordedFor({ names: new Set(Object.keys(tasks)), recorded }),
+});
+
+/**
+ * Whether a manifest holds a set of tasks this kit wrote.
+ *
+ * The same proof the plan runs on, asked on its own: a record, or a key holding
+ * exactly the command this kit ships. A run that wires something which only
+ * works beside one of these groups asks this first.
+ *
+ * @param {{ recorded?: Record<string, string>, scripts?: Record<string, string>,
+ *           tasks: Record<string, string> }} args
+ * @returns {boolean}
+ */
+export const hasTasksFromKit = ({ recorded = {}, scripts = {}, tasks }) =>
+  Object.keys(knownFor({ recorded, scripts, tasks })).length > 0;
+
 const groupPlan = ({ group, recorded, scripts }) => {
   const { establish = false, tasks, withheld = new Set() } = group;
-  const known = {
-    ...adoptedFrom({ scripts, tasks }),
-    ...recordedFor({ names: new Set(Object.keys(tasks)), recorded }),
-  };
+  const known = knownFor({ recorded, scripts, tasks });
   if (!establish && Object.keys(known).length === 0) return [];
 
   return Object.entries(tasks)

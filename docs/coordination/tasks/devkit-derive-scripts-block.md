@@ -9,6 +9,9 @@ area:
   - packages/devkit/assets/root/COMMANDS.md
   - packages/devkit/README.md
   - packages/devkit/ARCHITECTURE.md
+  - packages/repo-standards/scripts/commands-doc*
+  - packages/repo-standards/scripts/verify-commands-doc.mjs
+  - packages/repo-standards/scripts/config.mjs
 started: 2026-09-09
 updated: 2026-09-09
 plan: (none)
@@ -22,6 +25,6 @@ Derive the emitted scripts block instead of copying it
 
 ## Status / next
 
-- Current step: implemented; running the gate
+- Current step: round 3 — the doc gate reads the configured runner
 - Blockers: none
 - Next: open the PR for review

@@ -20,7 +20,7 @@ import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { applyInit } from './command-init.mjs';
 import { runDoctor, runSync } from './command-sync.mjs';
-import { GATE_TASKS } from './init.mjs';
+import { blueprintDependentTasks, GATE_TASKS } from './init.mjs';
 import { MANIFEST_FILE } from './manifest.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
 import { WORKSPACE_SCRIPTS } from './workspace.mjs';
@@ -338,15 +338,74 @@ describe('what a run says when a command key is missing', () => {
     restore();
   });
 
-  test('doctor --check says it too, rather than only sending them to sync', () => {
+  test('doctor --check names it beside what sync can still write', () => {
     const root = withoutRunKey();
     const { error, restore } = silenced();
 
     expect(runDoctor(['--check'], root)).toBe(1);
 
     const output = error.mock.calls.flat().join('\n');
-    expect(output).toContain('Run devkit sync.');
+    expect(output).toContain('Run devkit sync for the rest.');
     expect(output).toContain('devkit init --upgrade');
+    restore();
+  });
+
+  test('and does not send them to sync when sync would write nothing', () => {
+    const root = withoutRunKey();
+    const { error, restore } = silenced();
+
+    runSync([], root);
+    error.mockClear();
+    expect(runDoctor(['--check'], root)).toBe(1);
+
+    const output = error.mock.calls.flat().join('\n');
+    expect(output).toContain('would change none of them');
+    expect(output).not.toContain('Run devkit sync');
+    expect(output).toContain('devkit init --upgrade');
+    restore();
+  });
+});
+
+const monorepoRepo = (scripts) => {
+  const root = gateRepo({ recorded: {}, scripts });
+  writeJson(root, 'devkit.config.json', {
+    commands: COMMANDS,
+    profile: 'monorepo',
+  });
+  return root;
+};
+
+describe('a gate that checks what the blueprint places', () => {
+  const [DOC_GATE] = blueprintDependentTasks({ profile: 'monorepo' });
+
+  test('is one task, so the rest of the rung is unaffected', () => {
+    expect(blueprintDependentTasks({ profile: 'monorepo' })).toEqual([
+      'commands:verify',
+    ]);
+    expect(blueprintDependentTasks({ profile: 'repo' })).toEqual([]);
+  });
+
+  test('is withheld from a repository that has not taken the blueprint', () => {
+    const root = monorepoRepo({ build: 'their own build' });
+    const { restore } = silenced();
+
+    applyInit({ profile: 'monorepo', root, upgrade: true });
+    const { scripts } = readJson(root, 'package.json');
+
+    expect(scripts[DOC_GATE]).toBeUndefined();
+    expect(scripts['adr:verify']).toBe(GATE_TASKS['adr:verify'].bin);
+    restore();
+  });
+
+  test('and is wired once the blueprint block is there', () => {
+    const root = monorepoRepo({ ...WORKSPACE_SCRIPTS });
+    const { restore } = silenced();
+
+    applyInit({ profile: 'monorepo', root, upgrade: true });
+
+    expect(readJson(root, 'package.json').scripts[DOC_GATE]).toBe(
+      GATE_TASKS[DOC_GATE].bin,
+    );
     restore();
   });
 });

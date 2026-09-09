@@ -170,9 +170,15 @@ From the `monorepo` profile up:
 
 That last one is the gate that holds this section to its word: it fails when a
 task in `package.json` is documented nowhere here, and when a task documented
-here is not one this repository has. It is wired from the `monorepo` profile up
-because that is the rung whose blueprint decides the toolchain, and the tasks
-below are that toolchain's.
+here is not one this repository has. It takes the spelling from the `run` key in
+§4, so it holds this file to the way **you** run a task rather than to any one
+toolchain's.
+
+It is wired only where the blueprint below is, because the section below is part
+of what it reads: a repository that took the gates and not the blueprint has none
+of those tasks, and would be handed a gate that was red the day it arrived. Wire
+it there yourself and that section is what it will report — delete it, or take
+the block.
 
 ### The blueprint's own tasks
 

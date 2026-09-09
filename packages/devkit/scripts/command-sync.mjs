@@ -81,6 +81,24 @@ const runAccept = ({ accept, accepted, entries, root }) => {
   return 0;
 };
 
+/**
+ * What to tell a reader whose repository has drifted.
+ *
+ * `sync` is the answer to almost all of it and to none of an unanswered command
+ * key, so the two sentences are composed rather than printed one after the
+ * other: sending someone to a command that cannot change what they are reading
+ * about is the one thing this report must not do.
+ *
+ * @param {{ unresolved?: string, writable: number }} args
+ * @returns {string}
+ */
+const driftAdvice = ({ unresolved, writable }) => {
+  if (unresolved === undefined) return 'Run devkit sync.';
+  return writable > 0
+    ? `Run devkit sync for the rest.\n${unresolved}`
+    : `Running devkit sync would change none of them.\n${unresolved}`;
+};
+
 const reportDrift = ({ argv, config, entries, tasks }) => {
   const { reported, written } = countsFor(entries);
 
@@ -88,14 +106,15 @@ const reportDrift = ({ argv, config, entries, tasks }) => {
   console.log(renderPlan(entries, { verbose: argv.includes('--verbose') }));
   printTaskPlan(tasks);
 
-  const drifted = written + reported + taskCounts(tasks).written;
+  const writable = written + taskCounts(tasks).written;
+  const drifted = writable + reported;
   if (drifted === 0 || !argv.includes('--check')) return 0;
 
-  const unresolved = unresolvedNotice(entries);
   console.error(
-    `\n${drifted} item(s) differ from the package. Run devkit sync.${
-      unresolved === undefined ? '' : `\n${unresolved}`
-    }`,
+    `\n${drifted} item(s) differ from the package. ${driftAdvice({
+      unresolved: unresolvedNotice(entries),
+      writable,
+    })}`,
   );
   return 1;
 };

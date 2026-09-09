@@ -1,6 +1,7 @@
 ---
 governs:
   - devkit
+  - repo-standards
 ---
 
 # ADR-116 — Reconcile the emitted task block key by key
@@ -73,7 +74,22 @@ been withdrawn, and delete them.
 The shipped `COMMANDS.md` documents every task the kit wires, spelling each one
 through the `commands.run` placeholder rather than a literal runner, and the
 consumer's own `commands:verify` gate — wired from the `monorepo` rung up — fails
-on a task documented nowhere in it or documented and absent. A test in this
+on a task documented nowhere in it or documented and absent.
+
+**A gate travels with what it checks.** `commands:verify` is wired only where
+the blueprint is, because the document it reads names the blueprint's tasks: in a
+repository that took the gates and not the blueprint it would be red the day it
+arrived, over a section its own prose says arrives with `create`. That is the
+same withholding rule a missing binary already gets, on a second condition.
+
+**That gate reads the same key.** It assumed one toolchain's spelling, so a
+repository whose tasks are documented as its own runner spells them was told
+every one of them was undocumented, with a remedy already carried out — a gate
+red on the day it is wired, saying something false. It now takes the spelling
+from `commands.run`, and takes the task list from the manifests unless the
+configured runner resolves a task from more than them, in which case it asks the
+runner as before. A repository that has never set the key is read exactly as it
+was. A test in this
 package holds the seed and the wired list to the same set, because both ship from
 here and a mismatch would otherwise reach a consumer as a repository failing its
 own gate on the day it was set up.
@@ -98,6 +114,12 @@ The seed lists the tasks rather than tabulating them. A substituted runner is
 shorter than the placeholder it replaces, so a table's header row no longer
 matches its widest cell and a formatter run in the consumer's own tree reports
 the file it was just handed.
+
+The command reference still documents the blueprint's tasks in a repository that
+does not have them, and nothing but its own prose says so. Rendering that section
+per repository is what it would take to close, and that means a materialised file
+diverging from the shipped one on day one — a repository reporting drift the day
+it was set up, which is the failure the manifest exists to avoid.
 
 Adoption by value can be wrong in one direction: a repository that independently
 holds a task spelled exactly as this kit spells it is read as having taken the

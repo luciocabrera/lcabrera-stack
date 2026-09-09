@@ -185,7 +185,9 @@ them: a task still holding what this kit wrote is updated, a task you changed is
 kept and reported, and a task this kit stops shipping is removed. A task whose
 binary is not installed here is only ever withheld from a manifest that does not
 already carry it — what is on this machine decides what may be wired, not what
-belongs in the file.
+belongs in the file. One gate is withheld on a second condition: `commands:verify`
+reads the command reference this kit ships, and that document names the
+blueprint's tasks, so it is wired only where the blueprint is.
 
 It **refuses** rather than proceeding when the repository is already set up — a
 config or a manifest already present means `sync` is the command you want, and it

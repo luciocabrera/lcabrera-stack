@@ -314,12 +314,18 @@ export const upgradeKeptCiSetup = ({ ciSetup = [], existing = {} }) => {
   ];
 };
 
+export const BLUEPRINT = 'blueprint';
+
 export const GATE_TASKS = {
   'adr:list': { args: ['--list'], bin: 'repo-verify-adrs', rung: 'repo' },
   'adr:new': { bin: 'repo-adr', rung: 'repo' },
   'adr:verify': { bin: 'repo-verify-adrs', rung: 'repo' },
   'branch:verify': { bin: 'repo-verify-branch', rung: 'agent' },
-  'commands:verify': { bin: 'repo-verify-commands', rung: 'monorepo' },
+  'commands:verify': {
+    bin: 'repo-verify-commands',
+    needs: BLUEPRINT,
+    rung: 'monorepo',
+  },
   'commit:verify': { bin: 'repo-verify-commit', rung: 'agent' },
   'coordination:close': { bin: 'repo-close-claim', rung: 'agent' },
   'coordination:verify': { bin: 'repo-verify-claims', rung: 'agent' },
@@ -371,6 +377,23 @@ export const tasksFor = ({ profile }) =>
  * @param {{ availableBins: Iterable<string>, profile: string }} args
  * @returns {string[]}
  */
+/**
+ * The rung's tasks that check something the blueprint places.
+ *
+ * `commands:verify` reads the command reference this kit ships, and that
+ * document names the blueprint's own tasks — so in a repository that has not
+ * taken the blueprint the gate is red the day it is wired, over a section
+ * describing tasks its own prose says arrive with `create`. A gate travels with
+ * what it checks.
+ *
+ * @param {{ profile: string }} args
+ * @returns {string[]}
+ */
+export const blueprintDependentTasks = ({ profile }) =>
+  rungTasks(profile)
+    .filter(([, task]) => task.needs === BLUEPRINT)
+    .map(([name]) => name);
+
 export const withheldTasks = ({ availableBins, profile }) => {
   const available = new Set(availableBins);
   return rungTasks(profile)

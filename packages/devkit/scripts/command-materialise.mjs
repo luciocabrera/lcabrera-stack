@@ -29,6 +29,7 @@ import {
 } from './config.mjs';
 import { readFilesUnder } from './files.mjs';
 import {
+  blueprintDependentTasks,
   GATE_TASKS,
   tasksFor,
   unmetCommandKeys,
@@ -51,6 +52,7 @@ import {
   withAcceptance,
 } from './sync.mjs';
 import {
+  hasTasksFromKit,
   isTaskWritten,
   planTasks,
   recordedTasks,
@@ -85,20 +87,30 @@ const installedBins = (root) => {
  * writes declares, so a repository that took the rung without them would be
  * handed tasks that cannot run.
  *
- * @param {{ config: object, establish: boolean, root: string }} args
+ * A gate task that checks what the blueprint places is withheld from a manifest
+ * that does not hold the blueprint, for the same reason a task whose bin is
+ * missing is: it would be wired and failing on the day it arrived.
+ *
+ * @param {{ config: object, establish: boolean, root: string,
+ *           scripts?: Record<string, string>, recorded?: Record<string, string> }} args
  */
-const taskGroups = ({ config, establish, root }) => {
+const taskGroups = ({ config, establish, recorded, root, scripts }) => {
   const { profile } = config;
+  const blueprint = includesRung({ profile, rung: 'monorepo' });
+  const withoutBlueprint =
+    blueprint &&
+    hasTasksFromKit({ recorded, scripts, tasks: WORKSPACE_SCRIPTS })
+      ? []
+      : blueprintDependentTasks({ profile });
   const gate = {
     establish,
     tasks: tasksFor({ profile }),
-    withheld: new Set(
-      withheldTasks({ availableBins: installedBins(root), profile }),
-    ),
+    withheld: new Set([
+      ...withheldTasks({ availableBins: installedBins(root), profile }),
+      ...withoutBlueprint,
+    ]),
   };
-  return includesRung({ profile, rung: 'monorepo' })
-    ? [gate, { tasks: WORKSPACE_SCRIPTS }]
-    : [gate];
+  return blueprint ? [gate, { tasks: WORKSPACE_SCRIPTS }] : [gate];
 };
 
 const EVERY_TASK_NAME = [
@@ -114,10 +126,17 @@ const EVERY_TASK_NAME = [
 const plannedTasks = ({ config, establish, manifest, root }) => {
   const packageManifest = readJsonIfPresent(join(root, PACKAGE_MANIFEST));
   if (packageManifest === undefined) return [];
+  const scripts = packageManifest.scripts;
   return planTasks({
-    groups: taskGroups({ config, establish, root }),
+    groups: taskGroups({
+      config,
+      establish,
+      recorded: manifest.tasks,
+      root,
+      scripts,
+    }),
     recorded: manifest.tasks,
-    scripts: packageManifest.scripts,
+    scripts,
     shipped: EVERY_TASK_NAME,
   });
 };
