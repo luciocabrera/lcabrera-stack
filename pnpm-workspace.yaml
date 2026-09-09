@@ -166,6 +166,7 @@ overrides:
   # no-op and an override is the only lever. Drop each once its parent's floor
   # clears the patched version.
   js-yaml@3: ^3.15.2
+  js-yaml@4: ^4.3.2
   # GHSA-q8mj-m7cp-5q26, GHSA-4mjr-xmp4-gh2g, GHSA-x5fp-wj9c-mxmx — DoS and an
   # array-limit bypass in qs, all patched in 6.16.0. It reaches the tree through
   # `@stryker-mutator/core` -> `typed-rest-client`, which pins qs EXACTLY at
@@ -174,7 +175,6 @@ overrides:
   # 6.16.0 already resolves here for express and body-parser, so the version is
   # proven in this install. Drop once typed-rest-client repins.
   qs@6: ^6.16.0
-  js-yaml@4: ^4.3.2
 peerDependencyRules:
   allowAny:
     - vite
