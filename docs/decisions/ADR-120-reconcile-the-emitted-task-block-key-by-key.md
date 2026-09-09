@@ -121,6 +121,21 @@ per repository is what it would take to close, and that means a materialised fil
 diverging from the shipped one on day one — a repository reporting drift the day
 it was set up, which is the failure the manifest exists to avoid.
 
+Wiring `commands:verify` at this rung also makes that document one the consumer
+has to edit. The gate fails on a root script the reference does not name, and the
+remedy it prints is to write the script in — so the first task a consumer adds of
+their own turns a materialised file into a modified one, and `doctor --check`
+reports it from then on. `doctor --accept` is the escape and it is the documented
+one, but it costs more for this file than for any other: an acknowledgement is
+keyed to the on-disk hash, so it quiets the file even when the package's own copy
+moves on. A consumer who acknowledges the command reference stops receiving the
+kit's revisions to the one document this gate exists to keep true. So the day-one
+divergence rejected above is not avoided here, only moved to day two — and moved
+to every consumer rather than to those who take the blueprint without the gates.
+Closing it needs a region of the file the recorded hash does not cover, which is
+a change to how a file is recorded rather than to this block, and is not made
+here (#1156).
+
 Adoption by value can be wrong in one direction: a repository that independently
 holds a task spelled exactly as this kit spells it is read as having taken the
 block, and the rest of the block is then added to it. The alternative — writing

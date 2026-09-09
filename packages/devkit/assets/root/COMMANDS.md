@@ -137,6 +137,12 @@ kept as you have it, and a task this kit stops shipping is removed. Your own
 tasks are never touched — write them in here as you add them, so this file stays
 true.
 
+Writing in here edits a file this kit placed, so `devkit doctor` reports this
+file as modified from the first task you add. Acknowledge it once —
+`devkit doctor --accept COMMANDS.md --reason "our own commands"` — and read
+`devkit doctor --verbose` when you upgrade: an acknowledgement holds back this
+kit's own changes to the file as well as reporting yours.
+
 They are listed rather than tabulated because the command that runs a task is
 substituted from your config, and no column width fits every repository's.
 
