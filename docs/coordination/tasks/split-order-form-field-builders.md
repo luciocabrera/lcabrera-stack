@@ -1,0 +1,26 @@
+---
+id: split-order-form-field-builders
+title: split create and edit order form field builders
+owner: agent:claude
+status: active
+branch: refactor/1140-split-order-form-field-builders
+area:
+  - apps/showcase/src/routes/enterprise-orders/utils/orderFormFields.util.ts
+  - apps/showcase/src/routes/enterprise-orders/utils/orderFormFields.util.test.ts
+  - apps/showcase/src/routes/enterprise-orders/OrderFormModal/**
+started: 2026-09-09
+updated: 2026-09-09
+plan: (none)
+pr: (none)
+issue: #1140
+---
+
+## What
+
+split create and edit order form field builders
+
+## Status / next
+
+- Current step: just claimed
+- Blockers: none
+- Next:
