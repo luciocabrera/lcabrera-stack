@@ -222,32 +222,34 @@ describe('shippedRangeFindings — a reader that has gone quiet', () => {
     ).toEqual([]);
   });
 
-  it('fails when the catalog reader yields nothing, though the manifest one still does', () => {
-    const findings = findingsFor({
-      declarations: MANIFEST_DECLARATIONS,
-      mentions: ALL_MENTIONS,
-    });
+  it.each([
+    {
+      answering: MANIFEST_DECLARATIONS,
+      quiet: 'catalog',
+      unread: [
+        { kind: 'unread', name: '@lcabrera/tsconfig', path: YAML },
+        { kind: 'unread', name: '@lcabrera/vite-config', path: YAML },
+      ],
+    },
+    {
+      answering: YAML_DECLARATIONS,
+      quiet: 'manifest',
+      unread: [{ kind: 'unread', name: '@lcabrera/tsconfig', path: MANIFEST }],
+    },
+  ])(
+    'fails when the $quiet reader yields nothing, though the other still does',
+    ({ answering, unread }) => {
+      const findings = findingsFor({
+        declarations: answering,
+        mentions: ALL_MENTIONS,
+      });
 
-    expect(
-      findings.map(({ kind, name, path }) => ({ kind, name, path })),
-    ).toEqual([
-      { kind: 'unread', name: '@lcabrera/tsconfig', path: YAML },
-      { kind: 'unread', name: '@lcabrera/vite-config', path: YAML },
-    ]);
-    expect(findingLine(findings[0])).toContain(YAML);
-  });
-
-  it('fails when the manifest reader yields nothing, though the catalog one still does', () => {
-    const findings = findingsFor({
-      declarations: YAML_DECLARATIONS,
-      mentions: ALL_MENTIONS,
-    });
-
-    expect(
-      findings.map(({ kind, name, path }) => ({ kind, name, path })),
-    ).toEqual([{ kind: 'unread', name: '@lcabrera/tsconfig', path: MANIFEST }]);
-    expect(findingLine(findings[0])).toContain(MANIFEST);
-  });
+      expect(
+        findings.map(({ kind, name, path }) => ({ kind, name, path })),
+      ).toEqual(unread);
+      expect(findingLine(findings[0])).toContain(unread[0].path);
+    },
+  );
 
   it('counts a name read in one file as unread in the other', () => {
     const findings = findingsFor({
