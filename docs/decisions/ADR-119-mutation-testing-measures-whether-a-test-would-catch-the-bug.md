@@ -63,12 +63,15 @@ gitignored, and never fails a build (`thresholds.break: null`), per ADR-049.
 **Use Stryker's `command` runner, not `vitest-runner`.** `vite` resolves to
 `@voidzero-dev/vite-plus-core` and `vitest` is 4.x;
 `@stryker-mutator/vitest-runner` drives Vitest through internals that this
-combination is not known to satisfy. The command runner shells out to this
-repository's own `test` task, so a mutant faces exactly the suite CI runs and
-there is no integration surface to break. It costs a full suite run per mutant
-and forfeits per-test filtering; for `packages/utils` — pure functions, no DOM,
-no I/O — the suite is fast enough that a whole-workspace run finishes in about a
-minute. Revisit only with a measurement showing the cost matters.
+combination is not known to satisfy. The command runner invokes this
+repository's own `test` task — `vp run test`, the task itself and not a copy of
+the string it expands to — so a mutant faces exactly the suite CI runs, the two
+cannot drift apart, and there is no integration surface to break. It costs a full suite run per mutant
+and forfeits per-test filtering, and invoking the task rather than the raw runner
+adds Vite+'s own startup to every mutant. For `packages/utils` — pure functions,
+no DOM, no I/O — the suite is small enough that this is still a few minutes for
+the whole workspace, which is worth paying to keep the command in one place.
+Revisit only with a measurement showing the cost matters.
 
 **`packages/utils` first, and only.** Pure, dependency-free, heavily depended
 upon, and the place a false-green test is most expensive. Widening is a separate

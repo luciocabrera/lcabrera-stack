@@ -38,6 +38,7 @@
         "reports/biome",
         "reports/eslint",
         "reports/fallow",
+        "reports/mutation",
         "reports/oxlint",
         "reports/react-doctor",
         "reports/skills",

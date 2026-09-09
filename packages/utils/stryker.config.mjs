@@ -1,5 +1,5 @@
 export default {
-  commandRunner: { command: 'node node_modules/vitest/vitest.mjs run' },
+  commandRunner: { command: 'vp run test' },
   concurrency: 4,
   coverageAnalysis: 'off',
   jsonReporter: { fileName: '../../reports/mutation/full-latest.json' },
