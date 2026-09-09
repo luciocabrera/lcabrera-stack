@@ -1,4 +1,3 @@
-/** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
 export default {
   commandRunner: { command: 'node node_modules/vitest/vitest.mjs run' },
   concurrency: 4,
