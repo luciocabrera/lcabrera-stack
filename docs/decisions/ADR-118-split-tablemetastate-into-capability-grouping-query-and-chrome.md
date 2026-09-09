@@ -3,7 +3,7 @@ governs:
   - ui
 ---
 
-# ADR-116 — Split TableMetaState into capability, grouping query, and chrome
+# ADR-118 — Split TableMetaState into capability, grouping query, and chrome
 
 **Status:** Accepted
 
