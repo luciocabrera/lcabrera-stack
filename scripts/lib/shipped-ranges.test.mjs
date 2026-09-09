@@ -159,6 +159,17 @@ describe('mentionsIn', () => {
     ).toEqual([]);
   });
 
+  it('reads no name out of a comment that starts the line', () => {
+    expect(
+      mentionsIn({
+        hashComments: true,
+        names,
+        path: YAML,
+        text: '# keep @lcabrera/ui in lockstep with the application\n',
+      }),
+    ).toEqual([]);
+  });
+
   it('reads a name out of JSON holding a hash, which is no comment there', () => {
     expect(
       mentionsIn({
@@ -324,6 +335,24 @@ describe('shippedRangeFindings — a reader that has gone quiet', () => {
     expect(findings.map(({ kind, path }) => ({ kind, path }))).toEqual([
       { kind: 'unread', path: MANIFEST },
     ]);
+  });
+
+  it('tells a scanned file it has no reader, rather than blaming one', () => {
+    const workflow = 'packages/devkit/assets/workflows/check.yml';
+    const [finding] = findingsFor({
+      declarations: [...MANIFEST_DECLARATIONS, ...YAML_DECLARATIONS],
+      mentions: [
+        ...ALL_MENTIONS,
+        { name: '@lcabrera/vite-config', path: workflow },
+      ],
+      sources: [...BOTH_SHAPES, { kind: 'scanned', path: workflow }],
+    });
+
+    expect(finding.kind).toBe('unread');
+    expect(findingLine(finding)).toContain(
+      'reads no declaration out of a file',
+    );
+    expect(findingLine(finding)).not.toContain('stopped reading it');
   });
 
   it('refuses a pass when no shipped file names a published package at all', () => {

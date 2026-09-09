@@ -26,7 +26,7 @@ const PLACE = /^(?:catalog|workspace):/u;
 
 const INDENTED = /^\s/u;
 
-const COMMENT = /\s#/u;
+const COMMENT = /(?:^|\s)#/u;
 
 const WHITESPACE = /\s/u;
 
@@ -225,9 +225,15 @@ export const shippedRangeFindings = ({
   );
   const declared = new Set(owned.map((declaration) => at(declaration)));
 
+  const shapeOf = new Map(sources.map(({ kind, path }) => [path, kind]));
+
   const unread = mentions
     .filter((mention) => !declared.has(at(mention)))
-    .map((mention) => ({ ...mention, kind: 'unread' }));
+    .map((mention) => ({
+      ...mention,
+      kind: 'unread',
+      shape: shapeOf.get(mention.path),
+    }));
 
   return [
     ...structural,
@@ -263,7 +269,9 @@ const noSourceLine = (finding) =>
   `the shipped assets yielded no ${finding.shape} to read — the walk narrowed, or the assets moved`;
 
 const unreadLine = (finding) =>
-  `${finding.path}  names ${finding.name} and no declaration of it was read there — the file's shape moved, or the reader stopped reading it`;
+  finding.shape === 'scanned'
+    ? `${finding.path}  names ${finding.name}, and this gate reads no declaration out of a file of that shape — either it declares a range in a shape the gate has not been taught, or the mention is incidental there`
+    : `${finding.path}  names ${finding.name} and no declaration of it was read there — the file's shape moved, or the reader stopped reading it`;
 
 /**
  * One line a reader can act on: where the range is, what is wrong with it, and

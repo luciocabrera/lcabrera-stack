@@ -73,6 +73,13 @@ consumer unread. That is the same boundary as the shipped `scripts/` below: a
 dependency declaration nothing else would read as one is not a shape this gate
 can be held to.
 
+The extension is also the limit of the paragraph above. A declaring file renamed
+_within_ those extensions is still scanned and still names itself; one renamed
+out of them — `package.json.tmpl`, or a name with no extension — is not, and
+passes silently. That is reachable rather than theoretical: `SHIPPED_AS` in
+`packages/devkit/scripts/config.mjs` already renames an asset on the way out, so
+it takes one more entry pointing at a manifest or a catalog for this to bite.
+
 Comment stripping follows the file's own syntax rather than the reader's habit.
 Dropping YAML's `#` comments from JSON makes the two readers disagree about the
 same file, which is how a per-file refusal is switched off without any reader
