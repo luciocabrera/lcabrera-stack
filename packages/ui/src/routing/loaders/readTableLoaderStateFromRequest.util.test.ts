@@ -501,6 +501,20 @@ describe('readTableLoaderStateFromRequest', () => {
         'gone',
       );
     });
+
+    it('does not throw when a pinning cookie omits a side', () => {
+      vi.mocked(readPersistedStateFromCookie).mockReturnValue({
+        columnPinning: { left: ['status'] } as never,
+      });
+
+      const result = readTableLoaderStateFromRequest<TestRow>({
+        columns: testColumns,
+        persistenceKey: 'orders',
+        request: new Request('https://example.com/orders'),
+      });
+
+      expect(result.columnPinning.right).toEqual([]);
+    });
   });
 
   describe('settingsTabOrder', () => {

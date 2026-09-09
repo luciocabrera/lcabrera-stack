@@ -1,3 +1,5 @@
+import { isObject } from '@lcabrera/utils/guards/is-object.util';
+
 import type {
   ColumnOrderState,
   ColumnPinningState,
@@ -26,22 +28,44 @@ export const sanitizeLayoutByColumns = <TData extends Record<string, unknown>>({
 }: SanitizeLayoutByColumnsArgs<TData>) => {
   const declaredKeys = new Set(columns.map((column) => String(column.key)));
 
+  const keepKeys = (value: unknown) =>
+    Array.isArray(value)
+      ? value.filter(
+          (key): key is string =>
+            typeof key === 'string' && declaredKeys.has(key),
+        )
+      : [];
+
+  const pinning: Record<string, unknown> =
+    isObject(columnPinning) && !Array.isArray(columnPinning)
+      ? columnPinning
+      : {};
+  const sizing: Record<string, unknown> =
+    isObject(columnSizing) && !Array.isArray(columnSizing) ? columnSizing : {};
+  const visibilitySource =
+    columnVisibility instanceof Set ? [...columnVisibility] : columnVisibility;
+
   return {
-    columnOrder: columnOrder.filter((key) =>
-      declaredKeys.has(String(key)),
-    ) as ColumnOrderState<TData>,
+    columnOrder: keepKeys(columnOrder) as ColumnOrderState<TData>,
     columnPinning: {
-      left: columnPinning.left.filter((key) => declaredKeys.has(String(key))),
-      right: columnPinning.right.filter((key) => declaredKeys.has(String(key))),
+      left: keepKeys(pinning.left),
+      right: keepKeys(pinning.right),
     } as ColumnPinningState<TData>,
     columnSizing: Object.fromEntries(
-      Object.entries(columnSizing).filter(([key]) => declaredKeys.has(key)),
+      Object.entries(sizing).filter(
+        ([key, size]) => declaredKeys.has(key) && typeof size === 'number',
+      ),
     ) as ColumnSizingState<TData>,
     columnVisibility: new Set(
-      [...columnVisibility].filter((key) => declaredKeys.has(String(key))),
+      keepKeys(visibilitySource),
     ) as ColumnVisibilityState<TData>,
-    sorting: sorting.filter((entry) =>
-      declaredKeys.has(String(entry.columnKey)),
-    ),
+    sorting: Array.isArray(sorting)
+      ? sorting.filter(
+          (entry) =>
+            isObject(entry) &&
+            typeof entry.columnKey === 'string' &&
+            declaredKeys.has(String(entry.columnKey)),
+        )
+      : [],
   };
 };
