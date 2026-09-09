@@ -77,14 +77,26 @@ const sharedLintConfig = createLintConfig({
 export const lintConfig = {
   ...sharedLintConfig,
   // The application `@lcabrera/devkit` ships is a tree for a repository that
-  // does not exist yet, and the type-aware pass can only read it as if it were
-  // one of ours. Its imports resolve against the packages that repository
-  // installs from the registry and against the tsconfig its own generator
-  // writes; neither is here, so every one of them reports as unresolvable and
-  // the JSX has no `jsx` option to compile under. Formatting still covers it,
-  // and the lint that means anything for it runs where it lands — the created
-  // repository's own `lint:check`, and `vp run tarball:verify`, which
-  // materialises it outside this tree.
+  // does not exist yet, and the type-aware pass can only read it as one of
+  // ours: its imports resolve against the packages that repository installs
+  // from the registry and against the tsconfig its own generator writes, and
+  // neither is here, so every one of them reports unresolvable.
+  //
+  // This entry takes the WHOLE Oxlint pass off that subtree, not only the type
+  // half, and nothing narrower is expressible: `typeAware`/`typeCheck` are
+  // root-level `options`, and an override carries only `env`, `excludeFiles`,
+  // `files`, `globals`, `jsPlugins`, `plugins` and `rules` — an override with
+  // `plugins: []` was tried and leaves the type diagnostics running. Excluding
+  // the directory from the root tsconfig does not stop them either.
+  //
+  // So `no-debugger` and the rest of the `correctness` category go unchecked
+  // here by Oxlint. What still reads these files is Oxfmt, and the eslint pass
+  // `packages/devkit` runs over its own directory — which carries `eslint`,
+  // `unicorn`, `perfectionist`, `security`, `typescript-eslint` and the local
+  // rules, and reports a planted `debugger` and an unused binding. That pass is
+  // itself proven live by `vp run lint:eslint:verify`, whose probe roster names
+  // this package for that reason. The rest runs where the tree lands: the
+  // created repository's own `lint:check`.
   ignorePatterns: [
     ...(sharedLintConfig.ignorePatterns ?? []),
     'packages/devkit/assets/workspace/apps/',

@@ -42,11 +42,31 @@ const holdsShippedFile = (path, shipped) => {
   return false;
 };
 
-const travelsWith = ({ path, rootDirectory, shipped }) => {
-  if (shipped.has(path) || holdsShippedFile(path, shipped)) return true;
+const isUnderRoot = ({ path, rootDirectory }) => {
   const root = rootDirectory.replace(/\/$/, '');
   return path === root || path.startsWith(`${root}/`);
 };
+
+const travelsWith = ({ path, rootDirectory, shipped }) =>
+  shipped.has(path) ||
+  holdsShippedFile(path, shipped) ||
+  isUnderRoot({ path, rootDirectory });
+
+/**
+ * The same containment question for a module specifier, which answers it with
+ * one fewer way to say yes.
+ *
+ * A directory holding a shipped file is a target a link may point at, and is
+ * not a module: an import naming it resolves only through the index file
+ * inside it. Accepting the prefix match certified a tree whose first build
+ * fails on the import — the bare path is tried first, so the index candidates
+ * below it were never reached.
+ *
+ * @param {{ path: string, rootDirectory: string, shipped: Set<string> }} args
+ * @returns {boolean}
+ */
+const resolvesAsModule = ({ path, rootDirectory, shipped }) =>
+  shipped.has(path) || isUnderRoot({ path, rootDirectory });
 
 const resolveFrom = (base, target) =>
   normalise([...base.split('/'), ...target.split('/')]).join('/');
@@ -140,7 +160,7 @@ const moduleCandidates = (path) => [
 
 const classifyModulePath = ({ path, rootDirectory, shipped }) => {
   const resolved = moduleCandidates(path).find((candidate) =>
-    travelsWith({ path: candidate, rootDirectory, shipped }),
+    resolvesAsModule({ path: candidate, rootDirectory, shipped }),
   );
   return resolved === undefined
     ? { kind: 'escape', resolved: path }

@@ -193,7 +193,11 @@
       ]
     },
     "eslintPass": {
-      "probeWorkspaces": ["packages/ui", "packages/vite-configs"]
+      "probeWorkspaces": [
+        "packages/ui",
+        "packages/vite-configs",
+        "packages/devkit"
+      ]
     },
     "affectedTests": {
       "coverageTaskPackage": "showcase",

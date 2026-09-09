@@ -10,7 +10,7 @@
     },
     "lists": {
       "approved": "Suppressions scoped to a public package — the rule is off BECAUSE of that package. Highest bar: argue why the engine is wrong about this specific code, and declare a `status`.",
-      "acknowledged": "Repo-wide policy (ADR-035 §7) that happens to reach a public package, because the package contains a test file, a config, or a tooling script. These are decisions about a file CATEGORY, not about the package. Listed rather than justified per-package — but listed, so a new override cannot widen onto these packages unnoticed. No `status`: the package never chose these, so there is no per-package deferral to declare."
+      "acknowledged": "Repo-wide policy (ADR-035 §7) that happens to reach a public package, because the package contains a file of that category — a test, a config, a tooling script, or a source tree it ships for a consumer to receive. These are decisions about a file CATEGORY, not about the package. Listed rather than justified per-package — but listed, so a new override cannot widen onto these packages unnoticed. No `status`: the package never chose these, so there is no per-package deferral to declare."
     }
   },
   "acknowledged": [

@@ -47,6 +47,14 @@ describe('a relative import of a shipped module', () => {
     expect(finding?.kind).toBe('import');
     expect(finding?.reference).toBe('./orders.absent');
   });
+
+  test('is an escape when the directory it names holds no index file', () => {
+    const [finding] = escapesFor(
+      "import * as constants from '../../constants';",
+    );
+    expect(finding?.kind).toBe('import');
+    expect(finding?.reference).toBe('../../constants');
+  });
 });
 
 describe('the source alias', () => {
@@ -62,6 +70,12 @@ describe('the source alias', () => {
     expect(finding?.reference).toBe('@/constants/absent');
   });
 
+  test('is an escape through the alias too when the directory holds no index', () => {
+    const [finding] = escapesFor("import * as all from '@/constants';");
+    expect(finding?.kind).toBe('import');
+    expect(finding?.reference).toBe('@/constants');
+  });
+
   test('is an escape from a file that sits under no source root', () => {
     const [finding] = analyseClosure({
       files: [
@@ -74,5 +88,36 @@ describe('the source alias', () => {
       shipped: shippedApp,
     }).escapes;
     expect(finding?.reference).toBe('@/constants/app.constants');
+  });
+});
+
+const importsIn = (path) =>
+  analyseClosure({
+    files: [{ content: "import { gone } from './absent';", path }],
+    rootDirectory,
+    shipped: shippedApp,
+  }).escapes.map((finding) => finding.kind);
+
+describe('which files an import is read out of', () => {
+  test('includes a JSX module, which a shipped application is mostly made of', () => {
+    expect(importsIn('apps/web/src/root.tsx')).toEqual(['import']);
+    expect(importsIn('apps/web/src/legacy.jsx')).toEqual(['import']);
+  });
+
+  test('and every other spelling of a source file', () => {
+    for (const path of [
+      'apps/web/src/a.ts',
+      'apps/web/src/a.mts',
+      'apps/web/src/a.cts',
+      'apps/web/src/a.js',
+      'apps/web/src/a.mjs',
+      'apps/web/src/a.cjs',
+    ]) {
+      expect(importsIn(path)).toEqual(['import']);
+    }
+  });
+
+  test('and nothing else, so prose is not read as source', () => {
+    expect(importsIn('apps/web/README.md')).toEqual([]);
   });
 });
