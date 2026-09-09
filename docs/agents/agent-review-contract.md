@@ -609,8 +609,9 @@ criterion.
 `claude-review.yml`, which reviews in CI and posts a pull-request review — so the
 sentence this paragraph used to carry, that no workflow in this repository calls a
 model, stopped being true on 2026-08-20 and has been removed rather than left to
-rot. What keeps it outside this contract is what it produces: a review comment
-read by `copilot-review-gate.yml`, never an `agent-review-verdict/v1` document.
+rot. `grok-review.yml` is a second such workflow (ADR-116): a catalog review, not
+a generic one, and still not a verdict. What keeps both outside this contract is
+what they produce: a review comment, never an `agent-review-verdict/v1` document.
 Nothing in CI emits a verdict, so §2.3's `absent` still means what it says.
 
 The distinction is worth holding on to, because the two reviewers answer different
