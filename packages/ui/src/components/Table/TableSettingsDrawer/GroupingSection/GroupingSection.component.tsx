@@ -50,7 +50,6 @@ export const GroupingSection = ({ isBusy = false }: GroupingSectionProps) => {
         defaultSelectedTab={GROUPING_SUBTAB_KEYS.keys}
         isBusy={isBusy}
         label={GROUPING_SUBTAB_LABEL}
-
         tabs={tabs}
       />
       <GroupingSectionToolbar isBusy={isBusy} />
