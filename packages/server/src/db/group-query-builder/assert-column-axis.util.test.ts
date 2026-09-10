@@ -73,22 +73,16 @@ describe('assertColumnAxis', () => {
   });
 
   it('refuses an axis the catalogue will not group', () => {
-    try {
+    expect(() =>
       assertColumnAxis({
         ...args,
         columnAxis: { key: 'amount', maxDistinct: 10, values: [1] },
-      });
-      expect.unreachable();
-    } catch (error) {
-      expect(error).toBeInstanceOf(GroupingRefusedError);
-      expect((error as GroupingRefusedError).reason).toBe(
-        'column-not-groupable',
-      );
-    }
+      }),
+    ).toThrow(/not a legal column axis: unique-ish/);
   });
 
   it('refuses when the supplied values exceed the caller ceiling, naming the column', () => {
-    try {
+    expect(() =>
       assertColumnAxis({
         ...args,
         columnAxis: {
@@ -96,18 +90,10 @@ describe('assertColumnAxis', () => {
           maxDistinct: 2,
           values: [2021, 2022, 2023],
         },
-      });
-      expect.unreachable();
-    } catch (error) {
-      expect(error).toBeInstanceOf(GroupingRefusedError);
-      expect((error as GroupingRefusedError).reason).toBe(
-        'column-axis-too-wide',
-      );
-      expect((error as GroupingRefusedError).column).toBe('year');
-      expect((error as GroupingRefusedError).message).toContain(
-        'configured 2 column-axis ceiling',
-      );
-    }
+      }),
+    ).toThrow(
+      'Column "year" has 3 distinct values, past the configured 2 column-axis ceiling.',
+    );
   });
 
   it('refuses a projection that would exceed Postgres tuple attributes', () => {
@@ -116,7 +102,7 @@ describe('assertColumnAxis', () => {
       (_, index) => index,
     );
 
-    try {
+    expect(() =>
       assertColumnAxis({
         ...args,
         columnAxis: {
@@ -125,16 +111,7 @@ describe('assertColumnAxis', () => {
           values,
         },
         measureCount: 1,
-      });
-      expect.unreachable();
-    } catch (error) {
-      expect(error).toBeInstanceOf(GroupingRefusedError);
-      expect((error as GroupingRefusedError).reason).toBe(
-        'column-axis-too-wide',
-      );
-      expect((error as GroupingRefusedError).message).toContain(
-        String(POSTGRES_MAX_TUPLE_ATTRIBUTES),
-      );
-    }
+      }),
+    ).toThrow(`past Postgres's ${POSTGRES_MAX_TUPLE_ATTRIBUTES} tuple limit`);
   });
 });

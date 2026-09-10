@@ -2,7 +2,8 @@ import type { Pool, PoolClient } from 'pg';
 
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import { GroupingRefusedError } from '../errors/grouping-refused.error.ts';
+import type { GroupingRefusedError } from '../errors/grouping-refused.error.ts';
+
 import { getPool } from './get-pool.util.ts';
 import { selectColumnAxisValues } from './select-column-axis-values.util.ts';
 
@@ -46,18 +47,14 @@ describe('selectColumnAxisValues', () => {
       rows: [{ year: 2021 }, { year: 2022 }, { year: 2023 }],
     });
 
-    try {
-      await selectColumnAxisValues({
+    await expect(
+      selectColumnAxisValues({
         ...ARGS,
         tx: { query } as unknown as PoolClient,
-      });
-      expect.unreachable();
-    } catch (error) {
-      expect(error).toBeInstanceOf(GroupingRefusedError);
-      expect((error as GroupingRefusedError).reason).toBe(
-        'column-axis-too-wide',
-      );
-      expect((error as GroupingRefusedError).column).toBe('year');
-    }
+      }),
+    ).rejects.toMatchObject({
+      column: 'year',
+      reason: 'column-axis-too-wide',
+    } satisfies Partial<GroupingRefusedError>);
   });
 });

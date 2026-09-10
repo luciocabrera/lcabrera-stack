@@ -4,11 +4,6 @@ import type { GroupAggregate } from './group-query-builder.types.ts';
 import { resolveAggregateAlias } from './resolve-aggregate-alias.util.ts';
 import { toColumnAxisAlias } from './to-column-axis-alias.util.ts';
 
-export type ExpandedColumnAxisAggregate = GroupAggregate & {
-  readonly alias: string;
-  readonly axisValue: unknown;
-};
-
 type ColumnAxisValue = {
   readonly key: string;
   readonly values: readonly unknown[];
@@ -17,6 +12,11 @@ type ColumnAxisValue = {
 type ExpandColumnAxisAggregatesArgs = {
   readonly aggregates: readonly GroupAggregate[];
   readonly columnAxis: ColumnAxisValue;
+};
+
+type ExpandedColumnAxisAggregate = GroupAggregate & {
+  readonly alias: string;
+  readonly axisValue: unknown;
 };
 
 const toAxisFilter = ({

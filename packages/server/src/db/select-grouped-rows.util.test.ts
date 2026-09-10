@@ -43,6 +43,14 @@ const resolvePreamble = () => {
     .mockResolvedValueOnce({ rows: [{ set_config: '10000' }] });
 };
 
+const resolveCapabilityThenEmpty = () => {
+  resolvePreamble();
+  query
+    .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
+    .mockResolvedValueOnce({ rows: [] })
+    .mockResolvedValueOnce({ rows: [] });
+};
+
 beforeEach(() => {
   query.mockReset();
   poolQuery.mockReset();
@@ -77,11 +85,7 @@ describe('selectGroupedRows', () => {
   });
 
   it('opens a transaction and scopes a statement timeout to it before anything else', async () => {
-    resolvePreamble();
-    query
-      .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    resolveCapabilityThenEmpty();
 
     await selectGroupedRows(DESCRIPTOR);
 
@@ -94,11 +98,7 @@ describe('selectGroupedRows', () => {
   });
 
   it('runs both round trips on the transaction the timeout applies to', async () => {
-    resolvePreamble();
-    query
-      .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    resolveCapabilityThenEmpty();
 
     await selectGroupedRows(DESCRIPTOR);
 
@@ -113,11 +113,7 @@ describe('selectGroupedRows', () => {
   });
 
   it('returns the decode metadata the rows cannot be read without', async () => {
-    resolvePreamble();
-    query
-      .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    resolveCapabilityThenEmpty();
 
     const result = await selectGroupedRows(DESCRIPTOR);
 
@@ -128,11 +124,7 @@ describe('selectGroupedRows', () => {
   });
 
   it('reports the pre-flight estimate beside the rows', async () => {
-    resolvePreamble();
-    query
-      .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    resolveCapabilityThenEmpty();
 
     const result = await selectGroupedRows(DESCRIPTOR);
 
@@ -172,11 +164,7 @@ describe('selectGroupedRows', () => {
   });
 
   it('asks the catalogue only about the keys and aggregate columns', async () => {
-    resolvePreamble();
-    query
-      .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    resolveCapabilityThenEmpty();
 
     await selectGroupedRows(DESCRIPTOR);
 
