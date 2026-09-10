@@ -15,11 +15,11 @@ const {
   useGetTotalsPlacementMock: vi.fn(() => 'last'),
 }));
 
-vi.mock('../../TableDrawerContext/actions', () => ({
+vi.mock('../../../TableDrawerContext/actions', () => ({
   useSetTotalsPlacement: () => setTotalsPlacementMock,
 }));
 
-vi.mock('../../TableDrawerContext/selectors', () => ({
+vi.mock('../../../TableDrawerContext/selectors', () => ({
   useGetGroupingMode: useGetGroupingModeMock,
   useGetTotalsPlacement: useGetTotalsPlacementMock,
 }));

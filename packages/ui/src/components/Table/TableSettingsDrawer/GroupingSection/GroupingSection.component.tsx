@@ -1,34 +1,58 @@
-import { useState } from 'react';
+import type { TabItem } from '#ui/components/Tabs';
 
-import {
-  SidePanelSectionMain,
-  SidePanelSectionOverlay,
-} from '#ui/components/SidePanel';
+import { SidePanelSectionMain } from '#ui/components/SidePanel';
+import { Tabs } from '#ui/components/Tabs';
 
 import type { GroupingSectionProps } from './GroupingSection.types';
 
-import { ActiveAggregateList } from './ActiveAggregateList';
-import { ActiveGroupKeyList } from './ActiveGroupKeyList';
-import { AddAggregateSection } from './AddAggregateSection';
-import { AddGroupKeySection } from './AddGroupKeySection';
+import {
+  AdvancedSettingsSection,
+  useHasAdvancedSettings,
+} from './AdvancedSettingsSection';
+import { AggregatesSubsection } from './AggregatesSubsection';
+import {
+  GROUPING_SUBTAB_KEYS,
+  GROUPING_SUBTAB_LABEL,
+} from './GroupingSection.constants';
 import { GroupingSectionToolbar } from './GroupingSectionToolbar';
+import { GroupKeysSubsection } from './GroupKeysSubsection';
 
 export const GroupingSection = ({ isBusy = false }: GroupingSectionProps) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const hasAdvancedSettings = useHasAdvancedSettings();
+
+  const advancedTabs: TabItem[] = hasAdvancedSettings
+    ? [
+        {
+          children: <AdvancedSettingsSection isBusy={isBusy} />,
+          header: 'Advanced',
+          key: GROUPING_SUBTAB_KEYS.advanced,
+        },
+      ]
+    : [];
+
+  const tabs: TabItem[] = [
+    {
+      children: <GroupKeysSubsection isBusy={isBusy} />,
+      header: 'Group Keys',
+      key: GROUPING_SUBTAB_KEYS.keys,
+    },
+    {
+      children: <AggregatesSubsection isBusy={isBusy} />,
+      header: 'Aggregates',
+      key: GROUPING_SUBTAB_KEYS.aggregates,
+    },
+    ...advancedTabs,
+  ];
 
   return (
     <SidePanelSectionMain>
-      <AddGroupKeySection
+      <Tabs
+        defaultSelectedTab={GROUPING_SUBTAB_KEYS.keys}
         isBusy={isBusy}
-        onDropdownOpenChange={setIsDropdownOpen}
+        label={GROUPING_SUBTAB_LABEL}
+        tabs={tabs}
       />
-
-      <SidePanelSectionOverlay isOpen={isDropdownOpen}>
-        <ActiveGroupKeyList isBusy={isBusy} />
-        <AddAggregateSection isBusy={isBusy} />
-        <ActiveAggregateList isBusy={isBusy} />
-        <GroupingSectionToolbar isBusy={isBusy} />
-      </SidePanelSectionOverlay>
+      <GroupingSectionToolbar isBusy={isBusy} />
     </SidePanelSectionMain>
   );
 };

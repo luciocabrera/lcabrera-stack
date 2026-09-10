@@ -3,7 +3,7 @@ import {
   useGetTableIsGroupingLocked,
 } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 
-import { useGetGroupingMode } from '../TableDrawerContext/selectors';
+import { useGetGroupingMode } from '../../TableDrawerContext/selectors';
 
 export const useHasAdvancedSettings = () => {
   const isGroupingEnabled = useGetTableIsGroupingEnabled();

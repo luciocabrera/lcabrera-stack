@@ -1,7 +1,7 @@
 # GroupingSection Architecture
 
-The settings drawer's Grouping tab: the staged group keys in nesting order,
-the staged aggregates, the totals mode, and the controls to add either.
+The settings drawer's Grouping tab: three sub-tabs over one staged grouping —
+the group keys in nesting order, the aggregates, and the totals controls.
 
 **The totals mode is grouping configuration, not a display setting.** `rollup`
 adds a subtotal row per level and a grand total to what the read returns, so it
@@ -234,30 +234,52 @@ that removes an applied distinct count, so the column carrying one goes on being
 offered it while every other column is not. This picker never sees the
 difference, since it subtracts what the column carries anyway.
 
-## Neither totals control is here any more
+## Three sub-tabs, one staged grouping
 
-This section's subject is which dimensions the read groups by and which measures
-it aggregates. Two controls used to sit between the two, and both have moved to
-the Advanced tab.
+The section is a shell over a nested `Tabs`. **Group Keys** holds the key picker
+and the staged key list; **Aggregates** holds the measure picker and the staged
+measure list; **Advanced** holds `GroupingModeSection` and
+`TotalsPlacementSection`. One subject per pane, so answering one question does
+not mean scrolling past another
+([ADR-122](../../../../../../../docs/decisions/ADR-122-the-grouping-tab-holds-its-three-subjects-as-sub-tabs.md)).
 
-`TotalsPlacementSection` went first. It stages like everything else, but what it
-stages lives in its **own** draft store rather than in the grouping draft,
-because it commits somewhere else: the grouping goes to the `grouping` search
-param, while the placement goes to the `totals` param **and** the UI-flags
-cookie, since it is a preference that outlives the table it was set on
-(ADR-085). Sitting in this section said the opposite of all three
-([ADR-114](../../../../../../../docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md)).
+**The strip carries its own accessible name.** Two tab strips are on screen at
+once — the drawer's and this one — and the name is what tells them apart, for a
+screen-reader user and for a role query alike. `Tabs` takes `label` for this and
+defaults to the drawer's own string.
 
-`GroupingModeSection` followed. It does stage into the grouping draft and does
-ride the `grouping` param, so nothing about its commit path was wrong. What was
-wrong is the subject: whether the read emits subtotal rows is a totals question,
-and it sat between the keys and the measures
-([ADR-115](../../../../../../../docs/decisions/ADR-115-the-settings-panel-separates-what-the-table-asks-from-how-the-panel-is-shaped.md)).
-`GroupingSection.test.tsx` renders it alongside this section, because the
-staging-to-one-commit flow it pins spans both.
+**The commit paths still differ, and the strip does not say so.**
+`TotalsPlacementSection` stages into its **own** draft store, because it commits
+somewhere else: the grouping goes to the `grouping` search param, while the
+placement goes to the `totals` param **and** the UI-flags cookie, since it is a
+preference that outlives the table it was set on (ADR-085).
+`GroupingModeSection` does stage into the grouping draft and does ride the
+`grouping` param. Both sit under Advanced because both decide what the read
+emits, not because they commit alike
+([ADR-114](../../../../../../../docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md),
+[ADR-115](../../../../../../../docs/decisions/ADR-115-the-settings-panel-separates-what-the-table-asks-from-how-the-panel-is-shaped.md)).
 
-Totals position still renders only under `rollup`. `flat` emits no subtotal and
-no grand total, so there would be nothing to position.
+**Advanced is painted only when one of its controls can render.**
+`useHasAdvancedSettings` combines the two guards — the mode renders nothing under
+a locked preset, the position nothing outside `rollup` — so a locked, flat
+grouping paints two sub-tabs rather than an empty third. Totals position still
+renders only under `rollup`: `flat` emits no subtotal and no grand total, so
+there would be nothing to position.
+
+**Clear and reset sit outside the strip.** `GroupingSectionToolbar`'s footer
+variant acts on the whole grouping, so it belongs below the tabs where it governs
+all three panes.
+
+**The sub-tab a reader is on is not remembered.** The nested `Tabs` is
+uncontrolled and opens on Group Keys. The drawer's own tab is persisted because a
+reader returns expecting the pane they left; which sub-tab they were on is a step
+inside one visit.
+
+**A test that reaches a control opens its sub-tab first.** Both pickers used to
+be on screen together. `GroupingSection.test.tsx`'s staging helpers select a tab
+before clicking, which makes the multi-edit commit test stronger rather than
+weaker: it stages a key on one sub-tab and an aggregate on another and still
+asserts a single navigation.
 
 ## A column carries as many aggregates as the user asks for
 

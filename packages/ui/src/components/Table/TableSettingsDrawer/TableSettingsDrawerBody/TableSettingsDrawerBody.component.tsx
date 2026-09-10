@@ -13,10 +13,6 @@ import { Tabs } from '#ui/components/Tabs';
 
 import type { TableSettingsDrawerBodyProps } from './TableSettingsDrawerBody.types';
 
-import {
-  AdvancedSettingsSection,
-  useHasAdvancedSettings,
-} from '../AdvancedSettingsSection';
 import { ColumnOrderSection } from '../ColumnOrderSection';
 import { ColumnOrderSectionProvider } from '../ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
 import { DetailsSection } from '../DetailsSection';
@@ -32,7 +28,6 @@ export const TableSettingsDrawerBody = ({
   const setSelectedTab = useSetTableSettingsSelectedTab();
   const isGroupingEnabled = useGetTableIsGroupingEnabled();
   const tabOrder = useGetTableSettingsTabOrder();
-  const hasAdvancedSettings = useHasAdvancedSettings();
 
   const groupingTabs: TabItem[] = isGroupingEnabled
     ? [
@@ -40,16 +35,6 @@ export const TableSettingsDrawerBody = ({
           children: <GroupingSection isBusy={isBusy} />,
           header: 'Grouping',
           key: 'grouping',
-        },
-      ]
-    : [];
-
-  const advancedTabs: TabItem[] = hasAdvancedSettings
-    ? [
-        {
-          children: <AdvancedSettingsSection isBusy={isBusy} />,
-          header: 'Advanced',
-          key: 'advanced',
         },
       ]
     : [];
@@ -83,7 +68,6 @@ export const TableSettingsDrawerBody = ({
         header: 'Details',
         key: 'details',
       },
-      ...advancedTabs,
     ],
   });
 

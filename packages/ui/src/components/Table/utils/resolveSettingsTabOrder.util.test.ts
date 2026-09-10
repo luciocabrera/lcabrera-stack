@@ -18,7 +18,19 @@ describe('resolveSettingsTabOrder', () => {
       'columns',
       'filters',
       'sorting',
-      'advanced',
+    ]);
+  });
+
+  it('drops a stored order naming the retired advanced role', () => {
+    expect(
+      resolveSettingsTabOrder(['details', 'advanced', 'grouping']),
+    ).toStrictEqual([
+      'details',
+      'grouping',
+      'general',
+      'columns',
+      'filters',
+      'sorting',
     ]);
   });
 

@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import type { TabsProps } from './Tabs.types';
 
+import { TABS_DEFAULT_LABEL } from './Tabs.constants';
 import { styles } from './Tabs.stylex';
 import { TabsContent } from './TabsContent/TabsContent.component';
 import { TabsHeader } from './TabsHeader/TabsHeader.component';
@@ -10,6 +11,7 @@ import { TabsHeader } from './TabsHeader/TabsHeader.component';
 export const Tabs = ({
   defaultSelectedTab,
   isBusy = false,
+  label = TABS_DEFAULT_LABEL,
   onSelectTab,
   selectedTab,
   tabs,
@@ -39,6 +41,7 @@ export const Tabs = ({
       <TabsHeader
         activeTab={activeTab}
         isBusy={isBusy}
+        label={label}
         onSelectTab={handleSelectTab}
         tabs={tabs}
       />

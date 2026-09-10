@@ -29,6 +29,7 @@ describe('TabsHeader', () => {
       <TabsHeader
         activeTab='a'
         isBusy={false}
+        label='Settings tabs'
         onSelectTab={vi.fn()}
         tabs={tabs}
       />,
@@ -43,6 +44,7 @@ describe('TabsHeader', () => {
       <TabsHeader
         activeTab='b'
         isBusy={false}
+        label='Settings tabs'
         onSelectTab={vi.fn()}
         tabs={tabs}
       />,
@@ -60,6 +62,7 @@ describe('TabsHeader', () => {
       <TabsHeader
         activeTab='a'
         isBusy={false}
+        label='Settings tabs'
         onSelectTab={vi.fn()}
         tabs={tabs}
       />,
@@ -75,6 +78,7 @@ describe('TabsHeader', () => {
       <TabsHeader
         activeTab='a'
         isBusy={false}
+        label='Settings tabs'
         onSelectTab={onSelectTab}
         tabs={tabs}
       />,
@@ -89,6 +93,7 @@ describe('TabsHeader', () => {
       <TabsHeader
         activeTab='a'
         isBusy={false}
+        label='Settings tabs'
         onSelectTab={onSelectTab}
         tabs={tabs}
       />,
@@ -109,6 +114,7 @@ describe('TabsHeader', () => {
       <TabsHeader
         activeTab={activeTab}
         isBusy={false}
+        label='Settings tabs'
         onSelectTab={onSelectTab}
         tabs={tabs}
       />,
@@ -125,6 +131,7 @@ describe('TabsHeader', () => {
       <TabsHeader
         activeTab='b'
         isBusy={false}
+        label='Settings tabs'
         onSelectTab={onSelectTab}
         tabs={tabs}
       />,
@@ -141,6 +148,7 @@ describe('TabsHeader', () => {
       <TabsHeader
         activeTab='a'
         isBusy={false}
+        label='Settings tabs'
         onSelectTab={onSelectTab}
         tabs={tabs}
       />,
@@ -151,7 +159,13 @@ describe('TabsHeader', () => {
 
   it('disables all tab buttons when busy', () => {
     render(
-      <TabsHeader activeTab='a' isBusy onSelectTab={vi.fn()} tabs={tabs} />,
+      <TabsHeader
+        activeTab='a'
+        isBusy
+        label='Settings tabs'
+        onSelectTab={vi.fn()}
+        tabs={tabs}
+      />,
     );
     const tabButtons = screen.getAllByRole('tab');
     expect(tabButtons).toHaveLength(3);
@@ -163,7 +177,13 @@ describe('TabsHeader', () => {
   it('ignores keyboard navigation when busy', () => {
     const onSelectTab = vi.fn();
     render(
-      <TabsHeader activeTab='a' isBusy onSelectTab={onSelectTab} tabs={tabs} />,
+      <TabsHeader
+        activeTab='a'
+        isBusy
+        label='Settings tabs'
+        onSelectTab={onSelectTab}
+        tabs={tabs}
+      />,
     );
     fireEvent.keyDown(focusedTab(), { key: 'ArrowRight' });
     expect(onSelectTab).not.toHaveBeenCalled();
@@ -175,6 +195,7 @@ describe('TabsHeader', () => {
       <TabsHeader
         activeTab='missing-tab'
         isBusy={false}
+        label='Settings tabs'
         onSelectTab={onSelectTab}
         tabs={tabs}
       />,
@@ -237,6 +258,7 @@ const renderHeader = async () => {
     <TabsHeader
       activeTab='a'
       isBusy={false}
+      label='Settings tabs'
       onSelectTab={vi.fn()}
       tabs={tabs}
     />,
