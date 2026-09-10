@@ -183,7 +183,7 @@ export type TableColumn<TData> = {
   /** Never a function: columns must cross the loader serialization boundary. */
   readonly filterOptionsDescriptor?: FilterOptionsDescriptor;
   readonly format?: TableColumnFormat;
-  /** Source column's label; set only by `withAggregateColumns` on a derived measure. */
+  /** Band label; set only by `withAggregateColumns` on a derived measure. */
   readonly headerGroupLabel?: string;
   readonly isFilterable?: boolean;
   readonly isGroupable?: boolean;
@@ -287,6 +287,8 @@ export type TableFocusState = {
 };
 
 export type TableGroupAggregateValue = {
+  readonly alias?: string;
+  readonly axis?: { readonly value: unknown };
   readonly columnKey: string;
   readonly fn: TableAggregateFn;
   readonly value: unknown;
@@ -316,6 +318,8 @@ export type TableGroupingRefusalReason =
 export type TableGroupingState = {
   /** Order is listing/render order; it shapes no SQL. */
   readonly aggregates: readonly TableColumnAggregate[];
+  /** Distinct values of this column become measure headers; omitted when unset. */
+  readonly columnAxis?: string;
   /** Order is the grouped query's nesting order. */
   readonly keys: readonly string[];
   readonly mode: TableGroupingMode;

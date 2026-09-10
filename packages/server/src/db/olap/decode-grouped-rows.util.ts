@@ -1,22 +1,22 @@
 import type {
-  AggregateFn,
   BuiltGroupAggregate,
   GroupAggregate,
   GroupSort,
 } from '../group-query-builder/group-query-builder.types';
 import type { QuerySort } from '../query-builder/query-builder.types';
-import type { GroupKeyTruncation } from './olap.types';
+import type { GroupKeyTruncation, RequestedGroupAggregate } from './olap.types';
 
 import { resolveAggregateAlias } from '../group-query-builder/resolve-aggregate-alias.util';
+import { decodeAxisAggregates } from './decode-axis-aggregates.util';
+import { decodeRequestedAggregates } from './decode-requested-aggregates.util';
+import { isUnexpandedCount } from './is-unexpanded-count.util';
 import { toGroupRow } from './to-group-row.util';
 
-export type RequestedGroupAggregate = {
-  readonly column: string;
-  readonly fn: AggregateFn;
-};
+export type { RequestedGroupAggregate } from './olap.types';
 
 type DecodeGroupedRowsArgs = {
   readonly aggregates: readonly BuiltGroupAggregate[];
+  readonly columnAxis?: { readonly values: readonly unknown[] };
   readonly columnKeys: readonly string[];
   readonly maskAlias: string;
   readonly requested: readonly RequestedGroupAggregate[];
@@ -38,47 +38,67 @@ export const toGroupAggregates = ({
 
 export const decodeGroupedRows = ({
   aggregates,
+  columnAxis,
   columnKeys,
   maskAlias,
   requested,
   rows,
   truncations,
 }: DecodeGroupedRowsArgs) => {
-  const [count, ...selected] = aggregates;
+  const isWide =
+    columnAxis !== undefined ||
+    aggregates.some((aggregate) => aggregate.axis !== undefined);
 
-  if (count === undefined || selected.length !== requested.length) {
-    throw new Error(
-      `Grouped read emitted ${String(aggregates.length)} aggregate alias(es) but ${String(requested.length + 1)} were requested (count(*) plus ${String(requested.length)}); pass the same list \`toGroupAggregates\` was given.`,
-    );
-  }
-
-  if (count.fn !== 'count' || count.column !== undefined) {
-    throw new Error(
-      `Grouped read projected \`${count.fn}\` first, not \`count(*)\`; the aggregate list was not built by \`toGroupAggregates\`.`,
-    );
-  }
-
-  const decoded = requested.map((aggregate, index) => {
-    const emitted = selected[index] ?? count;
-
-    if (emitted.fn !== aggregate.fn || emitted.column !== aggregate.column) {
+  if (aggregates.length === 0) {
+    if (requested.length === 0) {
       throw new Error(
-        `Grouped read projected \`${emitted.fn}\` on \`${emitted.column ?? '*'}\` at position ${String(index + 1)} but \`${aggregate.fn}\` on \`${aggregate.column}\` was requested there; the two lists are ordered differently.`,
+        `Grouped read emitted ${String(aggregates.length)} aggregate alias(es) but ${String(requested.length + 1)} were requested (count(*) plus ${String(requested.length)}); pass the same list \`toGroupAggregates\` was given.`,
       );
     }
 
-    return {
-      alias: emitted.alias,
-      columnKey: aggregate.column,
-      fn: aggregate.fn,
-    };
-  });
+    return rows.map((row) =>
+      toGroupRow({
+        aggregates: [],
+        columnKeys,
+        countAlias: '',
+        maskAlias,
+        row,
+        truncations,
+      }),
+    );
+  }
+
+  const count = aggregates.find((aggregate) => isUnexpandedCount(aggregate));
+  const selected = aggregates.filter((aggregate) => aggregate !== count);
+
+  if (!isWide) {
+    if (count === undefined) {
+      throw new Error(
+        `Grouped read projected \`${aggregates[0]?.fn ?? '*'}\` first, not \`count(*)\`; the aggregate list was not built by \`toGroupAggregates\`.`,
+      );
+    }
+
+    const decoded = decodeRequestedAggregates({ requested, selected });
+
+    return rows.map((row) =>
+      toGroupRow({
+        aggregates: decoded,
+        columnKeys,
+        countAlias: count.alias,
+        maskAlias,
+        row,
+        truncations,
+      }),
+    );
+  }
+
+  const decoded = decodeAxisAggregates({ requested, selected });
 
   return rows.map((row) =>
     toGroupRow({
       aggregates: decoded,
       columnKeys,
-      countAlias: count.alias,
+      countAlias: count?.alias ?? '',
       maskAlias,
       row,
       truncations,

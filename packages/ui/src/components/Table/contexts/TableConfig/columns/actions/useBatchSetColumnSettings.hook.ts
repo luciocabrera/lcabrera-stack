@@ -5,6 +5,7 @@ import {
   getColumnSettingsNextStatePatch,
   getHasQueryChanged,
 } from '#ui/components/Table/utils';
+import { toColumnAxisDerivationArgs } from '#ui/components/Table/utils/toColumnAxisDerivationArgs.util';
 
 import type { BatchColumnSettingsUpdate } from './utils/resolveBatchColumnSettingsUpdate.util';
 
@@ -31,6 +32,10 @@ export const useBatchSetColumnSettings = <TData>() => {
       columnsState,
       groupingKeys: grouping.keys,
       settings,
+      ...toColumnAxisDerivationArgs({
+        columnAxis: grouping.columnAxis,
+        data: dataStore.get().data,
+      }),
     });
     const hasQueryChanged = getHasQueryChanged<TData>({
       columnsState,

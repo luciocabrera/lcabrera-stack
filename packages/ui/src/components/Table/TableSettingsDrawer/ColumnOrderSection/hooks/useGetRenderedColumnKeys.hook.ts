@@ -4,6 +4,7 @@ import {
   useGetColumnPinning,
   useGetColumnVisibility,
   useGetGroupingAggregates,
+  useGetGroupingColumnAxis,
   useGetGroupingKeys,
 } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/selectors';
 
@@ -11,6 +12,7 @@ import { resolveRenderedColumnKeys } from '../utils';
 
 export const useGetRenderedColumnKeys = () => {
   const aggregates = useGetGroupingAggregates();
+  const columnAxis = useGetGroupingColumnAxis();
   const columnOrder = useGetColumnOrder();
   const columnPinning = useGetColumnPinning();
   const columns = useGetColumns();
@@ -24,5 +26,6 @@ export const useGetRenderedColumnKeys = () => {
     columns,
     columnVisibility,
     groupingKeys,
+    ...(columnAxis !== undefined && { columnAxis }),
   });
 };

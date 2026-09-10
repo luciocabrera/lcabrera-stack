@@ -8,6 +8,7 @@ import type {
   TableColumn,
   TableColumnAggregate,
 } from '#ui/components/Table/Table.types';
+import type { ColumnAxisEmittedAggregate } from '#ui/components/Table/utils/columnAxisEmitted.types';
 
 import {
   deriveColumnViewState,
@@ -25,6 +26,8 @@ export type BatchTableSettingsUpdate<TData> = {
 
 type ResolveBatchTableSettingsUpdateArgs<TData> = {
   readonly aggregates: readonly TableColumnAggregate[];
+  readonly columnAxis?: string;
+  readonly columnAxisEmitted?: readonly ColumnAxisEmittedAggregate[];
   readonly columns: readonly TableColumn<TData>[];
   readonly groupingKeys: readonly string[];
   readonly settings: BatchTableSettingsUpdate<TData>;
@@ -32,6 +35,8 @@ type ResolveBatchTableSettingsUpdateArgs<TData> = {
 
 export const resolveBatchTableSettingsUpdate = <TData>({
   aggregates,
+  columnAxis,
+  columnAxisEmitted,
   columns,
   groupingKeys,
   settings,
@@ -50,6 +55,8 @@ export const resolveBatchTableSettingsUpdate = <TData>({
     columnVisibility: settings.columnVisibility,
     groupingKeys,
     sorting: settings.sorting,
+    ...(columnAxis !== undefined && { columnAxis }),
+    ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
   });
 
   return {

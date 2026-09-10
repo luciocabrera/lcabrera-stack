@@ -5,6 +5,7 @@ import type {
 } from '#ui/components/Table/Table.types';
 
 import {
+  pruneColumnAxis,
   pruneGroupPeriods,
   resolveNewGroupingMode,
 } from '#ui/components/Table/contexts/TableConfig/grouping/utils';
@@ -27,6 +28,10 @@ export const toggleTableGroupKey = ({
     ? grouping.keys.filter((key) => key !== columnKey)
     : [...grouping.keys, columnKey];
   const pruned = pruneGroupPeriods({ keys, periods: grouping.periods });
+  const nextColumnAxis = pruneColumnAxis({
+    columnAxis: grouping.columnAxis,
+    keys,
+  });
 
   return {
     aggregates: grouping.aggregates,
@@ -43,5 +48,6 @@ export const toggleTableGroupKey = ({
         : { ...pruned, [columnKey]: period },
     shares: grouping.shares,
     totalsPlacement: grouping.totalsPlacement,
+    ...(nextColumnAxis !== undefined && { columnAxis: nextColumnAxis }),
   };
 };

@@ -195,6 +195,38 @@ describe('groupingCodec', () => {
     ).toStrictEqual({ keys: [] });
   });
 
+  it('round-trips a column-axis key beside the keys', () => {
+    const compact = {
+      axis: 'order_status',
+      keys: ['shipping_country'],
+    } as const;
+
+    expect(groupingCodec.serialize(compact)).toBe(
+      '{"axis":"order_status","keys":["shipping_country"]}',
+    );
+    expect(
+      groupingCodec.deserialize(groupingCodec.serialize(compact)),
+    ).toStrictEqual(compact);
+  });
+
+  it('omits the axis when none is set', () => {
+    expect(groupingCodec.serialize({ keys: ['shipping_country'] })).toBe(
+      '{"keys":["shipping_country"]}',
+    );
+  });
+
+  it('refuses an empty axis rather than treating it as unset', () => {
+    expect(
+      groupingCodec.deserialize('{"axis":"","keys":["shipping_country"]}'),
+    ).toStrictEqual({ keys: [] });
+  });
+
+  it('refuses an axis that is not a string', () => {
+    expect(
+      groupingCodec.deserialize('{"axis":["order_status"],"keys":["a"]}'),
+    ).toStrictEqual({ keys: [] });
+  });
+
   it('drops an empty share list on the way out', () => {
     expect(
       groupingCodec.serialize({

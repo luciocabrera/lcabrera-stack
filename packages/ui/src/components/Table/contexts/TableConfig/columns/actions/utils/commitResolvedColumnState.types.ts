@@ -10,6 +10,7 @@ import type {
   TablePersistenceConfig,
   TablePersistenceSliceEntry,
 } from '#ui/components/Table/Table.types';
+import type { ColumnAxisEmittedAggregate } from '#ui/components/Table/utils/columnAxisEmitted.types';
 import type { TStore } from '#ui/hooks/useStore.hook';
 
 export type CommitResolvedColumnStateArgs<
@@ -17,6 +18,8 @@ export type CommitResolvedColumnStateArgs<
   TSlice extends keyof TablePersistenceConfig,
 > = {
   readonly aggregates: readonly TableColumnAggregate[];
+  readonly columnAxis?: string;
+  readonly columnAxisEmitted?: readonly ColumnAxisEmittedAggregate[];
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];

@@ -171,10 +171,15 @@ value back in the frame it was truncated in.
 `decodeGroupedRows` (`decode-grouped-rows.util.ts`) are the two halves of the
 `count(*)`-first convention — the position one puts the count in is the position
 the other skips, and nothing in the type system relates them, so they live in one
-module for the reason ADR-082 keeps an encoder beside its parser. `toGroupSort`
-sits with them: it derives the grouped `ORDER BY` from the table's own sort, one
-term per key in nesting order, dropping a sort on any column a grouped result has
-no values of.
+module for the reason ADR-082 keeps an encoder beside its parser. A column axis
+is the exception: expansion makes selected length unequal to requested, and
+`decodeAxisAggregates` (`decode-axis-aggregates.util.ts`) carries each emitted
+alias and axis value through so the grid can key cells by alias.
+`decodeRequestedAggregates` (`decode-requested-aggregates.util.ts`) is the 1:1
+half. `isUnexpandedCount` (`is-unexpanded-count.util.ts`) is the leading
+`count(*)` the axis expansion leaves alone. `toGroupSort` sits with them: it
+derives the grouped `ORDER BY` from the table's own sort, one term per key in
+nesting order, dropping a sort on any column a grouped result has no values of.
 
 **Drilling back down.** `toDrillRead` (`to-drill-read.util.ts`) turns a group row
 into the paginated read of the rows underneath it, or a typed refusal for a

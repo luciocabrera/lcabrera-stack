@@ -8,6 +8,8 @@ import type {
   TableColumnAggregate,
 } from '#ui/components/Table/Table.types';
 
+import type { ColumnAxisEmittedAggregate } from './columnAxisEmitted.types';
+
 import { getEffectiveColumns } from './getEffectiveColumns.util';
 import { getPinnedColumnOffsets } from './getPinnedColumnOffsets.util';
 import { splitColumnsByPinning } from './splitColumnsByPinning.util';
@@ -19,6 +21,8 @@ import { withGroupedColumnWidths } from './withGroupedColumnWidths.util';
 
 type GetPinnedDerivedColumnsStateArgs<TData> = {
   readonly aggregates: readonly TableColumnAggregate[];
+  readonly columnAxis?: string;
+  readonly columnAxisEmitted?: readonly ColumnAxisEmittedAggregate[];
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
@@ -29,6 +33,8 @@ type GetPinnedDerivedColumnsStateArgs<TData> = {
 
 export const getPinnedDerivedColumnsState = <TData>({
   aggregates,
+  columnAxis,
+  columnAxisEmitted,
   columnOrder,
   columnPinning,
   columns,
@@ -36,6 +42,7 @@ export const getPinnedDerivedColumnsState = <TData>({
   columnVisibility = new Set<DataKey<TData>>(),
   groupingKeys,
 }: GetPinnedDerivedColumnsStateArgs<TData>) => {
+  const declaredKeys = new Set(columns.map((column) => String(column.key)));
   const measured = withAggregateColumns<TData>({
     aggregates,
     columnOrder,
@@ -43,7 +50,14 @@ export const getPinnedDerivedColumnsState = <TData>({
     columns,
     columnVisibility,
     groupingKeys,
+    ...(columnAxis !== undefined && {
+      columnAxis: { emitted: columnAxisEmitted ?? [] },
+    }),
   });
+
+  const extraKeys = measured.columns
+    .map((column) => String(column.key))
+    .filter((key) => !declaredKeys.has(key));
 
   const scoped = withGroupedColumnScope<TData>({
     aggregates,
@@ -51,17 +65,21 @@ export const getPinnedDerivedColumnsState = <TData>({
     columnPinning: measured.columnPinning,
     columns: measured.columns,
     columnVisibility: measured.columnVisibility,
+    extraKeys,
     groupingKeys,
   });
 
-  const staged = withAggregateColumnOrder<TData>({
-    aggregates,
-    columnOrder: scoped.columnOrder,
-    columnPinning: scoped.columnPinning,
-    columns: scoped.columns,
-    columnVisibility: scoped.columnVisibility,
-    groupingKeys,
-  });
+  const staged =
+    columnAxis === undefined
+      ? withAggregateColumnOrder<TData>({
+          aggregates,
+          columnOrder: scoped.columnOrder,
+          columnPinning: scoped.columnPinning,
+          columns: scoped.columns,
+          columnVisibility: scoped.columnVisibility,
+          groupingKeys,
+        })
+      : scoped;
 
   const {
     columnOrder: gridColumnOrder,

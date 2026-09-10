@@ -18,13 +18,9 @@ export const reorderTableColumnAggregates = ({
     rankById.get(toTableAggregateToken(aggregate)) ?? unrankedRank;
 
   return {
+    ...grouping,
     aggregates: grouping.aggregates.toSorted(
       (left, right) => rankOf(left) - rankOf(right),
     ),
-    keys: grouping.keys,
-    mode: grouping.mode,
-    periods: grouping.periods,
-    shares: grouping.shares,
-    totalsPlacement: grouping.totalsPlacement,
   };
 };

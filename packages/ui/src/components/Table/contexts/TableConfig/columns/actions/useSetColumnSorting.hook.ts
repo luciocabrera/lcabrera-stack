@@ -2,6 +2,7 @@ import type { Sorting } from '#ui/types/ui.types';
 
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
+import { toColumnAxisDerivationArgs } from '#ui/components/Table/utils/toColumnAxisDerivationArgs.util';
 
 import { usePersistTableStateAction } from './hooks/usePersistTableStateAction.hook';
 import { getPinningActionContext, resolveColumnSortingUpdate } from './utils';
@@ -34,6 +35,10 @@ export const useSetColumnSorting = <TData>() => {
       existingSorting,
       groupingKeys: grouping.keys,
       sort: { columnKey, direction },
+      ...toColumnAxisDerivationArgs({
+        columnAxis: grouping.columnAxis,
+        data: dataStore.get().data,
+      }),
     });
 
     if (result.kind !== 'updated') return;

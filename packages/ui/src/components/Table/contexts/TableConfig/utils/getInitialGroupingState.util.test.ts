@@ -59,6 +59,24 @@ describe('getInitialGroupingState', () => {
     });
   });
 
+  it('seeds a column axis that is not also a row key', () => {
+    expect(
+      getInitialGroupingState({
+        columnAxis: 'order_status',
+        keys: ['region'],
+      }).columnAxis,
+    ).toBe('order_status');
+  });
+
+  it('drops a column axis that is also a row key', () => {
+    expect(
+      getInitialGroupingState({
+        columnAxis: 'order_status',
+        keys: ['order_status'],
+      }).columnAxis,
+    ).toBeUndefined();
+  });
+
   it('defaults to no grouping when the loader supplied none', () => {
     expect(getInitialGroupingState({})).toStrictEqual({
       aggregates: [],

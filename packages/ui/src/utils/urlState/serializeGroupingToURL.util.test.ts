@@ -140,6 +140,37 @@ describe('serializeGroupingToURL', () => {
     ).toBe('{"keys":["order_status"]}');
   });
 
+  it('carries the column-axis key beside the keys', () => {
+    expect(
+      serializeGroupingToURL({
+        grouping: {
+          aggregates: [],
+          columnAxis: 'order_status',
+          keys: ['shipping_country'],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+          totalsPlacement: 'last',
+        },
+      }),
+    ).toBe('{"axis":"order_status","keys":["shipping_country"]}');
+  });
+
+  it('leaves the axis out when none is set', () => {
+    expect(
+      serializeGroupingToURL({
+        grouping: {
+          aggregates: [],
+          keys: ['shipping_country'],
+          mode: 'flat',
+          periods: {},
+          shares: [],
+          totalsPlacement: 'last',
+        },
+      }),
+    ).toBe('{"keys":["shipping_country"]}');
+  });
+
   it('carries the shares beside the keys', () => {
     expect(
       serializeGroupingToURL({

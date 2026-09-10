@@ -3,6 +3,7 @@ import type { TableGroupingState } from '#ui/components/Table/Table.types';
 import {
   areGroupAggregatesLegal,
   areGroupKeysLegal,
+  pruneColumnAxis,
   pruneGroupPeriods,
   pruneGroupShares,
 } from '../grouping/utils';
@@ -18,6 +19,7 @@ const NO_GROUPING: TableGroupingState = {
 
 export const getInitialGroupingState = ({
   aggregates = [],
+  columnAxis,
   keys = [],
   mode = 'flat',
   periods = {},
@@ -32,6 +34,8 @@ export const getInitialGroupingState = ({
     return { ...NO_GROUPING, totalsPlacement };
   }
 
+  const nextColumnAxis = pruneColumnAxis({ columnAxis, keys });
+
   return {
     aggregates: [...aggregates],
     keys: [...keys],
@@ -45,5 +49,6 @@ export const getInitialGroupingState = ({
       shares,
     }),
     totalsPlacement,
+    ...(nextColumnAxis !== undefined && { columnAxis: nextColumnAxis }),
   };
 };

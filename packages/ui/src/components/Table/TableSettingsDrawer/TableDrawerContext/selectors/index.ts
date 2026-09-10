@@ -4,6 +4,7 @@ export { useGetColumnPinning } from './useGetColumnPinning.hook';
 export { useGetColumnsSorting } from './useGetColumnsSorting.hook';
 export { useGetColumnVisibility } from './useGetColumnVisibility.hook';
 export { useGetGroupingAggregates } from './useGetGroupingAggregates.hook';
+export { useGetGroupingColumnAxis } from './useGetGroupingColumnAxis.hook';
 export { useGetGroupingKeys } from './useGetGroupingKeys.hook';
 export { useGetGroupingMode } from './useGetGroupingMode.hook';
 export { useGetGroupingPeriods } from './useGetGroupingPeriods.hook';

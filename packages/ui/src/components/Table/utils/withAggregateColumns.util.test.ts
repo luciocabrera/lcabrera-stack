@@ -36,6 +36,14 @@ const noPinning: ColumnPinningState<Row> = { left: [], right: [] };
 
 type RunArgs = {
   readonly aggregates: readonly TableColumnAggregate[];
+  readonly columnAxis?: {
+    readonly emitted: readonly {
+      readonly alias: string;
+      readonly axis?: { readonly value: unknown };
+      readonly columnKey: string;
+      readonly fn: TableColumnAggregate['fn'];
+    }[];
+  };
   readonly columnOrder?: readonly string[];
   readonly columnPinning?: ColumnPinningState<Row>;
   readonly columns?: readonly TableColumn<Row>[];
@@ -45,6 +53,7 @@ type RunArgs = {
 
 const run = ({
   aggregates,
+  columnAxis,
   columnOrder = ['order_id', 'customer_type', 'total_amount', 'order_count'],
   columnPinning = noPinning,
   columns: runColumns = columns,
@@ -58,6 +67,7 @@ const run = ({
     columns: runColumns,
     columnVisibility: columnVisibility as never,
     groupingKeys,
+    ...(columnAxis !== undefined && { columnAxis }),
   });
 
 const withTotalAmount = (patch: Partial<TableColumn<Row>>) =>
@@ -360,6 +370,97 @@ describe('a measured column the consumer locked', () => {
       isFilterable: false,
       isGroupable: false,
       isSortable: true,
+    });
+  });
+});
+
+describe('a column axis', () => {
+  const emitted = [
+    {
+      alias: 'sum_total_amount_c0',
+      axis: { value: 'Pending' },
+      columnKey: 'total_amount',
+      fn: 'sum' as const,
+    },
+    {
+      alias: 'sum_total_amount_c1',
+      axis: { value: undefined },
+      columnKey: 'total_amount',
+      fn: 'sum' as const,
+    },
+  ];
+
+  it('uses the emitted alias as the column key and the axis value as the header', () => {
+    const result = run({
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+      columnAxis: { emitted },
+    });
+
+    expect(keysOf(result)).toStrictEqual([
+      'order_id',
+      'customer_type',
+      'sum_total_amount_c0',
+      'sum_total_amount_c1',
+      'order_count',
+    ]);
+    expect(columnAt({ key: 'sum_total_amount_c0', result })?.label).toBe(
+      'Pending',
+    );
+  });
+
+  it('renders SQL NULL as an empty header', () => {
+    const result = run({
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+      columnAxis: { emitted },
+    });
+
+    expect(columnAt({ key: 'sum_total_amount_c1', result })?.label).toBe('');
+  });
+
+  it('emits no measure columns when the axis is empty', () => {
+    const result = run({
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+      columnAxis: { emitted: [] },
+    });
+
+    expect(keysOf(result)).toStrictEqual([
+      'order_id',
+      'customer_type',
+      'order_count',
+    ]);
+  });
+
+  it('bands several measures under one axis value', () => {
+    const result = run({
+      aggregates: [
+        { columnKey: 'total_amount', fn: 'sum' },
+        { columnKey: 'total_amount', fn: 'avg' },
+      ],
+      columnAxis: {
+        emitted: [
+          {
+            alias: 'sum_total_amount_c0',
+            axis: { value: 'Pending' },
+            columnKey: 'total_amount',
+            fn: 'sum',
+          },
+          {
+            alias: 'avg_total_amount_c0',
+            axis: { value: 'Pending' },
+            columnKey: 'total_amount',
+            fn: 'avg',
+          },
+        ],
+      },
+    });
+
+    expect(columnAt({ key: 'sum_total_amount_c0', result })).toMatchObject({
+      headerGroupLabel: 'Pending',
+      label: 'Sum',
+    });
+    expect(columnAt({ key: 'avg_total_amount_c0', result })).toMatchObject({
+      headerGroupLabel: 'Pending',
+      label: 'Average',
     });
   });
 });

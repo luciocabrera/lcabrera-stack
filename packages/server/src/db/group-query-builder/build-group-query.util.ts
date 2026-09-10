@@ -57,10 +57,25 @@ export const buildGroupQuery = ({
 
   assertGroupAggregates({ aggregates, allowedColumns, capabilities });
 
+  const leadingCount = aggregates[0];
+  const hasUnexpandedCount =
+    aggregates.length > 1 &&
+    leadingCount?.fn === 'count' &&
+    leadingCount.column === undefined &&
+    leadingCount.filters === undefined;
+  const expandable = hasUnexpandedCount ? aggregates.slice(1) : aggregates;
   const expanded =
     columnAxis === undefined
       ? undefined
-      : expandColumnAxisAggregates({ aggregates, columnAxis });
+      : [
+          ...(hasUnexpandedCount && leadingCount !== undefined
+            ? [leadingCount]
+            : []),
+          ...expandColumnAxisAggregates({
+            aggregates: expandable,
+            columnAxis,
+          }),
+        ];
   const queryAggregates = expanded ?? aggregates;
 
   if (expanded !== undefined) {

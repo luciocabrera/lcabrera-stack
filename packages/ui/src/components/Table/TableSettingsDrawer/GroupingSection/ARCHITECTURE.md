@@ -1,7 +1,8 @@
 # GroupingSection Architecture
 
 The settings drawer's Grouping tab: three sub-tabs over one staged grouping —
-the group keys in nesting order, the aggregates, and the totals controls.
+the group keys in nesting order, the aggregates, and the advanced controls
+(column axis, totals mode, totals position).
 
 **The totals mode is grouping configuration, not a display setting.** `rollup`
 adds a subtotal row per level and a grand total to what the read returns, so it
@@ -66,6 +67,8 @@ GroupingSection/
 │   ├── AggregateItemContent/           → One measure row: label, share toggle, remove
 │   └── ShareOfTotalToggle/             → Share of the grand total, on the measures it is defined for
 ├── GroupingSectionToolbar/             → Clear/reset, scoped to the keys, the aggregates or the whole grouping (toolbar + footer, and reused in the General tab)
+├── AdvancedSettingsSection/            → Column axis, totals mode, totals position
+│   └── ColumnAxisSection/              → Single column picker for the axis key
 └── utils/
     ├── toGroupKeyItems.util.ts         → Staged keys + labels, in nesting order
     ├── toAggregateItems.util.ts        → Staged aggregates + labels + a per-entry id, in staged order
@@ -242,7 +245,7 @@ difference, since it subtracts what the column carries anyway.
 
 The section is a shell over a nested `Tabs`. **Group Keys** holds the key picker
 and the staged key list; **Aggregates** holds the measure picker and the staged
-measure list; **Advanced** holds `GroupingModeSection` and
+measure list; **Advanced** holds `ColumnAxisSection`, `GroupingModeSection` and
 `TotalsPlacementSection`. One subject per pane, so answering one question does
 not mean scrolling past another
 ([ADR-122](../../../../../../../docs/decisions/ADR-122-the-grouping-tab-holds-its-three-subjects-as-sub-tabs.md)).

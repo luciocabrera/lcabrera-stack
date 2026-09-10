@@ -591,6 +591,26 @@ describe('a column axis', () => {
     ).toThrow('a column axis would emit 2');
   });
 
+  it('keeps the leading count(*) unexpanded so the group still has a size', () => {
+    const result = buildGroupQuery(
+      descriptor({
+        aggregates: [{ fn: 'count' }, { column: 'total_amount', fn: 'sum' }],
+        columnAxis: {
+          key: 'order_status',
+          maxDistinct: 10,
+          values: ['Pending', 'Shipped'],
+        },
+        keys: ['shipping_country'],
+      }),
+    );
+
+    expect(result.aggregates.map((aggregate) => aggregate.alias)).toEqual([
+      'count_rows',
+      'sum_total_amount_c0',
+      'sum_total_amount_c1',
+    ]);
+  });
+
   it('does not change a read that has no column axis', () => {
     const withAxisFieldAbsent = buildGroupQuery(descriptor());
     const withUndefined = buildGroupQuery(

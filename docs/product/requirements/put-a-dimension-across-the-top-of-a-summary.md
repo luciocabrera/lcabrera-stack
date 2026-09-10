@@ -3,16 +3,21 @@ id: put-a-dimension-across-the-top-of-a-summary
 lines:
   - application
 persona: data-user
-state: unmet
+state: met
 packages:
   - server
   - ui
 requires:
   - browse-and-edit-a-table-without-writing-sql
 issues:
+  - 1170
   - 1164
   - 660
 evidence:
+  - type: command
+    ref: vp run test:ci
+  - type: test
+    ref: packages/ui/src/components/Table/Table.columnAxis.test.tsx
   - type: test
     ref: packages/server/src/db/group-query-builder/build-group-query.util.test.ts
   - type: code
@@ -39,11 +44,12 @@ grouping I already use.
 - The ceiling on those columns is supplied by the caller, not invented by the
   package. Decided by `columnAxis.maxDistinct` being required, and by
   `readPivotMaxDistinct` reading `DB_PIVOT_MAX_DISTINCT`.
-- The grid paints a successful result rather than refusing it for width. Not
-  decided yet — column virtualization is a later child of #660.
+- The grid paints a successful result rather than refusing it for width.
+  Decided by `Table.columnAxis.test.tsx` → "paints unique axis values as
+  headers with the measure in the cells". Column virtualization is a later
+  child of #660.
 
 ## Notes
 
-The SQL half lands with #1164. The requirement stays `unmet` until a reader can
-see the matrix in the grid, because that is the persona's test, not whether the
-builder emits `FILTER`.
+The SQL half landed with #1164. The paint half is `Table.columnAxis.test.tsx`.
+Breaking the header assertion in that file fails `vp run test:ci`.

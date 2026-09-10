@@ -491,6 +491,12 @@ A module-level context cannot keep `TData`. Form, TableConfig, and TableData pro
 
 ---
 
+## Derived columns from a grouped read
+
+A grouped grid paints measures as ordinary `TableColumn` objects. `withAggregateColumns` is the one derived-column path: a token (`columnKey:fn`) when there is no axis, the emitted `alias` when there is one, with `axis.value` as the header (SQL NULL is empty). Do not add a second mapper, and do not grow `Table`'s public `columns` prop past `TableColumn[]`.
+
+---
+
 ## Thin Shell + Self-Connected Delegates (Store Wiring Ownership)
 
 Every store slice is read — and every action dispatched — **inside the component that actually renders it**, never in a parent that only forwards the values as props.

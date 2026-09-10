@@ -11,6 +11,8 @@ type CommitResolvedPinningStateArgs<TData> = CommitResolvedColumnStateArgs<
 
 export const commitResolvedPinningState = <TData>({
   aggregates,
+  columnAxis,
+  columnAxisEmitted,
   columnOrder,
   columnPinning,
   columns,
@@ -32,6 +34,8 @@ export const commitResolvedPinningState = <TData>({
       columnSizing,
       columnVisibility,
       groupingKeys,
+      ...(columnAxis !== undefined && { columnAxis }),
+      ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
     });
 
   if (

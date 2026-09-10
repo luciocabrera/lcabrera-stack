@@ -79,6 +79,10 @@ const MockTableTitle = vi.hoisted(() => {
   };
 });
 
+vi.mock('../contexts/TableConfig/grouping/actions', () => ({
+  useSyncColumnAxisColumns: vi.fn(),
+}));
+
 vi.mock('../contexts/TableConfig/meta/actions', () => ({
   useToogleTableIsTableSettingsOpen: useToogleTableIsTableSettingsOpenMock,
 }));

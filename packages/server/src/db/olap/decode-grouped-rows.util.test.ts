@@ -66,8 +66,8 @@ describe('decodeGroupedRows', () => {
 
     expect(summary?.count).toBe(42);
     expect(summary?.aggregates).toStrictEqual([
-      { columnKey: 'amount', fn: 'sum', value: 1000 },
-      { columnKey: 'quantity', fn: 'avg', value: 7 },
+      { alias: 'sum_amount', columnKey: 'amount', fn: 'sum', value: 1000 },
+      { alias: 'avg_quantity', columnKey: 'quantity', fn: 'avg', value: 7 },
     ]);
   });
 
@@ -101,8 +101,8 @@ describe('decodeGroupedRows', () => {
     });
 
     expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.aggregates).toStrictEqual([
-      { columnKey: 'amount', fn: 'sum', value: 1000 },
-      { columnKey: 'amount', fn: 'avg', value: 250 },
+      { alias: 'sum_amount', columnKey: 'amount', fn: 'sum', value: 1000 },
+      { alias: 'avg_amount', columnKey: 'amount', fn: 'avg', value: 250 },
     ]);
   });
 
@@ -193,6 +193,71 @@ describe('decodeGroupedRows', () => {
         ],
       }),
     ).toHaveLength(2);
+  });
+});
+
+describe('a column axis', () => {
+  it('decodes an expanded list keyed by alias, carrying the axis value', () => {
+    const [decoded] = decodeGroupedRows({
+      aggregates: [
+        { alias: 'count_rows', fn: 'count' },
+        {
+          alias: 'sum_amount_c0',
+          axis: { value: 'Pending' },
+          column: 'amount',
+          fn: 'sum',
+        },
+        {
+          alias: 'sum_amount_c1',
+          axis: { value: undefined },
+          column: 'amount',
+          fn: 'sum',
+        },
+      ],
+      columnKeys: ['status'],
+      maskAlias: 'grouping_mask',
+      requested: [{ column: 'amount', fn: 'sum' }],
+      rows: [
+        {
+          count_rows: '4',
+          grouping_mask: 0,
+          status: 'Business',
+          sum_amount_c0: 100,
+          sum_amount_c1: 20,
+        },
+      ],
+    });
+
+    expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.aggregates).toStrictEqual([
+      {
+        alias: 'sum_amount_c0',
+        axis: { value: 'Pending' },
+        columnKey: 'amount',
+        fn: 'sum',
+        value: 100,
+      },
+      {
+        alias: 'sum_amount_c1',
+        axis: { value: undefined },
+        columnKey: 'amount',
+        fn: 'sum',
+        value: 20,
+      },
+    ]);
+  });
+
+  it('decodes an empty axis as no measure columns', () => {
+    const [decoded] = decodeGroupedRows({
+      aggregates: [{ alias: 'count_rows', fn: 'count' }],
+      columnAxis: { values: [] },
+      columnKeys: ['status'],
+      maskAlias: 'grouping_mask',
+      requested: [{ column: 'amount', fn: 'sum' }],
+      rows: [{ count_rows: '4', grouping_mask: 0, status: 'Business' }],
+    });
+
+    expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.aggregates).toStrictEqual([]);
+    expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.count).toBe(4);
   });
 });
 

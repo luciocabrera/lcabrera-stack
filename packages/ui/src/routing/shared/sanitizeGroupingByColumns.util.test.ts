@@ -28,6 +28,7 @@ const NO_GROUPING = getInitialGroupingState({});
 
 type GroupingArgs = {
   readonly aggregates?: TableGroupingState['aggregates'];
+  readonly columnAxis?: string;
   readonly keys: readonly string[];
   readonly mode?: TableGroupingState['mode'];
   readonly periods?: TableGroupingState['periods'];
@@ -37,6 +38,7 @@ type GroupingArgs = {
 
 const grouping = ({
   aggregates = [],
+  columnAxis,
   keys,
   mode = 'flat',
   periods = {},
@@ -49,6 +51,7 @@ const grouping = ({
   periods,
   shares,
   totalsPlacement,
+  ...(columnAxis !== undefined && { columnAxis }),
 });
 
 describe('sanitizeGroupingByColumns', () => {
@@ -300,6 +303,42 @@ describe('sanitizeGroupingByColumns', () => {
     expect(
       sanitizeGroupingByColumns({ columns, grouping: applied }),
     ).toStrictEqual(applied);
+  });
+
+  it('keeps an axis that names a groupable column that is not a row key', () => {
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          columnAxis: 'name',
+          keys: ['status'],
+        }),
+      }).columnAxis,
+    ).toBe('name');
+  });
+
+  it('refuses the whole configuration when the axis is also a row key', () => {
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          columnAxis: 'status',
+          keys: ['status'],
+        }),
+      }),
+    ).toStrictEqual(NO_GROUPING);
+  });
+
+  it('refuses the whole configuration when the axis names no declared column', () => {
+    expect(
+      sanitizeGroupingByColumns({
+        columns,
+        grouping: grouping({
+          columnAxis: 'nope',
+          keys: ['status'],
+        }),
+      }),
+    ).toStrictEqual(NO_GROUPING);
   });
 
   it('refuses a repeated share, as it refuses a repeated key', () => {

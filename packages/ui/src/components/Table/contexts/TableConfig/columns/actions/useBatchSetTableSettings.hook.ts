@@ -8,6 +8,7 @@ import { usePersistTableUiFlagsAction } from '#ui/components/Table/contexts/Tabl
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { getHasQueryChanged } from '#ui/components/Table/utils';
+import { toColumnAxisDerivationArgs } from '#ui/components/Table/utils/toColumnAxisDerivationArgs.util';
 
 import type { BatchTableSettingsUpdate } from './utils/resolveBatchTableSettingsUpdate.util';
 
@@ -52,6 +53,12 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       columns: columnsState?.columns ?? [],
       groupingKeys: nextGrouping.keys,
       settings,
+      ...toColumnAxisDerivationArgs({
+        columnAxis: nextGrouping.columnAxis,
+        ...(groupingUpdate.kind !== 'updated' && {
+          data: dataStore.get().data,
+        }),
+      }),
     });
     const hasQueryChanged = getHasQueryChanged<TData>({
       columnsState,

@@ -35,6 +35,7 @@ const isSameGrouping = ({
 
   return (
     nextGrouping.mode === existingGrouping.mode &&
+    nextGrouping.columnAxis === existingGrouping.columnAxis &&
     nextGrouping.keys.length === existingGrouping.keys.length &&
     nextGrouping.keys.every(
       (key, index) => key === existingGrouping.keys[index],

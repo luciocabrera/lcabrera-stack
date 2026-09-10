@@ -21,6 +21,7 @@ import {
 import { TableWrapperContext } from '#ui/components/Table/contexts/TableWrapper/TableWrapperContext.context';
 import { TableBase } from '#ui/components/Table/TableBase';
 import { TableBody } from '#ui/components/Table/TableBody';
+import { collectColumnAxisEmitted } from '#ui/components/Table/utils/collectColumnAxisEmitted.util';
 
 import { attachScrollMetrics } from './attachScrollMetrics.util';
 
@@ -58,6 +59,7 @@ export const GroupedTableTestShell = <TData extends Record<string, unknown>>({
 
   return (
     <TableConfigProvider<TData>
+      columnAxisEmitted={collectColumnAxisEmitted(data)}
       columnsState={{ columns }}
       groupingState={groupingState}
       metaState={{

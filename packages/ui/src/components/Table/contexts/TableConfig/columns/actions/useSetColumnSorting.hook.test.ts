@@ -51,7 +51,7 @@ const {
     get: vi.fn(() => ({ aggregates, keys: groupingKeys })),
   };
 
-  const mockDataStore = { set: vi.fn() };
+  const mockDataStore = { get: vi.fn(() => ({ data: [] })), set: vi.fn() };
   const mockPersistTableState = vi.fn();
 
   return {

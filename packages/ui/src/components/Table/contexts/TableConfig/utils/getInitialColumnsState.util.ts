@@ -7,6 +7,7 @@ import type {
   TableColumnsState,
   TableCrudConfig,
 } from '#ui/components/Table/Table.types';
+import type { ColumnAxisEmittedAggregate } from '#ui/components/Table/utils/columnAxisEmitted.types';
 
 import { ACTIONS_COLUMN_KEY } from '#ui/components/Table/Table.constants';
 import {
@@ -18,12 +19,16 @@ type GetInitialTableStateArgs<TData extends Record<string, unknown>> = Partial<
   TableColumnsState<TData>
 > & {
   readonly aggregates?: readonly TableColumnAggregate[];
+  readonly columnAxis?: string;
+  readonly columnAxisEmitted?: readonly ColumnAxisEmittedAggregate[];
   readonly crud?: TableCrudConfig;
   readonly groupingKeys?: readonly string[];
 };
 
 export const getInitialColumnsState = <TData extends Record<string, unknown>>({
   aggregates = [],
+  columnAxis,
+  columnAxisEmitted,
   columnFilters = {} as ColumnFiltersState<TData>,
   columnOrder = [],
   columnPinning = { left: [], right: [] },
@@ -70,6 +75,8 @@ export const getInitialColumnsState = <TData extends Record<string, unknown>>({
     columnVisibility: nextColumnVisibility,
     groupingKeys,
     sorting,
+    ...(columnAxis !== undefined && { columnAxis }),
+    ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
   });
 
   return {

@@ -44,6 +44,11 @@ export const createTableConfigColumnsActionMocks = <
     }),
   };
 
+  const mockDataStore = {
+    get: vi.fn(() => ({ data: [] })),
+    set: vi.fn(),
+  };
+
   const mockPersistTableState = vi.fn(() => true);
 
   const mockGroupingStore = {
@@ -60,6 +65,7 @@ export const createTableConfigColumnsActionMocks = <
 
   return {
     mockColumnsStore,
+    mockDataStore,
     mockGroupingStore,
     mockMetaStore,
     mockPersistTableState,

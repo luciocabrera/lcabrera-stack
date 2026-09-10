@@ -15,6 +15,7 @@ type WithGroupedColumnScopeArgs<TData> = {
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
   readonly columnVisibility: ColumnVisibilityState<TData>;
+  readonly extraKeys?: readonly string[];
   readonly groupingKeys: readonly string[];
 };
 
@@ -24,6 +25,7 @@ export const withGroupedColumnScope = <TData>({
   columnPinning,
   columns,
   columnVisibility,
+  extraKeys = [],
   groupingKeys,
 }: WithGroupedColumnScopeArgs<TData>) => {
   const unchanged = { columnOrder, columnPinning, columns, columnVisibility };
@@ -35,6 +37,7 @@ export const withGroupedColumnScope = <TData>({
   const scopedKeys = new Set<string>([
     ...keys,
     ...aggregates.map((aggregate) => toTableAggregateToken(aggregate)),
+    ...extraKeys,
   ]);
 
   return {

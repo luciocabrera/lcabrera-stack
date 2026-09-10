@@ -26,6 +26,7 @@ import {
 
 export const TableConfigProvider = <TData extends Record<string, unknown>>({
   children,
+  columnAxisEmitted,
   columnsState,
   groupingState,
   metaState,
@@ -39,6 +40,10 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     aggregates: normalizedGroupingState.aggregates,
     crud: metaState?.crud,
     groupingKeys: normalizedGroupingState.keys,
+    ...(normalizedGroupingState.columnAxis !== undefined && {
+      columnAxis: normalizedGroupingState.columnAxis,
+    }),
+    ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
   });
 
   const columnsStore = useStore<TableColumnsState<TData>>(
@@ -86,10 +91,15 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
         aggregates: grouping.aggregates,
         crud: meta.crud,
         groupingKeys: grouping.keys,
+        ...(grouping.columnAxis !== undefined && {
+          columnAxis: grouping.columnAxis,
+        }),
+        ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
       }),
       store: columnsStore,
     });
   }, [
+    columnAxisEmitted,
     columnsState,
     columnsStore,
     groupingState,

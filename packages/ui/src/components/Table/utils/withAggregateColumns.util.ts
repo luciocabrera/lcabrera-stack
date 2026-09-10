@@ -6,14 +6,19 @@ import type {
   TableColumn,
   TableColumnAggregate,
 } from '../Table.types';
+import type { ColumnAxisEmittedAggregate } from './columnAxisEmitted.types';
 
 import { TABLE_AGGREGATE_LABELS } from '../Table.constants';
 import { resolveAggregateDataType } from '../TableGroupAggregate/utils/resolveAggregateDataType.util';
+import { expandAxisAggregateColumns } from './expandAxisAggregateColumns.util';
 import { resolveGroupedColumnWidthBand } from './resolveGroupedColumnWidthBand.util';
 import { toTableAggregateToken } from './tableAggregateToken.util';
 
 type WithAggregateColumnsArgs<TData> = {
   readonly aggregates: readonly TableColumnAggregate[];
+  readonly columnAxis?: {
+    readonly emitted: readonly ColumnAxisEmittedAggregate[];
+  };
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
@@ -23,12 +28,25 @@ type WithAggregateColumnsArgs<TData> = {
 
 export const withAggregateColumns = <TData>({
   aggregates,
+  columnAxis,
   columnOrder,
   columnPinning,
   columns,
   columnVisibility,
   groupingKeys,
 }: WithAggregateColumnsArgs<TData>) => {
+  if (columnAxis !== undefined) {
+    return expandAxisAggregateColumns({
+      aggregates,
+      columnOrder,
+      columnPinning,
+      columns,
+      columnVisibility,
+      emitted: columnAxis.emitted,
+      groupingKeys,
+    });
+  }
+
   const unchanged = { columnOrder, columnPinning, columns, columnVisibility };
 
   if (aggregates.length === 0) return unchanged;

@@ -17,6 +17,7 @@ const NO_GROUPING: CompactGrouping = { keys: [] };
 
 const COMPACT_GROUPING_MEMBERS: ReadonlySet<string> = new Set([
   'agg',
+  'axis',
   'gran',
   'keys',
   'mode',
@@ -97,6 +98,9 @@ const readOptionalMember = <TValue>({
 const narrowMode = (value: unknown) =>
   isTableGroupingMode(value) ? value : undefined;
 
+const narrowAxis = (value: unknown) =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
 const narrowCompactGrouping = (parsed: unknown) => {
   if (!isObject(parsed) || Array.isArray(parsed)) {
     return;
@@ -121,6 +125,11 @@ const narrowCompactGrouping = (parsed: unknown) => {
     narrow: narrowAggregateTokens,
     parsed,
   });
+  const axis = readOptionalMember({
+    member: 'axis',
+    narrow: narrowAxis,
+    parsed,
+  });
   const gran = readOptionalMember({
     member: 'gran',
     narrow: (value) => narrowGranularities({ keys, value }),
@@ -139,6 +148,7 @@ const narrowCompactGrouping = (parsed: unknown) => {
 
   if (
     agg.kind === 'refused' ||
+    axis.kind === 'refused' ||
     gran.kind === 'refused' ||
     mode.kind === 'refused' ||
     share.kind === 'refused'
@@ -148,6 +158,7 @@ const narrowCompactGrouping = (parsed: unknown) => {
 
   return {
     ...(agg.kind === 'present' && { agg: agg.value }),
+    ...(axis.kind === 'present' && { axis: axis.value }),
     ...(gran.kind === 'present' && { gran: gran.value }),
     keys,
     ...(mode.kind === 'present' && { mode: mode.value }),
@@ -164,11 +175,12 @@ export const groupingCodec = createUrlStateCodec<CompactGrouping>({
   // The token form is written **here and nowhere else**, so the string shape and
   // the right-split that reads it back stay one decision (`narrowAggregateTokens`
   // above). No component ever builds or parses one.
-  compact: ({ agg, gran, keys, mode, share }) => ({
+  compact: ({ agg, axis, gran, keys, mode, share }) => ({
     ...(agg !== undefined &&
       agg.length > 0 && {
         agg: agg.map((entry) => toTableAggregateToken(entry)),
       }),
+    ...(axis !== undefined && axis.length > 0 && { axis }),
     ...(gran !== undefined && Object.keys(gran).length > 0 && { gran }),
     keys,
     ...(mode !== undefined && mode !== 'flat' && { mode }),

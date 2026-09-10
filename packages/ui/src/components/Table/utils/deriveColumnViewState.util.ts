@@ -8,12 +8,16 @@ import type {
   TableColumnAggregate,
 } from '#ui/components/Table/Table.types';
 
+import type { ColumnAxisEmittedAggregate } from './columnAxisEmitted.types';
+
 import { getNormalizedColumns } from './getNormalizedColumns.util';
 import { getPinnedDerivedColumnsState } from './getPinnedDerivedColumnsState.util';
 import { getStaticColumnKeys } from './getStaticColumnKeys.util';
 
 type DeriveColumnViewStateArgs<TData> = {
   readonly aggregates: readonly TableColumnAggregate[];
+  readonly columnAxis?: string;
+  readonly columnAxisEmitted?: readonly ColumnAxisEmittedAggregate[];
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
@@ -25,6 +29,8 @@ type DeriveColumnViewStateArgs<TData> = {
 
 export const deriveColumnViewState = <TData>({
   aggregates,
+  columnAxis,
+  columnAxisEmitted,
   columnOrder,
   columnPinning,
   columns,
@@ -46,6 +52,8 @@ export const deriveColumnViewState = <TData>({
     columnSizing,
     columnVisibility,
     groupingKeys,
+    ...(columnAxis !== undefined && { columnAxis }),
+    ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
   });
 
   const normalizedColumns = getNormalizedColumns<TData>({

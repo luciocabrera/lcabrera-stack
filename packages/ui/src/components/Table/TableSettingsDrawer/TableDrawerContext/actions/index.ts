@@ -19,6 +19,7 @@ export { useResetTableSettings } from './useResetTableSettings.hook';
 export { useSetColumnFilters } from './useSetColumnFilters.hook';
 export { useSetColumnsSizing } from './useSetColumnsSizing.hook';
 export { useSetColumnsSortings } from './useSetColumnsSortings.hook';
+export { useSetGroupingColumnAxis } from './useSetGroupingColumnAxis.hook';
 export { useSetGroupingMode } from './useSetGroupingMode.hook';
 export { useSetGroupKeyPeriod } from './useSetGroupKeyPeriod.hook';
 export { useSetGroupKeys } from './useSetGroupKeys.hook';

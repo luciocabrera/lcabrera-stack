@@ -23,13 +23,16 @@ them look separable.
 
 ## Files
 
-| File                          | Role                                                                                                                                                                               |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `decode-grouped-rows.util.ts` | **Entry point.** `toGroupAggregates` / `decodeGroupedRows` — the `count(*)`-first pair — plus `toGroupSort`, which appends an aggregate term for a sort naming a requested measure |
-| `to-drill-read.util.ts`       | **Entry point.** A group row → the paginated read of the rows underneath it, or a typed refusal                                                                                    |
-| `to-group-row.util.ts`        | **Entry point.** One row of a grouped read → the group summary a grid renders, decoding the mask                                                                                   |
-| `to-group-label.util.ts`      | One group key value → its display string. Composed by `to-group-row`; the closed dimension vocabulary                                                                              |
-| `olap.types.ts`               | `OlapDrillRead`, `OlapDrillRefusal`, `OlapDrillTranslation`                                                                                                                        |
+| File                                  | Role                                                                                                                                                                                                                                               |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `decode-grouped-rows.util.ts`         | **Entry point.** `toGroupAggregates` / `decodeGroupedRows` — the `count(*)`-first pair, plus the column-axis expansion that makes selected ≠ requested — plus `toGroupSort`, which appends an aggregate term for a sort naming a requested measure |
+| `decode-axis-aggregates.util.ts`      | Private. Pairs each expanded alias with the requested measure and carries `axis` through                                                                                                                                                           |
+| `decode-requested-aggregates.util.ts` | Private. The 1:1 half: each requested measure at the position `toGroupAggregates` assigned                                                                                                                                                         |
+| `is-unexpanded-count.util.ts`         | Private. The leading `count(*)` an axis expansion leaves unexpanded                                                                                                                                                                                |
+| `to-drill-read.util.ts`               | **Entry point.** A group row → the paginated read of the rows underneath it, or a typed refusal                                                                                                                                                    |
+| `to-group-row.util.ts`                | **Entry point.** One row of a grouped read → the group summary a grid renders, decoding the mask                                                                                                                                                   |
+| `to-group-label.util.ts`              | One group key value → its display string. Composed by `to-group-row`; the closed dimension vocabulary                                                                                                                                              |
+| `olap.types.ts`                       | `OlapDrillRead`, `OlapDrillRefusal`, `OlapDrillTranslation`                                                                                                                                                                                        |
 
 ## The mask is the only thing that separates a subtotal from a NULL
 

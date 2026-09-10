@@ -7,6 +7,7 @@ import type {
   TableColumn,
   TableColumnAggregate,
 } from '#ui/components/Table/Table.types';
+import type { ColumnAxisEmittedAggregate } from '#ui/components/Table/utils/columnAxisEmitted.types';
 import type { Sorting } from '#ui/types/ui.types';
 
 import { deriveColumnViewState } from '#ui/components/Table/utils';
@@ -15,6 +16,8 @@ import { serializeSortingToURL } from '#ui/utils/urlState';
 
 type ResolveColumnSortingUpdateArgs<TData> = {
   readonly aggregates: readonly TableColumnAggregate[];
+  readonly columnAxis?: string;
+  readonly columnAxisEmitted?: readonly ColumnAxisEmittedAggregate[];
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
@@ -44,6 +47,8 @@ type ResolveColumnSortingUpdateResult<TData> =
 
 export const resolveColumnSortingUpdate = <TData>({
   aggregates,
+  columnAxis,
+  columnAxisEmitted,
   columnOrder,
   columnPinning,
   columns,
@@ -89,6 +94,8 @@ export const resolveColumnSortingUpdate = <TData>({
       columnVisibility,
       groupingKeys,
       sorting,
+      ...(columnAxis !== undefined && { columnAxis }),
+      ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
     }),
   };
 };

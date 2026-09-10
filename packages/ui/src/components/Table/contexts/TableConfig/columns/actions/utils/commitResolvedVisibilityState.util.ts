@@ -13,6 +13,8 @@ type CommitResolvedVisibilityStateArgs<TData> = CommitResolvedColumnStateArgs<
 
 export const commitResolvedVisibilityState = <TData>({
   aggregates,
+  columnAxis,
+  columnAxisEmitted,
   columnOrder,
   columnPinning,
   columns,
@@ -34,6 +36,8 @@ export const commitResolvedVisibilityState = <TData>({
       columnSizing,
       columnVisibility,
       groupingKeys,
+      ...(columnAxis !== undefined && { columnAxis }),
+      ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
     });
 
   const didPersist = persistTableState([
