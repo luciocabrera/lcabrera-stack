@@ -27,7 +27,6 @@ const {
   mockPersistTableState,
   mockUsePersistTableStateAction,
   mockUseTableConfigContextValue,
-  mockUseTableDataContextValue,
   resetMocks,
   setAggregates,
   setColumnsState,
@@ -41,13 +40,6 @@ vi.mock(
   '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
     useTableConfigContextValue: () => mockUseTableConfigContextValue(),
-  }),
-);
-
-vi.mock(
-  '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
-  () => ({
-    useTableDataContextValue: () => mockUseTableDataContextValue(),
   }),
 );
 

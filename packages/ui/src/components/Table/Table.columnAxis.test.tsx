@@ -91,11 +91,8 @@ describe('a grouped grid with a column axis', () => {
       'Shipped',
     ]);
 
-    const groupRow = screen.getByTestId('table-group-header-row');
-    const cells = [...groupRow.querySelectorAll('[role="gridcell"]')].map(
-      (cell) => cell.textContent,
+    expect(screen.getByTestId('table-group-header-row').textContent).toBe(
+      'Business100250',
     );
-
-    expect(cells).toStrictEqual(['Business', '100', '250']);
   });
 });

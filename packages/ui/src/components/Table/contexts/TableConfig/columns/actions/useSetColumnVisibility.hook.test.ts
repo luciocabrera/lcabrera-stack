@@ -44,15 +44,6 @@ vi.mock(
   }),
 );
 
-vi.mock(
-  '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
-  () => ({
-    useTableDataContextValue: () => ({
-      dataStore: { get: () => ({ data: [] }), set: () => undefined },
-    }),
-  }),
-);
-
 vi.mock('./hooks/usePersistTableStateAction.hook', () => ({
   usePersistTableStateAction: () => mockUsePersistTableStateAction(),
 }));

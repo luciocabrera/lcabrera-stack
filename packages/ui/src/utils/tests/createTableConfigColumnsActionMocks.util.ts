@@ -44,11 +44,6 @@ export const createTableConfigColumnsActionMocks = <
     }),
   };
 
-  const mockDataStore = {
-    get: vi.fn(() => ({ data: [] })),
-    set: vi.fn(),
-  };
-
   const mockPersistTableState = vi.fn(() => true);
 
   const mockGroupingStore = {
@@ -65,7 +60,6 @@ export const createTableConfigColumnsActionMocks = <
 
   return {
     mockColumnsStore,
-    mockDataStore,
     mockGroupingStore,
     mockMetaStore,
     mockPersistTableState,
@@ -75,7 +69,6 @@ export const createTableConfigColumnsActionMocks = <
       groupingStore: mockGroupingStore,
       metaStore: mockMetaStore,
     }),
-    mockUseTableDataContextValue: () => ({ dataStore: mockDataStore }),
     resetMocks: () => {
       drawersSyncNonce = 0;
       (mockColumnsStore.set as ReturnType<typeof vi.fn>).mockClear();

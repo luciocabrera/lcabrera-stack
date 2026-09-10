@@ -37,7 +37,6 @@ export const useSetColumnSorting = <TData>() => {
       sort: { columnKey, direction },
       ...toColumnAxisDerivationArgs({
         columnAxis: grouping.columnAxis,
-        data: dataStore.get().data,
       }),
     });
 

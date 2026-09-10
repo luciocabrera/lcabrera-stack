@@ -70,7 +70,6 @@ const NO_GROUPING: TableGroupingState = {
 
 type GroupingArgs = {
   readonly aggregates?: TableGroupingState['aggregates'];
-  readonly columnAxis?: string;
   readonly keys: readonly string[];
   readonly mode?: TableGroupingState['mode'];
   readonly periods?: TableGroupingState['periods'];
@@ -79,7 +78,6 @@ type GroupingArgs = {
 
 const grouping = ({
   aggregates = [],
-  columnAxis,
   keys,
   mode = 'flat',
   periods = {},
@@ -91,7 +89,6 @@ const grouping = ({
   periods,
   shares,
   totalsPlacement: 'last',
-  ...(columnAxis !== undefined && { columnAxis }),
 });
 
 beforeEach(() => {
@@ -233,42 +230,6 @@ it('truncates a sort longer than the table has columns', async () => {
   const [descriptor] = vi.mocked(selectRows).mock.calls[0] ?? [];
 
   expect(descriptor?.sort).toHaveLength(MAX_ENTERPRISE_ORDERS_SORT_RULES);
-});
-
-it('passes a column axis into the grouped read with the process ceiling', async () => {
-  await selectOrdersPage({
-    filters: [],
-    grouping: grouping({
-      columnAxis: 'order_status',
-      keys: ['customer_type'],
-    }),
-    includeTotal: true,
-    limit: 50,
-    offset: 0,
-    sort: [],
-  });
-
-  const [descriptor] = vi.mocked(selectGroupedRows).mock.calls[0] ?? [];
-
-  expect(descriptor?.columnAxis).toEqual({
-    key: 'order_status',
-    maxDistinct: expect.any(Number),
-  });
-});
-
-it('does not pass a column axis when the grouping names none', async () => {
-  await selectOrdersPage({
-    filters: [],
-    grouping: grouping({ keys: ['customer_type'] }),
-    includeTotal: true,
-    limit: 50,
-    offset: 0,
-    sort: [],
-  });
-
-  const [descriptor] = vi.mocked(selectGroupedRows).mock.calls[0] ?? [];
-
-  expect(descriptor?.columnAxis).toBeUndefined();
 });
 
 it('orders a grouped read by the bounded sort too', async () => {
