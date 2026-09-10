@@ -68,6 +68,15 @@ describe('a run that reviews nothing must fail', () => {
     );
   });
 
+  it('seeds a findings file that is not already a valid empty answer', () => {
+    const step = stepNamed(COLLECT_STEP);
+    expect(step).toBeDefined();
+    expect(step).toContain(
+      "printf '%s\\n' '(replace this file with the findings array)' > grok-review-findings.json",
+    );
+    expect(step).not.toContain("'[]' > grok-review-findings.json");
+  });
+
   it('cancels a superseded run rather than posting a review of dead code', () => {
     const source = readRepoFile(WORKFLOW);
     expect(source).toContain('group: grok-review-');
@@ -128,9 +137,19 @@ describe('the prompt is the catalog, not a second generic review', () => {
     const prompt = readRepoFile(PROMPT);
     expect(prompt).toContain('.github/skills/code-smell-zen/SKILL.md');
     expect(prompt).toContain('BLOCKER or HIGH');
-    expect(prompt).toContain('MEDIUM, LOW, or NIT');
+    expect(prompt).toContain('MEDIUM, LOW, and NIT do **not** belong');
     expect(prompt).toContain('grok-review-findings.json');
     expect(prompt).toContain('no findings');
+  });
+
+  it('routes a finding by severity, and calibrates what HIGH means', () => {
+    const prompt = readRepoFile(PROMPT);
+    expect(prompt).toContain(
+      '**Give every finding a severity before you decide which file it goes in.**',
+    );
+    expect(prompt).toContain('at least **HIGH**');
+    expect(prompt).toContain('`REACT.EFFECT-STATE-SYNC`');
+    expect(prompt).toContain('while the findings file is `[]`');
   });
 
   it('is the file the workflow concatenates into the prompt Grok sees', () => {
