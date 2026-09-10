@@ -1,6 +1,9 @@
 import { useState } from 'react';
 
-import { SidePanelSectionOverlay } from '#ui/components/SidePanel';
+import {
+  SidePanelSectionMain,
+  SidePanelSectionOverlay,
+} from '#ui/components/SidePanel';
 
 import type { GroupKeysSubsectionProps } from './GroupKeysSubsection.types';
 
@@ -13,7 +16,7 @@ export const GroupKeysSubsection = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
-    <>
+    <SidePanelSectionMain>
       <AddGroupKeySection
         isBusy={isBusy}
         onDropdownOpenChange={setIsDropdownOpen}
@@ -22,6 +25,6 @@ export const GroupKeysSubsection = ({
       <SidePanelSectionOverlay isOpen={isDropdownOpen}>
         <ActiveGroupKeyList isBusy={isBusy} />
       </SidePanelSectionOverlay>
-    </>
+    </SidePanelSectionMain>
   );
 };
