@@ -31,9 +31,14 @@ finding written into the body carries no thread, holds no merge, and is read as
 
 - **BLOCKER** — security, correctness, data-loss, or runtime-crash risk
 - **HIGH** — clearly wrong; will regress maintainability or behavior
-- **MEDIUM** — design weakness worth fixing now (body only)
+- **MEDIUM** — design weakness worth fixing, but not worth holding this pull
+  request for (body only)
 - **LOW** — minor; in-passing fix (body only)
 - **NIT** — style preference, no real cost (body only)
+
+The scale grades the finding; the file you put it in grades whether the merge
+waits for it. MEDIUM is the highest severity a reasonable author may merge and
+fix afterwards.
 
 Calibrate against what you wrote, not against how the finding feels. If you can
 name the file, name a line **this diff added**, and write a concrete fix the
@@ -41,8 +46,8 @@ author could apply, the finding is at least **HIGH** unless leaving it in costs
 nothing but taste. Duplication (`CC.G5`), a new file that contradicts its
 siblings in the same diff (`CC.G11`), and state mirrored through an effect
 (`REACT.EFFECT-STATE-SYNC`) are HIGH by default: each is a defect every later
-change pays for. Keep MEDIUM and below for what you would **not** ask the author
-to change before merge.
+change pays for. Keep MEDIUM and below for what you would **not** hold the merge
+for.
 
 ### `grok-review-findings.json`
 
