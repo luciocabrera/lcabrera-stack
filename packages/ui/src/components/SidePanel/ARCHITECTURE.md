@@ -312,6 +312,14 @@ map for the same reason. A consumer that passes no `onWidthReset` gets no reset:
 the handler returns before touching the event, so a double-click stays an
 ordinary pair of clicks.
 
+`Enter` on the focused splitter does the same thing, and that pairing is the
+point rather than a convenience. The splitter is a focusable `separator` that
+resizes on arrows and Home/End, so a reader who never touches a pointer can
+reach a width they then have no way to undo — a reset available only to a
+double-click is a capability the keyboard half cannot see. The key is `Enter`
+because the column splitter already answers it there, and both go through the
+same `onWidthReset`, so neither can drift from the other.
+
 **The band is enforced twice, and both are load-bearing.** The gesture clamps to
 `SIDE_PANEL_MIN_WIDTH`–`SIDE_PANEL_MAX_WIDTH_RATIO × viewport`, and the style
 clamps again as `max(320px, min(<width>px, 90vw))` — because a width persisted on

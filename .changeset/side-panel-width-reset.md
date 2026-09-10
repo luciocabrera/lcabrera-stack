@@ -26,6 +26,8 @@ A double-click is two of those, which made the new reset write the old width twi
 before dropping it. The end state was always right; the writes were not. Nothing
 about a real drag changes.
 
-Resetting from the keyboard is not part of this. The splitter's arrow and
-Home/End handling is unchanged, and it has no reset key the way the column
-splitter's `Enter` does.
+`Enter` on the focused splitter resets it too, so the gesture is not pointer-only.
+The splitter is a focusable `role='separator'`, so a reader who resized it with
+the arrows or Home/End can undo that from the keyboard rather than being left with
+a width they cannot put back. Arrow and Home/End handling is unchanged, and a
+consumer that passes no `onWidthReset` sees `Enter` fall through untouched.

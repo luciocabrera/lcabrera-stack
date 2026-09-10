@@ -79,6 +79,34 @@ const renderResizablePanel = () => {
   };
 };
 
+type RenderResetPanelArgs = {
+  readonly hasReset?: boolean;
+};
+
+const renderResetPanel = ({ hasReset = true }: RenderResetPanelArgs = {}) => {
+  const onWidthChange = vi.fn();
+  const onWidthReset = vi.fn();
+
+  render(
+    <SidePanel
+      isOpen
+      isPinned
+      isResizable
+      onWidthChange={onWidthChange}
+      onWidthReset={hasReset ? onWidthReset : undefined}
+      width={640}
+    >
+      <span>Pinned content</span>
+    </SidePanel>,
+  );
+
+  return {
+    handle: screen.getByTestId('side-panel-resize-handle'),
+    onWidthChange,
+    onWidthReset,
+  };
+};
+
 describe('SidePanel', () => {
   it('renders children content', () => {
     render(
@@ -178,23 +206,9 @@ describe('SidePanel', () => {
   });
 
   it('resets the width on a double-click, so the panel returns to its size', () => {
-    const onWidthChange = vi.fn();
-    const onWidthReset = vi.fn();
+    const { handle, onWidthChange, onWidthReset } = renderResetPanel();
 
-    render(
-      <SidePanel
-        isOpen
-        isPinned
-        isResizable
-        onWidthChange={onWidthChange}
-        onWidthReset={onWidthReset}
-        width={640}
-      >
-        <span>Pinned content</span>
-      </SidePanel>,
-    );
-
-    fireEvent.doubleClick(screen.getByTestId('side-panel-resize-handle'));
+    fireEvent.doubleClick(handle);
 
     expect({
       reset: onWidthReset.mock.calls.length,
@@ -203,28 +217,43 @@ describe('SidePanel', () => {
   });
 
   it('leaves a double-click alone when the consumer offers no reset', () => {
-    const onWidthChange = vi.fn();
-
-    render(
-      <SidePanel
-        isOpen
-        isPinned
-        isResizable
-        onWidthChange={onWidthChange}
-        width={640}
-      >
-        <span>Pinned content</span>
-      </SidePanel>,
-    );
+    const { handle, onWidthChange } = renderResetPanel({ hasReset: false });
 
     const doubleClick = new MouseEvent('dblclick', {
       bubbles: true,
       cancelable: true,
     });
-    fireEvent(screen.getByTestId('side-panel-resize-handle'), doubleClick);
+    fireEvent(handle, doubleClick);
 
     expect({
       prevented: doubleClick.defaultPrevented,
+      resized: onWidthChange.mock.calls.length,
+    }).toStrictEqual({ prevented: false, resized: 0 });
+  });
+
+  it('resets the width on Enter, so the reset is not pointer-only', () => {
+    const { handle, onWidthChange, onWidthReset } = renderResetPanel();
+
+    fireEvent.keyDown(handle, { key: 'Enter' });
+
+    expect({
+      reset: onWidthReset.mock.calls.length,
+      resized: onWidthChange.mock.calls.length,
+    }).toStrictEqual({ reset: 1, resized: 0 });
+  });
+
+  it('leaves Enter alone when the consumer offers no reset', () => {
+    const { handle, onWidthChange } = renderResetPanel({ hasReset: false });
+
+    const enter = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'Enter',
+    });
+    fireEvent(handle, enter);
+
+    expect({
+      prevented: enter.defaultPrevented,
       resized: onWidthChange.mock.calls.length,
     }).toStrictEqual({ prevented: false, resized: 0 });
   });

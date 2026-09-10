@@ -90,6 +90,18 @@ export const useSidePanelResize = ({
       return;
     }
 
+    if (action.type === 'reset') {
+      if (onWidthReset === undefined) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      onWidthReset();
+
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
     onWidthChange(action.width);

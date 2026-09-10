@@ -16,6 +16,7 @@ type ResolveSidePanelKeyboardResizeActionArgs = {
 
 type SidePanelResizeAction =
   | { readonly type: 'ignore' }
+  | { readonly type: 'reset' }
   | { readonly type: 'resize'; readonly width: number };
 
 export const resolveSidePanelKeyboardResizeAction = ({
@@ -26,6 +27,10 @@ export const resolveSidePanelKeyboardResizeAction = ({
   minWidth,
   position,
 }: ResolveSidePanelKeyboardResizeActionArgs): SidePanelResizeAction => {
+  if (key === 'Enter') {
+    return { type: 'reset' };
+  }
+
   if (key === 'Home') {
     return { type: 'resize', width: minWidth };
   }
