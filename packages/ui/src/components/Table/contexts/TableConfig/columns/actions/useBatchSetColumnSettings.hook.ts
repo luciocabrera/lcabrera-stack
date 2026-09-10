@@ -34,6 +34,7 @@ export const useBatchSetColumnSettings = <TData>() => {
       settings,
       ...toColumnAxisDerivationArgs({
         columnAxis: grouping.columnAxis,
+        data: dataStore.get().data,
       }),
     });
     const hasQueryChanged = getHasQueryChanged<TData>({

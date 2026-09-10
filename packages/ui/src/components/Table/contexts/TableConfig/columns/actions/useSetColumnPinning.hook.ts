@@ -1,6 +1,7 @@
 import type { DataKey } from '#ui/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { toColumnAxisDerivationArgs } from '#ui/components/Table/utils/toColumnAxisDerivationArgs.util';
 
 import { usePersistTableStateAction } from './hooks/usePersistTableStateAction.hook';
@@ -19,6 +20,7 @@ type SetColumnPinningArgs<TData> = {
 export const useSetColumnPinning = <TData>() => {
   const { columnsStore, groupingStore, metaStore } =
     useTableConfigContextValue<TData>();
+  const { dataStore } = useTableDataContextValue<TData>();
   const persistTableState = usePersistTableStateAction();
 
   return ({ columnKey, side }: SetColumnPinningArgs<TData>) => {
@@ -58,6 +60,7 @@ export const useSetColumnPinning = <TData>() => {
       persistTableState,
       ...toColumnAxisDerivationArgs({
         columnAxis: grouping.columnAxis,
+        data: dataStore.get().data,
       }),
     });
   };
