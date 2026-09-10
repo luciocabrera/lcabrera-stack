@@ -7,12 +7,14 @@ import { assertSafeIdentifier } from '../query-builder/assert-safe-identifier.ut
 import { buildOptionalNumericClauses } from '../query-builder/build-optional-numeric-clauses.util.ts';
 import { buildWhereClause } from '../query-builder/build-where-clause.util.ts';
 import { quoteIdentifier } from '../query-builder/quote-identifier.util.ts';
+import { assertColumnAxis } from './assert-column-axis.util.ts';
 import { assertGroupAggregates } from './assert-group-aggregates.util.ts';
 import { assertGroupAliases } from './assert-group-aliases.util.ts';
 import { assertGroupKeys } from './assert-group-keys.util.ts';
 import { buildAggregateProjection } from './build-aggregate-projection.util.ts';
 import { buildGroupOrderByClause } from './build-group-order-by-clause.util.ts';
 import { buildGroupingSetsClause } from './build-grouping-sets-clause.util.ts';
+import { expandColumnAxisAggregates } from './expand-column-axis-aggregates.util.ts';
 import { expandGroupingSets } from './expand-grouping-sets.util.ts';
 import { GROUP_MASK_ALIAS } from './group-query-builder.constants.ts';
 import { resolveAggregateAlias } from './resolve-aggregate-alias.util.ts';
@@ -24,6 +26,7 @@ export const buildGroupQuery = ({
   aggregates,
   allowedColumns,
   capabilities,
+  columnAxis,
   filters,
   grouping,
   keys,
@@ -37,7 +40,24 @@ export const buildGroupQuery = ({
   assertSafeIdentifier(schema);
   assertSafeIdentifier(table);
   assertGroupKeys({ allowedColumns, capabilities, grouping, keys, periods });
+
+  if (columnAxis !== undefined) {
+    assertColumnAxis({
+      allowedColumns,
+      capabilities,
+      columnAxis,
+      keys,
+      measureCount: aggregates.length,
+    });
+  }
+
   assertGroupAggregates({ aggregates, allowedColumns, capabilities });
+
+  const expanded =
+    columnAxis === undefined || columnAxis.values.length === 0
+      ? undefined
+      : expandColumnAxisAggregates({ aggregates, columnAxis });
+  const queryAggregates = expanded ?? aggregates;
 
   const guardRails = resolveGroupGuardRails({
     capabilities,
@@ -46,7 +66,7 @@ export const buildGroupQuery = ({
     maxRows,
   });
 
-  const aliased = aggregates.map((aggregate) => ({
+  const aliased = queryAggregates.map((aggregate) => ({
     aggregate,
     alias: resolveAggregateAlias(aggregate),
   }));
@@ -92,7 +112,7 @@ export const buildGroupQuery = ({
         : `${keyExpressions[index]} AS ${quoteIdentifier(key)}`,
     ),
     `GROUPING(${keyExpressions.join(', ')}) AS ${quoteIdentifier(GROUP_MASK_ALIAS)}`,
-    projection.text,
+    ...(projection.text.length > 0 ? [projection.text] : []),
   ].join(', ');
 
   const text = [
@@ -113,15 +133,25 @@ export const buildGroupQuery = ({
     .join(' ');
 
   return {
-    aggregates: aliased.map(({ aggregate, alias }) => ({
-      alias,
-      fn: aggregate.fn,
-      ...(aggregate.column !== undefined && { column: aggregate.column }),
-    })),
+    aggregates: aliased.map(({ aggregate, alias }, index) => {
+      const expandedAggregate = expanded?.[index];
+
+      return {
+        alias,
+        fn: aggregate.fn,
+        ...(aggregate.column !== undefined && { column: aggregate.column }),
+        ...(expandedAggregate !== undefined && {
+          axis: { value: expandedAggregate.axisValue },
+        }),
+      };
+    }),
     groupingSetMasks: sets.map((set) => toGroupingSetMask({ keys, set })),
     guardRails,
     keys,
     maskAlias: GROUP_MASK_ALIAS,
+    ...(columnAxis !== undefined && {
+      columnAxis: { key: columnAxis.key, values: columnAxis.values },
+    }),
     text,
     values: [
       ...projection.values,

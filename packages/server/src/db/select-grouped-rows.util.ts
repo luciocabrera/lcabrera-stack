@@ -1,7 +1,10 @@
 import type { QueryResultRow } from 'pg';
 
 import type { ExecutorOptions, TransactionClient } from './db.types.ts';
-import type { GroupQueryDescriptor } from './group-query-builder/group-query-builder.types.ts';
+import type {
+  ColumnAxisRequest,
+  GroupQueryDescriptor,
+} from './group-query-builder/group-query-builder.types.ts';
 
 import { readGroupStatementTimeoutMs } from './env.schema.ts';
 import { getColumnGroupingCapabilities } from './get-column-grouping-capabilities.util.ts';
@@ -11,18 +14,26 @@ import { buildGroupQuery } from './group-query-builder/build-group-query.util.ts
 import { collectCapabilityColumns } from './group-query-builder/collect-capability-columns.util.ts';
 import { toGroupKeyTruncations } from './olap/to-group-key-truncations.util.ts';
 import { runQuery } from './run-query.util.ts';
+import { selectColumnAxisValues } from './select-column-axis-values.util.ts';
 import { setStatementTimeout } from './set-statement-timeout.util.ts';
 import { withTransaction } from './with-transaction.util.ts';
 
-type SelectGroupedRowsArgs = Omit<GroupQueryDescriptor, 'capabilities'>;
+type SelectGroupedRowsArgs = Omit<
+  GroupQueryDescriptor,
+  'capabilities' | 'columnAxis'
+> & {
+  readonly columnAxis?: ColumnAxisRequest;
+};
 
 export const selectGroupedRows = async <TRow extends QueryResultRow>({
   tx,
   ...descriptor
 }: ExecutorOptions & SelectGroupedRowsArgs) => {
+  const { columnAxis: columnAxisRequest, ...grouped } = descriptor;
+
   assertGroupDepth({
-    grouping: descriptor.grouping,
-    keys: descriptor.keys,
+    grouping: grouped.grouping,
+    keys: grouped.keys,
   });
 
   const run = async (client: TransactionClient) => {
@@ -33,15 +44,36 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
 
     const capabilities = await getColumnGroupingCapabilities({
       columns: collectCapabilityColumns({
-        aggregates: descriptor.aggregates,
-        keys: descriptor.keys,
+        aggregates: grouped.aggregates,
+        columnAxisKey: columnAxisRequest?.key,
+        keys: grouped.keys,
       }),
-      schema: descriptor.schema,
-      table: descriptor.table,
+      schema: grouped.schema,
+      table: grouped.table,
       tx: client,
     });
 
-    const built = buildGroupQuery({ ...descriptor, capabilities });
+    const columnAxis =
+      columnAxisRequest === undefined
+        ? undefined
+        : {
+            ...columnAxisRequest,
+            values: await selectColumnAxisValues({
+              allowedColumns: grouped.allowedColumns,
+              filters: grouped.filters,
+              key: columnAxisRequest.key,
+              maxDistinct: columnAxisRequest.maxDistinct,
+              schema: grouped.schema,
+              table: grouped.table,
+              tx: client,
+            }),
+          };
+
+    const built = buildGroupQuery({
+      ...grouped,
+      capabilities,
+      ...(columnAxis !== undefined && { columnAxis }),
+    });
     const result = await runQuery<TRow>({
       text: built.text,
       tx: client,
@@ -60,9 +92,10 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
       keys: built.keys,
       maskAlias: built.maskAlias,
       rows: result.rows as readonly TRow[],
+      ...(built.columnAxis !== undefined && { columnAxis: built.columnAxis }),
       truncations: toGroupKeyTruncations({
         capabilities,
-        periods: descriptor.periods,
+        periods: grouped.periods,
       }),
       ...(built.guardRails.warning !== undefined && {
         warning: built.guardRails.warning,

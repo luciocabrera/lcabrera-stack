@@ -104,6 +104,9 @@ documented in ADR-058, and something the UI has to surface rather than hide.
 | `assert-group-column.util.ts`             | The two shared column assertions (`assertSafeIdentifier`, `assertColumnAllowed`) raised as a **typed** refusal — they are shared with the flat builder and so cannot throw one themselves |
 | `assert-group-depth.util.ts`              | The capability-free half of the key rules — non-empty, within the depth cap, no repeats. Split out so the executor can run it **before borrowing a connection**                           |
 | `assert-group-keys.util.ts`               | `assertGroupDepth` plus the allowlist and the catalogue's own refusal                                                                                                                     |
+| `assert-column-axis.util.ts`              | The column-axis gates: caller `maxDistinct`, not also a row key, catalogue-legal, and the Postgres tuple-attribute ceiling                                                                |
+| `to-column-axis-alias.util.ts`            | `${aggregateAlias}_c${index}` — values are not identifiers                                                                                                                                |
+| `expand-column-axis-aggregates.util.ts`   | One `FILTER` aggregate per axis value, value-major across the requested measures                                                                                                          |
 | `estimate-group-cardinality.util.ts`      | The pre-flight row bound, summed over the sets `expandGroupingSets` will emit — so a new mode needs no formula here                                                                       |
 | `resolve-widest-group-key.util.ts`        | Which key contributes most to that bound, i.e. which one a refusal should name                                                                                                            |
 | `assert-group-cardinality.util.ts`        | Refuse / warn / say nothing, against the two thresholds. Unknown statistics warn — never refuse                                                                                           |
@@ -217,9 +220,13 @@ one.
 
 The result also stays **long** — one row per grouping-set combination, each
 stating its own coordinates — rather than being pre-flattened or widened into a
-matrix. A long result can be re-projected into a pivot later; a pre-widened one
-has already thrown the coordinates away. That is the difference between a pivot
-table being a rendering change and being a rewrite.
+matrix. Cube emission does not grow a `PIVOT` clause. A **column axis** is a
+different read: the row keys still go through `GROUPING SETS`, and each distinct
+value of the axis column becomes a `FILTER (WHERE …)` aggregate
+([ADR-122](../../../../../docs/decisions/ADR-122-a-grouped-read-can-put-a-dimension-on-the-column-axis.md)).
+The ceiling on those values is the caller's `maxDistinct`, not a package
+constant. A long cube can still be re-projected later; this path does not throw
+the coordinates away because it never asked cube for them.
 
 That the sets expanded here are the ones `CUBE (…)` means needs a **live-Postgres
 smoke test**. A unit test can only assert the expansion against _our own_

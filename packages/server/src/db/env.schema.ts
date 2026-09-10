@@ -17,6 +17,7 @@ export const envSchema = z.object({
   DB_IDLE_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
   DB_NAME: z.string().min(1),
   DB_PASSWORD: z.string().min(1),
+  DB_PIVOT_MAX_DISTINCT: z.coerce.number().int().positive().default(1024),
   DB_POOL_MAX: z.coerce.number().int().positive().default(10),
   DB_PORT: z.coerce.number().int().positive(),
   DB_STATEMENT_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
@@ -35,3 +36,7 @@ export const readEnvConfig = ({ env }: ReadEnvConfigArgs): EnvConfig =>
 export const readGroupStatementTimeoutMs = ({ env }: ReadEnvConfigArgs) =>
   envSchema.pick({ DB_GROUP_STATEMENT_TIMEOUT_MS: true }).parse(env)
     .DB_GROUP_STATEMENT_TIMEOUT_MS;
+
+export const readPivotMaxDistinct = ({ env }: ReadEnvConfigArgs) =>
+  envSchema.pick({ DB_PIVOT_MAX_DISTINCT: true }).parse(env)
+    .DB_PIVOT_MAX_DISTINCT;

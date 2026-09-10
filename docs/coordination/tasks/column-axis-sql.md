@@ -21,10 +21,11 @@ issue: #1164
 
 ## What
 
-emit a wide grouped read from a column axis
+Server-side column axis: `FILTER` aggregates per distinct value, caller-supplied
+`maxDistinct`, env helper, ADR-122. Grid render is a later child of #660.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implementation in review
 - Blockers: none
-- Next:
+- Next: quality gate, draft PR

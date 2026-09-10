@@ -468,6 +468,95 @@ describe('buildGroupQuery', () => {
   });
 });
 
+describe('a column axis', () => {
+  it('emits one FILTER aggregate per axis value and leaves the row keys grouped', () => {
+    const result = buildGroupQuery(
+      descriptor({
+        aggregates: [{ column: 'total_amount', fn: 'sum' }],
+        columnAxis: {
+          key: 'order_status',
+          maxDistinct: 10,
+          values: ['Pending', 'Shipped'],
+        },
+        keys: ['shipping_country'],
+      }),
+    );
+
+    expect(result.text).toBe(
+      'SELECT "shipping_country", GROUPING("shipping_country") AS "group_mask", ' +
+        'sum("total_amount") FILTER (WHERE "order_status" = $1) AS "sum_total_amount_c0", ' +
+        'sum("total_amount") FILTER (WHERE "order_status" = $2) AS "sum_total_amount_c1" ' +
+        'FROM "public"."enterprise_orders" ' +
+        'GROUP BY GROUPING SETS (("shipping_country")) ' +
+        'ORDER BY "shipping_country" ASC ' +
+        'LIMIT $3',
+    );
+    expect(result.values).toEqual(['Pending', 'Shipped', 5001]);
+    expect(result.columnAxis).toEqual({
+      key: 'order_status',
+      values: ['Pending', 'Shipped'],
+    });
+    expect(result.aggregates).toEqual([
+      {
+        alias: 'sum_total_amount_c0',
+        axis: { value: 'Pending' },
+        column: 'total_amount',
+        fn: 'sum',
+      },
+      {
+        alias: 'sum_total_amount_c1',
+        axis: { value: 'Shipped' },
+        column: 'total_amount',
+        fn: 'sum',
+      },
+    ]);
+  });
+
+  it('uses IS NULL for a missing axis value', () => {
+    const result = buildGroupQuery(
+      descriptor({
+        aggregates: [{ fn: 'count' }],
+        columnAxis: {
+          key: 'order_status',
+          maxDistinct: 10,
+          values: [undefined],
+        },
+        keys: ['shipping_country'],
+      }),
+    );
+
+    expect(result.text).toContain(
+      'count(*) FILTER (WHERE "order_status" IS NULL) AS "count_rows_c0"',
+    );
+    expect(result.aggregates[0]?.axis).toEqual({ value: undefined });
+  });
+
+  it('does not change a read that has no column axis', () => {
+    const withAxisFieldAbsent = buildGroupQuery(descriptor());
+    const withUndefined = buildGroupQuery(
+      descriptor({ columnAxis: undefined }),
+    );
+
+    expect(withAxisFieldAbsent.text).toBe(withUndefined.text);
+    expect(withAxisFieldAbsent.columnAxis).toBeUndefined();
+  });
+
+  it('refuses when the caller ceiling is exceeded', () => {
+    expect(() =>
+      buildGroupQuery(
+        descriptor({
+          columnAxis: {
+            key: 'order_status',
+            maxDistinct: 1,
+            values: ['Pending', 'Shipped'],
+          },
+          keys: ['shipping_country'],
+        }),
+      ),
+    ).toThrow('configured 1 column-axis ceiling');
+  });
+});
+
 describe('a truncated group key in the SQL', () => {
   const dated = {
     ...dimension('order_date'),

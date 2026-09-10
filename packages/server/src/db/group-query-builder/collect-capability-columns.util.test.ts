@@ -41,4 +41,14 @@ describe('collectCapabilityColumns', () => {
       collectCapabilityColumns({ aggregates: [{ fn: 'count' }], keys: [] }),
     ).toStrictEqual([]);
   });
+
+  it('includes a column-axis key that is not already a row key', () => {
+    expect(
+      collectCapabilityColumns({
+        aggregates: [{ fn: 'count' }],
+        columnAxisKey: 'year',
+        keys: ['region'],
+      }),
+    ).toStrictEqual(['region', 'year']);
+  });
 });
