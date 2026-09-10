@@ -7,7 +7,6 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import type { MockStore } from '#ui/utils/tests/createMockStore.util';
 
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
-import '#ui/utils/tests/registerColumnViewStateSelectorMocks';
 
 const COLUMN_KEYS = ['col0', 'col1', 'col2', 'col3'] as const;
 
@@ -110,8 +109,8 @@ const renderCells = (onCellRender: (columnKey: string) => void) =>
     </table>,
   );
 
-describe('TableHeaderCell column-view subscriptions', () => {
-  it('re-renders every header when a shared column view input changes', () => {
+describe('TableHeaderCell store subscriptions', () => {
+  it('re-renders only the resized header cell when one column width changes', () => {
     const renders = new Map<string, number>();
     const bump = (key: string) => renders.set(key, (renders.get(key) ?? 0) + 1);
 
@@ -126,6 +125,6 @@ describe('TableHeaderCell column-view subscriptions', () => {
 
     const rerendered = COLUMN_KEYS.filter((key) => (renders.get(key) ?? 0) > 0);
 
-    expect(rerendered).toEqual(COLUMN_KEYS);
+    expect(rerendered).toEqual(['col0']);
   });
 });

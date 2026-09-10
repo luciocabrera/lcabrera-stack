@@ -3,9 +3,9 @@ import type {
   PinnedColumnInfo,
 } from '#ui/components/Table/Table.types';
 
-import { useGetColumnViewState } from './useGetColumnViewState.hook';
+import { useColumnsStore } from '../useColumnsStore.hook';
 
 export const useGetPinnedColumnInfo = <TData>(columnKey: DataKey<TData>) =>
-  useGetColumnViewState<TData>().pinnedColumnOffsets[columnKey] as
-    | PinnedColumnInfo
-    | undefined;
+  useColumnsStore<PinnedColumnInfo | undefined, TData>(
+    (state) => state.pinnedColumnOffsets[columnKey],
+  );

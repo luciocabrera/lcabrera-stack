@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import type { MockStore } from '#ui/utils/tests/createMockStore.util';
 
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
-import '#ui/utils/tests/registerColumnViewStateSelectorMocks';
 
 const createInitialColumnsState = () => {
   return {
@@ -122,9 +121,9 @@ describe('TableConfig column hooks', () => {
     expect(
       renderHook(() => useGetPinnedColumnPartition()).result.current,
     ).toEqual({
-      centerCols: [],
-      leftPinnedCols: [{ key: 'id' }],
-      rightPinnedCols: [{ key: 'actions' }],
+      center: [{ key: 'status' }],
+      left: [{ key: 'id' }],
+      right: [{ key: 'actions' }],
     });
     expect(renderHook(() => useGetColumnOrder()).result.current).toEqual([
       'id',
@@ -159,8 +158,7 @@ describe('TableConfig column hooks', () => {
       renderHook(() => useGetNormalizedColumn('status')).result.current,
     ).toEqual({
       key: 'status',
-      sortDirection: 'desc',
-      sortIndex: 0,
+      label: 'Status',
     });
     expect(
       renderHook(() => useGetPinnedColumnOffsets()).result.current,

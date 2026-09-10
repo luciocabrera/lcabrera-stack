@@ -1,4 +1,4 @@
-import { useGetColumnViewState } from './useGetColumnViewState.hook';
+import { useColumnsStore } from '../useColumnsStore.hook';
 
 export const useGetPinnedColumnOffsets = () =>
-  useGetColumnViewState().pinnedColumnOffsets;
+  useColumnsStore((state) => state.pinnedColumnOffsets);

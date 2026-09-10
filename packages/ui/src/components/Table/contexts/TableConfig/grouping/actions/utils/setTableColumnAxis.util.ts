@@ -18,12 +18,7 @@ export const setTableColumnAxis = ({
   if (next === grouping.columnAxis) return grouping;
 
   return {
-    aggregates: grouping.aggregates,
-    keys: grouping.keys,
-    mode: grouping.mode,
-    periods: grouping.periods,
-    shares: grouping.shares,
-    totalsPlacement: grouping.totalsPlacement,
-    ...(next !== undefined && { columnAxis: next }),
+    ...grouping,
+    columnAxis: next,
   };
 };
