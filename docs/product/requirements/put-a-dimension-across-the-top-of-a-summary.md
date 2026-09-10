@@ -18,7 +18,7 @@ evidence:
   - type: code
     ref: packages/server/src/db/group-query-builder/expand-column-axis-aggregates.util.ts
   - type: doc
-    ref: docs/decisions/ADR-122-a-grouped-read-can-put-a-dimension-on-the-column-axis.md
+    ref: docs/decisions/ADR-123-a-grouped-read-can-put-a-dimension-on-the-column-axis.md
 ---
 
 # I can put a dimension across the top of a summary

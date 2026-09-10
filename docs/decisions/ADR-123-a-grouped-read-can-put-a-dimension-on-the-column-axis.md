@@ -3,7 +3,7 @@ governs:
   - server
 ---
 
-# ADR-122 — A grouped read can put a dimension on the column axis with FILTER aggregates
+# ADR-123 — A grouped read can put a dimension on the column axis with FILTER aggregates
 
 **Status:** Accepted
 

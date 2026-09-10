@@ -224,7 +224,7 @@ stating its own coordinates — rather than being pre-flattened or widened into 
 matrix. Cube emission does not grow a `PIVOT` clause. A **column axis** is a
 different read: the row keys still go through `GROUPING SETS`, and each distinct
 value of the axis column becomes a `FILTER (WHERE …)` aggregate
-([ADR-122](../../../../../docs/decisions/ADR-122-a-grouped-read-can-put-a-dimension-on-the-column-axis.md)).
+([ADR-123](../../../../../docs/decisions/ADR-123-a-grouped-read-can-put-a-dimension-on-the-column-axis.md)).
 The ceiling on those values is the caller's `maxDistinct`, not a package
 constant. A long cube can still be re-projected later; this path does not throw
 the coordinates away because it never asked cube for them.

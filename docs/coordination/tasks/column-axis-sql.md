@@ -22,7 +22,7 @@ issue: #1164
 ## What
 
 Server-side column axis: `FILTER` aggregates per distinct value, caller-supplied
-`maxDistinct`, env helper, ADR-122. Grid render is a later child of #660.
+`maxDistinct`, env helper, ADR-123. Grid render is a later child of #660.
 
 ## Status / next
 
