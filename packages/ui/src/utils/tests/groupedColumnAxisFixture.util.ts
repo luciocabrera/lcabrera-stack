@@ -5,8 +5,6 @@ import type {
 
 import { TABLE_GROUP_ROW_FIELD } from '#ui/components/Table/Table.constants';
 
-export type GroupedColumnAxisFixtureRow = Record<string, unknown>;
-
 export const groupedColumnAxisFixture = {
   aggregates: [
     { columnKey: 'total_amount', fn: 'sum' },
@@ -17,7 +15,7 @@ export const groupedColumnAxisFixture = {
     { key: 'customer_type', label: 'Customer Type' },
     { dataType: 'number', key: 'total_amount', label: 'Total Amount' },
     { key: 'order_status', label: 'Status' },
-  ] as TableColumn<GroupedColumnAxisFixtureRow>[],
+  ] as TableColumn<Record<string, unknown>>[],
   groupingKeys: ['customer_type'] as const,
   rows: [
     {
@@ -49,5 +47,5 @@ export const groupedColumnAxisFixture = {
         ],
       },
     },
-  ] as readonly GroupedColumnAxisFixtureRow[],
+  ] as readonly Record<string, unknown>[],
 };
