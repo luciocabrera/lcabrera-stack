@@ -149,15 +149,18 @@ describe('useResetTableSettings', () => {
       sorting: [],
     });
   });
-  it('re-seeds the grouping draft from the live grouping, discarding what was staged', () => {
-    setTableGrouping({
+  it('re-seeds the grouping draft from the live grouping, including the column axis', () => {
+    const grouping = {
       aggregates: [{ columnKey: 'total', fn: 'sum' }],
+      columnAxis: 'order_status',
       keys: ['status'],
       mode: 'flat',
       periods: {},
       shares: [],
-      totalsPlacement: 'last',
-    });
+      totalsPlacement: 'last' as const,
+    };
+
+    setTableGrouping(grouping);
 
     const { result } = renderHook(() => useResetTableSettings());
 
@@ -165,41 +168,6 @@ describe('useResetTableSettings', () => {
       result.current();
     });
 
-    expect(drawerGroupingStore.set).toHaveBeenCalledWith({
-      aggregates: [{ columnKey: 'total', fn: 'sum' }],
-      keys: ['status'],
-      mode: 'flat',
-      periods: {},
-      shares: [],
-      totalsPlacement: 'last',
-    });
-  });
-
-  it('re-seeds the applied column axis rather than dropping it', () => {
-    setTableGrouping({
-      aggregates: [{ columnKey: 'total', fn: 'sum' }],
-      columnAxis: 'order_status',
-      keys: ['status'],
-      mode: 'flat',
-      periods: {},
-      shares: [],
-      totalsPlacement: 'last',
-    });
-
-    const { result } = renderHook(() => useResetTableSettings());
-
-    act(() => {
-      result.current();
-    });
-
-    expect(drawerGroupingStore.set).toHaveBeenCalledWith({
-      aggregates: [{ columnKey: 'total', fn: 'sum' }],
-      columnAxis: 'order_status',
-      keys: ['status'],
-      mode: 'flat',
-      periods: {},
-      shares: [],
-      totalsPlacement: 'last',
-    });
+    expect(drawerGroupingStore.set).toHaveBeenCalledWith(grouping);
   });
 });
