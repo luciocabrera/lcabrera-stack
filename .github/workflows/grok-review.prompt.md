@@ -76,18 +76,22 @@ The file currently contains a placeholder. Replace the whole contents. Write
 this file even if you found nothing. An empty file or the leftover placeholder
 is read as "never ran"; "no findings" and "never ran" have to be distinguishable.
 
-A short paragraph saying what the change does, then any MEDIUM, LOW, or NIT
-findings. Open each one with its severity in bold, then the catalog ID, then the
-path, then a one-sentence why and a one-sentence fix:
+Start with a short paragraph saying what the change does. If you filed any
+BLOCKER or HIGH findings, follow it with one line naming how many threads this
+review opened and their catalog IDs — a pointer, so the body is not silent about
+what is holding the merge. Do not restate the findings themselves; they are
+already threads, and a second copy makes the thread look optional.
+
+Then any MEDIUM, LOW, or NIT findings. Open each one with its severity in bold,
+then the catalog ID, then the path, then a one-sentence why and a one-sentence
+fix:
 
 ```markdown
 **MEDIUM** `CC.G11` — `src/thing.ts`. Why. Fix: …
 ```
 
-If there are none, say so in those words: **no findings**.
-
-Do not restate a BLOCKER or HIGH finding here. It is already a thread; a second
-copy in the body only makes the thread look optional.
+Say **no findings**, in those words, when the whole review found nothing —
+no threads and nothing in the body. Never write it while a thread is open.
 
 ## Before you finish
 

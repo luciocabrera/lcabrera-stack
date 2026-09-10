@@ -162,6 +162,14 @@ describe('the prompt is the catalog, not a second generic review', () => {
     expect(prompt).not.toContain('style preference, no real cost');
   });
 
+  it('never lets the body read "no findings" while a thread is open', () => {
+    const unwrapped = readRepoFile(PROMPT).replaceAll(/\s+/gu, ' ');
+    expect(unwrapped).toContain(
+      'when the whole review found nothing — no threads and nothing in the body',
+    );
+    expect(unwrapped).toContain('Never write it while a thread is open');
+  });
+
   it('is the file the workflow concatenates into the prompt Grok sees', () => {
     const step = stepBlock(readRepoFile(WORKFLOW), RUN_STEP);
     expect(step).toBeDefined();
