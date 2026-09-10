@@ -2,7 +2,7 @@
 id: paint-column-axis
 title: Paint a grouped read's column axis as ordinary columns
 owner: agent:claude
-status: active
+status: review
 branch: feat/1170-paint-column-axis
 area:
   - packages/ui/src/utils/urlState/**
@@ -20,16 +20,16 @@ area:
 started: 2026-09-10
 updated: 2026-09-10
 plan: (none)
-pr: (none)
+pr: #1171
 issue: #1170
 ---
 
 ## What
 
-Paint a grouped read's column axis as ordinary columns
+Paint a grouped read's column axis as ordinary columns.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: independent verifier PASS on 04164f92f; PR ready for review
 - Blockers: none
-- Next:
+- Next: human review; do not merge from this agent
