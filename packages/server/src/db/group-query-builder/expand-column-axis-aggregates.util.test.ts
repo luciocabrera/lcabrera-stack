@@ -43,6 +43,18 @@ describe('expandColumnAxisAggregates', () => {
     ]);
   });
 
+  it('stores a driver SQL NULL as undefined', () => {
+    expect(
+      expandColumnAxisAggregates({
+        aggregates: [{ fn: 'count' }],
+        columnAxis: {
+          key: 'order_status',
+          values: [JSON.parse('null')],
+        },
+      })[0]?.axisValue,
+    ).toBeUndefined();
+  });
+
   it('crosses several measures with several values, value-major', () => {
     const expanded = expandColumnAxisAggregates({
       aggregates: [{ fn: 'count' }, { column: 'total_amount', fn: 'sum' }],

@@ -333,6 +333,27 @@ describe('selectGroupedRows', () => {
     );
   });
 
+  it('refuses empty aggregates before DISTINCT', async () => {
+    resolvePreamble();
+    query.mockResolvedValueOnce({
+      rows: [
+        CAPABILITY_ROW,
+        { ...CAPABILITY_ROW, column: 'year', nDistinct: 2 },
+      ],
+    });
+
+    await expect(
+      selectGroupedRows({
+        ...YEAR_AXIS,
+        aggregates: [],
+        columnAxis: { key: 'year', maxDistinct: 8 },
+      }),
+    ).rejects.toThrow('at least one aggregate');
+    expect(statements().some((text) => text.includes('SELECT DISTINCT'))).toBe(
+      false,
+    );
+  });
+
   it('refuses an axis that is also a row key before DISTINCT', async () => {
     resolvePreamble();
     query.mockResolvedValueOnce({ rows: [CAPABILITY_ROW] });

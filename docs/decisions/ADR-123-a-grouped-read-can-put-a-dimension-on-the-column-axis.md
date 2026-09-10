@@ -80,8 +80,9 @@ does **not** warn-and-proceed on the axis: the capped distinct is what answers
 width. An empty distinct set still reports the axis and emits no `FILTER`
 columns. `maxDistinct` is checked before the discovery query, so a zero or
 non-integer ceiling never becomes `LIMIT`. The axis key is checked against
-the catalogue (not also a row key, groupable) before DISTINCT, so an illegal
-axis is a grouping refusal rather than a driver error. A `countDistinct`
+the catalogue (not also a row key, groupable) before DISTINCT — that gate
+does not take values, so it is not a no-op width check. An illegal axis is a
+grouping refusal rather than a driver error. A `countDistinct`
 that expansion would emit more than once is `aggregate-not-legal`.
 
 A read without `columnAxis` is unchanged.

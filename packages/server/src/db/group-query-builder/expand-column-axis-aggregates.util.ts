@@ -34,12 +34,13 @@ export const expandColumnAxisAggregates = ({
   aggregates,
   columnAxis,
 }: ExpandColumnAxisAggregatesArgs) =>
-  columnAxis.values.flatMap((axisValue, index) =>
+  columnAxis.values.flatMap((rawAxisValue, index) =>
     aggregates.map((aggregate) => {
       const alias = toColumnAxisAlias({
         alias: resolveAggregateAlias(aggregate),
         index,
       });
+      const axisValue = rawAxisValue ?? undefined;
 
       return {
         ...aggregate,

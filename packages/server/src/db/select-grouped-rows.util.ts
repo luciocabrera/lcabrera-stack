@@ -8,7 +8,8 @@ import type {
 
 import { readGroupStatementTimeoutMs } from './env.schema.ts';
 import { getColumnGroupingCapabilities } from './get-column-grouping-capabilities.util.ts';
-import { assertColumnAxis } from './group-query-builder/assert-column-axis.util.ts';
+import { assertColumnAxisKey } from './group-query-builder/assert-column-axis-key.util.ts';
+import { assertGroupAggregates } from './group-query-builder/assert-group-aggregates.util.ts';
 import { assertGroupDepth } from './group-query-builder/assert-group-depth.util.ts';
 import { assertGroupRowBackstop } from './group-query-builder/assert-group-row-backstop.util.ts';
 import { buildGroupQuery } from './group-query-builder/build-group-query.util.ts';
@@ -56,12 +57,16 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
     });
 
     if (columnAxisRequest !== undefined) {
-      assertColumnAxis({
+      assertColumnAxisKey({
         allowedColumns: grouped.allowedColumns,
         capabilities,
-        columnAxis: { ...columnAxisRequest, values: [] },
+        key: columnAxisRequest.key,
         keys: grouped.keys,
-        measureCount: grouped.aggregates.length,
+      });
+      assertGroupAggregates({
+        aggregates: grouped.aggregates,
+        allowedColumns: grouped.allowedColumns,
+        capabilities,
       });
     }
 

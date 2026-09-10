@@ -107,7 +107,8 @@ map the legality half resolved and refuses anything the catalogue turned down,
 which is how a pure function enforces ADR-058. Everything it composes
 (`expandGroupingSets`, `expandCubeSets`, `toGroupingSetMask`, `assertGroupKeys`,
 `assertGroupAggregates`, `assertGroupAliases`, `assertColumnAxis`,
-`assertColumnAxisMaxDistinct`, `assertGroupSort`, `resolveAggregateAlias`,
+`assertColumnAxisKey`, `assertColumnAxisMaxDistinct`, `assertGroupSort`,
+`resolveAggregateAlias`,
 `expandColumnAxisAggregates`, `toColumnAxisAlias`, `buildAggregateProjection`,
 `buildGroupingSetsClause`, `buildGroupOrderByClause`, `collectCapabilityColumns`)
 is a private,

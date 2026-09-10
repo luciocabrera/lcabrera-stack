@@ -531,6 +531,23 @@ describe('a column axis', () => {
     expect(result.aggregates[0]?.axis).toEqual({ value: undefined });
   });
 
+  it('exposes a driver SQL NULL as undefined on the public axis metadata', () => {
+    const result = buildGroupQuery(
+      descriptor({
+        aggregates: [{ fn: 'count' }],
+        columnAxis: {
+          key: 'order_status',
+          maxDistinct: 10,
+          values: [JSON.parse('null')],
+        },
+        keys: ['shipping_country'],
+      }),
+    );
+
+    expect(result.columnAxis?.values).toEqual([undefined]);
+    expect(result.aggregates[0]?.axis).toEqual({ value: undefined });
+  });
+
   it('emits no FILTER columns when the axis has no values', () => {
     const result = buildGroupQuery(
       descriptor({

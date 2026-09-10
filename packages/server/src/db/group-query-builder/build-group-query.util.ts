@@ -162,7 +162,10 @@ export const buildGroupQuery = ({
     keys,
     maskAlias: GROUP_MASK_ALIAS,
     ...(columnAxis !== undefined && {
-      columnAxis: { key: columnAxis.key, values: columnAxis.values },
+      columnAxis: {
+        key: columnAxis.key,
+        values: columnAxis.values.map((value) => value ?? undefined),
+      },
     }),
     text,
     values: [
