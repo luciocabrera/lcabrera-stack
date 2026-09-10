@@ -39,6 +39,7 @@ export const ColumnAxisSection = ({
   const options = [
     COLUMN_AXIS_NONE_OPTION,
     ...toGroupKeyColumnOptions({
+      allowRequiredPeriod: false,
       capabilities,
       columns,
       stagedKeys: new Set(groupingKeys),

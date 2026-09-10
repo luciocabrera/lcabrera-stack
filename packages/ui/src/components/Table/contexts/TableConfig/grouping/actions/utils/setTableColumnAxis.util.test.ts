@@ -44,6 +44,17 @@ describe('setTableColumnAxis', () => {
     ).toStrictEqual(grouping());
   });
 
+  it('keeps the current axis rather than clearing it when the next one is a row key', () => {
+    const current = grouping({ columnAxis: 'order_status' });
+
+    expect(
+      setTableColumnAxis({
+        columnAxis: 'region',
+        grouping: current,
+      }),
+    ).toBe(current);
+  });
+
   it('returns the same object when the axis is unchanged', () => {
     const current = grouping({ columnAxis: 'order_status' });
 

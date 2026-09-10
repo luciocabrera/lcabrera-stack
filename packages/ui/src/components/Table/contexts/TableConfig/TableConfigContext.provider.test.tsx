@@ -13,6 +13,7 @@ import {
   useGetColumns,
   useGetColumnSizing,
 } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetColumnsSorting } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumnsSorting.hook';
 import { useGetTableDrawersSyncNonce } from '#ui/components/Table/contexts/TableConfig/meta/selectors/useGetTableDrawersSyncNonce.hook';
 import { useGetTableIsTableSettingsOpen } from '#ui/components/Table/contexts/TableConfig/meta/selectors/useGetTableIsTableSettingsOpen.hook';
 import { useGetTableData } from '#ui/components/Table/contexts/TableData/data/selectors';
@@ -66,6 +67,7 @@ const Probe = () => {
   const groupingKeys = useGetTableGroupingKeys();
   const columns = useGetColumns<TestRow>();
   const columnSizing = useGetColumnSizing<TestRow>();
+  const sorting = useGetColumnsSorting<TestRow>();
   const data = useGetTableData<TestRow>();
   const drawersSyncNonce = useGetTableDrawersSyncNonce();
   const isTableSettingsOpen = useGetTableIsTableSettingsOpen();
@@ -77,6 +79,20 @@ const Probe = () => {
   const handleResize = () => {
     columnsStore.set({
       columnSizing: { id: 180 } as ColumnSizingState<TestRow>,
+    });
+  };
+
+  const handlePaintAxis = () => {
+    const state = columnsStore.get();
+
+    const painted = {
+      key: 'sum_c0',
+      label: 'Pending',
+    } as unknown as TableColumn<TestRow>;
+
+    columnsStore.set({
+      columns: [...state.columns, painted],
+      effectiveColumns: [...state.effectiveColumns, painted],
     });
   };
 
@@ -96,6 +112,9 @@ const Probe = () => {
       <button onClick={handleResize} type='button'>
         resize
       </button>
+      <button onClick={handlePaintAxis} type='button'>
+        paint-axis
+      </button>
       <button onClick={handleOpenSettings} type='button'>
         open-settings
       </button>
@@ -104,6 +123,11 @@ const Probe = () => {
         {columns.map((column) => column.key).join(',')}
       </output>
       <output data-testid='sizing'>{JSON.stringify(columnSizing)}</output>
+      <output data-testid='sorting'>
+        {sorting
+          .map((entry) => `${String(entry.columnKey)}:${entry.direction ?? ''}`)
+          .join(',')}
+      </output>
       <output data-testid='nonce'>{String(drawersSyncNonce)}</output>
       <output data-testid='settings-open'>{String(isTableSettingsOpen)}</output>
       <output data-testid='data'>{data.map((row) => row.id).join(',')}</output>
@@ -191,6 +215,34 @@ describe('TableConfigProvider', () => {
 
     expect(readProbe('columns')).toBe('id,name');
     expect(readProbe('grouping')).toBe('priority');
+  });
+
+  it('applies a later sorting snapshot without wiping a painted column axis', () => {
+    const groupingState = { columnAxis: 'name', keys: ['id'] };
+    const { rerender } = render(
+      <Harness
+        columnsState={{ columns: [ID_COLUMN, NAME_COLUMN] }}
+        groupingState={groupingState}
+        revalidation={1}
+      />,
+    );
+
+    fireEvent.click(screen.getByText('paint-axis'));
+    expect(readProbe('columns')).toContain('sum_c0');
+
+    rerender(
+      <Harness
+        columnsState={{
+          columns: [ID_COLUMN, NAME_COLUMN],
+          sorting: [{ columnKey: 'name', direction: 'asc' }],
+        }}
+        groupingState={groupingState}
+        revalidation={1}
+      />,
+    );
+
+    expect(readProbe('sorting')).toBe('name:asc');
+    expect(readProbe('columns')).toContain('sum_c0');
   });
 
   it('replaces columns when the incoming columns snapshot identity changes', () => {

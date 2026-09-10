@@ -75,33 +75,45 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
 
   useEffect(() => {
     const grouping = groupingStore.get();
-
-    if (columnAxisEmitted === undefined && grouping.columnAxis !== undefined) {
-      return;
-    }
-
     const currentColumns = columnsStore.get();
     const meta = metaStore.get();
     const isLayoutTransient = meta.isColumnLayoutTransient === true;
-
-    syncStoreFromProps({
-      next: getInitialColumnsState<TData>({
-        ...currentColumns,
-        ...columnsState,
-        ...(isLayoutTransient && {
-          columnOrder: currentColumns.columnOrder,
-          columnPinning: currentColumns.columnPinning,
-          columnSizing: currentColumns.columnSizing,
-          columnVisibility: currentColumns.columnVisibility,
-        }),
-        aggregates: grouping.aggregates,
-        crud: meta.crud,
-        groupingKeys: grouping.keys,
-        ...(grouping.columnAxis !== undefined && {
+    const isKeepPaintedAxis =
+      columnAxisEmitted === undefined && grouping.columnAxis !== undefined;
+    const next = getInitialColumnsState<TData>({
+      ...currentColumns,
+      ...columnsState,
+      ...(isLayoutTransient && {
+        columnOrder: currentColumns.columnOrder,
+        columnPinning: currentColumns.columnPinning,
+        columnSizing: currentColumns.columnSizing,
+        columnVisibility: currentColumns.columnVisibility,
+      }),
+      aggregates: grouping.aggregates,
+      crud: meta.crud,
+      groupingKeys: grouping.keys,
+      ...(!isKeepPaintedAxis &&
+        grouping.columnAxis !== undefined && {
           columnAxis: grouping.columnAxis,
         }),
-        ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
-      }),
+      ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
+    });
+
+    syncStoreFromProps({
+      next: isKeepPaintedAxis
+        ? {
+            ...next,
+            columnOrder: currentColumns.columnOrder,
+            columnPinning: currentColumns.columnPinning,
+            columns: currentColumns.columns,
+            columnVisibility: currentColumns.columnVisibility,
+            effectiveColumns: currentColumns.effectiveColumns,
+            normalizedColumns: currentColumns.normalizedColumns,
+            pinnedColumnOffsets: currentColumns.pinnedColumnOffsets,
+            pinnedColumnPartition: currentColumns.pinnedColumnPartition,
+            staticKeys: currentColumns.staticKeys,
+          }
+        : next,
       store: columnsStore,
     });
   }, [

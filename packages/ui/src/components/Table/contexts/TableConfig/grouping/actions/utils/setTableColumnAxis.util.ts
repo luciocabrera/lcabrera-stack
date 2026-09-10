@@ -13,6 +13,8 @@ export const setTableColumnAxis = ({
 }: SetTableColumnAxisArgs): TableGroupingState => {
   const next = pruneColumnAxis({ columnAxis, keys: grouping.keys });
 
+  if (columnAxis !== undefined && next === undefined) return grouping;
+
   if (next === grouping.columnAxis) return grouping;
 
   return {
