@@ -12,6 +12,7 @@ type SelectColumnAxisValuesArgs = ExecutorOptions & {
   readonly allowedColumns: readonly string[];
   readonly filters?: readonly QueryFilter[];
   readonly key: string;
+  readonly limit?: number;
   readonly maxDistinct: number;
   readonly schema: string;
   readonly table: string;
@@ -21,6 +22,7 @@ export const selectColumnAxisValues = async ({
   allowedColumns,
   filters,
   key,
+  limit,
   maxDistinct,
   schema,
   table,
@@ -33,7 +35,7 @@ export const selectColumnAxisValues = async ({
     distinct: true,
     fields: [key],
     filters,
-    limit: maxDistinct + 1,
+    limit: limit ?? maxDistinct + 1,
     schema,
     sort: [{ column: key, direction: 'asc' }],
     table,

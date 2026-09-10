@@ -13,6 +13,7 @@ import { assertGroupDepth } from './group-query-builder/assert-group-depth.util.
 import { assertGroupRowBackstop } from './group-query-builder/assert-group-row-backstop.util.ts';
 import { buildGroupQuery } from './group-query-builder/build-group-query.util.ts';
 import { collectCapabilityColumns } from './group-query-builder/collect-capability-columns.util.ts';
+import { toColumnAxisDiscoveryLimit } from './group-query-builder/to-column-axis-discovery-limit.util.ts';
 import { toGroupKeyTruncations } from './olap/to-group-key-truncations.util.ts';
 import { runQuery } from './run-query.util.ts';
 import { selectColumnAxisValues } from './select-column-axis-values.util.ts';
@@ -73,6 +74,11 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
               allowedColumns: grouped.allowedColumns,
               filters: grouped.filters,
               key: columnAxisRequest.key,
+              limit: toColumnAxisDiscoveryLimit({
+                keyCount: grouped.keys.length,
+                maxDistinct: columnAxisRequest.maxDistinct,
+                measureCount: grouped.aggregates.length,
+              }),
               maxDistinct: columnAxisRequest.maxDistinct,
               schema: grouped.schema,
               table: grouped.table,

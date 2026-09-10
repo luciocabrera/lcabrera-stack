@@ -3,6 +3,7 @@ import type { Pool, PoolClient } from 'pg';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { getPool } from './get-pool.util.ts';
+import { toColumnAxisDiscoveryLimit } from './group-query-builder/to-column-axis-discovery-limit.util.ts';
 import { selectGroupedRows } from './select-grouped-rows.util.ts';
 
 // The pool is the one impure edge here; stubbing it keeps this package's
@@ -47,6 +48,25 @@ const resolveCapabilityThenEmpty = () => {
   resolvePreamble();
   query
     .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
+    .mockResolvedValueOnce({ rows: [] })
+    .mockResolvedValueOnce({ rows: [] });
+};
+
+const YEAR_AXIS = {
+  ...DESCRIPTOR,
+  allowedColumns: ['country', 'year', 'amount'],
+} as const;
+
+const resolveYearAxisThenEmpty = () => {
+  resolvePreamble();
+  query
+    .mockResolvedValueOnce({
+      rows: [
+        CAPABILITY_ROW,
+        { ...CAPABILITY_ROW, column: 'year', nDistinct: 2 },
+      ],
+    })
+    .mockResolvedValueOnce({ rows: [{ year: 2022 }] })
     .mockResolvedValueOnce({ rows: [] })
     .mockResolvedValueOnce({ rows: [] });
 };
@@ -280,21 +300,10 @@ describe('selectGroupedRows', () => {
   });
 
   it('asks the catalogue about the column-axis key as well as the row keys', async () => {
-    resolvePreamble();
-    query
-      .mockResolvedValueOnce({
-        rows: [
-          CAPABILITY_ROW,
-          { ...CAPABILITY_ROW, column: 'year', nDistinct: 2 },
-        ],
-      })
-      .mockResolvedValueOnce({ rows: [{ year: 2022 }] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    resolveYearAxisThenEmpty();
 
     await selectGroupedRows({
-      ...DESCRIPTOR,
-      allowedColumns: ['country', 'year', 'amount'],
+      ...YEAR_AXIS,
       columnAxis: { key: 'year', maxDistinct: 8 },
     });
 
@@ -302,6 +311,26 @@ describe('selectGroupedRows', () => {
     const columns = capabilityValues?.[2];
 
     expect(columns).toEqual(expect.arrayContaining(['country', 'year']));
+  });
+
+  it('caps DISTINCT at the heap fit when maxDistinct is larger', async () => {
+    resolveYearAxisThenEmpty();
+
+    await selectGroupedRows({
+      ...YEAR_AXIS,
+      columnAxis: { key: 'year', maxDistinct: 50_000 },
+    });
+
+    const distinctValues = query.mock.calls[3]?.[1];
+
+    expect(statements()[3]).toContain('SELECT DISTINCT');
+    expect(distinctValues?.at(-1)).toBe(
+      toColumnAxisDiscoveryLimit({
+        keyCount: 1,
+        maxDistinct: 50_000,
+        measureCount: 1,
+      }),
+    );
   });
 
   it('refuses an axis that is also a row key before DISTINCT', async () => {

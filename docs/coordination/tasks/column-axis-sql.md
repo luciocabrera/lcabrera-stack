@@ -7,10 +7,12 @@ branch: feat/1164-column-axis-sql
 area:
   - packages/server/src/db/**
   - packages/server/src/errors/**
+  - packages/server/src/INVENTORY.md
   - packages/ui/src/components/Table/Table.types.ts
   - packages/ui/src/components/Table/utils/isTableGroupingRefusalReason.util.ts
   - docs/decisions/**
   - docs/product/requirements/**
+  - reports/api-surface/**
   - .changeset/**
 started: 2026-09-10
 updated: 2026-09-10

@@ -56,6 +56,20 @@ describe('selectColumnAxisValues', () => {
     expect(query).toHaveBeenCalled();
   });
 
+  it('uses the caller LIMIT when one is passed', async () => {
+    query.mockResolvedValueOnce({
+      rows: [{ year: 2022 }],
+    });
+
+    await selectColumnAxisValues({
+      ...ARGS,
+      limit: 4,
+      tx: { query } as unknown as PoolClient,
+    });
+
+    expect(query.mock.calls[0]?.[1]).toEqual(['PE', 4]);
+  });
+
   it('refuses a non-positive ceiling before touching Postgres', async () => {
     await expect(
       selectColumnAxisValues({
