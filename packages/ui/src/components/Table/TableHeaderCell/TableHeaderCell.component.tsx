@@ -2,6 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
+import { skeleton } from '#ui/design-system/tokens/commons.stylex';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
 
@@ -12,10 +13,7 @@ import {
 } from '../contexts/TableConfig/columns/selectors';
 import { ResizeHandle } from './ResizeHandle';
 import { TableHeaderActionsMenu } from './TableHeaderActionsMenu';
-import {
-  skeletonStyles,
-  tableHeaderCellStyles,
-} from './TableHeaderCell.stylex';
+import { tableHeaderCellStyles } from './TableHeaderCell.stylex';
 import { getPinnedStyle, getShadowStyle, resolveAriaSort } from './utils';
 
 export const TableHeaderCell = <TData extends Record<string, unknown>>({
@@ -58,8 +56,8 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
       )}
     >
       {Boolean(isLoadingState) && (
-        <div {...stylex.props(skeletonStyles.loadingOverlay)}>
-          <div {...stylex.props(skeletonStyles.shimmerWave)} />
+        <div {...stylex.props(skeleton.loadingOverlay)}>
+          <div {...stylex.props(skeleton.shimmerWave)} />
         </div>
       )}
       {!isHeaderHidden && (

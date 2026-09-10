@@ -1,10 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { useTableCellFocus } from '#ui/components/Table/hooks';
+import { skeleton } from '#ui/design-system/tokens/commons.stylex';
 
 import type { TableBodyCellProps } from './TableBodyCell.types';
 
-import { skeletonStyles } from './TableBodyCell.stylex';
 import {
   detectDataType,
   getCellStyleProps,
@@ -65,8 +65,8 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
       })}
     >
       {Boolean(isLoadingState) && (
-        <div {...stylex.props(skeletonStyles.loadingOverlay)}>
-          <div {...stylex.props(skeletonStyles.shimmerWave)} />
+        <div {...stylex.props(skeleton.loadingOverlay)}>
+          <div {...stylex.props(skeleton.shimmerWave)} />
         </div>
       )}
       {renderDisplayedContent({ content, dataType, hasCustomContent })}
