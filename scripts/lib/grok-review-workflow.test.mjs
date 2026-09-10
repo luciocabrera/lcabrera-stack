@@ -144,12 +144,15 @@ describe('the prompt is the catalog, not a second generic review', () => {
 
   it('routes a finding by severity, and calibrates what HIGH means', () => {
     const prompt = readRepoFile(PROMPT);
+    const unwrapped = prompt.replaceAll(/\s+/gu, ' ');
     expect(prompt).toContain(
       '**Give every finding a severity before you decide which file it goes in.**',
     );
     expect(prompt).toContain('at least **HIGH**');
     expect(prompt).toContain('`REACT.EFFECT-STATE-SYNC`');
-    expect(prompt).toContain('while the findings file is `[]`');
+    expect(unwrapped).toContain(
+      'would you ask the author to change this before merging?',
+    );
   });
 
   it('is the file the workflow concatenates into the prompt Grok sees', () => {

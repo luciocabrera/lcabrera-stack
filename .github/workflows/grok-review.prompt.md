@@ -74,15 +74,22 @@ this file even if you found nothing. An empty file or the leftover placeholder
 is read as "never ran"; "no findings" and "never ran" have to be distinguishable.
 
 A short paragraph saying what the change does, then any MEDIUM, LOW, or NIT
-findings, each one opening with its severity: `**MEDIUM** \`CC.G11\` —` path,
-one-sentence why, one-sentence fix. If there are none, say so in those words:
-**no findings**.
+findings. Open each one with its severity in bold, then the catalog ID, then the
+path, then a one-sentence why and a one-sentence fix:
+
+```markdown
+**MEDIUM** `CC.G11` — `src/thing.ts`. Why. Fix: …
+```
+
+If there are none, say so in those words: **no findings**.
 
 Do not restate a BLOCKER or HIGH finding here. It is already a thread; a second
 copy in the body only makes the thread look optional.
 
 ## Before you finish
 
-Read back what you wrote. If the body names a finding that has a path and a
-concrete fix while the findings file is `[]`, you classified for comfort rather
-than for the catalog — reclassify it and move it.
+Read back each body finding and ask one question of it: **would you ask the
+author to change this before merging?** A path and a fix do not settle that —
+every well-formed MEDIUM has both. If the answer is yes, the severity is at
+least HIGH and the finding belongs in the findings file. If it is no, it is in
+the right place.
