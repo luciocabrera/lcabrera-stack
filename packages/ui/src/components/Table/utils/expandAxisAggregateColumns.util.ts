@@ -59,12 +59,14 @@ export const expandAxisAggregateColumns = <TData>({
       }),
       isFilterable: false,
       isGroupable: false,
-      isSortable: true,
+      isSortable: false,
       key: entry.alias as DataKey<TData>,
-      label: isSingleMeasure ? header : TABLE_AGGREGATE_LABELS[entry.fn],
+      label: isSingleMeasure
+        ? header
+        : `${TABLE_AGGREGATE_LABELS[entry.fn]} · ${header}`,
       maxWidth,
       minWidth,
-      ...(!isSingleMeasure && { headerGroupLabel: header }),
+      ...(!isSingleMeasure && { headerGroupLabel: source.label }),
       ...(source.format !== undefined && { format: source.format }),
       ...(source.isResizable !== undefined && {
         isResizable: source.isResizable,

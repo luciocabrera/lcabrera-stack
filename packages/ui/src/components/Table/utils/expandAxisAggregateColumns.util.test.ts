@@ -39,6 +39,8 @@ describe('expandAxisAggregateColumns', () => {
       'sum_total_amount_c0',
     ]);
     expect(result.columns[1]?.label).toBe('Pending');
+    expect(result.columns[1]?.isSortable).toBe(false);
+    expect(result.columns[1]?.headerGroupLabel).toBeUndefined();
   });
 
   it('hides only the aliases of the measured column that was hidden', () => {
@@ -96,6 +98,17 @@ describe('expandAxisAggregateColumns', () => {
       'sum_total_amount_c1',
       'sum_quantity_c0',
       'sum_quantity_c1',
+    ]);
+    expect(
+      result.columns.slice(1).map((column) => ({
+        headerGroupLabel: column.headerGroupLabel,
+        label: column.label,
+      })),
+    ).toStrictEqual([
+      { headerGroupLabel: 'Total Amount', label: 'Sum · Pending' },
+      { headerGroupLabel: 'Total Amount', label: 'Sum · Shipped' },
+      { headerGroupLabel: 'Quantity', label: 'Sum · Pending' },
+      { headerGroupLabel: 'Quantity', label: 'Sum · Shipped' },
     ]);
   });
 });

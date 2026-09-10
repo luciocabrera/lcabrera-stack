@@ -406,6 +406,9 @@ describe('a column axis', () => {
     expect(columnAt({ key: 'sum_total_amount_c0', result })?.label).toBe(
       'Pending',
     );
+    expect(columnAt({ key: 'sum_total_amount_c0', result })?.isSortable).toBe(
+      false,
+    );
   });
 
   it('renders SQL NULL as an empty header', () => {
@@ -455,12 +458,12 @@ describe('a column axis', () => {
     });
 
     expect(columnAt({ key: 'sum_total_amount_c0', result })).toMatchObject({
-      headerGroupLabel: 'Pending',
-      label: 'Sum',
+      headerGroupLabel: 'Total Amount',
+      label: 'Sum · Pending',
     });
     expect(columnAt({ key: 'avg_total_amount_c0', result })).toMatchObject({
-      headerGroupLabel: 'Pending',
-      label: 'Average',
+      headerGroupLabel: 'Total Amount',
+      label: 'Average · Pending',
     });
   });
 });
