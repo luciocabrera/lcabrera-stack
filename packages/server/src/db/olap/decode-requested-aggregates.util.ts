@@ -19,10 +19,7 @@ export const decodeRequestedAggregates = ({
   return requested.map((aggregate, index) => {
     const emitted = selected[index];
 
-    if (
-      emitted?.fn !== aggregate.fn ||
-      emitted.column !== aggregate.column
-    ) {
+    if (emitted?.fn !== aggregate.fn || emitted.column !== aggregate.column) {
       throw new Error(
         `Grouped read projected \`${emitted?.fn ?? '*'}\` on \`${emitted?.column ?? '*'}\` at position ${String(index + 1)} but \`${aggregate.fn}\` on \`${aggregate.column}\` was requested there; the two lists are ordered differently.`,
       );
