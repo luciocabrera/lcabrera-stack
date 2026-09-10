@@ -33,6 +33,7 @@ export const useSetTableGrouping = () => {
       groupingKeys: result.grouping.keys,
       ...toColumnAxisDerivationArgs({
         columnAxis: result.grouping.columnAxis,
+        data: dataStore.get().data,
       }),
     });
 

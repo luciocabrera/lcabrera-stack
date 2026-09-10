@@ -33,6 +33,7 @@ const {
       readonly columnKey: string;
       readonly fn: string;
     }[];
+    readonly columnAxis?: string;
     readonly keys: readonly string[];
     readonly mode: string;
     readonly periods: Record<string, string>;
@@ -166,6 +167,34 @@ describe('useResetTableSettings', () => {
 
     expect(drawerGroupingStore.set).toHaveBeenCalledWith({
       aggregates: [{ columnKey: 'total', fn: 'sum' }],
+      keys: ['status'],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+      totalsPlacement: 'last',
+    });
+  });
+
+  it('re-seeds the applied column axis rather than dropping it', () => {
+    setTableGrouping({
+      aggregates: [{ columnKey: 'total', fn: 'sum' }],
+      columnAxis: 'order_status',
+      keys: ['status'],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+      totalsPlacement: 'last',
+    });
+
+    const { result } = renderHook(() => useResetTableSettings());
+
+    act(() => {
+      result.current();
+    });
+
+    expect(drawerGroupingStore.set).toHaveBeenCalledWith({
+      aggregates: [{ columnKey: 'total', fn: 'sum' }],
+      columnAxis: 'order_status',
       keys: ['status'],
       mode: 'flat',
       periods: {},

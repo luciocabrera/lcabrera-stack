@@ -69,7 +69,10 @@ vi.mock('#ui/components/ToggleSwitch', () => ({
   ),
 }));
 
-import { TableConfigProvider } from '#ui/components/Table/contexts';
+import {
+  TableConfigProvider,
+  TableDataProvider,
+} from '#ui/components/Table/contexts';
 import { ColumnOrderSection } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection';
 import { ColumnOrderSectionProvider } from '#ui/components/Table/TableSettingsDrawer/ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
 import { TableDrawerProvider } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/TableDrawerContext.provider';
@@ -104,11 +107,20 @@ const Harness = ({ columnVisibility, groupingKeys }: HarnessProps) => (
         columnsState={{ columns, columnVisibility }}
         groupingState={{ keys: groupingKeys }}
       >
-        <TableDrawerProvider>
-          <ColumnOrderSectionProvider>
-            <ColumnOrderSection />
-          </ColumnOrderSectionProvider>
-        </TableDrawerProvider>
+        <TableDataProvider<Row>
+          dataState={{
+            data: [],
+            isLoading: false,
+            isLoadingMore: false,
+            totalRows: 0,
+          }}
+        >
+          <TableDrawerProvider>
+            <ColumnOrderSectionProvider>
+              <ColumnOrderSection />
+            </ColumnOrderSectionProvider>
+          </TableDrawerProvider>
+        </TableDataProvider>
       </TableConfigProvider>
     </NotificationProvider>
   </GlobalSettingsProvider>

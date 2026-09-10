@@ -74,10 +74,16 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   }, [metaState, metaStore]);
 
   useEffect(() => {
-    const currentColumns = columnsStore.get();
     const grouping = groupingStore.get();
+
+    if (columnAxisEmitted === undefined && grouping.columnAxis !== undefined) {
+      return;
+    }
+
+    const currentColumns = columnsStore.get();
     const meta = metaStore.get();
     const isLayoutTransient = meta.isColumnLayoutTransient === true;
+
     syncStoreFromProps({
       next: getInitialColumnsState<TData>({
         ...currentColumns,

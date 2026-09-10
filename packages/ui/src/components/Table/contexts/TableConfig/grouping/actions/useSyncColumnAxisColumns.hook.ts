@@ -1,33 +1,40 @@
 import { useEffect, useLayoutEffect } from 'react';
 
+import { useGetColumns } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumns.hook';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useGetTableData } from '#ui/components/Table/contexts/TableData/data/selectors';
 import { arePaintedColumnsUnchanged } from '#ui/components/Table/utils/arePaintedColumnsUnchanged.util';
 import { collectColumnAxisEmitted } from '#ui/components/Table/utils/collectColumnAxisEmitted.util';
 
-import { useGetTableGroupingColumnAxis } from '../selectors';
+import {
+  useGetTableGroupingAggregates,
+  useGetTableGroupingColumnAxis,
+  useGetTableGroupingKeys,
+} from '../selectors';
 import { resolveGroupingColumnsPatch } from './utils';
 
 const useIsomorphicLayoutEffect =
   typeof document === 'undefined' ? useEffect : useLayoutEffect;
 
 export const useSyncColumnAxisColumns = () => {
-  const { columnsStore, groupingStore } = useTableConfigContextValue();
+  const { columnsStore } = useTableConfigContextValue();
+  const aggregates = useGetTableGroupingAggregates();
   const columnAxis = useGetTableGroupingColumnAxis();
+  const columns = useGetColumns();
   const data = useGetTableData();
+  const groupingKeys = useGetTableGroupingKeys();
 
   useIsomorphicLayoutEffect(() => {
     if (columnAxis === undefined) return;
 
-    const grouping = groupingStore.get();
     const columnsState = columnsStore.get();
     const emitted = collectColumnAxisEmitted(data);
     const patch = resolveGroupingColumnsPatch({
-      aggregates: grouping.aggregates,
+      aggregates,
       columnAxis,
       columnAxisEmitted: emitted,
       columnsState,
-      groupingKeys: grouping.keys,
+      groupingKeys,
     });
     if (
       arePaintedColumnsUnchanged({
@@ -39,5 +46,5 @@ export const useSyncColumnAxisColumns = () => {
     }
 
     columnsStore.set(patch);
-  }, [columnAxis, columnsStore, data, groupingStore]);
+  }, [aggregates, columnAxis, columns, columnsStore, data, groupingKeys]);
 };

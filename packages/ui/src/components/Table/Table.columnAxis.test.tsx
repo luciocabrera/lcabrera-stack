@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, screen } from '@testing-library/react';
+import { cleanup, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import type {
@@ -82,14 +82,16 @@ const headerLabels = () =>
 describe('a grouped grid with a column axis', () => {
   afterEach(cleanup);
 
-  it('paints unique axis values as headers with the measure in the cells', () => {
+  it('paints unique axis values as headers with the measure in the cells', async () => {
     renderGroupedTableRoute(<Harness />);
 
-    expect(headerLabels()).toStrictEqual([
-      'Customer Type',
-      'Pending',
-      'Shipped',
-    ]);
+    await waitFor(() => {
+      expect(headerLabels()).toStrictEqual([
+        'Customer Type',
+        'Pending',
+        'Shipped',
+      ]);
+    });
 
     expect(screen.getByTestId('table-group-header-row').textContent).toBe(
       'Business100250',

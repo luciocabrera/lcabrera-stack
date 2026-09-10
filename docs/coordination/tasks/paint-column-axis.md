@@ -30,6 +30,6 @@ Paint a grouped read's column axis as ordinary columns.
 
 ## Status / next
 
-- Current step: independent verifier PASS on 04164f92f; PR ready for review
+- Current step: addressing PR #1171 review threads (drawer seed, emitted keys, production paint sync)
 - Blockers: none
-- Next: human review; do not merge from this agent
+- Next: push, resolve threads; do not merge from this agent

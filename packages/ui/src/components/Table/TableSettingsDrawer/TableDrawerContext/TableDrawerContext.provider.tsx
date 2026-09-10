@@ -16,6 +16,7 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     useTableConfigContextValue();
 
   const tableColumnsState = tableColumnsStore.get();
+  const grouping = tableGroupingStore.get();
   const {
     columnFilters,
     columnOrder,
@@ -24,8 +25,6 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     columnVisibility,
     sorting,
   } = tableColumnsState;
-  const { aggregates, keys, mode, periods, shares, totalsPlacement } =
-    tableGroupingStore.get();
 
   const columnsStore = useStore<
     TableDrawerColumnsState<Record<string, unknown>>
@@ -37,16 +36,9 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     columnVisibility,
     sorting,
   });
-  const groupingStore = useStore<TableGroupingState>({
-    aggregates,
-    keys,
-    mode,
-    periods,
-    shares,
-    totalsPlacement,
-  });
+  const groupingStore = useStore<TableGroupingState>(grouping);
   const totalsPlacementStore = useStore<TableDrawerTotalsPlacementState>({
-    totalsPlacement,
+    totalsPlacement: grouping.totalsPlacement,
   });
 
   return (

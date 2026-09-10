@@ -5,6 +5,7 @@ import type {
   TableColumn,
   TableColumnAggregate,
 } from '#ui/components/Table/Table.types';
+import type { ColumnAxisEmittedAggregate } from '#ui/components/Table/utils/columnAxisEmitted.types';
 
 import { resolveRenderedColumnKeys } from './resolveRenderedColumnKeys.util';
 
@@ -24,12 +25,16 @@ const noPinning: ColumnPinningState<Row> = { left: [], right: [] };
 
 type RunArgs = {
   readonly aggregates?: readonly TableColumnAggregate[];
+  readonly columnAxis?: string;
+  readonly columnAxisEmitted?: readonly ColumnAxisEmittedAggregate[];
   readonly columnVisibility?: ReadonlySet<string>;
   readonly groupingKeys?: readonly string[];
 };
 
 const run = ({
   aggregates = [],
+  columnAxis,
+  columnAxisEmitted,
   columnVisibility = new Set<string>(),
   groupingKeys = [],
 }: RunArgs = {}) =>
@@ -40,6 +45,8 @@ const run = ({
     columns,
     columnVisibility: columnVisibility as never,
     groupingKeys,
+    ...(columnAxis !== undefined && { columnAxis }),
+    ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
   });
 
 describe('resolveRenderedColumnKeys', () => {
@@ -99,5 +106,42 @@ describe('the drawer listing and the grid agree about measure order', () => {
         groupingKeys: ['region'],
       }),
     ).toStrictEqual(['region', 'id', 'amount']);
+  });
+});
+
+describe('a column axis listing', () => {
+  it('names the emitted aliases rather than the unexpanded measure', () => {
+    expect(
+      run({
+        aggregates: [{ columnKey: 'amount', fn: 'sum' }],
+        columnAxis: 'status',
+        columnAxisEmitted: [
+          {
+            alias: 'sum_amount_c0',
+            axis: { value: 'Pending' },
+            columnKey: 'amount',
+            fn: 'sum',
+          },
+          {
+            alias: 'sum_amount_c1',
+            axis: { value: 'Shipped' },
+            columnKey: 'amount',
+            fn: 'sum',
+          },
+        ],
+        groupingKeys: ['region'],
+      }),
+    ).toStrictEqual(['region', 'sum_amount_c0', 'sum_amount_c1']);
+  });
+
+  it('drops the measure when the axis has no emitted aliases yet', () => {
+    expect(
+      run({
+        aggregates: [{ columnKey: 'amount', fn: 'sum' }],
+        columnAxis: 'status',
+        columnAxisEmitted: [],
+        groupingKeys: ['region'],
+      }),
+    ).toStrictEqual(['region']);
   });
 });
