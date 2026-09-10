@@ -13,6 +13,7 @@ import { resolveAggregateDataType } from '../TableGroupAggregate/utils/resolveAg
 import { resolveGroupedColumnWidthBand } from './resolveGroupedColumnWidthBand.util';
 import { toTableAggregateToken } from './tableAggregateToken.util';
 import { toAxisHeaderLabel } from './toAxisHeaderLabel.util';
+import { withExpandedColumnKeys } from './withExpandedColumnKeys.util';
 
 type ExpandAxisAggregateColumnsArgs<TData> = {
   readonly aggregates: readonly TableColumnAggregate[];
@@ -87,33 +88,24 @@ export const expandAxisAggregateColumns = <TData>({
     return unchanged;
   }
 
-  const expandKey = (key: DataKey<TData>): readonly DataKey<TData>[] => {
-    const derived = derivedBySource.get(String(key));
-
-    if (derived !== undefined) return derived.map((column) => column.key);
-
-    return measureSourceKeys.has(String(key)) ? [] : [key];
-  };
-
-  const expandKeys = (
-    keys: readonly DataKey<TData>[],
-  ): readonly DataKey<TData>[] => [
-    ...new Set(keys.flatMap((key) => expandKey(key))),
-  ];
-
-  return {
-    columnOrder: expandKeys(columnOrder),
-    columnPinning: {
-      left: expandKeys(columnPinning.left),
-      right: expandKeys(columnPinning.right),
-    },
-    columns: columns.flatMap((column) => {
+  return withExpandedColumnKeys({
+    columnOrder,
+    columnPinning,
+    columns,
+    columnVisibility,
+    expandColumn: (column) => {
       const derived = derivedBySource.get(String(column.key));
 
       if (derived !== undefined) return derived;
 
       return measureSourceKeys.has(String(column.key)) ? [] : [column];
-    }),
-    columnVisibility: new Set(expandKeys([...columnVisibility])),
-  };
+    },
+    expandKey: (key) => {
+      const derived = derivedBySource.get(String(key));
+
+      if (derived !== undefined) return derived.map((column) => column.key);
+
+      return measureSourceKeys.has(String(key)) ? [] : [key];
+    },
+  });
 };
