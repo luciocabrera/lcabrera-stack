@@ -32,6 +32,9 @@ export const tableRowStyles = stylex.create({
     backgroundColor: colors.surfaceSecondary,
   },
   striped: {
-    backgroundColor: { ':nth-child(even)': colors.backgroundSecondary },
+    backgroundColor: {
+      default: colors.surfacePrimary,
+      ':nth-child(even)': colors.backgroundSecondary,
+    },
   },
 });

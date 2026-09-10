@@ -2,7 +2,6 @@ import * as stylex from '@stylexjs/stylex';
 
 import { typography, zIndex } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
-import { skeleton } from '#ui/design-system/tokens/commons.stylex';
 
 export const tableBodyCellStyles = stylex.create({
   alignCenter: {
@@ -19,6 +18,7 @@ export const tableBodyCellStyles = stylex.create({
     boxSizing: 'border-box',
     color: colors.textPrimary,
     display: 'flex',
+    flexShrink: 0,
     fontSize: typography.fontSizeSm,
     fontWeight: typography.fontWeightNormal,
     position: 'relative',
@@ -32,13 +32,13 @@ export const tableBodyCellStyles = stylex.create({
     width: width ?? minWidth ?? null,
   }),
   pinnedLeft: (offset: number) => ({
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: 'inherit',
     position: 'sticky',
     zIndex: `calc(${zIndex.sticky} - 1)`,
     left: offset,
   }),
   pinnedRight: (offset: number) => ({
-    backgroundColor: colors.surfaceSecondary,
+    backgroundColor: 'inherit',
     position: 'sticky',
     zIndex: `calc(${zIndex.sticky} - 1)`,
     right: offset,
@@ -66,5 +66,3 @@ export const tableBodyCellStyles = stylex.create({
     width: '100%',
   },
 });
-
-export const skeletonStyles = { ...skeleton };
