@@ -4,7 +4,7 @@ import type { ExecutorOptions } from './db.types.ts';
 import type { QueryFilter } from './query-builder/query-builder.types.ts';
 
 import { GroupingRefusedError } from '../errors/grouping-refused.error.ts';
-import { assertColumnAxisMaxDistinct } from './group-query-builder/assert-column-axis.util.ts';
+import { assertColumnAxisMaxDistinct } from './group-query-builder/assert-column-axis-max-distinct.util.ts';
 import { buildSelectQuery } from './query-builder/build-select-query.util.ts';
 import { runQuery } from './run-query.util.ts';
 

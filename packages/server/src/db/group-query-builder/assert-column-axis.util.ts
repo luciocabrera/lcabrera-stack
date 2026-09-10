@@ -4,6 +4,7 @@ import type {
 } from './group-query-builder.types.ts';
 
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
+import { assertColumnAxisMaxDistinct } from './assert-column-axis-max-distinct.util.ts';
 import { assertGroupColumn } from './assert-group-column.util.ts';
 import { POSTGRES_MAX_HEAP_ATTRIBUTES } from './group-query-builder.constants.ts';
 
@@ -70,13 +71,5 @@ export const assertColumnAxis = ({
       message: `This column axis would project ${projected} attributes, past Postgres's ${POSTGRES_MAX_HEAP_ATTRIBUTES}-attribute heap limit.`,
       reason: 'column-axis-too-wide',
     });
-  }
-};
-
-export const assertColumnAxisMaxDistinct = (maxDistinct: number) => {
-  if (!Number.isSafeInteger(maxDistinct) || maxDistinct < 1) {
-    throw new Error(
-      `columnAxis.maxDistinct must be a positive integer; got ${maxDistinct}.`,
-    );
   }
 };

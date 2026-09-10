@@ -79,7 +79,10 @@ Postgres's heap-attribute limit is the same reason. Statistics-unavailable
 does **not** warn-and-proceed on the axis: the capped distinct is what answers
 width. An empty distinct set still reports the axis and emits no `FILTER`
 columns. `maxDistinct` is checked before the discovery query, so a zero or
-non-integer ceiling never becomes `LIMIT`.
+non-integer ceiling never becomes `LIMIT`. The axis key is checked against
+the catalogue (not also a row key, groupable) before DISTINCT, so an illegal
+axis is a grouping refusal rather than a driver error. A `countDistinct`
+that expansion would emit more than once is `aggregate-not-legal`.
 
 A read without `columnAxis` is unchanged.
 

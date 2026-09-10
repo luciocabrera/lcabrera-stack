@@ -303,4 +303,40 @@ describe('selectGroupedRows', () => {
 
     expect(columns).toEqual(expect.arrayContaining(['country', 'year']));
   });
+
+  it('refuses an axis that is also a row key before DISTINCT', async () => {
+    resolvePreamble();
+    query.mockResolvedValueOnce({ rows: [CAPABILITY_ROW] });
+
+    await expect(
+      selectGroupedRows({
+        ...DESCRIPTOR,
+        columnAxis: { key: 'country', maxDistinct: 8 },
+      }),
+    ).rejects.toThrow('cannot be a row key and a column axis');
+    expect(statements().some((text) => text.includes('SELECT DISTINCT'))).toBe(
+      false,
+    );
+  });
+
+  it('refuses an axis the catalogue will not group before DISTINCT', async () => {
+    resolvePreamble();
+    query.mockResolvedValueOnce({
+      rows: [
+        CAPABILITY_ROW,
+        { ...CAPABILITY_ROW, column: 'payload', hasEquality: false },
+      ],
+    });
+
+    await expect(
+      selectGroupedRows({
+        ...DESCRIPTOR,
+        allowedColumns: ['country', 'payload'],
+        columnAxis: { key: 'payload', maxDistinct: 8 },
+      }),
+    ).rejects.toThrow('not a legal column axis');
+    expect(statements().some((text) => text.includes('SELECT DISTINCT'))).toBe(
+      false,
+    );
+  });
 });
