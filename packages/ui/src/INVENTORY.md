@@ -539,6 +539,7 @@ data context is re-created on every navigation.
 | `invokeColumnFilterFetch`             | `utils/tests/invokeColumnFilterFetch.util.ts`             | Runs a column filter-options fetch inside renderHook so suites share the act                                                      |
 | `renderGroupedTableRoute`             | `utils/tests/renderGroupedTableRoute.util.tsx`            | Mounts a grouped Table harness under a memory router with the cookie action                                                       |
 | `mockDialogElement`                   | `utils/tests/mockDialogElement.util.ts`                   | Mocks HTMLDialogElement prototype behavior with restore handles for test teardown                                                 |
+| `MockToggleSwitch`                    | `utils/tests/createMockToggleSwitch.util.tsx`             | The labelled button stand-in every suite that mocks `ToggleSwitch` renders                                                        |
 | `createMockVirtualSelect`             | `utils/tests/createMockVirtualSelect.util.tsx`            | The option-list stand-in every suite that mocks `VirtualSelect` renders; `testId` overrides the placeholder-derived `data-testid` |
 
 ### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/`
