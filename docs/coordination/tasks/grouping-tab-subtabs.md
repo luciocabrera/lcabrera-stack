@@ -7,6 +7,11 @@ branch: feat/1162-grouping-tab-subtabs
 area:
   - packages/ui/src/components/Table/TableSettingsDrawer/**
   - packages/ui/src/components/Tabs/**
+  - packages/ui/src/components/Table/Table.constants.ts
+  - packages/ui/src/components/Table/Table.types.ts
+  - docs/decisions/ADR-122-*
+  - .changeset/grouping-tab-subtabs.md
+  - reports/api-surface/**
 started: 2026-09-10
 updated: 2026-09-10
 plan: (none)
