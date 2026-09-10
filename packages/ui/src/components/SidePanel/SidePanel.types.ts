@@ -11,6 +11,8 @@ export type SidePanelProps = ComponentPropsWithoutRef<'dialog'> & {
   readonly onWidthChange?: (width: number) => void;
   /** Called once a resize gesture ends, for a consumer that persists it. */
   readonly onWidthCommit?: (width: number) => void;
+  /** Called when the splitter is double-clicked; clear the stored width to restore `size`. */
+  readonly onWidthReset?: () => void;
   readonly portalContainer?: RefObject<HTMLElement | null>;
   readonly position?: SidePanelPosition;
   /** Names what the splitter resizes, for a consumer whose panel is not "the panel". */

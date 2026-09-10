@@ -1,6 +1,7 @@
 import { SidePanel } from '#ui/components/SidePanel';
 
 import {
+  useResetTableSettingsPanelWidth,
   useSetTableSettingsPanelWidth,
   useSyncTableSettingsPanelWidth,
 } from '../contexts/TableConfig/meta/actions';
@@ -25,6 +26,7 @@ export const TableSettingsDrawer = () => {
   const isBusy = isLoading || isLoadingMore;
   const cancelTableSettings = useCancelTableSettings({ isBusy });
   const panelWidth = useGetTableSettingsPanelWidth();
+  const resetPanelWidth = useResetTableSettingsPanelWidth();
   const setPanelWidth = useSetTableSettingsPanelWidth();
   const syncPanelWidth = useSyncTableSettingsPanelWidth();
 
@@ -36,6 +38,7 @@ export const TableSettingsDrawer = () => {
       onClose={cancelTableSettings}
       onWidthChange={setPanelWidth}
       onWidthCommit={syncPanelWidth}
+      onWidthReset={resetPanelWidth}
       position='right'
       resizeLabel='Resize table settings panel'
       size='md'

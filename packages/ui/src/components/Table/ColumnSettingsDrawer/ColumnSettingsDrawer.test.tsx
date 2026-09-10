@@ -211,6 +211,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
+  useResetTableSettingsPanelWidth: () => vi.fn(),
   useSetTableColumnSettingsSelectedTab: () =>
     setTableColumnSettingsSelectedTabMock,
   useSetTableIsColumnSettingsPinned: () => setTableIsColumnSettingsPinnedMock,

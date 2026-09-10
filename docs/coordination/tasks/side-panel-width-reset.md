@@ -2,7 +2,7 @@
 id: side-panel-width-reset
 title: feat(ui): double-click the settings panel splitter to reset its width
 owner: agent:claude
-status: active
+status: review
 branch: feat/1159-side-panel-width-reset
 area:
   - packages/ui/src/components/SidePanel/**
@@ -10,7 +10,7 @@ area:
 started: 2026-09-10
 updated: 2026-09-10
 plan: (none)
-pr: (none)
+pr: "#1160"
 issue: #1159
 ---
 
@@ -20,6 +20,6 @@ feat(ui): double-click the settings panel splitter to reset its width
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; quality gate green, PR ready for review
 - Blockers: none
-- Next:
+- Next: merge once reviewed

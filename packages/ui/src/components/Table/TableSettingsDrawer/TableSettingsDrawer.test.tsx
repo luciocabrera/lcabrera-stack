@@ -17,6 +17,7 @@ const {
   isTableSettingsPinnedMock,
   notifyMock,
   panelWidthMock,
+  resetPanelWidthMock,
   resetTableDrawerSettingsMock,
   selectedTabMock,
   setPanelWidthMock,
@@ -32,6 +33,7 @@ const {
   isTableSettingsPinnedMock: vi.fn(() => false),
   notifyMock: vi.fn(),
   panelWidthMock: vi.fn<() => number | undefined>(),
+  resetPanelWidthMock: vi.fn(),
   resetTableDrawerSettingsMock: vi.fn(),
   selectedTabMock: vi.fn(() => 'general'),
   setPanelWidthMock: vi.fn(),
@@ -90,6 +92,7 @@ type MockSidePanelProps = {
   readonly children: ReactNode;
   readonly isPinned: boolean;
   readonly onClose: () => void;
+  readonly onWidthReset?: () => void;
 };
 
 type MockTabsProps = {
@@ -131,10 +134,18 @@ vi.mock('#ui/components/NotificationCenter', () => ({
 }));
 
 vi.mock('#ui/components/SidePanel', () => ({
-  SidePanel: ({ children, isPinned, onClose }: MockSidePanelProps) => (
+  SidePanel: ({
+    children,
+    isPinned,
+    onClose,
+    onWidthReset,
+  }: MockSidePanelProps) => (
     <div data-pinned={String(isPinned)} data-testid='side-panel'>
       <button onClick={onClose} type='button'>
         Panel close
+      </button>
+      <button onClick={onWidthReset} type='button'>
+        Panel width reset
       </button>
       {children}
     </div>
@@ -192,6 +203,7 @@ vi.mock('#ui/components/Tabs', () => ({
 }));
 
 vi.mock('../contexts/TableConfig/meta/actions', () => ({
+  useResetTableSettingsPanelWidth: () => resetPanelWidthMock,
   useSetTableIsTableSettingsOpen: () => setTableIsTableSettingsOpenMock,
   useSetTableIsTableSettingsPinned: () => setTableIsTableSettingsPinnedMock,
   useSetTableSettingsPanelWidth: () => setPanelWidthMock,
@@ -274,6 +286,17 @@ describe('TableSettingsDrawer', () => {
       'Sorting',
     );
     expect(screen.getByText('Columns').textContent).toBe('Columns');
+  });
+
+  it('clears the stored panel width when the splitter is double-clicked', () => {
+    render(<TableSettingsDrawer />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Panel width reset' }));
+
+    expect({
+      reset: resetPanelWidthMock.mock.calls.length,
+      sized: setPanelWidthMock.mock.calls.length,
+    }).toStrictEqual({ reset: 1, sized: 0 });
   });
 
   it('accepts changes and closes the drawer when unpinned', () => {

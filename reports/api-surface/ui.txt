@@ -171,7 +171,7 @@ meta [const] () => ({ title: string; content?: undefined; name?: undefined; } | 
 ## ./components/SidePanel
 SIDE_PANEL_MAX_WIDTH_RATIO [const] 0.9
 SIDE_PANEL_MIN_WIDTH [const] 320
-SidePanel [const] ({ children, isOpen, isPinned, isResizable, onClose, onWidthChange, onWidthCommit, portalContainer, position, resizeLabel, shouldShowOverlay, size, width, ...props }: SidePanelProps) => JSX.Element
+SidePanel [const] ({ children, isOpen, isPinned, isResizable, onClose, onWidthChange, onWidthCommit, onWidthReset, portalContainer, position, resizeLabel, shouldShowOverlay, size, width, ...props }: SidePanelProps) => JSX.Element
 SidePanelBody [const] ({ children, ...props }: SidePanelBodyProps) => JSX.Element
 SidePanelFooter [const] ({ children, ...props }: SidePanelFooterProps) => JSX.Element
 SidePanelHeader [const] ({ actions, children, ...props }: SidePanelHeaderProps) => JSX.Element

@@ -157,6 +157,51 @@ describe('SidePanel', () => {
     }).toStrictEqual({ committed: [500], resized: [500] });
   });
 
+  it('resets the width on a double-click, so the panel returns to its size', () => {
+    const onWidthChange = vi.fn();
+    const onWidthReset = vi.fn();
+
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={onWidthChange}
+        onWidthReset={onWidthReset}
+        width={640}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    fireEvent.doubleClick(screen.getByTestId('side-panel-resize-handle'));
+
+    expect({
+      reset: onWidthReset.mock.calls.length,
+      resized: onWidthChange.mock.calls.length,
+    }).toStrictEqual({ reset: 1, resized: 0 });
+  });
+
+  it('ignores a double-click when the consumer offers no reset', () => {
+    const onWidthChange = vi.fn();
+
+    render(
+      <SidePanel
+        isOpen
+        isPinned
+        isResizable
+        onWidthChange={onWidthChange}
+        width={640}
+      >
+        <span>Pinned content</span>
+      </SidePanel>,
+    );
+
+    fireEvent.doubleClick(screen.getByTestId('side-panel-resize-handle'));
+
+    expect(onWidthChange).not.toHaveBeenCalled();
+  });
+
   it('puts the splitter after the content, so opening the panel does not focus it', () => {
     render(
       <SidePanel isOpen isResizable onWidthChange={vi.fn()}>

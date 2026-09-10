@@ -15,6 +15,7 @@ export const SidePanelResizeHandle = ({
   label = SIDE_PANEL_RESIZE_LABEL,
   onWidthChange,
   onWidthCommit,
+  onWidthReset,
   position,
   width,
 }: SidePanelResizeHandleProps) => {
@@ -23,12 +24,14 @@ export const SidePanelResizeHandle = ({
   const currentWidth =
     hostWidth > 0 ? hostWidth : (width ?? SIDE_PANEL_MIN_WIDTH);
 
-  const { bounds, isResizing, onKeyDown, onMouseDown } = useSidePanelResize({
-    onWidthChange,
-    ...(onWidthCommit !== undefined && { onWidthCommit }),
-    position,
-    width: currentWidth,
-  });
+  const { bounds, isResizing, onDoubleClick, onKeyDown, onMouseDown } =
+    useSidePanelResize({
+      onWidthChange,
+      ...(onWidthCommit !== undefined && { onWidthCommit }),
+      ...(onWidthReset !== undefined && { onWidthReset }),
+      position,
+      width: currentWidth,
+    });
 
   return (
     <button
@@ -39,6 +42,7 @@ export const SidePanelResizeHandle = ({
       aria-valuenow={Math.round(currentWidth)}
       aria-valuetext={`${Math.round(currentWidth)} pixels`}
       data-testid='side-panel-resize-handle'
+      onDoubleClick={onDoubleClick}
       onKeyDown={onKeyDown}
       onMouseDown={onMouseDown}
       ref={handleRef}

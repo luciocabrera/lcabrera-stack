@@ -12,6 +12,7 @@ export const SidePanel = ({
   onClose,
   onWidthChange,
   onWidthCommit,
+  onWidthReset,
   portalContainer,
   position = 'right',
   resizeLabel,
@@ -28,6 +29,7 @@ export const SidePanel = ({
           label={resizeLabel}
           onWidthChange={onWidthChange}
           onWidthCommit={onWidthCommit}
+          onWidthReset={onWidthReset}
           position={position}
           width={width}
         />
