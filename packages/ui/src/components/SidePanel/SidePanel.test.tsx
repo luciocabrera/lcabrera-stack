@@ -55,6 +55,30 @@ const readPanelTabOrder = () => {
   return [buttons[0]?.textContent, buttons.at(-1)?.dataset.testid];
 };
 
+const renderResizablePanel = () => {
+  const onWidthChange = vi.fn();
+  const onWidthCommit = vi.fn();
+
+  render(
+    <SidePanel
+      isOpen
+      isPinned
+      isResizable
+      onWidthChange={onWidthChange}
+      onWidthCommit={onWidthCommit}
+      width={400}
+    >
+      <span>Pinned content</span>
+    </SidePanel>,
+  );
+
+  return {
+    handle: screen.getByTestId('side-panel-resize-handle'),
+    onWidthChange,
+    onWidthCommit,
+  };
+};
+
 describe('SidePanel', () => {
   it('renders children content', () => {
     render(
@@ -129,23 +153,7 @@ describe('SidePanel', () => {
   });
 
   it('resizes from the drag, and commits once the gesture ends', () => {
-    const onWidthChange = vi.fn();
-    const onWidthCommit = vi.fn();
-
-    render(
-      <SidePanel
-        isOpen
-        isPinned
-        isResizable
-        onWidthChange={onWidthChange}
-        onWidthCommit={onWidthCommit}
-        width={400}
-      >
-        <span>Pinned content</span>
-      </SidePanel>,
-    );
-
-    const handle = screen.getByTestId('side-panel-resize-handle');
+    const { handle, onWidthChange, onWidthCommit } = renderResizablePanel();
 
     fireEvent.mouseDown(handle, { clientX: 1000 });
     fireEvent.mouseMove(document, { clientX: 900 });
@@ -155,6 +163,18 @@ describe('SidePanel', () => {
       committed: onWidthCommit.mock.calls.at(-1),
       resized: onWidthChange.mock.calls.at(-1),
     }).toStrictEqual({ committed: [500], resized: [500] });
+  });
+
+  it('commits nothing when the pointer never moved, so a click is not a resize', () => {
+    const { handle, onWidthChange, onWidthCommit } = renderResizablePanel();
+
+    fireEvent.mouseDown(handle, { clientX: 1000 });
+    fireEvent.mouseUp(document);
+
+    expect({
+      committed: onWidthCommit.mock.calls.length,
+      resized: onWidthChange.mock.calls.length,
+    }).toStrictEqual({ committed: 0, resized: 0 });
   });
 
   it('resets the width on a double-click, so the panel returns to its size', () => {

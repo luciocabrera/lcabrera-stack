@@ -41,6 +41,20 @@ const createMouseDownEvent = ({
     stopPropagation: vi.fn(),
   }) as unknown as React.MouseEvent<HTMLDivElement>;
 
+const renderSession = () =>
+  renderHook(() =>
+    useColumnDragSession<Row>({ columnKey: 'name', currentWidth: 200 }),
+  );
+
+const renderBoundedSession = () =>
+  renderHook(() =>
+    useColumnDragSession<Row>({
+      columnKey: 'name',
+      currentWidth: 200,
+      minWidth: 100,
+    }),
+  );
+
 describe('useColumnDragSession', () => {
   beforeEach(() => {
     vi.stubGlobal('cancelAnimationFrame', vi.fn());
@@ -97,13 +111,7 @@ describe('useColumnDragSession', () => {
   });
 
   it('persists once per gesture, not once per frame', () => {
-    const { result } = renderHook(() =>
-      useColumnDragSession<Row>({
-        columnKey: 'name',
-        currentWidth: 200,
-        minWidth: 100,
-      }),
-    );
+    const { result } = renderBoundedSession();
 
     act(() => {
       result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
@@ -125,13 +133,7 @@ describe('useColumnDragSession', () => {
       return pendingFrames.length;
     });
 
-    const { result } = renderHook(() =>
-      useColumnDragSession<Row>({
-        columnKey: 'name',
-        currentWidth: 200,
-        minWidth: 100,
-      }),
-    );
+    const { result } = renderBoundedSession();
 
     act(() => {
       result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
@@ -148,13 +150,7 @@ describe('useColumnDragSession', () => {
   });
 
   it('does not re-write a width the last frame already applied', () => {
-    const { result } = renderHook(() =>
-      useColumnDragSession<Row>({
-        columnKey: 'name',
-        currentWidth: 200,
-        minWidth: 100,
-      }),
-    );
+    const { result } = renderBoundedSession();
 
     act(() => {
       result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
@@ -210,12 +206,7 @@ describe('useColumnDragSession', () => {
   });
 
   it('stops listening to document mouse moves once the drag ends', () => {
-    const { result } = renderHook(() =>
-      useColumnDragSession<Row>({
-        columnKey: 'name',
-        currentWidth: 200,
-      }),
-    );
+    const { result } = renderSession();
 
     act(() => {
       result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
@@ -224,17 +215,21 @@ describe('useColumnDragSession', () => {
     });
 
     expect(setColumnSizingWithoutSyncMock).not.toHaveBeenCalled();
-    expect(syncColumnsSizingMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('commits nothing when the pointer never moved, so a click is not a resize', () => {
+    const { result } = renderSession();
+
+    act(() => {
+      result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));
+      document.dispatchEvent(new MouseEvent('mouseup'));
+    });
+
+    expect(syncColumnsSizingMock).not.toHaveBeenCalled();
   });
 
   it('supersedes an in-flight session when a new drag starts', () => {
-    const { result } = renderHook(() =>
-      useColumnDragSession<Row>({
-        columnKey: 'name',
-        currentWidth: 200,
-        minWidth: 100,
-      }),
-    );
+    const { result } = renderBoundedSession();
 
     act(() => {
       result.current.onMouseDown(createMouseDownEvent({ clientX: 100 }));

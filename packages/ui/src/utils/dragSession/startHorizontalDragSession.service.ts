@@ -6,9 +6,13 @@
  * the session itself: a frame-throttled write, an `AbortController` that takes
  * both listeners down at once, and the body cursor the whole document wears
  * while a drag is live (ADR-114).
+ *
+ * A session that never saw a pointer move commits nothing. A press and release
+ * on the handle is not a resize, and committing the width it started at makes a
+ * click persist a value the reader did not change — twice over for a
+ * double-click, which the panel reads as a reset.
  */
 type StartHorizontalDragSessionArgs = {
-  readonly initialWidth: number;
   readonly onCommit: (width: number) => void;
   readonly onGestureEnd: () => void;
   readonly onSessionEnd: () => void;
@@ -17,7 +21,6 @@ type StartHorizontalDragSessionArgs = {
 };
 
 export const startHorizontalDragSession = ({
-  initialWidth,
   onCommit,
   onGestureEnd,
   onSessionEnd,
@@ -63,7 +66,9 @@ export const startHorizontalDragSession = ({
       onWidth(pendingWidth);
     }
 
-    onCommit(settledWidth ?? initialWidth);
+    if (settledWidth !== undefined) {
+      onCommit(settledWidth);
+    }
   };
 
   document.body.style.userSelect = 'none';
