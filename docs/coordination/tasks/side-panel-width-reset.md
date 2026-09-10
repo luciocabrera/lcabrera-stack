@@ -9,7 +9,7 @@ area:
   - packages/ui/src/components/Table/contexts/TableConfig/meta/**
   - packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawer.*
   - packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawer.*
-  - .changeset/**
+  - .changeset/side-panel-width-reset.md
   - reports/api-surface/**
 started: 2026-09-10
 updated: 2026-09-10
