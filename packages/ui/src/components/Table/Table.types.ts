@@ -7,6 +7,7 @@ import type {
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
+import type { ColumnAxisEmittedAggregate } from '#ui/components/Table/utils/columnAxisEmitted.types';
 import type { ColumnFilter } from '#ui/types/filterOperators.types';
 import type { InfiniteScroll, Sorting } from '#ui/types/ui.types';
 
@@ -234,6 +235,8 @@ export type TableColumnGroupingCapability =
 export type TableColumnLayoutLock = 'group-key' | 'measure';
 
 export type TableColumnsState<TData = Record<string, unknown>> = {
+  /** Emitted aliases from the last column-axis paint. */
+  readonly columnAxisEmitted?: readonly ColumnAxisEmittedAggregate[];
   readonly columnFilters: ColumnFiltersState<TData>;
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
@@ -250,6 +253,7 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
 
 export type TableColumnsStateInput<TData = Record<string, unknown>> = Omit<
   TableColumnsState<TData>,
+  | 'columnAxisEmitted'
   | 'effectiveColumns'
   | 'normalizedColumns'
   | 'pinnedColumnOffsets'

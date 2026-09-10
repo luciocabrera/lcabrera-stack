@@ -39,6 +39,7 @@ export const resolveGroupingColumnsPatch = <TData>({
 
   return {
     ...derived,
+    ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
     sorting: pruneSortingToColumns<TData>({
       declaredColumnKeys: columnsState.columns.map((column) =>
         String(column.key),

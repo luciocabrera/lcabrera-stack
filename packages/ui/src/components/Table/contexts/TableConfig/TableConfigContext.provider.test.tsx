@@ -14,6 +14,7 @@ import {
   useGetColumnSizing,
 } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useGetColumnsSorting } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumnsSorting.hook';
+import { useColumnsStore } from '#ui/components/Table/contexts/TableConfig/columns/useColumnsStore.hook';
 import { useGetTableDrawersSyncNonce } from '#ui/components/Table/contexts/TableConfig/meta/selectors/useGetTableDrawersSyncNonce.hook';
 import { useGetTableIsTableSettingsOpen } from '#ui/components/Table/contexts/TableConfig/meta/selectors/useGetTableIsTableSettingsOpen.hook';
 import { useGetTableData } from '#ui/components/Table/contexts/TableData/data/selectors';
@@ -33,6 +34,7 @@ type HarnessProps = {
 };
 
 type TestRow = {
+  readonly city?: string;
   readonly id: number;
   readonly name: string;
 };
@@ -57,6 +59,7 @@ const DataMountCounter = () => {
 
 const ID_COLUMN: TableColumn<TestRow> = { key: 'id', label: 'ID' };
 const NAME_COLUMN: TableColumn<TestRow> = { key: 'name', label: 'Name' };
+const CITY_COLUMN: TableColumn<TestRow> = { key: 'city', label: 'City' };
 const DEFAULT_COLUMNS_STATE = { columns: [ID_COLUMN] };
 const GROUPING_ORDER_STATUS = { keys: ['order_status'] };
 const META_STATE = { persistenceKey: 'orders' };
@@ -68,6 +71,12 @@ const Probe = () => {
   const columns = useGetColumns<TestRow>();
   const columnSizing = useGetColumnSizing<TestRow>();
   const sorting = useGetColumnsSorting<TestRow>();
+  const effectiveColumnKeys = useColumnsStore<string, TestRow>((state) =>
+    state.effectiveColumns.map((column) => String(column.key)).join(','),
+  );
+  const idSortDirection = useColumnsStore<string, TestRow>(
+    (state) => state.normalizedColumns.id?.sortDirection ?? '',
+  );
   const data = useGetTableData<TestRow>();
   const drawersSyncNonce = useGetTableDrawersSyncNonce();
   const isTableSettingsOpen = useGetTableIsTableSettingsOpen();
@@ -84,14 +93,20 @@ const Probe = () => {
 
   const handlePaintAxis = () => {
     const state = columnsStore.get();
-
     const painted = {
       key: 'sum_c0',
       label: 'Pending',
     } as unknown as TableColumn<TestRow>;
 
     columnsStore.set({
-      columns: [...state.columns, painted],
+      columnAxisEmitted: [
+        {
+          alias: 'sum_c0',
+          axis: { value: 'Pending' },
+          columnKey: 'name',
+          fn: 'sum',
+        },
+      ],
       effectiveColumns: [...state.effectiveColumns, painted],
     });
   };
@@ -122,6 +137,8 @@ const Probe = () => {
       <output data-testid='columns'>
         {columns.map((column) => column.key).join(',')}
       </output>
+      <output data-testid='effective-columns'>{effectiveColumnKeys}</output>
+      <output data-testid='id-sort-dir'>{idSortDirection}</output>
       <output data-testid='sizing'>{JSON.stringify(columnSizing)}</output>
       <output data-testid='sorting'>
         {sorting
@@ -228,21 +245,48 @@ describe('TableConfigProvider', () => {
     );
 
     fireEvent.click(screen.getByText('paint-axis'));
-    expect(readProbe('columns')).toContain('sum_c0');
+    expect(readProbe('effective-columns')).toContain('sum_c0');
 
     rerender(
       <Harness
         columnsState={{
           columns: [ID_COLUMN, NAME_COLUMN],
-          sorting: [{ columnKey: 'name', direction: 'asc' }],
+          sorting: [{ columnKey: 'id', direction: 'asc' }],
         }}
         groupingState={groupingState}
         revalidation={1}
       />,
     );
 
-    expect(readProbe('sorting')).toBe('name:asc');
-    expect(readProbe('columns')).toContain('sum_c0');
+    expect(readProbe('sorting')).toBe('id:asc');
+    expect(readProbe('id-sort-dir')).toBe('asc');
+    expect(readProbe('effective-columns')).toContain('sum_c0');
+    expect(readProbe('columns')).toBe('id,name');
+  });
+
+  it('replaces declared columns under an axis without dropping the painted measure', () => {
+    const groupingState = { columnAxis: 'name', keys: ['id'] };
+    const { rerender } = render(
+      <Harness
+        columnsState={{ columns: [ID_COLUMN, NAME_COLUMN] }}
+        groupingState={groupingState}
+        revalidation={1}
+      />,
+    );
+
+    fireEvent.click(screen.getByText('paint-axis'));
+    expect(readProbe('effective-columns')).toContain('sum_c0');
+
+    rerender(
+      <Harness
+        columnsState={{ columns: [ID_COLUMN, NAME_COLUMN, CITY_COLUMN] }}
+        groupingState={groupingState}
+        revalidation={1}
+      />,
+    );
+
+    expect(readProbe('columns')).toBe('id,name,city');
+    expect(readProbe('effective-columns')).toContain('sum_c0');
   });
 
   it('replaces columns when the incoming columns snapshot identity changes', () => {

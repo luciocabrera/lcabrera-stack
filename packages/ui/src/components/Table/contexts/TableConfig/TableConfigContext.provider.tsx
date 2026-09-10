@@ -78,10 +78,14 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     const currentColumns = columnsStore.get();
     const meta = metaStore.get();
     const isLayoutTransient = meta.isColumnLayoutTransient === true;
-    const isKeepPaintedAxis =
-      columnAxisEmitted === undefined && grouping.columnAxis !== undefined;
+    const { columnAxisEmitted: storedEmitted, ...currentColumnsRest } =
+      currentColumns;
+    const nextEmitted =
+      grouping.columnAxis === undefined
+        ? columnAxisEmitted
+        : (columnAxisEmitted ?? storedEmitted);
     const next = getInitialColumnsState<TData>({
-      ...currentColumns,
+      ...currentColumnsRest,
       ...columnsState,
       ...(isLayoutTransient && {
         columnOrder: currentColumns.columnOrder,
@@ -92,28 +96,14 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
       aggregates: grouping.aggregates,
       crud: meta.crud,
       groupingKeys: grouping.keys,
-      ...(!isKeepPaintedAxis &&
-        grouping.columnAxis !== undefined && {
-          columnAxis: grouping.columnAxis,
-        }),
-      ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
+      ...(grouping.columnAxis !== undefined && {
+        columnAxis: grouping.columnAxis,
+      }),
+      ...(nextEmitted !== undefined && { columnAxisEmitted: nextEmitted }),
     });
 
     syncStoreFromProps({
-      next: isKeepPaintedAxis
-        ? {
-            ...next,
-            columnOrder: currentColumns.columnOrder,
-            columnPinning: currentColumns.columnPinning,
-            columns: currentColumns.columns,
-            columnVisibility: currentColumns.columnVisibility,
-            effectiveColumns: currentColumns.effectiveColumns,
-            normalizedColumns: currentColumns.normalizedColumns,
-            pinnedColumnOffsets: currentColumns.pinnedColumnOffsets,
-            pinnedColumnPartition: currentColumns.pinnedColumnPartition,
-            staticKeys: currentColumns.staticKeys,
-          }
-        : next,
+      next,
       store: columnsStore,
     });
   }, [

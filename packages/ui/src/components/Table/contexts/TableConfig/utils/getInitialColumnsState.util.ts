@@ -80,6 +80,7 @@ export const getInitialColumnsState = <TData extends Record<string, unknown>>({
   });
 
   return {
+    columnAxisEmitted,
     columnFilters,
     columnOrder: nextColumnOrder,
     columnPinning: nextColumnPinning,

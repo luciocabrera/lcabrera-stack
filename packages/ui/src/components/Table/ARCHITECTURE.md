@@ -318,7 +318,9 @@ the primary key included, since a row id is resolved from the declared columns
 and never from the painted list. A column axis uses that same path: the emitted
 `alias` is `TableColumn.key` and `axis.value` is the header (SQL NULL is an
 empty header); an empty axis emits no measure columns. There is not a second
-mapper. `withGroupedColumnScope` then drops every
+mapper. The last emitted list is stored on the columns store so a later
+loader snapshot re-derives those columns instead of freezing the painted
+list. `withGroupedColumnScope` then drops every
 column the grouping neither keys nor measures, so the grid holds the group keys
 and the measures and nothing else
 ([ADR-096](../../../../../docs/decisions/ADR-096-the-grouping-decides-which-columns-the-grid-shows.md),

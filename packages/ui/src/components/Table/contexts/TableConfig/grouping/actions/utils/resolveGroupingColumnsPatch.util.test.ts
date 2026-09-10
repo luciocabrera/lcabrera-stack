@@ -98,6 +98,27 @@ describe('resolveGroupingColumnsPatch', () => {
     ).not.toContain('order_status');
   });
 
+  it('carries stored axis aliases with the derived slices', () => {
+    const emitted = [
+      {
+        alias: 'sum_c0',
+        axis: { value: 'PE' },
+        columnKey: 'ship_country',
+        fn: 'sum' as const,
+      },
+    ];
+
+    expect(
+      resolveGroupingColumnsPatch<Row>({
+        aggregates: measureAmount,
+        columnAxis: 'ship_country',
+        columnAxisEmitted: emitted,
+        columnsState,
+        groupingKeys: ['order_status'],
+      }).columnAxisEmitted,
+    ).toBe(emitted);
+  });
+
   it('patches the derived slices and the sort, never the layout the user owns', () => {
     expect(
       Object.keys(patch({ groupingKeys: ['order_status'] })).toSorted((a, b) =>
