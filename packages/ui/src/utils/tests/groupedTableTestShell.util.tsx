@@ -18,7 +18,6 @@ import {
   TableDataProvider,
   TableFocusProvider,
 } from '#ui/components/Table/contexts';
-import { useSyncColumnAxisColumns } from '#ui/components/Table/contexts/TableConfig/grouping/actions';
 import { TableWrapperContext } from '#ui/components/Table/contexts/TableWrapper/TableWrapperContext.context';
 import { TableBase } from '#ui/components/Table/TableBase';
 import { TableBody } from '#ui/components/Table/TableBody';
@@ -34,11 +33,6 @@ type GroupedTableTestShellProps<TData extends Record<string, unknown>> = {
   readonly header?: ReactNode;
   readonly metaState?: Partial<TableMetaState>;
   readonly toolbar?: ReactNode;
-};
-
-const SyncColumnAxisColumns = () => {
-  useSyncColumnAxisColumns();
-  return <></>;
 };
 
 export const GroupedTableTestShell = <TData extends Record<string, unknown>>({
@@ -81,7 +75,6 @@ export const GroupedTableTestShell = <TData extends Record<string, unknown>>({
             totalRows: data.length,
           }}
         >
-          <SyncColumnAxisColumns />
           <TableWrapperContext value={{ containerRef, wrapperRef }}>
             {toolbar}
             <div data-testid='scroll-container' ref={setContainer}>

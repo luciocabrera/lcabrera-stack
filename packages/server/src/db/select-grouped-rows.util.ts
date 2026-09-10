@@ -72,8 +72,9 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
       });
     }
 
+    const expandingMeasureCount = toExpandingMeasureCount(grouped.aggregates);
     const columnAxis =
-      columnAxisRequest === undefined
+      columnAxisRequest === undefined || expandingMeasureCount === 0
         ? undefined
         : {
             ...columnAxisRequest,
@@ -84,7 +85,7 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
               limit: toColumnAxisDiscoveryLimit({
                 keyCount: grouped.keys.length,
                 maxDistinct: columnAxisRequest.maxDistinct,
-                measureCount: toExpandingMeasureCount(grouped.aggregates),
+                measureCount: expandingMeasureCount,
                 ...(isUnexpandedLeadingCount(grouped.aggregates[0]) && {
                   fixedAggregateCount: 1,
                 }),

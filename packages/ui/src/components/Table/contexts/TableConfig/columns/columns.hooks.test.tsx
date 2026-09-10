@@ -70,6 +70,23 @@ vi.mock(
   }),
 );
 
+vi.mock(
+  '#ui/components/Table/contexts/TableConfig/grouping/selectors/useGetTableGroupingAggregates.hook',
+  () => ({ useGetTableGroupingAggregates: () => [] }),
+);
+vi.mock(
+  '#ui/components/Table/contexts/TableConfig/grouping/selectors/useGetTableGroupingColumnAxis.hook',
+  () => ({ useGetTableGroupingColumnAxis: () => undefined }),
+);
+vi.mock(
+  '#ui/components/Table/contexts/TableConfig/grouping/selectors/useGetTableGroupingKeys.hook',
+  () => ({ useGetTableGroupingKeys: () => [] }),
+);
+vi.mock(
+  '#ui/components/Table/contexts/TableData/data/selectors/useGetTableData.hook',
+  () => ({ useGetTableData: () => [] }),
+);
+
 import { useGetColumnFilters } from './selectors/useGetColumnFilters.hook';
 import { useGetColumnOrder } from './selectors/useGetColumnOrder.hook';
 import { useGetColumnPinning } from './selectors/useGetColumnPinning.hook';
@@ -121,9 +138,9 @@ describe('TableConfig column hooks', () => {
     expect(
       renderHook(() => useGetPinnedColumnPartition()).result.current,
     ).toEqual({
-      center: [{ key: 'status' }],
-      left: [{ key: 'id' }],
-      right: [{ key: 'actions' }],
+      centerCols: [],
+      leftPinnedCols: [{ key: 'id' }],
+      rightPinnedCols: [{ key: 'actions' }],
     });
     expect(renderHook(() => useGetColumnOrder()).result.current).toEqual([
       'id',

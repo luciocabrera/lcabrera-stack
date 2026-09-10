@@ -20,19 +20,18 @@ export const toGroupKeyColumnOptions = <TData extends Record<string, unknown>>({
   columns,
   stagedKeys,
 }: ToGroupKeyColumnOptionsArgs<TData>) =>
-  columns.flatMap((column) => {
-    if (stagedKeys.has(String(column.key))) return [];
+  columns
+    .filter((column) => {
+      if (stagedKeys.has(String(column.key))) return false;
 
-    const availability = resolveGroupKeyAvailability<TData>({
-      capability: capabilities[String(column.key)],
-      column,
-    });
+      const availability = resolveGroupKeyAvailability<TData>({
+        capability: capabilities[String(column.key)],
+        column,
+      });
 
-    if (!availability.isGroupable) return [];
-
-    if (!allowRequiredPeriod && availability.requiredPeriod !== undefined) {
-      return [];
-    }
-
-    return [{ label: column.label, value: String(column.key) }];
-  });
+      return (
+        availability.isGroupable &&
+        (allowRequiredPeriod || availability.requiredPeriod === undefined)
+      );
+    })
+    .map((column) => ({ label: column.label, value: String(column.key) }));

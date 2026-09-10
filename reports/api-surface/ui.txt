@@ -341,6 +341,7 @@ resolvePrimaryKeyColumnKeys [const] <TData>({ columns, }: ResolvePrimaryKeyColum
 resolveTableActionsColumn [const] <TData extends Record<string, unknown>>({ columns, crud, }: ResolveTableActionsColumnArgs<TData>) => { columns: TableColumn<TData>[]; hasActionsColumn: boolean; }
 serializeStateSlice [const] ({ appId, persistenceKey, slice, value, }: SerializeStateSliceArgs) => { key: string; value: string; }
 syncColumnOrderWithPinning [const] <TData>({ columnKey, columnPinning, columns, currentOrder, newPinning, previousPinning, }: SyncColumnOrderWithPinningArgs<TData>) => ColumnOrderState<TData>
+toColumnAxisDerivationArgs [const] ({ columnAxis, data, }: ToColumnAxisDerivationArgs) => { columnAxis?: undefined; columnAxisEmitted?: undefined; } | { columnAxis: string; columnAxisEmitted: readonly ColumnAxisEmittedAggregate[]; }
 toLockedFiltersHeading [const] (lockedFilters: TableLockedFilters | undefined) => string | undefined
 
 ## ./components/Table/utils/createEmptyColumnsState.util

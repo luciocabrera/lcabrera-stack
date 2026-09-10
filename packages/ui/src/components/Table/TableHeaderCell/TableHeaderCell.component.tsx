@@ -17,13 +17,18 @@ import { tableHeaderCellStyles } from './TableHeaderCell.stylex';
 import { getPinnedStyle, getShadowStyle, resolveAriaSort } from './utils';
 
 export const TableHeaderCell = <TData extends Record<string, unknown>>({
+  column: columnProp,
   columnKey,
   customStylex,
   hasSettings = false,
   isLoadingState = false,
   ...rest
 }: TableHeaderCellProps<TData>) => {
-  const column = useGetNormalizedColumn<TData>(columnKey);
+  const storedColumn = useGetNormalizedColumn<TData>(columnKey);
+  const column =
+    columnProp === undefined
+      ? storedColumn
+      : { ...columnProp, ...storedColumn };
   const width = useGetColumnWidth<TData>(columnKey);
   const pinInfo = useGetPinnedColumnInfo<TData>(columnKey);
 

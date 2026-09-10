@@ -314,10 +314,28 @@ describe('selectGroupedRows', () => {
   });
 
   it('caps DISTINCT at the heap fit when maxDistinct is larger', async () => {
-    resolveYearAxisThenEmpty();
+    resolvePreamble();
+    query
+      .mockResolvedValueOnce({
+        rows: [
+          CAPABILITY_ROW,
+          { ...CAPABILITY_ROW, column: 'year', nDistinct: 2 },
+          {
+            ...CAPABILITY_ROW,
+            aggregates: ['avg', 'count', 'max', 'min', 'sum'],
+            column: 'amount',
+            typeCategory: 'N',
+            typeName: 'numeric',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [{ year: 2022 }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
 
     await selectGroupedRows({
       ...YEAR_AXIS,
+      aggregates: [{ column: 'amount', fn: 'sum' }],
       columnAxis: { key: 'year', maxDistinct: 50_000 },
     });
 
@@ -326,11 +344,34 @@ describe('selectGroupedRows', () => {
     expect(statements()[3]).toContain('SELECT DISTINCT');
     expect(distinctValues?.at(-1)).toBe(
       toColumnAxisDiscoveryLimit({
-        fixedAggregateCount: 1,
         keyCount: 1,
         maxDistinct: 50_000,
-        measureCount: 0,
+        measureCount: 1,
       }),
+    );
+  });
+
+  it('skips axis discovery when a leading count(*) is the only aggregate', async () => {
+    resolvePreamble();
+    query
+      .mockResolvedValueOnce({
+        rows: [
+          CAPABILITY_ROW,
+          { ...CAPABILITY_ROW, column: 'year', nDistinct: 2 },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const result = await selectGroupedRows({
+      ...YEAR_AXIS,
+      columnAxis: { key: 'year', maxDistinct: 8 },
+    });
+
+    expect(result.columnAxis).toBeUndefined();
+    expect(result.aggregates).toEqual([{ alias: 'count_rows', fn: 'count' }]);
+    expect(statements().some((text) => text.includes('SELECT DISTINCT'))).toBe(
+      false,
     );
   });
 

@@ -11,8 +11,17 @@ import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 const COLUMN_KEYS = ['col0', 'col1', 'col2', 'col3'] as const;
 
 const createColumnsState = () => ({
+  columnOrder: COLUMN_KEYS,
   columnPinning: { left: [], right: [] },
+  columns: COLUMN_KEYS.map((key) => ({
+    isResizable: true,
+    isSortable: false,
+    isStatic: false,
+    key,
+    label: key,
+  })),
   columnSizing: Object.fromEntries(COLUMN_KEYS.map((key) => [key, 100])),
+  columnVisibility: new Set(),
   effectiveColumns: COLUMN_KEYS.map((key) => ({ key })),
   normalizedColumns: Object.fromEntries(
     COLUMN_KEYS.map((key) => [
@@ -27,6 +36,13 @@ const createColumnsState = () => ({
     ]),
   ),
   pinnedColumnOffsets: {},
+  pinnedColumnPartition: {
+    centerCols: COLUMN_KEYS.map((key) => ({ key })),
+    leftPinnedCols: [],
+    rightPinnedCols: [],
+  },
+  sorting: [],
+  staticKeys: new Set(),
 });
 
 type ColumnsState = ReturnType<typeof createColumnsState>;
@@ -47,6 +63,23 @@ vi.mock(
       metaStore: storesRef.metaStore,
     }),
   }),
+);
+
+vi.mock(
+  '#ui/components/Table/contexts/TableConfig/grouping/selectors/useGetTableGroupingAggregates.hook',
+  () => ({ useGetTableGroupingAggregates: () => [] }),
+);
+vi.mock(
+  '#ui/components/Table/contexts/TableConfig/grouping/selectors/useGetTableGroupingColumnAxis.hook',
+  () => ({ useGetTableGroupingColumnAxis: () => undefined }),
+);
+vi.mock(
+  '#ui/components/Table/contexts/TableConfig/grouping/selectors/useGetTableGroupingKeys.hook',
+  () => ({ useGetTableGroupingKeys: () => [] }),
+);
+vi.mock(
+  '#ui/components/Table/contexts/TableData/data/selectors/useGetTableData.hook',
+  () => ({ useGetTableData: () => [] }),
 );
 
 // Isolate the store-subscription behaviour: mock the two heavy children so the

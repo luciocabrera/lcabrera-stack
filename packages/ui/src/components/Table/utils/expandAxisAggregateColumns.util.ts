@@ -59,7 +59,9 @@ export const expandAxisAggregateColumns = <TData>({
       }),
       isFilterable: false,
       isGroupable: false,
+      isResizable: false,
       isSortable: false,
+      isStatic: true,
       key: entry.alias as DataKey<TData>,
       label: isSingleMeasure
         ? header
@@ -68,10 +70,6 @@ export const expandAxisAggregateColumns = <TData>({
       minWidth,
       ...(!isSingleMeasure && { headerGroupLabel: source.label }),
       ...(source.format !== undefined && { format: source.format }),
-      ...(source.isResizable !== undefined && {
-        isResizable: source.isResizable,
-      }),
-      ...(source.isStatic !== undefined && { isStatic: source.isStatic }),
     } satisfies TableColumn<TData>;
 
     derivedBySource.set(entry.columnKey, [
