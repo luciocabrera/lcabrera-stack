@@ -182,6 +182,31 @@ const SIZED_COLUMNS_STATE = {
 };
 
 const WIDER_COLUMNS_STATE = { columns: [ID_COLUMN, NAME_COLUMN] };
+const AXIS_GROUPING = { columnAxis: 'name', keys: ['id'] };
+const AXIS_COLUMNS = { columns: [ID_COLUMN, NAME_COLUMN] };
+
+const paintAxisThenRerender = (
+  columnsState: TableConfigProviderProps<TestRow>['columnsState'],
+) => {
+  const { rerender } = render(
+    <Harness
+      columnsState={AXIS_COLUMNS}
+      groupingState={AXIS_GROUPING}
+      revalidation={1}
+    />,
+  );
+
+  fireEvent.click(screen.getByText('paint-axis'));
+  expect(readProbe('effective-columns')).toContain('sum_c0');
+
+  rerender(
+    <Harness
+      columnsState={columnsState}
+      groupingState={AXIS_GROUPING}
+      revalidation={1}
+    />,
+  );
+};
 
 describe('TableConfigProvider', () => {
   beforeEach(() => {
@@ -235,28 +260,10 @@ describe('TableConfigProvider', () => {
   });
 
   it('applies a later sorting snapshot without wiping a painted column axis', () => {
-    const groupingState = { columnAxis: 'name', keys: ['id'] };
-    const { rerender } = render(
-      <Harness
-        columnsState={{ columns: [ID_COLUMN, NAME_COLUMN] }}
-        groupingState={groupingState}
-        revalidation={1}
-      />,
-    );
-
-    fireEvent.click(screen.getByText('paint-axis'));
-    expect(readProbe('effective-columns')).toContain('sum_c0');
-
-    rerender(
-      <Harness
-        columnsState={{
-          columns: [ID_COLUMN, NAME_COLUMN],
-          sorting: [{ columnKey: 'id', direction: 'asc' }],
-        }}
-        groupingState={groupingState}
-        revalidation={1}
-      />,
-    );
+    paintAxisThenRerender({
+      columns: [ID_COLUMN, NAME_COLUMN],
+      sorting: [{ columnKey: 'id', direction: 'asc' }],
+    });
 
     expect(readProbe('sorting')).toBe('id:asc');
     expect(readProbe('id-sort-dir')).toBe('asc');
@@ -265,25 +272,9 @@ describe('TableConfigProvider', () => {
   });
 
   it('replaces declared columns under an axis without dropping the painted measure', () => {
-    const groupingState = { columnAxis: 'name', keys: ['id'] };
-    const { rerender } = render(
-      <Harness
-        columnsState={{ columns: [ID_COLUMN, NAME_COLUMN] }}
-        groupingState={groupingState}
-        revalidation={1}
-      />,
-    );
-
-    fireEvent.click(screen.getByText('paint-axis'));
-    expect(readProbe('effective-columns')).toContain('sum_c0');
-
-    rerender(
-      <Harness
-        columnsState={{ columns: [ID_COLUMN, NAME_COLUMN, CITY_COLUMN] }}
-        groupingState={groupingState}
-        revalidation={1}
-      />,
-    );
+    paintAxisThenRerender({
+      columns: [ID_COLUMN, NAME_COLUMN, CITY_COLUMN],
+    });
 
     expect(readProbe('columns')).toBe('id,name,city');
     expect(readProbe('effective-columns')).toContain('sum_c0');
