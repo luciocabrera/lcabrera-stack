@@ -10,6 +10,7 @@ export const tableHeaderBandStyles = stylex.create({
     boxSizing: 'border-box',
     color: colors.textTertiary,
     display: 'flex',
+    flexShrink: 0,
     fontSize: typography.fontSizeXs,
     fontWeight: typography.fontWeightSemibold,
     justifyContent: 'flex-start',
