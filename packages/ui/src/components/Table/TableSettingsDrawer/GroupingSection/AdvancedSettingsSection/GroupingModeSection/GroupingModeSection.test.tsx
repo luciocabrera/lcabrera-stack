@@ -19,11 +19,11 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableIsGroupingLocked: useGetTableIsGroupingLockedMock,
 }));
 
-vi.mock('../../TableDrawerContext/actions', () => ({
+vi.mock('../../../TableDrawerContext/actions', () => ({
   useSetGroupingMode: () => setGroupingModeMock,
 }));
 
-vi.mock('../../TableDrawerContext/selectors', () => ({
+vi.mock('../../../TableDrawerContext/selectors', () => ({
   useGetGroupingMode: useGetGroupingModeMock,
 }));
 

@@ -1,19 +1,11 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from 'react';
-
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 type MockSectionProps = {
   readonly isBusy?: boolean;
 };
-
-vi.mock('#ui/components/SidePanel', () => ({
-  SidePanelSectionMain: ({ children }: { readonly children: ReactNode }) => (
-    <main>{children}</main>
-  ),
-}));
 
 vi.mock('./GroupingModeSection', () => ({
   GroupingModeSection: ({ isBusy }: MockSectionProps) => (

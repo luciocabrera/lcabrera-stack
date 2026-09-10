@@ -78,13 +78,6 @@ TableSettingsDrawer/
 │   ├── utils/                             → buildPresetColumnSizing
 │   └── index.ts
 │
-├── AdvancedSettingsSection/               → Totals, away from the dimensions and measures
-│   ├── AdvancedSettingsSection.component.tsx → Thin composition
-│   ├── AdvancedSettingsSection.types.ts
-│   ├── GroupingModeSection/              → Totals mode: groups only, or groups with subtotals
-│   ├── TotalsPlacementSection/           → Totals position: above or below their rows (rollup only)
-│   └── index.ts
-│
 ├── DetailsSection/                        → Read-only table metadata and metrics
 │   ├── DetailsSection.component.tsx
 │   ├── DetailsSection.types.ts
@@ -175,8 +168,8 @@ graph LR
   GeneralSettingsSection --> ColumnOrderSectionToolbar
   GeneralSettingsSection --> GroupingSectionToolbar
 
-  AdvancedSettingsSection --> TableDrawerContext
-  AdvancedSettingsSection --> TableConfigContext
+  GroupingSection --> TableDrawerContext
+  GroupingSection --> TableConfigContext
 
   DetailsSection --> TableConfigContext
   DetailsSection --> TableDataContext
@@ -223,9 +216,6 @@ graph TD
 
   D --> E2["Tab: Details"]
   E2 --> F2["DetailsSection"]
-
-  D --> E3["Tab: Advanced (only when isGroupingEnabled)"]
-  E3 --> F3["AdvancedSettingsSection"]
 
   D --> G["Tab: Filters"]
   G --> H["FiltersSection"]
@@ -300,15 +290,14 @@ All sections follow a consistent pattern: they use SidePanel sub-components for 
 read/write state through TableDrawerContext actions and selectors, and each features
 a toolbar in dual-variant mode.
 
-| Section                   | Tab      | Features                                                                                                                                                                                                             |
-| ------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GeneralSettingsSection`  | General  | Width presets, and the clear/reset pair for filters, sorting, columns and grouping (the last only where the route declared `isGroupingEnabled`), plus all-settings clear/reset                                       |
-| `DetailsSection`          | Details  | Required row counts, optional table/schema, technical metadata                                                                                                                                                       |
-| `FiltersSection`          | Filters  | Add/remove/expand filters, FilterInputs, validation, plus the read-only restrictions below                                                                                                                           |
-| `SortingSection`          | Sorting  | Add/remove/reorder sorts, direction toggle                                                                                                                                                                           |
-| `GroupingSection`         | Grouping | Multi-key group add/remove/reorder, legality-derived aggregate selection. Tab present only where the route declared `isGroupingEnabled`. See [GroupingSection/ARCHITECTURE.md](GroupingSection/ARCHITECTURE.md).     |
-| `ColumnOrderSection`      | Columns  | Drag-drop reorder, pin toggle, visibility toggle, conflict and grouping-prompt modals. See [ColumnOrderSection/ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md).                                                 |
-| `AdvancedSettingsSection` | Advanced | Totals mode and totals position. Tab present only where `useHasAdvancedSettings` says one of the two can render — the route declared `isGroupingEnabled`, and either the preset is unlocked or the mode is `rollup`. |
+| Section                  | Tab      | Features                                                                                                                                                                                                                                                                         |
+| ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GeneralSettingsSection` | General  | Width presets, and the clear/reset pair for filters, sorting, columns and grouping (the last only where the route declared `isGroupingEnabled`), plus all-settings clear/reset                                                                                                   |
+| `DetailsSection`         | Details  | Required row counts, optional table/schema, technical metadata                                                                                                                                                                                                                   |
+| `FiltersSection`         | Filters  | Add/remove/expand filters, FilterInputs, validation, plus the read-only restrictions below                                                                                                                                                                                       |
+| `SortingSection`         | Sorting  | Add/remove/reorder sorts, direction toggle                                                                                                                                                                                                                                       |
+| `GroupingSection`        | Grouping | Its own sub-tab strip — Group Keys, Aggregates, Advanced (the last only where `useHasAdvancedSettings` says a totals control can render). Tab present only where the route declared `isGroupingEnabled`. See [GroupingSection/ARCHITECTURE.md](GroupingSection/ARCHITECTURE.md). |
+| `ColumnOrderSection`     | Columns  | Drag-drop reorder, pin toggle, visibility toggle, conflict and grouping-prompt modals. See [ColumnOrderSection/ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md).                                                                                                             |
 
 ### A filter the table cannot change
 

@@ -16,7 +16,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
   useGetTableIsGroupingLocked: () => isGroupingLockedRef.current,
 }));
 
-vi.mock('../TableDrawerContext/selectors', () => ({
+vi.mock('../../TableDrawerContext/selectors', () => ({
   useGetGroupingMode: () => modeRef.current,
 }));
 

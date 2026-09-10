@@ -215,7 +215,6 @@ describe('Settings', () => {
         'sorting',
         'grouping',
         'details',
-        'advanced',
       ],
     });
   });

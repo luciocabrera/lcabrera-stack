@@ -212,11 +212,6 @@ vi.mock('../contexts/TableData/data/selectors', () => ({
   useGetTableIsLoadingMore: () => useGetTableIsLoadingMoreMock(),
 }));
 
-vi.mock('./AdvancedSettingsSection', () => ({
-  AdvancedSettingsSection: () => <div>Advanced settings section</div>,
-  useHasAdvancedSettings: () => false,
-}));
-
 vi.mock('./ColumnOrderSection', () => ({
   ColumnOrderSection: () => <div>Column order section</div>,
 }));

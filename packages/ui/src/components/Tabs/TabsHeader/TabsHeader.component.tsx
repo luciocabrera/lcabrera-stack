@@ -16,6 +16,7 @@ import { scrollTabIntoView } from './utils/scrollTabIntoView.util';
 export const TabsHeader = ({
   activeTab,
   isBusy,
+  label,
   onSelectTab,
   tabs,
 }: TabsHeaderProps) => {
@@ -76,7 +77,7 @@ export const TabsHeader = ({
         <div
           ref={listRef}
           {...stylex.props(styles.tabList)}
-          aria-label='Settings tabs'
+          aria-label={label}
           role='tablist'
         >
           {tabs.map((tab) => (

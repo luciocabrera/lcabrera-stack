@@ -10,11 +10,11 @@ import { accessibility } from '#ui/design-system/tokens/commons.stylex';
 
 import type { TotalsPlacementSectionProps } from './TotalsPlacementSection.types';
 
-import { useSetTotalsPlacement } from '../../TableDrawerContext/actions';
+import { useSetTotalsPlacement } from '../../../TableDrawerContext/actions';
 import {
   useGetGroupingMode,
   useGetTotalsPlacement,
-} from '../../TableDrawerContext/selectors';
+} from '../../../TableDrawerContext/selectors';
 import { styles } from './TotalsPlacementSection.stylex';
 
 const SECTION_TITLE = 'Totals position';

@@ -130,9 +130,9 @@ vi.mock('#ui/components/VirtualSelect', async () => {
   return { VirtualSelect: createMockVirtualSelect() };
 });
 
-import { GroupingModeSection } from '../AdvancedSettingsSection/GroupingModeSection';
 import { TableDrawerProvider } from '../TableDrawerContext/TableDrawerContext.provider';
 import { TableSettingsDrawerFooter } from '../TableSettingsDrawerFooter/TableSettingsDrawerFooter.component';
+import { GroupingModeSection } from './AdvancedSettingsSection/GroupingModeSection';
 import { GroupingSection } from './GroupingSection.component';
 
 const renderDrawer = (extras?: ReactNode) =>
@@ -144,17 +144,14 @@ const renderDrawer = (extras?: ReactNode) =>
     </TableDrawerProvider>,
   );
 
-const getAddButtons = () => {
-  const addButtons = screen.getAllByRole('button', { name: 'Add' });
-
-  expect(addButtons).toHaveLength(2);
-
-  return { addAggregate: addButtons[1], addGroupKey: addButtons[0] };
+const openSubtab = (name: 'Advanced' | 'Aggregates' | 'Group Keys') => {
+  fireEvent.click(screen.getByRole('tab', { name }));
 };
 
 const stageGroupKey = (label: string) => {
+  openSubtab('Group Keys');
   fireEvent.click(screen.getByRole('button', { name: label }));
-  fireEvent.click(getAddButtons().addGroupKey as HTMLElement);
+  fireEvent.click(screen.getByRole('button', { name: 'Add' }));
 };
 
 const stageAggregate = ({
@@ -164,21 +161,24 @@ const stageAggregate = ({
   readonly columnLabel: string;
   readonly fnLabel: string;
 }) => {
+  openSubtab('Aggregates');
   fireEvent.click(screen.getByRole('button', { name: columnLabel }));
   fireEvent.click(screen.getByRole('button', { name: fnLabel }));
-  fireEvent.click(getAddButtons().addAggregate as HTMLElement);
+  fireEvent.click(screen.getByRole('button', { name: 'Add' }));
 };
 
-const getReverseButtons = () => {
-  const reverseButtons = screen.getAllByRole('button', { name: 'Reverse' });
+const getReverseButtons = () => ({
+  get reverseAggregates() {
+    openSubtab('Aggregates');
 
-  expect(reverseButtons).toHaveLength(2);
+    return screen.getByRole('button', { name: 'Reverse' });
+  },
+  get reverseGroupKeys() {
+    openSubtab('Group Keys');
 
-  return {
-    reverseAggregates: reverseButtons[1],
-    reverseGroupKeys: reverseButtons[0],
-  };
-};
+    return screen.getByRole('button', { name: 'Reverse' });
+  },
+});
 
 const getCommittedGroupingParam = () =>
   (persistTableState.mock.calls[0]?.[0] ?? []).find(
@@ -588,5 +588,59 @@ describe('GroupingSection staging', () => {
 
     expect(screen.getByText('1. Status')).not.toBeNull();
     expect(persistTableState).not.toHaveBeenCalled();
+  });
+});
+
+describe('GroupingSection sub-tabs', () => {
+  it('names its own tab strip, so it is not the drawer strip a reader hears', () => {
+    renderDrawer();
+
+    expect(
+      screen.getByRole('tablist', { name: 'Grouping settings tabs' }),
+    ).not.toBeNull();
+  });
+
+  it('separates the keys, the measures and the totals into three tabs', () => {
+    stores.metaStore.set({ isGroupingEnabled: true });
+
+    renderDrawer();
+
+    expect(
+      screen.getAllByRole('tab').map((tab) => tab.textContent),
+    ).toStrictEqual(['Group Keys', 'Aggregates', 'Advanced']);
+  });
+
+  it('opens on the group keys, since a grouping starts with a dimension', () => {
+    renderDrawer();
+
+    expect(
+      screen
+        .getByRole('tab', { name: 'Group Keys' })
+        .getAttribute('aria-selected'),
+    ).toBe('true');
+    expect(screen.getByRole('button', { name: 'Add' })).not.toBeNull();
+  });
+
+  it('keeps the clear and reset pair outside the tabs, where it governs all three', () => {
+    renderDrawer();
+
+    openSubtab('Aggregates');
+
+    expect(
+      screen.getAllByRole('button', { name: 'Clear Grouping' }).length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getAllByRole('button', { name: 'Reset Grouping' }).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it('drops the Advanced tab where neither totals control can render', () => {
+    stores.metaStore.set({ isGroupingEnabled: true, isGroupingLocked: true });
+
+    renderDrawer();
+
+    expect(
+      screen.getAllByRole('tab').map((tab) => tab.textContent),
+    ).toStrictEqual(['Group Keys', 'Aggregates']);
   });
 });

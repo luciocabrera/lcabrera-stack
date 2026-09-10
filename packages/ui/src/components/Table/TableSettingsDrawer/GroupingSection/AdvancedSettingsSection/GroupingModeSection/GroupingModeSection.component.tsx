@@ -11,8 +11,8 @@ import { accessibility } from '#ui/design-system/tokens/commons.stylex';
 
 import type { GroupingModeSectionProps } from './GroupingModeSection.types';
 
-import { useSetGroupingMode } from '../../TableDrawerContext/actions';
-import { useGetGroupingMode } from '../../TableDrawerContext/selectors';
+import { useSetGroupingMode } from '../../../TableDrawerContext/actions';
+import { useGetGroupingMode } from '../../../TableDrawerContext/selectors';
 import { styles } from './GroupingModeSection.stylex';
 
 const SECTION_TITLE = 'Totals';
