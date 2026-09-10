@@ -14,6 +14,7 @@ import type { ActiveAggregateListProps } from './ActiveAggregateList.types';
 
 import { useReorderColumnAggregates } from '../../TableDrawerContext/actions';
 import { useGetGroupingAggregates } from '../../TableDrawerContext/selectors';
+import { GroupingSectionToolbar } from '../GroupingSectionToolbar';
 import { toAggregateItems } from '../utils';
 import { styles } from './ActiveAggregateList.stylex';
 import { AggregateItemContent } from './AggregateItemContent';
@@ -39,7 +40,16 @@ export const ActiveAggregateList = ({
 
   return (
     <SidePanelSection>
-      <SidePanelSectionHeader title={`Aggregates (${aggregateItems.length})`} />
+      <SidePanelSectionHeader
+        title={`Aggregates (${aggregateItems.length})`}
+        toolbar={
+          <GroupingSectionToolbar
+            isBusy={isBusy}
+            scope='aggregates'
+            variant='toolbar'
+          />
+        }
+      />
       {aggregateItems.length === 0 ? (
         <InfoBox>
           No aggregates selected. Every group still shows how many rows it

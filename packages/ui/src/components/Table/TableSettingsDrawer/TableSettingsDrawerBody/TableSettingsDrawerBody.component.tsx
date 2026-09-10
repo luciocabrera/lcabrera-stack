@@ -33,6 +33,7 @@ export const TableSettingsDrawerBody = ({
     ? [
         {
           children: <GroupingSection isBusy={isBusy} />,
+          hasPadding: false,
           header: 'Grouping',
           key: 'grouping',
         },

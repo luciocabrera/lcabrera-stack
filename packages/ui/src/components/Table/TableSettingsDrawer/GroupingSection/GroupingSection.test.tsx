@@ -144,6 +144,17 @@ const renderDrawer = (extras?: ReactNode) =>
     </TableDrawerProvider>,
   );
 
+const applyOneKeyAndOneAggregate = () => {
+  stores.groupingStore.reset({
+    aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+    keys: ['order_status'],
+    mode: 'flat',
+    periods: {},
+    shares: [],
+    totalsPlacement: 'last',
+  });
+};
+
 const openSubtab = (name: 'Advanced' | 'Aggregates' | 'Group Keys') => {
   fireEvent.click(screen.getByRole('tab', { name }));
 };
@@ -501,29 +512,44 @@ describe('GroupingSection staging', () => {
     expect(persistTableState).not.toHaveBeenCalled();
   });
 
-  it('stages a clear from either toolbar placement', () => {
-    stores.groupingStore.reset({
-      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
-      keys: ['order_status'],
-      mode: 'flat',
-      periods: {},
-      shares: [],
-      totalsPlacement: 'last',
-    });
+  it('takes the aggregates with the last group key, because the state holds no measure without one', () => {
+    applyOneKeyAndOneAggregate();
 
     renderDrawer();
-
-    const clearButtons = screen.getAllByRole('button', {
-      name: 'Clear Grouping',
-    });
-
-    expect(clearButtons).toHaveLength(2);
-
-    fireEvent.click(clearButtons[0] as HTMLElement);
+    fireEvent.click(screen.getByRole('button', { name: 'Clear Group Keys' }));
 
     expect(persistTableState).not.toHaveBeenCalled();
     expect(stores.groupingStore.get().keys).toStrictEqual(['order_status']);
     expect(screen.getByText(/No grouping applied/)).not.toBeNull();
+
+    openSubtab('Aggregates');
+
+    expect(screen.getByText(/No aggregates selected/)).not.toBeNull();
+  });
+
+  it('clears the aggregates without touching the staged group keys', () => {
+    applyOneKeyAndOneAggregate();
+
+    renderDrawer();
+    openSubtab('Aggregates');
+    fireEvent.click(screen.getByRole('button', { name: 'Clear Aggregates' }));
+
+    expect(persistTableState).not.toHaveBeenCalled();
+    expect(screen.getByText(/No aggregates selected/)).not.toBeNull();
+
+    openSubtab('Group Keys');
+
+    expect(screen.getByText('1. Status')).not.toBeNull();
+  });
+
+  it('disables a scoped clear while its own subject is empty', () => {
+    renderDrawer();
+
+    expect(
+      screen
+        .getByRole('button', { name: 'Clear Group Keys' })
+        .hasAttribute('disabled'),
+    ).toBe(true);
   });
 
   it('stages a clear from the footer placement too', () => {
@@ -537,11 +563,7 @@ describe('GroupingSection staging', () => {
     });
 
     renderDrawer();
-    fireEvent.click(
-      screen.getAllByRole('button', {
-        name: 'Clear Grouping',
-      })[1] as HTMLElement,
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Clear Grouping' }));
 
     expect(persistTableState).not.toHaveBeenCalled();
     expect(screen.getByText(/No grouping applied/)).not.toBeNull();
@@ -552,23 +574,41 @@ describe('GroupingSection staging', () => {
     expect(stores.groupingStore.get()).toStrictEqual(NO_GROUPING);
   });
 
-  it('offers a reset beside the clear, as every other section does', () => {
+  it('offers a reset beside every clear, as other sections do', () => {
     renderDrawer();
 
     expect(
-      screen.getAllByRole('button', { name: 'Reset Grouping' }),
-    ).toHaveLength(2);
+      screen.getByRole('button', { name: 'Reset Grouping' }),
+    ).not.toBeNull();
+    expect(
+      screen.getByRole('button', { name: 'Reset Group Keys' }),
+    ).not.toBeNull();
+
+    openSubtab('Aggregates');
+
+    expect(
+      screen.getByRole('button', { name: 'Reset Aggregates' }),
+    ).not.toBeNull();
+  });
+
+  it('puts back only the subject its reset names', () => {
+    applyOneKeyAndOneAggregate();
+
+    renderDrawer();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear Group Keys' }));
+    openSubtab('Aggregates');
+    fireEvent.click(screen.getByRole('button', { name: 'Clear Aggregates' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Reset Aggregates' }));
+
+    expect(screen.getByText('Sum of Total')).not.toBeNull();
+
+    openSubtab('Group Keys');
+
+    expect(screen.getByText(/No grouping applied/)).not.toBeNull();
   });
 
   it('puts a staged edit back from the applied grouping', () => {
-    stores.groupingStore.reset({
-      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
-      keys: ['order_status'],
-      mode: 'flat',
-      periods: {},
-      shares: [],
-      totalsPlacement: 'last',
-    });
+    applyOneKeyAndOneAggregate();
 
     renderDrawer();
 

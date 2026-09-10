@@ -15,6 +15,31 @@ const tabs = [
   { children: <span>Content C</span>, header: 'Tab C', key: 'c' },
 ];
 
+const toClassNames = (element: Element | null) =>
+  (element?.getAttribute('class') ?? '').split(' ').filter(Boolean);
+
+const renderPaddingPair = () => {
+  render(
+    <TabsContent
+      activeTab='padded'
+      tabs={[
+        { children: <span>Padded</span>, header: 'Padded', key: 'padded' },
+        {
+          children: <span>Flush</span>,
+          hasPadding: false,
+          header: 'Flush',
+          key: 'flush',
+        },
+      ]}
+    />,
+  );
+
+  return {
+    flush: toClassNames(document.querySelector('#tabpanel-flush')),
+    padded: toClassNames(document.querySelector('#tabpanel-padded')),
+  };
+};
+
 describe('TabsContent', () => {
   it('keeps every panel mounted, including hidden ones', () => {
     render(<TabsContent activeTab='a' tabs={tabs} />);
@@ -46,5 +71,27 @@ describe('TabsContent', () => {
     render(<TabsContent activeTab='a' tabs={tabs} />);
     const visiblePanels = screen.getAllByRole('tabpanel');
     expect(visiblePanels[0]?.getAttribute('tabIndex')).toBe('0');
+  });
+});
+
+describe('TabsContent horizontal inset', () => {
+  it('paints a different panel class when a tab opts out of the inset', () => {
+    const { flush, padded } = renderPaddingPair();
+
+    expect(padded.length).toBeGreaterThan(0);
+    expect(flush).not.toStrictEqual(padded);
+  });
+
+  it('leaves a tab that says nothing about padding inset', () => {
+    const { flush, padded } = renderPaddingPair();
+
+    const droppedByFlush = padded.filter(
+      (className) => !flush.includes(className),
+    );
+
+    expect(
+      droppedByFlush.length,
+      'A tab that declares no `hasPadding` lost a class the opted-out tab also lacks, so the inset is no longer the default.',
+    ).toBeGreaterThan(0);
   });
 });

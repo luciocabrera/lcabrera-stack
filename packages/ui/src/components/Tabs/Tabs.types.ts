@@ -2,6 +2,8 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 export type TabItem = {
   readonly children: ReactNode;
+  /** Defaults to `true`; `false` drops the body's horizontal inset for this tab. */
+  readonly hasPadding?: boolean;
   readonly header: ReactNode;
   readonly key: string;
 };

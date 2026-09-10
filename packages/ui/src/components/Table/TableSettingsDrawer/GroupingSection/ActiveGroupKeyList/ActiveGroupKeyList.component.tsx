@@ -59,7 +59,13 @@ export const ActiveGroupKeyList = ({
             ? `Group Keys (${groupKeyItems.length})`
             : `Group Keys (${groupKeyItems.length}/${MAX_TABLE_GROUP_KEYS})`
         }
-        toolbar={<GroupingSectionToolbar isBusy={isBusy} variant='toolbar' />}
+        toolbar={
+          <GroupingSectionToolbar
+            isBusy={isBusy}
+            scope='keys'
+            variant='toolbar'
+          />
+        }
       />
       {groupKeyItems.length === 0 && (
         <InfoBox>

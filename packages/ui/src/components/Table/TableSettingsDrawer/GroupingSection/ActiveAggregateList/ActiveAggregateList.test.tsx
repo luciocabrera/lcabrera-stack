@@ -35,15 +35,32 @@ vi.mock(
   }),
 );
 
+const mockClearColumnAggregates = vi.fn();
+const mockResetColumnAggregates = vi.fn();
+const groupingKeysRef: { current: readonly string[] } = { current: [] };
+
 vi.mock('../../TableDrawerContext/actions', () => ({
+  useClearColumnAggregates: () => mockClearColumnAggregates,
+  useClearGrouping: () => vi.fn(),
+  useClearGroupKeys: () => vi.fn(),
   useRemoveColumnAggregate: () => mockRemoveColumnAggregate,
   useReorderColumnAggregates: () => mockReorderColumnAggregates,
+  useResetColumnAggregates: () => mockResetColumnAggregates,
+  useResetGrouping: () => vi.fn(),
+  useResetGroupKeys: () => vi.fn(),
   useToggleGroupShare: () => mockToggleGroupShare,
 }));
 
 vi.mock('../../TableDrawerContext/selectors', () => ({
   useGetGroupingAggregates: () => aggregatesRef.current,
+  useGetGroupingKeys: () => groupingKeysRef.current,
   useGetGroupingShares: () => sharesRef.current,
+}));
+
+// The section header now carries the aggregates-scoped clear/reset pair, which
+// asks whether the grouping is locked before it renders anything.
+vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({
+  useGetTableIsGroupingLocked: () => false,
 }));
 
 import { ActiveAggregateList } from './ActiveAggregateList.component';

@@ -8,13 +8,16 @@ export const styles = stylex.create({
     scrollbarGutter: 'stable both-edges',
     flex: '1',
     overflow: 'auto',
-    paddingInline: spacing.sm,
     minHeight: 0,
   },
   tabPanel: {
+    paddingInline: spacing.sm,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
     width: '100%',
+  },
+  tabPanelFlush: {
+    paddingInline: 0,
   },
 });
