@@ -2,7 +2,7 @@
 id: pinned-cell-opacity
 title: fix(ui): pinned cells are translucent, so scrolled columns show through
 owner: agent:claude
-status: active
+status: review
 branch: fix/1166-pinned-cell-opacity
 area:
   - packages/ui/src/components/Table/TableBodyCell/TableBodyCell.stylex.ts
@@ -11,7 +11,7 @@ area:
 started: 2026-09-10
 updated: 2026-09-10
 plan: (none)
-pr: (none)
+pr: "#1167"
 issue: #1166
 ---
 

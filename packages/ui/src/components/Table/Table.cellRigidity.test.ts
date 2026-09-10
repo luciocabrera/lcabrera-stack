@@ -110,7 +110,7 @@ describe('table row backgrounds', () => {
     expect(rowSurfaceClassNames.length).toBeGreaterThan(0);
   });
 
-  it('keeps an opaque background on a striped row that is not an even child', () => {
+  it('keeps an unconditional background on a striped row that is not an even child', () => {
     const painted = toClassNames(
       stylex.props(tableRowStyles.base, tableRowStyles.striped).className,
     );
