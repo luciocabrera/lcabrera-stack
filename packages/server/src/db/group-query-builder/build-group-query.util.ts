@@ -3,18 +3,24 @@ import type {
   GroupQueryDescriptor,
 } from './group-query-builder.types.ts';
 
+import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
 import { assertSafeIdentifier } from '../query-builder/assert-safe-identifier.util.ts';
 import { buildOptionalNumericClauses } from '../query-builder/build-optional-numeric-clauses.util.ts';
 import { buildWhereClause } from '../query-builder/build-where-clause.util.ts';
 import { quoteIdentifier } from '../query-builder/quote-identifier.util.ts';
+import { assertColumnAxis } from './assert-column-axis.util.ts';
 import { assertGroupAggregates } from './assert-group-aggregates.util.ts';
 import { assertGroupAliases } from './assert-group-aliases.util.ts';
 import { assertGroupKeys } from './assert-group-keys.util.ts';
 import { buildAggregateProjection } from './build-aggregate-projection.util.ts';
 import { buildGroupOrderByClause } from './build-group-order-by-clause.util.ts';
 import { buildGroupingSetsClause } from './build-grouping-sets-clause.util.ts';
+import { expandColumnAxisAggregates } from './expand-column-axis-aggregates.util.ts';
 import { expandGroupingSets } from './expand-grouping-sets.util.ts';
-import { GROUP_MASK_ALIAS } from './group-query-builder.constants.ts';
+import {
+  GROUP_MASK_ALIAS,
+  MAX_COUNT_DISTINCT_AGGREGATES,
+} from './group-query-builder.constants.ts';
 import { resolveAggregateAlias } from './resolve-aggregate-alias.util.ts';
 import { resolveGroupGuardRails } from './resolve-group-guard-rails.util.ts';
 import { resolveGroupKeyExpression } from './resolve-group-key-expression.util.ts';
@@ -24,6 +30,7 @@ export const buildGroupQuery = ({
   aggregates,
   allowedColumns,
   capabilities,
+  columnAxis,
   filters,
   grouping,
   keys,
@@ -37,7 +44,37 @@ export const buildGroupQuery = ({
   assertSafeIdentifier(schema);
   assertSafeIdentifier(table);
   assertGroupKeys({ allowedColumns, capabilities, grouping, keys, periods });
+
+  if (columnAxis !== undefined) {
+    assertColumnAxis({
+      allowedColumns,
+      capabilities,
+      columnAxis,
+      keys,
+      measureCount: aggregates.length,
+    });
+  }
+
   assertGroupAggregates({ aggregates, allowedColumns, capabilities });
+
+  const expanded =
+    columnAxis === undefined
+      ? undefined
+      : expandColumnAxisAggregates({ aggregates, columnAxis });
+  const queryAggregates = expanded ?? aggregates;
+
+  if (expanded !== undefined) {
+    const distinctCount = expanded.filter(
+      (aggregate) => aggregate.fn === 'countDistinct',
+    ).length;
+
+    if (distinctCount > MAX_COUNT_DISTINCT_AGGREGATES) {
+      throw new GroupingRefusedError({
+        message: `A grouped query takes at most ${MAX_COUNT_DISTINCT_AGGREGATES} countDistinct aggregate; a column axis would emit ${distinctCount}.`,
+        reason: 'aggregate-not-legal',
+      });
+    }
+  }
 
   const guardRails = resolveGroupGuardRails({
     capabilities,
@@ -46,7 +83,7 @@ export const buildGroupQuery = ({
     maxRows,
   });
 
-  const aliased = aggregates.map((aggregate) => ({
+  const aliased = queryAggregates.map((aggregate) => ({
     aggregate,
     alias: resolveAggregateAlias(aggregate),
   }));
@@ -92,7 +129,7 @@ export const buildGroupQuery = ({
         : `${keyExpressions[index]} AS ${quoteIdentifier(key)}`,
     ),
     `GROUPING(${keyExpressions.join(', ')}) AS ${quoteIdentifier(GROUP_MASK_ALIAS)}`,
-    projection.text,
+    ...(projection.text.length > 0 ? [projection.text] : []),
   ].join(', ');
 
   const text = [
@@ -102,6 +139,7 @@ export const buildGroupQuery = ({
     buildGroupOrderByClause({
       aggregateAliases,
       expressionByKey,
+      hasColumnAxis: columnAxis !== undefined,
       keys,
       sets,
       sort,
@@ -117,11 +155,18 @@ export const buildGroupQuery = ({
       alias,
       fn: aggregate.fn,
       ...(aggregate.column !== undefined && { column: aggregate.column }),
+      ...('axisValue' in aggregate && { axis: { value: aggregate.axisValue } }),
     })),
     groupingSetMasks: sets.map((set) => toGroupingSetMask({ keys, set })),
     guardRails,
     keys,
     maskAlias: GROUP_MASK_ALIAS,
+    ...(columnAxis !== undefined && {
+      columnAxis: {
+        key: columnAxis.key,
+        values: columnAxis.values.map((value) => value ?? undefined),
+      },
+    }),
     text,
     values: [
       ...projection.values,

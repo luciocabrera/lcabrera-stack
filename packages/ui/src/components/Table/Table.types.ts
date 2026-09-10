@@ -304,6 +304,7 @@ export type TableGroupingMode = 'flat' | 'rollup';
 
 export type TableGroupingRefusalReason =
   | 'aggregate-not-legal'
+  | 'column-axis-too-wide'
   | 'column-not-groupable'
   | 'duplicate-keys'
   | 'estimate-too-large'

@@ -6,6 +6,7 @@ import { assertGroupSort } from './assert-group-sort.util.ts';
 type BuildGroupOrderByClauseArgs = {
   readonly aggregateAliases: readonly string[];
   readonly expressionByKey?: Readonly<Record<string, string>>;
+  readonly hasColumnAxis?: boolean;
   readonly keys: readonly string[];
   readonly sets: readonly (readonly string[])[];
   readonly sort?: readonly GroupSort[];
@@ -18,12 +19,13 @@ const toDirection = (direction: 'asc' | 'desc' | undefined) =>
 export const buildGroupOrderByClause = ({
   aggregateAliases,
   expressionByKey = {},
+  hasColumnAxis = false,
   keys,
   sets,
   sort = [],
   subtotalPlacement = 'last',
 }: BuildGroupOrderByClauseArgs): string => {
-  assertGroupSort({ aggregateAliases, keys, sort });
+  assertGroupSort({ aggregateAliases, hasColumnAxis, keys, sort });
 
   const placement = subtotalPlacement === 'first' ? 'DESC' : 'ASC';
 

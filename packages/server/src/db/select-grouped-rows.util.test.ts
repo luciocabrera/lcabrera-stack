@@ -3,6 +3,7 @@ import type { Pool, PoolClient } from 'pg';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { getPool } from './get-pool.util.ts';
+import { toColumnAxisDiscoveryLimit } from './group-query-builder/to-column-axis-discovery-limit.util.ts';
 import { selectGroupedRows } from './select-grouped-rows.util.ts';
 
 // The pool is the one impure edge here; stubbing it keeps this package's
@@ -43,6 +44,33 @@ const resolvePreamble = () => {
     .mockResolvedValueOnce({ rows: [{ set_config: '10000' }] });
 };
 
+const resolveCapabilityThenEmpty = () => {
+  resolvePreamble();
+  query
+    .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
+    .mockResolvedValueOnce({ rows: [] })
+    .mockResolvedValueOnce({ rows: [] });
+};
+
+const YEAR_AXIS = {
+  ...DESCRIPTOR,
+  allowedColumns: ['country', 'year', 'amount'],
+} as const;
+
+const resolveYearAxisThenEmpty = () => {
+  resolvePreamble();
+  query
+    .mockResolvedValueOnce({
+      rows: [
+        CAPABILITY_ROW,
+        { ...CAPABILITY_ROW, column: 'year', nDistinct: 2 },
+      ],
+    })
+    .mockResolvedValueOnce({ rows: [{ year: 2022 }] })
+    .mockResolvedValueOnce({ rows: [] })
+    .mockResolvedValueOnce({ rows: [] });
+};
+
 beforeEach(() => {
   query.mockReset();
   poolQuery.mockReset();
@@ -77,11 +105,7 @@ describe('selectGroupedRows', () => {
   });
 
   it('opens a transaction and scopes a statement timeout to it before anything else', async () => {
-    resolvePreamble();
-    query
-      .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    resolveCapabilityThenEmpty();
 
     await selectGroupedRows(DESCRIPTOR);
 
@@ -94,11 +118,7 @@ describe('selectGroupedRows', () => {
   });
 
   it('runs both round trips on the transaction the timeout applies to', async () => {
-    resolvePreamble();
-    query
-      .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    resolveCapabilityThenEmpty();
 
     await selectGroupedRows(DESCRIPTOR);
 
@@ -113,11 +133,7 @@ describe('selectGroupedRows', () => {
   });
 
   it('returns the decode metadata the rows cannot be read without', async () => {
-    resolvePreamble();
-    query
-      .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    resolveCapabilityThenEmpty();
 
     const result = await selectGroupedRows(DESCRIPTOR);
 
@@ -128,11 +144,7 @@ describe('selectGroupedRows', () => {
   });
 
   it('reports the pre-flight estimate beside the rows', async () => {
-    resolvePreamble();
-    query
-      .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    resolveCapabilityThenEmpty();
 
     const result = await selectGroupedRows(DESCRIPTOR);
 
@@ -172,11 +184,7 @@ describe('selectGroupedRows', () => {
   });
 
   it('asks the catalogue only about the keys and aggregate columns', async () => {
-    resolvePreamble();
-    query
-      .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    resolveCapabilityThenEmpty();
 
     await selectGroupedRows(DESCRIPTOR);
 
@@ -238,5 +246,147 @@ describe('selectGroupedRows', () => {
     ]);
     expect(connect).not.toHaveBeenCalled();
     expect(poolQuery).not.toHaveBeenCalled();
+  });
+
+  it('discovers axis values then emits FILTER aggregates in the same transaction', async () => {
+    const yearCapability = {
+      ...CAPABILITY_ROW,
+      column: 'year',
+      nDistinct: 2,
+    };
+    const amountCapability = {
+      aggregates: ['avg', 'count', 'max', 'min', 'sum'],
+      column: 'amount',
+      hasEquality: true,
+      hasStats: true,
+      nDistinct: 4000,
+      relTuples: 50_000,
+      typeCategory: 'N',
+      typeName: 'numeric',
+    };
+    const rows = [{ country: 'PE', group_mask: 0, sum_amount_c0: '10' }];
+
+    resolvePreamble();
+    query
+      .mockResolvedValueOnce({
+        rows: [CAPABILITY_ROW, yearCapability, amountCapability],
+      })
+      .mockResolvedValueOnce({ rows: [{ year: 2022 }, { year: 2023 }] })
+      .mockResolvedValueOnce({ rows })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const result = await selectGroupedRows({
+      ...DESCRIPTOR,
+      aggregates: [{ column: 'amount', fn: 'sum' }],
+      allowedColumns: ['country', 'year', 'amount'],
+      columnAxis: { key: 'year', maxDistinct: 8 },
+    });
+
+    expect(result.columnAxis).toEqual({
+      key: 'year',
+      values: [2022, 2023],
+    });
+    expect(result.aggregates.map((aggregate) => aggregate.alias)).toEqual([
+      'sum_amount_c0',
+      'sum_amount_c1',
+    ]);
+
+    const texts = statements();
+
+    expect(texts[3]).toContain('SELECT DISTINCT');
+    expect(texts[4]).toContain('FILTER (WHERE "year" = $1)');
+    expect(texts[4]).toContain('FILTER (WHERE "year" = $2)');
+    expect(texts[4]).toContain('GROUP BY GROUPING SETS');
+  });
+
+  it('asks the catalogue about the column-axis key as well as the row keys', async () => {
+    resolveYearAxisThenEmpty();
+
+    await selectGroupedRows({
+      ...YEAR_AXIS,
+      columnAxis: { key: 'year', maxDistinct: 8 },
+    });
+
+    const [, capabilityValues] = query.mock.calls[2] ?? [];
+    const columns = capabilityValues?.[2];
+
+    expect(columns).toEqual(expect.arrayContaining(['country', 'year']));
+  });
+
+  it('caps DISTINCT at the heap fit when maxDistinct is larger', async () => {
+    resolveYearAxisThenEmpty();
+
+    await selectGroupedRows({
+      ...YEAR_AXIS,
+      columnAxis: { key: 'year', maxDistinct: 50_000 },
+    });
+
+    const distinctValues = query.mock.calls[3]?.[1];
+
+    expect(statements()[3]).toContain('SELECT DISTINCT');
+    expect(distinctValues?.at(-1)).toBe(
+      toColumnAxisDiscoveryLimit({
+        keyCount: 1,
+        maxDistinct: 50_000,
+        measureCount: 1,
+      }),
+    );
+  });
+
+  it('refuses empty aggregates before DISTINCT', async () => {
+    resolvePreamble();
+    query.mockResolvedValueOnce({
+      rows: [
+        CAPABILITY_ROW,
+        { ...CAPABILITY_ROW, column: 'year', nDistinct: 2 },
+      ],
+    });
+
+    await expect(
+      selectGroupedRows({
+        ...YEAR_AXIS,
+        aggregates: [],
+        columnAxis: { key: 'year', maxDistinct: 8 },
+      }),
+    ).rejects.toThrow('at least one aggregate');
+    expect(statements().some((text) => text.includes('SELECT DISTINCT'))).toBe(
+      false,
+    );
+  });
+
+  it('refuses an axis that is also a row key before DISTINCT', async () => {
+    resolvePreamble();
+    query.mockResolvedValueOnce({ rows: [CAPABILITY_ROW] });
+
+    await expect(
+      selectGroupedRows({
+        ...DESCRIPTOR,
+        columnAxis: { key: 'country', maxDistinct: 8 },
+      }),
+    ).rejects.toThrow('cannot be a row key and a column axis');
+    expect(statements().some((text) => text.includes('SELECT DISTINCT'))).toBe(
+      false,
+    );
+  });
+
+  it('refuses an axis the catalogue will not group before DISTINCT', async () => {
+    resolvePreamble();
+    query.mockResolvedValueOnce({
+      rows: [
+        CAPABILITY_ROW,
+        { ...CAPABILITY_ROW, column: 'payload', hasEquality: false },
+      ],
+    });
+
+    await expect(
+      selectGroupedRows({
+        ...DESCRIPTOR,
+        allowedColumns: ['country', 'payload'],
+        columnAxis: { key: 'payload', maxDistinct: 8 },
+      }),
+    ).rejects.toThrow('not a legal column axis');
+    expect(statements().some((text) => text.includes('SELECT DISTINCT'))).toBe(
+      false,
+    );
   });
 });

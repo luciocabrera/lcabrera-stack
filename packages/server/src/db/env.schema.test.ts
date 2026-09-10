@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { readEnvConfig, readGroupStatementTimeoutMs } from './env.schema.ts';
+import {
+  readEnvConfig,
+  readGroupStatementTimeoutMs,
+  readPivotMaxDistinct,
+} from './env.schema.ts';
 
 const credentials = {
   DB_HOST: 'localhost',
@@ -17,6 +21,7 @@ describe('readEnvConfig', () => {
       DB_CONNECTION_TIMEOUT_MS: 10_000,
       DB_GROUP_STATEMENT_TIMEOUT_MS: 10_000,
       DB_IDLE_TIMEOUT_MS: 10_000,
+      DB_PIVOT_MAX_DISTINCT: 1024,
       DB_POOL_MAX: 10,
       DB_PORT: 5434,
       DB_STATEMENT_TIMEOUT_MS: 30_000,
@@ -30,6 +35,7 @@ describe('readEnvConfig', () => {
         DB_CONNECTION_TIMEOUT_MS: '2000',
         DB_GROUP_STATEMENT_TIMEOUT_MS: '3000',
         DB_IDLE_TIMEOUT_MS: '5000',
+        DB_PIVOT_MAX_DISTINCT: '64',
         DB_POOL_MAX: '25',
         DB_STATEMENT_TIMEOUT_MS: '15000',
       },
@@ -39,6 +45,7 @@ describe('readEnvConfig', () => {
     expect(config.DB_GROUP_STATEMENT_TIMEOUT_MS).toBe(3000);
     expect(config.DB_IDLE_TIMEOUT_MS).toBe(5000);
     expect(config.DB_POOL_MAX).toBe(25);
+    expect(config.DB_PIVOT_MAX_DISTINCT).toBe(64);
     expect(config.DB_STATEMENT_TIMEOUT_MS).toBe(15_000);
   });
 
@@ -79,6 +86,24 @@ describe('readGroupStatementTimeoutMs', () => {
       readGroupStatementTimeoutMs({
         env: { DB_GROUP_STATEMENT_TIMEOUT_MS: '0' },
       }),
+    ).toThrow();
+  });
+});
+
+describe('readPivotMaxDistinct', () => {
+  it('defaults without requiring credentials', () => {
+    expect(readPivotMaxDistinct({ env: {} })).toBe(1024);
+  });
+
+  it('reads the key from the environment', () => {
+    expect(readPivotMaxDistinct({ env: { DB_PIVOT_MAX_DISTINCT: '48' } })).toBe(
+      48,
+    );
+  });
+
+  it('rejects a non-positive value rather than disabling the bound', () => {
+    expect(() =>
+      readPivotMaxDistinct({ env: { DB_PIVOT_MAX_DISTINCT: '0' } }),
     ).toThrow();
   });
 });

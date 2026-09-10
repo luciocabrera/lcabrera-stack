@@ -6,6 +6,7 @@ import { isTableGroupingRefusalReason } from './isTableGroupingRefusalReason.uti
 
 const TABLE_GROUPING_REFUSAL_REASONS = [
   'aggregate-not-legal',
+  'column-axis-too-wide',
   'column-not-groupable',
   'duplicate-keys',
   'estimate-too-large',

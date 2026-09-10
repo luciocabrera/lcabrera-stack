@@ -68,4 +68,15 @@ describe('assertGroupSort', () => {
       assert([{ aggregateAlias: 'avg_total_amount', direction: 'asc' }]),
     ).toThrow("it is not one of this query's aggregates");
   });
+
+  it('names the _c alias expansion when a column axis is present', () => {
+    expect(() =>
+      assertGroupSort({
+        aggregateAliases: ['sum_total_amount_c0'],
+        hasColumnAxis: true,
+        keys: KEYS,
+        sort: [{ aggregateAlias: 'sum_total_amount', direction: 'desc' }],
+      }),
+    ).toThrow('expands aggregates to _c0, _c1, … aliases');
+  });
 });

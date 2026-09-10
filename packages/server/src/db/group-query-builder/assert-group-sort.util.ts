@@ -2,12 +2,14 @@ import type { GroupSort } from './group-query-builder.types.ts';
 
 type AssertGroupSortArgs = {
   readonly aggregateAliases: readonly string[];
+  readonly hasColumnAxis?: boolean;
   readonly keys: readonly string[];
   readonly sort: readonly GroupSort[];
 };
 
 export const assertGroupSort = ({
   aggregateAliases,
+  hasColumnAxis = false,
   keys,
   sort,
 }: AssertGroupSortArgs) => {
@@ -32,7 +34,9 @@ export const assertGroupSort = ({
 
     if (!aggregateAliases.includes(entry.aggregateAlias)) {
       throw new Error(
-        `Cannot sort by "${entry.aggregateAlias}": it is not one of this query's aggregates.`,
+        hasColumnAxis
+          ? `Cannot sort by "${entry.aggregateAlias}": a column axis expands aggregates to _c0, _c1, … aliases; sort by one of those.`
+          : `Cannot sort by "${entry.aggregateAlias}": it is not one of this query's aggregates.`,
       );
     }
 

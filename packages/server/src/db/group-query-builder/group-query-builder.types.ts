@@ -22,14 +22,22 @@ export type AliasedGroupAggregate = {
   readonly alias: string;
 };
 
+export type BuiltColumnAxis = {
+  readonly key: string;
+  readonly values: readonly unknown[];
+};
+
 export type BuiltGroupAggregate = {
   readonly alias: string;
+  /** Present when this aggregate is one value of a column axis. `value` is undefined for SQL NULL. */
+  readonly axis?: { readonly value: unknown };
   readonly column?: string;
   readonly fn: AggregateFn;
 };
 
 export type BuiltGroupQuery = {
   readonly aggregates: readonly BuiltGroupAggregate[];
+  readonly columnAxis?: BuiltColumnAxis;
   /** A GROUPING() value per emitted set, in emission order; bit `keys.length - 1 - i` is 1 when `keys[i]` rolled up. */
   readonly groupingSetMasks: readonly number[];
   readonly guardRails: GroupGuardRails;
@@ -41,6 +49,18 @@ export type BuiltGroupQuery = {
 };
 
 export type ColumnAnalyticalRole = 'dimension' | 'fact' | 'unsupported';
+
+export type ColumnAxis = {
+  readonly key: string;
+  /** Caller-supplied ceiling on distinct axis values; the package does not invent one. */
+  readonly maxDistinct: number;
+  readonly values: readonly unknown[];
+};
+
+export type ColumnAxisRequest = {
+  readonly key: string;
+  readonly maxDistinct: number;
+};
 
 export type ColumnCapabilitiesQueryDescriptor = {
   readonly columns: readonly string[];
@@ -115,6 +135,7 @@ export type GroupQueryDescriptor = {
   readonly aggregates: readonly GroupAggregate[];
   readonly allowedColumns: readonly string[];
   readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>;
+  readonly columnAxis?: ColumnAxis;
   readonly filters?: readonly QueryFilter[];
   readonly grouping: GroupingMode;
   readonly keys: readonly string[];

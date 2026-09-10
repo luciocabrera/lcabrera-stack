@@ -297,7 +297,7 @@ TableGroupAggregateValue [type] { readonly columnKey: string; readonly fn: Table
 TableGroupExpansionState [type] { readonly defaultFold: TableGroupFold; /** The groups folded the other way from `defaultFold`, and only those; path keys, never row indexes. */ readonly toggledGroupPaths: ReadonlySet<string>; }
 TableGroupFold [type] 'collapsed' | 'expanded'
 TableGroupingMode [type] 'flat' | 'rollup'
-TableGroupingRefusalReason [type] | 'aggregate-not-legal' | 'column-not-groupable' | 'duplicate-keys' | 'estimate-too-large' | 'no-keys' | 'row-limit-reached' | 'too-many-keys' | 'unknown-column'
+TableGroupingRefusalReason [type] | 'aggregate-not-legal' | 'column-axis-too-wide' | 'column-not-groupable' | 'duplicate-keys' | 'estimate-too-large' | 'no-keys' | 'row-limit-reached' | 'too-many-keys' | 'unknown-column'
 TableGroupingState [type] { /** Order is listing/render order; it shapes no SQL. */ readonly aggregates: readonly TableColumnAggregate[]; /** Order is the grouped query's nesting order. */ readonly keys: readonly string[]; readonly mode: TableGroupingMode; readonly periods: Readonly<Record<string, TableGroupPeriod>>; readonly shares: readonly TableColumnAggregate[]; /** Query setting, not display: emitted as the `GROUPING()` `ORDER BY` direction. */ readonly totalsPlacement: TableTotalsPlacement; }
 TableGroupKeyRefusalReason [type] | 'no-equality-operator' | 'not-a-dimension' | 'stats-unavailable' | 'too-many-distinct' | 'unique-ish'
 TableGroupKeyValue [type] { readonly columnKey: string; readonly label: string; /** `null` is a legitimate group, not a missing value; `label` renders it as `(empty)`. */ readonly value: unknown; }

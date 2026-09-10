@@ -3,6 +3,7 @@ import type { TableGroupingRefusalReason } from '../Table.types';
 const TABLE_GROUPING_REFUSAL_REASONS: Record<TableGroupingRefusalReason, true> =
   {
     'aggregate-not-legal': true,
+    'column-axis-too-wide': true,
     'column-not-groupable': true,
     'duplicate-keys': true,
     'estimate-too-large': true,
