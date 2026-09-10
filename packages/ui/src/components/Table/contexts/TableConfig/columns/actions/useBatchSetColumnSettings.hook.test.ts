@@ -44,7 +44,6 @@ const {
       set: vi.fn(),
     },
     mockDataStore: {
-      get: vi.fn(() => ({ data: [] })),
       set: vi.fn(),
     },
     mockGroupingStore: {

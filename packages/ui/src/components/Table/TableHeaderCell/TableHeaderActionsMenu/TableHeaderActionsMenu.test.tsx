@@ -56,7 +56,6 @@ vi.mock('#ui/components/Table/contexts/TableConfig/grouping/actions', () => ({
   useAddTableColumnAggregate: () => vi.fn(),
   useClearTableGrouping: () => vi.fn(),
   useRemoveTableColumnAggregate: () => vi.fn(),
-  useSyncColumnAxisColumns: () => vi.fn(),
   useToggleTableGroupKey: () => vi.fn(),
 }));
 
