@@ -116,4 +116,32 @@ describe('assertColumnAxis', () => {
       `past Postgres's ${POSTGRES_MAX_HEAP_ATTRIBUTES}-attribute heap limit`,
     );
   });
+
+  it('holds an unexpanded count(*) as one attribute, not one per axis value', () => {
+    const values = Array.from({ length: 800 }, (_, index) => index);
+    const columnAxis = {
+      key: 'year',
+      maxDistinct: 800,
+      values,
+    } as const;
+
+    expect(() =>
+      assertColumnAxis({
+        ...args,
+        columnAxis,
+        measureCount: 2,
+      }),
+    ).toThrow(
+      `past Postgres's ${POSTGRES_MAX_HEAP_ATTRIBUTES}-attribute heap limit`,
+    );
+
+    expect(() =>
+      assertColumnAxis({
+        ...args,
+        columnAxis,
+        fixedAggregateCount: 1,
+        measureCount: 1,
+      }),
+    ).not.toThrow();
+  });
 });

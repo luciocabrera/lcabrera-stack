@@ -69,36 +69,23 @@ export const decodeGroupedRows = ({
   }
 
   const count = aggregates.find((aggregate) => isUnexpandedCount(aggregate));
-  const selected = aggregates.filter((aggregate) => aggregate !== count);
 
-  if (!isWide) {
-    if (count === undefined) {
-      throw new Error(
-        `Grouped read projected \`${aggregates[0]?.fn ?? '*'}\` first, not \`count(*)\`; the aggregate list was not built by \`toGroupAggregates\`.`,
-      );
-    }
-
-    const decoded = decodeRequestedAggregates({ requested, selected });
-
-    return rows.map((row) =>
-      toGroupRow({
-        aggregates: decoded,
-        columnKeys,
-        countAlias: count.alias,
-        maskAlias,
-        row,
-        truncations,
-      }),
+  if (count === undefined) {
+    throw new Error(
+      `Grouped read projected \`${aggregates[0]?.fn ?? '*'}\` first, not \`count(*)\`; the aggregate list was not built by \`toGroupAggregates\`.`,
     );
   }
 
-  const decoded = decodeAxisAggregates({ requested, selected });
+  const selected = aggregates.filter((aggregate) => aggregate !== count);
+  const decoded = isWide
+    ? decodeAxisAggregates({ requested, selected })
+    : decodeRequestedAggregates({ requested, selected });
 
   return rows.map((row) =>
     toGroupRow({
       aggregates: decoded,
       columnKeys,
-      countAlias: count?.alias ?? '',
+      countAlias: count.alias,
       maskAlias,
       row,
       truncations,

@@ -272,6 +272,38 @@ describe('a column axis', () => {
     expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.aggregates).toStrictEqual([]);
     expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.count).toBe(4);
   });
+
+  it('throws on a wide list that expanded every aggregate including count(*)', () => {
+    expect(() =>
+      decodeGroupedRows({
+        aggregates: [
+          {
+            alias: 'count_rows_c0',
+            axis: { value: 'Pending' },
+            fn: 'count',
+          },
+          {
+            alias: 'sum_amount_c0',
+            axis: { value: 'Pending' },
+            column: 'amount',
+            fn: 'sum',
+          },
+        ],
+        columnAxis: { values: ['Pending'] },
+        columnKeys: ['status'],
+        maskAlias: 'grouping_mask',
+        requested: [{ column: 'amount', fn: 'sum' }],
+        rows: [
+          {
+            count_rows_c0: '4',
+            grouping_mask: 0,
+            status: 'Business',
+            sum_amount_c0: 100,
+          },
+        ],
+      }),
+    ).toThrow(/not `count\(\*\)`/);
+  });
 });
 
 describe('toGroupSort', () => {

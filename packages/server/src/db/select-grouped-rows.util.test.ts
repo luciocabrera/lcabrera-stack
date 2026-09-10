@@ -326,9 +326,10 @@ describe('selectGroupedRows', () => {
     expect(statements()[3]).toContain('SELECT DISTINCT');
     expect(distinctValues?.at(-1)).toBe(
       toColumnAxisDiscoveryLimit({
+        fixedAggregateCount: 1,
         keyCount: 1,
         maxDistinct: 50_000,
-        measureCount: 1,
+        measureCount: 0,
       }),
     );
   });

@@ -12,6 +12,7 @@ type AssertColumnAxisArgs = {
   readonly allowedColumns: readonly string[];
   readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>;
   readonly columnAxis: ColumnAxis;
+  readonly fixedAggregateCount?: number;
   readonly keys: readonly string[];
   readonly measureCount: number;
 };
@@ -20,6 +21,7 @@ export const assertColumnAxis = ({
   allowedColumns,
   capabilities,
   columnAxis,
+  fixedAggregateCount = 0,
   keys,
   measureCount,
 }: AssertColumnAxisArgs) => {
@@ -36,7 +38,8 @@ export const assertColumnAxis = ({
     });
   }
 
-  const projected = keys.length + 1 + measureCount * values.length;
+  const projected =
+    keys.length + 1 + fixedAggregateCount + measureCount * values.length;
 
   if (projected > POSTGRES_MAX_HEAP_ATTRIBUTES) {
     throw new GroupingRefusedError({
