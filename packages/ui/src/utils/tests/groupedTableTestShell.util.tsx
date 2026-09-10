@@ -38,7 +38,7 @@ type GroupedTableTestShellProps<TData extends Record<string, unknown>> = {
 
 const SyncColumnAxisColumns = () => {
   useSyncColumnAxisColumns();
-  return;
+  return <></>;
 };
 
 export const GroupedTableTestShell = <TData extends Record<string, unknown>>({
