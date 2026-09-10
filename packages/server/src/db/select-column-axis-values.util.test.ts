@@ -42,6 +42,31 @@ describe('selectColumnAxisValues', () => {
     expect(query.mock.calls[0]?.[1]).toEqual(['PE', 3]);
   });
 
+  it('normalizes a driver SQL NULL to undefined', async () => {
+    query.mockResolvedValueOnce({
+      rows: [{ year: 2022 }, { year: JSON.parse('null') }],
+    });
+
+    const values = await selectColumnAxisValues({
+      ...ARGS,
+      tx: { query } as unknown as PoolClient,
+    });
+
+    expect(values).toEqual([2022, undefined]);
+    expect(query).toHaveBeenCalled();
+  });
+
+  it('refuses a non-positive ceiling before touching Postgres', async () => {
+    await expect(
+      selectColumnAxisValues({
+        ...ARGS,
+        maxDistinct: 0,
+        tx: { query } as unknown as PoolClient,
+      }),
+    ).rejects.toThrow('positive integer');
+    expect(query).not.toHaveBeenCalled();
+  });
+
   it('refuses when the extra row past the ceiling arrives', async () => {
     query.mockResolvedValueOnce({
       rows: [{ year: 2021 }, { year: 2022 }, { year: 2023 }],

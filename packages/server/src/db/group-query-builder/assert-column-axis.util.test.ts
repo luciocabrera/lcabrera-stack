@@ -4,7 +4,7 @@ import type { ColumnGroupingCapability } from './group-query-builder.types.ts';
 
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
 import { assertColumnAxis } from './assert-column-axis.util.ts';
-import { POSTGRES_MAX_TUPLE_ATTRIBUTES } from './group-query-builder.constants.ts';
+import { POSTGRES_MAX_HEAP_ATTRIBUTES } from './group-query-builder.constants.ts';
 
 const dimension = (column: string): ColumnGroupingCapability => ({
   aggregates: ['count'],
@@ -96,9 +96,9 @@ describe('assertColumnAxis', () => {
     );
   });
 
-  it('refuses a projection that would exceed Postgres tuple attributes', () => {
+  it('refuses a projection that would exceed Postgres heap attributes', () => {
     const values = Array.from(
-      { length: POSTGRES_MAX_TUPLE_ATTRIBUTES },
+      { length: POSTGRES_MAX_HEAP_ATTRIBUTES },
       (_, index) => index,
     );
 
@@ -107,11 +107,13 @@ describe('assertColumnAxis', () => {
         ...args,
         columnAxis: {
           key: 'year',
-          maxDistinct: POSTGRES_MAX_TUPLE_ATTRIBUTES,
+          maxDistinct: POSTGRES_MAX_HEAP_ATTRIBUTES,
           values,
         },
         measureCount: 1,
       }),
-    ).toThrow(`past Postgres's ${POSTGRES_MAX_TUPLE_ATTRIBUTES} tuple limit`);
+    ).toThrow(
+      `past Postgres's ${POSTGRES_MAX_HEAP_ATTRIBUTES}-attribute heap limit`,
+    );
   });
 });

@@ -61,7 +61,7 @@ export const GROUP_PERIOD_TIME_ZONE = 'UTC';
 
 export const MAX_GROUP_KEYS = 4;
 
-export const POSTGRES_MAX_TUPLE_ATTRIBUTES = 1600;
+export const POSTGRES_MAX_HEAP_ATTRIBUTES = 1600;
 
 export const MAX_KEYS_BY_GROUPING: Readonly<Record<GroupingMode, number>> = {
   cube: 3,

@@ -3,6 +3,7 @@ import type {
   GroupQueryDescriptor,
 } from './group-query-builder.types.ts';
 
+import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
 import { assertSafeIdentifier } from '../query-builder/assert-safe-identifier.util.ts';
 import { buildOptionalNumericClauses } from '../query-builder/build-optional-numeric-clauses.util.ts';
 import { buildWhereClause } from '../query-builder/build-where-clause.util.ts';
@@ -16,7 +17,10 @@ import { buildGroupOrderByClause } from './build-group-order-by-clause.util.ts';
 import { buildGroupingSetsClause } from './build-grouping-sets-clause.util.ts';
 import { expandColumnAxisAggregates } from './expand-column-axis-aggregates.util.ts';
 import { expandGroupingSets } from './expand-grouping-sets.util.ts';
-import { GROUP_MASK_ALIAS } from './group-query-builder.constants.ts';
+import {
+  GROUP_MASK_ALIAS,
+  MAX_COUNT_DISTINCT_AGGREGATES,
+} from './group-query-builder.constants.ts';
 import { resolveAggregateAlias } from './resolve-aggregate-alias.util.ts';
 import { resolveGroupGuardRails } from './resolve-group-guard-rails.util.ts';
 import { resolveGroupKeyExpression } from './resolve-group-key-expression.util.ts';
@@ -54,10 +58,23 @@ export const buildGroupQuery = ({
   assertGroupAggregates({ aggregates, allowedColumns, capabilities });
 
   const expanded =
-    columnAxis === undefined || columnAxis.values.length === 0
+    columnAxis === undefined
       ? undefined
       : expandColumnAxisAggregates({ aggregates, columnAxis });
   const queryAggregates = expanded ?? aggregates;
+
+  if (expanded !== undefined) {
+    const distinctCount = expanded.filter(
+      (aggregate) => aggregate.fn === 'countDistinct',
+    ).length;
+
+    if (distinctCount > MAX_COUNT_DISTINCT_AGGREGATES) {
+      throw new GroupingRefusedError({
+        message: `A grouped query takes at most ${MAX_COUNT_DISTINCT_AGGREGATES} countDistinct aggregate; a column axis would emit ${distinctCount}.`,
+        reason: 'aggregate-not-legal',
+      });
+    }
+  }
 
   const guardRails = resolveGroupGuardRails({
     capabilities,
@@ -122,6 +139,7 @@ export const buildGroupQuery = ({
     buildGroupOrderByClause({
       aggregateAliases,
       expressionByKey,
+      hasColumnAxis: columnAxis !== undefined,
       keys,
       sets,
       sort,
@@ -133,18 +151,12 @@ export const buildGroupQuery = ({
     .join(' ');
 
   return {
-    aggregates: aliased.map(({ aggregate, alias }, index) => {
-      const expandedAggregate = expanded?.[index];
-
-      return {
-        alias,
-        fn: aggregate.fn,
-        ...(aggregate.column !== undefined && { column: aggregate.column }),
-        ...(expandedAggregate !== undefined && {
-          axis: { value: expandedAggregate.axisValue },
-        }),
-      };
-    }),
+    aggregates: aliased.map(({ aggregate, alias }) => ({
+      alias,
+      fn: aggregate.fn,
+      ...(aggregate.column !== undefined && { column: aggregate.column }),
+      ...('axisValue' in aggregate && { axis: { value: aggregate.axisValue } }),
+    })),
     groupingSetMasks: sets.map((set) => toGroupingSetMask({ keys, set })),
     guardRails,
     keys,

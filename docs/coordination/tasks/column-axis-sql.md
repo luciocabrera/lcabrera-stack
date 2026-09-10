@@ -26,6 +26,6 @@ Server-side column axis: `FILTER` aggregates per distinct value, caller-supplied
 
 ## Status / next
 
-- Current step: implementation in review
+- Current step: addressing review comments on #1165
 - Blockers: none
-- Next: quality gate, draft PR
+- Next: wait for CI after the review-fix commit

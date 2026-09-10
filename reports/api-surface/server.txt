@@ -56,7 +56,7 @@ MAX_KEYS_BY_GROUPING [const] Readonly<Record<GroupingMode, number>>
 PERIOD_CAPABLE_TYPE_NAMES [const] ReadonlySet<string>
 PERIOD_MEAN_DAYS [const] Readonly<Record<OlapGroupPeriod, number>>
 PERIOD_SQL_FIELD [const] Readonly<Record<OlapGroupPeriod, string>>
-POSTGRES_MAX_TUPLE_ATTRIBUTES [const] 1600
+POSTGRES_MAX_HEAP_ATTRIBUTES [const] 1600
 UNIQUE_ISH_DISTINCT_RATIO [const] 0.95
 
 ## ./db/group-query-builder/group-query-builder.types

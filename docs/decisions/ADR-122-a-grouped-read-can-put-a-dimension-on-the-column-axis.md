@@ -54,8 +54,10 @@ Two other constraints were settled with the work, not after it:
 
 3. **A package-constant cap of a few dozen columns.** Rejected. A process
    default belongs in env (`DB_PIVOT_MAX_DISTINCT`); a per-read ceiling belongs
-   on the descriptor as required `maxDistinct`. Postgres's 1600-attribute tuple
-   limit is a protocol fact and is checked as such, not as a product opinion.
+   on the descriptor as required `maxDistinct`. Postgres's 1600-attribute heap
+   limit (`MaxHeapAttributeNumber`) is a protocol fact and is checked as such,
+   not as a product opinion. A result tuple may hold 1664 attributes; 1600 is
+   the conservative bound so a projection never exceeds either.
 
 ## Decision
 
@@ -73,9 +75,11 @@ error.
 
 A distinct set past `maxDistinct` is `GroupingRefusedError` with reason
 `column-axis-too-wide`, naming the axis column. A projection that would exceed
-Postgres's tuple-attribute limit is the same reason. Statistics-unavailable
+Postgres's heap-attribute limit is the same reason. Statistics-unavailable
 does **not** warn-and-proceed on the axis: the capped distinct is what answers
-width.
+width. An empty distinct set still reports the axis and emits no `FILTER`
+columns. `maxDistinct` is checked before the discovery query, so a zero or
+non-integer ceiling never becomes `LIMIT`.
 
 A read without `columnAxis` is unchanged.
 

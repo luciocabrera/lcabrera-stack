@@ -531,6 +531,49 @@ describe('a column axis', () => {
     expect(result.aggregates[0]?.axis).toEqual({ value: undefined });
   });
 
+  it('emits no FILTER columns when the axis has no values', () => {
+    const result = buildGroupQuery(
+      descriptor({
+        aggregates: [{ column: 'total_amount', fn: 'sum' }],
+        columnAxis: {
+          key: 'order_status',
+          maxDistinct: 10,
+          values: [],
+        },
+        keys: ['shipping_country'],
+      }),
+    );
+
+    expect(result.text).toBe(
+      'SELECT "shipping_country", GROUPING("shipping_country") AS "group_mask" ' +
+        'FROM "public"."enterprise_orders" ' +
+        'GROUP BY GROUPING SETS (("shipping_country")) ' +
+        'ORDER BY "shipping_country" ASC ' +
+        'LIMIT $1',
+    );
+    expect(result.aggregates).toEqual([]);
+    expect(result.columnAxis).toEqual({
+      key: 'order_status',
+      values: [],
+    });
+  });
+
+  it('refuses a countDistinct that a column axis would emit more than once', () => {
+    expect(() =>
+      buildGroupQuery(
+        descriptor({
+          aggregates: [{ column: 'shipping_country', fn: 'countDistinct' }],
+          columnAxis: {
+            key: 'order_status',
+            maxDistinct: 10,
+            values: ['Pending', 'Shipped'],
+          },
+          keys: ['city'],
+        }),
+      ),
+    ).toThrow('a column axis would emit 2');
+  });
+
   it('does not change a read that has no column axis', () => {
     const withAxisFieldAbsent = buildGroupQuery(descriptor());
     const withUndefined = buildGroupQuery(

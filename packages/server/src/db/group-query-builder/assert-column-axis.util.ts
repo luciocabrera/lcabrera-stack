@@ -5,7 +5,7 @@ import type {
 
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
 import { assertGroupColumn } from './assert-group-column.util.ts';
-import { POSTGRES_MAX_TUPLE_ATTRIBUTES } from './group-query-builder.constants.ts';
+import { POSTGRES_MAX_HEAP_ATTRIBUTES } from './group-query-builder.constants.ts';
 
 type AssertColumnAxisArgs = {
   readonly allowedColumns: readonly string[];
@@ -24,11 +24,7 @@ export const assertColumnAxis = ({
 }: AssertColumnAxisArgs) => {
   const { key, maxDistinct, values } = columnAxis;
 
-  if (!Number.isSafeInteger(maxDistinct) || maxDistinct < 1) {
-    throw new Error(
-      `columnAxis.maxDistinct must be a positive integer; got ${maxDistinct}.`,
-    );
-  }
+  assertColumnAxisMaxDistinct(maxDistinct);
 
   if (keys.includes(key)) {
     throw new GroupingRefusedError({
@@ -68,11 +64,19 @@ export const assertColumnAxis = ({
 
   const projected = keys.length + 1 + measureCount * values.length;
 
-  if (projected > POSTGRES_MAX_TUPLE_ATTRIBUTES) {
+  if (projected > POSTGRES_MAX_HEAP_ATTRIBUTES) {
     throw new GroupingRefusedError({
       column: key,
-      message: `This column axis would project ${projected} attributes, past Postgres's ${POSTGRES_MAX_TUPLE_ATTRIBUTES} tuple limit.`,
+      message: `This column axis would project ${projected} attributes, past Postgres's ${POSTGRES_MAX_HEAP_ATTRIBUTES}-attribute heap limit.`,
       reason: 'column-axis-too-wide',
     });
+  }
+};
+
+export const assertColumnAxisMaxDistinct = (maxDistinct: number) => {
+  if (!Number.isSafeInteger(maxDistinct) || maxDistinct < 1) {
+    throw new Error(
+      `columnAxis.maxDistinct must be a positive integer; got ${maxDistinct}.`,
+    );
   }
 };
