@@ -3,17 +3,12 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { TABS_FIXTURE as tabs } from '../Tabs.fixtures';
 import { TabsContent } from './TabsContent.component';
 
 afterEach(() => {
   cleanup();
 });
-
-const tabs = [
-  { children: <span>Content A</span>, header: 'Tab A', key: 'a' },
-  { children: <span>Content B</span>, header: 'Tab B', key: 'b' },
-  { children: <span>Content C</span>, header: 'Tab C', key: 'c' },
-];
 
 const toClassNames = (element: Element | null) =>
   (element?.getAttribute('class') ?? '').split(' ').filter(Boolean);

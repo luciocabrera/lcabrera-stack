@@ -4,18 +4,11 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { Tabs } from './Tabs.component';
+import { focusedTab, TABS_FIXTURE as tabs } from './Tabs.fixtures';
 
 afterEach(() => {
   cleanup();
 });
-
-const tabs = [
-  { children: <span>Content A</span>, header: 'Tab A', key: 'a' },
-  { children: <span>Content B</span>, header: 'Tab B', key: 'b' },
-  { children: <span>Content C</span>, header: 'Tab C', key: 'c' },
-];
-
-const focusedTab = () => screen.getByRole('tab', { selected: true });
 
 describe('Tabs', () => {
   it('renders all tab buttons', () => {
