@@ -55,6 +55,58 @@ const readPanelTabOrder = () => {
   return [buttons[0]?.textContent, buttons.at(-1)?.dataset.testid];
 };
 
+const renderResizablePanel = () => {
+  const onWidthChange = vi.fn();
+  const onWidthCommit = vi.fn();
+
+  render(
+    <SidePanel
+      isOpen
+      isPinned
+      isResizable
+      onWidthChange={onWidthChange}
+      onWidthCommit={onWidthCommit}
+      width={400}
+    >
+      <span>Pinned content</span>
+    </SidePanel>,
+  );
+
+  return {
+    handle: screen.getByTestId('side-panel-resize-handle'),
+    onWidthChange,
+    onWidthCommit,
+  };
+};
+
+type RenderResetPanelArgs = {
+  readonly hasReset?: boolean;
+};
+
+const renderResetPanel = ({ hasReset = true }: RenderResetPanelArgs = {}) => {
+  const onWidthChange = vi.fn();
+  const onWidthReset = vi.fn();
+
+  render(
+    <SidePanel
+      isOpen
+      isPinned
+      isResizable
+      onWidthChange={onWidthChange}
+      onWidthReset={hasReset ? onWidthReset : undefined}
+      width={640}
+    >
+      <span>Pinned content</span>
+    </SidePanel>,
+  );
+
+  return {
+    handle: screen.getByTestId('side-panel-resize-handle'),
+    onWidthChange,
+    onWidthReset,
+  };
+};
+
 describe('SidePanel', () => {
   it('renders children content', () => {
     render(
@@ -129,23 +181,7 @@ describe('SidePanel', () => {
   });
 
   it('resizes from the drag, and commits once the gesture ends', () => {
-    const onWidthChange = vi.fn();
-    const onWidthCommit = vi.fn();
-
-    render(
-      <SidePanel
-        isOpen
-        isPinned
-        isResizable
-        onWidthChange={onWidthChange}
-        onWidthCommit={onWidthCommit}
-        width={400}
-      >
-        <span>Pinned content</span>
-      </SidePanel>,
-    );
-
-    const handle = screen.getByTestId('side-panel-resize-handle');
+    const { handle, onWidthChange, onWidthCommit } = renderResizablePanel();
 
     fireEvent.mouseDown(handle, { clientX: 1000 });
     fireEvent.mouseMove(document, { clientX: 900 });
@@ -155,6 +191,71 @@ describe('SidePanel', () => {
       committed: onWidthCommit.mock.calls.at(-1),
       resized: onWidthChange.mock.calls.at(-1),
     }).toStrictEqual({ committed: [500], resized: [500] });
+  });
+
+  it('commits nothing when the pointer never moved, so a click is not a resize', () => {
+    const { handle, onWidthChange, onWidthCommit } = renderResizablePanel();
+
+    fireEvent.mouseDown(handle, { clientX: 1000 });
+    fireEvent.mouseUp(document);
+
+    expect({
+      committed: onWidthCommit.mock.calls.length,
+      resized: onWidthChange.mock.calls.length,
+    }).toStrictEqual({ committed: 0, resized: 0 });
+  });
+
+  it('resets the width on a double-click, so the panel returns to its size', () => {
+    const { handle, onWidthChange, onWidthReset } = renderResetPanel();
+
+    fireEvent.doubleClick(handle);
+
+    expect({
+      reset: onWidthReset.mock.calls.length,
+      resized: onWidthChange.mock.calls.length,
+    }).toStrictEqual({ reset: 1, resized: 0 });
+  });
+
+  it('leaves a double-click alone when the consumer offers no reset', () => {
+    const { handle, onWidthChange } = renderResetPanel({ hasReset: false });
+
+    const doubleClick = new MouseEvent('dblclick', {
+      bubbles: true,
+      cancelable: true,
+    });
+    fireEvent(handle, doubleClick);
+
+    expect({
+      prevented: doubleClick.defaultPrevented,
+      resized: onWidthChange.mock.calls.length,
+    }).toStrictEqual({ prevented: false, resized: 0 });
+  });
+
+  it('resets the width on Enter, so the reset is not pointer-only', () => {
+    const { handle, onWidthChange, onWidthReset } = renderResetPanel();
+
+    fireEvent.keyDown(handle, { key: 'Enter' });
+
+    expect({
+      reset: onWidthReset.mock.calls.length,
+      resized: onWidthChange.mock.calls.length,
+    }).toStrictEqual({ reset: 1, resized: 0 });
+  });
+
+  it('leaves Enter alone when the consumer offers no reset', () => {
+    const { handle, onWidthChange } = renderResetPanel({ hasReset: false });
+
+    const enter = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'Enter',
+    });
+    fireEvent(handle, enter);
+
+    expect({
+      prevented: enter.defaultPrevented,
+      resized: onWidthChange.mock.calls.length,
+    }).toStrictEqual({ prevented: false, resized: 0 });
   });
 
   it('puts the splitter after the content, so opening the panel does not focus it', () => {

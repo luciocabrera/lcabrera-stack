@@ -70,9 +70,15 @@ describe('resolveSidePanelKeyboardResizeAction', () => {
     ).toStrictEqual({ type: 'resize', width: 800 });
   });
 
-  it('ignores a key that is not a resize', () => {
+  it('resets the width on Enter, the gesture the column splitter already answers', () => {
     expect(
       resolveSidePanelKeyboardResizeAction({ ...args, key: 'Enter' }),
+    ).toStrictEqual({ type: 'reset' });
+  });
+
+  it('ignores a key that is not a resize', () => {
+    expect(
+      resolveSidePanelKeyboardResizeAction({ ...args, key: 'Escape' }),
     ).toStrictEqual({ type: 'ignore' });
   });
 });

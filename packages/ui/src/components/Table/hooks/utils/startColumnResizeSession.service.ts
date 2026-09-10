@@ -37,7 +37,6 @@ export const startColumnResizeSession = <TData>({
   });
 
   return startHorizontalDragSession({
-    initialWidth: startData.initialWidth,
     onCommit: syncColumnWidth,
     onGestureEnd,
     onSessionEnd,

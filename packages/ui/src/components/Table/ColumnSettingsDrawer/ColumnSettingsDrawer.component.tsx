@@ -1,5 +1,6 @@
 import { SidePanel } from '#ui/components/SidePanel';
 import {
+  useResetTableSettingsPanelWidth,
   useSetTableSettingsPanelWidth,
   useSyncTableSettingsPanelWidth,
 } from '#ui/components/Table/contexts/TableConfig/meta/actions';
@@ -26,6 +27,7 @@ export const ColumnSettingsDrawer = () => {
   const cancelColumnSettings = useCancelColumnSettings({ isBusy });
   const wrapperRef = useTableWrapperRef();
   const panelWidth = useGetTableSettingsPanelWidth();
+  const resetPanelWidth = useResetTableSettingsPanelWidth();
   const setPanelWidth = useSetTableSettingsPanelWidth();
   const syncPanelWidth = useSyncTableSettingsPanelWidth();
 
@@ -37,6 +39,7 @@ export const ColumnSettingsDrawer = () => {
       onClose={cancelColumnSettings}
       onWidthChange={setPanelWidth}
       onWidthCommit={syncPanelWidth}
+      onWidthReset={resetPanelWidth}
       portalContainer={wrapperRef}
       position='right'
       resizeLabel='Resize column settings panel'

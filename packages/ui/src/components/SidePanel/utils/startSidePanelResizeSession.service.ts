@@ -29,7 +29,6 @@ export const startSidePanelResizeSession = ({
   const bounds = resolveSidePanelWidthBounds({ currentWidth, viewportWidth });
 
   return startHorizontalDragSession({
-    initialWidth: currentWidth,
     onCommit: onWidthCommit,
     onGestureEnd,
     onSessionEnd,

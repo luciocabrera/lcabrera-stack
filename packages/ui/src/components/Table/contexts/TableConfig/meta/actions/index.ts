@@ -1,3 +1,4 @@
+export { useResetTableSettingsPanelWidth } from './useResetTableSettingsPanelWidth.hook';
 export { useSetTableColumnSelectedKey } from './useSetTableColumnSelectedKey.hook';
 export { useSetTableColumnSettingsSelectedTab } from './useSetTableColumnSettingsSelectedTab.hook';
 export { useSetTableDrawersOpenState } from './useSetTableDrawersOpenState.hook';

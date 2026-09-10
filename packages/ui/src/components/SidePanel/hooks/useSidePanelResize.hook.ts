@@ -13,6 +13,7 @@ import {
 type UseSidePanelResizeArgs = {
   readonly onWidthChange: (width: number) => void;
   readonly onWidthCommit?: (width: number) => void;
+  readonly onWidthReset?: () => void;
   readonly position: SidePanelPosition;
   readonly width: number;
 };
@@ -20,6 +21,7 @@ type UseSidePanelResizeArgs = {
 export const useSidePanelResize = ({
   onWidthChange,
   onWidthCommit,
+  onWidthReset,
   position,
   width,
 }: UseSidePanelResizeArgs) => {
@@ -64,6 +66,16 @@ export const useSidePanelResize = ({
     setIsResizing(true);
   };
 
+  const onDoubleClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (onWidthReset === undefined) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    onWidthReset();
+  };
+
   const onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     const action = resolveSidePanelKeyboardResizeAction({
       currentWidth: width,
@@ -78,11 +90,23 @@ export const useSidePanelResize = ({
       return;
     }
 
+    if (action.type === 'reset') {
+      if (onWidthReset === undefined) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      onWidthReset();
+
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
     onWidthChange(action.width);
     commitWidth(action.width);
   };
 
-  return { bounds, isResizing, onKeyDown, onMouseDown };
+  return { bounds, isResizing, onDoubleClick, onKeyDown, onMouseDown };
 };

@@ -301,6 +301,25 @@ only the settled one. That is what the Table drawers do: the meta store on every
 frame, the UI-flags cookie once
 ([ADR-114](../../../../../docs/decisions/ADR-114-the-settings-panel-takes-the-shape-the-reader-gives-it.md)).
 
+**A double-click puts the width back, and putting it back means clearing it.**
+`onWidthReset` fires on a double-click of the splitter, and the consumer answers
+by dropping the width it stored rather than by writing a number. That is what
+makes the panel paint from its `size` variant again — a reset that wrote
+`SIDE_PANEL_MIN_WIDTH` would leave every panel at the band's floor regardless of
+the size it was opened at, and the floor is not a default. The gesture mirrors
+the column splitter, which resets by writing `undefined` into the column sizing
+map for the same reason. A consumer that passes no `onWidthReset` gets no reset:
+the handler returns before touching the event, so a double-click stays an
+ordinary pair of clicks.
+
+`Enter` on the focused splitter does the same thing, and that pairing is the
+point rather than a convenience. The splitter is a focusable `separator` that
+resizes on arrows and Home/End, so a reader who never touches a pointer can
+reach a width they then have no way to undo — a reset available only to a
+double-click is a capability the keyboard half cannot see. The key is `Enter`
+because the column splitter already answers it there, and both go through the
+same `onWidthReset`, so neither can drift from the other.
+
 **The band is enforced twice, and both are load-bearing.** The gesture clamps to
 `SIDE_PANEL_MIN_WIDTH`–`SIDE_PANEL_MAX_WIDTH_RATIO × viewport`, and the style
 clamps again as `max(320px, min(<width>px, 90vw))` — because a width persisted on
