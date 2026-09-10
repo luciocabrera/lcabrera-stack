@@ -32,13 +32,13 @@ export const tableBodyCellStyles = stylex.create({
     width: width ?? minWidth ?? null,
   }),
   pinnedLeft: (offset: number) => ({
-    backgroundColor: 'inherit',
+    backgroundColor: colors.surfaceSecondary,
     position: 'sticky',
     zIndex: `calc(${zIndex.sticky} - 1)`,
     left: offset,
   }),
   pinnedRight: (offset: number) => ({
-    backgroundColor: 'inherit',
+    backgroundColor: colors.surfaceSecondary,
     position: 'sticky',
     zIndex: `calc(${zIndex.sticky} - 1)`,
     right: offset,
