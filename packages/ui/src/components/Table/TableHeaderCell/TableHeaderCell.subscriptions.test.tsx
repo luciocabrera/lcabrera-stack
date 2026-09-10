@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import type { MockStore } from '#ui/utils/tests/createMockStore.util';
 
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
+import '#ui/utils/tests/registerColumnViewStateSelectorMocks';
 
 const COLUMN_KEYS = ['col0', 'col1', 'col2', 'col3'] as const;
 
@@ -63,23 +64,6 @@ vi.mock(
       metaStore: storesRef.metaStore,
     }),
   }),
-);
-
-vi.mock(
-  '#ui/components/Table/contexts/TableConfig/grouping/selectors/useGetTableGroupingAggregates.hook',
-  () => ({ useGetTableGroupingAggregates: () => [] }),
-);
-vi.mock(
-  '#ui/components/Table/contexts/TableConfig/grouping/selectors/useGetTableGroupingColumnAxis.hook',
-  () => ({ useGetTableGroupingColumnAxis: () => undefined }),
-);
-vi.mock(
-  '#ui/components/Table/contexts/TableConfig/grouping/selectors/useGetTableGroupingKeys.hook',
-  () => ({ useGetTableGroupingKeys: () => [] }),
-);
-vi.mock(
-  '#ui/components/Table/contexts/TableData/data/selectors/useGetTableData.hook',
-  () => ({ useGetTableData: () => [] }),
 );
 
 // Isolate the store-subscription behaviour: mock the two heavy children so the

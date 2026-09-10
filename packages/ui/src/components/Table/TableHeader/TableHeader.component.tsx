@@ -55,7 +55,6 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
       <TableRow aria-rowindex={HEADER_ARIA_ROW_INDEX} isHeader>
         {leftPinnedCols.map((col) => (
           <TableHeaderCell
-            column={col}
             columnKey={col.key}
             hasSettings={hasHeaderSettings(col)}
             isLoadingState={isLoadingState}
@@ -64,7 +63,6 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
         ))}
         {centerCols.map((col) => (
           <TableHeaderCell
-            column={col}
             columnKey={col.key}
             hasSettings={hasHeaderSettings(col)}
             isLoadingState={isLoadingState}
@@ -73,7 +71,6 @@ export const TableHeader = <TData extends Record<string, unknown>, TResponse>({
         ))}
         {rightPinnedCols.map((col) => (
           <TableHeaderCell
-            column={col}
             columnKey={col.key}
             hasSettings={hasHeaderSettings(col)}
             isLoadingState={isLoadingState}
