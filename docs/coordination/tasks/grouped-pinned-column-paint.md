@@ -2,7 +2,7 @@
 id: grouped-pinned-column-paint
 title: fix(ui): grouped pinned columns shrink and lose their borders on horizontal scroll
 owner: agent:claude
-status: active
+status: review
 branch: fix/1157-grouped-pinned-column-paint
 area:
   - packages/ui/src/components/Table/TableBodyCell/**
@@ -11,7 +11,7 @@ area:
 started: 2026-09-10
 updated: 2026-09-10
 plan: (none)
-pr: (none)
+pr: "#1158"
 issue: #1157
 ---
 
@@ -21,6 +21,6 @@ fix(ui): grouped pinned columns shrink and lose their borders on horizontal scro
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; quality gate green, PR ready for review
 - Blockers: none
-- Next:
+- Next: merge once reviewed
