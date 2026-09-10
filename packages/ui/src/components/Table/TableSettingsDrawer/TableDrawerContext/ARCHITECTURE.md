@@ -31,10 +31,15 @@ TableDrawerContext/
 │   ├── useClearAllSettings                 → Clear all column fields
 │   ├── useClearColumnOrderSection          → Clear visibility + pinning
 │   ├── useClearFilters                     → Clear all filters
+│   ├── useClearColumnAggregates            → Stage no aggregates, keeping the group keys
+│   ├── useClearGroupKeys                   → Stage no group keys
 │   ├── useClearGrouping                    → Stage grouping switched off
 │   ├── useClearSorting                     → Clear all sorting
 │   ├── useOrderColumnsBySorting            → Reorder columns by current sorting
+│   ├── useResetColumnAggregates            → Reset aggregates from table, keeping the staged keys
 │   ├── useResetColumnOrderAndVisibility    → Reset order + visibility from table
+│   ├── useResetGroupKeys                   → Reset group keys from table, keeping the staged aggregates
+│   ├── useResetGrouping                    → Reset the whole grouping from table
 │   ├── useResetFilters                     → Reset filters from table
 │   ├── useResetSorting                     → Reset sorting from table
 │   ├── useResetTableSettings               → Re-seed both drafts from the table
@@ -180,6 +185,11 @@ and calls `set(partial)` on it — `columnsStore` for the column draft,
 | `useRemoveColumnAggregate`         | —                    | `groupingStore`        | Un-stages one of a column's aggregates, or every one of them                 |
 | `useReorderColumnAggregates`       | —                    | `groupingStore`        | Stages the aggregates in a new order, named by `(columnKey, fn)` id (#832)   |
 | `useClearGrouping`                 | —                    | `groupingStore`        | Stages no keys and no aggregates                                             |
+| `useClearGroupKeys`                | —                    | `groupingStore`        | Stages no group keys; the model drops the aggregates with the last key       |
+| `useClearColumnAggregates`         | —                    | `groupingStore`        | Stages no aggregates and no shares, leaving the group keys staged            |
+| `useResetGrouping`                 | `TableConfigContext` | `groupingStore`        | Restores the whole grouping from the table                                   |
+| `useResetGroupKeys`                | `TableConfigContext` | `groupingStore`        | Restores keys and periods from the table, leaving the staged aggregates      |
+| `useResetColumnAggregates`         | `TableConfigContext` | `groupingStore`        | Restores aggregates and shares from the table, leaving the staged keys       |
 | `useSetTotalsPlacement`            | —                    | `totalsPlacementStore` | Stages where subtotals sit relative to the rows they total                   |
 | `useBatchSetTableDrawerSettings`   | every drawer store   | `TableConfig`          | Pushes all three drafts to the table in **one** commit — see below           |
 
