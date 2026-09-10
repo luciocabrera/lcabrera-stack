@@ -155,6 +155,13 @@ describe('the prompt is the catalog, not a second generic review', () => {
     );
   });
 
+  it('defers the severity scale to the skill rather than copying it', () => {
+    const prompt = readRepoFile(PROMPT);
+    expect(prompt).toContain('is defined in `SKILL.md` Step 5');
+    expect(prompt).not.toContain('security, correctness, data-loss');
+    expect(prompt).not.toContain('style preference, no real cost');
+  });
+
   it('is the file the workflow concatenates into the prompt Grok sees', () => {
     const step = stepBlock(readRepoFile(WORKFLOW), RUN_STEP);
     expect(step).toBeDefined();

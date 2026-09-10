@@ -29,16 +29,14 @@ finding written into the body carries no thread, holds no merge, and is read as
 
 ## Severity
 
-- **BLOCKER** — security, correctness, data-loss, or runtime-crash risk
-- **HIGH** — clearly wrong; will regress maintainability or behavior
-- **MEDIUM** — design weakness worth fixing, but not worth holding this pull
-  request for (body only)
-- **LOW** — minor; in-passing fix (body only)
-- **NIT** — style preference, no real cost (body only)
+The scale — BLOCKER, HIGH, MEDIUM, LOW, NIT — is defined in `SKILL.md` Step 5.
+It is not restated here: a second copy is a copy that drifts, and this file
+already sends you to read that one.
 
-The scale grades the finding; the file you put it in grades whether the merge
-waits for it. MEDIUM is the highest severity a reasonable author may merge and
-fix afterwards.
+What Step 5 does not say is where a finding goes. BLOCKER and HIGH become
+inline comments; MEDIUM, LOW and NIT stay in the body. So the severity grades
+the finding and the file grades whether the merge waits for it, and MEDIUM is
+the highest severity that lets a pull request through.
 
 Calibrate against what you wrote, not against how the finding feels. If you can
 name the file, name a line **this diff added**, and write a concrete fix the
