@@ -30,6 +30,7 @@ type MockTabsProps = {
   readonly selectedTab?: string;
   readonly tabs: readonly {
     readonly children: ReactNode;
+    readonly hasPadding?: boolean;
     readonly header: string;
     readonly key: string;
   }[];
@@ -53,7 +54,10 @@ vi.mock('#ui/components/Tabs', () => ({
         Select sorting tab
       </button>
       {tabs.map((tab) => (
-        <section key={tab.key}>
+        <section
+          data-has-padding={String(tab.hasPadding !== false)}
+          key={tab.key}
+        >
           <h2>{tab.header}</h2>
           {tab.children}
         </section>
@@ -236,5 +240,28 @@ describe('TableSettingsDrawerBody', () => {
     expect(
       screen.getByText('Select sorting tab').parentElement?.dataset.busy,
     ).toBe('true');
+  });
+
+  it('leaves every tab body inset, the grouping tab included', () => {
+    isGroupingEnabledRef.current = true;
+
+    render(<TableSettingsDrawerBody />);
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Grouping' }),
+      'The grouping tab is absent, so the case below would pass without checking anything.',
+    ).not.toBeNull();
+
+    const flushTabs = screen
+      .getAllByRole('heading', { level: 2 })
+      .filter(
+        (heading) => heading.parentElement?.dataset.hasPadding === 'false',
+      )
+      .map((heading) => heading.textContent);
+
+    expect(
+      flushTabs,
+      'A drawer tab dropped the body inset, which its section header, its footer toolbar and any nested tab strip all sit inside.',
+    ).toStrictEqual([]);
   });
 });

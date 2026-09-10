@@ -14,7 +14,10 @@ export const TabsContent = ({ activeTab, tabs }: TabsContentProps) => {
           mode={activeTab === tab.key ? 'visible' : 'hidden'}
         >
           <div
-            {...stylex.props(styles.tabPanel)}
+            {...stylex.props(
+              styles.tabPanel,
+              tab.hasPadding === false && styles.tabPanelFlush,
+            )}
             aria-labelledby={`tab-${tab.key}`}
             id={`tabpanel-${tab.key}`}
             role='tabpanel'

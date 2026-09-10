@@ -41,14 +41,21 @@ vi.mock(
   }),
 );
 
+const NO_AGGREGATES: readonly never[] = [];
+
 vi.mock('../../TableDrawerContext/actions', () => ({
+  useClearColumnAggregates: () => vi.fn(),
   useClearGrouping: () => vi.fn(),
+  useClearGroupKeys: () => vi.fn(),
+  useResetColumnAggregates: () => vi.fn(),
   useResetGrouping: () => vi.fn(),
+  useResetGroupKeys: () => vi.fn(),
   useSetGroupKeyPeriod: () => vi.fn(),
   useSetGroupKeys: () => mockSetGroupKeys,
 }));
 
 vi.mock('../../TableDrawerContext/selectors', () => ({
+  useGetGroupingAggregates: () => NO_AGGREGATES,
   useGetGroupingKeys: () => groupingKeysRef.current,
   useGetGroupingPeriods: () => NO_PERIODS,
 }));

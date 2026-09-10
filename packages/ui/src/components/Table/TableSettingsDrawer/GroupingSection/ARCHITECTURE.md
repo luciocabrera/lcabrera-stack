@@ -65,7 +65,7 @@ GroupingSection/
 ├── ActiveAggregateList/                → DraggableList of staged aggregates — one row per (column, function)
 │   ├── AggregateItemContent/           → One measure row: label, share toggle, remove
 │   └── ShareOfTotalToggle/             → Share of the grand total, on the measures it is defined for
-├── GroupingSectionToolbar/             → Clear/reset grouping (toolbar + footer, and reused in the General tab)
+├── GroupingSectionToolbar/             → Clear/reset, scoped to the keys, the aggregates or the whole grouping (toolbar + footer, and reused in the General tab)
 └── utils/
     ├── toGroupKeyItems.util.ts         → Staged keys + labels, in nesting order
     ├── toAggregateItems.util.ts        → Staged aggregates + labels + a per-entry id, in staged order
@@ -97,8 +97,12 @@ flowchart TD
   H -->|remove| L2["useRemoveColumnAggregate"]
   H -->|reorder| L3["useReorderColumnAggregates"]
   I -->|add| L["useAddColumnAggregate"]
-  M["GroupingSectionToolbar"] -->|clear| N["useClearGrouping"]
-  M -->|reset| N2["useResetGrouping"]
+  M["GroupingSectionToolbar"] -->|clear, no scope| N["useClearGrouping"]
+  M -->|reset, no scope| N2["useResetGrouping"]
+  M -->|clear, scope=keys| N3["useClearGroupKeys"]
+  M -->|reset, scope=keys| N4["useResetGroupKeys"]
+  M -->|clear, scope=aggregates| N5["useClearColumnAggregates"]
+  M -->|reset, scope=aggregates| N6["useResetColumnAggregates"]
 
   J --> O["useSetGrouping (internal)"]
   K --> O
@@ -266,9 +270,36 @@ grouping paints two sub-tabs rather than an empty third. Totals position still
 renders only under `rollup`: `flat` emits no subtotal and no grand total, so
 there would be nothing to position.
 
-**Clear and reset sit outside the strip.** `GroupingSectionToolbar`'s footer
-variant acts on the whole grouping, so it belongs below the tabs where it governs
-all three panes.
+**The sub-tabs drop their own inset; the drawer tab keeps its.** Each nested
+`TabItem` sets `hasPadding: false`, so pane content is inset once by the Grouping
+tab that holds it rather than twice. The opt-out cannot move up to the drawer tab:
+that inset also positions this section's footer toolbar and the nested tab strip,
+which sit outside the nested panels and so get nothing back from them.
+
+**Clear and reset sit at the scope they act on.** `GroupingSectionToolbar`'s
+footer variant takes no `scope` and acts on the whole grouping, so it belongs
+below the tabs where it governs all three panes. Its `toolbar` variant takes one
+and sits in the section header of the sub-tab that owns that subject: `keys` in
+`ActiveGroupKeyList`, `aggregates` in `ActiveAggregateList`. A scoped clear is
+disabled while its own subject is empty.
+
+**Every scoped action goes through `useSetGrouping`, so none of them can stage a
+grouping the table would refuse.** The unscoped `useResetGrouping` may write the
+drawer store directly because it copies the whole committed state, which came out
+of the reducer already; a scoped action mixes committed and staged values, and
+that is the combination the reducer has to rule on.
+
+Two consequences follow, and both are the model rather than the actions.
+`resolveTableGroupingUpdate` collapses the whole grouping to `flat` when the last
+key goes, because the state has no representation for a measure with no key to
+measure over — so clearing the keys clears the aggregates, and resetting the
+aggregates does nothing while no key is staged. The reverse does not hold:
+clearing the aggregates leaves the keys staged.
+
+`useResetGroupKeys` reads `mode` from the table when the draft holds no keys of
+its own. A draft with no keys was collapsed to `flat` by the reducer, so its mode
+is that collapse rather than a reader's choice, and taking it back would flatten a
+rollup grouping on the clear-then-reset round trip.
 
 **The sub-tab a reader is on is not remembered.** The nested `Tabs` is
 uncontrolled and opens on Group Keys. The drawer's own tab is persisted because a
@@ -393,17 +424,18 @@ cannot predict at all.
 
 ## Props
 
-| Component                | Prop                   | Type                        | Default    | Notes                                   |
-| ------------------------ | ---------------------- | --------------------------- | ---------- | --------------------------------------- |
-| `GroupingSection`        | `isBusy`               | `boolean`                   | `false`    | Forwarded to every delegate             |
-| `AddGroupKeySection`     | `isBusy`               | `boolean`                   | `false`    |                                         |
-| `AddGroupKeySection`     | `onDropdownOpenChange` | `(isOpen: boolean) => void` | —          | Dims the rest of the section while open |
-| `ActiveGroupKeyList`     | `isBusy`               | `boolean`                   | `false`    |                                         |
-| `AddAggregateSection`    | `isBusy`               | `boolean`                   | `false`    |                                         |
-| `ActiveAggregateList`    | `isBusy`               | `boolean`                   | `false`    |                                         |
-| `TotalsPlacementSection` | `isBusy`               | `boolean`                   | `false`    | Renders nothing outside `rollup`        |
-| `GroupingSectionToolbar` | `isBusy`               | `boolean`                   | `false`    |                                         |
-| `GroupingSectionToolbar` | `variant`              | `'footer' \| 'toolbar'`     | `'footer'` | The dual-variant pattern                |
+| Component                | Prop                   | Type                                   | Default      | Notes                                   |
+| ------------------------ | ---------------------- | -------------------------------------- | ------------ | --------------------------------------- |
+| `GroupingSection`        | `isBusy`               | `boolean`                              | `false`      | Forwarded to every delegate             |
+| `AddGroupKeySection`     | `isBusy`               | `boolean`                              | `false`      |                                         |
+| `AddGroupKeySection`     | `onDropdownOpenChange` | `(isOpen: boolean) => void`            | —            | Dims the rest of the section while open |
+| `ActiveGroupKeyList`     | `isBusy`               | `boolean`                              | `false`      |                                         |
+| `AddAggregateSection`    | `isBusy`               | `boolean`                              | `false`      |                                         |
+| `ActiveAggregateList`    | `isBusy`               | `boolean`                              | `false`      |                                         |
+| `TotalsPlacementSection` | `isBusy`               | `boolean`                              | `false`      | Renders nothing outside `rollup`        |
+| `GroupingSectionToolbar` | `isBusy`               | `boolean`                              | `false`      |                                         |
+| `GroupingSectionToolbar` | `variant`              | `'footer' \| 'toolbar'`                | `'footer'`   | The dual-variant pattern                |
+| `GroupingSectionToolbar` | `scope`                | `'aggregates' \| 'grouping' \| 'keys'` | `'grouping'` | The subject the pair acts on            |
 
 Every delegate is self-connected: the shell forwards presentation flags and
 nothing else, so no grouping state is drilled through it.

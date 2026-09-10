@@ -9,19 +9,12 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { focusedTab, TABS_FIXTURE as tabs } from '../Tabs.fixtures';
 import { TabsHeader } from './TabsHeader.component';
 
 afterEach(() => {
   cleanup();
 });
-
-const tabs = [
-  { children: <span>Content A</span>, header: 'Tab A', key: 'a' },
-  { children: <span>Content B</span>, header: 'Tab B', key: 'b' },
-  { children: <span>Content C</span>, header: 'Tab C', key: 'c' },
-];
-
-const focusedTab = () => screen.getByRole('tab', { selected: true });
 
 describe('TabsHeader', () => {
   it('renders one tab button per tab', () => {
