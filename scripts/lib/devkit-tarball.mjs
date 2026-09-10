@@ -285,6 +285,29 @@ export const inertHooks = ({ hooksPath, materialised }) => {
     );
 };
 
+const WORKSPACE_SPECIFIER = 'workspace:';
+
+/**
+ * Whether a produced repository still points at a sibling of this one.
+ *
+ * A `workspace:` specifier resolves a directory of the workspace it is written
+ * in. Every manifest here uses one, so writing one into a shipped file is the
+ * easy mistake and nothing in this tree can see it: the specifier resolves,
+ * installs and passes, right up until a bootstrapped repository — which has no
+ * such sibling — tries to install it. Read from the produced tree rather than
+ * from the assets, because the produced tree is what an installer gets.
+ *
+ * @param {{ materialised: { content: string, path: string }[] }} args
+ * @returns {string[]}
+ */
+export const foreignSpecifiers = ({ materialised }) =>
+  materialised
+    .filter((file) => file.content.includes(WORKSPACE_SPECIFIER))
+    .map(
+      (file) =>
+        `\`${file.path}\` carries a \`${WORKSPACE_SPECIFIER}\` specifier, which resolves nothing in a repository that has no such sibling`,
+    );
+
 /**
  * Whether the published initializer actually produced a repository.
  *

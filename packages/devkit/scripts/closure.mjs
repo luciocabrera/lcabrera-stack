@@ -29,7 +29,16 @@ import { requiredConfigKeys, requiresDeclarationLine } from './frontmatter.mjs';
 
 export { classifyLink, classifyPathToken } from './closure-classify.mjs';
 
-const SOURCE_EXTENSIONS = ['.cjs', '.js', '.mjs', '.mts', '.ts'];
+const SOURCE_EXTENSIONS = [
+  '.cjs',
+  '.cts',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.mts',
+  '.ts',
+  '.tsx',
+];
 
 const isSourceFile = (path) =>
   SOURCE_EXTENSIONS.some((extension) => path.endsWith(extension));

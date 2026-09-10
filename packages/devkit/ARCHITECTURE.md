@@ -164,6 +164,49 @@ possible: a file in the small profile pointing at one only the wider profile
 places resolves for a consumer who took everything and dangles for the one who
 did not, so it can only be seen by checking the smaller set on its own.
 
+**The application the monorepo rung places is an asset, not a thing `create`
+writes.** The root manifest is written by `create` because it carries the
+repository's own name; the application's carries nothing a consumer's tree
+decides, so it ships verbatim and the manifest records its hash — which is what
+lets `sync` update it and `doctor` report a local edit to it. The task block it
+declares is what forces the split: a seed may not carry this repository's runner
+word, so a manifest naming `vp` could not ship at all. Its tasks therefore name
+binaries directly, and the tasks that do want the runner live in the Vite config
+beside it, where the shipped-seed rule does not reach.
+
+**Its `@lcabrera/*` ranges are floors bounded at the next major, never carets.**
+Below 1.0.0 a caret admits no minor above the one it names, so `^0.7.0` excludes
+`0.7.1`'s successor the day it is published and a repository created afterwards
+resolves the older one — with nothing to report it, because the range stays
+syntactically valid and every gate stays green. A range is checked here for
+admitting the minor above its own floor, so writing a caret fails rather than
+merely ages.
+
+**It declares a route for every path the library it renders submits to, and
+that set is not derivable from the application's own source.** The component
+library persists a grid's state by submitting to one fixed path, from the sort,
+the resize, the pin, the global preferences and the theme alike; the path is the
+library's, not the application's, so nothing in the emitted tree mentions it
+except the route that answers it. Leaving it undeclared costs no build error and
+no failing type — the application serves, renders and then replaces its table
+with an error boundary on the first interaction, because the router has nothing
+to match the submission against. The route is therefore part of the rung rather
+than an example a consumer adds, and what checks it is a test over the emitted
+tree here plus one inside the application that submits through the library's own
+hook and asserts the router answered.
+
+**The grid it renders offers only what the read behind it answers.** Every
+capability on the component library's column type defaults to on, so a column
+that says nothing offers sorting and filtering and the grid draws the controls
+for both. Neither is resolved in the browser, and the page this rung reads is
+assembled from a module, so both would take a click and change nothing. The
+columns therefore declare them off, and the flags are the one place a rung with a
+real read turns them back on
+([ADR-121](../../docs/decisions/ADR-121-the-blueprint-offers-only-what-its-rung-delivers.md)).
+What checks it is a test here that loads those declarations rather than reading
+the file as text, plus tests inside the application asserting the same thing and
+that a rendered header announces no sort.
+
 **A seed refers to its own directory relatively, so the layout is never
 interpolated.** There is no `{{paths.*}}` placeholder and none is needed: the
 register's README ships _into_ the register, so it links `tasks/_TEMPLATE.md`;

@@ -256,17 +256,18 @@ A profile is a rung on a ladder, and each rung contains the one below it. A
 file lands on the lowest rung whose preconditions it can assume, and a rung
 without a gate of its own is a flag, not a rung.
 
-| Rung       | What it places                                                                                                                                                                                                |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `agent`    | What an agent reads: skills, path rules, subagent definitions, the contracts and coordination register they bind to, and the decision home's template and README.                                             |
-| `repo`     | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, and `COMMANDS.md`.                                                                                 |
-| `monorepo` | All of that, plus the workspace itself: the pnpm workspace file and its catalog, the Node pin and engine band, the root lint/format config, the Biome config, and a tsconfig roster with the generator wired. |
-| `full`     | What `monorepo` places. The application and its database are its content, and none of it ships yet.                                                                                                           |
+| Rung       | What it places                                                                                                                                                                                                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `agent`    | What an agent reads: skills, path rules, subagent definitions, the contracts and coordination register they bind to, and the decision home's template and README.                                                                                                                          |
+| `repo`     | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, and `COMMANDS.md`.                                                                                                                                                              |
+| `monorepo` | All of that, plus the workspace itself: the pnpm workspace file and its catalog, the Node pin and engine band, the root lint/format config, the Biome config, a tsconfig roster with the generator wired, and a React Router application rendering a table through the published packages. |
+| `full`     | What `monorepo` places. The database behind that application's route is its content, and none of it ships yet.                                                                                                                                                                             |
 
 A consumer who wants the prose and keeps their own process takes `agent` and
 receives none of the scaffolding. `repo` is a governed single-package
 repository. `monorepo` is a workspace that installs, lints, formats,
-type-checks and tests on the command after the one that made it. `full` is
+type-checks, tests, builds and serves a page on the command after the one that
+made it. `full` is
 accepted today so a config can name the rung it means, and a run under it prints
 the line saying so:
 
@@ -286,10 +287,68 @@ cd my-repo && pnpm install
 The install is not optional and is not a convenience: the tree is written before
 anything is on disk, so the root task block names binaries the manifest declares
 and nothing has fetched yet. The install also runs `prepare`, which is what
-writes every `tsconfig.app.json` in the tree. **No tsconfig here is written by
+writes every tsconfig in the tree. **No tsconfig here is written by
 hand** — you edit the roster (`tsconfig.entries.ts`, in the workspace the rung
 places for it) and the generator writes the JSON; a hand edit survives exactly
-until the next regeneration reverts it.
+until the next regeneration reverts it. That includes the application's own
+project file, and it has to: the type-aware linter finds a file's configuration
+by walking up for that exact name, while a stub referencing a config the
+generator has not written yet fails the very install that would write it.
+
+One of the workspaces it places is an application, and it is there to be run
+rather than read. Its build and start tasks are declared in its own Vite config,
+so it is the runner that reads them — and the runner is a dependency of the
+created repository, not a command on your PATH. Reach it through the package
+manager:
+
+```bash
+pnpm exec vp run --filter web build
+pnpm exec vp run --filter web start   # then open http://localhost:3000
+```
+
+It is React Router in framework mode with one page route and one action route.
+The page renders a table from rows the module holds — no server, no database, no
+fetch.
+
+Every column it declares turns sorting and filtering off, and that is a
+deliberate part of the example rather than an omission. Both are resolved by
+whatever answers the read, not in the browser, and a page assembled from a module
+answers the same rows to every request — so a header offering a sort would take a
+click and change nothing. What the grid offers instead is what this rung can
+answer: pinning, hiding, column widths, column order, the settings panel and the
+theme. Deleting the two flags from a column is what turns them back on, and doing
+that belongs with a loader that reads a page it can sort
+([ADR-121](https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/decisions/ADR-121-the-blueprint-offers-only-what-its-rung-delivers.md)).
+
+Every
+`@lcabrera/*` package it names is declared as a semver range and resolved from
+the registry, which is the point of it: what renders there is the published
+surface, with none of the authoring repository's wiring available to make up a
+difference. Everything else it depends on resolves through the catalog.
+
+The action route is not optional decoration, and deleting it costs no build
+error. The component library persists a grid's own state — a sort, a column
+width, a pinned column, a global preference, the theme — by submitting it to one
+fixed path, and it re-exports the handler that answers there; the route is that
+re-export. Without it the application still builds and serves, and the first pin
+or column resize then submits to a path the router cannot match, which the page's
+error boundary answers by replacing the table. The page route also exports the library's
+revalidation predicate, which keeps a state write that changed no search
+parameter from re-running the loader.
+
+Three settings in that workspace's Vite config are load-bearing and travel
+together, because the component library publishes TypeScript source rather than
+a build. StyleX has to see the library's own files to emit their styles, so the
+plugin is given an alias resolved from the installed package; the client bundler
+must not pre-bundle those files past the plugin; and the server build must not
+externalise them, because Node refuses to strip types under `node_modules` and
+the failure then lands when the server starts rather than when it builds.
+
+The ranges are written as a floor and a bound at the next major
+(`>=0.7.0 <1.0.0`) rather than as a caret. Below 1.0.0 a caret stops at the next
+minor, so a released minor of one of these packages would fall outside a caret
+range the day it shipped and the created repository would quietly resolve the
+version before it.
 
 **All of that is the `create` path.** The root manifest is the one file this rung
 does not materialise, because it carries the repository's own name — so `sync`

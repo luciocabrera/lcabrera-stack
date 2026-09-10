@@ -25,12 +25,14 @@ allowBuilds:
 # second declaration nothing keeps in step.
 catalogs:
   build:
+    '@babel/preset-typescript': ^8.0.1
     typescript: ^6.0.3
     # `vite` is aliased to Vite+ core so the whole workspace resolves ONE Vite
     # instance; the `overrides` below redirect every `vite` edge here. Without
     # it the graph splits across separate Vite+, Vite and Vitest copies. Keep in
     # lockstep with `vite-plus` (same Vite+ release).
     vite: npm:@voidzero-dev/vite-plus-core@0.3.0
+    vite-plugin-babel: ^1.7.3
     vite-plus: 0.3.0
 
   lint:
@@ -42,6 +44,7 @@ catalogs:
     '@react-router/serve': ^8.3.1
     '@stylexjs/stylex': ^0.19.0
     '@stylexjs/unplugin': ^0.19.0
+    babel-plugin-react-compiler: ^1.0.0
     isbot: 5.2.1
     react: ^19.2.8
     react-dom: ^19.2.8
@@ -52,6 +55,8 @@ catalogs:
     '@lcabrera/vite-config': '>=0.5.0 <1.0.0'
 
   test:
+    '@testing-library/react': ^16.3.3
+    jsdom: ^30.0.1
     # Declared because every workspace invokes the binary by path, and pnpm only
     # materialises `node_modules/vitest` for a direct dependency.
     vitest: 4.1.11

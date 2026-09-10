@@ -32,15 +32,20 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
-  statSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join } from 'node:path';
 import process from 'node:process';
 
 import { readGates } from '../packages/repo-standards/scripts/config.mjs';
 import { runGitStatus } from '../packages/repo-standards/scripts/git-exec.mjs';
+import {
+  materialisedFailure,
+  materialisedModes,
+  specifierFindings,
+  survivingPlaceholders,
+} from './lib/devkit-tarball-produced.mjs';
 import { shimFindings } from './lib/devkit-tarball-shim.mjs';
 import {
   binsWithoutNodeFloor,
@@ -50,7 +55,6 @@ import {
   failureLine,
   gateProbeFindings,
   inertHooks,
-  materialisationFailure,
   oversizedScript,
   bareTaskFindings,
   clobberedConfigKeys,
@@ -68,15 +72,6 @@ const run = (command, args, cwd) =>
     cwd,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
-  });
-
-const toPosix = (value) => value.replaceAll('\\', '/');
-
-const materialisedFiles = (directory) =>
-  readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-    if (entry.name === 'node_modules' || entry.name === '.git') return [];
-    const path = join(directory, entry.name);
-    return entry.isDirectory() ? materialisedFiles(path) : [path];
   });
 
 const packedFileReader = (tarball) => (target) => {
@@ -236,14 +231,6 @@ const gateBinFailures = (consumer) =>
     }
   });
 
-const EXECUTABLE_BITS = 0o111;
-
-const materialisedModes = (consumer) =>
-  materialisedFiles(consumer).map((path) => ({
-    executable: (statSync(path).mode & EXECUTABLE_BITS) !== 0,
-    path: toPosix(relative(consumer, path)),
-  }));
-
 const binFailures = ({ consumer, manifest }) =>
   declaredBins(manifest).flatMap(({ name }) => {
     let output = '';
@@ -272,28 +259,6 @@ const consumerStepFailure = ({ args, bin, consumer }) => {
     return [`\`devkit ${args.join(' ')}\` failed in the consumer: ${detail}`];
   }
 };
-
-const materialisedFailure = (consumer) => {
-  const manifestPath = join(consumer, '.devkit-manifest.json');
-  const manifest = existsSync(manifestPath)
-    ? JSON.parse(readFileSync(manifestPath, 'utf8'))
-    : {};
-  const failure = materialisationFailure({
-    manifestFiles: manifest.files,
-    presentPaths: materialisedFiles(consumer).map((path) =>
-      toPosix(relative(consumer, path)),
-    ),
-  });
-  return failure === undefined ? [] : [failure];
-};
-
-const survivingPlaceholders = (consumer) =>
-  materialisedFiles(consumer)
-    .filter((path) => readFileSync(path, 'utf8').includes('{{commands.'))
-    .map(
-      (path) =>
-        `\`${relative(consumer, path)}\` still carries a {{commands.*}} placeholder`,
-    );
 
 const report = (findings) => {
   for (const finding of findings) process.stderr.write(`  • ${finding}\n`);
@@ -355,6 +320,7 @@ const main = () => {
         consumer,
       }),
       ...survivingPlaceholders(consumer),
+      ...specifierFindings(consumer),
       ...materialisedFailure(consumer),
       ...inertHooks({
         hooksPath: HOOKS_PATH,
@@ -392,7 +358,7 @@ const main = () => {
     ).length;
 
     process.stdout.write(
-      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, ${tasks} runnable task(s) wired, ${GATE_PLANTS.length} gate bin(s) proven against a planted violation — and the \`create-lcabrera-stack\` initializer made a committed repository from an empty directory.\n`,
+      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, none of them naming a workspace sibling, ${tasks} runnable task(s) wired, ${GATE_PLANTS.length} gate bin(s) proven against a planted violation — and the \`create-lcabrera-stack\` initializer made a committed repository from an empty directory.\n`,
     );
   } finally {
     rmSync(staging, { force: true, recursive: true });

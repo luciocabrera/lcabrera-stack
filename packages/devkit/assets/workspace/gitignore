@@ -3,5 +3,6 @@ dist/
 build/
 coverage/
 .tmp/
+.react-router/
 *.tsbuildinfo
 .DS_Store

@@ -26,7 +26,7 @@ const PACKAGE_MANAGER =
 
 export const TSCONFIG_WORKSPACE = '@repo/typescript-config';
 
-export const GENERATED_TSCONFIGS = '**/tsconfig.*.json';
+export const GENERATED_TSCONFIGS = '**/tsconfig*.json';
 
 /**
  * The band an install may proceed in, derived from the exact pin.

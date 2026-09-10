@@ -10,7 +10,7 @@
     },
     "lists": {
       "approved": "Suppressions scoped to a public package — the rule is off BECAUSE of that package. Highest bar: argue why the engine is wrong about this specific code, and declare a `status`.",
-      "acknowledged": "Repo-wide policy (ADR-035 §7) that happens to reach a public package, because the package contains a test file, a config, or a tooling script. These are decisions about a file CATEGORY, not about the package. Listed rather than justified per-package — but listed, so a new override cannot widen onto these packages unnoticed. No `status`: the package never chose these, so there is no per-package deferral to declare."
+      "acknowledged": "Repo-wide policy (ADR-035 §7) that happens to reach a public package, because the package contains a file of that category — a test, a config, a tooling script, or a source tree it ships for a consumer to receive. These are decisions about a file CATEGORY, not about the package. Listed rather than justified per-package — but listed, so a new override cannot widen onto these packages unnoticed. No `status`: the package never chose these, so there is no per-package deferral to declare."
     }
   },
   "acknowledged": [
@@ -90,6 +90,30 @@
       "key": "biome **/config/** noDefaultExport",
       "count": 1,
       "reason": "Config fragments kept in a config/ directory follow the same default-export contract as the top-level config files.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/entry.*.tsx noDefaultExport",
+      "count": 1,
+      "reason": "A React Router entry module's default export IS its contract — the framework loads it that way and there is no named form. Reaches a public package because @lcabrera/devkit ships an application blueprint, whose entry modules are the same file category.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/root.tsx noDefaultExport",
+      "count": 1,
+      "reason": "The same framework contract for the root route module. Reaches a public package through the application blueprint @lcabrera/devkit ships, not through anything that package's own code does.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/routes.ts noDefaultExport",
+      "count": 1,
+      "reason": "The route config is read as a default export by the framework's own config loader. Reaches a public package through the application blueprint @lcabrera/devkit ships.",
+      "ref": "ADR-035 §7"
+    },
+    {
+      "key": "biome **/routes/** noDefaultExport",
+      "count": 1,
+      "reason": "A route module's component is its default export, which is how the framework resolves it. Reaches a public package through the application blueprint @lcabrera/devkit ships.",
       "ref": "ADR-035 §7"
     },
     {

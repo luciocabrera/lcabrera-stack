@@ -3,6 +3,12 @@
  *
  * Split out of `closure.mjs` so every resolver — markdown, workflow, subagent —
  * shares one containment rule instead of restating it.
+ *
+ * A module specifier is not a link and cannot be read as one: a bundler adds
+ * the extension, resolves a directory to its index file and drops the query a
+ * loader was selected with, so the literal path an import names is usually not
+ * the name of any file. Read literally, every extensionless import in a shipped
+ * source tree reports as an escape from the tree it is in.
  */
 
 const isExternalUrl = (target) =>
@@ -36,11 +42,31 @@ const holdsShippedFile = (path, shipped) => {
   return false;
 };
 
-const travelsWith = ({ path, rootDirectory, shipped }) => {
-  if (shipped.has(path) || holdsShippedFile(path, shipped)) return true;
+const isUnderRoot = ({ path, rootDirectory }) => {
   const root = rootDirectory.replace(/\/$/, '');
   return path === root || path.startsWith(`${root}/`);
 };
+
+const travelsWith = ({ path, rootDirectory, shipped }) =>
+  shipped.has(path) ||
+  holdsShippedFile(path, shipped) ||
+  isUnderRoot({ path, rootDirectory });
+
+/**
+ * The same containment question for a module specifier, which answers it with
+ * one fewer way to say yes.
+ *
+ * A directory holding a shipped file is a target a link may point at, and is
+ * not a module: an import naming it resolves only through the index file
+ * inside it. Accepting the prefix match certified a tree whose first build
+ * fails on the import — the bare path is tried first, so the index candidates
+ * below it were never reached.
+ *
+ * @param {{ path: string, rootDirectory: string, shipped: Set<string> }} args
+ * @returns {boolean}
+ */
+const resolvesAsModule = ({ path, rootDirectory, shipped }) =>
+  shipped.has(path) || isUnderRoot({ path, rootDirectory });
 
 const resolveFrom = (base, target) =>
   normalise([...base.split('/'), ...target.split('/')]).join('/');
@@ -107,21 +133,84 @@ const packageNameOf = (specifier) => {
     : (segments[0] ?? specifier);
 };
 
+const MODULE_EXTENSIONS = [
+  '.ts',
+  '.tsx',
+  '.mts',
+  '.cts',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.cjs',
+  '.json',
+  '.css',
+];
+
+const SOURCE_ALIAS = '@/';
+
+const SOURCE_DIRECTORY = 'src';
+
+const withoutQuery = (specifier) => specifier.split('?', 1)[0] ?? specifier;
+
+const moduleCandidates = (path) => [
+  path,
+  ...MODULE_EXTENSIONS.map((extension) => `${path}${extension}`),
+  ...MODULE_EXTENSIONS.map((extension) => `${path}/index${extension}`),
+];
+
+const classifyModulePath = ({ path, rootDirectory, shipped }) => {
+  const resolved = moduleCandidates(path).find((candidate) =>
+    resolvesAsModule({ path: candidate, rootDirectory, shipped }),
+  );
+  return resolved === undefined
+    ? { kind: 'escape', resolved: path }
+    : { kind: 'internal', resolved };
+};
+
+/**
+ * The directory `@/` names for a file, which is the source root above it.
+ *
+ * Every app configuration this toolchain generates maps the alias to the
+ * workspace's own `src`, so the answer is read off the importing file's path
+ * rather than out of a tsconfig the analysis does not have.
+ *
+ * @param {string} fromDirectory
+ * @returns {string | undefined}
+ */
+const sourceRootOf = (fromDirectory) => {
+  const segments = fromDirectory.split('/');
+  const index = segments.lastIndexOf(SOURCE_DIRECTORY);
+  return index === -1 ? undefined : segments.slice(0, index + 1).join('/');
+};
+
 export const classifyImport = ({
   fromDirectory,
   rootDirectory,
-  shipped,
+  shipped = new Set(),
   specifier,
 }) => {
   if (specifier.startsWith('node:')) return { kind: 'builtin' };
+  const target = withoutQuery(withoutAnchor(specifier));
+
   if (specifier.startsWith('.')) {
-    return classifyLink({
-      fromDirectory,
+    return classifyModulePath({
+      path: resolveFrom(fromDirectory, target),
       rootDirectory,
       shipped,
-      target: specifier,
     });
   }
+
+  if (target.startsWith(SOURCE_ALIAS)) {
+    const sourceRoot = sourceRootOf(fromDirectory);
+    return sourceRoot === undefined
+      ? { kind: 'escape', resolved: target }
+      : classifyModulePath({
+          path: resolveFrom(sourceRoot, target.slice(SOURCE_ALIAS.length)),
+          rootDirectory,
+          shipped,
+        });
+  }
+
   return { kind: 'package', packageName: packageNameOf(specifier) };
 };
 

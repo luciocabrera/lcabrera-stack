@@ -17,8 +17,11 @@
       // included, and Biome reads a `biome.jsonc` anywhere in the tree as a
       // nested root and refuses the whole run. Excluding the file alone does
       // not help — discovery walks directories — so the blueprint is out as a
-      // directory. Oxlint still reaches it; what goes uncovered here is the
-      // Biome-only rules, which the tree it is emitted into runs for itself.
+      // directory. Oxlint reaches the configs and the tsconfig roster here, and
+      // NOT the application under `apps/`, which the root Vite config takes off
+      // the Oxlint pass for its own reason (stated there). So for that subtree
+      // the eslint pass `packages/devkit` runs is the whole of the lint it gets
+      // in this repository; the tree it is emitted into runs the rest itself.
       "!packages/devkit/assets/workspace",
       "!**/dist",
       "!**/build",

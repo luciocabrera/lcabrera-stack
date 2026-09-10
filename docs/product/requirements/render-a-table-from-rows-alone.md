@@ -49,3 +49,11 @@ whose props are a columns-state object and a promise. Whether the answer is to
 export the one that exists or to build a different one is the issue's business,
 not this file's — the requirement is the shape a consumer needs, not the
 implementation that satisfies it.
+
+Re-examined against the application `devkit create --profile monorepo` now emits
+(#1076), which renders a table from rows the module holds and nothing else. It
+does not earn this: reaching the table there still costs a columns list, a
+persistence key, a table name, a title and a loader built by
+`createTableRouteLoader`, because that is what the published surface offers. The
+demonstration this requirement asks for is one call taking rows and columns, and
+no export answering that description exists yet.
