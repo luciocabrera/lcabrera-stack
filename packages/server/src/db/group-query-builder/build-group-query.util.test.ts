@@ -515,7 +515,7 @@ describe('a column axis', () => {
   it('uses IS NULL for a missing axis value', () => {
     const result = buildGroupQuery(
       descriptor({
-        aggregates: [{ fn: 'count' }],
+        aggregates: [{ fn: 'count' }, { fn: 'count' }],
         columnAxis: {
           key: 'order_status',
           maxDistinct: 10,
@@ -528,13 +528,13 @@ describe('a column axis', () => {
     expect(result.text).toContain(
       'count(*) FILTER (WHERE "order_status" IS NULL) AS "count_rows_c0"',
     );
-    expect(result.aggregates[0]?.axis).toEqual({ value: undefined });
+    expect(result.aggregates[1]?.axis).toEqual({ value: undefined });
   });
 
   it('exposes a driver SQL NULL as undefined on the public axis metadata', () => {
     const result = buildGroupQuery(
       descriptor({
-        aggregates: [{ fn: 'count' }],
+        aggregates: [{ fn: 'count' }, { fn: 'count' }],
         columnAxis: {
           key: 'order_status',
           maxDistinct: 10,
@@ -545,7 +545,7 @@ describe('a column axis', () => {
     );
 
     expect(result.columnAxis?.values).toEqual([undefined]);
-    expect(result.aggregates[0]?.axis).toEqual({ value: undefined });
+    expect(result.aggregates[1]?.axis).toEqual({ value: undefined });
   });
 
   it('emits no FILTER columns when the axis has no values', () => {
@@ -589,6 +589,23 @@ describe('a column axis', () => {
         }),
       ),
     ).toThrow('a column axis would emit 2');
+  });
+
+  it('keeps a lone leading count(*) unexpanded when no measure is selected', () => {
+    const result = buildGroupQuery(
+      descriptor({
+        aggregates: [{ fn: 'count' }],
+        columnAxis: {
+          key: 'order_status',
+          maxDistinct: 10,
+          values: ['Pending', 'Shipped'],
+        },
+        keys: ['shipping_country'],
+      }),
+    );
+
+    expect(result.aggregates).toEqual([{ alias: 'count_rows', fn: 'count' }]);
+    expect(result.text).not.toContain('FILTER');
   });
 
   it('keeps the leading count(*) unexpanded so the group still has a size', () => {

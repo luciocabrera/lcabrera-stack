@@ -50,7 +50,7 @@ export const decodeGroupedRows = ({
     aggregates.some((aggregate) => aggregate.axis !== undefined);
 
   if (aggregates.length === 0) {
-    if (requested.length === 0) {
+    if (requested.length > 0) {
       throw new Error(
         `Grouped read emitted ${String(aggregates.length)} aggregate alias(es) but ${String(requested.length + 1)} were requested (count(*) plus ${String(requested.length)}); pass the same list \`toGroupAggregates\` was given.`,
       );

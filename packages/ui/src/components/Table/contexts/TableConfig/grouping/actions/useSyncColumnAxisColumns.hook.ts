@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect } from 'react';
 
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useGetTableData } from '#ui/components/Table/contexts/TableData/data/selectors';
+import { arePaintedColumnsUnchanged } from '#ui/components/Table/utils/arePaintedColumnsUnchanged.util';
 import { collectColumnAxisEmitted } from '#ui/components/Table/utils/collectColumnAxisEmitted.util';
 
 import { useGetTableGroupingColumnAxis } from '../selectors';
@@ -28,15 +29,14 @@ export const useSyncColumnAxisColumns = () => {
       columnsState,
       groupingKeys: grouping.keys,
     });
-    const currentKeys = columnsState.effectiveColumns.map((column) =>
-      String(column.key),
-    );
-    const nextKeys = patch.effectiveColumns.map((column) => String(column.key));
-    const isSame =
-      currentKeys.length === nextKeys.length &&
-      currentKeys.every((key, index) => key === nextKeys[index]);
-
-    if (isSame) return;
+    if (
+      arePaintedColumnsUnchanged({
+        current: columnsState.effectiveColumns,
+        next: patch.effectiveColumns,
+      })
+    ) {
+      return;
+    }
 
     columnsStore.set(patch);
   }, [columnAxis, columnsStore, data, groupingStore]);

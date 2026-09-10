@@ -132,16 +132,29 @@ describe('decodeGroupedRows', () => {
     ).toThrow(/aggregate alias/);
   });
 
-  it('throws when the read emitted no aggregates at all', () => {
+  it('throws when measures were requested and none were projected', () => {
     expect(() =>
       decodeGroupedRows({
         aggregates: [],
         columnKeys: ['status'],
         maskAlias: 'grouping_mask',
-        requested: [],
+        requested: REQUESTED,
         rows: [{ count_all: '1', grouping_mask: 0, status: 'A' }],
       }),
     ).toThrow(/aggregate alias/);
+  });
+
+  it('decodes an empty projection when nothing was requested', () => {
+    const [decoded] = decodeGroupedRows({
+      aggregates: [],
+      columnKeys: ['status'],
+      maskAlias: 'grouping_mask',
+      requested: [],
+      rows: [{ grouping_mask: 0, status: 'A' }],
+    });
+
+    expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.count).toBe(0);
+    expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.aggregates).toStrictEqual([]);
   });
 
   it('throws on a list of the right length in the wrong order', () => {

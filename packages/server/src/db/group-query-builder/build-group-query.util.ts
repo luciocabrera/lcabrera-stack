@@ -59,7 +59,6 @@ export const buildGroupQuery = ({
 
   const leadingCount = aggregates[0];
   const hasUnexpandedCount =
-    aggregates.length > 1 &&
     leadingCount?.fn === 'count' &&
     leadingCount.column === undefined &&
     leadingCount.filters === undefined;
