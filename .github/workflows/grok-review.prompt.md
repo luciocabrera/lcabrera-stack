@@ -21,38 +21,82 @@ review.
 You do not post anything. You have no tool that could. Writing these two files
 is the whole of the job.
 
+**Give every finding a severity before you decide which file it goes in.** The
+severity is what routes it, and the routing is the only thing that decides
+whether the finding opens a review thread or scrolls past in a summary. A
+finding written into the body carries no thread, holds no merge, and is read as
+"the reviewer did not think this had to change".
+
+## Severity
+
+The scale — BLOCKER, HIGH, MEDIUM, LOW, NIT — is defined in `SKILL.md` Step 5.
+It is not restated here: a second copy is a copy that drifts, and this file
+already sends you to read that one.
+
+What Step 5 does not say is where a finding goes. BLOCKER and HIGH become
+inline comments; MEDIUM, LOW and NIT stay in the body. So the severity grades
+the finding and the file grades whether the merge waits for it, and MEDIUM is
+the highest severity that lets a pull request through.
+
+Calibrate against what you wrote, not against how the finding feels. If you can
+name the file, name a line **this diff added**, and write a concrete fix the
+author could apply, the finding is at least **HIGH** unless leaving it in costs
+nothing but taste. Duplication (`CC.G5`), a new file that contradicts its
+siblings in the same diff (`CC.G11`), and state mirrored through an effect
+(`REACT.EFFECT-STATE-SYNC`) are HIGH by default: each is a defect every later
+change pays for. Keep MEDIUM and below for what you would **not** hold the merge
+for.
+
+### `grok-review-findings.json`
+
+The file starts as a placeholder that is not valid JSON, so a run that never
+wrote it is distinguishable from a run that found nothing. Replace the whole
+contents with a JSON array, one entry per BLOCKER or HIGH finding, most
+important first:
+
+```json
+[{ "path": "src/thing.ts", "line": 42, "body": "`CC.G30`: why. Fix: …" }]
+```
+
+Write `[]` when — and only when — there is genuinely no BLOCKER or HIGH finding.
+Each entry becomes an inline comment that opens a review thread, and an
+unresolved thread blocks the merge until a person resolves it, so an entry here
+is a claim that this line should not merge as written.
+
+`line` must be a line **this diff added**, on the right-hand side, as numbered
+in the file after the change. A wrong line costs the finding its thread. For a
+finding about a whole new file, anchor it on the added line of the declaration
+it is about.
+
+MEDIUM, LOW, and NIT do **not** belong in this file.
+
 ### `grok-review-body.md`
 
 The file currently contains a placeholder. Replace the whole contents. Write
 this file even if you found nothing. An empty file or the leftover placeholder
 is read as "never ran"; "no findings" and "never ran" have to be distinguishable.
 
-A short paragraph saying what the change does, then any MEDIUM, LOW, or NIT
-findings (catalog ID, path, one-sentence why, one-sentence fix). Those must
-not become threads. If there are none, say so in those words: **no findings**.
+Start with a short paragraph saying what the change does. If you filed any
+BLOCKER or HIGH findings, follow it with one line naming how many threads this
+review opened and their catalog IDs — a pointer, so the body is not silent about
+what is holding the merge. Do not restate the findings themselves; they are
+already threads, and a second copy makes the thread look optional.
 
-### `grok-review-findings.json`
+Then any MEDIUM, LOW, or NIT findings. Open each one with its severity in bold,
+then the catalog ID, then the path, then a one-sentence why and a one-sentence
+fix:
 
-A JSON array, one entry per BLOCKER or HIGH finding, most important first:
-
-```json
-[{ "path": "src/thing.ts", "line": 42, "body": "`CC.G30`: why. Fix: …" }]
+```markdown
+**MEDIUM** `CC.G11` — `src/thing.ts`. Why. Fix: …
 ```
 
-Write `[]` when there is no BLOCKER or HIGH finding. Each of these becomes an
-inline comment that opens a review thread, and an unresolved thread blocks the
-merge until a person resolves it — so a finding here is a claim that this line
-should not merge as written.
+Say **no findings**, in those words, when the whole review found nothing —
+no threads and nothing in the body. Never write it while a thread is open.
 
-`line` must be a line **this diff added**, on the right-hand side, as numbered
-in the file after the change. A wrong line costs the finding its thread.
+## Before you finish
 
-MEDIUM, LOW, and NIT do **not** belong in this file.
-
-## Severity
-
-- **BLOCKER** — security, correctness, data-loss, or runtime-crash risk
-- **HIGH** — clearly wrong; will regress maintainability or behavior
-- **MEDIUM** — design weakness worth fixing now (body only)
-- **LOW** — minor; in-passing fix (body only)
-- **NIT** — style preference, no real cost (body only)
+Read back each body finding and ask one question of it: **would you ask the
+author to change this before merging?** A path and a fix do not settle that —
+every well-formed MEDIUM has both. If the answer is yes, the severity is at
+least HIGH and the finding belongs in the findings file. If it is no, it is in
+the right place.

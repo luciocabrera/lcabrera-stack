@@ -80,7 +80,12 @@ jobs:
 
       # The diff is collected here so the model does not need a shell tool.
       # The two output files are seeded with a placeholder so search_replace
-      # can fill them: that tool edits, it does not create.
+      # can fill them: that tool edits, it does not create. Neither seed is a
+      # valid answer — `[]` would be, and a model that never classified would
+      # then be indistinguishable from one that found nothing worth a thread.
+      # An unreplaced findings seed is a parse failure, so
+      # build-review-payload.mjs posts a body-only review and says in it that
+      # the findings file is not valid JSON.
       - name: Collect the pull request diff
         env:
           GH_TOKEN: ${{ github.token }}
@@ -89,7 +94,7 @@ jobs:
           set -euo pipefail
           gh pr diff "$PR_NUMBER" --color=never > grok-review-diff.diff
           printf '%s\n' '(replace this file with the review body)' > grok-review-body.md
-          printf '%s\n' '[]' > grok-review-findings.json
+          printf '%s\n' '(replace this file with the findings array)' > grok-review-findings.json
 
       # Fork pull requests receive an empty XAI_API_KEY — secrets are not
       # exposed to them — so this step fails without spending anything and
