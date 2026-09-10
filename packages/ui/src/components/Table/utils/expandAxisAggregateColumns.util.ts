@@ -43,36 +43,39 @@ export const expandAxisAggregateColumns = <TData>({
     emitted.map((entry) => toTableAggregateToken(entry)),
   );
   const isSingleMeasure = uniqueMeasures.size === 1;
+  const derivedBySource = new Map<string, TableColumn<TData>[]>();
 
-  const derived = emitted.flatMap((entry) => {
+  for (const entry of emitted) {
     const source = sources.get(entry.columnKey);
 
-    if (source === undefined || groupKeys.has(entry.columnKey)) return [];
+    if (source === undefined || groupKeys.has(entry.columnKey)) continue;
 
     const header = toAxisHeaderLabel(entry.axis?.value);
+    const derived = {
+      dataType: resolveAggregateDataType({
+        columnDataType: source.dataType,
+        fn: entry.fn,
+      }),
+      isFilterable: false,
+      isGroupable: false,
+      isSortable: true,
+      key: entry.alias as DataKey<TData>,
+      label: isSingleMeasure ? header : TABLE_AGGREGATE_LABELS[entry.fn],
+      maxWidth,
+      minWidth,
+      ...(!isSingleMeasure && { headerGroupLabel: header }),
+      ...(source.format !== undefined && { format: source.format }),
+      ...(source.isResizable !== undefined && {
+        isResizable: source.isResizable,
+      }),
+      ...(source.isStatic !== undefined && { isStatic: source.isStatic }),
+    } satisfies TableColumn<TData>;
 
-    return [
-      {
-        dataType: resolveAggregateDataType({
-          columnDataType: source.dataType,
-          fn: entry.fn,
-        }),
-        isFilterable: false,
-        isGroupable: false,
-        isSortable: true,
-        key: entry.alias as DataKey<TData>,
-        label: isSingleMeasure ? header : TABLE_AGGREGATE_LABELS[entry.fn],
-        maxWidth,
-        minWidth,
-        ...(!isSingleMeasure && { headerGroupLabel: header }),
-        ...(source.format !== undefined && { format: source.format }),
-        ...(source.isResizable !== undefined && {
-          isResizable: source.isResizable,
-        }),
-        ...(source.isStatic !== undefined && { isStatic: source.isStatic }),
-      } satisfies TableColumn<TData>,
-    ];
-  });
+    derivedBySource.set(entry.columnKey, [
+      ...(derivedBySource.get(entry.columnKey) ?? []),
+      derived,
+    ]);
+  }
 
   const measureSourceKeys = new Set(
     (emitted.length === 0 ? aggregates : emitted)
@@ -80,20 +83,23 @@ export const expandAxisAggregateColumns = <TData>({
       .filter((key) => sources.has(key) && !groupKeys.has(key)),
   );
 
-  if (measureSourceKeys.size === 0 && derived.length === 0) return unchanged;
+  if (measureSourceKeys.size === 0 && derivedBySource.size === 0) {
+    return unchanged;
+  }
 
-  const expandKey = (key: DataKey<TData>): readonly DataKey<TData>[] =>
-    measureSourceKeys.has(String(key))
-      ? derived.map((column) => column.key)
-      : [key];
+  const expandKey = (key: DataKey<TData>): readonly DataKey<TData>[] => {
+    const derived = derivedBySource.get(String(key));
+
+    if (derived !== undefined) return derived.map((column) => column.key);
+
+    return measureSourceKeys.has(String(key)) ? [] : [key];
+  };
 
   const expandKeys = (
     keys: readonly DataKey<TData>[],
   ): readonly DataKey<TData>[] => [
     ...new Set(keys.flatMap((key) => expandKey(key))),
   ];
-
-  let isInserted = false;
 
   return {
     columnOrder: expandKeys(columnOrder),
@@ -102,13 +108,11 @@ export const expandAxisAggregateColumns = <TData>({
       right: expandKeys(columnPinning.right),
     },
     columns: columns.flatMap((column) => {
-      if (!measureSourceKeys.has(String(column.key))) return [column];
+      const derived = derivedBySource.get(String(column.key));
 
-      if (isInserted) return [];
+      if (derived !== undefined) return derived;
 
-      isInserted = true;
-
-      return derived;
+      return measureSourceKeys.has(String(column.key)) ? [] : [column];
     }),
     columnVisibility: new Set(expandKeys([...columnVisibility])),
   };
