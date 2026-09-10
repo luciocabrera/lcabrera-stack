@@ -55,9 +55,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       settings,
       ...toColumnAxisDerivationArgs({
         columnAxis: nextGrouping.columnAxis,
-        ...(groupingUpdate.kind !== 'updated' && {
-          data: dataStore.get().data,
-        }),
+        data: dataStore.get().data,
       }),
     });
     const hasQueryChanged = getHasQueryChanged<TData>({

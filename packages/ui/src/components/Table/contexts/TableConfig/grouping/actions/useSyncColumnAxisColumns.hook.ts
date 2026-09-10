@@ -4,7 +4,7 @@ import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableC
 import { useGetTableData } from '#ui/components/Table/contexts/TableData/data/selectors';
 import { collectColumnAxisEmitted } from '#ui/components/Table/utils/collectColumnAxisEmitted.util';
 
-import { useGetTableGroupingColumnAxis } from '../selectors/useGetTableGroupingColumnAxis.hook';
+import { useGetTableGroupingColumnAxis } from '../selectors';
 import { resolveGroupingColumnsPatch } from './utils';
 
 export const useSyncColumnAxisColumns = () => {

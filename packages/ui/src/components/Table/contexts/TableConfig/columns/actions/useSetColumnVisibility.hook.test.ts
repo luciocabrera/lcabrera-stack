@@ -48,7 +48,7 @@ vi.mock(
   '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook',
   () => ({
     useTableDataContextValue: () => ({
-      dataStore: { get: () => ({ data: [] }), set: vi.fn() },
+      dataStore: { get: () => ({ data: [] }), set: () => undefined },
     }),
   }),
 );
