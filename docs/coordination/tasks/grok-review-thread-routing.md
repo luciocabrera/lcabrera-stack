@@ -1,8 +1,8 @@
 ---
 id: grok-review-thread-routing
 title: Grok catalog findings open review threads instead of body-only comments
-owner: agent:claude
-status: active
+owner: agent:copilot
+status: review
 branch: ci/1173-grok-review-thread-routing
 area:
   - .github/workflows/grok-review.yml
@@ -11,16 +11,19 @@ area:
 started: 2026-09-10
 updated: 2026-09-10
 plan: (none)
-pr: (none)
+pr: '#1174'
 issue: #1173
 ---
 
 ## What
 
-Grok catalog findings open review threads instead of body-only comments
+The catalog reviewer wrote findings with a path and a concrete fix into the
+review body and left `grok-review-findings.json` empty, so nothing anchored and
+no thread opened. The prompt now routes by severity, and the findings file is no
+longer seeded with a valid empty answer.
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: pushed, quality gate green, awaiting review
 - Blockers: none
-- Next:
+- Next: merge and delete this file
