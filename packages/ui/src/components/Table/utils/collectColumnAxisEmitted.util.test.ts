@@ -52,4 +52,40 @@ describe('collectColumnAxisEmitted', () => {
       },
     ]);
   });
+
+  it('leaves out an alias emitted by a narrow aggregate read', () => {
+    expect(
+      collectColumnAxisEmitted([
+        {
+          [TABLE_GROUP_ROW_FIELD]: {
+            aggregates: [
+              {
+                alias: 'sum_total_amount',
+                columnKey: 'total_amount',
+                fn: 'sum',
+                value: 10,
+              },
+              {
+                alias: 'sum_total_amount_c0',
+                axis: { value: 'Pending' },
+                columnKey: 'total_amount',
+                fn: 'sum',
+                value: 7,
+              },
+            ],
+            count: 1,
+            isSubtotal: false,
+            path: [],
+          },
+        },
+      ]),
+    ).toStrictEqual([
+      {
+        alias: 'sum_total_amount_c0',
+        axis: { value: 'Pending' },
+        columnKey: 'total_amount',
+        fn: 'sum',
+      },
+    ]);
+  });
 });
