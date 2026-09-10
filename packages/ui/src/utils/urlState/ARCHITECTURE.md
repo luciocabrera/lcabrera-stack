@@ -188,9 +188,11 @@ each value through `deserializeFilter`.
 
 ### groupingCodec.util.ts
 
-Codec for the `grouping` param. Its narrowing admits **one** member, named
-`keys`, holding an array of strings — a second member, a misspelling, or one
-non-string element refuses the whole payload.
+Codec for the `grouping` param. Its narrowing admits a closed envelope:
+`keys` (required) plus optional `agg`, `axis`, `gran`, `mode`, `share`. A
+member outside that set, a misspelling, or one non-string key refuses the
+whole payload. `axis` is a column key; empty is omitted on the way out, same
+as `agg`.
 
 The single-member check is also what makes `__proto__` a non-issue without
 `Object.fromEntries`: `JSON.parse` hands it back as an own property, so a payload

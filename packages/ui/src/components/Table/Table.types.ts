@@ -7,6 +7,7 @@ import type {
 import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
+import type { ColumnAxisEmittedAggregate } from '#ui/components/Table/utils/columnAxisEmitted.types';
 import type { ColumnFilter } from '#ui/types/filterOperators.types';
 import type { InfiniteScroll, Sorting } from '#ui/types/ui.types';
 
@@ -183,7 +184,7 @@ export type TableColumn<TData> = {
   /** Never a function: columns must cross the loader serialization boundary. */
   readonly filterOptionsDescriptor?: FilterOptionsDescriptor;
   readonly format?: TableColumnFormat;
-  /** Source column's label; set only by `withAggregateColumns` on a derived measure. */
+  /** Band label; set only by `withAggregateColumns` on a derived measure. */
   readonly headerGroupLabel?: string;
   readonly isFilterable?: boolean;
   readonly isGroupable?: boolean;
@@ -234,6 +235,8 @@ export type TableColumnGroupingCapability =
 export type TableColumnLayoutLock = 'group-key' | 'measure';
 
 export type TableColumnsState<TData = Record<string, unknown>> = {
+  /** Emitted aliases from the last column-axis paint. */
+  readonly columnAxisEmitted?: readonly ColumnAxisEmittedAggregate[];
   readonly columnFilters: ColumnFiltersState<TData>;
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
@@ -250,6 +253,7 @@ export type TableColumnsState<TData = Record<string, unknown>> = {
 
 export type TableColumnsStateInput<TData = Record<string, unknown>> = Omit<
   TableColumnsState<TData>,
+  | 'columnAxisEmitted'
   | 'effectiveColumns'
   | 'normalizedColumns'
   | 'pinnedColumnOffsets'
@@ -287,6 +291,8 @@ export type TableFocusState = {
 };
 
 export type TableGroupAggregateValue = {
+  readonly alias?: string;
+  readonly axis?: { readonly value: unknown };
   readonly columnKey: string;
   readonly fn: TableAggregateFn;
   readonly value: unknown;
@@ -316,6 +322,8 @@ export type TableGroupingRefusalReason =
 export type TableGroupingState = {
   /** Order is listing/render order; it shapes no SQL. */
   readonly aggregates: readonly TableColumnAggregate[];
+  /** Distinct values of this column become measure headers; omitted when unset. */
+  readonly columnAxis?: string;
   /** Order is the grouped query's nesting order. */
   readonly keys: readonly string[];
   readonly mode: TableGroupingMode;

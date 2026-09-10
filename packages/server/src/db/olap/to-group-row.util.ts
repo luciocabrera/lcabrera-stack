@@ -8,6 +8,7 @@ import { toGroupPeriodLabel } from './to-group-period-label.util';
 
 type GroupRowAggregate = {
   readonly alias: string;
+  readonly axis?: { readonly value: unknown };
   readonly columnKey: string;
   readonly fn: AggregateFn;
 };
@@ -53,10 +54,12 @@ export const toGroupRow = ({
 
   return {
     [OLAP_GROUP_ROW_FIELD]: {
-      aggregates: aggregates.map(({ alias, columnKey, fn }) => ({
+      aggregates: aggregates.map(({ alias, axis, columnKey, fn }) => ({
+        alias,
         columnKey,
         fn,
         value: row[alias],
+        ...(axis !== undefined && { axis }),
       })),
       count: Number.isFinite(count) ? count : 0,
       isSubtotal: groupedKeys.length < columnKeys.length,

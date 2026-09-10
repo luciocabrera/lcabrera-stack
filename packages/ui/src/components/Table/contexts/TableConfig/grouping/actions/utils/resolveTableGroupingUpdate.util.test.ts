@@ -46,6 +46,35 @@ describe('resolveTableGroupingUpdate', () => {
     });
   });
 
+  it('writes the axis into the compact param', () => {
+    const result = resolveTableGroupingUpdate({
+      existingGrouping: {
+        aggregates: [],
+        keys: ['region'],
+        mode: 'flat',
+        periods: {},
+        shares: [],
+        totalsPlacement: 'last',
+      },
+      nextGrouping: {
+        aggregates: [],
+        columnAxis: 'order_status',
+        keys: ['region'],
+        mode: 'flat',
+        periods: {},
+        shares: [],
+        totalsPlacement: 'last',
+      },
+    });
+
+    expect(result.kind).toBe('updated');
+    if (result.kind !== 'updated') return;
+
+    expect(result.persistenceEntry.searchParamValue).toBe(
+      '{"axis":"order_status","keys":["region"]}',
+    );
+  });
+
   it('applies several keys in the order given, which is the nesting order', () => {
     const result = resolveTableGroupingUpdate({
       existingGrouping: {

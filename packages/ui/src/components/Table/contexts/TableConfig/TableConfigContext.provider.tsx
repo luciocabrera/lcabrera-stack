@@ -26,6 +26,7 @@ import {
 
 export const TableConfigProvider = <TData extends Record<string, unknown>>({
   children,
+  columnAxisEmitted,
   columnsState,
   groupingState,
   metaState,
@@ -39,6 +40,10 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     aggregates: normalizedGroupingState.aggregates,
     crud: metaState?.crud,
     groupingKeys: normalizedGroupingState.keys,
+    ...(normalizedGroupingState.columnAxis !== undefined && {
+      columnAxis: normalizedGroupingState.columnAxis,
+    }),
+    ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
   });
 
   const columnsStore = useStore<TableColumnsState<TData>>(
@@ -69,27 +74,40 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
   }, [metaState, metaStore]);
 
   useEffect(() => {
-    const currentColumns = columnsStore.get();
     const grouping = groupingStore.get();
+    const currentColumns = columnsStore.get();
     const meta = metaStore.get();
     const isLayoutTransient = meta.isColumnLayoutTransient === true;
-    syncStoreFromProps({
-      next: getInitialColumnsState<TData>({
-        ...currentColumns,
-        ...columnsState,
-        ...(isLayoutTransient && {
-          columnOrder: currentColumns.columnOrder,
-          columnPinning: currentColumns.columnPinning,
-          columnSizing: currentColumns.columnSizing,
-          columnVisibility: currentColumns.columnVisibility,
-        }),
-        aggregates: grouping.aggregates,
-        crud: meta.crud,
-        groupingKeys: grouping.keys,
+    const { columnAxisEmitted: storedEmitted, ...currentColumnsRest } =
+      currentColumns;
+    const nextEmitted =
+      grouping.columnAxis === undefined
+        ? columnAxisEmitted
+        : (columnAxisEmitted ?? storedEmitted);
+    const next = getInitialColumnsState<TData>({
+      ...currentColumnsRest,
+      ...columnsState,
+      ...(isLayoutTransient && {
+        columnOrder: currentColumns.columnOrder,
+        columnPinning: currentColumns.columnPinning,
+        columnSizing: currentColumns.columnSizing,
+        columnVisibility: currentColumns.columnVisibility,
       }),
+      aggregates: grouping.aggregates,
+      crud: meta.crud,
+      groupingKeys: grouping.keys,
+      ...(grouping.columnAxis !== undefined && {
+        columnAxis: grouping.columnAxis,
+      }),
+      ...(nextEmitted !== undefined && { columnAxisEmitted: nextEmitted }),
+    });
+
+    syncStoreFromProps({
+      next,
       store: columnsStore,
     });
   }, [
+    columnAxisEmitted,
     columnsState,
     columnsStore,
     groupingState,

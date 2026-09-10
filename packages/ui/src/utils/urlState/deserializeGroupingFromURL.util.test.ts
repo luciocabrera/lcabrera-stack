@@ -75,6 +75,37 @@ describe('deserializeGroupingFromURL', () => {
     );
   });
 
+  it('reads the column-axis key back out', () => {
+    expect(
+      deserializeGroupingFromURL(
+        '{"axis":"order_status","keys":["shipping_country"]}',
+      ),
+    ).toStrictEqual({
+      aggregates: [],
+      columnAxis: 'order_status',
+      keys: ['shipping_country'],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+      totalsPlacement: 'last',
+    });
+  });
+
+  it('round-trips a grouping that names an axis', () => {
+    const grouping = {
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+      columnAxis: 'order_status',
+      keys: ['shipping_country'],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+      totalsPlacement: 'last',
+    } as const;
+    const param = serializeGroupingToURL({ grouping });
+
+    expect(deserializeGroupingFromURL(param ?? '')).toStrictEqual(grouping);
+  });
+
   it('round-trips what serializeGroupingToURL wrote', () => {
     const grouping = {
       aggregates: [{ columnKey: 'total_amount', fn: 'avg' }],

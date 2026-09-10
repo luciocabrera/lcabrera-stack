@@ -4,6 +4,7 @@ import type {
   TableColumnAggregate,
   TableColumnsState,
 } from '#ui/components/Table/Table.types';
+import type { ColumnAxisEmittedAggregate } from '#ui/components/Table/utils/columnAxisEmitted.types';
 import type { ColumnFilter } from '#ui/types/filterOperators.types';
 import type { SortDirection } from '#ui/types/ui.types';
 
@@ -29,6 +30,8 @@ export type BatchColumnSettingsUpdate<TData> = {
 
 type ResolveBatchColumnSettingsUpdateArgs<TData> = {
   readonly aggregates: readonly TableColumnAggregate[];
+  readonly columnAxis?: string;
+  readonly columnAxisEmitted?: readonly ColumnAxisEmittedAggregate[];
   readonly columnsState?: Partial<TableColumnsState<TData>>;
   readonly groupingKeys: readonly string[];
   readonly settings: BatchColumnSettingsUpdate<TData>;
@@ -36,6 +39,8 @@ type ResolveBatchColumnSettingsUpdateArgs<TData> = {
 
 export const resolveBatchColumnSettingsUpdate = <TData>({
   aggregates,
+  columnAxis,
+  columnAxisEmitted,
   columnsState,
   groupingKeys,
   settings,
@@ -102,6 +107,8 @@ export const resolveBatchColumnSettingsUpdate = <TData>({
     columnSizing: newColumnSizing,
     groupingKeys,
     sorting: newSorting,
+    ...(columnAxis !== undefined && { columnAxis }),
+    ...(columnAxisEmitted !== undefined && { columnAxisEmitted }),
   });
 
   return {

@@ -10,6 +10,7 @@ import { toGroupKeyColumnOptions } from './toGroupKeyColumnOptions.util';
 type TestRow = {
   readonly doc: string;
   readonly order_status: string;
+  readonly ordered_at: string;
   readonly priority: string;
   readonly total_amount: number;
 };
@@ -17,6 +18,7 @@ type TestRow = {
 const columns: TableColumn<TestRow>[] = [
   { key: 'order_status', label: 'Status' },
   { key: 'priority', label: 'Priority' },
+  { key: 'ordered_at', label: 'Ordered at' },
   // Declared `string` on purpose: this is the `numeric` column the presentation
   // vocabulary cannot tell from text (#550). Only the catalogue knows better.
   { key: 'total_amount', label: 'Total' },
@@ -40,6 +42,15 @@ const capabilities: Readonly<Record<string, TableColumnGroupingCapability>> = {
     periods: [],
     role: 'dimension',
     typeName: 'text',
+  },
+  ordered_at: {
+    aggregates: ['count', 'countDistinct', 'max', 'min'],
+    canGroup: false,
+    column: 'ordered_at',
+    periods: ['day', 'month'],
+    refusal: 'too-many-distinct',
+    role: 'dimension',
+    typeName: 'timestamptz',
   },
   priority: {
     aggregates: ['count', 'countDistinct'],
@@ -72,6 +83,21 @@ describe('toGroupKeyColumnOptions', () => {
     ).toStrictEqual([
       { label: 'Status', value: 'order_status' },
       { label: 'Priority', value: 'priority' },
+      { label: 'Ordered at', value: 'ordered_at' },
+    ]);
+  });
+
+  it('leaves out a truncated-only column when the caller cannot apply a period', () => {
+    expect(
+      toGroupKeyColumnOptions({
+        allowRequiredPeriod: false,
+        capabilities,
+        columns,
+        stagedKeys: new Set(),
+      }),
+    ).toStrictEqual([
+      { label: 'Status', value: 'order_status' },
+      { label: 'Priority', value: 'priority' },
     ]);
   });
 
@@ -82,7 +108,10 @@ describe('toGroupKeyColumnOptions', () => {
         columns,
         stagedKeys: new Set(['order_status']),
       }),
-    ).toStrictEqual([{ label: 'Priority', value: 'priority' }]);
+    ).toStrictEqual([
+      { label: 'Priority', value: 'priority' },
+      { label: 'Ordered at', value: 'ordered_at' },
+    ]);
   });
 
   it('offers every declared-groupable column when the route resolved no capabilities', () => {
@@ -95,6 +124,7 @@ describe('toGroupKeyColumnOptions', () => {
     ).toStrictEqual([
       { label: 'Status', value: 'order_status' },
       { label: 'Priority', value: 'priority' },
+      { label: 'Ordered at', value: 'ordered_at' },
       { label: 'Total', value: 'total_amount' },
       { label: 'Document', value: 'doc' },
     ]);

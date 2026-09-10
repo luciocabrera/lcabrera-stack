@@ -13,6 +13,8 @@ import {
   useGetColumns,
   useGetColumnSizing,
 } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
+import { useGetColumnsSorting } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumnsSorting.hook';
+import { useColumnsStore } from '#ui/components/Table/contexts/TableConfig/columns/useColumnsStore.hook';
 import { useGetTableDrawersSyncNonce } from '#ui/components/Table/contexts/TableConfig/meta/selectors/useGetTableDrawersSyncNonce.hook';
 import { useGetTableIsTableSettingsOpen } from '#ui/components/Table/contexts/TableConfig/meta/selectors/useGetTableIsTableSettingsOpen.hook';
 import { useGetTableData } from '#ui/components/Table/contexts/TableData/data/selectors';
@@ -32,6 +34,7 @@ type HarnessProps = {
 };
 
 type TestRow = {
+  readonly city?: string;
   readonly id: number;
   readonly name: string;
 };
@@ -56,6 +59,7 @@ const DataMountCounter = () => {
 
 const ID_COLUMN: TableColumn<TestRow> = { key: 'id', label: 'ID' };
 const NAME_COLUMN: TableColumn<TestRow> = { key: 'name', label: 'Name' };
+const CITY_COLUMN: TableColumn<TestRow> = { key: 'city', label: 'City' };
 const DEFAULT_COLUMNS_STATE = { columns: [ID_COLUMN] };
 const GROUPING_ORDER_STATUS = { keys: ['order_status'] };
 const META_STATE = { persistenceKey: 'orders' };
@@ -66,6 +70,13 @@ const Probe = () => {
   const groupingKeys = useGetTableGroupingKeys();
   const columns = useGetColumns<TestRow>();
   const columnSizing = useGetColumnSizing<TestRow>();
+  const sorting = useGetColumnsSorting<TestRow>();
+  const effectiveColumnKeys = useColumnsStore<string, TestRow>((state) =>
+    state.effectiveColumns.map((column) => String(column.key)).join(','),
+  );
+  const idSortDirection = useColumnsStore<string, TestRow>(
+    (state) => state.normalizedColumns.id?.sortDirection ?? '',
+  );
   const data = useGetTableData<TestRow>();
   const drawersSyncNonce = useGetTableDrawersSyncNonce();
   const isTableSettingsOpen = useGetTableIsTableSettingsOpen();
@@ -77,6 +88,26 @@ const Probe = () => {
   const handleResize = () => {
     columnsStore.set({
       columnSizing: { id: 180 } as ColumnSizingState<TestRow>,
+    });
+  };
+
+  const handlePaintAxis = () => {
+    const state = columnsStore.get();
+    const painted = {
+      key: 'sum_c0',
+      label: 'Pending',
+    } as unknown as TableColumn<TestRow>;
+
+    columnsStore.set({
+      columnAxisEmitted: [
+        {
+          alias: 'sum_c0',
+          axis: { value: 'Pending' },
+          columnKey: 'name',
+          fn: 'sum',
+        },
+      ],
+      effectiveColumns: [...state.effectiveColumns, painted],
     });
   };
 
@@ -96,6 +127,9 @@ const Probe = () => {
       <button onClick={handleResize} type='button'>
         resize
       </button>
+      <button onClick={handlePaintAxis} type='button'>
+        paint-axis
+      </button>
       <button onClick={handleOpenSettings} type='button'>
         open-settings
       </button>
@@ -103,7 +137,14 @@ const Probe = () => {
       <output data-testid='columns'>
         {columns.map((column) => column.key).join(',')}
       </output>
+      <output data-testid='effective-columns'>{effectiveColumnKeys}</output>
+      <output data-testid='id-sort-dir'>{idSortDirection}</output>
       <output data-testid='sizing'>{JSON.stringify(columnSizing)}</output>
+      <output data-testid='sorting'>
+        {sorting
+          .map((entry) => `${String(entry.columnKey)}:${entry.direction ?? ''}`)
+          .join(',')}
+      </output>
       <output data-testid='nonce'>{String(drawersSyncNonce)}</output>
       <output data-testid='settings-open'>{String(isTableSettingsOpen)}</output>
       <output data-testid='data'>{data.map((row) => row.id).join(',')}</output>
@@ -141,6 +182,31 @@ const SIZED_COLUMNS_STATE = {
 };
 
 const WIDER_COLUMNS_STATE = { columns: [ID_COLUMN, NAME_COLUMN] };
+const AXIS_GROUPING = { columnAxis: 'name', keys: ['id'] };
+const AXIS_COLUMNS = { columns: [ID_COLUMN, NAME_COLUMN] };
+
+const paintAxisThenRerender = (
+  columnsState: TableConfigProviderProps<TestRow>['columnsState'],
+) => {
+  const { rerender } = render(
+    <Harness
+      columnsState={AXIS_COLUMNS}
+      groupingState={AXIS_GROUPING}
+      revalidation={1}
+    />,
+  );
+
+  fireEvent.click(screen.getByText('paint-axis'));
+  expect(readProbe('effective-columns')).toContain('sum_c0');
+
+  rerender(
+    <Harness
+      columnsState={columnsState}
+      groupingState={AXIS_GROUPING}
+      revalidation={1}
+    />,
+  );
+};
 
 describe('TableConfigProvider', () => {
   beforeEach(() => {
@@ -191,6 +257,27 @@ describe('TableConfigProvider', () => {
 
     expect(readProbe('columns')).toBe('id,name');
     expect(readProbe('grouping')).toBe('priority');
+  });
+
+  it('applies a later sorting snapshot without wiping a painted column axis', () => {
+    paintAxisThenRerender({
+      columns: [ID_COLUMN, NAME_COLUMN],
+      sorting: [{ columnKey: 'id', direction: 'asc' }],
+    });
+
+    expect(readProbe('sorting')).toBe('id:asc');
+    expect(readProbe('id-sort-dir')).toBe('asc');
+    expect(readProbe('effective-columns')).toContain('sum_c0');
+    expect(readProbe('columns')).toBe('id,name');
+  });
+
+  it('replaces declared columns under an axis without dropping the painted measure', () => {
+    paintAxisThenRerender({
+      columns: [ID_COLUMN, NAME_COLUMN, CITY_COLUMN],
+    });
+
+    expect(readProbe('columns')).toBe('id,name,city');
+    expect(readProbe('effective-columns')).toContain('sum_c0');
   });
 
   it('replaces columns when the incoming columns snapshot identity changes', () => {

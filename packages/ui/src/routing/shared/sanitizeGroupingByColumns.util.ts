@@ -19,7 +19,15 @@ export const sanitizeGroupingByColumns = <
   columns,
   grouping,
 }: SanitizeGroupingByColumnsArgs<TData>): TableGroupingState => {
-  const { aggregates, keys, mode, periods, shares, totalsPlacement } = grouping;
+  const {
+    aggregates,
+    columnAxis,
+    keys,
+    mode,
+    periods,
+    shares,
+    totalsPlacement,
+  } = grouping;
 
   if (keys.length === 0 || keys.length > MAX_TABLE_GROUP_KEYS) {
     return getInitialGroupingState({ totalsPlacement });
@@ -54,6 +62,11 @@ export const sanitizeGroupingByColumns = <
   const areSharesDistinct =
     new Set(shares.map((entry) => toTableAggregateToken(entry))).size ===
     shares.length;
+  const isAxisAbsent = columnAxis === undefined;
+  const isAxisADeclaredGroupableColumn =
+    columnAxis !== undefined && groupableKeys.has(columnAxis);
+  const isAxisDistinctFromRowKeys =
+    columnAxis === undefined || !keys.includes(columnAxis);
 
   return isEveryKeyGroupable &&
     areKeysDistinct &&
@@ -62,7 +75,9 @@ export const sanitizeGroupingByColumns = <
     isCountDistinctAffordable &&
     isEveryGranularityOnAKey &&
     isEveryShareOnAShareableAggregate &&
-    areSharesDistinct
+    areSharesDistinct &&
+    isAxisDistinctFromRowKeys &&
+    (isAxisAbsent || isAxisADeclaredGroupableColumn)
     ? {
         aggregates: [...aggregates],
         keys: [...keys],
@@ -70,6 +85,7 @@ export const sanitizeGroupingByColumns = <
         periods: { ...periods },
         shares: [...shares],
         totalsPlacement,
+        ...(columnAxis !== undefined && { columnAxis }),
       }
     : getInitialGroupingState({ totalsPlacement });
 };

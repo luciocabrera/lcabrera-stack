@@ -8,12 +8,13 @@ type SerializeGroupingToURLArgs = {
 };
 
 export const serializeGroupingToURL = ({
-  grouping: { aggregates, keys, mode, periods, shares },
+  grouping: { aggregates, columnAxis, keys, mode, periods, shares },
   keepWhenEmpty = false,
 }: SerializeGroupingToURLArgs) => {
   if (keys.length > 0) {
     return groupingCodec.serialize({
       agg: aggregates,
+      ...(columnAxis !== undefined && { axis: columnAxis }),
       gran: periods,
       keys,
       mode,

@@ -35,4 +35,20 @@ describe('toColumnAxisDiscoveryLimit', () => {
       }),
     ).toBe(9);
   });
+
+  it('reserves a leading unexpanded count(*) before dividing the heap', () => {
+    const withoutCount = toColumnAxisDiscoveryLimit({
+      keyCount: 1,
+      maxDistinct: 50_000,
+      measureCount: 1,
+    });
+    const withCount = toColumnAxisDiscoveryLimit({
+      fixedAggregateCount: 1,
+      keyCount: 1,
+      maxDistinct: 50_000,
+      measureCount: 1,
+    });
+
+    expect(withCount).toBe(withoutCount - 1);
+  });
 });

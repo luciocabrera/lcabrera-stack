@@ -43,30 +43,15 @@ vi.mock('#ui/components/DraggableList', () => ({
   ),
 }));
 
-vi.mock('#ui/components/ToggleSwitch', () => ({
-  ToggleSwitch: ({
-    isChecked,
-    isDisabled,
-    label,
-    onChange,
-  }: {
-    readonly isBusy?: boolean;
-    readonly isChecked: boolean;
-    readonly isDisabled?: boolean;
-    readonly label: string;
-    readonly onChange: (isChecked: boolean) => void;
-  }) => (
-    <button
-      aria-label={`${label}-${isChecked ? 'on' : 'off'}`}
-      disabled={isDisabled}
-      onClick={() => {
-        onChange(!isChecked);
-      }}
-      type='button'
-    >
-      {label}
-    </button>
-  ),
+vi.mock('#ui/components/ToggleSwitch', async () => {
+  const { MockToggleSwitch } =
+    await import('#ui/utils/tests/createMockToggleSwitch.util');
+
+  return { ToggleSwitch: MockToggleSwitch };
+});
+
+vi.mock('#ui/components/Table/contexts/TableData/data/selectors', () => ({
+  useGetTableData: () => [],
 }));
 
 import { TableConfigProvider } from '#ui/components/Table/contexts';

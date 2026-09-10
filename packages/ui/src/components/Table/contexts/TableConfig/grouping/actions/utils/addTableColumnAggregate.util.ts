@@ -27,15 +27,11 @@ export const addTableColumnAggregate = ({
     lastOfColumn === -1 ? grouping.aggregates.length : lastOfColumn + 1;
 
   return {
+    ...grouping,
     aggregates: [
       ...grouping.aggregates.slice(0, insertAt),
       { columnKey, fn },
       ...grouping.aggregates.slice(insertAt),
     ],
-    keys: grouping.keys,
-    mode: grouping.mode,
-    periods: grouping.periods,
-    shares: grouping.shares,
-    totalsPlacement: grouping.totalsPlacement,
   };
 };

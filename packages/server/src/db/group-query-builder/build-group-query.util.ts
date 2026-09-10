@@ -21,9 +21,11 @@ import {
   GROUP_MASK_ALIAS,
   MAX_COUNT_DISTINCT_AGGREGATES,
 } from './group-query-builder.constants.ts';
+import { isUnexpandedLeadingCount } from './is-unexpanded-leading-count.util.ts';
 import { resolveAggregateAlias } from './resolve-aggregate-alias.util.ts';
 import { resolveGroupGuardRails } from './resolve-group-guard-rails.util.ts';
 import { resolveGroupKeyExpression } from './resolve-group-key-expression.util.ts';
+import { toExpandingMeasureCount } from './to-expanding-measure-count.util.ts';
 import { toGroupingSetMask } from './to-grouping-set-mask.util.ts';
 
 export const buildGroupQuery = ({
@@ -45,22 +47,34 @@ export const buildGroupQuery = ({
   assertSafeIdentifier(table);
   assertGroupKeys({ allowedColumns, capabilities, grouping, keys, periods });
 
+  const leadingCount = aggregates[0];
+  const hasUnexpandedCount = isUnexpandedLeadingCount(leadingCount);
+  const expandable = hasUnexpandedCount ? aggregates.slice(1) : aggregates;
+
   if (columnAxis !== undefined) {
     assertColumnAxis({
       allowedColumns,
       capabilities,
       columnAxis,
       keys,
-      measureCount: aggregates.length,
+      measureCount: toExpandingMeasureCount(aggregates),
+      ...(hasUnexpandedCount && { fixedAggregateCount: 1 }),
     });
   }
 
   assertGroupAggregates({ aggregates, allowedColumns, capabilities });
-
   const expanded =
     columnAxis === undefined
       ? undefined
-      : expandColumnAxisAggregates({ aggregates, columnAxis });
+      : [
+          ...(hasUnexpandedCount && leadingCount !== undefined
+            ? [leadingCount]
+            : []),
+          ...expandColumnAxisAggregates({
+            aggregates: expandable,
+            columnAxis,
+          }),
+        ];
   const queryAggregates = expanded ?? aggregates;
 
   if (expanded !== undefined) {

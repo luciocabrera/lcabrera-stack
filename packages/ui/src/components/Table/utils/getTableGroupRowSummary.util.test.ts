@@ -33,6 +33,24 @@ describe('getTableGroupRowSummary', () => {
     ).toStrictEqual(path);
   });
 
+  it('reads alias and axis off an expanded aggregate', () => {
+    const aggregates = [
+      {
+        alias: 'sum_total_amount_c0',
+        axis: { value: 'Pending' },
+        columnKey: 'total_amount',
+        fn: 'sum',
+        value: 10,
+      },
+    ];
+
+    expect(
+      getTableGroupRowSummary({
+        [TABLE_GROUP_ROW_FIELD]: { ...summary, aggregates },
+      })?.aggregates,
+    ).toStrictEqual(aggregates);
+  });
+
   it('reads the aggregates a grouped read attached', () => {
     const aggregates = [
       { columnKey: 'total_amount', fn: 'sum', value: '302540833.38' },

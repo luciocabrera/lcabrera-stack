@@ -128,4 +128,28 @@ describe('useResetGrouping', () => {
       totalsPlacement: 'last',
     });
   });
+
+  it('re-seeds the applied column axis rather than dropping it', () => {
+    setConfigGrouping({
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+      columnAxis: 'order_status',
+      keys: ['region'],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+      totalsPlacement: 'last',
+    });
+
+    resetGrouping();
+
+    expect(drawerGroupingStore.set).toHaveBeenCalledExactlyOnceWith({
+      aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
+      columnAxis: 'order_status',
+      keys: ['region'],
+      mode: 'flat',
+      periods: {},
+      shares: [],
+      totalsPlacement: 'last',
+    });
+  });
 });

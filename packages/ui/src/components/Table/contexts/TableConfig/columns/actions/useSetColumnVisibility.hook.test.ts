@@ -4,6 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { createTableConfigColumnsActionMocks } from '#ui/utils/tests/createTableConfigColumnsActionMocks.util';
+import '#ui/utils/tests/registerColumnActionDataStoreMock';
 
 import { useSetColumnVisibility } from './useSetColumnVisibility.hook';
 

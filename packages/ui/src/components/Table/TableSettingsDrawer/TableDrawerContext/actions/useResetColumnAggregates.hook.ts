@@ -16,6 +16,9 @@ export const useResetColumnAggregates = () => {
       periods: grouping.periods,
       shares,
       totalsPlacement: grouping.totalsPlacement,
+      ...(grouping.columnAxis !== undefined && {
+        columnAxis: grouping.columnAxis,
+      }),
     }));
   };
 };

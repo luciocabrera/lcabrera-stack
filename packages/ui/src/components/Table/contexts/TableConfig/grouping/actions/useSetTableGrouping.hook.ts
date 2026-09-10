@@ -2,6 +2,7 @@ import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
+import { toColumnAxisDerivationArgs } from '#ui/components/Table/utils/toColumnAxisDerivationArgs.util';
 import { serializeSortingToURL } from '#ui/utils/urlState/serializeSortingToURL.util';
 
 import { usePersistTableStateAction } from '../../columns/actions/hooks/usePersistTableStateAction.hook';
@@ -30,6 +31,10 @@ export const useSetTableGrouping = () => {
       aggregates: result.grouping.aggregates,
       columnsState,
       groupingKeys: result.grouping.keys,
+      ...toColumnAxisDerivationArgs({
+        columnAxis: result.grouping.columnAxis,
+        data: dataStore.get().data,
+      }),
     });
 
     const entries =

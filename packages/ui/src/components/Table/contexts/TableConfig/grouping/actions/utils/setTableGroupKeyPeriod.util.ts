@@ -19,13 +19,9 @@ export const setTableGroupKeyPeriod = ({
   );
 
   return {
-    aggregates: grouping.aggregates,
-    keys: grouping.keys,
-    mode: grouping.mode,
+    ...grouping,
     periods: Object.fromEntries(
       period === undefined ? remaining : [...remaining, [columnKey, period]],
     ),
-    shares: grouping.shares,
-    totalsPlacement: grouping.totalsPlacement,
   };
 };

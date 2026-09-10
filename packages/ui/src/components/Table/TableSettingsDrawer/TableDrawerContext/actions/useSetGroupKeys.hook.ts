@@ -1,4 +1,5 @@
 import {
+  pruneColumnAxis,
   pruneGroupPeriods,
   resolveNewGroupingMode,
 } from '#ui/components/Table/contexts/TableConfig/grouping/utils';
@@ -11,18 +12,26 @@ export const useSetGroupKeys = () => {
   const preferredMode = useGetTablePreferredGroupingMode();
 
   return (keys: readonly string[]) => {
-    setGrouping((grouping) => ({
-      aggregates: grouping.aggregates,
-      keys,
-      mode: resolveNewGroupingMode({
+    setGrouping((grouping) => {
+      const nextColumnAxis = pruneColumnAxis({
+        columnAxis: grouping.columnAxis,
         keys,
-        preferredMode,
-        previousKeys: grouping.keys,
-        previousMode: grouping.mode,
-      }),
-      periods: pruneGroupPeriods({ keys, periods: grouping.periods }),
-      shares: grouping.shares,
-      totalsPlacement: grouping.totalsPlacement,
-    }));
+      });
+
+      return {
+        aggregates: grouping.aggregates,
+        keys,
+        mode: resolveNewGroupingMode({
+          keys,
+          preferredMode,
+          previousKeys: grouping.keys,
+          previousMode: grouping.mode,
+        }),
+        periods: pruneGroupPeriods({ keys, periods: grouping.periods }),
+        shares: grouping.shares,
+        totalsPlacement: grouping.totalsPlacement,
+        ...(nextColumnAxis !== undefined && { columnAxis: nextColumnAxis }),
+      };
+    });
   };
 };

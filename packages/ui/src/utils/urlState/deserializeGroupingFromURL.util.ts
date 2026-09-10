@@ -5,10 +5,12 @@ import { groupingCodec } from './groupingCodec.util';
 export const deserializeGroupingFromURL = (
   param: string,
 ): TableGroupingState => {
-  const { agg, gran, keys, mode, share } = groupingCodec.deserialize(param);
+  const { agg, axis, gran, keys, mode, share } =
+    groupingCodec.deserialize(param);
 
   return {
     aggregates: agg ?? [],
+    ...(axis !== undefined && { columnAxis: axis }),
     keys,
     mode: mode ?? 'flat',
     periods: gran ?? {},

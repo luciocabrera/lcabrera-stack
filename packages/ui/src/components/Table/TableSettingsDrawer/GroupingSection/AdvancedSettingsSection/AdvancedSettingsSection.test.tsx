@@ -7,6 +7,12 @@ type MockSectionProps = {
   readonly isBusy?: boolean;
 };
 
+vi.mock('./ColumnAxisSection', () => ({
+  ColumnAxisSection: ({ isBusy }: MockSectionProps) => (
+    <div data-busy={String(isBusy)}>Column axis section</div>
+  ),
+}));
+
 vi.mock('./GroupingModeSection', () => ({
   GroupingModeSection: ({ isBusy }: MockSectionProps) => (
     <div data-busy={String(isBusy)}>Grouping mode section</div>
@@ -26,9 +32,10 @@ afterEach(() => {
 });
 
 describe('AdvancedSettingsSection', () => {
-  it('composes the two totals controls', () => {
+  it('composes the axis picker with the totals controls', () => {
     render(<AdvancedSettingsSection />);
 
+    expect(screen.getByText('Column axis section')).not.toBeNull();
     expect(screen.getByText('Grouping mode section')).not.toBeNull();
     expect(screen.getByText('Totals placement section')).not.toBeNull();
   });
@@ -36,6 +43,7 @@ describe('AdvancedSettingsSection', () => {
   it('forwards the busy flag to every subsection', () => {
     render(<AdvancedSettingsSection isBusy />);
 
+    expect(screen.getByText('Column axis section').dataset.busy).toBe('true');
     expect(screen.getByText('Grouping mode section').dataset.busy).toBe('true');
     expect(screen.getByText('Totals placement section').dataset.busy).toBe(
       'true',

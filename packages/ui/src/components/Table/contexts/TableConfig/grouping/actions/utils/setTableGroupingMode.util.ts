@@ -12,10 +12,6 @@ export const setTableGroupingMode = ({
   grouping,
   mode,
 }: SetTableGroupingModeArgs): TableGroupingState => ({
-  aggregates: grouping.aggregates,
-  keys: grouping.keys,
+  ...grouping,
   mode,
-  periods: grouping.periods,
-  shares: grouping.shares,
-  totalsPlacement: grouping.totalsPlacement,
 });

@@ -18,4 +18,5 @@ export { resolvePrimaryKeyColumnKeys } from './resolvePrimaryKeyColumnKeys.util'
 export { resolveTableActionsColumn } from './resolveTableActionsColumn.util';
 export { serializeStateSlice } from './serializeStateSlice.util';
 export { syncColumnOrderWithPinning } from './syncColumnOrderWithPinning.util';
+export { toColumnAxisDerivationArgs } from './toColumnAxisDerivationArgs.util';
 export { toLockedFiltersHeading } from './toLockedFiltersHeading.util';

@@ -23,6 +23,16 @@ const toKeyValue = (entry: unknown): TableGroupKeyValue | undefined => {
     : undefined;
 };
 
+const toAggregateAxis = (entry: Record<string, unknown>) => {
+  const { axis } = entry;
+
+  if (!isObject(axis) || !Object.hasOwn(axis, 'value')) {
+    return;
+  }
+
+  return { value: axis.value };
+};
+
 const toAggregateValue = (
   entry: unknown,
 ): TableGroupAggregateValue | undefined => {
@@ -30,13 +40,25 @@ const toAggregateValue = (
     return;
   }
 
-  const { columnKey, fn, value } = entry;
+  const { alias, columnKey, fn, value } = entry;
 
-  return typeof columnKey === 'string' &&
-    isTableAggregateFn(fn) &&
-    Object.hasOwn(entry, 'value')
-    ? { columnKey, fn, value }
-    : undefined;
+  if (
+    typeof columnKey !== 'string' ||
+    !isTableAggregateFn(fn) ||
+    !Object.hasOwn(entry, 'value')
+  ) {
+    return;
+  }
+
+  const axis = toAggregateAxis(entry);
+
+  return {
+    columnKey,
+    fn,
+    value,
+    ...(typeof alias === 'string' && { alias }),
+    ...(axis !== undefined && { axis }),
+  };
 };
 
 type NarrowEveryArgs<TValue> = {

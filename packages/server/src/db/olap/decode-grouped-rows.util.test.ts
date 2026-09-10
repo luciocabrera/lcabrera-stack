@@ -66,8 +66,8 @@ describe('decodeGroupedRows', () => {
 
     expect(summary?.count).toBe(42);
     expect(summary?.aggregates).toStrictEqual([
-      { columnKey: 'amount', fn: 'sum', value: 1000 },
-      { columnKey: 'quantity', fn: 'avg', value: 7 },
+      { alias: 'sum_amount', columnKey: 'amount', fn: 'sum', value: 1000 },
+      { alias: 'avg_quantity', columnKey: 'quantity', fn: 'avg', value: 7 },
     ]);
   });
 
@@ -101,8 +101,8 @@ describe('decodeGroupedRows', () => {
     });
 
     expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.aggregates).toStrictEqual([
-      { columnKey: 'amount', fn: 'sum', value: 1000 },
-      { columnKey: 'amount', fn: 'avg', value: 250 },
+      { alias: 'sum_amount', columnKey: 'amount', fn: 'sum', value: 1000 },
+      { alias: 'avg_amount', columnKey: 'amount', fn: 'avg', value: 250 },
     ]);
   });
 
@@ -132,16 +132,29 @@ describe('decodeGroupedRows', () => {
     ).toThrow(/aggregate alias/);
   });
 
-  it('throws when the read emitted no aggregates at all', () => {
+  it('throws when measures were requested and none were projected', () => {
     expect(() =>
       decodeGroupedRows({
         aggregates: [],
         columnKeys: ['status'],
         maskAlias: 'grouping_mask',
-        requested: [],
+        requested: REQUESTED,
         rows: [{ count_all: '1', grouping_mask: 0, status: 'A' }],
       }),
     ).toThrow(/aggregate alias/);
+  });
+
+  it('decodes an empty projection when nothing was requested', () => {
+    const [decoded] = decodeGroupedRows({
+      aggregates: [],
+      columnKeys: ['status'],
+      maskAlias: 'grouping_mask',
+      requested: [],
+      rows: [{ grouping_mask: 0, status: 'A' }],
+    });
+
+    expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.count).toBe(0);
+    expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.aggregates).toStrictEqual([]);
   });
 
   it('throws on a list of the right length in the wrong order', () => {
@@ -193,6 +206,103 @@ describe('decodeGroupedRows', () => {
         ],
       }),
     ).toHaveLength(2);
+  });
+});
+
+describe('a column axis', () => {
+  it('decodes an expanded list keyed by alias, carrying the axis value', () => {
+    const [decoded] = decodeGroupedRows({
+      aggregates: [
+        { alias: 'count_rows', fn: 'count' },
+        {
+          alias: 'sum_amount_c0',
+          axis: { value: 'Pending' },
+          column: 'amount',
+          fn: 'sum',
+        },
+        {
+          alias: 'sum_amount_c1',
+          axis: { value: undefined },
+          column: 'amount',
+          fn: 'sum',
+        },
+      ],
+      columnKeys: ['status'],
+      maskAlias: 'grouping_mask',
+      requested: [{ column: 'amount', fn: 'sum' }],
+      rows: [
+        {
+          count_rows: '4',
+          grouping_mask: 0,
+          status: 'Business',
+          sum_amount_c0: 100,
+          sum_amount_c1: 20,
+        },
+      ],
+    });
+
+    expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.aggregates).toStrictEqual([
+      {
+        alias: 'sum_amount_c0',
+        axis: { value: 'Pending' },
+        columnKey: 'amount',
+        fn: 'sum',
+        value: 100,
+      },
+      {
+        alias: 'sum_amount_c1',
+        axis: { value: undefined },
+        columnKey: 'amount',
+        fn: 'sum',
+        value: 20,
+      },
+    ]);
+  });
+
+  it('decodes an empty axis as no measure columns', () => {
+    const [decoded] = decodeGroupedRows({
+      aggregates: [{ alias: 'count_rows', fn: 'count' }],
+      columnAxis: { values: [] },
+      columnKeys: ['status'],
+      maskAlias: 'grouping_mask',
+      requested: [{ column: 'amount', fn: 'sum' }],
+      rows: [{ count_rows: '4', grouping_mask: 0, status: 'Business' }],
+    });
+
+    expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.aggregates).toStrictEqual([]);
+    expect(decoded?.[OLAP_GROUP_ROW_FIELD]?.count).toBe(4);
+  });
+
+  it('throws on a wide list that expanded every aggregate including count(*)', () => {
+    expect(() =>
+      decodeGroupedRows({
+        aggregates: [
+          {
+            alias: 'count_rows_c0',
+            axis: { value: 'Pending' },
+            fn: 'count',
+          },
+          {
+            alias: 'sum_amount_c0',
+            axis: { value: 'Pending' },
+            column: 'amount',
+            fn: 'sum',
+          },
+        ],
+        columnAxis: { values: ['Pending'] },
+        columnKeys: ['status'],
+        maskAlias: 'grouping_mask',
+        requested: [{ column: 'amount', fn: 'sum' }],
+        rows: [
+          {
+            count_rows_c0: '4',
+            grouping_mask: 0,
+            status: 'Business',
+            sum_amount_c0: 100,
+          },
+        ],
+      }),
+    ).toThrow(/not `count\(\*\)`/);
   });
 });
 

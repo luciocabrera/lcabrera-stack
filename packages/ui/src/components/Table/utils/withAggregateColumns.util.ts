@@ -6,14 +6,20 @@ import type {
   TableColumn,
   TableColumnAggregate,
 } from '../Table.types';
+import type { ColumnAxisEmittedAggregate } from './columnAxisEmitted.types';
 
 import { TABLE_AGGREGATE_LABELS } from '../Table.constants';
 import { resolveAggregateDataType } from '../TableGroupAggregate/utils/resolveAggregateDataType.util';
+import { expandAxisAggregateColumns } from './expandAxisAggregateColumns.util';
 import { resolveGroupedColumnWidthBand } from './resolveGroupedColumnWidthBand.util';
 import { toTableAggregateToken } from './tableAggregateToken.util';
+import { withExpandedColumnKeys } from './withExpandedColumnKeys.util';
 
 type WithAggregateColumnsArgs<TData> = {
   readonly aggregates: readonly TableColumnAggregate[];
+  readonly columnAxis?: {
+    readonly emitted: readonly ColumnAxisEmittedAggregate[];
+  };
   readonly columnOrder: ColumnOrderState<TData>;
   readonly columnPinning: ColumnPinningState<TData>;
   readonly columns: readonly TableColumn<TData>[];
@@ -23,12 +29,25 @@ type WithAggregateColumnsArgs<TData> = {
 
 export const withAggregateColumns = <TData>({
   aggregates,
+  columnAxis,
   columnOrder,
   columnPinning,
   columns,
   columnVisibility,
   groupingKeys,
 }: WithAggregateColumnsArgs<TData>) => {
+  if (columnAxis !== undefined) {
+    return expandAxisAggregateColumns({
+      aggregates,
+      columnOrder,
+      columnPinning,
+      columns,
+      columnVisibility,
+      emitted: columnAxis.emitted,
+      groupingKeys,
+    });
+  }
+
   const unchanged = { columnOrder, columnPinning, columns, columnVisibility };
 
   if (aggregates.length === 0) return unchanged;
@@ -73,27 +92,19 @@ export const withAggregateColumns = <TData>({
 
   if (derivedBySource.size === 0) return unchanged;
 
-  const expandKey = (key: DataKey<TData>): readonly DataKey<TData>[] => {
-    const derived = derivedBySource.get(String(key));
+  return withExpandedColumnKeys({
+    columnOrder,
+    columnPinning,
+    columns,
+    columnVisibility,
+    expandColumn: (column) =>
+      derivedBySource.get(String(column.key)) ?? [column],
+    expandKey: (key) => {
+      const derived = derivedBySource.get(String(key));
 
-    return derived === undefined ? [key] : derived.map((column) => column.key);
-  };
-
-  const expandKeys = (
-    keys: readonly DataKey<TData>[],
-  ): readonly DataKey<TData>[] => [
-    ...new Set(keys.flatMap((key) => expandKey(key))),
-  ];
-
-  return {
-    columnOrder: expandKeys(columnOrder),
-    columnPinning: {
-      left: expandKeys(columnPinning.left),
-      right: expandKeys(columnPinning.right),
+      return derived === undefined
+        ? [key]
+        : derived.map((column) => column.key);
     },
-    columns: columns.flatMap(
-      (column) => derivedBySource.get(String(column.key)) ?? [column],
-    ),
-    columnVisibility: new Set(expandKeys([...columnVisibility])),
-  };
+  });
 };

@@ -26,7 +26,8 @@ export const TableGroupAggregate = ({
   summary,
 }: TableGroupAggregateProps) => {
   const aggregate = summary.aggregates.find(
-    (entry) => toTableAggregateToken(entry) === columnKey,
+    (entry) =>
+      entry.alias === columnKey || toTableAggregateToken(entry) === columnKey,
   );
   const column = useGetNormalizedColumn<Record<string, unknown>>(columnKey);
   const hasColumnFilter = useGetHasColumnFilter(

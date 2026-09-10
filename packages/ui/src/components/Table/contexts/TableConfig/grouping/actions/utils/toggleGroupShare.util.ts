@@ -31,15 +31,11 @@ export const toggleGroupShare = ({
   }
 
   return {
-    aggregates: grouping.aggregates,
-    keys: grouping.keys,
-    mode: grouping.mode,
-    periods: grouping.periods,
+    ...grouping,
     shares: isRemoval
       ? grouping.shares.filter(
           (share) => toTableAggregateToken(share) !== token,
         )
       : [...grouping.shares, { columnKey, fn }],
-    totalsPlacement: grouping.totalsPlacement,
   };
 };

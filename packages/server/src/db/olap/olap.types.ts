@@ -1,4 +1,7 @@
-import type { GroupKeyPeriod } from '../group-query-builder/group-query-builder.types';
+import type {
+  AggregateFn,
+  GroupKeyPeriod,
+} from '../group-query-builder/group-query-builder.types';
 import type {
   QueryFilter,
   QuerySort,
@@ -47,3 +50,8 @@ export type OlapGroupReadResolution =
       readonly message: string;
       readonly reason: OlapGroupReadRefusal;
     };
+
+export type RequestedGroupAggregate = {
+  readonly column: string;
+  readonly fn: AggregateFn;
+};

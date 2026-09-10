@@ -72,6 +72,27 @@ describe('getInitialColumnsState (TableConfig)', () => {
     expect(result.columnPinning.right).toEqual([]);
   });
 
+  it('re-derives axis measure columns from stored emitted aliases', () => {
+    const result = getInitialColumnsState({
+      columnAxis: 'name',
+      columnAxisEmitted: [
+        {
+          alias: 'sum_c0',
+          axis: { value: 'Pending' },
+          columnKey: 'name',
+          fn: 'sum',
+        },
+      ],
+      columns,
+      groupingKeys: ['id'],
+    });
+
+    expect(result.effectiveColumns.map((column) => column.key)).toContain(
+      'sum_c0',
+    );
+    expect(result.columnAxisEmitted?.[0]?.alias).toBe('sum_c0');
+  });
+
   it('synthesizes and right-pins the actions column when crud.delete is enabled', () => {
     const result = getInitialColumnsState({
       columns,

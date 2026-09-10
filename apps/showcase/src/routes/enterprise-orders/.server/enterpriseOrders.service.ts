@@ -11,6 +11,7 @@ import type {
 } from '@lcabrera/ui/components/Table/Table.types';
 
 import { deleteRows } from '@lcabrera/server/db/delete-rows.util';
+import { readPivotMaxDistinct } from '@lcabrera/server/db/env.schema';
 import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-grouping-capabilities.util';
 import { getMaxValue } from '@lcabrera/server/db/get-max-value.util';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
@@ -62,6 +63,7 @@ const NO_GROUPING: TableGroupingState = {
 
 type SelectGroupedOrdersArgs = {
   readonly aggregates: TableGroupingState['aggregates'];
+  readonly columnAxis?: string;
   readonly filters: readonly QueryFilter[];
   readonly groupKeys: readonly string[];
   readonly groupMode: TableGroupingState['mode'];
@@ -72,6 +74,7 @@ type SelectGroupedOrdersArgs = {
 
 const selectGroupedOrders = async ({
   aggregates: selectedAggregates,
+  columnAxis,
   filters,
   groupKeys,
   groupMode,
@@ -85,18 +88,30 @@ const selectGroupedOrders = async ({
   );
 
   try {
-    const { aggregates, maskAlias, rows, truncations, warning } =
-      await selectGroupedRows({
-        ...TARGET,
-        aggregates: toGroupAggregates({ requested }),
-        filters,
-        grouping: groupMode,
-        keys: groupKeys,
-        maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
-        periods: groupPeriods,
-        sort: toGroupSort({ groupKeys, requested, sort }),
-        subtotalPlacement,
-      });
+    const {
+      aggregates,
+      columnAxis: builtAxis,
+      maskAlias,
+      rows,
+      truncations,
+      warning,
+    } = await selectGroupedRows({
+      ...TARGET,
+      aggregates: toGroupAggregates({ requested }),
+      filters,
+      grouping: groupMode,
+      keys: groupKeys,
+      maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
+      periods: groupPeriods,
+      sort: toGroupSort({ groupKeys, requested, sort }),
+      subtotalPlacement,
+      ...(columnAxis !== undefined && {
+        columnAxis: {
+          key: columnAxis,
+          maxDistinct: readPivotMaxDistinct({ env: process.env }),
+        },
+      }),
+    });
 
     const data = decodeGroupedRows({
       aggregates,
@@ -105,6 +120,7 @@ const selectGroupedOrders = async ({
       requested,
       rows,
       truncations,
+      ...(builtAxis !== undefined && { columnAxis: builtAxis }),
     });
 
     return {
@@ -186,6 +202,9 @@ export const selectOrdersPage = async ({
       groupPeriods: grouping.periods,
       sort: boundedSort,
       subtotalPlacement: totalsPlacement,
+      ...(grouping.columnAxis !== undefined && {
+        columnAxis: grouping.columnAxis,
+      }),
     });
   }
 

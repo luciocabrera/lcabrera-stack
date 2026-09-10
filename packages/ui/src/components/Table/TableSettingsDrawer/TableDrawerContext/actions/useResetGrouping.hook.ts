@@ -7,16 +7,6 @@ export const useResetGrouping = () => {
   const { groupingStore: groupingDrawerStore } = useTableDrawerContextValue();
 
   return () => {
-    const { aggregates, keys, mode, periods, shares, totalsPlacement } =
-      groupingStore.get();
-
-    groupingDrawerStore.set({
-      aggregates,
-      keys,
-      mode,
-      periods,
-      shares,
-      totalsPlacement,
-    });
+    groupingDrawerStore.set(groupingStore.get());
   };
 };

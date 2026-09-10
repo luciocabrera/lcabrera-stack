@@ -10,36 +10,22 @@ type CommitResolvedPinningStateArgs<TData> = CommitResolvedColumnStateArgs<
 >;
 
 export const commitResolvedPinningState = <TData>({
-  aggregates,
-  columnOrder,
-  columnPinning,
-  columns,
-  columnSizing,
   columnsStore,
-  columnVisibility,
   drawersSyncNonce,
-  groupingKeys,
   metaStore,
   persistenceKey,
   persistTableState,
+  ...derived
 }: CommitResolvedPinningStateArgs<TData>) => {
   const { effectiveColumns, pinnedColumnOffsets, pinnedColumnPartition } =
-    getPinnedDerivedColumnsState<TData>({
-      aggregates,
-      columnOrder,
-      columnPinning,
-      columns,
-      columnSizing,
-      columnVisibility,
-      groupingKeys,
-    });
+    getPinnedDerivedColumnsState<TData>(derived);
 
   if (
     !commitPinningAndOrderUpdate<TData>({
       columnsStore,
       effectiveColumns,
-      newColumnOrder: columnOrder,
-      newPinning: columnPinning,
+      newColumnOrder: derived.columnOrder,
+      newPinning: derived.columnPinning,
       persistenceKey,
       persistTableState,
       pinnedColumnOffsets,

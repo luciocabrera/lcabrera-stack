@@ -79,6 +79,10 @@ const MockTableTitle = vi.hoisted(() => {
   };
 });
 
+vi.mock('../contexts/TableConfig/grouping/actions', () => ({
+  useSyncColumnAxisColumns: vi.fn(),
+}));
+
 vi.mock('../contexts/TableConfig/meta/actions', () => ({
   useToogleTableIsTableSettingsOpen: useToogleTableIsTableSettingsOpenMock,
 }));
@@ -130,6 +134,30 @@ vi.mock('../TableTitle', () => ({
   TableTitle: MockTableTitle,
 }));
 
+type ReadClosestElementArgs = {
+  readonly selector: string;
+  readonly testId: string;
+};
+
+const readClosestElement = ({ selector, testId }: ReadClosestElementArgs) => {
+  const node = screen.getByTestId(testId).closest(selector);
+  expect(node).toBeInstanceOf(HTMLElement);
+  if (!(node instanceof HTMLElement)) {
+    throw new TypeError('Expected container to be an HTMLElement');
+  }
+  return node;
+};
+
+const mockElementScrollTo = (element: HTMLElement) => {
+  const scrollToMock = vi.fn();
+  Object.defineProperty(element, 'scrollTo', {
+    configurable: true,
+    value: scrollToMock,
+    writable: true,
+  });
+  return scrollToMock;
+};
+
 describe('TableContent', () => {
   beforeEach(() => {
     useGetTableThresholdMock.mockReturnValue(200);
@@ -147,12 +175,10 @@ describe('TableContent', () => {
 
     render(<TableContent />);
 
-    const tableBody = screen.getByTestId('table-body');
-    const scrollContainer = tableBody.closest('[data-scroll-locked]');
-    expect(scrollContainer).toBeInstanceOf(HTMLElement);
-    if (!(scrollContainer instanceof HTMLElement)) {
-      throw new TypeError('Expected scroll container to be an HTMLElement');
-    }
+    const scrollContainer = readClosestElement({
+      selector: '[data-scroll-locked]',
+      testId: 'table-body',
+    });
 
     expect(scrollContainer.dataset.scrollLocked).toBe('true');
     expect(screen.getByTestId('table-header')).toBeTruthy();
@@ -162,28 +188,23 @@ describe('TableContent', () => {
   it('keeps scrolling enabled when idle', () => {
     render(<TableContent />);
 
-    const tableBody = screen.getByTestId('table-body');
-    const scrollContainer = tableBody.closest('[data-scroll-locked]');
-    expect(scrollContainer).toBeInstanceOf(HTMLElement);
-    if (!(scrollContainer instanceof HTMLElement)) {
-      throw new TypeError('Expected scroll container to be an HTMLElement');
-    }
-
-    expect(scrollContainer.dataset.scrollLocked).toBe('false');
+    expect(
+      readClosestElement({
+        selector: '[data-scroll-locked]',
+        testId: 'table-body',
+      }).dataset.scrollLocked,
+    ).toBe('false');
   });
 
   it('renders square corners by default', () => {
     render(<TableContent />);
 
-    const outerContainer = screen
-      .getByTestId('table-body')
-      .closest('[data-rounded]');
-    expect(outerContainer).toBeInstanceOf(HTMLElement);
-    if (!(outerContainer instanceof HTMLElement)) {
-      throw new TypeError('Expected outer container to be an HTMLElement');
-    }
-
-    expect(outerContainer.dataset.rounded).toBe('false');
+    expect(
+      readClosestElement({
+        selector: '[data-rounded]',
+        testId: 'table-body',
+      }).dataset.rounded,
+    ).toBe('false');
   });
 
   it('rounds the table card when isRounded is enabled', () => {
@@ -191,13 +212,10 @@ describe('TableContent', () => {
 
     render(<TableContent />);
 
-    const outerContainer = screen
-      .getByTestId('table-body')
-      .closest('[data-rounded]');
-    expect(outerContainer).toBeInstanceOf(HTMLElement);
-    if (!(outerContainer instanceof HTMLElement)) {
-      throw new TypeError('Expected outer container to be an HTMLElement');
-    }
+    const outerContainer = readClosestElement({
+      selector: '[data-rounded]',
+      testId: 'table-body',
+    });
 
     expect(outerContainer.dataset.rounded).toBe('true');
     expect(
@@ -210,20 +228,12 @@ describe('TableContent', () => {
     useGetTableIsLoadingMock.mockImplementation(() => isLoadingState);
 
     const { rerender } = render(<TableContent />);
-
-    const tableBody = screen.getByTestId('table-body');
-    const scrollContainer = tableBody.closest('[data-scroll-locked]');
-    expect(scrollContainer).toBeInstanceOf(HTMLElement);
-    if (!(scrollContainer instanceof HTMLElement)) {
-      throw new TypeError('Expected scroll container to be an HTMLElement');
-    }
-
-    const scrollToMock = vi.fn();
-    Object.defineProperty(scrollContainer, 'scrollTo', {
-      configurable: true,
-      value: scrollToMock,
-      writable: true,
-    });
+    const scrollToMock = mockElementScrollTo(
+      readClosestElement({
+        selector: '[data-scroll-locked]',
+        testId: 'table-body',
+      }),
+    );
 
     isLoadingState = false;
     rerender(<TableContent />);
@@ -241,20 +251,12 @@ describe('TableContent', () => {
     useGetTableIsLoadingMoreMock.mockImplementation(() => isLoadingMoreState);
 
     const { rerender } = render(<TableContent />);
-
-    const tableBody = screen.getByTestId('table-body');
-    const scrollContainer = tableBody.closest('[data-scroll-locked]');
-    expect(scrollContainer).toBeInstanceOf(HTMLElement);
-    if (!(scrollContainer instanceof HTMLElement)) {
-      throw new TypeError('Expected scroll container to be an HTMLElement');
-    }
-
-    const scrollToMock = vi.fn();
-    Object.defineProperty(scrollContainer, 'scrollTo', {
-      configurable: true,
-      value: scrollToMock,
-      writable: true,
-    });
+    const scrollToMock = mockElementScrollTo(
+      readClosestElement({
+        selector: '[data-scroll-locked]',
+        testId: 'table-body',
+      }),
+    );
 
     isLoadingMoreState = true;
     rerender(<TableContent />);

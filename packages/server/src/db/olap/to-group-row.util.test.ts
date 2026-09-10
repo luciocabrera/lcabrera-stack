@@ -62,7 +62,12 @@ describe('toGroupRow', () => {
     });
 
     expect(result[OLAP_GROUP_ROW_FIELD].aggregates).toStrictEqual([
-      { columnKey: 'total_amount', fn: 'sum', value: '1234.5600' },
+      {
+        alias: 'sum_total_amount',
+        columnKey: 'total_amount',
+        fn: 'sum',
+        value: '1234.5600',
+      },
     ]);
   });
 
@@ -80,7 +85,9 @@ describe('toGroupRow', () => {
     });
 
     expect(result[OLAP_GROUP_ROW_FIELD].aggregates).toStrictEqual(
-      JSON.parse('[{"columnKey":"unit_price","fn":"avg","value":null}]'),
+      JSON.parse(
+        '[{"alias":"avg_unit_price","columnKey":"unit_price","fn":"avg","value":null}]',
+      ),
     );
   });
 

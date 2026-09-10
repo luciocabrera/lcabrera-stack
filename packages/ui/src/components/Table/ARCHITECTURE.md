@@ -315,7 +315,12 @@ While grouping is applied, five derivations reshape the column list, in an
 order that matters. `withAggregateColumns` runs first and replaces each
 **measured** column with one column per aggregate applied to it —
 the primary key included, since a row id is resolved from the declared columns
-and never from the painted list. `withGroupedColumnScope` then drops every
+and never from the painted list. A column axis uses that same path: the emitted
+`alias` is `TableColumn.key` and `axis.value` is the header (SQL NULL is an
+empty header); an empty axis emits no measure columns. There is not a second
+mapper. The column-view selectors derive the emitted list from the current
+group rows, so a loaded response and its painted columns stay in one read
+path. `withGroupedColumnScope` then drops every
 column the grouping neither keys nor measures, so the grid holds the group keys
 and the measures and nothing else
 ([ADR-096](../../../../../docs/decisions/ADR-096-the-grouping-decides-which-columns-the-grid-shows.md),
