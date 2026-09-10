@@ -8,6 +8,9 @@ area:
   - packages/ui/src/components/Table/TableBodyCell/**
   - packages/ui/src/components/Table/TableHeaderCell/**
   - packages/ui/src/components/Table/TableHeaderBand/**
+  - packages/ui/src/components/Table/TableRow/**
+  - packages/ui/src/components/Table/*.test.ts
+  - .changeset/**
 started: 2026-09-10
 updated: 2026-09-10
 plan: (none)
