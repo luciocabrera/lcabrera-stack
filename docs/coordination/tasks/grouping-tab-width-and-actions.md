@@ -2,19 +2,21 @@
 id: grouping-tab-width-and-actions
 title: the grouping tab keeps its width and clears each subject on its own
 owner: agent:claude
-status: active
+status: review
 branch: feat/1168-grouping-tab-width-and-actions
 area:
   - packages/ui/src/components/Tabs/**
   - packages/ui/src/components/Table/TableSettingsDrawer/GroupingSection/**
   - packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawerBody/**
   - packages/ui/src/components/Table/TableSettingsDrawer/TableDrawerContext/actions/**
+  - packages/ui/src/components/Table/TableSettingsDrawer/TableDrawerContext/ARCHITECTURE.md
+  - packages/ui/src/INVENTORY.md
   - .changeset/grouping-tab-width-and-actions.md
   - reports/api-surface/**
 started: 2026-09-10
 updated: 2026-09-10
 plan: (none)
-pr: (none)
+pr: '#1172'
 issue: #1168
 ---
 
