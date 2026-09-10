@@ -3,9 +3,9 @@ import type {
   NormalizedColumnsState,
 } from '#ui/components/Table/Table.types';
 
-import { useColumnsStore } from '../useColumnsStore.hook';
+import { useGetColumnViewState } from './useGetColumnViewState.hook';
 
 export const useGetNormalizedColumn = <TData>(columnKey: DataKey<TData>) =>
-  useColumnsStore<NormalizedColumnsState<TData>[DataKey<TData>], TData>(
-    (state) => state.normalizedColumns[columnKey],
-  );
+  useGetColumnViewState<TData>().normalizedColumns[
+    columnKey
+  ] as NormalizedColumnsState<TData>[DataKey<TData>];

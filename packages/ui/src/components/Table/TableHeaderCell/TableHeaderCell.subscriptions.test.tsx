@@ -126,8 +126,8 @@ const renderCells = (onCellRender: (columnKey: string) => void) =>
     </table>,
   );
 
-describe('TableHeaderCell store subscriptions', () => {
-  it('re-renders only the resized header cell when one column width changes', () => {
+describe('TableHeaderCell column-view subscriptions', () => {
+  it('re-renders every header when a shared column view input changes', () => {
     const renders = new Map<string, number>();
     const bump = (key: string) => renders.set(key, (renders.get(key) ?? 0) + 1);
 
@@ -142,6 +142,6 @@ describe('TableHeaderCell store subscriptions', () => {
 
     const rerendered = COLUMN_KEYS.filter((key) => (renders.get(key) ?? 0) > 0);
 
-    expect(rerendered).toEqual(['col0']);
+    expect(rerendered).toEqual(COLUMN_KEYS);
   });
 });

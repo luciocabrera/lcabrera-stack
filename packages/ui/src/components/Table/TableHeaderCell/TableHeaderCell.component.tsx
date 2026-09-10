@@ -28,7 +28,16 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const column =
     columnProp === undefined
       ? storedColumn
-      : { ...columnProp, ...storedColumn };
+      : {
+          ...storedColumn,
+          ...columnProp,
+          ...(storedColumn.sortDirection !== undefined && {
+            sortDirection: storedColumn.sortDirection,
+          }),
+          ...(storedColumn.sortIndex !== undefined && {
+            sortIndex: storedColumn.sortIndex,
+          }),
+        };
   const width = useGetColumnWidth<TData>(columnKey);
   const pinInfo = useGetPinnedColumnInfo<TData>(columnKey);
 

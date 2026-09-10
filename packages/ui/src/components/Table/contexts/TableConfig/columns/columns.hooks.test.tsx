@@ -175,7 +175,8 @@ describe('TableConfig column hooks', () => {
       renderHook(() => useGetNormalizedColumn('status')).result.current,
     ).toEqual({
       key: 'status',
-      label: 'Status',
+      sortDirection: 'desc',
+      sortIndex: 0,
     });
     expect(
       renderHook(() => useGetPinnedColumnOffsets()).result.current,
