@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 
+import * as stylex from '@stylexjs/stylex';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
   afterEach,
@@ -18,6 +19,7 @@ import type {
   TablePersistenceEntry,
 } from '#ui/components/Table/Table.types';
 
+import { spacing } from '#ui/design-system/tokens/base.stylex';
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 import { deserializeGroupingFromURL } from '#ui/utils/urlState';
 
@@ -51,6 +53,14 @@ const NO_GROUPING: TableGroupingState = {
   shares: [],
   totalsPlacement: 'last',
 };
+
+const referenceStyles = stylex.create({
+  inset: { paddingInline: spacing.sm },
+});
+
+const insetClassNames = (stylex.props(referenceStyles.inset).className ?? '')
+  .split(' ')
+  .filter(Boolean);
 
 const stores = {
   columnsStore: createMockStore<Record<string, unknown>>({}),
@@ -666,6 +676,26 @@ describe('GroupingSection staging', () => {
 });
 
 describe('GroupingSection sub-tabs', () => {
+  it('drops the inset on every sub-tab panel, so the drawer tab insets them once', () => {
+    stores.metaStore.set({ isGroupingEnabled: true });
+
+    renderDrawer();
+
+    const insetPanels = screen
+      .getAllByRole('tabpanel', { hidden: true })
+      .filter((panel) =>
+        insetClassNames.some((className) =>
+          panel.getAttribute('class')?.split(' ').includes(className),
+        ),
+      )
+      .map((panel) => panel.getAttribute('id'));
+
+    expect(
+      insetPanels,
+      'A sub-tab panel carries its own inset while the drawer tab around it is already inset, which is the double inset #1168 removed.',
+    ).toStrictEqual([]);
+  });
+
   it('names its own tab strip, so it is not the drawer strip a reader hears', () => {
     renderDrawer();
 

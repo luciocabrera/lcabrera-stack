@@ -24,6 +24,7 @@
     "src",
     "CHANGELOG.md",
     "!src/**/*.test.*",
+    "!src/**/*.fixtures.*",
     "!src/benchmarks",
     "!src/**/*.md"
   ],

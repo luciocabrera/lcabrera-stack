@@ -24,6 +24,7 @@ export const GroupingSection = ({ isBusy = false }: GroupingSectionProps) => {
     ? [
         {
           children: <AdvancedSettingsSection isBusy={isBusy} />,
+          hasPadding: false,
           header: 'Advanced',
           key: GROUPING_SUBTAB_KEYS.advanced,
         },
@@ -33,11 +34,13 @@ export const GroupingSection = ({ isBusy = false }: GroupingSectionProps) => {
   const tabs: TabItem[] = [
     {
       children: <GroupKeysSubsection isBusy={isBusy} />,
+      hasPadding: false,
       header: 'Group Keys',
       key: GROUPING_SUBTAB_KEYS.keys,
     },
     {
       children: <AggregatesSubsection isBusy={isBusy} />,
+      hasPadding: false,
       header: 'Aggregates',
       key: GROUPING_SUBTAB_KEYS.aggregates,
     },

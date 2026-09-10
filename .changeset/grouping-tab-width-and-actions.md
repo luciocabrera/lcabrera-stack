@@ -12,7 +12,11 @@ already inset its body once, and the reader was paying for it twice in a panel
 that has little width to spare. The inset moves from the shared scroll container
 onto each panel to make that possible; the container keeps its scrollbar gutter.
 
-The Grouping tab declares it, so its three sub-tabs are inset once.
+The Grouping tab's three sub-tabs declare it, so their content is inset once by
+the drawer tab that holds them. The opt-out belongs on the nested strip rather
+than on the drawer tab: a drawer tab's inset also positions its section header,
+its footer toolbar and any nested tab strip, none of which the nested panels put
+back.
 
 **Group keys and aggregates can now be cleared and reset independently.** The
 pair in each sub-tab header acts on that sub-tab's subject, and the pair in the

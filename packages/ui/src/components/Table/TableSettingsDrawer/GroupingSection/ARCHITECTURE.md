@@ -270,6 +270,12 @@ grouping paints two sub-tabs rather than an empty third. Totals position still
 renders only under `rollup`: `flat` emits no subtotal and no grand total, so
 there would be nothing to position.
 
+**The sub-tabs drop their own inset; the drawer tab keeps its.** Each nested
+`TabItem` sets `hasPadding: false`, so pane content is inset once by the Grouping
+tab that holds it rather than twice. The opt-out cannot move up to the drawer tab:
+that inset also positions this section's footer toolbar and the nested tab strip,
+which sit outside the nested panels and so get nothing back from them.
+
 **Clear and reset sit at the scope they act on.** `GroupingSectionToolbar`'s
 footer variant takes no `scope` and acts on the whole grouping, so it belongs
 below the tabs where it governs all three panes. Its `toolbar` variant takes one
