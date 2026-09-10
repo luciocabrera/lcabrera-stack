@@ -1,5 +1,4 @@
 type MockToggleSwitchProps = {
-  readonly isBusy?: boolean;
   readonly isChecked: boolean;
   readonly isDisabled?: boolean;
   readonly label: string;
