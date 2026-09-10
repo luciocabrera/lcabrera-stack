@@ -24,6 +24,7 @@ type MockSidePanelHeaderToolbarProps = {
 type MockSidePanelProps = {
   readonly children: ReactNode;
   readonly onClose?: () => void;
+  readonly onWidthReset?: () => void;
 };
 
 type MockTabsProps = {
@@ -38,6 +39,7 @@ type MockTitleProps = {
 const {
   batchSetColumnDrawerSettingsMock,
   resetAllColumnDrawerSettingsMock,
+  resetPanelWidthMock,
   setTableColumnSettingsSelectedTabMock,
   setTableIsColumnSettingsPinnedMock,
   useGetNormalizedColumnMock,
@@ -47,6 +49,7 @@ const {
 } = vi.hoisted(() => ({
   batchSetColumnDrawerSettingsMock: vi.fn(),
   resetAllColumnDrawerSettingsMock: vi.fn(),
+  resetPanelWidthMock: vi.fn(),
   setTableColumnSettingsSelectedTabMock: vi.fn(),
   setTableIsColumnSettingsPinnedMock: vi.fn(),
   useGetNormalizedColumnMock: vi.fn(),
@@ -96,11 +99,18 @@ const MockSettingsIcon = vi.hoisted(() => {
 });
 
 const MockSidePanel = vi.hoisted(() => {
-  return function MockSidePanel({ children, onClose }: MockSidePanelProps) {
+  return function MockSidePanel({
+    children,
+    onClose,
+    onWidthReset,
+  }: MockSidePanelProps) {
     return (
       <div data-testid='side-panel'>
         <button onClick={onClose} type='button'>
           SidePanel Close
+        </button>
+        <button onClick={onWidthReset} type='button'>
+          SidePanel Width Reset
         </button>
         {children}
       </div>
@@ -211,7 +221,7 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
-  useResetTableSettingsPanelWidth: () => vi.fn(),
+  useResetTableSettingsPanelWidth: () => resetPanelWidthMock,
   useSetTableColumnSettingsSelectedTab: () =>
     setTableColumnSettingsSelectedTabMock,
   useSetTableIsColumnSettingsPinned: () => setTableIsColumnSettingsPinnedMock,
@@ -311,6 +321,24 @@ describe('ColumnSettingsDrawer', () => {
     render(<ColumnSettingsDrawer />);
 
     expect(screen.getByTestId('tabs').textContent).toBe('General|Details');
+  });
+
+  it('wires the panel width reset, which it shares with the table drawer', () => {
+    useGetNormalizedColumnMock.mockReturnValue({
+      dataType: 'string',
+      isFilterable: true,
+      isSortable: true,
+      key: 'name',
+      label: 'Name',
+    });
+
+    render(<ColumnSettingsDrawer />);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'SidePanel Width Reset' }),
+    );
+
+    expect(resetPanelWidthMock).toHaveBeenCalledTimes(1);
   });
 
   it('calls batch and reset actions from footer buttons', () => {

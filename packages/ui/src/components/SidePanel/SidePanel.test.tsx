@@ -182,7 +182,7 @@ describe('SidePanel', () => {
     }).toStrictEqual({ reset: 1, resized: 0 });
   });
 
-  it('ignores a double-click when the consumer offers no reset', () => {
+  it('leaves a double-click alone when the consumer offers no reset', () => {
     const onWidthChange = vi.fn();
 
     render(
@@ -197,9 +197,16 @@ describe('SidePanel', () => {
       </SidePanel>,
     );
 
-    fireEvent.doubleClick(screen.getByTestId('side-panel-resize-handle'));
+    const doubleClick = new MouseEvent('dblclick', {
+      bubbles: true,
+      cancelable: true,
+    });
+    fireEvent(screen.getByTestId('side-panel-resize-handle'), doubleClick);
 
-    expect(onWidthChange).not.toHaveBeenCalled();
+    expect({
+      prevented: doubleClick.defaultPrevented,
+      resized: onWidthChange.mock.calls.length,
+    }).toStrictEqual({ prevented: false, resized: 0 });
   });
 
   it('puts the splitter after the content, so opening the panel does not focus it', () => {

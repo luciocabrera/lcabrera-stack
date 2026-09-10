@@ -6,7 +6,11 @@ status: review
 branch: feat/1159-side-panel-width-reset
 area:
   - packages/ui/src/components/SidePanel/**
-  - packages/ui/src/components/Table/contexts/TableConfig/meta/actions/**
+  - packages/ui/src/components/Table/contexts/TableConfig/meta/**
+  - packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawer.*
+  - packages/ui/src/components/Table/ColumnSettingsDrawer/ColumnSettingsDrawer.*
+  - .changeset/**
+  - reports/api-surface/**
 started: 2026-09-10
 updated: 2026-09-10
 plan: (none)

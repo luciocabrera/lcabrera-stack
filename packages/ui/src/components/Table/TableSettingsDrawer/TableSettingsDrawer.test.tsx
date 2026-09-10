@@ -288,7 +288,7 @@ describe('TableSettingsDrawer', () => {
     expect(screen.getByText('Columns').textContent).toBe('Columns');
   });
 
-  it('clears the stored panel width when the splitter is double-clicked', () => {
+  it('wires the panel width reset to the action that clears it', () => {
     render(<TableSettingsDrawer />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Panel width reset' }));
