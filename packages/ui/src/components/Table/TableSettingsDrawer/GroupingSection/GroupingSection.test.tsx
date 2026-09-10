@@ -595,7 +595,6 @@ describe('GroupingSection staging', () => {
     applyOneKeyAndOneAggregate();
 
     renderDrawer();
-    fireEvent.click(screen.getByRole('button', { name: 'Clear Group Keys' }));
     openSubtab('Aggregates');
     fireEvent.click(screen.getByRole('button', { name: 'Clear Aggregates' }));
     fireEvent.click(screen.getByRole('button', { name: 'Reset Aggregates' }));
@@ -604,7 +603,42 @@ describe('GroupingSection staging', () => {
 
     openSubtab('Group Keys');
 
-    expect(screen.getByText(/No grouping applied/)).not.toBeNull();
+    expect(screen.getByText('1. Status')).not.toBeNull();
+  });
+
+  it('refuses to put aggregates back while no group key is staged', () => {
+    applyOneKeyAndOneAggregate();
+
+    renderDrawer();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear Group Keys' }));
+    openSubtab('Aggregates');
+    fireEvent.click(screen.getByRole('button', { name: 'Reset Aggregates' }));
+
+    expect(
+      screen.queryByText('Sum of Total'),
+      'A measure was staged with no key to measure over, which the grouping reducer discards on Accept without telling the reader.',
+    ).toBeNull();
+  });
+
+  it('puts back the mode the group keys were applied with', () => {
+    stores.groupingStore.reset({
+      aggregates: [],
+      keys: ['order_status'],
+      mode: 'rollup',
+      periods: {},
+      shares: [],
+      totalsPlacement: 'last',
+    });
+
+    renderDrawer();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear Group Keys' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Reset Group Keys' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(
+      stores.groupingStore.get().mode,
+      'Clearing the keys collapsed the draft to `flat`, and the reset read the mode back from that draft rather than from the table.',
+    ).toBe('rollup');
   });
 
   it('puts a staged edit back from the applied grouping', () => {

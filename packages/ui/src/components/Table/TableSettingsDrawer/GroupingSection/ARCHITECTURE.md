@@ -277,11 +277,23 @@ and sits in the section header of the sub-tab that owns that subject: `keys` in
 `ActiveGroupKeyList`, `aggregates` in `ActiveAggregateList`. A scoped clear is
 disabled while its own subject is empty.
 
-**Clearing the keys clears the aggregates, and that is the model, not the
-action.** `resolveTableGroupingUpdate` collapses the whole grouping to `flat`
-when the last key goes, because the state has no representation for a measure
-with no key to measure over. The reverse does not hold: clearing the aggregates
-leaves the keys staged.
+**Every scoped action goes through `useSetGrouping`, so none of them can stage a
+grouping the table would refuse.** The unscoped `useResetGrouping` may write the
+drawer store directly because it copies the whole committed state, which came out
+of the reducer already; a scoped action mixes committed and staged values, and
+that is the combination the reducer has to rule on.
+
+Two consequences follow, and both are the model rather than the actions.
+`resolveTableGroupingUpdate` collapses the whole grouping to `flat` when the last
+key goes, because the state has no representation for a measure with no key to
+measure over — so clearing the keys clears the aggregates, and resetting the
+aggregates does nothing while no key is staged. The reverse does not hold:
+clearing the aggregates leaves the keys staged.
+
+`useResetGroupKeys` reads `mode` from the table when the draft holds no keys of
+its own. A draft with no keys was collapsed to `flat` by the reducer, so its mode
+is that collapse rather than a reader's choice, and taking it back would flatten a
+rollup grouping on the clear-then-reset round trip.
 
 **The sub-tab a reader is on is not remembered.** The nested `Tabs` is
 uncontrolled and opens on Group Keys. The drawer's own tab is persisted because a

@@ -1,10 +1,17 @@
 // @vitest-environment jsdom
 
+import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { spacing } from '#ui/design-system/tokens/base.stylex';
+
 import { TABS_FIXTURE as tabs } from '../Tabs.fixtures';
 import { TabsContent } from './TabsContent.component';
+
+const referenceStyles = stylex.create({
+  inset: { paddingInline: spacing.sm },
+});
 
 afterEach(() => {
   cleanup();
@@ -12,6 +19,10 @@ afterEach(() => {
 
 const toClassNames = (element: Element | null) =>
   (element?.getAttribute('class') ?? '').split(' ').filter(Boolean);
+
+const insetClassNames = (stylex.props(referenceStyles.inset).className ?? '')
+  .split(' ')
+  .filter(Boolean);
 
 const renderPaddingPair = () => {
   render(
@@ -70,23 +81,28 @@ describe('TabsContent', () => {
 });
 
 describe('TabsContent horizontal inset', () => {
-  it('paints a different panel class when a tab opts out of the inset', () => {
-    const { flush, padded } = renderPaddingPair();
-
-    expect(padded.length).toBeGreaterThan(0);
-    expect(flush).not.toStrictEqual(padded);
+  it('compiles a non-empty reference for the inset it is looking for', () => {
+    expect(
+      insetClassNames.length,
+      'The reference declaration compiled to no class, so every case below would pass without checking anything.',
+    ).toBeGreaterThan(0);
   });
 
-  it('leaves a tab that says nothing about padding inset', () => {
-    const { flush, padded } = renderPaddingPair();
-
-    const droppedByFlush = padded.filter(
-      (className) => !flush.includes(className),
-    );
+  it('insets a tab that says nothing about padding', () => {
+    const { padded } = renderPaddingPair();
 
     expect(
-      droppedByFlush.length,
-      'A tab that declares no `hasPadding` lost a class the opted-out tab also lacks, so the inset is no longer the default.',
-    ).toBeGreaterThan(0);
+      insetClassNames.every((className) => padded.includes(className)),
+      'A tab that declares no `hasPadding` no longer carries the inset declaration, so the inset is not the default.',
+    ).toBe(true);
+  });
+
+  it('drops the inset from a tab that opts out of it', () => {
+    const { flush } = renderPaddingPair();
+
+    expect(
+      insetClassNames.some((className) => flush.includes(className)),
+      '`hasPadding: false` left the inset declaration on the panel.',
+    ).toBe(false);
   });
 });

@@ -21,11 +21,19 @@ travel with the aggregates, so a scoped action carries the state that depends on
 it. Each scoped clear is disabled while its own subject is empty, and a locked
 grouping offers none of them.
 
-One asymmetry is worth stating, because it is the grouping model rather than
-these actions: clearing the group keys clears the aggregates too. The grouping
-state has no representation for a measure with no key to measure over — the
-reducer collapses the whole grouping when the last key goes — so the reverse
-does not hold. Clearing the aggregates leaves the keys alone.
+Every scoped action goes through the same reducer the unscoped pair uses, so
+none of them can stage a grouping the table would refuse. That is what decides
+the two asymmetries below; they are the grouping model, not these actions.
+
+Clearing the group keys clears the aggregates too. The grouping state has no
+representation for a measure with no key to measure over, and the reducer
+collapses the whole grouping when the last key goes. The reverse does not hold:
+clearing the aggregates leaves the keys alone.
+
+Resetting the aggregates does nothing while no group key is staged, for the same
+reason. Resetting the group keys puts back the mode they were applied with when
+the draft has no keys of its own, so clearing the keys and resetting them
+round-trips a rollup grouping instead of flattening it.
 
 `Clear Grouping` is now offered whenever either subject holds something, rather
 than only when a group key does; it previously sat disabled while aggregates

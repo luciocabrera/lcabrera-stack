@@ -160,38 +160,38 @@ Actions are hooks that return a callback. Each callback reads the store it owns
 and calls `set(partial)` on it — `columnsStore` for the column draft,
 `groupingStore` for the grouping one.
 
-| Hook                               | Reads From           | Writes To              | Side Effect                                                                  |
-| ---------------------------------- | -------------------- | ---------------------- | ---------------------------------------------------------------------------- |
-| `useSetColumnFilters`              | —                    | `columnsStore`         | —                                                                            |
-| `useSetColumnsOrder`               | —                    | `columnsStore`         | —                                                                            |
-| `useSetColumnsSortings`            | —                    | `columnsStore`         | —                                                                            |
-| `useSetColumnPinning`              | —                    | `columnsStore`         | —                                                                            |
-| `useSetColumnsSizing`              | —                    | `columnsStore`         | —                                                                            |
-| `useSetColumnsVisibility`          | —                    | `columnsStore`         | —                                                                            |
-| `useClearFilters`                  | —                    | `columnsStore`         | Sets `columnFilters` to `{}`                                                 |
-| `useClearSorting`                  | —                    | `columnsStore`         | Sets `sorting` to `[]`                                                       |
-| `useClearColumnOrderSection`       | —                    | `columnsStore`         | Clears visibility + pinning                                                  |
-| `useClearAllSettings`              | —                    | `columnsStore`         | Clears all fields                                                            |
-| `useResetFilters`                  | `TableConfigContext` | `columnsStore`         | Restores filters from table                                                  |
-| `useResetSorting`                  | `TableConfigContext` | `columnsStore`         | Restores sorting from table                                                  |
-| `useResetColumnOrderAndVisibility` | `TableConfigContext` | `columnsStore`         | Restores order + visibility from table                                       |
-| `useResetTableSettings`            | `TableConfigContext` | both drawer stores     | Restores all fields, grouping included, from the table                       |
-| `useOrderColumnsBySorting`         | `columnsStore`       | `columnsStore`         | Reorders columns by current sorting                                          |
-| `useSortByColumnOrder`             | `columnsStore`       | `columnsStore`         | Creates asc sorts from column order                                          |
-| `useSetGrouping` (internal)        | `groupingStore`      | `groupingStore`        | Resolves through `resolveTableGroupingUpdate`; no persistence, no navigation |
-| `useToggleGroupKey`                | —                    | `groupingStore`        | Stages a key added or removed                                                |
-| `useSetGroupKeys`                  | —                    | `groupingStore`        | Stages the whole ordered key list (reorder, remove)                          |
-| `useAddColumnAggregate`            | —                    | `groupingStore`        | Stages one more aggregate for a column (#831)                                |
-| `useRemoveColumnAggregate`         | —                    | `groupingStore`        | Un-stages one of a column's aggregates, or every one of them                 |
-| `useReorderColumnAggregates`       | —                    | `groupingStore`        | Stages the aggregates in a new order, named by `(columnKey, fn)` id (#832)   |
-| `useClearGrouping`                 | —                    | `groupingStore`        | Stages no keys and no aggregates                                             |
-| `useClearGroupKeys`                | —                    | `groupingStore`        | Stages no group keys; the model drops the aggregates with the last key       |
-| `useClearColumnAggregates`         | —                    | `groupingStore`        | Stages no aggregates and no shares, leaving the group keys staged            |
-| `useResetGrouping`                 | `TableConfigContext` | `groupingStore`        | Restores the whole grouping from the table                                   |
-| `useResetGroupKeys`                | `TableConfigContext` | `groupingStore`        | Restores keys and periods from the table, leaving the staged aggregates      |
-| `useResetColumnAggregates`         | `TableConfigContext` | `groupingStore`        | Restores aggregates and shares from the table, leaving the staged keys       |
-| `useSetTotalsPlacement`            | —                    | `totalsPlacementStore` | Stages where subtotals sit relative to the rows they total                   |
-| `useBatchSetTableDrawerSettings`   | every drawer store   | `TableConfig`          | Pushes all three drafts to the table in **one** commit — see below           |
+| Hook                               | Reads From           | Writes To              | Side Effect                                                                                                                                |
+| ---------------------------------- | -------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `useSetColumnFilters`              | —                    | `columnsStore`         | —                                                                                                                                          |
+| `useSetColumnsOrder`               | —                    | `columnsStore`         | —                                                                                                                                          |
+| `useSetColumnsSortings`            | —                    | `columnsStore`         | —                                                                                                                                          |
+| `useSetColumnPinning`              | —                    | `columnsStore`         | —                                                                                                                                          |
+| `useSetColumnsSizing`              | —                    | `columnsStore`         | —                                                                                                                                          |
+| `useSetColumnsVisibility`          | —                    | `columnsStore`         | —                                                                                                                                          |
+| `useClearFilters`                  | —                    | `columnsStore`         | Sets `columnFilters` to `{}`                                                                                                               |
+| `useClearSorting`                  | —                    | `columnsStore`         | Sets `sorting` to `[]`                                                                                                                     |
+| `useClearColumnOrderSection`       | —                    | `columnsStore`         | Clears visibility + pinning                                                                                                                |
+| `useClearAllSettings`              | —                    | `columnsStore`         | Clears all fields                                                                                                                          |
+| `useResetFilters`                  | `TableConfigContext` | `columnsStore`         | Restores filters from table                                                                                                                |
+| `useResetSorting`                  | `TableConfigContext` | `columnsStore`         | Restores sorting from table                                                                                                                |
+| `useResetColumnOrderAndVisibility` | `TableConfigContext` | `columnsStore`         | Restores order + visibility from table                                                                                                     |
+| `useResetTableSettings`            | `TableConfigContext` | both drawer stores     | Restores all fields, grouping included, from the table                                                                                     |
+| `useOrderColumnsBySorting`         | `columnsStore`       | `columnsStore`         | Reorders columns by current sorting                                                                                                        |
+| `useSortByColumnOrder`             | `columnsStore`       | `columnsStore`         | Creates asc sorts from column order                                                                                                        |
+| `useSetGrouping` (internal)        | `groupingStore`      | `groupingStore`        | Resolves through `resolveTableGroupingUpdate`; no persistence, no navigation                                                               |
+| `useToggleGroupKey`                | —                    | `groupingStore`        | Stages a key added or removed                                                                                                              |
+| `useSetGroupKeys`                  | —                    | `groupingStore`        | Stages the whole ordered key list (reorder, remove)                                                                                        |
+| `useAddColumnAggregate`            | —                    | `groupingStore`        | Stages one more aggregate for a column (#831)                                                                                              |
+| `useRemoveColumnAggregate`         | —                    | `groupingStore`        | Un-stages one of a column's aggregates, or every one of them                                                                               |
+| `useReorderColumnAggregates`       | —                    | `groupingStore`        | Stages the aggregates in a new order, named by `(columnKey, fn)` id (#832)                                                                 |
+| `useClearGrouping`                 | —                    | `groupingStore`        | Stages no keys and no aggregates                                                                                                           |
+| `useClearGroupKeys`                | —                    | `groupingStore`        | Stages no group keys; the model drops the aggregates with the last key                                                                     |
+| `useClearColumnAggregates`         | —                    | `groupingStore`        | Stages no aggregates and no shares, leaving the group keys staged                                                                          |
+| `useResetGrouping`                 | `TableConfigContext` | `groupingStore`        | Restores the whole grouping from the table                                                                                                 |
+| `useResetGroupKeys`                | `TableConfigContext` | `groupingStore`        | Restores keys and periods from the table through the reducer, leaving the staged aggregates; takes the mode too when the draft has no keys |
+| `useResetColumnAggregates`         | `TableConfigContext` | `groupingStore`        | Restores aggregates and shares from the table through the reducer, leaving the staged keys; a no-op while no key is staged                 |
+| `useSetTotalsPlacement`            | —                    | `totalsPlacementStore` | Stages where subtotals sit relative to the rows they total                                                                                 |
+| `useBatchSetTableDrawerSettings`   | every drawer store   | `TableConfig`          | Pushes all three drafts to the table in **one** commit — see below                                                                         |
 
 ## Selectors
 

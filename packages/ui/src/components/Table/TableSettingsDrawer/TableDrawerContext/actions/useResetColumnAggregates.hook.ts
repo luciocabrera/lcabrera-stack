@@ -1,22 +1,21 @@
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 
-import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
+import { useSetGrouping } from './useSetGrouping.hook';
 
 export const useResetColumnAggregates = () => {
   const { groupingStore } = useTableConfigContextValue();
-  const { groupingStore: groupingDrawerStore } = useTableDrawerContextValue();
+  const setGrouping = useSetGrouping();
 
   return () => {
     const { aggregates, shares } = groupingStore.get();
-    const { keys, mode, periods, totalsPlacement } = groupingDrawerStore.get();
 
-    groupingDrawerStore.set({
+    setGrouping((grouping) => ({
       aggregates,
-      keys,
-      mode,
-      periods,
+      keys: grouping.keys,
+      mode: grouping.mode,
+      periods: grouping.periods,
       shares,
-      totalsPlacement,
-    });
+      totalsPlacement: grouping.totalsPlacement,
+    }));
   };
 };

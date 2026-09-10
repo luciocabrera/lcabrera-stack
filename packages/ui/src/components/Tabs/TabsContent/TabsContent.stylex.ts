@@ -12,6 +12,7 @@ export const styles = stylex.create({
   },
   tabPanel: {
     paddingInline: spacing.sm,
+    boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
