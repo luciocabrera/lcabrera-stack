@@ -9,20 +9,25 @@ type CommitResolvedPinningStateArgs<TData> = CommitResolvedColumnStateArgs<
   'columnOrder' | 'columnPinning'
 >;
 
-export const commitResolvedPinningState = <TData>(
-  args: CommitResolvedPinningStateArgs<TData>,
-) => {
+export const commitResolvedPinningState = <TData>({
+  columnsStore,
+  drawersSyncNonce,
+  metaStore,
+  persistenceKey,
+  persistTableState,
+  ...derived
+}: CommitResolvedPinningStateArgs<TData>) => {
   const { effectiveColumns, pinnedColumnOffsets, pinnedColumnPartition } =
-    getPinnedDerivedColumnsState<TData>(args);
+    getPinnedDerivedColumnsState<TData>(derived);
 
   if (
     !commitPinningAndOrderUpdate<TData>({
-      columnsStore: args.columnsStore,
+      columnsStore,
       effectiveColumns,
-      newColumnOrder: args.columnOrder,
-      newPinning: args.columnPinning,
-      persistenceKey: args.persistenceKey,
-      persistTableState: args.persistTableState,
+      newColumnOrder: derived.columnOrder,
+      newPinning: derived.columnPinning,
+      persistenceKey,
+      persistTableState,
       pinnedColumnOffsets,
       pinnedColumnPartition,
     })
@@ -30,5 +35,5 @@ export const commitResolvedPinningState = <TData>(
     return;
   }
 
-  args.metaStore.set({ drawersSyncNonce: args.drawersSyncNonce + 1 });
+  metaStore.set({ drawersSyncNonce: drawersSyncNonce + 1 });
 };

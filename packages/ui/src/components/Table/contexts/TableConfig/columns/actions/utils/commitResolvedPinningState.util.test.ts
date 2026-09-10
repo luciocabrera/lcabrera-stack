@@ -63,24 +63,22 @@ describe('commitResolvedPinningState', () => {
       persistTableState,
     });
 
-    expect(mockGetPinnedDerivedColumnsState).toHaveBeenCalledWith(
-      expect.objectContaining({
-        aggregates: [],
-        columnOrder: ['id', 'name'],
-        columnPinning: { left: ['id'], right: [] },
-        columns: [
-          { key: 'id', label: 'ID' },
-          { key: 'name', label: 'Name' },
-        ],
-        columnSizing: {
-          actions: 0,
-          id: 100,
-          name: 0,
-        },
-        columnVisibility: new Set<keyof TData>(),
-        groupingKeys: [],
-      }),
-    );
+    expect(mockGetPinnedDerivedColumnsState).toHaveBeenCalledWith({
+      aggregates: [],
+      columnOrder: ['id', 'name'],
+      columnPinning: { left: ['id'], right: [] },
+      columns: [
+        { key: 'id', label: 'ID' },
+        { key: 'name', label: 'Name' },
+      ],
+      columnSizing: {
+        actions: 0,
+        id: 100,
+        name: 0,
+      },
+      columnVisibility: new Set<keyof TData>(),
+      groupingKeys: [],
+    });
 
     expect(mockCommitPinningAndOrderUpdate).toHaveBeenCalledWith({
       columnsStore,

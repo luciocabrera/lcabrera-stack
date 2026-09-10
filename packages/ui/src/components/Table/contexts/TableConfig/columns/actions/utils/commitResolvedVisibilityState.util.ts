@@ -11,32 +11,38 @@ type CommitResolvedVisibilityStateArgs<TData> = CommitResolvedColumnStateArgs<
   readonly columnVisibility: ColumnVisibilityState<TData>;
 };
 
-export const commitResolvedVisibilityState = <TData>(
-  args: CommitResolvedVisibilityStateArgs<TData>,
-) => {
+export const commitResolvedVisibilityState = <TData>({
+  columnsStore,
+  columnVisibility,
+  drawersSyncNonce,
+  metaStore,
+  persistenceKey,
+  persistTableState,
+  ...derived
+}: CommitResolvedVisibilityStateArgs<TData>) => {
   const { effectiveColumns, pinnedColumnOffsets, pinnedColumnPartition } =
-    getPinnedDerivedColumnsState<TData>(args);
+    getPinnedDerivedColumnsState<TData>({ ...derived, columnVisibility });
 
   if (
-    !args.persistTableState([
+    !persistTableState([
       {
-        persistenceKey: args.persistenceKey,
+        persistenceKey,
         slice: 'columnVisibility',
-        valueSlice: args.columnVisibility,
+        valueSlice: columnVisibility,
       },
     ])
   ) {
     return false;
   }
 
-  args.columnsStore.set({
-    columnVisibility: args.columnVisibility,
+  columnsStore.set({
+    columnVisibility,
     effectiveColumns,
     pinnedColumnOffsets,
     pinnedColumnPartition,
   });
 
-  args.metaStore.set({ drawersSyncNonce: args.drawersSyncNonce + 1 });
+  metaStore.set({ drawersSyncNonce: drawersSyncNonce + 1 });
 
   return true;
 };
