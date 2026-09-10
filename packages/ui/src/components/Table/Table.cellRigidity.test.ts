@@ -1,5 +1,5 @@
 /**
- * Two invariants a grouped, horizontally scrolled grid rests on.
+ * Three invariants a horizontally scrolled grid rests on.
  *
  * **Every cell a row paints declares `flexShrink: 0`.** A row is a flex
  * container and each cell is a flex item, so without this a cell carrying a
@@ -10,9 +10,17 @@
  * matches: the pinned columns overlap and the overlapped cell's right border is
  * painted under its neighbour's background.
  *
- * **Every row paints an opaque background whatever child it is.** A pinned cell
- * inherits its row's background, and a transparent sticky cell lets the columns
- * scrolling underneath show through it.
+ * **Every row paints a background whatever child it is.** StyleX merges by
+ * property rather than by condition, so a `backgroundColor` object with no
+ * `default:` key replaces the class beneath it and an odd row paints nothing.
+ *
+ * **A pinned body cell paints its own opaque background.** It is the cell the
+ * unpinned ones slide underneath, so it is the one that may not be see-through.
+ * It may not take the row's surface and it may not `inherit`: `surfacePrimary`
+ * carries alpha in both themes — `lab(100 0 0 / 0.66)` light, `lab(4 -0.35
+ * -1.26 / 0.48)` dark — so a cell wearing it shows the scrolled columns through
+ * itself. The translucency is the intended glass surface, which is why the cell
+ * changes rather than the token.
  *
  * Both assertions compare against reference declarations compiled in this file
  * rather than against literal hashes, because StyleX compiles a declaration to a
@@ -33,8 +41,9 @@ import { tableHeaderCellStyles } from './TableHeaderCell/TableHeaderCell.stylex'
 import { tableRowStyles } from './TableRow/TableRow.stylex';
 
 const referenceStyles = stylex.create({
-  opaqueBackground: { backgroundColor: colors.surfacePrimary },
+  pinnedSurface: { backgroundColor: colors.surfaceSecondary },
   rigid: { flexShrink: 0 },
+  rowSurface: { backgroundColor: colors.surfacePrimary },
 });
 
 const toDeclarations = (style: unknown) =>
@@ -53,9 +62,17 @@ const rigidEntries = toEntries(referenceStyles.rigid);
 const toClassNames = (className: string | undefined) =>
   (className ?? '').split(' ').filter(Boolean);
 
-const opaqueClassNames = toClassNames(
-  stylex.props(referenceStyles.opaqueBackground).className,
+const rowSurfaceClassNames = toClassNames(
+  stylex.props(referenceStyles.rowSurface).className,
 );
+const pinnedSurfaceClassNames = toClassNames(
+  stylex.props(referenceStyles.pinnedSurface).className,
+);
+
+const PINNED_CELL_STYLES = [
+  ['pinnedLeft', tableBodyCellStyles.pinnedLeft(0)],
+  ['pinnedRight', tableBodyCellStyles.pinnedRight(0)],
+] as const;
 
 type DeclaresEveryArgs = {
   readonly entries: readonly (readonly [string, unknown])[];
@@ -90,17 +107,45 @@ describe('table cell styles', () => {
 
 describe('table row backgrounds', () => {
   it('compiles a reference background declaration to compare against', () => {
-    expect(opaqueClassNames.length).toBeGreaterThan(0);
+    expect(rowSurfaceClassNames.length).toBeGreaterThan(0);
   });
 
-  it('keeps an opaque background on a striped row that is not an even child', () => {
+  it('keeps an unconditional background on a striped row that is not an even child', () => {
     const painted = toClassNames(
       stylex.props(tableRowStyles.base, tableRowStyles.striped).className,
     );
 
     expect(
-      opaqueClassNames.every((className) => painted.includes(className)),
-      'A striped row lost its unconditional background-color class. StyleX merges by property, not by condition: a backgroundColor object with no `default:` key replaces the class beneath it outright, so an odd row would paint no background at all. Pinned cells inherit that background, and a transparent sticky cell lets the scrolled columns show through it.',
+      rowSurfaceClassNames.every((className) => painted.includes(className)),
+      'A striped row lost its unconditional background-color class. StyleX merges by property, not by condition: a backgroundColor object with no `default:` key replaces the class beneath it outright, so an odd row would paint no background at all.',
     ).toBe(true);
   });
+});
+
+describe('pinned body cell backgrounds', () => {
+  it('compiles a reference pinned background to compare against', () => {
+    expect(pinnedSurfaceClassNames.length).toBeGreaterThan(0);
+  });
+
+  for (const [variantName, style] of PINNED_CELL_STYLES) {
+    it(`${variantName} paints the opaque pinned surface`, () => {
+      const painted = toClassNames(stylex.props(style).className);
+
+      expect(
+        pinnedSurfaceClassNames.every((className) =>
+          painted.includes(className),
+        ),
+        `TableBodyCell.${variantName} no longer paints the opaque pinned surface. A pinned cell is what the unpinned cells scroll underneath, so anything see-through there — 'inherit', or a token carrying alpha — lets those columns show through it.`,
+      ).toBe(true);
+    });
+
+    it(`${variantName} refuses the translucent row surface`, () => {
+      const painted = toClassNames(stylex.props(style).className);
+
+      expect(
+        rowSurfaceClassNames.some((className) => painted.includes(className)),
+        `TableBodyCell.${variantName} paints the row surface. surfacePrimary carries alpha in both themes, so the scrolled columns show through the pinned cell.`,
+      ).toBe(false);
+    });
+  }
 });
