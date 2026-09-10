@@ -72,6 +72,7 @@ vi.mock('#ui/hooks/usePersistCookieAction.hook', () => ({
   usePersistCookieAction: () => vi.fn(),
 }));
 
+import { useResetTableSettingsPanelWidth } from './actions/useResetTableSettingsPanelWidth.hook';
 import { useSetTableColumnSelectedKey } from './actions/useSetTableColumnSelectedKey.hook';
 import { useSetTableDrawersOpenState } from './actions/useSetTableDrawersOpenState.hook';
 import { useSetTableIsTableSettingsOpen } from './actions/useSetTableIsTableSettingsOpen.hook';
@@ -210,5 +211,19 @@ describe('TableConfig meta hooks', () => {
       'status',
     ]);
     expect(storesRef.metaStore.get().tableSettingsSelectedTab).toBe('sorting');
+  });
+
+  it('resets the settings panel width by clearing it, not by writing the band floor', () => {
+    const resetPanelWidth = renderHook(() => useResetTableSettingsPanelWidth());
+
+    act(() => {
+      storesRef.metaStore.set({ settingsPanelWidth: 640 });
+    });
+
+    act(() => {
+      resetPanelWidth.result.current();
+    });
+
+    expect(storesRef.metaStore.get().settingsPanelWidth).toBeUndefined();
   });
 });
