@@ -10,7 +10,7 @@ area:
   - packages/ui/src/components/Table/TableHeaderBand/**
   - packages/ui/src/components/Table/TableRow/**
   - packages/ui/src/components/Table/*.test.ts
-  - .changeset/**
+  - .changeset/table-cells-hold-their-width.md
 started: 2026-09-10
 updated: 2026-09-10
 plan: (none)
