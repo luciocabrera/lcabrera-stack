@@ -7,11 +7,12 @@ export const useResetTableSettingsPanelWidth = () => {
 
   return () => {
     const metaState = metaStore.get();
+    const nextStatePatch = { settingsPanelWidth: undefined };
 
-    metaStore.set({ settingsPanelWidth: undefined });
     persistUiFlags({
       currentState: metaState,
-      nextStatePatch: { settingsPanelWidth: undefined },
+      nextStatePatch,
     });
+    metaStore.set(nextStatePatch);
   };
 };
