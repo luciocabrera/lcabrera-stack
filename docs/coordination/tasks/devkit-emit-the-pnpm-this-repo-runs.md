@@ -12,6 +12,7 @@ area:
   - scripts/lib/devkit-pins.mjs
   - scripts/lib/devkit-pins.test.mjs
   - scripts/lib/devkit-emitted-pins.test.mjs
+  - scripts/lib/deps-refresh-pin-drift.test.mjs
   - .fallowrc.json
   - .changeset/**
 started: 2026-09-11
