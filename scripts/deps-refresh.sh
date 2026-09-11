@@ -8,6 +8,8 @@
 #   - vp itself (the global CLI) via `vp upgrade`
 #   - pnpm (the pinned `packageManager`) — taze moves the version, corepack adds
 #     the integrity hash; both write the field (#927)
+#   - the Node and pnpm pins devkit writes into a new repository, which are
+#     copies of the two above and moved to match them (#1179)
 #   - the pnpm catalog + every workspace package.json via taze — which also bumps
 #     the `vite-plus` dep, and with it vite/rolldown/vitest/oxlint/oxfmt/tsdown
 # then clean + reinstall so the tree resolves against all of it. Superseded
@@ -121,7 +123,7 @@ open_the_pr() {
   extra=""
   [[ -n "$deps_commit" ]] && extra="$(git log --format='- %s' "${deps_commit}..HEAD")"
   if [[ -z "$extra" ]]; then
-    impact="Manifests + lockfile only — the catalog, workspace package.json versions, and the pinned \`packageManager\` (pnpm); no source change."
+    impact="Manifests + lockfile only — the catalog, workspace package.json versions, and the pinned \`packageManager\` (pnpm) — plus the Node and pnpm pins \`devkit\` emits into a new repository, when the root ones moved; no other source change."
   else
     impact="Manifests + lockfile, **plus the source commits the gate required** to land the bump:
 
@@ -300,6 +302,13 @@ corepack_failed=()
 node scripts/verify-package-manager-pin.mjs --before "$pnpm_before" ${corepack_failed[@]+"${corepack_failed[@]}"} ||
   die "the packageManager pin lost its integrity hash — see above. The working tree holds the half-finished refresh; no issue, branch or commit was made."
 
+# devkit writes the Node and pnpm pins into a new repository as constants, and a
+# test holds them to the root pins moved above. Without this step the refresh
+# PR could not go green until someone edited them by hand (#1179).
+log "Syncing the pins devkit emits (packages/devkit/scripts/workspace.mjs) with the root"
+node scripts/sync-devkit-pins.mjs ||
+  die "the pins devkit emits could not be moved with the root — see above. The working tree holds the half-finished refresh; no issue, branch or commit was made."
+
 log "Reinstalling with the refreshed versions (vp install)"
 "$vp_global" install
 
@@ -356,7 +365,7 @@ Refresh all dependencies to their latest in-range versions (TypeScript held for 
 
 ## 3. Context & Background
 
-Opened by `vp run deps:refresh` (scripts/deps-refresh.sh): vp upgrade → pnpm clean → taze → corepack use pnpm@latest → vp install, then this issue + branch + PR. Manifests + lockfile, and the `.node-version` pin when taze moves it; no source change expected.
+Opened by `vp run deps:refresh` (scripts/deps-refresh.sh): vp upgrade → pnpm clean → taze → corepack use pnpm@latest → sync the pins devkit emits → vp install, then this issue + branch + PR. Manifests + lockfile, the `.node-version` pin when taze moves it, and the devkit copies of the Node and pnpm pins when the root ones moved; no other source change expected.
 
 ## 4. Reproduction Steps
 
@@ -368,6 +377,7 @@ Not a bug — routine maintenance.
 
 - Version bumps in `pnpm-workspace.yaml` (catalog) and workspace `package.json` files, plus the regenerated `pnpm-lock.yaml`.
 - The `.node-version` pin, when taze moves it. CI runs on that pin, so the gate verifies the new runtime; local machines do not inherit it and must install it.
+- The Node and pnpm pins `devkit` writes into a new repository, moved to match the root ones.
 
 ### Out of Scope
 
