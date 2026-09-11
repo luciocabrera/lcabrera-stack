@@ -19,7 +19,7 @@
  * every regenerated config is left dirty.
  */
 
-export const NODE_VERSION = '26.8.1';
+export const NODE_VERSION = '26.8.2';
 
 const PACKAGE_MANAGER =
   'pnpm@11.25.0+sha256.33dd0748f27e7916c4f1c8b6943461983e3453b06bbda6312a6280130b4881e5';

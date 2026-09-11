@@ -71,7 +71,7 @@ const catalogGroups = (workspaceFile) => {
 
 describe('nodeEngineBand', () => {
   test('admits the whole major the pin sits in, and nothing above it', () => {
-    expect(nodeEngineBand('26.8.1')).toBe('>=26 <27');
+    expect(nodeEngineBand('26.8.2')).toBe('>=26 <27');
     expect(nodeEngineBand('7.0.0')).toBe('>=7 <8');
   });
 
