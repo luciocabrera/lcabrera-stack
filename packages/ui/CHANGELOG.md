@@ -1,5 +1,173 @@
 # @lcabrera/ui
 
+## 0.8.0
+
+### Minor Changes
+
+- 29c562b: A grouped read can name a column axis: distinct values become `FILTER`
+  aggregates, the ceiling comes from the caller, and a set past that ceiling is
+  refused as `column-axis-too-wide`. A `countDistinct` that expansion would emit
+  more than once is refused.
+- b6035fc: The grouping settings now separate their three subjects into sub-tabs, and the
+  top-level Advanced tab is gone.
+
+  The Grouping tab paints its own strip — **Group Keys**, **Aggregates**,
+  **Advanced** — so configuring the dimensions a read groups by no longer means
+  scrolling past the measures it aggregates. Advanced holds the totals mode and the
+  totals position, and is painted only when one of the two can render: a locked,
+  non-rollup grouping shows two sub-tabs.
+
+  The settings drawer's own strip is now General, Columns, Filters, Sorting,
+  Grouping, Details.
+
+  **Breaking, for a consumer that names the tab role.** `TableSettingsTabRole` no
+  longer includes `'advanced'`. Code that writes that role — a stored tab order, a
+  literal in a test, an exhaustive switch over the union — stops compiling and
+  should drop it. A stored order that names it needs no migration: the value is
+  sanitised on read, so the name is dropped and the remaining roles keep their
+  positions. A reader whose last-selected tab was `advanced` lands on the first tab
+  once, and one click corrects it.
+
+  `Tabs` takes an optional `label` for the tab strip's accessible name, defaulting
+  to what it used to hardcode. Pass it wherever a page paints more than one strip:
+  two `tablist` elements sharing a name are ambiguous to a screen reader and to a
+  role query alike.
+
+- 27e4ff6: A tab can decline the tab body's horizontal inset, and the grouping settings
+  clear and reset each of their subjects on its own.
+
+  `TabItem` takes an optional `hasPadding`. It defaults to `true`, so every
+  existing tab paints the inset it painted before. Setting it to `false` drops the
+  inset for that panel alone, which is what a nested tab strip needs: the parent
+  already inset its body once, and the reader was paying for it twice in a panel
+  that has little width to spare. The inset moves from the shared scroll container
+  onto each panel to make that possible; the container keeps its scrollbar gutter.
+
+  The Grouping tab's three sub-tabs declare it, so their content is inset once by
+  the drawer tab that holds them. The opt-out belongs on the nested strip rather
+  than on the drawer tab: a drawer tab's inset also positions its section header,
+  its footer toolbar and any nested tab strip, none of which the nested panels put
+  back.
+
+  **Group keys and aggregates can now be cleared and reset independently.** The
+  pair in each sub-tab header acts on that sub-tab's subject, and the pair in the
+  footer still acts on the whole grouping. Periods travel with the keys and shares
+  travel with the aggregates, so a scoped action carries the state that depends on
+  it. Each scoped clear is disabled while its own subject is empty, and a locked
+  grouping offers none of them.
+
+  Every scoped action goes through the same reducer the unscoped pair uses, so
+  none of them can stage a grouping the table would refuse. That is what decides
+  the two asymmetries below; they are the grouping model, not these actions.
+
+  Clearing the group keys clears the aggregates too. The grouping state has no
+  representation for a measure with no key to measure over, and the reducer
+  collapses the whole grouping when the last key goes. The reverse does not hold:
+  clearing the aggregates leaves the keys alone.
+
+  Resetting the aggregates does nothing while no group key is staged, for the same
+  reason. Resetting the group keys puts back the mode they were applied with when
+  the draft has no keys of its own, so clearing the keys and resetting them
+  round-trips a rollup grouping instead of flattening it.
+
+  `Clear Grouping` is now offered whenever either subject holds something, rather
+  than only when a group key does; it previously sat disabled while aggregates
+  were staged against no key.
+
+- 557c8a1: A grouped read can name a column axis on the grouping envelope. Derived
+  columns use the emitted alias as the column key and the axis value as the
+  header; an empty axis emits no measure columns. A malformed axis, or one
+  that is also a row key, drops the whole grouping payload.
+- 349d23d: Double-clicking a `SidePanel`'s splitter now resets the panel to the width it
+  opens at, matching the gesture the grid's column splitter already answers.
+
+  `SidePanel` takes a new optional `onWidthReset`. It fires on a double-click of
+  the splitter, and the consumer answers by dropping the width it stored rather
+  than by writing a number — that is what lets the panel paint from its `size`
+  variant again. Writing the band's floor instead would park every panel at the
+  same width whatever size it was opened at, which is why the callback carries no
+  number to write.
+
+  A consumer that passes no `onWidthReset` is unaffected: the handler returns
+  before touching the event, so a double-click stays an ordinary pair of clicks.
+
+  The settings drawers pass it, so a reader who has dragged either one wider can
+  put it back and it stays put — the cleared width is persisted, not just applied
+  to the open panel.
+
+  **A resize gesture that never moved the pointer now commits nothing.** Both
+  splitters — the panel's and a grid column's — committed the width they started at
+  on every mouse-up, so a plain click persisted a value the reader had not changed.
+  A double-click is two of those, which made the new reset write the old width twice
+  before dropping it. The end state was always right; the writes were not. Nothing
+  about a real drag changes.
+
+  `Enter` on the focused splitter resets it too, so the gesture is not pointer-only.
+  The splitter is a focusable `role='separator'`, so a reader who resized it with
+  the arrows or Home/End can undo that from the keyboard rather than being left with
+  a width they cannot put back. Arrow and Home/End handling is unchanged, and a
+  consumer that passes no `onWidthReset` sees `Enter` fall through untouched.
+
+- d698c54: Split the grid's meta snapshot into capability and chrome types, and keep the
+  grouping query on the grouping store — including totals placement — so a chrome
+  patch cannot name a group key. Filter-options and load-more failures write
+  `TableResponseError` on the store that fetched, not a string on meta.
+
+### Patch Changes
+
+- fba91ed: Drop a persisted or URL-borne column key that is no longer in the column set,
+  and refuse a settings cookie whose JSON is not an object.
+- a2314eb: Sync a store provider from a later snapshot of the same instance, and abort an
+  initial list fetch when the provider unmounts so a closed list cannot write the
+  next open's first page.
+- 6c52aa7: A pinned table cell is opaque again, so the columns scrolling underneath it no
+  longer show through.
+
+  The previous release made a pinned body cell inherit its row's background so it
+  would pick up a group or subtotal row's tint. That reasoning missed which token
+  an ordinary row paints: `surfacePrimary` carries alpha in both themes, and it is
+  the glass surface the design intends. A pinned cell wearing it is see-through,
+  and a pinned cell is precisely the one the unpinned cells scroll beneath — so
+  their text was legible on top of it, on every row the stripe did not tint.
+
+  Pinned cells take an opaque surface again. Nothing else about pinning changes,
+  and cells still refuse to shrink under flex.
+
+  The tint that motivated the change is not restored by other means. A row tint
+  that is itself translucent cannot make an opaque cell, so matching the two needs
+  the tint passed to the cell as its own opaque colour rather than inherited.
+
+- aae85ce: Stop a grid's cells from shrinking, which was making pinned columns overlap and
+  lose their borders once the grid scrolled sideways.
+
+  A row is a flex container and every cell is a flex item, but no cell declared
+  `flexShrink: 0`. A cell whose width has been committed — by a drag, a preset, or
+  the width band a grouped grid applies — could therefore be squeezed back toward
+  its minimum whenever the row's columns totalled more than the viewport. That is
+  the same condition that produces the horizontal scrollbar, so the squeeze arrived
+  exactly when the reader scrolled.
+
+  The sticky offset of each pinned column is derived from its declared width, so a
+  squeezed pinned cell left the next one anchored where the first no longer ended.
+  Pinned columns drew on top of one another and the covered cell's right border
+  disappeared under its neighbour. Group-key columns showed it first because a
+  grouped grid pins every one of them.
+
+  **A striped row now paints a background on every row, not only even ones.** Its
+  `backgroundColor` named the `:nth-child(even)` case alone, and StyleX merges by
+  property rather than by condition — so the rule replaced the row's plain
+  background outright and an odd row carried no `background-color` at all. Nothing
+  showed, because the surface behind it matched. It matters now: a pinned cell
+  inherits its row's background instead of always painting the plain surface, so it
+  carries the same tint as the rest of a group, subtotal or grand-total row rather
+  than leaving a seam where the pinned columns end — and inheriting a transparent
+  background would have let the scrolled columns show through the pinned ones.
+
+  The two table cell style modules no longer re-export the shared skeleton token
+  under a local name; their components read it from the design-system tokens
+  directly. Nothing published changes — neither module is reachable through this
+  package's `exports`.
+
 ## 0.7.0
 
 ### Minor Changes

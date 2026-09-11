@@ -1,5 +1,95 @@
 # @lcabrera/devkit
 
+## 0.5.0
+
+### Minor Changes
+
+- 49d794e: Reconcile the whole task block in a consumer's root manifest instead of writing
+  it once. Every run now merges it key by key — the gate tasks and, from the
+  `monorepo` profile up, the blueprint's — against the record of what this kit last
+  wrote there: a task it wrote and you have not touched is updated in place, a task
+  you changed is reported and kept as you have it, a task it no longer ships is
+  removed, and one it has added since arrives, beside your own tasks, which it
+  never touches. Wiring a task where the manifest holds none is still only `init`'s
+  job for the gate tasks and `create`'s for the blueprint's, and a task whose
+  binary is not installed is still never written into a manifest that lacks it. The
+  record lives in a new `tasks` block in `.devkit-manifest.json`.
+
+  A task the run left alone counts as divergence, so `doctor --check` fails on a
+  block that has diverged. It reports what it counts either way; counting only the
+  tasks a run would write would have made a check that names your changed task and
+  then exits zero.
+
+  The shipped `COMMANDS.md` now documents every task the kit wires, and
+  `commands:verify` is wired from the `monorepo` profile up so a consumer's own gate
+  holds the two together.
+
+  **Configure `commands.run`** — the prefix your repository runs a task by, such as
+  `npm run`. It is new, the shipped command reference carries a placeholder for it,
+  and a file whose placeholders cannot all be answered is not written: without the
+  key `COMMANDS.md` is reported as `unresolved` rather than materialised. `devkit
+init --upgrade` adds it and keeps everything else you set — and `sync` and
+  `doctor --check` now say so themselves, instead of sending you to the one command
+  that cannot write a config key.
+
+- c0fc143: The workspace rung now emits a running application, not an empty directory
+  where one should be.
+
+  `create --profile monorepo` places a React Router application in framework mode
+  — root, a page route, an action route, error boundaries, entry files and route
+  config — whose page renders a table from rows the module holds. There is nothing
+  behind that page to ask for a second one, so the set is sized to the one page
+  the loader reads and the row count the table reports is the row count it can
+  show. It has no server, no database and no fetch, so the rung it belongs to is
+  falsifiable on its own: the tree it produces builds, serves a page, and passes
+  its own typecheck, test, lint and format tasks.
+
+  Every column that page declares turns sorting and filtering off. Both are
+  resolved by whatever answers the read rather than in the browser, and a page
+  assembled from a module answers the same rows to every request — so a header
+  offering a sort would take a click and change nothing. The grid offers what this
+  rung can answer instead: pinning, hiding, column widths, column order, the
+  settings panel and the theme. Deleting the two flags from a column is what turns
+  them back on, and it belongs with a loader that reads a page it can sort.
+
+  The action route answers the fixed path the component library submits a grid's
+  persisted state to — a sort, a column width, a pin, a global preference, the
+  theme — and the page route exports the library's revalidation predicate beside
+  its loader. Without that route the application still builds and serves, and the
+  first pin or column resize then submits to a path the router cannot match: the
+  not-found lands on the page and its error boundary takes the place of the
+  table.
+
+  Every stack package the application names is declared as a semver range resolved
+  from the registry, and the packed tarball gate now fails any produced file
+  carrying a `workspace:` specifier — one of those resolves a directory of the
+  workspace it was written in, so it installs where it was authored and nowhere
+  else. The ranges are written as a floor bounded at the next major rather than as
+  a caret, because below 1.0.0 a caret admits no minor above the one it names: a
+  release would fall outside the range on the day it shipped, with every gate
+  still green.
+
+  Three settings in the emitted Vite config follow from the component library
+  publishing TypeScript source rather than a build, and none of them is optional.
+  StyleX is given an alias resolved from the installed package so it can see the
+  library's own files, the client bundler is told not to pre-bundle them past that
+  plugin, and the server build is told not to externalise them — Node refuses to
+  strip types under `node_modules`, so that last one fails when the server starts
+  rather than when it builds.
+
+### Patch Changes
+
+- 01100d3: `@lcabrera/server` now declares `zod` at `^4.6.1`; a consumer installing it
+  resolves that release or later. `@lcabrera/devkit` pins Node 26.8.2 in the
+  `.node-version` it writes into a new repository, and derives the install band
+  from that pin.
+- 95817db: The workspace the monorepo profile places now catalogs `@lcabrera/vite-config`
+  and `@lcabrera/tsconfig` as `>=<current> <1.0.0` rather than a caret. Below
+  1.0.0 a caret range ends at the next minor, so a repository created after either
+  package released one resolved the version before it — an install that succeeded
+  and quietly left the release behind. A repository created now resolves what is
+  current on the day it is created, and keeps doing so as those packages release.
+
 ## 0.4.0
 
 ### Minor Changes

@@ -1,5 +1,25 @@
 # @lcabrera/server
 
+## 0.7.0
+
+### Minor Changes
+
+- 29c562b: A grouped read can name a column axis: distinct values become `FILTER`
+  aggregates, the ceiling comes from the caller, and a set past that ceiling is
+  refused as `column-axis-too-wide`. A `countDistinct` that expansion would emit
+  more than once is refused.
+- 557c8a1: A grouped read can name a column axis on the grouping envelope. Derived
+  columns use the emitted alias as the column key and the axis value as the
+  header; an empty axis emits no measure columns. A malformed axis, or one
+  that is also a row key, drops the whole grouping payload.
+
+### Patch Changes
+
+- 01100d3: `@lcabrera/server` now declares `zod` at `^4.6.1`; a consumer installing it
+  resolves that release or later. `@lcabrera/devkit` pins Node 26.8.2 in the
+  `.node-version` it writes into a new repository, and derives the install band
+  from that pin.
+
 ## 0.6.0
 
 ### Minor Changes
