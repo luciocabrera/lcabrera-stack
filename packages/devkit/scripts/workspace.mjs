@@ -10,9 +10,15 @@
  * still reconciles, key by key — `tasks.mjs` — because a block of names is
  * mergeable where the rest of the manifest is not.
  *
- * The versions are deliberately absent. Every dependency here resolves through
- * `catalog:`, so `pnpm-workspace.yaml` is the one place a version is declared
- * and a second copy cannot drift from it.
+ * The dependency versions are deliberately absent. Every dependency here
+ * resolves through `catalog:`, so `pnpm-workspace.yaml` is the one place a
+ * version is declared and a second copy cannot drift from it.
+ *
+ * The two runtime pins are the exception, and they are copies on purpose: a new
+ * repository has no catalog to read them from, so they ship as constants. Each
+ * is held to the pin this repository runs by a test, and `deps:refresh` moves
+ * them with the root — the pnpm one once sat a major behind because nothing did
+ * either (#1179).
  *
  * The generate task formats what it wrote because the published writer emits
  * plain `JSON.stringify` output that Oxfmt then collapses; without that step
@@ -21,8 +27,8 @@
 
 export const NODE_VERSION = '26.8.2';
 
-const PACKAGE_MANAGER =
-  'pnpm@11.25.0+sha256.33dd0748f27e7916c4f1c8b6943461983e3453b06bbda6312a6280130b4881e5';
+export const PACKAGE_MANAGER =
+  'pnpm@12.3.4+sha256.08a3d2d539b377a6b7ea2469b612672255ca71c30a62698530582cb9d35c268f';
 
 export const TSCONFIG_WORKSPACE = '@repo/typescript-config';
 
