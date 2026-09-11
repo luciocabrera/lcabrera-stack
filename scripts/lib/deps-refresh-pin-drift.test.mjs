@@ -49,3 +49,17 @@ describe('deps-refresh.sh and the packageManager pin', () => {
     expect(script).not.toContain('taze does not touch the `packageManager`');
   });
 });
+
+describe('deps-refresh.sh and the pins devkit emits', () => {
+  it('rewrites the devkit copies after corepack has written the root pin', () => {
+    const corepackWrote = script.indexOf('use pnpm@latest');
+    const synced = script.indexOf('node scripts/sync-devkit-pins.mjs');
+
+    expect(
+      corepackWrote,
+      'the corepack call moved or was renamed',
+    ).toBeGreaterThan(-1);
+    expect(synced, 'the devkit pins are never synced').toBeGreaterThan(-1);
+    expect(synced).toBeGreaterThan(corepackWrote);
+  });
+});

@@ -6,7 +6,8 @@
  * nothing to read them from yet. `deps:refresh` moves the root pins every day
  * and nothing else reached the copies: the Node one was caught by devkit's own
  * blueprint test, the pnpm one was not and shipped a major behind (#1179). This
- * holds each copy to the root, and holds the refresh script to rewriting them.
+ * holds each copy to the root; `deps-refresh-pin-drift.test.mjs` holds the
+ * refresh script to rewriting them.
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -33,21 +34,5 @@ describe('the pins devkit emits are the pins this repository runs', () => {
 
   it('node: the emitted .node-version is the root pin', () => {
     expect(NODE_VERSION).toBe(read('.node-version').trim());
-  });
-});
-
-describe('deps-refresh.sh carries the emitted pins with the root ones', () => {
-  const script = read('scripts', 'deps-refresh.sh');
-
-  it('rewrites the devkit constants after corepack has written the root pin', () => {
-    const corepackWrote = script.indexOf('use pnpm@latest');
-    const synced = script.indexOf('packages/devkit/scripts/workspace.mjs');
-
-    expect(
-      corepackWrote,
-      'the corepack call moved or was renamed',
-    ).toBeGreaterThan(-1);
-    expect(synced, 'the devkit pins are never synced').toBeGreaterThan(-1);
-    expect(synced).toBeGreaterThan(corepackWrote);
   });
 });
