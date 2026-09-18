@@ -60,7 +60,7 @@ on:
     #   scheduled runs are delivered on a best-effort basis and are routinely
     #   late under load, so a five-minute schedule promises a freshness it cannot
     #   keep.
-    - cron: '7,37 * * * *'
+    - cron: '0 9 * * 1'
   # Break-glass, and the one rung that recomputes BOTH gates at once. A dispatch
   # is attributed to whoever pressed it, so a maintainer's run executes where the
   # bot-triggered event it stands in for does not.
