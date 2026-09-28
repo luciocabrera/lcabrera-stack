@@ -10,6 +10,8 @@ area:
   - packages/ui/src/INVENTORY.md
   - packages/ui/src/utils/tests/drawerClearActionStores.util.ts
   - packages/ui/src/utils/tests/registerDrawerClearActionMocks.ts
+  - packages/ui/src/utils/tests/createMockSectionToolbar.util.tsx
+  - packages/ui/src/components/Table/contexts/TableConfig/columns/selectors/**
   - .changeset/clear-column-layout-to-defaults.md
 started: 2026-09-28
 updated: 2026-09-28
