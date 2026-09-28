@@ -36,8 +36,8 @@ describe('the reconcile workflow — that it runs on its own', () => {
     expect(readRepoFile(RECONCILE)).toMatch(/^\s*schedule:\s*$/m);
   });
 
-  it('runs on the recorded half-hourly cron, offset off the hour', () => {
-    expect(readRepoFile(RECONCILE)).toMatch(/-\s*cron:\s*'7,37 \* \* \* \*'/);
+  it('runs on the recorded weekly cron, offset off the hour', () => {
+    expect(readRepoFile(RECONCILE)).toMatch(/-\s*cron:\s*'7 9 \* \* 1'/);
   });
 
   it('records why that interval, so the next reader does not have to guess', () => {

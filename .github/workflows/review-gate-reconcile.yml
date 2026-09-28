@@ -44,23 +44,19 @@ name: Review Gate Reconcile
 
 on:
   schedule:
-    # Every 30 minutes, offset off the hour. THE INTERVAL IS A DECISION:
+    # Once a week, Monday 09:07 UTC. THE INTERVAL IS A DECISION:
     #
-    # - Low enough that a stale status corrects itself inside a working session.
-    #   An author who pushes, gets a review, and comes back to the tab finds the
-    #   status right; the longest anyone waits before break-glass is worth
-    #   reaching for is one interval.
-    # - High enough not to be the thing the other header rejects. The run does no
-    #   install and no build; it reads a handful of API pages per open pull
-    #   request, and this repository holds a handful of them open at a time. The
-    #   cost is bounded by open pull requests, not by review latency, which is
-    #   exactly the property a sleeping job does not have.
-    # - The offset avoids the top of the hour, where scheduled runs across GitHub
-    #   queue longest. A tighter cron would not buy a tighter bound anyway:
-    #   scheduled runs are delivered on a best-effort basis and are routinely
-    #   late under load, so a five-minute schedule promises a freshness it cannot
-    #   keep.
-    - cron: '0 9 * * 1'
+    # - Weekly, because a half-hourly sweep spent most of its runs publishing
+    #   nothing. The schedule is now the backstop that catches a status nobody
+    #   recomputed, not the thing that corrects one inside a working session.
+    #   An author who needs a status right sooner dispatches this workflow or the
+    #   gate's own; docs/tooling/review-gate-reconcile.md has the ladder.
+    # - The cost stays bounded by open pull requests, not by review latency,
+    #   which is the property a sleeping job does not have. The run does no
+    #   install and no build.
+    # - The :07 offset avoids the top of the hour, where scheduled runs across
+    #   GitHub queue longest.
+    - cron: '7 9 * * 1'
   # Break-glass, and the one rung that recomputes BOTH gates at once. A dispatch
   # is attributed to whoever pressed it, so a maintainer's run executes where the
   # bot-triggered event it stands in for does not.

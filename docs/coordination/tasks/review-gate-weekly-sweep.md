@@ -2,7 +2,7 @@
 id: review-gate-weekly-sweep
 title: ci(repo): record the weekly review-gate reconcile schedule
 owner: agent:claude
-status: active
+status: review
 branch: ci/1187-review-gate-weekly-sweep
 area:
   - .github/workflows/review-gate-reconcile.yml
@@ -12,7 +12,7 @@ area:
 started: 2026-09-28
 updated: 2026-09-28
 plan: (none)
-pr: (none)
+pr: '#1188'
 issue: #1187
 ---
 
