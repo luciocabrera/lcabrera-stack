@@ -337,8 +337,12 @@ declined to move.
 
 ## Recovery, when the status is wrong right now
 
-The schedule runs weekly, so for a pull request someone is waiting on, these
-steps are the ordinary answer rather than the exception:
+The schedule runs weekly, so a stale status is no longer something to wait out.
+For a pull request blocked on `Copilot review complete`, the required context,
+go straight to step 2 and dispatch **Copilot Review Gate**. Do not start with
+step 1: its paragraph below explains why a local run leaves that context
+unsatisfied and makes a later reconcile dispatch post nothing. Step 1 is for the
+two advisory contexts, and for reading what the sweep thinks.
 
 1. **Run the sweep against that one pull request**, from a checkout with `gh`
    logged in:
