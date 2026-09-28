@@ -85,10 +85,11 @@ the reviewer; if it survives **two** rounds, escalate rather than looping.
 [`packages/repo-standards/scripts/verify-review-threads.mjs`](../../packages/repo-standards/scripts/verify-review-threads.mjs)
 and republished for every open pull request by the reconcile sweep
 ([`review-gate-reconcile.md`](../tooling/review-gate-reconcile.md)). The sweep
-is its only publisher and runs weekly, so while a pull request is open the
-status is usually stale: it can show green over a thread opened since, or red
+is its only scheduled publisher and runs weekly, so while a pull request is
+open the status is usually stale: it can show green over a thread opened since, or red
 over threads already resolved. Read `vp run pr:threads -- --pr <n>` or the
-merge box instead.
+merge box instead; `vp run review-threads:verify -- --pr <n>` republishes the
+status on demand.
 
 It is deliberately **not** a required context. The ruleset is the enforcement;
 this is the report, so a stale status can never be the thing that stops a merge.

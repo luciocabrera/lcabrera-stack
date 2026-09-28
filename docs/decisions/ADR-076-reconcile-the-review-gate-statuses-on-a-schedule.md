@@ -154,14 +154,15 @@ tighter bound anyway, because scheduled delivery is best-effort.
 > second path to a verdict computed by code under review). `docs/tooling/review-gate-reconcile.md`
 > carries the closure's reach, what the withhold costs, and the recovery ladder.
 
-> **Interval changed by [#1187](https://github.com/luciocabrera/lcabrera-stack/issues/1187)**
-> (2026-09-28). The schedule is now **weekly, Monday 09:07 UTC**, replacing the
-> half-hourly cron in _Decision_. The maintainer chose it for the cost named under
-> _Consequences_: most runs publish nothing. What it gives up is the property the
+> **Interval changed by `cbcc75fde`** (2026-09-18), **recorded by [#1187](https://github.com/luciocabrera/lcabrera-stack/issues/1187) / [#1188](https://github.com/luciocabrera/lcabrera-stack/pull/1188)**
+> (2026-09-28). The schedule is now **weekly**, replacing the half-hourly cron in
+> _Decision_: `cbcc75fde` set Monday 09:00 UTC, and #1188 moved it to 09:07 to stay off the
+> hour. The commit records no reason. The cost it removes is the one _Consequences_ names:
+> most half-hourly runs published nothing. What it gives up is the property the
 > half-hourly interval was chosen for — a stale status no longer corrects itself inside a
 > working session. A stale `Copilot review complete` on a pull request someone is waiting
 > on is now cleared by a dispatch, which makes the dispatch the ordinary path rather than
-> break-glass. `Review threads resolved` loses more: the sweep is its only publisher, so
+> break-glass. `Review threads resolved` loses more: the sweep is its only scheduled publisher, so
 > at a week it is usually not recomputed at all for the life of a pull request. It is not
 > a required context, and the ruleset's native thread-resolution rule still blocks the
 > merge, so the status can mislead a reader but cannot let a merge through. The four

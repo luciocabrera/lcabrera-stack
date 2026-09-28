@@ -61,14 +61,14 @@ the same event; a sweep does not need the event at all.
 **Once a week, Monday at 09:07 UTC.** Recorded here and in the workflow because
 it is a judgement, not a default:
 
-- **Weekly, not half-hourly.** The sweep ran every 30 minutes until #1187, and
+- **Weekly, not half-hourly.** The sweep ran every 30 minutes until `cbcc75fde` (2026-09-18), and
   most of those runs published nothing. At a week the schedule is a backstop: it
   still finds a status nobody recomputed, but it no longer corrects one inside a
   working session. When a status is wrong and the pull request is waiting on it,
   dispatch — [Recovery](#recovery-when-the-status-is-wrong-right-now) has the
   steps.
 - **`Review threads resolved` pays more than latency.** The sweep is its only
-  publisher (see the per-gate note below), so at a week that context is usually
+  scheduled publisher (see the per-gate note below), so at a week that context is usually
   not recomputed at all while a pull request is open. It can show `success` while
   a thread a reviewer opened since is still unresolved, or the reverse. It is not
   a required context: the `main` ruleset's own thread-resolution rule is what
