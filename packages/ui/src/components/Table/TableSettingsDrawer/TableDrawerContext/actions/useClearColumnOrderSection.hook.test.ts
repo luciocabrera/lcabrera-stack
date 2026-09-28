@@ -1,51 +1,19 @@
 // @vitest-environment jsdom
 
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { beforeEach, describe, expect, it } from 'vite-plus/test';
+
+import { drawerColumnsStore } from '#ui/utils/tests/drawerClearActionStores.util';
+import '#ui/utils/tests/registerDrawerClearActionMocks';
 
 import { useClearColumnOrderSection } from './useClearColumnOrderSection.hook';
 
-const { configColumnsStore, drawerColumnsStore, setConfigState } = vi.hoisted(
-  () => {
-    let configState:
-      | undefined
-      | {
-          readonly columnPinning?: {
-            readonly left: readonly string[];
-            readonly right: readonly string[];
-          };
-        };
-
-    return {
-      configColumnsStore: { get: vi.fn(() => configState) },
-      drawerColumnsStore: { set: vi.fn() },
-      setConfigState: (next: typeof configState) => {
-        configState = next;
-      },
-    };
-  },
-);
-
-vi.mock(
-  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
-  () => ({
-    useTableConfigContextValue: () => ({ columnsStore: configColumnsStore }),
-  }),
-);
-
-vi.mock('../useTableDrawerContextValue.hook', () => ({
-  useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
-}));
-
 beforeEach(() => {
   drawerColumnsStore.set.mockClear();
-  setConfigState(undefined);
 });
 
 describe('useClearColumnOrderSection', () => {
-  it('resets visibility to empty and restores the config pinning default', () => {
-    setConfigState({ columnPinning: { left: ['id'], right: ['actions'] } });
-
+  it('empties the order, pinning and visibility and keeps static columns pinned', () => {
     const { result } = renderHook(() => useClearColumnOrderSection());
 
     act(() => {
@@ -53,20 +21,8 @@ describe('useClearColumnOrderSection', () => {
     });
 
     expect(drawerColumnsStore.set).toHaveBeenCalledExactlyOnceWith({
-      columnPinning: { left: ['id'], right: ['actions'] },
-      columnVisibility: new Set(),
-    });
-  });
-
-  it('falls back to empty pinning when the config has none', () => {
-    const { result } = renderHook(() => useClearColumnOrderSection());
-
-    act(() => {
-      result.current();
-    });
-
-    expect(drawerColumnsStore.set).toHaveBeenCalledExactlyOnceWith({
-      columnPinning: { left: [], right: [] },
+      columnOrder: [],
+      columnPinning: { left: [], right: ['actions'] },
       columnVisibility: new Set(),
     });
   });

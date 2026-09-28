@@ -8,3 +8,4 @@ export { useGetNormalizedColumn } from './useGetNormalizedColumn.hook';
 export { useGetPinnedColumnInfo } from './useGetPinnedColumnInfo.hook';
 export { useGetPinnedColumnOffsets } from './useGetPinnedColumnOffsets.hook';
 export { useGetPinnedColumnPartition } from './useGetPinnedColumnPartition.hook';
+export { useGetStaticKeys } from './useGetStaticKeys.hook';
