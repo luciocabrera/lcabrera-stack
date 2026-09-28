@@ -13,6 +13,8 @@ area:
   - COMMANDS.md
   - docs/agents/agent-review-contract.md
   - docs/tooling/copilot-review-gate.md
+  - docs/agents/pr-review-threads.md
+  - docs/agents/merge-checklist.md
 started: 2026-09-28
 updated: 2026-09-28
 plan: (none)

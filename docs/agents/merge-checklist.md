@@ -69,7 +69,8 @@ trust the check and look at its output.
       required context, so it blocks the merge — a head with no accepted review
       does not go in.
 - [ ] **Every review thread is addressed and resolved** — whoever opened it
-      **[auto: `Review threads resolved`; `vp run pr:threads -- --pr <n>` exits 0]**.
+      **[`vp run pr:threads -- --pr <n>` exits 0]** — not the
+      `Review threads resolved` status, which the weekly sweep leaves stale.
       Each ends with a fix naming its commit, or a reply refuting the finding
       with a re-runnable probe; `outdated` is not resolution. The `main` ruleset
       blocks the merge on this, and says so only in the merge box — #646 and

@@ -12,7 +12,10 @@ name: Review Gate Reconcile
 # honestly still waiting. #737 carries the measurement and the two commands that
 # reproduce it. Fixing it was the prerequisite for promotion, and #698 promoted
 # `Copilot review complete` on 2026-08-21: a required check that only a missing
-# event would refresh makes break-glass the normal path.
+# event would refresh makes break-glass the normal path. Since #1187 the sweep
+# runs weekly and no longer prevents that: for a pull request someone is waiting
+# on, the Copilot Review Gate dispatch is the normal path again, and the sweep is
+# the backstop behind it (ADR-076, third amendment).
 #
 # THIS IS NOT THE POLLING `copilot-review-gate.yml` REJECTS, and the distinction
 # is mechanical rather than a matter of degree. What that header rules out is a
