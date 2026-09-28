@@ -12,4 +12,5 @@ plugin and unplugin `^0.19.1`, `eslint` `^10.11.0`, `typescript-eslint`
 `^8.70.1`, `eslint-plugin-perfectionist` `^5.12.1`, `eslint-plugin-react-dom` and
 `eslint-plugin-react-x` `^5.20.8`, `eslint-plugin-react-refresh` `^0.5.7` and
 `eslint-plugin-security` `^4.1.0`. `@lcabrera/devkit` pins Node 26.10.0 in the
-`.node-version` it writes into a new repository.
+`.node-version` it writes into a new repository, and the CI workflow it writes
+sets up Vite+ with `voidzero-dev/setup-vp` at the v1.21.1 commit.

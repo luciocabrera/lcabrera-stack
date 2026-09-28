@@ -141,7 +141,6 @@ minimumReleaseAgeExclude:
   - '@react-router/*'
 
   - '@voidzero-dev/*'
-  - react-router@8.3.0
   - vite-plus
 
 # Redirect every `vite`/`vitest` edge to the toolchain catalog so the workspace
