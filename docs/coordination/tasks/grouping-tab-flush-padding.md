@@ -7,6 +7,7 @@ branch: fix/1189-grouping-tab-flush-padding
 area:
   - packages/ui/src/components/Table/TableSettingsDrawer/TableSettingsDrawerBody/**
   - packages/ui/src/components/Table/TableSettingsDrawer/GroupingSection/GroupingSection.*
+  - packages/ui/src/components/Table/TableSettingsDrawer/GroupingSection/ARCHITECTURE.md
   - packages/ui/src/stylex-module-paths.test.json
   - .changeset/grouping-tab-runs-flush.md
 started: 2026-09-28
@@ -22,6 +23,6 @@ fix(ui): drop the padding from the settings drawer grouping tab
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review on #1190
 - Blockers: none
 - Next:

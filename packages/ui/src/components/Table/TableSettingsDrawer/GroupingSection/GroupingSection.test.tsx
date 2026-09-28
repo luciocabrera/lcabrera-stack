@@ -723,6 +723,21 @@ describe('GroupingSection sub-tabs', () => {
     ).toBe(true);
   });
 
+  it('renders no footer box at all while grouping is locked', () => {
+    stores.metaStore.set({ isGroupingEnabled: true, isGroupingLocked: true });
+
+    renderDrawer();
+
+    const section = screen
+      .getByRole('tablist', { name: 'Grouping settings tabs' })
+      .closest('[data-testid="side-panel-section-main"]');
+
+    expect(
+      section?.children.length,
+      'A locked grouping has no footer toolbar, so an inset wrapper left behind is an empty flex item the section gap still spaces.',
+    ).toBe(1);
+  });
+
   it('names its own tab strip, so it is not the drawer strip a reader hears', () => {
     renderDrawer();
 
