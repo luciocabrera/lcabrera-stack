@@ -25,10 +25,10 @@
  * every regenerated config is left dirty.
  */
 
-export const NODE_VERSION = '26.8.2';
+export const NODE_VERSION = '26.10.0';
 
 export const PACKAGE_MANAGER =
-  'pnpm@12.3.4+sha256.08a3d2d539b377a6b7ea2469b612672255ca71c30a62698530582cb9d35c268f';
+  'pnpm@12.6.0+sha256.05b7b921fbb31564505c967eabf825895a1cc18f50935c00be98815272cc9d56';
 
 export const TSCONFIG_WORKSPACE = '@repo/typescript-config';
 
