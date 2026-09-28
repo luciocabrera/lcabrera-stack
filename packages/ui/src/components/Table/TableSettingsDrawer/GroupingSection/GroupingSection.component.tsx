@@ -1,3 +1,5 @@
+import * as stylex from '@stylexjs/stylex';
+
 import type { TabItem } from '#ui/components/Tabs';
 
 import { SidePanelSectionMain } from '#ui/components/SidePanel';
@@ -14,6 +16,7 @@ import {
   GROUPING_SUBTAB_KEYS,
   GROUPING_SUBTAB_LABEL,
 } from './GroupingSection.constants';
+import { styles } from './GroupingSection.stylex';
 import { GroupingSectionToolbar } from './GroupingSectionToolbar';
 import { GroupKeysSubsection } from './GroupKeysSubsection';
 
@@ -55,7 +58,9 @@ export const GroupingSection = ({ isBusy = false }: GroupingSectionProps) => {
         label={GROUPING_SUBTAB_LABEL}
         tabs={tabs}
       />
-      <GroupingSectionToolbar isBusy={isBusy} />
+      <div {...stylex.props(styles.footer)}>
+        <GroupingSectionToolbar isBusy={isBusy} />
+      </div>
     </SidePanelSectionMain>
   );
 };

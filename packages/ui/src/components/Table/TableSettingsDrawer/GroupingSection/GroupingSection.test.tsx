@@ -676,7 +676,7 @@ describe('GroupingSection staging', () => {
 });
 
 describe('GroupingSection sub-tabs', () => {
-  it('drops the inset on every sub-tab panel, so the drawer tab insets them once', () => {
+  it('drops the inset on every sub-tab panel, so the grouping tab runs flush', () => {
     stores.metaStore.set({ isGroupingEnabled: true });
 
     renderDrawer();
@@ -692,8 +692,35 @@ describe('GroupingSection sub-tabs', () => {
 
     expect(
       insetPanels,
-      'A sub-tab panel carries its own inset while the drawer tab around it is already inset, which is the double inset #1168 removed.',
+      'A sub-tab panel carries its own inset, so the grouping tab no longer runs flush to the drawer body.',
     ).toStrictEqual([]);
+  });
+
+  it('insets its footer toolbar itself, since the drawer tab around it runs flush', () => {
+    stores.metaStore.set({ isGroupingEnabled: true });
+
+    renderDrawer();
+
+    const clearGrouping = screen.getByRole('button', {
+      name: 'Clear Grouping',
+    });
+    const ancestors: Element[] = [];
+    for (
+      let node = clearGrouping.parentElement;
+      node;
+      node = node.parentElement
+    ) {
+      ancestors.push(node);
+    }
+
+    expect(
+      ancestors.some((node) =>
+        insetClassNames.some((className) =>
+          node.getAttribute('class')?.split(' ').includes(className),
+        ),
+      ),
+      'The footer toolbar sits outside every sub-tab panel, so without its own inset it runs to the drawer edge while the other tabs keep theirs.',
+    ).toBe(true);
   });
 
   it('names its own tab strip, so it is not the drawer strip a reader hears', () => {

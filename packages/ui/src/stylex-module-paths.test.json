@@ -113,6 +113,7 @@
   "src/components/Table/TableSettingsDrawer/GroupingSection/AdvancedSettingsSection/ColumnAxisSection/ColumnAxisSection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GroupingSection/AdvancedSettingsSection/GroupingModeSection/GroupingModeSection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/GroupingSection/AdvancedSettingsSection/TotalsPlacementSection/TotalsPlacementSection.stylex.ts",
+  "src/components/Table/TableSettingsDrawer/GroupingSection/GroupingSection.stylex.ts",
   "src/components/Table/TableSettingsDrawer/SectionToolbar/SectionToolbar.stylex.ts",
   "src/components/Table/TableSettingsDrawer/SortingSection/ActiveSortList/ActiveSortList.stylex.ts",
   "src/components/Table/TableSettingsDrawer/SortingSection/ActiveSortList/SortItemContent/SortItemContent.stylex.ts",
