@@ -1,24 +1,19 @@
 // @vitest-environment jsdom
 
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { beforeEach, describe, expect, it } from 'vite-plus/test';
+
+import { drawerColumnsStore } from '#ui/utils/tests/drawerClearActionStores.util';
+import '#ui/utils/tests/registerDrawerClearActionMocks';
 
 import { useClearColumnOrderSection } from './useClearColumnOrderSection.hook';
-
-const { drawerColumnsStore } = vi.hoisted(() => ({
-  drawerColumnsStore: { set: vi.fn() },
-}));
-
-vi.mock('../useTableDrawerContextValue.hook', () => ({
-  useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
-}));
 
 beforeEach(() => {
   drawerColumnsStore.set.mockClear();
 });
 
 describe('useClearColumnOrderSection', () => {
-  it('empties the drawer column order, pinning and visibility when invoked', () => {
+  it('empties the order, pinning and visibility whatever the table has applied', () => {
     const { result } = renderHook(() => useClearColumnOrderSection());
 
     act(() => {
