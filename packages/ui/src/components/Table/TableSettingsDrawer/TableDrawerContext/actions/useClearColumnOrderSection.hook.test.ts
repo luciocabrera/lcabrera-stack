@@ -13,7 +13,7 @@ beforeEach(() => {
 });
 
 describe('useClearColumnOrderSection', () => {
-  it('empties the order, pinning and visibility whatever the table has applied', () => {
+  it('empties the order, pinning and visibility and keeps static columns pinned', () => {
     const { result } = renderHook(() => useClearColumnOrderSection());
 
     act(() => {
@@ -22,7 +22,7 @@ describe('useClearColumnOrderSection', () => {
 
     expect(drawerColumnsStore.set).toHaveBeenCalledExactlyOnceWith({
       columnOrder: [],
-      columnPinning: { left: [], right: [] },
+      columnPinning: { left: [], right: ['actions'] },
       columnVisibility: new Set(),
     });
   });

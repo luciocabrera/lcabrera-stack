@@ -7,5 +7,6 @@ export const appliedColumnsStore = {
     columnOrder: ['status', 'id'],
     columnPinning: { left: ['id'], right: ['actions'] },
     columnVisibility: new Set(['email']),
+    staticKeys: new Set(['actions']),
   }),
 };

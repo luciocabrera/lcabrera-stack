@@ -13,7 +13,7 @@ beforeEach(() => {
 });
 
 describe('useClearAllSettings', () => {
-  it('empties every column slice whatever the table has applied', () => {
+  it('empties every column slice and keeps static columns pinned', () => {
     const { result } = renderHook(() => useClearAllSettings());
 
     act(() => {
@@ -23,7 +23,7 @@ describe('useClearAllSettings', () => {
     expect(drawerColumnsStore.set).toHaveBeenCalledExactlyOnceWith({
       columnFilters: {},
       columnOrder: [],
-      columnPinning: { left: [], right: [] },
+      columnPinning: { left: [], right: ['actions'] },
       columnSizing: {},
       columnVisibility: new Set(),
       sorting: [],
