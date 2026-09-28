@@ -9,6 +9,10 @@ area:
   - scripts/lib/review-gate-reconcile-workflow.test.mjs
   - docs/tooling/review-gate-reconcile.md
   - docs/decisions/ADR-076-reconcile-the-review-gate-statuses-on-a-schedule.md
+  - .github/workflows/claude-review.yml
+  - COMMANDS.md
+  - docs/agents/agent-review-contract.md
+  - docs/tooling/copilot-review-gate.md
 started: 2026-09-28
 updated: 2026-09-28
 plan: (none)

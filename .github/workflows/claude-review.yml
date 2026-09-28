@@ -24,8 +24,8 @@ name: Claude Review
 # redundant — deliberately. One measurement is not a reliability claim; Copilot's
 # equivalent trigger is documented as unreliable (#737); and a trigger that fails to
 # arrive cannot be retried where an explicit request can. `review-gate-reconcile.yml`'s
-# sweep is half-hourly, which is the alternative if both fail. Do not remove the dispatch
-# on the reasoning that events now arrive.
+# sweep is the alternative if both fail, and it runs weekly. Do not remove the dispatch on
+# the reasoning that events now arrive.
 #
 # Deliberately does NOT publish a commit status. Two writers to one status context can
 # disagree about the head, which is the exact failure the gate was built to make visible.
@@ -248,7 +248,7 @@ jobs:
       # **Why this step exists is now a different reason from the one it was built for, and
       # the original no longer applies.** #853 added it because a review authored by the
       # default GITHUB_TOKEN generates no `pull_request_review` run at all, so the gate
-      # could not wake — the status kept its push-time `pending` until the half-hourly
+      # could not wake — the status kept its push-time `pending` until the scheduled
       # sweep. Since #865 the review is authored by the Claude General Reviewer App, whose
       # installation token is not that token, and the trigger does fire: measured on #866,
       # review at 07:55:45Z, `pull_request_review` run at 07:55:48Z.
@@ -257,7 +257,7 @@ jobs:
       # same run this step fired at 07:55:47Z, a second ahead of the trigger, so the two are
       # now redundant on purpose. One measurement is not a reliability claim, and Copilot's
       # trigger on the same endpoint is documented as unreliable (#737). The cost is one
-      # extra gate run per review; the alternative failure costs half an hour.
+      # extra gate run per review; the alternative failure costs up to a week, the sweep's interval.
       #
       # `workflow_dispatch` is the one trigger a token can pull deliberately, and the gate
       # already exposes it as its break-glass path. Using it here is wiring, not new

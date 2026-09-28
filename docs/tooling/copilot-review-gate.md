@@ -385,7 +385,7 @@ every push, the new head has no review yet, and the status therefore goes
 
 Three things recompute it that are not events on this pull request:
 
-- **The scheduled reconcile**, half-hourly over every open pull request. The
+- **The scheduled reconcile**, weekly over every open pull request. The
   review events are not delivered reliably here, and this is the recompute path
   that does not depend on them — see
   [`review-gate-reconcile.md`](./review-gate-reconcile.md) for the interval, the
