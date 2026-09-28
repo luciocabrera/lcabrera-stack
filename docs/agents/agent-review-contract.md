@@ -668,7 +668,7 @@ rule, from there.
   `issue_comment` — and the verdict is posted **by an agent**, the actor class
   whose events go missing in this repository (#737). So the check can report
   `absent` on a pull request that has just been reviewed. A scheduled sweep
-  revalidates every open pull request half-hourly, and
+  revalidates every open pull request once a week, and
   `gh workflow run agent-review-verdict.yml -f pr=<n> --ref <branch>` revalidates
   one on demand — name the ref, or `gh` runs the default branch's copy (#866).
   Locally, `vp run agent-review:verify -- --pr <n> --dry-run` prints what the

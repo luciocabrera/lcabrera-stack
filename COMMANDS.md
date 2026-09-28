@@ -1063,7 +1063,7 @@ file is on `main`. The status is pinned to `success` while the check is advisory
 so the state lives in its description; promoting it is #698.
 
 [`review-gate-reconcile.yml`](.github/workflows/review-gate-reconcile.yml) is the
-other **scheduled** workflow, and it serves both of the gates above: half-hourly
+other **scheduled** workflow, and it serves both of the gates above: once a week
 it republishes their statuses for every open pull request, because the review and
 comment events those gates depend on are not delivered reliably here (#737). It
 is not the polling `copilot-review-gate.yml` rejects — it holds nothing open and

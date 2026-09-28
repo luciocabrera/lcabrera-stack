@@ -58,20 +58,27 @@ the same event; a sweep does not need the event at all.
 
 ## The interval
 
-**Every 30 minutes, at :07 and :37.** Recorded here and in the workflow because
+**Once a week, Monday at 09:07 UTC.** Recorded here and in the workflow because
 it is a judgement, not a default:
 
-- **Low enough** that a stale status corrects itself inside a working session.
-  An author who pushes, waits for the review and comes back to the tab finds the
-  status right; the longest anyone sits in front of a wrong status before
-  break-glass is worth reaching for is one interval.
-- **High enough** not to be the thing the gate header rejects. The run does no
-  install and no build — it reads a handful of API pages per open pull request,
-  and this repository holds a handful of them open at a time.
+- **Weekly, not half-hourly.** The sweep ran every 30 minutes until `cbcc75fde` (2026-09-18), and
+  most of those runs published nothing. At a week the schedule is a backstop: it
+  still finds a status nobody recomputed, but it no longer corrects one inside a
+  working session. When a status is wrong and the pull request is waiting on it,
+  dispatch — [Recovery](#recovery-when-the-status-is-wrong-right-now) has the
+  steps.
+- **`Review threads resolved` pays more than latency.** The sweep is its only
+  scheduled publisher (see the per-gate note below), so at a week that context is usually
+  not recomputed at all while a pull request is open. It can show `success` while
+  a thread a reviewer opened since is still unresolved, or the reverse. It is not
+  a required context: the `main` ruleset's own thread-resolution rule is what
+  blocks the merge, and the merge box reports that correctly. Read the merge box
+  or `vp run pr:threads`, not the status.
+- **Still not the thing the gate header rejects.** The run does no install and
+  no build. It reads a handful of API pages per open pull request, so its cost
+  is bounded by open pull requests rather than by review latency.
 - **Offset off the hour** because scheduled runs across GitHub queue longest at
-  `:00`. A tighter cron would not buy a tighter bound in any case: scheduled runs
-  are best-effort and routinely late under load, so a five-minute schedule
-  promises a freshness it cannot keep.
+  `:00`.
 
 One workflow serves every gate rather than one each. There is a single mechanism
 here — recompute a review-gate status without the event that normally would — and
@@ -330,7 +337,12 @@ declined to move.
 
 ## Recovery, when the status is wrong right now
 
-Waiting up to one interval is the ordinary answer. When that is too long:
+The schedule runs weekly, so a stale status is no longer something to wait out.
+For a pull request blocked on `Copilot review complete`, the required context,
+go straight to step 2 and dispatch **Copilot Review Gate**. Do not start with
+step 1: its paragraph below explains why a local run leaves that context
+unsatisfied and makes a later reconcile dispatch post nothing. Step 1 is for the
+two advisory contexts, and for reading what the sweep thinks.
 
 1. **Run the sweep against that one pull request**, from a checkout with `gh`
    logged in:
