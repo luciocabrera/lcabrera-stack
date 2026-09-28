@@ -161,7 +161,11 @@ tighter bound anyway, because scheduled delivery is best-effort.
 > half-hourly interval was chosen for — a stale status no longer corrects itself inside a
 > working session. A stale `Copilot review complete` on a pull request someone is waiting
 > on is now cleared by a dispatch, which makes the dispatch the ordinary path rather than
-> break-glass. The four properties and the two narrowings above are unchanged.
+> break-glass. `Review threads resolved` loses more: the sweep is its only publisher, so
+> at a week it is usually not recomputed at all for the life of a pull request. It is not
+> a required context, and the ruleset's native thread-resolution rule still blocks the
+> merge, so the status can mislead a reader but cannot let a merge through. The four
+> properties and the two narrowings above are unchanged.
 
 ## References
 

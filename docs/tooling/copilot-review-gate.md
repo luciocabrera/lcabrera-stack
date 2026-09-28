@@ -592,8 +592,10 @@ the two cases above it is for — a rung aimed at the wrong one is not merely
 useless, and rung 5 makes things worse.
 
 **Before any of them:** in the stale case the scheduled sweep corrects the status
-within one interval with nobody doing anything, so these rungs are for when that
-is too long, or when the sweep is not running. Check rather than assume —
+within one interval with nobody doing anything, but the interval is a week, so for
+a pull request someone is waiting on these rungs are the ordinary path, not the
+exception. They are also the path when the sweep is not running. Check rather
+than assume —
 
 ```bash
 gh run list -R luciocabrera/lcabrera-stack \

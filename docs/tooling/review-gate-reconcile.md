@@ -67,6 +67,13 @@ it is a judgement, not a default:
   working session. When a status is wrong and the pull request is waiting on it,
   dispatch — [Recovery](#recovery-when-the-status-is-wrong-right-now) has the
   steps.
+- **`Review threads resolved` pays more than latency.** The sweep is its only
+  publisher (see the per-gate note below), so at a week that context is usually
+  not recomputed at all while a pull request is open. It can show `success` while
+  a thread a reviewer opened since is still unresolved, or the reverse. It is not
+  a required context: the `main` ruleset's own thread-resolution rule is what
+  blocks the merge, and the merge box reports that correctly. Read the merge box
+  or `vp run pr:threads`, not the status.
 - **Still not the thing the gate header rejects.** The run does no install and
   no build. It reads a handful of API pages per open pull request, so its cost
   is bounded by open pull requests rather than by review latency.
