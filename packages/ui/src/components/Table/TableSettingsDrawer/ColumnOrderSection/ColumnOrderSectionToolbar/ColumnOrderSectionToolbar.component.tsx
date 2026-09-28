@@ -3,6 +3,7 @@ import {
   EraserIcon,
   RefreshIcon,
 } from '#ui/components/Icons';
+import { useGetStaticKeys } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import {
   useClearColumnOrderSection,
   useResetColumnOrderAndVisibility,
@@ -34,6 +35,7 @@ export const ColumnOrderSectionToolbar = ({
   const columnOrder = useGetColumnOrder();
   const pinning = useGetColumnPinning();
   const visibility = useGetColumnVisibility();
+  const staticKeys = useGetStaticKeys();
 
   const orderBySorting = useOrderBySorting();
   const clearColumnOrderSection = useClearColumnOrderSection();
@@ -41,7 +43,9 @@ export const ColumnOrderSectionToolbar = ({
 
   const hasSorting = sorting.length > 0;
   const hasColumnOrder = columnOrder.length > 0;
-  const hasPinning = pinning.left.length > 0 || pinning.right.length > 0;
+  const hasPinning = [...pinning.left, ...pinning.right].some(
+    (key) => !staticKeys.has(key),
+  );
   const hasHiddenColumns = visibility instanceof Set && visibility.size > 0;
   const hasClearableState = hasColumnOrder || hasPinning || hasHiddenColumns;
 

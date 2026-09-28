@@ -49,6 +49,10 @@ vi.mock(
   }),
 );
 
+vi.mock('#ui/components/Table/contexts/TableConfig/columns/selectors', () => ({
+  useGetStaticKeys: () => new Set(['actions']),
+}));
+
 vi.mock('../ColumnOrderSectionContext/actions', () => ({
   useOrderBySorting: () => vi.fn(),
 }));
@@ -90,5 +94,33 @@ describe('ColumnOrderSectionToolbar', () => {
     fireEvent.click(screen.getByRole('button', { name: CLEAR_LABEL }));
 
     expect(mockClearColumnOrderSection).toHaveBeenCalledOnce();
+  });
+
+  it('disables the clear when only a static column is pinned', () => {
+    columnsStateRef.current = {
+      ...columnsStateRef.current,
+      columnPinning: { left: [], right: ['actions'] },
+    };
+
+    render(<ColumnOrderSectionToolbar />);
+
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: CLEAR_LABEL })
+        .disabled,
+    ).toBe(true);
+  });
+
+  it('enables the clear when a non-static column is pinned', () => {
+    columnsStateRef.current = {
+      ...columnsStateRef.current,
+      columnPinning: { left: ['id'], right: ['actions'] },
+    };
+
+    render(<ColumnOrderSectionToolbar />);
+
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: CLEAR_LABEL })
+        .disabled,
+    ).toBe(false);
   });
 });
