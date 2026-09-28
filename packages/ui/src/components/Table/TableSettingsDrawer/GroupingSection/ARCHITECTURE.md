@@ -273,11 +273,12 @@ grouping paints two sub-tabs rather than an empty third. Totals position still
 renders only under `rollup`: `flat` emits no subtotal and no grand total, so
 there would be nothing to position.
 
-**The sub-tabs drop their own inset; the drawer tab keeps its.** Each nested
-`TabItem` sets `hasPadding: false`, so pane content is inset once by the Grouping
-tab that holds it rather than twice. The opt-out cannot move up to the drawer tab:
-that inset also positions this section's footer toolbar and the nested tab strip,
-which sit outside the nested panels and so get nothing back from them.
+**The Grouping tab and its sub-tabs all run flush; the footer insets itself.**
+The drawer's Grouping `TabItem` and each nested one set `hasPadding: false`, so
+the nested tab strip lines up with the drawer's own strip. The footer toolbar
+sits outside every nested panel, so nothing inset it once the drawer tab went
+flush. `GroupingSection` wraps it in `styles.footer`, which restores the same
+`spacing.sm` the footer carries in the other drawer tabs.
 
 **Clear and reset sit at the scope they act on.** `GroupingSectionToolbar`'s
 footer variant takes no `scope` and acts on the whole grouping, so it belongs

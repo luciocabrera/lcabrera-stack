@@ -242,7 +242,7 @@ describe('TableSettingsDrawerBody', () => {
     ).toBe('true');
   });
 
-  it('leaves every tab body inset, the grouping tab included', () => {
+  it('drops the body inset on the grouping tab and on no other', () => {
     isGroupingEnabledRef.current = true;
 
     render(<TableSettingsDrawerBody />);
@@ -261,7 +261,7 @@ describe('TableSettingsDrawerBody', () => {
 
     expect(
       flushTabs,
-      'A drawer tab dropped the body inset, which its section header, its footer toolbar and any nested tab strip all sit inside.',
-    ).toStrictEqual([]);
+      'Only the grouping tab runs flush, so its nested tab strip lines up with the drawer strip; any other tab keeps the body inset.',
+    ).toStrictEqual(['Grouping']);
   });
 });
