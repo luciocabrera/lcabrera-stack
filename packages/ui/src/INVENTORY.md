@@ -545,6 +545,7 @@ data context is re-created on every navigation.
 | `renderGroupedTableRoute`              | `utils/tests/renderGroupedTableRoute.util.tsx`            | Mounts a grouped Table harness under a memory router with the cookie action                                                       |
 | `mockDialogElement`                    | `utils/tests/mockDialogElement.util.ts`                   | Mocks HTMLDialogElement prototype behavior with restore handles for test teardown                                                 |
 | `MockToggleSwitch`                     | `utils/tests/createMockToggleSwitch.util.tsx`             | The labelled button stand-in every suite that mocks `ToggleSwitch` renders                                                        |
+| `MockSectionToolbar`                   | `utils/tests/createMockSectionToolbar.util.tsx`           | The button stand-in the section-toolbar suites render, carrying each label, disabled state and click handler                      |
 | `createMockVirtualSelect`              | `utils/tests/createMockVirtualSelect.util.tsx`            | The option-list stand-in every suite that mocks `VirtualSelect` renders; `testId` overrides the placeholder-derived `data-testid` |
 
 ### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/`

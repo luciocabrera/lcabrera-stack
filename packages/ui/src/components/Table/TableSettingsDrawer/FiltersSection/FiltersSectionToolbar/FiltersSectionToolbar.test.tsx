@@ -24,31 +24,12 @@ const {
   mockSetExpandedFilters: vi.fn(),
 }));
 
-vi.mock('../../SectionToolbar', () => ({
-  SectionToolbar: ({
-    buttons,
-  }: {
-    readonly buttons: readonly {
-      readonly isDisabled?: boolean;
-      readonly key: string;
-      readonly label: string;
-      readonly onClick?: () => void;
-    }[];
-  }) => (
-    <div>
-      {buttons.map((button) => (
-        <button
-          disabled={button.isDisabled}
-          key={button.key}
-          onClick={button.onClick}
-          type='button'
-        >
-          {button.label}
-        </button>
-      ))}
-    </div>
-  ),
-}));
+vi.mock('../../SectionToolbar', async () => {
+  const { MockSectionToolbar } =
+    await import('#ui/utils/tests/createMockSectionToolbar.util');
+
+  return { SectionToolbar: MockSectionToolbar };
+});
 
 vi.mock('../../TableDrawerContext/actions', () => ({
   useClearFilters: () => mockClearFilters,
