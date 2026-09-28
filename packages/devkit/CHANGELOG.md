@@ -1,5 +1,19 @@
 # @lcabrera/devkit
 
+## 0.5.1
+
+### Patch Changes
+
+- 02f0092: `create` now pins `pnpm@12.6.0` in the root manifest it writes, the release the
+  rest of the toolchain is verified against; it wrote a pnpm one major behind. The
+  Node and pnpm pins it emits are now held to the toolchain's own by test, so a
+  future refresh cannot leave either behind.
+- 827c977: `@lcabrera/server` now declares `zod` at `^4.6.5`, and `@lcabrera/eslint-plugin`
+  declares `@typescript-eslint/utils` at `^8.70.1`. `@lcabrera/devkit` pins Node
+  26.10.0 in the `.node-version` it writes into a new repository, and the CI
+  workflow it writes sets up Vite+ with `voidzero-dev/setup-vp` at the v1.21.1
+  commit.
+
 ## 0.5.0
 
 ### Minor Changes
