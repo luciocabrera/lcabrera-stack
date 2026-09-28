@@ -8,6 +8,7 @@ import {
   useResetColumnOrderAndVisibility,
 } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/actions';
 import {
+  useGetColumnOrder,
   useGetColumnPinning,
   useGetColumnsSorting,
   useGetColumnVisibility,
@@ -20,7 +21,7 @@ import { SectionToolbar } from '../../SectionToolbar';
 import { useOrderBySorting } from '../ColumnOrderSectionContext/actions';
 
 const COLUMN_ORDER_TOOLBAR = {
-  clear: { label: 'Clear Visibility & Pinning' },
+  clear: { label: 'Clear Order, Visibility & Pinning' },
   orderBySorting: { label: 'Order by Sorting' },
   reset: { label: 'Reset Order & Visibility' },
 } as const;
@@ -30,6 +31,7 @@ export const ColumnOrderSectionToolbar = ({
   variant = 'footer',
 }: ColumnOrderSectionToolbarProps) => {
   const sorting = useGetColumnsSorting();
+  const columnOrder = useGetColumnOrder();
   const pinning = useGetColumnPinning();
   const visibility = useGetColumnVisibility();
 
@@ -38,9 +40,10 @@ export const ColumnOrderSectionToolbar = ({
   const resetColumnOrderAndVisibility = useResetColumnOrderAndVisibility();
 
   const hasSorting = sorting.length > 0;
+  const hasColumnOrder = columnOrder.length > 0;
   const hasPinning = pinning.left.length > 0 || pinning.right.length > 0;
   const hasHiddenColumns = visibility instanceof Set && visibility.size > 0;
-  const hasClearableState = hasPinning || hasHiddenColumns;
+  const hasClearableState = hasColumnOrder || hasPinning || hasHiddenColumns;
 
   const buttons: readonly SectionToolbarButton[] = [
     {

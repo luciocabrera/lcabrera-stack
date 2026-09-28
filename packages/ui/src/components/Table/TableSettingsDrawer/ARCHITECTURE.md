@@ -37,7 +37,7 @@ TableSettingsDrawer/
 │   ├── actions/                           → Action hooks (set/clear/reset/batch/stage)
 │   │   ├── useBatchSetTableDrawerSettings → Push both drafts to the table in one commit
 │   │   ├── useClearAllSettings            → Clear all column fields
-│   │   ├── useClearColumnOrderSection     → Clear visibility + pinning
+│   │   ├── useClearColumnOrderSection     → Clear order + visibility + pinning
 │   │   ├── useClearFilters                → Clear all filters
 │   │   ├── useClearGrouping               → Stage grouping switched off
 │   │   ├── useClearSorting                → Clear all sorting

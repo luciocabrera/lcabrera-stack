@@ -425,8 +425,8 @@ _persisted_ and the settings drawer builds its rows from the **declared**
 columns. A derived key written into `columnVisibility` therefore reaches the
 cookie with nothing in the per-column UI able to take it out again: the drawer
 lists `Total Amount`, never `Average`, so toggling it writes the declared key
-and leaves the derived one hidden. Only the drawer's blanket "Clear Visibility &
-Pinning" clears it, along with every other preference. So hiding `Average` hides
+and leaves the derived one hidden. Only the drawer's blanket "Clear Order,
+Visibility & Pinning" clears it, along with every other preference. So hiding `Average` hides
 `Total Amount`, and the derivation expands that back into both measures — which
 is also what makes the drawer's own toggle work, since a key `gridColumns` no
 longer holds would otherwise filter nothing while the drawer drew the column as

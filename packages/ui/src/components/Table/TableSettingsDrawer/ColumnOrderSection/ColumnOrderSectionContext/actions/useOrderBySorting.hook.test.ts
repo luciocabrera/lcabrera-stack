@@ -125,4 +125,26 @@ describe('useOrderBySorting', () => {
     expect(modalsStore.set).toHaveBeenCalledWith({ orderConflict });
     expect(drawerColumnsStore.set).not.toHaveBeenCalled();
   });
+
+  it('orders from the declared columns when no custom order is staged', () => {
+    drawerColumnsStore._state = {
+      ...drawerColumnsStore._state,
+      columnOrder: [],
+    };
+    mockResolveOrderConflictUpdate.mockImplementation(({ newOrder }) => ({
+      kind: 'apply-order',
+      newOrder,
+      pendingPinning: { left: [], right: [] },
+    }));
+
+    const { result } = renderHook(() => useOrderBySorting());
+
+    act(() => {
+      result.current();
+    });
+
+    expect(drawerColumnsStore.set).toHaveBeenCalledExactlyOnceWith({
+      columnOrder: ['name', 'id', 'age'],
+    });
+  });
 });

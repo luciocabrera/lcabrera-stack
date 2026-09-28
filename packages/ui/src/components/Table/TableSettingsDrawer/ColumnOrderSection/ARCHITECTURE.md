@@ -233,11 +233,11 @@ Actions in ColumnOrderSectionContext read/write to both stores.
 | `'toolbar'` | SidePanelSectionHeader | `ghost`, `mini`, `auto` | No (icon only) |
 | `'footer'`  | Below DraggableList    | `outline`, `sm`, `full` | Yes            |
 
-| Button                     | Action                            | Disabled When             |
-| -------------------------- | --------------------------------- | ------------------------- |
-| Order by Sorting           | `orderBySorting()`                | No sorting exists         |
-| Clear Visibility & Pinning | `clearColumnOrderSection()`       | No pinning or hidden cols |
-| Reset Order & Visibility   | `resetColumnOrderAndVisibility()` | Never                     |
+| Button                            | Action                            | Disabled When                           |
+| --------------------------------- | --------------------------------- | --------------------------------------- |
+| Order by Sorting                  | `orderBySorting()`                | No sorting exists                       |
+| Clear Order, Visibility & Pinning | `clearColumnOrderSection()`       | No custom order, pinning or hidden cols |
+| Reset Order & Visibility          | `resetColumnOrderAndVisibility()` | Never                                   |
 
 ## Utility Functions
 

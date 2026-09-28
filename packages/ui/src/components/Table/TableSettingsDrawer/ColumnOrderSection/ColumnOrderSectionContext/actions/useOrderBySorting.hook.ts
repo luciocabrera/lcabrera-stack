@@ -2,6 +2,7 @@ import type { SortingState } from '#ui/components/Table/Table.types';
 
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDrawerContextValue } from '#ui/components/Table/TableSettingsDrawer/TableDrawerContext/useTableDrawerContextValue.hook';
+import { orderColumnsByKeys } from '#ui/components/Table/utils/orderColumnsByKeys.util';
 
 import { useColumnOrderSectionContextValue } from '../useColumnOrderSectionContextValue.hook';
 import { buildOrderBySorting } from './utils/buildOrderBySorting.util';
@@ -17,6 +18,7 @@ export const useOrderBySorting = () => {
     const drawerState = drawerColumnsStore.get();
     const {
       columnPinning,
+      columns,
       columnsOrder,
       staticKeys: rawStaticKeys,
     } = readPinActionState({
@@ -26,8 +28,13 @@ export const useOrderBySorting = () => {
     const sorting = drawerState?.sorting ?? ([] as SortingState);
     const staticKeys = rawStaticKeys ?? new Set<string>();
 
-    const newOrder = buildOrderBySorting({
+    const renderedOrder = orderColumnsByKeys({
       columnOrder: columnsOrder,
+      columns,
+    }).map((column) => column.key);
+
+    const newOrder = buildOrderBySorting({
+      columnOrder: renderedOrder,
       sorting,
       staticKeys,
     });

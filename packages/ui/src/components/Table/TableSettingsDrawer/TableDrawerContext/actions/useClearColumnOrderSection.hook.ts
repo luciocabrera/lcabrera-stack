@@ -1,19 +1,17 @@
-import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
+import type {
+  ColumnOrderState,
+  ColumnPinningState,
+} from '#ui/components/Table/Table.types';
 
 import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
-import { getDefaultColumnPinning } from './getDefaultColumnPinning.util';
 
 export const useClearColumnOrderSection = () => {
-  const { columnsStore: tableColumnsStore } = useTableConfigContextValue();
   const { columnsStore } = useTableDrawerContextValue();
 
   return () => {
-    const defaultPinning = getDefaultColumnPinning(
-      tableColumnsStore.get()?.columnPinning,
-    );
-
     columnsStore.set({
-      columnPinning: defaultPinning,
+      columnOrder: [] as ColumnOrderState,
+      columnPinning: { left: [], right: [] } as ColumnPinningState,
       columnVisibility: new Set(),
     });
   };

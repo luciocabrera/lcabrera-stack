@@ -29,7 +29,7 @@ TableDrawerContext/
 │   ├── buildBatchTableSettingsUpdate.util.ts → Normalize drawer snapshot into the table batch-update payload
 │   ├── useBatchSetTableDrawerSettings      → Push both drafts to the table in one commit
 │   ├── useClearAllSettings                 → Clear all column fields
-│   ├── useClearColumnOrderSection          → Clear visibility + pinning
+│   ├── useClearColumnOrderSection          → Clear order + visibility + pinning
 │   ├── useClearFilters                     → Clear all filters
 │   ├── useClearColumnAggregates            → Stage no aggregates, keeping the group keys
 │   ├── useClearGroupKeys                   → Stage no group keys
@@ -170,7 +170,7 @@ and calls `set(partial)` on it — `columnsStore` for the column draft,
 | `useSetColumnsVisibility`          | —                    | `columnsStore`         | —                                                                                                                                          |
 | `useClearFilters`                  | —                    | `columnsStore`         | Sets `columnFilters` to `{}`                                                                                                               |
 | `useClearSorting`                  | —                    | `columnsStore`         | Sets `sorting` to `[]`                                                                                                                     |
-| `useClearColumnOrderSection`       | —                    | `columnsStore`         | Clears visibility + pinning                                                                                                                |
+| `useClearColumnOrderSection`       | —                    | `columnsStore`         | Clears order + visibility + pinning                                                                                                        |
 | `useClearAllSettings`              | —                    | `columnsStore`         | Clears all fields                                                                                                                          |
 | `useResetFilters`                  | `TableConfigContext` | `columnsStore`         | Restores filters from table                                                                                                                |
 | `useResetSorting`                  | `TableConfigContext` | `columnsStore`         | Restores sorting from table                                                                                                                |
