@@ -20,6 +20,8 @@ const quoted = (value) => `\`${value}\``;
 
 export const CREATE_BRANCH = 'main';
 
+export const CREATE_DEFAULT_PROFILE = 'monorepo';
+
 export const INITIAL_COMMIT_MESSAGE =
   'chore: initialise the repository with devkit';
 

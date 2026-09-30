@@ -2,7 +2,7 @@
 id: create-default-monorepo
 title: feat(devkit): create defaults to the rung that leaves a working repository
 owner: agent:claude
-status: active
+status: review
 branch: feat/1191-create-default-monorepo
 area:
   - packages/devkit/**
@@ -12,7 +12,7 @@ area:
 started: 2026-09-30
 updated: 2026-09-30
 plan: (none)
-pr: (none)
+pr: #1199
 issue: #1191
 ---
 
@@ -22,6 +22,6 @@ feat(devkit): create defaults to the rung that leaves a working repository
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; gate green
 - Blockers: none
 - Next:

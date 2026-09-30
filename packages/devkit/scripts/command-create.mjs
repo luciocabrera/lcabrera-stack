@@ -27,6 +27,7 @@ import {
   ancestorsOf,
   commitIdentityArgs,
   CREATE_BRANCH,
+  CREATE_DEFAULT_PROFILE,
   createRefusal,
   createSummary,
   gitStepFailure,
@@ -99,7 +100,7 @@ const resolvedProfile = (flagged) => {
     return {
       profile: withProfile({
         config: DEFAULT_CONFIG,
-        profile: flagged ?? DEFAULT_CONFIG.profile,
+        profile: flagged ?? CREATE_DEFAULT_PROFILE,
       }).profile,
     };
   } catch (error) {
