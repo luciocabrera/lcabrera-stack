@@ -162,6 +162,14 @@ describe('an install outside a work tree', () => {
     expect(localHooksPath(root)).toBe('');
   });
 
+  test('exits 0 without reading a devkit.config.json it cannot parse', () => {
+    const root = scratch();
+    mkdirSync(join(root, '.githooks'));
+    writeFileSync(join(root, 'devkit.config.json'), '{ not json');
+
+    expect(install(root).status).toBe(0);
+  });
+
   test('leaves the repository around it alone', () => {
     const outer = clone();
     const inner = join(outer, 'unpacked');

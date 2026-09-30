@@ -131,6 +131,8 @@ const readIfPresent = (path) =>
 const point = ({ binary, root }) => {
   const git = gitRunner(binary);
   const read = quietly(git);
+  const topLevel = realPathOf(read(['rev-parse', '--show-toplevel']));
+  if (topLevel !== root) return;
   const hooksPath = hooksPathIn(readIfPresent(join(root, CONFIG_FILE_NAME)));
   const current = read(['config', '--local', '--get', 'core.hooksPath']);
   const action = hooksPathAction({
@@ -138,7 +140,7 @@ const point = ({ binary, root }) => {
     hooksPath,
     hooksPresent: existsSync(join(root, hooksPath)),
     root,
-    topLevel: realPathOf(read(['rev-parse', '--show-toplevel'])),
+    topLevel,
   });
   if (action === 'point') {
     git(['config', '--local', 'core.hooksPath', hooksPath]);
