@@ -37,6 +37,15 @@ export const scopedNames = (manifest) => [
 ];
 
 /**
+ * @param {Record<string, unknown>} manifest
+ * @returns {Record<string, unknown>}
+ */
+export const installedManifest = (manifest) =>
+  Object.fromEntries(
+    Object.entries(manifest).filter(([field]) => field !== 'devDependencies'),
+  );
+
+/**
  * @param {{ manifestOf: (name: string) => Record<string, unknown> | undefined,
  *           roots: readonly string[] }} args
  * @returns {{ missing: string[], names: string[] }}
@@ -54,7 +63,7 @@ export const packageClosure = ({ manifestOf, roots }) => {
       continue;
     }
     seen.add(name);
-    pending.push(...scopedNames(manifest));
+    pending.push(...scopedNames(installedManifest(manifest)));
   }
   const byName = (left, right) => left.localeCompare(right);
   return {

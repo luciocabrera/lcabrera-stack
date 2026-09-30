@@ -50,6 +50,7 @@ import {
   missingPackageFindings,
   packageClosure,
   digestsOf,
+  installedManifest,
   rangeFindings,
   scopedDeclarations,
   scopedNames,
@@ -136,7 +137,7 @@ const packedPackages = ({ staging, tree }) => {
     manifests: [
       ...manifests,
       ...packed.map(({ manifest }) => ({
-        manifest,
+        manifest: installedManifest(manifest),
         where: `the packed \`${manifest.name}\``,
       })),
     ],

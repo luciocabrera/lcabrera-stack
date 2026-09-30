@@ -49,6 +49,20 @@ describe('packageClosure', () => {
     });
   });
 
+  it("does not follow a reached package's devDependencies, which a consumer never installs", () => {
+    expect(
+      packageClosure({
+        manifestOf: (name) =>
+          ({
+            '@lcabrera/api': {
+              devDependencies: { '@lcabrera/server': 'workspace:*' },
+            },
+          })[name],
+        roots: ['@lcabrera/api'],
+      }),
+    ).toEqual({ missing: [], names: ['@lcabrera/api'] });
+  });
+
   it('reports a package this checkout does not hold', () => {
     const { missing } = packageClosure({
       manifestOf: (name) => manifests[name],
