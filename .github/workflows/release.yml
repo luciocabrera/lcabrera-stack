@@ -67,6 +67,8 @@ jobs:
   publish:
     name: Publish changed packages
     runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.publish.outputs.published }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -193,6 +195,9 @@ jobs:
             echo "::error::changeset publish reported $reported tag(s) but $created exist. The packages are already on npm and CANNOT be republished — re-running will not fix this. Create the missing tags and Releases by hand, then fix the tagging step."
             exit 1
           fi
+          if [ -s /tmp/tags-new ]; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          fi
 
       # Split from the publish on purpose. npm is already written to by this
       # point and cannot be undone, so a failure here must be recoverable by
@@ -210,3 +215,14 @@ jobs:
             node scripts/release-notes.mjs "$tag" > /tmp/notes.md
             gh release create "$tag" --title "$tag" --notes-file /tmp/notes.md
           done < /tmp/tags-new
+
+  # workspace:verify in Check Safe installs the packages packed from the
+  # checkout, so nothing before this point has asked whether the registry, now
+  # holding what just shipped, gives a user a tree that works.
+  registry-tree:
+    name: A tree created from npm passes its own tasks
+    needs: publish
+    if: needs.publish.outputs.published == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/created-tree-registry.yml

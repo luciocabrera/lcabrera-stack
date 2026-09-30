@@ -14,10 +14,15 @@ area:
   - .github/workflows/release.yml
   - .github/workflows/created-tree-registry.yml
   - package.json
+  - pnpm-workspace.yaml
+  - pnpm-lock.yaml
+  - scripts/lib/devkit-tree-run*
+  - packages/devkit/CLASSIFICATION.md
+  - docs/decisions/ADR-125-*
 started: 2026-09-30
 updated: 2026-09-30
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1207
 issue: #1205
 ---
 
@@ -27,6 +32,6 @@ ci(tooling): the created-tree gate installs every @lcabrera package from this ch
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green, PR ready
 - Blockers: none
 - Next:

@@ -1,21 +1,20 @@
 /**
  * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
- * installs it from the registry, and runs the tasks that tree wires for itself,
- * the upgrade that should find nothing left to add, and its commit-msg hook.
- * The blueprint's own configs are the only ones that fully lint it, and nothing
- * else here runs them. Every scratch directory sits under the OS temp root so
- * the tree inherits nothing from this checkout (ADR-073).
+ * installs every `@lcabrera/*` package it resolves from a tarball packed from
+ * this checkout, and runs the tasks that tree wires for itself, the upgrade
+ * that should find nothing left to add, and its commit-msg hook. So the gate
+ * tests what the next release ships, together; `registry-tree:verify` is
+ * the check of what npm serves today. Every scratch directory sits under the OS
+ * temp root so the tree inherits nothing from this checkout (ADR-073).
  *
  * Usage: node scripts/verify-devkit-workspace.mjs
  * Exit codes: 0 = the created tree installs and its tasks pass, 1 = it does not.
  */
 
-import { spawnSync } from 'node:child_process';
 import {
   existsSync,
   mkdtempSync,
   readdirSync,
-  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -29,75 +28,151 @@ import {
 } from '../packages/devkit/scripts/config.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
 import {
-  commandLabel,
+  createFindings,
+  execute,
+  installedBin,
+  installFindings,
+  readIfPresent,
+  readJson,
+  report,
+  reportCrash,
+  runtimeFindings,
+  taskRunFindings,
+  tasksLabel,
+  trackedChangeFindings,
+  TREE_NAME,
+  treeFindings,
+} from './lib/devkit-tree-run.mjs';
+import {
+  catalogsOf,
+  missingPackageFindings,
+  packageClosure,
+  rangeFindings,
+  registryResolvedFindings,
+  scopedDeclarations,
+  scopedNames,
+  withTarballOverrides,
+} from './lib/devkit-workspace-packages.mjs';
+import {
   commitHookFindings,
   missingBlueprintFiles,
   missingToolchainBins,
-  modifiedTrackedFiles,
-  nodeFindings,
-  outputTail,
   taskFindings,
   tasksAddedByUpgrade,
   TOOLCHAIN_BINS,
   trackedPathsIn,
   trackedWritesByUpgrade,
-  TREE_TASKS,
 } from './lib/devkit-workspace.mjs';
 
 const REPO_ROOT = process.cwd();
 
 const BLUEPRINT = 'packages/devkit/assets/workspace';
 
-const TREE_NAME = 'made';
-
 const CREATE_ARGS = ['create', TREE_NAME, '--profile', 'monorepo'];
 
-const INSTALL_ARGS = ['install', '--no-frozen-lockfile'];
+const WORKSPACE_FILE = 'pnpm-workspace.yaml';
 
-const readIfPresent = (path) =>
-  existsSync(path) ? readFileSync(path, 'utf8') : undefined;
+const LOCKFILE = 'pnpm-lock.yaml';
 
-const readJson = (path) => JSON.parse(readIfPresent(path) ?? '{}');
+const SCRATCH_IDENTITY = [
+  '-c',
+  'user.name=workspace-gate',
+  '-c',
+  'user.email=workspace-gate@invalid',
+  '-c',
+  'commit.gpgsign=false',
+];
 
-const OUTPUT_LIMIT_BYTES = 64 * 1024 * 1024;
+const checkoutPackages = () =>
+  new Map(
+    readdirSync(join(REPO_ROOT, 'packages'), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => ({
+        directory: entry.name,
+        manifest: readJson(
+          join(REPO_ROOT, 'packages', entry.name, 'package.json'),
+        ),
+      }))
+      .filter(({ manifest }) => typeof manifest.name === 'string')
+      .map((found) => [found.manifest.name, found]),
+  );
 
-const execute = ({ args, command, cwd }) => {
-  const result = spawnSync(command, args, {
-    cwd,
-    encoding: 'utf8',
-    maxBuffer: OUTPUT_LIMIT_BYTES,
+const treeManifests = (tree) =>
+  run('git', ['ls-files', '--', '*package.json'], tree)
+    .split('\n')
+    .filter((path) => path === 'package.json' || path.endsWith('/package.json'))
+    .map((path) => ({
+      manifest: readJson(join(tree, path)),
+      where: `\`${path}\``,
+    }));
+
+const packAll = ({ directories, staging }) =>
+  directories.map((directory) =>
+    packOne({ directory, into: staging, repoRoot: REPO_ROOT }),
+  );
+
+const packedPackages = ({ staging, tree }) => {
+  const checkout = checkoutPackages();
+  const manifests = treeManifests(tree);
+  const { missing, names } = packageClosure({
+    manifestOf: (name) => checkout.get(name)?.manifest,
+    roots: manifests.flatMap(({ manifest }) => scopedNames(manifest)),
+  });
+  if (missing.length > 0) {
+    return { findings: missingPackageFindings(missing), tarballs: new Map() };
+  }
+  run('vp', ['run', 'packages:build'], REPO_ROOT);
+  const packed = packAll({
+    directories: names.map((name) => checkout.get(name).directory),
+    staging,
+  });
+  const declarations = scopedDeclarations({
+    catalogs: catalogsOf(readIfPresent(join(tree, WORKSPACE_FILE)) ?? ''),
+    manifests: [
+      ...manifests,
+      ...packed.map(({ manifest }) => ({
+        manifest,
+        where: `the packed \`${manifest.name}\``,
+      })),
+    ],
   });
   return {
-    error: result.error?.message,
-    output: [result.stdout, result.stderr].filter(Boolean).join(''),
-    signal: result.signal,
-    status: result.status,
+    findings: rangeFindings({
+      declarations,
+      versions: new Map(
+        packed.map(({ manifest }) => [manifest.name, manifest.version]),
+      ),
+    }),
+    tarballs: new Map(
+      packed.map(({ manifest, tarball }) => [manifest.name, tarball]),
+    ),
   };
 };
 
-const installedDevkit = ({ holder, staging }) => {
-  const { tarball } = packOne({
-    directory: 'devkit',
-    into: staging,
-    repoRoot: REPO_ROOT,
-  });
+const installFromTarballs = ({ tarballs, tree }) => {
+  const path = join(tree, WORKSPACE_FILE);
   writeFileSync(
-    join(holder, 'package.json'),
-    `${JSON.stringify({ name: 'holder', private: true, version: '1.0.0' }, undefined, 2)}\n`,
-  );
-  run('npm', ['install', '--no-audit', '--no-fund', tarball], holder);
-  return join(holder, 'node_modules', '.bin', 'devkit');
-};
-
-const createFindings = ({ devkit, parent }) =>
-  taskFindings({
-    label: ['devkit', ...CREATE_ARGS].join(' '),
-    ...execute({
-      args: CREATE_ARGS,
-      command: devkit,
-      cwd: parent,
+    path,
+    withTarballOverrides({
+      tarballs,
+      workspaceYaml: readIfPresent(path) ?? '',
     }),
-  });
+  );
+  run(
+    'git',
+    [
+      ...SCRATCH_IDENTITY,
+      'commit',
+      '--quiet',
+      '--no-verify',
+      '--message',
+      'chore(gate): install the packages packed from the checkout',
+      '--',
+      WORKSPACE_FILE,
+    ],
+    tree,
+  );
+};
 
 const blueprintFindings = ({ tree }) =>
   missingBlueprintFiles({
@@ -109,30 +184,14 @@ const blueprintFindings = ({ tree }) =>
       targetPathFor({ assetPath: `workspace/${path}`, config: DEFAULT_CONFIG }),
   });
 
-const runtimeFindings = (tree) =>
-  nodeFindings({
-    band: readJson(join(tree, 'package.json')).engines?.node,
-    pinned: readIfPresent(join(tree, '.node-version'))?.trim(),
-    running: process.versions.node,
-  });
-
-const installFindings = (tree) =>
-  taskFindings({
-    label: commandLabel(INSTALL_ARGS),
-    ...execute({
-      args: INSTALL_ARGS,
-      command: 'vp',
-      cwd: tree,
-    }),
-  });
-
-const taskRunFindings = ({ tree }) =>
-  TREE_TASKS.flatMap((args) =>
-    taskFindings({
-      label: commandLabel(args),
-      ...execute({ args, command: 'vp', cwd: tree }),
-    }),
-  );
+const sourceFindings = (tree) => {
+  const lockfile = readIfPresent(join(tree, LOCKFILE));
+  return lockfile === undefined
+    ? [
+        `the install wrote no \`${LOCKFILE}\`, so nothing shows where each \`@lcabrera/*\` package came from`,
+      ]
+    : registryResolvedFindings(lockfile);
+};
 
 const toolchainBinFindings = ({ tree }) => {
   const binDirectory = join(tree, 'node_modules', '.bin');
@@ -211,8 +270,7 @@ const commitHookRunFindings = ({ tree }) => {
   });
 };
 
-const trackedChangeFindings = ({ tree }) =>
-  modifiedTrackedFiles(trackedPorcelain(tree));
+const PREREQUISITES = [runtimeFindings, installFindings, sourceFindings];
 
 const TREE_CHECKS = [
   blueprintFindings,
@@ -223,46 +281,39 @@ const TREE_CHECKS = [
   commitHookRunFindings,
 ];
 
-const PREREQUISITES = [runtimeFindings, installFindings];
-
-const firstBlocking = (tree) =>
-  PREREQUISITES.reduce(
-    (found, check) => (found.length > 0 ? found : check(tree)),
-    [],
-  );
-
-const treeFindings = ({ devkit, tree }) => {
-  const blocking = firstBlocking(tree);
-  return blocking.length > 0
-    ? blocking
-    : TREE_CHECKS.flatMap((check) => check({ devkit, tree }));
+const checkedTree = ({ devkit, staging, tree }) => {
+  const { findings, tarballs } = packedPackages({ staging, tree });
+  if (findings.length > 0) return findings;
+  installFromTarballs({ tarballs, tree });
+  return treeFindings({
+    checks: TREE_CHECKS,
+    context: { devkit },
+    prerequisites: PREREQUISITES,
+    tree,
+  });
 };
 
 const main = () => {
   const staging = mkdtempSync(join(tmpdir(), 'devkit-workspace-pack-'));
   const holder = mkdtempSync(join(tmpdir(), 'devkit-workspace-holder-'));
   const parent = mkdtempSync(join(tmpdir(), 'devkit-workspace-tree-'));
-  const tree = join(parent, TREE_NAME);
 
   try {
-    const devkit = installedDevkit({ holder, staging });
-    const created = createFindings({ devkit, parent });
-    const findings =
-      created.length > 0 ? created : treeFindings({ devkit, tree });
-
-    if (findings.length > 0) {
-      process.stderr.write(
-        `\nCreated-workspace gate — ${findings.length} finding(s):\n\n`,
-      );
-      for (const finding of findings) process.stderr.write(`  • ${finding}\n`);
-      process.exitCode = 1;
-      return;
-    }
-
-    const tasks = TREE_TASKS.map((args) => commandLabel(args)).join(', ');
-    process.stdout.write(
-      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed with ${TOOLCHAIN_BINS.join(', ')} in it, ${tasks} all exited zero, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.\n`,
-    );
+    const { tarball } = packOne({
+      directory: 'devkit',
+      into: staging,
+      repoRoot: REPO_ROOT,
+    });
+    const devkit = installedBin({ bin: 'devkit', holder, spec: tarball });
+    const created = createFindings({ args: CREATE_ARGS, bin: devkit, parent });
+    report({
+      findings:
+        created.length > 0
+          ? created
+          : checkedTree({ devkit, staging, tree: join(parent, TREE_NAME) }),
+      passed: `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} all exited zero, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
+      title: 'Created-workspace gate',
+    });
   } finally {
     for (const directory of [staging, holder, parent]) {
       rmSync(directory, { force: true, recursive: true });
@@ -273,10 +324,5 @@ const main = () => {
 try {
   main();
 } catch (error) {
-  const detail =
-    error instanceof Error
-      ? outputTail([error.message, error.stderr ?? ''].join('\n'))
-      : String(error);
-  process.stderr.write(`${detail}\n`);
-  process.exitCode = 1;
+  reportCrash(error);
 }
