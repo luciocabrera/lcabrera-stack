@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import semver from 'semver';
 import { describe, expect, test } from 'vite-plus/test';
 
 import {
@@ -7,15 +9,28 @@ import {
   CREATE_BRANCH,
   createRefusal,
   createSummary,
+  declaredToolchainBins,
   DEFAULT_COMMIT_IDENTITY,
+  DEVKIT_PACKAGE,
+  GATE_RUNTIME_PACKAGE,
   gitStepFailure,
   inFormatterOrder,
   INITIAL_COMMIT_MESSAGE,
   initialManifest,
   missingGitRefusal,
   packageNameFor,
+  TOOLCHAIN_RANGES,
+  toolchainDependencies,
   unfinishedNotice,
 } from './create.mjs';
+import { gateBinNames, withheldTasks } from './init.mjs';
+
+const manifestOf = (relative) =>
+  JSON.parse(readFileSync(new URL(relative, import.meta.url), 'utf8'));
+
+const devkitManifest = manifestOf('../package.json');
+
+const gateRuntimeManifest = manifestOf('../../repo-standards/package.json');
 
 describe('createRefusal', () => {
   test('lets a fresh name through', () => {
@@ -159,7 +174,8 @@ describe('packageNameFor', () => {
 
 describe('initialManifest', () => {
   test('starts private, so a first commit cannot publish anything', () => {
-    expect(initialManifest({ name: 'demo' })).toEqual({
+    expect(initialManifest({ name: 'demo', profile: 'agent' })).toEqual({
+      devDependencies: { [DEVKIT_PACKAGE]: TOOLCHAIN_RANGES[DEVKIT_PACKAGE] },
       name: 'demo',
       private: true,
       type: 'module',
@@ -170,7 +186,18 @@ describe('initialManifest', () => {
   test('a rung below monorepo is written in the order the formatter wants', () => {
     expect(
       Object.keys(initialManifest({ name: 'demo', profile: 'agent' })),
-    ).toEqual(['name', 'version', 'private', 'type']);
+    ).toEqual(['name', 'version', 'private', 'type', 'devDependencies']);
+  });
+
+  test('declares the toolchain beside the workspace dependencies, in name order', () => {
+    const declared = Object.keys(
+      initialManifest({ name: 'demo', profile: 'monorepo' }).devDependencies,
+    );
+    expect(declared).toContain(DEVKIT_PACKAGE);
+    expect(declared).toContain(GATE_RUNTIME_PACKAGE);
+    expect(declared).toEqual(
+      declared.toSorted((left, right) => left.localeCompare(right)),
+    );
   });
 
   test('the monorepo rung is written in the order the formatter wants', () => {
@@ -223,7 +250,7 @@ describe('what a run says afterwards', () => {
     const summary = createSummary({ branch: CREATE_BRANCH, target: 'demo' });
     expect(summary).toContain('demo');
     expect(summary).toContain(CREATE_BRANCH);
-    expect(summary).toContain('devkit init --upgrade');
+    expect(summary).not.toContain('devkit init');
   });
 
   test('a machine without git is refused, naming where it looked', () => {
@@ -266,5 +293,94 @@ describe('what a run says afterwards', () => {
 
   test('the initial commit message is a conventional commit, since the kit ships that gate', () => {
     expect(INITIAL_COMMIT_MESSAGE).toMatch(/^[a-z]+(\([^)]+\))?: .+/);
+  });
+});
+
+describe('the toolchain a created repository declares', () => {
+  test('declares this kit at every rung', () => {
+    for (const profile of ['agent', 'repo', 'monorepo', 'full']) {
+      expect(toolchainDependencies({ profile })[DEVKIT_PACKAGE]).toBe(
+        TOOLCHAIN_RANGES[DEVKIT_PACKAGE],
+      );
+    }
+  });
+
+  test('declares the gate runtime from the rung that places its callers', () => {
+    expect(
+      toolchainDependencies({ profile: 'agent' })[GATE_RUNTIME_PACKAGE],
+    ).toBeUndefined();
+    for (const profile of ['repo', 'monorepo', 'full']) {
+      expect(toolchainDependencies({ profile })[GATE_RUNTIME_PACKAGE]).toBe(
+        TOOLCHAIN_RANGES[GATE_RUNTIME_PACKAGE],
+      );
+    }
+  });
+
+  test('never declares a sibling directory, which no created tree has', () => {
+    for (const range of Object.values(TOOLCHAIN_RANGES)) {
+      expect(range.startsWith('workspace:')).toBe(false);
+      expect(semver.validRange(range)).not.toBeNull();
+    }
+  });
+
+  test('each range admits the next minor and stops below the next major', () => {
+    for (const range of Object.values(TOOLCHAIN_RANGES)) {
+      const floor = semver.minVersion(range).version;
+      expect(semver.satisfies(semver.inc(floor, 'minor'), range)).toBe(true);
+      expect(semver.satisfies(semver.inc(floor, 'major'), range)).toBe(false);
+    }
+  });
+
+  test('each range admits the version its package is on now', () => {
+    expect(
+      semver.satisfies(
+        devkitManifest.version,
+        TOOLCHAIN_RANGES[DEVKIT_PACKAGE],
+      ),
+    ).toBe(true);
+    expect(
+      semver.satisfies(
+        gateRuntimeManifest.version,
+        TOOLCHAIN_RANGES[GATE_RUNTIME_PACKAGE],
+      ),
+    ).toBe(true);
+  });
+
+  test('the gate runtime range sits inside the peer range this kit declares', () => {
+    expect(
+      semver.subset(
+        TOOLCHAIN_RANGES[GATE_RUNTIME_PACKAGE],
+        devkitManifest.peerDependencies[GATE_RUNTIME_PACKAGE],
+      ),
+    ).toBe(true);
+  });
+
+  test('every gate bin is shipped by one of the two declared packages', () => {
+    const shipped = new Set([
+      ...Object.keys(devkitManifest.bin),
+      ...Object.keys(gateRuntimeManifest.bin),
+    ]);
+    expect(gateBinNames().filter((bin) => !shipped.has(bin))).toEqual([]);
+  });
+
+  test('a rung that declares the gate runtime withholds no gate task', () => {
+    for (const profile of ['repo', 'monorepo', 'full']) {
+      const availableBins = declaredToolchainBins({
+        devkitBins: Object.keys(devkitManifest.bin),
+        profile,
+      });
+      expect(withheldTasks({ availableBins, profile })).toEqual([]);
+    }
+  });
+
+  test('the agent rung withholds only the tasks the gate runtime runs', () => {
+    const availableBins = declaredToolchainBins({
+      devkitBins: Object.keys(devkitManifest.bin),
+      profile: 'agent',
+    });
+    expect(availableBins).toEqual(Object.keys(devkitManifest.bin));
+    expect(withheldTasks({ availableBins, profile: 'agent' })).not.toContain(
+      'devkit:sync',
+    );
   });
 });

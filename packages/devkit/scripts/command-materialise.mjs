@@ -94,7 +94,14 @@ const installedBins = (root) => {
  * @param {{ config: object, establish: boolean, root: string,
  *           scripts?: Record<string, string>, recorded?: Record<string, string> }} args
  */
-const taskGroups = ({ config, establish, recorded, root, scripts }) => {
+const taskGroups = ({
+  config,
+  declaredBins,
+  establish,
+  recorded,
+  root,
+  scripts,
+}) => {
   const { profile } = config;
   const blueprint = includesRung({ profile, rung: 'monorepo' });
   const withoutBlueprint =
@@ -106,7 +113,10 @@ const taskGroups = ({ config, establish, recorded, root, scripts }) => {
     establish,
     tasks: tasksFor({ profile }),
     withheld: new Set([
-      ...withheldTasks({ availableBins: installedBins(root), profile }),
+      ...withheldTasks({
+        availableBins: [...installedBins(root), ...declaredBins],
+        profile,
+      }),
       ...withoutBlueprint,
     ]),
   };
@@ -123,13 +133,14 @@ const EVERY_TASK_NAME = [
  * nothing can apply: recording tasks as written into a file that does not exist
  * would leave the record claiming what the tree does not have.
  */
-const plannedTasks = ({ config, establish, manifest, root }) => {
+const plannedTasks = ({ config, declaredBins, establish, manifest, root }) => {
   const packageManifest = readJsonIfPresent(join(root, PACKAGE_MANIFEST));
   if (packageManifest === undefined) return [];
   const scripts = packageManifest.scripts;
   return planTasks({
     groups: taskGroups({
       config,
+      declaredBins,
       establish,
       recorded: manifest.tasks,
       root,
@@ -162,7 +173,12 @@ const resolvePeerVersions = (assets) =>
     ]),
   );
 
-export const buildPlan = ({ establish = false, profile, root }) => {
+export const buildPlan = ({
+  declaredBins = [],
+  establish = false,
+  profile,
+  root,
+}) => {
   const configured = resolveConfig(readIfPresent(join(root, CONFIG_FILE_NAME)));
   const config =
     profile === undefined
@@ -189,7 +205,7 @@ export const buildPlan = ({ establish = false, profile, root }) => {
     config,
     entries,
     manifest,
-    tasks: plannedTasks({ config, establish, manifest, root }),
+    tasks: plannedTasks({ config, declaredBins, establish, manifest, root }),
   };
 };
 

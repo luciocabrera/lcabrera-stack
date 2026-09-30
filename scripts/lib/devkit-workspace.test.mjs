@@ -6,11 +6,15 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   commandLabel,
+  commitHookFindings,
   missingBlueprintFiles,
+  missingToolchainBins,
   modifiedTrackedFiles,
   nodeFindings,
   outputTail,
   taskFindings,
+  tasksAddedByUpgrade,
+  TOOLCHAIN_BINS,
   TREE_TASKS,
 } from './devkit-workspace.mjs';
 
@@ -188,5 +192,77 @@ describe('missingBlueprintFiles', () => {
         targetOf,
       }),
     ).toHaveLength(1);
+  });
+});
+
+describe('missingToolchainBins', () => {
+  it('expects the kit and the gate the commit hook calls', () => {
+    expect(TOOLCHAIN_BINS).toContain('devkit');
+    expect(TOOLCHAIN_BINS).toContain('repo-verify-commit');
+  });
+
+  it('finds nothing when every expected bin was installed', () => {
+    expect(
+      missingToolchainBins({
+        expected: TOOLCHAIN_BINS,
+        present: [...TOOLCHAIN_BINS, 'vp'],
+      }),
+    ).toEqual([]);
+  });
+
+  it('names each bin the install did not put in place', () => {
+    const findings = missingToolchainBins({
+      expected: ['devkit', 'repo-verify-commit'],
+      present: ['devkit'],
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('node_modules/.bin/repo-verify-commit');
+  });
+});
+
+describe('tasksAddedByUpgrade', () => {
+  it('finds nothing when the upgrade left the task block as it was', () => {
+    const scripts = { 'commit:verify': 'repo-verify-commit' };
+    expect(tasksAddedByUpgrade({ after: scripts, before: scripts })).toEqual(
+      [],
+    );
+  });
+
+  it('names each task the upgrade added', () => {
+    const findings = tasksAddedByUpgrade({
+      after: { 'commit:verify': 'repo-verify-commit', check: 'vp check' },
+      before: { check: 'vp check' },
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('`commit:verify`');
+  });
+});
+
+describe('commitHookFindings', () => {
+  it('finds nothing when the hook takes the good message and refuses the bad one', () => {
+    expect(
+      commitHookFindings({
+        accepted: { output: '', status: 0 },
+        refused: { output: 'not Conventional', status: 1 },
+      }),
+    ).toEqual([]);
+  });
+
+  it('reports a refused Conventional Commit with what the hook said', () => {
+    const findings = commitHookFindings({
+      accepted: { output: 'repo-verify-commit is missing', status: 1 },
+      refused: { output: '', status: 1 },
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('repo-verify-commit is missing');
+  });
+
+  it('reports a malformed message the hook let through', () => {
+    const findings = commitHookFindings({
+      accepted: { output: '', status: 0 },
+      refused: { output: '', status: 0 },
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('accepted a message');
   });
 });

@@ -24,6 +24,7 @@ import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runCreate } from './command-create.mjs';
 import { CREATE_BRANCH, INITIAL_COMMIT_MESSAGE } from './create.mjs';
+import { tasksFor } from './init.mjs';
 
 const scratches = [];
 
@@ -356,5 +357,34 @@ describe('a rung above repo', () => {
     ]) {
       expect(existsSync(join(parent, 'demo', path))).toBe(true);
     }
+  });
+});
+
+const scriptsOf = (parent) =>
+  JSON.parse(readFileSync(join(parent, 'demo', 'package.json'), 'utf8'))
+    .scripts;
+
+describe('the gate tasks, wired before anything is installed', () => {
+  test('a rung that declares the gate runtime gets every gate task it wires', () => {
+    for (const profile of ['repo', 'monorepo']) {
+      const parent = scratch();
+      const { code, printed } = createUnder({ parent, profile });
+
+      expect(code).toBe(0);
+      expect(existsSync(join(parent, 'demo', 'node_modules'))).toBe(false);
+      expect(scriptsOf(parent)).toMatchObject(tasksFor({ profile }));
+      expect(printed).not.toContain('devkit init --upgrade');
+    }
+  });
+
+  test('the agent rung gets only the tasks this kit runs itself', () => {
+    const parent = scratch();
+    const { code } = createUnder({ parent, profile: 'agent' });
+
+    expect(code).toBe(0);
+    expect(Object.keys(scriptsOf(parent))).toEqual([
+      'devkit:check',
+      'devkit:sync',
+    ]);
   });
 });

@@ -13,12 +13,14 @@ import {
   lstatSync,
   mkdirSync,
   readdirSync,
+  readFileSync,
   realpathSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 import { applyInit } from './command-init.mjs';
 import { DEFAULT_CONFIG, withProfile } from './config.mjs';
@@ -30,6 +32,7 @@ import {
   CREATE_DEFAULT_PROFILE,
   createRefusal,
   createSummary,
+  declaredToolchainBins,
   gitStepFailure,
   INITIAL_COMMIT_MESSAGE,
   initialManifest,
@@ -44,6 +47,14 @@ import {
   TRUSTED_GIT_DIRECTORIES,
 } from './git-exec.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
+
+const ownManifestPath = join(
+  dirname(dirname(fileURLToPath(import.meta.url))),
+  'package.json',
+);
+
+const ownBins = () =>
+  Object.keys(JSON.parse(readFileSync(ownManifestPath, 'utf8')).bin ?? {});
 
 const identityIn = (cwd) => ({
   email: readGit({ args: ['config', '--get', 'user.email'], cwd }),
@@ -159,6 +170,7 @@ const scaffold = ({ absolute, profile, target }) => {
   );
 
   const code = applyInit({
+    declaredBins: declaredToolchainBins({ devkitBins: ownBins(), profile }),
     profile,
     root: absolute,
     upgrade: false,

@@ -19,6 +19,7 @@ issues:
   - 1075
   - 1076
   - 1107
+  - 1194
 evidence:
   - type: command
     ref: vp run workspace:verify

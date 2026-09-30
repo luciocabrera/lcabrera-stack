@@ -100,3 +100,56 @@ export const missingBlueprintFiles = ({ blueprint, placed, targetOf }) => {
         `the blueprint's \`${path}\` never reached the created tree — the packed tarball does not carry it, so a consumer's \`devkit create\` would not place it either`,
     );
 };
+
+/**
+ * @type {readonly string[]}
+ */
+export const TOOLCHAIN_BINS = [
+  'devkit',
+  'repo-verify-commit',
+  'repo-verify-branch',
+];
+
+/**
+ * @param {{ expected: readonly string[], present: readonly string[] }} args
+ * @returns {string[]}
+ */
+export const missingToolchainBins = ({ expected, present }) => {
+  const installed = new Set(present);
+  return expected
+    .filter((bin) => !installed.has(bin))
+    .map(
+      (bin) =>
+        `\`node_modules/.bin/${bin}\` is not in the created tree after its install — the manifest \`devkit create\` wrote does not declare the package that ships it, so the hooks, workflows and gate tasks calling it fail`,
+    );
+};
+
+/**
+ * @param {{ after: Record<string, string>, before: Record<string, string> }} args
+ * @returns {string[]}
+ */
+export const tasksAddedByUpgrade = ({ after, before }) =>
+  Object.keys(after)
+    .filter((name) => !Object.hasOwn(before, name))
+    .map(
+      (name) =>
+        `\`devkit init --upgrade\` added \`${name}\` to a tree \`devkit create\` had just made and installed — create withheld a task its own manifest makes runnable`,
+    );
+
+/**
+ * @param {{ accepted: { output: string, status: number | null },
+ *           refused: { output: string, status: number | null } }} args
+ * @returns {string[]}
+ */
+export const commitHookFindings = ({ accepted, refused }) => [
+  ...(accepted.status === 0
+    ? []
+    : [
+        `the created tree's \`commit-msg\` hook refused a Conventional Commit message:\n${outputTail(accepted.output)}`,
+      ]),
+  ...(refused.status === 0
+    ? [
+        "the created tree's `commit-msg` hook accepted a message that is not a Conventional Commit",
+      ]
+    : []),
+];
