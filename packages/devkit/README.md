@@ -171,11 +171,15 @@ that already exists. Nothing overrides them: `init`'s refusals and these are the
 two halves of one rule, and a flag that got past either would put this kit's
 files somewhere it cannot record or restore them.
 
-No gate task is wired by a `create` run, because a repository made a second ago
-has installed nothing, and a task naming a binary you do not have is a
-`command not found` on your first run. Install your dependencies and then run
-`devkit init --upgrade` inside the new repository: it adds the tasks whose
-binaries have arrived and leaves the config as you have it.
+The manifest `create` writes declares the toolchain the tree calls:
+`@lcabrera/devkit` and `@lcabrera/repo-standards`, at every rung, because every
+rung owns gate tasks that run the gate runtime's binaries. Each is written as a
+floor with a bound below the next major, never as a `workspace:` specifier. Because the tree is about to be installed from that
+manifest, `create` wires every gate task the rung owns whose binary the manifest
+declares, even though nothing is installed yet. One install is the only step
+left: after it the hooks, the workflows and the gate tasks find their binaries,
+and `devkit init --upgrade` has no task left to add. `init` in a repository that
+already exists still decides by what is installed.
 
 ## Setting up a repository
 

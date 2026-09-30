@@ -12,6 +12,7 @@
 import { dirname } from 'node:path';
 
 import { includesRung } from './config.mjs';
+import { gateBinNames } from './init.mjs';
 import { withWorkspaceFields } from './workspace.mjs';
 
 const CREATE_USAGE = 'devkit create <directory> [--profile <name>]';
@@ -168,6 +169,31 @@ export const inFormatterOrder = (manifest) => {
   );
 };
 
+export const DEVKIT_PACKAGE = '@lcabrera/devkit';
+
+export const GATE_RUNTIME_PACKAGE = '@lcabrera/repo-standards';
+
+export const TOOLCHAIN_RANGES = {
+  [DEVKIT_PACKAGE]: '>=0.5.1 <1.0.0',
+  [GATE_RUNTIME_PACKAGE]: '>=0.6.0 <1.0.0',
+};
+
+/**
+ * @param {{ devkitBins: readonly string[] }} args
+ * @returns {string[]}
+ */
+export const declaredToolchainBins = ({ devkitBins }) => [
+  ...devkitBins,
+  ...gateBinNames().filter((bin) => !devkitBins.includes(bin)),
+];
+
+const sortedByName = (record) =>
+  Object.fromEntries(
+    Object.entries(record).toSorted(([left], [right]) =>
+      left.localeCompare(right),
+    ),
+  );
+
 /**
  * The manifest a created repository starts from.
  *
@@ -188,16 +214,19 @@ export const inFormatterOrder = (manifest) => {
  */
 export const initialManifest = ({ name, profile = '' }) => {
   const base = {
+    devDependencies: TOOLCHAIN_RANGES,
     name,
     private: true,
     type: 'module',
     version: '0.0.0',
   };
-  return inFormatterOrder(
-    includesRung({ profile, rung: 'monorepo' })
-      ? withWorkspaceFields({ manifest: base })
-      : base,
-  );
+  const manifest = includesRung({ profile, rung: 'monorepo' })
+    ? withWorkspaceFields({ manifest: base })
+    : base;
+  return inFormatterOrder({
+    ...manifest,
+    devDependencies: sortedByName(manifest.devDependencies),
+  });
 };
 
 /**
@@ -276,5 +305,5 @@ export const unfinishedNotice = ({ target }) =>
 export const createSummary = ({ branch, target }) =>
   [
     `Created \`${target}\`: a git repository on \`${branch}\`, with everything above committed.`,
-    `Nothing is installed yet, so install your dependencies in \`${target}\` first. Then run \`devkit init --upgrade\` there to add the gate tasks whose binaries have arrived, keeping the config as you have it.`,
+    `Nothing is installed yet: install the dependencies in \`${target}\`, and the gate tasks wired above find the toolchain its manifest declares.`,
   ].join('\n');
