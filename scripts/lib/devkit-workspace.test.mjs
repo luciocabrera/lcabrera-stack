@@ -5,7 +5,9 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  commandLabel,
   missingBlueprintFiles,
+  modifiedTrackedFiles,
   nodeFindings,
   outputTail,
   taskFindings,
@@ -13,9 +15,25 @@ import {
 } from './devkit-workspace.mjs';
 
 describe('TREE_TASKS', () => {
-  it('runs the four tasks the created tree wires for itself', () => {
-    expect(TREE_TASKS.map(({ label }) => label)).toEqual([
-      'vp run lint:all',
+  it('runs the check-only tasks the created tree wires for itself', () => {
+    expect(TREE_TASKS).toEqual([
+      ['run', 'lint:check'],
+      ['run', 'typecheck:all'],
+      ['fmt', '--check', '.'],
+      ['run', 'test:all'],
+    ]);
+  });
+
+  it('runs no task that writes: no lint:all, no --fix, no --write', () => {
+    const words = TREE_TASKS.flat();
+    expect(words).not.toContain('lint:all');
+    expect(words).not.toContain('--fix');
+    expect(words).not.toContain('--write');
+  });
+
+  it('labels each task with the command it runs', () => {
+    expect(TREE_TASKS.map((args) => commandLabel(args))).toEqual([
+      'vp run lint:check',
       'vp run typecheck:all',
       'vp fmt --check .',
       'vp run test:all',
@@ -64,10 +82,58 @@ describe('taskFindings', () => {
     expect(finding).toContain('lint/style/noEnum');
   });
 
-  it('reports a process killed by a signal as a failure', () => {
+  it('reports a process killed by a signal by naming the signal', () => {
     expect(
-      taskFindings({ label: 'vp install', output: '', status: null }),
-    ).toEqual([expect.stringContaining('exited on a signal')]);
+      taskFindings({
+        label: 'vp install',
+        output: '',
+        signal: 'SIGKILL',
+        status: null,
+      }),
+    ).toEqual([expect.stringContaining('was killed by SIGKILL')]);
+  });
+
+  it('reports a process that never ran by its spawn error, not as a signal', () => {
+    const [finding] = taskFindings({
+      error: 'spawnSync vp ENOENT',
+      label: 'vp install',
+      output: '',
+      signal: null,
+      status: null,
+    });
+    expect(finding).toContain('could not run (spawnSync vp ENOENT)');
+    expect(finding).not.toContain('signal');
+  });
+
+  it('reports an error even when the process exited zero', () => {
+    expect(
+      taskFindings({
+        error: 'spawnSync vp ENOBUFS',
+        label: 'vp run test:all',
+        output: '',
+        signal: 'SIGTERM',
+        status: 0,
+      }),
+    ).toEqual([
+      expect.stringContaining('could not run (spawnSync vp ENOBUFS)'),
+    ]);
+  });
+});
+
+describe('modifiedTrackedFiles', () => {
+  it('reports nothing for a clean tree', () => {
+    expect(modifiedTrackedFiles('')).toEqual([]);
+  });
+
+  it('names each committed file a step changed', () => {
+    const findings = modifiedTrackedFiles(
+      ' M vite.config.ts\n M apps/web/src/root.tsx\n',
+    );
+    expect(findings).toHaveLength(2);
+    expect(findings[0]).toContain(
+      '`vite.config.ts` changed while the gate ran',
+    );
+    expect(findings[1]).toContain('`apps/web/src/root.tsx`');
   });
 });
 

@@ -2,7 +2,7 @@
  * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
  * installs it from the registry, and runs the tasks that tree wires for itself.
  * The blueprint's own configs are the only ones that fully lint it, and nothing
- * else here runs them. Both scratch directories sit under the OS temp root so
+ * else here runs them. Every scratch directory sits under the OS temp root so
  * the tree inherits nothing from this checkout (ADR-073).
  *
  * Usage: node scripts/verify-devkit-workspace.mjs
@@ -27,7 +27,9 @@ import {
 } from '../packages/devkit/scripts/config.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
 import {
+  commandLabel,
   missingBlueprintFiles,
+  modifiedTrackedFiles,
   nodeFindings,
   outputTail,
   taskFindings,
@@ -40,15 +42,27 @@ const BLUEPRINT = 'packages/devkit/assets/workspace';
 
 const TREE_NAME = 'made';
 
+const CREATE_ARGS = ['create', TREE_NAME, '--profile', 'monorepo'];
+
+const INSTALL_ARGS = ['install', '--no-frozen-lockfile'];
+
 const readIfPresent = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
 
 const readJson = (path) => JSON.parse(readIfPresent(path) ?? '{}');
 
+const OUTPUT_LIMIT_BYTES = 64 * 1024 * 1024;
+
 const execute = ({ args, command, cwd }) => {
-  const result = spawnSync(command, args, { cwd, encoding: 'utf8' });
+  const result = spawnSync(command, args, {
+    cwd,
+    encoding: 'utf8',
+    maxBuffer: OUTPUT_LIMIT_BYTES,
+  });
   return {
-    output: `${result.stdout ?? ''}${result.stderr ?? ''}${result.error?.message ?? ''}`,
+    error: result.error?.message,
+    output: [result.stdout, result.stderr].filter(Boolean).join(''),
+    signal: result.signal,
     status: result.status,
   };
 };
@@ -69,9 +83,9 @@ const installedDevkit = ({ holder, staging }) => {
 
 const createFindings = ({ devkit, parent }) =>
   taskFindings({
-    label: `devkit create ${TREE_NAME} --profile monorepo`,
+    label: ['devkit', ...CREATE_ARGS].join(' '),
     ...execute({
-      args: ['create', TREE_NAME, '--profile', 'monorepo'],
+      args: CREATE_ARGS,
       command: devkit,
       cwd: parent,
     }),
@@ -96,20 +110,28 @@ const runtimeFindings = (tree) =>
 
 const installFindings = (tree) =>
   taskFindings({
-    label: 'vp install --no-frozen-lockfile',
+    label: commandLabel(INSTALL_ARGS),
     ...execute({
-      args: ['install', '--no-frozen-lockfile'],
+      args: INSTALL_ARGS,
       command: 'vp',
       cwd: tree,
     }),
   });
 
 const taskRunFindings = (tree) =>
-  TREE_TASKS.flatMap(({ args, label }) =>
-    taskFindings({ label, ...execute({ args, command: 'vp', cwd: tree }) }),
+  TREE_TASKS.flatMap((args) =>
+    taskFindings({
+      label: commandLabel(args),
+      ...execute({ args, command: 'vp', cwd: tree }),
+    }),
   );
 
-const TREE_CHECKS = [blueprintFindings, taskRunFindings];
+const trackedChangeFindings = (tree) =>
+  modifiedTrackedFiles(
+    run('git', ['status', '--porcelain', '--untracked-files=no'], tree),
+  );
+
+const TREE_CHECKS = [blueprintFindings, taskRunFindings, trackedChangeFindings];
 
 const PREREQUISITES = [runtimeFindings, installFindings];
 
@@ -146,8 +168,9 @@ const main = () => {
       return;
     }
 
+    const tasks = TREE_TASKS.map((args) => commandLabel(args)).join(', ');
     process.stdout.write(
-      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed, and ${TREE_TASKS.map(({ label }) => `\`${label}\``).join(', ')} all exited zero.\n`,
+      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed, ${tasks} all exited zero, and none of them changed a committed file.\n`,
     );
   } finally {
     for (const directory of [staging, holder, parent]) {
@@ -159,8 +182,10 @@ const main = () => {
 try {
   main();
 } catch (error) {
-  process.stderr.write(
-    `${error instanceof Error ? outputTail(`${error.message}\n${error.stderr ?? ''}`) : String(error)}\n`,
-  );
+  const detail =
+    error instanceof Error
+      ? outputTail([error.message, error.stderr ?? ''].join('\n'))
+      : String(error);
+  process.stderr.write(`${detail}\n`);
   process.exitCode = 1;
 }

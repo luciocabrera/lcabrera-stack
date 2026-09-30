@@ -27,6 +27,6 @@ Build a monorepo-rung tree in a gate and run its own tasks
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate built and wired into CI; PR #1200 in review
 - Blockers: none
-- Next:
+- Next: address review threads, then merge

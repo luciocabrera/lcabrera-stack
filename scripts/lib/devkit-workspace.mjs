@@ -10,14 +10,20 @@ import semver from 'semver';
 const OUTPUT_TAIL_LINES = 40;
 
 /**
- * @type {ReadonlyArray<{ args: readonly string[], label: string }>}
+ * @type {ReadonlyArray<readonly string[]>}
  */
 export const TREE_TASKS = [
-  { args: ['run', 'lint:all'], label: 'vp run lint:all' },
-  { args: ['run', 'typecheck:all'], label: 'vp run typecheck:all' },
-  { args: ['fmt', '--check', '.'], label: 'vp fmt --check .' },
-  { args: ['run', 'test:all'], label: 'vp run test:all' },
+  ['run', 'lint:check'],
+  ['run', 'typecheck:all'],
+  ['fmt', '--check', '.'],
+  ['run', 'test:all'],
 ];
+
+/**
+ * @param {readonly string[]} args
+ * @returns {string}
+ */
+export const commandLabel = (args) => ['vp', ...args].join(' ');
 
 /**
  * @param {string} output
@@ -46,16 +52,38 @@ export const nodeFindings = ({ band, pinned, running }) => {
   ];
 };
 
+const outcomeOf = ({ error, signal, status }) => {
+  if (error !== undefined) return `could not run (${error})`;
+  if (signal !== undefined && signal !== null) return `was killed by ${signal}`;
+  return `exited ${status}`;
+};
+
 /**
- * @param {{ label: string, output: string, status: number | null }} result
+ * @param {{ error?: string, label: string, output: string,
+ *           signal?: string | null, status: number | null }} result
  * @returns {string[]}
  */
-export const taskFindings = ({ label, output, status }) =>
-  status === 0
-    ? []
-    : [
-        `\`${label}\` exited ${status ?? 'on a signal'} in the created tree:\n${outputTail(output)}`,
-      ];
+export const taskFindings = ({ error, label, output, signal, status }) => {
+  if (error === undefined && status === 0) return [];
+  const outcome = outcomeOf({ error, signal, status });
+  return [
+    `\`${label}\` ${outcome} in the created tree:\n${outputTail(output)}`,
+  ];
+};
+
+/**
+ * @param {string} porcelain
+ * @returns {string[]}
+ */
+export const modifiedTrackedFiles = (porcelain) =>
+  porcelain
+    .split('\n')
+    .filter((line) => line.trim() !== '')
+    .map((line) => line.slice(3))
+    .map(
+      (path) =>
+        `\`${path}\` changed while the gate ran — a step wrote to the committed tree it was checking, so a check that passed may have passed on its own fix`,
+    );
 
 /**
  * @param {{ blueprint: readonly string[], placed: readonly string[],
