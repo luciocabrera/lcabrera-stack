@@ -62,7 +62,7 @@ const RUNNERS = [
       '    run-install: false',
     ],
     commands: {
-      audit: 'vp run deps:audit',
+      audit: 'vp pm audit --level moderate',
       check: 'vp check',
       install: 'vp install',
       run: 'vp run',
@@ -70,6 +70,7 @@ const RUNNERS = [
     },
     detect: ({ dependencies }) => dependencies.has('vite-plus'),
     name: 'vite-plus',
+    taskCommands: { audit: 'deps:audit', test: 'test:all' },
   },
   {
     commands: {
@@ -150,13 +151,27 @@ export const runnerFromUserAgent = (userAgent) => {
 };
 
 /**
+ * @param {{ runner: object, tasks: Set<string> }} args
+ * @returns {Record<string, string>}
+ */
+const commandsFor = ({ runner, tasks }) => ({
+  ...runner.commands,
+  ...Object.fromEntries(
+    Object.entries(runner.taskCommands ?? {})
+      .filter(([, task]) => tasks.has(task))
+      .map(([key, task]) => [key, `${runner.commands.run} ${task}`]),
+  ),
+});
+
+/**
  * @param {{ dependencies?: Iterable<string>, files?: Iterable<string>,
- *           userAgent?: string }} args
+ *           tasks?: Iterable<string>, userAgent?: string }} args
  * @returns {{ commands: Record<string, string>, name: string }}
  */
 export const inferRunner = ({
   dependencies = [],
   files = [],
+  tasks = [],
   userAgent,
 } = {}) => {
   const context = {
@@ -174,7 +189,7 @@ export const inferRunner = ({
       : RUNNERS.find((candidate) => candidate.name === named);
   return {
     ciSetup: [...(runner.ciSetup ?? [])],
-    commands: { ...runner.commands },
+    commands: commandsFor({ runner, tasks: new Set(tasks) }),
     name: runner.name,
   };
 };
@@ -329,6 +344,12 @@ export const GATE_TASKS = {
   'commit:verify': { bin: 'repo-verify-commit', rung: 'agent' },
   'coordination:close': { bin: 'repo-close-claim', rung: 'agent' },
   'coordination:verify': { bin: 'repo-verify-claims', rung: 'agent' },
+  'deps:audit': {
+    bin: 'repo-verify-deps-audit',
+    input: 'vp pm audit --json',
+    needs: BLUEPRINT,
+    rung: 'monorepo',
+  },
   'devkit:check': { args: ['doctor', '--check'], bin: 'devkit', rung: 'agent' },
   'devkit:sync': { args: ['sync'], bin: 'devkit', rung: 'agent' },
   'issue:verify': { bin: 'repo-verify-issue', rung: 'repo' },
@@ -341,7 +362,10 @@ export const gateBinNames = () => [
   ...new Set(Object.values(GATE_TASKS).map((task) => task.bin)),
 ];
 
-const commandLine = ({ args = [], bin }) => [bin, ...args].join(' ');
+const commandLine = ({ args = [], bin, input }) => {
+  const line = [bin, ...args].join(' ');
+  return input === undefined ? line : `${input} | ${line}`;
+};
 
 const rungTasks = (profile) =>
   Object.entries(GATE_TASKS).filter(([, task]) =>
@@ -366,7 +390,7 @@ export const tasksFor = ({ profile }) =>
   );
 
 /**
- * The rung's tasks that check something the blueprint places.
+ * The rung's tasks that need something only the blueprint places.
  *
  * `commands:verify` reads the command reference this kit ships, and that
  * document names the blueprint's own tasks — so in a repository that has not

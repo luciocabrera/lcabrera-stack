@@ -18,6 +18,7 @@ import {
   printPlacementNotice,
   printTaskPlan,
   renderPlan,
+  taskNamesAfterInit,
 } from './command-materialise.mjs';
 import {
   CONFIG_FILE_NAME,
@@ -64,11 +65,12 @@ const currentBranch = (root) => {
   }
 };
 
-const writeConfig = ({ profile, root, upgrade, userAgent }) => {
+const writeConfig = ({ declaredBins, profile, root, upgrade, userAgent }) => {
   const manifest = readJsonIfPresent(join(root, MANIFEST));
   const runner = inferRunner({
     dependencies: declaredDependencies(manifest),
     files: readdirSync(root),
+    tasks: taskNamesAfterInit({ declaredBins, profile, root }),
     userAgent,
   });
   const defaultBranch = currentBranch(root);
@@ -137,7 +139,13 @@ export const applyInit = ({
   upgrade,
   userAgent,
 }) => {
-  const runner = writeConfig({ profile, root, upgrade, userAgent });
+  const runner = writeConfig({
+    declaredBins,
+    profile,
+    root,
+    upgrade,
+    userAgent,
+  });
   const warning = missingManifestWarning(root);
   const { entries, tasks } = materialise({ declaredBins, profile, root });
   const { added, skipped } = taskOutcomes(tasks);
