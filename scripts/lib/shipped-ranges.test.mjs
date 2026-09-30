@@ -19,7 +19,6 @@ import {
   ALL_MENTIONS,
   CATALOG,
   CONSTANT_DECLARATIONS,
-  CONSTANT_SOURCE,
   EVERY_SHAPE,
   MANIFEST,
   MANIFEST_DECLARATIONS,
@@ -195,25 +194,13 @@ describe('mentionsIn', () => {
 
 describe('shippedRangeFindings — a shape the walk stopped reaching', () => {
   it.each([
-    {
-      missing: 'workspace catalog',
-      sources: [{ kind: 'manifest', path: MANIFEST }, CONSTANT_SOURCE],
-    },
-    {
-      missing: 'manifest',
-      sources: [{ kind: 'catalog', path: YAML }, CONSTANT_SOURCE],
-    },
-    {
-      missing: 'range constant',
-      sources: [
-        { kind: 'manifest', path: MANIFEST },
-        { kind: 'catalog', path: YAML },
-      ],
-    },
-  ])('refuses a pass when no $missing was read', ({ missing, sources }) => {
+    { absent: 'catalog', missing: 'workspace catalog' },
+    { absent: 'manifest', missing: 'manifest' },
+    { absent: 'constant', missing: 'range constant' },
+  ])('refuses a pass when no $missing was read', ({ absent, missing }) => {
     const findings = findingsFor({
       declarations: [...MANIFEST_DECLARATIONS, ...YAML_DECLARATIONS],
-      sources,
+      sources: EVERY_SHAPE.filter(({ kind }) => kind !== absent),
     });
 
     expect(findings.map(({ kind, shape }) => ({ kind, shape }))).toEqual([

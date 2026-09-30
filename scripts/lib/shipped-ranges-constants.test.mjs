@@ -8,22 +8,20 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   constantRanges,
   findingLine,
+  passLine,
   shippedRangeFindings,
 } from './shipped-ranges.mjs';
 import {
   ALL_MENTIONS,
   CONSTANT,
+  CONSTANT_DECLARATIONS,
+  CONSTANT_RANGES,
   EVERY_SHAPE,
-  MODULE,
   MANIFEST_DECLARATIONS,
+  MODULE,
+  VERSIONS,
   YAML_DECLARATIONS,
 } from './shipped-ranges-fixtures.mjs';
-
-const VERSIONS = {
-  '@lcabrera/devkit': '0.5.1',
-  '@lcabrera/tsconfig': '0.2.2',
-  '@lcabrera/vite-config': '0.5.0',
-};
 
 const findingsFor = (ranges) =>
   shippedRangeFindings({
@@ -43,45 +41,37 @@ describe('constantRanges', () => {
       constantRanges({
         constant: CONSTANT,
         path: MODULE,
-        ranges: { '@lcabrera/devkit': '>=0.5.1 <1.0.0' },
+        ranges: CONSTANT_RANGES,
       }),
-    ).toEqual([
-      {
-        constant: CONSTANT,
-        field: CONSTANT,
-        name: '@lcabrera/devkit',
-        path: MODULE,
-        range: '>=0.5.1 <1.0.0',
-      },
-    ]);
+    ).toEqual(CONSTANT_DECLARATIONS);
   });
 });
 
 describe('shippedRangeFindings — a range constant', () => {
   it('passes while the constant admits the current version and the next minor', () => {
-    expect(findingsFor({ '@lcabrera/devkit': '>=0.5.1 <1.0.0' })).toEqual([]);
+    expect(findingsFor(CONSTANT_RANGES)).toEqual([]);
   });
 
   it('reports a range the published version has left, naming the constant', () => {
     const [finding, ...rest] = findingsFor({
-      '@lcabrera/devkit': '>=0.4.0 <0.5.0',
+      '@lcabrera/tsconfig': '>=0.1.0 <0.2.0',
     });
 
     expect(rest).toEqual([]);
     expect(finding.kind).toBe('excludes-current');
     expect(findingLine(finding)).toContain(`${MODULE}:${CONSTANT}`);
-    expect(findingLine(finding)).toContain('write `>=0.5.1 <1.0.0`');
+    expect(findingLine(finding)).toContain('write `>=0.2.2 <1.0.0`');
   });
 
   it('reports a caret that stops short of the next minor', () => {
-    const [finding] = findingsFor({ '@lcabrera/devkit': '^0.5.1' });
+    const [finding] = findingsFor({ '@lcabrera/tsconfig': '^0.2.2' });
 
     expect(finding.kind).toBe('excludes-next-minor');
   });
 
   it('reports an entry naming a package this repository does not publish', () => {
     const [finding, ...rest] = findingsFor({
-      '@lcabrera/devkit': '>=0.5.1 <1.0.0',
+      ...CONSTANT_RANGES,
       '@lcabrera/gone': '>=0.1.0 <1.0.0',
     });
 
@@ -106,11 +96,7 @@ describe('shippedRangeFindings — a range constant', () => {
       declarations: [
         ...MANIFEST_DECLARATIONS,
         ...YAML_DECLARATIONS,
-        ...constantRanges({
-          constant: CONSTANT,
-          path: MODULE,
-          ranges: { '@lcabrera/devkit': '>=0.5.1 <1.0.0' },
-        }),
+        ...CONSTANT_DECLARATIONS,
         ...constantRanges({ constant: other, path: MODULE, ranges: {} }),
       ],
       mentions: ALL_MENTIONS,
@@ -125,5 +111,25 @@ describe('shippedRangeFindings — a range constant', () => {
       { constant: other, kind: 'no-declarations' },
     ]);
     expect(findingLine(findings[0])).toContain(`${MODULE}:${other}`);
+  });
+});
+
+describe('passLine', () => {
+  it('counts each thing under the label that names it', () => {
+    const line = passLine({
+      declarations: [...MANIFEST_DECLARATIONS, ...YAML_DECLARATIONS],
+      mentions: ALL_MENTIONS,
+      sources: [
+        ...EVERY_SHAPE,
+        { kind: 'scanned', path: 'workflows/check.yml' },
+      ],
+    });
+
+    expect(line).toContain(
+      '3 declaration(s) read from 2 shipped file(s) and 1 range constant(s)',
+    );
+    expect(line).toContain(
+      '3 shipped data file(s) scanned for a package this repository publishes, 3 mention(s) found',
+    );
   });
 });

@@ -48,6 +48,8 @@ export const EVERY_SHAPE = [
   CONSTANT_SOURCE,
 ];
 
+export const CONSTANT_RANGES = { '@lcabrera/tsconfig': '>=0.2.2 <1.0.0' };
+
 export const CONSTANT_DECLARATIONS = [
   {
     constant: CONSTANT,

@@ -282,3 +282,14 @@ export const findingLine = (finding) => {
 
   return `${where(finding)}  ${finding.name}: ${REASONS[finding.kind](finding)} — write \`${suggestion(finding.version)}\``;
 };
+
+/**
+ * @param {{ declarations: readonly object[], mentions: readonly object[], sources: readonly { kind: string }[] }} args
+ */
+export const passLine = ({ declarations, mentions, sources }) => {
+  const files = sources.filter(({ kind }) => kind !== 'constant');
+  const parsed = files.filter(({ kind }) => kind !== 'scanned').length;
+  const constants = sources.length - files.length;
+
+  return `Shipped range gate passed: ${declarations.length} declaration(s) read from ${parsed} shipped file(s) and ${constants} range constant(s); ${files.length} shipped data file(s) scanned for a package this repository publishes, ${mentions.length} mention(s) found, each one read.`;
+};

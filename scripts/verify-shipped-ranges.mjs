@@ -25,6 +25,7 @@ import {
   findingLine,
   manifestRanges,
   mentionsIn,
+  passLine,
   shippedRangeFindings,
   sourceOf,
 } from './lib/shipped-ranges.mjs';
@@ -115,11 +116,7 @@ const main = async () => {
     return;
   }
 
-  const read = sources.filter(({ kind }) => kind !== 'scanned').length;
-
-  console.log(
-    `Shipped range gate passed: ${declarations.length} declaration(s) read from ${read} shipped source(s), out of ${sources.length} scanned for a package this repository publishes — ${mentions.length} mention(s), each one read.`,
-  );
+  console.log(passLine({ declarations, mentions, sources }));
 };
 
 try {
