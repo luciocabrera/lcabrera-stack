@@ -305,15 +305,20 @@ by walking up for that exact name, while a stub referencing a config the
 generator has not written yet fails the very install that would write it.
 
 One of the workspaces it places is an application, and it is there to be run
-rather than read. Its build and start tasks are declared in its own Vite config,
-so it is the runner that reads them — and the runner is a dependency of the
-created repository, not a command on your PATH. Reach it through the package
-manager:
+rather than read. The root manifest runs it, so from the repository root:
 
 ```bash
-pnpm exec vp run --filter web build
-pnpm exec vp run --filter web start   # then open http://localhost:3000
+vp run dev     # the development server
+vp run build   # a production build, in apps/web/build
+vp run start   # serve that build; then open http://localhost:3000
 ```
+
+Each root task hands off to the application's own task of the same name. `dev`
+is a script in its manifest; `build` and `start` are declared in its Vite
+config, which only the runner reads — so call the application's tasks through
+`vp run`, never through the package manager's own `run`. `vp` here is the
+runner the created repository declares as a dependency; without it on your
+PATH, prefix each line with `pnpm exec`.
 
 It is React Router in framework mode with one page route and one action route.
 The page renders a table from rows the module holds — no server, no database, no

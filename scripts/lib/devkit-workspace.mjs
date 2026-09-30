@@ -17,8 +17,13 @@ export const TREE_TASKS = [
   ['run', 'typecheck:all'],
   ['fmt', '--check', '.'],
   ['run', 'test:all'],
+  ['run', 'build'],
   ['run', 'lint:all'],
 ];
+
+export const START_ARGS = ['run', 'start'];
+
+export const BUILT_SERVER_ENTRY = 'apps/web/build/server/index.js';
 
 /**
  * @param {readonly string[]} args
@@ -99,4 +104,30 @@ export const missingBlueprintFiles = ({ blueprint, placed, targetOf }) => {
       (path) =>
         `the blueprint's \`${path}\` never reached the created tree — the packed tarball does not carry it, so a consumer's \`devkit create\` would not place it either`,
     );
+};
+
+/**
+ * @param {{ exists: boolean }} args
+ * @returns {string[]}
+ */
+export const buildOutputFindings = ({ exists }) =>
+  exists
+    ? []
+    : [
+        `\`vp run build\` exited zero in the created tree but wrote no \`${BUILT_SERVER_ENTRY}\`, so the root task reached no application build`,
+      ];
+
+/**
+ * @param {{ error?: string, output: string, status?: number, url: string }} args
+ * @returns {string[]}
+ */
+export const serveFindings = ({ error, output, status, url }) => {
+  if (status === 200) return [];
+  const outcome =
+    status === undefined
+      ? `never answered (${error ?? 'no response'})`
+      : `answered HTTP ${status}`;
+  return [
+    `\`${commandLabel(START_ARGS)}\` in the created tree ${outcome} at ${url}:\n${outputTail(output)}`,
+  ];
 };

@@ -1,6 +1,7 @@
 /**
  * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
- * installs it from the registry, and runs the tasks that tree wires for itself.
+ * installs it from the registry, runs the tasks that tree wires for itself, and
+ * fetches `/` from the app its root `start` task serves.
  * The blueprint's own configs are the only ones that fully lint it, and nothing
  * else here runs them. Every scratch directory sits under the OS temp root so
  * the tree inherits nothing from this checkout (ADR-073).
@@ -9,7 +10,7 @@
  * Exit codes: 0 = the created tree installs and its tasks pass, 1 = it does not.
  */
 
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import {
   existsSync,
   mkdtempSync,
@@ -17,9 +18,11 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
+import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
+import { setTimeout as delay } from 'node:timers/promises';
 
 import {
   DEFAULT_CONFIG,
@@ -27,11 +30,15 @@ import {
 } from '../packages/devkit/scripts/config.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
 import {
+  BUILT_SERVER_ENTRY,
+  buildOutputFindings,
   commandLabel,
   missingBlueprintFiles,
   modifiedTrackedFiles,
   nodeFindings,
   outputTail,
+  serveFindings,
+  START_ARGS,
   taskFindings,
   TREE_TASKS,
 } from './lib/devkit-workspace.mjs';
@@ -131,7 +138,72 @@ const trackedChangeFindings = (tree) =>
     run('git', ['status', '--porcelain', '--untracked-files=no'], tree),
   );
 
-const TREE_CHECKS = [blueprintFindings, taskRunFindings, trackedChangeFindings];
+const builtFindings = (tree) =>
+  buildOutputFindings({ exists: existsSync(join(tree, BUILT_SERVER_ENTRY)) });
+
+const SERVE_DEADLINE_MS = 60_000;
+
+const SERVE_POLL_MS = 500;
+
+const freePort = () =>
+  new Promise((resolve, reject) => {
+    const server = createServer();
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const { port } = server.address();
+      server.close(() => resolve(port));
+    });
+  });
+
+const firstAnswer = async ({ child, url }) => {
+  const deadline = Date.now() + SERVE_DEADLINE_MS;
+  while (Date.now() < deadline) {
+    if (child.exitCode !== null) {
+      return { error: `the task exited ${child.exitCode} before answering` };
+    }
+    try {
+      const response = await fetch(url);
+      return { status: response.status };
+    } catch {
+      await delay(SERVE_POLL_MS);
+    }
+  }
+  return { error: `no answer within ${SERVE_DEADLINE_MS / 1000}s` };
+};
+
+const stopped = (child) =>
+  new Promise((resolve) => {
+    if (child.exitCode !== null || child.signalCode !== null) {
+      resolve();
+      return;
+    }
+    child.once('exit', () => resolve());
+    process.kill(-child.pid, 'SIGTERM');
+  });
+
+const servedFindings = async (tree) => {
+  const port = await freePort();
+  writeFileSync(join(tree, 'apps', 'web', '.env'), `PORT=${port}\n`);
+  const url = `http://127.0.0.1:${port}/`;
+  const child = spawn('vp', START_ARGS, { cwd: tree, detached: true });
+  const chunks = [];
+  child.stdout.on('data', (chunk) => chunks.push(chunk));
+  child.stderr.on('data', (chunk) => chunks.push(chunk));
+  try {
+    const answer = await firstAnswer({ child, url });
+    return serveFindings({ ...answer, output: chunks.join(''), url });
+  } finally {
+    await stopped(child);
+  }
+};
+
+const TREE_CHECKS = [
+  blueprintFindings,
+  taskRunFindings,
+  builtFindings,
+  servedFindings,
+  trackedChangeFindings,
+];
 
 const PREREQUISITES = [runtimeFindings, installFindings];
 
@@ -141,14 +213,15 @@ const firstBlocking = (tree) =>
     [],
   );
 
-const treeFindings = (tree) => {
+const treeFindings = async (tree) => {
   const blocking = firstBlocking(tree);
-  return blocking.length > 0
-    ? blocking
-    : TREE_CHECKS.flatMap((check) => check(tree));
+  if (blocking.length > 0) return blocking;
+  const findings = [];
+  for (const check of TREE_CHECKS) findings.push(...(await check(tree)));
+  return findings;
 };
 
-const main = () => {
+const main = async () => {
   const staging = mkdtempSync(join(tmpdir(), 'devkit-workspace-pack-'));
   const holder = mkdtempSync(join(tmpdir(), 'devkit-workspace-holder-'));
   const parent = mkdtempSync(join(tmpdir(), 'devkit-workspace-tree-'));
@@ -157,7 +230,7 @@ const main = () => {
   try {
     const devkit = installedDevkit({ holder, staging });
     const created = createFindings({ devkit, parent });
-    const findings = created.length > 0 ? created : treeFindings(tree);
+    const findings = created.length > 0 ? created : await treeFindings(tree);
 
     if (findings.length > 0) {
       process.stderr.write(
@@ -170,7 +243,7 @@ const main = () => {
 
     const tasks = TREE_TASKS.map((args) => commandLabel(args)).join(', ');
     process.stdout.write(
-      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed, ${tasks} all exited zero, and none of them changed a committed file.\n`,
+      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed, ${tasks} all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200, and none of them changed a committed file.\n`,
     );
   } finally {
     for (const directory of [staging, holder, parent]) {
@@ -180,7 +253,7 @@ const main = () => {
 };
 
 try {
-  main();
+  await main();
 } catch (error) {
   const detail =
     error instanceof Error
