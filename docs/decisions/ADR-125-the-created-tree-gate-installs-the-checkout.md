@@ -87,6 +87,23 @@ it shipped, and the fix is another release.
 `workspace:verify` now builds the publishable packages before it packs, so it
 takes longer than a gate that packed one unbuilt package.
 
+`check:safe` now chains `workspace:verify`, after `tarball:verify`. It used to
+be CI-only, on the grounds that a registry install on every push is a cost each
+contributor would pay. That cost has not gone away: the tree still installs
+everything outside `@lcabrera` from npm, builds, runs its own tasks, serves a
+page and runs an upgrade. But it no longer falls on every push. The pre-push
+hook runs `check:push`, which does not include this gate, and `check:safe` is
+the deliberate full gate that already chains `tarball:verify`, which also
+installs from npm. The gate needs network access to npm, so an offline
+`check:safe` fails here.
+
+The registry check runs the same `TREE_TASKS` as `workspace:verify`, so a task
+added to that list fails the registry check until a devkit that wires the task
+is published. That red run is true: a user who creates a tree from npm at that
+moment gets a tree without the task. The release job that runs the check can
+therefore fail after a publish that itself succeeded. Read that failure as npm
+being behind the checkout, not as a failed release.
+
 The registry check runs soon after the publish. If npm has not yet served the
 new versions to the runner, it tests the previous ones and can pass or fail on
 them. Re-running it on demand is how to read the settled state.
