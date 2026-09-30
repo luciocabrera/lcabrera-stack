@@ -173,36 +173,18 @@ export const DEVKIT_PACKAGE = '@lcabrera/devkit';
 
 export const GATE_RUNTIME_PACKAGE = '@lcabrera/repo-standards';
 
-const GATE_RUNTIME_RUNG = 'repo';
-
 export const TOOLCHAIN_RANGES = {
   [DEVKIT_PACKAGE]: '>=0.5.1 <1.0.0',
   [GATE_RUNTIME_PACKAGE]: '>=0.6.0 <1.0.0',
 };
 
-const hasGateRuntime = (profile) =>
-  includesRung({ profile, rung: GATE_RUNTIME_RUNG });
-
 /**
- * @param {{ profile?: string }} args
- * @returns {Record<string, string>}
- */
-export const toolchainDependencies = ({ profile = '' }) => ({
-  [DEVKIT_PACKAGE]: TOOLCHAIN_RANGES[DEVKIT_PACKAGE],
-  ...(hasGateRuntime(profile) && {
-    [GATE_RUNTIME_PACKAGE]: TOOLCHAIN_RANGES[GATE_RUNTIME_PACKAGE],
-  }),
-});
-
-/**
- * @param {{ devkitBins: readonly string[], profile?: string }} args
+ * @param {{ devkitBins: readonly string[] }} args
  * @returns {string[]}
  */
-export const declaredToolchainBins = ({ devkitBins, profile = '' }) => [
+export const declaredToolchainBins = ({ devkitBins }) => [
   ...devkitBins,
-  ...(hasGateRuntime(profile)
-    ? gateBinNames().filter((bin) => !devkitBins.includes(bin))
-    : []),
+  ...gateBinNames().filter((bin) => !devkitBins.includes(bin)),
 ];
 
 const sortedByName = (record) =>
@@ -232,7 +214,7 @@ const sortedByName = (record) =>
  */
 export const initialManifest = ({ name, profile = '' }) => {
   const base = {
-    devDependencies: toolchainDependencies({ profile }),
+    devDependencies: TOOLCHAIN_RANGES,
     name,
     private: true,
     type: 'module',

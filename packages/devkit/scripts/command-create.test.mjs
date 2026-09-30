@@ -23,6 +23,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runCreate } from './command-create.mjs';
+import { PROFILE_LADDER } from './config.mjs';
 import { CREATE_BRANCH, INITIAL_COMMIT_MESSAGE } from './create.mjs';
 import { tasksFor } from './init.mjs';
 
@@ -365,8 +366,8 @@ const scriptsOf = (parent) =>
     .scripts;
 
 describe('the gate tasks, wired before anything is installed', () => {
-  test('a rung that declares the gate runtime gets every gate task it wires', () => {
-    for (const profile of ['repo', 'monorepo']) {
+  test('every rung is created with every gate task it owns', () => {
+    for (const profile of PROFILE_LADDER) {
       const parent = scratch();
       const { code, printed } = createUnder({ parent, profile });
 
@@ -375,16 +376,5 @@ describe('the gate tasks, wired before anything is installed', () => {
       expect(scriptsOf(parent)).toMatchObject(tasksFor({ profile }));
       expect(printed).not.toContain('devkit init --upgrade');
     }
-  });
-
-  test('the agent rung gets only the tasks this kit runs itself', () => {
-    const parent = scratch();
-    const { code } = createUnder({ parent, profile: 'agent' });
-
-    expect(code).toBe(0);
-    expect(Object.keys(scriptsOf(parent))).toEqual([
-      'devkit:check',
-      'devkit:sync',
-    ]);
   });
 });

@@ -25,6 +25,6 @@ a created repository declares the toolchain it tells you to run
 
 ## Status / next
 
-- Current step: gate green, PR ready for review
+- Current step: round 2, gate runtime declared at every rung
 - Blockers: none
 - Next: review

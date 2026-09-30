@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import semver from 'semver';
 import { describe, expect, test } from 'vite-plus/test';
 
+import { PROFILE_LADDER } from './config.mjs';
 import {
   abandonedNotice,
   ancestorsOf,
@@ -20,7 +21,6 @@ import {
   missingGitRefusal,
   packageNameFor,
   TOOLCHAIN_RANGES,
-  toolchainDependencies,
   unfinishedNotice,
 } from './create.mjs';
 import { gateBinNames, withheldTasks } from './init.mjs';
@@ -175,7 +175,7 @@ describe('packageNameFor', () => {
 describe('initialManifest', () => {
   test('starts private, so a first commit cannot publish anything', () => {
     expect(initialManifest({ name: 'demo', profile: 'agent' })).toEqual({
-      devDependencies: { [DEVKIT_PACKAGE]: TOOLCHAIN_RANGES[DEVKIT_PACKAGE] },
+      devDependencies: TOOLCHAIN_RANGES,
       name: 'demo',
       private: true,
       type: 'module',
@@ -297,20 +297,14 @@ describe('what a run says afterwards', () => {
 });
 
 describe('the toolchain a created repository declares', () => {
-  test('declares this kit at every rung', () => {
-    for (const profile of ['agent', 'repo', 'monorepo', 'full']) {
-      expect(toolchainDependencies({ profile })[DEVKIT_PACKAGE]).toBe(
-        TOOLCHAIN_RANGES[DEVKIT_PACKAGE],
-      );
-    }
-  });
-
-  test('declares the gate runtime from the rung that places its callers', () => {
-    expect(
-      toolchainDependencies({ profile: 'agent' })[GATE_RUNTIME_PACKAGE],
-    ).toBeUndefined();
-    for (const profile of ['repo', 'monorepo', 'full']) {
-      expect(toolchainDependencies({ profile })[GATE_RUNTIME_PACKAGE]).toBe(
+  test('declares this kit and its gate runtime at every rung', () => {
+    for (const profile of PROFILE_LADDER) {
+      const declared = initialManifest({
+        name: 'demo',
+        profile,
+      }).devDependencies;
+      expect(declared[DEVKIT_PACKAGE]).toBe(TOOLCHAIN_RANGES[DEVKIT_PACKAGE]);
+      expect(declared[GATE_RUNTIME_PACKAGE]).toBe(
         TOOLCHAIN_RANGES[GATE_RUNTIME_PACKAGE],
       );
     }
@@ -363,24 +357,12 @@ describe('the toolchain a created repository declares', () => {
     expect(gateBinNames().filter((bin) => !shipped.has(bin))).toEqual([]);
   });
 
-  test('a rung that declares the gate runtime withholds no gate task', () => {
-    for (const profile of ['repo', 'monorepo', 'full']) {
-      const availableBins = declaredToolchainBins({
-        devkitBins: Object.keys(devkitManifest.bin),
-        profile,
-      });
-      expect(withheldTasks({ availableBins, profile })).toEqual([]);
-    }
-  });
-
-  test('the agent rung withholds only the tasks the gate runtime runs', () => {
+  test('no rung withholds a gate task it owns', () => {
     const availableBins = declaredToolchainBins({
       devkitBins: Object.keys(devkitManifest.bin),
-      profile: 'agent',
     });
-    expect(availableBins).toEqual(Object.keys(devkitManifest.bin));
-    expect(withheldTasks({ availableBins, profile: 'agent' })).not.toContain(
-      'devkit:sync',
-    );
+    for (const profile of PROFILE_LADDER) {
+      expect(withheldTasks({ availableBins, profile })).toEqual([]);
+    }
   });
 });

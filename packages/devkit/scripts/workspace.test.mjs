@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vite-plus/test';
 
 import { configs } from '../assets/workspace/packages/typescript-config/tsconfig.entries.ts';
-import { initialManifest, toolchainDependencies } from './create.mjs';
+import { initialManifest, TOOLCHAIN_RANGES } from './create.mjs';
 import {
   GENERATED_TSCONFIGS,
   NODE_VERSION,
@@ -202,9 +202,7 @@ describe('initialManifest', () => {
     for (const profile of ['agent', 'repo']) {
       const manifest = initialManifest({ name: 'demo', profile });
       expect(manifest.scripts).toBeUndefined();
-      expect(manifest.devDependencies).toEqual(
-        toolchainDependencies({ profile }),
-      );
+      expect(manifest.devDependencies).toEqual(TOOLCHAIN_RANGES);
       expect(manifest.engines).toBeUndefined();
     }
   });

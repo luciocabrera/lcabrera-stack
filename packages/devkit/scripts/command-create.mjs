@@ -170,7 +170,7 @@ const scaffold = ({ absolute, profile, target }) => {
   );
 
   const code = applyInit({
-    declaredBins: declaredToolchainBins({ devkitBins: ownBins(), profile }),
+    declaredBins: declaredToolchainBins({ devkitBins: ownBins() }),
     profile,
     root: absolute,
     upgrade: false,

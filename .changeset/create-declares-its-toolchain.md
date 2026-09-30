@@ -3,10 +3,9 @@
 ---
 
 `devkit create` now declares the toolchain the created tree calls. The root
-manifest lists `@lcabrera/devkit` at every rung and `@lcabrera/repo-standards`
-from the `repo` rung up, each as a floor with a bound below the next major. The
-gate tasks for the rung are wired in the same run, because the manifest declares
-their binaries. After one install, the hooks, the workflows and the gate tasks
+manifest lists `@lcabrera/devkit` and `@lcabrera/repo-standards` at every rung,
+each as a floor with a bound below the next major. Every gate task the rung owns
+is wired in the same run, because the manifest declares its binary. After one install, the hooks, the workflows and the gate tasks
 find what they call, and `devkit init --upgrade` has nothing left to add.
 
 Previously the manifest declared neither package. The hooks and workflows

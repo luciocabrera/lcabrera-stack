@@ -172,8 +172,8 @@ two halves of one rule, and a flag that got past either would put this kit's
 files somewhere it cannot record or restore them.
 
 The manifest `create` writes declares the toolchain the tree calls:
-`@lcabrera/devkit` at every rung, and `@lcabrera/repo-standards` from the `repo`
-rung up, where the hooks and workflows that run its binaries are placed. Both
+`@lcabrera/devkit` and `@lcabrera/repo-standards`, at every rung, because every
+rung owns gate tasks that run the gate runtime's binaries. Both
 are written as a floor and a bound at the next major (`>=x.y.z <1.0.0`), never
 as a `workspace:` specifier. Because the tree is about to be installed from that
 manifest, `create` wires every gate task the rung owns whose binary the manifest
