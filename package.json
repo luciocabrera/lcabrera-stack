@@ -99,7 +99,6 @@
     "suppressions:packages": "node scripts/verify-suppressions.mjs --packages",
     "suppressions:verify": "node scripts/verify-suppressions.mjs",
     "tarball:verify": "node scripts/verify-devkit-tarball.mjs",
-    "workspace:verify": "node scripts/verify-devkit-workspace.mjs",
     "test:all": "vp run -r test && vp run test:scripts",
     "test:changed": "bash scripts/changed-files.sh repo-test-changed",
     "test:ci": "vp run --filter '!showcase' test && vp run test:scripts && vp run --filter showcase test:ci",
@@ -109,6 +108,7 @@
     "typegen:all": "vp run -r typegen",
     "usage:report": "repo-usage-report",
     "viteplus:verify": "repo-verify-viteplus-block",
+    "workspace:verify": "node scripts/verify-devkit-workspace.mjs",
     "worktree:env": "repo-worktree-env"
   },
   "devDependencies": {
