@@ -114,7 +114,7 @@ export const buildOutputFindings = ({ exists }) =>
   exists
     ? []
     : [
-        `\`vp run build\` exited zero in the created tree but wrote no \`${BUILT_SERVER_ENTRY}\`, so the root task reached no application build`,
+        `the created tree holds no \`${BUILT_SERVER_ENTRY}\` after the gate's \`vp run build\` step, so the root \`build\` task produced no application build`,
       ];
 
 /**

@@ -8,6 +8,7 @@ area:
   - packages/devkit/**
   - scripts/verify-devkit-workspace.mjs
   - scripts/lib/devkit-workspace*
+  - scripts/lib/devkit-serve*
   - .changeset/**
   - COMMANDS.md
 started: 2026-09-30

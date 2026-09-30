@@ -22,13 +22,13 @@ import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
-import { setTimeout as delay } from 'node:timers/promises';
 
 import {
   DEFAULT_CONFIG,
   targetPathFor,
 } from '../packages/devkit/scripts/config.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
+import { firstAnswer, stopGroup } from './lib/devkit-serve.mjs';
 import {
   BUILT_SERVER_ENTRY,
   buildOutputFindings,
@@ -145,6 +145,10 @@ const SERVE_DEADLINE_MS = 60_000;
 
 const SERVE_POLL_MS = 500;
 
+const SERVE_REQUEST_TIMEOUT_MS = 5000;
+
+const STOP_GRACE_MS = 5000;
+
 const freePort = () =>
   new Promise((resolve, reject) => {
     const server = createServer();
@@ -153,32 +157,6 @@ const freePort = () =>
       const { port } = server.address();
       server.close(() => resolve(port));
     });
-  });
-
-const firstAnswer = async ({ child, deadline, url }) => {
-  if (child.exitCode !== null) {
-    return { error: `the task exited ${child.exitCode} before answering` };
-  }
-  if (Date.now() >= deadline) {
-    return { error: `no answer within ${SERVE_DEADLINE_MS / 1000}s` };
-  }
-  try {
-    const response = await fetch(url);
-    return { status: response.status };
-  } catch {
-    await delay(SERVE_POLL_MS);
-    return firstAnswer({ child, deadline, url });
-  }
-};
-
-const stopped = (child) =>
-  new Promise((resolve) => {
-    if (child.exitCode !== null || child.signalCode !== null) {
-      resolve();
-      return;
-    }
-    child.once('exit', () => resolve());
-    process.kill(-child.pid, 'SIGTERM');
   });
 
 const servedFindings = async (tree) => {
@@ -196,11 +174,13 @@ const servedFindings = async (tree) => {
     const answer = await firstAnswer({
       child,
       deadline: Date.now() + SERVE_DEADLINE_MS,
+      pollMs: SERVE_POLL_MS,
+      requestTimeoutMs: SERVE_REQUEST_TIMEOUT_MS,
       url,
     });
     return serveFindings({ ...answer, output: chunks.join(''), url });
   } finally {
-    await stopped(child);
+    await stopGroup({ child, graceMs: STOP_GRACE_MS });
   }
 };
 
