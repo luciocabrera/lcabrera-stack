@@ -11,6 +11,32 @@ import { setTimeout as delay } from 'node:timers/promises';
 const isRunning = (child) =>
   child.exitCode === null && child.signalCode === null;
 
+const endOf = (child) =>
+  child.signalCode === null
+    ? `the task exited ${child.exitCode}`
+    : `the task was killed by ${child.signalCode}`;
+
+/**
+ * @param {{ chunk: string, limit: number, tail: string }} args
+ * @returns {string}
+ */
+export const keptTail = ({ chunk, limit, tail }) =>
+  `${tail}${chunk}`.slice(-limit);
+
+/**
+ * @param {{ child: import('node:child_process').ChildProcess, limit: number }} args
+ * @returns {() => string}
+ */
+export const collectedTail = ({ child, limit }) => {
+  let tail = '';
+  const keep = (chunk) => {
+    tail = keptTail({ chunk: String(chunk), limit, tail });
+  };
+  child.stdout?.on('data', keep);
+  child.stderr?.on('data', keep);
+  return () => tail;
+};
+
 const signalGroup = ({ child, signal }) => {
   try {
     process.kill(-child.pid, signal);
@@ -55,7 +81,7 @@ export const firstAnswer = async ({
   url,
 }) => {
   if (!isRunning(child)) {
-    return { error: `the task exited ${child.exitCode} before answering` };
+    return { error: `${endOf(child)} before answering` };
   }
   if (Date.now() >= deadline) {
     return {

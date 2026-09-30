@@ -10,7 +10,12 @@ import { createServer as createTcpServer } from 'node:net';
 import process from 'node:process';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
-import { firstAnswer, stopGroup } from './devkit-serve.mjs';
+import {
+  collectedTail,
+  firstAnswer,
+  keptTail,
+  stopGroup,
+} from './devkit-serve.mjs';
 
 const IGNORES_SIGTERM =
   "process.on('SIGTERM', () => {}); setInterval(() => {}, 1000); process.stdout.write('ready\\n');";
@@ -44,7 +49,7 @@ const started = [];
 const startedChild = (script) => {
   const child = spawn(process.execPath, ['-e', script], {
     detached: true,
-    stdio: ['ignore', 'pipe', 'ignore'],
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
   started.push(child);
   return child;
@@ -133,6 +138,43 @@ describe('firstAnswer', () => {
     });
 
     expect(answer).toEqual({ error: 'the task exited 3 before answering' });
+  });
+
+  it('names the signal when the task was killed before answering', async () => {
+    const child = startedChild("process.kill(process.pid, 'SIGKILL')");
+    await new Promise((resolve) => child.once('exit', resolve));
+
+    const answer = await firstAnswer({
+      child,
+      deadline: Date.now() + 5000,
+      pollMs: 50,
+      requestTimeoutMs: 400,
+      url: 'http://127.0.0.1:9/',
+    });
+
+    expect(answer).toEqual({
+      error: 'the task was killed by SIGKILL before answering',
+    });
+  });
+});
+
+describe('keptTail', () => {
+  it('keeps only the last characters up to the limit', () => {
+    expect(keptTail({ chunk: 'defgh', limit: 4, tail: 'abc' })).toBe('efgh');
+    expect(keptTail({ chunk: 'b', limit: 4, tail: 'a' })).toBe('ab');
+  });
+});
+
+describe('collectedTail', () => {
+  it('holds a bounded tail of a task that logs a great deal', async () => {
+    const child = startedChild(
+      "process.stdout.write('x'.repeat(200000) + 'END');",
+    );
+    const output = collectedTail({ child, limit: 1000 });
+    await new Promise((resolve) => child.once('close', resolve));
+
+    expect(output()).toHaveLength(1000);
+    expect(output().endsWith('xEND')).toBe(true);
   });
 });
 

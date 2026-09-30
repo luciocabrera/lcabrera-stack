@@ -28,7 +28,7 @@ import {
   targetPathFor,
 } from '../packages/devkit/scripts/config.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
-import { firstAnswer, stopGroup } from './lib/devkit-serve.mjs';
+import { collectedTail, firstAnswer, stopGroup } from './lib/devkit-serve.mjs';
 import {
   BUILT_SERVER_ENTRY,
   buildOutputFindings,
@@ -149,6 +149,8 @@ const SERVE_REQUEST_TIMEOUT_MS = 5000;
 
 const STOP_GRACE_MS = 5000;
 
+const SERVE_OUTPUT_LIMIT_CHARS = 64 * 1024;
+
 const freePort = () =>
   new Promise((resolve, reject) => {
     const server = createServer();
@@ -167,9 +169,7 @@ const servedFindings = async (tree) => {
     cwd: tree,
     detached: true,
   });
-  const chunks = [];
-  child.stdout.on('data', (chunk) => chunks.push(chunk));
-  child.stderr.on('data', (chunk) => chunks.push(chunk));
+  const output = collectedTail({ child, limit: SERVE_OUTPUT_LIMIT_CHARS });
   try {
     const answer = await firstAnswer({
       child,
@@ -178,7 +178,7 @@ const servedFindings = async (tree) => {
       requestTimeoutMs: SERVE_REQUEST_TIMEOUT_MS,
       url,
     });
-    return serveFindings({ ...answer, output: chunks.join(''), url });
+    return serveFindings({ ...answer, output: output(), url });
   } finally {
     await stopGroup({ child, graceMs: STOP_GRACE_MS });
   }
