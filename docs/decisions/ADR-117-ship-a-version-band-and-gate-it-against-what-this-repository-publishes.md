@@ -141,9 +141,12 @@ to widen with it; those two are a pair.
 
 `devkit create` writes the created repository's own toolchain dependencies from
 `TOOLCHAIN_RANGES` in `packages/devkit/scripts/create.mjs`, a constant rather
-than an asset, so the gate never read it and a major release of either package
-would have left created repositories on the one before
+than an asset, so this gate never read it
 ([#1206](https://github.com/luciocabrera/lcabrera-stack/issues/1206)).
+`create.test.mjs` already failed on a range that stopped admitting the version
+its package is on. Nothing failed on a range that admits that version but not
+the minor after it — a published minor would have left created repositories on
+the one before.
 
 The gate now **imports** that constant and judges each of its entries exactly
 as it judges a shipped declaration, with the finding naming the file and the
