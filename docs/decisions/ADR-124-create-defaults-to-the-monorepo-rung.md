@@ -21,7 +21,7 @@ application or a root config into a project that has its own.
 
 `create` has no such project. Its target is an empty directory or one that does
 not exist, and it refuses anything else. Run with no flag, it placed the
-`agent` rung into that empty tree: skills, a path rule, two register templates
+`agent` rung into that empty tree: skills, path rules, the register templates
 and a manifest, with no workspace, no application and nothing to install. The
 first command a new user types left a repository that looked empty.
 
@@ -43,8 +43,9 @@ is the fallback for every command that reads a `devkit.config.json` without a
 `create` writes the rung it used into the `profile` key of the
 `devkit.config.json` it creates, so that file names `monorepo` after a flagless
 run. A later `sync` or `doctor` with no flag reads that key and plans against
-the same rung, rather than dropping back to `DEFAULT_CONFIG` and reporting the
-workspace files as outside the profile.
+the same rung. Without it they would drop back to `DEFAULT_CONFIG` and plan
+against `agent`, which leaves the workspace files out of the plan: an edited
+workspace file is not reported, and `doctor --check` does not fail on it.
 
 `create-lcabrera-stack` forwards its arguments to `devkit create` unchanged, so
 it takes the same default without a change of its own.
@@ -59,10 +60,12 @@ it takes the same default without a change of its own.
   cannot show that, so the README states each default where it describes the
   command.
 - A created repository's config is the only thing keeping later commands on
-  `monorepo`. Delete the `profile` key and `sync` falls back to `agent`, and
-  `doctor` no longer counts the workspace files. That is the same behaviour any
-  repository gets when the key is missing, and the README already tells users to
-  set the profile in the config rather than by flag.
+  `monorepo`. Delete the `profile` key, or set it to a lower rung, and `sync`
+  and `doctor` plan against that rung. They then say nothing about the
+  workspace files, drifted or not, and `doctor --check` does not fail on them.
+  The failure is silent. Any repository whose key is missing behaves the same
+  way, and the README already tells users to set the profile in the config
+  rather than by flag.
 
 ## Alternatives considered
 
