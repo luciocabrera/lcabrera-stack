@@ -1,14 +1,16 @@
 /**
  * Which `@lcabrera/*` packages a created tree resolves, whether its declared
- * ranges admit the versions packed from this checkout, and whether the install
- * took every one of them from those tarballs rather than the registry
- * (verify-devkit-workspace.mjs).
+ * ranges admit the versions packed from this checkout, what the scratch
+ * registry serves for each, and whether the install took every one of them
+ * from those tarballs rather than npm (verify-devkit-workspace.mjs).
  *
- * Pure: the CLI hands in manifests, YAML text and the lockfile.
+ * Pure: the CLI hands in manifests, bytes, YAML text and the lockfile.
  */
 
+import { createHash } from 'node:crypto';
+
 import semver from 'semver';
-import { parse, parseAllDocuments, parseDocument } from 'yaml';
+import { parse, parseAllDocuments } from 'yaml';
 
 const SCOPE = '@lcabrera/';
 
@@ -20,8 +22,6 @@ const DEPENDENCY_FIELDS = [
 ];
 
 const CATALOG_PROTOCOL = 'catalog:';
-
-const FILE_PROTOCOL = 'file:';
 
 const declaredEntries = (manifest) =>
   DEPENDENCY_FIELDS.flatMap((field) =>
@@ -135,33 +135,71 @@ export const rangeFindings = ({ declarations, versions }) =>
     .filter((finding) => finding !== undefined);
 
 /**
- * @param {{ tarballs: ReadonlyMap<string, string>, workspaceYaml: string }} args
- * @returns {string}
+ * @param {Uint8Array} bytes
+ * @returns {{ integrity: string, shasum: string }}
  */
-export const withTarballOverrides = ({ tarballs, workspaceYaml }) => {
-  const document = parseDocument(workspaceYaml);
-  for (const [name, tarball] of tarballs) {
-    document.setIn(['overrides', name], `${FILE_PROTOCOL}${tarball}`);
-  }
-  return document.toString({ lineWidth: 0, singleQuote: true });
-};
-
-const packageNameOf = (key) => key.slice(0, key.indexOf('@', 1));
+export const digestsOf = (bytes) => ({
+  integrity: `sha512-${createHash('sha512').update(bytes).digest('base64')}`,
+  shasum: createHash('sha1').update(bytes).digest('hex'),
+});
 
 /**
- * @param {string} lockfile
+ * @param {{ baseUrl: string,
+ *           packed: { file: string, integrity: string,
+ *                     manifest: Record<string, unknown>, shasum: string } }} args
+ * @returns {Record<string, unknown>}
+ */
+export const packumentFor = ({ baseUrl, packed }) => {
+  const { file, integrity, manifest, shasum } = packed;
+  const { name, version } = manifest;
+  return {
+    'dist-tags': { latest: version },
+    name,
+    versions: {
+      [version]: {
+        ...manifest,
+        dist: { integrity, shasum, tarball: `${baseUrl}/-/${file}` },
+      },
+    },
+  };
+};
+
+/**
+ * @param {string} url
+ * @returns {string}
+ */
+export const scopedRegistryConfig = (url) =>
+  `${SCOPE.slice(0, -1)}:registry=${url}/\n`;
+
+const packageKeyOf = (key) => {
+  const at = key.indexOf('@', 1);
+  return { name: key.slice(0, at), version: key.slice(at + 1) };
+};
+
+const sourceFinding = ({ entry, key, packed, registry }) => {
+  const { name, version } = packageKeyOf(key);
+  const expected = packed.get(name);
+  const { integrity, tarball = '' } = entry?.resolution ?? {};
+  if (
+    expected !== undefined &&
+    expected.version === version &&
+    expected.integrity === integrity &&
+    tarball.startsWith(`${registry}/`)
+  ) {
+    return undefined;
+  }
+  return `\`${name}@${version}\` was not installed from the tarball packed from this checkout, so the gate tested a published version rather than what the next release ships`;
+};
+
+/**
+ * @param {{ lockfile: string,
+ *           packed: ReadonlyMap<string, { integrity: string, version: string }>,
+ *           registry: string }} args
  * @returns {string[]}
  */
-export const registryResolvedFindings = (lockfile) =>
+export const unpackedSourceFindings = ({ lockfile, packed, registry }) =>
   parseAllDocuments(lockfile)
     .flatMap((document) => Object.entries(document.toJS()?.packages ?? {}))
     .filter(([key]) => key.startsWith(SCOPE))
-    .filter(
-      ([, entry]) =>
-        !String(entry?.resolution?.tarball ?? '').startsWith(FILE_PROTOCOL),
-    )
-    .map(([key]) => packageNameOf(key))
-    .map(
-      (name) =>
-        `\`${name}\` was installed from the registry, not from a tarball packed from this checkout, so the gate tested a published version rather than what the next release ships`,
-    );
+    .map(([key, entry]) => sourceFinding({ entry, key, packed, registry }))
+    .filter((finding) => finding !== undefined);

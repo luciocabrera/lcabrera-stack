@@ -1,7 +1,7 @@
 /**
  * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
  * installs every `@lcabrera/*` package it resolves from a tarball packed from
- * this checkout, and runs the tasks that tree wires for itself, the upgrade
+ * this checkout and served by a scratch registry, and runs the tasks that tree wires for itself, the upgrade
  * that should find nothing left to add, and its commit-msg hook. So the gate
  * tests what the next release ships, together; `registry-tree:verify` is
  * the check of what npm serves today. Every scratch directory sits under the OS
@@ -11,15 +11,17 @@
  * Exit codes: 0 = the created tree installs and its tasks pass, 1 = it does not.
  */
 
+import { spawn } from 'node:child_process';
 import {
   existsSync,
   mkdtempSync,
   readdirSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import process from 'node:process';
 
 import {
@@ -47,11 +49,12 @@ import {
   catalogsOf,
   missingPackageFindings,
   packageClosure,
+  digestsOf,
   rangeFindings,
-  registryResolvedFindings,
   scopedDeclarations,
   scopedNames,
-  withTarballOverrides,
+  scopedRegistryConfig,
+  unpackedSourceFindings,
 } from './lib/devkit-workspace-packages.mjs';
 import {
   commitHookFindings,
@@ -74,14 +77,16 @@ const WORKSPACE_FILE = 'pnpm-workspace.yaml';
 
 const LOCKFILE = 'pnpm-lock.yaml';
 
-const SCRATCH_IDENTITY = [
-  '-c',
-  'user.name=workspace-gate',
-  '-c',
-  'user.email=workspace-gate@invalid',
-  '-c',
-  'commit.gpgsign=false',
-];
+const REGISTRY_SERVER = join(
+  REPO_ROOT,
+  'scripts',
+  'lib',
+  'devkit-registry-server.mjs',
+);
+
+const REGISTRY_START_MS = 10_000;
+
+const POLL_MS = 50;
 
 const checkoutPackages = () =>
   new Map(
@@ -119,7 +124,7 @@ const packedPackages = ({ staging, tree }) => {
     roots: manifests.flatMap(({ manifest }) => scopedNames(manifest)),
   });
   if (missing.length > 0) {
-    return { findings: missingPackageFindings(missing), tarballs: new Map() };
+    return { findings: missingPackageFindings(missing), packed: [] };
   }
   run('vp', ['run', 'packages:build'], REPO_ROOT);
   const packed = packAll({
@@ -143,35 +148,42 @@ const packedPackages = ({ staging, tree }) => {
         packed.map(({ manifest }) => [manifest.name, manifest.version]),
       ),
     }),
-    tarballs: new Map(
-      packed.map(({ manifest, tarball }) => [manifest.name, tarball]),
-    ),
+    packed: packed.map(({ manifest, tarball }) => ({
+      file: basename(tarball),
+      manifest,
+      ...digestsOf(readFileSync(tarball)),
+    })),
   };
 };
 
-const installFromTarballs = ({ tarballs, tree }) => {
-  const path = join(tree, WORKSPACE_FILE);
+const sleep = (milliseconds) =>
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
+
+const portFrom = (portFile) => {
+  const deadline = Date.now() + REGISTRY_START_MS;
+  while (!existsSync(portFile) && Date.now() < deadline) sleep(POLL_MS);
+  const port = readIfPresent(portFile);
+  if (port === undefined) {
+    throw new Error(
+      `the scratch registry did not start within ${REGISTRY_START_MS} ms`,
+    );
+  }
+  return port;
+};
+
+const startedRegistry = ({ packed, staging }) => {
+  const index = join(staging, 'registry-index.json');
+  const portFile = join(staging, 'registry-port');
   writeFileSync(
-    path,
-    withTarballOverrides({
-      tarballs,
-      workspaceYaml: readIfPresent(path) ?? '',
-    }),
+    index,
+    JSON.stringify(
+      Object.fromEntries(packed.map((entry) => [entry.manifest.name, entry])),
+    ),
   );
-  run(
-    'git',
-    [
-      ...SCRATCH_IDENTITY,
-      'commit',
-      '--quiet',
-      '--no-verify',
-      '--message',
-      'chore(gate): install the packages packed from the checkout',
-      '--',
-      WORKSPACE_FILE,
-    ],
-    tree,
-  );
+  const server = spawn(process.execPath, [REGISTRY_SERVER, index, portFile], {
+    stdio: 'ignore',
+  });
+  return { server, url: `http://127.0.0.1:${portFrom(portFile)}` };
 };
 
 const blueprintFindings = ({ tree }) =>
@@ -184,14 +196,25 @@ const blueprintFindings = ({ tree }) =>
       targetPathFor({ assetPath: `workspace/${path}`, config: DEFAULT_CONFIG }),
   });
 
-const sourceFindings = (tree) => {
-  const lockfile = readIfPresent(join(tree, LOCKFILE));
-  return lockfile === undefined
-    ? [
-        `the install wrote no \`${LOCKFILE}\`, so nothing shows where each \`@lcabrera/*\` package came from`,
-      ]
-    : registryResolvedFindings(lockfile);
-};
+const sourceFindingsFor =
+  ({ packed, registry }) =>
+  (tree) => {
+    const lockfile = readIfPresent(join(tree, LOCKFILE));
+    return lockfile === undefined
+      ? [
+          `the install wrote no \`${LOCKFILE}\`, so nothing shows where each \`@lcabrera/*\` package came from`,
+        ]
+      : unpackedSourceFindings({
+          lockfile,
+          packed: new Map(
+            packed.map(({ integrity, manifest }) => [
+              manifest.name,
+              { integrity, version: manifest.version },
+            ]),
+          ),
+          registry,
+        });
+  };
 
 const toolchainBinFindings = ({ tree }) => {
   const binDirectory = join(tree, 'node_modules', '.bin');
@@ -270,8 +293,6 @@ const commitHookRunFindings = ({ tree }) => {
   });
 };
 
-const PREREQUISITES = [runtimeFindings, installFindings, sourceFindings];
-
 const TREE_CHECKS = [
   blueprintFindings,
   toolchainBinFindings,
@@ -282,15 +303,24 @@ const TREE_CHECKS = [
 ];
 
 const checkedTree = ({ devkit, staging, tree }) => {
-  const { findings, tarballs } = packedPackages({ staging, tree });
+  const { findings, packed } = packedPackages({ staging, tree });
   if (findings.length > 0) return findings;
-  installFromTarballs({ tarballs, tree });
-  return treeFindings({
-    checks: TREE_CHECKS,
-    context: { devkit },
-    prerequisites: PREREQUISITES,
-    tree,
-  });
+  const { server, url } = startedRegistry({ packed, staging });
+  try {
+    writeFileSync(join(tree, '.npmrc'), scopedRegistryConfig(url));
+    return treeFindings({
+      checks: TREE_CHECKS,
+      context: { devkit },
+      prerequisites: [
+        runtimeFindings,
+        installFindings,
+        sourceFindingsFor({ packed, registry: url }),
+      ],
+      tree,
+    });
+  } finally {
+    server.kill();
+  }
 };
 
 const main = () => {
@@ -311,7 +341,7 @@ const main = () => {
         created.length > 0
           ? created
           : checkedTree({ devkit, staging, tree: join(parent, TREE_NAME) }),
-      passed: `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} all exited zero, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
+      passed: `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout through a scratch registry, with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} all exited zero, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
       title: 'Created-workspace gate',
     });
   } finally {

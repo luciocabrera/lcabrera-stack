@@ -39,18 +39,29 @@ every such fix needed a release in the middle of it.
 
 `workspace:verify` walks every `@lcabrera/*` package the created tree declares,
 and every one those declare in turn, and packs each from this checkout with
-`pnpm pack` after `vp run packages:build`. It writes `overrides` pointing at
-those tarballs into the scratch tree's `pnpm-workspace.yaml`, and never into the
-blueprint.
+`pnpm pack` after `vp run packages:build`. A scratch registry
+(`scripts/lib/devkit-registry-server.mjs`, a child process on `127.0.0.1`)
+serves those tarballs, each as the only version of its package. The scratch
+tree gets an untracked `.npmrc` that points the `@lcabrera` scope at it. The
+blueprint is never touched, and nothing else in the install moves off npm.
 
-An override replaces the declared range, so the gate checks the ranges itself
-before installing. Every declaration of a packed package, in the tree's
-manifests, through its catalogs, and in the other packed manifests, must admit
-the packed version. A range that does not is a finding, not a silent pass. After
-the install, the gate reads the tree's lockfile and fails, naming the package,
-if any `@lcabrera/*` package resolved from anywhere other than a packed tarball.
-A package the tree resolves that has no workspace in this checkout fails before
-anything is packed.
+The tarballs are served, not installed as `file:` specifiers or `overrides`,
+because pnpm does not treat a `file:` install as a version. A peer range between
+two packed packages, for example `@lcabrera/devkit`'s peer on
+`@lcabrera/repo-standards`, then reads as unmet even when the packed version
+satisfies it. From a registry, pnpm resolves each package to its semver version
+and checks every range and peer the way it will for a consumer after the
+release. An override would also have replaced the declared ranges outright.
+
+Before the install, the gate checks the ranges itself so that a miss is named
+precisely. Every declaration of a packed package must admit the packed version:
+in the tree's manifests, through its catalogs, and in the other packed
+manifests, peers included. After the install, it reads the tree's lockfile. Each
+`@lcabrera/*` entry must carry the packed version and integrity, and a tarball
+URL on the scratch registry. The URL check is needed because an unchanged
+package packs byte-identical to its published tarball, so matching integrity
+alone cannot tell npm and the checkout apart. A package the tree resolves that
+has no workspace in this checkout fails before anything is packed.
 
 `vp run registry-tree:verify` is the other half. It creates the tree with
 the published `create-lcabrera-stack`, installs it from npm, and runs the same
