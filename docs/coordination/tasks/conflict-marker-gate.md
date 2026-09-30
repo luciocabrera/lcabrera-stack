@@ -2,7 +2,7 @@
 id: conflict-marker-gate
 title: feat(repo-standards): fail a tracked file that carries a merge-conflict marker
 owner: agent:claude
-status: active
+status: review
 branch: feat/1212-conflict-marker-gate
 area:
   - packages/repo-standards/**
@@ -15,7 +15,7 @@ area:
 started: 2026-09-30
 updated: 2026-09-30
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1213
 issue: #1212
 ---
 
@@ -25,6 +25,6 @@ feat(repo-standards): fail a tracked file that carries a merge-conflict marker
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green, PR open for review
 - Blockers: none
-- Next:
+- Next: merge
