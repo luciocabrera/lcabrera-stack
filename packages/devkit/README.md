@@ -145,6 +145,14 @@ gates expect, writes a minimal manifest, sets the repository up exactly as
 `init` does, and commits the result. What comes out is a repository with a
 history, not a directory you still have to turn into one.
 
+With no `--profile`, `create` places the `monorepo` rung: a workspace with an
+application, its configs and its tasks. `init` and `sync` read the rung from
+`devkit.config.json` when there is no flag, and fall back to `agent` only when
+the config names none, because they write into a repository that already has
+its own workspace. `create` records the rung it used in `devkit.config.json`, so a
+later `sync` or `doctor` without the flag works against the same rung. Pass
+`--profile agent` or `--profile repo` for a smaller tree.
+
 It **refuses** the following, and each refusal names what to do instead:
 
 | Refused                                 | Why                                                                                       |
@@ -178,7 +186,8 @@ devkit init [--profile <name>] [--force] [--upgrade]
 `init` is `sync` plus the wiring a repository does not have yet: it writes
 `devkit.config.json` with a command map inferred from your lockfile, adds the
 gate tasks whose binaries are actually installed, and then materialises the
-selected profile.
+selected profile. With no `--profile` and no `profile` in an existing config,
+that is `agent`.
 
 Wiring them is the part only `init` does. From then on every run reconciles
 them: a task still holding what this kit wrote is updated, a task you changed is

@@ -8,7 +8,9 @@ pnpm create lcabrera-stack my-project --profile repo
 ```
 
 It makes the directory, initialises a git repository in it, materialises the
-profile you asked for, and leaves an initial commit.
+profile you asked for, and leaves an initial commit. With no `--profile` it
+places `monorepo`: a pnpm workspace with an application, ready for
+`pnpm install`.
 
 ## It is a shim
 
