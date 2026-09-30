@@ -24,7 +24,6 @@
  * Exit codes: 0 = a consumer would get a working install, 1 = they would not.
  */
 
-import { execFileSync } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
@@ -46,6 +45,7 @@ import {
   specifierFindings,
   survivingPlaceholders,
 } from './lib/devkit-tarball-produced.mjs';
+import { packedFileReader, packOne, run } from './lib/devkit-pack.mjs';
 import { shimFindings } from './lib/devkit-tarball-shim.mjs';
 import {
   binsWithoutNodeFloor,
@@ -66,40 +66,6 @@ import {
 const REPO_ROOT = process.cwd();
 
 const DISTRIBUTED = ['devkit', 'repo-standards', 'create-lcabrera-stack'];
-
-const run = (command, args, cwd) =>
-  execFileSync(command, args, {
-    cwd,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-
-const packedFileReader = (tarball) => (target) => {
-  try {
-    return run('tar', ['-xzOf', tarball, `package/${target}`], REPO_ROOT);
-  } catch {
-    return undefined;
-  }
-};
-
-const packOne = ({ directory, into }) => {
-  const packageDir = join(REPO_ROOT, 'packages', directory);
-  const output = run('pnpm', ['pack', '--pack-destination', into], packageDir);
-  const tarball = output
-    .split('\n')
-    .map((line) => line.trim())
-    .findLast((line) => line.endsWith('.tgz'));
-
-  if (tarball === undefined) {
-    throw new Error(`pnpm pack produced no tarball for packages/${directory}`);
-  }
-
-  const packed = packedFileReader(tarball)('package.json');
-  if (packed === undefined) {
-    throw new Error(`the tarball for packages/${directory} holds no manifest`);
-  }
-  return { manifest: JSON.parse(packed), tarball };
-};
 
 const packedPathsOf = (tarball) =>
   run('tar', ['-tzf', tarball], REPO_ROOT)
@@ -273,7 +239,7 @@ const main = () => {
 
   try {
     const packed = DISTRIBUTED.map((directory) =>
-      packOne({ directory, into: staging }),
+      packOne({ directory, into: staging, repoRoot: REPO_ROOT }),
     );
 
     const contents = packed.flatMap(({ manifest, tarball }) => [

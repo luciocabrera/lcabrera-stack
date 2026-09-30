@@ -108,6 +108,7 @@
     "typegen:all": "vp run -r typegen",
     "usage:report": "repo-usage-report",
     "viteplus:verify": "repo-verify-viteplus-block",
+    "workspace:verify": "node scripts/verify-devkit-workspace.mjs",
     "worktree:env": "repo-worktree-env"
   },
   "devDependencies": {
