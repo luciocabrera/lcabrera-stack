@@ -12,8 +12,8 @@ governs:
 
 ## Context
 
-`devkit create`, `devkit init` and `devkit sync` all take `--profile <name>`,
-and until now all three ended at the same value when it was absent:
+`devkit create`, `devkit init` and `devkit sync` take `--profile <name>`, and
+until now each of them ended at the same value when it was absent:
 `profile: 'agent'` in `DEFAULT_CONFIG`. `create` went to it directly. `init`
 and `sync` first read the `profile` key of an existing `devkit.config.json` and
 reach `agent` only when the config names no rung. For `init` and `sync` that
@@ -35,7 +35,7 @@ rung and says `agent` and `repo` do not answer it.
 
 `create` resolves a missing `--profile` to `monorepo`. The value is
 `CREATE_DEFAULT_PROFILE` in `packages/devkit/scripts/create.mjs`, and
-`resolvedProfile` in `command-create.mjs` is the one place that reads it. A
+`resolvedProfile` in `command-create.mjs` reads it. A
 flag still wins, so `--profile agent` gives the old tree.
 
 `init` and `sync` are unchanged. With no flag they use the configured
@@ -58,7 +58,7 @@ it takes the same default without a change of its own.
   block that expect an install. A user who wanted only the agent harness in a
   new directory has to say `--profile agent`, where before that was what they
   got without asking.
-- The same flag has two defaults depending on the command. The usage line
+- The same flag defaults differently depending on the command. The usage line
   cannot show that, so the README states each default where it describes the
   command.
 - A created repository's config is the only thing keeping later commands on
@@ -71,7 +71,7 @@ it takes the same default without a change of its own.
 
 ## Alternatives considered
 
-1. **Change `DEFAULT_CONFIG.profile` to `monorepo`.** One default for every
+1. **Change `DEFAULT_CONFIG.profile` to `monorepo`.** A shared default for every
    command. Rejected: `init` would then place a workspace and an application
    into an existing project by default, and `sync` in a repository whose config
    has no `profile` key would start planning files it never placed.
