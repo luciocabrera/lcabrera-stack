@@ -232,6 +232,19 @@ jobs:
         # scratch repository under the OS temp root, and runs every declared bin.
         run: vp run tarball:verify
 
+      - name: A tree created from the packed blueprint passes its own tasks
+        id: devkit_workspace_gate
+        # tarball:verify proves the packaging; this proves the product. It runs
+        # `devkit create --profile monorepo` from the packed tarball in a scratch
+        # directory, installs the tree from the registry, and runs the tasks it
+        # wires for itself, so a blueprint defect only its own configs reject
+        # fails here instead of at a consumer. It needs the Node the blueprint
+        # pins, which a test in scripts/lib holds equal to this repository's
+        # pin, so the job already runs on it. It is CI-only: `check:safe` does not chain
+        # it, because a registry install on every push is a cost each
+        # contributor would pay.
+        run: vp run workspace:verify
+
       - name: Every shipped document reads with only its package on disk
         id: shipped_docs_gate
         # The doc gate below asks whether a path resolves in THIS repository,

@@ -18,7 +18,10 @@ issues:
   - 1074
   - 1075
   - 1076
+  - 1107
 evidence:
+  - type: command
+    ref: vp run workspace:verify
   - type: doc
     ref: docs/decisions/ADR-107-the-stack-is-a-precondition-of-the-packages.md
   - type: code

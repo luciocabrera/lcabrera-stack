@@ -2,19 +2,22 @@
 id: 1107-monorepo-rung-gate
 title: Build a monorepo-rung tree in a gate and run its own tasks
 owner: agent:claude
-status: active
+status: review
 branch: ci/1107-1107-monorepo-rung-gate
 area:
-  - scripts/verify-devkit-monorepo.mjs
-  - scripts/lib/devkit-monorepo*
+  - scripts/verify-devkit-workspace.mjs
+  - scripts/verify-devkit-tarball.mjs
+  - scripts/lib/devkit-workspace*
+  - scripts/lib/devkit-pack.mjs
   - package.json
   - COMMANDS.md
+  - packages/devkit/CLASSIFICATION.md
   - .github/workflows/check-safe.yml
-  - scripts/script-size-baseline.json
+  - docs/product/requirements/one-command-leaves-a-working-repository.md
 started: 2026-09-30
 updated: 2026-09-30
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1200
 issue: #1107
 ---
 
