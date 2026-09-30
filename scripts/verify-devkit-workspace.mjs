@@ -1,7 +1,8 @@
 /**
  * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
  * installs it from the registry, runs the tasks that tree wires for itself,
- * fetches `/` from the app its root `start` task serves, then runs the upgrade
+ * fetches `/` from the app its root `start` task serves, runs every command its
+ * `devkit.config.json` hands its workflows and hooks, then runs the upgrade
  * that should find nothing left to add, and its commit-msg hook — which create
  * and the install must have turned on without being asked.
  * The blueprint's own configs are the only ones that fully lint it, and nothing
@@ -30,6 +31,7 @@ import {
   DEFAULT_CONFIG,
   targetPathFor,
 } from '../packages/devkit/scripts/config.mjs';
+import { configuredCommandRuns } from './lib/devkit-config-commands.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
 import { collectedTail, firstAnswer, stopGroup } from './lib/devkit-serve.mjs';
 import {
@@ -142,6 +144,21 @@ const taskRunFindings = ({ tree }) =>
       ...execute({ args, command: 'vp', cwd: tree }),
     }),
   );
+
+const configuredCommandFindings = ({ tree }) => {
+  const { findings, runs } = configuredCommandRuns(
+    readJson(join(tree, 'devkit.config.json')).commands,
+  );
+  return [
+    ...findings,
+    ...runs.flatMap(({ command, label }) =>
+      taskFindings({
+        label,
+        ...execute({ args: ['-c', command], command: 'sh', cwd: tree }),
+      }),
+    ),
+  ];
+};
 
 const toolchainBinFindings = ({ tree }) => {
   const binDirectory = join(tree, 'node_modules', '.bin');
@@ -302,6 +319,7 @@ const TREE_CHECKS = [
   taskRunFindings,
   builtFindings,
   servedFindings,
+  configuredCommandFindings,
   trackedChangeFindings,
   upgradeFindings,
   commitHookRunFindings,
@@ -351,7 +369,7 @@ const main = async () => {
 
     const tasks = TREE_TASKS.map((args) => commandLabel(args)).join(', ');
     process.stdout.write(
-      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed with ${TOOLCHAIN_BINS.join(', ')} in it, ${tasks} all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.\n`,
+      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed with ${TOOLCHAIN_BINS.join(', ')} in it, ${tasks} and every command in its \`devkit.config.json\` all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.\n`,
     );
   } finally {
     for (const directory of [staging, holder, parent]) {

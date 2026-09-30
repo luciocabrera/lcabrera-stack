@@ -177,8 +177,10 @@ From the `repo` profile up:
 From the `monorepo` profile up:
 
 - `{{commands.run}} commands:verify` — `repo-verify-commands`
+- `{{commands.run}} deps:audit` — `repo-verify-deps-audit`, fed the package
+  manager's audit report as JSON
 
-That last one is the gate that holds this section to its word: it fails when a
+`commands:verify` is the gate that holds this section to its word: it fails when a
 task in `package.json` is documented nowhere here, and when a task documented
 here is not one this repository has. It takes the spelling from the `run` key in
 §4, so it holds this file to the way **you** run a task rather than to any one
@@ -189,6 +191,12 @@ of what it reads: a repository that took the gates and not the blueprint has non
 of those tasks, and would be handed a gate that was red the day it arrived. Wire
 it there yourself and that section is what it will report — delete it, or take
 the block.
+
+`deps:audit` is wired only where the blueprint is as well, because the report it
+reads comes from the toolchain the blueprint declares. It fails on an advisory at
+`moderate` or above, and on a report that walked no dependencies, so a registry
+it could not reach fails it rather than passing it. Where it is wired, `init`
+points the `audit` key in §4 at it.
 
 ### The blueprint's own tasks
 

@@ -198,9 +198,10 @@ them: a task still holding what this kit wrote is updated, a task you changed is
 kept and reported, and a task this kit stops shipping is removed. A task whose
 binary is not installed here is only ever withheld from a manifest that does not
 already carry it — what is on this machine decides what may be wired, not what
-belongs in the file. One gate is withheld on a second condition: `commands:verify`
-reads the command reference this kit ships, and that document names the
-blueprint's tasks, so it is wired only where the blueprint is.
+belongs in the file. `commands:verify` and `deps:audit` are withheld on a second
+condition, and are wired only where the blueprint is: `commands:verify` reads the command reference this
+kit ships, and that document names the blueprint's tasks; `deps:audit` reads the
+audit report of the toolchain the blueprint declares.
 
 It **refuses** rather than proceeding when the repository is already set up — a
 config or a manifest already present means `sync` is the command you want, and it
@@ -239,7 +240,11 @@ that exited 0 would read afterwards as a working repository whose CI workflows
 are simply absent.
 
 The inferred commands are a starting point, not a verdict — `init` names the
-runner it guessed so you can correct it. Check them before you rely on them.
+runner it guessed so you can correct it. Check them before you rely on them. The
+one exception is a key that stands for a task the run itself wires: under
+Vite+, `test` runs the blueprint's `test:all` and `audit` runs `deps:audit`
+wherever the manifest holds them after the run, and falls back to the runner's
+own guess where it does not.
 
 ## Commands
 
