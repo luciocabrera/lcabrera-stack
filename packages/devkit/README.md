@@ -311,7 +311,9 @@ places sets
 `core.hooksPath` to the `paths.hooks` directory when the install root is the top
 of a git work tree, the directory is there, and the clone has no
 `core.hooksPath` of its own. Anywhere else it does nothing and the install
-passes. **No tsconfig here is written by
+passes. It imports only Node's own modules, so an install without this package
+still runs it, and it runs git from the fixed install directories first, then
+PATH, skipping any `node_modules` directory an install puts on PATH. **No tsconfig here is written by
 hand** — you edit the roster (`tsconfig.entries.ts`, in the workspace the rung
 places for it) and the generator writes the JSON; a hand edit survives exactly
 until the next regeneration reverts it. That includes the application's own

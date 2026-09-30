@@ -22,32 +22,30 @@
  * wanted only the prose install the gates too (ADR-039 takes the duplicate over
  * the edge). `scripts/lib/git-exec-drift.test.mjs` asserts the two lists agree,
  * which is a check the repository owns and this package does not carry.
+ *
+ * The trusted directories, the scrubbed variables and the child environment
+ * come from the `prepare` script the monorepo rung places, which has to carry
+ * them itself because it runs where this package may not be installed.
  */
 
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { delimiter, dirname, join } from 'node:path';
+import { delimiter, join } from 'node:path';
+
+import {
+  gitEnvironment,
+  TRUSTED_GIT_DIRECTORIES,
+} from '../assets/workspace/scripts/hooks-path.mjs';
+
+export {
+  GIT_REPOSITORY_VARIABLES,
+  gitEnvironment,
+  TRUSTED_GIT_DIRECTORIES,
+} from '../assets/workspace/scripts/hooks-path.mjs';
 
 const IS_ON_WINDOWS = process.platform === 'win32';
 
-export const TRUSTED_GIT_DIRECTORIES = IS_ON_WINDOWS
-  ? [
-      String.raw`C:\Program Files\Git\cmd`,
-      String.raw`C:\Program Files (x86)\Git\cmd`,
-    ]
-  : ['/usr/local/bin', '/usr/bin', '/bin'];
-
 const GIT_FILENAMES = IS_ON_WINDOWS ? ['git.exe', 'git'] : ['git'];
-
-export const GIT_REPOSITORY_VARIABLES = new Set([
-  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
-  'GIT_COMMON_DIR',
-  'GIT_DIR',
-  'GIT_INDEX_FILE',
-  'GIT_NAMESPACE',
-  'GIT_OBJECT_DIRECTORY',
-  'GIT_WORK_TREE',
-]);
 
 const gitUnder = (directory) =>
   GIT_FILENAMES.map((name) => join(directory, name)).find((path) =>
@@ -76,36 +74,6 @@ export const gitBinary = () =>
     directories: TRUSTED_GIT_DIRECTORIES,
     pathEntries: pathDirectories(),
   });
-
-const PATH_NAME = 'PATH';
-
-const isPathName = (name) => name.toUpperCase() === PATH_NAME;
-
-/**
- * @param {Record<string, string | undefined>} env
- * @returns {string} the spelling this environment already uses for PATH —
- * Windows writes `Path`, and adding a second key beside it leaves which one
- * the child reads undefined
- */
-const pathNameIn = (env) =>
-  Object.keys(env).find((value) => isPathName(value)) ?? PATH_NAME;
-
-/**
- * @param {{ binary: string, env: Record<string, string | undefined> }} args
- * @returns {Record<string, string | undefined>}
- */
-export const gitEnvironment = ({ binary, env }) =>
-  Object.fromEntries([
-    ...Object.entries(env).filter(
-      ([name]) => !GIT_REPOSITORY_VARIABLES.has(name) && !isPathName(name),
-    ),
-    [
-      pathNameIn(env),
-      [...new Set([dirname(binary), ...TRUSTED_GIT_DIRECTORIES])].join(
-        delimiter,
-      ),
-    ],
-  ]);
 
 /**
  * @param {string | undefined} binary

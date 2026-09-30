@@ -9,64 +9,37 @@
  * without failing.
  */
 
-import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import process from 'node:process';
-import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { hooksPathAction } from '../assets/workspace/scripts/hooks-path.mjs';
 import { runCreate } from './command-create.mjs';
 import { runCommand } from './command-router.mjs';
 import { INITIAL_COMMIT_MESSAGE } from './create.mjs';
-import { GIT_REPOSITORY_VARIABLES } from './git-exec.mjs';
+import {
+  CLEAN_ENV,
+  gitIn as git,
+  HOOKS_SCRIPT,
+  localHooksPathIn as localHooksPath,
+  PACKAGE_ROOT,
+  scratchDirectories,
+} from './hooks-path-fixtures.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
 import { HOOKS_PATH_SCRIPT, WORKSPACE_SCRIPTS } from './workspace.mjs';
 
-const PACKAGE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
+const { drain, scratch } = scratchDirectories('devkit-hooks-path-');
 
-const SCRIPT = join(PACKAGE_ROOT, 'assets', 'workspace', HOOKS_PATH_SCRIPT);
-
-const ENV = Object.fromEntries(
-  Object.entries(process.env).filter(
-    ([name]) => !GIT_REPOSITORY_VARIABLES.has(name),
-  ),
-);
-
-const scratches = [];
-
-const scratch = () => {
-  const root = mkdtempSync(join(tmpdir(), 'devkit-hooks-path-'));
-  scratches.push(root);
-  return root;
-};
-
-afterEach(() => {
-  const drained = [...scratches];
-  scratches.length = 0;
-  for (const root of drained) rmSync(root, { force: true, recursive: true });
-});
-
-const git = (args, cwd) =>
-  execFileSync('git', args, {
-    cwd,
-    encoding: 'utf8',
-    env: ENV,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  }).trim();
-
-const localHooksPath = (cwd) => {
-  try {
-    return git(['config', '--local', '--get', 'core.hooksPath'], cwd);
-  } catch {
-    return '';
-  }
-};
+afterEach(drain);
 
 const install = (cwd) =>
-  spawnSync(process.execPath, [SCRIPT], { cwd, encoding: 'utf8', env: ENV });
+  spawnSync(process.execPath, [HOOKS_SCRIPT], {
+    cwd,
+    encoding: 'utf8',
+    env: CLEAN_ENV,
+  });
 
 const clone = ({ hooks = '.githooks' } = {}) => {
   const root = scratch();

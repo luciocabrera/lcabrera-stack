@@ -53,7 +53,7 @@ const isPackageDirectory = (entry) =>
  * @param {{ exists: (path: string) => boolean, pathEntries: string[] }} args
  * @returns {string | undefined}
  */
-export const resolveGit = ({ exists, pathEntries }) =>
+export const resolveInstallGit = ({ exists, pathEntries }) =>
   [
     ...TRUSTED_GIT_DIRECTORIES,
     ...pathEntries.filter(
@@ -155,7 +155,7 @@ const point = ({ binary, root }) => {
 };
 
 const main = () => {
-  const binary = resolveGit({
+  const binary = resolveInstallGit({
     exists: existsSync,
     pathEntries: (process.env.PATH ?? '').split(delimiter),
   });

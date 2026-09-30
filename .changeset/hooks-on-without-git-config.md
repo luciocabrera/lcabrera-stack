@@ -11,7 +11,10 @@ which the rung now places. After a clone and one install, git runs the hooks. Th
 script reads the hooks directory from `devkit.config.json`. It does nothing
 outside a repository whose work tree starts at the install root, when the hooks
 directory is missing, or when the clone already set `core.hooksPath` to another
-directory. In each of those cases the install still exits 0.
+directory. In each of those cases the install still exits 0. The script imports
+only Node's own modules. It runs git from the fixed install directories first,
+then from PATH, and skips any `node_modules` directory on PATH, so a
+dependency's `git` bin never runs in its place.
 
 The task block is reconciled key by key, so `sync` updates an untouched
 `prepare` in a repository already at the rung. `devkit init` and `devkit sync`
