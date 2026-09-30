@@ -127,7 +127,7 @@ describe('the prepare task', () => {
     expect(WORKSPACE_SCRIPTS.prepare).toContain(`node ${HOOKS_PATH_SCRIPT}`);
   });
 
-  test('ships a script whose import the created manifest declares', () => {
+  test('ships a tree the closure calls self-contained on every path that places it', () => {
     const { code, printed } = printedBy(() =>
       runCommand({
         argv: ['closure', '--profile', 'monorepo', '--shipped'],

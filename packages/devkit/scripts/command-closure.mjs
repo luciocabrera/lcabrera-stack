@@ -24,9 +24,9 @@ import {
   includesRung,
   PROFILES,
 } from './config.mjs';
-import { initialManifest } from './create.mjs';
 import { gateBinNames } from './init.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
+import { WORKSPACE_DEPENDENCIES } from './workspace.mjs';
 
 const MANIFEST_NAME = 'package.json';
 
@@ -52,8 +52,8 @@ const dependencyNamesIn = (content) => {
  * From the `monorepo` rung up something does: the rung emits the manifests that
  * declare its own dependencies, so those names are read back off the very files
  * being analysed rather than listed a second time here. The root manifest is
- * the one create writes rather than materialises, so its block is read off the
- * manifest create builds for the same profile.
+ * the one create writes rather than materialises, so its block is added from the
+ * module that defines it.
  *
  * @param {{ entries: { path: string, content: string }[], profile: string }} args
  * @returns {string[]}
@@ -62,7 +62,7 @@ const providedPackages = ({ entries, profile }) => {
   if (!includesRung({ profile, rung: 'monorepo' })) return [];
   return [
     ...new Set([
-      ...Object.keys(initialManifest({ name: '', profile }).devDependencies),
+      ...Object.keys(WORKSPACE_DEPENDENCIES),
       ...entries
         .filter((entry) => isManifest(entry.path))
         .flatMap((entry) => dependencyNamesIn(entry.content)),
