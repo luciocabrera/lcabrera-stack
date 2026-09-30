@@ -155,20 +155,20 @@ const freePort = () =>
     });
   });
 
-const firstAnswer = async ({ child, url }) => {
-  const deadline = Date.now() + SERVE_DEADLINE_MS;
-  while (Date.now() < deadline) {
-    if (child.exitCode !== null) {
-      return { error: `the task exited ${child.exitCode} before answering` };
-    }
-    try {
-      const response = await fetch(url);
-      return { status: response.status };
-    } catch {
-      await delay(SERVE_POLL_MS);
-    }
+const firstAnswer = async ({ child, deadline, url }) => {
+  if (child.exitCode !== null) {
+    return { error: `the task exited ${child.exitCode} before answering` };
   }
-  return { error: `no answer within ${SERVE_DEADLINE_MS / 1000}s` };
+  if (Date.now() >= deadline) {
+    return { error: `no answer within ${SERVE_DEADLINE_MS / 1000}s` };
+  }
+  try {
+    const response = await fetch(url);
+    return { status: response.status };
+  } catch {
+    await delay(SERVE_POLL_MS);
+    return firstAnswer({ child, deadline, url });
+  }
 };
 
 const stopped = (child) =>
@@ -185,12 +185,19 @@ const servedFindings = async (tree) => {
   const port = await freePort();
   writeFileSync(join(tree, 'apps', 'web', '.env'), `PORT=${port}\n`);
   const url = `http://127.0.0.1:${port}/`;
-  const child = spawn('vp', START_ARGS, { cwd: tree, detached: true });
+  const child = spawn(join(tree, 'node_modules', '.bin', 'vp'), START_ARGS, {
+    cwd: tree,
+    detached: true,
+  });
   const chunks = [];
   child.stdout.on('data', (chunk) => chunks.push(chunk));
   child.stderr.on('data', (chunk) => chunks.push(chunk));
   try {
-    const answer = await firstAnswer({ child, url });
+    const answer = await firstAnswer({
+      child,
+      deadline: Date.now() + SERVE_DEADLINE_MS,
+      url,
+    });
     return serveFindings({ ...answer, output: chunks.join(''), url });
   } finally {
     await stopped(child);
@@ -216,9 +223,10 @@ const firstBlocking = (tree) =>
 const treeFindings = async (tree) => {
   const blocking = firstBlocking(tree);
   if (blocking.length > 0) return blocking;
-  const findings = [];
-  for (const check of TREE_CHECKS) findings.push(...(await check(tree)));
-  return findings;
+  return TREE_CHECKS.reduce(
+    async (earlier, check) => [...(await earlier), ...(await check(tree))],
+    Promise.resolve([]),
+  );
 };
 
 const main = async () => {
