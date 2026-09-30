@@ -55,9 +55,7 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write # git tags + GitHub Releases
-  id-token: write # OIDC token for npm trusted publishing
+permissions: {}
 
 concurrency:
   group: release-${{ github.ref }}
@@ -67,6 +65,9 @@ jobs:
   publish:
     name: Publish changed packages
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # git tags + GitHub Releases
+      id-token: write # OIDC token for npm trusted publishing
     outputs:
       published: ${{ steps.publish.outputs.published }}
     steps:
@@ -177,7 +178,8 @@ jobs:
           # the one job holding an OIDC token with publish rights. `pnpm exec`
           # runs the binary already in node_modules, at the lockfile's version.
           git tag | sort > /tmp/tags-before
-          pnpm exec changeset publish 2>&1 | tee /tmp/publish.log
+          published_status=0
+          pnpm exec changeset publish 2>&1 | tee /tmp/publish.log || published_status=$?
           git tag | sort > /tmp/tags-after
           comm -13 /tmp/tags-before /tmp/tags-after > /tmp/tags-new
 
@@ -191,12 +193,19 @@ jobs:
           created="$(grep -c . /tmp/tags-new || true)"
           echo "Newly published tags: $created (changeset reported $reported)"
           cat /tmp/tags-new
+
+          # Set before either failure below, because npm is written to by then:
+          # the registry check after this job must run whenever anything shipped.
+          if [ "$reported" -gt 0 ] || [ "$created" -gt 0 ]; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          fi
+          if [ "$published_status" -ne 0 ]; then
+            echo "::error::changeset publish exited $published_status. Anything it reported above is already on npm."
+            exit "$published_status"
+          fi
           if [ "$reported" -ne "$created" ]; then
             echo "::error::changeset publish reported $reported tag(s) but $created exist. The packages are already on npm and CANNOT be republished — re-running will not fix this. Create the missing tags and Releases by hand, then fix the tagging step."
             exit 1
-          fi
-          if [ -s /tmp/tags-new ]; then
-            echo "published=true" >> "$GITHUB_OUTPUT"
           fi
 
       # Split from the publish on purpose. npm is already written to by this
@@ -218,11 +227,12 @@ jobs:
 
   # workspace:verify in Check Safe installs the packages packed from the
   # checkout, so nothing before this point has asked whether the registry, now
-  # holding what just shipped, gives a user a tree that works.
+  # holding what just shipped, gives a user a tree that works. `always()`
+  # because a step failing after the publish does not unpublish anything.
   registry-tree:
     name: A tree created from npm passes its own tasks
     needs: publish
-    if: needs.publish.outputs.published == 'true'
+    if: always() && needs.publish.outputs.published == 'true'
     permissions:
       contents: read
     uses: ./.github/workflows/created-tree-registry.yml

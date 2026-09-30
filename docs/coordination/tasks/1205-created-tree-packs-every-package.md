@@ -2,7 +2,7 @@
 id: 1205-created-tree-packs-every-package
 title: ci(tooling): the created-tree gate installs every @lcabrera package from this checkout
 owner: agent:claude
-status: active
+status: review
 branch: ci/1205-1205-created-tree-packs-every-package
 area:
   - scripts/verify-devkit-workspace.mjs
@@ -32,6 +32,6 @@ ci(tooling): the created-tree gate installs every @lcabrera package from this ch
 
 ## Status / next
 
-- Current step: gate green, PR ready
+- Current step: in review (round 2 fixes pushed)
 - Blockers: none
 - Next:

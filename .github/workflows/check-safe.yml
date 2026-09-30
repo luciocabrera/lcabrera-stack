@@ -245,9 +245,8 @@ jobs:
         # What npm serves is checked after a release instead, by
         # created-tree-registry.yml (ADR-125). It needs the Node the blueprint
         # pins, which a test in scripts/lib holds equal to this repository's
-        # pin, so the job already runs on it. It is CI-only: `check:safe` does
-        # not chain it, because a registry install on every push is a cost each
-        # contributor would pay.
+        # pin, so the job already runs on it. `check:safe` chains it after
+        # tarball:verify; the pre-push hook runs `check:push`, which does not.
         run: vp run workspace:verify
 
       - name: Every shipped document reads with only its package on disk
