@@ -17,6 +17,7 @@ area:
   - pnpm-workspace.yaml
   - pnpm-lock.yaml
   - scripts/lib/devkit-tree-run*
+  - scripts/lib/devkit-registry-server.mjs
   - packages/devkit/CLASSIFICATION.md
   - docs/decisions/ADR-125-*
 started: 2026-09-30
@@ -32,6 +33,6 @@ ci(tooling): the created-tree gate installs every @lcabrera package from this ch
 
 ## Status / next
 
-- Current step: in review (round 3: scratch registry)
+- Current step: in review (round 3)
 - Blockers: none
 - Next:

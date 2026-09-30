@@ -102,5 +102,10 @@ export const startedRegistry = ({ launch, packed, staging }) => {
   const server = spawn(process.execPath, [...launch, index, portFile], {
     stdio: 'ignore',
   });
-  return { server, url: `http://127.0.0.1:${portFrom(portFile)}` };
+  try {
+    return { server, url: `http://127.0.0.1:${portFrom(portFile)}` };
+  } catch (error) {
+    server.kill();
+    throw error;
+  }
 };
