@@ -219,8 +219,7 @@ export const buildPlan = ({
 
 /**
  * @param {{ declaredBins?: readonly string[], profile: string, root: string }} args
- * @returns {string[]} every task name the manifest holds once `init` has applied
- * its plan
+ * @returns {string[]}
  */
 export const taskNamesAfterInit = ({ declaredBins = [], profile, root }) => {
   const { tasks } = buildPlan({ declaredBins, establish: true, profile, root });

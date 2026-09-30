@@ -13,6 +13,7 @@ area:
   - packages/devkit/assets/root/COMMANDS.md
   - packages/devkit/README.md
   - scripts/lib/devkit-workspace*.mjs
+  - scripts/lib/devkit-config-commands*.mjs
   - scripts/verify-devkit-workspace.mjs
   - .changeset/command-map-names-wired-tasks.md
   - COMMANDS.md

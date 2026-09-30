@@ -5,14 +5,16 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  buildOutputFindings,
   commandLabel,
   commitHookFindings,
-  configuredCommandRuns,
   missingBlueprintFiles,
   missingToolchainBins,
   modifiedTrackedFiles,
   nodeFindings,
   outputTail,
+  serveFindings,
+  START_ARGS,
   taskFindings,
   tasksAddedByUpgrade,
   TOOLCHAIN_BINS,
@@ -28,6 +30,7 @@ describe('TREE_TASKS', () => {
       ['run', 'typecheck:all'],
       ['fmt', '--check', '.'],
       ['run', 'test:all'],
+      ['run', 'build'],
       ['run', 'lint:all'],
     ]);
   });
@@ -46,6 +49,7 @@ describe('TREE_TASKS', () => {
       'vp run typecheck:all',
       'vp fmt --check .',
       'vp run test:all',
+      'vp run build',
       'vp run lint:all',
     ]);
   });
@@ -312,39 +316,47 @@ describe('trackedWritesByUpgrade', () => {
   });
 });
 
-describe('configuredCommandRuns', () => {
-  it('runs every configured command, in key order, labelled by its key', () => {
-    expect(
-      configuredCommandRuns({
-        test: 'vp run test:all',
-        audit: 'vp run deps:audit',
-        run: 'vp run',
-      }),
-    ).toEqual({
-      findings: [],
-      runs: [
-        {
-          command: 'vp run deps:audit',
-          label: 'commands.audit: vp run deps:audit',
-        },
-        { command: 'vp run', label: 'commands.run: vp run' },
-        { command: 'vp run test:all', label: 'commands.test: vp run test:all' },
-      ],
-    });
+describe('buildOutputFindings', () => {
+  it('accepts a build that wrote the server entry', () => {
+    expect(buildOutputFindings({ exists: true })).toEqual([]);
   });
 
-  it('reports a missing test or audit key rather than running nothing for it', () => {
-    const { findings, runs } = configuredCommandRuns({ check: 'vp check' });
-    expect(runs).toEqual([
-      { command: 'vp check', label: 'commands.check: vp check' },
+  it('reports a build that wrote no server entry', () => {
+    expect(buildOutputFindings({ exists: false })).toEqual([
+      expect.stringContaining('apps/web/build/server/index.js'),
     ]);
-    expect(findings).toHaveLength(2);
-    expect(findings[0]).toContain('commands.audit');
-    expect(findings[1]).toContain('commands.test');
+  });
+});
+
+describe('serveFindings', () => {
+  const url = 'http://127.0.0.1:4100/';
+
+  it('serves the start task from the root', () => {
+    expect(START_ARGS).toEqual(['run', 'start']);
   });
 
-  it('reads a tree with no commands block as missing both keys', () => {
-    expect(configuredCommandRuns().findings).toHaveLength(2);
-    expect(configuredCommandRuns(undefined).runs).toEqual([]);
+  it('accepts an HTTP 200', () => {
+    expect(serveFindings({ output: '', status: 200, url })).toEqual([]);
+  });
+
+  it('reports any other status with the server output', () => {
+    const [finding] = serveFindings({
+      output: 'Error: boom\n',
+      status: 500,
+      url,
+    });
+    expect(finding).toContain('`vp run start`');
+    expect(finding).toContain('answered HTTP 500');
+    expect(finding).toContain('Error: boom');
+  });
+
+  it('reports a server that never answered by the reason', () => {
+    const [finding] = serveFindings({
+      error: 'the task exited 1 before answering',
+      output: '',
+      url,
+    });
+    expect(finding).toContain('never answered (the task exited 1');
+    expect(finding).toContain(url);
   });
 });

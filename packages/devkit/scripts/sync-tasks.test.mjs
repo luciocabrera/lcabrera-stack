@@ -71,7 +71,7 @@ const settledRepo = ({ overridden = true } = {}) => {
     private: true,
     scripts: {
       ...recorded,
-      build: 'their own build',
+      deploy: 'their own deploy',
       ...(overridden && { check: 'their own check' }),
     },
   });
@@ -122,7 +122,7 @@ describe('sync reconciles the task block', () => {
     expect(runSync([], root)).toBe(0);
     const { scripts } = readJson(root, 'package.json');
 
-    expect(scripts.build).toBe('their own build');
+    expect(scripts.deploy).toBe('their own deploy');
     expect(scripts[ARRIVING]).toBe(WORKSPACE_SCRIPTS[ARRIVING]);
     restore();
   });
@@ -209,14 +209,14 @@ describe('sync reconciles the task block', () => {
     writeJson(root, 'package.json', {
       name: 'consumer',
       private: true,
-      scripts: { build: 'their own build' },
+      scripts: { deploy: 'their own deploy' },
     });
     const { restore } = silenced();
 
     runSync([], root);
 
     expect(readJson(root, 'package.json').scripts).toEqual({
-      build: 'their own build',
+      deploy: 'their own deploy',
     });
     expect(readJson(root, MANIFEST_FILE).tasks).toBeUndefined();
     restore();
@@ -398,13 +398,13 @@ describe('the gates that need the blueprint', () => {
   const BLUEPRINT_GATES = blueprintDependentTasks({ profile: 'monorepo' });
   const MONOREPO_TASKS = tasksFor({ profile: 'monorepo' });
 
-  test('are these two tasks, so the rest of the rung is unaffected', () => {
+  test('are exactly these tasks, so the rest of the rung is unaffected', () => {
     expect(BLUEPRINT_GATES).toEqual(['commands:verify', 'deps:audit']);
     expect(blueprintDependentTasks({ profile: 'repo' })).toEqual([]);
   });
 
   test('are withheld from a repository that has not taken the blueprint', () => {
-    const root = monorepoRepo({ build: 'their own build' });
+    const root = monorepoRepo({ deploy: 'their own deploy' });
     const { restore } = silenced();
 
     applyInit({ profile: 'monorepo', root, upgrade: true });

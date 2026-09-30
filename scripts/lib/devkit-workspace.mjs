@@ -17,8 +17,13 @@ export const TREE_TASKS = [
   ['run', 'typecheck:all'],
   ['fmt', '--check', '.'],
   ['run', 'test:all'],
+  ['run', 'build'],
   ['run', 'lint:all'],
 ];
+
+export const START_ARGS = ['run', 'start'];
+
+export const BUILT_SERVER_ENTRY = 'apps/web/build/server/index.js';
 
 /**
  * @param {readonly string[]} args
@@ -175,27 +180,27 @@ export const commitHookFindings = ({ accepted, refused }) => [
 ];
 
 /**
- * @type {readonly string[]}
+ * @param {{ exists: boolean }} args
+ * @returns {string[]}
  */
-const REQUIRED_COMMAND_KEYS = ['audit', 'test'];
+export const buildOutputFindings = ({ exists }) =>
+  exists
+    ? []
+    : [
+        `the created tree holds no \`${BUILT_SERVER_ENTRY}\` after the gate's \`vp run build\` step, so the root \`build\` task produced no application build`,
+      ];
 
 /**
- * @param {Readonly<Record<string, unknown>> | undefined} commands
- * @returns {{ findings: string[],
- *             runs: { command: string, label: string }[] }}
+ * @param {{ error?: string, output: string, status?: number, url: string }} args
+ * @returns {string[]}
  */
-export const configuredCommandRuns = (commands = {}) => ({
-  findings: REQUIRED_COMMAND_KEYS.filter(
-    (key) => typeof commands[key] !== 'string',
-  ).map(
-    (key) =>
-      `the created tree's \`devkit.config.json\` sets no \`commands.${key}\`, so the workflow and hook steps that read it are not written`,
-  ),
-  runs: Object.entries(commands)
-    .filter(([, command]) => typeof command === 'string')
-    .toSorted(([left], [right]) => left.localeCompare(right))
-    .map(([key, command]) => ({
-      command,
-      label: `commands.${key}: ${command}`,
-    })),
-});
+export const serveFindings = ({ error, output, status, url }) => {
+  if (status === 200) return [];
+  const outcome =
+    status === undefined
+      ? `never answered (${error ?? 'no response'})`
+      : `answered HTTP ${status}`;
+  return [
+    `\`${commandLabel(START_ARGS)}\` in the created tree ${outcome} at ${url}:\n${outputTail(output)}`,
+  ];
+};

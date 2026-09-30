@@ -166,7 +166,6 @@ const commandsFor = ({ runner, tasks }) => ({
 /**
  * @param {{ dependencies?: Iterable<string>, files?: Iterable<string>,
  *           tasks?: Iterable<string>, userAgent?: string }} args
- * `tasks` is every task name the tree holds once this run has wired its own.
  * @returns {{ commands: Record<string, string>, name: string }}
  */
 export const inferRunner = ({
