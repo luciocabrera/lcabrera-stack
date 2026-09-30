@@ -8,7 +8,7 @@
  */
 
 import { spawn } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { basename, dirname, join } from 'node:path';
 import process from 'node:process';
@@ -20,6 +20,8 @@ const TARBALL_PREFIX = '/-/';
 const START_DEADLINE_MS = 10_000;
 
 const POLL_MS = 50;
+
+const MAX_PORT = 65_535;
 
 const send = ({ body, response, status, type }) => {
   response.writeHead(status, { 'content-type': type });
@@ -51,6 +53,26 @@ const packumentResponse = ({ baseUrl, index, path, response }) => {
 };
 
 /**
+ * @param {{ port: number, portFile: string }} args
+ */
+export const publishPort = ({ port, portFile }) => {
+  const staged = `${portFile}.partial`;
+  writeFileSync(staged, String(port));
+  renameSync(staged, portFile);
+};
+
+/**
+ * @param {string | undefined} text
+ * @returns {number | undefined}
+ */
+export const parsedPort = (text) => {
+  const trimmed = text?.trim() ?? '';
+  if (!/^\d+$/.test(trimmed)) return undefined;
+  const port = Number(trimmed);
+  return port >= 1 && port <= MAX_PORT ? port : undefined;
+};
+
+/**
  * @param {{ indexPath: string, portFile: string }} args
  */
 export const serveRegistry = ({ indexPath, portFile }) => {
@@ -66,22 +88,41 @@ export const serveRegistry = ({ indexPath, portFile }) => {
     packumentResponse({ baseUrl, index, path, response });
   });
   server.listen(0, '127.0.0.1', () => {
-    writeFileSync(portFile, String(server.address().port));
+    publishPort({ port: server.address().port, portFile });
   });
 };
 
 const sleep = (milliseconds) =>
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
 
-const portFrom = (portFile) => {
-  const deadline = Date.now() + START_DEADLINE_MS;
-  while (!existsSync(portFile) && Date.now() < deadline) sleep(POLL_MS);
-  if (!existsSync(portFile)) {
+const readOrUndefined = (path) => {
+  try {
+    return readFileSync(path, 'utf8');
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * @param {{ deadlineMs?: number, portFile: string }} args
+ * @returns {number}
+ */
+export const portFrom = ({ deadlineMs = START_DEADLINE_MS, portFile }) => {
+  const deadline = Date.now() + deadlineMs;
+  let text = readOrUndefined(portFile);
+  while (parsedPort(text) === undefined && Date.now() < deadline) {
+    sleep(POLL_MS);
+    text = readOrUndefined(portFile);
+  }
+  const port = parsedPort(text);
+  if (port === undefined) {
     throw new Error(
-      `the scratch registry did not start within ${START_DEADLINE_MS} ms`,
+      text === undefined
+        ? `the scratch registry did not start within ${deadlineMs} ms`
+        : `the scratch registry wrote ${JSON.stringify(text)} as its port, which is not an integer from 1 to ${MAX_PORT}`,
     );
   }
-  return readFileSync(portFile, 'utf8');
+  return port;
 };
 
 /**
@@ -103,7 +144,7 @@ export const startedRegistry = ({ launch, packed, staging }) => {
     stdio: 'ignore',
   });
   try {
-    return { server, url: `http://127.0.0.1:${portFrom(portFile)}` };
+    return { server, url: `http://127.0.0.1:${portFrom({ portFile })}` };
   } catch (error) {
     server.kill();
     throw error;
