@@ -36,16 +36,10 @@ export const MODULE = 'create.mjs';
 
 export const CONSTANT = 'TOOLCHAIN_RANGES';
 
-export const CONSTANT_SOURCE = {
-  constant: CONSTANT,
-  kind: 'constant',
-  path: MODULE,
-};
-
 export const EVERY_SHAPE = [
   { kind: 'manifest', path: MANIFEST },
   { kind: 'catalog', path: YAML },
-  CONSTANT_SOURCE,
+  { constant: CONSTANT, kind: 'constant', path: MODULE },
 ];
 
 export const CONSTANT_RANGES = { '@lcabrera/tsconfig': '>=0.2.2 <1.0.0' };
