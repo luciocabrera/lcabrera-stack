@@ -153,6 +153,13 @@ plugin set (`eslint-plugin-react-x`, `eslint-plugin-react-dom`,
 The declared peer ranges are the versions this package is exercised against; a
 wider range has not been tested.
 
+`@babel/preset-typescript` accepts both the 7 and the 8 line. `./plugins` hands
+it to `vite-plugin-babel`, which peers on `@babel/core` 7, so the 7 line is the
+one that installs with no unmet peer. The two lines take different options: on
+the 7 line, a project that includes files by module id rather than by extension
+passes `{ allExtensions: true, isTSX: true }`, where the 8 line takes
+`{ ignoreExtensions: true }`.
+
 ## License
 
 MIT

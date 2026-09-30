@@ -25,7 +25,7 @@ allowBuilds:
 # second declaration nothing keeps in step.
 catalogs:
   build:
-    '@babel/preset-typescript': ^8.0.1
+    '@babel/preset-typescript': ^7.29.7
     typescript: ^6.0.3
     # `vite` is aliased to Vite+ core so the whole workspace resolves ONE Vite
     # instance; the `overrides` below redirect every `vite` edge here. Without

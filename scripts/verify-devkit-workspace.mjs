@@ -1,6 +1,7 @@
 /**
  * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
- * installs it from the registry, and runs the tasks that tree wires for itself.
+ * installs it from the registry, checks its peers, and runs the tasks that tree
+ * wires for itself.
  * The blueprint's own configs are the only ones that fully lint it, and nothing
  * else here runs them. Every scratch directory sits under the OS temp root so
  * the tree inherits nothing from this checkout (ADR-073).
@@ -45,6 +46,8 @@ const TREE_NAME = 'made';
 const CREATE_ARGS = ['create', TREE_NAME, '--profile', 'monorepo'];
 
 const INSTALL_ARGS = ['install', '--no-frozen-lockfile'];
+
+const PEERS_ARGS = ['peers', 'check'];
 
 const readIfPresent = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
@@ -118,6 +121,12 @@ const installFindings = (tree) =>
     }),
   });
 
+const peerFindings = (tree) =>
+  taskFindings({
+    label: ['pnpm', ...PEERS_ARGS].join(' '),
+    ...execute({ args: PEERS_ARGS, command: 'pnpm', cwd: tree }),
+  });
+
 const taskRunFindings = (tree) =>
   TREE_TASKS.flatMap((args) =>
     taskFindings({
@@ -131,7 +140,12 @@ const trackedChangeFindings = (tree) =>
     run('git', ['status', '--porcelain', '--untracked-files=no'], tree),
   );
 
-const TREE_CHECKS = [blueprintFindings, taskRunFindings, trackedChangeFindings];
+const TREE_CHECKS = [
+  blueprintFindings,
+  peerFindings,
+  taskRunFindings,
+  trackedChangeFindings,
+];
 
 const PREREQUISITES = [runtimeFindings, installFindings];
 
@@ -170,7 +184,7 @@ const main = () => {
 
     const tasks = TREE_TASKS.map((args) => commandLabel(args)).join(', ');
     process.stdout.write(
-      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed, ${tasks} all exited zero, and none of them changed a committed file.\n`,
+      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed with no unmet peer, ${tasks} all exited zero, and none of them changed a committed file.\n`,
     );
   } finally {
     for (const directory of [staging, holder, parent]) {
