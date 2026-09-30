@@ -114,6 +114,38 @@ describe('inferRunner', () => {
   });
 });
 
+describe('a key that stands for a task', () => {
+  const VITE_PLUS = { dependencies: ['vite-plus'] };
+
+  test('runs that task wherever the tree wires it', () => {
+    const { commands } = inferRunner({
+      ...VITE_PLUS,
+      tasks: ['deps:audit', 'test:all'],
+    });
+    expect(commands.test).toBe('vp run test:all');
+    expect(commands.audit).toBe('vp run deps:audit');
+  });
+
+  test('keeps the runner default where the tree does not wire it', () => {
+    const { commands } = inferRunner(VITE_PLUS);
+    expect(commands.test).toBe('vp run test');
+    expect(commands.audit).toBe('vp pm audit --audit-level moderate');
+  });
+
+  test('answers each key from its own task alone', () => {
+    const { commands } = inferRunner({ ...VITE_PLUS, tasks: ['test:all'] });
+    expect(commands.test).toBe('vp run test:all');
+    expect(commands.audit).toBe('vp pm audit --audit-level moderate');
+  });
+
+  test('leaves a runner with no task-backed keys as it was', () => {
+    expect(
+      inferRunner({ files: ['pnpm-lock.yaml'], tasks: ['test:all'] }).commands
+        .test,
+    ).toBe('pnpm run test');
+  });
+});
+
 describe('runnerFromUserAgent', () => {
   test('reads the runner a package manager names for what it launched', () => {
     expect(runnerFromUserAgent('pnpm/11.25.0 npm/? node/v26 linux x64')).toBe(

@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   commandLabel,
   commitHookFindings,
+  configuredCommandRuns,
   missingBlueprintFiles,
   missingToolchainBins,
   modifiedTrackedFiles,
@@ -308,5 +309,42 @@ describe('trackedWritesByUpgrade', () => {
     expect(
       trackedWritesByUpgrade({ after: {}, before: { 'biome.jsonc': 'abc' } }),
     ).toHaveLength(1);
+  });
+});
+
+describe('configuredCommandRuns', () => {
+  it('runs every configured command, in key order, labelled by its key', () => {
+    expect(
+      configuredCommandRuns({
+        test: 'vp run test:all',
+        audit: 'vp run deps:audit',
+        run: 'vp run',
+      }),
+    ).toEqual({
+      findings: [],
+      runs: [
+        {
+          command: 'vp run deps:audit',
+          label: 'commands.audit: vp run deps:audit',
+        },
+        { command: 'vp run', label: 'commands.run: vp run' },
+        { command: 'vp run test:all', label: 'commands.test: vp run test:all' },
+      ],
+    });
+  });
+
+  it('reports a missing test or audit key rather than running nothing for it', () => {
+    const { findings, runs } = configuredCommandRuns({ check: 'vp check' });
+    expect(runs).toEqual([
+      { command: 'vp check', label: 'commands.check: vp check' },
+    ]);
+    expect(findings).toHaveLength(2);
+    expect(findings[0]).toContain('commands.audit');
+    expect(findings[1]).toContain('commands.test');
+  });
+
+  it('reads a tree with no commands block as missing both keys', () => {
+    expect(configuredCommandRuns().findings).toHaveLength(2);
+    expect(configuredCommandRuns(undefined).runs).toEqual([]);
   });
 });

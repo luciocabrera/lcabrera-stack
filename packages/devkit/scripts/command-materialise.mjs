@@ -217,6 +217,21 @@ export const buildPlan = ({
   };
 };
 
+/**
+ * @param {{ declaredBins?: readonly string[], profile: string, root: string }} args
+ * @returns {string[]} every task name the manifest holds once `init` has applied
+ * its plan
+ */
+export const taskNamesAfterInit = ({ declaredBins = [], profile, root }) => {
+  const { tasks } = buildPlan({ declaredBins, establish: true, profile, root });
+  return Object.keys(
+    scriptsAfterTasks({
+      entries: tasks,
+      scripts: readJsonIfPresent(join(root, PACKAGE_MANIFEST))?.scripts,
+    }),
+  );
+};
+
 const nextManifestFor = ({ entries, manifest, tasks = [] }) =>
   manifestAfter({
     entries,
