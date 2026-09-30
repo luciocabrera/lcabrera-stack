@@ -8,6 +8,7 @@
  * temp root so the tree inherits nothing from this checkout (ADR-073).
  *
  * Usage: node scripts/verify-devkit-workspace.mjs
+ *        (it re-runs itself with --serve-registry to host the scratch registry)
  * Exit codes: 0 = the created tree installs and its tasks pass, 1 = it does not.
  */
 
@@ -23,12 +24,14 @@ import {
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 import {
   DEFAULT_CONFIG,
   targetPathFor,
 } from '../packages/devkit/scripts/config.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
+import { serveRegistry } from './lib/devkit-registry-server.mjs';
 import {
   createFindings,
   execute,
@@ -78,12 +81,7 @@ const WORKSPACE_FILE = 'pnpm-workspace.yaml';
 
 const LOCKFILE = 'pnpm-lock.yaml';
 
-const REGISTRY_SERVER = join(
-  REPO_ROOT,
-  'scripts',
-  'lib',
-  'devkit-registry-server.mjs',
-);
+const SERVE_FLAG = '--serve-registry';
 
 const REGISTRY_START_MS = 10_000;
 
@@ -181,9 +179,11 @@ const startedRegistry = ({ packed, staging }) => {
       Object.fromEntries(packed.map((entry) => [entry.manifest.name, entry])),
     ),
   );
-  const server = spawn(process.execPath, [REGISTRY_SERVER, index, portFile], {
-    stdio: 'ignore',
-  });
+  const server = spawn(
+    process.execPath,
+    [fileURLToPath(import.meta.url), SERVE_FLAG, index, portFile],
+    { stdio: 'ignore' },
+  );
   return { server, url: `http://127.0.0.1:${portFrom(portFile)}` };
 };
 
@@ -352,8 +352,14 @@ const main = () => {
   }
 };
 
+const [mode, servedIndex, servedPortFile] = process.argv.slice(2);
+
 try {
-  main();
+  if (mode === SERVE_FLAG) {
+    serveRegistry({ indexPath: servedIndex, portFile: servedPortFile });
+  } else {
+    main();
+  }
 } catch (error) {
   reportCrash(error);
 }

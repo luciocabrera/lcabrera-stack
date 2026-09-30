@@ -32,6 +32,6 @@ ci(tooling): the created-tree gate installs every @lcabrera package from this ch
 
 ## Status / next
 
-- Current step: in review (round 2 fixes pushed)
+- Current step: in review (round 3: scratch registry)
 - Blockers: none
 - Next:

@@ -3,32 +3,27 @@
  * `@lcabrera/*` tarballs from. Served over HTTP rather than as `file:`
  * specifiers so pnpm resolves each one as the semver version it will carry on
  * npm, and a peer range between two of them behaves as it will for a consumer
- * (ADR-125). It runs as a child process because the gate's own calls block.
- *
- * Usage: node scripts/lib/devkit-registry-server.mjs <index.json> <port-file>
- * Exit codes: 1 = the index could not be read; otherwise it serves until killed.
+ * (ADR-125). The gate runs it in a child copy of itself, because the gate's own
+ * calls block.
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { basename, dirname, join } from 'node:path';
-import process from 'node:process';
 
 import { packumentFor } from './devkit-workspace-packages.mjs';
 
 const TARBALL_PREFIX = '/-/';
-
-const [indexPath, portFile] = process.argv.slice(2);
 
 const send = ({ body, response, status, type }) => {
   response.writeHead(status, { 'content-type': type });
   response.end(body);
 };
 
-const tarballResponse = ({ path, response }) => {
+const tarballResponse = ({ directory, path, response }) => {
   const file = basename(path);
   send({
-    body: readFileSync(join(dirname(indexPath), file)),
+    body: readFileSync(join(directory, file)),
     response,
     status: 200,
     type: 'application/octet-stream',
@@ -49,12 +44,17 @@ const packumentResponse = ({ baseUrl, index, path, response }) => {
   });
 };
 
-const serve = (index) => {
+/**
+ * @param {{ indexPath: string, portFile: string }} args
+ */
+export const serveRegistry = ({ indexPath, portFile }) => {
+  const index = JSON.parse(readFileSync(indexPath, 'utf8'));
+  const directory = dirname(indexPath);
   const server = createServer((request, response) => {
     const path = new URL(request.url ?? '/', 'http://registry').pathname;
     const baseUrl = `http://${request.headers.host}`;
     if (path.startsWith(TARBALL_PREFIX)) {
-      tarballResponse({ path, response });
+      tarballResponse({ directory, path, response });
       return;
     }
     packumentResponse({ baseUrl, index, path, response });
@@ -63,10 +63,3 @@ const serve = (index) => {
     writeFileSync(portFile, String(server.address().port));
   });
 };
-
-try {
-  serve(JSON.parse(readFileSync(indexPath, 'utf8')));
-} catch (error) {
-  process.stderr.write(`${String(error)}\n`);
-  process.exitCode = 1;
-}
