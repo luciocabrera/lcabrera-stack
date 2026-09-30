@@ -10,4 +10,5 @@ its tasks, ready to install. The created `devkit.config.json` records
 that rung. `pnpm create lcabrera-stack` forwards to `devkit create` and gets the
 same default. Pass `--profile agent` for the previous tree.
 
-`devkit init` and `devkit sync` still default to `agent`.
+`devkit init` and `devkit sync` are unchanged: with no flag they use the
+`profile` in `devkit.config.json`, and `agent` when the config names none.

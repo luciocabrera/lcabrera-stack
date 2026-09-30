@@ -4,7 +4,7 @@ governs:
   - create-lcabrera-stack
 ---
 
-# ADR-124 — `create` defaults to the monorepo rung; `init` and `sync` keep `agent`
+# ADR-124 — `create` defaults to the monorepo rung; `init` and `sync` keep their fallback
 
 **Status:** Accepted
 
@@ -13,9 +13,11 @@ governs:
 ## Context
 
 `devkit create`, `devkit init` and `devkit sync` all take `--profile <name>`,
-and until now all three fell back to the same value when it was absent:
-`profile: 'agent'` in `DEFAULT_CONFIG`. For `init` and `sync` that is the
-cautious choice. They run inside a repository someone already has, and the
+and until now all three ended at the same value when it was absent:
+`profile: 'agent'` in `DEFAULT_CONFIG`. `create` went to it directly. `init`
+and `sync` first read the `profile` key of an existing `devkit.config.json` and
+reach `agent` only when the config names no rung. For `init` and `sync` that
+fallback is the cautious choice. They run inside a repository someone already has, and the
 `agent` rung adds prose and templates without placing a workspace, an
 application or a root config into a project that has its own.
 
@@ -36,9 +38,9 @@ rung and says `agent` and `repo` do not answer it.
 `resolvedProfile` in `command-create.mjs` is the one place that reads it. A
 flag still wins, so `--profile agent` gives the old tree.
 
-`init` and `sync` keep `agent`. `DEFAULT_CONFIG.profile` stays `'agent'`, and it
-is the fallback for every command that reads a `devkit.config.json` without a
-`profile` key.
+`init` and `sync` are unchanged. With no flag they use the configured
+`profile`, and `DEFAULT_CONFIG.profile`, which stays `'agent'`, applies only
+when neither the flag nor `devkit.config.json` names a rung.
 
 `create` writes the rung it used into the `profile` key of the
 `devkit.config.json` it creates, so that file names `monorepo` after a flagless
