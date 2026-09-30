@@ -8,8 +8,9 @@ area:
   - packages/devkit/scripts/create*.mjs
   - packages/devkit/scripts/command-create*.mjs
   - packages/devkit/scripts/command-init.mjs
-  - packages/devkit/scripts/command-closure.mjs
-  - packages/devkit/scripts/hooks-path.test.mjs
+  - packages/devkit/scripts/hooks-path*.mjs
+  - packages/devkit/scripts/git-exec.mjs
+  - packages/devkit/scripts/closure-shipped-plant.test.mjs
   - packages/devkit/scripts/workspace.mjs
   - packages/devkit/assets/workspace/scripts/**
   - packages/devkit/assets/root/COMMANDS.md
