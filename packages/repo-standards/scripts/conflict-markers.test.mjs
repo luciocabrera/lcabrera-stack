@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   conflictMarkerLines,
-  conflictMarkersIn,
   formatFinding,
-  isConflictMarker,
+  isBinaryContent,
+  markerKind,
 } from './conflict-markers.mjs';
 
 const OPEN = '<'.repeat(7);
@@ -13,37 +13,54 @@ const SPLIT = '='.repeat(7);
 const CLOSE = '>'.repeat(7);
 const QUOTED_CLOSE = Array.from({ length: 7 }, () => '>').join(' ');
 
-describe('isConflictMarker', () => {
+describe('markerKind', () => {
   it.each([
     `${OPEN} HEAD`,
     OPEN,
     `${BASE} merged common ancestors`,
-    SPLIT,
-    `${SPLIT}  `,
     `${CLOSE} origin/main`,
     CLOSE,
-  ])('flags the marker git writes: %s', (line) => {
-    expect(isConflictMarker(line)).toBe(true);
+  ])('reads the opening, base and closing markers git writes: %s', (line) => {
+    expect(markerKind(line)).toBe('anchor');
   });
 
   it.each([`${QUOTED_CLOSE} origin/main`, QUOTED_CLOSE])(
-    'flags a closing marker a formatter reprinted as nested block quotes: %s',
+    'reads a closing marker a formatter reprinted as nested block quotes: %s',
     (line) => {
-      expect(isConflictMarker(line)).toBe(true);
+      expect(markerKind(line)).toBe('anchor');
+    },
+  );
+
+  it.each([`| ${OPEN} HEAD |`, `|${CLOSE}|`, `| ${CLOSE} origin/main |`])(
+    'reads a marker a formatter folded into a table as its first cell: %s',
+    (line) => {
+      expect(markerKind(line)).toBe('anchor');
     },
   );
 
   it.each([
-    `| ${OPEN} HEAD |`,
-    `| ${SPLIT}      |`,
-    `|${CLOSE}|`,
-    `| ${CLOSE} origin/main |`,
+    `  ${OPEN} HEAD`,
+    `   ${OPEN} HEAD`,
+    `\t${CLOSE} topic`,
+    `  ${QUOTED_CLOSE} origin/main`,
   ])(
-    'flags a marker a formatter folded into a table as its first cell: %s',
+    'reads a marker a formatter indented as a list continuation: %s',
     (line) => {
-      expect(isConflictMarker(line)).toBe(true);
+      expect(markerKind(line)).toBe('anchor');
     },
   );
+
+  it.each([
+    SPLIT,
+    `${SPLIT}  `,
+    `\\${SPLIT}`,
+    `    \\${SPLIT}`,
+    `  ${SPLIT}`,
+    `| ${SPLIT}      |`,
+    `| ${SPLIT}                        |`,
+  ])('reads a separator, raw or reshaped: %s', (line) => {
+    expect(markerKind(line)).toBe('separator');
+  });
 
   it.each([
     `${OPEN}<`,
@@ -51,8 +68,8 @@ describe('isConflictMarker', () => {
     `${CLOSE}>`,
     `${OPEN}HEAD`,
     `${SPLIT} heading`,
-    `  ${OPEN} HEAD`,
     `text ${SPLIT}`,
+    `text ${OPEN} HEAD`,
     Array.from({ length: 6 }, () => '>').join(' '),
     `${QUOTED_CLOSE}>`,
     `| \`${OPEN}\` | a marker named in prose |`,
@@ -60,12 +77,12 @@ describe('isConflictMarker', () => {
     '|'.repeat(8),
     '',
   ])('leaves an ordinary line alone: %s', (line) => {
-    expect(isConflictMarker(line)).toBe(false);
+    expect(markerKind(line)).toBeUndefined();
   });
 });
 
 describe('conflictMarkerLines', () => {
-  it('reports each marker with its one-based line number', () => {
+  it('names every marker of a conflict with its one-based line number', () => {
     const text = [
       '# Title',
       `${OPEN} HEAD`,
@@ -83,44 +100,84 @@ describe('conflictMarkerLines', () => {
     ]);
   });
 
-  it('reads a file with CRLF line endings the same way', () => {
-    expect(conflictMarkerLines(`a\r\n${SPLIT}\r\nb\r\n`)).toEqual([
+  it('passes a heading underlined with exactly seven `=`', () => {
+    expect(conflictMarkerLines(`Summary\n${SPLIT}\n\nText.\n`)).toEqual([]);
+  });
+
+  it('names that same underline once the file also holds a real marker', () => {
+    expect(
+      conflictMarkerLines(`Summary\n${SPLIT}\n\n${CLOSE} topic\n`),
+    ).toEqual([
       { line: 2, text: SPLIT },
+      { line: 4, text: `${CLOSE} topic` },
     ]);
+  });
+
+  it('names every line of a conflict a formatter reshaped inside a list', () => {
+    const text = [
+      '- item one',
+      `  ${OPEN} HEAD`,
+      '  - ours',
+      `    \\${SPLIT}`,
+      '  - theirs',
+      `  ${QUOTED_CLOSE} origin/main`,
+      '- item two',
+    ].join('\n');
+
+    expect(conflictMarkerLines(text).map(({ line }) => line)).toEqual([
+      2, 4, 6,
+    ]);
+  });
+
+  it('names every line of a conflict whose separator a formatter folded into a table', () => {
+    const text = [
+      '### Tooling',
+      '',
+      `${OPEN} HEAD`,
+      '',
+      '| Command         | Does   |',
+      '| --------------- | ------ |',
+      '| `vp run report` | ours   |',
+      '| `vp run setup`  | shared |',
+      `| ${SPLIT}         |`,
+      '| Command         | Does   |',
+      '| --------------- | ------ |',
+      '| `vp run setup`  | shared |',
+      '',
+      `${QUOTED_CLOSE} origin/main`,
+    ].join('\n');
+
+    expect(conflictMarkerLines(text).map(({ line }) => line)).toEqual([
+      3, 9, 14,
+    ]);
+  });
+
+  it('reads a file with CRLF line endings the same way', () => {
+    expect(conflictMarkerLines(`a\r\n${OPEN} x\r\n${SPLIT}\r\nb\r\n`)).toEqual([
+      { line: 2, text: `${OPEN} x` },
+      { line: 3, text: SPLIT },
+    ]);
+  });
+
+  it('returns nothing for a clean file', () => {
+    expect(conflictMarkerLines('# Readme\n\nText.\n')).toEqual([]);
   });
 });
 
-describe('conflictMarkersIn', () => {
-  it('names the file and the line of every marker across the files it is given', () => {
-    expect(
-      conflictMarkersIn([
-        { path: 'clean.md', text: 'nothing here\n' },
-        { path: 'doc.md', text: `intro\n${OPEN} HEAD\n` },
-        { path: 'src/a.ts', text: `${CLOSE} topic\n` },
-      ]),
-    ).toEqual([
-      { line: 2, path: 'doc.md', text: `${OPEN} HEAD` },
-      { line: 1, path: 'src/a.ts', text: `${CLOSE} topic` },
-    ]);
+describe('isBinaryContent', () => {
+  it('reads a NUL byte as binary, before any decoding', () => {
+    expect(isBinaryContent(Buffer.from([0x3d, 0x00, 0x0a]))).toBe(true);
   });
 
-  it('skips a binary file, whose bytes can spell a marker by chance', () => {
-    expect(
-      conflictMarkersIn([{ path: 'image.png', text: `\0\n${SPLIT}\n` }]),
-    ).toEqual([]);
-  });
-
-  it('returns nothing for a clean tree', () => {
-    expect(
-      conflictMarkersIn([{ path: 'README.md', text: '# Readme\n\nText.\n' }]),
-    ).toEqual([]);
+  it('reads text bytes as text', () => {
+    expect(isBinaryContent(Buffer.from(`${SPLIT}\n`, 'utf8'))).toBe(false);
   });
 });
 
 describe('formatFinding', () => {
   it('prints path, line and the marker text', () => {
     expect(
-      formatFinding({ line: 3, path: 'doc.md', text: `${OPEN} HEAD` }),
+      formatFinding({ line: 3, path: 'doc.md', text: `  ${OPEN} HEAD` }),
     ).toBe(`doc.md:3: ${OPEN} HEAD`);
   });
 });
