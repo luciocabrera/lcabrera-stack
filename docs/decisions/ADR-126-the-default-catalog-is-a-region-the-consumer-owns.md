@@ -36,8 +36,8 @@ not cover as the open answer for files a consumer must edit (#1156).
 
 A materialised file may name one top-level YAML key as **a region its consumer
 owns**. The shipped file never carries that key. `consumer-region.mjs` maps asset
-paths to their key, and `pnpm-workspace.yaml` is the only entry: its region is
-`catalog`, the default catalog. The kit ships only the named `catalogs:`.
+paths to their key. It maps `pnpm-workspace.yaml` to `catalog`, the default
+catalog. The kit ships only the named `catalogs:`.
 
 The region is the key's line, every indented line under it, and any column-zero
 comment lines directly above it. `planSync` splits it off the on-disk content
@@ -75,9 +75,12 @@ entries, leaves part of the block in the kit's half. That part then reads as an
 edit and is reported. It errs toward reporting a change, never toward hiding one.
 
 An acknowledgement recorded for `pnpm-workspace.yaml` before this change was
-keyed to the whole file's hash, so it no longer matches. If the only edit was a
-default catalog, the file is now `current` and the stale entry does nothing.
-Otherwise the file is reported again and has to be accepted once more.
+keyed to the whole file's hash. If the file holds no default `catalog:` block,
+that hash is unchanged and the acknowledgement still matches. If it holds one,
+the hash now leaves the block out, so the acknowledgement stops matching. Where
+the default catalog was the only edit, the file is now `current` and the stale
+entry does nothing. Otherwise the file is reported again and has to be accepted
+once more, with `devkit doctor --accept pnpm-workspace.yaml --reason "<why>"`.
 
 Other keys the package manager can write, such as build approvals under
 `allowBuilds`, are not regions. They are keys the kit ships, so a change to one

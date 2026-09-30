@@ -23,6 +23,6 @@ fix(devkit): a dependency added with vp add leaves the workspace file unmodified
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented and gated; PR #1211 in review
 - Blockers: none
-- Next:
+- Next: answer review threads, then merge

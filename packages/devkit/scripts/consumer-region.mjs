@@ -4,7 +4,7 @@
  *
  * A region is one top-level YAML key the shipped file never carries, so every
  * line under it is the consumer's by construction and the recorded hash covers
- * everything else. ADR-126 is the decision and names the one region there is.
+ * everything else. ADR-126 is the decision.
  */
 
 const REGIONS = new Map([['workspace/pnpm-workspace.yaml', 'catalog']]);

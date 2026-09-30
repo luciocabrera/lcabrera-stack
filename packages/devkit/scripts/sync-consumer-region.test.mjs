@@ -3,6 +3,8 @@
  * package manager adds one: a default-catalog block appended after the kit's
  * last key. Asserted against a real tree, because the claim is about what
  * `doctor` reports and what `sync` writes over it.
+ *
+ * Usage: `vp run test` in this workspace; exits non-zero on a failing case.
  */
 
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';

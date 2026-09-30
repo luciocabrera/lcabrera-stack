@@ -1,3 +1,11 @@
+/*
+ * The splitter behind the region a consumer owns, held to the shapes the
+ * package manager writes, and the shipped workspace file held to carrying no
+ * region of its own — if it did, the kit's entries would read as the consumer's.
+ *
+ * Usage: `vp run test` in this workspace; exits non-zero on a failing case.
+ */
+
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
