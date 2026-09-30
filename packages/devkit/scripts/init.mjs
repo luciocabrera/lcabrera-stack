@@ -62,7 +62,7 @@ const RUNNERS = [
       '    run-install: false',
     ],
     commands: {
-      audit: 'vp pm audit --audit-level moderate',
+      audit: 'vp pm audit --level moderate',
       check: 'vp check',
       install: 'vp install',
       run: 'vp run',

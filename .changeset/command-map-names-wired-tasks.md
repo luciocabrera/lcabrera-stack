@@ -6,7 +6,7 @@ Every command in the `commands` map of a tree `devkit create` makes at the
 `monorepo` profile now runs in that tree. Under Vite+, `test` and `audit` stand
 for tasks: `test` runs `vp run test:all` and `audit` runs `vp run deps:audit`
 wherever the manifest holds that task after the run. Where it does not, `test`
-stays `vp run test` and `audit` is `vp pm audit --audit-level moderate`, which
+stays `vp run test` and `audit` is `vp pm audit --level moderate`, which
 any Vite+ repository can run.
 
 `deps:audit` is a new gate task at the `monorepo` profile:
