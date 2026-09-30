@@ -1,5 +1,5 @@
 ---
-'@lcabrera/devkit': patch
+'@lcabrera/devkit': minor
 ---
 
 Adding a dependency with `vp add` no longer makes `devkit doctor --check` report
