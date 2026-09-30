@@ -17,6 +17,7 @@ import { describe, expect, test } from 'vite-plus/test';
 import { configs } from '../assets/workspace/packages/typescript-config/tsconfig.entries.ts';
 import { initialManifest, TOOLCHAIN_RANGES } from './create.mjs';
 import {
+  APP_WORKSPACE,
   GENERATED_TSCONFIGS,
   NODE_VERSION,
   nodeEngineBand,
@@ -112,6 +113,16 @@ describe('the tasks name what the blueprint holds', () => {
     expect(WORKSPACE_SCRIPTS['tsconfig:generate']).toContain(
       TSCONFIG_WORKSPACE,
     );
+  });
+
+  test('the app tasks filter for the application that is shipped', () => {
+    const manifest = JSON.parse(read('apps', 'web', 'package.json'));
+    expect(manifest.name).toBe(APP_WORKSPACE);
+    for (const name of ['build', 'dev', 'start']) {
+      expect(WORKSPACE_SCRIPTS[name]).toBe(
+        `vp run --filter ${APP_WORKSPACE} ${name}`,
+      );
+    }
   });
 
   test('every dependency the rung adds resolves through the catalog', () => {

@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  buildOutputFindings,
   commandLabel,
   commitHookFindings,
   missingBlueprintFiles,
@@ -12,6 +13,8 @@ import {
   modifiedTrackedFiles,
   nodeFindings,
   outputTail,
+  serveFindings,
+  START_ARGS,
   taskFindings,
   tasksAddedByUpgrade,
   TOOLCHAIN_BINS,
@@ -27,6 +30,7 @@ describe('TREE_TASKS', () => {
       ['run', 'typecheck:all'],
       ['fmt', '--check', '.'],
       ['run', 'test:all'],
+      ['run', 'build'],
       ['run', 'lint:all'],
     ]);
   });
@@ -45,6 +49,7 @@ describe('TREE_TASKS', () => {
       'vp run typecheck:all',
       'vp fmt --check .',
       'vp run test:all',
+      'vp run build',
       'vp run lint:all',
     ]);
   });
@@ -308,5 +313,50 @@ describe('trackedWritesByUpgrade', () => {
     expect(
       trackedWritesByUpgrade({ after: {}, before: { 'biome.jsonc': 'abc' } }),
     ).toHaveLength(1);
+  });
+});
+
+describe('buildOutputFindings', () => {
+  it('accepts a build that wrote the server entry', () => {
+    expect(buildOutputFindings({ exists: true })).toEqual([]);
+  });
+
+  it('reports a build that wrote no server entry', () => {
+    expect(buildOutputFindings({ exists: false })).toEqual([
+      expect.stringContaining('apps/web/build/server/index.js'),
+    ]);
+  });
+});
+
+describe('serveFindings', () => {
+  const url = 'http://127.0.0.1:4100/';
+
+  it('serves the start task from the root', () => {
+    expect(START_ARGS).toEqual(['run', 'start']);
+  });
+
+  it('accepts an HTTP 200', () => {
+    expect(serveFindings({ output: '', status: 200, url })).toEqual([]);
+  });
+
+  it('reports any other status with the server output', () => {
+    const [finding] = serveFindings({
+      output: 'Error: boom\n',
+      status: 500,
+      url,
+    });
+    expect(finding).toContain('`vp run start`');
+    expect(finding).toContain('answered HTTP 500');
+    expect(finding).toContain('Error: boom');
+  });
+
+  it('reports a server that never answered by the reason', () => {
+    const [finding] = serveFindings({
+      error: 'the task exited 1 before answering',
+      output: '',
+      url,
+    });
+    expect(finding).toContain('never answered (the task exited 1');
+    expect(finding).toContain(url);
   });
 });
