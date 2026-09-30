@@ -1,16 +1,10 @@
 /**
- * Whether a dependency range a shipped asset carries still admits the package
+ * Whether a dependency range this repository ships — in a devkit asset, or in
+ * a range constant a devkit command writes from — still admits the package
  * this repository publishes under that name, and the minor after it.
  *
- * Below 1.0.0 a caret stops at the next minor, so a literal in a bootstrapped
- * tree hands a consumer the release before last the day one ships — and stays
- * syntactically valid while it falls further behind. Background: #1129.
- *
- * A file that names a published package and yields no declaration for it is a
- * finding here, not a clean file: that is what a reader looks like once the
- * shape it parses has moved under it.
- *
- * Ranges are evaluated by `semver`, never by hand.
+ * The decision and its boundaries are ADR-117 and its amendment. Ranges are
+ * evaluated by `semver`, never by hand.
  */
 
 import { inc, satisfies, validRange } from 'semver';
@@ -58,9 +52,6 @@ const entryOn = ({ line, path, text }) => {
 const at = ({ name, path }) => JSON.stringify([path, name]);
 
 /**
- * Every `name: value` pair a workspace YAML declares, wherever it sits in the
- * file. Which of them matter is decided against the published roster, not here.
- *
  * @param {{ path: string, text: string }} args
  */
 export const catalogRanges = ({ path, text }) =>
@@ -71,13 +62,6 @@ export const catalogRanges = ({ path, text }) =>
     );
 
 /**
- * Every dependency a manifest declares, whatever its specifier says. Reading is
- * not judging: a specifier this gate cannot read a range out of is still a
- * declaration this reader saw, which is what tells it apart from a name it
- * failed to read. Which specifiers are then exempt from judgement is the judge's
- * question, and only `catalog:` and `workspace:` are — they name where the
- * version is declared, where `npm:` pins one.
- *
  * @param {{ manifest: object, path: string }} args
  */
 export const manifestRanges = ({ manifest, path }) =>
@@ -86,6 +70,18 @@ export const manifestRanges = ({ manifest, path }) =>
       .filter(([, range]) => typeof range === 'string')
       .map(([name, range]) => ({ field, name, path, range })),
   );
+
+/**
+ * @param {{ constant: string, path: string, ranges: Record<string, string> }} args
+ */
+export const constantRanges = ({ constant, path, ranges }) =>
+  Object.entries(ranges).map(([name, range]) => ({
+    constant,
+    field: constant,
+    name,
+    path,
+    range,
+  }));
 
 const tokensIn = ({ hashComments, text }) =>
   new Set(
@@ -97,12 +93,6 @@ const tokensIn = ({ hashComments, text }) =>
   );
 
 /**
- * Where a shipped file names a package this repository publishes, whether or
- * not a reader made a declaration of it. Read as whole tokens, so a longer name
- * that starts with a shorter one is not one mention of each; `hashComments` says
- * whether this file's syntax has `#` comments to drop, because applying one
- * syntax's rule to another file makes two readers disagree about it.
- *
  * @param {{ hashComments?: boolean, names: readonly string[], path: string, text: string }} args
  */
 export const mentionsIn = ({ hashComments = false, names, path, text }) => {
@@ -131,14 +121,6 @@ const HASH_COMMENT_EXTENSIONS = new Set(['.yaml', '.yml']);
 const extensionOf = (fileName) => fileName.slice(fileName.lastIndexOf('.'));
 
 /**
- * What a shipped file is to this gate: a shape it reads declarations out of, a
- * data file it only scans for names, or nothing.
- *
- * Every shipped data file is scanned even when no reader parses it, because a
- * declaring file that leaves the reader's set — renamed, or a shape nobody
- * taught this gate — otherwise takes its own mentions with it and goes quiet
- * with no finding to name it.
- *
  * @param {string} fileName
  */
 export const sourceOf = (fileName) => {
@@ -152,38 +134,56 @@ export const sourceOf = (fileName) => {
 };
 
 const REQUIRED_SHAPES = [
-  { kind: 'manifest', shape: 'manifest' },
-  { kind: 'catalog', shape: 'workspace catalog' },
+  { from: 'the shipped assets', kind: 'manifest', shape: 'manifest' },
+  { from: 'the shipped assets', kind: 'catalog', shape: 'workspace catalog' },
+  {
+    from: 'the list of range constants',
+    kind: 'constant',
+    shape: 'range constant',
+  },
 ];
 
 /**
- * The shapes this gate knows how to read, both of which the shipped assets are
- * expected to carry. A run that found neither read less than it was built to
- * read, and says so instead of reporting the coverage it managed.
- *
  * @param {readonly { kind: string }[]} sources
  */
 const missingShapes = (sources) =>
   REQUIRED_SHAPES.filter(
     ({ kind }) => !sources.some((source) => source.kind === kind),
-  ).map(({ shape }) => ({ kind: 'no-source', shape }));
+  ).map(({ from, shape }) => ({ from, kind: 'no-source', shape }));
+
+const PROMISING_ENTRIES = new Map([
+  ['catalog', 'workspace catalog'],
+  ['constant', 'range constant'],
+]);
 
 /**
- * A file the walk selected as a catalog and read nothing out of. A catalog is
- * the one shape that promises entries — a manifest may legitimately declare
- * none — so zero of them means the reader, not the file, has gone quiet.
- *
  * @param {{ declarations: readonly object[], sources: readonly object[] }} args
  */
-const quietCatalogs = ({ declarations, sources }) =>
+const quietSources = ({ declarations, sources }) =>
   sources
-    .filter(({ kind }) => kind === 'catalog')
-    .filter(({ path }) => !declarations.some((entry) => entry.path === path))
-    .map(({ path }) => ({
+    .filter(({ kind }) => PROMISING_ENTRIES.has(kind))
+    .filter(
+      (source) =>
+        !declarations.some(
+          (entry) =>
+            entry.path === source.path && entry.constant === source.constant,
+        ),
+    )
+    .map(({ constant, kind, path }) => ({
+      constant,
       kind: 'no-declarations',
       path,
-      shape: 'workspace catalog',
+      shape: PROMISING_ENTRIES.get(kind),
     }));
+
+/**
+ * @param {{ declarations: readonly object[], versions: Record<string, string> }} args
+ */
+const unpublishedConstants = ({ declarations, versions }) =>
+  declarations
+    .filter(({ constant }) => constant !== undefined)
+    .filter(({ name }) => typeof versions[name] !== 'string')
+    .map((declaration) => ({ ...declaration, kind: 'unpublished' }));
 
 const verdict = ({ declaration, version }) => {
   if (validRange(declaration.range) === null) return 'malformed';
@@ -202,14 +202,6 @@ const rangeFinding = ({ declaration, versions }) => {
 };
 
 /**
- * What is wrong with the shipped ranges, given the versions this repository
- * publishes and where those packages are named.
- *
- * A name a shipped file mentions but no reader declared is reported per file,
- * because a reader that has gone quiet on one source reports exactly the pass a
- * correct one does — and one that still reads the other source hides it behind
- * a finding count above zero.
- *
  * @param {{ declarations: readonly object[], mentions: readonly object[], sources?: readonly object[], versions: Record<string, string> }} args
  */
 export const shippedRangeFindings = ({
@@ -238,7 +230,8 @@ export const shippedRangeFindings = ({
 
   return [
     ...structural,
-    ...quietCatalogs({ declarations, sources }),
+    ...quietSources({ declarations, sources }),
+    ...unpublishedConstants({ declarations, versions }),
     ...unread,
     ...owned
       .filter((declaration) => !PLACE.test(declaration.range))
@@ -264,10 +257,13 @@ const NOTHING_READ =
   'no shipped file names a package this repository publishes — the assets moved, or the walk stopped reaching them';
 
 const noDeclarationsLine = (finding) =>
-  `${finding.path}  is a ${finding.shape} and yielded no entry — the file changed shape, or the reader stopped reading it`;
+  `${[finding.path, finding.constant].filter(Boolean).join(':')}  is a ${finding.shape} and yielded no entry — the file changed shape, or the reader stopped reading it`;
 
 const noSourceLine = (finding) =>
-  `the shipped assets yielded no ${finding.shape} to read — the walk narrowed, or the assets moved`;
+  `${finding.from} yielded no ${finding.shape} to read — the walk narrowed, or the sources moved`;
+
+const unpublishedLine = (finding) =>
+  `${where(finding)}  ${finding.name}: this repository publishes no package of that name, and a range constant holds only its own — the package was renamed, or the entry is stale`;
 
 const unreadLine = (finding) =>
   finding.shape === 'scanned'
@@ -275,9 +271,6 @@ const unreadLine = (finding) =>
     : `${finding.path}  names ${finding.name} and no declaration of it was read there — the file's shape moved, or the reader stopped reading it`;
 
 /**
- * One line a reader can act on: where the range is, what is wrong with it, and
- * what admits every release up to the next major.
- *
  * @param {object} finding
  */
 export const findingLine = (finding) => {
@@ -285,6 +278,18 @@ export const findingLine = (finding) => {
   if (finding.kind === 'no-source') return noSourceLine(finding);
   if (finding.kind === 'nothing-read') return NOTHING_READ;
   if (finding.kind === 'unread') return unreadLine(finding);
+  if (finding.kind === 'unpublished') return unpublishedLine(finding);
 
   return `${where(finding)}  ${finding.name}: ${REASONS[finding.kind](finding)} — write \`${suggestion(finding.version)}\``;
+};
+
+/**
+ * @param {{ declarations: readonly object[], mentions: readonly object[], sources: readonly { kind: string }[] }} args
+ */
+export const passLine = ({ declarations, mentions, sources }) => {
+  const files = sources.filter(({ kind }) => kind !== 'constant');
+  const parsed = files.filter(({ kind }) => kind !== 'scanned').length;
+  const constants = sources.length - files.length;
+
+  return `Shipped range gate passed: ${declarations.length} declaration(s) read from ${parsed} shipped file(s) and ${constants} range constant(s); ${files.length} shipped data file(s) scanned for a package this repository publishes, ${mentions.length} mention(s) found, each one read.`;
 };
