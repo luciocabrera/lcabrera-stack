@@ -6,14 +6,13 @@
  * its own `afterEach` and `expect`.
  */
 
-import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import { GIT_REPOSITORY_VARIABLES } from './git-exec.mjs';
+import { GIT_REPOSITORY_VARIABLES, runGit } from './git-exec.mjs';
 import { HOOKS_PATH_SCRIPT } from './workspace.mjs';
 
 export const PACKAGE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -36,13 +35,7 @@ export const CLEAN_ENV = Object.fromEntries(
  * @param {string} cwd
  * @returns {string}
  */
-export const gitIn = (args, cwd) =>
-  execFileSync('git', args, {
-    cwd,
-    encoding: 'utf8',
-    env: CLEAN_ENV,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  }).trim();
+export const gitIn = (args, cwd) => runGit({ args, cwd });
 
 /**
  * @param {string} cwd

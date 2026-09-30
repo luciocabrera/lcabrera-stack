@@ -71,6 +71,15 @@ describe('resolveInstallGit', () => {
     ).toBe('/opt/git/bin/git');
   });
 
+  test('never takes a git from a relative PATH entry', () => {
+    expect(
+      resolveInstallGit({
+        exists: only([join('node_modules', '.bin', 'git'), join('bin', 'git')]),
+        pathEntries: [join('node_modules', '.bin'), 'bin'],
+      }),
+    ).toBeUndefined();
+  });
+
   test('never takes a git from a package directory on PATH', () => {
     expect(
       resolveInstallGit({

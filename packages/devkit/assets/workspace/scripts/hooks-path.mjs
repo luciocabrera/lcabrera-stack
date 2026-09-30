@@ -16,7 +16,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, realpathSync } from 'node:fs';
-import { delimiter, dirname, join, sep } from 'node:path';
+import { delimiter, dirname, isAbsolute, join, sep } from 'node:path';
 import process from 'node:process';
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
@@ -44,10 +44,8 @@ export const GIT_REPOSITORY_VARIABLES = new Set([
 
 const GIT_FILENAMES = IS_ON_WINDOWS ? ['git.exe', 'git'] : ['git'];
 
-const PACKAGE_DIRECTORY = `${sep}node_modules${sep}`;
-
-const isPackageDirectory = (entry) =>
-  `${entry}${sep}`.includes(PACKAGE_DIRECTORY);
+const isSearchable = (entry) =>
+  isAbsolute(entry) && !entry.split(sep).includes('node_modules');
 
 /**
  * @param {{ exists: (path: string) => boolean, pathEntries: string[] }} args
@@ -56,9 +54,7 @@ const isPackageDirectory = (entry) =>
 export const resolveInstallGit = ({ exists, pathEntries }) =>
   [
     ...TRUSTED_GIT_DIRECTORIES,
-    ...pathEntries.filter(
-      (entry) => entry !== '' && !isPackageDirectory(entry),
-    ),
+    ...pathEntries.filter((entry) => isSearchable(entry)),
   ]
     .flatMap((directory) => GIT_FILENAMES.map((name) => join(directory, name)))
     .find((path) => exists(path));
