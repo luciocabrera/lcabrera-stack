@@ -10,8 +10,9 @@ From the `monorepo` rung up, `prepare` also runs a `hooks-path.mjs` script,
 which the rung now places. After a clone and one install, git runs the hooks. The
 script reads the hooks directory from `devkit.config.json`. It does nothing
 outside a repository whose work tree starts at the install root, when the hooks
-directory is missing, or when the clone already set `core.hooksPath` to another
-directory. In each of those cases the install still exits 0. The script imports
+directory is missing, when the clone already set `core.hooksPath` to another
+directory, or when `CI` is set, so a workflow that commits or pushes from its
+checkout runs no hook. In each of those cases the install still exits 0. The script imports
 only Node's own modules. It runs git from the fixed install directories first,
 then from PATH, and skips any `node_modules` directory on PATH, so a
 dependency's `git` bin never runs in its place.

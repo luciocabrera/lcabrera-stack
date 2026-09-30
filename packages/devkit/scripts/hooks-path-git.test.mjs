@@ -9,7 +9,14 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { chmodSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  realpathSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { delimiter, join } from 'node:path';
 import process from 'node:process';
 import { afterEach, describe, expect, test } from 'vite-plus/test';
@@ -18,11 +25,14 @@ import {
   DEFAULT_HOOKS_PATH,
   gitEnvironment,
   hooksPathIn,
+  isContinuousIntegration,
+  isInPackageDirectory,
   resolveInstallGit,
   CONFIG_FILE_NAME as SCRIPT_CONFIG_FILE_NAME,
   TRUSTED_GIT_DIRECTORIES,
 } from '../assets/workspace/scripts/hooks-path.mjs';
 import { CONFIG_FILE_NAME, DEFAULT_CONFIG } from './config.mjs';
+import { gitEnvironment as execGitEnvironment } from './git-exec.mjs';
 import {
   CLEAN_ENV,
   gitIn as git,
@@ -51,6 +61,8 @@ describe('what the script reads', () => {
 
 const only = (paths) => (path) => paths.includes(path);
 
+const asIs = (path) => path;
+
 describe('resolveInstallGit', () => {
   test('takes a trusted directory over anything on PATH', () => {
     const trusted = join(TRUSTED_GIT_DIRECTORIES[0] ?? '', 'git');
@@ -58,6 +70,7 @@ describe('resolveInstallGit', () => {
       resolveInstallGit({
         exists: only([trusted, '/opt/git/bin/git']),
         pathEntries: ['/opt/git/bin'],
+        realPath: asIs,
       }),
     ).toBe(trusted);
   });
@@ -67,6 +80,7 @@ describe('resolveInstallGit', () => {
       resolveInstallGit({
         exists: only(['/opt/git/bin/git']),
         pathEntries: ['', '/opt/git/bin'],
+        realPath: asIs,
       }),
     ).toBe('/opt/git/bin/git');
   });
@@ -76,6 +90,7 @@ describe('resolveInstallGit', () => {
       resolveInstallGit({
         exists: only([join('node_modules', '.bin', 'git'), join('bin', 'git')]),
         pathEntries: [join('node_modules', '.bin'), 'bin'],
+        realPath: asIs,
       }),
     ).toBeUndefined();
   });
@@ -85,10 +100,51 @@ describe('resolveInstallGit', () => {
       resolveInstallGit({
         exists: only(['/tree/node_modules/.bin/git']),
         pathEntries: ['/tree/node_modules/.bin'],
+        realPath: asIs,
       }),
     ).toBeUndefined();
   });
 
+  test('matches the package directory case-insensitively on Windows', () => {
+    expect(
+      isInPackageDirectory({
+        path: String.raw`C:\tree\Node_Modules\.bin\git.exe`,
+        platform: 'win32',
+      }),
+    ).toBe(true);
+    expect(
+      isInPackageDirectory({
+        path: '/tree/Node_Modules/git',
+        platform: 'linux',
+      }),
+    ).toBe(false);
+  });
+
+  test.skipIf(process.platform === 'win32')(
+    'judges where a symlinked PATH entry really leads',
+    () => {
+      const root = scratch();
+      const packageBins = join(root, 'node_modules', '.bin');
+      plantGit({ directory: packageBins, marker: join(root, 'unused') });
+      const alias = join(root, 'tools');
+      symlinkSync(packageBins, alias);
+      const real = join(root, 'git-home');
+      plantGit({ directory: real, marker: join(root, 'unused') });
+      const resolve = (pathEntries) =>
+        resolveInstallGit({
+          directories: [],
+          exists: existsSync,
+          pathEntries,
+          realPath: realpathSync,
+        });
+
+      expect(resolve([alias])).toBeUndefined();
+      expect(resolve([alias, real])).toBe(join(realpathSync(real), 'git'));
+    },
+  );
+});
+
+describe('gitEnvironment', () => {
   test('pins the child PATH and drops the repository variables', () => {
     const env = gitEnvironment({
       binary: '/opt/git/bin/git',
@@ -100,6 +156,37 @@ describe('resolveInstallGit', () => {
       '/opt/git/bin',
       ...TRUSTED_GIT_DIRECTORIES,
     ]);
+  });
+
+  test('drops a repository variable in any case on Windows', () => {
+    const env = gitEnvironment({
+      binary: String.raw`C:\Git\cmd\git.exe`,
+      env: {
+        Git_Dir: String.raw`C:\elsewhere`,
+        git_work_tree: String.raw`C:\other`,
+        Path: String.raw`C:\x`,
+      },
+      platform: 'win32',
+    });
+    expect(Object.keys(env)).toEqual(['Path']);
+  });
+
+  test('is what git-exec runs create with', () => {
+    expect(execGitEnvironment).toBe(gitEnvironment);
+  });
+});
+
+describe('isContinuousIntegration', () => {
+  test.each([
+    [{}, false],
+    [{ CI: '' }, false],
+    [{ CI: '0' }, false],
+    [{ CI: 'false' }, false],
+    [{ CI: 'FALSE' }, false],
+    [{ CI: 'true' }, true],
+    [{ CI: '1' }, true],
+  ])('%o is %s', (env, expected) => {
+    expect(isContinuousIntegration(env)).toBe(expected);
   });
 });
 

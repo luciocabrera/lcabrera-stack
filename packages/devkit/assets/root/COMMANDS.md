@@ -123,8 +123,8 @@ Three things no sync can do for you, in the order they will bite:
    ```
 
    `devkit create` does this for the repository it makes, and from the
-   `monorepo` rung up so does every install, through `prepare`. A sync into a
-   repository that already exists does not.
+   `monorepo` rung up so does every install outside CI, through `prepare`. A
+   sync into a repository that already exists does not.
 
 3. **Add a `.node-version`.** The workflows read it, so a repository without one
    fails its first run on the setup step — deliberately, rather than silently

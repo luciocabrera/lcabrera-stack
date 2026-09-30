@@ -5,7 +5,9 @@
  * It points only a repository whose work tree starts here, only at a hooks
  * directory that exists, and never over a `core.hooksPath` this clone already
  * set to something else. Anywhere else — an unpacked tarball, a build with no
- * `.git`, a machine with no git — it does nothing and the install carries on.
+ * `.git`, a machine with no git, or a CI job — it does nothing and the install
+ * carries on. A CI job is left alone because a workflow that commits or pushes
+ * from its checkout would otherwise run the whole pre-push gate inside itself.
  * It imports nothing but Node, because it runs in installs that may not have
  * the package that placed it.
  *
@@ -15,8 +17,8 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, realpathSync } from 'node:fs';
-import { delimiter, dirname, isAbsolute, join, sep } from 'node:path';
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
+import { delimiter, dirname, isAbsolute, join } from 'node:path';
 import process from 'node:process';
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
@@ -44,31 +46,78 @@ export const GIT_REPOSITORY_VARIABLES = new Set([
 
 const GIT_FILENAMES = IS_ON_WINDOWS ? ['git.exe', 'git'] : ['git'];
 
-const isSearchable = (entry) =>
-  isAbsolute(entry) && !entry.split(sep).includes('node_modules');
+const PACKAGE_DIRECTORY = 'node_modules';
 
 /**
- * @param {{ exists: (path: string) => boolean, pathEntries: string[] }} args
+ * @param {{ path: string, platform: string }} args
+ * @returns {boolean}
+ */
+export const isInPackageDirectory = ({ path, platform }) =>
+  path
+    .split(/[\\/]/)
+    .some(
+      (segment) =>
+        (platform === 'win32' ? segment.toLowerCase() : segment) ===
+        PACKAGE_DIRECTORY,
+    );
+
+const canonical = ({ path, realPath }) => {
+  try {
+    return realPath(path);
+  } catch {
+    return;
+  }
+};
+
+/**
+ * @param {{ directories?: readonly string[],
+ *           exists: (path: string) => boolean, pathEntries: string[],
+ *           platform?: string, realPath: (path: string) => string }} args
  * @returns {string | undefined}
  */
-export const resolveInstallGit = ({ exists, pathEntries }) =>
-  [
-    ...TRUSTED_GIT_DIRECTORIES,
-    ...pathEntries.filter((entry) => isSearchable(entry)),
-  ]
+export const resolveInstallGit = ({
+  directories = TRUSTED_GIT_DIRECTORIES,
+  exists,
+  pathEntries,
+  platform = process.platform,
+  realPath,
+}) =>
+  [...directories, ...pathEntries.filter((entry) => isAbsolute(entry))]
     .flatMap((directory) => GIT_FILENAMES.map((name) => join(directory, name)))
-    .find((path) => exists(path));
+    .filter((path) => exists(path))
+    .map((path) => canonical({ path, realPath }))
+    .find(
+      (path) => path !== undefined && !isInPackageDirectory({ path, platform }),
+    );
 
 const isPathName = (name) => name.toUpperCase() === 'PATH';
 
 /**
- * @param {{ binary: string, env: Record<string, string | undefined> }} args
+ * @param {{ name: string, platform?: string }} args
+ * @returns {boolean}
+ */
+const isRepositoryVariable = ({ name, platform = process.platform }) =>
+  GIT_REPOSITORY_VARIABLES.has(
+    platform === 'win32' ? name.toUpperCase() : name,
+  );
+
+/**
+ * @param {Record<string, string | undefined>} env
+ * @returns {boolean}
+ */
+export const isContinuousIntegration = (env) =>
+  !['', '0', 'false', undefined].includes(env.CI?.trim().toLowerCase());
+
+/**
+ * @param {{ binary: string, env: Record<string, string | undefined>,
+ *           platform?: string }} args
  * @returns {Record<string, string | undefined>}
  */
-export const gitEnvironment = ({ binary, env }) =>
+export const gitEnvironment = ({ binary, env, platform = process.platform }) =>
   Object.fromEntries([
     ...Object.entries(env).filter(
-      ([name]) => !GIT_REPOSITORY_VARIABLES.has(name) && !isPathName(name),
+      ([name]) =>
+        !isRepositoryVariable({ name, platform }) && !isPathName(name),
     ),
     [
       Object.keys(env).find((name) => isPathName(name)) ?? 'PATH',
@@ -125,6 +174,14 @@ const quietly = (git) => (args) => {
 
 const realPathOf = (path) => (path === '' ? '' : realpathSync(path));
 
+const isDirectory = (path) => {
+  try {
+    return statSync(path, { throwIfNoEntry: false })?.isDirectory() === true;
+  } catch {
+    return false;
+  }
+};
+
 const readIfPresent = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
 
@@ -138,7 +195,7 @@ const point = ({ binary, root }) => {
   const action = hooksPathAction({
     current,
     hooksPath,
-    hooksPresent: existsSync(join(root, hooksPath)),
+    hooksPresent: isDirectory(join(root, hooksPath)),
     root,
     topLevel,
   });
@@ -153,9 +210,11 @@ const point = ({ binary, root }) => {
 };
 
 const main = () => {
+  if (isContinuousIntegration(process.env)) return;
   const binary = resolveInstallGit({
     exists: existsSync,
     pathEntries: (process.env.PATH ?? '').split(delimiter),
+    realPath: realpathSync,
   });
   if (binary === undefined) return;
   point({ binary, root: realpathSync(process.cwd()) });

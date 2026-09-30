@@ -26,7 +26,7 @@ export const HOOKS_SCRIPT = join(
 
 export const CLEAN_ENV = Object.fromEntries(
   Object.entries(process.env).filter(
-    ([name]) => !GIT_REPOSITORY_VARIABLES.has(name),
+    ([name]) => !GIT_REPOSITORY_VARIABLES.has(name) && name !== 'CI',
   ),
 );
 

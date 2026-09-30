@@ -309,8 +309,10 @@ at the hooks and writes every tsconfig in the tree. `create` already pointed git
 at them, so the hook half is for a clone: the `hooks-path.mjs` script the rung
 places sets
 `core.hooksPath` to the `paths.hooks` directory when the install root is the top
-of a git work tree, the directory is there, and the clone has no
-`core.hooksPath` of its own. Anywhere else it does nothing and the install
+of a git work tree, the directory is there, the clone has no
+`core.hooksPath` of its own, and `CI` is unset. A CI job is left alone because a
+workflow that commits or pushes from its checkout would otherwise run the
+whole pre-push gate inside itself. Anywhere else it does nothing and the install
 passes. It imports only Node's own modules, so an install without this package
 still runs it, and it runs git from the fixed install directories first, then
 PATH, skipping any `node_modules` directory an install puts on PATH. **No tsconfig here is written by

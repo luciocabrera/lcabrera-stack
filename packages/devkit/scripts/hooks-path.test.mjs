@@ -10,7 +10,7 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import process from 'node:process';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
@@ -143,12 +143,66 @@ describe('an install in a clone', () => {
     expect(stdout).toContain('git config core.hooksPath .githooks');
   });
 
+  test('points nothing when the hooks path is a file, not a directory', () => {
+    const root = scratch();
+    git(['init', '--quiet', '.'], root);
+    writeFileSync(join(root, '.githooks'), 'not a directory\n');
+
+    expect(install(root).status).toBe(0);
+    expect(localHooksPath(root)).toBe('');
+  });
+
   test('points nothing when the tree holds no hooks', () => {
     const root = scratch();
     git(['init', '--quiet', '.'], root);
 
     expect(install(root).status).toBe(0);
     expect(localHooksPath(root)).toBe('');
+  });
+});
+
+describe('an install in a CI job', () => {
+  test('leaves git alone, so a workflow that commits or pushes runs no hook', () => {
+    const root = clone();
+    const { status } = spawnSync(process.execPath, [HOOKS_SCRIPT], {
+      cwd: root,
+      encoding: 'utf8',
+      env: { ...CLEAN_ENV, CI: 'true' },
+    });
+
+    expect(status).toBe(0);
+    expect(localHooksPath(root)).toBe('');
+    writeFileSync(
+      join(root, '.githooks', 'commit-msg'),
+      '#!/usr/bin/env sh\nexit 1\n',
+    );
+    git(
+      [
+        '-c',
+        'user.name=ci',
+        '-c',
+        'user.email=ci@localhost',
+        'commit',
+        '--allow-empty',
+        '--quiet',
+        '-m',
+        'not conventional',
+      ],
+      root,
+    );
+    expect(git(['log', '-1', '--pretty=%s'], root)).toBe('not conventional');
+  });
+
+  test('is how every shipped workflow that commits or pushes runs', () => {
+    const workflows = join(PACKAGE_ROOT, 'assets', 'workflows');
+    const writing = readdirSync(workflows)
+      .map((name) => readFileSync(join(workflows, name), 'utf8'))
+      .filter((content) => /\bgit (?:commit|push)\b/.test(content));
+
+    expect(writing.length).toBeGreaterThan(0);
+    for (const content of writing) {
+      expect(content).toMatch(/^\s+runs-on:/m);
+    }
   });
 });
 

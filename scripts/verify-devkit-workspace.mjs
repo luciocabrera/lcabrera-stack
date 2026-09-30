@@ -72,10 +72,11 @@ const readJson = (path) => JSON.parse(readIfPresent(path) ?? '{}');
 
 const OUTPUT_LIMIT_BYTES = 64 * 1024 * 1024;
 
-const execute = ({ args, command, cwd }) => {
+const execute = ({ args, command, cwd, env = process.env }) => {
   const result = spawnSync(command, args, {
     cwd,
     encoding: 'utf8',
+    env,
     maxBuffer: OUTPUT_LIMIT_BYTES,
   });
   return {
@@ -127,6 +128,10 @@ const runtimeFindings = (tree) =>
     running: process.versions.node,
   });
 
+const DEVELOPER_ENV = Object.fromEntries(
+  Object.entries(process.env).filter(([name]) => name !== 'CI'),
+);
+
 const installFindings = (tree) =>
   taskFindings({
     label: commandLabel(INSTALL_ARGS),
@@ -134,6 +139,7 @@ const installFindings = (tree) =>
       args: INSTALL_ARGS,
       command: 'vp',
       cwd: tree,
+      env: DEVELOPER_ENV,
     }),
   });
 
