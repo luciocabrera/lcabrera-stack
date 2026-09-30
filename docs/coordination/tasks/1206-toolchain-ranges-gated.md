@@ -2,7 +2,7 @@
 id: 1206-toolchain-ranges-gated
 title: gate the toolchain ranges create writes against what this repo publishes
 owner: agent:claude
-status: active
+status: review
 branch: fix/1206-1206-toolchain-ranges-gated
 area:
   - scripts/verify-shipped-ranges.mjs
@@ -12,7 +12,7 @@ area:
 started: 2026-09-30
 updated: 2026-09-30
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1210
 issue: #1206
 ---
 
@@ -22,6 +22,6 @@ gate the toolchain ranges create writes against what this repo publishes
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green, PR ready for review
 - Blockers: none
 - Next:

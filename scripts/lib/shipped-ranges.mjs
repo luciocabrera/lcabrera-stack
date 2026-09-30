@@ -87,6 +87,23 @@ export const manifestRanges = ({ manifest, path }) =>
       .map(([name, range]) => ({ field, name, path, range })),
   );
 
+/**
+ * Every range a named constant holds, keyed by package name — the shape a range
+ * takes when a command writes it into a created repository instead of copying
+ * it from an asset. Read from the imported value, never parsed out of source
+ * text, so there is no string literal to guess at.
+ *
+ * @param {{ constant: string, path: string, ranges: Record<string, string> }} args
+ */
+export const constantRanges = ({ constant, path, ranges }) =>
+  Object.entries(ranges).map(([name, range]) => ({
+    constant,
+    field: constant,
+    name,
+    path,
+    range,
+  }));
+
 const tokensIn = ({ hashComments, text }) =>
   new Set(
     text
@@ -168,22 +185,41 @@ const missingShapes = (sources) =>
     ({ kind }) => !sources.some((source) => source.kind === kind),
   ).map(({ shape }) => ({ kind: 'no-source', shape }));
 
+const PROMISING_ENTRIES = new Map([
+  ['catalog', 'workspace catalog'],
+  ['constant', 'range constant'],
+]);
+
 /**
- * A file the walk selected as a catalog and read nothing out of. A catalog is
- * the one shape that promises entries — a manifest may legitimately declare
- * none — so zero of them means the reader, not the file, has gone quiet.
+ * A catalog or a range constant the gate read nothing out of. Those are the
+ * shapes that promise entries — a manifest may legitimately declare none — so
+ * zero of them means the reader, not the source, has gone quiet.
  *
  * @param {{ declarations: readonly object[], sources: readonly object[] }} args
  */
-const quietCatalogs = ({ declarations, sources }) =>
+const quietSources = ({ declarations, sources }) =>
   sources
-    .filter(({ kind }) => kind === 'catalog')
+    .filter(({ kind }) => PROMISING_ENTRIES.has(kind))
     .filter(({ path }) => !declarations.some((entry) => entry.path === path))
-    .map(({ path }) => ({
+    .map(({ constant, kind, path }) => ({
+      constant,
       kind: 'no-declarations',
       path,
-      shape: 'workspace catalog',
+      shape: PROMISING_ENTRIES.get(kind),
     }));
+
+/**
+ * A range constant holds this repository's own packages and nothing else, so
+ * an entry naming one it does not publish is a rename the constant missed, not
+ * a third-party dependency to leave unjudged.
+ *
+ * @param {{ declarations: readonly object[], versions: Record<string, string> }} args
+ */
+const unpublishedConstants = ({ declarations, versions }) =>
+  declarations
+    .filter(({ constant }) => constant !== undefined)
+    .filter(({ name }) => typeof versions[name] !== 'string')
+    .map((declaration) => ({ ...declaration, kind: 'unpublished' }));
 
 const verdict = ({ declaration, version }) => {
   if (validRange(declaration.range) === null) return 'malformed';
@@ -238,7 +274,8 @@ export const shippedRangeFindings = ({
 
   return [
     ...structural,
-    ...quietCatalogs({ declarations, sources }),
+    ...quietSources({ declarations, sources }),
+    ...unpublishedConstants({ declarations, versions }),
     ...unread,
     ...owned
       .filter((declaration) => !PLACE.test(declaration.range))
@@ -264,10 +301,13 @@ const NOTHING_READ =
   'no shipped file names a package this repository publishes — the assets moved, or the walk stopped reaching them';
 
 const noDeclarationsLine = (finding) =>
-  `${finding.path}  is a ${finding.shape} and yielded no entry — the file changed shape, or the reader stopped reading it`;
+  `${[finding.path, finding.constant].filter(Boolean).join(':')}  is a ${finding.shape} and yielded no entry — the file changed shape, or the reader stopped reading it`;
 
 const noSourceLine = (finding) =>
   `the shipped assets yielded no ${finding.shape} to read — the walk narrowed, or the assets moved`;
+
+const unpublishedLine = (finding) =>
+  `${where(finding)}  ${finding.name}: this repository publishes no package of that name, and a range constant holds only its own — the package was renamed, or the entry is stale`;
 
 const unreadLine = (finding) =>
   finding.shape === 'scanned'
@@ -285,6 +325,7 @@ export const findingLine = (finding) => {
   if (finding.kind === 'no-source') return noSourceLine(finding);
   if (finding.kind === 'nothing-read') return NOTHING_READ;
   if (finding.kind === 'unread') return unreadLine(finding);
+  if (finding.kind === 'unpublished') return unpublishedLine(finding);
 
   return `${where(finding)}  ${finding.name}: ${REASONS[finding.kind](finding)} — write \`${suggestion(finding.version)}\``;
 };
