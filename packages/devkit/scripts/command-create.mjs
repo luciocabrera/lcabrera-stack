@@ -34,6 +34,7 @@ import {
   createSummary,
   declaredToolchainBins,
   gitStepFailure,
+  hooksPathArgs,
   INITIAL_COMMIT_MESSAGE,
   initialManifest,
   missingGitRefusal,
@@ -140,6 +141,16 @@ const gitStep = ({ args, cwd, step, target }) => {
   }
 };
 
+const hooksStep = ({ absolute, hooksPath, target }) =>
+  hooksPath === undefined
+    ? undefined
+    : gitStep({
+        args: hooksPathArgs(hooksPath),
+        cwd: absolute,
+        step: hooksPathArgs(hooksPath).join(' '),
+        target,
+      });
+
 const halted = ({ failure, notice }) => {
   if (failure !== undefined) console.error(`\n${failure}`);
   console.error(`\n${notice}`);
@@ -169,7 +180,8 @@ const scaffold = ({ absolute, profile, target }) => {
     `${JSON.stringify(manifest, undefined, 2)}\n`,
   );
 
-  const code = applyInit({
+  const { code, hooksPath } = applyInit({
+    activatesHooks: true,
     declaredBins: declaredToolchainBins({ devkitBins: ownBins() }),
     profile,
     root: absolute,
@@ -192,14 +204,17 @@ const scaffold = ({ absolute, profile, target }) => {
       step: 'commit',
       target,
     });
-  if (committed !== undefined) {
+  const finished = committed ?? hooksStep({ absolute, hooksPath, target });
+  if (finished !== undefined) {
     return halted({
-      failure: committed,
+      failure: finished,
       notice: unfinishedNotice({ target }),
     });
   }
 
-  console.log(`\n${createSummary({ branch: CREATE_BRANCH, target })}`);
+  console.log(
+    `\n${createSummary({ branch: CREATE_BRANCH, hooksPath, target })}`,
+  );
   return 0;
 };
 

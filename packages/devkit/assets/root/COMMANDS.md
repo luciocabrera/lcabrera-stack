@@ -122,6 +122,10 @@ Three things no sync can do for you, in the order they will bite:
    git config core.hooksPath .githooks
    ```
 
+   `devkit create` does this for the repository it makes, and from the
+   `monorepo` rung up so does every install, through `prepare`. A sync into a
+   repository that already exists does not.
+
 3. **Add a `.node-version`.** The workflows read it, so a repository without one
    fails its first run on the setup step — deliberately, rather than silently
    using whatever Node the runner happened to have.
@@ -201,7 +205,8 @@ exactly like the tasks above.
 - `{{commands.run}} lint:biome` — the second linter alone, fixing what it can.
 - `{{commands.run}} lint:biome:check` — the second linter alone, reporting only.
 - `{{commands.run}} lint:check` — both linters, reporting only, for CI.
-- `{{commands.run}} prepare` — regenerate the generated configs after an install.
+- `{{commands.run}} prepare` — point git at the hooks, then regenerate the
+  generated configs, after an install.
 - `{{commands.run}} test:all` — every workspace's tests, in dependency order.
 - `{{commands.run}} tsconfig:generate` — rewrite the generated TypeScript configs
   and format what it wrote.

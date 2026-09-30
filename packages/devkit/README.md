@@ -299,8 +299,14 @@ cd my-repo && pnpm install
 
 The install is not optional and is not a convenience: the tree is written before
 anything is on disk, so the root task block names binaries the manifest declares
-and nothing has fetched yet. The install also runs `prepare`, which is what
-writes every tsconfig in the tree. **No tsconfig here is written by
+and nothing has fetched yet. The install also runs `prepare`, which points git
+at the hooks and writes every tsconfig in the tree. `create` already pointed git
+at them, so the hook half is for a clone: the `hooks-path.mjs` script the rung
+places sets
+`core.hooksPath` to the `paths.hooks` directory when the install root is the top
+of a git work tree, the directory is there, and the clone has no
+`core.hooksPath` of its own. Anywhere else it does nothing and the install
+passes. **No tsconfig here is written by
 hand** — you edit the roster (`tsconfig.entries.ts`, in the workspace the rung
 places for it) and the generator writes the JSON; a hand edit survives exactly
 until the next regeneration reverts it. That includes the application's own
@@ -445,7 +451,10 @@ is what keeps the question from being asked two ways.
 git config core.hooksPath .githooks
 ```
 
-points git at the seeded hooks — without it they sit there and never run. And the
+points git at the seeded hooks — without it they sit there and never run.
+`create` sets it for the repository it makes, and from the `monorepo` rung up
+so does every install, through `prepare`; `init` and `sync` leave git config
+alone. And the
 seeded workflows read `.node-version`, so a repository without one fails its
 first run on the setup step. That is deliberate: failing there is loud, where
 silently using whatever Node the runner happened to have is not.

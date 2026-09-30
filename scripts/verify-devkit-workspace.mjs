@@ -1,7 +1,8 @@
 /**
  * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
  * installs it from the registry, and runs the tasks that tree wires for itself,
- * the upgrade that should find nothing left to add, and its commit-msg hook.
+ * the upgrade that should find nothing left to add, and its commit-msg hook —
+ * which create and the install must have turned on without being asked.
  * The blueprint's own configs are the only ones that fully lint it, and nothing
  * else here runs them. Every scratch directory sits under the OS temp root so
  * the tree inherits nothing from this checkout (ADR-073).
@@ -31,6 +32,7 @@ import { packOne, run } from './lib/devkit-pack.mjs';
 import {
   commandLabel,
   commitHookFindings,
+  hooksPathFindings,
   missingBlueprintFiles,
   missingToolchainBins,
   modifiedTrackedFiles,
@@ -203,13 +205,39 @@ const commitWith = ({ message, tree }) =>
     cwd: tree,
   });
 
-const commitHookRunFindings = ({ tree }) => {
-  run('git', ['config', 'core.hooksPath', '.githooks'], tree);
-  return commitHookFindings({
+const HOOKS_PATH = DEFAULT_CONFIG.paths.hooks;
+
+const hooksPathIn = (tree) =>
+  execute({
+    args: ['config', '--local', '--get', 'core.hooksPath'],
+    command: 'git',
+    cwd: tree,
+  }).output.trim();
+
+const createdHooksFindings = (tree) => {
+  const actual = hooksPathIn(tree);
+  if (actual !== '') {
+    run('git', ['config', '--local', '--unset', 'core.hooksPath'], tree);
+  }
+  return hooksPathFindings({
+    actual,
+    expected: HOOKS_PATH,
+    step: CREATE_ARGS.join(' '),
+  });
+};
+
+const installedHooksFindings = ({ tree }) =>
+  hooksPathFindings({
+    actual: hooksPathIn(tree),
+    expected: HOOKS_PATH,
+    step: commandLabel(INSTALL_ARGS),
+  });
+
+const commitHookRunFindings = ({ tree }) =>
+  commitHookFindings({
     accepted: commitWith({ message: 'chore: probe the commit hook', tree }),
     refused: commitWith({ message: 'probe the commit hook', tree }),
   });
-};
 
 const trackedChangeFindings = ({ tree }) =>
   modifiedTrackedFiles(trackedPorcelain(tree));
@@ -217,6 +245,7 @@ const trackedChangeFindings = ({ tree }) =>
 const TREE_CHECKS = [
   blueprintFindings,
   toolchainBinFindings,
+  installedHooksFindings,
   taskRunFindings,
   trackedChangeFindings,
   upgradeFindings,
@@ -232,10 +261,14 @@ const firstBlocking = (tree) =>
   );
 
 const treeFindings = ({ devkit, tree }) => {
+  const created = createdHooksFindings(tree);
   const blocking = firstBlocking(tree);
-  return blocking.length > 0
-    ? blocking
-    : TREE_CHECKS.flatMap((check) => check({ devkit, tree }));
+  return [
+    ...created,
+    ...(blocking.length > 0
+      ? blocking
+      : TREE_CHECKS.flatMap((check) => check({ devkit, tree }))),
+  ];
 };
 
 const main = () => {
@@ -261,7 +294,7 @@ const main = () => {
 
     const tasks = TREE_TASKS.map((args) => commandLabel(args)).join(', ');
     process.stdout.write(
-      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed with ${TOOLCHAIN_BINS.join(', ')} in it, ${tasks} all exited zero, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.\n`,
+      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed with ${TOOLCHAIN_BINS.join(', ')} in it, ${tasks} all exited zero, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.\n`,
     );
   } finally {
     for (const directory of [staging, holder, parent]) {

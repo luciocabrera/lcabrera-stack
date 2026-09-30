@@ -300,10 +300,25 @@ export const unfinishedNotice = ({ target }) =>
   `\`${target}\` was created and is left in place with whatever did materialise. Do what the failure above asks from inside it — the repository is real, so the commands for one that already exists are the ones that apply now.`;
 
 /**
- * @param {{ branch: string, target: string }} args
+ * @param {string} hooksPath
+ * @returns {string[]}
  */
-export const createSummary = ({ branch, target }) =>
+export const hooksPathArgs = (hooksPath) => [
+  'config',
+  'core.hooksPath',
+  hooksPath,
+];
+
+/**
+ * @param {{ branch: string, hooksPath?: string, target: string }} args
+ */
+export const createSummary = ({ branch, hooksPath, target }) =>
   [
     `Created \`${target}\`: a git repository on \`${branch}\`, with everything above committed.`,
+    ...(hooksPath === undefined
+      ? []
+      : [
+          `git runs the hooks in \`${hooksPath}/\`: this repository's core.hooksPath points there.`,
+        ]),
     `Nothing is installed yet: install the dependencies in \`${target}\`, and the gate tasks wired above find the toolchain its manifest declares.`,
   ].join('\n');

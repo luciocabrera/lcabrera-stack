@@ -34,6 +34,8 @@ export const TSCONFIG_WORKSPACE = '@repo/typescript-config';
 
 export const GENERATED_TSCONFIGS = '**/tsconfig*.json';
 
+export const HOOKS_PATH_SCRIPT = 'scripts/hooks-path.mjs';
+
 /**
  * The band an install may proceed in, derived from the exact pin.
  *
@@ -82,7 +84,10 @@ export const WORKSPACE_TASKS = [
   { command: 'biome lint . --write', name: 'lint:biome' },
   { command: 'biome lint .', name: 'lint:biome:check' },
   { command: 'vp lint . && vp run lint:biome:check', name: 'lint:check' },
-  { command: 'vp run tsconfig:generate', name: 'prepare' },
+  {
+    command: `node ${HOOKS_PATH_SCRIPT} && vp run tsconfig:generate`,
+    name: 'prepare',
+  },
   { command: 'vp run -r test', name: 'test:all' },
   {
     command: `vp run --filter ${TSCONFIG_WORKSPACE} generate && vp fmt '${GENERATED_TSCONFIGS}'`,

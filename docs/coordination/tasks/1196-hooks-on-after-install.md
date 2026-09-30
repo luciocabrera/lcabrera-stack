@@ -2,15 +2,17 @@
 id: 1196-hooks-on-after-install
 title: fix(devkit): the hooks a created repository ships run without a manual git config
 owner: agent:claude
-status: active
+status: review
 branch: fix/1196-1196-hooks-on-after-install
 area:
   - packages/devkit/scripts/create*.mjs
   - packages/devkit/scripts/command-create*.mjs
   - packages/devkit/scripts/command-init.mjs
-  - packages/devkit/scripts/workspace*.mjs
+  - packages/devkit/scripts/command-closure.mjs
+  - packages/devkit/scripts/hooks-path.test.mjs
+  - packages/devkit/scripts/workspace.mjs
   - packages/devkit/assets/workspace/scripts/**
-  - packages/devkit/assets/workspace/vite.config.ts
+  - packages/devkit/assets/root/COMMANDS.md
   - packages/devkit/README.md
   - scripts/verify-devkit-workspace.mjs
   - scripts/lib/devkit-workspace*.mjs
@@ -19,7 +21,7 @@ area:
 started: 2026-09-30
 updated: 2026-09-30
 plan: (none)
-pr: (none)
+pr: '#1209'
 issue: #1196
 ---
 
@@ -29,6 +31,6 @@ fix(devkit): the hooks a created repository ships run without a manual git confi
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: built, gate green, PR ready for review
 - Blockers: none
-- Next:
+- Next: review and merge
