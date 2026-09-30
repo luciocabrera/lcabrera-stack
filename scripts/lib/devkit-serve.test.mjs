@@ -125,8 +125,14 @@ describe('firstAnswer', () => {
     expect(Date.now() - begun).toBeLessThan(3000);
   });
 
-  it('stops waiting once the task has exited', async () => {
-    const child = startedChild('process.exit(3)');
+  it.each([
+    ['process.exit(3)', 'the task exited 3 before answering'],
+    [
+      "process.kill(process.pid, 'SIGKILL')",
+      'the task was killed by SIGKILL before answering',
+    ],
+  ])('stops waiting once the task has ended: %s', async (script, error) => {
+    const child = startedChild(script);
     await new Promise((resolve) => child.once('exit', resolve));
 
     const answer = await firstAnswer({
@@ -137,24 +143,7 @@ describe('firstAnswer', () => {
       url: 'http://127.0.0.1:9/',
     });
 
-    expect(answer).toEqual({ error: 'the task exited 3 before answering' });
-  });
-
-  it('names the signal when the task was killed before answering', async () => {
-    const child = startedChild("process.kill(process.pid, 'SIGKILL')");
-    await new Promise((resolve) => child.once('exit', resolve));
-
-    const answer = await firstAnswer({
-      child,
-      deadline: Date.now() + 5000,
-      pollMs: 50,
-      requestTimeoutMs: 400,
-      url: 'http://127.0.0.1:9/',
-    });
-
-    expect(answer).toEqual({
-      error: 'the task was killed by SIGKILL before answering',
-    });
+    expect(answer).toEqual({ error });
   });
 });
 
