@@ -25,6 +25,6 @@ a created repository declares the toolchain it tells you to run
 
 ## Status / next
 
-- Current step: round 2, gate runtime declared at every rung
+- Current step: round 3, review findings addressed
 - Blockers: none
 - Next: review

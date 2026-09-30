@@ -15,6 +15,8 @@ import {
   taskFindings,
   tasksAddedByUpgrade,
   TOOLCHAIN_BINS,
+  trackedPathsIn,
+  trackedWritesByUpgrade,
   TREE_TASKS,
 } from './devkit-workspace.mjs';
 
@@ -264,5 +266,47 @@ describe('commitHookFindings', () => {
     });
     expect(findings).toHaveLength(1);
     expect(findings[0]).toContain('accepted a message');
+  });
+});
+
+describe('trackedPathsIn', () => {
+  it('reads each path out of porcelain status lines', () => {
+    expect(trackedPathsIn(' M package.json\n D biome.jsonc\n')).toEqual([
+      'package.json',
+      'biome.jsonc',
+    ]);
+  });
+});
+
+describe('trackedWritesByUpgrade', () => {
+  it('finds nothing when the upgrade left every tracked file as it found it', () => {
+    const snapshot = { 'vite.config.ts': 'abc' };
+    expect(
+      trackedWritesByUpgrade({ after: snapshot, before: snapshot }),
+    ).toEqual([]);
+  });
+
+  it('names the upgrade for a file it dirtied', () => {
+    const findings = trackedWritesByUpgrade({
+      after: { 'devkit.config.json': 'def' },
+      before: {},
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('`devkit init --upgrade`');
+    expect(findings[0]).toContain('`devkit.config.json`');
+  });
+
+  it('names the upgrade for a file a task had dirtied and it rewrote again', () => {
+    const findings = trackedWritesByUpgrade({
+      after: { 'vite.config.ts': 'def' },
+      before: { 'vite.config.ts': 'abc' },
+    });
+    expect(findings).toHaveLength(1);
+  });
+
+  it('names the upgrade for a file it put back to what was committed', () => {
+    expect(
+      trackedWritesByUpgrade({ after: {}, before: { 'biome.jsonc': 'abc' } }),
+    ).toHaveLength(1);
   });
 });

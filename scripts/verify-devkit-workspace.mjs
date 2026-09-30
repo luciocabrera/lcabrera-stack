@@ -39,6 +39,8 @@ import {
   taskFindings,
   tasksAddedByUpgrade,
   TOOLCHAIN_BINS,
+  trackedPathsIn,
+  trackedWritesByUpgrade,
   TREE_TASKS,
 } from './lib/devkit-workspace.mjs';
 
@@ -143,15 +145,41 @@ const toolchainBinFindings = ({ tree }) => {
 const treeScripts = (tree) =>
   readJson(join(tree, 'package.json')).scripts ?? {};
 
+const trackedPorcelain = (tree) =>
+  run('git', ['status', '--porcelain', '--untracked-files=no'], tree);
+
+const workingContentOf = ({ path, tree }) =>
+  existsSync(join(tree, path))
+    ? run('git', ['hash-object', '--', path], tree).trim()
+    : 'deleted';
+
+const trackedSnapshot = (tree) =>
+  Object.fromEntries(
+    trackedPathsIn(trackedPorcelain(tree)).map((path) => [
+      path,
+      workingContentOf({ path, tree }),
+    ]),
+  );
+
 const upgradeFindings = ({ devkit, tree }) => {
-  const before = treeScripts(tree);
+  const scriptsBefore = treeScripts(tree);
+  const trackedBefore = trackedSnapshot(tree);
   const upgraded = taskFindings({
     label: 'devkit init --upgrade',
     ...execute({ args: ['init', '--upgrade'], command: devkit, cwd: tree }),
   });
   return upgraded.length > 0
     ? upgraded
-    : tasksAddedByUpgrade({ after: treeScripts(tree), before });
+    : [
+        ...tasksAddedByUpgrade({
+          after: treeScripts(tree),
+          before: scriptsBefore,
+        }),
+        ...trackedWritesByUpgrade({
+          after: trackedSnapshot(tree),
+          before: trackedBefore,
+        }),
+      ];
 };
 
 const HOOK_IDENTITY = [
@@ -184,17 +212,15 @@ const commitHookRunFindings = ({ tree }) => {
 };
 
 const trackedChangeFindings = ({ tree }) =>
-  modifiedTrackedFiles(
-    run('git', ['status', '--porcelain', '--untracked-files=no'], tree),
-  );
+  modifiedTrackedFiles(trackedPorcelain(tree));
 
 const TREE_CHECKS = [
   blueprintFindings,
   toolchainBinFindings,
   taskRunFindings,
+  trackedChangeFindings,
   upgradeFindings,
   commitHookRunFindings,
-  trackedChangeFindings,
 ];
 
 const PREREQUISITES = [runtimeFindings, installFindings];
@@ -235,7 +261,7 @@ const main = () => {
 
     const tasks = TREE_TASKS.map((args) => commandLabel(args)).join(', ');
     process.stdout.write(
-      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed with ${TOOLCHAIN_BINS.join(', ')} in it, ${tasks} all exited zero, \`devkit init --upgrade\` added no task, the commit-msg hook took a Conventional Commit and refused a malformed one, and nothing changed a committed file.\n`,
+      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed with ${TOOLCHAIN_BINS.join(', ')} in it, ${tasks} all exited zero, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.\n`,
     );
   } finally {
     for (const directory of [staging, holder, parent]) {

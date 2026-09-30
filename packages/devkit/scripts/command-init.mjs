@@ -112,6 +112,9 @@ const missingManifestWarning = (root) =>
     ? undefined
     : `init: no ${MANIFEST} here, so no gate tasks were written. Create one and re-run with --force to wire them up.`;
 
+/**
+ * @param {{ declaredBins: readonly string[], profile: string, root: string }} args
+ */
 const materialise = ({ declaredBins, profile, root }) => {
   const { entries, manifest, tasks } = buildPlan({
     declaredBins,
@@ -123,6 +126,10 @@ const materialise = ({ declaredBins, profile, root }) => {
   return { entries, tasks };
 };
 
+/**
+ * @param {{ declaredBins?: readonly string[], profile: string, root: string,
+ *           upgrade: boolean, userAgent?: string }} args
+ */
 export const applyInit = ({
   declaredBins = [],
   profile,
