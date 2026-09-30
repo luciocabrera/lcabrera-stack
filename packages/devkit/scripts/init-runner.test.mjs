@@ -1,3 +1,6 @@
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vite-plus/test';
@@ -9,6 +12,7 @@ import {
   runnerFromUserAgent,
 } from './init.mjs';
 import { requiredCommands } from './placeholders.mjs';
+import { PACKAGE_MANAGER } from './workspace.mjs';
 
 const ASSETS_DIR = join(
   dirname(dirname(fileURLToPath(import.meta.url))),
@@ -111,6 +115,72 @@ describe('inferRunner', () => {
       expect(answered.length).toBeGreaterThan(0);
       for (const key of asked) expect(answered).toContain(key);
     }
+  });
+});
+
+describe('a key that stands for a task', () => {
+  const VITE_PLUS = { dependencies: ['vite-plus'] };
+
+  test('runs that task wherever the tree wires it', () => {
+    const { commands } = inferRunner({
+      ...VITE_PLUS,
+      tasks: ['deps:audit', 'test:all'],
+    });
+    expect(commands.test).toBe('vp run test:all');
+    expect(commands.audit).toBe('vp run deps:audit');
+  });
+
+  test('keeps the runner default where the tree does not wire it', () => {
+    const { commands } = inferRunner(VITE_PLUS);
+    expect(commands.test).toBe('vp run test');
+    expect(commands.audit).toBe('vp pm audit --level moderate');
+  });
+
+  test('answers each key from its own task alone', () => {
+    const { commands } = inferRunner({ ...VITE_PLUS, tasks: ['test:all'] });
+    expect(commands.test).toBe('vp run test:all');
+    expect(commands.audit).toBe('vp pm audit --level moderate');
+  });
+
+  test('leaves a runner with no task-backed keys as it was', () => {
+    expect(
+      inferRunner({ files: ['pnpm-lock.yaml'], tasks: ['test:all'] }).commands
+        .test,
+    ).toBe('pnpm run test');
+  });
+});
+
+const runInLockfilelessTree = (command) => {
+  const root = mkdtempSync(join(tmpdir(), 'devkit-runner-audit-'));
+  try {
+    writeFileSync(
+      join(root, 'package.json'),
+      `${JSON.stringify({ name: 'probe', packageManager: PACKAGE_MANAGER, private: true })}\n`,
+    );
+    const result = spawnSync('sh', ['-c', command], {
+      cwd: root,
+      encoding: 'utf8',
+      timeout: 60_000,
+    });
+    return {
+      error: result.error,
+      output: `${result.stdout}${result.stderr}`,
+      status: result.status,
+    };
+  } finally {
+    rmSync(root, { force: true, recursive: true });
+  }
+};
+
+describe('the Vite+ audit default, run by the installed vp', () => {
+  test('is handed to the package manager rather than refused by vp', () => {
+    const { commands } = inferRunner({ dependencies: ['vite-plus'] });
+    const { error, output, status } = runInLockfilelessTree(commands.audit);
+
+    expect(error).toBeUndefined();
+    expect(output).not.toContain('Unexpected argument');
+    expect(output).toContain('ERR_PNPM_AUDIT_NO_LOCKFILE');
+    expect(status).toBe(1);
   });
 });
 
