@@ -1,7 +1,8 @@
 /**
  * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
- * installs it from the registry, runs the tasks that tree wires for itself, and
- * fetches `/` from the app its root `start` task serves.
+ * installs it from the registry, runs the tasks that tree wires for itself,
+ * fetches `/` from the app its root `start` task serves, then runs the upgrade
+ * that should find nothing left to add, and its commit-msg hook.
  * The blueprint's own configs are the only ones that fully lint it, and nothing
  * else here runs them. Every scratch directory sits under the OS temp root so
  * the tree inherits nothing from this checkout (ADR-073).
@@ -14,6 +15,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import {
   existsSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -33,13 +35,19 @@ import {
   BUILT_SERVER_ENTRY,
   buildOutputFindings,
   commandLabel,
+  commitHookFindings,
   missingBlueprintFiles,
+  missingToolchainBins,
   modifiedTrackedFiles,
   nodeFindings,
   outputTail,
   serveFindings,
   START_ARGS,
   taskFindings,
+  tasksAddedByUpgrade,
+  TOOLCHAIN_BINS,
+  trackedPathsIn,
+  trackedWritesByUpgrade,
   TREE_TASKS,
 } from './lib/devkit-workspace.mjs';
 
@@ -98,7 +106,7 @@ const createFindings = ({ devkit, parent }) =>
     }),
   });
 
-const blueprintFindings = (tree) =>
+const blueprintFindings = ({ tree }) =>
   missingBlueprintFiles({
     blueprint: run('git', ['ls-files', '--', '.'], join(REPO_ROOT, BLUEPRINT))
       .split('\n')
@@ -125,7 +133,7 @@ const installFindings = (tree) =>
     }),
   });
 
-const taskRunFindings = (tree) =>
+const taskRunFindings = ({ tree }) =>
   TREE_TASKS.flatMap((args) =>
     taskFindings({
       label: commandLabel(args),
@@ -133,12 +141,87 @@ const taskRunFindings = (tree) =>
     }),
   );
 
-const trackedChangeFindings = (tree) =>
-  modifiedTrackedFiles(
-    run('git', ['status', '--porcelain', '--untracked-files=no'], tree),
+const toolchainBinFindings = ({ tree }) => {
+  const binDirectory = join(tree, 'node_modules', '.bin');
+  return missingToolchainBins({
+    expected: TOOLCHAIN_BINS,
+    present: existsSync(binDirectory) ? readdirSync(binDirectory) : [],
+  });
+};
+
+const treeScripts = (tree) =>
+  readJson(join(tree, 'package.json')).scripts ?? {};
+
+const trackedPorcelain = (tree) =>
+  run('git', ['status', '--porcelain', '--untracked-files=no'], tree);
+
+const workingContentOf = ({ path, tree }) =>
+  existsSync(join(tree, path))
+    ? run('git', ['hash-object', '--', path], tree).trim()
+    : 'deleted';
+
+const trackedSnapshot = (tree) =>
+  Object.fromEntries(
+    trackedPathsIn(trackedPorcelain(tree)).map((path) => [
+      path,
+      workingContentOf({ path, tree }),
+    ]),
   );
 
-const builtFindings = (tree) =>
+const upgradeFindings = ({ devkit, tree }) => {
+  const scriptsBefore = treeScripts(tree);
+  const trackedBefore = trackedSnapshot(tree);
+  const upgraded = taskFindings({
+    label: 'devkit init --upgrade',
+    ...execute({ args: ['init', '--upgrade'], command: devkit, cwd: tree }),
+  });
+  return upgraded.length > 0
+    ? upgraded
+    : [
+        ...tasksAddedByUpgrade({
+          after: treeScripts(tree),
+          before: scriptsBefore,
+        }),
+        ...trackedWritesByUpgrade({
+          after: trackedSnapshot(tree),
+          before: trackedBefore,
+        }),
+      ];
+};
+
+const HOOK_IDENTITY = [
+  '-c',
+  'user.name=gate',
+  '-c',
+  'user.email=gate@localhost',
+];
+
+const commitWith = ({ message, tree }) =>
+  execute({
+    args: [
+      ...HOOK_IDENTITY,
+      'commit',
+      '--allow-empty',
+      '--quiet',
+      '-m',
+      message,
+    ],
+    command: 'git',
+    cwd: tree,
+  });
+
+const commitHookRunFindings = ({ tree }) => {
+  run('git', ['config', 'core.hooksPath', '.githooks'], tree);
+  return commitHookFindings({
+    accepted: commitWith({ message: 'chore: probe the commit hook', tree }),
+    refused: commitWith({ message: 'probe the commit hook', tree }),
+  });
+};
+
+const trackedChangeFindings = ({ tree }) =>
+  modifiedTrackedFiles(trackedPorcelain(tree));
+
+const builtFindings = ({ tree }) =>
   buildOutputFindings({ exists: existsSync(join(tree, BUILT_SERVER_ENTRY)) });
 
 const SERVE_DEADLINE_MS = 60_000;
@@ -161,7 +244,7 @@ const freePort = () =>
     });
   });
 
-const servedFindings = async (tree) => {
+const servedFindings = async ({ tree }) => {
   const port = await freePort();
   writeFileSync(join(tree, 'apps', 'web', '.env'), `PORT=${port}\n`);
   const url = `http://127.0.0.1:${port}/`;
@@ -186,10 +269,13 @@ const servedFindings = async (tree) => {
 
 const TREE_CHECKS = [
   blueprintFindings,
+  toolchainBinFindings,
   taskRunFindings,
   builtFindings,
   servedFindings,
   trackedChangeFindings,
+  upgradeFindings,
+  commitHookRunFindings,
 ];
 
 const PREREQUISITES = [runtimeFindings, installFindings];
@@ -200,11 +286,14 @@ const firstBlocking = (tree) =>
     [],
   );
 
-const treeFindings = async (tree) => {
+const treeFindings = async ({ devkit, tree }) => {
   const blocking = firstBlocking(tree);
   if (blocking.length > 0) return blocking;
   return TREE_CHECKS.reduce(
-    async (earlier, check) => [...(await earlier), ...(await check(tree))],
+    async (earlier, check) => [
+      ...(await earlier),
+      ...(await check({ devkit, tree })),
+    ],
     Promise.resolve([]),
   );
 };
@@ -218,7 +307,8 @@ const main = async () => {
   try {
     const devkit = installedDevkit({ holder, staging });
     const created = createFindings({ devkit, parent });
-    const findings = created.length > 0 ? created : await treeFindings(tree);
+    const findings =
+      created.length > 0 ? created : await treeFindings({ devkit, tree });
 
     if (findings.length > 0) {
       process.stderr.write(
@@ -231,7 +321,7 @@ const main = async () => {
 
     const tasks = TREE_TASKS.map((args) => commandLabel(args)).join(', ');
     process.stdout.write(
-      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed, ${tasks} all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200, and none of them changed a committed file.\n`,
+      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed with ${TOOLCHAIN_BINS.join(', ')} in it, ${tasks} all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.\n`,
     );
   } finally {
     for (const directory of [staging, holder, parent]) {

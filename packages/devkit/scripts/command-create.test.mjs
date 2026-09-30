@@ -23,7 +23,9 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runCreate } from './command-create.mjs';
+import { PROFILE_LADDER } from './config.mjs';
 import { CREATE_BRANCH, INITIAL_COMMIT_MESSAGE } from './create.mjs';
+import { tasksFor } from './init.mjs';
 
 const scratches = [];
 
@@ -355,6 +357,24 @@ describe('a rung above repo', () => {
       'packages/typescript-config/tsconfig.entries.ts',
     ]) {
       expect(existsSync(join(parent, 'demo', path))).toBe(true);
+    }
+  });
+});
+
+const scriptsOf = (parent) =>
+  JSON.parse(readFileSync(join(parent, 'demo', 'package.json'), 'utf8'))
+    .scripts;
+
+describe('the gate tasks, wired before anything is installed', () => {
+  test('every rung is created with every gate task it owns', () => {
+    for (const profile of PROFILE_LADDER) {
+      const parent = scratch();
+      const { code, printed } = createUnder({ parent, profile });
+
+      expect(code).toBe(0);
+      expect(existsSync(join(parent, 'demo', 'node_modules'))).toBe(false);
+      expect(scriptsOf(parent)).toMatchObject(tasksFor({ profile }));
+      expect(printed).not.toContain('devkit init --upgrade');
     }
   });
 });

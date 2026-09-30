@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vite-plus/test';
 
 import { configs } from '../assets/workspace/packages/typescript-config/tsconfig.entries.ts';
-import { initialManifest } from './create.mjs';
+import { initialManifest, TOOLCHAIN_RANGES } from './create.mjs';
 import {
   APP_WORKSPACE,
   GENERATED_TSCONFIGS,
@@ -209,11 +209,11 @@ describe('withWorkspaceFields', () => {
 });
 
 describe('initialManifest', () => {
-  test('a rung below monorepo gets a manifest with nothing wired', () => {
+  test('a rung below monorepo gets a manifest declaring only the toolchain', () => {
     for (const profile of ['agent', 'repo']) {
       const manifest = initialManifest({ name: 'demo', profile });
       expect(manifest.scripts).toBeUndefined();
-      expect(manifest.devDependencies).toBeUndefined();
+      expect(manifest.devDependencies).toEqual(TOOLCHAIN_RANGES);
       expect(manifest.engines).toBeUndefined();
     }
   });

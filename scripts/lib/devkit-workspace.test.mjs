@@ -7,13 +7,19 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   buildOutputFindings,
   commandLabel,
+  commitHookFindings,
   missingBlueprintFiles,
+  missingToolchainBins,
   modifiedTrackedFiles,
   nodeFindings,
   outputTail,
   serveFindings,
   START_ARGS,
   taskFindings,
+  tasksAddedByUpgrade,
+  TOOLCHAIN_BINS,
+  trackedPathsIn,
+  trackedWritesByUpgrade,
   TREE_TASKS,
 } from './devkit-workspace.mjs';
 
@@ -192,6 +198,120 @@ describe('missingBlueprintFiles', () => {
         placed: ['gitignore'],
         targetOf,
       }),
+    ).toHaveLength(1);
+  });
+});
+
+describe('missingToolchainBins', () => {
+  it('expects the kit and the gate the commit hook calls', () => {
+    expect(TOOLCHAIN_BINS).toContain('devkit');
+    expect(TOOLCHAIN_BINS).toContain('repo-verify-commit');
+  });
+
+  it('finds nothing when every expected bin was installed', () => {
+    expect(
+      missingToolchainBins({
+        expected: TOOLCHAIN_BINS,
+        present: [...TOOLCHAIN_BINS, 'vp'],
+      }),
+    ).toEqual([]);
+  });
+
+  it('names each bin the install did not put in place', () => {
+    const findings = missingToolchainBins({
+      expected: ['devkit', 'repo-verify-commit'],
+      present: ['devkit'],
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('node_modules/.bin/repo-verify-commit');
+  });
+});
+
+describe('tasksAddedByUpgrade', () => {
+  it('finds nothing when the upgrade left the task block as it was', () => {
+    const scripts = { 'commit:verify': 'repo-verify-commit' };
+    expect(tasksAddedByUpgrade({ after: scripts, before: scripts })).toEqual(
+      [],
+    );
+  });
+
+  it('names each task the upgrade added', () => {
+    const findings = tasksAddedByUpgrade({
+      after: { 'commit:verify': 'repo-verify-commit', check: 'vp check' },
+      before: { check: 'vp check' },
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('`commit:verify`');
+  });
+});
+
+describe('commitHookFindings', () => {
+  it('finds nothing when the hook takes the good message and refuses the bad one', () => {
+    expect(
+      commitHookFindings({
+        accepted: { output: '', status: 0 },
+        refused: { output: 'not Conventional', status: 1 },
+      }),
+    ).toEqual([]);
+  });
+
+  it('reports a refused Conventional Commit with what the hook said', () => {
+    const findings = commitHookFindings({
+      accepted: { output: 'repo-verify-commit is missing', status: 1 },
+      refused: { output: '', status: 1 },
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('repo-verify-commit is missing');
+  });
+
+  it('reports a malformed message the hook let through', () => {
+    const findings = commitHookFindings({
+      accepted: { output: '', status: 0 },
+      refused: { output: '', status: 0 },
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('accepted a message');
+  });
+});
+
+describe('trackedPathsIn', () => {
+  it('reads each path out of porcelain status lines', () => {
+    expect(trackedPathsIn(' M package.json\n D biome.jsonc\n')).toEqual([
+      'package.json',
+      'biome.jsonc',
+    ]);
+  });
+});
+
+describe('trackedWritesByUpgrade', () => {
+  it('finds nothing when the upgrade left every tracked file as it found it', () => {
+    const snapshot = { 'vite.config.ts': 'abc' };
+    expect(
+      trackedWritesByUpgrade({ after: snapshot, before: snapshot }),
+    ).toEqual([]);
+  });
+
+  it('names the upgrade for a file it dirtied', () => {
+    const findings = trackedWritesByUpgrade({
+      after: { 'devkit.config.json': 'def' },
+      before: {},
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('`devkit init --upgrade`');
+    expect(findings[0]).toContain('`devkit.config.json`');
+  });
+
+  it('names the upgrade for a file a task had dirtied and it rewrote again', () => {
+    const findings = trackedWritesByUpgrade({
+      after: { 'vite.config.ts': 'def' },
+      before: { 'vite.config.ts': 'abc' },
+    });
+    expect(findings).toHaveLength(1);
+  });
+
+  it('names the upgrade for a file it put back to what was committed', () => {
+    expect(
+      trackedWritesByUpgrade({ after: {}, before: { 'biome.jsonc': 'abc' } }),
     ).toHaveLength(1);
   });
 });
