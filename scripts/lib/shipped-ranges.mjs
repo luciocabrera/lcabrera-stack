@@ -186,10 +186,6 @@ const PROMISING_ENTRIES = new Map([
 ]);
 
 /**
- * A catalog or a range constant the gate read nothing out of. Those are the
- * shapes that promise entries — a manifest may legitimately declare none — so
- * zero of them means the reader, not the source, has gone quiet.
- *
  * @param {{ declarations: readonly object[], sources: readonly object[] }} args
  */
 const quietSources = ({ declarations, sources }) =>
