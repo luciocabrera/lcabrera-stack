@@ -198,7 +198,9 @@ places. They are the one set no other run wires, because they name binaries only
 the manifest `create` writes declares — and they are reconciled from then on
 exactly like the tasks above.
 
+- `{{commands.run}} build` — build the application for production.
 - `{{commands.run}} check` — format, lint and type-check in one pass.
+- `{{commands.run}} dev` — start the application's development server.
 - `{{commands.run}} format:all` — format the tree.
 - `{{commands.run}} format:check` — report formatting without writing, for CI.
 - `{{commands.run}} lint:all` — both linters, fixing what can be fixed.
@@ -207,6 +209,8 @@ exactly like the tasks above.
 - `{{commands.run}} lint:check` — both linters, reporting only, for CI.
 - `{{commands.run}} prepare` — point git at the hooks, then regenerate the
   generated configs, after an install.
+- `{{commands.run}} start` — serve the production build, building it first if
+  there is none.
 - `{{commands.run}} test:all` — every workspace's tests, in dependency order.
 - `{{commands.run}} tsconfig:generate` — rewrite the generated TypeScript configs
   and format what it wrote.

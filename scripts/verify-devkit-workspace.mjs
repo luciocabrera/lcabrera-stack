@@ -1,8 +1,9 @@
 /**
  * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
- * installs it from the registry, and runs the tasks that tree wires for itself,
- * the upgrade that should find nothing left to add, and its commit-msg hook —
- * which create and the install must have turned on without being asked.
+ * installs it from the registry, runs the tasks that tree wires for itself,
+ * fetches `/` from the app its root `start` task serves, then runs the upgrade
+ * that should find nothing left to add, and its commit-msg hook — which create
+ * and the install must have turned on without being asked.
  * The blueprint's own configs are the only ones that fully lint it, and nothing
  * else here runs them. Every scratch directory sits under the OS temp root so
  * the tree inherits nothing from this checkout (ADR-073).
@@ -11,7 +12,7 @@
  * Exit codes: 0 = the created tree installs and its tasks pass, 1 = it does not.
  */
 
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import {
   existsSync,
   mkdtempSync,
@@ -20,6 +21,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
+import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
@@ -29,7 +31,10 @@ import {
   targetPathFor,
 } from '../packages/devkit/scripts/config.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
+import { collectedTail, firstAnswer, stopGroup } from './lib/devkit-serve.mjs';
 import {
+  BUILT_SERVER_ENTRY,
+  buildOutputFindings,
   commandLabel,
   commitHookFindings,
   hooksPathFindings,
@@ -38,6 +43,8 @@ import {
   modifiedTrackedFiles,
   nodeFindings,
   outputTail,
+  serveFindings,
+  START_ARGS,
   taskFindings,
   tasksAddedByUpgrade,
   TOOLCHAIN_BINS,
@@ -242,11 +249,59 @@ const commitHookRunFindings = ({ tree }) =>
 const trackedChangeFindings = ({ tree }) =>
   modifiedTrackedFiles(trackedPorcelain(tree));
 
+const builtFindings = ({ tree }) =>
+  buildOutputFindings({ exists: existsSync(join(tree, BUILT_SERVER_ENTRY)) });
+
+const SERVE_DEADLINE_MS = 60_000;
+
+const SERVE_POLL_MS = 500;
+
+const SERVE_REQUEST_TIMEOUT_MS = 5000;
+
+const STOP_GRACE_MS = 5000;
+
+const SERVE_OUTPUT_LIMIT_CHARS = 64 * 1024;
+
+const freePort = () =>
+  new Promise((resolve, reject) => {
+    const server = createServer();
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const { port } = server.address();
+      server.close(() => resolve(port));
+    });
+  });
+
+const servedFindings = async ({ tree }) => {
+  const port = await freePort();
+  writeFileSync(join(tree, 'apps', 'web', '.env'), `PORT=${port}\n`);
+  const url = `http://127.0.0.1:${port}/`;
+  const child = spawn(join(tree, 'node_modules', '.bin', 'vp'), START_ARGS, {
+    cwd: tree,
+    detached: true,
+  });
+  const output = collectedTail({ child, limit: SERVE_OUTPUT_LIMIT_CHARS });
+  try {
+    const answer = await firstAnswer({
+      child,
+      deadline: Date.now() + SERVE_DEADLINE_MS,
+      pollMs: SERVE_POLL_MS,
+      requestTimeoutMs: SERVE_REQUEST_TIMEOUT_MS,
+      url,
+    });
+    return serveFindings({ ...answer, output: output(), url });
+  } finally {
+    await stopGroup({ child, graceMs: STOP_GRACE_MS });
+  }
+};
+
 const TREE_CHECKS = [
   blueprintFindings,
   toolchainBinFindings,
   installedHooksFindings,
   taskRunFindings,
+  builtFindings,
+  servedFindings,
   trackedChangeFindings,
   upgradeFindings,
   commitHookRunFindings,
@@ -260,18 +315,20 @@ const firstBlocking = (tree) =>
     [],
   );
 
-const treeFindings = ({ devkit, tree }) => {
+const treeFindings = async ({ devkit, tree }) => {
   const created = createdHooksFindings(tree);
   const blocking = firstBlocking(tree);
-  return [
-    ...created,
-    ...(blocking.length > 0
-      ? blocking
-      : TREE_CHECKS.flatMap((check) => check({ devkit, tree }))),
-  ];
+  if (blocking.length > 0) return [...created, ...blocking];
+  return TREE_CHECKS.reduce(
+    async (earlier, check) => [
+      ...(await earlier),
+      ...(await check({ devkit, tree })),
+    ],
+    Promise.resolve(created),
+  );
 };
 
-const main = () => {
+const main = async () => {
   const staging = mkdtempSync(join(tmpdir(), 'devkit-workspace-pack-'));
   const holder = mkdtempSync(join(tmpdir(), 'devkit-workspace-holder-'));
   const parent = mkdtempSync(join(tmpdir(), 'devkit-workspace-tree-'));
@@ -281,7 +338,7 @@ const main = () => {
     const devkit = installedDevkit({ holder, staging });
     const created = createFindings({ devkit, parent });
     const findings =
-      created.length > 0 ? created : treeFindings({ devkit, tree });
+      created.length > 0 ? created : await treeFindings({ devkit, tree });
 
     if (findings.length > 0) {
       process.stderr.write(
@@ -294,7 +351,7 @@ const main = () => {
 
     const tasks = TREE_TASKS.map((args) => commandLabel(args)).join(', ');
     process.stdout.write(
-      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed with ${TOOLCHAIN_BINS.join(', ')} in it, ${tasks} all exited zero, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.\n`,
+      `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed with ${TOOLCHAIN_BINS.join(', ')} in it, ${tasks} all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.\n`,
     );
   } finally {
     for (const directory of [staging, holder, parent]) {
@@ -304,7 +361,7 @@ const main = () => {
 };
 
 try {
-  main();
+  await main();
 } catch (error) {
   const detail =
     error instanceof Error

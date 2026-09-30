@@ -32,6 +32,8 @@ export const PACKAGE_MANAGER =
 
 export const TSCONFIG_WORKSPACE = '@repo/typescript-config';
 
+export const APP_WORKSPACE = 'web';
+
 export const GENERATED_TSCONFIGS = '**/tsconfig*.json';
 
 export const HOOKS_PATH_SCRIPT = 'scripts/hooks-path.mjs';
@@ -77,7 +79,9 @@ export const WORKSPACE_DEPENDENCIES = {
  * @type {ReadonlyArray<{ command: string, name: string }>}
  */
 export const WORKSPACE_TASKS = [
+  { command: `vp run --filter ${APP_WORKSPACE} build`, name: 'build' },
   { command: 'vp check', name: 'check' },
+  { command: `vp run --filter ${APP_WORKSPACE} dev`, name: 'dev' },
   { command: 'vp fmt .', name: 'format:all' },
   { command: 'vp fmt --check .', name: 'format:check' },
   { command: 'vp lint . --fix && vp run lint:biome', name: 'lint:all' },
@@ -88,6 +92,7 @@ export const WORKSPACE_TASKS = [
     command: `node ${HOOKS_PATH_SCRIPT} && vp run tsconfig:generate`,
     name: 'prepare',
   },
+  { command: `vp run --filter ${APP_WORKSPACE} start`, name: 'start' },
   { command: 'vp run -r test', name: 'test:all' },
   {
     command: `vp run --filter ${TSCONFIG_WORKSPACE} generate && vp fmt '${GENERATED_TSCONFIGS}'`,
