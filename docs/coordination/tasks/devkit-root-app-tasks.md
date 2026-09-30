@@ -24,6 +24,6 @@ Run a created monorepo's app from the repository root
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review on #1202; the gate and `workspace:verify` are green
 - Blockers: none
-- Next:
+- Next: merge
