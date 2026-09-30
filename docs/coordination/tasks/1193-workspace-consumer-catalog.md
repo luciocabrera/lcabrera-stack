@@ -2,7 +2,7 @@
 id: 1193-workspace-consumer-catalog
 title: fix(devkit): a dependency added with vp add leaves the workspace file unmodified
 owner: agent:claude
-status: active
+status: review
 branch: fix/1193-1193-workspace-consumer-catalog
 area:
   - packages/devkit/scripts/**
@@ -13,7 +13,7 @@ area:
 started: 2026-09-30
 updated: 2026-09-30
 plan: (none)
-pr: (none)
+pr: '#1211'
 issue: #1193
 ---
 
