@@ -1,11 +1,13 @@
 /**
  * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
  * installs every `@lcabrera/*` package it resolves from a tarball packed from
- * this checkout and served by a scratch registry, and runs the tasks that tree wires for itself, the upgrade
- * that should find nothing left to add, and its commit-msg hook. So the gate
- * tests what the next release ships, together; `registry-tree:verify` is
- * the check of what npm serves today. Every scratch directory sits under the OS
- * temp root so the tree inherits nothing from this checkout (ADR-073).
+ * this checkout and served by a scratch registry, runs the tasks that tree
+ * wires for itself, fetches `/` from the app its root `start` task serves, then
+ * runs the upgrade that should find nothing left to add, and its commit-msg
+ * hook. So the gate tests what the next release ships, together;
+ * `registry-tree:verify` is the check of what npm serves today. Every scratch
+ * directory sits under the OS temp root so the tree inherits nothing from this
+ * checkout (ADR-073).
  *
  * Usage: node scripts/verify-devkit-workspace.mjs
  *        (it re-runs itself with --serve-registry to host the scratch registry)
@@ -21,6 +23,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
+import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import process from 'node:process';
@@ -31,7 +34,11 @@ import {
   targetPathFor,
 } from '../packages/devkit/scripts/config.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
-import { serveRegistry } from './lib/devkit-registry-server.mjs';
+import {
+  serveRegistry,
+  startedRegistry,
+} from './lib/devkit-registry-server.mjs';
+import { collectedTail, firstAnswer, stopGroup } from './lib/devkit-serve.mjs';
 import {
   createFindings,
   execute,
@@ -61,9 +68,14 @@ import {
   unpackedSourceFindings,
 } from './lib/devkit-workspace-packages.mjs';
 import {
+  BUILT_SERVER_ENTRY,
+  buildOutputFindings,
+  commandLabel,
   commitHookFindings,
   missingBlueprintFiles,
   missingToolchainBins,
+  serveFindings,
+  START_ARGS,
   taskFindings,
   tasksAddedByUpgrade,
   TOOLCHAIN_BINS,
@@ -82,10 +94,6 @@ const WORKSPACE_FILE = 'pnpm-workspace.yaml';
 const LOCKFILE = 'pnpm-lock.yaml';
 
 const SERVE_FLAG = '--serve-registry';
-
-const REGISTRY_START_MS = 10_000;
-
-const POLL_MS = 50;
 
 const checkoutPackages = () =>
   new Map(
@@ -153,38 +161,6 @@ const packedPackages = ({ staging, tree }) => {
       ...digestsOf(readFileSync(tarball)),
     })),
   };
-};
-
-const sleep = (milliseconds) =>
-  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
-
-const portFrom = (portFile) => {
-  const deadline = Date.now() + REGISTRY_START_MS;
-  while (!existsSync(portFile) && Date.now() < deadline) sleep(POLL_MS);
-  const port = readIfPresent(portFile);
-  if (port === undefined) {
-    throw new Error(
-      `the scratch registry did not start within ${REGISTRY_START_MS} ms`,
-    );
-  }
-  return port;
-};
-
-const startedRegistry = ({ packed, staging }) => {
-  const index = join(staging, 'registry-index.json');
-  const portFile = join(staging, 'registry-port');
-  writeFileSync(
-    index,
-    JSON.stringify(
-      Object.fromEntries(packed.map((entry) => [entry.manifest.name, entry])),
-    ),
-  );
-  const server = spawn(
-    process.execPath,
-    [fileURLToPath(import.meta.url), SERVE_FLAG, index, portFile],
-    { stdio: 'ignore' },
-  );
-  return { server, url: `http://127.0.0.1:${portFrom(portFile)}` };
 };
 
 const blueprintFindings = ({ tree }) =>
@@ -294,22 +270,74 @@ const commitHookRunFindings = ({ tree }) => {
   });
 };
 
+const builtFindings = ({ tree }) =>
+  buildOutputFindings({ exists: existsSync(join(tree, BUILT_SERVER_ENTRY)) });
+
+const SERVE_DEADLINE_MS = 60_000;
+
+const SERVE_POLL_MS = 500;
+
+const SERVE_REQUEST_TIMEOUT_MS = 5000;
+
+const STOP_GRACE_MS = 5000;
+
+const SERVE_OUTPUT_LIMIT_CHARS = 64 * 1024;
+
+const freePort = () =>
+  new Promise((resolve, reject) => {
+    const server = createServer();
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const { port } = server.address();
+      server.close(() => resolve(port));
+    });
+  });
+
+const servedFindings = async ({ tree }) => {
+  const port = await freePort();
+  writeFileSync(join(tree, 'apps', 'web', '.env'), `PORT=${port}\n`);
+  const url = `http://127.0.0.1:${port}/`;
+  const child = spawn(join(tree, 'node_modules', '.bin', 'vp'), START_ARGS, {
+    cwd: tree,
+    detached: true,
+  });
+  const output = collectedTail({ child, limit: SERVE_OUTPUT_LIMIT_CHARS });
+  try {
+    const answer = await firstAnswer({
+      child,
+      deadline: Date.now() + SERVE_DEADLINE_MS,
+      pollMs: SERVE_POLL_MS,
+      requestTimeoutMs: SERVE_REQUEST_TIMEOUT_MS,
+      url,
+    });
+    return serveFindings({ ...answer, output: output(), url });
+  } finally {
+    await stopGroup({ child, graceMs: STOP_GRACE_MS });
+  }
+};
+
 const TREE_CHECKS = [
   blueprintFindings,
   toolchainBinFindings,
   taskRunFindings,
+  builtFindings,
+  servedFindings,
   trackedChangeFindings,
   upgradeFindings,
   commitHookRunFindings,
 ];
 
-const checkedTree = ({ devkit, staging, tree }) => {
+const checkedTree = async ({ devkit, staging, tree }) => {
   const { findings, packed } = packedPackages({ staging, tree });
   if (findings.length > 0) return findings;
-  const { server, url } = startedRegistry({ packed, staging });
+  const { server, url } = startedRegistry({
+    launch: [fileURLToPath(import.meta.url), SERVE_FLAG],
+    packed,
+    staging,
+  });
   try {
     writeFileSync(join(tree, '.npmrc'), scopedRegistryConfig(url));
-    return treeFindings({
+    return await treeFindings({
       checks: TREE_CHECKS,
       context: { devkit },
       prerequisites: [
@@ -324,7 +352,7 @@ const checkedTree = ({ devkit, staging, tree }) => {
   }
 };
 
-const main = () => {
+const main = async () => {
   const staging = mkdtempSync(join(tmpdir(), 'devkit-workspace-pack-'));
   const holder = mkdtempSync(join(tmpdir(), 'devkit-workspace-holder-'));
   const parent = mkdtempSync(join(tmpdir(), 'devkit-workspace-tree-'));
@@ -341,8 +369,12 @@ const main = () => {
       findings:
         created.length > 0
           ? created
-          : checkedTree({ devkit, staging, tree: join(parent, TREE_NAME) }),
-      passed: `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout through a scratch registry, with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} all exited zero, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
+          : await checkedTree({
+              devkit,
+              staging,
+              tree: join(parent, TREE_NAME),
+            }),
+      passed: `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout through a scratch registry, with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
       title: 'Created-workspace gate',
     });
   } finally {
@@ -358,7 +390,7 @@ try {
   if (mode === SERVE_FLAG) {
     serveRegistry({ indexPath: servedIndex, portFile: servedPortFile });
   } else {
-    main();
+    await main();
   }
 } catch (error) {
   reportCrash(error);

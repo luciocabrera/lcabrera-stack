@@ -35,7 +35,7 @@ const PREREQUISITES = [runtimeFindings, installFindings];
 
 const TREE_CHECKS = [taskRunFindings, trackedChangeFindings];
 
-const main = () => {
+const main = async () => {
   const holder = mkdtempSync(join(tmpdir(), 'devkit-registry-holder-'));
   const parent = mkdtempSync(join(tmpdir(), 'devkit-registry-tree-'));
 
@@ -54,7 +54,7 @@ const main = () => {
       findings:
         created.length > 0
           ? created
-          : treeFindings({
+          : await treeFindings({
               checks: TREE_CHECKS,
               prerequisites: PREREQUISITES,
               tree: join(parent, TREE_NAME),
@@ -70,7 +70,7 @@ const main = () => {
 };
 
 try {
-  main();
+  await main();
 } catch (error) {
   reportCrash(error);
 }

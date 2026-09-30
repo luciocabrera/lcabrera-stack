@@ -71,7 +71,7 @@ const settledRepo = ({ overridden = true } = {}) => {
     private: true,
     scripts: {
       ...recorded,
-      build: 'their own build',
+      deploy: 'their own deploy',
       ...(overridden && { check: 'their own check' }),
     },
   });
@@ -122,7 +122,7 @@ describe('sync reconciles the task block', () => {
     expect(runSync([], root)).toBe(0);
     const { scripts } = readJson(root, 'package.json');
 
-    expect(scripts.build).toBe('their own build');
+    expect(scripts.deploy).toBe('their own deploy');
     expect(scripts[ARRIVING]).toBe(WORKSPACE_SCRIPTS[ARRIVING]);
     restore();
   });
@@ -209,14 +209,14 @@ describe('sync reconciles the task block', () => {
     writeJson(root, 'package.json', {
       name: 'consumer',
       private: true,
-      scripts: { build: 'their own build' },
+      scripts: { deploy: 'their own deploy' },
     });
     const { restore } = silenced();
 
     runSync([], root);
 
     expect(readJson(root, 'package.json').scripts).toEqual({
-      build: 'their own build',
+      deploy: 'their own deploy',
     });
     expect(readJson(root, MANIFEST_FILE).tasks).toBeUndefined();
     restore();
@@ -405,7 +405,7 @@ describe('a gate that checks what the blueprint places', () => {
   });
 
   test('is withheld from a repository that has not taken the blueprint', () => {
-    const root = monorepoRepo({ build: 'their own build' });
+    const root = monorepoRepo({ deploy: 'their own deploy' });
     const { restore } = silenced();
 
     applyInit({ profile: 'monorepo', root, upgrade: true });

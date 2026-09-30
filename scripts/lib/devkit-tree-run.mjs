@@ -125,20 +125,31 @@ export const trackedChangeFindings = ({ tree }) =>
   );
 
 /**
- * @param {{ checks: ReadonlyArray<(context: Record<string, string>) => string[]>,
+ * @param {{ checks: ReadonlyArray<(context: Record<string, string>) =>
+ *             string[] | Promise<string[]>>,
  *           context?: Record<string, string>,
  *           prerequisites: ReadonlyArray<(tree: string) => string[]>,
  *           tree: string }} args
- * @returns {string[]}
+ * @returns {Promise<string[]>}
  */
-export const treeFindings = ({ checks, context = {}, prerequisites, tree }) => {
+export const treeFindings = async ({
+  checks,
+  context = {},
+  prerequisites,
+  tree,
+}) => {
   const blocking = prerequisites.reduce(
     (found, check) => (found.length > 0 ? found : check(tree)),
     [],
   );
-  return blocking.length > 0
-    ? blocking
-    : checks.flatMap((check) => check({ ...context, tree }));
+  if (blocking.length > 0) return blocking;
+  return checks.reduce(
+    async (earlier, check) => [
+      ...(await earlier),
+      ...(await check({ ...context, tree })),
+    ],
+    Promise.resolve([]),
+  );
 };
 
 /**
