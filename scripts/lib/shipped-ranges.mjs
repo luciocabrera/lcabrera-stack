@@ -88,11 +88,6 @@ export const manifestRanges = ({ manifest, path }) =>
   );
 
 /**
- * Every range a named constant holds, keyed by package name — the shape a range
- * takes when a command writes it into a created repository instead of copying
- * it from an asset. Read from the imported value, never parsed out of source
- * text, so there is no string literal to guess at.
- *
  * @param {{ constant: string, path: string, ranges: Record<string, string> }} args
  */
 export const constantRanges = ({ constant, path, ranges }) =>
@@ -200,7 +195,13 @@ const PROMISING_ENTRIES = new Map([
 const quietSources = ({ declarations, sources }) =>
   sources
     .filter(({ kind }) => PROMISING_ENTRIES.has(kind))
-    .filter(({ path }) => !declarations.some((entry) => entry.path === path))
+    .filter(
+      (source) =>
+        !declarations.some(
+          (entry) =>
+            entry.path === source.path && entry.constant === source.constant,
+        ),
+    )
     .map(({ constant, kind, path }) => ({
       constant,
       kind: 'no-declarations',
@@ -209,10 +210,6 @@ const quietSources = ({ declarations, sources }) =>
     }));
 
 /**
- * A range constant holds this repository's own packages and nothing else, so
- * an entry naming one it does not publish is a rename the constant missed, not
- * a third-party dependency to leave unjudged.
- *
  * @param {{ declarations: readonly object[], versions: Record<string, string> }} args
  */
 const unpublishedConstants = ({ declarations, versions }) =>

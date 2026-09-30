@@ -103,4 +103,32 @@ describe('shippedRangeFindings — a range constant', () => {
     expect(findingLine(finding)).toContain(`${SOURCE}:${CONSTANT}`);
     expect(findingLine(finding)).toContain('range constant');
   });
+
+  it('refuses a pass for an empty constant beside a full one in the same file', () => {
+    const other = 'OTHER_RANGES';
+    const findings = shippedRangeFindings({
+      declarations: [
+        ...MANIFEST_DECLARATIONS,
+        ...YAML_DECLARATIONS,
+        ...constantRanges({
+          constant: CONSTANT,
+          path: SOURCE,
+          ranges: { '@lcabrera/devkit': '>=0.5.1 <1.0.0' },
+        }),
+        ...constantRanges({ constant: other, path: SOURCE, ranges: {} }),
+      ],
+      mentions: ALL_MENTIONS,
+      sources: [
+        ...BOTH_SHAPES,
+        CONSTANT_SOURCE,
+        { constant: other, kind: 'constant', path: SOURCE },
+      ],
+      versions: VERSIONS,
+    });
+
+    expect(findings.map(({ constant, kind }) => ({ constant, kind }))).toEqual([
+      { constant: other, kind: 'no-declarations' },
+    ]);
+    expect(findingLine(findings[0])).toContain(`${SOURCE}:${other}`);
+  });
 });
