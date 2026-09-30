@@ -65,6 +65,13 @@ const recordAsWritten = (root, content) => {
 
 const doctor = (root) => quietly(() => runDoctor(['--check'], root));
 
+const acrossSync = (root) => {
+  const before = doctor(root);
+  const synced = quietly(() => runSync([], root));
+  const content = read(root);
+  return { after: doctor(root), before, content, synced };
+};
+
 afterEach(() => {
   const drained = [...scratches];
   scratches.length = 0;
@@ -87,10 +94,12 @@ describe('a dependency added to the default catalog', () => {
     write(root, `${older}${ADDED}`);
     recordAsWritten(root, older);
 
-    expect(doctor(root)).toBe(1);
-    expect(quietly(() => runSync([], root))).toBe(0);
-    expect(read(root)).toBe(`${shipped}${ADDED}`);
-    expect(doctor(root)).toBe(0);
+    expect(acrossSync(root)).toEqual({
+      after: 0,
+      before: 1,
+      content: `${shipped}${ADDED}`,
+      synced: 0,
+    });
   });
 
   test('does not hide a change to an entry the kit ships', () => {
@@ -98,8 +107,11 @@ describe('a dependency added to the default catalog', () => {
     const edited = `${withTypescriptAt(shipped, '^0.0.1')}${ADDED}`;
     write(root, edited);
 
-    expect(doctor(root)).toBe(1);
-    expect(quietly(() => runSync([], root))).toBe(0);
-    expect(read(root)).toBe(edited);
+    expect(acrossSync(root)).toEqual({
+      after: 1,
+      before: 1,
+      content: edited,
+      synced: 0,
+    });
   });
 });
