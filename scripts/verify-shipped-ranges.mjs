@@ -1,20 +1,16 @@
 /**
- * Fails when a dependency range `packages/devkit` ships excludes the version
- * this repository publishes for that package, or the minor after it — a range
- * in a shipped asset, or one `devkit create` writes from `TOOLCHAIN_RANGES`.
- *
- * A bootstrapped repository installs from the registry, so a range in a shipped
- * asset is what decides which release it gets. Below 1.0.0 a caret admits no
- * minor at all, and nothing reports the drift: the asset stays valid, every
- * other gate stays green, and the created repository quietly runs an older
- * package. Background: #1129.
+ * Fails when a dependency range this repository ships excludes the version it
+ * publishes for that package, or the minor after it — a range in a
+ * `packages/devkit` asset, or one a constant listed in `RANGE_CONSTANTS` holds
+ * for a devkit command to write. That range decides which release a created
+ * repository installs (ADR-117).
  *
  * The deciding half is `./lib/shipped-ranges.mjs` (pure); this file is the
  * reading, the printing and the exit code. See `.claude/rules/scripts.md`.
  *
  * Usage: node scripts/verify-shipped-ranges.mjs
- * Exit codes: 0 = every shipped range admits it, 1 = one does not, or nothing
- * shipped could be read.
+ * Exit codes: 0 = every range admits it, 1 = one does not, or an asset or a
+ * listed constant could not be read.
  */
 
 import { readdirSync, readFileSync } from 'node:fs';
