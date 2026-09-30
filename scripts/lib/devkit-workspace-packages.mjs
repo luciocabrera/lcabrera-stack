@@ -145,21 +145,20 @@ export const rangeFindings = ({ declarations, versions }) =>
 
 /**
  * @param {Uint8Array} bytes
- * @returns {{ integrity: string, shasum: string }}
+ * @returns {{ integrity: string }}
  */
 export const digestsOf = (bytes) => ({
   integrity: `sha512-${createHash('sha512').update(bytes).digest('base64')}`,
-  shasum: createHash('sha1').update(bytes).digest('hex'),
 });
 
 /**
  * @param {{ baseUrl: string,
  *           packed: { file: string, integrity: string,
- *                     manifest: Record<string, unknown>, shasum: string } }} args
+ *                     manifest: Record<string, unknown> } }} args
  * @returns {Record<string, unknown>}
  */
 export const packumentFor = ({ baseUrl, packed }) => {
-  const { file, integrity, manifest, shasum } = packed;
+  const { file, integrity, manifest } = packed;
   const { name, version } = manifest;
   return {
     'dist-tags': { latest: version },
@@ -167,7 +166,7 @@ export const packumentFor = ({ baseUrl, packed }) => {
     versions: {
       [version]: {
         ...manifest,
-        dist: { integrity, shasum, tarball: `${baseUrl}/-/${file}` },
+        dist: { integrity, tarball: `${baseUrl}/-/${file}` },
       },
     },
   };
@@ -206,9 +205,20 @@ const sourceFinding = ({ entry, key, packed, registry }) => {
  *           registry: string }} args
  * @returns {string[]}
  */
-export const unpackedSourceFindings = ({ lockfile, packed, registry }) =>
-  parseAllDocuments(lockfile)
+export const unpackedSourceFindings = ({ lockfile, packed, registry }) => {
+  const scoped = parseAllDocuments(lockfile)
     .flatMap((document) => Object.entries(document.toJS()?.packages ?? {}))
-    .filter(([key]) => key.startsWith(SCOPE))
-    .map(([key, entry]) => sourceFinding({ entry, key, packed, registry }))
-    .filter((finding) => finding !== undefined);
+    .filter(([key]) => key.startsWith(SCOPE));
+  const read = new Set(scoped.map(([key]) => packageKeyOf(key).name));
+  return [
+    ...[...packed.keys()]
+      .filter((name) => !read.has(name))
+      .map(
+        (name) =>
+          `\`${name}\` was packed from this checkout but no entry for it was read from the tree's lockfile, so nothing shows where the install took it from`,
+      ),
+    ...scoped
+      .map(([key, entry]) => sourceFinding({ entry, key, packed, registry }))
+      .filter((finding) => finding !== undefined),
+  ];
+};

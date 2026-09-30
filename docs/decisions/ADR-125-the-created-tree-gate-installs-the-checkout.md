@@ -65,8 +65,17 @@ has no workspace in this checkout fails before anything is packed.
 
 `vp run registry-tree:verify` is the other half. It creates the tree with
 the published `create-lcabrera-stack`, installs it from npm, and runs the same
-tasks. `release.yml` runs it after a publish that created at least one tag, and
-`created-tree-registry.yml` runs it on demand.
+tasks. `created-tree-registry.yml` runs it on demand, and `release.yml` runs it
+whenever a publish reached npm. The guard is what reached npm, not whether the
+job succeeded. The publish step sets its `published` output as soon as
+`changeset publish` reports a tag or git has created one, and it does so before
+the step can fail on a non-zero publish or on a tag count that does not match.
+The registry job runs on `always()` with that output, because nothing that fails
+after the upload takes a version back off npm.
+
+An empty lockfile read is not a pass either. Every packed package must appear in
+the tree's lockfile, so a lockfile the gate could not read fails rather than
+reporting that nothing came from npm.
 
 ## Consequences
 

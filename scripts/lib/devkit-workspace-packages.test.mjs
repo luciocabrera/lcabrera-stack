@@ -144,11 +144,10 @@ describe('rangeFindings', () => {
 });
 
 describe('digestsOf', () => {
-  it('gives the sha512 integrity and sha1 shasum npm publishes', () => {
+  it('gives the sha512 integrity npm publishes', () => {
     expect(digestsOf(new TextEncoder().encode('abc'))).toEqual({
       integrity:
         'sha512-3a81oZNherrMQXNJriBBMRLm+k6JqX6iCp7u5ktV05ohkpkqJ0/BqDa6PCOj/uu9RU1EI2Q86A4qmslPpUyknw==',
-      shasum: 'a9993e364706816aba3e25717850c26c9cd0d89d',
     });
   });
 });
@@ -161,13 +160,11 @@ describe('packumentFor', () => {
         file: 'lcabrera-ui-0.8.0.tgz',
         integrity: 'sha512-x',
         manifest: { name: '@lcabrera/ui', version: '0.8.0' },
-        shasum: 'y',
       },
     });
     expect(packument['dist-tags']).toEqual({ latest: '0.8.0' });
     expect(packument.versions['0.8.0'].dist).toEqual({
       integrity: 'sha512-x',
-      shasum: 'y',
       tarball: 'http://127.0.0.1:4873/-/lcabrera-ui-0.8.0.tgz',
     });
   });
@@ -237,6 +234,23 @@ describe('unpackedSourceFindings', () => {
     });
     expect(findings).toHaveLength(1);
     expect(findings[0]).toContain('`@lcabrera/utils@0.2.2`');
+  });
+
+  it('names a packed package the lockfile never mentions, so an unread lockfile cannot pass', () => {
+    const [finding] = unpackedSourceFindings({
+      lockfile: lockfile(`  react@19.3.0:
+    resolution: {integrity: sha512-b}`),
+      packed: PACKED,
+      registry: REGISTRY,
+    });
+    expect(finding).toContain('`@lcabrera/ui`');
+    expect(
+      unpackedSourceFindings({
+        lockfile: 'lockfileVersion: 9.0\n',
+        packed: PACKED,
+        registry: REGISTRY,
+      }),
+    ).toHaveLength(1);
   });
 
   it('names a package whose integrity is not the packed one', () => {

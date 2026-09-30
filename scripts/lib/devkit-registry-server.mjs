@@ -57,7 +57,7 @@ export const serveRegistry = ({ indexPath, portFile }) => {
   const index = JSON.parse(readFileSync(indexPath, 'utf8'));
   const directory = dirname(indexPath);
   const server = createServer((request, response) => {
-    const path = new URL(request.url ?? '/', 'http://registry').pathname;
+    const [path] = (request.url ?? '/').split('?');
     const baseUrl = `http://${request.headers.host}`;
     if (path.startsWith(TARBALL_PREFIX)) {
       tarballResponse({ directory, path, response });
