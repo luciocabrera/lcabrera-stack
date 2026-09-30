@@ -164,8 +164,13 @@ export const sourceOf = (fileName) => {
 };
 
 const REQUIRED_SHAPES = [
-  { kind: 'manifest', shape: 'manifest' },
-  { kind: 'catalog', shape: 'workspace catalog' },
+  { from: 'the shipped assets', kind: 'manifest', shape: 'manifest' },
+  { from: 'the shipped assets', kind: 'catalog', shape: 'workspace catalog' },
+  {
+    from: 'the list of range constants',
+    kind: 'constant',
+    shape: 'range constant',
+  },
 ];
 
 /**
@@ -178,7 +183,7 @@ const REQUIRED_SHAPES = [
 const missingShapes = (sources) =>
   REQUIRED_SHAPES.filter(
     ({ kind }) => !sources.some((source) => source.kind === kind),
-  ).map(({ shape }) => ({ kind: 'no-source', shape }));
+  ).map(({ from, shape }) => ({ from, kind: 'no-source', shape }));
 
 const PROMISING_ENTRIES = new Map([
   ['catalog', 'workspace catalog'],
@@ -297,7 +302,7 @@ const noDeclarationsLine = (finding) =>
   `${[finding.path, finding.constant].filter(Boolean).join(':')}  is a ${finding.shape} and yielded no entry — the file changed shape, or the reader stopped reading it`;
 
 const noSourceLine = (finding) =>
-  `the shipped assets yielded no ${finding.shape} to read — the walk narrowed, or the assets moved`;
+  `${finding.from} yielded no ${finding.shape} to read — the walk narrowed, or the sources moved`;
 
 const unpublishedLine = (finding) =>
   `${where(finding)}  ${finding.name}: this repository publishes no package of that name, and a range constant holds only its own — the package was renamed, or the entry is stale`;

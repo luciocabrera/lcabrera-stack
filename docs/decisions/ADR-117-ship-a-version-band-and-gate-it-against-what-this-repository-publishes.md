@@ -158,4 +158,5 @@ exported fails the run, since the gate imports it by name.
 
 A new constant of the same kind is read only once it is listed in
 `RANGE_CONSTANTS` in `scripts/verify-shipped-ranges.mjs`; the gate does not go
-looking for one.
+looking for one. An empty list fails the run, just as a run that reached no
+manifest or no workspace catalog does.

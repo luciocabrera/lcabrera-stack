@@ -17,8 +17,10 @@ import {
 } from './shipped-ranges.mjs';
 import {
   ALL_MENTIONS,
-  BOTH_SHAPES,
   CATALOG,
+  CONSTANT_DECLARATIONS,
+  CONSTANT_SOURCE,
+  EVERY_SHAPE,
   MANIFEST,
   MANIFEST_DECLARATIONS,
   VERSIONS,
@@ -34,11 +36,11 @@ const mentionsOf = (declarations) =>
 const findingsFor = ({
   declarations,
   mentions,
-  sources = BOTH_SHAPES,
+  sources = EVERY_SHAPE,
   versions = VERSIONS,
 }) =>
   shippedRangeFindings({
-    declarations,
+    declarations: [...declarations, ...CONSTANT_DECLARATIONS],
     mentions: mentions ?? mentionsOf(declarations),
     sources,
     versions,
@@ -195,9 +197,19 @@ describe('shippedRangeFindings — a shape the walk stopped reaching', () => {
   it.each([
     {
       missing: 'workspace catalog',
-      sources: [{ kind: 'manifest', path: MANIFEST }],
+      sources: [{ kind: 'manifest', path: MANIFEST }, CONSTANT_SOURCE],
     },
-    { missing: 'manifest', sources: [{ kind: 'catalog', path: YAML }] },
+    {
+      missing: 'manifest',
+      sources: [{ kind: 'catalog', path: YAML }, CONSTANT_SOURCE],
+    },
+    {
+      missing: 'range constant',
+      sources: [
+        { kind: 'manifest', path: MANIFEST },
+        { kind: 'catalog', path: YAML },
+      ],
+    },
   ])('refuses a pass when no $missing was read', ({ missing, sources }) => {
     const findings = findingsFor({
       declarations: [...MANIFEST_DECLARATIONS, ...YAML_DECLARATIONS],
@@ -208,6 +220,17 @@ describe('shippedRangeFindings — a shape the walk stopped reaching', () => {
       { kind: 'no-source', shape: missing },
     ]);
     expect(findingLine(findings[0])).toContain(missing);
+  });
+
+  it('says an emptied list of range constants is where nothing was read', () => {
+    const [finding] = findingsFor({
+      declarations: [...MANIFEST_DECLARATIONS, ...YAML_DECLARATIONS],
+      sources: EVERY_SHAPE.filter(({ kind }) => kind !== 'constant'),
+    });
+
+    expect(findingLine(finding)).toContain(
+      'the list of range constants yielded no range constant',
+    );
   });
 });
 
@@ -240,7 +263,7 @@ describe('shippedRangeFindings', () => {
     expect(
       findingsFor({
         declarations: declare('^1.2.3'),
-        versions: { '@lcabrera/vite-config': '1.2.3' },
+        versions: { ...VERSIONS, '@lcabrera/vite-config': '1.2.3' },
       }),
     ).toEqual([]);
   });
@@ -345,7 +368,7 @@ describe('shippedRangeFindings — a reader that has gone quiet', () => {
         ...ALL_MENTIONS,
         { name: '@lcabrera/vite-config', path: workflow },
       ],
-      sources: [...BOTH_SHAPES, { kind: 'scanned', path: workflow }],
+      sources: [...EVERY_SHAPE, { kind: 'scanned', path: workflow }],
     });
 
     expect(finding.kind).toBe('unread');

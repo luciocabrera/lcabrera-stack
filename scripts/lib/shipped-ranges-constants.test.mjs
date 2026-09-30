@@ -12,16 +12,12 @@ import {
 } from './shipped-ranges.mjs';
 import {
   ALL_MENTIONS,
-  BOTH_SHAPES,
+  CONSTANT,
+  EVERY_SHAPE,
+  MODULE,
   MANIFEST_DECLARATIONS,
   YAML_DECLARATIONS,
 } from './shipped-ranges-fixtures.mjs';
-
-const SOURCE = 'packages/devkit/scripts/create.mjs';
-
-const CONSTANT = 'TOOLCHAIN_RANGES';
-
-const CONSTANT_SOURCE = { constant: CONSTANT, kind: 'constant', path: SOURCE };
 
 const VERSIONS = {
   '@lcabrera/devkit': '0.5.1',
@@ -34,10 +30,10 @@ const findingsFor = (ranges) =>
     declarations: [
       ...MANIFEST_DECLARATIONS,
       ...YAML_DECLARATIONS,
-      ...constantRanges({ constant: CONSTANT, path: SOURCE, ranges }),
+      ...constantRanges({ constant: CONSTANT, path: MODULE, ranges }),
     ],
     mentions: ALL_MENTIONS,
-    sources: [...BOTH_SHAPES, CONSTANT_SOURCE],
+    sources: EVERY_SHAPE,
     versions: VERSIONS,
   });
 
@@ -46,7 +42,7 @@ describe('constantRanges', () => {
     expect(
       constantRanges({
         constant: CONSTANT,
-        path: SOURCE,
+        path: MODULE,
         ranges: { '@lcabrera/devkit': '>=0.5.1 <1.0.0' },
       }),
     ).toEqual([
@@ -54,7 +50,7 @@ describe('constantRanges', () => {
         constant: CONSTANT,
         field: CONSTANT,
         name: '@lcabrera/devkit',
-        path: SOURCE,
+        path: MODULE,
         range: '>=0.5.1 <1.0.0',
       },
     ]);
@@ -73,7 +69,7 @@ describe('shippedRangeFindings — a range constant', () => {
 
     expect(rest).toEqual([]);
     expect(finding.kind).toBe('excludes-current');
-    expect(findingLine(finding)).toContain(`${SOURCE}:${CONSTANT}`);
+    expect(findingLine(finding)).toContain(`${MODULE}:${CONSTANT}`);
     expect(findingLine(finding)).toContain('write `>=0.5.1 <1.0.0`');
   });
 
@@ -91,7 +87,7 @@ describe('shippedRangeFindings — a range constant', () => {
 
     expect(rest).toEqual([]);
     expect(finding.kind).toBe('unpublished');
-    expect(findingLine(finding)).toContain(`${SOURCE}:${CONSTANT}`);
+    expect(findingLine(finding)).toContain(`${MODULE}:${CONSTANT}`);
     expect(findingLine(finding)).toContain('@lcabrera/gone');
   });
 
@@ -100,7 +96,7 @@ describe('shippedRangeFindings — a range constant', () => {
 
     expect(rest).toEqual([]);
     expect(finding.kind).toBe('no-declarations');
-    expect(findingLine(finding)).toContain(`${SOURCE}:${CONSTANT}`);
+    expect(findingLine(finding)).toContain(`${MODULE}:${CONSTANT}`);
     expect(findingLine(finding)).toContain('range constant');
   });
 
@@ -112,16 +108,15 @@ describe('shippedRangeFindings — a range constant', () => {
         ...YAML_DECLARATIONS,
         ...constantRanges({
           constant: CONSTANT,
-          path: SOURCE,
+          path: MODULE,
           ranges: { '@lcabrera/devkit': '>=0.5.1 <1.0.0' },
         }),
-        ...constantRanges({ constant: other, path: SOURCE, ranges: {} }),
+        ...constantRanges({ constant: other, path: MODULE, ranges: {} }),
       ],
       mentions: ALL_MENTIONS,
       sources: [
-        ...BOTH_SHAPES,
-        CONSTANT_SOURCE,
-        { constant: other, kind: 'constant', path: SOURCE },
+        ...EVERY_SHAPE,
+        { constant: other, kind: 'constant', path: MODULE },
       ],
       versions: VERSIONS,
     });
@@ -129,6 +124,6 @@ describe('shippedRangeFindings — a range constant', () => {
     expect(findings.map(({ constant, kind }) => ({ constant, kind }))).toEqual([
       { constant: other, kind: 'no-declarations' },
     ]);
-    expect(findingLine(findings[0])).toContain(`${SOURCE}:${other}`);
+    expect(findingLine(findings[0])).toContain(`${MODULE}:${other}`);
   });
 });

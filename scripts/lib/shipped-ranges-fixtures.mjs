@@ -32,9 +32,30 @@ export const VERSIONS = {
   '@lcabrera/vite-config': '0.5.0',
 };
 
-export const BOTH_SHAPES = [
+export const MODULE = 'create.mjs';
+
+export const CONSTANT = 'TOOLCHAIN_RANGES';
+
+export const CONSTANT_SOURCE = {
+  constant: CONSTANT,
+  kind: 'constant',
+  path: MODULE,
+};
+
+export const EVERY_SHAPE = [
   { kind: 'manifest', path: MANIFEST },
   { kind: 'catalog', path: YAML },
+  CONSTANT_SOURCE,
+];
+
+export const CONSTANT_DECLARATIONS = [
+  {
+    constant: CONSTANT,
+    field: CONSTANT,
+    name: '@lcabrera/tsconfig',
+    path: MODULE,
+    range: '>=0.2.2 <1.0.0',
+  },
 ];
 
 export const MANIFEST_DECLARATIONS = [
