@@ -15,20 +15,22 @@ import {
 } from './devkit-workspace.mjs';
 
 describe('TREE_TASKS', () => {
-  it('runs the check-only tasks the created tree wires for itself', () => {
+  it('runs the check-only tasks, then the writing lint:all last', () => {
     expect(TREE_TASKS).toEqual([
       ['run', 'lint:check'],
       ['run', 'typecheck:all'],
       ['fmt', '--check', '.'],
       ['run', 'test:all'],
+      ['run', 'lint:all'],
     ]);
   });
 
-  it('runs no task that writes: no lint:all, no --fix, no --write', () => {
-    const words = TREE_TASKS.flat();
-    expect(words).not.toContain('lint:all');
-    expect(words).not.toContain('--fix');
-    expect(words).not.toContain('--write');
+  it('runs no writing task before a check it could mask', () => {
+    const writing = new Set(['lint:all', '--fix', '--write']);
+    const firstWriting = TREE_TASKS.findIndex((args) =>
+      args.some((word) => writing.has(word)),
+    );
+    expect(firstWriting).toBe(TREE_TASKS.length - 1);
   });
 
   it('labels each task with the command it runs', () => {
@@ -37,6 +39,7 @@ describe('TREE_TASKS', () => {
       'vp run typecheck:all',
       'vp fmt --check .',
       'vp run test:all',
+      'vp run lint:all',
     ]);
   });
 });

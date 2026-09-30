@@ -17,6 +17,7 @@ export const TREE_TASKS = [
   ['run', 'typecheck:all'],
   ['fmt', '--check', '.'],
   ['run', 'test:all'],
+  ['run', 'lint:all'],
 ];
 
 /**
@@ -82,7 +83,7 @@ export const modifiedTrackedFiles = (porcelain) =>
     .map((line) => line.slice(3))
     .map(
       (path) =>
-        `\`${path}\` changed while the gate ran — a step wrote to the committed tree it was checking, so a check that passed may have passed on its own fix`,
+        `\`${path}\` changed while the gate ran — a task rewrote a file the blueprint shipped, so a consumer's fresh tree goes dirty the first time they run it`,
     );
 
 /**
