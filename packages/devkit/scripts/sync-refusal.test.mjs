@@ -8,6 +8,7 @@
 
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -17,6 +18,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
+import { runInit } from './command-init.mjs';
 import { runDoctor, runSync } from './command-sync.mjs';
 import { hashContent, MANIFEST_FILE } from './manifest.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
@@ -76,30 +78,38 @@ const BROKEN = {
   },
 };
 
+const afterRun = ({ names, root, run }) => {
+  const { code, errors } = captured(() => run(root));
+  return {
+    code,
+    explained: errors.includes(names),
+    recorded: Object.hasOwn(
+      JSON.parse(readFileSync(join(root, MANIFEST_FILE), 'utf8')).files,
+      RECORDED,
+    ),
+    survives: existsSync(join(root, RECORDED)),
+  };
+};
+
+const REFUSED = { code: 1, explained: true, recorded: true, survives: true };
+
+const COMMANDS = {
+  'doctor --check': (root) => runDoctor(['--check'], root),
+  init: (root) => {
+    mkdirSync(join(root, '.git'));
+    return runInit(['--force'], root);
+  },
+  sync: (root) => runSync([], root),
+};
+
 describe('an install whose asset set is broken', () => {
   for (const [label, { keeps, names }] of Object.entries(BROKEN)) {
-    test(`makes sync fail, say why and retire nothing when ${label}`, () => {
-      shipped.keeps = keeps;
-      const root = recordedTree();
+    for (const [command, run] of Object.entries(COMMANDS)) {
+      test(`makes ${command} fail, say why and retire nothing when ${label}`, () => {
+        shipped.keeps = keeps;
 
-      const { code, errors } = captured(() => runSync([], root));
-
-      expect(code).toBe(1);
-      expect(errors).toContain(names);
-      expect(existsSync(join(root, RECORDED))).toBe(true);
-      expect(
-        JSON.parse(readFileSync(join(root, MANIFEST_FILE), 'utf8')).files,
-      ).toHaveProperty([RECORDED]);
-    });
-
-    test(`makes doctor --check fail and say why when ${label}`, () => {
-      shipped.keeps = keeps;
-      const root = recordedTree();
-
-      const { code, errors } = captured(() => runDoctor(['--check'], root));
-
-      expect(code).toBe(1);
-      expect(errors).toContain(names);
-    });
+        expect(afterRun({ names, root: recordedTree(), run })).toEqual(REFUSED);
+      });
+    }
   }
 });

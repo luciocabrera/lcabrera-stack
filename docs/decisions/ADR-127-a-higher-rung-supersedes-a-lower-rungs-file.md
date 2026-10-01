@@ -87,6 +87,11 @@ symbolic link on the way, to somewhere strictly inside the root. A record that
 fails is `outside`: it is never read or deleted, it is reported, and its record
 leaves the manifest because the kit will never act on it. The lexical half is
 `isRepositoryRelative`, the check the `hooks` path already goes through.
+Records and shipped paths are compared by the file they resolve to, not by
+their spelling, so a record that names a placed file through `..` or a
+symbolic link inside the repository is not retired. One plan never both places
+and retires the same file. Retirement entries carry no content, so
+`devkit closure` reads only the files a run would place.
 
 **The asset set has to be a shipping list before an absence means anything.**
 "No asset maps onto this path" is only evidence that the package stopped shipping

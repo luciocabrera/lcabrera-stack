@@ -44,7 +44,7 @@ import {
   serialiseManifest,
 } from './manifest.mjs';
 import { declaredPeerNames, installedPeerVersion } from './peer.mjs';
-import { containedIn, retirementRefusal } from './retirement.mjs';
+import { destinationIn, retirementRefusal } from './retirement.mjs';
 import {
   applySync,
   manifestAfter,
@@ -205,7 +205,7 @@ export const buildPlan = ({
     entries: planSync({
       assets,
       config,
-      isContained: containedIn(root),
+      destinationOf: destinationIn(root),
       manifest,
       onDiskContent: onDiskReader(root),
       onDiskHash: onDiskHasher(root),

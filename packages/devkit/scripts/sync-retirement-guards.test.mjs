@@ -21,10 +21,12 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
+import { runClosure } from './command-closure.mjs';
 import { DEFAULT_CONFIG, KIT_GROUPS } from './config.mjs';
-import { hashContent } from './manifest.mjs';
-import { containedIn, retirementRefusal } from './retirement.mjs';
+import { hashContent, MANIFEST_FILE } from './manifest.mjs';
+import { destinationIn, retirementRefusal } from './retirement.mjs';
 import { applySync, manifestAfter, onDiskHasher, planSync } from './sync.mjs';
+import { silencedConsole } from './test-fixtures.mjs';
 
 const CONFIG = {
   ...DEFAULT_CONFIG,
@@ -65,8 +67,8 @@ const syncRecord = ({
   const entries = planSync({
     assets,
     config: CONFIG,
+    destinationOf: destinationIn(root),
     groups: ['lower'],
-    isContained: containedIn(root),
     kitGroups,
     manifest,
     onDiskHash,
@@ -126,10 +128,10 @@ describe('a recorded path outside the repository', () => {
 
   test('the repository root itself is not a path inside it', () => {
     const { root } = scratchRepository();
-    expect(['.', '', 'a/..'].map(containedIn(root))).toEqual([
-      false,
-      false,
-      false,
+    expect(['.', '', 'a/..'].map(destinationIn(root))).toEqual([
+      undefined,
+      undefined,
+      undefined,
     ]);
   });
 });
@@ -181,5 +183,80 @@ describe('an asset set that cannot be trusted as the shipping list', () => {
       .map((entry) => entry.name);
 
     expect(KIT_GROUPS.toSorted(byName)).toEqual(directories.toSorted(byName));
+  });
+});
+
+const SHIPPED_AT = 'app/kept.md';
+
+const planAlias = (root, alias) => {
+  writeFileSync(join(root, 'app', 'kept.md'), LOWER.content);
+  const entries = planSync({
+    assets: [LOWER],
+    config: CONFIG,
+    destinationOf: destinationIn(root),
+    groups: ['lower'],
+    kitGroups: ['lower'],
+    manifest: {
+      files: {
+        [alias]: hashContent(LOWER.content),
+        [SHIPPED_AT]: hashContent(LOWER.content),
+      },
+    },
+    onDiskHash: onDiskHasher(root),
+  });
+  applySync({ entries, root });
+  return {
+    planned: entries.map(({ path, state }) => ({ path, state })),
+    survives: existsSync(join(root, SHIPPED_AT)),
+  };
+};
+
+describe('a record naming a placed file by another spelling', () => {
+  const ALIASES = {
+    'a parent segment': () => 'app/sub/../kept.md',
+    'a symlinked directory inside the repository': (root) => {
+      symlinkSync(join(root, 'app'), join(root, 'alias'), 'dir');
+      return 'alias/kept.md';
+    },
+  };
+
+  for (const [label, aliasFor] of Object.entries(ALIASES)) {
+    test(`is not retired when it reaches it through ${label}`, () => {
+      const { root } = scratchRepository();
+      mkdirSync(join(root, 'app'));
+
+      expect(planAlias(root, aliasFor(root))).toEqual({
+        planned: [{ path: SHIPPED_AT, state: 'current' }],
+        survives: true,
+      });
+    });
+  }
+});
+
+const closureOf = (root) => {
+  const silenced = silencedConsole(vi);
+  try {
+    const code = runClosure(['--shipped'], root);
+    return { code, printed: silenced.log.mock.calls.flat().join('\n') };
+  } finally {
+    silenced.restore();
+  }
+};
+
+describe('the shipped closure of a tree holding a stale record', () => {
+  test('reports exactly what it reports without the record', () => {
+    const { root } = scratchRepository();
+    const clean = closureOf(root);
+    writeFileSync(
+      join(root, MANIFEST_FILE),
+      JSON.stringify({
+        files: { 'gone.md': hashContent('gone') },
+        packageVersion: '0.0.0',
+        version: 1,
+      }),
+    );
+    writeFileSync(join(root, 'gone.md'), 'gone');
+
+    expect(closureOf(root)).toEqual(clean);
   });
 });

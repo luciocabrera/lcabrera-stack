@@ -14,7 +14,7 @@
  */
 
 import { realpathSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname, join, posix } from 'node:path';
 
 import {
   isRepositoryRelative,
@@ -35,18 +35,30 @@ const throughLinks = (path) => {
 };
 
 /**
- * @param {string} root
- * @returns {(targetPath: string) => boolean} whether a path resolves, through
- * every symbolic link on the way, to somewhere strictly inside `root`
+ * @param {string} path
+ * @returns {string | undefined} the normalised repository-relative path, or
+ * nothing for one that is absolute, climbs out, or names the root itself
  */
-export const containedIn = (root) => {
+export const lexicalDestination = (path) => {
+  if (!isRepositoryRelative(path)) return;
+  const normal = posix.normalize(path.replaceAll('\\', '/'));
+  return normal === '.' || normal === './' ? undefined : normal;
+};
+
+/**
+ * @param {string} root
+ * @returns {(path: string) => string | undefined} the file a path names once
+ * every symbolic link on the way is resolved, or nothing when that file is not
+ * strictly inside `root`
+ */
+export const destinationIn = (root) => {
   const realRoot = throughLinks(root);
-  return (targetPath) => {
-    if (!isRepositoryRelative(targetPath)) return false;
-    const resolved = throughLinks(join(root, targetPath));
-    return (
-      resolved !== realRoot && isWithin({ path: resolved, root: realRoot })
-    );
+  return (path) => {
+    if (lexicalDestination(path) === undefined) return;
+    const resolved = throughLinks(join(root, path));
+    return resolved !== realRoot && isWithin({ path: resolved, root: realRoot })
+      ? resolved
+      : undefined;
   };
 };
 
@@ -72,8 +84,8 @@ export const declaredRetirements = ({ config, retiring }) =>
       .filter((targetPath) => targetPath !== undefined),
   );
 
-const retirementEntry = ({ isContained, onDiskHash, path, recordedHash }) => {
-  if (!isContained(path)) {
+const retirementEntry = ({ destination, onDiskHash, path, recordedHash }) => {
+  if (destination === undefined) {
     return { executable: false, missing: [], path, state: OUTSIDE_STATE };
   }
   const onDisk = onDiskHash(path);
@@ -86,20 +98,30 @@ const retirementEntry = ({ isContained, onDiskHash, path, recordedHash }) => {
   };
 };
 
+const destinationsOf = ({ destinationOf, paths }) =>
+  new Set(
+    [...paths]
+      .map((path) => destinationOf(path))
+      .filter((destination) => destination !== undefined),
+  );
+
 /**
  * @param {{ assets: { path: string }[], config: object,
- *   declared: Set<string>, isContained: (targetPath: string) => boolean,
+ *   declared: Set<string>,
+ *   destinationOf: (targetPath: string) => string | undefined,
  *   kitGroups?: readonly string[], manifest: { files: Record<string, string> },
- *   onDiskHash: (targetPath: string) => string | undefined }} args
+ *   onDiskHash: (targetPath: string) => string | undefined,
+ *   placed: Set<string> }} args
  */
 export const retirementsFor = ({
   assets,
   config,
   declared,
-  isContained,
+  destinationOf,
   kitGroups,
   manifest,
   onDiskHash,
+  placed,
 }) => {
   if (retirementRefusal({ assets, kitGroups }) !== undefined) return [];
   const shipped = new Set(
@@ -107,9 +129,22 @@ export const retirementsFor = ({
       .map((asset) => targetPathFor({ assetPath: asset.path, config }))
       .filter((targetPath) => targetPath !== undefined),
   );
+  const placedAt = destinationsOf({ destinationOf, paths: placed });
+  const declaredAt = destinationsOf({ destinationOf, paths: declared });
+  const shippedAt = destinationsOf({ destinationOf, paths: shipped });
+  const stillShipped = (destination) =>
+    placedAt.has(destination) ||
+    (shippedAt.has(destination) && !declaredAt.has(destination));
   return Object.entries(manifest.files)
     .filter(([path]) => declared.has(path) || !shipped.has(path))
-    .map(([path, recordedHash]) =>
-      retirementEntry({ isContained, onDiskHash, path, recordedHash }),
-    );
+    .map(([path, recordedHash]) => ({
+      destination: destinationOf(path),
+      path,
+      recordedHash,
+    }))
+    .filter(
+      ({ destination }) =>
+        destination === undefined || !stillShipped(destination),
+    )
+    .map((record) => retirementEntry({ ...record, onDiskHash }));
 };

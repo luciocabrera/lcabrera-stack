@@ -25,6 +25,7 @@ import {
   PROFILES,
 } from './config.mjs';
 import { gateBinNames } from './init.mjs';
+import { isRetirement } from './manifest.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
 import { WORKSPACE_DEPENDENCIES } from './workspace.mjs';
 
@@ -71,7 +72,8 @@ const providedPackages = ({ entries, profile }) => {
 };
 
 const shippedContext = ({ profile, root }) => {
-  const { config, entries } = buildPlan({ profile, root });
+  const { config, entries: planned } = buildPlan({ profile, root });
+  const entries = planned.filter((entry) => !isRetirement(entry.state));
   return {
     agentDirectory: config.paths.agents,
     allowedBins: gateBinNames(),

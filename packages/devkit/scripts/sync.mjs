@@ -17,7 +17,6 @@ import {
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import { isRepositoryRelative } from '../assets/workspace/scripts/hooks-path.mjs';
 import { acceptedEntry, isAccepted } from './accepted.mjs';
 import { substituteCiSetup } from './ci-setup.mjs';
 import {
@@ -45,7 +44,11 @@ import {
 } from './manifest.mjs';
 import { unmetPeers } from './peer.mjs';
 import { substituteCommands } from './placeholders.mjs';
-import { declaredRetirements, retirementsFor } from './retirement.mjs';
+import {
+  declaredRetirements,
+  lexicalDestination,
+  retirementsFor,
+} from './retirement.mjs';
 
 const unmetDeclaration = ({ config, content, peerVersions }) => {
   const keys = requiredConfigKeys(content).filter(
@@ -179,14 +182,14 @@ const prevailingAssets = ({ assets, config, groups }) => {
  *   onDiskHash: (targetPath: string) => string | undefined,
  *   peerVersions?: Map<string, string | undefined>,
  *   retiring?: readonly string[],
- *   isContained?: (targetPath: string) => boolean,
+ *   destinationOf?: (targetPath: string) => string | undefined,
  *   kitGroups?: readonly string[] }} args
  */
 export const planSync = ({
   assets,
   config,
+  destinationOf = lexicalDestination,
   groups = groupsFor(config),
-  isContained = isRepositoryRelative,
   kitGroups,
   manifest,
   onDiskContent = () => undefined,
@@ -200,10 +203,6 @@ export const planSync = ({
     config,
     groups,
   });
-  const placedPaths = new Set(placed.map(({ targetPath }) => targetPath));
-  const declared = declaredRetirements({ config, retiring }).difference(
-    placedPaths,
-  );
   const planned = placed.map(({ asset, targetPath }) => {
     const entry = planEntryFor({
       asset,
@@ -222,11 +221,12 @@ export const planSync = ({
     ...retirementsFor({
       assets,
       config,
-      declared,
-      isContained,
+      declared: declaredRetirements({ config, retiring }),
+      destinationOf,
       kitGroups,
       manifest,
       onDiskHash,
+      placed: new Set(placed.map(({ targetPath }) => targetPath)),
     }),
   ];
 };

@@ -20,6 +20,8 @@ area:
   - packages/devkit/scripts/retirement.mjs
   - packages/devkit/scripts/command-init.mjs
   - packages/devkit/ARCHITECTURE.md
+  - packages/devkit/assets/root/COMMANDS.md
+  - packages/devkit/scripts/command-closure.mjs
 started: 2026-10-01
 updated: 2026-10-01
 plan: (none)
