@@ -2,7 +2,17 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TablePageReader } from './create-table-page-reader.util.ts';
 
+import { getRowsCount } from '../db/get-rows-count.util.ts';
+import { selectRows } from '../db/select-rows.util.ts';
 import { createGroupDetailReads } from './create-group-detail-reads.util.ts';
+import { createTablePageReader } from './create-table-page-reader.util.ts';
+
+vi.mock('../db/get-rows-count.util.ts', () => ({
+  getRowsCount: vi.fn(async () => 0),
+}));
+vi.mock('../db/select-rows.util.ts', () => ({
+  selectRows: vi.fn(async () => []),
+}));
 
 type Reader = TablePageReader<{ readonly id: number }>;
 
@@ -101,5 +111,53 @@ describe('resolveLockedFilters', () => {
     expect(args?.columns).toBe(COLUMNS);
     expect(args?.isGroupRequired).toBe(true);
     expect(args?.params.get('group')).toBe('token');
+  });
+});
+
+describe('over a reader that declares ignored sort columns', () => {
+  const readerReads = createGroupDetailReads({
+    columns: COLUMNS,
+    limit: 50,
+    reader: createTablePageReader<{ readonly id: number }, 'id'>({
+      defaultLimit: 50,
+      fallbackSort: [{ columnKey: 'id', direction: 'asc' }],
+      groupMaxRows: 500,
+      ignoredSortColumns: ['menu'],
+      maxLimit: 100,
+      primaryKey: 'id',
+      target: {
+        allowedColumns: ['id', 'name', 'status'],
+        schema: 'public',
+        table: 'items',
+      },
+    }),
+  });
+
+  it('drops a sort on an ignored column before it reaches the read', async () => {
+    vi.mocked(selectRows).mockClear();
+    vi.mocked(getRowsCount).mockClear();
+
+    const groupToken = encodeURIComponent(
+      JSON.stringify({
+        isSubtotal: false,
+        keys: ['status'],
+        path: [{ columnKey: 'status', value: 'open' }],
+      }),
+    );
+
+    const page = await readerReads.fetchPage({
+      effectiveSorting: [
+        { columnKey: 'menu', direction: 'asc' },
+        { columnKey: 'name', direction: 'desc' },
+      ],
+      filters: {},
+      request: new Request(`http://localhost/items/group?group=${groupToken}`),
+    });
+
+    expect(page.error).toBeUndefined();
+    expect(vi.mocked(selectRows).mock.calls[0]?.[0]?.sort).toStrictEqual([
+      { column: 'name', direction: 'desc' },
+      { column: 'id', direction: 'asc' },
+    ]);
   });
 });

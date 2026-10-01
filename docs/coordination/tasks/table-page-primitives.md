@@ -14,6 +14,7 @@ area:
   - .changeset/table-page-primitives*.md
   - apps/showcase/src/INVENTORY.md
   - scripts/inventory-drift-baseline.json
+  - pnpm-lock.yaml
   - docs/decisions/ADR-128-*.md
 started: 2026-10-01
 updated: 2026-10-01

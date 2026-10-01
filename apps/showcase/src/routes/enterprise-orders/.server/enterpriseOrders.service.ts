@@ -36,7 +36,10 @@ const TARGET = {
   table: ENTERPRISE_ORDERS_TABLE,
 } as const;
 
-const ordersPage = createTablePageReader<EnterpriseOrderListRow>({
+const ordersPage = createTablePageReader<
+  EnterpriseOrderListRow,
+  typeof ENTERPRISE_ORDER_PRIMARY_KEY
+>({
   defaultLimit: INITIAL_PAGE_SIZE,
   fallbackSort: ENTERPRISE_ORDER_FALLBACK_SORT,
   fields: ENTERPRISE_ORDER_LIST_COLUMNS,

@@ -16,6 +16,10 @@ functions bound to that table:
   search params and scopes the read to a drill-down group when one is named.
 - `resolveGroupRead`, `resolveGroupRestriction`, `selectGroupingCapabilities`,
   `selectGroupKeyTruncations` and `deleteRow` are bound to the same table.
+  `deleteRow` takes the primary key column's type: name the row and the key
+  as type arguments, `createTablePageReader<Row, 'id'>(…)`.
+- `ignoredSortColumns` is dropped from every read the reader resolves, the
+  page params and a group-detail read alike.
 
 Three factories wrap those functions into request handlers that take
 `{ request }`: `createTablePageLoader` answers with the page as JSON,

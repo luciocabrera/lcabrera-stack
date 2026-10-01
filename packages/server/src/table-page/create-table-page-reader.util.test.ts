@@ -1,4 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import {
+  beforeEach,
+  describe,
+  expect,
+  expectTypeOf,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 import { deleteRows } from '../db/delete-rows.util.ts';
 import { getColumnGroupingCapabilities } from '../db/get-column-grouping-capabilities.util.ts';
@@ -42,7 +49,7 @@ const TARGET = {
 const MAX_LIMIT = 100;
 const GROUP_MAX_ROWS = 500;
 
-const reader = createTablePageReader<{ readonly id: number }>({
+const reader = createTablePageReader<{ readonly id: number }, 'id'>({
   defaultLimit: 50,
   fallbackSort: [{ columnKey: 'id', direction: 'asc' }],
   fields: ['id', 'name'],
@@ -467,6 +474,11 @@ describe('resolveGroupRestriction', () => {
 });
 
 describe('deleteRow', () => {
+  it('takes the primary key column’s type, and nothing else', () => {
+    expectTypeOf(reader.deleteRow).parameter(0).toEqualTypeOf<number>();
+    expectTypeOf(reader.deleteRow).parameter(0).not.toEqualTypeOf<string>();
+  });
+
   it('deletes by primary key', async () => {
     await reader.deleteRow(7);
 

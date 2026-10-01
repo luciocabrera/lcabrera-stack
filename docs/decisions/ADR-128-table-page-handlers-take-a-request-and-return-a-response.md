@@ -72,8 +72,9 @@ remains the caller's.
 
 `ignoredSortColumns` exists because a UI may send sort keys for columns that
 hold no data. The package cannot know their names, so the caller has to pass
-them. A caller that forgets gets the existing refusal from the query builder
-for a column it does not allow.
+them, once, to the reader. The reader drops them from every read it resolves,
+so the paginated read and a group-detail read agree. A caller that forgets gets
+the existing refusal from the query builder for a column it does not allow.
 
 ## Alternatives considered
 

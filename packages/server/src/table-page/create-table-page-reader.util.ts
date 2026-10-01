@@ -19,7 +19,7 @@ import { parseTablePageParams } from './parse-table-page-params.util.ts';
 import { selectGroupedTablePage } from './select-grouped-table-page.util.ts';
 import { toKeysetCursor } from './to-keyset-cursor.util.ts';
 
-export type CreateTablePageReaderArgs = {
+export type CreateTablePageReaderArgs<TKey extends string = string> = {
   /** Page size a request that names no `limit` gets. */
   readonly defaultLimit: number;
   /** Order a request that sends no usable sort gets; must be non-empty. */
@@ -28,14 +28,14 @@ export type CreateTablePageReaderArgs = {
   readonly fields?: readonly string[];
   /** Row ceiling of a grouped read, which is never paginated. */
   readonly groupMaxRows: number;
-  /** Sort keys a client may send that name no data column. */
+  /** Sort keys that name no data column; dropped from every read this reader resolves. */
   readonly ignoredSortColumns?: readonly string[];
   /** Largest page a request can ask for; smaller pages pass through. */
   readonly maxLimit: number;
   /** Longest ORDER BY a request can ask for. Defaults to the allowed column count. */
   readonly maxSortRules?: number;
   /** Unique, non-null column that breaks sort ties and anchors keyset pages. */
-  readonly primaryKey: string;
+  readonly primaryKey: TKey;
   readonly target: TablePageTarget;
 };
 
@@ -49,7 +49,10 @@ export type TablePageGroupRestrictionArgs = Omit<
   'selectTruncations'
 >;
 
-export const createTablePageReader = <TRow extends QueryResultRow>({
+export const createTablePageReader = <
+  TRow extends QueryResultRow,
+  TKey extends keyof TRow & string,
+>({
   defaultLimit,
   fallbackSort,
   fields,
@@ -59,7 +62,7 @@ export const createTablePageReader = <TRow extends QueryResultRow>({
   maxSortRules,
   primaryKey,
   target,
-}: CreateTablePageReaderArgs) => {
+}: CreateTablePageReaderArgs<TKey>) => {
   const sortRuleCeiling = maxSortRules ?? target.allowedColumns.length;
   const projection = fields ?? target.allowedColumns;
 
@@ -147,6 +150,9 @@ export const createTablePageReader = <TRow extends QueryResultRow>({
       maxLimit,
       primaryKey,
       selectTruncations: selectGroupKeyTruncations,
+      sort: args.sort.filter(
+        ({ column }) => !(ignoredSortColumns ?? []).includes(column),
+      ),
     });
 
   const resolveTableGroupRestriction = async (
@@ -168,7 +174,7 @@ export const createTablePageReader = <TRow extends QueryResultRow>({
       params,
     });
 
-  const deleteRow = async (id: unknown) => {
+  const deleteRow = async (id: TRow[TKey]) => {
     await deleteRows({
       ...target,
       filters: [{ column: primaryKey, operator: 'eq', value: id }],
@@ -186,5 +192,7 @@ export const createTablePageReader = <TRow extends QueryResultRow>({
   };
 };
 
-export type TablePageReader<TRow extends QueryResultRow = QueryResultRow> =
-  ReturnType<typeof createTablePageReader<TRow>>;
+export type TablePageReader<
+  TRow extends QueryResultRow = QueryResultRow,
+  TKey extends keyof TRow & string = keyof TRow & string,
+> = ReturnType<typeof createTablePageReader<TRow, TKey>>;
