@@ -37,8 +37,10 @@ import {
 import { configuredCommandRuns } from './lib/devkit-config-commands.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
 import {
+  registryState,
   serveRegistry,
   startedRegistry,
+  withRegistryFindings,
 } from './lib/devkit-registry-server.mjs';
 import { collectedTail, firstAnswer, stopGroup } from './lib/devkit-serve.mjs';
 import {
@@ -314,26 +316,29 @@ const checkedTree = async ({ devkit, staging, tree }) => {
     tree,
   });
   if (findings.length > 0) return [...created, ...findings];
-  const { server, url } = startedRegistry({
+  const { log, server, url } = startedRegistry({
     launch: [fileURLToPath(import.meta.url), SERVE_FLAG],
     packed,
     staging,
   });
   try {
     writeFileSync(join(tree, '.npmrc'), scopedRegistryConfig(url));
-    return [
-      ...created,
-      ...(await treeFindings({
-        checks: TREE_CHECKS,
-        context: { devkit },
-        prerequisites: [
-          runtimeFindings,
-          developerInstallFindings,
-          sourceFindingsFor({ packed, registry: url }),
-        ],
-        tree,
-      })),
-    ];
+    const found = await treeFindings({
+      checks: TREE_CHECKS,
+      context: { devkit },
+      prerequisites: [
+        runtimeFindings,
+        developerInstallFindings,
+        sourceFindingsFor({ packed, registry: url }),
+      ],
+      tree,
+    });
+    return withRegistryFindings({
+      ...(await registryState({ server, url })),
+      findings: [...created, ...found],
+      log: readIfPresent(log),
+      url,
+    });
   } finally {
     server.kill();
   }

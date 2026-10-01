@@ -3,10 +3,19 @@
  */
 
 import { spawn } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs';
+import { request } from 'node:http';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
@@ -14,6 +23,11 @@ import {
   parsedPort,
   portFrom,
   publishPort,
+  registryFaultFindings,
+  registryResponse,
+  registryState,
+  startedRegistry,
+  withRegistryFindings,
 } from './devkit-registry-server.mjs';
 
 const directories = [];
@@ -93,5 +107,271 @@ describe('portFrom', () => {
     expect(() =>
       portFrom({ deadlineMs: 200, portFile: join(directory, 'port') }),
     ).toThrow(/did not start within 200 ms/);
+  });
+});
+
+const PACKED = {
+  file: 'lcabrera-api-1.2.3.tgz',
+  integrity: 'sha512-abc',
+  manifest: { name: '@lcabrera/api', version: '1.2.3' },
+};
+
+const TARBALL_PATH = '/staging/lcabrera-api-1.2.3.tgz';
+
+const INDEX = { '@lcabrera/api': { ...PACKED, tarballPath: TARBALL_PATH } };
+
+const BASE_URL = 'http://127.0.0.1:4873';
+
+describe('registryResponse', () => {
+  it('serves the packument of a packed package under its encoded name', () => {
+    const { body, status } = registryResponse({
+      baseUrl: BASE_URL,
+      index: INDEX,
+      path: '/@lcabrera%2Fapi',
+    });
+    expect(status).toBe(200);
+    expect(JSON.parse(body).versions['1.2.3'].dist.tarball).toBe(
+      `${BASE_URL}/-/${PACKED.file}`,
+    );
+  });
+
+  it('reads a packed tarball from the path its index entry stores', () => {
+    expect(
+      registryResponse({
+        baseUrl: BASE_URL,
+        index: INDEX,
+        path: `/-/${PACKED.file}`,
+      }),
+    ).toMatchObject({ status: 200, tarballPath: TARBALL_PATH });
+  });
+
+  it.each([
+    '/-/npm/v1/attestations/@lcabrera/api@1.2.3',
+    '/-/npm/v1/security/advisories/bulk',
+    '/-/lcabrera-api-9.9.9.tgz',
+    '/-/../../etc/passwd',
+    '/-/..%2F..%2Fetc%2Fpasswd',
+    `/-/../${PACKED.file}`,
+    '/@lcabrera%2Fmissing',
+    '/%E0%A4%A',
+    '/__proto__',
+    '/',
+  ])('answers %s with 404 rather than a file it does not hold', (path) => {
+    expect(registryResponse({ baseUrl: BASE_URL, index: INDEX, path })).toEqual(
+      {
+        body: JSON.stringify({ error: 'not found' }),
+        status: 404,
+        type: 'application/json',
+      },
+    );
+  });
+});
+
+describe('registryFaultFindings', () => {
+  const url = BASE_URL;
+
+  it('finds nothing while the registry is running and answers', () => {
+    expect(registryFaultFindings({ probe: { status: 404 }, url })).toEqual([]);
+  });
+
+  it('names the registry, its exit and its last output when it exited', () => {
+    const [finding] = registryFaultFindings({
+      exit: { code: 1, signal: null },
+      log: 'Error: ENOENT: no such file or directory',
+      probe: { error: 'connect ECONNREFUSED' },
+      url,
+    });
+    expect(finding).toMatch(
+      /^the scratch registry at http:\/\/127\.0\.0\.1:4873 /,
+    );
+    expect(finding).toContain('it exited 1');
+    expect(finding).toContain('not in the created tree');
+    expect(finding).toContain('ENOENT');
+  });
+
+  it('names the registry when it is running but does not answer', () => {
+    const [finding] = registryFaultFindings({
+      probe: { error: 'The operation was aborted due to timeout' },
+      url,
+    });
+    expect(finding).toContain('scratch registry');
+    expect(finding).toContain('aborted due to timeout');
+  });
+});
+
+describe('withRegistryFindings', () => {
+  const url = BASE_URL;
+  const stack = 'Error: EACCES: permission denied, open lcabrera-api-1.2.3.tgz';
+
+  it('appends the registry log to a failing run whose registry still answers', () => {
+    const findings = withRegistryFindings({
+      findings: ['`vp install` exited 1 in the created tree'],
+      log: stack,
+      probe: { status: 404 },
+      url,
+    });
+    expect(findings).toHaveLength(2);
+    expect(findings[0]).toBe('`vp install` exited 1 in the created tree');
+    expect(findings[1]).toContain(`the scratch registry at ${url}`);
+    expect(findings[1]).toContain(stack);
+  });
+
+  it('adds nothing to a failing run whose registry wrote nothing', () => {
+    expect(
+      withRegistryFindings({
+        findings: ['a tree finding'],
+        log: '\n',
+        probe: { status: 404 },
+        url,
+      }),
+    ).toEqual(['a tree finding']);
+  });
+
+  it('keeps a passing run passing when the registry wrote something', () => {
+    expect(
+      withRegistryFindings({
+        findings: [],
+        log: stack,
+        probe: { status: 404 },
+        url,
+      }),
+    ).toEqual([]);
+  });
+
+  it('leads with a stopped registry and quotes its log once', () => {
+    const findings = withRegistryFindings({
+      exit: { code: 1, signal: null },
+      findings: ['a tree finding'],
+      log: stack,
+      probe: { error: 'connect ECONNREFUSED' },
+      url,
+    });
+    expect(findings).toHaveLength(2);
+    expect(findings[0]).toContain('stopped answering (it exited 1)');
+    expect(findings[1]).toBe('a tree finding');
+  });
+});
+
+const SERVE_LAUNCHER = `
+import process from 'node:process';
+import { serveRegistry } from ${JSON.stringify(
+  fileURLToPath(new URL('devkit-registry-server.mjs', import.meta.url)),
+)};
+const [indexPath, portFile] = process.argv.slice(2);
+serveRegistry({ indexPath, portFile });
+`;
+
+const launchedRegistry = () => {
+  const staging = join(scratch(), 'staging');
+  mkdirSync(staging);
+  const launcher = join(staging, 'serve.mjs');
+  writeFileSync(launcher, SERVE_LAUNCHER);
+  writeFileSync(join(staging, PACKED.file), 'tarball bytes');
+  return startedRegistry({ launch: [launcher], packed: [PACKED], staging });
+};
+
+const rawGet = ({ path, url }) =>
+  new Promise((resolve, reject) => {
+    const { hostname, port } = new URL(url);
+    request({ hostname, path, port }, (response) => {
+      let body = '';
+      response.on('data', (chunk) => {
+        body += chunk;
+      });
+      response.on('end', () => resolve({ body, status: response.statusCode }));
+    })
+      .on('error', reject)
+      .end();
+  });
+
+const stopped = (server) =>
+  new Promise((resolve) => {
+    server.once('exit', resolve);
+    server.kill();
+  });
+
+describe('the scratch registry process', () => {
+  it('keeps answering after a request for a path it does not serve', async () => {
+    const { server, url } = launchedRegistry();
+    try {
+      const attestation = await fetch(
+        `${url}/-/npm/v1/attestations/@lcabrera/api@1.2.3`,
+      );
+      expect(attestation.status).toBe(404);
+      const packument = await fetch(`${url}/@lcabrera%2Fapi`);
+      expect(packument.status).toBe(200);
+      const tarball = await fetch(`${url}/-/${PACKED.file}`);
+      expect(await tarball.text()).toBe('tarball bytes');
+      expect(
+        registryFaultFindings({
+          ...(await registryState({ server, url })),
+          url,
+        }),
+      ).toEqual([]);
+    } finally {
+      await stopped(server);
+    }
+  });
+
+  it.each(['/-/../outside.txt', '/-/..%2Foutside.txt', '/-/outside.txt'])(
+    'answers %s with 404 and never reads the file it names',
+    async (path) => {
+      const { log, server, url } = launchedRegistry();
+      try {
+        const staging = dirname(log);
+        writeFileSync(join(staging, 'outside.txt'), 'outside the index');
+        writeFileSync(
+          join(dirname(staging), 'outside.txt'),
+          'outside the index',
+        );
+        const { body, status } = await rawGet({ path, url });
+        expect(status).toBe(404);
+        expect(body).not.toContain('outside the index');
+      } finally {
+        await stopped(server);
+      }
+    },
+  );
+
+  it('puts the stack of a request it answered with 500 in a failing report', async () => {
+    const { log, server, url } = launchedRegistry();
+    try {
+      unlinkSync(join(dirname(log), PACKED.file));
+      const tarball = await fetch(`${url}/-/${PACKED.file}`);
+      expect(tarball.status).toBe(500);
+      const findings = withRegistryFindings({
+        ...(await registryState({ server, url })),
+        findings: ['a tree finding'],
+        log: readFileSync(log, 'utf8'),
+        url,
+      });
+      expect(findings[0]).toBe('a tree finding');
+      expect(findings[1]).toContain(`the scratch registry at ${url}`);
+      expect(findings[1]).toContain('ENOENT');
+    } finally {
+      await stopped(server);
+    }
+  });
+
+  it('reports how it ended without the caller waiting for its exit', async () => {
+    const { server, url } = launchedRegistry();
+    process.kill(server.pid, 'SIGKILL');
+    const [finding] = registryFaultFindings({
+      ...(await registryState({ server, url })),
+      url,
+    });
+    expect(finding).toContain('it was killed by SIGKILL');
+  });
+
+  it('is reported by name once it has stopped', async () => {
+    const { log, server, url } = launchedRegistry();
+    await stopped(server);
+    const [finding] = registryFaultFindings({
+      ...(await registryState({ server, url })),
+      log: readFileSync(log, 'utf8'),
+      url,
+    });
+    expect(finding).toContain(`the scratch registry at ${url}`);
+    expect(finding).toContain('it was killed by SIGTERM');
   });
 });
