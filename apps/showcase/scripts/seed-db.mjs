@@ -103,12 +103,12 @@ const applySources = ({ connection, database, sources }) =>
   withClient({
     connection,
     database,
-    run: async (client) => {
-      for (const { path, prepare } of sources) {
+    run: (client) =>
+      sources.reduce(async (previous, { path, prepare }) => {
+        await previous;
         console.log(`   applying ${path}`);
-        await client.query(prepare(readFileSync(path, 'utf8')));
-      }
-    },
+        return client.query(prepare(readFileSync(path, 'utf8')));
+      }, Promise.resolve()),
   });
 
 const main = async () => {
