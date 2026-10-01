@@ -13,8 +13,8 @@ import {
 } from '../EnterpriseOrders.constants';
 import { loader } from './group-details.loader';
 
-vi.mock('../.server/enterpriseOrders.service', () => ({
-  selectOrderGroupKeyTruncations: vi.fn(async () => ({})),
+vi.mock('../.server/enterpriseOrders.service', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
   selectOrdersPage: vi.fn(async () => ({ data: [], hasMore: false, total: 0 })),
 }));
 
