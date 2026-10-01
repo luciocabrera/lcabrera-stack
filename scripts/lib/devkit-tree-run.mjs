@@ -106,6 +106,18 @@ export const installFindings = (tree, env = process.env) =>
     ...execute({ args: INSTALL_ARGS, command: 'vp', cwd: tree, env }),
   });
 
+const PEERS_ARGS = ['peers', 'check'];
+
+/**
+ * @param {{ tree: string }} args
+ * @returns {string[]}
+ */
+export const peerFindings = ({ tree }) =>
+  taskFindings({
+    label: ['pnpm', ...PEERS_ARGS].join(' '),
+    ...execute({ args: PEERS_ARGS, command: 'pnpm', cwd: tree }),
+  });
+
 /**
  * @param {{ tree: string }} args
  * @returns {string[]}

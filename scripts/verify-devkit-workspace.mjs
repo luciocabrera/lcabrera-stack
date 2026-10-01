@@ -1,12 +1,12 @@
 /**
  * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
  * installs every `@lcabrera/*` package it resolves from a tarball packed from
- * this checkout and served by a scratch registry, runs the tasks that tree
- * wires for itself, fetches `/` from the app its root `start` task serves, runs
- * every command its `devkit.config.json` hands its workflows and hooks, then
- * runs the upgrade that should find nothing left to add, and its commit-msg
- * hook, which create and the install must have turned on without being asked.
- * So the gate tests what the next release ships, together;
+ * this checkout and served by a scratch registry, checks its peers, runs the
+ * tasks that tree wires for itself, fetches `/` from the app its root `start`
+ * task serves, runs every command its `devkit.config.json` hands its workflows
+ * and hooks, then runs the upgrade that should find nothing left to add, and
+ * its commit-msg hook, which create and the install must have turned on without
+ * being asked. So the gate tests what the next release ships, together;
  * `registry-tree:verify` is the check of what npm serves today. Every scratch
  * directory sits under the OS temp root so the tree inherits nothing from this
  * checkout (ADR-073).
@@ -46,6 +46,7 @@ import {
   execute,
   installedBin,
   installFindings,
+  peerFindings,
   readIfPresent,
   readJson,
   report,
@@ -293,6 +294,7 @@ const servedFindings = async ({ tree }) => {
 
 const TREE_CHECKS = [
   blueprintFindings,
+  peerFindings,
   toolchainBinFindings,
   installedHooksFindings,
   taskRunFindings,
@@ -359,7 +361,7 @@ const main = async () => {
               staging,
               tree: join(parent, TREE_NAME),
             }),
-      passed: `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout through a scratch registry, with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} and every command in its \`devkit.config.json\` all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
+      passed: `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout through a scratch registry with no unmet peer, with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} and every command in its \`devkit.config.json\` all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
       title: 'Created-workspace gate',
     });
   } finally {

@@ -1,6 +1,6 @@
 /**
  * Creates a `monorepo`-rung tree with the published `create-lcabrera-stack`,
- * installs it from npm, and runs the tasks that tree wires for itself — what a
+ * installs it from npm, checks its peers, and runs the tasks that tree wires for itself — what a
  * user who runs the initializer today actually gets. `workspace:verify` packs
  * this checkout instead, so it proves the next release and not the registry;
  * this runs after a publish, when the registry has caught up.
@@ -17,6 +17,7 @@ import {
   createFindings,
   installedBin,
   installFindings,
+  peerFindings,
   report,
   reportCrash,
   runtimeFindings,
@@ -33,7 +34,7 @@ const CREATE_ARGS = [TREE_NAME, '--profile', 'monorepo'];
 
 const PREREQUISITES = [runtimeFindings, installFindings];
 
-const TREE_CHECKS = [taskRunFindings, trackedChangeFindings];
+const TREE_CHECKS = [peerFindings, taskRunFindings, trackedChangeFindings];
 
 const main = async () => {
   const holder = mkdtempSync(join(tmpdir(), 'devkit-registry-holder-'));
@@ -59,7 +60,7 @@ const main = async () => {
               prerequisites: PREREQUISITES,
               tree: join(parent, TREE_NAME),
             }),
-      passed: `Registry created-workspace gate passed: the published \`${INITIALIZER}\` created a monorepo-rung tree, it installed from npm, ${tasksLabel()} all exited zero, and none of them changed a committed file.`,
+      passed: `Registry created-workspace gate passed: the published \`${INITIALIZER}\` created a monorepo-rung tree, it installed from npm with no unmet peer, ${tasksLabel()} all exited zero, and none of them changed a committed file.`,
       title: 'Registry created-workspace gate',
     });
   } finally {
