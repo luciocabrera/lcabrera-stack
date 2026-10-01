@@ -5,9 +5,10 @@
  * reads and `devkit:pins` raises it, so both read the same set (ADR-117).
  */
 
-import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join, relative, sep } from 'node:path';
+import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 
 import { readPublishableManifests } from '../../packages/repo-standards/scripts/publishable-workspaces.mjs';
@@ -47,20 +48,36 @@ export const assetSources = (root) =>
     ];
   });
 
-const moduleUrl = ({ absolute, text }) => {
-  const url = pathToFileURL(absolute);
-  url.searchParams.set(
-    'content',
-    createHash('sha256').update(text).digest('hex'),
+const EXPORT_READER = [
+  'const [url, name] = process.argv.slice(1);',
+  'const value = (await import(url))[name];',
+  'process.stdout.write(JSON.stringify(value ?? null));',
+].join('\n');
+
+const exportedValue = ({ absolute, constant }) => {
+  const result = spawnSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '--eval',
+      EXPORT_READER,
+      pathToFileURL(absolute).href,
+      constant,
+    ],
+    { encoding: 'utf8' },
   );
-  return url.href;
+  if (result.status !== 0) {
+    throw new Error(
+      `${absolute} could not be imported to read \`${constant}\`:\n${result.stderr}`,
+    );
+  }
+  return JSON.parse(result.stdout);
 };
 
-const constantSource = async ({ constant, path, root }) => {
+const constantSource = ({ constant, path, root }) => {
   const absolute = join(root, path);
   const text = readFileSync(absolute, 'utf8');
-  const exported = await import(moduleUrl({ absolute, text }));
-  const ranges = exported[constant];
+  const ranges = exportedValue({ absolute, constant });
   if (typeof ranges !== 'object' || ranges === null) {
     throw new TypeError(
       `${path} exports no \`${constant}\` object — the constant moved or was renamed, so the ranges it held are no longer read by this gate`,
@@ -79,9 +96,7 @@ const constantSource = async ({ constant, path, root }) => {
  * @param {string} root
  */
 export const constantSources = (root) =>
-  Promise.all(
-    RANGE_CONSTANTS.map((entry) => constantSource({ ...entry, root })),
-  );
+  RANGE_CONSTANTS.map((entry) => constantSource({ ...entry, root }));
 
 /**
  * @param {{ constant?: string, kind: string, path: string,
@@ -112,11 +127,11 @@ export const publishedVersions = (root) =>
  * what moved.
  *
  * @param {string} root
- * @returns {Promise<{ from: string, name: string, path: string, to: string }[]>}
+ * @returns {{ from: string, name: string, path: string, to: string }[]}
  */
-export const raiseShippedFloors = async (root) => {
+export const raiseShippedFloors = (root) => {
   const versions = publishedVersions(root);
-  const sources = [...assetSources(root), ...(await constantSources(root))];
+  const sources = [...assetSources(root), ...constantSources(root)];
   const raised = [];
 
   for (const source of sources) {

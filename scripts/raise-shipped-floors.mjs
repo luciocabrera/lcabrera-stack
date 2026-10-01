@@ -19,7 +19,7 @@ const summary = (raised) =>
     : `raise-shipped-floors: raised ${raised.map(({ name, path, to }) => `${name} to \`${to}\` in ${path}`).join(', ')}\n`;
 
 try {
-  process.stdout.write(summary(await raiseShippedFloors(process.cwd())));
+  process.stdout.write(summary(raiseShippedFloors(process.cwd())));
 } catch (error) {
   process.stderr.write(
     `raise-shipped-floors: a shipped range floor could not be raised — ${error.message}\n`,

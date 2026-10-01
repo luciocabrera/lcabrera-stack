@@ -44,14 +44,14 @@ const changesetVersion = () => {
   }
 };
 
-const publishRaisedFloors = async (raised) => {
+const publishRaisedFloors = (raised) => {
   writeFileSync(
     FLOOR_CHANGESET,
     floorChangeset({ packageName: DEVKIT_PACKAGE, raised }),
   );
   changesetVersion();
 
-  const again = await raiseShippedFloors(ROOT);
+  const again = raiseShippedFloors(ROOT);
   if (again.length > 0) {
     throw new Error(
       `versioning ${DEVKIT_PACKAGE} moved more floors (${again.map(({ name }) => name).join(', ')}), which no published release would carry`,
@@ -59,13 +59,13 @@ const publishRaisedFloors = async (raised) => {
   }
 };
 
-const main = async () => {
+const main = () => {
   const before = devkitVersion();
   changesetVersion();
 
-  const raised = await raiseShippedFloors(ROOT);
+  const raised = raiseShippedFloors(ROOT);
   if (raised.length > 0 && devkitVersion() === before) {
-    await publishRaisedFloors(raised);
+    publishRaisedFloors(raised);
   }
 
   process.stdout.write(
@@ -76,7 +76,7 @@ const main = async () => {
 };
 
 try {
-  await main();
+  main();
 } catch (error) {
   process.stderr.write(`release-version: ${error.message}\n`);
   process.exitCode = 1;

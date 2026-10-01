@@ -31,9 +31,9 @@ import {
 
 const REPO_ROOT = process.cwd();
 
-const main = async () => {
+const main = () => {
   const assets = assetSources(REPO_ROOT);
-  const constants = await constantSources(REPO_ROOT);
+  const constants = constantSources(REPO_ROOT);
   const sources = [...assets, ...constants];
   const versions = publishedVersions(REPO_ROOT);
   const names = Object.keys(versions);
@@ -66,7 +66,7 @@ const main = async () => {
 };
 
 try {
-  await main();
+  main();
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;

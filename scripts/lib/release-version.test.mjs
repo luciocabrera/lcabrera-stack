@@ -62,7 +62,14 @@ const workspaceWith = (changeset) => {
   write(
     root,
     'packages/devkit/scripts/create.mjs',
-    'export const TOOLCHAIN_RANGES = {};\n',
+    [
+      "import manifest from '../package.json' with { type: 'json' };",
+      '',
+      'export const TOOLCHAIN_RANGES = {',
+      "  '@lcabrera/devkit': `>=${manifest.version} <1.0.0`,",
+      '};',
+      '',
+    ].join('\n'),
   );
   write(root, WEB_MANIFEST, {
     dependencies: { '@lcabrera/ui': '>=0.8.1 <1.0.0' },
