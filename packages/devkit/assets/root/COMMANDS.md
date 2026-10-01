@@ -39,8 +39,9 @@ this repository.
 **Choose your profile in `devkit.config.json`, not on the command line.**
 `"profile": "agent"` places the skills, the path rules, the subagent definitions,
 the coordination register and the decision home; `"profile": "repo"` adds the
-workflows, the git hooks, the templates and this file. `monorepo` and `full` are
-the rungs above, and place what `repo` places until their content lands.
+workflows, the git hooks, the templates and this file; `"profile": "monorepo"`
+adds the workspace itself. `full` is the rung above, and places what `monorepo`
+places until its content lands.
 
 Every command accepts `--profile <name>` as a one-off, and using it is how the
 two get out of step: sync the wider profile by flag, let CI run
