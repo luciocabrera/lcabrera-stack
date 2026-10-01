@@ -43,6 +43,7 @@
     "repo-verify-claims": "./scripts/verify-coordination.mjs",
     "repo-verify-commands": "./scripts/verify-commands-doc.mjs",
     "repo-verify-commit": "./scripts/verify-commit-msg.mjs",
+    "repo-verify-conflict-markers": "./scripts/verify-conflict-markers.mjs",
     "repo-verify-departed-names": "./scripts/verify-departed-names.mjs",
     "repo-verify-deps-audit": "./scripts/verify-deps-audit.mjs",
     "repo-verify-doc-registers": "./scripts/verify-doc-registers.mjs",
