@@ -25,6 +25,8 @@ area:
   - packages/ui/src/public-api.ts
   - packages/ui/src/INVENTORY.md
   - packages/ui/src/stylex-module-paths.test.json
+  - packages/ui/src/components/Table/contexts/TableData/**
+  - packages/ui/src/PATTERNS.md
   - apps/showcase/src/routes/enterprise-orders/enterprise-orders.loader.ts
   - apps/showcase/src/routes/enterprise-orders/group-details/**
   - apps/showcase/src/routes/enterprise-orders/fetchOrderGroupPage.service.ts

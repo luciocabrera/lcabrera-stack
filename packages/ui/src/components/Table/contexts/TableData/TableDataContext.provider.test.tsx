@@ -2,12 +2,13 @@
 
 import type { ReactNode } from 'react';
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { useGetTableData } from './data/selectors/useGetTableData.hook';
 import { useGetTableHasMore } from './data/selectors/useGetTableHasMore.hook';
 import { useGetTableTotalLoadedRows } from './data/selectors/useGetTableTotalLoadedRows.hook';
+import { useTableDataContextValue } from './data/useTableDataContextValue.hook';
 import { TableDataProvider } from './TableDataContext.provider';
 
 type TestRow = {
@@ -117,6 +118,44 @@ describe('TableDataProvider', () => {
         hasMore: false,
         totalLoadedRows: 2,
       });
+    });
+  });
+
+  it('keeps the pages loaded since, when it re-renders with the same response', async () => {
+    const firstPage = [{ id: 1 }];
+    const response = { data: firstPage, totalRows: 3 };
+    let dataState = { ...response, isLoading: false };
+
+    const dynamicWrapper = ({ children }: WrapperProps) => (
+      <TableDataProvider<TestRow> dataState={dataState}>
+        {children}
+      </TableDataProvider>
+    );
+
+    const { rerender, result } = renderHook(
+      () => ({
+        data: useGetTableData<TestRow>(),
+        store: useTableDataContextValue<TestRow>().dataStore,
+      }),
+      { wrapper: dynamicWrapper },
+    );
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual(firstPage);
+    });
+
+    act(() => {
+      result.current.store.set({
+        data: [...firstPage, { id: 2 }, { id: 3 }],
+        totalLoadedRows: 3,
+      });
+    });
+
+    dataState = { ...response, isLoading: false };
+    rerender();
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }]);
     });
   });
 });
