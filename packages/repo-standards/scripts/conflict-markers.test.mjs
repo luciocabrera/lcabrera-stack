@@ -124,6 +124,20 @@ describe('conflictMarkerLines', () => {
     expect(conflictMarkerLines(text)).toEqual([{ line: 2, text: SPLIT }]);
   });
 
+  it('names a separator two text lines below a blank line', () => {
+    const text = [
+      'intro.',
+      '',
+      'const ours = 1;',
+      'const mid = 2;',
+      SPLIT,
+      'const theirs = 3;',
+      '',
+    ].join('\n');
+
+    expect(conflictMarkerLines(text)).toEqual([{ line: 5, text: SPLIT }]);
+  });
+
   it('names a separator with no text above it and text below it', () => {
     expect(conflictMarkerLines(`${SPLIT}\ntheirs\n`)).toEqual([
       { line: 1, text: SPLIT },

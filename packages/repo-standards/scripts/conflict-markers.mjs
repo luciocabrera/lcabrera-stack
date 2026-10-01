@@ -57,7 +57,7 @@ const isUnderline = (lines, index) =>
   !isBlank(lines[index - 1]) && isBlank(lines[index + 1]);
 
 const isOverline = (lines, index) =>
-  index >= 0 &&
+  isBareSeparator(lines[index]) &&
   isBlank(lines[index - 1]) &&
   !isBlank(lines[index + 1]) &&
   isBareSeparator(lines[index + 2]);
