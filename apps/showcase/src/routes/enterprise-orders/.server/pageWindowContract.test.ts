@@ -19,7 +19,7 @@ import { selectOrdersPage } from './enterpriseOrders.service';
  *
  * **Why this file exists at all.** `/_api/enterprise-orders/paginated` takes its
  * window from search params; the route's SSR loader takes its own from
- * `INITIAL_PAGE_SIZE`. Only the first passes through `parseOrdersPageParams`, so
+ * `INITIAL_PAGE_SIZE`. Only the first passes through `resolveOrdersPageRead`, so
  * a test that watched the parser clamp would say nothing about the other half of
  * the surface — the trap #701 hit on the sibling route, where a parser-only fix
  * looked complete and left the SSR path uncapped. Both entry points are driven

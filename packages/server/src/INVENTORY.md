@@ -340,6 +340,30 @@ See `sort/ARCHITECTURE.md`.
 
 ---
 
+## `src/table-page/`
+
+A database-backed table page, declared once. `createTablePageReader` takes the
+table (`target`, `primaryKey`, `fallbackSort`, ceilings) and returns the read
+functions bound to it; the other factories turn those functions into a
+request handler, so an endpoint is a few lines over them. Every request-derived
+size is clamped inside `selectPage`, which every entry point reaches.
+
+| Artifact                 | Location                                       | Description                                                                                                                                                                                                                                                              |
+| ------------------------ | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `table-page.types`       | `table-page/table-page.types.ts`               | `TablePage`, `TablePageRead`, `TablePageGrouping`, `TablePageParams`, `TablePageTarget` — the read and response shapes the factories share                                                                                                                               |
+| `createTablePageReader`  | `table-page/create-table-page-reader.util.ts`  | One table in, bound functions out: `selectPage` (clamped window and ORDER BY, rows plus count, keyset or offset, or the grouped branch), `resolvePageRead`, `resolveGroupRead`, `resolveGroupRestriction`, `deleteRow`, and the grouping-capability and truncation reads |
+| `parseTablePageParams`   | `table-page/parse-table-page-params.util.ts`   | `limit`/`skip`/`cursor`/`filter`/`sort` search params → `TablePageParams`; drops sort rules with no direction or on an ignored column, then falls back to the declared sort. Does not clamp                                                                              |
+| `toKeysetCursor`         | `table-page/to-keyset-cursor.util.ts`          | A client cursor tuple → `QueryCursor` only when it matches the sort and ends on a non-null unique column; otherwise `undefined`, and the read falls back to offset                                                                                                       |
+| `createTablePageLoader`  | `table-page/create-table-page-loader.util.ts`  | `{ request }` → JSON `Response` of the resolved page; a refused group read is an empty page carrying the refusal, never a read of the whole table                                                                                                                        |
+| `createGroupDetailReads` | `table-page/create-group-detail-reads.util.ts` | `fetchPage` and `resolveLockedFilters` for a page that opens one group's rows, with the group required                                                                                                                                                                   |
+| `createRowDeleteAction`  | `table-page/create-row-delete-action.util.ts`  | `{ request }` → deletes the row a `{ intent: 'delete', id }` form names; 400 for any other intent or an id the caller's `parseId` refuses                                                                                                                                |
+| `toIntegerRowId`         | `table-page/to-integer-row-id.util.ts`         | A form value → a positive safe integer, or `undefined` — the `parseId` for an integer primary key                                                                                                                                                                        |
+| `toQuerySortRules`       | `table-page/to-query-sort-rules.util.ts`       | Private. Keeps the entries that are `{ columnKey, direction }` sort rules and not on an ignored column                                                                                                                                                                   |
+| `selectGroupedTablePage` | `table-page/select-grouped-table-page.util.ts` | Private. The grouped branch of `selectPage`: one `selectGroupedRows` call, decoded to group rows, a refusal mapped to a serializable error                                                                                                                               |
+| `toRefusedTablePage`     | `table-page/to-refused-table-page.util.ts`     | Private. The empty, final page that carries a refusal message                                                                                                                                                                                                            |
+
+---
+
 ## `src/tickets/`
 
 Reusable, DB-free **stateless capability** primitives. A ticket

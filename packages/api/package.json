@@ -44,7 +44,9 @@
     "./olap/is-olap-group-period.util": "./src/olap/is-olap-group-period.util.ts",
     "./olap/olap.constants": "./src/olap/olap.constants.ts",
     "./olap/olap.types": "./src/olap/olap.types.ts",
-    "./olap/parse-drill-group.util": "./src/olap/parse-drill-group.util.ts"
+    "./olap/parse-drill-group.util": "./src/olap/parse-drill-group.util.ts",
+    "./table-page/is-table-page-response.util": "./src/table-page/is-table-page-response.util.ts",
+    "./table-page/table-page.types": "./src/table-page/table-page.types.ts"
   },
   "publishConfig": {
     "exports": {
@@ -111,6 +113,14 @@
       "./olap/parse-drill-group.util": {
         "types": "./dist/olap/parse-drill-group.util.d.mts",
         "default": "./dist/olap/parse-drill-group.util.mjs"
+      },
+      "./table-page/is-table-page-response.util": {
+        "types": "./dist/table-page/is-table-page-response.util.d.mts",
+        "default": "./dist/table-page/is-table-page-response.util.mjs"
+      },
+      "./table-page/table-page.types": {
+        "types": "./dist/table-page/table-page.types.d.mts",
+        "default": "./dist/table-page/table-page.types.mjs"
       }
     },
     "access": "public"

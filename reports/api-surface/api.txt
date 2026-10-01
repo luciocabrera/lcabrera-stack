@@ -57,3 +57,10 @@ OlapGroupPeriod [type] 'day' | 'month' | 'quarter' | 'year'
 
 ## ./olap/parse-drill-group.util
 parseDrillGroup [const] (params: URLSearchParams) => OlapDrillRequest | undefined
+
+## ./table-page/is-table-page-response.util
+isTablePageResponse [const] <TResponse extends TablePageResponseShape = TablePageResponseShape>(value: unknown) => value is TResponse
+
+## ./table-page/table-page.types
+TablePageResponseShape [type] { readonly data: readonly unknown[]; readonly error?: TaggedPayload; readonly groupingWarning?: TaggedPayload; readonly hasMore: boolean; /** Present on the first page of a read, absent on a load-more. */ readonly total?: number; }
+TaggedPayload [type] { readonly kind: string; }

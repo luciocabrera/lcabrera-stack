@@ -3,10 +3,9 @@ import type { PaginatedFetchArgs } from '@lcabrera/api/http/http.types';
 import { buildPaginatedQueryParams } from '@lcabrera/api/http/build-paginated-query-params.util';
 import { fetchAndValidate } from '@lcabrera/api/http/fetch-and-validate.util';
 import { OLAP_DRILL_GROUP_PARAM } from '@lcabrera/api/olap/olap.constants';
+import { isTablePageResponse } from '@lcabrera/api/table-page/is-table-page-response.util';
 
 import type { EnterpriseOrdersResponse } from './config';
-
-import { isEnterpriseOrdersResponse } from './config';
 
 const PAGINATED_PATH = '/_api/enterprise-orders/paginated';
 
@@ -35,7 +34,7 @@ export const fetchOrderGroupPage = ({
   params.set(OLAP_DRILL_GROUP_PARAM, group);
 
   return fetchAndValidate<EnterpriseOrdersResponse>({
-    isValid: isEnterpriseOrdersResponse,
+    isValid: isTablePageResponse<EnterpriseOrdersResponse>,
     shapeErrorMessage: `Unexpected response shape from ${PAGINATED_PATH}`,
     signal,
     timeoutMs,
