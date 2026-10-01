@@ -2,7 +2,7 @@
  * Reading the ranges this repository ships: every data file under the devkit
  * assets, every range constant listed in `RANGE_CONSTANTS`, and the versions
  * the publishable workspaces are on. `shipped-ranges:verify` judges what this
- * reads and `devkit:pins` raises it, so both read the same set (ADR-117).
+ * reads and `shipped-ranges:raise` raises it, so both read the same set (ADR-117).
  */
 
 import { spawnSync } from 'node:child_process';
@@ -124,7 +124,7 @@ export const publishedVersions = (root) =>
 
 /**
  * @param {string} root
- * @returns {{ from: string, name: string, path: string, to: string }[]}
+ * @returns {{ from: string, kind: string, name: string, path: string, to: string }[]}
  */
 export const raiseShippedFloors = (root) => {
   const versions = publishedVersions(root);
@@ -146,6 +146,7 @@ export const raiseShippedFloors = (root) => {
       ...floorRaises({ declarations, versions }).map(
         ({ declaration, raised: to }) => ({
           from: declaration.range,
+          kind: source.kind,
           name: declaration.name,
           path: source.path,
           to,

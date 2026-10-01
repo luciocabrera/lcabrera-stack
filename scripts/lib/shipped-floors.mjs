@@ -159,9 +159,21 @@ export const withRaisedFloors = ({ declarations, kind, text, versions }) =>
         text,
       );
 
+const PLACES = {
+  catalog: 'the workspace catalog',
+  constant: 'the toolchain ranges `devkit create` writes',
+  manifest: 'the application manifest',
+};
+
 /**
- * @param {{ packageName: string, raised: readonly { from: string, name: string,
- *           path: string, to: string }[] }} args
+ * @param {string} kind
+ * @returns {string}
+ */
+export const placeOf = (kind) => PLACES[kind] ?? 'a shipped workspace file';
+
+/**
+ * @param {{ packageName: string, raised: readonly { from: string, kind: string,
+ *           name: string, to: string }[] }} args
  * @returns {string}
  */
 export const floorChangeset = ({ packageName, raised }) =>
@@ -173,8 +185,10 @@ export const floorChangeset = ({ packageName, raised }) =>
     'A repository this release creates declares each of these from the version released with it, so it cannot resolve an older one:',
     '',
     ...raised.map(
-      ({ from, name, path, to }) =>
-        `- \`${name}\` \`${to}\` (was \`${from}\`) in \`${path}\``,
+      ({ from, kind, name, to }) =>
+        `- \`${name}\` \`${to}\` (was \`${from}\`) in ${placeOf(kind)}`,
     ),
+    '',
+    'Until this release is a day old, pnpm installs none of these versions, because its minimum release age holds them back. A repository created in that window needs `pnpm_config_minimum_release_age=0 pnpm install` for its first install.',
     '',
   ].join('\n');

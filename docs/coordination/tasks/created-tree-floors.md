@@ -15,6 +15,7 @@ area:
   - packages/devkit/assets/workspace/pnpm-workspace.yaml
   - packages/devkit/assets/workspace/apps/web/package.json
   - packages/create-lcabrera-stack/README.md
+  - packages/devkit/README.md
   - .changeset/created-tree-floors*.md
   - scripts/lib/shipped-range-sources.mjs
   - scripts/lib/shipped-floors.mjs

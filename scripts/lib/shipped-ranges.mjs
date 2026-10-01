@@ -254,7 +254,7 @@ const REASONS = {
   'excludes-next-minor': (finding) =>
     `\`${finding.range}\` admits ${finding.version} but not ${inc(finding.version, 'minor')}, so the next minor release leaves a created repository behind`,
   'floor-below-current': (finding) =>
-    `\`${finding.range}\` admits releases older than ${finding.version}, the version this repository publishes, so a repository created by this release can resolve one that predates it; \`vp run devkit:pins\` raises every floor`,
+    `\`${finding.range}\` admits releases older than ${finding.version}, the version this repository publishes, so a repository created by this release can resolve one that predates it; \`vp run shipped-ranges:raise\` raises every floor`,
   malformed: (finding) =>
     `\`${finding.range}\` is not a version range — only \`catalog:\` and \`workspace:\` stand in for one, because they name where the version is declared rather than pinning an artifact`,
 };

@@ -4,7 +4,7 @@
  * checkout, so a repository created by a release cannot resolve a package
  * older than that release (ADR-117, #1219). A no-op on a tree already in step.
  *
- * Usage (from the repo root): vp run devkit:pins
+ * Usage (from the repo root): vp run shipped-ranges:raise
  *
  * Exit : 0 when every floor starts at the published version (whether or not it
  *        was rewritten), 1 when a floor cannot be found or raised.

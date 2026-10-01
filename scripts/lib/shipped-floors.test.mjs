@@ -1,7 +1,7 @@
 /*
  * A shipped range whose floor sits below the version this repository publishes
  * lets a created repository resolve a release older than the one that wrote it
- * (#1219). The gate reports such a floor, and `devkit:pins` raises it.
+ * (#1219). The gate reports such a floor, and `shipped-ranges:raise` raises it.
  */
 import { describe, expect, it } from 'vite-plus/test';
 

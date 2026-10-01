@@ -119,8 +119,12 @@ describe('release-version', () => {
       '0.6.1',
     );
     expect(changelogOf(root)).toContain(
-      '`@lcabrera/ui` `>=0.9.0 <1.0.0` (was `>=0.8.1 <1.0.0`)',
+      '`@lcabrera/ui` `>=0.9.0 <1.0.0` (was `>=0.8.1 <1.0.0`) in the application manifest',
     );
+    expect(changelogOf(root)).toContain(
+      'pnpm_config_minimum_release_age=0 pnpm install',
+    );
+    expect(changelogOf(root)).not.toContain('packages/devkit');
   });
 
   it('leaves devkit alone when no shipped floor moved', () => {

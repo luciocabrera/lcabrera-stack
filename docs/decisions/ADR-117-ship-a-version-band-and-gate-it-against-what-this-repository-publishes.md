@@ -177,7 +177,7 @@ did not meet ([#1219](https://github.com/luciocabrera/lcabrera-stack/issues/1219
 
 The band's floor is now the version this repository publishes, not a version it
 once published. `vp run shipped-ranges:verify` fails on a floor below it, with
-the range to write. Nobody writes it: `vp run devkit:pins` raises every floor
+the range to write. Nobody writes it: `vp run shipped-ranges:raise` raises every floor
 below the version in the checkout to that version, keeps the ceiling, and leaves
 every other byte of the file alone. On a tree already in step it changes
 nothing. A floor it cannot find written in the range, or a raise that would pass
