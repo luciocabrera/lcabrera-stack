@@ -309,10 +309,64 @@ export const hooksPathArgs = (hooksPath) => [
   hooksPath,
 ];
 
+const DEVKIT_TASKS = ['devkit:check', 'devkit:sync'];
+
+const PLAIN_PATH = /^[\w.][\w./-]*$/;
+
+const VITE_PLUS_INSTALL = 'https://viteplus.dev/guide/';
+
+export const firstInstallFor = (run) => `${run.split(' ', 1)[0]} install`;
+
+export const changeDirectoryStep = (target) =>
+  PLAIN_PATH.test(target)
+    ? { command: `cd ${target}` }
+    : { prose: `Change into \`${target}\`, then run:` };
+
 /**
- * @param {{ branch: string, hooksPath?: string, target: string }} args
+ * @param {{ commands: { run?: string }, target: string,
+ *           tasks: readonly string[] }} args
+ * @returns {string[]}
  */
-export const createSummary = ({ branch, hooksPath, target }) =>
+const nextSteps = ({ commands: { run }, target, tasks }) => {
+  const enter = changeDirectoryStep(target);
+  const steps = [
+    ...(enter.command === undefined ? [] : [enter.command]),
+    ...(run === undefined ? [] : [firstInstallFor(run)]),
+    ...(run !== undefined && tasks.includes('dev') ? [`${run} dev`] : []),
+  ];
+  const indented = steps.map((step) => `  ${step}`).join('\n');
+  const lead = enter.prose ?? 'Start with:';
+  const devkitTasks = DEVKIT_TASKS.filter((task) => tasks.includes(task));
+  const devkitCommands = devkitTasks
+    .map((task) => `${run} ${task}`)
+    .map((command) => `\`${command}\``)
+    .join(', ');
+  return [
+    `Nothing is installed yet. ${lead}\n${indented}`,
+    ...(run?.startsWith('vp ')
+      ? [
+          `\`vp\` is the Vite+ CLI, installed once per machine rather than per repository. If your shell does not find it, install it first: ${VITE_PLUS_INSTALL}`,
+        ]
+      : []),
+    ...(run === undefined || devkitTasks.length === 0
+      ? []
+      : [
+          `devkit is a dev dependency, not a global command, so a bare \`devkit\` is not on your PATH. Run it through the tasks wired above: ${devkitCommands}.`,
+        ]),
+  ];
+};
+
+/**
+ * @param {{ branch: string, commands?: { run?: string },
+ *           hooksPath?: string, target: string, tasks?: readonly string[] }} args
+ */
+export const createSummary = ({
+  branch,
+  commands = {},
+  hooksPath,
+  target,
+  tasks = [],
+}) =>
   [
     `Created \`${target}\`: a git repository on \`${branch}\`, with everything above committed.`,
     ...(hooksPath === undefined
@@ -320,5 +374,5 @@ export const createSummary = ({ branch, hooksPath, target }) =>
       : [
           `git runs the hooks in \`${hooksPath}/\`: this repository's core.hooksPath points there.`,
         ]),
-    `Nothing is installed yet: install the dependencies in \`${target}\`, and the gate tasks wired above find the toolchain its manifest declares.`,
+    ...nextSteps({ commands, target, tasks }),
   ].join('\n');

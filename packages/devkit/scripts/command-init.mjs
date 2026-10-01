@@ -8,8 +8,14 @@
  * repository reporting drift on the day it was set up.
  */
 
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  writeFileSync,
+} from 'node:fs';
+import { join, resolve } from 'node:path';
 
 import {
   applyPlan,
@@ -26,6 +32,7 @@ import {
   resolveConfig,
   withProfile,
 } from './config.mjs';
+import { readGit } from './git-exec.mjs';
 import {
   declaredDependencies,
   inferRunner,
@@ -44,6 +51,30 @@ import { readProfileFlag } from './profile-flag.mjs';
 import { taskOutcomes } from './tasks.mjs';
 
 const MANIFEST = 'package.json';
+
+const canonicalPath = (path) => {
+  try {
+    return realpathSync(path);
+  } catch {
+    return path;
+  }
+};
+
+const gitRunsHooksFrom = ({ hooksPath, root }) => {
+  try {
+    const pointed = readGit({
+      args: ['config', '--get', 'core.hooksPath'],
+      cwd: root,
+    });
+    return (
+      pointed !== '' &&
+      canonicalPath(resolve(root, pointed)) ===
+        canonicalPath(resolve(root, hooksPath))
+    );
+  } catch {
+    return false;
+  }
+};
 
 const readJsonIfPresent = (path) =>
   existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : undefined;
@@ -222,5 +253,13 @@ export const runInit = (argv, root) => {
     return 1;
   }
 
-  return applyInit({ profile, root, upgrade }).code;
+  return applyInit({
+    activatesHooks: gitRunsHooksFrom({
+      hooksPath: configured.paths.hooks,
+      root,
+    }),
+    profile,
+    root,
+    upgrade,
+  }).code;
 };

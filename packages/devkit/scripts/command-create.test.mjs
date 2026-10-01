@@ -6,60 +6,36 @@
  * refusal that created nothing. A stubbed writer would assert the stub.
  */
 
-import { execFileSync } from 'node:child_process';
 import {
   chmodSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
-  rmSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runCreate } from './command-create.mjs';
 import { PROFILE_LADDER } from './config.mjs';
+import {
+  createUnderWith,
+  git,
+  quietlyWith,
+  scratchDirectories,
+} from './create-fixtures.mjs';
 import { CREATE_BRANCH, INITIAL_COMMIT_MESSAGE } from './create.mjs';
 import { tasksFor } from './init.mjs';
 
-const scratches = [];
+const scratches = scratchDirectories('devkit-create-');
 
-const scratch = () => {
-  const root = mkdtempSync(join(tmpdir(), 'devkit-create-'));
-  scratches.push(root);
-  return root;
-};
+const scratch = scratches.make;
 
-const git = (args, cwd) =>
-  execFileSync('git', args, {
-    cwd,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  }).trim();
+const quietly = (run) => quietlyWith(vi, run);
 
-const quietly = (run) => {
-  const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-  const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-  try {
-    const code = run();
-    return {
-      code,
-      errors: error.mock.calls.flat().join('\n'),
-      printed: log.mock.calls.flat().join('\n'),
-    };
-  } finally {
-    log.mockRestore();
-    error.mockRestore();
-  }
-};
-
-const createUnder = ({ parent, profile }) =>
-  quietly(() => runCreate(['demo', '--profile', profile], parent));
+const createUnder = (args) => createUnderWith(vi, args);
 
 const repositoryBehindALink = ({ linkedFrom, parent }) => {
   const outer = join(parent, 'outer');
@@ -95,13 +71,7 @@ const createUnderGitConfig = ({ contents, parent }) => {
   }
 };
 
-afterEach(() => {
-  const drained = [...scratches];
-  scratches.length = 0;
-  for (const root of drained) {
-    rmSync(root, { force: true, recursive: true });
-  }
-});
+afterEach(scratches.drain);
 
 describe('devkit create, from an empty parent directory', () => {
   test('leaves a git repository holding the agent rung, with a commit', () => {
