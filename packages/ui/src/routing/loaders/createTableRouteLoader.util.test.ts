@@ -622,6 +622,33 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.groupingCapabilities).toEqual({});
     });
 
+    it('fails with the catalogue error and leaves the failed page read handled', async () => {
+      const unhandled = vi.fn();
+      process.on('unhandledRejection', unhandled);
+
+      try {
+        await expect(
+          invoke({
+            config: {
+              fetchPage: async () => {
+                throw new Error('page read failed');
+              },
+              meta: { isGroupingEnabled: true },
+              resolveGroupingCapabilities: async () => {
+                throw new Error('catalogue read failed');
+              },
+            },
+          }),
+        ).rejects.toThrow('catalogue read failed');
+        await new Promise((resolve) => setImmediate(resolve));
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(unhandled).not.toHaveBeenCalled();
+      } finally {
+        process.off('unhandledRejection', unhandled);
+      }
+    });
+
     it('cannot have capabilities injected through the UI-flags cookie', async () => {
       const { result } = await invoke({
         config: { meta: { isGroupingEnabled: true } },

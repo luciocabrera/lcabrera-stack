@@ -20,6 +20,7 @@ RootErrorBoundary [const] ({ error }: RootErrorBoundaryProps) => JSX.Element
 RouteErrorBoundary [const] ({ defaultMessage, error, icon, title, }: RouteErrorBoundaryProps) => JSX.Element
 SectionCard [const] ({ children, customStylex, description, title, }: SectionCardProps) => JSX.Element
 StatusBadge [const] ({ label, tone }: StatusBadgeProps) => JSX.Element
+TableGroupDetailsView [const] <TData extends Record<string, unknown>, TResponse extends TablePageResponse<TData>>({ closePath, fallbackTitle, fetchPage, }: TableGroupDetailsViewProps<TData, TResponse>) => JSX.Element
 TableLayout [const] <TData extends Record<string, unknown>, TResponse = Record<string, unknown>>({ actions, columnsState, dataErrorSelector, dataPromise, dataSelector, dataTotalSelector, groupingState, metaState, onLoadMore, }: TableLayoutProps<TData, TResponse>) => JSX.Element
 TablePageResponse [type] { readonly data: readonly TData[]; /** A refusal arrives as a successful response carrying data, not a rejected promise. */ readonly error?: TableResponseError; readonly hasMore?: boolean; readonly total?: number; }
 TableRouteView [const] <TData extends Record<string, unknown>, TResponse extends TablePageResponse<TData>>({ actions, dataErrorSelector, dataSelector, dataTotalSelector, fetchPage, }: TableRouteViewProps<TData, TResponse>) => JSX.Element

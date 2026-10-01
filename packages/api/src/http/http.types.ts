@@ -3,6 +3,8 @@
  * per-call concerns the factory cannot know statically.
  */
 export type PaginatedFetchArgs = PaginatedQuery & {
+  /** A drill-down group token; scopes the page to that group's rows. */
+  readonly group?: string;
   /** SSR only; omit in the browser, where the origin comes from the document. */
   readonly requestUrl?: string;
   readonly signal?: AbortSignal;
