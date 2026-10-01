@@ -1,12 +1,14 @@
 /*
- * The two conditions under which a run retires nothing: a recorded path that
- * does not resolve inside the repository, and an asset set that cannot be
- * trusted as the package's shipping list. Asserted on a real tree, because the
- * claim is about which files survive.
+ * When a run leaves a recorded path alone or retires nothing: a path that does
+ * not resolve inside the repository, a path holding something other than a
+ * readable regular file, and an asset set that cannot be trusted as the
+ * package's shipping list. Asserted on a real tree, because the claim is about
+ * which files survive.
  *
  * Usage: `vp run test` in this workspace; exits non-zero on a failing case.
  */
 
+import { spawnSync } from 'node:child_process';
 import {
   chmodSync,
   existsSync,
@@ -26,7 +28,7 @@ import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 import { runClosure } from './command-closure.mjs';
 import { DEFAULT_CONFIG, KIT_GROUPS } from './config.mjs';
 import { hashContent, MANIFEST_FILE } from './manifest.mjs';
-import { absenceIn, destinationIn, retirementRefusal } from './retirement.mjs';
+import { destinationIn, nodeKindIn, retirementRefusal } from './retirement.mjs';
 import { applySync, manifestAfter, onDiskHasher, planSync } from './sync.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
 
@@ -71,7 +73,7 @@ const syncRecord = ({
     config: CONFIG,
     destinationOf: destinationIn(root),
     groups: ['lower'],
-    isAbsent: absenceIn(root),
+    kindOf: nodeKindIn(root),
     kitGroups,
     manifest,
     onDiskHash,
@@ -278,7 +280,7 @@ describe('a recorded path that holds something unreadable', () => {
     writeFileSync(join(root, 'stale', 'inside.txt'), 'consumer content');
 
     expect(keptOutcome({ path: 'stale', root })).toEqual({
-      hashed: true,
+      hashed: false,
       recorded: false,
       state: 'kept',
       survives: true,
@@ -305,10 +307,63 @@ describe('a recorded path that holds something unreadable', () => {
     const { root } = scratchRepository();
 
     expect(keptOutcome({ path: 'missing.txt', root })).toEqual({
-      hashed: true,
+      hashed: false,
       recorded: false,
       state: 'retired',
       survives: false,
     });
   });
+});
+
+const HAS_MKFIFO =
+  process.platform !== 'win32' &&
+  spawnSync('mkfifo', ['--version'], { encoding: 'utf8' }).error === undefined;
+
+const PLAN_IN_A_CHILD = `
+import { pathToFileURL } from 'node:url';
+const [scripts, root, path] = process.argv.slice(1);
+const load = (name) => import(pathToFileURL(scripts + '/' + name).href);
+const { DEFAULT_CONFIG } = await load('config.mjs');
+const { hashContent } = await load('manifest.mjs');
+const { destinationIn, nodeKindIn } = await load('retirement.mjs');
+const { onDiskHasher, planSync } = await load('sync.mjs');
+const entries = planSync({
+  assets: [{ content: 'lower body', path: 'lower/kept.md' }],
+  config: { ...DEFAULT_CONFIG, paths: { ...DEFAULT_CONFIG.paths, lower: 'app' } },
+  destinationOf: destinationIn(root),
+  groups: ['lower'],
+  kindOf: nodeKindIn(root),
+  kitGroups: ['lower'],
+  manifest: { files: { [path]: hashContent('victim body') } },
+  onDiskHash: onDiskHasher(root),
+});
+process.stdout.write(entries.find((entry) => entry.path === path)?.state ?? '');
+`;
+
+describe('a recorded path that holds a FIFO', () => {
+  test.skipIf(!HAS_MKFIFO)(
+    'is kept without being opened, so the plan finishes (skipped where mkfifo is unavailable)',
+    () => {
+      const { root } = scratchRepository();
+      spawnSync('mkfifo', [join(root, 'pipe')]);
+
+      const child = spawnSync(
+        process.execPath,
+        [
+          '--input-type=module',
+          '--eval',
+          PLAN_IN_A_CHILD,
+          dirname(fileURLToPath(import.meta.url)),
+          root,
+          'pipe',
+        ],
+        { encoding: 'utf8', timeout: 3000 },
+      );
+
+      expect({ signal: child.signal, state: child.stdout }).toEqual({
+        signal: null,
+        state: 'kept',
+      });
+    },
+  );
 });

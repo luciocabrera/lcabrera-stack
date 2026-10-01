@@ -52,18 +52,20 @@ groups on one rung ship the same path today.
 **A recorded file that no group of this version ships at any profile retires.**
 Each run compares the manifest's records with the target path of every asset the
 package ships, whether or not the run holds that asset's group. A record with no
-match is planned as one of two states:
+match is planned in one of these states:
 
 - `retired` — the file on disk still matches the record, or it is already gone.
   The file is deleted and the record leaves the manifest. This is a write, so
   `doctor --check` counts it as drift until `sync` runs.
-- `kept` — the consumer edited the file, or something is at the path that cannot
-  be read as a file, such as a directory or a file without read permission. It
-  is left alone and reported, never deleted, and the record leaves the manifest.
-  Only a path where nothing exists at all counts as gone. This is a reported state, so
+- `kept` — the consumer edited the file, or something is at the path that is
+  not a readable regular file: a directory, a FIFO, a socket, a device, or a
+  file without read permission. The node's kind is read with `lstat` before
+  anything is opened, so a FIFO is never read. It is left alone and reported,
+  never deleted, and the record leaves the manifest. Only a path where nothing
+  exists at all counts as gone. This is a reported state, so
   `doctor --check` fails until `sync` runs.
 
-Four boundaries make this safe.
+These boundaries make this safe.
 
 **Retirement is read against every group, not the held ones.** This follows
 ADR-120. `sync --profile` overrides the configured profile, and a config that

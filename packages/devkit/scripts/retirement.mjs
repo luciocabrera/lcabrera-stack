@@ -1,6 +1,6 @@
 /*
- * Which recorded files a run may retire, and the two conditions under which it
- * may retire none of them.
+ * Which recorded files a run may retire, and the conditions under which it may
+ * retire none of them.
  *
  * A retirement deletes a file because the package no longer ships its path, so
  * the shipping list is the authority and has to be one. An install whose
@@ -9,11 +9,11 @@
  * a key in a file the consumer can edit, so it is read as a path inside the
  * repository only once it has been shown to be one.
  *
- * Usage: imported by `sync.mjs`; `destinationIn`, `absenceIn` and
+ * Usage: imported by `sync.mjs`; `destinationIn`, `nodeKindIn` and
  * `retirementRefusal` are also used by `command-materialise.mjs`.
  */
 
-import { lstatSync, realpathSync } from 'node:fs';
+import { lstatSync, realpathSync, statSync } from 'node:fs';
 import { basename, dirname, join, posix } from 'node:path';
 
 import {
@@ -74,7 +74,7 @@ export const retirementRefusal = ({ assets, kitGroups = KIT_GROUPS }) => {
   const present = new Set(assets.map((asset) => assetGroup(asset.path)));
   const missing = kitGroups.filter((group) => !present.has(group));
   if (missing.length === 0) return;
-  return `Retired nothing: this install of @lcabrera/devkit holds no assets in ${missing.join(', ')}, which every version ships, so its asset set is incomplete and cannot say what the package stopped shipping. Every recorded file was left in place. Reinstall the package and re-run.`;
+  return `Retired nothing: this install of @lcabrera/devkit holds no assets in ${missing.join(', ')}, which this version ships, so its asset set is incomplete and cannot say what the package stopped shipping. Every recorded file was left in place. Reinstall the package and re-run.`;
 };
 
 export const declaredRetirements = ({ config, retiring }) =>
@@ -86,28 +86,40 @@ export const declaredRetirements = ({ config, retiring }) =>
 
 const GONE_CODES = new Set(['ENOENT', 'ENOTDIR']);
 
-/**
- * @param {string} root
- * @returns {(path: string) => boolean} whether nothing at all is at the path,
- * as opposed to something that is there and cannot be read as a file
- */
-export const absenceIn = (root) => (path) => {
+const linkedKind = (path) => {
   try {
-    lstatSync(join(root, path));
-    return false;
-  } catch (error) {
-    return GONE_CODES.has(error?.code);
+    return statSync(path).isFile() ? 'file' : 'other';
+  } catch {
+    return 'other';
   }
 };
 
-const retirementState = ({ isAbsent, onDisk, path, recordedHash }) =>
-  onDisk === undefined && !isAbsent(path)
-    ? 'kept'
-    : classifyRetirement({ onDiskHash: onDisk, recordedHash });
+/**
+ * @param {string} root
+ * @returns {(path: string) => 'absent' | 'file' | 'other'} what is at the path
+ * without reading it: nothing, a regular file (directly or through a link), or
+ * anything else, which is never opened
+ */
+export const nodeKindIn = (root) => (path) => {
+  const full = join(root, path);
+  try {
+    const node = lstatSync(full);
+    if (node.isFile()) return 'file';
+    return node.isSymbolicLink() ? linkedKind(full) : 'other';
+  } catch (error) {
+    return GONE_CODES.has(error?.code) ? 'absent' : 'other';
+  }
+};
+
+const retirementState = ({ kind, onDisk, recordedHash }) => {
+  if (kind === 'absent') return 'retired';
+  if (kind !== 'file' || onDisk === undefined) return 'kept';
+  return classifyRetirement({ onDiskHash: onDisk, recordedHash });
+};
 
 const retirementEntry = ({
   destination,
-  isAbsent,
+  kindOf,
   onDiskHash,
   path,
   recordedHash,
@@ -115,13 +127,14 @@ const retirementEntry = ({
   if (destination === undefined) {
     return { executable: false, missing: [], path, state: OUTSIDE_STATE };
   }
-  const onDisk = onDiskHash(path);
+  const kind = kindOf(path);
+  const onDisk = kind === 'file' ? onDiskHash(path) : undefined;
   return {
     executable: false,
     missing: [],
     onDiskHash: onDisk,
     path,
-    state: retirementState({ isAbsent, onDisk, path, recordedHash }),
+    state: retirementState({ kind, onDisk, recordedHash }),
   };
 };
 
@@ -136,7 +149,7 @@ const destinationsOf = ({ destinationOf, paths }) =>
  * @param {{ assets: { path: string }[], config: object,
  *   declared: Set<string>,
  *   destinationOf: (targetPath: string) => string | undefined,
- *   isAbsent: (targetPath: string) => boolean,
+ *   kindOf: (targetPath: string) => 'absent' | 'file' | 'other',
  *   kitGroups?: readonly string[], manifest: { files: Record<string, string> },
  *   onDiskHash: (targetPath: string) => string | undefined,
  *   placed: Set<string> }} args
@@ -146,7 +159,7 @@ export const retirementsFor = ({
   config,
   declared,
   destinationOf,
-  isAbsent,
+  kindOf,
   kitGroups,
   manifest,
   onDiskHash,
@@ -175,5 +188,5 @@ export const retirementsFor = ({
       ({ destination }) =>
         destination === undefined || !stillShipped(destination),
     )
-    .map((record) => retirementEntry({ ...record, isAbsent, onDiskHash }));
+    .map((record) => retirementEntry({ ...record, kindOf, onDiskHash }));
 };
