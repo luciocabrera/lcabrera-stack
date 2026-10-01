@@ -149,14 +149,14 @@ const missingManifestWarning = (root) =>
  * @param {{ declaredBins: readonly string[], profile: string, root: string }} args
  */
 const materialise = ({ declaredBins, profile, root }) => {
-  const { entries, manifest, tasks } = buildPlan({
+  const { entries, manifest, refusal, tasks } = buildPlan({
     declaredBins,
     establish: true,
     profile,
     root,
   });
   applyPlan({ entries, manifest, root, tasks });
-  return { entries, tasks };
+  return { entries, refusal, tasks };
 };
 
 /**
@@ -181,7 +181,11 @@ export const applyInit = ({
     userAgent,
   });
   const warning = missingManifestWarning(root);
-  const { entries, tasks } = materialise({ declaredBins, profile, root });
+  const { entries, refusal, tasks } = materialise({
+    declaredBins,
+    profile,
+    root,
+  });
   const { added, skipped } = taskOutcomes(tasks);
   const { written } = countsFor(entries);
 
@@ -193,6 +197,10 @@ export const applyInit = ({
   console.log(renderPlan(entries));
   printTaskPlan(tasks);
   if (warning !== undefined) console.error(warning);
+  if (refusal !== undefined) {
+    console.error(`\n${refusal}`);
+    return { code: 1 };
+  }
 
   const failure = initFailure({
     planned: entries.length,

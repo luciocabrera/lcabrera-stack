@@ -45,7 +45,7 @@ export const classifyMaterialisation = ({
 export const classifyRetirement = ({ onDiskHash, recordedHash }) =>
   onDiskHash === undefined || onDiskHash === recordedHash ? 'retired' : 'kept';
 
-const RETIREMENT_STATES = new Set(['kept', 'retired']);
+const RETIREMENT_STATES = new Set(['kept', 'outside', 'retired']);
 
 export const isRetirement = (state) => RETIREMENT_STATES.has(state);
 
@@ -63,6 +63,7 @@ const REPORTED_STATES = new Set([
   'conflict',
   'kept',
   'modified',
+  'outside',
   'unmet',
   'unresolved',
 ]);

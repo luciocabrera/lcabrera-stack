@@ -22,6 +22,7 @@ can travel, and **moving** it into a consumer's tree.
 | `tasks.mjs`                         | Merge the task block a consumer's manifest carries, one key at a time. Pure.                                      |
 | `consumer-region.mjs`               | Split off, and put back, the part of a materialised file its consumer owns. Pure.                                 |
 | `accepted.mjs`                      | The record of which local edits the consumer said they meant, and what may go into it. Pure.                      |
+| `retirement.mjs`                    | Decide which recorded files a run may retire, and refuse when a record or the asset set cannot be trusted.        |
 | `sync.mjs`                          | Turn assets plus a manifest into a plan, layer acceptance over it, then apply it.                                 |
 | `init.mjs`                          | What `init` refuses, infers and wires, and when the run failed. Pure.                                             |
 | `command-materialise.mjs`           | The plan `sync`, `doctor` and `init` share, and the writer the latter two share.                                  |

@@ -61,6 +61,7 @@ run classifies it:
 | `conflict`           | **left alone** — an unmanaged file already occupies that path; acknowledgeable |
 | `retired`            | deleted — recorded, unedited, and no rung of this version ships it any more    |
 | `kept`               | **left alone** — the same, but edited locally; reported once, then yours       |
+| `outside`            | **left alone** — a recorded path that resolves outside the repository          |
 | `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                     |
 | `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered     |
 
@@ -73,6 +74,10 @@ if edited, `modified`. A file retires when no rung of this version ships it, or
 when a rung the profile includes declares that it retires the file; running at
 a lower profile leaves a higher rung's files where they are, and a lower rung's
 file that a higher rung retires is placed again.
+
+Nothing is retired from an install whose own asset set is empty or missing a
+group: the run says which, exits non-zero, and leaves every recorded file in
+place. Reinstall the package and re-run.
 
 The two refusals are never written **and never recorded**. Recording one would
 make the next run read the file's absence as a deletion the consumer chose,

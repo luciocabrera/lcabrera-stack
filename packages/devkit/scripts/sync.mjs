@@ -9,6 +9,7 @@
 
 import {
   chmodSync,
+  lstatSync,
   mkdirSync,
   readFileSync,
   rmSync,
@@ -16,9 +17,11 @@ import {
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { isRepositoryRelative } from '../assets/workspace/scripts/hooks-path.mjs';
 import { acceptedEntry, isAccepted } from './accepted.mjs';
 import { substituteCiSetup } from './ci-setup.mjs';
 import {
+  assetGroup,
   groupsFor,
   hasConfigKey,
   retiredAssetsFor,
@@ -33,7 +36,6 @@ import { requiredConfigKeys, requiredPeers } from './frontmatter.mjs';
 import {
   ACKNOWLEDGED_STATE,
   classifyMaterialisation,
-  classifyRetirement,
   hashContent,
   isAcknowledgeable,
   isRecorded,
@@ -43,6 +45,7 @@ import {
 } from './manifest.mjs';
 import { unmetPeers } from './peer.mjs';
 import { substituteCommands } from './placeholders.mjs';
+import { declaredRetirements, retirementsFor } from './retirement.mjs';
 
 const unmetDeclaration = ({ config, content, peerVersions }) => {
   const keys = requiredConfigKeys(content).filter(
@@ -135,8 +138,6 @@ const planEntryFor = ({
   };
 };
 
-const groupOf = (assetPath) => assetPath.split('/', 1)[0];
-
 const targetedAssets = ({ assets, config }) =>
   assets
     .map((asset) => ({
@@ -150,7 +151,7 @@ const prevailingAssets = ({ assets, config, groups }) => {
   const prevailing = new Map();
   const targeted = targetedAssets({ assets, config });
   for (const { asset, targetPath } of targeted) {
-    const held = rank.get(groupOf(asset.path));
+    const held = rank.get(assetGroup(asset.path));
     if (held === undefined) continue;
     const incumbent = prevailing.get(targetPath);
     if (incumbent === undefined || held > incumbent.rank) {
@@ -158,31 +159,6 @@ const prevailingAssets = ({ assets, config, groups }) => {
     }
   }
   return prevailing.values().toArray();
-};
-
-const declaredRetirements = ({ config, retiring }) =>
-  new Set(
-    retiring
-      .map((assetPath) => targetPathFor({ assetPath, config }))
-      .filter((targetPath) => targetPath !== undefined),
-  );
-
-const retirementsFor = ({ assets, config, declared, manifest, onDiskHash }) => {
-  const shipped = new Set(
-    targetedAssets({ assets, config }).map(({ targetPath }) => targetPath),
-  );
-  return Object.entries(manifest.files)
-    .filter(([path]) => declared.has(path) || !shipped.has(path))
-    .map(([path, recordedHash]) => {
-      const onDisk = onDiskHash(path);
-      return {
-        executable: false,
-        missing: [],
-        onDiskHash: onDisk,
-        path,
-        state: classifyRetirement({ onDiskHash: onDisk, recordedHash }),
-      };
-    });
 };
 
 /**
@@ -202,12 +178,16 @@ const retirementsFor = ({ assets, config, declared, manifest, onDiskHash }) => {
  *   onDiskContent?: (targetPath: string) => string | undefined,
  *   onDiskHash: (targetPath: string) => string | undefined,
  *   peerVersions?: Map<string, string | undefined>,
- *   retiring?: readonly string[] }} args
+ *   retiring?: readonly string[],
+ *   isContained?: (targetPath: string) => boolean,
+ *   kitGroups?: readonly string[] }} args
  */
 export const planSync = ({
   assets,
   config,
   groups = groupsFor(config),
+  isContained = isRepositoryRelative,
+  kitGroups,
   manifest,
   onDiskContent = () => undefined,
   onDiskHash,
@@ -232,7 +212,15 @@ export const planSync = ({
 
   return [
     ...planned,
-    ...retirementsFor({ assets, config, declared, manifest, onDiskHash }),
+    ...retirementsFor({
+      assets,
+      config,
+      declared,
+      isContained,
+      kitGroups,
+      manifest,
+      onDiskHash,
+    }),
   ];
 };
 
@@ -254,12 +242,21 @@ const EXECUTABLE_MODE = 0o755;
 const needsExecutableBit = (entry) =>
   entry.executable === true && isRecorded(entry.state);
 
+const removeFile = (path) => {
+  try {
+    if (lstatSync(path).isDirectory()) return;
+  } catch {
+    return;
+  }
+  rmSync(path, { force: true });
+};
+
 export const applySync = ({ entries, root }) => {
   for (const entry of entries) {
     if (!isWritten(entry.state)) continue;
     const destination = join(root, entry.path);
     if (isRemoval(entry.state)) {
-      rmSync(destination, { force: true });
+      removeFile(destination);
       continue;
     }
     mkdirSync(dirname(destination), { recursive: true });

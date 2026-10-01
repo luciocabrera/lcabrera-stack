@@ -44,6 +44,7 @@ import {
   serialiseManifest,
 } from './manifest.mjs';
 import { declaredPeerNames, installedPeerVersion } from './peer.mjs';
+import { containedIn, retirementRefusal } from './retirement.mjs';
 import {
   applySync,
   manifestAfter,
@@ -204,6 +205,7 @@ export const buildPlan = ({
     entries: planSync({
       assets,
       config,
+      isContained: containedIn(root),
       manifest,
       onDiskContent: onDiskReader(root),
       onDiskHash: onDiskHasher(root),
@@ -215,6 +217,7 @@ export const buildPlan = ({
     config,
     entries,
     manifest,
+    refusal: retirementRefusal({ assets }),
     tasks: plannedTasks({ config, declaredBins, establish, manifest, root }),
   };
 };
@@ -286,6 +289,7 @@ const STATE_LABELS = {
   current: 'up to date',
   kept: 'left alone — locally modified, and this version no longer ships it',
   modified: 'left alone — locally modified',
+  outside: 'left alone — the recorded path resolves outside this repository',
   restored: 'restored',
   retired: 'removed — this version no longer ships it',
   unmet: UNMET_LABELS.config,

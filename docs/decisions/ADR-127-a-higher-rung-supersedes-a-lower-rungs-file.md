@@ -61,7 +61,7 @@ match is planned as one of two states:
   and the record leaves the manifest. This is a reported state, so
   `doctor --check` fails until `sync` runs.
 
-Two boundaries make this safe.
+Four boundaries make this safe.
 
 **Retirement is read against every group, not the held ones.** This follows
 ADR-120. `sync --profile` overrides the configured profile, and a config that
@@ -78,6 +78,26 @@ record stayed, the file would be reported on every run, `doctor --check` would
 fail for ever, and the only fix would be to delete a file the consumer chose to
 keep. The run that retires the record names the file once. After that the file
 belongs to the consumer, like any other file the kit never wrote.
+
+**A record is a path inside the repository only once it resolves to one.** The
+manifest is a file the consumer can edit, and its keys are read back as paths.
+Before a retiring record is hashed or deleted it must be repository-relative
+(not absolute, not climbing out with `..`) and must resolve, through every
+symbolic link on the way, to somewhere strictly inside the root. A record that
+fails is `outside`: it is never read or deleted, it is reported, and its record
+leaves the manifest because the kit will never act on it. The lexical half is
+`isRepositoryRelative`, the check the `hooks` path already goes through.
+
+**The asset set has to be a shipping list before an absence means anything.**
+"No asset maps onto this path" is only evidence that the package stopped shipping
+it when the asset set is complete. An install whose assets directory is missing
+or empty, or that holds nothing in one of the groups this version ships, would
+otherwise read as a package that ships nothing there and retire every record.
+`retirementRefusal` refuses that set: the run plans no retirement at all, says
+which groups are absent, and `sync`, `init` and `doctor --check` exit non-zero.
+The groups it expects are `KIT_GROUPS`, the ladder's groups less the ones that
+ship no asset yet, and a test holds that list equal to the package's `assets/`
+directories, so a group that gains its first asset cannot be forgotten.
 
 **A rung can declare the asset paths it retires.** `RUNG_RETIREMENTS` in
 `config.mjs` sits beside `RUNG_GROUPS` and lists, per rung, the asset paths that
@@ -133,7 +153,12 @@ tree at that rung.
    higher rung.** Rejected: the tree would hold an empty file the kit records as
    its own, rather than no file.
 
-4. **Refuse to plan when two groups map onto one path.** Rejected: that leaves a
+4. **Treat an empty asset set as an error in the reader instead.** Rejected on
+   its own: it covers the empty install and not the partial one, where a packer
+   dropped one group's files. The check is made where an absence would be read
+   as authority, so it covers both.
+
+5. **Refuse to plan when two groups map onto one path.** Rejected: that leaves a
    higher rung no way to replace a lower rung's file. Every rung would have to
    choose paths that no rung below it uses.
 

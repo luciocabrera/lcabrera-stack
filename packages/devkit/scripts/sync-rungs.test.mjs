@@ -21,6 +21,7 @@ import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 import { runDoctor, runSync } from './command-sync.mjs';
 import { DEFAULT_CONFIG, retiredAssetsFor } from './config.mjs';
 import { hashContent, MANIFEST_FILE } from './manifest.mjs';
+import { containedIn } from './retirement.mjs';
 import {
   applySync,
   manifestAfter,
@@ -67,6 +68,8 @@ const syncTree = ({ assets, groups, manifest, retiring = [], root }) => {
     assets,
     config: CONFIG,
     groups,
+    isContained: containedIn(root),
+    kitGroups: ['lower'],
     manifest,
     onDiskContent: onDiskReader(root),
     onDiskHash: onDiskHasher(root),

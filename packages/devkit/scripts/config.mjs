@@ -48,6 +48,12 @@ const RUNG_GROUPS = [
 
 const GROUPS_BY_RUNG = new Map(RUNG_GROUPS);
 
+const GROUPS_WITHOUT_ASSETS = new Set(['agents', 'docs']);
+
+export const KIT_GROUPS = RUNG_GROUPS.flatMap(([, groups]) => groups).filter(
+  (group) => !GROUPS_WITHOUT_ASSETS.has(group),
+);
+
 /** @type {ReadonlyArray<readonly [string, readonly string[]]>} */
 const RUNG_RETIREMENTS = [
   ['agent', []],
@@ -205,10 +211,16 @@ export const targetPathFor = ({ assetPath, config }) => {
 
 export const groupsFor = (config) => PROFILES[config.profile] ?? [];
 
+/**
+ * @param {string} assetPath
+ * @returns {string}
+ */
+export const assetGroup = (assetPath) => assetPath.split('/', 1)[0];
+
 const EXECUTABLE_GROUPS = new Set(['hooks']);
 
 export const isExecutableAsset = (assetPath) =>
-  EXECUTABLE_GROUPS.has(assetPath.split('/', 1)[0]);
+  EXECUTABLE_GROUPS.has(assetGroup(assetPath));
 
 export const configuredCommandWords = (config) =>
   Object.values(config.commands ?? {})

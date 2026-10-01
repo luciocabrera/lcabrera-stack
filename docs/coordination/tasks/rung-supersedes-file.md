@@ -2,7 +2,7 @@
 id: rung-supersedes-file
 title: feat(devkit): a higher rung supersedes a lower rung's file
 owner: agent:claude
-status: active
+status: review
 branch: feat/1220-rung-supersedes-file
 area:
   - packages/devkit/scripts/sync.mjs
@@ -17,6 +17,9 @@ area:
   - docs/decisions/ADR-*-higher-rung*
   - .changeset/rung-supersedes*.md
   - reports/api-surface/devkit.txt
+  - packages/devkit/scripts/retirement.mjs
+  - packages/devkit/scripts/command-init.mjs
+  - packages/devkit/ARCHITECTURE.md
 started: 2026-10-01
 updated: 2026-10-01
 plan: (none)
@@ -30,6 +33,6 @@ feat(devkit): a higher rung supersedes a lower rung's file
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review on #1225; round 2 adds the containment and asset-set guards on retirement
 - Blockers: none
 - Next:
