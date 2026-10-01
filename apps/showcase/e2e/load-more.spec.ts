@@ -69,6 +69,28 @@ const isSortedFollowUp = (url: string) => {
   );
 };
 
+const isFilteredFollowUp = (url: string) => {
+  const params = new URL(url).searchParams;
+  const filter = params.get('filter') ?? '';
+
+  return (
+    params.get('limit') === '150' &&
+    Boolean(params.get('cursor')) &&
+    filter.includes('order_status') &&
+    filter.includes('Delivered')
+  );
+};
+
+const isUnfilteredFollowUp = (url: string) => {
+  const params = new URL(url).searchParams;
+
+  return (
+    params.get('limit') === '150' &&
+    Number(params.get('skip')) > 0 &&
+    !params.has('filter')
+  );
+};
+
 it('the first paint does not ask for another page', async ({ page }) => {
   const hits = watch(page, ENTERPRISE_PAGE);
   await openGrid(page);
@@ -100,6 +122,8 @@ it('scrolling asks for the next page with a cursor and keeps the dataset count',
 });
 
 it('a filtered follow-up page carries the filter', async ({ page }) => {
+  const urls = watch(page, ENTERPRISE_PAGE);
+
   await openGrid(page);
   await openSettings(page);
   await selectTab(page, 'Filters');
@@ -109,12 +133,11 @@ it('a filtered follow-up page carries the filter', async ({ page }) => {
     'Delivered',
   );
   await acceptSettings(page);
-
-  const responsePromise = nextPage(page, ENTERPRISE_PAGE);
+  await expect(grid(page)).not.toHaveAttribute('aria-rowcount', '-1');
   await scrollToEnd(page);
-  const filter = readParams(await responsePromise).get('filter') ?? '';
-  expect(filter).toContain('order_status');
-  expect(filter).toContain('Delivered');
+  await expect
+    .poll(() => urls.some((url) => isFilteredFollowUp(url)))
+    .toBe(true);
 });
 
 it('a sorted follow-up page carries the sort', async ({ page }) => {
@@ -153,10 +176,11 @@ it('the infinite route follow-up omits a browser filter', async ({ page }) => {
   await fillFilterText(page.getByTestId('filter-item-model'), 'A');
   await acceptSettings(page);
 
-  const responsePromise = nextPage(page, CAR_SALES_PAGE);
+  await expect(grid(page)).not.toHaveAttribute('aria-rowcount', '-1');
   await scrollToEnd(page);
-  const params = readParams(await responsePromise);
-  expect(params.has('filter')).toBe(false);
+  await expect
+    .poll(() => hits.some((url) => isUnfilteredFollowUp(url)))
+    .toBe(true);
   expect(hits.every((url) => !new URL(url).searchParams.has('filter'))).toBe(
     true,
   );
