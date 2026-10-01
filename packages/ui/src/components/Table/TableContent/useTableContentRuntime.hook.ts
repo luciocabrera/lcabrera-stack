@@ -2,7 +2,6 @@ import { useRef } from 'react';
 
 import type { TableContentProps } from './TableContent.types';
 
-import { useKeepTableStateFetcherMounted } from '../contexts/TableConfig/columns/actions/hooks/useKeepTableStateFetcherMounted.hook';
 import { useSyncColumnAxisColumns } from '../contexts/TableConfig/grouping/actions';
 import {
   useGetTableIsRounded,
@@ -15,6 +14,7 @@ import {
   useGetTableIsLoadingMore,
 } from '../contexts/TableData/data/selectors';
 import { useInfiniteScroll, useScrollResetAfterLoad } from '../hooks';
+import { useRetainTablePersistFetchers } from '../TableLayout/useRetainTablePersistFetchers.hook';
 
 type UseTableContentRuntimeArgs<
   TData extends Record<string, unknown>,
@@ -33,7 +33,7 @@ export const useTableContentRuntime = <
   onLoadMore,
 }: UseTableContentRuntimeArgs<TData, TResponse>) => {
   const threshold = useGetTableThreshold();
-  useKeepTableStateFetcherMounted();
+  useRetainTablePersistFetchers();
   useSyncColumnAxisColumns();
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();

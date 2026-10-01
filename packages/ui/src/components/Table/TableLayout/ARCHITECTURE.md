@@ -45,8 +45,8 @@ that submits usually sits in a popover that closes in the same handler. React
 Router drops the redirect of a fetcher whose last owner has unmounted, so the
 loader would never run again
 ([#1153](https://github.com/luciocabrera/lcabrera-stack/issues/1153)).
-`TableLayout` therefore holds the table-state and UI-flag fetcher keys for as
-long as the table is mounted, through `useRetainTablePersistFetchers`.
+The grid shell holds the table-state and UI-flag fetcher keys for as long as
+the grid is mounted, through `useRetainTablePersistFetchers`.
 
 ## Props
 
