@@ -116,7 +116,7 @@ const waitedForDatabase = (absolute) => {
     env: process.env,
     file: existsSync(file) ? readFileSync(file, 'utf8') : '',
   });
-  console.log(`\nWaiting for Postgres on ${host}:${port}`);
+  console.log('\nWaiting for Postgres to answer');
   return succeeded({
     args: [
       '--input-type=module',
