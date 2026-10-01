@@ -17,7 +17,7 @@ const chooseFromTrigger = async (trigger: Locator, label: string) => {
   await listbox.getByRole('button', { exact: true, name: label }).click();
 };
 
-export const chooseColumn = async (page: Page, label: string) => {
+const chooseColumn = async (page: Page, label: string) => {
   const panel = visiblePanel(page);
   await chooseFromTrigger(
     panel.getByRole('button', { name: 'Select a column...' }),
