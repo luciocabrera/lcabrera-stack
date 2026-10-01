@@ -59,11 +59,18 @@ run classifies it:
 | `modified`           | **left alone** — edited locally, and reported on every run                     |
 | `acknowledged`       | **left alone** — an edit you said you meant; reported only under `--verbose`   |
 | `conflict`           | **left alone** — an unmanaged file already occupies that path; acknowledgeable |
+| `retired`            | deleted — recorded, unedited, and no rung of this version ships it any more    |
+| `kept`               | **left alone** — the same, but edited locally; reported once, then yours       |
 | `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                     |
 | `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered     |
 
 A local edit is a supported state, not a defect. It survives every sync, which
 is what stops a consumer forking the kit to change one line.
+
+Where two rungs a profile holds place a file at the same path, the higher rung's
+file is the one planned, so a tree moving up a rung has that file `updated` or,
+if edited, `modified`. A file retires only when no rung of this version ships
+it: running at a lower profile leaves a higher rung's files where they are.
 
 The two refusals are never written **and never recorded**. Recording one would
 make the next run read the file's absence as a deletion the consumer chose,

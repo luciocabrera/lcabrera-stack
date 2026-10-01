@@ -73,9 +73,13 @@ file, and may be assumed by anything placed there:
 All four rungs are accepted. `PROFILES` in
 `packages/devkit/scripts/config.mjs` is derived from the ladder, `withProfile`
 refuses any other name, and each gate task in `init.mjs` names the rung it lands
-on. `agent` and `repo` place groups; `monorepo` and `full` place what `repo`
-places until #1075 and #1078 land their content, and a run under either says so
-rather than reporting files it did not add. The `decisions` group sits at
+on. `agent`, `repo` and `monorepo` place groups; `full` places what `monorepo`
+places until #1078 lands its content, and a run under it says so rather than
+reporting files it did not add. Where two held groups map onto one path, the
+higher rung's file is the one placed, and a recorded file no rung ships any more
+is retired
+([ADR-127](../../docs/decisions/ADR-127-a-higher-rung-supersedes-a-lower-rungs-file.md)).
+The `decisions` group sits at
 `agent`, where both `decisions/*` seeds are classified below: a record template
 and its home README are prose a directory holds, and neither needs git or a
 runner.

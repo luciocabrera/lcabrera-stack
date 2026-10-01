@@ -28,12 +28,15 @@ withProfile [const] ({ config, profile, source }: { config: object; profile: str
 acknowledgeableStates [const] () => string[]
 ACKNOWLEDGED_STATE [const] "acknowledged"
 classifyMaterialisation [const] ({ incomingHash, onDiskHash, recordedHash, }: { incomingHash: any; onDiskHash: any; recordedHash: any; }) => "added" | "current" | "conflict" | "restored" | "modified" | "updated"
+classifyRetirement [const] ({ onDiskHash, recordedHash }: { onDiskHash: any; recordedHash: any; }) => "retired" | "kept"
 emptyManifest [const] (version: any) => { files: {}; packageVersion: any; tasks: {}; version: number; }
 hashContent [const] (content: any) => string
 isAcknowledgeable [const] (state: any) => boolean
 isAcknowledged [const] (state: any) => boolean
 isRecorded [const] (state: any) => boolean
+isRemoval [const] (state: any) => boolean
 isReported [const] (state: any) => boolean
+isRetirement [const] (state: any) => boolean
 isWritten [const] (state: any) => boolean
 MANIFEST_FILE [const] ".devkit-manifest.json"
 MANIFEST_VERSION [const] 1

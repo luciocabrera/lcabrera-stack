@@ -16,10 +16,11 @@ area:
   - packages/devkit/README.md
   - docs/decisions/ADR-*-higher-rung*
   - .changeset/rung-supersedes*.md
+  - reports/api-surface/devkit.txt
 started: 2026-10-01
 updated: 2026-10-01
 plan: (none)
-pr: (none)
+pr: '#1225'
 issue: #1220
 ---
 
