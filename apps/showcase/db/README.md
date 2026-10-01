@@ -20,9 +20,10 @@ row bound to the showcase's load-test volume (`LOAD_TEST_ROWS` in
 `seed-db-sources.mjs`); every other line applies as shipped. So a schema change
 is made in that file, and the showcase picks it up on its next seed.
 
-Two things fail if that arrangement breaks. The seeder refuses a shipped file
+Three things fail if that arrangement breaks. The seeder refuses a shipped file
 that does not hold exactly one row bound to raise, rather than seeding the
-demo-sized volume. And `../scripts/seed-db-sources.test.mjs` fails when any
+demo-sized volume, and devkit's own `full-ddl-contract.test.mjs` fails on the
+same shape in a pull request that touches only devkit. And `../scripts/seed-db-sources.test.mjs` fails when any
 tracked `.sql` file other than the shipped one defines `enterprise_orders` — a
 second copy is the drift this replaced
 ([ADR-071](../../../docs/decisions/ADR-071-split-the-demo-database-setup.md)).

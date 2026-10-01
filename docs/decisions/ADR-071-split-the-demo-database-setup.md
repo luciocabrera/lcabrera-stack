@@ -61,13 +61,16 @@ that workspace left the repository)**.
 > own `enterprise_orders` DDL, that copy is likewise beyond reach of any check
 > here.
 >
-> **Two costs.** A change to the shipped file changes the showcase's table on
-> its next seed, so an edit made for installing repositories is also an edit
-> to the load-test fixture. And `seed-db-sources.test.mjs` runs with the
-> showcase's tests, which a pull request touching only `packages/devkit` does
-> not select, because the showcase declares no dependency on it: a shipped edit
-> that removes the row bound is caught by the full suite (`test:all`, and CI on
-> `main`) rather than by that pull request's own run.
+> **One cost, and the gap it nearly had.** A change to the shipped file changes
+> the showcase's table on its next seed, so an edit made for installing
+> repositories is also an edit to the load-test fixture.
+> `seed-db-sources.test.mjs` runs with the showcase's tests, which a pull
+> request touching only `packages/devkit` does not select, because the showcase
+> declares no dependency on it. So devkit carries its own check:
+> `packages/devkit/scripts/full-ddl-contract.test.mjs` fails when the shipped
+> file does not hold exactly one row bound, which its header names as the one
+> value to raise to change the seeded volume. A devkit pull request that breaks
+> the bound fails in its own run.
 
 ## Context
 

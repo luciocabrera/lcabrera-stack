@@ -8,6 +8,7 @@ area:
   - apps/showcase/db/**
   - apps/showcase/scripts/seed-db*.mjs
   - packages/devkit/assets/full/apps/web/db/**
+  - packages/devkit/scripts/full-ddl-contract.test.mjs
   - apps/showcase/README.md
   - apps/showcase/src/INVENTORY.md
   - AGENTS.md
