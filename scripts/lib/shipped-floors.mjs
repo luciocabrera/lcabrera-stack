@@ -165,11 +165,7 @@ const PLACES = {
   manifest: 'the application manifest',
 };
 
-/**
- * @param {string} kind
- * @returns {string}
- */
-export const placeOf = (kind) => PLACES[kind] ?? 'a shipped workspace file';
+const placeOf = (kind) => PLACES[kind] ?? 'a shipped workspace file';
 
 /**
  * @param {{ packageName: string, raised: readonly { from: string, kind: string,
