@@ -79,12 +79,11 @@ bundle's two states apart, and why the response shapes are identical:
 
 ## Database
 
-This app owns the DDL for every table it queries — `db/setup_large_data.sql`
-(`car_sales`, `wide_alltypes_150`) and `db/setup_enterprise_orders.sql`
-(`enterprise_orders`) — and seeds itself with them. Nothing outside this
-workspace is involved; [`db/README.md`](db/README.md) covers the one file that
-is deliberately duplicated with an external API server and how the copies are
-kept from drifting now that the two live in separate repositories.
+This app seeds every table it queries. `db/setup_large_data.sql` (`car_sales`,
+`wide_alltypes_150`) is its own; `enterprise_orders` comes from the DDL
+`@lcabrera/devkit` ships, read in place and raised to a load-test row count, so
+there is no second copy of it here. [`db/README.md`](db/README.md) covers both,
+and the one file that is deliberately duplicated with an external API server.
 
 Start local PostgreSQL from the monorepo root, then seed:
 
