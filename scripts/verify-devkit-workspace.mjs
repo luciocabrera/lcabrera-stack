@@ -37,6 +37,8 @@ import {
 import { configuredCommandRuns } from './lib/devkit-config-commands.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
 import {
+  registryFaultFindings,
+  registryState,
   serveRegistry,
   startedRegistry,
 } from './lib/devkit-registry-server.mjs';
@@ -314,25 +316,31 @@ const checkedTree = async ({ devkit, staging, tree }) => {
     tree,
   });
   if (findings.length > 0) return [...created, ...findings];
-  const { server, url } = startedRegistry({
+  const { log, server, url } = startedRegistry({
     launch: [fileURLToPath(import.meta.url), SERVE_FLAG],
     packed,
     staging,
   });
   try {
     writeFileSync(join(tree, '.npmrc'), scopedRegistryConfig(url));
+    const found = await treeFindings({
+      checks: TREE_CHECKS,
+      context: { devkit },
+      prerequisites: [
+        runtimeFindings,
+        developerInstallFindings,
+        sourceFindingsFor({ packed, registry: url }),
+      ],
+      tree,
+    });
     return [
+      ...registryFaultFindings({
+        ...(await registryState({ server, url })),
+        log: readIfPresent(log),
+        url,
+      }),
       ...created,
-      ...(await treeFindings({
-        checks: TREE_CHECKS,
-        context: { devkit },
-        prerequisites: [
-          runtimeFindings,
-          developerInstallFindings,
-          sourceFindingsFor({ packed, registry: url }),
-        ],
-        tree,
-      })),
+      ...found,
     ];
   } finally {
     server.kill();

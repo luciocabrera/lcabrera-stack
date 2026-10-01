@@ -4,15 +4,23 @@
  * specifiers so pnpm resolves each one as the semver version it will carry on
  * npm, and a peer range between two of them behaves as it will for a consumer
  * (ADR-125). The gate runs it in a child copy of itself, because the gate's own
- * calls block, and waits here for the port it writes.
+ * calls block, and waits here for the port it writes. Every path it does not
+ * hold gets a 404, so a request for one cannot take the registry down.
  */
 
 import { spawn } from 'node:child_process';
-import { readFileSync, renameSync, writeFileSync } from 'node:fs';
+import {
+  closeSync,
+  openSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from 'node:fs';
 import { createServer } from 'node:http';
-import { basename, dirname, join } from 'node:path';
+import { dirname, join } from 'node:path';
 import process from 'node:process';
 
+import { outputTail } from './devkit-workspace.mjs';
 import { packumentFor } from './devkit-workspace-packages.mjs';
 
 const TARBALL_PREFIX = '/-/';
@@ -23,32 +31,63 @@ const POLL_MS = 50;
 
 const MAX_PORT = 65_535;
 
+const PROBE_TIMEOUT_MS = 5000;
+
+const decodedName = (path) => {
+  try {
+    return decodeURIComponent(path.slice(1));
+  } catch {
+    return '';
+  }
+};
+
+const NOT_FOUND = {
+  body: JSON.stringify({ error: 'not found' }),
+  status: 404,
+  type: 'application/json',
+};
+
+/**
+ * @param {{ baseUrl: string,
+ *           index: Record<string, { file: string, integrity: string,
+ *                                   manifest: Record<string, unknown> }>,
+ *           path: string }} args
+ * @returns {{ body?: string, file?: string, status: number, type: string }}
+ */
+export const registryResponse = ({ baseUrl, index, path }) => {
+  if (path.startsWith(TARBALL_PREFIX)) {
+    const file = path.slice(TARBALL_PREFIX.length);
+    return Object.values(index).some((entry) => entry.file === file)
+      ? { file, status: 200, type: 'application/octet-stream' }
+      : NOT_FOUND;
+  }
+  const name = decodedName(path);
+  const packed = Object.hasOwn(index, name) ? index[name] : undefined;
+  return packed === undefined
+    ? NOT_FOUND
+    : {
+        body: JSON.stringify(packumentFor({ baseUrl, packed })),
+        status: 200,
+        type: 'application/json',
+      };
+};
+
 const send = ({ body, response, status, type }) => {
   response.writeHead(status, { 'content-type': type });
   response.end(body);
 };
 
-const tarballResponse = ({ directory, path, response }) => {
-  const file = basename(path);
-  send({
-    body: readFileSync(join(directory, file)),
-    response,
-    status: 200,
-    type: 'application/octet-stream',
+const answer = ({ baseUrl, directory, index, path, response }) => {
+  const { body, file, status, type } = registryResponse({
+    baseUrl,
+    index,
+    path,
   });
-};
-
-const packumentResponse = ({ baseUrl, index, path, response }) => {
-  const packed = index[decodeURIComponent(path.slice(1))];
-  if (packed === undefined) {
-    send({ body: '{}', response, status: 404, type: 'application/json' });
-    return;
-  }
   send({
-    body: JSON.stringify(packumentFor({ baseUrl, packed })),
+    body: file === undefined ? body : readFileSync(join(directory, file)),
     response,
-    status: 200,
-    type: 'application/json',
+    status,
+    type,
   });
 };
 
@@ -80,12 +119,18 @@ export const serveRegistry = ({ indexPath, portFile }) => {
   const directory = dirname(indexPath);
   const server = createServer((request, response) => {
     const [path] = (request.url ?? '/').split('?');
-    const baseUrl = `http://${request.headers.host}`;
-    if (path.startsWith(TARBALL_PREFIX)) {
-      tarballResponse({ directory, path, response });
-      return;
+    try {
+      answer({
+        baseUrl: `http://${request.headers.host}`,
+        directory,
+        index,
+        path,
+        response,
+      });
+    } catch (error) {
+      process.stderr.write(`${request.url}: ${error.stack ?? error}\n`);
+      send({ body: String(error), response, status: 500, type: 'text/plain' });
     }
-    packumentResponse({ baseUrl, index, path, response });
   });
   server.listen(0, '127.0.0.1', () => {
     publishPort({ port: server.address().port, portFile });
@@ -129,24 +174,79 @@ export const portFrom = ({ deadlineMs = START_DEADLINE_MS, portFile }) => {
  * @param {{ launch: readonly string[],
  *           packed: ReadonlyArray<{ manifest: { name: string } }>,
  *           staging: string }} args
- * @returns {{ server: import('node:child_process').ChildProcess, url: string }}
+ * @returns {{ log: string, server: import('node:child_process').ChildProcess,
+ *             url: string }}
  */
 export const startedRegistry = ({ launch, packed, staging }) => {
   const index = join(staging, 'registry-index.json');
   const portFile = join(staging, 'registry-port');
+  const log = join(staging, 'registry.log');
   writeFileSync(
     index,
     JSON.stringify(
       Object.fromEntries(packed.map((entry) => [entry.manifest.name, entry])),
     ),
   );
+  const logFd = openSync(log, 'w');
   const server = spawn(process.execPath, [...launch, index, portFile], {
-    stdio: 'ignore',
+    stdio: ['ignore', 'ignore', logFd],
   });
+  closeSync(logFd);
   try {
-    return { server, url: `http://127.0.0.1:${portFrom({ portFile })}` };
+    return {
+      log,
+      server,
+      url: `http://127.0.0.1:${portFrom({ portFile })}`,
+    };
   } catch (error) {
     server.kill();
     throw error;
   }
+};
+
+const probeOf = async (url) => {
+  try {
+    const response = await fetch(`${url}/`, {
+      signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+    });
+    return { status: response.status };
+  } catch (error) {
+    return { error: error.cause?.message ?? error.message };
+  }
+};
+
+/**
+ * @param {{ server: import('node:child_process').ChildProcess, url: string }} args
+ * @returns {Promise<{ exit?: { code: number | null, signal: string | null },
+ *                     probe: { error?: string, status?: number } }>}
+ */
+export const registryState = async ({ server, url }) => {
+  const probe = await probeOf(url);
+  const { exitCode: code, signalCode: signal } = server;
+  return code === null && signal === null
+    ? { probe }
+    : { exit: { code, signal }, probe };
+};
+
+const faultOf = ({ exit, probe }) => {
+  if (exit === undefined) return probe.error;
+  return exit.signal === null
+    ? `it exited ${exit.code}`
+    : `it was killed by ${exit.signal}`;
+};
+
+/**
+ * @param {{ exit?: { code: number | null, signal: string | null },
+ *           log?: string,
+ *           probe: { error?: string, status?: number },
+ *           url: string }} args
+ * @returns {string[]}
+ */
+export const registryFaultFindings = ({ exit, log = '', probe, url }) => {
+  const fault = faultOf({ exit, probe });
+  return fault === undefined
+    ? []
+    : [
+        `the scratch registry at ${url} stopped answering (${fault}). That is a fault in the gate's own registry, not in the created tree, so read an install or metadata failure below as its consequence. Its last output:\n${outputTail(log)}`,
+      ];
 };

@@ -9,10 +9,12 @@ area:
   - scripts/lib/devkit-workspace*.mjs
   - scripts/lib/registry*.mjs
   - scripts/lib/scratch-registry*.mjs
+  - scripts/lib/devkit-registry-server*.mjs
+  - docs/decisions/ADR-125-*.md
 started: 2026-10-01
 updated: 2026-10-01
 plan: (none)
-pr: (none)
+pr: '#1231'
 issue: #1229
 ---
 
@@ -22,6 +24,6 @@ fix(tooling): the created-tree gate's scratch registry intermittently stops answ
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: fix committed; the scratch registry 404s paths it does not hold and the gate names a registry fault
 - Blockers: none
-- Next:
+- Next: verifier

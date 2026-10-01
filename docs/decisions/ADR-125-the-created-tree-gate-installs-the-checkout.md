@@ -46,6 +46,17 @@ serves those tarballs, each as the only version of its package. The scratch
 tree gets an untracked `.npmrc` that points the `@lcabrera` scope at it. The
 blueprint is never touched, and nothing else in the install moves off npm.
 
+The scratch registry answers 404 for every path that is not one of those
+packuments or tarballs. That includes the npm attestation endpoint that pnpm
+reads when it verifies a lockfile against its supply-chain policies. When the
+registry treated that path as a tarball, the read failed and the error took the
+registry process down, so every later request was refused
+([#1229](https://github.com/luciocabrera/lcabrera-stack/issues/1229)). After the
+tree's checks, the gate requests something from the registry. If the registry
+has exited or does not answer, the first finding names it as a fault in the
+gate's own registry, not in the created tree, and quotes what the registry wrote
+to stderr.
+
 The tarballs are served, not installed as `file:` specifiers or `overrides`,
 because pnpm does not treat a `file:` install as a version. A peer range between
 two packed packages, for example `@lcabrera/devkit`'s peer on
