@@ -1,5 +1,6 @@
 import type { PaginatedFetchArgs } from './http.types.ts';
 
+import { OLAP_DRILL_GROUP_PARAM } from '../olap/olap.constants.ts';
 import { buildPaginatedQueryParams } from './build-paginated-query-params.util.ts';
 import { fetchAndValidate } from './fetch-and-validate.util.ts';
 
@@ -19,6 +20,7 @@ export const createPaginatedFetcher = <TResponse>({
   return ({
     cursor,
     filter,
+    group,
     limit,
     requestUrl,
     signal,
@@ -33,6 +35,8 @@ export const createPaginatedFetcher = <TResponse>({
       skip,
       sorting,
     });
+
+    if (group !== undefined) params.set(OLAP_DRILL_GROUP_PARAM, group);
 
     return fetchAndValidate<TResponse>({
       isValid,

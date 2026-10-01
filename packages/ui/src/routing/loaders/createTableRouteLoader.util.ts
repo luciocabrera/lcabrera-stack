@@ -146,6 +146,7 @@ export const createTableRouteLoader = <
       request,
       totalsPlacement,
     });
+    void dataPromise.catch(() => undefined);
 
     const [groupingCapabilities, lockedFilters] = await Promise.all([
       startInjectedResolver(() =>

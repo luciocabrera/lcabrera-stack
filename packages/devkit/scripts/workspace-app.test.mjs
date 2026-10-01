@@ -170,34 +170,62 @@ describe('the application answers every state change its table makes', () => {
 
 const ORDERS_ROUTE = 'routes/orders';
 
-const declaredColumns = async () => {
-  const module = await import(
-    pathToFileURL(join(appSourceRoot(), ORDERS_ROUTE, 'Orders.constants.ts'))
-      .href
+const RUNGS = [
+  { group: 'workspace', isOffered: false, rung: 'monorepo' },
+  { group: 'full', isOffered: true, rung: 'full' },
+];
+
+const constantsOf = async (group) =>
+  import(
+    pathToFileURL(
+      join(
+        ASSETS,
+        group,
+        ...APP_DIRECTORY.split('/'),
+        'src',
+        ORDERS_ROUTE,
+        'Orders.constants.ts',
+      ),
+    ).href
   );
-  return module.COLUMNS;
-};
 
-describe('the table it renders offers only what its loader answers', () => {
-  test('declares the columns the page shows', async () => {
-    const columns = await declaredColumns();
-    expect(columns.length).toBeGreaterThan(0);
-  });
+const isOn = ({ column, flag }) => column[flag] !== false;
 
-  test('turns sorting off on every one of them', async () => {
-    const columns = await declaredColumns();
-    const sortable = columns
-      .filter((column) => column.isSortable !== false)
-      .map((column) => column.key);
-    expect(sortable).toEqual([]);
-  });
+const offeredBy = ({ columns, flag, isOffered }) =>
+  columns
+    .filter((column) => isOn({ column, flag }) !== isOffered)
+    .map((column) => column.key);
 
-  test('turns filtering off on every one of them', async () => {
-    const columns = await declaredColumns();
-    const filterable = columns
-      .filter((column) => column.isFilterable !== false)
-      .map((column) => column.key);
-    expect(filterable).toEqual([]);
+describe.each(RUNGS)(
+  'the table the $rung rung renders offers only what its loader answers',
+  ({ group, isOffered }) => {
+    test('declares the columns the page shows', async () => {
+      const { COLUMNS } = await constantsOf(group);
+      expect(COLUMNS.length).toBeGreaterThan(0);
+    });
+
+    test(`turns sorting ${isOffered ? 'on' : 'off'} on every one of them`, async () => {
+      const { COLUMNS } = await constantsOf(group);
+      expect(
+        offeredBy({ columns: COLUMNS, flag: 'isSortable', isOffered }),
+      ).toEqual([]);
+    });
+
+    test(`turns filtering ${isOffered ? 'on' : 'off'} on every one of them`, async () => {
+      const { COLUMNS } = await constantsOf(group);
+      expect(
+        offeredBy({ columns: COLUMNS, flag: 'isFilterable', isOffered }),
+      ).toEqual([]);
+    });
+  },
+);
+
+describe('the rung whose read answers sorting and filtering', () => {
+  test('reads exactly the columns it offers them on', async () => {
+    const { COLUMNS, TARGET } = await constantsOf('full');
+    expect(TARGET.allowedColumns).toEqual(
+      COLUMNS.map((column) => String(column.key)),
+    );
   });
 });
 

@@ -11,6 +11,7 @@ TableLayout/
 ├── TableLayout.component.tsx   → Provider stack + Suspense + Table
 ├── TableLayout.types.ts        → TableLayoutProps (columns, dataPromise, config, ...)
 ├── TableLayout.stylex.ts       → Container styles
+├── useRetainTablePersistFetchers.hook.ts → Keeps the persistence fetchers mounted
 └── index.ts                    → Barrel export
 ```
 
@@ -35,6 +36,17 @@ graph TD
 
   style TSB stroke-dasharray: 5 5
 ```
+
+## Persistence fetchers outlive the control that submits
+
+A sort, a filter or a totals placement is persisted by submitting to the
+persist-cookie action, which redirects to the URL that carries it. The control
+that submits usually sits in a popover that closes in the same handler. React
+Router drops the redirect of a fetcher whose last owner has unmounted, so the
+loader would never run again
+([#1153](https://github.com/luciocabrera/lcabrera-stack/issues/1153)).
+`TableLayout` therefore holds the table-state and UI-flag fetcher keys for as
+long as the table is mounted, through `useRetainTablePersistFetchers`.
 
 ## Props
 

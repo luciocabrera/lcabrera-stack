@@ -28,13 +28,13 @@ parseFilterOptionsParams [const] ({ defaultPageSize, searchParams }: ParseFilter
 buildPaginatedQueryParams [const] ({ cursor, filter, limit, skip, sorting }: PaginatedQuery) => URLSearchParams
 
 ## ./http/create-paginated-fetcher.util
-createPaginatedFetcher [const] <TResponse>({ isValid, path, resolveBaseUrl, shapeErrorMessage }: CreatePaginatedFetcherArgs<TResponse>) => ({ cursor, filter, limit, requestUrl, signal, skip, sorting, timeoutMs }: PaginatedFetchArgs) => Promise<TResponse>
+createPaginatedFetcher [const] <TResponse>({ isValid, path, resolveBaseUrl, shapeErrorMessage }: CreatePaginatedFetcherArgs<TResponse>) => ({ cursor, filter, group, limit, requestUrl, signal, skip, sorting, timeoutMs }: PaginatedFetchArgs) => Promise<TResponse>
 
 ## ./http/fetch-and-validate.util
 fetchAndValidate [const] <T>({ isValid, shapeErrorMessage, signal, timeoutMs, url }: FetchAndValidateArgs<T>) => Promise<T>
 
 ## ./http/http.types
-PaginatedFetchArgs [type] PaginatedQuery & { /** SSR only; omit in the browser, where the origin comes from the document. */ readonly requestUrl?: string; readonly signal?: AbortSignal; readonly timeoutMs?: number; }
+PaginatedFetchArgs [type] PaginatedQuery & { /** A drill-down group token; scopes the page to that group's rows. */ readonly group?: string; /** SSR only; omit in the browser, where the origin comes from the document. */ readonly requestUrl?: string; readonly signal?: AbortSignal; readonly timeoutMs?: number; }
 PaginatedQuery [type] { /** Sort-key tuple of the last row loaded, in `sorting` order, for an endpoint that can seek past it. */ readonly cursor?: readonly unknown[]; readonly filter?: unknown; readonly limit: number; /** Rows already loaded — not an offset past `cursor`, which is sent alongside it and may be ignored. */ readonly skip: number; readonly sorting?: readonly PaginatedSort[]; }
 PaginatedSort [type] { readonly columnKey: PropertyKey; readonly direction?: 'asc' | 'desc'; }
 

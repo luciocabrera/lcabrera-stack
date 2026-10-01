@@ -209,25 +209,33 @@ hook and asserts the router answered.
 **The grid it renders offers only what the read behind it answers.** Every
 capability on the component library's column type defaults to on, so a column
 that says nothing offers sorting and filtering and the grid draws the controls
-for both. Neither is resolved in the browser, and the page this rung reads is
-assembled from a module, so both would take a click and change nothing. The
-columns therefore declare them off, and the flags are the one place a rung with a
-real read turns them back on
+for both. Neither is resolved in the browser. At the `monorepo` rung the page is
+assembled from a module, so both would take a click and change nothing, and the
+columns declare them off. At the `full` rung the loader hands both to a read
+against Postgres, the columns declare neither flag, and the read accepts exactly
+the columns the page declares
 ([ADR-121](../../docs/decisions/ADR-121-the-blueprint-offers-only-what-its-rung-delivers.md)).
-What checks it is a test here that loads those declarations rather than reading
-the file as text, plus tests inside the application asserting the same thing and
-that a rendered header announces no sort.
+What checks it is a test here that loads each rung's declarations rather than
+reading the file as text, plus tests inside the application: at `monorepo` that
+a rendered header announces no sort, and at `full` that the loader passes the
+request's sort and filters to the read.
 
-**The `full` rung replaces two files of the rung below, and adds the rest.**
-The command reference has to change with the task block, because the consumer's
-`commands:verify` fails on a task it does not document and on a documented task
-the tree does not have, so no one copy serves both rungs. The application's
-manifest has to change because the seed needs the driver and the database tests
-need the server package. Both copies are held by a test to the lower rung's
-file plus exactly what the rung adds, so an edit to one cannot leave the other
-behind. The database tasks join the blueprint's task group rather than forming
-their own, so a tree that took the blueprint gains them on its first run at
-`full`.
+**The `full` rung replaces files of the rung below at the same path, retires
+two, and adds the rest.** The command reference has to change with the task
+block, because the consumer's `commands:verify` fails on a task it does not
+document and on a documented task the tree does not have, so no one copy serves
+both rungs. The application's manifest has to change because the seed needs the
+driver and the database tests need the server package. Both copies are held by a
+test to the lower rung's file plus exactly what the rung adds, so an edit to one
+cannot leave the other behind. The page route is replaced the same way: its
+column declarations, row type, loader, reader, view and route table move from a
+module of rows to the database, and `RUNG_RETIREMENTS` removes the rows module
+and the test of the reader that served them, which nothing at `full` imports. A
+test here assembles the tree a `full` consumer receives and checks that every
+route module it declares is placed, that none it places is undeclared, and that
+no placed file imports a retired one. The database tasks join the blueprint's
+task group rather than forming their own, so a tree that took the blueprint
+gains them on its first run at `full`.
 
 **A seed refers to its own directory relatively, so the layout is never
 interpolated.** There is no `{{paths.*}}` placeholder and none is needed: the

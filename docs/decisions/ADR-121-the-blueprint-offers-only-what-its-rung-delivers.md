@@ -92,3 +92,23 @@ which is what the tests above exist to catch.
   and
   [ADR-102](./ADR-102-the-sorting-tab-offers-only-the-terms-the-grouped-read-applies.md)
   — the same rule applied inside the component library.
+
+## Amendments
+
+**2026-10-01 — the `full` rung turns both back on (#1079).** The decision above
+is unchanged at the `monorepo` rung. The `full` rung replaces the page's column
+declarations and its loader at the same paths
+([ADR-127](./ADR-127-a-higher-rung-supersedes-a-lower-rungs-file.md)). Its
+loader passes the request's sort and filters to a read against Postgres, so
+`ORDER BY` and `WHERE` resolve them. Every column that read accepts declares
+neither flag, so both default to on, and the read accepts exactly the columns
+the page declares. The kit's suite checks each rung's declarations against its
+own rule, off at `monorepo` and on at `full`. The application's tests fail on a
+loader that drops the sort or the filters.
+
+Option 1 rejected sorting at this rung partly because a sort chosen from a
+column's header menu never reached the loader
+([#1153](https://github.com/luciocabrera/lcabrera-stack/issues/1153)). The
+component library now keeps the table's persistence fetchers mounted for as long
+as the table is. A redirect from a menu that has already closed is applied, and
+the loader runs again with the new sort.

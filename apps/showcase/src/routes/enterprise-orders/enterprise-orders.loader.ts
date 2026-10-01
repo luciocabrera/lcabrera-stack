@@ -1,7 +1,6 @@
-import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
+import { createTableLoaderReads } from '@lcabrera/server/table-page/create-table-loader-reads.util';
 import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
 import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTableRouteLoader.util';
-import { toQuerySort } from '@lcabrera/ui/routing/shared/toQuerySort.util';
 
 import { APP_ID } from '@/constants/app.constants';
 
@@ -29,18 +28,15 @@ export const loader = createTableRouteLoader<
   EnterpriseOrderTableRow,
   EnterpriseOrdersResponse
 >({
+  ...createTableLoaderReads({
+    limit: INITIAL_PAGE_SIZE,
+    reader: {
+      selectGroupingCapabilities: selectOrderGroupingCapabilities,
+      selectPage: selectOrdersPage,
+    },
+  }),
   appId: APP_ID,
   columns: COLUMNS,
-  fetchPage: ({ effectiveSorting, filters, grouping, totalsPlacement }) =>
-    selectOrdersPage({
-      filters: toQueryFilters({ filters }),
-      grouping,
-      includeTotal: true,
-      limit: INITIAL_PAGE_SIZE,
-      offset: 0,
-      sort: toQuerySort({ sorting: effectiveSorting }),
-      totalsPlacement,
-    }),
   filterOptions: { transport: 'loader' },
   // This endpoint filters server-side, seeks, and groups, so it declares all
   // three capabilities (ADR-063); they travel with the loader data for the
@@ -59,11 +55,6 @@ export const loader = createTableRouteLoader<
     isServerFilterEnabled: true,
   },
   persistenceKey: PERSISTENCE_KEY,
-  // What each column may do in a grouped read, from the pg catalogue (ADR-058),
-  // shipped to the client so the aggregate menu is built from the column's real
-  // Postgres type rather than from its declared `dataType` (#550). One extra
-  // catalogue query per page load here, run concurrently with the data query.
-  resolveGroupingCapabilities: selectOrderGroupingCapabilities,
   schemaName: SCHEMA_NAME,
   tableName: TABLE_NAME,
   title: TITLE,
