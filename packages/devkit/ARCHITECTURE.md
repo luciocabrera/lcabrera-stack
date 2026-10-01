@@ -20,6 +20,7 @@ can travel, and **moving** it into a consumer's tree.
 | `peer.mjs`                          | Resolve an installed peer's version, and decide whether it answers a declared range. Pure but for the resolution. |
 | `manifest.mjs`                      | Hash files, and decide what happens to each on the next run. Pure.                                                |
 | `tasks.mjs`                         | Merge the task block a consumer's manifest carries, one key at a time. Pure.                                      |
+| `consumer-region.mjs`               | Split off, and put back, the part of a materialised file its consumer owns. Pure.                                 |
 | `accepted.mjs`                      | The record of which local edits the consumer said they meant, and what may go into it. Pure.                      |
 | `sync.mjs`                          | Turn assets plus a manifest into a plan, layer acceptance over it, then apply it.                                 |
 | `init.mjs`                          | What `init` refuses, infers and wires, and when the run failed. Pure.                                             |
@@ -34,6 +35,15 @@ be judged on its own by the rule `classifyMaterialisation` already applies to a
 file's content — which is why the manifest records a value per task beside a hash
 per file. A prose seed has no such key, so it stays all-or-nothing: the two are
 different problems, and this merge is not a first step towards merging markdown.
+
+**A file may name a region its consumer owns, and the hash never covers it.** It
+is one top-level YAML key the shipped file does not carry — the default `catalog`
+in `pnpm-workspace.yaml`, where the package manager writes a dependency a
+consumer adds. `planSync` hashes the file without it and `applySync` appends it
+back under what it writes, so adding a dependency leaves the file `current` and a
+later kit revision still reaches it. It is a region rather than a merge: an edit
+to a kit-owned entry is still `modified`
+([ADR-126](../../docs/decisions/ADR-126-the-default-catalog-is-a-region-the-consumer-owns.md)).
 
 **The tasks are planned in groups, and every group goes through the one plan.**
 A group carries whether this run may establish it — `init` wires the gate tasks,
