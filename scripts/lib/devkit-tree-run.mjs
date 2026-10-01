@@ -41,14 +41,16 @@ export const readIfPresent = (path) =>
 export const readJson = (path) => JSON.parse(readIfPresent(path) ?? '{}');
 
 /**
- * @param {{ args: string[], command: string, cwd: string }} args
+ * @param {{ args: string[], command: string, cwd: string,
+ *           env?: NodeJS.ProcessEnv }} args
  * @returns {{ error?: string, output: string, signal: string | null,
  *             status: number | null }}
  */
-export const execute = ({ args, command, cwd }) => {
+export const execute = ({ args, command, cwd, env = process.env }) => {
   const result = spawnSync(command, args, {
     cwd,
     encoding: 'utf8',
+    env,
     maxBuffer: OUTPUT_LIMIT_BYTES,
   });
   return {
@@ -95,12 +97,13 @@ export const runtimeFindings = (tree) =>
 
 /**
  * @param {string} tree
+ * @param {NodeJS.ProcessEnv} [env]
  * @returns {string[]}
  */
-export const installFindings = (tree) =>
+export const installFindings = (tree, env = process.env) =>
   taskFindings({
     label: commandLabel(INSTALL_ARGS),
-    ...execute({ args: INSTALL_ARGS, command: 'vp', cwd: tree }),
+    ...execute({ args: INSTALL_ARGS, command: 'vp', cwd: tree, env }),
   });
 
 const PEERS_ARGS = ['peers', 'check'];

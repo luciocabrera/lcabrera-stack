@@ -207,3 +207,37 @@ describe('resolveConfig on the ci block', () => {
     );
   });
 });
+
+describe('resolveConfig on paths.hooks', () => {
+  test.each([['.githooks'], ['tools/hooks']])(
+    'takes %s, a directory inside the repository',
+    (hooks) => {
+      expect(
+        resolveConfig(JSON.stringify({ paths: { hooks } })).paths.hooks,
+      ).toBe(hooks);
+    },
+  );
+
+  test.each([
+    ['/hooks'],
+    [String.raw`C:\hooks`],
+    ['C:/hooks'],
+    [String.raw`\\server\share\hooks`],
+    ['../hooks'],
+    ['tools/../../hooks'],
+    ['~/.hooks'],
+    ['~user/hooks'],
+    ['%(prefix)/hooks'],
+    [':(optional)hooks'],
+    [''],
+    [7],
+    [null],
+  ])(
+    'refuses %s, which git would not read as the placed directory',
+    (hooks) => {
+      expect(() => resolveConfig(JSON.stringify({ paths: { hooks } }))).toThrow(
+        /"paths\.hooks" must be a directory inside the repository/,
+      );
+    },
+  );
+});

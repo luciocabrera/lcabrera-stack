@@ -129,10 +129,13 @@ const materialise = ({ declaredBins, profile, root }) => {
 };
 
 /**
- * @param {{ declaredBins?: readonly string[], profile: string, root: string,
- *           upgrade: boolean, userAgent?: string }} args
+ * @param {{ activatesHooks?: boolean, declaredBins?: readonly string[],
+ *           profile: string, root: string, upgrade: boolean,
+ *           userAgent?: string }} args
+ * @returns {{ code: number, hooksPath?: string }}
  */
 export const applyInit = ({
+  activatesHooks = false,
   declaredBins = [],
   profile,
   root,
@@ -166,7 +169,7 @@ export const applyInit = ({
   });
   if (failure !== undefined) {
     console.error(`\n${failure}`);
-    return 1;
+    return { code: 1 };
   }
 
   if (runner.kept.length > 0) {
@@ -174,11 +177,12 @@ export const applyInit = ({
     console.log(`\nLeft alone, because you set them:\n${kept}`);
   }
 
+  const placed = placedHooksPath({ entries, hooksPath });
   console.log(
     `\n${initSummary({
       added,
       defaultBranch: runner.defaultBranch,
-      hooksPath: placedHooksPath({ entries, hooksPath }),
+      hooksPath: activatesHooks ? undefined : placed,
       profile,
       recordedTrunk: runner.recordedTrunk,
       runner: runner.name,
@@ -187,7 +191,7 @@ export const applyInit = ({
       written,
     })}`,
   );
-  return 0;
+  return { code: 0, hooksPath: placed };
 };
 
 export const runInit = (argv, root) => {
@@ -218,5 +222,5 @@ export const runInit = (argv, root) => {
     return 1;
   }
 
-  return applyInit({ profile, root, upgrade });
+  return applyInit({ profile, root, upgrade }).code;
 };

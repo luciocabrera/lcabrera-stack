@@ -8,6 +8,7 @@ import {
   buildOutputFindings,
   commandLabel,
   commitHookFindings,
+  hooksPathFindings,
   missingBlueprintFiles,
   missingToolchainBins,
   modifiedTrackedFiles,
@@ -358,5 +359,38 @@ describe('serveFindings', () => {
     });
     expect(finding).toContain('never answered (the task exited 1');
     expect(finding).toContain(url);
+  });
+});
+
+describe('hooksPathFindings', () => {
+  it('finds nothing when git points at the hooks the tree ships', () => {
+    expect(
+      hooksPathFindings({
+        actual: '.githooks',
+        expected: '.githooks',
+        step: 'vp install',
+      }),
+    ).toEqual([]);
+  });
+
+  it('reports an unset core.hooksPath and the step that left it so', () => {
+    const findings = hooksPathFindings({
+      actual: '',
+      expected: '.githooks',
+      step: 'vp install',
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('after `vp install`');
+    expect(findings[0]).toContain('is unset');
+  });
+
+  it('reports a core.hooksPath pointing somewhere else', () => {
+    const findings = hooksPathFindings({
+      actual: '.husky',
+      expected: '.githooks',
+      step: 'devkit create',
+    });
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toContain('is `.husky`');
   });
 });

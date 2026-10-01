@@ -15,6 +15,8 @@
  * spelled `gitignore` and is renamed on the way out.
  */
 
+import { hooksPathRefusal } from '../assets/workspace/scripts/hooks-path.mjs';
+
 export const CONFIG_FILE_NAME = 'devkit.config.json';
 
 export const DEFAULT_CONFIG = {
@@ -134,6 +136,12 @@ const ciSetupLines = (ci) => {
   return ci.setup;
 };
 
+const checkedPaths = (paths) => {
+  const refusal = hooksPathRefusal(paths.hooks);
+  if (refusal !== undefined) throw new TypeError(refusal);
+  return paths;
+};
+
 export const resolveConfig = (raw) => {
   if (raw === undefined) return DEFAULT_CONFIG;
   const parsed = JSON.parse(raw);
@@ -150,10 +158,10 @@ export const resolveConfig = (raw) => {
     commands: isPlainObject(parsed.commands)
       ? parsed.commands
       : DEFAULT_CONFIG.commands,
-    paths: {
+    paths: checkedPaths({
       ...DEFAULT_CONFIG.paths,
       ...(isPlainObject(parsed.paths) && parsed.paths),
-    },
+    }),
     profile,
   };
 };

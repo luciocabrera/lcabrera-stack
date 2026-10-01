@@ -162,6 +162,18 @@ export const trackedWritesByUpgrade = ({ after, before }) =>
     );
 
 /**
+ * @param {{ actual: string, expected: string, step: string }} args
+ * @returns {string[]}
+ */
+export const hooksPathFindings = ({ actual, expected, step }) => {
+  if (actual === expected) return [];
+  const held = actual === '' ? 'unset' : '`' + actual + '`';
+  return [
+    `after \`${step}\` the created tree's \`core.hooksPath\` is ${held}, not \`${expected}\` — git skips the hooks it ships without a word, so the commit-msg and pre-push gates are absent`,
+  ];
+};
+
+/**
  * @param {{ accepted: { output: string, status: number | null },
  *           refused: { output: string, status: number | null } }} args
  * @returns {string[]}
