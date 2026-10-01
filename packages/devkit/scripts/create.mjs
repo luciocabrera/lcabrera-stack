@@ -311,27 +311,34 @@ export const hooksPathArgs = (hooksPath) => [
 
 const DEVKIT_TASKS = ['devkit:check', 'devkit:sync'];
 
+const PLAIN_PATH = /^[\w./-]+$/;
+
+export const shellWord = (word) =>
+  PLAIN_PATH.test(word)
+    ? word
+    : "'" + word.replaceAll("'", String.raw`'\''`) + "'";
+
+export const firstInstallFor = (run) => run.split(' ', 1)[0] + ' install';
+
 /**
- * @param {{ commands: { install?: string, run?: string },
- *           tasks: readonly string[], target: string }} args
+ * @param {{ commands: { run?: string }, target: string,
+ *           tasks: readonly string[] }} args
  * @returns {string[]}
  */
-const nextSteps = ({ commands, target, tasks }) => {
+const nextSteps = ({ commands: { run }, target, tasks }) => {
   const steps = [
-    `cd ${target}`,
-    ...(commands.install === undefined ? [] : [commands.install]),
-    ...(commands.run !== undefined && tasks.includes('dev')
-      ? [`${commands.run} dev`]
-      : []),
+    'cd ' + shellWord(target),
+    ...(run === undefined ? [] : [firstInstallFor(run)]),
+    ...(run !== undefined && tasks.includes('dev') ? [run + ' dev'] : []),
   ];
   const indented = steps.map((step) => '  ' + step).join('\n');
   const devkitTasks = DEVKIT_TASKS.filter((task) => tasks.includes(task));
   const devkitCommands = devkitTasks
-    .map((task) => '`' + commands.run + ' ' + task + '`')
+    .map((task) => '`' + run + ' ' + task + '`')
     .join(', ');
   return [
     `Nothing is installed yet. Start with:\n${indented}`,
-    ...(commands.run === undefined || devkitTasks.length === 0
+    ...(run === undefined || devkitTasks.length === 0
       ? []
       : [
           `devkit is a dev dependency, not a global command, so a bare \`devkit\` is not on your PATH. Run it through the tasks wired above: ${devkitCommands}.`,
@@ -340,7 +347,7 @@ const nextSteps = ({ commands, target, tasks }) => {
 };
 
 /**
- * @param {{ branch: string, commands?: { install?: string, run?: string },
+ * @param {{ branch: string, commands?: { run?: string },
  *           hooksPath?: string, target: string, tasks?: readonly string[] }} args
  */
 export const createSummary = ({
