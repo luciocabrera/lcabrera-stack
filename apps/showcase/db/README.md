@@ -1,16 +1,34 @@
 # Showcase database setup
 
-The DDL for every table this app queries. `../scripts/seed-db.mjs` applies both
-files in the order listed below; see [`../README.md`](../README.md#database) for
-the commands.
+The DDL for the tables this app queries. `../scripts/seed-db.mjs` applies the
+sources listed in [`../scripts/seed-db-sources.mjs`](../scripts/seed-db-sources.mjs)
+in order; see [`../README.md`](../README.md#database) for the commands.
 
-| File                          | Creates                          | Queried by                                                |
-| ----------------------------- | -------------------------------- | --------------------------------------------------------- |
-| `setup_large_data.sql`        | `car_sales`, `wide_alltypes_150` | `/car-sales`, `/car-sales-infinite`, `/wide-alltypes-150` |
-| `setup_enterprise_orders.sql` | `enterprise_orders`              | `/enterprise-orders`                                      |
+| Source                                                                | Creates                          | Queried by                                                |
+| --------------------------------------------------------------------- | -------------------------------- | --------------------------------------------------------- |
+| `setup_large_data.sql` (this directory)                               | `car_sales`, `wide_alltypes_150` | `/car-sales`, `/car-sales-infinite`, `/wide-alltypes-150` |
+| `packages/devkit/assets/full/apps/web/db/setup_enterprise_orders.sql` | `enterprise_orders`              | `/enterprise-orders`                                      |
 
-Each file drops and recreates what it owns and generates its rows, so applying
+Each source drops and recreates what it owns and generates its rows, so applying
 one is how you return to a known state rather than something to run once.
+
+## `enterprise_orders` is defined once, in the file devkit ships
+
+There is no `enterprise_orders` DDL in this directory. The seeder reads the file
+`@lcabrera/devkit` ships to a new application and raises its `generate_series`
+row bound to the showcase's load-test volume (`LOAD_TEST_ROWS` in
+`seed-db-sources.mjs`); every other line applies as shipped. So a schema change
+is made in that file, and the showcase picks it up on its next seed.
+
+Three things fail if that arrangement breaks. The seeder refuses a shipped file
+that does not hold exactly one row bound to raise, rather than seeding the
+demo-sized volume, and devkit's own `full-ddl-contract.test.mjs` fails on the
+same shape in a pull request that touches only devkit. And
+`../scripts/seed-db-sources.test.mjs` fails when any tracked SQL or script
+source other than the shipped file defines `enterprise_orders`, in any
+`CREATE … TABLE` form or embedded as a string — a second copy is the drift this
+replaced
+([ADR-071](../../../docs/decisions/ADR-071-split-the-demo-database-setup.md)).
 
 No file here uses a `psql` meta-command. That is what lets the seeder apply them
 through `pg`, so seeding needs no `psql` on the machine — and it holds for the
@@ -20,12 +38,12 @@ something it could apply.
 ## `seed_olap_drill.sql` — an opt-in fixture, not part of the reset
 
 `seed_olap_drill.sql` **appends** to `enterprise_orders` instead of recreating
-it, so it is deliberately absent from `SQL_FILENAMES` in
-[`../scripts/seed-db.mjs`](../scripts/seed-db.mjs): applying it is a choice, not
+it, so it is deliberately absent from `SEED_SOURCES` in
+[`../scripts/seed-db-sources.mjs`](../scripts/seed-db-sources.mjs): applying it is a choice, not
 part of returning to a known state, and it changes every group count the base
 seed produces.
 
-It exists because `setup_enterprise_orders.sql` derives every dimension from one
+It exists because the `enterprise_orders` seed derives every dimension from one
 `generate_series` counter, which correlates them — each (category, subcategory,
 customer type) cell holds exactly one customer, so a fourth group key on
 `customer_name` changes nothing, and every leaf group is far past a page. The
