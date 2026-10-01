@@ -312,8 +312,10 @@ places sets
 of a git work tree, the directory is there, the clone has no
 `core.hooksPath` of its own, and `CI` is unset. A CI job is left alone because a
 workflow that commits or pushes from its checkout would otherwise run the
-whole pre-push gate inside itself. Anywhere else it does nothing and the install
-passes. It imports only Node's own modules, so an install without this package
+whole pre-push gate inside itself. A `paths.hooks` the config readers refuse
+fails the install. A hooks directory that resolves outside the repository is
+not pointed at, and a `core.hooksPath` already set to it is unset. In every
+other case it does nothing and the install passes. It imports only Node's own modules, so an install without this package
 still runs it, and it runs git from the fixed install directories first, then
 PATH, skipping any `node_modules` directory an install puts on PATH. **No tsconfig here is written by
 hand** — you edit the roster (`tsconfig.entries.ts`, in the workspace the rung
