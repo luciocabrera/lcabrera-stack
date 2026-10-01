@@ -25,6 +25,7 @@ const {
   useGetTableThresholdMock,
   useGetTableTitleSingularMock,
   useInfiniteScrollMock,
+  useRetainTablePersistFetchersMock,
   useToogleTableIsTableSettingsOpenMock,
 } = vi.hoisted(() => ({
   useFetchMoreDataMock: vi.fn(() => vi.fn()),
@@ -38,6 +39,7 @@ const {
   useGetTableThresholdMock: vi.fn(),
   useGetTableTitleSingularMock: vi.fn(),
   useInfiniteScrollMock: vi.fn(),
+  useRetainTablePersistFetchersMock: vi.fn(),
   useToogleTableIsTableSettingsOpenMock: vi.fn(() => vi.fn()),
 }));
 
@@ -78,6 +80,10 @@ const MockTableTitle = vi.hoisted(() => {
     return <div data-testid='table-title'>{actions}</div>;
   };
 });
+
+vi.mock('../TableLayout/useRetainTablePersistFetchers.hook', () => ({
+  useRetainTablePersistFetchers: useRetainTablePersistFetchersMock,
+}));
 
 vi.mock('../contexts/TableConfig/grouping/actions', () => ({
   useSyncColumnAxisColumns: vi.fn(),
@@ -181,6 +187,9 @@ describe('TableContent', () => {
     });
 
     expect(scrollContainer.dataset.scrollLocked).toBe('true');
+    expect(screen.getByTestId('table-scroll-container')).toBe(scrollContainer);
+    expect(screen.getByTestId('table-scroll-sentinel')).toBeTruthy();
+    expect(useRetainTablePersistFetchersMock).toHaveBeenCalled();
     expect(screen.getByTestId('table-header')).toBeTruthy();
     expect(screen.getByTestId('table-body')).toBeTruthy();
   });

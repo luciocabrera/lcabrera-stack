@@ -7,6 +7,11 @@ export const useSetTableIsTableSettingsOpen = () => {
 
   return (isTableSettingsOpen: boolean) => {
     const metaState = metaStore.get();
+
+    if (metaState.isTableSettingsOpen === isTableSettingsOpen) {
+      return;
+    }
+
     const nextStatePatch = { isTableSettingsOpen };
 
     persistUiFlags({

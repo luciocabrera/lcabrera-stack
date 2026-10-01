@@ -12,6 +12,7 @@ import type {
   SortingState,
 } from '#ui/components/Table/Table.types';
 
+import { buildUiFlagsCookieEntry } from '#ui/components/Table/contexts/TableConfig/meta/actions/utils';
 import { getInitialGroupingState } from '#ui/components/Table/contexts/TableConfig/utils';
 
 import { useBatchSetTableSettings } from './useBatchSetTableSettings.hook';
@@ -22,6 +23,16 @@ type Row = {
   readonly name: string;
 };
 
+const CLOSED_DRAWER_FLAGS = {
+  currentState: {
+    isTableSettingsPinned: false,
+    persistenceKey: 'orders-table',
+  },
+  nextStatePatch: {
+    isTableSettingsOpen: false,
+  },
+  totalsPlacement: 'last' as const,
+};
 const NO_GROUPING = getInitialGroupingState({});
 const NAME_GROUPING = getInitialGroupingState({ keys: ['name'] });
 const NAME_AGE_SUM_GROUPING = getInitialGroupingState({
@@ -249,26 +260,20 @@ describe('useBatchSetTableSettings', () => {
       persistenceKey: 'orders-table',
       sorting: [{ columnKey: 'name', direction: 'asc' }],
     });
-    expect(mockPersistTableState).toHaveBeenCalledWith([
-      {
-        persistenceKey: 'orders-table',
-        slice: 'columnOrder',
-        valueSlice: ['id', 'age', 'name'],
-      },
-    ]);
+    expect(mockPersistTableState).toHaveBeenCalledWith({
+      cookieEntries: [buildUiFlagsCookieEntry(CLOSED_DRAWER_FLAGS)],
+      entries: [
+        {
+          persistenceKey: 'orders-table',
+          slice: 'columnOrder',
+          valueSlice: ['id', 'age', 'name'],
+        },
+      ],
+    });
     expect(mockColumnsStore.set).toHaveBeenCalledWith(
       mockResolveBatchTableSettingsUpdate.mock.results[0]?.value,
     );
-    expect(mockPersistUiFlags).toHaveBeenCalledWith({
-      currentState: {
-        isTableSettingsPinned: false,
-        persistenceKey: 'orders-table',
-      },
-      nextStatePatch: {
-        isTableSettingsOpen: false,
-      },
-      totalsPlacement: 'last',
-    });
+    expect(mockPersistUiFlags).not.toHaveBeenCalled();
     expect(mockMetaStore.set).toHaveBeenCalledWith({
       isTableSettingsOpen: false,
     });
@@ -384,17 +389,20 @@ describe('useBatchSetTableSettings', () => {
     });
 
     expect(mockPersistTableState).toHaveBeenCalledTimes(1);
-    expect(mockPersistTableState).toHaveBeenCalledWith([
-      {
-        persistenceKey: 'orders-table',
-        slice: 'columnOrder',
-        valueSlice: ['id', 'age', 'name'],
-      },
-      {
-        searchParamKey: 'grouping',
-        searchParamValue: '{"agg":["age:sum"],"keys":["name"]}',
-      },
-    ]);
+    expect(mockPersistTableState).toHaveBeenCalledWith({
+      cookieEntries: [buildUiFlagsCookieEntry(CLOSED_DRAWER_FLAGS)],
+      entries: [
+        {
+          persistenceKey: 'orders-table',
+          slice: 'columnOrder',
+          valueSlice: ['id', 'age', 'name'],
+        },
+        {
+          searchParamKey: 'grouping',
+          searchParamValue: '{"agg":["age:sum"],"keys":["name"]}',
+        },
+      ],
+    });
     expect(mockLiveGroupingStore.set).toHaveBeenCalledWith(
       NAME_AGE_SUM_GROUPING,
     );

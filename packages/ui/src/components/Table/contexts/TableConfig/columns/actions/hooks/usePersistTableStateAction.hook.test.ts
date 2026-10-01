@@ -100,6 +100,59 @@ describe('usePersistTableStateAction', () => {
     );
   });
 
+  it('submits an extra cookie entry on the same request as the grid state', () => {
+    serializeStateSliceMock.mockReturnValue({
+      key: 'orders:sorting',
+      value: '[{"columnKey":"id","direction":"asc"}]',
+    });
+
+    const { result } = renderHook(() => usePersistTableStateAction());
+
+    act(() => {
+      result.current({
+        cookieEntries: [
+          {
+            key: 'orders-ui-flags',
+            searchParamKey: '',
+            searchParamValue: '',
+            value: '{"value":{"isTableSettingsOpen":false}}',
+          },
+        ],
+        entries: [
+          {
+            persistenceKey: 'orders',
+            searchParamKey: 'sort',
+            searchParamValue: 'id:asc',
+            slice: 'sorting',
+            valueSlice: [{ columnKey: 'id', direction: 'asc' }],
+          },
+        ],
+      });
+    });
+
+    expect(submitMock).toHaveBeenCalledTimes(1);
+    expect(submitMock).toHaveBeenCalledWith(
+      {
+        currentUrl: '/enterprise-orders?page=2',
+        entries: JSON.stringify([
+          {
+            key: 'orders:sorting',
+            searchParamKey: 'sort',
+            searchParamValue: 'id:asc',
+            value: '[{"columnKey":"id","direction":"asc"}]',
+          },
+          {
+            key: 'orders-ui-flags',
+            searchParamKey: '',
+            searchParamValue: '',
+            value: '{"value":{"isTableSettingsOpen":false}}',
+          },
+        ]),
+      },
+      { action: '/_action/persist-cookie', method: 'POST' },
+    );
+  });
+
   it('persists to the cookie only, never to sessionStorage', () => {
     serializeStateSliceMock.mockReturnValue({
       key: 'orders:sorting',

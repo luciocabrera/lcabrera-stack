@@ -1,21 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
-import { useRef } from 'react';
 
 import type { TableContentProps } from './TableContent.types';
 
-import { useSyncColumnAxisColumns } from '../contexts/TableConfig/grouping/actions';
-import {
-  useGetTableIsRounded,
-  useGetTableThreshold,
-} from '../contexts/TableConfig/meta/selectors';
-import { useFetchMoreData } from '../contexts/TableData/data/actions';
-import {
-  useGetTableHasMore,
-  useGetTableIsLoading,
-  useGetTableIsLoadingMore,
-} from '../contexts/TableData/data/selectors';
 import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context';
-import { useInfiniteScroll, useScrollResetAfterLoad } from '../hooks';
 import { TableBase } from '../TableBase';
 import { TableBody } from '../TableBody';
 import { TableDrawersSection } from '../TableDrawersSection';
@@ -23,6 +10,7 @@ import { TableHeader } from '../TableHeader';
 import { TableTitle } from '../TableTitle';
 import { styles } from './TableContent.stylex';
 import { TableTitleActions } from './TableTitleActions/TableTitleActions.component';
+import { useTableContentRuntime } from './useTableContentRuntime.hook';
 
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
@@ -31,33 +19,13 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   icon,
   onLoadMore,
 }: TableContentProps<TData, TResponse>) => {
-  const threshold = useGetTableThreshold();
-  useSyncColumnAxisColumns();
-  const isLoading = useGetTableIsLoading();
-  const isLoadingMore = useGetTableIsLoadingMore();
-  const isRounded = useGetTableIsRounded();
-  const hasMore = useGetTableHasMore();
-
-  const fetchMoreData = useFetchMoreData<TData, TResponse>();
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const { containerRef, isLoading, isRounded, sentinelRef, wrapperRef } =
+    useTableContentRuntime<TData, TResponse>({
+      dataSelector,
+      dataTotalSelector,
+      onLoadMore,
+    });
   const wrapperContextValue = { containerRef, wrapperRef };
-
-  useScrollResetAfterLoad({ scrollContainerRef: containerRef });
-
-  useInfiniteScroll({
-    dataSelector,
-    dataTotalSelector,
-    fetchMoreData,
-    hasMore,
-    isLoadingMore,
-    onLoadMore,
-    scrollContainerRef: containerRef,
-    sentinelRef,
-    threshold,
-  });
 
   return (
     <TableWrapperContext value={wrapperContextValue}>
@@ -77,6 +45,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
               styles.container,
               isLoading && styles.containerLocked,
             )}
+            data-testid='table-scroll-container'
           >
             <TableBase>
               <TableHeader />
@@ -86,6 +55,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
               aria-hidden
               ref={sentinelRef}
               {...stylex.props(styles.sentinel)}
+              data-testid='table-scroll-sentinel'
             />
           </div>
         </div>

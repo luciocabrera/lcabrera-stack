@@ -156,6 +156,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run test:changed`                 | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below                                   |
 | `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                                                   |
 | `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                                                            |
+| `vp run --filter showcase test:e2e`   | the browser suite for the grid — Postgres, opt-in, and not part of `test:ci` or `check:safe`                                         |
 | `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only) — see below                                                            |
 | `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment — see below                                                             |
 
@@ -171,6 +172,11 @@ files each gate on `SMOKE_DB`, which is set in exactly one place —
 Nothing else sets it, so under `test`, `test:all`, `test:ci` and `test:changed`
 those suites skip and no connection is opened. Start Postgres with
 `vp run db:up` before running them.
+
+`vp run --filter showcase test:e2e` is the browser suite for the same database.
+It is opt-in in the same way: it is not part of `test:ci` or `check:safe`.
+Seed first (`vp run --filter showcase db:seed`) and leave `VITE_API_URL` unset
+so the routes read the local database.
 
 `test:scripts` is chained into both, and needs to be: root `scripts/` is **not a
 workspace**, so `vp run -r test` never reaches it. That is why the logic behind
@@ -935,20 +941,20 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 Beyond that, tasks are per-workspace. `build` and `test` are common but come from
 `vite.config.ts` rather than `scripts` in most workspaces (see §1).
 
-| Workspace                        | Package name               | Notable extra tasks                                                                                                                  |
-| -------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `apps/showcase`                  | `showcase`                 | `typegen`, `test:ci`, `test:smoke`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
-| `packages/ui`                    | `@lcabrera/ui`             | `check:public-api`, `test:coverage`, `bench`                                                                                         |
-| `packages/server`                | `@lcabrera/server`         | `test:coverage`                                                                                                                      |
-| `packages/node-runtime`          | `@lcabrera/node`           | `build`, `test:coverage`                                                                                                             |
-| `packages/ts-configs`            | `@repo/ts-configs`         | `generate`                                                                                                                           |
-| `packages/tsconfig`              | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                                             |
-| `packages/eslint-local-rules`    | `@lcabrera/eslint-plugin`  | —                                                                                                                                    |
-| `packages/devkit`                | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                              |
-| `packages/create-lcabrera-stack` | `create-lcabrera-stack`    | `test`, `test:coverage`                                                                                                              |
-| `packages/repo-standards`        | `@lcabrera/repo-standards` | `test`, `test:coverage`                                                                                                              |
-| `packages/utils`                 | `@lcabrera/utils`          | —                                                                                                                                    |
-| `packages/vite-configs`          | `@lcabrera/vite-config`    | `build`, `test`, `test:coverage`                                                                                                     |
+| Workspace                        | Package name               | Notable extra tasks                                                                                                                              |
+| -------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `apps/showcase`                  | `showcase`                 | `typegen`, `test:ci`, `test:smoke`, `test:e2e`, `test:watch`, `preview`, `knip`, `seed`, `db:seed`, `audit:lighthouse`, `audit:lighthouse:check` |
+| `packages/ui`                    | `@lcabrera/ui`             | `check:public-api`, `test:coverage`, `bench`                                                                                                     |
+| `packages/server`                | `@lcabrera/server`         | `test:coverage`                                                                                                                                  |
+| `packages/node-runtime`          | `@lcabrera/node`           | `build`, `test:coverage`                                                                                                                         |
+| `packages/ts-configs`            | `@repo/ts-configs`         | `generate`                                                                                                                                       |
+| `packages/tsconfig`              | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                                                         |
+| `packages/eslint-local-rules`    | `@lcabrera/eslint-plugin`  | —                                                                                                                                                |
+| `packages/devkit`                | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                                          |
+| `packages/create-lcabrera-stack` | `create-lcabrera-stack`    | `test`, `test:coverage`                                                                                                                          |
+| `packages/repo-standards`        | `@lcabrera/repo-standards` | `test`, `test:coverage`                                                                                                                          |
+| `packages/utils`                 | `@lcabrera/utils`          | —                                                                                                                                                |
+| `packages/vite-configs`          | `@lcabrera/vite-config`    | `build`, `test`, `test:coverage`                                                                                                                 |
 
 Notes on the non-obvious ones:
 
