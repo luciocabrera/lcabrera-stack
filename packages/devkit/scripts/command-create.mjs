@@ -23,7 +23,12 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import { applyInit } from './command-init.mjs';
-import { DEFAULT_CONFIG, withProfile } from './config.mjs';
+import {
+  CONFIG_FILE_NAME,
+  DEFAULT_CONFIG,
+  resolveConfig,
+  withProfile,
+} from './config.mjs';
 import {
   abandonedNotice,
   ancestorsOf,
@@ -56,6 +61,16 @@ const ownManifestPath = join(
 
 const ownBins = () =>
   Object.keys(JSON.parse(readFileSync(ownManifestPath, 'utf8')).bin ?? {});
+
+const configuredCommands = (root) =>
+  resolveConfig(readFileSync(join(root, CONFIG_FILE_NAME), 'utf8')).commands;
+
+const wiredTasks = (root) => {
+  const { scripts } = JSON.parse(
+    readFileSync(join(root, 'package.json'), 'utf8'),
+  );
+  return Object.keys(scripts ?? {});
+};
 
 const identityIn = (cwd) => ({
   email: readGit({ args: ['config', '--get', 'user.email'], cwd }),
@@ -213,7 +228,13 @@ const scaffold = ({ absolute, profile, target }) => {
   }
 
   console.log(
-    `\n${createSummary({ branch: CREATE_BRANCH, hooksPath, target })}`,
+    `\n${createSummary({
+      branch: CREATE_BRANCH,
+      commands: configuredCommands(absolute),
+      hooksPath,
+      target,
+      tasks: wiredTasks(absolute),
+    })}`,
   );
   return 0;
 };

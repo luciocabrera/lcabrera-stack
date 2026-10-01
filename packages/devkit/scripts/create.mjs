@@ -309,10 +309,43 @@ export const hooksPathArgs = (hooksPath) => [
   hooksPath,
 ];
 
+const DEVKIT_TASKS = ['devkit:check', 'devkit:sync'];
+
 /**
- * @param {{ branch: string, hooksPath?: string, target: string }} args
+ * @param {{ commands: { install?: string, run?: string },
+ *           tasks: readonly string[], target: string }} args
+ * @returns {string[]}
  */
-export const createSummary = ({ branch, hooksPath, target }) =>
+const nextSteps = ({ commands, target, tasks }) => {
+  const steps = [
+    `cd ${target}`,
+    ...(commands.install === undefined ? [] : [commands.install]),
+    ...(commands.run !== undefined && tasks.includes('dev')
+      ? [`${commands.run} dev`]
+      : []),
+  ];
+  const devkitTasks = DEVKIT_TASKS.filter((task) => tasks.includes(task));
+  return [
+    `Nothing is installed yet. Start with:\n${steps.map((step) => `  ${step}`).join('\n')}`,
+    ...(commands.run === undefined || devkitTasks.length === 0
+      ? []
+      : [
+          `devkit is a dev dependency, not a global command, so a bare \`devkit\` is not on your PATH. Run it through the tasks wired above: ${devkitTasks.map((task) => `\`${commands.run} ${task}\``).join(', ')}.`,
+        ]),
+  ];
+};
+
+/**
+ * @param {{ branch: string, commands?: { install?: string, run?: string },
+ *           hooksPath?: string, target: string, tasks?: readonly string[] }} args
+ */
+export const createSummary = ({
+  branch,
+  commands = {},
+  hooksPath,
+  target,
+  tasks = [],
+}) =>
   [
     `Created \`${target}\`: a git repository on \`${branch}\`, with everything above committed.`,
     ...(hooksPath === undefined
@@ -320,5 +353,5 @@ export const createSummary = ({ branch, hooksPath, target }) =>
       : [
           `git runs the hooks in \`${hooksPath}/\`: this repository's core.hooksPath points there.`,
         ]),
-    `Nothing is installed yet: install the dependencies in \`${target}\`, and the gate tasks wired above find the toolchain its manifest declares.`,
+    ...nextSteps({ commands, target, tasks }),
   ].join('\n');
