@@ -31,6 +31,7 @@ const stubScript = (name) =>
     `echo "${name} $*" >> "$SETUP_LOG"`,
     'if [ "$*" = "run db:seed" ] && [ -n "$FAIL_SEED" ]; then exit 1; fi',
     'if [ "$*" = "install" ] && [ -n "$FAIL_INSTALL" ]; then exit 1; fi',
+    'if [ "$*" = "run db:up" ]; then echo "DB_PORT=$STUB_PG_PORT" >> docker/local/.env; fi',
     `if [ "${name}" = docker ] && [ -n "$DOCKER_STOPPED" ]; then exit 1; fi`,
     'exit 0',
     '',
@@ -52,9 +53,9 @@ export const writeStubs = ({ directory, names }) => {
  * @param {string} log
  * @returns {Promise<{ close: () => Promise<void>, port: number }>}
  */
-const answeringProbe = (log) => (socket) => {
+const answeringProbe = (log, label) => (socket) => {
   socket.once('data', () => {
-    appendFileSync(log, 'probe\n');
+    appendFileSync(log, `${label}\n`);
     socket.end(AUTHENTICATION_OK);
   });
 };
@@ -64,9 +65,9 @@ const closed = (server) =>
     server.close(() => done());
   });
 
-export const stubPostgres = (log) =>
+export const stubPostgres = (log, label = 'probe') =>
   new Promise((resolve) => {
-    const server = createServer(answeringProbe(log));
+    const server = createServer(answeringProbe(log, label));
     server.listen(0, '127.0.0.1', () =>
       resolve({ close: () => closed(server), port: server.address().port }),
     );

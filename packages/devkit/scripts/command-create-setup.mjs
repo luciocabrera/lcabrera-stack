@@ -32,6 +32,7 @@ import {
   runPrefixFor,
   SEED_TASK,
   setupStepFailure,
+  withoutDatabaseSettings,
 } from './create-setup.mjs';
 import { firstInstallFor } from './create.mjs';
 
@@ -77,9 +78,10 @@ const findOnPath = (name, env = process.env) =>
     )
     .find((path) => isExecutableFile(path));
 
-const succeeded = ({ args, binary, cwd, stdio = 'inherit' }) => {
+const succeeded = ({ args, binary, cwd, env, stdio = 'inherit' }) => {
   const result = spawnSync(IS_ON_WINDOWS ? `"${binary}"` : binary, args, {
     cwd,
+    env,
     shell: IS_ON_WINDOWS,
     stdio,
     timeout: stdio === 'ignore' ? DOCKER_PROBE_TIMEOUT_MS : undefined,
@@ -105,15 +107,16 @@ export const copyEnvironmentTemplate = ({ absolute, packageName }) => {
   return true;
 };
 
-const announced = ({ args, binary, cwd, label }) => {
+const announced = ({ args, binary, cwd, env, label }) => {
   console.log(`\nRunning \`${label}\``);
-  return succeeded({ args, binary, cwd });
+  return succeeded({ args, binary, cwd, env });
 };
+
+const treeEnv = () => withoutDatabaseSettings(process.env);
 
 const waitedForDatabase = (absolute) => {
   const file = join(absolute, ENVIRONMENT_FILE);
   const { host, port, user } = databaseTarget({
-    env: process.env,
     file: existsSync(file) ? readFileSync(file, 'utf8') : '',
   });
   console.log('\nWaiting for Postgres to answer');
@@ -165,6 +168,7 @@ const seededDatabase = ({ absolute, binary, run, state, target }) => {
           args: ['run', DATABASE_UP_TASK],
           binary,
           cwd: absolute,
+          env: treeEnv(),
           label: up,
         }),
     },
@@ -176,6 +180,7 @@ const seededDatabase = ({ absolute, binary, run, state, target }) => {
           args: ['run', SEED_TASK],
           binary,
           cwd: absolute,
+          env: treeEnv(),
           label: seed,
         }),
     },

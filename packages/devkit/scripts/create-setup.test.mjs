@@ -99,17 +99,17 @@ describe('databaseTarget', () => {
   const file = 'DB_HOST=filehost\nDB_PORT=6000\nDB_USER=fileuser\n';
 
   test('reads the file the tasks read', () => {
-    expect(databaseTarget({ env: {}, file })).toEqual({
+    expect(databaseTarget({ file })).toEqual({
       host: 'filehost',
       port: '6000',
       user: 'fileuser',
     });
   });
 
-  test('lets the environment win over the file, as compose and node do', () => {
-    expect(databaseTarget({ env: { DB_PORT: '7000' }, file })).toEqual({
-      host: 'filehost',
-      port: '7000',
+  test('falls back to the compose defaults for a setting the file lacks', () => {
+    expect(databaseTarget({ file: 'DB_USER=fileuser\n' })).toEqual({
+      host: 'localhost',
+      port: '5432',
       user: 'fileuser',
     });
   });

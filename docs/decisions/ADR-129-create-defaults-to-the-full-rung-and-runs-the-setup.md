@@ -51,9 +51,12 @@ fallback ADR-124 left them.
    then runs `<run> db:seed`. These are the tree's own tasks, so a command the
    summary prints later is the one `create` would have run. The wait sends a
    Postgres startup message to `DB_HOST:DB_PORT` and stops at the first answer
-   that is not "starting up", with a 90-second limit. The target is read the
-   way the tasks read it: a variable already in the environment wins over the
-   file. The probe lives in `create-readiness.mjs`, and `create` runs it in a
+   that is not "starting up", with a 90-second limit. The target is read from
+   the tree's `docker/local/.env` alone, and `db:up` and `db:seed` run with
+   every `DB_*` variable and `COMPOSE_PROJECT_NAME` removed from their
+   environment. A shell that exports another project's settings would
+   otherwise win over the file for compose, for the seed and for the wait,
+   and point all three at a database `create` did not start. The probe lives in `create-readiness.mjs`, and `create` runs it in a
    child `node` process because the rest of `create` is synchronous.
 
 **A step that cannot run is reported, and the run still exits 0.** That covers

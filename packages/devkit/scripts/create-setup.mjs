@@ -87,17 +87,28 @@ export const composeProjectNameFor = (packageName) =>
   packageName.replaceAll('.', '-');
 
 /**
- * @param {{ env: Record<string, string | undefined>, file: string }} args
+ * @param {{ file: string }} args
  * @returns {{ host: string, port: string, user: string }}
  */
-export const databaseTarget = ({ env, file }) => {
-  const merged = { ...parseEnv(file), ...env };
+export const databaseTarget = ({ file }) => {
+  const settings = parseEnv(file);
   return {
-    host: merged.DB_HOST ?? 'localhost',
-    port: merged.DB_PORT ?? '5432',
-    user: merged.DB_USER ?? 'postgres',
+    host: settings.DB_HOST ?? 'localhost',
+    port: settings.DB_PORT ?? '5432',
+    user: settings.DB_USER ?? 'postgres',
   };
 };
+
+/**
+ * @param {Record<string, string | undefined>} env
+ * @returns {Record<string, string | undefined>}
+ */
+export const withoutDatabaseSettings = (env) =>
+  Object.fromEntries(
+    Object.entries(env).filter(
+      ([name]) => !name.startsWith('DB_') && name !== 'COMPOSE_PROJECT_NAME',
+    ),
+  );
 
 /**
  * @param {{ reason: string, seed: string }} args

@@ -27,7 +27,7 @@ afterEach(async () => {
   await Promise.all(open.map((listener) => listener.close()));
 });
 
-const createdWith = async ({ args = [], env = {}, stubs }) => {
+const createdWith = async ({ args = [], env = async () => ({}), stubs }) => {
   const parent = scratches.make();
   const bin = join(parent, 'bin');
   const log = join(parent, 'setup.log');
@@ -37,12 +37,11 @@ const createdWith = async ({ args = [], env = {}, stubs }) => {
   const result = await createProcess({
     args: ['p', ...args],
     env: {
-      DB_HOST: '127.0.0.1',
-      DB_PORT: String(postgres.port),
       HOME: parent,
       PATH: bin,
       SETUP_LOG: log,
-      ...env,
+      STUB_PG_PORT: String(postgres.port),
+      ...(await env(log)),
     },
     parent,
   });
@@ -74,6 +73,26 @@ describe('devkit create with vp and docker on PATH', () => {
       'The dependencies are installed and the database is seeded.',
     );
     expect(remainingSteps(stdout)).toEqual(['cd p', 'vp run dev']);
+  });
+
+  test('waits on the port the tree file names, not one the shell exports', async () => {
+    const { status, steps } = await createdWith({
+      env: async (log) => {
+        const other = await stubPostgres(log, 'probe of the shell port');
+        listeners.push(other);
+        return { DB_HOST: '127.0.0.1', DB_PORT: String(other.port) };
+      },
+      stubs: ['vp', 'docker'],
+    });
+
+    expect(status).toBe(0);
+    expect(steps).toEqual([
+      'vp install',
+      'docker info',
+      'vp run db:up',
+      'probe',
+      'vp run db:seed',
+    ]);
   });
 
   test('--no-db installs and leaves the database to a command it names', async () => {
@@ -110,7 +129,7 @@ describe('devkit create with vp and docker on PATH', () => {
 
   test('a failing seed exits non-zero and says the repository is in place', async () => {
     const { status, stderr, stdout, steps } = await createdWith({
-      env: { FAIL_SEED: '1' },
+      env: async () => ({ FAIL_SEED: '1' }),
       stubs: ['vp', 'docker'],
     });
 
@@ -143,7 +162,7 @@ describe('devkit create when a step cannot run', () => {
 
   test('with Docker not running it exits 0 and names the seed', async () => {
     const { status, stdout, steps } = await createdWith({
-      env: { DOCKER_STOPPED: '1' },
+      env: async () => ({ DOCKER_STOPPED: '1' }),
       stubs: ['vp', 'docker'],
     });
 
@@ -168,7 +187,9 @@ describe('devkit create when a step cannot run', () => {
 
   test('without vp it installs with the package manager that launched it', async () => {
     const { status, stdout, steps } = await createdWith({
-      env: { npm_config_user_agent: 'pnpm/12.6.0 npm/? node/v26.10.0' },
+      env: async () => ({
+        npm_config_user_agent: 'pnpm/12.6.0 npm/? node/v26.10.0',
+      }),
       stubs: ['pnpm', 'docker'],
     });
 

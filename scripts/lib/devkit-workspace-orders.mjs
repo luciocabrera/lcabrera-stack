@@ -87,15 +87,20 @@ export const orderProbeFindings = ({
       `the seeded table gives the same first rows to \`${ORDERS_QUERIES[key]}\` as to \`${ORDERS_QUERIES.baseline}\`, so \`GET ${url}\` cannot show whether the route did ${verb} — the seed no longer separates the two`,
     ];
   }
-  const shown = rendered.slice(0, COMPARED_ROWS);
+  const shown =
+    key === 'filtered' ? rendered : rendered.slice(0, COMPARED_ROWS);
   if (shown.length === 0) {
     return [
       `\`GET ${url}\` rendered no order rows, so nothing shows the route did ${verb}`,
     ];
   }
-  if (sameStart({ expected, shown })) return [];
+  const differs = shown.findIndex((id, index) => id !== expected[index]);
+  if (differs === -1) return [];
+  const from = Math.max(0, differs - COMPARED_ROWS + 1);
+  const window = shown.slice(from, from + COMPARED_ROWS);
+  const rows = `${from + 1}–${from + window.length}`;
   return [
-    `\`GET ${url}\` rendered order_id ${listed(shown)} first, where \`${ORDERS_QUERIES[key]}\` gives ${listed(head)} — the route did not ${verb} in the database`,
+    `\`GET ${url}\` rendered order_id ${listed(window)} at rows ${rows}, where \`${ORDERS_QUERIES[key]}\` gives ${listed(expected.slice(from, from + COMPARED_ROWS))} — the route did not ${verb} in the database`,
   ];
 };
 

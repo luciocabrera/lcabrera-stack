@@ -90,6 +90,19 @@ describe('orderProbeFindings', () => {
     ).toEqual([]);
   });
 
+  test('fails a filtered page whose first ten rows match and whose eleventh does not', () => {
+    const matching = [3, 7, 9, 15, 22, 30, 31, 32, 50, 51, 60, 61];
+    const [finding] = orderProbeFindings({
+      ...probe,
+      expected: matching,
+      key: 'filtered',
+      rendered: [...matching.slice(0, 10), 52],
+    });
+
+    expect(finding).toContain('at rows 2–11');
+    expect(finding).toContain('did not sort');
+  });
+
   test('fails a filtered page that shows a row the filter excludes', () => {
     expect(
       orderProbeFindings({
