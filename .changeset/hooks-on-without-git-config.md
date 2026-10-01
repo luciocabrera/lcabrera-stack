@@ -20,3 +20,9 @@ dependency's `git` bin never runs in its place.
 The task block is reconciled key by key, so `sync` updates an untouched
 `prepare` in a repository already at the rung. `devkit init` and `devkit sync`
 still never change git config themselves.
+
+`paths.hooks` in `devkit.config.json` must now be a path inside the repository,
+relative to its root. An absolute path or one that climbs out with `..` was
+materialised under the repository but handed to git as written, so the hooks
+never ran; every command and the `prepare` script now refuse it with an error
+naming the key. A config that already names a relative directory is unaffected.

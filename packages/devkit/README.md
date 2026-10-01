@@ -568,7 +568,9 @@ harm: the alternative is a check that prints your changed task and exits zero.
 Every `paths` key is a group of shipped files, and `hooks` defaults to
 `.githooks` rather than to any one toolchain's hook directory: git runs whatever
 `core.hooksPath` names, so naming the directory a particular runner owns would
-put the seeds where a consumer on another runner never looks.
+put the seeds where a consumer on another runner never looks. `hooks` must be a
+path inside the repository, relative to its root: an absolute path, or one that
+climbs out with `..`, is refused by every command and by the `prepare` script.
 
 `commands` answers the placeholders a shipped file carries. A skill's procedure
 travels but the command carrying out each step does not, so the file says

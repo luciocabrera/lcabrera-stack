@@ -18,7 +18,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
-import { delimiter, dirname, isAbsolute, join } from 'node:path';
+import { delimiter, dirname, isAbsolute, join, posix, win32 } from 'node:path';
 import process from 'node:process';
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
@@ -128,12 +128,33 @@ export const gitEnvironment = ({ binary, env, platform = process.platform }) =>
   ]);
 
 /**
+ * @param {string} path
+ * @returns {boolean}
+ */
+export const isRepositoryRelative = (path) => {
+  if (/^[A-Za-z]:/.test(path) || win32.isAbsolute(path)) return false;
+  const normal = posix.normalize(path.replaceAll('\\', '/'));
+  return normal !== '..' && !normal.startsWith('../');
+};
+
+/**
+ * @param {unknown} path
+ * @returns {string | undefined}
+ */
+export const hooksPathRefusal = (path) =>
+  typeof path !== 'string' || isRepositoryRelative(path)
+    ? undefined
+    : `${CONFIG_FILE_NAME}: "paths.hooks" must be a directory inside the repository, relative to its root — got "${path}"`;
+
+/**
  * @param {string | undefined} raw
  * @returns {string}
  */
 export const hooksPathIn = (raw) => {
   if (raw === undefined) return DEFAULT_HOOKS_PATH;
   const configured = JSON.parse(raw)?.paths?.hooks;
+  const refusal = hooksPathRefusal(configured);
+  if (refusal !== undefined) throw new Error(refusal);
   return typeof configured === 'string' && configured !== ''
     ? configured
     : DEFAULT_HOOKS_PATH;

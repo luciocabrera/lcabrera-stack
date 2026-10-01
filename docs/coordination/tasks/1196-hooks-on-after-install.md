@@ -8,6 +8,8 @@ area:
   - packages/devkit/scripts/create*.mjs
   - packages/devkit/scripts/command-create*.mjs
   - packages/devkit/scripts/command-init.mjs
+  - packages/devkit/scripts/config.mjs
+  - packages/devkit/scripts/config.test.mjs
   - packages/devkit/scripts/hooks-path*.mjs
   - packages/devkit/scripts/git-exec.mjs
   - packages/devkit/scripts/closure-shipped-plant.test.mjs
@@ -20,7 +22,7 @@ area:
   - COMMANDS.md
   - .changeset/**
 started: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-01
 plan: (none)
 pr: '#1209'
 issue: #1196

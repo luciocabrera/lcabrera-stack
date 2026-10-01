@@ -143,6 +143,22 @@ describe('an install in a clone', () => {
     expect(stdout).toContain('git config core.hooksPath .githooks');
   });
 
+  test.each([['/hooks'], [String.raw`C:\hooks`], ['../hooks']])(
+    'fails on %s rather than pointing git outside the repository',
+    (hooks) => {
+      const root = clone({ hooks: 'hooks' });
+      writeFileSync(
+        join(root, 'devkit.config.json'),
+        `${JSON.stringify({ paths: { hooks } })}\n`,
+      );
+      const { status, stderr } = install(root);
+
+      expect(status).toBe(1);
+      expect(stderr).toContain('"paths.hooks" must be a directory inside');
+      expect(localHooksPath(root)).toBe('');
+    },
+  );
+
   test('points nothing when the hooks path is a file, not a directory', () => {
     const root = scratch();
     git(['init', '--quiet', '.'], root);

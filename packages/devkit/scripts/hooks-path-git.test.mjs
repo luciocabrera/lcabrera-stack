@@ -27,6 +27,7 @@ import {
   hooksPathIn,
   isContinuousIntegration,
   isInPackageDirectory,
+  isRepositoryRelative,
   resolveInstallGit,
   CONFIG_FILE_NAME as SCRIPT_CONFIG_FILE_NAME,
   TRUSTED_GIT_DIRECTORIES,
@@ -197,8 +198,35 @@ describe('hooksPathIn', () => {
     ['{"paths":{"hooks":""}}', '.githooks'],
     ['{"paths":{"hooks":7}}', '.githooks'],
     ['{"paths":{"hooks":"hooks"}}', 'hooks'],
+    ['{"paths":{"hooks":"tools/hooks"}}', 'tools/hooks'],
   ])('%s is %s', (raw, expected) => {
     expect(hooksPathIn(raw)).toBe(expected);
+  });
+
+  test.each([['/hooks'], [String.raw`C:\hooks`], ['../hooks']])(
+    'refuses %s rather than handing git a directory outside the repository',
+    (hooks) => {
+      expect(() => hooksPathIn(JSON.stringify({ paths: { hooks } }))).toThrow(
+        /"paths\.hooks" must be a directory inside the repository/,
+      );
+    },
+  );
+});
+
+describe('isRepositoryRelative', () => {
+  test.each([
+    ['.githooks', true],
+    ['tools/hooks', true],
+    ['tools/../hooks', true],
+    ['/hooks', false],
+    [String.raw`C:\hooks`, false],
+    ['C:hooks', false],
+    [String.raw`\\server\share\hooks`, false],
+    ['..', false],
+    ['../hooks', false],
+    [String.raw`tools\..\..\hooks`, false],
+  ])('%s is %s', (path, expected) => {
+    expect(isRepositoryRelative(path)).toBe(expected);
   });
 });
 
