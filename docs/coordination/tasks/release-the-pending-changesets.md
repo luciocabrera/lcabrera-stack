@@ -2,7 +2,7 @@
 id: release-the-pending-changesets
 title: chore(release): version the packages from the pending changesets
 owner: agent:claude
-status: active
+status: review
 branch: chore/1217-release-the-pending-changesets
 area:
   - packages/*/package.json
@@ -11,7 +11,7 @@ area:
 started: 2026-10-01
 updated: 2026-10-01
 plan: (none)
-pr: (none)
+pr: "#1218"
 issue: #1217
 ---
 
@@ -21,6 +21,6 @@ chore(release): version the packages from the pending changesets
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: versioned; workspace:verify and tarball:verify pass; in review on #1218
 - Blockers: none
-- Next:
+- Next: merge #1218; release.yml publishes
