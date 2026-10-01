@@ -62,7 +62,11 @@ import {
   renderTasks,
   scriptsAfterTasks,
 } from './tasks.mjs';
-import { WORKSPACE_SCRIPTS } from './workspace.mjs';
+import {
+  BLUEPRINT_TASK_NAMES,
+  WORKSPACE_SCRIPTS,
+  workspaceScriptsFor,
+} from './workspace.mjs';
 
 const packageRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -124,13 +128,12 @@ const taskGroups = ({
       ...withoutBlueprint,
     ]),
   };
-  return blueprint ? [gate, { tasks: WORKSPACE_SCRIPTS }] : [gate];
+  return blueprint
+    ? [gate, { tasks: workspaceScriptsFor({ profile }) }]
+    : [gate];
 };
 
-const EVERY_TASK_NAME = [
-  ...Object.keys(GATE_TASKS),
-  ...Object.keys(WORKSPACE_SCRIPTS),
-];
+const EVERY_TASK_NAME = [...Object.keys(GATE_TASKS), ...BLUEPRINT_TASK_NAMES];
 
 /**
  * A repository with no manifest gets no task plan at all, rather than a plan

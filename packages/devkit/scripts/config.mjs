@@ -27,7 +27,7 @@ export const CONFIG_FILE_NAME = 'devkit.config.json';
  *   ci: Readonly<{ setup: readonly never[] }>,
  *   commands: Readonly<{}>,
  *   paths: Readonly<{ agents: string, coordination: string, decisions: string,
- *     docs: string, hooks: string, root: string, rules: string,
+ *     docs: string, full: string, hooks: string, root: string, rules: string,
  *     skills: string, templates: string, workflows: string,
  *     workspace: string }>,
  *   profile: string }>}
@@ -40,6 +40,7 @@ export const DEFAULT_CONFIG = Object.freeze({
     coordination: 'docs/coordination',
     decisions: 'docs/decisions',
     docs: 'docs/agents',
+    full: '.',
     hooks: '.githooks',
     root: '.',
     rules: '.claude/rules',
@@ -66,7 +67,7 @@ const RUNG_GROUPS = frozenRungs([
   ['agent', ['skills', 'rules', 'agents', 'docs', 'coordination', 'decisions']],
   ['repo', ['templates', 'workflows', 'hooks', 'root']],
   ['monorepo', ['workspace']],
-  ['full', []],
+  ['full', ['full']],
 ]);
 
 const GROUPS_BY_RUNG = new Map(RUNG_GROUPS);
@@ -126,21 +127,23 @@ export const PROFILES = Object.freeze(
 
 /**
  * @param {string} profile
+ * @param {Readonly<Record<string, readonly string[]>>} [profiles]
  * @returns {string | undefined} the lowest rung below `profile` placing the
  * same groups, or `undefined` when `profile` places a group of its own
  */
-export const rungPlacedAs = (profile) =>
+export const rungPlacedAs = (profile, profiles = PROFILES) =>
   PROFILE_LADDER.slice(0, Math.max(rungIndex(profile), 0)).find(
-    (rung) => PROFILES[rung].length === PROFILES[profile].length,
+    (rung) => profiles[rung]?.length === profiles[profile]?.length,
   );
 
 /**
  * @param {string} profile
+ * @param {Readonly<Record<string, readonly string[]>>} [profiles]
  * @returns {string | undefined} the line a run prints for a rung that places
  * nothing of its own yet
  */
-export const placementNotice = (profile) => {
-  const placedAs = rungPlacedAs(profile);
+export const placementNotice = (profile, profiles = PROFILES) => {
+  const placedAs = rungPlacedAs(profile, profiles);
   if (placedAs === undefined) return;
   return `The "${profile}" profile places what "${placedAs}" places — nothing above "${placedAs}" ships in this version.`;
 };

@@ -24,6 +24,7 @@
     "**/.tmp/**",
     "**/coverage/**",
     "packages/devkit/assets/workspace/apps/**",
+    "packages/devkit/assets/full/apps/**",
     "reports/**"
   ],
   "ignoreDependencies": [

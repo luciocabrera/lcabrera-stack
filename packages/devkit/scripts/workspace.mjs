@@ -23,7 +23,12 @@
  * The generate task formats what it wrote because the published writer emits
  * plain `JSON.stringify` output that Oxfmt then collapses; without that step
  * every regenerated config is left dirty.
+ *
+ * Each task list names the rung it lands on, so the `full` rung's database
+ * tasks reach only a tree that also holds the compose file they drive.
  */
+
+import { includesRung } from './config.mjs';
 
 export const NODE_VERSION = '26.10.0';
 
@@ -104,9 +109,46 @@ export const WORKSPACE_TASKS = [
   },
 ];
 
-export const WORKSPACE_SCRIPTS = Object.fromEntries(
-  WORKSPACE_TASKS.map(({ command, name }) => [name, command]),
+const COMPOSE = 'docker compose -f docker/local/docker-compose.yml';
+
+const COMPOSE_WITH_ENV = `${COMPOSE} --env-file docker/local/.env`;
+
+/** @type {ReadonlyArray<{ command: string, name: string }>} */
+export const DATABASE_TASKS = [
+  { command: `${COMPOSE_WITH_ENV} down`, name: 'db:down' },
+  {
+    command: `vp run db:up && vp run --filter ${APP_WORKSPACE} seed`,
+    name: 'db:seed',
+  },
+  { command: `${COMPOSE_WITH_ENV} ps`, name: 'db:status' },
+  { command: `${COMPOSE_WITH_ENV} up -d --wait postgres`, name: 'db:up' },
+];
+
+const RUNG_TASKS = [
+  ['monorepo', WORKSPACE_TASKS],
+  ['full', DATABASE_TASKS],
+];
+
+const asScripts = (tasks) =>
+  Object.fromEntries(tasks.map(({ command, name }) => [name, command]));
+
+export const WORKSPACE_SCRIPTS = asScripts(WORKSPACE_TASKS);
+
+export const BLUEPRINT_TASK_NAMES = RUNG_TASKS.flatMap(([, tasks]) =>
+  tasks.map(({ name }) => name),
 );
+
+/**
+ * @param {{ profile: string }} args
+ * @returns {Record<string, string>} the blueprint tasks every rung `profile`
+ * includes wires, empty below `monorepo`
+ */
+export const workspaceScriptsFor = ({ profile }) =>
+  asScripts(
+    RUNG_TASKS.filter(([rung]) => includesRung({ profile, rung })).flatMap(
+      ([, tasks]) => tasks,
+    ),
+  );
 
 /**
  * The manifest fields the rung adds, over whatever the caller already has.
@@ -114,13 +156,16 @@ export const WORKSPACE_SCRIPTS = Object.fromEntries(
  * A field the caller set wins, for the same reason a task it already declared
  * does: setting up a repository must not break one that works.
  *
- * @param {{ manifest?: object }} args
+ * @param {{ manifest?: object, profile?: string }} args
  * @returns {object}
  */
-export const withWorkspaceFields = ({ manifest = {} } = {}) => ({
+export const withWorkspaceFields = ({
+  manifest = {},
+  profile = 'monorepo',
+} = {}) => ({
   ...manifest,
   devDependencies: { ...WORKSPACE_DEPENDENCIES, ...manifest.devDependencies },
   engines: { node: nodeEngineBand(NODE_VERSION), ...manifest.engines },
   packageManager: manifest.packageManager ?? PACKAGE_MANAGER,
-  scripts: { ...WORKSPACE_SCRIPTS, ...manifest.scripts },
+  scripts: { ...workspaceScriptsFor({ profile }), ...manifest.scripts },
 });

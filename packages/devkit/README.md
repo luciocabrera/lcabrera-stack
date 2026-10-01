@@ -317,21 +317,18 @@ without a gate of its own is a flag, not a rung.
 | `agent`    | What an agent reads: skills, path rules, subagent definitions, the contracts and coordination register they bind to, and the decision home's template and README.                                                                                                                          |
 | `repo`     | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, and `COMMANDS.md`.                                                                                                                                                              |
 | `monorepo` | All of that, plus the workspace itself: the pnpm workspace file and its catalog, the Node pin and engine band, the root lint/format config, the Biome config, a tsconfig roster with the generator wired, and a React Router application rendering a table through the published packages. |
-| `full`     | What `monorepo` places. The database behind that application's route is its content, and none of it ships yet.                                                                                                                                                                             |
+| `full`     | All of that, plus a local database behind the application: a Postgres compose file and its environment template, the `enterprise_orders` DDL with a demo-sized seed, the seed runner, a database test gated on `SMOKE_DB`, and four `db:*` root tasks.                                     |
 
 A consumer who wants the prose and keeps their own process takes `agent` and
 receives none of the scaffolding. `repo` is a governed single-package
 repository. `monorepo` is a workspace that installs, lints, formats,
 type-checks, tests, builds and serves a page on the command after the one that
-made it. `full` is
-accepted today so a config can name the rung it means, and a run under it prints
-the line saying so:
+made it. `full` is that workspace with a database it can create, seed and test
+against, which is described [below](#what-the-full-rung-adds).
 
-```
-The "full" profile places what "monorepo" places — nothing above "monorepo" ships in this version.
-```
-
-The line goes away on its own the day the rung places a group of its own.
+A rung that places no group of its own prints a line saying which rung it places
+as, rather than reporting files it did not add. Every rung places one today, so
+no run prints it.
 
 ### What the `monorepo` rung emits
 
@@ -494,11 +491,9 @@ them, and take an unmet-peer warning on each resolving install instead.
 
 **`full` used to be the name of what is now `repo`.** A config naming `full`
 from before the rename still resolves, to the top rung — which now places the
-workspace blueprint as well, so such a run materialises more than it did before
-the rename. There is no separate notice for the old
-meaning: the placement line above is what such a run prints, and the changelog
-records the rename. If the harness is what you meant, set `repo`; `full` will
-grow.
+workspace blueprint and the database lane as well, so such a run materialises
+more than it did before the rename. The changelog records the rename. If the
+harness is what you meant, set `repo`.
 
 **Set it in `devkit.config.json` rather than passing `--profile`.** Every
 command takes the flag, and that is how the commands get out of step: sync the
@@ -528,6 +523,57 @@ at all. Reading the mode from disk worked in this repository — `workspace:*`
 resolves the source directory, where the bit is set — and produced inert hooks
 for every consumer, which git skips without a word. The packed-tarball gate now
 asserts it, because no test run from a workspace can.
+
+### What the `full` rung adds
+
+```bash
+devkit create my-repo --profile full
+cd my-repo && pnpm install
+cp docker/local/.env.example docker/local/.env   # then replace each placeholder
+vp run db:seed    # start Postgres, create the database, load the demo table
+vp run --filter web test:smoke
+```
+
+It places everything the `monorepo` rung does, and a local database behind the
+application. It needs Docker to run that database. Nothing else, `psql`
+included, has to be installed on the host.
+
+- `docker-compose.yml`, in docker/local, starts one Postgres container, bound
+  to the loopback interface. Every value it reads comes from the `.env` beside
+  it. The credentials have no default, so a missing one stops compose and names
+  the variable.
+- `.env.example`, beside it, is the template for that file, and it holds only
+  placeholders. The workspace `.gitignore` ignores `.env` and `.env.*` and keeps
+  `.env.example`, so the real file is never committed. `COMPOSE_PROJECT_NAME`
+  in it names the container and its volume. Set it to something unique, or two
+  repositories created from this rung on one machine share one database.
+- `setup_enterprise_orders.sql`, in the application's `db` directory, creates
+  the `enterprise_orders` table and fills it with 1,000 rows. Every value derives from the row number,
+  so every seed writes the same table, and the seed takes well under a second.
+  For a load test, raise the `generate_series` bound in that file. Nothing else
+  in it depends on the number.
+- `seed-db.mjs`, in the application's `scripts` directory, is its `seed` task. It uses `pg`
+  directly, creates `DB_NAME` when it is missing, and applies the DDL in one
+  transaction, so a seed that fails leaves the previous table in place. It lives
+  in the application rather than in `@lcabrera/server`, which is a library of
+  queries and does not read files.
+- `enterpriseOrders.smoke.test.ts`, beside the DDL, reads that table back through
+  `@lcabrera/server`, which the application now declares. It gates itself on
+  `SMOKE_DB`. A plain test run, including `test:all` and CI, skips it.
+  `test:smoke` sets the variable and loads the same environment file.
+
+The root manifest gains `db:up`, `db:down`, `db:status` and `db:seed`. They are
+tagged to this rung, so `create` writes them only here. A tree that took the
+`monorepo` blueprint gains them on its first `sync` at this profile.
+
+Two files are replaced rather than added. The application's `package.json` is
+the `monorepo` one plus the server package, the driver and the two tasks.
+`COMMANDS.md` is the shipped command reference plus a section documenting the
+database tasks. It has to be replaced: the created tree's `commands:verify` fails
+on a task the reference does not document, and also on a documented task the
+tree does not have, so one reference cannot serve both rungs. A tree moved up to
+this rung takes both files when it has not edited them. An edited one is
+reported as modified and kept.
 
 ## Acknowledging a deliberate edit
 
@@ -591,6 +637,7 @@ harm: the alternative is a check that prints your changed task and exits zero.
     "coordination": "docs/coordination",
     "decisions": "docs/decisions",
     "docs": "docs/agents",
+    "full": ".",
     "hooks": ".githooks",
     "root": ".",
     "rules": ".claude/rules",

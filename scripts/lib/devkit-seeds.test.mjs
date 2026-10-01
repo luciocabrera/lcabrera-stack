@@ -126,6 +126,17 @@ describe('wordsFor', () => {
     ]);
   });
 
+  it('reads the full rung as blueprint, the runner still forbidden', () => {
+    const scoped = wordsFor({
+      installableNames,
+      path: 'full/apps/web/package.json',
+      words,
+    });
+    for (const name of installableNames) expect(scoped).not.toContain(name);
+    expect(scoped).toContain('vp ');
+    expect(scoped).toContain('apps/showcase');
+  });
+
   it('leaves a seed outside the blueprint held to every word', () => {
     expect(
       wordsFor({ installableNames, path: 'skills/x/SKILL.md', words }),

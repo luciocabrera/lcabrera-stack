@@ -218,6 +218,17 @@ What checks it is a test here that loads those declarations rather than reading
 the file as text, plus tests inside the application asserting the same thing and
 that a rendered header announces no sort.
 
+**The `full` rung replaces two files of the rung below, and adds the rest.**
+The command reference has to change with the task block, because the consumer's
+`commands:verify` fails on a task it does not document and on a documented task
+the tree does not have, so no one copy serves both rungs. The application's
+manifest has to change because the seed needs the driver and the database tests
+need the server package. Both copies are held by a test to the lower rung's
+file plus exactly what the rung adds, so an edit to one cannot leave the other
+behind. The database tasks join the blueprint's task group rather than forming
+their own, so a tree that took the blueprint gains them on its first run at
+`full`.
+
 **A seed refers to its own directory relatively, so the layout is never
 interpolated.** There is no `{{paths.*}}` placeholder and none is needed: the
 register's README ships _into_ the register, so it links `tasks/_TEMPLATE.md`;
@@ -239,8 +250,8 @@ where it belongs, so the only symptom is closure reporting the file as an escape
 from a shipped set it is in.
 
 A profile is a rung on a ladder of those groups, each rung holding the one
-below it: `agent` is what an agent reads, `repo` adds what CI and git run, and
-`monorepo` and `full` sit above with no group of their own yet. Each gate task
+below it: `agent` is what an agent reads, `repo` adds what CI and git run,
+`monorepo` adds the workspace, and `full` adds the database lane. Each gate task
 names the rung it lands on, and one containment check answers both which groups
 a profile places and which tasks it writes. A group named by a rung with no
 `paths` entry is dropped from the plan without a word, which is why a test

@@ -15,6 +15,17 @@ area:
   - packages/devkit/CLASSIFICATION.md
   - packages/devkit/README.md
   - .changeset/full-rung-database*.md
+  - packages/devkit/assets/root/COMMANDS.md
+  - packages/devkit/ARCHITECTURE.md
+  - packages/devkit/scripts/command-materialise.mjs
+  - packages/devkit/scripts/create.mjs
+  - packages/devkit/scripts/command-create.test.mjs
+  - packages/devkit/scripts/sync-executable.test.mjs
+  - packages/devkit/scripts/commands-doc.test.mjs
+  - scripts/lib/devkit-seeds*.mjs
+  - vite.config.ts
+  - .fallowrc.json
+  - reports/api-surface/devkit.txt
 started: 2026-10-01
 updated: 2026-10-01
 plan: (none)
@@ -28,6 +39,6 @@ feat(devkit): the full rung ships the database lane
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implementing; the full asset group, the database tasks and their tests
 - Blockers: none
 - Next:

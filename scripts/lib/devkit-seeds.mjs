@@ -118,15 +118,16 @@ export const forbiddenWords = ({
   ]),
 ];
 
-const BLUEPRINT_PREFIX = 'workspace/';
+const BLUEPRINT_PREFIXES = ['workspace/', 'full/'];
 
-const isBlueprintSeed = (path) => path.startsWith(BLUEPRINT_PREFIX);
+const isBlueprintSeed = (path) =>
+  BLUEPRINT_PREFIXES.some((prefix) => path.startsWith(prefix));
 
 /**
  * The words one seed is read against.
  *
- * A blueprint seed is held to everything except the names of packages this
- * repository publishes. Those are registry identifiers any consumer can install,
+ * A blueprint seed — one the `monorepo` or the `full` rung places — is held to
+ * everything except the names of packages this repository publishes. Those are registry identifiers any consumer can install,
  * so a manifest or an import naming one hands the reader something they can
  * fetch — which is the opposite of the failure this gate exists for, a shipped
  * file pointing at a tree only this repository has. The repository's own slug,

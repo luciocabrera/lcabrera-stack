@@ -19,6 +19,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runCreate } from './command-create.mjs';
+import { runSync } from './command-sync.mjs';
 import { PROFILE_LADDER } from './config.mjs';
 import {
   createUnderWith,
@@ -28,6 +29,7 @@ import {
 } from './create-fixtures.mjs';
 import { CREATE_BRANCH, INITIAL_COMMIT_MESSAGE } from './create.mjs';
 import { tasksFor } from './init.mjs';
+import { workspaceScriptsFor } from './workspace.mjs';
 
 const scratches = scratchDirectories('devkit-create-');
 
@@ -36,6 +38,10 @@ const scratch = scratches.make;
 const quietly = (run) => quietlyWith(vi, run);
 
 const createUnder = (args) => createUnderWith(vi, args);
+
+const scriptsOf = (parent) =>
+  JSON.parse(readFileSync(join(parent, 'demo', 'package.json'), 'utf8'))
+    .scripts;
 
 const repositoryBehindALink = ({ linkedFrom, parent }) => {
   const outer = join(parent, 'outer');
@@ -304,12 +310,48 @@ describe('when a git step fails', () => {
 });
 
 describe('a rung above repo', () => {
-  test('says what it places, rather than looking like it placed more', () => {
+  test('the full rung places the database lane beside the workspace', () => {
     const parent = scratch();
     const { code, printed } = createUnder({ parent, profile: 'full' });
 
     expect(code).toBe(0);
-    expect(printed).toContain('"full" profile places what "monorepo" places');
+    expect(printed).not.toContain('places what');
+    for (const path of [
+      'docker/local/docker-compose.yml',
+      'docker/local/.env.example',
+      'apps/web/db/setup_enterprise_orders.sql',
+      'apps/web/scripts/seed-db.mjs',
+    ]) {
+      expect(existsSync(join(parent, 'demo', path))).toBe(true);
+    }
+    expect(existsSync(join(parent, 'demo', 'docker/local/.env'))).toBe(false);
+    expect(Object.keys(scriptsOf(parent))).toEqual(
+      expect.arrayContaining(['db:down', 'db:seed', 'db:status', 'db:up']),
+    );
+  });
+
+  test('a monorepo tree synced at full gains the database tasks', () => {
+    const parent = scratch();
+    createUnder({ parent, profile: 'monorepo' });
+
+    const { code } = quietly(() =>
+      runSync(['--profile', 'full'], join(parent, 'demo')),
+    );
+
+    expect(code).toBe(0);
+    expect(scriptsOf(parent)).toMatchObject(
+      workspaceScriptsFor({ profile: 'full' }),
+    );
+  });
+
+  test('the monorepo rung wires no database task', () => {
+    const parent = scratch();
+    createUnder({ parent, profile: 'monorepo' });
+
+    expect(
+      Object.keys(scriptsOf(parent)).filter((name) => name.startsWith('db:')),
+    ).toEqual([]);
+    expect(existsSync(join(parent, 'demo', 'docker'))).toBe(false);
   });
 
   test('the monorepo rung places its own files and claims nothing else', () => {
@@ -330,10 +372,6 @@ describe('a rung above repo', () => {
     }
   });
 });
-
-const scriptsOf = (parent) =>
-  JSON.parse(readFileSync(join(parent, 'demo', 'package.json'), 'utf8'))
-    .scripts;
 
 describe('the gate tasks, wired before anything is installed', () => {
   test('every rung is created with every gate task it owns', () => {

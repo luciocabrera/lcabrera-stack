@@ -8,6 +8,11 @@
  * check on the day it is set up. Nothing at run time can catch that: both halves
  * ship from this package, so the earliest place it can be caught is here.
  *
+ * The `full` rung places its own copy over that file, because the gate also
+ * fails on a documented task the repository does not have, and the database
+ * tasks are absent below that rung. The copy is held to the shipped reference
+ * plus one section, so the two cannot drift apart.
+ *
  * The seed spells the runner as a placeholder rather than literally, because a
  * shipped file may not name one repository's toolchain — which is also why the
  * command lines themselves stay in this package's code and only the names are
@@ -20,23 +25,22 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vite-plus/test';
 
 import { GATE_TASKS } from './init.mjs';
-import { WORKSPACE_TASKS } from './workspace.mjs';
+import { DATABASE_TASKS, WORKSPACE_TASKS } from './workspace.mjs';
 
-const COMMANDS_DOC = join(
-  dirname(dirname(fileURLToPath(import.meta.url))),
-  'assets',
-  'root',
-  'COMMANDS.md',
-);
+const ASSETS = join(dirname(dirname(fileURLToPath(import.meta.url))), 'assets');
+
+const COMMANDS_DOC = join(ASSETS, 'root', 'COMMANDS.md');
+
+const FULL_COMMANDS_DOC = join(ASSETS, 'full', 'COMMANDS.md');
 
 const DOCUMENTED = /\{\{commands\.run\}\} ([a-z][\w:-]*)/g;
 
 const sorted = (names) =>
   [...new Set(names)].toSorted((left, right) => left.localeCompare(right));
 
-const documentedTasks = () =>
+const documentedTasks = (path = COMMANDS_DOC) =>
   sorted(
-    readFileSync(COMMANDS_DOC, 'utf8')
+    readFileSync(path, 'utf8')
       .matchAll(DOCUMENTED)
       .map(([, name]) => name),
   );
@@ -47,6 +51,9 @@ const wiredTasks = () =>
     ...WORKSPACE_TASKS.map(({ name }) => name),
   ]);
 
+const wiredAtFull = () =>
+  sorted([...wiredTasks(), ...DATABASE_TASKS.map(({ name }) => name)]);
+
 describe('the shipped command reference', () => {
   test('documents a task, so a reader is looking at something', () => {
     expect(documentedTasks().length).toBeGreaterThan(0);
@@ -54,5 +61,18 @@ describe('the shipped command reference', () => {
 
   test('documents every task this kit wires, and only those', () => {
     expect(documentedTasks()).toEqual(wiredTasks());
+  });
+});
+
+describe('the command reference the full rung places over it', () => {
+  test('is the shipped reference with the database section after it', () => {
+    const below = readFileSync(COMMANDS_DOC, 'utf8');
+    const full = readFileSync(FULL_COMMANDS_DOC, 'utf8');
+    expect(full.startsWith(below)).toBe(true);
+    expect(full.slice(below.length)).toMatch(/^\n### The database tasks\n/);
+  });
+
+  test('documents every task the full rung wires, and only those', () => {
+    expect(documentedTasks(FULL_COMMANDS_DOC)).toEqual(wiredAtFull());
   });
 });

@@ -224,3 +224,22 @@ exactly like the tasks above.
 - `{{commands.run}} tsconfig:generate` — rewrite the generated TypeScript configs
   and format what it wrote.
 - `{{commands.run}} typecheck:all` — type-check the root, then every workspace.
+
+### The database tasks
+
+These arrive with `devkit create` at the `full` profile, beside the
+`docker-compose.yml` in docker/local and the application's own seed. They run a
+local Postgres through Docker and read every setting from the `.env` file beside
+that compose file, which git ignores. Create it as a copy of the `.env.example`
+there, and replace each placeholder before the first of them runs.
+
+- `{{commands.run}} db:up` — start the database and wait until it answers.
+- `{{commands.run}} db:down` — stop it. Its data volume is kept.
+- `{{commands.run}} db:status` — show whether it is running.
+- `{{commands.run}} db:seed` — start it, then create the application's database
+  if it is missing and load the demo table.
+
+The application's own `seed` task is the second half of `db:seed`, for a
+database that is already running. Its `test:smoke` task runs the tests that read
+that database. Every other test run skips them, because they gate themselves on
+`SMOKE_DB` and only `test:smoke` sets it.

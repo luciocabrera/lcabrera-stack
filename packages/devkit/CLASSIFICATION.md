@@ -73,9 +73,9 @@ file, and may be assumed by anything placed there:
 All four rungs are accepted. `PROFILES` in
 `packages/devkit/scripts/config.mjs` is derived from the ladder, `withProfile`
 refuses any other name, and each gate task in `init.mjs` names the rung it lands
-on. `agent`, `repo` and `monorepo` place groups; `full` places what `monorepo`
-places until #1078 lands its content, and a run under it says so rather than
-reporting files it did not add. Where two held groups map onto one path, the
+on. Every rung places a group of its own: `full` adds the database lane, and
+`db:up`, `db:down`, `db:status` and `db:seed` are tagged to it in `workspace.mjs`.
+Where two held groups map onto one path, the
 higher rung's file is the one placed, and a recorded file no rung ships any
 more, or one a held rung declares it retires, is retired
 ([ADR-127](../../docs/decisions/ADR-127-a-higher-rung-supersedes-a-lower-rungs-file.md)).
@@ -476,30 +476,31 @@ Every row is **parameterise** and **hard**: the body names this repository's
 runner, its analysers, its workspaces or its compose file, and a line naming a
 tool nobody installed is a step nobody defined.
 
-| Task               | Profile    | Update | Verdict          | Dependency | Reason                                                                                             |
-| ------------------ | ---------- | ------ | ---------------- | ---------- | -------------------------------------------------------------------------------------------------- |
-| `prepare`          | `repo`     | seed   | **parameterise** | **hard**   | The runner's own install hook.                                                                     |
-| `format:all`       | `repo`     | seed   | **parameterise** | **hard**   | One formatter invocation.                                                                          |
-| `lint:all`         | `repo`     | seed   | **parameterise** | **hard**   | A chain of the consumer's lint tasks.                                                              |
-| `lint:biome`       | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation; which analysers a consumer runs is theirs.                                |
-| `lint:biome:check` | `repo`     | seed   | **parameterise** | **hard**   | The same analyser without `--write` — the form a gate runs.                                        |
-| `test:scripts`     | `repo`     | seed   | **parameterise** | **hard**   | Runs the suites that live in no workspace.                                                         |
-| `fallow:full`      | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation, configured by a seeded config file.                                       |
-| `fallow:audit`     | `repo`     | seed   | **parameterise** | **hard**   | Its `audit` subcommand.                                                                            |
-| `fallow:dead-code` | `repo`     | seed   | **parameterise** | **hard**   | Its `dead-code` subcommand.                                                                        |
-| `fallow:dupes`     | `repo`     | seed   | **parameterise** | **hard**   | Its `dupes` subcommand.                                                                            |
-| `fallow:health`    | `repo`     | seed   | **parameterise** | **hard**   | Its `health` subcommand, plus the flags to print with it — the line is the artifact.               |
-| `build:all`        | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out in dependency order.                                                                       |
-| `typecheck:all`    | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out.                                                                                           |
-| `typegen:all`      | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out.                                                                                           |
-| `test:all`         | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out plus the root script suites.                                                               |
-| `test:ci`          | `monorepo` | seed   | **parameterise** | **hard**   | The same fan-out ordered so the coverage summary is the fresh one. The ordering is the consumer's. |
-| `packages:build`   | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out over the package workspaces.                                                               |
-| `dev:showcase`     | `full`     | seed   | **parameterise** | **hard**   | Starts the example application. The line ships; the application's name is the consumer's.          |
-| `start:showcase`   | `full`     | seed   | **parameterise** | **hard**   | Runs that application in production mode.                                                          |
-| `db:up`            | `full`     | seed   | **parameterise** | **hard**   | The database lane. Image, ports and env file are the consumer's.                                   |
-| `db:down`          | `full`     | seed   | **parameterise** | **hard**   | Stops it, through the same compose file.                                                           |
-| `db:status`        | `full`     | seed   | **parameterise** | **hard**   | Reports what that compose file has running.                                                        |
+| Task               | Profile    | Update | Verdict          | Dependency | Reason                                                                                               |
+| ------------------ | ---------- | ------ | ---------------- | ---------- | ---------------------------------------------------------------------------------------------------- |
+| `prepare`          | `repo`     | seed   | **parameterise** | **hard**   | The runner's own install hook.                                                                       |
+| `format:all`       | `repo`     | seed   | **parameterise** | **hard**   | One formatter invocation.                                                                            |
+| `lint:all`         | `repo`     | seed   | **parameterise** | **hard**   | A chain of the consumer's lint tasks.                                                                |
+| `lint:biome`       | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation; which analysers a consumer runs is theirs.                                  |
+| `lint:biome:check` | `repo`     | seed   | **parameterise** | **hard**   | The same analyser without `--write` — the form a gate runs.                                          |
+| `test:scripts`     | `repo`     | seed   | **parameterise** | **hard**   | Runs the suites that live in no workspace.                                                           |
+| `fallow:full`      | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation, configured by a seeded config file.                                         |
+| `fallow:audit`     | `repo`     | seed   | **parameterise** | **hard**   | Its `audit` subcommand.                                                                              |
+| `fallow:dead-code` | `repo`     | seed   | **parameterise** | **hard**   | Its `dead-code` subcommand.                                                                          |
+| `fallow:dupes`     | `repo`     | seed   | **parameterise** | **hard**   | Its `dupes` subcommand.                                                                              |
+| `fallow:health`    | `repo`     | seed   | **parameterise** | **hard**   | Its `health` subcommand, plus the flags to print with it — the line is the artifact.                 |
+| `build:all`        | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out in dependency order.                                                                         |
+| `typecheck:all`    | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out.                                                                                             |
+| `typegen:all`      | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out.                                                                                             |
+| `test:all`         | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out plus the root script suites.                                                                 |
+| `test:ci`          | `monorepo` | seed   | **parameterise** | **hard**   | The same fan-out ordered so the coverage summary is the fresh one. The ordering is the consumer's.   |
+| `packages:build`   | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out over the package workspaces.                                                                 |
+| `dev:showcase`     | `full`     | seed   | **parameterise** | **hard**   | Starts the example application. The line ships; the application's name is the consumer's.            |
+| `start:showcase`   | `full`     | seed   | **parameterise** | **hard**   | Runs that application in production mode.                                                            |
+| `db:up`            | `full`     | seed   | **parameterise** | **hard**   | The database lane. Image, ports and env file are the consumer's.                                     |
+| `db:down`          | `full`     | seed   | **parameterise** | **hard**   | Stops it, through the same compose file.                                                             |
+| `db:status`        | `full`     | seed   | **parameterise** | **hard**   | Reports what that compose file has running.                                                          |
+| `db:seed`          | `full`     | seed   | **parameterise** | **hard**   | Starts the database, then runs the application's own seed. The application's name is the consumer's. |
 
 ### Root scripts that do not ship
 
@@ -544,7 +545,8 @@ and nothing else.
 **`docker/local/docker-compose.yml`.** Profile: it defines a database, and there
 is no database below `full`, so `full`. Update: image tag, ports, volume names
 and credentials are the consumer's, and nothing reads it to decide pass or fail —
-an edit that is wrong fails loudly, at connection time. So `seed`.
+an edit that is wrong fails loudly, at connection time. So `seed`, and the `full`
+group now ships it as one.
 
 **`docs/agents/dependency-advisories.json`.** Profile: `deps:audit` is the only
 thing that reads it and that gate is `repo`, so `repo`. Update: every entry is an
@@ -559,7 +561,7 @@ it gets a green hook on a message the upstream gate rejects, and nothing in thei
 tree can tell. So `package`.
 
 The third is the falsification: it already lives in a package, so a criterion
-answering "seed" there would be wrong, and it does not. The first two have no
+answering "seed" there would be wrong, and it does not. The second has no
 placement yet, and the answers match what the tables above give comparable
 files — the database lane is `full`/`seed` like `db:up`, and a register read by a
 gate is `seed` beside a `package` gate, like the coordination task template.

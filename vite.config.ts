@@ -76,13 +76,13 @@ const sharedLintConfig = createLintConfig({
 
 export const lintConfig = {
   ...sharedLintConfig,
-  // The application `@lcabrera/devkit` ships is a tree for a repository that
-  // does not exist yet, and the type-aware pass can only read it as one of
+  // The application `@lcabrera/devkit` ships, at either rung that places part
+  // of it, is a tree for a repository that does not exist yet, and the type-aware pass can only read it as one of
   // ours: its imports resolve against the packages that repository installs
   // from the registry and against the tsconfig its own generator writes, and
   // neither is here, so every one of them reports unresolvable.
   //
-  // This entry takes the WHOLE Oxlint pass off that subtree, not only the type
+  // These entries take the WHOLE Oxlint pass off those subtrees, not only the type
   // half, and nothing narrower is expressible: `typeAware`/`typeCheck` are
   // root-level `options`, and an override carries only `env`, `excludeFiles`,
   // `files`, `globals`, `jsPlugins`, `plugins` and `rules` — an override with
@@ -100,6 +100,7 @@ export const lintConfig = {
   ignorePatterns: [
     ...(sharedLintConfig.ignorePatterns ?? []),
     'packages/devkit/assets/workspace/apps/',
+    'packages/devkit/assets/full/apps/',
   ],
 };
 

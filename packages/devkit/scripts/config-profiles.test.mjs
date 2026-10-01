@@ -54,8 +54,20 @@ describe('profiles', () => {
     expect(PROFILES.repo).not.toContain('workspace');
   });
 
-  test('full places what monorepo places until its content lands', () => {
-    expect(PROFILES.full).toEqual(PROFILES.monorepo);
+  test('the database lane arrives at full and is out of monorepo', () => {
+    expect(PROFILES.full).toContain('full');
+    expect(PROFILES.monorepo).not.toContain('full');
+    expect(PROFILES.full.length).toBeGreaterThan(PROFILES.monorepo.length);
+  });
+
+  test('the database lane lands where the workspace does', () => {
+    expect(DEFAULT_CONFIG.paths.full).toBe(DEFAULT_CONFIG.paths.workspace);
+    expect(
+      targetPathFor({
+        assetPath: 'full/docker/local/docker-compose.yml',
+        config: DEFAULT_CONFIG,
+      }),
+    ).toBe('docker/local/docker-compose.yml');
   });
 });
 
@@ -77,21 +89,27 @@ describe('includesRung', () => {
   });
 });
 
+const WITHOUT_A_GROUP_OF_ITS_OWN = {
+  ...PROFILES,
+  full: PROFILES.monorepo,
+};
+
 describe('placementNotice', () => {
   test('a rung that adds nothing of its own names the rung it places as', () => {
-    expect(rungPlacedAs('full')).toBe('monorepo');
-    expect(placementNotice('full')).toMatch(
+    expect(rungPlacedAs('full', WITHOUT_A_GROUP_OF_ITS_OWN)).toBe('monorepo');
+    expect(placementNotice('full', WITHOUT_A_GROUP_OF_ITS_OWN)).toMatch(
       /"full" profile places what "monorepo" places/,
     );
-    expect(placementNotice('full')).toMatch(/nothing above "monorepo" ships/);
+    expect(placementNotice('full', WITHOUT_A_GROUP_OF_ITS_OWN)).toMatch(
+      /nothing above "monorepo" ships/,
+    );
   });
 
-  test('a rung that places a group of its own says nothing', () => {
-    expect(rungPlacedAs('agent')).toBeUndefined();
-    expect(rungPlacedAs('repo')).toBeUndefined();
-    expect(rungPlacedAs('monorepo')).toBeUndefined();
-    expect(placementNotice('repo')).toBeUndefined();
-    expect(placementNotice('monorepo')).toBeUndefined();
+  test('every rung places a group of its own, so none says anything', () => {
+    for (const rung of PROFILE_LADDER) {
+      expect(rungPlacedAs(rung)).toBeUndefined();
+      expect(placementNotice(rung)).toBeUndefined();
+    }
   });
 
   test('a name off the ladder says nothing rather than throwing', () => {
