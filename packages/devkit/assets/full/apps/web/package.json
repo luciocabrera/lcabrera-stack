@@ -1,0 +1,43 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "react-router dev",
+    "seed": "node --env-file-if-exists=../../docker/local/.env scripts/seed-db.mjs",
+    "test:smoke": "SMOKE_DB=1 node --env-file-if-exists=../../docker/local/.env node_modules/vitest/vitest.mjs run .smoke.",
+    "typecheck": "react-router typegen && tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "typegen": "react-router typegen"
+  },
+  "dependencies": {
+    "@lcabrera/api": ">=0.4.2 <1.0.0",
+    "@lcabrera/server": ">=0.7.1 <1.0.0",
+    "@lcabrera/ui": ">=0.8.1 <1.0.0",
+    "@lcabrera/utils": ">=0.2.2 <1.0.0",
+    "@react-router/serve": "catalog:react",
+    "@stylexjs/stylex": "catalog:react",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "react-router": "catalog:react"
+  },
+  "devDependencies": {
+    "@babel/preset-typescript": "catalog:build",
+    "@lcabrera/vite-config": "catalog:stack",
+    "@react-router/dev": "catalog:react",
+    "@react-router/node": "catalog:react",
+    "@stylexjs/unplugin": "catalog:react",
+    "@testing-library/react": "catalog:test",
+    "@types/node": "catalog:types",
+    "@types/react": "catalog:types",
+    "@types/react-dom": "catalog:types",
+    "babel-plugin-react-compiler": "catalog:react",
+    "jsdom": "catalog:test",
+    "pg": "^8.23.0",
+    "typescript": "catalog:build",
+    "vite": "catalog:build",
+    "vite-plugin-babel": "catalog:build",
+    "vite-plus": "catalog:build",
+    "vitest": "catalog:test"
+  }
+}

@@ -12,18 +12,18 @@ allowedConfigKeys [const] (config: any) => string[]
 assetGroup [const] (assetPath: string) => string
 CONFIG_FILE_NAME [const] "devkit.config.json"
 configuredCommandWords [const] (config: any) => string[]
-DEFAULT_CONFIG [const] Readonly<{ ci: Readonly<{ setup: readonly never[]; }>; commands: Readonly<{}>; paths: Readonly<{ agents: string; coordination: string; decisions: string; docs: string; hooks: string; root: string; rules: string; skills: string; templates: string; workflows: string; workspace: string; }>; profile: string; }>
+DEFAULT_CONFIG [const] Readonly<{ ci: Readonly<{ setup: readonly never[]; }>; commands: Readonly<{}>; paths: Readonly<{ agents: string; coordination: string; decisions: string; docs: string; full: string; hooks: string; root: string; rules: string; skills: string; templates: string; workflows: string; workspace: string; }>; profile: string; }>
 groupsFor [const] (config: any) => readonly string[]
 hasConfigKey [const] ({ config, path }: { config: any; path: any; }) => boolean
 includesRung [const] ({ profile, rung }: { profile: string; rung: string; }) => boolean
 isExecutableAsset [const] (assetPath: any) => boolean
 KIT_GROUPS [const] readonly string[]
-placementNotice [const] (profile: string) => string | undefined
+placementNotice [const] (profile: string, profiles?: Readonly<Record<string, readonly string[]>>) => string | undefined
 PROFILE_LADDER [const] readonly string[]
 PROFILES [const] Readonly<{ [k: string]: readonly string[]; }>
 resolveConfig [const] (raw: any) => { ci: { setup: any; }; commands: any; paths: any; profile: string; }
 retiredAssetsFor [const] ({ profile, retirements }: { profile: string; retirements?: ReadonlyArray<readonly [string, readonly string[]]>; }) => string[]
-rungPlacedAs [const] (profile: string) => string | undefined
+rungPlacedAs [const] (profile: string, profiles?: Readonly<Record<string, readonly string[]>>) => string | undefined
 targetPathFor [const] ({ assetPath, config }: { assetPath: any; config: any; }) => any
 withProfile [const] ({ config, profile, source }: { config: object; profile: string; source?: string; }) => { profile: string; }
 

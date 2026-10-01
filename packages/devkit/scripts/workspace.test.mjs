@@ -18,6 +18,8 @@ import { configs } from '../assets/workspace/packages/typescript-config/tsconfig
 import { initialManifest, TOOLCHAIN_RANGES } from './create.mjs';
 import {
   APP_WORKSPACE,
+  BLUEPRINT_TASK_NAMES,
+  DATABASE_TASKS,
   GENERATED_TSCONFIGS,
   NODE_VERSION,
   nodeEngineBand,
@@ -26,6 +28,7 @@ import {
   WORKSPACE_DEPENDENCIES,
   WORKSPACE_SCRIPTS,
   WORKSPACE_TASKS,
+  workspaceScriptsFor,
 } from './workspace.mjs';
 
 const BLUEPRINT = join(
@@ -186,6 +189,45 @@ describe('the tasks name what the blueprint holds', () => {
   });
 });
 
+const DATABASE_TASK_NAMES = ['db:down', 'db:seed', 'db:status', 'db:up'];
+
+describe('the database tasks', () => {
+  test('are the four the full rung names, each once', () => {
+    expect(DATABASE_TASKS.map(({ name }) => name)).toEqual(DATABASE_TASK_NAMES);
+    expect(new Set(BLUEPRINT_TASK_NAMES).size).toBe(
+      BLUEPRINT_TASK_NAMES.length,
+    );
+  });
+
+  test('reach the full rung and no rung below it', () => {
+    expect(Object.keys(workspaceScriptsFor({ profile: 'full' }))).toEqual(
+      [...WORKSPACE_TASKS, ...DATABASE_TASKS].map(({ name }) => name),
+    );
+    expect(workspaceScriptsFor({ profile: 'monorepo' })).toEqual(
+      WORKSPACE_SCRIPTS,
+    );
+    expect(workspaceScriptsFor({ profile: 'repo' })).toEqual({});
+  });
+
+  test('drive the compose file and the seed the full rung ships', () => {
+    const scripts = workspaceScriptsFor({ profile: 'full' });
+    const fullAssets = join(dirname(BLUEPRINT), 'full');
+    for (const name of ['db:down', 'db:status', 'db:up']) {
+      expect(scripts[name]).toContain('docker/local/docker-compose.yml');
+    }
+    expect(() =>
+      readFileSync(join(fullAssets, 'docker/local/docker-compose.yml')),
+    ).not.toThrow();
+    const app = JSON.parse(
+      readFileSync(join(fullAssets, 'apps/web/package.json'), 'utf8'),
+    );
+    expect(scripts['db:seed']).toBe(
+      `vp run db:up && vp run --filter ${app.name} seed`,
+    );
+    expect(app.scripts.seed).toContain('scripts/seed-db.mjs');
+  });
+});
+
 describe('withWorkspaceFields', () => {
   test('adds the task block, the band and the package manager pin', () => {
     const manifest = withWorkspaceFields();
@@ -223,9 +265,21 @@ describe('initialManifest', () => {
       const manifest = initialManifest({ name: 'demo', profile });
       expect(manifest.name).toBe('demo');
       expect(manifest.private).toBe(true);
-      expect(manifest.scripts).toEqual(WORKSPACE_SCRIPTS);
+      expect(manifest.scripts).toEqual(workspaceScriptsFor({ profile }));
       expect(manifest.engines.node).toBe(nodeEngineBand(NODE_VERSION));
     }
+  });
+
+  test('only the full rung gets the database tasks', () => {
+    const databaseTasks = DATABASE_TASKS.map(({ name }) => name);
+    expect(
+      Object.keys(initialManifest({ name: 'demo', profile: 'full' }).scripts),
+    ).toEqual(expect.arrayContaining(databaseTasks));
+    expect(
+      Object.keys(
+        initialManifest({ name: 'demo', profile: 'monorepo' }).scripts,
+      ).filter((name) => databaseTasks.includes(name)),
+    ).toEqual([]);
   });
 
   test('a profile nobody passed places nothing, rather than everything', () => {

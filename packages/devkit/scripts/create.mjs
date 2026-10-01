@@ -223,7 +223,7 @@ export const initialManifest = ({ name, profile = '' }) => {
     version: '0.0.0',
   };
   const manifest = includesRung({ profile, rung: 'monorepo' })
-    ? withWorkspaceFields({ manifest: base })
+    ? withWorkspaceFields({ manifest: base, profile })
     : base;
   return inFormatterOrder({
     ...manifest,

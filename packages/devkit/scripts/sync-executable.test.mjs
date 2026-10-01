@@ -242,21 +242,22 @@ describe('doctor reads the same set sync wrote', () => {
     restore();
   });
 
-  test('a rung above monorepo reads the same set and says it adds nothing yet', () => {
+  test('the rung above monorepo places its own files over a monorepo tree', () => {
     const root = scratchRepo({ ...REPO_COMMANDS, audit: 'true' });
     const { log, restore } = silenced();
 
     runSync(['--profile', 'monorepo'], root);
-
-    expect(runDoctor(['--check', '--profile', 'full'], root)).toBe(0);
-    expect(
-      log.mock.calls
-        .flat()
-        .filter((line) => /places what "monorepo" places/.test(line)),
-    ).toEqual([expect.stringMatching(/^The "full" profile/)]);
-
-    rmSync(join(root, '.githooks/pre-push'));
     expect(runDoctor(['--check', '--profile', 'full'], root)).toBe(1);
+
+    runSync(['--profile', 'full'], root);
+
+    expect(
+      log.mock.calls.flat().filter((line) => /places what/.test(line)),
+    ).toEqual([]);
+    expect(
+      statSync(join(root, 'docker/local/docker-compose.yml')).isFile(),
+    ).toBe(true);
+    expect(runDoctor(['--check', '--profile', 'full'], root)).toBe(0);
 
     restore();
   });

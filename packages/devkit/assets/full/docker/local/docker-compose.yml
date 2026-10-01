@@ -1,0 +1,28 @@
+# The local database server the application reads. Every value comes from
+# `.env` beside this file, which git ignores; `.env.example` is its template. A
+# value missing there stops compose with the variable's name rather than
+# starting a server on a guessed credential. The port is bound to the loopback
+# interface only, and the application's own database is created by its seed.
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -d postgres -U "$${POSTGRES_USER}"']
+      start_period: 20s
+      interval: 5s
+      retries: 10
+      timeout: 5s
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: ${DB_USER:?set DB_USER in docker/local/.env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in docker/local/.env}
+      POSTGRES_DB: postgres
+    ports:
+      - '127.0.0.1:${DB_PORT:?set DB_PORT in docker/local/.env}:5432'
+
+volumes:
+  postgres_data:
+    driver: local
