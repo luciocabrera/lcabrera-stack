@@ -149,21 +149,50 @@ const targetedAssets = ({ assets, config }) =>
     }))
     .filter(({ targetPath }) => targetPath !== undefined);
 
+const destinationKey = (destinationOf) => (path) =>
+  destinationOf(path) ?? lexicalDestination(path) ?? path;
+
 const prevailingAssets = ({ assets, config, destinationOf, groups }) => {
+  const keyOf = destinationKey(destinationOf);
   const rank = new Map(groups.map((group, index) => [group, index]));
   const prevailing = new Map();
   const targeted = targetedAssets({ assets, config });
   for (const { asset, targetPath } of targeted) {
     const held = rank.get(assetGroup(asset.path));
     if (held === undefined) continue;
-    const key =
-      destinationOf(targetPath) ?? lexicalDestination(targetPath) ?? targetPath;
+    const key = keyOf(targetPath);
     const incumbent = prevailing.get(key);
     if (incumbent === undefined || held > incumbent.rank) {
       prevailing.set(key, { asset, rank: held, targetPath });
     }
   }
   return prevailing.values().toArray();
+};
+
+const canonicalRecords = ({ destinationOf, manifest, placed }) => {
+  const keyOf = destinationKey(destinationOf);
+  const recordedAt = new Map(
+    Object.keys(manifest.files).map((path) => [keyOf(path), path]),
+  );
+  const aliasOf = new Map(
+    placed
+      .filter(({ targetPath }) => !Object.hasOwn(manifest.files, targetPath))
+      .map(({ targetPath }) => [targetPath, recordedAt.get(keyOf(targetPath))])
+      .filter(([, alias]) => alias !== undefined),
+  );
+  return { aliasOf, files: renamedRecords({ aliasOf, files: manifest.files }) };
+};
+
+const renamedRecords = ({ aliasOf, files }) => {
+  const aliases = new Set(aliasOf.values());
+  return {
+    ...Object.fromEntries(
+      Object.entries(files).filter(([path]) => !aliases.has(path)),
+    ),
+    ...Object.fromEntries(
+      [...aliasOf].map(([path, alias]) => [path, files[alias]]),
+    ),
+  };
 };
 
 /**
@@ -208,17 +237,28 @@ export const planSync = ({
     destinationOf,
     groups,
   });
+  const { aliasOf, files } = canonicalRecords({
+    destinationOf,
+    manifest,
+    placed,
+  });
+  const recorded = { ...manifest, files };
   const planned = placed.map(({ asset, targetPath }) => {
     const entry = planEntryFor({
       asset,
       config,
-      manifest,
+      manifest: recorded,
       onDiskContent,
       onDiskHash,
       peerVersions,
       targetPath,
     });
-    return { ...entry, executable: asset.executable === true };
+    const recordedAs = aliasOf.get(targetPath);
+    return {
+      ...entry,
+      executable: asset.executable === true,
+      ...(recordedAs !== undefined && { recordedAs }),
+    };
   });
 
   return [
@@ -230,7 +270,7 @@ export const planSync = ({
       destinationOf,
       kindOf,
       kitGroups,
-      manifest,
+      manifest: recorded,
       onDiskHash,
       placed: new Set(placed.map(({ targetPath }) => targetPath)),
     }),
@@ -292,7 +332,17 @@ export const manifestAfter = ({ entries, previous, tasks, version }) =>
       path: entry.path,
       state: entry.state,
     })),
-    previous,
+    previous: {
+      ...previous,
+      files: renamedRecords({
+        aliasOf: new Map(
+          entries
+            .filter((entry) => entry.recordedAs !== undefined)
+            .map((entry) => [entry.path, entry.recordedAs]),
+        ),
+        files: previous.files,
+      }),
+    },
     tasks,
     version,
   });

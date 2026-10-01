@@ -51,19 +51,19 @@ The record is what makes it distribution rather than copy-paste. Every
 materialised file is hashed into `.devkit-manifest.json`, and each subsequent
 run classifies it:
 
-| State                | What happens                                                                   |
-| -------------------- | ------------------------------------------------------------------------------ |
-| `added` / `restored` | written — the consumer does not have it                                        |
-| `updated`            | written — untouched locally, and the package has moved on                      |
-| `current`            | nothing written; adopted into the record                                       |
-| `modified`           | **left alone** — edited locally, and reported on every run                     |
-| `acknowledged`       | **left alone** — an edit you said you meant; reported only under `--verbose`   |
-| `conflict`           | **left alone** — an unmanaged file already occupies that path; acknowledgeable |
-| `retired`            | deleted — recorded, unedited, and no rung of this version ships it any more    |
-| `kept`               | **left alone** — the same, but edited or unreadable; reported once, then yours |
-| `outside`            | **left alone** — a recorded path that resolves outside the repository          |
-| `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                     |
-| `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered     |
+| State                | What happens                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| `added` / `restored` | written — the consumer does not have it                                              |
+| `updated`            | written — untouched locally, and the package has moved on                            |
+| `current`            | nothing written; adopted into the record                                             |
+| `modified`           | **left alone** — edited locally, and reported on every run                           |
+| `acknowledged`       | **left alone** — an edit you said you meant; reported only under `--verbose`         |
+| `conflict`           | **left alone** — an unmanaged file already occupies that path; acknowledgeable       |
+| `retired`            | deleted — recorded, unedited, and no rung of this version ships it any more          |
+| `kept`               | **left alone** — the same, but edited, unreadable or not a file; the line says which |
+| `outside`            | **left alone** — a recorded path that resolves outside the repository                |
+| `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                           |
+| `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered           |
 
 A local edit is a supported state, not a defect. It survives every sync, which
 is what stops a consumer forking the kit to change one line.

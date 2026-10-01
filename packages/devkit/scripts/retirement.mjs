@@ -111,10 +111,12 @@ export const nodeKindIn = (root) => (path) => {
   }
 };
 
-const retirementState = ({ kind, onDisk, recordedHash }) => {
-  if (kind === 'absent') return 'retired';
-  if (kind !== 'file' || onDisk === undefined) return 'kept';
-  return classifyRetirement({ onDiskHash: onDisk, recordedHash });
+const retirementOutcome = ({ kind, onDisk, recordedHash }) => {
+  if (kind === 'absent') return { state: 'retired' };
+  if (kind !== 'file') return { keptBecause: 'not-regular', state: 'kept' };
+  if (onDisk === undefined) return { keptBecause: 'unreadable', state: 'kept' };
+  const state = classifyRetirement({ onDiskHash: onDisk, recordedHash });
+  return state === 'kept' ? { keptBecause: 'edited', state } : { state };
 };
 
 const retirementEntry = ({
@@ -134,7 +136,7 @@ const retirementEntry = ({
     missing: [],
     onDiskHash: onDisk,
     path,
-    state: retirementState({ kind, onDisk, recordedHash }),
+    ...retirementOutcome({ kind, onDisk, recordedHash }),
   };
 };
 

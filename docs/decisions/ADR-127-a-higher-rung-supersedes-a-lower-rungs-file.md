@@ -40,7 +40,9 @@ one planned.** `planSync` ranks the groups a profile holds in ladder order,
 lowest rung first, and keeps one asset per target path, from the highest-ranked
 group, keyed by the file the path resolves to rather than its spelling, so
 two bases reaching one directory through an in-repository symbolic link still
-count as one path. A `paths` base may not carry a `..` segment, so the
+count as one path. The record follows the same identity: a record kept under
+another spelling of the placed file is read as that file's record and moved to
+the placed spelling, so the tree moving up is `updated` and holds one record. A `paths` base may not carry a `..` segment, so the
 configuration cannot spell one directory two ways. The plan never holds two
 entries for one path. The existing
 classification then decides what happens to the file. The manifest records what

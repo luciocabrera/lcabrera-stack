@@ -19,6 +19,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, test } from 'vite-plus/test';
 
+import { renderPlan } from './command-materialise.mjs';
 import { hashContent } from './manifest.mjs';
 import {
   RETIREMENT_CONFIG as CONFIG,
@@ -182,6 +183,55 @@ describe('planSync without a node-kind probe', () => {
         state: entries.find((entry) => entry.path === 'locked.txt')?.state,
         survives: existsSync(join(root, 'locked.txt')),
       }).toEqual({ state: 'kept', survives: true });
+    },
+  );
+});
+
+const keptLine = ({ path, root }) =>
+  renderPlan(
+    planSync({
+      assets: [LOWER],
+      config: CONFIG,
+      destinationOf: destinationIn(root),
+      groups: ['lower'],
+      kindOf: nodeKindIn(root),
+      kitGroups: ['lower'],
+      manifest: { files: { [path]: hashContent(VICTIM) } },
+      onDiskHash: onDiskHasher(root),
+    }),
+  )
+    .split('\n')
+    .find((line) => line.includes(path));
+
+describe('the line a kept record prints', () => {
+  test('says the file was modified when it was edited', () => {
+    const { root } = scratchRepository();
+    writeFileSync(join(root, 'edited.txt'), 'edited');
+
+    expect(keptLine({ path: 'edited.txt', root })).toContain(
+      'left alone — locally modified, and this version no longer ships it',
+    );
+  });
+
+  test('says it is not a regular file when a directory is there', () => {
+    const { root } = scratchRepository();
+    mkdirSync(join(root, 'stale'));
+
+    expect(keptLine({ path: 'stale', root })).toContain(
+      'left alone — not a regular file, and this version no longer ships it',
+    );
+  });
+
+  test.skipIf(IS_ROOT_USER)(
+    'says it could not be read when the file has no read permission (skipped as root, which reads any mode)',
+    () => {
+      const { root } = scratchRepository();
+      writeFileSync(join(root, 'locked.txt'), VICTIM);
+      chmodSync(join(root, 'locked.txt'), 0o000);
+
+      expect(keptLine({ path: 'locked.txt', root })).toContain(
+        'left alone — could not be read, and this version no longer ships it',
+      );
     },
   );
 });
