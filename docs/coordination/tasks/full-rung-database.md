@@ -39,6 +39,6 @@ feat(devkit): the full rung ships the database lane
 
 ## Status / next
 
-- Current step: implementing; the full asset group, the database tasks and their tests
+- Current step: built and gate green; awaiting independent verification
 - Blockers: none
 - Next:
