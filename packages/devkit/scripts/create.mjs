@@ -311,7 +311,7 @@ export const hooksPathArgs = (hooksPath) => [
 
 const DEVKIT_TASKS = ['devkit:check', 'devkit:sync'];
 
-const PLAIN_PATH = /^[\w./-]+$/;
+const PLAIN_PATH = /^[\w.][\w./-]*$/;
 
 const VITE_PLUS_INSTALL = 'https://viteplus.dev/guide/';
 

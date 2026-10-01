@@ -78,6 +78,8 @@ describe('what a created repository is told to do next', () => {
     "it's",
     '$(touch x)',
     '%TEMP%',
+    '/d',
+    '-x',
     String.raw`C:\work`,
   ])(
     '`%s` is named, not handed over as a command some shell would misread',
