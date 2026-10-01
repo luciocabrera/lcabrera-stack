@@ -2,7 +2,7 @@
 id: scratch-registry-flake
 title: fix(tooling): the created-tree gate's scratch registry intermittently stops answering
 owner: agent:claude
-status: active
+status: review
 branch: fix/1229-scratch-registry-flake
 area:
   - scripts/verify-devkit-workspace.mjs
@@ -24,6 +24,6 @@ fix(tooling): the created-tree gate's scratch registry intermittently stops answ
 
 ## Status / next
 
-- Current step: fix committed; the scratch registry 404s paths it does not hold and the gate names a registry fault
+- Current step: in review on #1231; the registry 404s every path it does not hold, reads a tarball only from the path its index stores, and the gate names a registry fault and quotes its log
 - Blockers: none
-- Next: verifier
+- Next: review threads and merge by the coordinator

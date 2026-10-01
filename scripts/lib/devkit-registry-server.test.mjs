@@ -4,17 +4,17 @@
 
 import { spawn } from 'node:child_process';
 import {
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
   unlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname } from 'node:path';
+import { request } from 'node:http';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import process from 'node:process';
-
 import { fileURLToPath } from 'node:url';
 
 import { afterEach, describe, expect, it } from 'vite-plus/test';
@@ -116,7 +116,9 @@ const PACKED = {
   manifest: { name: '@lcabrera/api', version: '1.2.3' },
 };
 
-const INDEX = { '@lcabrera/api': PACKED };
+const TARBALL_PATH = '/staging/lcabrera-api-1.2.3.tgz';
+
+const INDEX = { '@lcabrera/api': { ...PACKED, tarballPath: TARBALL_PATH } };
 
 const BASE_URL = 'http://127.0.0.1:4873';
 
@@ -133,20 +135,23 @@ describe('registryResponse', () => {
     );
   });
 
-  it('names the packed tarball for its own file', () => {
+  it('reads a packed tarball from the path its index entry stores', () => {
     expect(
       registryResponse({
         baseUrl: BASE_URL,
         index: INDEX,
         path: `/-/${PACKED.file}`,
       }),
-    ).toMatchObject({ file: PACKED.file, status: 200 });
+    ).toMatchObject({ status: 200, tarballPath: TARBALL_PATH });
   });
 
   it.each([
     '/-/npm/v1/attestations/@lcabrera/api@1.2.3',
     '/-/npm/v1/security/advisories/bulk',
     '/-/lcabrera-api-9.9.9.tgz',
+    '/-/../../etc/passwd',
+    '/-/..%2F..%2Fetc%2Fpasswd',
+    `/-/../${PACKED.file}`,
     '/@lcabrera%2Fmissing',
     '/%E0%A4%A',
     '/__proto__',
@@ -257,12 +262,27 @@ serveRegistry({ indexPath, portFile });
 `;
 
 const launchedRegistry = () => {
-  const staging = scratch();
+  const staging = join(scratch(), 'staging');
+  mkdirSync(staging);
   const launcher = join(staging, 'serve.mjs');
   writeFileSync(launcher, SERVE_LAUNCHER);
   writeFileSync(join(staging, PACKED.file), 'tarball bytes');
   return startedRegistry({ launch: [launcher], packed: [PACKED], staging });
 };
+
+const rawGet = ({ path, url }) =>
+  new Promise((resolve, reject) => {
+    const { hostname, port } = new URL(url);
+    request({ hostname, path, port }, (response) => {
+      let body = '';
+      response.on('data', (chunk) => {
+        body += chunk;
+      });
+      response.on('end', () => resolve({ body, status: response.statusCode }));
+    })
+      .on('error', reject)
+      .end();
+  });
 
 const stopped = (server) =>
   new Promise((resolve) => {
@@ -292,6 +312,26 @@ describe('the scratch registry process', () => {
       await stopped(server);
     }
   });
+
+  it.each(['/-/../outside.txt', '/-/..%2Foutside.txt', '/-/outside.txt'])(
+    'answers %s with 404 and never reads the file it names',
+    async (path) => {
+      const { log, server, url } = launchedRegistry();
+      try {
+        const staging = dirname(log);
+        writeFileSync(join(staging, 'outside.txt'), 'outside the index');
+        writeFileSync(
+          join(dirname(staging), 'outside.txt'),
+          'outside the index',
+        );
+        const { body, status } = await rawGet({ path, url });
+        expect(status).toBe(404);
+        expect(body).not.toContain('outside the index');
+      } finally {
+        await stopped(server);
+      }
+    },
+  );
 
   it('puts the stack of a request it answered with 500 in a failing report', async () => {
     const { log, server, url } = launchedRegistry();

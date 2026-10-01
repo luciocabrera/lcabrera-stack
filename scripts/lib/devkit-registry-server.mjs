@@ -18,7 +18,7 @@ import {
 } from 'node:fs';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import process from 'node:process';
 import { setTimeout as delay } from 'node:timers/promises';
 
@@ -54,16 +54,24 @@ const NOT_FOUND = {
 /**
  * @param {{ baseUrl: string,
  *           index: Record<string, { file: string, integrity: string,
- *                                   manifest: Record<string, unknown> }>,
+ *                                   manifest: Record<string, unknown>,
+ *                                   tarballPath: string }>,
  *           path: string }} args
- * @returns {{ body?: string, file?: string, status: number, type: string }}
+ * @returns {{ body?: string, status: number, tarballPath?: string,
+ *             type: string }}
  */
 export const registryResponse = ({ baseUrl, index, path }) => {
   if (path.startsWith(TARBALL_PREFIX)) {
-    const file = path.slice(TARBALL_PREFIX.length);
-    return Object.values(index).some((entry) => entry.file === file)
-      ? { file, status: 200, type: 'application/octet-stream' }
-      : NOT_FOUND;
+    const indexed = Object.values(index).find(
+      (entry) => `${TARBALL_PREFIX}${entry.file}` === path,
+    );
+    return indexed === undefined
+      ? NOT_FOUND
+      : {
+          status: 200,
+          tarballPath: indexed.tarballPath,
+          type: 'application/octet-stream',
+        };
   }
   const name = decodedName(path);
   const packed = Object.hasOwn(index, name) ? index[name] : undefined;
@@ -81,14 +89,14 @@ const send = ({ body, response, status, type }) => {
   response.end(body);
 };
 
-const answer = ({ baseUrl, directory, index, path, response }) => {
-  const { body, file, status, type } = registryResponse({
+const answer = ({ baseUrl, index, path, response }) => {
+  const { body, status, tarballPath, type } = registryResponse({
     baseUrl,
     index,
     path,
   });
   send({
-    body: file === undefined ? body : readFileSync(join(directory, file)),
+    body: tarballPath === undefined ? body : readFileSync(tarballPath),
     response,
     status,
     type,
@@ -120,13 +128,11 @@ export const parsedPort = (text) => {
  */
 export const serveRegistry = ({ indexPath, portFile }) => {
   const index = JSON.parse(readFileSync(indexPath, 'utf8'));
-  const directory = dirname(indexPath);
   const server = createServer((request, response) => {
     const [path] = (request.url ?? '/').split('?');
     try {
       answer({
         baseUrl: `http://${request.headers.host}`,
-        directory,
         index,
         path,
         response,
@@ -176,7 +182,7 @@ export const portFrom = ({ deadlineMs = START_DEADLINE_MS, portFile }) => {
 
 /**
  * @param {{ launch: readonly string[],
- *           packed: ReadonlyArray<{ manifest: { name: string } }>,
+ *           packed: ReadonlyArray<{ file: string, manifest: { name: string } }>,
  *           staging: string }} args
  * @returns {{ log: string, server: import('node:child_process').ChildProcess,
  *             url: string }}
@@ -188,7 +194,12 @@ export const startedRegistry = ({ launch, packed, staging }) => {
   writeFileSync(
     index,
     JSON.stringify(
-      Object.fromEntries(packed.map((entry) => [entry.manifest.name, entry])),
+      Object.fromEntries(
+        packed.map((entry) => [
+          entry.manifest.name,
+          { ...entry, tarballPath: join(staging, entry.file) },
+        ]),
+      ),
     ),
   );
   const logFd = openSync(log, 'w');
