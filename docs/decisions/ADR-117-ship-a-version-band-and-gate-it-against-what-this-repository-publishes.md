@@ -136,3 +136,30 @@ to widen with it; those two are a pair.
   defect in the emitted application manifest
 - [ADR-073](./ADR-073-publishing-gates-check-the-packed-tarball.md) — the other
   gate that answers for what a consumer receives rather than for this tree
+
+## Amendment 2026-09-30 — a range constant `create` writes is read too
+
+`devkit create` writes the created repository's own toolchain dependencies from
+`TOOLCHAIN_RANGES` in `packages/devkit/scripts/create.mjs`, a constant rather
+than an asset, so this gate never read it
+([#1206](https://github.com/luciocabrera/lcabrera-stack/issues/1206)).
+`create.test.mjs` already failed on a range that stopped admitting the version
+its package is on. Nothing failed on a range that admits that version but not
+the minor after it — a published minor would have left created repositories on
+the one before.
+
+The gate now **imports** that constant and judges each of its entries exactly
+as it judges a shipped declaration, with the finding naming the file and the
+constant. This does not reopen the boundary the Consequences section drew
+around `scripts/`: that boundary was against guessing which string literal in
+JavaScript is a range, and an imported, named value involves no guess. Two
+findings are specific to a constant, because it holds only this repository's own
+packages: an entry naming a package this repository does not publish is
+reported rather than skipped, and a constant that yields no entry at all is
+reported the way a quiet catalog is. A constant that is renamed or stops being
+exported fails the run, since the gate imports it by name.
+
+A new constant of the same kind is read only once it is listed in
+`RANGE_CONSTANTS` in `scripts/verify-shipped-ranges.mjs`; the gate does not go
+looking for one. An empty list fails the run, just as a run that reached no
+manifest or no workspace catalog does.

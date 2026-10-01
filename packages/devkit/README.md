@@ -423,9 +423,13 @@ than the pin, so a patch release does not hard-fail every install before someone
 moves it.
 
 The catalog is the one place a version is declared for the packages you author.
-Reference it as `catalog:<group>` from any workspace, and add a new dependency to
-the group that matches its role — a version repeated in prose is a second
-declaration nothing keeps in step. The `typescript-config` workspace the rung
+The named groups under `catalogs:` are this kit's, and a later `sync` updates
+them. Your own dependencies go in the default `catalog:`, which is where
+`vp add <pkg>` writes them: the record does not cover that block, so adding one
+leaves `doctor --check` green and the rest of the file still takes updates.
+Adding to a named group is an edit to the kit's part of the file, and it is
+reported like any other. A version repeated in prose is a second declaration
+nothing keeps in step. The `typescript-config` workspace the rung
 places is the exception, and deliberately: it pins its dependencies outright, so
 it installs into a tree whose own `pnpm-workspace.yaml` was kept on a conflict
 and declares no catalogs. Its ranges and the catalog's are held equal by a test

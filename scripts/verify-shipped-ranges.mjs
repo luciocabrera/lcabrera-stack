@@ -1,37 +1,52 @@
 /**
- * Fails when a dependency range `packages/devkit` ships excludes the version
- * this repository publishes for that package, or the minor after it.
- *
- * A bootstrapped repository installs from the registry, so a range in a shipped
- * asset is what decides which release it gets. Below 1.0.0 a caret admits no
- * minor at all, and nothing reports the drift: the asset stays valid, every
- * other gate stays green, and the created repository quietly runs an older
- * package. Background: #1129.
+ * Fails when a dependency range this repository ships excludes the version it
+ * publishes for that package, or the minor after it — a range in a
+ * `packages/devkit` asset, or one a constant listed in `RANGE_CONSTANTS` holds
+ * for a devkit command to write. That range decides which release a created
+ * repository installs (ADR-117).
  *
  * The deciding half is `./lib/shipped-ranges.mjs` (pure); this file is the
  * reading, the printing and the exit code. See `.claude/rules/scripts.md`.
  *
  * Usage: node scripts/verify-shipped-ranges.mjs
- * Exit codes: 0 = every shipped range admits it, 1 = one does not, or nothing
- * shipped could be read.
+ * Exit codes: 0 = every range admits it, 1 = one does not, or an asset or a
+ * listed constant could not be read.
  */
 
 import { readdirSync, readFileSync } from 'node:fs';
 import { basename, join, relative, sep } from 'node:path';
 import process from 'node:process';
+import { pathToFileURL } from 'node:url';
 
 import { readPublishableManifests } from '../packages/repo-standards/scripts/publishable-workspaces.mjs';
 import {
   catalogRanges,
+  constantRanges,
   findingLine,
   manifestRanges,
   mentionsIn,
+  passLine,
   shippedRangeFindings,
   sourceOf,
 } from './lib/shipped-ranges.mjs';
 
 const REPO_ROOT = process.cwd();
 const ASSETS_DIR = join(REPO_ROOT, 'packages', 'devkit', 'assets');
+
+const RANGE_CONSTANTS = [
+  { constant: 'TOOLCHAIN_RANGES', path: 'packages/devkit/scripts/create.mjs' },
+];
+
+const constantSource = async ({ constant, path }) => {
+  const exported = await import(pathToFileURL(join(REPO_ROOT, path)).href);
+  const ranges = exported[constant];
+  if (typeof ranges !== 'object' || ranges === null) {
+    throw new TypeError(
+      `${path} exports no \`${constant}\` object — the constant moved or was renamed, so the ranges it held are no longer read by this gate`,
+    );
+  }
+  return { constant, kind: 'constant', path, ranges };
+};
 
 const shippedFiles = () =>
   readdirSync(ASSETS_DIR, { recursive: true, withFileTypes: true })
@@ -54,7 +69,8 @@ const sourcesUnder = () =>
     ];
   });
 
-const declarationsIn = ({ kind, path, text }) => {
+const declarationsIn = ({ constant, kind, path, ranges, text }) => {
+  if (kind === 'constant') return constantRanges({ constant, path, ranges });
   if (kind === 'manifest') {
     return manifestRanges({ manifest: JSON.parse(text), path });
   }
@@ -69,13 +85,15 @@ const publishedVersions = () =>
     ]),
   );
 
-const main = () => {
-  const sources = sourcesUnder();
+const main = async () => {
+  const assets = sourcesUnder();
+  const constants = await Promise.all(RANGE_CONSTANTS.map(constantSource));
+  const sources = [...assets, ...constants];
   const versions = publishedVersions();
   const names = Object.keys(versions);
 
   const declarations = sources.flatMap(declarationsIn);
-  const mentions = sources.flatMap(({ hashComments, path, text }) =>
+  const mentions = assets.flatMap(({ hashComments, path, text }) =>
     mentionsIn({ hashComments, names, path, text }),
   );
 
@@ -98,15 +116,11 @@ const main = () => {
     return;
   }
 
-  const read = sources.filter(({ kind }) => kind !== 'scanned').length;
-
-  console.log(
-    `Shipped range gate passed: ${declarations.length} declaration(s) read from ${read} shipped file(s), out of ${sources.length} scanned for a package this repository publishes — ${mentions.length} mention(s), each one read.`,
-  );
+  console.log(passLine({ declarations, mentions, sources }));
 };
 
 try {
-  main();
+  await main();
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;

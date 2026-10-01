@@ -13,6 +13,11 @@ import { dirname, join } from 'node:path';
 import { acceptedEntry, isAccepted } from './accepted.mjs';
 import { substituteCiSetup } from './ci-setup.mjs';
 import { groupsFor, hasConfigKey, targetPathFor } from './config.mjs';
+import {
+  consumerRegionKey,
+  joinConsumerRegion,
+  splitConsumerRegion,
+} from './consumer-region.mjs';
 import { requiredConfigKeys, requiredPeers } from './frontmatter.mjs';
 import {
   ACKNOWLEDGED_STATE,
@@ -39,17 +44,32 @@ const unmetDeclaration = ({ config, content, peerVersions }) => {
   return peers.length > 0 ? { missing: peers, unmetKind: 'peer' } : undefined;
 };
 
+const onDiskFor = ({ assetPath, onDiskContent, onDiskHash, targetPath }) => {
+  const key = consumerRegionKey(assetPath);
+  const content = key === undefined ? undefined : onDiskContent(targetPath);
+  if (content === undefined) return { hash: onDiskHash(targetPath) };
+  const { kit, region } = splitConsumerRegion({ content, key });
+  const hash = hashContent(kit);
+  return region === '' ? { hash } : { hash, region };
+};
+
 const planEntryFor = ({
   asset,
   config,
   manifest,
+  onDiskContent,
   onDiskHash,
   peerVersions,
 }) => {
   const targetPath = targetPathFor({ assetPath: asset.path, config });
   if (targetPath === undefined) return;
 
-  const onDisk = onDiskHash(targetPath);
+  const { hash: onDisk, region } = onDiskFor({
+    assetPath: asset.path,
+    onDiskContent,
+    onDiskHash,
+    targetPath,
+  });
 
   const unmet = unmetDeclaration({
     config,
@@ -95,6 +115,7 @@ const planEntryFor = ({
     missing,
     onDiskHash: onDisk,
     path: targetPath,
+    ...(region !== undefined && { region }),
     state: classifyMaterialisation({
       incomingHash,
       onDiskHash: onDisk,
@@ -116,6 +137,7 @@ const planEntryFor = ({
  *
  * @param {{ assets: { path: string, content: string, executable?: boolean }[],
  *   config: object, manifest: { files: Record<string, string> },
+ *   onDiskContent?: (targetPath: string) => string | undefined,
  *   onDiskHash: (targetPath: string) => string | undefined,
  *   peerVersions?: Map<string, string | undefined> }} args
  */
@@ -123,6 +145,7 @@ export const planSync = ({
   assets,
   config,
   manifest,
+  onDiskContent = () => undefined,
   onDiskHash,
   peerVersions = new Map(),
 }) => {
@@ -135,6 +158,7 @@ export const planSync = ({
         asset,
         config,
         manifest,
+        onDiskContent,
         onDiskHash,
         peerVersions,
       });
@@ -168,7 +192,10 @@ export const applySync = ({ entries, root }) => {
     if (!isWritten(entry.state)) continue;
     const destination = join(root, entry.path);
     mkdirSync(dirname(destination), { recursive: true });
-    writeFileSync(destination, entry.content);
+    writeFileSync(
+      destination,
+      joinConsumerRegion({ kit: entry.content, region: entry.region }),
+    );
   }
 
   for (const entry of entries) {
@@ -188,6 +215,14 @@ export const manifestAfter = ({ entries, previous, tasks, version }) =>
     tasks,
     version,
   });
+
+export const onDiskReader = (root) => (targetPath) => {
+  try {
+    return readFileSync(join(root, targetPath), 'utf8');
+  } catch {
+    return;
+  }
+};
 
 export const onDiskHasher = (root) => (targetPath) => {
   try {

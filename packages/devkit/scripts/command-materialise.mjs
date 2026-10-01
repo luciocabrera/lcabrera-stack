@@ -48,6 +48,7 @@ import {
   applySync,
   manifestAfter,
   onDiskHasher,
+  onDiskReader,
   planSync,
   withAcceptance,
 } from './sync.mjs';
@@ -204,6 +205,7 @@ export const buildPlan = ({
       assets,
       config,
       manifest,
+      onDiskContent: onDiskReader(root),
       onDiskHash: onDiskHasher(root),
       peerVersions: resolvePeerVersions(assets),
     }),
