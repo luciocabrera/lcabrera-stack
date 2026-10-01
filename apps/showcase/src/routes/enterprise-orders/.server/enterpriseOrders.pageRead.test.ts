@@ -64,6 +64,36 @@ describe('resolveOrdersPageRead', () => {
     });
   });
 
+  it('drops a sort on the row-actions column, keeping the rules beside it', async () => {
+    const resolved = await resolveOrdersPageRead(
+      paramsFor({
+        sort: JSON.stringify([
+          { columnKey: 'actions', direction: 'asc' },
+          { columnKey: 'order_date', direction: 'desc' },
+        ]),
+      }),
+    );
+
+    expect(resolved.kind === 'read' && resolved.read.sort).toStrictEqual([
+      { column: 'order_date', direction: 'desc' },
+    ]);
+  });
+
+  it('orders by the primary key when every sort rule sanitizes away', async () => {
+    const resolved = await resolveOrdersPageRead(
+      paramsFor({
+        sort: JSON.stringify([
+          { columnKey: 'actions', direction: 'asc' },
+          { columnKey: 'order_number' },
+        ]),
+      }),
+    );
+
+    expect(resolved.kind === 'read' && resolved.read.sort).toStrictEqual([
+      { column: ENTERPRISE_ORDER_PRIMARY_KEY, direction: 'asc' },
+    ]);
+  });
+
   it('refuses an unreadable group token instead of reading the whole table', async () => {
     const resolved = await resolveOrdersPageRead(
       paramsFor({ group: 'not json' }),
