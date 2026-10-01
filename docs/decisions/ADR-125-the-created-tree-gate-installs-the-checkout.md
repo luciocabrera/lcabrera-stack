@@ -52,10 +52,13 @@ reads when it verifies a lockfile against its supply-chain policies. When the
 registry treated that path as a tarball, the read failed and the error took the
 registry process down, so every later request was refused
 ([#1229](https://github.com/luciocabrera/lcabrera-stack/issues/1229)). After the
-tree's checks, the gate requests something from the registry. If the registry
-has exited or does not answer, the first finding names it as a fault in the
-gate's own registry, not in the created tree, and quotes what the registry wrote
-to stderr.
+tree's checks, the gate requests something from the registry, and if that
+request fails it waits briefly for the process to exit. If the registry has
+exited or does not answer, the first finding names it as a fault in the
+gate's own registry, not in the created tree, and quotes what it wrote to
+stderr. A registry that is still answering can still have failed a request with
+a 500. So whenever the gate fails and the registry's stderr is not empty, a last
+finding names the registry and quotes that output.
 
 The tarballs are served, not installed as `file:` specifiers or `overrides`,
 because pnpm does not treat a `file:` install as a version. A peer range between

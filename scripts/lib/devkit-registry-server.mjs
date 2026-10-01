@@ -16,9 +16,11 @@ import {
   renameSync,
   writeFileSync,
 } from 'node:fs';
+import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { dirname, join } from 'node:path';
 import process from 'node:process';
+import { setTimeout as delay } from 'node:timers/promises';
 
 import { outputTail } from './devkit-workspace.mjs';
 import { packumentFor } from './devkit-workspace-packages.mjs';
@@ -32,6 +34,8 @@ const POLL_MS = 50;
 const MAX_PORT = 65_535;
 
 const PROBE_TIMEOUT_MS = 5000;
+
+const EXIT_WAIT_MS = 2000;
 
 const decodedName = (path) => {
   try {
@@ -204,6 +208,19 @@ export const startedRegistry = ({ launch, packed, staging }) => {
   }
 };
 
+const isRunning = (server) =>
+  server.exitCode === null && server.signalCode === null;
+
+const exitWithin = ({ milliseconds, server }) => {
+  const ended = new AbortController();
+  return Promise.race([
+    once(server, 'exit', { signal: ended.signal }).catch(() => undefined),
+    delay(milliseconds, undefined, { signal: ended.signal }).catch(
+      () => undefined,
+    ),
+  ]).finally(() => ended.abort());
+};
+
 const probeOf = async (url) => {
   try {
     const response = await fetch(`${url}/`, {
@@ -222,10 +239,11 @@ const probeOf = async (url) => {
  */
 export const registryState = async ({ server, url }) => {
   const probe = await probeOf(url);
+  if (probe.error !== undefined && isRunning(server)) {
+    await exitWithin({ milliseconds: EXIT_WAIT_MS, server });
+  }
   const { exitCode: code, signalCode: signal } = server;
-  return code === null && signal === null
-    ? { probe }
-    : { exit: { code, signal }, probe };
+  return isRunning(server) ? { probe } : { exit: { code, signal }, probe };
 };
 
 const faultOf = ({ exit, probe }) => {
@@ -249,4 +267,33 @@ export const registryFaultFindings = ({ exit, log = '', probe, url }) => {
     : [
         `the scratch registry at ${url} stopped answering (${fault}). That is a fault in the gate's own registry, not in the created tree, so read an install or metadata failure below as its consequence. Its last output:\n${outputTail(log)}`,
       ];
+};
+
+const logFindings = ({ log, url }) =>
+  log.trim() === ''
+    ? []
+    : [
+        `the scratch registry at ${url} wrote to its stderr during this failing run, so a request it could not serve may be behind a finding above. Its last output:\n${outputTail(log)}`,
+      ];
+
+/**
+ * @param {{ exit?: { code: number | null, signal: string | null },
+ *           findings: readonly string[],
+ *           log?: string,
+ *           probe: { error?: string, status?: number },
+ *           url: string }} args
+ * @returns {string[]}
+ */
+export const withRegistryFindings = ({
+  exit,
+  findings,
+  log = '',
+  probe,
+  url,
+}) => {
+  const fault = registryFaultFindings({ exit, log, probe, url });
+  if (fault.length > 0) return [...fault, ...findings];
+  return findings.length === 0
+    ? []
+    : [...findings, ...logFindings({ log, url })];
 };

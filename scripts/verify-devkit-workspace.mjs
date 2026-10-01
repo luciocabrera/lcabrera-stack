@@ -37,10 +37,10 @@ import {
 import { configuredCommandRuns } from './lib/devkit-config-commands.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
 import {
-  registryFaultFindings,
   registryState,
   serveRegistry,
   startedRegistry,
+  withRegistryFindings,
 } from './lib/devkit-registry-server.mjs';
 import { collectedTail, firstAnswer, stopGroup } from './lib/devkit-serve.mjs';
 import {
@@ -333,15 +333,12 @@ const checkedTree = async ({ devkit, staging, tree }) => {
       ],
       tree,
     });
-    return [
-      ...registryFaultFindings({
-        ...(await registryState({ server, url })),
-        log: readIfPresent(log),
-        url,
-      }),
-      ...created,
-      ...found,
-    ];
+    return withRegistryFindings({
+      ...(await registryState({ server, url })),
+      findings: [...created, ...found],
+      log: readIfPresent(log),
+      url,
+    });
   } finally {
     server.kill();
   }
