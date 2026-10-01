@@ -142,9 +142,10 @@ export const isRepositoryRelative = (path) => {
  * @returns {string | undefined}
  */
 export const hooksPathRefusal = (path) =>
-  typeof path !== 'string' || isRepositoryRelative(path)
+  path === undefined ||
+  (typeof path === 'string' && path !== '' && isRepositoryRelative(path))
     ? undefined
-    : `${CONFIG_FILE_NAME}: "paths.hooks" must be a directory inside the repository, relative to its root — got "${path}"`;
+    : `${CONFIG_FILE_NAME}: "paths.hooks" must be a directory inside the repository, relative to its root — got ${typeof path === 'string' ? `"${path}"` : JSON.stringify(path)}`;
 
 /**
  * @param {string | undefined} raw
@@ -155,9 +156,7 @@ export const hooksPathIn = (raw) => {
   const configured = JSON.parse(raw)?.paths?.hooks;
   const refusal = hooksPathRefusal(configured);
   if (refusal !== undefined) throw new Error(refusal);
-  return typeof configured === 'string' && configured !== ''
-    ? configured
-    : DEFAULT_HOOKS_PATH;
+  return configured ?? DEFAULT_HOOKS_PATH;
 };
 
 /**

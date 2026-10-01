@@ -196,16 +196,21 @@ describe('hooksPathIn', () => {
   test.each([
     [undefined, '.githooks'],
     ['{}', '.githooks'],
-    ['{"paths":{"hooks":""}}', '.githooks'],
-    ['{"paths":{"hooks":7}}', '.githooks'],
     ['{"paths":{"hooks":"hooks"}}', 'hooks'],
     ['{"paths":{"hooks":"tools/hooks"}}', 'tools/hooks'],
   ])('%s is %s', (raw, expected) => {
     expect(hooksPathIn(raw)).toBe(expected);
   });
 
-  test.each([['/hooks'], [String.raw`C:\hooks`], ['../hooks']])(
-    'refuses %s rather than handing git a directory outside the repository',
+  test.each([
+    ['/hooks'],
+    [String.raw`C:\hooks`],
+    ['../hooks'],
+    [''],
+    [7],
+    [null],
+  ])(
+    'refuses %s rather than handing git a directory devkit did not place',
     (hooks) => {
       expect(() => hooksPathIn(JSON.stringify({ paths: { hooks } }))).toThrow(
         /"paths\.hooks" must be a directory inside the repository/,

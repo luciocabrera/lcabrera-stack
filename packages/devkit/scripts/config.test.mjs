@@ -225,9 +225,15 @@ describe('resolveConfig on paths.hooks', () => {
     [String.raw`\\server\share\hooks`],
     ['../hooks'],
     ['tools/../../hooks'],
-  ])('refuses %s, which git would read outside the repository', (hooks) => {
-    expect(() => resolveConfig(JSON.stringify({ paths: { hooks } }))).toThrow(
-      /"paths\.hooks" must be a directory inside the repository/,
-    );
-  });
+    [''],
+    [7],
+    [null],
+  ])(
+    'refuses %s, which git would not read as the placed directory',
+    (hooks) => {
+      expect(() => resolveConfig(JSON.stringify({ paths: { hooks } }))).toThrow(
+        /"paths\.hooks" must be a directory inside the repository/,
+      );
+    },
+  );
 });
