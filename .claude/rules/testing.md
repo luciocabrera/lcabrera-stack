@@ -14,7 +14,7 @@ paths:
 
 - Tests colocated with the unit under test (`ComponentName.test.tsx`, `foo.util.test.ts`, `validate-skills.test.mjs`).
 - Use `@testing-library/react` for component tests.
-- Import test utilities from `vite-plus/test` (e.g. `import { expect, test, vi } from 'vite-plus/test'`) — never from `vitest` directly. It re-exports the vite-plus-bundled Vitest, so the test runtime always matches the toolchain ([ADR-045](../../docs/decisions/ADR-045-vite-plus-test-imports.md), which retired the earlier `vitest`-direct rule).
+- Import test utilities from `vite-plus/test` (e.g. `import { expect, test, vi } from 'vite-plus/test'`) — never from `vitest` directly. It re-exports the vite-plus-bundled Vitest, so the test runtime always matches the toolchain ([ADR-045](../../docs/decisions/ADR-045-vite-plus-test-imports.md), which retired the earlier `vitest`-direct rule). Playwright specs in `apps/showcase/e2e/` import from `@playwright/test`, live in that directory, and run with `vp run --filter showcase test:e2e`.
 - Run tests from the workspace under test: `vp run test`. Never use `vp test` — this repo defines a custom `test` task (`node node_modules/vitest/vitest.mjs run`) to avoid the `vp test` OXC transform bug with `erasableSyntaxOnly: true`.
 - Run a single test file: `vp run test -- --reporter=verbose <path/to/file.test.tsx>`
 - 80% minimum unit test coverage target.
