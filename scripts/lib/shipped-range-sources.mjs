@@ -5,7 +5,8 @@
  * reads and `devkit:pins` raises it, so both read the same set (ADR-117).
  */
 
-import { readdirSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join, relative, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -16,6 +17,7 @@ import {
   manifestRanges,
   sourceOf,
 } from './shipped-ranges.mjs';
+import { floorRaises, withRaisedFloors } from './shipped-floors.mjs';
 
 const RANGE_CONSTANTS = [
   { constant: 'TOOLCHAIN_RANGES', path: 'packages/devkit/scripts/create.mjs' },
@@ -45,9 +47,19 @@ export const assetSources = (root) =>
     ];
   });
 
+const moduleUrl = ({ absolute, text }) => {
+  const url = pathToFileURL(absolute);
+  url.searchParams.set(
+    'content',
+    createHash('sha256').update(text).digest('hex'),
+  );
+  return url.href;
+};
+
 const constantSource = async ({ constant, path, root }) => {
   const absolute = join(root, path);
-  const exported = await import(pathToFileURL(absolute).href);
+  const text = readFileSync(absolute, 'utf8');
+  const exported = await import(moduleUrl({ absolute, text }));
   const ranges = exported[constant];
   if (typeof ranges !== 'object' || ranges === null) {
     throw new TypeError(
@@ -59,7 +71,7 @@ const constantSource = async ({ constant, path, root }) => {
     kind: 'constant',
     path,
     ranges,
-    text: readFileSync(absolute, 'utf8'),
+    text,
   };
 };
 
@@ -94,3 +106,40 @@ export const publishedVersions = (root) =>
       manifest.version,
     ]),
   );
+
+/**
+ * Raises every shipped floor below the version in `root` to it, and returns
+ * what moved.
+ *
+ * @param {string} root
+ * @returns {Promise<{ from: string, name: string, path: string, to: string }[]>}
+ */
+export const raiseShippedFloors = async (root) => {
+  const versions = publishedVersions(root);
+  const sources = [...assetSources(root), ...(await constantSources(root))];
+  const raised = [];
+
+  for (const source of sources) {
+    const declarations = declarationsIn(source);
+    const next = withRaisedFloors({
+      declarations,
+      kind: source.kind,
+      text: source.text,
+      versions,
+    });
+    if (next === source.text) continue;
+
+    writeFileSync(join(root, source.path), next);
+    raised.push(
+      ...floorRaises({ declarations, versions }).map(
+        ({ declaration, raised: to }) => ({
+          from: declaration.range,
+          name: declaration.name,
+          path: source.path,
+          to,
+        }),
+      ),
+    );
+  }
+  return raised;
+};

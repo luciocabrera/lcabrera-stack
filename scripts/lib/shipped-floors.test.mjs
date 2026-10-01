@@ -49,6 +49,8 @@ const catalogText = (range) =>
 
 const moduleText = (range) =>
   [
+    "export const VITE_CONFIG = '@lcabrera/vite-config';",
+    '',
     'export const TOOLCHAIN_RANGES = {',
     `  [VITE_CONFIG]: '${range}',`,
     '};',
@@ -179,7 +181,38 @@ describe('withRaisedFloors', () => {
     );
   });
 
-  it('refuses a constant whose range it cannot place exactly once', () => {
+  it('raises each entry by its key when two entries share a range', () => {
+    const shared = [
+      "const TSCONFIG = '@lcabrera/tsconfig';",
+      'export const TOOLCHAIN_RANGES = {',
+      "  [TSCONFIG]: '>=0.2.0 <1.0.0',",
+      "  '@lcabrera/utils': '>=0.2.0 <1.0.0',",
+      '};',
+      '',
+    ].join('\n');
+
+    expect(
+      withRaisedFloors({
+        declarations: constantRanges({
+          constant: CONSTANT,
+          path: MODULE,
+          ranges: {
+            '@lcabrera/tsconfig': '>=0.2.0 <1.0.0',
+            '@lcabrera/utils': '>=0.2.0 <1.0.0',
+          },
+        }),
+        kind: 'constant',
+        text: shared,
+        versions: { '@lcabrera/tsconfig': '0.2.2', '@lcabrera/utils': '0.2.1' },
+      }),
+    ).toBe(
+      shared
+        .replace("[TSCONFIG]: '>=0.2.0", "[TSCONFIG]: '>=0.2.2")
+        .replace("'@lcabrera/utils': '>=0.2.0", "'@lcabrera/utils': '>=0.2.1"),
+    );
+  });
+
+  it('refuses a constant entry it cannot find by its key', () => {
     expect(() =>
       withRaisedFloors({
         declarations: constantRanges({
@@ -188,9 +221,12 @@ describe('withRaisedFloors', () => {
           ranges: { '@lcabrera/vite-config': '>=0.5.0 <1.0.0' },
         }),
         kind: 'constant',
-        text: `${moduleText('>=0.5.0 <1.0.0')}${moduleText('>=0.5.0 <1.0.0')}`,
+        text: moduleText('>=0.5.0 <1.0.0').replace(
+          "VITE_CONFIG = '@lcabrera/vite-config'",
+          "VITE_CONFIG = '@lcabrera/other'",
+        ),
         versions: VERSIONS,
       }),
-    ).toThrow('found 2');
+    ).toThrow('holds 0 literal entries for `@lcabrera/vite-config`');
   });
 });

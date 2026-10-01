@@ -8,6 +8,7 @@
     "scripts/release-notes.mjs",
     "scripts/resolve-subject-pr.mjs",
     "scripts/submit-pr-review.mjs",
+    "scripts/sync-devkit-pins.mjs",
     "scripts/sync-project-status.mjs",
     "scripts/verify-package-manager-pin.mjs",
     "scripts/**/*.test.mjs",

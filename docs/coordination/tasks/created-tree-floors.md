@@ -23,8 +23,10 @@ area:
   - packages/devkit/scripts/create-toolchain-floor.test.mjs
   - docs/decisions/ADR-117-ship-a-version-band-and-gate-it-against-what-this-repository-publishes.md
   - COMMANDS.md
-  - .fallowrc.json
   - package.json
+  - scripts/raise-shipped-floors.mjs
+  - scripts/release-version.mjs
+  - scripts/lib/release-version.test.mjs
 started: 2026-10-01
 updated: 2026-10-01
 plan: (none)
@@ -38,6 +40,6 @@ fix(devkit): a created tree resolves the release that wrote it
 
 ## Status / next
 
-- Current step: gate green, draft PR #1224 awaiting verification
+- Current step: round 2 review fixes (#1226 folded in)
 - Blockers: none
 - Next:

@@ -10,8 +10,6 @@ import { inc, lt, minVersion, satisfies, validRange } from 'semver';
 
 const PLACE = /^(?:catalog|workspace):/u;
 
-const escaped = (value) => value.replaceAll(/[$()*+.?[\\\]^{|}]/gu, '\\$&');
-
 /**
  * @param {{ range: string, version: string }} args
  * @returns {string}
@@ -39,18 +37,6 @@ export const raisedRange = ({ range, version }) => {
   return raised;
 };
 
-const occurrences = ({ pattern, text }) => text.match(pattern)?.length ?? 0;
-
-const replacedOnce = ({ path, pattern, replacement, text }) => {
-  const found = occurrences({ pattern, text });
-  if (found !== 1) {
-    throw new Error(
-      `${path}: expected one ${pattern.source} to raise and found ${found}`,
-    );
-  }
-  return text.replace(pattern, replacement);
-};
-
 const inManifest = ({ declaration, raised, text }) =>
   text.replaceAll(
     `${JSON.stringify(declaration.name)}: ${JSON.stringify(declaration.range)}`,
@@ -67,13 +53,65 @@ const inCatalog = ({ declaration, raised, text }) =>
     )
     .join('\n');
 
-const inConstant = ({ declaration, raised, text }) =>
-  replacedOnce({
-    path: declaration.path,
-    pattern: new RegExp(`(['"])${escaped(declaration.range)}\\1`, 'gu'),
-    replacement: `$1${raised}$1`,
+const ENTRY =
+  /^\s*(?:\[(?<identifier>\w+)\]|(?<keyQuote>['"])(?<key>[^'"]+)\k<keyQuote>)\s*:\s*(?<quote>['"])(?<range>[^'"]*)\k<quote>,?\s*$/u;
+
+const BLOCK_END = /^\s*\};?\s*$/u;
+
+const identifierValue = ({ identifier, text }) =>
+  new RegExp(String.raw`const ${identifier} =\s*(['"])([^'"]+)\1`, 'u').exec(
     text,
-  });
+  )?.[2];
+
+const keyOf = ({ groups, text }) =>
+  groups.identifier === undefined
+    ? groups.key
+    : identifierValue({ identifier: groups.identifier, text });
+
+const blockOf = ({ constant, lines }) => {
+  const start = lines.findIndex((line) =>
+    line.includes(`const ${constant} = {`),
+  );
+  if (start === -1) return { end: -1, start };
+  const length = lines
+    .slice(start + 1)
+    .findIndex((line) => BLOCK_END.test(line));
+  return { end: length === -1 ? -1 : start + 1 + length, start };
+};
+
+const entryLines = ({ declaration, lines, text }) => {
+  const { end, start } = blockOf({ constant: declaration.constant, lines });
+  if (end === -1) {
+    throw new Error(
+      `${declaration.path}: no \`${declaration.constant}\` object literal found to raise \`${declaration.name}\` in`,
+    );
+  }
+  return lines
+    .map((line, index) => ({ groups: ENTRY.exec(line)?.groups, index }))
+    .filter(({ index }) => index > start && index < end)
+    .filter(({ groups }) => groups !== undefined)
+    .filter(
+      ({ groups }) =>
+        keyOf({ groups, text }) === declaration.name &&
+        groups.range === declaration.range,
+    )
+    .map(({ index }) => index);
+};
+
+const inConstant = ({ declaration, raised, text }) => {
+  const lines = text.split('\n');
+  const found = entryLines({ declaration, lines, text });
+  if (found.length !== 1) {
+    throw new Error(
+      `${declaration.path}: \`${declaration.constant}\` holds ${found.length} literal entries for \`${declaration.name}\` reading \`${declaration.range}\`, and a raise needs exactly one`,
+    );
+  }
+  return lines
+    .map((line, index) =>
+      index === found[0] ? line.replace(declaration.range, raised) : line,
+    )
+    .join('\n');
+};
 
 const REWRITERS = {
   catalog: inCatalog,
@@ -81,13 +119,26 @@ const REWRITERS = {
   manifest: inManifest,
 };
 
-const rewriteOne = ({ declaration, kind, text, versions }) => {
-  const version = versions[declaration.name];
-  if (typeof version !== 'string') return text;
+/**
+ * Every declaration whose floor sits below the published version, with the
+ * range it is raised to.
+ *
+ * @param {{ declarations: readonly object[], versions: Record<string, string> }} args
+ * @returns {{ declaration: object, raised: string }[]}
+ */
+export const floorRaises = ({ declarations, versions }) =>
+  declarations
+    .filter(({ name }) => typeof versions[name] === 'string')
+    .map((declaration) => ({
+      declaration,
+      raised: raisedRange({
+        range: declaration.range,
+        version: versions[declaration.name],
+      }),
+    }))
+    .filter(({ declaration, raised }) => raised !== declaration.range);
 
-  const raised = raisedRange({ range: declaration.range, version });
-  if (raised === declaration.range) return text;
-
+const rewriteOne = ({ declaration, kind, raised, text }) => {
   const next = REWRITERS[kind]({ declaration, raised, text });
   if (next === text) {
     throw new Error(
@@ -107,8 +158,30 @@ const rewriteOne = ({ declaration, kind, text, versions }) => {
 export const withRaisedFloors = ({ declarations, kind, text, versions }) =>
   REWRITERS[kind] === undefined
     ? text
-    : declarations.reduce(
-        (current, declaration) =>
-          rewriteOne({ declaration, kind, text: current, versions }),
+    : floorRaises({ declarations, versions }).reduce(
+        (current, { declaration, raised }) =>
+          rewriteOne({ declaration, kind, raised, text: current }),
         text,
       );
+
+/**
+ * The changeset that publishes raised floors with the kit that ships them.
+ *
+ * @param {{ packageName: string, raised: readonly { from: string, name: string,
+ *           path: string, to: string }[] }} args
+ * @returns {string}
+ */
+export const floorChangeset = ({ packageName, raised }) =>
+  [
+    '---',
+    `'${packageName}': patch`,
+    '---',
+    '',
+    'A repository this release creates declares each of these from the version released with it, so it cannot resolve an older one:',
+    '',
+    ...raised.map(
+      ({ from, name, path, to }) =>
+        `- \`${name}\` \`${to}\` (was \`${from}\`) in \`${path}\``,
+    ),
+    '',
+  ].join('\n');

@@ -160,7 +160,7 @@ reported the way a quiet catalog is. A constant that is renamed or stops being
 exported fails the run, since the gate imports it by name.
 
 A new constant of the same kind is read only once it is listed in
-`RANGE_CONSTANTS` in `scripts/verify-shipped-ranges.mjs`; the gate does not go
+`RANGE_CONSTANTS` in `scripts/lib/shipped-range-sources.mjs`; the gate does not go
 looking for one. An empty list fails the run, just as a run that reached no
 manifest or no workspace catalog does.
 
@@ -179,10 +179,23 @@ The band's floor is now the version this repository publishes, not a version it
 once published. `vp run shipped-ranges:verify` fails on a floor below it, with
 the range to write. Nobody writes it: `vp run devkit:pins` raises every floor
 below the version in the checkout to that version, keeps the ceiling, and leaves
-every other byte of the file alone, and `release:version` runs it right after
-the changesets move the versions. On a tree already in step it changes nothing.
-A floor it cannot find written in the range, or a raise that would pass the
-ceiling, fails the run, because the ceiling is a decision a person makes.
+every other byte of the file alone. On a tree already in step it changes
+nothing. A floor it cannot find written in the range, or a raise that would pass
+the ceiling, fails the run, because the ceiling is a decision a person makes. A
+range constant's entry is found by its key, so two entries that share a range
+are raised separately.
+
+`release:version` raises the floors right after the changesets move the
+versions. Every raised floor sits in a file `@lcabrera/devkit` ships, so it
+reaches nobody until devkit publishes. When the changesets did not move devkit,
+the release writes a devkit patch changeset that names each raised floor and
+versions again, so devkit publishes with them and its changelog says why
+([#1226](https://github.com/luciocabrera/lcabrera-stack/issues/1226)). When no
+floor moved, devkit is not versioned. Both gates read state in which this does
+not show: `shipped-ranges:verify` reads the checkout, where the floor is
+already right, and the registry gate installs with the delay lifted. So
+`scripts/lib/release-version.test.mjs` runs the release step in a scratch
+workspace and checks both outcomes.
 
 The kit's own entry in `TOOLCHAIN_RANGES` is not raised: it is computed from the
 kit's manifest when `create` runs, so whatever release of the kit creates a
@@ -195,5 +208,5 @@ registry gate lifts it for the same reason — it runs minutes after the publish
 it checks.
 
 The reading half of this gate, including `RANGE_CONSTANTS`, moved to
-`scripts/lib/shipped-range-sources.mjs`, which the sync reads too, so the set it
-raises and the set this gate judges are one list.
+`scripts/lib/shipped-range-sources.mjs`. The raise reads it too, so the set it
+raises and the set this gate judges are the same list.
