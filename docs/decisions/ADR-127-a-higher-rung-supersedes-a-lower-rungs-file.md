@@ -18,9 +18,11 @@ loser's hash no longer matched the file on disk, so `doctor` reported it for
 ever.
 
 A higher rung has to be able to replace a file a lower rung places, at the same
-path. The `full` rung is the first rung that will need to. Without a precedence
-rule, the only way to do that is to stop shipping the lower file, which takes it
-away from every profile that stops at the lower rung.
+path. It also has to be able to remove a lower rung's file that its own content
+makes obsolete, at a path it does not ship. The `full` rung is the first rung
+that will need both. Without a rule for either, the only way to do it is to stop
+shipping the lower file, which takes it away from every profile that stops at
+the lower rung.
 
 The manifest only grew. `nextManifest` added and updated records and never
 removed one. A file the package stopped shipping stayed on disk and in the
@@ -77,6 +79,21 @@ fail for ever, and the only fix would be to delete a file the consumer chose to
 keep. The run that retires the record names the file once. After that the file
 belongs to the consumer, like any other file the kit never wrote.
 
+**A rung can declare the asset paths it retires.** `RUNG_RETIREMENTS` in
+`config.mjs` sits beside `RUNG_GROUPS` and lists, per rung, the asset paths that
+rung makes obsolete. A declaration applies only while the profile includes the
+declaring rung; `retiredAssetsFor` answers the paths for one profile. While it
+applies, the path is left out of the placed entries even though a lower group
+still ships it, and a recorded file there is planned as `retired` or `kept` by
+the same rule as above. A path the manifest does not record is left alone,
+because the kit never wrote it.
+
+A run at a profile below the declaring rung does not see the declaration. The
+lower group still ships the path, so the file is planned like any other: left
+alone when it matches, written back when it is missing. A declaration names an
+asset path rather than a target path, so it follows the consumer's `paths`
+configuration the way the asset does. No rung declares a path yet.
+
 ## Consequences
 
 A higher rung can ship a file at a lower rung's path, and a tree moving up takes
@@ -96,10 +113,9 @@ no longer shipped. A retiring file that holds such a region is therefore `kept`
 rather than deleted. The error goes toward keeping content, not toward removing
 it.
 
-A file that a higher rung drops, and that a lower rung still ships, is not
-retired by this rule. Precedence replaces a file at the same path. It does not
-remove a file at another path. A rung that needs to remove one needs a separate
-rule, and none is decided here.
+A tree moved down a rung gets back a file the higher rung retired, because the
+lower rung still ships it. That is the lower rung's content, placed as for any
+tree at that rung.
 
 ## Alternatives considered
 
@@ -113,7 +129,11 @@ rule, and none is decided here.
    reconciles. A file at a path the kit no longer ships would be reported on every
    run, and the only fix would be to delete it.
 
-3. **Refuse to plan when two groups map onto one path.** Rejected: that leaves a
+3. **Retire a lower rung's file by shipping an empty file at its path from the
+   higher rung.** Rejected: the tree would hold an empty file the kit records as
+   its own, rather than no file.
+
+4. **Refuse to plan when two groups map onto one path.** Rejected: that leaves a
    higher rung no way to replace a lower rung's file. Every rung would have to
    choose paths that no rung below it uses.
 

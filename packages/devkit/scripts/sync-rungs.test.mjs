@@ -19,7 +19,7 @@ import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runDoctor, runSync } from './command-sync.mjs';
-import { DEFAULT_CONFIG } from './config.mjs';
+import { DEFAULT_CONFIG, retiredAssetsFor } from './config.mjs';
 import { hashContent, MANIFEST_FILE } from './manifest.mjs';
 import {
   applySync,
@@ -62,7 +62,7 @@ const writeAt = (root, path, content) => {
   writeFileSync(join(root, path), content);
 };
 
-const syncTree = ({ assets, groups, manifest, root }) => {
+const syncTree = ({ assets, groups, manifest, retiring = [], root }) => {
   const entries = planSync({
     assets,
     config: CONFIG,
@@ -70,6 +70,7 @@ const syncTree = ({ assets, groups, manifest, root }) => {
     manifest,
     onDiskContent: onDiskReader(root),
     onDiskHash: onDiskHasher(root),
+    retiring,
   });
   applySync({ entries, root });
   return {
@@ -126,6 +127,15 @@ const recordRetiree = (root, onDisk) => {
   );
   writeAt(root, RETIRED.path, onDisk);
 };
+
+const stateOf = (entries, target) =>
+  entries.find(({ path }) => path === target)?.state;
+
+const retiredOutcome = (root, { entries, manifest }) => ({
+  present: existsSync(join(root, RETIRED.path)),
+  recorded: Object.keys(manifest.files),
+  state: stateOf(entries, RETIRED.path),
+});
 
 const placed = (plan) => plan.map(({ content, path }) => ({ content, path }));
 
@@ -212,16 +222,13 @@ describe('syncing a tree from a lower rung to a higher one', () => {
 describe('a recorded file no group ships', () => {
   test('is deleted when unmodified, and its record leaves the manifest', () => {
     const root = scratch();
-    const { entries, manifest } = retireIn(
-      root,
-      recordedRetiree(root, RETIRED.content),
-    );
+    const run = retireIn(root, recordedRetiree(root, RETIRED.content));
 
-    expect(entries.find(({ path }) => path === RETIRED.path)?.state).toBe(
-      'retired',
-    );
-    expect(existsSync(join(root, RETIRED.path))).toBe(false);
-    expect(Object.keys(manifest.files)).toEqual([TARGET]);
+    expect(retiredOutcome(root, run)).toEqual({
+      present: false,
+      recorded: [TARGET],
+      state: 'retired',
+    });
   });
 
   test('is kept and reported when edited, and its record leaves the manifest', () => {
@@ -284,4 +291,93 @@ describe('doctor --check and a pending retire', () => {
       expect(recordedPaths(root)).not.toContain(RETIRED.path);
     });
   }
+});
+
+const HELPER = {
+  content: RETIRED.content,
+  path: 'lower/routes/example.helper.ts',
+};
+
+const FIXTURE_RETIREMENTS = [
+  ['monorepo', []],
+  ['full', [HELPER.path]],
+];
+
+const withHelperAtLowerRung = (root) =>
+  syncTree({
+    assets: [LOWER, HELPER, HIGHER],
+    groups: ['lower'],
+    manifest: { files: {} },
+    root,
+  }).manifest;
+
+const syncAtProfile = ({ manifest, profile, root }) =>
+  syncTree({
+    assets: [LOWER, HELPER, HIGHER],
+    groups: profile === 'full' ? ['lower', 'higher'] : ['lower'],
+    manifest,
+    retiring: retiredAssetsFor({ profile, retirements: FIXTURE_RETIREMENTS }),
+    root,
+  });
+
+describe('a path a rung declares it retires', () => {
+  test('is declared only while the profile includes that rung', () => {
+    expect({
+      full: retiredAssetsFor({
+        profile: 'full',
+        retirements: FIXTURE_RETIREMENTS,
+      }),
+      monorepo: retiredAssetsFor({
+        profile: 'monorepo',
+        retirements: FIXTURE_RETIREMENTS,
+      }),
+    }).toEqual({ full: [HELPER.path], monorepo: [] });
+  });
+
+  test('is deleted when unmodified, though a lower group still ships it', () => {
+    const root = scratch();
+    const run = syncAtProfile({
+      manifest: withHelperAtLowerRung(root),
+      profile: 'full',
+      root,
+    });
+
+    expect(retiredOutcome(root, run)).toEqual({
+      present: false,
+      recorded: [TARGET],
+      state: 'retired',
+    });
+  });
+
+  test('is kept and reported when edited', () => {
+    const root = scratch();
+    const lower = withHelperAtLowerRung(root);
+    writeAt(root, RETIRED.path, 'helper body, edited');
+
+    const { entries } = syncAtProfile({
+      manifest: lower,
+      profile: 'full',
+      root,
+    });
+
+    expect(stateOf(entries, RETIRED.path)).toBe('kept');
+    expect(readFileSync(join(root, RETIRED.path), 'utf8')).toBe(
+      'helper body, edited',
+    );
+  });
+
+  test('is left alone by a run at a profile below the declaring rung', () => {
+    const root = scratch();
+    const lower = withHelperAtLowerRung(root);
+
+    const { entries, manifest } = syncAtProfile({
+      manifest: lower,
+      profile: 'monorepo',
+      root,
+    });
+
+    expect(stateOf(entries, RETIRED.path)).toBe('current');
+    expect(readFileSync(join(root, RETIRED.path), 'utf8')).toBe(HELPER.content);
+    expect(manifest.files[RETIRED.path]).toBe(hashContent(HELPER.content));
+  });
 });

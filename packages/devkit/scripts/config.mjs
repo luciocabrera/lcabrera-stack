@@ -48,6 +48,14 @@ const RUNG_GROUPS = [
 
 const GROUPS_BY_RUNG = new Map(RUNG_GROUPS);
 
+/** @type {ReadonlyArray<readonly [string, readonly string[]]>} */
+const RUNG_RETIREMENTS = [
+  ['agent', []],
+  ['repo', []],
+  ['monorepo', []],
+  ['full', []],
+];
+
 export const PROFILE_LADDER = RUNG_GROUPS.map(([rung]) => rung);
 
 const rungIndex = (name) => PROFILE_LADDER.indexOf(name);
@@ -62,6 +70,16 @@ export const includesRung = ({ profile, rung }) => {
   const asked = rungIndex(rung);
   return held !== -1 && asked !== -1 && asked <= held;
 };
+
+/**
+ * @param {{ profile: string,
+ *   retirements?: ReadonlyArray<readonly [string, readonly string[]]> }} args
+ * @returns {string[]} the asset paths retired by every rung `profile` includes
+ */
+export const retiredAssetsFor = ({ profile, retirements = RUNG_RETIREMENTS }) =>
+  retirements
+    .filter(([rung]) => includesRung({ profile, rung }))
+    .flatMap(([, assetPaths]) => assetPaths);
 
 export const PROFILES = Object.fromEntries(
   PROFILE_LADDER.map((name) => [

@@ -18,7 +18,12 @@ import { dirname, join } from 'node:path';
 
 import { acceptedEntry, isAccepted } from './accepted.mjs';
 import { substituteCiSetup } from './ci-setup.mjs';
-import { groupsFor, hasConfigKey, targetPathFor } from './config.mjs';
+import {
+  groupsFor,
+  hasConfigKey,
+  retiredAssetsFor,
+  targetPathFor,
+} from './config.mjs';
 import {
   consumerRegionKey,
   joinConsumerRegion,
@@ -155,12 +160,19 @@ const prevailingAssets = ({ assets, config, groups }) => {
   return prevailing.values().toArray();
 };
 
-const retirementsFor = ({ assets, config, manifest, onDiskHash }) => {
+const declaredRetirements = ({ config, retiring }) =>
+  new Set(
+    retiring
+      .map((assetPath) => targetPathFor({ assetPath, config }))
+      .filter((targetPath) => targetPath !== undefined),
+  );
+
+const retirementsFor = ({ assets, config, declared, manifest, onDiskHash }) => {
   const shipped = new Set(
     targetedAssets({ assets, config }).map(({ targetPath }) => targetPath),
   );
   return Object.entries(manifest.files)
-    .filter(([path]) => !shipped.has(path))
+    .filter(([path]) => declared.has(path) || !shipped.has(path))
     .map(([path, recordedHash]) => {
       const onDisk = onDiskHash(path);
       return {
@@ -189,7 +201,8 @@ const retirementsFor = ({ assets, config, manifest, onDiskHash }) => {
  *   manifest: { files: Record<string, string> },
  *   onDiskContent?: (targetPath: string) => string | undefined,
  *   onDiskHash: (targetPath: string) => string | undefined,
- *   peerVersions?: Map<string, string | undefined> }} args
+ *   peerVersions?: Map<string, string | undefined>,
+ *   retiring?: readonly string[] }} args
  */
 export const planSync = ({
   assets,
@@ -199,9 +212,12 @@ export const planSync = ({
   onDiskContent = () => undefined,
   onDiskHash,
   peerVersions = new Map(),
+  retiring = retiredAssetsFor({ profile: config.profile }),
 }) => {
-  const planned = prevailingAssets({ assets, config, groups }).map(
-    ({ asset, targetPath }) => {
+  const declared = declaredRetirements({ config, retiring });
+  const planned = prevailingAssets({ assets, config, groups })
+    .filter(({ targetPath }) => !declared.has(targetPath))
+    .map(({ asset, targetPath }) => {
       const entry = planEntryFor({
         asset,
         config,
@@ -212,12 +228,11 @@ export const planSync = ({
         targetPath,
       });
       return { ...entry, executable: asset.executable === true };
-    },
-  );
+    });
 
   return [
     ...planned,
-    ...retirementsFor({ assets, config, manifest, onDiskHash }),
+    ...retirementsFor({ assets, config, declared, manifest, onDiskHash }),
   ];
 };
 

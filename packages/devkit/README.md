@@ -69,8 +69,10 @@ is what stops a consumer forking the kit to change one line.
 
 Where two rungs a profile holds place a file at the same path, the higher rung's
 file is the one planned, so a tree moving up a rung has that file `updated` or,
-if edited, `modified`. A file retires only when no rung of this version ships
-it: running at a lower profile leaves a higher rung's files where they are.
+if edited, `modified`. A file retires when no rung of this version ships it, or
+when a rung the profile includes declares that it retires the file; running at
+a lower profile leaves a higher rung's files where they are, and a lower rung's
+file that a higher rung retires is placed again.
 
 The two refusals are never written **and never recorded**. Recording one would
 make the next run read the file's absence as a deletion the consumer chose,

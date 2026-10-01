@@ -20,6 +20,7 @@ placementNotice [const] (profile: string) => string | undefined
 PROFILE_LADDER [const] string[]
 PROFILES [const] { [k: string]: string[]; }
 resolveConfig [const] (raw: any) => { ci: { setup: any; }; commands: any; paths: any; profile: string; }
+retiredAssetsFor [const] ({ profile, retirements }: { profile: string; retirements?: ReadonlyArray<readonly [string, readonly string[]]>; }) => string[]
 rungPlacedAs [const] (profile: string) => string | undefined
 targetPathFor [const] ({ assetPath, config }: { assetPath: any; config: any; }) => any
 withProfile [const] ({ config, profile, source }: { config: object; profile: string; source?: string; }) => { profile: string; }
