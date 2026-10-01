@@ -151,14 +151,18 @@ plugin set (`eslint-plugin-react-x`, `eslint-plugin-react-dom`,
 `@stylexjs/eslint-plugin`) itself.
 
 The declared peer ranges are the versions this package is exercised against; a
-wider range has not been tested.
+wider range has not been tested. `@babel/preset-typescript` is the exception:
+its range also admits the older major that matches the `@babel/core`
+`vite-plugin-babel` peers on, because `./plugins` hands the preset to that plugin
+and only that major installs with no unmet peer. This package's own suite runs
+the newest major in the range, so the older one is exercised only by projects
+that install it.
 
-The peer range for `@babel/preset-typescript` admits the major that matches the
-`@babel/core` `vite-plugin-babel` peers on, since `./plugins` hands the preset to
-that plugin, and that major installs with no unmet peer. Options differ by major:
-a project on that one that includes files by module id rather than by extension
-passes `{ allExtensions: true, isTSX: true }`, where a newer major takes
-`{ ignoreExtensions: true }`.
+Options differ by major. On the older one, a project that includes files by
+module id rather than by extension passes `{ allExtensions: true, isTSX: true }`.
+The newer one takes `{ ignoreExtensions: true }` for that, and since that option
+does not enable JSX, the project also passes `parserOpts: { plugins: ['jsx'] }`
+to the Babel pass.
 
 ## License
 

@@ -7,6 +7,8 @@ branch: fix/1192-1192-blueprint-babel-peers
 area:
   - packages/devkit/assets/workspace/**
   - scripts/verify-devkit-workspace.mjs
+  - scripts/verify-devkit-registry.mjs
+  - scripts/lib/devkit-tree-run.mjs
   - scripts/lib/devkit-workspace*
   - .changeset/**
   - packages/vite-configs/package.json

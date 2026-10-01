@@ -45,6 +45,7 @@ import {
   execute,
   installedBin,
   installFindings,
+  peerFindings,
   readIfPresent,
   readJson,
   report,
@@ -171,14 +172,6 @@ const HOOK_IDENTITY = [
   '-c',
   'user.email=gate@localhost',
 ];
-
-const PEERS_ARGS = ['peers', 'check'];
-
-const peerFindings = ({ tree }) =>
-  taskFindings({
-    label: ['pnpm', ...PEERS_ARGS].join(' '),
-    ...execute({ args: PEERS_ARGS, command: 'pnpm', cwd: tree }),
-  });
 
 const commitWith = ({ message, tree }) =>
   execute({
