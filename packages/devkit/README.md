@@ -183,12 +183,27 @@ files somewhere it cannot record or restore them.
 The manifest `create` writes declares the toolchain the tree calls:
 `@lcabrera/devkit` and `@lcabrera/repo-standards`, at every rung, because every
 rung owns gate tasks that run the gate runtime's binaries. Each is written as a
-floor with a bound below the next major, never as a `workspace:` specifier. Because the tree is about to be installed from that
+floor with a bound below the next major, never as a `workspace:` specifier. The
+floor for `@lcabrera/devkit` is the version of the kit running `create`, read
+from its own manifest, and the floor for `@lcabrera/repo-standards` is the
+version released with that kit. Because the tree is about to be installed from that
 manifest, `create` wires every gate task the rung owns whose binary the manifest
 declares, even though nothing is installed yet. One install is the only step
 left: after it the hooks, the workflows and the gate tasks find their binaries,
 and `devkit init --upgrade` has no task left to add. `init` in a repository that
 already exists still decides by what is installed.
+
+**Within a day of a release, that install fails unless you lift pnpm's delay.**
+pnpm installs no version younger than its minimum release age, which defaults to
+a day, and every `@lcabrera/*` floor in the created tree is the version released
+with the kit that wrote it. Until that release is a day old, no version the
+floors admit is old enough to install. Lift the delay for the first install:
+
+```bash
+pnpm_config_minimum_release_age=0 pnpm install
+```
+
+After the day has passed, a plain install works.
 
 ## Setting up a repository
 
@@ -392,7 +407,11 @@ The ranges are written as a floor and a bound at the next major
 (`>=0.7.0 <1.0.0`) rather than as a caret. Below 1.0.0 a caret stops at the next
 minor, so a released minor of one of these packages would fall outside a caret
 range the day it shipped and the created repository would quietly resolve the
-version before it.
+version before it. The floor is the version released with this kit, so a
+repository created by a release cannot resolve an older one. The one-day window
+described under
+[Starting a repository that does not exist yet](#starting-a-repository-that-does-not-exist-yet)
+applies to it.
 
 **All of that is the `create` path.** The root manifest is the one file this rung
 does not materialise, because it carries the repository's own name — so `sync`

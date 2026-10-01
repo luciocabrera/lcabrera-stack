@@ -106,6 +106,16 @@ export const installFindings = (tree, env = process.env) =>
     ...execute({ args: INSTALL_ARGS, command: 'vp', cwd: tree, env }),
   });
 
+export const RELEASE_AGE_LIFTED = { pnpm_config_minimum_release_age: '0' };
+
+/**
+ * @param {string} tree
+ * @param {NodeJS.ProcessEnv} [env]
+ * @returns {string[]}
+ */
+export const registryInstallFindings = (tree, env = process.env) =>
+  installFindings(tree, { ...env, ...RELEASE_AGE_LIFTED });
+
 const PEERS_ARGS = ['peers', 'check'];
 
 /**

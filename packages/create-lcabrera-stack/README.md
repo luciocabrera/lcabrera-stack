@@ -12,6 +12,23 @@ profile you asked for, and leaves an initial commit. With no `--profile` it
 places `monorepo`: a pnpm workspace with an application, ready for
 `pnpm install`.
 
+## The day a release ships
+
+pnpm installs no version until it has been on the registry for a day
+(`minimumReleaseAge`), so for that day `pnpm create lcabrera-stack` runs the
+previous release. To create a repository from the one that just shipped, lift
+the delay for the create and for the first install in the new repository:
+
+```bash
+pnpm create --config.minimum-release-age=0 lcabrera-stack my-project
+cd my-project
+pnpm_config_minimum_release_age=0 pnpm install
+```
+
+A repository created by a release declares every `@lcabrera/*` package from the
+version that release shipped, so once the day has passed a plain install
+resolves them without the override.
+
 ## It is a shim
 
 Every decision above belongs to [`@lcabrera/devkit`](https://www.npmjs.com/package/@lcabrera/devkit),
