@@ -42,7 +42,7 @@ export const bodyCells = (page: Page, columnKey: string) =>
 export const firstBodyCell = (page: Page, columnKey: string) =>
   bodyCells(page, columnKey).first();
 
-export const headerLabels = async (page: Page) =>
+export const headerLabels = (page: Page) =>
   page.getByTestId('table-header-label').allTextContents();
 
 export const columnHeader = (page: Page, label: string) =>
