@@ -52,6 +52,7 @@ export const configs = [
   },
   {
     config: createAppTsConfig({
+      exclude: ['e2e', 'playwright.config.ts'],
       paths: {
         '@lcabrera/server/*': ['../../packages/server/src/*'],
         // Bare specifier only. There is deliberately NO `@lcabrera/ui/*`

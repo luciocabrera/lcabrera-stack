@@ -51,4 +51,7 @@ export default defineConfig({
   staged: {
     '*': 'vp check --fix',
   },
+  test: {
+    exclude: ['e2e/**', '**/node_modules/**', '**/.git/**'],
+  },
 });

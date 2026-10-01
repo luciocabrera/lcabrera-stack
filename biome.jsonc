@@ -273,6 +273,8 @@
         "**/config/**",
         "**/entry.*.tsx",
         "**/root.tsx",
+        // Playwright's globalSetup module is loaded by that name and must default-export.
+        "**/e2e/global-setup.ts",
         // Only the rule sources, not the whole package: @lcabrera/eslint-plugin is
         // public, so its exemptions are held to the narrowest glob that works.
         "**/eslint-local-rules/src/**",

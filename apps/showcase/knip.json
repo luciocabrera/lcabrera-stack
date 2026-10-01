@@ -1,7 +1,12 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["config/**/*.ts"],
-  "project": ["config/**/*.ts", "src/**/*.{ts,tsx}"],
+  "entry": ["config/**/*.ts", "playwright.config.ts", "e2e/**/*.ts"],
+  "project": [
+    "config/**/*.ts",
+    "src/**/*.{ts,tsx}",
+    "playwright.config.ts",
+    "e2e/**/*.ts"
+  ],
   "ignoreExportsUsedInFile": {
     "interface": true,
     "type": true

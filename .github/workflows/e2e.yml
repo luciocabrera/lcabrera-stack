@@ -1,0 +1,83 @@
+name: Grid browser suite
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/ui/**'
+      - 'packages/api/**'
+      - 'packages/server/**'
+      - 'apps/showcase/src/routes/**'
+      - 'apps/showcase/e2e/**'
+      - 'apps/showcase/db/**'
+      - 'apps/showcase/playwright.config.ts'
+      - 'apps/showcase/package.json'
+      - '.github/workflows/e2e.yml'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  DB_HOST: localhost
+  DB_PORT: 5432
+  DB_USER: root
+  DB_PASSWORD: root
+  DB_NAME: car_sales_db
+  VITE_API_URL: ''
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U root -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
+        with:
+          cache: true
+          run-install: false
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Install Playwright browsers
+        run: cd apps/showcase && vp exec playwright install chromium --with-deps
+
+      - name: Seed the database
+        run: vp run --filter showcase seed
+
+      - name: Build production
+        run: cd apps/showcase && vp run build
+
+      - name: Run the browser suite
+        run: vp run --filter showcase test:e2e
+
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: playwright-report
+          path: .tmp/playwright
+          retention-days: 7

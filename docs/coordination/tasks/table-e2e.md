@@ -1,12 +1,13 @@
 ---
 id: table-e2e
 title: test(showcase): exercise the table in the browser
-owner: agent:claude
-status: active
+owner: agent:grok
+status: review
 branch: test/1227-table-e2e
 area:
   - apps/showcase/e2e/**
   - apps/showcase/playwright.config.ts
+  - apps/showcase/vite.config.ts
   - apps/showcase/package.json
   - apps/showcase/tsconfig.e2e.json
   - apps/showcase/knip.json
@@ -22,7 +23,7 @@ area:
 started: 2026-10-01
 updated: 2026-10-01
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1228
 issue: #1227
 ---
 
@@ -32,6 +33,6 @@ test(showcase): exercise the table in the browser
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: draft pull request, local gate and browser suite green
 - Blockers: none
-- Next:
+- Next: CI runs the browser suite on the draft

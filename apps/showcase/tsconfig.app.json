@@ -30,7 +30,7 @@
     "useDefineForClassFields": true,
     "verbatimModuleSyntax": true
   },
-  "exclude": [],
+  "exclude": ["e2e", "playwright.config.ts"],
   "include": [
     "src",
     "**/*",
