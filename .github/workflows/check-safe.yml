@@ -236,13 +236,17 @@ jobs:
         id: devkit_workspace_gate
         # tarball:verify proves the packaging; this proves the product. It runs
         # `devkit create --profile monorepo` from the packed tarball in a scratch
-        # directory, installs the tree from the registry, and runs the tasks it
-        # wires for itself, so a blueprint defect only its own configs reject
-        # fails here instead of at a consumer. It needs the Node the blueprint
+        # directory, installs every @lcabrera package the tree resolves from a
+        # tarball packed from this checkout, and runs the tasks it wires for
+        # itself, so a blueprint defect only its own configs reject fails here
+        # instead of at a consumer. Packing all of them is what lets a change
+        # that moves the blueprint and a package together pass before either
+        # publishes; it fails if any @lcabrera package came from the registry.
+        # What npm serves is checked after a release instead, by
+        # created-tree-registry.yml (ADR-125). It needs the Node the blueprint
         # pins, which a test in scripts/lib holds equal to this repository's
-        # pin, so the job already runs on it. It is CI-only: `check:safe` does not chain
-        # it, because a registry install on every push is a cost each
-        # contributor would pay.
+        # pin, so the job already runs on it. `check:safe` chains it after
+        # tarball:verify; the pre-push hook runs `check:push`, which does not.
         run: vp run workspace:verify
 
       - name: Every shipped document reads with only its package on disk

@@ -1,0 +1,43 @@
+# What a user who runs `pnpm create lcabrera-stack` gets today, from npm alone.
+#
+# The Check Safe gate `workspace:verify` installs every @lcabrera package the
+# created tree resolves from a tarball packed from the checkout, so it proves
+# what the next release ships and says nothing about what the registry serves.
+# This is the other half: it creates the tree with the published initializer,
+# installs it from npm, and runs the same tasks. It is not a PR check, because a
+# change that moves two packages together is red here until both publish.
+# Release calls it after a publish; run it on demand from the Actions tab.
+name: Created Tree From The Registry
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+permissions:
+  contents: read
+
+jobs:
+  registry-tree:
+    name: A tree created from npm passes its own tasks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
+        with:
+          cache: false
+          run-install: false
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: A tree created from the published initializer passes its own tasks
+        id: registry_tree_gate
+        run: vp run registry-tree:verify
