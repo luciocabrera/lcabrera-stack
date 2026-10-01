@@ -13,6 +13,7 @@ import { join } from 'node:path';
 
 import { runCreate } from './command-create.mjs';
 import { runGit } from './git-exec.mjs';
+import { silencedConsole } from './test-fixtures.mjs';
 
 export const scratchDirectories = (prefix) => {
   const roots = [];
@@ -35,8 +36,7 @@ export const scratchDirectories = (prefix) => {
 export const git = (args, cwd) => runGit({ args, cwd });
 
 export const quietlyWith = (vi, run) => {
-  const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-  const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  const { error, log, restore } = silencedConsole(vi);
   try {
     const code = run();
     return {
@@ -45,8 +45,7 @@ export const quietlyWith = (vi, run) => {
       printed: log.mock.calls.flat().join('\n'),
     };
   } finally {
-    log.mockRestore();
-    error.mockRestore();
+    restore();
   }
 };
 

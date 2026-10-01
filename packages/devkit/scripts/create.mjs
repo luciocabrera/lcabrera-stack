@@ -10,6 +10,7 @@
  */
 
 import { dirname } from 'node:path';
+import process from 'node:process';
 
 import { includesRung } from './config.mjs';
 import { gateBinNames } from './init.mjs';
@@ -313,10 +314,12 @@ const DEVKIT_TASKS = ['devkit:check', 'devkit:sync'];
 
 const PLAIN_PATH = /^[\w./-]+$/;
 
-export const shellWord = (word) =>
-  PLAIN_PATH.test(word)
-    ? word
+export const shellWord = (word, platform = process.platform) => {
+  if (PLAIN_PATH.test(word)) return word;
+  return platform === 'win32'
+    ? '"' + word + '"'
     : "'" + word.replaceAll("'", String.raw`'\''`) + "'";
+};
 
 export const firstInstallFor = (run) => run.split(' ', 1)[0] + ' install';
 

@@ -62,8 +62,16 @@ describe('what a created repository is told to do next', () => {
     ['my project', "'my project'"],
     ["it's", String.raw`'it'\''s'`],
     ['$(touch x)', "'$(touch x)'"],
-  ])('cd names %s as a shell reads it', (target, word) => {
-    expect(shellWord(target)).toBe(word);
+  ])('cd names %s as a POSIX shell reads it', (target, word) => {
+    expect(shellWord(target, 'linux')).toBe(word);
+  });
+
+  test.each([
+    ['demo', 'demo'],
+    ['my project', '"my project"'],
+    [String.raw`C:\work\my project`, String.raw`"C:\work\my project"`],
+  ])('cd names %s as cmd and PowerShell read it', (target, word) => {
+    expect(shellWord(target, 'win32')).toBe(word);
   });
 
   test.each([
