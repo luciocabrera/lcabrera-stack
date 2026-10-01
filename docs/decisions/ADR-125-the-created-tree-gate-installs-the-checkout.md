@@ -38,8 +38,9 @@ every such fix needed a release in the middle of it.
 ## Decision
 
 `workspace:verify` walks every `@lcabrera/*` package the created tree declares,
-and every one those declare in turn, and packs each from this checkout with
-`pnpm pack` after `vp run packages:build`. A scratch registry
+and in turn every one each of those lists under `dependencies`,
+`optionalDependencies` or `peerDependencies`, and packs each from this checkout
+with `pnpm pack` after `vp run packages:build`. A scratch registry
 (`scripts/lib/devkit-registry-server.mjs`, a child process on `127.0.0.1`)
 serves those tarballs, each as the only version of its package. The scratch
 tree gets an untracked `.npmrc` that points the `@lcabrera` scope at it. The
@@ -56,9 +57,11 @@ release. An override would also have replaced the declared ranges outright.
 Before the install, the gate checks the ranges itself so that a miss is named
 precisely. Every declaration of a packed package must admit the packed version:
 in the tree's manifests, through its catalogs, and in the other packed
-manifests, peers included. After the install, it reads the tree's lockfile. Each
-`@lcabrera/*` entry must carry the packed version and integrity, and a tarball
-URL on the scratch registry. The URL check is needed because an unchanged
+manifests' `dependencies`, `optionalDependencies` and `peerDependencies`. A
+packed package's `devDependencies` are left out of both the walk and this check,
+because a consumer's install never reads them. After the install, it reads the
+tree's lockfile. Each `@lcabrera/*` entry must carry the packed version and
+integrity, and a tarball URL on the scratch registry. The URL check is needed because an unchanged
 package packs byte-identical to its published tarball, so matching integrity
 alone cannot tell npm and the checkout apart. A package the tree resolves that
 has no workspace in this checkout fails before anything is packed.
