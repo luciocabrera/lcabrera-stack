@@ -163,3 +163,37 @@ A new constant of the same kind is read only once it is listed in
 `RANGE_CONSTANTS` in `scripts/verify-shipped-ranges.mjs`; the gate does not go
 looking for one. An empty list fails the run, just as a run that reached no
 manifest or no workspace catalog does.
+
+## Amendment 2026-10-01 — the floor is the version this repository publishes
+
+The band admitted every release up to the next major, and nothing raised its
+floor, so a floor written once stayed where it was while the packages moved on.
+That is harmless only while the registry serves the newest version to every
+install. pnpm does not: it holds back a version younger than its minimum
+release age, which defaults to a day, and installs the newest older one the range
+admits. A repository created the day a release shipped therefore resolved the
+releases before it, and its peer check failed on a Babel peer the older pair
+did not meet ([#1219](https://github.com/luciocabrera/lcabrera-stack/issues/1219)).
+
+The band's floor is now the version this repository publishes, not a version it
+once published. `vp run shipped-ranges:verify` fails on a floor below it, with
+the range to write. Nobody writes it: `vp run devkit:pins` raises every floor
+below the version in the checkout to that version, keeps the ceiling, and leaves
+every other byte of the file alone, and `release:version` runs it right after
+the changesets move the versions. On a tree already in step it changes nothing.
+A floor it cannot find written in the range, or a raise that would pass the
+ceiling, fails the run, because the ceiling is a decision a person makes.
+
+The kit's own entry in `TOOLCHAIN_RANGES` is not raised: it is computed from the
+kit's manifest when `create` runs, so whatever release of the kit creates a
+repository is that repository's floor, whether or not the sync ran.
+
+The cost is the one the minimum release age exists for. Until a release is a day
+old, a repository it creates cannot install without lifting the delay, since no
+version the floors admit is old enough; the initializer's README says how. The
+registry gate lifts it for the same reason — it runs minutes after the publish
+it checks.
+
+The reading half of this gate, including `RANGE_CONSTANTS`, moved to
+`scripts/lib/shipped-range-sources.mjs`, which the sync reads too, so the set it
+raises and the set this gate judges are one list.

@@ -10,7 +10,9 @@
  */
 
 import { dirname } from 'node:path';
+import { inc } from 'semver';
 
+import ownManifest from '../package.json' with { type: 'json' };
 import { includesRung } from './config.mjs';
 import { gateBinNames } from './init.mjs';
 import { withWorkspaceFields } from './workspace.mjs';
@@ -174,8 +176,8 @@ export const DEVKIT_PACKAGE = '@lcabrera/devkit';
 export const GATE_RUNTIME_PACKAGE = '@lcabrera/repo-standards';
 
 export const TOOLCHAIN_RANGES = {
-  [DEVKIT_PACKAGE]: '>=0.5.1 <1.0.0',
-  [GATE_RUNTIME_PACKAGE]: '>=0.6.0 <1.0.0',
+  [DEVKIT_PACKAGE]: `>=${ownManifest.version} <${inc(ownManifest.version, 'major')}`,
+  [GATE_RUNTIME_PACKAGE]: '>=0.7.0 <1.0.0',
 };
 
 /**

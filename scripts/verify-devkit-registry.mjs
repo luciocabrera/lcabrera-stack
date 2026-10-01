@@ -3,7 +3,8 @@
  * installs it from npm, checks its peers, and runs the tasks that tree wires for itself — what a
  * user who runs the initializer today actually gets. `workspace:verify` packs
  * this checkout instead, so it proves the next release and not the registry;
- * this runs after a publish, when the registry has caught up.
+ * this runs right after a publish, so the tree's install lifts pnpm's
+ * minimum release age, which would otherwise resolve the release before it.
  *
  * Usage: node scripts/verify-devkit-registry.mjs
  * Exit codes: 0 = the created tree installs and its tasks pass, 1 = it does not.
@@ -16,8 +17,8 @@ import { join } from 'node:path';
 import {
   createFindings,
   installedBin,
-  installFindings,
   peerFindings,
+  registryInstallFindings,
   report,
   reportCrash,
   runtimeFindings,
@@ -32,7 +33,7 @@ const INITIALIZER = 'create-lcabrera-stack';
 
 const CREATE_ARGS = [TREE_NAME, '--profile', 'monorepo'];
 
-const PREREQUISITES = [runtimeFindings, installFindings];
+const PREREQUISITES = [runtimeFindings, registryInstallFindings];
 
 const TREE_CHECKS = [peerFindings, taskRunFindings, trackedChangeFindings];
 

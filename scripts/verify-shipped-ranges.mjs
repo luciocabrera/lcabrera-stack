@@ -1,95 +1,41 @@
 /**
  * Fails when a dependency range this repository ships excludes the version it
- * publishes for that package, or the minor after it — a range in a
- * `packages/devkit` asset, or one a constant listed in `RANGE_CONSTANTS` holds
- * for a devkit command to write. That range decides which release a created
- * repository installs (ADR-117).
+ * publishes for that package, or the minor after it, or admits a release older
+ * than it — a range in a `packages/devkit` asset, or one a constant listed in
+ * `RANGE_CONSTANTS` holds for a devkit command to write. That range decides
+ * which release a created repository installs (ADR-117).
  *
- * The deciding half is `./lib/shipped-ranges.mjs` (pure); this file is the
- * reading, the printing and the exit code. See `.claude/rules/scripts.md`.
+ * The deciding half is `./lib/shipped-ranges.mjs` (pure) and the reading is
+ * `./lib/shipped-range-sources.mjs`; this file is the printing and the exit
+ * code. See `.claude/rules/scripts.md`.
  *
  * Usage: node scripts/verify-shipped-ranges.mjs
  * Exit codes: 0 = every range admits it, 1 = one does not, or an asset or a
  * listed constant could not be read.
  */
 
-import { readdirSync, readFileSync } from 'node:fs';
-import { basename, join, relative, sep } from 'node:path';
 import process from 'node:process';
-import { pathToFileURL } from 'node:url';
 
-import { readPublishableManifests } from '../packages/repo-standards/scripts/publishable-workspaces.mjs';
 import {
-  catalogRanges,
-  constantRanges,
+  assetSources,
+  constantSources,
+  declarationsIn,
+  publishedVersions,
+} from './lib/shipped-range-sources.mjs';
+import {
   findingLine,
-  manifestRanges,
   mentionsIn,
   passLine,
   shippedRangeFindings,
-  sourceOf,
 } from './lib/shipped-ranges.mjs';
 
 const REPO_ROOT = process.cwd();
-const ASSETS_DIR = join(REPO_ROOT, 'packages', 'devkit', 'assets');
-
-const RANGE_CONSTANTS = [
-  { constant: 'TOOLCHAIN_RANGES', path: 'packages/devkit/scripts/create.mjs' },
-];
-
-const constantSource = async ({ constant, path }) => {
-  const exported = await import(pathToFileURL(join(REPO_ROOT, path)).href);
-  const ranges = exported[constant];
-  if (typeof ranges !== 'object' || ranges === null) {
-    throw new TypeError(
-      `${path} exports no \`${constant}\` object — the constant moved or was renamed, so the ranges it held are no longer read by this gate`,
-    );
-  }
-  return { constant, kind: 'constant', path, ranges };
-};
-
-const shippedFiles = () =>
-  readdirSync(ASSETS_DIR, { recursive: true, withFileTypes: true })
-    .filter((entry) => entry.isFile())
-    .map((entry) => join(entry.parentPath, entry.name));
-
-const toPosix = (path) => path.split(sep).join('/');
-
-const sourcesUnder = () =>
-  shippedFiles().flatMap((path) => {
-    const source = sourceOf(basename(path));
-    if (source === undefined) return [];
-
-    return [
-      {
-        ...source,
-        path: toPosix(relative(REPO_ROOT, path)),
-        text: readFileSync(path, 'utf8'),
-      },
-    ];
-  });
-
-const declarationsIn = ({ constant, kind, path, ranges, text }) => {
-  if (kind === 'constant') return constantRanges({ constant, path, ranges });
-  if (kind === 'manifest') {
-    return manifestRanges({ manifest: JSON.parse(text), path });
-  }
-  return kind === 'catalog' ? catalogRanges({ path, text }) : [];
-};
-
-const publishedVersions = () =>
-  Object.fromEntries(
-    readPublishableManifests(REPO_ROOT).map((manifest) => [
-      manifest.name,
-      manifest.version,
-    ]),
-  );
 
 const main = async () => {
-  const assets = sourcesUnder();
-  const constants = await Promise.all(RANGE_CONSTANTS.map(constantSource));
+  const assets = assetSources(REPO_ROOT);
+  const constants = await constantSources(REPO_ROOT);
   const sources = [...assets, ...constants];
-  const versions = publishedVersions();
+  const versions = publishedVersions(REPO_ROOT);
   const names = Object.keys(versions);
 
   const declarations = sources.flatMap(declarationsIn);
@@ -110,7 +56,7 @@ const main = async () => {
 
   if (findings.length > 0) {
     console.error(
-      '\nA shipped range decides which release a created repository installs, so it has to admit the one this repository publishes and the minor after it — and a file naming one of those packages has to yield a declaration this gate can judge.',
+      '\nA shipped range decides which release a created repository installs, so it has to start at the one this repository publishes and admit the minor after it — and a file naming one of those packages has to yield a declaration this gate can judge.',
     );
     process.exitCode = 1;
     return;

@@ -1,13 +1,14 @@
 /**
  * Whether a dependency range this repository ships — in a devkit asset, or in
  * a range constant a devkit command writes from — still admits the package
- * this repository publishes under that name, and the minor after it.
+ * this repository publishes under that name, and the minor after it, and
+ * admits no release older than that one.
  *
  * The decision and its boundaries are ADR-117 and its amendment. Ranges are
  * evaluated by `semver`, never by hand.
  */
 
-import { inc, satisfies, validRange } from 'semver';
+import { inc, lt, minVersion, satisfies, validRange } from 'semver';
 
 const DECLARING_FIELDS = [
   'dependencies',
@@ -191,6 +192,9 @@ const verdict = ({ declaration, version }) => {
   if (!satisfies(inc(version, 'minor'), declaration.range)) {
     return 'excludes-next-minor';
   }
+  if (lt(minVersion(declaration.range).version, version)) {
+    return 'floor-below-current';
+  }
   return 'admits';
 };
 
@@ -249,6 +253,8 @@ const REASONS = {
     `\`${finding.range}\` excludes ${finding.version}, the version this repository publishes`,
   'excludes-next-minor': (finding) =>
     `\`${finding.range}\` admits ${finding.version} but not ${inc(finding.version, 'minor')}, so the next minor release leaves a created repository behind`,
+  'floor-below-current': (finding) =>
+    `\`${finding.range}\` admits releases older than ${finding.version}, the version this repository publishes, so a repository created by this release can resolve one that predates it; \`vp run devkit:pins\` raises every floor`,
   malformed: (finding) =>
     `\`${finding.range}\` is not a version range — only \`catalog:\` and \`workspace:\` stand in for one, because they name where the version is declared rather than pinning an artifact`,
 };

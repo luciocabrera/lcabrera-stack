@@ -6,7 +6,10 @@
 # This is the other half: it creates the tree with the published initializer,
 # installs it from npm, and runs the same tasks. It is not a PR check, because a
 # change that moves two packages together is red here until both publish.
-# Release calls it after a publish; run it on demand from the Actions tab.
+# Release calls it after a publish; run it on demand from the Actions tab. The
+# gate lifts pnpm's minimum release age for the tree's install, because it runs
+# minutes after the publish it checks and pnpm would otherwise hold the new
+# versions back for a day.
 name: Created Tree From The Registry
 
 on:
