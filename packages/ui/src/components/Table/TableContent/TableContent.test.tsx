@@ -181,6 +181,8 @@ describe('TableContent', () => {
     });
 
     expect(scrollContainer.dataset.scrollLocked).toBe('true');
+    expect(screen.getByTestId('table-scroll-container')).toBe(scrollContainer);
+    expect(screen.getByTestId('table-scroll-sentinel')).toBeTruthy();
     expect(screen.getByTestId('table-header')).toBeTruthy();
     expect(screen.getByTestId('table-body')).toBeTruthy();
   });

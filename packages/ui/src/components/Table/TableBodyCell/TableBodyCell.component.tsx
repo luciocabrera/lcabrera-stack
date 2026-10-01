@@ -63,6 +63,8 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
         pinInfo,
         width,
       })}
+      data-column-key={String(columnKey)}
+      data-testid='table-body-cell'
     >
       {Boolean(isLoadingState) && (
         <div {...stylex.props(skeleton.loadingOverlay)}>

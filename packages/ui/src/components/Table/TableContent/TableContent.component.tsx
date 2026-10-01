@@ -77,6 +77,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
               styles.container,
               isLoading && styles.containerLocked,
             )}
+            data-testid='table-scroll-container'
           >
             <TableBase>
               <TableHeader />
@@ -86,6 +87,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
               aria-hidden
               ref={sentinelRef}
               {...stylex.props(styles.sentinel)}
+              data-testid='table-scroll-sentinel'
             />
           </div>
         </div>

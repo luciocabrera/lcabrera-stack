@@ -65,8 +65,27 @@ describe('TableBodyCell', () => {
       />,
     );
 
-    const cell = screen.getByText('42').closest('td');
-    expect(cell?.tagName).toBe('TD');
+    const cell = screen.getByTestId('table-body-cell');
+    expect(cell.tagName).toBe('TD');
+    expect(cell.dataset.columnKey).toBe('amount');
+  });
+
+  it('keeps the column key when a caller passes its own test id', () => {
+    renderCell(
+      <TableBodyCell
+        columnKey='amount'
+        data-testid='caller'
+        label='Amount'
+        rowIndex={0}
+        rowKey='pk:[1]'
+        value={42}
+      />,
+    );
+
+    expect(screen.getByTestId('table-body-cell').dataset.columnKey).toBe(
+      'amount',
+    );
+    expect(screen.queryByTestId('caller')).toBeNull();
   });
 
   it('renders the shimmer overlay when loading state is passed in', () => {
