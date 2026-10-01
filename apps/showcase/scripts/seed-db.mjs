@@ -1,12 +1,13 @@
 /**
- * Creates the showcase's database and applies the DDL it owns in `db/`.
+ * Creates the showcase's database and applies the DDL for every table it serves.
  *
  * Why: every table route in this app reads Postgres in this process, so the
- * showcase has to be able to build its own schema without reaching into another
- * workspace for the SQL or for the runner (#689). It talks to Postgres through
- * `pg` — the driver the app already runs on — rather than shelling out, so the
- * only things a fresh machine needs are Docker and Node. That is also why the
- * files in `db/` carry no `psql` meta-commands.
+ * showcase has to be able to build its own schema (#689). It talks to Postgres
+ * through `pg` — the driver the app already runs on — rather than shelling out,
+ * so a fresh machine needs only Docker and Node, and no applied file may carry a
+ * `psql` meta-command. What it applies, and from where, is
+ * `./seed-db-sources.mjs`: `enterprise_orders` comes from the file
+ * `@lcabrera/devkit` ships, not from a copy here (ADR-071).
  *
  * Connection settings come from the same five `DB_*` variables the app itself
  * requires (`@lcabrera/server`'s env schema), loaded by the `seed` script from
@@ -19,7 +20,7 @@
  *
  * Exit codes: 0 = seeded, 1 = env is incomplete, or a statement failed.
  *
- * Three constraints the code cannot state. The DDL files are applied in the
+ * Three constraints the code cannot state. The sources are applied in the
  * order the list gives them, and each drops and recreates the tables it owns,
  * so the order is the dependency order rather than a preference. Each file is
  * sent as one simple query, which Postgres runs as a single implicit
@@ -29,13 +30,9 @@
  * used.
  */
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { Client } from 'pg';
 
-const WORKSPACE_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-
-const SQL_FILENAMES = ['setup_large_data.sql', 'setup_enterprise_orders.sql'];
+import { SEED_SOURCES } from './seed-db-sources.mjs';
 
 const REQUIRED_ENV_KEYS = [
   'DB_HOST',
@@ -102,14 +99,14 @@ const ensureDatabaseExists = async ({ connection, database }) => {
   });
 };
 
-const applySqlFiles = ({ connection, database, sqlPaths }) =>
+const applySources = ({ connection, database, sources }) =>
   withClient({
     connection,
     database,
     run: async (client) => {
-      for (const sqlPath of sqlPaths) {
-        console.log(`   applying ${sqlPath}`);
-        await client.query(readFileSync(sqlPath, 'utf8'));
+      for (const { path, prepare } of sources) {
+        console.log(`   applying ${path}`);
+        await client.query(prepare(readFileSync(path, 'utf8')));
       }
     },
   });
@@ -134,13 +131,7 @@ const main = async () => {
     console.log(`   created database: ${database}`);
   }
 
-  await applySqlFiles({
-    connection,
-    database,
-    sqlPaths: SQL_FILENAMES.map((filename) =>
-      join(WORKSPACE_ROOT, 'db', filename),
-    ),
-  });
+  await applySources({ connection, database, sources: SEED_SOURCES });
 
   console.log('Seeding finished successfully');
 };

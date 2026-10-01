@@ -78,15 +78,16 @@ Create and edit each have their own builder. Shared tab helpers are one util per
 ## Database setup (`db/`, `scripts/`)
 
 Outside `src/`, but the routes above have nothing to read without it. This app
-owns the DDL for every table it queries and seeds itself — see
+seeds every table it queries, taking `enterprise_orders` from the DDL devkit
+ships rather than a copy of its own — see
 [`db/README.md`](../db/README.md) and
 [ADR-071](../../../docs/decisions/ADR-071-split-the-demo-database-setup.md).
 
-| Artifact                      | Location   | Description                                                                                                            |
-| ----------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `setup_large_data.sql`        | `db/`      | `car_sales` + `wide_alltypes_150`. A copy lives in a separate repository; the two are independent (see `db/README.md`) |
-| `setup_enterprise_orders.sql` | `db/`      | `enterprise_orders` — this app is the only thing that serves it                                                        |
-| `seed-db.mjs`                 | `scripts/` | Creates `DB_NAME` if absent, then applies both files through `pg`. `vp run --filter showcase seed`                     |
+| Artifact               | Location   | Description                                                                                                                      |
+| ---------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `setup_large_data.sql` | `db/`      | `car_sales` + `wide_alltypes_150`. A copy lives in a separate repository; the two are independent (see `db/README.md`)           |
+| `seed-db-sources.mjs`  | `scripts/` | What the seeder applies, in order — `enterprise_orders` from the DDL `@lcabrera/devkit` ships, raised to the load-test row count |
+| `seed-db.mjs`          | `scripts/` | Creates `DB_NAME` if absent, then applies every source through `pg`. `vp run --filter showcase seed`                             |
 
 ---
 

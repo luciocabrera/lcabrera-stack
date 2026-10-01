@@ -18,8 +18,8 @@ Scope any command's output with `-w`, e.g.
 
 - a script that a workflow, a Claude hook (`.claude/settings.json`) or a shell
   script under `scripts/` runs with `node`, one line per file;
-- the `*.test.mjs` files under `scripts/` and `packages/*/scripts/`, as a
-  pattern, because fallow's vitest detection lists a `.test.js` planted in
+- the `*.test.mjs` files under `scripts/`, `packages/*/scripts/` and
+  `apps/*/scripts/`, as a pattern, because fallow's vitest detection lists a `.test.js` planted in
   `packages/utils/src` and not the `.test.mjs` planted beside it;
 - the Vite config fragments in `config/` directories and the Lighthouse config,
   which a tool reads rather than imports.

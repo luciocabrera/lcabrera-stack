@@ -8,13 +8,16 @@ area:
   - apps/showcase/db/**
   - apps/showcase/scripts/seed-db*.mjs
   - packages/devkit/assets/full/apps/web/db/**
+  - apps/showcase/README.md
+  - apps/showcase/src/INVENTORY.md
+  - AGENTS.md
+  - .fallowrc.json
+  - .github/skills/fallow-code-checker/CONFIGURATION.md
   - docs/decisions/ADR-071*
-  - scripts/lib/*ddl*.mjs
-  - .changeset/one-orders-ddl*.md
 started: 2026-10-01
 updated: 2026-10-01
 plan: (none)
-pr: (none)
+pr: '#1234'
 issue: #1080
 ---
 

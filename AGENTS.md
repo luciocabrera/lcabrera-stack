@@ -319,12 +319,13 @@ Commands: [COMMANDS.md §4 → Database](COMMANDS.md#database). `vp run db:up` s
 local Postgres; seeding goes through `vp run --filter showcase seed`,
 because `seed`/`db:seed` are **workspace scripts, not root scripts**.
 
-**The showcase owns the DDL for the tables it serves and seeds itself**
-([ADR-071](docs/decisions/ADR-071-split-the-demo-database-setup.md)) from
-`apps/showcase/db/`, which is what creates `enterprise_orders`. The other
-copy of `setup_large_data.sql` lives in a separate repository, so the
-duplication ADR-071 describes is cross-repo and the two can drift with nothing
-here to catch it.
+**The showcase seeds every table it serves**
+([ADR-071](docs/decisions/ADR-071-split-the-demo-database-setup.md)), and that
+seed is what creates `enterprise_orders`. Its DDL has one tracked home, the
+file `packages/devkit` ships, which the showcase reads in place and raises to
+its load-test row count; a second definition fails the showcase's tests. The
+other copy of `setup_large_data.sql` lives in a separate repository, so that
+duplication is cross-repo and the two can drift with nothing here to catch it.
 
 It reads env from `docker/local/.env` and then the workspace's own `.env`. The frontend proxies `/api` to `http://localhost:3001` for the external-API lane, which means a server run from outside this repository.
 

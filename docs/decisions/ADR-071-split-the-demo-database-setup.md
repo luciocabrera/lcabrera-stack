@@ -10,8 +10,9 @@ that workspace left the repository)**.
 > own, so every API-side bullet below now describes a path over there, not one
 > here.
 >
-> **What still governs here:** the showcase owns the DDL for the tables it
-> serves and seeds itself — `apps/react-router/db/` and its `seed-db.mjs`.
+> **What still governs here:** the showcase seeds itself, through its own
+> `seed-db.mjs`, and owns the DDL for `car_sales` and `wide_alltypes_150`. It no
+> longer owns the `enterprise_orders` DDL — see the amendment below.
 >
 > **What this ADR can no longer promise:** the last line of the Decision says
 > "nothing in this repository names a path under the API workspace". That was
@@ -20,6 +21,53 @@ that workspace left the repository)**.
 > `setup_large_data.sql` is still duplicated — but the two copies are now in
 > **different repositories**, so nothing can compare them and the drift check
 > this ADR relied on does not exist. AGENTS.md records that.
+
+> **⚠️ Amended 2026-10-01 (#1080) — `enterprise_orders` has one definition.**
+> `@lcabrera/devkit` now ships the `enterprise_orders` DDL with a demo-sized
+> seed, as `packages/devkit/assets/full/apps/web/db/setup_enterprise_orders.sql`.
+> Keeping the showcase's own `setup_enterprise_orders.sql` beside it would have
+> made a second copy of the same table inside this repository, which nothing
+> compared, and drift between them would have reached an installing repository
+> before anyone here saw it.
+>
+> **Decision.** The shipped file is the only tracked definition. The showcase
+> deleted its copy, and its seeder reads the shipped file in place and changes
+> one thing: the `generate_series` row bound, raised from the demo size to the
+> showcase's load-test volume. The shipped file's own header already names that
+> bound as the one value nothing else in it depends on. So the table, its
+> indexes and the function that derives each row come from one place, and only
+> the volume differs.
+>
+> **What holds it.** Divergence is not caught by a comparison, because there is
+> nothing left to compare: a schema edit in the shipped file is what the
+> showcase applies on its next seed. Two checks guard the arrangement itself.
+> The seeder refuses a shipped file that does not hold exactly one row bound,
+> instead of quietly seeding the demo volume. And
+> `apps/showcase/scripts/seed-db-sources.test.mjs` fails when any tracked
+> `.sql` file other than the shipped one defines `enterprise_orders`, which is
+> what reintroducing a copy looks like.
+>
+> **Why the edge is allowed.** The showcase now reads a file inside another
+> workspace, by relative path, without declaring that workspace. ADR-039 rejects
+> undeclared edges because a package installed elsewhere would not find them.
+> The showcase is never installed elsewhere: it runs only in this checkout,
+> where the path always resolves, so the edge has nowhere to break. Nothing
+> shipped reads in the other direction; the devkit file names nothing from this
+> repository (`seeds:verify`).
+>
+> **What remains cross-repository.** `setup_large_data.sql` is still duplicated
+> with the external API servers' repository, as the Consequences below
+> describe, and nothing here can compare the two. If that repository carries its
+> own `enterprise_orders` DDL, that copy is likewise beyond reach of any check
+> here.
+>
+> **Two costs.** A change to the shipped file changes the showcase's table on
+> its next seed, so an edit made for installing repositories is also an edit
+> to the load-test fixture. And `seed-db-sources.test.mjs` runs with the
+> showcase's tests, which a pull request touching only `packages/devkit` does
+> not select, because the showcase declares no dependency on it: a shipped edit
+> that removes the row bound is caught by the full suite (`test:all`, and CI on
+> `main`) rather than by that pull request's own run.
 
 ## Context
 
