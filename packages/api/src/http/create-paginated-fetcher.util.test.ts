@@ -62,6 +62,30 @@ describe('createPaginatedFetcher', () => {
     expect(url.searchParams.get('skip')).toBe('0');
   });
 
+  it('scopes the page to a drill-down group when the call names one', async () => {
+    const fetchMock = stubFetch({ body: page });
+    const fetchPage = createPaginatedFetcher({
+      isValid: isPage,
+      path: '/_api/orders/paginated',
+    });
+
+    await fetchPage({ group: 'token', limit: 50, skip: 0 });
+
+    expect(requestedUrl(fetchMock).searchParams.get('group')).toBe('token');
+  });
+
+  it('sends no group when the call names none', async () => {
+    const fetchMock = stubFetch({ body: page });
+    const fetchPage = createPaginatedFetcher({
+      isValid: isPage,
+      path: '/_api/orders/paginated',
+    });
+
+    await fetchPage({ limit: 50, skip: 0 });
+
+    expect(requestedUrl(fetchMock).searchParams.has('group')).toBe(false);
+  });
+
   it('prefixes the path with the resolved origin', async () => {
     const fetchMock = stubFetch({ body: page });
     const fetchPage = createPaginatedFetcher({

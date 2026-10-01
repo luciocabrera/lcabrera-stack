@@ -11,6 +11,7 @@ import { TableSuspenseBoundary } from '#ui/components/Table/TableSuspenseBoundar
 import type { TableLayoutProps } from './TableLayout.types';
 
 import { styles } from './TableLayout.stylex';
+import { useRetainTablePersistFetchers } from './useRetainTablePersistFetchers.hook';
 
 export const TableLayout = <
   TData extends Record<string, unknown>,
@@ -26,6 +27,8 @@ export const TableLayout = <
   metaState,
   onLoadMore,
 }: TableLayoutProps<TData, TResponse>) => {
+  useRetainTablePersistFetchers();
+
   return (
     <div {...stylex.props(styles.container)}>
       <TableConfigProvider<TData>

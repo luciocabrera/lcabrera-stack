@@ -124,6 +124,7 @@
   "src/components/Table/filters/NumberFilterInput/NumberFilterInput.stylex.ts",
   "src/components/Table/filters/SelectFilterInput/SelectFilterInput.stylex.ts",
   "src/components/Table/filters/TextFilterInput/TextFilterInput.stylex.ts",
+  "src/components/TableGroupDetailsView/TableGroupDetailsView.stylex.ts",
   "src/components/Tabs/Tabs.stylex.ts",
   "src/components/Tabs/TabsContent/TabsContent.stylex.ts",
   "src/components/Tabs/TabsHeader/TabsHeader.stylex.ts",

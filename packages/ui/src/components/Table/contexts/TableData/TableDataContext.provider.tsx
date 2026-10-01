@@ -20,13 +20,20 @@ export const TableDataProvider = <TData extends Record<string, unknown>>({
 }: TableDataProviderProps<TData>) => {
   const initialDataState = getInitialDataState<TData>(dataState ?? {});
   const dataStore = useStore<TableDataState<TData>>(initialDataState);
+  const { data, error, isLoading, isLoadingMore, totalRows } = dataState ?? {};
 
   useEffect(() => {
     syncStoreFromProps({
-      next: getInitialDataState<TData>(dataState ?? {}),
+      next: getInitialDataState<TData>({
+        ...(data !== undefined && { data }),
+        error,
+        ...(isLoading !== undefined && { isLoading }),
+        ...(isLoadingMore !== undefined && { isLoadingMore }),
+        ...(totalRows !== undefined && { totalRows }),
+      }),
       store: dataStore,
     });
-  }, [dataState, dataStore]);
+  }, [data, dataStore, error, isLoading, isLoadingMore, totalRows]);
 
   const value: TableDataContextValue<TData> = { dataStore };
 

@@ -84,7 +84,13 @@ const RUNG_RETIREMENTS = frozenRungs([
   ['agent', []],
   ['repo', []],
   ['monorepo', []],
-  ['full', []],
+  [
+    'full',
+    [
+      'workspace/apps/web/src/routes/orders/orders.rows.ts',
+      'workspace/apps/web/src/routes/orders/readOrdersPage.util.test.ts',
+    ],
+  ],
 ]);
 
 export const PROFILE_LADDER = Object.freeze(RUNG_GROUPS.map(([rung]) => rung));

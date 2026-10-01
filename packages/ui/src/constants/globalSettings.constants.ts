@@ -44,6 +44,8 @@ export const NAVIGATION_COLLAPSED_PREFERENCE_OPTIONS: readonly RadioOption<Globa
   ];
 
 export const PERSIST_COOKIE_ACTION = '/_action/persist-cookie';
+export const PERSIST_TABLE_STATE_FETCHER_KEY = 'persist-table-state';
+export const PERSIST_TABLE_UI_FLAGS_FETCHER_KEY = 'persist-table-ui-flags';
 export const MAX_COOKIE_ENTRY_VALUE_LENGTH = 10_000;
 
 export const PERSISTENCE_SIZE_WARNING: Omit<

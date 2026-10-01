@@ -8,7 +8,7 @@ the Suspense boundary so loading/error states are handled by React transitions.
 ```
 TableData/
 ├── TableDataContext.context.ts              → createContext (undefined default)
-├── TableDataContext.provider.tsx             → Provider: seeds the store from the first snapshot, then syncs later `dataState` identities through `syncStoreFromProps`
+├── TableDataContext.provider.tsx             → Provider: seeds the store from the first snapshot, then syncs a later snapshot's values through `syncStoreFromProps`
 ├── TableDataContext.types.ts                → TableDataState, ContextValue
 ├── index.ts                                 → Barrel: TableDataProvider, hooks
 │
@@ -77,16 +77,19 @@ graph TD
   A["TableDataProvider receives initial data + totalRows"]
   A --> B["getInitialDataState(dataState)"]
   B --> C["useStore(initialState) → dataStore"]
-  C --> D["effect on dataState change"]
+  C --> D["effect on a change to data, error, isLoading, isLoadingMore or totalRows"]
   D --> E["dataStore.set(getInitialDataState(dataState))"]
   E --> F["Provide via TableDataContext"]
 ```
 
 This keeps the same store instance mounted across transitions and atomically
 replaces rows when new loader data resolves. The write is `syncStoreFromProps`;
-the effect keys on `dataState` identity, the same hydration rule
-`TableConfigProvider` uses (`packages/ui/src/PATTERNS.md` → Store provider
-hydration).
+the effect keys on the snapshot's values rather than on the `dataState` object,
+because `Table` allocates that object on every render. Keyed on the object, any
+re-render above the table (a route re-rendering with the same response, or a
+router state change reaching a subscribed ancestor) reset the store to the first
+page and threw away every page loaded since, so scrolling re-requested the same
+pages and never grew (`packages/ui/src/PATTERNS.md` → Store provider hydration).
 
 ## Actions
 

@@ -6,6 +6,7 @@ import { TABLE_NESTED_URL_STATE_PREFIX } from '#ui/components/Table/Table.consta
 import { serializeStateSlice } from '#ui/components/Table/utils';
 import {
   MAX_COOKIE_ENTRY_VALUE_LENGTH,
+  PERSIST_TABLE_STATE_FETCHER_KEY,
   PERSISTENCE_SIZE_WARNING,
 } from '#ui/constants/globalSettings.constants';
 import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
@@ -14,7 +15,7 @@ import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
 export const usePersistTableStateAction = () => {
   const { metaStore } = useTableConfigContextValue();
   const persistCookie = usePersistCookieAction({
-    fetcherKey: 'persist-table-state',
+    fetcherKey: PERSIST_TABLE_STATE_FETCHER_KEY,
   });
   const notify = useNotifyAction();
 

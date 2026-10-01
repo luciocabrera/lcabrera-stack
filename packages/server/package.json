@@ -87,6 +87,7 @@
     "./sort/sort.types": "./src/sort/sort.types.ts",
     "./table-page/create-group-detail-reads.util": "./src/table-page/create-group-detail-reads.util.ts",
     "./table-page/create-row-delete-action.util": "./src/table-page/create-row-delete-action.util.ts",
+    "./table-page/create-table-loader-reads.util": "./src/table-page/create-table-loader-reads.util.ts",
     "./table-page/create-table-page-loader.util": "./src/table-page/create-table-page-loader.util.ts",
     "./table-page/create-table-page-reader.util": "./src/table-page/create-table-page-reader.util.ts",
     "./table-page/parse-table-page-params.util": "./src/table-page/parse-table-page-params.util.ts",
@@ -331,6 +332,10 @@
       "./table-page/create-row-delete-action.util": {
         "types": "./dist/table-page/create-row-delete-action.util.d.mts",
         "default": "./dist/table-page/create-row-delete-action.util.mjs"
+      },
+      "./table-page/create-table-loader-reads.util": {
+        "types": "./dist/table-page/create-table-loader-reads.util.d.mts",
+        "default": "./dist/table-page/create-table-loader-reads.util.mjs"
       },
       "./table-page/create-table-page-loader.util": {
         "types": "./dist/table-page/create-table-page-loader.util.d.mts",

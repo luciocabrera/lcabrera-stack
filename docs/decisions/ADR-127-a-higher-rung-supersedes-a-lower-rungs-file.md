@@ -131,7 +131,8 @@ A run at a profile below the declaring rung does not see the declaration. The
 lower group still ships the path, so the file is planned like any other: left
 alone when it matches, written back when it is missing. A declaration names an
 asset path rather than a target path, so it follows the consumer's `paths`
-configuration the way the asset does. No rung declares a path yet.
+configuration the way the asset does. The `full` rung declares the module rows the `monorepo` page renders from, and
+that page's reader test (#1079).
 
 ## Consequences
 

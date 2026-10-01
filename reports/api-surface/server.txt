@@ -271,6 +271,12 @@ CreateRowDeleteActionArgs [type] { readonly deleteRow: (id: TId) => Promise<unkn
 RowDeleteAction [type] (args: RowDeleteActionArgs) => Promise<Response>
 RowDeleteActionArgs [type] { readonly request: Request; }
 
+## ./table-page/create-table-loader-reads.util
+createTableLoaderReads [const] <TPage, TGrouping extends TablePageGrouping = TablePageGrouping>({ limit, reader }: CreateTableLoaderReadsArgs<TPage, TGrouping>) => { fetchPage: ({ effectiveSorting, filters, grouping, totalsPlacement }: TableLoaderPageArgs<TGrouping>) => Promise<TPage>; resolveGroupingCapabilities: () => Promise<Readonly<Record<string, ColumnGroupingCapability>>>; }
+CreateTableLoaderReadsArgs [type] { /** Size of the first page the table opens on. */ readonly limit: number; readonly reader: Pick<TablePageReader, 'selectGroupingCapabilities'> & { readonly selectPage: (read: TableLoaderRead<TGrouping>) => Promise<TPage>; }; }
+TableLoaderPageArgs [type] { readonly effectiveSorting: readonly TablePageSortRule[]; readonly filters: Readonly<Record<string, ColumnFilter>>; /** A grouping with no keys reads rows. */ readonly grouping?: TGrouping; readonly totalsPlacement?: TablePageRead['totalsPlacement']; }
+TableLoaderRead [type] Omit<TablePageRead, 'grouping'> & { readonly grouping?: TGrouping; }
+
 ## ./table-page/create-table-page-loader.util
 createTablePageLoader [const] ({ resolvePageRead, selectPage }: CreateTablePageLoaderArgs) => TablePageLoader
 CreateTablePageLoaderArgs [type] { readonly resolvePageRead: TablePageReader['resolvePageRead']; readonly selectPage: (read: OlapGroupRead) => Promise<unknown>; }

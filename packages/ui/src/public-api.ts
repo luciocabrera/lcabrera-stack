@@ -13,6 +13,7 @@ export { RouteErrorBoundary } from './components/RouteErrorBoundary/RouteErrorBo
 export { SectionCard } from './components/SectionCard/SectionCard.component';
 export { StatusBadge } from './components/StatusBadge/StatusBadge.component';
 export { TableLayout } from './components/Table/TableLayout/TableLayout.component';
+export { TableGroupDetailsView } from './components/TableGroupDetailsView/TableGroupDetailsView.component';
 export { TableRouteView } from './components/TableRouteView/TableRouteView.component';
 export { Tabs } from './components/Tabs/Tabs.component';
 export { hydrateApp } from './entry/hydrateApp.util';

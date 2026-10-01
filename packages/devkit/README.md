@@ -312,12 +312,12 @@ A profile is a rung on a ladder, and each rung contains the one below it. A
 file lands on the lowest rung whose preconditions it can assume, and a rung
 without a gate of its own is a flag, not a rung.
 
-| Rung       | What it places                                                                                                                                                                                                                                                                             |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `agent`    | What an agent reads: skills, path rules, subagent definitions, the contracts and coordination register they bind to, and the decision home's template and README.                                                                                                                          |
-| `repo`     | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, and `COMMANDS.md`.                                                                                                                                                              |
-| `monorepo` | All of that, plus the workspace itself: the pnpm workspace file and its catalog, the Node pin and engine band, the root lint/format config, the Biome config, a tsconfig roster with the generator wired, and a React Router application rendering a table through the published packages. |
-| `full`     | All of that, plus a local database behind the application: a Postgres compose file and its environment template, the `enterprise_orders` DDL with a demo-sized seed, the seed runner, a database test gated on `SMOKE_DB`, and four `db:*` root tasks.                                     |
+| Rung       | What it places                                                                                                                                                                                                                                                                                                              |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent`    | What an agent reads: skills, path rules, subagent definitions, the contracts and coordination register they bind to, and the decision home's template and README.                                                                                                                                                           |
+| `repo`     | All of that, plus what CI and git run: the workflows, the git hooks, the pull-request and issue templates, and `COMMANDS.md`.                                                                                                                                                                                               |
+| `monorepo` | All of that, plus the workspace itself: the pnpm workspace file and its catalog, the Node pin and engine band, the root lint/format config, the Biome config, a tsconfig roster with the generator wired, and a React Router application rendering a table through the published packages.                                  |
+| `full`     | All of that, plus a local database behind the application: a Postgres compose file and its environment template, the `enterprise_orders` DDL with a demo-sized seed, the seed runner, database tests gated on `SMOKE_DB`, four `db:*` root tasks, and a page that sorts, filters, groups, drills, pages and deletes in SQL. |
 
 A consumer who wants the prose and keeps their own process takes `agent` and
 receives none of the scaffolding. `repo` is a governed single-package
@@ -532,6 +532,7 @@ cd my-repo && pnpm install
 cp docker/local/.env.example docker/local/.env   # then replace each placeholder
 vp run db:seed    # start Postgres, create the database, load the demo table
 vp run --filter web test:smoke
+vp run dev
 ```
 
 It places everything the `monorepo` rung does, and a local database behind the
@@ -561,13 +562,27 @@ included, has to be installed on the host.
   `@lcabrera/server`, which the application now declares. It gates itself on
   `SMOKE_DB`. A plain test run, including `test:all` and CI, skips it.
   `test:smoke` sets the variable and loads the same environment file.
+- The page at `/` reads that table. Its loader passes the request's sort,
+  filters and grouping to `@lcabrera/server`'s table-page reader, so Postgres
+  resolves each one, and every column the read accepts offers sorting and
+  filtering. A resource route answers each further page from a keyset cursor. A
+  group row opens that group's rows in a dialog, and each row's menu deletes the
+  row through an action, after which the page reads again. The route's own tests
+  run under `test:all` with the reader mocked. One more, gated on `SMOKE_DB`,
+  holds each answer to plain SQL over the seeded table.
 
 The root manifest gains `db:up`, `db:down`, `db:status` and `db:seed`. They are
 tagged to this rung, so `create` writes them only here. A tree that took the
 `monorepo` blueprint gains them on its first `sync` at this profile.
 
-Two files are replaced rather than added. The application's `package.json` is
-the `monorepo` one plus the server package, the driver and the two tasks.
+Some files are replaced rather than added. The page route's column
+declarations, row type, loader, page reader, view, route table and its two tests
+replace the
+`monorepo` ones at the same paths. The module of rows the `monorepo` page
+renders from, and the test of the reader that served it, are retired: a tree
+moved up removes them when it has not edited them. The application's
+`package.json` is the `monorepo` one plus the server package, the driver and the
+two tasks.
 `COMMANDS.md` is the shipped command reference plus a section documenting the
 database tasks. It has to be replaced: the created tree's `commands:verify` fails
 on a task the reference does not document, and also on a documented task the
