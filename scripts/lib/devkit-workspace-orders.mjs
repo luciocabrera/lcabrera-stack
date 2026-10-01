@@ -104,7 +104,7 @@ export const orderProbeFindings = ({
  * @returns {string}
  */
 export const withSettings = ({ file, settings }) => {
-  const lines = file.replace(/\n+$/, '').split('\n');
+  const lines = file.trimEnd().split('\n');
   const keyOf = (line) => line.split('=', 1)[0];
   const present = new Set(lines.map((line) => keyOf(line)));
   return [

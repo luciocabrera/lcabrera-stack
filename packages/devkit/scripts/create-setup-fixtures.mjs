@@ -52,19 +52,23 @@ export const writeStubs = ({ directory, names }) => {
  * @param {string} log
  * @returns {Promise<{ close: () => Promise<void>, port: number }>}
  */
+const answeringProbe = (log) => (socket) => {
+  socket.once('data', () => {
+    appendFileSync(log, 'probe\n');
+    socket.end(AUTHENTICATION_OK);
+  });
+};
+
+const closed = (server) =>
+  new Promise((done) => {
+    server.close(() => done());
+  });
+
 export const stubPostgres = (log) =>
   new Promise((resolve) => {
-    const server = createServer((socket) => {
-      socket.once('data', () => {
-        appendFileSync(log, 'probe\n');
-        socket.end(AUTHENTICATION_OK);
-      });
-    });
+    const server = createServer(answeringProbe(log));
     server.listen(0, '127.0.0.1', () =>
-      resolve({
-        close: () => new Promise((done) => server.close(() => done())),
-        port: server.address().port,
-      }),
+      resolve({ close: () => closed(server), port: server.address().port }),
     );
   });
 

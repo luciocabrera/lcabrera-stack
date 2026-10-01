@@ -254,8 +254,12 @@ export const orderedRowFindings = async ({ answers, baseUrl }) => {
       const url = `${baseUrl}${search}`;
       const page = await pageOf(url);
       if (page.status !== 200) {
+        const outcome =
+          page.status === undefined
+            ? `never answered (${page.error})`
+            : `answered HTTP ${page.status}`;
         return [
-          `\`GET ${url}\` ${page.status === undefined ? `never answered (${page.error})` : `answered HTTP ${page.status}`}, so nothing shows whether the route did ${verb}`,
+          `\`GET ${url}\` ${outcome}, so nothing shows whether the route did ${verb}`,
         ];
       }
       return orderProbeFindings({
