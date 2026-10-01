@@ -1,5 +1,138 @@
 # @lcabrera/devkit
 
+## 0.6.0
+
+### Minor Changes
+
+- 5898a4f: `devkit create` with no `--profile` now places the `monorepo` rung instead of
+  `agent`. A flagless run leaves a workspace with an application, its configs and
+  its tasks, ready to install. The created `devkit.config.json` records
+  `"profile": "monorepo"`, so a later `sync` or `doctor` without the flag keeps to
+  that rung. `pnpm create lcabrera-stack` forwards to `devkit create` and gets the
+  same default. Pass `--profile agent` for the previous tree.
+
+  `devkit init` and `devkit sync` are unchanged: with no flag they use the
+  `profile` in `devkit.config.json`, and `agent` when the config names none.
+
+- 05b5e85: Adding a dependency with `vp add` no longer makes `devkit doctor --check` report
+  `pnpm-workspace.yaml` as modified. The package manager writes the new version
+  under the default `catalog:` key. The kit never ships that key, so the recorded
+  hash now leaves it out. `devkit sync` still updates the kit's part of the file,
+  including the named `catalogs:`, and keeps the default catalog as you left it. A
+  change to anything the kit ships is still reported.
+
+  If you acknowledged `pnpm-workspace.yaml` earlier and the file holds a default
+  `catalog:` block, that acknowledgement no longer matches, because the hash now
+  leaves the block out. If the default catalog was your only edit, the file is
+  simply up to date. Otherwise it is reported again. Acknowledge it once more
+  with:
+
+  ```bash
+  devkit doctor --accept pnpm-workspace.yaml --reason "<why this edit is deliberate>"
+  ```
+
+  An acknowledgement of a file with no default catalog still matches.
+
+- d00a8d8: The hooks a created repository ships now run without a manual `git config`.
+  `devkit create` sets `core.hooksPath` to the hooks directory it placed, after
+  the initial commit, and its summary says so instead of printing the command.
+
+  From the `monorepo` rung up, `prepare` also runs a `hooks-path.mjs` script,
+  which the rung now places. After a clone and one install, git runs the hooks. The
+  script reads the hooks directory from `devkit.config.json`. It does nothing
+  outside a repository whose work tree starts at the install root, when the hooks
+  directory is missing, when the clone already set `core.hooksPath` to another
+  directory, or when `CI` is set, so a workflow that commits or pushes from its
+  checkout runs no hook. In each of those cases the install still exits 0. The script imports
+  only Node's own modules. It runs git from the fixed install directories first,
+  then from PATH, and skips any `node_modules` directory on PATH, so a
+  dependency's `git` bin never runs in its place.
+
+  The task block is reconciled key by key, so `sync` updates an untouched
+  `prepare` in a repository already at the rung. `devkit init` and `devkit sync`
+  still never change git config themselves.
+
+  `paths.hooks` in `devkit.config.json` must now be a non-empty path inside the
+  repository, relative to its root. An absolute path, one that climbs out with
+  `..`, or one starting with a prefix git expands (`~`, `%(prefix)`,
+  `:(optional)`) was materialised under the repository but read by git somewhere
+  else, and an empty or non-string value placed the hooks where the `prepare`
+  script did not look, so in each case the shipped hooks never ran. Every command
+  and the `prepare` script now refuse such a value with an error naming the key. A
+  config that already names a plain relative directory is unaffected.
+
+  The `prepare` script also leaves the hooks off when the hooks directory resolves
+  outside the repository through a symlink, and unsets `core.hooksPath` if it
+  already pointed there.
+
+- 9af96cf: The `monorepo` rung's root manifest now has `dev`, `build` and `start` tasks. Each one hands off to the application workspace's task of the same name, so `vp run dev`, `vp run build` and `vp run start` work from the repository root. The shipped `COMMANDS.md` documents all three, which keeps `commands:verify` green. A repository already on the rung picks them up on its next sync, next to its own tasks. A root task of the same name that the repository already declares is reported and left alone.
+
+### Patch Changes
+
+- 5ca7b6a: A `monorepo`-rung tree now installs with no unmet peer. Its catalog pinned
+  `@babel/preset-typescript` to a major newer than the `@babel/core` that
+  `vite-plugin-babel`, which runs the preset, peers on. The install resolved one
+  `@babel/core` for both, and `pnpm peers check` reported every Babel package
+  under the preset. The catalog now pins the preset to the major that matches
+  that core, and the web application's Vite config passes that major's options
+  (`allExtensions` and `isTSX` in place of `ignoreExtensions`), so every file the
+  Babel pass includes still parses as TSX.
+
+  This needs a `@lcabrera/vite-config` whose peer range admits that preset major.
+  The blueprint's range for that package picks the release up once it is
+  published.
+
+- 60e1d19: Every command in the `commands` map of a tree `devkit create` makes at the
+  `monorepo` profile now runs in that tree. Under Vite+, `test` and `audit` stand
+  for tasks: `test` runs `vp run test:all` and `audit` runs `vp run deps:audit`
+  wherever the manifest holds that task after the run. Where it does not, `test`
+  stays `vp run test` and `audit` is `vp pm audit --level moderate`, which
+  any Vite+ repository can run.
+
+  `deps:audit` is a new gate task at the `monorepo` profile:
+  `vp pm audit --json | repo-verify-deps-audit`. It is wired only where the
+  blueprint is, like `commands:verify`, and only where `repo-verify-deps-audit` is
+  installed or declared. It fails on an advisory at `moderate` or above, and on a
+  report that walked no dependencies, so an unreachable registry fails it.
+
+  Previously the map named `vp run test` and `vp run deps:audit`, and a created
+  tree defined neither task, so the check workflow, the dependency-audit workflow
+  and the pre-push hook all failed.
+
+  A tree created by an earlier version keeps the commands it has. `devkit init
+--upgrade` wires `deps:audit`, which makes its `audit` command run, and prints
+  `test: kept "vp run test" (would infer "vp run test:all")` so you can correct
+  `test` by hand.
+
+- 7e8d034: `devkit create` now declares the toolchain the created tree calls. The root
+  manifest lists `@lcabrera/devkit` and `@lcabrera/repo-standards` at every rung,
+  each as a floor with a bound below the next major. Every gate task the rung owns
+  is wired in the same run, because the manifest declares its binary. After one install, the hooks, the workflows and the gate tasks
+  find what they call, and `devkit init --upgrade` has nothing left to add.
+
+  Previously the manifest declared neither package. The hooks and workflows
+  failed on a missing binary, and the closing message sent you to
+  `devkit init --upgrade`, where no `devkit` binary was installed to answer it.
+  That message is gone.
+
+  `devkit init` in an existing repository is unchanged: it still wires a gate task
+  only when its binary is installed.
+
+- 4867b22: `devkit create` now ends with the commands that start the new repository: `cd`
+  into it, a plain install with the repository's package manager, and the `dev`
+  task when the profile wires one. The install is not `commands.install`, which
+  is the lockfile-bound CI form and fails in a repository that has no lockfile
+  yet. A directory name that is not a plain path is named rather than printed as
+  a `cd` command, because no single quoting is read literally by every shell. When
+  the runner is Vite+, the summary says `vp` is installed once per machine and
+  where to get it. It also says `devkit` is a dev dependency, not a global
+  command, and names the `devkit:check` and `devkit:sync` tasks that run it.
+
+  `devkit init --upgrade` no longer tells you to run `git config core.hooksPath`
+  when git already runs the hooks from that directory, however the path is
+  spelled (`./.githooks`, `.githooks/`, absolute, or through a symlink). It still says so when the key
+  is unset or names another directory.
+
 ## 0.5.1
 
 ### Patch Changes

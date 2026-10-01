@@ -1,5 +1,31 @@
 # create-lcabrera-stack
 
+## 0.3.0
+
+### Minor Changes
+
+- 5898a4f: `devkit create` with no `--profile` now places the `monorepo` rung instead of
+  `agent`. A flagless run leaves a workspace with an application, its configs and
+  its tasks, ready to install. The created `devkit.config.json` records
+  `"profile": "monorepo"`, so a later `sync` or `doctor` without the flag keeps to
+  that rung. `pnpm create lcabrera-stack` forwards to `devkit create` and gets the
+  same default. Pass `--profile agent` for the previous tree.
+
+  `devkit init` and `devkit sync` are unchanged: with no flag they use the
+  `profile` in `devkit.config.json`, and `agent` when the config names none.
+
+### Patch Changes
+
+- Updated dependencies [5ca7b6a]
+- Updated dependencies [60e1d19]
+- Updated dependencies [7e8d034]
+- Updated dependencies [5898a4f]
+- Updated dependencies [4867b22]
+- Updated dependencies [05b5e85]
+- Updated dependencies [d00a8d8]
+- Updated dependencies [9af96cf]
+  - @lcabrera/devkit@0.6.0
+
 ## 0.2.2
 
 ### Patch Changes
