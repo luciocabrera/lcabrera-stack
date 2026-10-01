@@ -9,7 +9,7 @@
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 import {
   applyPlan,
@@ -48,9 +48,12 @@ const MANIFEST = 'package.json';
 
 const gitRunsHooksFrom = ({ hooksPath, root }) => {
   try {
+    const pointed = readGit({
+      args: ['config', '--get', 'core.hooksPath'],
+      cwd: root,
+    });
     return (
-      readGit({ args: ['config', '--get', 'core.hooksPath'], cwd: root }) ===
-      hooksPath
+      pointed !== '' && resolve(root, pointed) === resolve(root, hooksPath)
     );
   } catch {
     return false;

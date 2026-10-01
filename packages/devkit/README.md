@@ -155,9 +155,12 @@ later `sync` or `doctor` without the flag works against the same rung. Pass
 
 The run ends with the commands that start the repository: `cd` into it, a plain
 install with its package manager (not the lockfile-bound `commands.install`,
-since there is no lockfile yet), and the `dev` task when the rung wires one. Inside
-the new repository `devkit` is a dev dependency, not a global command, so run it
-through the `devkit:check` and `devkit:sync` tasks, not as a bare `devkit`.
+since there is no lockfile yet), and the `dev` task when the rung wires one. A
+directory name that is not a plain path is named, not printed as a `cd`, since
+no one quoting suits every shell. `vp` is the Vite+ CLI and is installed once
+per machine ([viteplus.dev](https://viteplus.dev/guide/)). Inside the new
+repository `devkit` is a dev dependency, not a global command, so run it through
+the `devkit:check` and `devkit:sync` tasks, not as a bare `devkit`.
 
 It **refuses** the following, and each refusal names what to do instead:
 

@@ -10,7 +10,6 @@
  */
 
 import { dirname } from 'node:path';
-import process from 'node:process';
 
 import { includesRung } from './config.mjs';
 import { gateBinNames } from './init.mjs';
@@ -314,14 +313,14 @@ const DEVKIT_TASKS = ['devkit:check', 'devkit:sync'];
 
 const PLAIN_PATH = /^[\w./-]+$/;
 
-export const shellWord = (word, platform = process.platform) => {
-  if (PLAIN_PATH.test(word)) return word;
-  return platform === 'win32'
-    ? '"' + word + '"'
-    : "'" + word.replaceAll("'", String.raw`'\''`) + "'";
-};
+const VITE_PLUS_INSTALL = 'https://viteplus.dev/guide/';
 
-export const firstInstallFor = (run) => run.split(' ', 1)[0] + ' install';
+export const firstInstallFor = (run) => `${run.split(' ', 1)[0]} install`;
+
+export const changeDirectoryStep = (target) =>
+  PLAIN_PATH.test(target)
+    ? { command: `cd ${target}` }
+    : { prose: `Change into \`${target}\`, then run:` };
 
 /**
  * @param {{ commands: { run?: string }, target: string,
@@ -329,18 +328,26 @@ export const firstInstallFor = (run) => run.split(' ', 1)[0] + ' install';
  * @returns {string[]}
  */
 const nextSteps = ({ commands: { run }, target, tasks }) => {
+  const enter = changeDirectoryStep(target);
   const steps = [
-    'cd ' + shellWord(target),
+    ...(enter.command === undefined ? [] : [enter.command]),
     ...(run === undefined ? [] : [firstInstallFor(run)]),
-    ...(run !== undefined && tasks.includes('dev') ? [run + ' dev'] : []),
+    ...(run !== undefined && tasks.includes('dev') ? [`${run} dev`] : []),
   ];
-  const indented = steps.map((step) => '  ' + step).join('\n');
+  const indented = steps.map((step) => `  ${step}`).join('\n');
+  const lead = enter.prose ?? 'Start with:';
   const devkitTasks = DEVKIT_TASKS.filter((task) => tasks.includes(task));
   const devkitCommands = devkitTasks
-    .map((task) => '`' + run + ' ' + task + '`')
+    .map((task) => `${run} ${task}`)
+    .map((command) => `\`${command}\``)
     .join(', ');
   return [
-    `Nothing is installed yet. Start with:\n${indented}`,
+    `Nothing is installed yet. ${lead}\n${indented}`,
+    ...(run?.startsWith('vp ')
+      ? [
+          `\`vp\` is the Vite+ CLI, installed once per machine rather than per repository. If your shell does not find it, install it first: ${VITE_PLUS_INSTALL}`,
+        ]
+      : []),
     ...(run === undefined || devkitTasks.length === 0
       ? []
       : [

@@ -21,6 +21,6 @@ fix(devkit): a created repository says how to start it, and init stops warning a
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented and verified; in review on #1216
 - Blockers: none
-- Next:
+- Next: merge #1216, then version and release the pending changesets

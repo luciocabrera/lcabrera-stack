@@ -9,6 +9,7 @@
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
+import { runCreate } from './command-create.mjs';
 import { runInit } from './command-init.mjs';
 import {
   createUnderWith,
@@ -16,7 +17,7 @@ import {
   quietlyWith,
   scratchDirectories,
 } from './create-fixtures.mjs';
-import { firstInstallFor, shellWord } from './create.mjs';
+import { changeDirectoryStep, firstInstallFor } from './create.mjs';
 
 const scratches = scratchDirectories('devkit-next-steps-');
 
@@ -56,22 +57,39 @@ describe('what a created repository is told to do next', () => {
     },
   );
 
-  test.each([
-    ['demo', 'demo'],
-    ['nested/demo', 'nested/demo'],
-    ['my project', "'my project'"],
-    ["it's", String.raw`'it'\''s'`],
-    ['$(touch x)', "'$(touch x)'"],
-  ])('cd names %s as a POSIX shell reads it', (target, word) => {
-    expect(shellWord(target, 'linux')).toBe(word);
-  });
+  test.each(['demo', 'nested/demo', 'my-project_2'])(
+    '`%s` is handed over as a `cd` to copy',
+    (target) => {
+      expect(changeDirectoryStep(target)).toEqual({ command: `cd ${target}` });
+    },
+  );
 
   test.each([
-    ['demo', 'demo'],
-    ['my project', '"my project"'],
-    [String.raw`C:\work\my project`, String.raw`"C:\work\my project"`],
-  ])('cd names %s as cmd and PowerShell read it', (target, word) => {
-    expect(shellWord(target, 'win32')).toBe(word);
+    'my project',
+    "it's",
+    '$(touch x)',
+    '%TEMP%',
+    String.raw`C:\work`,
+  ])(
+    '`%s` is named, not handed over as a command some shell would misread',
+    (target) => {
+      expect(changeDirectoryStep(target)).toEqual({
+        prose: `Change into \`${target}\`, then run:`,
+      });
+    },
+  );
+
+  test('a target with a space still prints the install and the dev task', () => {
+    const parent = scratch();
+    const { code, printed } = quietly(() =>
+      runCreate(['my project', '--profile', 'monorepo'], parent),
+    );
+
+    expect(code).toBe(0);
+    expect(printed).toContain(
+      'Change into `my project`, then run:\n  vp install\n  vp run dev',
+    );
+    expect(printed).not.toContain('cd my project');
   });
 
   test.each([
@@ -98,6 +116,21 @@ describe('an upgrade straight after create', () => {
     expect(upgraded.code).toBe(0);
     expect(upgraded.printed).not.toContain('core.hooksPath');
   });
+
+  test.each(['./.githooks', '.githooks/', 'absolute'])(
+    'does not ask when core.hooksPath is %s, the same directory spelled differently',
+    (spelling) => {
+      const parent = scratch();
+      createUnder({ parent, profile: 'repo' });
+      const created = join(parent, 'demo');
+      const pointed =
+        spelling === 'absolute' ? join(created, '.githooks') : spelling;
+      git(['config', 'core.hooksPath', pointed], created);
+      const upgraded = quietly(() => runInit(['--upgrade'], created));
+
+      expect(upgraded.printed).not.toContain('core.hooksPath');
+    },
+  );
 
   test('still asks when git does not run them', () => {
     const parent = scratch();
