@@ -17,11 +17,11 @@ area:
   - pnpm-workspace.yaml
   - pnpm-lock.yaml
   - scripts/lib/devkit-tree-run*
-  - scripts/lib/devkit-registry-server.mjs
+  - scripts/lib/devkit-registry-server*
   - packages/devkit/CLASSIFICATION.md
   - docs/decisions/ADR-125-*
 started: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-01
 plan: (none)
 pr: https://github.com/luciocabrera/lcabrera-stack/pull/1207
 issue: #1205
