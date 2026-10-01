@@ -411,6 +411,15 @@ jobs:
         # stated the opposite, and editing it changed nothing.
         run: vp run configs:verify
 
+      - name: No tracked file carries a merge-conflict marker
+        id: conflict_markers_gate
+        # A merge committed an unresolved conflict into a Markdown file and every
+        # other check passed: the formatter had already rewritten the closing
+        # marker into nested block quotes, so neither `git diff --check` nor a
+        # search for the raw marker found it (#1212). This reads every tracked
+        # text file for the markers git writes and the forms a formatter leaves.
+        run: vp run conflict-markers:verify
+
       - name: No unaddressed dependency advisory
         id: deps_audit_gate
         # The repo gated its docs, its ADR numbering and four linters, but not
