@@ -21,7 +21,10 @@ import { join } from 'node:path';
 import process from 'node:process';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
-import { hooksPathAction } from '../assets/workspace/scripts/hooks-path.mjs';
+import {
+  hooksPathAction,
+  hooksPathReport,
+} from '../assets/workspace/scripts/hooks-path.mjs';
 import { runCreate } from './command-create.mjs';
 import { runCommand } from './command-router.mjs';
 import { INITIAL_COMMIT_MESSAGE } from './create.mjs';
@@ -294,4 +297,36 @@ describe('hooksPathAction', () => {
   ])('%o is %s', (overrides, action) => {
     expect(hooksPathAction({ ...args, ...overrides })).toBe(action);
   });
+});
+
+describe('hooksPathReport', () => {
+  const args = { current: '.husky', hooksPath: '.githooks' };
+
+  test('says the hooks run once git is pointed at them', () => {
+    expect(hooksPathReport({ ...args, action: 'point' })).toEqual({
+      stream: 'log',
+      text: 'git runs the hooks in `.githooks/` from now on.',
+    });
+  });
+
+  test('names the existing value and how to switch when it is kept', () => {
+    const report = hooksPathReport({ ...args, action: 'kept' });
+
+    expect(report?.stream).toBe('log');
+    expect(report?.text).toContain('core.hooksPath is `.husky`');
+    expect(report?.text).toContain('git config core.hooksPath .githooks');
+  });
+
+  test('warns on stderr when the directory leads outside the repository', () => {
+    expect(hooksPathReport({ ...args, action: 'escapes' })?.stream).toBe(
+      'error',
+    );
+  });
+
+  test.each([['pointed'], ['absent'], ['outside']])(
+    'says nothing for %s',
+    (action) => {
+      expect(hooksPathReport({ ...args, action })).toBeUndefined();
+    },
+  );
 });

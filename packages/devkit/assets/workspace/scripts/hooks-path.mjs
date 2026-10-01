@@ -234,6 +234,53 @@ export const hooksPathInstruction = (hooksPath) =>
 const readIfPresent = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
 
+const REPORTS = new Map([
+  [
+    'escapes',
+    ({ hooksPath }) => ({
+      stream: 'error',
+      text: `\`${hooksPath}/\` resolves to a directory outside this repository, so git was not pointed at it and its hooks stay off.`,
+    }),
+  ],
+  [
+    'kept',
+    ({ current, hooksPath }) => ({
+      stream: 'log',
+      text: `core.hooksPath is \`${current}\` in this clone, so the hooks in \`${hooksPath}/\` were left off. ${hooksPathInstruction(hooksPath)}`,
+    }),
+  ],
+  [
+    'point',
+    ({ hooksPath }) => ({
+      stream: 'log',
+      text: `git runs the hooks in \`${hooksPath}/\` from now on.`,
+    }),
+  ],
+]);
+
+/**
+ * @param {{ action: string, current: string, hooksPath: string }} args
+ * @returns {{ stream: 'error' | 'log', text: string } | undefined}
+ */
+export const hooksPathReport = ({ action, current, hooksPath }) =>
+  REPORTS.get(action)?.({ current, hooksPath });
+
+const hooksDirectory = ({ hooksPath, root }) => {
+  const directory = join(root, hooksPath);
+  const hooksPresent = isDirectory(directory);
+  return {
+    hooksInside:
+      hooksPresent && isWithin({ path: realpathSync(directory), root }),
+    hooksPresent,
+  };
+};
+
+const printReport = (report) => {
+  if (report === undefined) return;
+  const print = report.stream === 'error' ? console.error : console.log;
+  print(report.text);
+};
+
 const point = ({ binary, root }) => {
   const git = gitRunner(binary);
   const read = quietly(git);
@@ -241,37 +288,17 @@ const point = ({ binary, root }) => {
   if (topLevel !== root) return;
   const hooksPath = hooksPathIn(readIfPresent(join(root, CONFIG_FILE_NAME)));
   const current = read(['config', '--local', '--get', 'core.hooksPath']);
-  const directory = join(root, hooksPath);
-  const hooksPresent = isDirectory(directory);
   const action = hooksPathAction({
     current,
-    hooksInside:
-      hooksPresent && isWithin({ path: realpathSync(directory), root }),
+    ...hooksDirectory({ hooksPath, root }),
     hooksPath,
-    hooksPresent,
     root,
     topLevel,
   });
-  switch (action) {
-    case 'escapes': {
-      console.error(
-        `\`${hooksPath}/\` resolves to a directory outside this repository, so git was not pointed at it and its hooks stay off.`,
-      );
-      break;
-    }
-    case 'kept': {
-      console.log(
-        `core.hooksPath is \`${current}\` in this clone, so the hooks in \`${hooksPath}/\` were left off. ${hooksPathInstruction(hooksPath)}`,
-      );
-      break;
-    }
-    case 'point': {
-      git(['config', '--local', 'core.hooksPath', hooksPath]);
-      console.log(`git runs the hooks in \`${hooksPath}/\` from now on.`);
-      break;
-    }
-    default:
+  if (action === 'point') {
+    git(['config', '--local', 'core.hooksPath', hooksPath]);
   }
+  printReport(hooksPathReport({ action, current, hooksPath }));
 };
 
 const main = () => {
