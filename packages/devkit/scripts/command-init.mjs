@@ -8,7 +8,13 @@
  * repository reporting drift on the day it was set up.
  */
 
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  writeFileSync,
+} from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import {
@@ -46,6 +52,14 @@ import { taskOutcomes } from './tasks.mjs';
 
 const MANIFEST = 'package.json';
 
+const canonicalPath = (path) => {
+  try {
+    return realpathSync(path);
+  } catch {
+    return path;
+  }
+};
+
 const gitRunsHooksFrom = ({ hooksPath, root }) => {
   try {
     const pointed = readGit({
@@ -53,7 +67,9 @@ const gitRunsHooksFrom = ({ hooksPath, root }) => {
       cwd: root,
     });
     return (
-      pointed !== '' && resolve(root, pointed) === resolve(root, hooksPath)
+      pointed !== '' &&
+      canonicalPath(resolve(root, pointed)) ===
+        canonicalPath(resolve(root, hooksPath))
     );
   } catch {
     return false;

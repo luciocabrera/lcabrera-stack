@@ -6,6 +6,7 @@
  * `create` into a scratch directory rather than against a stub.
  */
 
+import { symlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
@@ -28,6 +29,14 @@ const quietly = (run) => quietlyWith(vi, run);
 const createUnder = (args) => createUnderWith(vi, args);
 
 afterEach(scratches.drain);
+
+const pointedSpelling = ({ created, parent, spelling }) => {
+  if (spelling === 'absolute') return join(created, '.githooks');
+  if (spelling !== 'symlink') return spelling;
+  const alias = join(parent, 'hooks-alias');
+  symlinkSync(join(created, '.githooks'), alias);
+  return alias;
+};
 
 describe('what a created repository is told to do next', () => {
   test('the monorepo rung: the directory, an install, the dev task and the devkit tasks', () => {
@@ -117,17 +126,17 @@ describe('an upgrade straight after create', () => {
     expect(upgraded.printed).not.toContain('core.hooksPath');
   });
 
-  test.each(['./.githooks', '.githooks/', 'absolute'])(
+  test.each(['./.githooks', '.githooks/', 'absolute', 'symlink'])(
     'does not ask when core.hooksPath is %s, the same directory spelled differently',
     (spelling) => {
       const parent = scratch();
       createUnder({ parent, profile: 'repo' });
       const created = join(parent, 'demo');
-      const pointed =
-        spelling === 'absolute' ? join(created, '.githooks') : spelling;
+      const pointed = pointedSpelling({ created, parent, spelling });
       git(['config', 'core.hooksPath', pointed], created);
       const upgraded = quietly(() => runInit(['--upgrade'], created));
 
+      expect(upgraded.code).toBe(0);
       expect(upgraded.printed).not.toContain('core.hooksPath');
     },
   );

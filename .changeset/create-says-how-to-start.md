@@ -14,5 +14,5 @@ command, and names the `devkit:check` and `devkit:sync` tasks that run it.
 
 `devkit init --upgrade` no longer tells you to run `git config core.hooksPath`
 when git already runs the hooks from that directory, however the path is
-spelled (`./.githooks`, `.githooks/`, absolute). It still says so when the key
+spelled (`./.githooks`, `.githooks/`, absolute, or through a symlink). It still says so when the key
 is unset or names another directory.
