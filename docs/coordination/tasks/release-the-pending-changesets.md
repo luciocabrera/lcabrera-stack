@@ -1,0 +1,26 @@
+---
+id: release-the-pending-changesets
+title: chore(release): version the packages from the pending changesets
+owner: agent:claude
+status: active
+branch: chore/1217-release-the-pending-changesets
+area:
+  - packages/*/package.json
+  - packages/*/CHANGELOG.md
+  - .changeset/**
+started: 2026-10-01
+updated: 2026-10-01
+plan: (none)
+pr: (none)
+issue: #1217
+---
+
+## What
+
+chore(release): version the packages from the pending changesets
+
+## Status / next
+
+- Current step: just claimed
+- Blockers: none
+- Next:
