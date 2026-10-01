@@ -13,7 +13,7 @@ area:
   - packages/vite-configs/README.md
   - COMMANDS.md
 started: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-01
 plan: (none)
 pr: '#1201'
 issue: #1192
@@ -26,5 +26,5 @@ the monorepo blueprint installs no unmet peer
 ## Status / next
 
 - Current step: PR open
-- Blockers: the created-tree gate stays red until a `@lcabrera/vite-config` with the widened preset peer is published
+- Blockers: none
 - Next: review
