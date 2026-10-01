@@ -4,10 +4,10 @@ import {
   ENTERPRISE_ORDER_PRIMARY_KEY,
   MAX_ENTERPRISE_ORDERS_LIMIT,
 } from '../config';
-import { resolveOrdersPageRead } from './resolveOrdersPageRead.util';
+import { resolveOrdersPageRead } from './enterpriseOrders.service';
 
-vi.mock('./enterpriseOrders.service', () => ({
-  selectOrderGroupKeyTruncations: vi.fn(async () => ({})),
+vi.mock('@lcabrera/server/db/get-column-grouping-capabilities.util', () => ({
+  getColumnGroupingCapabilities: vi.fn(async () => ({})),
 }));
 
 const GROUP_TOKEN = JSON.stringify({

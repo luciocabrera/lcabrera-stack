@@ -19,9 +19,6 @@
   "apps/showcase/src/routes/api/car-sales-paginated/parseCarSalesPageParams.util.ts": [
     "parseCarSalesPageParams"
   ],
-  "apps/showcase/src/routes/api/enterprise-orders-delete/parseOrderId.util.ts": [
-    "parseOrderId"
-  ],
   "apps/showcase/src/routes/api/wide-alltypes-150-paginated/parseWideAlltypes150PageParams.util.ts": [
     "parseWideAlltypes150PageParams"
   ],
@@ -33,9 +30,6 @@
   ],
   "apps/showcase/src/routes/enterprise-orders/config/formatOrderNumber.util.ts": [
     "formatOrderNumber"
-  ],
-  "apps/showcase/src/routes/enterprise-orders/config/isEnterpriseOrdersResponse.util.ts": [
-    "isEnterpriseOrdersResponse"
   ],
   "apps/showcase/src/routes/enterprise-orders/config/parseOrderFormData.util.ts": [
     "parseOrderFormData"
@@ -54,9 +48,6 @@
   ],
   "apps/showcase/src/routes/enterprise-orders/config/toOrderInsertValues.util.ts": [
     "toOrderInsertValues"
-  ],
-  "apps/showcase/src/routes/enterprise-orders/config/toOrderKeysetCursor.util.ts": [
-    "toOrderKeysetCursor"
   ],
   "apps/showcase/src/routes/enterprise-orders/config/toOrderUpdateValues.util.ts": [
     "toOrderUpdateValues"

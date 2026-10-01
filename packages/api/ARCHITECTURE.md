@@ -39,19 +39,21 @@ half out removes that edge at the package boundary rather than papering over it.
 
 ## Artifacts
 
-| Domain      | File                                   | Description                                                                                     |
-| ----------- | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `config/`   | `config.constants.ts`                  | `API_SERVER_PORT` and the `CONFIG` per-environment host map                                     |
-| `config/`   | `config.types.ts`                      | `ApiConfig` — the shape of `CONFIG`                                                             |
-| `config/`   | `get-api-base-url.util.ts`             | Resolves the API base URL across SSR, dev-proxy, private-IP and production cases                |
-| `http/`     | `fetch-and-validate.util.ts`           | Fetches, asserts OK, parses JSON, validates the body through a type guard                       |
-| `http/`     | `build-paginated-query-params.util.ts` | Builds the `limit`/`skip`/`sort`/`filter` query params shared by paginated fetchers             |
-| `http/`     | `create-paginated-fetcher.util.ts`     | Factory: endpoint declaration (path, guard, base-URL strategy) in, validated page fetcher out   |
-| `http/`     | `http.types.ts`                        | `PaginatedSort`, `PaginatedQuery`, `PaginatedFetchArgs` — the shared paginated-read contract    |
-| `distinct/` | `distinct.types.ts`                    | `DistinctValuesResponse` — the wire contract a distinct-values endpoint returns                 |
-| `distinct/` | `fetch-distinct-values.util.ts`        | Pages a distinct-values endpoint — the HTTP half of the ADR-009 descriptors                     |
-| `distinct/` | `is-distinct-values-response.util.ts`  | Type guard for `DistinctValuesResponse`                                                         |
-| `distinct/` | `parse-filter-options-params.util.ts`  | Parses filter-option search params into `fetchDistinctValues` args (page-size default injected) |
+| Domain        | File                                   | Description                                                                                                                               |
+| ------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `config/`     | `config.constants.ts`                  | `API_SERVER_PORT` and the `CONFIG` per-environment host map                                                                               |
+| `config/`     | `config.types.ts`                      | `ApiConfig` — the shape of `CONFIG`                                                                                                       |
+| `config/`     | `get-api-base-url.util.ts`             | Resolves the API base URL across SSR, dev-proxy, private-IP and production cases                                                          |
+| `http/`       | `fetch-and-validate.util.ts`           | Fetches, asserts OK, parses JSON, validates the body through a type guard                                                                 |
+| `http/`       | `build-paginated-query-params.util.ts` | Builds the `limit`/`skip`/`sort`/`filter` query params shared by paginated fetchers                                                       |
+| `http/`       | `create-paginated-fetcher.util.ts`     | Factory: endpoint declaration (path, guard, base-URL strategy) in, validated page fetcher out                                             |
+| `http/`       | `http.types.ts`                        | `PaginatedSort`, `PaginatedQuery`, `PaginatedFetchArgs` — the shared paginated-read contract                                              |
+| `distinct/`   | `distinct.types.ts`                    | `DistinctValuesResponse` — the wire contract a distinct-values endpoint returns                                                           |
+| `distinct/`   | `fetch-distinct-values.util.ts`        | Pages a distinct-values endpoint — the HTTP half of the ADR-009 descriptors                                                               |
+| `distinct/`   | `is-distinct-values-response.util.ts`  | Type guard for `DistinctValuesResponse`                                                                                                   |
+| `distinct/`   | `parse-filter-options-params.util.ts`  | Parses filter-option search params into `fetchDistinctValues` args (page-size default injected)                                           |
+| `table-page/` | `table-page.types.ts`                  | `TablePageResponseShape` — the envelope a table-page endpoint returns                                                                     |
+| `table-page/` | `is-table-page-response.util.ts`       | Type guard for a table page: rows array, `hasMore`, optional numeric `total`, and `error`/`groupingWarning` tagged by `kind` when present |
 
 ## Base-URL resolution
 

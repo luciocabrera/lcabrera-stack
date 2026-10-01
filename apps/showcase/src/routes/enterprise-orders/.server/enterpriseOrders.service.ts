@@ -1,31 +1,15 @@
-import type { GroupAggregate } from '@lcabrera/server/db/group-query-builder/group-query-builder.types';
-import type {
-  QueryFilter,
-  QuerySort,
-} from '@lcabrera/server/db/query-builder/query-builder.types';
-import type {
-  TableAggregateFn,
-  TableGroupingState,
-  TableGroupPeriod,
-  TableTotalsPlacement,
-} from '@lcabrera/ui/components/Table/Table.types';
+import type { TablePageRead } from '@lcabrera/server/table-page/table-page.types';
+import type { TableGroupingState } from '@lcabrera/ui/components/Table/Table.types';
 
-import { deleteRows } from '@lcabrera/server/db/delete-rows.util';
-import { readPivotMaxDistinct } from '@lcabrera/server/db/env.schema';
-import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-grouping-capabilities.util';
 import { getMaxValue } from '@lcabrera/server/db/get-max-value.util';
-import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { insertRow } from '@lcabrera/server/db/insert-row.util';
-import {
-  decodeGroupedRows,
-  toGroupAggregates,
-  toGroupSort,
-} from '@lcabrera/server/db/olap/decode-grouped-rows.util';
-import { toGroupKeyTruncations } from '@lcabrera/server/db/olap/to-group-key-truncations.util';
-import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { updateRows } from '@lcabrera/server/db/update-rows.util';
-import { toSerializableDbError } from '@lcabrera/server/errors/to-serializable-db-error.util';
+import { createTablePageReader } from '@lcabrera/server/table-page/create-table-page-reader.util';
+import {
+  ACTIONS_COLUMN_KEY,
+  INITIAL_PAGE_SIZE,
+} from '@lcabrera/ui/components/Table/Table.constants';
 
 import type {
   EnterpriseOrder,
@@ -36,6 +20,7 @@ import type {
 import {
   ENTERPRISE_ORDER_ALLOWED_COLUMNS,
   ENTERPRISE_ORDER_COLUMNS,
+  ENTERPRISE_ORDER_FALLBACK_SORT,
   ENTERPRISE_ORDER_GROUP_MAX_ROWS,
   ENTERPRISE_ORDER_LIST_COLUMNS,
   ENTERPRISE_ORDER_PRIMARY_KEY,
@@ -43,7 +28,6 @@ import {
   ENTERPRISE_ORDERS_TABLE,
   MAX_ENTERPRISE_ORDERS_LIMIT,
   MAX_ENTERPRISE_ORDERS_SORT_RULES,
-  toOrderKeysetCursor,
 } from '../config';
 
 const TARGET = {
@@ -52,195 +36,34 @@ const TARGET = {
   table: ENTERPRISE_ORDERS_TABLE,
 } as const;
 
-const NO_GROUPING: TableGroupingState = {
-  aggregates: [],
-  keys: [],
-  mode: 'flat',
-  periods: {},
-  shares: [],
-  totalsPlacement: 'last',
-};
+const ordersPage = createTablePageReader<EnterpriseOrderListRow>({
+  defaultLimit: INITIAL_PAGE_SIZE,
+  fallbackSort: ENTERPRISE_ORDER_FALLBACK_SORT,
+  fields: ENTERPRISE_ORDER_LIST_COLUMNS,
+  groupMaxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
+  ignoredSortColumns: [ACTIONS_COLUMN_KEY],
+  maxLimit: MAX_ENTERPRISE_ORDERS_LIMIT,
+  maxSortRules: MAX_ENTERPRISE_ORDERS_SORT_RULES,
+  primaryKey: ENTERPRISE_ORDER_PRIMARY_KEY,
+  target: TARGET,
+});
 
-type SelectGroupedOrdersArgs = {
-  readonly aggregates: TableGroupingState['aggregates'];
-  readonly columnAxis?: string;
-  readonly filters: readonly QueryFilter[];
-  readonly groupKeys: readonly string[];
-  readonly groupMode: TableGroupingState['mode'];
-  readonly groupPeriods: TableGroupingState['periods'];
-  readonly sort: readonly QuerySort[];
-  readonly subtotalPlacement: TableTotalsPlacement;
-};
+export const {
+  deleteRow: deleteOrder,
+  resolveGroupRead: resolveOrdersGroupRead,
+  resolveGroupRestriction: resolveOrdersGroupRestriction,
+  resolvePageRead: resolveOrdersPageRead,
+  selectGroupingCapabilities: selectOrderGroupingCapabilities,
+  selectGroupKeyTruncations: selectOrderGroupKeyTruncations,
+} = ordersPage;
 
-const selectGroupedOrders = async ({
-  aggregates: selectedAggregates,
-  columnAxis,
-  filters,
-  groupKeys,
-  groupMode,
-  groupPeriods,
-  sort,
-  subtotalPlacement,
-}: SelectGroupedOrdersArgs): Promise<EnterpriseOrdersResponse> => {
-  const requested: readonly OrderColumnAggregate[] = selectedAggregates.map(
-    ({ columnKey, fn }) =>
-      ({ column: columnKey, fn }) satisfies UnfilteredOrderAggregate,
-  );
-
-  try {
-    const {
-      aggregates,
-      columnAxis: builtAxis,
-      maskAlias,
-      rows,
-      truncations,
-      warning,
-    } = await selectGroupedRows({
-      ...TARGET,
-      aggregates: toGroupAggregates({ requested }),
-      filters,
-      grouping: groupMode,
-      keys: groupKeys,
-      maxRows: ENTERPRISE_ORDER_GROUP_MAX_ROWS,
-      periods: groupPeriods,
-      sort: toGroupSort({ groupKeys, requested, sort }),
-      subtotalPlacement,
-      ...(columnAxis !== undefined && {
-        columnAxis: {
-          key: columnAxis,
-          maxDistinct: readPivotMaxDistinct({ env: process.env }),
-        },
-      }),
-    });
-
-    const data = decodeGroupedRows({
-      aggregates,
-      columnKeys: groupKeys,
-      maskAlias,
-      requested,
-      rows,
-      truncations,
-      ...(builtAxis !== undefined && { columnAxis: builtAxis }),
-    });
-
-    return {
-      data,
-      hasMore: false,
-      total: data.length,
-      ...(warning !== undefined && { groupingWarning: warning }),
-    };
-  } catch (error) {
-    return {
-      data: [],
-      error: toSerializableDbError(error),
-      hasMore: false,
-      total: 0,
-    };
-  }
-};
-
-export const selectOrderGroupingCapabilities = async () =>
-  getColumnGroupingCapabilities({
-    columns: ENTERPRISE_ORDER_ALLOWED_COLUMNS,
-    schema: ENTERPRISE_ORDERS_SCHEMA,
-    table: ENTERPRISE_ORDERS_TABLE,
-  });
-
-export const selectOrderGroupKeyTruncations = async (
-  periods: Readonly<Record<string, TableGroupPeriod>> | undefined,
-) => {
-  const columns = Object.keys(periods ?? {});
-
-  if (columns.length === 0) return {};
-
-  return toGroupKeyTruncations({
-    capabilities: await getColumnGroupingCapabilities({
-      columns,
-      schema: ENTERPRISE_ORDERS_SCHEMA,
-      table: ENTERPRISE_ORDERS_TABLE,
-    }),
-    periods,
-  });
-};
-
-export type SelectOrdersPageArgs = {
-  readonly cursor?: readonly unknown[];
-  readonly filters: readonly QueryFilter[];
+type SelectOrdersPageArgs = Omit<TablePageRead, 'grouping'> & {
   readonly grouping?: TableGroupingState;
-  readonly includeTotal: boolean;
-  readonly limit: number;
-  readonly offset: number;
-  readonly sort: readonly QuerySort[];
-  readonly totalsPlacement?: TableTotalsPlacement;
 };
 
-type OrderColumnAggregate = {
-  readonly column: string;
-  readonly fn: TableAggregateFn;
-};
-
-type UnfilteredOrderAggregate = Omit<GroupAggregate, 'alias' | 'filters'>;
-
-export const selectOrdersPage = async ({
-  cursor,
-  filters,
-  grouping = NO_GROUPING,
-  includeTotal,
-  limit,
-  offset,
-  sort,
-  totalsPlacement = 'last',
-}: SelectOrdersPageArgs): Promise<EnterpriseOrdersResponse> => {
-  const boundedSort = sort.slice(0, MAX_ENTERPRISE_ORDERS_SORT_RULES);
-
-  if (grouping.keys.length > 0) {
-    return selectGroupedOrders({
-      aggregates: grouping.aggregates,
-      filters,
-      groupKeys: grouping.keys,
-      groupMode: grouping.mode,
-      groupPeriods: grouping.periods,
-      sort: boundedSort,
-      subtotalPlacement: totalsPlacement,
-      ...(grouping.columnAxis !== undefined && {
-        columnAxis: grouping.columnAxis,
-      }),
-    });
-  }
-
-  const boundedLimit = Math.min(
-    MAX_ENTERPRISE_ORDERS_LIMIT,
-    Math.max(1, limit),
-  );
-  const keysetCursor = toOrderKeysetCursor({ cursor, sort: boundedSort });
-
-  const [data, total] = await Promise.all([
-    selectRows<EnterpriseOrderListRow>({
-      ...TARGET,
-      fields: ENTERPRISE_ORDER_LIST_COLUMNS,
-      filters,
-      limit: boundedLimit,
-      sort: boundedSort,
-      ...(keysetCursor === undefined ? { offset } : { cursor: keysetCursor }),
-    }),
-    includeTotal
-      ? getRowsCount({
-          ...TARGET,
-          column: ENTERPRISE_ORDER_PRIMARY_KEY,
-          filters,
-        })
-      : undefined,
-  ]);
-
-  return {
-    data,
-    hasMore:
-      total === undefined
-        ? data.length === boundedLimit
-        : offset + data.length < total,
-    ...(total !== undefined && { total }),
-  };
-};
+export const selectOrdersPage: (
+  args: SelectOrdersPageArgs,
+) => Promise<EnterpriseOrdersResponse> = ordersPage.selectPage;
 
 export const selectOrderById = async (orderId: number) => {
   const rows = await selectRows<EnterpriseOrder>({
@@ -285,11 +108,4 @@ export const updateOrder = async ({ orderId, values }: UpdateOrderArgs) => {
   });
 
   return rows[0];
-};
-
-export const deleteOrder = async (orderId: number) => {
-  await deleteRows({
-    ...TARGET,
-    filters: [{ column: 'order_id', operator: 'eq', value: orderId }],
-  });
 };

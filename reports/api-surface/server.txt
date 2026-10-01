@@ -259,6 +259,52 @@ ResolveQuerySortArgs [type] { /** Applied when `sorting` is empty; must itself b
 ## ./sort/sort.types
 ColumnSort [type] { readonly columnKey: string; readonly direction: 'asc' | 'desc'; }
 
+## ./table-page/create-group-detail-reads.util
+createGroupDetailReads [const] <TPage>({ columns, limit, reader }: CreateGroupDetailReadsArgs<TPage>) => { fetchPage: ({ effectiveSorting, filters, request }: GroupDetailPageArgs) => Promise<TPage | TablePage<never>>; resolveLockedFilters: ({ request }: GroupDetailRequestArgs) => Promise<GroupRestrictionStatement | undefined>; }
+CreateGroupDetailReadsArgs [type] { /** Labels the locked-filter statement; a column with no label shows its key. */ readonly columns: Parameters<TablePageReader['resolveGroupRestriction']>[0]['columns']; /** Size of the first page of the group's rows. */ readonly limit: number; readonly reader: Pick<TablePageReader, 'resolveGroupRead' | 'resolveGroupRestriction'> & { readonly selectPage: (read: OlapGroupRead) => Promise<TPage>; }; }
+GroupDetailPageArgs [type] { readonly effectiveSorting: readonly TablePageSortRule[]; readonly filters: Readonly<Record<string, ColumnFilter>>; readonly request: Request; }
+GroupDetailRequestArgs [type] { readonly request: Request; }
+
+## ./table-page/create-row-delete-action.util
+createRowDeleteAction [const] <TId>({ deleteRow, parseId }: CreateRowDeleteActionArgs<TId>) => RowDeleteAction
+CreateRowDeleteActionArgs [type] { readonly deleteRow: (id: TId) => Promise<unknown>; /** Returns `undefined` for a value that names no row, which is answered 400. */ readonly parseId: (raw: string) => TId | undefined; }
+RowDeleteAction [type] (args: RowDeleteActionArgs) => Promise<Response>
+RowDeleteActionArgs [type] { readonly request: Request; }
+
+## ./table-page/create-table-page-loader.util
+createTablePageLoader [const] ({ resolvePageRead, selectPage }: CreateTablePageLoaderArgs) => TablePageLoader
+CreateTablePageLoaderArgs [type] { readonly resolvePageRead: TablePageReader['resolvePageRead']; readonly selectPage: (read: OlapGroupRead) => Promise<unknown>; }
+TablePageLoader [type] (args: TablePageLoaderArgs) => Promise<Response>
+TablePageLoaderArgs [type] { readonly request: Request; }
+
+## ./table-page/create-table-page-reader.util
+createTablePageReader [const] <TRow extends QueryResultRow>({ defaultLimit, fallbackSort, fields, groupMaxRows, ignoredSortColumns, maxLimit, maxSortRules, primaryKey, target }: CreateTablePageReaderArgs) => { deleteRow: (id: unknown) => Promise<void>; resolveGroupRead: (args: TablePageGroupReadArgs) => Promise<OlapGroupReadResolution>; resolveGroupRestriction: (args: TablePageGroupRestrictionArgs) => Promise<GroupRestrictionStatement | undefined>; resolvePageRead: (params: URLSearchParams) => Promise<OlapGroupReadResolution>; selectGroupingCapabilities: () => Promise<Readonly<Record<string, ColumnGroupingCapability>>>; selectGroupKeyTruncations: (periods: Readonly<Record<string, GroupKeyPeriod>> | undefined) => Promise<Readonly<Record<string, GroupKeyTruncation>>>; selectPage: ({ cursor, filters, grouping, includeTotal, limit, offset, sort, totalsPlacement }: TablePageRead) => Promise<TablePage<TRow>>; }
+CreateTablePageReaderArgs [type] { /** Page size a request that names no `limit` gets. */ readonly defaultLimit: number; /** Order a request that sends no usable sort gets; must be non-empty. */ readonly fallbackSort: readonly ColumnSort[]; /** Columns a row read projects. Defaults to `target.allowedColumns`. */ readonly fields?: readonly string[]; /** Row ceiling of a grouped read, which is never paginated. */ readonly groupMaxRows: number; /** Sort keys a client may send that name no data column. */ readonly ignoredSortColumns?: readonly string[]; /** Largest page a request can ask for; smaller pages pass through. */ readonly maxLimit: number; /** Longest ORDER BY a request can ask for. Defaults to the allowed column count. */ readonly maxSortRules?: number; /** Unique, non-null column that breaks sort ties and anchors keyset pages. */ readonly primaryKey: string; readonly target: TablePageTarget; }
+TablePageGroupReadArgs [type] Omit<Parameters<typeof resolveGroupRead>[0], 'maxLimit' | 'primaryKey' | 'selectTruncations'>
+TablePageGroupRestrictionArgs [type] Omit<Parameters<typeof resolveGroupRestriction>[0], 'selectTruncations'>
+TablePageReader [type] ReturnType<typeof createTablePageReader<TRow>>
+
+## ./table-page/parse-table-page-params.util
+parseTablePageParams [const] ({ defaultLimit, fallbackSort, ignoredSortColumns, params }: ParseTablePageParamsArgs) => TablePageParams
+ParseTablePageParamsArgs [type] { /** Used when the request names no `limit`, or an unreadable one. */ readonly defaultLimit: number; /** Used when the request carries no usable sort rule; must be non-empty. */ readonly fallbackSort: readonly ColumnSort[]; /** Columns a client may send a sort for that are not data columns. */ readonly ignoredSortColumns?: readonly string[]; readonly params: URLSearchParams; }
+
+## ./table-page/table-page.types
+TablePage [type] { readonly data: readonly (TablePageGroupRow | TRow)[]; readonly error?: SerializableDbError; readonly groupingWarning?: GroupCardinalityWarning; readonly hasMore: boolean; readonly total?: number; }
+TablePageAggregate [type] { readonly columnKey: string; readonly fn: AggregateFn; }
+TablePageGrouping [type] { readonly aggregates: readonly TablePageAggregate[]; /** Distinct values of this column become measure columns. */ readonly columnAxis?: string; readonly keys: readonly string[]; readonly mode: GroupingMode; readonly periods: Readonly<Record<string, GroupKeyPeriod>>; }
+TablePageGroupRow [type] ReturnType<typeof toGroupRow>
+TablePageParams [type] { readonly cursor?: readonly unknown[]; readonly filters: readonly QueryFilter[]; readonly limit: number; readonly skip: number; readonly sort: readonly QuerySort[]; }
+TablePageRead [type] { /** One value per `sort` entry, from the last row of the previous page. */ readonly cursor?: readonly unknown[]; readonly filters: readonly QueryFilter[]; /** A read with no group keys returns rows, not groups. */ readonly grouping?: TablePageGrouping; readonly includeTotal: boolean; readonly limit: number; readonly offset: number; readonly sort: readonly QuerySort[]; /** Defaults to `'last'`. */ readonly totalsPlacement?: 'first' | 'last'; }
+TablePageSortRule [type] { readonly columnKey: string; /** A rule with no direction sorts nothing and is dropped. */ readonly direction?: ColumnSort['direction']; }
+TablePageTarget [type] { /** Every request-derived column is checked against this list. */ readonly allowedColumns: readonly string[]; readonly schema: string; readonly table: string; }
+
+## ./table-page/to-integer-row-id.util
+toIntegerRowId [const] (raw: string) => number | undefined
+
+## ./table-page/to-keyset-cursor.util
+toKeysetCursor [const] ({ cursor, sort, uniqueColumn }: ToKeysetCursorArgs) => { uniqueColumn: string; values: readonly unknown[]; } | undefined
+ToKeysetCursorArgs [type] { readonly cursor?: readonly unknown[]; readonly sort: readonly QuerySort[]; readonly uniqueColumn: string; }
+
 ## ./tickets/is-access-ticket-valid.util
 isAccessTicketValid [const] ({ now, secret, subject, ticket }: VerifyAccessTicketArgs) => boolean
 
