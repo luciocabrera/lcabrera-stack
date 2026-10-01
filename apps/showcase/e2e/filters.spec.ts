@@ -32,9 +32,34 @@ const ORDER_DATE = 'order_date';
 const GIFT = 'is_gift';
 const PRIORITY = 'priority';
 
-const apply = async (page: Parameters<typeof openGrid>[0], count: number) => {
+type GridPage = Parameters<typeof openGrid>[0];
+
+const apply = async (page: GridPage, count: number) => {
   await acceptSettings(page);
   await expectDatasetCount(page, count);
+};
+
+const draftDelivered = async (page: GridPage) => {
+  await openGrid(page);
+  await openSettings(page);
+  await selectTab(page, 'Filters');
+  await addColumn(page, 'Status');
+  await pickFilterOption(filterItem(page, STATUS), 'Delivered');
+};
+
+const clearAcceptedFilters = async (page: GridPage) => {
+  await openSettings(page);
+  await selectTab(page, 'Filters');
+  await clickToolbar(page, 'Clear Filters');
+};
+
+const draftOrderPrefix = async (page: GridPage, prefix: string) => {
+  await openGrid(page);
+  await openSettings(page);
+  await selectTab(page, 'Filters');
+  await addColumn(page, 'Order #');
+  await chooseOperator(filterItem(page, ORDER_NUMBER), 'Starts with');
+  await fillFilterText(filterItem(page, ORDER_NUMBER), prefix);
 };
 
 it('filters status to the rows the database counts as Delivered', async ({
@@ -44,11 +69,7 @@ it('filters status to the rows the database counts as Delivered', async ({
     filters: [{ type: 'statusEquals', value: 'Delivered' }],
   });
 
-  await openGrid(page);
-  await openSettings(page);
-  await selectTab(page, 'Filters');
-  await addColumn(page, 'Status');
-  await pickFilterOption(filterItem(page, STATUS), 'Delivered');
+  await draftDelivered(page);
   await apply(page, sample.count);
 
   const statuses = await bodyCells(page, STATUS).allTextContents();
@@ -63,12 +84,7 @@ it('filters an order number by the prefix the database matches', async ({
     filters: [{ prefix: 'ORD-0000001', type: 'orderNumberStartsWith' }],
   });
 
-  await openGrid(page);
-  await openSettings(page);
-  await selectTab(page, 'Filters');
-  await addColumn(page, 'Order #');
-  await chooseOperator(filterItem(page, ORDER_NUMBER), 'Starts with');
-  await fillFilterText(filterItem(page, ORDER_NUMBER), 'ORD-0000001');
+  await draftOrderPrefix(page, 'ORD-0000001');
   await apply(page, sample.count);
   await expect(firstBodyCell(page, ORDER_NUMBER)).toHaveText(/^ORD-0000001/);
 });
@@ -141,11 +157,7 @@ it('filters status and priority together', async ({ page }) => {
     ],
   });
 
-  await openGrid(page);
-  await openSettings(page);
-  await selectTab(page, 'Filters');
-  await addColumn(page, 'Status');
-  await pickFilterOption(filterItem(page, STATUS), 'Delivered');
+  await draftDelivered(page);
   await addColumn(page, 'Priority');
   await pickFilterOption(filterItem(page, PRIORITY), 'High');
   await apply(page, sample.count);
@@ -176,16 +188,9 @@ it('clearing a live filter and accepting restores the full count', async ({
     filters: [{ type: 'statusEquals', value: 'Delivered' }],
   });
 
-  await openGrid(page);
-  await openSettings(page);
-  await selectTab(page, 'Filters');
-  await addColumn(page, 'Status');
-  await pickFilterOption(filterItem(page, STATUS), 'Delivered');
+  await draftDelivered(page);
   await apply(page, delivered.count);
-
-  await openSettings(page);
-  await selectTab(page, 'Filters');
-  await clickToolbar(page, 'Clear Filters');
+  await clearAcceptedFilters(page);
   await apply(page, full.count);
 });
 
@@ -194,16 +199,9 @@ it('reset restores the live filter into the draft', async ({ page }) => {
     filters: [{ type: 'statusEquals', value: 'Delivered' }],
   });
 
-  await openGrid(page);
-  await openSettings(page);
-  await selectTab(page, 'Filters');
-  await addColumn(page, 'Status');
-  await pickFilterOption(filterItem(page, STATUS), 'Delivered');
+  await draftDelivered(page);
   await apply(page, delivered.count);
-
-  await openSettings(page);
-  await selectTab(page, 'Filters');
-  await clickToolbar(page, 'Clear Filters');
+  await clearAcceptedFilters(page);
   await expect(filterItem(page, STATUS)).toHaveCount(0);
   await clickToolbar(page, 'Reset Filters');
   await expect(filterItem(page, STATUS)).toBeVisible();
@@ -219,11 +217,7 @@ it('a reload keeps the accepted filter and a new context does not', async ({
     filters: [{ type: 'statusEquals', value: 'Delivered' }],
   });
 
-  await openGrid(page);
-  await openSettings(page);
-  await selectTab(page, 'Filters');
-  await addColumn(page, 'Status');
-  await pickFilterOption(filterItem(page, STATUS), 'Delivered');
+  await draftDelivered(page);
   await apply(page, delivered.count);
 
   await page.reload();
@@ -264,12 +258,7 @@ it('a prefix no generated order number uses shows the empty notice', async ({
   });
   expect(sample.count).toBe(0);
 
-  await openGrid(page);
-  await openSettings(page);
-  await selectTab(page, 'Filters');
-  await addColumn(page, 'Order #');
-  await chooseOperator(filterItem(page, ORDER_NUMBER), 'Starts with');
-  await fillFilterText(filterItem(page, ORDER_NUMBER), 'ZZZ');
+  await draftOrderPrefix(page, 'ZZZ');
   await apply(page, 0);
   await expect(
     page.getByText(/No records match the current view/),

@@ -5,52 +5,36 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { useSetTableIsTableSettingsOpen } from './useSetTableIsTableSettingsOpen.hook';
 
-const {
-  getMetaState,
-  mockUseTableConfigContextValue,
-  persistUiFlagsMock,
-  setMetaState,
-} = vi.hoisted(() => {
-  let metaState = {
+const state = vi.hoisted(() => ({
+  meta: {
     isTableSettingsOpen: true,
     persistenceKey: 'orders',
-  };
-
-  const mockMetaStore = {
-    get: vi.fn(() => metaState),
-    set: vi.fn((value: Record<string, unknown>) => {
-      metaState = { ...metaState, ...value };
-    }),
-  };
-  const persistUiFlagsMock = vi.fn();
-
-  return {
-    getMetaState: () => metaState,
-    mockUseTableConfigContextValue: () => ({
-      metaStore: mockMetaStore,
-    }),
-    persistUiFlagsMock,
-    setMetaState: (nextState: typeof metaState) => {
-      metaState = nextState;
-    },
-  };
-});
+  },
+  persistUiFlags: vi.fn(),
+}));
 
 vi.mock('./usePersistTableUiFlagsAction.hook', () => ({
-  usePersistTableUiFlagsAction: () => persistUiFlagsMock,
+  usePersistTableUiFlagsAction: () => state.persistUiFlags,
 }));
 
 vi.mock('../../useTableConfigContextValue.hook', () => ({
-  useTableConfigContextValue: mockUseTableConfigContextValue,
+  useTableConfigContextValue: () => ({
+    metaStore: {
+      get: () => state.meta,
+      set: (value: Partial<typeof state.meta>) => {
+        state.meta = { ...state.meta, ...value };
+      },
+    },
+  }),
 }));
 
 describe('useSetTableIsTableSettingsOpen', () => {
   beforeEach(() => {
-    persistUiFlagsMock.mockReset();
-    setMetaState({
+    state.persistUiFlags.mockReset();
+    state.meta = {
       isTableSettingsOpen: true,
       persistenceKey: 'orders',
-    });
+    };
   });
 
   it('stores the open flag when it changes', () => {
@@ -60,8 +44,8 @@ describe('useSetTableIsTableSettingsOpen', () => {
       result.current(false);
     });
 
-    expect(getMetaState().isTableSettingsOpen).toBe(false);
-    expect(persistUiFlagsMock).toHaveBeenCalledTimes(1);
+    expect(state.meta.isTableSettingsOpen).toBe(false);
+    expect(state.persistUiFlags).toHaveBeenCalledTimes(1);
   });
 
   it('does not write the flag again when it is already the requested value', () => {
@@ -72,7 +56,7 @@ describe('useSetTableIsTableSettingsOpen', () => {
       result.current(false);
     });
 
-    expect(persistUiFlagsMock).toHaveBeenCalledTimes(1);
-    expect(getMetaState().isTableSettingsOpen).toBe(false);
+    expect(state.persistUiFlags).toHaveBeenCalledTimes(1);
+    expect(state.meta.isTableSettingsOpen).toBe(false);
   });
 });

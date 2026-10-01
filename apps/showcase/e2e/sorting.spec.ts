@@ -15,8 +15,19 @@ import {
 import { readOrderSample } from './oracle';
 import { addColumn, clickToolbar } from './settings';
 
+type GridPage = Parameters<typeof openGrid>[0];
+
+const acceptQuantityAscending = async (page: GridPage) => {
+  await openGrid(page);
+  await openSettings(page);
+  await selectTab(page, 'Sorting');
+  await addColumn(page, 'Quantity');
+  await page.getByRole('button', { name: 'Sort Quantity ascending' }).click();
+  await acceptSettings(page);
+};
+
 const expectFirstOrder = async (
-  page: Parameters<typeof openGrid>[0],
+  page: GridPage,
   orderNumber: string | undefined,
 ) => {
   if (orderNumber === undefined) {
@@ -101,12 +112,7 @@ it('clearing a sort draft and cancelling keeps the live order', async ({
 }) => {
   const sample = await readOrderSample({ sort: 'quantityDesc' });
 
-  await openGrid(page);
-  await openSettings(page);
-  await selectTab(page, 'Sorting');
-  await addColumn(page, 'Quantity');
-  await page.getByRole('button', { name: 'Sort Quantity ascending' }).click();
-  await acceptSettings(page);
+  await acceptQuantityAscending(page);
   await expectFirstOrder(page, sample.orderNumber);
 
   await openSettings(page);
@@ -122,12 +128,7 @@ it('clearing a sort and accepting restores the default order', async ({
   const sorted = await readOrderSample({ sort: 'quantityDesc' });
   const original = await readOrderSample();
 
-  await openGrid(page);
-  await openSettings(page);
-  await selectTab(page, 'Sorting');
-  await addColumn(page, 'Quantity');
-  await page.getByRole('button', { name: 'Sort Quantity ascending' }).click();
-  await acceptSettings(page);
+  await acceptQuantityAscending(page);
   await expectFirstOrder(page, sorted.orderNumber);
 
   await openSettings(page);
@@ -140,12 +141,7 @@ it('clearing a sort and accepting restores the default order', async ({
 it('reset puts the live sort back into the draft', async ({ page }) => {
   const sample = await readOrderSample({ sort: 'quantityDesc' });
 
-  await openGrid(page);
-  await openSettings(page);
-  await selectTab(page, 'Sorting');
-  await addColumn(page, 'Quantity');
-  await page.getByRole('button', { name: 'Sort Quantity ascending' }).click();
-  await acceptSettings(page);
+  await acceptQuantityAscending(page);
 
   await openSettings(page);
   await selectTab(page, 'Sorting');
