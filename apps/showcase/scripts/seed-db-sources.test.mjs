@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
@@ -12,15 +13,33 @@ import {
 } from './seed-db-sources.mjs';
 
 const DEFINES_ENTERPRISE_ORDERS =
-  /\bcreate\s+table\s+(?:if\s+not\s+exists\s+)?(?:"?public"?\.)?"?enterprise_orders"?[\s(]/iu;
+  /\bcreate\s+(?:(?:global|local)\s+)?(?:(?:unlogged|temp|temporary)\s+)?table\s+(?:if\s+not\s+exists\s+)?(?:"?\w+"?\.)?"?enterprise_orders\b/iu;
 
-const trackedSqlFiles = () =>
-  execFileSync('git', ['ls-files', '-z', '--', '*.sql'], {
+const TEXT_SOURCES = [
+  '*.sql',
+  '*.mjs',
+  '*.cjs',
+  '*.js',
+  '*.ts',
+  '*.tsx',
+  '*.mts',
+  '*.cts',
+];
+
+const THIS_TEST = relative(REPO_ROOT, fileURLToPath(import.meta.url));
+
+const SHIPPED_DDL = relative(REPO_ROOT, ENTERPRISE_ORDERS_DDL);
+
+const trackedTextFiles = () =>
+  execFileSync('git', ['ls-files', '-z', '--', ...TEXT_SOURCES], {
     cwd: REPO_ROOT,
     encoding: 'utf8',
   })
     .split('\0')
     .filter((path) => path !== '');
+
+const hasEnterpriseOrdersDefinition = (path) =>
+  DEFINES_ENTERPRISE_ORDERS.test(readFileSync(join(REPO_ROOT, path), 'utf8'));
 
 const shippedDdl = readFileSync(ENTERPRISE_ORDERS_DDL, 'utf8');
 
@@ -33,16 +52,16 @@ const lineDifferences = (before, after) => {
 };
 
 describe('the enterprise_orders definition', () => {
-  it('lives in exactly one tracked file, the one devkit ships', () => {
-    const definitions = trackedSqlFiles().filter((path) =>
-      DEFINES_ENTERPRISE_ORDERS.test(
-        readFileSync(join(REPO_ROOT, path), 'utf8'),
-      ),
-    );
+  it('is defined by the file devkit ships', () => {
+    expect(hasEnterpriseOrdersDefinition(SHIPPED_DDL)).toBe(true);
+  });
 
-    expect(definitions).toStrictEqual([
-      relative(REPO_ROOT, ENTERPRISE_ORDERS_DDL),
-    ]);
+  it('is defined by no other tracked source file, in SQL or embedded in code', () => {
+    const copies = trackedTextFiles()
+      .filter((path) => path !== SHIPPED_DDL && path !== THIS_TEST)
+      .filter((path) => hasEnterpriseOrdersDefinition(path));
+
+    expect(copies).toStrictEqual([]);
   });
 
   it('is what the seeder applies for that table', () => {

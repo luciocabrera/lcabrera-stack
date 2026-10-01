@@ -44,7 +44,8 @@ that workspace left the repository)**.
 > The seeder refuses a shipped file that does not hold exactly one row bound,
 > instead of quietly seeding the demo volume. And
 > `apps/showcase/scripts/seed-db-sources.test.mjs` fails when any tracked
-> `.sql` file other than the shipped one defines `enterprise_orders`, which is
+> SQL or script source other than the shipped file defines `enterprise_orders`,
+> in any `CREATE … TABLE` form or embedded as a string, which is
 > what reintroducing a copy looks like.
 >
 > **Why the edge is allowed.** The showcase now reads a file inside another
