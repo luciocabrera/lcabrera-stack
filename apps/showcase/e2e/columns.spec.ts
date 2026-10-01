@@ -25,13 +25,15 @@ const indexOf = (labels: readonly string[], label: string) => {
   return index;
 };
 
-it('dragging two unlocked columns swaps their header order after accept', async ({
+it('dragging a column onto another inserts it at that place', async ({
   page,
 }) => {
   await openGrid(page);
   const before = await headerLabels(page);
   const quantityBefore = indexOf(before, 'Quantity');
   const priorityBefore = indexOf(before, 'Priority');
+  const priorityAfter =
+    quantityBefore < priorityBefore ? priorityBefore - 1 : priorityBefore + 1;
 
   await openSettings(page);
   await selectTab(page, 'Columns');
@@ -39,8 +41,8 @@ it('dragging two unlocked columns swaps their header order after accept', async 
   await acceptSettings(page);
 
   const after = await headerLabels(page);
-  expect(indexOf(after, 'Quantity')).not.toBe(quantityBefore);
-  expect(indexOf(after, 'Priority')).not.toBe(priorityBefore);
+  expect(indexOf(after, 'Quantity')).toBe(priorityBefore);
+  expect(indexOf(after, 'Priority')).toBe(priorityAfter);
 });
 
 it('the actions column cannot be dragged, pinned, or hidden from the list', async ({
