@@ -82,10 +82,9 @@ describe('TableBodyCell', () => {
       />,
     );
 
-    expect(screen.getByTestId('table-body-cell').dataset.columnKey).toBe(
-      'amount',
-    );
-    expect(screen.queryByTestId('caller')).toBeNull();
+    const cell = screen.getByTestId('caller');
+    expect(cell.dataset.columnKey).toBe('amount');
+    expect(screen.queryByTestId('table-body-cell')).toBeNull();
   });
 
   it('renders the shimmer overlay when loading state is passed in', () => {

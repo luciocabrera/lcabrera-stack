@@ -50,6 +50,8 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
 
   return (
     <td
+      data-column-key={String(columnKey)}
+      data-testid='table-body-cell'
       {...rest}
       onFocus={onFocus}
       ref={cellRef}
@@ -63,8 +65,6 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
         pinInfo,
         width,
       })}
-      data-column-key={String(columnKey)}
-      data-testid='table-body-cell'
     >
       {Boolean(isLoadingState) && (
         <div {...stylex.props(skeleton.loadingOverlay)}>
