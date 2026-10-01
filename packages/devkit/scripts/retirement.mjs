@@ -9,11 +9,11 @@
  * a key in a file the consumer can edit, so it is read as a path inside the
  * repository only once it has been shown to be one.
  *
- * Usage: imported by `sync.mjs`; `containedIn` and `retirementRefusal` are
- * also used by `command-materialise.mjs`.
+ * Usage: imported by `sync.mjs`; `destinationIn`, `absenceIn` and
+ * `retirementRefusal` are also used by `command-materialise.mjs`.
  */
 
-import { realpathSync } from 'node:fs';
+import { lstatSync, realpathSync } from 'node:fs';
 import { basename, dirname, join, posix } from 'node:path';
 
 import {
@@ -84,7 +84,34 @@ export const declaredRetirements = ({ config, retiring }) =>
       .filter((targetPath) => targetPath !== undefined),
   );
 
-const retirementEntry = ({ destination, onDiskHash, path, recordedHash }) => {
+const GONE_CODES = new Set(['ENOENT', 'ENOTDIR']);
+
+/**
+ * @param {string} root
+ * @returns {(path: string) => boolean} whether nothing at all is at the path,
+ * as opposed to something that is there and cannot be read as a file
+ */
+export const absenceIn = (root) => (path) => {
+  try {
+    lstatSync(join(root, path));
+    return false;
+  } catch (error) {
+    return GONE_CODES.has(error?.code);
+  }
+};
+
+const retirementState = ({ isAbsent, onDisk, path, recordedHash }) =>
+  onDisk === undefined && !isAbsent(path)
+    ? 'kept'
+    : classifyRetirement({ onDiskHash: onDisk, recordedHash });
+
+const retirementEntry = ({
+  destination,
+  isAbsent,
+  onDiskHash,
+  path,
+  recordedHash,
+}) => {
   if (destination === undefined) {
     return { executable: false, missing: [], path, state: OUTSIDE_STATE };
   }
@@ -94,7 +121,7 @@ const retirementEntry = ({ destination, onDiskHash, path, recordedHash }) => {
     missing: [],
     onDiskHash: onDisk,
     path,
-    state: classifyRetirement({ onDiskHash: onDisk, recordedHash }),
+    state: retirementState({ isAbsent, onDisk, path, recordedHash }),
   };
 };
 
@@ -109,6 +136,7 @@ const destinationsOf = ({ destinationOf, paths }) =>
  * @param {{ assets: { path: string }[], config: object,
  *   declared: Set<string>,
  *   destinationOf: (targetPath: string) => string | undefined,
+ *   isAbsent: (targetPath: string) => boolean,
  *   kitGroups?: readonly string[], manifest: { files: Record<string, string> },
  *   onDiskHash: (targetPath: string) => string | undefined,
  *   placed: Set<string> }} args
@@ -118,6 +146,7 @@ export const retirementsFor = ({
   config,
   declared,
   destinationOf,
+  isAbsent,
   kitGroups,
   manifest,
   onDiskHash,
@@ -146,5 +175,5 @@ export const retirementsFor = ({
       ({ destination }) =>
         destination === undefined || !stillShipped(destination),
     )
-    .map((record) => retirementEntry({ ...record, onDiskHash }));
+    .map((record) => retirementEntry({ ...record, isAbsent, onDiskHash }));
 };

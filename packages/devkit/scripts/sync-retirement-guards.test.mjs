@@ -8,6 +8,7 @@
  */
 
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -18,13 +19,14 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runClosure } from './command-closure.mjs';
 import { DEFAULT_CONFIG, KIT_GROUPS } from './config.mjs';
 import { hashContent, MANIFEST_FILE } from './manifest.mjs';
-import { destinationIn, retirementRefusal } from './retirement.mjs';
+import { absenceIn, destinationIn, retirementRefusal } from './retirement.mjs';
 import { applySync, manifestAfter, onDiskHasher, planSync } from './sync.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
 
@@ -69,6 +71,7 @@ const syncRecord = ({
     config: CONFIG,
     destinationOf: destinationIn(root),
     groups: ['lower'],
+    isAbsent: absenceIn(root),
     kitGroups,
     manifest,
     onDiskHash,
@@ -258,5 +261,54 @@ describe('the shipped closure of a tree holding a stale record', () => {
     writeFileSync(join(root, 'gone.md'), 'gone');
 
     expect(closureOf(root)).toEqual(clean);
+  });
+});
+
+const IS_ROOT_USER = process.getuid?.() === 0;
+
+const keptOutcome = ({ path, root }) => ({
+  ...syncRecord({ path, root }),
+  survives: existsSync(join(root, path)),
+});
+
+describe('a recorded path that holds something unreadable', () => {
+  test('is kept, not retired, when a directory is there now', () => {
+    const { root } = scratchRepository();
+    mkdirSync(join(root, 'stale'));
+    writeFileSync(join(root, 'stale', 'inside.txt'), 'consumer content');
+
+    expect(keptOutcome({ path: 'stale', root })).toEqual({
+      hashed: true,
+      recorded: false,
+      state: 'kept',
+      survives: true,
+    });
+  });
+
+  test.skipIf(IS_ROOT_USER)(
+    'is kept, not retired, when the file cannot be read (skipped as root, which reads any mode)',
+    () => {
+      const { root } = scratchRepository();
+      writeFileSync(join(root, 'locked.txt'), VICTIM);
+      chmodSync(join(root, 'locked.txt'), 0o000);
+
+      expect(keptOutcome({ path: 'locked.txt', root })).toEqual({
+        hashed: true,
+        recorded: false,
+        state: 'kept',
+        survives: true,
+      });
+    },
+  );
+
+  test('is retired when nothing is there at all', () => {
+    const { root } = scratchRepository();
+
+    expect(keptOutcome({ path: 'missing.txt', root })).toEqual({
+      hashed: true,
+      recorded: false,
+      state: 'retired',
+      survives: false,
+    });
   });
 });

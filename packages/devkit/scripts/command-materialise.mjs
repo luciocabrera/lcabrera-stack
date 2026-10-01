@@ -44,7 +44,7 @@ import {
   serialiseManifest,
 } from './manifest.mjs';
 import { declaredPeerNames, installedPeerVersion } from './peer.mjs';
-import { destinationIn, retirementRefusal } from './retirement.mjs';
+import { absenceIn, destinationIn, retirementRefusal } from './retirement.mjs';
 import {
   applySync,
   manifestAfter,
@@ -206,6 +206,7 @@ export const buildPlan = ({
       assets,
       config,
       destinationOf: destinationIn(root),
+      isAbsent: absenceIn(root),
       manifest,
       onDiskContent: onDiskReader(root),
       onDiskHash: onDiskHasher(root),

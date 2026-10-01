@@ -183,6 +183,7 @@ const prevailingAssets = ({ assets, config, groups }) => {
  *   peerVersions?: Map<string, string | undefined>,
  *   retiring?: readonly string[],
  *   destinationOf?: (targetPath: string) => string | undefined,
+ *   isAbsent?: (targetPath: string) => boolean,
  *   kitGroups?: readonly string[] }} args
  */
 export const planSync = ({
@@ -190,6 +191,7 @@ export const planSync = ({
   config,
   destinationOf = lexicalDestination,
   groups = groupsFor(config),
+  isAbsent = (targetPath) => onDiskHash(targetPath) === undefined,
   kitGroups,
   manifest,
   onDiskContent = () => undefined,
@@ -223,6 +225,7 @@ export const planSync = ({
       config,
       declared: declaredRetirements({ config, retiring }),
       destinationOf,
+      isAbsent,
       kitGroups,
       manifest,
       onDiskHash,

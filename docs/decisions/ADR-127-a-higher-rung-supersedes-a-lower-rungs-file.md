@@ -57,8 +57,10 @@ match is planned as one of two states:
 - `retired` — the file on disk still matches the record, or it is already gone.
   The file is deleted and the record leaves the manifest. This is a write, so
   `doctor --check` counts it as drift until `sync` runs.
-- `kept` — the consumer edited the file. The file is left alone and reported,
-  and the record leaves the manifest. This is a reported state, so
+- `kept` — the consumer edited the file, or something is at the path that cannot
+  be read as a file, such as a directory or a file without read permission. It
+  is left alone and reported, never deleted, and the record leaves the manifest.
+  Only a path where nothing exists at all counts as gone. This is a reported state, so
   `doctor --check` fails until `sync` runs.
 
 Four boundaries make this safe.

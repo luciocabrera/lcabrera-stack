@@ -60,7 +60,7 @@ run classifies it:
 | `acknowledged`       | **left alone** — an edit you said you meant; reported only under `--verbose`   |
 | `conflict`           | **left alone** — an unmanaged file already occupies that path; acknowledgeable |
 | `retired`            | deleted — recorded, unedited, and no rung of this version ships it any more    |
-| `kept`               | **left alone** — the same, but edited locally; reported once, then yours       |
+| `kept`               | **left alone** — the same, but edited or unreadable; reported once, then yours |
 | `outside`            | **left alone** — a recorded path that resolves outside the repository          |
 | `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                     |
 | `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered     |
