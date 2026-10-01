@@ -38,7 +38,11 @@ higher rung.
 **Where two held groups map onto one target path, the higher rung's asset is the
 one planned.** `planSync` ranks the groups a profile holds in ladder order,
 lowest rung first, and keeps one asset per target path, from the highest-ranked
-group. The plan never holds two entries for one path. The existing
+group, keyed by the file the path resolves to rather than its spelling, so
+two bases reaching one directory through an in-repository symbolic link still
+count as one path. A `paths` base may not carry a `..` segment, so the
+configuration cannot spell one directory two ways. The plan never holds two
+entries for one path. The existing
 classification then decides what happens to the file. The manifest records what
 the lower rung wrote, so:
 

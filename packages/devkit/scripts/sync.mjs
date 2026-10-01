@@ -44,7 +44,11 @@ import {
 } from './manifest.mjs';
 import { unmetPeers } from './peer.mjs';
 import { substituteCommands } from './placeholders.mjs';
-import { declaredRetirements, retirementsFor } from './retirement.mjs';
+import {
+  declaredRetirements,
+  lexicalDestination,
+  retirementsFor,
+} from './retirement.mjs';
 
 const unmetDeclaration = ({ config, content, peerVersions }) => {
   const keys = requiredConfigKeys(content).filter(
@@ -145,16 +149,18 @@ const targetedAssets = ({ assets, config }) =>
     }))
     .filter(({ targetPath }) => targetPath !== undefined);
 
-const prevailingAssets = ({ assets, config, groups }) => {
+const prevailingAssets = ({ assets, config, destinationOf, groups }) => {
   const rank = new Map(groups.map((group, index) => [group, index]));
   const prevailing = new Map();
   const targeted = targetedAssets({ assets, config });
   for (const { asset, targetPath } of targeted) {
     const held = rank.get(assetGroup(asset.path));
     if (held === undefined) continue;
-    const incumbent = prevailing.get(targetPath);
+    const key =
+      destinationOf(targetPath) ?? lexicalDestination(targetPath) ?? targetPath;
+    const incumbent = prevailing.get(key);
     if (incumbent === undefined || held > incumbent.rank) {
-      prevailing.set(targetPath, { asset, rank: held, targetPath });
+      prevailing.set(key, { asset, rank: held, targetPath });
     }
   }
   return prevailing.values().toArray();
@@ -199,6 +205,7 @@ export const planSync = ({
   const placed = prevailingAssets({
     assets: assets.filter((asset) => !retired.has(asset.path)),
     config,
+    destinationOf,
     groups,
   });
   const planned = placed.map(({ asset, targetPath }) => {

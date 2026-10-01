@@ -597,7 +597,11 @@ put the seeds where a consumer on another runner never looks. `hooks` must be a
 non-empty path inside the repository, relative to its root: an empty string, a
 value that is not a string, an absolute path, one that climbs out with `..`, or
 one starting with a prefix git expands (`~`, `%(prefix)`, `:(optional)`) is
-refused by every command and by the `prepare` script.
+refused by every command and by the `prepare` script. Every other `paths` key
+follows the same rule, may also be the repository root (`.`), and may not
+contain a `..` segment even where it would stay inside: each base names its
+directory by one spelling, so two keys cannot reach one file by two. Every
+command refuses a config that breaks it and names the key.
 
 `commands` answers the placeholders a shipped file carries. A skill's procedure
 travels but the command carrying out each step does not, so the file says

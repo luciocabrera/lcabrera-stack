@@ -15,7 +15,10 @@
  * spelled `gitignore` and is renamed on the way out.
  */
 
-import { hooksPathRefusal } from '../assets/workspace/scripts/hooks-path.mjs';
+import {
+  hooksPathRefusal,
+  isRepositoryRelative,
+} from '../assets/workspace/scripts/hooks-path.mjs';
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
 
@@ -185,8 +188,22 @@ const ciSetupLines = (ci) => {
   return ci.setup;
 };
 
+const isPlacementBase = (value) =>
+  typeof value === 'string' &&
+  isRepositoryRelative(value) &&
+  !value.split(/[\\/]/).includes('..');
+
+const pathRefusal = ([key, value]) =>
+  isPlacementBase(value)
+    ? undefined
+    : `${CONFIG_FILE_NAME}: "paths.${key}" must be a directory inside the repository, relative to its root, with no ".." segment — got ${JSON.stringify(value)}`;
+
 const checkedPaths = (paths) => {
-  const refusal = hooksPathRefusal(paths.hooks);
+  const refusal =
+    hooksPathRefusal(paths.hooks) ??
+    Object.entries(paths)
+      .map((entry) => pathRefusal(entry))
+      .find((message) => message !== undefined);
   if (refusal !== undefined) throw new TypeError(refusal);
   return paths;
 };
