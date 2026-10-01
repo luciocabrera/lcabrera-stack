@@ -120,7 +120,7 @@
     "vitest": "catalog:test"
   },
   "peerDependencies": {
-    "@babel/preset-typescript": "catalog:build",
+    "@babel/preset-typescript": "^7.29.7 || ^8.0.1",
     "@eslint/js": "catalog:lint",
     "@react-router/dev": "catalog:react",
     "@stylexjs/eslint-plugin": "catalog:react",

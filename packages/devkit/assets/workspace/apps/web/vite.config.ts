@@ -28,10 +28,9 @@ export default defineConfig({
   plugins: createReactRouterPluginsConfig({
     appRootUrl: import.meta.url,
     babelConfigOverrides: {
-      parserOpts: {
-        plugins: ['jsx'],
-      },
-      presets: [['@babel/preset-typescript', { ignoreExtensions: true }]],
+      presets: [
+        ['@babel/preset-typescript', { allExtensions: true, isTSX: true }],
+      ],
     },
     babelIncludePattern: /\/src\/[^?]*\.[jt]sx?(?:$|\?)/,
     stylexAliases: { [`${UI_PACKAGE}/*`]: `${uiSourceUrl}*` },
