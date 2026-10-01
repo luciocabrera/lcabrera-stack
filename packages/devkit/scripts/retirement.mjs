@@ -39,7 +39,7 @@ const throughLinks = (path) => {
  * @returns {string | undefined} the normalised repository-relative path, or
  * nothing for one that is absolute, climbs out, or names the root itself
  */
-export const lexicalDestination = (path) => {
+const lexicalDestination = (path) => {
   if (!isRepositoryRelative(path)) return;
   const normal = posix.normalize(path.replaceAll('\\', '/'));
   return normal === '.' || normal === './' ? undefined : normal;

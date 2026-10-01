@@ -1,93 +1,45 @@
 /*
  * When a run leaves a recorded path alone or retires nothing: a path that does
- * not resolve inside the repository, a path holding something other than a
- * readable regular file, and an asset set that cannot be trusted as the
- * package's shipping list. Asserted on a real tree, because the claim is about
+ * not resolve inside the repository, or names a placed file by another
+ * spelling, and an asset set that cannot be trusted as the package's shipping
+ * list. Asserted on a real tree, because the claim is about
  * which files survive.
  *
  * Usage: `vp run test` in this workspace; exits non-zero on a failing case.
  */
 
-import { spawnSync } from 'node:child_process';
 import {
-  chmodSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
-  rmSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runClosure } from './command-closure.mjs';
-import { DEFAULT_CONFIG, KIT_GROUPS } from './config.mjs';
+import { KIT_GROUPS } from './config.mjs';
 import { hashContent, MANIFEST_FILE } from './manifest.mjs';
-import { destinationIn, nodeKindIn, retirementRefusal } from './retirement.mjs';
-import { applySync, manifestAfter, onDiskHasher, planSync } from './sync.mjs';
+import {
+  LOWER,
+  RETIREMENT_CONFIG,
+  scratchRepositories,
+  syncRecord,
+  VICTIM,
+} from './retirement-fixtures.mjs';
+import { destinationIn, retirementRefusal } from './retirement.mjs';
+import { applySync, onDiskHasher, planSync } from './sync.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
-
-const CONFIG = {
-  ...DEFAULT_CONFIG,
-  paths: { ...DEFAULT_CONFIG.paths, lower: 'app' },
-};
-
-const LOWER = { content: 'lower body', path: 'lower/kept.md' };
-
-const VICTIM = 'victim body';
 
 const byName = (left, right) => left.localeCompare(right);
 
-const scratches = [];
+const { drain, scratchRepository } = scratchRepositories();
 
-const scratchRepository = () => {
-  const parent = mkdtempSync(join(tmpdir(), 'devkit-guards-'));
-  scratches.push(parent);
-  const root = join(parent, 'repo');
-  mkdirSync(root);
-  writeFileSync(join(parent, 'victim.txt'), VICTIM);
-  return { parent, root };
-};
+afterEach(drain);
 
-afterEach(() => {
-  const drained = [...scratches];
-  scratches.length = 0;
-  for (const path of drained) rmSync(path, { force: true, recursive: true });
-});
-
-const syncRecord = ({
-  assets = [LOWER],
-  kitGroups = ['lower'],
-  path,
-  root,
-}) => {
-  const onDiskHash = vi.fn(onDiskHasher(root));
-  const manifest = { files: { [path]: hashContent(VICTIM) } };
-  const entries = planSync({
-    assets,
-    config: CONFIG,
-    destinationOf: destinationIn(root),
-    groups: ['lower'],
-    kindOf: nodeKindIn(root),
-    kitGroups,
-    manifest,
-    onDiskHash,
-  });
-  applySync({ entries, root });
-  return {
-    hashed: onDiskHash.mock.calls.some(([read]) => read === path),
-    recorded: Object.hasOwn(
-      manifestAfter({ entries, previous: manifest, version: '0' }).files,
-      path,
-    ),
-    state: entries.find((entry) => entry.path === path)?.state,
-  };
-};
+const CONFIG = RETIREMENT_CONFIG;
 
 describe('a recorded path outside the repository', () => {
   const OUTSIDE = {
@@ -264,106 +216,4 @@ describe('the shipped closure of a tree holding a stale record', () => {
 
     expect(closureOf(root)).toEqual(clean);
   });
-});
-
-const IS_ROOT_USER = process.getuid?.() === 0;
-
-const keptOutcome = ({ path, root }) => ({
-  ...syncRecord({ path, root }),
-  survives: existsSync(join(root, path)),
-});
-
-describe('a recorded path that holds something unreadable', () => {
-  test('is kept, not retired, when a directory is there now', () => {
-    const { root } = scratchRepository();
-    mkdirSync(join(root, 'stale'));
-    writeFileSync(join(root, 'stale', 'inside.txt'), 'consumer content');
-
-    expect(keptOutcome({ path: 'stale', root })).toEqual({
-      hashed: false,
-      recorded: false,
-      state: 'kept',
-      survives: true,
-    });
-  });
-
-  test.skipIf(IS_ROOT_USER)(
-    'is kept, not retired, when the file cannot be read (skipped as root, which reads any mode)',
-    () => {
-      const { root } = scratchRepository();
-      writeFileSync(join(root, 'locked.txt'), VICTIM);
-      chmodSync(join(root, 'locked.txt'), 0o000);
-
-      expect(keptOutcome({ path: 'locked.txt', root })).toEqual({
-        hashed: true,
-        recorded: false,
-        state: 'kept',
-        survives: true,
-      });
-    },
-  );
-
-  test('is retired when nothing is there at all', () => {
-    const { root } = scratchRepository();
-
-    expect(keptOutcome({ path: 'missing.txt', root })).toEqual({
-      hashed: false,
-      recorded: false,
-      state: 'retired',
-      survives: false,
-    });
-  });
-});
-
-const HAS_MKFIFO =
-  process.platform !== 'win32' &&
-  spawnSync('mkfifo', ['--version'], { encoding: 'utf8' }).error === undefined;
-
-const PLAN_IN_A_CHILD = `
-import { pathToFileURL } from 'node:url';
-const [scripts, root, path] = process.argv.slice(1);
-const load = (name) => import(pathToFileURL(scripts + '/' + name).href);
-const { DEFAULT_CONFIG } = await load('config.mjs');
-const { hashContent } = await load('manifest.mjs');
-const { destinationIn, nodeKindIn } = await load('retirement.mjs');
-const { onDiskHasher, planSync } = await load('sync.mjs');
-const entries = planSync({
-  assets: [{ content: 'lower body', path: 'lower/kept.md' }],
-  config: { ...DEFAULT_CONFIG, paths: { ...DEFAULT_CONFIG.paths, lower: 'app' } },
-  destinationOf: destinationIn(root),
-  groups: ['lower'],
-  kindOf: nodeKindIn(root),
-  kitGroups: ['lower'],
-  manifest: { files: { [path]: hashContent('victim body') } },
-  onDiskHash: onDiskHasher(root),
-});
-process.stdout.write(entries.find((entry) => entry.path === path)?.state ?? '');
-`;
-
-describe('a recorded path that holds a FIFO', () => {
-  test.skipIf(!HAS_MKFIFO)(
-    'is kept without being opened, so the plan finishes (skipped where mkfifo is unavailable)',
-    () => {
-      const { root } = scratchRepository();
-      spawnSync('mkfifo', [join(root, 'pipe')]);
-
-      const child = spawnSync(
-        process.execPath,
-        [
-          '--input-type=module',
-          '--eval',
-          PLAN_IN_A_CHILD,
-          dirname(fileURLToPath(import.meta.url)),
-          root,
-          'pipe',
-        ],
-        { encoding: 'utf8', timeout: 3000 },
-      );
-
-      expect({ signal: child.signal, state: child.stdout }).toEqual({
-        signal: null,
-        state: 'kept',
-      });
-    },
-  );
 });

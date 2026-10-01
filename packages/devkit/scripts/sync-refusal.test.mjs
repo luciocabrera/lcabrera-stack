@@ -7,6 +7,7 @@
  */
 
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -16,6 +17,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import process from 'node:process';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runInit } from './command-init.mjs';
@@ -112,4 +114,21 @@ describe('an install whose asset set is broken', () => {
       });
     }
   }
+});
+
+describe('sync through the command', () => {
+  test.skipIf(process.getuid?.() === 0)(
+    'keeps an unreadable recorded file the package does not ship (skipped as root, which reads any mode)',
+    () => {
+      const root = recordedTree();
+      chmodSync(join(root, RECORDED), 0o000);
+
+      const { code } = captured(() => runSync([], root));
+
+      expect({ code, survives: existsSync(join(root, RECORDED)) }).toEqual({
+        code: 0,
+        survives: true,
+      });
+    },
+  );
 });

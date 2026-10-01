@@ -44,11 +44,7 @@ import {
 } from './manifest.mjs';
 import { unmetPeers } from './peer.mjs';
 import { substituteCommands } from './placeholders.mjs';
-import {
-  declaredRetirements,
-  lexicalDestination,
-  retirementsFor,
-} from './retirement.mjs';
+import { declaredRetirements, retirementsFor } from './retirement.mjs';
 
 const unmetDeclaration = ({ config, content, peerVersions }) => {
   const keys = requiredConfigKeys(content).filter(
@@ -189,10 +185,9 @@ const prevailingAssets = ({ assets, config, groups }) => {
 export const planSync = ({
   assets,
   config,
-  destinationOf = lexicalDestination,
+  destinationOf = () => undefined,
   groups = groupsFor(config),
-  kindOf = (targetPath) =>
-    onDiskHash(targetPath) === undefined ? 'absent' : 'file',
+  kindOf = () => 'other',
   kitGroups,
   manifest,
   onDiskContent = () => undefined,

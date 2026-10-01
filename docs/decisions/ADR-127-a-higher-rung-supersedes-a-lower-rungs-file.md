@@ -60,7 +60,9 @@ match is planned in one of these states:
 - `kept` — the consumer edited the file, or something is at the path that is
   not a readable regular file: a directory, a FIFO, a socket, a device, or a
   file without read permission. The node's kind is read with `lstat` before
-  anything is opened, so a FIFO is never read. It is left alone and reported,
+  anything is opened, so a FIFO is never read. A plan built without the filesystem probes for the
+  node's kind and its destination reads nothing and deletes nothing: it reports
+  the record as `outside` or `kept`. It is left alone and reported,
   never deleted, and the record leaves the manifest. Only a path where nothing
   exists at all counts as gone. This is a reported state, so
   `doctor --check` fails until `sync` runs.

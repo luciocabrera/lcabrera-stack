@@ -21,7 +21,7 @@ import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 import { runDoctor, runSync } from './command-sync.mjs';
 import { DEFAULT_CONFIG, retiredAssetsFor } from './config.mjs';
 import { hashContent, MANIFEST_FILE } from './manifest.mjs';
-import { destinationIn } from './retirement.mjs';
+import { destinationIn, nodeKindIn } from './retirement.mjs';
 import {
   applySync,
   manifestAfter,
@@ -69,6 +69,7 @@ const syncTree = ({ assets, groups, manifest, retiring = [], root }) => {
     config: CONFIG,
     destinationOf: destinationIn(root),
     groups,
+    kindOf: nodeKindIn(root),
     kitGroups: ['lower'],
     manifest,
     onDiskContent: onDiskReader(root),
@@ -374,6 +375,7 @@ describe('a path a rung declares it retires', () => {
     const plan = planSync({
       assets: [LOWER, HIGHER],
       config: CONFIG,
+      destinationOf: (path) => path,
       groups: ['lower', 'higher'],
       kitGroups: ['lower'],
       manifest: { files: { [TARGET]: hashContent(LOWER.content) } },
