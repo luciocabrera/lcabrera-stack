@@ -10,19 +10,38 @@ import { inc, lt, minVersion, satisfies, validRange } from 'semver';
 
 const PLACE = /^(?:catalog|workspace):/u;
 
+const quoted = (value) => (value === undefined ? undefined : `\`${value}\``);
+
+const refusal = ({ name, path, range, reason }) => {
+  const where = [path, quoted(name)].filter(Boolean).join(': ');
+  return new Error(`${where} reads ${quoted(range)}, ${reason}`);
+};
+
 /**
- * @param {{ range: string, version: string }} args
+ * @param {{ name?: string, path?: string, range: string, version: string }} args
  * @returns {string}
  */
-export const raisedRange = ({ range, version }) => {
-  if (PLACE.test(range) || validRange(range) === null) return range;
+export const raisedRange = ({ name, path, range, version }) => {
+  if (PLACE.test(range)) return range;
+  if (validRange(range) === null) {
+    throw refusal({
+      name,
+      path,
+      range,
+      reason:
+        'which is not a version range — only `catalog:` and `workspace:` stand in for one',
+    });
+  }
 
   const floor = minVersion(range).version;
   if (!lt(floor, version)) return range;
   if (!range.includes(floor)) {
-    throw new Error(
-      `\`${range}\` has no literal floor to raise to ${version} — write it as \`>=${floor} <ceiling>\``,
-    );
+    throw refusal({
+      name,
+      path,
+      range,
+      reason: `which has no literal floor to raise to ${version} — write it as \`>=${floor} <ceiling>\``,
+    });
   }
 
   const raised = range.replace(floor, version);
@@ -30,9 +49,12 @@ export const raisedRange = ({ range, version }) => {
     !satisfies(version, raised) ||
     !satisfies(inc(version, 'minor'), raised)
   ) {
-    throw new Error(
-      `raising \`${range}\` to ${version} gives \`${raised}\`, which excludes ${version} or the minor after it — its ceiling has to move by hand`,
-    );
+    throw refusal({
+      name,
+      path,
+      range,
+      reason: `and raising it to ${version} gives \`${raised}\`, which excludes ${version} or the minor after it — its ceiling has to move by hand`,
+    });
   }
   return raised;
 };
@@ -129,6 +151,8 @@ export const floorRaises = ({ declarations, versions }) =>
     .map((declaration) => ({
       declaration,
       raised: raisedRange({
+        name: declaration.name,
+        path: declaration.path,
         range: declaration.range,
         version: versions[declaration.name],
       }),

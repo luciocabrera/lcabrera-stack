@@ -141,6 +141,31 @@ describe('raisedRange', () => {
     );
   });
 
+  it('leaves a workspace place alone too', () => {
+    expect(raisedRange({ range: 'workspace:*', version: '0.6.1' })).toBe(
+      'workspace:*',
+    );
+  });
+
+  it.each(['npm:@lcabrera/ui@0.5.0', 'file:../ui', 'latest-ish'])(
+    'refuses `%s`, which the gate calls malformed, naming the file and package',
+    (range) => {
+      expect(() =>
+        withRaisedFloors({
+          declarations: manifestRanges({
+            manifest: { dependencies: { '@lcabrera/vite-config': range } },
+            path: MANIFEST_PATH,
+          }),
+          kind: 'manifest',
+          text: manifestText(range),
+          versions: VERSIONS,
+        }),
+      ).toThrow(
+        `${MANIFEST_PATH}: \`@lcabrera/vite-config\` reads \`${range}\`, which is not a version range`,
+      );
+    },
+  );
+
   it('refuses a raise that would pass its ceiling', () => {
     expect(() =>
       raisedRange({ range: '>=0.9.0 <1.0.0', version: '1.0.0' }),
