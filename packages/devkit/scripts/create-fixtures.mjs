@@ -7,12 +7,12 @@
  * its own `afterEach` and passes its own `vi`.
  */
 
-import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { runCreate } from './command-create.mjs';
+import { runGit } from './git-exec.mjs';
 
 export const scratchDirectories = (prefix) => {
   const roots = [];
@@ -32,12 +32,7 @@ export const scratchDirectories = (prefix) => {
   };
 };
 
-export const git = (args, cwd) =>
-  execFileSync('git', args, {
-    cwd,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  }).trim();
+export const git = (args, cwd) => runGit({ args, cwd });
 
 export const quietlyWith = (vi, run) => {
   const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);

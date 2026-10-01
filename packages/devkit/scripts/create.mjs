@@ -324,13 +324,17 @@ const nextSteps = ({ commands, target, tasks }) => {
       ? [`${commands.run} dev`]
       : []),
   ];
+  const indented = steps.map((step) => '  ' + step).join('\n');
   const devkitTasks = DEVKIT_TASKS.filter((task) => tasks.includes(task));
+  const devkitCommands = devkitTasks
+    .map((task) => '`' + commands.run + ' ' + task + '`')
+    .join(', ');
   return [
-    `Nothing is installed yet. Start with:\n${steps.map((step) => `  ${step}`).join('\n')}`,
+    `Nothing is installed yet. Start with:\n${indented}`,
     ...(commands.run === undefined || devkitTasks.length === 0
       ? []
       : [
-          `devkit is a dev dependency, not a global command, so a bare \`devkit\` is not on your PATH. Run it through the tasks wired above: ${devkitTasks.map((task) => `\`${commands.run} ${task}\``).join(', ')}.`,
+          `devkit is a dev dependency, not a global command, so a bare \`devkit\` is not on your PATH. Run it through the tasks wired above: ${devkitCommands}.`,
         ]),
   ];
 };
