@@ -242,7 +242,7 @@ describe('an install in a CI job', () => {
 
     expect(writing.length).toBeGreaterThan(0);
     for (const content of writing) {
-      expect(content).toMatch(/^\s+runs-on:/m);
+      expect(content).not.toMatch(/^\s*CI\s*:/m);
     }
   });
 });

@@ -1,5 +1,5 @@
 ---
-'@lcabrera/devkit': patch
+'@lcabrera/devkit': minor
 ---
 
 The hooks a created repository ships now run without a manual `git config`.
