@@ -66,7 +66,9 @@ const workspaceWith = (changeset) => {
       "import manifest from '../package.json' with { type: 'json' };",
       '',
       'export const TOOLCHAIN_RANGES = {',
-      "  '@lcabrera/devkit': `>=${manifest.version} <1.0.0`,",
+      ["  '@lcabrera/devkit': `>=", '$', '{manifest.version} <1.0.0`,'].join(
+        '',
+      ),
       '};',
       '',
     ].join('\n'),
