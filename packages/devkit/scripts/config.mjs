@@ -19,10 +19,10 @@ import { hooksPathRefusal } from '../assets/workspace/scripts/hooks-path.mjs';
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
 
-export const DEFAULT_CONFIG = {
-  ci: { setup: [] },
-  commands: {},
-  paths: {
+export const DEFAULT_CONFIG = Object.freeze({
+  ci: Object.freeze({ setup: Object.freeze([]) }),
+  commands: Object.freeze({}),
+  paths: Object.freeze({
     agents: '.claude/agents',
     coordination: 'docs/coordination',
     decisions: 'docs/decisions',
@@ -34,35 +34,46 @@ export const DEFAULT_CONFIG = {
     templates: '.github',
     workflows: '.github/workflows',
     workspace: '.',
-  },
+  }),
   profile: 'agent',
-};
+});
 
-/** @type {ReadonlyArray<readonly [string, readonly string[]]>} */
-const RUNG_GROUPS = [
+/**
+ * @param {ReadonlyArray<readonly [string, readonly string[]]>} entries
+ * @returns {ReadonlyArray<readonly [string, readonly string[]]>}
+ */
+const frozenRungs = (entries) =>
+  Object.freeze(
+    entries.map(([rung, list]) =>
+      Object.freeze(/** @type {const} */ ([rung, Object.freeze([...list])])),
+    ),
+  );
+
+const RUNG_GROUPS = frozenRungs([
   ['agent', ['skills', 'rules', 'agents', 'docs', 'coordination', 'decisions']],
   ['repo', ['templates', 'workflows', 'hooks', 'root']],
   ['monorepo', ['workspace']],
   ['full', []],
-];
+]);
 
 const GROUPS_BY_RUNG = new Map(RUNG_GROUPS);
 
 const GROUPS_WITHOUT_ASSETS = new Set(['agents', 'docs']);
 
-export const KIT_GROUPS = RUNG_GROUPS.flatMap(([, groups]) => groups).filter(
-  (group) => !GROUPS_WITHOUT_ASSETS.has(group),
+export const KIT_GROUPS = Object.freeze(
+  RUNG_GROUPS.flatMap(([, groups]) => groups).filter(
+    (group) => !GROUPS_WITHOUT_ASSETS.has(group),
+  ),
 );
 
-/** @type {ReadonlyArray<readonly [string, readonly string[]]>} */
-const RUNG_RETIREMENTS = [
+const RUNG_RETIREMENTS = frozenRungs([
   ['agent', []],
   ['repo', []],
   ['monorepo', []],
   ['full', []],
-];
+]);
 
-export const PROFILE_LADDER = RUNG_GROUPS.map(([rung]) => rung);
+export const PROFILE_LADDER = Object.freeze(RUNG_GROUPS.map(([rung]) => rung));
 
 const rungIndex = (name) => PROFILE_LADDER.indexOf(name);
 
@@ -87,13 +98,17 @@ export const retiredAssetsFor = ({ profile, retirements = RUNG_RETIREMENTS }) =>
     .filter(([rung]) => includesRung({ profile, rung }))
     .flatMap(([, assetPaths]) => assetPaths);
 
-export const PROFILES = Object.fromEntries(
-  PROFILE_LADDER.map((name) => [
-    name,
-    PROFILE_LADDER.filter((rung) =>
-      includesRung({ profile: name, rung }),
-    ).flatMap((rung) => GROUPS_BY_RUNG.get(rung) ?? []),
-  ]),
+export const PROFILES = Object.freeze(
+  Object.fromEntries(
+    PROFILE_LADDER.map((name) => [
+      name,
+      Object.freeze(
+        PROFILE_LADDER.filter((rung) =>
+          includesRung({ profile: name, rung }),
+        ).flatMap((rung) => GROUPS_BY_RUNG.get(rung) ?? []),
+      ),
+    ]),
+  ),
 );
 
 /**

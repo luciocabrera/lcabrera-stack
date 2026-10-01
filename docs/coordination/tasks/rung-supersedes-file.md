@@ -19,6 +19,7 @@ area:
   - reports/api-surface/devkit.txt
   - packages/devkit/scripts/retirement.mjs
   - packages/devkit/scripts/retirement-fixtures.mjs
+  - packages/devkit/scripts/config-frozen.test.mjs
   - packages/devkit/scripts/command-init.mjs
   - packages/devkit/ARCHITECTURE.md
   - packages/devkit/assets/root/COMMANDS.md
