@@ -194,21 +194,28 @@ export const planSync = ({
   peerVersions = new Map(),
   retiring = retiredAssetsFor({ profile: config.profile }),
 }) => {
-  const declared = declaredRetirements({ config, retiring });
-  const planned = prevailingAssets({ assets, config, groups })
-    .filter(({ targetPath }) => !declared.has(targetPath))
-    .map(({ asset, targetPath }) => {
-      const entry = planEntryFor({
-        asset,
-        config,
-        manifest,
-        onDiskContent,
-        onDiskHash,
-        peerVersions,
-        targetPath,
-      });
-      return { ...entry, executable: asset.executable === true };
+  const retired = new Set(retiring);
+  const placed = prevailingAssets({
+    assets: assets.filter((asset) => !retired.has(asset.path)),
+    config,
+    groups,
+  });
+  const placedPaths = new Set(placed.map(({ targetPath }) => targetPath));
+  const declared = declaredRetirements({ config, retiring }).difference(
+    placedPaths,
+  );
+  const planned = placed.map(({ asset, targetPath }) => {
+    const entry = planEntryFor({
+      asset,
+      config,
+      manifest,
+      onDiskContent,
+      onDiskHash,
+      peerVersions,
+      targetPath,
     });
+    return { ...entry, executable: asset.executable === true };
+  });
 
   return [
     ...planned,

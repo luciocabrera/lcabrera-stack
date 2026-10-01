@@ -265,6 +265,7 @@ describe('a recorded file no group ships', () => {
       assets: [LOWER, { content: 'kept upstream', path: 'higher/extra.md' }],
       config: CONFIG,
       groups: ['lower'],
+      kitGroups: ['lower', 'higher'],
       manifest: { files: { 'app/extra.md': hashContent('kept upstream') } },
       onDiskHash: () => hashContent('kept upstream'),
     });
@@ -367,6 +368,22 @@ describe('a path a rung declares it retires', () => {
     expect(readFileSync(join(root, RETIRED.path), 'utf8')).toBe(
       'helper body, edited',
     );
+  });
+
+  test('gives way to a file the declaring rung ships at the same path', () => {
+    const plan = planSync({
+      assets: [LOWER, HIGHER],
+      config: CONFIG,
+      groups: ['lower', 'higher'],
+      kitGroups: ['lower'],
+      manifest: { files: { [TARGET]: hashContent(LOWER.content) } },
+      onDiskHash: () => hashContent(LOWER.content),
+      retiring: [LOWER.path],
+    });
+
+    expect(
+      plan.map(({ content, path, state }) => ({ content, path, state })),
+    ).toEqual([{ content: HIGHER.content, path: TARGET, state: 'updated' }]);
   });
 
   test('is left alone by a run at a profile below the declaring rung', () => {

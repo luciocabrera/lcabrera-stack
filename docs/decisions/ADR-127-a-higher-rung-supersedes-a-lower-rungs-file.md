@@ -103,10 +103,12 @@ directories, so a group that gains its first asset cannot be forgotten.
 `config.mjs` sits beside `RUNG_GROUPS` and lists, per rung, the asset paths that
 rung makes obsolete. A declaration applies only while the profile includes the
 declaring rung; `retiredAssetsFor` answers the paths for one profile. While it
-applies, the path is left out of the placed entries even though a lower group
-still ships it, and a recorded file there is planned as `retired` or `kept` by
-the same rule as above. A path the manifest does not record is left alone,
-because the kit never wrote it.
+applies, the declared asset is left out of the plan even though a lower group
+still ships it. If no other held asset is placed at its target path, a recorded
+file there is planned as `retired` or `kept` by the same rule as above. If one
+is, for example the declaring rung's own file, that file is placed and
+precedence decides as for any other shared path. A path the manifest does not
+record is left alone, because the kit never wrote it.
 
 A run at a profile below the declaring rung does not see the declaration. The
 lower group still ships the path, so the file is planned like any other: left
