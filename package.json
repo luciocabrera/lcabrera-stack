@@ -15,7 +15,7 @@
     "build:all": "vp run -r build",
     "changelog:generate": "git log --no-merges --format=%H%x1f%D%x1f%cI%x1f%s%x1f%b%x1e -- ':!CHANGELOG.md' | node scripts/generate-changelog.mjs",
     "check:push": "vp run typegen:all && vp check && vp run typecheck:changed && vp run -r lint:eslint:check && vp run lint:biome:check && vp run react-doctor:verify && vp run commands:verify && vp run coordination:verify && vp run scripts:verify && vp run scripts:exits:verify && vp run seeds:verify && vp run shipped-ranges:verify && vp run devkit:closure -- --shipped && vp run devkit:check && vp run lint:plugins:verify && vp run lint:eslint:verify && vp run suppressions:verify && vp run docs:verify && vp run harness:verify && vp run registers:verify && vp run package-refs:verify && vp run departed:verify && vp run renames:verify && vp run route-names:verify && vp run inventory:verify && vp run adr:verify && vp run viteplus:verify && vp run configs:verify",
-    "check:safe": "vp run typegen:all && vp check && vp run typecheck:all && vp run -r lint:eslint:check && vp run lint:biome:check && vp run react-doctor:verify && vp run commands:verify && vp run coordination:verify && vp run scripts:verify && vp run scripts:exits:verify && vp run seeds:verify && vp run shipped-ranges:verify && vp run devkit:closure -- --shipped && vp run devkit:check && vp run lint:plugins:verify && vp run lint:eslint:verify && vp run suppressions:verify && vp run docs:verify && vp run harness:verify && vp run registers:verify && vp run package-refs:verify && vp run departed:verify && vp run renames:verify && vp run route-names:verify && vp run inventory:verify && vp run adr:verify && vp run viteplus:verify && vp run configs:verify && vp run deps:audit && vp run tarball:verify && vp run shipped-docs:verify && vp run packages:build && vp run publish:verify && vp run api-surface:verify && vp run attw:verify && vp run test:all",
+    "check:safe": "vp run typegen:all && vp check && vp run typecheck:all && vp run -r lint:eslint:check && vp run lint:biome:check && vp run react-doctor:verify && vp run commands:verify && vp run coordination:verify && vp run scripts:verify && vp run scripts:exits:verify && vp run seeds:verify && vp run shipped-ranges:verify && vp run devkit:closure -- --shipped && vp run devkit:check && vp run lint:plugins:verify && vp run lint:eslint:verify && vp run suppressions:verify && vp run docs:verify && vp run harness:verify && vp run registers:verify && vp run package-refs:verify && vp run departed:verify && vp run renames:verify && vp run route-names:verify && vp run inventory:verify && vp run adr:verify && vp run viteplus:verify && vp run configs:verify && vp run deps:audit && vp run tarball:verify && vp run workspace:verify && vp run shipped-docs:verify && vp run packages:build && vp run publish:verify && vp run api-surface:verify && vp run attw:verify && vp run test:all",
     "commands:verify": "repo-verify-commands",
     "commit:verify": "repo-verify-commit",
     "configs:verify": "repo-verify-stray-configs",
@@ -76,6 +76,7 @@
     "react-doctor:verify": "repo-verify-react-doctor",
     "ready": "vp run check:safe && vp run build:all",
     "registers:verify": "repo-verify-doc-registers",
+    "registry-tree:verify": "node scripts/verify-devkit-registry.mjs",
     "release:add": "changeset",
     "release:audit": "repo-audit-release",
     "release:plan": "repo-plan-release",
@@ -126,7 +127,8 @@
     "ts-morph": "catalog:tooling",
     "vite": "catalog:build",
     "vite-plus": "catalog:build",
-    "vitest": "catalog:test"
+    "vitest": "catalog:test",
+    "yaml": "catalog:tooling"
   },
   "engines": {
     "node": ">=26 <27"
