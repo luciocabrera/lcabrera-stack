@@ -22,7 +22,7 @@ the delay for the create and for the first install in the new repository:
 ```bash
 pnpm create --config.minimum-release-age=0 lcabrera-stack my-project
 cd my-project
-pnpm_config_minimum_release_age=0 vp install
+pnpm_config_minimum_release_age=0 pnpm install
 ```
 
 A repository created by a release declares every `@lcabrera/*` package from the

@@ -123,9 +123,6 @@ export const publishedVersions = (root) =>
   );
 
 /**
- * Raises every shipped floor below the version in `root` to it, and returns
- * what moved.
- *
  * @param {string} root
  * @returns {{ from: string, name: string, path: string, to: string }[]}
  */

@@ -13,10 +13,12 @@ import process from 'node:process';
 
 import { raiseShippedFloors } from './lib/shipped-range-sources.mjs';
 
+const raiseLine = ({ name, path, to }) => `${name} to \`${to}\` in ${path}`;
+
 const summary = (raised) =>
   raised.length === 0
     ? 'raise-shipped-floors: every shipped range already starts at the version this repository publishes\n'
-    : `raise-shipped-floors: raised ${raised.map(({ name, path, to }) => `${name} to \`${to}\` in ${path}`).join(', ')}\n`;
+    : `raise-shipped-floors: raised ${raised.map(raiseLine).join(', ')}\n`;
 
 try {
   process.stdout.write(summary(raiseShippedFloors(process.cwd())));

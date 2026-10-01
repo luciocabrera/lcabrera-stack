@@ -120,9 +120,6 @@ const REWRITERS = {
 };
 
 /**
- * Every declaration whose floor sits below the published version, with the
- * range it is raised to.
- *
  * @param {{ declarations: readonly object[], versions: Record<string, string> }} args
  * @returns {{ declaration: object, raised: string }[]}
  */
@@ -149,8 +146,6 @@ const rewriteOne = ({ declaration, kind, raised, text }) => {
 };
 
 /**
- * The source's text with every floor below the published version raised to it.
- *
  * @param {{ declarations: readonly object[], kind: string, text: string,
  *           versions: Record<string, string> }} args
  * @returns {string}
@@ -165,8 +160,6 @@ export const withRaisedFloors = ({ declarations, kind, text, versions }) =>
       );
 
 /**
- * The changeset that publishes raised floors with the kit that ships them.
- *
  * @param {{ packageName: string, raised: readonly { from: string, name: string,
  *           path: string, to: string }[] }} args
  * @returns {string}
