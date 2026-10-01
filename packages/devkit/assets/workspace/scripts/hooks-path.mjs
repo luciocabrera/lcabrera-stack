@@ -135,12 +135,14 @@ export const gitEnvironment = ({ binary, env, platform = process.platform }) =>
     ],
   ]);
 
+const GIT_PATH_PREFIX = /^(?:[A-Za-z]:|~|%\(|:\()/u;
+
 /**
  * @param {string} path
  * @returns {boolean}
  */
 export const isRepositoryRelative = (path) => {
-  if (/^[A-Za-z]:/.test(path) || win32.isAbsolute(path)) return false;
+  if (GIT_PATH_PREFIX.test(path) || win32.isAbsolute(path)) return false;
   const normal = posix.normalize(path.replaceAll('\\', '/'));
   return normal !== '..' && !normal.startsWith('../');
 };
@@ -275,6 +277,19 @@ const hooksDirectory = ({ hooksPath, root }) => {
   };
 };
 
+/**
+ * @param {{ action: string, current: string, hooksPath: string }} args
+ * @returns {string[] | undefined}
+ */
+export const gitConfigChange = ({ action, current, hooksPath }) => {
+  if (action === 'point') {
+    return ['config', '--local', 'core.hooksPath', hooksPath];
+  }
+  return action === 'escapes' && current === hooksPath
+    ? ['config', '--local', '--unset', 'core.hooksPath']
+    : undefined;
+};
+
 const printReport = (report) => {
   if (report === undefined) return;
   const print = report.stream === 'error' ? console.error : console.log;
@@ -295,9 +310,8 @@ const point = ({ binary, root }) => {
     root,
     topLevel,
   });
-  if (action === 'point') {
-    git(['config', '--local', 'core.hooksPath', hooksPath]);
-  }
+  const change = gitConfigChange({ action, current, hooksPath });
+  if (change !== undefined) git(change);
   printReport(hooksPathReport({ action, current, hooksPath }));
 };
 

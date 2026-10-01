@@ -207,6 +207,8 @@ describe('hooksPathIn', () => {
     ['/hooks'],
     [String.raw`C:\hooks`],
     ['../hooks'],
+    ['~/.hooks'],
+    ['%(prefix)/hooks'],
     [''],
     [7],
     [null],
@@ -232,6 +234,11 @@ describe('isRepositoryRelative', () => {
     ['..', false],
     ['../hooks', false],
     [String.raw`tools\..\..\hooks`, false],
+    ['~/.hooks', false],
+    ['~user/hooks', false],
+    ['%(prefix)/hooks', false],
+    [':(optional)hooks', false],
+    ['tools/~hooks', true],
   ])('%s is %s', (path, expected) => {
     expect(isRepositoryRelative(path)).toBe(expected);
   });

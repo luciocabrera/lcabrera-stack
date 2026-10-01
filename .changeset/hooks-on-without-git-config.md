@@ -22,8 +22,14 @@ The task block is reconciled key by key, so `sync` updates an untouched
 still never change git config themselves.
 
 `paths.hooks` in `devkit.config.json` must now be a non-empty path inside the
-repository, relative to its root. An absolute path or one that climbs out with
-`..` was materialised under the repository but handed to git as written, and an
-empty or non-string value placed the hooks where the `prepare` script did not
-look, so in both cases the hooks never ran. Every command and the `prepare`
-script now refuse such a value with an error naming the key. A config that already names a relative directory is unaffected.
+repository, relative to its root. An absolute path, one that climbs out with
+`..`, or one starting with a prefix git expands (`~`, `%(prefix)`,
+`:(optional)`) was materialised under the repository but read by git somewhere
+else, and an empty or non-string value placed the hooks where the `prepare`
+script did not look, so in each case the shipped hooks never ran. Every command
+and the `prepare` script now refuse such a value with an error naming the key. A
+config that already names a plain relative directory is unaffected.
+
+The `prepare` script also leaves the hooks off when the hooks directory resolves
+outside the repository through a symlink, and unsets `core.hooksPath` if it
+already pointed there.

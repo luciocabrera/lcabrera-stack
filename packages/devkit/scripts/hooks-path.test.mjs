@@ -22,6 +22,7 @@ import process from 'node:process';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import {
+  gitConfigChange,
   hooksPathAction,
   hooksPathReport,
 } from '../assets/workspace/scripts/hooks-path.mjs';
@@ -168,11 +169,16 @@ describe('an install in a clone', () => {
     },
   );
 
-  test.skipIf(process.platform === 'win32')(
-    'points nothing when the hooks directory links outside the repository',
-    () => {
+  test.skipIf(process.platform === 'win32').each([
+    ['unset', ''],
+    ['already pointed there', '.githooks'],
+  ])(
+    'leaves core.hooksPath unset when the hooks directory links outside the repository and it was %s',
+    (_state, configured) => {
       const root = scratch();
       git(['init', '--quiet', '.'], root);
+      if (configured !== '')
+        git(['config', 'core.hooksPath', configured], root);
       const elsewhere = scratch();
       writeFileSync(join(elsewhere, 'commit-msg'), '#!/usr/bin/env sh\n');
       symlinkSync(elsewhere, join(root, '.githooks'), 'dir');
@@ -329,4 +335,33 @@ describe('hooksPathReport', () => {
       expect(hooksPathReport({ ...args, action })).toBeUndefined();
     },
   );
+});
+
+describe('gitConfigChange', () => {
+  const args = { current: '', hooksPath: '.githooks' };
+
+  test('sets the path when pointing', () => {
+    expect(gitConfigChange({ ...args, action: 'point' })).toEqual([
+      'config',
+      '--local',
+      'core.hooksPath',
+      '.githooks',
+    ]);
+  });
+
+  test('unsets the path when the configured directory escapes', () => {
+    expect(
+      gitConfigChange({ ...args, action: 'escapes', current: '.githooks' }),
+    ).toEqual(['config', '--local', '--unset', 'core.hooksPath']);
+  });
+
+  test.each([
+    ['escapes', '.husky'],
+    ['escapes', ''],
+    ['kept', '.husky'],
+    ['pointed', '.githooks'],
+    ['absent', ''],
+  ])('changes nothing for %s with %o configured', (action, current) => {
+    expect(gitConfigChange({ ...args, action, current })).toBeUndefined();
+  });
 });

@@ -19,6 +19,7 @@ area:
   - packages/devkit/README.md
   - scripts/verify-devkit-workspace.mjs
   - scripts/lib/devkit-workspace*.mjs
+  - scripts/lib/devkit-tree-run.mjs
   - COMMANDS.md
   - .changeset/**
 started: 2026-09-30
