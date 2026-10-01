@@ -104,6 +104,42 @@ describe('conflictMarkerLines', () => {
     expect(conflictMarkerLines(`Summary\n${SPLIT}\n\nText.\n`)).toEqual([]);
   });
 
+  it('passes a heading underlined at the end of the file', () => {
+    expect(conflictMarkerLines(`Text.\n\nSummary\n${SPLIT}`)).toEqual([]);
+    expect(conflictMarkerLines(`Text.\n\nSummary\n${SPLIT}\n`)).toEqual([]);
+  });
+
+  it('passes a reStructuredText title with an overline and an underline', () => {
+    expect(
+      conflictMarkerLines(`${SPLIT}\nSummary\n${SPLIT}\n\nText.\n`),
+    ).toEqual([]);
+    expect(
+      conflictMarkerLines(`Intro.\n\n${SPLIT}\nSummary\n${SPLIT}\nText.\n`),
+    ).toEqual([]);
+  });
+
+  it('names a separator left alone between the two sides of a resolved conflict', () => {
+    const text = ['const ours = 1;', SPLIT, 'const theirs = 2;', ''].join('\n');
+
+    expect(conflictMarkerLines(text)).toEqual([{ line: 2, text: SPLIT }]);
+  });
+
+  it('names a separator with no text above it and text below it', () => {
+    expect(conflictMarkerLines(`${SPLIT}\ntheirs\n`)).toEqual([
+      { line: 1, text: SPLIT },
+    ]);
+  });
+
+  it('names an escaped separator without any other marker in the file', () => {
+    expect(conflictMarkerLines(`Text.\n\n\\${SPLIT}\n\nMore.\n`)).toEqual([
+      { line: 3, text: `\\${SPLIT}` },
+    ]);
+  });
+
+  it('passes a separator folded into a table cell when no marker is beside it', () => {
+    expect(conflictMarkerLines(`| a |\n| ${SPLIT} |\n| b |\n`)).toEqual([]);
+  });
+
   it('names that same underline once the file also holds a real marker', () => {
     expect(
       conflictMarkerLines(`Summary\n${SPLIT}\n\n${CLOSE} topic\n`),

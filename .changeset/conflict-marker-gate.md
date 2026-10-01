@@ -12,9 +12,14 @@ marker indented inside a list item, and a separator escaped with a backslash.
 `git diff --check` and a search for the raw marker miss all of these, and the
 formatter usually runs before any gate does.
 
-Seven `=` alone is also a heading underline, so a separator is reported only in
-a file that also holds an opening, base or closing marker. A heading passes; a
-real conflict names every marker line.
+Seven `=` alone is also a Markdown or reStructuredText heading underline. In a
+file that holds an opening, base or closing marker, every marker line is
+reported. Without one, a separator is reported unless it is shaped like a
+heading: below a text line and above a blank line or the end of the file, or an
+overline whose title has a matching underline. A separator left between the two
+sides of a resolved conflict sits between text lines, so it is reported. The
+backslash-escaped separator is reported on its own, since a formatter prints it
+only for a line that is not a heading.
 
 It reads nothing from `devkit.config.json`. It reads one file at a time and
 skips a file holding a NUL byte without decoding it. A test that needs a marker
