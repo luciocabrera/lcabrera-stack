@@ -58,6 +58,20 @@ const isSortedFollowUp = (url: string) => {
 it('the first paint does not ask for another page', async ({ page }) => {
   const hits = watch(page, ENTERPRISE_PAGE);
   await openGrid(page);
+  const pending = page.waitForRequest(
+    (request) => request.url().includes(ENTERPRISE_PAGE),
+    { timeout: 2000 },
+  );
+
+  let isArrived = true;
+
+  try {
+    await pending;
+  } catch {
+    isArrived = false;
+  }
+
+  expect(isArrived).toBe(false);
   expect(hits).toEqual([]);
 });
 
