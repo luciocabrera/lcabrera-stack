@@ -66,7 +66,11 @@ const captured = (run) => {
   const silenced = silencedConsole(vi);
   try {
     const code = run();
-    return { code, errors: silenced.error.mock.calls.flat().join('\n') };
+    return {
+      code,
+      errors: silenced.error.mock.calls.flat().join('\n'),
+      printed: silenced.log.mock.calls.flat().join('\n'),
+    };
   } finally {
     silenced.restore();
   }
@@ -131,4 +135,28 @@ describe('sync through the command', () => {
       });
     },
   );
+});
+
+const materialised = (printed) =>
+  Number(/: (\d+) file\(s\) materialised/.exec(printed)?.[1]);
+
+describe('init on a tree holding a stale record', () => {
+  test('counts only the files it placed as materialised', () => {
+    const withRecord = recordedTree();
+    mkdirSync(join(withRecord, '.git'));
+    const withoutRecord = recordedTree();
+    rmSync(join(withoutRecord, MANIFEST_FILE));
+    rmSync(join(withoutRecord, RECORDED));
+    mkdirSync(join(withoutRecord, '.git'));
+
+    const stale = captured(() => runInit(['--force'], withRecord));
+    const clean = captured(() => runInit(['--force'], withoutRecord));
+
+    expect({
+      materialised: materialised(stale.printed),
+      retired: new RegExp(String.raw`retired\s+${RECORDED}`).test(
+        stale.printed,
+      ),
+    }).toEqual({ materialised: materialised(clean.printed), retired: true });
+  });
 });

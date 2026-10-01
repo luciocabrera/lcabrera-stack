@@ -37,6 +37,7 @@ import {
 } from './init.mjs';
 import {
   isAcknowledged,
+  isRemoval,
   isReported,
   isWritten,
   MANIFEST_FILE,
@@ -377,6 +378,10 @@ export const printPlacementNotice = (profile) => {
   const notice = placementNotice(profile);
   if (notice !== undefined) console.log(notice);
 };
+
+export const placedCount = (entries) =>
+  entries.filter((entry) => isWritten(entry.state) && !isRemoval(entry.state))
+    .length;
 
 export const countsFor = (entries) => ({
   reported: entries.filter((entry) => isReported(entry.state)).length,

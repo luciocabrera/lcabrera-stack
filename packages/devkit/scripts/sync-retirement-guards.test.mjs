@@ -217,3 +217,12 @@ describe('the shipped closure of a tree holding a stale record', () => {
     expect(closureOf(root)).toEqual(clean);
   });
 });
+
+describe('a recorded path many directories deep', () => {
+  test('resolves without exhausting the stack', () => {
+    const { root } = scratchRepository();
+    const deep = `${Array.from({ length: 20_000 }, () => 'a').join('/')}/f.md`;
+
+    expect(destinationIn(root)(deep)?.startsWith(root)).toBe(true);
+  });
+});

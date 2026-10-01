@@ -20,7 +20,7 @@ import { join, resolve } from 'node:path';
 import {
   applyPlan,
   buildPlan,
-  countsFor,
+  placedCount,
   printPlacementNotice,
   printTaskPlan,
   renderPlan,
@@ -187,7 +187,7 @@ export const applyInit = ({
     root,
   });
   const { added, skipped } = taskOutcomes(tasks);
-  const { written } = countsFor(entries);
+  const written = placedCount(entries);
 
   const hooksPath = resolveConfig(
     readTextIfPresent(join(root, CONFIG_FILE_NAME)),

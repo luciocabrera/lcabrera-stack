@@ -171,26 +171,30 @@ const prevailingAssets = ({ assets, config, destinationOf, groups }) => {
 
 const canonicalRecords = ({ destinationOf, manifest, placed }) => {
   const keyOf = destinationKey(destinationOf);
-  const recordedAt = new Map(
-    Object.keys(manifest.files).map((path) => [keyOf(path), path]),
-  );
+  const recordedAt = Map.groupBy(Object.keys(manifest.files), keyOf);
   const aliasOf = new Map(
     placed
-      .filter(({ targetPath }) => !Object.hasOwn(manifest.files, targetPath))
-      .map(({ targetPath }) => [targetPath, recordedAt.get(keyOf(targetPath))])
-      .filter(([, alias]) => alias !== undefined),
+      .map(({ targetPath }) => [
+        targetPath,
+        (recordedAt.get(keyOf(targetPath)) ?? []).filter(
+          (path) => path !== targetPath,
+        ),
+      ])
+      .filter(([, aliases]) => aliases.length > 0),
   );
   return { aliasOf, files: renamedRecords({ aliasOf, files: manifest.files }) };
 };
 
 const renamedRecords = ({ aliasOf, files }) => {
-  const aliases = new Set(aliasOf.values());
+  const aliases = new Set(aliasOf.values().toArray().flat());
   return {
     ...Object.fromEntries(
       Object.entries(files).filter(([path]) => !aliases.has(path)),
     ),
     ...Object.fromEntries(
-      [...aliasOf].map(([path, alias]) => [path, files[alias]]),
+      [...aliasOf]
+        .map(([path, spellings]) => [path, files[path] ?? files[spellings[0]]])
+        .filter(([, hash]) => hash !== undefined),
     ),
   };
 };

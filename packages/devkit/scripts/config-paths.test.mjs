@@ -139,9 +139,14 @@ const ALIASED = {
   lower: { content: 'lower body', path: 'lower/routes/example.tsx' },
 };
 
-const syncAliased = ({ groups, manifest, root }) => {
+const syncAliased = ({
+  assets = [ALIASED.lower, ALIASED.higher],
+  groups,
+  manifest,
+  root,
+}) => {
   const entries = planSync({
-    assets: [ALIASED.lower, ALIASED.higher],
+    assets,
     config: ALIASED.config,
     destinationOf: destinationIn(root),
     groups,
@@ -190,6 +195,41 @@ describe('a tree moving up a rung through a symlinked base', () => {
       content: 'higher body',
       moved: ['updated alias/routes/example.tsx'],
       records: { 'alias/routes/example.tsx': hashContent('higher body') },
+    });
+  });
+});
+
+describe('a manifest holding two spellings of one placed file', () => {
+  test('keeps one record, and a later retirement plans one entry', () => {
+    const root = scratch();
+    mkdirSync(join(root, 'app', 'routes'), { recursive: true });
+    symlinkSync(join(root, 'app'), join(root, 'alias'), 'dir');
+    writeFileSync(join(root, 'app/routes/example.tsx'), 'lower body');
+    const both = {
+      files: {
+        'alias/routes/example.tsx': hashContent('lower body'),
+        'app/routes/example.tsx': hashContent('lower body'),
+      },
+    };
+
+    const moved = syncAliased({
+      groups: ['lower', 'higher'],
+      manifest: both,
+      root,
+    });
+    const departed = syncAliased({
+      assets: [{ content: 'other', path: 'lower/other.md' }],
+      groups: ['lower', 'higher'],
+      manifest: moved.manifest,
+      root,
+    });
+
+    expect({
+      departed: departed.states.filter((line) => line.includes('example')),
+      records: Object.keys(moved.manifest.files),
+    }).toEqual({
+      departed: ['retired alias/routes/example.tsx'],
+      records: ['alias/routes/example.tsx'],
     });
   });
 });

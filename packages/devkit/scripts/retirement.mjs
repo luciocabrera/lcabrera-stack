@@ -14,7 +14,7 @@
  */
 
 import { lstatSync, realpathSync, statSync } from 'node:fs';
-import { basename, dirname, join, posix } from 'node:path';
+import { join, parse, posix, sep } from 'node:path';
 
 import {
   isRepositoryRelative,
@@ -25,13 +25,24 @@ import { classifyRetirement } from './manifest.mjs';
 
 const OUTSIDE_STATE = 'outside';
 
-const throughLinks = (path) => {
+const realPathOrNothing = (path) => {
   try {
     return realpathSync(path);
   } catch {
-    const parent = dirname(path);
-    return parent === path ? path : join(throughLinks(parent), basename(path));
+    return;
   }
+};
+
+const throughLinks = (path) => {
+  const { root } = parse(path);
+  const segments = path.slice(root.length).split(sep).filter(Boolean);
+  let resolved = realPathOrNothing(root) ?? root;
+  for (const [index, segment] of segments.entries()) {
+    const next = realPathOrNothing(join(resolved, segment));
+    if (next === undefined) return join(resolved, ...segments.slice(index));
+    resolved = next;
+  }
+  return resolved;
 };
 
 /**
