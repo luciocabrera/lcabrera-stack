@@ -50,4 +50,6 @@ export const quietlyWith = (vi, run) => {
 };
 
 export const createUnderWith = (vi, { parent, profile }) =>
-  quietlyWith(vi, () => runCreate(['demo', '--profile', profile], parent));
+  quietlyWith(vi, () =>
+    runCreate(['demo', '--profile', profile, '--no-install'], parent),
+  );

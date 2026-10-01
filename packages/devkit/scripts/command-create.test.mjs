@@ -67,7 +67,9 @@ const createUnderGitConfig = ({ contents, parent }) => {
   const inherited = process.env.GIT_CONFIG_GLOBAL;
   process.env.GIT_CONFIG_GLOBAL = config;
   try {
-    return quietly(() => runCreate(['demo', '--profile', 'agent'], parent));
+    return quietly(() =>
+      runCreate(['demo', '--profile', 'agent', '--no-install'], parent),
+    );
   } finally {
     if (inherited === undefined) {
       delete process.env.GIT_CONFIG_GLOBAL;
@@ -83,7 +85,7 @@ describe('devkit create, from an empty parent directory', () => {
   test('leaves a git repository holding the agent rung, with a commit', () => {
     const parent = scratch();
     const { code } = quietly(() =>
-      runCreate(['demo', '--profile', 'agent'], parent),
+      runCreate(['demo', '--profile', 'agent', '--no-install'], parent),
     );
     const created = join(parent, 'demo');
 
@@ -120,7 +122,9 @@ describe('devkit create, from an empty parent directory', () => {
     const parent = scratch();
     mkdirSync(join(parent, 'empty'));
 
-    const { code } = quietly(() => runCreate(['empty'], parent));
+    const { code } = quietly(() =>
+      runCreate(['empty', '--no-install'], parent),
+    );
 
     expect(code).toBe(0);
     expect(git(['log', '-1', '--pretty=%s'], join(parent, 'empty'))).toBe(
@@ -136,7 +140,7 @@ describe('devkit create, from an empty parent directory', () => {
     mkdirSync(side);
     symlinkSync(real, join(side, 'demo'));
 
-    const { code } = quietly(() => runCreate(['demo'], side));
+    const { code } = quietly(() => runCreate(['demo', '--no-install'], side));
 
     expect(code).toBe(0);
     expect(git(['log', '-1', '--pretty=%s'], real)).toBe(
@@ -146,7 +150,7 @@ describe('devkit create, from an empty parent directory', () => {
 
   test('names the package after the directory it made', () => {
     const parent = scratch();
-    quietly(() => runCreate(['My App'], parent));
+    quietly(() => runCreate(['My App', '--no-install'], parent));
     expect(
       JSON.parse(readFileSync(join(parent, 'My App', 'package.json'), 'utf8'))
         .name,
@@ -160,7 +164,9 @@ describe('what devkit create refuses', () => {
     mkdirSync(join(parent, 'demo'));
     writeFileSync(join(parent, 'demo', 'README.md'), '# mine\n');
 
-    const { code, errors } = quietly(() => runCreate(['demo'], parent));
+    const { code, errors } = quietly(() =>
+      runCreate(['demo', '--no-install'], parent),
+    );
 
     expect(code).toBe(1);
     expect(errors).toContain('is not empty');
@@ -172,7 +178,9 @@ describe('what devkit create refuses', () => {
     const parent = scratch();
     writeFileSync(join(parent, 'demo'), 'not a directory\n');
 
-    const { code, errors } = quietly(() => runCreate(['demo'], parent));
+    const { code, errors } = quietly(() =>
+      runCreate(['demo', '--no-install'], parent),
+    );
 
     expect(code).toBe(1);
     expect(errors).toContain('is not a directory');
@@ -188,7 +196,9 @@ describe('what devkit create refuses', () => {
     mkdirSync(locked);
     chmodSync(locked, 0o000);
 
-    const { code, errors } = quietly(() => runCreate(['locked'], parent));
+    const { code, errors } = quietly(() =>
+      runCreate(['locked', '--no-install'], parent),
+    );
     chmodSync(locked, 0o755);
 
     expect(code).toBe(1);
@@ -200,7 +210,9 @@ describe('what devkit create refuses', () => {
     const parent = scratch();
     git(['init', '--quiet', '.'], parent);
 
-    const { code, errors } = quietly(() => runCreate(['demo'], parent));
+    const { code, errors } = quietly(() =>
+      runCreate(['demo', '--no-install'], parent),
+    );
 
     expect(code).toBe(1);
     expect(errors).toContain('devkit init');
@@ -233,7 +245,9 @@ describe('what devkit create refuses', () => {
         parent,
       });
 
-      const { code, errors } = quietly(() => runCreate(['demo'], link));
+      const { code, errors } = quietly(() =>
+        runCreate(['demo', '--no-install'], link),
+      );
 
       expect(code).toBe(1);
       expect(errors).toContain(outer);
@@ -324,7 +338,12 @@ describe('a rung above repo', () => {
     ]) {
       expect(existsSync(join(parent, 'demo', path))).toBe(true);
     }
-    expect(existsSync(join(parent, 'demo', 'docker/local/.env'))).toBe(false);
+    expect(git(['ls-files', 'docker/local'], join(parent, 'demo'))).toBe(
+      'docker/local/.env.example\ndocker/local/docker-compose.yml',
+    );
+    expect(
+      git(['check-ignore', 'docker/local/.env'], join(parent, 'demo')),
+    ).toBe('docker/local/.env');
     expect(Object.keys(scriptsOf(parent))).toEqual(
       expect.arrayContaining(['db:down', 'db:seed', 'db:status', 'db:up']),
     );

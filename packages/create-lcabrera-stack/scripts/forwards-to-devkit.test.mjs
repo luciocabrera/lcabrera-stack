@@ -48,6 +48,31 @@ describe('create-lcabrera-stack', () => {
   });
 });
 
+const installedShim = ({ devkitSource, root }) => {
+  const devkit = join(root, 'node_modules', '@lcabrera', 'devkit');
+  mkdirSync(join(devkit, 'scripts'), { recursive: true });
+  writeFileSync(
+    join(devkit, 'package.json'),
+    JSON.stringify({
+      bin: { devkit: './scripts/devkit.mjs' },
+      name: '@lcabrera/devkit',
+      version: '0.0.0',
+    }),
+  );
+  writeFileSync(join(devkit, 'scripts', 'devkit.mjs'), devkitSource);
+
+  const installed = join(
+    root,
+    'node_modules',
+    'create-lcabrera-stack',
+    'scripts',
+  );
+  mkdirSync(installed, { recursive: true });
+  const copy = join(installed, 'create-lcabrera-stack.mjs');
+  copyFileSync(BIN, copy);
+  return copy;
+};
+
 describe('the exit code a consumer sees', () => {
   const scratches = [];
 
@@ -62,34 +87,37 @@ describe('the exit code a consumer sees', () => {
   test("forwards the wrapped CLI's own exit code when it does start", () => {
     const root = mkdtempSync(join(tmpdir(), 'create-shim-'));
     scratches.push(root);
-
-    const devkit = join(root, 'node_modules', '@lcabrera', 'devkit');
-    mkdirSync(join(devkit, 'scripts'), { recursive: true });
-    writeFileSync(
-      join(devkit, 'package.json'),
-      JSON.stringify({
-        bin: { devkit: './scripts/devkit.mjs' },
-        name: '@lcabrera/devkit',
-        version: '0.0.0',
-      }),
-    );
-    writeFileSync(
-      join(devkit, 'scripts', 'devkit.mjs'),
-      'process.exitCode = 7;\n',
-    );
-
-    const installed = join(
+    const copy = installedShim({
+      devkitSource: 'process.exitCode = 7;\n',
       root,
-      'node_modules',
-      'create-lcabrera-stack',
-      'scripts',
-    );
-    mkdirSync(installed, { recursive: true });
-    const copy = join(installed, 'create-lcabrera-stack.mjs');
-    copyFileSync(BIN, copy);
+    });
 
     expect(
       spawnSync(process.execPath, [copy, 'demo'], { encoding: 'utf8' }).status,
     ).toBe(7);
+  });
+
+  test('hands --no-install and --no-db to devkit create as they were given', () => {
+    const root = mkdtempSync(join(tmpdir(), 'create-shim-'));
+    scratches.push(root);
+    const copy = installedShim({
+      devkitSource:
+        'process.stdout.write(JSON.stringify(process.argv.slice(2)));\n',
+      root,
+    });
+
+    const { status, stdout } = spawnSync(
+      process.execPath,
+      [copy, 'demo', '--no-install', '--no-db'],
+      { encoding: 'utf8' },
+    );
+
+    expect(status).toBe(0);
+    expect(JSON.parse(stdout)).toEqual([
+      'create',
+      'demo',
+      '--no-install',
+      '--no-db',
+    ]);
   });
 });

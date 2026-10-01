@@ -6,7 +6,7 @@ governs:
 
 # ADR-124 — `create` defaults to the monorepo rung; `init` and `sync` keep their fallback
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-129](./ADR-129-create-defaults-to-the-full-rung-and-runs-the-setup.md)
 
 **Issue:** [#1191](https://github.com/luciocabrera/lcabrera-stack/issues/1191)
 

@@ -29,7 +29,10 @@ const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const createdIn = ({ parent, profile }) => {
   const silenced = silencedConsole(vi);
   try {
-    const code = runCreate([profile, '--profile', profile], parent);
+    const code = runCreate(
+      [profile, '--profile', profile, '--no-install'],
+      parent,
+    );
     const root = join(parent, profile);
     return {
       code,

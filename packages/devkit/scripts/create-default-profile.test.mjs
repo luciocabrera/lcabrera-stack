@@ -2,9 +2,9 @@
  * Which rung each command places when no `--profile` is given.
  *
  * `create` and `init` share the flag and not the default: `create` writes into
- * an empty directory, so its default is the rung that leaves a workspace, while
- * `init` writes into a repository that already exists and keeps the smallest
- * one. Both are asserted against a real tree and a real git, because the claim
+ * an empty directory, so its default is the widest rung, the one whose
+ * application reads a database, while `init` writes into a repository that
+ * already exists and keeps the smallest one. Both are asserted against a real tree and a real git, because the claim
  * is about what lands on disk and what a later `sync` makes of it.
  */
 
@@ -47,7 +47,9 @@ const quietly = (run) => {
 
 const created = (argv) => {
   const parent = scratch();
-  const code = quietly(() => runCreate(['demo', ...argv], parent));
+  const code = quietly(() =>
+    runCreate(['demo', ...argv, '--no-install'], parent),
+  );
   return { code, root: join(parent, 'demo') };
 };
 
@@ -63,13 +65,15 @@ afterEach(() => {
 });
 
 describe('devkit create with no --profile', () => {
-  test('commits the same tree as --profile monorepo', () => {
+  test('commits the same tree as --profile full', () => {
     const unflagged = created([]);
-    const flagged = created(['--profile', 'monorepo']);
+    const flagged = created(['--profile', 'full']);
 
     expect(unflagged.code).toBe(0);
     expect(flagged.code).toBe(0);
-    expect(existsSync(join(unflagged.root, 'pnpm-workspace.yaml'))).toBe(true);
+    expect(
+      existsSync(join(unflagged.root, 'docker/local/docker-compose.yml')),
+    ).toBe(true);
     expect(git(['ls-files', '--stage'], unflagged.root)).toBe(
       git(['ls-files', '--stage'], flagged.root),
     );
@@ -78,7 +82,7 @@ describe('devkit create with no --profile', () => {
   test('records the rung it used, so a later sync keeps to it', () => {
     const { root } = created([]);
 
-    expect(configuredProfile(root)).toBe('monorepo');
+    expect(configuredProfile(root)).toBe('full');
     expect(quietly(() => runSync([], root))).toBe(0);
     expect(git(['status', '--porcelain'], root)).toBe('');
     expect(quietly(() => runDoctor(['--check'], root))).toBe(0);

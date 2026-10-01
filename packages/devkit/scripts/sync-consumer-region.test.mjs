@@ -35,7 +35,7 @@ const quietly = (run) => {
 const created = () => {
   const parent = mkdtempSync(join(tmpdir(), 'devkit-consumer-region-'));
   scratches.push(parent);
-  quietly(() => runCreate(['demo'], parent));
+  quietly(() => runCreate(['demo', '--no-install'], parent));
   const root = join(parent, 'demo');
   const shipped = readFileSync(join(root, WORKSPACE_FILE), 'utf8');
   return { root, shipped };

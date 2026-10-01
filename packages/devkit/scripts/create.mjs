@@ -17,13 +17,14 @@ import { includesRung } from './config.mjs';
 import { gateBinNames } from './init.mjs';
 import { withWorkspaceFields } from './workspace.mjs';
 
-const CREATE_USAGE = 'devkit create <directory> [--profile <name>]';
+const CREATE_USAGE =
+  'devkit create <directory> [--profile <name>] [--no-install] [--no-db]';
 
 const quoted = (value) => `\`${value}\``;
 
 export const CREATE_BRANCH = 'main';
 
-export const CREATE_DEFAULT_PROFILE = 'monorepo';
+export const CREATE_DEFAULT_PROFILE = 'full';
 
 export const INITIAL_COMMIT_MESSAGE =
   'chore: initialise the repository with devkit';
@@ -75,7 +76,7 @@ export const createRefusal = ({
   unrecognised = [],
 }) => {
   if (unrecognised.length > 0) {
-    return `create: ${unrecognised.map((value) => quoted(value)).join(', ')} is not an option this command takes — \`--profile <name>\` is the only one, and it is spelled with a space. Run \`${CREATE_USAGE}\`.`;
+    return `create: ${unrecognised.map((value) => quoted(value)).join(', ')} is not an option this command takes — it takes \`--profile <name>\`, spelled with a space, \`--no-install\` and \`--no-db\`. Run \`${CREATE_USAGE}\`.`;
   }
   if (targets.length === 0) {
     return `create: no target directory — run \`${CREATE_USAGE}\`, or run \`devkit init\` in the repository you already have.`;
@@ -324,19 +325,43 @@ export const changeDirectoryStep = (target) =>
     ? { command: `cd ${target}` }
     : { prose: `Change into \`${target}\`, then run:` };
 
+const leadFor = ({ installed, seeded }) => {
+  if (!installed) return 'Nothing is installed yet.';
+  return seeded
+    ? 'The dependencies are installed and the database is seeded.'
+    : 'The dependencies are installed.';
+};
+
 /**
- * @param {{ commands: { run?: string }, target: string,
+ * @param {{ run?: string, setup: { installed?: boolean, seeded?: boolean },
+ *           target: string, tasks: readonly string[] }} args
+ * @returns {string[]}
+ */
+const remainingSteps = ({ run, setup, target, tasks }) => {
+  const enter = changeDirectoryStep(target);
+  if (run === undefined)
+    return enter.command === undefined ? [] : [enter.command];
+  return [
+    ...(enter.command === undefined ? [] : [enter.command]),
+    ...(setup.installed === true ? [] : [firstInstallFor(run)]),
+    ...(tasks.includes('db:seed') && setup.seeded !== true
+      ? [`${run} db:seed`]
+      : []),
+    ...(tasks.includes('dev') ? [`${run} dev`] : []),
+  ];
+};
+
+/**
+ * @param {{ run?: string, setup: { installed?: boolean, notes?: string[],
+ *           seeded?: boolean }, target: string,
  *           tasks: readonly string[] }} args
  * @returns {string[]}
  */
-const nextSteps = ({ commands: { run }, target, tasks }) => {
+const nextSteps = ({ run, setup, target, tasks }) => {
   const enter = changeDirectoryStep(target);
-  const steps = [
-    ...(enter.command === undefined ? [] : [enter.command]),
-    ...(run === undefined ? [] : [firstInstallFor(run)]),
-    ...(run !== undefined && tasks.includes('dev') ? [`${run} dev`] : []),
-  ];
-  const indented = steps.map((step) => `  ${step}`).join('\n');
+  const indented = remainingSteps({ run, setup, target, tasks })
+    .map((step) => `  ${step}`)
+    .join('\n');
   const lead = enter.prose ?? 'Start with:';
   const devkitTasks = DEVKIT_TASKS.filter((task) => tasks.includes(task));
   const devkitCommands = devkitTasks
@@ -344,7 +369,8 @@ const nextSteps = ({ commands: { run }, target, tasks }) => {
     .map((command) => `\`${command}\``)
     .join(', ');
   return [
-    `Nothing is installed yet. ${lead}\n${indented}`,
+    ...(setup.notes ?? []),
+    `${leadFor({ installed: setup.installed === true, seeded: setup.seeded === true })} ${lead}\n${indented}`,
     ...(run?.startsWith('vp ')
       ? [
           `\`vp\` is the Vite+ CLI, installed once per machine rather than per repository. If your shell does not find it, install it first: ${VITE_PLUS_INSTALL}`,
@@ -360,12 +386,17 @@ const nextSteps = ({ commands: { run }, target, tasks }) => {
 
 /**
  * @param {{ branch: string, commands?: { run?: string },
- *           hooksPath?: string, target: string, tasks?: readonly string[] }} args
+ *           environmentCopied?: string, hooksPath?: string,
+ *           setup?: { installed?: boolean, notes?: string[], run?: string,
+ *                     seeded?: boolean },
+ *           target: string, tasks?: readonly string[] }} args
  */
 export const createSummary = ({
   branch,
   commands = {},
+  environmentCopied,
   hooksPath,
+  setup = {},
   target,
   tasks = [],
 }) =>
@@ -376,5 +407,10 @@ export const createSummary = ({
       : [
           `git runs the hooks in \`${hooksPath}/\`: this repository's core.hooksPath points there.`,
         ]),
-    ...nextSteps({ commands, target, tasks }),
+    ...(environmentCopied === undefined
+      ? []
+      : [
+          `\`${environmentCopied}\` holds the local database settings: a copy of its template, ignored by git, whose placeholder values are the ones the local database starts with.`,
+        ]),
+    ...nextSteps({ run: setup.run ?? commands.run, setup, target, tasks }),
   ].join('\n');

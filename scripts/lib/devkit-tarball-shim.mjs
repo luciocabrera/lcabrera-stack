@@ -5,6 +5,8 @@
  * It runs in a scratch directory of its own, outside the scratch consumer:
  * that consumer is a git repository, and `create` refuses to nest one inside
  * another — which is the behaviour under test, not an obstacle to it.
+ * It passes `--no-install`: what is under test is the packed shim and the
+ * commit it leaves, and an install would resolve from the registry instead.
  *
  * The deciding half is `createShimFindings` in `./devkit-tarball.mjs`.
  */
@@ -44,7 +46,7 @@ export const shimFindings = (consumer) => {
   const parent = mkdtempSync(join(tmpdir(), 'devkit-create-'));
   try {
     const failure = spawnFailure({
-      args: ['made', '--profile', 'agent'],
+      args: ['made', '--profile', 'agent', '--no-install'],
       bin: join(consumer, 'node_modules', '.bin', NAME),
       cwd: parent,
     });

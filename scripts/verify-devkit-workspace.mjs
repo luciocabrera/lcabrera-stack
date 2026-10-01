@@ -1,12 +1,14 @@
 /**
- * Creates a `monorepo`-rung tree from the packed `@lcabrera/devkit` tarball,
+ * Creates a `full`-rung tree from the packed `@lcabrera/devkit` tarball,
  * installs every `@lcabrera/*` package it resolves from a tarball packed from
  * this checkout and served by a scratch registry, checks its peers, runs the
- * tasks that tree wires for itself, fetches `/` from the app its root `start`
- * task serves, runs every command its `devkit.config.json` hands its workflows
- * and hooks, then runs the upgrade that should find nothing left to add, and
- * its commit-msg hook, which create and the install must have turned on without
- * being asked. So the gate tests what the next release ships, together;
+ * tasks that tree wires for itself, seeds its database and runs its smoke
+ * tests, fetches `/` from the app its root `start` task serves along with a
+ * sorted and a filtered page held to SQL, runs every command its
+ * `devkit.config.json` hands its workflows and hooks, then runs the upgrade
+ * that should find nothing left to add, and its commit-msg hook, which create
+ * and the install must have turned on without being asked. The database is the
+ * one `DEVKIT_TREE_DB_HOST` names, else the tree's own `db:up` (Docker). So the gate tests what the next release ships, together;
  * `registry-tree:verify` is the check of what npm serves today. Every scratch
  * directory sits under the OS temp root so the tree inherits nothing from this
  * checkout (ADR-073).
@@ -24,7 +26,6 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
@@ -32,6 +33,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   DEFAULT_CONFIG,
+  retiredAssetsFor,
   targetPathFor,
 } from '../packages/devkit/scripts/config.mjs';
 import { configuredCommandRuns } from './lib/devkit-config-commands.mjs';
@@ -44,7 +46,14 @@ import {
 } from './lib/devkit-registry-server.mjs';
 import { collectedTail, firstAnswer, stopGroup } from './lib/devkit-serve.mjs';
 import {
+  databaseLane,
+  freePort,
+  orderedRowFindings,
+  queriedOrders,
+} from './lib/devkit-tree-run-database.mjs';
+import {
   createFindings,
+  developerEnv,
   execute,
   installedBin,
   installFindings,
@@ -84,23 +93,36 @@ import {
 
 const REPO_ROOT = process.cwd();
 
-const BLUEPRINT = 'packages/devkit/assets/workspace';
+const BLUEPRINT_GROUPS = ['workspace', 'full'];
 
-const CREATE_ARGS = ['create', TREE_NAME, '--profile', 'monorepo'];
+const RETIRED_AT_FULL = new Set(retiredAssetsFor({ profile: 'full' }));
+
+const CREATE_ARGS = ['create', TREE_NAME, '--profile', 'full', '--no-install'];
 
 const LOCKFILE = 'pnpm-lock.yaml';
 
 const SERVE_FLAG = '--serve-registry';
 
 const blueprintFindings = ({ tree }) =>
-  missingBlueprintFiles({
-    blueprint: run('git', ['ls-files', '--', '.'], join(REPO_ROOT, BLUEPRINT))
-      .split('\n')
-      .filter((line) => line !== ''),
-    placed: Object.keys(readJson(join(tree, '.devkit-manifest.json')).files),
-    targetOf: (path) =>
-      targetPathFor({ assetPath: `workspace/${path}`, config: DEFAULT_CONFIG }),
-  });
+  BLUEPRINT_GROUPS.flatMap((group) =>
+    missingBlueprintFiles({
+      blueprint: run(
+        'git',
+        ['ls-files', '--', '.'],
+        join(REPO_ROOT, 'packages/devkit/assets', group),
+      )
+        .split('\n')
+        .filter(
+          (line) => line !== '' && !RETIRED_AT_FULL.has(`${group}/${line}`),
+        ),
+      placed: Object.keys(readJson(join(tree, '.devkit-manifest.json')).files),
+      targetOf: (path) =>
+        targetPathFor({
+          assetPath: `${group}/${path}`,
+          config: DEFAULT_CONFIG,
+        }),
+    }),
+  );
 
 const sourceFindingsFor =
   ({ packed, registry }) =>
@@ -195,11 +217,8 @@ const HOOKS_PATH = DEFAULT_CONFIG.paths.hooks;
 
 const INSTALL_STEP = commandLabel(['install', '--no-frozen-lockfile']);
 
-const DEVELOPER_ENV = Object.fromEntries(
-  Object.entries(process.env).filter(([name]) => name !== 'CI'),
-);
-
-const developerInstallFindings = (tree) => installFindings(tree, DEVELOPER_ENV);
+const developerInstallFindings = (tree) =>
+  installFindings(tree, developerEnv());
 
 const hooksPathIn = (tree) =>
   execute({
@@ -261,16 +280,6 @@ const STOP_GRACE_MS = 5000;
 
 const SERVE_OUTPUT_LIMIT_CHARS = 64 * 1024;
 
-const freePort = () =>
-  new Promise((resolve, reject) => {
-    const server = createServer();
-    server.once('error', reject);
-    server.listen(0, '127.0.0.1', () => {
-      const { port } = server.address();
-      server.close(() => resolve(port));
-    });
-  });
-
 const servedFindings = async ({ tree }) => {
   const port = await freePort();
   writeFileSync(join(tree, 'apps', 'web', '.env'), `PORT=${port}\n`);
@@ -288,19 +297,25 @@ const servedFindings = async ({ tree }) => {
       requestTimeoutMs: SERVE_REQUEST_TIMEOUT_MS,
       url,
     });
-    return serveFindings({ ...answer, output: output(), url });
+    const served = serveFindings({ ...answer, output: output(), url });
+    if (served.length > 0) return served;
+    const { answers, findings } = queriedOrders({ tree });
+    return answers === undefined
+      ? findings
+      : await orderedRowFindings({ answers, baseUrl: url });
   } finally {
     await stopGroup({ child, graceMs: STOP_GRACE_MS });
   }
 };
 
-const TREE_CHECKS = [
+const treeChecks = (database) => [
   blueprintFindings,
   peerFindings,
   toolchainBinFindings,
   installedHooksFindings,
   taskRunFindings,
   builtFindings,
+  database.prepared,
   servedFindings,
   configuredCommandFindings,
   trackedChangeFindings,
@@ -316,6 +331,7 @@ const checkedTree = async ({ devkit, staging, tree }) => {
     tree,
   });
   if (findings.length > 0) return [...created, ...findings];
+  const database = databaseLane();
   const { log, server, url } = startedRegistry({
     launch: [fileURLToPath(import.meta.url), SERVE_FLAG],
     packed,
@@ -324,7 +340,7 @@ const checkedTree = async ({ devkit, staging, tree }) => {
   try {
     writeFileSync(join(tree, '.npmrc'), scopedRegistryConfig(url));
     const found = await treeFindings({
-      checks: TREE_CHECKS,
+      checks: treeChecks(database),
       context: { devkit },
       prerequisites: [
         runtimeFindings,
@@ -340,6 +356,7 @@ const checkedTree = async ({ devkit, staging, tree }) => {
       url,
     });
   } finally {
+    database.teardown();
     server.kill();
   }
 };
@@ -366,7 +383,7 @@ const main = async () => {
               staging,
               tree: join(parent, TREE_NAME),
             }),
-      passed: `Created-workspace gate passed: \`devkit create --profile monorepo\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout through a scratch registry with no unmet peer, with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} and every command in its \`devkit.config.json\` all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
+      passed: `Created-workspace gate passed: \`devkit create --profile full\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout through a scratch registry with no unmet peer, with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} and every command in its \`devkit.config.json\` all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, the tree's seed and smoke tests passed against its database, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200 and a sorted and a filtered page whose rows match SQL, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
       title: 'Created-workspace gate',
     });
   } finally {

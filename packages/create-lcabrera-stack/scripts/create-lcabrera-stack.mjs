@@ -8,7 +8,7 @@
  * only to hand its arguments to `devkit create`; anything it decided for itself
  * would be a second implementation nobody runs the other way round.
  *
- * Usage: create-lcabrera-stack <directory> [--profile <name>]
+ * Usage: create-lcabrera-stack <directory> [--profile <name>] [--no-install] [--no-db]
  * Exit codes: whatever `devkit create` exits with; 1 if it could not be run,
  * and a run that never started says so rather than exiting quietly.
  */
