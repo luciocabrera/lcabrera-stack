@@ -203,6 +203,15 @@ const isDirectory = (path) => {
   }
 };
 
+/**
+ * @param {string} hooksPath
+ * @returns {string}
+ */
+export const hooksPathInstruction = (hooksPath) =>
+  /^[\w./-]+$/u.test(hooksPath)
+    ? `Run \`git config core.hooksPath ${hooksPath}\` to turn them on.`
+    : `Set core.hooksPath to \`${hooksPath}\` in this clone to turn them on.`;
+
 const readIfPresent = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
 
@@ -225,7 +234,7 @@ const point = ({ binary, root }) => {
     console.log(`git runs the hooks in \`${hooksPath}/\` from now on.`);
   } else if (action === 'kept') {
     console.log(
-      `core.hooksPath is \`${current}\` in this clone, so the hooks in \`${hooksPath}/\` were left off. Run \`git config core.hooksPath ${hooksPath}\` to turn them on.`,
+      `core.hooksPath is \`${current}\` in this clone, so the hooks in \`${hooksPath}/\` were left off. ${hooksPathInstruction(hooksPath)}`,
     );
   }
 };

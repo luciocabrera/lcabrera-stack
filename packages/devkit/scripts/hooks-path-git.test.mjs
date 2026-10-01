@@ -25,6 +25,7 @@ import {
   DEFAULT_HOOKS_PATH,
   gitEnvironment,
   hooksPathIn,
+  hooksPathInstruction,
   isContinuousIntegration,
   isInPackageDirectory,
   isRepositoryRelative,
@@ -228,6 +229,23 @@ describe('isRepositoryRelative', () => {
   ])('%s is %s', (path, expected) => {
     expect(isRepositoryRelative(path)).toBe(expected);
   });
+});
+
+describe('hooksPathInstruction', () => {
+  test('gives a command to copy for a plain path', () => {
+    expect(hooksPathInstruction('tools/.githooks')).toBe(
+      'Run `git config core.hooksPath tools/.githooks` to turn them on.',
+    );
+  });
+
+  test.each([['tools/my hooks'], ['hooks;rm'], ['$HOME/hooks']])(
+    'names the value instead of a command for %s',
+    (path) => {
+      expect(hooksPathInstruction(path)).toBe(
+        `Set core.hooksPath to \`${path}\` in this clone to turn them on.`,
+      );
+    },
+  );
 });
 
 describe.skipIf(process.platform === 'win32')(
