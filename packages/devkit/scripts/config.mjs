@@ -19,6 +19,16 @@ import { hooksPathRefusal } from '../assets/workspace/scripts/hooks-path.mjs';
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
 
+/**
+ * @type {Readonly<{
+ *   ci: Readonly<{ setup: readonly never[] }>,
+ *   commands: Readonly<{}>,
+ *   paths: Readonly<{ agents: string, coordination: string, decisions: string,
+ *     docs: string, hooks: string, root: string, rules: string,
+ *     skills: string, templates: string, workflows: string,
+ *     workspace: string }>,
+ *   profile: string }>}
+ */
 export const DEFAULT_CONFIG = Object.freeze({
   ci: Object.freeze({ setup: Object.freeze([]) }),
   commands: Object.freeze({}),
@@ -182,8 +192,7 @@ const checkedPaths = (paths) => {
 };
 
 export const resolveConfig = (raw) => {
-  if (raw === undefined) return DEFAULT_CONFIG;
-  const parsed = JSON.parse(raw);
+  const parsed = raw === undefined ? {} : JSON.parse(raw);
   if (!isPlainObject(parsed)) {
     throw new TypeError(`${CONFIG_FILE_NAME} must contain a JSON object`);
   }
