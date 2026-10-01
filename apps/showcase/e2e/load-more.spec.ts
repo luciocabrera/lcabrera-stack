@@ -42,6 +42,20 @@ const nextPage = (page: Page, fragment: string) =>
     { timeout: 60_000 },
   );
 
+const pageRequest = (page: Page, fragment: string) =>
+  page.waitForRequest((request) => request.url().includes(fragment), {
+    timeout: 2000,
+  });
+
+const requestArrived = async (pending: Promise<unknown>) => {
+  try {
+    await pending;
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const readParams = (response: Response) => new URL(response.url()).searchParams;
 
 const isSortedFollowUp = (url: string) => {
@@ -58,20 +72,7 @@ const isSortedFollowUp = (url: string) => {
 it('the first paint does not ask for another page', async ({ page }) => {
   const hits = watch(page, ENTERPRISE_PAGE);
   await openGrid(page);
-  const pending = page.waitForRequest(
-    (request) => request.url().includes(ENTERPRISE_PAGE),
-    { timeout: 2000 },
-  );
-
-  let isArrived = true;
-
-  try {
-    await pending;
-  } catch {
-    isArrived = false;
-  }
-
-  expect(isArrived).toBe(false);
+  expect(await requestArrived(pageRequest(page, ENTERPRISE_PAGE))).toBe(false);
   expect(hits).toEqual([]);
 });
 
@@ -135,22 +136,10 @@ it('the single-slice route does not ask for another page when scrolled', async (
 }) => {
   const hits = watch(page, CAR_SALES_PAGE);
   await openGrid(page, '/car-sales');
-  const pending = page.waitForRequest(
-    (request) => request.url().includes(CAR_SALES_PAGE),
-    { timeout: 2000 },
-  );
+  const pending = pageRequest(page, CAR_SALES_PAGE);
 
   await scrollToEnd(page);
-
-  let isArrived = true;
-
-  try {
-    await pending;
-  } catch {
-    isArrived = false;
-  }
-
-  expect(isArrived).toBe(false);
+  expect(await requestArrived(pending)).toBe(false);
   expect(hits).toEqual([]);
 });
 
