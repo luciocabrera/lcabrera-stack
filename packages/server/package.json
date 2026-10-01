@@ -85,6 +85,14 @@
     "./filters/to-text-query-filters.util": "./src/filters/to-text-query-filters.util.ts",
     "./sort/resolve-query-sort.util": "./src/sort/resolve-query-sort.util.ts",
     "./sort/sort.types": "./src/sort/sort.types.ts",
+    "./table-page/create-group-detail-reads.util": "./src/table-page/create-group-detail-reads.util.ts",
+    "./table-page/create-row-delete-action.util": "./src/table-page/create-row-delete-action.util.ts",
+    "./table-page/create-table-page-loader.util": "./src/table-page/create-table-page-loader.util.ts",
+    "./table-page/create-table-page-reader.util": "./src/table-page/create-table-page-reader.util.ts",
+    "./table-page/parse-table-page-params.util": "./src/table-page/parse-table-page-params.util.ts",
+    "./table-page/table-page.types": "./src/table-page/table-page.types.ts",
+    "./table-page/to-integer-row-id.util": "./src/table-page/to-integer-row-id.util.ts",
+    "./table-page/to-keyset-cursor.util": "./src/table-page/to-keyset-cursor.util.ts",
     "./tickets/is-access-ticket-valid.util": "./src/tickets/is-access-ticket-valid.util.ts",
     "./tickets/sign-access-ticket.util": "./src/tickets/sign-access-ticket.util.ts",
     "./tokens/generate-api-token.util": "./src/tokens/generate-api-token.util.ts",
@@ -316,6 +324,38 @@
         "types": "./dist/sort/sort.types.d.mts",
         "default": "./dist/sort/sort.types.mjs"
       },
+      "./table-page/create-group-detail-reads.util": {
+        "types": "./dist/table-page/create-group-detail-reads.util.d.mts",
+        "default": "./dist/table-page/create-group-detail-reads.util.mjs"
+      },
+      "./table-page/create-row-delete-action.util": {
+        "types": "./dist/table-page/create-row-delete-action.util.d.mts",
+        "default": "./dist/table-page/create-row-delete-action.util.mjs"
+      },
+      "./table-page/create-table-page-loader.util": {
+        "types": "./dist/table-page/create-table-page-loader.util.d.mts",
+        "default": "./dist/table-page/create-table-page-loader.util.mjs"
+      },
+      "./table-page/create-table-page-reader.util": {
+        "types": "./dist/table-page/create-table-page-reader.util.d.mts",
+        "default": "./dist/table-page/create-table-page-reader.util.mjs"
+      },
+      "./table-page/parse-table-page-params.util": {
+        "types": "./dist/table-page/parse-table-page-params.util.d.mts",
+        "default": "./dist/table-page/parse-table-page-params.util.mjs"
+      },
+      "./table-page/table-page.types": {
+        "types": "./dist/table-page/table-page.types.d.mts",
+        "default": "./dist/table-page/table-page.types.mjs"
+      },
+      "./table-page/to-integer-row-id.util": {
+        "types": "./dist/table-page/to-integer-row-id.util.d.mts",
+        "default": "./dist/table-page/to-integer-row-id.util.mjs"
+      },
+      "./table-page/to-keyset-cursor.util": {
+        "types": "./dist/table-page/to-keyset-cursor.util.d.mts",
+        "default": "./dist/table-page/to-keyset-cursor.util.mjs"
+      },
       "./tickets/is-access-ticket-valid.util": {
         "types": "./dist/tickets/is-access-ticket-valid.util.d.mts",
         "default": "./dist/tickets/is-access-ticket-valid.util.mjs"
@@ -347,6 +387,7 @@
   },
   "dependencies": {
     "@lcabrera/api": "workspace:*",
+    "@lcabrera/utils": "workspace:*",
     "pg": "catalog:backend",
     "zod": "catalog:runtime"
   },

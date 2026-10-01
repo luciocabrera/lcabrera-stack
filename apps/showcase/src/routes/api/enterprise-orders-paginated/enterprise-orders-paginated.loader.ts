@@ -1,20 +1,11 @@
-import type { LoaderFunctionArgs } from 'react-router';
+import { createTablePageLoader } from '@lcabrera/server/table-page/create-table-page-loader.util';
 
-import { selectOrdersPage } from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
-import { resolveOrdersPageRead } from '@/routes/enterprise-orders/.server/resolveOrdersPageRead.util';
+import {
+  resolveOrdersPageRead,
+  selectOrdersPage,
+} from '@/routes/enterprise-orders/.server/enterpriseOrders.service';
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const url = new URL(request.url);
-  const resolved = await resolveOrdersPageRead(url.searchParams);
-
-  if (resolved.kind === 'refused') {
-    return Response.json({
-      data: [],
-      error: { kind: 'unexpected', message: resolved.message },
-      hasMore: false,
-      total: 0,
-    });
-  }
-
-  return Response.json(await selectOrdersPage(resolved.read));
-};
+export const loader = createTablePageLoader({
+  resolvePageRead: resolveOrdersPageRead,
+  selectPage: selectOrdersPage,
+});

@@ -699,6 +699,9 @@ importers:
       '@lcabrera/api':
         specifier: workspace:*
         version: link:../api
+      '@lcabrera/utils':
+        specifier: workspace:*
+        version: link:../utils
       pg:
         specifier: catalog:backend
         version: 8.23.0
