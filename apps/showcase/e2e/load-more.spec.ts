@@ -7,6 +7,7 @@ import {
   bodyCells,
   clickMenuAction,
   expectDatasetCount,
+  grid,
   openColumnMenu,
   openGrid,
   openSettings,
@@ -42,6 +43,17 @@ const nextPage = (page: Page, fragment: string) =>
   );
 
 const readParams = (response: Response) => new URL(response.url()).searchParams;
+
+const isSortedFollowUp = (url: string) => {
+  const params = new URL(url).searchParams;
+  const sort = params.get('sort') ?? '';
+
+  return (
+    sort.includes('quantity') &&
+    sort.includes('desc') &&
+    params.get('limit') === '150'
+  );
+};
 
 it('the first paint does not ask for another page', async ({ page }) => {
   const hits = watch(page, ENTERPRISE_PAGE);
@@ -91,18 +103,17 @@ it('a filtered follow-up page carries the filter', async ({ page }) => {
 });
 
 it('a sorted follow-up page carries the sort', async ({ page }) => {
+  const urls = watch(page, ENTERPRISE_PAGE);
+
   await openGrid(page);
   await openColumnMenu(page, 'Quantity');
   await clickMenuAction(page, 'Descending');
   await expect(
     page.getByRole('columnheader', { name: /Quantity/ }),
   ).toHaveAttribute('aria-sort', 'descending');
-
-  const responsePromise = nextPage(page, ENTERPRISE_PAGE);
+  await expect(grid(page)).not.toHaveAttribute('aria-rowcount', '-1');
   await scrollToEnd(page);
-  const sort = readParams(await responsePromise).get('sort') ?? '';
-  expect(sort).toContain('quantity');
-  expect(sort).toContain('desc');
+  await expect.poll(() => urls.some((url) => isSortedFollowUp(url))).toBe(true);
 });
 
 it('the single-slice route does not ask for another page when scrolled', async ({
