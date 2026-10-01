@@ -1,4 +1,5 @@
 import type { TablePersistenceEntry } from '#ui/components/Table/Table.types';
+import type { PersistCookieEntry } from '#ui/routing/actions/routing.types';
 
 import { resolvePersistenceEntries } from '#ui/components/Table/contexts/TableConfig/columns/actions/utils';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
@@ -12,6 +13,35 @@ import {
 import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
 import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
 
+type PersistTableStateArgs =
+  | readonly TablePersistenceEntry[]
+  | TablePersistenceEntry
+  | {
+      readonly cookieEntries: readonly PersistCookieEntry[];
+      readonly entries: readonly TablePersistenceEntry[];
+    };
+
+const readPersistRequest = (args: PersistTableStateArgs) => {
+  if ('cookieEntries' in args) {
+    return {
+      cookieEntries: args.cookieEntries,
+      entries: args.entries,
+    };
+  }
+
+  if (Array.isArray(args)) {
+    return {
+      cookieEntries: [],
+      entries: args,
+    };
+  }
+
+  return {
+    cookieEntries: [],
+    entries: [args],
+  };
+};
+
 export const usePersistTableStateAction = () => {
   const { metaStore } = useTableConfigContextValue();
   const persistCookie = usePersistCookieAction({
@@ -19,8 +49,8 @@ export const usePersistTableStateAction = () => {
   });
   const notify = useNotifyAction();
 
-  return (args: TablePersistenceEntry | TablePersistenceEntry[]) => {
-    const entries = Array.isArray(args) ? args : [args];
+  return (args: PersistTableStateArgs) => {
+    const { cookieEntries, entries } = readPersistRequest(args);
     const meta = metaStore.get();
     const appId = meta?.appId;
     const paramPrefix =
@@ -60,12 +90,13 @@ export const usePersistTableStateAction = () => {
       },
     );
 
-    const entriesString = JSON.stringify(serializedEntries);
+    const payload = [...serializedEntries, ...cookieEntries];
+    const entriesString = JSON.stringify(payload);
     if (entriesString.length > MAX_COOKIE_ENTRY_VALUE_LENGTH) {
       notify(PERSISTENCE_SIZE_WARNING);
       return false;
     }
-    if (serializedEntries.length === 0) {
+    if (payload.length === 0) {
       return true;
     }
 
@@ -76,7 +107,7 @@ export const usePersistTableStateAction = () => {
       variant: 'success' as const,
     });
 
-    persistCookie(serializedEntries);
+    persistCookie(payload);
 
     return true;
   };

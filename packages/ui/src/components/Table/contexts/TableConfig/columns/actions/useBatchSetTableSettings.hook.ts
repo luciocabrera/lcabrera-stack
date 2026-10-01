@@ -5,6 +5,7 @@ import type {
 
 import { resolveTableGroupingUpdate } from '#ui/components/Table/contexts/TableConfig/grouping/actions/utils';
 import { usePersistTableUiFlagsAction } from '#ui/components/Table/contexts/TableConfig/meta/actions/usePersistTableUiFlagsAction.hook';
+import { buildUiFlagsCookieEntry } from '#ui/components/Table/contexts/TableConfig/meta/actions/utils';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { getHasQueryChanged } from '#ui/components/Table/utils';
@@ -70,24 +71,44 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       hasQueryChanged ||
       groupingUpdate.kind === 'updated';
 
-    if (
-      !persistTableState(
-        appendQueryPersistenceEntries({
-          columnEntries: buildPersistencePayload<TData>({
-            columnFilters: settings.columnFilters,
-            columnOrder: settings.columnOrder,
-            columnPinning: settings.columnPinning,
-            columnSizing: settings.columnSizing,
-            columnVisibility: settings.columnVisibility,
-            persistenceKey: metaState?.persistenceKey ?? '',
-            sorting: resolvedUpdate.sorting,
-          }),
-          groupingUpdate,
-          hasPlacementChanged,
+    const stateEntries = appendQueryPersistenceEntries({
+      columnEntries: buildPersistencePayload<TData>({
+        columnFilters: settings.columnFilters,
+        columnOrder: settings.columnOrder,
+        columnPinning: settings.columnPinning,
+        columnSizing: settings.columnSizing,
+        columnVisibility: settings.columnVisibility,
+        persistenceKey: metaState?.persistenceKey ?? '',
+        sorting: resolvedUpdate.sorting,
+      }),
+      groupingUpdate,
+      hasPlacementChanged,
+      totalsPlacement,
+    });
+    const nextStatePatch = {
+      ...(metaState?.isTableSettingsPinned !== true && {
+        isTableSettingsOpen: false,
+      }),
+    };
+    const shouldPersistUiFlags =
+      hasPlacementChanged || Object.keys(nextStatePatch).length > 0;
+    const uiFlagsEntry = shouldPersistUiFlags
+      ? buildUiFlagsCookieEntry({
+          currentState: metaState,
+          nextStatePatch,
           totalsPlacement,
-        }),
-      )
-    ) {
+        })
+      : undefined;
+    const didPersist = persistTableState(
+      hasLiveQueryChanged && uiFlagsEntry
+        ? {
+            cookieEntries: [uiFlagsEntry],
+            entries: stateEntries,
+          }
+        : stateEntries,
+    );
+
+    if (!didPersist) {
       return;
     }
 
@@ -106,13 +127,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       );
     }
 
-    const nextStatePatch = {
-      ...(metaState?.isTableSettingsPinned !== true && {
-        isTableSettingsOpen: false,
-      }),
-    };
-
-    if (hasPlacementChanged || Object.keys(nextStatePatch).length > 0) {
+    if (shouldPersistUiFlags && !(hasLiveQueryChanged && uiFlagsEntry)) {
       persistUiFlags({
         currentState: metaState,
         nextStatePatch,

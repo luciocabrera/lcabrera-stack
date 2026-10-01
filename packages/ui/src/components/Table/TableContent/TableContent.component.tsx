@@ -3,6 +3,7 @@ import { useRef } from 'react';
 
 import type { TableContentProps } from './TableContent.types';
 
+import { useKeepTableStateFetcherMounted } from '../contexts/TableConfig/columns/actions/hooks/useKeepTableStateFetcherMounted.hook';
 import { useSyncColumnAxisColumns } from '../contexts/TableConfig/grouping/actions';
 import {
   useGetTableIsRounded,
@@ -32,6 +33,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   onLoadMore,
 }: TableContentProps<TData, TResponse>) => {
   const threshold = useGetTableThreshold();
+  useKeepTableStateFetcherMounted();
   useSyncColumnAxisColumns();
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
