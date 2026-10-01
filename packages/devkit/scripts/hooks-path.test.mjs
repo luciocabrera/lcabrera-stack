@@ -71,7 +71,7 @@ const printedBy = (run) => {
 const created = (profile) => {
   const parent = scratch();
   const { code, printed } = printedBy(() =>
-    runCreate(['demo', '--profile', profile], parent),
+    runCreate(['demo', '--profile', profile, '--no-install'], parent),
   );
   return { code, printed, root: join(parent, 'demo') };
 };

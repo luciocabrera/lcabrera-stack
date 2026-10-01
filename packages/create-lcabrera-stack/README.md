@@ -9,20 +9,28 @@ pnpm create lcabrera-stack my-project --profile repo
 
 It makes the directory, initialises a git repository in it, materialises the
 profile you asked for, and leaves an initial commit. With no `--profile` it
-places `monorepo`: a pnpm workspace with an application, ready for
-`pnpm install`.
+places `full`: a pnpm workspace with an application that reads a local
+Postgres. It then installs the dependencies and, when Docker is running,
+starts the database, waits for it and seeds it, so what is left is:
+
+```bash
+cd my-project
+vp run dev
+```
+
+A step it cannot take on your machine, such as one with no Docker, is printed
+as the command to run later. `--no-db` skips the database and `--no-install`
+skips the install as well.
 
 ## The day a release ships
 
 pnpm installs no version until it has been on the registry for a day
 (`minimumReleaseAge`), so for that day `pnpm create lcabrera-stack` runs the
 previous release. To create a repository from the one that just shipped, lift
-the delay for the create and for the first install in the new repository:
+the delay for the create and for the install it runs in the new repository:
 
 ```bash
-pnpm create --config.minimum-release-age=0 lcabrera-stack my-project
-cd my-project
-pnpm_config_minimum_release_age=0 pnpm install
+pnpm_config_minimum_release_age=0 pnpm create --config.minimum-release-age=0 lcabrera-stack my-project
 ```
 
 A repository created by a release declares every `@lcabrera/*` package from the

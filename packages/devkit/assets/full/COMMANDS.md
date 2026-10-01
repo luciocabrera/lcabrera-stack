@@ -230,8 +230,9 @@ exactly like the tasks above.
 These arrive with `devkit create` at the `full` profile, beside the
 `docker-compose.yml` in docker/local and the application's own seed. They run a
 local Postgres through Docker and read every setting from the `.env` file beside
-that compose file, which git ignores. Create it as a copy of the `.env.example`
-there, and replace each placeholder before the first of them runs.
+that compose file, which git ignores. `devkit create` writes it from the
+`.env.example` there and runs `db:up` and `db:seed` once. In a tree that has no
+`.env` yet, create it as a copy of that template before the first of them runs.
 
 - `{{commands.run}} db:up` — start the database and wait until it answers.
 - `{{commands.run}} db:down` — stop it. Its data volume is kept.

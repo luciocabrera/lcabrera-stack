@@ -1,0 +1,74 @@
+/**
+ * The application's own Vite configuration at the `full` rung: the one the
+ * rung below places, plus the database settings. Lint and format are absent on
+ * purpose: Vite+ reads those from the workspace root config only.
+ *
+ * The component library ships TypeScript source rather than a build, so this
+ * project's own toolchain compiles it. Three settings follow from that and none
+ * of them is optional — StyleX has to see the library's files to emit their
+ * styles, the client bundler must not pre-bundle them past that plugin, and the
+ * SSR build must not externalise a dependency Node cannot load as it is.
+ *
+ * The route reads Postgres through settings in the compose environment file,
+ * which nothing else puts into the server's environment: the development
+ * server loads it while this file is read, without overriding a variable the
+ * shell already set, and `start` sources it before the application's own.
+ */
+
+import { createReactRouterPluginsConfig } from '@lcabrera/vite-config/plugins';
+import { createReactRouterRunConfig } from '@lcabrera/vite-config/run';
+import { fileURLToPath, URL } from 'node:url';
+import { defineConfig } from 'vite-plus';
+
+const UI_PACKAGE = '@lcabrera/ui';
+
+const DATABASE_ENV_FILE = '../../docker/local/.env';
+
+const uiSourceUrl = new URL('.', import.meta.resolve(UI_PACKAGE)).href;
+
+const databaseEnvPath = fileURLToPath(
+  new URL(DATABASE_ENV_FILE, import.meta.url),
+);
+
+const isMissingFile = (error: unknown) =>
+  error instanceof Error && 'code' in error && error.code === 'ENOENT';
+
+try {
+  process.loadEnvFile(databaseEnvPath);
+} catch (error) {
+  if (!isMissingFile(error)) throw error;
+}
+
+export default defineConfig({
+  build: {
+    sourcemap: false,
+  },
+  optimizeDeps: {
+    exclude: [UI_PACKAGE],
+  },
+  plugins: createReactRouterPluginsConfig({
+    appRootUrl: import.meta.url,
+    babelConfigOverrides: {
+      presets: [
+        ['@babel/preset-typescript', { allExtensions: true, isTSX: true }],
+      ],
+    },
+    babelIncludePattern: /\/src\/[^?]*\.[jt]sx?(?:$|\?)/,
+    stylexAliases: { [`${UI_PACKAGE}/*`]: `${uiSourceUrl}*` },
+    stylexAliasPattern: './src/*',
+  }),
+  resolve: {
+    alias: [
+      {
+        find: /^@\//,
+        replacement: `${fileURLToPath(new URL('src', import.meta.url))}/`,
+      },
+    ],
+  },
+  run: createReactRouterRunConfig({
+    envFiles: [DATABASE_ENV_FILE, './.env'],
+  }),
+  ssr: {
+    noExternal: [UI_PACKAGE],
+  },
+});

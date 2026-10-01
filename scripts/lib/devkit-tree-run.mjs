@@ -75,14 +75,22 @@ export const installedBin = ({ bin, holder, spec }) => {
 };
 
 /**
- * @param {{ args: string[], bin: string, parent: string }} args
+ * @param {{ args: string[], bin: string, env?: NodeJS.ProcessEnv,
+ *           parent: string }} args
  * @returns {string[]}
  */
-export const createFindings = ({ args, bin, parent }) =>
+export const createFindings = ({ args, bin, env, parent }) =>
   taskFindings({
     label: [bin.split('/').at(-1), ...args].join(' '),
-    ...execute({ args, command: bin, cwd: parent }),
+    ...execute({ args, command: bin, cwd: parent, env }),
   });
+
+/**
+ * @param {NodeJS.ProcessEnv} [env]
+ * @returns {NodeJS.ProcessEnv}
+ */
+export const developerEnv = (env = process.env) =>
+  Object.fromEntries(Object.entries(env).filter(([name]) => name !== 'CI'));
 
 /**
  * @param {string} tree
@@ -109,12 +117,13 @@ export const installFindings = (tree, env = process.env) =>
 export const RELEASE_AGE_LIFTED = { pnpm_config_minimum_release_age: '0' };
 
 /**
- * @param {string} tree
  * @param {NodeJS.ProcessEnv} [env]
- * @returns {string[]}
+ * @returns {NodeJS.ProcessEnv}
  */
-export const registryInstallFindings = (tree, env = process.env) =>
-  installFindings(tree, { ...env, ...RELEASE_AGE_LIFTED });
+export const registryCreateEnv = (env = process.env) => ({
+  ...developerEnv(env),
+  ...RELEASE_AGE_LIFTED,
+});
 
 const PEERS_ARGS = ['peers', 'check'];
 

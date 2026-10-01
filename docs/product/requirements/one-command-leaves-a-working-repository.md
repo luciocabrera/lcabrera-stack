@@ -6,8 +6,11 @@ lines:
 persona: project-starter
 state: unmet
 packages:
+  - api
+  - create-lcabrera-stack
   - devkit
   - repo-standards
+  - server
   - tsconfig
   - ui
   - vite-configs
@@ -20,6 +23,7 @@ issues:
   - 1076
   - 1107
   - 1194
+  - 1222
 evidence:
   - type: command
     ref: vp run workspace:verify
@@ -27,6 +31,8 @@ evidence:
     ref: docs/decisions/ADR-107-the-stack-is-a-precondition-of-the-packages.md
   - type: code
     ref: packages/devkit/scripts/command-init.mjs
+  - type: doc
+    ref: docs/decisions/ADR-129-create-defaults-to-the-full-rung-and-runs-the-setup.md
 ---
 
 # One command leaves me a repository I can work in
@@ -48,6 +54,14 @@ I have to finish assembling.
 - From an empty directory, one command produces a git repository that installs
   with no manual step, and in which the workspace's own build, test, lint,
   format-check and typecheck tasks all pass.
+- With no flag, that command also installs the dependencies, starts a local
+  database, waits for it and seeds it, so the one step it leaves is changing
+  into the directory and starting the development server. A step this machine
+  cannot take, such as one with no Docker, is named as the command to run
+  later, and the command still succeeds.
+- The application it produces reads that database. A request that sorts the
+  table and a request that filters it render the rows the same query gives in
+  SQL, and the check fails on a tree whose route ignores the sort.
 - The repository it produces contains the agent harness — the skills, the path
   rules and the subagent definitions — and every path any of them references
   resolves inside that repository: `devkit closure`.
@@ -79,6 +93,11 @@ the failure is precisely the one this repository is not.
 Which rung of the profile ladder is being produced changes what "working" means —
 `monorepo` has no database and its route renders from static rows, `full` adds
 the database lane and a data-backed route. This requirement is written against
-`monorepo` and is not satisfied by a rung below it: `agent` and `repo` install
-into a repository that already exists, so neither answers this persona's
-question.
+`full`, the rung `create` places when no flag is given
+([ADR-129](../../decisions/ADR-129-create-defaults-to-the-full-rung-and-runs-the-setup.md)),
+and is not satisfied by a rung below it: a `monorepo` tree's table ignores the
+sort a user turns on, and `agent` and `repo` install into a repository that
+already exists, so neither answers this persona's question.
+
+It stays `unmet` for one bullet: nothing yet checks the **produced** tree for a
+file naming this repository.

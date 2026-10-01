@@ -22,6 +22,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
+import { copyEnvironmentTemplate, runSetup } from './command-create-setup.mjs';
 import { applyInit } from './command-init.mjs';
 import {
   CONFIG_FILE_NAME,
@@ -29,6 +30,11 @@ import {
   resolveConfig,
   withProfile,
 } from './config.mjs';
+import {
+  ENVIRONMENT_FILE,
+  readSetupFlags,
+  SEED_TASK,
+} from './create-setup.mjs';
 import {
   abandonedNotice,
   ancestorsOf,
@@ -172,7 +178,35 @@ const halted = ({ failure, notice }) => {
   return 1;
 };
 
-const scaffold = ({ absolute, profile, target }) => {
+const finishedSetup = ({ absolute, flags, hooksPath, packageName, target }) => {
+  const environmentCopied = copyEnvironmentTemplate({ absolute, packageName })
+    ? ENVIRONMENT_FILE
+    : undefined;
+  const commands = configuredCommands(absolute);
+  const tasks = wiredTasks(absolute);
+  const setup = runSetup({
+    absolute,
+    configuredRun: commands.run,
+    flags,
+    hasDatabase: tasks.includes(SEED_TASK),
+    target,
+  });
+  if (setup.failure !== undefined) console.error(`\n${setup.failure}`);
+  console.log(
+    `\n${createSummary({
+      branch: CREATE_BRANCH,
+      commands,
+      environmentCopied,
+      hooksPath,
+      setup,
+      target,
+      tasks,
+    })}`,
+  );
+  return setup.code;
+};
+
+const scaffold = ({ absolute, flags, profile, target }) => {
   mkdirSync(absolute, { recursive: true });
   const initFailure = gitStep({
     args: ['init', '--quiet', '--initial-branch', CREATE_BRANCH, '.'],
@@ -186,10 +220,8 @@ const scaffold = ({ absolute, profile, target }) => {
       notice: abandonedNotice({ target }),
     });
   }
-  const manifest = initialManifest({
-    name: packageNameFor(basename(absolute)),
-    profile,
-  });
+  const packageName = packageNameFor(basename(absolute));
+  const manifest = initialManifest({ name: packageName, profile });
   writeFileSync(
     join(absolute, 'package.json'),
     `${JSON.stringify(manifest, undefined, 2)}\n`,
@@ -227,20 +259,12 @@ const scaffold = ({ absolute, profile, target }) => {
     });
   }
 
-  console.log(
-    `\n${createSummary({
-      branch: CREATE_BRANCH,
-      commands: configuredCommands(absolute),
-      hooksPath,
-      target,
-      tasks: wiredTasks(absolute),
-    })}`,
-  );
-  return 0;
+  return finishedSetup({ absolute, flags, hooksPath, packageName, target });
 };
 
 export const runCreate = (argv, root) => {
-  const { error, profile: flagged, rest } = readProfileFlag(argv);
+  const { rest: unflagged, ...flags } = readSetupFlags(argv);
+  const { error, profile: flagged, rest } = readProfileFlag(unflagged);
   if (error !== undefined) {
     console.error(error);
     return 1;
@@ -278,5 +302,5 @@ export const runCreate = (argv, root) => {
     return 1;
   }
 
-  return scaffold({ absolute, profile: chosen.profile, target });
+  return scaffold({ absolute, flags, profile: chosen.profile, target });
 };

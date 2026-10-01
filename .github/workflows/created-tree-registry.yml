@@ -3,11 +3,13 @@
 # The Check Safe gate `workspace:verify` installs every @lcabrera package the
 # created tree resolves from a tarball packed from the checkout, so it proves
 # what the next release ships and says nothing about what the registry serves.
-# This is the other half: it creates the tree with the published initializer,
-# installs it from npm, and runs the same tasks. It is not a PR check, because a
-# change that moves two packages together is red here until both publish.
+# This is the other half: it creates the tree with the published initializer
+# at its default rung, which installs it from npm itself, then runs the same
+# tasks, and the tree's seed and smoke tests against the job's Postgres. It is
+# not a PR check, because a change that moves two packages together is red
+# here until both publish.
 # Release calls it after a publish; run it on demand from the Actions tab. The
-# gate lifts pnpm's minimum release age for the tree's install, because it runs
+# gate lifts pnpm's minimum release age for create's install, because it runs
 # minutes after the publish it checks and pnpm would otherwise hold the new
 # versions back for a day.
 name: Created Tree From The Registry
@@ -28,6 +30,22 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # The database the created tree seeds and runs its smoke tests against. A
+    # scratch server for one job, so it trusts every connection.
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_USER: tree_gate
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tree_gate -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -43,4 +61,9 @@ jobs:
 
       - name: A tree created from the published initializer passes its own tasks
         id: registry_tree_gate
+        env:
+          DEVKIT_TREE_DB_HOST: localhost
+          DEVKIT_TREE_DB_PORT: '5432'
+          DEVKIT_TREE_DB_USER: tree_gate
+          DEVKIT_TREE_DB_PASSWORD: unused-under-trust
         run: vp run registry-tree:verify

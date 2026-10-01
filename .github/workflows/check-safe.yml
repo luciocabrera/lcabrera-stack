@@ -31,6 +31,23 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # The database the created-tree gate seeds and serves from. It is a
+    # scratch server for one job, so it trusts every connection and holds no
+    # credential worth keeping out of this file.
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_USER: tree_gate
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tree_gate -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -235,7 +252,7 @@ jobs:
       - name: A tree created from the packed blueprint passes its own tasks
         id: devkit_workspace_gate
         # tarball:verify proves the packaging; this proves the product. It runs
-        # `devkit create --profile monorepo` from the packed tarball in a scratch
+        # `devkit create --profile full` from the packed tarball in a scratch
         # directory, installs every @lcabrera package the tree resolves from a
         # tarball packed from this checkout, and runs the tasks it wires for
         # itself, so a blueprint defect only its own configs reject fails here
@@ -247,6 +264,17 @@ jobs:
         # pins, which a test in scripts/lib holds equal to this repository's
         # pin, so the job already runs on it. `check:safe` chains it after
         # tarball:verify; the pre-push hook runs `check:push`, which does not.
+        #
+        # The tree is the `full` rung, so it also seeds the job's Postgres
+        # service through its own task, runs its smoke tests, and holds a
+        # sorted and a filtered page its `start` serves to what SQL gives over
+        # the same rows. Run locally with none of these set, the gate starts
+        # the tree's own database through Docker instead.
+        env:
+          DEVKIT_TREE_DB_HOST: localhost
+          DEVKIT_TREE_DB_PORT: '5432'
+          DEVKIT_TREE_DB_USER: tree_gate
+          DEVKIT_TREE_DB_PASSWORD: unused-under-trust
         run: vp run workspace:verify
 
       - name: Every shipped document reads with only its package on disk

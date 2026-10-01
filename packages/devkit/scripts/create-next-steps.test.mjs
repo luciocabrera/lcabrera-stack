@@ -93,7 +93,10 @@ describe('what a created repository is told to do next', () => {
   test('a target with a space still prints the install and the dev task', () => {
     const parent = scratch();
     const { code, printed } = quietly(() =>
-      runCreate(['my project', '--profile', 'monorepo'], parent),
+      runCreate(
+        ['my project', '--profile', 'monorepo', '--no-install'],
+        parent,
+      ),
     );
 
     expect(code).toBe(0);

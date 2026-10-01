@@ -145,13 +145,13 @@ resolve for nobody.
 ## Starting a repository that does not exist yet
 
 ```bash
-devkit create <directory> [--profile <name>]
+devkit create <directory> [--profile <name>] [--no-install] [--no-db]
 ```
 
 Or, without knowing this package's name first:
 
 ```bash
-pnpm create lcabrera-stack <directory> [--profile <name>]
+pnpm create lcabrera-stack <directory> [--profile <name>] [--no-install] [--no-db]
 ```
 
 `create` makes the directory, runs `git init` on the trunk branch this kit's
@@ -159,17 +159,39 @@ gates expect, writes a minimal manifest, sets the repository up exactly as
 `init` does, and commits the result. What comes out is a repository with a
 history, not a directory you still have to turn into one.
 
-With no `--profile`, `create` places the `monorepo` rung: a workspace with an
-application, its configs and its tasks. `init` and `sync` read the rung from
+With no `--profile`, `create` places the `full` rung: a workspace with an
+application, its configs and its tasks, and a local Postgres the application
+reads. `init` and `sync` read the rung from
 `devkit.config.json` when there is no flag, and fall back to `agent` only when
 the config names none, because they write into a repository that already has
 its own workspace. `create` records the rung it used in `devkit.config.json`, so a
 later `sync` or `doctor` without the flag works against the same rung. Pass
-`--profile agent` or `--profile repo` for a smaller tree.
+`--profile monorepo`, `--profile agent` or `--profile repo` for a smaller tree.
 
-The run ends with the commands that start the repository: `cd` into it, a plain
-install with its package manager (not the lockfile-bound `commands.install`,
-since there is no lockfile yet), and the `dev` task when the rung wires one. A
+After the commit, `create` finishes the setup itself:
+
+1. At the `full` rung it copies the compose environment template, the
+   `.env.example` in docker/local, to the `.env` beside it, which git ignores,
+   naming the compose project after the repository. The
+   other values stay the template's placeholders, and the local database is
+   created with them.
+2. It installs, with `vp install` when `vp` is on your PATH, otherwise with the
+   package manager that ran it (`pnpm create` runs it with pnpm).
+3. When the tree has the database tasks and Docker is running, it runs
+   `db:up`, waits until Postgres answers on the configured port (90 seconds at
+   most), then runs `db:seed`.
+
+The run then prints only the steps it did not do. After a full run that is
+`cd` into the directory and the `dev` task. A step this machine cannot take is
+named with the command to run later, and the run still exits 0: no `vp` and no
+package manager it can name, no `docker` on the PATH, or a Docker that is not
+running. A step that ran and failed exits 1. The repository is in place and
+committed either way, so the advice is to finish it, never to create it again.
+`--no-install` skips the install and the database, and `--no-db` skips only the
+database.
+
+A printed install step is a plain install with the package manager (not the
+lockfile-bound `commands.install`, since there is no lockfile yet). A
 directory name that is not a plain path is named, not printed as a `cd`, since
 no single quoting style suits every shell. `vp` is the Vite+ CLI and is installed once
 per machine ([viteplus.dev](https://viteplus.dev/guide/)). Inside the new
@@ -178,16 +200,16 @@ the `devkit:check` and `devkit:sync` tasks, not as a bare `devkit`.
 
 It **refuses** the following, and each refusal names what to do instead:
 
-| Refused                                 | Why                                                                                       |
-| --------------------------------------- | ----------------------------------------------------------------------------------------- |
-| A target that is not empty              | `create` writes a whole tree and cannot tell your project from an abandoned attempt       |
-| A target inside a git repository        | the inner tree would sit under the outer repository's index and gates                     |
-| A name something else already holds     | a file, or a link to nothing, occupying the name is not a directory `create` can write to |
-| A directory it cannot list              | an unreadable directory and an empty one are indistinguishable, and it must not guess     |
-| No target, or more than one             | `create` makes one repository, and which one has to be said                               |
-| A profile that is not on the ladder     | the same refusal every command makes — an unknown profile places nothing, silently        |
-| An option other than `--profile <name>` | `--profile=<name>` is dropped by the parser, so it would run the default rung and exit 0  |
-| A machine with no git                   | `create` makes a git repository, so this cannot be discovered after the directory exists  |
+| Refused                             | Why                                                                                       |
+| ----------------------------------- | ----------------------------------------------------------------------------------------- |
+| A target that is not empty          | `create` writes a whole tree and cannot tell your project from an abandoned attempt       |
+| A target inside a git repository    | the inner tree would sit under the outer repository's index and gates                     |
+| A name something else already holds | a file, or a link to nothing, occupying the name is not a directory `create` can write to |
+| A directory it cannot list          | an unreadable directory and an empty one are indistinguishable, and it must not guess     |
+| No target, or more than one         | `create` makes one repository, and which one has to be said                               |
+| A profile that is not on the ladder | the same refusal every command makes — an unknown profile places nothing, silently        |
+| An option it does not take          | `--profile=<name>` is dropped by the parser, so it would run the default rung and exit 0  |
+| A machine with no git               | `create` makes a git repository, so this cannot be discovered after the directory exists  |
 
 The first two point at `devkit init`, which is the command for a repository
 that already exists. Nothing overrides them: `init`'s refusals and these are the
@@ -287,7 +309,7 @@ own guess where it does not.
 ## Commands
 
 ```bash
-devkit create <directory> [--profile <name>]   # make a repository that does not exist yet
+devkit create <directory> [--profile <name>] [--no-install] [--no-db]   # make a repository that does not exist yet
 devkit init [--profile <name>] [--force]   # set up a repository that has none of this
 devkit sync [--profile <name>]        # materialise into the current repository
 devkit doctor [--profile <name>] [--check] [--verbose]   # report divergence; --check makes it fail
@@ -527,11 +549,17 @@ asserts it, because no test run from a workspace can.
 ### What the `full` rung adds
 
 ```bash
-devkit create my-repo --profile full
-cd my-repo && pnpm install
-cp docker/local/.env.example docker/local/.env   # then replace each placeholder
-vp run db:seed    # start Postgres, create the database, load the demo table
+devkit create my-repo     # installs, starts Postgres and seeds it
+cd my-repo
 vp run --filter web test:smoke
+vp run dev
+```
+
+With `--no-install`, the steps `create` leaves are the ones it would have run:
+
+```bash
+cd my-repo && vp install
+vp run db:seed    # start Postgres, create the database, load the demo table
 vp run dev
 ```
 
@@ -545,9 +573,11 @@ included, has to be installed on the host.
   the variable.
 - `.env.example`, beside it, is the template for that file, and it holds only
   placeholders. The workspace `.gitignore` ignores `.env` and `.env.*` and keeps
-  `.env.example`, so the real file is never committed. `COMPOSE_PROJECT_NAME`
-  in it names the container and its volume. Set it to something unique, or two
-  repositories created from this rung on one machine share one database.
+  `.env.example`, so the real file is never committed. `create` writes the real
+  file from it, with `COMPOSE_PROJECT_NAME`, which names the container and its
+  volume, set to the repository's name. Postgres reads the credentials only
+  when it first creates its volume, so changing them later means `db:down` and
+  removing that volume too.
 - `setup_enterprise_orders.sql`, in the application's `db` directory, creates
   the `enterprise_orders` table and fills it with 1,000 rows. Every value derives from the row number,
   so every seed writes the same table, and the seed takes well under a second.
@@ -582,7 +612,9 @@ replace the
 renders from, and the test of the reader that served it, are retired: a tree
 moved up removes them when it has not edited them. The application's
 `package.json` is the `monorepo` one plus the server package, the driver and the
-two tasks.
+two tasks. Its `vite.config.ts` is the `monorepo` one plus the environment
+file beside the compose file, which the development server loads and `start`
+sources, so the page reaches the database without exporting anything first.
 `COMMANDS.md` is the shipped command reference plus a section documenting the
 database tasks. It has to be replaced: the created tree's `commands:verify` fails
 on a task the reference does not document, and also on a documented task the

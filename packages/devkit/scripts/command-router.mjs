@@ -14,7 +14,7 @@ import { runDoctor, runSync } from './command-sync.mjs';
 
 const USAGE = [
   'usage:',
-  '  devkit create <directory> [--profile <name>]',
+  '  devkit create <directory> [--profile <name>] [--no-install] [--no-db]',
   '  devkit init [--profile <name>] [--force] [--upgrade]',
   '  devkit sync [--profile <name>]',
   '  devkit doctor [--profile <name>] [--check] [--verbose]',

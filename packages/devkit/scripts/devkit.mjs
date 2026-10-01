@@ -10,7 +10,7 @@
  * package have diverged, and measure whether a directory can travel at all.
  *
  * Usage:
- *   devkit create <directory> [--profile <name>]
+ *   devkit create <directory> [--profile <name>] [--no-install] [--no-db]
  *   devkit init [--profile <name>] [--force] [--upgrade]
  *   devkit sync [--profile <name>]
  *   devkit doctor [--profile <name>] [--check] [--verbose]
@@ -18,8 +18,8 @@
  *   devkit closure [--profile <name>] <directory> [<directory> ...]
  *   devkit closure [--profile <name>] --shipped
  *
- * Exit codes: 0 = nothing to report, 1 = findings, drift under --check, or bad
- * arguments.
+ * Exit codes: 0 = nothing to report, 1 = findings, drift under --check, bad
+ * arguments, or a step `create` ran after its commit that failed.
  */
 
 import { runCommand } from './command-router.mjs';
