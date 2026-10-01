@@ -20,7 +20,7 @@ import { join, resolve } from 'node:path';
 import {
   applyPlan,
   buildPlan,
-  countsFor,
+  placedCount,
   printPlacementNotice,
   printTaskPlan,
   renderPlan,
@@ -149,14 +149,14 @@ const missingManifestWarning = (root) =>
  * @param {{ declaredBins: readonly string[], profile: string, root: string }} args
  */
 const materialise = ({ declaredBins, profile, root }) => {
-  const { entries, manifest, tasks } = buildPlan({
+  const { entries, manifest, refusal, tasks } = buildPlan({
     declaredBins,
     establish: true,
     profile,
     root,
   });
   applyPlan({ entries, manifest, root, tasks });
-  return { entries, tasks };
+  return { entries, refusal, tasks };
 };
 
 /**
@@ -181,9 +181,13 @@ export const applyInit = ({
     userAgent,
   });
   const warning = missingManifestWarning(root);
-  const { entries, tasks } = materialise({ declaredBins, profile, root });
+  const { entries, refusal, tasks } = materialise({
+    declaredBins,
+    profile,
+    root,
+  });
   const { added, skipped } = taskOutcomes(tasks);
-  const { written } = countsFor(entries);
+  const written = placedCount(entries);
 
   const hooksPath = resolveConfig(
     readTextIfPresent(join(root, CONFIG_FILE_NAME)),
@@ -193,6 +197,10 @@ export const applyInit = ({
   console.log(renderPlan(entries));
   printTaskPlan(tasks);
   if (warning !== undefined) console.error(warning);
+  if (refusal !== undefined) {
+    console.error(`\n${refusal}`);
+    return { code: 1 };
+  }
 
   const failure = initFailure({
     planned: entries.length,

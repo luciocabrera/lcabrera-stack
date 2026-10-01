@@ -15,14 +15,27 @@
  * spelled `gitignore` and is renamed on the way out.
  */
 
-import { hooksPathRefusal } from '../assets/workspace/scripts/hooks-path.mjs';
+import {
+  hooksPathRefusal,
+  isRepositoryRelative,
+} from '../assets/workspace/scripts/hooks-path.mjs';
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
 
-export const DEFAULT_CONFIG = {
-  ci: { setup: [] },
-  commands: {},
-  paths: {
+/**
+ * @type {Readonly<{
+ *   ci: Readonly<{ setup: readonly never[] }>,
+ *   commands: Readonly<{}>,
+ *   paths: Readonly<{ agents: string, coordination: string, decisions: string,
+ *     docs: string, hooks: string, root: string, rules: string,
+ *     skills: string, templates: string, workflows: string,
+ *     workspace: string }>,
+ *   profile: string }>}
+ */
+export const DEFAULT_CONFIG = Object.freeze({
+  ci: Object.freeze({ setup: Object.freeze([]) }),
+  commands: Object.freeze({}),
+  paths: Object.freeze({
     agents: '.claude/agents',
     coordination: 'docs/coordination',
     decisions: 'docs/decisions',
@@ -34,21 +47,46 @@ export const DEFAULT_CONFIG = {
     templates: '.github',
     workflows: '.github/workflows',
     workspace: '.',
-  },
+  }),
   profile: 'agent',
-};
+});
 
-/** @type {ReadonlyArray<readonly [string, readonly string[]]>} */
-const RUNG_GROUPS = [
+/**
+ * @param {ReadonlyArray<readonly [string, readonly string[]]>} entries
+ * @returns {ReadonlyArray<readonly [string, readonly string[]]>}
+ */
+const frozenRungs = (entries) =>
+  Object.freeze(
+    entries.map(([rung, list]) =>
+      Object.freeze(/** @type {const} */ ([rung, Object.freeze([...list])])),
+    ),
+  );
+
+const RUNG_GROUPS = frozenRungs([
   ['agent', ['skills', 'rules', 'agents', 'docs', 'coordination', 'decisions']],
   ['repo', ['templates', 'workflows', 'hooks', 'root']],
   ['monorepo', ['workspace']],
   ['full', []],
-];
+]);
 
 const GROUPS_BY_RUNG = new Map(RUNG_GROUPS);
 
-export const PROFILE_LADDER = RUNG_GROUPS.map(([rung]) => rung);
+const GROUPS_WITHOUT_ASSETS = new Set(['agents', 'docs']);
+
+export const KIT_GROUPS = Object.freeze(
+  RUNG_GROUPS.flatMap(([, groups]) => groups).filter(
+    (group) => !GROUPS_WITHOUT_ASSETS.has(group),
+  ),
+);
+
+const RUNG_RETIREMENTS = frozenRungs([
+  ['agent', []],
+  ['repo', []],
+  ['monorepo', []],
+  ['full', []],
+]);
+
+export const PROFILE_LADDER = Object.freeze(RUNG_GROUPS.map(([rung]) => rung));
 
 const rungIndex = (name) => PROFILE_LADDER.indexOf(name);
 
@@ -63,13 +101,27 @@ export const includesRung = ({ profile, rung }) => {
   return held !== -1 && asked !== -1 && asked <= held;
 };
 
-export const PROFILES = Object.fromEntries(
-  PROFILE_LADDER.map((name) => [
-    name,
-    PROFILE_LADDER.filter((rung) =>
-      includesRung({ profile: name, rung }),
-    ).flatMap((rung) => GROUPS_BY_RUNG.get(rung) ?? []),
-  ]),
+/**
+ * @param {{ profile: string,
+ *   retirements?: ReadonlyArray<readonly [string, readonly string[]]> }} args
+ * @returns {string[]} the asset paths retired by every rung `profile` includes
+ */
+export const retiredAssetsFor = ({ profile, retirements = RUNG_RETIREMENTS }) =>
+  retirements
+    .filter(([rung]) => includesRung({ profile, rung }))
+    .flatMap(([, assetPaths]) => assetPaths);
+
+export const PROFILES = Object.freeze(
+  Object.fromEntries(
+    PROFILE_LADDER.map((name) => [
+      name,
+      Object.freeze(
+        PROFILE_LADDER.filter((rung) =>
+          includesRung({ profile: name, rung }),
+        ).flatMap((rung) => GROUPS_BY_RUNG.get(rung) ?? []),
+      ),
+    ]),
+  ),
 );
 
 /**
@@ -136,15 +188,28 @@ const ciSetupLines = (ci) => {
   return ci.setup;
 };
 
+const isPlacementBase = (value) =>
+  typeof value === 'string' &&
+  isRepositoryRelative(value) &&
+  !value.split(/[\\/]/).includes('..');
+
+const pathRefusal = ([key, value]) =>
+  isPlacementBase(value)
+    ? undefined
+    : `${CONFIG_FILE_NAME}: "paths.${key}" must be a directory inside the repository, relative to its root, with no ".." segment — got ${JSON.stringify(value)}`;
+
 const checkedPaths = (paths) => {
-  const refusal = hooksPathRefusal(paths.hooks);
+  const refusal =
+    hooksPathRefusal(paths.hooks) ??
+    Object.entries(paths)
+      .map((entry) => pathRefusal(entry))
+      .find((message) => message !== undefined);
   if (refusal !== undefined) throw new TypeError(refusal);
   return paths;
 };
 
 export const resolveConfig = (raw) => {
-  if (raw === undefined) return DEFAULT_CONFIG;
-  const parsed = JSON.parse(raw);
+  const parsed = raw === undefined ? {} : JSON.parse(raw);
   if (!isPlainObject(parsed)) {
     throw new TypeError(`${CONFIG_FILE_NAME} must contain a JSON object`);
   }
@@ -187,10 +252,16 @@ export const targetPathFor = ({ assetPath, config }) => {
 
 export const groupsFor = (config) => PROFILES[config.profile] ?? [];
 
+/**
+ * @param {string} assetPath
+ * @returns {string}
+ */
+export const assetGroup = (assetPath) => assetPath.split('/', 1)[0];
+
 const EXECUTABLE_GROUPS = new Set(['hooks']);
 
 export const isExecutableAsset = (assetPath) =>
-  EXECUTABLE_GROUPS.has(assetPath.split('/', 1)[0]);
+  EXECUTABLE_GROUPS.has(assetGroup(assetPath));
 
 export const configuredCommandWords = (config) =>
   Object.values(config.commands ?? {})

@@ -7,12 +7,25 @@
  * would be worse than no doctor at all.
  */
 
-import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import { acceptedEntry, isAccepted } from './accepted.mjs';
 import { substituteCiSetup } from './ci-setup.mjs';
-import { groupsFor, hasConfigKey, targetPathFor } from './config.mjs';
+import {
+  assetGroup,
+  groupsFor,
+  hasConfigKey,
+  retiredAssetsFor,
+  targetPathFor,
+} from './config.mjs';
 import {
   consumerRegionKey,
   joinConsumerRegion,
@@ -25,11 +38,17 @@ import {
   hashContent,
   isAcknowledgeable,
   isRecorded,
+  isRemoval,
   isWritten,
   nextManifest,
 } from './manifest.mjs';
 import { unmetPeers } from './peer.mjs';
 import { substituteCommands } from './placeholders.mjs';
+import {
+  declaredRetirements,
+  lexicalDestination,
+  retirementsFor,
+} from './retirement.mjs';
 
 const unmetDeclaration = ({ config, content, peerVersions }) => {
   const keys = requiredConfigKeys(content).filter(
@@ -60,10 +79,8 @@ const planEntryFor = ({
   onDiskContent,
   onDiskHash,
   peerVersions,
+  targetPath,
 }) => {
-  const targetPath = targetPathFor({ assetPath: asset.path, config });
-  if (targetPath === undefined) return;
-
   const { hash: onDisk, region } = onDiskFor({
     assetPath: asset.path,
     onDiskContent,
@@ -124,6 +141,64 @@ const planEntryFor = ({
   };
 };
 
+const targetedAssets = ({ assets, config }) =>
+  assets
+    .map((asset) => ({
+      asset,
+      targetPath: targetPathFor({ assetPath: asset.path, config }),
+    }))
+    .filter(({ targetPath }) => targetPath !== undefined);
+
+const destinationKey = (destinationOf) => (path) =>
+  destinationOf(path) ?? lexicalDestination(path) ?? path;
+
+const prevailingAssets = ({ assets, config, destinationOf, groups }) => {
+  const keyOf = destinationKey(destinationOf);
+  const rank = new Map(groups.map((group, index) => [group, index]));
+  const prevailing = new Map();
+  const targeted = targetedAssets({ assets, config });
+  for (const { asset, targetPath } of targeted) {
+    const held = rank.get(assetGroup(asset.path));
+    if (held === undefined) continue;
+    const key = keyOf(targetPath);
+    const incumbent = prevailing.get(key);
+    if (incumbent === undefined || held > incumbent.rank) {
+      prevailing.set(key, { asset, rank: held, targetPath });
+    }
+  }
+  return prevailing.values().toArray();
+};
+
+const canonicalRecords = ({ destinationOf, manifest, placed }) => {
+  const keyOf = destinationKey(destinationOf);
+  const recordedAt = Map.groupBy(Object.keys(manifest.files), keyOf);
+  const aliasOf = new Map(
+    placed
+      .map(({ targetPath }) => [
+        targetPath,
+        (recordedAt.get(keyOf(targetPath)) ?? []).filter(
+          (path) => path !== targetPath,
+        ),
+      ])
+      .filter(([, aliases]) => aliases.length > 0),
+  );
+  return { aliasOf, files: renamedRecords({ aliasOf, files: manifest.files }) };
+};
+
+const renamedRecords = ({ aliasOf, files }) => {
+  const aliases = new Set(aliasOf.values().toArray().flat());
+  return {
+    ...Object.fromEntries(
+      Object.entries(files).filter(([path]) => !aliases.has(path)),
+    ),
+    ...Object.fromEntries(
+      [...aliasOf]
+        .map(([path, spellings]) => [path, files[path] ?? files[spellings[0]]])
+        .filter(([, hash]) => hash !== undefined),
+    ),
+  };
+};
+
 /**
  * `peerVersions` is supplied rather than resolved here, so planning stays pure
  * and every asset naming the same peer is answered from one lookup. Its default
@@ -136,37 +211,74 @@ const planEntryFor = ({
  * plan is built, so applying one stays a matter of reading the entry.
  *
  * @param {{ assets: { path: string, content: string, executable?: boolean }[],
- *   config: object, manifest: { files: Record<string, string> },
+ *   config: object, groups?: readonly string[],
+ *   manifest: { files: Record<string, string> },
  *   onDiskContent?: (targetPath: string) => string | undefined,
  *   onDiskHash: (targetPath: string) => string | undefined,
- *   peerVersions?: Map<string, string | undefined> }} args
+ *   peerVersions?: Map<string, string | undefined>,
+ *   retiring?: readonly string[],
+ *   destinationOf?: (targetPath: string) => string | undefined,
+ *   kindOf?: (targetPath: string) => 'absent' | 'file' | 'other',
+ *   kitGroups?: readonly string[] }} args
  */
 export const planSync = ({
   assets,
   config,
+  destinationOf = () => undefined,
+  groups = groupsFor(config),
+  kindOf = () => 'other',
+  kitGroups,
   manifest,
   onDiskContent = () => undefined,
   onDiskHash,
   peerVersions = new Map(),
+  retiring = retiredAssetsFor({ profile: config.profile }),
 }) => {
-  const groups = new Set(groupsFor(config));
+  const retired = new Set(retiring);
+  const placed = prevailingAssets({
+    assets: assets.filter((asset) => !retired.has(asset.path)),
+    config,
+    destinationOf,
+    groups,
+  });
+  const { aliasOf, files } = canonicalRecords({
+    destinationOf,
+    manifest,
+    placed,
+  });
+  const recorded = { ...manifest, files };
+  const planned = placed.map(({ asset, targetPath }) => {
+    const entry = planEntryFor({
+      asset,
+      config,
+      manifest: recorded,
+      onDiskContent,
+      onDiskHash,
+      peerVersions,
+      targetPath,
+    });
+    const recordedAs = aliasOf.get(targetPath);
+    return {
+      ...entry,
+      executable: asset.executable === true,
+      ...(recordedAs !== undefined && { recordedAs }),
+    };
+  });
 
-  return assets
-    .filter((asset) => groups.has(asset.path.split('/', 1)[0]))
-    .map((asset) => {
-      const entry = planEntryFor({
-        asset,
-        config,
-        manifest,
-        onDiskContent,
-        onDiskHash,
-        peerVersions,
-      });
-      return entry === undefined
-        ? undefined
-        : { ...entry, executable: asset.executable === true };
-    })
-    .filter((entry) => entry !== undefined);
+  return [
+    ...planned,
+    ...retirementsFor({
+      assets,
+      config,
+      declared: declaredRetirements({ config, retiring }),
+      destinationOf,
+      kindOf,
+      kitGroups,
+      manifest: recorded,
+      onDiskHash,
+      placed: new Set(placed.map(({ targetPath }) => targetPath)),
+    }),
+  ];
 };
 
 export const withAcceptance = ({ accepted, entries }) =>
@@ -187,10 +299,23 @@ const EXECUTABLE_MODE = 0o755;
 const needsExecutableBit = (entry) =>
   entry.executable === true && isRecorded(entry.state);
 
+const removeFile = (path) => {
+  try {
+    if (lstatSync(path).isDirectory()) return;
+  } catch {
+    return;
+  }
+  rmSync(path, { force: true });
+};
+
 export const applySync = ({ entries, root }) => {
   for (const entry of entries) {
     if (!isWritten(entry.state)) continue;
     const destination = join(root, entry.path);
+    if (isRemoval(entry.state)) {
+      removeFile(destination);
+      continue;
+    }
     mkdirSync(dirname(destination), { recursive: true });
     writeFileSync(
       destination,
@@ -211,7 +336,17 @@ export const manifestAfter = ({ entries, previous, tasks, version }) =>
       path: entry.path,
       state: entry.state,
     })),
-    previous,
+    previous: {
+      ...previous,
+      files: renamedRecords({
+        aliasOf: new Map(
+          entries
+            .filter((entry) => entry.recordedAs !== undefined)
+            .map((entry) => [entry.path, entry.recordedAs]),
+        ),
+        files: previous.files,
+      }),
+    },
     tasks,
     version,
   });

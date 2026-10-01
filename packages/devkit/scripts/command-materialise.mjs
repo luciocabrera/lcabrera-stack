@@ -37,6 +37,7 @@ import {
 } from './init.mjs';
 import {
   isAcknowledged,
+  isRemoval,
   isReported,
   isWritten,
   MANIFEST_FILE,
@@ -44,6 +45,7 @@ import {
   serialiseManifest,
 } from './manifest.mjs';
 import { declaredPeerNames, installedPeerVersion } from './peer.mjs';
+import { destinationIn, nodeKindIn, retirementRefusal } from './retirement.mjs';
 import {
   applySync,
   manifestAfter,
@@ -204,6 +206,8 @@ export const buildPlan = ({
     entries: planSync({
       assets,
       config,
+      destinationOf: destinationIn(root),
+      kindOf: nodeKindIn(root),
       manifest,
       onDiskContent: onDiskReader(root),
       onDiskHash: onDiskHasher(root),
@@ -215,6 +219,7 @@ export const buildPlan = ({
     config,
     entries,
     manifest,
+    refusal: retirementRefusal({ assets }),
     tasks: plannedTasks({ config, declaredBins, establish, manifest, root }),
   };
 };
@@ -284,8 +289,11 @@ const STATE_LABELS = {
   added: 'added',
   conflict: 'left alone — a file you wrote is already there',
   current: 'up to date',
+  kept: 'left alone — this version no longer ships it',
   modified: 'left alone — locally modified',
+  outside: 'left alone — the recorded path resolves outside this repository',
   restored: 'restored',
+  retired: 'removed — this version no longer ships it',
   unmet: UNMET_LABELS.config,
   unresolved: 'not written — no command configured for',
   updated: 'updated',
@@ -297,10 +305,23 @@ const STATE_COLUMN_WIDTH = Math.max(
 
 const STATES_NAMING_WHAT_IS_MISSING = new Set(['unmet', 'unresolved']);
 
-const labelFor = (entry) =>
-  entry.state === 'unmet' && entry.unmetKind === 'peer'
-    ? UNMET_LABELS.peer
-    : STATE_LABELS[entry.state];
+const KEPT_LABELS = {
+  edited: 'left alone — locally modified, and this version no longer ships it',
+  'not-regular':
+    'left alone — not a regular file, and this version no longer ships it',
+  unreadable:
+    'left alone — could not be read, and this version no longer ships it',
+};
+
+const labelFor = (entry) => {
+  if (entry.state === 'unmet' && entry.unmetKind === 'peer') {
+    return UNMET_LABELS.peer;
+  }
+  if (entry.state === 'kept') {
+    return KEPT_LABELS[entry.keptBecause] ?? STATE_LABELS.kept;
+  }
+  return STATE_LABELS[entry.state];
+};
 
 const detailFor = (entry) => {
   if (STATES_NAMING_WHAT_IS_MISSING.has(entry.state)) {
@@ -357,6 +378,10 @@ export const printPlacementNotice = (profile) => {
   const notice = placementNotice(profile);
   if (notice !== undefined) console.log(notice);
 };
+
+export const placedCount = (entries) =>
+  entries.filter((entry) => isWritten(entry.state) && !isRemoval(entry.state))
+    .length;
 
 export const countsFor = (entries) => ({
   reported: entries.filter((entry) => isReported(entry.state)).length,

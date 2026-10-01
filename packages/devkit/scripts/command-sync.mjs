@@ -35,7 +35,10 @@ export const runSync = (argv, root) => {
     return 1;
   }
 
-  const { config, entries, manifest, tasks } = buildPlan({ profile, root });
+  const { config, entries, manifest, refusal, tasks } = buildPlan({
+    profile,
+    root,
+  });
   const reported = countsFor(entries).reported + taskCounts(tasks).reported;
 
   printPlacementNotice(config.profile);
@@ -46,6 +49,10 @@ export const runSync = (argv, root) => {
 
   const unresolved = unresolvedNotice(entries);
   if (unresolved !== undefined) console.error(`\n${unresolved}`);
+  if (refusal !== undefined) {
+    console.error(`\n${refusal}`);
+    return 1;
+  }
   if (reported > 0) {
     console.log(
       '\nWhat was left alone is yours to keep. Re-run after resolving it, or leave it diverged.',
@@ -99,25 +106,28 @@ const driftAdvice = ({ unresolved, writable }) => {
     : `Running devkit sync would change none of them.\n${unresolved}`;
 };
 
-const reportDrift = ({ argv, config, entries, tasks }) => {
+const reportDrift = ({ argv, config, entries, refusal, tasks }) => {
   const files = countsFor(entries);
   const taskDrift = taskCounts(tasks);
 
   printPlacementNotice(config.profile);
   console.log(renderPlan(entries, { verbose: argv.includes('--verbose') }));
   printTaskPlan(tasks);
+  if (refusal !== undefined) console.error(`\n${refusal}`);
+
+  if (!argv.includes('--check')) return 0;
 
   const writable = files.written + taskDrift.written;
   const drifted = writable + files.reported + taskDrift.reported;
-  if (drifted === 0 || !argv.includes('--check')) return 0;
-
-  console.error(
-    `\n${drifted} item(s) differ from the package. ${driftAdvice({
-      unresolved: unresolvedNotice(entries),
-      writable,
-    })}`,
-  );
-  return 1;
+  if (drifted > 0) {
+    console.error(
+      `\n${drifted} item(s) differ from the package. ${driftAdvice({
+        unresolved: unresolvedNotice(entries),
+        writable,
+      })}`,
+    );
+  }
+  return refusal !== undefined || drifted > 0 ? 1 : 0;
 };
 
 export const runDoctor = (argv, root) => {
@@ -127,12 +137,15 @@ export const runDoctor = (argv, root) => {
     return 1;
   }
 
-  const { accepted, config, entries, tasks } = buildPlan({ profile, root });
+  const { accepted, config, entries, refusal, tasks } = buildPlan({
+    profile,
+    root,
+  });
 
   const accept = parseAcceptArgs(argv);
   if (accept !== undefined) {
     return runAccept({ accept, accepted, entries, root });
   }
 
-  return reportDrift({ argv, config, entries, tasks });
+  return reportDrift({ argv, config, entries, refusal, tasks });
 };

@@ -51,19 +51,33 @@ The record is what makes it distribution rather than copy-paste. Every
 materialised file is hashed into `.devkit-manifest.json`, and each subsequent
 run classifies it:
 
-| State                | What happens                                                                   |
-| -------------------- | ------------------------------------------------------------------------------ |
-| `added` / `restored` | written — the consumer does not have it                                        |
-| `updated`            | written — untouched locally, and the package has moved on                      |
-| `current`            | nothing written; adopted into the record                                       |
-| `modified`           | **left alone** — edited locally, and reported on every run                     |
-| `acknowledged`       | **left alone** — an edit you said you meant; reported only under `--verbose`   |
-| `conflict`           | **left alone** — an unmanaged file already occupies that path; acknowledgeable |
-| `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                     |
-| `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered     |
+| State                | What happens                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| `added` / `restored` | written — the consumer does not have it                                              |
+| `updated`            | written — untouched locally, and the package has moved on                            |
+| `current`            | nothing written; adopted into the record                                             |
+| `modified`           | **left alone** — edited locally, and reported on every run                           |
+| `acknowledged`       | **left alone** — an edit you said you meant; reported only under `--verbose`         |
+| `conflict`           | **left alone** — an unmanaged file already occupies that path; acknowledgeable       |
+| `retired`            | deleted — recorded, unedited, and no rung of this version ships it any more          |
+| `kept`               | **left alone** — the same, but edited, unreadable or not a file; the line says which |
+| `outside`            | **left alone** — a recorded path that resolves outside the repository                |
+| `unresolved`         | **refused** — a `{{commands.*}}` placeholder has no answer                           |
+| `unmet`              | **refused** — a `requires:` key is unset, or a `peer:` range is unanswered           |
 
 A local edit is a supported state, not a defect. It survives every sync, which
 is what stops a consumer forking the kit to change one line.
+
+Where two rungs a profile holds place a file at the same path, the higher rung's
+file is the one planned, so a tree moving up a rung has that file `updated` or,
+if edited, `modified`. A file retires when no rung of this version ships it, or
+when a rung the profile includes declares that it retires the file; running at
+a lower profile leaves a higher rung's files where they are, and a lower rung's
+file that a higher rung retires is placed again.
+
+Nothing is retired from an install whose own asset set is empty or missing a
+group: the run says which, exits non-zero, and leaves every recorded file in
+place. Reinstall the package and re-run.
 
 The two refusals are never written **and never recorded**. Recording one would
 make the next run read the file's absence as a deletion the consumer chose,
@@ -602,7 +616,11 @@ put the seeds where a consumer on another runner never looks. `hooks` must be a
 non-empty path inside the repository, relative to its root: an empty string, a
 value that is not a string, an absolute path, one that climbs out with `..`, or
 one starting with a prefix git expands (`~`, `%(prefix)`, `:(optional)`) is
-refused by every command and by the `prepare` script.
+refused by every command and by the `prepare` script. Every other `paths` key
+follows the same rule, may also be the repository root (`.`), and may not
+contain a `..` segment even where it would stay inside: each base names its
+directory by one spelling, so two keys cannot reach one file by two. Every
+command refuses a config that breaks it and names the key.
 
 `commands` answers the placeholders a shipped file carries. A skill's procedure
 travels but the command carrying out each step does not, so the file says

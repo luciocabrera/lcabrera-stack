@@ -42,7 +42,16 @@ export const classifyMaterialisation = ({
   return incomingHash === recordedHash ? 'current' : 'updated';
 };
 
-const WRITTEN_STATES = new Set(['added', 'restored', 'updated']);
+export const classifyRetirement = ({ onDiskHash, recordedHash }) =>
+  onDiskHash === undefined || onDiskHash === recordedHash ? 'retired' : 'kept';
+
+const RETIREMENT_STATES = new Set(['kept', 'outside', 'retired']);
+
+export const isRetirement = (state) => RETIREMENT_STATES.has(state);
+
+export const isRemoval = (state) => state === 'retired';
+
+const WRITTEN_STATES = new Set(['added', 'restored', 'retired', 'updated']);
 
 export const isWritten = (state) => WRITTEN_STATES.has(state);
 
@@ -52,7 +61,9 @@ export const isRecorded = (state) => RECORDED_STATES.has(state);
 
 const REPORTED_STATES = new Set([
   'conflict',
+  'kept',
   'modified',
+  'outside',
   'unmet',
   'unresolved',
 ]);
@@ -113,6 +124,7 @@ export const nextManifest = ({ entries, previous, tasks, version }) => {
   const files = entries.reduce(
     (accumulated, entry) => {
       if (isRecorded(entry.state)) accumulated[entry.path] = entry.incomingHash;
+      if (isRetirement(entry.state)) delete accumulated[entry.path];
       return accumulated;
     },
     { ...previous.files },
