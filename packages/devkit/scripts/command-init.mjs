@@ -18,6 +18,7 @@ import {
   printPlacementNotice,
   printTaskPlan,
   renderPlan,
+  taskNamesAfterInit,
 } from './command-materialise.mjs';
 import {
   CONFIG_FILE_NAME,
@@ -64,11 +65,12 @@ const currentBranch = (root) => {
   }
 };
 
-const writeConfig = ({ profile, root, upgrade, userAgent }) => {
+const writeConfig = ({ declaredBins, profile, root, upgrade, userAgent }) => {
   const manifest = readJsonIfPresent(join(root, MANIFEST));
   const runner = inferRunner({
     dependencies: declaredDependencies(manifest),
     files: readdirSync(root),
+    tasks: taskNamesAfterInit({ declaredBins, profile, root }),
     userAgent,
   });
   const defaultBranch = currentBranch(root);
@@ -112,8 +114,12 @@ const missingManifestWarning = (root) =>
     ? undefined
     : `init: no ${MANIFEST} here, so no gate tasks were written. Create one and re-run with --force to wire them up.`;
 
-const materialise = ({ profile, root }) => {
+/**
+ * @param {{ declaredBins: readonly string[], profile: string, root: string }} args
+ */
+const materialise = ({ declaredBins, profile, root }) => {
   const { entries, manifest, tasks } = buildPlan({
+    declaredBins,
     establish: true,
     profile,
     root,
@@ -122,10 +128,26 @@ const materialise = ({ profile, root }) => {
   return { entries, tasks };
 };
 
-export const applyInit = ({ profile, root, upgrade, userAgent }) => {
-  const runner = writeConfig({ profile, root, upgrade, userAgent });
+/**
+ * @param {{ declaredBins?: readonly string[], profile: string, root: string,
+ *           upgrade: boolean, userAgent?: string }} args
+ */
+export const applyInit = ({
+  declaredBins = [],
+  profile,
+  root,
+  upgrade,
+  userAgent,
+}) => {
+  const runner = writeConfig({
+    declaredBins,
+    profile,
+    root,
+    upgrade,
+    userAgent,
+  });
   const warning = missingManifestWarning(root);
-  const { entries, tasks } = materialise({ profile, root });
+  const { entries, tasks } = materialise({ declaredBins, profile, root });
   const { added, skipped } = taskOutcomes(tasks);
   const { written } = countsFor(entries);
 

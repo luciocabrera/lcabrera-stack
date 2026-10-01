@@ -48,6 +48,7 @@ import {
   applySync,
   manifestAfter,
   onDiskHasher,
+  onDiskReader,
   planSync,
   withAcceptance,
 } from './sync.mjs';
@@ -91,10 +92,18 @@ const installedBins = (root) => {
  * that does not hold the blueprint, for the same reason a task whose bin is
  * missing is: it would be wired and failing on the day it arrived.
  *
- * @param {{ config: object, establish: boolean, root: string,
+ * @param {{ config: object, declaredBins: readonly string[],
+ *           establish: boolean, root: string,
  *           scripts?: Record<string, string>, recorded?: Record<string, string> }} args
  */
-const taskGroups = ({ config, establish, recorded, root, scripts }) => {
+const taskGroups = ({
+  config,
+  declaredBins,
+  establish,
+  recorded,
+  root,
+  scripts,
+}) => {
   const { profile } = config;
   const blueprint = includesRung({ profile, rung: 'monorepo' });
   const withoutBlueprint =
@@ -106,7 +115,10 @@ const taskGroups = ({ config, establish, recorded, root, scripts }) => {
     establish,
     tasks: tasksFor({ profile }),
     withheld: new Set([
-      ...withheldTasks({ availableBins: installedBins(root), profile }),
+      ...withheldTasks({
+        availableBins: [...installedBins(root), ...declaredBins],
+        profile,
+      }),
       ...withoutBlueprint,
     ]),
   };
@@ -122,14 +134,18 @@ const EVERY_TASK_NAME = [
  * A repository with no manifest gets no task plan at all, rather than a plan
  * nothing can apply: recording tasks as written into a file that does not exist
  * would leave the record claiming what the tree does not have.
+ *
+ * @param {{ config: object, declaredBins: readonly string[],
+ *           establish: boolean, manifest: object, root: string }} args
  */
-const plannedTasks = ({ config, establish, manifest, root }) => {
+const plannedTasks = ({ config, declaredBins, establish, manifest, root }) => {
   const packageManifest = readJsonIfPresent(join(root, PACKAGE_MANIFEST));
   if (packageManifest === undefined) return [];
   const scripts = packageManifest.scripts;
   return planTasks({
     groups: taskGroups({
       config,
+      declaredBins,
       establish,
       recorded: manifest.tasks,
       root,
@@ -162,7 +178,16 @@ const resolvePeerVersions = (assets) =>
     ]),
   );
 
-export const buildPlan = ({ establish = false, profile, root }) => {
+/**
+ * @param {{ declaredBins?: readonly string[], establish?: boolean,
+ *           profile?: string, root: string }} args
+ */
+export const buildPlan = ({
+  declaredBins = [],
+  establish = false,
+  profile,
+  root,
+}) => {
   const configured = resolveConfig(readIfPresent(join(root, CONFIG_FILE_NAME)));
   const config =
     profile === undefined
@@ -180,6 +205,7 @@ export const buildPlan = ({ establish = false, profile, root }) => {
       assets,
       config,
       manifest,
+      onDiskContent: onDiskReader(root),
       onDiskHash: onDiskHasher(root),
       peerVersions: resolvePeerVersions(assets),
     }),
@@ -189,8 +215,22 @@ export const buildPlan = ({ establish = false, profile, root }) => {
     config,
     entries,
     manifest,
-    tasks: plannedTasks({ config, establish, manifest, root }),
+    tasks: plannedTasks({ config, declaredBins, establish, manifest, root }),
   };
+};
+
+/**
+ * @param {{ declaredBins?: readonly string[], profile: string, root: string }} args
+ * @returns {string[]}
+ */
+export const taskNamesAfterInit = ({ declaredBins = [], profile, root }) => {
+  const { tasks } = buildPlan({ declaredBins, establish: true, profile, root });
+  return Object.keys(
+    scriptsAfterTasks({
+      entries: tasks,
+      scripts: readJsonIfPresent(join(root, PACKAGE_MANIFEST))?.scripts,
+    }),
+  );
 };
 
 const nextManifestFor = ({ entries, manifest, tasks = [] }) =>

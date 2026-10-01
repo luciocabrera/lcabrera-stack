@@ -20,7 +20,7 @@ import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { applyInit } from './command-init.mjs';
 import { runDoctor, runSync } from './command-sync.mjs';
-import { blueprintDependentTasks, GATE_TASKS } from './init.mjs';
+import { blueprintDependentTasks, GATE_TASKS, tasksFor } from './init.mjs';
 import { MANIFEST_FILE } from './manifest.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
 import { WORKSPACE_SCRIPTS } from './workspace.mjs';
@@ -71,7 +71,7 @@ const settledRepo = ({ overridden = true } = {}) => {
     private: true,
     scripts: {
       ...recorded,
-      build: 'their own build',
+      deploy: 'their own deploy',
       ...(overridden && { check: 'their own check' }),
     },
   });
@@ -122,7 +122,7 @@ describe('sync reconciles the task block', () => {
     expect(runSync([], root)).toBe(0);
     const { scripts } = readJson(root, 'package.json');
 
-    expect(scripts.build).toBe('their own build');
+    expect(scripts.deploy).toBe('their own deploy');
     expect(scripts[ARRIVING]).toBe(WORKSPACE_SCRIPTS[ARRIVING]);
     restore();
   });
@@ -209,14 +209,14 @@ describe('sync reconciles the task block', () => {
     writeJson(root, 'package.json', {
       name: 'consumer',
       private: true,
-      scripts: { build: 'their own build' },
+      scripts: { deploy: 'their own deploy' },
     });
     const { restore } = silenced();
 
     runSync([], root);
 
     expect(readJson(root, 'package.json').scripts).toEqual({
-      build: 'their own build',
+      deploy: 'their own deploy',
     });
     expect(readJson(root, MANIFEST_FILE).tasks).toBeUndefined();
     restore();
@@ -394,36 +394,39 @@ const monorepoRepo = (scripts) => {
   return root;
 };
 
-describe('a gate that checks what the blueprint places', () => {
-  const [DOC_GATE] = blueprintDependentTasks({ profile: 'monorepo' });
+describe('the gates that need the blueprint', () => {
+  const BLUEPRINT_GATES = blueprintDependentTasks({ profile: 'monorepo' });
+  const MONOREPO_TASKS = tasksFor({ profile: 'monorepo' });
 
-  test('is one task, so the rest of the rung is unaffected', () => {
-    expect(blueprintDependentTasks({ profile: 'monorepo' })).toEqual([
-      'commands:verify',
-    ]);
+  test('are exactly these tasks, so the rest of the rung is unaffected', () => {
+    expect(BLUEPRINT_GATES).toEqual(['commands:verify', 'deps:audit']);
     expect(blueprintDependentTasks({ profile: 'repo' })).toEqual([]);
   });
 
-  test('is withheld from a repository that has not taken the blueprint', () => {
-    const root = monorepoRepo({ build: 'their own build' });
+  test('are withheld from a repository that has not taken the blueprint', () => {
+    const root = monorepoRepo({ deploy: 'their own deploy' });
     const { restore } = silenced();
 
     applyInit({ profile: 'monorepo', root, upgrade: true });
     const { scripts } = readJson(root, 'package.json');
 
-    expect(scripts[DOC_GATE]).toBeUndefined();
+    for (const name of BLUEPRINT_GATES) expect(scripts[name]).toBeUndefined();
     expect(scripts['adr:verify']).toBe(GATE_TASKS['adr:verify'].bin);
     restore();
   });
 
-  test('and is wired once the blueprint block is there', () => {
+  test('and are wired once the blueprint block is there', () => {
     const root = monorepoRepo({ ...WORKSPACE_SCRIPTS });
     const { restore } = silenced();
 
     applyInit({ profile: 'monorepo', root, upgrade: true });
+    const { scripts } = readJson(root, 'package.json');
 
-    expect(readJson(root, 'package.json').scripts[DOC_GATE]).toBe(
-      GATE_TASKS[DOC_GATE].bin,
+    for (const name of BLUEPRINT_GATES) {
+      expect(scripts[name]).toBe(MONOREPO_TASKS[name]);
+    }
+    expect(scripts['deps:audit']).toBe(
+      'vp pm audit --json | repo-verify-deps-audit',
     );
     restore();
   });

@@ -173,8 +173,10 @@ From the `repo` profile up:
 From the `monorepo` profile up:
 
 - `{{commands.run}} commands:verify` — `repo-verify-commands`
+- `{{commands.run}} deps:audit` — `repo-verify-deps-audit`, fed the package
+  manager's audit report as JSON
 
-That last one is the gate that holds this section to its word: it fails when a
+`commands:verify` is the gate that holds this section to its word: it fails when a
 task in `package.json` is documented nowhere here, and when a task documented
 here is not one this repository has. It takes the spelling from the `run` key in
 §4, so it holds this file to the way **you** run a task rather than to any one
@@ -186,6 +188,12 @@ of those tasks, and would be handed a gate that was red the day it arrived. Wire
 it there yourself and that section is what it will report — delete it, or take
 the block.
 
+`deps:audit` is wired only where the blueprint is as well, because the report it
+reads comes from the toolchain the blueprint declares. It fails on an advisory at
+`moderate` or above, and on a report that walked no dependencies, so a registry
+it could not reach fails it rather than passing it. Where it is wired, `init`
+points the `audit` key in §4 at it.
+
 ### The blueprint's own tasks
 
 These arrive with `devkit create` at the `monorepo` profile, alongside the
@@ -194,7 +202,9 @@ places. They are the one set no other run wires, because they name binaries only
 the manifest `create` writes declares — and they are reconciled from then on
 exactly like the tasks above.
 
+- `{{commands.run}} build` — build the application for production.
 - `{{commands.run}} check` — format, lint and type-check in one pass.
+- `{{commands.run}} dev` — start the application's development server.
 - `{{commands.run}} format:all` — format the tree.
 - `{{commands.run}} format:check` — report formatting without writing, for CI.
 - `{{commands.run}} lint:all` — both linters, fixing what can be fixed.
@@ -202,6 +212,8 @@ exactly like the tasks above.
 - `{{commands.run}} lint:biome:check` — the second linter alone, reporting only.
 - `{{commands.run}} lint:check` — both linters, reporting only, for CI.
 - `{{commands.run}} prepare` — regenerate the generated configs after an install.
+- `{{commands.run}} start` — serve the production build, building it first if
+  there is none.
 - `{{commands.run}} test:all` — every workspace's tests, in dependency order.
 - `{{commands.run}} tsconfig:generate` — rewrite the generated TypeScript configs
   and format what it wrote.

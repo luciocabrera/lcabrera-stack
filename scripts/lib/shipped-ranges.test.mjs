@@ -17,8 +17,9 @@ import {
 } from './shipped-ranges.mjs';
 import {
   ALL_MENTIONS,
-  BOTH_SHAPES,
   CATALOG,
+  CONSTANT_DECLARATIONS,
+  EVERY_SHAPE,
   MANIFEST,
   MANIFEST_DECLARATIONS,
   VERSIONS,
@@ -34,11 +35,11 @@ const mentionsOf = (declarations) =>
 const findingsFor = ({
   declarations,
   mentions,
-  sources = BOTH_SHAPES,
+  sources = EVERY_SHAPE,
   versions = VERSIONS,
 }) =>
   shippedRangeFindings({
-    declarations,
+    declarations: [...declarations, ...CONSTANT_DECLARATIONS],
     mentions: mentions ?? mentionsOf(declarations),
     sources,
     versions,
@@ -193,21 +194,30 @@ describe('mentionsIn', () => {
 
 describe('shippedRangeFindings — a shape the walk stopped reaching', () => {
   it.each([
-    {
-      missing: 'workspace catalog',
-      sources: [{ kind: 'manifest', path: MANIFEST }],
-    },
-    { missing: 'manifest', sources: [{ kind: 'catalog', path: YAML }] },
-  ])('refuses a pass when no $missing was read', ({ missing, sources }) => {
+    { absent: 'catalog', missing: 'workspace catalog' },
+    { absent: 'manifest', missing: 'manifest' },
+    { absent: 'constant', missing: 'range constant' },
+  ])('refuses a pass when no $missing was read', ({ absent, missing }) => {
     const findings = findingsFor({
       declarations: [...MANIFEST_DECLARATIONS, ...YAML_DECLARATIONS],
-      sources,
+      sources: EVERY_SHAPE.filter(({ kind }) => kind !== absent),
     });
 
     expect(findings.map(({ kind, shape }) => ({ kind, shape }))).toEqual([
       { kind: 'no-source', shape: missing },
     ]);
     expect(findingLine(findings[0])).toContain(missing);
+  });
+
+  it('says an emptied list of range constants is where nothing was read', () => {
+    const [finding] = findingsFor({
+      declarations: [...MANIFEST_DECLARATIONS, ...YAML_DECLARATIONS],
+      sources: EVERY_SHAPE.filter(({ kind }) => kind !== 'constant'),
+    });
+
+    expect(findingLine(finding)).toContain(
+      'the list of range constants yielded no range constant',
+    );
   });
 });
 
@@ -240,7 +250,7 @@ describe('shippedRangeFindings', () => {
     expect(
       findingsFor({
         declarations: declare('^1.2.3'),
-        versions: { '@lcabrera/vite-config': '1.2.3' },
+        versions: { ...VERSIONS, '@lcabrera/vite-config': '1.2.3' },
       }),
     ).toEqual([]);
   });
@@ -345,7 +355,7 @@ describe('shippedRangeFindings — a reader that has gone quiet', () => {
         ...ALL_MENTIONS,
         { name: '@lcabrera/vite-config', path: workflow },
       ],
-      sources: [...BOTH_SHAPES, { kind: 'scanned', path: workflow }],
+      sources: [...EVERY_SHAPE, { kind: 'scanned', path: workflow }],
     });
 
     expect(finding.kind).toBe('unread');

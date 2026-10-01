@@ -15,8 +15,9 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vite-plus/test';
 
 import { configs } from '../assets/workspace/packages/typescript-config/tsconfig.entries.ts';
-import { initialManifest } from './create.mjs';
+import { initialManifest, TOOLCHAIN_RANGES } from './create.mjs';
 import {
+  APP_WORKSPACE,
   GENERATED_TSCONFIGS,
   NODE_VERSION,
   nodeEngineBand,
@@ -114,6 +115,16 @@ describe('the tasks name what the blueprint holds', () => {
     );
   });
 
+  test('the app tasks filter for the application that is shipped', () => {
+    const manifest = JSON.parse(read('apps', 'web', 'package.json'));
+    expect(manifest.name).toBe(APP_WORKSPACE);
+    for (const name of ['build', 'dev', 'start']) {
+      expect(WORKSPACE_SCRIPTS[name]).toBe(
+        `vp run --filter ${APP_WORKSPACE} ${name}`,
+      );
+    }
+  });
+
   test('every dependency the rung adds resolves through the catalog', () => {
     const catalogued = Object.values(WORKSPACE_DEPENDENCIES).filter(
       (specifier) => !specifier.startsWith('catalog:'),
@@ -198,11 +209,11 @@ describe('withWorkspaceFields', () => {
 });
 
 describe('initialManifest', () => {
-  test('a rung below monorepo gets a manifest with nothing wired', () => {
+  test('a rung below monorepo gets a manifest declaring only the toolchain', () => {
     for (const profile of ['agent', 'repo']) {
       const manifest = initialManifest({ name: 'demo', profile });
       expect(manifest.scripts).toBeUndefined();
-      expect(manifest.devDependencies).toBeUndefined();
+      expect(manifest.devDependencies).toEqual(TOOLCHAIN_RANGES);
       expect(manifest.engines).toBeUndefined();
     }
   });

@@ -171,11 +171,15 @@ that already exists. Nothing overrides them: `init`'s refusals and these are the
 two halves of one rule, and a flag that got past either would put this kit's
 files somewhere it cannot record or restore them.
 
-No gate task is wired by a `create` run, because a repository made a second ago
-has installed nothing, and a task naming a binary you do not have is a
-`command not found` on your first run. Install your dependencies and then run
-`devkit init --upgrade` inside the new repository: it adds the tasks whose
-binaries have arrived and leaves the config as you have it.
+The manifest `create` writes declares the toolchain the tree calls:
+`@lcabrera/devkit` and `@lcabrera/repo-standards`, at every rung, because every
+rung owns gate tasks that run the gate runtime's binaries. Each is written as a
+floor with a bound below the next major, never as a `workspace:` specifier. Because the tree is about to be installed from that
+manifest, `create` wires every gate task the rung owns whose binary the manifest
+declares, even though nothing is installed yet. One install is the only step
+left: after it the hooks, the workflows and the gate tasks find their binaries,
+and `devkit init --upgrade` has no task left to add. `init` in a repository that
+already exists still decides by what is installed.
 
 ## Setting up a repository
 
@@ -194,9 +198,10 @@ them: a task still holding what this kit wrote is updated, a task you changed is
 kept and reported, and a task this kit stops shipping is removed. A task whose
 binary is not installed here is only ever withheld from a manifest that does not
 already carry it — what is on this machine decides what may be wired, not what
-belongs in the file. One gate is withheld on a second condition: `commands:verify`
-reads the command reference this kit ships, and that document names the
-blueprint's tasks, so it is wired only where the blueprint is.
+belongs in the file. `commands:verify` and `deps:audit` are withheld on a second
+condition, and are wired only where the blueprint is: `commands:verify` reads the command reference this
+kit ships, and that document names the blueprint's tasks; `deps:audit` reads the
+audit report of the toolchain the blueprint declares.
 
 It **refuses** rather than proceeding when the repository is already set up — a
 config or a manifest already present means `sync` is the command you want, and it
@@ -235,7 +240,11 @@ that exited 0 would read afterwards as a working repository whose CI workflows
 are simply absent.
 
 The inferred commands are a starting point, not a verdict — `init` names the
-runner it guessed so you can correct it. Check them before you rely on them.
+runner it guessed so you can correct it. Check them before you rely on them. The
+one exception is a key that stands for a task the run itself wires: under
+Vite+, `test` runs the blueprint's `test:all` and `audit` runs `deps:audit`
+wherever the manifest holds them after the run, and falls back to the runner's
+own guess where it does not.
 
 ## Commands
 
@@ -305,15 +314,20 @@ by walking up for that exact name, while a stub referencing a config the
 generator has not written yet fails the very install that would write it.
 
 One of the workspaces it places is an application, and it is there to be run
-rather than read. Its build and start tasks are declared in its own Vite config,
-so it is the runner that reads them — and the runner is a dependency of the
-created repository, not a command on your PATH. Reach it through the package
-manager:
+rather than read. The root manifest runs it, so from the repository root:
 
 ```bash
-pnpm exec vp run --filter web build
-pnpm exec vp run --filter web start   # then open http://localhost:3000
+vp run dev     # the development server
+vp run build   # a production build, in apps/web/build
+vp run start   # serve that build; then open http://localhost:3000
 ```
+
+Each root task hands off to the application's own task of the same name. `dev`
+is a script in its manifest; `build` and `start` are declared in its Vite
+config, which only the runner reads — so call the application's tasks through
+`vp run`, never through the package manager's own `run`. `vp` here is the
+runner the created repository declares as a dependency; without it on your
+PATH, prefix each line with `pnpm exec`.
 
 It is React Router in framework mode with one page route and one action route.
 The page renders a table from rows the module holds — no server, no database, no
@@ -399,9 +413,13 @@ than the pin, so a patch release does not hard-fail every install before someone
 moves it.
 
 The catalog is the one place a version is declared for the packages you author.
-Reference it as `catalog:<group>` from any workspace, and add a new dependency to
-the group that matches its role — a version repeated in prose is a second
-declaration nothing keeps in step. The `typescript-config` workspace the rung
+The named groups under `catalogs:` are this kit's, and a later `sync` updates
+them. Your own dependencies go in the default `catalog:`, which is where
+`vp add <pkg>` writes them: the record does not cover that block, so adding one
+leaves `doctor --check` green and the rest of the file still takes updates.
+Adding to a named group is an edit to the kit's part of the file, and it is
+reported like any other. A version repeated in prose is a second declaration
+nothing keeps in step. The `typescript-config` workspace the rung
 places is the exception, and deliberately: it pins its dependencies outright, so
 it installs into a tree whose own `pnpm-workspace.yaml` was kept on a conflict
 and declares no catalogs. Its ranges and the catalog's are held equal by a test

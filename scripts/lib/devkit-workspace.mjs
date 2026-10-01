@@ -17,8 +17,13 @@ export const TREE_TASKS = [
   ['run', 'typecheck:all'],
   ['fmt', '--check', '.'],
   ['run', 'test:all'],
+  ['run', 'build'],
   ['run', 'lint:all'],
 ];
+
+export const START_ARGS = ['run', 'start'];
+
+export const BUILT_SERVER_ENTRY = 'apps/web/build/server/index.js';
 
 /**
  * @param {readonly string[]} args
@@ -76,15 +81,21 @@ export const taskFindings = ({ error, label, output, signal, status }) => {
  * @param {string} porcelain
  * @returns {string[]}
  */
-export const modifiedTrackedFiles = (porcelain) =>
+export const trackedPathsIn = (porcelain) =>
   porcelain
     .split('\n')
     .filter((line) => line.trim() !== '')
-    .map((line) => line.slice(3))
-    .map(
-      (path) =>
-        `\`${path}\` changed while the gate ran — a task rewrote a file the blueprint shipped, so a consumer's fresh tree goes dirty the first time they run it`,
-    );
+    .map((line) => line.slice(3));
+
+/**
+ * @param {string} porcelain
+ * @returns {string[]}
+ */
+export const modifiedTrackedFiles = (porcelain) =>
+  trackedPathsIn(porcelain).map(
+    (path) =>
+      `\`${path}\` changed while the gate ran — a task rewrote a file the blueprint shipped, so a consumer's fresh tree goes dirty the first time they run it`,
+  );
 
 /**
  * @param {{ blueprint: readonly string[], placed: readonly string[],
@@ -99,4 +110,97 @@ export const missingBlueprintFiles = ({ blueprint, placed, targetOf }) => {
       (path) =>
         `the blueprint's \`${path}\` never reached the created tree — the packed tarball does not carry it, so a consumer's \`devkit create\` would not place it either`,
     );
+};
+
+/**
+ * @type {readonly string[]}
+ */
+export const TOOLCHAIN_BINS = [
+  'devkit',
+  'repo-verify-commit',
+  'repo-verify-branch',
+];
+
+/**
+ * @param {{ expected: readonly string[], present: readonly string[] }} args
+ * @returns {string[]}
+ */
+export const missingToolchainBins = ({ expected, present }) => {
+  const installed = new Set(present);
+  return expected
+    .filter((bin) => !installed.has(bin))
+    .map(
+      (bin) =>
+        `\`node_modules/.bin/${bin}\` is not in the created tree after its install — the manifest \`devkit create\` wrote does not declare the package that ships it, so the hooks, workflows and gate tasks calling it fail`,
+    );
+};
+
+/**
+ * @param {{ after: Record<string, string>, before: Record<string, string> }} args
+ * @returns {string[]}
+ */
+export const tasksAddedByUpgrade = ({ after, before }) =>
+  Object.keys(after)
+    .filter((name) => !Object.hasOwn(before, name))
+    .map(
+      (name) =>
+        `\`devkit init --upgrade\` added \`${name}\` to a tree \`devkit create\` had just made and installed — create withheld a task its own manifest makes runnable`,
+    );
+
+/**
+ * @param {{ after: Readonly<Record<string, string>>,
+ *           before: Readonly<Record<string, string>> }} args
+ * @returns {string[]}
+ */
+export const trackedWritesByUpgrade = ({ after, before }) =>
+  [...new Set([...Object.keys(before), ...Object.keys(after)])]
+    .filter((path) => before[path] !== after[path])
+    .toSorted((left, right) => left.localeCompare(right))
+    .map(
+      (path) =>
+        `\`devkit init --upgrade\` changed the committed \`${path}\` in a tree \`devkit create\` had just made and installed — create and upgrade disagree about what that file holds`,
+    );
+
+/**
+ * @param {{ accepted: { output: string, status: number | null },
+ *           refused: { output: string, status: number | null } }} args
+ * @returns {string[]}
+ */
+export const commitHookFindings = ({ accepted, refused }) => [
+  ...(accepted.status === 0
+    ? []
+    : [
+        `the created tree's \`commit-msg\` hook refused a Conventional Commit message:\n${outputTail(accepted.output)}`,
+      ]),
+  ...(refused.status === 0
+    ? [
+        "the created tree's `commit-msg` hook accepted a message that is not a Conventional Commit",
+      ]
+    : []),
+];
+
+/**
+ * @param {{ exists: boolean }} args
+ * @returns {string[]}
+ */
+export const buildOutputFindings = ({ exists }) =>
+  exists
+    ? []
+    : [
+        `the created tree holds no \`${BUILT_SERVER_ENTRY}\` after the gate's \`vp run build\` step, so the root \`build\` task produced no application build`,
+      ];
+
+/**
+ * @param {{ error?: string, output: string, status?: number, url: string }} args
+ * @returns {string[]}
+ */
+export const serveFindings = ({ error, output, status, url }) => {
+  if (status === 200) return [];
+  const outcome =
+    status === undefined
+      ? `never answered (${error ?? 'no response'})`
+      : `answered HTTP ${status}`;
+  return [
+    `\`${commandLabel(START_ARGS)}\` in the created tree ${outcome} at ${url}:\n${outputTail(output)}`,
+  ];
 };
