@@ -76,6 +76,16 @@ export const configs = [
   },
   {
     config: createAppTsConfig({
+      baseTypes: [],
+      include: ['e2e/**/*.ts', 'playwright.config.ts'],
+      srcAlias: false,
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.e2e.tsbuildinfo',
+      types: ['node'],
+    }),
+    filePath: path.resolve(workspaceRoot, 'apps/showcase/tsconfig.e2e.json'),
+  },
+  {
+    config: createAppTsConfig({
       // packages/ui has no vite.config.ts of its own — everything lives
       // under src/, consumed directly by whichever app's Vite/tsc instance
       // processes it. This config exists so tools that resolve the nearest
