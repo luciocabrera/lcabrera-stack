@@ -2,7 +2,7 @@
 id: release-the-pending-changesets
 title: chore(release): version the packages from the pending changesets
 owner: agent:claude
-status: active
+status: review
 branch: chore/1239-release-the-pending-changesets
 area:
   - packages/*/package.json
@@ -24,6 +24,6 @@ chore(release): version the packages from the pending changesets
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: versioned; release:plan, shipped-ranges:verify, tarball:verify and workspace:verify (full tree, Postgres) pass
 - Blockers: none
-- Next:
+- Next: maintainer approves the merge; release.yml publishes
