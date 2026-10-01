@@ -10,7 +10,13 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 import process from 'node:process';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
@@ -159,6 +165,22 @@ describe('an install in a clone', () => {
     },
   );
 
+  test.skipIf(process.platform === 'win32')(
+    'points nothing when the hooks directory links outside the repository',
+    () => {
+      const root = scratch();
+      git(['init', '--quiet', '.'], root);
+      const elsewhere = scratch();
+      writeFileSync(join(elsewhere, 'commit-msg'), '#!/usr/bin/env sh\n');
+      symlinkSync(elsewhere, join(root, '.githooks'), 'dir');
+      const { status, stderr } = install(root);
+
+      expect(status).toBe(0);
+      expect(stderr).toContain('outside this repository');
+      expect(localHooksPath(root)).toBe('');
+    },
+  );
+
   test('points nothing when the hooks path is a file, not a directory', () => {
     const root = scratch();
     git(['init', '--quiet', '.'], root);
@@ -253,6 +275,7 @@ describe('an install outside a work tree', () => {
 describe('hooksPathAction', () => {
   const args = {
     current: '',
+    hooksInside: true,
     hooksPath: '.githooks',
     hooksPresent: true,
     root: '/tree',
@@ -264,6 +287,8 @@ describe('hooksPathAction', () => {
     [{ current: '.githooks' }, 'pointed'],
     [{ current: '.husky' }, 'kept'],
     [{ hooksPresent: false }, 'absent'],
+    [{ hooksInside: false }, 'escapes'],
+    [{ current: '.githooks', hooksInside: false }, 'escapes'],
     [{ topLevel: '' }, 'outside'],
     [{ topLevel: '/' }, 'outside'],
   ])('%o is %s', (overrides, action) => {

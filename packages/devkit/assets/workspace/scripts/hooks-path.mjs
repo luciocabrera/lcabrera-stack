@@ -18,7 +18,15 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
-import { delimiter, dirname, isAbsolute, join, posix, win32 } from 'node:path';
+import {
+  delimiter,
+  dirname,
+  isAbsolute,
+  join,
+  posix,
+  sep,
+  win32,
+} from 'node:path';
 import process from 'node:process';
 
 export const CONFIG_FILE_NAME = 'devkit.config.json';
@@ -137,6 +145,9 @@ export const isRepositoryRelative = (path) => {
   return normal !== '..' && !normal.startsWith('../');
 };
 
+const shownValue = (value) =>
+  typeof value === 'string' ? `"${value}"` : JSON.stringify(value);
+
 /**
  * @param {unknown} path
  * @returns {string | undefined}
@@ -145,7 +156,7 @@ export const hooksPathRefusal = (path) =>
   path === undefined ||
   (typeof path === 'string' && path !== '' && isRepositoryRelative(path))
     ? undefined
-    : `${CONFIG_FILE_NAME}: "paths.hooks" must be a directory inside the repository, relative to its root — got ${typeof path === 'string' ? `"${path}"` : JSON.stringify(path)}`;
+    : `${CONFIG_FILE_NAME}: "paths.hooks" must be a directory inside the repository, relative to its root — got ${shownValue(path)}`;
 
 /**
  * @param {string | undefined} raw
@@ -160,12 +171,20 @@ export const hooksPathIn = (raw) => {
 };
 
 /**
- * @param {{ current: string, hooksPath: string, hooksPresent: boolean,
- *           root: string, topLevel: string }} args
- * @returns {'kept' | 'outside' | 'pointed' | 'point' | 'absent'}
+ * @param {{ path: string, root: string }} args
+ * @returns {boolean}
+ */
+export const isWithin = ({ path, root }) =>
+  path === root || path.startsWith(root.endsWith(sep) ? root : `${root}${sep}`);
+
+/**
+ * @param {{ current: string, hooksInside: boolean, hooksPath: string,
+ *           hooksPresent: boolean, root: string, topLevel: string }} args
+ * @returns {'kept' | 'outside' | 'pointed' | 'point' | 'absent' | 'escapes'}
  */
 export const hooksPathAction = ({
   current,
+  hooksInside,
   hooksPath,
   hooksPresent,
   root,
@@ -173,6 +192,7 @@ export const hooksPathAction = ({
 }) => {
   if (topLevel !== root) return 'outside';
   if (!hooksPresent) return 'absent';
+  if (!hooksInside) return 'escapes';
   if (current === hooksPath) return 'pointed';
   return current === '' ? 'point' : 'kept';
 };
@@ -221,20 +241,36 @@ const point = ({ binary, root }) => {
   if (topLevel !== root) return;
   const hooksPath = hooksPathIn(readIfPresent(join(root, CONFIG_FILE_NAME)));
   const current = read(['config', '--local', '--get', 'core.hooksPath']);
+  const directory = join(root, hooksPath);
+  const hooksPresent = isDirectory(directory);
   const action = hooksPathAction({
     current,
+    hooksInside:
+      hooksPresent && isWithin({ path: realpathSync(directory), root }),
     hooksPath,
-    hooksPresent: isDirectory(join(root, hooksPath)),
+    hooksPresent,
     root,
     topLevel,
   });
-  if (action === 'point') {
-    git(['config', '--local', 'core.hooksPath', hooksPath]);
-    console.log(`git runs the hooks in \`${hooksPath}/\` from now on.`);
-  } else if (action === 'kept') {
-    console.log(
-      `core.hooksPath is \`${current}\` in this clone, so the hooks in \`${hooksPath}/\` were left off. ${hooksPathInstruction(hooksPath)}`,
-    );
+  switch (action) {
+    case 'escapes': {
+      console.error(
+        `\`${hooksPath}/\` resolves to a directory outside this repository, so git was not pointed at it and its hooks stay off.`,
+      );
+      break;
+    }
+    case 'kept': {
+      console.log(
+        `core.hooksPath is \`${current}\` in this clone, so the hooks in \`${hooksPath}/\` were left off. ${hooksPathInstruction(hooksPath)}`,
+      );
+      break;
+    }
+    case 'point': {
+      git(['config', '--local', 'core.hooksPath', hooksPath]);
+      console.log(`git runs the hooks in \`${hooksPath}/\` from now on.`);
+      break;
+    }
+    default:
   }
 };
 

@@ -29,6 +29,7 @@ import {
   isContinuousIntegration,
   isInPackageDirectory,
   isRepositoryRelative,
+  isWithin,
   resolveInstallGit,
   CONFIG_FILE_NAME as SCRIPT_CONFIG_FILE_NAME,
   TRUSTED_GIT_DIRECTORIES,
@@ -233,6 +234,18 @@ describe('isRepositoryRelative', () => {
     [String.raw`tools\..\..\hooks`, false],
   ])('%s is %s', (path, expected) => {
     expect(isRepositoryRelative(path)).toBe(expected);
+  });
+});
+
+describe('isWithin', () => {
+  test.each([
+    ['/tree', '/tree', true],
+    ['/tree/.githooks', '/tree', true],
+    ['/tree/', '/tree/', true],
+    ['/treehouse', '/tree', false],
+    ['/elsewhere', '/tree', false],
+  ])('%s within %s is %s', (path, root, expected) => {
+    expect(isWithin({ path, root })).toBe(expected);
   });
 });
 
