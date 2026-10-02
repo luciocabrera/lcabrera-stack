@@ -1,5 +1,21 @@
 # create-lcabrera-stack
 
+## 0.4.0
+
+### Minor Changes
+
+- ada2dc2: `pnpm create lcabrera-stack <directory>` now creates the `full` rung and installs it, then starts and seeds its local database when Docker is running, because it runs `devkit create` with the arguments it was given. `--no-install` and `--no-db` reach `devkit create` unchanged. The README shows the one command that lifts pnpm's minimum release age for both the create and the install it now runs.
+
+### Patch Changes
+
+- fc1738d: The README says why `pnpm create lcabrera-stack` runs the previous release for a day after one ships, and how to lift pnpm's minimum release age for the create and the first install.
+- Updated dependencies [ada2dc2]
+- Updated dependencies [fc1738d]
+- Updated dependencies [72cc8c9]
+- Updated dependencies [955f68d]
+- Updated dependencies [b4d6b92]
+  - @lcabrera/devkit@0.7.0
+
 ## 0.3.0
 
 ### Minor Changes
