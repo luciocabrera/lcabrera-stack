@@ -18,6 +18,9 @@ vp run evals:skills -- commit-and-pr epic  # some skills
 vp run evals:skills -- epic --hide epic    # prove epic's trigger task can fail
 ```
 
+A skill name with no eval here, or a `--hide` name that is no skill, stops the
+run before any session starts, so a typo cannot pass as an empty green run.
+
 It needs a Claude login, or `CLAUDE_CODE_OAUTH_TOKEN`. Each task runs in a fresh
 temporary directory whose `.claude/skills` links to `.github/skills`, so the
 session sees the whole catalog, plus the skills Claude Code ships with, and
@@ -30,7 +33,8 @@ session's `Skill` tool calls, not on its reply. Transcripts go to
 that matches it.** Those skills' tasks name a fixture
 (`inputs.context.fixture`, under the skill's `fixtures/`) and ask the agent to
 read it, in the near-miss as well as the trigger. Without that, the near-miss
-would pass only because the skill was never offered. Take the fixture out of
+would pass only because the skill was never offered. So a task that names a
+fixture also fails when the session never reads it. Take the fixture out of
 `react-19`'s trigger task and it fails.
 
 Fixture files are stored with a `.fixture` suffix, so no linter or type checker

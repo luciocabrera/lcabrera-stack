@@ -28,10 +28,14 @@ import { parseArgs } from 'node:util';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import {
+  chunk,
   describeResult,
   errorText,
+  fixtureWasRead,
   invokedSkills,
+  readPaths,
   readTask,
+  selectedSkills,
   sessionScope,
   taskPassed,
 } from './skill-triggers.mjs';
@@ -42,12 +46,11 @@ const REPORT_DIR = '.tmp/skill-evals';
 const FIXTURE_SUFFIX = '.fixture';
 const CONCURRENCY = 4;
 
-const evalDirectories = (only) =>
+const evalDirectories = () =>
   readdirSync(EVALS_ROOT, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .filter((name) => existsSync(join(EVALS_ROOT, name, 'eval.yaml')))
-    .filter((name) => only.length === 0 || only.includes(name))
     .toSorted((a, b) => a.localeCompare(b));
 
 const tasksOf = (skill) => {
@@ -58,24 +61,27 @@ const tasksOf = (skill) => {
     .map((name) => readTask(readFileSync(join(directory, name), 'utf8')));
 };
 
+const copyFixture = ({ cwd, skill, task }) => {
+  cpSync(join(EVALS_ROOT, skill, 'fixtures', task.fixture), cwd, {
+    recursive: true,
+  });
+  return readdirSync(cwd, { recursive: true })
+    .map(String)
+    .filter((path) => path.endsWith(FIXTURE_SUFFIX))
+    .map((path) => {
+      const target = path.slice(0, -FIXTURE_SUFFIX.length);
+      renameSync(join(cwd, path), join(cwd, target));
+      return target;
+    });
+};
+
 const workspaceFor = ({ skill, task }) => {
   const cwd = mkdtempSync(join(tmpdir(), 'skill-eval-'));
   mkdirSync(join(cwd, '.claude'));
   symlinkSync(resolve(SKILLS_ROOT), join(cwd, '.claude', 'skills'));
-  if (task.fixture !== undefined) {
-    cpSync(join(EVALS_ROOT, skill, 'fixtures', task.fixture), cwd, {
-      recursive: true,
-    });
-    for (const path of readdirSync(cwd, { recursive: true })) {
-      if (String(path).endsWith(FIXTURE_SUFFIX)) {
-        renameSync(
-          join(cwd, path),
-          join(cwd, String(path).slice(0, -FIXTURE_SUFFIX.length)),
-        );
-      }
-    }
-  }
-  return cwd;
+  const fixtureFiles =
+    task.fixture === undefined ? [] : copyFixture({ cwd, skill, task });
+  return { cwd, fixtureFiles };
 };
 
 const catalog = () =>
@@ -96,10 +102,11 @@ const drain = async (session) => {
 };
 
 const runTask = async ({ hidden, model, skill, task }) => {
+  const { cwd, fixtureFiles } = workspaceFor({ skill, task });
   const session = query({
     options: {
       ...sessionScope({ catalog: catalog(), hidden, task }),
-      cwd: workspaceFor({ skill, task }),
+      cwd,
       maxTurns: 8,
       mcpServers: {},
       model,
@@ -115,26 +122,27 @@ const runTask = async ({ hidden, model, skill, task }) => {
     JSON.stringify(messages, null, 2),
   );
   const invoked = invokedSkills(messages);
+  const fixtureRead = fixtureWasRead({
+    fixtureFiles,
+    read: readPaths(messages),
+  });
   return {
     error,
+    fixtureRead,
     invoked,
-    passed: taskPassed({ error, invoked, skill, task }),
+    passed: taskPassed({ error, fixtureRead, invoked, skill, task }),
     skill,
     task,
   };
 };
 
-const inBatches = async (jobs, size) => {
-  const results = [];
-  for (let start = 0; start < jobs.length; start += size) {
-    results.push(
-      ...(await Promise.all(
-        jobs.slice(start, start + size).map((job) => job()),
-      )),
-    );
-  }
-  return results;
-};
+const runBatches = async ([batch, ...rest]) =>
+  batch === undefined
+    ? []
+    : [
+        ...(await Promise.all(batch.map((job) => job()))),
+        ...(await runBatches(rest)),
+      ];
 
 const main = async () => {
   const { positionals, values } = parseArgs({
@@ -144,14 +152,23 @@ const main = async () => {
       model: { default: 'claude-opus-5-5', type: 'string' },
     },
   });
+  const selected = selectedSkills({
+    catalog: catalog(),
+    evals: evalDirectories(),
+    hidden: values.hide,
+    requested: positionals,
+  });
   mkdirSync(REPORT_DIR, { recursive: true });
-  const jobs = evalDirectories(positionals).flatMap((skill) =>
+  const jobs = selected.flatMap((skill) =>
     tasksOf(skill).map(
       (task) => () =>
         runTask({ hidden: values.hide, model: values.model, skill, task }),
     ),
   );
-  const results = await inBatches(jobs, CONCURRENCY);
+  if (jobs.length === 0) {
+    throw new Error('the selection resolved to no tasks');
+  }
+  const results = await runBatches(chunk(jobs, CONCURRENCY));
   console.log(results.map(describeResult).join('\n'));
   console.log(`Transcripts: ${REPORT_DIR}/`);
   if (results.some(({ passed }) => !passed)) {

@@ -17,13 +17,50 @@ export const readTask = (source) => {
   };
 };
 
-export const invokedSkills = (messages) =>
+const toolCalls = (messages, name) =>
   messages
     .filter((message) => message.type === 'assistant')
     .flatMap((message) => message.message.content)
-    .filter((block) => block.type === 'tool_use' && block.name === 'Skill')
+    .filter((block) => block.type === 'tool_use' && block.name === name);
+
+export const invokedSkills = (messages) =>
+  toolCalls(messages, 'Skill')
     .map((block) => block.input?.skill)
     .filter((skill) => typeof skill === 'string');
+
+export const readPaths = (messages) =>
+  toolCalls(messages, 'Read')
+    .map((block) => block.input?.file_path)
+    .filter((path) => typeof path === 'string');
+
+export const fixtureWasRead = ({ fixtureFiles, read }) =>
+  fixtureFiles.length === 0 ||
+  read.some((path) => fixtureFiles.some((file) => path.endsWith(file)));
+
+const unknownNames = ({ known, requested }) =>
+  requested.filter((name) => !known.includes(name));
+
+export const selectionProblems = ({ catalog, evals, hidden, requested }) => [
+  ...unknownNames({ known: evals, requested }).map(
+    (name) => `no eval for "${name}" under evals/skills/`,
+  ),
+  ...unknownNames({ known: catalog, requested: hidden }).map(
+    (name) => `--hide "${name}" names no skill in .github/skills/`,
+  ),
+];
+
+export const selectedSkills = ({ catalog, evals, hidden, requested }) => {
+  const problems = selectionProblems({ catalog, evals, hidden, requested });
+  if (problems.length > 0) {
+    throw new Error(problems.join('\n'));
+  }
+  return requested.length === 0 ? evals : requested;
+};
+
+export const chunk = (items, size) =>
+  Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
+    items.slice(index * size, (index + 1) * size),
+  );
 
 export const errorText = (error) =>
   error instanceof Error ? error.message : String(error);
@@ -39,8 +76,9 @@ export const sessionScope = ({ catalog, hidden, task }) => ({
 export const judgeTask = ({ invoked, shouldTrigger, skill }) =>
   invoked.includes(skill) === shouldTrigger;
 
-export const taskPassed = ({ error, invoked, skill, task }) =>
+export const taskPassed = ({ error, fixtureRead, invoked, skill, task }) =>
   error === undefined &&
+  fixtureRead &&
   judgeTask({ invoked, shouldTrigger: task.shouldTrigger, skill });
 
 const expectationOf = (task) =>
@@ -49,8 +87,19 @@ const expectationOf = (task) =>
 const seenOf = (invoked) =>
   invoked.length === 0 ? 'no skill' : invoked.join(', ');
 
-const failureOf = (error) =>
-  error === undefined ? '' : `; session error: ${error}`;
+const failureOf = ({ error, fixtureRead }) => {
+  if (error !== undefined) {
+    return `; session error: ${error}`;
+  }
+  return fixtureRead ? '' : '; the session never read the fixture';
+};
 
-export const describeResult = ({ error, invoked, passed, skill, task }) =>
-  `${passed ? 'ok  ' : 'FAIL'} ${skill}/${task.id}: ${expectationOf(task)}; invoked ${seenOf(invoked)}${failureOf(error)}`;
+export const describeResult = ({
+  error,
+  fixtureRead,
+  invoked,
+  passed,
+  skill,
+  task,
+}) =>
+  `${passed ? 'ok  ' : 'FAIL'} ${skill}/${task.id}: ${expectationOf(task)}; invoked ${seenOf(invoked)}${failureOf({ error, fixtureRead })}`;

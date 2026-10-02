@@ -44,7 +44,7 @@ jobs:
           WAZA_TAG: v0.38.7
         run: |
           mkdir -p "$RUNNER_TEMP/waza"
-          curl -fsSL -o "$RUNNER_TEMP/waza/waza" \
+          curl --proto '=https' --tlsv1.2 -fsSL -o "$RUNNER_TEMP/waza/waza" \
             "https://github.com/microsoft/waza/releases/download/$WAZA_TAG/waza-linux-amd64"
           echo "$WAZA_SHA256  $RUNNER_TEMP/waza/waza" | sha256sum -c -
           chmod +x "$RUNNER_TEMP/waza/waza"

@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  chunk,
   describeResult,
   errorText,
+  fixtureWasRead,
   invokedSkills,
   judgeTask,
+  readPaths,
   readTask,
+  selectedSkills,
+  selectionProblems,
   sessionScope,
   taskPassed,
 } from './skill-triggers.mjs';
@@ -96,6 +101,7 @@ describe('describeResult', () => {
     expect(
       describeResult({
         error: 'Reached maximum number of turns (8)',
+        fixtureRead: true,
         invoked: [],
         passed: false,
         skill: 'epic',
@@ -129,10 +135,22 @@ describe('taskPassed', () => {
   it('fails a task whose session errored, even when the skills look right', () => {
     const task = { shouldTrigger: false };
     expect(
-      taskPassed({ error: undefined, invoked: [], skill: 'x', task }),
+      taskPassed({
+        error: undefined,
+        fixtureRead: true,
+        invoked: [],
+        skill: 'x',
+        task,
+      }),
     ).toBe(true);
     expect(
-      taskPassed({ error: 'turn limit', invoked: [], skill: 'x', task }),
+      taskPassed({
+        error: 'turn limit',
+        fixtureRead: true,
+        invoked: [],
+        skill: 'x',
+        task,
+      }),
     ).toBe(false);
   });
 });
@@ -142,6 +160,7 @@ describe('describeResult on a pass', () => {
     expect(
       describeResult({
         error: undefined,
+        fixtureRead: true,
         invoked: ['store-pattern', 'react-19'],
         passed: true,
         skill: 'store-pattern',
@@ -157,5 +176,102 @@ describe('errorText', () => {
   it('reads an Error by its message and anything else as a string', () => {
     expect(errorText(new Error('turn limit'))).toBe('turn limit');
     expect(errorText('aborted')).toBe('aborted');
+  });
+});
+
+describe('fixture reads', () => {
+  const read = (file_path) => ({
+    message: {
+      content: [{ input: { file_path }, name: 'Read', type: 'tool_use' }],
+    },
+    type: 'assistant',
+  });
+
+  it('collects the paths the session read', () => {
+    expect(readPaths([read('/tmp/w/src/A.tsx')])).toStrictEqual([
+      '/tmp/w/src/A.tsx',
+    ]);
+  });
+
+  it('accepts a task with no fixture, and one whose fixture was read', () => {
+    expect(fixtureWasRead({ fixtureFiles: [], read: [] })).toBe(true);
+    expect(
+      fixtureWasRead({
+        fixtureFiles: ['src/A.tsx'],
+        read: ['/tmp/w/src/A.tsx'],
+      }),
+    ).toBe(true);
+  });
+
+  it('fails a near-miss that never read its fixture, and says why', () => {
+    const task = { id: 'near-miss', shouldTrigger: false };
+    const fixtureRead = fixtureWasRead({
+      fixtureFiles: ['src/A.tsx'],
+      read: [],
+    });
+    expect(
+      taskPassed({
+        error: undefined,
+        fixtureRead,
+        invoked: [],
+        skill: 'x',
+        task,
+      }),
+    ).toBe(false);
+    expect(
+      describeResult({
+        error: undefined,
+        fixtureRead,
+        invoked: [],
+        passed: false,
+        skill: 'x',
+        task,
+      }),
+    ).toBe(
+      'FAIL x/near-miss: should not load; invoked no skill; the session never read the fixture',
+    );
+  });
+});
+
+describe('selectionProblems', () => {
+  it('names a skill with no eval and a hidden name in no catalog', () => {
+    expect(
+      selectionProblems({
+        catalog: ['react-19'],
+        evals: ['react-19'],
+        hidden: ['react19'],
+        requested: ['react-19', 'reakt-19'],
+      }),
+    ).toStrictEqual([
+      'no eval for "reakt-19" under evals/skills/',
+      '--hide "react19" names no skill in .github/skills/',
+    ]);
+  });
+
+  it('finds nothing wrong with an empty selection', () => {
+    expect(
+      selectionProblems({ catalog: [], evals: [], hidden: [], requested: [] }),
+    ).toStrictEqual([]);
+  });
+});
+
+describe('chunk', () => {
+  it('splits into batches of at most the given size', () => {
+    expect(chunk([1, 2, 3, 4, 5], 2)).toStrictEqual([[1, 2], [3, 4], [5]]);
+    expect(chunk([], 2)).toStrictEqual([]);
+  });
+});
+
+describe('selectedSkills', () => {
+  it('selects every eval when none is named, and refuses an unknown name', () => {
+    const args = { catalog: ['a'], evals: ['a', 'b'], hidden: [] };
+    expect(selectedSkills({ ...args, requested: [] })).toStrictEqual([
+      'a',
+      'b',
+    ]);
+    expect(selectedSkills({ ...args, requested: ['b'] })).toStrictEqual(['b']);
+    expect(() => selectedSkills({ ...args, requested: ['c'] })).toThrow(
+      'no eval for "c"',
+    );
   });
 });
