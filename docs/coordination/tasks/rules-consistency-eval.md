@@ -8,6 +8,9 @@ area:
   - evals/**
   - .github/workflows/agent-evals.yml
   - .fallowrc.json
+  - package.json
+  - COMMANDS.md
+  - packages/devkit/CLASSIFICATION.md
 started: 2026-10-02
 updated: 2026-10-02
 plan: (none)
