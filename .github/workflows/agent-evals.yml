@@ -75,6 +75,9 @@ jobs:
 
   skill-triggers:
     name: Skill triggers (Claude)
+    concurrency:
+      group: skill-triggers-${{ github.ref }}
+      cancel-in-progress: true
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
@@ -108,6 +111,9 @@ jobs:
 
   verifier-fixtures:
     name: Verifier fixtures (Claude, advisory)
+    concurrency:
+      group: verifier-fixtures-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
