@@ -82,6 +82,22 @@ export const isPathScoped = (skillSource) =>
 
 const REQUIRED_TASKS = ['trigger', 'near-miss'];
 
+export const PROMPT_SUFFIX =
+  "Load any skill you need, but don't run shell commands or edit files.";
+
+const suffixProblems = ({ name, tasks }) =>
+  tasks
+    .filter(
+      (task) =>
+        !String(task.prompt ?? '')
+          .trimEnd()
+          .endsWith(PROMPT_SUFFIX),
+    )
+    .map(
+      (task) =>
+        `${name}/${task.id} does not end its prompt with "${PROMPT_SUFFIX}"`,
+    );
+
 const skillCoverageProblems = ({ name, scoped, tasks }) => {
   if (tasks === undefined) {
     return [`${name} has no eval under evals/skills/`];
@@ -128,9 +144,10 @@ export const coverageProblems = ({ catalog, declared, evals }) => {
     ...[...evals.keys()]
       .filter((name) => !skills.has(name))
       .map((name) => `evals/skills/${name} has no skill under .github/skills/`),
-    ...[...evals.entries()].flatMap(([name, tasks]) =>
-      namingProblems({ declared: declared.get(name), name, tasks }),
-    ),
+    ...[...evals.entries()].flatMap(([name, tasks]) => [
+      ...namingProblems({ declared: declared.get(name), name, tasks }),
+      ...suffixProblems({ name, tasks }),
+    ]),
   ];
 };
 

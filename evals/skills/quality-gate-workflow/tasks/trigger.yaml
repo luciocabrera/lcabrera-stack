@@ -3,7 +3,7 @@ name: Validating a finished change
 tags:
   - positive-trigger
 inputs:
-  prompt: "I just finished changing the Table's sort selector in packages/ui. Validate the change before I open a PR. Load any skill you need, but don't run shell commands or edit files; tell me what you would do first."
+  prompt: "I just finished changing the Table's sort selector in packages/ui. Validate the change before I open a PR. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
 expected:
   should_trigger: true
 graders:

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   chunk,
   coverageProblems,
+  PROMPT_SUFFIX,
   isPathScoped,
   selectedSkills,
   selectionProblems,
@@ -73,9 +74,10 @@ describe('withoutSeparator', () => {
 });
 
 describe('coverageProblems', () => {
+  const prompt = `Do it. ${PROMPT_SUFFIX}`;
   const graded = (name, extra = {}) => [
-    { graderSkills: [name], id: 'trigger', ...extra },
-    { graderSkills: [name], id: 'near-miss', ...extra },
+    { graderSkills: [name], id: 'trigger', prompt, ...extra },
+    { graderSkills: [name], id: 'near-miss', prompt, ...extra },
   ];
   const declaredAs = (...names) => new Map(names.map((name) => [name, name]));
 
@@ -105,12 +107,12 @@ describe('coverageProblems', () => {
         ],
         declared: declaredAs('b', 'c'),
         evals: new Map([
-          ['b', [{ graderSkills: ['b'], id: 'trigger' }]],
+          ['b', [{ graderSkills: ['b'], id: 'trigger', prompt }]],
           [
             'c',
             [
-              { fixture: 'f', graderSkills: ['c'], id: 'trigger' },
-              { graderSkills: ['c'], id: 'near-miss' },
+              { fixture: 'f', graderSkills: ['c'], id: 'trigger', prompt },
+              { graderSkills: ['c'], id: 'near-miss', prompt },
             ],
           ],
         ]),
@@ -143,8 +145,8 @@ describe('coverageProblems', () => {
           [
             'foo',
             [
-              { graderSkills: ['releasing'], id: 'trigger' },
-              { graderSkills: [], id: 'near-miss' },
+              { graderSkills: ['releasing'], id: 'trigger', prompt },
+              { graderSkills: [], id: 'near-miss', prompt },
             ],
           ],
         ]),
@@ -153,6 +155,30 @@ describe('coverageProblems', () => {
       'evals/skills/foo/eval.yaml names skill "releasing", not "foo"',
       'foo/trigger grades "releasing", not "foo"',
       'foo/near-miss has no grader naming a skill',
+    ]);
+  });
+
+  it('names a task whose prompt dropped the sentence that lets it load a skill', () => {
+    expect(
+      coverageProblems({
+        catalog: [{ name: 'a', scoped: false }],
+        declared: declaredAs('a'),
+        evals: new Map([
+          [
+            'a',
+            [
+              {
+                graderSkills: ['a'],
+                id: 'trigger',
+                prompt: 'Do it. Do not run anything.',
+              },
+              { graderSkills: ['a'], id: 'near-miss', prompt },
+            ],
+          ],
+        ]),
+      }),
+    ).toStrictEqual([
+      `a/trigger does not end its prompt with "${PROMPT_SUFFIX}"`,
     ]);
   });
 });
