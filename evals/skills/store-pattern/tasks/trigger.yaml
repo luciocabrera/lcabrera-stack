@@ -3,7 +3,9 @@ name: Designing state for a stateful grid
 tags:
   - positive-trigger
 inputs:
-  prompt: "I am building a new stateful grid component that needs granular subscriptions and stable performance. Set up its state architecture; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+  prompt: "Read src/contexts/GridContext.tsx. I am turning it into a stateful grid that needs granular subscriptions and stable performance; set up its state architecture and tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: grid
 expected:
   should_trigger: true
 graders:

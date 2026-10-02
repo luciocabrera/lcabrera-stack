@@ -1,9 +1,11 @@
 id: near-miss
-name: Explaining useState
+name: Naming a file's export
 tags:
   - negative-trigger
 inputs:
-  prompt: "What does React's useState hook return? One sentence. Load any skill you need, but don't run shell commands or edit files."
+  prompt: "Read src/contexts/GridContext.tsx and tell me only the name of the context it exports. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: grid
 expected:
   should_trigger: false
 graders:

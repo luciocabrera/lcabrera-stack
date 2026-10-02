@@ -1,0 +1,24 @@
+import { useEffect, useState } from 'react';
+
+type Order = { readonly id: string; readonly total: number };
+
+export default function Orders() {
+  const [orders, setOrders] = useState<readonly Order[]>([]);
+
+  useEffect(() => {
+    fetch('/api/orders')
+      .then((response) => response.json())
+      .then(setOrders);
+  }, []);
+
+  return (
+    <form method='post'>
+      <ul>
+        {orders.map((order) => (
+          <li key={order.id}>{order.total}</li>
+        ))}
+      </ul>
+      <button type='submit'>Add order</button>
+    </form>
+  );
+}

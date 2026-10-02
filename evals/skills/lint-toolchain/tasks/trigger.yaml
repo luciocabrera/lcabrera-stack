@@ -3,7 +3,9 @@ name: Debugging a silent lint rule
 tags:
   - positive-trigger
 inputs:
-  prompt: "A new Oxlint rule I added to the root vite.config.ts reports nothing, even on a file I know violates it. Help me find out why; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+  prompt: "Read vite.config.ts. The unicorn/no-array-for-each rule I added there reports nothing, even on a file I know violates it. Help me find out why; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: config
 expected:
   should_trigger: true
 graders:

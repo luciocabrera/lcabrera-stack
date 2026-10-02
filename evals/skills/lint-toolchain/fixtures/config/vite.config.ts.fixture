@@ -1,0 +1,10 @@
+import { defineConfig } from 'vite-plus';
+
+export default defineConfig({
+  lint: {
+    categories: { correctness: 'error' },
+    plugins: ['typescript', 'unicorn'],
+    rules: { 'unicorn/no-array-for-each': 'error' },
+  },
+  server: { port: 5173 },
+});

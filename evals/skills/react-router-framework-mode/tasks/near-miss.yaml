@@ -1,9 +1,11 @@
 id: near-miss
-name: Explaining URL encoding
+name: Listing a route's imports
 tags:
   - negative-trigger
 inputs:
-  prompt: "What does encodeURIComponent do differently from encodeURI? Two sentences. Load any skill you need, but don't run shell commands or edit files."
+  prompt: "Read app/routes/orders.tsx and tell me only which packages it imports. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: route
 expected:
   should_trigger: false
 graders:

@@ -1,9 +1,11 @@
 id: near-miss
-name: Defining an ESLint rule
+name: Reading the dev-server port
 tags:
   - negative-trigger
 inputs:
-  prompt: "In general, what does the ESLint rule no-unused-vars flag? One sentence. Load any skill you need, but don't run shell commands or edit files."
+  prompt: "Read vite.config.ts and tell me only which port the dev server uses. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: config
 expected:
   should_trigger: false
 graders:

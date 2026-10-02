@@ -1,9 +1,11 @@
 id: near-miss
-name: Explaining a DOM API
+name: Counting a component's lines
 tags:
   - negative-trigger
 inputs:
-  prompt: "How does the browser History API's pushState work? Two sentences. Load any skill you need, but don't run shell commands or edit files."
+  prompt: "Read src/NewsletterForm.tsx and tell me only how many lines it has. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: form
 expected:
   should_trigger: false
 graders:
