@@ -76,6 +76,36 @@ jobs:
   skill-triggers:
     name: Skill triggers (Claude)
     if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
+        with:
+          cache: false
+          run-install: false
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Trigger and near-miss tasks
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: vp run evals:skills
+
+      - name: Upload transcripts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: skill-trigger-transcripts
+          path: .tmp/skill-evals/
+          if-no-files-found: ignore
+          retention-days: 7
+
   verifier-fixtures:
     name: Verifier fixtures (Claude, advisory)
     if: >-
@@ -88,8 +118,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Setup Vite+
         with:
           fetch-depth: 0
 
@@ -115,19 +143,6 @@ jobs:
           run-install: false
 
       - name: Install dependencies
-        run: vp install --frozen-lockfile --ignore-scripts && vp config
-
-      - name: Trigger and near-miss tasks
-        env:
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: vp run evals:skills
-
-      - name: Upload transcripts
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: skill-trigger-transcripts
-          path: .tmp/skill-evals/
         if: steps.scope.outputs.run == 'true'
         run: vp install --frozen-lockfile --ignore-scripts && vp config
 
