@@ -50,13 +50,20 @@ jobs:
           chmod +x "$RUNNER_TEMP/waza/waza"
           echo "$RUNNER_TEMP/waza" >> "$GITHUB_PATH"
 
-      - name: Skill frontmatter parses
+      - name: Skills parse and have trigger evals
         run: |
           checked=0
           status=0
           for skill in .github/skills/*/; do
             [ -f "${skill}SKILL.md" ] || continue
             checked=$((checked + 1))
+            name=$(basename "$skill")
+            for task in eval.yaml tasks/trigger.yaml tasks/near-miss.yaml; do
+              if [ ! -f "evals/skills/$name/$task" ]; then
+                echo "::error file=${skill}SKILL.md::evals/skills/$name/$task is missing"
+                status=1
+              fi
+            done
             if ! report=$(waza check "$skill" --no-update-check 2>&1); then
               echo "::error file=${skill}SKILL.md::waza check could not parse this skill"
               echo "$report"

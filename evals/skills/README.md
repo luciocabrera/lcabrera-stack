@@ -87,7 +87,8 @@ a trigger test passes whatever the description says.
 
 The **Agent Evals (deterministic)** job in
 [`agent-evals.yml`](../../.github/workflows/agent-evals.yml) runs `waza check` on
-every skill, on every pull request. It installs Waza v0.38.7 and checks the
+every skill, on every pull request, and fails a skill under `.github/skills/`
+that has no `eval.yaml`, `tasks/trigger.yaml` or `tasks/near-miss.yaml` here. It installs Waza v0.38.7 and checks the
 binary against a SHA-256 pinned in the workflow. The step fails only when a
 `SKILL.md`'s frontmatter does not parse. Its token budget, unknown fields and
 link-scope reports are advisory, because they are this repository's
