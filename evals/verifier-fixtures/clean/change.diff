@@ -1,0 +1,80 @@
+diff --git a/docs/decisions/ADR-130-reject-inverted-bounds-in-clamp-number.md b/docs/decisions/ADR-130-reject-inverted-bounds-in-clamp-number.md
+new file mode 100644
+index 0000000..f5ff6dd
+--- /dev/null
++++ b/docs/decisions/ADR-130-reject-inverted-bounds-in-clamp-number.md
+@@ -0,0 +1,26 @@
++---
++governs:
++  - utils
++---
++
++# ADR-130 — Reject inverted bounds in clampNumber instead of swapping them
++
++**Status:** Accepted
++
++## Context
++
++`clampNumber` takes `min` and `max` from callers that compute them. A caller
++can pass them inverted, and the function has to do something with that input.
++
++## Decision
++
++It throws a `RangeError` that names both values.
++
++## Consequences
++
++A caller that can produce inverted bounds orders them before calling.
++
++## Alternatives considered
++
++Swapping the bounds. It returns a value inside a range nobody asked for and
++hides the caller's bug, so it was rejected.
+diff --git a/packages/utils/src/numbers/clamp-number.util.test.ts b/packages/utils/src/numbers/clamp-number.util.test.ts
+new file mode 100644
+index 0000000..d7c8af5
+--- /dev/null
++++ b/packages/utils/src/numbers/clamp-number.util.test.ts
+@@ -0,0 +1,23 @@
++import { describe, expect, it } from 'vite-plus/test';
++
++import { clampNumber } from './clamp-number.util';
++
++describe('clampNumber', () => {
++  it('returns min when the value is below it', () => {
++    expect(clampNumber({ max: 10, min: 0, value: -5 })).toBe(0);
++  });
++
++  it('returns max when the value is above it', () => {
++    expect(clampNumber({ max: 10, min: 0, value: 15 })).toBe(10);
++  });
++
++  it('returns the value when it is within the bounds', () => {
++    expect(clampNumber({ max: 10, min: 0, value: 7 })).toBe(7);
++  });
++
++  it('throws a RangeError when min is greater than max', () => {
++    expect(() => clampNumber({ max: 0, min: 10, value: 5 })).toThrow(
++      RangeError,
++    );
++  });
++});
+diff --git a/packages/utils/src/numbers/clamp-number.util.ts b/packages/utils/src/numbers/clamp-number.util.ts
+new file mode 100644
+index 0000000..43836ec
+--- /dev/null
++++ b/packages/utils/src/numbers/clamp-number.util.ts
+@@ -0,0 +1,13 @@
++type ClampNumberArgs = {
++  readonly max: number;
++  readonly min: number;
++  readonly value: number;
++};
++
++export const clampNumber = ({ max, min, value }: ClampNumberArgs) => {
++  if (min > max) {
++    throw new RangeError(`min (${min}) is greater than max (${max})`);
++  }
++
++  return Math.min(Math.max(value, min), max);
++};

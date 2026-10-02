@@ -1,0 +1,7 @@
+{
+  "clean": [],
+  "suppressed-lint": [3],
+  "missing-test": [2],
+  "missing-adr": [5],
+  "rules-violation": [4]
+}
