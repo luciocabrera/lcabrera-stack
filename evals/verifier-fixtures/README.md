@@ -66,3 +66,12 @@ could not check, and does not count as a finding.
 3. Run the suite. Then prove the fixture can fail: add a sentence to the
    verifier prompt that excuses exactly that violation, run again, and confirm
    only that fixture fails. Revert the prompt.
+
+## What CI runs
+
+The **Verifier fixtures (Claude, advisory)** job in
+[`agent-evals.yml`](../../.github/workflows/agent-evals.yml) runs the suite on
+`workflow_dispatch`, and on a same-repository pull request that touches the
+verifier prompt, the contract or this directory, on `CLAUDE_CODE_OAUTH_TOKEN`.
+It uploads the reports. It is not a required check: a red run is a reason to
+read the reports before merging, and a spent usage limit cannot stall a merge.

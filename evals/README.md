@@ -12,6 +12,7 @@ suites' own tests.
 | ---------------------------------------- | --------------------------- | ------------- |
 | [Rules consistency](./rules-consistency) | `vp run evals:rules:verify` | no            |
 | [Skill triggers](./skills)               | `vp run evals:skills`       | yes           |
+| [Verifier fixtures](./verifier-fixtures) | `vp run evals:verifier`     | yes           |
 | The suites' own tests                    | `vp run test:evals`         | no            |
 
 ## Rules consistency
