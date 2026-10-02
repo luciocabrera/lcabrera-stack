@@ -21,6 +21,8 @@ import {
   describeJudgement,
   judgeFixture,
   renderDispatch,
+  runCount,
+  withoutSeparator,
 } from './verifier-fixtures.mjs';
 
 const MODEL = 'claude-opus-5-5';
@@ -69,9 +71,10 @@ const runFixture = async ({ expectedNotMet, fixture, runs, shared }) => {
 
 const main = async () => {
   const { values } = parseArgs({
+    args: withoutSeparator(process.argv.slice(2)),
     options: { runs: { default: '2', type: 'string' } },
   });
-  const runs = Number(values.runs);
+  const runs = runCount(values.runs);
   const shared = {
     contract: read('../../docs/agents/refactor-verified-contract.md'),
     issue: read('./issue.md'),

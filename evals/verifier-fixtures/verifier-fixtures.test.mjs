@@ -6,7 +6,9 @@ import {
   describeJudgement,
   judgeFixture,
   renderDispatch,
+  runCount,
   verdictOf,
+  withoutSeparator,
 } from './verifier-fixtures.mjs';
 
 const report = (verdict, rows) =>
@@ -140,5 +142,23 @@ describe('judgeFixture', () => {
     });
     expect(judgement.stable).toBe(false);
     expect(describeJudgement(judgement)).toContain('runs disagree');
+  });
+});
+
+describe('arguments', () => {
+  it('drops the -- that vp run passes through', () => {
+    expect(withoutSeparator(['--', '--runs', '3'])).toStrictEqual([
+      '--runs',
+      '3',
+    ]);
+    expect(withoutSeparator(['--runs', '3'])).toStrictEqual(['--runs', '3']);
+  });
+
+  it('refuses a run count that would judge nothing', () => {
+    expect(runCount('2')).toBe(2);
+    expect(() => runCount('0')).toThrow(
+      '--runs must be a whole number of at least 1, got "0"',
+    );
+    expect(() => runCount('two')).toThrow('got "two"');
   });
 });

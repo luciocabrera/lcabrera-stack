@@ -82,3 +82,16 @@ export const describeJudgement = ({
   const status = problems.length === 0 ? 'ok' : `FAIL (${problems.join('; ')})`;
   return `${fixture}: ${runs.map(describeRun).join(' | ')} -> ${status}`;
 };
+
+export const withoutSeparator = (args) =>
+  args[0] === '--' ? args.slice(1) : args;
+
+export const runCount = (value) => {
+  const runs = Number(value);
+  if (!Number.isInteger(runs) || runs < 1) {
+    throw new Error(
+      `--runs must be a whole number of at least 1, got "${value}"`,
+    );
+  }
+  return runs;
+};
