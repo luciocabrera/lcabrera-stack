@@ -16,8 +16,8 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
-  rules-consistency:
-    name: Rules Consistency
+  deterministic:
+    name: Agent Evals (deterministic)
     runs-on: ubuntu-latest
     permissions:
       contents: read
