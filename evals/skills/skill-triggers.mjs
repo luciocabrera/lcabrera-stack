@@ -125,6 +125,22 @@ export const sessionScope = ({ catalog, hidden, task }) => ({
   tools: task.fixture === undefined ? ['Skill'] : ['Read', 'Skill'],
 });
 
+const sorted = (names) => [...names].toSorted((a, b) => a.localeCompare(b));
+
+export const scopeError = ({ expectedTools, messages }) => {
+  const init = messages.find(
+    (message) => message.type === 'system' && message.subtype === 'init',
+  );
+  if (init === undefined) {
+    return 'the session reported no tools';
+  }
+  const actual = sorted(init.tools ?? []);
+  const expected = sorted(expectedTools);
+  return actual.join(',') === expected.join(',')
+    ? undefined
+    : `the session held ${actual.join(', ') || 'no tools'}, not ${expected.join(', ')}`;
+};
+
 export const judgeTask = ({ invoked, shouldTrigger, skill }) =>
   invoked.includes(skill) === shouldTrigger;
 

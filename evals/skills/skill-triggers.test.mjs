@@ -8,6 +8,7 @@ import {
   judgeTask,
   readPaths,
   readTask,
+  scopeError,
   sessionError,
   sessionScope,
   taskPassed,
@@ -259,6 +260,34 @@ describe('sessionError', () => {
   it('reports a session that never produced a result', () => {
     expect(sessionError([{ type: 'assistant' }])).toBe(
       'the session ended without a result',
+    );
+  });
+});
+
+describe('scopeError', () => {
+  const init = (tools) => [{ subtype: 'init', tools, type: 'system' }];
+
+  it('accepts a session that holds exactly the requested tools', () => {
+    expect(
+      scopeError({
+        expectedTools: ['Read', 'Skill'],
+        messages: init(['Skill', 'Read']),
+      }),
+    ).toBeUndefined();
+  });
+
+  it('names the tools when an option was ignored and the session holds more', () => {
+    expect(
+      scopeError({
+        expectedTools: ['Skill'],
+        messages: init(['Bash', 'Skill', 'Write']),
+      }),
+    ).toBe('the session held Bash, Skill, Write, not Skill');
+  });
+
+  it('fails a session that never reported its tools', () => {
+    expect(scopeError({ expectedTools: ['Skill'], messages: [] })).toBe(
+      'the session reported no tools',
     );
   });
 });

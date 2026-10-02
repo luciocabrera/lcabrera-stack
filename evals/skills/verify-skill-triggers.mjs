@@ -40,6 +40,7 @@ import {
   isPathScoped,
   readPaths,
   readTask,
+  scopeError,
   selectedSkills,
   sessionError,
   sessionScope,
@@ -115,9 +116,10 @@ const drain = async (session) => {
 
 const attemptTask = async ({ hidden, model, skill, task }) => {
   const { cwd, fixtureFiles } = workspaceFor({ skill, task });
+  const scope = sessionScope({ catalog: catalog(), hidden, task });
   const session = query({
     options: {
-      ...sessionScope({ catalog: catalog(), hidden, task }),
+      ...scope,
       cwd,
       maxTurns: 8,
       mcpServers: {},
@@ -128,7 +130,10 @@ const attemptTask = async ({ hidden, model, skill, task }) => {
     },
     prompt: task.prompt,
   });
-  const { error, messages } = await drain(session);
+  const drained = await drain(session);
+  const { messages } = drained;
+  const error =
+    drained.error ?? scopeError({ expectedTools: scope.tools, messages });
   writeFileSync(
     join(REPORT_DIR, `${skill}-${task.id}.json`),
     JSON.stringify(messages, null, 2),

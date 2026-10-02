@@ -26,7 +26,9 @@ It needs a Claude login, or `CLAUDE_CODE_OAUTH_TOKEN`. Each task runs in a fresh
 temporary directory whose `.claude/skills` links to `.github/skills`, so the
 session sees the whole catalog, plus the skills Claude Code ships with, and
 nothing else. It loads no CLAUDE.md, hooks or MCP servers, and has one tool:
-`Skill`, plus `Read` when the task copies in a fixture. A task passes on the
+`Skill`, plus `Read` when the task copies in a fixture. A task fails unless the session's
+own `init` message lists exactly those tools, so an option the SDK ignored cannot
+pass as a restricted session. A task passes on the
 session's `Skill` tool calls, not on its reply. Transcripts go to
 `.tmp/skill-evals/`.
 
