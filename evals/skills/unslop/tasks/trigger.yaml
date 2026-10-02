@@ -3,7 +3,7 @@ name: De-AI a paragraph
 tags:
   - positive-trigger
 inputs:
-  prompt: "Unslop this paragraph: 'In today's fast-paced world, our robust solution seamlessly empowers teams to unlock their full potential.'"
+  prompt: "Unslop this paragraph: 'In today's fast-paced world, our robust solution seamlessly empowers teams to unlock their full potential.' Load any skill you need, but don't run shell commands or edit files."
 expected:
   should_trigger: true
 graders:
