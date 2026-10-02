@@ -2,7 +2,7 @@
 id: skill-evals-waza
 title: test(evals): Waza trigger evals for the skills
 owner: agent:claude
-status: active
+status: review
 branch: test/1244-skill-evals-waza
 area:
   - evals/skills/**
@@ -17,7 +17,7 @@ area:
 started: 2026-10-02
 updated: 2026-10-02
 plan: (none)
-pr: (none)
+pr: '#1245'
 issue: #1244
 ---
 
@@ -27,6 +27,6 @@ test(evals): Waza trigger evals for the skills
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: review threads answered; merges once none is open
 - Blockers: none
-- Next:
+- Next: after the merge, a manual dispatch of the Skill triggers (Claude) job on main

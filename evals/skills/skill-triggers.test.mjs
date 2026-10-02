@@ -370,3 +370,18 @@ describe('withoutSeparator', () => {
     ]);
   });
 });
+
+describe('coverageProblems, the other direction', () => {
+  it('names an eval whose skill is gone', () => {
+    expect(
+      coverageProblems({
+        catalog: [],
+        evals: new Map([
+          ['renamed-away', [{ id: 'trigger' }, { id: 'near-miss' }]],
+        ]),
+      }),
+    ).toStrictEqual([
+      'evals/skills/renamed-away has no skill under .github/skills/',
+    ]);
+  });
+});

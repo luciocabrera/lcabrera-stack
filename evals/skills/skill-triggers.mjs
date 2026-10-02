@@ -78,9 +78,9 @@ const skillCoverageProblems = ({ name, scoped, tasks }) => {
   if (tasks === undefined) {
     return [`${name} has no eval under evals/skills/`];
   }
-  const ids = tasks.map((task) => task.id);
+  const ids = new Set(tasks.map((task) => task.id));
   return [
-    ...REQUIRED_TASKS.filter((id) => !ids.includes(id)).map(
+    ...REQUIRED_TASKS.filter((id) => !ids.has(id)).map(
       (id) => `${name} has no ${id} task`,
     ),
     ...(scoped
@@ -94,10 +94,17 @@ const skillCoverageProblems = ({ name, scoped, tasks }) => {
   ];
 };
 
-export const coverageProblems = ({ catalog, evals }) =>
-  catalog.flatMap(({ name, scoped }) =>
-    skillCoverageProblems({ name, scoped, tasks: evals.get(name) }),
-  );
+export const coverageProblems = ({ catalog, evals }) => {
+  const skills = new Set(catalog.map(({ name }) => name));
+  return [
+    ...catalog.flatMap(({ name, scoped }) =>
+      skillCoverageProblems({ name, scoped, tasks: evals.get(name) }),
+    ),
+    ...[...evals.keys()]
+      .filter((name) => !skills.has(name))
+      .map((name) => `evals/skills/${name} has no skill under .github/skills/`),
+  ];
+};
 
 export const withoutSeparator = (args) =>
   args[0] === '--' ? args.slice(1) : args;
