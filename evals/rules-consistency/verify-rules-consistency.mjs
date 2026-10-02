@@ -8,9 +8,10 @@
  * Usage (from the repo root): vp run evals:rules:verify
  * Exit codes: 0 = consistent, 1 = at least one finding (all are listed).
  */
-import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { runGit } from '../../packages/repo-standards/scripts/git-exec.mjs';
 
 import {
   coverage,
@@ -38,10 +39,17 @@ const readRules = (repoRoot) =>
       };
     });
 
-const trackedFiles = (repoRoot) =>
-  execFileSync('git', ['ls-files', '-z'], { cwd: repoRoot, encoding: 'utf8' })
+const trackedFiles = (repoRoot) => {
+  const files = (runGit({ args: ['ls-files', '-z'], cwd: repoRoot }) ?? '')
     .split('\0')
     .filter(Boolean);
+  if (files.length === 0) {
+    throw new Error(
+      '`git ls-files` listed no tracked files. Refusing to report a clean pass on no data.',
+    );
+  }
+  return files;
+};
 
 const describeOverlap = ({ first, second, shared }) =>
   `  ${first} + ${second}: ${shared.length} file(s), e.g. ${shared.slice(0, SAMPLE_SIZE).join(', ')}`;
