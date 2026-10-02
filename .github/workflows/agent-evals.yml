@@ -127,9 +127,17 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [ "$EVENT_NAME" = workflow_dispatch ] ||
-            git diff --name-only "origin/$BASE_REF...HEAD" |
-              grep -qE '^(\.claude/agents/refactor-verifier\.md|docs/agents/refactor-verified-contract\.md|evals/verifier-fixtures/)'; then
+          if [ "$EVENT_NAME" = workflow_dispatch ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! CHANGED="$(git diff --name-only "origin/$BASE_REF...HEAD" 2>/dev/null)"; then
+            echo "::notice::Diff range origin/$BASE_REF...HEAD unresolvable, so running the fixtures."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if printf '%s\n' "$CHANGED" |
+            grep -qE '^(\.claude/agents/refactor-verifier\.md|docs/agents/refactor-verified-contract\.md|evals/verifier-fixtures/)'; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"

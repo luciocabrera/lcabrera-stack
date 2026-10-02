@@ -50,12 +50,14 @@ const sameNumbers = (a, b) => a.join(',') === b.join(',');
 
 const toolsProblem = (init) => {
   if (init === undefined) {
-    return 'the session reported no tools';
+    return 'the session never reported its tools';
   }
-  const tools = init.tools ?? [];
-  return tools.length === 0
+  if (!Array.isArray(init.tools)) {
+    return 'the session reported no tool list';
+  }
+  return init.tools.length === 0
     ? undefined
-    : `the session held ${tools.join(', ')}`;
+    : `the session held ${init.tools.join(', ')}`;
 };
 
 export const finalResult = (messages) =>

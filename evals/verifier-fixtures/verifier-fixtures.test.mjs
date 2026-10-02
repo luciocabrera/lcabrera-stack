@@ -229,6 +229,11 @@ describe('sessionProblem', () => {
       ]),
     ).toBe('the session ended with error_max_turns');
     expect(sessionProblem([init([])])).toBe('the session ended with no result');
-    expect(sessionProblem([success])).toBe('the session reported no tools');
+    expect(sessionProblem([success])).toBe(
+      'the session never reported its tools',
+    );
+    expect(sessionProblem([{ subtype: 'init', type: 'system' }, success])).toBe(
+      'the session reported no tool list',
+    );
   });
 });
