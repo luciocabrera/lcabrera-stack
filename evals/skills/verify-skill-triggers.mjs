@@ -7,6 +7,8 @@
  *
  * Usage (from the repo root): vp run evals:skills [-- <skill> ...] [--model <id>]
  *   [--hide <skill>]  leave a skill out of the session, to prove its trigger task can fail
+ *   [--check]         only check coverage, with no model call: every skill has both
+ *                     tasks, and a skill with a paths: list names a fixture in each
  * Needs a Claude login, or CLAUDE_CODE_OAUTH_TOKEN in CI.
  * Exit codes: 0 = every task passed, 1 = otherwise.
  */
@@ -30,16 +32,19 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import {
   chunk,
+  coverageProblems,
   describeResult,
   errorText,
   fixtureWasRead,
   invokedSkills,
+  isPathScoped,
   readPaths,
   readTask,
   selectedSkills,
   sessionError,
   sessionScope,
   taskPassed,
+  withoutSeparator,
 } from './skill-triggers.mjs';
 
 const EVALS_ROOT = 'evals/skills';
@@ -144,6 +149,17 @@ const attemptTask = async ({ hidden, model, skill, task }) => {
   };
 };
 
+const coverage = () =>
+  coverageProblems({
+    catalog: catalog().map((name) => ({
+      name,
+      scoped: isPathScoped(
+        readFileSync(join(SKILLS_ROOT, name, 'SKILL.md'), 'utf8'),
+      ),
+    })),
+    evals: new Map(evalDirectories().map((name) => [name, tasksOf(name)])),
+  });
+
 const runTask = (args) =>
   attemptTask(args).catch((error) => ({
     error: errorText(error),
@@ -162,14 +178,14 @@ const runBatches = async ([batch, ...rest]) =>
         ...(await runBatches(rest)),
       ];
 
-const main = async () => {
-  const { positionals, values } = parseArgs({
-    allowPositionals: true,
-    options: {
-      hide: { default: [], multiple: true, type: 'string' },
-      model: { default: 'claude-opus-5-5', type: 'string' },
-    },
-  });
+const assertCoverage = () => {
+  const gaps = coverage();
+  if (gaps.length > 0) {
+    throw new Error(gaps.join('\n'));
+  }
+};
+
+const runSelection = async ({ positionals, values }) => {
   const selected = selectedSkills({
     catalog: catalog(),
     evals: evalDirectories(),
@@ -192,6 +208,24 @@ const main = async () => {
   if (results.some(({ passed }) => !passed)) {
     process.exitCode = 1;
   }
+};
+
+const main = async () => {
+  const parsed = parseArgs({
+    allowPositionals: true,
+    args: withoutSeparator(process.argv.slice(2)),
+    options: {
+      check: { default: false, type: 'boolean' },
+      hide: { default: [], multiple: true, type: 'string' },
+      model: { default: 'claude-opus-5-5', type: 'string' },
+    },
+  });
+  assertCoverage();
+  if (parsed.values.check) {
+    console.log(`Coverage passed for ${catalog().length} skill(s).`);
+    return;
+  }
+  await runSelection(parsed);
 };
 
 try {

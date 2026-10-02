@@ -67,6 +67,41 @@ export const selectedSkills = ({ catalog, evals, hidden, requested }) => {
   return requested.length === 0 ? evals : requested;
 };
 
+const PATHS_KEY = /^paths:/m;
+
+export const isPathScoped = (skillSource) =>
+  PATHS_KEY.test(/^---\r?\n([\s\S]*?)\r?\n---/.exec(skillSource)?.[1] ?? '');
+
+const REQUIRED_TASKS = ['trigger', 'near-miss'];
+
+const skillCoverageProblems = ({ name, scoped, tasks }) => {
+  if (tasks === undefined) {
+    return [`${name} has no eval under evals/skills/`];
+  }
+  const ids = tasks.map((task) => task.id);
+  return [
+    ...REQUIRED_TASKS.filter((id) => !ids.includes(id)).map(
+      (id) => `${name} has no ${id} task`,
+    ),
+    ...(scoped
+      ? tasks
+          .filter((task) => task.fixture === undefined)
+          .map(
+            (task) =>
+              `${name}/${task.id} names no fixture, but ${name} has a paths: list, so it is offered only after a matching file is read`,
+          )
+      : []),
+  ];
+};
+
+export const coverageProblems = ({ catalog, evals }) =>
+  catalog.flatMap(({ name, scoped }) =>
+    skillCoverageProblems({ name, scoped, tasks: evals.get(name) }),
+  );
+
+export const withoutSeparator = (args) =>
+  args[0] === '--' ? args.slice(1) : args;
+
 export const chunk = (items, size) =>
   Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
     items.slice(index * size, (index + 1) * size),

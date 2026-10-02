@@ -1,5 +1,5 @@
 name: react-router-framework-mode-trigger
-description: Does react-router-framework-mode load for loaders and actions, and stay out of a browser API question?
+description: Does react-router-framework-mode load for a route's loader and action, and stay out of listing the same route's imports?
 skill: react-router-framework-mode
 version: '1.0'
 config:

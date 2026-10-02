@@ -1,5 +1,5 @@
 name: store-pattern-trigger
-description: Does store-pattern load for a stateful grid's state architecture, and stay out of a useState question?
+description: Does store-pattern load for a stateful grid's state architecture, and stay out of naming the same file's export?
 skill: store-pattern
 version: '1.0'
 config:

@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   chunk,
+  coverageProblems,
   describeResult,
   errorText,
   fixtureWasRead,
   invokedSkills,
+  isPathScoped,
   judgeTask,
   readPaths,
   readTask,
@@ -14,6 +16,7 @@ import {
   sessionError,
   sessionScope,
   taskPassed,
+  withoutSeparator,
 } from './skill-triggers.mjs';
 
 const assistant = (...content) => ({ message: { content }, type: 'assistant' });
@@ -306,5 +309,64 @@ describe('sessionError', () => {
     expect(sessionError([{ type: 'assistant' }])).toBe(
       'the session ended without a result',
     );
+  });
+});
+
+describe('isPathScoped', () => {
+  it('reads a paths: key in the frontmatter only', () => {
+    expect(isPathScoped("---\nname: a\npaths: ['**/*.tsx']\n---\nbody")).toBe(
+      true,
+    );
+    expect(isPathScoped('---\nname: a\n---\npaths: in the body\n')).toBe(false);
+  });
+});
+
+describe('coverageProblems', () => {
+  const both = [{ id: 'trigger' }, { id: 'near-miss' }];
+
+  it('passes a skill with both tasks, and a scoped skill whose tasks name a fixture', () => {
+    expect(
+      coverageProblems({
+        catalog: [
+          { name: 'a', scoped: false },
+          { name: 'b', scoped: true },
+        ],
+        evals: new Map([
+          ['a', both],
+          ['b', both.map((task) => ({ ...task, fixture: 'f' }))],
+        ]),
+      }),
+    ).toStrictEqual([]);
+  });
+
+  it('names a missing eval, a missing task, and a scoped task with no fixture', () => {
+    expect(
+      coverageProblems({
+        catalog: [
+          { name: 'a', scoped: false },
+          { name: 'b', scoped: false },
+          { name: 'c', scoped: true },
+        ],
+        evals: new Map([
+          ['b', [{ id: 'trigger' }]],
+          ['c', [{ fixture: 'f', id: 'trigger' }, { id: 'near-miss' }]],
+        ]),
+      }),
+    ).toStrictEqual([
+      'a has no eval under evals/skills/',
+      'b has no near-miss task',
+      'c/near-miss names no fixture, but c has a paths: list, so it is offered only after a matching file is read',
+    ]);
+  });
+});
+
+describe('withoutSeparator', () => {
+  it('drops the -- that vp run passes through, and nothing else', () => {
+    expect(withoutSeparator(['--', '--check'])).toStrictEqual(['--check']);
+    expect(withoutSeparator(['epic', '--hide', 'epic'])).toStrictEqual([
+      'epic',
+      '--hide',
+      'epic',
+    ]);
   });
 });

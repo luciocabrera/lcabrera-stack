@@ -1,5 +1,5 @@
 name: react-19-trigger
-description: Does react-19 load when writing a React component, and stay out of a browser API question?
+description: Does react-19 load when moving a component's form to an action, and stay out of counting the same file's lines?
 skill: react-19
 version: '1.0'
 config:
