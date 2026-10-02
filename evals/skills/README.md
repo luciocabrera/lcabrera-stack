@@ -52,9 +52,12 @@ waza run commit-and-pr/eval.yaml
 ```
 
 This spends premium requests on the Copilot account you are signed in with. Use
-Waza v0.38.7: v0.38.8 passes `--model` to a bundled runtime that rejects it
-([microsoft/waza#630](https://github.com/microsoft/waza/issues/630)). Install it
-from the release page with its `checksums.txt`, and name the tag.
+the version the **Install Waza** step in
+[`agent-evals.yml`](../../.github/workflows/agent-evals.yml) pins (`WAZA_TAG`),
+installed from its release page and checked against the SHA-256 that step
+pins. The latest release is not always usable: one passed `--model` to a
+bundled runtime that rejects it
+([microsoft/waza#630](https://github.com/microsoft/waza/issues/630)).
 
 Waza starts the agent in a temporary directory, but the agent has a shell and
 your credentials, and nothing stops it from `cd`-ing into this checkout. Every
@@ -90,14 +93,16 @@ a trigger test passes whatever the description says.
 
 The **Agent Evals (deterministic)** job in
 [`agent-evals.yml`](../../.github/workflows/agent-evals.yml) runs `waza check` on
-every skill, on every pull request, and `vp run evals:skills -- --check`, which
-makes no model call. That fails a skill under `.github/skills/` with no trigger
-or near-miss task here, and a skill with a `paths:` list whose tasks name no
-fixture. It installs Waza v0.38.7 and checks the
-binary against a SHA-256 pinned in the workflow. The step fails only when a
-`SKILL.md`'s frontmatter does not parse. Its token budget, unknown fields and
-link-scope reports are advisory, because they are this repository's
-conventions, not defects.
+every skill, on every pull request, using the version and SHA-256 its **Install
+Waza** step pins. That step fails only when a `SKILL.md`'s frontmatter does not
+parse; its token budget, unknown fields and link-scope reports are advisory,
+because they are this repository's conventions, not defects.
+
+The same job runs `vp run evals:skills -- --check`, which makes no model call.
+It fails a skill under `.github/skills/` with no trigger or near-miss task here,
+an eval whose skill is gone, an eval or grader that names a different skill
+than its directory, a task whose prompt does not end with the sentence above,
+and a skill with a `paths:` list whose tasks name no fixture.
 
 The **Skill triggers (Claude)** job runs `vp run evals:skills` on
 `workflow_dispatch` only, on `CLAUDE_CODE_OAUTH_TOKEN`, and uploads the
