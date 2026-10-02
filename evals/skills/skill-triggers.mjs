@@ -99,7 +99,7 @@ const seenOf = (invoked) =>
 
 const failureOf = ({ error, fixtureRead }) => {
   if (error !== undefined) {
-    return `; session error: ${error}`;
+    return `; error: ${error}`;
   }
   return fixtureRead ? '' : '; the session never read the fixture';
 };

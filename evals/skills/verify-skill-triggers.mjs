@@ -108,7 +108,7 @@ const drain = async (session) => {
   }
 };
 
-const runTask = async ({ hidden, model, skill, task }) => {
+const attemptTask = async ({ hidden, model, skill, task }) => {
   const { cwd, fixtureFiles } = workspaceFor({ skill, task });
   const session = query({
     options: {
@@ -143,6 +143,16 @@ const runTask = async ({ hidden, model, skill, task }) => {
     task,
   };
 };
+
+const runTask = (args) =>
+  attemptTask(args).catch((error) => ({
+    error: errorText(error),
+    fixtureRead: true,
+    invoked: [],
+    passed: false,
+    skill: args.skill,
+    task: args.task,
+  }));
 
 const runBatches = async ([batch, ...rest]) =>
   batch === undefined

@@ -109,7 +109,7 @@ describe('describeResult', () => {
         task: { id: 'near-miss', shouldTrigger: false },
       }),
     ).toBe(
-      'FAIL epic/near-miss: should not load; invoked no skill; session error: Reached maximum number of turns (8)',
+      'FAIL epic/near-miss: should not load; invoked no skill; error: Reached maximum number of turns (8)',
     );
   });
 });
