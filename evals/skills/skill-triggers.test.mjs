@@ -33,6 +33,7 @@ describe('readTask', () => {
       ),
     ).toStrictEqual({
       fixture: 'form',
+      graderSkills: [],
       id: 'trigger',
       name: 'A task',
       prompt: 'Do it.',

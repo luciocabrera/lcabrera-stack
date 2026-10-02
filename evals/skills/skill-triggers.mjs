@@ -6,10 +6,18 @@
  */
 import { parse } from 'yaml';
 
+const skillsNamedBy = ({ config = {} }) => [
+  ...(config.required_skills ?? []),
+  ...(config.forbidden_skills ?? []),
+];
+
+export const readEvalSkill = (source) => parse(source)?.skill;
+
 export const readTask = (source) => {
   const task = parse(source);
   return {
     fixture: task.inputs?.context?.fixture,
+    graderSkills: (task.graders ?? []).flatMap(skillsNamedBy),
     id: task.id,
     name: task.name,
     prompt: task.inputs.prompt,
@@ -94,7 +102,24 @@ const skillCoverageProblems = ({ name, scoped, tasks }) => {
   ];
 };
 
-export const coverageProblems = ({ catalog, evals }) => {
+const namingProblems = ({ declared, name, tasks }) => [
+  ...(declared === name
+    ? []
+    : [
+        `evals/skills/${name}/eval.yaml names skill "${declared}", not "${name}"`,
+      ]),
+  ...tasks.flatMap((task) =>
+    task.graderSkills.length === 0
+      ? [`${name}/${task.id} has no grader naming a skill`]
+      : task.graderSkills
+          .filter((skill) => skill !== name)
+          .map(
+            (skill) => `${name}/${task.id} grades "${skill}", not "${name}"`,
+          ),
+  ),
+];
+
+export const coverageProblems = ({ catalog, declared, evals }) => {
   const skills = new Set(catalog.map(({ name }) => name));
   return [
     ...catalog.flatMap(({ name, scoped }) =>
@@ -103,6 +128,9 @@ export const coverageProblems = ({ catalog, evals }) => {
     ...[...evals.keys()]
       .filter((name) => !skills.has(name))
       .map((name) => `evals/skills/${name} has no skill under .github/skills/`),
+    ...[...evals.entries()].flatMap(([name, tasks]) =>
+      namingProblems({ declared: declared.get(name), name, tasks }),
+    ),
   ];
 };
 

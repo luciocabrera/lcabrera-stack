@@ -61,8 +61,23 @@ describe('isPathScoped', () => {
   });
 });
 
+describe('withoutSeparator', () => {
+  it('drops the -- that vp run passes through, and nothing else', () => {
+    expect(withoutSeparator(['--', '--check'])).toStrictEqual(['--check']);
+    expect(withoutSeparator(['epic', '--hide', 'epic'])).toStrictEqual([
+      'epic',
+      '--hide',
+      'epic',
+    ]);
+  });
+});
+
 describe('coverageProblems', () => {
-  const both = [{ id: 'trigger' }, { id: 'near-miss' }];
+  const graded = (name, extra = {}) => [
+    { graderSkills: [name], id: 'trigger', ...extra },
+    { graderSkills: [name], id: 'near-miss', ...extra },
+  ];
+  const declaredAs = (...names) => new Map(names.map((name) => [name, name]));
 
   it('passes a skill with both tasks, and a scoped skill whose tasks name a fixture', () => {
     expect(
@@ -71,9 +86,10 @@ describe('coverageProblems', () => {
           { name: 'a', scoped: false },
           { name: 'b', scoped: true },
         ],
+        declared: declaredAs('a', 'b'),
         evals: new Map([
-          ['a', both],
-          ['b', both.map((task) => ({ ...task, fixture: 'f' }))],
+          ['a', graded('a')],
+          ['b', graded('b', { fixture: 'f' })],
         ]),
       }),
     ).toStrictEqual([]);
@@ -87,9 +103,16 @@ describe('coverageProblems', () => {
           { name: 'b', scoped: false },
           { name: 'c', scoped: true },
         ],
+        declared: declaredAs('b', 'c'),
         evals: new Map([
-          ['b', [{ id: 'trigger' }]],
-          ['c', [{ fixture: 'f', id: 'trigger' }, { id: 'near-miss' }]],
+          ['b', [{ graderSkills: ['b'], id: 'trigger' }]],
+          [
+            'c',
+            [
+              { fixture: 'f', graderSkills: ['c'], id: 'trigger' },
+              { graderSkills: ['c'], id: 'near-miss' },
+            ],
+          ],
         ]),
       }),
     ).toStrictEqual([
@@ -98,30 +121,38 @@ describe('coverageProblems', () => {
       'c/near-miss names no fixture, but c has a paths: list, so it is offered only after a matching file is read',
     ]);
   });
-});
 
-describe('withoutSeparator', () => {
-  it('drops the -- that vp run passes through, and nothing else', () => {
-    expect(withoutSeparator(['--', '--check'])).toStrictEqual(['--check']);
-    expect(withoutSeparator(['epic', '--hide', 'epic'])).toStrictEqual([
-      'epic',
-      '--hide',
-      'epic',
-    ]);
-  });
-});
-
-describe('coverageProblems, the other direction', () => {
   it('names an eval whose skill is gone', () => {
     expect(
       coverageProblems({
         catalog: [],
-        evals: new Map([
-          ['renamed-away', [{ id: 'trigger' }, { id: 'near-miss' }]],
-        ]),
+        declared: declaredAs('renamed-away'),
+        evals: new Map([['renamed-away', graded('renamed-away')]]),
       }),
     ).toStrictEqual([
       'evals/skills/renamed-away has no skill under .github/skills/',
+    ]);
+  });
+
+  it('names a copied eval that still grades the skill it was copied from', () => {
+    expect(
+      coverageProblems({
+        catalog: [{ name: 'foo', scoped: false }],
+        declared: new Map([['foo', 'releasing']]),
+        evals: new Map([
+          [
+            'foo',
+            [
+              { graderSkills: ['releasing'], id: 'trigger' },
+              { graderSkills: [], id: 'near-miss' },
+            ],
+          ],
+        ]),
+      }),
+    ).toStrictEqual([
+      'evals/skills/foo/eval.yaml names skill "releasing", not "foo"',
+      'foo/trigger grades "releasing", not "foo"',
+      'foo/near-miss has no grader naming a skill',
     ]);
   });
 });

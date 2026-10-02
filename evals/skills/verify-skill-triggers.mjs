@@ -38,6 +38,7 @@ import {
   fixtureWasRead,
   invokedSkills,
   isPathScoped,
+  readEvalSkill,
   readPaths,
   readTask,
   scopeError,
@@ -162,6 +163,14 @@ const coverage = () =>
         readFileSync(join(SKILLS_ROOT, name, 'SKILL.md'), 'utf8'),
       ),
     })),
+    declared: new Map(
+      evalDirectories().map((name) => [
+        name,
+        readEvalSkill(
+          readFileSync(join(EVALS_ROOT, name, 'eval.yaml'), 'utf8'),
+        ),
+      ]),
+    ),
     evals: new Map(evalDirectories().map((name) => [name, tasksOf(name)])),
   });
 
