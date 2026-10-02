@@ -1,8 +1,6 @@
 name: Agent Evals
 
-# No `paths:` filter: a required check behind one never reports on a pull
-# request it skips, and the merge waits on it. Jobs that call a model gate
-# themselves on a diff step instead, so a skipped job still reports.
+# Why there is no `paths:` filter: COMMANDS.md §6.
 on:
   pull_request:
   merge_group:

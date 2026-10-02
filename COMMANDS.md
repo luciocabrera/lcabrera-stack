@@ -1020,6 +1020,14 @@ anyone touching this repository — a hand-publish never passes through CI — a
 an immutable broken version cannot be fixed by a commit, so it deliberately does
 not gate a pull request ([ADR-077](docs/decisions/ADR-077-audit-every-published-version-and-report-rather-than-block.md)).
 
+[`agent-evals.yml`](.github/workflows/agent-evals.yml) checks the agent-facing
+surface: skills, subagents and path rules. Its **Agent Evals (deterministic)**
+job runs `test:evals` and `evals:rules:verify` on every pull request, merge-group
+build and push to `main`. The workflow has no `paths:` filter: a required check
+behind one never reports on a pull request the filter skips, so the merge waits
+on a check that will never arrive. A job that calls a model gates itself on a
+diff step instead, and a job skipped that way still reports.
+
 Other workflows: `lighthouse.yml`, `validate-skills.yml`, and
 [`pr-standards.yml`](.github/workflows/pr-standards.yml) — on every pull request
 and every merge-group build it runs `pr:verify` (title + description) and
