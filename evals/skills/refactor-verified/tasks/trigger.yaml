@@ -1,0 +1,15 @@
+id: trigger
+name: Taking a backlog issue to a verified PR
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Pick up backlog issue #9999. It is a refactor with testable acceptance criteria; get it to a PR that an independent verifier has certified. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-refactor-verified
+    config:
+      mode: any_order
+      required_skills:
+        - refactor-verified

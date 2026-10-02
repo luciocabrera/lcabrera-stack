@@ -1,0 +1,15 @@
+id: trigger
+name: Sweeping every lint engine
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Run a full deterministic lint sweep of the repo with every engine and write the JSON reports; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-linter-checker
+    config:
+      mode: any_order
+      required_skills:
+        - linter-checker

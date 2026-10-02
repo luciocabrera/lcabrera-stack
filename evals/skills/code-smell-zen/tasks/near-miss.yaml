@@ -1,0 +1,14 @@
+id: near-miss
+name: Reading a hunk header
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What does a git diff hunk header like @@ -1,4 +1,5 @@ mean? Two sentences. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-code-smell-zen-alone
+    config:
+      forbidden_skills:
+        - code-smell-zen

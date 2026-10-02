@@ -1,0 +1,23 @@
+import { useContext, useState } from 'react';
+
+import { ThemeContext } from './ThemeContext';
+
+export const NewsletterForm = () => {
+  const theme = useContext(ThemeContext);
+  const [email, setEmail] = useState('');
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    await fetch('/api/newsletter', {
+      body: JSON.stringify({ email }),
+      method: 'POST',
+    });
+  };
+
+  return (
+    <form className={theme} onSubmit={handleSubmit}>
+      <input onChange={(event) => setEmail(event.target.value)} value={email} />
+      <button type='submit'>Subscribe</button>
+    </form>
+  );
+};

@@ -1,0 +1,17 @@
+id: trigger
+name: Debugging a silent lint rule
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Read vite.config.ts. The unicorn/no-array-for-each rule I added there reports nothing, even on a file I know violates it. Help me find out why; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: config
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-lint-toolchain
+    config:
+      mode: any_order
+      required_skills:
+        - lint-toolchain

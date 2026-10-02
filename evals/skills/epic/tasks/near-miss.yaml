@@ -1,0 +1,14 @@
+id: near-miss
+name: Epic versus milestone, as vocabulary
+tags:
+  - negative-trigger
+inputs:
+  prompt: "In general GitHub project planning, what is the difference between an epic and a milestone? Two sentences. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-epic-alone
+    config:
+      forbidden_skills:
+        - epic

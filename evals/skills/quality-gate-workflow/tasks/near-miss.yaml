@@ -1,0 +1,14 @@
+id: near-miss
+name: A TypeScript option question
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What does the TypeScript compiler option noUncheckedIndexedAccess change? Explain briefly. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-quality-gate-workflow-alone
+    config:
+      forbidden_skills:
+        - quality-gate-workflow

@@ -1,0 +1,14 @@
+id: near-miss
+name: Removing one unused import
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Remove the unused import from this snippet and show only the result: import { a, b } from 'x'; export const y = a; Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-fallow-code-checker-alone
+    config:
+      forbidden_skills:
+        - fallow-code-checker

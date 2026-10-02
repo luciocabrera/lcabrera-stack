@@ -37,3 +37,71 @@ jobs:
 
       - name: Rules agree with the index and the tree
         run: vp run evals:rules:verify
+
+      - name: Install Waza
+        env:
+          WAZA_SHA256: e227cd884173de796bc28c6cb1828498f250297e0e606a4e4504d14465ff879f
+          WAZA_TAG: v0.38.7
+        run: |
+          mkdir -p "$RUNNER_TEMP/waza"
+          curl --proto '=https' --tlsv1.2 -fsSL -o "$RUNNER_TEMP/waza/waza" \
+            "https://github.com/microsoft/waza/releases/download/$WAZA_TAG/waza-linux-amd64"
+          echo "$WAZA_SHA256  $RUNNER_TEMP/waza/waza" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/waza/waza"
+          echo "$RUNNER_TEMP/waza" >> "$GITHUB_PATH"
+
+      - name: Skill frontmatter parses
+        run: |
+          checked=0
+          status=0
+          for skill in .github/skills/*/; do
+            [ -f "${skill}SKILL.md" ] || continue
+            checked=$((checked + 1))
+            if ! report=$(waza check "$skill" --no-update-check 2>&1); then
+              echo "::error file=${skill}SKILL.md::waza check could not parse this skill"
+              echo "$report"
+              status=1
+            fi
+          done
+          echo "waza check read $checked skill(s)"
+          if [ "$checked" -eq 0 ]; then
+            echo "::error::no SKILL.md found under .github/skills"
+            exit 1
+          fi
+          exit "$status"
+
+      - name: Every skill has trigger evals
+        run: vp run evals:skills -- --check
+
+  skill-triggers:
+    name: Skill triggers (Claude)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
+        with:
+          cache: false
+          run-install: false
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Trigger and near-miss tasks
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: vp run evals:skills
+
+      - name: Upload transcripts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: skill-trigger-transcripts
+          path: .tmp/skill-evals/
+          if-no-files-found: ignore
+          retention-days: 7

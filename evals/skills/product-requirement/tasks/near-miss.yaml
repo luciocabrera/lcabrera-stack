@@ -1,0 +1,14 @@
+id: near-miss
+name: Describing a PRD in general
+tags:
+  - negative-trigger
+inputs:
+  prompt: "In general, what sections does a product requirements document usually contain? A short list. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-product-requirement-alone
+    config:
+      forbidden_skills:
+        - product-requirement

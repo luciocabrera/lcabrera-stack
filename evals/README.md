@@ -11,6 +11,7 @@ suites' own tests.
 | Suite                                    | Run locally                 | Calls a model |
 | ---------------------------------------- | --------------------------- | ------------- |
 | [Rules consistency](./rules-consistency) | `vp run evals:rules:verify` | no            |
+| [Skill triggers](./skills)               | `vp run evals:skills`       | yes           |
 | The suites' own tests                    | `vp run test:evals`         | no            |
 
 ## Rules consistency

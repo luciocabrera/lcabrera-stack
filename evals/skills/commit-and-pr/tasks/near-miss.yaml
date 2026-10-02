@@ -1,0 +1,14 @@
+id: near-miss
+name: A git question that writes no commit
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What is the difference between git commit --amend and git commit --fixup? Explain briefly. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-commit-and-pr-alone
+    config:
+      forbidden_skills:
+        - commit-and-pr

@@ -1,0 +1,14 @@
+id: near-miss
+name: Translating a sentence
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Translate this sentence into Spanish, word for word: 'The gate fails when a rule is missing from the index.' Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-unslop-alone
+    config:
+      forbidden_skills:
+        - unslop

@@ -1,0 +1,14 @@
+id: near-miss
+name: Pretty-printing JSON
+tags:
+  - negative-trigger
+inputs:
+  prompt: 'Format this JSON so it is readable and show only the result: {"a":1,"b":[1,2]} Load any skill you need, but don''t run shell commands or edit files.'
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-linter-checker-alone
+    config:
+      forbidden_skills:
+        - linter-checker

@@ -1,0 +1,14 @@
+id: near-miss
+name: Explaining a utility type
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What does the TypeScript utility type Partial<T> do? One sentence. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-typescript-api-engineering-alone
+    config:
+      forbidden_skills:
+        - typescript-api-engineering

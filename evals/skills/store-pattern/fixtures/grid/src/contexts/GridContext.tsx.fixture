@@ -1,0 +1,14 @@
+import { createContext, useState, type ReactNode } from 'react';
+
+type GridState = { readonly rows: readonly string[]; readonly sort: string };
+
+export const GridContext = createContext<GridState>({ rows: [], sort: 'id' });
+
+export const GridProvider = ({
+  children,
+}: {
+  readonly children: ReactNode;
+}) => {
+  const [state] = useState<GridState>({ rows: [], sort: 'id' });
+  return <GridContext.Provider value={state}>{children}</GridContext.Provider>;
+};

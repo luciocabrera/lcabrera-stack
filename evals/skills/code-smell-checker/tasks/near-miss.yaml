@@ -1,0 +1,14 @@
+id: near-miss
+name: Defining one smell
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What is the feature envy code smell? One short paragraph, in general terms. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-code-smell-checker-alone
+    config:
+      forbidden_skills:
+        - code-smell-checker
