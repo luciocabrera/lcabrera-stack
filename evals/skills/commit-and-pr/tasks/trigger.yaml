@@ -1,0 +1,15 @@
+id: trigger
+name: Writing a commit message and PR description
+tags:
+  - positive-trigger
+inputs:
+  prompt: "I've finished the column-resize change in packages/ui. Draft the commit message and the pull request description for it. Load any skill you need, but don't run shell commands or edit files; tell me what you would do first."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-commit-and-pr
+    config:
+      mode: any_order
+      required_skills:
+        - commit-and-pr

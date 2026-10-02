@@ -1,0 +1,14 @@
+id: near-miss
+name: Explaining useState
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What does React's useState hook return? One sentence. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-store-pattern-alone
+    config:
+      forbidden_skills:
+        - store-pattern

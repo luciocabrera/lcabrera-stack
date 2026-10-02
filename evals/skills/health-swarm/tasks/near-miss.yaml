@@ -1,0 +1,14 @@
+id: near-miss
+name: Checking one dependency version
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Is lodash 4.17.21 the latest 4.x release that you know of? One sentence. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-health-swarm-alone
+    config:
+      forbidden_skills:
+        - health-swarm

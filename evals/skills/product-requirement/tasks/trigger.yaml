@@ -1,0 +1,15 @@
+id: trigger
+name: Checking what consumers are promised
+tags:
+  - positive-trigger
+inputs:
+  prompt: "I am about to change the public API of @lcabrera/server. Check what its consumers are promised and write acceptance criteria for the change; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-product-requirement
+    config:
+      mode: any_order
+      required_skills:
+        - product-requirement

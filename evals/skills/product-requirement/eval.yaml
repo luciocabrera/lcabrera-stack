@@ -1,0 +1,19 @@
+name: product-requirement-trigger
+description: Does product-requirement load before changing a published package's promises, and stay out of a generic PRD question?
+skill: product-requirement
+version: '1.0'
+config:
+  trials_per_task: 1
+  timeout_seconds: 240
+  executor: copilot-sdk
+  model: claude-sonnet-5.5
+  inject_skill_body: false
+  skill_directories:
+    - ../../../.github/skills
+metrics:
+  - name: task_completion
+    weight: 1.0
+    threshold: 1.0
+    description: The skill loaded when it should and not when it should not.
+tasks:
+  - 'tasks/*.yaml'

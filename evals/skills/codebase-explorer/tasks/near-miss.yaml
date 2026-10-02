@@ -1,0 +1,14 @@
+id: near-miss
+name: Naming one file's location
+tags:
+  - negative-trigger
+inputs:
+  prompt: "In a Vite project, which file at the repository root usually holds the Vite config? Just the file name. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-codebase-explorer-alone
+    config:
+      forbidden_skills:
+        - codebase-explorer

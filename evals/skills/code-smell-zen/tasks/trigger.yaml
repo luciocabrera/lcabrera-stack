@@ -1,0 +1,15 @@
+id: trigger
+name: Reviewing a branch diff for smells
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Review my branch's diff against main for code smells before I open the PR; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-code-smell-zen
+    config:
+      mode: any_order
+      required_skills:
+        - code-smell-zen

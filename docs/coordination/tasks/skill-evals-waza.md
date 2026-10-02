@@ -6,7 +6,7 @@ status: active
 branch: test/1244-skill-evals-waza
 area:
   - evals/skills/**
-  - .waza.yaml
+  - .github/skills/unslop/SKILL.md
 started: 2026-10-02
 updated: 2026-10-02
 plan: (none)

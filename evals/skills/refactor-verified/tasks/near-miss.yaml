@@ -1,0 +1,14 @@
+id: near-miss
+name: An inline refactor of one function
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Rewrite this function with Array.prototype.map instead of the loop, and show only the result: function double(xs) { const out = []; for (const x of xs) out.push(x * 2); return out; } Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-refactor-verified-alone
+    config:
+      forbidden_skills:
+        - refactor-verified

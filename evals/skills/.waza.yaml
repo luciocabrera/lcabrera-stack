@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/waza/main/schemas/config.schema.json
+
+paths:
+  skills: ../../.github/skills/
+  evals: ./
+  results: results/
+files:
+  evalFile: eval.yaml
+  taskGlob: tasks/*.yaml
+  taskFileSuffix: .yaml
+defaults:
+  engine: copilot-sdk
+  model: claude-sonnet-5.5
+  timeout: 300
+  parallel: false
+cache:
+  enabled: false
