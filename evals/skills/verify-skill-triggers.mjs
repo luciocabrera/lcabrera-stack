@@ -18,6 +18,7 @@ import {
   readdirSync,
   readFileSync,
   renameSync,
+  statSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs';
@@ -36,6 +37,7 @@ import {
   readPaths,
   readTask,
   selectedSkills,
+  sessionError,
   sessionScope,
   taskPassed,
 } from './skill-triggers.mjs';
@@ -62,17 +64,22 @@ const tasksOf = (skill) => {
 };
 
 const copyFixture = ({ cwd, skill, task }) => {
-  cpSync(join(EVALS_ROOT, skill, 'fixtures', task.fixture), cwd, {
-    recursive: true,
-  });
-  return readdirSync(cwd, { recursive: true })
+  const source = join(EVALS_ROOT, skill, 'fixtures', task.fixture);
+  const files = readdirSync(source, { recursive: true })
     .map(String)
-    .filter((path) => path.endsWith(FIXTURE_SUFFIX))
-    .map((path) => {
-      const target = path.slice(0, -FIXTURE_SUFFIX.length);
-      renameSync(join(cwd, path), join(cwd, target));
-      return target;
-    });
+    .filter((path) => statSync(join(source, path)).isFile());
+  if (files.length === 0) {
+    throw new Error(`fixture ${skill}/fixtures/${task.fixture} has no files`);
+  }
+  cpSync(source, cwd, { recursive: true });
+  return files.map((path) => {
+    if (!path.endsWith(FIXTURE_SUFFIX)) {
+      return path;
+    }
+    const target = path.slice(0, -FIXTURE_SUFFIX.length);
+    renameSync(join(cwd, path), join(cwd, target));
+    return target;
+  });
 };
 
 const workspaceFor = ({ skill, task }) => {
@@ -95,7 +102,7 @@ const drain = async (session) => {
     for await (const message of session) {
       messages.push(message);
     }
-    return { messages };
+    return { error: sessionError(messages), messages };
   } catch (error) {
     return { error: errorText(error), messages };
   }
@@ -125,6 +132,7 @@ const runTask = async ({ hidden, model, skill, task }) => {
   const fixtureRead = fixtureWasRead({
     fixtureFiles,
     read: readPaths(messages),
+    task,
   });
   return {
     error,

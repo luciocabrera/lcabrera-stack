@@ -11,6 +11,7 @@ import {
   readTask,
   selectedSkills,
   selectionProblems,
+  sessionError,
   sessionScope,
   taskPassed,
 } from './skill-triggers.mjs';
@@ -194,11 +195,12 @@ describe('fixture reads', () => {
   });
 
   it('accepts a task with no fixture, and one whose fixture was read', () => {
-    expect(fixtureWasRead({ fixtureFiles: [], read: [] })).toBe(true);
+    expect(fixtureWasRead({ fixtureFiles: [], read: [], task: {} })).toBe(true);
     expect(
       fixtureWasRead({
         fixtureFiles: ['src/A.tsx'],
         read: ['/tmp/w/src/A.tsx'],
+        task: { fixture: 'f' },
       }),
     ).toBe(true);
   });
@@ -208,6 +210,7 @@ describe('fixture reads', () => {
     const fixtureRead = fixtureWasRead({
       fixtureFiles: ['src/A.tsx'],
       read: [],
+      task: { fixture: 'f' },
     });
     expect(
       taskPassed({
@@ -272,6 +275,36 @@ describe('selectedSkills', () => {
     expect(selectedSkills({ ...args, requested: ['b'] })).toStrictEqual(['b']);
     expect(() => selectedSkills({ ...args, requested: ['c'] })).toThrow(
       'no eval for "c"',
+    );
+  });
+});
+
+describe('fixtureWasRead with no files reported', () => {
+  it('still requires a read when the task names a fixture', () => {
+    expect(
+      fixtureWasRead({ fixtureFiles: [], read: [], task: { fixture: 'f' } }),
+    ).toBe(false);
+  });
+});
+
+describe('sessionError', () => {
+  it('accepts a session that ended in success', () => {
+    expect(
+      sessionError([{ subtype: 'success', type: 'result' }]),
+    ).toBeUndefined();
+  });
+
+  it('reports a turn limit delivered as a result, not a throw', () => {
+    expect(
+      sessionError([
+        { is_error: true, subtype: 'error_max_turns', type: 'result' },
+      ]),
+    ).toBe('the session ended with error_max_turns');
+  });
+
+  it('reports a session that never produced a result', () => {
+    expect(sessionError([{ type: 'assistant' }])).toBe(
+      'the session ended without a result',
     );
   });
 });

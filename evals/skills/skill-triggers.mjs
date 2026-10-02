@@ -33,9 +33,19 @@ export const readPaths = (messages) =>
     .map((block) => block.input?.file_path)
     .filter((path) => typeof path === 'string');
 
-export const fixtureWasRead = ({ fixtureFiles, read }) =>
-  fixtureFiles.length === 0 ||
+export const fixtureWasRead = ({ fixtureFiles, read, task }) =>
+  task.fixture === undefined ||
   read.some((path) => fixtureFiles.some((file) => path.endsWith(file)));
+
+export const sessionError = (messages) => {
+  const result = messages.findLast((message) => message.type === 'result');
+  if (result === undefined) {
+    return 'the session ended without a result';
+  }
+  return result.subtype === 'success' && result.is_error !== true
+    ? undefined
+    : `the session ended with ${result.subtype}`;
+};
 
 const unknownNames = ({ known, requested }) =>
   requested.filter((name) => !known.includes(name));
