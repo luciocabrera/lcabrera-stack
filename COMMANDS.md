@@ -1023,8 +1023,11 @@ not gate a pull request ([ADR-077](docs/decisions/ADR-077-audit-every-published-
 
 [`agent-evals.yml`](.github/workflows/agent-evals.yml) checks the agent-facing
 surface: skills, subagents and path rules. Its **Agent Evals (deterministic)**
-job runs `test:evals` and `evals:rules:verify` on every pull request, merge-group
-build and push to `main`. The workflow has no `paths:` filter: a required check
+job runs `test:evals`, `evals:rules:verify` and `waza check` on every skill on
+every pull request, merge-group build and push to `main`; `waza check` fails
+only a `SKILL.md` whose frontmatter does not parse. Its **Skill triggers
+(Claude)** job runs `evals:skills` on `workflow_dispatch` only, on
+`CLAUDE_CODE_OAUTH_TOKEN`. The workflow has no `paths:` filter: a required check
 behind one never reports on a pull request the filter skips, so the merge waits
 on a check that will never arrive. A job that calls a model gates itself on a
 diff step instead, and a job skipped that way still reports.

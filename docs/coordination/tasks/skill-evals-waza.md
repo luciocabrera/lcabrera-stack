@@ -11,6 +11,9 @@ area:
   - pnpm-workspace.yaml
   - pnpm-lock.yaml
   - .fallowrc.json
+  - .github/workflows/agent-evals.yml
+  - COMMANDS.md
+  - evals/README.md
 started: 2026-10-02
 updated: 2026-10-02
 plan: (none)
