@@ -3,7 +3,7 @@
 paths:
   skills: ../../.github/skills/
   evals: ./
-  results: results/
+  results: ../../.tmp/waza-results/
 files:
   evalFile: eval.yaml
   taskGlob: tasks/*.yaml
