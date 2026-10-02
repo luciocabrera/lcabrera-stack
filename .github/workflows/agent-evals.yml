@@ -75,6 +75,9 @@ jobs:
 
   skill-triggers:
     name: Skill triggers (Claude)
+    concurrency:
+      group: skill-triggers-${{ github.ref }}
+      cancel-in-progress: true
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
@@ -103,5 +106,71 @@ jobs:
         with:
           name: skill-trigger-transcripts
           path: .tmp/skill-evals/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  verifier-fixtures:
+    name: Verifier fixtures (Claude, advisory)
+    concurrency:
+      group: verifier-fixtures-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Did the verifier's inputs change
+        id: scope
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = workflow_dispatch ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! CHANGED="$(git diff --name-only "origin/$BASE_REF...HEAD" 2>/dev/null)"; then
+            echo "::notice::Diff range origin/$BASE_REF...HEAD unresolvable, so running the fixtures."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if printf '%s\n' "$CHANGED" |
+            grep -qE '^(\.claude/agents/refactor-verifier\.md|docs/agents/refactor-verified-contract\.md|evals/verifier-fixtures/)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Vite+
+        if: steps.scope.outputs.run == 'true'
+        uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
+        with:
+          cache: false
+          run-install: false
+
+      - name: Install dependencies
+        if: steps.scope.outputs.run == 'true'
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Verifier verdicts on the fixtures
+        if: steps.scope.outputs.run == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: vp run evals:verifier
+
+      - name: Upload reports
+        if: always() && steps.scope.outputs.run == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: verifier-fixture-reports
+          path: .tmp/verifier-evals/
           if-no-files-found: ignore
           retention-days: 7

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  chunk,
   coverageProblems,
   PROMPT_SUFFIX,
   isPathScoped,
@@ -29,13 +28,6 @@ describe('selectionProblems', () => {
     expect(
       selectionProblems({ catalog: [], evals: [], hidden: [], requested: [] }),
     ).toStrictEqual([]);
-  });
-});
-
-describe('chunk', () => {
-  it('splits into batches of at most the given size', () => {
-    expect(chunk([1, 2, 3, 4, 5], 2)).toStrictEqual([[1, 2], [3, 4], [5]]);
-    expect(chunk([], 2)).toStrictEqual([]);
   });
 });
 
