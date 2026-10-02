@@ -117,6 +117,7 @@
     "worktree:env": "repo-worktree-env"
   },
   "devDependencies": {
+    "@anthropic-ai/claude-agent-sdk": "catalog:test",
     "@arethetypeswrong/core": "catalog:tooling",
     "@biomejs/biome": "catalog:lint",
     "@changesets/cli": "catalog:tooling",
