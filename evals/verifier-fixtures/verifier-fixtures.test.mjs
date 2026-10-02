@@ -7,6 +7,7 @@ import {
   judgeFixture,
   renderDispatch,
   runCount,
+  sessionProblem,
   verdictOf,
   withoutSeparator,
 } from './verifier-fixtures.mjs';
@@ -109,7 +110,7 @@ describe('judgeFixture', () => {
     const judgement = judgeFixture({
       expectedNotMet: [3],
       fixture: 'suppressed-lint',
-      reports: [caught, caught],
+      runs: [{ report: caught }, { report: caught }],
     });
     expect(judgement.matched && judgement.stable).toBe(true);
   });
@@ -119,7 +120,7 @@ describe('judgeFixture', () => {
       judgeFixture({
         expectedNotMet: [3],
         fixture: 'f',
-        reports: [clean, clean],
+        runs: [{ report: clean }, { report: clean }],
       }).matched,
     ).toBe(false);
   });
@@ -129,7 +130,7 @@ describe('judgeFixture', () => {
       judgeFixture({
         expectedNotMet: [],
         fixture: 'clean',
-        reports: [report('PASS', [])],
+        runs: [{ report: report('PASS', []) }],
       }).matched,
     ).toBe(false);
   });
@@ -138,7 +139,7 @@ describe('judgeFixture', () => {
     const judgement = judgeFixture({
       expectedNotMet: [3],
       fixture: 'f',
-      reports: [caught, clean],
+      runs: [{ report: caught }, { report: clean }],
     });
     expect(judgement.stable).toBe(false);
     expect(describeJudgement(judgement)).toContain('runs disagree');
@@ -156,9 +157,78 @@ describe('arguments', () => {
 
   it('refuses a run count that would judge nothing', () => {
     expect(runCount('2')).toBe(2);
-    expect(() => runCount('0')).toThrow(
-      '--runs must be a whole number of at least 1, got "0"',
-    );
+    expect(() => runCount('1')).toThrow('at least 2');
+    expect(() => runCount('0')).toThrow('got "0"');
     expect(() => runCount('two')).toThrow('got "two"');
+  });
+});
+
+describe('a run that could not conclude', () => {
+  const clean = report('FAIL', [
+    '| 1 | Lint clean | not-met (unverified) | none | no tools |',
+  ]);
+
+  it('fails the clean fixture when the session errored, though it found nothing', () => {
+    expect(
+      judgeFixture({
+        expectedNotMet: [],
+        fixture: 'clean',
+        runs: [
+          { report: clean },
+          { error: 'the session ended with error_max_turns', report: '' },
+        ],
+      }).matched,
+    ).toBe(false);
+  });
+
+  it('fails a report with no verdict line', () => {
+    expect(
+      judgeFixture({
+        expectedNotMet: [],
+        fixture: 'clean',
+        runs: [{ report: '| 1 | a | met |' }],
+      }).matched,
+    ).toBe(false);
+  });
+
+  it('fails any verdict that starts with PASS, prose or not', () => {
+    for (const verdict of [
+      'PASS — every criterion met',
+      'PASS (inspection-only)',
+    ]) {
+      expect(
+        judgeFixture({
+          expectedNotMet: [],
+          fixture: 'clean',
+          runs: [{ report: report(verdict, []) }],
+        }).matched,
+      ).toBe(false);
+    }
+  });
+});
+
+describe('sessionProblem', () => {
+  const init = (tools) => ({ subtype: 'init', tools, type: 'system' });
+  const success = { subtype: 'success', type: 'result' };
+
+  it('accepts a session with no tools that ended in success', () => {
+    expect(sessionProblem([init([]), success])).toBeUndefined();
+  });
+
+  it('names the tools when the no-tools option did not take', () => {
+    expect(sessionProblem([init(['Bash', 'Read']), success])).toBe(
+      'the session held Bash, Read',
+    );
+  });
+
+  it('reports a session that did not finish, or never said what it held', () => {
+    expect(
+      sessionProblem([
+        init([]),
+        { is_error: true, subtype: 'error_max_turns', type: 'result' },
+      ]),
+    ).toBe('the session ended with error_max_turns');
+    expect(sessionProblem([init([])])).toBe('the session ended with no result');
+    expect(sessionProblem([success])).toBe('the session reported no tools');
   });
 });

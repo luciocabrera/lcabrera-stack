@@ -4,7 +4,7 @@
  * Usage: imported by `verify-verifier-verdicts.mjs`.
  */
 const FRONTMATTER = /^---\r?\n[\s\S]*?\r?\n---\r?\n/;
-const VERDICT_LINE = /^VERDICT:[ \t]*(.+?)[ \t]*$/m;
+const VERDICT_LINE = /^VERDICT:(.*)$/m;
 
 export const agentBody = (definition) => definition.replace(FRONTMATTER, '');
 
@@ -14,7 +14,7 @@ export const renderDispatch = ({ contract, diff, issue, template }) =>
     .replace('{{ diff }}', () => diff.trim())
     .replace('{{ contract }}', () => contract.trim());
 
-export const verdictOf = (report) => VERDICT_LINE.exec(report)?.[1];
+export const verdictOf = (report) => VERDICT_LINE.exec(report)?.[1].trim();
 
 const UNVERIFIED =
   /unverified|not verified|could(?:n't| not) (?:run|verify|check)/i;
@@ -48,23 +48,62 @@ export const definiteNotMet = (report) =>
 
 const sameNumbers = (a, b) => a.join(',') === b.join(',');
 
-export const judgeFixture = ({ expectedNotMet, fixture, reports }) => {
-  const runs = reports.map((report) => ({
+const toolsProblem = (init) => {
+  if (init === undefined) {
+    return 'the session reported no tools';
+  }
+  const tools = init.tools ?? [];
+  return tools.length === 0
+    ? undefined
+    : `the session held ${tools.join(', ')}`;
+};
+
+export const finalResult = (messages) =>
+  messages.findLast((message) => message.type === 'result');
+
+const succeeded = (result) =>
+  result?.subtype === 'success' && result.is_error !== true;
+
+const endingOf = (result) => result?.subtype ?? 'no result';
+
+const resultProblem = (result) =>
+  succeeded(result) ? undefined : `the session ended with ${endingOf(result)}`;
+
+export const sessionProblem = (messages) =>
+  toolsProblem(
+    messages.find(
+      (message) => message.type === 'system' && message.subtype === 'init',
+    ),
+  ) ?? resultProblem(finalResult(messages));
+
+export const errorText = (error) =>
+  error instanceof Error ? error.message : String(error);
+
+const PASS_VERDICT = /^PASS\b/;
+
+const runCounts = ({ expectedNotMet, run }) =>
+  run.error === undefined &&
+  run.verdict !== undefined &&
+  !PASS_VERDICT.test(run.verdict) &&
+  sameNumbers(run.notMet, expectedNotMet);
+
+export const judgeFixture = ({ expectedNotMet, fixture, runs: sessions }) => {
+  const runs = sessions.map(({ error, report = '' }) => ({
+    error,
     notMet: definiteNotMet(report),
-    verdict: verdictOf(report) ?? '(no verdict line)',
+    verdict: verdictOf(report),
   }));
-  const matched = runs.every(
-    ({ notMet, verdict }) =>
-      sameNumbers(notMet, expectedNotMet) && verdict !== 'PASS',
-  );
+  const matched = runs.every((run) => runCounts({ expectedNotMet, run }));
   const stable = runs.every(({ notMet }) =>
     sameNumbers(notMet, runs[0].notMet),
   );
   return { expectedNotMet, fixture, matched, runs, stable };
 };
 
-const describeRun = ({ notMet, verdict }) =>
-  `not-met [${notMet.join(',')}], verdict ${verdict.slice(0, 30)}`;
+const describeRun = ({ error, notMet, verdict }) =>
+  error === undefined
+    ? `not-met [${notMet.join(',')}], verdict ${(verdict ?? '(no verdict line)').slice(0, 30)}`
+    : `error: ${error}`;
 
 export const describeJudgement = ({
   expectedNotMet,
@@ -76,7 +115,9 @@ export const describeJudgement = ({
   const problems = [
     ...(matched
       ? []
-      : [`expected not-met [${expectedNotMet.join(',')}] and no plain PASS`]),
+      : [
+          `expected not-met [${expectedNotMet.join(',')}], a verdict line that is not a PASS, and no session error`,
+        ]),
     ...(stable ? [] : ['runs disagree']),
   ];
   const status = problems.length === 0 ? 'ok' : `FAIL (${problems.join('; ')})`;
@@ -88,9 +129,9 @@ export const withoutSeparator = (args) =>
 
 export const runCount = (value) => {
   const runs = Number(value);
-  if (!Number.isInteger(runs) || runs < 1) {
+  if (!Number.isInteger(runs) || runs < 2) {
     throw new Error(
-      `--runs must be a whole number of at least 1, got "${value}"`,
+      `--runs must be a whole number of at least 2, so the runs can be compared; got "${value}"`,
     );
   }
   return runs;

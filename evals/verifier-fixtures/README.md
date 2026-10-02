@@ -21,7 +21,8 @@ dispatch ([`dispatch.md`](./dispatch.md)): the shared issue's §5 and §6
 `docs/agents/refactor-verified-contract.md`, which the verifier would otherwise
 read itself.
 
-The session has no tools and loads no settings. **That makes this a narrower
+The session has no tools, no MCP servers and loads no settings, and the run
+fails if the session's own `init` message lists any tool. **That makes this a narrower
 test than the contract describes.** The real verifier runs gates, plants a
 violation and reverts it; this one only reads. So the fixtures test whether it
 finds a violation in the diff, and nothing about its gate proof.
@@ -47,16 +48,18 @@ the only difference between them. Check with
 
 A fixture passes when, in every run:
 
+- the session reported no tools and finished, so a run that errored or hit a
+  limit fails instead of reading as "found nothing";
+- the report has a `VERDICT:` line, and it does not start with `PASS`, which a
+  run with no tools cannot have earned under the contract's §4;
 - the criteria the verifier marks `not-met` are exactly the expected ones;
-- the verdict is not a plain `PASS`, which a run with no tools cannot have
-  earned under the contract's §4;
-- and the runs agree.
+- and the runs agree, which is why `--runs` must be at least 2.
 
-It reads the criteria table, not the `VERDICT:` line. Without tools the verdict
-line cannot separate "found the violation" from "could not run a gate": both
-come out as `FAIL`, or as an `ERROR` the schema does not have. A row whose
-outcome reads `not-met (unverified)` or `unverified` is a criterion the verifier
-could not check, and does not count as a finding.
+It reads the criteria table, not the verdict. Without tools the verdict line
+cannot separate "found the violation" from "could not run a gate": both come out
+as `FAIL`, or as an `ERROR` the schema does not have. So the dispatch tells the
+verifier to write `not-met (unverified)` for a criterion it cannot establish
+without tools, and such a row does not count as a finding.
 
 ## Adding a fixture
 
