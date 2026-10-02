@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   describeResult,
-  errorText,
   fixtureWasRead,
   invokedSkills,
   judgeTask,
@@ -169,13 +168,6 @@ describe('describeResult on a pass', () => {
     ).toBe(
       'ok   store-pattern/trigger: should load; invoked store-pattern, react-19',
     );
-  });
-});
-
-describe('errorText', () => {
-  it('reads an Error by its message and anything else as a string', () => {
-    expect(errorText(new Error('turn limit'))).toBe('turn limit');
-    expect(errorText('aborted')).toBe('aborted');
   });
 });
 

@@ -19,7 +19,9 @@ passes the body as the system prompt, unchanged. Each fixture sends one
 dispatch ([`dispatch.md`](./dispatch.md)): the shared issue's §5 and §6
 ([`issue.md`](./issue.md)), the fixture's `change.diff`, and
 `docs/agents/refactor-verified-contract.md`, which the verifier would otherwise
-read itself.
+read itself. It asks for the prose report only: the verdict document
+the prompt also describes needs `docs/agents/agent-review-contract.md` and a
+pull request, and neither exists in this run.
 
 The session has no tools, no MCP servers and loads no settings, and the run
 fails if the session's own `init` message lists any tool. **That makes this a narrower

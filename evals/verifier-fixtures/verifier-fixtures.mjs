@@ -78,9 +78,6 @@ export const sessionProblem = (messages) =>
     ),
   ) ?? resultProblem(finalResult(messages));
 
-export const errorText = (error) =>
-  error instanceof Error ? error.message : String(error);
-
 const PASS_VERDICT = /^PASS\b/;
 
 const runCounts = ({ expectedNotMet, run }) =>

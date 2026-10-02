@@ -154,14 +154,6 @@ export const coverageProblems = ({ catalog, declared, evals }) => {
 export const withoutSeparator = (args) =>
   args[0] === '--' ? args.slice(1) : args;
 
-export const chunk = (items, size) =>
-  Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
-    items.slice(index * size, (index + 1) * size),
-  );
-
-export const errorText = (error) =>
-  error instanceof Error ? error.message : String(error);
-
 export const sessionScope = ({ catalog, hidden, task }) => ({
   skills:
     hidden.length === 0

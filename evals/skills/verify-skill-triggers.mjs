@@ -30,11 +30,11 @@ import { parseArgs } from 'node:util';
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
+import { chunk, drain, errorText, runBatches } from '../agent-sessions.mjs';
+
 import {
-  chunk,
   coverageProblems,
   describeResult,
-  errorText,
   fixtureWasRead,
   invokedSkills,
   isPathScoped,
@@ -103,18 +103,6 @@ const catalog = () =>
     existsSync(join(SKILLS_ROOT, name, 'SKILL.md')),
   );
 
-const drain = async (session) => {
-  const messages = [];
-  try {
-    for await (const message of session) {
-      messages.push(message);
-    }
-    return { error: sessionError(messages), messages };
-  } catch (error) {
-    return { error: errorText(error), messages };
-  }
-};
-
 const attemptTask = async ({ hidden, model, skill, task }) => {
   const { cwd, fixtureFiles } = workspaceFor({ skill, task });
   const scope = sessionScope({ catalog: catalog(), hidden, task });
@@ -134,7 +122,9 @@ const attemptTask = async ({ hidden, model, skill, task }) => {
   const drained = await drain(session);
   const { messages } = drained;
   const error =
-    drained.error ?? scopeError({ expectedTools: scope.tools, messages });
+    drained.error ??
+    sessionError(messages) ??
+    scopeError({ expectedTools: scope.tools, messages });
   writeFileSync(
     join(REPORT_DIR, `${skill}-${task.id}.json`),
     JSON.stringify(messages, null, 2),
@@ -183,14 +173,6 @@ const runTask = (args) =>
     skill: args.skill,
     task: args.task,
   }));
-
-const runBatches = async ([batch, ...rest]) =>
-  batch === undefined
-    ? []
-    : [
-        ...(await Promise.all(batch.map((job) => job()))),
-        ...(await runBatches(rest)),
-      ];
 
 const assertCoverage = () => {
   const gaps = coverage();

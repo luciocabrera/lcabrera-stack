@@ -17,10 +17,11 @@ import { parseArgs } from 'node:util';
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
+import { chunk, drain, runBatches } from '../agent-sessions.mjs';
+
 import {
   agentBody,
   describeJudgement,
-  errorText,
   finalResult,
   judgeFixture,
   renderDispatch,
@@ -33,18 +34,6 @@ const MODEL = 'claude-opus-5-5';
 const REPORT_DIR = '.tmp/verifier-evals';
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
-
-const drain = async (session) => {
-  const messages = [];
-  try {
-    for await (const message of session) {
-      messages.push(message);
-    }
-    return { messages };
-  } catch (error) {
-    return { error: errorText(error), messages };
-  }
-};
 
 const runVerifier = async ({ dispatch, systemPrompt }) => {
   const session = query({
@@ -68,23 +57,15 @@ const runVerifier = async ({ dispatch, systemPrompt }) => {
   };
 };
 
-const runFixture = async ({ expectedNotMet, fixture, runs, shared }) => {
-  const dispatch = renderDispatch({
-    ...shared,
-    diff: read(`./${fixture}/change.diff`),
-  });
-  const sessions = await Promise.all(
-    Array.from({ length: runs }, () =>
-      runVerifier({ dispatch, systemPrompt: shared.systemPrompt }),
-    ),
-  );
+const CONCURRENCY = 4;
+
+const saveReports = ({ fixture, sessions }) => {
   for (const [index, { error, report }] of sessions.entries()) {
     writeFileSync(
       join(REPORT_DIR, `${fixture}-${index + 1}.md`),
       error === undefined ? report : `(${error})\n\n${report}`,
     );
   }
-  return judgeFixture({ expectedNotMet, fixture, runs: sessions });
 };
 
 const main = async () => {
@@ -100,12 +81,23 @@ const main = async () => {
     template: read('./dispatch.md'),
   };
   mkdirSync(REPORT_DIR, { recursive: true });
-  const judgements = await Promise.all(
-    Object.entries(JSON.parse(read('./expected.json'))).map(
-      ([fixture, expectedNotMet]) =>
-        runFixture({ expectedNotMet, fixture, runs, shared }),
-    ),
-  );
+  const fixtures = Object.entries(JSON.parse(read('./expected.json')));
+  const jobs = fixtures.flatMap(([fixture]) => {
+    const dispatch = renderDispatch({
+      ...shared,
+      diff: read(`./${fixture}/change.diff`),
+    });
+    return Array.from(
+      { length: runs },
+      () => () => runVerifier({ dispatch, systemPrompt: shared.systemPrompt }),
+    );
+  });
+  const results = await runBatches(chunk(jobs, CONCURRENCY));
+  const judgements = fixtures.map(([fixture, expectedNotMet], position) => {
+    const sessions = results.slice(position * runs, (position + 1) * runs);
+    saveReports({ fixture, sessions });
+    return judgeFixture({ expectedNotMet, fixture, runs: sessions });
+  });
   console.log(judgements.map(describeJudgement).join('\n'));
   console.log(`Full reports: ${REPORT_DIR}/`);
   if (judgements.some(({ matched, stable }) => !matched || !stable)) {
