@@ -1,6 +1,6 @@
 ---
 name: unslop
-description: "Cut AI tells from English a person will read: typography, vocabulary, structure, and this repo's engineering prose. Use when asked to unslop, humanize, de-AI, or make text sound human, and before drafting prose that is published or kept: PR and issue bodies, docs, ADRs, review comments, and chat write-ups longer than a few sentences. A short factual answer does not need it. Invoke as /unslop."
+description: "Cut AI tells from English a person will read: typography, vocabulary, structure, and this repo's engineering prose. Use when asked to unslop, humanize, de-AI, or make text sound human, and before drafting prose that is published or kept: PR and issue bodies, docs, ADRs, review comments, and chat write-ups longer than a few sentences. Invoke as /unslop."
 user-invocable: true
 argument-hint: '[text | calibrate]'
 ---
