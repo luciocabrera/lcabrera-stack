@@ -48,36 +48,6 @@ export const definiteNotMet = (report) =>
 
 const sameNumbers = (a, b) => a.join(',') === b.join(',');
 
-const toolsProblem = (init) => {
-  if (init === undefined) {
-    return 'the session never reported its tools';
-  }
-  if (!Array.isArray(init.tools)) {
-    return 'the session reported no tool list';
-  }
-  return init.tools.length === 0
-    ? undefined
-    : `the session held ${init.tools.join(', ')}`;
-};
-
-export const finalResult = (messages) =>
-  messages.findLast((message) => message.type === 'result');
-
-const succeeded = (result) =>
-  result?.subtype === 'success' && result.is_error !== true;
-
-const endingOf = (result) => result?.subtype ?? 'no result';
-
-const resultProblem = (result) =>
-  succeeded(result) ? undefined : `the session ended with ${endingOf(result)}`;
-
-export const sessionProblem = (messages) =>
-  toolsProblem(
-    messages.find(
-      (message) => message.type === 'system' && message.subtype === 'init',
-    ),
-  ) ?? resultProblem(finalResult(messages));
-
 const PASS_VERDICT = /^PASS\b/;
 
 const runCounts = ({ expectedNotMet, run }) =>
@@ -122,9 +92,6 @@ export const describeJudgement = ({
   const status = problems.length === 0 ? 'ok' : `FAIL (${problems.join('; ')})`;
   return `${fixture}: ${runs.map(describeRun).join(' | ')} -> ${status}`;
 };
-
-export const withoutSeparator = (args) =>
-  args[0] === '--' ? args.slice(1) : args;
 
 export const runCount = (value) => {
   const runs = Number(value);

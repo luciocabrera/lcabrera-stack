@@ -23,12 +23,14 @@ import { parseArgs } from 'node:util';
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
-import { chunk, drain, runBatches } from '../agent-sessions.mjs';
 import {
+  chunk,
+  drain,
   finalResult,
+  runBatches,
   sessionProblem,
   withoutSeparator,
-} from '../verifier-fixtures/verifier-fixtures.mjs';
+} from '../agent-sessions.mjs';
 
 import {
   baselineTable,

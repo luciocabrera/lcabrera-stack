@@ -7,6 +7,9 @@ branch: test/1251-skill-quality-baseline
 area:
   - evals/skill-quality/**
   - evals/README.md
+  - evals/agent-sessions.mjs
+  - evals/agent-sessions.test.mjs
+  - evals/verifier-fixtures/**
   - package.json
   - COMMANDS.md
   - .fallowrc.json
