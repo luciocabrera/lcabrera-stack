@@ -6,7 +6,8 @@ status: review
 branch: chore/1058-braces-advisory
 area:
   - docs/agents/dependency-advisories.json
-  - packages/devkit/assets/root/docs/**
+  - packages/devkit/assets/workspace/docs/**
+  - packages/devkit/README.md
   - packages/devkit/CLASSIFICATION.md
   - .changeset/**
 started: 2026-10-03

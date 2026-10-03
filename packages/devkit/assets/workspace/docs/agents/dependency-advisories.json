@@ -10,7 +10,7 @@
     {
       "ghsa": "GHSA-vfj7-8cjw-p6xm",
       "expires": "2026-11-03",
-      "reason": "No patched braces exists: 3.0.3 is the latest release and the advisory lists no fixed version. It is reached only through micromatch 4 in dev tooling (changesets, the StyleX eslint plugin, fast-glob), with no production path; those tools expand glob patterns from this repository's own config. Re-check on expiry or when braces publishes a fix.",
+      "reason": "No patched braces exists: 3.0.3 is the latest release and the advisory lists no fixed version. This rung installs the kit's shared Vite config, whose peer @stylexjs/eslint-plugin reaches braces through micromatch 4; that is lint tooling, with no production path, and it expands glob patterns from the repository's own config. Delete this entry if your tree no longer resolves braces 3.0.3 or older, and re-check it on expiry.",
       "ref": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm"
     }
   ]

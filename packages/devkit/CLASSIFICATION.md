@@ -351,15 +351,16 @@ that run them before a push, the templates they check against and the registers
 they read are path-discovered exactly like a skill, so they use the same
 mechanism and the same manifest.
 
-| Seed                                                        | Profile | Update | Verdict          | Dependency | Reason                                                                                                                                                                                                                                                                                                                    |
-| ----------------------------------------------------------- | ------- | ------ | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `coordination/README.md`, `coordination/tasks/_TEMPLATE.md` | `agent` | seed   | **portable**     | —          | The claim protocol and the task schema, with this repository's board, its one-step claim command and its decision citations removed. On `agent` rather than `repo`: the skills bind to it, and reading it needs nothing.                                                                                                  |
-| `decisions/_TEMPLATE.md`                                    | `agent` | seed   | **portable**     | —          | The record shape. The numbering rule travels; the taxonomy citation does not.                                                                                                                                                                                                                                             |
-| `decisions/README.md`                                       | `agent` | seed   | **portable**     | —          | Generated, not authored: byte-identical to what the ADR gate renders for a default home, pinned by `scripts/lib/devkit-seeds.test.mjs` — which lives outside both packages because neither may depend on the other. Without it a fresh home fails its own gate; without the test it would drift into failing it silently. |
-| `templates/pull_request_template.md`                        | `repo`  | seed   | **portable**     | —          | The sections are the gate runtime's, and it names the allowed types itself when it rejects one. `repo`, because nothing reads it until there is a code host.                                                                                                                                                              |
-| `templates/ISSUE_TEMPLATE/standard_issue.md`                | `repo`  | seed   | **portable**     | —          | The sections `repo-verify-issue` requires, and nothing this repository owns. `repo`, because nothing reads it until there is a code host.                                                                                                                                                                                 |
-| `hooks/commit-msg`, `hooks/pre-push`                        | `repo`  | seed   | **parameterise** | **hard**   | Git discovers a hook by path, so the file must be materialised — and its body is nothing but an invocation of the runtime's bins plus the consumer's `check`/`test`. They arrive **executable**: a hook without the bit is skipped by git without a word, which reads like a hook that passed.                            |
-| `root/COMMANDS.md`                                          | `repo`  | seed   | **portable**     | —          | Lists only what the two packages provide, and the config keys a consumer supplies. `repo`, because every command in it needs a runner.                                                                                                                                                                                    |
+| Seed                                                        | Profile    | Update | Verdict          | Dependency | Reason                                                                                                                                                                                                                                                                                                                                |
+| ----------------------------------------------------------- | ---------- | ------ | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `coordination/README.md`, `coordination/tasks/_TEMPLATE.md` | `agent`    | seed   | **portable**     | —          | The claim protocol and the task schema, with this repository's board, its one-step claim command and its decision citations removed. On `agent` rather than `repo`: the skills bind to it, and reading it needs nothing.                                                                                                              |
+| `decisions/_TEMPLATE.md`                                    | `agent`    | seed   | **portable**     | —          | The record shape. The numbering rule travels; the taxonomy citation does not.                                                                                                                                                                                                                                                         |
+| `decisions/README.md`                                       | `agent`    | seed   | **portable**     | —          | Generated, not authored: byte-identical to what the ADR gate renders for a default home, pinned by `scripts/lib/devkit-seeds.test.mjs` — which lives outside both packages because neither may depend on the other. Without it a fresh home fails its own gate; without the test it would drift into failing it silently.             |
+| `templates/pull_request_template.md`                        | `repo`     | seed   | **portable**     | —          | The sections are the gate runtime's, and it names the allowed types itself when it rejects one. `repo`, because nothing reads it until there is a code host.                                                                                                                                                                          |
+| `templates/ISSUE_TEMPLATE/standard_issue.md`                | `repo`     | seed   | **portable**     | —          | The sections `repo-verify-issue` requires, and nothing this repository owns. `repo`, because nothing reads it until there is a code host.                                                                                                                                                                                             |
+| `hooks/commit-msg`, `hooks/pre-push`                        | `repo`     | seed   | **parameterise** | **hard**   | Git discovers a hook by path, so the file must be materialised — and its body is nothing but an invocation of the runtime's bins plus the consumer's `check`/`test`. They arrive **executable**: a hook without the bit is skipped by git without a word, which reads like a hook that passed.                                        |
+| `root/COMMANDS.md`                                          | `repo`     | seed   | **portable**     | —          | Lists only what the two packages provide, and the config keys a consumer supplies. `repo`, because every command in it needs a runner.                                                                                                                                                                                                |
+| `workspace/docs/agents/dependency-advisories.json`          | `monorepo` | seed   | **portable**     | —          | The register `deps:audit` reads, carrying the allowances for advisories the kit's own dependencies bring in, so a created workspace passes its audit on the command after the one that made it. `monorepo`, because that rung wires `deps:audit` and installs `@lcabrera/vite-config`, whose peers are where those advisories arrive. |
 
 ## Root scripts
 
@@ -550,12 +551,12 @@ an edit that is wrong fails loudly, at connection time. So `seed`, and the `full
 group now ships it as one.
 
 **`docs/agents/dependency-advisories.json`.** Profile: `deps:audit` is the only
-thing that reads it and that gate is `repo`, so `repo`. Update: every entry is an
+thing that reads it, and `init` wires that task at `monorepo`, so `monorepo`. Update: every entry is an
 allowance this consumer granted, with their own expiry date. It is theirs to
 write, so `seed`. The schema it must satisfy is enforced by the gate, which is a
-package — the register is the data, not the decision. The `root` group ships it,
-holding the allowances for advisories the kit's own dependencies bring in, so a
-created tree passes its audit on day one. Like every placed file, `sync`
+package — the register is the data, not the decision. The `workspace` group
+ships it with the allowances for advisories the kit's own dependencies bring in
+(the "Scaffolding seeds" table has the row). Like every placed file, `sync`
 refreshes it while the consumer has not edited it, and keeps their edits once
 they have.
 
@@ -567,7 +568,7 @@ tree can tell. So `package`.
 
 The third is the falsification: it already lives in a package, so a criterion
 answering "seed" there would be wrong, and it does not. The second is placed by
-the `root` group, and the answers match what the tables above give comparable
+the `workspace` group, and the answers match what the tables above give comparable
 files — the database lane is `full`/`seed` like `db:up`, and a register read by a
 gate is `seed` beside a `package` gate, like the coordination task template.
 
