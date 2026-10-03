@@ -85,6 +85,23 @@ const nameMatchFindings = (artifact) => {
  * @param {{
  *   kind: string;
  *   label: string;
+ *   parsed: { yamlError?: string } | null;
+ * }} artifact
+ */
+const yamlFindings = (artifact) =>
+  artifact.parsed?.yamlError === undefined
+    ? []
+    : [
+        finding(
+          artifact,
+          `Frontmatter in ${artifact.label} is not valid YAML: ${artifact.parsed.yamlError}`,
+        ),
+      ];
+
+/**
+ * @param {{
+ *   kind: string;
+ *   label: string;
  *   name: string;
  *   parsed: object | null;
  * }} artifact
@@ -99,7 +116,11 @@ const contractFindings = (artifact) => {
     ];
   }
 
-  return [...missingFieldFindings(artifact), ...nameMatchFindings(artifact)];
+  return [
+    ...yamlFindings(artifact),
+    ...missingFieldFindings(artifact),
+    ...nameMatchFindings(artifact),
+  ];
 };
 
 module.exports = {

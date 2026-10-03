@@ -14,6 +14,15 @@ describe('conformance contract — planted malformed frontmatter', () => {
     },
     {
       files: {
+        '.github/skills/colon/SKILL.md':
+          '---\nname: colon\ndescription: Use when a person will read: prose, docs.\n---\n\n# Colon\n',
+      },
+      message:
+        'Frontmatter in .github/skills/colon/SKILL.md is not valid YAML: Nested mappings are not allowed in compact mappings (line 3)',
+      planted: 'a skill whose plain description holds a colon and a space',
+    },
+    {
+      files: {
         '.claude/rules/no-paths.md': '---\ndescription: none\n---\n\n# Rule\n',
       },
       message:

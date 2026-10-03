@@ -686,6 +686,9 @@ importers:
       ts-morph:
         specifier: catalog:tooling
         version: 28.0.0
+      yaml:
+        specifier: catalog:tooling
+        version: 2.9.1
     devDependencies:
       '@lcabrera/vite-config':
         specifier: workspace:*
