@@ -130,7 +130,8 @@
   },
   "dependencies": {
     "@arethetypeswrong/core": "catalog:tooling",
-    "ts-morph": "catalog:tooling"
+    "ts-morph": "catalog:tooling",
+    "yaml": "catalog:tooling"
   },
   "devDependencies": {
     "@lcabrera/vite-config": "workspace:*",

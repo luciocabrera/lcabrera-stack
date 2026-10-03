@@ -10,6 +10,7 @@
 'use strict';
 
 const fs = require('node:fs');
+const { parse: parseYaml, YAMLParseError } = require('yaml');
 
 const ENTRY_START = /^[A-Za-z][\w-]*:/;
 const BLOCK_SCALAR = /^[|>][-+\d]*$/;
@@ -108,11 +109,41 @@ const listValues = (lines) => {
 };
 
 /**
+ * @param {unknown} error
+ * @returns {string}
+ */
+const describeYamlError = (error) => {
+  if (!(error instanceof YAMLParseError)) {
+    return error instanceof Error ? error.message : String(error);
+  }
+
+  const reason = error.message
+    .split('\n', 1)[0]
+    .replace(/ at line \d+, column \d+:?$/, '');
+  const line = error.linePos?.[0].line;
+  return line === undefined ? reason : `${reason} (line ${line + 1})`;
+};
+
+/**
+ * @param {string} raw
+ * @returns {string | undefined}
+ */
+const yamlError = (raw) => {
+  try {
+    parseYaml(raw);
+    return;
+  } catch (error) {
+    return describeYamlError(error);
+  }
+};
+
+/**
  * @param {string} rawContent
  * @returns {{
  *   body: string;
  *   frontmatter: Record<string, string>;
  *   lists: Record<string, readonly string[]>;
+ *   yamlError: string | undefined;
  * } | null}
  */
 const parseFrontmatterContent = (rawContent) => {
@@ -134,6 +165,7 @@ const parseFrontmatterContent = (rawContent) => {
         return values === undefined ? [] : [[entry.key, values]];
       }),
     ),
+    yamlError: yamlError(split.raw),
   };
 };
 

@@ -77,7 +77,7 @@ resolvePublishing [const] (raw: any) => { apiSurfaceDir: string; packagesDir: st
 resolveRegisters [const] (raw: any) => { adrCommands: { list: string; new: string; write: string; }; adrContentBaseline: string; adrDraftDir: string; adrGrandfatheredDuplicates: never[]; adrHomes: { blurb: string; dir: string; tier: string; title: string; }[]; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; planningDir: string; requirementsDir: string; } | { adrCommands: { [k: string]: any; }; adrContentBaseline: string; adrDraftDir: string; adrGrandfatheredDuplicates: any; adrHomes: any; adrTemplateHome: string; coordinationBoardDoc: string; coordinationTasksDir: string; planningDir: string; requirementsDir: string; }
 
 ## ./conformance-artifacts
-collectArtifacts [value] ({ repoRoot }: { repoRoot: string; }) => { artifacts: { filePath: string; kind: string; label: string; name: string; parsed: { body: string; frontmatter: Record<string, string>; lists: Record<string, readonly string[]>; } | null; }[]; findings: { kind: string; label: any; message: string; }[]; skippedDirectories: string[] | never[]; unreadableNames: string[] | never[]; }
+collectArtifacts [value] ({ repoRoot }: { repoRoot: string; }) => { artifacts: { filePath: string; kind: string; label: string; name: string; parsed: { body: string; frontmatter: Record<string, string>; lists: Record<string, readonly string[]>; yamlError: string | undefined; } | null; }[]; findings: { kind: string; label: any; message: string; }[]; skippedDirectories: string[] | never[]; unreadableNames: string[] | never[]; }
 KINDS [value] { rule: { nameSource: string; requiredFields: string[]; root: string; triggerField: string; }; skill: { nameSource: string; requiredFields: string[]; root: string; triggerField: string; }; subagent: { nameSource: string; requiredFields: string[]; root: string; triggerField: string; }; }
 SUPPORT_DIRECTORIES [value] Set<string>
 
@@ -86,7 +86,7 @@ checkConformance [value] (args?: { repoRoot?: string; }) => { checked: { [k: str
 
 ## ./conformance-frontmatter
 parseFrontmatter [value] (filePath: string) => ReturnType<typeof parseFrontmatterContent>
-parseFrontmatterContent [value] (rawContent: string) => { body: string; frontmatter: Record<string, string>; lists: Record<string, readonly string[]>; } | null
+parseFrontmatterContent [value] (rawContent: string) => { body: string; frontmatter: Record<string, string>; lists: Record<string, readonly string[]>; yamlError: string | undefined; } | null
 
 ## ./conformance-references
 extractRelativeLinks [value] (markdown: string) => readonly string[]
