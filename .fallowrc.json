@@ -47,6 +47,7 @@
     "eslint-plugin-security",
     "eslint-plugin-unicorn",
     "globals",
+    "react-doctor",
     "ts-morph",
     "vite-plugin-babel",
     "typescript-eslint"

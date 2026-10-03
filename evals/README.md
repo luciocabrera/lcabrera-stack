@@ -8,12 +8,13 @@ path it names resolves; nothing here repeats that. CI runs this directory in
 and `check:safe` run the rules check, and `test:all` and `test:ci` run the
 suites' own tests.
 
-| Suite                                    | Run locally                 | Calls a model |
-| ---------------------------------------- | --------------------------- | ------------- |
-| [Rules consistency](./rules-consistency) | `vp run evals:rules:verify` | no            |
-| [Skill triggers](./skills)               | `vp run evals:skills`       | yes           |
-| [Verifier fixtures](./verifier-fixtures) | `vp run evals:verifier`     | yes           |
-| The suites' own tests                    | `vp run test:evals`         | no            |
+| Suite                                    | Run locally                   | Calls a model |
+| ---------------------------------------- | ----------------------------- | ------------- |
+| [Rules consistency](./rules-consistency) | `vp run evals:rules:verify`   | no            |
+| [Skill triggers](./skills)               | `vp run evals:skills`         | yes           |
+| [Skill quality](./skill-quality)         | `vp run evals:skills:quality` | yes           |
+| [Verifier fixtures](./verifier-fixtures) | `vp run evals:verifier`       | yes           |
+| The suites' own tests                    | `vp run test:evals`           | no            |
 
 ## Rules consistency
 

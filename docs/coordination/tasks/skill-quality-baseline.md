@@ -2,7 +2,7 @@
 id: skill-quality-baseline
 title: Claude-judged skill quality baseline in place of waza quality
 owner: agent:claude
-status: active
+status: review
 branch: test/1251-skill-quality-baseline
 area:
   - evals/skill-quality/**
@@ -12,7 +12,7 @@ area:
 started: 2026-10-03
 updated: 2026-10-03
 plan: (none)
-pr: (none)
+pr: #1252
 issue: #1251
 ---
 
@@ -22,6 +22,6 @@ Claude-judged skill quality baseline in place of waza quality
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review on #1252
 - Blockers: none
-- Next:
+- Next: resolve review threads, then merge
