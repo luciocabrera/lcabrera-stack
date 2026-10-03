@@ -553,7 +553,11 @@ group now ships it as one.
 thing that reads it and that gate is `repo`, so `repo`. Update: every entry is an
 allowance this consumer granted, with their own expiry date. It is theirs to
 write, so `seed`. The schema it must satisfy is enforced by the gate, which is a
-package — the register is the data, not the decision.
+package — the register is the data, not the decision. The `root` group ships it,
+holding the allowances for advisories the kit's own dependencies bring in, so a
+created tree passes its audit on day one. Like every placed file, `sync`
+refreshes it while the consumer has not edited it, and keeps their edits once
+they have.
 
 **`packages/repo-standards/scripts/commit-convention.mjs`.** Profile: commits and
 branches are `repo`-rung facts, so `repo`. Update: it is the one spec behind the
@@ -562,8 +566,8 @@ it gets a green hook on a message the upstream gate rejects, and nothing in thei
 tree can tell. So `package`.
 
 The third is the falsification: it already lives in a package, so a criterion
-answering "seed" there would be wrong, and it does not. The second has no
-placement yet, and the answers match what the tables above give comparable
+answering "seed" there would be wrong, and it does not. The second is placed by
+the `root` group, and the answers match what the tables above give comparable
 files — the database lane is `full`/`seed` like `db:up`, and a register read by a
 gate is `seed` beside a `package` gate, like the coordination task template.
 

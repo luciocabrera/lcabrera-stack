@@ -1,0 +1,17 @@
+{
+  "$schema-note": "Read by the dependency audit gate. Each entry carries an advisory the gate would otherwise fail on.",
+  "policy": {
+    "key": "`ghsa` is the GitHub advisory identifier (GHSA-xxxx-xxxx-xxxx), never the numeric id the package manager's audit prints.",
+    "expires": "REQUIRED, `YYYY-MM-DD`. Past its date the entry stops covering the advisory and the gate fails, so the deferral is argued again or the dependency is bumped.",
+    "removal": "The gate also fails on an entry matching no advisory in the tree: delete it once the dependency is fixed.",
+    "reason": "Say why the advisory cannot be fixed now and what makes carrying it acceptable meanwhile, in terms someone can re-check."
+  },
+  "allowed": [
+    {
+      "ghsa": "GHSA-vfj7-8cjw-p6xm",
+      "expires": "2026-11-03",
+      "reason": "No patched braces exists: 3.0.3 is the latest release and the advisory lists no fixed version. It is reached only through micromatch 4 in dev tooling (changesets, the StyleX eslint plugin, fast-glob), with no production path; those tools expand glob patterns from this repository's own config. Re-check on expiry or when braces publishes a fix.",
+      "ref": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm"
+    }
+  ]
+}

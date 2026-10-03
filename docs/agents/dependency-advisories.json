@@ -7,5 +7,12 @@
     "removal": "The gate also fails on an entry matching NO advisory in the tree. `minimumReleaseAgeExclude` in pnpm-workspace.yaml rotted exactly that way — 13 of 15 entries pinned to versions that no longer resolved, recording a supply-chain posture the repo was not running (#516 Finding 3). A list that does not clean itself is how that happens.",
     "reason": "Say why the advisory cannot simply be fixed, and what makes carrying it acceptable meanwhile — which declared range blocks the bump, or which code path makes it unreachable. `pnpm audit` marks a finding `dev: false` when it reaches the tree through a runtime path; the gate surfaces that as `[production path]`, and a reason that ignores it is not a reason."
   },
-  "allowed": []
+  "allowed": [
+    {
+      "ghsa": "GHSA-vfj7-8cjw-p6xm",
+      "expires": "2026-11-03",
+      "reason": "No patched braces exists: 3.0.3 is the latest release and the advisory lists no fixed version, so there is nothing to bump to. It is reached only through micromatch 4 (via @changesets/*, @stylexjs/eslint-plugin and fast-glob/globby), all dev tooling; the audit marks no production path. Those tools expand glob patterns written in this repository's own config and file lists, not input from outside it. Re-check on expiry or when braces publishes a fix.",
+      "ref": "#1058"
+    }
+  ]
 }
