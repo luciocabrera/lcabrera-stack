@@ -64,17 +64,6 @@ export const judgePrompt = (skillContent) =>
 
 const FENCE = '```';
 
-const jsonText = (reply) => {
-  const start = reply.indexOf(FENCE);
-  const end = reply.lastIndexOf(FENCE);
-  return start === -1 || end <= start
-    ? reply.trim()
-    : reply
-        .slice(start + FENCE.length, end)
-        .replace(/^json/, '')
-        .trim();
-};
-
 const parseJson = (text) => {
   try {
     return JSON.parse(text);
@@ -82,6 +71,20 @@ const parseJson = (text) => {
     return;
   }
 };
+
+const fencedText = (reply) => {
+  const start = reply.indexOf(FENCE);
+  const end = reply.lastIndexOf(FENCE);
+  return end > start
+    ? reply
+        .slice(start + FENCE.length, end)
+        .replace(/^json/, '')
+        .trim()
+    : '';
+};
+
+const replyJson = (reply) =>
+  parseJson(reply.trim()) ?? parseJson(fencedText(reply));
 
 const isScore = (score) => Number.isInteger(score) && score >= 1 && score <= 5;
 
@@ -118,7 +121,7 @@ const byNameOf = (dimensions) =>
   new Map(dimensions.map((dimension) => [dimension?.name, dimension]));
 
 export const parseJudgement = (reply) => {
-  const parsed = parseJson(jsonText(reply));
+  const parsed = replyJson(reply);
   if (!Array.isArray(parsed?.dimensions)) {
     return {
       problems: ['the reply is not the JSON object the prompt asks for'],

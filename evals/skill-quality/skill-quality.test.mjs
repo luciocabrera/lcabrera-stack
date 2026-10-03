@@ -45,6 +45,17 @@ describe('parseJudgement', () => {
     expect(parseJudgement(fenced).judgement?.overall).toBe(5);
   });
 
+  it('reads a bare reply whose feedback quotes a fence', () => {
+    const text = JSON.stringify({
+      dimensions: RUBRIC.map(({ name }) => ({
+        feedback: 'The ```bash``` block up front helps.',
+        name,
+        score: 4,
+      })),
+    });
+    expect(parseJudgement(text).judgement?.overall).toBe(4);
+  });
+
   it.each([
     [
       'prose',
