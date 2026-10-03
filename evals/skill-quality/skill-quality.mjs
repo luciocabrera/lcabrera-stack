@@ -62,9 +62,18 @@ export const judgePrompt = (skillContent) =>
     '---',
   ].join('\n');
 
-const FENCED = /```(?:json)?\s*([\s\S]*?)```/;
+const FENCE = '```';
 
-const jsonText = (reply) => (FENCED.exec(reply)?.[1] ?? reply).trim();
+const jsonText = (reply) => {
+  const start = reply.indexOf(FENCE);
+  const end = reply.lastIndexOf(FENCE);
+  return start === -1 || end <= start
+    ? reply.trim()
+    : reply
+        .slice(start + FENCE.length, end)
+        .replace(/^json/, '')
+        .trim();
+};
 
 const parseJson = (text) => {
   try {
