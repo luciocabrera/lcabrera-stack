@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { chunk, drain, errorText, runBatches } from './agent-sessions.mjs';
+import {
+  chunk,
+  drain,
+  errorText,
+  runBatches,
+  sessionProblem,
+  withoutSeparator,
+} from './agent-sessions.mjs';
 
 describe('chunk', () => {
   it('splits into batches of at most the given size', () => {
@@ -50,5 +57,46 @@ describe('drain', () => {
       error: 'Reached maximum number of turns (1)',
       messages: [{ type: 'system' }],
     });
+  });
+});
+
+describe('sessionProblem', () => {
+  const init = (tools) => ({ subtype: 'init', tools, type: 'system' });
+  const success = { subtype: 'success', type: 'result' };
+
+  it('accepts a session with no tools that ended in success', () => {
+    expect(sessionProblem([init([]), success])).toBeUndefined();
+  });
+
+  it('names the tools when the no-tools option did not take', () => {
+    expect(sessionProblem([init(['Bash', 'Read']), success])).toBe(
+      'the session held Bash, Read',
+    );
+  });
+
+  it('reports a session that did not finish, or never said what it held', () => {
+    expect(
+      sessionProblem([
+        init([]),
+        { is_error: true, subtype: 'error_max_turns', type: 'result' },
+      ]),
+    ).toBe('the session ended with error_max_turns');
+    expect(sessionProblem([init([])])).toBe('the session ended with no result');
+    expect(sessionProblem([success])).toBe(
+      'the session never reported its tools',
+    );
+    expect(sessionProblem([{ subtype: 'init', type: 'system' }, success])).toBe(
+      'the session reported no tool list',
+    );
+  });
+});
+
+describe('withoutSeparator', () => {
+  it('drops the -- that vp run passes through', () => {
+    expect(withoutSeparator(['--', '--runs', '3'])).toStrictEqual([
+      '--runs',
+      '3',
+    ]);
+    expect(withoutSeparator(['--runs', '3'])).toStrictEqual(['--runs', '3']);
   });
 });

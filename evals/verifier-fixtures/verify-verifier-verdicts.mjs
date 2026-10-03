@@ -17,17 +17,21 @@ import { parseArgs } from 'node:util';
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
-import { chunk, drain, runBatches } from '../agent-sessions.mjs';
+import {
+  chunk,
+  drain,
+  finalResult,
+  runBatches,
+  sessionProblem,
+  withoutSeparator,
+} from '../agent-sessions.mjs';
 
 import {
   agentBody,
   describeJudgement,
-  finalResult,
   judgeFixture,
   renderDispatch,
   runCount,
-  sessionProblem,
-  withoutSeparator,
 } from './verifier-fixtures.mjs';
 
 const MODEL = 'claude-opus-5-5';
