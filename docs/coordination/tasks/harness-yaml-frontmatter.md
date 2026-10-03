@@ -8,6 +8,7 @@ area:
   - packages/repo-standards/scripts/conformance-*
   - packages/repo-standards/package.json
   - .changeset/**
+  - .github/workflows/validate-skills.yml
 started: 2026-10-03
 updated: 2026-10-03
 plan: (none)
