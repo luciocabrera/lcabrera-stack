@@ -9,6 +9,7 @@ area:
   - evals/README.md
   - package.json
   - COMMANDS.md
+  - .fallowrc.json
 started: 2026-10-03
 updated: 2026-10-03
 plan: (none)
