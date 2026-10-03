@@ -28,7 +28,8 @@ first launch post.
 ## When it applies
 
 Apply from the first draft, not as a polish pass, whenever a person will read
-the English: chat replies, PR/issue **prose**, docs, ADRs, review comments.
+the English: chat replies longer than a few sentences, PR/issue **prose**,
+docs, ADRs, review comments. A short factual answer does not need it.
 
 **Do not apply** (or apply only Level 1 debris cleanup) to:
 
