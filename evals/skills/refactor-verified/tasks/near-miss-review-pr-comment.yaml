@@ -4,8 +4,8 @@ set: capability
 tags:
   - negative-trigger
 inputs:
-  prompt: A reviewer wrote 'why not use a Set here?' on my PR. Draft a one-
-    sentence reply saying the list is small and order matters. Load any
+  prompt: A reviewer wrote 'why not use a Set here?' on my PR. Draft a
+    one-sentence reply saying the list is small and order matters. Load any
     skill you need, but don't run shell commands or edit files.
 expected:
   should_trigger: false
