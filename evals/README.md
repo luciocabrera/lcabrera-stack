@@ -20,21 +20,23 @@ suites' own tests.
 
 The skill-trigger and verifier suites run each task or fixture three times by
 default, so a task that fails one trial in three shows as flaky rather than
-broken. The cost below is the sum each runner prints at the end, from the cost
-its sessions reported. It was measured on 2026-10-05, on `claude-opus-5-5` with
-a Claude subscription, at the defaults, when `evals/skills/` held 132 tasks and
-the verifier 5 fixtures:
+broken. To measure what one full run costs, run each suite at its defaults
+under `time`:
 
-| Command                 | Sessions | Reported cost | Wall time |
-| ----------------------- | -------- | ------------- | --------- |
-| `vp run evals:skills`   | 396      | $28.22        | 24 min    |
-| `vp run evals:verifier` | 15       | $1.80         | 2 min     |
+```bash
+time vp run evals:skills
+time vp run evals:verifier
+```
 
-It moves with the task count, the model and the prompts, so rerun the command
-for a current figure rather than trusting the table. The skills suite came to
-about $0.07 a session, which scales it to the current task count. `--runs 1` on
-the skills runner costs about a third as much; the verifier refuses fewer than
-2 runs.
+Each runner ends with a `Cost:` line: the sum of the `total_cost_usd` every
+session reported, and how many sessions reported none. On a Claude subscription
+that figure is notional, priced as if the tokens were billed per call, so it
+compares one run with another and is not a bill. The count of sessions is the task
+count times `--runs`, so `--runs 1` on the skills runner costs about a third of
+the default. The verifier refuses fewer than 2 runs.
+
+The recorded measurement, with its date, model and the task set it ran
+against, is on [#1292](https://github.com/luciocabrera/lcabrera-stack/issues/1292).
 
 ## Turning a real failure into a task
 
