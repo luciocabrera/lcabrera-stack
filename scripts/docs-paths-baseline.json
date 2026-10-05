@@ -1,7 +1,4 @@
 {
-  "docs/agents/planning/adr-drafts/eval-history-lives-in-a-private-workspace.md": {
-    "packages/eval-history": "Workspace this draft proposes; created by #1265, then pruned by --write"
-  },
   "docs/agents/planning/adr-drafts/serve-the-eval-dashboard-from-the-showcase.md": {
     "apps/eval-dashboard": "A separate app the draft weighs and rejects; never created",
     "apps/showcase/src/routes/evals/": "Route folder the draft proposes; created by #1277, then pruned by --write"
