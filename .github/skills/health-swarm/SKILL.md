@@ -1,6 +1,6 @@
 ---
 name: health-swarm
-description: Run a parallel codebase-health sweep — six read-mostly scout subagents (duplication, dead code, perf, deps, doc drift, lint coherence), each filing evidence-backed findings classified MECHANICAL or JUDGMENT. Use for a periodic audit, before a large refactor, or when asking "what has rotted here".
+description: Run a parallel codebase-health sweep — six read-mostly scout subagents (duplication, dead code, perf, deps, doc drift, lint coherence), each filing evidence-backed findings classified MECHANICAL or JUDGMENT. Use for a periodic audit, before a large refactor, or when asking "what has rotted here". A cleanup list limited to unimported files, unused exports or dependencies and duplicated code is fallow-code-checker.
 argument-hint: 'Optional scout subset, for example: perf deps, or lint-coherence. Omit to run all six.'
 user-invocable: true
 ---

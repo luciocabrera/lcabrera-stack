@@ -1,6 +1,6 @@
 ---
 name: fallow-code-checker
-description: Run a full fallow scan with vp and produce a prioritized, evidence-based report aligned to the code-smell-checker output contract. Use when running a full static analysis scan for dead code, unused exports, high complexity, or fallow findings.
+description: Run a full fallow scan with vp and produce a prioritized, evidence-based report aligned to the code-smell-checker output contract. Use for a full static analysis scan, or a prioritized cleanup list, of what fallow finds — unimported files, unused exports or dependencies, duplicated code, high complexity. A sweep that also covers stale docs, performance or lint-config coherence is health-swarm.
 argument-hint: 'Optional scope, for example: repo, apps/showcase, or changed files only'
 user-invocable: true
 context: fork
