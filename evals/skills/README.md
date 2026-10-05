@@ -1,6 +1,6 @@
 # Skill trigger evals
 
-Every skill under `.github/skills/` has at least one task of each kind under
+Every skill under `.github/skills/` has at least five tasks of each kind under
 its `tasks/`, and may have more:
 
 - a trigger task (`expected.should_trigger: true`): a prompt the skill exists
@@ -145,7 +145,8 @@ parse; its token budget, unknown fields and link-scope reports are advisory,
 because they are this repository's conventions, not defects.
 
 The same job runs `vp run evals:skills -- --check`, which makes no model call.
-It fails a skill under `.github/skills/` with no trigger or near-miss task here,
+It fails a skill under `.github/skills/` with fewer than five trigger or five
+near-miss tasks here, naming the skill and the kind it is short of,
 a task with no `id`, two tasks of one skill sharing an `id`, a task whose
 `should_trigger` is missing or not a boolean, a task with no `set` or an
 unknown `set` or `source` (each naming the task's file), an eval whose

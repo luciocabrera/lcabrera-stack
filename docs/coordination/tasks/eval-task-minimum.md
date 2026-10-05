@@ -2,7 +2,7 @@
 id: eval-task-minimum
 title: Require five trigger and five near-miss tasks per skill in --check
 owner: agent:claude
-status: active
+status: review
 branch: feat/1291-eval-task-minimum
 area:
   - evals/skills/skill-triggers.mjs
@@ -13,7 +13,7 @@ area:
 started: 2026-10-05
 updated: 2026-10-05
 plan: (none)
-pr: (none)
+pr: '#1321'
 issue: #1291
 ---
 
