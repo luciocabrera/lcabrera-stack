@@ -56,6 +56,10 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   // defineConfig(...)`, `export default createRule(...)`, a config array — and
   // the only fix available is to bind the same call to a variable first.
   'unicorn/no-top-level-side-effects': 'off',
+  // New in unicorn 77's recommended set. A `flatMap` callback may return a bare
+  // value, but one that returns an array from every branch shows "zero, one or
+  // many" at a glance, and the bare value saves one allocation.
+  'unicorn/no-unnecessary-array-flat-map': 'off',
   // Two positions are exempt, both because the fixer is unsafe there rather
   // than because the rule is wrong.
   //
@@ -88,6 +92,9 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   // that an http origin is rejected became https, and the test inverted.
   'unicorn/prefer-https': 'off',
   'unicorn/prefer-query-selector': 'off',
+  // unicorn 77 extends the rule to merge an `if` that returns with the `return`
+  // after it. `only-single-line` keeps that where the condition and both values
+  // each fit on one line, and leaves a multi-line guard clause as it is.
   'unicorn/prefer-ternary': ['error', 'only-single-line'],
   'unicorn/prevent-abbreviations': 'off',
   // New in unicorn 73's recommended set. Off deliberately and temporarily, not
@@ -206,5 +213,24 @@ export const createCommonJsFileConfig = () => ({
   files: ['**/*.cjs'],
   rules: {
     '@typescript-eslint/no-require-imports': 'off',
+  },
+});
+
+/**
+ * The narrower block for tests, which `.test.*`, `.spec.*` and an `e2e/`
+ * directory declare a file to be.
+ *
+ * `unicorn/no-unnecessary-parameters` reports a parameter that receives the
+ * same value at every call. In a test nearly every such parameter belongs to a
+ * helper that the current cases happen to call the same way, and inlining the
+ * value makes a general helper specific to them. Source code keeps the rule.
+ */
+export const createTestFileConfig = () => ({
+  files: [
+    '**/*.{test,spec}.{js,mjs,cjs,jsx,ts,mts,cts,tsx}',
+    '**/e2e/**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}',
+  ],
+  rules: {
+    'unicorn/no-unnecessary-parameters': 'off',
   },
 });

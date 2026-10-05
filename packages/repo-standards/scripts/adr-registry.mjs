@@ -61,12 +61,16 @@ const homeFindings = (home, entries) =>
   entries.flatMap((entry) => {
     const parsed = parseAdrFilename(entry.filename);
     if (parsed === undefined) {
-      return `${home.dir}/${entry.filename} — filename must be ADR-NNN-kebab-slug.md`;
+      return [
+        `${home.dir}/${entry.filename} — filename must be ADR-NNN-kebab-slug.md`,
+      ];
     }
     const declared = entry.headingNumber;
     return declared === undefined || declared === parsed.number
       ? []
-      : `${home.dir}/${entry.filename} — its heading says ADR-${pad(declared)}; the filename says ADR-${pad(parsed.number)}`;
+      : [
+          `${home.dir}/${entry.filename} — its heading says ADR-${pad(declared)}; the filename says ADR-${pad(parsed.number)}`,
+        ];
   });
 
 const numberedEntries = (home) =>

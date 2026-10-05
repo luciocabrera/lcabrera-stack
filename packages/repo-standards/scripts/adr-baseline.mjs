@@ -90,10 +90,14 @@ export const baselineFindings = ({ baseline, records }) => {
     ...baseline.files.flatMap((filename) => {
       const record = byFilename.get(filename);
       if (record === undefined) {
-        return `${filename} is grandfathered but names no ADR — prune it with \`--write\``;
+        return [
+          `${filename} is grandfathered but names no ADR — prune it with \`--write\``,
+        ];
       }
       return record.findings.length === 0
-        ? `${filename} is grandfathered but now satisfies the content rules — prune it with \`--write\``
+        ? [
+            `${filename} is grandfathered but now satisfies the content rules — prune it with \`--write\``,
+          ]
         : [];
     }),
   ];

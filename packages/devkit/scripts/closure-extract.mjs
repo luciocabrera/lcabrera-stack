@@ -162,9 +162,11 @@ const withoutTrailingPunctuation = (token) => {
 
 export const isPathToken = (token) => {
   if (token.includes('://') || /\s/.test(token)) return false;
-  return token.startsWith('./') || token.startsWith('../')
-    ? true
-    : token.includes('/') && EXTENSION_PATTERN.test(token);
+  return (
+    token.startsWith('./') ||
+    token.startsWith('../') ||
+    (token.includes('/') && EXTENSION_PATTERN.test(token))
+  );
 };
 
 /** @param {{ line: number, text: string }[]} lines */

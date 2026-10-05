@@ -91,11 +91,15 @@ const linkFindings = ({ docPath, holds, lines }) =>
     .flatMap(({ number, target }) => {
       const resolved = resolveTarget({ docPath, target });
       if (escapesPackage(resolved)) {
-        return `${docPath}:${number} links to \`${target}\`, which is outside the package — a reader with only the install has nothing there`;
+        return [
+          `${docPath}:${number} links to \`${target}\`, which is outside the package — a reader with only the install has nothing there`,
+        ];
       }
       return holds(resolved)
         ? []
-        : `${docPath}:${number} links to \`${target}\`, which the package does not ship — the link resolves in the source tree and nowhere else`;
+        : [
+            `${docPath}:${number} links to \`${target}\`, which the package does not ship — the link resolves in the source tree and nowhere else`,
+          ];
     });
 
 const repoAnchored = ({ holds, repoOnlyDirs, token }) =>

@@ -27,19 +27,21 @@ const diffSubpath = ({ base, next, subpath }) => {
     const isHad = Object.hasOwn(before, name);
     const isHas = Object.hasOwn(after, name);
     if (isHad && !isHas) {
-      return { kind: 'removed', name, subpath };
+      return [{ kind: 'removed', name, subpath }];
     }
     if (!isHad && isHas) {
-      return { kind: 'added', name, signature: after[name], subpath };
+      return [{ kind: 'added', name, signature: after[name], subpath }];
     }
     if (before[name] !== after[name]) {
-      return {
-        from: before[name],
-        kind: 'changed',
-        name,
-        signature: after[name],
-        subpath,
-      };
+      return [
+        {
+          from: before[name],
+          kind: 'changed',
+          name,
+          signature: after[name],
+          subpath,
+        },
+      ];
     }
     return [];
   });

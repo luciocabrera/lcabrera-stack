@@ -68,7 +68,7 @@ export const describeEscape = (finding) =>
 export const renderClosureReport = (results) => {
   const lines = results.flatMap((result) => {
     if (result.escapes.length === 0) {
-      return `✓ ${result.directory} — self-contained`;
+      return [`✓ ${result.directory} — self-contained`];
     }
     return [
       `✗ ${result.directory}`,

@@ -134,7 +134,9 @@ export const departedPathReferences = ({ allow, names, paths }) =>
 export const staleAllowances = ({ allow, seen, walked }) =>
   [...allow].flatMap(([path, allowedNames]) => {
     if (!walked.has(path)) {
-      return `${path} — allowed, but the scan did not read it. Remove the entry.`;
+      return [
+        `${path} — allowed, but the scan did not read it. Remove the entry.`,
+      ];
     }
     return [...allowedNames]
       .filter((name) => !seen.has(`${path}\0${name}`))

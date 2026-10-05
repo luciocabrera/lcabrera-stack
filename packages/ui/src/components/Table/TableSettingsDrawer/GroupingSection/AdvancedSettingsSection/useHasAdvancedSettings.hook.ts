@@ -10,5 +10,5 @@ export const useHasAdvancedSettings = () => {
   const isGroupingLocked = useGetTableIsGroupingLocked();
   const mode = useGetGroupingMode();
 
-  return isGroupingEnabled ? !isGroupingLocked || mode === 'rollup' : false;
+  return isGroupingEnabled && (!isGroupingLocked || mode === 'rollup');
 };

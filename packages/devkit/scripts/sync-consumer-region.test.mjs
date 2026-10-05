@@ -46,8 +46,8 @@ const write = (root, content) =>
 
 const read = (root) => readFileSync(join(root, WORKSPACE_FILE), 'utf8');
 
-const withOlderTypescript = (content) =>
-  content.replace(/^( {4}typescript: ).*$/m, (_line, key) => `${key}^0.0.1`);
+const withTypescriptAt = (content, range) =>
+  content.replace(/^( {4}typescript: ).*$/m, (_line, key) => `${key}${range}`);
 
 const recordAsWritten = (root, content) => {
   const path = join(root, MANIFEST_FILE);
@@ -92,7 +92,7 @@ describe('a dependency added to the default catalog', () => {
 
   test('survives a sync that brings the kit a changed catalog entry', () => {
     const { root, shipped } = created();
-    const older = withOlderTypescript(shipped);
+    const older = withTypescriptAt(shipped, '^0.0.1');
     write(root, `${older}${ADDED}`);
     recordAsWritten(root, older);
 
@@ -106,7 +106,7 @@ describe('a dependency added to the default catalog', () => {
 
   test('does not hide a change to an entry the kit ships', () => {
     const { root, shipped } = created();
-    const edited = `${withOlderTypescript(shipped)}${ADDED}`;
+    const edited = `${withTypescriptAt(shipped, '^0.0.1')}${ADDED}`;
     write(root, edited);
 
     expect(acrossSync(root)).toEqual({

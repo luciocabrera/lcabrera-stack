@@ -42,7 +42,7 @@ export const extractUses = (content) =>
     const declared = USES_KEY.exec(line)?.[1];
     if (declared === undefined) return [];
     const target = unquote(declared.replace(TRAILING_COMMENT, '').trim());
-    return target === '' ? [] : { line: index + 1, target };
+    return target === '' ? [] : [{ line: index + 1, target }];
   });
 
 /** @param {string} content */
@@ -53,7 +53,7 @@ export const extractRunScripts = (content) => {
     if (declared === undefined) return [];
     const inline = declared.trim();
     if (inline !== '' && !BLOCK_SCALAR.test(inline)) {
-      return { line: index + 1, text: unquote(inline) };
+      return [{ line: index + 1, text: unquote(inline) }];
     }
     return blockBody({
       keyIndent: line.indexOf('run:'),

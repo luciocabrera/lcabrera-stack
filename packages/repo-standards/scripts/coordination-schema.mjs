@@ -45,10 +45,12 @@ const missingFields = (data, required) =>
     .filter((field) => isBlank(data[field]))
     .map((field) => `missing required field \`${field}\``);
 
-const statusError = (value, allowed) =>
+const enumError = (label, value, allowed) =>
   value !== undefined && !allowed.has(value)
-    ? `status \`${value}\` is not one of ${[...allowed].join(', ')}`
+    ? `${label} \`${value}\` is not one of ${[...allowed].join(', ')}`
     : undefined;
+
+const statusError = (value, allowed) => enumError('status', value, allowed);
 
 const patternError = (label, value, pattern, hint) =>
   value !== undefined && !pattern.test(value)

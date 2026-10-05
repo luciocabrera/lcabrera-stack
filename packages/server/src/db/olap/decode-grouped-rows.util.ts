@@ -113,10 +113,12 @@ export const toGroupSort = ({
 
     return measure === undefined
       ? []
-      : {
-          aggregateAlias: resolveAggregateAlias(measure),
-          direction: entry.direction,
-        };
+      : [
+          {
+            aggregateAlias: resolveAggregateAlias(measure),
+            direction: entry.direction,
+          },
+        ];
   });
 
   return [...keyTerms, ...aggregateTerms];

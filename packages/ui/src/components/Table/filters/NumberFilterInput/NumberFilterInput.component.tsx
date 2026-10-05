@@ -21,8 +21,8 @@ export const NumberFilterInput = <TData,>({
   const [value, setValue] = useState<'' | number>(initialValue);
   const [maxValue, setMaxValue] = useState<'' | number>(initialMaxValue);
 
-  const updateFilter = ({ maxVal, op, val }: UpdateFilterArgs) => {
-    if (op === 'between') {
+  const updateFilter = ({ maxVal, val }: UpdateFilterArgs) => {
+    if (operator === 'between') {
       onChange({
         operator: 'between',
         type: 'number',
@@ -32,7 +32,7 @@ export const NumberFilterInput = <TData,>({
       return;
     }
     onChange({
-      operator: op,
+      operator,
       type: 'number',
       value: val === '' ? undefined : val,
     });
@@ -43,7 +43,7 @@ export const NumberFilterInput = <TData,>({
   ) => {
     const newValue = e.target.value === '' ? '' : Number(e.target.value);
     setValue(newValue);
-    updateFilter({ maxVal: maxValue, op: operator, val: newValue });
+    updateFilter({ maxVal: maxValue, val: newValue });
   };
 
   const handleMaxValueChange = (
@@ -51,7 +51,7 @@ export const NumberFilterInput = <TData,>({
   ) => {
     const newMaxValue = e.target.value === '' ? '' : Number(e.target.value);
     setMaxValue(newMaxValue);
-    updateFilter({ maxVal: newMaxValue, op: operator, val: value });
+    updateFilter({ maxVal: newMaxValue, val: value });
   };
 
   return (

@@ -30,11 +30,13 @@ export const decodeAxisAggregates = ({
       );
     }
 
-    return {
-      alias: emitted.alias,
-      columnKey: column,
-      fn: emitted.fn,
-      ...(emitted.axis !== undefined && { axis: emitted.axis }),
-    };
+    return [
+      {
+        alias: emitted.alias,
+        columnKey: column,
+        fn: emitted.fn,
+        ...(emitted.axis !== undefined && { axis: emitted.axis }),
+      },
+    ];
   });
 };

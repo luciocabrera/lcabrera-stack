@@ -41,21 +41,27 @@ const drawerSection = (page: Page, title: string) =>
     .filter({ has: page.getByRole('heading', { exact: true, name: title }) })
     .locator('..');
 
-const chooseColumnInSection = async (
+const chooseInSection = async (
   page: Page,
   title: string,
+  trigger: string,
   label: string,
 ) => {
   const section = drawerSection(page, title);
   await chooseFromTrigger(
-    section.getByRole('button', { name: 'Select a column...' }),
+    section.getByRole('button', { name: trigger }),
     label,
   );
   return section;
 };
 
 export const addColumnIn = async (page: Page, title: string, label: string) => {
-  const section = await chooseColumnInSection(page, title, label);
+  const section = await chooseInSection(
+    page,
+    title,
+    'Select a column...',
+    label,
+  );
   await section.getByRole('button', { exact: true, name: 'Add' }).click();
 };
 
@@ -64,7 +70,12 @@ export const addAggregate = async (
   column: string,
   functionLabel: string,
 ) => {
-  const section = await chooseColumnInSection(page, 'Add Aggregate', column);
+  const section = await chooseInSection(
+    page,
+    'Add Aggregate',
+    'Select a column...',
+    column,
+  );
   await chooseFromTrigger(
     section.getByRole('button', { name: 'Select a function...' }),
     functionLabel,
