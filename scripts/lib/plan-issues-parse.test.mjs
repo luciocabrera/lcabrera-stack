@@ -191,6 +191,44 @@ describe('dependency maps', () => {
     });
   });
 
+  it('reads issue numbers in a block-style map', () => {
+    const yaml = [
+      'dependencies:',
+      '  blocking: [#1270]',
+      '  blockedBy:',
+      '    - #1267',
+      '    - #1268',
+      '  parent: #1260',
+      '  children: []',
+    ].join('\n');
+    expect(dependenciesOf(yaml)).toEqual({
+      blocking: ['#1270'],
+      blockedBy: ['#1267', '#1268'],
+      parent: '#1260',
+      children: [],
+    });
+  });
+
+  it('reads issue numbers in a flow-style map', () => {
+    expect(
+      dependenciesOf(
+        'dependencies: { blocking: [#1270], blockedBy: [#1267, #1268], parent: #1260, children: [] }',
+      ),
+    ).toEqual({
+      blocking: ['#1270'],
+      blockedBy: ['#1267', '#1268'],
+      parent: '#1260',
+      children: [],
+    });
+  });
+
+  it('reads issue numbers and plan ids mixed in one list', () => {
+    const block = 'dependencies:\n  blockedBy: [#1267, P-02]\n  parent: E-1';
+    const flow = 'dependencies: { blockedBy: [#1267, P-02], parent: E-1 }';
+    expect(dependenciesOf(block).blockedBy).toEqual(['#1267', 'P-02']);
+    expect(dependenciesOf(flow)).toEqual(dependenciesOf(block));
+  });
+
   it('treats an absent map as no dependencies', () => {
     expect(dependenciesOf('')).toEqual({
       blocking: [],
@@ -206,6 +244,8 @@ describe('dependency maps', () => {
     ['a scalar where a list belongs', 'dependencies:\n  blockedBy: P-02'],
     ['a list where the parent belongs', 'dependencies:\n  parent: [E-1]'],
     ['a scalar in place of the map', 'dependencies: P-02'],
+    ['an unclosed list of issue numbers', 'dependencies:\n  blockedBy: [#1267'],
+    ['an issue number with trailing text', 'dependencies:\n  parent: #12x'],
   ])('fails naming the entry on %s', (_case, yaml) => {
     expect(() => dependenciesOf(yaml)).toThrow(
       /^P-01: cannot parse dependencies/,

@@ -102,12 +102,36 @@ const dependencySource = (yaml) => {
   return lines.slice(start, end === -1 ? undefined : end).join('\n');
 };
 
+const FLOW_ISSUE_NUMBER =
+  /(?<lead>[[,:][ \t]*)#(?<number>\d+)(?=[ \t]*(?:[\],}]|$))/gm;
+
+const LIST_ISSUE_NUMBER = /^(?<lead>[ \t]*-[ \t]+)#(?<number>\d+)(?=[ \t]*$)/gm;
+
+const quoteIssueNumbers = (source) =>
+  source
+    .replaceAll(FLOW_ISSUE_NUMBER, "$<lead>'#$<number>'")
+    .replaceAll(LIST_ISSUE_NUMBER, "$<lead>'#$<number>'");
+
+const SWALLOWED_VALUE = /(?:[[,:]|^[ \t]*-)[ \t]*(?<token>#\S*)/m;
+
+const refuseSwallowedValue = (source) => {
+  const token = SWALLOWED_VALUE.exec(source)?.groups.token;
+  if (token !== undefined) {
+    throw new Error(
+      `"${token}" is not an issue number and would be read as a comment`,
+    );
+  }
+  return source;
+};
+
 const isScalar = (value) =>
   typeof value === 'string' || typeof value === 'number';
 
 const readDependencyMap = (source) => {
   try {
-    return parse(source)?.dependencies ?? {};
+    return (
+      parse(refuseSwallowedValue(quoteIssueNumbers(source)))?.dependencies ?? {}
+    );
   } catch (error) {
     throw new Error(error.message.split('\n')[0].replace(/:$/, ''), {
       cause: error,
