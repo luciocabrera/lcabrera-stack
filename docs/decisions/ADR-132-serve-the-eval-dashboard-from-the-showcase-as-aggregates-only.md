@@ -46,61 +46,79 @@ were left to this decision. Their answers are recorded on the epic,
 showcase's routes directory, and every route reads through the private
 `@repo/eval-history` workspace using a database role that can only `SELECT`.
 
-**Every `/evals` route is public, and this is all a route may return:**
+**Every `/evals` route is public, and what it may return is set column by
+column.** A route reads two kinds of thing: the `evals` schema's columns, and
+the fields inside its `jsonb` columns, which follow the envelope. Both are
+allow-listed, and anything not on a list is excluded.
 
-- names and identifiers: the suite, run, trial and task identifiers, the task
-  key, and each subject's kind, name and version;
-- a run's provenance: `model_id`, `harness_version`, `sdk_version`,
-  `trigger`, `status`, `git_sha`, `branch`, `pr_number`, `started_at`,
-  `finished_at` and `catalog_hash`;
-- a subject's `content_hash`;
-- a task's `task_hash`, `fixture_hash`, `expected_hash`, `judge_prompt_hash`
-  and `agent_prompt_hash`;
-- from a run's `settings`, only `runs`, `concurrency`, `timeout_ms`,
-  `max_turns`, `tools`, `hidden` and `selection`;
-- from a run's `env`, only `node`, `os`, `arch` and `ci_runner`;
-- each trial's outcome, error class, timestamps, duration, turns, token counts
-  and cost;
-- aggregates computed from the fields above, such as pass rates, intervals,
-  trends, flaky sets, comparisons, attributions to a changed hash, and counts;
-- from a trial's `detail`, only these fields: the invoked skills, the expected
-  skill, the verdict, the not-met criterion numbers with the expected ones, and
-  the rubric dimension names with their scores.
+The table below names every text column of schema `evals`, allowed or
+excluded. A column that is not text (an enum, timestamp, number, boolean,
+uuid or identity) carries no free text and is allowed, unless the last column
+of the table excludes it by name:
 
-The input hashes are there so a comparison can name the one input that
-changed. A hash does not carry the text it was taken from. The transcript's
-own hash stays excluded with the rest of its pointer, because no route needs
-it.
+| Table                  | Allowed text columns                                                                                  | Excluded by name                                                                |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `suite`                | `name`                                                                                                |                                                                                 |
+| `eval_run`             | `project`, `suite`, `branch`, `git_sha`, `model_id`, `harness_version`, `sdk_version`, `catalog_hash` | `actor` (it identifies a person), `envelope_sha256`                             |
+| `eval_subject`         | `name`                                                                                                | `path`                                                                          |
+| `eval_subject_version` | `content_hash`, `first_seen_sha`                                                                      | `content` (the subject's text, a prompt for a `prompt` subject)                 |
+| `eval_task`            | `suite`, `task_key`, `source`, `tags`                                                                 |                                                                                 |
+| `eval_task_version`    | `task_hash`, `fixture_hash`, `expected_hash`, `judge_prompt_hash`, `agent_prompt_hash`                |                                                                                 |
+| `eval_trial`           | `error_class`                                                                                         | `transcript_uri`, `transcript_sha`, `transcript_bytes`, `transcript_expires_at` |
+| `eval_trial_detail`    | `detail_schema`                                                                                       | `detail` as a whole (only the paths below)                                      |
+| `eval_tool_call`       | `tool`                                                                                                | `input_summary`                                                                 |
+| `eval_baseline`        | `suite`, `model_id`, `metric`, `git_sha`                                                              |                                                                                 |
+| `eval_annotation`      | none; `at` and `kind` are allowed, which is enough to mark a timeline                                 | `text`, `author`                                                                |
+| `eval_human_grade`     | `dimension`                                                                                           | `grader`                                                                        |
+| `model_price`          | `model_id`                                                                                            |                                                                                 |
+| `schema_migration`     |                                                                                                       | every column; no route reads the migrator's ledger                              |
 
-A route returns nothing outside that list. That excludes transcript text,
-prompt text, judge replies, the transcript pointer (`uri`, hash, size), the
-quality suite's `summary` and per-dimension `feedback`, rule-check `findings`,
-`settings.argv` (the full command line the run was started with), the run's
-`actor` (it identifies a person), and any `detail`, `settings` or `env` field
-the list does not name. The `.json` route serves the same allow-listed
-projection of a run and never the stored envelope.
+These `jsonb` fields may be returned:
 
-**The allow-list is data, not prose and not a `SELECT` list.** It is one
-exported set of envelope field paths, `PUBLIC_FIELD_PATHS`, in
-`@repo/eval-history/queries`. Every query function that serves a route
-projects its result through that set, and no query returns `detail`,
-`settings` or `env` whole for a route to filter afterwards. The list above is
-what the set holds at adoption. Adding a path to the set is the change this
-ADR governs, and it is reviewed against this ADR.
+- from `eval_run.settings`, only `runs`, `concurrency`, `timeout_ms`,
+  `max_turns`, `tools`, `hidden` and `selection`. `argv`, the full command
+  line, is excluded by name;
+- from `eval_run.env`, only `node`, `os`, `arch` and `ci_runner`;
+- from `eval_run.totals`, every field, since it holds only counts, rates,
+  durations, cost and tokens;
+- from `eval_trial_detail.detail`, only the invoked skills, the expected skill,
+  the verdict, the not-met criterion numbers with the expected ones, and the
+  rubric dimension names with their scores. The quality suite's `summary` and
+  per-dimension `feedback`, rule-check `findings`, and every other `detail`
+  field are excluded.
 
-**How it is tested.** One showcase test enforces the rule above:
+Aggregates computed from allowed values may be returned: pass rates,
+intervals, trends, flaky sets, comparisons, attributions to a changed hash,
+and counts. The input hashes are allowed so a comparison can name the one
+input that changed; a hash does not carry the text it was taken from. The
+`.json` route serves the same projection of a run and never the stored
+envelope.
 
-1. It walks the envelope's Zod schema for every string field and every
-   string-array field, subtracts `PUBLIC_FIELD_PATHS`, and seeds the history
-   database with a unique marker string in each path that remains. That
-   includes every suite's `detail`, the transcript pointer, `settings.argv`
-   and `actor`. The test imports the same set the query functions use and
-   holds no list of its own, so a field that a later schema version adds is
-   seeded by default, and the only way to stop seeding it is to add it to
-   `PUBLIC_FIELD_PATHS`.
-2. With the flag set, it calls the loader of every `/evals` route, and every
+**The allow-list is data, not prose and not a `SELECT` list.** One module,
+`@repo/eval-history/queries`, exports two sets: `PUBLIC_COLUMNS`, the allowed
+columns of schema `evals` as `table.column`, text or not, and `PUBLIC_FIELD_PATHS`, the
+allowed envelope paths inside the `jsonb` columns. Every query function that
+serves a route projects its result through those sets. A view or function
+that a route reads (`v_subject_trend`, `run_compare`, `flaky_tasks` and the
+rest) takes its text columns only from allowed columns. No query returns
+`detail`, `settings` or `env` whole for a route to filter afterwards. The
+tables above are what the sets hold at adoption. Adding an entry to either set
+is the change this ADR governs, and it is reviewed against this ADR.
+
+**How it is tested.** One showcase test enforces the rule above. It holds no
+list of its own; it imports both sets.
+
+1. It migrates a scratch history database, then reads `information_schema`
+   for every column in schema `evals` whose type is text, varchar, char or an
+   array of one. It subtracts `PUBLIC_COLUMNS` and seeds a unique marker
+   string into every remaining column of every seeded row. A column that a
+   later migration adds is therefore seeded by default.
+2. It walks the envelope's Zod schema for every string and string-array field
+   inside the `jsonb` columns, subtracts `PUBLIC_FIELD_PATHS`, and seeds the
+   marker into each path that remains, `settings.argv` included.
+3. With the flag set, it calls the loader of every `/evals` route, and every
    resource route, for the seeded runs. It serialises each result.
-3. It fails if the marker appears in any serialised result.
+4. It fails if the marker appears in any serialised result.
 
 The test takes the set of routes from the showcase's route config, filtered to
 the `/evals` prefix, so a new route is covered without a change to the test.
@@ -133,12 +151,15 @@ heatmap and the matrix are small, fixed shapes.
   outside this decision.
 - Drawing the charts by hand means this repository owns axis, tick and tooltip
   code. A fifth chart shape is the point to revisit the library question.
-- `PUBLIC_FIELD_PATHS` and the query functions that project through it are
-  the only thing keeping transcripts and prose off a route. A query that
-  selects `detail` whole, or skips the projection, is a defect, and the marker
-  test is what catches it. A path added to the set is not seeded, so the
-  marker test cannot catch a wrong addition; review against this ADR is the
-  only check on it.
+- `PUBLIC_COLUMNS`, `PUBLIC_FIELD_PATHS` and the query functions that project
+  through them are the only thing keeping transcripts and prose off a route. A
+  query that selects `detail` whole, or skips the projection, is a defect, and
+  the marker test is what catches it. An entry added to either set is not
+  seeded, so the marker test cannot catch a wrong addition; review against
+  this ADR is the only check on it.
+- Every excluded text column accepts an arbitrary string at adoption. A later
+  column whose check or foreign key rejects the marker makes the seed fail, so
+  it has to be decided here rather than skipped.
 
 ## Alternatives considered
 
