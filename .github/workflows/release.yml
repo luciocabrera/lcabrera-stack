@@ -178,18 +178,22 @@ jobs:
           # the one job holding an OIDC token with publish rights. `pnpm exec`
           # runs the binary already in node_modules, at the lockfile's version.
           git tag | sort > /tmp/tags-before
+          : > /tmp/publish-events.ndjson
           published_status=0
-          pnpm exec changeset publish 2>&1 | tee /tmp/publish.log || published_status=$?
+          CHANGESETS_OUTPUT=/tmp/publish-events.ndjson pnpm exec changeset publish 2>&1 | tee /tmp/publish.log || published_status=$?
           git tag | sort > /tmp/tags-after
           comm -13 /tmp/tags-before /tmp/tags-after > /tmp/tags-new
 
-          # `changeset publish` logs `New tag: <name>` BEFORE calling git and
-          # discards the result, so its log names tags git may never have made.
-          # Its count and the refs that actually exist are therefore independent
-          # signals, and comparing them is the only thing that tells a real
-          # tagging failure apart from a publish that legitimately shipped
-          # nothing — both leave the diff empty.
-          reported="$(grep -c 'New tag:' /tmp/publish.log || true)"
+          # `changeset publish` writes one `git-tag` event per tag it attempts
+          # to the NDJSON file `CHANGESETS_OUTPUT` names, and discards the
+          # result of `git tag`, so the events name tags git may never have
+          # made. Its console log is no count at all: the `Created git tags:`
+          # block lists only tag-only releases, never a package it published.
+          # The event count and the refs that actually exist are therefore
+          # independent signals, and comparing them is the only thing that
+          # tells a real tagging failure apart from a publish that legitimately
+          # shipped nothing — both leave the diff empty.
+          reported="$(grep -c '"type":"git-tag"' /tmp/publish-events.ndjson || true)"
           created="$(grep -c . /tmp/tags-new || true)"
           echo "Newly published tags: $created (changeset reported $reported)"
           cat /tmp/tags-new

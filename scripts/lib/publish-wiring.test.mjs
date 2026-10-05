@@ -20,7 +20,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import getReleasePlan from '@changesets/get-release-plan';
+import { getReleasePlan } from '@changesets/get-release-plan';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { readPublishing } from '../../packages/repo-standards/scripts/config.mjs';
