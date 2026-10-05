@@ -19,9 +19,5 @@ export const resolveOptionLabels = ({
     return value.map((item) => toLabel(item)).join(', ');
   }
 
-  if (value === undefined || value === '') {
-    return '';
-  }
-
-  return toLabel(value);
+  return value === undefined || value === '' ? '' : toLabel(value);
 };

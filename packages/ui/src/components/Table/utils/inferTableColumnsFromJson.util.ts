@@ -36,11 +36,7 @@ const inferValueType = (value: unknown) => {
     return isIsoDateString(value) ? 'date' : 'string';
   }
 
-  if (typeof value === 'object' && value !== null) {
-    return 'object';
-  }
-
-  return 'string';
+  return typeof value === 'object' && value !== null ? 'object' : 'string';
 };
 
 const humanizeKey = (key: string) =>

@@ -26,11 +26,7 @@ const normalizeImportPath = (source: string): string => {
     return './';
   }
 
-  if (normalized === '..') {
-    return '../';
-  }
-
-  return normalized;
+  return normalized === '..' ? '../' : normalized;
 };
 
 const getQuoteCharacter = (rawSourceText: string): "'" | '"' =>

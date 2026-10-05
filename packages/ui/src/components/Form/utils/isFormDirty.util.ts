@@ -15,10 +15,8 @@ export const isFormDirty = <TValues extends Record<string, unknown>>({
     const initial = initialValues[accessor];
     const current = currentValues[accessor];
 
-    if (Array.isArray(initial) && Array.isArray(current)) {
-      return !areArraysEqual({ left: initial, right: current });
-    }
-
-    return initial !== current;
+    return Array.isArray(initial) && Array.isArray(current)
+      ? !areArraysEqual({ left: initial, right: current })
+      : initial !== current;
   });
 };

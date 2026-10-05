@@ -7,9 +7,7 @@ export const shouldRevalidatePersistCookieAction = ({
   defaultShouldRevalidate,
   formAction,
 }: ShouldRevalidateFunctionArgs) => {
-  if (actionStatus === 204 && isPersistCookieAction(formAction)) {
-    return false;
-  }
-
-  return defaultShouldRevalidate;
+  return actionStatus === 204 && isPersistCookieAction(formAction)
+    ? false
+    : defaultShouldRevalidate;
 };

@@ -13,6 +13,5 @@ export const getColumnPinSide = <TData = Record<string, unknown>>({
   pinning,
 }: GetColumnPinSideArgs<TData>): 'left' | 'right' | undefined => {
   if (pinning?.left.includes(columnKey)) return 'left';
-  if (pinning?.right.includes(columnKey)) return 'right';
-  return undefined;
+  return pinning?.right.includes(columnKey) ? 'right' : undefined;
 };

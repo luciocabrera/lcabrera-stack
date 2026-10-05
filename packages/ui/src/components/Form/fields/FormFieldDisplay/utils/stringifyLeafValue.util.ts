@@ -3,9 +3,7 @@ export const stringifyLeafValue = (value: unknown) => {
     return value;
   }
 
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return String(value);
-  }
-
-  return '';
+  return typeof value === 'number' || typeof value === 'boolean'
+    ? String(value)
+    : '';
 };

@@ -11,8 +11,8 @@ export const attachScrollMetrics = ({
   container,
   height,
 }: AttachScrollMetricsArgs) => {
-  if (!container) return;
-  if (Object.getOwnPropertyDescriptor(container, 'scrollTop')) return;
+  if (!container || Object.getOwnPropertyDescriptor(container, 'scrollTop'))
+    return;
 
   Object.defineProperties(container, {
     clientHeight: { configurable: true, value: height },

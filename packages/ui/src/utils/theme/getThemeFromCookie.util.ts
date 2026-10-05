@@ -19,9 +19,5 @@ export const getThemeFromCookie = ({
     key: getAppScopedCookieKey({ appId, key: THEME_COOKIE_NAME }),
   });
 
-  if (theme === 'dark' || theme === 'light') {
-    return theme;
-  }
-
-  return undefined;
+  return theme === 'dark' || theme === 'light' ? theme : undefined;
 };

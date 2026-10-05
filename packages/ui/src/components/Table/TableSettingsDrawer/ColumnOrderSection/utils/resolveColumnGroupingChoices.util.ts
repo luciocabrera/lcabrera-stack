@@ -71,7 +71,5 @@ export const resolveColumnGroupingChoices = <TData>({
   if (options.length > 0) return { options, refusal: undefined };
   if (isGroupKey) return { options, refusal: 'already-a-key' };
   if (isGroupable && isAtKeyCap) return { options, refusal: 'key-cap-reached' };
-  if (gap !== undefined) return { options, refusal: gap };
-
-  return { options, refusal: 'not-offered' };
+  return { options, refusal: gap === undefined ? 'not-offered' : gap };
 };

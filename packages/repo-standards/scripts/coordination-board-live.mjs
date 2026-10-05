@@ -56,10 +56,7 @@ const checksGlyph = (rollup) => {
   if (states.some((s) => FAILING.has(s))) {
     return '🔴';
   }
-  if (states.some((s) => !DONE.has(s))) {
-    return '🟡';
-  }
-  return '✅';
+  return states.some((s) => !DONE.has(s)) ? '🟡' : '✅';
 };
 
 const prForTask = (data, byBranch, byNumber) =>

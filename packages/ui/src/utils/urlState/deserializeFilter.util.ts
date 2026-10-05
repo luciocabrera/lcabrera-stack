@@ -31,11 +31,7 @@ const isNumberOperatorType = (
   ].includes(operator);
 
 const parseBooleanFilter = (value: unknown): ColumnFilter | undefined => {
-  if (typeof value !== 'boolean') {
-    return undefined;
-  }
-
-  return { type: 'boolean', value };
+  return typeof value === 'boolean' ? { type: 'boolean', value } : undefined;
 };
 
 const parseEmptyFilter = (value: unknown): ColumnFilter | undefined => {
@@ -171,11 +167,9 @@ const parseEqualsSelectFilter = (
 ): ColumnFilter | undefined => {
   const values = arr.filter((item): item is string => typeof item === 'string');
 
-  if (values.length !== arr.length) {
-    return undefined;
-  }
-
-  return { operator: 'equals', type: 'select', values };
+  return values.length === arr.length
+    ? { operator: 'equals', type: 'select', values }
+    : undefined;
 };
 
 export const deserializeFilter = (value: unknown): ColumnFilter | undefined => {

@@ -24,9 +24,5 @@ export const countVisibleTags = ({
 
   const overflow = totalCount - fittingCount;
 
-  if (overflow > 0) {
-    return Math.max(1, fittingCount - 1);
-  }
-
-  return fittingCount;
+  return overflow > 0 ? Math.max(1, fittingCount - 1) : fittingCount;
 };

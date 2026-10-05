@@ -35,19 +35,21 @@ export const VirtualizedOption = ({ index }: VirtualizedOptionProps) => {
   const optionIndex = shouldShowSelectAll ? index - 1 : index;
   const option = filteredOptions[optionIndex];
 
-  if (option !== undefined) {
-    const handleToggle = () => {
-      toggleOption(option);
-    };
-
-    return (
-      <SelectOption
-        hasCheckbox={hasCheckboxes}
-        isLoading={isLoadingOptions}
-        isSelected={selectedValues.includes(option)}
-        onToggle={handleToggle}
-        option={option}
-      />
-    );
+  if (option === undefined) {
+    return;
   }
+
+  const handleToggle = () => {
+    toggleOption(option);
+  };
+
+  return (
+    <SelectOption
+      hasCheckbox={hasCheckboxes}
+      isLoading={isLoadingOptions}
+      isSelected={selectedValues.includes(option)}
+      onToggle={handleToggle}
+      option={option}
+    />
+  );
 };

@@ -32,10 +32,8 @@ export const toQueryFilters = ({
       if (filter.type === 'number') {
         return toNumberQueryFilters({ column, filter });
       }
-      if (filter.type === 'text') {
-        return toTextQueryFilters({ column, filter });
-      }
-
-      return toSelectQueryFilters({ column, filter });
+      return filter.type === 'text'
+        ? toTextQueryFilters({ column, filter })
+        : toSelectQueryFilters({ column, filter });
     },
   );

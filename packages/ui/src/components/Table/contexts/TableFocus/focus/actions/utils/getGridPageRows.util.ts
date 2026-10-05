@@ -7,7 +7,7 @@ export const getGridPageRows = ({
   container,
   rowHeight,
 }: GetGridPageRowsArgs) => {
-  if (!container || rowHeight <= 0) return 1;
-
-  return Math.max(Math.floor(container.clientHeight / rowHeight), 1);
+  return !container || rowHeight <= 0
+    ? 1
+    : Math.max(Math.floor(container.clientHeight / rowHeight), 1);
 };

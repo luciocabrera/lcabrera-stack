@@ -15,9 +15,5 @@ export const resolveClosestSide = ({
     return 'left';
   }
 
-  if (distanceFromRight < distanceFromLeft) {
-    return 'right';
-  }
-
-  return originalSide;
+  return distanceFromRight < distanceFromLeft ? 'right' : originalSide;
 };

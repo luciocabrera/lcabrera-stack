@@ -50,10 +50,7 @@ const readGitDirPointer = (gitPath, repoRoot) => {
 export const resolveGitDir = (repoRoot) => {
   const root = resolve(repoRoot);
   const gitPath = join(root, '.git');
-  if (!gitPath.startsWith(root + sep)) {
-    return;
-  }
-  if (!existsSync(gitPath)) {
+  if (!gitPath.startsWith(root + sep) || !existsSync(gitPath)) {
     return;
   }
   try {

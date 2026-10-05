@@ -104,7 +104,7 @@ const probeFailures = () =>
   PROBE_WORKSPACES.flatMap((workspace) => {
     const verdict = verdictFor(workspace);
 
-    return verdict === 'reported' ? [] : [{ verdict, workspace }];
+    return verdict === 'reported' ? [] : { verdict, workspace };
   });
 
 const report = () => {

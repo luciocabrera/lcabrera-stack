@@ -33,11 +33,11 @@ const warningsAgainst = ({ from, live }) =>
     if (isSameBranch(a, b)) return [];
     const clash = firstClash(a, b);
     if (clash === undefined) return [];
-    return [
+    return (
       `${live[from].name} and ${other.name} claim overlapping areas ` +
-        `(e.g. \`${clash}\`) on different branches — narrow a glob, serialise, ` +
-        'or share one branch (branches/<slug>.md).',
-    ];
+      `(e.g. \`${clash}\`) on different branches — narrow a glob, serialise, ` +
+      'or share one branch (branches/<slug>.md).'
+    );
   });
 
 export const overlapWarnings = (tasks) => {

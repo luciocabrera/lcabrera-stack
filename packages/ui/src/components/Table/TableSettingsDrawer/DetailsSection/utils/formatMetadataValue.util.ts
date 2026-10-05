@@ -7,9 +7,7 @@ export const formatMetadataValue = (value: TableMetadataValue) => {
     return value ? 'Yes' : 'No';
   }
 
-  if (typeof value === 'number') {
-    return formatNumber({ maximumFractionDigits: 0, value });
-  }
-
-  return String(value);
+  return typeof value === 'number'
+    ? formatNumber({ maximumFractionDigits: 0, value })
+    : String(value);
 };

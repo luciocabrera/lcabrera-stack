@@ -30,9 +30,5 @@ export const verifyAuthToken = ({
   }
 
   const claims = decodeAuthClaims({ payload: parsed.payload });
-  if (claims === undefined || claims.exp <= nowSeconds) {
-    return undefined;
-  }
-
-  return claims;
+  return claims === undefined || claims.exp <= nowSeconds ? undefined : claims;
 };

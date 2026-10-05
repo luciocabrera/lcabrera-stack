@@ -241,10 +241,9 @@ const coverageSentence = ({ observedBackTo, window }) => {
   if (observedBackTo === undefined) {
     return `No run of this report has observed ${window.end}, the last day of the window above, so coverage cannot be traced continuously back from it and a zero in the invocation counts settles nothing about the window as a whole.`;
   }
-  if (observedBackTo <= window.start) {
-    return `Runs of this report have observed the window continuously back to ${window.start}, so the invocation counts above cover it in full.`;
-  }
-  return `Observation runs continuously back only to ${observedBackTo}, so the earlier part of the window above is unobserved rather than empty — a zero in the invocation counts settles nothing about those days. A recorded day earlier than that is a record, not coverage.`;
+  return observedBackTo <= window.start
+    ? `Runs of this report have observed the window continuously back to ${window.start}, so the invocation counts above cover it in full.`
+    : `Observation runs continuously back only to ${observedBackTo}, so the earlier part of the window above is unobserved rather than empty — a zero in the invocation counts settles nothing about those days. A recorded day earlier than that is a record, not coverage.`;
 };
 
 const observationSentence = (transcripts) => {

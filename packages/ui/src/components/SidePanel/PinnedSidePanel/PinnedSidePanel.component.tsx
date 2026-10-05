@@ -36,9 +36,7 @@ export const PinnedSidePanel = ({
     </aside>
   );
 
-  if (portalContainer?.current) {
-    return createPortal(aside, portalContainer.current);
-  }
-
-  return aside;
+  return portalContainer?.current
+    ? createPortal(aside, portalContainer.current)
+    : aside;
 };

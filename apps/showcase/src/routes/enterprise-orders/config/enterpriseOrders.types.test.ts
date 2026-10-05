@@ -17,11 +17,9 @@ const groupRow: EnterpriseOrderTableRow = {
 };
 
 const readOrderId = (row: EnterpriseOrderTableRow) => {
-  if (row[TABLE_GROUP_ROW_FIELD] !== undefined) {
-    return row[TABLE_GROUP_ROW_FIELD].path[0]?.label ?? '';
-  }
-
-  return row.order_id.toFixed(0);
+  return row[TABLE_GROUP_ROW_FIELD] === undefined
+    ? row.order_id.toFixed(0)
+    : (row[TABLE_GROUP_ROW_FIELD].path[0]?.label ?? '');
 };
 
 describe('EnterpriseOrderTableRow', () => {

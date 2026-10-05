@@ -16,10 +16,12 @@ it('parses and coerces a valid submission', () => {
   const result = parseOrderFormData(buildFormData());
 
   expect(result.success).toBe(true);
-  if (result.success) {
-    expect(result.data.quantity).toBe(2);
-    expect(result.data.customer_id).toBe(42);
+  if (!result.success) {
+    return;
   }
+
+  expect(result.data.quantity).toBe(2);
+  expect(result.data.customer_id).toBe(42);
 });
 
 it('fails for an invalid submission', () => {

@@ -17,14 +17,12 @@ export const collectColumnAxisEmitted = (
     return summary.aggregates.flatMap((entry) =>
       entry.axis === undefined || entry.alias === undefined
         ? []
-        : [
-            {
-              alias: entry.alias,
-              axis: entry.axis,
-              columnKey: entry.columnKey,
-              fn: entry.fn,
-            },
-          ],
+        : {
+            alias: entry.alias,
+            axis: entry.axis,
+            columnKey: entry.columnKey,
+            fn: entry.fn,
+          },
     );
   }
 

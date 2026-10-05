@@ -7,9 +7,7 @@ export const mergeArrays = <T>({
   baseValue,
   overrideValue,
 }: MergeArraysArgs<T>): T[] | undefined => {
-  if (!baseValue && !overrideValue) {
-    return undefined;
-  }
-
-  return [...(baseValue ?? []), ...(overrideValue ?? [])];
+  return !baseValue && !overrideValue
+    ? undefined
+    : [...(baseValue ?? []), ...(overrideValue ?? [])];
 };

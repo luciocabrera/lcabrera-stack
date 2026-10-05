@@ -28,11 +28,7 @@ const formatMockCellValue = (value: unknown): string => {
     return '';
   }
 
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-
-  return '';
+  return typeof value === 'object' ? JSON.stringify(value) : '';
 };
 
 const {

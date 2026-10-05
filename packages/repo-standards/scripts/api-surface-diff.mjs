@@ -27,21 +27,19 @@ const diffSubpath = ({ base, next, subpath }) => {
     const isHad = Object.hasOwn(before, name);
     const isHas = Object.hasOwn(after, name);
     if (isHad && !isHas) {
-      return [{ kind: 'removed', name, subpath }];
+      return { kind: 'removed', name, subpath };
     }
     if (!isHad && isHas) {
-      return [{ kind: 'added', name, signature: after[name], subpath }];
+      return { kind: 'added', name, signature: after[name], subpath };
     }
     if (before[name] !== after[name]) {
-      return [
-        {
-          from: before[name],
-          kind: 'changed',
-          name,
-          signature: after[name],
-          subpath,
-        },
-      ];
+      return {
+        from: before[name],
+        kind: 'changed',
+        name,
+        signature: after[name],
+        subpath,
+      };
     }
     return [];
   });
@@ -65,8 +63,7 @@ export const formatChange = (change) => {
   if (change.kind === 'removed') {
     return `  removed  ${at}`;
   }
-  if (change.kind === 'added') {
-    return `  added    ${at}: ${change.signature}`;
-  }
-  return `  changed  ${at}\n             was: ${change.from}\n             now: ${change.signature}`;
+  return change.kind === 'added'
+    ? `  added    ${at}: ${change.signature}`
+    : `  changed  ${at}\n             was: ${change.from}\n             now: ${change.signature}`;
 };

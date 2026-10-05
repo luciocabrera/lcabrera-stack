@@ -43,9 +43,7 @@ export const resolveFilterOptionsSource = ({
     ? columns[column]
     : undefined;
 
-  if (columnType === undefined) {
-    return { allowed: false, refusal: 'unknown-column' };
-  }
-
-  return { allowed: true, allowedColumns: Object.keys(columns), columnType };
+  return columnType === undefined
+    ? { allowed: false, refusal: 'unknown-column' }
+    : { allowed: true, allowedColumns: Object.keys(columns), columnType };
 };

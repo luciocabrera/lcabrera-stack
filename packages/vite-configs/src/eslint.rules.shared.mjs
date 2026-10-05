@@ -88,6 +88,7 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   // that an http origin is rejected became https, and the test inverted.
   'unicorn/prefer-https': 'off',
   'unicorn/prefer-query-selector': 'off',
+  'unicorn/prefer-ternary': ['error', 'only-single-line'],
   'unicorn/prevent-abbreviations': 'off',
   // New in unicorn 73's recommended set. Off deliberately and temporarily, not
   // as a verdict on the rule: its default `multiline` fixer rewrites every

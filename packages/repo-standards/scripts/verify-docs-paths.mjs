@@ -174,12 +174,14 @@ const runWrite = (findings, baseline) => {
   const unbaselined = findings.filter(
     (finding) => !isBaselined(baseline, finding.doc, finding.token),
   );
-  if (unbaselined.length > 0) {
-    console.error(
-      `\n${unbaselined.length} failing reference(s) were NOT added — fix them, or grandfather each with --accept.`,
-    );
-    process.exitCode = 1;
+  if (unbaselined.length === 0) {
+    return;
   }
+
+  console.error(
+    `\n${unbaselined.length} failing reference(s) were NOT added — fix them, or grandfather each with --accept.`,
+  );
+  process.exitCode = 1;
 };
 
 const reportIntroduced = (introduced) => {

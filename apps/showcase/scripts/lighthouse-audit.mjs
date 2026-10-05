@@ -39,11 +39,7 @@ const colors = {
 };
 
 function getErrorMessage(error) {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return String(error);
+  return error instanceof Error ? error.message : String(error);
 }
 
 function getLocalBinaryPath(binaryName) {
@@ -58,11 +54,7 @@ function getScoreColor(score) {
     return colors.green;
   }
 
-  if (score >= 50) {
-    return colors.yellow;
-  }
-
-  return colors.red;
+  return score >= 50 ? colors.yellow : colors.red;
 }
 
 async function isServerResponding(url) {

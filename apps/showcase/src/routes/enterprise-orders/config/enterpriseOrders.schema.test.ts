@@ -57,12 +57,14 @@ it('accepts a fully valid payload and coerces numbers', () => {
   const result = enterpriseOrderSchema.safeParse(validInput());
 
   expect(result.success).toBe(true);
-  if (result.success) {
-    expect(result.data.quantity).toBe(2);
-    expect(result.data.unit_price).toBe(100);
-    expect(result.data.customer_rating).toBe(5);
-    expect(result.data.discount_percentage).toBe(10);
+  if (!result.success) {
+    return;
   }
+
+  expect(result.data.quantity).toBe(2);
+  expect(result.data.unit_price).toBe(100);
+  expect(result.data.customer_rating).toBe(5);
+  expect(result.data.discount_percentage).toBe(10);
 });
 
 it('treats an empty customer_rating as absent (not zero)', () => {

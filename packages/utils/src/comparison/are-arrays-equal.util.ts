@@ -8,13 +8,7 @@ export const areArraysEqual = <T>({ left, right }: AreArraysEqualArgs<T>) => {
     return true;
   }
 
-  if (!left || !right) {
-    return false;
-  }
-
-  if (left.length !== right.length) {
-    return false;
-  }
-
-  return left.every((value, index) => value === right[index]);
+  return !left || !right || left.length !== right.length
+    ? false
+    : left.every((value, index) => value === right[index]);
 };

@@ -27,9 +27,7 @@ export const resolveOperatorChange = ({
     return resolveNumberOperatorChange({ filter, operator });
   }
 
-  if (dataType === 'date') {
-    return resolveDateOperatorChange({ filter, operator });
-  }
-
-  return resolveTextOperatorChange({ filter, operator });
+  return dataType === 'date'
+    ? resolveDateOperatorChange({ filter, operator })
+    : resolveTextOperatorChange({ filter, operator });
 };

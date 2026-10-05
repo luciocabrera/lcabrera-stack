@@ -45,12 +45,7 @@ const UPSTREAM = `origin/${readConventions(REPO_ROOT).defaultBranch}`;
 const KEEP = new Set();
 
 const prVerdictsByHead = (pullRequests) => {
-  const grouped = new Map();
-  for (const pr of pullRequests) {
-    const list = grouped.get(pr.headRefName) ?? [];
-    list.push(pr);
-    grouped.set(pr.headRefName, list);
-  }
+  const grouped = Map.groupBy(pullRequests, (pr) => pr.headRefName);
   return new Map([...grouped].map(([head, prs]) => [head, summarizePrs(prs)]));
 };
 
@@ -176,13 +171,15 @@ const main = async () => {
     return;
   }
   const failures = applyPlan(plan);
-  if (failures.length > 0) {
-    process.stderr.write(`\n  ⚠ ${failures.length} operation(s) failed:\n`);
-    for (const failure of failures) {
-      process.stderr.write(`    ${failure}\n`);
-    }
-    process.exitCode = 1;
+  if (failures.length === 0) {
+    return;
   }
+
+  process.stderr.write(`\n  ⚠ ${failures.length} operation(s) failed:\n`);
+  for (const failure of failures) {
+    process.stderr.write(`    ${failure}\n`);
+  }
+  process.exitCode = 1;
 };
 
 await main();

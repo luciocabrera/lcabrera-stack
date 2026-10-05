@@ -41,9 +41,11 @@ export const useSetColumnSorting = <TData>() => {
       }),
     });
 
-    if (result.kind !== 'updated') return;
-
-    if (!persistTableState(result.persistenceEntry)) return;
+    if (
+      result.kind !== 'updated' ||
+      !persistTableState(result.persistenceEntry)
+    )
+      return;
 
     dataStore.set({ isLoading: true });
 

@@ -60,7 +60,7 @@ it('documents every rule at a URL that resolves', () => {
 
     return documented && url === `${DOCS_LOCATION}#${ruleName}`
       ? []
-      : [`${ruleName}: url=${url ?? 'none'} documented=${documented}`];
+      : `${ruleName}: url=${url ?? 'none'} documented=${documented}`;
   });
 
   expect(broken).toEqual([]);

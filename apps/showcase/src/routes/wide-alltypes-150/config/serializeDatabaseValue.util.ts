@@ -5,9 +5,7 @@ export const serializeDatabaseValue = (value: unknown): unknown => {
     return toHexString(value);
   }
 
-  if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-    return JSON.stringify(value);
-  }
-
-  return value;
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? JSON.stringify(value)
+    : value;
 };

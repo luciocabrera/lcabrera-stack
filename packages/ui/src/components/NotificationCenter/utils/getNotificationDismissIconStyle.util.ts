@@ -25,9 +25,7 @@ export const getNotificationDismissIconStyle = (
     return styles.dismissButtonSuccess;
   }
 
-  if (variant === 'warning') {
-    return styles.dismissButtonWarning;
-  }
-
-  return styles.dismissButtonDefault;
+  return variant === 'warning'
+    ? styles.dismissButtonWarning
+    : styles.dismissButtonDefault;
 };
