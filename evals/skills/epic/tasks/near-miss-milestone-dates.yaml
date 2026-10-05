@@ -1,0 +1,17 @@
+id: near-miss-milestone-dates
+name: A milestone date question
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: Can a GitHub milestone have a start date as well as a due date? Answer
+    yes or no and one sentence. Load any skill you need, but don't run shell
+    commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-epic-alone
+    config:
+      forbidden_skills:
+        - epic

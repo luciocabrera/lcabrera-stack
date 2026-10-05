@@ -1,0 +1,17 @@
+id: near-miss-format-snippet
+name: Formatting a snippet by hand
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Reformat this one line with two-space indentation and show only the
+    result: if(a){return b} Load any skill you need, but don't run shell
+    commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-quality-gate-workflow-alone
+    config:
+      forbidden_skills:
+        - quality-gate-workflow

@@ -1,0 +1,16 @@
+id: near-miss-define-refactor
+name: Defining refactoring
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: What is the difference between a refactor and a bug fix? One sentence.
+    Load any skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-refactor-verified-alone
+    config:
+      forbidden_skills:
+        - refactor-verified

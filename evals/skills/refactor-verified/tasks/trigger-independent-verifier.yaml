@@ -1,0 +1,20 @@
+id: trigger-independent-verifier
+name: Asking for an independent check of an implementation
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt:
+    "Implement issue #9999, but I don't want you grading your own work: have
+    a separate agent check the diff against the acceptance criteria before
+    the PR goes up for review. Tell me what you would do first. Load any
+    skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-refactor-verified
+    config:
+      mode: any_order
+      required_skills:
+        - refactor-verified

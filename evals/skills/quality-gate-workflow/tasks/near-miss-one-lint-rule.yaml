@@ -1,0 +1,17 @@
+id: near-miss-one-lint-rule
+name: What a lint rule means
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt:
+    What does the Oxlint rule no-unused-vars report? One sentence. Load any
+    skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-quality-gate-workflow-alone
+    config:
+      forbidden_skills:
+        - quality-gate-workflow

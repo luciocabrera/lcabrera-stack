@@ -1,0 +1,18 @@
+id: near-miss-ci-yaml-syntax
+name: A GitHub Actions syntax question
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt:
+    In a GitHub Actions workflow, what does the 'needs' key on a job do? One
+    sentence. Load any skill you need, but don't run shell commands or edit
+    files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-quality-gate-workflow-alone
+    config:
+      forbidden_skills:
+        - quality-gate-workflow

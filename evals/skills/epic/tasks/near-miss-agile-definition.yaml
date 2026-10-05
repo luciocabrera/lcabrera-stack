@@ -1,0 +1,17 @@
+id: near-miss-agile-definition
+name: Epic as a Scrum term
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt:
+    In Scrum, how does an epic differ from a user story? One sentence. Load
+    any skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-epic-alone
+    config:
+      forbidden_skills:
+        - epic

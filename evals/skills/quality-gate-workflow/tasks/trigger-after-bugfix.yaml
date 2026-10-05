@@ -1,0 +1,20 @@
+id: trigger-after-bugfix
+name: Done with a bug fix
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt:
+    I fixed the off-by-one in packages/utils' pagination helper. Is it done,
+    or is there anything left to check before I call it finished? Tell me
+    what you would do first. Load any skill you need, but don't run shell
+    commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-quality-gate-workflow
+    config:
+      mode: any_order
+      required_skills:
+        - quality-gate-workflow

@@ -1,0 +1,17 @@
+id: near-miss-review-pr-comment
+name: Answering one review comment
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: A reviewer wrote 'why not use a Set here?' on my PR. Draft a
+    one-sentence reply saying the list is small and order matters. Load any
+    skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-refactor-verified-alone
+    config:
+      forbidden_skills:
+        - refactor-verified

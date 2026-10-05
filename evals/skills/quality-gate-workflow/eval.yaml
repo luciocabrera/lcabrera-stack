@@ -1,5 +1,5 @@
 name: quality-gate-workflow-trigger
-description: Does quality-gate-workflow load when a change needs validating, and stay out of a compiler-option question?
+description: Does quality-gate-workflow load when a change needs validating before it is done, opened or merged, and stay out of single-tool, test-matcher and CI-syntax questions?
 skill: quality-gate-workflow
 version: '1.0'
 config:

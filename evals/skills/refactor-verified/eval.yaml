@@ -1,5 +1,5 @@
 name: refactor-verified-trigger
-description: Does refactor-verified load for a backlog issue taken to a verified PR, and stay out of an inline refactor?
+description: Does refactor-verified load when a backlog issue must be built and certified by an independent verifier, and stay out of inline edits, definitions and review replies?
 skill: refactor-verified
 version: '1.0'
 config:

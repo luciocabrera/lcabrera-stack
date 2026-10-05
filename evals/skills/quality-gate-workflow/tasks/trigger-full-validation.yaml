@@ -1,0 +1,18 @@
+id: trigger-full-validation
+name: The full validation sequence
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: What is the full validation sequence I should run after a refactor in
+    this repo, and in what order? Tell me what you would do first. Load any
+    skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-quality-gate-workflow
+    config:
+      mode: any_order
+      required_skills:
+        - quality-gate-workflow

@@ -1,0 +1,21 @@
+id: trigger-redo-unchecked
+name: Redoing work that was declared done too early
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt:
+    "Last time an agent said issue #9999 was done and it was not. Redo it so
+    the change is checked against the issue's acceptance criteria by someone
+    who never saw the implementer's reasoning. Tell me what you would do
+    first. Load any skill you need, but don't run shell commands or edit
+    files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-refactor-verified
+    config:
+      mode: any_order
+      required_skills:
+        - refactor-verified

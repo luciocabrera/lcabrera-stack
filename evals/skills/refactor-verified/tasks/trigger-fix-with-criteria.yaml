@@ -1,0 +1,19 @@
+id: trigger-fix-with-criteria
+name: A bug fix with acceptance criteria
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Issue #9999 is a bug in the date filter; its section 6 lists four
+    acceptance criteria. Take it through build, verify, and only then a PR.
+    Tell me what you would do first. Load any skill you need, but don't run
+    shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-refactor-verified
+    config:
+      mode: any_order
+      required_skills:
+        - refactor-verified
