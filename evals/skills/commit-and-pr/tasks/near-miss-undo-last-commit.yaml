@@ -1,0 +1,18 @@
+id: near-miss-undo-last-commit
+name: Undoing a local commit
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: >-
+    How do I undo my last local commit but keep the changes in my working
+    tree? One command is enough. Load any skill you need, but don't run shell
+    commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-commit-and-pr-alone
+    config:
+      forbidden_skills:
+        - commit-and-pr

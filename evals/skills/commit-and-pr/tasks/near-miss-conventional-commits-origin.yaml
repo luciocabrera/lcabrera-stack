@@ -1,0 +1,18 @@
+id: near-miss-conventional-commits-origin
+name: Where Conventional Commits came from
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: >-
+    In general, who came up with the Conventional Commits idea, and roughly
+    when? One sentence. Load any skill you need, but don't run shell commands
+    or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-commit-and-pr-alone
+    config:
+      forbidden_skills:
+        - commit-and-pr

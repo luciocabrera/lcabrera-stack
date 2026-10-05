@@ -1,5 +1,5 @@
 name: commit-and-pr-trigger
-description: Does commit-and-pr load for commit and PR writing, and stay out of a plain git question?
+description: Does commit-and-pr load to write or fix a commit message, PR body or branch name, and stay out of a general git or GitHub question?
 skill: commit-and-pr
 version: '1.0'
 config:

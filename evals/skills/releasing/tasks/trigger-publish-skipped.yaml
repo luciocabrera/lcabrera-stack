@@ -1,0 +1,19 @@
+id: trigger-publish-skipped
+name: A merged version bump that did not publish
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: >-
+    We merged the version PR for @lcabrera/ui yesterday, but the new version
+    never showed up on npm. Where would you start looking? Load any skill you
+    need, but don't run shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-releasing
+    config:
+      mode: any_order
+      required_skills:
+        - releasing

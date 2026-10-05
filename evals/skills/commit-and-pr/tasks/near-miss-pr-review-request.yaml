@@ -1,0 +1,18 @@
+id: near-miss-pr-review-request
+name: Requesting a reviewer on GitHub
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: >-
+    On GitHub, where in the web interface do I add a reviewer to a pull
+    request that is already open? Load any skill you need, but don't run
+    shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-commit-and-pr-alone
+    config:
+      forbidden_skills:
+        - commit-and-pr

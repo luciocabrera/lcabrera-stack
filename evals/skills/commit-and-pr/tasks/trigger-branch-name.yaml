@@ -1,0 +1,19 @@
+id: trigger-branch-name
+name: Naming a branch for an issue
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: >-
+    I'm about to start on issue 812, a bug fix in the date filter. What
+    should I name the branch so the pre-push hook doesn't reject it? Load any
+    skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-commit-and-pr
+    config:
+      mode: any_order
+      required_skills:
+        - commit-and-pr

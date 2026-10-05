@@ -1,0 +1,18 @@
+id: near-miss-git-tag-list
+name: Listing git tags
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: >-
+    What git command lists every tag in a repository, sorted by version? Just
+    the command. Load any skill you need, but don't run shell commands or
+    edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-releasing-alone
+    config:
+      forbidden_skills:
+        - releasing

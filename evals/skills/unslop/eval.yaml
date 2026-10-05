@@ -1,5 +1,5 @@
 name: unslop-trigger
-description: Does unslop load when asked to de-AI prose, and stay out of a translation?
+description: Does unslop load to de-AI prose or to draft prose that is kept, and stay out of spelling, grammar, counting and translation?
 skill: unslop
 version: '1.0'
 config:

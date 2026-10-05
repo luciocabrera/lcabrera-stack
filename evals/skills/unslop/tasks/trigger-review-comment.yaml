@@ -1,0 +1,21 @@
+id: trigger-review-comment
+name: Rewriting a review comment so it reads naturally
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: >-
+    I'm about to post this review comment on a PR. Clean it up so it doesn't
+    read like AI wrote it: 'Great question! This is a crucial consideration.
+    Let's delve into the nuances of the caching strategy to ensure
+    robustness.' Load any skill you need, but don't run shell commands or
+    edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-unslop
+    config:
+      mode: any_order
+      required_skills:
+        - unslop

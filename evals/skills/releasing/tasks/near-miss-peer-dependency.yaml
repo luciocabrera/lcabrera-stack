@@ -1,0 +1,17 @@
+id: near-miss-peer-dependency
+name: Defining a peer dependency
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: >-
+    In general, what is a peer dependency in npm? Two sentences. Load any
+    skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-releasing-alone
+    config:
+      forbidden_skills:
+        - releasing

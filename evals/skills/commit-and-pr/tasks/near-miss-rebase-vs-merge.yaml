@@ -1,0 +1,18 @@
+id: near-miss-rebase-vs-merge
+name: Rebase versus merge in general
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: >-
+    In general terms, when would someone prefer git rebase over git merge?
+    Two sentences. Load any skill you need, but don't run shell commands or
+    edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-commit-and-pr-alone
+    config:
+      forbidden_skills:
+        - commit-and-pr
