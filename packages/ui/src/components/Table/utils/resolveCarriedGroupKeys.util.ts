@@ -30,9 +30,8 @@ export const resolveCarriedGroupKeys = ({
 
     if (
       entry === undefined ||
-      previousEntry === undefined ||
-      entry.columnKey !== previousEntry.columnKey ||
-      entry.label !== previousEntry.label
+      previousEntry?.columnKey !== entry.columnKey ||
+      previousEntry.label !== entry.label
     )
       break;
 

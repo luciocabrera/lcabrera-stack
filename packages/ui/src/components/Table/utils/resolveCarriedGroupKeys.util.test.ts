@@ -88,6 +88,41 @@ describe('resolveCarriedGroupKeys', () => {
     ]).toStrictEqual([]);
   });
 
+  it('stops where the row above has no level left', () => {
+    expect([
+      ...resolveCarriedGroupKeys({
+        isWindowFirst: false,
+        previousRow: rowOf([['city', 'Paris']]),
+        summary: summaryOf([
+          ['city', 'Paris'],
+          ['district', 'Marais'],
+          ['block', 'A'],
+        ]),
+      }),
+    ]).toStrictEqual(['city']);
+  });
+
+  it('stops where both rows lack a level', () => {
+    const summary = summaryOf([
+      ['city', 'Paris'],
+      ['district', 'Marais'],
+      ['block', 'A'],
+    ]);
+
+    expect([
+      ...resolveCarriedGroupKeys({
+        isWindowFirst: false,
+        previousRow: rowOf([['city', 'Paris']]),
+        summary: {
+          ...summary,
+          path: summary.path.map((entry, level) =>
+            level === 1 ? undefined : entry,
+          ) as TableGroupRowSummary['path'],
+        },
+      }),
+    ]).toStrictEqual(['city']);
+  });
+
   it('carries nothing for a detail row', () => {
     expect(
       resolveCarriedGroupKeys({
