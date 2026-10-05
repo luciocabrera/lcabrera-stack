@@ -41,7 +41,8 @@ built-in ones.
 - `TableColumn` has a `cell` field holding a `{ kind, params }` call with no
   function member, and the no-function-path assertion in
   `enterprise-orders.loader.test.ts` still passes with `cell` and a
-  `cellPalette` set.
+  `cellPalette` set. A `cellPalette` maps a tone name to a light and a dark
+  pair of background and text colours.
 - A cell renderer is registered on the client with a kind, a Standard Schema
   for its params and a render function. A test registers one backed by Zod
   while `@lcabrera/ui` declares no Zod dependency.
@@ -72,8 +73,9 @@ The screenshot is the target. Each of its columns is one call:
 - the overall is bold `text` over a one-decimal number,
 - the change is a `delta`.
 
-The orange step has no built-in tone, and it should not need one. The loader
-names it, and the palette it sends defines it. #1318 holds the call and
+Four steps in one column outrun the built-in tones, which have one step
+(`warning`) between `success` and `error`. The fourth should not need a library
+change: the loader names it, and the palette it sends defines it. #1318 holds the call and
 renderer types, the palette shape and the open questions.
 
 `render` already exists and does not answer this, because single-fetch replaces
