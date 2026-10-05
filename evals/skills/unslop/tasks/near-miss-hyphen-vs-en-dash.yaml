@@ -1,5 +1,5 @@
-id: near-miss-define-em-dash
-name: Defining an em dash
+id: near-miss-hyphen-vs-en-dash
+name: Telling a hyphen from an en dash
 set: capability
 tags:
   - negative-trigger
