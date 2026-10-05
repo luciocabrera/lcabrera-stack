@@ -1,5 +1,6 @@
 id: trigger
 name: Driving an epic's next wave
+set: regression
 tags:
   - positive-trigger
 inputs:

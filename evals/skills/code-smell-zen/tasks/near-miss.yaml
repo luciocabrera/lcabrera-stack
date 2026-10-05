@@ -1,5 +1,6 @@
 id: near-miss
 name: Reading a hunk header
+set: regression
 tags:
   - negative-trigger
 inputs:

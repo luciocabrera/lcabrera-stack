@@ -1,5 +1,6 @@
 id: near-miss
 name: An inline refactor of one function
+set: regression
 tags:
   - negative-trigger
 inputs:

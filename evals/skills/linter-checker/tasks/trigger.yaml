@@ -1,5 +1,6 @@
 id: trigger
 name: Sweeping every lint engine
+set: regression
 tags:
   - positive-trigger
 inputs:

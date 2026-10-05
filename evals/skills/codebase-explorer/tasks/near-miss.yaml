@@ -1,5 +1,6 @@
 id: near-miss
 name: Naming one file's location
+set: regression
 tags:
   - negative-trigger
 inputs:

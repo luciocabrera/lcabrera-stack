@@ -1,5 +1,6 @@
 id: near-miss
 name: Naming a file's export
+set: regression
 tags:
   - negative-trigger
 inputs:

@@ -1,5 +1,6 @@
 id: trigger
 name: Cutting a release
+set: regression
 tags:
   - positive-trigger
 inputs:

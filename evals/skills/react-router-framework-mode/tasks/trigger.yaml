@@ -1,5 +1,6 @@
 id: trigger
 name: Adding a loader and an action
+set: regression
 tags:
   - positive-trigger
 inputs:

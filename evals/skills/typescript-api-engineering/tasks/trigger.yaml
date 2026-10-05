@@ -1,5 +1,6 @@
 id: trigger
 name: Designing a typed HTTP endpoint
+set: regression
 tags:
   - positive-trigger
 inputs:

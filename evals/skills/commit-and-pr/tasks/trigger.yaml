@@ -1,5 +1,6 @@
 id: trigger
 name: Writing a commit message and PR description
+set: regression
 tags:
   - positive-trigger
 inputs:

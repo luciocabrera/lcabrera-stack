@@ -1,5 +1,6 @@
 id: near-miss
 name: Explaining a utility type
+set: regression
 tags:
   - negative-trigger
 inputs:

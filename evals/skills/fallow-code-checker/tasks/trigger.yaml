@@ -1,5 +1,6 @@
 id: trigger
 name: Running a full dead-code scan
+set: regression
 tags:
   - positive-trigger
 inputs:

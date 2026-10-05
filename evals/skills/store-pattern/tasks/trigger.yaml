@@ -1,5 +1,6 @@
 id: trigger
 name: Designing state for a stateful grid
+set: regression
 tags:
   - positive-trigger
 inputs:

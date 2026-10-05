@@ -1,5 +1,6 @@
 id: trigger
 name: Checking what consumers are promised
+set: regression
 tags:
   - positive-trigger
 inputs:

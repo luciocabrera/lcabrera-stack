@@ -1,11 +1,29 @@
 # Skill trigger evals
 
-Every skill under `.github/skills/` has two tasks here:
+Every skill under `.github/skills/` has at least one task of each kind under
+its `tasks/`, and may have more:
 
-- `tasks/trigger.yaml`: a prompt the skill exists for. Passes only if the
-  session invokes the skill.
-- `tasks/near-miss.yaml`: a prompt close to the skill's subject that it should
-  not handle. Passes only if the session does not invoke it.
+- a trigger task (`expected.should_trigger: true`): a prompt the skill exists
+  for. Passes only if the session invokes the skill.
+- a near-miss task (`should_trigger: false` or absent): a prompt close to the
+  skill's subject that it should not handle. Passes only if the session does
+  not invoke it.
+
+The kind comes from `should_trigger`, not from the file name or the `id`. Each
+task's `id` must be unique within its skill, because the transcript is named
+after it.
+
+Every task also carries a top-level `set`:
+
+- `regression`: a task that passes reliably today, so a failure means
+  something changed.
+- `capability`: a task the skill does not pass reliably yet. Promote it to
+  `regression` once it does.
+
+A task written from a real failure also carries `source: incident`. See
+[Turning a real failure into a task](../README.md#turning-a-real-failure-into-a-task).
+Waza's task schema has neither key. `waza run` logs "unknown schema field
+ignored" for each one, on every task, and runs the task anyway.
 
 The task files are [Waza](https://github.com/microsoft/waza)'s format, so two
 harnesses run the same tasks.
@@ -74,6 +92,7 @@ a trigger test passes whatever the description says.
   or edit files." Loading a skill is a tool call. A prompt that says "don't run
   anything" stops the agent from loading the skill it has already chosen: the
   trigger task fails and the near-miss passes, both for the wrong reason.
+- Give the task a `set`, and an `id` no other task of the skill uses.
 - Write the trigger prompt in the words a user would use, not the
   description's.
 - A near-miss shares the subject but needs nothing from the skill: a
@@ -84,8 +103,11 @@ a trigger test passes whatever the description says.
 
 1. Copy an existing skill's directory, and rename every mention of that skill.
 2. If the new skill has a `paths:` list, add a fixture that matches it and
-   point both tasks at it.
-3. Run `vp run evals:skills -- <skill>`, then
+   point every task at it.
+3. The copied tasks carry `set: regression`, but a new task has not shown it
+   passes reliably. Set each one to `set: capability`, and promote it to
+   `regression` once it does.
+4. Run `vp run evals:skills -- <skill>`, then
    `vp run evals:skills -- <skill> --hide <skill>` and confirm the trigger task
    fails.
 
@@ -100,9 +122,11 @@ because they are this repository's conventions, not defects.
 
 The same job runs `vp run evals:skills -- --check`, which makes no model call.
 It fails a skill under `.github/skills/` with no trigger or near-miss task here,
-an eval whose skill is gone, an eval or grader that names a different skill
-than its directory, a task whose prompt does not end with the sentence above,
-and a skill with a `paths:` list whose tasks name no fixture.
+a task with no `id`, two tasks of one skill sharing an `id`, a task with no
+`set` or an unknown `set` or `source` (naming the task's file), an eval whose
+skill is gone, an eval or grader that names a different skill than its
+directory, a task whose prompt does not end with the sentence above, and a
+skill with a `paths:` list whose tasks name no fixture.
 
 The **Skill triggers (Claude)** job runs `vp run evals:skills` on
 `workflow_dispatch` only, on `CLAUDE_CODE_OAUTH_TOKEN`, and uploads the

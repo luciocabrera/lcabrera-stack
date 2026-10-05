@@ -1,5 +1,6 @@
 id: near-miss
 name: A git question that writes no commit
+set: regression
 tags:
   - negative-trigger
 inputs:
