@@ -11,9 +11,9 @@ is adopted before the package exists (#1265).
 
 ## Context
 
-Each eval runner writes its own shape. The skills runner saves the raw SDK
-message array, the verifier saves reply text, and skill-quality saves a map
-of skill to score. Two of the four never write their graded result at all.
+Each eval runner writes its own shape, and only skill-quality writes a graded
+result. The skills runner saves the raw SDK message array, the verifiers save
+reply text or reports, and rules-consistency writes nothing.
 
 The history database needs one shape to ingest, and that shape will change
 faster than the database schema: a new suite, a new SDK field, a new graded

@@ -14,7 +14,8 @@ decision is about this repository's own tooling in any case.
 
 ## Context
 
-The four eval suites under `evals/` write to `.tmp/` and keep nothing. The
+The eval suites under `evals/` (rules-consistency, skills, verifier-fixtures,
+the tooled verifier and skill-quality) write to `.tmp/` and keep nothing. The
 requirements in [`eval-history-prd.md`](../eval-history-prd.md) ask for every
 run to be stored in Postgres, read by a CLI, by CI and by a dashboard, through
 one data-layer package.

@@ -510,9 +510,12 @@ follows the dashboard's queries:
 - `evals.v_subject_trend`: per subject and run, `n`, `k`, the run's
   `started_at`, model, and the subject's content hash, so a trend can mark
   where the hash changed.
-- `evals.v_flaky_tasks`: per task, over its last 10 runs (the window comes
-  from a parameter table the config writes, not a literal), the fraction of
-  runs whose trials disagree.
+- `evals.flaky_tasks(window int)`: a set-returning function, not a view,
+  for the same reason as `run_compare`: per task, over its last `window`
+  runs, the fraction of runs whose trials disagree. The caller passes
+  `flaky.window` from `evals/regression.config.json`, so the config file
+  stays the only home for the number and no table can disagree with it.
+  (The PRD's `v_flaky_tasks`.)
 - `evals.run_compare(a uuid, b uuid)`: a set-returning SQL function (the PRD's
   `v_run_compare(a, b)`; a view cannot take arguments) that returns one row
   per task in either run with both outcomes and both hash sets.
@@ -535,10 +538,17 @@ them in SQL as well would make two implementations of one formula.
 
 1. `0001-schema.sql` (P-07 / #1268): schema, enums, every table above except
    `eval_human_grade`, indexes, `model_price` rows.
-2. `0002-reporting.sql` (P-15 / #1276): views, `run_compare`, grants to the
-   reader role.
+2. `0002-reporting.sql` (P-15 / #1276): views, `run_compare`,
+   `flaky_tasks`. No grants: a static `grant ... to evals_reader` aborts the
+   migration on a host where that role was never created.
 3. `0003-grades-and-annotations.sql` (P-20 / #1281): `eval_human_grade`.
 4. Retention needs no schema change; `transcript_expires_at` is set at ingest.
+
+Grants live in the migrator, not in a migration file. After applying files,
+`evals:migrate` checks `pg_roles` for `evals_writer` and `evals_reader`,
+grants each the privileges the P-01 draft lists when it exists, and prints
+the `CREATE ROLE` and `GRANT` statements for any that does not, exiting 0.
+A missing role is a setup step the operator owns, not a failed migration.
 
 `model_price` rows come from `packages/eval-history/model-prices.json`,
 upserted on every `evals:migrate`. Prices are taken from Anthropic's published
@@ -769,18 +779,18 @@ Declared in `apps/showcase/src/routes.ts`, one folder per route under
 `apps/showcase/src/routes/evals/`, server code under `.server/` as the
 existing routes do.
 
-| Route                                | Loader query (`@repo/eval-history/queries`)                                       | Issue |
-| ------------------------------------ | --------------------------------------------------------------------------------- | ----- |
-| `/evals`                             | latest run per suite, `totals`, last 30 pass rates per suite, regressions on main | #1277 |
-| `/evals/runs/:runId`                 | run header (settings, env) and a trial page via `fetchPage`                       | #1277 |
-| `/evals/runs/:runId.json`            | the run's allow-listed projection (§8.3), never the stored envelope               | #1279 |
-| `/evals/compare?a=&b=` or `?branch=` | `evals.run_compare(a, b)` plus `attribute()`                                      | #1278 |
-| `/evals/subjects/:kind/:name`        | `v_subject_trend` for one subject, annotations in range                           | #1278 |
-| `/evals/heatmap`                     | subjects × last N runs from `v_subject_trend`, flaky set from `v_flaky_tasks`     | #1278 |
-| `/evals/cost`                        | tokens and both costs per run, suite and skill; p50/p95 duration                  | #1278 |
-| `/evals/confusion`                   | expected skill × invoked skill over `eval_trial_detail` for one run or a range    | #1280 |
-| `/evals/quality`                     | five rubric dimensions over time with each one's baseline band                    | #1280 |
-| `/evals/health`                      | outcome × error class counts, tool-list mismatches                                | #1280 |
+| Route                                | Loader query (`@repo/eval-history/queries`)                                         | Issue |
+| ------------------------------------ | ----------------------------------------------------------------------------------- | ----- |
+| `/evals`                             | latest run per suite, `totals`, last 30 pass rates per suite, regressions on main   | #1277 |
+| `/evals/runs/:runId`                 | run header (settings, env) and a trial page via `fetchPage`                         | #1277 |
+| `/evals/runs/:runId.json`            | the run's allow-listed projection (§8.3), never the stored envelope                 | #1279 |
+| `/evals/compare?a=&b=` or `?branch=` | `evals.run_compare(a, b)` plus `attribute()`                                        | #1278 |
+| `/evals/subjects/:kind/:name`        | `v_subject_trend` for one subject, annotations in range                             | #1278 |
+| `/evals/heatmap`                     | subjects × last N runs from `v_subject_trend`, flaky set from `flaky_tasks(window)` | #1278 |
+| `/evals/cost`                        | tokens and both costs per run, suite and skill; p50/p95 duration                    | #1278 |
+| `/evals/confusion`                   | expected skill × invoked skill over `eval_trial_detail` for one run or a range      | #1280 |
+| `/evals/quality`                     | five rubric dimensions over time with each one's baseline band                      | #1280 |
+| `/evals/health`                      | outcome × error class counts, tool-list mismatches                                  | #1280 |
 
 ### 8.2 Reuse, and what is new
 
