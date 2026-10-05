@@ -5,7 +5,7 @@
  */
 const NO_SKILL = '(none)';
 const ERRORED = '(error)';
-const CORNER = 'expected \\ loaded';
+const CORNER = String.raw`expected \ loaded`;
 const EMPTY_CELL = '.';
 
 export const trialRecord = ({ error, invoked, passed, skill, task }) => ({

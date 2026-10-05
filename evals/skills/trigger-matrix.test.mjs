@@ -90,7 +90,7 @@ describe('confusionMatrix', () => {
 describe('formatMatrix', () => {
   it('prints expected skills down the side and loaded skills across the top', () => {
     expect(formatMatrix(confusionMatrix(trials)).split('\n')).toStrictEqual([
-      'expected \\ loaded  commit-and-pr  epic  refactor-verified  (none)  (error)  trials',
+      String.raw`expected \ loaded  commit-and-pr  epic  refactor-verified  (none)  (error)  trials`,
       'epic                           .     2                  2       .        1       4',
       'not epic                       1     .                  .       1        .       2',
     ]);
