@@ -1,0 +1,18 @@
+id: near-miss-hyphen-vs-en-dash
+name: Telling a hyphen from an en dash
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: >-
+    What is the difference between a hyphen and an en dash, typographically?
+    One sentence. Load any skill you need, but don't run shell commands or
+    edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-unslop-alone
+    config:
+      forbidden_skills:
+        - unslop

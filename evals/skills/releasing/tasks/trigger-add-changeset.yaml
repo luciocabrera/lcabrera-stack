@@ -1,0 +1,19 @@
+id: trigger-add-changeset
+name: Adding a changeset for a package change
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: >-
+    I changed the public API of @lcabrera/utils in this branch. What do I
+    need to add to the PR so the package gets a new version when it merges?
+    Load any skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-releasing
+    config:
+      mode: any_order
+      required_skills:
+        - releasing

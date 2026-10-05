@@ -1,0 +1,20 @@
+id: trigger-split-commits
+name: Splitting staged work into commits
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: >-
+    I have a refactor of the form store and a docs fix for it staged
+    together. Help me split them into commits and write a message for each
+    one before I commit. Load any skill you need, but don't run shell
+    commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-commit-and-pr
+    config:
+      mode: any_order
+      required_skills:
+        - commit-and-pr

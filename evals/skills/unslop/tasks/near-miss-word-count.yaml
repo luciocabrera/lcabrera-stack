@@ -1,0 +1,18 @@
+id: near-miss-word-count
+name: Counting words in a sentence
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: >-
+    How many words are in this sentence: 'The gate fails when a rule is
+    missing.' Just the number. Load any skill you need, but don't run shell
+    commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-unslop-alone
+    config:
+      forbidden_skills:
+        - unslop

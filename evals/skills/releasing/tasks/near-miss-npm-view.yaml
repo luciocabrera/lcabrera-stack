@@ -1,0 +1,18 @@
+id: near-miss-npm-view
+name: Checking a package's latest version on npm
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: >-
+    Which npm command shows the latest published version of a package? Just
+    the command. Load any skill you need, but don't run shell commands or
+    edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-releasing-alone
+    config:
+      forbidden_skills:
+        - releasing

@@ -1,0 +1,17 @@
+id: near-miss-grammar-rule
+name: A grammar question
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: >-
+    Is it 'fewer errors' or 'less errors'? Give the rule in one sentence.
+    Load any skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-unslop-alone
+    config:
+      forbidden_skills:
+        - unslop

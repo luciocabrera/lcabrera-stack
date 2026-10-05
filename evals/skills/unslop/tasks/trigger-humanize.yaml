@@ -1,0 +1,21 @@
+id: trigger-humanize
+name: Making a paragraph sound human
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: >-
+    This reads like a chatbot wrote it. Make it sound like a person:
+    'Moreover, it is worth noting that this pivotal change not only
+    streamlines the workflow but also fosters a seamless developer
+    experience.' Load any skill you need, but don't run shell commands or
+    edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-unslop
+    config:
+      mode: any_order
+      required_skills:
+        - unslop

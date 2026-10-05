@@ -1,0 +1,19 @@
+id: trigger-pr-check-failing
+name: A pull request whose description check fails
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: >-
+    The pr-standards check is red on my pull request and says the description
+    is missing sections. What do I need to change in the PR body to make it
+    pass? Load any skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-commit-and-pr
+    config:
+      mode: any_order
+      required_skills:
+        - commit-and-pr

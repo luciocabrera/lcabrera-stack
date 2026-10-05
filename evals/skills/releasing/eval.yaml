@@ -1,5 +1,5 @@
 name: releasing-trigger
-description: Does releasing load to cut a package release, and stay out of a semver question?
+description: Does releasing load for a release, a changeset, the changelog, a publish or the label taxonomy, and stay out of a general npm or semver question?
 skill: releasing
 version: '1.0'
 config:

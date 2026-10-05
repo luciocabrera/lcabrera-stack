@@ -1,0 +1,19 @@
+id: trigger-commit-rejected
+name: A commit the commit-msg hook rejected
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: >-
+    My commit got rejected by the commit-msg hook. The message was 'Fixed the
+    table sorting bug'. Rewrite it so the hook accepts it. Load any skill you
+    need, but don't run shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-commit-and-pr
+    config:
+      mode: any_order
+      required_skills:
+        - commit-and-pr

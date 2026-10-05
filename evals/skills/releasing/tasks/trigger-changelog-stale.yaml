@@ -1,0 +1,19 @@
+id: trigger-changelog-stale
+name: A CHANGELOG.md that missed recent commits
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: >-
+    CHANGELOG.md hasn't picked up the last few merged PRs. How do I
+    regenerate it the way this repo expects? Load any skill you need, but
+    don't run shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-releasing
+    config:
+      mode: any_order
+      required_skills:
+        - releasing

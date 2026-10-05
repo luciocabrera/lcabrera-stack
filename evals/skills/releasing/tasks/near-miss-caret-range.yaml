@@ -1,0 +1,18 @@
+id: near-miss-caret-range
+name: What a caret range means
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: >-
+    In a package.json, what does a caret range like ^2.3.1 allow? One
+    sentence. Load any skill you need, but don't run shell commands or edit
+    files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-releasing-alone
+    config:
+      forbidden_skills:
+        - releasing
