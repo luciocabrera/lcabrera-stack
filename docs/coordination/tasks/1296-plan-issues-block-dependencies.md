@@ -6,6 +6,8 @@ status: review
 branch: fix/1296-1296-plan-issues-block-dependencies
 area:
   - scripts/lib/plan-issues-parse*
+  - scripts/plan-issues.mjs
+  - scripts/plan-issues.test.mjs
 started: 2026-10-05
 updated: 2026-10-05
 plan: (none)

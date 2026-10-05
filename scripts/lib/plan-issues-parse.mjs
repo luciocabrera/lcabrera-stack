@@ -143,28 +143,35 @@ const checkDependencyMap = (map) => {
   return map;
 };
 
-const yamlDependencies = (id, body) => {
+const yamlDependencies = (body) => {
   try {
-    return checkDependencyMap(
-      readDependencyMap(dependencySource(yamlBlock(body))),
-    );
+    return {
+      map: checkDependencyMap(
+        readDependencyMap(dependencySource(yamlBlock(body))),
+      ),
+      errors: [],
+    };
   } catch (error) {
-    throw new Error(`${id}: cannot parse dependencies — ${error.message}`, {
-      cause: error,
-    });
+    return {
+      map: {},
+      errors: [`cannot parse dependencies — ${error.message}`],
+    };
   }
 };
 
 const idList = (list) => (list ?? []).map(String);
 
-const parseDependencies = (id, body) => {
-  const map = yamlDependencies(id, body);
+const parseDependencies = (body) => {
+  const { map, errors } = yamlDependencies(body);
   return {
-    blocking: idList(map.blocking),
-    blockedBy: idList(map.blockedBy),
-    parent:
-      map.parent == null ? parseParentFromProse(body) : String(map.parent),
-    children: idList(map.children).concat(parseChildrenFromProse(body)),
+    errors,
+    dependencies: {
+      blocking: idList(map.blocking),
+      blockedBy: idList(map.blockedBy),
+      parent:
+        map.parent == null ? parseParentFromProse(body) : String(map.parent),
+      children: idList(map.children).concat(parseChildrenFromProse(body)),
+    },
   };
 };
 
@@ -200,13 +207,13 @@ const dedent = (text) => {
 };
 
 const toRecord = ({ id, title, note, body }, milestoneNames) => ({
+  ...parseDependencies(body),
   id,
   title,
   note: note.replaceAll(/[_*]/g, '').trim(),
   kind: id.startsWith('E-') ? 'epic' : 'issue',
   labels: parseLabels(body),
   milestone: parseMilestone(body, milestoneNames),
-  dependencies: parseDependencies(id, body),
   sections: {
     problem: sectionText(body, ['Problem Statement', 'Problem']),
     objective: sectionText(body, ['Objective']),

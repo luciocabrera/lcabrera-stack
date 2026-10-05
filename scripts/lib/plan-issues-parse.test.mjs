@@ -340,10 +340,32 @@ describe('dependency maps', () => {
       'dependencies:\n  blockedBy:\n    #1267',
     ],
     ['stray text at column 0', 'dependencies:\n  blockedBy: [P-02]\nP-03'],
-  ])('fails naming the entry on %s', (_case, yaml) => {
-    expect(() => dependenciesOf(yaml)).toThrow(
-      /^P-01: cannot parse dependencies/,
-    );
+  ])('records a parse error on the entry for %s', (_case, yaml) => {
+    const [record] = parsePlan(entry(yaml));
+    expect(record.id).toBe('P-01');
+    expect(record.errors).toEqual([
+      expect.stringMatching(/^cannot parse dependencies — /),
+    ]);
+    expect(record.dependencies).toMatchObject({ blocking: [], blockedBy: [] });
+  });
+
+  it('records no error on a map that parses', () => {
+    expect(parsePlan(entry(BLOCK))[0].errors).toEqual([]);
+  });
+
+  it('keeps parsing past a broken entry so every one is reported', () => {
+    const plan = [
+      entry('dependencies:\n  blockedby: [P-02]'),
+      entry('dependencies:\n  blockedBy: [P-02]').replace('P-01', 'P-02'),
+      entry('dependencies:\n  blockedBy: P-02').replace('P-01', 'P-03'),
+    ].join('\n');
+    expect(
+      parsePlan(plan).map(({ id, errors }) => [id, errors.length]),
+    ).toEqual([
+      ['P-01', 1],
+      ['P-02', 0],
+      ['P-03', 1],
+    ]);
   });
 });
 
