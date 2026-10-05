@@ -71,6 +71,7 @@ const auditRecord = (record, { allowed, milestones, source }) => {
     record,
     body,
     errors: [
+      ...record.errors,
       ...validateIssueBody(body).errors,
       ...['title', 'milestone']
         .filter((field) => startsWithDash(record[field]))

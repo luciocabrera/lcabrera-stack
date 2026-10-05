@@ -18,6 +18,7 @@
  * JS rather than fenced by two whitespace runs around a lazy group, which is
  * super-linear backtracking (Sonar S8786).
  */
+import { parse } from 'yaml';
 
 const HEADING_RE =
   /^###\s+(?<id>[EPG]-\d+)\s+—\s+`(?<title>[^`]+)`(?<note>.*)$/;
@@ -85,23 +86,92 @@ const parseMilestone = (body, milestoneNames) => {
   return milestoneNames.find((name) => name.startsWith(`M${mention} `)) ?? '';
 };
 
+const DEPENDENCY_LISTS = ['blocking', 'blockedBy', 'children'];
+
+const DEPENDENCY_KEYS = new Set([...DEPENDENCY_LISTS, 'parent']);
+
+const TOP_LEVEL_KEY = /^[A-Za-z_"'][^:]*:(?:[ \t]|$)/;
+
+const dependencySource = (yaml) => {
+  const lines = yaml.split('\n');
+  const start = lines.findIndex((line) => line.startsWith('dependencies:'));
+  if (start === -1) {
+    return '';
+  }
+  const rest = lines.slice(start + 1);
+  const end = rest.findIndex((line) => TOP_LEVEL_KEY.test(line));
+  return [lines[start], ...rest.slice(0, end === -1 ? undefined : end)].join(
+    '\n',
+  );
+};
+
+const ISSUE_NUMBER = /(?<!['"#\w])#(?<number>\d+)/g;
+
+const quoteIssueNumbers = (source) =>
+  source.replaceAll(ISSUE_NUMBER, "'#$<number>'");
+
+const isScalar = (value) =>
+  typeof value === 'string' || typeof value === 'number';
+
+const readDependencyMap = (source) => {
+  try {
+    return parse(quoteIssueNumbers(source))?.dependencies ?? {};
+  } catch (error) {
+    throw new Error(error.message.split('\n')[0].replace(/:$/, ''), {
+      cause: error,
+    });
+  }
+};
+
+const checkDependencyMap = (map) => {
+  if (typeof map !== 'object' || Array.isArray(map)) {
+    throw new TypeError('dependencies is not a map');
+  }
+  const stray = Object.keys(map).filter((key) => !DEPENDENCY_KEYS.has(key));
+  if (stray.length > 0) {
+    throw new Error(`unknown dependency key(s): ${stray.join(', ')}`);
+  }
+  for (const key of DEPENDENCY_LISTS) {
+    const list = map[key] ?? [];
+    if (!Array.isArray(list) || !list.every(isScalar)) {
+      throw new TypeError(`${key} is not a list of issue ids`);
+    }
+  }
+  if (map.parent != null && !isScalar(map.parent)) {
+    throw new TypeError('parent is not a single issue id');
+  }
+  return map;
+};
+
+const yamlDependencies = (body) => {
+  try {
+    return {
+      map: checkDependencyMap(
+        readDependencyMap(dependencySource(yamlBlock(body))),
+      ),
+      errors: [],
+    };
+  } catch (error) {
+    return {
+      map: {},
+      errors: [`cannot parse dependencies — ${error.message}`],
+    };
+  }
+};
+
+const idList = (list) => (list ?? []).map(String);
+
 const parseDependencies = (body) => {
-  const raw = yamlValue(yamlBlock(body), 'dependencies');
-  const field = (key) =>
-    new RegExp(String.raw`${key}:\s*(?<value>\[[^\]]*\]|[A-Za-z0-9-]+)`).exec(
-      raw,
-    )?.groups.value ?? '';
-  const scalar = (key) => {
-    const value = field(key);
-    return value === '' || value === 'null' ? undefined : value;
-  };
+  const { map, errors } = yamlDependencies(body);
   return {
-    blocking: bracketList(field('blocking')),
-    blockedBy: bracketList(field('blockedBy')),
-    parent: scalar('parent') ?? parseParentFromProse(body),
-    children: bracketList(field('children')).concat(
-      parseChildrenFromProse(body),
-    ),
+    errors,
+    dependencies: {
+      blocking: idList(map.blocking),
+      blockedBy: idList(map.blockedBy),
+      parent:
+        map.parent == null ? parseParentFromProse(body) : String(map.parent),
+      children: idList(map.children).concat(parseChildrenFromProse(body)),
+    },
   };
 };
 
@@ -137,13 +207,13 @@ const dedent = (text) => {
 };
 
 const toRecord = ({ id, title, note, body }, milestoneNames) => ({
+  ...parseDependencies(body),
   id,
   title,
   note: note.replaceAll(/[_*]/g, '').trim(),
   kind: id.startsWith('E-') ? 'epic' : 'issue',
   labels: parseLabels(body),
   milestone: parseMilestone(body, milestoneNames),
-  dependencies: parseDependencies(body),
   sections: {
     problem: sectionText(body, ['Problem Statement', 'Problem']),
     objective: sectionText(body, ['Objective']),

@@ -146,6 +146,229 @@ describe('malformed input', () => {
   });
 });
 
+describe('dependency maps', () => {
+  const entry = (yaml) =>
+    `### P-01 — \`docs(x): y\`\n\n\`\`\`yaml\nlabels: [type: docs]\n${yaml}\nmilestone: M1 - Foundation\n\`\`\`\n`;
+  const dependenciesOf = (yaml) => parsePlan(entry(yaml))[0].dependencies;
+
+  const BLOCK = [
+    'dependencies:',
+    '  blocking: [P-03]',
+    '  blockedBy: [P-02]',
+    '  parent: E-1',
+    '  children: []',
+  ].join('\n');
+
+  const FLOW =
+    'dependencies: { blocking: [P-03], blockedBy: [P-02], parent: E-1, children: [] }';
+
+  it('reads every key of a block-style map', () => {
+    expect(dependenciesOf(BLOCK)).toEqual({
+      blocking: ['P-03'],
+      blockedBy: ['P-02'],
+      parent: 'E-1',
+      children: [],
+    });
+  });
+
+  it('parses block and flow style to the same record', () => {
+    expect(dependenciesOf(BLOCK)).toEqual(dependenciesOf(FLOW));
+  });
+
+  it('reads a block-style list written one item per line', () => {
+    const yaml = [
+      'dependencies:',
+      '  blockedBy:',
+      '    - P-02',
+      '    - P-04',
+      '  parent: null',
+    ].join('\n');
+    expect(dependenciesOf(yaml)).toEqual({
+      blocking: [],
+      blockedBy: ['P-02', 'P-04'],
+      parent: undefined,
+      children: [],
+    });
+  });
+
+  it('reads issue numbers in a block-style map', () => {
+    const yaml = [
+      'dependencies:',
+      '  blocking: [#1270]',
+      '  blockedBy:',
+      '    - #1267',
+      '    - #1268',
+      '  parent: #1260',
+      '  children: []',
+    ].join('\n');
+    expect(dependenciesOf(yaml)).toEqual({
+      blocking: ['#1270'],
+      blockedBy: ['#1267', '#1268'],
+      parent: '#1260',
+      children: [],
+    });
+  });
+
+  it('reads issue numbers in a flow-style map', () => {
+    expect(
+      dependenciesOf(
+        'dependencies: { blocking: [#1270], blockedBy: [#1267, #1268], parent: #1260, children: [] }',
+      ),
+    ).toEqual({
+      blocking: ['#1270'],
+      blockedBy: ['#1267', '#1268'],
+      parent: '#1260',
+      children: [],
+    });
+  });
+
+  it('reads issue numbers and plan ids mixed in one list', () => {
+    const block = 'dependencies:\n  blockedBy: [#1267, P-02]\n  parent: E-1';
+    const flow = 'dependencies: { blockedBy: [#1267, P-02], parent: E-1 }';
+    expect(dependenciesOf(block).blockedBy).toEqual(['#1267', 'P-02']);
+    expect(dependenciesOf(flow)).toEqual(dependenciesOf(block));
+  });
+
+  it.each([
+    ['a bare comment', '#upstream'],
+    ['a heading-like comment', '### upstream'],
+    ['a blank line and a comment', '\n# upstream'],
+  ])('reads past %s at column 0 inside a block-style map', (_case, comment) => {
+    const yaml = [
+      'dependencies:',
+      comment,
+      '  blocking: []',
+      '  blockedBy: [P-02]',
+      '  parent: E-1',
+      '  children: []',
+    ].join('\n');
+    expect(dependenciesOf(yaml)).toMatchObject({
+      blockedBy: ['P-02'],
+      parent: 'E-1',
+    });
+  });
+
+  it('reads a multi-line flow map closed at column 0', () => {
+    const yaml = [
+      'dependencies: {',
+      '  blocking: [P-03],',
+      '  blockedBy: [#1267, P-02],',
+      '  parent: E-1',
+      '}',
+    ].join('\n');
+    expect(dependenciesOf(yaml)).toEqual({
+      blocking: ['P-03'],
+      blockedBy: ['#1267', 'P-02'],
+      parent: 'E-1',
+      children: [],
+    });
+  });
+
+  it('stops at the next top-level key', () => {
+    const yaml = 'dependencies:\n  blockedBy: [P-02]\nnotes: x';
+    expect(dependenciesOf(yaml).blockedBy).toEqual(['P-02']);
+  });
+
+  it.each([
+    [
+      'first',
+      ['  blockedBy: [', '    #1267,', '    P-02', '  ]'],
+      ['#1267', 'P-02'],
+    ],
+    [
+      'last',
+      ['  blockedBy: [', '    P-02,', '    #1267', '  ]'],
+      ['P-02', '#1267'],
+    ],
+    [
+      'alone on a line',
+      ['  blockedBy: [P-02,', '    #1267', '  ]'],
+      ['P-02', '#1267'],
+    ],
+  ])(
+    'reads an issue number %s in a wrapped flow list',
+    (_case, lines, expected) => {
+      expect(
+        dependenciesOf(['dependencies:', ...lines].join('\n')).blockedBy,
+      ).toEqual(expected);
+    },
+  );
+
+  it.each([
+    ['a spaced comment', '  # upstream'],
+    ['an unspaced comment', '  #upstream'],
+    ['a comment naming an issue', '  # waits on #1267'],
+  ])('ignores %s inside the map', (_case, comment) => {
+    const yaml = [
+      'dependencies:',
+      comment,
+      '  blockedBy: [P-02] # after #1268',
+      '  parent: E-1',
+    ].join('\n');
+    expect(dependenciesOf(yaml)).toMatchObject({
+      blockedBy: ['P-02'],
+      parent: 'E-1',
+    });
+  });
+
+  it('leaves an issue number the author already quoted alone', () => {
+    expect(
+      dependenciesOf('dependencies:\n  blockedBy: [\'#1267\', "#1268"]')
+        .blockedBy,
+    ).toEqual(['#1267', '#1268']);
+  });
+
+  it('treats an absent map as no dependencies', () => {
+    expect(dependenciesOf('')).toEqual({
+      blocking: [],
+      blockedBy: [],
+      parent: undefined,
+      children: [],
+    });
+  });
+
+  it.each([
+    ['malformed yaml', 'dependencies: { blockedBy: [P-02 }'],
+    ['a misspelt key', 'dependencies:\n  blockedby: [P-02]'],
+    ['a scalar where a list belongs', 'dependencies:\n  blockedBy: P-02'],
+    ['a list where the parent belongs', 'dependencies:\n  parent: [E-1]'],
+    ['a scalar in place of the map', 'dependencies: P-02'],
+    ['an unclosed list of issue numbers', 'dependencies:\n  blockedBy: [#1267'],
+    ['an issue number with trailing text', 'dependencies:\n  parent: #12x'],
+    [
+      'a bare issue number where a list belongs',
+      'dependencies:\n  blockedBy:\n    #1267',
+    ],
+    ['stray text at column 0', 'dependencies:\n  blockedBy: [P-02]\nP-03'],
+  ])('records a parse error on the entry for %s', (_case, yaml) => {
+    const [record] = parsePlan(entry(yaml));
+    expect(record.id).toBe('P-01');
+    expect(record.errors).toEqual([
+      expect.stringMatching(/^cannot parse dependencies — /),
+    ]);
+    expect(record.dependencies).toMatchObject({ blocking: [], blockedBy: [] });
+  });
+
+  it('records no error on a map that parses', () => {
+    expect(parsePlan(entry(BLOCK))[0].errors).toEqual([]);
+  });
+
+  it('keeps parsing past a broken entry so every one is reported', () => {
+    const plan = [
+      entry('dependencies:\n  blockedby: [P-02]'),
+      entry('dependencies:\n  blockedBy: [P-02]').replace('P-01', 'P-02'),
+      entry('dependencies:\n  blockedBy: P-02').replace('P-01', 'P-03'),
+    ].join('\n');
+    expect(
+      parsePlan(plan).map(({ id, errors }) => [id, errors.length]),
+    ).toEqual([
+      ['P-01', 1],
+      ['P-02', 0],
+      ['P-03', 1],
+    ]);
+  });
+});
+
 describe('parseMilestoneNames', () => {
   it('normalises en dashes so one milestone does not become two', () => {
     const scheme = '### M1 – Foundation\n\ntext\n\n### M3 – Cross‑App\n';
