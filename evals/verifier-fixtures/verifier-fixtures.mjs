@@ -74,31 +74,50 @@ const describeRun = ({ error, notMet, verdict }) =>
     ? `not-met [${notMet.join(',')}], verdict ${(verdict ?? '(no verdict line)').slice(0, 30)}`
     : `error: ${error}`;
 
+export const fixtureLine = ({ fixture, lines, matched, stable, wanted }) => {
+  const problems = [
+    ...(matched ? [] : [wanted]),
+    ...(stable ? [] : ['runs disagree']),
+  ];
+  const status = problems.length === 0 ? 'ok' : `FAIL (${problems.join('; ')})`;
+  return `${fixture}: ${lines.join(' | ')} -> ${status}`;
+};
+
 export const describeJudgement = ({
   expectedNotMet,
   fixture,
   matched,
   runs,
   stable,
-}) => {
-  const problems = [
-    ...(matched
-      ? []
-      : [
-          `expected not-met [${expectedNotMet.join(',')}], a verdict line that is not a PASS, and no session error`,
-        ]),
-    ...(stable ? [] : ['runs disagree']),
-  ];
-  const status = problems.length === 0 ? 'ok' : `FAIL (${problems.join('; ')})`;
-  return `${fixture}: ${runs.map(describeRun).join(' | ')} -> ${status}`;
-};
+}) =>
+  fixtureLine({
+    fixture,
+    lines: runs.map(describeRun),
+    matched,
+    stable,
+    wanted: `expected not-met [${expectedNotMet.join(',')}], a verdict line that is not a PASS, and no session error`,
+  });
 
-export const runCount = (value) => {
-  const runs = Number(value);
-  if (!Number.isInteger(runs) || runs < 2) {
+export const suiteEnd = ({ judgements, reportDir }) => ({
+  exitCode: judgements.some(({ matched, stable }) => !matched || !stable)
+    ? 1
+    : 0,
+  footer: `Full reports: ${reportDir}/`,
+});
+
+export const wholeNumber = ({ minimum, reason = '', value }) => {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < minimum) {
     throw new Error(
-      `--runs must be a whole number of at least 2, so the runs can be compared; got "${value}"`,
+      `--runs must be a whole number of at least ${minimum}${reason}; got "${value}"`,
     );
   }
-  return runs;
+  return number;
 };
+
+export const runCount = (value) =>
+  wholeNumber({
+    minimum: 2,
+    reason: ', so the runs can be compared',
+    value,
+  });

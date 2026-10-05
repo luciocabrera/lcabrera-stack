@@ -74,6 +74,18 @@ describe('sessionProblem', () => {
     );
   });
 
+  it('accepts the expected tools in any order, and names a mismatch', () => {
+    expect(
+      sessionProblem([init(['Read', 'Bash']), success], ['Bash', 'Read']),
+    ).toBeUndefined();
+    expect(sessionProblem([init(['Bash']), success], ['Bash', 'Read'])).toBe(
+      'the session held Bash instead of Bash, Read',
+    );
+    expect(sessionProblem([init([]), success], ['Bash'])).toBe(
+      'the session held no tools instead of Bash',
+    );
+  });
+
   it('reports a session that did not finish, or never said what it held', () => {
     expect(
       sessionProblem([

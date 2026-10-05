@@ -72,6 +72,43 @@ without running anything", not "I found a mistake". A verifier with its tools
 returns PASS on clean work; testing that tier is
 [#1254](https://github.com/luciocabrera/lcabrera-stack/issues/1254).
 
+## The tooled tier
+
+```bash
+vp run evals:verifier:tooled              # every fixture, once each
+vp run evals:verifier:tooled -- clean     # one fixture
+vp run evals:verifier:tooled -- clean --keep --runs 2
+```
+
+This tier tests the verifier's real job. For each fixture it:
+
+1. adds a worktree on a throwaway branch at `main`'s current commit;
+2. renumbers the fixture's ADR to the next free number, applies the diff and
+   commits it;
+3. installs, generates route types and links the local env files
+   (`worktree:env`);
+4. runs the verifier there with the tools its definition lists, the project's
+   settings, and the dispatch `/refactor-verified` uses. Commits, pushes and
+   `gh` are blocked.
+
+A fixture passes only when:
+
+- `clean` gets a plain `VERDICT: PASS`, and each violation fixture `FAIL`
+  with exactly its criterion from `expected.json` marked `not-met`;
+- the report's gate proof shows a `Failed:` line with a non-zero exit and a
+  `Passed:` line with exit 0;
+- the session held exactly the verifier's tools and finished;
+- the worktree is clean with its HEAD unmoved afterwards, and the main checkout
+  has the same `git status` as before.
+
+Worktrees and branches are removed after each run unless `--keep` is given.
+Reports go to `.tmp/verifier-evals-tooled/`.
+
+It is slow and costly: every fixture is a many-turn session that may run the
+full quality gate, so fixtures run one at a time, which also keeps them off each
+other's database. It needs the local Postgres the full gate uses, and it never
+runs in CI.
+
 ## Adding a fixture
 
 1. Write the violation as one edit to `clean/change.diff`, breaking one
