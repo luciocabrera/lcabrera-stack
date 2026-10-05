@@ -2,12 +2,12 @@
 
 **Status:** Proposed
 
-**Governs at adoption:** `eval-history`
+**Governs at adoption:** `repository`
 
 **Issue:** [#1263](https://github.com/luciocabrera/lcabrera-stack/issues/1263)
 
-**Waits on:** nothing beyond review. `governs` names a workspace that does
-not exist until #1265.
+**Waits on:** nothing beyond review. `governs` is `repository` because this
+is adopted before the package exists (#1265).
 
 ## Context
 
@@ -53,8 +53,10 @@ it reads today.
 - An artifact two versions old cannot be ingested. History from before an
   upgrade has to be ingested before the next one.
 - Raw judge replies and transcripts are never inside the envelope's
-  `detail`, only behind a transcript pointer, so a reader of the envelope
-  cannot leak them by accident.
+  `detail`, only behind a transcript pointer. Graded prose (a quality
+  judge's `summary` and `feedback`) is in `detail`, so the envelope as a
+  whole is not public-safe; the dashboard's allow-list is what keeps that
+  prose off public routes.
 
 ## Alternatives considered
 

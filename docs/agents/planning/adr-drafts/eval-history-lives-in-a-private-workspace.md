@@ -2,14 +2,15 @@
 
 **Status:** Proposed
 
-**Governs at adoption:** `eval-history`
+**Governs at adoption:** `repository`
 
 **Issue:** [#1262](https://github.com/luciocabrera/lcabrera-stack/issues/1262)
 
 **Waits on:** questions 1, 2, 7 and 8 in
 [`eval-history-plan.md`](../eval-history-plan.md#12-questions-for-stakeholders).
-`governs` names a workspace that does not exist until #1265; `adr:verify`
-will reject it if this is adopted first.
+`governs` is `repository`: this ADR is adopted before `packages/eval-history`
+exists (#1265), so `adr:verify` would reject the workspace name, and the
+decision is about this repository's own tooling in any case.
 
 ## Context
 
