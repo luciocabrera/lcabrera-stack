@@ -90,16 +90,32 @@ const DEPENDENCY_LISTS = ['blocking', 'blockedBy', 'children'];
 
 const DEPENDENCY_KEYS = new Set([...DEPENDENCY_LISTS, 'parent']);
 
+const TOP_LEVEL_KEY = /^[A-Za-z_"'][^:]*:(?:[ \t]|$)/;
+
+const isCommentLine = (line) => line.trimStart().startsWith('#');
+
+const refuseCommentedIssueNumber = (line) => {
+  if (/^[ \t]*#\d+[ \t]*$/.test(line)) {
+    throw new Error(
+      `"${line.trim()}" on a line of its own is read as a comment, not an issue number`,
+    );
+  }
+  return line;
+};
+
 const dependencySource = (yaml) => {
   const lines = yaml.split('\n');
   const start = lines.findIndex((line) => line.startsWith('dependencies:'));
   if (start === -1) {
     return '';
   }
-  const end = lines.findIndex(
-    (line, index) => index > start && /^\S/.test(line),
-  );
-  return lines.slice(start, end === -1 ? undefined : end).join('\n');
+  const rest = lines.slice(start + 1);
+  const end = rest.findIndex((line) => TOP_LEVEL_KEY.test(line));
+  const map = rest
+    .slice(0, end === -1 ? undefined : end)
+    .map(refuseCommentedIssueNumber)
+    .filter((line) => !isCommentLine(line));
+  return [lines[start], ...map].join('\n');
 };
 
 const FLOW_ISSUE_NUMBER =

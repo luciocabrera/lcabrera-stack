@@ -229,6 +229,46 @@ describe('dependency maps', () => {
     expect(dependenciesOf(flow)).toEqual(dependenciesOf(block));
   });
 
+  it.each([
+    ['a bare comment', '#upstream'],
+    ['a heading-like comment', '### upstream'],
+    ['a blank line and a comment', '\n# upstream'],
+  ])('reads past %s at column 0 inside a block-style map', (_case, comment) => {
+    const yaml = [
+      'dependencies:',
+      comment,
+      '  blocking: []',
+      '  blockedBy: [P-02]',
+      '  parent: E-1',
+      '  children: []',
+    ].join('\n');
+    expect(dependenciesOf(yaml)).toMatchObject({
+      blockedBy: ['P-02'],
+      parent: 'E-1',
+    });
+  });
+
+  it('reads a multi-line flow map closed at column 0', () => {
+    const yaml = [
+      'dependencies: {',
+      '  blocking: [P-03],',
+      '  blockedBy: [#1267, P-02],',
+      '  parent: E-1',
+      '}',
+    ].join('\n');
+    expect(dependenciesOf(yaml)).toEqual({
+      blocking: ['P-03'],
+      blockedBy: ['#1267', 'P-02'],
+      parent: 'E-1',
+      children: [],
+    });
+  });
+
+  it('stops at the next top-level key', () => {
+    const yaml = 'dependencies:\n  blockedBy: [P-02]\nnotes: x';
+    expect(dependenciesOf(yaml).blockedBy).toEqual(['P-02']);
+  });
+
   it('treats an absent map as no dependencies', () => {
     expect(dependenciesOf('')).toEqual({
       blocking: [],
@@ -246,6 +286,11 @@ describe('dependency maps', () => {
     ['a scalar in place of the map', 'dependencies: P-02'],
     ['an unclosed list of issue numbers', 'dependencies:\n  blockedBy: [#1267'],
     ['an issue number with trailing text', 'dependencies:\n  parent: #12x'],
+    [
+      'an issue number alone on a line',
+      'dependencies:\n  blockedBy:\n    #1267',
+    ],
+    ['stray text at column 0', 'dependencies:\n  blockedBy: [P-02]\nP-03'],
   ])('fails naming the entry on %s', (_case, yaml) => {
     expect(() => dependenciesOf(yaml)).toThrow(
       /^P-01: cannot parse dependencies/,
