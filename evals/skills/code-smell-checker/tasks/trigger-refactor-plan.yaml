@@ -1,0 +1,16 @@
+id: trigger-refactor-plan
+name: Planning a refactor of a package
+set: regression
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Before we start a big refactor of packages/server, go through the whole package for code smells, tell me which ones are real and which are noise, and give me a fix order; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-code-smell-checker
+    config:
+      mode: any_order
+      required_skills:
+        - code-smell-checker

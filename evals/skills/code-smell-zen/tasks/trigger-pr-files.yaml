@@ -1,0 +1,16 @@
+id: trigger-pr-files
+name: Smell-checking the files a PR touches
+set: regression
+tags:
+  - positive-trigger
+inputs:
+  prompt: "I'm about to ask for review on my PR. Go through the files it changes for smells like long functions, magic numbers or duplicated logic, and tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-code-smell-zen
+    config:
+      mode: any_order
+      required_skills:
+        - code-smell-zen

@@ -1,0 +1,15 @@
+id: near-miss-dead-code-scan
+name: Running a dead-code scan
+set: regression
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Run fallow over the repo and list the unused exports and files nothing imports; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-code-smell-checker-alone
+    config:
+      forbidden_skills:
+        - code-smell-checker

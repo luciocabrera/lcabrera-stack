@@ -1,0 +1,15 @@
+id: near-miss-whole-tree-audit
+name: Auditing the whole tree
+set: regression
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Audit the entire codebase, every package and app, for code smells and give me a tech-debt roadmap for next quarter; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-code-smell-zen-alone
+    config:
+      forbidden_skills:
+        - code-smell-zen

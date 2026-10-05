@@ -1,0 +1,16 @@
+id: trigger-unused-exports
+name: Finding exports nothing imports
+set: regression
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Which exports in this monorepo are never imported anywhere? Do a full static analysis and rank what to delete first; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-fallow-code-checker
+    config:
+      mode: any_order
+      required_skills:
+        - fallow-code-checker

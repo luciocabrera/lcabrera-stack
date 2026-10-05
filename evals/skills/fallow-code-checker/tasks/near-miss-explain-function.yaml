@@ -1,0 +1,15 @@
+id: near-miss-explain-function
+name: Explaining one function
+set: regression
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Explain what this function does, in two sentences: function isUnused(name, imports) { return !imports.some((i) => i.names.includes(name)); } Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-fallow-code-checker-alone
+    config:
+      forbidden_skills:
+        - fallow-code-checker

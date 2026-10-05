@@ -1,0 +1,16 @@
+id: trigger-tech-debt-review
+name: Reviewing tech debt across the repository
+set: regression
+tags:
+  - positive-trigger
+inputs:
+  prompt: "We have a sprint set aside for tech debt. Go over the whole repository and tell me which smells are worth that sprint and which can wait, with a severity for each; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-code-smell-checker
+    config:
+      mode: any_order
+      required_skills:
+        - code-smell-checker
