@@ -2,7 +2,7 @@
 id: unicorn-77
 title: build(deps): take eslint-plugin-unicorn 77
 owner: agent:claude
-status: active
+status: review
 branch: build/1305-unicorn-77
 area:
   - pnpm-workspace.yaml
@@ -14,7 +14,7 @@ area:
 started: 2026-10-05
 updated: 2026-10-05
 plan: (none)
-pr: (none)
+pr: '#1312'
 issue: #1305
 ---
 
