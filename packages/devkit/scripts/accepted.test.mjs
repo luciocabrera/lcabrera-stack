@@ -15,8 +15,8 @@ const PATH = '.github/skills/demo/SKILL.md';
 const EDIT = 'a'.repeat(64);
 const OTHER_EDIT = 'b'.repeat(64);
 
-const record = (overrides) => ({
-  [PATH]: { hash: EDIT, reason: 'our tracker is not GitHub', ...overrides },
+const record = () => ({
+  [PATH]: { hash: EDIT, reason: 'our tracker is not GitHub' },
 });
 
 describe('parseAccepted', () => {

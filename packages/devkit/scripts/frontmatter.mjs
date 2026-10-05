@@ -81,8 +81,7 @@ const significantLines = (lines) =>
     .map((line) => line.replace(COMMENT, ''))
     .filter((line) => line.trim() !== '');
 
-const opensWith = (line, character) =>
-  (line ?? '').trimStart().startsWith(character);
+const opensFlowArray = (line) => (line ?? '').trimStart().startsWith('[');
 
 const flowArrayBody = (value) => {
   const open = value.indexOf('[');
@@ -100,11 +99,11 @@ const blockSequenceBody = (lines) => {
 
 const declaredEntries = (inline, following) => {
   if (inline !== '') {
-    return opensWith(inline, '[')
+    return opensFlowArray(inline)
       ? flowArrayBody([inline, ...following].join('\n'))
       : inline;
   }
-  return opensWith(following[0], '[')
+  return opensFlowArray(following[0])
     ? flowArrayBody(following.join('\n'))
     : blockSequenceBody(following);
 };

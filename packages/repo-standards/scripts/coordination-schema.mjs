@@ -45,9 +45,9 @@ const missingFields = (data, required) =>
     .filter((field) => isBlank(data[field]))
     .map((field) => `missing required field \`${field}\``);
 
-const enumError = (label, value, allowed) =>
+const statusError = (value, allowed) =>
   value !== undefined && !allowed.has(value)
-    ? `${label} \`${value}\` is not one of ${[...allowed].join(', ')}`
+    ? `status \`${value}\` is not one of ${[...allowed].join(', ')}`
     : undefined;
 
 const patternError = (label, value, pattern, hint) =>
@@ -93,7 +93,7 @@ const slugForBranch = (slug, branch) =>
 export const taskErrors = ({ data, slug }, seen) =>
   [
     ...missingFields(data, TASK_REQUIRED),
-    enumError('status', data.status, TASK_STATUSES),
+    statusError(data.status, TASK_STATUSES),
     ownerError('owner', data.owner),
     issueError('issue', data.issue),
     dateError('started', data.started),
@@ -105,7 +105,7 @@ export const taskErrors = ({ data, slug }, seen) =>
 export const branchErrors = ({ data, slug }) =>
   [
     ...missingFields(data, BRANCH_REQUIRED),
-    enumError('status', data.status, BRANCH_STATUSES),
+    statusError(data.status, BRANCH_STATUSES),
     ownerError('integrator', data.integrator),
     dateError('updated', data.updated),
     slugForBranch(slug, data.branch),

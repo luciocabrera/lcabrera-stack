@@ -64,15 +64,14 @@ const isExecutableFile = (path) => {
 
 /**
  * @param {string} name
- * @param {Record<string, string | undefined>} [env]
  * @returns {string | undefined}
  */
-const findOnPath = (name, env = process.env) =>
-  (env.PATH ?? '')
+const findOnPath = (name) =>
+  (process.env.PATH ?? '')
     .split(delimiter)
     .filter((entry) => entry !== '')
     .flatMap((directory) =>
-      extensionsFor(env).map((extension) =>
+      extensionsFor(process.env).map((extension) =>
         join(directory, `${name}${extension}`),
       ),
     )

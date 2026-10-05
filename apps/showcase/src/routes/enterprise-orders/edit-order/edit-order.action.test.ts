@@ -20,19 +20,23 @@ const existing = { order_id: 7 } as EnterpriseOrder;
 
 type RunArgs = {
   readonly fields: Record<string, string>;
-  readonly orderId: string;
 };
+
+const ORDER_ID = '7';
 
 const authClaims = { exp: 0, iat: 0, jti: 't', sub: 'demo@example.com' };
 
-const run = ({ fields, orderId }: RunArgs) =>
+const run = ({ fields }: RunArgs) =>
   action({
     context: { get: () => authClaims },
-    params: { orderId },
-    request: new Request(`http://localhost/enterprise-orders/edit/${orderId}`, {
-      body: new URLSearchParams(fields),
-      method: 'POST',
-    }),
+    params: { orderId: ORDER_ID },
+    request: new Request(
+      `http://localhost/enterprise-orders/edit/${ORDER_ID}`,
+      {
+        body: new URLSearchParams(fields),
+        method: 'POST',
+      },
+    ),
   } as unknown as ActionFunctionArgs);
 
 it('recomputes totals, updates and redirects to the view', async () => {
@@ -40,7 +44,6 @@ it('recomputes totals, updates and redirects to the view', async () => {
 
   const result = await run({
     fields: buildValidOrderFormFields(),
-    orderId: '7',
   });
 
   expect(result).toBeInstanceOf(Response);
@@ -57,7 +60,7 @@ it('throws a 404 when the target order is gone', async () => {
   vi.mocked(selectOrderById).mockResolvedValueOnce(undefined);
 
   await expect(
-    run({ fields: buildValidOrderFormFields(), orderId: '7' }),
+    run({ fields: buildValidOrderFormFields() }),
   ).rejects.toMatchObject({
     init: { status: 404 },
   });
@@ -69,7 +72,6 @@ it('returns field errors for an invalid submission', async () => {
 
   const result = await run({
     fields: { ...buildValidOrderFormFields(), quantity: '0' },
-    orderId: '7',
   });
 
   expect(result).toStrictEqual({

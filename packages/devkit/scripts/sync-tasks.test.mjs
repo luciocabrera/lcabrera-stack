@@ -107,10 +107,10 @@ const erroredBy = (run) => {
  * A removal is two claims, and a test asserting only the first would pass over
  * a run that deleted a task and said nothing.
  */
-const expectRemoved = ({ log, name, root }) => {
-  expect(readJson(root, 'package.json').scripts[name]).toBeUndefined();
+const expectDepartedRemoved = ({ log, root }) => {
+  expect(readJson(root, 'package.json').scripts[DEPARTED]).toBeUndefined();
   expect(log.mock.calls.flat().join('\n')).toMatch(
-    new RegExp(String.raw`removed\s+${name}`),
+    new RegExp(String.raw`removed\s+${DEPARTED}`),
   );
 };
 
@@ -148,7 +148,7 @@ describe('sync reconciles the task block', () => {
 
     runSync([], root);
 
-    expectRemoved({ log, name: DEPARTED, root });
+    expectDepartedRemoved({ log, root });
     restore();
   });
 
@@ -298,7 +298,7 @@ describe('sync reconciles the gate tasks too', () => {
 
     runSync([], root);
 
-    expectRemoved({ log, name: DEPARTED, root });
+    expectDepartedRemoved({ log, root });
     restore();
   });
 

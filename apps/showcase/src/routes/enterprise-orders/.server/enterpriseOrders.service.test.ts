@@ -72,22 +72,18 @@ type GroupingArgs = {
   readonly aggregates?: TableGroupingState['aggregates'];
   readonly keys: readonly string[];
   readonly mode?: TableGroupingState['mode'];
-  readonly periods?: TableGroupingState['periods'];
-  readonly shares?: TableGroupingState['shares'];
 };
 
 const grouping = ({
   aggregates = [],
   keys,
   mode = 'flat',
-  periods = {},
-  shares = [],
 }: GroupingArgs): TableGroupingState => ({
   aggregates,
   keys,
   mode,
-  periods,
-  shares,
+  periods: {},
+  shares: [],
   totalsPlacement: 'last',
 });
 
