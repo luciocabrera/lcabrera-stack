@@ -1,5 +1,6 @@
 id: trigger
 name: Validating a finished change
+set: regression
 tags:
   - positive-trigger
 inputs:

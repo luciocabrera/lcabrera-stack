@@ -1,5 +1,6 @@
 id: trigger
 name: Moving a form to an action
+set: regression
 tags:
   - positive-trigger
 inputs:

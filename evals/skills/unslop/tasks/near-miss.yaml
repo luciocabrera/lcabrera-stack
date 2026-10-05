@@ -1,5 +1,6 @@
 id: near-miss
 name: Translating a sentence
+set: regression
 tags:
   - negative-trigger
 inputs:

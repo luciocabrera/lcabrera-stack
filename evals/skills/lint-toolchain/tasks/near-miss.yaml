@@ -1,5 +1,6 @@
 id: near-miss
 name: Reading the dev-server port
+set: regression
 tags:
   - negative-trigger
 inputs:

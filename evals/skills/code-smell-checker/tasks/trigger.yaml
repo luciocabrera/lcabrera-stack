@@ -1,5 +1,6 @@
 id: trigger
 name: Auditing a package for smells
+set: regression
 tags:
   - positive-trigger
 inputs:

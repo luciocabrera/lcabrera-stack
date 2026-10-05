@@ -1,5 +1,6 @@
 id: trigger
 name: Taking a backlog issue to a verified PR
+set: regression
 tags:
   - positive-trigger
 inputs:

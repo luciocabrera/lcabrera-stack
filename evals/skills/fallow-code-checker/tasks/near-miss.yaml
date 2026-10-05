@@ -1,5 +1,6 @@
 id: near-miss
 name: Removing one unused import
+set: regression
 tags:
   - negative-trigger
 inputs:

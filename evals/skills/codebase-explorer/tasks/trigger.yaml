@@ -1,5 +1,6 @@
 id: trigger
 name: Tracing a feature end to end
+set: regression
 tags:
   - positive-trigger
 inputs:

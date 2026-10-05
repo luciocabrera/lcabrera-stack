@@ -22,6 +22,8 @@ describe('readTask', () => {
         [
           'id: trigger',
           'name: A task',
+          'set: capability',
+          'source: incident',
           'inputs:',
           '  prompt: "Do it."',
           '  context:',
@@ -36,14 +38,21 @@ describe('readTask', () => {
       id: 'trigger',
       name: 'A task',
       prompt: 'Do it.',
+      set: 'capability',
       shouldTrigger: true,
+      source: 'incident',
     });
   });
 
   it('treats a missing should_trigger as a near-miss', () => {
     expect(
       readTask('id: n\nname: n\ninputs:\n  prompt: p\nexpected: {}\n'),
-    ).toMatchObject({ fixture: undefined, shouldTrigger: false });
+    ).toMatchObject({
+      fixture: undefined,
+      set: undefined,
+      shouldTrigger: false,
+      source: undefined,
+    });
   });
 });
 

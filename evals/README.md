@@ -16,6 +16,22 @@ suites' own tests.
 | [Verifier fixtures](./verifier-fixtures) | `vp run evals:verifier`       | yes           |
 | The suites' own tests                    | `vp run test:evals`           | no            |
 
+## Turning a real failure into a task
+
+When an agent in real work loads the wrong skill, or misses one it needed,
+keep the prompt that caused it as a task in [`skills/`](./skills):
+
+1. Add a file under `evals/skills/<skill>/tasks/` for the skill that should
+   have loaded (a trigger task) or should have stayed out (a near-miss task).
+   Copy the user's words, cut to what the decision needed, and end the prompt
+   with the sentence every prompt ends with.
+2. Give it an `id` the skill's other tasks do not use, `set: capability` and
+   `source: incident`. `capability` because the skill just failed it.
+3. Run `vp run evals:skills -- <skill>`. For a trigger task, also run it with
+   `--hide <skill>` and confirm it fails.
+4. Once the fix to the skill makes it pass reliably, change `set` to
+   `regression` and keep `source: incident`.
+
 ## Rules consistency
 
 Fails when:

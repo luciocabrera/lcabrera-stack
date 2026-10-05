@@ -1,5 +1,6 @@
 id: near-miss
 name: Pretty-printing JSON
+set: regression
 tags:
   - negative-trigger
 inputs:

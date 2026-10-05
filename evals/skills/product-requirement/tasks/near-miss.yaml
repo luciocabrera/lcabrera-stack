@@ -1,5 +1,6 @@
 id: near-miss
 name: Describing a PRD in general
+set: regression
 tags:
   - negative-trigger
 inputs:

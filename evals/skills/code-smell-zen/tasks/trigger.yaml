@@ -1,5 +1,6 @@
 id: trigger
 name: Reviewing a branch diff for smells
+set: regression
 tags:
   - positive-trigger
 inputs:

@@ -1,5 +1,6 @@
 id: trigger
 name: De-AI a paragraph
+set: regression
 tags:
   - positive-trigger
 inputs:

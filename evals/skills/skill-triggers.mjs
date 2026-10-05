@@ -21,7 +21,9 @@ export const readTask = (source) => {
     id: task.id,
     name: task.name,
     prompt: task.inputs.prompt,
+    set: task.set,
     shouldTrigger: task.expected.should_trigger === true,
+    source: task.source,
   };
 };
 
@@ -80,7 +82,14 @@ const PATHS_KEY = /^paths:/m;
 export const isPathScoped = (skillSource) =>
   PATHS_KEY.test(/^---\r?\n([\s\S]*?)\r?\n---/.exec(skillSource)?.[1] ?? '');
 
-const REQUIRED_TASKS = ['trigger', 'near-miss'];
+const KINDS = [
+  { kind: 'trigger', shouldTrigger: true },
+  { kind: 'near-miss', shouldTrigger: false },
+];
+
+const TASK_SETS = ['regression', 'capability'];
+
+const TASK_SOURCES = ['incident'];
 
 export const PROMPT_SUFFIX =
   "Load any skill you need, but don't run shell commands or edit files.";
@@ -102,11 +111,11 @@ const skillCoverageProblems = ({ name, scoped, tasks }) => {
   if (tasks === undefined) {
     return [`${name} has no eval under evals/skills/`];
   }
-  const ids = new Set(tasks.map((task) => task.id));
   return [
-    ...REQUIRED_TASKS.filter((id) => !ids.has(id)).map(
-      (id) => `${name} has no ${id} task`,
-    ),
+    ...KINDS.filter(
+      ({ shouldTrigger }) =>
+        !tasks.some((task) => task.shouldTrigger === shouldTrigger),
+    ).map(({ kind }) => `${name} has no ${kind} task`),
     ...(scoped
       ? tasks
           .filter((task) => task.fixture === undefined)
@@ -117,6 +126,42 @@ const skillCoverageProblems = ({ name, scoped, tasks }) => {
       : []),
   ];
 };
+
+const idProblems = ({ name, tasks }) => [
+  ...tasks
+    .filter((task) => typeof task.id !== 'string' || task.id === '')
+    .map((task) => `${task.file} has no id`),
+  ...[
+    ...Map.groupBy(
+      tasks.filter((task) => typeof task.id === 'string' && task.id !== ''),
+      (task) => task.id,
+    ),
+  ]
+    .filter(([, same]) => same.length > 1)
+    .map(
+      ([id, same]) =>
+        `${name} has ${same.length} tasks with id "${id}": ${same.map((task) => task.file).join(', ')}`,
+    ),
+];
+
+const setProblem = (task) => {
+  if (TASK_SETS.includes(task.set)) {
+    return [];
+  }
+  const found =
+    task.set === undefined ? 'has no set tag' : `has set "${task.set}"`;
+  return [`${task.file} ${found}; give it set: ${TASK_SETS.join(' or set: ')}`];
+};
+
+const sourceProblem = (task) =>
+  task.source === undefined || TASK_SOURCES.includes(task.source)
+    ? []
+    : [
+        `${task.file} has source "${task.source}"; leave it out, or give it source: ${TASK_SOURCES.join(' or source: ')}`,
+      ];
+
+const tagProblems = ({ tasks }) =>
+  tasks.flatMap((task) => [...setProblem(task), ...sourceProblem(task)]);
 
 const namingProblems = ({ declared, name, tasks }) => [
   ...(declared === name
@@ -146,6 +191,8 @@ export const coverageProblems = ({ catalog, declared, evals }) => {
       .map((name) => `evals/skills/${name} has no skill under .github/skills/`),
     ...[...evals.entries()].flatMap(([name, tasks]) => [
       ...namingProblems({ declared: declared.get(name), name, tasks }),
+      ...idProblems({ name, tasks }),
+      ...tagProblems({ tasks }),
       ...suffixProblems({ name, tasks }),
     ]),
   ];

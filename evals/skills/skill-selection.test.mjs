@@ -67,9 +67,18 @@ describe('withoutSeparator', () => {
 
 describe('coverageProblems', () => {
   const prompt = `Do it. ${PROMPT_SUFFIX}`;
+  const task = (name, id, shouldTrigger, extra = {}) => ({
+    file: `evals/skills/${name}/tasks/${id}.yaml`,
+    graderSkills: [name],
+    id,
+    prompt,
+    set: 'regression',
+    shouldTrigger,
+    ...extra,
+  });
   const graded = (name, extra = {}) => [
-    { graderSkills: [name], id: 'trigger', prompt, ...extra },
-    { graderSkills: [name], id: 'near-miss', prompt, ...extra },
+    task(name, 'trigger', true, extra),
+    task(name, 'near-miss', false, extra),
   ];
   const declaredAs = (...names) => new Map(names.map((name) => [name, name]));
 
@@ -99,12 +108,12 @@ describe('coverageProblems', () => {
         ],
         declared: declaredAs('b', 'c'),
         evals: new Map([
-          ['b', [{ graderSkills: ['b'], id: 'trigger', prompt }]],
+          ['b', [task('b', 'trigger', true)]],
           [
             'c',
             [
-              { fixture: 'f', graderSkills: ['c'], id: 'trigger', prompt },
-              { graderSkills: ['c'], id: 'near-miss', prompt },
+              task('c', 'trigger', true, { fixture: 'f' }),
+              task('c', 'near-miss', false),
             ],
           ],
         ]),
@@ -137,8 +146,8 @@ describe('coverageProblems', () => {
           [
             'foo',
             [
-              { graderSkills: ['releasing'], id: 'trigger', prompt },
-              { graderSkills: [], id: 'near-miss', prompt },
+              task('foo', 'trigger', true, { graderSkills: ['releasing'] }),
+              task('foo', 'near-miss', false, { graderSkills: [] }),
             ],
           ],
         ]),
@@ -159,18 +168,99 @@ describe('coverageProblems', () => {
           [
             'a',
             [
-              {
-                graderSkills: ['a'],
-                id: 'trigger',
+              task('a', 'trigger', true, {
                 prompt: 'Do it. Do not run anything.',
-              },
-              { graderSkills: ['a'], id: 'near-miss', prompt },
+              }),
+              task('a', 'near-miss', false),
             ],
           ],
         ]),
       }),
     ).toStrictEqual([
       `a/trigger does not end its prompt with "${PROMPT_SUFFIX}"`,
+    ]);
+  });
+
+  it('passes a skill with three trigger tasks and two near-miss tasks', () => {
+    expect(
+      coverageProblems({
+        catalog: [{ name: 'a', scoped: false }],
+        declared: declaredAs('a'),
+        evals: new Map([
+          [
+            'a',
+            [
+              task('a', 'trigger-1', true),
+              task('a', 'trigger-2', true, { set: 'capability' }),
+              task('a', 'trigger-3', true, { source: 'incident' }),
+              task('a', 'near-miss-1', false),
+              task('a', 'near-miss-2', false, { set: 'capability' }),
+            ],
+          ],
+        ]),
+      }),
+    ).toStrictEqual([]);
+  });
+
+  it('takes a task kind from should_trigger, not from its id', () => {
+    expect(
+      coverageProblems({
+        catalog: [{ name: 'a', scoped: false }],
+        declared: declaredAs('a'),
+        evals: new Map([
+          ['a', [task('a', 'trigger', true), task('a', 'near-miss', true)]],
+        ]),
+      }),
+    ).toStrictEqual(['a has no near-miss task']);
+  });
+
+  it('names every file that shares an id, and a task with no id', () => {
+    expect(
+      coverageProblems({
+        catalog: [{ name: 'a', scoped: false }],
+        declared: declaredAs('a'),
+        evals: new Map([
+          [
+            'a',
+            [
+              task('a', 'trigger', true),
+              task('a', 'near-miss', false),
+              task('a', 'trigger', true, {
+                file: 'evals/skills/a/tasks/copy.yaml',
+              }),
+              task('a', undefined, false, {
+                file: 'evals/skills/a/tasks/blank.yaml',
+              }),
+            ],
+          ],
+        ]),
+      }),
+    ).toStrictEqual([
+      'evals/skills/a/tasks/blank.yaml has no id',
+      'a has 2 tasks with id "trigger": evals/skills/a/tasks/trigger.yaml, evals/skills/a/tasks/copy.yaml',
+    ]);
+  });
+
+  it('names the file of a task with no set, an unknown set, or an unknown source', () => {
+    expect(
+      coverageProblems({
+        catalog: [{ name: 'a', scoped: false }],
+        declared: declaredAs('a'),
+        evals: new Map([
+          [
+            'a',
+            [
+              task('a', 'trigger', true, { set: undefined }),
+              task('a', 'near-miss', false, { set: 'smoke' }),
+              task('a', 'trigger-2', true, { source: 'guess' }),
+            ],
+          ],
+        ]),
+      }),
+    ).toStrictEqual([
+      'evals/skills/a/tasks/trigger.yaml has no set tag; give it set: regression or set: capability',
+      'evals/skills/a/tasks/near-miss.yaml has set "smoke"; give it set: regression or set: capability',
+      'evals/skills/a/tasks/trigger-2.yaml has source "guess"; leave it out, or give it source: incident',
     ]);
   });
 });

@@ -1,5 +1,6 @@
 id: near-miss
 name: Epic versus milestone, as vocabulary
+set: regression
 tags:
   - negative-trigger
 inputs:

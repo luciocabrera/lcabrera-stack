@@ -1,5 +1,6 @@
 id: near-miss
 name: Checking one dependency version
+set: regression
 tags:
   - negative-trigger
 inputs:

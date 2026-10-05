@@ -1,5 +1,6 @@
 id: near-miss
 name: Listing a route's imports
+set: regression
 tags:
   - negative-trigger
 inputs:

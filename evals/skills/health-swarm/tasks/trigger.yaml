@@ -1,5 +1,6 @@
 id: trigger
 name: Auditing what has rotted
+set: regression
 tags:
   - positive-trigger
 inputs:

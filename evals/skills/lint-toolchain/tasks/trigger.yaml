@@ -1,5 +1,6 @@
 id: trigger
 name: Debugging a silent lint rule
+set: regression
 tags:
   - positive-trigger
 inputs:
