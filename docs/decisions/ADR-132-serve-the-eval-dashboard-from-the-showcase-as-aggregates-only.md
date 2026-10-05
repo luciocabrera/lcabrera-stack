@@ -52,9 +52,10 @@ the fields inside its `jsonb` columns, which follow the envelope. Both are
 allow-listed, and anything not on a list is excluded.
 
 The table below names every text column of schema `evals`, allowed or
-excluded. A column that is not text (an enum, timestamp, number, boolean,
-uuid or identity) carries no free text and is allowed, unless the last column
-of the table excludes it by name:
+excluded. A column that is neither text nor `jsonb` (an enum, timestamp,
+number, boolean, uuid or identity) carries no free text and is allowed,
+unless the last column of the table excludes it by name. A `jsonb` column is
+never returned whole; a route reads only its fields listed further down:
 
 | Table                  | Allowed text columns                                                                                  | Excluded by name                                                                |
 | ---------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
@@ -96,18 +97,35 @@ input that changed; a hash does not carry the text it was taken from. The
 envelope.
 
 **The allow-list is data, not prose and not a `SELECT` list.** One module,
-`@repo/eval-history/queries`, exports two sets: `PUBLIC_COLUMNS`, the allowed
-columns of schema `evals` as `table.column`, text or not, and `PUBLIC_FIELD_PATHS`, the
-allowed envelope paths inside the `jsonb` columns. Every query function that
-serves a route projects its result through those sets. A view or function
-that a route reads (`v_subject_trend`, `run_compare`, `flaky_tasks` and the
-rest) takes its text columns only from allowed columns. No query returns
-`detail`, `settings` or `env` whole for a route to filter afterwards. The
-tables above are what the sets hold at adoption. Adding an entry to either set
-is the change this ADR governs, and it is reviewed against this ADR.
+`@repo/eval-history/queries`, holds it as two written lists and two derived
+sets:
 
-**How it is tested.** One showcase test enforces the rule above. It holds no
-list of its own; it imports both sets.
+- `EXCLUDED_COLUMNS` is the table's last column: every column excluded by
+  name, text or not, including `eval_trial.transcript_bytes` and
+  `eval_trial.transcript_expires_at`.
+- `ALLOWED_TEXT_COLUMNS` is the table's middle column: the text columns a
+  route may return.
+- `PUBLIC_COLUMNS` is built in code from the migrated schema, never written
+  out. It is every column of schema `evals` that `information_schema`
+  reports, minus `EXCLUDED_COLUMNS`, minus every `jsonb` column, minus every
+  text column not in `ALLOWED_TEXT_COLUMNS`. Every number, timestamp and
+  identifier the dashboard shows, such as `eval_trial.duration_ms`, the token
+  counts, `eval_baseline.mean` and `stddev`, is in it without being listed.
+- `PUBLIC_FIELD_PATHS` is the allowed envelope paths inside the `jsonb`
+  columns, written out.
+
+Every query function that serves a route projects its result through
+`PUBLIC_COLUMNS` and `PUBLIC_FIELD_PATHS`. A view or function that a route
+reads (`v_subject_trend`, `run_compare`, `flaky_tasks` and the rest) takes its
+text columns only from allowed columns. No query returns `detail`, `settings`
+or `env` whole for a route to filter afterwards. Adding an entry to
+`ALLOWED_TEXT_COLUMNS` or `PUBLIC_FIELD_PATHS`, or removing one from
+`EXCLUDED_COLUMNS`, is the change this ADR governs, and it is reviewed
+against this ADR.
+
+**How it is tested.** A marker test in the showcase enforces the rule above.
+It holds no list of its own; it imports `PUBLIC_COLUMNS` and
+`PUBLIC_FIELD_PATHS`.
 
 1. It migrates a scratch history database, then reads `information_schema`
    for every column in schema `evals` whose type is text, varchar, char or an
@@ -129,7 +147,13 @@ must show a failing run against a query that returns `detail` whole.
 A second test unsets the flag and asserts that every route in that same set
 answers with 404.
 
-**Where they run.** Both tests run in `check-safe.yml`'s `unit-tests` job, on
+A third test guards the derivation in the other direction. Against the same
+migrated schema, it asserts that every column that is neither text, `jsonb`
+nor in `EXCLUDED_COLUMNS` is in `PUBLIC_COLUMNS`, with
+`eval_trial.duration_ms` as the named case. A set stripped of the numbers
+would otherwise pass the marker test, which seeds only text.
+
+**Where they run.** All three tests run in `check-safe.yml`'s `unit-tests` job, on
 the Postgres service that #1268 adds there for the history package's own
 integration test. That is the rule the plan's §7.2 sets. They read
 `EVALS_TEST_DATABASE_URL`, not `SMOKE_DB`, which no workflow sets. When the
@@ -166,9 +190,14 @@ heatmap and the matrix are small, fixed shapes.
 - `PUBLIC_COLUMNS`, `PUBLIC_FIELD_PATHS` and the query functions that project
   through them are the only thing keeping transcripts and prose off a route. A
   query that selects `detail` whole, or skips the projection, is a defect, and
-  the marker test is what catches it. An entry added to either set is not
-  seeded, so the marker test cannot catch a wrong addition; review against
-  this ADR is the only check on it.
+  the marker test is what catches it. An entry added to
+  `ALLOWED_TEXT_COLUMNS` or `PUBLIC_FIELD_PATHS` is not seeded, so the marker
+  test cannot catch a wrong addition; review against this ADR is the only
+  check on it.
+- A non-text column that a later migration adds is public by default, because
+  `PUBLIC_COLUMNS` is derived. That is the price of not listing every number
+  by hand. A non-text column that must stay private has to be added to
+  `EXCLUDED_COLUMNS` in the same migration's PR.
 - Every excluded text column accepts an arbitrary string at adoption. A later
   column whose check or foreign key rejects the marker makes the seed fail, so
   it has to be decided here rather than skipped.
