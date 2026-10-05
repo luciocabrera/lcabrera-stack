@@ -57,22 +57,22 @@ number, boolean, uuid or identity) carries no free text and is allowed,
 unless the last column of the table excludes it by name. A `jsonb` column is
 never returned whole; a route reads only its fields listed further down:
 
-| Table                  | Allowed text columns                                                                                  | Excluded by name                                                                |
-| ---------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `suite`                | `name`                                                                                                |                                                                                 |
-| `eval_run`             | `project`, `suite`, `branch`, `git_sha`, `model_id`, `harness_version`, `sdk_version`, `catalog_hash` | `actor` (it identifies a person), `envelope_sha256`                             |
-| `eval_subject`         | `name`                                                                                                | `path`                                                                          |
-| `eval_subject_version` | `content_hash`, `first_seen_sha`                                                                      | `content` (the subject's text, a prompt for a `prompt` subject)                 |
-| `eval_task`            | `suite`, `task_key`, `source`, `tags`                                                                 |                                                                                 |
-| `eval_task_version`    | `task_hash`, `fixture_hash`, `expected_hash`, `judge_prompt_hash`, `agent_prompt_hash`                |                                                                                 |
-| `eval_trial`           | `error_class`                                                                                         | `transcript_uri`, `transcript_sha`, `transcript_bytes`, `transcript_expires_at` |
-| `eval_trial_detail`    | `detail_schema`                                                                                       | `detail` as a whole (only the paths below)                                      |
-| `eval_tool_call`       | `tool`                                                                                                | `input_summary`                                                                 |
-| `eval_baseline`        | `suite`, `model_id`, `metric`, `git_sha`                                                              |                                                                                 |
-| `eval_annotation`      | none; `at` and `kind` are allowed, which is enough to mark a timeline                                 | `text`, `author`                                                                |
-| `eval_human_grade`     | `dimension`                                                                                           | `grader`                                                                        |
-| `model_price`          | `model_id`                                                                                            |                                                                                 |
-| `schema_migration`     |                                                                                                       | every column; no route reads the migrator's ledger                              |
+| Table                  | Allowed text columns                                                                                  | Excluded by name                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `suite`                | `name`                                                                                                |                                                                                  |
+| `eval_run`             | `project`, `suite`, `branch`, `git_sha`, `model_id`, `harness_version`, `sdk_version`, `catalog_hash` | `actor` (it identifies a person), `envelope_sha256`                              |
+| `eval_subject`         | `name`                                                                                                | `path`                                                                           |
+| `eval_subject_version` | `content_hash`, `first_seen_sha`                                                                      | `content` (the subject's text, a prompt for a `prompt` subject)                  |
+| `eval_task`            | `suite`, `task_key`, `source`, `tags`                                                                 |                                                                                  |
+| `eval_task_version`    | `task_hash`, `fixture_hash`, `expected_hash`, `judge_prompt_hash`, `agent_prompt_hash`                |                                                                                  |
+| `eval_trial`           | `error_class`                                                                                         | `transcript_uri`, `transcript_sha`, `transcript_bytes`, `transcript_expires_at`  |
+| `eval_trial_detail`    | `detail_schema`                                                                                       | `detail` (its fields only through the paths below)                               |
+| `eval_tool_call`       | `tool`                                                                                                | `input_summary`                                                                  |
+| `eval_baseline`        | `suite`, `model_id`, `metric`, `git_sha`                                                              |                                                                                  |
+| `eval_annotation`      | none; `at` and `kind` are allowed, which is enough to mark a timeline                                 | `text`, `author`                                                                 |
+| `eval_human_grade`     | `dimension`                                                                                           | `grader`                                                                         |
+| `model_price`          | `model_id`                                                                                            |                                                                                  |
+| `schema_migration`     |                                                                                                       | the whole table, through `EXCLUDED_TABLES`; no route reads the migrator's ledger |
 
 These `jsonb` fields may be returned:
 
@@ -97,18 +97,24 @@ input that changed; a hash does not carry the text it was taken from. The
 envelope.
 
 **The allow-list is data, not prose and not a `SELECT` list.** One module,
-`@repo/eval-history/queries`, holds it as two written lists and two derived
+`@repo/eval-history/queries`, holds it as three written lists and two derived
 sets:
 
-- `EXCLUDED_COLUMNS` is the table's last column: every column excluded by
-  name, text or not, including `eval_trial.transcript_bytes` and
-  `eval_trial.transcript_expires_at`.
+- `EXCLUDED_TABLES` names the tables none of whose columns a route may
+  return, at adoption only `schema_migration`. It removes every column of a
+  named table, including `version` and `applied_at` and any column a later
+  migration adds to it, so no column of that table is listed one by one.
+- `EXCLUDED_COLUMNS` is the table's last column for every other row: every
+  column excluded by name, text or not, including
+  `eval_trial.transcript_bytes`, `eval_trial.transcript_expires_at` and
+  `eval_trial_detail.detail`.
 - `ALLOWED_TEXT_COLUMNS` is the table's middle column: the text columns a
   route may return.
 - `PUBLIC_COLUMNS` is built in code from the migrated schema, never written
   out. It is every column of schema `evals` that `information_schema`
-  reports, minus `EXCLUDED_COLUMNS`, minus every `jsonb` column, minus every
-  text column not in `ALLOWED_TEXT_COLUMNS`. Every number, timestamp and
+  reports, minus every column of a table in `EXCLUDED_TABLES`, minus
+  `EXCLUDED_COLUMNS`, minus every `jsonb` column, minus every text column not
+  in `ALLOWED_TEXT_COLUMNS`. Every number, timestamp and
   identifier the dashboard shows, such as `eval_trial.duration_ms`, the token
   counts, `eval_baseline.mean` and `stddev`, is in it without being listed.
 - `PUBLIC_FIELD_PATHS` is the allowed envelope paths inside the `jsonb`
@@ -120,7 +126,7 @@ reads (`v_subject_trend`, `run_compare`, `flaky_tasks` and the rest) takes its
 text columns only from allowed columns. No query returns `detail`, `settings`
 or `env` whole for a route to filter afterwards. Adding an entry to
 `ALLOWED_TEXT_COLUMNS` or `PUBLIC_FIELD_PATHS`, or removing one from
-`EXCLUDED_COLUMNS`, is the change this ADR governs, and it is reviewed
+`EXCLUDED_COLUMNS` or `EXCLUDED_TABLES`, is the change this ADR governs, and it is reviewed
 against this ADR.
 
 **How it is tested.** A marker test in the showcase enforces the rule above.
@@ -148,9 +154,10 @@ A second test unsets the flag and asserts that every route in that same set
 answers with 404.
 
 A third test guards the derivation in the other direction. Against the same
-migrated schema, it asserts that every column that is neither text, `jsonb`
-nor in `EXCLUDED_COLUMNS` is in `PUBLIC_COLUMNS`, with
-`eval_trial.duration_ms` as the named case. A set stripped of the numbers
+migrated schema, it asserts that every column that is neither text, `jsonb`,
+in `EXCLUDED_COLUMNS` nor in a table in `EXCLUDED_TABLES` is in
+`PUBLIC_COLUMNS`, with `eval_trial.duration_ms` as the named case. It also
+asserts that no column of `schema_migration` is in `PUBLIC_COLUMNS`. A set stripped of the numbers
 would otherwise pass the marker test, which seeds only text.
 
 **Where they run.** All three tests run in `check-safe.yml`'s `unit-tests` job, on
@@ -197,7 +204,8 @@ heatmap and the matrix are small, fixed shapes.
 - A non-text column that a later migration adds is public by default, because
   `PUBLIC_COLUMNS` is derived. That is the price of not listing every number
   by hand. A non-text column that must stay private has to be added to
-  `EXCLUDED_COLUMNS` in the same migration's PR.
+  `EXCLUDED_COLUMNS`, or its table to `EXCLUDED_TABLES`, in the same
+  migration's PR.
 - Every excluded text column accepts an arbitrary string at adoption. A later
   column whose check or foreign key rejects the marker makes the seed fail, so
   it has to be decided here rather than skipped.
