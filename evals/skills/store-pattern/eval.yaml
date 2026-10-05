@@ -1,5 +1,5 @@
 name: store-pattern-trigger
-description: Does store-pattern load for a stateful grid's state architecture, and stay out of naming the same file's export?
+description: Does store-pattern load for a stateful grid's subscriptions, re-renders, external store and split actions, and stay out of reading the same file's names, fields and defaults?
 skill: store-pattern
 version: '1.0'
 config:

@@ -2,7 +2,7 @@
 id: react-skill-eval-tasks
 title: Write trigger and near-miss tasks for the React skills
 owner: agent:claude
-status: active
+status: review
 branch: test/1289-react-skill-eval-tasks
 area:
   - evals/skills/react-19/**
@@ -11,7 +11,7 @@ area:
 started: 2026-10-05
 updated: 2026-10-05
 plan: (none)
-pr: (none)
+pr: #1316
 issue: #1289
 ---
 

@@ -1,0 +1,18 @@
+id: trigger-focus-from-parent
+name: 'Letting a parent focus the input'
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Read src/NewsletterForm.tsx. A parent component needs to focus the email input. Change this component so it accepts a ref without forwardRef. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: form
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-react-19
+    config:
+      mode: any_order
+      required_skills:
+        - react-19

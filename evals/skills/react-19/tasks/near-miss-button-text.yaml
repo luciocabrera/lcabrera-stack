@@ -1,0 +1,17 @@
+id: near-miss-button-text
+name: "Reading a button's text"
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Read src/NewsletterForm.tsx and tell me only the text on its submit button. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: form
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-react-19-alone
+    config:
+      forbidden_skills:
+        - react-19

@@ -1,0 +1,17 @@
+id: near-miss-list-key
+name: 'Why a list item needs a key'
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Read app/routes/orders.tsx. In one sentence, why does each <li> in it carry a key prop? Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: route
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-react-router-framework-mode-alone
+    config:
+      forbidden_skills:
+        - react-router-framework-mode

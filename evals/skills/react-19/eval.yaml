@@ -1,5 +1,5 @@
 name: react-19-trigger
-description: Does react-19 load when moving a component's form to an action, and stay out of counting the same file's lines?
+description: Does react-19 load for form actions, pending and optimistic UI, ref props and memoization under the compiler, and stay out of reading a component's text, imports or file type?
 skill: react-19
 version: '1.0'
 config:

@@ -1,0 +1,17 @@
+id: near-miss-order-fields
+name: "Listing a type's fields"
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Read app/routes/orders.tsx and tell me only which fields the Order type has. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: route
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-react-router-framework-mode-alone
+    config:
+      forbidden_skills:
+        - react-router-framework-mode

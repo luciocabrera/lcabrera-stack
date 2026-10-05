@@ -1,0 +1,18 @@
+id: trigger-pending-button
+name: 'Disabling the button while the form submits'
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Read src/NewsletterForm.tsx and disable the Subscribe button while the form is submitting, without passing a prop down to it. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: form
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-react-19
+    config:
+      mode: any_order
+      required_skills:
+        - react-19

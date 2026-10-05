@@ -1,0 +1,17 @@
+id: near-miss-state-fields
+name: "Listing a state type's fields"
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Read src/contexts/GridContext.tsx and tell me only which fields the GridState type has. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: grid
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-store-pattern-alone
+    config:
+      forbidden_skills:
+        - store-pattern

@@ -1,0 +1,17 @@
+id: near-miss-endpoint
+name: 'Naming the endpoint a form posts to'
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Read src/NewsletterForm.tsx and tell me only the URL it sends the email to. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: form
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-react-19-alone
+    config:
+      forbidden_skills:
+        - react-19

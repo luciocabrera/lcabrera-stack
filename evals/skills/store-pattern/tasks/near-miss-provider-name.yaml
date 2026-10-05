@@ -1,0 +1,17 @@
+id: near-miss-provider-name
+name: 'Naming a provider component'
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Read src/contexts/GridContext.tsx and tell me only the name of the provider component it exports. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: grid
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-store-pattern-alone
+    config:
+      forbidden_skills:
+        - store-pattern
