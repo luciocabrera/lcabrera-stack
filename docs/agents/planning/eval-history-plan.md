@@ -757,9 +757,13 @@ the ingester logs host and database name only.
   `evals:ingest` with `continue-on-error: true`, and runs only when the secret
   is set, so a fork or a missing secret skips with a notice.
 - **Package tests:** `@repo/eval-history`'s integration test needs Postgres.
-  It reads `EVALS_TEST_DATABASE_URL` and skips with a printed reason when it
-  is unset. `check-safe.yml`'s `quality-gate` job already runs a
-  `postgres:18-alpine` service; the test gets its own database on it.
+  The suites run in `check-safe.yml`'s `unit-tests` job (`test:changed -- --ci`
+  on a PR, `test:ci` on main), which has no `services:` block today; the
+  `postgres:18-alpine` service on `quality-gate` serves the created-tree gate
+  and runs no tests. So #1268 adds a Postgres service to `unit-tests` and sets
+  `EVALS_TEST_DATABASE_URL` there. The test skips with a printed reason when
+  the variable is unset locally, and **fails** when it is unset under `CI`, so a
+  job wired without the database cannot report green having never reached it.
 - **PR comment (P-14 / #1275):** a non-required job on PRs touching
   `.github/skills/`, `.claude/rules/`, `.claude/agents/` or `evals/`. It runs
   the affected skills (question 9), then `evals:report -- --compare main`, and
