@@ -1,6 +1,6 @@
 id: trigger-cleanup-list
 name: Building a dead-code cleanup list
-set: capability
+set: regression
 tags:
   - positive-trigger
 inputs:
