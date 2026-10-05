@@ -9,19 +9,17 @@
 import { parse as parseYaml } from 'yaml';
 
 import {
+  agentFrontmatter,
   definiteNotMet,
+  describeRun,
   fixtureLine,
+  sameNumbers,
   verdictOf,
   wholeNumber,
 } from './verifier-fixtures.mjs';
 
-const FRONTMATTER = /^---\n([\s\S]*?)\n---\n/;
-
-const frontmatterOf = (definition) =>
-  parseYaml(FRONTMATTER.exec(definition)?.[1] ?? '') ?? {};
-
 export const agentTools = (definition) => {
-  const { tools } = frontmatterOf(definition);
+  const { tools } = parseYaml(agentFrontmatter(definition)) ?? {};
   if (!Array.isArray(tools) || tools.length === 0) {
     throw new Error('the agent definition lists no tools');
   }
@@ -78,9 +76,6 @@ export const expectedVerdict = (expectedNotMet) =>
 const verdictMatches = ({ expected, verdict = '' }) =>
   expected === 'PASS' ? verdict === 'PASS' : /^FAIL\b/.test(verdict);
 
-const sameNumbers = (a, b) =>
-  a.length === b.length && a.every((value, index) => value === b[index]);
-
 const readRun = ({ error, report = '', treeProblem }) => ({
   error: error ?? treeProblem,
   notMet: definiteNotMet(report),
@@ -112,12 +107,10 @@ export const judgeTooledFixture = ({ expectedNotMet, fixture, runs }) => {
 
 const proofText = (proof) => (proof ? 'yes' : 'no');
 
-const verdictText = (verdict) => (verdict ?? '(no verdict line)').slice(0, 30);
-
-const describeRun = ({ error, notMet, proof, verdict }) =>
-  error === undefined
-    ? `not-met [${notMet.join(',')}], verdict ${verdictText(verdict)}, gate proof ${proofText(proof)}`
-    : `error: ${error}`;
+const describeTooledRun = (run) =>
+  run.error === undefined
+    ? `${describeRun(run)}, gate proof ${proofText(run.proof)}`
+    : describeRun(run);
 
 export const describeTooledJudgement = ({
   expectedNotMet,
@@ -128,7 +121,7 @@ export const describeTooledJudgement = ({
 }) =>
   fixtureLine({
     fixture,
-    lines: runs.map(describeRun),
+    lines: runs.map(describeTooledRun),
     matched,
     stable,
     wanted: `expected ${expectedVerdict(expectedNotMet)} with not-met [${expectedNotMet.join(',')}] and a fail-to-pass gate proof`,

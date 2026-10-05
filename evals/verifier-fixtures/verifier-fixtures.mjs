@@ -3,10 +3,13 @@
  * sends, read the verdict a report states, and judge a fixture's runs.
  * Usage: imported by `verify-verifier-verdicts.mjs`.
  */
-const FRONTMATTER = /^---\r?\n[\s\S]*?\r?\n---\r?\n/;
+const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/;
 const VERDICT_LINE = /^VERDICT:(.*)$/m;
 
 export const agentBody = (definition) => definition.replace(FRONTMATTER, '');
+
+export const agentFrontmatter = (definition) =>
+  FRONTMATTER.exec(definition)?.[1] ?? '';
 
 export const renderDispatch = ({ contract, diff, issue, template }) =>
   template
@@ -46,7 +49,7 @@ export const definiteNotMet = (report) =>
     .filter((number) => number !== undefined)
     .toSorted((a, b) => a - b);
 
-const sameNumbers = (a, b) => a.join(',') === b.join(',');
+export const sameNumbers = (a, b) => a.join(',') === b.join(',');
 
 const PASS_VERDICT = /^PASS\b/;
 
@@ -69,7 +72,7 @@ export const judgeFixture = ({ expectedNotMet, fixture, runs: sessions }) => {
   return { expectedNotMet, fixture, matched, runs, stable };
 };
 
-const describeRun = ({ error, notMet, verdict }) =>
+export const describeRun = ({ error, notMet, verdict }) =>
   error === undefined
     ? `not-met [${notMet.join(',')}], verdict ${(verdict ?? '(no verdict line)').slice(0, 30)}`
     : `error: ${error}`;

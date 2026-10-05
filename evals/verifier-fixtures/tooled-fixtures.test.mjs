@@ -58,6 +58,12 @@ describe('agentTools', () => {
     ]);
   });
 
+  it('reads a definition with CRLF line endings', () => {
+    expect(
+      agentTools('---\r\nname: x\r\ntools:\r\n  - Bash\r\n---\r\nbody'),
+    ).toEqual(['Bash']);
+  });
+
   it('refuses a definition that lists no tools', () => {
     expect(() => agentTools('---\nname: x\n---\nbody')).toThrow('no tools');
   });
