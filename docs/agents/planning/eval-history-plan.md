@@ -914,8 +914,8 @@ Drafts in [`adr-drafts/`](./adr-drafts/), no number until adoption:
    `EVALS_READER_DATABASE_URL` to schema `evals`. Locally that is a separate
    database on the compose Postgres. Migrations are plain SQL files applied
    by a migrator in the package.
-2. [`version-the-eval-run-envelope.md`](./adr-drafts/version-the-eval-run-envelope.md)
-   (#1263). One envelope per run with an integer `schema_version`. A change
+2. [ADR-131](../../decisions/ADR-131-version-the-eval-run-envelope-and-accept-the-previous-version.md)
+   (#1263), adopted. One envelope per run with an integer `schema_version`. A change
    that removes, renames or re-means a field bumps it; adding an optional
    field does not. The ingester accepts the current version and the one
    before it through an upcaster, and rejects anything else by name.

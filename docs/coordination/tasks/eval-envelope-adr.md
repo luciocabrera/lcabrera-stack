@@ -2,7 +2,7 @@
 id: eval-envelope-adr
 title: Version the eval run envelope and accept the previous version
 owner: agent:claude
-status: active
+status: review
 branch: docs/1263-eval-envelope-adr
 area:
   - docs/decisions/ADR-*-version-the-eval-run-envelope*.md
@@ -11,7 +11,7 @@ area:
 started: 2026-10-06
 updated: 2026-10-06
 plan: (none)
-pr: (none)
+pr: #1325
 issue: #1263
 ---
 
