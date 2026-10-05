@@ -1,0 +1,15 @@
+id: near-miss-explain-function
+name: Explaining one function
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Explain what this function does, in two sentences: const total = (xs) => xs.reduce((sum, x) => sum + x.price * x.qty, 0); Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-code-smell-checker-alone
+    config:
+      forbidden_skills:
+        - code-smell-checker

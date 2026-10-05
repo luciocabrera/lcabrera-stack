@@ -1,0 +1,16 @@
+id: trigger-changed-only
+name: Limiting a smell check to changed files
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Smell-check just the code this branch adds or modifies, not the whole repo, so I can fix it before merging; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-code-smell-zen
+    config:
+      mode: any_order
+      required_skills:
+        - code-smell-zen

@@ -1,0 +1,15 @@
+id: near-miss-count-lines
+name: Counting lines in a directory
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "How do I count the lines of code in a directory from the shell? One command, in general terms. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-fallow-code-checker-alone
+    config:
+      forbidden_skills:
+        - fallow-code-checker

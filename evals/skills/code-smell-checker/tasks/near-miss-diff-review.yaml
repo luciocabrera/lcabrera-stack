@@ -1,0 +1,15 @@
+id: near-miss-diff-review
+name: Reviewing only a branch diff
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Check only what my branch changed against main for code smells before I push; I don't care about the rest of the repo. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-code-smell-checker-alone
+    config:
+      forbidden_skills:
+        - code-smell-checker

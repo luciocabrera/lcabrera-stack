@@ -1,0 +1,15 @@
+id: near-miss-dead-code-scan
+name: Running a dead-code scan
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Run a full fallow scan for dead code, unused exports and high complexity across the monorepo and give me the findings; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-code-smell-zen-alone
+    config:
+      forbidden_skills:
+        - code-smell-zen

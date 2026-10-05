@@ -1,0 +1,15 @@
+id: near-miss-smell-audit
+name: Auditing a package for design smells
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Audit packages/ui for design smells like god components, feature envy and prop drilling, and give me a tech-debt list; tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-fallow-code-checker-alone
+    config:
+      forbidden_skills:
+        - fallow-code-checker

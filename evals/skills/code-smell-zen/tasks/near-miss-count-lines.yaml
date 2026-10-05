@@ -1,0 +1,15 @@
+id: near-miss-count-lines
+name: Counting changed lines
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Which git command shows how many lines my branch added and removed compared with main? The command only. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-code-smell-zen-alone
+    config:
+      forbidden_skills:
+        - code-smell-zen

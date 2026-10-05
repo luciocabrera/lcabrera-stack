@@ -1,0 +1,16 @@
+id: trigger-complexity
+name: Finding the most complex functions
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Use fallow to find the functions with the highest cyclomatic complexity across the repo and tell me which to split first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-fallow-code-checker
+    config:
+      mode: any_order
+      required_skills:
+        - fallow-code-checker

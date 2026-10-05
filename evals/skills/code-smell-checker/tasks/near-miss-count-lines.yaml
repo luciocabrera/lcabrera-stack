@@ -1,0 +1,15 @@
+id: near-miss-count-lines
+name: Counting lines in a package
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "How do I count the lines of TypeScript in packages/ui? Give me one command and nothing else. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-code-smell-checker-alone
+    config:
+      forbidden_skills:
+        - code-smell-checker
