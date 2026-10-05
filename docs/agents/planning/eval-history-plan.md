@@ -305,17 +305,27 @@ create type evals.task_set as enum ('regression', 'capability');
 create type evals.annotation_kind as enum ('model-change', 'harness-change', 'incident', 'note');
 ```
 
-`suite` is `text` with a check constraint rather than an enum: a fifth suite
-should be a one-line migration that does not rewrite a type.
+`suite` is `text` referencing a lookup table, `evals.suite`, rather than an
+enum or a check constraint. Every table that stores a suite (`eval_run`,
+`eval_task`, `eval_baseline`) references it, so a misspelt suite fails at
+insert instead of becoming a separate series in the views, and a sixth suite
+is one inserted row, not a rewritten type or three edited constraints.
 
 ### 3.2 Tables
 
 ```sql
+create table evals.suite (
+  name text primary key
+);
+
+insert into evals.suite (name) values
+  ('rules-consistency'), ('skills'), ('verifier-fixtures'), ('verifier-tooled'), ('skill-quality');
+
 create table evals.eval_run (
   id bigint generated always as identity primary key,
   run_id uuid not null unique,
   project text not null default 'lcabrera-stack',
-  suite text not null check (suite in ('rules-consistency', 'skills', 'verifier-fixtures', 'verifier-tooled', 'skill-quality')),
+  suite text not null references evals.suite (name),
   trigger evals.trigger not null,
   actor text not null,
   branch text not null,
@@ -361,7 +371,7 @@ create table evals.eval_subject_version (
 
 create table evals.eval_task (
   id bigint generated always as identity primary key,
-  suite text not null,
+  suite text not null references evals.suite (name),
   subject_id bigint not null references evals.eval_subject (id),
   task_key text not null,
   kind evals.task_kind not null,
@@ -431,7 +441,7 @@ create table evals.eval_tool_call (
 create table evals.eval_baseline (
   id bigint generated always as identity primary key,
   baseline_id uuid not null,
-  suite text not null,
+  suite text not null references evals.suite (name),
   model_id text not null,
   subject_id bigint references evals.eval_subject (id),
   metric text not null check (metric in ('pass_rate', 'quality_overall')),
@@ -515,7 +525,7 @@ them in SQL as well would make two implementations of one formula.
 | jsonb "with a JSON Schema check"           | Zod validation in the ingester, `detail_schema` column, `jsonb_typeof` check | Postgres has no built-in JSON Schema check, and `pg_jsonschema` is an extension many hosted providers do not offer. The ingester is the only writer (§8). |
 | `cost_usd`                                 | `cost_usd_reported` and `cost_usd_computed`                                  | The PRD's own rule: store cost twice.                                                                                                                     |
 | `v_run_compare(a, b)` as a view            | `evals.run_compare(a, b)` function                                           | A view takes no arguments.                                                                                                                                |
-| `suite` (implied enum)                     | `text` with a check constraint                                               | Adding a suite should not rewrite a type.                                                                                                                 |
+| `suite` (implied enum)                     | `text` referencing an `evals.suite` lookup table                             | Adding a suite should not rewrite a type, and the three tables that store one must agree on the list.                                                     |
 | no `agent_prompt_hash` on the task version | added                                                                        | FR-1.4 hashes the agent prompt, and the verifier's result depends on it.                                                                                  |
 | `eval_baseline` without a metric           | `metric` column                                                              | A binary suite's baseline is a pass rate and the quality suite's is a score; one table holds both.                                                        |
 
