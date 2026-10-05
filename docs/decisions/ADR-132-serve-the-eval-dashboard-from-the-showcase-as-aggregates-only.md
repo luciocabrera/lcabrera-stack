@@ -129,6 +129,17 @@ must show a failing run against a query that returns `detail` whole.
 A second test unsets the flag and asserts that every route in that same set
 answers with 404.
 
+**Where they run.** Both tests run in `check-safe.yml`'s `unit-tests` job, on
+the Postgres service that #1268 adds there for the history package's own
+integration test. That is the rule the plan's §7.2 sets. They read
+`EVALS_TEST_DATABASE_URL`, not `SMOKE_DB`, which no workflow sets. When the
+variable is unset they skip with a printed reason outside CI, and they
+**fail** under `CI`, so a job wired without the database cannot report green
+having never run them. They reach CI through the lane `unit-tests` already
+runs: `test:changed -- --ci` on a pull request, which selects the showcase
+whenever it or a workspace it depends on changes, `@repo/eval-history`
+included, and `test:ci` on every push to `main`.
+
 **The flag is `EVALS_DASHBOARD=1`.** It is a server variable read by one helper
 that every `/evals` loader calls. When it is unset, the loader throws a 404
 `Response`. It has no `VITE_` prefix, so it never reaches the client bundle.
