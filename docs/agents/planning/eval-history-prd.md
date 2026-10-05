@@ -14,10 +14,11 @@ packages: [showcase]
 > [#1260](https://github.com/luciocabrera/lcabrera-stack/issues/1260) can read
 > them. The design that answers them is
 > [`eval-history-plan.md`](./eval-history-plan.md). Two edits were made on
-> import: a framework version in prose became the framework's name
-> (AGENTS.md §7), and an embedded diagram became the sentence under it. The
-> hand-off prompt at the end has been executed; the plan says where it
-> followed the repository over the prompt.
+> import, both also applied inside the hand-off prompt where they occur: a
+> framework version in prose became the framework's name (AGENTS.md §7), and
+> an embedded diagram became the sentence under it. The hand-off prompt at
+> the end is reproduced as given and has been executed; the section after it
+> says where the execution followed the repository over the prompt.
 
 ## Summary and problem
 
@@ -304,11 +305,94 @@ Confusion matrix, quality dimension trends, flaky-task view, run health, annotat
 
 ## Hand-off prompt for the coding agent
 
-The PRD asked the coding agent for a plan, not code: a plan document plus the
-ADRs it needs, written for review before implementation starts. It named
-`docs/prd/`, `docs/plans/` and ADRs with status "Proposed" in the ADR folder.
-This repository routes plans to `docs/agents/planning/` and proposed decisions
-to `docs/agents/planning/adr-drafts/` without a number
+The prompt below is reproduced as the PRD gave it, with the same version edit
+applied inside it as in the body (a framework version became its name). The
+next section says how it was executed.
+
+```markdown
+# Task: produce an implementation plan for Eval History & Regression Tracking
+
+You are planning, not implementing. Do not write production code, migrations or
+workflow changes in this task. Your output is a plan document plus any ADRs it needs.
+
+## Inputs (read all before planning)
+
+1. docs/prd/eval-history.md: the PRD. It is the source of truth for WHAT. Do not
+   change requirements; if one is unclear, infeasible or contradicts the repo, list it
+   under "Questions for stakeholders" instead of deciding it yourself.
+2. AGENTS.md, CLAUDE.md, .claude/rules/*, and the ADR folder: repo conventions, path
+   rules and past decisions you must follow.
+3. evals/: all four suites (rules-consistency, skills, skill-quality,
+   verifier-fixtures), their runners (verify-*.mjs), their current JSON output and
+   the unit tests run by `vp run test:evals`.
+4. .github/workflows/agent-evals.yml: what runs where, and which checks are required.
+5. The showcase app: its routing (React Router framework mode loaders/actions), its existing
+   Postgres access layer and migration tool, auth, feature flags and design system /
+   grid component.
+6. The existing interactive results explorer (HTML) and the JSON shape it consumes.
+
+## Constraints (non-negotiable)
+
+- Deterministic CI stays the only required check. Nothing here may block a merge or
+  make a run fail because the database is unreachable.
+- The data layer lives in its own workspace package (proposed name
+  packages/eval-history) used by the CLI, CI and the app. The web app only reads,
+  using a read-only DB role, in a separate Postgres schema `evals`.
+- Results are written locally first (.tmp/eval-results/), then sent. Ingest is
+  idempotent on run_id.
+- Reuse the repo's existing tools: pnpm, `vp run` tasks, its migration tool, its test
+  runner, its lint and type-check gates. Add no new framework without an ADR.
+- Every new check must be shown to fail on a deliberate plant, then the plant is
+  reverted. This matches the existing evals practice.
+- Transcripts and raw prompts never reach a public route.
+
+## What the plan must contain
+
+1. Current-state findings: how each runner produces results today, the exact fields
+   available from the Agent SDK result (tokens, cost, timings, turns), and gaps
+   against PRD FR-1. Cite file paths.
+2. Envelope spec: the JSON Schema for the versioned result envelope, with one
+   example per suite, and how the explorer keeps working with it.
+3. Database design: DDL-level design for every table, enum, index and view in the
+   PRD data model, with column types, constraints, jsonb validation strategy,
+   and the migration sequence. Justify any deviation from the PRD.
+4. Hashing: exactly which bytes are hashed for skill, task, fixture, expected,
+   judge prompt, agent prompt and catalog, and how line endings and whitespace are
+   normalised.
+5. Statistics module: function signatures and the algorithms for the Wilson
+   interval, pass@k / pass^k, the baseline, the regression rule and flaky detection,
+   with config file format and defaults.
+6. CLI surface: new `vp run` tasks (evals:ingest, evals:baseline, evals:report)
+   with flags and example output.
+7. CI changes: workflow steps, secrets (EVALS_DATABASE_URL), the PR-comment upsert,
+   the scheduled run, and artifact retention.
+8. Dashboard: route map under /evals, the loader query behind each view, the
+   components reused from the showcase app, the public vs authenticated split, and
+   the feature flag.
+9. Work breakdown: PR-sized tasks grouped by the PRD's four phases plus
+   Workstream B (suite reliability, B1-B12), which runs in parallel and needs no
+   database. For B2 (more tasks per skill), propose the task list per skill and
+   how to split the writing across parallel agents or PRs. Give each task its files
+   touched, dependencies, its acceptance criteria copied from the PRD, its tests,
+   and the plant that proves its check can fail. Phase 2's regression rule must depend on B1 and B2. Mark which tasks can run in
+   parallel.
+10. ADRs to write (title + one-paragraph decision each), at minimum: where the history
+    DB lives, the envelope versioning, and the dashboard placement.
+11. Risks and mitigations specific to this repo, beyond the PRD's list.
+12. Questions for stakeholders, numbered, each with your recommended answer.
+
+## Output
+
+Write the plan to docs/plans/eval-history-plan.md and any draft ADRs to the ADR
+folder with status "Proposed". Then reply with a short summary: the phase-1 task
+list, the top 3 risks, and the open questions. Stop there and wait for review.
+```
+
+## How the hand-off was executed
+
+The prompt named `docs/prd/`, `docs/plans/` and ADRs with status "Proposed" in
+the ADR folder. This repository routes plans to `docs/agents/planning/` and
+proposed decisions to `docs/agents/planning/adr-drafts/` without a number
 ([ADR-048](../../decisions/ADR-048-adr-taxonomy-and-one-sequence.md)), so the
 outputs landed there. The twelve sections the prompt required are the twelve
 sections of [`eval-history-plan.md`](./eval-history-plan.md).

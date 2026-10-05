@@ -149,7 +149,14 @@ around `query()`.
 ## 2. Envelope spec
 
 One JSON document per run, written to
-`.tmp/eval-results/<suite>/<run_id>.json` before the runner exits. Transcripts
+`.tmp/eval-results/<suite>/<run_id>.json` on every path a runner can leave by.
+A normal finish writes `status: 'complete'`. A thrown error, caught by a
+`finally` around the batch loop, writes the trials finished so far with
+`status: 'partial'`, which is the PRD's "keep a partial run and flag it" when a
+usage limit runs out. `SIGINT` and `SIGTERM` handlers write the same with
+`status: 'aborted'` before exiting. A hard kill (`SIGKILL`, out of memory)
+cannot write anything; that run is lost, and it is the one case FR-1.5 cannot
+cover from inside the process. Transcripts
 sit beside it in `.tmp/eval-results/<suite>/<run_id>/`. The schema is a Zod
 schema in `@repo/eval-history` (`src/envelope/envelope.schema.ts`), and
 `z.toJSONSchema` emits `envelope.schema.json` next to it for readers outside
