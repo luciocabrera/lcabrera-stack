@@ -89,6 +89,8 @@ const KINDS = [
   { kind: 'near-miss', shouldTrigger: false },
 ];
 
+const MINIMUM_TASKS_PER_KIND = 5;
+
 const TASK_SETS = ['regression', 'capability'];
 
 const TASK_SOURCES = ['incident'];
@@ -114,10 +116,16 @@ const skillCoverageProblems = ({ name, scoped, tasks }) => {
     return [`${name} has no eval under evals/skills/`];
   }
   return [
-    ...KINDS.filter(
-      ({ shouldTrigger }) =>
-        !tasks.some((task) => task.shouldTrigger === shouldTrigger),
-    ).map(({ kind }) => `${name} has no ${kind} task`),
+    ...KINDS.map(({ kind, shouldTrigger }) => ({
+      count: tasks.filter((task) => task.shouldTrigger === shouldTrigger)
+        .length,
+      kind,
+    }))
+      .filter(({ count }) => count < MINIMUM_TASKS_PER_KIND)
+      .map(
+        ({ count, kind }) =>
+          `${name} has ${count} ${kind} task(s); every skill needs at least ${MINIMUM_TASKS_PER_KIND}`,
+      ),
     ...(scoped
       ? tasks
           .filter((task) => task.fixture === undefined)

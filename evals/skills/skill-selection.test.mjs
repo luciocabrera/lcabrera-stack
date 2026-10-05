@@ -76,9 +76,15 @@ describe('coverageProblems', () => {
     shouldTrigger,
     ...extra,
   });
+  const padding = (name, extra = {}) =>
+    [1, 2, 3, 4].flatMap((n) => [
+      task(name, `trigger-pad-${n}`, true, extra),
+      task(name, `near-miss-pad-${n}`, false, extra),
+    ]);
   const graded = (name, extra = {}) => [
     task(name, 'trigger', true, extra),
     task(name, 'near-miss', false, extra),
+    ...padding(name, extra),
   ];
   const declaredAs = (...names) => new Map(names.map((name) => [name, name]));
 
@@ -98,7 +104,7 @@ describe('coverageProblems', () => {
     ).toStrictEqual([]);
   });
 
-  it('names a missing eval, a missing task, and a scoped task with no fixture', () => {
+  it('names a missing eval, a missing kind, and a scoped task with no fixture', () => {
     expect(
       coverageProblems({
         catalog: [
@@ -108,19 +114,26 @@ describe('coverageProblems', () => {
         ],
         declared: declaredAs('b', 'c'),
         evals: new Map([
-          ['b', [task('b', 'trigger', true)]],
+          [
+            'b',
+            [
+              task('b', 'trigger', true),
+              ...padding('b').filter((padded) => padded.shouldTrigger),
+            ],
+          ],
           [
             'c',
             [
               task('c', 'trigger', true, { fixture: 'f' }),
               task('c', 'near-miss', false),
+              ...padding('c', { fixture: 'f' }),
             ],
           ],
         ]),
       }),
     ).toStrictEqual([
       'a has no eval under evals/skills/',
-      'b has no near-miss task',
+      'b has 0 near-miss task(s); every skill needs at least 5',
       'c/near-miss names no fixture, but c has a paths: list, so it is offered only after a matching file is read',
     ]);
   });
@@ -148,6 +161,7 @@ describe('coverageProblems', () => {
             [
               task('foo', 'trigger', true, { graderSkills: ['releasing'] }),
               task('foo', 'near-miss', false, { graderSkills: [] }),
+              ...padding('foo'),
             ],
           ],
         ]),
@@ -172,6 +186,7 @@ describe('coverageProblems', () => {
                 prompt: 'Do it. Do not run anything.',
               }),
               task('a', 'near-miss', false),
+              ...padding('a'),
             ],
           ],
         ]),
@@ -181,7 +196,7 @@ describe('coverageProblems', () => {
     ]);
   });
 
-  it('passes a skill with three trigger tasks and two near-miss tasks', () => {
+  it('passes a skill with five tasks of each kind, whatever their set and source', () => {
     expect(
       coverageProblems({
         catalog: [{ name: 'a', scoped: false }],
@@ -195,6 +210,11 @@ describe('coverageProblems', () => {
               task('a', 'trigger-3', true, { source: 'incident' }),
               task('a', 'near-miss-1', false),
               task('a', 'near-miss-2', false, { set: 'capability' }),
+              task('a', 'near-miss-3', false, { source: 'incident' }),
+              task('a', 'trigger-4', true),
+              task('a', 'trigger-5', true),
+              task('a', 'near-miss-4', false),
+              task('a', 'near-miss-5', false),
             ],
           ],
         ]),
@@ -208,10 +228,48 @@ describe('coverageProblems', () => {
         catalog: [{ name: 'a', scoped: false }],
         declared: declaredAs('a'),
         evals: new Map([
-          ['a', [task('a', 'trigger', true), task('a', 'near-miss', true)]],
+          [
+            'a',
+            [
+              task('a', 'trigger', true),
+              task('a', 'near-miss', true),
+              ...padding('a'),
+            ],
+          ],
         ]),
       }),
-    ).toStrictEqual(['a has no near-miss task']);
+    ).toStrictEqual([
+      'a has 4 near-miss task(s); every skill needs at least 5',
+    ]);
+  });
+
+  it('names a skill one trigger task short of five, and only that kind', () => {
+    expect(
+      coverageProblems({
+        catalog: [{ name: 'a', scoped: false }],
+        declared: declaredAs('a'),
+        evals: new Map([['a', graded('a').slice(1)]]),
+      }),
+    ).toStrictEqual(['a has 4 trigger task(s); every skill needs at least 5']);
+  });
+
+  it('counts both kinds against the minimum, naming the skill in each', () => {
+    expect(
+      coverageProblems({
+        catalog: [
+          { name: 'a', scoped: false },
+          { name: 'b', scoped: false },
+        ],
+        declared: declaredAs('a', 'b'),
+        evals: new Map([
+          ['a', graded('a')],
+          ['b', [task('b', 'trigger', true), task('b', 'near-miss', false)]],
+        ]),
+      }),
+    ).toStrictEqual([
+      'b has 1 trigger task(s); every skill needs at least 5',
+      'b has 1 near-miss task(s); every skill needs at least 5',
+    ]);
   });
 
   it('names every file that shares an id, and a task with no id', () => {
@@ -231,6 +289,7 @@ describe('coverageProblems', () => {
               task('a', undefined, false, {
                 file: 'evals/skills/a/tasks/blank.yaml',
               }),
+              ...padding('a'),
             ],
           ],
         ]),
@@ -253,6 +312,7 @@ describe('coverageProblems', () => {
               task('a', 'trigger', true, { set: undefined }),
               task('a', 'near-miss', false, { set: 'smoke' }),
               task('a', 'trigger-2', true, { source: 'guess' }),
+              ...padding('a'),
             ],
           ],
         ]),
