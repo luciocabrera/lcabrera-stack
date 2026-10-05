@@ -47,18 +47,16 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   ],
   'unicorn/name-replacements': 'off',
   'unicorn/no-array-reduce': 'off',
-  // Off in unicorn 73's recommended set and on in 77's. Purely stylistic: it
-  // rejects the ` * ` line prefix that editors insert into every JSDoc block.
-  // It changes no behaviour and catches no bug.
+  // Purely stylistic: it rejects the ` * ` line prefix that editors insert
+  // into every JSDoc block. It changes no behaviour and catches no bug.
   'unicorn/no-asterisk-prefix-in-documentation-comments': 'off',
-  // Reports under unicorn 77 that 73 did not make. Each is a pure factory
-  // call — `export default defineConfig(...)`, `export default
-  // createRule(...)`, a config array — and the only fix is to bind the same
-  // call to a variable first.
+  // Each report is a pure factory call — `export default defineConfig(...)`,
+  // `export default createRule(...)`, a config array — and the only fix is to
+  // bind the same call to a variable first.
   'unicorn/no-top-level-side-effects': 'off',
-  // Reports under unicorn 77 that 73 did not make. A `flatMap` callback may
-  // return a bare value, but one that returns an array from every branch shows
-  // "zero, one or many" at a glance, and the bare value saves one allocation.
+  // A `flatMap` callback may return a bare value, but one that returns an
+  // array from every branch shows "zero, one or many" at a glance, and the
+  // bare value saves one allocation.
   'unicorn/no-unnecessary-array-flat-map': 'off',
   // Two positions are exempt, both because the fixer is unsafe there rather
   // than because the rule is wrong.
@@ -79,10 +77,9 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
     'error',
     { checkArguments: false, checkArrowFunctionBody: false },
   ],
-  // Since unicorn 73 it also reports a parameter or destructured variable read
-  // as `x ?? literal` or `x || literal`. A default applies only to
-  // `undefined`, so each rewrite changes what `null` does — and, for `||`,
-  // every other falsy value. A child process's `close` exit code is `null`
+  // It reports a parameter or destructured variable read as `x ?? literal` or
+  // `x || literal`. A default applies only to `undefined`, so each rewrite
+  // changes what `null` does — and, for `||`, every other falsy value. A child process's `close` exit code is `null`
   // when a signal killed it. The rule's own documentation says to disable it
   // where `null` and `undefined` are meant to be handled alike.
   'unicorn/prefer-default-parameters': 'off',
@@ -91,9 +88,9 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   // that an http origin is rejected became https, and the test inverted.
   'unicorn/prefer-https': 'off',
   'unicorn/prefer-query-selector': 'off',
-  // Since unicorn 73 the rule also merges an `if` that returns with the
-  // `return` after it. `only-single-line` keeps that where the condition and
-  // both values each fit on one line, and leaves a multi-line guard as it is.
+  // The rule merges an `if` that returns with the `return` after it.
+  // `only-single-line` keeps that where the condition and both values each fit
+  // on one line, and leaves a multi-line guard as it is.
   'unicorn/prefer-ternary': ['error', 'only-single-line'],
   'unicorn/prevent-abbreviations': 'off',
   // New in unicorn 73's recommended set. Off deliberately and temporarily, not
