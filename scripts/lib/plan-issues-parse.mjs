@@ -92,17 +92,6 @@ const DEPENDENCY_KEYS = new Set([...DEPENDENCY_LISTS, 'parent']);
 
 const TOP_LEVEL_KEY = /^[A-Za-z_"'][^:]*:(?:[ \t]|$)/;
 
-const isCommentLine = (line) => line.trimStart().startsWith('#');
-
-const refuseCommentedIssueNumber = (line) => {
-  if (/^[ \t]*#\d+[ \t]*$/.test(line)) {
-    throw new Error(
-      `"${line.trim()}" on a line of its own is read as a comment, not an issue number`,
-    );
-  }
-  return line;
-};
-
 const dependencySource = (yaml) => {
   const lines = yaml.split('\n');
   const start = lines.findIndex((line) => line.startsWith('dependencies:'));
@@ -111,43 +100,22 @@ const dependencySource = (yaml) => {
   }
   const rest = lines.slice(start + 1);
   const end = rest.findIndex((line) => TOP_LEVEL_KEY.test(line));
-  const map = rest
-    .slice(0, end === -1 ? undefined : end)
-    .map(refuseCommentedIssueNumber)
-    .filter((line) => !isCommentLine(line));
-  return [lines[start], ...map].join('\n');
+  return [lines[start], ...rest.slice(0, end === -1 ? undefined : end)].join(
+    '\n',
+  );
 };
 
-const FLOW_ISSUE_NUMBER =
-  /(?<lead>[[,:][ \t]*)#(?<number>\d+)(?=[ \t]*(?:[\],}]|$))/gm;
-
-const LIST_ISSUE_NUMBER = /^(?<lead>[ \t]*-[ \t]+)#(?<number>\d+)(?=[ \t]*$)/gm;
+const ISSUE_NUMBER = /(?<!['"#\w])#(?<number>\d+)/g;
 
 const quoteIssueNumbers = (source) =>
-  source
-    .replaceAll(FLOW_ISSUE_NUMBER, "$<lead>'#$<number>'")
-    .replaceAll(LIST_ISSUE_NUMBER, "$<lead>'#$<number>'");
-
-const SWALLOWED_VALUE = /(?:[[,:]|^[ \t]*-)[ \t]*(?<token>#\S*)/m;
-
-const refuseSwallowedValue = (source) => {
-  const token = SWALLOWED_VALUE.exec(source)?.groups.token;
-  if (token !== undefined) {
-    throw new Error(
-      `"${token}" is not an issue number and would be read as a comment`,
-    );
-  }
-  return source;
-};
+  source.replaceAll(ISSUE_NUMBER, "'#$<number>'");
 
 const isScalar = (value) =>
   typeof value === 'string' || typeof value === 'number';
 
 const readDependencyMap = (source) => {
   try {
-    return (
-      parse(refuseSwallowedValue(quoteIssueNumbers(source)))?.dependencies ?? {}
-    );
+    return parse(quoteIssueNumbers(source))?.dependencies ?? {};
   } catch (error) {
     throw new Error(error.message.split('\n')[0].replace(/:$/, ''), {
       cause: error,

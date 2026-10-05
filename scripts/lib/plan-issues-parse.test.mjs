@@ -269,6 +269,55 @@ describe('dependency maps', () => {
     expect(dependenciesOf(yaml).blockedBy).toEqual(['P-02']);
   });
 
+  it.each([
+    [
+      'first',
+      ['  blockedBy: [', '    #1267,', '    P-02', '  ]'],
+      ['#1267', 'P-02'],
+    ],
+    [
+      'last',
+      ['  blockedBy: [', '    P-02,', '    #1267', '  ]'],
+      ['P-02', '#1267'],
+    ],
+    [
+      'alone on a line',
+      ['  blockedBy: [P-02,', '    #1267', '  ]'],
+      ['P-02', '#1267'],
+    ],
+  ])(
+    'reads an issue number %s in a wrapped flow list',
+    (_case, lines, expected) => {
+      expect(
+        dependenciesOf(['dependencies:', ...lines].join('\n')).blockedBy,
+      ).toEqual(expected);
+    },
+  );
+
+  it.each([
+    ['a spaced comment', '  # upstream'],
+    ['an unspaced comment', '  #upstream'],
+    ['a comment naming an issue', '  # waits on #1267'],
+  ])('ignores %s inside the map', (_case, comment) => {
+    const yaml = [
+      'dependencies:',
+      comment,
+      '  blockedBy: [P-02] # after #1268',
+      '  parent: E-1',
+    ].join('\n');
+    expect(dependenciesOf(yaml)).toMatchObject({
+      blockedBy: ['P-02'],
+      parent: 'E-1',
+    });
+  });
+
+  it('leaves an issue number the author already quoted alone', () => {
+    expect(
+      dependenciesOf('dependencies:\n  blockedBy: [\'#1267\', "#1268"]')
+        .blockedBy,
+    ).toEqual(['#1267', '#1268']);
+  });
+
   it('treats an absent map as no dependencies', () => {
     expect(dependenciesOf('')).toEqual({
       blocking: [],
@@ -287,7 +336,7 @@ describe('dependency maps', () => {
     ['an unclosed list of issue numbers', 'dependencies:\n  blockedBy: [#1267'],
     ['an issue number with trailing text', 'dependencies:\n  parent: #12x'],
     [
-      'an issue number alone on a line',
+      'a bare issue number where a list belongs',
       'dependencies:\n  blockedBy:\n    #1267',
     ],
     ['stray text at column 0', 'dependencies:\n  blockedBy: [P-02]\nP-03'],
