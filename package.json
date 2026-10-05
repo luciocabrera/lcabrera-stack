@@ -142,5 +142,5 @@
   "engines": {
     "node": ">=26 <27"
   },
-  "packageManager": "pnpm@12.6.0+sha256.05b7b921fbb31564505c967eabf825895a1cc18f50935c00be98815272cc9d56"
+  "packageManager": "pnpm@12.9.1+sha256.44c80447645c2a1d8da9308d3efedcec6ca2db4579183abcb15d8a90a88277d4"
 }
