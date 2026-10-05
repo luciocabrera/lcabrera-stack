@@ -280,9 +280,11 @@ stores beside it:
 Raw judge replies and full reply text go to the transcript file, never into
 `detail`. Graded prose does live in `detail`: the quality suite's `summary`
 and each dimension's `feedback` are judge-written text. So `detail` is not
-safe to serve as a whole, and the boundary for anything public is the
-allow-list in §8.3, applied in the package's query functions; no route
-returns `detail` unfiltered.
+safe to serve as a whole. The boundary for anything public is the
+allow-list in
+[ADR-132](../../decisions/ADR-132-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md),
+applied in the package's query functions; no route returns `detail`
+unfiltered.
 
 One example per suite lives in
 `packages/eval-history/src/envelope/fixtures/<suite>.json`, and the schema
@@ -794,8 +796,8 @@ existing routes do.
 | Route                                | Loader query (`@repo/eval-history/queries`)                                         | Issue |
 | ------------------------------------ | ----------------------------------------------------------------------------------- | ----- |
 | `/evals`                             | latest run per suite, `totals`, last 30 pass rates per suite, regressions on main   | #1277 |
-| `/evals/runs/:runId`                 | run header (settings, env) and a trial page via `fetchPage`                         | #1277 |
-| `/evals/runs/:runId.json`            | the run's allow-listed projection (§8.3), never the stored envelope                 | #1279 |
+| `/evals/runs/:runId`                 | run header (allow-listed settings and env) and a trial page via `fetchPage`         | #1277 |
+| `/evals/runs/:runId.json`            | the run's projection allow-listed by ADR-132, never the stored envelope             | #1279 |
 | `/evals/compare?a=&b=` or `?branch=` | `evals.run_compare(a, b)` plus `attribute()`                                        | #1278 |
 | `/evals/subjects/:kind/:name`        | `v_subject_trend` for one subject, annotations in range                             | #1278 |
 | `/evals/heatmap`                     | subjects × last N runs from `v_subject_trend`, flaky set from `flaky_tasks(window)` | #1278 |
@@ -813,20 +815,17 @@ existing routes do.
 - Error boundaries: `RouteErrorBoundary` and `useNotifyOnError`, as every
   route does.
 - Charts: sparkline, trend with bands, heatmap and matrix are drawn as SVG
-  with StyleX. Four small shapes do not justify a charting dependency; the
-  P-03 draft records the alternative.
+  with StyleX. Four small shapes do not justify a charting dependency;
+  ADR-132's Alternatives considered records the rejected library.
 - The reader pool is the package's own, built from
   `EVALS_READER_DATABASE_URL` and validated by a Zod schema in the package.
 
 ### 8.3 Public and private
 
-The recommendation (question 3) is that every `/evals` route is public, with
-nothing private behind it. No route returns transcript text, a prompt, a
-judge reply or `eval_trial_detail.detail` fields other than an allow-list
-(invoked skills, verdict, not-met numbers, dimension scores). The allow-list
-lives in the query functions. A test renders every loader against a seeded
-database and fails if any payload contains a planted marker string that the
-seed put into transcripts and replies.
+Every `/evals` route is public, with nothing private behind it (question 3).
+[ADR-132](../../decisions/ADR-132-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)
+is the single source for what a route may return and for the marker test
+that enforces it; this plan does not restate either.
 
 Login is not a v1 option: the auth middleware exists but is switched off
 (§1.4), and fixing it is outside this epic.

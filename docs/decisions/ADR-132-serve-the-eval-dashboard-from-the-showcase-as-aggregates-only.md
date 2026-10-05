@@ -50,7 +50,9 @@ showcase's routes directory, and every route reads through the private
 
 - names and identifiers: suite, task, subject (skill or rule) and its version,
   run, trial, branch and commit;
-- a run's settings and environment;
+- from a run's `settings`, only `runs`, `concurrency`, `timeout_ms`,
+  `max_turns`, `tools`, `hidden` and `selection`;
+- from a run's `env`, only `node`, `os`, `arch` and `ci_runner`;
 - each trial's outcome, error class, timestamps, duration, turns, token counts
   and cost;
 - aggregates computed from the rows above, such as pass rates, intervals,
@@ -62,18 +64,20 @@ showcase's routes directory, and every route reads through the private
 A route returns nothing outside that list. That excludes transcript text,
 prompt text, judge replies, the transcript pointer (`uri`, hash, size), the
 quality suite's `summary` and per-dimension `feedback`, rule-check `findings`,
-and any `detail` field the list does not name. The `.json` route serves the
+`settings.argv` (the full command line the run was started with), and any
+`detail`, `settings` or `env` field the list does not name. The `.json` route serves the
 same allow-listed projection of a run and never the stored envelope.
 
 The allow-list lives in the query functions of `@repo/eval-history`. No query
-returns `detail` whole for a route to filter afterwards.
+returns `detail`, `settings` or `env` whole for a route to filter afterwards.
 
 **How it is tested.** One showcase test enforces the rule above:
 
 1. It seeds the history database with a unique marker string in every
-   string-valued field that the envelope's Zod schema defines and the
-   allow-list does not name, in every suite's `detail` schema and in the
-   transcript pointer. The test derives that set by walking the schema, not
+   string-valued field, and every element of a string array, that the
+   envelope's Zod schema defines anywhere and the allow-list does not name.
+   That includes every suite's `detail`, the transcript pointer, and
+   `settings.argv`. The test derives that set by walking the schema, not
    from a list written into the test. A field that a later schema version
    adds is therefore seeded by default, and the only way to stop seeding it is
    to add it to the allow-list.
