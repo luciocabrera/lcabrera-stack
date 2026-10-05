@@ -1,6 +1,6 @@
 id: trigger-unused-exports
 name: Finding exports nothing imports
-set: regression
+set: capability
 tags:
   - positive-trigger
 inputs:

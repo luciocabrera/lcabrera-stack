@@ -1,6 +1,6 @@
 id: near-miss-dead-code-scan
 name: Running a dead-code scan
-set: regression
+set: capability
 tags:
   - negative-trigger
 inputs:

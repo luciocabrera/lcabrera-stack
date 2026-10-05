@@ -1,6 +1,6 @@
 id: near-miss-explain-function
 name: Explaining a function from a diff
-set: regression
+set: capability
 tags:
   - negative-trigger
 inputs:

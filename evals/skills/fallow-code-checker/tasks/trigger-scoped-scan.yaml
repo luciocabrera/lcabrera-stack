@@ -1,6 +1,6 @@
 id: trigger-scoped-scan
 name: Scanning one workspace with fallow
-set: regression
+set: capability
 tags:
   - positive-trigger
 inputs:

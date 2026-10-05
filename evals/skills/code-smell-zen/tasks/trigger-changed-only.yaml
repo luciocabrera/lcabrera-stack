@@ -1,6 +1,6 @@
 id: trigger-changed-only
 name: Limiting a smell check to changed files
-set: regression
+set: capability
 tags:
   - positive-trigger
 inputs:

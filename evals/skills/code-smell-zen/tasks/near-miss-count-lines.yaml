@@ -1,6 +1,6 @@
 id: near-miss-count-lines
 name: Counting changed lines
-set: regression
+set: capability
 tags:
   - negative-trigger
 inputs:

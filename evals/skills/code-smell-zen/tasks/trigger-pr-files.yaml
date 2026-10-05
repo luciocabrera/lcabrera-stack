@@ -1,6 +1,6 @@
 id: trigger-pr-files
 name: Smell-checking the files a PR touches
-set: regression
+set: capability
 tags:
   - positive-trigger
 inputs:

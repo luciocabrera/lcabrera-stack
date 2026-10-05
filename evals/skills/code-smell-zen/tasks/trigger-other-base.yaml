@@ -1,6 +1,6 @@
 id: trigger-other-base
 name: Reviewing a diff against a non-default base
-set: regression
+set: capability
 tags:
   - positive-trigger
 inputs:

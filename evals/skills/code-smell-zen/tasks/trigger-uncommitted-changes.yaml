@@ -1,6 +1,6 @@
 id: trigger-uncommitted-changes
 name: Checking uncommitted changes for smells
-set: regression
+set: capability
 tags:
   - positive-trigger
 inputs:

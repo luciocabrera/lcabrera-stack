@@ -1,6 +1,6 @@
 id: trigger-maintainability-ranking
 name: Ranking maintainability problems across an app
-set: regression
+set: capability
 tags:
   - positive-trigger
 inputs:

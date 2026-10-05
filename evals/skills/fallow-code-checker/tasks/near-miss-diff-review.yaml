@@ -1,6 +1,6 @@
 id: near-miss-diff-review
 name: Reviewing a branch diff for smells
-set: regression
+set: capability
 tags:
   - negative-trigger
 inputs:

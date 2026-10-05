@@ -1,6 +1,6 @@
 id: trigger-refactor-plan
 name: Planning a refactor of a package
-set: regression
+set: capability
 tags:
   - positive-trigger
 inputs:

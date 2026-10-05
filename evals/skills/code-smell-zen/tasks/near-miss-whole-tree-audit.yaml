@@ -1,6 +1,6 @@
 id: near-miss-whole-tree-audit
 name: Auditing the whole tree
-set: regression
+set: capability
 tags:
   - negative-trigger
 inputs:

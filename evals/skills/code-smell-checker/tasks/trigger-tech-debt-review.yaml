@@ -1,6 +1,6 @@
 id: trigger-tech-debt-review
 name: Reviewing tech debt across the repository
-set: regression
+set: capability
 tags:
   - positive-trigger
 inputs:

@@ -1,6 +1,6 @@
 id: trigger-react-frontend
 name: Sweeping a React package for smells
-set: regression
+set: capability
 tags:
   - positive-trigger
 inputs:

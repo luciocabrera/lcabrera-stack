@@ -1,6 +1,6 @@
 id: near-miss-diff-review
 name: Reviewing only a branch diff
-set: regression
+set: capability
 tags:
   - negative-trigger
 inputs:

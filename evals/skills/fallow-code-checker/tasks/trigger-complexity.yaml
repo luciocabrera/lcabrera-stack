@@ -1,6 +1,6 @@
 id: trigger-complexity
 name: Finding the most complex functions
-set: regression
+set: capability
 tags:
   - positive-trigger
 inputs:
