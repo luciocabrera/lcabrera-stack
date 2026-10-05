@@ -82,10 +82,11 @@ These `jsonb` fields may be returned:
 - from `eval_run.totals`, every field, since it holds only counts, rates,
   durations, cost and tokens;
 - from `eval_trial_detail.detail`, only the invoked skills, the expected skill,
-  the verdict, the not-met criterion numbers with the expected ones, and the
-  rubric dimension names with their scores. The quality suite's `summary` and
-  per-dimension `feedback`, rule-check `findings`, and every other `detail`
-  field are excluded.
+  the verdict, the not-met criterion numbers with the expected ones, the
+  rubric dimension names with their scores, and the quality suite's
+  `overall` score, which the `quality_overall` baseline is computed from.
+  The quality suite's `summary` and per-dimension `feedback`, rule-check
+  `findings`, and every other `detail` field are excluded.
 
 Aggregates computed from allowed values may be returned: pass rates,
 intervals, trends, flaky sets, comparisons, attributions to a changed hash,
