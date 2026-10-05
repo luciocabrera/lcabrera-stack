@@ -4,59 +4,29 @@
 <title>Skill Quality Report</title>
 <style>
   :root {
-    --bg: #f3f4f1;
-    --panel: #ffffff;
-    --ink: #1a211e;
-    --muted: #5c6863;
-    --line: #d8ddd8;
-    --accent: #2357a8;
-    --accent-soft: #e4ebf7;
-    --s1: #c4372b;
-    --s2: #d9782a;
-    --s3: #c9a227;
-    --s4: #6aa84f;
-    --s5: #2e8b57;
+    color-scheme: light dark;
+    --bg: light-dark(#f3f4f1, #131917);
+    --panel: light-dark(#ffffff, #1b2320);
+    --ink: light-dark(#1a211e, #e3eae6);
+    --muted: light-dark(#5c6863, #9aa8a2);
+    --line: light-dark(#d8ddd8, #2f3b36);
+    --accent: light-dark(#2357a8, #85abea);
+    --accent-soft: light-dark(#e4ebf7, #1e2b3e);
+    --s1: light-dark(#c4372b, #b8483d);
+    --s2: light-dark(#d9782a, #b86d33);
+    --s3: light-dark(#c9a227, #a88b2e);
+    --s4: light-dark(#6aa84f, #5a8f45);
+    --s5: light-dark(#2e8b57, #2f7a52);
+    --up: light-dark(#2e8b57, #6fd39a);
+    --down: light-dark(#c4372b, #f08a80);
     --s-ink: #ffffff;
-    --up: #2e8b57;
-    --down: #c4372b;
     --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
     --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  }
+  :root[data-theme='light'] {
     color-scheme: light;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme='light']) {
-      --bg: #131917;
-      --panel: #1b2320;
-      --ink: #e3eae6;
-      --muted: #9aa8a2;
-      --line: #2f3b36;
-      --accent: #85abea;
-      --accent-soft: #1e2b3e;
-      --s1: #b8483d;
-      --s2: #b86d33;
-      --s3: #a88b2e;
-      --s4: #5a8f45;
-      --s5: #2f7a52;
-      --up: #6fd39a;
-      --down: #f08a80;
-      color-scheme: dark;
-    }
-  }
   :root[data-theme='dark'] {
-    --bg: #131917;
-    --panel: #1b2320;
-    --ink: #e3eae6;
-    --muted: #9aa8a2;
-    --line: #2f3b36;
-    --accent: #85abea;
-    --accent-soft: #1e2b3e;
-    --s1: #b8483d;
-    --s2: #b86d33;
-    --s3: #a88b2e;
-    --s4: #5a8f45;
-    --s5: #2f7a52;
-    --up: #6fd39a;
-    --down: #f08a80;
     color-scheme: dark;
   }
   * {
@@ -363,7 +333,40 @@
     <div class="table-wrap">
       <table>
         <thead>
-          <tr id="head"></tr>
+          <tr id="head">
+            <th scope="col">
+              <button type="button" data-key="skill">skill</button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="clarity">clarity</button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="completeness">
+                completeness
+              </button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="trigger_precision">
+                trigger precision
+              </button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="scope_coverage">
+                scope coverage
+              </button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="anti_patterns">
+                anti patterns
+              </button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="overall">overall</button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="change">change</button>
+            </th>
+          </tr>
         </thead>
         <tbody id="rows"></tbody>
       </table>
@@ -375,8 +378,10 @@
   </section>
 
   <section class="panel" id="detail-panel">
-    <h2 id="detail-title"></h2>
-    <p id="detail-summary"></p>
+    <h2 id="detail-title">Feedback</h2>
+    <p id="detail-summary">
+      Click a skill in the table to read what the judge said about it.
+    </p>
     <div class="detail" id="detail"></div>
   </section>
 
@@ -478,12 +483,6 @@
       ),
     );
 
-    const columns = [
-      ['skill', 'skill'],
-      ...dims.map((d) => [d, label(d)]),
-      ['overall', 'overall'],
-      ['change', 'change'],
-    ];
     const valueFor = (s, key) => {
       if (key === 'skill') return s.skill;
       if (key === 'overall') return s.overall ?? -1;
@@ -493,25 +492,22 @@
           : s.overall - s.previous;
       return scoreOf(s, key) ?? -1;
     };
-    const head = document.getElementById('head');
-    const headButtons = columns.map(([key, text]) => {
-      const button = el('button', {
-        type: 'button',
-        textContent: text,
-        onclick: () => {
-          sortDir =
-            sortKey === key && sortDir === 'descending'
-              ? 'ascending'
-              : key === 'skill'
-                ? 'ascending'
-                : 'descending';
+    const nextDirection = (key) => {
+      if (sortKey === key)
+        return sortDir === 'descending' ? 'ascending' : 'descending';
+      return key === 'skill' ? 'ascending' : 'descending';
+    };
+    const headButtons = [...document.querySelectorAll('#head button')].map(
+      (button) => {
+        const key = button.dataset.key;
+        button.addEventListener('click', () => {
+          sortDir = nextDirection(key);
           sortKey = key;
           render();
-        },
-      });
-      head.append(el('th', { scope: 'col' }, [button]));
-      return [key, button];
-    });
+        });
+        return [key, button];
+      },
+    );
 
     const changeCell = (s) => {
       if (s.overall === undefined || s.previous === undefined)

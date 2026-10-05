@@ -62,6 +62,6 @@ export const renderReport = ({ data, template }) => {
       `the report template has no ${REPORT_PLACEHOLDER} placeholder`,
     );
   }
-  const json = JSON.stringify(data).replaceAll('<', '\\u003c');
+  const json = JSON.stringify(data).replaceAll('<', String.raw`\u003c`);
   return template.replace(REPORT_PLACEHOLDER, () => json);
 };

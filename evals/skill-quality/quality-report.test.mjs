@@ -111,6 +111,18 @@ describe('renderReport', () => {
     expect(html).toContain('\\u003c/script>\\u003cb>x\\u003c/b> $&');
   });
 
+  it('has a sortable header for each rubric dimension, in rubric order', () => {
+    const keys = [...template.matchAll(/data-key="([a-z_]+)"/g)].map(
+      ([, key]) => key,
+    );
+    expect(keys).toEqual([
+      'skill',
+      ...RUBRIC.map(({ name }) => name),
+      'overall',
+      'change',
+    ]);
+  });
+
   it('refuses a template without the placeholder', () => {
     expect(() =>
       renderReport({ data: {}, template: '<p>no slot</p>' }),
