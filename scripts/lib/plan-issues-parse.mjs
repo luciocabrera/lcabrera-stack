@@ -18,6 +18,7 @@
  * JS rather than fenced by two whitespace runs around a lazy group, which is
  * super-linear backtracking (Sonar S8786).
  */
+import { parse } from 'yaml';
 
 const HEADING_RE =
   /^###\s+(?<id>[EPG]-\d+)\s+—\s+`(?<title>[^`]+)`(?<note>.*)$/;
@@ -85,23 +86,77 @@ const parseMilestone = (body, milestoneNames) => {
   return milestoneNames.find((name) => name.startsWith(`M${mention} `)) ?? '';
 };
 
-const parseDependencies = (body) => {
-  const raw = yamlValue(yamlBlock(body), 'dependencies');
-  const field = (key) =>
-    new RegExp(String.raw`${key}:\s*(?<value>\[[^\]]*\]|[A-Za-z0-9-]+)`).exec(
-      raw,
-    )?.groups.value ?? '';
-  const scalar = (key) => {
-    const value = field(key);
-    return value === '' || value === 'null' ? undefined : value;
-  };
+const DEPENDENCY_LISTS = ['blocking', 'blockedBy', 'children'];
+
+const DEPENDENCY_KEYS = new Set([...DEPENDENCY_LISTS, 'parent']);
+
+const dependencySource = (yaml) => {
+  const lines = yaml.split('\n');
+  const start = lines.findIndex((line) => line.startsWith('dependencies:'));
+  if (start === -1) {
+    return '';
+  }
+  const end = lines.findIndex(
+    (line, index) => index > start && /^\S/.test(line),
+  );
+  return lines.slice(start, end === -1 ? undefined : end).join('\n');
+};
+
+const isScalar = (value) =>
+  typeof value === 'string' || typeof value === 'number';
+
+const readDependencyMap = (source) => {
+  try {
+    return parse(source)?.dependencies ?? {};
+  } catch (error) {
+    throw new Error(error.message.split('\n')[0].replace(/:$/, ''), {
+      cause: error,
+    });
+  }
+};
+
+const checkDependencyMap = (map) => {
+  if (typeof map !== 'object' || Array.isArray(map)) {
+    throw new TypeError('dependencies is not a map');
+  }
+  const stray = Object.keys(map).filter((key) => !DEPENDENCY_KEYS.has(key));
+  if (stray.length > 0) {
+    throw new Error(`unknown dependency key(s): ${stray.join(', ')}`);
+  }
+  for (const key of DEPENDENCY_LISTS) {
+    const list = map[key] ?? [];
+    if (!Array.isArray(list) || !list.every(isScalar)) {
+      throw new TypeError(`${key} is not a list of issue ids`);
+    }
+  }
+  if (map.parent != null && !isScalar(map.parent)) {
+    throw new TypeError('parent is not a single issue id');
+  }
+  return map;
+};
+
+const yamlDependencies = (id, body) => {
+  try {
+    return checkDependencyMap(
+      readDependencyMap(dependencySource(yamlBlock(body))),
+    );
+  } catch (error) {
+    throw new Error(`${id}: cannot parse dependencies — ${error.message}`, {
+      cause: error,
+    });
+  }
+};
+
+const idList = (list) => (list ?? []).map(String);
+
+const parseDependencies = (id, body) => {
+  const map = yamlDependencies(id, body);
   return {
-    blocking: bracketList(field('blocking')),
-    blockedBy: bracketList(field('blockedBy')),
-    parent: scalar('parent') ?? parseParentFromProse(body),
-    children: bracketList(field('children')).concat(
-      parseChildrenFromProse(body),
-    ),
+    blocking: idList(map.blocking),
+    blockedBy: idList(map.blockedBy),
+    parent:
+      map.parent == null ? parseParentFromProse(body) : String(map.parent),
+    children: idList(map.children).concat(parseChildrenFromProse(body)),
   };
 };
 
@@ -143,7 +198,7 @@ const toRecord = ({ id, title, note, body }, milestoneNames) => ({
   kind: id.startsWith('E-') ? 'epic' : 'issue',
   labels: parseLabels(body),
   milestone: parseMilestone(body, milestoneNames),
-  dependencies: parseDependencies(body),
+  dependencies: parseDependencies(id, body),
   sections: {
     problem: sectionText(body, ['Problem Statement', 'Problem']),
     objective: sectionText(body, ['Objective']),

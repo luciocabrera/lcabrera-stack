@@ -2,14 +2,14 @@
 id: 1296-plan-issues-block-dependencies
 title: fix(tooling): plan:issues drops block-style dependency keys
 owner: agent:claude
-status: active
+status: review
 branch: fix/1296-1296-plan-issues-block-dependencies
 area:
   - scripts/lib/plan-issues-parse*
 started: 2026-10-05
 updated: 2026-10-05
 plan: (none)
-pr: (none)
+pr: #1322
 issue: #1296
 ---
 
@@ -19,6 +19,6 @@ fix(tooling): plan:issues drops block-style dependency keys
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: parser fixed, gate green, PR ready for review
 - Blockers: none
-- Next:
+- Next: merge

@@ -146,6 +146,73 @@ describe('malformed input', () => {
   });
 });
 
+describe('dependency maps', () => {
+  const entry = (yaml) =>
+    `### P-01 — \`docs(x): y\`\n\n\`\`\`yaml\nlabels: [type: docs]\n${yaml}\nmilestone: M1 - Foundation\n\`\`\`\n`;
+  const dependenciesOf = (yaml) => parsePlan(entry(yaml))[0].dependencies;
+
+  const BLOCK = [
+    'dependencies:',
+    '  blocking: [P-03]',
+    '  blockedBy: [P-02]',
+    '  parent: E-1',
+    '  children: []',
+  ].join('\n');
+
+  const FLOW =
+    'dependencies: { blocking: [P-03], blockedBy: [P-02], parent: E-1, children: [] }';
+
+  it('reads every key of a block-style map', () => {
+    expect(dependenciesOf(BLOCK)).toEqual({
+      blocking: ['P-03'],
+      blockedBy: ['P-02'],
+      parent: 'E-1',
+      children: [],
+    });
+  });
+
+  it('parses block and flow style to the same record', () => {
+    expect(dependenciesOf(BLOCK)).toEqual(dependenciesOf(FLOW));
+  });
+
+  it('reads a block-style list written one item per line', () => {
+    const yaml = [
+      'dependencies:',
+      '  blockedBy:',
+      '    - P-02',
+      '    - P-04',
+      '  parent: null',
+    ].join('\n');
+    expect(dependenciesOf(yaml)).toEqual({
+      blocking: [],
+      blockedBy: ['P-02', 'P-04'],
+      parent: undefined,
+      children: [],
+    });
+  });
+
+  it('treats an absent map as no dependencies', () => {
+    expect(dependenciesOf('')).toEqual({
+      blocking: [],
+      blockedBy: [],
+      parent: undefined,
+      children: [],
+    });
+  });
+
+  it.each([
+    ['malformed yaml', 'dependencies: { blockedBy: [P-02 }'],
+    ['a misspelt key', 'dependencies:\n  blockedby: [P-02]'],
+    ['a scalar where a list belongs', 'dependencies:\n  blockedBy: P-02'],
+    ['a list where the parent belongs', 'dependencies:\n  parent: [E-1]'],
+    ['a scalar in place of the map', 'dependencies: P-02'],
+  ])('fails naming the entry on %s', (_case, yaml) => {
+    expect(() => dependenciesOf(yaml)).toThrow(
+      /^P-01: cannot parse dependencies/,
+    );
+  });
+});
+
 describe('parseMilestoneNames', () => {
   it('normalises en dashes so one milestone does not become two', () => {
     const scheme = '### M1 – Foundation\n\ntext\n\n### M3 – Cross‑App\n';
