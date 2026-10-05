@@ -113,8 +113,8 @@ const main = async () => {
   console.log(
     [
       ...judgements.map(describeJudgement),
-      costLine(results.map(({ metrics }) => metrics)),
       footer,
+      costLine(results.map(({ metrics }) => metrics)),
     ].join('\n'),
   );
   process.exitCode = exitCode;

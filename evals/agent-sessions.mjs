@@ -234,5 +234,6 @@ export const costLine = (metrics) => {
   const costs = metrics.map(reportedCost).filter(Number.isFinite);
   const total = costs.reduce((sum, cost) => sum + cost, 0);
   const missing = metrics.length - costs.length;
-  return `Cost: $${total.toFixed(2)} reported over ${costs.length} session(s)${missing === 0 ? '' : `; ${missing} reported none`}`;
+  const reported = `Cost: $${total.toFixed(2)} reported over ${costs.length} session(s)`;
+  return missing === 0 ? reported : `${reported}; ${missing} reported none`;
 };
