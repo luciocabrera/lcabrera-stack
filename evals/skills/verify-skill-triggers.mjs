@@ -31,7 +31,13 @@ import { parseArgs } from 'node:util';
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
-import { chunk, drain, errorText, runBatches } from '../agent-sessions.mjs';
+import {
+  chunk,
+  errorText,
+  runBatches,
+  sessionMetrics,
+  timedDrain,
+} from '../agent-sessions.mjs';
 
 import {
   coverageProblems,
@@ -107,23 +113,24 @@ const catalog = () =>
     existsSync(join(SKILLS_ROOT, name, 'SKILL.md')),
   );
 
-const attemptTask = async ({ hidden, model, skill, task }) => {
+const attemptTask = async ({ hidden, model, queuedAt, skill, task }) => {
   const { cwd, fixtureFiles } = workspaceFor({ skill, task });
   const scope = sessionScope({ catalog: catalog(), hidden, task });
-  const session = query({
-    options: {
-      ...scope,
-      cwd,
-      maxTurns: 8,
-      mcpServers: {},
-      model,
-      persistSession: false,
-      settingSources: ['project'],
-      strictMcpConfig: true,
-    },
-    prompt: task.prompt,
-  });
-  const drained = await drain(session);
+  const open = () =>
+    query({
+      options: {
+        ...scope,
+        cwd,
+        maxTurns: 8,
+        mcpServers: {},
+        model,
+        persistSession: false,
+        settingSources: ['project'],
+        strictMcpConfig: true,
+      },
+      prompt: task.prompt,
+    });
+  const drained = await timedDrain({ open, queuedAt });
   const { messages } = drained;
   const error =
     drained.error ??
@@ -143,6 +150,7 @@ const attemptTask = async ({ hidden, model, skill, task }) => {
     error,
     fixtureRead,
     invoked,
+    metrics: sessionMetrics(messages, drained.timestamps, drained.error),
     passed: taskPassed({ error, fixtureRead, invoked, skill, task }),
     skill,
     task,
@@ -194,10 +202,17 @@ const runSelection = async ({ positionals, values }) => {
   });
   mkdirSync(REPORT_DIR, { recursive: true });
   const jobs = selected.flatMap((skill) =>
-    tasksOf(skill).map(
-      (task) => () =>
-        runTask({ hidden: values.hide, model: values.model, skill, task }),
-    ),
+    tasksOf(skill).map((task) => {
+      const queuedAt = Date.now();
+      return () =>
+        runTask({
+          hidden: values.hide,
+          model: values.model,
+          queuedAt,
+          skill,
+          task,
+        });
+    }),
   );
   if (jobs.length === 0) {
     throw new Error('the selection resolved to no tasks');
