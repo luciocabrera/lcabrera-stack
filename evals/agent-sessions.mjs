@@ -157,17 +157,13 @@ const resultClass = (result) =>
 const thrownClass = (thrown) =>
   THROW_CLASSES.find(([, pattern]) => pattern.test(thrown))?.[0] ?? 'drain';
 
-const failed = (result) => result !== undefined && !succeeded(result);
+const endedCleanly = (result, thrown) =>
+  succeeded(result) && thrown === undefined;
 
-const unfinished = (result, thrown) =>
-  result === undefined || thrown !== undefined;
-
-const errorClass = (result, thrown) => {
-  if (failed(result)) {
-    return resultClass(result);
-  }
-  return unfinished(result, thrown) ? thrownClass(thrown ?? '') : null;
-};
+const errorClass = (result, thrown) =>
+  result === undefined || succeeded(result)
+    ? thrownClass(thrown ?? '')
+    : resultClass(result);
 
 const REPORTED_FIELDS = {
   cost_usd_reported: 'total_cost_usd',
@@ -201,12 +197,14 @@ const stampedTimes = (result, timestamps) => ({
   started_at: isoAt(timestamps.started),
 });
 
-export const sessionMetrics = (messages, timestamps = {}, thrown) => {
+export const sessionMetrics = (messages, timestamps, thrown) => {
   const result = finalResult(messages);
   return {
     ...reportedFields(result),
     ...stampedTimes(result, timestamps),
-    error_class: errorClass(result, thrown),
+    error_class: endedCleanly(result, thrown)
+      ? null
+      : errorClass(result, thrown),
     model_usage: result?.modelUsage ?? {},
     tokens: summedTokens(result?.modelUsage),
   };
