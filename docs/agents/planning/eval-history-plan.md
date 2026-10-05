@@ -16,6 +16,15 @@ issues (ADR-036). This document holds the reasoning and the identifier map,
 and it is a dated record: true as of 2026-10-05, amended above the body
 rather than rewritten.
 
+> **Amended 2026-10-05, after the first waves merged.** §1 describes the tree
+> at `42f63c789`, the commit this plan was written against. Since then
+> #1297 (session metrics), #1298 (many tasks per skill, `set`/`source`
+> tags), #1304 (confusion matrix), #1309, #1314 (three trials by default),
+> #1320 and #1321 (five-and-five task floor) and the B2 task batches have
+> landed, so several §1 gaps are closed. `git show 42f63c789:<path>` shows
+> what §1 read. One finding was missed outright: the tooled verifier runner,
+> which §1.1 and the suite lists in §2 and §3 now include.
+
 The PRD stays the source of truth for what to build. Where it contradicts the
 repository, this plan says so and puts the call in
 [§12](#12-questions-for-stakeholders) instead of deciding it here.
@@ -41,17 +50,19 @@ issue body names its planning id; this table resolves one.
 
 ### 1.1 How each runner produces results today
 
-All four runners parse arguments with `node:util` `parseArgs`, drop a
+The model runners parse arguments with `node:util` `parseArgs`, drop a
 leading `--` (`withoutSeparator` in `evals/agent-sessions.mjs`), and run
 sessions four at a time (`CONCURRENCY = 4`, `chunk` + `runBatches`). None takes
-a timeout or a tools flag.
+a timeout or a tools flag. rules-consistency is the exception: it calls no
+model, takes no flags and runs no sessions.
 
-| Suite             | Runner                                                 | Flags                                                               | Writes                                                                                                           | Kept in memory only                                                          |
-| ----------------- | ------------------------------------------------------ | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| rules-consistency | `evals/rules-consistency/verify-rules-consistency.mjs` | none                                                                | nothing; exit 1 on findings                                                                                      | the findings                                                                 |
-| skills            | `evals/skills/verify-skill-triggers.mjs`               | skill names, `--check`, `--hide` (repeatable), `--model`            | `.tmp/skill-evals/<skill>-<task>.json`: the raw SDK message array, which is the only transcript any suite keeps  | `{error, fixtureRead, invoked, passed, skill, task}`                         |
-| verifier-fixtures | `evals/verifier-fixtures/verify-verifier-verdicts.mjs` | `--runs` (default 2, below 2 rejected); model hard-coded in `MODEL` | `.tmp/verifier-evals/<fixture>-<n>.md`: the reply text only                                                      | `{expectedNotMet, fixture, matched, runs[{error, notMet, verdict}], stable}` |
-| skill-quality     | `evals/skill-quality/verify-skill-quality.mjs`         | skill names, `--model`                                              | `.tmp/skill-quality/<skill>.json` (raw reply), `runs/<iso>.json` (`{generatedAt, model, scores}`), `report.html` | `{skill, judgement{dimensions, overall, summary}}`                           |
+| Suite             | Runner                                                 | Flags                                                                                                                 | Writes                                                                                                           | Kept in memory only                                                          |
+| ----------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| rules-consistency | `evals/rules-consistency/verify-rules-consistency.mjs` | none                                                                                                                  | nothing; exit 1 on findings                                                                                      | the findings                                                                 |
+| skills            | `evals/skills/verify-skill-triggers.mjs`               | skill names, `--check`, `--hide` (repeatable), `--model`                                                              | `.tmp/skill-evals/<skill>-<task>.json`: the raw SDK message array, which is the only transcript any suite keeps  | `{error, fixtureRead, invoked, passed, skill, task}`                         |
+| verifier-fixtures | `evals/verifier-fixtures/verify-verifier-verdicts.mjs` | `--runs` (default 2, below 2 rejected); model hard-coded in `MODEL`                                                   | `.tmp/verifier-evals/<fixture>-<n>.md`: the reply text only                                                      | `{expectedNotMet, fixture, matched, runs[{error, notMet, verdict}], stable}` |
+| verifier-tooled   | `evals/verifier-fixtures/verify-verifier-tooled.mjs`   | `--runs`, `--keep`; the verifier with real tools in a scratch worktree, grading a fail-to-pass gate proof per fixture | reports under `.tmp/`                                                                                            | per-fixture judgements                                                       |
+| skill-quality     | `evals/skill-quality/verify-skill-quality.mjs`         | skill names, `--model`                                                                                                | `.tmp/skill-quality/<skill>.json` (raw reply), `runs/<iso>.json` (`{generatedAt, model, scores}`), `report.html` | `{skill, judgement{dimensions, overall, summary}}`                           |
 
 skill-quality is the only suite with any history (`readHistory` over
 `runs/*.json`), and it keeps one number per skill per run.
@@ -100,9 +111,10 @@ around `query()`.
   `claude-opus-5-5`. The envelope records what the runner used. The Waza
   value is a second declaration nothing reads at run time; this plan leaves
   it alone and names it as a risk (§11).
-- A skill can hold only one task of each kind: `REQUIRED_TASKS` in
-  `evals/skills/skill-triggers.mjs` keys tasks on the ids `trigger` and
-  `near-miss` (P-23 / #1284).
+- At `42f63c789`, a skill could hold only one task of each kind:
+  `REQUIRED_TASKS` in `evals/skills/skill-triggers.mjs` keyed tasks on the
+  ids `trigger` and `near-miss`. #1298 (P-23 / #1284) replaced it with a
+  kind taken from `should_trigger`, and #1321 now requires five of each.
 - `evals/` is not a workspace. It has no `package.json`; its dependencies
   resolve from the root and `test:evals` is vitest with `--root evals`.
 
@@ -147,7 +159,11 @@ type RunEnvelope = {
     readonly run_id: string; // uuid v4, minted by the runner
     readonly project: 'lcabrera-stack';
     readonly suite:
-      'rules-consistency' | 'skills' | 'verifier-fixtures' | 'skill-quality';
+      | 'rules-consistency'
+      | 'skills'
+      | 'verifier-fixtures'
+      | 'verifier-tooled'
+      | 'skill-quality';
     readonly trigger:
       'local' | 'ci-pr' | 'ci-push' | 'ci-scheduled' | 'ci-manual' | 'baseline';
     readonly actor: string; // GITHUB_ACTOR, else git user.email's local part
@@ -246,6 +262,7 @@ stores beside it:
 | rules-consistency | `{schema: 'rules/1', check: 'indexed' \| 'covered' \| 'overlap', findings: string[]}`                                          |
 | skills            | `{schema: 'skills/1', expected_skill, should_trigger, invoked: string[], fixture_read: boolean \| null, init_tools: string[]}` |
 | verifier-fixtures | `{schema: 'verifier/1', fixture, expected_not_met: number[], not_met: number[], verdict: 'PASS' \| 'FAIL' \| null, matched}`   |
+| verifier-tooled   | `{schema: 'verifier-tooled/1', fixture, expected_not_met: number[], not_met: number[], verdict, gate_proof_seen: boolean}`     |
 | skill-quality     | `{schema: 'quality/1', judge_model, dimensions: {name, score, feedback}[], overall, summary, reply_sha256}`                    |
 
 Raw judge replies and reply text go to the transcript file, never into
@@ -253,7 +270,7 @@ Raw judge replies and reply text go to the transcript file, never into
 
 One example per suite lives in
 `packages/eval-history/src/envelope/fixtures/<suite>.json`, and the schema
-test parses all four. They are fixtures rather than copies in this document:
+test parses every one. They are fixtures rather than copies in this document:
 an example here would be a second schema nothing validates.
 
 **The explorer keeps working.** `quality-report.mjs` gets a
@@ -290,7 +307,7 @@ create table evals.eval_run (
   id bigint generated always as identity primary key,
   run_id uuid not null unique,
   project text not null default 'lcabrera-stack',
-  suite text not null check (suite in ('rules-consistency', 'skills', 'verifier-fixtures', 'skill-quality')),
+  suite text not null check (suite in ('rules-consistency', 'skills', 'verifier-fixtures', 'verifier-tooled', 'skill-quality')),
   trigger evals.trigger not null,
   actor text not null,
   branch text not null,
