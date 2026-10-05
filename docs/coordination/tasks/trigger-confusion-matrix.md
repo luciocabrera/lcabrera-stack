@@ -2,7 +2,7 @@
 id: trigger-confusion-matrix
 title: feat(evals): print the trigger confusion matrix from the skills runner
 owner: agent:claude
-status: active
+status: review
 branch: feat/1294-trigger-confusion-matrix
 area:
   - evals/skills/*.mjs
@@ -11,7 +11,7 @@ area:
 started: 2026-10-05
 updated: 2026-10-05
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1304
 issue: #1294
 ---
 

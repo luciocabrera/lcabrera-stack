@@ -50,6 +50,14 @@ pass as a restricted session. A task passes on the
 session's `Skill` tool calls, not on its reply. Transcripts go to
 `.tmp/skill-evals/`.
 
+After the per-task lines, the runner prints a confusion matrix: one row per
+expectation (`epic` for a trigger task, `not epic` for a near-miss), one column
+per skill any trial loaded, and a count of trials in each cell. So a failed
+trigger task shows which skill loaded in its place. A trial that loaded two
+skills counts in both columns. One that loaded none counts under `(none)`, or
+under `(error)` if its session failed. Every trial's expectation, its outcome
+and the skills it invoked are written to `.tmp/skill-evals/trials.json`.
+
 **A skill with a `paths:` list is offered only after the session reads a file
 that matches it.** Those skills' tasks name a fixture
 (`inputs.context.fixture`, under the skill's `fixtures/`) and ask the agent to
