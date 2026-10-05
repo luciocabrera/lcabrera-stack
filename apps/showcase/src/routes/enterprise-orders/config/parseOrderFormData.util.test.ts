@@ -15,13 +15,10 @@ const buildFormData = (overrides: Record<string, string> = {}) => {
 it('parses and coerces a valid submission', () => {
   const result = parseOrderFormData(buildFormData());
 
-  expect(result.success).toBe(true);
-  if (!result.success) {
-    return;
-  }
-
-  expect(result.data.quantity).toBe(2);
-  expect(result.data.customer_id).toBe(42);
+  expect(result).toMatchObject({
+    data: { customer_id: 42, quantity: 2 },
+    success: true,
+  });
 });
 
 it('fails for an invalid submission', () => {
