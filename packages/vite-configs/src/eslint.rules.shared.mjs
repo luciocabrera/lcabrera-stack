@@ -47,6 +47,15 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   ],
   'unicorn/name-replacements': 'off',
   'unicorn/no-array-reduce': 'off',
+  // New in unicorn 77's recommended set. Purely stylistic: it rejects the ` * `
+  // line prefix that editors insert into every JSDoc block and that the JSDoc
+  // convention is written in. It changes no behaviour and catches no bug.
+  'unicorn/no-asterisk-prefix-in-documentation-comments': 'off',
+  // New in unicorn 77's recommended set. Every report it makes against a
+  // config file or a rule module is a pure factory call — `export default
+  // defineConfig(...)`, `export default createRule(...)`, a config array — and
+  // the only fix available is to bind the same call to a variable first.
+  'unicorn/no-top-level-side-effects': 'off',
   // Two positions are exempt, both because the fixer is unsafe there rather
   // than because the rule is wrong.
   //
@@ -66,6 +75,14 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
     'error',
     { checkArguments: false, checkArrowFunctionBody: false },
   ],
+  // In unicorn 77's recommended set it reports `x ?? literal` and
+  // `x || literal` fallbacks. A default applies only to `undefined`, so each
+  // rewrite changes what `null` does — and, for `||`, every other falsy value.
+  // A child process's `close` exit code is `null` when a signal killed it, so
+  // `exitCode ?? 0` and a default of `0` are different programs. The rule's own
+  // documentation says to turn it off where `null` and `undefined` are handled
+  // alike.
+  'unicorn/prefer-default-parameters': 'off',
   // The auto-fixer rewrites http:// to https:// inside string literals, which
   // silently corrupts test fixtures and local-dev URLs — a fixture asserting
   // that an http origin is rejected became https, and the test inverted.
