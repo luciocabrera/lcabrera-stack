@@ -79,6 +79,8 @@
   "src/components/Table/TableBody/TableBody.stylex.ts",
   "src/components/Table/TableBodyCell/TableBodyCell.stylex.ts",
   "src/components/Table/TableBodyRows/TableBodyRows.stylex.ts",
+  "src/components/Table/TableCellBadge/TableCellBadge.stylex.ts",
+  "src/components/Table/TableCellText/TableCellText.stylex.ts",
   "src/components/Table/TableContent/TableContent.stylex.ts",
   "src/components/Table/TableEmptyState/TableEmptyState.stylex.ts",
   "src/components/Table/TableEmptyState/TableEmptyStateMessage/TableEmptyStateMessage.stylex.ts",

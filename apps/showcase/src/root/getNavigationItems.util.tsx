@@ -37,6 +37,12 @@ export const getNavigationItems = (
     type: 'link',
   },
   {
+    icon: <BarChartIcon size={iconSize} />,
+    label: 'Skill Scores',
+    to: '/skill-scores',
+    type: 'link',
+  },
+  {
     icon: <FileTextIcon size={iconSize} />,
     label: 'Enterprise Orders',
     to: '/enterprise-orders',

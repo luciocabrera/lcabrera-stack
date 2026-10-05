@@ -243,6 +243,25 @@ lost exactly this way, which is what made every drill chrome row a data row.
 Adding a per-row field means adding it to that signature too, and
 `Table.groupedCrud.test.tsx` is what notices when it is not.
 
+## Cell calls
+
+A column's `cell` is a `{ kind, params }` call, plain data that crosses the
+loader. `TableBodyRows` validates each painted column's call once per render,
+against the renderers merged by `kind` over the built-ins (`badge`, `delta`,
+`text`), and `buildTableBodyCellDescriptor` resolves a cell in this order: the
+structural group cell, `render`, the call, the `dataType` default. An
+unregistered kind, params the renderer's Standard Schema rejects, an
+asynchronous or throwing validator, and a loading placeholder row all draw the
+default — the call never throws on the render path. Group aggregates keep the
+plain default through `TableGroupAggregate`.
+
+Renderers and palettes reach the body through `TableCellRenderingProvider`, a
+static context that `TableLayout` and `Table` each render and that appends its
+layers to its parent's, so a tone resolves nearest-first: `Table`'s
+`cellPalette`, `TableLayout`'s, then the loader's `columnsState.cellPalette`, then
+the built-in tones, then `neutral`. The decision and its costs are
+[ADR-130](../../../../../docs/decisions/ADR-130-a-cells-look-is-a-call-validated-against-a-registered-renderer.md).
+
 ## Grouped rows
 
 ### Grouping requires a SQL-backed paginated endpoint

@@ -1,3 +1,6 @@
+import { resolveTableCellCalls } from '#ui/components/Table/cellRenderers/resolveTableCellCalls.util';
+import { useTableCellRendering } from '#ui/components/Table/contexts/TableCellRendering/useTableCellRendering.hook';
+import { useWarnUnresolvedTableCellCalls } from '#ui/components/Table/contexts/TableCellRendering/useWarnUnresolvedTableCellCalls.hook';
 import {
   useGetColumns,
   useGetColumnSizing,
@@ -33,6 +36,13 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
   const columnSizing = useGetColumnSizing<TData>();
   const pinnedOffsets = useGetPinnedColumnOffsets();
   const appliedGroupingKeys = useGetTableGroupingKeys();
+  const { renderers, tone } = useTableCellRendering();
+  const cellCalls = resolveTableCellCalls({
+    columns: [...leftPinnedCols, ...centerCols, ...rightPinnedCols],
+    renderers,
+  });
+
+  useWarnUnresolvedTableCellCalls(cellCalls);
 
   const groupingKeys = resolveDeclaredGroupingKeys<TData>({
     columns,
@@ -42,10 +52,12 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
   const visibleRows = rows.slice(startIndex, endIndex);
 
   const renderBodyCell = createRenderTableBodyCell({
+    cellCalls,
     columnSizing,
     groupingKeys,
     isLoadingState,
     pinnedOffsets,
+    tone,
   });
 
   return (

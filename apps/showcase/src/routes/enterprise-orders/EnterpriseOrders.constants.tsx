@@ -1,4 +1,5 @@
 import type {
+  TableCellPalette,
   TableColumn,
   TableCrudConfig,
 } from '@lcabrera/ui/components/Table/Table.types';
@@ -28,6 +29,13 @@ export const CRUD: TableCrudConfig = {
   update: true,
 };
 
+export const CELL_PALETTE: TableCellPalette = {
+  held: {
+    dark: { background: 'oklch(0.5 0.12 300)', text: 'oklch(0.97 0.01 300)' },
+    light: { background: 'oklch(0.72 0.12 300)', text: 'oklch(0.22 0.04 300)' },
+  },
+};
+
 export const COLUMNS: TableColumn<EnterpriseOrderTableRow>[] = [
   createBasicColumn({
     dataType: 'number',
@@ -52,6 +60,21 @@ export const COLUMNS: TableColumn<EnterpriseOrderTableRow>[] = [
     minWidth: 120,
   }),
   {
+    cell: {
+      kind: 'badge',
+      params: {
+        rules: [
+          { equals: 'Delivered', tone: 'success' },
+          { equals: 'Shipped', tone: 'info' },
+          { equals: 'Processing', tone: 'info' },
+          { equals: 'Pending', tone: 'warning' },
+          { equals: 'On Hold', tone: 'held' },
+          { equals: 'Cancelled', tone: 'error' },
+          { equals: 'Refunded', tone: 'error' },
+          { equals: 'Returned', tone: 'error' },
+        ],
+      },
+    },
     dataType: 'string',
     ...createStaticFilterOptions<EnterpriseOrderTableRow>([
       'Cancelled',

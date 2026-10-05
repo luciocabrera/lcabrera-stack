@@ -8,6 +8,12 @@ import type {
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
 
+import {
+  TABLE_CELL_BUILT_IN_RENDERERS,
+  TABLE_CELL_NEUTRAL_TONE,
+} from '#ui/components/Table/cellRenderers/cellRenderers.constants';
+import { mergeTableCellRenderers } from '#ui/components/Table/cellRenderers/mergeTableCellRenderers.util';
+import { validateTableCellCall } from '#ui/components/Table/cellRenderers/validateTableCellCall.util';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 
 import { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
@@ -204,6 +210,85 @@ describe('buildTableBodyCellDescriptor', () => {
       rowKey: ROW_KEY,
       value: '',
       width: 90,
+    });
+  });
+
+  describe('a cell call', () => {
+    const CALLED: TableColumn<Row> = {
+      cell: { kind: 'text', params: { weight: 'bold' } },
+      dataType: 'number',
+      key: 'amount',
+      label: 'Amount',
+    };
+    const resolvedCall = (col: TableColumn<Row>) => ({
+      outcome:
+        col.cell === undefined
+          ? undefined
+          : validateTableCellCall({
+              call: col.cell,
+              renderers: mergeTableCellRenderers([
+                TABLE_CELL_BUILT_IN_RENDERERS,
+              ]),
+            }),
+      tone: () => TABLE_CELL_NEUTRAL_TONE,
+    });
+
+    it('renders the call and keeps the column type for alignment', () => {
+      const descriptor = buildTableBodyCellDescriptor({
+        ...baseArgs,
+        cellCall: resolvedCall(CALLED),
+        col: CALLED,
+      });
+
+      expect(descriptor.kind).toBe('custom');
+      expect(descriptor.dataType).toBe('number');
+    });
+
+    it('lets render win over the call', () => {
+      const descriptor = buildTableBodyCellDescriptor({
+        ...baseArgs,
+        cellCall: resolvedCall(CALLED),
+        col: { ...CALLED, render: () => 'own' },
+      });
+
+      expect(descriptor.kind === 'custom' && descriptor.children).toBe('own');
+    });
+
+    it('lets the structural group cell win over the call', () => {
+      const descriptor = buildTableBodyCellDescriptor({
+        ...baseArgs,
+        cellCall: resolvedCall(CALLED),
+        col: CALLED,
+        groupSummary: SUMMARY,
+      });
+
+      expect(descriptor.dataType).toBe('number');
+      expect(descriptor.kind === 'custom' && descriptor.children).not.toBe(
+        undefined,
+      );
+    });
+
+    it('falls through to the dataType default for an unregistered kind', () => {
+      const col = { ...CALLED, cell: { kind: 'gauge' } };
+
+      expect(
+        buildTableBodyCellDescriptor({
+          ...baseArgs,
+          cellCall: resolvedCall(col),
+          col,
+        }).kind,
+      ).toBe('default');
+    });
+
+    it('draws the dataType default while the row is a loading placeholder', () => {
+      expect(
+        buildTableBodyCellDescriptor({
+          ...baseArgs,
+          cellCall: resolvedCall(CALLED),
+          col: CALLED,
+          isLoadingState: true,
+        }).kind,
+      ).toBe('default');
     });
   });
 });

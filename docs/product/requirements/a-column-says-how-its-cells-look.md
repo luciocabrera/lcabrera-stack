@@ -3,12 +3,11 @@ id: a-column-says-how-its-cells-look
 lines:
   - application
 persona: application-developer
-state: unmet
+state: met
 packages:
   - ui
 requires: []
-issues:
-  - 1318
+issues: []
 evidence:
   - type: code
     ref: packages/ui/src/components/Table/Table.types.ts
@@ -20,8 +19,20 @@ evidence:
     ref: packages/ui/src/design-system/tokens/colors.stylex.ts
   - type: test
     ref: apps/showcase/src/routes/enterprise-orders/enterprise-orders.loader.test.ts
+  - type: code
+    ref: packages/ui/src/components/Table/cellRenderers/validateTableCellCall.util.ts
+  - type: code
+    ref: packages/ui/src/components/Table/cellRenderers/resolveTableCellTone.util.ts
+  - type: test
+    ref: packages/ui/src/components/Table/Table.cellRenderers.test.tsx
+  - type: test
+    ref: apps/showcase/src/routes/skill-scores/SkillScores.cellRenderers.test.tsx
   - type: doc
     ref: docs/decisions/ADR-009-serializable-filter-options-descriptors.md
+  - type: doc
+    ref: docs/decisions/ADR-130-a-cells-look-is-a-call-validated-against-a-registered-renderer.md
+  - type: command
+    ref: vp run test:ci
 ---
 
 # A column says how its cells look, even when the server sends it
@@ -75,8 +86,8 @@ The screenshot is the target. Each of its columns is one call:
 
 Four steps in one column outrun the built-in tones, which have one step
 (`warning`) between `success` and `error`. The fourth should not need a library
-change: the loader names it, and the palette it sends defines it. #1318 holds the call and
-renderer types, the palette shape and the open questions.
+change: the loader names it, and the palette it sends defines it. ADR-130 holds
+the decision, and #1318 the call and renderer types and the palette shape.
 
 `render` already exists and does not answer this, because single-fetch replaces
 a function with `undefined` on the client. ADR-009 hit that trap for filter

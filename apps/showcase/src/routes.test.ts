@@ -31,6 +31,7 @@ describe('routes', () => {
   it('registers the routes the table pages themselves are served from', () => {
     expect(registeredPaths).toContain('car-sales');
     expect(registeredPaths).toContain('car-sales-infinite');
+    expect(registeredPaths).toContain('skill-scores');
     expect(registeredPaths).toContain('wide-alltypes-150');
   });
 });

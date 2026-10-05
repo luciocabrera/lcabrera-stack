@@ -7,6 +7,7 @@ import type {
 } from '#ui/components/Table';
 import type {
   FilterOptionsTransport,
+  TableCellPalette,
   TableColumnGroupingCapability,
   TableGroupingState,
   TableLockedFilters,
@@ -39,6 +40,7 @@ type CreateTableRouteLoaderArgs<
   TResponse,
 > = {
   readonly appId: string;
+  readonly cellPalette?: TableCellPalette;
   readonly columns: TableColumn<TData>[];
   readonly defaultGrouping?: TableGroupingState;
   readonly fetchPage: (
@@ -75,6 +77,7 @@ export const createTableRouteLoader = <
   TResponse,
 >({
   appId,
+  cellPalette,
   columns,
   defaultGrouping,
   fetchPage,
@@ -159,6 +162,7 @@ export const createTableRouteLoader = <
 
     return {
       columnsState: {
+        ...(cellPalette !== undefined && { cellPalette }),
         columnFilters: filters,
         columnOrder,
         columnPinning,

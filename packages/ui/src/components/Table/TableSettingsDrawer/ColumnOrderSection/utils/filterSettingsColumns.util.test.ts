@@ -49,4 +49,12 @@ describe('filterSettingsColumns', () => {
   it('returns an empty array for empty input', () => {
     expect(filterSettingsColumns<Row>([])).toEqual([]);
   });
+
+  it('keeps a column that carries a cell call', () => {
+    expect(
+      filterSettingsColumns<Row>([
+        { cell: { kind: 'badge' }, key: 'name', label: 'Name' },
+      ]).map((col) => col.key),
+    ).toEqual(['name']);
+  });
 });

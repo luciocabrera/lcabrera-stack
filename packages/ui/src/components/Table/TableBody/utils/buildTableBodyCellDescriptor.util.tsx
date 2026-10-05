@@ -1,3 +1,4 @@
+import type { TableCellCallBinding } from '#ui/components/Table/cellRenderers/cellRenderers.types';
 import type {
   ColumnSizingState,
   DataKey,
@@ -11,6 +12,7 @@ import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupD
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { TableRowActionsMenu } from '#ui/components/Table/TableRowActionsMenu';
 
+import { resolveOwnCellChildren } from './resolveOwnCellChildren.util';
 import { resolveStructuralCellChildren } from './resolveStructuralCellChildren.util';
 
 export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
@@ -19,6 +21,7 @@ export type TableBodyCellDescriptor<TData extends Record<string, unknown>> =
 
 type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly carriedGroupKeys: ReadonlySet<string>;
+  readonly cellCall?: TableCellCallBinding;
   readonly col: TableColumn<TData>;
   readonly columnSizing: ColumnSizingState<TData>;
   readonly disclosure?: TableGroupDisclosureState;
@@ -64,6 +67,7 @@ export const buildTableBodyCellDescriptor = <
   TData extends Record<string, unknown>,
 >({
   carriedGroupKeys,
+  cellCall,
   col,
   columnSizing,
   disclosure,
@@ -122,23 +126,24 @@ export const buildTableBodyCellDescriptor = <
     };
   }
 
-  if (customActions) {
-    return { ...shared, children: customActions, dataType: undefined };
-  }
+  const value = Object.hasOwn(row, col.key) ? row[col.key] : '';
+  const own = resolveOwnCellChildren({
+    cellCall,
+    col,
+    customActions,
+    isLoadingState,
+    row,
+    value,
+  });
+
+  if (own !== undefined) return { ...shared, ...own };
 
   return {
-    columnKey,
+    ...shared,
     dataType: col.dataType,
     format: col.format,
-    isLoadingState,
-    key: col.key,
     kind: 'default',
     label: col.label,
-    minWidth,
-    pinInfo,
-    rowIndex,
-    rowKey,
-    value: Object.hasOwn(row, col.key) ? row[col.key] : '',
-    width,
+    value,
   };
 };
