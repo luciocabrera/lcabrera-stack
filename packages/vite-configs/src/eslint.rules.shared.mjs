@@ -47,18 +47,18 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   ],
   'unicorn/name-replacements': 'off',
   'unicorn/no-array-reduce': 'off',
-  // New in unicorn 77's recommended set. Purely stylistic: it rejects the ` * `
-  // line prefix that editors insert into every JSDoc block and that the JSDoc
-  // convention is written in. It changes no behaviour and catches no bug.
+  // Off in unicorn 73's recommended set and on in 77's. Purely stylistic: it
+  // rejects the ` * ` line prefix that editors insert into every JSDoc block.
+  // It changes no behaviour and catches no bug.
   'unicorn/no-asterisk-prefix-in-documentation-comments': 'off',
-  // New in unicorn 77's recommended set. Every report it makes against a
-  // config file or a rule module is a pure factory call — `export default
-  // defineConfig(...)`, `export default createRule(...)`, a config array — and
-  // the only fix available is to bind the same call to a variable first.
+  // Reports under unicorn 77 that 73 did not make. Each is a pure factory
+  // call — `export default defineConfig(...)`, `export default
+  // createRule(...)`, a config array — and the only fix is to bind the same
+  // call to a variable first.
   'unicorn/no-top-level-side-effects': 'off',
-  // New in unicorn 77's recommended set. A `flatMap` callback may return a bare
-  // value, but one that returns an array from every branch shows "zero, one or
-  // many" at a glance, and the bare value saves one allocation.
+  // Reports under unicorn 77 that 73 did not make. A `flatMap` callback may
+  // return a bare value, but one that returns an array from every branch shows
+  // "zero, one or many" at a glance, and the bare value saves one allocation.
   'unicorn/no-unnecessary-array-flat-map': 'off',
   // Two positions are exempt, both because the fixer is unsafe there rather
   // than because the rule is wrong.
@@ -79,22 +79,21 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
     'error',
     { checkArguments: false, checkArrowFunctionBody: false },
   ],
-  // In unicorn 77's recommended set it reports `x ?? literal` and
-  // `x || literal` fallbacks. A default applies only to `undefined`, so each
-  // rewrite changes what `null` does — and, for `||`, every other falsy value.
-  // A child process's `close` exit code is `null` when a signal killed it, so
-  // `exitCode ?? 0` and a default of `0` are different programs. The rule's own
-  // documentation says to turn it off where `null` and `undefined` are handled
-  // alike.
+  // Since unicorn 73 it also reports a parameter or destructured variable read
+  // as `x ?? literal` or `x || literal`. A default applies only to
+  // `undefined`, so each rewrite changes what `null` does — and, for `||`,
+  // every other falsy value. A child process's `close` exit code is `null`
+  // when a signal killed it. The rule's own documentation says to disable it
+  // where `null` and `undefined` are meant to be handled alike.
   'unicorn/prefer-default-parameters': 'off',
   // The auto-fixer rewrites http:// to https:// inside string literals, which
   // silently corrupts test fixtures and local-dev URLs — a fixture asserting
   // that an http origin is rejected became https, and the test inverted.
   'unicorn/prefer-https': 'off',
   'unicorn/prefer-query-selector': 'off',
-  // unicorn 77 extends the rule to merge an `if` that returns with the `return`
-  // after it. `only-single-line` keeps that where the condition and both values
-  // each fit on one line, and leaves a multi-line guard clause as it is.
+  // Since unicorn 73 the rule also merges an `if` that returns with the
+  // `return` after it. `only-single-line` keeps that where the condition and
+  // both values each fit on one line, and leaves a multi-line guard as it is.
   'unicorn/prefer-ternary': ['error', 'only-single-line'],
   'unicorn/prevent-abbreviations': 'off',
   // New in unicorn 73's recommended set. Off deliberately and temporarily, not
