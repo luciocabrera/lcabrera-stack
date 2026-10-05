@@ -48,39 +48,56 @@ showcase's routes directory, and every route reads through the private
 
 **Every `/evals` route is public, and this is all a route may return:**
 
-- names and identifiers: suite, task, subject (skill or rule) and its version,
-  run, trial, branch and commit;
+- names and identifiers: the suite, run, trial and task identifiers, the task
+  key, and each subject's kind, name and version;
+- a run's provenance: `model_id`, `harness_version`, `sdk_version`,
+  `trigger`, `status`, `git_sha`, `branch`, `pr_number`, `started_at`,
+  `finished_at` and `catalog_hash`;
+- a subject's `content_hash`;
+- a task's `task_hash`, `fixture_hash`, `expected_hash`, `judge_prompt_hash`
+  and `agent_prompt_hash`;
 - from a run's `settings`, only `runs`, `concurrency`, `timeout_ms`,
   `max_turns`, `tools`, `hidden` and `selection`;
 - from a run's `env`, only `node`, `os`, `arch` and `ci_runner`;
 - each trial's outcome, error class, timestamps, duration, turns, token counts
   and cost;
-- aggregates computed from the rows above, such as pass rates, intervals,
-  trends, flaky sets, comparisons and counts;
+- aggregates computed from the fields above, such as pass rates, intervals,
+  trends, flaky sets, comparisons, attributions to a changed hash, and counts;
 - from a trial's `detail`, only these fields: the invoked skills, the expected
   skill, the verdict, the not-met criterion numbers with the expected ones, and
   the rubric dimension names with their scores.
 
+The input hashes are there so a comparison can name the one input that
+changed. A hash does not carry the text it was taken from. The transcript's
+own hash stays excluded with the rest of its pointer, because no route needs
+it.
+
 A route returns nothing outside that list. That excludes transcript text,
 prompt text, judge replies, the transcript pointer (`uri`, hash, size), the
 quality suite's `summary` and per-dimension `feedback`, rule-check `findings`,
-`settings.argv` (the full command line the run was started with), and any
-`detail`, `settings` or `env` field the list does not name. The `.json` route serves the
-same allow-listed projection of a run and never the stored envelope.
+`settings.argv` (the full command line the run was started with), the run's
+`actor` (it identifies a person), and any `detail`, `settings` or `env` field
+the list does not name. The `.json` route serves the same allow-listed
+projection of a run and never the stored envelope.
 
-The allow-list lives in the query functions of `@repo/eval-history`. No query
-returns `detail`, `settings` or `env` whole for a route to filter afterwards.
+**The allow-list is data, not prose and not a `SELECT` list.** It is one
+exported set of envelope field paths, `PUBLIC_FIELD_PATHS`, in
+`@repo/eval-history/queries`. Every query function that serves a route
+projects its result through that set, and no query returns `detail`,
+`settings` or `env` whole for a route to filter afterwards. The list above is
+what the set holds at adoption. Adding a path to the set is the change this
+ADR governs, and it is reviewed against this ADR.
 
 **How it is tested.** One showcase test enforces the rule above:
 
-1. It seeds the history database with a unique marker string in every
-   string-valued field, and every element of a string array, that the
-   envelope's Zod schema defines anywhere and the allow-list does not name.
-   That includes every suite's `detail`, the transcript pointer, and
-   `settings.argv`. The test derives that set by walking the schema, not
-   from a list written into the test. A field that a later schema version
-   adds is therefore seeded by default, and the only way to stop seeding it is
-   to add it to the allow-list.
+1. It walks the envelope's Zod schema for every string field and every
+   string-array field, subtracts `PUBLIC_FIELD_PATHS`, and seeds the history
+   database with a unique marker string in each path that remains. That
+   includes every suite's `detail`, the transcript pointer, `settings.argv`
+   and `actor`. The test imports the same set the query functions use and
+   holds no list of its own, so a field that a later schema version adds is
+   seeded by default, and the only way to stop seeding it is to add it to
+   `PUBLIC_FIELD_PATHS`.
 2. With the flag set, it calls the loader of every `/evals` route, and every
    resource route, for the seeded runs. It serialises each result.
 3. It fails if the marker appears in any serialised result.
@@ -116,10 +133,12 @@ heatmap and the matrix are small, fixed shapes.
   outside this decision.
 - Drawing the charts by hand means this repository owns axis, tick and tooltip
   code. A fifth chart shape is the point to revisit the library question.
-- The query functions are the only thing keeping transcripts and prose off a
-  route. A query that selects `detail` whole is a defect, and the marker test is
-  what catches it. Adding a field to the allow-list is a change to this ADR,
-  not just to a query.
+- `PUBLIC_FIELD_PATHS` and the query functions that project through it are
+  the only thing keeping transcripts and prose off a route. A query that
+  selects `detail` whole, or skips the projection, is a defect, and the marker
+  test is what catches it. A path added to the set is not seeded, so the
+  marker test cannot catch a wrong addition; review against this ADR is the
+  only check on it.
 
 ## Alternatives considered
 
