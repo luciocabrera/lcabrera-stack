@@ -2,7 +2,7 @@
 id: eval-history-adr
 title: Adopt the eval-history private-workspace ADR
 owner: agent:claude
-status: active
+status: review
 branch: docs/1262-eval-history-adr
 area:
   - docs/decisions/ADR-*eval-history*
@@ -11,7 +11,7 @@ area:
 started: 2026-10-06
 updated: 2026-10-06
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1324
 issue: #1262
 ---
 
@@ -21,6 +21,6 @@ Adopt the eval-history private-workspace ADR
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: ADR-130 adopted, PR ready for review
 - Blockers: none
 - Next:

@@ -553,7 +553,7 @@ them in SQL as well would make two implementations of one formula.
 
 Grants live in the migrator, not in a migration file. After applying files,
 `evals:migrate` checks `pg_roles` for `evals_writer` and `evals_reader`,
-grants each the privileges the P-01 draft lists when it exists, and prints
+grants each the privileges ADR-130 lists when it exists, and prints
 the `CREATE ROLE` and `GRANT` statements for any that does not, exiting 0.
 A missing role is a setup step the operator owns, not a failed migration.
 
@@ -563,9 +563,9 @@ pricing on the day P-07 lands; this document does not copy them.
 
 ## 4. Migrator
 
-No tool exists to reuse, and the choice is the subject of the P-01 draft
-([`adr-drafts/eval-history-lives-in-a-private-workspace.md`](./adr-drafts/eval-history-lives-in-a-private-workspace.md)).
-The recommendation is a small migrator in the package:
+No tool exists to reuse, and the choice was the subject of the P-01 draft,
+adopted as [ADR-130](../../decisions/ADR-130-keep-eval-history-in-a-private-workspace-with-its-own-schema-and-migrator.md).
+The decision is a small migrator in the package:
 
 - Migrations are `packages/eval-history/migrations/NNNN-<slug>.sql`, applied
   in filename order.
@@ -579,7 +579,7 @@ char(64), applied_at timestamptz)` records each one.
   fix.
 
 It is about one screen of code over `pg`, which `catalog:backend` already
-provides. `node-pg-migrate` was considered; the draft ADR records why it lost.
+provides. `node-pg-migrate` was considered; ADR-130 records why it lost.
 
 ## 5. Hashing
 
@@ -907,7 +907,7 @@ opposite; the README is the rule.
 
 Drafts in [`adr-drafts/`](./adr-drafts/), no number until adoption:
 
-1. [`eval-history-lives-in-a-private-workspace.md`](./adr-drafts/eval-history-lives-in-a-private-workspace.md)
+1. Adopted as [ADR-130](../../decisions/ADR-130-keep-eval-history-in-a-private-workspace-with-its-own-schema-and-migrator.md)
    (#1262). `@repo/eval-history` is a private workspace under `packages/`.
    It owns the envelope schema, hashing, statistics, migrations, ingest and
    queries, and connects only through `EVALS_DATABASE_URL` /
