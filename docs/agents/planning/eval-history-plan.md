@@ -907,8 +907,8 @@ opposite; the README is the rule.
 
 Drafts in [`adr-drafts/`](./adr-drafts/), no number until adoption:
 
-1. Adopted as [ADR-130](../../decisions/ADR-130-keep-eval-history-in-a-private-workspace-with-its-own-schema-and-migrator.md)
-   (#1262). `@repo/eval-history` is a private workspace under `packages/`.
+1. [ADR-130](../../decisions/ADR-130-keep-eval-history-in-a-private-workspace-with-its-own-schema-and-migrator.md)
+   (#1262), adopted. `@repo/eval-history` is a private workspace under `packages/`.
    It owns the envelope schema, hashing, statistics, migrations, ingest and
    queries, and connects only through `EVALS_DATABASE_URL` /
    `EVALS_READER_DATABASE_URL` to schema `evals`. Locally that is a separate
