@@ -1,0 +1,15 @@
+id: near-miss-define-monorepo
+name: What a monorepo is
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What is a monorepo? One sentence. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-codebase-explorer-alone
+    config:
+      forbidden_skills:
+        - codebase-explorer

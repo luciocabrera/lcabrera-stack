@@ -1,0 +1,15 @@
+id: near-miss-gherkin-keywords
+name: Gherkin keywords
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "In Gherkin, what do Given, When and Then each stand for? One sentence. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-product-requirement-alone
+    config:
+      forbidden_skills:
+        - product-requirement

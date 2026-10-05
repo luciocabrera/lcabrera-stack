@@ -1,5 +1,5 @@
 name: typescript-api-engineering-trigger
-description: Does typescript-api-engineering load when designing a TypeScript HTTP API, and stay out of a TypeScript syntax question?
+description: Does typescript-api-engineering load to design, extend or review a TypeScript HTTP API, and stay out of TypeScript syntax, HTTP status, API-style and client fetch questions?
 skill: typescript-api-engineering
 version: '1.0'
 config:

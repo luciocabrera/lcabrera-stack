@@ -1,0 +1,15 @@
+id: near-miss-fetch-json
+name: Sending JSON from the browser
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "How do I send a JSON body with fetch in the browser? One line of code. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-typescript-api-engineering-alone
+    config:
+      forbidden_skills:
+        - typescript-api-engineering

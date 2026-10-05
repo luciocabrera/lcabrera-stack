@@ -1,0 +1,15 @@
+id: near-miss-define-dependency-graph
+name: A dependency graph in general
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "In general, what is a dependency graph in software? One sentence. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-codebase-explorer-alone
+    config:
+      forbidden_skills:
+        - codebase-explorer

@@ -1,0 +1,15 @@
+id: near-miss-grep-flag
+name: A grep flag
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Which grep flag makes a search case-insensitive? Just the flag. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-codebase-explorer-alone
+    config:
+      forbidden_skills:
+        - codebase-explorer

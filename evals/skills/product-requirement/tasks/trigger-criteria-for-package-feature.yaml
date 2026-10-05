@@ -1,0 +1,16 @@
+id: trigger-criteria-for-package-feature
+name: Acceptance criteria for a package feature
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Write the acceptance criteria for a new issue: @lcabrera/utils should export a date-range parser that installing apps can call. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-product-requirement
+    config:
+      mode: any_order
+      required_skills:
+        - product-requirement

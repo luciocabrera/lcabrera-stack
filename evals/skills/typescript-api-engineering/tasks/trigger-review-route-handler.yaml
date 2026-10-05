@@ -1,0 +1,16 @@
+id: trigger-review-route-handler
+name: Reviewing an unsafe route handler
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Review this Express route in TypeScript for validation, error handling and security: app.post('/users', (req, res) => { db.insert(req.body); res.send('ok') }). Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-typescript-api-engineering
+    config:
+      mode: any_order
+      required_skills:
+        - typescript-api-engineering

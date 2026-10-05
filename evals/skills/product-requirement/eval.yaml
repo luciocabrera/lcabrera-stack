@@ -1,5 +1,5 @@
 name: product-requirement-trigger
-description: Does product-requirement load before changing a published package's promises, and stay out of a generic PRD question?
+description: Does product-requirement load to check, write or mark met what a published package promises, or to write acceptance criteria for one, and stay out of generic PRD, user-story, semver and manifest questions?
 skill: product-requirement
 version: '1.0'
 config:

@@ -1,0 +1,15 @@
+id: near-miss-satisfies-operator
+name: A TypeScript operator
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What does the satisfies operator do in TypeScript? One sentence. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-typescript-api-engineering-alone
+    config:
+      forbidden_skills:
+        - typescript-api-engineering

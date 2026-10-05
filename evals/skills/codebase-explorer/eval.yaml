@@ -1,5 +1,5 @@
 name: codebase-explorer-trigger
-description: Does codebase-explorer load to trace a feature across the codebase, and stay out of a single-path lookup?
+description: Does codebase-explorer load to trace a feature, map integrations, learn an unfamiliar area or work out what a change touches, and stay out of single-file lookups, tool flags and definitions?
 skill: codebase-explorer
 version: '1.0'
 config:
