@@ -10,7 +10,7 @@ its `tasks/`, and may have more:
   not invoke it.
 
 The kind comes from `should_trigger`, not from the file name or the `id`, and
-`--check` fails a task whose `should_trigger` is missing or not a boolean. Each
+[`--check`](#what-ci-runs) lists what a task must carry. Each
 task's `id` must be unique within its skill, because the transcript is named
 after it.
 
@@ -131,8 +131,9 @@ because they are this repository's conventions, not defects.
 
 The same job runs `vp run evals:skills -- --check`, which makes no model call.
 It fails a skill under `.github/skills/` with no trigger or near-miss task here,
-a task with no `id`, two tasks of one skill sharing an `id`, a task with no
-`set` or an unknown `set` or `source` (naming the task's file), an eval whose
+a task with no `id`, two tasks of one skill sharing an `id`, a task whose
+`should_trigger` is missing or not a boolean, a task with no `set` or an
+unknown `set` or `source` (each naming the task's file), an eval whose
 skill is gone, an eval or grader that names a different skill than its
 directory, a task whose prompt does not end with the sentence above, and a
 skill with a `paths:` list whose tasks name no fixture.
