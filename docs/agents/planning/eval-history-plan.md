@@ -781,8 +781,9 @@ the ingester logs host and database name only.
 
 ## 8. Dashboard
 
-Placement and exposure are the P-03 draft
-([`adr-drafts/serve-the-eval-dashboard-from-the-showcase.md`](./adr-drafts/serve-the-eval-dashboard-from-the-showcase.md)).
+Placement and exposure are decided in
+[ADR-131](../../decisions/ADR-131-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md),
+adopted from the P-03 draft.
 
 ### 8.1 Routes
 
@@ -919,8 +920,8 @@ Drafts in [`adr-drafts/`](./adr-drafts/), no number until adoption:
    that removes, renames or re-means a field bumps it; adding an optional
    field does not. The ingester accepts the current version and the one
    before it through an upcaster, and rejects anything else by name.
-3. [`serve-the-eval-dashboard-from-the-showcase.md`](./adr-drafts/serve-the-eval-dashboard-from-the-showcase.md)
-   (#1264). `/evals` in the showcase, every route public and aggregate-only,
+3. [ADR-131](../../decisions/ADR-131-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)
+   (#1264), adopted. `/evals` in the showcase, every route public and aggregate-only,
    behind a server-side `EVALS_DASHBOARD` variable, charts in SVG with
    StyleX, reading through a role that can only SELECT.
 

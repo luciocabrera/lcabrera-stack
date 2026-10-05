@@ -2,7 +2,7 @@
 id: eval-dashboard-adr
 title: docs(adr): serve the eval dashboard from the showcase app as aggregates only
 owner: agent:claude
-status: active
+status: review
 branch: docs/1264-eval-dashboard-adr
 area:
   - docs/decisions/ADR-*-serve-the-eval-dashboard*
@@ -12,7 +12,7 @@ area:
 started: 2026-10-06
 updated: 2026-10-06
 plan: (none)
-pr: (none)
+pr: #1326
 issue: #1264
 ---
 
@@ -22,6 +22,6 @@ docs(adr): serve the eval dashboard from the showcase app as aggregates only
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: ADR-131 adopted, gate green, PR ready
 - Blockers: none
-- Next:
+- Next: merge
