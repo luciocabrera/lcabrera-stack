@@ -36,7 +36,20 @@ vp run evals:skills                        # every skill
 vp run evals:skills -- commit-and-pr epic  # some skills
 vp run evals:skills -- epic --hide epic    # prove epic's trigger task can fail
 vp run evals:skills -- --check             # coverage only, no model call
+vp run evals:skills -- epic --runs 1       # one trial per task
 ```
+
+**Every task runs three times by default**, and `--runs <n>` changes that. A
+single trial cannot tell a task that fails sometimes from one that always
+fails, so the runner prints one line per task with its count of passing
+trials, and the failed trials under it:
+
+- `ok`: every trial passed;
+- `FLAKY`: some trials passed and some failed;
+- `FAIL`: no trial passed.
+
+The run fails unless every task is `ok`. `--runs` takes any whole number from 1
+up; anything else stops the run before any session starts.
 
 A skill name with no eval here, or a `--hide` name that is no skill, stops the
 run before any session starts, so a typo cannot pass as an empty green run.
@@ -49,15 +62,17 @@ nothing else. It loads no CLAUDE.md, hooks or MCP servers, and has one tool:
 own `init` message lists exactly those tools, so an option the SDK ignored cannot
 pass as a restricted session. A task passes on the
 session's `Skill` tool calls, not on its reply. Transcripts go to
-`.tmp/skill-evals/`.
+`.tmp/skill-evals/`, one per trial, named `<skill>-<task id>-<trial>.json`.
 
 After the per-task lines, the runner prints a confusion matrix: one row per
 expectation (`epic` for a trigger task, `not epic` for a near-miss), one column
 per skill any trial loaded, and a count of trials in each cell. So a failed
 trigger task shows which skill loaded in its place. A trial that loaded two
 skills counts in both columns. One that loaded none counts under `(none)`, or
-under `(error)` if its session failed. Every trial's expectation, its outcome
-and the skills it invoked are written to `.tmp/skill-evals/trials.json`.
+under `(error)` if its session failed. Every trial's expectation, its outcome,
+the skills it invoked and its trial number are written to
+`.tmp/skill-evals/trials.json`. The last line is the cost the sessions
+reported, summed.
 
 **A skill with a `paths:` list is offered only after the session reads a file
 that matches it.** Those skills' tasks name a fixture

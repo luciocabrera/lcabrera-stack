@@ -8,6 +8,8 @@
  */
 import { parse as parseYaml } from 'yaml';
 
+import { wholeNumber } from '../agent-sessions.mjs';
+
 import {
   agentFrontmatter,
   definiteNotMet,
@@ -15,7 +17,6 @@ import {
   fixtureLine,
   sameNumbers,
   verdictOf,
-  wholeNumber,
 } from './verifier-fixtures.mjs';
 
 export const agentTools = (definition) => {

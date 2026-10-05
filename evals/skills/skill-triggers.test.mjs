@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   describeResult,
+  describeVerdict,
   fixtureWasRead,
   invokedSkills,
   judgeTask,
@@ -11,6 +12,8 @@ import {
   sessionError,
   sessionScope,
   taskPassed,
+  taskVerdicts,
+  trialCount,
 } from './skill-triggers.mjs';
 
 const assistant = (...content) => ({ message: { content }, type: 'assistant' });
@@ -126,6 +129,75 @@ describe('describeResult', () => {
       }),
     ).toBe(
       'FAIL epic/near-miss: should not load; invoked no skill; error: Reached maximum number of turns (8)',
+    );
+  });
+
+  it('numbers the trial when there is one', () => {
+    expect(
+      describeResult({
+        fixtureRead: true,
+        invoked: [],
+        passed: false,
+        skill: 'epic',
+        task: { id: 'trigger', shouldTrigger: true },
+        trial: 2,
+      }),
+    ).toBe('FAIL epic/trigger #2: should load; invoked no skill');
+  });
+});
+
+describe('trialCount', () => {
+  it('accepts one trial and refuses fewer or a non-number', () => {
+    expect(trialCount('3')).toBe(3);
+    expect(trialCount('1')).toBe(1);
+    expect(() => trialCount('0')).toThrow('at least 1; got "0"');
+    expect(() => trialCount('three')).toThrow('got "three"');
+  });
+});
+
+describe('taskVerdicts', () => {
+  const trial = ({ id = 'trigger', passed, trial: number }) => ({
+    error: undefined,
+    fixtureRead: true,
+    invoked: passed ? ['epic'] : [],
+    passed,
+    skill: 'epic',
+    task: { id, shouldTrigger: true },
+    trial: number,
+  });
+  const verdicts = taskVerdicts([
+    trial({ passed: true, trial: 1 }),
+    trial({ passed: false, trial: 2 }),
+    trial({ passed: true, trial: 3 }),
+    trial({ id: 'broken', passed: false, trial: 1 }),
+    trial({ id: 'broken', passed: false, trial: 2 }),
+    trial({ id: 'stable', passed: true, trial: 1 }),
+  ]);
+
+  it('tells a task that sometimes passes from one that never does', () => {
+    expect(
+      verdicts.map(({ name, passed, trials, verdict }) => ({
+        name,
+        passed,
+        trials,
+        verdict,
+      })),
+    ).toStrictEqual([
+      { name: 'epic/trigger', passed: 2, trials: 3, verdict: 'flaky' },
+      { name: 'epic/broken', passed: 0, trials: 2, verdict: 'fail' },
+      { name: 'epic/stable', passed: 1, trials: 1, verdict: 'ok' },
+    ]);
+  });
+
+  it('lists only the failed trials under a task', () => {
+    expect(describeVerdict(verdicts[0])).toBe(
+      [
+        'FLAKY epic/trigger: 2/3 trial(s) passed',
+        '      FAIL epic/trigger #2: should load; invoked no skill',
+      ].join('\n'),
+    );
+    expect(describeVerdict(verdicts[2])).toBe(
+      'ok    epic/stable: 1/1 trial(s) passed',
     );
   });
 });

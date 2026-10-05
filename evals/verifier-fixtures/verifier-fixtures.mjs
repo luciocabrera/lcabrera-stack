@@ -3,6 +3,8 @@
  * sends, read the verdict a report states, and judge a fixture's runs.
  * Usage: imported by `verify-verifier-verdicts.mjs`.
  */
+import { wholeNumber } from '../agent-sessions.mjs';
+
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/;
 const VERDICT_LINE = /^VERDICT:(.*)$/m;
 
@@ -107,16 +109,6 @@ export const suiteEnd = ({ judgements, reportDir }) => ({
     : 0,
   footer: `Full reports: ${reportDir}/`,
 });
-
-export const wholeNumber = ({ minimum, reason = '', value }) => {
-  const number = Number(value);
-  if (!Number.isInteger(number) || number < minimum) {
-    throw new Error(
-      `--runs must be a whole number of at least ${minimum}${reason}; got "${value}"`,
-    );
-  }
-  return number;
-};
 
 export const runCount = (value) =>
   wholeNumber({

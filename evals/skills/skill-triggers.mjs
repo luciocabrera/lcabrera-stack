@@ -6,6 +6,8 @@
  */
 import { parse } from 'yaml';
 
+import { wholeNumber } from '../agent-sessions.mjs';
+
 const skillsNamedBy = ({ config = {} }) => [
   ...(config.required_skills ?? []),
   ...(config.forbidden_skills ?? []),
@@ -266,6 +268,8 @@ const failureOf = ({ error, fixtureRead }) => {
   return fixtureRead ? '' : '; the session never read the fixture';
 };
 
+const trialOf = (trial) => (trial === undefined ? '' : ` #${trial}`);
+
 export const describeResult = ({
   error,
   fixtureRead,
@@ -273,5 +277,37 @@ export const describeResult = ({
   passed,
   skill,
   task,
+  trial,
 }) =>
-  `${passed ? 'ok  ' : 'FAIL'} ${skill}/${task.id}: ${expectationOf(task)}; invoked ${seenOf(invoked)}${failureOf({ error, fixtureRead })}`;
+  `${passed ? 'ok  ' : 'FAIL'} ${skill}/${task.id}${trialOf(trial)}: ${expectationOf(task)}; invoked ${seenOf(invoked)}${failureOf({ error, fixtureRead })}`;
+
+export const trialCount = (value) => wholeNumber({ minimum: 1, value });
+
+const verdictOf = ({ passed, trials }) => {
+  if (passed === trials) {
+    return 'ok';
+  }
+  return passed === 0 ? 'fail' : 'flaky';
+};
+
+export const taskVerdicts = (results) =>
+  [...Map.groupBy(results, ({ skill, task }) => `${skill}/${task.id}`)].map(
+    ([name, trials]) => {
+      const passed = trials.filter((trial) => trial.passed).length;
+      return {
+        failed: trials.filter((trial) => !trial.passed),
+        name,
+        passed,
+        trials: trials.length,
+        verdict: verdictOf({ passed, trials: trials.length }),
+      };
+    },
+  );
+
+const VERDICT_LABELS = { fail: 'FAIL ', flaky: 'FLAKY', ok: 'ok   ' };
+
+export const describeVerdict = ({ failed, name, passed, trials, verdict }) =>
+  [
+    `${VERDICT_LABELS[verdict]} ${name}: ${passed}/${trials} trial(s) passed`,
+    ...failed.map((result) => `      ${describeResult(result)}`),
+  ].join('\n');

@@ -6,6 +6,7 @@
  * tool, plus Read when a task copies in a fixture for a path-scoped skill.
  *
  * Usage (from the repo root): vp run evals:skills [-- <skill> ...] [--model <id>]
+ *   [--runs <n>]      trials per task, 3 by default; a task passes only if every trial does
  *   [--hide <skill>]  leave a skill out of the session, to prove its trigger task can fail
  *   [--check]         only check coverage, with no model call: every skill has a trigger
  *                     and a near-miss task, every task a unique id, a set tag and a
@@ -34,6 +35,7 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import {
   chunk,
+  costLine,
   errorText,
   runBatches,
   sessionMetrics,
@@ -42,7 +44,7 @@ import {
 
 import {
   coverageProblems,
-  describeResult,
+  describeVerdict,
   fixtureWasRead,
   invokedSkills,
   isPathScoped,
@@ -54,6 +56,8 @@ import {
   sessionError,
   sessionScope,
   taskPassed,
+  taskVerdicts,
+  trialCount,
   withoutSeparator,
 } from './skill-triggers.mjs';
 import {
@@ -120,7 +124,7 @@ const catalog = () =>
     existsSync(join(SKILLS_ROOT, name, 'SKILL.md')),
   );
 
-const attemptTask = async ({ hidden, model, queuedAt, skill, task }) => {
+const attemptTask = async ({ hidden, model, queuedAt, skill, task, trial }) => {
   const { cwd, fixtureFiles } = workspaceFor({ skill, task });
   const scope = sessionScope({ catalog: catalog(), hidden, task });
   const open = () =>
@@ -144,7 +148,7 @@ const attemptTask = async ({ hidden, model, queuedAt, skill, task }) => {
     sessionError(messages) ??
     scopeError({ expectedTools: scope.tools, messages });
   writeFileSync(
-    join(REPORT_DIR, `${skill}-${task.id}.json`),
+    join(REPORT_DIR, `${skill}-${task.id}-${trial}.json`),
     JSON.stringify(messages, null, 2),
   );
   const invoked = invokedSkills(messages);
@@ -161,6 +165,7 @@ const attemptTask = async ({ hidden, model, queuedAt, skill, task }) => {
     passed: taskPassed({ error, fixtureRead, invoked, skill, task }),
     skill,
     task,
+    trial,
   };
 };
 
@@ -191,6 +196,7 @@ const runTask = (args) =>
     passed: false,
     skill: args.skill,
     task: args.task,
+    trial: args.trial,
   }));
 
 const assertCoverage = () => {
@@ -201,6 +207,7 @@ const assertCoverage = () => {
 };
 
 const runSelection = async ({ positionals, values }) => {
+  const runs = trialCount(values.runs);
   const selected = selectedSkills({
     catalog: catalog(),
     evals: evalDirectories(),
@@ -209,17 +216,20 @@ const runSelection = async ({ positionals, values }) => {
   });
   mkdirSync(REPORT_DIR, { recursive: true });
   const jobs = selected.flatMap((skill) =>
-    tasksOf(skill).map((task) => {
-      const queuedAt = Date.now();
-      return () =>
-        runTask({
-          hidden: values.hide,
-          model: values.model,
-          queuedAt,
-          skill,
-          task,
-        });
-    }),
+    tasksOf(skill).flatMap((task) =>
+      Array.from({ length: runs }, (_, index) => {
+        const queuedAt = Date.now();
+        return () =>
+          runTask({
+            hidden: values.hide,
+            model: values.model,
+            queuedAt,
+            skill,
+            task,
+            trial: index + 1,
+          });
+      }),
+    ),
   );
   if (jobs.length === 0) {
     throw new Error('the selection resolved to no tasks');
@@ -227,11 +237,13 @@ const runSelection = async ({ positionals, values }) => {
   const results = await runBatches(chunk(jobs, CONCURRENCY));
   const trials = results.map(trialRecord);
   writeFileSync(TRIALS_FILE, JSON.stringify(trials, null, 2));
-  console.log(results.map(describeResult).join('\n'));
+  const verdicts = taskVerdicts(results);
+  console.log(verdicts.map(describeVerdict).join('\n'));
   console.log(`\n${formatMatrix(confusionMatrix(trials))}\n`);
   console.log(`Transcripts: ${REPORT_DIR}/`);
   console.log(`Trials: ${TRIALS_FILE}`);
-  if (results.some(({ passed }) => !passed)) {
+  console.log(costLine(results.map(({ metrics }) => metrics)));
+  if (verdicts.some(({ verdict }) => verdict !== 'ok')) {
     process.exitCode = 1;
   }
 };
@@ -244,6 +256,7 @@ const main = async () => {
       check: { default: false, type: 'boolean' },
       hide: { default: [], multiple: true, type: 'string' },
       model: { default: 'claude-opus-5-5', type: 'string' },
+      runs: { default: '3', type: 'string' },
     },
   });
   assertCoverage();

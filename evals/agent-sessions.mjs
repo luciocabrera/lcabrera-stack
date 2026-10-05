@@ -2,8 +2,9 @@
  * What the model-calling eval runners do with Agent SDK sessions: run them in
  * capped batches, collect a session's messages without letting a throw lose
  * the ones already received, stamp when it was queued, started, answered and
- * finished, read its cost, tokens and timing, and say why a session failed or
- * held tools other than the ones it was given.
+ * finished, read its cost, tokens and timing, say why a session failed or
+ * held tools other than the ones it was given, check a --runs count, and sum
+ * the cost a run's sessions reported.
  * Usage: imported by `evals/skills/`, `evals/verifier-fixtures/` and
  * `evals/skill-quality/`.
  */
@@ -216,3 +217,23 @@ export const sessionMetrics = (messages, timestamps, thrown) => {
 
 export const withoutSeparator = (args) =>
   args[0] === '--' ? args.slice(1) : args;
+
+export const wholeNumber = ({ minimum, reason = '', value }) => {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < minimum) {
+    throw new Error(
+      `--runs must be a whole number of at least ${minimum}${reason}; got "${value}"`,
+    );
+  }
+  return number;
+};
+
+const reportedCost = (metrics) => metrics?.cost_usd_reported;
+
+export const costLine = (metrics) => {
+  const costs = metrics.map(reportedCost).filter(Number.isFinite);
+  const total = costs.reduce((sum, cost) => sum + cost, 0);
+  const missing = metrics.length - costs.length;
+  const reported = `Cost: $${total.toFixed(2)} reported over ${costs.length} session(s)`;
+  return missing === 0 ? reported : `${reported}; ${missing} reported none`;
+};

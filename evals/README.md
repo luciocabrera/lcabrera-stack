@@ -16,6 +16,28 @@ suites' own tests.
 | [Verifier fixtures](./verifier-fixtures) | `vp run evals:verifier`       | yes           |
 | The suites' own tests                    | `vp run test:evals`           | no            |
 
+## What a full run costs
+
+The skill-trigger and verifier suites run each task or fixture three times by
+default, so a task that fails one trial in three shows as flaky rather than
+broken. To measure what one full run costs, run each suite at its defaults
+under `time`:
+
+```bash
+time vp run evals:skills
+time vp run evals:verifier
+```
+
+Each runner ends with a `Cost:` line: the sum of the `total_cost_usd` every
+session reported, and how many sessions reported none. On a Claude subscription
+that figure is notional, priced as if the tokens were billed per call, so it
+compares one run with another and is not a bill. The count of sessions is the task
+count times `--runs`, so `--runs 1` on the skills runner costs about a third of
+the default. The verifier refuses fewer than 2 runs.
+
+The recorded measurement, with its date, model and the task set it ran
+against, is on [#1292](https://github.com/luciocabrera/lcabrera-stack/issues/1292).
+
 ## Turning a real failure into a task
 
 When an agent in real work loads the wrong skill, or misses one it needed,

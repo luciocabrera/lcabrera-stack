@@ -4,7 +4,8 @@
  * over each fixture diff with no tools, and checks which criteria each report
  * marks not-met against the planted ones in expected.json. A run counts only
  * if its session held no tools, finished, and wrote a verdict line that is not
- * a PASS. Each fixture runs at least twice, and runs that disagree fail.
+ * a PASS. Each fixture runs three times unless --runs says otherwise, never
+ * fewer than twice, and runs that disagree fail.
  *
  * Usage (from the repo root): vp run evals:verifier [-- --runs <n>]
  * Needs a Claude login, or CLAUDE_CODE_OAUTH_TOKEN in CI.
@@ -19,6 +20,7 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import {
   chunk,
+  costLine,
   finalResult,
   runBatches,
   sessionMetrics,
@@ -79,7 +81,7 @@ const saveReports = ({ fixture, sessions }) => {
 const main = async () => {
   const { values } = parseArgs({
     args: withoutSeparator(process.argv.slice(2)),
-    options: { runs: { default: '2', type: 'string' } },
+    options: { runs: { default: '3', type: 'string' } },
   });
   const runs = runCount(values.runs);
   const shared = {
@@ -108,7 +110,13 @@ const main = async () => {
     return judgeFixture({ expectedNotMet, fixture, runs: sessions });
   });
   const { exitCode, footer } = suiteEnd({ judgements, reportDir: REPORT_DIR });
-  console.log([...judgements.map(describeJudgement), footer].join('\n'));
+  console.log(
+    [
+      ...judgements.map(describeJudgement),
+      footer,
+      costLine(results.map(({ metrics }) => metrics)),
+    ].join('\n'),
+  );
   process.exitCode = exitCode;
 };
 
