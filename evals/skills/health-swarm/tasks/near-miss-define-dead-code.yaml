@@ -1,0 +1,17 @@
+id: near-miss-define-dead-code
+name: Defining dead code
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt:
+    What is dead code? One sentence. Load any skill you need, but don't run
+    shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-health-swarm-alone
+    config:
+      forbidden_skills:
+        - health-swarm

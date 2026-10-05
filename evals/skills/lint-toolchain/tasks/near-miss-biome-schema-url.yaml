@@ -1,0 +1,18 @@
+id: near-miss-biome-schema-url
+name: Reading the Biome schema URL
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: Read biome.jsonc and tell me only the URL its $schema points at. Load
+    any skill you need, but don't run shell commands or edit files.
+  context:
+    fixture: biome
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-lint-toolchain-alone
+    config:
+      forbidden_skills:
+        - lint-toolchain

@@ -1,5 +1,5 @@
 name: health-swarm-trigger
-description: Does health-swarm load for a repo-wide rot audit, and stay out of a single version question?
+description: Does health-swarm load for a broad, evidence-backed rot audit or a subset of its scouts, and stay out of a single scan, a diff review or one stale sentence?
 skill: health-swarm
 version: '1.0'
 config:

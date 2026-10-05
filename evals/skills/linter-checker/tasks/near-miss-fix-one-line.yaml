@@ -1,0 +1,17 @@
+id: near-miss-fix-one-line
+name: Fixing one line a rule flagged
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Rewrite this line so it uses no nested ternary, and show only the
+    result: const size = big ? 'l' : medium ? 'm' : 's'; Load any skill you
+    need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-linter-checker-alone
+    config:
+      forbidden_skills:
+        - linter-checker

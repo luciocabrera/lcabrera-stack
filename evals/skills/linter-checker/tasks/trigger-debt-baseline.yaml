@@ -1,0 +1,18 @@
+id: trigger-debt-baseline
+name: A lint baseline before burning down debt
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: Before I start burning down lint debt, I need a snapshot of every lint
+    finding in the monorepo, one file per engine. Tell me what you would do
+    first. Load any skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-linter-checker
+    config:
+      mode: any_order
+      required_skills:
+        - linter-checker

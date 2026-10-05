@@ -1,0 +1,17 @@
+id: near-miss-one-stale-sentence
+name: Fixing one stale sentence
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Rewrite this README sentence so it does not hard-code a number, and
+    show only the result: 'The repo has 14 workspaces.' Load any skill you need,
+    but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-health-swarm-alone
+    config:
+      forbidden_skills:
+        - health-swarm

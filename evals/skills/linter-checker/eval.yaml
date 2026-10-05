@@ -1,5 +1,5 @@
 name: linter-checker-trigger
-description: Does linter-checker load for a deterministic repo-wide lint sweep, and stay out of formatting a JSON snippet?
+description: Does linter-checker load when asked for a deterministic, repo-wide lint report per engine, and stay out of one rule, one line, or a diff review?
 skill: linter-checker
 version: '1.0'
 config:

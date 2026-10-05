@@ -1,0 +1,14 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
+  "formatter": { "enabled": false },
+  "linter": {
+    "enabled": true,
+    "rules": { "recommended": true }
+  },
+  "overrides": [
+    {
+      "includes": ["apps/web/**"],
+      "linter": { "domains": { "react": "recommended" } }
+    }
+  ]
+}

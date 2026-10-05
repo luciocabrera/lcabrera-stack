@@ -1,0 +1,17 @@
+id: near-miss-diff-smells
+name: Reviewing a branch diff for smells
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: Review the code smells in my branch's diff against main before I open
+    the PR. Tell me what you would do first. Load any skill you need, but don't
+    run shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-linter-checker-alone
+    config:
+      forbidden_skills:
+        - linter-checker

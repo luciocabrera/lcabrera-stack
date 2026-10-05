@@ -1,0 +1,4 @@
+sonar.projectKey=acme_widgets
+sonar.organization=acme
+sonar.sources=src
+sonar.exclusions=**/*.test.ts

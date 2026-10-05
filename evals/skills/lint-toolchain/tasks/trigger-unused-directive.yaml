@@ -1,0 +1,22 @@
+id: trigger-unused-directive
+name: An eslint-disable reported as unused
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: Read eslint.config.mjs. eslint now fails with 'Unused eslint-disable
+    directive' on a line that says // eslint-disable-next-line
+    typescript-eslint/unbound-method, and Oxlint still needs that directive.
+    What is going on? Tell me what you would do first. Load any skill you need,
+    but don't run shell commands or edit files.
+  context:
+    fixture: eslint
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-lint-toolchain
+    config:
+      mode: any_order
+      required_skills:
+        - lint-toolchain

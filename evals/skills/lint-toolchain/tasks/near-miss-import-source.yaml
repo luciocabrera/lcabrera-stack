@@ -1,0 +1,19 @@
+id: near-miss-import-source
+name: Where defineConfig comes from
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: Read vite.config.ts and tell me only which package defineConfig is
+    imported from. Load any skill you need, but don't run shell commands or edit
+    files.
+  context:
+    fixture: config
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-lint-toolchain-alone
+    config:
+      forbidden_skills:
+        - lint-toolchain

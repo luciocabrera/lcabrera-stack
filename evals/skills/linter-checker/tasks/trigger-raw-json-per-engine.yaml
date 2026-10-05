@@ -1,0 +1,19 @@
+id: trigger-raw-json-per-engine
+name: Raw findings from every engine, untriaged
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: I want the raw oxlint, eslint and Biome findings for the whole repo as
+    JSON files I can diff later, with no triage from you. How do I get them?
+    Tell me what you would do first. Load any skill you need, but don't run
+    shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-linter-checker
+    config:
+      mode: any_order
+      required_skills:
+        - linter-checker

@@ -1,0 +1,20 @@
+id: near-miss-module-syntax
+name: Which module syntax a config uses
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt:
+    Read eslint.config.mjs and tell me in one word whether it is written as
+    an ES module or as CommonJS. Load any skill you need, but don't run shell
+    commands or edit files.
+  context:
+    fixture: eslint
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-lint-toolchain-alone
+    config:
+      forbidden_skills:
+        - lint-toolchain

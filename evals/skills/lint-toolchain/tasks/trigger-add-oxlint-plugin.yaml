@@ -1,0 +1,20 @@
+id: trigger-add-oxlint-plugin
+name: Adding an Oxlint plugin
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: Read vite.config.ts. I want Oxlint's jsdoc rules too, so I plan to
+    change plugins to ['jsdoc']. Is that right? Tell me what you would do first.
+    Load any skill you need, but don't run shell commands or edit files.
+  context:
+    fixture: config
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-lint-toolchain
+    config:
+      mode: any_order
+      required_skills:
+        - lint-toolchain
