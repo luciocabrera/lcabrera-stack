@@ -8,8 +8,9 @@
  * Usage (from the repo root): vp run evals:skills [-- <skill> ...] [--model <id>]
  *   [--hide <skill>]  leave a skill out of the session, to prove its trigger task can fail
  *   [--check]         only check coverage, with no model call: every skill has a trigger
- *                     and a near-miss task, every task a unique id and a set tag, and a
- *                     skill with a paths: list names a fixture in each
+ *                     and a near-miss task, every task a unique id, a set tag and a
+ *                     boolean should_trigger, and a skill with a paths: list names a
+ *                     fixture in each
  * Needs a Claude login, or CLAUDE_CODE_OAUTH_TOKEN in CI.
  * Exit codes: 0 = every task passed, 1 = otherwise.
  */
