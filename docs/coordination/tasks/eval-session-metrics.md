@@ -2,7 +2,7 @@
 id: eval-session-metrics
 title: read cost, tokens, timing and turns from every agent session
 owner: agent:claude
-status: active
+status: review
 branch: feat/1266-eval-session-metrics
 area:
   - evals/agent-sessions*
@@ -12,7 +12,7 @@ area:
 started: 2026-10-05
 updated: 2026-10-05
 plan: (none)
-pr: (none)
+pr: #1297
 issue: #1266
 ---
 
@@ -22,6 +22,6 @@ read cost, tokens, timing and turns from every agent session
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: built, gate green, PR ready for review
 - Blockers: none
-- Next:
+- Next: verifier and review

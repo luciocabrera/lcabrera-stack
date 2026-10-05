@@ -26,10 +26,11 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import {
   chunk,
-  drain,
   finalResult,
   runBatches,
+  sessionMetrics,
   sessionProblem,
+  timedDrain,
   withoutSeparator,
 } from '../agent-sessions.mjs';
 
@@ -70,32 +71,34 @@ const judged = ({ reply, skill }) => {
 
 const replyOf = (messages) => finalResult(messages)?.result ?? '';
 
-const outcome = ({ error, messages, skill }) => {
+const outcome = ({ error, messages, skill, timestamps }) => {
   const reply = replyOf(messages);
   writeFileSync(join(REPORT_DIR, `${skill}.json`), reply);
   const problem = error ?? sessionProblem(messages);
+  const metrics = sessionMetrics(messages, timestamps, error);
   return problem === undefined
-    ? judged({ reply, skill })
-    : { error: problem, skill };
+    ? { ...judged({ reply, skill }), metrics }
+    : { error: problem, metrics, skill };
 };
 
-const judgeSkill = async ({ model, skill }) => {
-  const session = query({
-    options: {
-      cwd: mkdtempSync(join(tmpdir(), 'skill-quality-')),
-      maxTurns: 1,
-      mcpServers: {},
-      model,
-      persistSession: false,
-      settingSources: [],
-      strictMcpConfig: true,
-      tools: [],
-    },
-    prompt: judgePrompt(
-      readFileSync(join(SKILLS_DIR, skill, 'SKILL.md'), 'utf8'),
-    ),
-  });
-  return outcome({ ...(await drain(session)), skill });
+const judgeSkill = async ({ model, queuedAt, skill }) => {
+  const open = () =>
+    query({
+      options: {
+        cwd: mkdtempSync(join(tmpdir(), 'skill-quality-')),
+        maxTurns: 1,
+        mcpServers: {},
+        model,
+        persistSession: false,
+        settingSources: [],
+        strictMcpConfig: true,
+        tools: [],
+      },
+      prompt: judgePrompt(
+        readFileSync(join(SKILLS_DIR, skill, 'SKILL.md'), 'utf8'),
+      ),
+    });
+  return outcome({ ...(await timedDrain({ open, queuedAt })), skill });
 };
 
 const readHistory = () =>
@@ -134,7 +137,10 @@ const main = async () => {
   mkdirSync(REPORT_DIR, { recursive: true });
   const results = await runBatches(
     chunk(
-      skills.map((skill) => () => judgeSkill({ model: values.model, skill })),
+      skills.map((skill) => {
+        const queuedAt = Date.now();
+        return () => judgeSkill({ model: values.model, queuedAt, skill });
+      }),
       CONCURRENCY,
     ),
   );

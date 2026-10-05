@@ -19,10 +19,11 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import {
   chunk,
-  drain,
   finalResult,
   runBatches,
+  sessionMetrics,
   sessionProblem,
+  timedDrain,
   withoutSeparator,
 } from '../agent-sessions.mjs';
 
@@ -40,24 +41,26 @@ const REPORT_DIR = '.tmp/verifier-evals';
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 
-const runVerifier = async ({ dispatch, systemPrompt }) => {
-  const session = query({
-    options: {
-      cwd: mkdtempSync(join(tmpdir(), 'verifier-eval-')),
-      maxTurns: 1,
-      mcpServers: {},
-      model: MODEL,
-      persistSession: false,
-      settingSources: [],
-      strictMcpConfig: true,
-      systemPrompt,
-      tools: [],
-    },
-    prompt: dispatch,
-  });
-  const { error, messages } = await drain(session);
+const runVerifier = async ({ dispatch, queuedAt, systemPrompt }) => {
+  const open = () =>
+    query({
+      options: {
+        cwd: mkdtempSync(join(tmpdir(), 'verifier-eval-')),
+        maxTurns: 1,
+        mcpServers: {},
+        model: MODEL,
+        persistSession: false,
+        settingSources: [],
+        strictMcpConfig: true,
+        systemPrompt,
+        tools: [],
+      },
+      prompt: dispatch,
+    });
+  const { error, messages, timestamps } = await timedDrain({ open, queuedAt });
   return {
     error: error ?? sessionProblem(messages),
+    metrics: sessionMetrics(messages, timestamps, error),
     report: finalResult(messages)?.result ?? '',
   };
 };
@@ -92,10 +95,11 @@ const main = async () => {
       ...shared,
       diff: read(`./${fixture}/change.diff`),
     });
-    return Array.from(
-      { length: runs },
-      () => () => runVerifier({ dispatch, systemPrompt: shared.systemPrompt }),
-    );
+    return Array.from({ length: runs }, () => {
+      const queuedAt = Date.now();
+      return () =>
+        runVerifier({ dispatch, queuedAt, systemPrompt: shared.systemPrompt });
+    });
   });
   const results = await runBatches(chunk(jobs, CONCURRENCY));
   const judgements = fixtures.map(([fixture, expectedNotMet], position) => {

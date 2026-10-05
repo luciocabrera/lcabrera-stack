@@ -28,11 +28,12 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 import { runGit } from '../../packages/repo-standards/scripts/git-exec.mjs';
 import {
   chunk,
-  drain,
   errorText,
   finalResult,
   runBatches,
+  sessionMetrics,
   sessionProblem,
+  timedDrain,
   withoutSeparator,
 } from '../agent-sessions.mjs';
 
@@ -118,28 +119,37 @@ const treeProblem = ({ before, head, worktree }) => {
     : 'the main checkout changed during the run';
 };
 
-const certify = async ({ dispatch, systemPrompt, tools, worktree }) => {
-  const { error, messages } = await drain(
-    query({
-      options: {
-        allowDangerouslySkipPermissions: true,
-        cwd: worktree,
-        disallowedTools: BLOCKED,
-        maxTurns: MAX_TURNS,
-        mcpServers: {},
-        model: MODEL,
-        permissionMode: 'bypassPermissions',
-        persistSession: false,
-        settingSources: ['project'],
-        strictMcpConfig: true,
-        systemPrompt,
-        tools,
-      },
-      prompt: dispatch,
-    }),
-  );
+const certify = async ({
+  dispatch,
+  queuedAt,
+  systemPrompt,
+  tools,
+  worktree,
+}) => {
+  const { error, messages, timestamps } = await timedDrain({
+    open: () =>
+      query({
+        options: {
+          allowDangerouslySkipPermissions: true,
+          cwd: worktree,
+          disallowedTools: BLOCKED,
+          maxTurns: MAX_TURNS,
+          mcpServers: {},
+          model: MODEL,
+          permissionMode: 'bypassPermissions',
+          persistSession: false,
+          settingSources: ['project'],
+          strictMcpConfig: true,
+          systemPrompt,
+          tools,
+        },
+        prompt: dispatch,
+      }),
+    queuedAt,
+  });
   return {
     error: error ?? sessionProblem(messages, tools),
+    metrics: sessionMetrics(messages, timestamps, error),
     report: finalResult(messages)?.result ?? '',
   };
 };
@@ -152,7 +162,7 @@ const cleanUp = ({ branch, keep, worktree }) => {
   rmSync(worktree, { force: true, recursive: true });
 };
 
-const runOnce = async ({ fixture, index, keep, shared }) => {
+const runOnce = async ({ fixture, index, keep, queuedAt, shared }) => {
   const branch = `eval/verifier-tooled/${fixture}-${Date.now()}-${index}`;
   const before = git(['status', '--porcelain']);
   const worktree = mkdtempSync(join(tmpdir(), 'verifier-tooled-'));
@@ -169,7 +179,7 @@ const runOnce = async ({ fixture, index, keep, shared }) => {
       diff: prepared.applied,
       worktree,
     });
-    const run = await certify({ ...shared, dispatch, worktree });
+    const run = await certify({ ...shared, dispatch, queuedAt, worktree });
     return {
       ...run,
       treeProblem: treeProblem({ before, head: prepared.head, worktree }),
@@ -197,10 +207,10 @@ const save = ({ fixture, runs }) => {
 const runFixture = async ({ fixture, keep, runs, shared }) => {
   const results = await runBatches(
     chunk(
-      Array.from(
-        { length: runs },
-        (_, index) => () => runOnce({ fixture, index, keep, shared }),
-      ),
+      Array.from({ length: runs }, (_, index) => {
+        const queuedAt = Date.now();
+        return () => runOnce({ fixture, index, keep, queuedAt, shared });
+      }),
       1,
     ),
   );
