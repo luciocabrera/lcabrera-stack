@@ -69,8 +69,7 @@ can show. The verifier marks it `not-met (unverified)`, and §4 of the contract
 turns any unmet criterion into a FAIL. `PASS (inspection-only)` is out too,
 because criterion 3 admits a gate. Here FAIL means "I cannot sign this off
 without running anything", not "I found a mistake". A verifier with its tools
-returns PASS on clean work; testing that tier is
-[#1254](https://github.com/luciocabrera/lcabrera-stack/issues/1254).
+returns PASS on clean work, and [the tooled tier](#the-tooled-tier) tests that.
 
 ## The tooled tier
 
