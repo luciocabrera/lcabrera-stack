@@ -2,7 +2,7 @@
 id: changesets-3
 title: build(deps): take @changesets/cli 3 and get-release-plan 5
 owner: agent:claude
-status: active
+status: review
 branch: build/1306-changesets-3
 area:
   - pnpm-workspace.yaml
@@ -16,7 +16,7 @@ area:
 started: 2026-10-05
 updated: 2026-10-05
 plan: (none)
-pr: https://github.com/luciocabrera/lcabrera-stack/pull/1313
+pr: 1313
 issue: #1306
 ---
 
