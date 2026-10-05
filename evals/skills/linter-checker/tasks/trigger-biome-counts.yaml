@@ -1,0 +1,20 @@
+id: trigger-biome-counts
+name: Biome's error and warning counts across the repo
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt:
+    How many Biome errors and warnings does the whole repo have right now? I
+    want the machine-readable report the count comes from, not your estimate.
+    Tell me what you would do first. Load any skill you need, but don't run
+    shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-linter-checker
+    config:
+      mode: any_order
+      required_skills:
+        - linter-checker

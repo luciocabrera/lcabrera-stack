@@ -1,0 +1,16 @@
+id: near-miss-engine-comparison
+name: Comparing two linters in general
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: In general, why is Biome faster than ESLint? Two sentences. Load any
+    skill you need, but don't run shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-linter-checker-alone
+    config:
+      forbidden_skills:
+        - linter-checker

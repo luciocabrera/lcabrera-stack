@@ -1,0 +1,19 @@
+id: trigger-perf-deps-subset
+name: Only the perf and deps part of a sweep
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt:
+    Run only the performance and dependency parts of a codebase health sweep
+    on this repo. Tell me what you would do first. Load any skill you need, but
+    don't run shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-health-swarm
+    config:
+      mode: any_order
+      required_skills:
+        - health-swarm

@@ -1,0 +1,18 @@
+id: near-miss-fallow-scan
+name: One fallow scan
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt:
+    Run the fallow dead-code and complexity scan and give me its prioritized
+    report. Tell me what you would do first. Load any skill you need, but don't
+    run shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-health-swarm-alone
+    config:
+      forbidden_skills:
+        - health-swarm

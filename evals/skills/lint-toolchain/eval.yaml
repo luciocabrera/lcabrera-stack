@@ -1,5 +1,5 @@
 name: lint-toolchain-trigger
-description: Does lint-toolchain load to debug a lint rule that reports nothing, and stay out of reading the same config's dev-server port?
+description: Does lint-toolchain load to configure or debug an analyser from its config file, and stay out of reading a non-lint value from the same files?
 skill: lint-toolchain
 version: '1.0'
 config:

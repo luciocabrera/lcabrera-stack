@@ -1,0 +1,17 @@
+id: near-miss-rule-meaning
+name: What one lint rule means
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: What does the unicorn/no-nested-ternary rule complain about? One
+    sentence. Load any skill you need, but don't run shell commands or edit
+    files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-linter-checker-alone
+    config:
+      forbidden_skills:
+        - linter-checker

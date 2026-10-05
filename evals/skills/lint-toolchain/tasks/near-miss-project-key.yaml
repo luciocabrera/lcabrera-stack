@@ -1,0 +1,19 @@
+id: near-miss-project-key
+name: Reading the Sonar project key
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: Read .sonarcloud.properties and tell me only the value of
+    sonar.projectKey. Load any skill you need, but don't run shell commands or
+    edit files.
+  context:
+    fixture: sonar
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-lint-toolchain-alone
+    config:
+      forbidden_skills:
+        - lint-toolchain
