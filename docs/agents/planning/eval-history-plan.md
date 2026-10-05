@@ -906,7 +906,7 @@ opposite; the README is the rule.
 
 ## 10. ADRs to write
 
-Drafts in [`adr-drafts/`](./adr-drafts/), no number until adoption:
+All three drafts from [`adr-drafts/`](./adr-drafts/) are adopted, each numbered at adoption:
 
 1. [ADR-130](../../decisions/ADR-130-keep-eval-history-in-a-private-workspace-with-its-own-schema-and-migrator.md)
    (#1262), adopted. `@repo/eval-history` is a private workspace under `packages/`.
