@@ -197,6 +197,11 @@ const stampedTimes = (result, timestamps) => ({
   started_at: isoAt(timestamps.started),
 });
 
+const usageFields = (modelUsage) => ({
+  model_usage: modelUsage ?? {},
+  tokens: summedTokens(modelUsage),
+});
+
 export const sessionMetrics = (messages, timestamps, thrown) => {
   const result = finalResult(messages);
   return {
@@ -205,8 +210,7 @@ export const sessionMetrics = (messages, timestamps, thrown) => {
     error_class: endedCleanly(result, thrown)
       ? null
       : errorClass(result, thrown),
-    model_usage: result?.modelUsage ?? {},
-    tokens: summedTokens(result?.modelUsage),
+    ...usageFields(result?.modelUsage),
   };
 };
 
