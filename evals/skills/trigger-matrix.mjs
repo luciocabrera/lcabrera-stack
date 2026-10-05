@@ -8,7 +8,14 @@ const ERRORED = '(error)';
 const CORNER = String.raw`expected \ loaded`;
 const EMPTY_CELL = '.';
 
-export const trialRecord = ({ error, invoked, passed, skill, task }) => ({
+export const trialRecord = ({
+  error,
+  invoked,
+  passed,
+  skill,
+  task,
+  trial,
+}) => ({
   error,
   invoked: [...new Set(invoked)],
   passed,
@@ -16,6 +23,7 @@ export const trialRecord = ({ error, invoked, passed, skill, task }) => ({
   shouldTrigger: task.shouldTrigger,
   skill,
   task: task.id,
+  trial,
 });
 
 const expectedOf = ({ shouldTrigger, skill }) =>

@@ -5,12 +5,12 @@ failure: someone edits `.claude/agents/refactor-verifier.md` and it quietly stop
 catching a class of violation.
 
 ```bash
-vp run evals:verifier              # every fixture, twice
-vp run evals:verifier -- --runs 3
+vp run evals:verifier              # every fixture, three times
+vp run evals:verifier -- --runs 5
 ```
 
 It needs a Claude login, or `CLAUDE_CODE_OAUTH_TOKEN` set. Full reports go to
-`.tmp/verifier-evals/`.
+`.tmp/verifier-evals/`. The run ends with the cost its sessions reported, summed.
 
 ## What a run does
 
@@ -55,7 +55,8 @@ A fixture passes when, in every run:
 - the report has a `VERDICT:` line, and it does not start with `PASS`, which a
   run with no tools cannot have earned under the contract's §4;
 - the criteria the verifier marks `not-met` are exactly the expected ones;
-- and the runs agree, which is why `--runs` must be at least 2.
+- and the runs agree, which is why `--runs` must be at least 2; `--runs 1`
+  stops before any session starts.
 
 It reads the criteria table, not the verdict. Without tools the verdict line
 cannot separate "found the violation" from "could not run a gate": both come out

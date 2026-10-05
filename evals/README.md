@@ -16,6 +16,26 @@ suites' own tests.
 | [Verifier fixtures](./verifier-fixtures) | `vp run evals:verifier`       | yes           |
 | The suites' own tests                    | `vp run test:evals`           | no            |
 
+## What a full run costs
+
+The skill-trigger and verifier suites run each task or fixture three times by
+default, so a task that fails one trial in three shows as flaky rather than
+broken. The cost below is the sum each runner prints at the end, from the cost
+its sessions reported. It was measured on 2026-10-05, on `claude-opus-5-5` with
+a Claude subscription, at the defaults, when `evals/skills/` held 132 tasks and
+the verifier 5 fixtures:
+
+| Command                 | Sessions | Reported cost | Wall time |
+| ----------------------- | -------- | ------------- | --------- |
+| `vp run evals:skills`   | 396      | $28.22        | 24 min    |
+| `vp run evals:verifier` | 15       | $1.80         | 2 min     |
+
+It moves with the task count, the model and the prompts, so rerun the command
+for a current figure rather than trusting the table. The skills suite came to
+about $0.07 a session, which scales it to the current task count. `--runs 1` on
+the skills runner costs about a third as much; the verifier refuses fewer than
+2 runs.
+
 ## Turning a real failure into a task
 
 When an agent in real work loads the wrong skill, or misses one it needed,

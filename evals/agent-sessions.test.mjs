@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   chunk,
+  costLine,
   drain,
   errorText,
   runBatches,
   sessionMetrics,
   sessionProblem,
   timedDrain,
+  wholeNumber,
   withoutSeparator,
 } from './agent-sessions.mjs';
 
@@ -280,5 +282,33 @@ describe('withoutSeparator', () => {
       '3',
     ]);
     expect(withoutSeparator(['--runs', '3'])).toStrictEqual(['--runs', '3']);
+  });
+});
+
+describe('wholeNumber', () => {
+  it('names the floor and the value it refused', () => {
+    expect(wholeNumber({ minimum: 1, value: '3' })).toBe(3);
+    expect(() => wholeNumber({ minimum: 1, value: '0' })).toThrow(
+      '--runs must be a whole number of at least 1; got "0"',
+    );
+    expect(() =>
+      wholeNumber({ minimum: 2, reason: ', so', value: '1.5' }),
+    ).toThrow('at least 2, so; got "1.5"');
+  });
+});
+
+describe('costLine', () => {
+  it('sums the reported cost and counts the sessions that reported none', () => {
+    expect(
+      costLine([
+        { cost_usd_reported: 0.125 },
+        { cost_usd_reported: 0.5 },
+        { cost_usd_reported: null },
+        undefined,
+      ]),
+    ).toBe('Cost: $0.63 reported over 2 session(s); 2 reported none');
+    expect(costLine([{ cost_usd_reported: 1 }])).toBe(
+      'Cost: $1.00 reported over 1 session(s)',
+    );
   });
 });

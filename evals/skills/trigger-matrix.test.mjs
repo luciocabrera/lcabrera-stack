@@ -12,12 +12,14 @@ const result = ({
   invoked,
   shouldTrigger = true,
   skill = 'epic',
+  trial = 1,
 }) => ({
   error,
   invoked,
   passed: invoked.includes(skill) === shouldTrigger,
   skill,
   task: { id, set: 'regression', shouldTrigger },
+  trial,
 });
 
 const trials = [
@@ -47,6 +49,7 @@ describe('trialRecord', () => {
       shouldTrigger: true,
       skill: 'epic',
       task: 'trigger',
+      trial: 1,
     });
   });
 });
