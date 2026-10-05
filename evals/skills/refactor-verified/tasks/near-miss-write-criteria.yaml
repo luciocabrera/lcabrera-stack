@@ -1,0 +1,17 @@
+id: near-miss-write-criteria
+name: Writing acceptance criteria text
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: Write three acceptance criteria, as a checklist, for a button that
+    copies a URL to the clipboard. Just the list. Load any skill you need,
+    but don't run shell commands or edit files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-refactor-verified-alone
+    config:
+      forbidden_skills:
+        - refactor-verified

@@ -1,0 +1,17 @@
+id: near-miss-vitest-matcher
+name: A test-matcher question
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: In Vitest, what is the difference between toBe and toEqual? One
+    sentence. Load any skill you need, but don't run shell commands or edit
+    files.
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-quality-gate-workflow-alone
+    config:
+      forbidden_skills:
+        - quality-gate-workflow

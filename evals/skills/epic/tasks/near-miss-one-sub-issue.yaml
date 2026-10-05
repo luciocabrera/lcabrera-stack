@@ -1,0 +1,19 @@
+id: near-miss-one-sub-issue
+name: One sub-issue of an epic
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt:
+    "One sub-issue of our tooling epic has the line 'labels: type: chore' in
+    its body. Change the label to 'type: maintenance' and show only the
+    edited line. Load any skill you need, but don't run shell commands or
+    edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-epic-alone
+    config:
+      forbidden_skills:
+        - epic

@@ -2,7 +2,7 @@
 id: 1287-delivery-skill-eval-tasks
 title: test(evals): write trigger and near-miss tasks for the delivery workflow skills
 owner: agent:claude
-status: active
+status: review
 branch: test/1287-1287-delivery-skill-eval-tasks
 area:
   - evals/skills/epic/**
@@ -11,7 +11,7 @@ area:
 started: 2026-10-05
 updated: 2026-10-05
 plan: (none)
-pr: (none)
+pr: #1310
 issue: #1287
 ---
 

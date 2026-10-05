@@ -1,0 +1,17 @@
+id: near-miss-rename-variable
+name: Renaming one variable
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Rename the variable tmp to total in this snippet and show only the
+    result: let tmp = 0; for (const n of ns) tmp += n; return tmp; Load any
+    skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-refactor-verified-alone
+    config:
+      forbidden_skills:
+        - refactor-verified

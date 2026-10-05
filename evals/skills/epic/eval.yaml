@@ -1,5 +1,5 @@
 name: epic-trigger
-description: Does epic load when asked to drive an epic, and stay out of a planning-vocabulary question?
+description: Does epic load when asked to run, resume or wave-plan an epic through agents and blind review, and stay out of planning vocabulary, issue writing and single-issue edits?
 skill: epic
 version: '1.0'
 config:

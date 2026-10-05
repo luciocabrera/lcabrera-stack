@@ -1,0 +1,20 @@
+id: trigger-resume-after-break
+name: Resuming an epic run that stopped
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt:
+    "We stopped halfway through epic #9999 yesterday; two PRs from the last
+    wave are still open. Pick the run back up where it left off. Tell me
+    what you would do first. Load any skill you need, but don't run shell
+    commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-epic
+    config:
+      mode: any_order
+      required_skills:
+        - epic

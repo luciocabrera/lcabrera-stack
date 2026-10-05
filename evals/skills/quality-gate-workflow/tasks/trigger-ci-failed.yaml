@@ -1,0 +1,19 @@
+id: trigger-ci-failed
+name: CI failed after a change
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: CI went red on my pull request after I changed a hook in packages/ui.
+    Run the same checks locally in the right order so I can see what is
+    failing. Tell me what you would do first. Load any skill you need, but
+    don't run shell commands or edit files.
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-quality-gate-workflow
+    config:
+      mode: any_order
+      required_skills:
+        - quality-gate-workflow
