@@ -3,7 +3,7 @@ governs:
   - showcase
 ---
 
-# ADR-131 — Serve the eval dashboard from the showcase app, public and aggregate-only
+# ADR-132 — Serve the eval dashboard from the showcase app, public and aggregate-only
 
 **Status:** Accepted
 
@@ -70,9 +70,13 @@ returns `detail` whole for a route to filter afterwards.
 
 **How it is tested.** One showcase test enforces the rule above:
 
-1. It seeds the history database with a unique marker string in every field
-   the list excludes: every free-text `detail` field of every suite, the
-   transcript pointer, and every other `detail` field outside the list.
+1. It seeds the history database with a unique marker string in every
+   string-valued field that the envelope's Zod schema defines and the
+   allow-list does not name, in every suite's `detail` schema and in the
+   transcript pointer. The test derives that set by walking the schema, not
+   from a list written into the test. A field that a later schema version
+   adds is therefore seeded by default, and the only way to stop seeding it is
+   to add it to the allow-list.
 2. With the flag set, it calls the loader of every `/evals` route, and every
    resource route, for the seeded runs. It serialises each result.
 3. It fails if the marker appears in any serialised result.

@@ -22,6 +22,6 @@ docs(adr): serve the eval dashboard from the showcase app as aggregates only
 
 ## Status / next
 
-- Current step: ADR-131 adopted, gate green, PR ready
+- Current step: ADR-132 adopted, gate green, PR ready
 - Blockers: none
 - Next: merge
