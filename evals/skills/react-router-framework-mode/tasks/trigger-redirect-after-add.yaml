@@ -1,0 +1,18 @@
+id: trigger-redirect-after-add
+name: 'Redirecting after the action runs'
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Read app/routes/orders.tsx. After an order is added, send the user to that new order's detail page at /orders/:id, read on the server. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: route
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-react-router-framework-mode
+    config:
+      mode: any_order
+      required_skills:
+        - react-router-framework-mode

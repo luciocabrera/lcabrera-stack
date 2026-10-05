@@ -1,0 +1,18 @@
+id: trigger-optimistic-subscribe
+name: 'Showing the subscription before the server answers'
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Read src/NewsletterForm.tsx and show the email as subscribed the moment the user submits, and roll it back if the request fails. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: form
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-react-19
+    config:
+      mode: any_order
+      required_skills:
+        - react-19

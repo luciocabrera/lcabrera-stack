@@ -1,0 +1,17 @@
+id: near-miss-http-verbs
+name: 'GET versus POST in general'
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Read app/routes/orders.tsx. In one sentence, and in general HTTP terms, how does a POST request differ from a GET? Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: route
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-react-router-framework-mode-alone
+    config:
+      forbidden_skills:
+        - react-router-framework-mode

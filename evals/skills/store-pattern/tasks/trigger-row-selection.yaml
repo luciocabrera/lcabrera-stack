@@ -1,0 +1,18 @@
+id: trigger-row-selection
+name: 'Adding row selection to shared grid state'
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Read src/contexts/GridContext.tsx and add row selection to this grid's shared state, so that a row re-renders only when its own selected flag changes. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: grid
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-store-pattern
+    config:
+      mode: any_order
+      required_skills:
+        - store-pattern

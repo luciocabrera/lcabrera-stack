@@ -1,0 +1,18 @@
+id: trigger-external-store
+name: 'Moving grid state out of useState'
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Read src/contexts/GridContext.tsx and move this grid's state out of useState into a store that lives outside React, which components subscribe to. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+  context:
+    fixture: grid
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-store-pattern
+    config:
+      mode: any_order
+      required_skills:
+        - store-pattern

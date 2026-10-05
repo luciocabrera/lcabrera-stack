@@ -1,5 +1,5 @@
 name: react-router-framework-mode-trigger
-description: Does react-router-framework-mode load for a route's loader and action, and stay out of listing the same route's imports?
+description: Does react-router-framework-mode load for a route's loader, action, error screen, pending state, background submit and redirect, and stay out of reading the route's names and types or general HTTP and React questions?
 skill: react-router-framework-mode
 version: '1.0'
 config:
