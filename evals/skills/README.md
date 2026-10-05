@@ -22,7 +22,8 @@ Every task also carries a top-level `set`:
 
 A task written from a real failure also carries `source: incident`. See
 [Turning a real failure into a task](../README.md#turning-a-real-failure-into-a-task).
-Waza ignores both keys.
+Waza's task schema has neither key. `waza run` logs "unknown schema field
+ignored" for each one, on every task, and runs the task anyway.
 
 The task files are [Waza](https://github.com/microsoft/waza)'s format, so two
 harnesses run the same tasks.
@@ -103,7 +104,10 @@ a trigger test passes whatever the description says.
 1. Copy an existing skill's directory, and rename every mention of that skill.
 2. If the new skill has a `paths:` list, add a fixture that matches it and
    point every task at it.
-3. Run `vp run evals:skills -- <skill>`, then
+3. The copied tasks carry `set: regression`, but a new task has not shown it
+   passes reliably. Set each one to `set: capability`, and promote it to
+   `regression` once it does.
+4. Run `vp run evals:skills -- <skill>`, then
    `vp run evals:skills -- <skill> --hide <skill>` and confirm the trigger task
    fails.
 
@@ -118,10 +122,11 @@ because they are this repository's conventions, not defects.
 
 The same job runs `vp run evals:skills -- --check`, which makes no model call.
 It fails a skill under `.github/skills/` with no trigger or near-miss task here,
-two tasks of one skill sharing an `id`, a task with no `set` or an unknown
-`set` or `source` (naming the task's file), an eval whose skill is gone, an
-eval or grader that names a different skill than its directory, a task whose prompt does not end with the sentence above,
-and a skill with a `paths:` list whose tasks name no fixture.
+a task with no `id`, two tasks of one skill sharing an `id`, a task with no
+`set` or an unknown `set` or `source` (naming the task's file), an eval whose
+skill is gone, an eval or grader that names a different skill than its
+directory, a task whose prompt does not end with the sentence above, and a
+skill with a `paths:` list whose tasks name no fixture.
 
 The **Skill triggers (Claude)** job runs `vp run evals:skills` on
 `workflow_dispatch` only, on `CLAUDE_CODE_OAUTH_TOKEN`, and uploads the
