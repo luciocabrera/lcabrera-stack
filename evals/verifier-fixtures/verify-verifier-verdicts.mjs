@@ -32,6 +32,7 @@ import {
   judgeFixture,
   renderDispatch,
   runCount,
+  suiteEnd,
 } from './verifier-fixtures.mjs';
 
 const MODEL = 'claude-opus-5-5';
@@ -102,11 +103,9 @@ const main = async () => {
     saveReports({ fixture, sessions });
     return judgeFixture({ expectedNotMet, fixture, runs: sessions });
   });
-  console.log(judgements.map(describeJudgement).join('\n'));
-  console.log(`Full reports: ${REPORT_DIR}/`);
-  if (judgements.some(({ matched, stable }) => !matched || !stable)) {
-    process.exitCode = 1;
-  }
+  const { exitCode, footer } = suiteEnd({ judgements, reportDir: REPORT_DIR });
+  console.log([...judgements.map(describeJudgement), footer].join('\n'));
+  process.exitCode = exitCode;
 };
 
 try {

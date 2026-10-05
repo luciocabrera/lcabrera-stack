@@ -46,6 +46,7 @@
     "evals:skills": "node evals/skills/verify-skill-triggers.mjs",
     "evals:skills:quality": "node evals/skill-quality/verify-skill-quality.mjs",
     "evals:verifier": "node evals/verifier-fixtures/verify-verifier-verdicts.mjs",
+    "evals:verifier:tooled": "node evals/verifier-fixtures/verify-verifier-tooled.mjs",
     "fallow:audit": "fallow audit",
     "fallow:dead-code": "fallow dead-code",
     "fallow:dupes": "fallow dupes",

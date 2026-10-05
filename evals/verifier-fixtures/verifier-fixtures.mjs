@@ -3,10 +3,13 @@
  * sends, read the verdict a report states, and judge a fixture's runs.
  * Usage: imported by `verify-verifier-verdicts.mjs`.
  */
-const FRONTMATTER = /^---\r?\n[\s\S]*?\r?\n---\r?\n/;
+const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/;
 const VERDICT_LINE = /^VERDICT:(.*)$/m;
 
 export const agentBody = (definition) => definition.replace(FRONTMATTER, '');
+
+export const agentFrontmatter = (definition) =>
+  FRONTMATTER.exec(definition)?.[1] ?? '';
 
 export const renderDispatch = ({ contract, diff, issue, template }) =>
   template
@@ -46,7 +49,7 @@ export const definiteNotMet = (report) =>
     .filter((number) => number !== undefined)
     .toSorted((a, b) => a - b);
 
-const sameNumbers = (a, b) => a.join(',') === b.join(',');
+export const sameNumbers = (a, b) => a.join(',') === b.join(',');
 
 const PASS_VERDICT = /^PASS\b/;
 
@@ -69,10 +72,19 @@ export const judgeFixture = ({ expectedNotMet, fixture, runs: sessions }) => {
   return { expectedNotMet, fixture, matched, runs, stable };
 };
 
-const describeRun = ({ error, notMet, verdict }) =>
+export const describeRun = ({ error, notMet, verdict }) =>
   error === undefined
     ? `not-met [${notMet.join(',')}], verdict ${(verdict ?? '(no verdict line)').slice(0, 30)}`
     : `error: ${error}`;
+
+export const fixtureLine = ({ fixture, lines, matched, stable, wanted }) => {
+  const problems = [
+    ...(matched ? [] : [wanted]),
+    ...(stable ? [] : ['runs disagree']),
+  ];
+  const status = problems.length === 0 ? 'ok' : `FAIL (${problems.join('; ')})`;
+  return `${fixture}: ${lines.join(' | ')} -> ${status}`;
+};
 
 export const describeJudgement = ({
   expectedNotMet,
@@ -80,25 +92,35 @@ export const describeJudgement = ({
   matched,
   runs,
   stable,
-}) => {
-  const problems = [
-    ...(matched
-      ? []
-      : [
-          `expected not-met [${expectedNotMet.join(',')}], a verdict line that is not a PASS, and no session error`,
-        ]),
-    ...(stable ? [] : ['runs disagree']),
-  ];
-  const status = problems.length === 0 ? 'ok' : `FAIL (${problems.join('; ')})`;
-  return `${fixture}: ${runs.map(describeRun).join(' | ')} -> ${status}`;
-};
+}) =>
+  fixtureLine({
+    fixture,
+    lines: runs.map(describeRun),
+    matched,
+    stable,
+    wanted: `expected not-met [${expectedNotMet.join(',')}], a verdict line that is not a PASS, and no session error`,
+  });
 
-export const runCount = (value) => {
-  const runs = Number(value);
-  if (!Number.isInteger(runs) || runs < 2) {
+export const suiteEnd = ({ judgements, reportDir }) => ({
+  exitCode: judgements.some(({ matched, stable }) => !matched || !stable)
+    ? 1
+    : 0,
+  footer: `Full reports: ${reportDir}/`,
+});
+
+export const wholeNumber = ({ minimum, reason = '', value }) => {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < minimum) {
     throw new Error(
-      `--runs must be a whole number of at least 2, so the runs can be compared; got "${value}"`,
+      `--runs must be a whole number of at least ${minimum}${reason}; got "${value}"`,
     );
   }
-  return runs;
+  return number;
 };
+
+export const runCount = (value) =>
+  wholeNumber({
+    minimum: 2,
+    reason: ', so the runs can be compared',
+    value,
+  });
