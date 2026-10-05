@@ -33,7 +33,7 @@
     "@types/react-dom": "catalog:types",
     "babel-plugin-react-compiler": "catalog:react",
     "jsdom": "catalog:test",
-    "pg": "^8.23.0",
+    "pg": "^8.23.1",
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-babel": "catalog:build",

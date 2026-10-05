@@ -116,6 +116,7 @@ const GLOBAL_IGNORES = [
  *   serverOnlySyntaxRestrictions?: readonly RestrictedSyntaxEntry[],
  *   tsconfigRootDir?: string,
  * }} [options]
+ * @returns {Promise<import('eslint').Linter.Config[]>}
  */
 export const createCustomRulesLintConfig = async ({
   ignorePatterns = [],

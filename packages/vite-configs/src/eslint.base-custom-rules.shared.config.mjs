@@ -42,6 +42,7 @@ const createTypescriptLanguageOptions = (tsconfigRootDir) => ({
  *   ignorePatterns?: readonly string[],
  *   tsconfigRootDir?: string,
  * }} [options]
+ * @returns {import('eslint').Linter.Config[]}
  */
 export const createBaseCustomRulesLintConfig = ({
   ignorePatterns = [],
