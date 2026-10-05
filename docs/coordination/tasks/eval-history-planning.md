@@ -22,6 +22,6 @@ Record the eval-history PRD, plan and ADR drafts
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review on #1295; the PRD, plan and three ADR drafts are written and the review threads are resolved
 - Blockers: none
-- Next:
+- Next: merge, then the ADR adoptions #1262 to #1264
