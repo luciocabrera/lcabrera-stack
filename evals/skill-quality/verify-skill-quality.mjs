@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Scores every skill's SKILL.md with the judge prompt and rubric `waza quality`
- * uses, on a Claude session with no tools, and prints a markdown table. It is a
+ * uses, on a Claude session with no tools, prints a markdown table, and writes
+ * an interactive report to .tmp/skill-quality/report.html on every run. It is a
  * baseline to read, not a gate: no score fails it.
  *
  * Usage (from the repo root): vp run evals:skills:quality [-- <skill> ...] [--model <id>]
@@ -39,8 +40,18 @@ import {
   selectedSkills,
 } from './skill-quality.mjs';
 
+import {
+  parseRun,
+  renderReport,
+  reportData,
+  runRecord,
+} from './quality-report.mjs';
+
 const SKILLS_DIR = '.github/skills';
 const REPORT_DIR = '.tmp/skill-quality';
+const RUNS_DIR = join(REPORT_DIR, 'runs');
+const REPORT_FILE = join(REPORT_DIR, 'report.html');
+const TEMPLATE = new URL('report-template.html', import.meta.url);
 const CONCURRENCY = 4;
 
 const catalog = () =>
@@ -87,6 +98,32 @@ const judgeSkill = async ({ model, skill }) => {
   return outcome({ ...(await drain(session)), skill });
 };
 
+const readHistory = () =>
+  existsSync(RUNS_DIR)
+    ? readdirSync(RUNS_DIR)
+        .filter((name) => name.endsWith('.json'))
+        .toSorted()
+        .map((name) => parseRun(readFileSync(join(RUNS_DIR, name), 'utf8')))
+        .filter((run) => run !== undefined)
+    : [];
+
+const writeReport = ({ model, results }) => {
+  const generatedAt = new Date().toISOString();
+  const history = readHistory();
+  mkdirSync(RUNS_DIR, { recursive: true });
+  writeFileSync(
+    join(RUNS_DIR, `${generatedAt.replaceAll(':', '-')}.json`),
+    JSON.stringify(runRecord({ generatedAt, model, results })),
+  );
+  writeFileSync(
+    REPORT_FILE,
+    renderReport({
+      data: reportData({ generatedAt, history, model, results }),
+      template: readFileSync(TEMPLATE, 'utf8'),
+    }),
+  );
+};
+
 const main = async () => {
   const { positionals, values } = parseArgs({
     allowPositionals: true,
@@ -101,8 +138,10 @@ const main = async () => {
       CONCURRENCY,
     ),
   );
+  writeReport({ model: values.model, results });
   console.log(baselineTable(results));
   console.log(`\nJudge: ${values.model}. Replies: ${REPORT_DIR}/`);
+  console.log(`Report: ${REPORT_FILE}`);
   if (results.some(({ judgement }) => judgement === undefined)) {
     process.exitCode = 1;
   }

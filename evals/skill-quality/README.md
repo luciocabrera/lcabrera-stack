@@ -30,3 +30,21 @@ Read the scores with three caveats:
 - The judge sees only `SKILL.md`, not the files it links to.
 
 Nothing in CI runs it.
+
+## The report
+
+Every run, a partial one or one where a skill could not be judged included,
+writes `.tmp/skill-quality/report.html`. Open it in a browser; it needs no
+network. It shows:
+
+- the mean overall score, how many skills were judged, and the weakest dimension;
+- the average of each dimension across the skills (click one to sort by it);
+- a table of every skill's five scores, sortable and filterable, with a
+  **change** column against the last run that judged the same skill;
+- the judge's summary and per-dimension feedback for the skill you click.
+
+The change column comes from `.tmp/skill-quality/runs/`, where each run leaves a
+small record of its overall scores. Delete that folder to start the history
+again. The page is built from
+[`report-template.html`](./report-template.html), which
+[`quality-report.mjs`](./quality-report.mjs) fills with the run's data.

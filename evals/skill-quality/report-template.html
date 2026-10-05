@@ -1,0 +1,616 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Skill Quality Report</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: light-dark(#f3f4f1, #131917);
+    --panel: light-dark(#ffffff, #1b2320);
+    --ink: light-dark(#1a211e, #e3eae6);
+    --muted: light-dark(#5c6863, #9aa8a2);
+    --line: light-dark(#d8ddd8, #2f3b36);
+    --accent: light-dark(#2357a8, #85abea);
+    --accent-soft: light-dark(#e4ebf7, #1e2b3e);
+    --s1: light-dark(#c4372b, #b8483d);
+    --s2: light-dark(#d9782a, #b86d33);
+    --s3: light-dark(#c9a227, #a88b2e);
+    --s4: light-dark(#6aa84f, #5a8f45);
+    --s5: light-dark(#2e8b57, #2f7a52);
+    --up: light-dark(#2e8b57, #6fd39a);
+    --down: light-dark(#c4372b, #f08a80);
+    --s-ink: #ffffff;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  }
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 var(--font);
+    padding-inline: 16px;
+    padding-block: 28px 56px;
+  }
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+  h1 {
+    font-size: clamp(1.7rem, 4vw, 2.3rem);
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    font-size: 1.15rem;
+  }
+  p {
+    margin: 0;
+    max-width: 72ch;
+  }
+  .muted {
+    color: var(--muted);
+  }
+  .mono {
+    font-family: var(--mono);
+    font-size: 0.9em;
+  }
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+  }
+  .tile {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tile b {
+    font-size: 1.6rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .tile span {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+  }
+  .bars {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bar {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr) 44px;
+    gap: 12px;
+    align-items: center;
+    background: none;
+    border: 0;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .bar:hover,
+  .bar:focus-visible {
+    background: var(--accent-soft);
+    outline: none;
+  }
+  .bar .track {
+    height: 10px;
+    background: var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar .fill {
+    height: 100%;
+    border-radius: 999px;
+  }
+  .bar .val {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  input[type='search'] {
+    font: inherit;
+    padding: 7px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--ink);
+    min-width: 0;
+    width: 260px;
+    max-width: 100%;
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 760px;
+    font-variant-numeric: tabular-nums;
+  }
+  th,
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+  }
+  th:first-child,
+  td:first-child {
+    text-align: left;
+  }
+  th button {
+    font: 600 12px var(--font);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    padding: 2px 0;
+  }
+  th button[aria-sort='ascending']::after {
+    content: ' ▲';
+  }
+  th button[aria-sort='descending']::after {
+    content: ' ▼';
+  }
+  th button:focus-visible {
+    outline: 2px solid var(--accent);
+  }
+  tbody tr {
+    cursor: pointer;
+  }
+  tbody tr:hover td,
+  tbody tr:focus-visible td {
+    background: var(--accent-soft);
+  }
+  tbody tr:focus-visible {
+    outline: none;
+  }
+  tbody tr.selected td {
+    background: var(--accent-soft);
+    font-weight: 600;
+  }
+  .cell {
+    display: inline-block;
+    min-width: 30px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    color: var(--s-ink);
+    font-weight: 600;
+  }
+  .s1 {
+    background: var(--s1);
+  }
+  .s2 {
+    background: var(--s2);
+  }
+  .s3 {
+    background: var(--s3);
+  }
+  .s4 {
+    background: var(--s4);
+  }
+  .s5 {
+    background: var(--s5);
+  }
+  .delta-up {
+    color: var(--up);
+  }
+  .delta-down {
+    color: var(--down);
+  }
+  .err {
+    color: var(--down);
+    text-align: left;
+  }
+  .detail {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .dim {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .dim header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .dim h3 {
+    font-size: 14px;
+  }
+  .dim p {
+    font-size: 14px;
+  }
+  details summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+  dl.rubric {
+    margin: 10px 0 0;
+    display: grid;
+    gap: 8px;
+  }
+  dl.rubric dt {
+    font-weight: 600;
+  }
+  dl.rubric dd {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .note {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  @media (max-width: 640px) {
+    .bar {
+      grid-template-columns: 110px minmax(0, 1fr) 40px;
+    }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Skill quality report</h1>
+    <p class="muted" id="meta"></p>
+    <p class="note">
+      Each skill's SKILL.md was scored from 1 to 5 by Claude, using the judge
+      prompt and rubric of <span class="mono">waza quality</span>. It is a
+      reading, not a gate. Scores move by a few tenths between runs, so compare
+      a skill with its own earlier score, not with its neighbour.
+    </p>
+  </header>
+
+  <div class="tiles" id="tiles"></div>
+
+  <section class="panel">
+    <h2>Average by dimension</h2>
+    <p class="note">Click a dimension to sort the table by it.</p>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <section class="panel">
+    <div class="toolbar">
+      <h2>Every skill</h2>
+      <label class="muted"
+        >Filter <input type="search" id="filter" placeholder="skill name"
+      /></label>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr id="head">
+            <th scope="col">
+              <button type="button" data-key="skill">skill</button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="clarity">clarity</button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="completeness">
+                completeness
+              </button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="trigger_precision">
+                trigger precision
+              </button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="scope_coverage">
+                scope coverage
+              </button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="anti_patterns">
+                anti patterns
+              </button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="overall">overall</button>
+            </th>
+            <th scope="col">
+              <button type="button" data-key="change">change</button>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="note">
+      Click a row to read the judge's feedback. "Change" compares with the last
+      run that judged the same skill.
+    </p>
+  </section>
+
+  <section class="panel" id="detail-panel">
+    <h2 id="detail-title">Feedback</h2>
+    <p id="detail-summary">
+      Click a skill in the table to read what the judge said about it.
+    </p>
+    <div class="detail" id="detail"></div>
+  </section>
+
+  <section class="panel">
+    <details>
+      <summary>What each dimension asks</summary>
+      <dl class="rubric" id="rubric"></dl>
+    </details>
+  </section>
+</div>
+
+<script id="report-data" type="application/json">
+  __REPORT_DATA__
+</script>
+<script>
+  (() => {
+    const data = JSON.parse(document.getElementById('report-data').textContent);
+    const dims = data.rubric.map((d) => d.name);
+    const label = (name) => name.replaceAll('_', ' ');
+    const el = (tag, props = {}, kids = []) => {
+      const node = Object.assign(document.createElement(tag), props);
+      node.append(...kids);
+      return node;
+    };
+    const chip = (score) =>
+      el('span', {
+        className: `cell s${Math.round(score)}`,
+        textContent: String(score),
+      });
+    const fixed = (n) => n.toFixed(1);
+    const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
+    const judged = data.skills.filter((s) => s.overall !== undefined);
+    const failed = data.skills.filter((s) => s.overall === undefined);
+    const scoreOf = (s, dim) =>
+      s.dimensions?.find((d) => d.name === dim)?.score;
+    const dimMeans = dims.map((d) => ({
+      name: d,
+      value: judged.length ? mean(judged.map((s) => scoreOf(s, d))) : 0,
+    }));
+
+    document.getElementById('meta').textContent =
+      `Judge ${data.model} · ${new Date(data.generatedAt).toLocaleString()} · ${data.skills.length} skill(s)`;
+
+    const weakest = [...dimMeans].sort((a, b) => a.value - b.value)[0];
+    const tiles = [
+      [
+        judged.length ? fixed(mean(judged.map((s) => s.overall))) : '—',
+        'mean overall score',
+      ],
+      [String(judged.length), 'skills judged'],
+      [String(failed.length), 'not judged (see table)'],
+      [
+        weakest && judged.length ? label(weakest.name) : '—',
+        'weakest dimension',
+      ],
+    ];
+    document
+      .getElementById('tiles')
+      .append(
+        ...tiles.map(([v, t]) =>
+          el('div', { className: 'tile' }, [
+            el('b', { textContent: v }),
+            el('span', { textContent: t }),
+          ]),
+        ),
+      );
+
+    let sortKey = 'overall';
+    let sortDir = 'descending';
+    let selected = (judged[0] ?? data.skills[0])?.skill;
+
+    document.getElementById('bars').append(
+      ...dimMeans.map((d) =>
+        el(
+          'button',
+          {
+            className: 'bar',
+            type: 'button',
+            onclick: () => {
+              sortKey = d.name;
+              sortDir = 'ascending';
+              render();
+            },
+          },
+          [
+            el('span', { textContent: label(d.name) }),
+            el('span', { className: 'track' }, [
+              el('span', {
+                className: `fill s${Math.round(d.value) || 1}`,
+                style: `width:${(d.value / 5) * 100}%;display:block`,
+              }),
+            ]),
+            el('span', {
+              className: 'val',
+              textContent: judged.length ? fixed(d.value) : '—',
+            }),
+          ],
+        ),
+      ),
+    );
+
+    const valueFor = (s, key) => {
+      if (key === 'skill') return s.skill;
+      if (key === 'overall') return s.overall ?? -1;
+      if (key === 'change')
+        return s.previous === undefined || s.overall === undefined
+          ? -99
+          : s.overall - s.previous;
+      return scoreOf(s, key) ?? -1;
+    };
+    const nextDirection = (key) => {
+      if (sortKey === key)
+        return sortDir === 'descending' ? 'ascending' : 'descending';
+      return key === 'skill' ? 'ascending' : 'descending';
+    };
+    const headButtons = [...document.querySelectorAll('#head button')].map(
+      (button) => {
+        const key = button.dataset.key;
+        button.addEventListener('click', () => {
+          sortDir = nextDirection(key);
+          sortKey = key;
+          render();
+        });
+        return [key, button];
+      },
+    );
+
+    const changeCell = (s) => {
+      if (s.overall === undefined || s.previous === undefined)
+        return el('span', { className: 'muted', textContent: '—' });
+      const diff = s.overall - s.previous;
+      if (Math.abs(diff) < 0.05)
+        return el('span', { className: 'muted', textContent: '±0.0' });
+      return el('span', {
+        className: diff > 0 ? 'delta-up' : 'delta-down',
+        textContent: `${diff > 0 ? '▲' : '▼'} ${fixed(Math.abs(diff))}`,
+      });
+    };
+    const row = (s) => {
+      const tr = el('tr', {
+        tabIndex: 0,
+        className: s.skill === selected ? 'selected' : '',
+        onclick: () => {
+          selected = s.skill;
+          render();
+        },
+        onkeydown: (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selected = s.skill;
+            render();
+          }
+        },
+      });
+      tr.append(
+        el('td', {}, [el('span', { className: 'mono', textContent: s.skill })]),
+      );
+      if (s.overall === undefined) {
+        tr.append(
+          el('td', {
+            className: 'err',
+            colSpan: dims.length + 2,
+            textContent: `not judged: ${s.error}`,
+          }),
+        );
+        return tr;
+      }
+      dims.forEach((d) => tr.append(el('td', {}, [chip(scoreOf(s, d))])));
+      tr.append(el('td', {}, [el('b', { textContent: fixed(s.overall) })]));
+      tr.append(el('td', {}, [changeCell(s)]));
+      return tr;
+    };
+
+    const renderDetail = () => {
+      const s = data.skills.find((x) => x.skill === selected);
+      const box = document.getElementById('detail');
+      box.replaceChildren();
+      if (!s) {
+        document.getElementById('detail-panel').hidden = true;
+        return;
+      }
+      document.getElementById('detail-panel').hidden = false;
+      document.getElementById('detail-title').textContent =
+        s.overall === undefined
+          ? `${s.skill} — not judged`
+          : `${s.skill} — ${fixed(s.overall)} overall`;
+      document.getElementById('detail-summary').textContent =
+        s.overall === undefined ? s.error : s.summary || '';
+      (s.dimensions ?? []).forEach((d) =>
+        box.append(
+          el('article', { className: 'dim' }, [
+            el('header', {}, [
+              el('h3', { textContent: label(d.name) }),
+              chip(d.score),
+            ]),
+            el('p', { textContent: d.feedback }),
+          ]),
+        ),
+      );
+    };
+
+    const render = () => {
+      const q = document.getElementById('filter').value.trim().toLowerCase();
+      const shown = data.skills
+        .filter((s) => s.skill.toLowerCase().includes(q))
+        .sort((a, b) => {
+          const x = valueFor(a, sortKey);
+          const y = valueFor(b, sortKey);
+          const order = typeof x === 'string' ? x.localeCompare(y) : x - y;
+          return sortDir === 'ascending' ? order : -order;
+        });
+      headButtons.forEach(([key, button]) =>
+        key === sortKey
+          ? button.setAttribute('aria-sort', sortDir)
+          : button.removeAttribute('aria-sort'),
+      );
+      document.getElementById('rows').replaceChildren(...shown.map(row));
+      renderDetail();
+    };
+
+    document
+      .getElementById('rubric')
+      .append(
+        ...data.rubric.flatMap((d) => [
+          el('dt', { textContent: label(d.name) }),
+          el('dd', { textContent: d.description }),
+        ]),
+      );
+    document.getElementById('filter').addEventListener('input', render);
+    render();
+  })();
+</script>
