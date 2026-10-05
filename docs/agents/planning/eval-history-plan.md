@@ -822,8 +822,10 @@ writers each holding one.
 | #1290 | codebase-explorer, product-requirement, typescript-api-engineering | tracing a feature vs a consumer requirement vs API design; a one-file lookup                                    |
 
 Each trigger task is shown to fail with `--hide <skill>` before it merges, and
-each new task carries `set: regression` unless it is known to pass
-unreliably, in which case it starts as `capability`.
+each new task starts as `set: capability` and is promoted to `regression`
+once repeated trials (#1292) show it passes reliably, as
+`evals/skills/README.md` states. An earlier draft of this sentence said the
+opposite; the README is the rule.
 
 ## 10. ADRs to write
 
