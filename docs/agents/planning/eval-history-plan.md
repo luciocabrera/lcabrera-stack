@@ -226,6 +226,7 @@ type RunEnvelope = {
     readonly kind:
       'trigger' | 'near-miss' | 'fixture' | 'quality' | 'rule-check';
     readonly set: 'regression' | 'capability';
+    readonly source: 'incident' | null; // PRD B11; validated by --check since #1298
     readonly tags: readonly string[];
     readonly task_hash: string;
     readonly fixture_hash: string | null;
@@ -376,6 +377,7 @@ create table evals.eval_task (
   task_key text not null,
   kind evals.task_kind not null,
   task_set evals.task_set not null,
+  source text check (source in ('incident')),
   tags text[] not null default '{}',
   created_at timestamptz not null default now(),
   unique (suite, task_key)
@@ -638,6 +640,13 @@ declare const attribute: (
   | { readonly kind: 'single'; readonly changed: string }
   | { readonly kind: 'multiple'; readonly changed: readonly string[] }
   | { readonly kind: 'none' };
+declare const triggerPrecisionRecall: (
+  trials: readonly TriggerTrial[],
+) => readonly {
+  readonly skill: string;
+  readonly precision: Rate;
+  readonly recall: Rate;
+}[];
 ```
 
 - **Wilson.** `center = (p + z²/2n) / (1 + z²/n)`,
@@ -656,6 +665,13 @@ declare const attribute: (
   `baseline.mean − sigma × baseline.stddev`.
 - **Flaky.** A task is flaky when, over its last `window` runs, more than
   `disagreeFraction` of them had trials that disagree.
+- **Trigger precision and recall** (PRD FR-3.4), per skill, over the skills
+  suite's valid trials (errors excluded, as for Wilson). Recall is the
+  share of trials expecting the skill in which it loaded; precision is the
+  share of trials in which it loaded that expected it. A trial that loaded
+  two skills counts toward both. Each is a `Rate`, so it carries n and its
+  Wilson interval, and falls back to `insufficient` the same way. The
+  confusion matrix (#1294, #1280) is the same counts laid out by pair.
 
 `evals/regression.config.json`, with the PRD's defaults:
 
