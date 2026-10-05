@@ -55,11 +55,17 @@ import {
   taskPassed,
   withoutSeparator,
 } from './skill-triggers.mjs';
+import {
+  confusionMatrix,
+  formatMatrix,
+  trialRecord,
+} from './trigger-matrix.mjs';
 
 const EVALS_ROOT = 'evals/skills';
 const SKILLS_ROOT = '.github/skills';
 const REPORT_DIR = '.tmp/skill-evals';
 const FIXTURE_SUFFIX = '.fixture';
+const TRIALS_FILE = join(REPORT_DIR, 'trials.json');
 const CONCURRENCY = 4;
 
 const evalDirectories = () =>
@@ -218,8 +224,12 @@ const runSelection = async ({ positionals, values }) => {
     throw new Error('the selection resolved to no tasks');
   }
   const results = await runBatches(chunk(jobs, CONCURRENCY));
+  const trials = results.map(trialRecord);
+  writeFileSync(TRIALS_FILE, JSON.stringify(trials, null, 2));
   console.log(results.map(describeResult).join('\n'));
+  console.log(`\n${formatMatrix(confusionMatrix(trials))}\n`);
   console.log(`Transcripts: ${REPORT_DIR}/`);
+  console.log(`Trials: ${TRIALS_FILE}`);
   if (results.some(({ passed }) => !passed)) {
     process.exitCode = 1;
   }
