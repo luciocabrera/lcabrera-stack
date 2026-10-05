@@ -1,0 +1,15 @@
+id: near-miss-semver-major
+name: Which semver number moves
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Under semantic versioning, which number goes up for a breaking change? One word. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-product-requirement-alone
+    config:
+      forbidden_skills:
+        - product-requirement

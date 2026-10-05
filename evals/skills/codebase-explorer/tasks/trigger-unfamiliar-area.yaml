@@ -1,0 +1,16 @@
+id: trigger-unfamiliar-area
+name: Learning an unfamiliar system
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "I'm new to this repo and have never opened the Form system. Investigate how it works across the codebase before I change anything in it. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-codebase-explorer
+    config:
+      mode: any_order
+      required_skills:
+        - codebase-explorer

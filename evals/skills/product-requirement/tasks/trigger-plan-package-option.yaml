@@ -1,0 +1,16 @@
+id: trigger-plan-package-option
+name: Planning a new option on a published package
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "I plan to add an option to @lcabrera/vite-config that a consuming repository would set. Before I start, find out what the package already promises the repositories that install it. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-product-requirement
+    config:
+      mode: any_order
+      required_skills:
+        - product-requirement

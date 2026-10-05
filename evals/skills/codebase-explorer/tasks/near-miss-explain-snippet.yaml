@@ -1,0 +1,15 @@
+id: near-miss-explain-snippet
+name: Reading one line of code
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What does `const [first, ...rest] = list` do in JavaScript? One sentence. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-codebase-explorer-alone
+    config:
+      forbidden_skills:
+        - codebase-explorer

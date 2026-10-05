@@ -1,0 +1,16 @@
+id: trigger-trace-usages
+name: Tracing a hook through the system
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Trace how the Table store is used across the whole system: every component that subscribes to it, what each one reads, and where its actions are called. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-codebase-explorer
+    config:
+      mode: any_order
+      required_skills:
+        - codebase-explorer

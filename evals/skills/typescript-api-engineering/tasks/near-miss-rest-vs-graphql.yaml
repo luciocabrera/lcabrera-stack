@@ -1,0 +1,15 @@
+id: near-miss-rest-vs-graphql
+name: REST and GraphQL in general
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "In general, how does REST differ from GraphQL? One sentence. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-typescript-api-engineering-alone
+    config:
+      forbidden_skills:
+        - typescript-api-engineering

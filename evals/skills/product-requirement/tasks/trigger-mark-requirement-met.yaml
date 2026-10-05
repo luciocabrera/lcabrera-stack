@@ -1,0 +1,16 @@
+id: trigger-mark-requirement-met
+name: Marking a requirement done
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "My branch finishes the feature that one of the requirements in docs/product/ asked for. Update that requirement so it shows the work is done. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-product-requirement
+    config:
+      mode: any_order
+      required_skills:
+        - product-requirement

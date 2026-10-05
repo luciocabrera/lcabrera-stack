@@ -1,0 +1,16 @@
+id: trigger-map-integrations
+name: Mapping every database touchpoint
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Before I refactor data access, map every place this monorepo talks to Postgres: which modules query it, and through which layer. Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-codebase-explorer
+    config:
+      mode: any_order
+      required_skills:
+        - codebase-explorer

@@ -1,0 +1,15 @@
+id: near-miss-user-story-format
+name: The user story template
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: 'What is the "As a ..., I want ..., so that ..." template usually called? One sentence. Load any skill you need, but don''t run shell commands or edit files.'
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-product-requirement-alone
+    config:
+      forbidden_skills:
+        - product-requirement

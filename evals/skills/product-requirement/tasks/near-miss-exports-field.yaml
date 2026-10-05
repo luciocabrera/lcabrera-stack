@@ -1,0 +1,15 @@
+id: near-miss-exports-field
+name: The package.json exports field
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What does the exports field in a package.json do? One sentence. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-product-requirement-alone
+    config:
+      forbidden_skills:
+        - product-requirement
