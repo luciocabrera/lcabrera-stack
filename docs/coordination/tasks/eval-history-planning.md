@@ -2,7 +2,7 @@
 id: eval-history-planning
 title: Record the eval-history PRD, plan and ADR drafts
 owner: agent:claude
-status: active
+status: review
 branch: chore/1261-eval-history-planning
 area:
   - docs/agents/planning/eval-history-*.md
@@ -12,7 +12,7 @@ area:
 started: 2026-10-05
 updated: 2026-10-05
 plan: (none)
-pr: (none)
+pr: #1295
 issue: #1261
 ---
 
