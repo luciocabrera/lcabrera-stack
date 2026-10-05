@@ -63,6 +63,15 @@ as `FAIL`, or as an `ERROR` the schema does not have. So the dispatch tells the
 verifier to write `not-met (unverified)` for a criterion it cannot establish
 without tools, and such a row does not count as a finding.
 
+**So `clean` scores `ok` with `VERDICT: FAIL`, and that is the expected
+result.** Criterion 3 says Oxlint reports nothing, which only running Oxlint
+can show. The verifier marks it `not-met (unverified)`, and §4 of the contract
+turns any unmet criterion into a FAIL. `PASS (inspection-only)` is out too,
+because criterion 3 admits a gate. Here FAIL means "I cannot sign this off
+without running anything", not "I found a mistake". A verifier with its tools
+returns PASS on clean work; testing that tier is
+[#1254](https://github.com/luciocabrera/lcabrera-stack/issues/1254).
+
 ## Adding a fixture
 
 1. Write the violation as one edit to `clean/change.diff`, breaking one
