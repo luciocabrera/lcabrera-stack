@@ -16,6 +16,7 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
+  rmSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -26,9 +27,11 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import { runGit } from '../../packages/repo-standards/scripts/git-exec.mjs';
 import {
+  chunk,
   drain,
   errorText,
   finalResult,
+  runBatches,
   sessionProblem,
   withoutSeparator,
 } from '../agent-sessions.mjs';
@@ -72,29 +75,37 @@ const git = (args, cwd = REPO_ROOT) => {
 const vp = (args, cwd) =>
   execFileSync(VP_BIN, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
 
+const applyPatch = ({ text, worktree }) => {
+  const patch = `${worktree}.diff`;
+  writeFileSync(patch, text);
+  try {
+    git(['apply', patch], worktree);
+  } finally {
+    rmSync(patch, { force: true });
+  }
+};
+
 const applyFixture = ({ diff, worktree }) => {
   const number = nextAdrNumber(
     readdirSync(join(worktree, 'docs', 'decisions')),
   );
-  const patch = join(worktree, '..', `${worktree.split('/').at(-1)}.diff`);
-  writeFileSync(patch, withAdrNumber({ diff, number }));
-  git(['apply', patch], worktree);
+  const text = withAdrNumber({ diff, number });
+  applyPatch({ text, worktree });
   git(['add', '-A'], worktree);
   git(
     [...IDENTITY, 'commit', '-q', '-m', 'test(evals): verifier fixture'],
     worktree,
   );
-  return readFileSync(patch, 'utf8');
+  return text;
 };
 
-const prepare = ({ base, branch, diff }) => {
-  const worktree = mkdtempSync(join(tmpdir(), 'verifier-tooled-'));
+const prepare = ({ base, branch, diff, worktree }) => {
   git(['worktree', 'add', '-q', '-b', branch, worktree, base]);
   const applied = applyFixture({ diff, worktree });
   vp(['install', '--frozen-lockfile'], worktree);
   vp(['run', 'typegen:all'], worktree);
   vp(['run', 'worktree:env'], worktree);
-  return { applied, head: git(['rev-parse', 'HEAD'], worktree), worktree };
+  return { applied, head: git(['rev-parse', 'HEAD'], worktree) };
 };
 
 const treeProblem = ({ before, head, worktree }) => {
@@ -134,22 +145,24 @@ const certify = async ({ dispatch, systemPrompt, tools, worktree }) => {
 };
 
 const cleanUp = ({ branch, keep, worktree }) => {
-  if (keep || worktree === undefined) return;
+  if (keep) return;
   runGit({ args: ['worktree', 'remove', '--force', worktree], cwd: REPO_ROOT });
+  runGit({ args: ['worktree', 'prune'], cwd: REPO_ROOT });
   runGit({ args: ['branch', '-D', branch], cwd: REPO_ROOT });
+  rmSync(worktree, { force: true, recursive: true });
 };
 
 const runOnce = async ({ fixture, index, keep, shared }) => {
   const branch = `eval/verifier-tooled/${fixture}-${Date.now()}-${index}`;
   const before = git(['status', '--porcelain']);
-  let worktree;
+  const worktree = mkdtempSync(join(tmpdir(), 'verifier-tooled-'));
   try {
     const prepared = prepare({
       base: shared.base,
       branch,
       diff: read(`./${fixture}/change.diff`),
+      worktree,
     });
-    worktree = prepared.worktree;
     const dispatch = tooledDispatch({
       ...shared,
       branch,
@@ -182,12 +195,28 @@ const save = ({ fixture, runs }) => {
 };
 
 const runFixture = async ({ fixture, keep, runs, shared }) => {
-  const results = [];
-  for (const index of Array.from({ length: runs }, (_, at) => at)) {
-    results.push(await runOnce({ fixture, index, keep, shared }));
-  }
+  const results = await runBatches(
+    chunk(
+      Array.from(
+        { length: runs },
+        (_, index) => () => runOnce({ fixture, index, keep, shared }),
+      ),
+      1,
+    ),
+  );
   save({ fixture, runs: results });
   return results;
+};
+
+const judgeAndPrint = async ({ expected, fixture, keep, runs, shared }) => {
+  const results = await runFixture({ fixture, keep, runs, shared });
+  const judgement = judgeTooledFixture({
+    expectedNotMet: expected[fixture],
+    fixture,
+    runs: results,
+  });
+  console.log(describeTooledJudgement(judgement));
+  return judgement;
 };
 
 const selected = ({ expected, names }) => {
@@ -218,22 +247,15 @@ const main = async () => {
     tools: agentTools(definition),
   };
   mkdirSync(REPORT_DIR, { recursive: true });
-  const judgements = [];
-  for (const fixture of fixtures) {
-    const results = await runFixture({
-      fixture,
-      keep: values.keep,
-      runs,
-      shared,
-    });
-    const judgement = judgeTooledFixture({
-      expectedNotMet: expected[fixture],
-      fixture,
-      runs: results,
-    });
-    console.log(describeTooledJudgement(judgement));
-    judgements.push(judgement);
-  }
+  const judgements = await runBatches(
+    chunk(
+      fixtures.map(
+        (fixture) => () =>
+          judgeAndPrint({ expected, fixture, keep: values.keep, runs, shared }),
+      ),
+      1,
+    ),
+  );
   const { exitCode, footer } = suiteEnd({ judgements, reportDir: REPORT_DIR });
   console.log(footer);
   process.exitCode = exitCode;

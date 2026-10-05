@@ -110,9 +110,13 @@ export const judgeTooledFixture = ({ expectedNotMet, fixture, runs }) => {
   };
 };
 
+const proofText = (proof) => (proof ? 'yes' : 'no');
+
+const verdictText = (verdict) => (verdict ?? '(no verdict line)').slice(0, 30);
+
 const describeRun = ({ error, notMet, proof, verdict }) =>
   error === undefined
-    ? `not-met [${notMet.join(',')}], verdict ${(verdict ?? '(no verdict line)').slice(0, 30)}, gate proof ${proof ? 'yes' : 'no'}`
+    ? `not-met [${notMet.join(',')}], verdict ${verdictText(verdict)}, gate proof ${proofText(proof)}`
     : `error: ${error}`;
 
 export const describeTooledJudgement = ({
