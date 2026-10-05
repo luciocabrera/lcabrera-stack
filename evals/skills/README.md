@@ -5,11 +5,12 @@ its `tasks/`, and may have more:
 
 - a trigger task (`expected.should_trigger: true`): a prompt the skill exists
   for. Passes only if the session invokes the skill.
-- a near-miss task (`should_trigger: false` or absent): a prompt close to the
+- a near-miss task (`expected.should_trigger: false`): a prompt close to the
   skill's subject that it should not handle. Passes only if the session does
   not invoke it.
 
-The kind comes from `should_trigger`, not from the file name or the `id`. Each
+The kind comes from `should_trigger`, not from the file name or the `id`, and
+`--check` fails a task whose `should_trigger` is missing or not a boolean. Each
 task's `id` must be unique within its skill, because the transcript is named
 after it.
 

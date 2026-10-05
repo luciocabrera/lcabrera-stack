@@ -22,7 +22,7 @@ export const readTask = (source) => {
     name: task.name,
     prompt: task.inputs.prompt,
     set: task.set,
-    shouldTrigger: task.expected.should_trigger === true,
+    shouldTrigger: task.expected?.should_trigger,
     source: task.source,
   };
 };
@@ -160,8 +160,25 @@ const sourceProblem = (task) =>
         `${task.file} has source "${task.source}"; leave it out, or give it source: ${TASK_SOURCES.join(' or source: ')}`,
       ];
 
+const expectationProblem = (task) => {
+  if (typeof task.shouldTrigger === 'boolean') {
+    return [];
+  }
+  const found =
+    task.shouldTrigger === undefined
+      ? 'has no expected.should_trigger'
+      : `has should_trigger ${JSON.stringify(task.shouldTrigger)}`;
+  return [
+    `${task.file} ${found}; give it expected.should_trigger: true or false`,
+  ];
+};
+
 const tagProblems = ({ tasks }) =>
-  tasks.flatMap((task) => [...setProblem(task), ...sourceProblem(task)]);
+  tasks.flatMap((task) => [
+    ...expectationProblem(task),
+    ...setProblem(task),
+    ...sourceProblem(task),
+  ]);
 
 const namingProblems = ({ declared, name, tasks }) => [
   ...(declared === name

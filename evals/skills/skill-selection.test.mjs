@@ -263,4 +263,26 @@ describe('coverageProblems', () => {
       'evals/skills/a/tasks/trigger-2.yaml has source "guess"; leave it out, or give it source: incident',
     ]);
   });
+
+  it('names the file of a task with no expected block or a should_trigger that is not a boolean', () => {
+    expect(
+      coverageProblems({
+        catalog: [{ name: 'a', scoped: false }],
+        declared: declaredAs('a'),
+        evals: new Map([
+          [
+            'a',
+            [
+              ...graded('a'),
+              task('a', 'blank', undefined),
+              task('a', 'quoted', 'true'),
+            ],
+          ],
+        ]),
+      }),
+    ).toStrictEqual([
+      'evals/skills/a/tasks/blank.yaml has no expected.should_trigger; give it expected.should_trigger: true or false',
+      'evals/skills/a/tasks/quoted.yaml has should_trigger "true"; give it expected.should_trigger: true or false',
+    ]);
+  });
 });

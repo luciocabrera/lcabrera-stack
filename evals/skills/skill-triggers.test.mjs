@@ -44,15 +44,24 @@ describe('readTask', () => {
     });
   });
 
-  it('treats a missing should_trigger as a near-miss', () => {
-    expect(
-      readTask('id: n\nname: n\ninputs:\n  prompt: p\nexpected: {}\n'),
-    ).toMatchObject({
+  it('leaves should_trigger unread when there is no expected block', () => {
+    expect(readTask('id: n\nname: n\ninputs:\n  prompt: p\n')).toMatchObject({
       fixture: undefined,
       set: undefined,
-      shouldTrigger: false,
+      shouldTrigger: undefined,
       source: undefined,
     });
+    expect(
+      readTask('id: n\nname: n\ninputs:\n  prompt: p\nexpected:\n'),
+    ).toMatchObject({ shouldTrigger: undefined });
+  });
+
+  it('keeps a should_trigger that is not a boolean as written', () => {
+    expect(
+      readTask(
+        'id: n\nname: n\ninputs:\n  prompt: p\nexpected:\n  should_trigger: "yes"\n',
+      ),
+    ).toMatchObject({ shouldTrigger: 'yes' });
   });
 });
 
