@@ -16,6 +16,8 @@ evidence:
     ref: packages/ui/src/components/Table/TableBodyCell/utils/renderCellContent.util.tsx
   - type: code
     ref: packages/ui/src/components/Table/TableBody/utils/buildTableBodyCellDescriptor.util.tsx
+  - type: code
+    ref: packages/ui/src/design-system/tokens/colors.stylex.ts
   - type: test
     ref: apps/showcase/src/routes/enterprise-orders/enterprise-orders.loader.test.ts
   - type: doc
@@ -27,39 +29,57 @@ evidence:
 ## Statement
 
 My columns come from the server, and some of them should look like more than
-text: a score as a coloured pill, a change as a signed arrow, a name in a fixed
-width font. I want to say that in the column definition the server sends and
-have the grid draw it. When I need a look the library does not ship, I want to
-register it once on the client, without rewriting columns the server already
-sent.
+text: a score as a pill coloured by its value, a change as a signed arrow, a
+name in a fixed-width font. I want to say that in the column definition the
+server sends, including colours the library does not know, and have the grid
+draw it in both themes. When I need a look the library does not ship, I want to
+register it once on the client and have it checked the same way as the
+built-in ones.
 
 ## Acceptance
 
-- `TableColumn` has a `cell` field whose type has no function member, and the
-  no-function-path assertion in `enterprise-orders.loader.test.ts` still passes
-  with `cell` set on a column.
-- `@lcabrera/ui` renders the `badge`, `delta` and `text` kinds, and unit tests
-  cover each one, including threshold edges and a categorical miss.
-- A `cell` of an unknown kind, or with malformed params, renders the column's
-  `dataType` default, and a test shows neither throws.
-- A renderer registered on the client by kind replaces the built-in of the same
-  name, and a test covers it.
-- A showcase route renders each built-in kind from columns its loader returns.
+- `TableColumn` has a `cell` field holding a `{ kind, params }` call with no
+  function member, and the no-function-path assertion in
+  `enterprise-orders.loader.test.ts` still passes with `cell` and a
+  `cellPalette` set.
+- A cell renderer is registered on the client with a kind, a Standard Schema
+  for its params and a render function. A test registers one backed by Zod
+  while `@lcabrera/ui` declares no Zod dependency.
+- `@lcabrera/ui` ships `badge`, `delta` and `text` renderers, and unit tests
+  cover their rules, including rule order, threshold edges and a categorical
+  match.
+- A call whose kind is not registered, or whose params fail the renderer's
+  schema, renders the column's `dataType` default, and a test shows neither
+  throws.
+- A renderer registered under an existing kind replaces the built-in one, and a
+  test covers it.
+- A tone name resolves against the built-in tokens, then the palette the loader
+  sends, then the palette the client passes, with the last one winning. An
+  unknown tone or an invalid colour renders as `neutral`. Tests cover each step.
+- A palette tone uses its dark pair under the dark theme.
+- A showcase route renders each built-in kind, and a tone only its loader
+  defines, from data that loader returns.
 - A badge shows its value as text, so colour is never the only signal.
 
 ## Notes
 
 ![A skills grid: monospace names, score pills coloured by value, a bold overall and a signed change](../assets/custom-cells-reference.png)
 
-The screenshot is the target. Every column in it can be described as data: the
-name is `text` with a monospace flag, each score is a `badge` with numeric
-thresholds, the overall is bold `text` over a one-decimal number, and the change
-is a `delta`. The proposed descriptor shapes, the open questions and the scope
-are on #1318.
+The screenshot is the target. Each of its columns is one call:
 
-`render` already exists and does not answer this. It is a function, and
-single-fetch replaces a function with `undefined` on the client, which is the
-trap ADR-009 recorded for filter options. The same answer applies here: the
-server sends a `{ kind, params }` descriptor and the client owns the
-implementation. The client merges renderers by kind, never by column key, so
-the server stays the one place that decides how a column looks.
+- the name is `text` with `monospace`,
+- each score is a `badge` whose rules map 4, 3, 2 and below to four tones,
+- the overall is bold `text` over a one-decimal number,
+- the change is a `delta`.
+
+The orange step has no built-in tone, and it should not need one. The loader
+names it, and the palette it sends defines it. #1318 holds the call and
+renderer types, the palette shape and the open questions.
+
+`render` already exists and does not answer this, because single-fetch replaces
+a function with `undefined` on the client. ADR-009 hit that trap for filter
+options. The answer here has the same shape as a tool call to an LLM: the
+server sends a name and arguments, and the client validates the arguments
+against the schema of the renderer it registered under that name, and then
+runs it. The client merges renderers and tones by name, never by column key,
+so the server stays the one place that decides which column looks how.
