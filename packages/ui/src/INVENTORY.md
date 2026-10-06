@@ -583,6 +583,8 @@ data context is re-created on every navigation.
 | `mockDialogElement`                    | `utils/tests/mockDialogElement.util.ts`                   | Mocks HTMLDialogElement prototype behavior with restore handles for test teardown                                                 |
 | `MockToggleSwitch`                     | `utils/tests/createMockToggleSwitch.util.tsx`             | The labelled button stand-in every suite that mocks `ToggleSwitch` renders                                                        |
 | `MockSectionToolbar`                   | `utils/tests/createMockSectionToolbar.util.tsx`           | The button stand-in the section-toolbar suites render, carrying each label, disabled state and click handler                      |
+| `createMockVariantToolbar`             | `utils/tests/createMockVariantToolbar.util.tsx`           | The busy-and-variant stand-in the section suites render for a mocked footer/toolbar, under the `data-testid` each suite names     |
+| `MockColumnWidthPresetButtons`         | `utils/tests/createMockColumnWidthPresetButtons.util.tsx` | The Min/Max/Default stand-in every suite that mocks `ColumnWidthPresetButtons` renders, exposing the selected preset              |
 | `createMockVirtualSelect`              | `utils/tests/createMockVirtualSelect.util.tsx`            | The option-list stand-in every suite that mocks `VirtualSelect` renders; `testId` overrides the placeholder-derived `data-testid` |
 
 ### `src/components/Table/ColumnSettingsDrawer/ColumnDrawerContext/utils/`

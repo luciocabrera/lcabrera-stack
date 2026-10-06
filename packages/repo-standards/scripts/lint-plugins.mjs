@@ -59,8 +59,8 @@ export const UNPROBED_PLUGINS = {
     'TypeScript error first, so a probe passes whether or not the plugin loaded',
 };
 
-export const probeFilename = ({ ext, plugin }) =>
-  `${plugin}.probe.${ext ?? 'ts'}`;
+export const probeFilename = ({ ext = 'ts', plugin }) =>
+  `${plugin}.probe.${ext}`;
 
 export const pluginsWithoutCoverage = (plugins) => {
   const covered = new Set([

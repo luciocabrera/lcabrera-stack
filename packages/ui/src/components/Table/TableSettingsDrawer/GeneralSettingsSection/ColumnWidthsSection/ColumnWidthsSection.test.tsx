@@ -15,15 +15,6 @@ const { setColumnsSizingMock, useGetColumnsMock } = vi.hoisted(() => ({
   useGetColumnsMock: vi.fn(() => [] as unknown[]),
 }));
 
-type MockPresetButtonsProps = {
-  readonly isMaxDisabled?: boolean;
-  readonly isMinDisabled?: boolean;
-  readonly onToggleDefault: () => void;
-  readonly onToggleMax: () => void;
-  readonly onToggleMin: () => void;
-  readonly selectedPreset?: string;
-};
-
 vi.mock('#ui/components/SidePanel', () => ({
   SidePanelSection: ({ children }: { readonly children: React.ReactNode }) => (
     <section>{children}</section>
@@ -42,31 +33,17 @@ vi.mock(
 
 vi.mock(
   '#ui/components/Table/shared/ColumnWidthPresetButtons',
-  async (importOriginal) => ({
-    ...(await importOriginal<
-      typeof import('#ui/components/Table/shared/ColumnWidthPresetButtons')
-    >()),
-    ColumnWidthPresetButtons: ({
-      isMaxDisabled,
-      isMinDisabled,
-      onToggleDefault,
-      onToggleMax,
-      onToggleMin,
-      selectedPreset,
-    }: MockPresetButtonsProps) => (
-      <div data-selected-preset={selectedPreset ?? 'none'}>
-        <button disabled={isMinDisabled} onClick={onToggleMin} type='button'>
-          Min
-        </button>
-        <button disabled={isMaxDisabled} onClick={onToggleMax} type='button'>
-          Max
-        </button>
-        <button onClick={onToggleDefault} type='button'>
-          Default
-        </button>
-      </div>
-    ),
-  }),
+  async (importOriginal) => {
+    const { MockColumnWidthPresetButtons } =
+      await import('#ui/utils/tests/createMockColumnWidthPresetButtons.util');
+
+    return {
+      ...(await importOriginal<
+        typeof import('#ui/components/Table/shared/ColumnWidthPresetButtons')
+      >()),
+      ColumnWidthPresetButtons: MockColumnWidthPresetButtons,
+    };
+  },
 );
 
 vi.mock('../../TableDrawerContext/actions', () => ({

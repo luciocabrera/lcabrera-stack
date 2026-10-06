@@ -40,19 +40,14 @@ vi.mock('../hooks', () => ({
   useGetRenderedColumnKeys: () => mockRenderedColumnKeys,
 }));
 
-vi.mock('../ColumnOrderSectionToolbar', () => ({
-  ColumnOrderSectionToolbar: ({
-    isBusy,
-    variant,
-  }: {
-    readonly isBusy?: boolean;
-    readonly variant?: 'footer' | 'toolbar';
-  }) => (
-    <div data-testid='section-toolbar'>
-      {variant ?? 'footer'}:{String(isBusy ?? false)}
-    </div>
-  ),
-}));
+vi.mock('../ColumnOrderSectionToolbar', async () => {
+  const { createMockVariantToolbar } =
+    await import('#ui/utils/tests/createMockVariantToolbar.util');
+
+  return {
+    ColumnOrderSectionToolbar: createMockVariantToolbar('section-toolbar'),
+  };
+});
 
 import { ColumnOrderSectionHeader } from './ColumnOrderSectionHeader.component';
 

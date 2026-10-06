@@ -59,8 +59,7 @@ const toEntries = (style: unknown) =>
 
 const rigidEntries = toEntries(referenceStyles.rigid);
 
-const toClassNames = (className: string | undefined) =>
-  (className ?? '').split(' ').filter(Boolean);
+const toClassNames = (className = '') => className.split(' ').filter(Boolean);
 
 const rowSurfaceClassNames = toClassNames(
   stylex.props(referenceStyles.rowSurface).className,

@@ -35,6 +35,7 @@ import { fileURLToPath } from 'node:url';
 import { readGates } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 import { parseJsonc } from './jsonc.mjs';
+import { renderFinding } from './react-doctor-finding.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
@@ -73,11 +74,6 @@ const scan = () => {
 
 const fail = (message) => {
   throw new Error(message);
-};
-
-const render = ({ id, line, message, normalizedFilePath, rule }) => {
-  const [repoPath] = (id ?? '').split('::', 1);
-  return `  ${repoPath || normalizedFilePath}:${line}  ${rule}\n      ${message}`;
 };
 
 const assertConfigParses = () => {
@@ -120,7 +116,8 @@ const main = () => {
 
   if (errors.length > 0) {
     process.stderr.write('\nReact Doctor error-severity finding(s):\n');
-    for (const finding of errors) process.stderr.write(`${render(finding)}\n`);
+    for (const finding of errors)
+      process.stderr.write(`${renderFinding(finding)}\n`);
     fail(
       `${errors.length} error-severity finding(s). Fix the code; a genuine false ` +
         `positive needs a justified entry in doctor.config.jsonc (see ADR-055).`,

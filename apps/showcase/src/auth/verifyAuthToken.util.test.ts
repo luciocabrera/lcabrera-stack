@@ -39,7 +39,7 @@ describe('verifyAuthToken', () => {
   });
 
   it('returns undefined when the payload is tampered with', () => {
-    const [, signature] = validToken.split('.', 2);
+    const [, signature = ''] = validToken.split('.', 2);
     const forgedPayload = Buffer.from(
       JSON.stringify({ ...CLAIMS, sub: 'attacker@example.com' }),
     ).toString('base64url');
@@ -48,7 +48,7 @@ describe('verifyAuthToken', () => {
       verifyAuthToken({
         nowSeconds: 1500,
         secret: SECRET,
-        token: `${forgedPayload}.${signature ?? ''}`,
+        token: `${forgedPayload}.${signature}`,
       }),
     ).toBeUndefined();
   });
