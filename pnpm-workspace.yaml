@@ -26,7 +26,15 @@ catalogs:
     pg: ^8.23.1
 
   build:
-    '@babel/preset-typescript': ^8.0.1
+    # Both Babel entries stay on the major whose `@babel/core` the peer of
+    # `vite-plugin-babel` accepts. The newer preset major peers on the newer
+    # core, so neither can move until a `vite-plugin-babel` release accepts
+    # that core. Moving only the preset leaves its core peer unmet, and its
+    # options reject the `allExtensions`/`isTSX` the Babel configs pass.
+    # Moving the core, alone or with the preset, leaves `vite-plugin-babel`'s
+    # peer unmet.
+    '@babel/core': ^7.29.7
+    '@babel/preset-typescript': ^7.29.7
     typescript: ^6.0.3
     # `vite` is aliased to Vite+ core so the whole workspace resolves ONE Vite
     # instance — the `overrides` at the bottom redirect every `vite` edge here.
