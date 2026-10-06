@@ -124,7 +124,8 @@
         "sha256": "c91136100a7304fb66490e526a37662611b28da19f4cccc53d41cfcf75207588",
         "uri": ".tmp/eval-results/x/verifier-fixtures-missing-test.json"
       },
-      "trial_index": 0
+      "trial_index": 0,
+      "turns": 7
     },
     {
       "cost_usd_reported": 0.12,
@@ -163,7 +164,8 @@
         "sha256": "c91136100a7304fb66490e526a37662611b28da19f4cccc53d41cfcf75207588",
         "uri": ".tmp/eval-results/x/verifier-fixtures-missing-test.json"
       },
-      "trial_index": 1
+      "trial_index": 1,
+      "turns": 7
     }
   ]
 }

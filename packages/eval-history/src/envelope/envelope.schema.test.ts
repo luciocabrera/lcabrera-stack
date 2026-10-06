@@ -76,6 +76,31 @@ describe('runEnvelopeSchema', () => {
     ).toEqual(['trials.0.detail.schema']);
   });
 
+  it('keeps the turn count the runner reported, or null when none ran', () => {
+    expect(readFixture('skills').trials.map(({ turns }) => turns)).toEqual([
+      4, 4, 4,
+    ]);
+    expect(readFixture('rules-consistency').trials[0]?.turns).toBeNull();
+  });
+
+  it('rejects a trial with no turns, or a turn count that is not a whole number', () => {
+    const envelope = readFixture('skills');
+    const [trial] = envelope.trials;
+    const withoutTurns = Object.fromEntries(
+      Object.entries(trial ?? {}).filter(([key]) => key !== 'turns'),
+    );
+
+    expect(issuePaths({ ...envelope, trials: [withoutTurns] })).toEqual([
+      'trials.0.turns',
+    ]);
+    expect(
+      issuePaths({ ...envelope, trials: [{ ...trial, turns: 2.5 }] }),
+    ).toEqual(['trials.0.turns']);
+    expect(
+      issuePaths({ ...envelope, trials: [{ ...trial, turns: -1 }] }),
+    ).toEqual(['trials.0.turns']);
+  });
+
   it('rejects a trial naming a task the envelope does not declare', () => {
     const envelope = readFixture('skills');
     const [trial] = envelope.trials;

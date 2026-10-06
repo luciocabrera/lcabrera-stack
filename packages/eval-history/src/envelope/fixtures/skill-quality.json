@@ -130,7 +130,8 @@
         "sha256": "576e7c3541639b3c58893c1c9109b5a97ed054e49c8b87d56125e49c64293646",
         "uri": ".tmp/eval-results/x/skill-quality-unslop.json"
       },
-      "trial_index": 0
+      "trial_index": 0,
+      "turns": 2
     }
   ]
 }

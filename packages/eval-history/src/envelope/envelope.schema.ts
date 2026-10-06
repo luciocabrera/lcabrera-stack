@@ -196,6 +196,7 @@ const trialSchema = z.object({
   tokens: tokensSchema,
   transcript: transcriptSchema.nullable(),
   trial_index: count,
+  turns: count.nullable(),
 });
 
 export const envelopeShapeSchema = z.object({

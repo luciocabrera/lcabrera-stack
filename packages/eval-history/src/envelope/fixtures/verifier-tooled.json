@@ -124,7 +124,8 @@
         "sha256": "810b30b3732435a7343cc61f8cb3d5dbc52323ebbb743fc7cd4499a456b0e0bf",
         "uri": ".tmp/eval-results/x/verifier-tooled-gate-proof.json"
       },
-      "trial_index": 0
+      "trial_index": 0,
+      "turns": 40
     }
   ]
 }
