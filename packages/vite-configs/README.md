@@ -155,11 +155,13 @@ wider range has not been tested. `@babel/preset-typescript` is the exception:
 its range also admits the older major that matches the `@babel/core`
 `vite-plugin-babel` peers on, because `./plugins` hands the preset to that plugin
 and only that major installs with no unmet peer. This package's own suite runs
-the newest major in the range, so the older one is exercised only by projects
-that install it.
+that older major, so the newer one is exercised only by projects that install
+it.
 
 Options differ by major. On the older one, a project that includes files by
-module id rather than by extension passes `{ allExtensions: true, isTSX: true }`.
+module id rather than by extension passes `{ allExtensions: true, isTSX: true }`,
+plus `allowDeclareFields: true` to keep a class field declared without an
+initializer, which the newer major keeps by default.
 The newer one takes `{ ignoreExtensions: true }` for that, and since that option
 does not enable JSX, the project also passes `parserOpts: { plugins: ['jsx'] }`
 to the Babel pass.

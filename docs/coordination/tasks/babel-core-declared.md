@@ -2,7 +2,7 @@
 id: babel-core-declared
 title: build(ui): declare the @babel/core packages/ui and the showcase build with
 owner: agent:claude
-status: active
+status: review
 branch: build/1331-babel-core-declared
 area:
   - pnpm-workspace.yaml
@@ -11,6 +11,9 @@ area:
   - apps/showcase/package.json
   - .changeset/**
   - packages/vite-configs/README.md
+  - packages/ui/README.md
+  - packages/ui/config/vite.plugins.config.ts
+  - apps/showcase/config/vite.plugins.config.ts
 started: 2026-10-06
 updated: 2026-10-06
 plan: (none)
@@ -24,6 +27,6 @@ build(ui): declare the @babel/core packages/ui and the showcase build with
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate run, PR open for review
 - Blockers: none
 - Next:

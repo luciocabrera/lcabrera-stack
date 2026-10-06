@@ -26,7 +26,8 @@ catalogs:
     pg: ^8.23.1
 
   build:
-    '@babel/preset-typescript': ^8.0.1
+    '@babel/core': ^7.29.7
+    '@babel/preset-typescript': ^7.29.7
     typescript: ^6.0.3
     # `vite` is aliased to Vite+ core so the whole workspace resolves ONE Vite
     # instance — the `overrides` at the bottom redirect every `vite` edge here.

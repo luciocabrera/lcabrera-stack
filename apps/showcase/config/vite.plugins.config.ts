@@ -3,15 +3,10 @@ import { createReactRouterPluginsConfig } from '@lcabrera/vite-config/plugins';
 export const pluginsConfig = createReactRouterPluginsConfig({
   appRootUrl: import.meta.url,
   babelConfigOverrides: {
-    parserOpts: {
-      plugins: ['jsx'],
-    },
     presets: [
       [
         '@babel/preset-typescript',
-        {
-          ignoreExtensions: true,
-        },
+        { allExtensions: true, allowDeclareFields: true, isTSX: true },
       ],
     ],
   },

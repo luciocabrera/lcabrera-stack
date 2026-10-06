@@ -61,9 +61,13 @@ export default {
     stylex.vite({ useCSSLayers: true }),
     babel({
       babelConfig: {
-        parserOpts: { plugins: ['jsx'] },
         plugins: [['babel-plugin-react-compiler']],
-        presets: [['@babel/preset-typescript', { ignoreExtensions: true }]],
+        presets: [
+          [
+            '@babel/preset-typescript',
+            { allExtensions: true, allowDeclareFields: true, isTSX: true },
+          ],
+        ],
       },
       include: /@lcabrera\/ui\/src\/(?!.*\.test\.).*\.[jt]sx?(\?.*)?$/,
     }),
