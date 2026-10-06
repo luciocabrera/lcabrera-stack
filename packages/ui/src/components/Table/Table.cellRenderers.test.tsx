@@ -338,6 +338,35 @@ describe('Table cell renderers', () => {
     expect(unhandled).not.toHaveBeenCalled();
   });
 
+  it('draws the formatted dataType default when a renderer returns undefined', async () => {
+    const deferring: TableCellRenderer = {
+      kind: 'defer',
+      params: {
+        '~standard': {
+          validate: () => ({ value: {} }),
+          vendor: 'test',
+          version: 1,
+        },
+      },
+      render: () => undefined,
+    };
+
+    await renderGrid({
+      cellRenderers: [deferring],
+      columns: withColumn({
+        cell: { kind: 'defer' },
+        dataType: 'number',
+        format: { number: { minimumFractionDigits: 2 } },
+        key: 'score',
+        label: 'Clarity',
+      }),
+    });
+
+    expect(cellOf({ columnKey: 'score', rowIndex: 0 }).textContent).toBe(
+      '4.00',
+    );
+  });
+
   it('lets a renderer registered under an existing kind replace the built-in', async () => {
     const params: StandardSchemaV1<{ readonly label: string }> = {
       '~standard': {

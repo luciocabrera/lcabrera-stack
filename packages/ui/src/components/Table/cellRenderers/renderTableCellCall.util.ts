@@ -31,13 +31,13 @@ export const renderTableCellCall = <TData>({
     value,
   });
 
-  return {
-    content: outcome.renderer.render({
-      formatted,
-      params: outcome.params,
-      row,
-      tone,
-      value,
-    }),
-  };
+  const content = outcome.renderer.render({
+    formatted,
+    params: outcome.params,
+    row,
+    tone,
+    value,
+  });
+
+  return content === undefined ? undefined : { content };
 };

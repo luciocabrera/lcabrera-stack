@@ -68,7 +68,9 @@ would read as a single score.
 A renderer receives the raw `value`, the `row`, its validated `params`, the
 column's `dataType` default rendering as `formatted`, and `tone(name)`. An
 exception thrown by a renderer's own `render` is not caught, the same contract
-`render` on a column has.
+`render` on a column has. A renderer that returns `undefined` hands the cell back to the `dataType`
+default, with the column's `format` and `label`, so a renderer can draw only the
+rows it cares about.
 
 **Colours are tone names.** A call names a tone; `tone(name)` resolves it to a
 `{ background, text }` pair for the active theme by walking the palettes from

@@ -83,6 +83,20 @@ describe('renderTableCellCall', () => {
     ).toBeUndefined();
   });
 
+  it('hands the cell back to the default path when the renderer draws nothing', () => {
+    render.mockReturnValueOnce(undefined);
+
+    expect(
+      renderTableCellCall({
+        cellCall: { outcome: RESOLVED, tone },
+        col: COLUMN,
+        isLoadingState: false,
+        row: ROW,
+        value: 3,
+      }),
+    ).toBeUndefined();
+  });
+
   it('hands the renderer its validated params, the row, the value and the formatted default', () => {
     expect(
       renderTableCellCall({
