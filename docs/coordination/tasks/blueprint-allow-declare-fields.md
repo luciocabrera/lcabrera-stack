@@ -2,7 +2,7 @@
 id: blueprint-allow-declare-fields
 title: fix(devkit): keep uninitialised class fields in the blueprint Babel config
 owner: agent:claude
-status: active
+status: review
 branch: fix/1336-blueprint-allow-declare-fields
 area:
   - packages/devkit/assets/full/apps/web/vite.config.ts
