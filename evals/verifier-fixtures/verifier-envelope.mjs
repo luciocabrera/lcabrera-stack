@@ -94,7 +94,6 @@ export const verifierTrial = ({
   });
 
 export const tooledTrial = ({
-  error,
   expectedNotMet,
   fixture,
   matched,
@@ -111,7 +110,7 @@ export const tooledTrial = ({
       gate_proof_seen: run.proof,
       schema: 'verifier-tooled/1',
     },
-    error,
+    error: run.error,
     fallbackClass: setupFailed ? 'setup' : 'harness',
     metrics,
     passed: matched,

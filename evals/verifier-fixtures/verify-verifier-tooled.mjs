@@ -155,7 +155,6 @@ const recordOnce = ({
   const run = readTooledRun(result);
   record.addTrial(
     tooledTrial({
-      error: result.error,
       expectedNotMet,
       fixture,
       matched: tooledRunCounts({ expectedNotMet, run }),

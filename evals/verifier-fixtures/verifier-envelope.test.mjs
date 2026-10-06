@@ -18,6 +18,7 @@ import {
   verifierSubject,
   verifierTrial,
 } from './verifier-envelope.mjs';
+import { readTooledRun, tooledRunCounts } from './tooled-fixtures.mjs';
 
 const task = (suite) =>
   fixtureTask({
@@ -99,13 +100,12 @@ describe('verifier envelopes', () => {
 
   it('records a tooled setup failure as an error, not a fail', () => {
     const trial = tooledTrial({
-      error: 'setup failed: no worktree',
       expectedNotMet: [2],
       fixture: 'missing-test',
       matched: false,
       metrics: undefined,
       queuedAt: STARTED_AT,
-      run: { notMet: [], proof: false, verdict: undefined },
+      run: readTooledRun({ error: 'setup failed: no worktree', report: '' }),
       setupFailed: true,
       transcript: null,
       trialIndex: 0,
@@ -123,5 +123,39 @@ describe('verifier envelopes', () => {
       parseEnvelope(envelopeFor({ suite: 'verifier-tooled', trials: [trial] }))
         .ok,
     ).toBe(true);
+  });
+
+  it('records a run that changed its worktree as an error, not a fail', () => {
+    const report = [
+      'VERDICT: FAIL',
+      '',
+      '| # | Criterion | Outcome | Method | Falsifier |',
+      '|---|---|---|---|---|',
+      '| 2 | a | not-met | ran it | x |',
+      '',
+      'Failed: vp run test exit 1',
+      'Passed: vp run test exit 0',
+    ].join('\n');
+    const dirtyRun = readTooledRun({
+      report,
+      treeProblem: 'the worktree was left dirty: M a.ts',
+    });
+    expect(
+      tooledTrial({
+        expectedNotMet: [2],
+        fixture: 'missing-test',
+        matched: tooledRunCounts({ expectedNotMet: [2], run: dirtyRun }),
+        metrics: finishedSession(),
+        queuedAt: STARTED_AT,
+        run: dirtyRun,
+        setupFailed: false,
+        transcript: null,
+        trialIndex: 0,
+      }),
+    ).toMatchObject({
+      detail: { gate_proof_seen: true, not_met: [2], verdict: 'FAIL' },
+      error_class: 'harness',
+      outcome: 'error',
+    });
   });
 });

@@ -87,7 +87,7 @@ export const runnerHarnessVersion = (runnerUrl) =>
   harnessVersion(
     importClosure([fileURLToPath(runnerUrl), SHARED_MODULE]).map((file) => ({
       bytes: readFileSync(file),
-      path: relative(REPO_ROOT, file).split('\\').join('/'),
+      path: relative(REPO_ROOT, file).replaceAll('\\', '/'),
     })),
   );
 
@@ -109,7 +109,7 @@ export const saveTranscript = ({
   return {
     bytes: bytes.length,
     sha256: createHash('sha256').update(bytes).digest('hex'),
-    uri: file.split('\\').join('/'),
+    uri: file.replaceAll('\\', '/'),
   };
 };
 
