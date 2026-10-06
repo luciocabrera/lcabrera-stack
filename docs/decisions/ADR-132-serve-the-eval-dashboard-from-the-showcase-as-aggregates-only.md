@@ -158,15 +158,21 @@ It holds no list of its own; it imports the module's sets.
    column that a later migration adds is therefore seeded by default. Views
    are not seeded, since they hold no rows of their own.
 2. It walks the envelope's Zod schema for every **free-string field** inside
-   the `jsonb` columns: a Zod string, or an array of strings, with no enum or
-   literal constraint. It subtracts `PUBLIC_FIELD_PATHS` and the columns in
+   the `jsonb` columns: a Zod string, or an array of strings, with no enum,
+   literal or closed-format constraint. It subtracts `PUBLIC_FIELD_PATHS` and the columns in
    `ALLOWED_WHOLE_JSONB`, and seeds the marker into each path that remains,
    `settings.argv` included. The seeded envelope still passes the Zod schema,
    so the ingest path writes it as it would a real run. A field typed as an
    enum or a literal, such as the `detail` discriminator `schema` or
    rules-consistency's `check`, is not seeded: it can only hold one of the
    values the schema names, so it carries no free text, and a marker in it
-   would fail validation.
+   would fail validation. A field with a **closed-format constraint** is
+   treated the same way: one whose pattern admits only a fixed alphabet and
+   shape, such as a hex hash, a uuid or an ISO 8601 timestamp, can hold no
+   prose. A pattern that still admits free text is not closed, so its field
+   is seeded with a marker that satisfies the pattern. If no marker can
+   satisfy it, the field must be allow-listed or its pattern closed, decided
+   in this ADR. The seed never writes an envelope that fails the schema.
 3. With the flag set, it calls the loader of every `/evals` route, and every
    resource route, with parameters that select the seeded runs, subjects and
    tasks. It asserts that each one answered 2xx, and that each result
@@ -243,9 +249,14 @@ heatmap and the matrix are small, fixed shapes.
   listing every number by hand. Such a column that must stay private has to be added to
   `EXCLUDED_COLUMNS`, or its table to `EXCLUDED_TABLES`, in the same
   migration's PR.
-- Every excluded text-typed column accepts an arbitrary string at adoption. A later
-  column whose check or foreign key rejects the marker makes the seed fail, so
-  it has to be decided here rather than skipped.
+- Every excluded text-typed column accepts an arbitrary string up to its
+  declared length at adoption. The fixed-length ones are `char(64)`
+  (`eval_run.envelope_sha256`, `eval_trial.transcript_sha` and
+  `schema_migration.sha256`), so the marker is at most 64 characters. A
+  shorter marker is blank-padded in a `char` column, and a substring search
+  still finds it. A later column that is shorter than the marker, or whose
+  check or foreign key rejects it, makes the seed fail, so it has to be
+  decided in this ADR rather than skipped in the seed.
 
 ## Alternatives considered
 
