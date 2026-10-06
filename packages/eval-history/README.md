@@ -21,7 +21,7 @@ decides how the envelope is versioned.
 - `src/queries/` — the read functions the dashboard calls, one per reporting
   view or function of `migrations/0002-reporting.sql`: `readTaskPassRates`
   (`evals.v_task_pass_rate`), `readSubjectTrend` (`evals.v_subject_trend`),
-  `readFlakyTasks` (`evals.flaky_tasks(window)`, the plan's `v_flaky_tasks`, a
+  `readFlakyTasks` (`evals.flaky_tasks(run_window)`, the plan's `v_flaky_tasks`, a
   function so the window comes from `evals/regression.config.json`) and
   `readRunComparison` (`evals.run_compare(a, b)`). Each builds its SQL in a
   pure `*Query.util.ts`, so a test can read what is sent, and none of them, nor
@@ -53,7 +53,7 @@ Last, it grants `evals_writer` and `evals_reader` the privileges
 `EVALS_WRITER_ROLE` and `EVALS_READER_ROLE` list, in
 `src/migrate/migrate.constants.ts`, to each role that exists. The reader gets
 `usage` on schema `evals` and `select` on its tables and views, and nothing
-else: it is the role the dashboard connects as. When it does not,
+else: it is the role the dashboard connects as. When a role does not exist,
 the run prints the `create role` and `grant` statements and still exits 0:
 creating a role needs a privilege some hosts withhold, so that step is the
 operator's.

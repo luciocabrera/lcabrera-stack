@@ -42,3 +42,5 @@ export const EVALS_ROLES: readonly EvalsRole[] = [
   EVALS_WRITER_ROLE,
   EVALS_READER_ROLE,
 ];
+
+export const MIGRATE_REPORT_PREFIX = 'evals:migrate:';
