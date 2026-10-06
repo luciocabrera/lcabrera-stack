@@ -1,6 +1,7 @@
 import type { EvalsRole, Migration } from './migrate.types.ts';
 
-import { roleSetupStatements } from './roleSetupStatements.util.ts';
+import { MIGRATE_REPORT_PREFIX } from './migrate.constants.ts';
+import { missingRoleLines } from './missingRoleLines.util.ts';
 
 type MigrateReportArgs = {
   readonly applied: readonly Migration[];
@@ -8,13 +9,6 @@ type MigrateReportArgs = {
   readonly missing: readonly EvalsRole[];
   readonly pricesUpserted: number;
 };
-
-const PREFIX = 'evals:migrate:';
-
-const missingRoleLines = (role: EvalsRole) => [
-  `${PREFIX} role ${role.name} does not exist; create it, then run evals:migrate again:`,
-  ...roleSetupStatements(role).map((statement) => `  ${statement};`),
-];
 
 export const migrateReport = ({
   applied,
@@ -24,9 +18,9 @@ export const migrateReport = ({
 }: MigrateReportArgs) =>
   [
     ...(applied.length === 0
-      ? [`${PREFIX} already current`]
-      : applied.map(({ name }) => `${PREFIX} applied ${name}`)),
-    `${PREFIX} upserted ${String(pricesUpserted)} model prices`,
-    ...granted.map(({ name }) => `${PREFIX} granted ${name}`),
+      ? [`${MIGRATE_REPORT_PREFIX} already current`]
+      : applied.map(({ name }) => `${MIGRATE_REPORT_PREFIX} applied ${name}`)),
+    `${MIGRATE_REPORT_PREFIX} upserted ${String(pricesUpserted)} model prices`,
+    ...granted.map(({ name }) => `${MIGRATE_REPORT_PREFIX} granted ${name}`),
     ...missing.flatMap((role) => missingRoleLines(role)),
   ].join('\n');
