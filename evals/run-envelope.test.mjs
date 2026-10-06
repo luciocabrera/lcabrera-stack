@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   finishedSession,
   STARTED_AT,
+  TEST_REGRESSION_CONFIG,
   testIdentity,
   testPlan,
 } from './envelope-test-support.mjs';
@@ -12,6 +13,8 @@ import {
   assembleEnvelope,
   branchOf,
   envelopeProblems,
+  passRateLine,
+  passRateOf,
   prNumberOf,
   relativeImports,
   runSettings,
@@ -132,12 +135,17 @@ describe('runTotals', () => {
 
   it('counts outcomes, leaves errors out of the rate, and sums what was reported', () => {
     expect(
-      runTotals({ costFree: false, durationMs: 10, trials }),
+      runTotals({
+        costFree: false,
+        durationMs: 10,
+        regressionConfig: TEST_REGRESSION_CONFIG,
+        trials,
+      }),
     ).toStrictEqual({
       by_outcome: { error: 1, fail: 1, pass: 1, skipped: 0, timeout: 0 },
       cost_usd_reported: 0.75,
       duration_ms: 10,
-      pass_rate: { k: 1, lower: null, n: 2, rate: 0.5, upper: null },
+      pass_rate: { k: 1, lower: null, n: 2, rate: null, upper: null },
       tokens: { cache_read: 0, cache_write: 0, input: 5, output: 0 },
       trials: 3,
     });
@@ -145,13 +153,121 @@ describe('runTotals', () => {
 
   it('costs nothing for a suite that calls no model, and null when none reported', () => {
     expect(
-      runTotals({ costFree: true, durationMs: 0, trials: [] })
-        .cost_usd_reported,
+      runTotals({
+        costFree: true,
+        durationMs: 0,
+        regressionConfig: TEST_REGRESSION_CONFIG,
+        trials: [],
+      }).cost_usd_reported,
     ).toBe(0);
     expect(
-      runTotals({ costFree: false, durationMs: 0, trials: [trials[1]] })
-        .cost_usd_reported,
+      runTotals({
+        costFree: false,
+        durationMs: 0,
+        regressionConfig: TEST_REGRESSION_CONFIG,
+        trials: [trials[1]],
+      }).cost_usd_reported,
     ).toBeNull();
+  });
+});
+
+const outcomes = (counts) =>
+  Object.entries(counts).flatMap(([outcome, count]) =>
+    Array.from({ length: count }, () => ({ outcome })),
+  );
+
+describe('passRateOf', () => {
+  it('carries n, the rate and its Wilson interval from the minimum trials on', () => {
+    expect(
+      passRateOf({
+        regressionConfig: TEST_REGRESSION_CONFIG,
+        trials: outcomes({ fail: 5, pass: 5 }),
+      }),
+    ).toStrictEqual({
+      k: 5,
+      lower: expect.closeTo(0.2366, 4),
+      n: 10,
+      rate: 0.5,
+      upper: expect.closeTo(0.7634, 4),
+    });
+  });
+
+  it('gives no rate and no interval below the minimum trials', () => {
+    expect(
+      passRateOf({
+        regressionConfig: TEST_REGRESSION_CONFIG,
+        trials: outcomes({ fail: 1, pass: 4 }),
+      }),
+    ).toStrictEqual({ k: 4, lower: null, n: 5, rate: null, upper: null });
+  });
+
+  it('counts neither error, timeout nor skipped toward n', () => {
+    expect(
+      passRateOf({
+        regressionConfig: TEST_REGRESSION_CONFIG,
+        trials: outcomes({ error: 2, pass: 5, skipped: 1, timeout: 1 }),
+      }),
+    ).toStrictEqual({ k: 5, lower: null, n: 5, rate: null, upper: null });
+  });
+
+  it('reads the minimum and z from the config it is given', () => {
+    const trials = outcomes({ fail: 1, pass: 3 });
+    expect(
+      passRateOf({ regressionConfig: { minTrialsForRate: 4, z: 1.96 }, trials })
+        .rate,
+    ).toBe(0.75);
+    const narrow = passRateOf({
+      regressionConfig: { minTrialsForRate: 4, z: 1 },
+      trials,
+    });
+    const wide = passRateOf({
+      regressionConfig: { minTrialsForRate: 4, z: 1.96 },
+      trials,
+    });
+    expect(narrow.lower).toBeGreaterThan(wide.lower);
+  });
+});
+
+const totalsOf = (counts) =>
+  runTotals({
+    costFree: true,
+    durationMs: 0,
+    regressionConfig: TEST_REGRESSION_CONFIG,
+    trials: outcomes(counts).map((trial) => ({ ...trial, tokens: tokensOf() })),
+  });
+
+describe('passRateLine', () => {
+  it('prints the rate with n and its interval', () => {
+    expect(
+      passRateLine({
+        regressionConfig: TEST_REGRESSION_CONFIG,
+        totals: totalsOf({ fail: 5, pass: 5 }),
+      }),
+    ).toBe(
+      'Pass rate: 50.0% (n=10, 5 passed; Wilson interval 23.7%–76.3% at z=1.96)',
+    );
+  });
+
+  it('prints insufficient data under the minimum trials', () => {
+    expect(
+      passRateLine({
+        regressionConfig: TEST_REGRESSION_CONFIG,
+        totals: totalsOf({ fail: 1, pass: 4 }),
+      }),
+    ).toBe(
+      'Pass rate: insufficient data (n=5, 4 passed; a rate needs 6 counted trials)',
+    );
+  });
+
+  it('says how many trials it left out of n', () => {
+    expect(
+      passRateLine({
+        regressionConfig: TEST_REGRESSION_CONFIG,
+        totals: totalsOf({ error: 2, fail: 1, pass: 5 }),
+      }),
+    ).toBe(
+      'Pass rate: 83.3% (n=6, 5 passed; Wilson interval 43.6%–97.0% at z=1.96; 2 error, timeout or skipped not counted)',
+    );
   });
 });
 
@@ -164,6 +280,7 @@ describe('assembleEnvelope', () => {
         settings: runSettings({ argv: ['x'], concurrency: 4, runs: 3 }),
         suite: 'rules-consistency',
       }),
+      regressionConfig: TEST_REGRESSION_CONFIG,
       status: 'partial',
       trials: [],
     });

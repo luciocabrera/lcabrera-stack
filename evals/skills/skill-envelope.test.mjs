@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   finishedSession,
   STARTED_AT,
+  TEST_REGRESSION_CONFIG,
   testIdentity,
   testPlan,
 } from '../envelope-test-support.mjs';
@@ -115,6 +116,7 @@ describe('a skills envelope', () => {
           }),
         ],
       }),
+      regressionConfig: TEST_REGRESSION_CONFIG,
       status: 'complete',
       trials,
     });

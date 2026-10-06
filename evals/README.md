@@ -31,6 +31,14 @@ The envelope is written on every way out: `complete` on a normal finish,
 `partial` when the run throws, and `aborted` on Ctrl-C or SIGTERM. A runner
 whose envelope fails the schema writes none, names each failing field and exits 1.
 
+Beside the envelope's path, each runner prints a `Pass rate:` line. It gives
+n, the number passed, the rate and its Wilson interval at the `z` in
+[`regression.config.json`](#regression-thresholds). Errors, timeouts and skipped
+trials are left out of n, and the line says how many there were. With fewer
+counted trials than `minTrialsForRate`, the line reads `insufficient data`. The
+envelope's `totals.pass_rate` holds the same figures, with `rate`, `lower` and
+`upper` set to null when the data is insufficient.
+
 ## What a full run costs
 
 The skill-trigger and verifier suites run each task or fixture three times by
