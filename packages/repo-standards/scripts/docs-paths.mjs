@@ -36,10 +36,11 @@ const isDisqualified = (token) =>
   /^[a-z]+:\/\//i.test(token);
 
 export const isRootAnchored = (token, repoRoots) => {
-  if (isDisqualified(token) || !token.includes('/')) {
-    return false;
-  }
-  return repoRoots.includes(token.split('/', 1)[0]);
+  return (
+    !isDisqualified(token) &&
+    token.includes('/') &&
+    repoRoots.includes(token.split('/', 1)[0])
+  );
 };
 
 const isExplicitlyRelative = (token) => /^\.\.?\//.test(token);

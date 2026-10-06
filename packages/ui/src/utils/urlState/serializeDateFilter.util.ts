@@ -9,9 +9,7 @@ type SerializeDateFilterArgs = {
 export const serializeDateFilter = ({ filter }: SerializeDateFilterArgs) => {
   const op = getSerializedOperator(filter.operator);
 
-  if (filter.operator === 'between' && filter.value2 !== undefined) {
-    return [op, filter.value, filter.value2];
-  }
-
-  return [op, filter.value];
+  return filter.operator === 'between' && filter.value2 !== undefined
+    ? [op, filter.value, filter.value2]
+    : [op, filter.value];
 };

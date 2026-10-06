@@ -80,10 +80,9 @@ const matchesCase = ({ expected, name }: MatchesCaseArgs) => {
   if (expected === 'kebab-case') {
     return isKebabCase(name);
   }
-  if (expected === 'PascalCase') {
-    return PASCAL_CASE.test(name);
-  }
-  return CAMEL_CASE.test(name);
+  return expected === 'PascalCase'
+    ? PASCAL_CASE.test(name)
+    : CAMEL_CASE.test(name);
 };
 
 export default createRule<Options, MessageIds>({

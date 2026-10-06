@@ -60,8 +60,7 @@ const generateCellValue = ({
   if (dataType === 'currency') return `$${randomCurrency()}`;
   if (dataType === 'date') return randomDate().toISOString().slice(0, 10);
   if (dataType === 'number') return rowIdx * colIdx;
-  if (dataType === 'string') return randomString(8);
-  return '';
+  return dataType === 'string' ? randomString(8) : '';
 };
 
 const tableData: MockRow[] = Array.from({ length: 10_000 }, (_, rowIdx) =>

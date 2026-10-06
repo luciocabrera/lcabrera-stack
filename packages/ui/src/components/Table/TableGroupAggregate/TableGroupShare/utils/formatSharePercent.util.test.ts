@@ -9,13 +9,15 @@ describe('formatSharePercent', () => {
 
   it('honours the table locale', () => {
     expect(formatSharePercent({ locale: 'de-DE', ratio: 0.255 })).toBe(
-      '25,5 %',
+      '25,5\u{A0}%',
     );
   });
 
   it('returns the same formatter output across calls', () => {
     expect(formatSharePercent({ locale: 'en-US', ratio: 0.5 })).toBe('50.0%');
-    expect(formatSharePercent({ locale: 'de-DE', ratio: 0.5 })).toBe('50,0 %');
+    expect(formatSharePercent({ locale: 'de-DE', ratio: 0.5 })).toBe(
+      '50,0\u{A0}%',
+    );
     expect(formatSharePercent({ locale: 'en-US', ratio: 0.5 })).toBe('50.0%');
   });
 

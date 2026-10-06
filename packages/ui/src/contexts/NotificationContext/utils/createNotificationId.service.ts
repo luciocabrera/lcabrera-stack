@@ -10,9 +10,7 @@ const createFallbackIdGenerator = () => {
 const generateFallbackId = createFallbackIdGenerator();
 
 export const createNotificationId = () => {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID();
-  }
-
-  return generateFallbackId();
+  return typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : generateFallbackId();
 };

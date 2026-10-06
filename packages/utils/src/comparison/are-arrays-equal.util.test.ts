@@ -21,6 +21,13 @@ describe('areArraysEqual', () => {
     expect(areArraysEqual({ left: undefined, right: ['a'] })).toBe(false);
   });
 
+  it('returns false when a plain-JS caller passes null on either side', () => {
+    const fromPlainJs: readonly string[] = JSON.parse('null');
+
+    expect(areArraysEqual({ left: fromPlainJs, right: ['a'] })).toBe(false);
+    expect(areArraysEqual({ left: ['a'], right: fromPlainJs })).toBe(false);
+  });
+
   it('returns true when both arrays are undefined', () => {
     expect(areArraysEqual<string>({ left: undefined, right: undefined })).toBe(
       true,

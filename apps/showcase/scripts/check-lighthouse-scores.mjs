@@ -98,14 +98,12 @@ async function checkLighthouseScores(reportPath) {
 
 function getScoreColor(score, threshold) {
   if (score >= threshold) return colors.green;
-  if (score >= threshold - 10) return colors.yellow;
-  return colors.red;
+  return score >= threshold - 10 ? colors.yellow : colors.red;
 }
 
 function getScoreEmoji(score, threshold) {
   if (score >= threshold) return '✅';
-  if (score >= threshold - 10) return '⚠️ ';
-  return '❌';
+  return score >= threshold - 10 ? '⚠️ ' : '❌';
 }
 
 function getTrendPresentation(diff) {

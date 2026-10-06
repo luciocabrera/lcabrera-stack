@@ -29,19 +29,21 @@ export const Tooltip = ({
     tooltipRef.current?.showPopover();
     requestAnimationFrame(() => {
       setIsVisible(true);
-      if (triggerRef.current && tooltipRef.current) {
-        const triggerRect = triggerRef.current.getBoundingClientRect();
-        const tooltipRect = tooltipRef.current.getBoundingClientRect();
-        const isVertical = placement === 'top' || placement === 'bottom';
-        const offset = getArrowOffset({
-          placement,
-          tooltipStart: isVertical ? tooltipRect.left : tooltipRect.top,
-          triggerCenter: isVertical
-            ? triggerRect.left + triggerRect.width / 2
-            : triggerRect.top + triggerRect.height / 2,
-        });
-        setArrowOffset(offset);
+      if (!triggerRef.current || !tooltipRef.current) {
+        return;
       }
+
+      const triggerRect = triggerRef.current.getBoundingClientRect();
+      const tooltipRect = tooltipRef.current.getBoundingClientRect();
+      const isVertical = placement === 'top' || placement === 'bottom';
+      const offset = getArrowOffset({
+        placement,
+        tooltipStart: isVertical ? tooltipRect.left : tooltipRect.top,
+        triggerCenter: isVertical
+          ? triggerRect.left + triggerRect.width / 2
+          : triggerRect.top + triggerRect.height / 2,
+      });
+      setArrowOffset(offset);
     });
   };
 

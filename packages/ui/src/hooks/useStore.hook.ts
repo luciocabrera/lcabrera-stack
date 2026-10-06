@@ -24,10 +24,12 @@ export const useStore = <TData extends Record<string, unknown>>(
     const set = (value: Partial<TData>) => {
       const next = { ...current, ...value } as TData;
 
-      if (!isShallowEqual({ objA: current, objB: next })) {
-        current = next;
-        for (const callback of listeners) callback();
+      if (isShallowEqual({ objA: current, objB: next })) {
+        return;
       }
+
+      current = next;
+      for (const callback of listeners) callback();
     };
 
     const reset = () => {

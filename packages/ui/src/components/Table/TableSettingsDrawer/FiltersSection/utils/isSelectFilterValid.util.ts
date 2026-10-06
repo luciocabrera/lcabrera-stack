@@ -3,8 +3,7 @@ import type { ColumnFilter } from '#ui/types/filterOperators.types';
 export const isSelectFilterValid = (
   filter: Extract<ColumnFilter, { type: 'multiSelect' | 'select' }>,
 ) => {
-  if ('values' in filter && filter.values) {
-    return filter.values.length > 0;
-  }
-  return Boolean('value' in filter && filter.value);
+  return 'values' in filter && filter.values
+    ? filter.values.length > 0
+    : Boolean('value' in filter && filter.value);
 };

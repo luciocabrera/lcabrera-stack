@@ -46,8 +46,9 @@ export const Table = <TData extends Record<string, unknown>, TResponse>({
     </TableCellRenderingProvider>
   );
 
-  if (isFlexWrapperEnabled)
-    return <div {...stylex.props(styles.wrapper)}>{tableContent}</div>;
-
-  return tableContent;
+  return isFlexWrapperEnabled ? (
+    <div {...stylex.props(styles.wrapper)}>{tableContent}</div>
+  ) : (
+    tableContent
+  );
 };

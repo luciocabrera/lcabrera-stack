@@ -50,8 +50,10 @@ const WAIT_PROGRAM = [
 
 const DOCKER_PROBE_TIMEOUT_MS = 30_000;
 
-const extensionsFor = (env) =>
-  IS_ON_WINDOWS ? ['', ...(env.PATHEXT ?? '.EXE;.CMD').split(';')] : [''];
+const extensionsFor = () =>
+  IS_ON_WINDOWS
+    ? ['', ...(process.env.PATHEXT ?? '.EXE;.CMD').split(';')]
+    : [''];
 
 const isExecutableFile = (path) => {
   try {
@@ -64,15 +66,14 @@ const isExecutableFile = (path) => {
 
 /**
  * @param {string} name
- * @param {Record<string, string | undefined>} [env]
  * @returns {string | undefined}
  */
-const findOnPath = (name, env = process.env) =>
-  (env.PATH ?? '')
+const findOnPath = (name) =>
+  (process.env.PATH ?? '')
     .split(delimiter)
     .filter((entry) => entry !== '')
     .flatMap((directory) =>
-      extensionsFor(env).map((extension) =>
+      extensionsFor().map((extension) =>
         join(directory, `${name}${extension}`),
       ),
     )

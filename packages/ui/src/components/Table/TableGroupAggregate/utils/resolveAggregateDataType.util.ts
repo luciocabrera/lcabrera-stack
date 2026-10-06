@@ -16,9 +16,7 @@ export const resolveAggregateDataType = ({
     return 'number';
   }
 
-  if (fn === 'boolAnd' || fn === 'boolOr') {
-    return 'boolean';
-  }
-
-  return columnDataType ?? 'string';
+  return fn === 'boolAnd' || fn === 'boolOr'
+    ? 'boolean'
+    : (columnDataType ?? 'string');
 };

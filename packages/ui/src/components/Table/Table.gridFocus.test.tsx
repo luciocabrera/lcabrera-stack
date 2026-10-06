@@ -52,8 +52,8 @@ const rows: readonly TestRow[] = Array.from(
 );
 
 const attachScrollMetrics = (container: HTMLDivElement | null) => {
-  if (!container) return;
-  if (Object.getOwnPropertyDescriptor(container, 'scrollTop')) return;
+  if (!container || Object.getOwnPropertyDescriptor(container, 'scrollTop'))
+    return;
 
   Object.defineProperties(container, {
     clientHeight: { configurable: true, value: CONTAINER_HEIGHT },

@@ -56,13 +56,15 @@ const validInput = () => ({
 it('accepts a fully valid payload and coerces numbers', () => {
   const result = enterpriseOrderSchema.safeParse(validInput());
 
-  expect(result.success).toBe(true);
-  if (result.success) {
-    expect(result.data.quantity).toBe(2);
-    expect(result.data.unit_price).toBe(100);
-    expect(result.data.customer_rating).toBe(5);
-    expect(result.data.discount_percentage).toBe(10);
-  }
+  expect(result).toMatchObject({
+    data: {
+      customer_rating: 5,
+      discount_percentage: 10,
+      quantity: 2,
+      unit_price: 100,
+    },
+    success: true,
+  });
 });
 
 it('treats an empty customer_rating as absent (not zero)', () => {

@@ -97,16 +97,13 @@ const folderShapeFor = ({
   folder,
   segments,
 }: FolderShapeForArgs): FolderShape => {
-  if (catchAllFolders.has(folder)) {
+  if (
+    catchAllFolders.has(folder) ||
+    segments.some((segment) => artifactFolders.has(segment))
+  ) {
     return 'exempt';
   }
-  if (segments.some((segment) => artifactFolders.has(segment))) {
-    return 'exempt';
-  }
-  if (PASCAL_CASE.test(folder)) {
-    return 'artifact';
-  }
-  return 'domain';
+  return PASCAL_CASE.test(folder) ? 'artifact' : 'domain';
 };
 
 type DirectorySegmentsArgs = {

@@ -7,9 +7,5 @@ export const toAxisHeaderLabel = (value: unknown) => {
     return String(value);
   }
 
-  if (value instanceof Date) {
-    return formatDate({ value });
-  }
-
-  return '';
+  return value instanceof Date ? formatDate({ value }) : '';
 };

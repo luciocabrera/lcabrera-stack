@@ -13,9 +13,7 @@ export const clientAction = async ({
     password: formData.get('password'),
   });
 
-  if (!parsed.success) {
-    return { errors: toLoginFieldErrors({ error: parsed.error }) };
-  }
-
-  return serverAction();
+  return parsed.success
+    ? serverAction()
+    : { errors: toLoginFieldErrors({ error: parsed.error }) };
 };

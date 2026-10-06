@@ -102,9 +102,7 @@ const alignmentOf = (cell: Element | undefined) => {
   const applied = new Set(classesOf(cell.className));
 
   if (RIGHT_CLASSES.every((cls) => applied.has(cls))) return 'right';
-  if (CENTER_CLASSES.every((cls) => applied.has(cls))) return 'center';
-
-  return 'default';
+  return CENTER_CLASSES.every((cls) => applied.has(cls)) ? 'center' : 'default';
 };
 
 const alignmentsByColumn = (row: Element | undefined) => {

@@ -25,9 +25,5 @@ export const parseAuthToken = ({
   }
 
   const [payload, signature] = parts;
-  if (!payload || !signature) {
-    return undefined;
-  }
-
-  return { payload, signature };
+  return !payload || !signature ? undefined : { payload, signature };
 };

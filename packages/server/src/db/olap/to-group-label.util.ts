@@ -9,9 +9,5 @@ export const toGroupLabel = (value: unknown) => {
     return String(value);
   }
 
-  if (value instanceof Date) {
-    return value.toISOString();
-  }
-
-  return EMPTY_GROUP_LABEL;
+  return value instanceof Date ? value.toISOString() : EMPTY_GROUP_LABEL;
 };

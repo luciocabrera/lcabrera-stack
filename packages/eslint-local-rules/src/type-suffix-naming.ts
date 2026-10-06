@@ -33,21 +33,23 @@ export default createRule({
           });
         }
 
-        if (isReactFile && typeName.endsWith('Properties')) {
-          const suggestedName = typeName.replace(/Properties$/, 'Props');
-
-          context.report({
-            data: {
-              suggestedName,
-              typeName,
-            },
-            fix(fixer) {
-              return fixer.replaceText(node.id, suggestedName);
-            },
-            messageId: 'usePropsSuffix',
-            node: node.id,
-          });
+        if (!isReactFile || !typeName.endsWith('Properties')) {
+          return;
         }
+
+        const suggestedName = typeName.replace(/Properties$/, 'Props');
+
+        context.report({
+          data: {
+            suggestedName,
+            typeName,
+          },
+          fix(fixer) {
+            return fixer.replaceText(node.id, suggestedName);
+          },
+          messageId: 'usePropsSuffix',
+          node: node.id,
+        });
       },
     };
   },

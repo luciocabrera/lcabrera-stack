@@ -143,9 +143,7 @@ export const runDoctor = (argv, root) => {
   });
 
   const accept = parseAcceptArgs(argv);
-  if (accept !== undefined) {
-    return runAccept({ accept, accepted, entries, root });
-  }
-
-  return reportDrift({ argv, config, entries, refusal, tasks });
+  return accept === undefined
+    ? reportDrift({ argv, config, entries, refusal, tasks })
+    : runAccept({ accept, accepted, entries, root });
 };

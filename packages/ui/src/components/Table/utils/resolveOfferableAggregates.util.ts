@@ -16,7 +16,7 @@ export const resolveOfferableAggregates = ({
   capability,
   isGroupKey,
 }: ResolveOfferableAggregatesArgs) => {
-  if (isGroupKey) return NO_AGGREGATES;
-
-  return orderLegalAggregates({ legal: capability?.aggregates ?? [] });
+  return isGroupKey
+    ? NO_AGGREGATES
+    : orderLegalAggregates({ legal: capability?.aggregates ?? [] });
 };

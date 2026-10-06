@@ -67,8 +67,9 @@ const lintCodes = (dir) => {
     raw = error.stdout ?? '';
   }
   const start = raw.indexOf('{');
-  if (start === -1) return [];
-  return JSON.parse(raw.slice(start)).diagnostics.map(({ code }) => code);
+  return start === -1
+    ? []
+    : JSON.parse(raw.slice(start)).diagnostics.map(({ code }) => code);
 };
 
 const workspaceDirs = (group) => {

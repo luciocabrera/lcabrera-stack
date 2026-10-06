@@ -45,9 +45,7 @@ export const validateTableCellCall = ({
   };
   const result = readResult();
 
-  if (result.issues !== undefined) {
-    return { issues: result.issues, kind, status: 'invalid' };
-  }
-
-  return { kind, params: result.value, renderer, status: 'resolved' };
+  return result.issues === undefined
+    ? { kind, params: result.value, renderer, status: 'resolved' }
+    : { issues: result.issues, kind, status: 'invalid' };
 };

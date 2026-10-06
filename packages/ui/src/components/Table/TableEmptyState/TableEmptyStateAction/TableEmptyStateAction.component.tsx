@@ -11,7 +11,9 @@ export const TableEmptyStateAction = () => {
   const isGroupingRefused =
     error?.kind === 'grouping-refused' && groupingKeys.length > 0;
 
-  if (isGroupingRefused) return <TableEmptyStateClearGroupingButton />;
-
-  return <TableEmptyStateRetryButton />;
+  return isGroupingRefused ? (
+    <TableEmptyStateClearGroupingButton />
+  ) : (
+    <TableEmptyStateRetryButton />
+  );
 };

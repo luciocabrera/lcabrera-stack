@@ -58,20 +58,22 @@ const extractEntry = (sourceFile) => {
 };
 
 const createProject = (packageConfig) =>
-  packageConfig.tsConfigFilePath === undefined
-    ? new Project({
-        compilerOptions: {
-          moduleResolution: ts.ModuleResolutionKind.Bundler,
-          skipLibCheck: true,
-          strict: true,
-          target: ts.ScriptTarget.ESNext,
+  new Project(
+    packageConfig.tsConfigFilePath === undefined
+      ? {
+          compilerOptions: {
+            moduleResolution: ts.ModuleResolutionKind.Bundler,
+            skipLibCheck: true,
+            strict: true,
+            target: ts.ScriptTarget.ESNext,
+          },
+          skipAddingFilesFromTsConfig: true,
+        }
+      : {
+          skipAddingFilesFromTsConfig: true,
+          tsConfigFilePath: packageConfig.tsConfigFilePath,
         },
-        skipAddingFilesFromTsConfig: true,
-      })
-    : new Project({
-        skipAddingFilesFromTsConfig: true,
-        tsConfigFilePath: packageConfig.tsConfigFilePath,
-      });
+  );
 
 export const extractSurface = (packageConfig) => {
   const project = createProject(packageConfig);

@@ -287,10 +287,12 @@ const runWrite = (homes, records) => {
   writeIndexes(homes);
 
   const remaining = recordContentFindings({ baseline: pruned, records });
-  if (remaining.length > 0) {
-    report(remaining, []);
-    process.exitCode = 1;
+  if (remaining.length === 0) {
+    return;
   }
+
+  report(remaining, []);
+  process.exitCode = 1;
 };
 
 const PACKAGE_FLAG = '--package';

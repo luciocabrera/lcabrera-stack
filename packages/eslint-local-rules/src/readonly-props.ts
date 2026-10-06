@@ -34,10 +34,9 @@ const ownTypeLiterals = (
   if (node.type === AST_NODE_TYPES.TSTypeLiteral) {
     return [node];
   }
-  if (node.type === AST_NODE_TYPES.TSIntersectionType) {
-    return node.types.flatMap((member) => ownTypeLiterals(member));
-  }
-  return [];
+  return node.type === AST_NODE_TYPES.TSIntersectionType
+    ? node.types.flatMap((member) => ownTypeLiterals(member))
+    : [];
 };
 
 const mutableMembers = (node: TSESTree.TypeNode) =>

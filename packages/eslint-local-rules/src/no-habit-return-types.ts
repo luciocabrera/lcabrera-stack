@@ -330,9 +330,12 @@ export default createRule<[], MessageIds>({
   create(context) {
     const check = (node: FunctionNode) => {
       const annotation = node.returnType?.typeAnnotation;
-      if (annotation === undefined) return;
-      if (!isRedundant({ annotation, node })) return;
-      if (isSelfReferential({ name: functionName(node), node })) return;
+      if (
+        annotation === undefined ||
+        !isRedundant({ annotation, node }) ||
+        isSelfReferential({ name: functionName(node), node })
+      )
+        return;
 
       context.report({
         fix: (fixer) => fixer.remove(node.returnType as TSESTree.Node),

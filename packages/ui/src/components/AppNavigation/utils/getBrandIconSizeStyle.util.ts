@@ -7,9 +7,7 @@ export const getBrandIconSizeStyle = (
     return styles.brandIconSizeMini;
   }
 
-  if (brandIconBoxSize === 'md') {
-    return styles.brandIconSizeMd;
-  }
-
-  return styles.brandIconSizeSm;
+  return brandIconBoxSize === 'md'
+    ? styles.brandIconSizeMd
+    : styles.brandIconSizeSm;
 };

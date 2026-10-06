@@ -11,8 +11,8 @@ export const toKeysetCursor = ({
   sort,
   uniqueColumn,
 }: ToKeysetCursorArgs) => {
-  if (cursor?.length !== sort.length) return;
-  if (sort.at(-1)?.column !== uniqueColumn) return;
+  if (cursor?.length !== sort.length || sort.at(-1)?.column !== uniqueColumn)
+    return;
 
   const uniqueValue = cursor.at(-1);
 

@@ -24,7 +24,7 @@ export const matchesTableCellBadgeRule = ({
 
   if (equals === undefined) return true;
 
-  if (typeof equals === 'number') return numeric === equals;
-
-  return value === equals || String(value) === String(equals);
+  return typeof equals === 'number'
+    ? numeric === equals
+    : value === equals || String(value) === String(equals);
 };

@@ -12,11 +12,7 @@ const resolveSelectedValues = ({ mode, value }: ResolveSelectedValuesArgs) => {
     return (value as string[] | undefined) ?? [];
   }
 
-  if (value) {
-    return [value as string];
-  }
-
-  return [];
+  return value ? [value as string] : [];
 };
 
 export const SelectField = <TValues extends Record<string, unknown>>({
