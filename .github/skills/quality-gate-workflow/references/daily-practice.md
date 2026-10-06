@@ -14,13 +14,13 @@ Run the quality gate after every change set so correctness and maintainability d
 
 Per-workspace stages (`vp fmt`, `vp lint`, `vp run typecheck`) run from the
 workspace whose files changed. `apps/showcase/` is an example, not the default.
-From the repo root, `vp run check:safe` chains the whole gate. Stages 3, 4, 5 and 8
-stay root-only.
+From the repo root, `vp run check:safe` chains the whole gate. Stages 4, 5 and 8
+stay root-only. Stage 3 needs `-r` to cover every workspace.
 
 ```bash
 vp fmt .
 vp lint .
-vp run -r lint:eslint:check # from the repo ROOT
+vp run -r lint:eslint:check # -r: every workspace
 vp run lint:biome:check     # from the repo ROOT
 vp run react-doctor:verify  # from the repo ROOT — errors block
 vp check
@@ -42,7 +42,7 @@ vp run test:changed         # from the repo ROOT — reaches root scripts/ too
 | 8    | `vp run test:changed`         | behavioral regressions, in every affected suite — untracked files included | highest-cost stage, run after static checks pass          |
 
 **Three linters, none redundant.** Oxlint (2) runs repo-wide from the root;
-eslint (3) runs from the root and `-r` fans it out to every workspace; Biome (4) is root-only — there is no
+eslint (3) runs per workspace, and `-r` fans it out to all of them; Biome (4) is root-only — there is no
 per-workspace `lint:biome`, because `biome.jsonc`'s `overrides` already scope the
 react domain. Run stage 4 from the repo root: inside a workspace it is not the
 gate. `vp run lint:all` chains those three with autofix and stops there — it does
@@ -146,7 +146,7 @@ cd packages/ui && vp run lint:biome:check
 # ✅ Canonical sequence
 vp fmt .
 vp lint .
-vp run -r lint:eslint:check # from the repo ROOT
+vp run -r lint:eslint:check # -r: every workspace
 vp run lint:biome:check     # from the repo ROOT
 vp run react-doctor:verify  # from the repo ROOT — errors block
 vp check
@@ -162,7 +162,7 @@ Use this in PR templates or review guides:
 
 - [ ] `vp fmt .` passed
 - [ ] `vp lint .` passed
-- [ ] `vp run -r lint:eslint:check` passed (from the root)
+- [ ] `vp run -r lint:eslint:check` passed
 - [ ] `vp run lint:biome:check` passed (from the root)
 - [ ] `vp run react-doctor:verify` passed (from the root)
 - [ ] `vp check` passed

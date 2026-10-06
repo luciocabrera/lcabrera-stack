@@ -29,13 +29,15 @@ This skill defines the mandatory validation sequence after code changes.
 > `vp run check:safe` chains the entire gate the way CI does. `apps/showcase/`
 > is an example of a workspace, not the implicit default.
 >
-> **Stages 3, 4, 5 and 8 are the exceptions** — all four are root-only passes and
+> **Stages 4, 5 and 8 are the exceptions** — all three are root-only passes and
 > are marked as such below. `cd` to the repo root for those, then come back.
 > Running one from inside a workspace is not the gate.
+> Stage 3 has a per-workspace form; `-r` is what makes it cover every
+> workspace.
 
 1. `vp fmt .`
 2. `vp lint .` — Oxlint
-3. `vp run -r lint:eslint:check` — the eslint custom-rules pass, fanned out to every workspace (`--fix` variant: `vp run -r lint:eslint`) — **run from the repo root**. There is no root task named `lint:eslint:check`, so the form without `-r` fails there
+3. `vp run -r lint:eslint:check` — the eslint custom-rules pass, fanned out to every workspace (`--fix` variant: `vp run -r lint:eslint`). Without `-r` it covers only the workspace you are in, and from the repo root it fails, because no root task has that name
 4. `vp run lint:biome:check` — the Biome pass (`--write` variant: `vp run lint:biome`) — **run from the repo root**
 5. `vp run react-doctor:verify` — the React Doctor gate — **run from the repo root**
 6. `vp check` — fmt + Oxlint + the **tsgolint** type pass
