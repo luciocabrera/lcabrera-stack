@@ -18,7 +18,7 @@ describe('renderFinding', () => {
   });
 
   it.each([
-    ['null', JSON.parse('null')],
+    ['null', null],
     ['missing', undefined],
     ['empty', ''],
   ])('falls back to the normalized path when the id is %s', (_label, id) => {

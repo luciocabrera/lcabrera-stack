@@ -1,4 +1,4 @@
-const isNullish = (value: unknown) => value === null || value === undefined;
-
 export const isEmptyCellValue = (value: unknown) =>
-  isNullish(value) || value === '';
+  typeof value === 'string'
+    ? value === ''
+    : value === null || value === undefined;
