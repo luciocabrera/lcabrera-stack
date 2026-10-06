@@ -69,6 +69,7 @@ describe('qualityTrial', () => {
   it('keeps the scores and the reply hash, not the reply', () => {
     expect(trialFor({})).toMatchObject({
       detail: {
+        problem: null,
         judge_model: 'claude-opus-5-5',
         overall: 4,
         reply_sha256: expect.stringMatching(/^[0-9a-f]{64}$/u),
@@ -93,7 +94,7 @@ describe('a skill-quality envelope', () => {
 
   it('feeds the report the data it built from the in-memory results', () => {
     const results = [
-      { error: 'unparsed_reply', skill: 'react-19' },
+      { error: 'the reply has no "clarity" dimension', skill: 'react-19' },
       { judgement, skill: 'unslop' },
     ];
     expect(envelopeResults(envelope)).toStrictEqual(results);
@@ -105,5 +106,29 @@ describe('a skill-quality envelope', () => {
         results,
       }),
     );
+  });
+
+  it('renders an unparsed reply as not judged with its problem text', () => {
+    const [unparsed] = reportDataFromEnvelope({ envelope, history: [] }).skills;
+    expect(unparsed).toStrictEqual({
+      error: 'the reply has no "clarity" dimension',
+      skill: 'react-19',
+    });
+  });
+
+  it('falls back to the error class for an envelope that recorded no problem', () => {
+    const legacy = {
+      ...envelope,
+      trials: envelope.trials.map(({ detail, ...trial }) => ({
+        ...trial,
+        detail: Object.fromEntries(
+          Object.entries(detail).filter(([key]) => key !== 'problem'),
+        ),
+      })),
+    };
+    expect(envelopeResults(legacy)[0]).toStrictEqual({
+      error: 'unparsed_reply',
+      skill: 'react-19',
+    });
   });
 });

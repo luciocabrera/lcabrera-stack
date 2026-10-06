@@ -6,6 +6,7 @@ status: review
 branch: feat/1267-eval-run-envelope
 area:
   - evals/**
+  - packages/eval-history/src/envelope/**
   - package.json
   - pnpm-lock.yaml
 started: 2026-10-06

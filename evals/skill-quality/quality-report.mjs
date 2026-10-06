@@ -74,7 +74,7 @@ const resultOf = ({ detail, error_class, outcome, skill }) =>
         },
         skill,
       }
-    : { error: error_class ?? outcome, skill };
+    : { error: detail.problem ?? error_class ?? outcome, skill };
 
 export const envelopeResults = ({ tasks, trials }) => {
   const order = taskOrder(tasks);

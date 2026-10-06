@@ -46,6 +46,7 @@ export const qualityTrial = ({
     detail: {
       ...scoresOf(judgement),
       judge_model: model,
+      problem: error ?? null,
       reply_sha256: replyHash(reply),
       schema: 'quality/1',
     },
