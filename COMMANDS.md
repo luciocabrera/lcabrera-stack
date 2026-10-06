@@ -266,8 +266,9 @@ in the `pre-push` hook, which must work offline. What to do when it fires is
 [`docs/agents/dependency-advisories.md`](docs/agents/dependency-advisories.md).
 
 `deps:peers` exits non-zero when an installed package's peer range is not met
-by what the lockfile resolved. It gates on the exit code, not on the listing:
-`pnpm peers check` can print an identical unmet set under only one importer. No
+by what the lockfile resolved. The exit code is the signal, not the listing:
+when several workspaces share one unmet peer, `pnpm peers check` can name fewer
+of them than have the problem, so read the listing as a sample. No
 other check sees an unmet peer — the type pass, the tests and the lint pass all
 run against whatever version was installed — so a hand-moved major can leave a
 plugin outside the range it was built for while every other gate stays green.
