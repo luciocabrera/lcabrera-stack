@@ -182,8 +182,12 @@ a Postgres service container; the Fallow Audit job has none, so the workspace's
 the database the variable names, so point it at a scratch database, never at
 `eval_history`. Its grant tests create and drop roles, which belong
 to the whole Postgres server rather than one database, so the user the variable
-connects as needs `CREATEROLE`. They use a randomly named role, never
-`evals_writer`.
+connects as must be a superuser, or have `CREATEROLE` with a
+`createrole_self_grant` that includes `set` (for example
+`alter role <user> set createrole_self_grant = 'set, inherit'`). `CREATEROLE`
+alone is not enough: the writer test inserts under `set local role` on the role
+it created, and from Postgres 16 a non-superuser creator cannot `set role` to it
+by default. They use a randomly named role, never `evals_writer`.
 
 `vp run --filter showcase test:e2e` is the browser suite for the same database.
 It is opt-in in the same way: it is not part of `test:ci` or `check:safe`.
