@@ -5,10 +5,13 @@
  * an interactive report to .tmp/skill-quality/report.html on every run. It is a
  * baseline to read, not a gate: no score fails it.
  *
+ * The report is built from the run envelope written under
+ * .tmp/eval-results/skill-quality/.
+ *
  * Usage (from the repo root): vp run evals:skills:quality [-- <skill> ...] [--model <id>]
  * Needs a Claude login, or CLAUDE_CODE_OAUTH_TOKEN.
  * Exit codes: 0 = every skill was judged, 1 = a session failed or a reply did
- * not parse, or a name is no skill.
+ * not parse, or a name is no skill, 130/143 = interrupted.
  */
 import {
   mkdirSync,
@@ -23,6 +26,8 @@ import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
+import { readFileSet } from '@repo/eval-history/hashing/readFileSet.service';
+import { skillHashes } from '@repo/eval-history/hashing/skillHashes.util';
 
 import {
   chunk,
@@ -33,6 +38,15 @@ import {
   timedDrain,
   withoutSeparator,
 } from '../agent-sessions.mjs';
+import { runSettings, skillSubjects } from '../run-envelope.mjs';
+import {
+  recordRun,
+  runIdentity,
+  runnerHarnessVersion,
+  sdkVersion,
+} from '../run-record.mjs';
+
+import { qualityTask, qualityTrial } from './quality-envelope.mjs';
 
 import {
   baselineTable,
@@ -42,9 +56,10 @@ import {
 } from './skill-quality.mjs';
 
 import {
+  envelopeResults,
   parseRun,
   renderReport,
-  reportData,
+  reportDataFromEnvelope,
   runRecord,
 } from './quality-report.mjs';
 
@@ -54,6 +69,7 @@ const RUNS_DIR = join(REPORT_DIR, 'runs');
 const REPORT_FILE = join(REPORT_DIR, 'report.html');
 const TEMPLATE = new URL('report-template.html', import.meta.url);
 const CONCURRENCY = 4;
+const MAX_TURNS = 1;
 
 const catalog = () =>
   readdirSync(SKILLS_DIR, { withFileTypes: true })
@@ -77,8 +93,23 @@ const outcome = ({ error, messages, skill, timestamps }) => {
   const problem = error ?? sessionProblem(messages);
   const metrics = sessionMetrics(messages, timestamps, error);
   return problem === undefined
-    ? { ...judged({ reply, skill }), metrics }
-    : { error: problem, metrics, skill };
+    ? { ...judged({ reply, skill }), metrics, reply, sessionFailed: false }
+    : { error: problem, metrics, reply, sessionFailed: true, skill };
+};
+
+const recordJudgement = ({ model, queuedAt, record, result }) => {
+  record.addTrial(
+    qualityTrial({
+      ...result,
+      model,
+      queuedAt,
+      transcript: record.transcript({
+        name: `${result.skill}.json`,
+        text: result.reply,
+      }),
+    }),
+  );
+  return result;
 };
 
 const judgeSkill = async ({ model, queuedAt, skill }) => {
@@ -86,7 +117,7 @@ const judgeSkill = async ({ model, queuedAt, skill }) => {
     query({
       options: {
         cwd: mkdtempSync(join(tmpdir(), 'skill-quality-')),
-        maxTurns: 1,
+        maxTurns: MAX_TURNS,
         mcpServers: {},
         model,
         persistSession: false,
@@ -110,22 +141,65 @@ const readHistory = () =>
         .filter((run) => run !== undefined)
     : [];
 
-const writeReport = ({ model, results }) => {
-  const generatedAt = new Date().toISOString();
+const writeReport = (envelope) => {
   const history = readHistory();
+  const generatedAt = envelope.run.finished_at;
   mkdirSync(RUNS_DIR, { recursive: true });
   writeFileSync(
     join(RUNS_DIR, `${generatedAt.replaceAll(':', '-')}.json`),
-    JSON.stringify(runRecord({ generatedAt, model, results })),
+    JSON.stringify(
+      runRecord({
+        generatedAt,
+        model: envelope.run.model_id,
+        results: envelopeResults(envelope),
+      }),
+    ),
   );
   writeFileSync(
     REPORT_FILE,
     renderReport({
-      data: reportData({ generatedAt, history, model, results }),
+      data: reportDataFromEnvelope({ envelope, history }),
       template: readFileSync(TEMPLATE, 'utf8'),
     }),
   );
 };
+
+const qualityPlan = async ({ model, skills }) => {
+  const hashes = skillHashes(await readFileSet({ directory: SKILLS_DIR }));
+  return {
+    catalogHash: hashes.catalog_hash,
+    harnessVersion: runnerHarnessVersion(import.meta.url),
+    modelId: model,
+    sdkVersion: sdkVersion(),
+    settings: runSettings({
+      argv: process.argv.slice(2),
+      concurrency: CONCURRENCY,
+      maxTurns: MAX_TURNS,
+      runs: 1,
+      selection: skills,
+    }),
+    subjects: skillSubjects({ hashes, selected: skills }),
+    suite: 'skill-quality',
+    tasks: skills.map(qualityTask),
+  };
+};
+
+const judgeAll = ({ model, record, skills }) =>
+  runBatches(
+    chunk(
+      skills.map((skill) => {
+        const queuedAt = Date.now();
+        return async () =>
+          recordJudgement({
+            model,
+            queuedAt,
+            record,
+            result: await judgeSkill({ model, queuedAt, skill }),
+          });
+      }),
+      CONCURRENCY,
+    ),
+  );
 
 const main = async () => {
   const { positionals, values } = parseArgs({
@@ -135,16 +209,12 @@ const main = async () => {
   });
   const skills = selectedSkills({ catalog: catalog(), requested: positionals });
   mkdirSync(REPORT_DIR, { recursive: true });
-  const results = await runBatches(
-    chunk(
-      skills.map((skill) => {
-        const queuedAt = Date.now();
-        return () => judgeSkill({ model: values.model, queuedAt, skill });
-      }),
-      CONCURRENCY,
-    ),
-  );
-  writeReport({ model: values.model, results });
+  const { envelope, result: results } = await recordRun({
+    execute: (record) => judgeAll({ model: values.model, record, skills }),
+    identity: runIdentity(),
+    plan: await qualityPlan({ model: values.model, skills }),
+  });
+  writeReport(envelope);
   console.log(baselineTable(results));
   console.log(`\nJudge: ${values.model}. Replies: ${REPORT_DIR}/`);
   console.log(`Report: ${REPORT_FILE}`);

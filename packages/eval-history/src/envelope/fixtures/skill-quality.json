@@ -99,6 +99,7 @@
         ],
         "judge_model": "claude-opus-5-5",
         "overall": 4,
+        "problem": null,
         "reply_sha256": "5782b18687e6cf8a482fc32d2db5b196d8821c458a0c069c6acf3953446e7bb5",
         "schema": "quality/1",
         "summary": "Clear and scoped."

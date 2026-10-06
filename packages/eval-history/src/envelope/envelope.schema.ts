@@ -68,6 +68,7 @@ const qualityDetailSchema = z.object({
   dimensions: z.array(dimensionSchema),
   judge_model: z.string(),
   overall: z.number(),
+  problem: z.string().nullable().optional(),
   reply_sha256: sha256,
   schema: z.literal(DETAIL_SCHEMA_BY_SUITE['skill-quality']),
   summary: z.string(),

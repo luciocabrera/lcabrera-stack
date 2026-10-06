@@ -4,6 +4,7 @@ import {
   agentBody,
   definiteNotMet,
   describeJudgement,
+  describeRun,
   judgeFixture,
   renderDispatch,
   runCount,
@@ -194,5 +195,14 @@ describe('a run that could not conclude', () => {
         }).matched,
       ).toBe(false);
     }
+  });
+});
+
+describe('describeRun', () => {
+  it('says so when a run wrote no verdict line', () => {
+    expect(
+      describeRun({ error: undefined, notMet: [2], verdict: undefined }),
+    ).toBe('not-met [2], verdict (no verdict line)');
+    expect(describeRun({ error: 'boom', notMet: [] })).toBe('error: boom');
   });
 });

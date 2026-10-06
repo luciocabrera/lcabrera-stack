@@ -26,6 +26,31 @@ describe('runEnvelopeSchema', () => {
     expect(envelope.trials.length).toBeGreaterThan(0);
   });
 
+  it('accepts a skill-quality detail with a problem, or with none recorded', () => {
+    const envelope = readFixture('skill-quality');
+    const [trial] = envelope.trials;
+    const withDetail = (detail: object) => ({
+      ...envelope,
+      trials: [{ ...trial, detail }],
+    });
+    const previous = Object.fromEntries(
+      Object.entries(trial?.detail ?? {}).filter(([key]) => key !== 'problem'),
+    );
+
+    expect(
+      issuePaths(
+        withDetail({
+          ...trial?.detail,
+          problem: 'the reply has no "clarity" dimension',
+        }),
+      ),
+    ).toEqual([]);
+    expect(issuePaths(withDetail(previous))).toEqual([]);
+    expect(issuePaths(withDetail({ ...trial?.detail, problem: 7 }))).toEqual([
+      'trials.0.detail.problem',
+    ]);
+  });
+
   it('rejects an envelope whose run has no run_id', () => {
     const envelope = readFixture('skills');
     const run = Object.fromEntries(

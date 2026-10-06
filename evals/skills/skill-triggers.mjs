@@ -15,6 +15,8 @@ const skillsNamedBy = ({ config = {} }) => [
 
 export const readEvalSkill = (source) => parse(source)?.skill;
 
+const tagsOf = (tags = []) => tags.filter((tag) => typeof tag === 'string');
+
 export const readTask = (source) => {
   const task = parse(source);
   return {
@@ -26,6 +28,7 @@ export const readTask = (source) => {
     set: task.set,
     shouldTrigger: task.expected?.should_trigger,
     source: task.source,
+    tags: tagsOf(task.tags),
   };
 };
 
@@ -238,7 +241,7 @@ export const sessionScope = ({ catalog, hidden, task }) => ({
 
 const sorted = (names) => [...names].toSorted((a, b) => a.localeCompare(b));
 
-const sessionTools = (messages) =>
+export const sessionTools = (messages) =>
   messages.find(
     (message) => message.type === 'system' && message.subtype === 'init',
   )?.tools;
