@@ -138,7 +138,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run ready`                        | `check:safe` + `build:all` — the full "is it shippable" check                                                                                                                      |
 | `vp run check:safe`                   | typegen → `vp check` → typecheck → eslint → biome → tests                                                                                                                          |
 | `vp run check:push`                   | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this, `test:changed`, then `fallow:preflight`                                                             |
-| `vp run typecheck:all`                | real tsc in all 13 workspaces, dependency order                                                                                                                                    |
+| `vp run typecheck:all`                | real tsc in all 14 workspaces, dependency order                                                                                                                                    |
 | `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                                                                                                  |
 | `vp run typegen:all`                  | route types for both React Router apps                                                                                                                                             |
 | `vp run fix`                          | `lint:all` then `format:all` — one command for everything a tool can fix itself; the formatter writes last                                                                         |
@@ -208,7 +208,7 @@ report) scope to the diff on pull requests; pushes to `main` still run the full
 `test:ci`.
 
 `typecheck:changed` applies the same change-based selection to the Quality Gate's
-slowest per-workspace step — real `tsc` across all 13 workspaces. It runs
+slowest per-workspace step — real `tsc` across all 14 workspaces. It runs
 `typecheck` only for the changed workspaces plus their dependents (a type error a
 diff introduces surfaces where the type is used, which the dependents walk covers),
 falling back to the full run on the same shared/root triggers and on pushes to
@@ -942,7 +942,7 @@ file under `reports/sonar/runs/` ([ADR-049](docs/decisions/ADR-049-findings-repo
 
 ## 5. Per-workspace tasks
 
-**Every one of the 13 workspaces** defines these seven:
+**Every one of the 14 workspaces** defines these seven:
 
 `format` · `format:check` · `lint` · `lint:check` · `lint:eslint` ·
 `lint:eslint:check` · `typecheck`
@@ -957,6 +957,7 @@ Beyond that, tasks are per-workspace. `build` and `test` are common but come fro
 | `packages/server`                | `@lcabrera/server`         | `test:coverage`                                                                                                                                  |
 | `packages/node-runtime`          | `@lcabrera/node`           | `build`, `test:coverage`                                                                                                                         |
 | `packages/ts-configs`            | `@repo/ts-configs`         | `generate`                                                                                                                                       |
+| `packages/eval-history`          | `@repo/eval-history`       | `test`, `test:coverage`, `schema:write`                                                                                                          |
 | `packages/tsconfig`              | `@lcabrera/tsconfig`       | `build`, `test:coverage`                                                                                                                         |
 | `packages/eslint-local-rules`    | `@lcabrera/eslint-plugin`  | —                                                                                                                                                |
 | `packages/devkit`                | `@lcabrera/devkit`         | `test`, `test:coverage`                                                                                                                          |
@@ -978,6 +979,10 @@ Notes on the non-obvious ones:
   (`packages/tsconfig`); what stays in `packages/ts-configs` is this repo's own
   entry table, which is why the task lives there and not in the package
   ([ADR-069](docs/decisions/ADR-069-publish-the-shared-toolchain.md)).
+- **`packages/eval-history` → `schema:write`** rewrites
+  `src/envelope/envelope.schema.json` from the Zod envelope schema; follow it
+  with `vp fmt .`. The envelope test fails while the file is stale
+  ([ADR-131](docs/decisions/ADR-131-version-the-eval-run-envelope-and-accept-the-previous-version.md)).
 - **A workspace with real-Postgres tests must split them**: keep the full suite as
   `test`, and expose a DB-free `test:unit` (plus `test:coverage`) — otherwise the
   whole workspace drops out of `test:ci` and takes its pure tests with it.

@@ -1,0 +1,117 @@
+{
+  "run": {
+    "actor": "luciocabrera",
+    "baseline_id": null,
+    "branch": "main",
+    "catalog_hash": null,
+    "env": {
+      "arch": "x64",
+      "ci_runner": null,
+      "node": "v26.10.0",
+      "os": "linux"
+    },
+    "finished_at": "2026-10-06T09:05:00.000Z",
+    "git_dirty": false,
+    "git_sha": "72b48600e7123dc9a70e2b5489db7b952d44fd6a",
+    "harness_version": "a8368fc2f15d",
+    "model_id": null,
+    "pr_number": null,
+    "project": "lcabrera-stack",
+    "run_id": "1f07f209-956c-48a0-8945-a2e39ee047a8",
+    "sdk_version": null,
+    "settings": {
+      "argv": [],
+      "concurrency": 1,
+      "hidden": [],
+      "max_turns": null,
+      "runs": 1,
+      "selection": [],
+      "timeout_ms": null,
+      "tools": []
+    },
+    "started_at": "2026-10-06T09:00:00.000Z",
+    "status": "complete",
+    "suite": "rules-consistency",
+    "trigger": "local",
+    "totals": {
+      "by_outcome": {
+        "pass": 1,
+        "fail": 0,
+        "error": 0,
+        "timeout": 0,
+        "skipped": 0
+      },
+      "cost_usd_reported": null,
+      "duration_ms": 40,
+      "pass_rate": {
+        "k": 1,
+        "lower": 0.2,
+        "n": 1,
+        "rate": 1,
+        "upper": 1
+      },
+      "tokens": {
+        "cache_read": 0,
+        "cache_write": 0,
+        "input": 0,
+        "output": 0
+      },
+      "trials": 1
+    }
+  },
+  "schema_version": 1,
+  "subjects": [
+    {
+      "content_hash": "7369949b47ef2c6ba26fbbee659cedc76123a75c17d321a52d8d1ef35e948042",
+      "kind": "rule",
+      "name": "typescript",
+      "path": ".claude/rules/typescript.md"
+    }
+  ],
+  "tasks": [
+    {
+      "agent_prompt_hash": null,
+      "expected_hash": null,
+      "fixture_hash": null,
+      "judge_prompt_hash": null,
+      "kind": "rule-check",
+      "set": "regression",
+      "source": null,
+      "subject": {
+        "kind": "rule",
+        "name": "typescript"
+      },
+      "tags": [],
+      "task_hash": "f900718466964734a5c004e9917d55b2cf78ab0cc2aa15ed30ea3540d633e215",
+      "task_key": "rules-consistency/typescript/indexed"
+    }
+  ],
+  "trials": [
+    {
+      "cost_usd_reported": null,
+      "detail": {
+        "check": "indexed",
+        "findings": [],
+        "schema": "rules/1"
+      },
+      "duration_api_ms": null,
+      "duration_ms": 40,
+      "error_class": null,
+      "finished_at": "2026-10-06T09:00:12.000Z",
+      "first_token_at": null,
+      "model_usage": {},
+      "outcome": "pass",
+      "queued_at": "2026-10-06T09:00:00.000Z",
+      "started_at": "2026-10-06T09:00:00.100Z",
+      "task_key": "rules-consistency/typescript/indexed",
+      "tokens": {
+        "cache_read": 0,
+        "cache_write": 0,
+        "input": 0,
+        "output": 0
+      },
+      "transcript": null,
+      "trial_index": 0
+    }
+  ]
+}

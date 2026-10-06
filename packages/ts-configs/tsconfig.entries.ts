@@ -218,6 +218,16 @@ export const configs = [
     ),
   },
   {
+    config: createNodeTsConfig({
+      include: ['src', 'scripts', 'vite.config.ts'],
+      tsBuildInfoFile: './node_modules/.tmp/tsconfig.app.tsbuildinfo',
+    }),
+    filePath: path.resolve(
+      workspaceRoot,
+      'packages/eval-history/tsconfig.app.json',
+    ),
+  },
+  {
     // Genuinely Node-only: ESLint rules, which run in the linter's process.
     // Until it became publishable this package carried a hand-written
     // tsconfig.json — the last one in the repo outside this generator — so it

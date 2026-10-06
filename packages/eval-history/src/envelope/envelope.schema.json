@@ -1,0 +1,881 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "run": {
+      "type": "object",
+      "properties": {
+        "actor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "catalog_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "env": {
+          "type": "object",
+          "properties": {
+            "arch": {
+              "type": "string"
+            },
+            "ci_runner": {
+              "type": ["string", "null"]
+            },
+            "node": {
+              "type": "string"
+            },
+            "os": {
+              "type": "string"
+            }
+          },
+          "required": ["arch", "ci_runner", "node", "os"]
+        },
+        "finished_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        "git_dirty": {
+          "type": "boolean"
+        },
+        "git_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "harness_version": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{12}$"
+        },
+        "model_id": {
+          "type": ["string", "null"]
+        },
+        "pr_number": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "project": {
+          "type": "string",
+          "const": "lcabrera-stack"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "sdk_version": {
+          "type": ["string", "null"]
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "argv": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "concurrency": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "hidden": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "max_turns": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "runs": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "selection": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "timeout_ms": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tools": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "argv",
+            "concurrency",
+            "hidden",
+            "max_turns",
+            "runs",
+            "selection",
+            "timeout_ms",
+            "tools"
+          ]
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["complete", "partial", "aborted"]
+        },
+        "suite": {
+          "type": "string",
+          "enum": [
+            "rules-consistency",
+            "skills",
+            "verifier-fixtures",
+            "verifier-tooled",
+            "skill-quality"
+          ]
+        },
+        "totals": {
+          "type": "object",
+          "properties": {
+            "by_outcome": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string",
+                "enum": ["pass", "fail", "error", "timeout", "skipped"]
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "required": ["pass", "fail", "error", "timeout", "skipped"]
+            },
+            "cost_usd_reported": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "duration_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "pass_rate": {
+              "type": "object",
+              "properties": {
+                "k": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "lower": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "n": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "rate": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "upper": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": ["k", "lower", "n", "rate", "upper"]
+            },
+            "tokens": {
+              "type": "object",
+              "properties": {
+                "cache_read": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "cache_write": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "input": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "output": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": ["cache_read", "cache_write", "input", "output"]
+            },
+            "trials": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "by_outcome",
+            "cost_usd_reported",
+            "duration_ms",
+            "pass_rate",
+            "tokens",
+            "trials"
+          ]
+        },
+        "trigger": {
+          "type": "string",
+          "enum": [
+            "local",
+            "ci-pr",
+            "ci-push",
+            "ci-scheduled",
+            "ci-manual",
+            "baseline"
+          ]
+        }
+      },
+      "required": [
+        "actor",
+        "baseline_id",
+        "branch",
+        "catalog_hash",
+        "env",
+        "finished_at",
+        "git_dirty",
+        "git_sha",
+        "harness_version",
+        "model_id",
+        "pr_number",
+        "project",
+        "run_id",
+        "sdk_version",
+        "settings",
+        "started_at",
+        "status",
+        "suite",
+        "totals",
+        "trigger"
+      ]
+    },
+    "schema_version": {
+      "type": "number",
+      "const": 1
+    },
+    "subjects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "content_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["skill", "rule", "agent", "prompt"]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["content_hash", "kind", "name", "path"]
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "agent_prompt_hash": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expected_hash": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fixture_hash": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "judge_prompt_hash": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["trigger", "near-miss", "fixture", "quality", "rule-check"]
+          },
+          "set": {
+            "type": "string",
+            "enum": ["regression", "capability"]
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "incident"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subject": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": ["skill", "rule", "agent", "prompt"]
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["kind", "name"]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "task_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "task_key": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "agent_prompt_hash",
+          "expected_hash",
+          "fixture_hash",
+          "judge_prompt_hash",
+          "kind",
+          "set",
+          "source",
+          "subject",
+          "tags",
+          "task_hash",
+          "task_key"
+        ]
+      }
+    },
+    "trials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cost_usd_reported": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "detail": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "check": {
+                    "type": "string",
+                    "enum": ["indexed", "covered", "overlap"]
+                  },
+                  "findings": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "schema": {
+                    "type": "string",
+                    "const": "rules/1"
+                  }
+                },
+                "required": ["check", "findings", "schema"]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "expected_skill": {
+                    "type": "string"
+                  },
+                  "fixture_read": {
+                    "type": ["boolean", "null"]
+                  },
+                  "init_tools": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "invoked": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "schema": {
+                    "type": "string",
+                    "const": "skills/1"
+                  },
+                  "should_trigger": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "expected_skill",
+                  "fixture_read",
+                  "init_tools",
+                  "invoked",
+                  "schema",
+                  "should_trigger"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "expected_not_met": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "fixture": {
+                    "type": "string"
+                  },
+                  "matched": {
+                    "type": "boolean"
+                  },
+                  "not_met": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "schema": {
+                    "type": "string",
+                    "const": "verifier/1"
+                  },
+                  "verdict": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": ["PASS", "FAIL"]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "expected_not_met",
+                  "fixture",
+                  "matched",
+                  "not_met",
+                  "schema",
+                  "verdict"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "expected_not_met": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "fixture": {
+                    "type": "string"
+                  },
+                  "gate_proof_seen": {
+                    "type": "boolean"
+                  },
+                  "not_met": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "schema": {
+                    "type": "string",
+                    "const": "verifier-tooled/1"
+                  },
+                  "verdict": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": ["PASS", "FAIL"]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "expected_not_met",
+                  "fixture",
+                  "gate_proof_seen",
+                  "not_met",
+                  "schema",
+                  "verdict"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "dimensions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "feedback": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "score": {
+                          "type": "number"
+                        }
+                      },
+                      "required": ["feedback", "name", "score"]
+                    }
+                  },
+                  "judge_model": {
+                    "type": "string"
+                  },
+                  "overall": {
+                    "type": "number"
+                  },
+                  "reply_sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "schema": {
+                    "type": "string",
+                    "const": "quality/1"
+                  },
+                  "summary": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "dimensions",
+                  "judge_model",
+                  "overall",
+                  "reply_sha256",
+                  "schema",
+                  "summary"
+                ]
+              }
+            ]
+          },
+          "duration_api_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error_class": {
+            "type": ["string", "null"]
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "first_token_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "model_usage": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "outcome": {
+            "type": "string",
+            "enum": ["pass", "fail", "error", "timeout", "skipped"]
+          },
+          "queued_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "task_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tokens": {
+            "type": "object",
+            "properties": {
+              "cache_read": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "cache_write": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "input": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "output": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["cache_read", "cache_write", "input", "output"]
+          },
+          "transcript": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "uri": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": ["bytes", "sha256", "uri"]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trial_index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "cost_usd_reported",
+          "detail",
+          "duration_api_ms",
+          "duration_ms",
+          "error_class",
+          "finished_at",
+          "first_token_at",
+          "model_usage",
+          "outcome",
+          "queued_at",
+          "started_at",
+          "task_key",
+          "tokens",
+          "transcript",
+          "trial_index"
+        ]
+      }
+    }
+  },
+  "required": ["run", "schema_version", "subjects", "tasks", "trials"]
+}
