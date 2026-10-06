@@ -24,28 +24,30 @@ describe('parseTableCellBadgeParams', () => {
   it('rejects an unknown param', () => {
     expect(
       parseTableCellBadgeParams({ rules: [], tones: [] }).issues?.[0],
-    ).toEqual({ message: 'unknown param "tones"', path: ['tones'] });
+    ).toEqual({ message: 'unknown param "tones"' });
   });
 
   it('rejects missing rules', () => {
-    expect(parseTableCellBadgeParams({}).issues?.[0]?.path).toEqual(['rules']);
+    expect(parseTableCellBadgeParams({}).issues?.[0]?.message).toBe(
+      'rules must be an array',
+    );
   });
 
   it('rejects a blank fallbackTone', () => {
     expect(
       parseTableCellBadgeParams({ fallbackTone: '', rules: [] }).issues?.[0]
-        ?.path,
-    ).toEqual(['fallbackTone']);
+        ?.message,
+    ).toBe('fallbackTone must be a tone name');
   });
 
   it('names every malformed rule by index', () => {
     expect(
       parseTableCellBadgeParams({
         rules: [{ gte: 4, tone: 'success' }, { gt: 3, tone: 'x' }, 'y'],
-      }).issues?.map((issue) => issue.path),
+      }).issues?.map((issue) => issue.message),
     ).toEqual([
-      ['rules', 1],
-      ['rules', 2],
+      'rules[1]: unknown rule key "gt"',
+      'rules[2]: a rule must be an object',
     ]);
   });
 });

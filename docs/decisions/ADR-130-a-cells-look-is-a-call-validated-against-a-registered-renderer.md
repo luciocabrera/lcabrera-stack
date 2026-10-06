@@ -35,7 +35,14 @@ server sends a name and arguments, and the client owns the implementations.
 validator it already uses (Zod, Valibot, ArkType) and `@lcabrera/ui` takes no
 validator dependency. The package carries its own structural copy of the
 Standard Schema type in `Table.types.ts`, which the specification allows, and the
-built-in renderers implement it with hand-written parsers. `render` is typed
+built-in renderers implement it with hand-written parsers. The copy holds only
+what the package reads: `validate`, `vendor`, `version` and each issue's
+`message`. The specification's `types` and issue `path` members are optional and
+declared `| undefined` by the vendors; copying them without that `undefined`
+makes a Zod schema unassignable for a consumer compiling with
+`exactOptionalPropertyTypes`, and copying them with it is redundant under this
+repository's settings. Leaving them out is assignable both ways, and a parser
+names the offending key in its message instead. `render` is typed
 bivariantly so that a list of renderers with different parameter types is one
 `readonly TableCellRenderer[]`; the schema is what guarantees each renderer
 receives its own params.
@@ -51,7 +58,9 @@ once per cell. A cell then resolves in this order: the structural group cell,
 `render`, the call, the `dataType` default. The call falls through to the default
 when its kind is not registered, when its params fail validation, when the
 validator answers asynchronously (the render path cannot wait), or when the
-validator throws. Each case logs one development-only warning per column per
+validator throws. Any thenable counts as asynchronous, not only a native
+`Promise`, and its settlement is caught, so a validator that rejects cannot
+become an unhandled rejection in a server render. Each case logs one development-only warning per column per
 grid. A malformed call is never executed. A loading placeholder row and a group
 row's aggregate cell draw the plain default; a pill around an averaged score
 would read as a single score.

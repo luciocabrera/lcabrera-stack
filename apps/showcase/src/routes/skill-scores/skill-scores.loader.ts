@@ -21,13 +21,14 @@ export const loader = createTableRouteLoader<
   appId: APP_ID,
   cellPalette: CELL_PALETTE,
   columns: COLUMNS,
-  fetchPage: async ({ effectiveSorting }) => ({
-    data: sortSkillScoreRows({
-      rows: SKILL_SCORE_ROWS,
-      sorting: effectiveSorting,
+  fetchPage: ({ effectiveSorting }) =>
+    Promise.resolve({
+      data: sortSkillScoreRows({
+        rows: SKILL_SCORE_ROWS,
+        sorting: effectiveSorting,
+      }),
+      total: SKILL_SCORE_ROWS.length,
     }),
-    total: SKILL_SCORE_ROWS.length,
-  }),
   includeFilters: false,
   persistenceKey: PERSISTENCE_KEY,
   tableName: TABLE_NAME,

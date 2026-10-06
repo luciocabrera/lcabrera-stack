@@ -28,13 +28,21 @@ describe('parseTableCellDeltaParams', () => {
   });
 
   it.each([
-    { params: 'x', path: undefined },
-    { params: { digits: 1 }, path: ['digits'] },
-    { params: { decrease: '' }, path: ['decrease'] },
-    { params: { increase: 3 }, path: ['increase'] },
-    { params: { unchanged: JSON.parse('null') }, path: ['unchanged'] },
-    { params: { precision: 1.5 }, path: ['precision'] },
-  ])('rejects $params', ({ params, path }) => {
-    expect(parseTableCellDeltaParams(params).issues?.[0]?.path).toEqual(path);
+    { message: 'params must be an object', params: 'x' },
+    { message: 'unknown param "digits"', params: { digits: 1 } },
+    { message: 'decrease must be a tone name', params: { decrease: '' } },
+    { message: 'increase must be a tone name', params: { increase: 3 } },
+    {
+      message: 'unchanged must be a tone name',
+      params: { unchanged: JSON.parse('null') },
+    },
+    {
+      message: 'precision must be an integer from 0 to 20',
+      params: { precision: 1.5 },
+    },
+  ])('rejects $params', ({ message, params }) => {
+    expect(parseTableCellDeltaParams(params).issues?.[0]?.message).toBe(
+      message,
+    );
   });
 });

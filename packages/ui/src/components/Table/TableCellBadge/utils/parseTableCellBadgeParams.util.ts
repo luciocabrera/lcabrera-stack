@@ -26,13 +26,11 @@ export const parseTableCellBadgeParams = (
   const { fallbackTone = 'neutral', rules } = read.record;
   if (!isTableCellToneName(fallbackTone)) {
     return {
-      issues: [
-        { message: 'fallbackTone must be a tone name', path: ['fallbackTone'] },
-      ],
+      issues: [{ message: 'fallbackTone must be a tone name' }],
     };
   }
   if (!Array.isArray(rules)) {
-    return { issues: [{ message: 'rules must be an array', path: ['rules'] }] };
+    return { issues: [{ message: 'rules must be an array' }] };
   }
 
   const issues: StandardSchemaV1Issue[] = [];
@@ -42,7 +40,7 @@ export const parseTableCellBadgeParams = (
     const message = findTableCellBadgeRuleIssue(rule);
 
     if (message !== undefined) {
-      issues.push({ message, path: ['rules', index] });
+      issues.push({ message: `rules[${index}]: ${message}` });
     } else if (isTableCellBadgeRule(rule)) {
       validRules.push(rule);
     }

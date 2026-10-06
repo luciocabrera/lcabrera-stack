@@ -19,7 +19,7 @@ describe('readTableCellParams', () => {
 
   it('names the first unknown key', () => {
     expect(readTableCellParams({ allowed, value: { mono: true } })).toEqual({
-      issues: [{ message: 'unknown param "mono"', path: ['mono'] }],
+      issues: [{ message: 'unknown param "mono"' }],
     });
   });
 });

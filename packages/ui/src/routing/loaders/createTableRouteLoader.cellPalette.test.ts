@@ -31,7 +31,7 @@ const load = async (cellPalette?: TableCellPalette) =>
     appId: 'test-app',
     ...(cellPalette !== undefined && { cellPalette }),
     columns: COLUMNS,
-    fetchPage: async () => ({ data: [] }),
+    fetchPage: () => Promise.resolve({ data: [] }),
     persistenceKey: 'rows',
     tableName: 'rows',
     title: { plural: 'Rows', singular: 'Row' },

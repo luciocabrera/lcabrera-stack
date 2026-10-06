@@ -24,9 +24,7 @@ export const readTableCellParams = ({
 
   if (unknownKey !== undefined) {
     return {
-      issues: [
-        { message: `unknown param "${unknownKey}"`, path: [unknownKey] },
-      ],
+      issues: [{ message: `unknown param "${unknownKey}"` }],
     };
   }
 

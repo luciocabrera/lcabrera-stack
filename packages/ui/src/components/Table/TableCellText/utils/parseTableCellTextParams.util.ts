@@ -17,14 +17,12 @@ export const parseTableCellTextParams = (
 
   if (typeof monospace !== 'boolean') {
     return {
-      issues: [{ message: 'monospace must be a boolean', path: ['monospace'] }],
+      issues: [{ message: 'monospace must be a boolean' }],
     };
   }
   if (weight !== 'bold' && weight !== 'regular') {
     return {
-      issues: [
-        { message: 'weight must be "regular" or "bold"', path: ['weight'] },
-      ],
+      issues: [{ message: 'weight must be "regular" or "bold"' }],
     };
   }
 

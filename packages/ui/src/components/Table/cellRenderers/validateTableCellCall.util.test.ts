@@ -1,17 +1,19 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type {
   StandardSchemaV1,
+  StandardSchemaV1Result,
   TableCellRenderer,
 } from '#ui/components/Table/Table.types';
 
 import { TABLE_CELL_BUILT_IN_RENDERERS } from './cellRenderers.constants';
+import { createForeignThenable } from './cellRenderers.fixtures';
 import { mergeTableCellRenderers } from './mergeTableCellRenderers.util';
 import { validateTableCellCall } from './validateTableCellCall.util';
 
 const renderers = mergeTableCellRenderers([TABLE_CELL_BUILT_IN_RENDERERS]);
 
-const withSchema = (schema: StandardSchemaV1<unknown, unknown>) =>
+const withSchema = (schema: StandardSchemaV1) =>
   new Map<string, TableCellRenderer>([
     ['x', { kind: 'x', params: schema, render: () => undefined }],
   ]);
@@ -49,7 +51,7 @@ describe('validateTableCellCall', () => {
     });
 
     expect(outcome).toEqual({
-      issues: [{ message: 'rules must be an array', path: ['rules'] }],
+      issues: [{ message: 'rules must be an array' }],
       kind: 'badge',
       status: 'invalid',
     });
@@ -68,6 +70,53 @@ describe('validateTableCellCall', () => {
     });
 
     expect(outcome.status).toBe('invalid');
+  });
+
+  it('settles a rejecting async validator rather than leaving it unhandled', async () => {
+    const unhandled = vi.fn();
+    process.on('unhandledRejection', unhandled);
+
+    const outcome = validateTableCellCall({
+      call: { kind: 'x' },
+      renderers: withSchema({
+        '~standard': {
+          validate: async () => {
+            throw new Error('async boom');
+          },
+          vendor: 'test',
+          version: 1,
+        },
+      }),
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    process.off('unhandledRejection', unhandled);
+
+    expect(outcome.status).toBe('invalid');
+    expect(unhandled).not.toHaveBeenCalled();
+  });
+
+  it('treats a thenable that is not a native promise as asynchronous', () => {
+    const thenable = createForeignThenable(() => undefined);
+    const outcome = validateTableCellCall({
+      call: { kind: 'x' },
+      renderers: withSchema({
+        '~standard': {
+          validate: () =>
+            thenable as unknown as Promise<StandardSchemaV1Result<unknown>>,
+          vendor: 'test',
+          version: 1,
+        },
+      }),
+    });
+
+    expect(outcome).toEqual({
+      issues: [
+        { message: 'params must validate synchronously to render a cell' },
+      ],
+      kind: 'x',
+      status: 'invalid',
+    });
   });
 
   it('turns a validator that throws into an invalid call', () => {

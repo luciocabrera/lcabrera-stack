@@ -309,8 +309,37 @@ describe('Table cell renderers', () => {
     },
   );
 
+  it('renders the dataType default for a validator that rejects asynchronously, leaving no unhandled rejection', async () => {
+    vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    const unhandled = vi.fn();
+    process.on('unhandledRejection', unhandled);
+    const rejecting: TableCellRenderer = {
+      kind: 'badge',
+      params: {
+        '~standard': {
+          validate: async () => {
+            throw new Error('async boom');
+          },
+          vendor: 'test',
+          version: 1,
+        },
+      },
+      render: () => <span data-testid='never-drawn' />,
+    };
+
+    await renderGrid({ cellRenderers: [rejecting] });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    process.off('unhandledRejection', unhandled);
+
+    const cell = cellOf({ columnKey: 'score', rowIndex: 0 });
+
+    expect(cell.textContent).toBe('4');
+    expect(screen.queryByTestId('never-drawn')).toBeNull();
+    expect(unhandled).not.toHaveBeenCalled();
+  });
+
   it('lets a renderer registered under an existing kind replace the built-in', async () => {
-    const params: StandardSchemaV1<unknown, { readonly label: string }> = {
+    const params: StandardSchemaV1<{ readonly label: string }> = {
       '~standard': {
         validate: () => ({ value: { label: 'replaced' } }),
         vendor: 'test',

@@ -103,11 +103,8 @@ export type PinnedColumnPartitionState<TData = Record<string, unknown>> = {
 
 export type SortingState<TData = Record<string, unknown>> = Sorting<TData>[];
 
-export type StandardSchemaV1<TInput = unknown, TOutput = TInput> = {
+export type StandardSchemaV1<TOutput = unknown> = {
   readonly '~standard': {
-    readonly types?:
-      | undefined
-      | { readonly input: TInput; readonly output: TOutput };
     readonly validate: (
       value: unknown,
     ) =>
@@ -120,9 +117,6 @@ export type StandardSchemaV1<TInput = unknown, TOutput = TInput> = {
 
 export type StandardSchemaV1Issue = {
   readonly message: string;
-  readonly path?:
-    | readonly (PropertyKey | { readonly key: PropertyKey })[]
-    | undefined;
 };
 
 export type StandardSchemaV1Result<TOutput> =
@@ -195,7 +189,7 @@ export type TableCellRenderArgs<TParams> = {
 
 export type TableCellRenderer<TParams = unknown> = {
   readonly kind: string;
-  readonly params: StandardSchemaV1<unknown, TParams>;
+  readonly params: StandardSchemaV1<TParams>;
   readonly render: TableCellRenderFunction<TParams>;
 };
 

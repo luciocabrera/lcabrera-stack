@@ -16,11 +16,14 @@ describe('parseTableCellTextParams', () => {
   });
 
   it.each([
-    { params: 'x', path: undefined },
-    { params: { italic: true }, path: ['italic'] },
-    { params: { monospace: 'yes' }, path: ['monospace'] },
-    { params: { weight: 'heavy' }, path: ['weight'] },
-  ])('rejects $params', ({ params, path }) => {
-    expect(parseTableCellTextParams(params).issues?.[0]?.path).toEqual(path);
+    { message: 'params must be an object', params: 'x' },
+    { message: 'unknown param "italic"', params: { italic: true } },
+    { message: 'monospace must be a boolean', params: { monospace: 'yes' } },
+    {
+      message: 'weight must be "regular" or "bold"',
+      params: { weight: 'heavy' },
+    },
+  ])('rejects $params', ({ message, params }) => {
+    expect(parseTableCellTextParams(params).issues?.[0]?.message).toBe(message);
   });
 });

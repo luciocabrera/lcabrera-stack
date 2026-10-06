@@ -31,19 +31,19 @@ export const parseTableCellDeltaParams = (
   } = read.record;
 
   if (!isTableCellToneName(decrease)) {
-    return { issues: [{ message: PARAM_ISSUES.decrease, path: ['decrease'] }] };
+    return { issues: [{ message: PARAM_ISSUES.decrease }] };
   }
   if (!isTableCellToneName(increase)) {
-    return { issues: [{ message: PARAM_ISSUES.increase, path: ['increase'] }] };
+    return { issues: [{ message: PARAM_ISSUES.increase }] };
   }
   if (!isTableCellToneName(unchanged)) {
     return {
-      issues: [{ message: PARAM_ISSUES.unchanged, path: ['unchanged'] }],
+      issues: [{ message: PARAM_ISSUES.unchanged }],
     };
   }
   if (precision !== undefined && !isTableCellDeltaPrecision(precision)) {
     return {
-      issues: [{ message: PARAM_ISSUES.precision, path: ['precision'] }],
+      issues: [{ message: PARAM_ISSUES.precision }],
     };
   }
 

@@ -6,6 +6,8 @@ import type {
 
 import type { TableCellCallOutcome } from './cellRenderers.types';
 
+import { isPromiseLike } from './isPromiseLike.util';
+
 type ValidateTableCellCallArgs = {
   readonly call: TableCellCall;
   readonly renderers: ReadonlyMap<string, TableCellRenderer>;
@@ -28,7 +30,11 @@ export const validateTableCellCall = ({
     try {
       const result = renderer.params['~standard'].validate(call.params ?? {});
 
-      return result instanceof Promise ? { issues: [ASYNC_ISSUE] } : result;
+      if (!isPromiseLike(result)) return result;
+
+      void Promise.resolve(result).catch(() => undefined);
+
+      return { issues: [ASYNC_ISSUE] };
     } catch (error) {
       return {
         issues: [
