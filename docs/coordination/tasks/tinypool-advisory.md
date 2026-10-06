@@ -23,6 +23,6 @@ Clear the tinypool and sprintf-js advisories
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review on #1330; tinypool overridden in the root and the devkit workspace blueprint, sprintf-js carried under a dated allowance
 - Blockers: none
-- Next:
+- Next: merge; delete the sprintf-js allowance when #1313 lands
