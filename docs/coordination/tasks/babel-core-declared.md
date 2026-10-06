@@ -1,6 +1,6 @@
 ---
 id: babel-core-declared
-title: build(ui): declare the @babel/core packages/ui and the showcase build with
+title: Declare the @babel/core the ui and showcase builds use
 owner: agent:claude
 status: review
 branch: build/1331-babel-core-declared
@@ -18,13 +18,15 @@ area:
 started: 2026-10-06
 updated: 2026-10-06
 plan: (none)
-pr: "#1335"
+pr: '#1335'
 issue: #1331
 ---
 
 ## What
 
-build(ui): declare the @babel/core packages/ui and the showcase build with
+Declare `@babel/core` in the workspaces that build with Babel, on the major
+`vite-plugin-babel` peers on, so every Babel peer is met whatever order pnpm
+resolves in.
 
 ## Status / next
 
