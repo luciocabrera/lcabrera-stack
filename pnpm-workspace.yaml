@@ -97,8 +97,8 @@ catalogs:
 
   tooling:
     '@arethetypeswrong/core': ^0.18.5
-    '@changesets/cli': ^2.31.1
-    '@changesets/get-release-plan': ^4.0.16
+    '@changesets/cli': ^3.0.3
+    '@changesets/get-release-plan': ^5.0.2
     fallow: ^3.31.0
     knip: ^6.39.0
     lighthouse: ^13.5.0
@@ -160,15 +160,6 @@ overrides:
   # the 3.x line, and an unscoped override would force a future 5.x consumer back
   # onto the 3.x line. Drop once postcss's own floor is >= 3.3.17.
   nanoid@3: ^3.3.19
-  # GHSA-5p4m-2wfm-xmqj — quadratic CPU consumption resolving `!!omap`, present
-  # in BOTH live major lines and not backported, so it needs two entries: 3.x
-  # arrives via `read-yaml-file` (asks `^3.6.1`), 4.x via `@changesets/parse`
-  # (asks `^4.1.1`). Both patches sit inside the range their parent already
-  # declares. Neither is declared by any workspace, so `vp update js-yaml` is a
-  # no-op and an override is the only lever. Drop each once its parent's floor
-  # clears the patched version.
-  js-yaml@3: ^3.15.2
-  js-yaml@4: ^4.3.2
   # GHSA-q8mj-m7cp-5q26, GHSA-4mjr-xmp4-gh2g, GHSA-x5fp-wj9c-mxmx — DoS and an
   # array-limit bypass in qs, all patched in 6.16.0. It reaches the tree through
   # `@stryker-mutator/core` -> `typed-rest-client`, which pins qs EXACTLY at

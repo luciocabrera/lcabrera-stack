@@ -70,12 +70,21 @@ Everything below is deliberate, and each one cost something to learn:
   once had none at all and were one `npm publish` from going out.
 - **The tags are not a side effect of publishing — they need a git identity.**
   `changeset publish` tags with `git tag -m`, i.e. annotated, which requires
-  `user.name`/`user.email`; `actions/checkout` sets neither. It also logs
-  `New tag: <name>` _before_ calling git and throws the result away, so its
-  output is a claim rather than a record. `release.yml` configures the identity
-  and then compares that claim against the refs that actually exist, because a
-  tagging failure and a publish that shipped nothing otherwise leave the same
-  empty tag diff (#745).
+  `user.name`/`user.email`; `actions/checkout` sets neither. It also throws
+  away the result of `git tag`, and the `git-tag` events it writes to the
+  NDJSON file `CHANGESETS_OUTPUT` names are a claim rather than a record — its
+  console log is not even that, since the `Created git tags:` block omits every
+  package it published. `release.yml` configures the identity and then compares
+  the event count against the refs that actually exist, because a tagging
+  failure and a publish that shipped nothing otherwise leave the same empty tag
+  diff (#745). `scripts/lib/release-publish-tags.test.mjs` runs the workflow's own
+  publish and `reported` lines against the installed CLI, with a stub `pnpm`
+  standing in for the registry, so a changesets release that moves the signal
+  fails a test rather than a publish.
+- **`release:version` treats an empty queue as nothing to version.**
+  `changeset version` exits 1 when no changeset is queued, so
+  `scripts/release-version.mjs` asks `getReleasePlan` first and skips the call,
+  then raises the shipped floors as it would after a real version.
 - **The job asks the registry, per package, what to publish.**
   `vp run release:plan` is that gate and runs locally: for each non-private
   workspace it compares the manifest version against npm and reports

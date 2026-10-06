@@ -51,9 +51,12 @@ const workspaceWith = (changeset) => {
     baseBranch: 'main',
     changelog: '@changesets/cli/changelog',
     commit: false,
+    format: false,
     updateInternalDependencies: 'patch',
   });
-  write(root, '.changeset/pending.md', changeset);
+  if (changeset !== undefined) {
+    write(root, '.changeset/pending.md', changeset);
+  }
   write(
     root,
     'packages/devkit/package.json',
@@ -155,6 +158,34 @@ describe('release-version', () => {
     );
     expect(readJson(root, WEB_MANIFEST).dependencies['@lcabrera/ui']).toBe(
       '>=0.9.0 <1.0.0',
+    );
+  });
+
+  it('versions nothing and exits 0 when no changeset is queued', () => {
+    const root = workspaceWith();
+    const run = release(root);
+
+    expect(run.status, run.stderr).toBe(0);
+    expect(run.stdout).toContain('release-version: no changeset is queued');
+    expect(run.stdout).toContain('release-version: no shipped floor moved');
+    expect(readJson(root, 'packages/ui/package.json').version).toBe('0.8.1');
+    expect(readJson(root, 'packages/devkit/package.json').version).toBe(
+      '0.6.0',
+    );
+    expect(changelogOf(root)).toBe('');
+  });
+
+  it('still raises a stale floor and versions devkit when no changeset is queued', () => {
+    const root = workspaceWith();
+    write(root, 'packages/ui/package.json', manifest('@lcabrera/ui', '0.9.0'));
+    const run = release(root);
+
+    expect(run.status, run.stderr).toBe(0);
+    expect(readJson(root, WEB_MANIFEST).dependencies['@lcabrera/ui']).toBe(
+      '>=0.9.0 <1.0.0',
+    );
+    expect(readJson(root, 'packages/devkit/package.json').version).toBe(
+      '0.6.1',
     );
   });
 });
