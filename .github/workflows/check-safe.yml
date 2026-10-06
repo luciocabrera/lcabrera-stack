@@ -652,6 +652,23 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    # The eval-history migrator's integration test runs against this scratch
+    # server and fails rather than skips under CI without it (#1268). Trust
+    # auth, so the job holds no credential worth keeping out of this file.
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_USER: evals_test
+          POSTGRES_DB: eval_history_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U evals_test -d eval_history_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -670,11 +687,11 @@ jobs:
       - name: Install dependencies
         run: vp install --frozen-lockfile --ignore-scripts && vp config
 
-      - name: Run the DB-free suites (changed on a base, all on main)
+      - name: Run the suites (changed on a base, all on main)
         # On a PR or a merge-group build, `test:changed --ci` runs only the
         # workspaces the diff touched plus their dependents — a root/shared
         # change still falls back to the full suite. On a push to `main` (no base
-        # ref) it runs the full DB-free `test:ci`. Either way the task
+        # ref) it runs the full `test:ci`. Either way the task
         # substitution is identical: scan packages use their DB-free `test:unit`,
         # and react-router runs its coverage `test:ci` last so it emits
         # coverage-summary.json for the step below. (When a run skips
@@ -682,6 +699,7 @@ jobs:
         # summaries out.)
         env:
           TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
+          EVALS_TEST_DATABASE_URL: postgres://evals_test@localhost:5432/eval_history_test
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             vp run test:ci

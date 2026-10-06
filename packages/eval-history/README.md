@@ -13,6 +13,17 @@ decides how the envelope is versioned.
   [the plan's §5](../../docs/agents/planning/eval-history-plan.md#5-hashing):
   normalized content hashes, the multi-file hash, canonical JSON, the skill
   catalog hash and the harness version.
+- `src/migrate/` and `migrations/` — the migrator ADR-130 decides and the
+  ordered SQL files it applies. A fix to an applied file is a new file: the
+  migrator refuses to run while an applied one has changed.
+
+`vp run evals:migrate` applies `migrations/` to the database
+`EVALS_DATABASE_URL` names. Locally that is a database named `eval_history` on
+the compose Postgres, created once with `create database eval_history`.
+
+The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
+scratch database, because it drops schema `evals` there before every test.
+Without the variable it skips and says why, except under `CI`, where it fails.
 
 The source is TypeScript with erasable syntax only, so a plain `.mjs` runner
 imports it through `exports` with no build and no loader.
