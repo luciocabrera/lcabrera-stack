@@ -75,6 +75,11 @@ catalogMode: prefer
 overrides:
   vite: catalog:build
   vitest: catalog:test
+  # GHSA-5gmw-xhrv-c9v3, GHSA-85c8-ppgw-ccpr — prototype pollution leading to
+  # code execution in tinypool before 2.1.2. `vite-plus` pins `oxfmt`, which pins
+  # tinypool exactly at 2.1.0; this lifts it within the same major. Drop once the
+  # pinned oxfmt asks for >= 2.1.2.
+  tinypool@2: ^2.1.2
 
 peerDependencyRules:
   allowAny:

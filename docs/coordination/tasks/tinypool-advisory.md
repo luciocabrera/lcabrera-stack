@@ -2,7 +2,7 @@
 id: tinypool-advisory
 title: Clear the tinypool and sprintf-js advisories
 owner: agent:claude
-status: active
+status: review
 branch: build/1328-tinypool-advisory
 area:
   - pnpm-workspace.yaml
@@ -13,7 +13,7 @@ area:
 started: 2026-10-06
 updated: 2026-10-06
 plan: (none)
-pr: (none)
+pr: #1330
 issue: #1328
 ---
 

@@ -177,6 +177,13 @@ overrides:
   # 6.16.0 already resolves here for express and body-parser, so the version is
   # proven in this install. Drop once typed-rest-client repins.
   qs@6: ^6.16.0
+  # GHSA-5gmw-xhrv-c9v3, GHSA-85c8-ppgw-ccpr — prototype pollution in worker and
+  # run() options leading to code execution, patched in 2.1.1 and 2.1.2. It
+  # arrives through `oxfmt`, which `vite-plus` pins exactly and which pins
+  # tinypool EXACTLY at 2.1.0, so like `qs@6` this moves the parent off its pin.
+  # Same major, and oxfmt's own later releases moved to the 2.2 line. Drop once
+  # the pinned oxfmt asks for >= 2.1.2.
+  tinypool@2: ^2.1.2
 peerDependencyRules:
   allowAny:
     - vite
