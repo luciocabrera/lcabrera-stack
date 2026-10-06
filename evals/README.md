@@ -75,8 +75,12 @@ the file at load when a field is missing, unknown or out of range.
 every trial on main is flagged when the share of its counted PR trials that
 failed is at least `failAtLeast / ofTrials`. At the default 2 and 3, 2 failures
 of 3 flag, 3 of 6 do not, and 4 of 6 do. `ofTrials` is also the fewest counted
-trials a task is judged on: a task with fewer makes the verdict insufficient,
-naming the task, when the missing trials could still flag it.
+trials the share is judged on. When `error`, `timeout` or `skipped` leaves a
+task short of it, the task is flagged if its counted failures already reach
+`failAtLeast`, because it flips however the missing trials would have gone. It
+makes the verdict insufficient, naming the task, if the missing trials would
+decide it. It adds nothing if even failing every missing trial would not reach
+`failAtLeast`.
 
 `error`, `timeout` and `skipped` trials count toward none of these. A flaky
 task, and any task tagged `set: capability`, is left out of both binary rules.

@@ -43,11 +43,20 @@ describe('flipped', () => {
     ).toBeUndefined();
   });
 
-  it('reports a task too short of counted trials to judge when the missing ones could flip it', () => {
+  it('flags a short task whose counted failures flip it whatever the missing trials were', () => {
+    expect(
+      flipped({ flip, main, pr: task(['fail', 'fail', 'error']) }),
+    ).toEqual({ failed: 2, kind: 'flip', taskKey: 'a/trigger', trials: 2 });
     expect(
       flipped({ flip, main, pr: task(['fail', 'error', 'fail']) }),
+    ).toEqual({ failed: 2, kind: 'flip', taskKey: 'a/trigger', trials: 2 });
+  });
+
+  it('reports a short task as insufficient when the missing trials decide it', () => {
+    expect(
+      flipped({ flip, main, pr: task(['fail', 'error', 'pass']) }),
     ).toEqual({
-      failed: 2,
+      failed: 1,
       kind: 'insufficient',
       taskKey: 'a/trigger',
       trials: 2,

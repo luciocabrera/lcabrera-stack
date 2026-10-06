@@ -6,9 +6,8 @@ import type {
 } from './stats.types.ts';
 
 import { comparability } from './comparability.util.ts';
-import { countOutcomes } from './countOutcomes.util.ts';
 import { flipped } from './flipped.util.ts';
-import { wilson } from './wilson.util.ts';
+import { pooledRate } from './pooledRate.util.ts';
 
 type BinaryRegressionArgs = {
   readonly allowHarnessChange?: boolean;
@@ -21,17 +20,6 @@ type BinaryRegressionArgs = {
 type BinaryRun = {
   readonly identity: RunIdentity;
   readonly tasks: readonly TaskTrials[];
-};
-
-type PooledRateArgs = {
-  readonly config: RegressionConfig;
-  readonly tasks: readonly TaskTrials[];
-};
-
-const pooledRate = ({ config, tasks }: PooledRateArgs) => {
-  const { k, n } = countOutcomes(tasks.flatMap(({ outcomes }) => outcomes));
-
-  return wilson({ k, minN: config.minTrialsForRate, n, z: config.z });
 };
 
 export const binaryRegression = ({

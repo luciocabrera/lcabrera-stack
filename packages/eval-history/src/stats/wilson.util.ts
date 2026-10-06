@@ -1,11 +1,11 @@
+import { clampToUnit } from './clampToUnit.util.ts';
+
 type WilsonArgs = {
   readonly k: number;
   readonly minN: number;
   readonly n: number;
   readonly z: number;
 };
-
-const clamp = (value: number) => Math.min(1, Math.max(0, value));
 
 export const wilson = ({ k, minN, n, z }: WilsonArgs) => {
   if (!Number.isSafeInteger(k) || !Number.isSafeInteger(n) || k < 0 || k > n) {
@@ -28,9 +28,9 @@ export const wilson = ({ k, minN, n, z }: WilsonArgs) => {
   return {
     k,
     kind: 'rate',
-    lower: clamp(center - half),
+    lower: clampToUnit(center - half),
     n,
     rate: p,
-    upper: clamp(center + half),
+    upper: clampToUnit(center + half),
   } as const;
 };

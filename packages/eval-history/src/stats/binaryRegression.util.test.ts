@@ -97,12 +97,26 @@ describe('binaryRegression — the flip rule', () => {
     });
   });
 
-  it('reports insufficient, naming the task, when an excluded trial leaves a flip unjudged', () => {
+  it('flags a flip that holds whatever the excluded trial would have been', () => {
     expect(
       compare({
         prTasks: tasks({
           outcomesAt: (index) =>
-            index === 0 ? ['fail', 'error', 'fail'] : PASSES,
+            index === 0 ? ['fail', 'fail', 'error'] : PASSES,
+        }),
+      }),
+    ).toEqual({
+      findings: [{ failed: 2, kind: 'flip', taskKey: 'task-0', trials: 2 }],
+      kind: 'regression',
+    });
+  });
+
+  it('reports insufficient, naming the task, when an excluded trial decides the flip', () => {
+    expect(
+      compare({
+        prTasks: tasks({
+          outcomesAt: (index) =>
+            index === 0 ? ['fail', 'error', 'pass'] : PASSES,
         }),
       }),
     ).toEqual({ kind: 'insufficient', unjudged: ['task-0'] });

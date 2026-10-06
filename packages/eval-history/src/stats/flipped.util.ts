@@ -20,7 +20,7 @@ export const flipped = ({ flip, main, pr }: FlippedArgs) => {
   const failed = n - k;
   const missing = Math.max(0, flip.ofTrials - n);
 
-  if (missing > 0) {
+  if (missing > 0 && failed < flip.failAtLeast) {
     return failed + missing >= flip.failAtLeast
       ? ({
           failed,

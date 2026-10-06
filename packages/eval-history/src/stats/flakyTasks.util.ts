@@ -1,20 +1,10 @@
-import type {
-  Outcome,
-  RegressionConfig,
-  TaskRunOutcomes,
-} from './stats.types.ts';
+import type { RegressionConfig, TaskRunOutcomes } from './stats.types.ts';
 
-import { countOutcomes } from './countOutcomes.util.ts';
+import { hasDisagreement } from './hasDisagreement.util.ts';
 
 type FlakyTasksArgs = {
   readonly config: RegressionConfig['flaky'];
   readonly history: readonly TaskRunOutcomes[];
-};
-
-const disagrees = (outcomes: readonly Outcome[]) => {
-  const { k, n } = countOutcomes(outcomes);
-
-  return k > 0 && k < n;
 };
 
 export const flakyTasks = ({
@@ -26,7 +16,8 @@ export const flakyTasks = ({
       const recent = runs.slice(-window);
 
       return {
-        disagreeing: recent.filter((outcomes) => disagrees(outcomes)).length,
+        disagreeing: recent.filter((outcomes) => hasDisagreement(outcomes))
+          .length,
         runs: recent.length,
         taskKey,
       };

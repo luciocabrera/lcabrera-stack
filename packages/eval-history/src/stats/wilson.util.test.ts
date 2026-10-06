@@ -29,6 +29,13 @@ describe('wilson', () => {
     expect(all.kind === 'rate' && all.upper).toBe(1);
   });
 
+  it('keeps the upper bound of an all-pass rate at the floor within rounding of 1', () => {
+    const result = wilson({ ...AT_95, k: 6, n: 6 });
+
+    expect(result.kind === 'rate' && result.upper).toBeLessThanOrEqual(1);
+    expect(result.kind === 'rate' && result.upper).toBeCloseTo(1, 12);
+  });
+
   it('returns insufficient instead of a rate below minN trials', () => {
     expect(wilson({ ...AT_95, k: 5, n: 5 })).toEqual({
       k: 5,
