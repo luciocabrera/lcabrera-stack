@@ -11,6 +11,7 @@ area:
   - pnpm-lock.yaml
   - vite.config.ts
   - biome.jsonc
+  - devkit.config.json
 started: 2026-10-06
 updated: 2026-10-06
 plan: (none)
