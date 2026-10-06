@@ -1,0 +1,235 @@
+import { EventEmitter } from 'node:events';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
+
+import {
+  finishedSession,
+  STARTED_AT,
+  testIdentity,
+  testPlan,
+} from './envelope-test-support.mjs';
+import { sessionTrial } from './run-envelope.mjs';
+import {
+  recordRun,
+  runIdentity,
+  runnerHarnessVersion,
+  saveEnvelope,
+  saveTranscript,
+} from './run-record.mjs';
+
+const TASK_KEY = 'rules-consistency/typescript/indexed';
+
+const plan = testPlan({
+  modelId: undefined,
+  subjects: [
+    {
+      content_hash: 'a'.repeat(64),
+      kind: 'rule',
+      name: 'typescript',
+      path: '.claude/rules/typescript.md',
+    },
+  ],
+  suite: 'rules-consistency',
+  tasks: [
+    {
+      agent_prompt_hash: null,
+      expected_hash: null,
+      fixture_hash: null,
+      judge_prompt_hash: null,
+      kind: 'rule-check',
+      set: 'regression',
+      source: null,
+      subject: { kind: 'rule', name: 'typescript' },
+      tags: [],
+      task_hash: 'b'.repeat(64),
+      task_key: TASK_KEY,
+    },
+  ],
+});
+
+const trial = sessionTrial({
+  detail: { check: 'indexed', findings: [], schema: 'rules/1' },
+  metrics: finishedSession(),
+  passed: true,
+  queuedAt: STARTED_AT,
+  taskKey: TASK_KEY,
+  trialIndex: 0,
+});
+
+let resultsDir;
+
+const written = () =>
+  JSON.parse(
+    readFileSync(
+      join(resultsDir, 'rules-consistency', `${testIdentity.run_id}.json`),
+      'utf8',
+    ),
+  );
+
+const record = (overrides) =>
+  recordRun({
+    clock: () => STARTED_AT + 2000,
+    identity: testIdentity,
+    plan,
+    resultsDir,
+    signals: new EventEmitter(),
+    ...overrides,
+  });
+
+beforeEach(() => {
+  resultsDir = mkdtempSync(join(tmpdir(), 'eval-results-'));
+  vi.spyOn(console, 'log').mockImplementation(() => undefined);
+  vi.spyOn(console, 'error').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  rmSync(resultsDir, { force: true, recursive: true });
+});
+
+describe('recordRun', () => {
+  it('writes a complete envelope on a normal finish and returns it', async () => {
+    const outcome = await record({
+      execute: ({ addTrial }) => {
+        addTrial(trial);
+        return 'done';
+      },
+    });
+    expect(outcome.result).toBe('done');
+    expect(outcome.envelope.run.status).toBe('complete');
+    expect(written()).toMatchObject({
+      run: { status: 'complete', totals: { trials: 1 } },
+      schema_version: 1,
+    });
+  });
+
+  it('writes the trials finished so far as partial when the run throws', async () => {
+    await expect(
+      record({
+        execute: async ({ addTrial }) => {
+          addTrial(trial);
+          throw new Error('usage limit reached');
+        },
+      }),
+    ).rejects.toThrow('usage limit reached');
+    expect(written()).toMatchObject({
+      run: { status: 'partial', totals: { trials: 1 } },
+    });
+  });
+
+  it('writes an aborted envelope on SIGINT or SIGTERM, then raises the signal again', async () => {
+    for (const signal of ['SIGINT', 'SIGTERM']) {
+      const signals = new EventEmitter();
+      const raise = vi.fn();
+      const started = Promise.withResolvers();
+      void record({
+        execute: ({ addTrial }) => {
+          addTrial(trial);
+          started.resolve();
+          return Promise.withResolvers().promise;
+        },
+        raise,
+        signals,
+      });
+      await started.promise;
+      signals.emit(signal);
+      expect(raise).toHaveBeenCalledWith(signal);
+      expect(signals.listenerCount('SIGINT')).toBe(0);
+      expect(signals.listenerCount('SIGTERM')).toBe(0);
+      expect(written()).toMatchObject({
+        run: { status: 'aborted', totals: { trials: 1 } },
+      });
+    }
+  });
+
+  it('stops listening for signals once the run is recorded', async () => {
+    const signals = new EventEmitter();
+    await record({ execute: () => undefined, signals });
+    expect(signals.listenerCount('SIGINT')).toBe(0);
+    expect(signals.listenerCount('SIGTERM')).toBe(0);
+  });
+
+  it('refuses an envelope that fails validation and names the field', async () => {
+    await expect(
+      record({
+        execute: () => undefined,
+        identity: { ...testIdentity, git_sha: 'not-a-sha' },
+      }),
+    ).rejects.toThrow(/run\.git_sha/u);
+    expect(() => written()).toThrow();
+  });
+});
+
+describe('saveEnvelope', () => {
+  it('names every failing field in its error', () => {
+    expect(() =>
+      saveEnvelope({
+        envelope: { run: { suite: 'skills' }, schema_version: 2 },
+        resultsDir,
+      }),
+    ).toThrow(
+      /the skills run envelope failed validation:[\s\S]*schema_version/u,
+    );
+  });
+});
+
+describe('saveTranscript', () => {
+  it('writes beside the envelope and returns its size and hash', () => {
+    const transcript = saveTranscript({
+      name: 'react-19-trigger-1.json',
+      resultsDir,
+      runId: testIdentity.run_id,
+      suite: 'skills',
+      text: 'abc',
+    });
+    expect(transcript).toStrictEqual({
+      bytes: 3,
+      sha256:
+        'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+      uri: join(
+        resultsDir,
+        'skills',
+        testIdentity.run_id,
+        'react-19-trigger-1.json',
+      ),
+    });
+    expect(readFileSync(transcript.uri, 'utf8')).toBe('abc');
+  });
+});
+
+describe('runnerHarnessVersion', () => {
+  it('hashes the runner and the evals modules it imports to 12 hex characters', () => {
+    const version = runnerHarnessVersion(
+      new URL(
+        'rules-consistency/verify-rules-consistency.mjs',
+        import.meta.url,
+      ),
+    );
+    expect(version).toMatch(/^[0-9a-f]{12}$/u);
+    expect(
+      runnerHarnessVersion(
+        new URL('skills/verify-skill-triggers.mjs', import.meta.url),
+      ),
+    ).not.toBe(version);
+  });
+});
+
+describe('runIdentity', () => {
+  it('reads the commit and mints a fresh uuid each run', () => {
+    const identity = runIdentity({ env: {}, now: STARTED_AT });
+    expect(identity.git_sha).toMatch(/^[0-9a-f]{40}$/u);
+    expect(identity.trigger).toBe('local');
+    expect(identity.started_at).toBe('2026-10-06T09:00:00.000Z');
+    expect(runIdentity({ env: {} }).run_id).not.toBe(identity.run_id);
+  });
+});

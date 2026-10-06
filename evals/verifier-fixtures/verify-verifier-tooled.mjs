@@ -6,26 +6,19 @@
  * every report carries a fail-to-pass gate proof. A run whose worktree or main
  * checkout changed fails too.
  *
+ * Each run also writes a run envelope under .tmp/eval-results/verifier-tooled/.
+ *
  * Usage (from the repo root): vp run evals:verifier:tooled [-- <fixture> ...] [--runs <n>] [--keep]
  * Needs a Claude login and the local database the full quality gate uses.
- * Exit codes: 0 = every fixture matched, 1 = otherwise.
+ * Exit codes: 0 = every fixture matched, 1 = otherwise, 130/143 = interrupted.
  */
-import { execFileSync } from 'node:child_process';
-import {
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
-import { runGit } from '../../packages/repo-standards/scripts/git-exec.mjs';
 import {
   chunk,
   errorText,
@@ -36,88 +29,41 @@ import {
   timedDrain,
   withoutSeparator,
 } from '../agent-sessions.mjs';
+import { runSettings } from '../run-envelope.mjs';
+import {
+  recordRun,
+  runIdentity,
+  runnerHarnessVersion,
+  sdkVersion,
+} from '../run-record.mjs';
 
 import {
   agentTools,
   describeTooledJudgement,
   judgeTooledFixture,
-  nextAdrNumber,
+  readTooledRun,
   tooledDispatch,
   tooledRunCount,
-  withAdrNumber,
+  tooledRunCounts,
 } from './tooled-fixtures.mjs';
+import {
+  agentPromptHash,
+  CONTRACT_PATH,
+  fixtureTask,
+  tooledTrial,
+  verifierSubject,
+} from './verifier-envelope.mjs';
 import { agentBody, suiteEnd } from './verifier-fixtures.mjs';
+import { cleanUp, git, prepare, treeProblem } from './tooled-worktree.mjs';
 
 const MODEL = 'claude-opus-5-5';
+const SUITE = 'verifier-tooled';
 const MAX_TURNS = 200;
 const REPO_ROOT = resolve('.');
 const REPORT_DIR = join(REPO_ROOT, '.tmp', 'verifier-evals-tooled');
-const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 const BLOCKED = ['Bash(git commit:*)', 'Bash(git push:*)', 'Bash(gh:*)'];
-const IDENTITY = [
-  '-c',
-  'core.hooksPath=/dev/null',
-  '-c',
-  'user.name=verifier-eval',
-  '-c',
-  'user.email=verifier-eval@example.invalid',
-];
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
-
-const git = (args, cwd = REPO_ROOT) => {
-  const output = runGit({ args, cwd });
-  if (output === undefined) {
-    throw new Error(`git ${args.join(' ')} failed in ${cwd}`);
-  }
-  return output;
-};
-
-const vp = (args, cwd) =>
-  execFileSync(VP_BIN, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
-
-const applyPatch = ({ text, worktree }) => {
-  const patch = `${worktree}.diff`;
-  writeFileSync(patch, text);
-  try {
-    git(['apply', patch], worktree);
-  } finally {
-    rmSync(patch, { force: true });
-  }
-};
-
-const applyFixture = ({ diff, worktree }) => {
-  const number = nextAdrNumber(
-    readdirSync(join(worktree, 'docs', 'decisions')),
-  );
-  const text = withAdrNumber({ diff, number });
-  applyPatch({ text, worktree });
-  git(['add', '-A'], worktree);
-  git(
-    [...IDENTITY, 'commit', '-q', '-m', 'test(evals): verifier fixture'],
-    worktree,
-  );
-  return text;
-};
-
-const prepare = ({ base, branch, diff, worktree }) => {
-  git(['worktree', 'add', '-q', '-b', branch, worktree, base]);
-  const applied = applyFixture({ diff, worktree });
-  vp(['install', '--frozen-lockfile'], worktree);
-  vp(['run', 'typegen:all'], worktree);
-  vp(['run', 'worktree:env'], worktree);
-  return { applied, head: git(['rev-parse', 'HEAD'], worktree) };
-};
-
-const treeProblem = ({ before, head, worktree }) => {
-  const dirty = git(['status', '--porcelain'], worktree);
-  if (dirty !== '') return `the worktree was left dirty: ${dirty}`;
-  if (git(['rev-parse', 'HEAD'], worktree) !== head)
-    return 'the worktree HEAD moved';
-  return git(['status', '--porcelain']) === before
-    ? undefined
-    : 'the main checkout changed during the run';
-};
 
 const certify = async ({
   dispatch,
@@ -154,14 +100,6 @@ const certify = async ({
   };
 };
 
-const cleanUp = ({ branch, keep, worktree }) => {
-  if (keep) return;
-  runGit({ args: ['worktree', 'remove', '--force', worktree], cwd: REPO_ROOT });
-  runGit({ args: ['worktree', 'prune'], cwd: REPO_ROOT });
-  runGit({ args: ['branch', '-D', branch], cwd: REPO_ROOT });
-  rmSync(worktree, { force: true, recursive: true });
-};
-
 const runOnce = async ({ fixture, index, keep, queuedAt, shared }) => {
   const branch = `eval/verifier-tooled/${fixture}-${Date.now()}-${index}`;
   const before = git(['status', '--porcelain']);
@@ -185,31 +123,77 @@ const runOnce = async ({ fixture, index, keep, queuedAt, shared }) => {
       treeProblem: treeProblem({ before, head: prepared.head, worktree }),
     };
   } catch (error) {
-    return { error: `setup failed: ${errorText(error)}`, report: '' };
+    return {
+      error: `setup failed: ${errorText(error)}`,
+      report: '',
+      setupFailed: true,
+    };
   } finally {
     cleanUp({ branch, keep, worktree });
   }
 };
 
+const runText = ({ error, report, treeProblem: problem }) =>
+  [...[error, problem].filter(Boolean).map((note) => `(${note})`), report].join(
+    '\n\n',
+  );
+
 const save = ({ fixture, runs }) => {
-  for (const [
-    index,
-    { error, report, treeProblem: problem },
-  ] of runs.entries()) {
-    const notes = [error, problem].filter(Boolean).map((note) => `(${note})`);
-    writeFileSync(
-      join(REPORT_DIR, `${fixture}-${index + 1}.md`),
-      [...notes, report].join('\n\n'),
-    );
+  for (const [index, run] of runs.entries()) {
+    writeFileSync(join(REPORT_DIR, `${fixture}-${index + 1}.md`), runText(run));
   }
 };
 
-const runFixture = async ({ fixture, keep, runs, shared }) => {
+const recordOnce = ({
+  expectedNotMet,
+  fixture,
+  index,
+  queuedAt,
+  record,
+  result,
+}) => {
+  const run = readTooledRun(result);
+  record.addTrial(
+    tooledTrial({
+      error: result.error,
+      expectedNotMet,
+      fixture,
+      matched: tooledRunCounts({ expectedNotMet, run }),
+      metrics: result.metrics,
+      queuedAt,
+      run,
+      setupFailed: result.setupFailed === true,
+      transcript: record.transcript({
+        name: `${fixture}-${index + 1}.md`,
+        text: runText(result),
+      }),
+      trialIndex: index,
+    }),
+  );
+  return result;
+};
+
+const runFixture = async ({
+  expected,
+  fixture,
+  keep,
+  record,
+  runs,
+  shared,
+}) => {
   const results = await runBatches(
     chunk(
       Array.from({ length: runs }, (_, index) => {
         const queuedAt = Date.now();
-        return () => runOnce({ fixture, index, keep, queuedAt, shared });
+        return async () =>
+          recordOnce({
+            expectedNotMet: expected[fixture],
+            fixture,
+            index,
+            queuedAt,
+            record,
+            result: await runOnce({ fixture, index, keep, queuedAt, shared }),
+          });
       }),
       1,
     ),
@@ -218,8 +202,22 @@ const runFixture = async ({ fixture, keep, runs, shared }) => {
   return results;
 };
 
-const judgeAndPrint = async ({ expected, fixture, keep, runs, shared }) => {
-  const results = await runFixture({ fixture, keep, runs, shared });
+const judgeAndPrint = async ({
+  expected,
+  fixture,
+  keep,
+  record,
+  runs,
+  shared,
+}) => {
+  const results = await runFixture({
+    expected,
+    fixture,
+    keep,
+    record,
+    runs,
+    shared,
+  });
   const judgement = judgeTooledFixture({
     expectedNotMet: expected[fixture],
     fixture,
@@ -235,6 +233,53 @@ const selected = ({ expected, names }) => {
     throw new Error(`no fixture named ${unknown.join(', ')} in expected.json`);
   }
   return names.length === 0 ? Object.keys(expected) : names;
+};
+
+const tooledPlan = ({ definition, expected, fixtures, runs, shared }) => {
+  const promptHash = agentPromptHash({
+    files: [{ bytes: read(`../../${CONTRACT_PATH}`), path: CONTRACT_PATH }],
+    systemPrompt: shared.systemPrompt,
+  });
+  return {
+    harnessVersion: runnerHarnessVersion(import.meta.url),
+    modelId: MODEL,
+    sdkVersion: sdkVersion(),
+    settings: runSettings({
+      argv: process.argv.slice(2),
+      concurrency: 1,
+      maxTurns: MAX_TURNS,
+      runs,
+      selection: fixtures,
+      tools: shared.tools,
+    }),
+    subjects: [verifierSubject(definition)],
+    suite: SUITE,
+    tasks: fixtures.map((fixture) =>
+      fixtureTask({
+        agentPromptHash: promptHash,
+        diff: read(`./${fixture}/change.diff`),
+        expectedNotMet: expected[fixture],
+        fixture,
+        issue: shared.issue,
+        suite: SUITE,
+      }),
+    ),
+  };
+};
+
+const runSuite = async ({ expected, fixtures, keep, record, runs, shared }) => {
+  const judgements = await runBatches(
+    chunk(
+      fixtures.map(
+        (fixture) => () =>
+          judgeAndPrint({ expected, fixture, keep, record, runs, shared }),
+      ),
+      1,
+    ),
+  );
+  const { exitCode, footer } = suiteEnd({ judgements, reportDir: REPORT_DIR });
+  console.log(footer);
+  process.exitCode = exitCode;
 };
 
 const main = async () => {
@@ -257,18 +302,12 @@ const main = async () => {
     tools: agentTools(definition),
   };
   mkdirSync(REPORT_DIR, { recursive: true });
-  const judgements = await runBatches(
-    chunk(
-      fixtures.map(
-        (fixture) => () =>
-          judgeAndPrint({ expected, fixture, keep: values.keep, runs, shared }),
-      ),
-      1,
-    ),
-  );
-  const { exitCode, footer } = suiteEnd({ judgements, reportDir: REPORT_DIR });
-  console.log(footer);
-  process.exitCode = exitCode;
+  await recordRun({
+    execute: (record) =>
+      runSuite({ expected, fixtures, keep: values.keep, record, runs, shared }),
+    identity: runIdentity(),
+    plan: tooledPlan({ definition, expected, fixtures, runs, shared }),
+  });
 };
 
 try {

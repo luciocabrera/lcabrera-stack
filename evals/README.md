@@ -16,6 +16,21 @@ suites' own tests.
 | [Verifier fixtures](./verifier-fixtures) | `vp run evals:verifier`       | yes           |
 | The suites' own tests                    | `vp run test:evals`           | no            |
 
+## What a run leaves behind
+
+Every runner, the tooled verifier (`vp run evals:verifier:tooled`) included,
+writes one run envelope to `.tmp/eval-results/<suite>/<run_id>.json`, with the
+run's transcripts beside it in `<run_id>/`. The envelope is the schema in
+[`@repo/eval-history`](../packages/eval-history) and holds the run's identity,
+settings and environment, the hash of every subject and task, and one trial per
+session, with its tokens, cost and durations. Each suite's own output under
+`.tmp/` is still written, and skill quality builds `report.html` from the
+envelope.
+
+The envelope is written on every way out: `complete` on a normal finish,
+`partial` when the run throws, and `aborted` on Ctrl-C or SIGTERM. A runner
+whose envelope fails the schema writes none, names each failing field and exits 1.
+
 ## What a full run costs
 
 The skill-trigger and verifier suites run each task or fixture three times by

@@ -77,14 +77,14 @@ export const expectedVerdict = (expectedNotMet) =>
 const verdictMatches = ({ expected, verdict = '' }) =>
   expected === 'PASS' ? verdict === 'PASS' : /^FAIL\b/.test(verdict);
 
-const readRun = ({ error, report = '', treeProblem }) => ({
+export const readTooledRun = ({ error, report = '', treeProblem }) => ({
   error: error ?? treeProblem,
   notMet: definiteNotMet(report),
   proof: hasGateProof(report),
   verdict: verdictOf(report),
 });
 
-const runCounts = ({ expectedNotMet, run }) =>
+export const tooledRunCounts = ({ expectedNotMet, run }) =>
   run.error === undefined &&
   run.proof &&
   verdictMatches({
@@ -94,13 +94,13 @@ const runCounts = ({ expectedNotMet, run }) =>
   sameNumbers(run.notMet, expectedNotMet);
 
 export const judgeTooledFixture = ({ expectedNotMet, fixture, runs }) => {
-  const read = runs.map(readRun);
+  const read = runs.map(readTooledRun);
   return {
     expectedNotMet,
     fixture,
     matched:
       read.length > 0 &&
-      read.every((run) => runCounts({ expectedNotMet, run })),
+      read.every((run) => tooledRunCounts({ expectedNotMet, run })),
     runs: read,
     stable: read.every(({ notMet }) => sameNumbers(notMet, read[0].notMet)),
   };

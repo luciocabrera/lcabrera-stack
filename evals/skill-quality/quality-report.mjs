@@ -1,6 +1,6 @@
 /**
- * Turns one skill-quality run into the data the HTML report shows, and pours it
- * into report-template.html. Each run is also kept as a small record, so the
+ * Turns one skill-quality run, read from its run envelope, into the data the
+ * HTML report shows, and pours it into report-template.html. Each run is also kept as a small record, so the
  * report can show how every skill moved since the last run that judged it.
  * Usage: imported by verify-skill-quality.mjs.
  */
@@ -55,6 +55,42 @@ export const reportData = ({ generatedAt, history, model, results }) => ({
   rubric: RUBRIC,
   skills: results.map((result) => skillEntry({ history, result })),
 });
+
+const taskOrder = (tasks) =>
+  new Map(
+    tasks.map(({ subject, task_key }, index) => [
+      task_key,
+      { index, skill: subject.name },
+    ]),
+  );
+
+const resultOf = ({ detail, error_class, outcome, skill }) =>
+  outcome === 'pass'
+    ? {
+        judgement: {
+          dimensions: detail.dimensions,
+          overall: detail.overall,
+          summary: detail.summary,
+        },
+        skill,
+      }
+    : { error: error_class ?? outcome, skill };
+
+export const envelopeResults = ({ tasks, trials }) => {
+  const order = taskOrder(tasks);
+  return trials
+    .map((trial) => ({ ...trial, ...order.get(trial.task_key) }))
+    .toSorted((left, right) => left.index - right.index)
+    .map(resultOf);
+};
+
+export const reportDataFromEnvelope = ({ envelope, history }) =>
+  reportData({
+    generatedAt: envelope.run.finished_at,
+    history,
+    model: envelope.run.model_id,
+    results: envelopeResults(envelope),
+  });
 
 export const renderReport = ({ data, template }) => {
   if (!template.includes(REPORT_PLACEHOLDER)) {

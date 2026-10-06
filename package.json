@@ -129,6 +129,7 @@
     "@lcabrera/devkit": "workspace:*",
     "@lcabrera/repo-standards": "workspace:*",
     "@lcabrera/vite-config": "workspace:*",
+    "@repo/eval-history": "workspace:*",
     "@vitest/coverage-v8": "catalog:test",
     "fallow": "catalog:tooling",
     "react-doctor": "catalog:lint",

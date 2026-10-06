@@ -27,6 +27,7 @@ describe('readTask', () => {
           'name: A task',
           'set: capability',
           'source: incident',
+          'tags: [positive-trigger, 7]',
           'inputs:',
           '  prompt: "Do it."',
           '  context:',
@@ -44,6 +45,7 @@ describe('readTask', () => {
       set: 'capability',
       shouldTrigger: true,
       source: 'incident',
+      tags: ['positive-trigger'],
     });
   });
 

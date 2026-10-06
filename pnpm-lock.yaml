@@ -371,6 +371,9 @@ importers:
       '@lcabrera/vite-config':
         specifier: workspace:*
         version: link:packages/vite-configs
+      '@repo/eval-history':
+        specifier: workspace:*
+        version: link:packages/eval-history
       '@vitest/coverage-v8':
         specifier: catalog:test
         version: 4.1.11(@vitest/browser@4.1.11)(vitest@4.1.11)
