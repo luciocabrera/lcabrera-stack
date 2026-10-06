@@ -367,6 +367,27 @@ describe('Table cell renderers', () => {
     );
   });
 
+  it.each([
+    { call: { kind: 'badge' }, tone: 'neutral' },
+    { call: { kind: 'badge', params: { fallbackTone: 'info' } }, tone: 'info' },
+  ] as const)('draws a single-tone pill for $call', async ({ call, tone }) => {
+    await renderGrid({
+      columns: withColumn({
+        cell: call,
+        dataType: 'number',
+        key: 'score',
+        label: 'Clarity',
+      }),
+    });
+
+    const badge = badgeOf({ columnKey: 'score', rowIndex: 0 });
+
+    expect(badge.textContent).toBe('4');
+    expect(styleOf(badge)).toContain(
+      TABLE_CELL_BUILT_IN_TONES[tone]?.background,
+    );
+  });
+
   it('lets a renderer registered under an existing kind replace the built-in', async () => {
     const params: StandardSchemaV1<{ readonly label: string }> = {
       '~standard': {

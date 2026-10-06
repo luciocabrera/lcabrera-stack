@@ -260,7 +260,7 @@ static context that `TableLayout` and `Table` each render and that appends its
 layers to its parent's, so a tone resolves nearest-first: `Table`'s
 `cellPalette`, `TableLayout`'s, then the loader's `columnsState.cellPalette`, then
 the built-in tones, then `neutral`. The decision and its costs are
-[ADR-130](../../../../../docs/decisions/ADR-130-a-cells-look-is-a-call-validated-against-a-registered-renderer.md).
+[ADR-132](../../../../../docs/decisions/ADR-132-a-cells-look-is-a-call-validated-against-a-registered-renderer.md).
 
 ## Grouped rows
 

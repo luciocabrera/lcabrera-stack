@@ -30,7 +30,7 @@ evidence:
   - type: doc
     ref: docs/decisions/ADR-009-serializable-filter-options-descriptors.md
   - type: doc
-    ref: docs/decisions/ADR-130-a-cells-look-is-a-call-validated-against-a-registered-renderer.md
+    ref: docs/decisions/ADR-132-a-cells-look-is-a-call-validated-against-a-registered-renderer.md
   - type: command
     ref: vp run test:ci
 ---
@@ -86,7 +86,7 @@ The screenshot is the target. Each of its columns is one call:
 
 Four steps in one column outrun the built-in tones, which have one step
 (`warning`) between `success` and `error`. The fourth should not need a library
-change: the loader names it, and the palette it sends defines it. ADR-130 holds
+change: the loader names it, and the palette it sends defines it. ADR-132 holds
 the decision, and #1318 the call and renderer types and the palette shape.
 
 `render` already exists and does not answer this, because single-fetch replaces

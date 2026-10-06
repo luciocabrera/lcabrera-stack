@@ -449,7 +449,7 @@ the data context — state placed there would be wiped by its own effect.
 | `isTableGroupPeriod`            | `components/Table/utils/isTableGroupPeriod.util.ts`                                                 | Whether a value is a granularity a group key may be truncated to — the wire guard under this package's own name, so there is one vocabulary rather than two that could drift (ADR-082, ADR-084)                                                                                                                                                               |
 | `getInitialGroupingState`       | `components/Table/contexts/TableConfig/utils/getInitialGroupingState.util.ts`                       | Seeds the grouping store from the `TableGroupingState` the loader applied, including `totalsPlacement`. A write path like any other, so it refuses an illegal key list whole via `areGroupKeysLegal` — the boundary a consumer's hand-written loader reaches                                                                                                  |
 
-### `src/components/Table/cellRenderers/` — cell calls (ADR-130)
+### `src/components/Table/cellRenderers/` — cell calls (ADR-132)
 
 A column's `cell: { kind, params }` call, validated against a renderer the client registers and coloured by tone names resolved against a layered palette.
 

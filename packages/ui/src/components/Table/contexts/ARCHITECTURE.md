@@ -31,7 +31,7 @@ contexts/
 │   ├── TableFocusContext.*      → Context, Provider, Types
 │   └── focus/                  → focusStore, its actions, selectors and utils
 │
-├── TableCellRendering/         → Static context: registered cell renderers + palette layers (ADR-130)
+├── TableCellRendering/         → Static context: registered cell renderers + palette layers (ADR-132)
 │
 └── TableWrapper/               → Ref-based context for wrapper DOM access
     ├── TableWrapperContext.*    → Context, Types

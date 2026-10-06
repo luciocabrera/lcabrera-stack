@@ -27,8 +27,17 @@ describe('parseTableCellBadgeParams', () => {
     ).toEqual({ message: 'unknown param "tones"' });
   });
 
-  it('rejects missing rules', () => {
-    expect(parseTableCellBadgeParams({}).issues?.[0]?.message).toBe(
+  it('defaults rules to an empty list, so only fallbackTone applies', () => {
+    expect(parseTableCellBadgeParams({})).toEqual({
+      value: { fallbackTone: 'neutral', rules: [] },
+    });
+    expect(parseTableCellBadgeParams({ fallbackTone: 'info' })).toEqual({
+      value: { fallbackTone: 'info', rules: [] },
+    });
+  });
+
+  it('rejects rules that are present but not an array', () => {
+    expect(parseTableCellBadgeParams({ rules: 'x' }).issues?.[0]?.message).toBe(
       'rules must be an array',
     );
   });

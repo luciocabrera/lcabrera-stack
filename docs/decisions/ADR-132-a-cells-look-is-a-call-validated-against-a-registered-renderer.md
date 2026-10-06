@@ -3,7 +3,7 @@ governs:
   - ui
 ---
 
-# ADR-130 — A cell's look is a call validated against a renderer the client registers
+# ADR-132 — A cell's look is a call validated against a renderer the client registers
 
 **Status:** Accepted
 

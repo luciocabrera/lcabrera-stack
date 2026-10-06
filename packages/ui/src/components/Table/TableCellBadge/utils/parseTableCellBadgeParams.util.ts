@@ -23,7 +23,7 @@ export const parseTableCellBadgeParams = (
 
   if ('issues' in read) return read;
 
-  const { fallbackTone = 'neutral', rules } = read.record;
+  const { fallbackTone = 'neutral', rules = [] } = read.record;
   if (!isTableCellToneName(fallbackTone)) {
     return {
       issues: [{ message: 'fallbackTone must be a tone name' }],
