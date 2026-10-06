@@ -50,7 +50,10 @@ export default defineConfig({
     appRootUrl: import.meta.url,
     babelConfigOverrides: {
       presets: [
-        ['@babel/preset-typescript', { allExtensions: true, isTSX: true }],
+        [
+          '@babel/preset-typescript',
+          { allExtensions: true, allowDeclareFields: true, isTSX: true },
+        ],
       ],
     },
     babelIncludePattern: /\/src\/[^?]*\.[jt]sx?(?:$|\?)/,
