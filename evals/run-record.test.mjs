@@ -174,6 +174,29 @@ describe('recordRun', () => {
     expect(ingest).toHaveBeenLastCalledWith({ file });
   });
 
+  it('sends the envelope only once its pass rate is written', async () => {
+    const sent = [];
+    ingest = vi.fn(async ({ file }) => {
+      sent.push(JSON.parse(readFileSync(file, 'utf8')).run.totals.pass_rate);
+    });
+    await record({
+      execute: ({ addTrial }) => {
+        for (const trialIndex of [0, 1, 2, 3, 4, 5]) {
+          addTrial({ ...trial, trial_index: trialIndex });
+        }
+      },
+    });
+    expect(sent).toStrictEqual([
+      {
+        k: 6,
+        lower: expect.closeTo(0.6097, 4),
+        n: 6,
+        rate: 1,
+        upper: expect.closeTo(1, 4),
+      },
+    ]);
+  });
+
   it('leaves an aborted envelope on disk for evals:ingest', async () => {
     const signals = new EventEmitter();
     const started = Promise.withResolvers();
@@ -189,6 +212,51 @@ describe('recordRun', () => {
     signals.emit('SIGINT');
     expect(written().run.status).toBe('aborted');
     expect(ingest).not.toHaveBeenCalled();
+  });
+
+  it('prints the pass rate the envelope carries, at the thresholds in regression.config.json', async () => {
+    const outcome = await record({
+      execute: ({ addTrial }) => {
+        for (const trialIndex of [0, 1, 2, 3, 4, 5]) {
+          addTrial({ ...trial, trial_index: trialIndex });
+        }
+      },
+    });
+    expect(written().run.totals.pass_rate).toStrictEqual({
+      k: 6,
+      lower: expect.closeTo(0.6097, 4),
+      n: 6,
+      rate: 1,
+      upper: expect.closeTo(1, 4),
+    });
+    expect(outcome.envelope.run.totals.pass_rate).toStrictEqual(
+      written().run.totals.pass_rate,
+    );
+    expect(console.log).toHaveBeenCalledWith(
+      'Pass rate: 100.0% (n=6, 6 passed; Wilson interval 61.0%–100.0% at z=1.96)',
+    );
+  });
+
+  it('prints and records insufficient data below the minimum trials', async () => {
+    await record({ execute: ({ addTrial }) => addTrial(trial) });
+    expect(written().run.totals.pass_rate).toStrictEqual({
+      k: 1,
+      lower: null,
+      n: 1,
+      rate: null,
+      upper: null,
+    });
+    expect(console.log).toHaveBeenCalledWith(
+      'Pass rate: insufficient data (n=1, 1 passed; a rate needs 6 counted trials)',
+    );
+  });
+
+  it('applies the thresholds it is given', async () => {
+    await record({
+      execute: ({ addTrial }) => addTrial(trial),
+      regressionConfig: Promise.resolve({ minTrialsForRate: 1, z: 1.96 }),
+    });
+    expect(written().run.totals.pass_rate.rate).toBe(1);
   });
 
   it('stops listening for signals once the run is recorded', async () => {

@@ -2,20 +2,28 @@
 
 /**
  * The migrator against a real Postgres: the advisory lock, the transaction per
- * file and the checksum check are claims a fake client reports green on
- * whether or not they hold. It owns schema `evals` in the database
- * EVALS_TEST_DATABASE_URL names and drops it before every test, so point it at
- * a scratch database. Unset, it skips locally and fails under CI.
+ * file, the checksum check, the price upsert and the role grants are claims a
+ * fake client reports green on whether or not they hold. It owns schema
+ * `evals` in the database EVALS_TEST_DATABASE_URL names and drops it before
+ * every test, so point it at a scratch database. Roles are cluster-wide, so the
+ * grant tests create a role under a random name and drop it afterwards rather
+ * than touch `evals_writer`. Unset, it skips locally and fails under CI.
  */
 
+import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import { afterAll, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import { compareCodeUnits } from '../hashing/compareCodeUnits.util.ts';
 import { readFileSet } from '../hashing/readFileSet.service.ts';
+import { readModelPrices } from '../prices/readModelPrices.service.ts';
 import { applyMigrations } from './applyMigrations.service.ts';
-import { MIGRATIONS_DIRECTORY } from './migrate.constants.ts';
+import {
+  EVALS_WRITER_ROLE,
+  MIGRATIONS_DIRECTORY,
+} from './migrate.constants.ts';
+import { migrateEvals } from './migrateEvals.service.ts';
 import { parseMigrationFiles } from './parseMigrationFiles.util.ts';
 import { readMigrations } from './readMigrations.service.ts';
 
@@ -55,6 +63,17 @@ const PLAN_ENUMS = [
   'task_kind',
   'task_set',
   'trigger',
+];
+
+const INGEST_TABLES = [
+  'eval_run',
+  'eval_subject',
+  'eval_subject_version',
+  'eval_task',
+  'eval_task_version',
+  'eval_tool_call',
+  'eval_trial',
+  'eval_trial_detail',
 ];
 
 const PLAN_SUITES = [
@@ -112,8 +131,41 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     await client.query('drop schema if exists evals cascade');
   });
 
+  const scratchRoles: string[] = [];
+
+  const scratchRole = () => {
+    const name = `evals_writer_test_${randomUUID().replaceAll('-', '')}`;
+
+    scratchRoles.push(name);
+
+    return { ...EVALS_WRITER_ROLE, name };
+  };
+
+  const storedPrices = async () => {
+    const client = await connect();
+    const { rows } = await client.query(
+      `select
+        model_id as "modelId",
+        usd_per_mtok_cache_read::float8 as "usdPerMtokCacheRead",
+        usd_per_mtok_cache_write::float8 as "usdPerMtokCacheWrite",
+        usd_per_mtok_in::float8 as "usdPerMtokIn",
+        usd_per_mtok_out::float8 as "usdPerMtokOut",
+        to_char(valid_from at time zone 'UTC', 'YYYY-MM-DD') as "validFrom"
+      from evals.model_price
+      order by model_id collate "C", valid_from`,
+    );
+
+    return rows;
+  };
+
   afterAll(async () => {
-    await Promise.all(clients.map((client) => client.end()));
+    const client = await connect();
+
+    await client.query('drop schema if exists evals cascade');
+    await Promise.all(
+      scratchRoles.map((name) => client.query(`drop role if exists "${name}"`)),
+    );
+    await Promise.all(clients.map((connection) => connection.end()));
   });
 
   it('records every file with its checksum', async () => {
@@ -252,5 +304,88 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
         "select table_name as value from information_schema.tables where table_schema = 'evals' and table_name = 'half_done'",
       ),
     ).toEqual([]);
+  });
+
+  it('seeds one price row per model and updates it in place on a changed price', async () => {
+    const migrations = await readMigrations();
+    const prices = await readModelPrices();
+
+    await migrateEvals({
+      client: await connect(),
+      migrations,
+      prices,
+      roles: [],
+    });
+
+    expect(await storedPrices()).toEqual(expect.arrayContaining([...prices]));
+    expect(await storedPrices()).toHaveLength(prices.length);
+
+    const [first, ...rest] = prices;
+
+    if (!first) {
+      throw new Error('model-prices.json lists no price');
+    }
+
+    const changed = { ...first, usdPerMtokOut: first.usdPerMtokOut + 1.25 };
+
+    await migrateEvals({
+      client: await connect(),
+      migrations,
+      prices: [changed, ...rest],
+      roles: [],
+    });
+
+    expect(await storedPrices()).toEqual(
+      expect.arrayContaining([changed, ...rest]),
+    );
+    expect(await storedPrices()).toHaveLength(prices.length);
+  });
+
+  it('grants an existing writer role INSERT on every ingest table', async () => {
+    const role = scratchRole();
+    const admin = await connect();
+
+    await admin.query(`create role "${role.name}" nologin`);
+    const result = await migrateEvals({
+      client: await connect(),
+      migrations: await readMigrations(),
+      prices: await readModelPrices(),
+      roles: [role],
+    });
+
+    expect(result.granted.map(({ name }) => name)).toEqual([role.name]);
+    expect(result.missing).toEqual([]);
+    expect(
+      await column(
+        `select c.relname as value from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'evals' and c.relkind = 'r' and has_table_privilege('${role.name}', c.oid, 'INSERT') order by 1`,
+      ),
+    ).toEqual(expect.arrayContaining(INGEST_TABLES));
+    expect(
+      await column(
+        `select privilege_type as value from information_schema.role_table_grants where grantee = '${role.name}' and table_schema = 'evals' and table_name = 'eval_trial' order by 1`,
+      ),
+    ).toEqual(['DELETE', 'INSERT', 'SELECT', 'UPDATE']);
+
+    await admin.query('begin');
+    await admin.query(`set local role "${role.name}"`);
+    const { rows } = await admin.query<{ readonly id: string }>(
+      "insert into evals.eval_subject (kind, name, path) values ('skill', 'probe', 'probe/SKILL.md') returning id",
+    );
+
+    await admin.query('rollback');
+    expect(rows).toHaveLength(1);
+  });
+
+  it('reports a missing role instead of failing', async () => {
+    const role = scratchRole();
+    const result = await migrateEvals({
+      client: await connect(),
+      migrations: await readMigrations(),
+      prices: await readModelPrices(),
+      roles: [role],
+    });
+
+    expect(result.granted).toEqual([]);
+    expect(result.missing).toEqual([role]);
   });
 });

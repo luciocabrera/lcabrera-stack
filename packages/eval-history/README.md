@@ -21,6 +21,8 @@ decides how the envelope is versioned.
   up to date through its upcaster in `ENVELOPE_UPCASTERS` and rejects any
   other version by name (ADR-131), and stores each run in one transaction keyed
   on `run_id`, so a run already stored is left alone.
+- `src/prices/` — the schema of `model-prices.json` and its upsert into
+  `evals.model_price`.
 - `src/stats/` — the statistics of
   [the plan's §6](../../docs/agents/planning/eval-history-plan.md#6-statistics-module):
   the Wilson interval, pass@k and pass^k, the baseline summary, the binary and
@@ -33,6 +35,19 @@ decides how the envelope is versioned.
 `vp run evals:migrate` applies `migrations/` to the database
 `EVALS_DATABASE_URL` names. Locally that is a database named `eval_history` on
 the compose Postgres, created once with `create database eval_history`.
+
+Every run then upserts [`model-prices.json`](./model-prices.json) into
+`evals.model_price`, keyed on `modelId` and `validFrom`. Take the prices from
+the page `source` names. A price that changes from a new date is a new entry
+with that `validFrom`, so the old rows still cost the runs before it; changing
+the numbers of an existing entry corrects that row in place. `src/prices/`
+holds the schema the file must pass.
+
+Last, it grants `evals_writer` the privileges `EVALS_WRITER_ROLE` lists, in
+`src/migrate/migrate.constants.ts`, when the role exists. When it does not,
+the run prints the `create role` and `grant` statements and still exits 0:
+creating a role needs a privilege some hosts withhold, so that step is the
+operator's.
 
 `vp run evals:ingest` reads the same variable. Every eval runner calls it on
 its own envelope with `--quiet-unreachable`, so an unset variable or a database
