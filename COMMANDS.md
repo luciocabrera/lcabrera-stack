@@ -66,16 +66,16 @@ and nowhere else. The table below is the _command reference_ this file exists to
 — which is why it is here and gated by `commands:verify`. If it and the skill ever
 disagree about the stages, the skill is right and this table is the bug.
 
-| #   | Command                      | Pass                                          |
-| --- | ---------------------------- | --------------------------------------------- |
-| 1   | `vp fmt .`                   | Oxfmt                                         |
-| 2   | `vp lint .`                  | Oxlint                                        |
-| 3   | `vp run lint:eslint:check`   | eslint custom rules — **not** in `vp check`   |
-| 4   | `vp run lint:biome:check`    | Biome — **not** in `vp check` (run from root) |
-| 5   | `vp run react-doctor:verify` | React Doctor — root-only, errors block        |
-| 6   | `vp check`                   | fmt + Oxlint + **tsgolint** type pass         |
-| 7   | `vp run typecheck`           | real **tsc** — **not** the same as step 6     |
-| 8   | `vp run test:changed`        | vitest — root-only; reaches `scripts/` too    |
+| #   | Command                       | Pass                                                         |
+| --- | ----------------------------- | ------------------------------------------------------------ |
+| 1   | `vp fmt .`                    | Oxfmt                                                        |
+| 2   | `vp lint .`                   | Oxlint                                                       |
+| 3   | `vp run -r lint:eslint:check` | eslint custom rules, every workspace — **not** in `vp check` |
+| 4   | `vp run lint:biome:check`     | Biome — **not** in `vp check` (run from root)                |
+| 5   | `vp run react-doctor:verify`  | React Doctor — root-only, errors block                       |
+| 6   | `vp check`                    | fmt + Oxlint + **tsgolint** type pass                        |
+| 7   | `vp run typecheck`            | real **tsc** — **not** the same as step 6                    |
+| 8   | `vp run test:changed`         | vitest — root-only; reaches `scripts/` too                   |
 
 Which stages get skipped in practice and why none is redundant is the skill's to
 explain, not this file's. From the root, `vp run check:safe` chains the whole thing
