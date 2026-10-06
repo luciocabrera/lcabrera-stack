@@ -15,9 +15,11 @@ export const describeUnresolvedTableCellCall = ({
     return `${prefix} is not registered; rendering its dataType default.`;
   }
 
-  if (outcome.status === 'invalid') {
-    const reasons = outcome.issues.map((issue) => issue.message).join('; ');
-
-    return `${prefix} has invalid params (${reasons}); rendering its dataType default.`;
+  if (outcome.status !== 'invalid') {
+    return;
   }
+
+  const reasons = outcome.issues.map((issue) => issue.message).join('; ');
+
+  return `${prefix} has invalid params (${reasons}); rendering its dataType default.`;
 };
