@@ -125,6 +125,7 @@
     "react-markdown": "catalog:react"
   },
   "devDependencies": {
+    "@babel/core": "catalog:build",
     "@babel/preset-typescript": "catalog:build",
     "@eslint/js": "catalog:lint",
     "@lcabrera/repo-standards": "workspace:*",
