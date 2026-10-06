@@ -65,11 +65,18 @@ the file at load when a field is missing, unknown or out of range.
 | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | `minTrialsForRate`       | Below this many counted trials a pass rate is reported as insufficient data                                |
 | `z`                      | The normal quantile for the Wilson interval; 1.96 is 95%                                                   |
-| `binary.flip`            | A regression-set task that passed on main is flagged when it fails at least `failAtLeast` of `ofTrials`    |
+| `binary.flip`            | The failure share that flags a task, and the fewest counted trials it is judged on (below)                 |
 | `scored.sigma`           | A scored suite is flagged when the PR mean falls more than this many baseline standard deviations below it |
 | `flaky.window`           | How many of a task's most recent runs flaky detection reads                                                |
 | `flaky.disagreeFraction` | A task is flaky when more than this share of those runs had trials that disagree                           |
 | `baseline.defaultRuns`   | How many runs an A/A baseline takes when none is given; at least 2                                         |
+
+`binary.flip` compares shares, not counts. A regression-set task that passed
+every trial on main is flagged when the share of its counted PR trials that
+failed is at least `failAtLeast / ofTrials`. At the default 2 and 3, 2 failures
+of 3 flag, 3 of 6 do not, and 4 of 6 do. `ofTrials` is also the fewest counted
+trials a task is judged on: a task with fewer makes the verdict insufficient,
+naming the task, when the missing trials could still flag it.
 
 `error`, `timeout` and `skipped` trials count toward none of these. A flaky
 task, and any task tagged `set: capability`, is left out of both binary rules.

@@ -11,15 +11,27 @@ type FlippedArgs = {
 
 export const flipped = ({ flip, main, pr }: FlippedArgs) => {
   const before = main.find(({ taskKey }) => taskKey === pr.taskKey);
-  const { k, n } = countOutcomes(pr.outcomes);
-  const failed = n - k;
-  const passedOnMain = before !== undefined && hasPassHatK(before.outcomes);
-  const isFailedOnPr =
-    n >= flip.ofTrials && failed * flip.ofTrials >= flip.failAtLeast * n;
 
-  if (!passedOnMain || !isFailedOnPr) {
+  if (before === undefined || !hasPassHatK(before.outcomes)) {
     return;
   }
 
-  return { failed, kind: 'flip', taskKey: pr.taskKey, trials: n } as const;
+  const { k, n } = countOutcomes(pr.outcomes);
+  const failed = n - k;
+  const missing = Math.max(0, flip.ofTrials - n);
+
+  if (missing > 0) {
+    return failed + missing >= flip.failAtLeast
+      ? ({
+          failed,
+          kind: 'insufficient',
+          taskKey: pr.taskKey,
+          trials: n,
+        } as const)
+      : undefined;
+  }
+
+  return failed * flip.ofTrials >= flip.failAtLeast * n
+    ? ({ failed, kind: 'flip', taskKey: pr.taskKey, trials: n } as const)
+    : undefined;
 };

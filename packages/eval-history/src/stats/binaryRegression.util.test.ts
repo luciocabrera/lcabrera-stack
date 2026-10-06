@@ -76,12 +76,12 @@ describe('binaryRegression — the interval rule', () => {
 
   it('reports insufficient when either side has too few trials for a rate', () => {
     const single: readonly TaskTrials[] = [
-      { outcomes: ['pass'], set: 'regression', taskKey: 'task-0' },
+      { outcomes: PASSES, set: 'regression', taskKey: 'task-0' },
     ];
 
     expect(
       compare({ main: { identity, tasks: single }, prTasks: single }),
-    ).toEqual({ kind: 'insufficient' });
+    ).toEqual({ kind: 'insufficient', unjudged: [] });
   });
 });
 
@@ -95,6 +95,28 @@ describe('binaryRegression — the flip rule', () => {
       findings: [{ failed: 2, kind: 'flip', taskKey: 'task-0', trials: 3 }],
       kind: 'regression',
     });
+  });
+
+  it('reports insufficient, naming the task, when an excluded trial leaves a flip unjudged', () => {
+    expect(
+      compare({
+        prTasks: tasks({
+          outcomesAt: (index) =>
+            index === 0 ? ['fail', 'error', 'fail'] : PASSES,
+        }),
+      }),
+    ).toEqual({ kind: 'insufficient', unjudged: ['task-0'] });
+  });
+
+  it('stays clear when an excluded trial could not have changed the verdict', () => {
+    expect(
+      compare({
+        prTasks: tasks({
+          outcomesAt: (index) =>
+            index === 0 ? ['pass', 'error', 'pass'] : PASSES,
+        }),
+      }),
+    ).toEqual({ kind: 'clear' });
   });
 
   it('does not flag the same flip on a capability task', () => {

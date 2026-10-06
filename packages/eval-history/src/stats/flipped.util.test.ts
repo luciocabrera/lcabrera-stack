@@ -43,9 +43,29 @@ describe('flipped', () => {
     ).toBeUndefined();
   });
 
-  it('does not count errors as failures or as trials', () => {
+  it('reports a task too short of counted trials to judge when the missing ones could flip it', () => {
     expect(
       flipped({ flip, main, pr: task(['fail', 'error', 'fail']) }),
+    ).toEqual({
+      failed: 2,
+      kind: 'insufficient',
+      taskKey: 'a/trigger',
+      trials: 2,
+    });
+    expect(
+      flipped({ flip, main, pr: task(['error', 'timeout', 'skipped']) }),
+    ).toMatchObject({ kind: 'insufficient', trials: 0 });
+  });
+
+  it('stays silent on a short task the missing trials could not flip', () => {
+    expect(
+      flipped({ flip, main, pr: task(['pass', 'error', 'pass']) }),
+    ).toBeUndefined();
+  });
+
+  it('does not report a short task that was not passing on main', () => {
+    expect(
+      flipped({ flip, main: [], pr: task(['fail', 'error', 'fail']) }),
     ).toBeUndefined();
   });
 

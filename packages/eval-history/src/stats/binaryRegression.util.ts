@@ -63,22 +63,29 @@ export const binaryRegression = ({
     mainRate.kind === 'rate' &&
     prRate.kind === 'rate' &&
     prRate.rate < mainRate.lower;
+  const taskVerdicts = prTasks
+    .map((task) =>
+      flipped({ flip: config.binary.flip, main: mainTasks, pr: task }),
+    )
+    .filter((verdict) => verdict !== undefined);
   const findings: readonly RegressionFinding[] = [
     ...(isRateDropped
       ? [{ kind: 'rate', main: mainRate, pr: prRate } as const]
       : []),
-    ...prTasks
-      .map((task) =>
-        flipped({ flip: config.binary.flip, main: mainTasks, pr: task }),
-      )
-      .filter((finding) => finding !== undefined),
+    ...taskVerdicts.filter((verdict) => verdict.kind === 'flip'),
   ];
 
   if (findings.length > 0) {
     return { findings, kind: 'regression' } as const;
   }
 
-  return mainRate.kind === 'rate' && prRate.kind === 'rate'
+  const unjudged = taskVerdicts
+    .filter(({ kind }) => kind === 'insufficient')
+    .map(({ taskKey }) => taskKey);
+
+  return mainRate.kind === 'rate' &&
+    prRate.kind === 'rate' &&
+    unjudged.length === 0
     ? ({ kind: 'clear' } as const)
-    : ({ kind: 'insufficient' } as const);
+    : ({ kind: 'insufficient', unjudged } as const);
 };
