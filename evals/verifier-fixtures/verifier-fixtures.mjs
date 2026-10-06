@@ -55,18 +55,23 @@ export const sameNumbers = (a, b) => a.join(',') === b.join(',');
 
 const PASS_VERDICT = /^PASS\b/;
 
-const runCounts = ({ expectedNotMet, run }) =>
+export const runCounts = ({ expectedNotMet, run }) =>
   run.error === undefined &&
   run.verdict !== undefined &&
   !PASS_VERDICT.test(run.verdict) &&
   sameNumbers(run.notMet, expectedNotMet);
 
+export const readReport = ({ error, report = '' }) => ({
+  error,
+  notMet: definiteNotMet(report),
+  verdict: verdictOf(report),
+});
+
+export const reportText = ({ error, report }) =>
+  error === undefined ? report : `(${error})\n\n${report}`;
+
 export const judgeFixture = ({ expectedNotMet, fixture, runs: sessions }) => {
-  const runs = sessions.map(({ error, report = '' }) => ({
-    error,
-    notMet: definiteNotMet(report),
-    verdict: verdictOf(report),
-  }));
+  const runs = sessions.map(readReport);
   const matched = runs.every((run) => runCounts({ expectedNotMet, run }));
   const stable = runs.every(({ notMet }) =>
     sameNumbers(notMet, runs[0].notMet),
@@ -74,9 +79,13 @@ export const judgeFixture = ({ expectedNotMet, fixture, runs: sessions }) => {
   return { expectedNotMet, fixture, matched, runs, stable };
 };
 
-export const describeRun = ({ error, notMet, verdict }) =>
+export const describeRun = ({
+  error,
+  notMet,
+  verdict = '(no verdict line)',
+}) =>
   error === undefined
-    ? `not-met [${notMet.join(',')}], verdict ${(verdict ?? '(no verdict line)').slice(0, 30)}`
+    ? `not-met [${notMet.join(',')}], verdict ${verdict.slice(0, 30)}`
     : `error: ${error}`;
 
 export const fixtureLine = ({ fixture, lines, matched, stable, wanted }) => {

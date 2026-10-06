@@ -108,12 +108,15 @@ const scored = (byName) =>
     score: byName.get(name).score,
   }));
 
+const summaryText = (summary) =>
+  summary === undefined || summary === null ? '' : String(summary);
+
 const judgementOf = ({ byName, summary }) => {
   const dimensions = scored(byName);
   return {
     dimensions,
     overall: mean(dimensions.map(({ score }) => score)),
-    summary: String(summary ?? ''),
+    summary: summaryText(summary),
   };
 };
 

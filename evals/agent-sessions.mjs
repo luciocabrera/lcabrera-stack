@@ -161,9 +161,9 @@ const thrownClass = (thrown) =>
 const endedCleanly = (result, thrown) =>
   succeeded(result) && thrown === undefined;
 
-const errorClass = (result, thrown) =>
+const errorClass = (result, thrown = '') =>
   result === undefined || succeeded(result)
-    ? thrownClass(thrown ?? '')
+    ? thrownClass(thrown)
     : resultClass(result);
 
 const REPORTED_FIELDS = {

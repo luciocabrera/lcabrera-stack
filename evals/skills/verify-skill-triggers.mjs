@@ -12,8 +12,9 @@
  *                     and five near-miss tasks, every task a unique id, a set tag and a
  *                     boolean should_trigger, and a skill with a paths: list names a
  *                     fixture in each
+ * Each run also writes a run envelope under .tmp/eval-results/skills/.
  * Needs a Claude login, or CLAUDE_CODE_OAUTH_TOKEN in CI.
- * Exit codes: 0 = every task passed, 1 = otherwise.
+ * Exit codes: 0 = every task passed, 1 = otherwise, 130/143 = interrupted.
  */
 import {
   cpSync,
@@ -32,6 +33,9 @@ import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
 import { query } from '@anthropic-ai/claude-agent-sdk';
+import { fileSetHash } from '@repo/eval-history/hashing/fileSetHash.util';
+import { readFileSet } from '@repo/eval-history/hashing/readFileSet.service';
+import { skillHashes } from '@repo/eval-history/hashing/skillHashes.util';
 
 import {
   chunk,
@@ -41,6 +45,13 @@ import {
   sessionMetrics,
   timedDrain,
 } from '../agent-sessions.mjs';
+import { runSettings, skillSubjects } from '../run-envelope.mjs';
+import {
+  recordRun,
+  runIdentity,
+  runnerHarnessVersion,
+  sdkVersion,
+} from '../run-record.mjs';
 
 import {
   coverageProblems,
@@ -55,11 +66,13 @@ import {
   selectedSkills,
   sessionError,
   sessionScope,
+  sessionTools,
   taskPassed,
   taskVerdicts,
   trialCount,
   withoutSeparator,
 } from './skill-triggers.mjs';
+import { skillTask, skillTrial } from './skill-envelope.mjs';
 import {
   confusionMatrix,
   formatMatrix,
@@ -72,6 +85,7 @@ const REPORT_DIR = '.tmp/skill-evals';
 const FIXTURE_SUFFIX = '.fixture';
 const TRIALS_FILE = join(REPORT_DIR, 'trials.json');
 const CONCURRENCY = 4;
+const MAX_TURNS = 8;
 
 const evalDirectories = () =>
   readdirSync(EVALS_ROOT, { withFileTypes: true })
@@ -85,10 +99,14 @@ const tasksOf = (skill) => {
   return readdirSync(directory)
     .filter((name) => name.endsWith('.yaml'))
     .toSorted((a, b) => a.localeCompare(b))
-    .map((name) => ({
-      ...readTask(readFileSync(join(directory, name), 'utf8')),
-      file: join(directory, name),
-    }));
+    .map((name) => {
+      const definition = readFileSync(join(directory, name), 'utf8');
+      return {
+        ...readTask(definition),
+        definition,
+        file: join(directory, name),
+      };
+    });
 };
 
 const copyFixture = ({ cwd, skill, task }) => {
@@ -124,7 +142,15 @@ const catalog = () =>
     existsSync(join(SKILLS_ROOT, name, 'SKILL.md')),
   );
 
-const attemptTask = async ({ hidden, model, queuedAt, skill, task, trial }) => {
+const attemptTask = async ({
+  hidden,
+  model,
+  queuedAt,
+  record,
+  skill,
+  task,
+  trial,
+}) => {
   const { cwd, fixtureFiles } = workspaceFor({ skill, task });
   const scope = sessionScope({ catalog: catalog(), hidden, task });
   const open = () =>
@@ -132,7 +158,7 @@ const attemptTask = async ({ hidden, model, queuedAt, skill, task, trial }) => {
       options: {
         ...scope,
         cwd,
-        maxTurns: 8,
+        maxTurns: MAX_TURNS,
         mcpServers: {},
         model,
         persistSession: false,
@@ -147,10 +173,9 @@ const attemptTask = async ({ hidden, model, queuedAt, skill, task, trial }) => {
     drained.error ??
     sessionError(messages) ??
     scopeError({ expectedTools: scope.tools, messages });
-  writeFileSync(
-    join(REPORT_DIR, `${skill}-${task.id}-${trial}.json`),
-    JSON.stringify(messages, null, 2),
-  );
+  const name = `${skill}-${task.id}-${trial}.json`;
+  const text = JSON.stringify(messages, null, 2);
+  writeFileSync(join(REPORT_DIR, name), text);
   const invoked = invokedSkills(messages);
   const fixtureRead = fixtureWasRead({
     fixtureFiles,
@@ -160,11 +185,13 @@ const attemptTask = async ({ hidden, model, queuedAt, skill, task, trial }) => {
   return {
     error,
     fixtureRead,
+    initTools: sessionTools(messages) ?? [],
     invoked,
     metrics: sessionMetrics(messages, drained.timestamps, drained.error),
     passed: taskPassed({ error, fixtureRead, invoked, skill, task }),
     skill,
     task,
+    transcript: record.transcript({ name, text }),
     trial,
   };
 };
@@ -188,8 +215,8 @@ const coverage = () =>
     evals: new Map(evalDirectories().map((name) => [name, tasksOf(name)])),
   });
 
-const runTask = (args) =>
-  attemptTask(args).catch((error) => ({
+const runTask = async (args) => {
+  const result = await attemptTask(args).catch((error) => ({
     error: errorText(error),
     fixtureRead: true,
     invoked: [],
@@ -198,6 +225,9 @@ const runTask = (args) =>
     task: args.task,
     trial: args.trial,
   }));
+  args.record.addTrial(skillTrial({ ...result, queuedAt: args.queuedAt }));
+  return result;
+};
 
 const assertCoverage = () => {
   const gaps = coverage();
@@ -206,35 +236,77 @@ const assertCoverage = () => {
   }
 };
 
-const runSelection = async ({ positionals, values }) => {
-  const runs = trialCount(values.runs);
-  const selected = selectedSkills({
-    catalog: catalog(),
-    evals: evalDirectories(),
-    hidden: values.hide,
-    requested: positionals,
-  });
-  mkdirSync(REPORT_DIR, { recursive: true });
-  const jobs = selected.flatMap((skill) =>
-    tasksOf(skill).flatMap((task) =>
-      Array.from({ length: runs }, (_, index) => {
-        const queuedAt = Date.now();
-        return () =>
-          runTask({
-            hidden: values.hide,
-            model: values.model,
-            queuedAt,
-            skill,
-            task,
-            trial: index + 1,
-          });
-      }),
+const fixtureHashOf = async ({ skill, task }) =>
+  task.fixture === undefined
+    ? null
+    : fileSetHash(
+        await readFileSet({
+          directory: join(EVALS_ROOT, skill, 'fixtures', task.fixture),
+        }),
+      );
+
+const selectionTasks = (selected) =>
+  selected.flatMap((skill) => tasksOf(skill).map((task) => ({ skill, task })));
+
+const offeredTools = ({ hidden, tasks }) =>
+  [
+    ...new Set(
+      tasks.flatMap(
+        ({ task }) => sessionScope({ catalog: catalog(), hidden, task }).tools,
+      ),
     ),
+  ].toSorted((a, b) => a.localeCompare(b));
+
+const skillPlan = async ({ runs, selected, values }) => {
+  const tasks = selectionTasks(selected);
+  const hashes = skillHashes(await readFileSet({ directory: SKILLS_ROOT }));
+  return {
+    catalogHash: hashes.catalog_hash,
+    harnessVersion: runnerHarnessVersion(import.meta.url),
+    modelId: values.model,
+    sdkVersion: sdkVersion(),
+    settings: runSettings({
+      argv: process.argv.slice(2),
+      concurrency: CONCURRENCY,
+      hidden: values.hide,
+      maxTurns: MAX_TURNS,
+      runs,
+      selection: selected,
+      tools: offeredTools({ hidden: values.hide, tasks }),
+    }),
+    subjects: skillSubjects({ hashes, selected }),
+    suite: 'skills',
+    tasks: await Promise.all(
+      tasks.map(async ({ skill, task }) =>
+        skillTask({
+          fixtureHash: await fixtureHashOf({ skill, task }),
+          skill,
+          source: task.definition,
+          task,
+        }),
+      ),
+    ),
+  };
+};
+
+const jobsFor = ({ record, runs, selected, values }) =>
+  selectionTasks(selected).flatMap(({ skill, task }) =>
+    Array.from({ length: runs }, (_, index) => {
+      const queuedAt = Date.now();
+      return () =>
+        runTask({
+          hidden: values.hide,
+          model: values.model,
+          queuedAt,
+          record,
+          skill,
+          task,
+          trial: index + 1,
+        });
+    }),
   );
-  if (jobs.length === 0) {
-    throw new Error('the selection resolved to no tasks');
-  }
-  const results = await runBatches(chunk(jobs, CONCURRENCY));
+
+const report = (results) => {
   const trials = results.map(trialRecord);
   writeFileSync(TRIALS_FILE, JSON.stringify(trials, null, 2));
   const verdicts = taskVerdicts(results);
@@ -246,6 +318,31 @@ const runSelection = async ({ positionals, values }) => {
   if (verdicts.some(({ verdict }) => verdict !== 'ok')) {
     process.exitCode = 1;
   }
+};
+
+const runSelection = async ({ positionals, values }) => {
+  const runs = trialCount(values.runs);
+  const selected = selectedSkills({
+    catalog: catalog(),
+    evals: evalDirectories(),
+    hidden: values.hide,
+    requested: positionals,
+  });
+  if (selectionTasks(selected).length === 0) {
+    throw new Error('the selection resolved to no tasks');
+  }
+  mkdirSync(REPORT_DIR, { recursive: true });
+  const identity = runIdentity();
+  await recordRun({
+    execute: async (record) =>
+      report(
+        await runBatches(
+          chunk(jobsFor({ record, runs, selected, values }), CONCURRENCY),
+        ),
+      ),
+    identity,
+    plan: await skillPlan({ runs, selected, values }),
+  });
 };
 
 const main = async () => {

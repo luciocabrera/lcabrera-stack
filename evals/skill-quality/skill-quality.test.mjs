@@ -31,6 +31,20 @@ describe('judgePrompt', () => {
 });
 
 describe('parseJudgement', () => {
+  it('reads a null or missing summary as empty and keeps any other as text', () => {
+    expect(
+      parseJudgement(reply([4, 4, 4, 4, 4], { summary: null })).judgement
+        ?.summary,
+    ).toBe('');
+    expect(
+      parseJudgement(reply([4, 4, 4, 4, 4], { summary: undefined })).judgement
+        ?.summary,
+    ).toBe('');
+    expect(
+      parseJudgement(reply([4, 4, 4, 4, 4], { summary: 7 })).judgement?.summary,
+    ).toBe('7');
+  });
+
   it('averages the dimension scores itself rather than trusting overall_score', () => {
     const { judgement, problems } = parseJudgement(reply([4, 3, 2, 5, 1]));
     expect(problems).toEqual([]);
