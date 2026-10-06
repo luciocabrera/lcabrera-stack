@@ -51,13 +51,22 @@ column.** A route reads two kinds of thing: the `evals` schema's columns, and
 the fields inside its `jsonb` columns, which follow the envelope. Both are
 allow-listed, and anything not on a list is excluded.
 
-The table below names every text column of schema `evals`, allowed or
-excluded. A column that is neither text nor `jsonb` (an enum, timestamp,
+**A text-typed column**, wherever this ADR uses the term, is one whose type
+as `information_schema.columns` reports it is `text`, `character varying`
+(varchar) or `character` (char, `bpchar`), or an array of any of them, which
+`information_schema` reports as `data_type = 'ARRAY'` with `udt_name` `_text`,
+`_varchar` or `_bpchar`. `eval_task.tags` is text-typed. The derivation of
+`PUBLIC_COLUMNS`, the marker seed and the third test below all use this one
+predicate, and the module exports it as `isTextTyped` so none of them restates
+it.
+
+The table below names every text-typed column of schema `evals`, allowed or
+excluded. A column that is neither text-typed nor `jsonb` (an enum, timestamp,
 number, boolean, uuid or identity) carries no free text and is allowed,
 unless the last column of the table excludes it by name. A `jsonb` column is
 never returned whole; a route reads only its fields listed further down:
 
-| Table                  | Allowed text columns                                                                                  | Excluded by name                                                                 |
+| Table                  | Allowed text-typed columns                                                                            | Excluded by name                                                                 |
 | ---------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `suite`                | `name`                                                                                                |                                                                                  |
 | `eval_run`             | `project`, `suite`, `branch`, `git_sha`, `model_id`, `harness_version`, `sdk_version`, `catalog_hash` | `actor` (it identifies a person), `envelope_sha256`                              |
@@ -107,8 +116,8 @@ set:
   column excluded by name, text or not, including
   `eval_trial.transcript_bytes`, `eval_trial.transcript_expires_at` and
   `eval_trial_detail.detail`.
-- `ALLOWED_TEXT_COLUMNS` is the table's middle column: the text columns a
-  route may return.
+- `ALLOWED_TEXT_COLUMNS` is the table's middle column: the text-typed
+  columns a route may return.
 - `PUBLIC_FIELD_PATHS` is the allowed envelope paths inside the `jsonb`
   columns, written out, plus `ALLOWED_WHOLE_JSONB`: the `jsonb` columns whose
   fields all pass, at adoption only `eval_run.totals`. `totals` qualifies
@@ -119,10 +128,10 @@ set:
   `information_schema.columns` joined to `information_schema.tables` where
   `table_type = 'BASE TABLE'`. From those it removes every column of a table
   in `EXCLUDED_TABLES`, `EXCLUDED_COLUMNS`, every `jsonb` column, and every
-  text column not in `ALLOWED_TEXT_COLUMNS`. Every number, timestamp and
+  text-typed column not in `ALLOWED_TEXT_COLUMNS`. Every number, timestamp and
   identifier the dashboard shows, such as `eval_trial.duration_ms`, the token
   counts, `eval_baseline.mean` and `stddev`, is in it without being listed.
-  Views are left out, because a view's text columns are not base columns and
+  Views are left out, because a view's text-typed columns are not base columns and
   would otherwise be stripped.
 
 A query function that reads base tables projects its result through
@@ -144,8 +153,8 @@ and it is reviewed against this ADR.
 It holds no list of its own; it imports the module's sets.
 
 1. It migrates a scratch history database, then reads `information_schema`
-   for every column of a base table in schema `evals` whose type is text,
-   varchar, char or an array of one. It subtracts `PUBLIC_COLUMNS` and seeds
+   for every text-typed column of a base table in schema `evals`. It
+   subtracts `PUBLIC_COLUMNS` and seeds
    a unique marker string into every remaining column of every seeded row. A
    column that a later migration adds is therefore seeded by default. Views
    are not seeded, since they hold no rows of their own.
@@ -167,10 +176,11 @@ answers with 404.
 
 A third test guards the derivation in the other direction, against the same
 migrated schema and over base tables only. It asserts that every column that
-is neither text, `jsonb`, in `EXCLUDED_COLUMNS` nor in a table in
+is neither text-typed, `jsonb`, in `EXCLUDED_COLUMNS` nor in a table in
 `EXCLUDED_TABLES` is in `PUBLIC_COLUMNS`, with `eval_trial.duration_ms` as the
 named case, and that no column of `schema_migration` is in it. A set stripped
-of the numbers would otherwise pass the marker test, which seeds only text.
+of the numbers would otherwise pass the marker test, which seeds only
+text-typed columns.
 It also walks the Zod schema of every column in `ALLOWED_WHOLE_JSONB` and
 fails if any field is a string or a string array, so a text field added to
 `totals` cannot pass whole without being decided here.
@@ -217,12 +227,12 @@ heatmap and the matrix are small, fixed shapes.
   `ALLOWED_TEXT_COLUMNS` or `PUBLIC_FIELD_PATHS` is not seeded, so the marker
   test cannot catch a wrong addition; review against this ADR is the only
   check on it.
-- A non-text column that a later migration adds is public by default, because
-  `PUBLIC_COLUMNS` is derived. That is the price of not listing every number
-  by hand. A non-text column that must stay private has to be added to
+- A column that is not text-typed and that a later migration adds is public
+  by default, because `PUBLIC_COLUMNS` is derived. That is the price of not
+  listing every number by hand. Such a column that must stay private has to be added to
   `EXCLUDED_COLUMNS`, or its table to `EXCLUDED_TABLES`, in the same
   migration's PR.
-- Every excluded text column accepts an arbitrary string at adoption. A later
+- Every excluded text-typed column accepts an arbitrary string at adoption. A later
   column whose check or foreign key rejects the marker makes the seed fail, so
   it has to be decided here rather than skipped.
 
