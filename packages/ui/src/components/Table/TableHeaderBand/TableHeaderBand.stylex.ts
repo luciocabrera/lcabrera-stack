@@ -4,7 +4,7 @@ import { typography, zIndex } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 export const tableHeaderBandStyles = stylex.create({
-  base: (width?: number | string) => ({
+  base: (width: number | string) => ({
     paddingInline: '6px',
     alignItems: 'flex-end',
     boxSizing: 'border-box',
@@ -19,10 +19,10 @@ export const tableHeaderBandStyles = stylex.create({
     zIndex: zIndex.sticky,
     height: '100%',
     maxHeight: '100%',
-    maxWidth: width ?? null,
-    minWidth: width ?? null,
+    maxWidth: width,
+    minWidth: width,
     top: 0,
-    width: width ?? null,
+    width,
   }),
   // A labelled band is the only one that draws: the rest hold space above
   // columns that have no group, and a border there would draw a box around

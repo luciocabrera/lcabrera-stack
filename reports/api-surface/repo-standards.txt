@@ -49,7 +49,7 @@ readStdin [const] (stream?: NodeJS.ReadStream & { fd: 0; }) => Promise<string>
 withoutSeparator [const] (argv?: string[]) => string[]
 
 ## ./commit-convention
-parseCommitHeader [const] (header: any) => { breaking: boolean; scope: any; subject: any; type: any; } | null
+parseCommitHeader [const] (header?: string) => { breaking: boolean; scope: any; subject: any; type: any; } | null
 validateBranchName [const] (branch: any, { defaultBranch }?: { defaultBranch?: string | undefined; }) => { errors: string[]; exempt: boolean; warnings: never[]; }
 validateCommitMessage [const] (raw: any, { workspaces }: { workspaces: any; }) => { errors: string[]; warnings: string[]; skipped: boolean; }
 validateIssueBody [const] (body: any) => { errors: string[]; warnings: never[]; }

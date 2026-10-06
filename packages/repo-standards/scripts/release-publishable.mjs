@@ -68,8 +68,8 @@ export const renderSummary = (classified) => {
   const rows = [...classified]
     .toSorted(compareRows)
     .map(
-      ({ localVersion, name, publishedVersion, state }) =>
-        `| \`${name}\` | ${localVersion} | ${publishedVersion ?? '—'} | ${STATE_LABEL[state]} |`,
+      ({ localVersion, name, publishedVersion = '—', state }) =>
+        `| \`${name}\` | ${localVersion} | ${publishedVersion} | ${STATE_LABEL[state]} |`,
     );
 
   return [

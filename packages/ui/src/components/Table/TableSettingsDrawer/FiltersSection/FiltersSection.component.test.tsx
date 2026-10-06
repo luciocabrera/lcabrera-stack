@@ -24,21 +24,21 @@ vi.mock('#ui/components/SidePanel', () => ({
 }));
 
 vi.mock('./ActiveFiltersList', () => ({
-  ActiveFiltersList: ({ isBusy }: { readonly isBusy?: boolean }) => (
-    <div data-testid='active-filters-list'>{String(isBusy ?? false)}</div>
+  ActiveFiltersList: ({ isBusy = false }: { readonly isBusy?: boolean }) => (
+    <div data-testid='active-filters-list'>{String(isBusy)}</div>
   ),
 }));
 
 vi.mock('./AddFilterSection', () => ({
   AddFilterSection: ({
-    isBusy,
+    isBusy = false,
     onDropdownOpenChange,
   }: {
     readonly isBusy?: boolean;
     readonly onDropdownOpenChange?: (isOpen: boolean) => void;
   }) => (
     <div data-testid='add-filter-section'>
-      {String(isBusy ?? false)}
+      {String(isBusy)}
       <button
         onClick={() => {
           onDropdownOpenChange?.(true);
@@ -55,19 +55,12 @@ vi.mock('./LockedFiltersList', () => ({
   LockedFiltersList: () => <div data-testid='locked-filters-list' />,
 }));
 
-vi.mock('./FiltersSectionToolbar', () => ({
-  FiltersSectionToolbar: ({
-    isBusy,
-    variant,
-  }: {
-    readonly isBusy?: boolean;
-    readonly variant?: 'footer' | 'toolbar';
-  }) => (
-    <div data-testid='filters-toolbar'>
-      {variant ?? 'footer'}:{String(isBusy ?? false)}
-    </div>
-  ),
-}));
+vi.mock('./FiltersSectionToolbar', async () => {
+  const { createMockVariantToolbar } =
+    await import('#ui/utils/tests/createMockVariantToolbar.util');
+
+  return { FiltersSectionToolbar: createMockVariantToolbar('filters-toolbar') };
+});
 
 import { FiltersSection } from './FiltersSection.component';
 

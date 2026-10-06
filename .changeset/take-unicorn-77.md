@@ -18,5 +18,4 @@ The `eslint-plugin-unicorn` peer range moves to `^77.0.0`, and both shared confi
 
 - `unicorn/no-asterisk-prefix-in-documentation-comments` rejects the `*` line prefix of a JSDoc block. It is a style preference that changes no behaviour and catches no bug.
 - `unicorn/no-top-level-side-effects` reports `export default defineConfig(...)`, `export default createRule(...)` and a default-exported config array, which are pure factory calls. Its only fix binds the same call to a variable first.
-- `unicorn/prefer-default-parameters` rewrites `x ?? literal` and `x || literal` into a default, and a default applies only to `undefined`. Each rewrite changes what `null` does, and for `||` what every other falsy value does.
 - `unicorn/no-unnecessary-array-flat-map` asks a `flatMap` callback to return a bare value instead of a one-element array. A callback that returns an array from every branch shows at a glance that it yields zero, one or many, and the bare value saves only one allocation.
