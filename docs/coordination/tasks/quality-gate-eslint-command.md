@@ -6,6 +6,8 @@ status: review
 branch: docs/1327-quality-gate-eslint-command
 area:
   - .github/skills/quality-gate-workflow/**
+  - COMMANDS.md
+  - AGENTS.md
 started: 2026-10-06
 updated: 2026-10-06
 plan: (none)

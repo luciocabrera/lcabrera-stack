@@ -281,7 +281,7 @@ There is deliberately **no `start:all`/`dev:all`**. One app is runnable, so `dev
 
 **Four analysers run, and `vp check` is not one of them.** Oxlint (`vp lint`,
 configured once in the root `vite.config.ts`), the per-workspace eslint
-custom-rules pass (`vp run lint:eslint:check`), Biome (`vp run lint:biome:check`,
+custom-rules pass (`vp run -r lint:eslint:check`), Biome (`vp run lint:biome:check`,
 root-only), and React Doctor (`vp run react-doctor:verify`). `vp check` covers
 only fmt + Oxlint + the tsgolint type pass, so it would let every eslint-only,
 Biome-only and React Doctor finding through — run the full gate (§7).
