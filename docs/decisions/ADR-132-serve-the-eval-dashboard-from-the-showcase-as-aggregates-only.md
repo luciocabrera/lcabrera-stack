@@ -80,8 +80,7 @@ These `jsonb` fields may be returned:
   `max_turns`, `tools`, `hidden` and `selection`. `argv`, the full command
   line, is excluded by name;
 - from `eval_run.env`, only `node`, `os`, `arch` and `ci_runner`;
-- from `eval_run.totals`, every field, since it holds only counts, rates,
-  durations, cost and tokens;
+- from `eval_run.totals`, every field, through `ALLOWED_WHOLE_JSONB` below;
 - from `eval_trial_detail.detail`, only the invoked skills, the expected skill,
   the verdict, the not-met criterion numbers with the expected ones, the
   rubric dimension names with their scores, and the quality suite's
@@ -97,8 +96,8 @@ input that changed; a hash does not carry the text it was taken from. The
 envelope.
 
 **The allow-list is data, not prose and not a `SELECT` list.** One module,
-`@repo/eval-history/queries`, holds it as three written lists and two derived
-sets:
+`@repo/eval-history/queries`, holds it as four written lists and one derived
+set:
 
 - `EXCLUDED_TABLES` names the tables none of whose columns a route may
   return, at adoption only `schema_migration`. It removes every column of a
@@ -110,37 +109,50 @@ sets:
   `eval_trial_detail.detail`.
 - `ALLOWED_TEXT_COLUMNS` is the table's middle column: the text columns a
   route may return.
+- `PUBLIC_FIELD_PATHS` is the allowed envelope paths inside the `jsonb`
+  columns, written out, plus `ALLOWED_WHOLE_JSONB`: the `jsonb` columns whose
+  fields all pass, at adoption only `eval_run.totals`. `totals` qualifies
+  because it is a closed set of counts, rates, durations, cost and tokens that
+  only the ingester writes, so it holds no free text to filter.
 - `PUBLIC_COLUMNS` is built in code from the migrated schema, never written
-  out. It is every column of schema `evals` that `information_schema`
-  reports, minus every column of a table in `EXCLUDED_TABLES`, minus
-  `EXCLUDED_COLUMNS`, minus every `jsonb` column, minus every text column not
-  in `ALLOWED_TEXT_COLUMNS`. Every number, timestamp and
+  out. It is every column of a **base table** in schema `evals`, which is
+  `information_schema.columns` joined to `information_schema.tables` where
+  `table_type = 'BASE TABLE'`. From those it removes every column of a table
+  in `EXCLUDED_TABLES`, `EXCLUDED_COLUMNS`, every `jsonb` column, and every
+  text column not in `ALLOWED_TEXT_COLUMNS`. Every number, timestamp and
   identifier the dashboard shows, such as `eval_trial.duration_ms`, the token
   counts, `eval_baseline.mean` and `stddev`, is in it without being listed.
-- `PUBLIC_FIELD_PATHS` is the allowed envelope paths inside the `jsonb`
-  columns, written out.
+  Views are left out, because a view's text columns are not base columns and
+  would otherwise be stripped.
 
-Every query function that serves a route projects its result through
-`PUBLIC_COLUMNS` and `PUBLIC_FIELD_PATHS`. A view or function that a route
-reads (`v_subject_trend`, `run_compare`, `flaky_tasks` and the rest) takes its
-text columns only from allowed columns. No query returns `detail`, `settings`
-or `env` whole for a route to filter afterwards. Adding an entry to
-`ALLOWED_TEXT_COLUMNS` or `PUBLIC_FIELD_PATHS`, or removing one from
-`EXCLUDED_COLUMNS` or `EXCLUDED_TABLES`, is the change this ADR governs, and it is reviewed
-against this ADR.
+A query function that reads base tables projects its result through
+`PUBLIC_COLUMNS`, `PUBLIC_FIELD_PATHS` and `ALLOWED_WHOLE_JSONB`. A view or a
+set-returning function (`v_task_pass_rate`, `v_subject_trend`, `run_compare`,
+`flaky_tasks` and the rest) is governed by its definition instead. It may
+select only values the projection would allow: columns in `PUBLIC_COLUMNS`,
+allowed `jsonb` fields, and aggregates of them. A query that returns its
+result is not projected again. The marker test checks a view or function the
+same way it checks a base-table query, through the routes that read it,
+because the seeded rows flow through it. No query returns `detail`,
+`settings` or `env` whole for a route to filter afterwards. Adding an entry to
+`ALLOWED_TEXT_COLUMNS`, `PUBLIC_FIELD_PATHS` or `ALLOWED_WHOLE_JSONB`,
+removing one from `EXCLUDED_COLUMNS` or `EXCLUDED_TABLES`, or selecting a new
+column in a view or function a route reads, is the change this ADR governs,
+and it is reviewed against this ADR.
 
 **How it is tested.** A marker test in the showcase enforces the rule above.
-It holds no list of its own; it imports `PUBLIC_COLUMNS` and
-`PUBLIC_FIELD_PATHS`.
+It holds no list of its own; it imports the module's sets.
 
 1. It migrates a scratch history database, then reads `information_schema`
-   for every column in schema `evals` whose type is text, varchar, char or an
-   array of one. It subtracts `PUBLIC_COLUMNS` and seeds a unique marker
-   string into every remaining column of every seeded row. A column that a
-   later migration adds is therefore seeded by default.
+   for every column of a base table in schema `evals` whose type is text,
+   varchar, char or an array of one. It subtracts `PUBLIC_COLUMNS` and seeds
+   a unique marker string into every remaining column of every seeded row. A
+   column that a later migration adds is therefore seeded by default. Views
+   are not seeded, since they hold no rows of their own.
 2. It walks the envelope's Zod schema for every string and string-array field
-   inside the `jsonb` columns, subtracts `PUBLIC_FIELD_PATHS`, and seeds the
-   marker into each path that remains, `settings.argv` included.
+   inside the `jsonb` columns, subtracts `PUBLIC_FIELD_PATHS` and the columns
+   in `ALLOWED_WHOLE_JSONB`, and seeds the marker into each path that remains,
+   `settings.argv` included.
 3. With the flag set, it calls the loader of every `/evals` route, and every
    resource route, for the seeded runs. It serialises each result.
 4. It fails if the marker appears in any serialised result.
@@ -153,12 +165,15 @@ must show a failing run against a query that returns `detail` whole.
 A second test unsets the flag and asserts that every route in that same set
 answers with 404.
 
-A third test guards the derivation in the other direction. Against the same
-migrated schema, it asserts that every column that is neither text, `jsonb`,
-in `EXCLUDED_COLUMNS` nor in a table in `EXCLUDED_TABLES` is in
-`PUBLIC_COLUMNS`, with `eval_trial.duration_ms` as the named case. It also
-asserts that no column of `schema_migration` is in `PUBLIC_COLUMNS`. A set stripped of the numbers
-would otherwise pass the marker test, which seeds only text.
+A third test guards the derivation in the other direction, against the same
+migrated schema and over base tables only. It asserts that every column that
+is neither text, `jsonb`, in `EXCLUDED_COLUMNS` nor in a table in
+`EXCLUDED_TABLES` is in `PUBLIC_COLUMNS`, with `eval_trial.duration_ms` as the
+named case, and that no column of `schema_migration` is in it. A set stripped
+of the numbers would otherwise pass the marker test, which seeds only text.
+It also walks the Zod schema of every column in `ALLOWED_WHOLE_JSONB` and
+fails if any field is a string or a string array, so a text field added to
+`totals` cannot pass whole without being decided here.
 
 **Where they run.** All three tests run in `check-safe.yml`'s `unit-tests` job, on
 the Postgres service that #1268 adds there for the history package's own
@@ -194,10 +209,11 @@ heatmap and the matrix are small, fixed shapes.
   outside this decision.
 - Drawing the charts by hand means this repository owns axis, tick and tooltip
   code. A fifth chart shape is the point to revisit the library question.
-- `PUBLIC_COLUMNS`, `PUBLIC_FIELD_PATHS` and the query functions that project
-  through them are the only thing keeping transcripts and prose off a route. A
-  query that selects `detail` whole, or skips the projection, is a defect, and
-  the marker test is what catches it. An entry added to
+- The module's sets, the query functions that project through them, and the
+  definitions of the views and functions a route reads are the only thing
+  keeping transcripts and prose off a route. A query that selects `detail`
+  whole, skips the projection, or a view that selects an excluded column, is
+  a defect, and the marker test is what catches it. An entry added to
   `ALLOWED_TEXT_COLUMNS` or `PUBLIC_FIELD_PATHS` is not seeded, so the marker
   test cannot catch a wrong addition; review against this ADR is the only
   check on it.
