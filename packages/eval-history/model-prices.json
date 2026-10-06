@@ -1,0 +1,29 @@
+{
+  "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+  "prices": [
+    {
+      "modelId": "claude-opus-5",
+      "usdPerMtokCacheRead": 0.5,
+      "usdPerMtokCacheWrite": 6.25,
+      "usdPerMtokIn": 5,
+      "usdPerMtokOut": 25,
+      "validFrom": "2026-10-06"
+    },
+    {
+      "modelId": "claude-opus-5-5",
+      "usdPerMtokCacheRead": 0.2,
+      "usdPerMtokCacheWrite": 5,
+      "usdPerMtokIn": 4,
+      "usdPerMtokOut": 20,
+      "validFrom": "2026-10-06"
+    },
+    {
+      "modelId": "claude-sonnet-5",
+      "usdPerMtokCacheRead": 0.2,
+      "usdPerMtokCacheWrite": 2.5,
+      "usdPerMtokIn": 2,
+      "usdPerMtokOut": 10,
+      "validFrom": "2026-10-06"
+    }
+  ]
+}
