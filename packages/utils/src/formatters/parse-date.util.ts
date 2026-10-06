@@ -3,10 +3,10 @@ export const parseDate = (value: unknown) => {
     return value;
   }
 
-  if (typeof value === 'string' || typeof value === 'number') {
-    const date = new Date(value);
-    if (!Number.isNaN(date.getTime())) {
-      return date;
-    }
+  if (typeof value !== 'string' && typeof value !== 'number') {
+    return;
   }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
 };

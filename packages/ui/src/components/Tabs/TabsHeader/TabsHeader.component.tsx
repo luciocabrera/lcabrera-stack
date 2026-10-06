@@ -58,11 +58,13 @@ export const TabsHeader = ({
 
     const newTab = tabs[newIndex];
 
-    if (newIndex !== currentIndex && newTab) {
-      onSelectTab(newTab.key);
-      tabRefs.current.get(newTab.key)?.focus();
-      event.preventDefault();
+    if (newIndex === currentIndex || !newTab) {
+      return;
     }
+
+    onSelectTab(newTab.key);
+    tabRefs.current.get(newTab.key)?.focus();
+    event.preventDefault();
   };
 
   return (

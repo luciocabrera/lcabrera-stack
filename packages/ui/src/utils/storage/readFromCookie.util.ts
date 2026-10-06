@@ -11,8 +11,10 @@ export const readFromCookie = ({ cookieString, key }: ReadFromCookieArgs) => {
     return cookies[key];
   }
 
-  if (cookieString) {
-    const cookies = parseCookies(cookieString);
-    return cookies[key];
+  if (!cookieString) {
+    return;
   }
+
+  const cookies = parseCookies(cookieString);
+  return cookies[key];
 };

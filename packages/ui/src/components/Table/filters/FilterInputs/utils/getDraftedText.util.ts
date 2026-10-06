@@ -5,9 +5,7 @@ export const getDraftedText = (filter?: ColumnFilter) => {
     return filter.value;
   }
 
-  if (filter?.type === 'multiSelect' || filter?.type === 'select') {
-    return filter.value ?? filter.values?.[0] ?? '';
-  }
-
-  return '';
+  return filter?.type === 'multiSelect' || filter?.type === 'select'
+    ? (filter.value ?? filter.values?.[0] ?? '')
+    : '';
 };

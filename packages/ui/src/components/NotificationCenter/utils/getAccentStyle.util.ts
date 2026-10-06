@@ -23,9 +23,7 @@ export const getAccentStyle = (variant: AppNotification['variant']) => {
     return styles.itemSurfaceSuccess;
   }
 
-  if (variant === 'warning') {
-    return styles.itemSurfaceWarning;
-  }
-
-  return styles.itemSurfaceDefault;
+  return variant === 'warning'
+    ? styles.itemSurfaceWarning
+    : styles.itemSurfaceDefault;
 };

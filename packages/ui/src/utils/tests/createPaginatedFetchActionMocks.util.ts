@@ -77,11 +77,9 @@ export const createPaginatedFetchActionMocks = <TDataState, TResponse>({
         return cache.data;
       }
 
-      if (cache?.skip === expectedSkip && cache.promise) {
-        return cache.promise;
-      }
-
-      return fetchFn();
+      return cache?.skip === expectedSkip && cache.promise
+        ? cache.promise
+        : fetchFn();
     },
   ) as CallableMock<
     [ResolveFromCacheOrFetchArgs<TResponse>],

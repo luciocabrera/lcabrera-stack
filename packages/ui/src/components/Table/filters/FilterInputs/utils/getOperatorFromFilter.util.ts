@@ -10,10 +10,6 @@ export const getOperatorFromFilter = ({
   dataType,
   filter,
 }: GetOperatorFromFilterParams) => {
-  if (!filter) return 'equals';
-  if (dataType === 'boolean') return 'equals';
-  if ('operator' in filter && filter.operator) {
-    return filter.operator;
-  }
-  return 'equals';
+  if (!filter || dataType === 'boolean') return 'equals';
+  return 'operator' in filter && filter.operator ? filter.operator : 'equals';
 };

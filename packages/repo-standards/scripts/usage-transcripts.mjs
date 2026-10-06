@@ -32,14 +32,14 @@ const invocationIn = (block) => {
   if (block.name === SKILL_TOOL && typeof block.input?.skill === 'string') {
     return { kind: 'skills', name: block.input.skill };
   }
-  if (SUBAGENT_TOOLS.has(block.name)) {
-    const name = block.input?.subagent_type ?? block.input?.agent_type;
-    return {
-      kind: 'subagents',
-      name:
-        typeof name === 'string' && name.length > 0 ? name : UNNAMED_SUBAGENT,
-    };
+  if (!SUBAGENT_TOOLS.has(block.name)) {
+    return;
   }
+  const name = block.input?.subagent_type ?? block.input?.agent_type;
+  return {
+    kind: 'subagents',
+    name: typeof name === 'string' && name.length > 0 ? name : UNNAMED_SUBAGENT,
+  };
 };
 
 export const invocationsInEntry = ({ entry, roots }) => {

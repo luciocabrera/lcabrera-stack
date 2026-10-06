@@ -47,6 +47,17 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   ],
   'unicorn/name-replacements': 'off',
   'unicorn/no-array-reduce': 'off',
+  // Purely stylistic: it rejects the ` * ` line prefix that editors insert
+  // into every JSDoc block. It changes no behaviour and catches no bug.
+  'unicorn/no-asterisk-prefix-in-documentation-comments': 'off',
+  // Each report is a pure factory call — `export default defineConfig(...)`,
+  // `export default createRule(...)`, a config array — and the only fix is to
+  // bind the same call to a variable first.
+  'unicorn/no-top-level-side-effects': 'off',
+  // A `flatMap` callback may return a bare value, but one that returns an
+  // array from every branch shows "zero, one or many" at a glance, and the
+  // bare value saves one allocation.
+  'unicorn/no-unnecessary-array-flat-map': 'off',
   // Two positions are exempt, both because the fixer is unsafe there rather
   // than because the rule is wrong.
   //
@@ -66,11 +77,22 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
     'error',
     { checkArguments: false, checkArrowFunctionBody: false },
   ],
+  // It reports a parameter or destructured variable read as `x ?? literal` or
+  // `x || literal`. A default applies only to `undefined`, so each rewrite
+  // changes what `null` does — and, for `||`, every other falsy value. A child
+  // process's `close` exit code is `null` when a signal killed it. The rule's
+  // own documentation says to disable it where `null` and `undefined` are
+  // meant to be handled alike.
+  'unicorn/prefer-default-parameters': 'off',
   // The auto-fixer rewrites http:// to https:// inside string literals, which
   // silently corrupts test fixtures and local-dev URLs — a fixture asserting
   // that an http origin is rejected became https, and the test inverted.
   'unicorn/prefer-https': 'off',
   'unicorn/prefer-query-selector': 'off',
+  // The rule merges an `if` that returns with the `return` after it.
+  // `only-single-line` keeps that where the condition and both values each fit
+  // on one line, and leaves a multi-line guard as it is.
+  'unicorn/prefer-ternary': ['error', 'only-single-line'],
   'unicorn/prevent-abbreviations': 'off',
   // New in unicorn 73's recommended set. Off deliberately and temporarily, not
   // as a verdict on the rule: its default `multiline` fixer rewrites every
@@ -188,5 +210,24 @@ export const createCommonJsFileConfig = () => ({
   files: ['**/*.cjs'],
   rules: {
     '@typescript-eslint/no-require-imports': 'off',
+  },
+});
+
+/**
+ * The narrower block for tests, which `.test.*`, `.spec.*` and an `e2e/`
+ * directory declare a file to be.
+ *
+ * `unicorn/no-unnecessary-parameters` reports a parameter that receives the
+ * same value at every call. In a test nearly every such parameter belongs to a
+ * helper that the current cases happen to call the same way, and inlining the
+ * value makes a general helper specific to them. Source code keeps the rule.
+ */
+export const createTestFileConfig = () => ({
+  files: [
+    '**/*.{test,spec}.{js,mjs,cjs,jsx,ts,mts,cts,tsx}',
+    '**/e2e/**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}',
+  ],
+  rules: {
+    'unicorn/no-unnecessary-parameters': 'off',
   },
 });

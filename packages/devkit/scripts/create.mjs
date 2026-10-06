@@ -95,12 +95,13 @@ export const createRefusal = ({
   if (!targetIsReadable) {
     return `create: \`${target}\` is already there and cannot be read, so create cannot tell whether it is empty. Fix its permissions, or pick a name nothing occupies.`;
   }
-  if (targetEntries !== undefined && targetEntries.length > 0) {
-    const [first] = targetEntries.toSorted((left, right) =>
-      left.localeCompare(right),
-    );
-    return `create: \`${target}\` is not empty — it already holds \`${first}\`, and create writes only into a directory with nothing in it. Pick a name nothing occupies, or run \`devkit init\` inside \`${target}\` if that is the project you meant.`;
+  if (targetEntries === undefined || targetEntries.length === 0) {
+    return;
   }
+  const [first] = targetEntries.toSorted((left, right) =>
+    left.localeCompare(right),
+  );
+  return `create: \`${target}\` is not empty — it already holds \`${first}\`, and create writes only into a directory with nothing in it. Pick a name nothing occupies, or run \`devkit init\` inside \`${target}\` if that is the project you meant.`;
 };
 
 const NAME_SEPARATORS = /[^a-z0-9._-]+/g;

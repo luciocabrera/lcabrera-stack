@@ -9,6 +9,5 @@ export type DateFilterInputProps = {
 
 export type UpdateDateFilterArgs = {
   readonly end: string;
-  readonly op: DateFilter['operator'];
   readonly val: string;
 };

@@ -58,18 +58,14 @@ const getSpecifierText = (
 ): string | undefined => {
   if (specifier.type === 'ImportSpecifier') {
     const importedName = getImportedName(specifier.imported);
-    if (importedName === specifier.local.name) {
-      return importedName;
-    }
-
-    return `${importedName} as ${specifier.local.name}`;
+    return importedName === specifier.local.name
+      ? importedName
+      : `${importedName} as ${specifier.local.name}`;
   }
 
-  if (specifier.type === 'ImportDefaultSpecifier') {
-    return `default as ${specifier.local.name}`;
-  }
-
-  return undefined;
+  return specifier.type === 'ImportDefaultSpecifier'
+    ? `default as ${specifier.local.name}`
+    : undefined;
 };
 
 const getUniqueSpecifiers = (

@@ -29,9 +29,7 @@ export const resolveTableCellTone = ({
     if (colors !== undefined) return colors;
   }
 
-  if (Object.hasOwn(TABLE_CELL_BUILT_IN_TONES, name)) {
-    return TABLE_CELL_BUILT_IN_TONES[name] ?? TABLE_CELL_NEUTRAL_TONE;
-  }
-
-  return TABLE_CELL_NEUTRAL_TONE;
+  return Object.hasOwn(TABLE_CELL_BUILT_IN_TONES, name)
+    ? (TABLE_CELL_BUILT_IN_TONES[name] ?? TABLE_CELL_NEUTRAL_TONE)
+    : TABLE_CELL_NEUTRAL_TONE;
 };

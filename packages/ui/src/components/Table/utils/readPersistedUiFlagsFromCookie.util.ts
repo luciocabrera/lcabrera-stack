@@ -19,7 +19,7 @@ export const readPersistedUiFlagsFromCookie = ({
   const key = `${getStorageKey({ appId, persistenceKey })}-${UI_FLAGS_COOKIE_KEY_SUFFIX}`;
   const rawValue = readFromCookie({ cookieString, key });
 
-  if (!rawValue) return {};
-
-  return toPersistedUiState(parseVersionedPayload({ rawValue }));
+  return rawValue
+    ? toPersistedUiState(parseVersionedPayload({ rawValue }))
+    : {};
 };

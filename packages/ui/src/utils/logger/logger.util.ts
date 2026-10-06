@@ -9,9 +9,9 @@ const resolveLogLevel = (override?: LogLevel) => {
 
   const envLevel = import.meta.env.VITE_LOG_LEVEL as LogLevel | undefined;
 
-  if (envLevel && Object.hasOwn(LOG_LEVEL_PRIORITY, envLevel)) return envLevel;
-
-  return DEFAULT_LOG_LEVEL;
+  return envLevel && Object.hasOwn(LOG_LEVEL_PRIORITY, envLevel)
+    ? envLevel
+    : DEFAULT_LOG_LEVEL;
 };
 
 export const createLogger = ({ level, prefix }: CreateLoggerArgs = {}) => {

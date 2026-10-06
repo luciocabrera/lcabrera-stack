@@ -32,7 +32,7 @@ export const resolveFocusedRowIndex = <TData extends Record<string, unknown>>({
     (row, index) => resolveRowKey({ columns, index, row }) === rowKey,
   );
 
-  if (foundIndex !== -1) return foundIndex;
-
-  return Math.min(Math.max(rowIndex ?? 0, 0), lastIndex);
+  return foundIndex === -1
+    ? Math.min(Math.max(rowIndex ?? 0, 0), lastIndex)
+    : foundIndex;
 };

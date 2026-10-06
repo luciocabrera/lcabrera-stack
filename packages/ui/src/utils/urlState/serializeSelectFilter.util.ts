@@ -12,9 +12,5 @@ export const serializeSelectFilter = ({
 }: SerializeSelectFilterArgs) => {
   const values = filter.values ?? (filter.value ? [filter.value] : []);
 
-  if (filter.operator === 'notEquals') {
-    return ['!', ...values];
-  }
-
-  return values;
+  return filter.operator === 'notEquals' ? ['!', ...values] : values;
 };

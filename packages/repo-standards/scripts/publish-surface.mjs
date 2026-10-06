@@ -58,10 +58,9 @@ export const collectTargets = (target) => {
   if (typeof target === 'string') {
     return [target];
   }
-  if (target === null || typeof target !== 'object') {
-    return [];
-  }
-  return Object.values(target).flatMap((value) => collectTargets(value));
+  return target === null || typeof target !== 'object'
+    ? []
+    : Object.values(target).flatMap((value) => collectTargets(value));
 };
 
 const toTarballPath = (target) =>

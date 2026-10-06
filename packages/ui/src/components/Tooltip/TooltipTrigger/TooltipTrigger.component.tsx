@@ -23,10 +23,12 @@ export const TooltipTrigger = ({
       return;
     }
 
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onShow();
+    if (!(event.key === 'Enter' || event.key === ' ')) {
+      return;
     }
+
+    event.preventDefault();
+    onShow();
   };
 
   return (

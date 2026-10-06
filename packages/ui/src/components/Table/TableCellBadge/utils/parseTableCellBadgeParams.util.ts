@@ -46,7 +46,7 @@ export const parseTableCellBadgeParams = (
     }
   }
 
-  if (issues.length > 0) return { issues };
-
-  return { value: { fallbackTone, rules: validRules } };
+  return issues.length > 0
+    ? { issues }
+    : { value: { fallbackTone, rules: validRules } };
 };

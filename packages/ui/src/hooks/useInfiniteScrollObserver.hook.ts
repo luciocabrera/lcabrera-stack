@@ -30,8 +30,13 @@ export const useInfiniteScrollObserver = ({
     const root = rootRef.current;
     const sentinel = sentinelRef.current;
 
-    if (!isEnabled || !root || !sentinel) return;
-    if (typeof IntersectionObserver === 'undefined') return;
+    if (
+      !isEnabled ||
+      !root ||
+      !sentinel ||
+      typeof IntersectionObserver === 'undefined'
+    )
+      return;
 
     const observer = new IntersectionObserver(
       (entries) => {

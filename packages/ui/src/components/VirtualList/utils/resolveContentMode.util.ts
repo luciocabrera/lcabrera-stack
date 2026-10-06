@@ -8,6 +8,5 @@ export const resolveContentMode = ({
   isInitialLoading,
 }: ResolveContentModeArgs) => {
   if (isInitialLoading) return 'loading' as const;
-  if (filteredOptionsCount === 0) return 'empty' as const;
-  return 'list' as const;
+  return filteredOptionsCount === 0 ? ('empty' as const) : ('list' as const);
 };

@@ -320,20 +320,18 @@ const labelFor = (entry) => {
   if (entry.state === 'unmet' && entry.unmetKind === 'peer') {
     return UNMET_LABELS.peer;
   }
-  if (entry.state === 'kept') {
-    return KEPT_LABELS[entry.keptBecause] ?? STATE_LABELS.kept;
-  }
-  return STATE_LABELS[entry.state];
+  return entry.state === 'kept'
+    ? (KEPT_LABELS[entry.keptBecause] ?? STATE_LABELS.kept)
+    : STATE_LABELS[entry.state];
 };
 
 const detailFor = (entry) => {
   if (STATES_NAMING_WHAT_IS_MISSING.has(entry.state)) {
     return `${labelFor(entry)} ${entry.missing.join(', ')}`;
   }
-  if (isAcknowledged(entry.state)) {
-    return `${labelFor(entry)}: ${entry.reason}`;
-  }
-  return labelFor(entry);
+  return isAcknowledged(entry.state)
+    ? `${labelFor(entry)}: ${entry.reason}`
+    : labelFor(entry);
 };
 
 export const renderPlan = (entries, { verbose = false } = {}) => {

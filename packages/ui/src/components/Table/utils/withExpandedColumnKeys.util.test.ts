@@ -21,10 +21,11 @@ describe('withExpandedColumnKeys', () => {
       columnPinning: { left: ['amount'] as never, right: [] },
       columns,
       columnVisibility: new Set(['amount']) as never,
-      expandColumn: (column) =>
+      expandColumn: (column) => [
         column.key === 'amount'
-          ? [{ key: 'sum_amount' as never, label: 'Sum' }]
-          : [column],
+          ? { key: 'sum_amount' as never, label: 'Sum' }
+          : column,
+      ],
       expandKey: (key) =>
         key === 'amount' ? (['sum_amount'] as never) : [key],
     });

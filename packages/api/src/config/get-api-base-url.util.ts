@@ -18,11 +18,11 @@ const PRIVATE_IP_PATTERNS = [
 ];
 
 const isLocalIp = (hostname: string): boolean => {
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return true;
-  }
-
-  return PRIVATE_IP_PATTERNS.some((pattern) => pattern.test(hostname));
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    PRIVATE_IP_PATTERNS.some((pattern) => pattern.test(hostname))
+  );
 };
 
 const resolveFromRequestUrl = (requestUrl: string) => {
@@ -64,11 +64,9 @@ export const getApiBaseUrl = (requestUrl?: string): string => {
   }
 
   if (isLocalIp(hostname)) {
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return CONFIG.localhost.apiHost;
-    }
-
-    return `${protocol}//${hostname}:${API_SERVER_PORT}/api`;
+    return hostname === 'localhost' || hostname === '127.0.0.1'
+      ? CONFIG.localhost.apiHost
+      : `${protocol}//${hostname}:${API_SERVER_PORT}/api`;
   }
 
   return `${protocol}//${hostname}${CONFIG.prod.apiHost}`;

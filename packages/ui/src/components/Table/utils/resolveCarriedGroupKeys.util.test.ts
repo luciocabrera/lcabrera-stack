@@ -88,6 +88,20 @@ describe('resolveCarriedGroupKeys', () => {
     ]).toStrictEqual([]);
   });
 
+  it('stops where the row above has no level left', () => {
+    expect([
+      ...resolveCarriedGroupKeys({
+        isWindowFirst: false,
+        previousRow: rowOf([['city', 'Paris']]),
+        summary: summaryOf([
+          ['city', 'Paris'],
+          ['district', 'Marais'],
+          ['block', 'A'],
+        ]),
+      }),
+    ]).toStrictEqual(['city']);
+  });
+
   it('carries nothing for a detail row', () => {
     expect(
       resolveCarriedGroupKeys({

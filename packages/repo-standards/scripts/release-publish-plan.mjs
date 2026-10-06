@@ -106,14 +106,16 @@ const main = async () => {
     writeGithub(classified, publishable, firstPublish);
   }
 
-  if (blocking.length > 0) {
-    const names = blocking.map(({ name }) => name).join(', ');
-
-    console.error(
-      `::error::Cannot release: ${names} has never been published, and \`changeset publish\` takes no package filter — it would try, fail with E404 under OIDC, and leave the packages published before it untagged. Publish it once by hand (or set \`private: true\` until then), then re-run.`,
-    );
-    process.exitCode = 1;
+  if (blocking.length === 0) {
+    return;
   }
+
+  const names = blocking.map(({ name }) => name).join(', ');
+
+  console.error(
+    `::error::Cannot release: ${names} has never been published, and \`changeset publish\` takes no package filter — it would try, fail with E404 under OIDC, and leave the packages published before it untagged. Publish it once by hand (or set \`private: true\` until then), then re-run.`,
+  );
+  process.exitCode = 1;
 };
 
 // This runs before `pnpm install` in the release workflow, where a stack trace

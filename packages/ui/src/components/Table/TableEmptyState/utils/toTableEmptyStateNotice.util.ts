@@ -26,8 +26,7 @@ export const toTableEmptyStateNotice = ({
           : `Grouping by ${columnName} was refused`,
     };
 
-  if (error.kind === 'db-canceled')
-    return { message: error.message, title: 'This query took too long' };
-
-  return { message: error.message, title: 'This table could not be loaded' };
+  return error.kind === 'db-canceled'
+    ? { message: error.message, title: 'This query took too long' }
+    : { message: error.message, title: 'This table could not be loaded' };
 };

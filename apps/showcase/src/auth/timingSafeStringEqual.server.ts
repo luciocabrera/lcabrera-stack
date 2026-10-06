@@ -9,9 +9,5 @@ export const timingSafeStringEqual = ({ a, b }: TimingSafeStringEqualArgs) => {
   const bufferA = Buffer.from(a);
   const bufferB = Buffer.from(b);
 
-  if (bufferA.length !== bufferB.length) {
-    return false;
-  }
-
-  return timingSafeEqual(bufferA, bufferB);
+  return bufferA.length === bufferB.length && timingSafeEqual(bufferA, bufferB);
 };

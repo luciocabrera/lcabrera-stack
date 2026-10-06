@@ -11,6 +11,7 @@ import { TEST_RUNNER_IMPORT_PATTERNS } from './eslint.restrictions.shared.mjs';
 import {
   createCommonJsFileConfig,
   createNodeScriptFileConfig,
+  createTestFileConfig,
   createToolingScriptFileConfig,
   SHARED_PLUGIN_RULE_SEVERITIES,
 } from './eslint.rules.shared.mjs';
@@ -70,6 +71,7 @@ export const createBaseCustomRulesLintConfig = ({
     createNodeScriptFileConfig({ globals }),
     createToolingScriptFileConfig(),
     createCommonJsFileConfig(),
+    createTestFileConfig(),
     {
       ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
     },

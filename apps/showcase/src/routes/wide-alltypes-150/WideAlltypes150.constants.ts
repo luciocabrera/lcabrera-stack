@@ -15,8 +15,7 @@ const getColDataType = (index: number) => {
   const mod = index % 20;
   if (mod === 6) return 'boolean';
   if (mod === 9) return 'date';
-  if ([0, 1, 4, 5].includes(mod)) return 'number';
-  return 'string';
+  return [0, 1, 4, 5].includes(mod) ? 'number' : 'string';
 };
 
 const PG_TYPE_LABELS: Readonly<Record<number, string>> = {

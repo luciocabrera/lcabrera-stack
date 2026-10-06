@@ -9,9 +9,7 @@ export const orderClientAction = async ({
   const formData = await request.clone().formData();
   const parsed = parseOrderFormData(formData);
 
-  if (!parsed.success) {
-    return { errors: toOrderFieldErrors({ error: parsed.error }) };
-  }
-
-  return serverAction();
+  return parsed.success
+    ? serverAction()
+    : { errors: toOrderFieldErrors({ error: parsed.error }) };
 };

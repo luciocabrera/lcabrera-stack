@@ -62,9 +62,9 @@ export const ColumnAxisSection = ({
         }}
         options={options}
         placeholder={COLUMN_AXIS_PLACEHOLDER}
-        selected={
-          columnAxis === undefined ? [COLUMN_AXIS_NONE_VALUE] : [columnAxis]
-        }
+        selected={[
+          columnAxis === undefined ? COLUMN_AXIS_NONE_VALUE : columnAxis,
+        ]}
       />
     </div>
   );

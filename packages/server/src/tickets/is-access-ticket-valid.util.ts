@@ -22,11 +22,11 @@ export const isAccessTicketValid = ({
 
   const expiresAtRaw = ticket.slice(0, separatorIndex);
   const expiresAt = Number(expiresAtRaw);
-  if (!Number.isSafeInteger(expiresAt) || String(expiresAt) !== expiresAtRaw) {
-    return false;
-  }
-
-  if (expiresAt <= now) {
+  if (
+    !Number.isSafeInteger(expiresAt) ||
+    String(expiresAt) !== expiresAtRaw ||
+    expiresAt <= now
+  ) {
     return false;
   }
 

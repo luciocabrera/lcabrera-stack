@@ -70,14 +70,16 @@ export const cycleFindings = (entries) => {
       continue;
     }
     const cycle = cycleFrom(entry.slug, edges, settled);
-    if (cycle !== undefined) {
-      findings.push({
-        file: fileBySlug.get(cycle[0]) ?? entry.file,
-        message: `\`requires\` cycle: ${cycle.join(' → ')}`,
-      });
-      for (const id of cycle) {
-        settled.add(id);
-      }
+    if (cycle === undefined) {
+      continue;
+    }
+
+    findings.push({
+      file: fileBySlug.get(cycle[0]) ?? entry.file,
+      message: `\`requires\` cycle: ${cycle.join(' → ')}`,
+    });
+    for (const id of cycle) {
+      settled.add(id);
     }
   }
   return findings;

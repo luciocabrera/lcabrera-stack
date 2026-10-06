@@ -10,13 +10,5 @@ export type NumberFilterInputProps<TData> = {
 
 export type UpdateFilterArgs = {
   readonly maxVal: '' | number;
-  readonly op:
-    | 'between'
-    | 'equals'
-    | 'greaterThan'
-    | 'greaterThanOrEqual'
-    | 'lessThan'
-    | 'lessThanOrEqual'
-    | 'notEquals';
   readonly val: '' | number;
 };

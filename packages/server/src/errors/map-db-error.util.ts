@@ -25,9 +25,7 @@ export const mapDbError = (error: unknown) => {
     return new ForeignKeyViolationError({ cause: error, fields });
   }
 
-  if (hasPostgresErrorCode({ code: SQLSTATE_QUERY_CANCELED, error })) {
-    return new QueryCanceledError({ cause: error, fields });
-  }
-
-  return new PersistenceError({ cause: error, fields });
+  return hasPostgresErrorCode({ code: SQLSTATE_QUERY_CANCELED, error })
+    ? new QueryCanceledError({ cause: error, fields })
+    : new PersistenceError({ cause: error, fields });
 };

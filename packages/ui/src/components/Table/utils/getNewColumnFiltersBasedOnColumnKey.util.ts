@@ -32,8 +32,7 @@ export const getNewColumnFiltersBasedOnColumnKey = <TData>({
   const next: ColumnFiltersState<TData> = {} as ColumnFiltersState<TData>;
 
   for (const k in columnFiltersState) {
-    if (!Object.hasOwn(columnFiltersState, k)) continue;
-    if (k === columnKey) continue;
+    if (k === columnKey || !Object.hasOwn(columnFiltersState, k)) continue;
     next[k as DataKey<TData>] = columnFiltersState[k as DataKey<TData>];
   }
 

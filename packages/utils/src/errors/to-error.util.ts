@@ -7,9 +7,9 @@ export const toError = (error: unknown) => {
     return new Error(error);
   }
 
-  if (error && typeof error === 'object') {
-    return new Error(JSON.stringify(error));
-  }
-
-  return new Error('Unknown server-side streaming error');
+  return new Error(
+    error && typeof error === 'object'
+      ? JSON.stringify(error)
+      : 'Unknown server-side streaming error',
+  );
 };

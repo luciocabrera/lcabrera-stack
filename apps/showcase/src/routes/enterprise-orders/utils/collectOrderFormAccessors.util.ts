@@ -9,9 +9,7 @@ export const collectOrderFormAccessors = (
     if (node.type === 'tab') {
       return node.tabs.flatMap((tab) => collectOrderFormAccessors(tab.fields));
     }
-    if (node.type === 'group' || node.type === 'row') {
-      return collectOrderFormAccessors(node.fields);
-    }
-
-    return [node.accessor];
+    return node.type === 'group' || node.type === 'row'
+      ? collectOrderFormAccessors(node.fields)
+      : [node.accessor];
   });

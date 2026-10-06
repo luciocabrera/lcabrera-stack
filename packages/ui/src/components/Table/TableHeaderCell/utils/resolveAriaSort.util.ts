@@ -11,7 +11,5 @@ export const resolveAriaSort = ({
 
   if (sortDirection === 'asc') return 'ascending';
 
-  if (sortDirection === 'desc') return 'descending';
-
-  return 'none';
+  return sortDirection === 'desc' ? 'descending' : 'none';
 };

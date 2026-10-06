@@ -43,9 +43,7 @@ export const resolveKeyboardResizeAction = ({
     return { type: 'resize', width: Math.max(minWidth, currentWidth - step) };
   }
 
-  if (key === 'ArrowRight') {
-    return { type: 'resize', width: Math.min(maxWidth, currentWidth + step) };
-  }
-
-  return { type: 'ignore' };
+  return key === 'ArrowRight'
+    ? { type: 'resize', width: Math.min(maxWidth, currentWidth + step) }
+    : { type: 'ignore' };
 };

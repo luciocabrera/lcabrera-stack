@@ -65,8 +65,7 @@ export const formatChange = (change) => {
   if (change.kind === 'removed') {
     return `  removed  ${at}`;
   }
-  if (change.kind === 'added') {
-    return `  added    ${at}: ${change.signature}`;
-  }
-  return `  changed  ${at}\n             was: ${change.from}\n             now: ${change.signature}`;
+  return change.kind === 'added'
+    ? `  added    ${at}: ${change.signature}`
+    : `  changed  ${at}\n             was: ${change.from}\n             now: ${change.signature}`;
 };

@@ -15,9 +15,5 @@ export const resolveAuthClaims = async ({
   secret,
 }: ResolveAuthClaimsArgs): Promise<AuthClaims | undefined> => {
   const token = await readAuthCookie({ request });
-  if (!token) {
-    return undefined;
-  }
-
-  return verifyAuthToken({ nowSeconds, secret, token });
+  return token ? verifyAuthToken({ nowSeconds, secret, token }) : undefined;
 };

@@ -16,8 +16,13 @@ export const readTableCellPaletteColors = ({
   const readPair = (pair: unknown): TableCellToneColors | undefined => {
     if (!isTableCellParamsRecord(pair)) return;
     const { background, text } = pair;
-    if (typeof background !== 'string' || typeof text !== 'string') return;
-    if (!isColor(background) || !isColor(text)) return;
+    if (
+      typeof background !== 'string' ||
+      typeof text !== 'string' ||
+      !isColor(background) ||
+      !isColor(text)
+    )
+      return;
 
     return { background, text };
   };

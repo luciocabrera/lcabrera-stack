@@ -36,11 +36,7 @@ const stringifyCellValue = (value: unknown) => {
     return '';
   }
 
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-
-  return '';
+  return typeof value === 'object' ? JSON.stringify(value) : '';
 };
 
 export const renderCellContent = ({

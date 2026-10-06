@@ -158,10 +158,9 @@ export const argumentError = ({ missing, paths, unknown }) => {
     return `unknown option ${unknown.join(', ')}. A file whose name starts with "-" goes after "--".\n${USAGE}`;
   }
   if (paths.length === 0) return USAGE;
-  if (missing.length > 0) {
-    const listed = missing.map((path) => `  • ${path}`).join('\n');
-    return `no such file(s), so nothing would lint them:\n${listed}`;
-  }
+  if (missing.length === 0) return;
+  const listed = missing.map((path) => `  • ${path}`).join('\n');
+  return `no such file(s), so nothing would lint them:\n${listed}`;
 };
 
 export const lintScriptOf = (scripts) =>
@@ -169,12 +168,10 @@ export const lintScriptOf = (scripts) =>
 
 export const spawnOutcome = (status) => {
   if (status === 0) return 'clean';
-  if (status === 1) return 'findings';
-  return 'broken';
+  return status === 1 ? 'findings' : 'broken';
 };
 
 export const exitCodeFor = (outcomes) => {
   if (outcomes.includes('broken')) return 2;
-  if (outcomes.includes('findings')) return 1;
-  return 0;
+  return outcomes.includes('findings') ? 1 : 0;
 };

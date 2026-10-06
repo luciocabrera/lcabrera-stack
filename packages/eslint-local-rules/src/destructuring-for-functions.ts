@@ -101,11 +101,8 @@ const checkFunction = ({
 }) => {
   const params = node.params;
 
-  if (params.length <= 1) {
-    return;
-  }
-
   if (
+    params.length <= 1 ||
     isArrayMethodCallback(node) ||
     isPromiseExecutor(node) ||
     isConformingToAnnotatedType(node)
