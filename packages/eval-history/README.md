@@ -13,6 +13,9 @@ decides how the envelope is versioned.
   [the plan's §5](../../docs/agents/planning/eval-history-plan.md#5-hashing):
   normalized content hashes, the multi-file hash, canonical JSON, the skill
   catalog hash and the harness version.
+- `src/migrate/` and `migrations/` — the migrator ADR-130 decides and the
+  ordered SQL files it applies. A fix to an applied file is a new file: the
+  migrator refuses to run while an applied one has changed.
 - `src/stats/` — the statistics of
   [the plan's §6](../../docs/agents/planning/eval-history-plan.md#6-statistics-module):
   the Wilson interval, pass@k and pass^k, the baseline summary, the binary and
@@ -21,6 +24,14 @@ decides how the envelope is versioned.
   toward n. The thresholds are not in the code: `loadRegressionConfig` reads
   them from [`evals/regression.config.json`](../../evals/regression.config.json)
   and rejects a file that fails `regressionConfigSchema`.
+
+`vp run evals:migrate` applies `migrations/` to the database
+`EVALS_DATABASE_URL` names. Locally that is a database named `eval_history` on
+the compose Postgres, created once with `create database eval_history`.
+
+The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
+scratch database, because it drops schema `evals` there before every test.
+Without the variable it skips and says why, except under `CI`, where it fails.
 
 The source is TypeScript with erasable syntax only, so a plain `.mjs` runner
 imports it through `exports` with no build and no loader.

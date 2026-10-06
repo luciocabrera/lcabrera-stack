@@ -14,7 +14,7 @@ export default defineConfig({
       },
       'test:coverage': {
         cache: false,
-        command: `node node_modules/vitest/vitest.mjs run ${VITEST_COVERAGE_FLAGS}`,
+        command: `node node_modules/vitest/vitest.mjs run ${VITEST_COVERAGE_FLAGS} --exclude '**/*.integration.test.ts'`,
       },
     },
   },
