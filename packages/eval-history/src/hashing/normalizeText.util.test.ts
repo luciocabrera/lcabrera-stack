@@ -8,7 +8,7 @@ describe('normalizeText', () => {
   });
 
   it('drops a leading byte order mark, from text or from bytes', () => {
-    expect(normalizeText('﻿a')).toBe('a\n');
+    expect(normalizeText('\u{FEFF}a')).toBe('a\n');
     expect(
       normalizeText(new Uint8Array([0xef, 0xbb, 0xbf, 0x61, 0x0d, 0x0a])),
     ).toBe('a\n');

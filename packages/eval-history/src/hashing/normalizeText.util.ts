@@ -1,4 +1,4 @@
-const BYTE_ORDER_MARK = '﻿';
+const BYTE_ORDER_MARK = '\u{FEFF}';
 
 export const normalizeText = (input: string | Uint8Array) => {
   const text =
