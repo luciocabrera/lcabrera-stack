@@ -978,6 +978,9 @@ importers:
         specifier: workspace:*
         version: link:../eslint-local-rules
     devDependencies:
+      '@babel/core':
+        specifier: catalog:build
+        version: 7.29.7(supports-color@7.2.0)
       '@babel/preset-typescript':
         specifier: catalog:build
         version: 7.29.7(@babel/core@7.29.7(supports-color@7.2.0))(supports-color@7.2.0)

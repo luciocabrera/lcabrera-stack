@@ -11,6 +11,7 @@ area:
   - apps/showcase/package.json
   - .changeset/**
   - packages/vite-configs/README.md
+  - packages/vite-configs/package.json
   - packages/ui/README.md
   - packages/ui/config/vite.plugins.config.ts
   - apps/showcase/config/vite.plugins.config.ts

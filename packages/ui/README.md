@@ -75,6 +75,16 @@ export default {
 };
 ```
 
+The build has to supply `@babel/core` itself, and these preset options belong to
+the older `@babel/preset-typescript` major, which matches the `@babel/core` major
+that `vite-plugin-babel` peers on. On that major the example installs with no
+unmet peer. `allowDeclareFields` keeps a class field declared without an
+initializer, which the newer major does by default. The newer major does not
+take `allExtensions` or `isTSX`. A build on it passes `{ ignoreExtensions: true }`
+and adds `parserOpts: { plugins: ['jsx'] }`, because that option does not enable
+JSX. It also installs the newer `@babel/core`, which leaves `vite-plugin-babel`'s
+peer unmet.
+
 If that is more build surface than you want, take the package as a reference
 implementation rather than a dependency — the source is the documentation. A
 leaf component's contract is its types; how a whole system is wired is written
