@@ -143,8 +143,8 @@ const FALLBACK_RUNNER = 'npm';
  * @param {string | undefined} userAgent
  * @returns {string | undefined}
  */
-export const runnerFromUserAgent = (userAgent) => {
-  const [named] = (userAgent ?? '').split('/', 1);
+export const runnerFromUserAgent = (userAgent = '') => {
+  const [named] = userAgent.split('/', 1);
   return RUNNERS.some((candidate) => candidate.name === named)
     ? named
     : undefined;

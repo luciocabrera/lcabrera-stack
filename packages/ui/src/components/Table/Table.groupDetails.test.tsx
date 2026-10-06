@@ -94,7 +94,8 @@ const renderGrid = ({
 const detailsLink = () => screen.queryByTestId('table-group-details-link');
 
 const paramsOf = (href: null | string | undefined) =>
-  new URL(href ?? '', 'http://table.test').searchParams;
+  new URL(typeof href === 'string' ? href : '', 'http://table.test')
+    .searchParams;
 
 afterEach(cleanup);
 

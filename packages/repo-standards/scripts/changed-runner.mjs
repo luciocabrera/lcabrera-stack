@@ -67,6 +67,26 @@ export const printReport = ({
   process.stdout.write('\n');
 };
 
+export const exitStatusOf = (child) =>
+  new Promise((resolve) => {
+    child.on('close', (exitCode) => resolve(exitCode === null ? 1 : exitCode));
+    child.on('error', () => resolve(1));
+  });
+
+export const runInSequence = (groups, runGroup) =>
+  groups.reduce(async (previous, group) => {
+    const failed = await previous;
+    const code = await runGroup(group);
+    return code === 0 ? failed : code;
+  }, Promise.resolve(0));
+
+const spawnGroup = (group) => {
+  process.stdout.write(`\n▶ vp ${vpArgsFor(group).join(' ')}\n`);
+  return exitStatusOf(
+    spawn(VP_BIN, vpArgsFor(group), { cwd: REPO_ROOT, stdio: 'inherit' }),
+  );
+};
+
 const runGroups = async (groups, { dryRun = false } = {}) => {
   if (dryRun) {
     for (const group of groups) {
@@ -74,22 +94,7 @@ const runGroups = async (groups, { dryRun = false } = {}) => {
     }
     return 0;
   }
-  let failed = 0;
-  for (const group of groups) {
-    process.stdout.write(`\n▶ vp ${vpArgsFor(group).join(' ')}\n`);
-    const code = await new Promise((res) => {
-      const child = spawn(VP_BIN, vpArgsFor(group), {
-        cwd: REPO_ROOT,
-        stdio: 'inherit',
-      });
-      child.on('close', (exitCode) => res(exitCode ?? 0));
-      child.on('error', () => res(1));
-    });
-    if (code !== 0) {
-      failed = code;
-    }
-  }
-  return failed;
+  return runInSequence(groups, spawnGroup);
 };
 
 export const runGroupsAsGate = async (groups, options) => {

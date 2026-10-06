@@ -86,10 +86,14 @@ export const resolveStatusSha = (payload) =>
   statusSha({ eventName: process.env.GITHUB_EVENT_NAME, payload });
 
 const runUrl = () => {
-  const { GITHUB_REPOSITORY, GITHUB_RUN_ID, GITHUB_SERVER_URL } = process.env;
+  const {
+    GITHUB_REPOSITORY,
+    GITHUB_RUN_ID,
+    GITHUB_SERVER_URL = 'https://github.com',
+  } = process.env;
   return GITHUB_RUN_ID === undefined
     ? undefined
-    : `${GITHUB_SERVER_URL ?? 'https://github.com'}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
+    : `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
 };
 
 export const postStatus = ({

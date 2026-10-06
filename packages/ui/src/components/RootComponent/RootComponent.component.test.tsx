@@ -26,12 +26,12 @@ vi.mock('#ui/contexts/AppConfigContext', () => ({
     children,
     getNavigationItems,
     isAuthEnabled,
-    logoutRoute,
+    logoutRoute = 'none',
   }: MockAppConfigProviderProps) => (
     <div
       data-auth={String(isAuthEnabled)}
       data-items={String(getNavigationItems(24).length)}
-      data-logout={logoutRoute ?? 'none'}
+      data-logout={logoutRoute}
       data-testid='app-config'
     >
       {children}
@@ -40,9 +40,13 @@ vi.mock('#ui/contexts/AppConfigContext', () => ({
 }));
 
 vi.mock('#ui/components/AppProviders', () => ({
-  AppProviders: ({ appId, children, defaultTheme }: MockAppProvidersProps) => (
+  AppProviders: ({
+    appId = 'none',
+    children,
+    defaultTheme,
+  }: MockAppProvidersProps) => (
     <div
-      data-app-id={appId ?? 'none'}
+      data-app-id={appId}
       data-default-theme={defaultTheme}
       data-testid='app-providers'
     >

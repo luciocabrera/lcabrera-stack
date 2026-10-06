@@ -33,7 +33,7 @@ type MockThemeProviderProps = {
   readonly appId?: string;
   readonly children: ReactNode;
   readonly defaultTheme?: ThemeMode;
-  readonly initialTheme?: ThemeMode;
+  readonly initialTheme?: 'none' | ThemeMode;
 };
 
 vi.mock('react-router', async () => {
@@ -48,15 +48,15 @@ vi.mock('react-router', async () => {
 
 vi.mock('#ui/contexts/ThemeContext', () => ({
   ThemeProvider: ({
-    appId,
+    appId = 'none',
     children,
     defaultTheme,
-    initialTheme,
+    initialTheme = 'none',
   }: MockThemeProviderProps) => (
     <div
-      data-app-id={appId ?? 'none'}
+      data-app-id={appId}
       data-default-theme={defaultTheme}
-      data-initial-theme={initialTheme ?? 'none'}
+      data-initial-theme={initialTheme}
       data-testid='theme-provider'
     >
       {children}
@@ -66,12 +66,12 @@ vi.mock('#ui/contexts/ThemeContext', () => ({
 
 vi.mock('#ui/contexts/GlobalSettingsContext', () => ({
   GlobalSettingsProvider: ({
-    appId,
+    appId = 'none',
     children,
     initialSettings,
   }: MockGlobalSettingsProviderProps) => (
     <div
-      data-app-id={appId ?? 'none'}
+      data-app-id={appId}
       data-initial-settings={JSON.stringify(initialSettings)}
       data-testid='global-settings-provider'
     >

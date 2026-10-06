@@ -9,14 +9,12 @@ type ResolveAggregateDataTypeArgs = {
 };
 
 export const resolveAggregateDataType = ({
-  columnDataType,
+  columnDataType = 'string',
   fn,
 }: ResolveAggregateDataTypeArgs): TableColumnDataType => {
   if (fn === 'count' || fn === 'countDistinct') {
     return 'number';
   }
 
-  return fn === 'boolAnd' || fn === 'boolOr'
-    ? 'boolean'
-    : (columnDataType ?? 'string');
+  return fn === 'boolAnd' || fn === 'boolOr' ? 'boolean' : columnDataType;
 };

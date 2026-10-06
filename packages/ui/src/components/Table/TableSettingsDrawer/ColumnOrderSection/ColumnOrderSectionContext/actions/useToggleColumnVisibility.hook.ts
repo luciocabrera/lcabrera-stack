@@ -53,16 +53,18 @@ export const useToggleColumnVisibility = () => {
       const column = columns.find(
         (candidate) => String(candidate.key) === columnKey,
       );
-      const { options, refusal } = resolveColumnGroupingChoices({
-        aggregates,
-        capability: capabilities[columnKey],
-        column,
-        groupingKeys,
-      });
+      const { options, refusal = 'not-offered' } = resolveColumnGroupingChoices(
+        {
+          aggregates,
+          capability: capabilities[columnKey],
+          column,
+          groupingKeys,
+        },
+      );
 
       if (options.length === 0) {
         notify({
-          message: COLUMN_GROUPING_REFUSAL_MESSAGES[refusal ?? 'not-offered'],
+          message: COLUMN_GROUPING_REFUSAL_MESSAGES[refusal],
           title: `${column?.label ?? columnKey} is not in this grouping`,
           variant: 'warning',
         });

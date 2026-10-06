@@ -30,8 +30,8 @@ describe('readOrdersPage', () => {
   });
 
   it('reports the end of the set once the window reaches it', async () => {
-    const { total } = await readOrdersPage({ limit: 1, skip: 0 });
-    const page = await readOrdersPage({ limit: total ?? 0, skip: 0 });
+    const { total = 0 } = await readOrdersPage({ limit: 1, skip: 0 });
+    const page = await readOrdersPage({ limit: total, skip: 0 });
 
     expect(page.hasMore).toBe(false);
   });

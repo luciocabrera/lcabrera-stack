@@ -558,9 +558,9 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
       const depths = new Set(summaries.map((summary) => summary?.path.length));
 
-      expect([...depths].toSorted((a, b) => (a ?? 0) - (b ?? 0))).toStrictEqual(
-        [0, 1, 2],
-      );
+      expect([...depths].toSorted((a = 0, b = 0) => a - b)).toStrictEqual([
+        0, 1, 2,
+      ]);
       expect(
         summaries.filter((summary) => summary?.path.length === 0),
       ).toHaveLength(1);

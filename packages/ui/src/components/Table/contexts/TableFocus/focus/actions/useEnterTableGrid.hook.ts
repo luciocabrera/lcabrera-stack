@@ -28,17 +28,21 @@ export const useEnterTableGrid = <TData extends Record<string, unknown>>() => {
       return;
     }
 
-    const { columnKeys, columns, data, focusedRowIndex, rowHeight } =
-      resolveGridFocusContext({
-        columnsState: columnsStore.get(),
-        dataState: dataStore.get(),
-        expansionState: expansionStore.get(),
-        focusState,
-        groupingState: groupingStore.get(),
-        metaState: metaStore.get(),
-      });
+    const {
+      columnKeys,
+      columns,
+      data,
+      focusedRowIndex: rowIndex = 0,
+      rowHeight,
+    } = resolveGridFocusContext({
+      columnsState: columnsStore.get(),
+      dataState: dataStore.get(),
+      expansionState: expansionStore.get(),
+      focusState,
+      groupingState: groupingStore.get(),
+      metaState: metaStore.get(),
+    });
 
-    const rowIndex = focusedRowIndex ?? 0;
     const targetRow = data[rowIndex];
     const columnKey =
       focusState.columnKey !== undefined &&

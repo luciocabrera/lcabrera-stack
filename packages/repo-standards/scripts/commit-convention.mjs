@@ -272,8 +272,8 @@ const validateHeader = (header, { kind, workspaces }) => {
   return { errors, warnings };
 };
 
-export const parseCommitHeader = (header) => {
-  const match = HEADER_RE.exec(header ?? '');
+export const parseCommitHeader = (header = '') => {
+  const match = HEADER_RE.exec(header);
   if (match === null) {
     return null;
   }

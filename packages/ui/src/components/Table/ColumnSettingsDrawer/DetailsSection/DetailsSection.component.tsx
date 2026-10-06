@@ -13,13 +13,20 @@ export const DetailsSection = <TData,>({
 }: DetailsSectionProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
 
-  const { dataType, key, label, maxWidth, minWidth, sortDirection } = column;
+  const {
+    dataType: displayedDataType = '—',
+    key,
+    label,
+    maxWidth,
+    minWidth,
+    sortDirection: displayedSortDirection = 'None',
+  } = column;
   const { isFilterable, isSortable } = resolveColumnCapabilities(column);
 
   const details: DetailItem[] = [
     { label: 'Label', value: label },
     { isMono: true, label: 'Key', value: key },
-    { label: 'Data Type', value: dataType ?? '—' },
+    { label: 'Data Type', value: displayedDataType },
     {
       isBadge: true,
       label: 'Sortable',
@@ -33,7 +40,7 @@ export const DetailsSection = <TData,>({
     {
       isBadge: true,
       label: 'Sort Direction',
-      value: sortDirection ?? 'None',
+      value: displayedSortDirection,
     },
     { label: 'Min Width', value: minWidth ? `${String(minWidth)}px` : '—' },
     { label: 'Max Width', value: maxWidth ? `${String(maxWidth)}px` : '—' },
