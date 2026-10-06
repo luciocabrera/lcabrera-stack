@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import type { EvalsRole, MigrationClient } from './migrate.types.ts';
 
-import { grantStatements } from './roleStatements.util.ts';
+import { grantStatements } from './grantStatements.util.ts';
 
 type GrantRolesArgs = {
   readonly client: MigrationClient;

@@ -1,6 +1,6 @@
 import type { EvalsRole, Migration } from './migrate.types.ts';
 
-import { roleSetupStatements } from './roleStatements.util.ts';
+import { roleSetupStatements } from './roleSetupStatements.util.ts';
 
 type MigrateReportArgs = {
   readonly applied: readonly Migration[];

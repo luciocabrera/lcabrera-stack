@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 
-import type { ReadText } from '../files/readJsonFile.service.ts';
+import type { ReadText } from '../files/files.types.ts';
 
 import { readJsonFile } from '../files/readJsonFile.service.ts';
 import { modelPricesSchema } from './modelPrices.schema.ts';

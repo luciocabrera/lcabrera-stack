@@ -1,4 +1,4 @@
-import type { ReadText } from '../files/readJsonFile.service.ts';
+import type { ReadText } from '../files/files.types.ts';
 
 import { readJsonFile } from '../files/readJsonFile.service.ts';
 import { regressionConfigSchema } from './regressionConfig.schema.ts';

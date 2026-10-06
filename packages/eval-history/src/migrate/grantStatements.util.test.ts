@@ -1,20 +1,13 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { grantStatements } from './grantStatements.util.ts';
 import { EVALS_WRITER_ROLE } from './migrate.constants.ts';
-import { grantStatements, roleSetupStatements } from './roleStatements.util.ts';
 
-describe('roleStatements', () => {
+describe('grantStatements', () => {
   it('grants the writer usage and create on the schema and DML on its tables', () => {
     expect(grantStatements(EVALS_WRITER_ROLE)).toEqual([
       'grant usage, create on schema evals to "evals_writer"',
       'grant select, insert, update, delete on all tables in schema evals to "evals_writer"',
-    ]);
-  });
-
-  it('creates the role before granting to it', () => {
-    expect(roleSetupStatements(EVALS_WRITER_ROLE)).toEqual([
-      'create role "evals_writer" login',
-      ...grantStatements(EVALS_WRITER_ROLE),
     ]);
   });
 

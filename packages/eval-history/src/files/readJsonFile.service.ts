@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
 
-export type ReadText = (file: string, encoding: 'utf8') => Promise<string>;
+import type { ReadText } from './files.types.ts';
 
 type ReadJsonFileArgs<Schema extends z.ZodType> = {
   readonly describedAs: string;
