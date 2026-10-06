@@ -3,7 +3,7 @@ governs:
   - showcase
 ---
 
-# ADR-132 — Serve the eval dashboard from the showcase app, public and aggregate-only
+# ADR-133 — Serve the eval dashboard from the showcase app, public and aggregate-only
 
 **Status:** Accepted
 
