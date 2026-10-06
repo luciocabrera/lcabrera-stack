@@ -27,5 +27,5 @@ Add reporting views, the reader role and a 15k-trial fixture
 ## Status / next
 
 - Current step: built and gated; PR ready for review
-- Blockers: stacked on feat/1344-evals-prices-and-writer-grants (#1346), which adds the role grants this extends
-- Next: merge after #1346
+- Blockers: none
+- Next: review
