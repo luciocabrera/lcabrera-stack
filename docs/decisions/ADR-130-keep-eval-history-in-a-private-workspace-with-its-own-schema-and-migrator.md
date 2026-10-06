@@ -11,6 +11,12 @@ governs:
 
 **Epic:** [#1260](https://github.com/luciocabrera/lcabrera-stack/issues/1260)
 
+**Amended by:** [ADR-134](ADR-134-the-eval-writer-role-is-granted-on-the-evals-schema-not-its-owner.md).
+The "Two roles" paragraph below says `evals_writer` owns the schema. The
+accurate statement is that it is granted privileges on schema `evals` and its
+tables, which `EVALS_WRITER_ROLE` lists, and does not own them. Everything else
+here stands, and the body below keeps its original reasoning.
+
 `governs` is `repository`: this ADR is adopted before `packages/eval-history`
 exists (#1265), so `adr:verify` would reject the workspace name, and the
 decision is about this repository's own tooling in any case.

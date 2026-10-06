@@ -2,7 +2,7 @@
 id: evals-writer-grants-adr
 title: Settle evals_writer as granted on the evals schema, not owner
 owner: agent:claude
-status: active
+status: review
 branch: docs/1347-evals-writer-grants-adr
 area:
   - docs/decisions/ADR-13[0-9]*
@@ -20,6 +20,6 @@ Settle evals_writer as granted on the evals schema, not owner
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: ADR-134 written; ADR-130 carries the amendment pointer
 - Blockers: none
 - Next:
