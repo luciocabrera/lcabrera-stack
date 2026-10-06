@@ -81,10 +81,7 @@ const significantLines = (lines) =>
     .map((line) => line.replace(COMMENT, ''))
     .filter((line) => line.trim() !== '');
 
-const opensWith = (line, character) =>
-  (line ?? '').trimStart().startsWith(character);
-
-const opensFlowArray = (line) => opensWith(line, '[');
+const opensFlowArray = (line) => (line ?? '').trimStart().startsWith('[');
 
 const flowArrayBody = (value) => {
   const open = value.indexOf('[');
