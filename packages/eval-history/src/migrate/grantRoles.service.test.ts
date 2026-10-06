@@ -49,13 +49,36 @@ describe('grantRoles', () => {
     });
     expect(statements.slice(1)).toEqual([
       'begin',
-      'grant usage on schema evals to "present"',
+      'grant usage on schema evals to "present";',
       'commit',
     ]);
   });
 
-  it('rolls back every grant when one fails', async () => {
-    const failOn = 'grant usage on schema evals to "second"';
+  it('sends every grant of every existing role as one statement batch', async () => {
+    const { client, statements } = fakeClient({
+      existing: ['first', 'second'],
+    });
+
+    await grantRoles({ client, roles: [role('first'), role('second')] });
+
+    expect(statements.slice(1)).toEqual([
+      'begin',
+      'grant usage on schema evals to "first";\ngrant usage on schema evals to "second";',
+      'commit',
+    ]);
+  });
+
+  it('opens no transaction when no role exists', async () => {
+    const { client, statements } = fakeClient({ existing: [] });
+    const result = await grantRoles({ client, roles: [role('absent')] });
+
+    expect(result).toEqual({ granted: [], missing: [role('absent')] });
+    expect(statements).toHaveLength(1);
+  });
+
+  it('rolls back the grants when the batch fails', async () => {
+    const failOn =
+      'grant usage on schema evals to "first";\ngrant usage on schema evals to "second";';
     const { client, statements } = fakeClient({
       existing: ['first', 'second'],
       failOn,
@@ -63,7 +86,7 @@ describe('grantRoles', () => {
 
     await expect(
       grantRoles({ client, roles: [role('first'), role('second')] }),
-    ).rejects.toThrow(failOn);
+    ).rejects.toThrow('failed: grant');
     expect(statements.at(-1)).toBe('rollback');
   });
 });

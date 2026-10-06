@@ -23,13 +23,16 @@ const existingRoleNames = async ({ client, roles }: GrantRolesArgs) => {
 const applyGrants = async ({ client, roles }: GrantRolesArgs) => {
   const statements = roles.flatMap((role) => grantStatements(role));
 
+  if (statements.length === 0) {
+    return;
+  }
+
   await client.query({ text: 'begin' });
 
   try {
-    for (const statement of statements) {
-      await client.query({ text: statement });
-    }
-
+    await client.query({
+      text: statements.map((statement) => `${statement};`).join('\n'),
+    });
     await client.query({ text: 'commit' });
   } catch (error) {
     await client.query({ text: 'rollback' });
