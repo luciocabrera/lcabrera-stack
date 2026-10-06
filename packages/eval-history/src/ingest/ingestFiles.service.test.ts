@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { RunEnvelope } from '../envelope/envelope.types.ts';
 import type { IngestClient } from './ingest.types.ts';
-import type { readEnvelopeFile } from './readEnvelopeFile.service.ts';
 
 import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { ingestFiles } from './ingestFiles.service.ts';
+import { readEnvelopeFile } from './readEnvelopeFile.service.ts';
 
 const fixtures = await readJsonFiles({
   directory: fileURLToPath(new URL('../envelope/fixtures', import.meta.url)),
@@ -19,7 +19,7 @@ const envelope: RunEnvelope = runEnvelopeSchema.parse(
 const startedAt = (file: string) =>
   file === 'late.json' ? '2026-10-07T00:00:00.000Z' : envelope.run.started_at;
 
-const read: typeof readEnvelopeFile = async ({ file }) =>
+const fakeRead: typeof readEnvelopeFile = async ({ file }) =>
   file === 'bad.json'
     ? { file, ok: false, problems: ['run: required'] }
     : {
@@ -75,7 +75,7 @@ describe('ingestFiles', () => {
       clock,
       connect,
       files: ['late.json', 'early.json', 'bad.json'],
-      read,
+      read: fakeRead,
     });
 
     expect(reports.map(({ file, result }) => [file, result])).toEqual([
@@ -97,7 +97,7 @@ describe('ingestFiles', () => {
         });
       },
       files: ['early.json'],
-      read,
+      read: fakeRead,
     });
 
     expect(reports).toEqual([
@@ -120,7 +120,7 @@ describe('ingestFiles', () => {
       clock,
       connect: async () => ({ client, end: async () => undefined }),
       files: ['early.json', 'late.json'],
-      read,
+      read: fakeRead,
     });
 
     expect(reports.map(({ problems, result }) => [result, problems])).toEqual([
@@ -129,10 +129,75 @@ describe('ingestFiles', () => {
     ]);
   });
 
+  it('rejects an unreadable file on its own and still ingests the rest', async () => {
+    const { client, runs } = recordingClient();
+    const denied = Object.assign(new Error('EACCES: permission denied'), {
+      code: 'EACCES',
+    });
+    const text = JSON.stringify(envelope);
+    const read: typeof readEnvelopeFile = async ({ file }) =>
+      readEnvelopeFile({
+        file,
+        readBytes: async () => {
+          if (file === 'locked.json') {
+            throw denied;
+          }
+
+          return new TextEncoder().encode(text);
+        },
+      });
+
+    const reports = await ingestFiles({
+      clock,
+      connect: async () => ({ client, end: async () => undefined }),
+      files: ['locked.json', 'early.json'],
+      read,
+    });
+
+    expect(
+      reports.map(({ file, problems, result }) => [file, result, problems]),
+    ).toEqual([
+      [
+        'locked.json',
+        'rejected',
+        ['could not read: EACCES: permission denied'],
+      ],
+      ['early.json', 'inserted', []],
+    ]);
+    expect(runs).toHaveLength(1);
+  });
+
+  it('rejects a file that vanishes between finding and sending it', async () => {
+    const { client } = recordingClient();
+    const reads = new Map<string, number>();
+    const read: typeof readEnvelopeFile = async ({ file }) => {
+      const count = (reads.get(file) ?? 0) + 1;
+
+      reads.set(file, count);
+
+      return file === 'gone.json' && count > 1
+        ? { file, ok: false, problems: ['could not read: ENOENT'] }
+        : fakeRead({ file });
+    };
+
+    const reports = await ingestFiles({
+      clock,
+      connect: async () => ({ client, end: async () => undefined }),
+      files: ['gone.json', 'late.json'],
+      read,
+    });
+
+    expect(reports.map(({ file, result }) => [file, result])).toEqual([
+      ['gone.json', 'rejected'],
+      ['late.json', 'inserted'],
+    ]);
+    expect(reports[0]).toMatchObject({ runId: envelope.run.run_id });
+  });
+
   it('does not connect when nothing is readable', async () => {
     const connect = vi.fn();
 
-    await ingestFiles({ clock, connect, files: ['bad.json'], read });
+    await ingestFiles({ clock, connect, files: ['bad.json'], read: fakeRead });
 
     expect(connect).not.toHaveBeenCalled();
   });

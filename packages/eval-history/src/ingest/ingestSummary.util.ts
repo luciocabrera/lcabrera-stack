@@ -1,5 +1,8 @@
 import type { IngestReport, IngestResult } from './ingest.types.ts';
 
+import { ingestLogLine } from './ingestLogLine.util.ts';
+import { unsentWarning } from './unsentWarning.util.ts';
+
 type IngestSummaryArgs = {
   readonly database: string;
   readonly missing: readonly string[];
@@ -12,34 +15,6 @@ const FAILING_RESULTS = new Set<IngestResult>([
   'failed',
   'rejected',
 ]);
-
-type LogLineArgs = {
-  readonly database: string;
-  readonly report: IngestReport;
-};
-
-const logLine = ({ database, report }: LogLineArgs) =>
-  JSON.stringify({
-    database,
-    duration_ms: report.durationMs,
-    event: 'evals.ingest',
-    file: report.file,
-    problems: report.problems,
-    result: report.result,
-    rows: report.rows,
-    run_id: report.runId,
-    suite: report.suite,
-  });
-
-const unsentWarning = ({ database, reports }: IngestSummaryArgs) => {
-  const unsent = reports.filter(({ result }) => result === 'unsent');
-
-  return unsent.length === 0
-    ? []
-    : [
-        `evals:ingest: ${database} is unreachable; ${String(unsent.length)} envelope(s) stay on disk until \`vp run evals:ingest\` sends them`,
-      ];
-};
 
 export const ingestSummary = (args: IngestSummaryArgs) => {
   const { database, missing, quietUnreachable, reports } = args;
@@ -59,6 +34,6 @@ export const ingestSummary = (args: IngestSummaryArgs) => {
       ),
       ...unsentWarning(args),
     ],
-    stdout: reports.map((report) => logLine({ database, report })),
+    stdout: reports.map((report) => ingestLogLine({ database, report })),
   };
 };

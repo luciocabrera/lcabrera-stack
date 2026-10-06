@@ -5,15 +5,13 @@ import {
   ENVELOPE_SCHEMA_VERSION,
   ENVELOPE_UPCASTERS,
 } from './envelope.constants.ts';
+import { versionLabel } from './versionLabel.util.ts';
 
 type UpcastEnvelopeArgs = {
   readonly current?: number;
   readonly input: unknown;
   readonly upcasters?: EnvelopeUpcasters;
 };
-
-const versionLabel = (version: unknown) =>
-  version === undefined ? 'missing' : JSON.stringify(version);
 
 export const upcastEnvelope = ({
   current = ENVELOPE_SCHEMA_VERSION,

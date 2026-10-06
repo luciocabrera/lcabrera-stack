@@ -28,6 +28,23 @@ describe('readEnvelopeFile', () => {
     expect(result.ok && result.envelope.run.suite).toBe('skills');
   });
 
+  it('rejects a file it cannot read, naming the reason', async () => {
+    expect(
+      await readEnvelopeFile({
+        file: 'locked.json',
+        readBytes: async () => {
+          throw Object.assign(new Error('EISDIR: illegal operation'), {
+            code: 'EISDIR',
+          });
+        },
+      }),
+    ).toEqual({
+      file: 'locked.json',
+      ok: false,
+      problems: ['could not read: EISDIR: illegal operation'],
+    });
+  });
+
   it('rejects a file that is not JSON', async () => {
     const result = await readEnvelopeFile({
       file: 'broken.json',

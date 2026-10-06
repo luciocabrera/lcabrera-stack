@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import type { EnvelopeUpcasters } from '../envelope/envelope.types.ts';
 
 import { toCurrentEnvelope } from '../envelope/toCurrentEnvelope.util.ts';
+import { errorReason } from './errorReason.util.ts';
 
 type ReadEnvelopeFileArgs = {
   readonly file: string;
@@ -22,12 +23,33 @@ const parseJson = (text: string) => {
   }
 };
 
+const readOrReason = async ({
+  file,
+  readBytes,
+}: Required<Pick<ReadEnvelopeFileArgs, 'file' | 'readBytes'>>) => {
+  try {
+    return { bytes: await readBytes(file), ok: true } as const;
+  } catch (error) {
+    return { ok: false, reason: errorReason(error) } as const;
+  }
+};
+
 export const readEnvelopeFile = async ({
   file,
   readBytes = readFile,
   upcasters,
 }: ReadEnvelopeFileArgs) => {
-  const bytes = await readBytes(file);
+  const read = await readOrReason({ file, readBytes });
+
+  if (!read.ok) {
+    return {
+      file,
+      ok: false,
+      problems: [`could not read: ${read.reason}`],
+    } as const;
+  }
+
+  const { bytes } = read;
   const sha256 = createHash('sha256').update(bytes).digest('hex');
   const json = parseJson(new TextDecoder().decode(bytes));
 

@@ -1,7 +1,5 @@
-import type { RunEnvelope } from '../envelope/envelope.types.ts';
 import type {
   IngestConnection,
-  IngestReport,
   IngestResult,
   IngestRows,
 } from './ingest.types.ts';
@@ -9,7 +7,15 @@ import type {
 import { compareCodeUnits } from '../hashing/compareCodeUnits.util.ts';
 import { errorReason } from './errorReason.util.ts';
 import { ingestEnvelope } from './ingestEnvelope.service.ts';
+import { inSequence } from './inSequence.util.ts';
 import { readEnvelopeFile } from './readEnvelopeFile.service.ts';
+
+type Indexed = {
+  readonly file: string;
+  readonly runId: string;
+  readonly startedAt: string;
+  readonly suite: string;
+};
 
 type IngestFilesArgs = {
   readonly clock?: () => number;
@@ -18,19 +24,14 @@ type IngestFilesArgs = {
   readonly read?: typeof readEnvelopeFile;
 };
 
-type Loaded = {
-  readonly envelope: RunEnvelope;
-  readonly file: string;
-  readonly sha256: string;
-};
-
 type ReportArgs = {
   readonly durationMs?: number;
-  readonly envelope?: RunEnvelope;
   readonly file: string;
   readonly problems?: readonly string[];
   readonly result: IngestResult;
   readonly rows?: IngestRows;
+  readonly runId?: string;
+  readonly suite?: string;
 };
 
 const NO_ROWS = { subjects: 0, tasks: 0, trials: 0 };
@@ -40,28 +41,48 @@ const CONFLICT_PROBLEM =
 
 const report = ({
   durationMs = 0,
-  envelope,
   file,
   problems = [],
   result,
   rows = NO_ROWS,
-}: ReportArgs) => ({
-  durationMs,
-  file,
-  problems,
-  result,
-  rows,
-  runId: envelope?.run.run_id,
-  suite: envelope?.run.suite,
-});
+  runId,
+  suite,
+}: ReportArgs) => ({ durationMs, file, problems, result, rows, runId, suite });
 
-type SendArgs = {
-  readonly clock: () => number;
-  readonly connection: IngestConnection;
-  readonly loaded: Loaded;
+type IndexArgs = Required<Pick<IngestFilesArgs, 'read'>> & {
+  readonly file: string;
 };
 
-const send = async ({ clock, connection, loaded }: SendArgs) => {
+const indexFile = async ({ file, read }: IndexArgs) => {
+  const loaded = await read({ file });
+
+  return loaded.ok
+    ? ({
+        file,
+        ok: true,
+        runId: loaded.envelope.run.run_id,
+        startedAt: loaded.envelope.run.started_at,
+        suite: loaded.envelope.run.suite,
+      } as const)
+    : ({ file, ok: false, problems: loaded.problems } as const);
+};
+
+type SendArgs = Required<Pick<IngestFilesArgs, 'clock' | 'read'>> & {
+  readonly connection: IngestConnection;
+  readonly indexed: Indexed;
+};
+
+const send = async ({ clock, connection, indexed, read }: SendArgs) => {
+  const loaded = await read({ file: indexed.file });
+
+  if (!loaded.ok) {
+    return report({
+      ...indexed,
+      problems: loaded.problems,
+      result: 'rejected',
+    });
+  }
+
   const started = clock();
 
   try {
@@ -72,33 +93,20 @@ const send = async ({ clock, connection, loaded }: SendArgs) => {
     });
 
     return report({
-      ...loaded,
+      ...indexed,
       ...outcome,
       durationMs: clock() - started,
       problems: outcome.result === 'conflict' ? [CONFLICT_PROBLEM] : [],
     });
   } catch (error) {
     return report({
-      ...loaded,
+      ...indexed,
       durationMs: clock() - started,
       problems: [errorReason(error)],
       result: 'failed',
     });
   }
 };
-
-type SendAllArgs = Omit<SendArgs, 'loaded'> & {
-  readonly loaded: readonly Loaded[];
-};
-
-const sendAll = async ({ loaded, ...args }: SendAllArgs) =>
-  loaded.reduce<Promise<readonly IngestReport[]>>(
-    async (previous, item) => [
-      ...(await previous),
-      await send({ ...args, loaded: item }),
-    ],
-    Promise.resolve([]),
-  );
 
 const openConnection = async (connect: IngestFilesArgs['connect']) => {
   try {
@@ -108,18 +116,18 @@ const openConnection = async (connect: IngestFilesArgs['connect']) => {
   }
 };
 
-type SendLoadedArgs = Pick<IngestFilesArgs, 'connect'> &
-  Pick<SendArgs, 'clock'> & { readonly loaded: readonly Loaded[] };
+type SendIndexedArgs = Omit<SendArgs, 'connection' | 'indexed'> &
+  Pick<IngestFilesArgs, 'connect'> & { readonly indexed: readonly Indexed[] };
 
-const sendLoaded = async ({ clock, connect, loaded }: SendLoadedArgs) => {
-  if (loaded.length === 0) {
+const sendIndexed = async ({ connect, indexed, ...args }: SendIndexedArgs) => {
+  if (indexed.length === 0) {
     return [];
   }
 
   const opened = await openConnection(connect);
 
   if (!opened.ok) {
-    return loaded.map((item) =>
+    return indexed.map((item) =>
       report({
         ...item,
         problems: [`could not connect: ${opened.reason}`],
@@ -129,7 +137,11 @@ const sendLoaded = async ({ clock, connect, loaded }: SendLoadedArgs) => {
   }
 
   try {
-    return await sendAll({ clock, connection: opened.connection, loaded });
+    return await inSequence({
+      items: indexed,
+      step: (item) =>
+        send({ ...args, connection: opened.connection, indexed: item }),
+    });
   } finally {
     await opened.connection.end();
   }
@@ -141,20 +153,23 @@ export const ingestFiles = async ({
   files,
   read = readEnvelopeFile,
 }: IngestFilesArgs) => {
-  const results = await Promise.all(files.map((file) => read({ file })));
-  const rejected = results
+  const index = await inSequence({
+    items: files,
+    step: (file) => indexFile({ file, read }),
+  });
+  const rejected = index
     .filter((item) => !item.ok)
     .map(({ file, problems }) =>
       report({ file, problems, result: 'rejected' }),
     );
-  const loaded = results
+  const indexed = index
     .filter((item) => item.ok)
     .toSorted((left, right) =>
-      compareCodeUnits(
-        left.envelope.run.started_at,
-        right.envelope.run.started_at,
-      ),
+      compareCodeUnits(left.startedAt, right.startedAt),
     );
 
-  return [...rejected, ...(await sendLoaded({ clock, connect, loaded }))];
+  return [
+    ...rejected,
+    ...(await sendIndexed({ clock, connect, indexed, read })),
+  ];
 };

@@ -1,5 +1,6 @@
 import type { EnvelopeUpcasters } from './envelope.types.ts';
 
+import { issueField } from './issueField.util.ts';
 import { parseEnvelope } from './parseEnvelope.util.ts';
 import { upcastEnvelope } from './upcastEnvelope.util.ts';
 
@@ -8,9 +9,6 @@ type ToCurrentEnvelopeArgs = {
   readonly input: unknown;
   readonly upcasters?: EnvelopeUpcasters;
 };
-
-const fieldOf = (path: readonly PropertyKey[]) =>
-  path.length === 0 ? '(root)' : path.map(String).join('.');
 
 export const toCurrentEnvelope = (args: ToCurrentEnvelopeArgs) => {
   const upcast = upcastEnvelope(args);
@@ -26,7 +24,7 @@ export const toCurrentEnvelope = (args: ToCurrentEnvelopeArgs) => {
     : ({
         ok: false,
         problems: parsed.issues.map(
-          ({ message, path }) => `${fieldOf(path)}: ${message}`,
+          ({ message, path }) => `${issueField(path)}: ${message}`,
         ),
       } as const);
 };

@@ -1,10 +1,4 @@
-const codeOf = (error: unknown) =>
-  typeof error === 'object' &&
-  error !== null &&
-  'code' in error &&
-  typeof error.code === 'string'
-    ? error.code
-    : undefined;
+import { errorCode } from './errorCode.util.ts';
 
 export const errorReason = (error: unknown): string => {
   if (error instanceof AggregateError && error.errors.length > 0) {
@@ -12,7 +6,7 @@ export const errorReason = (error: unknown): string => {
   }
 
   const message = error instanceof Error ? error.message : String(error);
-  const code = codeOf(error);
+  const code = errorCode(error);
 
   if (!code) {
     return message;

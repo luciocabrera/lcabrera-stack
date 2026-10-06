@@ -11,6 +11,7 @@ import {
   UPSERT_SUBJECT_SQL,
   UPSERT_TASK_SQL,
 } from './ingest.constants.ts';
+import { inSequence } from './inSequence.util.ts';
 
 type IngestEnvelopeArgs = {
   readonly client: IngestClient;
@@ -182,38 +183,24 @@ const writeTask = async ({ client, run, subjects, task }: WriteTaskArgs) => {
   ] as const;
 };
 
-type InSequenceArgs<Item, Result> = {
-  readonly items: readonly Item[];
-  readonly write: (item: Item) => Promise<Result>;
-};
-
-const inSequence = async <Item, Result>({
-  items,
-  write,
-}: InSequenceArgs<Item, Result>) =>
-  items.reduce<Promise<readonly Result[]>>(
-    async (previous, item) => [...(await previous), await write(item)],
-    Promise.resolve([]),
-  );
-
 const writeRows = async ({ client, envelope }: IngestEnvelopeArgs) => {
   const { run } = envelope;
   const subjects = new Map(
     await inSequence({
       items: envelope.subjects,
-      write: (subject) => writeSubject({ client, run, subject }),
+      step: (subject) => writeSubject({ client, run, subject }),
     }),
   );
   const tasks = new Map(
     await inSequence({
       items: envelope.tasks,
-      write: (task) => writeTask({ client, run, subjects, task }),
+      step: (task) => writeTask({ client, run, subjects, task }),
     }),
   );
 
   await inSequence({
     items: envelope.trials,
-    write: async (trial) => {
+    step: async (trial) => {
       const versions = tasks.get(trial.task_key);
 
       if (!versions) {
