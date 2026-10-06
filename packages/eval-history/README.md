@@ -13,6 +13,14 @@ decides how the envelope is versioned.
   [the plan's §5](../../docs/agents/planning/eval-history-plan.md#5-hashing):
   normalized content hashes, the multi-file hash, canonical JSON, the skill
   catalog hash and the harness version.
+- `src/stats/` — the statistics of
+  [the plan's §6](../../docs/agents/planning/eval-history-plan.md#6-statistics-module):
+  the Wilson interval, pass@k and pass^k, the baseline summary, the binary and
+  scored regression rules, flaky detection, hash attribution and trigger
+  precision and recall. `error`, `timeout` and `skipped` trials never count
+  toward n. The thresholds are not in the code: `loadRegressionConfig` reads
+  them from [`evals/regression.config.json`](../../evals/regression.config.json)
+  and rejects a file that fails `regressionConfigSchema`.
 
 The source is TypeScript with erasable syntax only, so a plain `.mjs` runner
 imports it through `exports` with no build and no loader.

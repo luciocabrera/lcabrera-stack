@@ -69,6 +69,37 @@ keep the prompt that caused it as a task in [`skills/`](./skills):
 4. Once the fix to the skill makes it pass reliably, change `set` to
    `regression` and keep `source: incident`.
 
+## Regression thresholds
+
+[`regression.config.json`](./regression.config.json) holds every threshold
+the statistics in [`@repo/eval-history`](../packages/eval-history) apply, so
+changing one is a change to this file and never to code. The package rejects
+the file at load when a field is missing, unknown or out of range.
+
+| Field                    | Meaning                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `minTrialsForRate`       | Below this many counted trials a pass rate is reported as insufficient data                                |
+| `z`                      | The normal quantile for the Wilson interval; 1.96 is 95%                                                   |
+| `binary.flip`            | The failure share that flags a task, and the fewest counted trials it is judged on (below)                 |
+| `scored.sigma`           | A scored suite is flagged when the PR mean falls more than this many baseline standard deviations below it |
+| `flaky.window`           | How many of a task's most recent runs flaky detection reads                                                |
+| `flaky.disagreeFraction` | A task is flaky when more than this share of those runs had trials that disagree                           |
+| `baseline.defaultRuns`   | How many runs an A/A baseline takes when none is given; at least 2                                         |
+
+`binary.flip` compares shares, not counts. A regression-set task that passed
+every trial on main is flagged when the share of its counted PR trials that
+failed is at least `failAtLeast / ofTrials`. At the default 2 and 3, 2 failures
+of 3 flag, 3 of 6 do not, and 4 of 6 do. `ofTrials` is also the fewest counted
+trials the share is judged on. When `error`, `timeout` or `skipped` leaves a
+task short of it, the task is flagged if its counted failures already reach
+`failAtLeast`, because it flips however the missing trials would have gone. It
+makes the verdict insufficient, naming the task, if the missing trials would
+decide it. It adds nothing if even failing every missing trial would not reach
+`failAtLeast`.
+
+`error`, `timeout` and `skipped` trials count toward none of these. A flaky
+task, and any task tagged `set: capability`, is left out of both binary rules.
+
 ## Rules consistency
 
 Fails when:

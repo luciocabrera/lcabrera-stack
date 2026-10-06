@@ -96,6 +96,7 @@
     "@lcabrera/eslint-plugin": "workspace:*"
   },
   "devDependencies": {
+    "@babel/core": "catalog:build",
     "@babel/preset-typescript": "catalog:build",
     "@eslint/js": "catalog:lint",
     "@react-router/dev": "catalog:react",
