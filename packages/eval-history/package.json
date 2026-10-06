@@ -18,7 +18,20 @@
     "./hashing/hashing.types": "./src/hashing/hashing.types.ts",
     "./hashing/readFileSet.service": "./src/hashing/readFileSet.service.ts",
     "./hashing/skillCatalogEntry.util": "./src/hashing/skillCatalogEntry.util.ts",
-    "./hashing/skillHashes.util": "./src/hashing/skillHashes.util.ts"
+    "./hashing/skillHashes.util": "./src/hashing/skillHashes.util.ts",
+    "./stats/attribute.util": "./src/stats/attribute.util.ts",
+    "./stats/binaryRegression.util": "./src/stats/binaryRegression.util.ts",
+    "./stats/countOutcomes.util": "./src/stats/countOutcomes.util.ts",
+    "./stats/flakyTasks.util": "./src/stats/flakyTasks.util.ts",
+    "./stats/loadRegressionConfig.service": "./src/stats/loadRegressionConfig.service.ts",
+    "./stats/hasPassAtK.util": "./src/stats/hasPassAtK.util.ts",
+    "./stats/hasPassHatK.util": "./src/stats/hasPassHatK.util.ts",
+    "./stats/regressionConfig.schema": "./src/stats/regressionConfig.schema.ts",
+    "./stats/scoredRegression.util": "./src/stats/scoredRegression.util.ts",
+    "./stats/stats.types": "./src/stats/stats.types.ts",
+    "./stats/summarize.util": "./src/stats/summarize.util.ts",
+    "./stats/triggerPrecisionRecall.util": "./src/stats/triggerPrecisionRecall.util.ts",
+    "./stats/wilson.util": "./src/stats/wilson.util.ts"
   },
   "scripts": {
     "format": "vp fmt .",

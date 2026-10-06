@@ -54,6 +54,26 @@ keep the prompt that caused it as a task in [`skills/`](./skills):
 4. Once the fix to the skill makes it pass reliably, change `set` to
    `regression` and keep `source: incident`.
 
+## Regression thresholds
+
+[`regression.config.json`](./regression.config.json) holds every threshold
+the statistics in [`@repo/eval-history`](../packages/eval-history) apply, so
+changing one is a change to this file and never to code. The package rejects
+the file at load when a field is missing, unknown or out of range.
+
+| Field                    | Meaning                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `minTrialsForRate`       | Below this many counted trials a pass rate is reported as insufficient data                                |
+| `z`                      | The normal quantile for the Wilson interval; 1.96 is 95%                                                   |
+| `binary.flip`            | A regression-set task that passed on main is flagged when it fails at least `failAtLeast` of `ofTrials`    |
+| `scored.sigma`           | A scored suite is flagged when the PR mean falls more than this many baseline standard deviations below it |
+| `flaky.window`           | How many of a task's most recent runs flaky detection reads                                                |
+| `flaky.disagreeFraction` | A task is flaky when more than this share of those runs had trials that disagree                           |
+| `baseline.defaultRuns`   | How many runs an A/A baseline takes when none is given; at least 2                                         |
+
+`error`, `timeout` and `skipped` trials count toward none of these. A flaky
+task, and any task tagged `set: capability`, is left out of both binary rules.
+
 ## Rules consistency
 
 Fails when:

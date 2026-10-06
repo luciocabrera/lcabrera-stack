@@ -1,0 +1,8 @@
+{
+  "minTrialsForRate": 6,
+  "z": 1.96,
+  "binary": { "flip": { "failAtLeast": 2, "ofTrials": 3 } },
+  "scored": { "sigma": 2 },
+  "flaky": { "window": 10, "disagreeFraction": 0.2 },
+  "baseline": { "defaultRuns": 5 }
+}
