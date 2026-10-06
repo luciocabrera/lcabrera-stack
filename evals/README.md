@@ -31,6 +31,12 @@ The envelope is written on every way out: `complete` on a normal finish,
 `partial` when the run throws, and `aborted` on Ctrl-C or SIGTERM. A runner
 whose envelope fails the schema writes none, names each failing field and exits 1.
 
+A complete or partial envelope is then sent to the eval-history database that
+`EVALS_DATABASE_URL` names. When the variable is unset or the database is down,
+the runner warns and still exits as its results say; `vp run evals:ingest`
+sends whatever is under `.tmp/eval-results/` later, and skips a run already
+stored. An aborted run is left for that command too.
+
 ## What a full run costs
 
 The skill-trigger and verifier suites run each task or fixture three times by

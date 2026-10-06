@@ -16,6 +16,11 @@ decides how the envelope is versioned.
 - `src/migrate/` and `migrations/` — the migrator ADR-130 decides and the
   ordered SQL files it applies. A fix to an applied file is a new file: the
   migrator refuses to run while an applied one has changed.
+- `src/ingest/` — the ingester behind `vp run evals:ingest`: it finds
+  envelopes under the paths it is given, brings one written a version earlier
+  up to date through its upcaster in `ENVELOPE_UPCASTERS` and rejects any
+  other version by name (ADR-131), and stores each run in one transaction keyed
+  on `run_id`, so a run already stored is left alone.
 - `src/stats/` — the statistics of
   [the plan's §6](../../docs/agents/planning/eval-history-plan.md#6-statistics-module):
   the Wilson interval, pass@k and pass^k, the baseline summary, the binary and
@@ -29,9 +34,15 @@ decides how the envelope is versioned.
 `EVALS_DATABASE_URL` names. Locally that is a database named `eval_history` on
 the compose Postgres, created once with `create database eval_history`.
 
+`vp run evals:ingest` reads the same variable. Every eval runner calls it on
+its own envelope with `--quiet-unreachable`, so an unset variable or a database
+that is down only warns, and the file waits on disk for the next
+`vp run evals:ingest`.
+
 The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
 scratch database, because it drops schema `evals` there before every test.
-Without the variable it skips and says why, except under `CI`, where it fails.
+The ingest test creates and drops a database of its own beside that one.
+Without the variable both skip and say why, except under `CI`, where they fail.
 
 The source is TypeScript with erasable syntax only, so a plain `.mjs` runner
 imports it through `exports` with no build and no loader.

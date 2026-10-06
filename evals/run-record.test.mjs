@@ -67,6 +67,7 @@ const trial = sessionTrial({
 });
 
 let resultsDir;
+let ingest;
 
 const written = () =>
   JSON.parse(
@@ -80,6 +81,7 @@ const record = (overrides) =>
   recordRun({
     clock: () => STARTED_AT + 2000,
     identity: testIdentity,
+    ingest,
     plan,
     resultsDir,
     signals: new EventEmitter(),
@@ -88,6 +90,7 @@ const record = (overrides) =>
 
 beforeEach(() => {
   resultsDir = mkdtempSync(join(tmpdir(), 'eval-results-'));
+  ingest = vi.fn(async () => undefined);
   vi.spyOn(console, 'log').mockImplementation(() => undefined);
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
 });
@@ -150,6 +153,42 @@ describe('recordRun', () => {
         run: { status: 'aborted', totals: { trials: 1 } },
       });
     }
+  });
+
+  it('sends a complete or partial envelope once it is written', async () => {
+    const file = join(
+      resultsDir,
+      'rules-consistency',
+      `${testIdentity.run_id}.json`,
+    );
+    await record({ execute: () => undefined });
+    expect(ingest).toHaveBeenLastCalledWith({ file });
+    await expect(
+      record({
+        execute: () => {
+          throw new Error('usage limit reached');
+        },
+      }),
+    ).rejects.toThrow('usage limit reached');
+    expect(ingest).toHaveBeenCalledTimes(2);
+    expect(ingest).toHaveBeenLastCalledWith({ file });
+  });
+
+  it('leaves an aborted envelope on disk for evals:ingest', async () => {
+    const signals = new EventEmitter();
+    const started = Promise.withResolvers();
+    void record({
+      execute: () => {
+        started.resolve();
+        return Promise.withResolvers().promise;
+      },
+      raise: vi.fn(),
+      signals,
+    });
+    await started.promise;
+    signals.emit('SIGINT');
+    expect(written().run.status).toBe('aborted');
+    expect(ingest).not.toHaveBeenCalled();
   });
 
   it('stops listening for signals once the run is recorded', async () => {
