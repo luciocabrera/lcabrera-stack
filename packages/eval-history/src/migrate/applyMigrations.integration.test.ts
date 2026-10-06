@@ -1,0 +1,256 @@
+// @vitest-environment node
+
+/**
+ * The migrator against a real Postgres: the advisory lock, the transaction per
+ * file and the checksum check are claims a fake client reports green on
+ * whether or not they hold. It owns schema `evals` in the database
+ * EVALS_TEST_DATABASE_URL names and drops it before every test, so point it at
+ * a scratch database. Unset, it skips locally and fails under CI.
+ */
+
+import { fileURLToPath } from 'node:url';
+import pg from 'pg';
+import { afterAll, beforeEach, describe, expect, it } from 'vite-plus/test';
+
+import { compareCodeUnits } from '../hashing/compareCodeUnits.util.ts';
+import { readFileSet } from '../hashing/readFileSet.service.ts';
+import { applyMigrations } from './applyMigrations.service.ts';
+import { MIGRATIONS_DIRECTORY } from './migrate.constants.ts';
+import { parseMigrationFiles } from './parseMigrationFiles.util.ts';
+import { readMigrations } from './readMigrations.service.ts';
+
+const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
+const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
+
+const PLAN_TABLES = [
+  'eval_annotation',
+  'eval_baseline',
+  'eval_run',
+  'eval_subject',
+  'eval_subject_version',
+  'eval_task',
+  'eval_task_version',
+  'eval_tool_call',
+  'eval_trial',
+  'eval_trial_detail',
+  'model_price',
+  'schema_migration',
+  'suite',
+];
+
+const PLAN_INDEXES = [
+  'eval_run_branch_suite',
+  'eval_run_git_sha',
+  'eval_run_suite_started',
+  'eval_trial_not_pass',
+  'eval_trial_task_run',
+  'eval_trial_transcript_expiry',
+];
+
+const PLAN_ENUMS = [
+  'annotation_kind',
+  'outcome',
+  'run_status',
+  'subject_kind',
+  'task_kind',
+  'task_set',
+  'trigger',
+];
+
+const PLAN_SUITES = [
+  'rules-consistency',
+  'skill-quality',
+  'skills',
+  'verifier-fixtures',
+  'verifier-tooled',
+];
+
+if (!DATABASE_URL && !IS_CI) {
+  process.stderr.write(
+    'Skipping the Postgres migrator tests: EVALS_TEST_DATABASE_URL is unset.\n',
+  );
+}
+
+it.runIf(IS_CI)('has a database to migrate under CI', () => {
+  expect(
+    DATABASE_URL,
+    'EVALS_TEST_DATABASE_URL must be set under CI',
+  ).toBeTruthy();
+});
+
+describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
+  const clients: pg.Client[] = [];
+
+  const connect = async () => {
+    const client = new pg.Client({ connectionString: DATABASE_URL });
+
+    await client.connect();
+    clients.push(client);
+
+    return client;
+  };
+
+  const column = async (sql: string) => {
+    const client = await connect();
+    const { rows } = await client.query<{ readonly value: string }>(sql);
+
+    return rows.map(({ value }) => value);
+  };
+
+  const recorded = async () => {
+    const client = await connect();
+    const { rows } = await client.query(
+      'select version, name, sha256, applied_at from evals.schema_migration order by version',
+    );
+
+    return rows;
+  };
+
+  beforeEach(async () => {
+    const client = await connect();
+
+    await client.query('drop schema if exists evals cascade');
+  });
+
+  afterAll(async () => {
+    await Promise.all(clients.map((client) => client.end()));
+  });
+
+  it('records every file with its checksum', async () => {
+    const migrations = await readMigrations();
+
+    await applyMigrations({ client: await connect(), migrations });
+
+    expect(await recorded()).toEqual(
+      migrations.map(({ name, sha256, version }) => ({
+        applied_at: expect.any(Date),
+        name,
+        sha256,
+        version,
+      })),
+    );
+  });
+
+  it('creates every table, index and enum of the first migration', async () => {
+    await applyMigrations({
+      client: await connect(),
+      migrations: await readMigrations(),
+    });
+
+    expect(
+      await column(
+        "select table_name as value from information_schema.tables where table_schema = 'evals' and table_type = 'BASE TABLE' order by 1",
+      ),
+    ).toEqual(expect.arrayContaining(PLAN_TABLES));
+    expect(
+      await column(
+        "select indexname as value from pg_indexes where schemaname = 'evals' order by 1",
+      ),
+    ).toEqual(expect.arrayContaining(PLAN_INDEXES));
+    expect(
+      await column(
+        "select t.typname as value from pg_type t join pg_namespace n on n.oid = t.typnamespace where n.nspname = 'evals' and t.typtype = 'e' order by 1",
+      ),
+    ).toEqual(expect.arrayContaining(PLAN_ENUMS));
+    expect(
+      await column('select name as value from evals.suite order by 1'),
+    ).toEqual(PLAN_SUITES);
+  });
+
+  it('is a no-op the second time', async () => {
+    const migrations = await readMigrations();
+
+    await applyMigrations({ client: await connect(), migrations });
+    const before = await recorded();
+    const second = await applyMigrations({
+      client: await connect(),
+      migrations,
+    });
+
+    expect(second).toEqual([]);
+    expect(await recorded()).toEqual(before);
+  });
+
+  it('refuses to run after an applied file is edited, and names it', async () => {
+    const files = await readFileSet({
+      directory: fileURLToPath(MIGRATIONS_DIRECTORY),
+    });
+    const edited = files.map((file) =>
+      file.path === '0001-schema.sql'
+        ? {
+            ...file,
+            bytes: `${new TextDecoder().decode(file.bytes)}create table evals.edited (id integer);\n`,
+          }
+        : file,
+    );
+    const later = {
+      bytes: 'create table evals.after_edit (id integer);\n',
+      path: '9999-after-edit.sql',
+    };
+
+    await applyMigrations({
+      client: await connect(),
+      migrations: parseMigrationFiles(files),
+    });
+    const before = await recorded();
+
+    await expect(
+      applyMigrations({
+        client: await connect(),
+        migrations: parseMigrationFiles([...edited, later]),
+      }),
+    ).rejects.toThrow(/0001-schema\.sql changed since it was applied/);
+    expect(await recorded()).toEqual(before);
+    expect(
+      await column(
+        "select table_name as value from information_schema.tables where table_schema = 'evals' and table_name in ('edited', 'after_edit')",
+      ),
+    ).toEqual([]);
+  });
+
+  it('applies each file once when two migrators race', async () => {
+    const migrations = await readMigrations();
+
+    const first = await connect();
+    const second = await connect();
+    const results = await Promise.all([
+      applyMigrations({ client: first, migrations }),
+      applyMigrations({ client: second, migrations }),
+    ]);
+
+    expect(
+      results
+        .flat()
+        .map(({ name }) => name)
+        .toSorted(compareCodeUnits),
+    ).toEqual(migrations.map(({ name }) => name));
+    expect(await recorded()).toHaveLength(migrations.length);
+  });
+
+  it('rolls back a failing file and records nothing for it', async () => {
+    const migrations = await readMigrations();
+    const failing = {
+      name: '9999-fails.sql',
+      sha256: '0'.repeat(64),
+      sql: 'create table evals.half_done (id integer); select 1 / 0;',
+      version: 9999,
+    };
+
+    await expect(
+      applyMigrations({
+        client: await connect(),
+        migrations: [...migrations, failing],
+      }),
+    ).rejects.toThrow(/division by zero/);
+    const rows = await recorded();
+
+    expect(rows.map(({ name }) => name)).toEqual(
+      migrations.map(({ name }) => name),
+    );
+    expect(
+      await column(
+        "select table_name as value from information_schema.tables where table_schema = 'evals' and table_name = 'half_done'",
+      ),
+    ).toEqual([]);
+  });
+});
