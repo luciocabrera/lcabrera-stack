@@ -37,6 +37,7 @@
     "zod": "catalog:runtime"
   },
   "devDependencies": {
+    "@babel/core": "catalog:build",
     "@babel/preset-typescript": "catalog:build",
     "@eslint/js": "catalog:lint",
     "@lcabrera/vite-config": "workspace:*",
