@@ -457,6 +457,15 @@ jobs:
         # an unreachable registry fails here instead of reporting a clean tree.
         run: vp run deps:audit
 
+      - name: Every peer dependency is met
+        id: deps_peers_gate
+        # An unmet peer passes every other check here: the type pass, the
+        # tests and the lint pass run against whatever version was installed,
+        # and the Babel plugin that peers on `@babel/core` is skipped under
+        # test runs (#1343). `pnpm peers check` exits non-zero on an unmet
+        # peer, and the exit code is the signal, not the listing.
+        run: vp run deps:peers
+
       - name: Published package surface resolves
         id: publish_gate
         # Builds first on purpose. `exports` points at `src` so this repo never
