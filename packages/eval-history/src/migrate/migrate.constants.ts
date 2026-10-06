@@ -1,3 +1,5 @@
+import type { EvalsRole } from './migrate.types.ts';
+
 export const MIGRATION_FILE_PATTERN = /^(\d{4})-[a-z\d][a-z\d-]*\.sql$/;
 
 export const MIGRATION_LOCK_KEY = 1_268_726_576;
@@ -16,3 +18,16 @@ create table if not exists evals.schema_migration (
   applied_at timestamptz not null default now()
 );
 `;
+
+export const EVALS_WRITER_ROLE = {
+  grants: [
+    { on: 'schema evals', privileges: 'usage, create' },
+    {
+      on: 'all tables in schema evals',
+      privileges: 'select, insert, update, delete',
+    },
+  ],
+  name: 'evals_writer',
+} as const satisfies EvalsRole;
+
+export const EVALS_ROLES: readonly EvalsRole[] = [EVALS_WRITER_ROLE];

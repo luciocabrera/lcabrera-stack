@@ -1,6 +1,6 @@
-import { readFile } from 'node:fs/promises';
-import { z } from 'zod';
+import type { ReadText } from '../files/readJsonFile.service.ts';
 
+import { readJsonFile } from '../files/readJsonFile.service.ts';
 import { regressionConfigSchema } from './regressionConfig.schema.ts';
 
 type LoadRegressionConfigArgs = {
@@ -8,21 +8,13 @@ type LoadRegressionConfigArgs = {
   readonly readText?: ReadText;
 };
 
-type ReadText = (file: string, encoding: 'utf8') => Promise<string>;
-
 export const loadRegressionConfig = async ({
   file,
-  readText = readFile,
-}: LoadRegressionConfigArgs) => {
-  const result = regressionConfigSchema.safeParse(
-    JSON.parse(await readText(file, 'utf8')),
-  );
-
-  if (!result.success) {
-    throw new Error(
-      `${file} is not a valid regression config:\n${z.prettifyError(result.error)}`,
-    );
-  }
-
-  return result.data;
-};
+  readText,
+}: LoadRegressionConfigArgs) =>
+  readJsonFile({
+    describedAs: 'regression config',
+    file,
+    readText,
+    schema: regressionConfigSchema,
+  });
