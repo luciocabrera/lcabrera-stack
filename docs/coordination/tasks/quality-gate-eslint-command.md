@@ -2,7 +2,7 @@
 id: quality-gate-eslint-command
 title: Name the eslint pass the quality-gate skill can run
 owner: agent:claude
-status: active
+status: review
 branch: docs/1327-quality-gate-eslint-command
 area:
   - .github/skills/quality-gate-workflow/SKILL.md
@@ -19,6 +19,6 @@ Name the eslint pass the quality-gate skill can run
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: stage 3 names the recursive form; gate run
 - Blockers: none
-- Next:
+- Next: review and merge
