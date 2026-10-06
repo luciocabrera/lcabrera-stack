@@ -77,13 +77,6 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
     'error',
     { checkArguments: false, checkArrowFunctionBody: false },
   ],
-  // It reports a parameter or destructured variable read as `x ?? literal` or
-  // `x || literal`. A default applies only to `undefined`, so each rewrite
-  // changes what `null` does — and, for `||`, every other falsy value. A child
-  // process's `close` exit code is `null` when a signal killed it. The rule's
-  // own documentation says to disable it where `null` and `undefined` are
-  // meant to be handled alike.
-  'unicorn/prefer-default-parameters': 'off',
   // The auto-fixer rewrites http:// to https:// inside string literals, which
   // silently corrupts test fixtures and local-dev URLs — a fixture asserting
   // that an http origin is rejected became https, and the test inverted.
@@ -94,13 +87,12 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   // on one line, and leaves a multi-line guard as it is.
   'unicorn/prefer-ternary': ['error', 'only-single-line'],
   'unicorn/prevent-abbreviations': 'off',
-  // New in unicorn 73's recommended set. Off deliberately and temporarily, not
-  // as a verdict on the rule: its default `multiline` fixer rewrites every
-  // one-line `/** … */` doc comment into an asterisk-less three-line block,
-  // which is not JSDoc, and choosing between that, `single-line` and off is a
-  // house-style call that should not be made under release pressure. #828
-  // decides it; an off-switch with no expiry is how `minimumReleaseAgeExclude`
-  // rotted.
+  // Off deliberately and temporarily, not as a verdict on the rule: its
+  // default `multiline` fixer rewrites every one-line `/** … */` doc comment
+  // into an asterisk-less three-line block, which is not JSDoc, and choosing
+  // between that, `single-line` and off is a house-style call that should not
+  // be made under release pressure. #828 decides it; an off-switch with no
+  // expiry is how `minimumReleaseAgeExclude` rotted.
   'unicorn/single-line-block-comment-style': 'off',
 };
 

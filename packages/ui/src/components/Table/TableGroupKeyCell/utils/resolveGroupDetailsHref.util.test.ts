@@ -31,8 +31,7 @@ const resolve = (
     ...args,
   });
 
-const paramsOf = (href: string | undefined) =>
-  new URL(href ?? '', 'http://table.test').searchParams;
+const paramsOf = (href = '') => new URL(href, 'http://table.test').searchParams;
 
 const groupParamOf = (href: string | undefined) =>
   href === undefined ? undefined : paramsOf(href).get('group');

@@ -65,7 +65,7 @@ export const usePersistTableStateAction = () => {
       ({
         persistenceKey,
         searchParamKey,
-        searchParamValue,
+        searchParamValue = '',
         slice,
         valueSlice,
       }) => {
@@ -84,7 +84,7 @@ export const usePersistTableStateAction = () => {
           searchParamKey: searchParamKey
             ? `${paramPrefix}${searchParamKey}`
             : '',
-          searchParamValue: searchParamValue ?? '',
+          searchParamValue,
           value,
         };
       },

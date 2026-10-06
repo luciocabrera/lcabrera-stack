@@ -86,8 +86,7 @@ const Harness = ({
 const renderGrid = (props: HarnessProps = {}) =>
   renderGroupedTableRoute(<Harness {...props} />);
 
-const classesOf = (className: string | undefined) =>
-  (className ?? '').split(' ').filter(Boolean);
+const classesOf = (className = '') => className.split(' ').filter(Boolean);
 
 const RIGHT_CLASSES = classesOf(
   stylex.props(tableBodyCellStyles.alignRight).className,

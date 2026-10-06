@@ -21,23 +21,21 @@ describe('signAuthToken', () => {
   });
 
   it('embeds the claims in the recoverable payload half', () => {
-    const [payload] = signAuthToken({ claims: CLAIMS, secret: 's' }).split(
+    const [payload = ''] = signAuthToken({ claims: CLAIMS, secret: 's' }).split(
       '.',
       1,
     );
 
-    expect(decodeAuthClaims({ payload: payload ?? '' })).toEqual(CLAIMS);
+    expect(decodeAuthClaims({ payload })).toEqual(CLAIMS);
   });
 
   it('signs the payload with the given secret', () => {
-    const [payload, signature] = signAuthToken({
+    const [payload = '', signature] = signAuthToken({
       claims: CLAIMS,
       secret: 'the-secret',
     }).split('.', 2);
 
-    expect(signature).toBe(
-      signAuthPayload({ payload: payload ?? '', secret: 'the-secret' }),
-    );
+    expect(signature).toBe(signAuthPayload({ payload, secret: 'the-secret' }));
   });
 
   it('yields different tokens for different secrets', () => {

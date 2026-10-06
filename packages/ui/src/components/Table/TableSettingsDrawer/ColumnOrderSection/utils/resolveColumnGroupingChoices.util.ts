@@ -43,12 +43,13 @@ export const resolveColumnGroupingChoices = <TData>({
     column,
   });
   const canAddGroupKey = isGroupable && !isGroupKey && !isAtKeyCap;
-  const { gap, options: aggregateOptions } = resolveAddableAggregates({
-    applied: aggregates,
-    capability,
-    columnKey,
-    isGroupKey,
-  });
+  const { gap = 'not-offered', options: aggregateOptions } =
+    resolveAddableAggregates({
+      applied: aggregates,
+      capability,
+      columnKey,
+      isGroupKey,
+    });
 
   const options: readonly RadioOption<ColumnGroupingChoice>[] = [
     ...(canAddGroupKey
@@ -72,7 +73,6 @@ export const resolveColumnGroupingChoices = <TData>({
   if (isGroupKey) return { options, refusal: 'already-a-key' };
   return {
     options,
-    refusal:
-      isGroupable && isAtKeyCap ? 'key-cap-reached' : (gap ?? 'not-offered'),
+    refusal: isGroupable && isAtKeyCap ? 'key-cap-reached' : gap,
   };
 };

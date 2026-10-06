@@ -2,7 +2,7 @@
 id: default-parameters
 title: build(lint): enable unicorn/prefer-default-parameters
 owner: agent:claude
-status: active
+status: review
 branch: build/1317-default-parameters
 area:
   - packages/vite-configs/src/**
@@ -15,6 +15,8 @@ area:
   - apps/showcase/**
   - scripts/**
   - .changeset/*.md
+  - packages/repo-standards/ARCHITECTURE.md
+  - reports/api-surface/repo-standards.txt
 started: 2026-10-06
 updated: 2026-10-06
 plan: (none)

@@ -32,14 +32,14 @@ vi.mock('#ui/components/Button', () => ({
     children,
     isIconOnly,
     size,
-    tooltipContent,
+    tooltipContent = 'none',
     type,
   }: MockButtonProps) => (
     <button
       aria-label='Log out'
       data-icon-only={String(isIconOnly)}
       data-size={size}
-      data-tooltip={tooltipContent ?? 'none'}
+      data-tooltip={tooltipContent}
       type={type === 'submit' ? 'submit' : 'button'}
     >
       {children}

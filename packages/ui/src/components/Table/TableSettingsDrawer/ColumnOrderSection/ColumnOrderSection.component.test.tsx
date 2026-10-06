@@ -15,17 +15,21 @@ vi.mock('#ui/components/SidePanel', () => ({
 }));
 
 vi.mock('./ColumnOrderSectionBody/ColumnOrderSectionBody.component', () => ({
-  ColumnOrderSectionBody: ({ isBusy }: { readonly isBusy?: boolean }) => (
-    <div data-testid='section-body'>{String(isBusy ?? false)}</div>
-  ),
+  ColumnOrderSectionBody: ({
+    isBusy = false,
+  }: {
+    readonly isBusy?: boolean;
+  }) => <div data-testid='section-body'>{String(isBusy)}</div>,
 }));
 
 vi.mock(
   './ColumnOrderSectionHeader/ColumnOrderSectionHeader.component',
   () => ({
-    ColumnOrderSectionHeader: ({ isBusy }: { readonly isBusy?: boolean }) => (
-      <div data-testid='section-header'>{String(isBusy ?? false)}</div>
-    ),
+    ColumnOrderSectionHeader: ({
+      isBusy = false,
+    }: {
+      readonly isBusy?: boolean;
+    }) => <div data-testid='section-header'>{String(isBusy)}</div>,
   }),
 );
 
@@ -36,19 +40,14 @@ vi.mock(
   }),
 );
 
-vi.mock('./ColumnOrderSectionToolbar', () => ({
-  ColumnOrderSectionToolbar: ({
-    isBusy,
-    variant,
-  }: {
-    readonly isBusy?: boolean;
-    readonly variant?: 'footer' | 'toolbar';
-  }) => (
-    <div data-testid='section-toolbar'>
-      {variant ?? 'footer'}:{String(isBusy ?? false)}
-    </div>
-  ),
-}));
+vi.mock('./ColumnOrderSectionToolbar', async () => {
+  const { createMockVariantToolbar } =
+    await import('#ui/utils/tests/createMockVariantToolbar.util');
+
+  return {
+    ColumnOrderSectionToolbar: createMockVariantToolbar('section-toolbar'),
+  };
+});
 
 import { ColumnOrderSection } from './ColumnOrderSection.component';
 

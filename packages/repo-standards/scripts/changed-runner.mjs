@@ -67,6 +67,12 @@ export const printReport = ({
   process.stdout.write('\n');
 };
 
+export const exitStatusOf = (child) =>
+  new Promise((resolve) => {
+    child.on('close', (exitCode) => resolve(exitCode === null ? 1 : exitCode));
+    child.on('error', () => resolve(1));
+  });
+
 const runGroups = async (groups, { dryRun = false } = {}) => {
   if (dryRun) {
     for (const group of groups) {
@@ -77,14 +83,9 @@ const runGroups = async (groups, { dryRun = false } = {}) => {
   let failed = 0;
   for (const group of groups) {
     process.stdout.write(`\n▶ vp ${vpArgsFor(group).join(' ')}\n`);
-    const code = await new Promise((res) => {
-      const child = spawn(VP_BIN, vpArgsFor(group), {
-        cwd: REPO_ROOT,
-        stdio: 'inherit',
-      });
-      child.on('close', (exitCode) => res(exitCode ?? 0));
-      child.on('error', () => res(1));
-    });
+    const code = await exitStatusOf(
+      spawn(VP_BIN, vpArgsFor(group), { cwd: REPO_ROOT, stdio: 'inherit' }),
+    );
     if (code !== 0) {
       failed = code;
     }

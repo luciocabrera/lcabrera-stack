@@ -33,12 +33,12 @@ vi.mock('#ui/components/Button', () => ({
     isIconOnly,
     onClick,
     size,
-    tooltipContent,
+    tooltipContent = 'none',
   }: MockButtonProps) => (
     <button
       data-icon-only={String(isIconOnly)}
       data-size={size}
-      data-tooltip={tooltipContent ?? 'none'}
+      data-tooltip={tooltipContent}
       onClick={onClick}
       type='button'
     >

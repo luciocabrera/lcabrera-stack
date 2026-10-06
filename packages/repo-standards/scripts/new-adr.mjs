@@ -57,16 +57,16 @@ const positional = ({ arg, options }) => {
 
 const VALUE_FLAGS = new Set(['--home', '--slug']);
 
-const applyArg = ({ arg, next, options }) => {
+const applyArg = ({ arg, next = '', options }) => {
   switch (arg) {
     case '--dry-run': {
       return { ...options, dryRun: true };
     }
     case '--home': {
-      return { ...options, home: next ?? '' };
+      return { ...options, home: next };
     }
     case '--slug': {
-      return { ...options, slug: next ?? '' };
+      return { ...options, slug: next };
     }
     default: {
       return positional({ arg, options });

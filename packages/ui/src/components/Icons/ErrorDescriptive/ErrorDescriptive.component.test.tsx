@@ -17,11 +17,11 @@ describe('ErrorDescriptive', () => {
     const labelledBy = image.getAttribute('aria-labelledby');
     expect(labelledBy).not.toBeNull();
 
-    const [titleId, descId] = (labelledBy ?? '').split(' ', 2);
-    expect(document.getElementById(titleId ?? '')?.textContent).toBe(
+    const [titleId = '', descId = ''] = (labelledBy ?? '').split(' ', 2);
+    expect(document.getElementById(titleId)?.textContent).toBe(
       'Data fetch error',
     );
-    expect(document.getElementById(descId ?? '')?.textContent).toContain(
+    expect(document.getElementById(descId)?.textContent).toContain(
       'breaking link',
     );
   });
