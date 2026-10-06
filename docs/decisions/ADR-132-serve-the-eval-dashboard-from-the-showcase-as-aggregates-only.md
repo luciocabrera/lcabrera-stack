@@ -154,17 +154,28 @@ It holds no list of its own; it imports the module's sets.
 
 1. It migrates a scratch history database, then reads `information_schema`
    for every text-typed column of a base table in schema `evals`. It
-   subtracts `PUBLIC_COLUMNS` and seeds
-   a unique marker string into every remaining column of every seeded row. A
+   subtracts `PUBLIC_COLUMNS` and seeds a unique marker string into every remaining column of every seeded row. A
    column that a later migration adds is therefore seeded by default. Views
    are not seeded, since they hold no rows of their own.
-2. It walks the envelope's Zod schema for every string and string-array field
-   inside the `jsonb` columns, subtracts `PUBLIC_FIELD_PATHS` and the columns
-   in `ALLOWED_WHOLE_JSONB`, and seeds the marker into each path that remains,
-   `settings.argv` included.
+2. It walks the envelope's Zod schema for every **free-string field** inside
+   the `jsonb` columns: a Zod string, or an array of strings, with no enum or
+   literal constraint. It subtracts `PUBLIC_FIELD_PATHS` and the columns in
+   `ALLOWED_WHOLE_JSONB`, and seeds the marker into each path that remains,
+   `settings.argv` included. The seeded envelope still passes the Zod schema,
+   so the ingest path writes it as it would a real run. A field typed as an
+   enum or a literal, such as the `detail` discriminator `schema` or
+   rules-consistency's `check`, is not seeded: it can only hold one of the
+   values the schema names, so it carries no free text, and a marker in it
+   would fail validation.
 3. With the flag set, it calls the loader of every `/evals` route, and every
-   resource route, for the seeded runs. It serialises each result.
-4. It fails if the marker appears in any serialised result.
+   resource route, with parameters that select the seeded runs, subjects and
+   tasks. It asserts that each one answered 2xx, and that each result
+   contains an allowed value from the seeded rows, such as the seeded run's
+   `run_id` or a seeded `task_key`. A route that errors, or that answers with
+   none of the seeded data, fails the test here instead of passing it with no
+   marker to find.
+4. It serialises each result and fails if the marker appears in any of
+   them.
 
 The test takes the set of routes from the showcase's route config, filtered to
 the `/evals` prefix, so a new route is covered without a change to the test.
@@ -182,8 +193,8 @@ named case, and that no column of `schema_migration` is in it. A set stripped
 of the numbers would otherwise pass the marker test, which seeds only
 text-typed columns.
 It also walks the Zod schema of every column in `ALLOWED_WHOLE_JSONB` and
-fails if any field is a string or a string array, so a text field added to
-`totals` cannot pass whole without being decided here.
+fails if any field is a free-string field, as step 2 defines it, so a text
+field added to `totals` cannot pass whole without being decided here.
 
 **Where they run.** All three tests run in `check-safe.yml`'s `unit-tests` job, on
 the Postgres service that #1268 adds there for the history package's own
