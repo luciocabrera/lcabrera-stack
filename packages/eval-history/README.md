@@ -16,6 +16,14 @@ decides how the envelope is versioned.
 - `src/migrate/` and `migrations/` — the migrator ADR-130 decides and the
   ordered SQL files it applies. A fix to an applied file is a new file: the
   migrator refuses to run while an applied one has changed.
+- `src/stats/` — the statistics of
+  [the plan's §6](../../docs/agents/planning/eval-history-plan.md#6-statistics-module):
+  the Wilson interval, pass@k and pass^k, the baseline summary, the binary and
+  scored regression rules, flaky detection, hash attribution and trigger
+  precision and recall. `error`, `timeout` and `skipped` trials never count
+  toward n. The thresholds are not in the code: `loadRegressionConfig` reads
+  them from [`evals/regression.config.json`](../../evals/regression.config.json)
+  and rejects a file that fails `regressionConfigSchema`.
 
 `vp run evals:migrate` applies `migrations/` to the database
 `EVALS_DATABASE_URL` names. Locally that is a database named `eval_history` on
