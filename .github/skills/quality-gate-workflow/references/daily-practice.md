@@ -20,7 +20,7 @@ stay root-only.
 ```bash
 vp fmt .
 vp lint .
-vp run lint:eslint:check
+vp run -r lint:eslint:check
 vp run lint:biome:check     # from the repo ROOT
 vp run react-doctor:verify  # from the repo ROOT — errors block
 vp check
@@ -30,16 +30,16 @@ vp run test:changed         # from the repo ROOT — reaches root scripts/ too
 
 ## Why This Order
 
-| Step | Command                      | What It Catches                                                            | Why First/Next                                            |
-| ---- | ---------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------- |
-| 1    | `vp fmt .`                   | formatting drift                                                           | cheapest auto-fix pass                                    |
-| 2    | `vp lint .`                  | rule violations, unsafe patterns, architecture guardrails                  | avoids type/test noise from known lint failures           |
-| 3    | `vp run lint:eslint:check`   | import/module order, react/stylex rules, `local-rules`                     | eslint-only rule sets no other stage runs                 |
-| 4    | `vp run lint:biome:check`    | the React-domain rules the other two miss                                  | root-only pass; last of the three linters                 |
-| 5    | `vp run react-doctor:verify` | effect cleanup, server/client boundaries, render cost                      | the only pass covering these; errors block                |
-| 6    | `vp check`                   | fmt + Oxlint + the tsgolint type pass                                      | verifies structural correctness before runtime assertions |
-| 7    | `vp run typecheck`           | real `tsc`; `check:public-api` in `packages/ui`                            | the reference type-check the tsgolint pass approximates   |
-| 8    | `vp run test:changed`        | behavioral regressions, in every affected suite — untracked files included | highest-cost stage, run after static checks pass          |
+| Step | Command                       | What It Catches                                                            | Why First/Next                                            |
+| ---- | ----------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 1    | `vp fmt .`                    | formatting drift                                                           | cheapest auto-fix pass                                    |
+| 2    | `vp lint .`                   | rule violations, unsafe patterns, architecture guardrails                  | avoids type/test noise from known lint failures           |
+| 3    | `vp run -r lint:eslint:check` | import/module order, react/stylex rules, `local-rules`                     | eslint-only rule sets no other stage runs                 |
+| 4    | `vp run lint:biome:check`     | the React-domain rules the other two miss                                  | root-only pass; last of the three linters                 |
+| 5    | `vp run react-doctor:verify`  | effect cleanup, server/client boundaries, render cost                      | the only pass covering these; errors block                |
+| 6    | `vp check`                    | fmt + Oxlint + the tsgolint type pass                                      | verifies structural correctness before runtime assertions |
+| 7    | `vp run typecheck`            | real `tsc`; `check:public-api` in `packages/ui`                            | the reference type-check the tsgolint pass approximates   |
+| 8    | `vp run test:changed`         | behavioral regressions, in every affected suite — untracked files included | highest-cost stage, run after static checks pass          |
 
 **Three linters, none redundant.** Oxlint (2) runs repo-wide from the root;
 eslint (3) fans out per workspace; Biome (4) is root-only — there is no
@@ -146,7 +146,7 @@ cd packages/ui && vp run lint:biome:check
 # ✅ Canonical sequence
 vp fmt .
 vp lint .
-vp run lint:eslint:check
+vp run -r lint:eslint:check
 vp run lint:biome:check     # from the repo ROOT
 vp run react-doctor:verify  # from the repo ROOT — errors block
 vp check
@@ -162,7 +162,7 @@ Use this in PR templates or review guides:
 
 - [ ] `vp fmt .` passed
 - [ ] `vp lint .` passed
-- [ ] `vp run lint:eslint:check` passed
+- [ ] `vp run -r lint:eslint:check` passed
 - [ ] `vp run lint:biome:check` passed (from the root)
 - [ ] `vp run react-doctor:verify` passed (from the root)
 - [ ] `vp check` passed
