@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   STARTED_AT,
+  TEST_REGRESSION_CONFIG,
   testIdentity,
   testPlan,
 } from '../envelope-test-support.mjs';
@@ -76,6 +77,7 @@ describe('rulesRecords', () => {
         suite: 'rules-consistency',
         tasks: records.tasks,
       }),
+      regressionConfig: TEST_REGRESSION_CONFIG,
       status: 'complete',
       trials: records.trials,
     });

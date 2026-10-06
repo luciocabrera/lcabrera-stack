@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   finishedSession,
   STARTED_AT,
+  TEST_REGRESSION_CONFIG,
   testIdentity,
   testPlan,
 } from '../envelope-test-support.mjs';
@@ -54,6 +55,7 @@ const envelope = assembleEnvelope({
     suite: 'skill-quality',
     tasks: ['react-19', 'unslop'].map(qualityTask),
   }),
+  regressionConfig: TEST_REGRESSION_CONFIG,
   status: 'complete',
   trials: [
     trialFor({}),

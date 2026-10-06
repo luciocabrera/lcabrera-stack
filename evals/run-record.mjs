@@ -5,6 +5,8 @@
  * `partial` when the run throws, `aborted` on SIGINT or SIGTERM, after which
  * the signal is raised again so the process ends the way it was asked to. An
  * envelope that fails the schema is not written, and the error names each field.
+ * Each envelope written prints the run's pass rate, with n and its Wilson
+ * interval at the thresholds in `regression.config.json`, beside its path.
  * Usage: imported by every runner under `evals/`.
  */
 import { createHash, randomUUID } from 'node:crypto';
@@ -15,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 import { parseEnvelope } from '@repo/eval-history/envelope/parseEnvelope.util';
 import { harnessVersion } from '@repo/eval-history/hashing/harnessVersion.util';
+import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
 
 import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 
@@ -24,6 +27,7 @@ import {
   branchOf,
   envelopeProblems,
   environmentOf,
+  passRateLine,
   prNumberOf,
   relativeImports,
   triggerOf,
@@ -33,6 +37,7 @@ const EVALS_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = dirname(EVALS_DIR);
 const RESULTS_DIR = '.tmp/eval-results';
 const SHARED_MODULE = join(EVALS_DIR, 'agent-sessions.mjs');
+const REGRESSION_CONFIG = join(EVALS_DIR, 'regression.config.json');
 const SIGNALS = ['SIGINT', 'SIGTERM'];
 
 const git = (args) => runGit({ args, cwd: REPO_ROOT });
@@ -130,14 +135,17 @@ export const saveEnvelope = ({ envelope, resultsDir = RESULTS_DIR }) => {
   return { envelope: parsed.envelope, file };
 };
 
-const reportSaved = (saved) => {
+const reportSaved = ({ regressionConfig, saved }) => {
+  console.log(
+    passRateLine({ regressionConfig, totals: saved.envelope.run.totals }),
+  );
   console.log(`Envelope: ${saved.file}`);
   return saved;
 };
 
 const saveOrReport = (save) => {
   try {
-    reportSaved(save());
+    save();
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
   }
@@ -149,20 +157,26 @@ export const recordRun = async ({
   identity,
   plan,
   raise = (signal) => process.kill(process.pid, signal),
+  regressionConfig = loadRegressionConfig({ file: REGRESSION_CONFIG }),
   resultsDir = RESULTS_DIR,
   signals = process,
 }) => {
+  const thresholds = await regressionConfig;
   const trials = [];
   const save = (status) =>
-    saveEnvelope({
-      envelope: assembleEnvelope({
-        finishedAt: clock(),
-        identity,
-        plan,
-        status,
-        trials,
+    reportSaved({
+      regressionConfig: thresholds,
+      saved: saveEnvelope({
+        envelope: assembleEnvelope({
+          finishedAt: clock(),
+          identity,
+          plan,
+          regressionConfig: thresholds,
+          status,
+          trials,
+        }),
+        resultsDir,
       }),
-      resultsDir,
     });
   const listeners = SIGNALS.map((signal) => [
     signal,
@@ -198,7 +212,7 @@ export const recordRun = async ({
         saveOrReport(() => save('partial'));
         throw error;
       });
-    return { ...reportSaved(save('complete')), result };
+    return { ...save('complete'), result };
   } finally {
     stopListening();
   }
