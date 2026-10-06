@@ -11,6 +11,8 @@ export type TableLayoutProps<
 > = Pick<
   TableProps<TData, TResponse>,
   | 'actions'
+  | 'cellPalette'
+  | 'cellRenderers'
   | 'dataErrorSelector'
   | 'dataSelector'
   | 'dataTotalSelector'

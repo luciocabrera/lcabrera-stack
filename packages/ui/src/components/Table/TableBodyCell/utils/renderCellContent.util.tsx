@@ -9,32 +9,14 @@ import type {
 
 import { TableCheckDisplay } from '#ui/components/Table/TableCheckDisplay';
 
+import { parseNumberValue } from './parseNumberValue.util';
+
 type RenderCellContentArgs = {
   readonly dataType: TableColumnDataType;
   readonly format?: TableColumnFormat;
   readonly label?: string;
   readonly locale?: string;
   readonly value: unknown;
-};
-
-const parseNumberValue = (value: unknown) => {
-  if (typeof value === 'number') {
-    return Number.isNaN(value) ? undefined : value;
-  }
-
-  if (typeof value !== 'string') {
-    return;
-  }
-
-  const trimmed = value.trim();
-
-  if (trimmed === '') {
-    return;
-  }
-
-  const parsed = Number(trimmed);
-
-  return Number.isNaN(parsed) ? undefined : parsed;
 };
 
 const stringifyCellValue = (value: unknown) => {

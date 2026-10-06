@@ -3,6 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import { Table } from '#ui/components/Table';
 import {
   FiltersDataProvider,
+  TableCellRenderingProvider,
   TableConfigProvider,
   TableFocusProvider,
 } from '#ui/components/Table/contexts';
@@ -18,6 +19,8 @@ export const TableLayout = <
   TResponse = Record<string, unknown>,
 >({
   actions,
+  cellPalette,
+  cellRenderers,
   columnsState,
   dataErrorSelector,
   dataPromise,
@@ -31,31 +34,36 @@ export const TableLayout = <
 
   return (
     <div {...stylex.props(styles.container)}>
-      <TableConfigProvider<TData>
-        columnsState={columnsState}
-        groupingState={groupingState}
-        metaState={metaState}
+      <TableCellRenderingProvider
+        cellPalettes={[columnsState.cellPalette, cellPalette]}
+        cellRenderers={cellRenderers}
       >
-        <TableFocusProvider>
-          <FiltersDataProvider<TData> columns={columnsState.columns}>
-            <TableSuspenseBoundary<TData, TResponse>
-              actions={actions}
-              dataPromise={dataPromise}
-            >
-              {(response) => (
-                <Table<TData, TResponse>
-                  actions={actions}
-                  dataErrorSelector={dataErrorSelector}
-                  dataSelector={dataSelector}
-                  dataTotalSelector={dataTotalSelector}
-                  onLoadMore={onLoadMore}
-                  response={response}
-                />
-              )}
-            </TableSuspenseBoundary>
-          </FiltersDataProvider>
-        </TableFocusProvider>
-      </TableConfigProvider>
+        <TableConfigProvider<TData>
+          columnsState={columnsState}
+          groupingState={groupingState}
+          metaState={metaState}
+        >
+          <TableFocusProvider>
+            <FiltersDataProvider<TData> columns={columnsState.columns}>
+              <TableSuspenseBoundary<TData, TResponse>
+                actions={actions}
+                dataPromise={dataPromise}
+              >
+                {(response) => (
+                  <Table<TData, TResponse>
+                    actions={actions}
+                    dataErrorSelector={dataErrorSelector}
+                    dataSelector={dataSelector}
+                    dataTotalSelector={dataTotalSelector}
+                    onLoadMore={onLoadMore}
+                    response={response}
+                  />
+                )}
+              </TableSuspenseBoundary>
+            </FiltersDataProvider>
+          </TableFocusProvider>
+        </TableConfigProvider>
+      </TableCellRenderingProvider>
     </div>
   );
 };

@@ -103,6 +103,26 @@ export type PinnedColumnPartitionState<TData = Record<string, unknown>> = {
 
 export type SortingState<TData = Record<string, unknown>> = Sorting<TData>[];
 
+export type StandardSchemaV1<TOutput = unknown> = {
+  readonly '~standard': {
+    readonly validate: (
+      value: unknown,
+    ) =>
+      | Promise<StandardSchemaV1Result<TOutput>>
+      | StandardSchemaV1Result<TOutput>;
+    readonly vendor: string;
+    readonly version: 1;
+  };
+};
+
+export type StandardSchemaV1Issue = {
+  readonly message: string;
+};
+
+export type StandardSchemaV1Result<TOutput> =
+  | { readonly issues: readonly StandardSchemaV1Issue[] }
+  | { readonly issues?: undefined; readonly value: TOutput };
+
 export type StaticFilterOptionsDescriptor = {
   readonly kind: 'static';
   readonly values: readonly string[];
@@ -145,6 +165,39 @@ export type TableCapabilityState = {
   readonly title?: TableTitle;
 };
 
+export type TableCellCall = {
+  readonly kind: string;
+  readonly params?: Readonly<Record<string, unknown>>;
+};
+
+export type TableCellPalette = Readonly<Record<string, TableCellPaletteEntry>>;
+
+export type TableCellPaletteEntry = {
+  readonly dark: TableCellToneColors;
+  readonly light: TableCellToneColors;
+};
+
+export type TableCellRenderArgs<TParams> = {
+  /** The cell's `dataType` default rendering of `value`. */
+  readonly formatted: ReactNode;
+  readonly params: TParams;
+  readonly row: unknown;
+  /** Resolves a tone name for the active theme; an unknown name answers `neutral`. */
+  readonly tone: (name: string) => TableCellToneColors;
+  readonly value: unknown;
+};
+
+export type TableCellRenderer<TParams = unknown> = {
+  readonly kind: string;
+  readonly params: StandardSchemaV1<TParams>;
+  readonly render: TableCellRenderFunction<TParams>;
+};
+
+export type TableCellToneColors = {
+  readonly background: string;
+  readonly text: string;
+};
+
 export type TableChromeState = {
   /** Namespaces persisted keys so apps sharing a `persistenceKey` do not clash. */
   readonly appId?: string;
@@ -180,6 +233,8 @@ export type TableChromeState = {
 };
 
 export type TableColumn<TData> = {
+  /** Plain data like `filterOptionsDescriptor`; resolved against the renderers registered on the client. */
+  readonly cell?: TableCellCall;
   readonly dataType?: TableColumnDataType;
   /** Never a function: columns must cross the loader serialization boundary. */
   readonly filterOptionsDescriptor?: FilterOptionsDescriptor;
@@ -259,7 +314,10 @@ export type TableColumnsStateInput<TData = Record<string, unknown>> = Omit<
   | 'pinnedColumnOffsets'
   | 'pinnedColumnPartition'
   | 'staticKeys'
->;
+> & {
+  /** Tones the columns' `cell` calls name; a client `cellPalette` entry of the same name wins. */
+  readonly cellPalette?: TableCellPalette;
+};
 
 export type TableCrudConfig = {
   readonly create?: boolean;
@@ -446,9 +504,16 @@ export type TableTotalsPlacement = 'first' | 'last';
 
 type BaseProps = ComponentPropsWithRef<'table'> & {
   readonly actions?: ReactNode;
+  readonly cellPalette?: TableCellPalette;
+  /** Merged over the built-in renderers by `kind`; a later entry replaces an earlier one. */
+  readonly cellRenderers?: readonly TableCellRenderer[];
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
 };
+
+type TableCellRenderFunction<TParams> = {
+  bivarianceHack(args: TableCellRenderArgs<TParams>): ReactNode;
+}['bivarianceHack'];
 
 type TableColumnCapabilityShared = {
   readonly aggregates: readonly TableAggregateFn[];

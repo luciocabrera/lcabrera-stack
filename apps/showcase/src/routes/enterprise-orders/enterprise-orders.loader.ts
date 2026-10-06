@@ -15,6 +15,7 @@ import {
 } from './.server/enterpriseOrders.service';
 import { ENTERPRISE_ORDERS_GROUP_PATH } from './config';
 import {
+  CELL_PALETTE,
   COLUMNS,
   CRUD,
   DELETE_ACTION_PATH,
@@ -36,6 +37,7 @@ export const loader = createTableRouteLoader<
     },
   }),
   appId: APP_ID,
+  cellPalette: CELL_PALETTE,
   columns: COLUMNS,
   filterOptions: { transport: 'loader' },
   // This endpoint filters server-side, seeks, and groups, so it declares all

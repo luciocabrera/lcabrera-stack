@@ -50,6 +50,11 @@ const MockTableDataProvider = vi.hoisted(() => {
 });
 
 vi.mock('./contexts', () => ({
+  TableCellRenderingProvider: ({
+    children,
+  }: {
+    readonly children: ReactNode;
+  }) => children,
   TableDataProvider: MockTableDataProvider,
 }));
 

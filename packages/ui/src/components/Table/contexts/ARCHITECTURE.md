@@ -31,6 +31,8 @@ contexts/
 │   ├── TableFocusContext.*      → Context, Provider, Types
 │   └── focus/                  → focusStore, its actions, selectors and utils
 │
+├── TableCellRendering/         → Static context: registered cell renderers + palette layers (ADR-132)
+│
 └── TableWrapper/               → Ref-based context for wrapper DOM access
     ├── TableWrapperContext.*    → Context, Types
     └── useTableWrapperRef      → Hook to consume the ref
@@ -70,6 +72,11 @@ graph TD
 - **TableDataProvider** sits inside Suspense — row data is re-created on
   each navigation via the resolved promise
 - **TableWrapperContext** is innermost — needs the rendered wrapper `<div>` ref
+- **TableCellRenderingProvider** holds no state: `TableLayout` renders one
+  outermost with the loader's palette under its own props, and `Table` renders
+  one inside with its props, each appending to its parent's layers so the
+  nearer layer wins. It is a context rather than a store because nothing writes
+  to it after render
 
 ## Store Overview
 
@@ -104,13 +111,14 @@ graph LR
 The per-slice hook lists live in each context's own `ARCHITECTURE.md` and its
 `INVENTORY.md` rows, which is where they stay in step with the code.
 
-| Context        | Store(s)                                                          | State Pattern                            |
-| -------------- | ----------------------------------------------------------------- | ---------------------------------------- |
-| `TableConfig`  | `columnsStore` + `expansionStore` + `groupingStore` + `metaStore` | `TStore` + `useSyncExternalStore`        |
-| `FiltersData`  | `filtersDataStore`                                                | Single `TStore` + `useSyncExternalStore` |
-| `TableData`    | `dataStore`                                                       | Single `TStore` + `useSyncExternalStore` |
-| `TableFocus`   | `focusStore`                                                      | Single `TStore` + `useSyncExternalStore` |
-| `TableWrapper` | — (ref only)                                                      | `RefObject<HTMLDivElement>`              |
+| Context              | Store(s)                                                          | State Pattern                            |
+| -------------------- | ----------------------------------------------------------------- | ---------------------------------------- |
+| `TableConfig`        | `columnsStore` + `expansionStore` + `groupingStore` + `metaStore` | `TStore` + `useSyncExternalStore`        |
+| `FiltersData`        | `filtersDataStore`                                                | Single `TStore` + `useSyncExternalStore` |
+| `TableData`          | `dataStore`                                                       | Single `TStore` + `useSyncExternalStore` |
+| `TableFocus`         | `focusStore`                                                      | Single `TStore` + `useSyncExternalStore` |
+| `TableWrapper`       | — (ref only)                                                      | `RefObject<HTMLDivElement>`              |
+| `TableCellRendering` | — (static layers, no store)                                       | Props appended to the parent's layers    |
 
 ## Cross-Context Data Flow
 

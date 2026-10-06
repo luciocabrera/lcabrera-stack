@@ -1,7 +1,9 @@
+import type { TableCellCallOutcome } from '#ui/components/Table/cellRenderers/cellRenderers.types';
 import type {
   ColumnSizingState,
   DataKey,
   PinnedColumnInfo,
+  TableCellToneColors,
   TableColumn,
   TableGroupRowSummary,
 } from '#ui/components/Table/Table.types';
@@ -11,10 +13,12 @@ import { buildTableBodyCellDescriptor } from './buildTableBodyCellDescriptor.uti
 import { renderFromDescriptor } from './renderFromDescriptor.util';
 
 type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
+  readonly cellCalls: ReadonlyMap<string, TableCellCallOutcome>;
   readonly columnSizing: ColumnSizingState<TData>;
   readonly groupingKeys: readonly string[];
   readonly isLoadingState: boolean;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
+  readonly tone: (name: string) => TableCellToneColors;
 };
 
 type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
@@ -30,10 +34,12 @@ type RenderBodyCellArgs<TData extends Record<string, unknown>> = {
 
 export const createRenderTableBodyCell =
   <TData extends Record<string, unknown>>({
+    cellCalls,
     columnSizing,
     groupingKeys,
     isLoadingState,
     pinnedOffsets,
+    tone,
   }: CreateRenderTableBodyCellArgs<TData>) =>
   ({
     carriedGroupKeys,
@@ -47,6 +53,7 @@ export const createRenderTableBodyCell =
   }: RenderBodyCellArgs<TData>) => {
     const descriptor = buildTableBodyCellDescriptor({
       carriedGroupKeys,
+      cellCall: { outcome: cellCalls.get(String(col.key)), tone },
       col,
       columnSizing,
       disclosure,
