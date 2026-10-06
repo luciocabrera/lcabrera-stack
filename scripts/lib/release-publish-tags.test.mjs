@@ -2,11 +2,14 @@
  * The publish job compares the tags `changeset publish` says it attempted with
  * the tags git actually gained (#745), and the first half of that comparison is
  * a parse of the CLI's output, which a major version can change without notice.
- * This runs the installed CLI against a scratch git workspace, then evaluates
- * the `reported` line exactly as `release.yml` states it.
+ * This runs `release.yml`'s own publish and `reported` lines in a scratch git
+ * workspace, with a stub `pnpm` on PATH that runs the installed CLI, reports
+ * every package unpublished and accepts every publish, so nothing leaves the
+ * machine.
  */
 import { spawnSync } from 'node:child_process';
 import {
+  chmodSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -57,12 +60,37 @@ const workflowLine = (pattern) => {
   return line;
 };
 
-const eventsPath = () =>
-  /CHANGESETS_OUTPUT=(\S+)/.exec(
-    workflowLine(/CHANGESETS_OUTPUT=\S+ pnpm exec changeset publish/),
-  )[1];
+const publishScript = (outDir) =>
+  [
+    'set -o pipefail',
+    workflowLine(/^: > \S+$/),
+    'published_status=0',
+    workflowLine(/^CHANGESETS_OUTPUT=\S+ pnpm exec changeset publish/),
+    workflowLine(/^reported=/),
+    String.raw`printf '\nRESULT %s %s\n' "$published_status" "$reported"`,
+  ]
+    .join('\n')
+    .replaceAll('/tmp/', `${outDir}/`);
 
-const reportedLine = () => workflowLine(/^reported=/);
+const stubPnpm = (binDir) => {
+  mkdirSync(binDir, { recursive: true });
+  const stub = join(binDir, 'pnpm');
+  writeFileSync(
+    stub,
+    [
+      '#!/usr/bin/env bash',
+      'case "$1" in',
+      '  --version) echo 12.9.1 ;;',
+      `  exec) shift; [ "$1" = changeset ] && shift; exec '${process.execPath}' '${CHANGESET_BIN}' "$@" ;;`,
+      `  info) echo '{"error":{"code":"ERR_PNPM_FETCH_404","message":"Not Found"}}'; exit 1 ;;`,
+      "  publish) echo '{}' ;;",
+      '  *) echo "stub pnpm: unexpected $*" >&2; exit 2 ;;',
+      'esac',
+      '',
+    ].join('\n'),
+  );
+  chmodSync(stub, 0o755);
+};
 
 const write = (root, path, value) => {
   mkdirSync(dirname(join(root, path)), { recursive: true });
@@ -76,11 +104,13 @@ const git = (root, args, env = {}) =>
     env: { ...process.env, ...ISOLATED_GIT, ...env },
   });
 
-const workspace = () => {
+const workspace = ({ isPrivate }) => {
   const root = mkdtempSync(join(tmpdir(), 'release-publish-tags-'));
   scratches.push(root);
   symlinkSync(join(REPO_ROOT, 'node_modules'), join(root, 'node_modules'));
-  writeFileSync(join(root, '.gitignore'), 'node_modules\nevents.ndjson\n');
+  stubPnpm(join(root, '.stub'));
+  mkdirSync(join(root, '.out'));
+  writeFileSync(join(root, '.gitignore'), 'node_modules\n.stub\n.out\n');
   writeFileSync(
     join(root, 'pnpm-workspace.yaml'),
     'packages:\n  - packages/*\n',
@@ -97,12 +127,12 @@ const workspace = () => {
   });
   write(root, 'packages/a/package.json', {
     name: '@scratch/a',
-    private: true,
+    private: isPrivate,
     version: '1.0.0',
   });
   write(root, 'packages/b/package.json', {
     name: '@scratch/b',
-    private: true,
+    private: isPrivate,
     version: '2.0.0',
   });
   git(root, ['init', '--quiet']);
@@ -118,27 +148,24 @@ const tags = (root) =>
     .filter((tag) => tag.length > 0);
 
 const publish = (root, env) => {
-  const events = join(root, 'events.ndjson');
-  writeFileSync(events, '');
   const before = tags(root).length;
-  const run = spawnSync(process.execPath, [CHANGESET_BIN, 'publish'], {
+  const { CHANGESETS_OUTPUT: _ignored, ...inherited } = process.env;
+  const run = spawnSync('bash', ['-c', publishScript(join(root, '.out'))], {
     cwd: root,
     encoding: 'utf8',
-    env: { ...process.env, ...ISOLATED_GIT, ...env, CHANGESETS_OUTPUT: events },
+    env: {
+      ...inherited,
+      ...ISOLATED_GIT,
+      ...env,
+      PATH: `${join(root, '.stub')}:${process.env.PATH}`,
+    },
   });
-  const reported = spawnSync(
-    'bash',
-    [
-      '-c',
-      `${reportedLine().replaceAll(eventsPath(), events)}; echo "$reported"`,
-    ],
-    { encoding: 'utf8' },
-  );
+  const [, status, reported] = /^RESULT (\d+) (\d+)$/m.exec(run.stdout) ?? [];
   return {
     created: tags(root).length - before,
-    reported: Number(reported.stdout.trim()),
-    status: run.status,
-    stderr: run.stderr,
+    output: `${run.stdout}${run.stderr}`,
+    reported: Number(reported),
+    status: Number(status),
   };
 };
 
@@ -149,26 +176,34 @@ afterEach(() => {
 });
 
 describe('the publish job counts the tags changeset attempted', () => {
-  it('reports every tag it created', () => {
-    const run = publish(workspace(), IDENTITY);
+  it('reports a tag for every package it published to the registry', () => {
+    const run = publish(workspace({ isPrivate: false }), IDENTITY);
 
-    expect(run.status, run.stderr).toBe(0);
+    expect(run.status, run.output).toBe(0);
+    expect(run.output).toContain('Successfully published');
+    expect(run).toMatchObject({ created: 2, reported: 2 });
+  });
+
+  it('reports every tag-only release it tagged', () => {
+    const run = publish(workspace({ isPrivate: true }), IDENTITY);
+
+    expect(run.status, run.output).toBe(0);
     expect(run).toMatchObject({ created: 2, reported: 2 });
   });
 
   it('reports none when nothing is left to publish', () => {
-    const root = workspace();
+    const root = workspace({ isPrivate: true });
     publish(root, IDENTITY);
     const run = publish(root, IDENTITY);
 
-    expect(run.status, run.stderr).toBe(0);
+    expect(run.status, run.output).toBe(0);
     expect(run).toMatchObject({ created: 0, reported: 0 });
   });
 
   it('still reports the tags git refused, so a tagging failure stays visible', () => {
-    const run = publish(workspace(), {});
+    const run = publish(workspace({ isPrivate: false }), {});
 
-    expect(run.status, run.stderr).toBe(0);
+    expect(run.status, run.output).toBe(0);
     expect(run).toMatchObject({ created: 0, reported: 2 });
   });
 });

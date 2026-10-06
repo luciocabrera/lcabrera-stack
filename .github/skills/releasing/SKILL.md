@@ -77,9 +77,10 @@ Everything below is deliberate, and each one cost something to learn:
   package it published. `release.yml` configures the identity and then compares
   the event count against the refs that actually exist, because a tagging
   failure and a publish that shipped nothing otherwise leave the same empty tag
-  diff (#745). `scripts/lib/release-publish-tags.test.mjs` runs the installed
-  CLI against the workflow's own `reported` line, so a changesets release that
-  moves the signal fails a test rather than a publish.
+  diff (#745). `scripts/lib/release-publish-tags.test.mjs` runs the workflow's own
+  publish and `reported` lines against the installed CLI, with a stub `pnpm`
+  standing in for the registry, so a changesets release that moves the signal
+  fails a test rather than a publish.
 - **`release:version` treats an empty queue as nothing to version.**
   `changeset version` exits 1 when no changeset is queued, so
   `scripts/release-version.mjs` asks `getReleasePlan` first and skips the call,
